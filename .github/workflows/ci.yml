@@ -30,10 +30,10 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22.13
+          node-version: 22.13.1
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v6
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -47,9 +47,9 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22.13
+          node-version: 22.13.1
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
 
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
@@ -63,9 +63,9 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22.13
+          node-version: 22.13.1
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
 
       - run: pnpm install --frozen-lockfile
       - run: pnpm format:check
@@ -79,9 +79,9 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22.13
+          node-version: 22.13.1
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
 
       - run: pnpm install --frozen-lockfile
       - run: pnpm typecheck
@@ -95,9 +95,9 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22.13
+          node-version: 22.13.1
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
 
       - run: pnpm install --frozen-lockfile
       - run: pnpm test:unit
@@ -111,9 +111,9 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22.13
+          node-version: 22.13.1
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
 
       - run: pnpm install --frozen-lockfile
       - run: pnpm test:integration
@@ -127,9 +127,9 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22.13
+          node-version: 22.13.1
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
 
       - run: pnpm install --frozen-lockfile
       - run: pnpm test:authorization
@@ -143,9 +143,9 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22.13
+          node-version: 22.13.1
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
 
       - run: pnpm install --frozen-lockfile
       - run: pnpm test:tenant-isolation
@@ -159,9 +159,9 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22.13
+          node-version: 22.13.1
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
 
       - run: pnpm install --frozen-lockfile
       - run: pnpm db:rls:check
@@ -175,9 +175,9 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22.13
+          node-version: 22.13.1
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
 
       - run: pnpm install --frozen-lockfile
       - run: pnpm db:migrate:check
@@ -191,9 +191,9 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22.13
+          node-version: 22.13.1
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
 
       - run: pnpm install --frozen-lockfile
       - run: pnpm check:route-metadata
@@ -207,9 +207,9 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22.13
+          node-version: 22.13.1
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
 
       - run: pnpm install --frozen-lockfile
       - run: pnpm check:prisma-boundary
@@ -223,9 +223,9 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22.13
+          node-version: 22.13.1
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
 
       - run: pnpm install --frozen-lockfile
       - run: pnpm check:audit-compliance
@@ -239,9 +239,9 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22.13
+          node-version: 22.13.1
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
 
       - run: pnpm install --frozen-lockfile
       - run: pnpm check:outbox-compliance
@@ -255,9 +255,9 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22.13
+          node-version: 22.13.1
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
 
       - run: pnpm install --frozen-lockfile
       - run: pnpm check:forbidden-scope
@@ -271,9 +271,9 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22.13
+          node-version: 22.13.1
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
 
       - run: pnpm install --frozen-lockfile
       - run: pnpm check:secrets
@@ -287,9 +287,9 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22.13
+          node-version: 22.13.1
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
 
       - run: pnpm install --frozen-lockfile
       - run: pnpm audit --audit-level high
@@ -319,9 +319,9 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22.13
+          node-version: 22.13.1
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
 
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
