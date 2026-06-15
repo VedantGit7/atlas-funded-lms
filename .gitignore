@@ -27,3 +27,4 @@ Thumbs.db
 # local generated files
 coverage/
 .playwright/
+packages/db/src/generated/
