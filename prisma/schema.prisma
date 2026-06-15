@@ -29,6 +29,13 @@ enum MembershipStatus {
   REMOVED
 }
 
+enum DispatchStatus {
+  QUEUED
+  SENT
+  FAILED
+  CANCELLED
+}
+
 model Tenant {
   id                   String      @id @db.Uuid
   slug                 String      @unique
@@ -311,4 +318,50 @@ model SecretRef {
 
   @@unique([tenant_id, key])
   @@map("secret_refs")
+}
+
+model OutboxEvent {
+  id              String   @id @db.Uuid
+  tenant_id       String?  @db.Uuid
+  event_type      String
+  aggregate_type  String
+  aggregate_id    String
+  idempotency_key String?
+  payload_json    Json
+  metadata_json   Json?
+  occurred_at     DateTime @default(now()) @db.Timestamptz(6)
+  available_at    DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([tenant_id, event_type, occurred_at])
+  @@index([available_at])
+  @@map("outbox_events")
+}
+
+model EventDelivery {
+  id              String         @id @db.Uuid
+  tenant_id       String?        @db.Uuid
+  outbox_event_id String         @db.Uuid
+  destination_key String
+  status          DispatchStatus @default(QUEUED)
+  attempt_count   Int            @default(0)
+  last_attempt_at DateTime?      @db.Timestamptz(6)
+  next_attempt_at DateTime?      @db.Timestamptz(6)
+  response_json   Json?
+  created_at      DateTime       @default(now()) @db.Timestamptz(6)
+
+  @@unique([outbox_event_id, destination_key])
+  @@index([tenant_id, status, next_attempt_at])
+  @@map("event_deliveries")
+}
+
+model DeadLetterEvent {
+  id              String   @id @db.Uuid
+  tenant_id       String?  @db.Uuid
+  outbox_event_id String   @db.Uuid
+  destination_key String?
+  error_json      Json
+  failed_at       DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([tenant_id, failed_at])
+  @@map("dead_letter_events")
 }
