@@ -150,6 +150,16 @@ export default tseslint.config(
     },
   },
 
+  {
+    files: ["scripts/**/*.mjs"],
+    ...tseslint.configs.disableTypeChecked,
+    languageOptions: {
+      globals: {
+        ...globals.node,
+      },
+    },
+  },
+
   ...tseslint.configs.strictTypeChecked.map((config) => ({
     ...config,
     files: ["**/*.{ts,tsx}"],
