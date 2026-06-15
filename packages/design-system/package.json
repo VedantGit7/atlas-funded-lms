@@ -5,7 +5,7 @@
   "scripts": {
     "build": "echo \"No design-system build configured yet.\"",
     "lint": "echo \"No design-system lint configured yet.\"",
-    "typecheck": "echo \"No design-system typecheck configured yet.\"",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "echo \"No design-system tests configured yet.\"",
     "test:unit": "echo \"No design-system unit tests configured yet.\"",
     "test:integration": "echo \"No design-system integration tests configured yet.\"",

@@ -12,7 +12,7 @@
     "dev": "pnpm --filter @atlas/web dev",
     "build": "pnpm -r build",
     "lint": "pnpm -r lint",
-    "typecheck": "pnpm -r typecheck",
+    "typecheck": "tsc -b",
     "test": "pnpm -r test",
     "test:unit": "pnpm -r test:unit",
     "test:integration": "pnpm -r test:integration",
@@ -23,5 +23,7 @@
     "db:seed": "pnpm --filter @atlas/db db:seed",
     "ci": "pnpm lint && pnpm typecheck && pnpm test && pnpm build"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "typescript": "^6.0.3"
+  }
 }
