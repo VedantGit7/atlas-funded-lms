@@ -24,7 +24,7 @@ if (migrationDirectories.length === 0) {
 }
 
 const migrateStatusCommand = process.env.DATABASE_URL
-  ? "prisma migrate status"
+  ? "pnpm exec prisma migrate status"
   : "dotenv -e .env.local -- prisma migrate status";
 
 execSync(migrateStatusCommand, {
