@@ -23,7 +23,12 @@ if (migrationDirectories.length === 0) {
   process.exit(0);
 }
 
-execSync("dotenv -e .env.local -- prisma migrate status", {
+const migrateStatusCommand = process.env.DATABASE_URL
+  ? "pnpm exec prisma migrate status"
+  : "dotenv -e .env.local -- prisma migrate status";
+
+execSync(migrateStatusCommand, {
   cwd: repoRoot,
   stdio: "inherit",
+  env: process.env,
 });
