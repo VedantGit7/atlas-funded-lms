@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+.next/
+out/
+dist/
+build/
+coverage/
+.turbo/
+
+# Package manager lockfiles
+pnpm-lock.yaml
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Locked source-of-truth artifacts
+docs/locked/**
+
+# Generated/cache files
+*.tsbuildinfo

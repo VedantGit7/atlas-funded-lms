@@ -22,8 +22,7 @@ const routeMetadataRule = {
         node?.type === "VariableDeclaration" &&
         node.declarations.some(
           (declaration) =>
-            declaration.id?.type === "Identifier" &&
-            declaration.id.name === "routeMetadata",
+            declaration.id?.type === "Identifier" && declaration.id.name === "routeMetadata",
         )
       );
     }
@@ -67,8 +66,7 @@ const noHardcodedTenantStringsRule = {
   meta: {
     type: "problem",
     docs: {
-      description:
-        "Prevent hardcoded tenant-specific strings in platform source code.",
+      description: "Prevent hardcoded tenant-specific strings in platform source code.",
     },
     messages: {
       hardcodedTenantString:
@@ -77,11 +75,7 @@ const noHardcodedTenantStringsRule = {
     schema: [],
   },
   create(context) {
-    const blockedTerms = [
-      "fundedbeyond",
-      "academy.fundedbeyond.com",
-      "funded beyond",
-    ];
+    const blockedTerms = ["fundedbeyond", "academy.fundedbeyond.com", "funded beyond"];
 
     function checkValue(node, value) {
       if (typeof value !== "string") {
@@ -253,8 +247,7 @@ export default tseslint.config(
                 "../../repositories/**",
                 "../../../repositories/**",
               ],
-              message:
-                "Frontend code must not import repositories or DB internals.",
+              message: "Frontend code must not import repositories or DB internals.",
             },
             {
               group: [
@@ -264,8 +257,7 @@ export default tseslint.config(
                 "../../../platform/**",
                 "@atlas/platform/*",
               ],
-              message:
-                "Tenant/frontend modules must not import platform-only code.",
+              message: "Tenant/frontend modules must not import platform-only code.",
             },
           ],
         },
