@@ -185,7 +185,9 @@ jobs:
           --health-timeout 5s
           --health-retries 10
     env:
-      DATABASE_URL: postgresql://atlas:atlas_dev_password@localhost:5432/atlas_lms_ci?schema=public
+      CI_POSTGRES_USER: atlas
+      CI_POSTGRES_PASSWORD: atlas_dev_password
+      CI_POSTGRES_DB: atlas_lms_ci
     steps:
       - uses: actions/checkout@v4
 
@@ -196,8 +198,7 @@ jobs:
       - uses: pnpm/action-setup@v6
 
       - run: pnpm install --frozen-lockfile
-      - run: pnpm exec prisma migrate deploy
-      - run: pnpm db:migrate:check
+      - run: node scripts/db/ci-migrate-validate.mjs
 
   route-metadata-check:
     name: route-metadata-check
