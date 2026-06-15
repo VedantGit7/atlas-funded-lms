@@ -2,9 +2,24 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "composite": true,
-    "rootDir": "src",
-    "tsBuildInfoFile": "node_modules/.cache/tsconfig.tsbuildinfo"
+    "rootDir": ".",
+    "jsx": "preserve",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "types": ["node"],
+    "tsBuildInfoFile": "node_modules/.cache/tsconfig.tsbuildinfo",
+    "esModuleInterop": true
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx"],
-  "exclude": ["node_modules", "dist", "build", ".next"]
+  "include": [
+    "next-env.d.ts",
+    "next.config.ts",
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": ["node_modules", "dist", "build"]
 }

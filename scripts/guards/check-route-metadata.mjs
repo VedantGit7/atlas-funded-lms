@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync, statSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 
 const apiRoots = ["apps/web/src/app/api", "apps/web/app/api"];
@@ -26,6 +26,23 @@ function walkFiles(directory) {
   }
 }
 
+function hasRouteMetadataExport(content) {
+  return (
+    /export\s+const\s+routeMetadata\s*=/.test(content) ||
+    /export\s*\{\s*routeMetadata\s*\}/.test(content)
+  );
+}
+
+function hasCoLocatedRouteMetadata(routeFile) {
+  const metadataFile = routeFile.replace(/route\.(ts|tsx)$/, "route.metadata.$1");
+
+  if (!existsSync(metadataFile)) {
+    return false;
+  }
+
+  return hasRouteMetadataExport(readFileSync(metadataFile, "utf8"));
+}
+
 const routeFiles = apiRoots
   .flatMap((root) => walkFiles(root))
   .filter((file) => /[/\\]route\.(ts|tsx)$/.test(file));
@@ -34,10 +51,7 @@ const failures = [];
 
 for (const file of routeFiles) {
   const content = readFileSync(file, "utf8");
-
-  const hasRouteMetadata =
-    /export\s+const\s+routeMetadata\s*=/.test(content) ||
-    /export\s*\{\s*routeMetadata\s*\}/.test(content);
+  const hasRouteMetadata = hasRouteMetadataExport(content) || hasCoLocatedRouteMetadata(file);
 
   if (!hasRouteMetadata) {
     failures.push(file);
