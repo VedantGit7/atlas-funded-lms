@@ -1,0 +1,18 @@
+{
+  "name": "@atlas/auth",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "echo \"No auth build configured yet.\"",
+    "lint": "echo \"No auth lint configured yet.\"",
+    "typecheck": "echo \"No auth typecheck configured yet.\"",
+    "test": "echo \"No auth tests configured yet.\"",
+    "test:unit": "echo \"No auth unit tests configured yet.\"",
+    "test:integration": "echo \"No auth integration tests configured yet.\"",
+    "test:authorization": "echo \"No auth authorization tests configured yet.\"",
+    "test:tenant-isolation": "echo \"No auth tenant-isolation tests configured yet.\"",
+    "test:e2e": "echo \"No auth e2e tests configured yet.\""
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}
