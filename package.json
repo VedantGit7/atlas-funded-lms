@@ -11,7 +11,7 @@
   "scripts": {
     "dev": "pnpm --filter @atlas/web dev",
     "build": "pnpm -r build",
-    "lint": "pnpm -r lint",
+    "lint": "eslint . --max-warnings=0",
     "typecheck": "tsc -b",
     "test": "pnpm -r test",
     "test:unit": "pnpm -r test:unit",
@@ -24,6 +24,10 @@
     "ci": "pnpm lint && pnpm typecheck && pnpm test && pnpm build"
   },
   "devDependencies": {
-    "typescript": "^6.0.3"
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.5.0",
+    "globals": "^17.6.0",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.61.0"
   }
 }
