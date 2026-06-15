@@ -5,7 +5,7 @@
   "scripts": {
     "build": "echo \"No storage build configured yet.\"",
     "lint": "echo \"No storage lint configured yet.\"",
-    "typecheck": "echo \"No storage typecheck configured yet.\"",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "echo \"No storage tests configured yet.\"",
     "test:unit": "echo \"No storage unit tests configured yet.\"",
     "test:integration": "echo \"No storage integration tests configured yet.\"",

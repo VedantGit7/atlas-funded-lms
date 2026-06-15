@@ -5,7 +5,7 @@
   "scripts": {
     "build": "echo \"No authorization build configured yet.\"",
     "lint": "echo \"No authorization lint configured yet.\"",
-    "typecheck": "echo \"No authorization typecheck configured yet.\"",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "echo \"No authorization tests configured yet.\"",
     "test:unit": "echo \"No authorization unit tests configured yet.\"",
     "test:integration": "echo \"No authorization integration tests configured yet.\"",

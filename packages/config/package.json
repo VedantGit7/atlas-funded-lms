@@ -5,7 +5,7 @@
   "scripts": {
     "build": "echo \"No config build configured yet.\"",
     "lint": "echo \"No config lint configured yet.\"",
-    "typecheck": "echo \"No config typecheck configured yet.\"",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "echo \"No config tests configured yet.\"",
     "test:unit": "echo \"No config unit tests configured yet.\"",
     "test:integration": "echo \"No config integration tests configured yet.\"",

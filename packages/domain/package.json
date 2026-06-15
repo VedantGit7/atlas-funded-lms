@@ -5,7 +5,7 @@
   "scripts": {
     "build": "echo \"No domain build configured yet.\"",
     "lint": "echo \"No domain lint configured yet.\"",
-    "typecheck": "echo \"No domain typecheck configured yet.\"",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "echo \"No domain tests configured yet.\"",
     "test:unit": "echo \"No domain unit tests configured yet.\"",
     "test:integration": "echo \"No domain integration tests configured yet.\"",

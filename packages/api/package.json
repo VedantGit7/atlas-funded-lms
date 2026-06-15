@@ -5,7 +5,7 @@
   "scripts": {
     "build": "echo \"No api build configured yet.\"",
     "lint": "echo \"No api lint configured yet.\"",
-    "typecheck": "echo \"No api typecheck configured yet.\"",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "echo \"No api tests configured yet.\"",
     "test:unit": "echo \"No api unit tests configured yet.\"",
     "test:integration": "echo \"No api integration tests configured yet.\"",

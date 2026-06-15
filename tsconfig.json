@@ -1,0 +1,22 @@
+{
+    "$schema": "https://json.schemastore.org/tsconfig",
+    "files": [],
+    "references": [
+      { "path": "./apps/web" },
+  
+      { "path": "./packages/api" },
+      { "path": "./packages/auth" },
+      { "path": "./packages/authorization" },
+      { "path": "./packages/config" },
+      { "path": "./packages/db" },
+      { "path": "./packages/design-system" },
+      { "path": "./packages/domain" },
+      { "path": "./packages/events" },
+      { "path": "./packages/observability" },
+      { "path": "./packages/security" },
+      { "path": "./packages/storage" },
+      { "path": "./packages/testing" },
+      { "path": "./packages/utils" },
+      { "path": "./packages/validation" }
+    ]
+  }

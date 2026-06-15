@@ -1,19 +1,19 @@
 {
-    "name": "@atlas/web",
-    "version": "0.0.0",
-    "private": true,
-    "scripts": {
-      "dev": "echo \"Next.js app is not initialized yet. This will be implemented in the Next.js baseline step.\"",
-      "build": "echo \"No web build configured yet.\"",
-      "lint": "echo \"No web lint configured yet.\"",
-      "typecheck": "echo \"No web typecheck configured yet.\"",
-      "test": "echo \"No web tests configured yet.\"",
-      "test:unit": "echo \"No web unit tests configured yet.\"",
-      "test:integration": "echo \"No web integration tests configured yet.\"",
-      "test:authorization": "echo \"No web authorization tests configured yet.\"",
-      "test:tenant-isolation": "echo \"No web tenant-isolation tests configured yet.\"",
-      "test:e2e": "echo \"No web e2e tests configured yet.\""
-    },
-    "dependencies": {},
-    "devDependencies": {}
-  }
+  "name": "@atlas/web",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "echo \"Next.js app is not initialized yet. This will be implemented in the Next.js baseline step.\"",
+    "build": "echo \"No web build configured yet.\"",
+    "lint": "echo \"No web lint configured yet.\"",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "echo \"No web tests configured yet.\"",
+    "test:unit": "echo \"No web unit tests configured yet.\"",
+    "test:integration": "echo \"No web integration tests configured yet.\"",
+    "test:authorization": "echo \"No web authorization tests configured yet.\"",
+    "test:tenant-isolation": "echo \"No web tenant-isolation tests configured yet.\"",
+    "test:e2e": "echo \"No web e2e tests configured yet.\""
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}

@@ -5,7 +5,7 @@
   "scripts": {
     "build": "echo \"No observability build configured yet.\"",
     "lint": "echo \"No observability lint configured yet.\"",
-    "typecheck": "echo \"No observability typecheck configured yet.\"",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "echo \"No observability tests configured yet.\"",
     "test:unit": "echo \"No observability unit tests configured yet.\"",
     "test:integration": "echo \"No observability integration tests configured yet.\"",
