@@ -36,6 +36,14 @@ enum DispatchStatus {
   CANCELLED
 }
 
+enum JobStatus {
+  QUEUED
+  RUNNING
+  SUCCEEDED
+  FAILED
+  CANCELLED
+}
+
 model Tenant {
   id                   String      @id @db.Uuid
   slug                 String      @unique
@@ -364,4 +372,79 @@ model DeadLetterEvent {
 
   @@index([tenant_id, failed_at])
   @@map("dead_letter_events")
+}
+
+model ProvisioningJob {
+  id              String    @id @db.Uuid
+  tenant_id       String    @db.Uuid
+  idempotency_key String
+  status          JobStatus @default(QUEUED)
+  step_key        String?
+  request_json    Json
+  result_json     Json?
+  error_json      Json?
+  created_at      DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime  @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenant_id, idempotency_key])
+  @@index([tenant_id, status, created_at])
+  @@map("provisioning_jobs")
+}
+
+model TenantBranding {
+  id                 String   @id @db.Uuid
+  tenant_id          String   @unique @db.Uuid
+  display_name       String
+  logo_light_key     String?
+  logo_dark_key      String?
+  favicon_key        String?
+  support_email      String?
+  social_links_json  Json?
+  legal_footer_text  String?
+  current_version_id String?  @db.Uuid
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime @updatedAt @db.Timestamptz(6)
+
+  @@map("tenant_branding")
+}
+
+model TenantTheme {
+  id                 String   @id @db.Uuid
+  tenant_id          String   @unique @db.Uuid
+  primary_color      String
+  secondary_color    String?
+  accent_color       String?
+  font_family        String?
+  token_json         Json
+  current_version_id String?  @db.Uuid
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime @updatedAt @db.Timestamptz(6)
+
+  @@map("tenant_theme")
+}
+
+model TenantBrandingVersion {
+  id                       String   @id @db.Uuid
+  tenant_id                String   @db.Uuid
+  version                  Int
+  snapshot_json            Json
+  created_by_membership_id String?  @db.Uuid
+  created_at               DateTime @default(now()) @db.Timestamptz(6)
+
+  @@unique([tenant_id, version])
+  @@index([tenant_id, created_at])
+  @@map("tenant_branding_version")
+}
+
+model TenantThemeVersion {
+  id                       String   @id @db.Uuid
+  tenant_id                String   @db.Uuid
+  version                  Int
+  snapshot_json            Json
+  created_by_membership_id String?  @db.Uuid
+  created_at               DateTime @default(now()) @db.Timestamptz(6)
+
+  @@unique([tenant_id, version])
+  @@index([tenant_id, created_at])
+  @@map("tenant_theme_version")
 }
