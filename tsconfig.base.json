@@ -1,70 +1,70 @@
 {
-    "$schema": "https://json.schemastore.org/tsconfig",
-    "compilerOptions": {
-      "target": "ES2022",
-      "lib": ["ES2022", "DOM", "DOM.Iterable"],
-      "module": "ESNext",
-      "moduleResolution": "Bundler",
-      "resolveJsonModule": true,
-      "allowJs": false,
-      "checkJs": false,
-      "strict": true,
-      "noImplicitAny": true,
-      "noUncheckedIndexedAccess": true,
-      "exactOptionalPropertyTypes": true,
-      "noImplicitOverride": true,
-      "noFallthroughCasesInSwitch": true,
-      "noPropertyAccessFromIndexSignature": true,
-      "useUnknownInCatchVariables": true,
-      "forceConsistentCasingInFileNames": true,
-      "isolatedModules": true,
-      "verbatimModuleSyntax": true,
-      "skipLibCheck": true,
-      "noEmit": true,
-      "ignoreDeprecations": "6.0",
-      "baseUrl": ".",
-      "paths": {
-        "@atlas/api": ["packages/api/src/index.ts"],
-        "@atlas/api/*": ["packages/api/src/*"],
-  
-        "@atlas/auth": ["packages/auth/src/index.ts"],
-        "@atlas/auth/*": ["packages/auth/src/*"],
-  
-        "@atlas/authorization": ["packages/authorization/src/index.ts"],
-        "@atlas/authorization/*": ["packages/authorization/src/*"],
-  
-        "@atlas/config": ["packages/config/src/index.ts"],
-        "@atlas/config/*": ["packages/config/src/*"],
-  
-        "@atlas/db": ["packages/db/src/index.ts"],
-        "@atlas/db/*": ["packages/db/src/*"],
-  
-        "@atlas/design-system": ["packages/design-system/src/index.ts"],
-        "@atlas/design-system/*": ["packages/design-system/src/*"],
-  
-        "@atlas/domain": ["packages/domain/src/index.ts"],
-        "@atlas/domain/*": ["packages/domain/src/*"],
-  
-        "@atlas/events": ["packages/events/src/index.ts"],
-        "@atlas/events/*": ["packages/events/src/*"],
-  
-        "@atlas/observability": ["packages/observability/src/index.ts"],
-        "@atlas/observability/*": ["packages/observability/src/*"],
-  
-        "@atlas/security": ["packages/security/src/index.ts"],
-        "@atlas/security/*": ["packages/security/src/*"],
-  
-        "@atlas/storage": ["packages/storage/src/index.ts"],
-        "@atlas/storage/*": ["packages/storage/src/*"],
-  
-        "@atlas/testing": ["packages/testing/src/index.ts"],
-        "@atlas/testing/*": ["packages/testing/src/*"],
-  
-        "@atlas/utils": ["packages/utils/src/index.ts"],
-        "@atlas/utils/*": ["packages/utils/src/*"],
-  
-        "@atlas/validation": ["packages/validation/src/index.ts"],
-        "@atlas/validation/*": ["packages/validation/src/*"]
-      }
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "resolveJsonModule": true,
+    "allowJs": false,
+    "checkJs": false,
+    "strict": true,
+    "noImplicitAny": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "useUnknownInCatchVariables": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "ignoreDeprecations": "6.0",
+    "baseUrl": ".",
+    "paths": {
+      "@atlas/api": ["packages/api/src/index.ts"],
+      "@atlas/api/*": ["packages/api/src/*"],
+
+      "@atlas/auth": ["packages/auth/src/index.ts"],
+      "@atlas/auth/*": ["packages/auth/src/*"],
+
+      "@atlas/authorization": ["packages/authorization/src/index.ts"],
+      "@atlas/authorization/*": ["packages/authorization/src/*"],
+
+      "@atlas/config": ["packages/config/src/index.ts"],
+      "@atlas/config/*": ["packages/config/src/*"],
+
+      "@atlas/db": ["packages/db/src/index.ts"],
+      "@atlas/db/*": ["packages/db/src/*"],
+
+      "@atlas/design-system": ["packages/design-system/src/index.ts"],
+      "@atlas/design-system/*": ["packages/design-system/src/*"],
+
+      "@atlas/domain": ["packages/domain/src/index.ts"],
+      "@atlas/domain/*": ["packages/domain/src/*"],
+
+      "@atlas/events": ["packages/events/src/index.ts"],
+      "@atlas/events/*": ["packages/events/src/*"],
+
+      "@atlas/observability": ["packages/observability/src/index.ts"],
+      "@atlas/observability/*": ["packages/observability/src/*"],
+
+      "@atlas/security": ["packages/security/src/index.ts"],
+      "@atlas/security/*": ["packages/security/src/*"],
+
+      "@atlas/storage": ["packages/storage/src/index.ts"],
+      "@atlas/storage/*": ["packages/storage/src/*"],
+
+      "@atlas/testing": ["packages/testing/src/index.ts"],
+      "@atlas/testing/*": ["packages/testing/src/*"],
+
+      "@atlas/utils": ["packages/utils/src/index.ts"],
+      "@atlas/utils/*": ["packages/utils/src/*"],
+
+      "@atlas/validation": ["packages/validation/src/index.ts"],
+      "@atlas/validation/*": ["packages/validation/src/*"]
     }
   }
+}
