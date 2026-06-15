@@ -21,7 +21,7 @@
     "test:e2e": "pnpm -r test:e2e",
     "db:migrate": "pnpm --filter @atlas/db db:migrate",
     "db:seed": "pnpm --filter @atlas/db db:seed",
-    "ci": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm test && pnpm build",
+    "ci": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm test && pnpm check:route-metadata && pnpm check:prisma-boundary && pnpm check:audit-compliance && pnpm check:outbox-compliance && pnpm check:forbidden-scope && pnpm check:secrets && pnpm db:migrate:check && pnpm db:rls:check && pnpm build",
     "format": "prettier . --write",
     "format:check": "prettier . --check",
     "prepare": "husky",
@@ -29,7 +29,13 @@
     "prepush": "pnpm test:unit && pnpm check:route-metadata && pnpm check:prisma-boundary",
     "check:env": "node scripts/guards/prevent-env-commit.mjs",
     "check:route-metadata": "node scripts/guards/check-route-metadata.mjs",
-    "check:prisma-boundary": "node scripts/guards/check-prisma-boundary.mjs"
+    "check:prisma-boundary": "node scripts/guards/check-prisma-boundary.mjs",
+    "db:migrate:check": "echo \"Migration validation is not configured yet. This will be implemented in Sprint 0.\"",
+    "db:rls:check": "echo \"RLS validation is not configured yet. This will be implemented in Sprint 0.\"",
+    "check:audit-compliance": "node scripts/guards/check-audit-compliance.mjs",
+    "check:outbox-compliance": "node scripts/guards/check-outbox-compliance.mjs",
+    "check:forbidden-scope": "node scripts/guards/check-forbidden-scope.mjs",
+    "check:secrets": "node scripts/guards/check-secrets.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
