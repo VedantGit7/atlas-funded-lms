@@ -2,6 +2,7 @@ import { readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 
 const approvedSqlDirectories = [
+  "prisma/migrations/",
   "prisma/sql/setup/",
   "prisma/sql/rls/",
   "prisma/sql/triggers/",
