@@ -1,0 +1,27 @@
+{
+  "name": "atlas-lms",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Atlas LMS multi-tenant white-label learning platform",
+  "packageManager": "pnpm@11.6.0",
+  "engines": {
+    "node": ">=22.0.0",
+    "pnpm": ">=11.0.0"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @atlas/web dev",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
+    "test:unit": "pnpm -r test:unit",
+    "test:integration": "pnpm -r test:integration",
+    "test:authorization": "pnpm -r test:authorization",
+    "test:tenant-isolation": "pnpm -r test:tenant-isolation",
+    "test:e2e": "pnpm -r test:e2e",
+    "db:migrate": "pnpm --filter @atlas/db db:migrate",
+    "db:seed": "pnpm --filter @atlas/db db:seed",
+    "ci": "pnpm lint && pnpm typecheck && pnpm test && pnpm build"
+  },
+  "devDependencies": {}
+}

@@ -1,0 +1,20 @@
+{
+  "name": "@atlas/db",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "echo \"No db build configured yet.\"",
+    "lint": "echo \"No db lint configured yet.\"",
+    "typecheck": "echo \"No db typecheck configured yet.\"",
+    "test": "echo \"No db tests configured yet.\"",
+    "test:unit": "echo \"No db unit tests configured yet.\"",
+    "test:integration": "echo \"No db integration tests configured yet.\"",
+    "test:authorization": "echo \"No db authorization tests configured yet.\"",
+    "test:tenant-isolation": "echo \"No db tenant-isolation tests configured yet.\"",
+    "test:e2e": "echo \"No db e2e tests configured yet.\"",
+    "db:migrate": "echo \"Prisma migration is not configured yet.\"",
+    "db:seed": "echo \"Database seed is not configured yet.\""
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}
