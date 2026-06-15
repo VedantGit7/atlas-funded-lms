@@ -448,3 +448,18 @@ model TenantThemeVersion {
   @@index([tenant_id, created_at])
   @@map("tenant_theme_version")
 }
+
+model LessonAsset {
+  id                String    @id @db.Uuid
+  tenant_id         String    @db.Uuid
+  lesson_id         String    @db.Uuid
+  asset_type        String
+  provider          String
+  object_key_or_url String
+  metadata_json     Json?
+  created_at        DateTime  @default(now()) @db.Timestamptz(6)
+  deleted_at        DateTime? @db.Timestamptz(6)
+
+  @@index([tenant_id, lesson_id])
+  @@map("lesson_assets")
+}
