@@ -1,0 +1,19 @@
+# Atlas LMS CODEOWNERS
+# Temporary owner mapping for repository bootstrap.
+# Replace @VedantGit7 with actual GitHub teams when team ownership is created.
+
+* @VedantGit7
+
+/prisma/ @VedantGit7
+/src/db/ @VedantGit7
+/src/permissions/ @VedantGit7
+/src/entitlements/ @VedantGit7
+/src/tenancy/ @VedantGit7
+/src/app/api/ @VedantGit7
+/src/app/platform/ @VedantGit7
+/infrastructure/ @VedantGit7
+/.github/ @VedantGit7
+/scripts/ @VedantGit7
+/monitoring/ @VedantGit7
+/runbooks/ @VedantGit7
+/docs/locked/ @VedantGit7
