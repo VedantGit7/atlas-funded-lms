@@ -152,6 +152,8 @@ export default tseslint.config(
       "**/pnpm-lock.yaml",
       "docs/locked/**",
       "apps/web/next-env.d.ts",
+      "prisma.config.ts",
+      "packages/db/src/generated/**",
     ],
   },
 
