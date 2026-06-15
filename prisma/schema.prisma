@@ -196,3 +196,80 @@ model PermissionOverride {
   @@index([tenant_id, permission_key, effect])
   @@map("permission_overrides")
 }
+
+model TenantConfig {
+  id                 String   @id @db.Uuid
+  tenant_id          String   @unique @db.Uuid
+  config_json        Json
+  current_version_id String?  @db.Uuid
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime @updatedAt @db.Timestamptz(6)
+
+  @@map("tenant_config")
+}
+
+model TenantConfigVersion {
+  id                       String   @id @db.Uuid
+  tenant_id                String   @db.Uuid
+  version                  Int
+  snapshot_json            Json
+  created_by_membership_id String?  @db.Uuid
+  created_at               DateTime @default(now()) @db.Timestamptz(6)
+
+  @@unique([tenant_id, version])
+  @@index([tenant_id, created_at])
+  @@map("tenant_config_version")
+}
+
+model FeatureFlag {
+  id            String   @id @db.Uuid
+  key           String   @unique
+  default_value Json
+  description   String?
+  created_at    DateTime @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime @updatedAt @db.Timestamptz(6)
+
+  @@map("feature_flags")
+}
+
+model FeatureFlagOverride {
+  id              String   @id @db.Uuid
+  tenant_id       String   @db.Uuid
+  feature_flag_id String   @db.Uuid
+  value_json      Json
+  created_at      DateTime @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenant_id, feature_flag_id])
+  @@map("feature_flag_overrides")
+}
+
+model Entitlement {
+  id         String    @id @db.Uuid
+  tenant_id  String    @db.Uuid
+  key        String
+  value_json Json
+  source     String
+  starts_at  DateTime  @default(now()) @db.Timestamptz(6)
+  expires_at DateTime? @db.Timestamptz(6)
+  created_at DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at DateTime  @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenant_id, key])
+  @@index([tenant_id, key, expires_at])
+  @@map("entitlements")
+}
+
+model EntitlementGrantHistory {
+  id                       String   @id @db.Uuid
+  tenant_id                String   @db.Uuid
+  entitlement_key          String
+  old_value_json           Json?
+  new_value_json           Json
+  changed_by_membership_id String?  @db.Uuid
+  reason                   String?
+  occurred_at              DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([tenant_id, entitlement_key, occurred_at])
+  @@map("entitlement_grant_history")
+}
