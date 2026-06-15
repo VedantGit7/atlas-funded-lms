@@ -51,6 +51,12 @@ enum PublishStatus {
   ARCHIVED
 }
 
+enum EntityStatus {
+  ACTIVE
+  INACTIVE
+  ARCHIVED
+}
+
 model Tenant {
   id                   String      @id @db.Uuid
   slug                 String      @unique
@@ -555,4 +561,36 @@ model LessonProgress {
   @@unique([tenant_id, lesson_id, membership_id])
   @@index([tenant_id, membership_id, updated_at])
   @@map("lesson_progress")
+}
+
+model WorkflowDefinition {
+  id              String       @id @db.Uuid
+  tenant_id       String       @db.Uuid
+  key             String
+  name            String
+  definition_json Json
+  status          EntityStatus @default(ACTIVE)
+  created_at      DateTime     @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime     @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenant_id, key])
+  @@map("workflow_definitions")
+}
+
+model WorkflowTransition {
+  id                     String   @id @db.Uuid
+  tenant_id              String   @db.Uuid
+  workflow_definition_id String   @db.Uuid
+  target_type            String
+  target_id              String   @db.Uuid
+  from_state             String
+  to_state               String
+  actor_membership_id    String   @db.Uuid
+  reason                 String?
+  metadata_json          Json?
+  occurred_at            DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([tenant_id, target_type, target_id, occurred_at])
+  @@index([tenant_id, actor_membership_id, occurred_at])
+  @@map("workflow_transitions")
 }
