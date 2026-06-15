@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "echo \"No db build configured yet.\"",
-    "lint": "echo \"No db lint configured yet.\"",
+    "lint": "eslint . --max-warnings=0",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "echo \"No db tests configured yet.\"",
     "test:unit": "echo \"No db unit tests configured yet.\"",
@@ -12,9 +12,13 @@
     "test:authorization": "echo \"No db authorization tests configured yet.\"",
     "test:tenant-isolation": "echo \"No db tenant-isolation tests configured yet.\"",
     "test:e2e": "echo \"No db e2e tests configured yet.\"",
-    "db:migrate": "echo \"Prisma migration is not configured yet.\"",
-    "db:seed": "echo \"Database seed is not configured yet.\""
+    "db:generate": "dotenv -e ../../.env.local -- prisma generate --config ../../prisma.config.ts",
+    "db:validate": "dotenv -e ../../.env.local -- prisma validate --config ../../prisma.config.ts",
+    "db:migrate": "dotenv -e ../../.env.local -- prisma migrate dev --config ../../prisma.config.ts",
+    "db:migrate:check": "node ../../scripts/guards/check-migrate-status.mjs",
+    "db:seed": "echo \"Seed skeleton is not configured yet.\""
   },
-  "dependencies": {},
-  "devDependencies": {}
+  "dependencies": {
+    "@prisma/client": "^7.8.0"
+  }
 }
