@@ -3,9 +3,10 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "dev": "echo \"Next.js app is not initialized yet. This will be implemented in the Next.js baseline step.\"",
-    "build": "echo \"No web build configured yet.\"",
-    "lint": "echo \"No web lint configured yet.\"",
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint . --max-warnings=0",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "echo \"No web tests configured yet.\"",
     "test:unit": "echo \"No web unit tests configured yet.\"",
@@ -14,6 +15,14 @@
     "test:tenant-isolation": "echo \"No web tenant-isolation tests configured yet.\"",
     "test:e2e": "echo \"No web e2e tests configured yet.\""
   },
-  "dependencies": {},
-  "devDependencies": {}
+  "dependencies": {
+    "next": "^15.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0"
+  }
 }

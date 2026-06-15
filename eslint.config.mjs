@@ -1,3 +1,4 @@
+import { existsSync, readFileSync } from "node:fs";
 import js from "@eslint/js";
 import globals from "globals";
 import tseslint from "typescript-eslint";
@@ -51,12 +52,27 @@ const routeMetadataRule = {
           /apps\/web\/src\/app\/api\/.*\/route\.(ts|tsx)$/.test(fileName) ||
           /apps\/web\/app\/api\/.*\/route\.(ts|tsx)$/.test(fileName);
 
-        if (isApiRouteFile && !hasRouteMetadataExport) {
-          context.report({
-            node,
-            messageId: "missingRouteMetadata",
-          });
+        if (!isApiRouteFile || hasRouteMetadataExport) {
+          return;
         }
+
+        const metadataFile = context.filename.replace(/route\.(ts|tsx)$/, "route.metadata.$1");
+
+        if (existsSync(metadataFile)) {
+          const metadataContent = readFileSync(metadataFile, "utf8");
+
+          if (
+            /export\s+const\s+routeMetadata\s*=/.test(metadataContent) ||
+            /export\s*\{\s*routeMetadata\s*\}/.test(metadataContent)
+          ) {
+            return;
+          }
+        }
+
+        context.report({
+          node,
+          messageId: "missingRouteMetadata",
+        });
       },
     };
   },
@@ -135,6 +151,7 @@ export default tseslint.config(
       "**/out/**",
       "**/pnpm-lock.yaml",
       "docs/locked/**",
+      "apps/web/next-env.d.ts",
     ],
   },
 
