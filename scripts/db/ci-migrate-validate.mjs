@@ -16,7 +16,7 @@ if (!user || !password || !database) {
 }
 
 process.env.DATABASE_URL = [
-  "postgresql",
+  "postgresql:",
   "//",
   user,
   ":",
