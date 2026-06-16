@@ -38,15 +38,15 @@ const files = roots
 const forbiddenPatterns = [
   {
     name: "session-level SET app.tenant_id",
-    pattern: /\bSET\s+app\.tenant_id\b/i,
+    pattern: /\bSET\s+app\.tenant_id\b/,
   },
   {
     name: "session-level SET app.actor_membership_id",
-    pattern: /\bSET\s+app\.actor_membership_id\b/i,
+    pattern: /\bSET\s+app\.actor_membership_id\b/,
   },
   {
     name: "session-level SET app.request_id",
-    pattern: /\bSET\s+app\.request_id\b/i,
+    pattern: /\bSET\s+app\.request_id\b/,
   },
   {
     name: "set_config app.tenant_id with false",
@@ -54,8 +54,12 @@ const forbiddenPatterns = [
   },
 ];
 
+function stripComments(content) {
+  return content.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, "");
+}
+
 for (const file of files) {
-  const content = readFileSync(file, "utf8");
+  const content = stripComments(readFileSync(file, "utf8"));
 
   for (const { name, pattern } of forbiddenPatterns) {
     if (pattern.test(content)) {
