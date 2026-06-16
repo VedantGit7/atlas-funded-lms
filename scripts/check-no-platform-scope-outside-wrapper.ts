@@ -4,15 +4,16 @@ import { join, relative } from "node:path";
 const root = process.cwd();
 
 const allowedFiles = new Set([
-  "packages/db/src/client.ts",
   "packages/db/src/platform-client.ts",
   "packages/db/src/platform-audit.ts",
-  "packages/db/src/with-tenant-tx.ts",
   "packages/db/src/with-platform-scope.ts",
-  "packages/db/src/index.ts",
+  "tests/db/with-platform-scope.test.ts",
 ]);
 
-const ignoredFiles = new Set(["scripts/check-no-direct-prisma.ts"]);
+const ignoredFiles = new Set([
+  "scripts/check-no-direct-prisma.ts",
+  "scripts/check-no-platform-scope-outside-wrapper.ts",
+]);
 
 const ignoredDirs = new Set([
   ".git",
@@ -22,7 +23,6 @@ const ignoredDirs = new Set([
   "build",
   "coverage",
   "prisma",
-  "tests",
 ]);
 
 const violations: string[] = [];
@@ -50,16 +50,13 @@ function walk(dir: string): void {
 
     const content = readFileSync(fullPath, "utf8");
 
-    const importsPrismaClient =
-      content.includes("from '@prisma/client'") || content.includes('from "@prisma/client"');
+    const setsPlatformScope =
+      content.includes("app.platform_scope") || content.includes("SET LOCAL ROLE atlas_platform");
 
-    const importsGeneratedPrisma = /from\s+['"][^'"]*generated\/prisma/.test(content);
+    const importsPlatformClient =
+      /from\s+['"].*platform-client['"]/.test(content) || content.includes("getPlatformPrisma");
 
-    const importsDbPrisma = /import\s+\{[^}]*\bprisma\b[^}]*\}\s+from\s+['"]@atlas\/db['"]/.test(
-      content,
-    );
-
-    if (importsPrismaClient || importsGeneratedPrisma || importsDbPrisma) {
+    if (setsPlatformScope || importsPlatformClient) {
       violations.push(relPath);
     }
   }
@@ -68,7 +65,7 @@ function walk(dir: string): void {
 walk(root);
 
 if (violations.length > 0) {
-  console.error("Direct Prisma access is forbidden outside @atlas/db wrappers.");
+  console.error("Platform scope is forbidden outside withPlatformScope() and its tests.");
   console.error("Violations:");
   for (const violation of violations) {
     console.error(`- ${violation}`);

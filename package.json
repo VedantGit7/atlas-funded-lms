@@ -43,7 +43,8 @@
     "db:sql:check": "node scripts/db/check-no-session-tenant-set.mjs && node scripts/db/check-sql-approved-paths.mjs",
     "db:sql:apply": "dotenv -e .env.local -- node scripts/db/apply-sql-directory.mjs",
     "db:check-no-direct-prisma": "tsx scripts/check-no-direct-prisma.ts",
-    "db:check-no-session-tenant-set": "node scripts/db/check-no-session-tenant-set.mjs"
+    "db:check-no-session-tenant-set": "node scripts/db/check-no-session-tenant-set.mjs",
+    "db:check-no-platform-scope-outside-wrapper": "tsx scripts/check-no-platform-scope-outside-wrapper.ts"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
