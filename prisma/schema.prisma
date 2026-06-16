@@ -57,6 +57,14 @@ enum EntityStatus {
   ARCHIVED
 }
 
+enum AttemptStatus {
+  STARTED
+  SUBMITTED
+  GRADED
+  ABANDONED
+  VOIDED
+}
+
 model Tenant {
   id                   String      @id @db.Uuid
   slug                 String      @unique
@@ -758,4 +766,88 @@ model ItemCollectionItem {
   @@unique([tenant_id, collection_id, item_id])
   @@unique([tenant_id, collection_id, position])
   @@map("item_collection_items")
+}
+
+model Assessment {
+  id              String        @id @db.Uuid
+  tenant_id       String        @db.Uuid
+  slug            String
+  title           String
+  assessment_type String
+  status          PublishStatus @default(DRAFT)
+  config_json     Json
+  created_at      DateTime      @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime      @updatedAt @db.Timestamptz(6)
+  deleted_at      DateTime?     @db.Timestamptz(6)
+
+  @@unique([tenant_id, slug])
+  @@index([tenant_id, assessment_type, status])
+  @@map("assessments")
+}
+
+model AssessmentItem {
+  id            String   @id @db.Uuid
+  tenant_id     String   @db.Uuid
+  assessment_id String   @db.Uuid
+  item_id       String   @db.Uuid
+  position      Int
+  points        Decimal  @db.Decimal(10, 2)
+  config_json   Json?
+  created_at    DateTime @default(now()) @db.Timestamptz(6)
+
+  @@unique([tenant_id, assessment_id, item_id])
+  @@unique([tenant_id, assessment_id, position])
+  @@map("assessment_items")
+}
+
+model Attempt {
+  id              String        @id @db.Uuid
+  tenant_id       String        @db.Uuid
+  assessment_id   String        @db.Uuid
+  membership_id   String        @db.Uuid
+  status          AttemptStatus @default(STARTED)
+  started_at      DateTime      @default(now()) @db.Timestamptz(6)
+  submitted_at    DateTime?     @db.Timestamptz(6)
+  graded_at       DateTime?     @db.Timestamptz(6)
+  score_pct       Decimal?      @db.Decimal(8, 4)
+  metadata_json   Json?
+  idempotency_key String?
+
+  @@unique([tenant_id, idempotency_key])
+  @@index([tenant_id, assessment_id, membership_id, started_at])
+  @@index([tenant_id, membership_id, status])
+  @@map("attempts")
+}
+
+model AttemptAnswer {
+  id                 String   @id @db.Uuid
+  tenant_id          String   @db.Uuid
+  attempt_id         String   @db.Uuid
+  assessment_item_id String   @db.Uuid
+  answer_json        Json
+  is_correct         Boolean?
+  points_awarded     Decimal? @db.Decimal(10, 2)
+  occurred_at        DateTime @default(now()) @db.Timestamptz(6)
+  idempotency_key    String
+
+  @@unique([tenant_id, idempotency_key])
+  @@unique([tenant_id, attempt_id, assessment_item_id])
+  @@index([tenant_id, attempt_id])
+  @@map("attempt_answers")
+}
+
+model GradingTask {
+  id                        String   @id @db.Uuid
+  tenant_id                 String   @db.Uuid
+  attempt_id                String   @db.Uuid
+  assigned_to_membership_id String?  @db.Uuid
+  status                    String   @default("open")
+  rubric_json               Json?
+  result_json               Json?
+  created_at                DateTime @default(now()) @db.Timestamptz(6)
+  updated_at                DateTime @updatedAt @db.Timestamptz(6)
+
+  @@index([tenant_id, status, created_at])
+  @@index([tenant_id, assigned_to_membership_id, status])
+  @@map("grading_tasks")
 }
