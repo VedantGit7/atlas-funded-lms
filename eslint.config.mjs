@@ -295,6 +295,13 @@ export default tseslint.config(
   },
 
   {
+    files: ["prisma/seeds/**/*.ts"],
+    rules: {
+      "atlas/no-hardcoded-tenant-strings": "off",
+    },
+  },
+
+  {
     files: ["scripts/**/*.ts", "tests/**/*.{ts,tsx}", "vitest.config.ts"],
     ...tseslint.configs.disableTypeChecked,
     languageOptions: {

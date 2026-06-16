@@ -25,7 +25,7 @@
     "db:migrate": "dotenv -e .env.local -- prisma migrate dev",
     "db:migrate:check": "node scripts/guards/check-migrate-status.mjs",
     "db:studio": "dotenv -e .env.local -- prisma studio",
-    "db:seed": "pnpm --filter @atlas/db db:seed",
+    "db:seed": "tsx prisma/seeds/index.ts all",
     "ci": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm test && pnpm check:route-metadata && pnpm check:prisma-boundary && pnpm check:audit-compliance && pnpm check:outbox-compliance && pnpm check:forbidden-scope && pnpm check:secrets && pnpm db:sql:check && pnpm db:migrate:check && pnpm db:rls:check && pnpm build",
     "format": "prettier . --write",
     "format:check": "prettier . --check",
@@ -44,7 +44,11 @@
     "db:sql:apply": "dotenv -e .env.local -- node scripts/db/apply-sql-directory.mjs",
     "db:check-no-direct-prisma": "tsx scripts/check-no-direct-prisma.ts",
     "db:check-no-session-tenant-set": "node scripts/db/check-no-session-tenant-set.mjs",
-    "db:check-no-platform-scope-outside-wrapper": "tsx scripts/check-no-platform-scope-outside-wrapper.ts"
+    "db:check-no-platform-scope-outside-wrapper": "tsx scripts/check-no-platform-scope-outside-wrapper.ts",
+    "db:seed:catalogues": "tsx prisma/seeds/index.ts catalogues",
+    "db:seed:tenants": "tsx prisma/seeds/index.ts tenants",
+    "db:seed:fundedbeyond": "tsx prisma/seeds/index.ts fundedbeyond",
+    "db:seed:smoke-tenant": "tsx prisma/seeds/index.ts smoke-tenant"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
