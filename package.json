@@ -13,13 +13,14 @@
     "build": "pnpm -r build",
     "lint": "eslint . --max-warnings=0",
     "typecheck": "tsc -b",
-    "test": "pnpm -r test",
+    "test": "pnpm -r test && dotenv -e .env.local -- vitest run tests/db",
     "test:unit": "pnpm -r test:unit",
-    "test:integration": "pnpm -r test:integration",
+    "test:integration": "dotenv -e .env.local -- vitest run tests/db",
     "test:authorization": "pnpm -r test:authorization",
     "test:tenant-isolation": "pnpm -r test:tenant-isolation",
     "test:e2e": "pnpm -r test:e2e",
     "db:generate": "dotenv -e .env.local -- prisma generate",
+    "db:generate:ci": "prisma generate --config prisma.config.ts",
     "db:validate": "dotenv -e .env.local -- prisma validate",
     "db:migrate": "dotenv -e .env.local -- prisma migrate dev",
     "db:migrate:check": "node scripts/guards/check-migrate-status.mjs",
@@ -40,10 +41,13 @@
     "check:forbidden-scope": "node scripts/guards/check-forbidden-scope.mjs",
     "check:secrets": "node scripts/guards/check-secrets.mjs",
     "db:sql:check": "node scripts/db/check-no-session-tenant-set.mjs && node scripts/db/check-sql-approved-paths.mjs",
-    "db:sql:apply": "dotenv -e .env.local -- node scripts/db/apply-sql-directory.mjs"
+    "db:sql:apply": "dotenv -e .env.local -- node scripts/db/apply-sql-directory.mjs",
+    "db:check-no-direct-prisma": "tsx scripts/check-no-direct-prisma.ts",
+    "db:check-no-session-tenant-set": "node scripts/db/check-no-session-tenant-set.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@types/node": "^24.0.0",
     "@types/pg": "^8.20.0",
     "dotenv": "^17.4.2",
     "dotenv-cli": "^11.0.0",
@@ -54,7 +58,9 @@
     "pg": "^8.21.0",
     "prettier": "^3.8.4",
     "prisma": "^7.8.0",
+    "tsx": "^4.21.0",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.61.0"
+    "typescript-eslint": "^8.61.0",
+    "vitest": "^4.0.18"
   }
 }

@@ -2,6 +2,9 @@
   "name": "@atlas/db",
   "version": "0.0.0",
   "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
   "scripts": {
     "build": "echo \"No db build configured yet.\"",
     "lint": "eslint . --max-warnings=0",
@@ -19,6 +22,13 @@
     "db:seed": "echo \"Seed skeleton is not configured yet.\""
   },
   "dependencies": {
-    "@prisma/client": "^7.8.0"
+    "@prisma/adapter-pg": "^7.8.0",
+    "@prisma/client": "^7.8.0",
+    "pg": "^8.21.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@types/pg": "^8.20.0",
+    "typescript": "^6.0.3"
   }
 }

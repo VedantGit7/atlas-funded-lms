@@ -160,7 +160,7 @@ export default tseslint.config(
   js.configs.recommended,
 
   {
-    files: ["**/*.config.{js,mjs,cjs}", "eslint.config.mjs"],
+    files: ["**/*.config.{js,mjs,cjs,ts}", "eslint.config.mjs", "vitest.config.ts"],
     ...tseslint.configs.disableTypeChecked,
     languageOptions: {
       globals: {
@@ -291,6 +291,19 @@ export default tseslint.config(
           ],
         },
       ],
+    },
+  },
+
+  {
+    files: ["scripts/**/*.ts", "tests/**/*.{ts,tsx}", "vitest.config.ts"],
+    ...tseslint.configs.disableTypeChecked,
+    languageOptions: {
+      parserOptions: {
+        projectService: false,
+      },
+      globals: {
+        ...globals.node,
+      },
     },
   },
 );
