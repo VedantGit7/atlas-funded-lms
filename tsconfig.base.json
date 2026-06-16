@@ -48,6 +48,9 @@
       "@atlas/domain": ["packages/domain/src/index.ts"],
       "@atlas/domain/*": ["packages/domain/src/*"],
 
+      "@atlas/membership": ["packages/membership/src/index.ts"],
+      "@atlas/membership/*": ["packages/membership/src/*"],
+
       "@atlas/events": ["packages/events/src/index.ts"],
       "@atlas/events/*": ["packages/events/src/*"],
 

@@ -270,7 +270,6 @@ export default tseslint.config(
             {
               group: [
                 "@atlas/db/client",
-                "@atlas/db/with-tenant-tx",
                 "@atlas/db/with-platform-scope",
                 "@atlas/db/platform-client",
                 "**/repositories/**",

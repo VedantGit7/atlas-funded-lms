@@ -13,6 +13,7 @@
     { "path": "./packages/design-system" },
     { "path": "./packages/domain" },
     { "path": "./packages/events" },
+    { "path": "./packages/membership" },
     { "path": "./packages/observability" },
     { "path": "./packages/security" },
     { "path": "./packages/storage" },

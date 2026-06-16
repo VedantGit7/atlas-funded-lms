@@ -75,6 +75,9 @@ importers:
       '@atlas/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@atlas/membership':
+        specifier: workspace:*
+        version: link:../../packages/membership
       '@atlas/tenancy':
         specifier: workspace:*
         version: link:../../packages/tenancy
@@ -160,6 +163,19 @@ importers:
   packages/domain: {}
 
   packages/events: {}
+
+  packages/membership:
+    dependencies:
+      '@atlas/core':
+        specifier: workspace:*
+        version: link:../core
+      zod:
+        specifier: ^3.25.76
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: ^24.0.0
+        version: 24.13.2
 
   packages/observability: {}
 

@@ -19,6 +19,7 @@
     "@atlas/auth": "workspace:*",
     "@atlas/core": "workspace:*",
     "@atlas/db": "workspace:*",
+    "@atlas/membership": "workspace:*",
     "@atlas/tenancy": "workspace:*",
     "next": "^15.0.0",
     "react": "^19.0.0",
