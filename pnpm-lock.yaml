@@ -59,6 +59,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@atlas/core':
+        specifier: workspace:*
+        version: link:../../packages/core
       next:
         specifier: ^15.0.0
         version: 15.5.19(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -86,6 +89,12 @@ importers:
   packages/authorization: {}
 
   packages/config: {}
+
+  packages/core:
+    devDependencies:
+      '@types/node':
+        specifier: ^24.0.0
+        version: 24.13.2
 
   packages/db:
     dependencies:
@@ -120,6 +129,12 @@ importers:
   packages/security: {}
 
   packages/storage: {}
+
+  packages/tenancy:
+    dependencies:
+      '@atlas/core':
+        specifier: workspace:*
+        version: link:../core
 
   packages/testing: {}
 
