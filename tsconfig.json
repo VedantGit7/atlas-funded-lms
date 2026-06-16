@@ -8,6 +8,7 @@
     { "path": "./packages/auth" },
     { "path": "./packages/authorization" },
     { "path": "./packages/config" },
+    { "path": "./packages/core" },
     { "path": "./packages/db" },
     { "path": "./packages/design-system" },
     { "path": "./packages/domain" },
@@ -15,6 +16,7 @@
     { "path": "./packages/observability" },
     { "path": "./packages/security" },
     { "path": "./packages/storage" },
+    { "path": "./packages/tenancy" },
     { "path": "./packages/testing" },
     { "path": "./packages/utils" },
     { "path": "./packages/validation" }

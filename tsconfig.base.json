@@ -36,6 +36,9 @@
       "@atlas/config": ["packages/config/src/index.ts"],
       "@atlas/config/*": ["packages/config/src/*"],
 
+      "@atlas/core": ["packages/core/src/index.ts"],
+      "@atlas/core/*": ["packages/core/src/*"],
+
       "@atlas/db": ["packages/db/src/index.ts"],
       "@atlas/db/*": ["packages/db/src/*"],
 
@@ -56,6 +59,9 @@
 
       "@atlas/storage": ["packages/storage/src/index.ts"],
       "@atlas/storage/*": ["packages/storage/src/*"],
+
+      "@atlas/tenancy": ["packages/tenancy/src/index.ts"],
+      "@atlas/tenancy/*": ["packages/tenancy/src/*"],
 
       "@atlas/testing": ["packages/testing/src/index.ts"],
       "@atlas/testing/*": ["packages/testing/src/*"],

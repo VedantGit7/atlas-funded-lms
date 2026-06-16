@@ -1,0 +1,24 @@
+{
+  "name": "@atlas/core",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    "./http/errors": "./src/http/errors.ts",
+    "./http/headers": "./src/http/headers.ts",
+    "./request/request-id": "./src/request/request-id.ts"
+  },
+  "scripts": {
+    "build": "echo \"No core build configured yet.\"",
+    "lint": "echo \"No core lint configured yet.\"",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "echo \"No core tests configured yet.\"",
+    "test:unit": "echo \"No core unit tests configured yet.\"",
+    "test:integration": "echo \"No core integration tests configured yet.\"",
+    "test:authorization": "echo \"No core authorization tests configured yet.\"",
+    "test:tenant-isolation": "echo \"No core tenant-isolation tests configured yet.\"",
+    "test:e2e": "echo \"No core e2e tests configured yet.\""
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "name": "@atlas/tenancy",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "echo \"No tenancy build configured yet.\"",
+    "lint": "echo \"No tenancy lint configured yet.\"",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "echo \"No tenancy tests configured yet.\"",
+    "test:unit": "echo \"No tenancy unit tests configured yet.\"",
+    "test:integration": "echo \"No tenancy integration tests configured yet.\"",
+    "test:authorization": "echo \"No tenancy authorization tests configured yet.\"",
+    "test:tenant-isolation": "echo \"No tenancy tenant-isolation tests configured yet.\"",
+    "test:e2e": "echo \"No tenancy e2e tests configured yet.\""
+  },
+  "dependencies": {
+    "@atlas/core": "workspace:*"
+  },
+  "devDependencies": {}
+}
