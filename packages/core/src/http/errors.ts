@@ -2,6 +2,7 @@ export type AtlasErrorCode =
   | "TENANT_NOT_FOUND"
   | "TENANT_DOMAIN_INACTIVE"
   | "TENANT_UNAVAILABLE"
+  | "AUTH_REQUIRED"
   | "VALIDATION_ERROR"
   | "INTERNAL_ERROR";
 
@@ -19,7 +20,24 @@ export class AtlasHttpError extends Error {
   }
 }
 
+function isValidationError(error: unknown): boolean {
+  return error instanceof Error && error.name === "ZodError";
+}
+
 export function toSafeErrorEnvelope(error: unknown, requestId: string) {
+  if (isValidationError(error)) {
+    return {
+      status: 400,
+      body: {
+        error: {
+          code: "VALIDATION_ERROR" as const,
+          message: "Invalid request",
+          requestId,
+        },
+      },
+    };
+  }
+
   if (error instanceof AtlasHttpError) {
     return {
       status: error.status,

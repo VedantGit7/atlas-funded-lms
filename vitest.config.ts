@@ -17,6 +17,18 @@ export default defineConfig({
         replacement: path.resolve(import.meta.dirname, "packages/tenancy/src/index.ts"),
       },
       {
+        find: /^@atlas\/auth\/(.+)$/,
+        replacement: path.resolve(import.meta.dirname, "packages/auth/src/$1.ts"),
+      },
+      {
+        find: "@atlas/auth",
+        replacement: path.resolve(import.meta.dirname, "packages/auth/src/index.ts"),
+      },
+      {
+        find: /^@atlas\/db\/(.+)$/,
+        replacement: path.resolve(import.meta.dirname, "packages/db/src/$1.ts"),
+      },
+      {
         find: "@atlas/db",
         replacement: path.resolve(import.meta.dirname, "packages/db/src/index.ts"),
       },

@@ -3,7 +3,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
-  transpilePackages: ["@atlas/core"],
+  transpilePackages: ["@atlas/auth", "@atlas/core", "@atlas/tenancy"],
 };
 
 export default nextConfig;

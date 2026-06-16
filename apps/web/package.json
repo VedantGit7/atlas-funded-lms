@@ -16,7 +16,10 @@
     "test:e2e": "echo \"No web e2e tests configured yet.\""
   },
   "dependencies": {
+    "@atlas/auth": "workspace:*",
     "@atlas/core": "workspace:*",
+    "@atlas/db": "workspace:*",
+    "@atlas/tenancy": "workspace:*",
     "next": "^15.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
