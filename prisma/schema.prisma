@@ -1090,3 +1090,47 @@ model AttributionToken {
   @@index([tenant_id, anonymous_id, created_at])
   @@map("attribution_tokens")
 }
+
+model CertificateTemplate {
+  id            String        @id @db.Uuid
+  tenant_id     String        @db.Uuid
+  key           String
+  name          String
+  template_json Json
+  status        PublishStatus @default(DRAFT)
+  created_at    DateTime      @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime      @updatedAt @db.Timestamptz(6)
+  deleted_at    DateTime?     @db.Timestamptz(6)
+
+  @@unique([tenant_id, key])
+  @@map("certificate_templates")
+}
+
+model Certificate {
+  id            String    @id @db.Uuid
+  tenant_id     String    @db.Uuid
+  template_id   String    @db.Uuid
+  membership_id String    @db.Uuid
+  credential_id String    @unique
+  status        String    @default("issued")
+  issued_at     DateTime  @default(now()) @db.Timestamptz(6)
+  revoked_at    DateTime? @db.Timestamptz(6)
+  r2_object_key String?
+  metadata_json Json?
+
+  @@index([tenant_id, membership_id, issued_at])
+  @@index([tenant_id, template_id, status])
+  @@map("certificates")
+}
+
+model CredentialVerification {
+  id              String   @id @db.Uuid
+  tenant_id       String   @db.Uuid
+  certificate_id  String   @db.Uuid
+  ip_hash         String?
+  user_agent_hash String?
+  occurred_at     DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([tenant_id, certificate_id, occurred_at])
+  @@map("credential_verifications")
+}
