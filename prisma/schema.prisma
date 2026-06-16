@@ -65,6 +65,21 @@ enum AttemptStatus {
   VOIDED
 }
 
+enum Visibility {
+  PRIVATE
+  TENANT
+  PUBLIC
+  UNLISTED
+}
+
+enum ModerationStatus {
+  OPEN
+  REVIEWING
+  ACTIONED
+  REJECTED
+  CLOSED
+}
+
 model Tenant {
   id                   String      @id @db.Uuid
   slug                 String      @unique
@@ -1285,4 +1300,134 @@ model NotificationDispatch {
   @@index([tenant_id, membership_id, created_at])
   @@index([tenant_id, status, created_at])
   @@map("notification_dispatches")
+}
+
+model CommunitySpace {
+  id          String     @id @db.Uuid
+  tenant_id   String     @db.Uuid
+  slug        String
+  name        String
+  visibility  Visibility @default(TENANT)
+  config_json Json?
+  created_at  DateTime   @default(now()) @db.Timestamptz(6)
+  updated_at  DateTime   @updatedAt @db.Timestamptz(6)
+  deleted_at  DateTime?  @db.Timestamptz(6)
+
+  @@unique([tenant_id, slug])
+  @@index([tenant_id, visibility])
+  @@map("community_spaces")
+}
+
+model GroupMembership {
+  id            String   @id @db.Uuid
+  tenant_id     String   @db.Uuid
+  space_id      String   @db.Uuid
+  membership_id String   @db.Uuid
+  role_key      String   @default("member")
+  joined_at     DateTime @default(now()) @db.Timestamptz(6)
+
+  @@unique([tenant_id, space_id, membership_id])
+  @@index([tenant_id, membership_id])
+  @@map("group_memberships")
+}
+
+model Post {
+  id                   String    @id @db.Uuid
+  tenant_id            String    @db.Uuid
+  space_id             String    @db.Uuid
+  author_membership_id String    @db.Uuid
+  title                String?
+  body_json            Json
+  status               String    @default("published")
+  created_at           DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime  @updatedAt @db.Timestamptz(6)
+  deleted_at           DateTime? @db.Timestamptz(6)
+
+  @@index([tenant_id, space_id, created_at])
+  @@index([tenant_id, author_membership_id, created_at])
+  @@map("posts")
+}
+
+model Comment {
+  id                   String    @id @db.Uuid
+  tenant_id            String    @db.Uuid
+  post_id              String    @db.Uuid
+  parent_comment_id    String?   @db.Uuid
+  author_membership_id String    @db.Uuid
+  body_json            Json
+  status               String    @default("published")
+  created_at           DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime  @updatedAt @db.Timestamptz(6)
+  deleted_at           DateTime? @db.Timestamptz(6)
+
+  @@index([tenant_id, post_id, created_at])
+  @@map("comments")
+}
+
+model Reaction {
+  id            String   @id @db.Uuid
+  tenant_id     String   @db.Uuid
+  membership_id String   @db.Uuid
+  target_type   String
+  target_id     String   @db.Uuid
+  reaction_key  String
+  created_at    DateTime @default(now()) @db.Timestamptz(6)
+
+  @@unique([tenant_id, membership_id, target_type, target_id, reaction_key])
+  @@index([tenant_id, target_type, target_id])
+  @@map("reactions")
+}
+
+model Mention {
+  id                      String   @id @db.Uuid
+  tenant_id               String   @db.Uuid
+  mentioned_membership_id String   @db.Uuid
+  source_type             String
+  source_id               String   @db.Uuid
+  created_at              DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([tenant_id, mentioned_membership_id, created_at])
+  @@map("mentions")
+}
+
+model ModerationCase {
+  id                      String           @id @db.Uuid
+  tenant_id               String           @db.Uuid
+  target_type             String
+  target_id               String           @db.Uuid
+  status                  ModerationStatus @default(OPEN)
+  reason_key              String?
+  opened_by_membership_id String?          @db.Uuid
+  created_at              DateTime         @default(now()) @db.Timestamptz(6)
+  updated_at              DateTime         @updatedAt @db.Timestamptz(6)
+
+  @@index([tenant_id, status, created_at])
+  @@map("moderation_cases")
+}
+
+model ModerationDecision {
+  id                       String   @id @db.Uuid
+  tenant_id                String   @db.Uuid
+  moderation_case_id       String   @db.Uuid
+  decided_by_membership_id String?  @db.Uuid
+  decision_key             String
+  decision_json            Json?
+  occurred_at              DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([tenant_id, moderation_case_id, occurred_at])
+  @@map("moderation_decisions")
+}
+
+model Appeal {
+  id                         String   @id @db.Uuid
+  tenant_id                  String   @db.Uuid
+  moderation_case_id         String   @db.Uuid
+  submitted_by_membership_id String   @db.Uuid
+  status                     String   @default("open")
+  body                       String
+  created_at                 DateTime @default(now()) @db.Timestamptz(6)
+  updated_at                 DateTime @updatedAt @db.Timestamptz(6)
+
+  @@index([tenant_id, status, created_at])
+  @@map("appeals")
 }
