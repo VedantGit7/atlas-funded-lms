@@ -1036,3 +1036,57 @@ model CompetencyScoreSnapshot {
   @@index([tenant_id, membership_id, occurred_at])
   @@map("competency_score_snapshots")
 }
+
+model DiagnosticSession {
+  id              String    @id @db.Uuid
+  tenant_id       String    @db.Uuid
+  anonymous_id    String?
+  membership_id   String?   @db.Uuid
+  assessment_id   String?   @db.Uuid
+  attempt_id      String?   @db.Uuid
+  status          String    @default("started")
+  ip_hash         String?
+  user_agent_hash String?
+  started_at      DateTime  @default(now()) @db.Timestamptz(6)
+  completed_at    DateTime? @db.Timestamptz(6)
+  merge_json      Json?
+  metadata_json   Json?
+
+  @@index([tenant_id, anonymous_id, started_at])
+  @@index([tenant_id, membership_id, started_at])
+  @@map("diagnostic_sessions")
+}
+
+model ReadinessPolicy {
+  id                 String       @id @db.Uuid
+  tenant_id          String       @db.Uuid
+  key                String
+  scoring_profile_id String       @db.Uuid
+  cta_policy_json    Json
+  legal_copy_json    Json?
+  status             EntityStatus @default(ACTIVE)
+  created_at         DateTime     @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime     @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenant_id, key])
+  @@map("readiness_policies")
+}
+
+model AttributionToken {
+  id                 String    @id @db.Uuid
+  tenant_id          String    @db.Uuid
+  membership_id      String?   @db.Uuid
+  anonymous_id       String?
+  token_hash         String    @unique
+  destination_url    String
+  source_surface     String
+  readiness_band_key String?
+  metadata_json      Json?
+  created_at         DateTime  @default(now()) @db.Timestamptz(6)
+  expires_at         DateTime  @db.Timestamptz(6)
+  consumed_at        DateTime? @db.Timestamptz(6)
+
+  @@index([tenant_id, membership_id, created_at])
+  @@index([tenant_id, anonymous_id, created_at])
+  @@map("attribution_tokens")
+}
