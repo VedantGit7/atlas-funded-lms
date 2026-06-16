@@ -901,3 +901,138 @@ model SrsState {
   @@index([tenant_id, membership_id, due_at])
   @@map("srs_state")
 }
+
+model CompetencyDimension {
+  id          String   @id @db.Uuid
+  tenant_id   String   @db.Uuid
+  key         String
+  name        String
+  description String?
+  created_at  DateTime @default(now()) @db.Timestamptz(6)
+  updated_at  DateTime @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenant_id, key])
+  @@map("competency_dimensions")
+}
+
+model ScoringProfile {
+  id                       String       @id @db.Uuid
+  tenant_id                String       @db.Uuid
+  key                      String
+  name                     String
+  status                   EntityStatus @default(ACTIVE)
+  active_config_version_id String?      @db.Uuid
+  created_at               DateTime     @default(now()) @db.Timestamptz(6)
+  updated_at               DateTime     @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenant_id, key])
+  @@map("scoring_profiles")
+}
+
+model ScoringConfigVersion {
+  id                       String    @id @db.Uuid
+  tenant_id                String    @db.Uuid
+  scoring_profile_id       String    @db.Uuid
+  version                  Int
+  config_json              Json
+  activated_at             DateTime? @db.Timestamptz(6)
+  created_by_membership_id String?   @db.Uuid
+  created_at               DateTime  @default(now()) @db.Timestamptz(6)
+
+  @@unique([tenant_id, scoring_profile_id, version])
+  @@index([tenant_id, scoring_profile_id, activated_at])
+  @@map("scoring_config_versions")
+}
+
+model CompetencyBand {
+  id                 String   @id @db.Uuid
+  tenant_id          String   @db.Uuid
+  scoring_profile_id String   @db.Uuid
+  key                String
+  label              String
+  min_score          Decimal  @db.Decimal(8, 4)
+  max_score          Decimal  @db.Decimal(8, 4)
+  sort_order         Int
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenant_id, scoring_profile_id, key])
+  @@map("competency_bands")
+}
+
+model SignalSource {
+  id             String   @id @db.Uuid
+  tenant_id      String   @db.Uuid
+  key            String
+  source_context String
+  config_json    Json?
+  created_at     DateTime @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenant_id, key])
+  @@map("signal_sources")
+}
+
+model CompetencySignal {
+  id                String   @id @db.Uuid
+  tenant_id         String   @db.Uuid
+  membership_id     String   @db.Uuid
+  dimension_id      String   @db.Uuid
+  signal_source_key String
+  source_event_id   String?  @db.Uuid
+  raw_score         Decimal  @db.Decimal(10, 4)
+  weight            Decimal  @db.Decimal(10, 4)
+  metadata_json     Json?
+  occurred_at       DateTime @default(now()) @db.Timestamptz(6)
+  idempotency_key   String
+
+  @@unique([tenant_id, idempotency_key])
+  @@index([tenant_id, membership_id, dimension_id, occurred_at])
+  @@index([tenant_id, signal_source_key, occurred_at])
+  @@map("competency_signals")
+}
+
+model CompetencyScore {
+  id                 String   @id @db.Uuid
+  tenant_id          String   @db.Uuid
+  membership_id      String   @db.Uuid
+  dimension_id       String   @db.Uuid
+  scoring_profile_id String   @db.Uuid
+  score              Decimal  @db.Decimal(10, 4)
+  band_key           String?
+  calculated_at      DateTime @default(now()) @db.Timestamptz(6)
+  config_version_id  String   @db.Uuid
+
+  @@unique([tenant_id, membership_id, dimension_id, scoring_profile_id])
+  @@index([tenant_id, dimension_id, band_key])
+  @@map("competency_scores")
+}
+
+model CompositeReadinessState {
+  id                 String   @id @db.Uuid
+  tenant_id          String   @db.Uuid
+  membership_id      String   @db.Uuid
+  scoring_profile_id String   @db.Uuid
+  composite_key      String
+  score              Decimal  @db.Decimal(10, 4)
+  band_key           String
+  hard_gates_json    Json?
+  calculated_at      DateTime @default(now()) @db.Timestamptz(6)
+  config_version_id  String   @db.Uuid
+
+  @@unique([tenant_id, membership_id, scoring_profile_id, composite_key])
+  @@index([tenant_id, composite_key, band_key])
+  @@map("composite_readiness_state")
+}
+
+model CompetencyScoreSnapshot {
+  id                 String   @id @db.Uuid
+  tenant_id          String   @db.Uuid
+  membership_id      String   @db.Uuid
+  scoring_profile_id String   @db.Uuid
+  snapshot_json      Json
+  occurred_at        DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([tenant_id, membership_id, occurred_at])
+  @@map("competency_score_snapshots")
+}
