@@ -1431,3 +1431,80 @@ model Appeal {
   @@index([tenant_id, status, created_at])
   @@map("appeals")
 }
+
+model SearchIndexEntry {
+  id             String     @id @db.Uuid
+  tenant_id      String     @db.Uuid
+  source_context String
+  source_type    String
+  source_id      String     @db.Uuid
+  title          String
+  body           String?
+  visibility     Visibility @default(TENANT)
+  access_json    Json?
+  vector_ref     String?
+  updated_at     DateTime   @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenant_id, source_context, source_type, source_id])
+  @@index([tenant_id, source_type])
+  @@map("search_index_entries")
+}
+
+model AnalyticsRollup {
+  id            String   @id @db.Uuid
+  tenant_id     String   @db.Uuid
+  rollup_key    String
+  subject_type  String
+  subject_id    String?
+  period_start  DateTime @db.Timestamptz(6)
+  period_end    DateTime @db.Timestamptz(6)
+  metrics_json  Json
+  calculated_at DateTime @default(now()) @db.Timestamptz(6)
+
+  @@unique([tenant_id, rollup_key, subject_type, subject_id, period_start])
+  @@index([tenant_id, rollup_key, period_start])
+  @@map("analytics_rollups")
+}
+
+model FunnelDailyRollup {
+  id            String   @id @db.Uuid
+  tenant_id     String   @db.Uuid
+  funnel_key    String
+  stage_key     String
+  day           DateTime @db.Date
+  count         Int      @default(0)
+  metrics_json  Json?
+  calculated_at DateTime @default(now()) @db.Timestamptz(6)
+
+  @@unique([tenant_id, funnel_key, stage_key, day])
+  @@index([tenant_id, funnel_key, day])
+  @@map("funnel_daily_rollups")
+}
+
+model ItemStatistic {
+  id             String   @id @db.Uuid
+  tenant_id      String   @db.Uuid
+  item_id        String   @db.Uuid
+  window_key     String
+  attempts_count Int      @default(0)
+  correct_count  Int      @default(0)
+  avg_latency_ms Int?
+  metrics_json   Json?
+  calculated_at  DateTime @default(now()) @db.Timestamptz(6)
+
+  @@unique([tenant_id, item_id, window_key])
+  @@index([tenant_id, calculated_at])
+  @@map("item_statistics")
+}
+
+model MaterializedViewRegistry {
+  id                  String    @id @db.Uuid
+  view_name           String    @unique
+  owner_context       String
+  refresh_policy_json Json
+  last_refresh_at     DateTime? @db.Timestamptz(6)
+  created_at          DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime  @updatedAt @db.Timestamptz(6)
+
+  @@map("materialized_view_registry")
+}
