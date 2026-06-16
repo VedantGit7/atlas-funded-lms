@@ -17,7 +17,7 @@
     "test:unit": "pnpm -r test:unit",
     "test:integration": "dotenv -e .env.local -- vitest run tests/db",
     "test:authorization": "pnpm -r test:authorization",
-    "test:tenant-isolation": "pnpm -r test:tenant-isolation",
+    "test:tenant-isolation": "dotenv -e .env.local -- vitest run tests/tenant-isolation",
     "test:e2e": "pnpm -r test:e2e",
     "db:generate": "dotenv -e .env.local -- prisma generate",
     "db:generate:ci": "prisma generate --config prisma.config.ts",
@@ -35,7 +35,6 @@
     "check:env": "node scripts/guards/prevent-env-commit.mjs",
     "check:route-metadata": "node scripts/guards/check-route-metadata.mjs",
     "check:prisma-boundary": "node scripts/guards/check-prisma-boundary.mjs",
-    "db:rls:check": "echo \"RLS validation is not configured yet. This will be implemented in the RLS harness step.\"",
     "check:audit-compliance": "node scripts/guards/check-audit-compliance.mjs",
     "check:outbox-compliance": "node scripts/guards/check-outbox-compliance.mjs",
     "check:forbidden-scope": "node scripts/guards/check-forbidden-scope.mjs",
@@ -48,7 +47,11 @@
     "db:seed:catalogues": "tsx prisma/seeds/index.ts catalogues",
     "db:seed:tenants": "tsx prisma/seeds/index.ts tenants",
     "db:seed:fundedbeyond": "tsx prisma/seeds/index.ts fundedbeyond",
-    "db:seed:smoke-tenant": "tsx prisma/seeds/index.ts smoke-tenant"
+    "db:seed:smoke-tenant": "tsx prisma/seeds/index.ts smoke-tenant",
+    "db:rls:check": "dotenv -e .env.local -- tsx scripts/check-rls-state.ts",
+    "db:tenant-indexes:check": "dotenv -e .env.local -- tsx scripts/check-tenant-leading-indexes.ts",
+    "db:append-only:check": "dotenv -e .env.local -- tsx scripts/check-append-only-trigger-coverage.ts",
+    "sprint0:gate": "pnpm typecheck && pnpm lint && pnpm test && pnpm test:tenant-isolation && pnpm db:rls:check && pnpm db:tenant-indexes:check && pnpm db:append-only:check && pnpm db:check-no-direct-prisma && pnpm db:check-no-platform-scope-outside-wrapper && pnpm db:check-no-session-tenant-set"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

@@ -29,6 +29,7 @@ function assertTenantContext(ctx: TenantRequestContext): void {
  * All tenant-scoped database work must run through this helper.
  *
  * Rules:
+ * - Uses SET LOCAL ROLE atlas_app inside the transaction
  * - Uses transaction-local set_config(..., true)
  * - Never uses session-level SET
  * - Does not accept client-supplied tenant_id
@@ -42,6 +43,8 @@ export async function withTenantTx<T>(
   assertTenantContext(ctx);
 
   return await prisma.$transaction(async (tx) => {
+    await tx.$executeRawUnsafe("SET LOCAL ROLE atlas_app");
+
     await tx.$executeRaw`
       SELECT set_config('app.tenant_id', ${ctx.tenantId}, true)
     `;
