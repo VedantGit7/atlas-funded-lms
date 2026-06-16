@@ -26,6 +26,7 @@
     { "path": "../../packages/auth" },
     { "path": "../../packages/core" },
     { "path": "../../packages/db" },
+    { "path": "../../packages/membership" },
     { "path": "../../packages/tenancy" }
   ]
 }

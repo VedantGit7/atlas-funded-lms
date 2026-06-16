@@ -3,17 +3,13 @@ import { NextResponse } from "next/server";
 import { resolveTenantFromRequest } from "@atlas/tenancy";
 import { getOrCreateRequestId } from "@atlas/core/request/request-id";
 import { toSafeErrorEnvelope } from "@atlas/core/http/errors";
-import { requireSupabaseUser, toSessionSafeIdentity, upsertAuthPrincipal } from "@atlas/auth";
+import { requireSupabaseUser, upsertAuthPrincipal } from "@atlas/auth";
 import { withGlobalDb } from "@atlas/db/global-db";
 import { withTenantTx } from "@atlas/db/with-tenant-tx";
-import {
-  findMemberProfile,
-  meMembershipOutputSchema,
-  requireActiveMembership,
-} from "@atlas/membership";
+import { permissionDeniedBeforeCan, requireActiveMembership } from "@atlas/membership";
 
 export const routeMetadata = {
-  permission: "profile.read",
+  permission: "membership.read",
   rateLimit: "authenticatedTenantRead",
   idempotency: "none",
   audit: "none",
@@ -34,52 +30,22 @@ export async function GET(req: NextRequest) {
         markLogin: false,
       });
 
-      const result = await withTenantTx(
+      await withTenantTx(
         {
           tenantId: tenant.tenantId,
           requestId,
           allowAnonymousTenantRead: true,
         },
         async (tx) => {
-          const membership = await requireActiveMembership({
+          await requireActiveMembership({
             tx,
             tenantId: tenant.tenantId,
             authPrincipalId: principal.id,
           });
-
-          const profile = await findMemberProfile({
-            tx,
-            tenantId: tenant.tenantId,
-            membershipId: membership.membershipId,
-          });
-
-          return { membership, profile };
         },
       );
 
-      const body = meMembershipOutputSchema.parse({
-        data: {
-          tenant: {
-            id: tenant.tenantId,
-            slug: tenant.tenantSlug,
-            state: tenant.tenantState,
-          },
-          identity: toSessionSafeIdentity(principal),
-          membership: {
-            id: result.membership.membershipId,
-            status: "ACTIVE",
-          },
-          profile: result.profile
-            ? {
-                id: result.profile.id,
-                displayName: result.profile.displayName,
-                avatarUrl: result.profile.avatarUrl,
-              }
-            : null,
-        },
-      });
-
-      return NextResponse.json(body);
+      throw permissionDeniedBeforeCan();
     });
   } catch (error) {
     const safe = toSafeErrorEnvelope(error, requestId);

@@ -1,0 +1,26 @@
+{
+  "name": "@atlas/membership",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "echo \"No membership build configured yet.\"",
+    "lint": "echo \"No membership lint configured yet.\"",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "echo \"No membership tests configured yet.\"",
+    "test:unit": "echo \"No membership unit tests configured yet.\"",
+    "test:integration": "echo \"No membership integration tests configured yet.\"",
+    "test:authorization": "echo \"No membership authorization tests configured yet.\"",
+    "test:tenant-isolation": "echo \"No membership tenant-isolation tests configured yet.\"",
+    "test:e2e": "echo \"No membership e2e tests configured yet.\""
+  },
+  "dependencies": {
+    "@atlas/core": "workspace:*",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0"
+  }
+}

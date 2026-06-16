@@ -3,23 +3,24 @@ import { NextResponse } from "next/server";
 import { resolveTenantFromRequest } from "@atlas/tenancy";
 import { getOrCreateRequestId } from "@atlas/core/request/request-id";
 import { toSafeErrorEnvelope } from "@atlas/core/http/errors";
-import { requireSupabaseUser, toSessionSafeIdentity, upsertAuthPrincipal } from "@atlas/auth";
+import { requireSupabaseUser, upsertAuthPrincipal } from "@atlas/auth";
 import { withGlobalDb } from "@atlas/db/global-db";
 import { withTenantTx } from "@atlas/db/with-tenant-tx";
 import {
-  findMemberProfile,
-  meMembershipOutputSchema,
-  requireActiveMembership,
+  acceptInvitation,
+  acceptInvitationInputSchema,
+  acceptInvitationOutputSchema,
 } from "@atlas/membership";
 
 export const routeMetadata = {
-  permission: "profile.read",
-  rateLimit: "authenticatedTenantRead",
+  public: true,
+  permission: "pub",
+  rateLimit: "publicInvitationAccept",
   idempotency: "none",
-  audit: "none",
+  audit: "required",
 } as const;
 
-export async function GET(req: NextRequest) {
+export async function POST(req: NextRequest) {
   const requestId = getOrCreateRequestId(req.headers);
 
   try {
@@ -33,6 +34,7 @@ export async function GET(req: NextRequest) {
         mfaEnabled: supabaseUser.mfaEnabled,
         markLogin: false,
       });
+      const input = acceptInvitationInputSchema.parse(await req.json());
 
       const result = await withTenantTx(
         {
@@ -40,42 +42,28 @@ export async function GET(req: NextRequest) {
           requestId,
           allowAnonymousTenantRead: true,
         },
-        async (tx) => {
-          const membership = await requireActiveMembership({
+        async (tx) =>
+          acceptInvitation({
             tx,
             tenantId: tenant.tenantId,
-            authPrincipalId: principal.id,
-          });
-
-          const profile = await findMemberProfile({
-            tx,
-            tenantId: tenant.tenantId,
-            membershipId: membership.membershipId,
-          });
-
-          return { membership, profile };
-        },
+            requestId,
+            input,
+            principal: {
+              id: principal.id,
+              emailNormalized: principal.emailNormalized,
+            },
+          }),
       );
 
-      const body = meMembershipOutputSchema.parse({
+      const body = acceptInvitationOutputSchema.parse({
         data: {
-          tenant: {
-            id: tenant.tenantId,
-            slug: tenant.tenantSlug,
-            state: tenant.tenantState,
+          accepted: true,
+          membership: result.membership,
+          profile: {
+            id: result.profile.id,
+            displayName: result.profile.displayName,
+            avatarUrl: result.profile.avatarUrl,
           },
-          identity: toSessionSafeIdentity(principal),
-          membership: {
-            id: result.membership.membershipId,
-            status: "ACTIVE",
-          },
-          profile: result.profile
-            ? {
-                id: result.profile.id,
-                displayName: result.profile.displayName,
-                avatarUrl: result.profile.avatarUrl,
-              }
-            : null,
         },
       });
 
