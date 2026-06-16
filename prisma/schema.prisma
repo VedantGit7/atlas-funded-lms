@@ -851,3 +851,53 @@ model GradingTask {
   @@index([tenant_id, assigned_to_membership_id, status])
   @@map("grading_tasks")
 }
+
+model PracticeSession {
+  id              String    @id @db.Uuid
+  tenant_id       String    @db.Uuid
+  membership_id   String    @db.Uuid
+  collection_id   String?   @db.Uuid
+  session_type    String
+  status          String    @default("started")
+  started_at      DateTime  @default(now()) @db.Timestamptz(6)
+  completed_at    DateTime? @db.Timestamptz(6)
+  summary_json    Json?
+  idempotency_key String?
+
+  @@unique([tenant_id, idempotency_key])
+  @@index([tenant_id, membership_id, started_at])
+  @@map("practice_sessions")
+}
+
+model PracticeResponse {
+  id                  String   @id @db.Uuid
+  tenant_id           String   @db.Uuid
+  practice_session_id String   @db.Uuid
+  membership_id       String   @db.Uuid
+  item_id             String   @db.Uuid
+  response_json       Json
+  is_correct          Boolean?
+  latency_ms          Int?
+  occurred_at         DateTime @default(now()) @db.Timestamptz(6)
+  idempotency_key     String
+
+  @@unique([tenant_id, idempotency_key])
+  @@index([tenant_id, membership_id, occurred_at])
+  @@index([tenant_id, item_id, occurred_at])
+  @@map("practice_responses")
+}
+
+model SrsState {
+  id            String   @id @db.Uuid
+  tenant_id     String   @db.Uuid
+  membership_id String   @db.Uuid
+  item_id       String   @db.Uuid
+  ease_factor   Decimal  @db.Decimal(8, 4)
+  interval_days Int
+  due_at        DateTime @db.Timestamptz(6)
+  updated_at    DateTime @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenant_id, membership_id, item_id])
+  @@index([tenant_id, membership_id, due_at])
+  @@map("srs_state")
+}
