@@ -41,7 +41,7 @@ export async function withTenantTx<T>(
 ): Promise<T> {
   assertTenantContext(ctx);
 
-  return prisma.$transaction(async (tx) => {
+  return await prisma.$transaction(async (tx) => {
     await tx.$executeRaw`
       SELECT set_config('app.tenant_id', ${ctx.tenantId}, true)
     `;

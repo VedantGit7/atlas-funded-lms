@@ -20,6 +20,7 @@
     "test:tenant-isolation": "pnpm -r test:tenant-isolation",
     "test:e2e": "pnpm -r test:e2e",
     "db:generate": "dotenv -e .env.local -- prisma generate",
+    "db:generate:ci": "prisma generate --config prisma.config.ts",
     "db:validate": "dotenv -e .env.local -- prisma validate",
     "db:migrate": "dotenv -e .env.local -- prisma migrate dev",
     "db:migrate:check": "node scripts/guards/check-migrate-status.mjs",
