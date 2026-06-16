@@ -1576,3 +1576,36 @@ model ExtensionRegistration {
   @@unique([tenant_id, extension_point_key, registration_key])
   @@map("extension_registrations")
 }
+
+model ExportJob {
+  id                         String    @id @db.Uuid
+  tenant_id                  String    @db.Uuid
+  requested_by_membership_id String    @db.Uuid
+  status                     JobStatus @default(QUEUED)
+  scope_json                 Json
+  r2_object_key              String?
+  error_json                 Json?
+  expires_at                 DateTime? @db.Timestamptz(6)
+  created_at                 DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at                 DateTime  @updatedAt @db.Timestamptz(6)
+
+  @@index([tenant_id, status, created_at])
+  @@map("export_jobs")
+}
+
+model DeletionRequest {
+  id                         String    @id @db.Uuid
+  tenant_id                  String    @db.Uuid
+  requested_by_membership_id String?   @db.Uuid
+  target_type                String
+  target_id                  String
+  status                     JobStatus @default(QUEUED)
+  reason                     String?
+  scheduled_at               DateTime? @db.Timestamptz(6)
+  completed_at               DateTime? @db.Timestamptz(6)
+  created_at                 DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at                 DateTime  @updatedAt @db.Timestamptz(6)
+
+  @@index([tenant_id, target_type, target_id])
+  @@map("deletion_requests")
+}
