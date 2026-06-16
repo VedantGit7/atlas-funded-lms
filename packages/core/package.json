@@ -3,9 +3,14 @@
   "version": "0.0.0",
   "private": true,
   "exports": {
+    ".": "./src/index.ts",
     "./http/errors": "./src/http/errors.ts",
     "./http/headers": "./src/http/headers.ts",
+    "./id/uuid-v7": "./src/id/uuid-v7.ts",
     "./request/request-id": "./src/request/request-id.ts"
+  },
+  "dependencies": {
+    "uuid": "^14.0.0"
   },
   "scripts": {
     "build": "echo \"No core build configured yet.\"",

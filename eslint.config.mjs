@@ -249,7 +249,56 @@ export default tseslint.config(
   },
 
   {
+    files: ["apps/web/src/app/api/**/*.{ts,tsx}"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            {
+              name: "@prisma/client",
+              message:
+                "Frontend code must never import Prisma directly. Use approved API/service boundaries.",
+            },
+            {
+              name: "@atlas/db",
+              message: "Route handlers must use approved DB helpers such as @atlas/db/global-db.",
+            },
+          ],
+          patterns: [
+            ...genericForbiddenImportPatterns,
+            {
+              group: [
+                "@atlas/db/client",
+                "@atlas/db/with-tenant-tx",
+                "@atlas/db/with-platform-scope",
+                "@atlas/db/platform-client",
+                "**/repositories/**",
+                "../repositories/**",
+                "../../repositories/**",
+                "../../../repositories/**",
+              ],
+              message: "Frontend code must not import repositories or DB internals.",
+            },
+            {
+              group: [
+                "**/platform/**",
+                "../platform/**",
+                "../../platform/**",
+                "../../../platform/**",
+                "@atlas/platform/*",
+              ],
+              message: "Tenant/frontend modules must not import platform-only code.",
+            },
+          ],
+        },
+      ],
+    },
+  },
+
+  {
     files: ["apps/web/**/*.{ts,tsx}"],
+    ignores: ["apps/web/src/app/api/**/*.{ts,tsx}"],
     rules: {
       "no-restricted-imports": [
         "error",
