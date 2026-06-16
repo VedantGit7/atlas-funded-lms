@@ -1249,3 +1249,40 @@ model LeaderboardSnapshot {
   @@index([tenant_id, leaderboard_id, calculated_at])
   @@map("leaderboard_snapshots")
 }
+
+model NotificationTemplate {
+  id             String       @id @db.Uuid
+  tenant_id      String       @db.Uuid
+  key            String
+  channel        String
+  locale         String       @default("en")
+  subject        String?
+  body           String
+  variables_json Json?
+  status         EntityStatus @default(ACTIVE)
+  created_at     DateTime     @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime     @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenant_id, key, channel, locale])
+  @@map("notification_templates")
+}
+
+model NotificationDispatch {
+  id              String         @id @db.Uuid
+  tenant_id       String         @db.Uuid
+  membership_id   String?        @db.Uuid
+  channel         String
+  template_key    String?
+  destination     String?
+  idempotency_key String
+  status          DispatchStatus @default(QUEUED)
+  payload_json    Json
+  error_json      Json?
+  created_at      DateTime       @default(now()) @db.Timestamptz(6)
+  sent_at         DateTime?      @db.Timestamptz(6)
+
+  @@unique([tenant_id, idempotency_key])
+  @@index([tenant_id, membership_id, created_at])
+  @@index([tenant_id, status, created_at])
+  @@map("notification_dispatches")
+}
