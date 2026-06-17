@@ -1,0 +1,42 @@
+export const APPROVED_EVENT_TYPES = new Set<string>([
+  "tenant.created",
+  "tenant.state_changed",
+  "membership.created",
+  "membership.status_changed",
+  "role.assigned",
+  "role.revoked",
+  "permission.changed",
+  "entitlement.changed",
+  "config.branding.published",
+  "config.theme.published",
+  "domain.changed",
+  "course.published",
+  "lesson.completed",
+  "path.step_completed",
+  "assessment.started",
+  "assessment.submitted",
+  "assessment.graded",
+  "practice.session_completed",
+  "competency.signal_recorded",
+  "competency.score_changed",
+  "readiness.band_changed",
+  "certificate.issued",
+  "certificate.revoked",
+  "badge.awarded",
+  "streak.changed",
+  "community.post.created",
+  "community.comment.created",
+  "moderation.reported",
+  "moderation.decided",
+  "notification.requested",
+  "search.reindex_requested",
+  "analytics.projection_requested",
+  "data.export_requested",
+  "data.deletion_requested",
+]);
+
+export function assertApprovedEventType(eventType: string): void {
+  if (!APPROVED_EVENT_TYPES.has(eventType)) {
+    throw new Error(`Unapproved outbox event type: ${eventType}`);
+  }
+}
