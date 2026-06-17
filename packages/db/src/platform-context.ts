@@ -35,4 +35,9 @@ export type PlatformContext = {
    * touches one or more tenants.
    */
   touchedTenantIds?: readonly string[];
+
+  /**
+   * Optional route identifier for platform scope audit metadata.
+   */
+  route?: string;
 };

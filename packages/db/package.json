@@ -8,7 +8,8 @@
   "exports": {
     ".": "./src/index.ts",
     "./global-db": "./src/global-db.ts",
-    "./with-tenant-tx": "./src/with-tenant-tx.ts"
+    "./with-tenant-tx": "./src/with-tenant-tx.ts",
+    "./generated/prisma/client": "./src/generated/prisma/client"
   },
   "scripts": {
     "build": "echo \"No db build configured yet.\"",
@@ -27,6 +28,7 @@
     "db:seed": "echo \"Seed skeleton is not configured yet.\""
   },
   "dependencies": {
+    "@atlas/audit": "workspace:*",
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
     "pg": "^8.21.0"

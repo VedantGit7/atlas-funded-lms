@@ -2,6 +2,10 @@
   "name": "@atlas/events",
   "version": "0.0.0",
   "private": true,
+  "exports": {
+    ".": "./src/index.ts",
+    "./services/outbox.service": "./src/services/outbox.service.ts"
+  },
   "scripts": {
     "build": "echo \"No events build configured yet.\"",
     "lint": "echo \"No events lint configured yet.\"",
@@ -13,6 +17,13 @@
     "test:tenant-isolation": "echo \"No events tenant-isolation tests configured yet.\"",
     "test:e2e": "echo \"No events e2e tests configured yet.\""
   },
-  "dependencies": {},
-  "devDependencies": {}
+  "dependencies": {
+    "@atlas/audit": "workspace:*",
+    "@atlas/core": "workspace:*",
+    "@atlas/db": "workspace:*",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0"
+  }
 }

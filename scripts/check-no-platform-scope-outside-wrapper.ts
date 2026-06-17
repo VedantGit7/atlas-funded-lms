@@ -5,7 +5,6 @@ const root = process.cwd();
 
 const allowedFiles = new Set([
   "packages/db/src/platform-client.ts",
-  "packages/db/src/platform-audit.ts",
   "packages/db/src/with-platform-scope.ts",
   "tests/db/with-platform-scope.test.ts",
   "tests/tenant-isolation/platform-leakage.test.ts",

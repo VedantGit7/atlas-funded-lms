@@ -23,3 +23,18 @@ export type RouteMetadata<TInput = unknown> = {
   rateLimit: string;
   idempotency: "none" | "required";
 };
+
+export type PlatformRouteContext = {
+  platformPrincipalId: string;
+  requestId: string;
+  reason: string;
+  idempotencyKey: string;
+};
+
+export type PlatformRouteMetadata = {
+  permission: string;
+  audit: "none" | "required" | "platform_scope";
+  rateLimit: string;
+  idempotency: "none" | "required";
+  reasonRequired?: boolean;
+};

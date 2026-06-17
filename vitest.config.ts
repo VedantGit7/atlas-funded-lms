@@ -13,6 +13,10 @@ export default defineConfig({
         replacement: path.resolve(import.meta.dirname, "packages/core/src/$1.ts"),
       },
       {
+        find: "@atlas/core",
+        replacement: path.resolve(import.meta.dirname, "packages/core/src/index.ts"),
+      },
+      {
         find: "@atlas/tenancy",
         replacement: path.resolve(import.meta.dirname, "packages/tenancy/src/index.ts"),
       },
@@ -71,6 +75,22 @@ export default defineConfig({
       {
         find: "@atlas/domain-config",
         replacement: path.resolve(import.meta.dirname, "packages/domain/config/src/index.ts"),
+      },
+      {
+        find: /^@atlas\/audit\/(.+)$/,
+        replacement: path.resolve(import.meta.dirname, "packages/audit/src/$1.ts"),
+      },
+      {
+        find: "@atlas/audit",
+        replacement: path.resolve(import.meta.dirname, "packages/audit/src/index.ts"),
+      },
+      {
+        find: /^@atlas\/events\/(.+)$/,
+        replacement: path.resolve(import.meta.dirname, "packages/events/src/$1.ts"),
+      },
+      {
+        find: "@atlas/events",
+        replacement: path.resolve(import.meta.dirname, "packages/events/src/index.ts"),
       },
     ],
   },

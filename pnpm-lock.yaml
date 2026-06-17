@@ -72,6 +72,9 @@ importers:
       vitest:
         specifier: ^4.0.18
         version: 4.1.9(@types/node@24.13.2)(vite@8.0.16(@types/node@24.13.2)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4)(yaml@2.9.0))
+      zod:
+        specifier: ^3.25.76
+        version: 3.25.76
 
   apps/web:
     dependencies:
@@ -156,6 +159,19 @@ importers:
         specifier: ^3.25.76
         version: 3.25.76
 
+  packages/audit:
+    dependencies:
+      '@atlas/core':
+        specifier: workspace:*
+        version: link:../core
+      zod:
+        specifier: ^3.25.76
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: ^24.0.0
+        version: 24.13.2
+
   packages/auth:
     dependencies:
       '@atlas/core':
@@ -205,6 +221,9 @@ importers:
 
   packages/db:
     dependencies:
+      '@atlas/audit':
+        specifier: workspace:*
+        version: link:../audit
       '@prisma/adapter-pg':
         specifier: ^7.8.0
         version: 7.8.0
@@ -242,7 +261,24 @@ importers:
         specifier: ^24.0.0
         version: 24.13.2
 
-  packages/events: {}
+  packages/events:
+    dependencies:
+      '@atlas/audit':
+        specifier: workspace:*
+        version: link:../audit
+      '@atlas/core':
+        specifier: workspace:*
+        version: link:../core
+      '@atlas/db':
+        specifier: workspace:*
+        version: link:../db
+      zod:
+        specifier: ^3.25.76
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: ^24.0.0
+        version: 24.13.2
 
   packages/membership:
     dependencies:

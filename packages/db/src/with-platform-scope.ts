@@ -1,7 +1,7 @@
+import { auditWriter } from "@atlas/audit/services/audit-writer";
 import type { Prisma } from "./generated/prisma/client";
 import { getPlatformPrisma } from "./platform-client";
 import type { PlatformContext, PlatformPermission } from "./platform-context";
-import { writePlatformScopeAudit } from "./platform-audit";
 
 export type PlatformTx = Prisma.TransactionClient;
 
@@ -51,6 +51,43 @@ function assertPlatformContext(ctx: PlatformContext, reason: string): string {
   return normalizedReason;
 }
 
+function platformScopeAuditMetadata(ctx: PlatformContext): Record<string, unknown> {
+  return ctx.route != null ? { route: ctx.route } : {};
+}
+
+type PlatformScopeAuditContext = {
+  tenantId: null;
+  actorMembershipId: null;
+  platformPrincipalId: string;
+  requestId: string;
+};
+
+type PlatformScopeAuditInput = {
+  action: string;
+  target: { type: string; id: string | null };
+  before: null;
+  after: Record<string, unknown>;
+  reason: string;
+  metadata: Record<string, unknown>;
+};
+
+function platformScopeAuditContext(ctx: PlatformContext): PlatformScopeAuditContext {
+  return {
+    tenantId: null,
+    actorMembershipId: null,
+    platformPrincipalId: ctx.principalId,
+    requestId: ctx.requestId,
+  };
+}
+
+async function writePlatformScopeAudit(
+  tx: PlatformTx,
+  auditCtx: PlatformScopeAuditContext,
+  input: PlatformScopeAuditInput,
+): Promise<void> {
+  await auditWriter.write(tx, auditCtx, input);
+}
+
 /**
  * Platform database work must run through this helper.
  *
@@ -71,6 +108,8 @@ export async function withPlatformScope<T>(
 ): Promise<T> {
   const normalizedReason = assertPlatformContext(ctx, reason);
   const platformPrisma = getPlatformPrisma();
+  const auditCtx = platformScopeAuditContext(ctx);
+  const auditMetadata = platformScopeAuditMetadata(ctx);
 
   return await platformPrisma.$transaction(async (tx) => {
     await tx.$executeRawUnsafe("SET LOCAL ROLE atlas_platform");
@@ -97,31 +136,39 @@ export async function withPlatformScope<T>(
       `;
     }
 
-    await writePlatformScopeAudit(tx, {
-      ctx,
-      reason: normalizedReason,
+    await writePlatformScopeAudit(tx, auditCtx, {
       action: "platform.scope.enter",
-      status: "started",
+      target: { type: "platform_scope", id: null },
+      before: null,
+      after: { reason: normalizedReason },
+      reason: normalizedReason,
+      metadata: auditMetadata,
     });
 
     try {
       const result = await fn(tx);
 
-      await writePlatformScopeAudit(tx, {
-        ctx,
-        reason: normalizedReason,
+      await writePlatformScopeAudit(tx, auditCtx, {
         action: "platform.scope.exit",
-        status: "success",
+        target: { type: "platform_scope", id: null },
+        before: null,
+        after: { status: "completed" },
+        reason: normalizedReason,
+        metadata: auditMetadata,
       });
 
       return result;
     } catch (error) {
-      await writePlatformScopeAudit(tx, {
-        ctx,
-        reason: normalizedReason,
+      await writePlatformScopeAudit(tx, auditCtx, {
         action: "platform.scope.exit",
-        status: "failure",
-        errorMessage: error instanceof Error ? error.message : "Unknown error",
+        target: { type: "platform_scope", id: null },
+        before: null,
+        after: { status: "failed" },
+        reason: normalizedReason,
+        metadata: {
+          ...auditMetadata,
+          errorMessage: error instanceof Error ? error.message : "Unknown error",
+        },
       });
 
       throw error;

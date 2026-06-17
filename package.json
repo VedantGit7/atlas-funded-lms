@@ -17,6 +17,7 @@
     "test:unit": "vitest run tests/unit",
     "test:integration": "dotenv -e .env.local -- vitest run tests/db",
     "test:authorization": "vitest run tests/authorization tests/unit/authorization",
+    "test:events": "vitest run tests/unit/events tests/events tests/authorization/audit-outbox-permissions.test.ts",
     "test:tenant-isolation": "dotenv -e .env.local -- vitest run tests/tenant-isolation",
     "test:e2e": "pnpm -r test:e2e",
     "db:generate": "dotenv -e .env.local -- prisma generate",
@@ -26,7 +27,7 @@
     "db:migrate:check": "node scripts/guards/check-migrate-status.mjs",
     "db:studio": "dotenv -e .env.local -- prisma studio",
     "db:seed": "dotenv -e .env.local -- tsx prisma/seeds/index.ts all",
-    "ci": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm test && pnpm check:route-metadata && pnpm check:prisma-boundary && pnpm check:audit-compliance && pnpm check:outbox-compliance && pnpm check:forbidden-scope && pnpm check:secrets && pnpm db:sql:check && pnpm db:migrate:check && pnpm db:rls:check && pnpm build",
+    "ci": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm test && pnpm check:route-metadata && pnpm check:prisma-boundary && pnpm check:audit-compliance && pnpm check:outbox-compliance && pnpm ci:audit-metadata && pnpm check:forbidden-scope && pnpm check:secrets && pnpm db:sql:check && pnpm db:migrate:check && pnpm db:rls:check && pnpm build",
     "format": "prettier . --write",
     "format:check": "prettier . --check",
     "prepare": "husky",
@@ -51,7 +52,8 @@
     "db:rls:check": "dotenv -e .env.local -- tsx scripts/check-rls-state.ts",
     "db:tenant-indexes:check": "dotenv -e .env.local -- tsx scripts/check-tenant-leading-indexes.ts",
     "db:append-only:check": "dotenv -e .env.local -- tsx scripts/check-append-only-trigger-coverage.ts",
-    "sprint0:gate": "pnpm typecheck && pnpm lint && pnpm test && pnpm test:tenant-isolation && pnpm db:rls:check && pnpm db:tenant-indexes:check && pnpm db:append-only:check && pnpm db:check-no-direct-prisma && pnpm db:check-no-platform-scope-outside-wrapper && pnpm db:check-no-session-tenant-set"
+    "sprint0:gate": "pnpm typecheck && pnpm lint && pnpm test && pnpm test:tenant-isolation && pnpm db:rls:check && pnpm db:tenant-indexes:check && pnpm db:append-only:check && pnpm db:check-no-direct-prisma && pnpm db:check-no-platform-scope-outside-wrapper && pnpm db:check-no-session-tenant-set",
+    "ci:audit-metadata": "tsx scripts/ci/check-sensitive-route-audit.ts"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -70,7 +72,8 @@
     "tsx": "^4.21.0",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.61.0",
-    "vitest": "^4.0.18"
+    "vitest": "^4.0.18",
+    "zod": "^3.25.76"
   },
   "dependencies": {
     "@atlas/access": "workspace:*",

@@ -1,0 +1,28 @@
+{
+  "name": "@atlas/audit",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts",
+    "./services/audit-writer": "./src/services/audit-writer.ts",
+    "./services/audit-chain.service": "./src/services/audit-chain.service.ts"
+  },
+  "scripts": {
+    "build": "echo \"No audit build configured yet.\"",
+    "lint": "echo \"No audit lint configured yet.\"",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "echo \"No audit tests configured yet.\"",
+    "test:unit": "echo \"No audit unit tests configured yet.\"",
+    "test:integration": "echo \"No audit integration tests configured yet.\"",
+    "test:authorization": "echo \"No audit authorization tests configured yet.\"",
+    "test:tenant-isolation": "echo \"No audit tenant-isolation tests configured yet.\"",
+    "test:e2e": "echo \"No audit e2e tests configured yet.\""
+  },
+  "dependencies": {
+    "@atlas/core": "workspace:*",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0"
+  }
+}

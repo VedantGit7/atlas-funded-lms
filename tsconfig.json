@@ -5,6 +5,7 @@
     { "path": "./apps/web" },
 
     { "path": "./packages/api" },
+    { "path": "./packages/audit" },
     { "path": "./packages/access" },
     { "path": "./packages/auth" },
     { "path": "./packages/authorization" },

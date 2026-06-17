@@ -154,6 +154,7 @@ export default tseslint.config(
       "apps/web/next-env.d.ts",
       "prisma.config.ts",
       "packages/db/src/generated/**",
+      "packages/**/src/**/*.d.ts",
       "packages/domain/config/src/schemas/**",
       "packages/domain/config/src/services/**",
       "packages/domain/config/src/repositories/feature-flag.repository.ts",

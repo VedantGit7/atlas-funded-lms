@@ -23,11 +23,13 @@
   "exclude": ["node_modules", "dist", "build"],
   "references": [
     { "path": "../../packages/api" },
+    { "path": "../../packages/audit" },
     { "path": "../../packages/auth" },
     { "path": "../../packages/authorization" },
     { "path": "../../packages/core" },
     { "path": "../../packages/db" },
     { "path": "../../packages/domain/config" },
+    { "path": "../../packages/events" },
     { "path": "../../packages/membership" },
     { "path": "../../packages/tenancy" }
   ]
