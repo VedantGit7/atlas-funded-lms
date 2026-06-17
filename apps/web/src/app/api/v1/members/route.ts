@@ -2,7 +2,12 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { resolveTenantFromRequest } from "@atlas/tenancy";
 import { getOrCreateRequestId } from "@atlas/core/request/request-id";
-import { toSafeErrorEnvelope } from "@atlas/core/http/errors";
+import {
+  runProtectedTenantRouteHandler,
+  toSafeErrorEnvelope,
+  type RouteMetadata,
+} from "@atlas/api";
+import { createTenantResourceRef } from "@atlas/authorization";
 import { requireSupabaseUser, upsertAuthPrincipal } from "@atlas/auth";
 import { withGlobalDb } from "@atlas/db/global-db";
 import { withTenantTx } from "@atlas/db/with-tenant-tx";
@@ -11,14 +16,21 @@ import {
   membersListOutputSchema,
   requireActiveMembership,
 } from "@atlas/membership";
-import { can, createTenantResourceRef, toAuthorizationError } from "@atlas/authorization";
 
-export const routeMetadata = {
+const membersRouteMetadata: RouteMetadata = {
   permission: "membership.read",
   rateLimit: "authenticatedTenantRead",
   idempotency: "none",
   audit: "none",
-} as const;
+  resourceLoader: ({ ctx }) =>
+    Promise.resolve(
+      createTenantResourceRef({
+        type: "membership_collection",
+        id: ctx.tenantId,
+        tenantId: ctx.tenantId,
+      }),
+    ),
+};
 
 export async function GET(req: NextRequest) {
   const requestId = getOrCreateRequestId(req.headers);
@@ -48,43 +60,32 @@ export async function GET(req: NextRequest) {
             authPrincipalId: principal.id,
           });
 
-          const resource = createTenantResourceRef({
-            type: "membership_collection",
-            id: tenant.tenantId,
-            tenantId: tenant.tenantId,
-          });
-
-          const decision = await can({
+          return runProtectedTenantRouteHandler({
             tx,
-            actor: {
-              tenantId: tenant.tenantId,
-              membershipId: membership.membershipId,
-            },
-            permission: routeMetadata.permission,
-            resource,
             ctx: {
               tenantId: tenant.tenantId,
               requestId,
+              actorMembershipId: membership.membershipId,
+            },
+            metadata: membersRouteMetadata,
+            params: {},
+            input: undefined,
+            handler: async ({ tx, ctx }) => {
+              const items = await listMembersForTenant({
+                tx,
+                tenantId: ctx.tenantId,
+                limit: 25,
+              });
+
+              return {
+                items,
+                pageInfo: {
+                  nextCursor: null,
+                  hasNextPage: false,
+                },
+              };
             },
           });
-
-          if (!decision.allowed) {
-            throw toAuthorizationError(decision);
-          }
-
-          const items = await listMembersForTenant({
-            tx,
-            tenantId: tenant.tenantId,
-            limit: 25,
-          });
-
-          return {
-            items,
-            pageInfo: {
-              nextCursor: null,
-              hasNextPage: false,
-            },
-          };
         },
       );
 

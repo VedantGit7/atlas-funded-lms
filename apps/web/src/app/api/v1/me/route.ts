@@ -2,7 +2,12 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { resolveTenantFromRequest } from "@atlas/tenancy";
 import { getOrCreateRequestId } from "@atlas/core/request/request-id";
-import { toSafeErrorEnvelope } from "@atlas/core/http/errors";
+import {
+  runProtectedTenantRouteHandler,
+  toSafeErrorEnvelope,
+  type RouteMetadata,
+} from "@atlas/api";
+import { createTenantResourceRef } from "@atlas/authorization";
 import { requireSupabaseUser, toSessionSafeIdentity, upsertAuthPrincipal } from "@atlas/auth";
 import { withGlobalDb } from "@atlas/db/global-db";
 import { withTenantTx } from "@atlas/db/with-tenant-tx";
@@ -11,14 +16,27 @@ import {
   meMembershipOutputSchema,
   requireActiveMembership,
 } from "@atlas/membership";
-import { can, createTenantResourceRef, toAuthorizationError } from "@atlas/authorization";
 
-export const routeMetadata = {
+const meRouteMetadata: RouteMetadata = {
   permission: "profile.read",
   rateLimit: "authenticatedTenantRead",
   idempotency: "none",
   audit: "none",
-} as const;
+  resourceLoader: async ({ tx, ctx }) => {
+    const profile = await findMemberProfile({
+      tx,
+      tenantId: ctx.tenantId,
+      membershipId: ctx.actorMembershipId,
+    });
+
+    return createTenantResourceRef({
+      type: "member_profile",
+      id: profile?.id ?? ctx.actorMembershipId,
+      tenantId: ctx.tenantId,
+      ownerMembershipId: ctx.actorMembershipId,
+    });
+  },
+};
 
 export async function GET(req: NextRequest) {
   const requestId = getOrCreateRequestId(req.headers);
@@ -48,38 +66,26 @@ export async function GET(req: NextRequest) {
             authPrincipalId: principal.id,
           });
 
-          const profile = await findMemberProfile({
+          return runProtectedTenantRouteHandler({
             tx,
-            tenantId: tenant.tenantId,
-            membershipId: membership.membershipId,
-          });
-
-          const resource = createTenantResourceRef({
-            type: "member_profile",
-            id: profile?.id ?? membership.membershipId,
-            tenantId: tenant.tenantId,
-            ownerMembershipId: membership.membershipId,
-          });
-
-          const decision = await can({
-            tx,
-            actor: {
-              tenantId: tenant.tenantId,
-              membershipId: membership.membershipId,
-            },
-            permission: "profile.read",
-            resource,
             ctx: {
               tenantId: tenant.tenantId,
               requestId,
+              actorMembershipId: membership.membershipId,
+            },
+            metadata: meRouteMetadata,
+            params: {},
+            input: undefined,
+            handler: async ({ tx, ctx }) => {
+              const profile = await findMemberProfile({
+                tx,
+                tenantId: ctx.tenantId,
+                membershipId: ctx.actorMembershipId,
+              });
+
+              return { membership, profile };
             },
           });
-
-          if (!decision.allowed) {
-            throw toAuthorizationError(decision);
-          }
-
-          return { membership, profile };
         },
       );
 

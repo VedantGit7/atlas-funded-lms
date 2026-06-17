@@ -48,6 +48,9 @@ importers:
       lint-staged:
         specifier: ^17.0.7
         version: 17.0.7
+      next:
+        specifier: ^15.0.0
+        version: 15.5.19(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       pg:
         specifier: ^8.21.0
         version: 8.21.0
@@ -72,6 +75,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@atlas/api':
+        specifier: workspace:*
+        version: link:../../packages/api
       '@atlas/auth':
         specifier: workspace:*
         version: link:../../packages/auth
@@ -120,7 +126,35 @@ importers:
         specifier: ^24.0.0
         version: 24.13.2
 
-  packages/api: {}
+  packages/api:
+    dependencies:
+      '@atlas/auth':
+        specifier: workspace:*
+        version: link:../auth
+      '@atlas/authorization':
+        specifier: workspace:*
+        version: link:../authorization
+      '@atlas/core':
+        specifier: workspace:*
+        version: link:../core
+      '@atlas/db':
+        specifier: workspace:*
+        version: link:../db
+      '@atlas/domain-config':
+        specifier: workspace:*
+        version: link:../domain/config
+      '@atlas/membership':
+        specifier: workspace:*
+        version: link:../membership
+      '@atlas/tenancy':
+        specifier: workspace:*
+        version: link:../tenancy
+      next:
+        specifier: ^15.0.0
+        version: 15.5.19(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      zod:
+        specifier: ^3.25.76
+        version: 3.25.76
 
   packages/auth:
     dependencies:
@@ -146,6 +180,12 @@ importers:
       '@atlas/core':
         specifier: workspace:*
         version: link:../core
+      '@atlas/db':
+        specifier: workspace:*
+        version: link:../db
+      '@atlas/domain-config':
+        specifier: workspace:*
+        version: link:../domain/config
     devDependencies:
       '@types/node':
         specifier: ^24.0.0
@@ -188,6 +228,19 @@ importers:
   packages/design-system: {}
 
   packages/domain: {}
+
+  packages/domain/config:
+    dependencies:
+      '@atlas/db':
+        specifier: workspace:*
+        version: link:../../db
+      zod:
+        specifier: ^3.25.76
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: ^24.0.0
+        version: 24.13.2
 
   packages/events: {}
 

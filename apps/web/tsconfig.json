@@ -2,7 +2,6 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "composite": true,
-    "rootDir": ".",
     "jsx": "preserve",
     "incremental": true,
     "plugins": [
@@ -23,10 +22,12 @@
   ],
   "exclude": ["node_modules", "dist", "build"],
   "references": [
+    { "path": "../../packages/api" },
     { "path": "../../packages/auth" },
     { "path": "../../packages/authorization" },
     { "path": "../../packages/core" },
     { "path": "../../packages/db" },
+    { "path": "../../packages/domain/config" },
     { "path": "../../packages/membership" },
     { "path": "../../packages/tenancy" }
   ]

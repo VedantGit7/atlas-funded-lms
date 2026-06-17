@@ -2,7 +2,7 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { resolveTenantFromRequest } from "@atlas/tenancy";
 import { getOrCreateRequestId } from "@atlas/core/request/request-id";
-import { toSafeErrorEnvelope } from "@atlas/core/http/errors";
+import { toSafeErrorEnvelope } from "@atlas/api";
 import { requireSupabaseUser, upsertAuthPrincipal } from "@atlas/auth";
 import { withGlobalDb } from "@atlas/db/global-db";
 import { withTenantTx } from "@atlas/db/with-tenant-tx";
@@ -11,14 +11,6 @@ import {
   acceptInvitationInputSchema,
   acceptInvitationOutputSchema,
 } from "@atlas/membership";
-
-export const routeMetadata = {
-  public: true,
-  permission: "pub",
-  rateLimit: "publicInvitationAccept",
-  idempotency: "none",
-  audit: "required",
-} as const;
 
 export async function POST(req: NextRequest) {
   const requestId = getOrCreateRequestId(req.headers);

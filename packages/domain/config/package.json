@@ -1,0 +1,27 @@
+{
+  "name": "@atlas/domain-config",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts",
+    "./*": "./src/*"
+  },
+  "scripts": {
+    "build": "echo \"No domain-config build configured yet.\"",
+    "lint": "echo \"No domain-config lint configured yet.\"",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "echo \"No domain-config tests configured yet.\"",
+    "test:unit": "echo \"No domain-config unit tests configured yet.\"",
+    "test:integration": "echo \"No domain-config integration tests configured yet.\"",
+    "test:authorization": "echo \"No domain-config authorization tests configured yet.\"",
+    "test:tenant-isolation": "echo \"No domain-config tenant-isolation tests configured yet.\"",
+    "test:e2e": "echo \"No domain-config e2e tests configured yet.\""
+  },
+  "dependencies": {
+    "@atlas/db": "workspace:*",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0"
+  }
+}
