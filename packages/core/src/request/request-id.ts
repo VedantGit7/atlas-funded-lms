@@ -1,9 +1,7 @@
-import { randomUUID } from "node:crypto";
-
 export const REQUEST_ID_HEADER = "x-atlas-request-id";
 
 export function createRequestId(): string {
-  const id = randomUUID();
+  const id = crypto.randomUUID();
   return `req_${id}`;
 }
 

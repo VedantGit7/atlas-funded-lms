@@ -4,9 +4,11 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   transpilePackages: [
+    "@atlas/api",
     "@atlas/auth",
     "@atlas/authorization",
     "@atlas/core",
+    "@atlas/domain-config",
     "@atlas/membership",
     "@atlas/tenancy",
   ],

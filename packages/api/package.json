@@ -13,6 +13,16 @@
     "test:tenant-isolation": "echo \"No api tenant-isolation tests configured yet.\"",
     "test:e2e": "echo \"No api e2e tests configured yet.\""
   },
-  "dependencies": {},
+  "dependencies": {
+    "@atlas/auth": "workspace:*",
+    "@atlas/authorization": "workspace:*",
+    "@atlas/core": "workspace:*",
+    "@atlas/db": "workspace:*",
+    "@atlas/domain-config": "workspace:*",
+    "@atlas/membership": "workspace:*",
+    "@atlas/tenancy": "workspace:*",
+    "next": "^15.0.0",
+    "zod": "^3.25.76"
+  },
   "devDependencies": {}
 }

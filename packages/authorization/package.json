@@ -17,7 +17,9 @@
     "test:e2e": "echo \"No authorization e2e tests configured yet.\""
   },
   "dependencies": {
-    "@atlas/core": "workspace:*"
+    "@atlas/core": "workspace:*",
+    "@atlas/db": "workspace:*",
+    "@atlas/domain-config": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^24.0.0"

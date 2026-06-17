@@ -56,6 +56,22 @@ export default defineConfig({
         find: "@atlas/authorization",
         replacement: path.resolve(import.meta.dirname, "packages/authorization/src/index.ts"),
       },
+      {
+        find: /^@atlas\/api\/(.+)$/,
+        replacement: path.resolve(import.meta.dirname, "packages/api/src/$1.ts"),
+      },
+      {
+        find: "@atlas/api",
+        replacement: path.resolve(import.meta.dirname, "packages/api/src/index.ts"),
+      },
+      {
+        find: /^@atlas\/domain-config\/(.+)$/,
+        replacement: path.resolve(import.meta.dirname, "packages/domain/config/src/$1.ts"),
+      },
+      {
+        find: "@atlas/domain-config",
+        replacement: path.resolve(import.meta.dirname, "packages/domain/config/src/index.ts"),
+      },
     ],
   },
 });
