@@ -81,6 +81,9 @@ importers:
       '@atlas/api':
         specifier: workspace:*
         version: link:../../packages/api
+      '@atlas/audit':
+        specifier: workspace:*
+        version: link:../../packages/audit
       '@atlas/auth':
         specifier: workspace:*
         version: link:../../packages/auth
@@ -93,6 +96,12 @@ importers:
       '@atlas/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@atlas/domain-tenancy':
+        specifier: workspace:*
+        version: link:../../packages/domain/tenancy
+      '@atlas/events':
+        specifier: workspace:*
+        version: link:../../packages/events
       '@atlas/membership':
         specifier: workspace:*
         version: link:../../packages/membership
@@ -253,6 +262,31 @@ importers:
       '@atlas/db':
         specifier: workspace:*
         version: link:../../db
+      zod:
+        specifier: ^3.25.76
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: ^24.0.0
+        version: 24.13.2
+
+  packages/domain/tenancy:
+    dependencies:
+      '@atlas/access':
+        specifier: workspace:*
+        version: link:../../access
+      '@atlas/audit':
+        specifier: workspace:*
+        version: link:../../audit
+      '@atlas/core':
+        specifier: workspace:*
+        version: link:../../core
+      '@atlas/db':
+        specifier: workspace:*
+        version: link:../../db
+      '@atlas/events':
+        specifier: workspace:*
+        version: link:../../events
       zod:
         specifier: ^3.25.76
         version: 3.25.76

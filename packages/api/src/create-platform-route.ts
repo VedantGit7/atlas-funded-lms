@@ -28,6 +28,11 @@ function readQueryInput<T>(req: NextRequest, schema: z.ZodType<T>): T {
   return schema.parse(query);
 }
 
+async function readBodyInput<T>(req: NextRequest, schema: z.ZodType<T>): Promise<T> {
+  const raw: unknown = await req.json();
+  return schema.parse(raw);
+}
+
 function readPlatformReason(req: NextRequest): string {
   const reason = req.headers.get(ATLAS_PLATFORM_REASON_HEADER)?.trim() ?? "";
 
@@ -56,11 +61,12 @@ function readIdempotencyKey(req: NextRequest): string {
   return idempotencyKey;
 }
 
-export type PlatformRouteHandler<TQuery, TParams, TOutput> = (args: {
+export type PlatformRouteHandler<TQuery, TParams, TBody, TOutput> = (args: {
   tx: PlatformTx;
   ctx: PlatformRouteContext;
   query: TQuery;
   params: TParams;
+  body: TBody;
 }) => Promise<TOutput>;
 
 type PlatformRouteContextArg = {
@@ -74,32 +80,28 @@ type PlatformRouteWithParams = (
 
 type PlatformRouteWithoutParams = (req: NextRequest) => Promise<NextResponse>;
 
-export function createPlatformRoute<TQuery, TParams, TOutput>(config: {
-  metadata: PlatformRouteMetadata;
-  query?: z.ZodType<TQuery>;
-  params: z.ZodType<TParams>;
-  output: z.ZodType<TOutput>;
-  handler: PlatformRouteHandler<TQuery, TParams, TOutput>;
-}): PlatformRouteWithParams;
-
-export function createPlatformRoute<TQuery, TOutput>(config: {
-  metadata: PlatformRouteMetadata;
-  query?: z.ZodType<TQuery>;
-  output: z.ZodType<TOutput>;
-  handler: PlatformRouteHandler<TQuery, Record<string, never>, TOutput>;
-}): PlatformRouteWithoutParams;
+type InferParams<TParams extends z.ZodTypeAny | undefined> = TParams extends z.ZodTypeAny
+  ? z.infer<TParams>
+  : Record<string, never>;
 
 export function createPlatformRoute<
   TQuery = Record<string, never>,
-  TParams = Record<string, never>,
+  TParams extends z.ZodTypeAny | undefined = undefined,
+  TBody = Record<string, never>,
   TOutput = unknown,
 >(config: {
   metadata: PlatformRouteMetadata;
   query?: z.ZodType<TQuery>;
-  params?: z.ZodType<TParams>;
+  params?: TParams;
+  body?: z.ZodType<TBody>;
   output: z.ZodType<TOutput>;
-  handler: PlatformRouteHandler<TQuery, TParams, TOutput>;
-}): PlatformRouteWithParams | PlatformRouteWithoutParams {
+  handler: PlatformRouteHandler<
+    TQuery,
+    TParams extends z.ZodTypeAny ? z.infer<TParams> : Record<string, never>,
+    TBody,
+    TOutput
+  >;
+}): TParams extends z.ZodTypeAny ? PlatformRouteWithParams : PlatformRouteWithoutParams {
   async function route(req: NextRequest, routeContext?: PlatformRouteContextArg) {
     const requestId = getOrCreateRequestId(req.headers);
 
@@ -126,10 +128,13 @@ export function createPlatformRoute<
             : (req.headers.get("idempotency-key")?.trim() ?? "");
 
         const query = config.query != null ? readQueryInput(req, config.query) : ({} as TQuery);
-        const params =
+        const params: InferParams<TParams> =
           config.params != null
-            ? config.params.parse(routeContext ? await routeContext.params : {})
-            : ({} as TParams);
+            ? (config.params.parse(
+                routeContext ? await routeContext.params : {},
+              ) as InferParams<TParams>)
+            : ({} as InferParams<TParams>);
+        const body = config.body != null ? await readBodyInput(req, config.body) : ({} as TBody);
 
         const ctx: PlatformRouteContext = {
           platformPrincipalId: platformPrincipal.platformPrincipalId,
@@ -154,11 +159,12 @@ export function createPlatformRoute<
               ctx,
               query,
               params,
+              body,
             }),
         );
 
-        const body = config.output.parse(result);
-        return NextResponse.json(body);
+        const bodyOut = config.output.parse(result);
+        return NextResponse.json(bodyOut);
       });
     } catch (error) {
       if (error instanceof PlatformScopeError) {
