@@ -8,7 +8,7 @@ export {
   type ProtectedTenantRouteHandler,
 } from "./create-tenant-route";
 export { createPlatformRoute, type PlatformRouteHandler } from "./create-platform-route";
-export { noBodySchema } from "./schemas";
+export { noBodySchema, emptyBodySchema } from "./schemas";
 export { loadResourceRefOrDefault } from "./load-resource-ref";
 export type {
   ResourceLoaderFn,

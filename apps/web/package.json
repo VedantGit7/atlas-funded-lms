@@ -22,6 +22,8 @@
     "@atlas/authorization": "workspace:*",
     "@atlas/core": "workspace:*",
     "@atlas/db": "workspace:*",
+    "@atlas/domain-branding": "workspace:*",
+    "@atlas/domain-config": "workspace:*",
     "@atlas/domain-tenancy": "workspace:*",
     "@atlas/events": "workspace:*",
     "@atlas/membership": "workspace:*",
