@@ -2,6 +2,7 @@ packages:
   - "apps/*"
   - "packages/*"
   - "packages/domain/config"
+  - "packages/domain/tenancy"
 
 allowBuilds:
   "@prisma/client": true

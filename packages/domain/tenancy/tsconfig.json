@@ -1,5 +1,5 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
     "composite": true,
     "rootDir": "src",
@@ -10,16 +10,13 @@
     "noEmit": false,
     "tsBuildInfoFile": "node_modules/.cache/tsconfig.tsbuildinfo"
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx"],
+  "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "dist", "build", ".next"],
   "references": [
-    { "path": "../auth" },
-    { "path": "../authorization" },
-    { "path": "../core" },
-    { "path": "../db" },
-    { "path": "../domain/config" },
-    { "path": "../domain/tenancy" },
-    { "path": "../membership" },
-    { "path": "../tenancy" }
+    { "path": "../../access" },
+    { "path": "../../audit" },
+    { "path": "../../core" },
+    { "path": "../../db" },
+    { "path": "../../events" }
   ]
 }

@@ -19,7 +19,7 @@
     "test:authorization": "vitest run tests/authorization tests/unit/authorization",
     "test:events": "vitest run tests/unit/events tests/events tests/authorization/audit-outbox-permissions.test.ts",
     "test:tenant-isolation": "dotenv -e .env.local -- vitest run tests/tenant-isolation",
-    "test:e2e": "pnpm -r test:e2e",
+    "test:e2e": "dotenv -e .env.local -- vitest run tests/e2e",
     "db:generate": "dotenv -e .env.local -- prisma generate",
     "db:generate:ci": "prisma generate --config prisma.config.ts",
     "db:validate": "dotenv -e .env.local -- prisma validate",

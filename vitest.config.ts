@@ -4,7 +4,7 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   test: {
     environment: "node",
-    include: ["tests/**/*.test.ts"],
+    include: ["tests/**/*.test.ts", "tests/**/*.e2e.ts"],
   },
   resolve: {
     alias: [
@@ -75,6 +75,14 @@ export default defineConfig({
       {
         find: "@atlas/domain-config",
         replacement: path.resolve(import.meta.dirname, "packages/domain/config/src/index.ts"),
+      },
+      {
+        find: /^@atlas\/domain-tenancy\/(.+)$/,
+        replacement: path.resolve(import.meta.dirname, "packages/domain/tenancy/src/$1.ts"),
+      },
+      {
+        find: "@atlas/domain-tenancy",
+        replacement: path.resolve(import.meta.dirname, "packages/domain/tenancy/src/index.ts"),
       },
       {
         find: /^@atlas\/audit\/(.+)$/,
