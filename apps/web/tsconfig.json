@@ -24,6 +24,7 @@
   "exclude": ["node_modules", "dist", "build"],
   "references": [
     { "path": "../../packages/auth" },
+    { "path": "../../packages/authorization" },
     { "path": "../../packages/core" },
     { "path": "../../packages/db" },
     { "path": "../../packages/membership" },

@@ -2,6 +2,9 @@
   "name": "@atlas/authorization",
   "version": "0.0.0",
   "private": true,
+  "exports": {
+    ".": "./src/index.ts"
+  },
   "scripts": {
     "build": "echo \"No authorization build configured yet.\"",
     "lint": "echo \"No authorization lint configured yet.\"",
@@ -13,6 +16,10 @@
     "test:tenant-isolation": "echo \"No authorization tenant-isolation tests configured yet.\"",
     "test:e2e": "echo \"No authorization e2e tests configured yet.\""
   },
-  "dependencies": {},
-  "devDependencies": {}
+  "dependencies": {
+    "@atlas/core": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0"
+  }
 }
