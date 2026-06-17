@@ -8,6 +8,12 @@ importers:
 
   .:
     dependencies:
+      '@atlas/access':
+        specifier: workspace:*
+        version: link:packages/access
+      '@atlas/db':
+        specifier: workspace:*
+        version: link:packages/db
       '@supabase/supabase-js':
         specifier: ^2.108.2
         version: 2.108.2
@@ -100,6 +106,16 @@ importers:
       '@types/react-dom':
         specifier: ^19.0.0
         version: 19.2.3(@types/react@19.2.17)
+
+  packages/access:
+    dependencies:
+      '@atlas/db':
+        specifier: workspace:*
+        version: link:../db
+    devDependencies:
+      '@types/node':
+        specifier: ^24.0.0
+        version: 24.13.2
 
   packages/api: {}
 

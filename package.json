@@ -25,7 +25,7 @@
     "db:migrate": "dotenv -e .env.local -- prisma migrate dev",
     "db:migrate:check": "node scripts/guards/check-migrate-status.mjs",
     "db:studio": "dotenv -e .env.local -- prisma studio",
-    "db:seed": "tsx prisma/seeds/index.ts all",
+    "db:seed": "dotenv -e .env.local -- tsx prisma/seeds/index.ts all",
     "ci": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm test && pnpm check:route-metadata && pnpm check:prisma-boundary && pnpm check:audit-compliance && pnpm check:outbox-compliance && pnpm check:forbidden-scope && pnpm check:secrets && pnpm db:sql:check && pnpm db:migrate:check && pnpm db:rls:check && pnpm build",
     "format": "prettier . --write",
     "format:check": "prettier . --check",
@@ -44,10 +44,10 @@
     "db:check-no-direct-prisma": "tsx scripts/check-no-direct-prisma.ts",
     "db:check-no-session-tenant-set": "node scripts/db/check-no-session-tenant-set.mjs",
     "db:check-no-platform-scope-outside-wrapper": "tsx scripts/check-no-platform-scope-outside-wrapper.ts",
-    "db:seed:catalogues": "tsx prisma/seeds/index.ts catalogues",
-    "db:seed:tenants": "tsx prisma/seeds/index.ts tenants",
-    "db:seed:fundedbeyond": "tsx prisma/seeds/index.ts fundedbeyond",
-    "db:seed:smoke-tenant": "tsx prisma/seeds/index.ts smoke-tenant",
+    "db:seed:catalogues": "dotenv -e .env.local -- tsx prisma/seeds/index.ts catalogues",
+    "db:seed:tenants": "dotenv -e .env.local -- tsx prisma/seeds/index.ts tenants",
+    "db:seed:fundedbeyond": "dotenv -e .env.local -- tsx prisma/seeds/index.ts fundedbeyond",
+    "db:seed:smoke-tenant": "dotenv -e .env.local -- tsx prisma/seeds/index.ts smoke-tenant",
     "db:rls:check": "dotenv -e .env.local -- tsx scripts/check-rls-state.ts",
     "db:tenant-indexes:check": "dotenv -e .env.local -- tsx scripts/check-tenant-leading-indexes.ts",
     "db:append-only:check": "dotenv -e .env.local -- tsx scripts/check-append-only-trigger-coverage.ts",
@@ -72,6 +72,8 @@
     "vitest": "^4.0.18"
   },
   "dependencies": {
+    "@atlas/access": "workspace:*",
+    "@atlas/db": "workspace:*",
     "@supabase/supabase-js": "^2.108.2",
     "uuid": "^14.0.0"
   }
