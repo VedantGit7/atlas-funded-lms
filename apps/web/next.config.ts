@@ -8,6 +8,7 @@ const nextConfig: NextConfig = {
     "@atlas/auth",
     "@atlas/authorization",
     "@atlas/core",
+    "@atlas/domain-branding",
     "@atlas/domain-config",
     "@atlas/membership",
     "@atlas/tenancy",

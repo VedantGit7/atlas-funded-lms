@@ -29,6 +29,7 @@
     { "path": "../../packages/core" },
     { "path": "../../packages/db" },
     { "path": "../../packages/domain/config" },
+    { "path": "../../packages/domain/branding" },
     { "path": "../../packages/domain/tenancy" },
     { "path": "../../packages/events" },
     { "path": "../../packages/membership" },

@@ -1,0 +1,32 @@
+{
+  "name": "@atlas/domain-branding",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts",
+    "./*": "./src/*"
+  },
+  "scripts": {
+    "build": "echo \"No domain-branding build configured yet.\"",
+    "lint": "echo \"No domain-branding lint configured yet.\"",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "echo \"No domain-branding tests configured yet.\"",
+    "test:unit": "echo \"No domain-branding unit tests configured yet.\"",
+    "test:integration": "echo \"No domain-branding integration tests configured yet.\"",
+    "test:authorization": "echo \"No domain-branding authorization tests configured yet.\"",
+    "test:tenant-isolation": "echo \"No domain-branding tenant-isolation tests configured yet.\"",
+    "test:e2e": "echo \"No domain-branding e2e tests configured yet.\""
+  },
+  "dependencies": {
+    "@atlas/audit": "workspace:*",
+    "@atlas/authorization": "workspace:*",
+    "@atlas/core": "workspace:*",
+    "@atlas/events": "workspace:*",
+    "@atlas/domain-config": "workspace:*",
+    "@atlas/db": "workspace:*",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0"
+  }
+}

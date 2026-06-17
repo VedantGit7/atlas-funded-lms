@@ -60,6 +60,9 @@
       "@atlas/domain-tenancy": ["packages/domain/tenancy/src/index.ts"],
       "@atlas/domain-tenancy/*": ["packages/domain/tenancy/src/*"],
 
+      "@atlas/domain-branding": ["packages/domain/branding/src/index.ts"],
+      "@atlas/domain-branding/*": ["packages/domain/branding/src/*"],
+
       "@atlas/membership": ["packages/membership/src/index.ts"],
       "@atlas/membership/*": ["packages/membership/src/*"],
 

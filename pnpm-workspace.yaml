@@ -3,6 +3,7 @@ packages:
   - "packages/*"
   - "packages/domain/config"
   - "packages/domain/tenancy"
+  - "packages/domain/branding"
 
 allowBuilds:
   "@prisma/client": true

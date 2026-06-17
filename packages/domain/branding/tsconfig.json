@@ -1,0 +1,23 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "rootDir": "src",
+    "types": ["node"],
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "outDir": "dist",
+    "noEmit": false,
+    "tsBuildInfoFile": "node_modules/.cache/tsconfig.tsbuildinfo"
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "dist", "build", ".next"],
+  "references": [
+    { "path": "../../audit" },
+    { "path": "../../authorization" },
+    { "path": "../../core" },
+    { "path": "../../db" },
+    { "path": "../../domain/config" },
+    { "path": "../../events" }
+  ]
+}

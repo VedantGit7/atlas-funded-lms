@@ -85,6 +85,14 @@ export default defineConfig({
         replacement: path.resolve(import.meta.dirname, "packages/domain/tenancy/src/index.ts"),
       },
       {
+        find: /^@atlas\/domain-branding\/(.+)$/,
+        replacement: path.resolve(import.meta.dirname, "packages/domain/branding/src/$1.ts"),
+      },
+      {
+        find: "@atlas/domain-branding",
+        replacement: path.resolve(import.meta.dirname, "packages/domain/branding/src/index.ts"),
+      },
+      {
         find: /^@atlas\/audit\/(.+)$/,
         replacement: path.resolve(import.meta.dirname, "packages/audit/src/$1.ts"),
       },
