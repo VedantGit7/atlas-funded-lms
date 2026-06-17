@@ -1,0 +1,25 @@
+{
+  "name": "@atlas/access",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "echo \"No access build configured yet.\"",
+    "lint": "echo \"No access lint configured yet.\"",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "echo \"No access tests configured yet.\"",
+    "test:unit": "echo \"No access unit tests configured yet.\"",
+    "test:integration": "echo \"No access integration tests configured yet.\"",
+    "test:authorization": "echo \"No access authorization tests configured yet.\"",
+    "test:tenant-isolation": "echo \"No access tenant-isolation tests configured yet.\"",
+    "test:e2e": "echo \"No access e2e tests configured yet.\""
+  },
+  "dependencies": {
+    "@atlas/db": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0"
+  }
+}

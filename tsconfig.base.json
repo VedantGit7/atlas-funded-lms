@@ -27,6 +27,9 @@
       "@atlas/api": ["packages/api/src/index.ts"],
       "@atlas/api/*": ["packages/api/src/*"],
 
+      "@atlas/access": ["packages/access/src/index.ts"],
+      "@atlas/access/*": ["packages/access/src/*"],
+
       "@atlas/auth": ["packages/auth/src/index.ts"],
       "@atlas/auth/*": ["packages/auth/src/*"],
 
