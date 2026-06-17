@@ -75,6 +75,9 @@ importers:
       '@atlas/auth':
         specifier: workspace:*
         version: link:../../packages/auth
+      '@atlas/authorization':
+        specifier: workspace:*
+        version: link:../../packages/authorization
       '@atlas/core':
         specifier: workspace:*
         version: link:../../packages/core
@@ -138,7 +141,15 @@ importers:
         specifier: ^24.0.0
         version: 24.13.2
 
-  packages/authorization: {}
+  packages/authorization:
+    dependencies:
+      '@atlas/core':
+        specifier: workspace:*
+        version: link:../core
+    devDependencies:
+      '@types/node':
+        specifier: ^24.0.0
+        version: 24.13.2
 
   packages/config: {}
 

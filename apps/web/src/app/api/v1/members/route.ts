@@ -6,7 +6,12 @@ import { toSafeErrorEnvelope } from "@atlas/core/http/errors";
 import { requireSupabaseUser, upsertAuthPrincipal } from "@atlas/auth";
 import { withGlobalDb } from "@atlas/db/global-db";
 import { withTenantTx } from "@atlas/db/with-tenant-tx";
-import { permissionDeniedBeforeCan, requireActiveMembership } from "@atlas/membership";
+import {
+  listMembersForTenant,
+  membersListOutputSchema,
+  requireActiveMembership,
+} from "@atlas/membership";
+import { can, createTenantResourceRef, toAuthorizationError } from "@atlas/authorization";
 
 export const routeMetadata = {
   permission: "membership.read",
@@ -30,22 +35,64 @@ export async function GET(req: NextRequest) {
         markLogin: false,
       });
 
-      await withTenantTx(
+      const result = await withTenantTx(
         {
           tenantId: tenant.tenantId,
           requestId,
           allowAnonymousTenantRead: true,
         },
         async (tx) => {
-          await requireActiveMembership({
+          const membership = await requireActiveMembership({
             tx,
             tenantId: tenant.tenantId,
             authPrincipalId: principal.id,
           });
+
+          const resource = createTenantResourceRef({
+            type: "membership_collection",
+            id: tenant.tenantId,
+            tenantId: tenant.tenantId,
+          });
+
+          const decision = await can({
+            tx,
+            actor: {
+              tenantId: tenant.tenantId,
+              membershipId: membership.membershipId,
+            },
+            permission: routeMetadata.permission,
+            resource,
+            ctx: {
+              tenantId: tenant.tenantId,
+              requestId,
+            },
+          });
+
+          if (!decision.allowed) {
+            throw toAuthorizationError(decision);
+          }
+
+          const items = await listMembersForTenant({
+            tx,
+            tenantId: tenant.tenantId,
+            limit: 25,
+          });
+
+          return {
+            items,
+            pageInfo: {
+              nextCursor: null,
+              hasNextPage: false,
+            },
+          };
         },
       );
 
-      throw permissionDeniedBeforeCan();
+      const body = membersListOutputSchema.parse({
+        data: result,
+      });
+
+      return NextResponse.json(body);
     });
   } catch (error) {
     const safe = toSafeErrorEnvelope(error, requestId);

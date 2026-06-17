@@ -11,6 +11,7 @@ import {
   meMembershipOutputSchema,
   requireActiveMembership,
 } from "@atlas/membership";
+import { can, createTenantResourceRef, toAuthorizationError } from "@atlas/authorization";
 
 export const routeMetadata = {
   permission: "profile.read",
@@ -52,6 +53,31 @@ export async function GET(req: NextRequest) {
             tenantId: tenant.tenantId,
             membershipId: membership.membershipId,
           });
+
+          const resource = createTenantResourceRef({
+            type: "member_profile",
+            id: profile?.id ?? membership.membershipId,
+            tenantId: tenant.tenantId,
+            ownerMembershipId: membership.membershipId,
+          });
+
+          const decision = await can({
+            tx,
+            actor: {
+              tenantId: tenant.tenantId,
+              membershipId: membership.membershipId,
+            },
+            permission: "profile.read",
+            resource,
+            ctx: {
+              tenantId: tenant.tenantId,
+              requestId,
+            },
+          });
+
+          if (!decision.allowed) {
+            throw toAuthorizationError(decision);
+          }
 
           return { membership, profile };
         },
