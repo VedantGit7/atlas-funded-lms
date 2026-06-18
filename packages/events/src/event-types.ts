@@ -11,6 +11,7 @@ export const APPROVED_EVENT_TYPES = new Set<string>([
   "config.theme.published",
   "domain.changed",
   "course.published",
+  "learning.enrollment.created",
   "lesson.completed",
   "path.step_completed",
   "assessment.started",

@@ -7,7 +7,7 @@ const RELATIONSHIP_PERMISSION_MAP: Record<string, string[]> = {
   "community.moderate": ["moderatorOfSpace"],
   "post.create": ["memberOfSpace"],
   "comment.create": ["memberOfSpace"],
-  "course.read": ["enrolledInCourse", "instructorOfCourse"],
+  "course.read": ["enrolledInCourse", "instructorOfCourse", "publishedLearnerVisible"],
   "progress.read": ["selfProgress", "instructorOfCourse"],
   "attempt.read": ["selfAttempt", "instructorOfCourse", "assigneeOfGradingTask"],
 };
