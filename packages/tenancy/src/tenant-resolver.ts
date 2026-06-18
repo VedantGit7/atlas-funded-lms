@@ -73,3 +73,43 @@ export async function resolveTenantFromHost(args: {
     tenantDomainStatus: row.domain_status,
   };
 }
+
+export async function lookupTenantFromHost(args: {
+  host: string;
+  requestId: string;
+  db: TenantResolverDb;
+}): Promise<ResolvedTenantContext | null> {
+  const host = normalizeHost(args.host);
+
+  const rows = await args.db.$queryRaw<TenantResolutionRow[]>`
+    select
+      t.id::text as tenant_id,
+      t.slug::text as tenant_slug,
+      t.state::text as tenant_state,
+      td.id::text as domain_id,
+      td.status::text as domain_status,
+      td.hostname::text as hostname
+    from tenant_domains td
+    join tenants t on t.id = td.tenant_id
+    where lower(td.hostname) = ${host}
+      and td.deleted_at is null
+      and t.deleted_at is null
+    limit 1
+  `;
+
+  const row = rows[0];
+
+  if (!row) {
+    return null;
+  }
+
+  return {
+    requestId: args.requestId,
+    host,
+    tenantId: row.tenant_id,
+    tenantSlug: row.tenant_slug,
+    tenantState: row.tenant_state,
+    tenantDomainId: row.domain_id,
+    tenantDomainStatus: row.domain_status,
+  };
+}

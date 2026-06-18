@@ -63,6 +63,9 @@
       "@atlas/domain-branding": ["packages/domain/branding/src/index.ts"],
       "@atlas/domain-branding/*": ["packages/domain/branding/src/*"],
 
+      "@atlas/domain-identity": ["packages/domain/identity/src/index.ts"],
+      "@atlas/domain-identity/*": ["packages/domain/identity/src/*"],
+
       "@atlas/membership": ["packages/membership/src/index.ts"],
       "@atlas/membership/*": ["packages/membership/src/*"],
 

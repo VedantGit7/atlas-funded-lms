@@ -9,6 +9,8 @@ export const emailSchema = z
 export const publicSignupInputSchema = z.object({
   email: emailSchema,
   password: z.string().min(8).max(128),
+  displayName: z.string().trim().min(2).max(120).optional(),
+  inviteToken: z.string().min(20).max(500).optional(),
 });
 
 export const publicLoginInputSchema = z.object({
