@@ -1,4 +1,5 @@
 import type { RouteMetadata } from "@atlas/api/route-metadata";
+import type { CourseDetailQuery } from "../../../../../../server/courses/course-authoring-schemas";
 import { loadCourseResourceRef } from "../../../../../../server/courses/load-course-resource-ref";
 
 export const getRouteMetadata = {
@@ -7,6 +8,25 @@ export const getRouteMetadata = {
   audit: "none",
   rateLimit: "authenticatedTenantRead",
   idempotency: "none",
+  resourceLoader: async ({ tx, ctx, params, input }) => {
+    const courseId = params["id"];
+    if (!courseId) throw new Error("Missing course id");
+
+    return await loadCourseResourceRef({
+      tx,
+      ctx,
+      courseId,
+      requirePublished: input.view !== "studio",
+    });
+  },
+} satisfies RouteMetadata<CourseDetailQuery>;
+
+export const postRouteMetadata = {
+  permission: "course.update",
+  entitlement: null,
+  audit: "required",
+  rateLimit: "tenantMutation",
+  idempotency: "required",
   resourceLoader: async ({ tx, ctx, params }) => {
     const courseId = params["id"];
     if (!courseId) throw new Error("Missing course id");
@@ -15,7 +35,7 @@ export const getRouteMetadata = {
       tx,
       ctx,
       courseId,
-      requirePublished: true,
+      requirePublished: false,
     });
   },
 } satisfies RouteMetadata;
