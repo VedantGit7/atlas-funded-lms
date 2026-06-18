@@ -108,6 +108,14 @@ export default defineConfig({
         find: "@atlas/events",
         replacement: path.resolve(import.meta.dirname, "packages/events/src/index.ts"),
       },
+      {
+        find: /^@atlas\/storage\/(.+)$/,
+        replacement: path.resolve(import.meta.dirname, "packages/storage/src/$1.ts"),
+      },
+      {
+        find: "@atlas/storage",
+        replacement: path.resolve(import.meta.dirname, "packages/storage/src/index.ts"),
+      },
     ],
   },
 });
