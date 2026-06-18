@@ -49,9 +49,9 @@ describe("createPendingAssetReferenceWithUpload", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2025-06-01T00:00:00.000Z"));
 
-    process.env.STORAGE_PROVIDER = "local-mock";
-    process.env.R2_BUCKET_NAME = "test-bucket";
-    process.env.STORAGE_SIGNED_UPLOAD_TTL_SECONDS = "300";
+    process.env["STORAGE_PROVIDER"] = "local-mock";
+    process.env["R2_BUCKET_NAME"] = "test-bucket";
+    process.env["STORAGE_SIGNED_UPLOAD_TTL_SECONDS"] = "300";
 
     insertPendingAssetReferenceMock.mockImplementation(async (_tx, input) => ({
       id: ASSET_ID,
@@ -110,7 +110,7 @@ describe("createPendingAssetReferenceWithUpload", () => {
   });
 
   it("signed URL expires within configured TTL", async () => {
-    process.env.STORAGE_SIGNED_UPLOAD_TTL_SECONDS = "600";
+    process.env["STORAGE_SIGNED_UPLOAD_TTL_SECONDS"] = "600";
     const provider = createProvider();
 
     const result = await createPendingAssetReferenceWithUpload(
@@ -139,7 +139,14 @@ describe("createPendingAssetReferenceWithUpload", () => {
       },
     );
 
-    const insertedKey = insertPendingAssetReferenceMock.mock.calls[0][1].key as string;
+    expect(insertPendingAssetReferenceMock).toHaveBeenCalledOnce();
+    const insertInput = insertPendingAssetReferenceMock.mock.calls[0]?.[1] as
+      | { key: string }
+      | undefined;
+    if (!insertInput) {
+      throw new Error("expected insertPendingAssetReference to be called with input");
+    }
+    const insertedKey = insertInput.key;
 
     expect(insertedKey).toMatch(new RegExp(`^tenants/${TENANT_ID}/branding/logos/`));
     expect(insertedKey).not.toContain("../");
@@ -169,7 +176,7 @@ describe("createPendingAssetReferenceWithUpload", () => {
   });
 
   it("rejects oversized file before signed URL generation", async () => {
-    process.env.STORAGE_MAX_BRANDING_ASSET_BYTES = "2000000";
+    process.env["STORAGE_MAX_BRANDING_ASSET_BYTES"] = "2000000";
     const provider = createProvider();
 
     await expect(

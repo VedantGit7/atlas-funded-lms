@@ -70,8 +70,8 @@ describe("assertAllowedSize", () => {
       deleteObject: vi.fn(),
     } satisfies StorageProvider;
 
-    process.env.STORAGE_PROVIDER = "local-mock";
-    process.env.R2_BUCKET_NAME = "test-bucket";
+    process.env["STORAGE_PROVIDER"] = "local-mock";
+    process.env["R2_BUCKET_NAME"] = "test-bucket";
 
     await expect(
       createPendingAssetReferenceWithUpload(
