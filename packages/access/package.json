@@ -17,6 +17,7 @@
     "test:e2e": "echo \"No access e2e tests configured yet.\""
   },
   "dependencies": {
+    "@atlas/core": "workspace:*",
     "@atlas/db": "workspace:*"
   },
   "devDependencies": {

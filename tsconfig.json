@@ -17,6 +17,7 @@
     { "path": "./packages/domain/config" },
     { "path": "./packages/domain/branding" },
     { "path": "./packages/domain/tenancy" },
+    { "path": "./packages/domain/access" },
     { "path": "./packages/events" },
     { "path": "./packages/membership" },
     { "path": "./packages/observability" },

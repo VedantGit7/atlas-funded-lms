@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./*": "./src/*"
   },
   "scripts": {
     "build": "echo \"No membership build configured yet.\"",
@@ -17,7 +18,12 @@
     "test:e2e": "echo \"No membership e2e tests configured yet.\""
   },
   "dependencies": {
+    "@atlas/access": "workspace:*",
+    "@atlas/audit": "workspace:*",
+    "@atlas/authorization": "workspace:*",
     "@atlas/core": "workspace:*",
+    "@atlas/db": "workspace:*",
+    "@atlas/events": "workspace:*",
     "zod": "^3.25.76"
   },
   "devDependencies": {

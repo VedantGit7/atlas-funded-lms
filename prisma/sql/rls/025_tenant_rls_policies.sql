@@ -46,6 +46,7 @@ DECLARE
 
     'audit_entries',
     'secret_refs',
+    'storage_references',
 
     'outbox_events',
     'event_deliveries',

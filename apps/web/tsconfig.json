@@ -22,6 +22,7 @@
   ],
   "exclude": ["node_modules", "dist", "build"],
   "references": [
+    { "path": "../../packages/access" },
     { "path": "../../packages/api" },
     { "path": "../../packages/audit" },
     { "path": "../../packages/auth" },
@@ -29,6 +30,7 @@
     { "path": "../../packages/core" },
     { "path": "../../packages/db" },
     { "path": "../../packages/domain/config" },
+    { "path": "../../packages/domain/access" },
     { "path": "../../packages/domain/branding" },
     { "path": "../../packages/domain/identity" },
     { "path": "../../packages/domain/tenancy" },
