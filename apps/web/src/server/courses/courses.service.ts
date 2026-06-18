@@ -7,10 +7,17 @@ import {
   listPublishedCoursesPaginated,
 } from "./courses.repository";
 import type { CourseListQuery } from "./schemas";
+import { studioCourseListQuerySchema, type CourseDetailQuery } from "./course-authoring-schemas";
+import {
+  getCourseForBuilder,
+  listCourseModulesForBuilderService,
+  listStudioCourses,
+} from "./course-authoring.service";
 
 type ServiceCtx = {
   tenantId: string;
   actorMembershipId: string;
+  requestId?: string;
 };
 
 function learnerMetadataProjection(metadata: Record<string, unknown> | null): {
@@ -43,6 +50,18 @@ function assertLearnerVisiblePublishedCourse(status: string): void {
 }
 
 export async function listPublishedCourses(tx: TenantTx, ctx: ServiceCtx, query: CourseListQuery) {
+  if (query.view === "studio") {
+    return listStudioCourses(
+      tx,
+      {
+        tenantId: ctx.tenantId,
+        actorMembershipId: ctx.actorMembershipId,
+        requestId: ctx.requestId ?? "list",
+      },
+      studioCourseListQuerySchema.parse(query),
+    );
+  }
+
   const result = await listPublishedCoursesPaginated({
     tx,
     membershipId: ctx.actorMembershipId,
@@ -67,7 +86,24 @@ export async function listPublishedCourses(tx: TenantTx, ctx: ServiceCtx, query:
   };
 }
 
-export async function getPublishedCourseDetail(tx: TenantTx, ctx: ServiceCtx, courseId: string) {
+export async function getPublishedCourseDetail(
+  tx: TenantTx,
+  ctx: ServiceCtx,
+  courseId: string,
+  query?: CourseDetailQuery,
+) {
+  if (query?.view === "studio") {
+    return getCourseForBuilder(
+      tx,
+      {
+        tenantId: ctx.tenantId,
+        actorMembershipId: ctx.actorMembershipId,
+        requestId: ctx.requestId ?? "detail",
+      },
+      courseId,
+    );
+  }
+
   const course = await findCourseAuthProjection({ tx, courseId });
 
   if (!course || course.tenantId !== ctx.tenantId) {
@@ -101,7 +137,24 @@ export async function getPublishedCourseDetail(tx: TenantTx, ctx: ServiceCtx, co
   };
 }
 
-export async function getPublishedCourseModules(tx: TenantTx, ctx: ServiceCtx, courseId: string) {
+export async function getPublishedCourseModules(
+  tx: TenantTx,
+  ctx: ServiceCtx,
+  courseId: string,
+  query?: CourseDetailQuery,
+) {
+  if (query?.view === "studio") {
+    return listCourseModulesForBuilderService(
+      tx,
+      {
+        tenantId: ctx.tenantId,
+        actorMembershipId: ctx.actorMembershipId,
+        requestId: ctx.requestId ?? "modules",
+      },
+      courseId,
+    );
+  }
+
   const course = await findCourseAuthProjection({ tx, courseId });
 
   if (!course || course.tenantId !== ctx.tenantId) {

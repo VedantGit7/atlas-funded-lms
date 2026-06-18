@@ -1,6 +1,5 @@
 import { z } from "zod";
 import { pageInfoSchema } from "@atlas/membership/schemas/shared";
-
 export const publishStatusLearnerSchema = z.literal("PUBLISHED");
 
 export const courseListQuerySchema = z
@@ -13,8 +12,19 @@ export const courseListQuerySchema = z
     persona: z.string().trim().min(1).max(100).optional(),
     certificate: z.enum(["true", "false"]).optional(),
     sort: z.enum(["updated_desc", "title_asc", "title_desc"]).default("updated_desc"),
+    view: z.literal("studio").optional(),
+    status: z.enum(["DRAFT", "REVIEW", "PUBLISHED", "ARCHIVED"]).optional(),
   })
-  .strict();
+  .strict()
+  .superRefine((value, ctx) => {
+    if (value.status != null && value.view !== "studio") {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "status filter requires view=studio",
+        path: ["status"],
+      });
+    }
+  });
 
 export type CourseListQuery = z.output<typeof courseListQuerySchema>;
 
@@ -71,3 +81,20 @@ export const courseModulesResponseSchema = z.object({
     items: z.array(courseModuleOutlineItemSchema),
   }),
 });
+
+export {
+  studioCourseListQuerySchema,
+  createCourseBodySchema,
+  updateCourseBodySchema,
+  createModuleBodySchema,
+  updateModuleBodySchema,
+  publishCourseBodySchema,
+  studioCourseListResponseSchema,
+  studioCourseDetailResponseSchema,
+  createCourseResponseSchema,
+  studioCourseModulesResponseSchema,
+  studioModuleResponseSchema,
+  publishCourseResponseSchema,
+  archiveCourseResponseSchema,
+  courseDetailQuerySchema,
+} from "./course-authoring-schemas";

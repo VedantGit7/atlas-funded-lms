@@ -1,6 +1,7 @@
 import { createTenantResourceRef } from "@atlas/authorization";
 import type { TenantTx } from "@atlas/db";
-import { courseNotFound } from "./courses.errors";
+import { findModuleWithCourse } from "./course-authoring.repository";
+import { courseNotFound, moduleNotFound } from "./courses.errors";
 import { findCourseAuthProjection, findEnrollmentForMembership } from "./courses.repository";
 
 type LoaderCtx = {
@@ -67,6 +68,42 @@ export async function loadCourseCatalogResourceRef(args: { ctx: LoaderCtx }) {
       },
     }),
   );
+}
+
+export async function loadCourseStudioCatalogResourceRef(args: { ctx: LoaderCtx }) {
+  return Promise.resolve(
+    createTenantResourceRef({
+      type: "course_studio_catalog",
+      id: args.ctx.tenantId,
+      tenantId: args.ctx.tenantId,
+      relationships: {
+        instructorOfCourse: args.ctx.actorMembershipId,
+      },
+    }),
+  );
+}
+
+export async function loadModuleParentCourseResourceRef(args: {
+  tx: TenantTx;
+  ctx: LoaderCtx;
+  moduleId: string;
+}) {
+  const module = await findModuleWithCourse({ tx: args.tx, moduleId: args.moduleId });
+
+  if (!module || module.tenantId !== args.ctx.tenantId) {
+    throw moduleNotFound();
+  }
+
+  if (module.createdByMembershipId !== args.ctx.actorMembershipId) {
+    throw moduleNotFound();
+  }
+
+  return loadCourseResourceRef({
+    tx: args.tx,
+    ctx: args.ctx,
+    courseId: module.courseId,
+    requirePublished: false,
+  });
 }
 
 export async function loadCourseForEnrollmentResourceRef(args: {
