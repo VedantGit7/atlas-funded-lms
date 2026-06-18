@@ -39,6 +39,37 @@ export function assertModuleEditable(courseStatus: CourseLifecycleStatus): void 
   assertCourseEditable(courseStatus);
 }
 
+export function assertLessonEditable(courseStatus: CourseLifecycleStatus): void {
+  assertCourseEditable(courseStatus);
+}
+
+export function validateLessonPositions(positions: number[]): void {
+  if (positions.length === 0) {
+    return;
+  }
+
+  const sorted = [...positions].sort((a, b) => a - b);
+  const unique = new Set(sorted);
+
+  if (unique.size !== sorted.length) {
+    throw new AtlasHttpError({
+      code: "VALIDATION_ERROR",
+      status: 400,
+      message: "Lesson positions must be unique.",
+    });
+  }
+
+  for (let index = 0; index < sorted.length; index += 1) {
+    if (sorted[index] !== index + 1) {
+      throw new AtlasHttpError({
+        code: "VALIDATION_ERROR",
+        status: 400,
+        message: "Lesson positions must be sequential starting at 1.",
+      });
+    }
+  }
+}
+
 export function validateModulePositions(positions: number[]): void {
   if (positions.length === 0) {
     return;

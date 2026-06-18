@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ClientApiError, clientApi } from "../../../lib/client-api";
 import type { z } from "zod";
@@ -25,6 +26,7 @@ export function CourseModuleTree({
   editable,
   onChanged,
 }: CourseModuleTreeProps) {
+  const router = useRouter();
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [newTitle, setNewTitle] = useState("");
@@ -90,13 +92,31 @@ export function CourseModuleTree({
     }
   }
 
+  async function createLessonForModule(moduleId: string) {
+    if (!editable) return;
+    const title = window.prompt("Lesson title");
+    if (!title?.trim()) return;
+    setBusyId(moduleId);
+    setError(null);
+    try {
+      const response = await clientApi.post<{ data: { id: string } }>(
+        `/api/v1/modules/${moduleId}/lessons`,
+        { title: title.trim() },
+        "lesson-create",
+      );
+      router.push(`/studio/courses/${courseId}/lessons/${response.data.id}`);
+    } catch (createError) {
+      setError(formatError(createError));
+    } finally {
+      setBusyId(null);
+    }
+  }
+
   return (
     <section className="space-y-4 rounded border p-4">
       <header>
         <h2>Modules</h2>
-        <p className="text-sm opacity-80">
-          Organize course sections. Lesson editing is not available in this story.
-        </p>
+        <p className="text-sm opacity-80">Organize course sections and lessons.</p>
       </header>
 
       {error ? <p role="alert">{error}</p> : null}
@@ -142,6 +162,15 @@ export function CourseModuleTree({
                 </div>
                 {editable ? (
                   <div className="flex gap-2 text-sm">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        void createLessonForModule(module.id);
+                      }}
+                      disabled={busyId === module.id}
+                    >
+                      Add lesson
+                    </button>
                     <button
                       type="button"
                       onClick={() => {

@@ -202,7 +202,7 @@ export async function createCourseAuthoringFixture(): Promise<CourseAuthoringFix
   return fixture;
 }
 
-export function instructorCtx(fixture: CourseAuthoringFixture, requestId = randomUUID()) {
+export function instructorCtx(fixture: CourseAuthoringFixture, requestId: string = randomUUID()) {
   return {
     tenantId: fixture.tenantId,
     actorMembershipId: fixture.instructorMembershipId,
@@ -210,7 +210,7 @@ export function instructorCtx(fixture: CourseAuthoringFixture, requestId = rando
   };
 }
 
-export function learnerCtx(fixture: CourseAuthoringFixture, requestId = randomUUID()) {
+export function learnerCtx(fixture: CourseAuthoringFixture, requestId: string = randomUUID()) {
   return {
     tenantId: fixture.tenantId,
     actorMembershipId: fixture.learnerMembershipId,
@@ -218,7 +218,10 @@ export function learnerCtx(fixture: CourseAuthoringFixture, requestId = randomUU
   };
 }
 
-export function otherInstructorCtx(fixture: CourseAuthoringFixture, requestId = randomUUID()) {
+export function otherInstructorCtx(
+  fixture: CourseAuthoringFixture,
+  requestId: string = randomUUID(),
+) {
   return {
     tenantId: fixture.tenantId,
     actorMembershipId: fixture.otherInstructorMembershipId,
@@ -229,7 +232,7 @@ export function otherInstructorCtx(fixture: CourseAuthoringFixture, requestId = 
 export function authoringTenantTx(
   fixture: CourseAuthoringFixture,
   membershipId: string = fixture.instructorMembershipId,
-  requestId = randomUUID(),
+  requestId: string = randomUUID(),
 ) {
   return {
     tenantId: fixture.tenantId,

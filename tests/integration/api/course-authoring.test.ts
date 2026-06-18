@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { describe, expect, it } from "vitest";
 import { withTenantTx } from "@atlas/db";
 import { courseListQuerySchema } from "../../../apps/web/src/server/courses/schemas";
@@ -15,7 +16,6 @@ import {
   authoringTenantTx,
 } from "../../fixtures/course-authoring-fixture";
 import { createCourseEnrollmentFixture } from "../../fixtures/course-enrollment-fixture";
-import { tenantCtx } from "../../tenant-isolation/tenant-isolation-fixture";
 const describeWithDb =
   process.env["DATABASE_URL"] && process.env["PLATFORM_DATABASE_URL"] ? describe : describe.skip;
 
@@ -24,8 +24,13 @@ describeWithDb("course authoring integration", () => {
     const fixture = await createCourseEnrollmentFixture();
     const ctx = { tenantId: fixture.tenantId, actorMembershipId: fixture.membershipId };
 
-    const result = await withTenantTx(tenantCtx(fixture), async (tx) =>
-      listPublishedCourses(tx, ctx, courseListQuerySchema.parse({})),
+    const result = await withTenantTx(
+      {
+        tenantId: fixture.tenantId,
+        actorMembershipId: fixture.membershipId,
+        requestId: randomUUID(),
+      },
+      async (tx) => listPublishedCourses(tx, ctx, courseListQuerySchema.parse({})),
     );
 
     const ids = result.data.items.map((item) => item.id);
@@ -48,7 +53,7 @@ describeWithDb("course authoring integration", () => {
 
   it("creates draft course", async () => {
     const fixture = await createCourseAuthoringFixture();
-    const ctx = instructorCtx(fixture, "req_create_course");
+    const ctx = instructorCtx(fixture);
 
     const created = await withTenantTx(authoringTenantTx(fixture), async (tx) =>
       createCourseDraft(tx, ctx, { title: "New Draft Course" }),
@@ -72,7 +77,7 @@ describeWithDb("course authoring integration", () => {
 
   it("updates owned draft", async () => {
     const fixture = await createCourseAuthoringFixture();
-    const ctx = instructorCtx(fixture, "req_update_course");
+    const ctx = instructorCtx(fixture);
 
     const updated = await withTenantTx(authoringTenantTx(fixture), async (tx) =>
       updateCourse(tx, ctx, fixture.draftCourseId, { title: "Updated Draft Title" }),
@@ -83,7 +88,7 @@ describeWithDb("course authoring integration", () => {
 
   it("archives owned draft", async () => {
     const fixture = await createCourseAuthoringFixture();
-    const ctx = instructorCtx(fixture, "req_archive_course");
+    const ctx = instructorCtx(fixture);
 
     const archived = await withTenantTx(authoringTenantTx(fixture), async (tx) =>
       archiveOrDeleteCourse(tx, ctx, fixture.draftCourseId),
@@ -94,7 +99,7 @@ describeWithDb("course authoring integration", () => {
 
   it("writes audit rows for course create", async () => {
     const fixture = await createCourseAuthoringFixture();
-    const ctx = instructorCtx(fixture, "req_audit_create");
+    const ctx = instructorCtx(fixture);
 
     await withTenantTx(authoringTenantTx(fixture), async (tx) => {
       const created = await createCourseDraft(tx, ctx, { title: "Audit Course" });
