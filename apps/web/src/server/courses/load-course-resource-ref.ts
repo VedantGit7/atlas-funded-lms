@@ -3,6 +3,8 @@ import type { TenantTx } from "@atlas/db";
 import { findModuleWithCourse } from "./course-authoring.repository";
 import { courseNotFound, moduleNotFound } from "./courses.errors";
 import { findCourseAuthProjection, findEnrollmentForMembership } from "./courses.repository";
+import { findLessonWithModuleAndCourse } from "../lessons/lessons.repository";
+import { lessonNotFound } from "../lessons/lessons.errors";
 
 type LoaderCtx = {
   tenantId: string;
@@ -116,5 +118,55 @@ export async function loadCourseForEnrollmentResourceRef(args: {
     ctx: args.ctx,
     courseId: args.courseId,
     requirePublished: true,
+  });
+}
+
+export async function loadLessonParentCourseResourceRef(args: {
+  tx: TenantTx;
+  ctx: LoaderCtx;
+  lessonId: string;
+  requirePublished?: boolean;
+}) {
+  const lesson = await findLessonWithModuleAndCourse({ tx: args.tx, lessonId: args.lessonId });
+
+  if (!lesson || lesson.tenantId !== args.ctx.tenantId) {
+    throw lessonNotFound();
+  }
+
+  if (args.requirePublished !== false && lesson.courseStatus !== "PUBLISHED") {
+    throw lessonNotFound();
+  }
+
+  return loadCourseResourceRef({
+    tx: args.tx,
+    ctx: args.ctx,
+    courseId: lesson.courseId,
+    requirePublished: args.requirePublished ?? lesson.courseStatus === "PUBLISHED",
+  });
+}
+
+export async function loadModuleLessonsResourceRef(args: {
+  tx: TenantTx;
+  ctx: LoaderCtx;
+  moduleId: string;
+  requirePublished?: boolean;
+}) {
+  const module = await findModuleWithCourse({ tx: args.tx, moduleId: args.moduleId });
+
+  if (!module || module.tenantId !== args.ctx.tenantId) {
+    throw moduleNotFound();
+  }
+
+  if (args.requirePublished === false) {
+    if (module.createdByMembershipId !== args.ctx.actorMembershipId) {
+      throw moduleNotFound();
+    }
+  }
+
+  return loadCourseResourceRef({
+    tx: args.tx,
+    ctx: args.ctx,
+    courseId: module.courseId,
+    requirePublished: args.requirePublished ?? module.courseStatus === "PUBLISHED",
   });
 }
