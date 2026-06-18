@@ -16,12 +16,14 @@
     "test:e2e": "echo \"No web e2e tests configured yet.\""
   },
   "dependencies": {
+    "@atlas/access": "workspace:*",
     "@atlas/api": "workspace:*",
     "@atlas/audit": "workspace:*",
     "@atlas/auth": "workspace:*",
     "@atlas/authorization": "workspace:*",
     "@atlas/core": "workspace:*",
     "@atlas/db": "workspace:*",
+    "@atlas/domain-access": "workspace:*",
     "@atlas/domain-branding": "workspace:*",
     "@atlas/domain-config": "workspace:*",
     "@atlas/domain-identity": "workspace:*",

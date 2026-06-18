@@ -62,6 +62,11 @@ async function request<T>(
 }
 
 export const clientApi = {
+  get: <T>(path: string) =>
+    request<T>(path, {
+      method: "GET",
+    }),
+
   put: <T>(path: string, body: object, idempotencyKeyPrefix: string) =>
     request<T>(path, {
       method: "PUT",

@@ -505,6 +505,29 @@ model LessonAsset {
   @@map("lesson_assets")
 }
 
+model StorageReference {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenant_id       String    @db.Uuid
+  bucket          String
+  object_key      String
+  purpose         String
+  resource_type   String
+  resource_id     String?   @db.Uuid
+  file_name       String
+  content_type    String
+  size_bytes      BigInt
+  checksum_sha256 String?
+  visibility      String
+  status          String
+  created_at      DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
+  deleted_at      DateTime? @db.Timestamptz(6)
+
+  @@index([tenant_id, status])
+  @@index([tenant_id, purpose])
+  @@map("storage_references")
+}
+
 model Course {
   id                       String        @id @db.Uuid
   tenant_id                String        @db.Uuid

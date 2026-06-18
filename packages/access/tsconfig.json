@@ -12,5 +12,5 @@
   },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "dist", "build", ".next"],
-  "references": [{ "path": "../db" }]
+  "references": [{ "path": "../core" }, { "path": "../db" }]
 }

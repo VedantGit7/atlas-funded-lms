@@ -1,0 +1,33 @@
+{
+  "name": "@atlas/domain-access",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts",
+    "./*": "./src/*"
+  },
+  "scripts": {
+    "build": "echo \"No domain-access build configured yet.\"",
+    "lint": "echo \"No domain-access lint configured yet.\"",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "echo \"No domain-access tests configured yet.\"",
+    "test:unit": "echo \"No domain-access unit tests configured yet.\"",
+    "test:integration": "echo \"No domain-access integration tests configured yet.\"",
+    "test:authorization": "echo \"No domain-access authorization tests configured yet.\"",
+    "test:tenant-isolation": "echo \"No domain-access tenant-isolation tests configured yet.\"",
+    "test:e2e": "echo \"No domain-access e2e tests configured yet.\""
+  },
+  "dependencies": {
+    "@atlas/access": "workspace:*",
+    "@atlas/audit": "workspace:*",
+    "@atlas/authorization": "workspace:*",
+    "@atlas/core": "workspace:*",
+    "@atlas/db": "workspace:*",
+    "@atlas/events": "workspace:*",
+    "@atlas/membership": "workspace:*",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0"
+  }
+}

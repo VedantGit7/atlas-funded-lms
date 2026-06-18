@@ -5,6 +5,7 @@ packages:
   - "packages/domain/tenancy"
   - "packages/domain/branding"
   - "packages/domain/identity"
+  - "packages/domain/access"
 
 allowBuilds:
   "@prisma/client": true

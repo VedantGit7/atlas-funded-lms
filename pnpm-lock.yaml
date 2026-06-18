@@ -78,6 +78,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@atlas/access':
+        specifier: workspace:*
+        version: link:../../packages/access
       '@atlas/api':
         specifier: workspace:*
         version: link:../../packages/api
@@ -96,6 +99,9 @@ importers:
       '@atlas/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@atlas/domain-access':
+        specifier: workspace:*
+        version: link:../../packages/domain/access
       '@atlas/domain-branding':
         specifier: workspace:*
         version: link:../../packages/domain/branding
@@ -142,6 +148,9 @@ importers:
 
   packages/access:
     dependencies:
+      '@atlas/core':
+        specifier: workspace:*
+        version: link:../core
       '@atlas/db':
         specifier: workspace:*
         version: link:../db
@@ -269,6 +278,37 @@ importers:
 
   packages/domain: {}
 
+  packages/domain/access:
+    dependencies:
+      '@atlas/access':
+        specifier: workspace:*
+        version: link:../../access
+      '@atlas/audit':
+        specifier: workspace:*
+        version: link:../../audit
+      '@atlas/authorization':
+        specifier: workspace:*
+        version: link:../../authorization
+      '@atlas/core':
+        specifier: workspace:*
+        version: link:../../core
+      '@atlas/db':
+        specifier: workspace:*
+        version: link:../../db
+      '@atlas/events':
+        specifier: workspace:*
+        version: link:../../events
+      '@atlas/membership':
+        specifier: workspace:*
+        version: link:../../membership
+      zod:
+        specifier: ^3.25.76
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: ^24.0.0
+        version: 24.13.2
+
   packages/domain/branding:
     dependencies:
       '@atlas/audit':
@@ -372,9 +412,24 @@ importers:
 
   packages/membership:
     dependencies:
+      '@atlas/access':
+        specifier: workspace:*
+        version: link:../access
+      '@atlas/audit':
+        specifier: workspace:*
+        version: link:../audit
+      '@atlas/authorization':
+        specifier: workspace:*
+        version: link:../authorization
       '@atlas/core':
         specifier: workspace:*
         version: link:../core
+      '@atlas/db':
+        specifier: workspace:*
+        version: link:../db
+      '@atlas/events':
+        specifier: workspace:*
+        version: link:../events
       zod:
         specifier: ^3.25.76
         version: 3.25.76
