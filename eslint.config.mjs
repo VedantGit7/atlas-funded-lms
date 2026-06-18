@@ -366,6 +366,25 @@ export default tseslint.config(
   },
 
   {
+    files: ["apps/web/src/server/**/*.{ts,tsx}"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            {
+              name: "@prisma/client",
+              message:
+                "Server orchestration must not import Prisma directly. Use approved DB helpers.",
+            },
+          ],
+          patterns: genericForbiddenImportPatterns,
+        },
+      ],
+    },
+  },
+
+  {
     files: ["prisma/seeds/**/*.ts"],
     rules: {
       "atlas/no-hardcoded-tenant-strings": "off",
