@@ -1,6 +1,8 @@
 export { EntitlementRequiredError } from "./errors";
 export { enforceEntitlement } from "@atlas/authorization";
 export { toSafeErrorEnvelope } from "./error-envelope";
+export { enforcePublicRateLimit, resetRateLimitsForTests } from "./rate-limit";
+export { createPublicRouteHandler, type PublicRouteMetadata } from "./public-route";
 export {
   runProtectedTenantRouteHandler,
   runProtectedTenantRoutePipeline,

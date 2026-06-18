@@ -1,0 +1,28 @@
+{
+  "name": "@atlas/domain-identity",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts",
+    "./*": "./src/*"
+  },
+  "scripts": {
+    "build": "echo \"No domain-identity build configured yet.\"",
+    "lint": "echo \"No domain-identity lint configured yet.\"",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "echo \"No domain-identity tests configured yet.\"",
+    "test:unit": "echo \"No domain-identity unit tests configured yet.\"",
+    "test:integration": "echo \"No domain-identity integration tests configured yet.\"",
+    "test:authorization": "echo \"No domain-identity authorization tests configured yet.\"",
+    "test:tenant-isolation": "echo \"No domain-identity tenant-isolation tests configured yet.\"",
+    "test:e2e": "echo \"No domain-identity e2e tests configured yet.\""
+  },
+  "dependencies": {
+    "@atlas/core": "workspace:*",
+    "@atlas/membership": "workspace:*",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0"
+  }
+}

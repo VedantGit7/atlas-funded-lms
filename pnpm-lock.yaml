@@ -102,6 +102,9 @@ importers:
       '@atlas/domain-config':
         specifier: workspace:*
         version: link:../../packages/domain/config
+      '@atlas/domain-identity':
+        specifier: workspace:*
+        version: link:../../packages/domain/identity
       '@atlas/domain-tenancy':
         specifier: workspace:*
         version: link:../../packages/domain/tenancy
@@ -114,6 +117,9 @@ importers:
       '@atlas/tenancy':
         specifier: workspace:*
         version: link:../../packages/tenancy
+      '@supabase/supabase-js':
+        specifier: ^2.108.2
+        version: 2.108.2
       next:
         specifier: ^15.0.0
         version: 15.5.19(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -296,6 +302,22 @@ importers:
       '@atlas/db':
         specifier: workspace:*
         version: link:../../db
+      zod:
+        specifier: ^3.25.76
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: ^24.0.0
+        version: 24.13.2
+
+  packages/domain/identity:
+    dependencies:
+      '@atlas/core':
+        specifier: workspace:*
+        version: link:../../core
+      '@atlas/membership':
+        specifier: workspace:*
+        version: link:../../membership
       zod:
         specifier: ^3.25.76
         version: 3.25.76
