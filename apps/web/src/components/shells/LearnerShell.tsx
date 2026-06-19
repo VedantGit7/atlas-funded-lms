@@ -5,7 +5,10 @@ type LearnerShellProps = {
   children: ReactNode;
 };
 
-const navItems = [{ href: "/courses", label: "Courses" }] as const;
+const navItems = [
+  { href: "/courses", label: "Courses" },
+  { href: "/roadmap", label: "Roadmap" },
+] as const;
 
 export function LearnerShell({ children }: LearnerShellProps) {
   return (
