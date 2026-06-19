@@ -8,7 +8,17 @@ const RELATIONSHIP_PERMISSION_MAP: Record<string, string[]> = {
   "post.create": ["memberOfSpace"],
   "comment.create": ["memberOfSpace"],
   "course.read": ["enrolledInCourse", "instructorOfCourse", "publishedLearnerVisible"],
-  "progress.read": ["selfProgress", "instructorOfCourse"],
+  "learning_path.read": ["enrolledInPath", "instructorOfPath", "publishedLearnerVisible"],
+  "learning_path.update": ["instructorOfPath"],
+  "learning_path.delete": ["instructorOfPath"],
+  "learning_path.publish": ["instructorOfPath"],
+  "learning_path.create": ["instructorOfPath"],
+  "progress.read": [
+    "selfProgress",
+    "instructorOfCourse",
+    "instructorOfPath",
+    "publishedLearnerVisible",
+  ],
   "attempt.read": ["selfAttempt", "instructorOfCourse", "assigneeOfGradingTask"],
   "workflow.transition.act": ["workflowApproverEligible", "moderatorOfSpace"],
 };

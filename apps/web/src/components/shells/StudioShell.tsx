@@ -7,6 +7,7 @@ type StudioShellProps = {
 
 const navItems = [
   { href: "/studio/courses", label: "Courses" },
+  { href: "/studio/learning-paths", label: "Learning paths" },
   { href: "/studio/assessments", label: "Assessments" },
   { href: "/studio/grading", label: "Grading" },
   { href: "/studio/items", label: "Items" },
