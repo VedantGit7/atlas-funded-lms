@@ -5,6 +5,7 @@ import type { SaveAnswerInput } from "../../features/assessments/schemas";
 import {
   assessmentsRepository,
   extractAssessmentConfig,
+  readCreatedByMembershipId,
   readItemRequired,
 } from "../assessments/assessments.repository";
 import { canReviewAnswers, scoreAttempt, type ScoringItem } from "../assessments/scoring.service";
@@ -462,6 +463,7 @@ export async function submitAttempt(
     await attemptsRepository.insertGradingTask(tx, {
       tenantId: ctx.tenantId,
       attemptId,
+      assignedToMembershipId: readCreatedByMembershipId(assessment.config_json),
     });
   }
 
