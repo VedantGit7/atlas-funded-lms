@@ -52,6 +52,12 @@ export default async function AdminDashboardPage() {
           <p>Configure dimensions, scoring profiles, bands, and publish versioned config.</p>
           <Link href="/admin/competency">Open competency config</Link>
         </article>
+
+        <article className="rounded border p-4">
+          <h2>Readiness Policy</h2>
+          <p>Configure CTA prominence rules, legal copy, and outbound redirect target.</p>
+          <Link href="/admin/readiness-policy">Open readiness policy</Link>
+        </article>
       </section>
     </main>
   );
