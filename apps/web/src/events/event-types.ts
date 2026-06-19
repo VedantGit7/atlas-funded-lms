@@ -10,3 +10,7 @@ export const COMPETENCY_EMITTED_EVENT_TYPES = [
   "competency.signal_recorded",
   "competency.score_changed",
 ] as const;
+
+export const READINESS_CONSUMED_EVENT_TYPES = ["competency.score_changed"] as const;
+
+export const READINESS_EMITTED_EVENT_TYPES = ["readiness.band_changed"] as const;
