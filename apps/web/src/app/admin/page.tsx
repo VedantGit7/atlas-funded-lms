@@ -46,6 +46,12 @@ export default async function AdminDashboardPage() {
           <p>{roleCount} role(s) visible in the tenant catalogue.</p>
           <Link href="/admin/roles">Manage roles</Link>
         </article>
+
+        <article className="rounded border p-4">
+          <h2>Competency & Scoring</h2>
+          <p>Configure dimensions, scoring profiles, bands, and publish versioned config.</p>
+          <Link href="/admin/competency">Open competency config</Link>
+        </article>
       </section>
     </main>
   );
