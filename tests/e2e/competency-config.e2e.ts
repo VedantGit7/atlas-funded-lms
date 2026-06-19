@@ -32,12 +32,17 @@ describe("competency config e2e wiring", () => {
     expect(source).toContain("denied");
   });
 
-  it("signal inspector placeholder does not call competency-signals API", () => {
-    const source = readFileSync(
-      resolve(webRoot, "features/competency/components/SignalInspectorPlaceholder.tsx"),
+  it("signal inspector uses competency-signals API", () => {
+    const tableSource = readFileSync(
+      resolve(webRoot, "features/competency/components/CompetencySignalTable.tsx"),
       "utf8",
     );
-    expect(source).not.toContain("/competency-signals");
+    const clientSource = readFileSync(
+      resolve(webRoot, "modules/competency/competency.api-client.ts"),
+      "utf8",
+    );
+    expect(tableSource).toContain("competencyApiClient.listCompetencySignals");
+    expect(clientSource).toContain("/api/v1/competency-signals");
   });
 
   it("dimension editor supports generic keys", () => {
