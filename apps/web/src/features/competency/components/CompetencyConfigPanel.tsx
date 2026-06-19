@@ -9,7 +9,7 @@ import { DimensionEditor } from "./DimensionEditor";
 import { ScoringProfileEditor } from "./ScoringProfileEditor";
 import { BandThresholdEditor } from "./BandThresholdEditor";
 import { ScoringPublishPanel } from "./ScoringPublishPanel";
-import { SignalInspectorPlaceholder } from "./SignalInspectorPlaceholder";
+import { CompetencySignalTable } from "./CompetencySignalTable";
 
 type CompetencyConfigPanelProps = {
   initialDimensions: CompetencyDimensionDto[];
@@ -73,7 +73,7 @@ export function CompetencyConfigPanel({
         onPublished={refresh}
       />
 
-      <SignalInspectorPlaceholder />
+      <CompetencySignalTable />
     </div>
   );
 }
