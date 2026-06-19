@@ -104,6 +104,29 @@ async function seedWorkflowDefinition(args: {
     )
   `;
 
+  await args.tx.$executeRaw`
+    insert into workflow_definitions (
+      id,
+      tenant_id,
+      key,
+      name,
+      definition_json,
+      status,
+      created_at,
+      updated_at
+    )
+    values (
+      ${randomUUID()}::uuid,
+      ${args.tenantId}::uuid,
+      'assessment.publish',
+      'Assessment publish review',
+      '{"targetType":"assessment","fromState":"DRAFT","reviewState":"REVIEW","approvedState":"PUBLISHED","rejectedState":"DRAFT","actions":["approve","reject","return"]}'::jsonb,
+      'ACTIVE',
+      now(),
+      now()
+    )
+  `;
+
   return workflowDefinitionId;
 }
 

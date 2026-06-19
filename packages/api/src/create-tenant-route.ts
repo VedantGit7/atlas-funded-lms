@@ -199,6 +199,8 @@ export function createTenantRoute<
               >)
             : {};
 
+        const idempotencyKey = req.headers.get("idempotency-key")?.trim() ?? undefined;
+
         const result = await withTenantTx(
           {
             tenantId: tenant.tenantId,
@@ -218,6 +220,7 @@ export function createTenantRoute<
                 tenantId: tenant.tenantId,
                 requestId,
                 actorMembershipId: membership.membershipId,
+                ...(idempotencyKey ? { idempotencyKey } : {}),
               },
               metadata: config.metadata,
               params,
