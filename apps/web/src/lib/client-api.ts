@@ -81,9 +81,10 @@ export const clientApi = {
       idempotencyKey: createIdempotencyKey(idempotencyKeyPrefix),
     }),
 
-  delete: <T>(path: string, idempotencyKeyPrefix: string) =>
+  delete: <T>(path: string, idempotencyKeyPrefix: string, body?: object) =>
     request<T>(path, {
       method: "DELETE",
+      body: body ? JSON.stringify(body) : null,
       idempotencyKey: createIdempotencyKey(idempotencyKeyPrefix),
     }),
 };

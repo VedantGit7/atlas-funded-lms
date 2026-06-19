@@ -1,3 +1,15 @@
+-- Drop legacy Prisma-default indexes superseded by migration 029 / this script.
+DROP INDEX IF EXISTS "audit_entries_tenant_id_occurred_at_idx";
+DROP INDEX IF EXISTS "audit_entries_tenant_id_action_occurred_at_idx";
+DROP INDEX IF EXISTS "notification_dispatches_tenant_id_status_created_at_idx";
+DROP INDEX IF EXISTS "export_jobs_tenant_id_status_created_at_idx";
+DROP INDEX IF EXISTS "deletion_requests_tenant_id_target_type_target_id_idx";
+DROP INDEX IF EXISTS "tenant_domains_hostname_key";
+DROP INDEX IF EXISTS "learning_paths_tenant_id_slug_key";
+DROP INDEX IF EXISTS "item_collections_tenant_id_slug_key";
+DROP INDEX IF EXISTS "certificate_templates_tenant_id_key_key";
+DROP INDEX IF EXISTS "community_spaces_tenant_id_slug_key";
+
 DO $$
 DECLARE
   r record;
