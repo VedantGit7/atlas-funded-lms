@@ -1,0 +1,64 @@
+import { existsSync, readFileSync } from "node:fs";
+import { resolve } from "node:path";
+import { describe, expect, it } from "vitest";
+
+const webRoot = resolve(import.meta.dirname, "../../apps/web/src");
+
+const competencyPaths = [
+  "app/admin/competency/page.tsx",
+  "features/competency/components/CompetencyConfigPanel.tsx",
+  "features/competency/components/DimensionEditor.tsx",
+  "features/competency/components/ScoringProfileEditor.tsx",
+  "features/competency/components/BandThresholdEditor.tsx",
+  "features/competency/components/ScoringPublishPanel.tsx",
+  "features/competency/components/SignalInspectorPlaceholder.tsx",
+  "app/api/v1/competency-dimensions/route.ts",
+  "app/api/v1/competency-dimensions/[id]/route.ts",
+  "app/api/v1/scoring-profiles/route.ts",
+  "app/api/v1/scoring-profiles/[id]/route.ts",
+  "app/api/v1/scoring-profiles/[id]/bands/route.ts",
+  "app/api/v1/scoring-config/[id]/publish/route.ts",
+];
+
+describe("competency config e2e wiring", () => {
+  it("includes approved admin screen and APIs", () => {
+    for (const relativePath of competencyPaths) {
+      expect(existsSync(resolve(webRoot, relativePath))).toBe(true);
+    }
+  });
+
+  it("admin competency page handles denied state", () => {
+    const source = readFileSync(resolve(webRoot, "app/admin/competency/page.tsx"), "utf8");
+    expect(source).toContain("denied");
+  });
+
+  it("signal inspector placeholder does not call competency-signals API", () => {
+    const source = readFileSync(
+      resolve(webRoot, "features/competency/components/SignalInspectorPlaceholder.tsx"),
+      "utf8",
+    );
+    expect(source).not.toContain("/competency-signals");
+  });
+
+  it("dimension editor supports generic keys", () => {
+    const source = readFileSync(
+      resolve(webRoot, "features/competency/components/DimensionEditor.tsx"),
+      "utf8",
+    );
+    expect(source).toContain("execution_skill");
+    expect(source).not.toMatch(/\b(TA|PSY|RISK|DISC|CR)\b/);
+  });
+
+  it("publish panel uses confirmation", () => {
+    const source = readFileSync(
+      resolve(webRoot, "features/competency/components/ScoringPublishPanel.tsx"),
+      "utf8",
+    );
+    expect(source).toContain("Confirm publish");
+  });
+
+  it("admin dashboard links to competency config", () => {
+    const source = readFileSync(resolve(webRoot, "app/admin/page.tsx"), "utf8");
+    expect(source).toContain("/admin/competency");
+  });
+});
