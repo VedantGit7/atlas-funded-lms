@@ -104,7 +104,7 @@ model Tenant {
 model TenantDomain {
   id                String       @id @db.Uuid
   tenant_id         String       @db.Uuid
-  hostname          String       @unique
+  hostname          String
   type              String
   status            DomainStatus @default(PENDING)
   is_primary        Boolean      @default(false)
@@ -348,8 +348,8 @@ model AuditEntry {
   entry_hash          String
   occurred_at         DateTime @default(now()) @db.Timestamptz(6)
 
-  @@index([tenant_id, occurred_at])
-  @@index([tenant_id, action, occurred_at])
+  @@index([tenant_id, occurred_at], map: "audit_entries_tenant_occurred_at_idx")
+  @@index([tenant_id, action, occurred_at], map: "audit_entries_tenant_action_occurred_at_idx")
   @@map("audit_entries")
 }
 
@@ -657,7 +657,7 @@ model LearningPath {
   updated_at  DateTime      @updatedAt @db.Timestamptz(6)
   deleted_at  DateTime?     @db.Timestamptz(6)
 
-  @@unique([tenant_id, slug])
+  @@index([tenant_id, slug])
   @@index([tenant_id, status])
   @@map("learning_paths")
 }
@@ -792,7 +792,7 @@ model ItemCollection {
   updated_at      DateTime      @updatedAt @db.Timestamptz(6)
   deleted_at      DateTime?     @db.Timestamptz(6)
 
-  @@unique([tenant_id, slug])
+  @@index([tenant_id, slug])
   @@index([tenant_id, collection_type, status])
   @@map("item_collections")
 }
@@ -1145,7 +1145,7 @@ model CertificateTemplate {
   updated_at    DateTime      @updatedAt @db.Timestamptz(6)
   deleted_at    DateTime?     @db.Timestamptz(6)
 
-  @@unique([tenant_id, key])
+  @@index([tenant_id, key])
   @@map("certificate_templates")
 }
 
@@ -1326,7 +1326,7 @@ model NotificationDispatch {
 
   @@unique([tenant_id, idempotency_key])
   @@index([tenant_id, membership_id, created_at])
-  @@index([tenant_id, status, created_at])
+  @@index([tenant_id, status, created_at], map: "notification_dispatches_tenant_status_created_at_idx")
   @@map("notification_dispatches")
 }
 
@@ -1341,7 +1341,7 @@ model CommunitySpace {
   updated_at  DateTime   @updatedAt @db.Timestamptz(6)
   deleted_at  DateTime?  @db.Timestamptz(6)
 
-  @@unique([tenant_id, slug])
+  @@index([tenant_id, slug])
   @@index([tenant_id, visibility])
   @@map("community_spaces")
 }
@@ -1617,7 +1617,7 @@ model ExportJob {
   created_at                 DateTime  @default(now()) @db.Timestamptz(6)
   updated_at                 DateTime  @updatedAt @db.Timestamptz(6)
 
-  @@index([tenant_id, status, created_at])
+  @@index([tenant_id, status, created_at], map: "export_jobs_tenant_status_created_at_idx")
   @@map("export_jobs")
 }
 
@@ -1634,6 +1634,6 @@ model DeletionRequest {
   created_at                 DateTime  @default(now()) @db.Timestamptz(6)
   updated_at                 DateTime  @updatedAt @db.Timestamptz(6)
 
-  @@index([tenant_id, target_type, target_id])
+  @@index([tenant_id, target_type, target_id], map: "deletion_requests_tenant_target_idx")
   @@map("deletion_requests")
 }
