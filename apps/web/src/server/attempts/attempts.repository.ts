@@ -317,6 +317,7 @@ export const attemptsRepository = {
     args: {
       tenantId: string;
       attemptId: string;
+      assignedToMembershipId: string | null;
     },
   ): Promise<void> {
     await tx.$executeRaw`
@@ -324,6 +325,7 @@ export const attemptsRepository = {
         id,
         tenant_id,
         attempt_id,
+        assigned_to_membership_id,
         status,
         created_at,
         updated_at
@@ -332,6 +334,7 @@ export const attemptsRepository = {
         ${randomUUID()}::uuid,
         ${args.tenantId}::uuid,
         ${args.attemptId}::uuid,
+        ${args.assignedToMembershipId}::uuid,
         'open',
         now(),
         now()
