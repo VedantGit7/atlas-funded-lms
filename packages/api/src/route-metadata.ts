@@ -5,6 +5,7 @@ export type TenantRouteContext = {
   tenantId: string;
   requestId: string;
   actorMembershipId: string;
+  idempotencyKey?: string;
 };
 
 export type ResourceLoaderFn<TInput = unknown> = (args: {

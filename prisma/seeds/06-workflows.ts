@@ -15,6 +15,19 @@ const COURSE_PUBLISH_WORKFLOW_DEFINITION = {
   },
 };
 
+const ASSESSMENT_PUBLISH_WORKFLOW_DEFINITION = {
+  key: "assessment.publish",
+  name: "Assessment publish review",
+  definitionJson: {
+    targetType: "assessment",
+    fromState: "DRAFT",
+    reviewState: "REVIEW",
+    approvedState: "PUBLISHED",
+    rejectedState: "DRAFT",
+    actions: ["approve", "reject", "return"],
+  },
+};
+
 async function listSeedableTenants(): Promise<Array<{ id: string }>> {
   return withGlobalDb(async (db) => {
     return db.$queryRaw<Array<{ id: string }>>`
@@ -27,7 +40,14 @@ async function listSeedableTenants(): Promise<Array<{ id: string }>> {
   });
 }
 
-async function seedTenantWorkflowDefinition(tenantId: string): Promise<boolean> {
+async function seedTenantWorkflowDefinition(
+  tenantId: string,
+  definition: {
+    key: string;
+    name: string;
+    definitionJson: Record<string, unknown>;
+  },
+): Promise<boolean> {
   return withTenantTx(
     {
       tenantId,
@@ -38,7 +58,7 @@ async function seedTenantWorkflowDefinition(tenantId: string): Promise<boolean> 
       const existing = await tx.$queryRaw<Array<{ id: string }>>`
         select id::text
         from workflow_definitions
-        where key = ${COURSE_PUBLISH_WORKFLOW_DEFINITION.key}
+        where key = ${definition.key}
         limit 1
       `;
 
@@ -60,9 +80,9 @@ async function seedTenantWorkflowDefinition(tenantId: string): Promise<boolean> 
         values (
           gen_random_uuid(),
           ${tenantId}::uuid,
-          ${COURSE_PUBLISH_WORKFLOW_DEFINITION.key},
-          ${COURSE_PUBLISH_WORKFLOW_DEFINITION.name},
-          ${JSON.stringify(COURSE_PUBLISH_WORKFLOW_DEFINITION.definitionJson)}::jsonb,
+          ${definition.key},
+          ${definition.name},
+          ${JSON.stringify(definition.definitionJson)}::jsonb,
           'ACTIVE',
           now(),
           now()
@@ -89,8 +109,15 @@ export const workflowsSeed: SeedModule = {
 
     for (const tenant of tenants) {
       ctx.log(`[06-workflows] seeding workflow definitions for ${tenant.id}`);
-      const created = await seedTenantWorkflowDefinition(tenant.id);
-      if (created) {
+      const courseCreated = await seedTenantWorkflowDefinition(
+        tenant.id,
+        COURSE_PUBLISH_WORKFLOW_DEFINITION,
+      );
+      const assessmentCreated = await seedTenantWorkflowDefinition(
+        tenant.id,
+        ASSESSMENT_PUBLISH_WORKFLOW_DEFINITION,
+      );
+      if (courseCreated || assessmentCreated) {
         inserted += 1;
       } else {
         skipped += 1;

@@ -19,6 +19,8 @@ const OWNER_BOUND_PERMISSIONS = new Set<string>([
   "assessment.delete",
   "assessment.publish",
 
+  "attempt.submit",
+
   "post.update",
   "post.delete",
 
