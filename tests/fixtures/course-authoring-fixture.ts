@@ -15,6 +15,8 @@ export type CourseAuthoringFixture = {
   slug: string;
   instructorMembershipId: string;
   instructorPrincipalId: string;
+  adminMembershipId: string;
+  adminPrincipalId: string;
   learnerMembershipId: string;
   learnerPrincipalId: string;
   otherInstructorMembershipId: string;
@@ -95,7 +97,7 @@ async function seedWorkflowDefinition(args: {
       ${args.tenantId}::uuid,
       'course.publish',
       'Course publish review',
-      '{"passThrough": false}'::jsonb,
+      '{"targetType":"course","fromState":"DRAFT","reviewState":"REVIEW","approvedState":"PUBLISHED","rejectedState":"DRAFT","actions":["approve","reject","return"]}'::jsonb,
       'ACTIVE',
       now(),
       now()
@@ -115,6 +117,8 @@ export async function createCourseAuthoringFixture(): Promise<CourseAuthoringFix
     slug: tenant.slug,
     instructorMembershipId: randomUUID(),
     instructorPrincipalId: randomUUID(),
+    adminMembershipId: randomUUID(),
+    adminPrincipalId: randomUUID(),
     learnerMembershipId: randomUUID(),
     learnerPrincipalId: randomUUID(),
     otherInstructorMembershipId: randomUUID(),
@@ -138,6 +142,12 @@ export async function createCourseAuthoringFixture(): Promise<CourseAuthoringFix
     await insertMembership({
       tx,
       tenantId: fixture.tenantId,
+      membershipId: fixture.adminMembershipId,
+      principalId: fixture.adminPrincipalId,
+    });
+    await insertMembership({
+      tx,
+      tenantId: fixture.tenantId,
       membershipId: fixture.learnerMembershipId,
       principalId: fixture.learnerPrincipalId,
     });
@@ -154,6 +164,13 @@ export async function createCourseAuthoringFixture(): Promise<CourseAuthoringFix
       membershipId: fixture.instructorMembershipId,
       roleKey: "instructor",
       assignedByMembershipId: fixture.instructorMembershipId,
+    });
+    await assignSystemRoleToMembership({
+      tx,
+      tenantId: fixture.tenantId,
+      membershipId: fixture.adminMembershipId,
+      roleKey: "admin",
+      assignedByMembershipId: fixture.adminMembershipId,
     });
     await assignSystemRoleToMembership({
       tx,
@@ -200,6 +217,14 @@ export async function createCourseAuthoringFixture(): Promise<CourseAuthoringFix
   });
 
   return fixture;
+}
+
+export function adminCtx(fixture: CourseAuthoringFixture, requestId: string = randomUUID()) {
+  return {
+    tenantId: fixture.tenantId,
+    actorMembershipId: fixture.adminMembershipId,
+    requestId,
+  };
 }
 
 export function instructorCtx(fixture: CourseAuthoringFixture, requestId: string = randomUUID()) {

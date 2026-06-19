@@ -22,6 +22,45 @@ export function assertCoursePublishable(status: CourseLifecycleStatus): void {
   }
 }
 
+export function assertCourseInReviewForApproval(status: CourseLifecycleStatus): void {
+  if (status !== "REVIEW") {
+    throw new AtlasHttpError({
+      code: "VALIDATION_ERROR",
+      status: 409,
+      message: "Course is not in review state.",
+    });
+  }
+}
+
+export function assertCourseReviewableForAction(
+  currentStatus: CourseLifecycleStatus,
+  nextStatus: CourseLifecycleStatus,
+): void {
+  if (currentStatus !== "REVIEW") {
+    throw new AtlasHttpError({
+      code: "VALIDATION_ERROR",
+      status: 409,
+      message: "Course is not in review state.",
+    });
+  }
+
+  if (nextStatus !== "PUBLISHED" && nextStatus !== "DRAFT") {
+    throw new AtlasHttpError({
+      code: "VALIDATION_ERROR",
+      status: 409,
+      message: "Invalid workflow transition for course review.",
+    });
+  }
+}
+
+export function canSubmitCourseForReview(status: CourseLifecycleStatus): boolean {
+  return status === "DRAFT";
+}
+
+export function canApproveCourseReview(status: CourseLifecycleStatus): boolean {
+  return status === "REVIEW";
+}
+
 export function assertCourseArchivable(
   status: CourseLifecycleStatus,
   hasActiveEnrollments: boolean,

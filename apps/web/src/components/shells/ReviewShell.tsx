@@ -1,30 +1,30 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
-type StudioShellProps = {
+type ReviewShellProps = {
   children: ReactNode;
 };
 
 const navItems = [
-  { href: "/studio/courses", label: "Courses" },
-  { href: "/review", label: "Review" },
+  { href: "/review", label: "Review & Approvals" },
+  { href: "/studio/courses", label: "Studio" },
+  { href: "/admin", label: "Admin" },
 ] as const;
 
-export function StudioShell({ children }: StudioShellProps) {
+export function ReviewShell({ children }: ReviewShellProps) {
   return (
-    <div className="studio-shell min-h-screen">
+    <div className="review-shell min-h-screen">
       <header className="border-b px-4 py-3">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
-          <Link href="/studio/courses" className="font-semibold">
-            Studio
+          <Link href="/review" className="font-semibold">
+            Review
           </Link>
-          <nav aria-label="Studio navigation" className="flex items-center gap-4 text-sm">
+          <nav aria-label="Review navigation" className="flex items-center gap-4 text-sm">
             {navItems.map((item) => (
               <Link key={item.href} href={item.href}>
                 {item.label}
               </Link>
             ))}
-            <Link href="/courses">Learner catalog</Link>
           </nav>
         </div>
       </header>

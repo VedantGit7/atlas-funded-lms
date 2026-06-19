@@ -1,5 +1,6 @@
 import type { TenantTx } from "@atlas/db";
 import { auditWriter } from "@atlas/audit";
+import { outbox } from "@atlas/events";
 import { AtlasHttpError } from "@atlas/core/http/errors";
 import {
   courseNotFound,
@@ -517,8 +518,7 @@ export async function submitCourseForReview(
     throw courseWorkflowNotConfigured();
   }
 
-  const passThrough = workflow.definitionJson["passThrough"] === true;
-  const toState = passThrough ? "PUBLISHED" : "REVIEW";
+  const toState = "REVIEW";
 
   const transition = await insertWorkflowTransition({
     tx,
@@ -531,7 +531,7 @@ export async function submitCourseForReview(
     actorMembershipId: ctx.actorMembershipId,
     reason: input.reason ?? null,
     metadata: {
-      passThrough,
+      action: "submit",
     },
   });
 
@@ -561,15 +561,32 @@ export async function submitCourseForReview(
       },
       reason: input.reason ?? null,
       metadata: {
-        passThrough,
+        workflowDefinitionId: workflow.id,
       },
     },
   );
 
+  await outbox.publish(tx, {
+    ctx: {
+      tenantId: ctx.tenantId,
+      actorMembershipId: ctx.actorMembershipId,
+      requestId: ctx.requestId,
+    },
+    eventType: "course.submitted_for_review",
+    aggregateType: "course",
+    aggregateId: courseId,
+    payload: {
+      courseId,
+      workflowTransitionId: transition.id,
+      submittedAt: new Date().toISOString(),
+    },
+    idempotencyKey: `${ctx.requestId}:course.submitted_for_review:${courseId}`,
+  });
+
   return {
     data: {
       id: courseId,
-      status: toState === "PUBLISHED" ? ("PUBLISHED" as const) : ("REVIEW" as const),
+      status: "REVIEW" as const,
       submittedAt: new Date().toISOString(),
       workflowTransitionId: transition.id,
     },

@@ -10,6 +10,7 @@ const RELATIONSHIP_PERMISSION_MAP: Record<string, string[]> = {
   "course.read": ["enrolledInCourse", "instructorOfCourse", "publishedLearnerVisible"],
   "progress.read": ["selfProgress", "instructorOfCourse"],
   "attempt.read": ["selfAttempt", "instructorOfCourse", "assigneeOfGradingTask"],
+  "workflow.transition.act": ["workflowApproverEligible", "moderatorOfSpace"],
 };
 
 export function requiredRelationships(permission: string): string[] {
