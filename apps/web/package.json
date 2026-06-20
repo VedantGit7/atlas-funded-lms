@@ -30,6 +30,7 @@
     "@atlas/domain-tenancy": "workspace:*",
     "@atlas/events": "workspace:*",
     "@atlas/membership": "workspace:*",
+    "@atlas/security": "workspace:*",
     "@atlas/tenancy": "workspace:*",
     "@supabase/supabase-js": "^2.108.2",
     "next": "^15.0.0",

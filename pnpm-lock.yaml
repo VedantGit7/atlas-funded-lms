@@ -120,6 +120,9 @@ importers:
       '@atlas/membership':
         specifier: workspace:*
         version: link:../../packages/membership
+      '@atlas/security':
+        specifier: workspace:*
+        version: link:../../packages/security
       '@atlas/tenancy':
         specifier: workspace:*
         version: link:../../packages/tenancy

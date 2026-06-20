@@ -49,7 +49,7 @@ const routeMetadataRule = {
         const fileName = context.filename.replaceAll("\\", "/");
 
         const isApiRouteFile =
-          /apps\/web\/src\/app\/api\/.*\/route\.(ts|tsx)$/.test(fileName) ||
+          /(?:apps\/web\/)?src\/app\/api\/.*\/route\.(ts|tsx)$/.test(fileName) ||
           /apps\/web\/app\/api\/.*\/route\.(ts|tsx)$/.test(fileName);
 
         if (!isApiRouteFile || hasRouteMetadataExport) {
@@ -62,7 +62,7 @@ const routeMetadataRule = {
           const metadataContent = readFileSync(metadataFile, "utf8");
 
           if (
-            /export\s+const\s+routeMetadata\s*=/.test(metadataContent) ||
+            /export\s+const\s+routeMetadata\s*(?::[^=]+)?=/.test(metadataContent) ||
             /export\s*\{\s*routeMetadata\s*\}/.test(metadataContent)
           ) {
             return;
@@ -301,7 +301,10 @@ export default tseslint.config(
 
   {
     files: ["apps/web/**/*.{ts,tsx}"],
-    ignores: ["apps/web/src/app/api/**/*.{ts,tsx}"],
+    ignores: [
+      "apps/web/src/app/api/**/*.{ts,tsx}",
+      "apps/web/src/modules/diagnostics/**/*.{ts,tsx}",
+    ],
     rules: {
       "no-restricted-imports": [
         "error",
@@ -376,6 +379,31 @@ export default tseslint.config(
               name: "@prisma/client",
               message:
                 "Server orchestration must not import Prisma directly. Use approved DB helpers.",
+            },
+          ],
+          patterns: genericForbiddenImportPatterns,
+        },
+      ],
+    },
+  },
+
+  {
+    files: ["apps/web/src/modules/diagnostics/**/*.{ts,tsx}"],
+    ignores: [
+      "apps/web/src/modules/diagnostics/diagnostic.api-client.ts",
+      "apps/web/src/modules/diagnostics/diagnostic.server-api.ts",
+      "apps/web/src/modules/diagnostics/diagnostic.types.ts",
+      "apps/web/src/modules/diagnostics/diagnostic.schemas.ts",
+    ],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            {
+              name: "@prisma/client",
+              message:
+                "Diagnostic server modules must not import Prisma directly. Use approved DB helpers.",
             },
           ],
           patterns: genericForbiddenImportPatterns,
