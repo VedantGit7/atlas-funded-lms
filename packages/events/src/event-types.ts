@@ -26,7 +26,7 @@ export const APPROVED_EVENT_TYPES = new Set<string>([
   "certificate.issued",
   "certificate.revoked",
   "badge.awarded",
-  "streak.changed",
+  "streak.updated",
   "community.post.created",
   "community.comment.created",
   "moderation.reported",

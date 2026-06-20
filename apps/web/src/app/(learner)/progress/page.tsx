@@ -1,15 +1,24 @@
 import { PageGate, PageHeader } from "../../../components/patterns/PageGate";
 import { CompetencyHistoryChart } from "../../../features/competency/components/CompetencyHistoryChart";
 import { CompetencyScoreCards } from "../../../features/competency/components/CompetencyScoreCards";
+import { GamificationSummaryCard } from "../../../features/gamification/components/GamificationSummaryCard";
 import { ServerApiError } from "../../../lib/server-api";
 import { competencyServerApi } from "../../../modules/competency/competency.server-api";
+import { gamificationServerApi } from "../../../modules/gamification/gamification.server-api";
 
 export default async function ProgressPage() {
   try {
-    const [competency, history] = await Promise.all([
+    const [competency, history, gamification, streaks] = await Promise.all([
       competencyServerApi.getMyCompetency(),
       competencyServerApi.getMyCompetencyHistory({ limit: 20 }),
+      gamificationServerApi.getMyGamification().catch(() => null),
+      gamificationServerApi.getMyStreaks().catch(() => null),
     ]);
+
+    const dailyStreak =
+      streaks?.data.items.find((item) => item.streakKey === "daily_learning") ??
+      streaks?.data.items[0] ??
+      null;
 
     return (
       <PageGate state="ready" title="Progress">
@@ -18,6 +27,13 @@ export default async function ProgressPage() {
             title="Progress"
             description="Track competency scores and improvement over time."
           />
+          {gamification ? (
+            <GamificationSummaryCard
+              levelKey={gamification.data.levelKey}
+              xpTotal={gamification.data.xpTotal}
+              streakCount={dailyStreak?.currentCount ?? 0}
+            />
+          ) : null}
           <CompetencyScoreCards scores={competency.data.scores} />
           <CompetencyHistoryChart snapshots={history.data.items} />
         </main>

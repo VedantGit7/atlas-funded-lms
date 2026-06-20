@@ -58,6 +58,12 @@ export default async function AdminDashboardPage() {
           <p>Configure CTA prominence rules, legal copy, and outbound redirect target.</p>
           <Link href="/admin/readiness-policy">Open readiness policy</Link>
         </article>
+
+        <article className="rounded border p-4">
+          <h2>Gamification</h2>
+          <p>Configure badges, leaderboards, and manual badge awards.</p>
+          <Link href="/admin/gamification">Open gamification config</Link>
+        </article>
       </section>
     </main>
   );

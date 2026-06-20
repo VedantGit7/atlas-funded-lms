@@ -12,6 +12,8 @@ const navItems = [
   { href: "/diagnostic/me", label: "Diagnostic" },
   { href: "/readiness", label: "Readiness" },
   { href: "/progress", label: "Progress" },
+  { href: "/achievements", label: "Achievements" },
+  { href: "/leaderboards", label: "Leaderboards" },
 ] as const;
 
 export function LearnerShell({ children }: LearnerShellProps) {
