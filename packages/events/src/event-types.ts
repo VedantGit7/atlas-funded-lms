@@ -32,6 +32,7 @@ export const APPROVED_EVENT_TYPES = new Set<string>([
   "moderation.reported",
   "moderation.decided",
   "notification.requested",
+  "notification.queued",
   "search.reindex_requested",
   "analytics.projection_requested",
   "data.export_requested",
