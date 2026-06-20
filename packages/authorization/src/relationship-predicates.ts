@@ -22,6 +22,7 @@ const RELATIONSHIP_PERMISSION_MAP: Record<string, string[]> = {
   "attempt.read": ["selfAttempt", "instructorOfCourse", "assigneeOfGradingTask"],
   "competency.score.read": ["selfCompetencyScore", "instructorOfCourse", "instructorOfPath"],
   "diagnostic.start": ["selfDiagnosticSession", "publishedLearnerVisible"],
+  "practice.start": ["selfPracticeSession", "selfSrsState"],
   "workflow.transition.act": ["workflowApproverEligible", "moderatorOfSpace"],
 };
 

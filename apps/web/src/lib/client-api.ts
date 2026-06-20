@@ -81,6 +81,13 @@ export const clientApi = {
       idempotencyKey: createIdempotencyKey(idempotencyKeyPrefix),
     }),
 
+  postWithKey: <T>(path: string, body: object | null, idempotencyKey: string) =>
+    request<T>(path, {
+      method: "POST",
+      body: body == null ? null : JSON.stringify(body),
+      idempotencyKey,
+    }),
+
   delete: <T>(path: string, idempotencyKeyPrefix: string, body?: object) =>
     request<T>(path, {
       method: "DELETE",
