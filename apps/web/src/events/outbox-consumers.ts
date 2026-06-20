@@ -40,6 +40,14 @@ import {
   handleNotificationSourceOutboxEvent,
 } from "../server/notifications/notification.worker";
 
+import {
+  AUTOMATION_WORKER_DESTINATION,
+  automationOutboxHandlers,
+  handleAutomationOutboxEvent,
+} from "../server/automation/automation.worker";
+
+import { AUTOMATION_TRIGGER_EVENT_TYPES } from "../server/automation/automation.registry";
+
 export { COMPETENCY_WORKER_DESTINATION, handleCompetencyOutboxEvent };
 
 export { GAMIFICATION_WORKER_DESTINATION, handleGamificationOutboxEvent };
@@ -54,6 +62,8 @@ export {
   notificationSourceOutboxHandlers,
   notificationQueuedOutboxHandlers,
 };
+
+export { AUTOMATION_WORKER_DESTINATION, handleAutomationOutboxEvent, automationOutboxHandlers };
 
 const CERTIFICATE_OUTBOX_EVENTS = [CERTIFICATE_ISSUED_EVENT, CERTIFICATE_REVOKED_EVENT] as const;
 
@@ -123,6 +133,16 @@ export function createNotificationOutboxConsumers(): Record<string, OutboxHandle
   return map;
 }
 
+export function createAutomationOutboxConsumers(): Record<string, OutboxHandler[]> {
+  const map: Record<string, OutboxHandler[]> = {};
+
+  for (const eventType of AUTOMATION_TRIGGER_EVENT_TYPES) {
+    appendHandlers(map, eventType, automationOutboxHandlers);
+  }
+
+  return map;
+}
+
 export function createEngagementOutboxConsumers(): Record<string, OutboxHandler[]> {
   const map: Record<string, OutboxHandler[]> = {};
 
@@ -131,6 +151,10 @@ export function createEngagementOutboxConsumers(): Record<string, OutboxHandler[
   }
 
   for (const [eventType, handlers] of Object.entries(createGamificationOutboxConsumers())) {
+    appendHandlers(map, eventType, handlers);
+  }
+
+  for (const [eventType, handlers] of Object.entries(createAutomationOutboxConsumers())) {
     appendHandlers(map, eventType, handlers);
   }
 
