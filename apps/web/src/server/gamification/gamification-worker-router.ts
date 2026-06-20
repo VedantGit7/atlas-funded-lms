@@ -2,10 +2,10 @@ import { withTenantTx } from "@atlas/db";
 import { processOutboxBatch } from "@atlas/events/services/outbox-worker.service";
 import {
   createEngagementOutboxConsumers,
-  createCompetencyOutboxConsumers,
+  createGamificationOutboxConsumers,
 } from "../../events/outbox-consumers";
 
-export async function processCompetencyOutboxBatch(args: {
+export async function processGamificationOutboxBatch(args: {
   tenantId: string;
   requestId: string;
   limit?: number;
@@ -26,5 +26,4 @@ export async function processCompetencyOutboxBatch(args: {
   );
 }
 
-export { createEngagementOutboxConsumers };
-export { createCompetencyOutboxConsumers };
+export { createGamificationOutboxConsumers, createEngagementOutboxConsumers };
