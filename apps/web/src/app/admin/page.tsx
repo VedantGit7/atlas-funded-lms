@@ -69,6 +69,18 @@ export default async function AdminDashboardPage() {
           <p>Configure in-app and email templates for approved system events.</p>
           <Link href="/admin/notifications/templates">Manage notification templates</Link>
         </article>
+
+        <article className="rounded border p-4">
+          <h2>Automation Rules</h2>
+          <p>Configure event-driven IF/THEN rules using approved triggers and actions.</p>
+          <Link href="/admin/automation">Manage automation rules</Link>
+        </article>
+
+        <article className="rounded border p-4">
+          <h2>Locales</h2>
+          <p>Manage tenant locale string overrides for approved UI copy.</p>
+          <Link href="/admin/locales">Manage locales</Link>
+        </article>
       </section>
     </main>
   );
