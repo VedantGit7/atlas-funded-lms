@@ -1,10 +1,11 @@
 import type { TenantTx } from "@atlas/db";
 import { outbox } from "@atlas/events";
-import type {
-  CreateAutomationRuleBody,
-  DeleteAutomationRuleBody,
-  EntityStatus,
-  UpdateAutomationRuleBody,
+import {
+  createAutomationRuleBodySchema,
+  type CreateAutomationRuleBody,
+  type DeleteAutomationRuleBody,
+  type EntityStatus,
+  type UpdateAutomationRuleBody,
 } from "./automation.dto";
 import { AUTOMATION_RULE_CREATED_EVENT, AUTOMATION_RULE_UPDATED_EVENT } from "./automation.events";
 import { automationRuleKeyConflict, automationRuleNotFound } from "./automation.errors";
@@ -44,22 +45,23 @@ export async function createAutomationRule(
   ctx: ServiceCtx,
   input: CreateAutomationRuleBody,
 ) {
-  assertAutomationTriggerEventType(input.triggerEventType);
-  const conditionJson = parseAutomationCondition(input.conditionJson);
-  const actionJson = parseAutomationAction(input.actionJson);
+  const body = createAutomationRuleBodySchema.parse(input);
+  assertAutomationTriggerEventType(body.triggerEventType);
+  const conditionJson = parseAutomationCondition(body.conditionJson);
+  const actionJson = parseAutomationAction(body.actionJson);
 
-  const existing = await automationRepository.findRuleByKey(tx, ctx.tenantId, input.key);
+  const existing = await automationRepository.findRuleByKey(tx, ctx.tenantId, body.key);
   if (existing) {
     throw automationRuleKeyConflict();
   }
 
   const created = await automationRepository.insertRule(tx, {
     tenantId: ctx.tenantId,
-    key: input.key,
-    triggerEventType: input.triggerEventType,
+    key: body.key,
+    triggerEventType: body.triggerEventType,
     conditionJson,
     actionJson,
-    status: input.status,
+    status: body.status,
   });
 
   await outbox.publish(tx, {
