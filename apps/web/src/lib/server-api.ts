@@ -68,4 +68,14 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 
 export const serverApi = {
   get: <T>(path: string) => request<T>(path),
+
+  post: <T>(path: string, body: object, idempotencyKeyPrefix: string) =>
+    request<T>(path, {
+      method: "POST",
+      body: JSON.stringify(body),
+      headers: {
+        "content-type": "application/json",
+        "idempotency-key": `${idempotencyKeyPrefix}-${randomUUID()}`,
+      },
+    }),
 };

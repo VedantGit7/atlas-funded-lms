@@ -4,6 +4,7 @@ export type RateLimitBucket =
   | "publicRead"
   | "publicAuth"
   | "publicInvitationAccept"
+  | "publicDiagnostic"
   | "authenticatedTenantRead"
   | "authenticatedTenantWrite";
 

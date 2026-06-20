@@ -132,6 +132,14 @@ export default defineConfig({
         find: "@atlas/storage",
         replacement: path.resolve(import.meta.dirname, "packages/storage/src/index.ts"),
       },
+      {
+        find: /^@atlas\/security\/(.+)$/,
+        replacement: path.resolve(import.meta.dirname, "packages/security/src/$1.ts"),
+      },
+      {
+        find: "@atlas/security",
+        replacement: path.resolve(import.meta.dirname, "packages/security/src/index.ts"),
+      },
     ],
   },
 });

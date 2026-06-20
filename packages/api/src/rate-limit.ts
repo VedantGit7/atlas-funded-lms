@@ -12,6 +12,7 @@ const BUCKET_LIMITS: Record<RateLimitBucket, { max: number; windowMs: number }> 
   publicRead: { max: 120, windowMs: 60_000 },
   publicAuth: { max: 20, windowMs: 60_000 },
   publicInvitationAccept: { max: 10, windowMs: 60_000 },
+  publicDiagnostic: { max: 10, windowMs: 60_000 },
   authenticatedTenantRead: { max: 240, windowMs: 60_000 },
   authenticatedTenantWrite: { max: 60, windowMs: 60_000 },
 };
