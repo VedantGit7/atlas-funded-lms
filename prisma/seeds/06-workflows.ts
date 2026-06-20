@@ -2,6 +2,34 @@ import { withGlobalDb } from "@atlas/db/global-db";
 import { withTenantTx } from "@atlas/db/with-tenant-tx";
 import { emptySeedResult, type SeedModule, type SeedResult } from "./types";
 
+const CERTIFICATE_TEMPLATE_PUBLISH_WORKFLOW_DEFINITION = {
+  key: "certificate_template.publish",
+  name: "Certificate template publish review",
+  definitionJson: {
+    targetType: "certificate_template",
+    fromState: "DRAFT",
+    reviewState: "REVIEW",
+    approvedState: "PUBLISHED",
+    rejectedState: "DRAFT",
+    requiresReview: false,
+    actions: ["approve", "reject", "return"],
+  },
+};
+
+const CERTIFICATE_ISSUE_WORKFLOW_DEFINITION = {
+  key: "certificate.issue",
+  name: "Certificate issuance review",
+  definitionJson: {
+    targetType: "certificate",
+    fromState: "DRAFT",
+    reviewState: "REVIEW",
+    approvedState: "PUBLISHED",
+    rejectedState: "DRAFT",
+    requiresReview: false,
+    actions: ["approve", "reject", "return"],
+  },
+};
+
 const COURSE_PUBLISH_WORKFLOW_DEFINITION = {
   key: "course.publish",
   name: "Course publish review",
@@ -117,7 +145,15 @@ export const workflowsSeed: SeedModule = {
         tenant.id,
         ASSESSMENT_PUBLISH_WORKFLOW_DEFINITION,
       );
-      if (courseCreated || assessmentCreated) {
+      const templateCreated = await seedTenantWorkflowDefinition(
+        tenant.id,
+        CERTIFICATE_TEMPLATE_PUBLISH_WORKFLOW_DEFINITION,
+      );
+      const issueCreated = await seedTenantWorkflowDefinition(
+        tenant.id,
+        CERTIFICATE_ISSUE_WORKFLOW_DEFINITION,
+      );
+      if (courseCreated || assessmentCreated || templateCreated || issueCreated) {
         inserted += 1;
       } else {
         skipped += 1;
