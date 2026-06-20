@@ -64,6 +64,11 @@ export default async function AdminDashboardPage() {
           <p>Configure badges, leaderboards, and manual badge awards.</p>
           <Link href="/admin/gamification">Open gamification config</Link>
         </article>
+        <article className="rounded border p-4">
+          <h2>Notification Templates</h2>
+          <p>Configure in-app and email templates for approved system events.</p>
+          <Link href="/admin/notifications/templates">Manage notification templates</Link>
+        </article>
       </section>
     </main>
   );
