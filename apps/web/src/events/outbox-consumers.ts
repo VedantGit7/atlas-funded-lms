@@ -18,11 +18,25 @@ import {
   handleReadinessOutboxEvent,
 } from "../server/readiness/readiness.worker";
 
+import {
+  CERTIFICATE_ISSUED_EVENT,
+  CERTIFICATE_REVOKED_EVENT,
+} from "../server/certificates/certificate.events";
+import {
+  CERTIFICATE_WORKER_DESTINATION,
+  certificateOutboxHandlers,
+  handleCertificateOutboxEvent,
+} from "../server/certificates/certificate.worker";
+
 export { COMPETENCY_WORKER_DESTINATION, handleCompetencyOutboxEvent };
 
 export { GAMIFICATION_WORKER_DESTINATION, handleGamificationOutboxEvent };
 
 export { READINESS_WORKER_DESTINATION, handleReadinessOutboxEvent, createReadinessOutboxConsumers };
+
+export { CERTIFICATE_WORKER_DESTINATION, handleCertificateOutboxEvent, certificateOutboxHandlers };
+
+const CERTIFICATE_OUTBOX_EVENTS = [CERTIFICATE_ISSUED_EVENT, CERTIFICATE_REVOKED_EVENT] as const;
 
 const GAMIFICATION_SOURCE_EVENTS = [
   "lesson.completed",
@@ -63,6 +77,16 @@ export function createGamificationOutboxConsumers(): Record<string, OutboxHandle
 
   for (const eventType of GAMIFICATION_SOURCE_EVENTS) {
     appendHandlers(map, eventType, gamificationOutboxHandlers);
+  }
+
+  return map;
+}
+
+export function createCertificateOutboxConsumers(): Record<string, OutboxHandler[]> {
+  const map: Record<string, OutboxHandler[]> = {};
+
+  for (const eventType of CERTIFICATE_OUTBOX_EVENTS) {
+    appendHandlers(map, eventType, certificateOutboxHandlers);
   }
 
   return map;
