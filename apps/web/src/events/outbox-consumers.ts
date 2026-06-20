@@ -19,14 +19,26 @@ import {
 } from "../server/readiness/readiness.worker";
 
 import {
-  CERTIFICATE_ISSUED_EVENT,
-  CERTIFICATE_REVOKED_EVENT,
-} from "../server/certificates/certificate.events";
-import {
   CERTIFICATE_WORKER_DESTINATION,
   certificateOutboxHandlers,
   handleCertificateOutboxEvent,
 } from "../server/certificates/certificate.worker";
+
+import {
+  CERTIFICATE_ISSUED_EVENT,
+  CERTIFICATE_REVOKED_EVENT,
+} from "../server/certificates/certificate.events";
+
+import {
+  NOTIFICATION_QUEUED_EVENT,
+  NOTIFICATION_SOURCE_EVENT_KEYS,
+} from "../server/notifications/notification.events";
+import {
+  notificationQueuedOutboxHandlers,
+  notificationSourceOutboxHandlers,
+  handleNotificationQueuedOutboxEvent,
+  handleNotificationSourceOutboxEvent,
+} from "../server/notifications/notification.worker";
 
 export { COMPETENCY_WORKER_DESTINATION, handleCompetencyOutboxEvent };
 
@@ -35,6 +47,13 @@ export { GAMIFICATION_WORKER_DESTINATION, handleGamificationOutboxEvent };
 export { READINESS_WORKER_DESTINATION, handleReadinessOutboxEvent, createReadinessOutboxConsumers };
 
 export { CERTIFICATE_WORKER_DESTINATION, handleCertificateOutboxEvent, certificateOutboxHandlers };
+
+export {
+  handleNotificationSourceOutboxEvent,
+  handleNotificationQueuedOutboxEvent,
+  notificationSourceOutboxHandlers,
+  notificationQueuedOutboxHandlers,
+};
 
 const CERTIFICATE_OUTBOX_EVENTS = [CERTIFICATE_ISSUED_EVENT, CERTIFICATE_REVOKED_EVENT] as const;
 
@@ -88,6 +107,18 @@ export function createCertificateOutboxConsumers(): Record<string, OutboxHandler
   for (const eventType of CERTIFICATE_OUTBOX_EVENTS) {
     appendHandlers(map, eventType, certificateOutboxHandlers);
   }
+
+  return map;
+}
+
+export function createNotificationOutboxConsumers(): Record<string, OutboxHandler[]> {
+  const map: Record<string, OutboxHandler[]> = {};
+
+  for (const eventType of NOTIFICATION_SOURCE_EVENT_KEYS) {
+    appendHandlers(map, eventType, notificationSourceOutboxHandlers);
+  }
+
+  appendHandlers(map, NOTIFICATION_QUEUED_EVENT, notificationQueuedOutboxHandlers);
 
   return map;
 }
