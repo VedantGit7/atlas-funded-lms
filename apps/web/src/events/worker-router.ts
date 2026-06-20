@@ -11,3 +11,7 @@ export {
   processReadinessOutboxBatch,
   createReadinessOutboxConsumers,
 } from "../server/readiness/readiness.worker";
+export {
+  processAutomationOutboxBatch,
+  createAutomationOutboxConsumers,
+} from "../server/automation/automation-worker-router";
