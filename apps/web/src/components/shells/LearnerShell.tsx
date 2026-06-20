@@ -8,6 +8,7 @@ type LearnerShellProps = {
 const navItems = [
   { href: "/courses", label: "Courses" },
   { href: "/roadmap", label: "Roadmap" },
+  { href: "/swipe", label: "Practice" },
   { href: "/diagnostic/me", label: "Diagnostic" },
   { href: "/readiness", label: "Readiness" },
   { href: "/progress", label: "Progress" },
