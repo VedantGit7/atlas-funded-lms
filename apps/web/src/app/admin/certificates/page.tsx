@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { MembersListResponse } from "@atlas/membership";
 import type { z } from "zod";
-import { PageGate, PageHeader } from "../../../components/patterns/PageGate";
+import { AdminPageGate, PageHeader } from "../../../components/patterns/AdminPageGate";
 import { AdminCertificatesClient } from "../../../features/certificates/components/AdminCertificatesClient";
 import { ServerApiError, serverApi } from "../../../lib/server-api";
 import type {
@@ -24,7 +24,7 @@ export default async function AdminCertificatesPage() {
     const defaultSource = { type: "course" as const, id: members.data.items[0]?.id ?? "" };
 
     return (
-      <PageGate state="ready" title="Issued Certificates">
+      <AdminPageGate screenId="T13" state="ready" title="Issued Certificates">
         <main className="space-y-6">
           <header className="flex flex-wrap items-center justify-between gap-3">
             <PageHeader
@@ -48,12 +48,13 @@ export default async function AdminCertificatesPage() {
             defaultSource={defaultSource}
           />
         </main>
-      </PageGate>
+      </AdminPageGate>
     );
   } catch (error: unknown) {
     if (error instanceof ServerApiError && (error.status === 401 || error.status === 403)) {
       return (
-        <PageGate
+        <AdminPageGate
+          screenId="T13"
           state="denied"
           title="Issued Certificates"
           deniedMessage="You do not have permission to manage certificates."
@@ -63,7 +64,8 @@ export default async function AdminCertificatesPage() {
 
     if (error instanceof ServerApiError) {
       return (
-        <PageGate
+        <AdminPageGate
+          screenId="T13"
           state="error"
           title="Issued Certificates"
           errorMessage={`Failed to load certificates. Request ID: ${error.requestId}`}

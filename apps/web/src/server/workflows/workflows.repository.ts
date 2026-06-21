@@ -378,3 +378,97 @@ function decodeCursor(cursor: string): Date {
 export function encodeWorkflowCursor(occurredAt: Date): string {
   return Buffer.from(occurredAt.toISOString(), "utf8").toString("base64url");
 }
+
+export type WorkflowDefinitionRow = {
+  id: string;
+  key: string;
+  name: string;
+  definition_json: Record<string, unknown>;
+  status: "ACTIVE" | "ARCHIVED" | "DRAFT";
+  updated_at: Date;
+};
+
+export async function listWorkflowDefinitions(tx: Tx): Promise<WorkflowDefinitionRow[]> {
+  return tx.$queryRaw<WorkflowDefinitionRow[]>`
+    select
+      id::text,
+      key,
+      name,
+      definition_json,
+      status,
+      updated_at
+    from workflow_definitions
+    order by key asc
+  `;
+}
+
+export async function createWorkflowDefinition(args: {
+  tx: Tx;
+  key: string;
+  name: string;
+  definitionJson: Record<string, unknown>;
+}): Promise<WorkflowDefinitionRow> {
+  const rows = await args.tx.$queryRaw<WorkflowDefinitionRow[]>`
+    insert into workflow_definitions (
+      id,
+      tenant_id,
+      key,
+      name,
+      definition_json,
+      status,
+      created_at,
+      updated_at
+    )
+    values (
+      ${randomUUID()}::uuid,
+      app.current_tenant_id(),
+      ${args.key},
+      ${args.name},
+      ${JSON.stringify(args.definitionJson)}::jsonb,
+      'ACTIVE',
+      now(),
+      now()
+    )
+    returning id::text, key, name, definition_json, status, updated_at
+  `;
+
+  const row = rows[0];
+  if (!row) {
+    throw new Error("WORKFLOW_DEFINITION_CREATE_FAILED");
+  }
+
+  return row;
+}
+
+export async function updateWorkflowDefinition(args: {
+  tx: Tx;
+  id: string;
+  name?: string;
+  definitionJson?: Record<string, unknown>;
+  status?: "ACTIVE" | "ARCHIVED" | "DRAFT";
+}): Promise<WorkflowDefinitionRow | null> {
+  const currentRows = await args.tx.$queryRaw<WorkflowDefinitionRow[]>`
+    select id::text, key, name, definition_json, status, updated_at
+    from workflow_definitions
+    where id = ${args.id}::uuid
+    limit 1
+  `;
+
+  const current = currentRows[0];
+  if (!current) {
+    return null;
+  }
+
+  const rows = await args.tx.$queryRaw<WorkflowDefinitionRow[]>`
+    update workflow_definitions
+    set
+      name = ${args.name ?? current.name},
+      definition_json = ${JSON.stringify(args.definitionJson ?? current.definition_json)}::jsonb,
+      status = ${args.status ?? current.status},
+      updated_at = now()
+    where id = ${args.id}::uuid
+    returning id::text, key, name, definition_json, status, updated_at
+  `;
+
+  return rows[0] ?? null;
+}

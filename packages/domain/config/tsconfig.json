@@ -10,15 +10,7 @@
     "noEmit": false,
     "tsBuildInfoFile": "node_modules/.cache/tsconfig.tsbuildinfo"
   },
-  "include": [
-    "src/index.ts",
-    "src/repositories/entitlement.repository.ts",
-    "src/repositories/feature-flag.repository.ts",
-    "src/schemas/entitlements.ts",
-    "src/schemas/feature-flags.ts",
-    "src/services/entitlement.service.ts",
-    "src/services/feature-flag.service.ts"
-  ],
+  "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "dist", "build", ".next"],
-  "references": [{ "path": "../../db" }]
+  "references": [{ "path": "../../audit" }, { "path": "../../db" }, { "path": "../../events" }]
 }

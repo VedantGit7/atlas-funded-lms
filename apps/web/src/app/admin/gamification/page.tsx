@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { MembersListResponse } from "@atlas/membership";
-import { PageGate, PageHeader } from "../../../components/patterns/PageGate";
+import { AdminPageGate, PageHeader } from "../../../components/patterns/AdminPageGate";
 import { AdminGamificationEditor } from "../../../features/gamification/components/AdminGamificationEditor";
 import { ServerApiError, serverApi } from "../../../lib/server-api";
 
@@ -16,7 +16,7 @@ export default async function AdminGamificationPage() {
     }));
 
     return (
-      <PageGate state="ready" title="Gamification Config">
+      <AdminPageGate screenId="T14" state="ready" title="Gamification Config">
         <main className="space-y-6">
           <header className="flex flex-wrap items-center justify-between gap-3">
             <PageHeader
@@ -30,12 +30,13 @@ export default async function AdminGamificationPage() {
 
           <AdminGamificationEditor members={memberOptions} />
         </main>
-      </PageGate>
+      </AdminPageGate>
     );
   } catch (error) {
     if (error instanceof ServerApiError && (error.status === 401 || error.status === 403)) {
       return (
-        <PageGate
+        <AdminPageGate
+          screenId="T14"
           state="denied"
           title="Gamification Config"
           deniedMessage="You do not have permission to manage gamification."
@@ -45,7 +46,8 @@ export default async function AdminGamificationPage() {
 
     if (error instanceof ServerApiError) {
       return (
-        <PageGate
+        <AdminPageGate
+          screenId="T14"
           state="error"
           title="Gamification Config"
           errorMessage={`Failed to load gamification config. Request ID: ${error.requestId}`}

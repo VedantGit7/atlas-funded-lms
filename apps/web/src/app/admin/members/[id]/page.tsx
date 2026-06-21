@@ -3,6 +3,7 @@ import type {
   PermissionOverrideListResponse,
   RoleListResponse,
 } from "@atlas/domain-access/schemas/access-admin";
+import { AdminPageGate, PageHeader } from "../../../../components/patterns/AdminPageGate";
 import { MemberProfileEditor } from "../../../../features/admin/members/MemberProfileEditor";
 import { MemberRoleEditor } from "../../../../features/admin/members/MemberRoleEditor";
 import { PermissionOverridePanel } from "../../../../features/admin/members/PermissionOverridePanel";
@@ -31,37 +32,38 @@ export default async function AdminMemberDetailPage({ params }: AdminMemberDetai
       `Member ${member.data.id.slice(0, 8)}`;
 
     return (
-      <main className="space-y-6">
-        <header>
-          <h1>{label}</h1>
-          <p>Status: {member.data.status}</p>
+      <AdminPageGate screenId="T3" state="ready" title="Member detail">
+        <main className="space-y-6">
+          <PageHeader title={label} description={`Status: ${member.data.status}`} />
           {isOwnerMember ? (
             <p>The owner membership has protected status and role actions.</p>
           ) : null}
-        </header>
 
-        <section>
-          <h2>Profile</h2>
-          <MemberProfileEditor membershipId={id} profile={member.data.profile} />
-        </section>
+          <section>
+            <h2>Profile</h2>
+            <MemberProfileEditor membershipId={id} profile={member.data.profile} />
+          </section>
 
-        <MemberRoleEditor
-          membershipId={id}
-          assignedRoles={member.data.roles}
-          availableRoles={roles.data.items}
-          isOwnerMember={isOwnerMember}
-        />
+          <MemberRoleEditor
+            membershipId={id}
+            assignedRoles={member.data.roles}
+            availableRoles={roles.data.items}
+            isOwnerMember={isOwnerMember}
+          />
 
-        <PermissionOverridePanel membershipId={id} overrides={overrides.data.items} />
-      </main>
+          <PermissionOverridePanel membershipId={id} overrides={overrides.data.items} />
+        </main>
+      </AdminPageGate>
     );
   } catch (error: unknown) {
     if (error instanceof ServerApiError && (error.status === 403 || error.status === 404)) {
       return (
-        <main>
-          <h1>Member detail</h1>
-          <p role="alert">Member not found or access denied.</p>
-        </main>
+        <AdminPageGate
+          screenId="T3"
+          state="not_found"
+          title="Member detail"
+          notFoundMessage="Member not found or access denied."
+        />
       );
     }
 

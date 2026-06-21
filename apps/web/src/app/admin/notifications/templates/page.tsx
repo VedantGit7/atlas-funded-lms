@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { z } from "zod";
-import { PageGate, PageHeader } from "../../../../components/patterns/PageGate";
+import { AdminPageGate, PageHeader } from "../../../../components/patterns/AdminPageGate";
 import { NotificationTemplateManager } from "../../../../features/notifications/components/NotificationTemplateManager";
 import { ServerApiError, serverApi } from "../../../../lib/server-api";
 import type { notificationTemplateListResponseSchema } from "../../../../server/notifications/notification.dto";
@@ -14,7 +14,7 @@ export default async function AdminNotificationTemplatesPage() {
     );
 
     return (
-      <PageGate state="ready" title="Notification Templates">
+      <AdminPageGate screenId="T15" state="ready" title="Notification Templates">
         <main className="space-y-6">
           <header className="flex flex-wrap items-center justify-between gap-3">
             <PageHeader
@@ -27,12 +27,13 @@ export default async function AdminNotificationTemplatesPage() {
           </header>
           <NotificationTemplateManager initialTemplates={templates.data} />
         </main>
-      </PageGate>
+      </AdminPageGate>
     );
   } catch (error: unknown) {
     if (error instanceof ServerApiError && (error.status === 401 || error.status === 403)) {
       return (
-        <PageGate
+        <AdminPageGate
+          screenId="T15"
           state="denied"
           title="Notification Templates"
           deniedMessage="You do not have permission to manage notification templates."
@@ -42,7 +43,8 @@ export default async function AdminNotificationTemplatesPage() {
 
     if (error instanceof ServerApiError) {
       return (
-        <PageGate
+        <AdminPageGate
+          screenId="T15"
           state="error"
           title="Notification Templates"
           errorMessage={`Failed to load templates. Request ID: ${error.requestId}`}

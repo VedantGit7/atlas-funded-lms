@@ -1,5 +1,5 @@
 import type { z } from "zod";
-import { PageGate, PageHeader } from "../../../components/patterns/PageGate";
+import { AdminPageGate, PageHeader } from "../../../components/patterns/AdminPageGate";
 import { ExtensionsAdmin } from "../../../features/extensions/components/extensions-admin";
 import { ServerApiError, serverApi } from "../../../lib/server-api";
 import type {
@@ -18,7 +18,7 @@ export default async function ExtensionsPage() {
     ]);
 
     return (
-      <PageGate state="ready" title="Extensions">
+      <AdminPageGate screenId="T19" state="ready" title="Extensions">
         <main className="space-y-6">
           <PageHeader
             title="Extensions"
@@ -29,12 +29,13 @@ export default async function ExtensionsPage() {
             registrations={registrations.data}
           />
         </main>
-      </PageGate>
+      </AdminPageGate>
     );
   } catch (error) {
     if (error instanceof ServerApiError && (error.status === 401 || error.status === 403)) {
       return (
-        <PageGate
+        <AdminPageGate
+          screenId="T19"
           state="denied"
           title="Extensions"
           deniedMessage="You do not have permission to manage extensions."
@@ -44,7 +45,8 @@ export default async function ExtensionsPage() {
 
     if (error instanceof ServerApiError) {
       return (
-        <PageGate
+        <AdminPageGate
+          screenId="T19"
           state="error"
           title="Extensions"
           errorMessage={`Failed to load extensions. Request ID: ${error.requestId}`}

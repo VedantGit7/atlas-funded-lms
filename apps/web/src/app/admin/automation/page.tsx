@@ -1,5 +1,5 @@
 import type { z } from "zod";
-import { PageGate, PageHeader } from "../../../components/patterns/PageGate";
+import { AdminPageGate, PageHeader } from "../../../components/patterns/AdminPageGate";
 import { AutomationRulesAdmin } from "../../../features/automation/components/AutomationRulesAdmin";
 import { ServerApiError, serverApi } from "../../../lib/server-api";
 import type { automationRuleListResponseSchema } from "../../../server/automation/automation.dto";
@@ -11,7 +11,7 @@ export default async function AdminAutomationPage() {
     const rules = await serverApi.get<AutomationRuleListResponse>("/api/v1/automation-rules");
 
     return (
-      <PageGate state="ready" title="Automation Rules">
+      <AdminPageGate screenId="T16" state="ready" title="Automation Rules">
         <main className="space-y-6">
           <PageHeader
             title="Automation Rules"
@@ -19,12 +19,13 @@ export default async function AdminAutomationPage() {
           />
           <AutomationRulesAdmin initialRules={rules.data} canManage />
         </main>
-      </PageGate>
+      </AdminPageGate>
     );
   } catch (error: unknown) {
     if (error instanceof ServerApiError && (error.status === 401 || error.status === 403)) {
       return (
-        <PageGate
+        <AdminPageGate
+          screenId="T16"
           state="denied"
           title="Automation Rules"
           deniedMessage="You do not have permission to manage automation rules."
@@ -34,7 +35,8 @@ export default async function AdminAutomationPage() {
 
     if (error instanceof ServerApiError) {
       return (
-        <PageGate
+        <AdminPageGate
+          screenId="T16"
           state="error"
           title="Automation Rules"
           errorMessage={`Failed to load automation rules. Request ID: ${error.requestId}`}

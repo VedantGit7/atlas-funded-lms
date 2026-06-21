@@ -3,13 +3,16 @@ import { auditWriter } from "@atlas/audit";
 import { outbox } from "@atlas/events";
 import {
   appendWorkflowTransition,
+  createWorkflowDefinition as createWorkflowDefinitionRepo,
   encodeWorkflowCursor,
   findCourseForWorkflow,
   findWorkflowTransitionById,
   hasLaterTransitionForTarget,
   listPendingCourseWorkflowItems,
+  listWorkflowDefinitions as listWorkflowDefinitionsRepo,
   listWorkflowHistoryForTarget,
   updateCourseStatusForWorkflow,
+  updateWorkflowDefinition as updateWorkflowDefinitionRepo,
 } from "./workflows.repository";
 import type { WorkflowListQuery, WorkflowTransitionBody } from "./workflow-schemas";
 import { workflowItemNotFound, workflowTransitionConflict } from "./workflow.errors";
@@ -290,4 +293,104 @@ export async function getWorkflowHistory(tx: TenantTx, targetType: string, targe
       })),
     },
   };
+}
+
+function mapWorkflowDefinition(row: {
+  id: string;
+  key: string;
+  name: string;
+  definition_json: Record<string, unknown>;
+  status: "ACTIVE" | "ARCHIVED" | "DRAFT";
+  updated_at: Date;
+}) {
+  return {
+    id: row.id,
+    key: row.key,
+    name: row.name,
+    definitionJson: row.definition_json,
+    status: row.status,
+    updatedAt: row.updated_at.toISOString(),
+  };
+}
+
+export async function listWorkflowDefinitions(tx: TenantTx) {
+  const rows = await listWorkflowDefinitionsRepo(tx);
+  return { data: rows.map(mapWorkflowDefinition) };
+}
+
+export async function createWorkflowDefinitionRecord(
+  tx: TenantTx,
+  ctx: ServiceCtx,
+  input: { key: string; name: string; definitionJson: Record<string, unknown> },
+) {
+  const row = await createWorkflowDefinitionRepo({
+    tx,
+    key: input.key,
+    name: input.name,
+    definitionJson: input.definitionJson,
+  });
+
+  await auditWriter.write(
+    tx,
+    {
+      tenantId: ctx.tenantId,
+      actorMembershipId: ctx.actorMembershipId,
+      platformPrincipalId: null,
+      requestId: ctx.requestId,
+    },
+    {
+      action: "workflow.definition.created",
+      target: { type: "workflow_definition", id: row.id },
+      before: null,
+      after: { key: row.key, name: row.name },
+      reason: null,
+      metadata: {},
+    },
+  );
+
+  return { data: mapWorkflowDefinition(row) };
+}
+
+export async function updateWorkflowDefinitionRecord(
+  tx: TenantTx,
+  ctx: ServiceCtx,
+  id: string,
+  input: {
+    name?: string;
+    definitionJson?: Record<string, unknown>;
+    status?: "ACTIVE" | "ARCHIVED" | "DRAFT";
+  },
+) {
+  const beforeRows = await listWorkflowDefinitionsRepo(tx);
+  const before = beforeRows.find((row) => row.id === id) ?? null;
+
+  const row = await updateWorkflowDefinitionRepo({
+    tx,
+    id,
+    ...input,
+  });
+
+  if (!row) {
+    throw workflowItemNotFound();
+  }
+
+  await auditWriter.write(
+    tx,
+    {
+      tenantId: ctx.tenantId,
+      actorMembershipId: ctx.actorMembershipId,
+      platformPrincipalId: null,
+      requestId: ctx.requestId,
+    },
+    {
+      action: "workflow.definition.updated",
+      target: { type: "workflow_definition", id: row.id },
+      before: before ? { key: before.key, name: before.name, status: before.status } : null,
+      after: { key: row.key, name: row.name, status: row.status },
+      reason: null,
+      metadata: {},
+    },
+  );
+
+  return { data: mapWorkflowDefinition(row) };
 }

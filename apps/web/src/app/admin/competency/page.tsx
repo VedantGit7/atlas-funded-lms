@@ -1,4 +1,4 @@
-import { PageGate, PageHeader } from "../../../components/patterns/PageGate";
+import { AdminPageGate, PageHeader } from "../../../components/patterns/AdminPageGate";
 import { CompetencyConfigPanel } from "../../../features/competency/components/CompetencyConfigPanel";
 import { competencyConfigServerApi } from "../../../modules/competency/competency-config.server-api";
 import { ServerApiError } from "../../../lib/server-api";
@@ -11,7 +11,7 @@ export default async function AdminCompetencyPage() {
     ]);
 
     return (
-      <PageGate state="ready" title="Competency & Scoring">
+      <AdminPageGate screenId="T11" state="ready" title="Competency & Scoring">
         <main className="space-y-6">
           <PageHeader
             title="Competency & Scoring"
@@ -27,12 +27,13 @@ export default async function AdminCompetencyPage() {
             canPublish
           />
         </main>
-      </PageGate>
+      </AdminPageGate>
     );
   } catch (error) {
     if (error instanceof ServerApiError && (error.status === 401 || error.status === 403)) {
       return (
-        <PageGate
+        <AdminPageGate
+          screenId="T11"
           state="denied"
           title="Competency & Scoring"
           deniedMessage="You do not have permission to manage competency scoring configuration."
@@ -42,7 +43,8 @@ export default async function AdminCompetencyPage() {
 
     if (error instanceof ServerApiError) {
       return (
-        <PageGate
+        <AdminPageGate
+          screenId="T11"
           state="error"
           title="Competency & Scoring"
           errorMessage={`Failed to load competency configuration. Request ID: ${error.requestId}`}
