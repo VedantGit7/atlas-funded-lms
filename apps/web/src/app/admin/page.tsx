@@ -85,6 +85,7 @@ export default async function AdminDashboardPage() {
               <Link href="/admin/config">Configuration</Link>
               <Link href="/admin/feature-flags">Feature flags</Link>
               <Link href="/admin/entitlements">Entitlements</Link>
+              <Link href="/admin/competency">Competency</Link>
             </div>
           </article>
 
