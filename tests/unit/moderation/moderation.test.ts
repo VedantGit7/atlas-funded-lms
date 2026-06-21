@@ -11,6 +11,7 @@ import {
   rejectUnsafePlainText,
   reviewAppealBodySchema,
 } from "../../../apps/web/src/server/moderation/moderation.dto";
+import { MODERATION_ROUTE_REGISTRY } from "../../../apps/web/src/features/moderation/moderation-route-registry";
 
 describe("moderation command validation", () => {
   it("accepts valid case creation input", () => {
@@ -110,5 +111,16 @@ describe("self-review guard helper", () => {
     const submitter = "11111111-1111-4111-8111-111111111111";
     const reviewer = "22222222-2222-4222-8222-222222222222";
     expect(submitter).not.toBe(reviewer);
+  });
+});
+
+describe("moderation frontend route contract", () => {
+  it("maps M1-M4 to approved paths", () => {
+    expect(MODERATION_ROUTE_REGISTRY.map((entry) => entry.screenId)).toEqual([
+      "M1",
+      "M2",
+      "M3",
+      "M4",
+    ]);
   });
 });
