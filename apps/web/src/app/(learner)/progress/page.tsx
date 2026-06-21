@@ -1,18 +1,23 @@
 import { PageGate, PageHeader } from "../../../components/patterns/PageGate";
-import { CompetencyHistoryChart } from "../../../features/competency/components/CompetencyHistoryChart";
-import { CompetencyScoreCards } from "../../../features/competency/components/CompetencyScoreCards";
-import { GamificationSummaryCard } from "../../../features/gamification/components/GamificationSummaryCard";
-import { ServerApiError } from "../../../lib/server-api";
+import { ProgressDashboard } from "../../../features/analytics/components/progress-dashboard";
+import { ServerApiError, serverApi } from "../../../lib/server-api";
 import { competencyServerApi } from "../../../modules/competency/competency.server-api";
 import { gamificationServerApi } from "../../../modules/gamification/gamification.server-api";
+import type { certificateListResponseSchema } from "../../../server/certificates/certificate.dto";
+import type { z } from "zod";
+
+type CertificateListResponse = z.infer<typeof certificateListResponseSchema>;
 
 export default async function ProgressPage() {
   try {
-    const [competency, history, gamification, streaks] = await Promise.all([
+    const [competency, history, gamification, streaks, certificates] = await Promise.all([
       competencyServerApi.getMyCompetency(),
       competencyServerApi.getMyCompetencyHistory({ limit: 20 }),
       gamificationServerApi.getMyGamification().catch(() => null),
       gamificationServerApi.getMyStreaks().catch(() => null),
+      serverApi
+        .get<CertificateListResponse>("/api/v1/certificates?limit=10")
+        .catch(() => ({ data: [], page: { nextCursor: null, hasMore: false } })),
     ]);
 
     const dailyStreak =
@@ -25,17 +30,22 @@ export default async function ProgressPage() {
         <main className="space-y-6">
           <PageHeader
             title="Progress"
-            description="Track competency scores and improvement over time."
+            description="Track competency scores, learning streaks, and certificates earned over time."
           />
-          {gamification ? (
-            <GamificationSummaryCard
-              levelKey={gamification.data.levelKey}
-              xpTotal={gamification.data.xpTotal}
-              streakCount={dailyStreak?.currentCount ?? 0}
-            />
-          ) : null}
-          <CompetencyScoreCards scores={competency.data.scores} />
-          <CompetencyHistoryChart snapshots={history.data.items} />
+          <ProgressDashboard
+            scores={competency.data.scores}
+            history={history.data.items}
+            gamification={
+              gamification
+                ? {
+                    levelKey: gamification.data.levelKey ?? "starter",
+                    xpTotal: gamification.data.xpTotal,
+                  }
+                : null
+            }
+            streakCount={dailyStreak?.currentCount ?? 0}
+            certificates={certificates.data}
+          />
         </main>
       </PageGate>
     );

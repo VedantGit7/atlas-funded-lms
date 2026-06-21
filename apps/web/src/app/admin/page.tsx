@@ -81,6 +81,12 @@ export default async function AdminDashboardPage() {
           <p>Manage tenant locale string overrides for approved UI copy.</p>
           <Link href="/admin/locales">Manage locales</Link>
         </article>
+
+        <article className="rounded border p-4">
+          <h2>Analytics</h2>
+          <p>Review tenant learning metrics, funnel stages, and assessment item performance.</p>
+          <Link href="/admin/analytics">Open analytics</Link>
+        </article>
       </section>
     </main>
   );
