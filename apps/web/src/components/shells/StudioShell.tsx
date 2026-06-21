@@ -1,40 +1,22 @@
-import Link from "next/link";
 import type { ReactNode } from "react";
+import { StudioShellGate } from "./StudioShellGate";
+import { STUDIO_PRIMARY_NAV } from "../../features/studio/studio-navigation";
+
+/**
+ * Studio shell navigation contract:
+ * /studio /studio/courses /studio/items /studio/item-collections
+ * /studio/assessments /studio/learning-paths /studio/grading /studio/analytics
+ * /review (when workflow.transition.act is available)
+ */
+export const studioShellNavigationContract = STUDIO_PRIMARY_NAV;
 
 type StudioShellProps = {
   children: ReactNode;
 };
 
-const navItems = [
-  { href: "/studio/courses", label: "Courses" },
-  { href: "/studio/learning-paths", label: "Learning paths" },
-  { href: "/studio/assessments", label: "Assessments" },
-  { href: "/studio/grading", label: "Grading" },
-  { href: "/studio/items", label: "Items" },
-  { href: "/studio/item-collections", label: "Collections" },
-  { href: "/studio/analytics", label: "Analytics" },
-  { href: "/review", label: "Review" },
-] as const;
-
 export function StudioShell({ children }: StudioShellProps) {
-  return (
-    <div className="studio-shell min-h-screen">
-      <header className="border-b px-4 py-3">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
-          <Link href="/studio/courses" className="font-semibold">
-            Studio
-          </Link>
-          <nav aria-label="Studio navigation" className="flex items-center gap-4 text-sm">
-            {navItems.map((item) => (
-              <Link key={item.href} href={item.href}>
-                {item.label}
-              </Link>
-            ))}
-            <Link href="/courses">Learner catalog</Link>
-          </nav>
-        </div>
-      </header>
-      <div className="mx-auto max-w-7xl px-4 py-6">{children}</div>
-    </div>
-  );
+  void studioShellNavigationContract;
+  return <StudioShellGate>{children}</StudioShellGate>;
 }
+
+export { StudioShellClient } from "./StudioShellClient";
