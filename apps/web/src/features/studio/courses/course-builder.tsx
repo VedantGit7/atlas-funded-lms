@@ -84,6 +84,11 @@ export function CourseBuilder({ initialCourse, initialModules, canPublish }: Cou
             <h1>{course.title}</h1>
             <CourseStatusBadge status={course.status} />
           </div>
+          {course.status === "PUBLISHED" ? (
+            <p className="text-sm">
+              <Link href={`/studio/courses/${course.id}/learners`}>View learner roster</Link>
+            </p>
+          ) : null}
         </div>
         {editable ? (
           <button

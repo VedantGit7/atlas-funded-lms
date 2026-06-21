@@ -44,6 +44,7 @@ export async function loadCourseResourceRef(args: {
 
   if (enrollment) {
     relationships["enrolledInCourse"] = args.ctx.actorMembershipId;
+    relationships["selfProgress"] = args.ctx.actorMembershipId;
   }
 
   if (course.createdByMembershipId === args.ctx.actorMembershipId) {

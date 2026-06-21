@@ -1,11 +1,16 @@
 import type { TenantTx } from "@atlas/db";
+import { createTenantResourceRef } from "@atlas/authorization";
 import { findCourseAuthProjection } from "../courses/courses.repository";
 import { courseEnrollmentDenied, courseNotFound } from "../courses/courses.errors";
+import { loadCourseResourceRef } from "../courses/load-course-resource-ref";
 import {
   findActiveEnrollment,
   insertEnrollment,
+  listEnrollmentsForCourse,
+  listEnrollmentsForMember,
   publishEnrollmentCreatedEvent,
 } from "./enrollments.repository";
+import type { EnrollmentListQuery } from "./schemas";
 
 type ServiceCtx = {
   tenantId: string;
@@ -16,6 +21,82 @@ type ServiceCtx = {
 export type EnrollmentCreateBody = {
   courseId: string;
 };
+
+export async function listEnrollments(tx: TenantTx, ctx: ServiceCtx, query: EnrollmentListQuery) {
+  if (query.courseId) {
+    const course = await findCourseAuthProjection({ tx, courseId: query.courseId });
+    if (!course || course.tenantId !== ctx.tenantId) {
+      throw courseNotFound();
+    }
+
+    const page = await listEnrollmentsForCourse({
+      tx,
+      courseId: query.courseId,
+      limit: query.limit,
+      ...(query.cursor ? { cursor: query.cursor } : {}),
+    });
+
+    return {
+      data: {
+        items: page.items.map((item) => ({
+          id: item.id,
+          courseId: item.courseId,
+          membershipId: item.membershipId,
+          displayName: item.displayName,
+          status: item.status,
+          enrolledAt: item.enrolledAt.toISOString(),
+        })),
+        pageInfo: page.pageInfo,
+      },
+    };
+  }
+
+  const page = await listEnrollmentsForMember({
+    tx,
+    membershipId: ctx.actorMembershipId,
+    limit: query.limit,
+    ...(query.cursor ? { cursor: query.cursor } : {}),
+  });
+
+  return {
+    data: {
+      items: page.items.map((item) => ({
+        id: item.id,
+        courseId: item.courseId,
+        membershipId: item.membershipId,
+        displayName: item.displayName,
+        status: item.status,
+        enrolledAt: item.enrolledAt.toISOString(),
+      })),
+      pageInfo: page.pageInfo,
+    },
+  };
+}
+
+export async function loadEnrollmentListResourceRef(args: {
+  tx: TenantTx;
+  ctx: ServiceCtx;
+  query: EnrollmentListQuery;
+}) {
+  if (args.query.courseId) {
+    return loadCourseResourceRef({
+      tx: args.tx,
+      ctx: args.ctx,
+      courseId: args.query.courseId,
+      requirePublished: false,
+    });
+  }
+
+  return createTenantResourceRef({
+    type: "member_enrollments",
+    id: args.ctx.actorMembershipId,
+    tenantId: args.ctx.tenantId,
+    ownerMembershipId: args.ctx.actorMembershipId,
+    relationships: {
+      selfEnrollmentList: args.ctx.actorMembershipId,
+    },
+  });
+}
 
 export async function enrollCurrentMemberInCourse(
   tx: TenantTx,
