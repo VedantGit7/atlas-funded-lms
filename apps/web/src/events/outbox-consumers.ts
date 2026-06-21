@@ -93,6 +93,20 @@ export {
 
 export { ANALYTICS_WORKER_DESTINATION, handleAnalyticsOutboxEvent, analyticsOutboxHandlers };
 
+import {
+  DATA_RIGHTS_OUTBOX_EVENTS,
+  DATA_EXPORT_WORKER_DESTINATION,
+  handleDataRightsOutboxEvent,
+  dataRightsOutboxHandlers,
+} from "@atlas/domain/data-rights/data-rights.worker";
+
+export {
+  DATA_EXPORT_WORKER_DESTINATION,
+  handleDataRightsOutboxEvent,
+  dataRightsOutboxHandlers,
+  DATA_RIGHTS_OUTBOX_EVENTS,
+};
+
 const CERTIFICATE_OUTBOX_EVENTS = [CERTIFICATE_ISSUED_EVENT, CERTIFICATE_REVOKED_EVENT] as const;
 
 const GAMIFICATION_SOURCE_EVENTS = [
@@ -186,6 +200,16 @@ export function createAnalyticsOutboxConsumers(): Record<string, OutboxHandler[]
 
   for (const eventType of ANALYTICS_SOURCE_EVENTS) {
     appendHandlers(map, eventType, analyticsOutboxHandlers);
+  }
+
+  return map;
+}
+
+export function createDataRightsOutboxConsumers(): Record<string, OutboxHandler[]> {
+  const map: Record<string, OutboxHandler[]> = {};
+
+  for (const eventType of DATA_RIGHTS_OUTBOX_EVENTS) {
+    appendHandlers(map, eventType, dataRightsOutboxHandlers);
   }
 
   return map;

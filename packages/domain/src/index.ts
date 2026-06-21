@@ -27,3 +27,11 @@ export type {
   AnalyticsFunnelResponse,
   AnalyticsItemStatisticsResponse,
 } from "./analytics/analytics.contract";
+export * from "./data-rights/data-rights.dto";
+export * from "./data-rights/data-rights.errors";
+export * from "./data-rights/data-rights.events";
+export * from "./data-rights/data-rights.repository";
+export * from "./data-rights/data-rights.service";
+export * from "./data-rights/data-rights.worker";
+export * from "./data-rights/data-rights.route-metadata";
+export * from "./data-rights/data-rights.contract";
