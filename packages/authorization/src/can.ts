@@ -3,6 +3,7 @@ import {
   findRolePermissionGrant,
   permissionExists,
 } from "./authorization.repository";
+import { allowsOwnershipOrRelationship } from "./ownership-or-relationship-permissions";
 import { actorOwnsResource, requiresOwnership } from "./ownership-predicates";
 import { hasRequiredRelationship, requiredRelationships } from "./relationship-predicates";
 import type {
@@ -85,21 +86,32 @@ export async function can(args: {
   }
 
   const bypassedResourcePredicate = isAdminBypassRole(roleKeys);
+  const requiredRelationshipKeys = requiredRelationships(args.permission);
+  const ownsResource = actorOwnsResource({ actor: args.actor, resource: args.resource });
+  const hasRelationship =
+    requiredRelationshipKeys.length === 0 ||
+    hasRequiredRelationship({
+      actor: args.actor,
+      resource: args.resource,
+      permission: args.permission,
+    });
 
   if (!bypassedResourcePredicate && requiresOwnership(args.permission)) {
-    if (!actorOwnsResource({ actor: args.actor, resource: args.resource })) {
+    if (allowsOwnershipOrRelationship(args.permission)) {
+      if (!ownsResource && !hasRelationship) {
+        return deny(args.permission, "OWNERSHIP_REQUIRED");
+      }
+    } else if (!ownsResource) {
       return deny(args.permission, "OWNERSHIP_REQUIRED");
     }
   }
 
-  if (!bypassedResourcePredicate && requiredRelationships(args.permission).length > 0) {
-    if (
-      !hasRequiredRelationship({
-        actor: args.actor,
-        resource: args.resource,
-        permission: args.permission,
-      })
-    ) {
+  if (
+    !bypassedResourcePredicate &&
+    requiredRelationshipKeys.length > 0 &&
+    !allowsOwnershipOrRelationship(args.permission)
+  ) {
+    if (!hasRelationship) {
       return deny(args.permission, "RELATIONSHIP_REQUIRED");
     }
   }

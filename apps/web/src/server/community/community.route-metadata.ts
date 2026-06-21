@@ -1,4 +1,5 @@
 import type { RouteMetadata } from "@atlas/api/route-metadata";
+import { loadPostDeleteResourceRefFromParams } from "../moderation/moderation.resource-loader";
 import {
   loadCommentResourceRefFromParams,
   loadCommunitySpaceCatalogResourceRef,
@@ -122,6 +123,16 @@ export const deleteCommentMetadata = {
   idempotency: "required",
   resourceLoader: async ({ tx, ctx, params }) =>
     loadCommentResourceRefFromParams({ tx, ctx, params }),
+} satisfies RouteMetadata;
+
+export const deletePostMetadata = {
+  permission: "post.delete",
+  entitlement: communityEntitlement,
+  audit: "none",
+  rateLimit: "authenticatedTenantWrite",
+  idempotency: "required",
+  resourceLoader: async ({ tx, ctx, params }) =>
+    loadPostDeleteResourceRefFromParams({ tx, ctx, params }),
 } satisfies RouteMetadata;
 
 export const createReactionMetadata = {
