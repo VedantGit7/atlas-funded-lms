@@ -14,6 +14,8 @@ const navItems = [
   { href: "/progress", label: "Progress" },
   { href: "/achievements", label: "Achievements" },
   { href: "/leaderboards", label: "Leaderboards" },
+  { href: "/community", label: "Community" },
+  { href: "/hall-of-fame", label: "Hall of Fame" },
   { href: "/certificates", label: "Certificates" },
   { href: "/notifications", label: "Notifications" },
 ] as const;
