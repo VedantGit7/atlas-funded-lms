@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   decideModerationCase,
   formatModerationError,
@@ -8,13 +8,20 @@ import {
   type ModerationCaseItem,
 } from "../api";
 
+type PendingDecision = {
+  decisionKey: "actioned" | "rejected" | "closed";
+  contentAction?: "delete";
+  label: string;
+};
+
 export function ModerationCaseDetailClient({ caseId }: { caseId: string }) {
   const [detail, setDetail] = useState<ModerationCaseItem | null>(null);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [reason, setReason] = useState("");
-  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [pendingDecision, setPendingDecision] = useState<PendingDecision | null>(null);
   const [busy, setBusy] = useState(false);
+  const cancelRef = useRef<HTMLButtonElement>(null);
 
   const loadDetail = useCallback(async () => {
     setLoading(true);
@@ -35,10 +42,13 @@ export function ModerationCaseDetailClient({ caseId }: { caseId: string }) {
     void loadDetail();
   }, [loadDetail]);
 
-  async function handleDecide(args: {
-    decisionKey: "actioned" | "rejected" | "closed";
-    contentAction?: "delete";
-  }) {
+  useEffect(() => {
+    if (pendingDecision) {
+      cancelRef.current?.focus();
+    }
+  }, [pendingDecision]);
+
+  async function handleDecide(args: PendingDecision) {
     setBusy(true);
     setErrorMessage(null);
 
@@ -48,7 +58,7 @@ export function ModerationCaseDetailClient({ caseId }: { caseId: string }) {
         ...(reason.trim() ? { reason: reason.trim() } : {}),
         ...(args.contentAction ? { contentAction: args.contentAction } : {}),
       });
-      setConfirmDelete(false);
+      setPendingDecision(null);
       await loadDetail();
     } catch (error) {
       setErrorMessage(formatModerationError(error));
@@ -130,7 +140,7 @@ export function ModerationCaseDetailClient({ caseId }: { caseId: string }) {
           <div className="rounded border p-4">
             <h2 className="font-semibold">Decision controls</h2>
             <label htmlFor="decision-reason" className="mt-3 block text-sm">
-              Reason
+              Decision reason
             </label>
             <textarea
               id="decision-reason"
@@ -139,6 +149,7 @@ export function ModerationCaseDetailClient({ caseId }: { caseId: string }) {
                 setReason(event.target.value);
               }}
               className="mt-1 min-h-24 w-full rounded border px-3 py-2 text-sm"
+              placeholder="Optional note for the decision record"
             />
 
             <div className="mt-3 flex flex-col gap-2">
@@ -147,7 +158,7 @@ export function ModerationCaseDetailClient({ caseId }: { caseId: string }) {
                 disabled={busy}
                 className="rounded border px-3 py-2 text-sm"
                 onClick={() => {
-                  void handleDecide({ decisionKey: "rejected" });
+                  setPendingDecision({ decisionKey: "rejected", label: "Reject case" });
                 }}
               >
                 Reject case
@@ -157,49 +168,25 @@ export function ModerationCaseDetailClient({ caseId }: { caseId: string }) {
                 disabled={busy}
                 className="rounded border px-3 py-2 text-sm"
                 onClick={() => {
-                  void handleDecide({ decisionKey: "closed" });
+                  setPendingDecision({ decisionKey: "closed", label: "Close case" });
                 }}
               >
                 Close case
               </button>
-              {!confirmDelete ? (
-                <button
-                  type="button"
-                  disabled={busy || detail.target?.deleted}
-                  className="rounded border border-red-700 px-3 py-2 text-sm text-red-700"
-                  onClick={() => {
-                    setConfirmDelete(true);
-                  }}
-                >
-                  Action and delete content
-                </button>
-              ) : (
-                <div className="space-y-2 rounded border border-red-700 p-3">
-                  <p className="text-sm text-red-700">
-                    Confirm deleting the reported content. This cannot be undone.
-                  </p>
-                  <button
-                    type="button"
-                    disabled={busy}
-                    className="w-full rounded bg-red-700 px-3 py-2 text-sm text-white"
-                    onClick={() => {
-                      void handleDecide({ decisionKey: "actioned", contentAction: "delete" });
-                    }}
-                  >
-                    Confirm delete
-                  </button>
-                  <button
-                    type="button"
-                    disabled={busy}
-                    className="w-full rounded border px-3 py-2 text-sm"
-                    onClick={() => {
-                      setConfirmDelete(false);
-                    }}
-                  >
-                    Cancel
-                  </button>
-                </div>
-              )}
+              <button
+                type="button"
+                disabled={busy || detail.target?.deleted}
+                className="rounded border border-red-700 px-3 py-2 text-sm text-red-700"
+                onClick={() => {
+                  setPendingDecision({
+                    decisionKey: "actioned",
+                    contentAction: "delete",
+                    label: "Action and delete content",
+                  });
+                }}
+              >
+                Action and delete content
+              </button>
             </div>
           </div>
         ) : null}
@@ -210,6 +197,51 @@ export function ModerationCaseDetailClient({ caseId }: { caseId: string }) {
           </p>
         ) : null}
       </aside>
+
+      {pendingDecision ? (
+        <div
+          className="fixed inset-0 z-30 flex items-center justify-center bg-black/40 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="case-decision-confirm-title"
+        >
+          <div className="w-full max-w-md rounded-lg border bg-white p-4 shadow-lg">
+            <h2 id="case-decision-confirm-title" className="font-semibold">
+              Confirm decision
+            </h2>
+            <p className="mt-2 text-sm">
+              {pendingDecision.contentAction === "delete"
+                ? "Confirm deleting the reported content and recording this decision. This cannot be undone."
+                : `Confirm ${pendingDecision.label.toLowerCase()}?`}
+            </p>
+            <div className="mt-4 flex flex-col gap-2 sm:flex-row-reverse sm:justify-start">
+              <button
+                type="button"
+                disabled={busy}
+                className={`rounded px-3 py-2 text-sm text-white ${
+                  pendingDecision.contentAction === "delete" ? "bg-red-700" : "bg-neutral-900"
+                }`}
+                onClick={() => {
+                  void handleDecide(pendingDecision);
+                }}
+              >
+                Confirm
+              </button>
+              <button
+                ref={cancelRef}
+                type="button"
+                disabled={busy}
+                className="rounded border px-3 py-2 text-sm"
+                onClick={() => {
+                  setPendingDecision(null);
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

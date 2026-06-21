@@ -1,24 +1,48 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ClientApiError, clientApi } from "../../../lib/client-api";
+
+type SpaceVisibility = "PRIVATE" | "TENANT" | "PUBLIC" | "UNLISTED";
 
 type AdminSpacesEditorProps = {
   initialSpaces: Array<{
     id: string;
     slug: string;
     name: string;
-    visibility: "PRIVATE" | "TENANT" | "PUBLIC" | "UNLISTED";
+    visibility: SpaceVisibility;
   }>;
+  allowedVisibilityOptions?: SpaceVisibility[];
 };
 
-export function AdminSpacesEditor({ initialSpaces }: AdminSpacesEditorProps) {
+const DEFAULT_VISIBILITY_OPTIONS: SpaceVisibility[] = ["TENANT", "PUBLIC"];
+
+const VISIBILITY_LABELS: Record<SpaceVisibility, string> = {
+  TENANT: "Tenant",
+  PUBLIC: "Public",
+  PRIVATE: "Private",
+  UNLISTED: "Unlisted",
+};
+
+export function AdminSpacesEditor({
+  initialSpaces,
+  allowedVisibilityOptions = DEFAULT_VISIBILITY_OPTIONS,
+}: AdminSpacesEditorProps) {
   const [spaces, setSpaces] = useState(initialSpaces);
   const [slug, setSlug] = useState("");
   const [name, setName] = useState("");
-  const [visibility, setVisibility] =
-    useState<AdminSpacesEditorProps["initialSpaces"][number]["visibility"]>("TENANT");
+  const [visibility, setVisibility] = useState<SpaceVisibility>(
+    allowedVisibilityOptions[0] ?? "TENANT",
+  );
   const [error, setError] = useState<string | null>(null);
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+  const cancelRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (pendingDeleteId) {
+      cancelRef.current?.focus();
+    }
+  }, [pendingDeleteId]);
 
   async function createSpace() {
     setError(null);
@@ -42,6 +66,7 @@ export function AdminSpacesEditor({ initialSpaces }: AdminSpacesEditorProps) {
     try {
       await clientApi.delete("/api/v1/spaces", "community-space-delete", { id, confirm: true });
       setSpaces((current) => current.filter((space) => space.id !== id));
+      setPendingDeleteId(null);
     } catch (err) {
       setError(err instanceof ClientApiError ? err.message : "Unable to delete space.");
     }
@@ -72,15 +97,14 @@ export function AdminSpacesEditor({ initialSpaces }: AdminSpacesEditorProps) {
             className="rounded border px-3 py-2 text-sm"
             value={visibility}
             onChange={(event) => {
-              setVisibility(
-                event.target.value as AdminSpacesEditorProps["initialSpaces"][number]["visibility"],
-              );
+              setVisibility(event.target.value as SpaceVisibility);
             }}
           >
-            <option value="TENANT">Tenant</option>
-            <option value="PUBLIC">Public</option>
-            <option value="PRIVATE">Private</option>
-            <option value="UNLISTED">Unlisted</option>
+            {allowedVisibilityOptions.map((option) => (
+              <option key={option} value={option}>
+                {VISIBILITY_LABELS[option]}
+              </option>
+            ))}
           </select>
         </div>
         <button
@@ -112,7 +136,9 @@ export function AdminSpacesEditor({ initialSpaces }: AdminSpacesEditorProps) {
                 <button
                   type="button"
                   className="underline"
-                  onClick={() => void deleteSpace(space.id)}
+                  onClick={() => {
+                    setPendingDeleteId(space.id);
+                  }}
                 >
                   Delete
                 </button>
@@ -121,6 +147,46 @@ export function AdminSpacesEditor({ initialSpaces }: AdminSpacesEditorProps) {
           ))}
         </tbody>
       </table>
+
+      {pendingDeleteId ? (
+        <div
+          className="fixed inset-0 z-30 flex items-center justify-center bg-black/40 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="space-delete-confirm-title"
+        >
+          <div className="w-full max-w-md rounded-lg border bg-white p-4 shadow-lg">
+            <h2 id="space-delete-confirm-title" className="font-semibold">
+              Delete community space
+            </h2>
+            <p className="mt-2 text-sm">
+              Confirm deleting this space. Existing posts remain preserved according to tenant
+              policy.
+            </p>
+            <div className="mt-4 flex flex-col gap-2 sm:flex-row-reverse sm:justify-start">
+              <button
+                type="button"
+                className="rounded bg-red-700 px-3 py-2 text-sm text-white"
+                onClick={() => {
+                  void deleteSpace(pendingDeleteId);
+                }}
+              >
+                Confirm delete
+              </button>
+              <button
+                ref={cancelRef}
+                type="button"
+                className="rounded border px-3 py-2 text-sm"
+                onClick={() => {
+                  setPendingDeleteId(null);
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

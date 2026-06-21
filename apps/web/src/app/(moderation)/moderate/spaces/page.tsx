@@ -1,12 +1,31 @@
 import Link from "next/link";
 import { PageGate, PageHeader } from "../../../../components/patterns/PageGate";
 import { AdminSpacesEditor } from "../../../../features/community/components/AdminSpacesEditor";
-import { ServerApiError } from "../../../../lib/server-api";
+import { ServerApiError, serverApi } from "../../../../lib/server-api";
+import { resolveModerationSpaceVisibilityOptions } from "../../../../lib/server/moderation-navigation-projection";
 import { communityServerApi } from "../../../../modules/community/community.server-api";
+import type { EntitlementView } from "@atlas/domain-config/schemas/entitlements";
 
 export default async function ModerateSpacesPage() {
   try {
-    const spaces = await communityServerApi.listSpaces();
+    const [spaces, entitlements] = await Promise.all([
+      communityServerApi.listSpaces(),
+      serverApi.get<{ data: EntitlementView[] }>("/api/v1/entitlements"),
+    ]);
+
+    const enabledEntitlements = new Set(
+      entitlements.data.filter((entry) => entry.enabled).map((entry) => entry.key),
+    );
+
+    if (!enabledEntitlements.has("community.enable")) {
+      return (
+        <PageGate
+          state="denied"
+          title="Community spaces"
+          deniedMessage="Community moderation requires the community entitlement."
+        />
+      );
+    }
 
     return (
       <PageGate state="ready" title="Community spaces">
@@ -20,7 +39,10 @@ export default async function ModerateSpacesPage() {
               Back to moderation
             </Link>
           </header>
-          <AdminSpacesEditor initialSpaces={spaces.data.items} />
+          <AdminSpacesEditor
+            initialSpaces={spaces.data.items}
+            allowedVisibilityOptions={resolveModerationSpaceVisibilityOptions(enabledEntitlements)}
+          />
         </main>
       </PageGate>
     );
@@ -31,6 +53,16 @@ export default async function ModerateSpacesPage() {
           state="denied"
           title="Community spaces"
           deniedMessage="You do not have permission to manage community spaces."
+        />
+      );
+    }
+
+    if (error instanceof ServerApiError && error.code === "ENTITLEMENT_REQUIRED") {
+      return (
+        <PageGate
+          state="denied"
+          title="Community spaces"
+          deniedMessage="Community moderation requires the community entitlement."
         />
       );
     }
