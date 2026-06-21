@@ -2,6 +2,10 @@
   "name": "@atlas/domain",
   "version": "0.0.0",
   "private": true,
+  "exports": {
+    ".": "./src/index.ts",
+    "./*": "./src/*"
+  },
   "scripts": {
     "build": "echo \"No domain build configured yet.\"",
     "lint": "echo \"No domain lint configured yet.\"",
@@ -13,6 +17,14 @@
     "test:tenant-isolation": "echo \"No domain tenant-isolation tests configured yet.\"",
     "test:e2e": "echo \"No domain e2e tests configured yet.\""
   },
-  "dependencies": {},
-  "devDependencies": {}
+  "dependencies": {
+    "@atlas/api": "workspace:*",
+    "@atlas/authorization": "workspace:*",
+    "@atlas/db": "workspace:*",
+    "@atlas/events": "workspace:*",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0"
+  }
 }

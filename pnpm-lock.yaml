@@ -279,7 +279,27 @@ importers:
 
   packages/design-system: {}
 
-  packages/domain: {}
+  packages/domain:
+    dependencies:
+      '@atlas/api':
+        specifier: workspace:*
+        version: link:../api
+      '@atlas/authorization':
+        specifier: workspace:*
+        version: link:../authorization
+      '@atlas/db':
+        specifier: workspace:*
+        version: link:../db
+      '@atlas/events':
+        specifier: workspace:*
+        version: link:../events
+      zod:
+        specifier: ^3.25.76
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: ^24.0.0
+        version: 24.13.2
 
   packages/domain/access:
     dependencies:
