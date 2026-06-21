@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { PageGate, PageHeader } from "../../../components/patterns/PageGate";
+import { AdminPageGate, PageHeader } from "../../../components/patterns/AdminPageGate";
 import { ReadinessPolicyEditor } from "../../../features/readiness/components/ReadinessPolicyEditor";
 import { competencyConfigServerApi } from "../../../modules/competency/competency-config.server-api";
 import { readinessServerApi } from "../../../modules/readiness/readiness.server-api";
@@ -13,7 +13,7 @@ export default async function AdminReadinessPolicyPage() {
     ]);
 
     return (
-      <PageGate state="ready" title="Readiness Policy">
+      <AdminPageGate screenId="T20" state="ready" title="Readiness Policy">
         <main className="space-y-6">
           <header className="flex flex-wrap items-center justify-between gap-3">
             <PageHeader
@@ -31,12 +31,13 @@ export default async function AdminReadinessPolicyPage() {
             canManage
           />
         </main>
-      </PageGate>
+      </AdminPageGate>
     );
   } catch (error) {
     if (error instanceof ServerApiError && (error.status === 401 || error.status === 403)) {
       return (
-        <PageGate
+        <AdminPageGate
+          screenId="T20"
           state="denied"
           title="Readiness Policy"
           deniedMessage="You do not have permission to manage readiness policy."
@@ -46,7 +47,8 @@ export default async function AdminReadinessPolicyPage() {
 
     if (error instanceof ServerApiError) {
       return (
-        <PageGate
+        <AdminPageGate
+          screenId="T20"
           state="error"
           title="Readiness Policy"
           errorMessage={`Failed to load readiness policy. Request ID: ${error.requestId}`}

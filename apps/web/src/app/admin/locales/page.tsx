@@ -1,5 +1,5 @@
 import type { z } from "zod";
-import { PageGate, PageHeader } from "../../../components/patterns/PageGate";
+import { AdminPageGate, PageHeader } from "../../../components/patterns/AdminPageGate";
 import { LocalesAdmin } from "../../../features/locales/components/LocalesAdmin";
 import { ServerApiError, serverApi } from "../../../lib/server-api";
 import type { localeResourceListResponseSchema } from "../../../server/locales/locale.dto";
@@ -11,7 +11,7 @@ export default async function AdminLocalesPage() {
     const locales = await serverApi.get<LocaleResourceListResponse>("/api/v1/locales");
 
     return (
-      <PageGate state="ready" title="Locales">
+      <AdminPageGate screenId="T18" state="ready" title="Locales">
         <main className="space-y-6">
           <PageHeader
             title="Locales"
@@ -19,12 +19,13 @@ export default async function AdminLocalesPage() {
           />
           <LocalesAdmin initialResources={locales.data} canManage />
         </main>
-      </PageGate>
+      </AdminPageGate>
     );
   } catch (error: unknown) {
     if (error instanceof ServerApiError && (error.status === 401 || error.status === 403)) {
       return (
-        <PageGate
+        <AdminPageGate
+          screenId="T18"
           state="denied"
           title="Locales"
           deniedMessage="You do not have permission to manage locale resources."
@@ -34,7 +35,8 @@ export default async function AdminLocalesPage() {
 
     if (error instanceof ServerApiError) {
       return (
-        <PageGate
+        <AdminPageGate
+          screenId="T18"
           state="error"
           title="Locales"
           errorMessage={`Failed to load locale resources. Request ID: ${error.requestId}`}

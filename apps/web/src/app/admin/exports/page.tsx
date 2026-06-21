@@ -1,4 +1,4 @@
-import { PageGate, PageHeader } from "../../../components/patterns/PageGate";
+import { AdminPageGate, PageHeader } from "../../../components/patterns/AdminPageGate";
 import { ExportJobsPanel } from "../../../features/data-rights/components/export-jobs-panel";
 import { ServerApiError, serverApi } from "../../../lib/server-api";
 import type { ExportJobItem } from "../../../features/data-rights/api";
@@ -10,7 +10,7 @@ export default async function AdminExportsPage() {
     }>("/api/v1/exports");
 
     return (
-      <PageGate state="ready" title="Data Exports">
+      <AdminPageGate screenId="T23" state="ready" title="Data Exports">
         <main className="space-y-6">
           <PageHeader
             title="Data Exports"
@@ -18,7 +18,7 @@ export default async function AdminExportsPage() {
           />
           <ExportJobsPanel initialJobs={exports.data.items} canRunExport />
         </main>
-      </PageGate>
+      </AdminPageGate>
     );
   } catch (error) {
     if (
@@ -27,7 +27,8 @@ export default async function AdminExportsPage() {
       error.code === "ENTITLEMENT_REQUIRED"
     ) {
       return (
-        <PageGate
+        <AdminPageGate
+          screenId="T23"
           state="denied"
           title="Data Exports"
           deniedMessage="Data export requires the data.export.enable entitlement."
@@ -37,7 +38,8 @@ export default async function AdminExportsPage() {
 
     if (error instanceof ServerApiError && (error.status === 401 || error.status === 403)) {
       return (
-        <PageGate
+        <AdminPageGate
+          screenId="T23"
           state="denied"
           title="Data Exports"
           deniedMessage="You do not have permission to manage exports."
@@ -47,7 +49,8 @@ export default async function AdminExportsPage() {
 
     if (error instanceof ServerApiError) {
       return (
-        <PageGate
+        <AdminPageGate
+          screenId="T23"
           state="error"
           title="Data Exports"
           errorMessage={`Failed to load exports. Request ID: ${error.requestId}`}

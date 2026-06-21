@@ -1,5 +1,6 @@
 import type { z } from "zod";
 import type { membersListResponseSchema } from "@atlas/membership";
+import { AdminPageGate, PageHeader } from "../../../components/patterns/AdminPageGate";
 import { InviteMemberDialog } from "../../../features/admin/members/InviteMemberDialog";
 import { MembersTable } from "../../../features/admin/members/MembersTable";
 import { ServerApiError, serverApi } from "../../../lib/server-api";
@@ -11,25 +12,29 @@ export default async function AdminMembersPage() {
     const members = await serverApi.get<MembersListResponse>("/api/v1/members?limit=100");
 
     return (
-      <main className="space-y-6">
-        <header className="flex items-start justify-between gap-4">
-          <div>
-            <h1>Members</h1>
-            <p>Manage tenant memberships, invitations, and member status.</p>
-          </div>
-          <InviteMemberDialog />
-        </header>
+      <AdminPageGate screenId="T2" state="ready" title="Members">
+        <main className="space-y-6">
+          <header className="flex items-start justify-between gap-4">
+            <PageHeader
+              title="Members"
+              description="Manage tenant memberships, invitations, and member status."
+            />
+            <InviteMemberDialog />
+          </header>
 
-        <MembersTable members={members.data.items} />
-      </main>
+          <MembersTable members={members.data.items} />
+        </main>
+      </AdminPageGate>
     );
   } catch (error) {
-    if (error instanceof ServerApiError && error.status === 403) {
+    if (error instanceof ServerApiError && (error.status === 401 || error.status === 403)) {
       return (
-        <main>
-          <h1>Members</h1>
-          <p role="alert">You do not have permission to view tenant members.</p>
-        </main>
+        <AdminPageGate
+          screenId="T2"
+          state="denied"
+          title="Members"
+          deniedMessage="You do not have permission to view tenant members."
+        />
       );
     }
 

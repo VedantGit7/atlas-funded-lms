@@ -374,9 +374,15 @@ importers:
 
   packages/domain/config:
     dependencies:
+      '@atlas/audit':
+        specifier: workspace:*
+        version: link:../../audit
       '@atlas/db':
         specifier: workspace:*
         version: link:../../db
+      '@atlas/events':
+        specifier: workspace:*
+        version: link:../../events
       zod:
         specifier: ^3.25.76
         version: 3.25.76

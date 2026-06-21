@@ -1,4 +1,4 @@
-import { PageGate, PageHeader } from "../../../components/patterns/PageGate";
+import { AdminPageGate, PageHeader } from "../../../components/patterns/AdminPageGate";
 import { AnalyticsDashboard } from "../../../features/analytics/components/analytics-dashboard";
 import { ServerApiError, serverApi } from "../../../lib/server-api";
 
@@ -15,7 +15,7 @@ export default async function AdminAnalyticsPage() {
       .catch(() => ({ data: { items: [] as Array<{ id: string; title: string }> } }));
 
     return (
-      <PageGate state="ready" title="Analytics">
+      <AdminPageGate screenId="T21" state="ready" title="Analytics">
         <main className="space-y-6">
           <PageHeader
             title="Analytics"
@@ -27,7 +27,7 @@ export default async function AdminAnalyticsPage() {
             initialAssessments={assessments.data.items}
           />
         </main>
-      </PageGate>
+      </AdminPageGate>
     );
   } catch (error) {
     if (
@@ -36,7 +36,8 @@ export default async function AdminAnalyticsPage() {
       error.code === "ENTITLEMENT_REQUIRED"
     ) {
       return (
-        <PageGate
+        <AdminPageGate
+          screenId="T21"
           state="denied"
           title="Analytics"
           deniedMessage="Advanced analytics requires the analytics.dashboard.view entitlement."
@@ -46,7 +47,8 @@ export default async function AdminAnalyticsPage() {
 
     if (error instanceof ServerApiError && (error.status === 401 || error.status === 403)) {
       return (
-        <PageGate
+        <AdminPageGate
+          screenId="T21"
           state="denied"
           title="Analytics"
           deniedMessage="You do not have permission to view tenant analytics."
@@ -56,7 +58,8 @@ export default async function AdminAnalyticsPage() {
 
     if (error instanceof ServerApiError) {
       return (
-        <PageGate
+        <AdminPageGate
+          screenId="T21"
           state="error"
           title="Analytics"
           errorMessage={`Failed to load analytics. Request ID: ${error.requestId}`}

@@ -1,4 +1,5 @@
 import type { RoleListResponse } from "@atlas/domain-access/schemas/access-admin";
+import { AdminPageGate, PageHeader } from "../../../../components/patterns/AdminPageGate";
 import { RoleEditor } from "../../../../features/admin/roles/RoleEditor";
 import { ServerApiError, serverApi } from "../../../../lib/server-api";
 
@@ -17,32 +18,35 @@ export default async function AdminRoleEditorPage({ params }: AdminRoleEditorPag
 
     if (!role) {
       return (
-        <main>
-          <h1>Role editor</h1>
-          <p role="alert">Role not found or access denied.</p>
-        </main>
+        <AdminPageGate
+          screenId="T5"
+          state="not_found"
+          title="Role editor"
+          notFoundMessage="Role not found or access denied."
+        />
       );
     }
 
     return (
-      <main className="space-y-6">
-        <header>
-          <h1>{role.name}</h1>
-          <p>
-            {role.key} — {role.isSystem ? "System role" : "Custom role"}
-          </p>
-        </header>
-
-        <RoleEditor role={role} />
-      </main>
+      <AdminPageGate screenId="T5" state="ready" title="Role editor">
+        <main className="space-y-6">
+          <PageHeader
+            title={role.name}
+            description={`${role.key} — ${role.isSystem ? "System role" : "Custom role"}`}
+          />
+          <RoleEditor role={role} />
+        </main>
+      </AdminPageGate>
     );
   } catch (error: unknown) {
-    if (error instanceof ServerApiError && error.status === 403) {
+    if (error instanceof ServerApiError && (error.status === 401 || error.status === 403)) {
       return (
-        <main>
-          <h1>Role editor</h1>
-          <p role="alert">You do not have permission to view tenant roles.</p>
-        </main>
+        <AdminPageGate
+          screenId="T5"
+          state="denied"
+          title="Role editor"
+          deniedMessage="You do not have permission to view tenant roles."
+        />
       );
     }
 

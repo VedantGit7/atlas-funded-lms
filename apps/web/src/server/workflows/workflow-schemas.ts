@@ -89,3 +89,36 @@ export const workflowHistoryResponseSchema = z.object({
     items: z.array(workflowHistoryItemSchema),
   }),
 });
+
+export const workflowDefinitionViewSchema = z.object({
+  id: z.string().uuid(),
+  key: z.string(),
+  name: z.string(),
+  definitionJson: z.record(z.string(), z.unknown()),
+  status: z.enum(["ACTIVE", "ARCHIVED", "DRAFT"]),
+  updatedAt: z.string().datetime(),
+});
+
+export const workflowDefinitionListResponseSchema = z.object({
+  data: z.array(workflowDefinitionViewSchema),
+});
+
+export const updateWorkflowDefinitionBodySchema = z
+  .object({
+    name: z.string().trim().min(1).max(200).optional(),
+    definitionJson: z.record(z.string(), z.unknown()).optional(),
+    status: z.enum(["ACTIVE", "ARCHIVED", "DRAFT"]).optional(),
+  })
+  .strict();
+
+export const createWorkflowDefinitionBodySchema = z
+  .object({
+    key: z.string().trim().min(1).max(120),
+    name: z.string().trim().min(1).max(200),
+    definitionJson: z.record(z.string(), z.unknown()).default({}),
+  })
+  .strict();
+
+export const workflowDefinitionResponseSchema = z.object({
+  data: workflowDefinitionViewSchema,
+});

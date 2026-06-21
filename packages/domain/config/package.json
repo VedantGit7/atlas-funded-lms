@@ -18,7 +18,9 @@
     "test:e2e": "echo \"No domain-config e2e tests configured yet.\""
   },
   "dependencies": {
+    "@atlas/audit": "workspace:*",
     "@atlas/db": "workspace:*",
+    "@atlas/events": "workspace:*",
     "zod": "^3.25.76"
   },
   "devDependencies": {

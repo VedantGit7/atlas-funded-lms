@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { z } from "zod";
-import { PageGate, PageHeader } from "../../../../components/patterns/PageGate";
+import { AdminPageGate, PageHeader } from "../../../../components/patterns/AdminPageGate";
 import { CertificateTemplateManager } from "../../../../features/certificates/components/CertificateTemplateManager";
 import { ServerApiError, serverApi } from "../../../../lib/server-api";
 import type { certificateTemplateListResponseSchema } from "../../../../server/certificates/certificate.dto";
@@ -14,7 +14,7 @@ export default async function AdminCertificateTemplatesPage() {
     );
 
     return (
-      <PageGate state="ready" title="Certificate Templates">
+      <AdminPageGate screenId="T12" state="ready" title="Certificate Templates">
         <main className="space-y-6">
           <header className="flex flex-wrap items-center justify-between gap-3">
             <PageHeader
@@ -27,12 +27,13 @@ export default async function AdminCertificateTemplatesPage() {
           </header>
           <CertificateTemplateManager initialTemplates={templates.data} />
         </main>
-      </PageGate>
+      </AdminPageGate>
     );
   } catch (error: unknown) {
     if (error instanceof ServerApiError && (error.status === 401 || error.status === 403)) {
       return (
-        <PageGate
+        <AdminPageGate
+          screenId="T12"
           state="denied"
           title="Certificate Templates"
           deniedMessage="You do not have permission to manage certificate templates."
@@ -42,7 +43,8 @@ export default async function AdminCertificateTemplatesPage() {
 
     if (error instanceof ServerApiError) {
       return (
-        <PageGate
+        <AdminPageGate
+          screenId="T12"
           state="error"
           title="Certificate Templates"
           errorMessage={`Failed to load templates. Request ID: ${error.requestId}`}
