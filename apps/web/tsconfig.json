@@ -29,6 +29,7 @@
     { "path": "../../packages/authorization" },
     { "path": "../../packages/core" },
     { "path": "../../packages/db" },
+    { "path": "../../packages/domain" },
     { "path": "../../packages/domain/config" },
     { "path": "../../packages/domain/access" },
     { "path": "../../packages/domain/branding" },

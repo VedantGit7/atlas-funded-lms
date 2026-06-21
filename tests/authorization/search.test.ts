@@ -1,0 +1,104 @@
+import { describe, expect, it, vi } from "vitest";
+import { can, createTenantResourceRef } from "@atlas/authorization";
+
+function learnerTx() {
+  return {
+    $queryRaw: vi
+      .fn()
+      .mockResolvedValueOnce([{ key: "search.query" }])
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([{ role_key: "learner" }]),
+  };
+}
+
+function adminTx() {
+  return {
+    $queryRaw: vi
+      .fn()
+      .mockResolvedValueOnce([{ key: "search.reindex.manage" }])
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([{ role_key: "admin" }]),
+  };
+}
+
+describe("search authorization", () => {
+  it("allows search.query on tenant search catalog", async () => {
+    const decision = await can({
+      tx: learnerTx(),
+      actor: { tenantId: "tenant-a", membershipId: "learner-a" },
+      permission: "search.query",
+      resource: createTenantResourceRef({
+        type: "search_index_entry",
+        id: "tenant-a",
+        tenantId: "tenant-a",
+      }),
+      ctx: { tenantId: "tenant-a", requestId: "req_search_auth" },
+    });
+
+    expect(decision.allowed).toBe(true);
+  });
+
+  it("allows search.reindex.manage for admin role grants", async () => {
+    const decision = await can({
+      tx: adminTx(),
+      actor: { tenantId: "tenant-a", membershipId: "admin-a" },
+      permission: "search.reindex.manage",
+      resource: createTenantResourceRef({
+        type: "search_index_entry",
+        id: "tenant-a",
+        tenantId: "tenant-a",
+      }),
+      ctx: { tenantId: "tenant-a", requestId: "req_search_reindex_auth" },
+    });
+
+    expect(decision.allowed).toBe(true);
+  });
+
+  it("denies search.reindex.manage for learner grants", async () => {
+    const tx = {
+      $queryRaw: vi
+        .fn()
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([{ role_key: "learner" }]),
+    };
+
+    const decision = await can({
+      tx,
+      actor: { tenantId: "tenant-a", membershipId: "learner-a" },
+      permission: "search.reindex.manage",
+      resource: createTenantResourceRef({
+        type: "search_index_entry",
+        id: "tenant-a",
+        tenantId: "tenant-a",
+      }),
+      ctx: { tenantId: "tenant-a", requestId: "req_search_reindex_denied" },
+    });
+
+    expect(decision.allowed).toBe(false);
+  });
+
+  it("applies permission override deny before allow", async () => {
+    const tx = {
+      $queryRaw: vi
+        .fn()
+        .mockResolvedValueOnce([{ key: "search.query" }])
+        .mockResolvedValueOnce([{ effect: "DENY" }]),
+    };
+
+    const decision = await can({
+      tx,
+      actor: { tenantId: "tenant-a", membershipId: "learner-a" },
+      permission: "search.query",
+      resource: createTenantResourceRef({
+        type: "search_index_entry",
+        id: "tenant-a",
+        tenantId: "tenant-a",
+      }),
+      ctx: { tenantId: "tenant-a", requestId: "req_search_override" },
+    });
+
+    expect(decision.allowed).toBe(false);
+    expect(decision.reason).toBe("EXPLICIT_DENY");
+  });
+});

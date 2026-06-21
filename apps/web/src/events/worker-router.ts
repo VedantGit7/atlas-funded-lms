@@ -15,3 +15,5 @@ export {
   processAutomationOutboxBatch,
   createAutomationOutboxConsumers,
 } from "../server/automation/automation-worker-router";
+export { processSearchOutboxBatch } from "../server/search/search-worker-router";
+export { createSearchOutboxConsumers } from "./outbox-consumers";
