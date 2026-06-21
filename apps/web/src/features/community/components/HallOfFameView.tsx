@@ -1,5 +1,9 @@
 import Link from "next/link";
 import { collectVerifyLinks, renderStructuredBody } from "./structured-body";
+import {
+  HALL_OF_FAME_DISCLAIMER,
+  formatHallOfFameLeaderboardUnavailable,
+} from "../../learner/copy/learner-copy";
 import type { z } from "zod";
 import type { structuredBodySchema } from "../../../server/community/community.dto";
 
@@ -21,6 +25,7 @@ type HallOfFameViewProps = {
 export function HallOfFameView({ posts, leaderboard, gamificationAvailable }: HallOfFameViewProps) {
   return (
     <div className="space-y-8">
+      <p className="text-sm opacity-80">{HALL_OF_FAME_DISCLAIMER}</p>
       <section className="space-y-4">
         <h2 className="text-lg font-medium">Recognition feed</h2>
         {posts.length === 0 ? (
@@ -52,7 +57,7 @@ export function HallOfFameView({ posts, leaderboard, gamificationAvailable }: Ha
       <section className="space-y-4">
         <h2 className="text-lg font-medium">Top performers</h2>
         {!gamificationAvailable ? (
-          <p className="text-sm opacity-80">Leaderboard recognition is unavailable on this plan.</p>
+          <p className="text-sm opacity-80">{formatHallOfFameLeaderboardUnavailable()}</p>
         ) : leaderboard && leaderboard.entries.length > 0 ? (
           <ol className="space-y-2 text-sm">
             {leaderboard.entries.map((entry) => (
