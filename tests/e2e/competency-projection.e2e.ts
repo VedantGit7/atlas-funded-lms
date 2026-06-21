@@ -31,8 +31,8 @@ describe("competency projection e2e wiring", () => {
     const source = readFileSync(resolve(webRoot, "app/(learner)/progress/page.tsx"), "utf8");
     expect(source).toContain("PageGate");
     expect(source).toContain("competencyServerApi");
-    expect(source).toContain("CompetencyScoreCards");
-    expect(source).toContain("CompetencyHistoryChart");
+    expect(source).toContain("ProgressDashboard");
+    expect(source).not.toContain("/api/v1/analytics/");
   });
 
   it("signal inspector uses competency-signals API with pagination", () => {

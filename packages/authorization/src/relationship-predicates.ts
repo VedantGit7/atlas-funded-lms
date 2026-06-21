@@ -32,6 +32,7 @@ const RELATIONSHIP_PERMISSION_MAP: Record<string, string[]> = {
   "certificate.read": ["selfCertificate", "instructorOfCourse", "instructorOfPath"],
   "certificate.issue": ["instructorOfCourse", "instructorOfPath"],
   "workflow.transition.act": ["workflowApproverEligible", "moderatorOfSpace"],
+  "analytics.dashboard.view": ["instructorOfCourse", "assessmentAuthor"],
 };
 
 export function requiredRelationships(permission: string): string[] {

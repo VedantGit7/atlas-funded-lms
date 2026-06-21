@@ -57,6 +57,16 @@ import {
   searchOutboxHandlers,
 } from "@atlas/domain/search/search.worker";
 
+import "../server/analytics/analytics-source-adapters";
+
+import {
+  ANALYTICS_WORKER_DESTINATION,
+  analyticsOutboxHandlers,
+  handleAnalyticsOutboxEvent,
+} from "@atlas/domain/analytics/analytics.worker";
+
+import { ANALYTICS_SOURCE_EVENTS } from "../server/analytics/analytics-source-adapters";
+
 export { COMPETENCY_WORKER_DESTINATION, handleCompetencyOutboxEvent };
 
 export { GAMIFICATION_WORKER_DESTINATION, handleGamificationOutboxEvent };
@@ -80,6 +90,8 @@ export {
   searchOutboxHandlers,
   SEARCH_OUTBOX_EVENTS,
 };
+
+export { ANALYTICS_WORKER_DESTINATION, handleAnalyticsOutboxEvent, analyticsOutboxHandlers };
 
 const CERTIFICATE_OUTBOX_EVENTS = [CERTIFICATE_ISSUED_EVENT, CERTIFICATE_REVOKED_EVENT] as const;
 
@@ -164,6 +176,16 @@ export function createSearchOutboxConsumers(): Record<string, OutboxHandler[]> {
 
   for (const eventType of SEARCH_OUTBOX_EVENTS) {
     appendHandlers(map, eventType, searchOutboxHandlers);
+  }
+
+  return map;
+}
+
+export function createAnalyticsOutboxConsumers(): Record<string, OutboxHandler[]> {
+  const map: Record<string, OutboxHandler[]> = {};
+
+  for (const eventType of ANALYTICS_SOURCE_EVENTS) {
+    appendHandlers(map, eventType, analyticsOutboxHandlers);
   }
 
   return map;

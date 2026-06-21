@@ -12,6 +12,7 @@ const navItems = [
   { href: "/studio/grading", label: "Grading" },
   { href: "/studio/items", label: "Items" },
   { href: "/studio/item-collections", label: "Collections" },
+  { href: "/studio/analytics", label: "Analytics" },
   { href: "/review", label: "Review" },
 ] as const;
 
