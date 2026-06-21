@@ -284,15 +284,27 @@ importers:
       '@atlas/api':
         specifier: workspace:*
         version: link:../api
+      '@atlas/audit':
+        specifier: workspace:*
+        version: link:../audit
       '@atlas/authorization':
         specifier: workspace:*
         version: link:../authorization
+      '@atlas/core':
+        specifier: workspace:*
+        version: link:../core
       '@atlas/db':
         specifier: workspace:*
         version: link:../db
       '@atlas/events':
         specifier: workspace:*
         version: link:../events
+      '@atlas/membership':
+        specifier: workspace:*
+        version: link:../membership
+      '@atlas/storage':
+        specifier: workspace:*
+        version: link:../storage
       zod:
         specifier: ^3.25.76
         version: 3.25.76
