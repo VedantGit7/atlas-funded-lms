@@ -48,6 +48,15 @@ import {
 
 import { AUTOMATION_TRIGGER_EVENT_TYPES } from "../server/automation/automation.registry";
 
+import "../server/search/search-source-adapters";
+
+import {
+  SEARCH_OUTBOX_EVENTS,
+  SEARCH_WORKER_DESTINATION,
+  handleSearchOutboxEvent,
+  searchOutboxHandlers,
+} from "@atlas/domain/search/search.worker";
+
 export { COMPETENCY_WORKER_DESTINATION, handleCompetencyOutboxEvent };
 
 export { GAMIFICATION_WORKER_DESTINATION, handleGamificationOutboxEvent };
@@ -64,6 +73,13 @@ export {
 };
 
 export { AUTOMATION_WORKER_DESTINATION, handleAutomationOutboxEvent, automationOutboxHandlers };
+
+export {
+  SEARCH_WORKER_DESTINATION,
+  handleSearchOutboxEvent,
+  searchOutboxHandlers,
+  SEARCH_OUTBOX_EVENTS,
+};
 
 const CERTIFICATE_OUTBOX_EVENTS = [CERTIFICATE_ISSUED_EVENT, CERTIFICATE_REVOKED_EVENT] as const;
 
@@ -138,6 +154,16 @@ export function createAutomationOutboxConsumers(): Record<string, OutboxHandler[
 
   for (const eventType of AUTOMATION_TRIGGER_EVENT_TYPES) {
     appendHandlers(map, eventType, automationOutboxHandlers);
+  }
+
+  return map;
+}
+
+export function createSearchOutboxConsumers(): Record<string, OutboxHandler[]> {
+  const map: Record<string, OutboxHandler[]> = {};
+
+  for (const eventType of SEARCH_OUTBOX_EVENTS) {
+    appendHandlers(map, eventType, searchOutboxHandlers);
   }
 
   return map;
