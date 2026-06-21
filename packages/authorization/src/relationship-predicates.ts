@@ -5,6 +5,8 @@ const RELATIONSHIP_PERMISSION_MAP: Record<string, string[]> = {
   "course.publish": ["instructorOfCourse"],
   "assessment.grade": ["assigneeOfGradingTask", "instructorOfCourse"],
   "community.moderate": ["moderatorOfSpace"],
+  "community.space.read": ["memberOfSpace", "tenantVisibleSpace"],
+  "post.read": ["memberOfSpace", "tenantVisibleSpace"],
   "post.create": ["memberOfSpace"],
   "comment.create": ["memberOfSpace"],
   "course.read": ["enrolledInCourse", "instructorOfCourse", "publishedLearnerVisible"],
