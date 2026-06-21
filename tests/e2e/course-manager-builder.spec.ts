@@ -6,9 +6,15 @@ const webRoot = resolve(import.meta.dirname, "../../apps/web/src");
 
 const studioPaths = [
   "app/studio/layout.tsx",
+  "app/studio/page.tsx",
   "app/studio/courses/page.tsx",
   "app/studio/courses/[id]/page.tsx",
+  "app/studio/courses/[id]/learners/page.tsx",
   "components/shells/StudioShell.tsx",
+  "components/shells/StudioShellGate.tsx",
+  "components/shells/StudioShellClient.tsx",
+  "features/studio/studio-route-registry.ts",
+  "features/studio/studio-navigation.ts",
   "features/studio/courses/course-manager.tsx",
   "features/studio/courses/course-table.tsx",
   "features/studio/courses/create-course-dialog.tsx",
@@ -34,6 +40,9 @@ describe("course manager builder e2e wiring", () => {
   it("uses StudioShell for studio pages", () => {
     const source = readFileSync(resolve(webRoot, "app/studio/layout.tsx"), "utf8");
     expect(source).toContain("StudioShell");
+    expect(readFileSync(resolve(webRoot, "components/shells/StudioShell.tsx"), "utf8")).toContain(
+      "StudioShellGate",
+    );
   });
 
   it("does not send tenant_id from create course dialog", () => {
