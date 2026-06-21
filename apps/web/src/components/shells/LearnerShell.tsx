@@ -25,9 +25,14 @@ export function LearnerShell({ children }: LearnerShellProps) {
     <div className="learner-shell min-h-screen">
       <header className="border-b px-4 py-3">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4">
-          <Link href="/courses" className="font-semibold">
-            Learn
-          </Link>
+          <div className="flex items-center gap-4">
+            <Link href="/courses" className="font-semibold">
+              Learn
+            </Link>
+            <Link href="/search" className="text-sm underline-offset-2 hover:underline">
+              Search
+            </Link>
+          </div>
           <nav aria-label="Learner navigation" className="flex items-center gap-4 text-sm">
             {navItems.map((item) => (
               <Link key={item.href} href={item.href}>
