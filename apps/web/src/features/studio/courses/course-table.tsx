@@ -40,6 +40,12 @@ export function CourseTable({ courses }: CourseTableProps) {
               <td>{new Date(course.updatedAt).toLocaleString()}</td>
               <td>
                 <Link href={`/studio/courses/${course.id}`}>Open builder</Link>
+                {course.status === "PUBLISHED" ? (
+                  <>
+                    {" · "}
+                    <Link href={`/studio/courses/${course.id}/learners`}>Learners</Link>
+                  </>
+                ) : null}
               </td>
             </tr>
           ))}

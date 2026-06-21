@@ -13,6 +13,7 @@ const RELATIONSHIP_PERMISSION_MAP: Record<string, string[]> = {
   "post.create": ["memberOfSpace"],
   "comment.create": ["memberOfSpace"],
   "course.read": ["enrolledInCourse", "instructorOfCourse", "publishedLearnerVisible"],
+  "enrollment.read": ["enrolledInCourse", "instructorOfCourse", "selfEnrollmentList"],
   "learning_path.read": ["enrolledInPath", "instructorOfPath", "publishedLearnerVisible"],
   "learning_path.update": ["instructorOfPath"],
   "learning_path.delete": ["instructorOfPath"],

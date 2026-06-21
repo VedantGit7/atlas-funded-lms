@@ -1,7 +1,7 @@
+import type { EntitlementView } from "@atlas/domain-config/schemas/entitlements";
 import { PageGate, PageHeader } from "../../../components/patterns/PageGate";
 import { AnalyticsDashboard } from "../../../features/analytics/components/analytics-dashboard";
-import { ServerApiError } from "../../../lib/server-api";
-import { serverApi } from "../../../lib/server-api";
+import { ServerApiError, serverApi } from "../../../lib/server-api";
 
 type CourseOption = { id: string; title: string };
 type AssessmentOption = { id: string; title: string };
@@ -18,10 +18,26 @@ type StudioAssessmentsResponse = {
   };
 };
 
+function hasAnalyticsEntitlement(entitlements: EntitlementView[]): boolean {
+  return entitlements.some((entry) => entry.key === "analytics.dashboard.view" && entry.enabled);
+}
+
 export default async function StudioAnalyticsPage() {
   try {
+    const entitlements = await serverApi.get<{ data: EntitlementView[] }>("/api/v1/entitlements");
+
+    if (!hasAnalyticsEntitlement(entitlements.data)) {
+      return (
+        <PageGate
+          state="denied"
+          title="Studio Analytics"
+          deniedMessage="Advanced analytics requires the analytics.dashboard.view entitlement."
+        />
+      );
+    }
+
     const [courses, assessments] = await Promise.all([
-      serverApi.get<StudioCoursesResponse>("/api/v1/courses?limit=50").catch(() => ({
+      serverApi.get<StudioCoursesResponse>("/api/v1/courses?view=studio&limit=50").catch(() => ({
         data: { items: [] as CourseOption[] },
       })),
       serverApi.get<StudioAssessmentsResponse>("/api/v1/assessments?limit=50").catch(() => ({
