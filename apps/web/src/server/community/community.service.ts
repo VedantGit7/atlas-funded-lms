@@ -462,13 +462,29 @@ export async function deleteComment(tx: TenantTx, ctx: ServiceCtx, commentId: st
     throw communityCommentNotFound();
   }
 
-  if (existing.author_membership_id !== ctx.actorMembershipId) {
-    throw communityCommentNotFound();
-  }
-
   const deleted = await communityRepository.softDeleteComment(tx, commentId);
   if (!deleted) {
     throw communityCommentNotFound();
+  }
+
+  if (existing.author_membership_id !== ctx.actorMembershipId) {
+    await auditWriter.write(
+      tx,
+      {
+        tenantId: ctx.tenantId,
+        actorMembershipId: ctx.actorMembershipId,
+        platformPrincipalId: null,
+        requestId: ctx.requestId,
+      },
+      {
+        action: "community.moderation.decided",
+        target: { type: "comment", id: commentId },
+        before: { deleted: false },
+        after: { deleted: true, contentAction: "delete" },
+        reason: null,
+        metadata: { moderationPath: true },
+      },
+    );
   }
 
   return { data: { id: commentId, deleted: true as const } };
@@ -526,4 +542,38 @@ export async function getPostById(tx: TenantTx, ctx: ServiceCtx, postId: string)
   }
 
   return { data: await mapPostDto(tx, post) };
+}
+
+export async function deletePost(tx: TenantTx, ctx: ServiceCtx, postId: string) {
+  const existing = await communityRepository.findPostById(tx, postId);
+  if (!existing || existing.tenant_id !== ctx.tenantId) {
+    throw communityPostNotFound();
+  }
+
+  const deleted = await communityRepository.softDeletePost(tx, postId);
+  if (!deleted) {
+    throw communityPostNotFound();
+  }
+
+  if (existing.author_membership_id !== ctx.actorMembershipId) {
+    await auditWriter.write(
+      tx,
+      {
+        tenantId: ctx.tenantId,
+        actorMembershipId: ctx.actorMembershipId,
+        platformPrincipalId: null,
+        requestId: ctx.requestId,
+      },
+      {
+        action: "community.moderation.decided",
+        target: { type: "post", id: postId },
+        before: { deleted: false },
+        after: { deleted: true, contentAction: "delete" },
+        reason: null,
+        metadata: { moderationPath: true },
+      },
+    );
+  }
+
+  return { data: { id: postId, deleted: true as const } };
 }

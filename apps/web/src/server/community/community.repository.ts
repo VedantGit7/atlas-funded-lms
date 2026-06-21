@@ -363,6 +363,18 @@ export const communityRepository = {
     return row ? mapPostRow(row) : null;
   },
 
+  async findPostByIdIncludingDeleted(tx: TenantTx, postId: string): Promise<PostRow | null> {
+    const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
+      select *
+      from posts
+      where id = ${postId}::uuid
+      limit 1
+    `;
+
+    const row = rows[0];
+    return row ? mapPostRow(row) : null;
+  },
+
   async insertPost(
     tx: TenantTx,
     args: {
@@ -430,6 +442,21 @@ export const communityRepository = {
     return row ? mapCommentRow(row) : null;
   },
 
+  async findCommentByIdIncludingDeleted(
+    tx: TenantTx,
+    commentId: string,
+  ): Promise<CommentRow | null> {
+    const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
+      select *
+      from comments
+      where id = ${commentId}::uuid
+      limit 1
+    `;
+
+    const row = rows[0];
+    return row ? mapCommentRow(row) : null;
+  },
+
   async insertComment(
     tx: TenantTx,
     args: {
@@ -490,6 +517,17 @@ export const communityRepository = {
       update comments
       set deleted_at = now(), updated_at = now(), status = 'deleted'
       where id = ${commentId}::uuid
+        and deleted_at is null
+    `;
+
+    return count > 0;
+  },
+
+  async softDeletePost(tx: TenantTx, postId: string): Promise<boolean> {
+    const count = await tx.$executeRaw`
+      update posts
+      set deleted_at = now(), updated_at = now(), status = 'deleted'
+      where id = ${postId}::uuid
         and deleted_at is null
     `;
 

@@ -11,7 +11,7 @@ const communityPaths = [
   "app/(learner)/community/posts/[id]/page.tsx",
   "app/(learner)/hall-of-fame/page.tsx",
   "app/(learner)/hall-of-fame/layout.tsx",
-  "app/moderate/spaces/page.tsx",
+  "app/(moderation)/moderate/spaces/page.tsx",
   "app/api/v1/spaces/route.ts",
   "app/api/v1/spaces/route.metadata.ts",
   "app/api/v1/spaces/[id]/join/route.ts",

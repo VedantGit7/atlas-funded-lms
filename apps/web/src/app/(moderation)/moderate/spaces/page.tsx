@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { PageGate, PageHeader } from "../../../components/patterns/PageGate";
-import { AdminSpacesEditor } from "../../../features/community/components/AdminSpacesEditor";
-import { ServerApiError } from "../../../lib/server-api";
-import { communityServerApi } from "../../../modules/community/community.server-api";
+import { PageGate, PageHeader } from "../../../../components/patterns/PageGate";
+import { AdminSpacesEditor } from "../../../../features/community/components/AdminSpacesEditor";
+import { ServerApiError } from "../../../../lib/server-api";
+import { communityServerApi } from "../../../../modules/community/community.server-api";
 
 export default async function ModerateSpacesPage() {
   try {
@@ -16,8 +16,8 @@ export default async function ModerateSpacesPage() {
               title="Community spaces"
               description="Create, update, and soft-delete community spaces."
             />
-            <Link href="/admin" className="text-sm underline">
-              Back to admin
+            <Link href="/moderate/cases" className="text-sm underline">
+              Back to moderation
             </Link>
           </header>
           <AdminSpacesEditor initialSpaces={spaces.data.items} />

@@ -239,6 +239,13 @@ export const deleteCommentResponseSchema = z.object({
   }),
 });
 
+export const deletePostResponseSchema = z.object({
+  data: z.object({
+    id: z.string().uuid(),
+    deleted: z.literal(true),
+  }),
+});
+
 export const joinSpaceResponseSchema = z.object({
   data: z.object({
     spaceId: z.string().uuid(),
