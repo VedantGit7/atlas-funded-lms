@@ -128,3 +128,77 @@ export async function findDeadLetterForReplay(
     request_id: parsed.requestId,
   };
 }
+
+export type DeadLetterListRow = {
+  id: string;
+  tenant_id: string | null;
+  outbox_event_id: string;
+  destination_key: string | null;
+  event_type: string;
+  error_code: string | null;
+  safe_error_message: string | null;
+  failed_at: Date;
+};
+
+function decodeDeadLetterCursor(cursor: string | undefined): { failedAt: Date; id: string } | null {
+  if (!cursor) {
+    return null;
+  }
+
+  const [failedAt, id] = cursor.split("|");
+  if (!failedAt || !id) {
+    return null;
+  }
+
+  const parsed = new Date(failedAt);
+  if (Number.isNaN(parsed.getTime())) {
+    return null;
+  }
+
+  return { failedAt: parsed, id };
+}
+
+function encodeDeadLetterCursor(row: DeadLetterListRow): string {
+  return `${row.failed_at.toISOString()}|${row.id}`;
+}
+
+export async function listDeadLetterEventsForPlatform(
+  tx: EventsDbTx,
+  query: { limit: number; cursor?: string },
+): Promise<{ rows: DeadLetterListRow[]; nextCursor: string | null; hasMore: boolean }> {
+  const limitPlusOne = query.limit + 1;
+  const cursor = decodeDeadLetterCursor(query.cursor);
+
+  const rows = await tx.$queryRaw<DeadLetterListRow[]>`
+    SELECT
+      d.id::text AS id,
+      d.tenant_id::text AS tenant_id,
+      d.outbox_event_id::text AS outbox_event_id,
+      d.destination_key,
+      COALESCE(d.error_json->>'eventType', 'unknown.event') AS event_type,
+      d.error_json->>'errorCode' AS error_code,
+      d.error_json->>'safeErrorMessage' AS safe_error_message,
+      d.failed_at
+    FROM dead_letter_events d
+    WHERE (
+      ${cursor?.failedAt ?? null}::timestamptz IS NULL
+      OR d.failed_at < ${cursor?.failedAt ?? null}::timestamptz
+      OR (
+        d.failed_at = ${cursor?.failedAt ?? null}::timestamptz
+        AND d.id < ${cursor?.id ?? null}::uuid
+      )
+    )
+    ORDER BY d.failed_at DESC, d.id DESC
+    LIMIT ${limitPlusOne}
+  `;
+
+  const hasMore = rows.length > query.limit;
+  const pageRows = hasMore ? rows.slice(0, query.limit) : rows;
+  const last = pageRows[pageRows.length - 1];
+
+  return {
+    rows: pageRows,
+    hasMore,
+    nextCursor: hasMore && last ? encodeDeadLetterCursor(last) : null,
+  };
+}

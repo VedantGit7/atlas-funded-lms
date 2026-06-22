@@ -13,3 +13,34 @@ export {
   readTenantConfig,
   updateTenantConfigDraft,
 } from "./services/tenant-config.service";
+export {
+  listPlatformFeatureFlags,
+  createPlatformFeatureFlag,
+  updatePlatformFeatureFlag,
+} from "./services/platform-feature-flag.service";
+export {
+  listPlatformPermissionCatalog,
+  createPlatformPermissionCatalogEntry,
+  listPlatformItemTypeCatalog,
+  createPlatformItemTypeCatalogEntry,
+  listPlatformExtensionPointCatalog,
+  createPlatformExtensionPointCatalogEntry,
+} from "./services/platform-catalog.service";
+export {
+  PlatformFeatureFlagListResponseSchema,
+  PlatformFeatureFlagViewSchema,
+  CreatePlatformFeatureFlagRequestSchema,
+  UpdatePlatformFeatureFlagRequestSchema,
+  PlatformFeatureFlagParamsSchema,
+} from "./schemas/platform-feature-flags";
+export {
+  PlatformPermissionCatalogListResponseSchema,
+  PlatformItemTypeCatalogListResponseSchema,
+  PlatformExtensionPointCatalogListResponseSchema,
+  PlatformPermissionCatalogEntrySchema,
+  PlatformItemTypeCatalogEntrySchema,
+  PlatformExtensionPointCatalogEntrySchema,
+  CreatePlatformPermissionRequestSchema,
+  CreatePlatformItemTypeRequestSchema,
+  CreatePlatformExtensionPointRequestSchema,
+} from "./schemas/platform-catalog";

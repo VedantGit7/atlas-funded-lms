@@ -17,5 +17,12 @@ export {
 export {
   insertDeadLetterEvent,
   findDeadLetterForReplay,
+  listDeadLetterEventsForPlatform,
   type DeadLetterReplayRow,
+  type DeadLetterListRow,
 } from "./repositories/dead-letter.repository";
+export { readPlatformDeadLetterList } from "./services/dead-letter-list.service";
+export {
+  DeadLetterListQuerySchema,
+  DeadLetterListResponseSchema,
+} from "./schemas/dead-letter-list";
