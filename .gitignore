@@ -27,4 +27,7 @@ Thumbs.db
 # local generated files
 coverage/
 .playwright/
+release-evidence.json
+packages/**/src/**/*.d.ts
+packages/**/tsconfig.tsbuildinfo
 packages/db/src/generated/

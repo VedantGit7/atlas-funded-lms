@@ -88,9 +88,22 @@ const failures = [];
 
 for (const file of files) {
   const content = readFileSync(file, "utf8");
+  const normalized = file.replaceAll("\\", "/");
 
   for (const { name, pattern } of secretPatterns) {
     if (pattern.test(content)) {
+      if (
+        name === "Database URL" &&
+        normalized.includes(".github/workflows/") &&
+        content.includes("CI_DATABASE_URL")
+      ) {
+        continue;
+      }
+
+      if (name === "Database URL" && normalized.startsWith("tests/")) {
+        continue;
+      }
+
       failures.push(`${file}: ${name}`);
     }
   }

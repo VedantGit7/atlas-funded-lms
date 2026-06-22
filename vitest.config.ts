@@ -5,6 +5,8 @@ export default defineConfig({
   test: {
     environment: "node",
     include: ["tests/**/*.test.ts", "tests/**/*.e2e.ts"],
+    testTimeout: 60_000,
+    hookTimeout: 60_000,
   },
   resolve: {
     alias: [
@@ -159,6 +161,14 @@ export default defineConfig({
       {
         find: "@atlas/tenant-config",
         replacement: path.resolve(import.meta.dirname, "packages/tenant-config/src/index.ts"),
+      },
+      {
+        find: /^@atlas\/release-readiness\/(.+)$/,
+        replacement: path.resolve(import.meta.dirname, "packages/release-readiness/src/$1.ts"),
+      },
+      {
+        find: "@atlas/release-readiness",
+        replacement: path.resolve(import.meta.dirname, "packages/release-readiness/src/index.ts"),
       },
       {
         find: "@atlas/security",

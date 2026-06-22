@@ -442,6 +442,55 @@ async function applyTenantScopedConfiguration(
   });
 }
 
+async function ensureGlobalFeatureFlags(
+  manifest: TenantManifest,
+  ctx: ApplyContext,
+): Promise<void> {
+  const keys = manifest.featureFlagOverrides.map((override) => override.key);
+  if (keys.length === 0) {
+    return;
+  }
+
+  await withPlatformScope(
+    {
+      principalId: ctx.platformPrincipalId,
+      requestId: ctx.requestId,
+      requiredPermission: "platform.catalog.manage",
+      platformPermissions: ["platform.catalog.manage"],
+    },
+    "Ensure global feature flags for tenant config apply",
+    async (tx) => {
+      for (const key of keys) {
+        const existing = await tx.$queryRaw<Array<{ id: string }>>`
+          SELECT id::text FROM feature_flags WHERE key = ${key} LIMIT 1
+        `;
+        if (existing.length > 0) {
+          continue;
+        }
+
+        await tx.$executeRaw`
+          INSERT INTO feature_flags (
+            id,
+            key,
+            default_value,
+            description,
+            created_at,
+            updated_at
+          )
+          VALUES (
+            gen_random_uuid(),
+            ${key},
+            '{"enabled":false}'::jsonb,
+            ${`Tenant config manifest feature flag ${key}`},
+            now(),
+            now()
+          )
+        `;
+      }
+    },
+  );
+}
+
 export async function applyTenantManifest(
   manifest: TenantManifest,
   ctx: ApplyContext,
@@ -488,6 +537,7 @@ export async function applyTenantManifest(
   }
 
   const actorMembershipId = await ensureActiveActorMembership(tenantId, manifest, ctx);
+  await ensureGlobalFeatureFlags(manifest, ctx);
   await applyTenantScopedConfiguration(manifest, tenantId, actorMembershipId, ctx);
 
   return {
