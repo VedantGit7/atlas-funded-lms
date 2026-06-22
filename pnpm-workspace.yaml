@@ -6,6 +6,9 @@ packages:
   - "packages/domain/branding"
   - "packages/domain/identity"
   - "packages/domain/access"
+  - "packages/tenant-config"
+
+minimumReleaseAge: 0
 
 allowBuilds:
   "@prisma/client": true

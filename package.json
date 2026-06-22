@@ -49,6 +49,12 @@
     "db:seed:tenants": "dotenv -e .env.local -- tsx prisma/seeds/index.ts tenants",
     "db:seed:fundedbeyond": "dotenv -e .env.local -- tsx prisma/seeds/index.ts fundedbeyond",
     "db:seed:smoke-tenant": "dotenv -e .env.local -- tsx prisma/seeds/index.ts smoke-tenant",
+    "db:seed:check": "pnpm tenant-config:validate -- --tenant fundedbeyond && pnpm tenant-config:validate -- --tenant second-smoke-academy",
+    "tenant-config:validate": "tsx scripts/tenants/validate.ts",
+    "tenant-config:plan": "tsx scripts/tenants/plan.ts",
+    "tenant-config:apply": "dotenv -e .env.local -- tsx scripts/tenants/apply.ts",
+    "tenant-config:verify": "tsx scripts/tenants/verify.ts",
+    "tenant-config:smoke": "dotenv -e .env.local -- tsx scripts/tenants/smoke.ts",
     "db:rls:check": "dotenv -e .env.local -- tsx scripts/check-rls-state.ts",
     "db:tenant-indexes:check": "dotenv -e .env.local -- tsx scripts/check-tenant-leading-indexes.ts",
     "db:append-only:check": "dotenv -e .env.local -- tsx scripts/check-append-only-trigger-coverage.ts",
@@ -86,6 +92,7 @@
   "dependencies": {
     "@atlas/access": "workspace:*",
     "@atlas/db": "workspace:*",
+    "@atlas/tenant-config": "workspace:*",
     "@supabase/supabase-js": "^2.108.2",
     "uuid": "^14.0.0"
   }

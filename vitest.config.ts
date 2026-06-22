@@ -153,6 +153,14 @@ export default defineConfig({
         replacement: path.resolve(import.meta.dirname, "packages/observability/src/index.ts"),
       },
       {
+        find: /^@atlas\/tenant-config\/(.+)$/,
+        replacement: path.resolve(import.meta.dirname, "packages/tenant-config/src/$1.ts"),
+      },
+      {
+        find: "@atlas/tenant-config",
+        replacement: path.resolve(import.meta.dirname, "packages/tenant-config/src/index.ts"),
+      },
+      {
         find: "@atlas/security",
         replacement: path.resolve(import.meta.dirname, "packages/security/src/index.ts"),
       },

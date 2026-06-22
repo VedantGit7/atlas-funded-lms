@@ -14,6 +14,9 @@ importers:
       '@atlas/db':
         specifier: workspace:*
         version: link:packages/db
+      '@atlas/tenant-config':
+        specifier: workspace:*
+        version: link:packages/tenant-config
       '@supabase/supabase-js':
         specifier: ^2.108.2
         version: 2.108.2
@@ -533,6 +536,16 @@ importers:
       '@atlas/core':
         specifier: workspace:*
         version: link:../core
+
+  packages/tenant-config:
+    dependencies:
+      zod:
+        specifier: ^3.25.76
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: ^24.0.0
+        version: 24.13.2
 
   packages/testing: {}
 
