@@ -1,5 +1,5 @@
-import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { readFileSync, readdirSync, statSync } from "node:fs";
+import { join, relative, resolve } from "node:path";
 
 const FORBIDDEN_RUNTIME_PATTERNS = [
   /tenant\.slug\s*===\s*["'`]fundedbeyond["'`]/,
@@ -14,6 +14,7 @@ const NO_FORK_SCAN_EXEMPT_PREFIXES = [
   "docs/",
   "tests/",
   "packages/tenant-config/",
+  "packages/db/",
 ] as const;
 
 export type NoForkFinding = {
@@ -68,4 +69,62 @@ export function scanSourceForForkViolations(filePath: string, content: string): 
 export function scanFileForForkViolations(filePath: string): NoForkFinding[] {
   const content = readFileSync(resolve(filePath), "utf8");
   return scanSourceForForkViolations(filePath, content);
+}
+
+function walkSourceFiles(directory: string): string[] {
+  try {
+    return readdirSync(directory).flatMap((entry) => {
+      const fullPath = join(directory, entry);
+      const normalized = fullPath.replaceAll("\\", "/");
+
+      if (
+        normalized.includes("/node_modules/") ||
+        normalized.includes("/.next/") ||
+        normalized.includes("/dist/")
+      ) {
+        return [];
+      }
+
+      const stat = statSync(fullPath);
+      if (stat.isDirectory()) {
+        return walkSourceFiles(fullPath);
+      }
+
+      return /\.(ts|tsx|js|mjs)$/.test(fullPath) ? [fullPath] : [];
+    });
+  } catch {
+    return [];
+  }
+}
+
+function isAllowedPath(normalizedPath: string, allowPaths: string[]): boolean {
+  return (
+    isNoForkScanExemptPath(normalizedPath) ||
+    allowPaths.some((prefix) => normalizedPath.includes(prefix.replaceAll("\\", "/")))
+  );
+}
+
+export function scanRuntimeForFundedBeyondFork(options: {
+  roots: string[];
+  allowPaths?: string[];
+  repoRoot?: string;
+}): NoForkFinding[] {
+  const repoRoot = options.repoRoot ?? process.cwd();
+  const allowPaths = options.allowPaths ?? [];
+  const findings: NoForkFinding[] = [];
+
+  for (const root of options.roots) {
+    const absoluteRoot = resolve(repoRoot, root);
+    for (const file of walkSourceFiles(absoluteRoot)) {
+      const relativePath = relative(repoRoot, file).replaceAll("\\", "/");
+      if (isAllowedPath(relativePath, allowPaths)) {
+        continue;
+      }
+
+      const content = readFileSync(file, "utf8");
+      findings.push(...scanSourceForForkViolations(relativePath, content));
+    }
+  }
+
+  return findings;
 }

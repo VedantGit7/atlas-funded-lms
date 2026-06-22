@@ -1,0 +1,27 @@
+{
+  "name": "@atlas/release-readiness",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./*": "./src/*"
+  },
+  "scripts": {
+    "build": "echo \"No release-readiness build configured yet.\"",
+    "lint": "echo \"No release-readiness lint configured yet.\"",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "echo \"No release-readiness tests configured yet.\"",
+    "test:unit": "echo \"No release-readiness unit tests configured yet.\"",
+    "test:integration": "echo \"No release-readiness integration tests configured yet.\"",
+    "test:authorization": "echo \"No release-readiness authorization tests configured yet.\"",
+    "test:tenant-isolation": "echo \"No release-readiness tenant-isolation tests configured yet.\"",
+    "test:e2e": "echo \"No release-readiness e2e tests configured yet.\""
+  },
+  "dependencies": {
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0"
+  }
+}
