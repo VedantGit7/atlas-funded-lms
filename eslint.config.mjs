@@ -435,13 +435,30 @@ export default tseslint.config(
       "configs/tenants/**",
       "scripts/tenants/**",
       "packages/tenant-config/**",
+      "packages/release-readiness/**",
       "tests/unit/tenant-config/**",
+      "tests/unit/release-readiness/**",
       "tests/integration/tenant-config/**",
       "tests/tenant-isolation/tenant-config.isolation.test.ts",
       "tests/e2e/tenant-config.e2e.ts",
+      "tests/e2e/fundedbeyond-journey.e2e.ts",
+      "tests/security/release-security-suite.test.ts",
     ],
     rules: {
       "atlas/no-hardcoded-tenant-strings": "off",
+    },
+  },
+
+  {
+    files: ["packages/release-readiness/**/*.ts"],
+    ...tseslint.configs.disableTypeChecked,
+    languageOptions: {
+      parserOptions: {
+        projectService: false,
+      },
+      globals: {
+        ...globals.node,
+      },
     },
   },
 

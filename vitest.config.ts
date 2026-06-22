@@ -161,6 +161,14 @@ export default defineConfig({
         replacement: path.resolve(import.meta.dirname, "packages/tenant-config/src/index.ts"),
       },
       {
+        find: /^@atlas\/release-readiness\/(.+)$/,
+        replacement: path.resolve(import.meta.dirname, "packages/release-readiness/src/$1.ts"),
+      },
+      {
+        find: "@atlas/release-readiness",
+        replacement: path.resolve(import.meta.dirname, "packages/release-readiness/src/index.ts"),
+      },
+      {
         find: "@atlas/security",
         replacement: path.resolve(import.meta.dirname, "packages/security/src/index.ts"),
       },

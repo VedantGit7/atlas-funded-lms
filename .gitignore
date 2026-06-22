@@ -27,4 +27,5 @@ Thumbs.db
 # local generated files
 coverage/
 .playwright/
+release-evidence.json
 packages/db/src/generated/

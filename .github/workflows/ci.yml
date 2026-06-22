@@ -171,6 +171,23 @@ jobs:
     name: tenant-isolation-tests
     runs-on: ubuntu-latest
     needs: install
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: atlas
+          POSTGRES_PASSWORD: atlas_dev_password
+          POSTGRES_DB: atlas_lms_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U atlas -d atlas_lms_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: ${{ env.CI_DATABASE_URL }}
+      PLATFORM_DATABASE_URL: ${{ env.CI_DATABASE_URL }}
     steps:
       - uses: actions/checkout@v4
 
@@ -181,6 +198,7 @@ jobs:
       - uses: pnpm/action-setup@v6
 
       - run: pnpm install --frozen-lockfile
+      - *generate-prisma-client
       - run: pnpm test:tenant-isolation
 
   rls-tests:
@@ -314,6 +332,139 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm check:forbidden-scope
 
+  zod-boundaries-check:
+    name: zod-boundaries-check
+    runs-on: ubuntu-latest
+    needs: install
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.13.1
+
+      - uses: pnpm/action-setup@v6
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm ci:zod-boundaries
+
+  permission-metadata-check:
+    name: permission-metadata-check
+    runs-on: ubuntu-latest
+    needs: install
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.13.1
+
+      - uses: pnpm/action-setup@v6
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm ci:permission-metadata
+
+  entitlement-metadata-check:
+    name: entitlement-metadata-check
+    runs-on: ubuntu-latest
+    needs: install
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.13.1
+
+      - uses: pnpm/action-setup@v6
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm ci:entitlement-metadata
+
+  tenant-resource-registry-check:
+    name: tenant-resource-registry-check
+    runs-on: ubuntu-latest
+    needs: install
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.13.1
+
+      - uses: pnpm/action-setup@v6
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm ci:tenant-resource-registry
+
+  security-check:
+    name: security-check
+    runs-on: ubuntu-latest
+    needs: install
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.13.1
+
+      - uses: pnpm/action-setup@v6
+
+      - run: pnpm install --frozen-lockfile
+      - *generate-prisma-client
+      - run: pnpm security:check
+
+  e2e-tests:
+    name: e2e-tests
+    runs-on: ubuntu-latest
+    needs: install
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: atlas
+          POSTGRES_PASSWORD: atlas_dev_password
+          POSTGRES_DB: atlas_lms_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U atlas -d atlas_lms_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: ${{ env.CI_DATABASE_URL }}
+      PLATFORM_DATABASE_URL: ${{ env.CI_DATABASE_URL }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.13.1
+
+      - uses: pnpm/action-setup@v6
+
+      - run: pnpm install --frozen-lockfile
+      - *generate-prisma-client
+      - run: pnpm test:e2e
+
+  release-evidence-validation:
+    name: release-evidence-validation
+    runs-on: ubuntu-latest
+    needs: install
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.13.1
+
+      - uses: pnpm/action-setup@v6
+
+      - run: pnpm install --frozen-lockfile
+      - *generate-prisma-client
+      - run: pnpm release:suite -- --skip-db --skip-build --skip-e2e
+      - run: test -f release-evidence.json
+
   observability-contract-check:
     name: observability-contract-check
     runs-on: ubuntu-latest
@@ -399,6 +550,13 @@ jobs:
       - audit-compliance-check
       - outbox-compliance-check
       - forbidden-scope-check
+      - zod-boundaries-check
+      - permission-metadata-check
+      - entitlement-metadata-check
+      - tenant-resource-registry-check
+      - security-check
+      - e2e-tests
+      - release-evidence-validation
       - observability-contract-check
       - secret-scan
       - dependency-scan
