@@ -9,3 +9,4 @@ export * from "./guards/permission-validation";
 export * from "./guards/role-rank";
 export * from "./guards/admin-role-guards";
 export * from "./guards/no-grant-up";
+export * from "./platform-role-permissions";

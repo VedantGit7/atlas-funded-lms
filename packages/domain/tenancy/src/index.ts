@@ -17,3 +17,12 @@ export {
   resumeTenant,
   archiveTenant,
 } from "./services/platform-tenant-lifecycle.service";
+export {
+  openPlatformSupportSession,
+  listActivePlatformSupportSessions,
+} from "./services/platform-support-session.service";
+export {
+  OpenSupportSessionRequestSchema,
+  OpenSupportSessionResponseSchema,
+  ActiveSupportSessionListSchema,
+} from "./schemas/platform-support";
