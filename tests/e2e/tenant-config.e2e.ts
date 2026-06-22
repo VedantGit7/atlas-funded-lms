@@ -14,6 +14,10 @@ describeWithE2E("tenant config e2e", () => {
     const adapted = {
       ...manifest,
       tenant: { ...manifest.tenant, slug },
+      learningPaths: [],
+      certificateTemplates: [],
+      gamification: { badges: [], leaderboards: [] },
+      communitySpaces: [],
       testOwner: {
         email: `${slug}-owner@example.test`,
         displayName: "Second Smoke Owner",

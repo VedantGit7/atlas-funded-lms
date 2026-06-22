@@ -28,4 +28,6 @@ Thumbs.db
 coverage/
 .playwright/
 release-evidence.json
+packages/**/src/**/*.d.ts
+packages/**/tsconfig.tsbuildinfo
 packages/db/src/generated/
