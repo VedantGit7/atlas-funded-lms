@@ -145,6 +145,14 @@ export default defineConfig({
         replacement: path.resolve(import.meta.dirname, "packages/security/src/$1.ts"),
       },
       {
+        find: /^@atlas\/observability\/(.+)$/,
+        replacement: path.resolve(import.meta.dirname, "packages/observability/src/$1.ts"),
+      },
+      {
+        find: "@atlas/observability",
+        replacement: path.resolve(import.meta.dirname, "packages/observability/src/index.ts"),
+      },
+      {
         find: "@atlas/security",
         replacement: path.resolve(import.meta.dirname, "packages/security/src/index.ts"),
       },

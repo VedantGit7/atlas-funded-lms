@@ -314,6 +314,41 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm check:forbidden-scope
 
+  observability-contract-check:
+    name: observability-contract-check
+    runs-on: ubuntu-latest
+    needs: install
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.13.1
+
+      - uses: pnpm/action-setup@v6
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm observability:check
+
+  release-health-check:
+    name: release-health-check
+    runs-on: ubuntu-latest
+    needs: install
+    if: ${{ vars.RELEASE_HEALTH_BASE_URL != '' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.13.1
+
+      - uses: pnpm/action-setup@v6
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm release:health -- --base-url "${{ vars.RELEASE_HEALTH_BASE_URL }}"
+        env:
+          RELEASE_HEALTH_EXPECTED_RELEASE: ${{ vars.RELEASE_HEALTH_EXPECTED_RELEASE }}
+
   secret-scan:
     name: secret-scan
     runs-on: ubuntu-latest
@@ -364,6 +399,7 @@ jobs:
       - audit-compliance-check
       - outbox-compliance-check
       - forbidden-scope-check
+      - observability-contract-check
       - secret-scan
       - dependency-scan
     steps:

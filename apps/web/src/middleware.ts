@@ -4,7 +4,7 @@ import {
   ATLAS_INTERNAL_REQUEST_ID_HEADER,
   SPOOFABLE_TENANT_HEADERS,
 } from "@atlas/core/http/headers";
-import { getOrCreateRequestId } from "@atlas/core/request/request-id";
+import { createRequestId, stripClientSuppliedRequestIds } from "@atlas/core/request/request-id";
 
 export function middleware(req: NextRequest) {
   const requestHeaders = new Headers(req.headers);
@@ -14,7 +14,8 @@ export function middleware(req: NextRequest) {
     requestHeaders.delete(header);
   }
 
-  const requestId = getOrCreateRequestId(requestHeaders);
+  stripClientSuppliedRequestIds(requestHeaders);
+  const requestId = createRequestId();
   requestHeaders.set(ATLAS_INTERNAL_REQUEST_ID_HEADER, requestId);
 
   const res = NextResponse.next({

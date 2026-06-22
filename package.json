@@ -53,7 +53,15 @@
     "db:tenant-indexes:check": "dotenv -e .env.local -- tsx scripts/check-tenant-leading-indexes.ts",
     "db:append-only:check": "dotenv -e .env.local -- tsx scripts/check-append-only-trigger-coverage.ts",
     "sprint0:gate": "pnpm typecheck && pnpm lint && pnpm test && pnpm test:tenant-isolation && pnpm db:rls:check && pnpm db:tenant-indexes:check && pnpm db:append-only:check && pnpm db:check-no-direct-prisma && pnpm db:check-no-platform-scope-outside-wrapper && pnpm db:check-no-session-tenant-set",
-    "ci:audit-metadata": "tsx scripts/ci/check-sensitive-route-audit.ts"
+    "ci:audit-metadata": "tsx scripts/ci/check-sensitive-route-audit.ts",
+    "ci:outbox-metadata": "pnpm check:outbox-compliance",
+    "ci:route-metadata": "pnpm check:route-metadata",
+    "ci:prisma-boundary": "pnpm check:prisma-boundary",
+    "ci:forbidden-scope": "pnpm check:forbidden-scope",
+    "observability:check": "node scripts/observability/check-contract.mjs",
+    "observability:validate-env": "node scripts/observability/validate-env.mjs",
+    "release:health": "node scripts/observability/release-health.mjs",
+    "test:workers": "pnpm test:events"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

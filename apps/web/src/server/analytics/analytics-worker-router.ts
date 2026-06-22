@@ -1,4 +1,5 @@
 import { withTenantTx } from "@atlas/db";
+import { runWorkerOutboxBatch } from "@atlas/observability";
 
 export const ANALYTICS_WORKER_DESTINATION = "analytics.projections";
 
@@ -11,17 +12,22 @@ export async function processAnalyticsOutboxBatch(args: {
   const { processOutboxBatch } = await import("@atlas/events/services/outbox-worker.service");
   const { createAnalyticsOutboxConsumers } = await import("../../events/outbox-consumers");
 
-  return withTenantTx(
-    {
-      tenantId: args.tenantId,
-      requestId: args.requestId,
-      allowAnonymousTenantRead: true,
-    },
-    async (tx) =>
-      processOutboxBatch(tx, {
-        limit: args.limit ?? 25,
-        maxRetries: args.maxRetries ?? 3,
-        handlers: createAnalyticsOutboxConsumers(),
-      }),
-  );
+  return runWorkerOutboxBatch({
+    parentRequestId: args.requestId,
+    jobName: "analytics-outbox",
+    execute: () =>
+      withTenantTx(
+        {
+          tenantId: args.tenantId,
+          requestId: args.requestId,
+          allowAnonymousTenantRead: true,
+        },
+        async (tx) =>
+          processOutboxBatch(tx, {
+            limit: args.limit ?? 25,
+            maxRetries: args.maxRetries ?? 3,
+            handlers: createAnalyticsOutboxConsumers(),
+          }),
+      ),
+  });
 }

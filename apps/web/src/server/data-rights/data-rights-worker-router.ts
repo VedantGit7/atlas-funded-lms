@@ -1,4 +1,5 @@
 import { withTenantTx } from "@atlas/db";
+import { runWorkerOutboxBatch } from "@atlas/observability";
 
 export { DATA_EXPORT_WORKER_DESTINATION } from "@atlas/domain/data-rights/data-rights.worker";
 
@@ -11,17 +12,22 @@ export async function processDataRightsOutboxBatch(args: {
   const { processOutboxBatch } = await import("@atlas/events/services/outbox-worker.service");
   const { createDataRightsOutboxConsumers } = await import("../../events/outbox-consumers");
 
-  return withTenantTx(
-    {
-      tenantId: args.tenantId,
-      requestId: args.requestId,
-      allowAnonymousTenantRead: true,
-    },
-    async (tx) =>
-      processOutboxBatch(tx, {
-        limit: args.limit ?? 25,
-        maxRetries: args.maxRetries ?? 3,
-        handlers: createDataRightsOutboxConsumers(),
-      }),
-  );
+  return runWorkerOutboxBatch({
+    parentRequestId: args.requestId,
+    jobName: "data-rights-outbox",
+    execute: () =>
+      withTenantTx(
+        {
+          tenantId: args.tenantId,
+          requestId: args.requestId,
+          allowAnonymousTenantRead: true,
+        },
+        async (tx) =>
+          processOutboxBatch(tx, {
+            limit: args.limit ?? 25,
+            maxRetries: args.maxRetries ?? 3,
+            handlers: createDataRightsOutboxConsumers(),
+          }),
+      ),
+  });
 }

@@ -16,6 +16,9 @@
   "include": [
     "next-env.d.ts",
     "next.config.ts",
+    "sentry.client.config.ts",
+    "sentry.server.config.ts",
+    "sentry.edge.config.ts",
     "src/**/*.ts",
     "src/**/*.tsx",
     ".next/types/**/*.ts"
@@ -37,6 +40,7 @@
     { "path": "../../packages/domain/tenancy" },
     { "path": "../../packages/events" },
     { "path": "../../packages/membership" },
+    { "path": "../../packages/observability" },
     { "path": "../../packages/security" },
     { "path": "../../packages/storage" },
     { "path": "../../packages/tenancy" }
