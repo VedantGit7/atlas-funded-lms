@@ -413,6 +413,17 @@ export default tseslint.config(
   },
 
   {
+    files: [
+      "apps/web/src/app/platform/**/*.{ts,tsx}",
+      "apps/web/src/components/shells/PlatformConsoleShell*.{ts,tsx}",
+      "apps/web/src/lib/server/platform-*.{ts,tsx}",
+    ],
+    rules: {
+      "no-restricted-imports": "off",
+    },
+  },
+
+  {
     files: ["prisma/seeds/**/*.ts"],
     rules: {
       "atlas/no-hardcoded-tenant-strings": "off",
