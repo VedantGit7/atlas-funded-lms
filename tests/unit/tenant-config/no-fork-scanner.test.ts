@@ -24,6 +24,18 @@ describe("tenant config no-fork scanner", () => {
     expect(findings).toEqual([]);
   });
 
+  it("does not flag the no-fork scanner source file", () => {
+    const source = readFileSync(
+      resolve(import.meta.dirname, "../../../packages/tenant-config/src/security-scan.ts"),
+      "utf8",
+    );
+    const findings = scanSourceForForkViolations(
+      "packages/tenant-config/src/security-scan.ts",
+      source,
+    );
+    expect(findings).toEqual([]);
+  });
+
   it("does not flag generic provisioning service", () => {
     const source = readFileSync(
       resolve(

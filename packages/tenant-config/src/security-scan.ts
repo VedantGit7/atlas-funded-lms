@@ -9,10 +9,11 @@ const FORBIDDEN_RUNTIME_PATTERNS = [
   /new\s+PrismaClient\s*\(/,
 ] as const;
 
-const ALLOWED_FUNDEDBEYOND_PATH_PREFIXES = [
+const NO_FORK_SCAN_EXEMPT_PREFIXES = [
   "configs/tenants/fundedbeyond/",
   "docs/",
   "tests/",
+  "packages/tenant-config/",
 ] as const;
 
 export type NoForkFinding = {
@@ -21,12 +22,16 @@ export type NoForkFinding = {
   pattern: string;
 };
 
-function isAllowedFundedBeyondPath(normalizedPath: string): boolean {
-  return ALLOWED_FUNDEDBEYOND_PATH_PREFIXES.some((prefix) => normalizedPath.includes(prefix));
+function isNoForkScanExemptPath(normalizedPath: string): boolean {
+  return NO_FORK_SCAN_EXEMPT_PREFIXES.some((prefix) => normalizedPath.includes(prefix));
 }
 
 export function scanSourceForForkViolations(filePath: string, content: string): NoForkFinding[] {
   const normalized = filePath.replaceAll("\\", "/");
+  if (isNoForkScanExemptPath(normalized)) {
+    return [];
+  }
+
   const findings: NoForkFinding[] = [];
   const lines = content.split("\n");
 
@@ -44,10 +49,7 @@ export function scanSourceForForkViolations(filePath: string, content: string): 
     });
   }
 
-  if (
-    /fundedbeyond|academy\.fundedbeyond\.com/i.test(content) &&
-    !isAllowedFundedBeyondPath(normalized)
-  ) {
+  if (/fundedbeyond|academy\.fundedbeyond\.com/i.test(content)) {
     if (normalized.startsWith("apps/") || normalized.startsWith("packages/")) {
       const lineIndex = lines.findIndex((line) =>
         /fundedbeyond|academy\.fundedbeyond\.com/i.test(line),

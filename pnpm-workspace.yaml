@@ -8,7 +8,9 @@ packages:
   - "packages/domain/access"
   - "packages/tenant-config"
 
-minimumReleaseAge: 0
+minimumReleaseAge: 1440
+minimumReleaseAgeExclude:
+  - nanoid
 
 allowBuilds:
   "@prisma/client": true
