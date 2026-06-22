@@ -1,4 +1,5 @@
 import { withTenantTx } from "@atlas/db";
+import { runWorkerOutboxBatch } from "@atlas/observability";
 
 export const SEARCH_WORKER_DESTINATION = "search.index";
 
@@ -11,17 +12,22 @@ export async function processSearchOutboxBatch(args: {
   const { processOutboxBatch } = await import("@atlas/events/services/outbox-worker.service");
   const { createSearchOutboxConsumers } = await import("../../events/outbox-consumers");
 
-  return withTenantTx(
-    {
-      tenantId: args.tenantId,
-      requestId: args.requestId,
-      allowAnonymousTenantRead: true,
-    },
-    async (tx) =>
-      processOutboxBatch(tx, {
-        limit: args.limit ?? 25,
-        maxRetries: args.maxRetries ?? 3,
-        handlers: createSearchOutboxConsumers(),
-      }),
-  );
+  return runWorkerOutboxBatch({
+    parentRequestId: args.requestId,
+    jobName: "search-outbox",
+    execute: () =>
+      withTenantTx(
+        {
+          tenantId: args.tenantId,
+          requestId: args.requestId,
+          allowAnonymousTenantRead: true,
+        },
+        async (tx) =>
+          processOutboxBatch(tx, {
+            limit: args.limit ?? 25,
+            maxRetries: args.maxRetries ?? 3,
+            handlers: createSearchOutboxConsumers(),
+          }),
+      ),
+  });
 }

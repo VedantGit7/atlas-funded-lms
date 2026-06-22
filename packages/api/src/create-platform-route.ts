@@ -5,6 +5,7 @@ import { requirePlatformPrincipal } from "@atlas/auth/platform-auth";
 import { ATLAS_PLATFORM_REASON_HEADER } from "@atlas/core/http/headers";
 import { AtlasHttpError } from "@atlas/core/http/errors";
 import { getOrCreateRequestId } from "@atlas/core/request/request-id";
+import { attachRequestIdHeader, inferRouteGroup, runRouteLifecycle } from "@atlas/observability";
 import { withGlobalDb } from "@atlas/db/global-db";
 import {
   withPlatformScope,
@@ -104,68 +105,80 @@ export function createPlatformRoute<
 }): TParams extends z.ZodTypeAny ? PlatformRouteWithParams : PlatformRouteWithoutParams {
   async function route(req: NextRequest, routeContext?: PlatformRouteContextArg) {
     const requestId = getOrCreateRequestId(req.headers);
+    const pathname = new URL(req.url).pathname;
 
     try {
-      if (!config.metadata.permission.startsWith("platform.")) {
-        throw new Error("Platform route must declare a platform.* permission");
-      }
-
-      return await withGlobalDb(async (db) => {
-        const platformPrincipal = await requirePlatformPrincipal({
-          req,
-          db,
-          requiredPermission: config.metadata.permission,
-        });
-
-        const reason =
-          config.metadata.reasonRequired === true
-            ? readPlatformReason(req)
-            : (req.headers.get(ATLAS_PLATFORM_REASON_HEADER)?.trim() ?? "platform.route");
-
-        const idempotencyKey =
-          config.metadata.idempotency === "required"
-            ? readIdempotencyKey(req)
-            : (req.headers.get("idempotency-key")?.trim() ?? "");
-
-        const query = config.query != null ? readQueryInput(req, config.query) : ({} as TQuery);
-        const params: InferParams<TParams> =
-          config.params != null
-            ? (config.params.parse(
-                routeContext ? await routeContext.params : {},
-              ) as InferParams<TParams>)
-            : ({} as InferParams<TParams>);
-        const body = config.body != null ? await readBodyInput(req, config.body) : ({} as TBody);
-
-        const ctx: PlatformRouteContext = {
-          platformPrincipalId: platformPrincipal.platformPrincipalId,
+      return await runRouteLifecycle(
+        {
           requestId,
-          reason,
-          idempotencyKey,
-        };
+          route: pathname,
+          routeGroup: inferRouteGroup(pathname),
+          actorPlane: "platform",
+        },
+        async () => {
+          if (!config.metadata.permission.startsWith("platform.")) {
+            throw new Error("Platform route must declare a platform.* permission");
+          }
 
-        const result = await withPlatformScope(
-          {
-            principalId: platformPrincipal.platformPrincipalId,
-            requestId,
-            requiredPermission: config.metadata.permission as PlatformPermission,
-            platformPermissions:
-              platformPrincipal.platformPermissions as readonly PlatformPermission[],
-            route: new URL(req.url).pathname,
-          },
-          reason,
-          async (tx) =>
-            config.handler({
-              tx,
-              ctx,
-              query,
-              params,
-              body,
-            }),
-        );
+          return await withGlobalDb(async (db) => {
+            const platformPrincipal = await requirePlatformPrincipal({
+              req,
+              db,
+              requiredPermission: config.metadata.permission,
+            });
 
-        const bodyOut = config.output.parse(result);
-        return NextResponse.json(bodyOut);
-      });
+            const reason =
+              config.metadata.reasonRequired === true
+                ? readPlatformReason(req)
+                : (req.headers.get(ATLAS_PLATFORM_REASON_HEADER)?.trim() ?? "platform.route");
+
+            const idempotencyKey =
+              config.metadata.idempotency === "required"
+                ? readIdempotencyKey(req)
+                : (req.headers.get("idempotency-key")?.trim() ?? "");
+
+            const query = config.query != null ? readQueryInput(req, config.query) : ({} as TQuery);
+            const params: InferParams<TParams> =
+              config.params != null
+                ? (config.params.parse(
+                    routeContext ? await routeContext.params : {},
+                  ) as InferParams<TParams>)
+                : ({} as InferParams<TParams>);
+            const body =
+              config.body != null ? await readBodyInput(req, config.body) : ({} as TBody);
+
+            const ctx: PlatformRouteContext = {
+              platformPrincipalId: platformPrincipal.platformPrincipalId,
+              requestId,
+              reason,
+              idempotencyKey,
+            };
+
+            const result = await withPlatformScope(
+              {
+                principalId: platformPrincipal.platformPrincipalId,
+                requestId,
+                requiredPermission: config.metadata.permission as PlatformPermission,
+                platformPermissions:
+                  platformPrincipal.platformPermissions as readonly PlatformPermission[],
+                route: new URL(req.url).pathname,
+              },
+              reason,
+              async (tx) =>
+                config.handler({
+                  tx,
+                  ctx,
+                  query,
+                  params,
+                  body,
+                }),
+            );
+
+            const bodyOut = config.output.parse(result);
+            return attachRequestIdHeader(NextResponse.json(bodyOut), requestId);
+          });
+        },
+      );
     } catch (error) {
       if (error instanceof PlatformScopeError) {
         const atlasError = new AtlasHttpError({
@@ -176,11 +189,17 @@ export function createPlatformRoute<
           message: error.message,
         });
         const safe = toSafeErrorEnvelope(atlasError, requestId);
-        return NextResponse.json(safe.body, { status: safe.status });
+        return attachRequestIdHeader(
+          NextResponse.json(safe.body, { status: safe.status }),
+          requestId,
+        );
       }
 
       const safe = toSafeErrorEnvelope(error, requestId);
-      return NextResponse.json(safe.body, { status: safe.status });
+      return attachRequestIdHeader(
+        NextResponse.json(safe.body, { status: safe.status }),
+        requestId,
+      );
     }
   }
 

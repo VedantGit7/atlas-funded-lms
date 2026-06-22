@@ -1,4 +1,5 @@
 import type { OutboxHandler } from "@atlas/events/services/outbox-worker.service";
+import { withPostHogProductHandlers } from "@atlas/observability/posthog/outbox-mapper";
 
 import {
   COMPETENCY_WORKER_DESTINATION,
@@ -230,5 +231,5 @@ export function createEngagementOutboxConsumers(): Record<string, OutboxHandler[
     appendHandlers(map, eventType, handlers);
   }
 
-  return map;
+  return withPostHogProductHandlers(map);
 }

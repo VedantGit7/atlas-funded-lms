@@ -5,6 +5,7 @@ import { can, enforceEntitlement, toAuthorizationError } from "@atlas/authorizat
 import type { ResourceRef } from "@atlas/authorization";
 import { AtlasHttpError } from "@atlas/core/http/errors";
 import { getOrCreateRequestId } from "@atlas/core/request/request-id";
+import { attachRequestIdHeader, inferRouteGroup, runRouteLifecycle } from "@atlas/observability";
 import { requireSupabaseUser, upsertAuthPrincipal } from "@atlas/auth";
 import { withGlobalDb } from "@atlas/db/global-db";
 import type { TenantTx } from "@atlas/db";
@@ -162,80 +163,94 @@ export function createTenantRoute<
 ): TenantRouteWithParams | TenantRouteWithoutParams {
   async function route(req: NextRequest, routeContext?: TenantRouteContextArg) {
     const requestId = getOrCreateRequestId(req.headers);
+    const pathname = new URL(req.url).pathname;
 
     try {
-      if (config.metadata.idempotency === "required") {
-        requireIdempotencyKey(req);
-      }
+      return await runRouteLifecycle(
+        {
+          requestId,
+          route: pathname,
+          routeGroup: inferRouteGroup(pathname),
+          actorPlane: "tenant",
+        },
+        async () => {
+          if (config.metadata.idempotency === "required") {
+            requireIdempotencyKey(req);
+          }
 
-      return await withGlobalDb(async (db) => {
-        const tenant = await resolveTenantFromRequest({ req, db });
-        const supabaseUser = await requireSupabaseUser(req);
-        const principal = await upsertAuthPrincipal({
-          db,
-          supabaseUserId: supabaseUser.supabaseUserId,
-          email: supabaseUser.email,
-          mfaEnabled: supabaseUser.mfaEnabled,
-          markLogin: false,
-        });
-
-        let input: TInput;
-
-        if (config.body != null) {
-          rejectClientSuppliedQueryParams(req);
-          input = (await readBodyInput(req, config.body)) as TInput;
-        } else if (config.input != null) {
-          input = readGetInput(req, config.input) as TInput;
-        } else {
-          readGetInput(req, noBodySchema);
-          input = {} as TInput;
-        }
-
-        const params: Record<string, string> =
-          config.params != null
-            ? (config.params.parse(routeContext ? await routeContext.params : {}) as Record<
-                string,
-                string
-              >)
-            : {};
-
-        const idempotencyKey = req.headers.get("idempotency-key")?.trim() ?? undefined;
-
-        const result = await withTenantTx(
-          {
-            tenantId: tenant.tenantId,
-            requestId,
-            allowAnonymousTenantRead: true,
-          },
-          async (tx) => {
-            const membership = await requireActiveMembership({
-              tx,
-              tenantId: tenant.tenantId,
-              authPrincipalId: principal.id,
+          return await withGlobalDb(async (db) => {
+            const tenant = await resolveTenantFromRequest({ req, db });
+            const supabaseUser = await requireSupabaseUser(req);
+            const principal = await upsertAuthPrincipal({
+              db,
+              supabaseUserId: supabaseUser.supabaseUserId,
+              email: supabaseUser.email,
+              mfaEnabled: supabaseUser.mfaEnabled,
+              markLogin: false,
             });
 
-            return runProtectedTenantRouteHandler({
-              tx,
-              ctx: {
+            let input: TInput;
+
+            if (config.body != null) {
+              rejectClientSuppliedQueryParams(req);
+              input = (await readBodyInput(req, config.body)) as TInput;
+            } else if (config.input != null) {
+              input = readGetInput(req, config.input) as TInput;
+            } else {
+              readGetInput(req, noBodySchema);
+              input = {} as TInput;
+            }
+
+            const params: Record<string, string> =
+              config.params != null
+                ? (config.params.parse(routeContext ? await routeContext.params : {}) as Record<
+                    string,
+                    string
+                  >)
+                : {};
+
+            const idempotencyKey = req.headers.get("idempotency-key")?.trim() ?? undefined;
+
+            const result = await withTenantTx(
+              {
                 tenantId: tenant.tenantId,
                 requestId,
-                actorMembershipId: membership.membershipId,
-                ...(idempotencyKey ? { idempotencyKey } : {}),
+                allowAnonymousTenantRead: true,
               },
-              metadata: config.metadata,
-              params,
-              input,
-              handler: config.handler,
-            });
-          },
-        );
+              async (tx) => {
+                const membership = await requireActiveMembership({
+                  tx,
+                  tenantId: tenant.tenantId,
+                  authPrincipalId: principal.id,
+                });
 
-        const body = config.output.parse(result) as TOutput;
-        return NextResponse.json(body);
-      });
+                return runProtectedTenantRouteHandler({
+                  tx,
+                  ctx: {
+                    tenantId: tenant.tenantId,
+                    requestId,
+                    actorMembershipId: membership.membershipId,
+                    ...(idempotencyKey ? { idempotencyKey } : {}),
+                  },
+                  metadata: config.metadata,
+                  params,
+                  input,
+                  handler: config.handler,
+                });
+              },
+            );
+
+            const body = config.output.parse(result) as TOutput;
+            return attachRequestIdHeader(NextResponse.json(body), requestId);
+          });
+        },
+      );
     } catch (error) {
       const safe = toSafeErrorEnvelope(error, requestId);
-      return NextResponse.json(safe.body, { status: safe.status });
+      return attachRequestIdHeader(
+        NextResponse.json(safe.body, { status: safe.status }),
+        requestId,
+      );
     }
   }
 

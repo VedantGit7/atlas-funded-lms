@@ -28,6 +28,11 @@ export function clearClientDataCache(
   reason: "logout" | "membership_failure" | "host_change",
 ): void {
   cache.clear();
+  if (reason === "logout" || reason === "host_change") {
+    void import("../../observability/posthog-browser").then(({ resetPostHogBrowser }) => {
+      resetPostHogBrowser();
+    });
+  }
   if (reason === "host_change") {
     activeTenantScope = null;
   }
