@@ -1,0 +1,325 @@
+{
+  "manifestVersion": "1",
+  "tenant": {
+    "slug": "fundedbeyond",
+    "displayName": "FundedBeyond Academy",
+    "legalName": "FundedBeyond Academy",
+    "defaultLocale": "en",
+    "defaultTimezone": "UTC"
+  },
+  "domains": {
+    "development": {
+      "hostname": "fundedbeyond.localhost.test",
+      "type": "ATLAS_SUBDOMAIN",
+      "makePrimary": false,
+      "recordOnly": true
+    },
+    "test": {
+      "hostname": "fundedbeyond-test.localhost.test",
+      "type": "ATLAS_SUBDOMAIN",
+      "makePrimary": false,
+      "recordOnly": true
+    },
+    "staging": {
+      "hostname": "fundedbeyond.staging.localhost.test",
+      "type": "ATLAS_SUBDOMAIN",
+      "makePrimary": false,
+      "recordOnly": true
+    },
+    "production": {
+      "hostname": "academy.fundedbeyond.com",
+      "type": "CUSTOM_DOMAIN",
+      "makePrimary": true,
+      "recordOnly": true
+    }
+  },
+  "branding": {
+    "publicName": "FundedBeyond Academy",
+    "issuerName": "FundedBeyond Academy",
+    "publicLandingCopy": {
+      "headline": "Educational trading readiness academy",
+      "subheadline": "Diagnose readiness, practice skills, and pursue structured learning paths."
+    }
+  },
+  "theme": {
+    "tokens": {
+      "primary": "#1B2A4A",
+      "accent": "#3D7BF0",
+      "background": "#0F172A",
+      "foreground": "#F8FAFC",
+      "radius": "md",
+      "modeDefault": "system"
+    },
+    "assetTokensRef": "approved-brand-tokens-pending-operator-upload"
+  },
+  "entitlements": [
+    { "key": "branding.custom_domain.enable", "enabled": true },
+    { "key": "community.enable", "enabled": true },
+    { "key": "certification.enable", "enabled": true },
+    { "key": "gamification.enable", "enabled": true },
+    { "key": "analytics.dashboard.view", "enabled": true },
+    { "key": "data.export.enable", "enabled": true }
+  ],
+  "featureFlagOverrides": [
+    {
+      "key": "analytics.dashboard.view",
+      "value": { "enabled": true }
+    }
+  ],
+  "extensions": [],
+  "scoring": {
+    "profileKey": "academy-readiness",
+    "profileName": "Academy Readiness Profile",
+    "dimensions": [
+      { "key": "technical_analysis", "name": "Technical Analysis" },
+      { "key": "trading_psychology", "name": "Trading Psychology" },
+      { "key": "risk_management", "name": "Risk Management" },
+      { "key": "discipline_consistency", "name": "Discipline and Consistency" },
+      { "key": "challenge_rule_mastery", "name": "Challenge Rule Mastery" }
+    ],
+    "bands": [
+      {
+        "key": "beginner",
+        "label": "Beginner",
+        "minScore": 0,
+        "maxScore": 19.9999,
+        "sortOrder": 1
+      },
+      {
+        "key": "developing",
+        "label": "Developing",
+        "minScore": 20,
+        "maxScore": 39.9999,
+        "sortOrder": 2
+      },
+      {
+        "key": "ready",
+        "label": "Ready",
+        "minScore": 40,
+        "maxScore": 59.9999,
+        "sortOrder": 3
+      },
+      {
+        "key": "challenge_ready",
+        "label": "Challenge Ready",
+        "minScore": 60,
+        "maxScore": 79.9999,
+        "sortOrder": 4
+      },
+      {
+        "key": "elite",
+        "label": "Elite",
+        "minScore": 80,
+        "maxScore": 100,
+        "sortOrder": 5
+      }
+    ]
+  },
+  "readiness": {
+    "legalApproval": {
+      "status": "pending_approval",
+      "reference": null
+    },
+    "ctaPolicy": {
+      "outboundTargetUrl": "https://fundedbeyond.com",
+      "tokenTtlSeconds": 3600,
+      "bandProminenceRules": [
+        { "bandKey": "beginner", "prominence": "subtle" },
+        { "bandKey": "developing", "prominence": "subtle" },
+        { "bandKey": "ready", "prominence": "standard" },
+        { "bandKey": "challenge_ready", "prominence": "prominent" },
+        { "bandKey": "elite", "prominence": "prominent" }
+      ]
+    }
+  },
+  "learningPaths": [
+    {
+      "slug": "beginner-trader-program",
+      "title": "Beginner Trader Program",
+      "description": "Draft learning path metadata for foundational trader education.",
+      "pathType": "program",
+      "availability": "draft"
+    },
+    {
+      "slug": "intermediate-trader-program",
+      "title": "Intermediate Trader Program",
+      "description": "Draft learning path metadata for intermediate trader education.",
+      "pathType": "program",
+      "availability": "draft"
+    },
+    {
+      "slug": "advanced-trader-program",
+      "title": "Advanced Trader Program",
+      "description": "Draft learning path metadata for advanced trader education.",
+      "pathType": "program",
+      "availability": "draft"
+    },
+    {
+      "slug": "trading-psychology-program",
+      "title": "Trading Psychology Program",
+      "description": "Draft learning path metadata for trading psychology education.",
+      "pathType": "program",
+      "availability": "draft"
+    },
+    {
+      "slug": "risk-management-program",
+      "title": "Risk Management Program",
+      "description": "Draft learning path metadata for risk management education.",
+      "pathType": "program",
+      "availability": "draft"
+    },
+    {
+      "slug": "challenge-preparation-program",
+      "title": "Challenge Preparation Program",
+      "description": "Draft learning path metadata for challenge preparation education.",
+      "pathType": "program",
+      "availability": "draft"
+    },
+    {
+      "slug": "funded-trader-program",
+      "title": "Funded Trader Program",
+      "description": "Deferred until inbound funded status integrations are approved.",
+      "pathType": "program",
+      "availability": "unavailable",
+      "metadata": { "deferredReason": "inbound_funded_status_deferred" }
+    }
+  ],
+  "certificateTemplates": [
+    {
+      "key": "trading-foundations",
+      "name": "Trading Foundations",
+      "templateJson": {
+        "headline": "Trading Foundations",
+        "bodyLines": ["Draft certificate template pending content approval."]
+      }
+    },
+    {
+      "key": "risk-management",
+      "name": "Risk Management",
+      "templateJson": {
+        "headline": "Risk Management",
+        "bodyLines": ["Draft certificate template pending content approval."]
+      }
+    },
+    {
+      "key": "trading-psychology",
+      "name": "Trading Psychology",
+      "templateJson": {
+        "headline": "Trading Psychology",
+        "bodyLines": ["Draft certificate template pending content approval."]
+      }
+    },
+    {
+      "key": "challenge-preparation",
+      "name": "Challenge Preparation",
+      "templateJson": {
+        "headline": "Challenge Preparation",
+        "bodyLines": ["Draft certificate template pending content approval."]
+      }
+    },
+    {
+      "key": "challenge-readiness",
+      "name": "Challenge Readiness",
+      "templateJson": {
+        "headline": "Challenge Readiness",
+        "bodyLines": ["Draft certificate template pending content approval."]
+      }
+    },
+    {
+      "key": "funded-trader",
+      "name": "Funded Trader",
+      "templateJson": {
+        "headline": "Funded Trader",
+        "bodyLines": ["Draft template only; issuance deferred pending inbound funded status."]
+      }
+    }
+  ],
+  "gamification": {
+    "badges": [
+      {
+        "key": "first-diagnostic-complete",
+        "name": "First Diagnostic Complete",
+        "criteria": {
+          "type": "event_count",
+          "eventType": "diagnostic.completed",
+          "minCount": 1
+        },
+        "status": "INACTIVE"
+      },
+      {
+        "key": "three-day-practice-streak",
+        "name": "Three-Day Practice Streak",
+        "criteria": {
+          "type": "streak_current",
+          "streakKey": "practice_daily",
+          "minCount": 3
+        },
+        "status": "INACTIVE"
+      },
+      {
+        "key": "seven-day-practice-streak",
+        "name": "Seven-Day Practice Streak",
+        "criteria": {
+          "type": "streak_current",
+          "streakKey": "practice_daily",
+          "minCount": 7
+        },
+        "status": "INACTIVE"
+      },
+      {
+        "key": "weekly-practice-consistency",
+        "name": "Weekly Practice Consistency",
+        "criteria": {
+          "type": "streak_current",
+          "streakKey": "practice_weekly",
+          "minCount": 4
+        },
+        "status": "INACTIVE"
+      }
+    ],
+    "leaderboards": []
+  },
+  "communitySpaces": [
+    {
+      "slug": "academy-community",
+      "name": "Academy Community",
+      "visibility": "PRIVATE"
+    },
+    {
+      "slug": "foundations-study",
+      "name": "Foundations and Study",
+      "visibility": "PRIVATE"
+    },
+    {
+      "slug": "risk-discipline",
+      "name": "Risk and Discipline",
+      "visibility": "PRIVATE"
+    },
+    {
+      "slug": "trading-psychology",
+      "name": "Trading Psychology",
+      "visibility": "PRIVATE"
+    },
+    {
+      "slug": "challenge-preparation",
+      "name": "Challenge Preparation",
+      "visibility": "PRIVATE"
+    }
+  ],
+  "locale": {
+    "code": "en"
+  },
+  "tenantConfigJson": {
+    "launchLocale": "en",
+    "gamification": {
+      "leaderboardsPublic": false
+    },
+    "hallOfFame": {
+      "enabled": false
+    }
+  },
+  "testOwner": {
+    "email": "fundedbeyond-owner@example.test",
+    "displayName": "Academy Test Owner"
+  }
+}

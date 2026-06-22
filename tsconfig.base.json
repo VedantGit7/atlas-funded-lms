@@ -94,7 +94,10 @@
       "@atlas/utils/*": ["packages/utils/src/*"],
 
       "@atlas/validation": ["packages/validation/src/index.ts"],
-      "@atlas/validation/*": ["packages/validation/src/*"]
+      "@atlas/validation/*": ["packages/validation/src/*"],
+
+      "@atlas/tenant-config": ["packages/tenant-config/src/index.ts"],
+      "@atlas/tenant-config/*": ["packages/tenant-config/src/*"]
     }
   }
 }

@@ -1,0 +1,162 @@
+{
+  "manifestVersion": "1",
+  "tenant": {
+    "slug": "second-smoke-academy",
+    "displayName": "Second Smoke Academy",
+    "legalName": "Second Smoke Academy",
+    "defaultLocale": "en",
+    "defaultTimezone": "UTC"
+  },
+  "domains": {
+    "development": {
+      "hostname": "second-smoke.localhost.test",
+      "type": "ATLAS_SUBDOMAIN",
+      "makePrimary": false,
+      "recordOnly": true
+    },
+    "test": {
+      "hostname": "second-smoke-test.localhost.test",
+      "type": "ATLAS_SUBDOMAIN",
+      "makePrimary": false,
+      "recordOnly": true
+    },
+    "staging": {
+      "hostname": "second-smoke.staging.localhost.test",
+      "type": "ATLAS_SUBDOMAIN",
+      "makePrimary": false,
+      "recordOnly": true
+    },
+    "production": {
+      "hostname": "academy.second-smoke.example",
+      "type": "CUSTOM_DOMAIN",
+      "makePrimary": true,
+      "recordOnly": true
+    }
+  },
+  "branding": {
+    "publicName": "Second Smoke Academy",
+    "issuerName": "Second Smoke Academy",
+    "publicLandingCopy": {
+      "headline": "Isolation smoke tenant academy",
+      "subheadline": "Synthetic tenant for Story 045 isolation verification."
+    }
+  },
+  "theme": {
+    "tokens": {
+      "primary": "#2D3748",
+      "accent": "#48BB78",
+      "background": "#1A202C",
+      "foreground": "#EDF2F7",
+      "radius": "lg",
+      "modeDefault": "light"
+    },
+    "assetTokensRef": "smoke-fixture-tokens-v1"
+  },
+  "entitlements": [
+    { "key": "branding.custom_domain.enable", "enabled": true },
+    { "key": "community.enable", "enabled": true },
+    { "key": "certification.enable", "enabled": true },
+    { "key": "gamification.enable", "enabled": true },
+    { "key": "analytics.dashboard.view", "enabled": true },
+    { "key": "data.export.enable", "enabled": true }
+  ],
+  "featureFlagOverrides": [
+    {
+      "key": "analytics.dashboard.view",
+      "value": { "enabled": true }
+    }
+  ],
+  "extensions": [],
+  "scoring": {
+    "profileKey": "smoke-readiness",
+    "profileName": "Smoke Readiness Profile",
+    "dimensions": [
+      { "key": "skill_focus", "name": "Skill Focus" },
+      { "key": "study_consistency", "name": "Study Consistency" }
+    ],
+    "bands": [
+      {
+        "key": "developing",
+        "label": "Developing",
+        "minScore": 0,
+        "maxScore": 49.9999,
+        "sortOrder": 1
+      },
+      {
+        "key": "proficient",
+        "label": "Proficient",
+        "minScore": 50,
+        "maxScore": 100,
+        "sortOrder": 2
+      }
+    ]
+  },
+  "readiness": {
+    "legalApproval": {
+      "status": "pending_approval",
+      "reference": null
+    },
+    "ctaPolicy": {
+      "outboundTargetUrl": "https://example.com/education-handoff",
+      "tokenTtlSeconds": 1800,
+      "bandProminenceRules": [
+        { "bandKey": "developing", "prominence": "subtle" },
+        { "bandKey": "proficient", "prominence": "standard" }
+      ]
+    }
+  },
+  "learningPaths": [
+    {
+      "slug": "smoke-foundations-program",
+      "title": "Smoke Foundations Program",
+      "description": "Draft isolation fixture learning path.",
+      "pathType": "program",
+      "availability": "draft"
+    }
+  ],
+  "certificateTemplates": [
+    {
+      "key": "smoke-foundations",
+      "name": "Smoke Foundations",
+      "templateJson": {
+        "headline": "Smoke Foundations",
+        "bodyLines": ["Draft smoke fixture certificate template."]
+      }
+    }
+  ],
+  "gamification": {
+    "badges": [
+      {
+        "key": "smoke-diagnostic-complete",
+        "name": "Smoke Diagnostic Complete",
+        "criteria": {
+          "type": "event_count",
+          "eventType": "diagnostic.completed",
+          "minCount": 1
+        },
+        "status": "INACTIVE"
+      }
+    ],
+    "leaderboards": []
+  },
+  "communitySpaces": [
+    {
+      "slug": "smoke-community",
+      "name": "Smoke Community",
+      "visibility": "PRIVATE"
+    }
+  ],
+  "locale": {
+    "code": "en"
+  },
+  "tenantConfigJson": {
+    "launchLocale": "en",
+    "gamification": {
+      "leaderboardsPublic": false
+    }
+  },
+  "testOwner": {
+    "email": "second-smoke-owner@example.test",
+    "displayName": "Smoke Academy Owner"
+  }
+}

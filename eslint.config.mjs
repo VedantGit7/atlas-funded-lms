@@ -431,6 +431,21 @@ export default tseslint.config(
   },
 
   {
+    files: [
+      "configs/tenants/**",
+      "scripts/tenants/**",
+      "packages/tenant-config/**",
+      "tests/unit/tenant-config/**",
+      "tests/integration/tenant-config/**",
+      "tests/tenant-isolation/tenant-config.isolation.test.ts",
+      "tests/e2e/tenant-config.e2e.ts",
+    ],
+    rules: {
+      "atlas/no-hardcoded-tenant-strings": "off",
+    },
+  },
+
+  {
     files: ["scripts/**/*.ts", "tests/**/*.{ts,tsx}", "vitest.config.ts"],
     ...tseslint.configs.disableTypeChecked,
     languageOptions: {

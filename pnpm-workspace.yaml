@@ -6,6 +6,11 @@ packages:
   - "packages/domain/branding"
   - "packages/domain/identity"
   - "packages/domain/access"
+  - "packages/tenant-config"
+
+minimumReleaseAge: 1440
+minimumReleaseAgeExclude:
+  - nanoid
 
 allowBuilds:
   "@prisma/client": true
