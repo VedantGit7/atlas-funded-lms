@@ -37,6 +37,13 @@ import {
 } from "./admin-batches-roster-api";
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
 
+function defined<T>(value: T, message = "Expected value to be defined"): NonNullable<T> {
+  if (value == null) {
+    throw new Error(message);
+  }
+  return value;
+}
+
 type ViewMode = "sessions" | "matrix";
 type SortBy = "scheduled_at" | "title" | "attendance_rate";
 type SortDir = "asc" | "desc";
@@ -73,7 +80,7 @@ function Shimmer({ className }: { className?: string }) {
 
 function formatPct(v: number | null | undefined) {
   if (v == null || Number.isNaN(v)) return "-";
-  return `${Number(v).toFixed(v % 1 === 0 ? 0 : 1)}%`;
+  return `${v.toFixed(v % 1 === 0 ? 0 : 1)}%`;
 }
 
 function formatDateTime(v: string | null | undefined) {
@@ -91,9 +98,10 @@ function formatDateTime(v: string | null | undefined) {
 
 function formatMinutesPair(actual: number | null | undefined, planned: number | null | undefined) {
   if (actual == null && planned == null) return "-";
-  if (actual != null && planned != null) return `${Math.round(actual)}m of ${Math.round(planned)}m`;
-  if (actual != null) return `${Math.round(actual)}m`;
-  return `of ${Math.round(planned!)}m`;
+  if (actual != null && planned != null)
+    return `${String(Math.round(actual))}m of ${String(Math.round(planned))}m`;
+  if (actual != null) return `${String(Math.round(actual))}m`;
+  return `of ${String(Math.round(defined(planned)))}m`;
 }
 
 function titleCase(v: string) {
@@ -189,7 +197,7 @@ function MiniBar({ value }: { value: number | null | undefined }) {
     <div className="mt-1 h-[3px] w-full max-w-[72px] overflow-hidden rounded-full bg-[var(--admin-surface-high)]">
       <div
         className={`h-full rounded-full ${barTone(value)}`}
-        style={{ width: `${Math.max(0, Math.min(100, value))}%` }}
+        style={{ width: `${String(Math.max(0, Math.min(100, value)))}%` }}
       />
     </div>
   );
@@ -301,7 +309,9 @@ export function AdminBatchLiveSessionsPage({ batchId }: { batchId: string }) {
     [batchId, router, searchParams],
   );
 
-  useEffect(() => setDraftQ(q), [q]);
+  useEffect(() => {
+    setDraftQ(q);
+  }, [q]);
 
   useEffect(() => {
     const t = window.setTimeout(() => {
@@ -309,7 +319,9 @@ export function AdminBatchLiveSessionsPage({ batchId }: { batchId: string }) {
       if (next === q) return;
       replaceParams({ q: next || null, page: "1" });
     }, 300);
-    return () => window.clearTimeout(t);
+    return () => {
+      window.clearTimeout(t);
+    };
   }, [draftQ, q, replaceParams]);
 
   const load = useCallback(async () => {
@@ -375,7 +387,8 @@ export function AdminBatchLiveSessionsPage({ batchId }: { batchId: string }) {
     try {
       const response = await exportBatchReport({ batchId, emailDownloadLink: true });
       const completed = await pollReportRunUntilComplete(response.data.runId);
-      if (completed.status === "failed") throw new Error(completed.errorMessage ?? "Export failed.");
+      if (completed.status === "failed")
+        throw new Error(completed.errorMessage ?? "Export failed.");
       if (completed.status === "completed") await downloadReportExport(completed.id, "csv");
     } catch (e) {
       setActionError(errMsg(e, "Unable to export report."));
@@ -439,7 +452,9 @@ export function AdminBatchLiveSessionsPage({ batchId }: { batchId: string }) {
       <button
         type="button"
         className="inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-[0.06em] text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-on-surface)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]/30"
-        onClick={() => toggleSort(col)}
+        onClick={() => {
+          toggleSort(col);
+        }}
       >
         {label}
         {sortBy === col ? (
@@ -470,7 +485,10 @@ export function AdminBatchLiveSessionsPage({ batchId }: { batchId: string }) {
           ].join(" ")}
         >
           <td className="sticky left-0 z-10 border-r border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 py-3 group-hover:bg-[var(--admin-surface-low)]">
-            <span className={`absolute inset-y-0 left-0 w-1 ${railClass(item)}`} aria-hidden="true" />
+            <span
+              className={`absolute inset-y-0 left-0 w-1 ${railClass(item)}`}
+              aria-hidden="true"
+            />
             <p
               className={[
                 "pl-2 text-sm font-medium",
@@ -590,7 +608,9 @@ export function AdminBatchLiveSessionsPage({ batchId }: { batchId: string }) {
               className="rounded p-1.5 text-[var(--admin-on-surface-variant)] hover:bg-[var(--admin-surface-high)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]/30"
               aria-label={`Actions for ${item.title}`}
               aria-expanded={rowMenuId === item.id}
-              onClick={() => setRowMenuId((c) => (c === item.id ? null : item.id))}
+              onClick={() => {
+                setRowMenuId((c) => (c === item.id ? null : item.id));
+              }}
             >
               <MoreVertical className="h-4 w-4" aria-hidden="true" />
             </button>
@@ -599,14 +619,18 @@ export function AdminBatchLiveSessionsPage({ batchId }: { batchId: string }) {
                 <Link
                   href={`/admin/reports/batches/${batchId}/live-sessions/${item.id}`}
                   className="block px-3 py-2 text-left text-xs text-[var(--admin-on-surface)] hover:bg-[var(--admin-surface-high)]"
-                  onClick={() => setRowMenuId(null)}
+                  onClick={() => {
+                    setRowMenuId(null);
+                  }}
                 >
                   Open attendance detail
                 </Link>
                 <Link
                   href="/admin/reports/live-class-attendance"
                   className="block px-3 py-2 text-left text-xs text-[var(--admin-on-surface)] hover:bg-[var(--admin-surface-high)]"
-                  onClick={() => setRowMenuId(null)}
+                  onClick={() => {
+                    setRowMenuId(null);
+                  }}
                 >
                   Tenant attendance report
                 </Link>
@@ -766,7 +790,13 @@ export function AdminBatchLiveSessionsPage({ batchId }: { batchId: string }) {
             />
             <p className="text-sm text-[var(--admin-danger)]">{actionError}</p>
           </div>
-          <button type="button" className={ghostButtonClassName} onClick={() => setActionError(null)}>
+          <button
+            type="button"
+            className={ghostButtonClassName}
+            onClick={() => {
+              setActionError(null);
+            }}
+          >
             Dismiss
           </button>
         </div>
@@ -785,7 +815,7 @@ export function AdminBatchLiveSessionsPage({ batchId }: { batchId: string }) {
               <div
                 className={`h-full rounded-full ${barTone(summary.avgAttendancePct)}`}
                 style={{
-                  width: `${Math.max(0, Math.min(100, summary.avgAttendancePct ?? 0))}%`,
+                  width: `${String(Math.max(0, Math.min(100, summary.avgAttendancePct ?? 0)))}%`,
                 }}
               />
             </div>
@@ -855,12 +885,12 @@ export function AdminBatchLiveSessionsPage({ batchId }: { batchId: string }) {
                   ? "bg-[var(--admin-surface)] text-[var(--admin-on-surface)] shadow-sm"
                   : "text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-on-surface)]",
               ].join(" ")}
-              onClick={() =>
+              onClick={() => {
                 replaceParams({
                   view: key === "sessions" ? null : key,
                   page: key === "sessions" ? String(page) : null,
-                })
-              }
+                });
+              }}
             >
               {label}
             </button>
@@ -877,7 +907,9 @@ export function AdminBatchLiveSessionsPage({ batchId }: { batchId: string }) {
             className={`${fieldClassName} w-full pl-9`}
             placeholder="Filter by session title"
             value={draftQ}
-            onChange={(e) => setDraftQ(e.target.value)}
+            onChange={(e) => {
+              setDraftQ(e.target.value);
+            }}
           />
         </label>
       </div>
@@ -887,7 +919,10 @@ export function AdminBatchLiveSessionsPage({ batchId }: { batchId: string }) {
           {loading && !listData?.items.length ? (
             <div>
               {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="border-b border-[var(--admin-border)] px-4 py-3 last:border-0">
+                <div
+                  key={i}
+                  className="border-b border-[var(--admin-border)] px-4 py-3 last:border-0"
+                >
                   <Shimmer className="h-4 w-full" />
                 </div>
               ))}
@@ -965,7 +1000,9 @@ export function AdminBatchLiveSessionsPage({ batchId }: { batchId: string }) {
                       type="button"
                       className={ghostButtonClassName}
                       disabled={page <= 1 || loading}
-                      onClick={() => replaceParams({ page: String(Math.max(1, page - 1)) })}
+                      onClick={() => {
+                        replaceParams({ page: String(Math.max(1, page - 1)) });
+                      }}
                       aria-label="Previous page"
                     >
                       <ChevronLeft className="h-4 w-4" aria-hidden="true" />
@@ -977,7 +1014,9 @@ export function AdminBatchLiveSessionsPage({ batchId }: { batchId: string }) {
                       type="button"
                       className={ghostButtonClassName}
                       disabled={page >= totalPages || loading}
-                      onClick={() => replaceParams({ page: String(page + 1) })}
+                      onClick={() => {
+                        replaceParams({ page: String(page + 1) });
+                      }}
                       aria-label="Next page"
                     >
                       <ChevronRight className="h-4 w-4" aria-hidden="true" />
@@ -1128,7 +1167,9 @@ export function AdminBatchLiveSessionsPage({ batchId }: { batchId: string }) {
               <button
                 type="button"
                 className="rounded p-1 text-[var(--admin-on-surface-variant)] hover:bg-[var(--admin-surface-high)]"
-                onClick={() => setMessageOpen(false)}
+                onClick={() => {
+                  setMessageOpen(false);
+                }}
                 aria-label="Close message dialog"
               >
                 <X className="h-4 w-4" aria-hidden="true" />
@@ -1144,7 +1185,9 @@ export function AdminBatchLiveSessionsPage({ batchId }: { batchId: string }) {
                 <input
                   className={fieldClassName}
                   value={messageSubject}
-                  onChange={(e) => setMessageSubject(e.target.value)}
+                  onChange={(e) => {
+                    setMessageSubject(e.target.value);
+                  }}
                   maxLength={200}
                 />
               </label>
@@ -1154,7 +1197,9 @@ export function AdminBatchLiveSessionsPage({ batchId }: { batchId: string }) {
                   className={`${fieldClassName} h-auto min-h-[120px] py-2`}
                   rows={5}
                   value={messageBody}
-                  onChange={(e) => setMessageBody(e.target.value)}
+                  onChange={(e) => {
+                    setMessageBody(e.target.value);
+                  }}
                   maxLength={10000}
                 />
               </label>
@@ -1163,7 +1208,9 @@ export function AdminBatchLiveSessionsPage({ batchId }: { batchId: string }) {
               <button
                 type="button"
                 className={ghostButtonClassName}
-                onClick={() => setMessageOpen(false)}
+                onClick={() => {
+                  setMessageOpen(false);
+                }}
               >
                 Cancel
               </button>
@@ -1173,7 +1220,7 @@ export function AdminBatchLiveSessionsPage({ batchId }: { batchId: string }) {
                 disabled={messageBusy || !messageSubject.trim() || !messageBody.trim()}
                 onClick={() => void handleSendMessage()}
               >
-                {messageBusy ? "Sending…" : `Send to ${messageIds.length}`}
+                {messageBusy ? "Sending…" : `Send to ${String(messageIds.length)}`}
               </button>
             </div>
           </div>

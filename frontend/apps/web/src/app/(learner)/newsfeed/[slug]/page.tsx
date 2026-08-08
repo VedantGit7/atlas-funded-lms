@@ -1,5 +1,5 @@
-import { PageGate } from "../../../components/patterns/PageGate";
-import { LearnerNewsfeedArticle } from "../../../features/learner/components/newsfeed/LearnerNewsfeedArticle";
+import { PageGate } from "../../../../components/patterns/PageGate";
+import { LearnerNewsfeedArticle } from "../../../../features/learner/components/newsfeed/LearnerNewsfeedArticle";
 
 type PageProps = { params: Promise<{ slug: string }> };
 

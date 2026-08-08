@@ -12,13 +12,7 @@ export const POLL_RESPONDENT_COLUMN_OPTIONS = [
 
 export type PollRespondentColumnKey = (typeof POLL_RESPONDENT_COLUMN_OPTIONS)[number]["key"];
 
-export type PollsListView =
-  | "all"
-  | "open"
-  | "anonymous"
-  | "quiz"
-  | "live"
-  | "standalone";
+export type PollsListView = "all" | "open" | "anonymous" | "quiz" | "live" | "standalone";
 
 export type PollListItem = {
   id: string;
@@ -345,14 +339,14 @@ function buildQuery(params: Record<string, string | number | undefined>): string
 }
 
 export async function fetchPollsRoster(filters?: {
-  q?: string;
-  status?: string;
-  pollType?: string;
-  view?: PollsListView;
-  createdFrom?: string;
-  createdTo?: string;
-  page?: number;
-  limit?: number;
+  q?: string | undefined;
+  status?: string | undefined;
+  pollType?: string | undefined;
+  view?: PollsListView | undefined;
+  createdFrom?: string | undefined;
+  createdTo?: string | undefined;
+  page?: number | undefined;
+  limit?: number | undefined;
 }) {
   return clientApi.get<{
     data: {
@@ -407,9 +401,9 @@ export type LiveSessionPollListItem = {
 };
 
 export async function fetchLiveSessionsWithPolls(filters?: {
-  q?: string;
-  page?: number;
-  limit?: number;
+  q?: string | undefined;
+  page?: number | undefined;
+  limit?: number | undefined;
 }) {
   return clientApi.get<{
     data: {
@@ -439,7 +433,7 @@ export async function extendPollLive(pollId: string, seconds = 30) {
     `/api/v1/reports/polls/${pollId}/live/extend`,
     { seconds },
     "poll-live-extend",
-    { successMessage: `Poll extended by ${seconds}s.` },
+    { successMessage: `Poll extended by ${String(seconds)}s.` },
   );
 }
 
@@ -452,13 +446,13 @@ export async function fetchPollOptionDetail(pollId: string, optionId: string) {
 export async function fetchPollNonRespondents(
   pollId: string,
   filters?: {
-    q?: string;
-    presence?: "any" | "present" | "absent";
-    excludeAbsent?: boolean;
-    sortBy?: string;
-    sortDir?: "asc" | "desc";
-    page?: number;
-    limit?: number;
+    q?: string | undefined;
+    presence?: "any" | "present" | "absent" | undefined;
+    excludeAbsent?: boolean | undefined;
+    sortBy?: string | undefined;
+    sortDir?: "asc" | "desc" | undefined;
+    page?: number | undefined;
+    limit?: number | undefined;
   },
 ) {
   return clientApi.get<{
@@ -484,15 +478,15 @@ export async function fetchPollNonRespondents(
 export async function fetchPollRespondents(
   pollId: string,
   filters: {
-    learnerName?: string;
-    optionId?: string;
-    isCorrect?: "any" | "correct" | "incorrect";
-    respondedFrom?: string;
-    respondedTo?: string;
-    sortBy?: string;
-    sortDir?: "asc" | "desc";
-    columns?: PollRespondentColumnKey[];
-    page?: number;
+    learnerName?: string | undefined;
+    optionId?: string | undefined;
+    isCorrect?: "any" | "correct" | "incorrect" | undefined;
+    respondedFrom?: string | undefined;
+    respondedTo?: string | undefined;
+    sortBy?: string | undefined;
+    sortDir?: "asc" | "desc" | undefined;
+    columns?: PollRespondentColumnKey[] | undefined;
+    page?: number | undefined;
   },
 ) {
   return clientApi.get<{
@@ -577,10 +571,7 @@ export type PollsCompareData = {
   trendInsight: string | null;
 };
 
-export async function fetchPollsCompare(
-  pollIds: string[],
-  alignBy: PollCompareAlignBy = "label",
-) {
+export async function fetchPollsCompare(pollIds: string[], alignBy: PollCompareAlignBy = "label") {
   const params = new URLSearchParams();
   params.set("pollIds", pollIds.join(","));
   params.set("alignBy", alignBy);

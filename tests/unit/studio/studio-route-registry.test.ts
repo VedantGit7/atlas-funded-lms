@@ -6,11 +6,11 @@ import {
 } from "../../../frontend/apps/web/src/features/studio/studio-route-registry";
 
 describe("studio route registry", () => {
-  it("defines exact I1-I13 contract registry", () => {
+  it("defines exact I1-I14 contract registry", () => {
     const screenIds = listStudioScreenIds();
-    expect(screenIds).toHaveLength(13);
+    expect(screenIds).toHaveLength(14);
     expect(screenIds[0]).toBe("I1");
-    expect(screenIds[12]).toBe("I13");
+    expect(screenIds[13]).toBe("I14");
   });
 
   it("maps known screens to approved paths", () => {
@@ -20,6 +20,7 @@ describe("studio route registry", () => {
     expect(getStudioRouteByScreenId("I9").detailPathPattern).toBe("/studio/learning-paths/:id");
     expect(getStudioRouteByScreenId("I12").pathPattern).toBe("/studio/courses/:id/learners");
     expect(getStudioRouteByScreenId("I13").pathPattern).toBe("/studio/analytics");
+    expect(getStudioRouteByScreenId("I14").pathPattern).toBe("/studio/review");
   });
 
   it("declares route-level entitlements only for I13 analytics", () => {

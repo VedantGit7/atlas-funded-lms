@@ -244,7 +244,7 @@ registerAnalyticsSourceAdapter({
 
     let courseId: string | null =
       "courseId" in payload && typeof (payload as { courseId?: unknown }).courseId === "string"
-        ? (payload as { courseId: string }).courseId
+        ? (payload as unknown as { courseId: string }).courseId
         : null;
 
     if (!courseId && payload.collectionId) {

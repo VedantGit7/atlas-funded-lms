@@ -1007,10 +1007,7 @@ export const gamificationRepository = {
     return rows.map((row) => row.space_id);
   },
 
-  async findGroupStreak(
-    tx: TenantTx,
-    args: { spaceId: string; streakKey: string },
-  ) {
+  async findGroupStreak(tx: TenantTx, args: { spaceId: string; streakKey: string }) {
     const rows = await tx.$queryRaw<
       Array<{
         id: string;
@@ -1098,10 +1095,7 @@ export const gamificationRepository = {
     return rows;
   },
 
-  async listTopProfilesByXpForGroup(
-    tx: TenantTx,
-    args: { limit: number; spaceId: string },
-  ) {
+  async listTopProfilesByXpForGroup(tx: TenantTx, args: { limit: number; spaceId: string }) {
     const rows = await tx.$queryRaw<Array<{ membership_id: string; xp_total: number }>>`
       select gp.membership_id::text, gp.xp_total
       from gamification_profiles gp
@@ -1131,7 +1125,14 @@ export const gamificationRepository = {
     `;
 
     const configJson = rows[0]?.config_json as
-      | { community?: { hallOfFame?: { recognitionSpaceSlug?: string; leaderboardKey?: string } } }
+      | {
+          community?: {
+            hallOfFame?: {
+              recognitionSpaceSlug?: string | undefined;
+              leaderboardKey?: string | undefined;
+            };
+          };
+        }
       | undefined;
 
     return configJson?.community?.hallOfFame ?? {};
@@ -1139,7 +1140,10 @@ export const gamificationRepository = {
 
   async upsertTenantHallOfFameConfig(
     tx: TenantTx,
-    hallOfFame: { recognitionSpaceSlug?: string; leaderboardKey?: string },
+    hallOfFame: {
+      recognitionSpaceSlug?: string | undefined;
+      leaderboardKey?: string | undefined;
+    },
   ) {
     await tx.$executeRaw`
       insert into tenant_config (

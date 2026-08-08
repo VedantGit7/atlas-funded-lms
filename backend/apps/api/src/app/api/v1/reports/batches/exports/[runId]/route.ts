@@ -16,5 +16,5 @@ export const GET = createTenantRoute<
   params: batchExportRunParamsSchema,
   input: noBodySchema,
   output: batchExportRunDetailResponseSchema,
-  handler: async ({ tx, ctx, params }) => getBatchExportRun(tx, ctx, params.runId),
+  handler: async ({ tx, ctx, params }) => getBatchExportRun(tx, ctx, params["runId"]),
 });

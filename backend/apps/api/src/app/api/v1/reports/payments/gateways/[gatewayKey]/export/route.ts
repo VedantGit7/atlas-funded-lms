@@ -21,6 +21,6 @@ export const POST = createTenantRoute<
     exportPaymentRoster(tx, ctx, {
       ...input,
       tab: "gateways",
-      gatewayKey: params.gatewayKey,
+      gatewayKey: params["gatewayKey"],
     }),
 });

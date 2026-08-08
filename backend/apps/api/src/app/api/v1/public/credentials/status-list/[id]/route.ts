@@ -10,15 +10,14 @@ import { routeMetadata } from "./route.metadata";
 const statusListIdSchema = z.string().uuid();
 
 function resolveOrigin(headers: Headers): string {
-  const host =
-    headers.get("x-forwarded-host") ?? headers.get("host") ?? "localhost:3000";
+  const host = headers.get("x-forwarded-host") ?? headers.get("host") ?? "localhost:3000";
   const proto =
     headers.get("x-forwarded-proto") ??
     (host.startsWith("localhost") || host.includes(".localhost") ? "http" : "https");
   return `${proto}://${host}`;
 }
 
-export const GET = createPublicRouteHandler<unknown>(routeMetadata, async ({ req, requestId }) => {
+export const GET = createPublicRouteHandler(routeMetadata, async ({ req, requestId }) => {
   return withGlobalDb(async (db) => {
     const tenant = await resolveTenantFromRequest({ req, db });
     const url = new URL(req.url);

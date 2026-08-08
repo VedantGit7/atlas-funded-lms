@@ -21,7 +21,7 @@ export const GET = createPublicRouteHandler(routeMetadata, async ({ req }) => {
   const env = parseStorageEnv(process.env);
   if (env.STORAGE_PROVIDER !== "local-fs") {
     throw new AtlasHttpError({
-      code: "NOT_FOUND",
+      code: "PERMISSION_DENIED",
       status: 404,
       message: "Local storage downloads are not enabled.",
     });
@@ -38,7 +38,7 @@ export const GET = createPublicRouteHandler(routeMetadata, async ({ req }) => {
   const provider = createStorageProvider(env);
   if (!(provider instanceof LocalFilesystemStorageProvider)) {
     throw new AtlasHttpError({
-      code: "NOT_FOUND",
+      code: "PERMISSION_DENIED",
       status: 404,
       message: "Local storage downloads are not enabled.",
     });

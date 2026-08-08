@@ -2,18 +2,19 @@
 
 import { Download } from "lucide-react";
 import type { TrendPoint } from "../analytics-studio-shared";
-import {
-  panelHeaderClassName,
-  recessedPanelClassName,
-} from "../analytics-studio-shared";
+import { panelHeaderClassName, recessedPanelClassName } from "../analytics-studio-shared";
 
 type AnalyticsPeakDaysPanelProps = {
   days: TrendPoint[];
-  onExport?: () => void;
-  loading?: boolean;
+  onExport?: (() => void) | undefined;
+  loading?: boolean | undefined;
 };
 
-export function AnalyticsPeakDaysPanel({ days, onExport, loading = false }: AnalyticsPeakDaysPanelProps) {
+export function AnalyticsPeakDaysPanel({
+  days,
+  onExport,
+  loading = false,
+}: AnalyticsPeakDaysPanelProps) {
   return (
     <section className={recessedPanelClassName} aria-labelledby="peak-days-heading">
       <div className="mb-3 flex items-center justify-between gap-3">
@@ -33,7 +34,9 @@ export function AnalyticsPeakDaysPanel({ days, onExport, loading = false }: Anal
 
       <div className="min-h-0 flex-1 overflow-y-auto">
         {loading ? (
-          <p className="py-6 text-center text-sm text-[var(--admin-on-surface-variant)]">Loading…</p>
+          <p className="py-6 text-center text-sm text-[var(--admin-on-surface-variant)]">
+            Loading…
+          </p>
         ) : days.length === 0 ? (
           <p className="py-6 text-center text-sm text-[var(--admin-on-surface-variant)]">
             Submission volume by day will appear once learners submit assessments.

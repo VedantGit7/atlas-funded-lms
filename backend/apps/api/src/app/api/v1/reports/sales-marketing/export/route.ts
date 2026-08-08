@@ -5,7 +5,7 @@ import {
   exportSalesMarketingResponseSchema,
 } from "@atlas/domain/reports/sales-marketing-roster.dto";
 import { exportSalesMarketingRosterMetadata } from "@atlas/domain/reports/sales-marketing-roster.route-metadata";
-import { exportSalesMarketingRoster } from "../../../../../../../server/reports/sales-marketing-roster-actions.service";
+import { exportSalesMarketingRoster } from "@atlas/api-server/reports/sales-marketing-roster-actions.service";
 
 export const POST = createTenantRoute<
   z.output<typeof exportSalesMarketingBodySchema>,

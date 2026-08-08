@@ -18,5 +18,5 @@ export const GET = createTenantRoute<
   params: salesCourseIdParamsSchema,
   output: salesPurchasersListResponseSchema,
   handler: async ({ tx, ctx, input, params }) =>
-    listSalesPurchasers(tx, ctx, params.courseId, input),
+    listSalesPurchasers(tx, ctx, params["courseId"], input),
 });

@@ -90,10 +90,16 @@ function formatConditionValue(condition: SegmentCondition): string[] {
   }
   if (op === "in_last_n_days" && condition.value && typeof condition.value === "object") {
     const days = (condition.value as { days?: number }).days;
-    return days != null ? [`${days} days`] : [];
+    return days != null ? [`${String(days)} days`] : [];
   }
   if (condition.value == null || condition.value === "") return [];
-  return [String(condition.value)];
+  return [
+    typeof condition.value === "string" ||
+    typeof condition.value === "number" ||
+    typeof condition.value === "boolean"
+      ? String(condition.value)
+      : "",
+  ];
 }
 
 function Shimmer({ className }: { className?: string }) {
@@ -248,9 +254,7 @@ export function AdminCustomFieldSegmentDetailPage({ segmentId }: { segmentId: st
       setAnalytics(response.data.analytics);
       setZeroMatch(response.data.zeroMatch);
     } catch (err) {
-      setError(
-        err instanceof ClientApiError ? err.message : "Couldn't load segment analytics.",
-      );
+      setError(err instanceof ClientApiError ? err.message : "Couldn't load segment analytics.");
       setSegment(null);
       setAnalytics(null);
     } finally {
@@ -262,14 +266,18 @@ export function AdminCustomFieldSegmentDetailPage({ segmentId }: { segmentId: st
     setLearnersLoading(true);
     try {
       const response = await fetchCustomFieldSegmentLearners(segmentId, {
-        q: search || undefined,
+        ...(search ? { q: search } : {}),
         page: learnersPage,
         limit: 25,
       });
       setLearners(response.data.items);
       setFieldDefinitions(response.data.fieldDefinitions);
       setLearnersTotal(response.data.pageInfo.totalCount);
-      if (!response.data.pageInfo.hasNextPage && learnersPage > 1 && response.data.items.length === 0) {
+      if (
+        !response.data.pageInfo.hasNextPage &&
+        learnersPage > 1 &&
+        response.data.items.length === 0
+      ) {
         setLearnersPage(1);
       }
     } catch (err) {
@@ -287,10 +295,7 @@ export function AdminCustomFieldSegmentDetailPage({ segmentId }: { segmentId: st
     if (!loading && !error) void loadLearners();
   }, [loading, error, loadLearners]);
 
-  const visibleCustomFields = useMemo(
-    () => fieldDefinitions.slice(0, 6),
-    [fieldDefinitions],
-  );
+  const visibleCustomFields = useMemo(() => fieldDefinitions.slice(0, 6), [fieldDefinitions]);
 
   const allSelected = learners.length > 0 && selected.size === learners.length;
 
@@ -323,7 +328,7 @@ export function AdminCustomFieldSegmentDetailPage({ segmentId }: { segmentId: st
     setCohortOpen(false);
     try {
       await createGroupFromSegment(segmentId, {
-        title: segment?.name ? `${segment.name} group` : undefined,
+        ...(segment?.name ? { title: `${segment.name} group` } : {}),
       });
     } catch (err) {
       setError(err instanceof ClientApiError ? err.message : "Could not create group.");
@@ -483,7 +488,9 @@ export function AdminCustomFieldSegmentDetailPage({ segmentId }: { segmentId: st
           <button
             type="button"
             className={primaryButtonClassName}
-            onClick={() => setCohortOpen((open) => !open)}
+            onClick={() => {
+              setCohortOpen((open) => !open);
+            }}
           >
             Cohort actions
             <ChevronDown className="h-4 w-4" />
@@ -501,7 +508,9 @@ export function AdminCustomFieldSegmentDetailPage({ segmentId }: { segmentId: st
               <Link
                 href="/admin/reports/custom-field"
                 className="block px-3 py-2 text-sm hover:bg-[var(--admin-surface-low)]"
-                onClick={() => setCohortOpen(false)}
+                onClick={() => {
+                  setCohortOpen(false);
+                }}
               >
                 Message learners
               </Link>
@@ -551,7 +560,7 @@ export function AdminCustomFieldSegmentDetailPage({ segmentId }: { segmentId: st
             <div className="mt-2 h-[3px] w-full overflow-hidden rounded-full bg-[var(--admin-surface-low)]">
               <div
                 className="h-full rounded-full bg-[var(--admin-primary)]"
-                style={{ width: `${Math.min(100, analytics.shareOfLearnersPct ?? 0)}%` }}
+                style={{ width: `${String(Math.min(100, analytics.shareOfLearnersPct ?? 0))}%` }}
               />
             </div>
           </div>
@@ -596,7 +605,10 @@ export function AdminCustomFieldSegmentDetailPage({ segmentId }: { segmentId: st
 
       {zeroMatch ? (
         <div className="flex flex-col items-center justify-center rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 py-24 text-center">
-          <UserX className="mb-4 h-10 w-10 text-[var(--admin-on-surface-variant)]" strokeWidth={1.25} />
+          <UserX
+            className="mb-4 h-10 w-10 text-[var(--admin-on-surface-variant)]"
+            strokeWidth={1.25}
+          />
           <h2 className="mb-2 text-base font-semibold text-[var(--admin-on-surface)]">
             No learners currently match this segment
           </h2>
@@ -709,11 +721,11 @@ export function AdminCustomFieldSegmentDetailPage({ segmentId }: { segmentId: st
                               <div className="absolute h-4 w-full rounded-sm bg-[var(--admin-surface-low)]" />
                               <div
                                 className="absolute z-10 h-4 rounded-sm bg-[color-mix(in_srgb,var(--admin-on-surface-variant)_20%,transparent)]"
-                                style={{ width: `${Math.min(100, bucket.tenantPct)}%` }}
+                                style={{ width: `${String(Math.min(100, bucket.tenantPct))}%` }}
                               />
                               <div
                                 className="absolute z-20 h-2 rounded-sm bg-[var(--admin-primary)]"
-                                style={{ width: `${Math.min(100, bucket.segmentPct)}%` }}
+                                style={{ width: `${String(Math.min(100, bucket.segmentPct))}%` }}
                               />
                             </div>
                             <div className="text-right font-mono text-[13px]">
@@ -766,7 +778,7 @@ export function AdminCustomFieldSegmentDetailPage({ segmentId }: { segmentId: st
                     <div
                       className="absolute bottom-0 top-0 z-10 border-l border-dashed border-[color-mix(in_srgb,var(--admin-on-surface)_40%,transparent)]"
                       style={{
-                        left: `${((analytics.tenantMedianBucketIndex + 0.5) / Math.max(1, analytics.spendHistogram.length)) * 100}%`,
+                        left: `${String(((analytics.tenantMedianBucketIndex + 0.5) / Math.max(1, analytics.spendHistogram.length)) * 100)}%`,
                       }}
                     >
                       <span className="absolute -top-4 left-1/2 -translate-x-1/2 whitespace-nowrap bg-[var(--admin-surface)] px-1 text-[10px] text-[var(--admin-on-surface-variant)]">
@@ -779,10 +791,10 @@ export function AdminCustomFieldSegmentDetailPage({ segmentId }: { segmentId: st
                       key={bucket.label}
                       className="w-full rounded-t-sm bg-[var(--admin-primary)]"
                       style={{
-                        height: `${Math.max(bucket.heightPct, bucket.count > 0 ? 4 : 2)}%`,
+                        height: `${String(Math.max(bucket.heightPct, bucket.count > 0 ? 4 : 2))}%`,
                         opacity: bucket.count > 0 ? 1 : 0.25,
                       }}
-                      title={`${bucket.label}: ${bucket.count}`}
+                      title={`${bucket.label}: ${String(bucket.count)}`}
                     />
                   ))}
                 </div>
@@ -807,7 +819,9 @@ export function AdminCustomFieldSegmentDetailPage({ segmentId }: { segmentId: st
                 </p>
                 <div className="flex flex-col gap-2">
                   {analytics.signupCohorts.length === 0 ? (
-                    <p className="text-sm text-[var(--admin-on-surface-variant)]">No signup data.</p>
+                    <p className="text-sm text-[var(--admin-on-surface-variant)]">
+                      No signup data.
+                    </p>
                   ) : (
                     analytics.signupCohorts.map((cohort) => (
                       <div key={cohort.label} className="flex items-center gap-3">
@@ -817,7 +831,7 @@ export function AdminCustomFieldSegmentDetailPage({ segmentId }: { segmentId: st
                         <div className="h-3 flex-1 overflow-hidden rounded-full bg-[var(--admin-surface-low)]">
                           <div
                             className="h-full rounded-full bg-[var(--admin-primary)]"
-                            style={{ width: `${cohort.pct}%` }}
+                            style={{ width: `${String(cohort.pct)}%` }}
                           />
                         </div>
                         <span className="w-8 font-mono text-xs">{cohort.count}</span>
@@ -859,7 +873,9 @@ export function AdminCustomFieldSegmentDetailPage({ segmentId }: { segmentId: st
                           </Link>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="font-mono text-sm">{formatCount(overlap.overlapCount)}</span>
+                          <span className="font-mono text-sm">
+                            {formatCount(overlap.overlapCount)}
+                          </span>
                           <span className="rounded-sm bg-[var(--admin-surface-low)] px-1.5 text-xs text-[var(--admin-on-surface-variant)]">
                             {formatPct(overlap.overlapPct)}
                           </span>
@@ -890,7 +906,9 @@ export function AdminCustomFieldSegmentDetailPage({ segmentId }: { segmentId: st
                     className="h-9 w-64 rounded-sm border border-[var(--admin-outline)] bg-[var(--admin-surface)] pl-9 pr-4 text-sm outline-none focus:border-[var(--admin-primary)] focus:ring-1 focus:ring-[var(--admin-primary)]"
                     placeholder="Search learners…"
                     value={searchDraft}
-                    onChange={(event) => setSearchDraft(event.target.value)}
+                    onChange={(event) => {
+                      setSearchDraft(event.target.value);
+                    }}
                     onKeyDown={(event) => {
                       if (event.key === "Enter") {
                         setLearnersPage(1);
@@ -921,7 +939,9 @@ export function AdminCustomFieldSegmentDetailPage({ segmentId }: { segmentId: st
                   <button
                     type="button"
                     className="rounded-sm border border-[var(--admin-outline)] bg-[var(--admin-surface)] px-2 py-1 text-xs"
-                    onClick={() => setSelected(new Set())}
+                    onClick={() => {
+                      setSelected(new Set());
+                    }}
                   >
                     Clear
                   </button>
@@ -994,13 +1014,19 @@ export function AdminCustomFieldSegmentDetailPage({ segmentId }: { segmentId: st
                 <tbody>
                   {learnersLoading ? (
                     <tr>
-                      <td colSpan={8 + visibleCustomFields.length} className="px-4 py-8 text-center text-sm text-[var(--admin-on-surface-variant)]">
+                      <td
+                        colSpan={8 + visibleCustomFields.length}
+                        className="px-4 py-8 text-center text-sm text-[var(--admin-on-surface-variant)]"
+                      >
                         Loading learners…
                       </td>
                     </tr>
                   ) : learners.length === 0 ? (
                     <tr>
-                      <td colSpan={8 + visibleCustomFields.length} className="px-4 py-8 text-center text-sm text-[var(--admin-on-surface-variant)]">
+                      <td
+                        colSpan={8 + visibleCustomFields.length}
+                        className="px-4 py-8 text-center text-sm text-[var(--admin-on-surface-variant)]"
+                      >
                         No learners on this page.
                       </td>
                     </tr>
@@ -1100,7 +1126,9 @@ export function AdminCustomFieldSegmentDetailPage({ segmentId }: { segmentId: st
                   type="button"
                   className={ghostButtonClassName}
                   disabled={learnersPage <= 1}
-                  onClick={() => setLearnersPage((page) => Math.max(1, page - 1))}
+                  onClick={() => {
+                    setLearnersPage((page) => Math.max(1, page - 1));
+                  }}
                 >
                   Previous
                 </button>
@@ -1108,7 +1136,9 @@ export function AdminCustomFieldSegmentDetailPage({ segmentId }: { segmentId: st
                   type="button"
                   className={ghostButtonClassName}
                   disabled={learnersPage * 25 >= learnersTotal}
-                  onClick={() => setLearnersPage((page) => page + 1)}
+                  onClick={() => {
+                    setLearnersPage((page) => page + 1);
+                  }}
                 >
                   Load more
                 </button>

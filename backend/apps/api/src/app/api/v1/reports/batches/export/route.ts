@@ -5,7 +5,7 @@ import {
   exportBatchRosterResponseSchema,
 } from "@atlas/domain/reports/batches-roster.dto";
 import { exportBatchesRosterMetadata } from "@atlas/domain/reports/batches-roster.route-metadata";
-import { exportBatchRoster } from "../../../../../../../server/reports/batches-roster-actions.service";
+import { exportBatchRoster } from "@atlas/api-server/reports/batches-roster-actions.service";
 
 export const POST = createTenantRoute<
   z.output<typeof exportBatchRosterBodySchema>,

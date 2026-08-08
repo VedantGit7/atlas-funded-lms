@@ -5,9 +5,17 @@ import type {
   CouponRedemptionsQuery,
   CouponsListQuery,
   ReferralWalletQuery,
+  SalesMarketingOverviewGrain,
   SalesProductsQuery,
   SalesPurchasersQuery,
 } from "./sales-marketing-roster.dto";
+
+function asUnknownString(value: unknown, fallback = ""): string {
+  if (typeof value === "string") return value;
+  if (typeof value === "number" || typeof value === "boolean") return String(value);
+  if (value == null) return fallback;
+  return fallback;
+}
 
 export type SalesProductRow = {
   course_id: string;
@@ -135,8 +143,6 @@ export type SalesMarketingOverviewFilter = {
   paidTo: string;
   currency?: string;
 };
-
-export type SalesMarketingOverviewGrain = "day" | "week" | "month";
 
 export const salesMarketingRosterRepository = {
   async countSalesProducts(tx: TenantTx, query: SalesProductsQuery): Promise<number> {
@@ -446,14 +452,14 @@ export const salesMarketingRosterRepository = {
       const discount = Number(row["discount_cents"] ?? 0);
       const units = Number(row["units_sold"] ?? 0);
       return {
-        course_id: String(row["course_id"]),
-        product_title: String(row["product_title"]),
-        product_type: String(row["product_type"] ?? "course"),
-        product_status: String(row["product_status"] ?? "DRAFT"),
+        course_id: asUnknownString(row["course_id"]),
+        product_title: asUnknownString(row["product_title"]),
+        product_type: asUnknownString(row["product_type"], "course"),
+        product_status: asUnknownString(row["product_status"], "DRAFT"),
         revenue_cents: revenue,
         discount_cents: discount,
         net_cents: Math.max(0, revenue - discount),
-        currency: String(row["currency"] ?? "INR"),
+        currency: asUnknownString(row["currency"], "INR"),
         units_sold: units,
         paid_learner_count: Number(row["paid_learner_count"] ?? 0),
         trial_learner_count: Number(row["trial_learner_count"] ?? 0),
@@ -649,14 +655,14 @@ export const salesMarketingRosterRepository = {
     const discount = Number(row["discount_cents"] ?? 0);
     const units = Number(row["purchaser_count"] ?? 0);
     return {
-      course_id: String(row["course_id"]),
-      product_title: String(row["product_title"]),
-      product_type: String(row["product_type"] ?? "course"),
-      product_status: String(row["product_status"] ?? "DRAFT"),
+      course_id: asUnknownString(row["course_id"]),
+      product_title: asUnknownString(row["product_title"]),
+      product_type: asUnknownString(row["product_type"], "course"),
+      product_status: asUnknownString(row["product_status"], "DRAFT"),
       revenue_cents: revenue,
       discount_cents: discount,
       net_cents: Math.max(0, revenue - discount),
-      currency: String(row["currency"] ?? "INR"),
+      currency: asUnknownString(row["currency"], "INR"),
       units_sold: units,
       paid_learner_count: Number(row["paid_learner_count"] ?? 0),
       trial_learner_count: Number(row["trial_learner_count"] ?? 0),
@@ -828,12 +834,12 @@ export const salesMarketingRosterRepository = {
     `;
 
     return rows.map((row) => ({
-      membership_id: String(row["membership_id"]),
+      membership_id: asUnknownString(row["membership_id"]),
       learner_name: typeof row["learner_name"] === "string" ? row["learner_name"] : null,
       email: typeof row["email"] === "string" ? row["email"] : null,
       amount_cents: Number(row["amount_cents"] ?? 0),
       discount_cents: Number(row["discount_cents"] ?? 0),
-      currency: String(row["currency"] ?? "INR"),
+      currency: asUnknownString(row["currency"], "INR"),
       enrolled_type: typeof row["enrolled_type"] === "string" ? row["enrolled_type"] : null,
       coupon_code: typeof row["coupon_code"] === "string" ? row["coupon_code"] : null,
       purchased_at: row["purchased_at"] as Date,
@@ -901,7 +907,7 @@ export const salesMarketingRosterRepository = {
   },
 
   async countCoupons(tx: TenantTx, query: CouponsListQuery): Promise<number> {
-    const view = query.view ?? "all";
+    const view = query.view;
     const rows = await tx.$queryRaw<Array<{ count: bigint }>>`
       select count(*)::bigint as count
       from sales_coupons c
@@ -941,7 +947,7 @@ export const salesMarketingRosterRepository = {
 
   async listCoupons(tx: TenantTx, query: CouponsListQuery): Promise<CouponRow[]> {
     const skip = (query.page - 1) * query.limit;
-    const view = query.view ?? "all";
+    const view = query.view;
     const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
       select
         c.id::text as id,
@@ -1022,18 +1028,17 @@ export const salesMarketingRosterRepository = {
       offset ${skip}
     `;
     return rows.map((row) => ({
-      id: String(row["id"]),
-      code: String(row["code"]),
-      name: String(row["name"]),
-      status: String(row["status"]),
-      discount_type: String(row["discount_type"]),
+      id: asUnknownString(row["id"]),
+      code: asUnknownString(row["code"]),
+      name: asUnknownString(row["name"]),
+      status: asUnknownString(row["status"]),
+      discount_type: asUnknownString(row["discount_type"]),
       discount_value: Number(row["discount_value"]),
-      currency: String(row["currency"]),
+      currency: asUnknownString(row["currency"]),
       redemption_count: Number(row["redemption_count"] ?? 0),
       total_discount_cents: Number(row["total_discount_cents"] ?? 0),
       total_revenue_cents: Number(row["total_revenue_cents"] ?? 0),
-      total_usage_limit:
-        row["total_usage_limit"] == null ? null : Number(row["total_usage_limit"]),
+      total_usage_limit: row["total_usage_limit"] == null ? null : Number(row["total_usage_limit"]),
       ends_at: (row["ends_at"] as Date | null) ?? null,
       starts_at: (row["starts_at"] as Date | null) ?? null,
       created_at: row["created_at"] as Date,
@@ -1051,7 +1056,7 @@ export const salesMarketingRosterRepository = {
     active_coupon_count: number;
     currency: string;
   }> {
-    const view = query.view ?? "all";
+    const view = query.view;
     const rows = await tx.$queryRaw<
       Array<{
         total_revenue_cents: bigint;
@@ -1154,18 +1159,17 @@ export const salesMarketingRosterRepository = {
     const row = rows[0];
     if (!row) return null;
     return {
-      id: String(row["id"]),
-      code: String(row["code"]),
-      name: String(row["name"]),
-      status: String(row["status"]),
-      discount_type: String(row["discount_type"]),
+      id: asUnknownString(row["id"]),
+      code: asUnknownString(row["code"]),
+      name: asUnknownString(row["name"]),
+      status: asUnknownString(row["status"]),
+      discount_type: asUnknownString(row["discount_type"]),
       discount_value: Number(row["discount_value"]),
-      currency: String(row["currency"]),
+      currency: asUnknownString(row["currency"]),
       redemption_count: Number(row["redemption_count"] ?? 0),
       total_discount_cents: Number(row["total_discount_cents"] ?? 0),
       total_revenue_cents: Number(row["total_revenue_cents"] ?? 0),
-      total_usage_limit:
-        row["total_usage_limit"] == null ? null : Number(row["total_usage_limit"]),
+      total_usage_limit: row["total_usage_limit"] == null ? null : Number(row["total_usage_limit"]),
       ends_at: (row["ends_at"] as Date | null) ?? null,
       starts_at: (row["starts_at"] as Date | null) ?? null,
       created_at: row["created_at"] as Date,
@@ -1278,8 +1282,8 @@ export const salesMarketingRosterRepository = {
       offset ${skip}
     `;
     return rows.map((row) => ({
-      id: String(row["id"]),
-      membership_id: String(row["membership_id"]),
+      id: asUnknownString(row["id"]),
+      membership_id: asUnknownString(row["membership_id"]),
       learner_name: typeof row["learner_name"] === "string" ? row["learner_name"] : null,
       email: typeof row["email"] === "string" ? row["email"] : null,
       product_title: typeof row["product_title"] === "string" ? row["product_title"] : null,
@@ -1287,7 +1291,7 @@ export const salesMarketingRosterRepository = {
       discount_cents: Number(row["discount_cents"] ?? 0),
       original_amount_cents: Number(row["original_amount_cents"] ?? 0),
       final_amount_cents: Number(row["final_amount_cents"] ?? 0),
-      currency: String(row["currency"]),
+      currency: asUnknownString(row["currency"]),
       payment_order_id:
         typeof row["payment_order_id"] === "string" ? row["payment_order_id"] : null,
       invoice_number: typeof row["invoice_number"] === "string" ? row["invoice_number"] : null,
@@ -1373,7 +1377,7 @@ export const salesMarketingRosterRepository = {
     `;
     return rows.map((row) => ({
       course_id: typeof row["course_id"] === "string" ? row["course_id"] : null,
-      product_title: String(row["product_title"] ?? "Unknown product"),
+      product_title: asUnknownString(row["product_title"], "Unknown product"),
       redemption_count: Number(row["redemption_count"] ?? 0),
       revenue_cents: Number(row["revenue_cents"] ?? 0),
       discount_cents: Number(row["discount_cents"] ?? 0),
@@ -1404,7 +1408,7 @@ export const salesMarketingRosterRepository = {
       order by 1 asc
     `;
     return rows.map((row) => ({
-      date: String(row["date"]),
+      date: asUnknownString(row["date"]),
       redemption_count: Number(row["redemption_count"] ?? 0),
       revenue_cents: Number(row["revenue_cents"] ?? 0),
       discount_cents: Number(row["discount_cents"] ?? 0),
@@ -1492,10 +1496,7 @@ export const salesMarketingRosterRepository = {
     return Number(rows[0]?.count ?? 0);
   },
 
-  async listReferralWallet(
-    tx: TenantTx,
-    query: ReferralWalletQuery,
-  ): Promise<ReferralWalletRow[]> {
+  async listReferralWallet(tx: TenantTx, query: ReferralWalletQuery): Promise<ReferralWalletRow[]> {
     const skip = (query.page - 1) * query.limit;
     const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
       select *
@@ -1577,7 +1578,7 @@ export const salesMarketingRosterRepository = {
       offset ${skip}
     `;
     return rows.map((row) => ({
-      membership_id: String(row["membership_id"]),
+      membership_id: asUnknownString(row["membership_id"]),
       learner_name: typeof row["learner_name"] === "string" ? row["learner_name"] : null,
       email: typeof row["email"] === "string" ? row["email"] : null,
       referral_code: typeof row["referral_code"] === "string" ? row["referral_code"] : null,
@@ -1696,7 +1697,7 @@ export const salesMarketingRosterRepository = {
       referred_revenue_cents: Number(row["referred_revenue_cents"] ?? 0),
       referrer_count: Number(row["referrer_count"] ?? 0),
       total_learners: Number(row["total_learners"] ?? 0),
-      currency: String(row["currency"] ?? "INR"),
+      currency: asUnknownString(row["currency"], "INR"),
     };
   },
 
@@ -1727,7 +1728,7 @@ export const salesMarketingRosterRepository = {
     const row = rows[0];
     if (!row) return null;
     return {
-      membership_id: String(row["membership_id"]),
+      membership_id: asUnknownString(row["membership_id"]),
       learner_name: typeof row["learner_name"] === "string" ? row["learner_name"] : null,
       email: typeof row["email"] === "string" ? row["email"] : null,
       referral_code: typeof row["referral_code"] === "string" ? row["referral_code"] : null,
@@ -1823,11 +1824,11 @@ export const salesMarketingRosterRepository = {
       offset ${skip}
     `;
     return rows.map((row) => {
-      const statusRaw = String(row["status"] ?? "PENDING");
+      const statusRaw = asUnknownString(row["status"], "PENDING");
       const status =
         statusRaw === "QUALIFIED" || statusRaw === "DISQUALIFIED" ? statusRaw : "PENDING";
       return {
-        membership_id: String(row["membership_id"]),
+        membership_id: asUnknownString(row["membership_id"]),
         learner_name: typeof row["learner_name"] === "string" ? row["learner_name"] : null,
         email: typeof row["email"] === "string" ? row["email"] : null,
         signed_up_at: row["signed_up_at"] as Date,
@@ -1835,7 +1836,7 @@ export const salesMarketingRosterRepository = {
           typeof row["first_purchase_title"] === "string" ? row["first_purchase_title"] : null,
         revenue_attributed_cents: Number(row["revenue_attributed_cents"] ?? 0),
         credit_awarded: Number(row["credit_awarded"] ?? 0),
-        currency: String(row["currency"] ?? "INR"),
+        currency: asUnknownString(row["currency"], "INR"),
         status,
       };
     });
@@ -1875,7 +1876,7 @@ export const salesMarketingRosterRepository = {
     return {
       total_credit_awarded: Number(row["total_credit_awarded"] ?? 0),
       total_revenue_cents: Number(row["total_revenue_cents"] ?? 0),
-      currency: String(row["currency"] ?? "INR"),
+      currency: asUnknownString(row["currency"], "INR"),
     };
   },
 
@@ -2143,12 +2144,11 @@ export const salesMarketingRosterRepository = {
       const revenue = Number(row["revenue_cents"] ?? 0);
       const commission = Number(row["commission_cents"] ?? 0);
       const net = Math.max(0, revenue - commission);
-      const effective =
-        revenue <= 0 ? 0 : Math.round((commission * 1000) / revenue) / 10;
+      const effective = revenue <= 0 ? 0 : Math.round((commission * 1000) / revenue) / 10;
       return {
-        course_id: String(row["course_id"]),
-        product_title: String(row["product_title"]),
-        product_type: String(row["product_type"] ?? "Course"),
+        course_id: asUnknownString(row["course_id"]),
+        product_title: asUnknownString(row["product_title"]),
+        product_type: asUnknownString(row["product_type"], "Course"),
         enabled: Boolean(row["enabled"]),
         commission_rate_pct: Number(row["commission_rate_pct"] ?? 0),
         inherits_default_rate: Boolean(row["inherits_default_rate"]),
@@ -2161,7 +2161,7 @@ export const salesMarketingRosterRepository = {
         active_affiliate_count: Number(row["active_affiliate_count"] ?? 0),
         unpaid_commission_cents: Number(row["unpaid_commission_cents"] ?? 0),
         published_at: row["published_at"] instanceof Date ? row["published_at"] : null,
-        currency: String(row["currency"] ?? "INR"),
+        currency: asUnknownString(row["currency"], "INR"),
       };
     });
   },
@@ -2246,7 +2246,7 @@ export const salesMarketingRosterRepository = {
       products_in_programme: Number(row["products_in_programme"] ?? 0),
       products_total: Number(row["products_total"] ?? 0),
       tenant_default_commission_pct: Number(row["tenant_default_commission_pct"] ?? 10),
-      currency: String(row["currency"] ?? "INR"),
+      currency: asUnknownString(row["currency"], "INR"),
     };
   },
 
@@ -2256,14 +2256,9 @@ export const salesMarketingRosterRepository = {
     activityFrom: string,
     activityTo: string,
   ): Promise<number> {
-    const statusFilter =
-      query.view === "suspended" ? "INACTIVE" : (query.status ?? null);
+    const statusFilter = query.view === "suspended" ? "INACTIVE" : (query.status ?? null);
     const unpaidBand =
-      query.view === "owed"
-        ? "has_unpaid"
-        : query.unpaidBand === "any"
-          ? null
-          : query.unpaidBand;
+      query.view === "owed" ? "has_unpaid" : query.unpaidBand === "any" ? null : query.unpaidBand;
     const rows = await tx.$queryRaw<Array<{ count: bigint }>>`
       select count(*)::bigint as count
       from sales_affiliates a
@@ -2332,16 +2327,10 @@ export const salesMarketingRosterRepository = {
     activityTo: string,
   ): Promise<AffiliateRow[]> {
     const skip = (query.page - 1) * query.limit;
-    const statusFilter =
-      query.view === "suspended" ? "INACTIVE" : (query.status ?? null);
+    const statusFilter = query.view === "suspended" ? "INACTIVE" : (query.status ?? null);
     const unpaidBand =
-      query.view === "owed"
-        ? "has_unpaid"
-        : query.unpaidBand === "any"
-          ? null
-          : query.unpaidBand;
-    const sortBy =
-      query.view === "top" ? "commission_earned_cents" : query.sortBy;
+      query.view === "owed" ? "has_unpaid" : query.unpaidBand === "any" ? null : query.unpaidBand;
+    const sortBy = query.view === "top" ? "commission_earned_cents" : query.sortBy;
     const sortDir = query.view === "top" ? "desc" : query.sortDir;
     const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
       select
@@ -2490,19 +2479,19 @@ export const salesMarketingRosterRepository = {
       offset ${skip}
     `;
     return rows.map((row) => ({
-      affiliate_id: String(row["affiliate_id"]),
-      membership_id: String(row["membership_id"]),
+      affiliate_id: asUnknownString(row["affiliate_id"]),
+      membership_id: asUnknownString(row["membership_id"]),
       learner_name: typeof row["learner_name"] === "string" ? row["learner_name"] : null,
       email: typeof row["email"] === "string" ? row["email"] : null,
-      tier: String(row["tier"]),
-      status: String(row["status"]),
-      coupon_code: String(row["coupon_code"]),
+      tier: asUnknownString(row["tier"]),
+      status: asUnknownString(row["status"]),
+      coupon_code: asUnknownString(row["coupon_code"]),
       revenue_contribution_cents: Number(row["revenue_contribution_cents"] ?? 0),
       commission_earned_cents: Number(row["commission_earned_cents"] ?? 0),
       unpaid_cents: Number(row["unpaid_cents"] ?? 0),
       paid_cents: Number(row["paid_cents"] ?? 0),
       signed_up_at: row["signed_up_at"] as Date,
-      currency: String(row["currency"] ?? "INR"),
+      currency: asUnknownString(row["currency"], "INR"),
     }));
   },
 
@@ -2594,7 +2583,7 @@ export const salesMarketingRosterRepository = {
       active_count: Number(row["active_count"] ?? 0),
       total_count: Number(row["total_count"] ?? 0),
       pending_approval_count: Number(row["pending_approval_count"] ?? 0),
-      currency: String(row["currency"] ?? "INR"),
+      currency: asUnknownString(row["currency"], "INR"),
     };
   },
 
@@ -2647,19 +2636,19 @@ export const salesMarketingRosterRepository = {
     const row = rows[0];
     if (!row) return null;
     return {
-      affiliate_id: String(row["affiliate_id"]),
-      membership_id: String(row["membership_id"]),
+      affiliate_id: asUnknownString(row["affiliate_id"]),
+      membership_id: asUnknownString(row["membership_id"]),
       learner_name: typeof row["learner_name"] === "string" ? row["learner_name"] : null,
       email: typeof row["email"] === "string" ? row["email"] : null,
-      tier: String(row["tier"]),
-      status: String(row["status"]),
-      coupon_code: String(row["coupon_code"]),
+      tier: asUnknownString(row["tier"]),
+      status: asUnknownString(row["status"]),
+      coupon_code: asUnknownString(row["coupon_code"]),
       revenue_contribution_cents: Number(row["revenue_contribution_cents"] ?? 0),
       commission_earned_cents: Number(row["commission_earned_cents"] ?? 0),
       unpaid_cents: Number(row["unpaid_cents"] ?? 0),
       paid_cents: Number(row["paid_cents"] ?? 0),
       signed_up_at: row["signed_up_at"] as Date,
-      currency: String(row["currency"] ?? "INR"),
+      currency: asUnknownString(row["currency"], "INR"),
     };
   },
 
@@ -2711,16 +2700,16 @@ export const salesMarketingRosterRepository = {
       limit ${limit}
     `;
     return rows.map((row) => ({
-      commission_id: String(row["commission_id"]),
-      payment_order_id: String(row["payment_order_id"]),
+      commission_id: asUnknownString(row["commission_id"]),
+      payment_order_id: asUnknownString(row["payment_order_id"]),
       invoice_number: typeof row["invoice_number"] === "string" ? row["invoice_number"] : null,
       learner_name: typeof row["learner_name"] === "string" ? row["learner_name"] : null,
       learner_email: typeof row["learner_email"] === "string" ? row["learner_email"] : null,
-      product_title: String(row["product_title"] ?? "Untitled product"),
+      product_title: asUnknownString(row["product_title"], "Untitled product"),
       order_amount_cents: Number(row["order_amount_cents"] ?? 0),
       commission_cents: Number(row["commission_cents"] ?? 0),
-      currency: String(row["currency"] ?? "INR"),
-      status: String(row["status"]),
+      currency: asUnknownString(row["currency"], "INR"),
+      status: asUnknownString(row["status"]),
       created_at: row["created_at"] as Date,
     }));
   },
@@ -2764,10 +2753,10 @@ export const salesMarketingRosterRepository = {
       limit ${limit}
     `;
     return rows.map((row) => ({
-      payout_id: String(row["payout_id"]),
+      payout_id: asUnknownString(row["payout_id"]),
       amount_cents: Number(row["amount_cents"] ?? 0),
-      currency: String(row["currency"] ?? "INR"),
-      status: String(row["status"]),
+      currency: asUnknownString(row["currency"], "INR"),
+      status: asUnknownString(row["status"]),
       note: typeof row["note"] === "string" ? row["note"] : null,
       paid_at: row["paid_at"] as Date,
     }));
@@ -2790,7 +2779,7 @@ export const salesMarketingRosterRepository = {
       order by 1 asc
     `;
     return rows.map((row) => ({
-      month: String(row["month"]),
+      month: asUnknownString(row["month"]),
       commission_cents: Number(row["commission_cents"] ?? 0),
       revenue_cents: Number(row["revenue_cents"] ?? 0),
     }));
@@ -2980,8 +2969,7 @@ export const salesMarketingRosterRepository = {
       order_count: number;
     }>
   > {
-    const trunc =
-      grain === "month" ? "month" : grain === "day" ? "day" : "week";
+    const trunc = grain === "month" ? "month" : grain === "day" ? "day" : "week";
     const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
       with paid as (
         select
@@ -3036,7 +3024,7 @@ export const salesMarketingRosterRepository = {
       order by bucket asc
     `;
     return rows.map((row) => ({
-      date: String(row["date"] ?? ""),
+      date: asUnknownString(row["date"], ""),
       direct_cents: Number(row["direct_cents"] ?? 0),
       coupon_cents: Number(row["coupon_cents"] ?? 0),
       referral_cents: Number(row["referral_cents"] ?? 0),
@@ -3085,10 +3073,9 @@ export const salesMarketingRosterRepository = {
     return rows.map((row) => {
       const courseId = row["course_id"];
       return {
-        course_id:
-          typeof courseId === "string" && courseId.length > 0 ? courseId : null,
-        product_title: String(row["product_title"] ?? "Untitled product"),
-        product_type: String(row["product_type"] ?? "course"),
+        course_id: typeof courseId === "string" && courseId.length > 0 ? courseId : null,
+        product_title: asUnknownString(row["product_title"], "Untitled product"),
+        product_type: asUnknownString(row["product_type"], "course"),
         purchaser_count: Number(row["purchaser_count"] ?? 0),
         revenue_cents: Number(row["revenue_cents"] ?? 0),
         discount_cents: Number(row["discount_cents"] ?? 0),
@@ -3122,8 +3109,8 @@ export const salesMarketingRosterRepository = {
       limit 5
     `;
     return rows.map((row) => ({
-      id: String(row["id"]),
-      code: String(row["code"] ?? ""),
+      id: asUnknownString(row["id"]),
+      code: asUnknownString(row["code"], ""),
       uses: Number(row["uses"] ?? 0),
       generated_cents: Number(row["generated_cents"] ?? 0),
     }));
@@ -3165,16 +3152,14 @@ export const salesMarketingRosterRepository = {
       limit 5
     `;
     return rows.map((row) => ({
-      affiliate_id: String(row["affiliate_id"]),
-      name: String(row["name"] ?? "Affiliate"),
+      affiliate_id: asUnknownString(row["affiliate_id"]),
+      name: asUnknownString(row["name"], "Affiliate"),
       commission_cents: Number(row["commission_cents"] ?? 0),
       unpaid_cents: Number(row["unpaid_cents"] ?? 0),
     }));
   },
 
-  async getOverviewAttention(
-    tx: TenantTx,
-  ): Promise<{
+  async getOverviewAttention(tx: TenantTx): Promise<{
     unpaid_commission_count: number;
     over_limit_coupon_count: number;
     pending_affiliate_request_count: number;

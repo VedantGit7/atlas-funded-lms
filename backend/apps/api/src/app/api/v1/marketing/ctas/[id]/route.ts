@@ -24,7 +24,7 @@ export const GET = createTenantRoute<
   metadata: listMarketingCtasMetadata,
   params: paramsSchema,
   output: marketingCtaResponseSchema,
-  handler: async ({ tx, ctx, params }) => getMarketingCta(tx, ctx, params.id),
+  handler: async ({ tx, ctx, params }) => getMarketingCta(tx, ctx, params["id"]),
 });
 
 export const PATCH = createTenantRoute<
@@ -37,5 +37,5 @@ export const PATCH = createTenantRoute<
   body: updateMarketingCtaBasicsBodySchema,
   output: marketingCtaResponseSchema,
   handler: async ({ tx, ctx, params, input }) =>
-    updateMarketingCtaBasics(tx, ctx, params.id, input),
+    updateMarketingCtaBasics(tx, ctx, params["id"], input),
 });

@@ -5,7 +5,7 @@ import {
   exportCustomFieldRosterResponseSchema,
 } from "@atlas/domain/reports/custom-field-roster.dto";
 import { exportCustomFieldRosterMetadata } from "@atlas/domain/reports/custom-field-roster.route-metadata";
-import { exportCustomFieldRoster } from "../../../../../../../server/reports/custom-field-roster-actions.service";
+import { exportCustomFieldRoster } from "@atlas/api-server/reports/custom-field-roster-actions.service";
 
 export const POST = createTenantRoute<
   z.output<typeof exportCustomFieldRosterBodySchema>,

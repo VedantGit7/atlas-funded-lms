@@ -22,7 +22,7 @@ export const PATCH = createTenantRoute<
   body: updateCustomFieldExportScheduleBodySchema,
   output: updateCustomFieldExportScheduleResponseSchema,
   handler: async ({ tx, ctx, params, input }) =>
-    updateCustomFieldExportSchedule(tx, ctx, params.scheduleId, input),
+    updateCustomFieldExportSchedule(tx, ctx, params["scheduleId"], input),
 });
 
 export const DELETE = createTenantRoute<
@@ -35,5 +35,5 @@ export const DELETE = createTenantRoute<
   input: noBodySchema,
   output: deleteCustomFieldExportScheduleResponseSchema,
   handler: async ({ tx, ctx, params }) =>
-    deleteCustomFieldExportSchedule(tx, ctx, params.scheduleId),
+    deleteCustomFieldExportSchedule(tx, ctx, params["scheduleId"]),
 });

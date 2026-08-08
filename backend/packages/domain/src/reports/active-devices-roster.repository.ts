@@ -67,26 +67,24 @@ export const activeDevicesRosterRepository = {
       limit 1
     `;
     const root =
-      rows[0]?.config_json && typeof rows[0].config_json === "object" && !Array.isArray(rows[0].config_json)
+      rows[0]?.config_json &&
+      typeof rows[0].config_json === "object" &&
+      !Array.isArray(rows[0].config_json)
         ? (rows[0].config_json as Record<string, unknown>)
         : {};
     const security =
-      root.security && typeof root.security === "object" && !Array.isArray(root.security)
-        ? (root.security as Record<string, unknown>)
+      root["security"] && typeof root["security"] === "object" && !Array.isArray(root["security"])
+        ? (root["security"] as Record<string, unknown>)
         : {};
-    const rawLimit = security.deviceRegistrationLimit;
+    const rawLimit = security["deviceRegistrationLimit"];
     const parsed =
-      typeof rawLimit === "number"
-        ? rawLimit
-        : typeof rawLimit === "string"
-          ? Number(rawLimit)
-          : 1;
+      typeof rawLimit === "number" ? rawLimit : typeof rawLimit === "string" ? Number(rawLimit) : 1;
     const registrationLimit = Number.isFinite(parsed)
       ? Math.min(10, Math.max(1, Math.trunc(parsed)))
       : 1;
     return {
       registrationLimit,
-      restrictionsEnabled: Boolean(security.deviceRestrictionsEnabled),
+      restrictionsEnabled: Boolean(security["deviceRestrictionsEnabled"]),
     };
   },
 
@@ -332,9 +330,7 @@ export const activeDevicesRosterRepository = {
     tx: TenantTx,
     membershipId: string,
   ): Promise<{ learner_name: string | null; email: string | null } | null> {
-    const rows = await tx.$queryRaw<
-      Array<{ learner_name: string | null; email: string | null }>
-    >`
+    const rows = await tx.$queryRaw<Array<{ learner_name: string | null; email: string | null }>>`
       select
         coalesce(mp.display_name, ap.email, m.invited_email_normalized) as learner_name,
         coalesce(ap.email, m.invited_email_normalized) as email

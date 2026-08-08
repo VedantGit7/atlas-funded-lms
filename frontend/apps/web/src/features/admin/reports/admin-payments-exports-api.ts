@@ -79,21 +79,21 @@ export type CreatePaymentExportBody = {
   dataset: PaymentExportDataset;
   columns: string[];
   format: PaymentExportFormat;
-  paidFrom?: string;
-  paidTo?: string;
-  gatewayKey?: string;
-  status?: string;
+  paidFrom?: string | undefined;
+  paidTo?: string | undefined;
+  gatewayKey?: string | undefined;
+  status?: string | undefined;
   useCurrentFilters: boolean;
   grouping: PaymentExportGrouping;
   includeSubtotals: boolean;
   delivery: PaymentExportDelivery;
-  recipients?: string[];
-  webhookUrl?: string | null;
+  recipients?: string[] | undefined;
+  webhookUrl?: string | null | undefined;
   scheduleEnabled: boolean;
-  scheduleName?: string;
-  cadence?: PaymentExportCadence;
-  time?: string;
-  timezone?: string;
+  scheduleName?: string | undefined;
+  cadence?: PaymentExportCadence | undefined;
+  time?: string | undefined;
+  timezone?: string | undefined;
 };
 
 export async function fetchPaymentExports() {
@@ -125,7 +125,7 @@ export async function retryPaymentExport(runId: string) {
 
 export async function updatePaymentExportSchedule(
   scheduleId: string,
-  body: { isActive?: boolean; name?: string },
+  body: { isActive?: boolean | undefined; name?: string | undefined },
 ) {
   return clientApi.patch<{ data: PaymentExportScheduleItem }>(
     `/api/v1/reports/payments/exports/schedules/${scheduleId}`,

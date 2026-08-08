@@ -31,10 +31,7 @@ import {
   type SalesProductsSortBy,
   type SalesProductsSummary,
 } from "./admin-sales-marketing-roster-api";
-import {
-  downloadReportExport,
-  pollReportRunUntilComplete,
-} from "./admin-reports-api";
+import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
 
 type Props = {
   /** Optional; row click navigates to the purchasers route. Kept for backward compatibility. */
@@ -99,8 +96,7 @@ function ChangePill({ value }: { value: number | null }) {
   if (value == null) {
     return (
       <span className="inline-flex items-center gap-0.5 rounded bg-[var(--admin-surface-high)] px-1.5 py-0.5 font-mono text-[11px] text-[var(--admin-on-surface-variant)]">
-        <Minus className="h-3 w-3" aria-hidden="true" />
-        —
+        <Minus className="h-3 w-3" aria-hidden="true" />—
       </span>
     );
   }
@@ -191,9 +187,9 @@ function KpiCard({
 }: {
   label: string;
   value: string;
-  suffix?: string;
+  suffix?: string | undefined;
   change: number | null;
-  previousLabel?: string;
+  previousLabel?: string | undefined;
 }) {
   return (
     <div className="flex flex-col rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] p-5 shadow-sm">
@@ -330,7 +326,11 @@ export function AdminSalesByProductPanel({ onSelectProduct }: Props) {
   const items = payload?.items ?? [];
   const pageInfo = payload?.pageInfo;
   const isEmpty =
-    !loading && !error && payload != null && payload.summary.productCount === 0 && items.length === 0;
+    !loading &&
+    !error &&
+    payload != null &&
+    payload.summary.productCount === 0 &&
+    items.length === 0;
 
   const productTypeOptions = useMemo(() => {
     const types = payload?.productTypes ?? [];
@@ -382,7 +382,10 @@ export function AdminSalesByProductPanel({ onSelectProduct }: Props) {
           role="alert"
         >
           <div className="flex items-start gap-3">
-            <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-[var(--admin-danger)]" aria-hidden="true" />
+            <AlertTriangle
+              className="mt-0.5 h-5 w-5 shrink-0 text-[var(--admin-danger)]"
+              aria-hidden="true"
+            />
             <div>
               <h2 className="text-base font-semibold text-[var(--admin-danger)]">
                 Couldn&apos;t load sales by product data.
@@ -416,7 +419,10 @@ export function AdminSalesByProductPanel({ onSelectProduct }: Props) {
               <div className="flex flex-col gap-1.5">
                 <span className="text-xs text-[var(--admin-on-surface-variant)]">Date range</span>
                 <span className="inline-flex h-9 items-center gap-2 rounded border border-[var(--admin-outline)] bg-[var(--admin-surface)] px-3 text-sm">
-                  <CalendarDays className="h-4 w-4 text-[var(--admin-on-surface-variant)]" aria-hidden="true" />
+                  <CalendarDays
+                    className="h-4 w-4 text-[var(--admin-on-surface-variant)]"
+                    aria-hidden="true"
+                  />
                   {formatShortDate(paidFrom)} – {formatShortDate(paidTo)}
                 </span>
               </div>
@@ -424,7 +430,11 @@ export function AdminSalesByProductPanel({ onSelectProduct }: Props) {
           </div>
           <div className="flex min-h-[360px] flex-col items-center justify-center px-6 py-12 text-center">
             <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-full border border-[var(--admin-border)] bg-[var(--admin-surface-low)] shadow-sm">
-              <Tag className="h-8 w-8 text-[var(--admin-on-surface-variant)]" strokeWidth={1.5} aria-hidden="true" />
+              <Tag
+                className="h-8 w-8 text-[var(--admin-on-surface-variant)]"
+                strokeWidth={1.5}
+                aria-hidden="true"
+              />
             </div>
             <h2 className="text-base font-semibold text-[var(--admin-on-surface)]">
               No products with sales in this range
@@ -490,7 +500,9 @@ export function AdminSalesByProductPanel({ onSelectProduct }: Props) {
                   <span className="text-xs text-[var(--admin-on-surface-variant)]">Date range</span>
                   <Select
                     value={preset}
-                    onValueChange={(value) => applyPreset(value as DatePreset)}
+                    onValueChange={(value) => {
+                      applyPreset(value as DatePreset);
+                    }}
                     options={DATE_PRESETS.map((item) => ({
                       value: item.value,
                       label: item.label,
@@ -501,7 +513,10 @@ export function AdminSalesByProductPanel({ onSelectProduct }: Props) {
                 </label>
                 {preset === "custom" ? (
                   <label className="inline-flex h-9 items-end gap-2 rounded border border-[var(--admin-outline)] bg-[var(--admin-surface)] px-3 text-xs">
-                    <CalendarDays className="mb-2.5 h-4 w-4 text-[var(--admin-on-surface-variant)]" aria-hidden="true" />
+                    <CalendarDays
+                      className="mb-2.5 h-4 w-4 text-[var(--admin-on-surface-variant)]"
+                      aria-hidden="true"
+                    />
                     <input
                       type="date"
                       value={paidFrom}
@@ -578,7 +593,9 @@ export function AdminSalesByProductPanel({ onSelectProduct }: Props) {
                       <button
                         type="button"
                         className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-[0.06em] text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-on-surface)]"
-                        onClick={() => toggleSort("product_title")}
+                        onClick={() => {
+                          toggleSort("product_title");
+                        }}
                       >
                         Product
                         {sortBy === "product_title" ? (
@@ -597,7 +614,9 @@ export function AdminSalesByProductPanel({ onSelectProduct }: Props) {
                       <button
                         type="button"
                         className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-[0.06em] text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-on-surface)]"
-                        onClick={() => toggleSort("purchaser_count")}
+                        onClick={() => {
+                          toggleSort("purchaser_count");
+                        }}
                       >
                         Units
                         {sortBy === "purchaser_count" ? (
@@ -618,7 +637,9 @@ export function AdminSalesByProductPanel({ onSelectProduct }: Props) {
                             ? "text-[var(--admin-primary)]"
                             : "text-[var(--admin-on-surface-variant)]",
                         ].join(" ")}
-                        onClick={() => toggleSort("revenue_cents")}
+                        onClick={() => {
+                          toggleSort("revenue_cents");
+                        }}
                       >
                         Gross
                         {sortBy === "revenue_cents" ? (
@@ -634,7 +655,9 @@ export function AdminSalesByProductPanel({ onSelectProduct }: Props) {
                       <button
                         type="button"
                         className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-[0.06em] text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-on-surface)]"
-                        onClick={() => toggleSort("discount_cents")}
+                        onClick={() => {
+                          toggleSort("discount_cents");
+                        }}
                       >
                         Discount
                         {sortBy === "discount_cents" ? (
@@ -650,7 +673,9 @@ export function AdminSalesByProductPanel({ onSelectProduct }: Props) {
                       <button
                         type="button"
                         className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-[0.06em] text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-on-surface)]"
-                        onClick={() => toggleSort("net_cents")}
+                        onClick={() => {
+                          toggleSort("net_cents");
+                        }}
                       >
                         Net / share
                         {sortBy === "net_cents" ? (
@@ -666,16 +691,15 @@ export function AdminSalesByProductPanel({ onSelectProduct }: Props) {
                 </thead>
                 <tbody>
                   {items.map((product, index) => {
-                    const rank = ((pageInfo?.page ?? 1) - 1) * (pageInfo?.pageSize ?? 25) + index + 1;
+                    const rank =
+                      ((pageInfo?.page ?? 1) - 1) * (pageInfo?.pageSize ?? 25) + index + 1;
                     const shareWidth = Math.max(4, (product.revenueSharePercent / maxShare) * 100);
                     return (
                       <tr
                         key={product.courseId}
                         className="group cursor-pointer border-b border-[var(--admin-border)] transition-colors last:border-b-0 hover:bg-[color-mix(in_srgb,var(--admin-surface-low)_70%,transparent)]"
                         onClick={() => {
-                          router.push(
-                            `/admin/reports/sales-marketing/sales/${product.courseId}`,
-                          );
+                          router.push(`/admin/reports/sales-marketing/sales/${product.courseId}`);
                           onSelectProduct?.(product);
                         }}
                       >
@@ -720,7 +744,7 @@ export function AdminSalesByProductPanel({ onSelectProduct }: Props) {
                           <div className="pointer-events-none absolute inset-y-1 left-4 right-4 overflow-hidden rounded bg-[color-mix(in_srgb,var(--admin-primary-strong)_6%,transparent)]">
                             <div
                               className="ml-auto h-full rounded-r bg-[color-mix(in_srgb,var(--admin-primary-strong)_18%,transparent)]"
-                              style={{ width: `${shareWidth}%` }}
+                              style={{ width: `${String(shareWidth)}%` }}
                             />
                           </div>
                           <div className="relative z-10 flex items-center justify-end gap-2 pr-1">
@@ -751,7 +775,9 @@ export function AdminSalesByProductPanel({ onSelectProduct }: Props) {
                     type="button"
                     className="rounded border border-[var(--admin-outline)] px-3 py-1 transition-colors hover:bg-[var(--admin-surface-high)] disabled:opacity-50"
                     disabled={!pageInfo.hasPreviousPage || loading}
-                    onClick={() => setPage((current) => Math.max(1, current - 1))}
+                    onClick={() => {
+                      setPage((current) => Math.max(1, current - 1));
+                    }}
                   >
                     Previous
                   </button>
@@ -762,7 +788,9 @@ export function AdminSalesByProductPanel({ onSelectProduct }: Props) {
                     type="button"
                     className="rounded border border-[var(--admin-outline)] px-3 py-1 transition-colors hover:bg-[var(--admin-surface-high)] disabled:opacity-50"
                     disabled={!pageInfo.hasNextPage || loading}
-                    onClick={() => setPage((current) => current + 1)}
+                    onClick={() => {
+                      setPage((current) => current + 1);
+                    }}
                   >
                     Next
                   </button>

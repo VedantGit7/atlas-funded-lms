@@ -18,5 +18,5 @@ export const POST = createTenantRoute<
   params: paymentInstalmentPlanParamsSchema,
   output: payPaymentInstalmentResponseSchema,
   handler: async ({ tx, ctx, input, params }) =>
-    payPaymentInstalment(tx, ctx, params.planId, input),
+    payPaymentInstalment(tx, ctx, params["planId"], input),
 });

@@ -47,9 +47,9 @@ function formatDuration(seconds: number | null | undefined): string {
   const hours = Math.floor(total / 3600);
   const minutes = Math.floor((total % 3600) / 60);
   const secs = total % 60;
-  if (hours > 0) return `${hours}h ${minutes}m`;
-  if (minutes > 0) return `${minutes}m ${secs}s`;
-  return `${secs}s`;
+  if (hours > 0) return `${String(hours)}h ${String(minutes)}m`;
+  if (minutes > 0) return `${String(minutes)}m ${String(secs)}s`;
+  return `${String(secs)}s`;
 }
 
 function titleCase(value: string): string {
@@ -253,9 +253,7 @@ export function AdminLiveClassAttendanceRosterPage() {
           <button type="button" className={ghostButtonClassName} onClick={goBack}>
             Back
           </button>
-          <p className="text-sm text-neutral-600">
-            {detail?.title ?? selectedSession?.title}
-          </p>
+          <p className="text-sm text-neutral-600">{detail?.title ?? selectedSession?.title}</p>
         </div>
       ) : null}
 
@@ -267,7 +265,9 @@ export function AdminLiveClassAttendanceRosterPage() {
               <input
                 className={fieldClassName}
                 value={searchQ}
-                onChange={(event) => setSearchQ(event.target.value)}
+                onChange={(event) => {
+                  setSearchQ(event.target.value);
+                }}
                 placeholder="Session title"
               />
             </label>
@@ -276,7 +276,9 @@ export function AdminLiveClassAttendanceRosterPage() {
               <select
                 className={fieldClassName}
                 value={sessionStatus}
-                onChange={(event) => setSessionStatus(event.target.value)}
+                onChange={(event) => {
+                  setSessionStatus(event.target.value);
+                }}
               >
                 <option value="">All</option>
                 <option value="scheduled">Scheduled</option>
@@ -291,7 +293,9 @@ export function AdminLiveClassAttendanceRosterPage() {
                 type="date"
                 className={fieldClassName}
                 value={startedFrom}
-                onChange={(event) => setStartedFrom(event.target.value)}
+                onChange={(event) => {
+                  setStartedFrom(event.target.value);
+                }}
               />
             </label>
             <label className="grid gap-1 text-sm">
@@ -300,7 +304,9 @@ export function AdminLiveClassAttendanceRosterPage() {
                 type="date"
                 className={fieldClassName}
                 value={startedTo}
-                onChange={(event) => setStartedTo(event.target.value)}
+                onChange={(event) => {
+                  setStartedTo(event.target.value);
+                }}
               />
             </label>
             <button
@@ -343,7 +349,9 @@ export function AdminLiveClassAttendanceRosterPage() {
                       <tr
                         key={session.id}
                         className={`${analyticsTableRowClassName} cursor-pointer`}
-                        onClick={() => openSession(session)}
+                        onClick={() => {
+                          openSession(session);
+                        }}
                       >
                         <td className="px-4 py-3">
                           <div className="font-medium">{session.title}</div>
@@ -377,7 +385,9 @@ export function AdminLiveClassAttendanceRosterPage() {
                 type="button"
                 className={ghostButtonClassName}
                 disabled={sessionsPage <= 1 || loading}
-                onClick={() => setSessionsPage((current) => Math.max(1, current - 1))}
+                onClick={() => {
+                  setSessionsPage((current) => Math.max(1, current - 1));
+                }}
               >
                 Previous
               </button>
@@ -388,7 +398,9 @@ export function AdminLiveClassAttendanceRosterPage() {
                 type="button"
                 className={ghostButtonClassName}
                 disabled={sessionsPage >= sessionsTotalPages || loading}
-                onClick={() => setSessionsPage((current) => current + 1)}
+                onClick={() => {
+                  setSessionsPage((current) => current + 1);
+                }}
               >
                 Next
               </button>
@@ -460,7 +472,9 @@ export function AdminLiveClassAttendanceRosterPage() {
                 <input
                   className={fieldClassName}
                   value={learnerName}
-                  onChange={(event) => setLearnerName(event.target.value)}
+                  onChange={(event) => {
+                    setLearnerName(event.target.value);
+                  }}
                   placeholder="Learner name"
                 />
               </label>
@@ -469,7 +483,9 @@ export function AdminLiveClassAttendanceRosterPage() {
                 <input
                   className={fieldClassName}
                   value={email}
-                  onChange={(event) => setEmail(event.target.value)}
+                  onChange={(event) => {
+                    setEmail(event.target.value);
+                  }}
                   placeholder="Learner email"
                 />
               </label>
@@ -478,7 +494,9 @@ export function AdminLiveClassAttendanceRosterPage() {
                 <select
                   className={fieldClassName}
                   value={attendeeStatus}
-                  onChange={(event) => setAttendeeStatus(event.target.value)}
+                  onChange={(event) => {
+                    setAttendeeStatus(event.target.value);
+                  }}
                 >
                   <option value="">All</option>
                   <option value="attended">Attended</option>
@@ -492,7 +510,9 @@ export function AdminLiveClassAttendanceRosterPage() {
                   type="date"
                   className={fieldClassName}
                   value={joinedFrom}
-                  onChange={(event) => setJoinedFrom(event.target.value)}
+                  onChange={(event) => {
+                    setJoinedFrom(event.target.value);
+                  }}
                 />
               </label>
               <label className="grid gap-1 text-sm">
@@ -501,7 +521,9 @@ export function AdminLiveClassAttendanceRosterPage() {
                   type="date"
                   className={fieldClassName}
                   value={joinedTo}
-                  onChange={(event) => setJoinedTo(event.target.value)}
+                  onChange={(event) => {
+                    setJoinedTo(event.target.value);
+                  }}
                 />
               </label>
               <label className="grid gap-1 text-sm">
@@ -509,7 +531,9 @@ export function AdminLiveClassAttendanceRosterPage() {
                 <select
                   className={fieldClassName}
                   value={sortBy}
-                  onChange={(event) => setSortBy(event.target.value)}
+                  onChange={(event) => {
+                    setSortBy(event.target.value);
+                  }}
                 >
                   <option value="joined_at">Joined</option>
                   <option value="left_at">Left</option>
@@ -524,9 +548,9 @@ export function AdminLiveClassAttendanceRosterPage() {
                 <select
                   className={fieldClassName}
                   value={sortDir}
-                  onChange={(event) =>
-                    setSortDir(event.target.value === "asc" ? "asc" : "desc")
-                  }
+                  onChange={(event) => {
+                    setSortDir(event.target.value === "asc" ? "asc" : "desc");
+                  }}
                 >
                   <option value="asc">Asc</option>
                   <option value="desc">Desc</option>
@@ -555,7 +579,9 @@ export function AdminLiveClassAttendanceRosterPage() {
                     <input
                       type="checkbox"
                       checked={checked}
-                      onChange={() => toggleColumn(column.key)}
+                      onChange={() => {
+                        toggleColumn(column.key);
+                      }}
                     />
                     {column.label}
                   </label>
@@ -574,12 +600,8 @@ export function AdminLiveClassAttendanceRosterPage() {
                         <th className="px-4 py-3">Name</th>
                       ) : null}
                       {columns.includes("email") ? <th className="px-4 py-3">Email</th> : null}
-                      {columns.includes("status") ? (
-                        <th className="px-4 py-3">Status</th>
-                      ) : null}
-                      {columns.includes("joined_at") ? (
-                        <th className="px-4 py-3">Joined</th>
-                      ) : null}
+                      {columns.includes("status") ? <th className="px-4 py-3">Status</th> : null}
+                      {columns.includes("joined_at") ? <th className="px-4 py-3">Joined</th> : null}
                       {columns.includes("left_at") ? <th className="px-4 py-3">Left</th> : null}
                       {columns.includes("duration_seconds") ? (
                         <th className="px-4 py-3">Duration</th>
@@ -600,9 +622,7 @@ export function AdminLiveClassAttendanceRosterPage() {
                       attendees.map((attendee) => (
                         <tr key={attendee.id} className={analyticsTableRowClassName}>
                           {columns.includes("learner_name") ? (
-                            <td className="px-4 py-3 font-medium">
-                              {attendee.learnerName ?? "—"}
-                            </td>
+                            <td className="px-4 py-3 font-medium">{attendee.learnerName ?? "—"}</td>
                           ) : null}
                           {columns.includes("email") ? (
                             <td className="px-4 py-3">{attendee.email ?? "—"}</td>
@@ -611,9 +631,7 @@ export function AdminLiveClassAttendanceRosterPage() {
                             <td className="px-4 py-3">{titleCase(attendee.status)}</td>
                           ) : null}
                           {columns.includes("joined_at") ? (
-                            <td className="px-4 py-3 text-xs">
-                              {formatDate(attendee.joinedAt)}
-                            </td>
+                            <td className="px-4 py-3 text-xs">{formatDate(attendee.joinedAt)}</td>
                           ) : null}
                           {columns.includes("left_at") ? (
                             <td className="px-4 py-3 text-xs">{formatDate(attendee.leftAt)}</td>
@@ -637,7 +655,9 @@ export function AdminLiveClassAttendanceRosterPage() {
                   type="button"
                   className={ghostButtonClassName}
                   disabled={page <= 1 || loading}
-                  onClick={() => setPage((current) => Math.max(1, current - 1))}
+                  onClick={() => {
+                    setPage((current) => Math.max(1, current - 1));
+                  }}
                 >
                   Previous
                 </button>
@@ -648,7 +668,9 @@ export function AdminLiveClassAttendanceRosterPage() {
                   type="button"
                   className={ghostButtonClassName}
                   disabled={page >= totalPages || loading}
-                  onClick={() => setPage((current) => current + 1)}
+                  onClick={() => {
+                    setPage((current) => current + 1);
+                  }}
                 >
                   Next
                 </button>

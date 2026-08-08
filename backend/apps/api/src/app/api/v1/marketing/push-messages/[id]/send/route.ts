@@ -19,5 +19,5 @@ export const POST = createTenantRoute<
   params: paramsSchema,
   body: sendPushMessageBodySchema,
   output: pushMessageResponseSchema,
-  handler: async ({ tx, ctx, params, input }) => sendPushMessage(tx, ctx, params.id, input),
+  handler: async ({ tx, ctx, params, input }) => sendPushMessage(tx, ctx, params["id"], input),
 });

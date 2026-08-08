@@ -1,9 +1,9 @@
 export const dynamic = "force-dynamic";
 
 import { notFound } from "next/navigation";
-import { AdminPageGate } from "../../../../../../components/patterns/AdminPageGate";
-import { AdminScoreQuizLearnersPage } from "../../../../../../features/admin/reports/AdminScoreQuizLearnersPage";
-import { runTenantStateGate } from "../../../../../../lib/server/tenant-state-gate";
+import { AdminPageGate } from "@/components/patterns/AdminPageGate";
+import { AdminScoreQuizLearnersPage } from "@/features/admin/reports/AdminScoreQuizLearnersPage";
+import { runTenantStateGate } from "@/lib/server/tenant-state-gate";
 
 export default async function AdminScoreQuizLearnersRoutePage({
   params,

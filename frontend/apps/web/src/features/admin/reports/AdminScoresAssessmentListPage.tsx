@@ -135,24 +135,18 @@ function openProductHref(productType: ScoreProductType): string {
   return "/admin/bundles";
 }
 
-function ScoreBar({
-  value,
-  passMark,
-}: {
-  value: number | null;
-  passMark: number | null;
-}) {
+function ScoreBar({ value, passMark }: { value: number | null; passMark: number | null }) {
   const pct = value == null ? 0 : Math.max(0, Math.min(100, value));
   return (
     <div className="relative h-[3px] w-full max-w-[120px] overflow-hidden rounded-full bg-[var(--admin-surface-high)]">
       <div
         className="h-full rounded-full bg-[var(--admin-primary)] transition-[width] duration-300"
-        style={{ width: `${pct}%` }}
+        style={{ width: `${String(pct)}%` }}
       />
       {passMark != null ? (
         <span
           className="absolute top-1/2 h-2 w-px -translate-y-1/2 bg-[var(--admin-on-surface)]"
-          style={{ left: `${Math.max(0, Math.min(100, passMark))}%` }}
+          style={{ left: `${String(Math.max(0, Math.min(100, passMark)))}%` }}
           title={`Pass mark ${formatPct(passMark)}`}
         />
       ) : null}
@@ -164,7 +158,9 @@ function ScoreSpreadRow({ item }: { item: ScoreQuizItem }) {
   const spread = item.scoreSpread;
   if (!spread) {
     return (
-      <p className="font-mono text-[11px] text-[var(--admin-on-surface-variant)]">No scored attempts</p>
+      <p className="font-mono text-[11px] text-[var(--admin-on-surface-variant)]">
+        No scored attempts
+      </p>
     );
   }
   const pass = item.passMarkPct;
@@ -174,28 +170,28 @@ function ScoreSpreadRow({ item }: { item: ScoreQuizItem }) {
       {pass != null ? (
         <div
           className="absolute top-0 bottom-0 w-px border-l border-dashed border-[var(--admin-outline)]"
-          style={{ left: `${pass}%` }}
+          style={{ left: `${String(pass)}%` }}
         />
       ) : null}
       <div
         className="absolute top-1/2 h-3 -translate-y-1/2 rounded-sm bg-[color-mix(in_srgb,var(--admin-primary)_35%,var(--admin-surface))]"
         style={{
-          left: `${spread.q1}%`,
-          width: `${Math.max(1, spread.q3 - spread.q1)}%`,
+          left: `${String(spread.q1)}%`,
+          width: `${String(Math.max(1, spread.q3 - spread.q1))}%`,
         }}
       />
       <div
         className="absolute top-1/2 h-4 w-0.5 -translate-y-1/2 bg-[var(--admin-on-surface)]"
-        style={{ left: `${spread.median}%` }}
+        style={{ left: `${String(spread.median)}%` }}
         title={`Median ${formatPct(spread.median)}`}
       />
       <div
         className="absolute top-1/2 h-2 w-0.5 -translate-y-1/2 bg-[var(--admin-outline)]"
-        style={{ left: `${spread.min}%` }}
+        style={{ left: `${String(spread.min)}%` }}
       />
       <div
         className="absolute top-1/2 h-2 w-0.5 -translate-y-1/2 bg-[var(--admin-outline)]"
-        style={{ left: `${spread.max}%` }}
+        style={{ left: `${String(spread.max)}%` }}
       />
     </div>
   );
@@ -296,7 +292,9 @@ export function AdminScoresAssessmentListPage({
       setDebouncedQ(searchInput.trim());
       setPage(1);
     }, 300);
-    return () => window.clearTimeout(timer);
+    return () => {
+      window.clearTimeout(timer);
+    };
   }, [searchInput]);
 
   const load = useCallback(async () => {
@@ -304,7 +302,7 @@ export function AdminScoresAssessmentListPage({
     setError(null);
     const [sortByRaw, sortDirRaw] = sortKey.split(":");
     const sortBy = (sortByRaw ?? "title") as ScoreQuizSortBy;
-    const sortDir = (sortDirRaw === "desc" ? "desc" : "asc") as "asc" | "desc";
+    const sortDir = sortDirRaw === "desc" ? "desc" : "asc";
     try {
       const response = await fetchScoreQuizzes(productType, productId, {
         q: debouncedQ || undefined,
@@ -347,9 +345,7 @@ export function AdminScoresAssessmentListPage({
     void load();
   }, [load]);
 
-  const hasActiveFilters = Boolean(
-    debouncedQ || assessmentType || passRateBand || hasUngraded,
-  );
+  const hasActiveFilters = Boolean(debouncedQ || assessmentType || passRateBand || hasUngraded);
   const empty = !loading && !error && items.length === 0;
   const productEmpty = empty && !hasActiveFilters && (summary?.assessmentCount ?? 0) === 0;
 
@@ -525,7 +521,9 @@ export function AdminScoresAssessmentListPage({
                   type="button"
                   className={`${primaryButtonClassName} inline-flex h-10 items-center justify-center gap-2 rounded-sm leading-none`}
                   aria-expanded={cohortOpen}
-                  onClick={() => setCohortOpen((open) => !open)}
+                  onClick={() => {
+                    setCohortOpen((open) => !open);
+                  }}
                 >
                   <Users className="h-4 w-4 shrink-0" aria-hidden="true" />
                   {cohortOpen ? "Hide cohort actions" : "Cohort actions"}
@@ -567,7 +565,9 @@ export function AdminScoresAssessmentListPage({
                     className="h-9 rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-3 text-sm text-[var(--admin-on-surface)]"
                     placeholder="Group title"
                     value={groupTitle}
-                    onChange={(e) => setGroupTitle(e.target.value)}
+                    onChange={(e) => {
+                      setGroupTitle(e.target.value);
+                    }}
                   />
                   <button
                     type="button"
@@ -583,13 +583,17 @@ export function AdminScoresAssessmentListPage({
                     className="h-9 rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-3 text-sm text-[var(--admin-on-surface)]"
                     placeholder="Message subject"
                     value={messageSubject}
-                    onChange={(e) => setMessageSubject(e.target.value)}
+                    onChange={(e) => {
+                      setMessageSubject(e.target.value);
+                    }}
                   />
                   <textarea
                     className="min-h-[72px] rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-3 py-2 text-sm text-[var(--admin-on-surface)]"
                     placeholder="Message body"
                     value={messageBody}
-                    onChange={(e) => setMessageBody(e.target.value)}
+                    onChange={(e) => {
+                      setMessageBody(e.target.value);
+                    }}
                   />
                   <button
                     type="button"
@@ -643,7 +647,7 @@ export function AdminScoresAssessmentListPage({
                 </p>
                 <p className="font-mono text-[11px] text-[var(--admin-on-surface-variant)]">
                   {summary.attemptsPerLearner != null
-                    ? `${summary.attemptsPerLearner} per learner`
+                    ? `${String(summary.attemptsPerLearner)} per learner`
                     : "No learners yet"}
                 </p>
               </div>
@@ -687,7 +691,9 @@ export function AdminScoresAssessmentListPage({
                   id={searchId}
                   type="search"
                   value={searchInput}
-                  onChange={(e) => setSearchInput(e.target.value)}
+                  onChange={(e) => {
+                    setSearchInput(e.target.value);
+                  }}
                   placeholder="Search assessment title"
                   className="h-9 w-full rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface)] pl-9 pr-3 text-sm text-[var(--admin-on-surface)] placeholder:text-[var(--admin-on-surface-variant)] focus:border-[var(--admin-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--admin-primary)]/30"
                 />
@@ -822,17 +828,16 @@ export function AdminScoresAssessmentListPage({
                               item.learnerCount > 0
                                 ? Math.round((item.attemptCount / item.learnerCount) * 10) / 10
                                 : null;
-                            const passDanger =
-                              item.passRatePct != null && item.passRatePct < 50;
+                            const passDanger = item.passRatePct != null && item.passRatePct < 50;
                             return (
                               <tr
                                 key={item.assessmentId}
                                 className="cursor-pointer transition-colors hover:bg-[color-mix(in_srgb,var(--admin-primary)_6%,var(--admin-surface))]"
-                                onClick={() =>
+                                onClick={() => {
                                   router.push(
                                     `/admin/reports/progress-score/scores/quizzes/${item.assessmentId}`,
-                                  )
-                                }
+                                  );
+                                }}
                                 onKeyDown={(e) => {
                                   if (e.key === "Enter" || e.key === " ") {
                                     e.preventDefault();
@@ -852,15 +857,15 @@ export function AdminScoresAssessmentListPage({
                                   </span>
                                 </td>
                                 <td className="px-4 py-3 text-[var(--admin-on-surface-variant)]">
-                                  {item.lessonTitle ?? (
-                                    <span className="italic">Standalone</span>
-                                  )}
+                                  {item.lessonTitle ?? <span className="italic">Standalone</span>}
                                 </td>
                                 <td className="px-4 py-3 text-right font-mono tabular-nums">
                                   {item.questionCount ?? "—"}
                                 </td>
                                 <td className="px-4 py-3 text-right font-mono tabular-nums text-[var(--admin-on-surface-variant)]">
-                                  {item.passMarkPct == null ? "Not set" : formatPct(item.passMarkPct)}
+                                  {item.passMarkPct == null
+                                    ? "Not set"
+                                    : formatPct(item.passMarkPct)}
                                 </td>
                                 <td className="px-4 py-3 text-right font-mono tabular-nums">
                                   {formatCount(item.learnerCount)}
@@ -879,10 +884,7 @@ export function AdminScoresAssessmentListPage({
                                   <p className="mb-1 font-mono tabular-nums">
                                     {formatPct(item.avgScorePct)}
                                   </p>
-                                  <ScoreBar
-                                    value={item.avgScorePct}
-                                    passMark={item.passMarkPct}
-                                  />
+                                  <ScoreBar value={item.avgScorePct} passMark={item.passMarkPct} />
                                 </td>
                                 <td
                                   className={[
@@ -898,9 +900,7 @@ export function AdminScoresAssessmentListPage({
                                     item.ungradedCount > 0 ? "text-[var(--admin-warning)]" : "",
                                   ].join(" ")}
                                 >
-                                  {item.ungradedCount > 0
-                                    ? formatCount(item.ungradedCount)
-                                    : "—"}
+                                  {item.ungradedCount > 0 ? formatCount(item.ungradedCount) : "—"}
                                 </td>
                                 <td className="px-4 py-3 text-right font-mono text-[12px] text-[var(--admin-on-surface-variant)]">
                                   {formatRelative(item.lastAttemptAt)}
@@ -923,16 +923,15 @@ export function AdminScoresAssessmentListPage({
                     key={item.assessmentId}
                     type="button"
                     className="rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface)] p-4 text-left transition-colors active:scale-[0.99]"
-                    onClick={() =>
+                    onClick={() => {
                       router.push(
                         `/admin/reports/progress-score/scores/quizzes/${item.assessmentId}`,
-                      )
-                    }
+                      );
+                    }}
                   >
                     <p className="font-medium text-[var(--admin-primary)]">{item.title}</p>
                     <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.08em] text-[var(--admin-on-surface-variant)]">
-                      {humanizeType(item.assessmentType)} ·{" "}
-                      {item.lessonTitle ?? "Standalone"}
+                      {humanizeType(item.assessmentType)} · {item.lessonTitle ?? "Standalone"}
                     </p>
                     <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 font-mono text-[12px] tabular-nums text-[var(--admin-on-surface-variant)]">
                       <span>Avg {formatPct(item.avgScorePct)}</span>
@@ -942,8 +941,7 @@ export function AdminScoresAssessmentListPage({
                     {item.scoreSpread ? (
                       <p className="mt-2 font-mono text-[11px] text-[var(--admin-on-surface-variant)]">
                         Spread {formatPct(item.scoreSpread.min)} –{" "}
-                        {formatPct(item.scoreSpread.median)} –{" "}
-                        {formatPct(item.scoreSpread.max)}
+                        {formatPct(item.scoreSpread.median)} – {formatPct(item.scoreSpread.max)}
                       </p>
                     ) : null}
                   </button>
@@ -984,20 +982,24 @@ export function AdminScoresAssessmentListPage({
                     type="button"
                     className={ghostButtonClassName}
                     disabled={!pageInfo.hasPreviousPage || loading}
-                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    onClick={() => {
+                      setPage((p) => Math.max(1, p - 1));
+                    }}
                   >
                     <ChevronLeft className="h-4 w-4" aria-hidden="true" />
                     Prev
                   </button>
                   <span>
                     Page {pageInfo.page}
-                    {pageInfo.totalPages > 0 ? ` / ${pageInfo.totalPages}` : ""}
+                    {pageInfo.totalPages > 0 ? ` / ${String(pageInfo.totalPages)}` : ""}
                   </span>
                   <button
                     type="button"
                     className={ghostButtonClassName}
                     disabled={!pageInfo.hasNextPage || loading}
-                    onClick={() => setPage((p) => p + 1)}
+                    onClick={() => {
+                      setPage((p) => p + 1);
+                    }}
                   >
                     Next
                     <ChevronRight className="h-4 w-4" aria-hidden="true" />

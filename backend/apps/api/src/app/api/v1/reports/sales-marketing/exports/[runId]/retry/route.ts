@@ -18,7 +18,7 @@ export const POST = createTenantRoute<
   input: noBodySchema,
   output: retrySalesMarketingExportResponseSchema,
   handler: async ({ tx, ctx, params }) => {
-    const result = await retrySalesMarketingExport(tx, ctx, params.runId);
+    const result = await retrySalesMarketingExport(tx, ctx, params["runId"]);
     scheduleSalesMarketingExportProcessing({
       tenantId: ctx.tenantId,
       requestId: ctx.requestId,

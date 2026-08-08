@@ -18,5 +18,5 @@ export const GET = createTenantRoute<
   params: referrerMembershipIdParamsSchema,
   output: referredLearnersListResponseSchema,
   handler: async ({ tx, ctx, input, params }) =>
-    listReferredLearners(tx, ctx, params.membershipId, input),
+    listReferredLearners(tx, ctx, params["membershipId"], input),
 });

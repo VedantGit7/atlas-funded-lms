@@ -20,5 +20,5 @@ export const GET = createTenantRoute<
   params: scoreAttemptReviewParamsSchema,
   output: scoreAttemptReviewResponseSchema,
   handler: async ({ tx, ctx, params }) =>
-    getScoreAttemptReview(tx, ctx, params.assessmentId, params.attemptId),
+    getScoreAttemptReview(tx, ctx, params["assessmentId"], params["attemptId"]),
 });

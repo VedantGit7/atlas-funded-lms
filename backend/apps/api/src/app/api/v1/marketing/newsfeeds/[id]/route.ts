@@ -24,7 +24,7 @@ export const GET = createTenantRoute<
   metadata: listMarketingNewsfeedMetadata,
   params: paramsSchema,
   output: newsfeedPostResponseSchema,
-  handler: async ({ tx, ctx, params }) => getMarketingNewsfeedPost(tx, ctx, params.id),
+  handler: async ({ tx, ctx, params }) => getMarketingNewsfeedPost(tx, ctx, params["id"]),
 });
 
 export const PATCH = createTenantRoute<
@@ -37,5 +37,5 @@ export const PATCH = createTenantRoute<
   body: updateNewsfeedPostBodySchema,
   output: newsfeedPostResponseSchema,
   handler: async ({ tx, ctx, params, input }) =>
-    updateMarketingNewsfeedPost(tx, ctx, params.id, input),
+    updateMarketingNewsfeedPost(tx, ctx, params["id"], input),
 });

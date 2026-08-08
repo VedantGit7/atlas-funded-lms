@@ -16,5 +16,5 @@ export const GET = createTenantRoute<
   params: activeDevicesLearnerParamsSchema,
   output: activeDevicesLearnerDetailResponseSchema,
   handler: async ({ tx, ctx, params }) =>
-    getActiveDevicesLearnerDetail(tx, ctx, params.membershipId),
+    getActiveDevicesLearnerDetail(tx, ctx, params["membershipId"]),
 });

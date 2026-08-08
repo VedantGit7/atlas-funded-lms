@@ -24,7 +24,7 @@ export const GET = createTenantRoute<
   metadata: listMarketingFormsMetadata,
   params: paramsSchema,
   output: marketingFormResponseSchema,
-  handler: async ({ tx, ctx, params }) => getMarketingForm(tx, ctx, params.id),
+  handler: async ({ tx, ctx, params }) => getMarketingForm(tx, ctx, params["id"]),
 });
 
 export const PATCH = createTenantRoute<
@@ -37,5 +37,5 @@ export const PATCH = createTenantRoute<
   body: updateMarketingFormBasicsBodySchema,
   output: marketingFormResponseSchema,
   handler: async ({ tx, ctx, params, input }) =>
-    updateMarketingFormBasics(tx, ctx, params.id, input),
+    updateMarketingFormBasics(tx, ctx, params["id"], input),
 });

@@ -20,5 +20,5 @@ export const PATCH = createTenantRoute<
   body: updateMarketingFormAppearanceBodySchema,
   output: marketingFormResponseSchema,
   handler: async ({ tx, ctx, params, input }) =>
-    updateMarketingFormAppearance(tx, ctx, params.id, input),
+    updateMarketingFormAppearance(tx, ctx, params["id"], input),
 });

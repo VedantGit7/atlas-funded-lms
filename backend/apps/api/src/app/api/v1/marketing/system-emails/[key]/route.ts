@@ -25,7 +25,7 @@ export const GET = createTenantRoute<
   metadata: listSystemEmailsMetadata,
   params: paramsSchema,
   output: systemEmailResponseSchema,
-  handler: async ({ tx, ctx, params }) => getSystemEmail(tx, ctx, params.key),
+  handler: async ({ tx, ctx, params }) => getSystemEmail(tx, ctx, params["key"]),
 });
 
 export const PUT = createTenantRoute<
@@ -37,5 +37,5 @@ export const PUT = createTenantRoute<
   params: paramsSchema,
   body: updateSystemEmailBodySchema,
   output: systemEmailResponseSchema,
-  handler: async ({ tx, ctx, params, input }) => updateSystemEmail(tx, ctx, params.key, input),
+  handler: async ({ tx, ctx, params, input }) => updateSystemEmail(tx, ctx, params["key"], input),
 });

@@ -16,5 +16,5 @@ export const POST = createTenantRoute<
   metadata: mutateSystemEmailsMetadata,
   params: paramsSchema,
   output: systemEmailResponseSchema,
-  handler: async ({ tx, ctx, params }) => resetSystemEmail(tx, ctx, params.key),
+  handler: async ({ tx, ctx, params }) => resetSystemEmail(tx, ctx, params["key"]),
 });

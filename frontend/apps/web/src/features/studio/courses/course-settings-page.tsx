@@ -62,37 +62,16 @@ function CourseSettingsPageInner({ course: initialCourse }: CourseSettingsPagePr
   }
 
   if (isCourseGeneralSettingsSection(sectionId)) {
-    return (
-      <CourseSettingsGeneralPage
-        course={course}
-        section={card}
-        onCourseChange={setCourse}
-      />
-    );
+    return <CourseSettingsGeneralPage course={course} section={card} onCourseChange={setCourse} />;
   }
 
   if (isCourseFeaturesSettingsSection(sectionId)) {
-    return (
-      <CourseSettingsFeaturesPage
-        course={course}
-        section={card}
-        onCourseChange={setCourse}
-      />
-    );
+    return <CourseSettingsFeaturesPage course={course} section={card} onCourseChange={setCourse} />;
   }
 
   if (isCoursePublishDeleteSettingsSection(sectionId)) {
-    if (card.externalHref) {
-      router.replace(card.externalHref(course.id));
-      return null;
-    }
-
     return (
-      <CourseSettingsPublishDeletePage
-        course={course}
-        section={card}
-        onCourseChange={setCourse}
-      />
+      <CourseSettingsPublishDeletePage course={course} section={card} onCourseChange={setCourse} />
     );
   }
 
@@ -110,11 +89,7 @@ function CourseSettingsPageInner({ course: initialCourse }: CourseSettingsPagePr
   if (card.id === "permissions") {
     return (
       <CourseSettingsDetailShell card={card} courseId={course.id}>
-        <CourseSettingsPermissionsPanel
-          course={course}
-          editable={editable}
-          onSaved={setCourse}
-        />
+        <CourseSettingsPermissionsPanel course={course} editable={editable} onSaved={setCourse} />
       </CourseSettingsDetailShell>
     );
   }
@@ -129,11 +104,7 @@ function CourseSettingsPageInner({ course: initialCourse }: CourseSettingsPagePr
 
   if (card.lifecyclePanel) {
     return (
-      <CourseSettingsPublishDeletePage
-        course={course}
-        section={card}
-        onCourseChange={setCourse}
-      />
+      <CourseSettingsPublishDeletePage course={course} section={card} onCourseChange={setCourse} />
     );
   }
 

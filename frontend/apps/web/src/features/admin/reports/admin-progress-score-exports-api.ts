@@ -13,12 +13,7 @@ export type ProgressScoreExportProductType =
   | "bundle"
   | "subscription"
   | "mock_test";
-export type ProgressScoreExportStatus =
-  | "QUEUED"
-  | "RUNNING"
-  | "SUCCEEDED"
-  | "FAILED"
-  | "CANCELLED";
+export type ProgressScoreExportStatus = "QUEUED" | "RUNNING" | "SUCCEEDED" | "FAILED" | "CANCELLED";
 
 export type ProgressScoreExportColumn = {
   key: string;
@@ -84,25 +79,25 @@ export type CreateProgressScoreExportBody = {
   dataset: ProgressScoreExportDataset;
   columns: string[];
   format: ProgressScoreExportFormat;
-  productType?: ProgressScoreExportProductType;
-  productId?: string;
-  courseId?: string;
-  assessmentId?: string;
-  dateFrom?: string;
-  dateTo?: string;
-  learnerName?: string;
-  enrolledType?: string;
-  status?: string;
-  resultStatus?: "pass" | "fail" | "pending" | "in_progress";
+  productType?: ProgressScoreExportProductType | undefined;
+  productId?: string | undefined;
+  courseId?: string | undefined;
+  assessmentId?: string | undefined;
+  dateFrom?: string | undefined;
+  dateTo?: string | undefined;
+  learnerName?: string | undefined;
+  enrolledType?: string | undefined;
+  status?: string | undefined;
+  resultStatus?: "pass" | "fail" | "pending" | "in_progress" | undefined;
   useCurrentFilters: boolean;
   delivery: ProgressScoreExportDelivery;
-  recipients?: string[];
-  webhookUrl?: string | null;
+  recipients?: string[] | undefined;
+  webhookUrl?: string | null | undefined;
   scheduleEnabled: boolean;
-  scheduleName?: string;
-  cadence?: ProgressScoreExportCadence;
-  time?: string;
-  timezone?: string;
+  scheduleName?: string | undefined;
+  cadence?: ProgressScoreExportCadence | undefined;
+  time?: string | undefined;
+  timezone?: string | undefined;
 };
 
 export async function fetchProgressScoreExports() {
@@ -139,7 +134,7 @@ export async function retryProgressScoreExport(runId: string) {
 
 export async function updateProgressScoreExportSchedule(
   scheduleId: string,
-  body: { isActive?: boolean; name?: string },
+  body: { isActive?: boolean | undefined; name?: string | undefined },
 ) {
   return clientApi.patch<{ data: ProgressScoreExportScheduleItem }>(
     `/api/v1/reports/progress-score/exports/schedules/${scheduleId}`,

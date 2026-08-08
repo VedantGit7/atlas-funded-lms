@@ -1,8 +1,10 @@
 import type { z } from "zod";
+import { z as zod } from "zod";
 import { createTenantRoute } from "@atlas/api";
 import {
   badgeDetailResponseSchema,
   badgeListResponseSchema,
+  manualAwardBulkResponseSchema,
   postBadgesBodySchema,
   updateBadgeBodySchema,
 } from "../../../../server/gamification/gamification.schemas";
@@ -14,6 +16,9 @@ import {
 import { getRouteMetadata, postRouteMetadata, putRouteMetadata } from "./route.metadata";
 
 type BadgeListResponse = z.output<typeof badgeListResponseSchema>;
+type BadgeMutationResponse =
+  | z.output<typeof badgeDetailResponseSchema>
+  | z.output<typeof manualAwardBulkResponseSchema>;
 type BadgeDetailResponse = z.output<typeof badgeDetailResponseSchema>;
 type PostBadgesBody = z.output<typeof postBadgesBodySchema>;
 type UpdateBadgeBody = z.output<typeof updateBadgeBodySchema>;
@@ -24,10 +29,10 @@ export const GET = createTenantRoute<Record<string, never>, BadgeListResponse>({
   handler: async ({ tx, ctx }) => listBadges(tx, ctx),
 });
 
-export const POST = createTenantRoute<PostBadgesBody, BadgeDetailResponse>({
+export const POST = createTenantRoute<PostBadgesBody, BadgeMutationResponse>({
   metadata: postRouteMetadata,
   body: postBadgesBodySchema,
-  output: badgeDetailResponseSchema,
+  output: zod.union([badgeDetailResponseSchema, manualAwardBulkResponseSchema]),
   handler: async ({ tx, ctx, input }) => mutateBadges(tx, ctx, input),
 });
 

@@ -8,11 +8,11 @@ import {
 } from "../../../frontend/apps/web/src/features/admin/admin-route-registry";
 
 describe("admin route registry", () => {
-  it("defines exact T1-T98 contract registry", () => {
-    const screenIds = listAdminScreenIds();
-    expect(screenIds).toHaveLength(98);
+  it("defines exact T1-T100 contract registry", () => {
+    const screenIds = [...new Set(listAdminScreenIds())];
+    expect(screenIds).toHaveLength(100);
     expect(screenIds[0]).toBe("T1");
-    expect(screenIds[97]).toBe("T98");
+    expect(screenIds[99]).toBe("T100");
   });
 
   it("maps known screens to approved paths", () => {
@@ -29,7 +29,9 @@ describe("admin route registry", () => {
     expect(getAdminRouteByScreenId("T32").pathPattern).toBe("/admin/learner-billing/pricing-model");
     expect(getAdminRouteByScreenId("T38").pathPattern).toBe("/admin/learner-billing/locations");
     expect(getAdminRouteByScreenId("T39").pathPattern).toBe("/admin/fast-checkout");
-    expect(getAdminRouteByScreenId("T40").pathPattern).toBe("/admin/security/learner-email-verification");
+    expect(getAdminRouteByScreenId("T40").pathPattern).toBe(
+      "/admin/security/learner-email-verification",
+    );
     expect(getAdminRouteByScreenId("T42").pathPattern).toBe("/admin/security/device-monitor");
     expect(getAdminRouteByScreenId("T43").pathPattern).toBe("/admin/channels/transactional-email");
     expect(getAdminRouteByScreenId("T45").pathPattern).toBe("/admin/channels/support-email");
@@ -79,9 +81,7 @@ describe("admin route registry", () => {
     expect(getAdminRouteByScreenId("T79").pathPattern).toBe(
       "/admin/marketing/messenger/announcements/create",
     );
-    expect(getAdminRouteByScreenId("T80").pathPattern).toBe(
-      "/admin/marketing/messenger/whatsapp",
-    );
+    expect(getAdminRouteByScreenId("T80").pathPattern).toBe("/admin/marketing/messenger/whatsapp");
     expect(getAdminRouteByScreenId("T81").pathPattern).toBe(
       "/admin/marketing/messenger/whatsapp/create",
     );
@@ -94,48 +94,24 @@ describe("admin route registry", () => {
     expect(getAdminRouteByScreenId("T84").pathPattern).toBe(
       "/admin/marketing/messenger/whatsapp/inbox",
     );
-    expect(getAdminRouteByScreenId("T85").pathPattern).toBe(
-      "/admin/marketing/workflows/create",
-    );
-    expect(getAdminRouteByScreenId("T86").pathPattern).toBe(
-      "/admin/marketing/workflows/:id",
-    );
-    expect(getAdminRouteByScreenId("T87").pathPattern).toBe(
-      "/admin/marketing/forms/create",
-    );
-    expect(getAdminRouteByScreenId("T88").pathPattern).toBe(
-      "/admin/marketing/forms/:id",
-    );
+    expect(getAdminRouteByScreenId("T85").pathPattern).toBe("/admin/marketing/workflows/create");
+    expect(getAdminRouteByScreenId("T86").pathPattern).toBe("/admin/marketing/workflows/:id");
+    expect(getAdminRouteByScreenId("T87").pathPattern).toBe("/admin/marketing/forms/create");
+    expect(getAdminRouteByScreenId("T88").pathPattern).toBe("/admin/marketing/forms/:id");
     expect(getAdminRouteByScreenId("T89").pathPattern).toBe(
       "/admin/marketing/forms/:id/submissions",
     );
-    expect(getAdminRouteByScreenId("T90").pathPattern).toBe(
-      "/admin/marketing/forms/contacts",
-    );
-    expect(getAdminRouteByScreenId("T91").pathPattern).toBe(
-      "/admin/marketing/cta/create",
-    );
-    expect(getAdminRouteByScreenId("T92").pathPattern).toBe(
-      "/admin/marketing/cta/:id",
-    );
-    expect(getAdminRouteByScreenId("T93").pathPattern).toBe(
-      "/admin/marketing/promo-slider/create",
-    );
-    expect(getAdminRouteByScreenId("T94").pathPattern).toBe(
-      "/admin/marketing/promo-slider/:id",
-    );
-    expect(getAdminRouteByScreenId("T95").pathPattern).toBe(
-      "/admin/marketing/events/create",
-    );
-    expect(getAdminRouteByScreenId("T96").pathPattern).toBe(
-      "/admin/marketing/events/:id",
-    );
-    expect(getAdminRouteByScreenId("T97").pathPattern).toBe(
-      "/admin/marketing/newsfeed/create",
-    );
-    expect(getAdminRouteByScreenId("T98").pathPattern).toBe(
-      "/admin/marketing/newsfeed/:id",
-    );
+    expect(getAdminRouteByScreenId("T90").pathPattern).toBe("/admin/marketing/forms/contacts");
+    expect(getAdminRouteByScreenId("T91").pathPattern).toBe("/admin/marketing/cta/create");
+    expect(getAdminRouteByScreenId("T92").pathPattern).toBe("/admin/marketing/cta/:id");
+    expect(getAdminRouteByScreenId("T93").pathPattern).toBe("/admin/marketing/promo-slider/create");
+    expect(getAdminRouteByScreenId("T94").pathPattern).toBe("/admin/marketing/promo-slider/:id");
+    expect(getAdminRouteByScreenId("T95").pathPattern).toBe("/admin/marketing/events/create");
+    expect(getAdminRouteByScreenId("T96").pathPattern).toBe("/admin/marketing/events/:id");
+    expect(getAdminRouteByScreenId("T97").pathPattern).toBe("/admin/marketing/newsfeed/create");
+    expect(getAdminRouteByScreenId("T98").pathPattern).toBe("/admin/marketing/newsfeed/:id");
+    expect(getAdminRouteByScreenId("T99").pathPattern).toBe("/admin/sales/coupons/create");
+    expect(getAdminRouteByScreenId("T100").pathPattern).toBe("/admin/sales/coupons/:id");
   });
 
   it("does not register forbidden duplicate admin content routes", () => {

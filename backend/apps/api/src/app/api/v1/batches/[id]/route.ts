@@ -10,6 +10,7 @@ import { deleteBatch, getBatch, updateBatch } from "@atlas/domain/batches/batche
 import { z as zod } from "zod";
 
 const paramsSchema = zod.object({ id: zod.string().uuid() });
+const deletedResponseSchema = zod.object({ data: zod.object({ deleted: zod.boolean() }) });
 
 export const GET = createTenantRoute<
   Record<string, never>,
@@ -19,7 +20,7 @@ export const GET = createTenantRoute<
   metadata: getBatchMetadata,
   params: paramsSchema,
   output: batchResponseSchema,
-  handler: async ({ tx, ctx, params }) => getBatch(tx, ctx, params.id),
+  handler: async ({ tx, ctx, params }) => getBatch(tx, ctx, params["id"]),
 });
 
 export const PATCH = createTenantRoute<
@@ -31,15 +32,16 @@ export const PATCH = createTenantRoute<
   params: paramsSchema,
   input: updateBatchBodySchema,
   output: batchResponseSchema,
-  handler: async ({ tx, ctx, params, input }) => updateBatch(tx, ctx, params.id, input),
+  handler: async ({ tx, ctx, params, input }) => updateBatch(tx, ctx, params["id"], input),
 });
 
 export const DELETE = createTenantRoute<
   Record<string, never>,
-  { data: { deleted: boolean } },
+  z.output<typeof deletedResponseSchema>,
   typeof paramsSchema
 >({
   metadata: deleteBatchMetadata,
   params: paramsSchema,
-  handler: async ({ tx, ctx, params }) => deleteBatch(tx, ctx, params.id),
+  output: deletedResponseSchema,
+  handler: async ({ tx, ctx, params }) => deleteBatch(tx, ctx, params["id"]),
 });

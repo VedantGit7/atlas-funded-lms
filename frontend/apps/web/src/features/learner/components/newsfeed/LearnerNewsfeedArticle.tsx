@@ -23,9 +23,7 @@ export function LearnerNewsfeedArticle({ slug }: { slug: string }) {
       setPost(response.data);
     } catch (caught) {
       setPost(null);
-      toast.error(
-        caught instanceof ClientApiError ? caught.message : "Could not load article.",
-      );
+      toast.error(caught instanceof ClientApiError ? caught.message : "Could not load article.");
     } finally {
       setLoading(false);
     }
@@ -86,7 +84,6 @@ export function LearnerNewsfeedArticle({ slug }: { slug: string }) {
           Back to Newsfeed
         </Link>
         {post.coverImageUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
           <img src={post.coverImageUrl} alt="" className="w-full rounded-xl object-cover" />
         ) : null}
         <h1 className="text-3xl font-semibold tracking-tight text-[var(--foreground)]">
@@ -121,7 +118,6 @@ export function LearnerNewsfeedArticle({ slug }: { slug: string }) {
         </button>
       </div>
       {post.coverImageUrl ? (
-        // eslint-disable-next-line @next/next/no-img-element
         <img
           src={post.coverImageUrl}
           alt=""
@@ -134,9 +130,7 @@ export function LearnerNewsfeedArticle({ slug }: { slug: string }) {
         </h1>
         <div className="flex flex-wrap gap-3 text-sm text-[var(--muted-foreground)]">
           {post.authorName ? <span>By {post.authorName}</span> : null}
-          {post.publishedAt ? (
-            <span>{new Date(post.publishedAt).toLocaleDateString()}</span>
-          ) : null}
+          {post.publishedAt ? <span>{new Date(post.publishedAt).toLocaleDateString()}</span> : null}
         </div>
         {post.tags.length > 0 ? (
           <div className="flex flex-wrap gap-2 pt-1">

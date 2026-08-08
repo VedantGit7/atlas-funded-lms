@@ -7,6 +7,13 @@ import type {
   ScoreProductsQuery,
 } from "./progress-score-roster.dto";
 
+function asUnknownString(value: unknown, fallback = ""): string {
+  if (typeof value === "string") return value;
+  if (typeof value === "number" || typeof value === "boolean") return String(value);
+  if (value == null) return fallback;
+  return fallback;
+}
+
 export type ScorePickerProductRow = {
   id: string;
   title: string;
@@ -30,19 +37,16 @@ export type ScorePickerSummaryRow = {
 
 function mapRow(row: Record<string, unknown>): ScorePickerProductRow {
   return {
-    id: String(row["id"]),
-    title: String(row["title"] ?? ""),
-    slug: String(row["slug"] ?? ""),
-    status: String(row["status"] ?? "DRAFT") as ProductPublishStatus,
+    id: asUnknownString(row["id"]),
+    title: asUnknownString(row["title"], ""),
+    slug: asUnknownString(row["slug"], ""),
+    status: asUnknownString(row["status"], "DRAFT") as ProductPublishStatus,
     assessment_count: Number(row["assessment_count"] ?? 0),
     learners_attempted: Number(row["learners_attempted"] ?? 0),
     attempt_count: Number(row["attempt_count"] ?? 0),
-    avg_score_pct:
-      row["avg_score_pct"] == null ? null : Number(row["avg_score_pct"]),
-    pass_mark_pct:
-      row["pass_mark_pct"] == null ? null : Number(row["pass_mark_pct"]),
-    pass_rate_pct:
-      row["pass_rate_pct"] == null ? null : Number(row["pass_rate_pct"]),
+    avg_score_pct: row["avg_score_pct"] == null ? null : Number(row["avg_score_pct"]),
+    pass_mark_pct: row["pass_mark_pct"] == null ? null : Number(row["pass_mark_pct"]),
+    pass_rate_pct: row["pass_rate_pct"] == null ? null : Number(row["pass_rate_pct"]),
     ungraded_count: Number(row["ungraded_count"] ?? 0),
     last_attempt_at: row["last_attempt_at"] instanceof Date ? row["last_attempt_at"] : null,
   };
@@ -191,26 +195,22 @@ export const progressScorePickerRepository = {
       return rows[0] ?? { product_count: 0, assessment_count: 0, attempt_count: 0 };
     }
 
-    if (productType === "bundle") {
-      const rows = await tx.$queryRaw<Array<ScorePickerSummaryRow>>`
-        select
-          count(*)::int as product_count,
-          0::int as assessment_count,
-          0::int as attempt_count
-        from bundles b
-        where b.tenant_id = current_setting('app.tenant_id', true)::uuid
-          and b.deleted_at is null
-          and (${status}::text is null or b.status::text = ${status})
-          and (
-            ${q}::text is null
-            or lower(b.title) like '%' || lower(${q}) || '%'
-            or lower(b.slug) like '%' || lower(${q}) || '%'
-          )
-      `;
-      return rows[0] ?? { product_count: 0, assessment_count: 0, attempt_count: 0 };
-    }
-
-    return { product_count: 0, assessment_count: 0, attempt_count: 0 };
+    const rows = await tx.$queryRaw<Array<ScorePickerSummaryRow>>`
+      select
+        count(*)::int as product_count,
+        0::int as assessment_count,
+        0::int as attempt_count
+      from bundles b
+      where b.tenant_id = current_setting('app.tenant_id', true)::uuid
+        and b.deleted_at is null
+        and (${status}::text is null or b.status::text = ${status})
+        and (
+          ${q}::text is null
+          or lower(b.title) like '%' || lower(${q}) || '%'
+          or lower(b.slug) like '%' || lower(${q}) || '%'
+        )
+    `;
+    return rows[0] ?? { product_count: 0, assessment_count: 0, attempt_count: 0 };
   },
 
   async countScoreProducts(
@@ -248,15 +248,13 @@ export const progressScorePickerRepository = {
         `;
         return Number(rows[0]?.count ?? 0);
       }
-      if (productType === "bundle") {
-        const rows = await tx.$queryRaw<Array<{ count: bigint }>>`
-          select count(*)::bigint as count
-          from bundles b
-          where b.tenant_id = current_setting('app.tenant_id', true)::uuid
-            and b.deleted_at is null
-        `;
-        return Number(rows[0]?.count ?? 0);
-      }
+      const rows = await tx.$queryRaw<Array<{ count: bigint }>>`
+        select count(*)::bigint as count
+        from bundles b
+        where b.tenant_id = current_setting('app.tenant_id', true)::uuid
+          and b.deleted_at is null
+      `;
+      return Number(rows[0]?.count ?? 0);
     }
 
     const all = await this.listScoreProducts(tx, productType, {
@@ -271,10 +269,10 @@ export const progressScorePickerRepository = {
     tx: TenantTx,
     productType: ScoreProductType,
     query: {
-      q?: string;
-      status?: ProductPublishStatus;
-      passRateBand?: ScorePassRateBand;
-      hasUngraded?: boolean;
+      q?: string | undefined;
+      status?: ProductPublishStatus | undefined;
+      passRateBand?: ScorePassRateBand | undefined;
+      hasUngraded?: boolean | undefined;
       sortBy: ScoreProductSortBy;
       sortDir: "asc" | "desc";
       limit: number;
@@ -711,70 +709,66 @@ export const progressScorePickerRepository = {
       return rows.map(mapRow);
     }
 
-    if (productType === "bundle") {
-      // Honest degradation: list bundles with assessment counts via existing quiz counter pattern.
-      const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
-        select
-          b.id::text as id,
-          b.title,
-          b.slug,
-          b.status::text as status,
-          coalesce(qz.assessment_count, 0)::int as assessment_count,
-          0::int as learners_attempted,
-          0::int as attempt_count,
-          null::float as avg_score_pct,
-          null::float as pass_mark_pct,
-          null::float as pass_rate_pct,
-          0::int as ungraded_count,
-          null::timestamptz as last_attempt_at
-        from bundles b
-        left join lateral (
-          select count(distinct a.id)::int as assessment_count
-          from bundle_items bi
-          join assessments a on a.tenant_id = bi.tenant_id and a.deleted_at is null
-          left join lessons l on bi.item_kind = 'course'
-            and l.deleted_at is null
-            and l.tenant_id = bi.tenant_id
-            and coalesce(l.content_json->'content'->>'assessmentId', l.content_json->>'assessmentId') = a.id::text
-          left join course_modules cm on bi.item_kind = 'course'
-            and cm.id = l.module_id and cm.tenant_id = l.tenant_id and cm.deleted_at is null and cm.course_id = bi.ref_id
-          left join mock_tests mt on bi.item_kind = 'mock_test'
-            and mt.id = bi.ref_id and mt.deleted_at is null and mt.assessment_id = a.id
-          left join test_series_items tsi on bi.item_kind = 'test_series'
-            and tsi.test_series_id = bi.ref_id and tsi.tenant_id = bi.tenant_id
-            and a.id = coalesce(
-              tsi.assessment_id,
-              (select mt2.assessment_id from mock_tests mt2 where mt2.id = tsi.mock_test_id and mt2.deleted_at is null)
-            )
-          where bi.bundle_id = b.id
-            and bi.tenant_id = b.tenant_id
-            and (
-              (bi.item_kind = 'course' and cm.id is not null)
-              or (bi.item_kind = 'mock_test' and mt.id is not null)
-              or (bi.item_kind = 'test_series' and tsi.id is not null)
-            )
-        ) qz on true
-        where b.tenant_id = current_setting('app.tenant_id', true)::uuid
-          and b.deleted_at is null
-          and (${status}::text is null or b.status::text = ${status})
-          and (
-            ${q}::text is null
-            or lower(b.title) like '%' || lower(${q}) || '%'
-            or lower(b.slug) like '%' || lower(${q}) || '%'
+    // Honest degradation: list bundles with assessment counts via existing quiz counter pattern.
+    const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
+      select
+        b.id::text as id,
+        b.title,
+        b.slug,
+        b.status::text as status,
+        coalesce(qz.assessment_count, 0)::int as assessment_count,
+        0::int as learners_attempted,
+        0::int as attempt_count,
+        null::float as avg_score_pct,
+        null::float as pass_mark_pct,
+        null::float as pass_rate_pct,
+        0::int as ungraded_count,
+        null::timestamptz as last_attempt_at
+      from bundles b
+      left join lateral (
+        select count(distinct a.id)::int as assessment_count
+        from bundle_items bi
+        join assessments a on a.tenant_id = bi.tenant_id and a.deleted_at is null
+        left join lessons l on bi.item_kind = 'course'
+          and l.deleted_at is null
+          and l.tenant_id = bi.tenant_id
+          and coalesce(l.content_json->'content'->>'assessmentId', l.content_json->>'assessmentId') = a.id::text
+        left join course_modules cm on bi.item_kind = 'course'
+          and cm.id = l.module_id and cm.tenant_id = l.tenant_id and cm.deleted_at is null and cm.course_id = bi.ref_id
+        left join mock_tests mt on bi.item_kind = 'mock_test'
+          and mt.id = bi.ref_id and mt.deleted_at is null and mt.assessment_id = a.id
+        left join test_series_items tsi on bi.item_kind = 'test_series'
+          and tsi.test_series_id = bi.ref_id and tsi.tenant_id = bi.tenant_id
+          and a.id = coalesce(
+            tsi.assessment_id,
+            (select mt2.assessment_id from mock_tests mt2 where mt2.id = tsi.mock_test_id and mt2.deleted_at is null)
           )
-          and (${hasUngraded}::boolean = false)
-          and (${passRateBand}::text is null)
-        order by
-          case when ${sortBy} = 'title' and ${sortDir} = 'asc' then b.title end asc,
-          case when ${sortBy} = 'title' and ${sortDir} = 'desc' then b.title end desc,
-          case when ${sortBy} = 'attempts' and ${sortDir} = 'desc' then coalesce(qz.assessment_count, 0) end desc,
-          b.title asc
-        limit ${query.limit}
-        offset ${skip}
-      `;
-      return rows.map(mapRow);
-    }
-
-    return [];
+        where bi.bundle_id = b.id
+          and bi.tenant_id = b.tenant_id
+          and (
+            (bi.item_kind = 'course' and cm.id is not null)
+            or (bi.item_kind = 'mock_test' and mt.id is not null)
+            or (bi.item_kind = 'test_series' and tsi.id is not null)
+          )
+      ) qz on true
+      where b.tenant_id = current_setting('app.tenant_id', true)::uuid
+        and b.deleted_at is null
+        and (${status}::text is null or b.status::text = ${status})
+        and (
+          ${q}::text is null
+          or lower(b.title) like '%' || lower(${q}) || '%'
+          or lower(b.slug) like '%' || lower(${q}) || '%'
+        )
+        and (${hasUngraded}::boolean = false)
+        and (${passRateBand}::text is null)
+      order by
+        case when ${sortBy} = 'title' and ${sortDir} = 'asc' then b.title end asc,
+        case when ${sortBy} = 'title' and ${sortDir} = 'desc' then b.title end desc,
+        case when ${sortBy} = 'attempts' and ${sortDir} = 'desc' then coalesce(qz.assessment_count, 0) end desc,
+        b.title asc
+      limit ${query.limit}
+      offset ${skip}
+    `;
+    return rows.map(mapRow);
   },
 };

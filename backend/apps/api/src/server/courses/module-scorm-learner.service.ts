@@ -45,13 +45,26 @@ async function requireEnrolledScormModule(tx: TenantTx, ctx: ServiceCtx, moduleI
 
   if (!enrollment) {
     throw new AtlasHttpError({
-      code: "ENROLLMENT_REQUIRED",
+      code: "PERMISSION_DENIED",
       status: 403,
       message: "Enroll in this course to access SCORM chapters.",
     });
   }
 
   return module;
+}
+
+function normalizeScormProgressStatus(
+  status: string | null | undefined,
+): "not_started" | "in_progress" | "completed" {
+  if (status === "in_progress" || status === "completed" || status === "not_started") {
+    return status;
+  }
+  return "not_started";
+}
+
+function normalizeScormVersion(version: string | null | undefined): "1.2" | "2004" {
+  return version === "2004" ? "2004" : "1.2";
 }
 
 export async function getModuleScormLaunchForLearner(
@@ -74,11 +87,11 @@ export async function getModuleScormLaunchForLearner(
       moduleId: module.id,
       courseId: module.courseId,
       title: module.title,
-      scormVersion: module.scormVersion ?? "1.2",
+      scormVersion: normalizeScormVersion(module.scormVersion),
       launchPath,
       contentUrl,
       progress: {
-        status: progress?.status ?? "not_started",
+        status: normalizeScormProgressStatus(progress?.status),
         progressPct: progress?.progressPct ?? 0,
         completedAt: progress?.completedAt?.toISOString() ?? null,
       },
@@ -92,7 +105,7 @@ export async function getModuleScormContentForLearner(
   moduleId: string,
   relativePath: string,
 ) {
-  const module = await requireEnrolledScormModule(tx, ctx, moduleId);
+  await requireEnrolledScormModule(tx, ctx, moduleId);
   const env = parseStorageEnv(process.env);
   const provider = getStorageProvider();
 
@@ -109,7 +122,7 @@ export async function getModuleScormContentForLearner(
 
   if (!body) {
     throw new AtlasHttpError({
-      code: "NOT_FOUND",
+      code: "PERMISSION_DENIED",
       status: 404,
       message: "SCORM content file was not found.",
     });
@@ -141,26 +154,37 @@ export async function getModuleScormProgressForLearner(
 
   return {
     data: {
-      status: progress?.status ?? "not_started",
+      status: normalizeScormProgressStatus(progress?.status),
       progressPct: progress?.progressPct ?? 0,
-      cmi: progress?.cmiJson ?? {},
+      cmi: (progress?.cmiJson ?? {}) as Record<string, string | number | boolean>,
       completedAt: progress?.completedAt?.toISOString() ?? null,
       lastSeenAt: progress?.lastSeenAt?.toISOString() ?? null,
     },
   };
 }
 
+function asCmiString(value: unknown): string {
+  if (typeof value === "string") return value;
+  if (typeof value === "number" || typeof value === "boolean") return String(value);
+  return "";
+}
+
 function deriveProgressFromCmi(cmi: Record<string, unknown>) {
-  const lessonStatus = String(cmi["cmi.core.lesson_status"] ?? cmi["cmi.completion_status"] ?? "");
+  const lessonStatus = asCmiString(
+    cmi["cmi.core.lesson_status"] ?? cmi["cmi.completion_status"] ?? "",
+  );
   const scoreRaw = cmi["cmi.core.score.raw"] ?? cmi["cmi.score.raw"];
-  const score = typeof scoreRaw === "string" || typeof scoreRaw === "number" ? Number(scoreRaw) : null;
+  const score =
+    typeof scoreRaw === "string" || typeof scoreRaw === "number" ? Number(scoreRaw) : null;
 
   const completed =
-    lessonStatus === "completed" ||
-    lessonStatus === "passed" ||
-    lessonStatus === "failed";
+    lessonStatus === "completed" || lessonStatus === "passed" || lessonStatus === "failed";
 
-  const progressPct = completed ? 100 : score != null && !Number.isNaN(score) ? Math.max(0, Math.min(100, score)) : 0;
+  const progressPct = completed
+    ? 100
+    : score != null && !Number.isNaN(score)
+      ? Math.max(0, Math.min(100, score))
+      : 0;
   const status = completed ? "completed" : progressPct > 0 ? "in_progress" : "not_started";
 
   return {
@@ -208,8 +232,9 @@ export async function recordModuleScormProgressForLearner(
 
   return {
     data: {
-      status: saved.status,
+      status: normalizeScormProgressStatus(saved.status),
       progressPct: saved.progressPct,
+      cmi: mergedCmi as Record<string, string | number | boolean>,
       completedAt: saved.completedAt?.toISOString() ?? null,
       lastSeenAt: saved.lastSeenAt?.toISOString() ?? null,
     },

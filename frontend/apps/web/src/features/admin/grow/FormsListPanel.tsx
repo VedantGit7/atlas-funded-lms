@@ -67,8 +67,7 @@ const EMPTY_SUMMARY: FormListSummary = {
 };
 
 function StatusPill({ status }: { status: FormStatus }) {
-  const tone =
-    status === "LIVE" ? "success" : status === "UNPUBLISHED" ? "warning" : "neutral";
+  const tone = status === "LIVE" ? "success" : status === "UNPUBLISHED" ? "warning" : "neutral";
   return (
     <div className="flex items-center gap-2">
       <span
@@ -116,8 +115,7 @@ function KindPill({ kind }: { kind: FormKind }) {
 
 function FormIcon({ form }: { form: FormDto }) {
   const muted = form.status !== "LIVE";
-  const Icon =
-    form.kind === "SIGNUP" ? UserPlus : form.status === "DRAFT" ? FileText : Download;
+  const Icon = form.kind === "SIGNUP" ? UserPlus : form.status === "DRAFT" ? FileText : Download;
   return (
     <div
       className={[
@@ -163,7 +161,9 @@ export function FormsListPanel() {
       setDebouncedQuery(query.trim());
       setPage(1);
     }, 250);
-    return () => { window.clearTimeout(timer); };
+    return () => {
+      window.clearTimeout(timer);
+    };
   }, [query]);
 
   useEffect(() => {
@@ -206,8 +206,7 @@ export function FormsListPanel() {
   const rangeStart = items.length === 0 ? 0 : (safePage - 1) * pageSize + 1;
   const rangeEnd = Math.min(safePage * pageSize, items.length);
   const hasFilters = Boolean(debouncedQuery || tab !== "ALL");
-  const deleteMatches =
-    deleteRow != null && deleteConfirm.trim() === deleteRow.title.trim();
+  const deleteMatches = deleteRow != null && deleteConfirm.trim() === deleteRow.title.trim();
 
   async function runAction(id: string, path: string, successMessage: string) {
     setActionBusy(id);
@@ -640,7 +639,9 @@ export function FormsListPanel() {
             </h2>
             <p className="text-sm text-[var(--admin-on-surface-variant)]">
               Type{" "}
-              <span className="font-semibold text-[var(--admin-on-surface)]">{deleteRow.title}</span>{" "}
+              <span className="font-semibold text-[var(--admin-on-surface)]">
+                {deleteRow.title}
+              </span>{" "}
               to confirm.
             </p>
             <input

@@ -14,7 +14,7 @@ type AnalyticsAdminDateRangeProps = {
   onFromChange: (value: string) => void;
   onToChange: (value: string) => void;
   onApply: () => void;
-  disabled?: boolean;
+  disabled?: boolean | undefined;
 };
 
 export function AnalyticsAdminDateRange({
@@ -53,7 +53,12 @@ export function AnalyticsAdminDateRange({
           className={`${fieldClassName} w-[8.5rem] border-none bg-transparent px-0 py-0 text-xs font-semibold shadow-none focus-visible:ring-0`}
         />
       </label>
-      <button type="button" className={applyToolbarButtonClassName} onClick={onApply} disabled={disabled}>
+      <button
+        type="button"
+        className={applyToolbarButtonClassName}
+        onClick={onApply}
+        disabled={disabled}
+      >
         Apply
       </button>
       <p className="sr-only" aria-live="polite">

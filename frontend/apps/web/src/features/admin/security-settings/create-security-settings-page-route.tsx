@@ -23,8 +23,8 @@ export function createSecuritySettingsPageRoute(config: SecuritySettingsPageConf
             <SecuritySettingsPlaceholderPage
               title={config.title}
               description={config.description}
-              relatedHref={config.relatedHref}
-              relatedLabel={config.relatedLabel}
+              {...(config.relatedHref !== undefined ? { relatedHref: config.relatedHref } : {})}
+              {...(config.relatedLabel !== undefined ? { relatedLabel: config.relatedLabel } : {})}
             />
           </SecuritySettingsShell>
         </AdminPageGate>

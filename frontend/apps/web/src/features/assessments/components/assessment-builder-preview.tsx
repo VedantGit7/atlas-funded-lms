@@ -13,6 +13,13 @@ import {
   sectionHeaderClassName,
 } from "../assessment-studio-shared";
 
+function defined<T>(value: T, message = "Expected value to be defined"): NonNullable<T> {
+  if (value == null) {
+    throw new Error(message);
+  }
+  return value;
+}
+
 type AssessmentItem = z.infer<typeof assessmentDetailSchema>["items"][number];
 
 type AssessmentBuilderPreviewProps = {
@@ -23,8 +30,8 @@ type AssessmentBuilderPreviewProps = {
 
 function readStem(contentJson: Record<string, unknown> | undefined): string {
   if (!contentJson) return "Question";
-  if (typeof contentJson.stem === "string" && contentJson.stem.trim()) {
-    return contentJson.stem.trim();
+  if (typeof contentJson["stem"] === "string" && contentJson["stem"].trim()) {
+    return contentJson["stem"].trim();
   }
   return itemDisplayTitle(contentJson);
 }
@@ -48,13 +55,15 @@ export function AssessmentBuilderPreview({
       <div className="flex min-h-40 items-center justify-center rounded-xl border-2 border-dashed border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-6 py-8 text-center">
         <div className="text-[var(--admin-on-surface-variant)]">
           <Eye className="mx-auto mb-2 h-8 w-8 opacity-40" aria-hidden="true" />
-          <p className="text-xs font-medium">Add items to preview how learners will see this assessment</p>
+          <p className="text-xs font-medium">
+            Add items to preview how learners will see this assessment
+          </p>
         </div>
       </div>
     );
   }
 
-  const activeItem = items[activeIndex]!;
+  const activeItem = defined(items[activeIndex]);
   const itemTypeKey = activeItem.itemTypeKey ?? "mcq_single";
   const typeVisual = getItemTypeVisual(itemTypeKey);
   const stem = readStem(activeItem.contentJson);
@@ -101,7 +110,9 @@ export function AssessmentBuilderPreview({
             {title.trim() || "Untitled assessment"}
           </p>
           {description.trim() ? (
-            <p className="mt-1 text-sm text-[var(--admin-on-surface-variant)]">{description.trim()}</p>
+            <p className="mt-1 text-sm text-[var(--admin-on-surface-variant)]">
+              {description.trim()}
+            </p>
           ) : null}
         </div>
 
@@ -124,12 +135,21 @@ export function AssessmentBuilderPreview({
             key={`${activeItem.itemId}-${String(activeItem.position)}`}
             itemTypeKey={itemTypeKey}
             stem={stem}
-            options={activeItem.options?.map((option) => ({
-              id: option.id,
-              optionJson: option.optionJson,
-              isCorrect: "isCorrect" in option ? (option.isCorrect ?? null) : null,
-              position: option.position,
-            }))}
+            {...(activeItem.options !== undefined
+              ? {
+                  options: activeItem.options.map((option) => ({
+                    id: option.id,
+                    optionJson: option.optionJson,
+                    isCorrect:
+                      "isCorrect" in option
+                        ? option.isCorrect === true || option.isCorrect === false
+                          ? option.isCorrect
+                          : null
+                        : null,
+                    position: option.position,
+                  })),
+                }
+              : {})}
             mode="preview"
             disabled={false}
             showStem={itemTypeKey !== "swipe"}

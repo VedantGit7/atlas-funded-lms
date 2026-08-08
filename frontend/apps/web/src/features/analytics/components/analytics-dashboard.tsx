@@ -7,7 +7,12 @@ import type {
   AnalyticsItemStatisticsResponse,
 } from "@atlas/domain/analytics/analytics.contract";
 import type { ChartGranularity } from "../analytics-studio-shared";
-import { metricsForTab, type AdminTab, latestMetricDay, resolveDrillDownRollupKey } from "../analytics-admin-utils";
+import {
+  metricsForTab,
+  type AdminTab,
+  latestMetricDay,
+  resolveDrillDownRollupKey,
+} from "../analytics-admin-utils";
 import { fetchAnalyticsDashboard, fetchAnalyticsFunnel, fetchItemStatistics } from "../api";
 import { AnalyticsAdminView } from "./analytics-admin-view";
 import { AnalyticsDrillDownDialog } from "./analytics-drill-down-dialog";
@@ -20,8 +25,8 @@ import { ItemStatisticsTable } from "./item-statistics-table";
 type AnalyticsDashboardProps = {
   mode: "admin" | "studio";
   canViewFunnel: boolean;
-  initialCourses?: Array<{ id: string; title: string }>;
-  initialAssessments?: Array<{ id: string; title: string }>;
+  initialCourses?: Array<{ id: string; title: string }> | undefined;
+  initialAssessments?: Array<{ id: string; title: string }> | undefined;
 };
 
 function defaultDateRange(): { from: string; to: string } {
@@ -45,7 +50,9 @@ function aggregateMetricTotals(
 }
 
 function downloadCsv(filename: string, rows: string[][]) {
-  const csv = rows.map((row) => row.map((cell) => `"${cell.replaceAll('"', '""')}"`).join(",")).join("\n");
+  const csv = rows
+    .map((row) => row.map((cell) => `"${cell.replaceAll('"', '""')}"`).join(","))
+    .join("\n");
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");

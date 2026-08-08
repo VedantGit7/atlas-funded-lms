@@ -41,7 +41,11 @@ import { creditCurrenciesForXp, getRewardsAdmin } from "./rewards.service";
 import { evaluateQuestsForEvent, listQuestsForAdmin, previewQuestsForEvent } from "./quest.service";
 import { listSeasonalEvents, resolveSeasonalMultiplier } from "./seasonal.service";
 import { gamificationRepository, toBadgeDto, toLeaderboardDto } from "./gamification.repository";
-import type { GamificationStreakRule, LeaderboardConfig, LeaderboardSnapshotPayload } from "./gamification.types";
+import type {
+  GamificationStreakRule,
+  LeaderboardConfig,
+  LeaderboardSnapshotPayload,
+} from "./gamification.types";
 import { sanitizeLeaderboardSnapshot } from "./gamification-rules.helpers";
 import type {
   badgeAwardsQuerySchema,
@@ -310,11 +314,7 @@ async function updateGroupStreakForActivity(
 
   let currentCount = 1;
   if (existing?.last_activity_period) {
-    const previousPeriod = getPreviousActivityPeriod(
-      args.cadence,
-      args.timezone,
-      activityPeriod,
-    );
+    const previousPeriod = getPreviousActivityPeriod(args.cadence, args.timezone, activityPeriod);
     currentCount =
       existing.last_activity_period === previousPeriod ? existing.current_count + 1 : 1;
   }
@@ -607,7 +607,7 @@ export async function updateGamificationRules(
   };
 
   await gamificationRepository.upsertTenantGamificationConfig(tx, nextPartial);
-  const after = mergeGamificationRules(nextPartial);
+  const after = mergeGamificationRules(nextPartial as Parameters<typeof mergeGamificationRules>[0]);
 
   await auditWriter.write(
     tx,
@@ -935,10 +935,7 @@ function weeklyRankForStanding(standing: {
  * total XP: which level they're on, and how far into the next one they are.
  * Returns null when no thresholds are configured so callers can hide the meter.
  */
-function computeLevelProgress(
-  xpTotal: number,
-  thresholds: { levelKey: string; minXp: number }[],
-) {
+function computeLevelProgress(xpTotal: number, thresholds: { levelKey: string; minXp: number }[]) {
   if (thresholds.length === 0) {
     return null;
   }

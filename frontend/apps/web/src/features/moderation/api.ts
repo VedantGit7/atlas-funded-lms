@@ -108,10 +108,7 @@ export async function createModerationCase(body: {
   return (await response.json()) as { data: ModerationCaseItem };
 }
 
-export async function createAppeal(body: {
-  moderationCaseId: string;
-  body: string;
-}): Promise<{
+export async function createAppeal(body: { moderationCaseId: string; body: string }): Promise<{
   data: {
     id: string;
     moderationCaseId: string;
@@ -227,4 +224,4 @@ export function formatModerationError(error: unknown): string {
   return "Something went wrong.";
 }
 
-export { STATUS_OPTIONS, TARGET_TYPE_OPTIONS };
+export { STATUS_OPTIONS };

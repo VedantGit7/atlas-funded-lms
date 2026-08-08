@@ -25,7 +25,7 @@ export const GET = createTenantRoute<
   metadata: listProductCopyJobsMetadata,
   params: paramsSchema,
   output: productCopyJobListResponseSchema,
-  handler: async ({ tx, ctx, params }) => listProductCopyJobs(tx, ctx, params.id),
+  handler: async ({ tx, ctx, params }) => listProductCopyJobs(tx, ctx, params["id"]),
 });
 
 export const POST = createTenantRoute<
@@ -37,6 +37,5 @@ export const POST = createTenantRoute<
   params: paramsSchema,
   body: createProductCopyJobBodySchema,
   output: productCopyJobResponseSchema,
-  handler: async ({ tx, ctx, params, input }) =>
-    createProductCopyJob(tx, ctx, params.id, input),
+  handler: async ({ tx, ctx, params, input }) => createProductCopyJob(tx, ctx, params["id"], input),
 });

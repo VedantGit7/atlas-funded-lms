@@ -22,7 +22,7 @@ export type WhatsappSubmitTemplateInput = {
   headerImageUrl?: string | null;
   body: string;
   footer?: string | null;
-  buttons?: Array<{ type: string; text: string; url?: string }>;
+  buttons?: Array<{ type: string; text: string; url?: string | undefined }>;
 };
 
 export type WhatsappSubmitTemplateResult = {
@@ -61,19 +61,19 @@ class MockWhatsappProvider implements WhatsappProvider {
     return true;
   }
 
-  async submitTemplate(
+  submitTemplate(
     _credentials: WhatsappProviderCredentials | null,
     input: WhatsappSubmitTemplateInput,
   ): Promise<WhatsappSubmitTemplateResult> {
     // Simulate Meta review: auto-approve for local/dev so the flow is fully usable.
-    return {
+    return Promise.resolve({
       status: "APPROVED",
       metaTemplateId: `mock_tpl_${input.name}`,
       rejectionReason: null,
-    };
+    });
   }
 
-  async sendTemplate(
+  sendTemplate(
     _credentials: WhatsappProviderCredentials | null,
     input: WhatsappTemplateSendInput,
   ): Promise<{ metaMessageId: string }> {
@@ -85,10 +85,10 @@ class MockWhatsappProvider implements WhatsappProvider {
         bodyPreview: input.body.slice(0, 80),
       });
     }
-    return { metaMessageId: `mock_msg_${Date.now()}` };
+    return Promise.resolve({ metaMessageId: `mock_msg_${String(Date.now())}` });
   }
 
-  async sendFreeform(
+  sendFreeform(
     _credentials: WhatsappProviderCredentials | null,
     input: WhatsappFreeformSendInput,
   ): Promise<{ metaMessageId: string }> {
@@ -99,7 +99,7 @@ class MockWhatsappProvider implements WhatsappProvider {
         bodyPreview: input.body.slice(0, 80),
       });
     }
-    return { metaMessageId: `mock_msg_${Date.now()}` };
+    return Promise.resolve({ metaMessageId: `mock_msg_${String(Date.now())}` });
   }
 }
 
@@ -108,9 +108,7 @@ class MetaWhatsappProvider implements WhatsappProvider {
   private readonly graphVersion = process.env["WHATSAPP_GRAPH_VERSION"] ?? "v21.0";
 
   isConfigured(credentials: WhatsappProviderCredentials | null): boolean {
-    return Boolean(
-      credentials?.accessToken && credentials.phoneNumberId && credentials.wabaId,
-    );
+    return Boolean(credentials?.accessToken && credentials.phoneNumberId && credentials.wabaId);
   }
 
   private assertCredentials(
@@ -139,9 +137,7 @@ class MetaWhatsappProvider implements WhatsappProvider {
       components.push({
         type: "HEADER",
         format: "IMAGE",
-        example: input.headerImageUrl
-          ? { header_handle: [input.headerImageUrl] }
-          : undefined,
+        example: input.headerImageUrl ? { header_handle: [input.headerImageUrl] } : undefined,
       });
     }
 
@@ -190,17 +186,14 @@ class MetaWhatsappProvider implements WhatsappProvider {
       return {
         status: "REJECTED",
         metaTemplateId: null,
-        rejectionReason: json.error?.message ?? `Meta template submit failed (${response.status})`,
+        rejectionReason:
+          json.error?.message ?? `Meta template submit failed (${String(response.status)})`,
       };
     }
 
     const statusRaw = (json.status ?? "PENDING").toUpperCase();
     const status =
-      statusRaw === "APPROVED"
-        ? "APPROVED"
-        : statusRaw === "REJECTED"
-          ? "REJECTED"
-          : "PENDING";
+      statusRaw === "APPROVED" ? "APPROVED" : statusRaw === "REJECTED" ? "REJECTED" : "PENDING";
 
     return {
       status,
@@ -239,7 +232,7 @@ class MetaWhatsappProvider implements WhatsappProvider {
       error?: { message?: string };
     };
     if (!response.ok) {
-      throw new Error(json.error?.message ?? `WhatsApp send failed (${response.status})`);
+      throw new Error(json.error?.message ?? `WhatsApp send failed (${String(response.status)})`);
     }
     const metaMessageId = json.messages?.[0]?.id;
     if (!metaMessageId) throw new Error("WhatsApp send returned no message id.");
@@ -273,7 +266,7 @@ class MetaWhatsappProvider implements WhatsappProvider {
       error?: { message?: string };
     };
     if (!response.ok) {
-      throw new Error(json.error?.message ?? `WhatsApp send failed (${response.status})`);
+      throw new Error(json.error?.message ?? `WhatsApp send failed (${String(response.status)})`);
     }
     const metaMessageId = json.messages?.[0]?.id;
     if (!metaMessageId) throw new Error("WhatsApp send returned no message id.");

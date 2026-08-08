@@ -28,11 +28,11 @@ import { ALL_VIZ_TYPES, VIZ_TYPE_LABELS, type NormalizedResult, type VizType } f
 type VisualizationPanelProps = {
   preferenceKey: string;
   data: NormalizedResult | null;
-  defaultViz?: VizType;
-  title?: string;
-  filters?: ReactNode;
-  loading?: boolean;
-  emptyMessage?: string;
+  defaultViz?: VizType | undefined;
+  title?: string | undefined;
+  filters?: ReactNode | undefined;
+  loading?: boolean | undefined;
+  emptyMessage?: string | undefined;
 };
 
 function renderViz(vizType: VizType, data: NormalizedResult) {
@@ -116,11 +116,7 @@ export function VisualizationPanel({
           ) : null}
           {filters ? <div className="mt-2">{filters}</div> : null}
         </div>
-        <div
-          className="flex flex-wrap gap-1"
-          role="tablist"
-          aria-label="Visualization type"
-        >
+        <div className="flex flex-wrap gap-1" role="tablist" aria-label="Visualization type">
           {ALL_VIZ_TYPES.map((type) => {
             const enabled = compatible.includes(type);
             const selected = vizType === type;
@@ -131,13 +127,15 @@ export function VisualizationPanel({
                 role="tab"
                 aria-selected={selected}
                 disabled={!enabled}
-                title={enabled ? VIZ_TYPE_LABELS[type] : `${VIZ_TYPE_LABELS[type]} (not compatible)`}
+                title={
+                  enabled ? VIZ_TYPE_LABELS[type] : `${VIZ_TYPE_LABELS[type]} (not compatible)`
+                }
                 className={`${ghostButtonClassName} px-2.5 py-1 text-xs ${
-                  selected
-                    ? "bg-[var(--admin-primary)] text-[var(--admin-on-primary)]"
-                    : ""
+                  selected ? "bg-[var(--admin-primary)] text-[var(--admin-on-primary)]" : ""
                 } ${!enabled ? "cursor-not-allowed opacity-40" : ""}`}
-                onClick={() => onSelectViz(type)}
+                onClick={() => {
+                  onSelectViz(type);
+                }}
               >
                 {VIZ_TYPE_LABELS[type]}
               </button>
@@ -164,7 +162,7 @@ export function VisualizationPanelRetryButton({
   label = "Retry",
 }: {
   onClick: () => void;
-  label?: string;
+  label?: string | undefined;
 }) {
   return (
     <button type="button" className={ghostButtonClassName} onClick={onClick}>

@@ -18,5 +18,5 @@ export const GET = createTenantRoute<
   params: batchIdParamsSchema,
   output: batchLearnersListResponseSchema,
   handler: async ({ tx, ctx, input, params }) =>
-    listBatchLearners(tx, ctx, params.batchId, input),
+    listBatchLearners(tx, ctx, params["batchId"], input),
 });

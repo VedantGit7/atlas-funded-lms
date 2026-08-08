@@ -78,10 +78,10 @@ export type DeviceAlertDetail = {
 };
 
 export type DeviceAlertsFilters = {
-  status?: DeviceAlertStatus;
-  type?: DeviceAlertType;
-  page?: number;
-  limit?: number;
+  status?: DeviceAlertStatus | undefined;
+  type?: DeviceAlertType | undefined;
+  page?: number | undefined;
+  limit?: number | undefined;
 };
 
 function buildQuery(filters: DeviceAlertsFilters): string {

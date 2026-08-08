@@ -18,5 +18,5 @@ export const GET = createTenantRoute<
   params: pollIdParamsSchema,
   output: pollNonRespondentsListResponseSchema,
   handler: async ({ tx, ctx, params, input }) =>
-    listPollNonRespondents(tx, ctx, params.pollId, input),
+    listPollNonRespondents(tx, ctx, params["pollId"], input),
 });

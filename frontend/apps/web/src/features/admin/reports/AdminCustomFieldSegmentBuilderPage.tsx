@@ -27,6 +27,17 @@ import {
   type SegmentPreviewLearner,
 } from "./admin-custom-field-segments-api";
 
+function isAborted(signal: AbortSignal): boolean {
+  return signal.aborted;
+}
+
+function defined<T>(value: T, message = "Expected value to be defined"): NonNullable<T> {
+  if (value == null) {
+    throw new Error(message);
+  }
+  return value;
+}
+
 const filterInputClassName =
   "h-9 w-full rounded-sm border border-[var(--admin-outline)] bg-[var(--admin-surface-low)] px-3 text-[13px] text-[var(--admin-on-surface)] outline-none transition-colors placeholder:text-[var(--admin-on-surface-variant)]/70 focus:border-[var(--admin-primary)] focus:ring-1 focus:ring-[var(--admin-primary)]";
 
@@ -60,11 +71,9 @@ function ValueControl({
   onChange: (value: unknown) => void;
 }) {
   const op = condition.operator;
-  const ring = incomplete
-    ? "ring-1 ring-[var(--admin-warning)] border-[var(--admin-warning)]"
-    : "";
+  const ring = incomplete ? "ring-1 ring-[var(--admin-warning)] border-[var(--admin-warning)]" : "";
 
-  if (op === "is_empty" || op === "is_not_empty" || op === "is_true" || op === "is_false") {
+  if (op === "is_empty" || op === "is_not_empty") {
     return (
       <div className="flex h-9 flex-1 items-center px-2 text-xs text-[var(--admin-on-surface-variant)]">
         No value needed
@@ -82,7 +91,9 @@ function ValueControl({
               ? "border-[var(--admin-success)] bg-[color-mix(in_srgb,var(--admin-success)_10%,var(--admin-surface))] text-[var(--admin-success)]"
               : "border-[var(--admin-border)] bg-[var(--admin-surface)]"
           }`}
-          onClick={() => onChange(true)}
+          onClick={() => {
+            onChange(true);
+          }}
         >
           Yes
         </button>
@@ -93,7 +104,9 @@ function ValueControl({
               ? "border-[var(--admin-outline)] bg-[var(--admin-surface-high)] text-[var(--admin-on-surface-variant)]"
               : "border-[var(--admin-border)] bg-[var(--admin-surface)]"
           }`}
-          onClick={() => onChange(false)}
+          onClick={() => {
+            onChange(false);
+          }}
         >
           No
         </button>
@@ -108,15 +121,19 @@ function ValueControl({
         <input
           type="number"
           className={filterInputClassName}
-          value={pair[0] ?? ""}
-          onChange={(event) => onChange([Number(event.target.value), Number(pair[1] ?? 0)])}
+          value={typeof pair[0] === "string" || typeof pair[0] === "number" ? String(pair[0]) : ""}
+          onChange={(event) => {
+            onChange([Number(event.target.value), Number(pair[1] ?? 0)]);
+          }}
           placeholder="Min"
         />
         <input
           type="number"
           className={filterInputClassName}
-          value={pair[1] ?? ""}
-          onChange={(event) => onChange([Number(pair[0] ?? 0), Number(event.target.value)])}
+          value={typeof pair[1] === "string" || typeof pair[1] === "number" ? String(pair[1]) : ""}
+          onChange={(event) => {
+            onChange([Number(pair[0] ?? 0), Number(event.target.value)]);
+          }}
           placeholder="Max"
         />
       </div>
@@ -131,13 +148,17 @@ function ValueControl({
           type="date"
           className={filterInputClassName}
           value={String(pair[0] ?? "")}
-          onChange={(event) => onChange([event.target.value, String(pair[1] ?? "")])}
+          onChange={(event) => {
+            onChange([event.target.value, String(pair[1] ?? "")]);
+          }}
         />
         <input
           type="date"
           className={filterInputClassName}
           value={String(pair[1] ?? "")}
-          onChange={(event) => onChange([String(pair[0] ?? ""), event.target.value])}
+          onChange={(event) => {
+            onChange([String(pair[0] ?? ""), event.target.value]);
+          }}
         />
       </div>
     );
@@ -146,7 +167,7 @@ function ValueControl({
   if (op === "in_last_n_days") {
     const days =
       condition.value && typeof condition.value === "object" && "days" in condition.value
-        ? Number((condition.value as { days: number }).days)
+        ? (condition.value as { days: number }).days
         : typeof condition.value === "number"
           ? condition.value
           : "";
@@ -156,7 +177,9 @@ function ValueControl({
         min={1}
         className={`${filterInputClassName} flex-1 ${ring}`}
         value={days}
-        onChange={(event) => onChange({ days: Number(event.target.value) })}
+        onChange={(event) => {
+          onChange({ days: Number(event.target.value) });
+        }}
         placeholder="Days"
       />
     );
@@ -168,7 +191,9 @@ function ValueControl({
       : ([] as string[]);
     if (field.options.length > 0) {
       return (
-        <div className={`flex flex-1 flex-wrap gap-1 rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface)] p-2 ${ring}`}>
+        <div
+          className={`flex flex-1 flex-wrap gap-1 rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface)] p-2 ${ring}`}
+        >
           {field.options.map((option) => {
             const active = selected.includes(option);
             return (
@@ -182,9 +207,7 @@ function ValueControl({
                 }`}
                 onClick={() => {
                   onChange(
-                    active
-                      ? selected.filter((item) => item !== option)
-                      : [...selected, option],
+                    active ? selected.filter((item) => item !== option) : [...selected, option],
                   );
                 }}
               >
@@ -199,14 +222,14 @@ function ValueControl({
       <input
         className={`${filterInputClassName} flex-1 ${ring}`}
         value={selected.join(", ")}
-        onChange={(event) =>
+        onChange={(event) => {
           onChange(
             event.target.value
               .split(",")
               .map((part) => part.trim())
               .filter(Boolean),
-          )
-        }
+          );
+        }}
         placeholder="Comma-separated values"
       />
     );
@@ -218,7 +241,9 @@ function ValueControl({
         type="number"
         className={`${filterInputClassName} flex-1 ${ring}`}
         value={typeof condition.value === "number" ? condition.value : ""}
-        onChange={(event) => onChange(Number(event.target.value))}
+        onChange={(event) => {
+          onChange(Number(event.target.value));
+        }}
       />
     );
   }
@@ -229,7 +254,9 @@ function ValueControl({
         type="date"
         className={`${filterInputClassName} flex-1 ${ring}`}
         value={typeof condition.value === "string" ? condition.value : ""}
-        onChange={(event) => onChange(event.target.value)}
+        onChange={(event) => {
+          onChange(event.target.value);
+        }}
       />
     );
   }
@@ -239,7 +266,9 @@ function ValueControl({
       <select
         className={`${selectClassName} flex-1 ${ring}`}
         value={typeof condition.value === "string" ? condition.value : ""}
-        onChange={(event) => onChange(event.target.value)}
+        onChange={(event) => {
+          onChange(event.target.value);
+        }}
       >
         <option value="">Select…</option>
         {field.options.map((option) => (
@@ -255,7 +284,9 @@ function ValueControl({
     <input
       className={`${filterInputClassName} flex-1 ${ring}`}
       value={typeof condition.value === "string" ? condition.value : ""}
-      onChange={(event) => onChange(event.target.value)}
+      onChange={(event) => {
+        onChange(event.target.value);
+      }}
       placeholder="Value"
     />
   );
@@ -315,7 +346,10 @@ function ResultsRail({
               .slice(0, 2)
               .toUpperCase();
             return (
-              <li key={learner.membershipId} className="-mx-2 flex items-center gap-3 rounded-sm p-2 hover:bg-[var(--admin-surface-low)]">
+              <li
+                key={learner.membershipId}
+                className="-mx-2 flex items-center gap-3 rounded-sm p-2 hover:bg-[var(--admin-surface-low)]"
+              >
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[var(--admin-border)] bg-[var(--admin-surface-high)] font-mono text-[11px] text-[var(--admin-on-surface-variant)]">
                   {initials}
                 </div>
@@ -345,11 +379,7 @@ function ResultsRail({
   );
 }
 
-export function AdminCustomFieldSegmentBuilderPage({
-  segmentId,
-}: {
-  segmentId?: string;
-}) {
+export function AdminCustomFieldSegmentBuilderPage({ segmentId }: { segmentId?: string }) {
   const router = useRouter();
   const isEdit = Boolean(segmentId);
   const [fields, setFields] = useState<SegmentFieldOption[]>([]);
@@ -369,17 +399,17 @@ export function AdminCustomFieldSegmentBuilderPage({
   const [previewLoading, setPreviewLoading] = useState(false);
 
   useEffect(() => {
-    let cancelled = false;
+    const ac = new AbortController();
     async function boot() {
       setLoading(true);
       setError(null);
       try {
         const fieldOptions = await fetchSegmentFieldOptions();
-        if (cancelled) return;
+        if (isAborted(ac.signal)) return;
         setFields(fieldOptions);
         if (segmentId) {
           const detail = await fetchCustomFieldSegment(segmentId);
-          if (cancelled) return;
+          if (isAborted(ac.signal)) return;
           setName(detail.data.name);
           setDescription(detail.data.description ?? "");
           setVisibility(detail.data.visibility);
@@ -387,16 +417,16 @@ export function AdminCustomFieldSegmentBuilderPage({
           setConditions(detail.data.conditions);
         }
       } catch (err) {
-        if (!cancelled) {
+        if (!isAborted(ac.signal)) {
           setError(err instanceof ClientApiError ? err.message : "Failed to load builder.");
         }
       } finally {
-        if (!cancelled) setLoading(false);
+        if (!isAborted(ac.signal)) setLoading(false);
       }
     }
     void boot();
     return () => {
-      cancelled = true;
+      ac.abort();
     };
   }, [segmentId]);
 
@@ -441,21 +471,22 @@ export function AdminCustomFieldSegmentBuilderPage({
         }
       })();
     }, 300);
-    return () => window.clearTimeout(handle);
+    return () => {
+      window.clearTimeout(handle);
+    };
   }, [conditions, fields, loading]);
 
-  const updateGroup = useCallback((groupId: string, updater: (group: SegmentConditionGroup) => SegmentConditionGroup) => {
-    setConditions((prev) => ({
-      ...prev,
-      groups: prev.groups.map((group) => (group.id === groupId ? updater(group) : group)),
-    }));
-  }, []);
+  const updateGroup = useCallback(
+    (groupId: string, updater: (group: SegmentConditionGroup) => SegmentConditionGroup) => {
+      setConditions((prev) => ({
+        ...prev,
+        groups: prev.groups.map((group) => (group.id === groupId ? updater(group) : group)),
+      }));
+    },
+    [],
+  );
 
-  function updateCondition(
-    groupId: string,
-    conditionId: string,
-    patch: Partial<SegmentCondition>,
-  ) {
+  function updateCondition(groupId: string, conditionId: string, patch: Partial<SegmentCondition>) {
     updateGroup(groupId, (group) => ({
       ...group,
       conditions: group.conditions.map((condition) =>
@@ -506,7 +537,10 @@ export function AdminCustomFieldSegmentBuilderPage({
   return (
     <div className="space-y-4 pb-24 lg:pb-0">
       <div className="flex items-center gap-2 text-xs text-[var(--admin-on-surface-variant)]">
-        <Link href="/admin/reports/custom-field/segments" className="hover:text-[var(--admin-primary)]">
+        <Link
+          href="/admin/reports/custom-field/segments"
+          className="hover:text-[var(--admin-primary)]"
+        >
           All segments
         </Link>
         <span>/</span>
@@ -545,7 +579,9 @@ export function AdminCustomFieldSegmentBuilderPage({
                     id="segment-name"
                     className={filterInputClassName}
                     value={name}
-                    onChange={(event) => setName(event.target.value)}
+                    onChange={(event) => {
+                      setName(event.target.value);
+                    }}
                     placeholder="e.g., Active Enterprise Users"
                   />
                 </div>
@@ -556,7 +592,9 @@ export function AdminCustomFieldSegmentBuilderPage({
                       <input
                         type="radio"
                         checked={visibility === "shared"}
-                        onChange={() => setVisibility("shared")}
+                        onChange={() => {
+                          setVisibility("shared");
+                        }}
                       />
                       Shared
                     </label>
@@ -564,7 +602,9 @@ export function AdminCustomFieldSegmentBuilderPage({
                       <input
                         type="radio"
                         checked={visibility === "private"}
-                        onChange={() => setVisibility("private")}
+                        onChange={() => {
+                          setVisibility("private");
+                        }}
                       />
                       Private
                     </label>
@@ -583,7 +623,9 @@ export function AdminCustomFieldSegmentBuilderPage({
                   rows={2}
                   className={`${filterInputClassName} h-auto py-2`}
                   value={description}
-                  onChange={(event) => setDescription(event.target.value)}
+                  onChange={(event) => {
+                    setDescription(event.target.value);
+                  }}
                   placeholder="Purpose of this segment…"
                 />
               </div>
@@ -599,12 +641,12 @@ export function AdminCustomFieldSegmentBuilderPage({
                   <select
                     className={selectClassName}
                     value={conditions.rootCombinator}
-                    onChange={(event) =>
+                    onChange={(event) => {
                       setConditions((prev) => ({
                         ...prev,
                         rootCombinator: event.target.value as "and" | "or",
-                      }))
-                    }
+                      }));
+                    }}
                   >
                     <option value="and">ALL groups (AND)</option>
                     <option value="or">ANY group (OR)</option>
@@ -628,12 +670,12 @@ export function AdminCustomFieldSegmentBuilderPage({
                         className="text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-danger)]"
                         title="Remove group"
                         disabled={conditions.groups.length === 1}
-                        onClick={() =>
+                        onClick={() => {
                           setConditions((prev) => ({
                             ...prev,
                             groups: prev.groups.filter((item) => item.id !== group.id),
-                          }))
-                        }
+                          }));
+                        }}
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
@@ -645,12 +687,12 @@ export function AdminCustomFieldSegmentBuilderPage({
                       <select
                         className={`${selectClassName} w-auto min-w-[120px]`}
                         value={group.combinator}
-                        onChange={(event) =>
+                        onChange={(event) => {
                           updateGroup(group.id, (current) => ({
                             ...current,
                             combinator: event.target.value as "and" | "or",
-                          }))
-                        }
+                          }));
+                        }}
                       >
                         <option value="and">AND</option>
                         <option value="or">OR</option>
@@ -660,7 +702,7 @@ export function AdminCustomFieldSegmentBuilderPage({
                     {group.conditions.map((condition, conditionIndex) => {
                       const field =
                         findField(fields, condition.fieldSource, condition.fieldKey) ??
-                        fields[0]!;
+                        defined(fields[0]);
                       const ops = operatorsForFieldType(field.fieldType);
                       const isIncomplete = incompleteIds.has(condition.id);
                       return (
@@ -674,7 +716,9 @@ export function AdminCustomFieldSegmentBuilderPage({
                           ) : null}
                           <div
                             className={`flex flex-wrap items-center gap-3 ${
-                              isIncomplete ? "rounded-sm bg-[color-mix(in_srgb,var(--admin-warning)_8%,transparent)] p-2" : ""
+                              isIncomplete
+                                ? "rounded-sm bg-[color-mix(in_srgb,var(--admin-warning)_8%,transparent)] p-2"
+                                : ""
                             }`}
                           >
                             <select
@@ -693,11 +737,11 @@ export function AdminCustomFieldSegmentBuilderPage({
                                 updateCondition(group.id, condition.id, {
                                   fieldSource: source as "learner" | "custom",
                                   fieldKey: key,
-                                  operator: nextOps[0]!.value,
+                                  operator: defined(nextOps[0]).value,
                                   value:
-                                    nextOps[0]!.value === "is_empty" ||
-                                    nextOps[0]!.value === "is_true" ||
-                                    nextOps[0]!.value === "is_false"
+                                    defined(nextOps[0]).value === "is_empty" ||
+                                    defined(nextOps[0]).value === "is_true" ||
+                                    defined(nextOps[0]).value === "is_false"
                                       ? null
                                       : nextField.fieldType === "select"
                                         ? []
@@ -728,8 +772,7 @@ export function AdminCustomFieldSegmentBuilderPage({
                               className={`${selectClassName} w-[140px]`}
                               value={condition.operator}
                               onChange={(event) => {
-                                const operator = event.target
-                                  .value as SegmentCondition["operator"];
+                                const operator = event.target.value as SegmentCondition["operator"];
                                 updateCondition(group.id, condition.id, {
                                   operator,
                                   value:
@@ -781,14 +824,14 @@ export function AdminCustomFieldSegmentBuilderPage({
                               className="p-2 text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-danger)]"
                               title="Remove condition"
                               disabled={group.conditions.length === 1}
-                              onClick={() =>
+                              onClick={() => {
                                 updateGroup(group.id, (current) => ({
                                   ...current,
                                   conditions: current.conditions.filter(
                                     (item) => item.id !== condition.id,
                                   ),
-                                }))
-                              }
+                                }));
+                              }}
                             >
                               <X className="h-4 w-4" />
                             </button>
@@ -800,7 +843,7 @@ export function AdminCustomFieldSegmentBuilderPage({
                     <button
                       type="button"
                       className="inline-flex items-center gap-1 text-sm font-medium text-[var(--admin-primary)] hover:underline"
-                      onClick={() =>
+                      onClick={() => {
                         updateGroup(group.id, (current) => ({
                           ...current,
                           conditions: [
@@ -813,8 +856,8 @@ export function AdminCustomFieldSegmentBuilderPage({
                               value: "ACTIVE",
                             },
                           ],
-                        }))
-                      }
+                        }));
+                      }}
                     >
                       <Plus className="h-4 w-4" />
                       Add condition
@@ -826,7 +869,7 @@ export function AdminCustomFieldSegmentBuilderPage({
               <button
                 type="button"
                 className="w-full rounded-sm border-2 border-dashed border-[var(--admin-outline)] p-3 text-center text-sm text-[var(--admin-on-surface-variant)] transition-colors hover:bg-[var(--admin-surface-high)] hover:text-[var(--admin-on-surface)]"
-                onClick={() =>
+                onClick={() => {
                   setConditions((prev) => ({
                     ...prev,
                     groups: [
@@ -845,8 +888,8 @@ export function AdminCustomFieldSegmentBuilderPage({
                         ],
                       },
                     ],
-                  }))
-                }
+                  }));
+                }}
               >
                 + Add Condition Group
               </button>
@@ -868,7 +911,9 @@ export function AdminCustomFieldSegmentBuilderPage({
                     type="radio"
                     className="mt-1"
                     checked={refreshMode === "live"}
-                    onChange={() => setRefreshMode("live")}
+                    onChange={() => {
+                      setRefreshMode("live");
+                    }}
                   />
                   <div>
                     <div className="text-sm font-semibold text-[var(--admin-on-surface)]">Live</div>
@@ -888,7 +933,9 @@ export function AdminCustomFieldSegmentBuilderPage({
                     type="radio"
                     className="mt-1"
                     checked={refreshMode === "snapshot"}
-                    onChange={() => setRefreshMode("snapshot")}
+                    onChange={() => {
+                      setRefreshMode("snapshot");
+                    }}
                   />
                   <div>
                     <div className="text-sm font-semibold text-[var(--admin-on-surface)]">

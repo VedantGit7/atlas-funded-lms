@@ -15,5 +15,5 @@ export const GET = createTenantRoute<
   metadata: listPaymentsRosterMetadata,
   params: paymentInstalmentPlanParamsSchema,
   output: paymentInstalmentPlanDetailResponseSchema,
-  handler: async ({ tx, ctx, params }) => getPaymentInstalmentPlanDetail(tx, ctx, params.planId),
+  handler: async ({ tx, ctx, params }) => getPaymentInstalmentPlanDetail(tx, ctx, params["planId"]),
 });

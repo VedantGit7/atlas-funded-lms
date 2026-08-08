@@ -22,8 +22,8 @@ export function resolveLessonTypeOption(
 }
 
 export function resolveLessonDisplayType(lesson: {
-  lessonType?: string | null;
-  videoUrl?: string | null;
+  lessonType?: string | null | undefined;
+  videoUrl?: string | null | undefined;
 }): string | null {
   if (lesson.lessonType) {
     return lesson.lessonType === "text" ? "article" : lesson.lessonType;
@@ -54,7 +54,7 @@ export function formatSectionSummary(lessons: LessonOutlineItem[]): string {
   const { lessonCount, quizCount } = countSectionLessons(lessons);
   const lessonLabel = lessonCount === 1 ? "Lesson" : "Lessons";
   const quizLabel = quizCount === 1 ? "Quiz" : "Quizzes";
-  return `${lessonCount} ${lessonLabel} • ${quizCount} ${quizLabel}`;
+  return `${String(lessonCount)} ${lessonLabel} • ${String(quizCount)} ${quizLabel}`;
 }
 
 export function resolveLessonBadges(lesson: LessonOutlineItem): LessonOutlineBadge[] {

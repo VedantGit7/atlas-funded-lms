@@ -15,6 +15,5 @@ export const POST = createTenantRoute<
   metadata: acknowledgeAtRiskAlertMetadata,
   params: acknowledgeAtRiskAlertParamsSchema,
   output: acknowledgeAtRiskAlertResponseSchema,
-  handler: async ({ tx, ctx, params }) =>
-    acknowledgeAtRiskAlert(tx, ctx, params.alertId),
+  handler: async ({ tx, ctx, params }) => acknowledgeAtRiskAlert(tx, ctx, params["alertId"]),
 });

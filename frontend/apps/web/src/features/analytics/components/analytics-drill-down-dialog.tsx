@@ -10,7 +10,7 @@ type AnalyticsDrillDownDialogProps = {
   open: boolean;
   rollupKey: string;
   day: string;
-  label?: string;
+  label?: string | undefined;
   onClose: () => void;
 };
 
@@ -68,7 +68,10 @@ export function AnalyticsDrillDownDialog({
       <div className="flex max-h-[80vh] w-full max-w-lg flex-col overflow-hidden rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)] shadow-xl">
         <div className="flex items-start justify-between gap-3 border-b border-[var(--admin-border)] px-5 py-4">
           <div>
-            <h2 id="analytics-drill-down-title" className="text-lg font-semibold text-[var(--admin-on-surface)]">
+            <h2
+              id="analytics-drill-down-title"
+              className="text-lg font-semibold text-[var(--admin-on-surface)]"
+            >
               {heading}
             </h2>
             <p className="mt-1 text-sm text-[var(--admin-on-surface-variant)]">
@@ -100,7 +103,10 @@ export function AnalyticsDrillDownDialog({
             <>
               <ul className="divide-y divide-[var(--admin-border)]">
                 {data.members.map((member) => (
-                  <li key={member.membershipId} className="py-2.5 text-sm text-[var(--admin-on-surface)]">
+                  <li
+                    key={member.membershipId}
+                    className="py-2.5 text-sm text-[var(--admin-on-surface)]"
+                  >
                     {member.displayName}
                   </li>
                 ))}

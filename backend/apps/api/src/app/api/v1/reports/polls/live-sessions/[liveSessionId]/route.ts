@@ -17,5 +17,5 @@ export const GET = createTenantRoute<
   params: liveSessionIdParamsSchema,
   output: liveSessionPollReportResponseSchema,
   handler: async ({ tx, ctx, params }) =>
-    getLiveSessionPollReport(tx, ctx, params.liveSessionId),
+    getLiveSessionPollReport(tx, ctx, params["liveSessionId"]),
 });

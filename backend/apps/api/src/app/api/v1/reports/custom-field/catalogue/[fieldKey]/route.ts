@@ -18,5 +18,5 @@ export const GET = createTenantRoute<
   input: customFieldDetailQuerySchema,
   output: customFieldDetailResponseSchema,
   handler: async ({ tx, ctx, params, input }) =>
-    getCustomFieldDetail(tx, ctx, params.fieldKey, input),
+    getCustomFieldDetail(tx, ctx, params["fieldKey"], input),
 });

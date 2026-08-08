@@ -29,10 +29,7 @@ import {
   type AffiliateProductsPayload,
   type AffiliateProductsSummary,
 } from "./admin-sales-marketing-roster-api";
-import {
-  downloadReportExport,
-  pollReportRunUntilComplete,
-} from "./admin-reports-api";
+import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
 
 type ProgrammeFilter = "all" | "enabled" | "disabled";
 type CommissionBand = "any" | "below_10" | "10_20" | "above_20";
@@ -233,7 +230,9 @@ export function AdminAffiliateProductsPanel() {
   const [enableTarget, setEnableTarget] = useState<AffiliateProductItem | null>(null);
   const [enableMode, setEnableMode] = useState<CommissionMode>("default");
   const [enableRate, setEnableRate] = useState("10");
-  const [enableStartDate, setEnableStartDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [enableStartDate, setEnableStartDate] = useState(() =>
+    new Date().toISOString().slice(0, 10),
+  );
 
   const [addOpen, setAddOpen] = useState(false);
   const [courses, setCourses] = useState<StudioCourseOption[]>([]);
@@ -242,8 +241,7 @@ export function AdminAffiliateProductsPanel() {
   const [addMode, setAddMode] = useState<CommissionMode>("default");
   const [addRate, setAddRate] = useState("10");
 
-  const filtersActive =
-    Boolean(searchQ.trim()) || programme !== "all" || commissionBand !== "any";
+  const filtersActive = Boolean(searchQ.trim()) || programme !== "all" || commissionBand !== "any";
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -386,7 +384,10 @@ export function AdminAffiliateProductsPanel() {
   async function confirmEnable() {
     if (!enableTarget) return;
     const overridePct = Number(enableRate);
-    if (enableMode === "override" && (!Number.isFinite(overridePct) || overridePct < 0 || overridePct > 100)) {
+    if (
+      enableMode === "override" &&
+      (!Number.isFinite(overridePct) || overridePct < 0 || overridePct > 100)
+    ) {
       setActionError("Enter a commission rate between 0 and 100.");
       return;
     }
@@ -411,8 +412,7 @@ export function AdminAffiliateProductsPanel() {
         courseId: enableTarget.courseId,
         enabled: true,
         standardDiscountPct: existing?.standardDiscountPct ?? null,
-        standardCommissionPct:
-          enableMode === "override" ? Math.round(overridePct) : null,
+        standardCommissionPct: enableMode === "override" ? Math.round(overridePct) : null,
         premiumDiscountPct: existing?.premiumDiscountPct ?? null,
         premiumCommissionPct: existing?.premiumCommissionPct ?? null,
       });
@@ -485,7 +485,10 @@ export function AdminAffiliateProductsPanel() {
       return;
     }
     const overridePct = Number(addRate);
-    if (addMode === "override" && (!Number.isFinite(overridePct) || overridePct < 0 || overridePct > 100)) {
+    if (
+      addMode === "override" &&
+      (!Number.isFinite(overridePct) || overridePct < 0 || overridePct > 100)
+    ) {
       setActionError("Enter a commission rate between 0 and 100.");
       return;
     }
@@ -521,8 +524,7 @@ export function AdminAffiliateProductsPanel() {
   );
   const isEmpty =
     !loading && !error && payload != null && pageInfo != null && pageInfo.totalCount === 0;
-  const isTrulyEmpty =
-    isEmpty && !filtersActive && (summary?.productsInProgramme ?? 0) === 0;
+  const isTrulyEmpty = isEmpty && !filtersActive && (summary?.productsInProgramme ?? 0) === 0;
   const isFilteredEmpty = isEmpty && !isTrulyEmpty;
   const allOnPageSelected =
     items.length > 0 && items.every((item) => selectedIds.has(item.courseId));
@@ -566,7 +568,10 @@ export function AdminAffiliateProductsPanel() {
 
         <div className="flex flex-wrap items-center gap-2">
           <label className="inline-flex h-9 items-center gap-2 rounded border border-[var(--admin-outline)] bg-[var(--admin-surface)] px-3 text-xs text-[var(--admin-on-surface)] transition-colors hover:bg-[var(--admin-surface-high)]">
-            <CalendarDays className="h-4 w-4 text-[var(--admin-on-surface-variant)]" aria-hidden="true" />
+            <CalendarDays
+              className="h-4 w-4 text-[var(--admin-on-surface-variant)]"
+              aria-hidden="true"
+            />
             <span className="sr-only">Activity from</span>
             <input
               type="date"
@@ -635,7 +640,10 @@ export function AdminAffiliateProductsPanel() {
           role="alert"
         >
           <div className="flex items-start gap-3">
-            <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-[var(--admin-danger)]" aria-hidden="true" />
+            <AlertTriangle
+              className="mt-0.5 h-5 w-5 shrink-0 text-[var(--admin-danger)]"
+              aria-hidden="true"
+            />
             <div>
               <h2 className="text-base font-semibold text-[var(--admin-danger)]">
                 Failed to load affiliate product configurations.
@@ -740,7 +748,9 @@ export function AdminAffiliateProductsPanel() {
                   className="h-9 w-full rounded border border-[var(--admin-outline)] bg-[var(--admin-surface)] pl-8 pr-3 text-sm text-[var(--admin-on-surface)] outline-none transition-colors focus:border-[var(--admin-primary)] focus:ring-1 focus:ring-[var(--admin-primary)]"
                   placeholder="Search product title"
                   value={draftQ}
-                  onChange={(event) => setDraftQ(event.target.value)}
+                  onChange={(event) => {
+                    setDraftQ(event.target.value);
+                  }}
                   onKeyDown={(event) => {
                     if (event.key === "Enter") applyFilters();
                   }}
@@ -751,7 +761,9 @@ export function AdminAffiliateProductsPanel() {
                 <Select
                   ariaLabel="Programme"
                   value={draftProgramme}
-                  onValueChange={(value) => setDraftProgramme(value as ProgrammeFilter)}
+                  onValueChange={(value) => {
+                    setDraftProgramme(value as ProgrammeFilter);
+                  }}
                   options={[
                     { value: "all", label: "Programme: All" },
                     { value: "enabled", label: "Enabled" },
@@ -765,7 +777,9 @@ export function AdminAffiliateProductsPanel() {
                 <Select
                   ariaLabel="Commission band"
                   value={draftCommissionBand}
-                  onValueChange={(value) => setDraftCommissionBand(value as CommissionBand)}
+                  onValueChange={(value) => {
+                    setDraftCommissionBand(value as CommissionBand);
+                  }}
                   options={[
                     { value: "any", label: "Commission: Any" },
                     { value: "below_10", label: "Below 10%" },
@@ -780,7 +794,9 @@ export function AdminAffiliateProductsPanel() {
                 <Select
                   ariaLabel="Sort by"
                   value={draftSortBy}
-                  onValueChange={(value) => setDraftSortBy(value as SortBy)}
+                  onValueChange={(value) => {
+                    setDraftSortBy(value as SortBy);
+                  }}
                   options={SORT_OPTIONS}
                   className="h-9"
                 />
@@ -797,7 +813,9 @@ export function AdminAffiliateProductsPanel() {
 
             {filterChips.length > 0 ? (
               <div className="mt-3 flex flex-wrap items-center gap-2">
-                <span className="text-xs text-[var(--admin-on-surface-variant)]">Active filters:</span>
+                <span className="text-xs text-[var(--admin-on-surface-variant)]">
+                  Active filters:
+                </span>
                 {filterChips.map((chip) => (
                   <span
                     key={chip.key}
@@ -820,7 +838,10 @@ export function AdminAffiliateProductsPanel() {
           {isTrulyEmpty ? (
             <div className="flex min-h-[360px] flex-col items-center justify-center rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] p-8 text-center">
               <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--admin-surface-high)]">
-                <Link2 className="h-8 w-8 text-[var(--admin-on-surface-variant)]" aria-hidden="true" />
+                <Link2
+                  className="h-8 w-8 text-[var(--admin-on-surface-variant)]"
+                  aria-hidden="true"
+                />
               </div>
               <h2 className="text-base font-semibold text-[var(--admin-on-surface)]">
                 No products are enabled for affiliates
@@ -841,7 +862,10 @@ export function AdminAffiliateProductsPanel() {
 
           {isFilteredEmpty ? (
             <div className="flex min-h-[240px] flex-col items-center justify-center rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] p-8 text-center">
-              <Package className="mb-4 h-8 w-8 text-[var(--admin-on-surface-variant)]" aria-hidden="true" />
+              <Package
+                className="mb-4 h-8 w-8 text-[var(--admin-on-surface-variant)]"
+                aria-hidden="true"
+              />
               <h2 className="text-base font-semibold text-[var(--admin-on-surface)]">
                 No products match these filters
               </h2>
@@ -894,7 +918,9 @@ export function AdminAffiliateProductsPanel() {
                   <tbody className="divide-y divide-[var(--admin-border)]">
                     {items.map((row) => {
                       const share =
-                        maxRevenue > 0 ? Math.max(4, Math.round((row.revenueCents / maxRevenue) * 100)) : 0;
+                        maxRevenue > 0
+                          ? Math.max(4, Math.round((row.revenueCents / maxRevenue) * 100))
+                          : 0;
                       const muted = !row.enabled;
                       const showWarning = !row.enabled && row.activeAffiliateCount > 0;
                       return (
@@ -975,7 +1001,9 @@ export function AdminAffiliateProductsPanel() {
                                     ? `Disable affiliate programme for ${row.productTitle}`
                                     : `Enable affiliate programme for ${row.productTitle}`
                                 }
-                                onToggle={() => onToggleClick(row)}
+                                onToggle={() => {
+                                  onToggleClick(row);
+                                }}
                               />
                               <span
                                 className={[
@@ -1026,7 +1054,7 @@ export function AdminAffiliateProductsPanel() {
                                       ? "bg-[var(--admin-outline)]"
                                       : "bg-[var(--admin-on-surface)]",
                                   ].join(" ")}
-                                  style={{ width: `${share}%` }}
+                                  style={{ width: `${String(share)}%` }}
                                 />
                               </div>
                             </div>
@@ -1081,7 +1109,9 @@ export function AdminAffiliateProductsPanel() {
                       type="button"
                       className="rounded border border-[var(--admin-outline)] px-3 py-1.5 disabled:opacity-40"
                       disabled={!pageInfo.hasPreviousPage || loading}
-                      onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+                      onClick={() => {
+                        setPage((prev) => Math.max(1, prev - 1));
+                      }}
                     >
                       Previous
                     </button>
@@ -1089,7 +1119,9 @@ export function AdminAffiliateProductsPanel() {
                       type="button"
                       className="rounded border border-[var(--admin-outline)] px-3 py-1.5 disabled:opacity-40"
                       disabled={!pageInfo.hasNextPage || loading}
-                      onClick={() => setPage((prev) => prev + 1)}
+                      onClick={() => {
+                        setPage((prev) => prev + 1);
+                      }}
                     >
                       Next
                     </button>
@@ -1104,14 +1136,18 @@ export function AdminAffiliateProductsPanel() {
       {disableTarget ? (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-[color-mix(in_srgb,var(--admin-on-surface)_45%,transparent)] p-4 backdrop-blur-sm"
-          onClick={() => !busy && setDisableTarget(null)}
+          onClick={() => {
+            if (!busy) setDisableTarget(null);
+          }}
         >
           <div
             role="dialog"
             aria-modal="true"
             aria-labelledby="disable-affiliate-product-title"
             className="flex w-full max-w-[480px] flex-col overflow-hidden rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)] shadow-[0_8px_30px_color-mix(in_srgb,var(--admin-on-surface)_8%,transparent)]"
-            onClick={(event) => event.stopPropagation()}
+            onClick={(event) => {
+              event.stopPropagation();
+            }}
           >
             <div className="flex items-center justify-between border-b border-[var(--admin-border)] px-6 py-5">
               <h2
@@ -1123,7 +1159,9 @@ export function AdminAffiliateProductsPanel() {
               <button
                 type="button"
                 className="text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-on-surface)]"
-                onClick={() => setDisableTarget(null)}
+                onClick={() => {
+                  setDisableTarget(null);
+                }}
                 aria-label="Close"
               >
                 <X className="h-5 w-5" />
@@ -1168,13 +1206,10 @@ export function AdminAffiliateProductsPanel() {
                 <Select
                   ariaLabel="Reason for disabling"
                   value={disableReason || "__none__"}
-                  onValueChange={(value) =>
-                    setDisableReason(value === "__none__" ? "" : (value as DisableReason))
-                  }
-                  options={[
-                    { value: "__none__", label: "Select a reason…" },
-                    ...DISABLE_REASONS,
-                  ]}
+                  onValueChange={(value) => {
+                    setDisableReason(value === "__none__" ? "" : (value as DisableReason));
+                  }}
+                  options={[{ value: "__none__", label: "Select a reason…" }, ...DISABLE_REASONS]}
                   className="h-10"
                 />
               </label>
@@ -1188,7 +1223,9 @@ export function AdminAffiliateProductsPanel() {
               <button
                 type="button"
                 className="inline-flex h-10 items-center rounded-md border border-[var(--admin-outline)] bg-[var(--admin-surface)] px-4 text-sm font-medium text-[var(--admin-on-surface)] hover:bg-[var(--admin-surface-high)]"
-                onClick={() => setDisableTarget(null)}
+                onClick={() => {
+                  setDisableTarget(null);
+                }}
                 disabled={busy}
               >
                 Cancel
@@ -1209,14 +1246,18 @@ export function AdminAffiliateProductsPanel() {
       {enableTarget ? (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-[color-mix(in_srgb,var(--admin-on-surface)_45%,transparent)] p-4 backdrop-blur-sm"
-          onClick={() => !busy && setEnableTarget(null)}
+          onClick={() => {
+            if (!busy) setEnableTarget(null);
+          }}
         >
           <div
             role="dialog"
             aria-modal="true"
             aria-labelledby="enable-affiliate-product-title"
             className="flex w-full max-w-[480px] flex-col overflow-hidden rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)] shadow-[0_8px_30px_color-mix(in_srgb,var(--admin-on-surface)_8%,transparent)]"
-            onClick={(event) => event.stopPropagation()}
+            onClick={(event) => {
+              event.stopPropagation();
+            }}
           >
             <div className="flex items-center justify-between border-b border-[var(--admin-border)] px-6 py-5">
               <h2
@@ -1228,7 +1269,9 @@ export function AdminAffiliateProductsPanel() {
               <button
                 type="button"
                 className="text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-on-surface)]"
-                onClick={() => setEnableTarget(null)}
+                onClick={() => {
+                  setEnableTarget(null);
+                }}
                 aria-label="Close"
               >
                 <X className="h-5 w-5" />
@@ -1258,7 +1301,9 @@ export function AdminAffiliateProductsPanel() {
                     type="radio"
                     name="enable-commission"
                     checked={enableMode === "default"}
-                    onChange={() => setEnableMode("default")}
+                    onChange={() => {
+                      setEnableMode("default");
+                    }}
                     className="text-[var(--admin-primary)] focus:ring-[var(--admin-primary)]"
                   />
                   <span>
@@ -1282,7 +1327,9 @@ export function AdminAffiliateProductsPanel() {
                     type="radio"
                     name="enable-commission"
                     checked={enableMode === "override"}
-                    onChange={() => setEnableMode("override")}
+                    onChange={() => {
+                      setEnableMode("override");
+                    }}
                     className="text-[var(--admin-primary)] focus:ring-[var(--admin-primary)]"
                   />
                   <span className="flex-1">
@@ -1302,7 +1349,9 @@ export function AdminAffiliateProductsPanel() {
                       min={0}
                       max={100}
                       value={enableRate}
-                      onChange={(event) => setEnableRate(event.target.value)}
+                      onChange={(event) => {
+                        setEnableRate(event.target.value);
+                      }}
                       className="h-10 w-28 rounded-md border border-[var(--admin-outline)] bg-[var(--admin-surface)] px-3 font-mono text-sm outline-none focus:border-[var(--admin-primary)] focus:ring-1 focus:ring-[var(--admin-primary)]"
                     />
                   </label>
@@ -1317,7 +1366,9 @@ export function AdminAffiliateProductsPanel() {
                   <input
                     type="date"
                     value={enableStartDate}
-                    onChange={(event) => setEnableStartDate(event.target.value)}
+                    onChange={(event) => {
+                      setEnableStartDate(event.target.value);
+                    }}
                     className="h-10 w-full rounded-md border border-[var(--admin-outline)] bg-[var(--admin-surface)] pl-10 pr-3 text-sm outline-none focus:border-[var(--admin-primary)] focus:ring-1 focus:ring-[var(--admin-primary)]"
                   />
                 </div>
@@ -1335,7 +1386,9 @@ export function AdminAffiliateProductsPanel() {
               <button
                 type="button"
                 className="inline-flex h-10 items-center rounded-md border border-[var(--admin-outline)] bg-[var(--admin-surface)] px-4 text-sm font-medium text-[var(--admin-on-surface)] hover:bg-[var(--admin-surface-high)]"
-                onClick={() => setEnableTarget(null)}
+                onClick={() => {
+                  setEnableTarget(null);
+                }}
                 disabled={busy}
               >
                 Cancel
@@ -1356,14 +1409,18 @@ export function AdminAffiliateProductsPanel() {
       {addOpen ? (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-[color-mix(in_srgb,var(--admin-on-surface)_45%,transparent)] p-4 backdrop-blur-sm"
-          onClick={() => !busy && setAddOpen(false)}
+          onClick={() => {
+            if (!busy) setAddOpen(false);
+          }}
         >
           <div
             role="dialog"
             aria-modal="true"
             aria-labelledby="add-affiliate-product-title"
             className="flex w-full max-w-[480px] flex-col overflow-hidden rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)] shadow-[0_8px_30px_color-mix(in_srgb,var(--admin-on-surface)_8%,transparent)]"
-            onClick={(event) => event.stopPropagation()}
+            onClick={(event) => {
+              event.stopPropagation();
+            }}
           >
             <div className="flex items-center justify-between border-b border-[var(--admin-border)] px-6 py-5">
               <h2
@@ -1375,7 +1432,9 @@ export function AdminAffiliateProductsPanel() {
               <button
                 type="button"
                 className="text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-on-surface)]"
-                onClick={() => setAddOpen(false)}
+                onClick={() => {
+                  setAddOpen(false);
+                }}
                 aria-label="Close"
               >
                 <X className="h-5 w-5" />
@@ -1392,7 +1451,9 @@ export function AdminAffiliateProductsPanel() {
                   <Select
                     ariaLabel="Course"
                     value={addCourseId || "__none__"}
-                    onValueChange={(value) => setAddCourseId(value === "__none__" ? "" : value)}
+                    onValueChange={(value) => {
+                      setAddCourseId(value === "__none__" ? "" : value);
+                    }}
                     options={[
                       { value: "__none__", label: "Select a course…" },
                       ...courses.map((course) => ({
@@ -1420,7 +1481,9 @@ export function AdminAffiliateProductsPanel() {
                     type="radio"
                     name="add-commission"
                     checked={addMode === "default"}
-                    onChange={() => setAddMode("default")}
+                    onChange={() => {
+                      setAddMode("default");
+                    }}
                     className="text-[var(--admin-primary)] focus:ring-[var(--admin-primary)]"
                   />
                   <span>
@@ -1428,8 +1491,7 @@ export function AdminAffiliateProductsPanel() {
                       Inherit tenant default
                     </span>
                     <span className="text-xs text-[var(--admin-on-surface-variant)]">
-                      Currently set to{" "}
-                      {formatRate(summary?.tenantDefaultCommissionPct ?? 10)}
+                      Currently set to {formatRate(summary?.tenantDefaultCommissionPct ?? 10)}
                     </span>
                   </span>
                 </label>
@@ -1445,7 +1507,9 @@ export function AdminAffiliateProductsPanel() {
                     type="radio"
                     name="add-commission"
                     checked={addMode === "override"}
-                    onChange={() => setAddMode("override")}
+                    onChange={() => {
+                      setAddMode("override");
+                    }}
                     className="text-[var(--admin-primary)] focus:ring-[var(--admin-primary)]"
                   />
                   <span className="flex-1">
@@ -1465,7 +1529,9 @@ export function AdminAffiliateProductsPanel() {
                       min={0}
                       max={100}
                       value={addRate}
-                      onChange={(event) => setAddRate(event.target.value)}
+                      onChange={(event) => {
+                        setAddRate(event.target.value);
+                      }}
                       className="h-10 w-28 rounded-md border border-[var(--admin-outline)] bg-[var(--admin-surface)] px-3 font-mono text-sm outline-none focus:border-[var(--admin-primary)] focus:ring-1 focus:ring-[var(--admin-primary)]"
                     />
                   </label>
@@ -1481,7 +1547,9 @@ export function AdminAffiliateProductsPanel() {
               <button
                 type="button"
                 className="inline-flex h-10 items-center rounded-md border border-[var(--admin-outline)] bg-[var(--admin-surface)] px-4 text-sm font-medium text-[var(--admin-on-surface)] hover:bg-[var(--admin-surface-high)]"
-                onClick={() => setAddOpen(false)}
+                onClick={() => {
+                  setAddOpen(false);
+                }}
                 disabled={busy}
               >
                 Cancel

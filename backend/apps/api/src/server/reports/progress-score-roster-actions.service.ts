@@ -167,11 +167,7 @@ async function sendAudienceMessage(
   });
 }
 
-export async function sendProgressRosterMessage(
-  tx: TenantTx,
-  ctx: ServiceCtx,
-  rawBody: unknown,
-) {
+export async function sendProgressRosterMessage(tx: TenantTx, ctx: ServiceCtx, rawBody: unknown) {
   const body = sendProgressMessageBodySchema.parse(rawBody);
   const membershipIds = await resolveProgressMembershipIds(tx, body);
   const productType = body.productType;
@@ -188,7 +184,7 @@ export async function sendProgressRosterMessage(
     source: "reports.progress-score.progress",
     audienceCaption:
       body.audienceCaption ??
-      `${membershipIds.length} learner${membershipIds.length === 1 ? "" : "s"} from progress roster`,
+      `${String(membershipIds.length)} learner${membershipIds.length === 1 ? "" : "s"} from progress roster`,
     ...(body.excludeMessagedWithinDays != null
       ? { excludeMessagedWithinDays: body.excludeMessagedWithinDays }
       : {}),
@@ -210,7 +206,7 @@ export async function sendScoreRosterMessage(tx: TenantTx, ctx: ServiceCtx, rawB
     source: "reports.progress-score.scores",
     audienceCaption:
       body.audienceCaption ??
-      `${membershipIds.length} learner${membershipIds.length === 1 ? "" : "s"} from score roster`,
+      `${String(membershipIds.length)} learner${membershipIds.length === 1 ? "" : "s"} from score roster`,
     ...(body.excludeMessagedWithinDays != null
       ? { excludeMessagedWithinDays: body.excludeMessagedWithinDays }
       : {}),
@@ -241,14 +237,11 @@ export async function retryCohortMessage(
     throw progressScoreCohortCampaignNotFound();
   }
 
-  const isScores =
-    (meta.source ?? "").includes("scores") || Boolean(meta.assessment_id);
+  const isScores = (meta.source ?? "").includes("scores") || Boolean(meta.assessment_id);
   const templateKey = isScores
     ? "reports.progress-score.scores.message"
     : "reports.progress-score.progress.message";
-  const source = isScores
-    ? "reports.progress-score.scores"
-    : "reports.progress-score.progress";
+  const source = isScores ? "reports.progress-score.scores" : "reports.progress-score.progress";
 
   // Strip prior greeting if present so we don't double-greet on retry
   const message = meta.message.replace(/^Hi [^,\n]+,\n\n/i, "");
@@ -279,11 +272,7 @@ export async function retryCohortMessage(
   });
 }
 
-export async function exportProgressScoreRoster(
-  tx: TenantTx,
-  ctx: ServiceCtx,
-  rawBody: unknown,
-) {
+export async function exportProgressScoreRoster(tx: TenantTx, ctx: ServiceCtx, rawBody: unknown) {
   const body = exportProgressScoreBodySchema.parse(rawBody);
   const params: Record<string, unknown> = {
     reportTab: body.tab,

@@ -15,7 +15,7 @@ import {
 } from "../analytics-studio-shared";
 
 type AnalyticsAtRiskTableProps = {
-  enabled?: boolean;
+  enabled?: boolean | undefined;
 };
 
 export function AnalyticsAtRiskTable({ enabled = true }: AnalyticsAtRiskTableProps) {
@@ -93,20 +93,29 @@ export function AnalyticsAtRiskTable({ enabled = true }: AnalyticsAtRiskTablePro
           }}
           disabled={evaluating}
         >
-          <RefreshCw className={`h-3.5 w-3.5 ${evaluating ? "animate-spin" : ""}`} aria-hidden="true" />
+          <RefreshCw
+            className={`h-3.5 w-3.5 ${evaluating ? "animate-spin" : ""}`}
+            aria-hidden="true"
+          />
           Recompute
         </button>
       </div>
 
       {errorMessage ? (
-        <div className="mx-4 mb-3 flex items-center gap-2 rounded-md border border-[var(--admin-danger)] bg-[color-mix(in_srgb,var(--admin-danger)_8%,var(--admin-surface))] px-3 py-2 text-sm text-[var(--admin-danger)]" role="alert">
+        <div
+          className="mx-4 mb-3 flex items-center gap-2 rounded-md border border-[var(--admin-danger)] bg-[color-mix(in_srgb,var(--admin-danger)_8%,var(--admin-surface))] px-3 py-2 text-sm text-[var(--admin-danger)]"
+          role="alert"
+        >
           <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden="true" />
           {errorMessage}
         </div>
       ) : null}
 
       {actionMessage ? (
-        <div className="mx-4 mb-3 flex items-center gap-2 text-sm text-[var(--admin-success)]" aria-live="polite">
+        <div
+          className="mx-4 mb-3 flex items-center gap-2 text-sm text-[var(--admin-success)]"
+          aria-live="polite"
+        >
           <CheckCircle2 className="h-4 w-4 shrink-0" aria-hidden="true" />
           {actionMessage}
         </div>
@@ -145,7 +154,9 @@ export function AnalyticsAtRiskTable({ enabled = true }: AnalyticsAtRiskTablePro
                   <td className="px-4 py-3 font-medium text-[var(--admin-on-surface)]">
                     {alert.displayName}
                   </td>
-                  <td className="px-4 py-3 text-[var(--admin-on-surface-variant)]">{alert.ruleName}</td>
+                  <td className="px-4 py-3 text-[var(--admin-on-surface-variant)]">
+                    {alert.ruleName}
+                  </td>
                   <td className="px-4 py-3 tabular-nums text-[var(--admin-on-surface-variant)]">
                     {new Date(alert.triggeredAt).toLocaleString()}
                   </td>

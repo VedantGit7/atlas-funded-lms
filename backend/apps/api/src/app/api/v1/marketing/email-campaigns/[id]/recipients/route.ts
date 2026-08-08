@@ -15,5 +15,5 @@ export const GET = createTenantRoute<
   metadata: listMarketingEmailMetadata,
   params: paramsSchema,
   output: marketingEmailRecipientsResponseSchema,
-  handler: async ({ tx, ctx, params }) => listMarketingEmailRecipients(tx, ctx, params.id),
+  handler: async ({ tx, ctx, params }) => listMarketingEmailRecipients(tx, ctx, params["id"]),
 });

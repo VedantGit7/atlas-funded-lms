@@ -28,18 +28,22 @@ function asRecord(value: unknown): Record<string, unknown> {
 }
 
 export function parseGraph(raw: unknown): WorkflowGraph {
-  return workflowGraphSchema.parse(raw && Object.keys(asRecord(raw)).length > 0 ? raw : {
-    entryNodeId: "trigger_1",
-    nodes: {
-      trigger_1: {
-        id: "trigger_1",
-        type: "trigger",
-        title: "Subscribe trigger",
-        config: { triggerType: "manual_test" },
-        next: null,
-      },
-    },
-  });
+  return workflowGraphSchema.parse(
+    raw && Object.keys(asRecord(raw)).length > 0
+      ? raw
+      : {
+          entryNodeId: "trigger_1",
+          nodes: {
+            trigger_1: {
+              id: "trigger_1",
+              type: "trigger",
+              title: "Subscribe trigger",
+              config: { triggerType: "manual_test" },
+              next: null,
+            },
+          },
+        },
+  );
 }
 
 function triggerMatches(
@@ -49,7 +53,7 @@ function triggerMatches(
 ): boolean {
   const config = workflowTriggerConfigSchema.safeParse(node.config);
   if (!config.success) return false;
-  const mapped = TRIGGER_EVENT_MAP[config.data.triggerType] ?? [];
+  const mapped = TRIGGER_EVENT_MAP[config.data.triggerType];
   if (!(mapped.includes(eventType) || config.data.triggerType === "manual_test")) {
     return false;
   }
@@ -63,16 +67,10 @@ function triggerMatches(
   return true;
 }
 
-function evaluateCondition(
-  node: WorkflowNode,
-  payload: Record<string, unknown>,
-): boolean {
+function evaluateCondition(node: WorkflowNode, payload: Record<string, unknown>): boolean {
   const config = workflowConditionConfigSchema.parse(node.config);
   const scoreRaw =
-    payload["scorePercent"] ??
-    payload["percentage"] ??
-    payload["score"] ??
-    payload["percent"];
+    payload["scorePercent"] ?? payload["percentage"] ?? payload["score"] ?? payload["percent"];
   const score = typeof scoreRaw === "number" ? scoreRaw : Number(scoreRaw);
   if (!Number.isFinite(score)) return false;
   if (config.operator === "gte") return score >= config.value;
@@ -210,8 +208,7 @@ async function executeAction(args: {
         email,
         name,
         membershipId: args.run.membership_id,
-        contactId:
-          typeof payload["contactId"] === "string" ? payload["contactId"] : null,
+        contactId: typeof payload["contactId"] === "string" ? payload["contactId"] : null,
       });
       await marketingWorkflowRepository.insertLog(args.tx, {
         runId: args.run.id,
@@ -241,7 +238,7 @@ async function executeAction(args: {
     return;
   }
 
-  let subject = emailConfig.subject;
+  const subject = emailConfig.subject;
   let bodyHtml = emailConfig.bodyHtml;
   if (config.couponCode) {
     bodyHtml += `<p><strong>Coupon:</strong> ${config.couponCode}</p>`;
@@ -285,7 +282,7 @@ async function advanceRun(
 
   while (currentId && guard < 50) {
     guard += 1;
-    const node = graph.nodes[currentId];
+    const node: WorkflowNode | undefined = graph.nodes[currentId];
     if (!node) {
       await marketingWorkflowRepository.updateRun(tx, {
         id: run.id,
@@ -304,7 +301,7 @@ async function advanceRun(
         nodeId: node.id,
         nodeType: node.type,
         status: "OK",
-        message: `Trigger matched: ${String(node.config["triggerType"] ?? "")}`,
+        message: `Trigger matched: ${typeof node.config["triggerType"] === "string" || typeof node.config["triggerType"] === "number" || typeof node.config["triggerType"] === "boolean" ? String(node.config["triggerType"]) : ""}`,
       });
       currentId = node.next ?? null;
       continue;
@@ -342,7 +339,9 @@ async function advanceRun(
       continue;
     }
 
-    if (node.type === "action") {
+    // Remaining node types are actions after trigger/delay/condition handling.
+
+    {
       try {
         await executeAction({ tx, ctx, run, node });
       } catch (error) {
@@ -456,11 +455,7 @@ export async function startWorkflowRunsForEvent(
   return { started };
 }
 
-export async function resumeWorkflowRun(
-  tx: TenantTx,
-  ctx: ServiceCtx,
-  runId: string,
-) {
+export async function resumeWorkflowRun(tx: TenantTx, ctx: ServiceCtx, runId: string) {
   const run = await marketingWorkflowRepository.findRun(tx, runId);
   if (!run) return;
   if (run.status !== "WAITING" && run.status !== "RUNNING") return;

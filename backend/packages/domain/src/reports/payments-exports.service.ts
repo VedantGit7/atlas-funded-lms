@@ -30,8 +30,8 @@ const DEFINITION_KEY = "payments";
 type PaymentDataset = (typeof PAYMENT_EXPORT_DATASETS)[number];
 
 function formatBytes(bytes: number): string {
-  if (bytes < 1024) return `${bytes}B`;
-  if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))}KB`;
+  if (bytes < 1024) return `${String(bytes)}B`;
+  if (bytes < 1024 * 1024) return `${String(Math.max(1, Math.round(bytes / 1024)))}KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)}MB`;
 }
 
@@ -50,10 +50,7 @@ function datasetLabel(dataset: PaymentDataset): string {
 }
 
 function normalizeDataset(value: unknown): PaymentDataset {
-  if (
-    typeof value === "string" &&
-    (PAYMENT_EXPORT_DATASETS as readonly string[]).includes(value)
-  ) {
+  if (typeof value === "string" && (PAYMENT_EXPORT_DATASETS as readonly string[]).includes(value)) {
     return value as PaymentDataset;
   }
   return "transactions";
@@ -61,9 +58,7 @@ function normalizeDataset(value: unknown): PaymentDataset {
 
 function fileNameFor(dataset: PaymentDataset, createdAt: string, format: string): string {
   const date = new Date(createdAt);
-  const stamp = Number.isNaN(date.getTime())
-    ? "export"
-    : date.toISOString().slice(0, 10);
+  const stamp = Number.isNaN(date.getTime()) ? "export" : date.toISOString().slice(0, 10);
   const slug =
     dataset === "gateways"
       ? "gateway-txns"
@@ -139,9 +134,9 @@ function cronFromCadence(cadence: "daily" | "weekly" | "monthly", time: string):
   const [hourRaw, minuteRaw] = time.split(":");
   const hour = Math.min(23, Math.max(0, Number(hourRaw) || 0));
   const minute = Math.min(59, Math.max(0, Number(minuteRaw) || 0));
-  if (cadence === "weekly") return `${minute} ${hour} * * 1`;
-  if (cadence === "monthly") return `${minute} ${hour} 1 * *`;
-  return `${minute} ${hour} * * *`;
+  if (cadence === "weekly") return `${String(minute)} ${String(hour)} * * 1`;
+  if (cadence === "monthly") return `${String(minute)} ${String(hour)} 1 * *`;
+  return `${String(minute)} ${String(hour)} * * *`;
 }
 
 function cadenceLabel(cron: string, timezone: string): string {
@@ -160,9 +155,9 @@ function nextRunLabel(nextRunAt: string): string {
   const diffMs = date.getTime() - Date.now();
   if (diffMs <= 0) return "Due now";
   const hours = Math.floor(diffMs / (60 * 60 * 1000));
-  if (hours < 48) return `Next run in ${Math.max(1, hours)}h`;
+  if (hours < 48) return `Next run in ${String(Math.max(1, hours))}h`;
   const days = Math.floor(hours / 24);
-  return `Next run in ${days} day${days === 1 ? "" : "s"}`;
+  return `Next run in ${String(days)} day${days === 1 ? "" : "s"}`;
 }
 
 function isExpired(expiresAt: string | null | undefined): boolean {
@@ -354,8 +349,7 @@ export async function getPaymentExports(tx: TenantTx, ctx: ServiceCtx) {
         canEmailDelivery: true,
         canWebhookDelivery: true,
         groupingApplied: true,
-        note:
-          "Exports generate from the LMS payments ledger with optional grouping/subtotals. Email and webhook delivery run after the artifact is ready (email requires a configured notification provider). Ready files expire after the artifact TTL.",
+        note: "Exports generate from the LMS payments ledger with optional grouping/subtotals. Email and webhook delivery run after the artifact is ready (email requires a configured notification provider). Ready files expire after the artifact TTL.",
       },
     },
   });
@@ -515,7 +509,7 @@ export async function updatePaymentExportSchedule(
   tx: TenantTx,
   ctx: ServiceCtx,
   scheduleId: string,
-  input: { isActive?: boolean; name?: string },
+  input: { isActive?: boolean | undefined; name?: string | undefined },
 ) {
   const body = updatePaymentExportScheduleBodySchema.parse(input);
   const schedules = await listReportSchedules(tx, ctx);

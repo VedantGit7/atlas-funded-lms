@@ -1,14 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import {
-  useCallback,
-  useEffect,
-  useId,
-  useRef,
-  useState,
-  type ReactNode,
-} from "react";
+import { useCallback, useEffect, useId, useRef, useState, type ReactNode } from "react";
 import {
   AlertTriangle,
   Bell,
@@ -115,7 +108,7 @@ function slugifyTrigger(label: string) {
     .replace(/[^a-z0-9]+/g, "_")
     .replace(/^_+|_+$/g, "")
     .slice(0, 64);
-  return slug || `nudge_${Date.now()}`;
+  return slug || `nudge_${String(Date.now())}`;
 }
 
 function statusBadge(status: BatchMessageHistoryItem["status"]) {
@@ -207,7 +200,10 @@ function ErrorStrip({
       role="alert"
     >
       <div className="flex items-start gap-3">
-        <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-[var(--admin-danger)]" aria-hidden="true" />
+        <AlertTriangle
+          className="mt-0.5 h-5 w-5 shrink-0 text-[var(--admin-danger)]"
+          aria-hidden="true"
+        />
         <div>
           <p className="text-sm font-medium text-[var(--admin-danger)]">{title}</p>
           {detail ? (
@@ -335,7 +331,9 @@ function ConfirmSendModal({
       }
     }
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+    };
   }, [open, busy, onCancel]);
 
   if (!open) return null;
@@ -418,7 +416,7 @@ function ComposerDrawer({
   const [sending, setSending] = useState(false);
 
   const isWholeBatch = composer.membershipIds == null;
-  const matchCount = isWholeBatch ? rosterCount : composer.membershipIds.length;
+  const matchCount = isWholeBatch ? rosterCount : (composer.membershipIds?.length ?? 0);
   const channels: Channel[] = [
     ...(channelEmail ? (["email"] as const) : []),
     ...(channelInApp ? (["in_app"] as const) : []),
@@ -460,7 +458,9 @@ function ComposerDrawer({
       }
     }
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+    };
   }, [open, busy, sending, confirmOpen, onClose]);
 
   function insertMergeTag(tag: string) {
@@ -470,8 +470,8 @@ function ComposerDrawer({
       onMessageChange(`${current}${tag}`);
       return;
     }
-    const start = el.selectionStart ?? current.length;
-    const end = el.selectionEnd ?? current.length;
+    const start = el.selectionStart;
+    const end = el.selectionEnd;
     const next = `${current.slice(0, start)}${tag}${current.slice(end)}`;
     onMessageChange(next);
     requestAnimationFrame(() => {
@@ -493,15 +493,15 @@ function ComposerDrawer({
         channels,
       };
       if (!isWholeBatch && composer.membershipIds) {
-        body.membershipIds = composer.membershipIds;
+        body["membershipIds"] = composer.membershipIds;
       }
       if (excludeRecent) {
-        body.excludeMessagedWithinDays = 7;
+        body["excludeMessagedWithinDays"] = 7;
       }
       if (timing === "schedule" && scheduleLocal) {
         const iso = new Date(scheduleLocal).toISOString();
         if (!Number.isNaN(new Date(iso).getTime())) {
-          body.scheduleAt = iso;
+          body["scheduleAt"] = iso;
         }
       }
       await sendBatchMessage(body);
@@ -545,9 +545,7 @@ function ComposerDrawer({
               </h2>
               <p className="mt-1 text-sm text-[var(--admin-on-surface-variant)]">
                 {composer.audienceLabel || (isWholeBatch ? "Whole batch" : "Selected learners")}
-                {excludeRecent
-                  ? " · Exclude recent may reduce the final send count"
-                  : ""}
+                {excludeRecent ? " · Exclude recent may reduce the final send count" : ""}
               </p>
             </div>
             <button
@@ -567,7 +565,9 @@ function ComposerDrawer({
               <input
                 className={fieldClassName}
                 value={composer.subject}
-                onChange={(e) => onSubjectChange(e.target.value)}
+                onChange={(e) => {
+                  onSubjectChange(e.target.value);
+                }}
                 maxLength={200}
                 placeholder="Announcement subject"
               />
@@ -582,7 +582,9 @@ function ComposerDrawer({
                       key={tag.key}
                       type="button"
                       className="rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface)] px-2 py-1 font-mono text-[10px] text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-on-surface)]"
-                      onClick={() => insertMergeTag(tag.key)}
+                      onClick={() => {
+                        insertMergeTag(tag.key);
+                      }}
                     >
                       {tag.label}
                     </button>
@@ -593,7 +595,9 @@ function ComposerDrawer({
                   className="min-h-[160px] w-full resize-y border-0 bg-transparent px-3 py-2 text-xs text-[var(--admin-on-surface)] outline-none placeholder:text-[var(--admin-on-surface-variant)]"
                   rows={8}
                   value={composer.message}
-                  onChange={(e) => onMessageChange(e.target.value)}
+                  onChange={(e) => {
+                    onMessageChange(e.target.value);
+                  }}
                   maxLength={10000}
                   placeholder="Write your announcement or nudge…"
                 />
@@ -605,7 +609,9 @@ function ComposerDrawer({
                 type="checkbox"
                 className="mt-0.5 accent-[var(--admin-primary)]"
                 checked={excludeRecent}
-                onChange={(e) => setExcludeRecent(e.target.checked)}
+                onChange={(e) => {
+                  setExcludeRecent(e.target.checked);
+                }}
               />
               <span>
                 Exclude learners messaged in the last 7 days
@@ -626,7 +632,9 @@ function ComposerDrawer({
                     type="checkbox"
                     className="accent-[var(--admin-primary)]"
                     checked={channelEmail}
-                    onChange={(e) => setChannelEmail(e.target.checked)}
+                    onChange={(e) => {
+                      setChannelEmail(e.target.checked);
+                    }}
                   />
                   Email
                 </label>
@@ -635,7 +643,9 @@ function ComposerDrawer({
                     type="checkbox"
                     className="accent-[var(--admin-primary)]"
                     checked={channelInApp}
-                    onChange={(e) => setChannelInApp(e.target.checked)}
+                    onChange={(e) => {
+                      setChannelInApp(e.target.checked);
+                    }}
                   />
                   In-app
                 </label>
@@ -656,7 +666,9 @@ function ComposerDrawer({
                     name="message-timing"
                     className="accent-[var(--admin-primary)]"
                     checked={timing === "now"}
-                    onChange={() => setTiming("now")}
+                    onChange={() => {
+                      setTiming("now");
+                    }}
                   />
                   Now
                 </label>
@@ -666,7 +678,9 @@ function ComposerDrawer({
                     name="message-timing"
                     className="accent-[var(--admin-primary)]"
                     checked={timing === "schedule"}
-                    onChange={() => setTiming("schedule")}
+                    onChange={() => {
+                      setTiming("schedule");
+                    }}
                   />
                   Schedule
                 </label>
@@ -678,7 +692,9 @@ function ComposerDrawer({
                     type="datetime-local"
                     className={fieldClassName}
                     value={scheduleLocal}
-                    onChange={(e) => setScheduleLocal(e.target.value)}
+                    onChange={(e) => {
+                      setScheduleLocal(e.target.value);
+                    }}
                   />
                 </label>
               ) : null}
@@ -698,7 +714,9 @@ function ComposerDrawer({
               type="button"
               className={primaryButtonClassName}
               disabled={busy || sending || !canSubmit}
-              onClick={() => setConfirmOpen(true)}
+              onClick={() => {
+                setConfirmOpen(true);
+              }}
             >
               <Mail className="h-4 w-4" aria-hidden="true" />
               Send to {formatCount(matchCount)} learners
@@ -711,7 +729,9 @@ function ComposerDrawer({
         open={confirmOpen}
         count={matchCount}
         busy={sending}
-        onCancel={() => setConfirmOpen(false)}
+        onCancel={() => {
+          setConfirmOpen(false);
+        }}
         onConfirm={() => void doSend()}
       />
     </>
@@ -802,7 +822,9 @@ function MessageHistoryCard({
               type="button"
               className={secondaryButtonClassName}
               disabled={retryingId === item.sendGroupId}
-              onClick={() => onRetry(item.sendGroupId)}
+              onClick={() => {
+                onRetry(item.sendGroupId);
+              }}
             >
               <RefreshCw className="h-3.5 w-3.5" aria-hidden="true" />
               {retryingId === item.sendGroupId ? "Retrying…" : "Retry failed"}
@@ -890,7 +912,6 @@ export function AdminBatchMessagesPage({ batchId }: { batchId: string }) {
 
   useEffect(() => {
     void loadAll({ page: 1 });
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- initial load only
   }, [batchId]);
 
   function openComposer(opts?: {
@@ -901,7 +922,7 @@ export function AdminBatchMessagesPage({ batchId }: { batchId: string }) {
   }) {
     const whole = opts?.membershipIds === undefined || opts.membershipIds === null;
     setComposer({
-      membershipIds: whole ? null : opts.membershipIds ?? [],
+      membershipIds: whole ? null : (opts.membershipIds ?? []),
       audienceLabel: opts?.audienceLabel?.trim() || (whole ? "Whole batch" : "Selected learners"),
       subject: opts?.subject ?? "",
       message: opts?.message ?? "",
@@ -952,7 +973,7 @@ export function AdminBatchMessagesPage({ batchId }: { batchId: string }) {
     const id =
       typeof crypto !== "undefined" && "randomUUID" in crypto
         ? crypto.randomUUID()
-        : `nudge_${Date.now()}`;
+        : `nudge_${String(Date.now())}`;
     const next: BatchMessageNudge[] = [
       ...nudges,
       { id, title, triggerKey, triggerLabel, enabled: true },
@@ -1010,7 +1031,10 @@ export function AdminBatchMessagesPage({ batchId }: { batchId: string }) {
           Batches
         </Link>
         <ChevronRight className="h-3.5 w-3.5" aria-hidden="true" />
-        <Link href={`/admin/reports/batches/${batchId}`} className="hover:text-[var(--admin-primary)]">
+        <Link
+          href={`/admin/reports/batches/${batchId}`}
+          className="hover:text-[var(--admin-primary)]"
+        >
           {batchName}
         </Link>
         <ChevronRight className="h-3.5 w-3.5" aria-hidden="true" />
@@ -1029,7 +1053,9 @@ export function AdminBatchMessagesPage({ batchId }: { batchId: string }) {
         <button
           type="button"
           className={primaryButtonClassName}
-          onClick={() => openComposer({ membershipIds: null, audienceLabel: "Whole batch" })}
+          onClick={() => {
+            openComposer({ membershipIds: null, audienceLabel: "Whole batch" });
+          }}
         >
           <Plus className="h-4 w-4" aria-hidden="true" />
           New message
@@ -1061,7 +1087,12 @@ export function AdminBatchMessagesPage({ batchId }: { batchId: string }) {
       </div>
 
       {actionError ? (
-        <ErrorStrip title={actionError} onDismiss={() => setActionError(null)} />
+        <ErrorStrip
+          title={actionError}
+          onDismiss={() => {
+            setActionError(null);
+          }}
+        />
       ) : null}
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.38fr)_minmax(0,1fr)]">
@@ -1088,9 +1119,9 @@ export function AdminBatchMessagesPage({ batchId }: { batchId: string }) {
                 <button
                   type="button"
                   className={primaryButtonClassName}
-                  onClick={() =>
-                    openComposer({ membershipIds: null, audienceLabel: "Whole batch" })
-                  }
+                  onClick={() => {
+                    openComposer({ membershipIds: null, audienceLabel: "Whole batch" });
+                  }}
                 >
                   <Plus className="h-4 w-4" aria-hidden="true" />
                   New message
@@ -1148,7 +1179,9 @@ export function AdminBatchMessagesPage({ batchId }: { batchId: string }) {
                 type="button"
                 className={ghostButtonClassName}
                 disabled={nudgeBusy}
-                onClick={() => setShowNudgeForm((v) => !v)}
+                onClick={() => {
+                  setShowNudgeForm((v) => !v);
+                }}
               >
                 <Plus className="h-3.5 w-3.5" aria-hidden="true" />
                 New nudge
@@ -1162,7 +1195,9 @@ export function AdminBatchMessagesPage({ batchId }: { batchId: string }) {
                   <input
                     className={fieldClassName}
                     value={nudgeTitle}
-                    onChange={(e) => setNudgeTitle(e.target.value)}
+                    onChange={(e) => {
+                      setNudgeTitle(e.target.value);
+                    }}
                     maxLength={120}
                     placeholder="Missed session follow-up"
                   />
@@ -1172,7 +1207,9 @@ export function AdminBatchMessagesPage({ batchId }: { batchId: string }) {
                   <input
                     className={fieldClassName}
                     value={nudgeTriggerLabel}
-                    onChange={(e) => setNudgeTriggerLabel(e.target.value)}
+                    onChange={(e) => {
+                      setNudgeTriggerLabel(e.target.value);
+                    }}
                     maxLength={120}
                     placeholder="After missed live session"
                   />
@@ -1193,9 +1230,7 @@ export function AdminBatchMessagesPage({ batchId }: { batchId: string }) {
                   <button
                     type="button"
                     className={secondaryButtonClassName}
-                    disabled={
-                      nudgeBusy || !nudgeTitle.trim() || !nudgeTriggerLabel.trim()
-                    }
+                    disabled={nudgeBusy || !nudgeTitle.trim() || !nudgeTriggerLabel.trim()}
                     onClick={() => void addNudge()}
                   >
                     Add nudge
@@ -1271,7 +1306,7 @@ export function AdminBatchMessagesPage({ batchId }: { batchId: string }) {
                       type="button"
                       className={secondaryButtonClassName}
                       disabled={audience.count === 0}
-                      onClick={() =>
+                      onClick={() => {
                         openComposer({
                           membershipIds:
                             audience.key === "whole_batch" ? null : audience.membershipIds,
@@ -1284,8 +1319,8 @@ export function AdminBatchMessagesPage({ batchId }: { batchId: string }) {
                             audience.key === "whole_batch"
                               ? "Sharing an update for everyone in {{Batch Name}}."
                               : "We wanted to check in. Please continue with {{Course Title}} when you can.",
-                        })
-                      }
+                        });
+                      }}
                     >
                       <Mail className="h-3.5 w-3.5" aria-hidden="true" />
                       Message
@@ -1304,9 +1339,15 @@ export function AdminBatchMessagesPage({ batchId }: { batchId: string }) {
         rosterCount={rosterCount}
         composer={composer}
         busy={false}
-        onClose={() => setComposerOpen(false)}
-        onSubjectChange={(v) => setComposer((c) => ({ ...c, subject: v }))}
-        onMessageChange={(v) => setComposer((c) => ({ ...c, message: v }))}
+        onClose={() => {
+          setComposerOpen(false);
+        }}
+        onSubjectChange={(v) => {
+          setComposer((c) => ({ ...c, subject: v }));
+        }}
+        onMessageChange={(v) => {
+          setComposer((c) => ({ ...c, message: v }));
+        }}
         onSent={() => {
           setComposerOpen(false);
           setComposer({
@@ -1317,7 +1358,9 @@ export function AdminBatchMessagesPage({ batchId }: { batchId: string }) {
           });
           void reloadHistory(1);
         }}
-        onError={(message) => setActionError(message)}
+        onError={(message) => {
+          setActionError(message);
+        }}
       />
     </div>
   );

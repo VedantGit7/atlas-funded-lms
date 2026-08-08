@@ -6,7 +6,7 @@ import {
   retryCohortMessageResponseSchema,
 } from "@atlas/domain/reports/progress-score-roster.dto";
 import { mutateProgressScoreRosterMetadata } from "@atlas/domain/reports/progress-score-roster.route-metadata";
-import { retryCohortMessage } from "../../../../../../../../server/reports/progress-score-roster-actions.service";
+import { retryCohortMessage } from "@atlas/api-server/reports/progress-score-roster-actions.service";
 
 export const POST = createTenantRoute<
   z.output<typeof retryCohortMessageBodySchema>,
@@ -18,5 +18,5 @@ export const POST = createTenantRoute<
   params: retryCohortMessageParamsSchema,
   output: retryCohortMessageResponseSchema,
   handler: async ({ tx, ctx, input, params }) =>
-    retryCohortMessage(tx, ctx, params.campaignId, input),
+    retryCohortMessage(tx, ctx, params["campaignId"], input),
 });

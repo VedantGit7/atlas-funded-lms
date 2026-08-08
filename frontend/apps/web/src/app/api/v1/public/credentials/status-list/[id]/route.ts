@@ -10,7 +10,7 @@ import { routeMetadata } from "./route.metadata";
 
 const statusListIdSchema = z.string().uuid();
 
-export const GET = createPublicRouteHandler<unknown>(routeMetadata, async ({ req, requestId }) => {
+export const GET = createPublicRouteHandler(routeMetadata, async ({ req, requestId }) => {
   return withGlobalDb(async (db) => {
     const tenant = await resolveTenantFromRequest({ req, db });
     const url = new URL(req.url);

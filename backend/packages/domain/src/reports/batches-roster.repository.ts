@@ -1,6 +1,20 @@
 import type { TenantTx } from "@atlas/db";
 import type { BatchesListQuery, BatchLearnersQuery } from "./batches-roster.dto";
 
+function defined<T>(value: T, message = "Expected value to be defined"): NonNullable<T> {
+  if (value == null) {
+    throw new Error(message);
+  }
+  return value;
+}
+
+function asUnknownString(value: unknown, fallback = ""): string {
+  if (typeof value === "string") return value;
+  if (typeof value === "number" || typeof value === "boolean") return String(value);
+  if (value == null) return fallback;
+  return fallback;
+}
+
 export type BatchListRow = {
   id: string;
   key: string;
@@ -276,8 +290,8 @@ export const batchesRosterRepository = {
   },
 
   async countBatches(tx: TenantTx, query: BatchesListQuery): Promise<number> {
-    const window = query.window ?? "any";
-    const health = query.health ?? "any";
+    const window = query.window;
+    const health = query.health;
     const rows = await tx.$queryRaw<Array<{ count: bigint }>>`
       with batch_base as (
         select
@@ -461,12 +475,9 @@ export const batchesRosterRepository = {
     return Number(rows[0]?.count ?? 0);
   },
 
-  async summarizeBatches(
-    tx: TenantTx,
-    query: BatchesListQuery,
-  ): Promise<BatchesListSummaryRow> {
-    const window = query.window ?? "any";
-    const health = query.health ?? "any";
+  async summarizeBatches(tx: TenantTx, query: BatchesListQuery): Promise<BatchesListSummaryRow> {
+    const window = query.window;
+    const health = query.health;
     const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
       with batch_base as (
         select
@@ -671,9 +682,7 @@ export const batchesRosterRepository = {
           ? null
           : Number(row["avg_content_completion_pct"]),
       avg_live_attendance_pct:
-        row["avg_live_attendance_pct"] == null
-          ? null
-          : Number(row["avg_live_attendance_pct"]),
+        row["avg_live_attendance_pct"] == null ? null : Number(row["avg_live_attendance_pct"]),
       at_risk_count: Number(row["at_risk_count"] ?? 0),
       ending_soon_count: Number(row["ending_soon_count"] ?? 0),
     };
@@ -681,10 +690,10 @@ export const batchesRosterRepository = {
 
   async listBatches(tx: TenantTx, query: BatchesListQuery): Promise<BatchListRow[]> {
     const skip = (query.page - 1) * query.limit;
-    const window = query.window ?? "any";
-    const health = query.health ?? "any";
-    const sortBy = query.sortBy ?? "member_count";
-    const sortDir = query.sortDir ?? "desc";
+    const window = query.window;
+    const health = query.health;
+    const sortBy = query.sortBy;
+    const sortDir = query.sortDir;
     const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
       with batch_base as (
         select
@@ -915,19 +924,19 @@ export const batchesRosterRepository = {
     `;
 
     return rows.map((row) => {
-      const healthValue = String(row["health"] ?? "on_track");
+      const healthValue = asUnknownString(row["health"], "on_track");
       const healthNormalized =
         healthValue === "critical" || healthValue === "at_risk" || healthValue === "on_track"
           ? healthValue
           : "on_track";
       return {
-        id: String(row["id"]),
-        key: String(row["key"]),
-        name: String(row["name"]),
+        id: asUnknownString(row["id"]),
+        key: asUnknownString(row["key"]),
+        name: asUnknownString(row["name"]),
         description: typeof row["description"] === "string" ? row["description"] : null,
         course_id: typeof row["course_id"] === "string" ? row["course_id"] : null,
         course_title: typeof row["course_title"] === "string" ? row["course_title"] : null,
-        status: String(row["status"]),
+        status: asUnknownString(row["status"]),
         starts_at: row["starts_at"] instanceof Date ? row["starts_at"] : null,
         ends_at: row["ends_at"] instanceof Date ? row["ends_at"] : null,
         member_count: Number(row["member_count"] ?? 0),
@@ -936,13 +945,10 @@ export const batchesRosterRepository = {
             ? null
             : Number(row["avg_content_completion_pct"]),
         avg_live_attendance_pct:
-          row["avg_live_attendance_pct"] == null
-            ? null
-            : Number(row["avg_live_attendance_pct"]),
+          row["avg_live_attendance_pct"] == null ? null : Number(row["avg_live_attendance_pct"]),
         avg_test_score_pct:
           row["avg_test_score_pct"] == null ? null : Number(row["avg_test_score_pct"]),
-        last_activity_at:
-          row["last_activity_at"] instanceof Date ? row["last_activity_at"] : null,
+        last_activity_at: row["last_activity_at"] instanceof Date ? row["last_activity_at"] : null,
         health: healthNormalized,
         created_at: row["created_at"] as Date,
       };
@@ -983,8 +989,8 @@ export const batchesRosterRepository = {
         )
     `;
     return {
-      total_count: Number(rows[0]?.total_count ?? 0),
-      held_count: Number(rows[0]?.held_count ?? 0),
+      total_count: rows[0]?.total_count ?? 0,
+      held_count: rows[0]?.held_count ?? 0,
     };
   },
 
@@ -1019,12 +1025,11 @@ export const batchesRosterRepository = {
       limit ${limit}
     `;
     return rows.map((row) => ({
-      live_session_id: String(row["live_session_id"]),
-      title: String(row["title"] ?? "Live session"),
+      live_session_id: asUnknownString(row["live_session_id"]),
+      title: asUnknownString(row["title"], "Live session"),
       scheduled_at: row["scheduled_at"] instanceof Date ? row["scheduled_at"] : null,
-      status: String(row["status"] ?? "scheduled"),
-      duration_minutes:
-        row["duration_minutes"] == null ? null : Number(row["duration_minutes"]),
+      status: asUnknownString(row["status"], "scheduled"),
+      duration_minutes: row["duration_minutes"] == null ? null : Number(row["duration_minutes"]),
     }));
   },
 
@@ -1120,11 +1125,9 @@ export const batchesRosterRepository = {
     return rows.map((row, index) => ({
       week_start: row["week_start"] as Date,
       week_label:
-        typeof row["week_label"] === "string" ? row["week_label"] : `W${index + 1}`,
+        typeof row["week_label"] === "string" ? row["week_label"] : `W${String(index + 1)}`,
       content_completion_pct:
-        row["content_completion_pct"] == null
-          ? null
-          : Number(row["content_completion_pct"]),
+        row["content_completion_pct"] == null ? null : Number(row["content_completion_pct"]),
       live_attendance_pct:
         row["live_attendance_pct"] == null ? null : Number(row["live_attendance_pct"]),
       test_score_pct: row["test_score_pct"] == null ? null : Number(row["test_score_pct"]),
@@ -1338,10 +1341,10 @@ export const batchesRosterRepository = {
           or content_completion_pct <= ${query.maxCompletion ?? null}::float
         )
         and (
-          ${(query.health ?? "any")}::text = 'any'
-          or health = ${(query.health ?? "any")}
+          ${query.health}::text = 'any'
+          or health = ${query.health}
           or (
-            ${(query.health ?? "any")}::text = 'needs_attention'
+            ${query.health}::text = 'needs_attention'
             and health in ('at_risk', 'critical')
           )
         )
@@ -1364,13 +1367,13 @@ export const batchesRosterRepository = {
     `;
 
     return rows.map((row) => {
-      const healthValue = String(row["health"] ?? "on_track");
+      const healthValue = asUnknownString(row["health"], "on_track");
       const healthNormalized =
         healthValue === "critical" || healthValue === "at_risk" || healthValue === "on_track"
           ? healthValue
           : "on_track";
       return {
-        membership_id: String(row["membership_id"]),
+        membership_id: asUnknownString(row["membership_id"]),
         learner_name: typeof row["learner_name"] === "string" ? row["learner_name"] : null,
         email: typeof row["email"] === "string" ? row["email"] : null,
         activity_at: row["activity_at"] instanceof Date ? row["activity_at"] : null,
@@ -1501,20 +1504,17 @@ export const batchesRosterRepository = {
       limit 200
     `;
     return rows.map((row) => ({
-      live_session_id: String(row["live_session_id"]),
-      title: String(row["title"] ?? "Live session"),
+      live_session_id: asUnknownString(row["live_session_id"]),
+      title: asUnknownString(row["title"], "Live session"),
       scheduled_at: row["scheduled_at"] instanceof Date ? row["scheduled_at"] : null,
-      status: String(row["status"] ?? "absent"),
-      session_status: String(row["session_status"] ?? "scheduled"),
+      status: asUnknownString(row["status"], "absent"),
+      session_status: asUnknownString(row["session_status"], "scheduled"),
       session_kind: typeof row["session_kind"] === "string" ? row["session_kind"] : null,
       joined_at: row["joined_at"] instanceof Date ? row["joined_at"] : null,
       left_at: row["left_at"] instanceof Date ? row["left_at"] : null,
-      duration_seconds:
-        row["duration_seconds"] == null ? null : Number(row["duration_seconds"]),
+      duration_seconds: row["duration_seconds"] == null ? null : Number(row["duration_seconds"]),
       planned_duration_minutes:
-        row["planned_duration_minutes"] == null
-          ? null
-          : Number(row["planned_duration_minutes"]),
+        row["planned_duration_minutes"] == null ? null : Number(row["planned_duration_minutes"]),
     }));
   },
 
@@ -1559,15 +1559,14 @@ export const batchesRosterRepository = {
       limit 200
     `;
     return rows.map((row) => ({
-      assessment_id: String(row["assessment_id"]),
-      assessment_title: String(row["assessment_title"] ?? "Assessment"),
-      attempt_id: String(row["attempt_id"]),
-      attempt_status: String(row["attempt_status"] ?? "STARTED"),
+      assessment_id: asUnknownString(row["assessment_id"]),
+      assessment_title: asUnknownString(row["assessment_title"], "Assessment"),
+      attempt_id: asUnknownString(row["attempt_id"]),
+      attempt_status: asUnknownString(row["attempt_status"], "STARTED"),
       score_pct: row["score_pct"] == null ? null : Number(row["score_pct"]),
       submitted_at: row["submitted_at"] instanceof Date ? row["submitted_at"] : null,
       started_at: row["started_at"] as Date,
-      duration_seconds:
-        row["duration_seconds"] == null ? null : Number(row["duration_seconds"]),
+      duration_seconds: row["duration_seconds"] == null ? null : Number(row["duration_seconds"]),
     }));
   },
 
@@ -1687,8 +1686,8 @@ export const batchesRosterRepository = {
       limit 80
     `;
     return rows.map((row) => ({
-      lesson_id: String(row["lesson_id"]),
-      title: String(row["title"] ?? "Lesson"),
+      lesson_id: asUnknownString(row["lesson_id"]),
+      title: asUnknownString(row["title"], "Lesson"),
       sort_order: Number(row["sort_order"] ?? 0),
       completed: Boolean(row["completed"]),
     }));
@@ -1738,11 +1737,7 @@ export const batchesRosterRepository = {
     `;
   },
 
-  async removeBatchMember(
-    tx: TenantTx,
-    batchId: string,
-    membershipId: string,
-  ): Promise<boolean> {
+  async removeBatchMember(tx: TenantTx, batchId: string, membershipId: string): Promise<boolean> {
     const count = await tx.$executeRaw`
       delete from batch_memberships
       where tenant_id = current_setting('app.tenant_id', true)::uuid
@@ -2000,22 +1995,18 @@ export const batchesRosterRepository = {
           ? row["recording_url"]
           : null;
       return {
-        id: String(row["id"]),
-        title: String(row["title"] ?? "Live session"),
+        id: asUnknownString(row["id"]),
+        title: asUnknownString(row["title"], "Live session"),
         kind: typeof row["session_kind"] === "string" ? row["session_kind"] : null,
-        status: String(row["status"] ?? "scheduled"),
+        status: asUnknownString(row["status"], "scheduled"),
         host_label: typeof row["host_label"] === "string" ? row["host_label"] : null,
         scheduled_at: row["scheduled_at"] instanceof Date ? row["scheduled_at"] : null,
         started_at: row["started_at"] instanceof Date ? row["started_at"] : null,
         ended_at: row["ended_at"] instanceof Date ? row["ended_at"] : null,
         planned_duration_minutes:
-          row["planned_duration_minutes"] == null
-            ? null
-            : Number(row["planned_duration_minutes"]),
+          row["planned_duration_minutes"] == null ? null : Number(row["planned_duration_minutes"]),
         actual_duration_minutes:
-          row["actual_duration_minutes"] == null
-            ? null
-            : Number(row["actual_duration_minutes"]),
+          row["actual_duration_minutes"] == null ? null : Number(row["actual_duration_minutes"]),
         roster_count: Number(row["roster_count"] ?? rosterCount),
         attended_count: Number(row["attended_count"] ?? 0),
         attendance_rate_pct:
@@ -2148,12 +2139,9 @@ export const batchesRosterRepository = {
       sessions_total_count: Number(row["sessions_total_count"] ?? 0),
       perfect_attendance_count: Number(row["perfect_attendance_count"] ?? 0),
       missed_three_or_more_count: Number(row["missed_three_or_more_count"] ?? 0),
-      avg_watch_minutes:
-        row["avg_watch_minutes"] == null ? null : Number(row["avg_watch_minutes"]),
+      avg_watch_minutes: row["avg_watch_minutes"] == null ? null : Number(row["avg_watch_minutes"]),
       planned_watch_minutes:
-        row["planned_watch_minutes"] == null
-          ? null
-          : Number(row["planned_watch_minutes"]),
+        row["planned_watch_minutes"] == null ? null : Number(row["planned_watch_minutes"]),
       roster_count: rosterCount,
     };
   },
@@ -2205,10 +2193,10 @@ export const batchesRosterRepository = {
     `;
 
     const sessions = sessionRows.map((row) => ({
-      id: String(row["id"]),
-      title: String(row["title"] ?? "Live session"),
+      id: asUnknownString(row["id"]),
+      title: asUnknownString(row["title"], "Live session"),
       scheduled_at: row["scheduled_at"] instanceof Date ? row["scheduled_at"] : null,
-      status: String(row["status"] ?? "scheduled"),
+      status: asUnknownString(row["status"], "scheduled"),
     }));
 
     if (sessions.length === 0) {
@@ -2248,13 +2236,18 @@ export const batchesRosterRepository = {
         and la.live_session_id = any(${sessionIds}::uuid[])
     `;
 
-    const attendanceByMember = new Map<string, Map<string, { status: string; duration: number | null }>>();
+    const attendanceByMember = new Map<
+      string,
+      Map<string, { status: string; duration: number | null }>
+    >();
     for (const row of attendanceRows) {
-      const membershipId = String(row["membership_id"]);
-      const sessionId = String(row["live_session_id"]);
-      const bucket = attendanceByMember.get(membershipId) ?? new Map();
+      const membershipId = asUnknownString(row["membership_id"]);
+      const sessionId = asUnknownString(row["live_session_id"]);
+      const bucket =
+        attendanceByMember.get(membershipId) ??
+        new Map<string, { status: string; duration: number | null }>();
       bucket.set(sessionId, {
-        status: String(row["status"] ?? ""),
+        status: asUnknownString(row["status"], ""),
         duration: row["duration_seconds"] == null ? null : Number(row["duration_seconds"]),
       });
       attendanceByMember.set(membershipId, bucket);
@@ -2262,8 +2255,10 @@ export const batchesRosterRepository = {
 
     const now = Date.now();
     const learners = learnerRows.map((row) => {
-      const membershipId = String(row["membership_id"]);
-      const memberAttendance = attendanceByMember.get(membershipId) ?? new Map();
+      const membershipId = asUnknownString(row["membership_id"]);
+      const memberAttendance =
+        attendanceByMember.get(membershipId) ??
+        new Map<string, { status: string; duration: number | null }>();
       let attendedCount = 0;
       let missedCount = 0;
       const cells = sessions.map((session) => {
@@ -2365,7 +2360,7 @@ export const batchesRosterRepository = {
       where missed_count >= ${minMissed}
       order by missed_count desc, membership_id
     `;
-    return rows.map((row) => String(row.membership_id));
+    return rows.map((row) => row.membership_id);
   },
 
   async findBatchLiveSession(
@@ -2431,22 +2426,18 @@ export const batchesRosterRepository = {
         ? row["recording_url"]
         : null;
     return {
-      id: String(row["id"]),
-      title: String(row["title"] ?? "Live session"),
+      id: asUnknownString(row["id"]),
+      title: asUnknownString(row["title"], "Live session"),
       kind: typeof row["session_kind"] === "string" ? row["session_kind"] : null,
-      status: String(row["status"] ?? "scheduled"),
+      status: asUnknownString(row["status"], "scheduled"),
       host_label: typeof row["host_label"] === "string" ? row["host_label"] : null,
       scheduled_at: row["scheduled_at"] instanceof Date ? row["scheduled_at"] : null,
       started_at: row["started_at"] instanceof Date ? row["started_at"] : null,
       ended_at: row["ended_at"] instanceof Date ? row["ended_at"] : null,
       planned_duration_minutes:
-        row["planned_duration_minutes"] == null
-          ? null
-          : Number(row["planned_duration_minutes"]),
+        row["planned_duration_minutes"] == null ? null : Number(row["planned_duration_minutes"]),
       actual_duration_minutes:
-        row["actual_duration_minutes"] == null
-          ? null
-          : Number(row["actual_duration_minutes"]),
+        row["actual_duration_minutes"] == null ? null : Number(row["actual_duration_minutes"]),
       recording_url: recordingUrl,
       timezone_label: typeof row["timezone_label"] === "string" ? row["timezone_label"] : null,
       batch_id: typeof row["batch_id"] === "string" ? row["batch_id"] : null,
@@ -2484,8 +2475,8 @@ export const batchesRosterRepository = {
     const row = rows[0];
     if (!row) return null;
     return {
-      id: String(row["id"]),
-      title: String(row["title"] ?? "Live session"),
+      id: asUnknownString(row["id"]),
+      title: asUnknownString(row["title"], "Live session"),
       scheduled_at: row["scheduled_at"] instanceof Date ? row["scheduled_at"] : null,
     };
   },
@@ -2509,11 +2500,10 @@ export const batchesRosterRepository = {
     return rows
       .filter((row) => row["joined_at"] instanceof Date)
       .map((row) => ({
-        membership_id: String(row["membership_id"]),
+        membership_id: asUnknownString(row["membership_id"]),
         joined_at: row["joined_at"] as Date,
         left_at: row["left_at"] instanceof Date ? row["left_at"] : null,
-        duration_seconds:
-          row["duration_seconds"] == null ? null : Number(row["duration_seconds"]),
+        duration_seconds: row["duration_seconds"] == null ? null : Number(row["duration_seconds"]),
       }));
   },
 
@@ -2522,7 +2512,7 @@ export const batchesRosterRepository = {
     batchId: string,
     sessionId: string,
     query: {
-      q?: string;
+      q?: string | undefined;
       attendanceKind: "any" | "attended" | "partial" | "absent" | "excused" | "upcoming";
       plannedSeconds: number | null;
       sessionStart: Date | null;
@@ -2532,7 +2522,7 @@ export const batchesRosterRepository = {
     },
   ): Promise<number> {
     const rows = await this.listBatchLiveSessionAttendeeRows(tx, batchId, sessionId, {
-      q: query.q,
+      ...(query.q !== undefined ? { q: query.q } : {}),
       attendanceKind: "any",
       sortBy: "learner_name",
       sortDir: "asc",
@@ -2619,8 +2609,7 @@ export const batchesRosterRepository = {
         row["duration_seconds"] == null ? null : Number(row["duration_seconds"]);
       const plannedSeconds = query.plannedSeconds;
 
-      let attendance_kind: "attended" | "partial" | "absent" | "excused" | "upcoming" =
-        "absent";
+      let attendance_kind: "attended" | "partial" | "absent" | "excused" | "upcoming" = "absent";
       if (query.isCancelled) {
         attendance_kind = "absent";
       } else if (query.isUpcoming && !joinedAt && !rawStatus) {
@@ -2656,13 +2645,13 @@ export const batchesRosterRepository = {
 
       const late =
         Boolean(joinedAt && query.sessionStart) &&
-        joinedAt!.getTime() > query.sessionStart!.getTime() + LATE_GRACE_MS;
+        defined(joinedAt).getTime() > defined(query.sessionStart).getTime() + LATE_GRACE_MS;
       const left_early =
         Boolean(leftAt && query.sessionEnd) &&
-        leftAt!.getTime() < query.sessionEnd!.getTime() - EARLY_LEAVE_MS;
+        defined(leftAt).getTime() < defined(query.sessionEnd).getTime() - EARLY_LEAVE_MS;
 
       return {
-        membership_id: String(row["membership_id"]),
+        membership_id: asUnknownString(row["membership_id"]),
         learner_name: typeof row["learner_name"] === "string" ? row["learner_name"] : null,
         email: typeof row["email"] === "string" ? row["email"] : null,
         raw_status: rawStatus,
@@ -2715,8 +2704,7 @@ export const batchesRosterRepository = {
         return cmp(a.rejoins, b.rejoins);
       }
       if (query.sortBy === "status") {
-        const byKind =
-          (kindOrder[a.attendance_kind] ?? 9) - (kindOrder[b.attendance_kind] ?? 9);
+        const byKind = (kindOrder[a.attendance_kind] ?? 9) - (kindOrder[b.attendance_kind] ?? 9);
         if (byKind !== 0) return byKind * dir;
         return cmp(
           (a.learner_name ?? a.email ?? "").toLowerCase(),
@@ -2886,10 +2874,8 @@ export const batchesRosterRepository = {
     `;
 
     return rows.map((row) => {
-      const passRate =
-        row["pass_rate_pct"] == null ? null : Number(row["pass_rate_pct"]);
-      const passMark =
-        row["pass_mark_pct"] == null ? 70 : Number(row["pass_mark_pct"]);
+      const passRate = row["pass_rate_pct"] == null ? null : Number(row["pass_rate_pct"]);
+      const passMark = row["pass_mark_pct"] == null ? 70 : Number(row["pass_mark_pct"]);
       let health_rail: "none" | "success" | "warning" | "danger" = "none";
       if (passRate != null) {
         if (passRate >= 70) health_rail = "success";
@@ -2901,22 +2887,18 @@ export const batchesRosterRepository = {
 
       const attempted = Number(row["attempted_count"] ?? 0);
       return {
-        assessment_id: String(row["assessment_id"]),
-        title: String(row["title"] ?? "Assessment"),
-        assessment_type: String(row["assessment_type"] ?? "QUIZ"),
+        assessment_id: asUnknownString(row["assessment_id"]),
+        title: asUnknownString(row["title"], "Assessment"),
+        assessment_type: asUnknownString(row["assessment_type"], "QUIZ"),
         released_at: row["released_at"] instanceof Date ? row["released_at"] : null,
         pass_mark_pct: passMark,
         roster_count: rosterCount,
         attempted_count: attempted,
-        attempted_pct:
-          rosterCount > 0 ? Math.round((attempted / rosterCount) * 1000) / 10 : null,
-        avg_score_pct:
-          row["avg_score_pct"] == null ? null : Number(row["avg_score_pct"]),
+        attempted_pct: rosterCount > 0 ? Math.round((attempted / rosterCount) * 1000) / 10 : null,
+        avg_score_pct: row["avg_score_pct"] == null ? null : Number(row["avg_score_pct"]),
         pass_rate_pct: passRate,
-        high_score_pct:
-          row["high_score_pct"] == null ? null : Number(row["high_score_pct"]),
-        low_score_pct:
-          row["low_score_pct"] == null ? null : Number(row["low_score_pct"]),
+        high_score_pct: row["high_score_pct"] == null ? null : Number(row["high_score_pct"]),
+        low_score_pct: row["low_score_pct"] == null ? null : Number(row["low_score_pct"]),
         awaiting_grading_count: Number(row["awaiting_grading_count"] ?? 0),
         health_rail,
         dist_min: row["low_score_pct"] == null ? null : Number(row["low_score_pct"]),
@@ -3070,13 +3052,12 @@ export const batchesRosterRepository = {
       )
       select count(*)::int as count from learner_avg
     `;
-    const withScores = Number(learnersWithScores[0]?.count ?? 0);
+    const withScores = learnersWithScores[0]?.count ?? 0;
 
     return {
       avg_score_pct: row["avg_score_pct"] == null ? null : Number(row["avg_score_pct"]),
       pass_mark_pct: passMarkPct,
-      pass_rate_pct:
-        withScores > 0 ? Math.round((passed / withScores) * 1000) / 10 : null,
+      pass_rate_pct: withScores > 0 ? Math.round((passed / withScores) * 1000) / 10 : null,
       passed_learner_count: passed,
       roster_count: rosterCount,
       attempt_count: attemptCount,
@@ -3137,8 +3118,8 @@ export const batchesRosterRepository = {
     `;
 
     const assessmentsMeta = assessmentRows.map((row) => ({
-      assessment_id: String(row["assessment_id"]),
-      title: String(row["title"] ?? "Assessment"),
+      assessment_id: asUnknownString(row["assessment_id"]),
+      title: asUnknownString(row["title"], "Assessment"),
       pass_mark: Number(row["pass_mark"] ?? 70),
     }));
 
@@ -3195,12 +3176,14 @@ export const batchesRosterRepository = {
     >();
     for (const row of attemptRows) {
       if (Number(row["rn"]) !== 1) continue;
-      const membershipId = String(row["membership_id"]);
-      const assessmentId = String(row["assessment_id"]);
-      const bucket = latestByMember.get(membershipId) ?? new Map();
+      const membershipId = asUnknownString(row["membership_id"]);
+      const assessmentId = asUnknownString(row["assessment_id"]);
+      const bucket =
+        latestByMember.get(membershipId) ??
+        new Map<string, { score: number | null; status: string; attempts: number }>();
       bucket.set(assessmentId, {
         score: row["score_pct"] == null ? null : Number(row["score_pct"]),
-        status: String(row["attempt_status"] ?? ""),
+        status: asUnknownString(row["attempt_status"], ""),
         attempts: Number(row["attempt_count"] ?? 1),
       });
       latestByMember.set(membershipId, bucket);
@@ -3223,8 +3206,10 @@ export const batchesRosterRepository = {
 
     const passMark = 70;
     const learners = learnerRows.map((row) => {
-      const membershipId = String(row["membership_id"]);
-      const memberAttempts = latestByMember.get(membershipId) ?? new Map();
+      const membershipId = asUnknownString(row["membership_id"]);
+      const memberAttempts =
+        latestByMember.get(membershipId) ??
+        new Map<string, { score: number | null; status: string; attempts: number }>();
       const scores: number[] = [];
       const cells = assessmentsMeta.map((assessment) => {
         const attempt = memberAttempts.get(assessment.assessment_id);
@@ -3247,9 +3232,7 @@ export const batchesRosterRepository = {
         scores.push(attempt.score);
         return {
           assessment_id: assessment.assessment_id,
-          kind: (attempt.score >= assessment.pass_mark ? "passed" : "failed") as
-            | "passed"
-            | "failed",
+          kind: attempt.score >= assessment.pass_mark ? ("passed" as const) : ("failed" as const),
           score_pct: attempt.score,
           attempt_count: attempt.attempts,
         };
@@ -3334,7 +3317,7 @@ export const batchesRosterRepository = {
       where avg_score is not null and avg_score < ${passMarkPct}
       order by avg_score asc
     `;
-    return rows.map((row) => String(row.membership_id));
+    return rows.map((row) => row.membership_id);
   },
 
   async summarizeBatchContent(
@@ -3489,7 +3472,7 @@ export const batchesRosterRepository = {
     tx: TenantTx,
     batchId: string,
     courseId: string,
-    rosterCount: number,
+    _rosterCount: number,
   ): Promise<
     Array<{
       lesson_id: string;
@@ -3504,6 +3487,7 @@ export const batchesRosterRepository = {
       median_duration_seconds: number | null;
     }>
   > {
+    void _rosterCount;
     const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
       with roster as (
         select bm.membership_id
@@ -3580,26 +3564,24 @@ export const batchesRosterRepository = {
     `;
 
     return rows.map((row) => {
-      const typeRaw = String(row["lesson_type"] ?? "other");
+      const typeRaw = asUnknownString(row["lesson_type"], "other");
       const lessonType = (
         ["video", "article", "quiz", "project", "interactive", "other"].includes(typeRaw)
           ? typeRaw
           : "other"
       ) as "video" | "article" | "quiz" | "project" | "interactive" | "other";
-      const planned =
-        row["duration_seconds"] == null ? null : Number(row["duration_seconds"]);
+      const planned = row["duration_seconds"] == null ? null : Number(row["duration_seconds"]);
       return {
-        lesson_id: String(row["lesson_id"]),
-        module_id: String(row["module_id"]),
-        module_title: String(row["module_title"] ?? "Module"),
+        lesson_id: asUnknownString(row["lesson_id"]),
+        module_id: asUnknownString(row["module_id"]),
+        module_title: asUnknownString(row["module_title"], "Module"),
         module_position: Number(row["module_position"] ?? 0),
         lesson_position: Number(row["lesson_position"] ?? 0),
         sequence_number: Number(row["sequence_number"] ?? 0),
-        title: String(row["title"] ?? "Lesson"),
+        title: asUnknownString(row["title"], "Lesson"),
         lesson_type: lessonType,
         completed_count: Number(row["completed_count"] ?? 0),
-        median_duration_seconds:
-          planned != null && planned > 0 ? Math.round(planned) : null,
+        median_duration_seconds: planned != null && planned > 0 ? Math.round(planned) : null,
       };
     });
   },
@@ -3620,9 +3602,7 @@ export const batchesRosterRepository = {
   > {
     if (!courseId) return [];
 
-    const rows = await tx.$queryRaw<
-      Array<{ week_start: Date; avg_completion_pct: number | null }>
-    >`
+    const rows = await tx.$queryRaw<Array<{ week_start: Date; avg_completion_pct: number | null }>>`
       with roster as (
         select bm.membership_id
         from batch_memberships bm
@@ -3674,17 +3654,13 @@ export const batchesRosterRepository = {
       limit 12
     `;
 
-    const windowMs =
-      startsAt && endsAt ? Math.max(1, endsAt.getTime() - startsAt.getTime()) : null;
+    const windowMs = startsAt && endsAt ? Math.max(1, endsAt.getTime() - startsAt.getTime()) : null;
 
     return rows.map((row) => {
       const weekEnd = new Date(row.week_start.getTime() + 7 * 24 * 60 * 60 * 1000);
       let expected: number | null = null;
       if (windowMs != null && startsAt) {
-        const elapsed = Math.min(
-          windowMs,
-          Math.max(0, weekEnd.getTime() - startsAt.getTime()),
-        );
+        const elapsed = Math.min(windowMs, Math.max(0, weekEnd.getTime() - startsAt.getTime()));
         expected = Math.round((elapsed / windowMs) * 1000) / 10;
       }
       const label = row.week_start.toLocaleDateString("en-US", {
@@ -3694,8 +3670,7 @@ export const batchesRosterRepository = {
       return {
         week_start: row.week_start,
         week_label: label,
-        completion_pct:
-          row.avg_completion_pct == null ? null : Number(row.avg_completion_pct),
+        completion_pct: row.avg_completion_pct == null ? null : row.avg_completion_pct,
         expected_pct: expected,
       };
     });
@@ -3708,7 +3683,12 @@ export const batchesRosterRepository = {
     query: {
       q?: string;
       view: "any" | "stalled" | "never_started" | "finished" | "in_progress";
-      sortBy: "learner_name" | "completion_pct" | "days_since" | "projected_finish" | "last_activity";
+      sortBy:
+        | "learner_name"
+        | "completion_pct"
+        | "days_since"
+        | "projected_finish"
+        | "last_activity";
       sortDir: "asc" | "desc";
       limit: number;
       page: number;
@@ -3809,7 +3789,7 @@ export const batchesRosterRepository = {
       where ${query.view}::text = 'any' or activity_status = ${query.view}::text
     `;
 
-    const totalCount = Number(countRows[0]?.count ?? 0);
+    const totalCount = countRows[0]?.count ?? 0;
 
     const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
       with roster as (
@@ -3947,22 +3927,21 @@ export const batchesRosterRepository = {
     return {
       totalCount,
       items: rows.map((row) => ({
-        membership_id: String(row["membership_id"]),
-        learner_name: row["learner_name"] == null ? null : String(row["learner_name"]),
-        email: row["email"] == null ? null : String(row["email"]),
+        membership_id: asUnknownString(row["membership_id"]),
+        learner_name: row["learner_name"] == null ? null : asUnknownString(row["learner_name"]),
+        email: row["email"] == null ? null : asUnknownString(row["email"]),
         completion_pct: Number(row["completion_pct"] ?? 0),
         completed_lessons: Number(row["completed_lessons"] ?? 0),
         total_lessons: Number(row["total_lessons"] ?? 0),
         last_lesson_title:
-          row["last_lesson_title"] == null ? null : String(row["last_lesson_title"]),
+          row["last_lesson_title"] == null ? null : asUnknownString(row["last_lesson_title"]),
         last_lesson_sequence:
           row["last_lesson_sequence"] == null ? null : Number(row["last_lesson_sequence"]),
         last_activity_at:
           row["last_activity_at"] == null ? null : (row["last_activity_at"] as Date),
         days_since_activity:
           row["days_since_activity"] == null ? null : Number(row["days_since_activity"]),
-        lessons_per_day:
-          row["lessons_per_day"] == null ? null : Number(row["lessons_per_day"]),
+        lessons_per_day: row["lessons_per_day"] == null ? null : Number(row["lessons_per_day"]),
         joined_at: row["joined_at"] == null ? null : (row["joined_at"] as Date),
       })),
     };
@@ -4020,14 +3999,10 @@ export const batchesRosterRepository = {
         )
       order by last_activity_at asc nulls first
     `;
-    return rows.map((row) => String(row.membership_id));
+    return rows.map((row) => row.membership_id);
   },
 
-  async updateBatchMetadata(
-    tx: TenantTx,
-    batchId: string,
-    metadata: unknown,
-  ): Promise<void> {
+  async updateBatchMetadata(tx: TenantTx, batchId: string, metadata: unknown): Promise<void> {
     await tx.$executeRaw`
       update batches
       set metadata_json = ${JSON.stringify(metadata ?? {})}::jsonb,
@@ -4073,7 +4048,7 @@ export const batchesRosterRepository = {
         group by 1
       ) groups
     `;
-    const totalCount = Number(countRows[0]?.count ?? 0);
+    const totalCount = countRows[0]?.count ?? 0;
 
     const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
       with grouped as (
@@ -4125,13 +4100,11 @@ export const batchesRosterRepository = {
           status = "failed";
         }
         const channelsRaw = row["channels"];
-        const channels = Array.isArray(channelsRaw)
-          ? channelsRaw.map((c) => String(c))
-          : ["email"];
+        const channels = Array.isArray(channelsRaw) ? channelsRaw.map((c) => String(c)) : ["email"];
         return {
-          send_group_id: String(row["send_group_id"]),
-          subject: String(row["subject"] ?? "Message"),
-          audience_label: String(row["audience_label"] ?? "Learners"),
+          send_group_id: asUnknownString(row["send_group_id"]),
+          subject: asUnknownString(row["subject"], "Message"),
+          audience_label: asUnknownString(row["audience_label"], "Learners"),
           recipient_count: Number(row["recipient_count"] ?? 0),
           delivered_count: delivered,
           skipped_count: Number(row["skipped_count"] ?? 0),
@@ -4140,7 +4113,8 @@ export const batchesRosterRepository = {
           status,
           sent_at: sentAt,
           scheduled_at: scheduledAt,
-          sent_by_label: row["sent_by_label"] == null ? null : String(row["sent_by_label"]),
+          sent_by_label:
+            row["sent_by_label"] == null ? null : asUnknownString(row["sent_by_label"]),
           is_automated: Boolean(row["is_automated"]),
         };
       }),
@@ -4210,7 +4184,7 @@ export const batchesRosterRepository = {
          or activity_at < now() - interval '14 days'
       order by content_completion_pct asc
     `;
-    return rows.map((row) => String(row.membership_id));
+    return rows.map((row) => row.membership_id);
   },
 
   async listMissedLastSessionMembershipIds(
@@ -4255,7 +4229,7 @@ export const batchesRosterRepository = {
       )
       order by r.membership_id
     `;
-    return rows.map((row) => String(row.membership_id));
+    return rows.map((row) => row.membership_id);
   },
 
   async listRecentlyMessagedMembershipIds(
@@ -4274,7 +4248,7 @@ export const batchesRosterRepository = {
         and nd.status::text = 'SENT'
         and nd.created_at >= now() - make_interval(days => ${withinDays})
     `;
-    return rows.map((row) => String(row.membership_id));
+    return rows.map((row) => row.membership_id);
   },
 
   async listFailedMembershipIdsForSendGroup(
@@ -4292,6 +4266,6 @@ export const batchesRosterRepository = {
         and nd.status::text = 'FAILED'
         and nd.membership_id is not null
     `;
-    return rows.map((row) => String(row.membership_id));
+    return rows.map((row) => row.membership_id);
   },
 };

@@ -9,9 +9,9 @@ import { enforcePublicRateLimit } from "./rate-limit";
 
 export type { PublicRouteMetadata };
 
-export function createPublicRouteHandler<T>(
+export function createPublicRouteHandler(
   metadata: PublicRouteMetadata,
-  handler: (args: { req: NextRequest; requestId: string }) => Promise<NextResponse<T>>,
+  handler: (args: { req: NextRequest; requestId: string }) => Promise<NextResponse>,
 ) {
   assertPublicRouteMetadata(metadata);
 

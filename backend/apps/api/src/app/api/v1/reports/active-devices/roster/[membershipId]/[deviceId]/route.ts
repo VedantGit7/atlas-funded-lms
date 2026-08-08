@@ -16,5 +16,5 @@ export const GET = createTenantRoute<
   params: activeDevicesSessionParamsSchema,
   output: activeDevicesSessionDetailResponseSchema,
   handler: async ({ tx, ctx, params }) =>
-    getActiveDevicesSessionDetail(tx, ctx, params.membershipId, params.deviceId),
+    getActiveDevicesSessionDetail(tx, ctx, params["membershipId"], params["deviceId"]),
 });

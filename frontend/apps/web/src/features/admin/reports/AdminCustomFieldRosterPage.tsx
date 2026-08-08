@@ -41,6 +41,13 @@ import { downloadReportExport, pollReportRunUntilComplete } from "./admin-report
 import { AdminCustomFieldLearnerDrawer } from "./AdminCustomFieldLearnerDrawer";
 import { CustomFieldReportTabs } from "./CustomFieldReportTabs";
 
+function defined<T>(value: T, message = "Expected value to be defined"): NonNullable<T> {
+  if (value == null) {
+    throw new Error(message);
+  }
+  return value;
+}
+
 const STATUS_OPTIONS: Array<{ value: string; label: string }> = [
   { value: "", label: "Any status" },
   { value: "ACTIVE", label: "Active" },
@@ -160,7 +167,7 @@ function learnerInitials(row: CustomFieldRosterItem): string {
   const source = row.learnerName?.trim() || row.email?.trim() || "?";
   const parts = source.split(/\s+/).filter(Boolean);
   if (parts.length >= 2) {
-    return `${parts[0]![0] ?? ""}${parts[1]![0] ?? ""}`.toUpperCase();
+    return `${defined(parts[0])[0] ?? ""}${defined(parts[1])[0] ?? ""}`.toUpperCase();
   }
   return source.slice(0, 2).toUpperCase();
 }
@@ -170,13 +177,7 @@ function isTruthyBoolean(value: string): boolean {
   return lower === "true" || lower === "yes" || lower === "1";
 }
 
-function CustomFieldCell({
-  value,
-  fieldType,
-}: {
-  value: string | null;
-  fieldType: string;
-}) {
+function CustomFieldCell({ value, fieldType }: { value: string | null; fieldType: string }) {
   if (value == null || value.trim() === "") {
     return <span className="text-[var(--admin-on-surface-variant)]">—</span>;
   }
@@ -223,7 +224,10 @@ function CustomFieldCell({
   }
 
   return (
-    <span className="block max-w-[160px] truncate text-[13px] text-[var(--admin-on-surface)]" title={value}>
+    <span
+      className="block max-w-[160px] truncate text-[13px] text-[var(--admin-on-surface)]"
+      title={value}
+    >
       {value}
     </span>
   );
@@ -325,7 +329,7 @@ function SummaryBand({ summary }: { summary: CustomFieldRosterSummary }) {
             <div
               className="h-full rounded-full bg-[var(--admin-primary)] transition-[width] duration-500"
               style={{
-                width: `${Math.min(100, Math.max(0, summary.averageCoveragePct ?? 0))}%`,
+                width: `${String(Math.min(100, Math.max(0, summary.averageCoveragePct ?? 0)))}%`,
               }}
             />
           </div>
@@ -422,7 +426,9 @@ export function AdminCustomFieldRosterPage() {
       setDebouncedSearch(searchInput.trim());
       setPage(1);
     }, 300);
-    return () => window.clearTimeout(timer);
+    return () => {
+      window.clearTimeout(timer);
+    };
   }, [searchInput]);
 
   const filterPayload = useMemo(() => {
@@ -450,10 +456,7 @@ export function AdminCustomFieldRosterPage() {
   }, [extraFilters, status]);
 
   const visibleCustomKeys = useMemo(
-    () =>
-      columns
-        .filter((column) => column.startsWith("cf:"))
-        .map((column) => column.slice(3)),
+    () => columns.filter((column) => column.startsWith("cf:")).map((column) => column.slice(3)),
     [columns],
   );
 
@@ -490,16 +493,7 @@ export function AdminCustomFieldRosterPage() {
     } finally {
       setLoading(false);
     }
-  }, [
-    debouncedSearch,
-    filterPayload,
-    page,
-    pageSize,
-    signedUpFrom,
-    signedUpTo,
-    sortBy,
-    sortDir,
-  ]);
+  }, [debouncedSearch, filterPayload, page, pageSize, signedUpFrom, signedUpTo, sortBy, sortDir]);
 
   useEffect(() => {
     void load();
@@ -523,15 +517,17 @@ export function AdminCustomFieldRosterPage() {
       setRowMenuId(null);
     }
     window.addEventListener("pointerdown", onPointerDown);
-    return () => window.removeEventListener("pointerdown", onPointerDown);
+    return () => {
+      window.removeEventListener("pointerdown", onPointerDown);
+    };
   }, [rowMenuId]);
 
   const hasActiveFilters = Boolean(
     debouncedSearch ||
-      status ||
-      signedUpFrom ||
-      signedUpTo ||
-      extraFilters.some((filter) => filter.value.trim()),
+    status ||
+    signedUpFrom ||
+    signedUpTo ||
+    extraFilters.some((filter) => filter.value.trim()),
   );
 
   const showingFrom = totalCount === 0 ? 0 : (page - 1) * pageSize + 1;
@@ -776,7 +772,9 @@ export function AdminCustomFieldRosterPage() {
               className={ghostButtonClassName}
               aria-expanded={columnsOpen}
               aria-controls={columnsPanelId}
-              onClick={() => setColumnsOpen((open) => !open)}
+              onClick={() => {
+                setColumnsOpen((open) => !open);
+              }}
             >
               <Columns3 className="h-4 w-4" aria-hidden />
               Columns
@@ -793,7 +791,9 @@ export function AdminCustomFieldRosterPage() {
                       className="h-8 w-full rounded-sm border-transparent bg-[var(--admin-surface-low)] pr-3 pl-8 text-[13px] text-[var(--admin-on-surface)] outline-none placeholder:text-[var(--admin-on-surface-variant)]/70 focus:border-[var(--admin-primary)] focus:bg-[var(--admin-surface)] focus:ring-1 focus:ring-[var(--admin-primary)]"
                       placeholder="Find column..."
                       value={columnSearch}
-                      onChange={(event) => setColumnSearch(event.target.value)}
+                      onChange={(event) => {
+                        setColumnSearch(event.target.value);
+                      }}
                     />
                   </div>
                 </div>
@@ -812,7 +812,9 @@ export function AdminCustomFieldRosterPage() {
                           className="h-3.5 w-3.5 rounded-[3px] border-[var(--admin-outline)] text-[var(--admin-primary)] focus:ring-[var(--admin-primary)]"
                           checked={columns.includes(column.key)}
                           disabled={column.key === "learner_name"}
-                          onChange={() => toggleColumn(column.key)}
+                          onChange={() => {
+                            toggleColumn(column.key);
+                          }}
                         />
                         <span className="flex-1 text-[13px] text-[var(--admin-on-surface)]">
                           {column.label}
@@ -857,7 +859,9 @@ export function AdminCustomFieldRosterPage() {
                               type="checkbox"
                               className="h-3.5 w-3.5 rounded-[3px] border-[var(--admin-outline)] text-[var(--admin-primary)] focus:ring-[var(--admin-primary)]"
                               checked={columns.includes(key)}
-                              onChange={() => toggleColumn(key)}
+                              onChange={() => {
+                                toggleColumn(key);
+                              }}
                             />
                             <span className="rounded-sm bg-[var(--admin-surface-high)] px-1 font-mono text-[10px] text-[var(--admin-on-surface-variant)]">
                               {fieldTypeMarker(definition.fieldType)}
@@ -882,7 +886,9 @@ export function AdminCustomFieldRosterPage() {
                   <button
                     type="button"
                     className={primaryButtonClassName}
-                    onClick={() => setColumnsOpen(false)}
+                    onClick={() => {
+                      setColumnsOpen(false);
+                    }}
                   >
                     Apply
                   </button>
@@ -909,7 +915,9 @@ export function AdminCustomFieldRosterPage() {
           <button
             type="button"
             className={primaryButtonClassName}
-            onClick={() => setActionsOpen((open) => !open)}
+            onClick={() => {
+              setActionsOpen((open) => !open);
+            }}
           >
             Cohort actions
           </button>
@@ -937,20 +945,25 @@ export function AdminCustomFieldRosterPage() {
               <strong className="font-medium text-[var(--admin-on-surface)]">
                 {selectedIds.size > 0 ? formatCount(selectedIds.size) : formatCount(totalCount)}
               </strong>{" "}
-              learner{selectedIds.size === 1 || (selectedIds.size === 0 && totalCount === 1) ? "" : "s"}
+              learner
+              {selectedIds.size === 1 || (selectedIds.size === 0 && totalCount === 1) ? "" : "s"}
               {selectedIds.size > 0 ? " (selection)" : " matching filters"}.
             </p>
             <input
               className={filterInputClassName}
               placeholder="Subject"
               value={messageSubject}
-              onChange={(event) => setMessageSubject(event.target.value)}
+              onChange={(event) => {
+                setMessageSubject(event.target.value);
+              }}
             />
             <textarea
               className={`${filterInputClassName} min-h-[80px] py-2`}
               placeholder="Message"
               value={messageBody}
-              onChange={(event) => setMessageBody(event.target.value)}
+              onChange={(event) => {
+                setMessageBody(event.target.value);
+              }}
             />
             <button
               type="button"
@@ -974,7 +987,9 @@ export function AdminCustomFieldRosterPage() {
               className={filterInputClassName}
               placeholder="Group title"
               value={groupTitle}
-              onChange={(event) => setGroupTitle(event.target.value)}
+              onChange={(event) => {
+                setGroupTitle(event.target.value);
+              }}
             />
             <button
               type="button"
@@ -997,7 +1012,10 @@ export function AdminCustomFieldRosterPage() {
           </div>
           <div className="relative flex flex-1 flex-col items-center justify-center p-12">
             <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-full border border-[var(--admin-border)] bg-[var(--admin-surface-low)] shadow-sm">
-              <FileText className="h-8 w-8 text-[var(--admin-on-surface-variant)]" strokeWidth={1.5} />
+              <FileText
+                className="h-8 w-8 text-[var(--admin-on-surface-variant)]"
+                strokeWidth={1.5}
+              />
             </div>
             <h2 className="mb-2 text-center text-lg font-semibold text-[var(--admin-on-surface)]">
               No custom fields are defined yet
@@ -1036,7 +1054,9 @@ export function AdminCustomFieldRosterPage() {
                     className={`${filterInputClassName} pl-9`}
                     placeholder="Name or email"
                     value={searchInput}
-                    onChange={(event) => setSearchInput(event.target.value)}
+                    onChange={(event) => {
+                      setSearchInput(event.target.value);
+                    }}
                   />
                 </div>
               </div>
@@ -1091,12 +1111,12 @@ export function AdminCustomFieldRosterPage() {
                 <button
                   type="button"
                   className="inline-flex h-9 items-center gap-1 rounded-sm border border-dashed border-[var(--admin-outline)] px-3 text-[13px] text-[var(--admin-on-surface-variant)] transition-colors hover:border-[var(--admin-primary)] hover:bg-[color-mix(in_srgb,var(--admin-primary)_5%,transparent)] hover:text-[var(--admin-primary)]"
-                  onClick={() =>
+                  onClick={() => {
                     setExtraFilters((current) => [
                       ...current,
-                      { id: `${Date.now()}`, field: "email", value: "" },
-                    ])
-                  }
+                      { id: String(Date.now()), field: "email", value: "" },
+                    ]);
+                  }}
                 >
                   <Plus className="h-4 w-4" aria-hidden />
                   Add field condition
@@ -1113,7 +1133,7 @@ export function AdminCustomFieldRosterPage() {
                       <select
                         className={filterInputClassName}
                         value={filter.field}
-                        onChange={(event) =>
+                        onChange={(event) => {
                           setExtraFilters((current) =>
                             current.map((item) =>
                               item.id === filter.id
@@ -1124,8 +1144,8 @@ export function AdminCustomFieldRosterPage() {
                                   }
                                 : item,
                             ),
-                          )
-                        }
+                          );
+                        }}
                       >
                         <option value="email">Email</option>
                         <option value="status">Status</option>
@@ -1145,25 +1165,23 @@ export function AdminCustomFieldRosterPage() {
                               ? "Amount (e.g. 1000)"
                               : "Filter value"
                         }
-                        onChange={(event) =>
+                        onChange={(event) => {
                           setExtraFilters((current) =>
                             current.map((item) =>
-                              item.id === filter.id
-                                ? { ...item, value: event.target.value }
-                                : item,
+                              item.id === filter.id ? { ...item, value: event.target.value } : item,
                             ),
-                          )
-                        }
+                          );
+                        }}
                       />
                     </div>
                     <button
                       type="button"
                       className={ghostButtonClassName}
-                      onClick={() =>
+                      onClick={() => {
                         setExtraFilters((current) =>
                           current.filter((item) => item.id !== filter.id),
-                        )
-                      }
+                        );
+                      }}
                     >
                       Remove
                     </button>
@@ -1183,7 +1201,9 @@ export function AdminCustomFieldRosterPage() {
               {debouncedSearch ? (
                 <span className="inline-flex items-center gap-1 rounded-sm border border-[var(--admin-outline)] bg-[var(--admin-surface-high)] px-2 py-1 text-[12px]">
                   <span className="text-[var(--admin-on-surface-variant)]">Search:</span>
-                  <span className="font-medium text-[var(--admin-on-surface)]">{debouncedSearch}</span>
+                  <span className="font-medium text-[var(--admin-on-surface)]">
+                    {debouncedSearch}
+                  </span>
                   <button
                     type="button"
                     className="text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-danger)]"
@@ -1204,7 +1224,9 @@ export function AdminCustomFieldRosterPage() {
                   <button
                     type="button"
                     className="text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-danger)]"
-                    onClick={() => setStatus("")}
+                    onClick={() => {
+                      setStatus("");
+                    }}
                     aria-label="Clear status"
                   >
                     <X className="h-3.5 w-3.5" />
@@ -1251,14 +1273,18 @@ export function AdminCustomFieldRosterPage() {
                 <button
                   type="button"
                   className="text-[13px] text-[var(--admin-primary)] hover:underline"
-                  onClick={() => setActionsOpen(true)}
+                  onClick={() => {
+                    setActionsOpen(true);
+                  }}
                 >
                   Cohort actions
                 </button>
                 <button
                   type="button"
                   className="text-[13px] text-[var(--admin-primary)] hover:underline"
-                  onClick={() => setSelectedIds(new Set())}
+                  onClick={() => {
+                    setSelectedIds(new Set());
+                  }}
                 >
                   Clear selection
                 </button>
@@ -1290,8 +1316,8 @@ export function AdminCustomFieldRosterPage() {
                   No learners match these filters
                 </h3>
                 <p className="mb-8 max-w-sm text-sm text-[var(--admin-on-surface-variant)]">
-                  Adjust or clear your current filter selections to view learners against your custom
-                  fields.
+                  Adjust or clear your current filter selections to view learners against your
+                  custom fields.
                 </p>
                 <button type="button" className={primaryButtonClassName} onClick={clearFilters}>
                   Clear filters
@@ -1317,7 +1343,9 @@ export function AdminCustomFieldRosterPage() {
                           <button
                             type="button"
                             className="inline-flex items-center gap-1"
-                            onClick={() => toggleSort("learner_name")}
+                            onClick={() => {
+                              toggleSort("learner_name");
+                            }}
                           >
                             Learner
                             {sortBy === "learner_name" ? (
@@ -1345,7 +1373,9 @@ export function AdminCustomFieldRosterPage() {
                           <button
                             type="button"
                             className="inline-flex w-full items-center justify-end gap-1"
-                            onClick={() => toggleSort("total_spent_cents")}
+                            onClick={() => {
+                              toggleSort("total_spent_cents");
+                            }}
                           >
                             Total spent
                             {sortBy === "total_spent_cents" ? (
@@ -1361,7 +1391,9 @@ export function AdminCustomFieldRosterPage() {
                           <button
                             type="button"
                             className="inline-flex w-full items-center justify-end gap-1"
-                            onClick={() => toggleSort("last_active_at")}
+                            onClick={() => {
+                              toggleSort("last_active_at");
+                            }}
                           >
                             Last active on
                             {sortBy === "last_active_at" ? (
@@ -1384,7 +1416,9 @@ export function AdminCustomFieldRosterPage() {
                           <button
                             type="button"
                             className="inline-flex w-full items-center justify-end gap-1"
-                            onClick={() => toggleSort("signed_up_at")}
+                            onClick={() => {
+                              toggleSort("signed_up_at");
+                            }}
                           >
                             Signed up on
                             {sortBy === "signed_up_at" ? (
@@ -1405,7 +1439,9 @@ export function AdminCustomFieldRosterPage() {
                             key={key}
                             className={[
                               "whitespace-nowrap px-4 py-3 font-mono text-[12px] font-semibold tracking-[0.06em] text-[var(--admin-on-surface-variant)] uppercase",
-                              index === 0 ? "border-l border-[color-mix(in_srgb,var(--admin-border)_50%,transparent)]" : "",
+                              index === 0
+                                ? "border-l border-[color-mix(in_srgb,var(--admin-border)_50%,transparent)]"
+                                : "",
                             ].join(" ")}
                           >
                             <div className="flex flex-col items-start gap-0.5 normal-case tracking-normal">
@@ -1454,7 +1490,9 @@ export function AdminCustomFieldRosterPage() {
                               type="checkbox"
                               className="h-3.5 w-3.5 cursor-pointer rounded-[3px] border-[var(--admin-outline)] text-[var(--admin-primary)] focus:ring-[var(--admin-primary)]"
                               checked={selected}
-                              onChange={() => toggleRowSelection(row.membershipId)}
+                              onChange={() => {
+                                toggleRowSelection(row.membershipId);
+                              }}
                               aria-label={`Select ${row.email ?? row.learnerName ?? "learner"}`}
                             />
                           </td>
@@ -1470,7 +1508,9 @@ export function AdminCustomFieldRosterPage() {
                               <button
                                 type="button"
                                 className="flex w-full items-center gap-3 text-left"
-                                onClick={() => setSelectedMembershipId(row.membershipId)}
+                                onClick={() => {
+                                  setSelectedMembershipId(row.membershipId);
+                                }}
                               >
                                 <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--admin-surface-high)] font-mono text-[10px] font-semibold text-[var(--admin-on-surface-variant)]">
                                   {learnerInitials(row)}
@@ -1494,7 +1534,9 @@ export function AdminCustomFieldRosterPage() {
                                 <button
                                   type="button"
                                   className="truncate text-left hover:text-[var(--admin-primary)] hover:underline"
-                                  onClick={() => setSelectedMembershipId(row.membershipId)}
+                                  onClick={() => {
+                                    setSelectedMembershipId(row.membershipId);
+                                  }}
                                 >
                                   {row.email}
                                 </button>
@@ -1565,7 +1607,9 @@ export function AdminCustomFieldRosterPage() {
                               className="flex h-8 w-8 items-center justify-center rounded-sm text-[var(--admin-on-surface-variant)] transition-colors hover:bg-[var(--admin-surface-low)] hover:text-[var(--admin-on-surface)]"
                               aria-label={`Actions for ${row.learnerName ?? row.email ?? "learner"}`}
                               aria-expanded={rowMenuId === row.membershipId}
-                              onPointerDown={(event) => event.stopPropagation()}
+                              onPointerDown={(event) => {
+                                event.stopPropagation();
+                              }}
                               onClick={(event) => {
                                 event.stopPropagation();
                                 setRowMenuId((current) =>
@@ -1578,7 +1622,9 @@ export function AdminCustomFieldRosterPage() {
                             {rowMenuId === row.membershipId ? (
                               <div
                                 className="absolute right-2 z-30 mt-1 w-48 overflow-hidden rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface)] shadow-[0_8px_24px_-8px_color-mix(in_srgb,var(--admin-on-surface)_16%,transparent)]"
-                                onPointerDown={(event) => event.stopPropagation()}
+                                onPointerDown={(event) => {
+                                  event.stopPropagation();
+                                }}
                               >
                                 <button
                                   type="button"
@@ -1593,7 +1639,9 @@ export function AdminCustomFieldRosterPage() {
                                 <Link
                                   href={`/admin/reports/custom-field/learners/${row.membershipId}`}
                                   className="flex w-full items-center gap-2 px-3 py-2 text-left text-[13px] text-[var(--admin-on-surface)] hover:bg-[var(--admin-surface-low)]"
-                                  onClick={() => setRowMenuId(null)}
+                                  onClick={() => {
+                                    setRowMenuId(null);
+                                  }}
                                 >
                                   <ExternalLink className="h-3.5 w-3.5" aria-hidden />
                                   Open full page
@@ -1601,7 +1649,9 @@ export function AdminCustomFieldRosterPage() {
                                 <Link
                                   href={`/admin/members/${row.membershipId}`}
                                   className="flex w-full items-center gap-2 px-3 py-2 text-left text-[13px] text-[var(--admin-on-surface)] hover:bg-[var(--admin-surface-low)]"
-                                  onClick={() => setRowMenuId(null)}
+                                  onClick={() => {
+                                    setRowMenuId(null);
+                                  }}
                                 >
                                   Open member profile
                                 </Link>
@@ -1637,7 +1687,9 @@ export function AdminCustomFieldRosterPage() {
                 type="button"
                 className="flex h-8 w-8 items-center justify-center rounded-sm text-[var(--admin-on-surface-variant)] transition-colors hover:bg-[var(--admin-surface-low)] disabled:opacity-50"
                 disabled={page <= 1 || loading}
-                onClick={() => setPage((current) => Math.max(1, current - 1))}
+                onClick={() => {
+                  setPage((current) => Math.max(1, current - 1));
+                }}
                 aria-label="Previous page"
               >
                 <ChevronLeft className="h-5 w-5" />
@@ -1646,7 +1698,9 @@ export function AdminCustomFieldRosterPage() {
                 type="button"
                 className="flex h-8 w-8 items-center justify-center rounded-sm text-[var(--admin-on-surface)] transition-colors hover:bg-[var(--admin-surface-low)] disabled:opacity-50"
                 disabled={page >= totalPages || loading || totalPages === 0}
-                onClick={() => setPage((current) => current + 1)}
+                onClick={() => {
+                  setPage((current) => current + 1);
+                }}
                 aria-label="Next page"
               >
                 <ChevronRight className="h-5 w-5" />
@@ -1662,7 +1716,9 @@ export function AdminCustomFieldRosterPage() {
 
       <AdminCustomFieldLearnerDrawer
         membershipId={selectedMembershipId}
-        onClose={() => setSelectedMembershipId(null)}
+        onClose={() => {
+          setSelectedMembershipId(null);
+        }}
       />
     </div>
   );

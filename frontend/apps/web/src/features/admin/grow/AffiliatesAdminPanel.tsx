@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ReactNode,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import {
   Banknote,
@@ -80,7 +73,9 @@ function ToggleSwitch(props: {
       aria-checked={props.checked}
       aria-label={props.ariaLabel}
       disabled={props.disabled}
-      onClick={() => props.onChange(!props.checked)}
+      onClick={() => {
+        props.onChange(!props.checked);
+      }}
       className={[
         "relative h-6 w-11 shrink-0 rounded-full transition-colors duration-200 disabled:opacity-50",
         props.checked ? "bg-[var(--admin-primary)]" : "bg-[var(--admin-outline)]",
@@ -134,7 +129,10 @@ type ProductRowDraft = {
   premiumCommissionPct: string;
 };
 
-function productToDraft(product: AffiliateProduct | null, enabledDefault: boolean): ProductRowDraft {
+function productToDraft(
+  product: AffiliateProduct | null,
+  enabledDefault: boolean,
+): ProductRowDraft {
   return {
     enabled: product?.enabled ?? enabledDefault,
     standardDiscountPct: pctInputValue(product?.standardDiscountPct),
@@ -180,9 +178,7 @@ function MemberSearchField(props: {
             profile: { displayName: string | null } | null;
           }>;
         };
-      }>(
-        `/api/v1/members?search=${encodeURIComponent(term.trim())}&limit=10&status=ACTIVE`,
-      );
+      }>(`/api/v1/members?search=${encodeURIComponent(term.trim())}&limit=10&status=ACTIVE`);
       setResults(
         response.data.items.map((member) => ({
           id: member.id,
@@ -305,8 +301,12 @@ export function AffiliatesAdminPanel() {
   const [recordingPayout, setRecordingPayout] = useState(false);
 
   useEffect(() => {
-    const timer = window.setTimeout(() => setDebouncedPartnerQuery(partnerQuery.trim()), 250);
-    return () => window.clearTimeout(timer);
+    const timer = window.setTimeout(() => {
+      setDebouncedPartnerQuery(partnerQuery.trim());
+    }, 250);
+    return () => {
+      window.clearTimeout(timer);
+    };
   }, [partnerQuery]);
 
   useEffect(() => {
@@ -448,7 +448,7 @@ export function AffiliatesAdminPanel() {
         await loadPartners();
       } else if (tab === "requests") {
         await loadRequests();
-      } else if (tab === "payouts") {
+      } else {
         await Promise.all([loadPayouts(), loadPartners()]);
       }
     } catch (caught) {
@@ -456,7 +456,16 @@ export function AffiliatesAdminPanel() {
     } finally {
       setLoading(false);
     }
-  }, [tab, loadConfig, loadCourses, loadPartners, loadPayouts, loadProducts, loadRequests, loadSummary]);
+  }, [
+    tab,
+    loadConfig,
+    loadCourses,
+    loadPartners,
+    loadPayouts,
+    loadProducts,
+    loadRequests,
+    loadSummary,
+  ]);
 
   useEffect(() => {
     void loadTab();
@@ -699,9 +708,7 @@ export function AffiliatesAdminPanel() {
         "affiliate-partner-update",
         { successMessage: "Partner updated." },
       );
-      setPartners((prev) =>
-        prev.map((row) => (row.id === response.data.id ? response.data : row)),
-      );
+      setPartners((prev) => prev.map((row) => (row.id === response.data.id ? response.data : row)));
       void loadSummary();
     } catch (caught) {
       toast.error(caught instanceof ClientApiError ? caught.message : "Could not update partner.");
@@ -837,7 +844,9 @@ export function AffiliatesAdminPanel() {
               type="button"
               role="tab"
               aria-selected={active}
-              onClick={() => setTab(entry.id)}
+              onClick={() => {
+                setTab(entry.id);
+              }}
               className={[
                 "relative -mb-px flex items-center gap-2 px-4 pb-3 pt-1 text-sm font-semibold transition-colors",
                 active
@@ -883,7 +892,9 @@ export function AffiliatesAdminPanel() {
                   <ToggleSwitch
                     checked={draft.enabled}
                     ariaLabel="Enable affiliate program"
-                    onChange={(next) => setDraft({ ...draft, enabled: next })}
+                    onChange={(next) => {
+                      setDraft({ ...draft, enabled: next });
+                    }}
                   />
                 </div>
 
@@ -894,7 +905,9 @@ export function AffiliatesAdminPanel() {
                       type="radio"
                       name="accessMode"
                       checked={draft.accessMode === "PUBLIC"}
-                      onChange={() => setDraft({ ...draft, accessMode: "PUBLIC" })}
+                      onChange={() => {
+                        setDraft({ ...draft, accessMode: "PUBLIC" });
+                      }}
                       className="mt-1"
                     />
                     <span>
@@ -911,7 +924,9 @@ export function AffiliatesAdminPanel() {
                       type="radio"
                       name="accessMode"
                       checked={draft.accessMode === "PRIVATE"}
-                      onChange={() => setDraft({ ...draft, accessMode: "PRIVATE" })}
+                      onChange={() => {
+                        setDraft({ ...draft, accessMode: "PRIVATE" });
+                      }}
                       className="mt-1"
                     />
                     <span>
@@ -937,7 +952,9 @@ export function AffiliatesAdminPanel() {
                   <ToggleSwitch
                     checked={draft.askAdmin}
                     ariaLabel="Require admin approval"
-                    onChange={(next) => setDraft({ ...draft, askAdmin: next })}
+                    onChange={(next) => {
+                      setDraft({ ...draft, askAdmin: next });
+                    }}
                   />
                 </div>
               </section>
@@ -945,9 +962,9 @@ export function AffiliatesAdminPanel() {
               <div className="flex gap-3 rounded-xl border border-[color-mix(in_srgb,var(--admin-primary)_20%,var(--admin-border))] bg-[color-mix(in_srgb,var(--admin-primary)_6%,var(--admin-surface))] p-4">
                 <Lightbulb className="mt-0.5 h-5 w-5 shrink-0 text-[var(--admin-primary)]" />
                 <p className="text-sm text-[var(--admin-on-surface-variant)]">
-                  Private access with admin approval tends to produce higher-quality partners because
-                  you control who promotes your courses. There is no guaranteed conversion lift; it
-                  is a workflow choice.
+                  Private access with admin approval tends to produce higher-quality partners
+                  because you control who promotes your courses. There is no guaranteed conversion
+                  lift; it is a workflow choice.
                 </p>
               </div>
             </div>
@@ -970,15 +987,15 @@ export function AffiliatesAdminPanel() {
                           min={0}
                           max={100}
                           value={draft.standardDiscountPct}
-                          onChange={(event) =>
+                          onChange={(event) => {
                             setDraft({
                               ...draft,
                               standardDiscountPct: Math.max(
                                 0,
                                 Math.min(100, Number(event.target.value) || 0),
                               ),
-                            })
-                          }
+                            });
+                          }}
                           className={`${MESSENGER_WIZARD_FIELD_CLASS} h-11`}
                         />
                       </div>
@@ -989,15 +1006,15 @@ export function AffiliatesAdminPanel() {
                           min={0}
                           max={100}
                           value={draft.standardCommissionPct}
-                          onChange={(event) =>
+                          onChange={(event) => {
                             setDraft({
                               ...draft,
                               standardCommissionPct: Math.max(
                                 0,
                                 Math.min(100, Number(event.target.value) || 0),
                               ),
-                            })
-                          }
+                            });
+                          }}
                           className={`${MESSENGER_WIZARD_FIELD_CLASS} h-11`}
                         />
                       </div>
@@ -1016,15 +1033,15 @@ export function AffiliatesAdminPanel() {
                           min={0}
                           max={100}
                           value={draft.premiumDiscountPct}
-                          onChange={(event) =>
+                          onChange={(event) => {
                             setDraft({
                               ...draft,
                               premiumDiscountPct: Math.max(
                                 0,
                                 Math.min(100, Number(event.target.value) || 0),
                               ),
-                            })
-                          }
+                            });
+                          }}
                           className={`${MESSENGER_WIZARD_FIELD_CLASS} h-11`}
                         />
                       </div>
@@ -1035,15 +1052,15 @@ export function AffiliatesAdminPanel() {
                           min={0}
                           max={100}
                           value={draft.premiumCommissionPct}
-                          onChange={(event) =>
+                          onChange={(event) => {
                             setDraft({
                               ...draft,
                               premiumCommissionPct: Math.max(
                                 0,
                                 Math.min(100, Number(event.target.value) || 0),
                               ),
-                            })
-                          }
+                            });
+                          }}
                           className={`${MESSENGER_WIZARD_FIELD_CLASS} h-11`}
                         />
                       </div>
@@ -1060,9 +1077,9 @@ export function AffiliatesAdminPanel() {
                   </h2>
                 </div>
                 <p className="text-sm text-[var(--admin-on-surface-variant)]">
-                  Commissions accrue when referred learners purchase. Payouts are recorded manually on
-                  the Payouts tab after you send funds outside Atlas. Partners set their own banking
-                  details in their profile.
+                  Commissions accrue when referred learners purchase. Payouts are recorded manually
+                  on the Payouts tab after you send funds outside Atlas. Partners set their own
+                  banking details in their profile.
                 </p>
               </section>
             </div>
@@ -1119,7 +1136,7 @@ export function AffiliatesAdminPanel() {
                 value={formatMoney(summary.unpaidCents, DEFAULT_CURRENCY)}
                 hint={
                   summary.partnersWithUnpaid > 0
-                    ? `${summary.partnersWithUnpaid} partner${summary.partnersWithUnpaid === 1 ? "" : "s"} with balance`
+                    ? `${String(summary.partnersWithUnpaid)} partner${summary.partnersWithUnpaid === 1 ? "" : "s"} with balance`
                     : "All caught up"
                 }
               />
@@ -1174,8 +1191,8 @@ export function AffiliatesAdminPanel() {
           <div className="flex gap-3 rounded-xl border border-[color-mix(in_srgb,var(--admin-primary)_20%,var(--admin-border))] bg-[color-mix(in_srgb,var(--admin-primary)_6%,var(--admin-surface))] p-4">
             <Info className="mt-0.5 h-5 w-5 shrink-0 text-[var(--admin-primary)]" />
             <p className="text-sm text-[var(--admin-on-surface-variant)]">
-              Leave override fields blank to use global tier defaults from Settings. Product overrides
-              apply only to that course.
+              Leave override fields blank to use global tier defaults from Settings. Product
+              overrides apply only to that course.
             </p>
           </div>
 
@@ -1208,7 +1225,7 @@ export function AffiliatesAdminPanel() {
                 <tbody>
                   {loading ? (
                     Array.from({ length: 3 }).map((_, index) => (
-                      <tr key={`sk-${index}`}>
+                      <tr key={`sk-${String(index)}`}>
                         <td colSpan={5} className="px-6 py-4">
                           <div className="h-10 animate-pulse rounded-lg bg-[var(--admin-surface-high)]" />
                         </td>
@@ -1216,7 +1233,10 @@ export function AffiliatesAdminPanel() {
                     ))
                   ) : mergedProducts.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="px-6 py-16 text-center text-[var(--admin-on-surface-variant)]">
+                      <td
+                        colSpan={5}
+                        className="px-6 py-16 text-center text-[var(--admin-on-surface-variant)]"
+                      >
                         No courses found. Publish courses in Studio first.
                       </td>
                     </tr>
@@ -1244,7 +1264,9 @@ export function AffiliatesAdminPanel() {
                             <ToggleSwitch
                               checked={rowDraft.enabled}
                               ariaLabel={`Enable ${courseTitle} for affiliates`}
-                              onChange={(next) => updateProductDraft(courseId, { enabled: next })}
+                              onChange={(next) => {
+                                updateProductDraft(courseId, { enabled: next });
+                              }}
                             />
                           </td>
                           <td className="px-4 py-4">
@@ -1253,11 +1275,11 @@ export function AffiliatesAdminPanel() {
                                 disabled={disabledInputs}
                                 value={rowDraft.standardDiscountPct}
                                 placeholder={String(savedConfig.standardDiscountPct)}
-                                onChange={(event) =>
+                                onChange={(event) => {
                                   updateProductDraft(courseId, {
                                     standardDiscountPct: event.target.value,
-                                  })
-                                }
+                                  });
+                                }}
                                 className={`${MESSENGER_WIZARD_FIELD_CLASS} h-9 text-xs disabled:opacity-50`}
                                 aria-label={`Standard discount override for ${courseTitle}`}
                               />
@@ -1265,11 +1287,11 @@ export function AffiliatesAdminPanel() {
                                 disabled={disabledInputs}
                                 value={rowDraft.standardCommissionPct}
                                 placeholder={String(savedConfig.standardCommissionPct)}
-                                onChange={(event) =>
+                                onChange={(event) => {
                                   updateProductDraft(courseId, {
                                     standardCommissionPct: event.target.value,
-                                  })
-                                }
+                                  });
+                                }}
                                 className={`${MESSENGER_WIZARD_FIELD_CLASS} h-9 text-xs disabled:opacity-50`}
                                 aria-label={`Standard commission override for ${courseTitle}`}
                               />
@@ -1292,11 +1314,11 @@ export function AffiliatesAdminPanel() {
                                 disabled={disabledInputs}
                                 value={rowDraft.premiumDiscountPct}
                                 placeholder={String(savedConfig.premiumDiscountPct)}
-                                onChange={(event) =>
+                                onChange={(event) => {
                                   updateProductDraft(courseId, {
                                     premiumDiscountPct: event.target.value,
-                                  })
-                                }
+                                  });
+                                }}
                                 className={`${MESSENGER_WIZARD_FIELD_CLASS} h-9 text-xs disabled:opacity-50`}
                                 aria-label={`Premium discount override for ${courseTitle}`}
                               />
@@ -1304,11 +1326,11 @@ export function AffiliatesAdminPanel() {
                                 disabled={disabledInputs}
                                 value={rowDraft.premiumCommissionPct}
                                 placeholder={String(savedConfig.premiumCommissionPct)}
-                                onChange={(event) =>
+                                onChange={(event) => {
                                   updateProductDraft(courseId, {
                                     premiumCommissionPct: event.target.value,
-                                  })
-                                }
+                                  });
+                                }}
                                 className={`${MESSENGER_WIZARD_FIELD_CLASS} h-9 text-xs disabled:opacity-50`}
                                 aria-label={`Premium commission override for ${courseTitle}`}
                               />
@@ -1355,7 +1377,9 @@ export function AffiliatesAdminPanel() {
             >
               <div className="mb-4 flex items-center gap-2">
                 <UserPlus className="h-5 w-5 text-[var(--admin-primary)]" />
-                <h2 className="text-lg font-semibold text-[var(--admin-on-surface)]">Add partner</h2>
+                <h2 className="text-lg font-semibold text-[var(--admin-on-surface)]">
+                  Add partner
+                </h2>
               </div>
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <MemberSearchField
@@ -1372,16 +1396,18 @@ export function AffiliatesAdminPanel() {
                     ariaLabel="Partner tier"
                     value={createTier}
                     options={[...TIER_OPTIONS]}
-                    onChange={(value) => setCreateTier(value as AffiliatePartner["tier"])}
+                    onChange={(value) => {
+                      setCreateTier(value as AffiliatePartner["tier"]);
+                    }}
                   />
                 </div>
                 <div className="md:col-span-2">
-                  <label className={MESSENGER_WIZARD_LABEL_CLASS}>
-                    Coupon code (optional)
-                  </label>
+                  <label className={MESSENGER_WIZARD_LABEL_CLASS}>Coupon code (optional)</label>
                   <input
                     value={createCoupon}
-                    onChange={(event) => setCreateCoupon(event.target.value.toUpperCase())}
+                    onChange={(event) => {
+                      setCreateCoupon(event.target.value.toUpperCase());
+                    }}
                     maxLength={64}
                     placeholder="Auto-generated if blank"
                     className={`${MESSENGER_WIZARD_FIELD_CLASS} h-11 font-mono`}
@@ -1409,7 +1435,9 @@ export function AffiliatesAdminPanel() {
                   <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--admin-on-surface-variant)]" />
                   <input
                     value={partnerQuery}
-                    onChange={(event) => setPartnerQuery(event.target.value)}
+                    onChange={(event) => {
+                      setPartnerQuery(event.target.value);
+                    }}
                     placeholder="Search name, email, code…"
                     className={`${MESSENGER_WIZARD_FIELD_CLASS} h-10 pl-9 text-[12px]`}
                   />
@@ -1449,7 +1477,9 @@ export function AffiliatesAdminPanel() {
                         return (
                           <tr
                             key={partner.id}
-                            onClick={() => setSelectedPartnerId(partner.id)}
+                            onClick={() => {
+                              setSelectedPartnerId(partner.id);
+                            }}
                             className={[
                               "cursor-pointer transition-colors",
                               active
@@ -1517,7 +1547,9 @@ export function AffiliatesAdminPanel() {
                     </div>
                     <button
                       type="button"
-                      onClick={() => setSelectedPartnerId(null)}
+                      onClick={() => {
+                        setSelectedPartnerId(null);
+                      }}
                       className="rounded-lg p-2 text-[var(--admin-on-surface-variant)] hover:bg-[var(--admin-surface-high)]"
                       aria-label="Close partner detail"
                     >
@@ -1557,12 +1589,12 @@ export function AffiliatesAdminPanel() {
                       <ToggleSwitch
                         checked={partnerDraft.status === "ACTIVE"}
                         ariaLabel="Enable commissions for partner"
-                        onChange={(next) =>
+                        onChange={(next) => {
                           setPartnerDraft({
                             ...partnerDraft,
                             status: next ? "ACTIVE" : "INACTIVE",
-                          })
-                        }
+                          });
+                        }}
                       />
                     </div>
 
@@ -1572,24 +1604,24 @@ export function AffiliatesAdminPanel() {
                       ariaLabel="Partner tier"
                       value={partnerDraft.tier}
                       options={[...TIER_OPTIONS]}
-                      onChange={(value) =>
+                      onChange={(value) => {
                         setPartnerDraft({
                           ...partnerDraft,
                           tier: value as AffiliatePartner["tier"],
-                        })
-                      }
+                        });
+                      }}
                     />
 
                     <div>
                       <label className={MESSENGER_WIZARD_LABEL_CLASS}>Coupon code</label>
                       <input
                         value={partnerDraft.couponCode}
-                        onChange={(event) =>
+                        onChange={(event) => {
                           setPartnerDraft({
                             ...partnerDraft,
                             couponCode: event.target.value.toUpperCase(),
-                          })
-                        }
+                          });
+                        }}
                         maxLength={64}
                         className={`${MESSENGER_WIZARD_FIELD_CLASS} h-11 font-mono`}
                       />
@@ -1612,12 +1644,12 @@ export function AffiliatesAdminPanel() {
                         <label className={MESSENGER_WIZARD_LABEL_CLASS}>Account name</label>
                         <input
                           value={partnerDraft.payoutAccountName}
-                          onChange={(event) =>
+                          onChange={(event) => {
                             setPartnerDraft({
                               ...partnerDraft,
                               payoutAccountName: event.target.value,
-                            })
-                          }
+                            });
+                          }}
                           className={`${MESSENGER_WIZARD_FIELD_CLASS} h-10`}
                         />
                       </div>
@@ -1625,12 +1657,12 @@ export function AffiliatesAdminPanel() {
                         <label className={MESSENGER_WIZARD_LABEL_CLASS}>Bank account</label>
                         <input
                           value={partnerDraft.payoutBankAccount}
-                          onChange={(event) =>
+                          onChange={(event) => {
                             setPartnerDraft({
                               ...partnerDraft,
                               payoutBankAccount: event.target.value,
-                            })
-                          }
+                            });
+                          }}
                           className={`${MESSENGER_WIZARD_FIELD_CLASS} h-10 font-mono`}
                           placeholder={
                             selectedPartner.payoutBankAccount
@@ -1644,12 +1676,12 @@ export function AffiliatesAdminPanel() {
                           <label className={MESSENGER_WIZARD_LABEL_CLASS}>IFSC / routing</label>
                           <input
                             value={partnerDraft.payoutIfsc}
-                            onChange={(event) =>
+                            onChange={(event) => {
                               setPartnerDraft({
                                 ...partnerDraft,
                                 payoutIfsc: event.target.value,
-                              })
-                            }
+                              });
+                            }}
                             className={`${MESSENGER_WIZARD_FIELD_CLASS} h-10 font-mono`}
                           />
                         </div>
@@ -1657,12 +1689,12 @@ export function AffiliatesAdminPanel() {
                           <label className={MESSENGER_WIZARD_LABEL_CLASS}>UPI ID</label>
                           <input
                             value={partnerDraft.payoutUpi}
-                            onChange={(event) =>
+                            onChange={(event) => {
                               setPartnerDraft({
                                 ...partnerDraft,
                                 payoutUpi: event.target.value,
-                              })
-                            }
+                              });
+                            }}
                             className={`${MESSENGER_WIZARD_FIELD_CLASS} h-10 font-mono`}
                           />
                         </div>
@@ -1823,16 +1855,16 @@ export function AffiliatesAdminPanel() {
                           {formatAffiliateDateTime(request.createdAt)}
                         </td>
                         <td className="max-w-xs px-4 py-4 text-[var(--admin-on-surface-variant)]">
-                          {request.note?.trim() || (
-                            <span className="italic">No note provided</span>
-                          )}
+                          {request.note?.trim() || <span className="italic">No note provided</span>}
                         </td>
                         <td className="px-6 py-4">
                           {rejectDraftId === request.id ? (
                             <div className="space-y-2">
                               <textarea
                                 value={rejectNote}
-                                onChange={(event) => setRejectNote(event.target.value)}
+                                onChange={(event) => {
+                                  setRejectNote(event.target.value);
+                                }}
                                 placeholder="Optional note to the applicant…"
                                 maxLength={500}
                                 rows={2}
@@ -1939,7 +1971,9 @@ export function AffiliatesAdminPanel() {
                 <label className={MESSENGER_WIZARD_LABEL_CLASS}>Note (optional)</label>
                 <input
                   value={payoutNote}
-                  onChange={(event) => setPayoutNote(event.target.value)}
+                  onChange={(event) => {
+                    setPayoutNote(event.target.value);
+                  }}
                   maxLength={500}
                   placeholder="Transfer reference or internal note"
                   className={`${MESSENGER_WIZARD_FIELD_CLASS} h-11`}
@@ -1959,7 +1993,9 @@ export function AffiliatesAdminPanel() {
 
           <section className="overflow-hidden rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)] shadow-sm">
             <div className="border-b border-[var(--admin-border)] p-6">
-              <h2 className="text-lg font-semibold text-[var(--admin-on-surface)]">Payout ledger</h2>
+              <h2 className="text-lg font-semibold text-[var(--admin-on-surface)]">
+                Payout ledger
+              </h2>
             </div>
             {loading ? (
               <div className="p-8">

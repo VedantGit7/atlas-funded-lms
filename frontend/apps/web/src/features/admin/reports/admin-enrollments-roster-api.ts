@@ -12,8 +12,7 @@ export const ENROLLMENT_ROSTER_COLUMN_OPTIONS = [
   { key: "expires_at", label: "Expiry date" },
 ] as const;
 
-export type EnrollmentRosterColumnKey =
-  (typeof ENROLLMENT_ROSTER_COLUMN_OPTIONS)[number]["key"];
+export type EnrollmentRosterColumnKey = (typeof ENROLLMENT_ROSTER_COLUMN_OPTIONS)[number]["key"];
 
 export type EnrollmentRosterItem = {
   id: string;
@@ -29,17 +28,17 @@ export type EnrollmentRosterItem = {
 };
 
 export type EnrollmentRosterFilters = {
-  enrolledFrom?: string;
-  enrolledTo?: string;
-  email?: string;
-  enrolledType?: string;
-  status?: string;
-  courseId?: string;
-  sortBy?: "enrolled_at" | "expires_at";
-  sortDir?: "asc" | "desc";
-  columns?: EnrollmentRosterColumnKey[];
-  page?: number;
-  limit?: number;
+  enrolledFrom?: string | undefined;
+  enrolledTo?: string | undefined;
+  email?: string | undefined;
+  enrolledType?: string | undefined;
+  status?: string | undefined;
+  courseId?: string | undefined;
+  sortBy?: "enrolled_at" | "expires_at" | undefined;
+  sortDir?: "asc" | "desc" | undefined;
+  columns?: EnrollmentRosterColumnKey[] | undefined;
+  page?: number | undefined;
+  limit?: number | undefined;
 };
 
 export type EnrollmentRosterResponse = {
@@ -58,12 +57,12 @@ export type EnrollmentRosterResponse = {
 };
 
 export type EnrollmentOverviewFilters = {
-  enrolledFrom?: string;
-  enrolledTo?: string;
-  email?: string;
-  enrolledType?: string;
-  status?: string;
-  courseId?: string;
+  enrolledFrom?: string | undefined;
+  enrolledTo?: string | undefined;
+  email?: string | undefined;
+  enrolledType?: string | undefined;
+  status?: string | undefined;
+  courseId?: string | undefined;
 };
 
 export type EnrollmentOverview = {
@@ -152,14 +151,14 @@ export async function fetchEnrollmentOverview(filters: EnrollmentOverviewFilters
 
 export async function createEnrollmentReportGroup(body: {
   title: string;
-  description?: string;
-  membershipIds?: string[];
-  enrolledFrom?: string;
-  enrolledTo?: string;
-  email?: string;
-  enrolledType?: string;
-  status?: string;
-  courseId?: string;
+  description?: string | undefined;
+  membershipIds?: string[] | undefined;
+  enrolledFrom?: string | undefined;
+  enrolledTo?: string | undefined;
+  email?: string | undefined;
+  enrolledType?: string | undefined;
+  status?: string | undefined;
+  courseId?: string | undefined;
 }) {
   return clientApi.post<{
     data: { batchId: string; key: string; name: string; memberCount: number };
@@ -171,13 +170,13 @@ export async function createEnrollmentReportGroup(body: {
 export async function sendEnrollmentReportMessage(body: {
   subject: string;
   message: string;
-  membershipIds?: string[];
-  enrolledFrom?: string;
-  enrolledTo?: string;
-  email?: string;
-  enrolledType?: string;
-  status?: string;
-  courseId?: string;
+  membershipIds?: string[] | undefined;
+  enrolledFrom?: string | undefined;
+  enrolledTo?: string | undefined;
+  email?: string | undefined;
+  enrolledType?: string | undefined;
+  status?: string | undefined;
+  courseId?: string | undefined;
 }) {
   return clientApi.post<{
     data: { deliveredCount: number; skippedCount: number; recipientCount: number };
@@ -187,15 +186,15 @@ export async function sendEnrollmentReportMessage(body: {
 }
 
 export async function exportEnrollmentReport(body: {
-  enrolledFrom?: string;
-  enrolledTo?: string;
-  email?: string;
-  enrolledType?: string;
-  status?: string;
-  courseId?: string;
-  sortBy?: "enrolled_at" | "expires_at";
-  sortDir?: "asc" | "desc";
-  emailDownloadLink?: boolean;
+  enrolledFrom?: string | undefined;
+  enrolledTo?: string | undefined;
+  email?: string | undefined;
+  enrolledType?: string | undefined;
+  status?: string | undefined;
+  courseId?: string | undefined;
+  sortBy?: "enrolled_at" | "expires_at" | undefined;
+  sortDir?: "asc" | "desc" | undefined;
+  emailDownloadLink?: boolean | undefined;
 }) {
   return clientApi.post<{
     data: { runId: string; status: string; emailed: boolean };

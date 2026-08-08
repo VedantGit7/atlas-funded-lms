@@ -2,15 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import {
-  useCallback,
-  useEffect,
-  useId,
-  useMemo,
-  useRef,
-  useState,
-  type ReactNode,
-} from "react";
+import { useCallback, useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   AlertTriangle,
   ChevronRight,
@@ -73,7 +65,7 @@ function Shimmer({ className }: { className?: string }) {
 
 function formatPct(v: number | null | undefined) {
   if (v == null || Number.isNaN(v)) return "-";
-  return `${Number(v).toFixed(v % 1 === 0 ? 0 : 1)}%`;
+  return `${v.toFixed(v % 1 === 0 ? 0 : 1)}%`;
 }
 
 function formatDate(v: string | null | undefined) {
@@ -183,13 +175,13 @@ function MiniBar({
       {passMark != null ? (
         <span
           className="absolute top-[-2px] z-10 h-[7px] w-px bg-[var(--admin-on-surface-variant)]"
-          style={{ left: `${clampPct(passMark)}%` }}
+          style={{ left: `${String(clampPct(passMark))}%` }}
           aria-hidden="true"
         />
       ) : null}
       <div
         className={`h-full rounded-full ${barTone(value, passMark ?? 50)}`}
-        style={{ width: `${fill}%` }}
+        style={{ width: `${String(fill)}%` }}
       />
     </div>
   );
@@ -293,7 +285,10 @@ function BoxPlotRow({
 
   return (
     <div className="flex items-center gap-4 py-2.5">
-      <p className="w-36 shrink-0 truncate text-xs font-medium text-[var(--admin-on-surface)]" title={title}>
+      <p
+        className="w-36 shrink-0 truncate text-xs font-medium text-[var(--admin-on-surface)]"
+        title={title}
+      >
         {title}
       </p>
       <div className="relative h-6 flex-1">
@@ -304,33 +299,36 @@ function BoxPlotRow({
         {passMarkPct != null ? (
           <div
             className="absolute inset-y-0 z-10 border-l border-dashed border-[var(--admin-on-surface-variant)]"
-            style={{ left: `${clampPct(passMarkPct)}%` }}
+            style={{ left: `${String(clampPct(passMarkPct))}%` }}
             aria-hidden="true"
           />
         ) : null}
         <div
           className="absolute top-1/2 h-px -translate-y-1/2 bg-[var(--admin-on-surface-variant)]"
-          style={{ left: `${clampPct(min)}%`, width: `${Math.max(0, clampPct(max) - clampPct(min))}%` }}
+          style={{
+            left: `${String(clampPct(min))}%`,
+            width: `${String(Math.max(0, clampPct(max) - clampPct(min)))}%`,
+          }}
           aria-hidden="true"
         />
         <div
           className="absolute top-1/2 h-3 w-0.5 -translate-y-1/2 bg-[var(--admin-on-surface)]"
-          style={{ left: `${clampPct(min)}%` }}
+          style={{ left: `${String(clampPct(min))}%` }}
           aria-hidden="true"
         />
         <div
           className="absolute top-1/2 h-3 w-0.5 -translate-y-1/2 bg-[var(--admin-on-surface)]"
-          style={{ left: `${clampPct(max)}%` }}
+          style={{ left: `${String(clampPct(max))}%` }}
           aria-hidden="true"
         />
         <div
           className="absolute top-1/2 h-4 -translate-y-1/2 rounded-sm border border-[var(--admin-outline)] bg-[color-mix(in_srgb,var(--admin-primary)_18%,var(--admin-surface))]"
-          style={{ left: `${left}%`, width: `${width}%` }}
+          style={{ left: `${String(left)}%`, width: `${String(width)}%` }}
           title={`IQR ${formatPct(q1)} - ${formatPct(q3)}`}
         />
         <div
           className="absolute top-1/2 z-10 h-5 w-0.5 -translate-y-1/2 bg-[var(--admin-primary)]"
-          style={{ left: `${clampPct(median)}%` }}
+          style={{ left: `${String(clampPct(median))}%` }}
           title={`Median ${formatPct(median)}`}
           aria-hidden="true"
         />
@@ -388,7 +386,9 @@ function MessageDrawer({
       }
     }
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+    };
   }, [open, busy, onClose]);
 
   if (!open) return null;
@@ -420,7 +420,9 @@ function MessageDrawer({
             </h2>
             <p className="mt-1 text-sm text-[var(--admin-on-surface-variant)]">
               {count} learner{count === 1 ? "" : "s"}
-              {passMarkPct != null ? ` scored below ${formatPct(passMarkPct)}` : " are below the pass mark"}
+              {passMarkPct != null
+                ? ` scored below ${formatPct(passMarkPct)}`
+                : " are below the pass mark"}
             </p>
           </div>
           <button
@@ -440,7 +442,9 @@ function MessageDrawer({
             <input
               className={fieldClassName}
               value={subject}
-              onChange={(e) => onSubjectChange(e.target.value)}
+              onChange={(e) => {
+                onSubjectChange(e.target.value);
+              }}
               maxLength={200}
             />
           </label>
@@ -450,7 +454,9 @@ function MessageDrawer({
               className={`${fieldClassName} h-auto min-h-[180px] py-2`}
               rows={8}
               value={body}
-              onChange={(e) => onBodyChange(e.target.value)}
+              onChange={(e) => {
+                onBodyChange(e.target.value);
+              }}
               maxLength={10000}
             />
           </label>
@@ -467,7 +473,7 @@ function MessageDrawer({
             onClick={onSend}
           >
             <Mail className="h-4 w-4" aria-hidden="true" />
-            {busy ? "Sending…" : `Send to ${count}`}
+            {busy ? "Sending…" : `Send to ${String(count)}`}
           </button>
         </div>
       </aside>
@@ -514,7 +520,9 @@ export function AdminBatchExamsPage({ batchId }: { batchId: string }) {
     [batchId, router, searchParams],
   );
 
-  useEffect(() => setDraftQ(q), [q]);
+  useEffect(() => {
+    setDraftQ(q);
+  }, [q]);
 
   useEffect(() => {
     const t = window.setTimeout(() => {
@@ -522,7 +530,9 @@ export function AdminBatchExamsPage({ batchId }: { batchId: string }) {
       if (next === q) return;
       replaceParams({ q: next || null });
     }, 300);
-    return () => window.clearTimeout(t);
+    return () => {
+      window.clearTimeout(t);
+    };
   }, [draftQ, q, replaceParams]);
 
   const load = useCallback(async () => {
@@ -578,7 +588,8 @@ export function AdminBatchExamsPage({ batchId }: { batchId: string }) {
     try {
       const response = await exportBatchReport({ batchId, emailDownloadLink: true });
       const completed = await pollReportRunUntilComplete(response.data.runId);
-      if (completed.status === "failed") throw new Error(completed.errorMessage ?? "Export failed.");
+      if (completed.status === "failed")
+        throw new Error(completed.errorMessage ?? "Export failed.");
       if (completed.status === "completed") await downloadReportExport(completed.id, "csv");
     } catch (e) {
       setActionError(errMsg(e, "Unable to export report."));
@@ -680,7 +691,8 @@ export function AdminBatchExamsPage({ batchId }: { batchId: string }) {
     );
   }
 
-  const noCourse = listData != null && listData.courseId == null && listData.assessments.length === 0;
+  const noCourse =
+    listData != null && listData.courseId == null && listData.assessments.length === 0;
   const noAssessments =
     listData != null && listData.assessments.length === 0 && listData.courseId != null;
 
@@ -784,7 +796,13 @@ export function AdminBatchExamsPage({ batchId }: { batchId: string }) {
             />
             <p className="text-sm text-[var(--admin-danger)]">{actionError}</p>
           </div>
-          <button type="button" className={ghostButtonClassName} onClick={() => setActionError(null)}>
+          <button
+            type="button"
+            className={ghostButtonClassName}
+            onClick={() => {
+              setActionError(null);
+            }}
+          >
             Dismiss
           </button>
         </div>
@@ -802,13 +820,13 @@ export function AdminBatchExamsPage({ batchId }: { batchId: string }) {
             <div className="relative mt-3 h-[3px] overflow-visible rounded-full bg-[var(--admin-surface-high)]">
               <span
                 className="absolute top-[-2px] z-10 h-[7px] w-px bg-[var(--admin-on-surface-variant)]"
-                style={{ left: `${clampPct(summary.passMarkPct)}%` }}
+                style={{ left: `${String(clampPct(summary.passMarkPct))}%` }}
                 aria-hidden="true"
               />
               <div
                 className={`h-full rounded-full ${barTone(summary.avgScorePct, summary.passMarkPct)}`}
                 style={{
-                  width: `${clampPct(summary.avgScorePct ?? 0)}%`,
+                  width: `${String(clampPct(summary.avgScorePct ?? 0))}%`,
                 }}
               />
             </div>
@@ -820,7 +838,9 @@ export function AdminBatchExamsPage({ batchId }: { batchId: string }) {
             <p className="mb-3 font-mono text-[11px] font-medium uppercase tracking-[0.1em] text-[var(--admin-on-surface-variant)]">
               Pass rate
             </p>
-            <p className={`font-mono text-2xl font-medium leading-none ${passRateTone(summary.passRatePct)}`}>
+            <p
+              className={`font-mono text-2xl font-medium leading-none ${passRateTone(summary.passRatePct)}`}
+            >
               {formatPct(summary.passRatePct)}
             </p>
             <p className="mt-2 text-xs text-[var(--admin-on-surface-variant)]">
@@ -837,7 +857,7 @@ export function AdminBatchExamsPage({ batchId }: { batchId: string }) {
             <p className="mt-2 text-xs text-[var(--admin-on-surface-variant)]">
               {summary.attemptsPerLearner == null
                 ? "-"
-                : `${Number(summary.attemptsPerLearner).toFixed(
+                : `${summary.attemptsPerLearner.toFixed(
                     summary.attemptsPerLearner % 1 === 0 ? 0 : 1,
                   )} per learner`}
             </p>
@@ -854,7 +874,9 @@ export function AdminBatchExamsPage({ batchId }: { batchId: string }) {
           <button
             type="button"
             className="flex flex-col justify-between bg-[var(--admin-surface)] p-5 text-left transition-colors hover:bg-[var(--admin-surface-low)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]/30"
-            onClick={() => replaceParams({ view: "matrix", q: null })}
+            onClick={() => {
+              replaceParams({ view: "matrix", q: null });
+            }}
           >
             <p className="mb-3 font-mono text-[11px] font-medium uppercase tracking-[0.1em] text-[var(--admin-warning)]">
               Not attempted
@@ -891,11 +913,11 @@ export function AdminBatchExamsPage({ batchId }: { batchId: string }) {
                   ? "bg-[var(--admin-surface)] text-[var(--admin-on-surface)] shadow-sm"
                   : "text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-on-surface)]",
               ].join(" ")}
-              onClick={() =>
+              onClick={() => {
                 replaceParams({
                   view: key === "assessments" ? null : key,
-                })
-              }
+                });
+              }}
             >
               {label}
             </button>
@@ -914,7 +936,9 @@ export function AdminBatchExamsPage({ batchId }: { batchId: string }) {
             className={`${fieldClassName} w-full pl-9`}
             placeholder={view === "matrix" ? "Filter learners" : "Filter assessments"}
             value={draftQ}
-            onChange={(e) => setDraftQ(e.target.value)}
+            onChange={(e) => {
+              setDraftQ(e.target.value);
+            }}
           />
         </label>
       </div>
@@ -938,7 +962,10 @@ export function AdminBatchExamsPage({ batchId }: { batchId: string }) {
                 title="No course linked"
                 description="This batch has no linked course, so assessment results cannot be reported yet."
                 action={
-                  <Link href={`/admin/reports/batches/${batchId}`} className={secondaryButtonClassName}>
+                  <Link
+                    href={`/admin/reports/batches/${batchId}`}
+                    className={secondaryButtonClassName}
+                  >
                     Open batch overview
                   </Link>
                 }
@@ -1084,7 +1111,10 @@ export function AdminBatchExamsPage({ batchId }: { batchId: string }) {
                     IQR (Q1-Q3)
                   </span>
                   <span className="inline-flex items-center gap-1.5">
-                    <span className="inline-block h-3 w-0.5 bg-[var(--admin-primary)]" aria-hidden="true" />
+                    <span
+                      className="inline-block h-3 w-0.5 bg-[var(--admin-primary)]"
+                      aria-hidden="true"
+                    />
                     Median
                   </span>
                   <span className="inline-flex items-center gap-1.5">
@@ -1199,8 +1229,9 @@ export function AdminBatchExamsPage({ batchId }: { batchId: string }) {
                           </td>
                           {matrixData.assessments.map((assessment) => {
                             const cell =
-                              learner.cells.find((c) => c.assessmentId === assessment.assessmentId) ??
-                              null;
+                              learner.cells.find(
+                                (c) => c.assessmentId === assessment.assessmentId,
+                              ) ?? null;
                             const kind = cell?.kind ?? "not_attempted";
                             const scoreLabel =
                               kind === "awaiting"

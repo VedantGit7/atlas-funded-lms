@@ -22,9 +22,9 @@ type SortDirection = "asc" | "desc";
 type AnalyticsItemBreakdownTableProps = {
   items: ItemStatisticRow[];
   assessmentId: string;
-  assessmentTitle?: string;
-  availableAssessments?: number;
-  loading?: boolean;
+  assessmentTitle?: string | undefined;
+  availableAssessments?: number | undefined;
+  loading?: boolean | undefined;
 };
 
 function qualityBadgeClassName(flag: "bad" | "fair" | "good" | undefined): string {
@@ -118,7 +118,10 @@ export function AnalyticsItemBreakdownTable({
         className="flex flex-col items-center justify-center rounded-xl border border-dashed border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-6 py-14 text-center"
         aria-label="Assessment item breakdown"
       >
-        <BarChart3 className="mb-3 h-10 w-10 text-[var(--admin-on-surface-variant)] opacity-50" aria-hidden="true" />
+        <BarChart3
+          className="mb-3 h-10 w-10 text-[var(--admin-on-surface-variant)] opacity-50"
+          aria-hidden="true"
+        />
         <h2 className="text-lg font-semibold text-[var(--admin-on-surface)]">
           {availableAssessments === 0 ? "No assessments to analyze" : "Select an assessment"}
         </h2>
@@ -126,7 +129,10 @@ export function AnalyticsItemBreakdownTable({
           {availableAssessments === 0 ? (
             <>
               Item-level accuracy and latency require an assessment you authored. Create one in{" "}
-              <Link href="/studio/assessments" className="font-medium text-[var(--admin-primary)] hover:underline">
+              <Link
+                href="/studio/assessments"
+                className="font-medium text-[var(--admin-primary)] hover:underline"
+              >
                 Studio Assessments
               </Link>
               , then return here.
@@ -135,8 +141,8 @@ export function AnalyticsItemBreakdownTable({
             <>
               This section shows per-question performance for one assessment. Choose an assessment
               from the{" "}
-              <span className="font-semibold text-[var(--admin-on-surface)]">Assessment</span> filter
-              above — not &ldquo;All evaluations&rdquo;.
+              <span className="font-semibold text-[var(--admin-on-surface)]">Assessment</span>{" "}
+              filter above — not &ldquo;All evaluations&rdquo;.
             </>
           )}
         </p>
@@ -152,7 +158,9 @@ export function AnalyticsItemBreakdownTable({
             Assessment item breakdown
           </h2>
           {assessmentTitle ? (
-            <p className="mt-0.5 text-xs text-[var(--admin-on-surface-variant)]">{assessmentTitle}</p>
+            <p className="mt-0.5 text-xs text-[var(--admin-on-surface-variant)]">
+              {assessmentTitle}
+            </p>
           ) : null}
         </div>
         <div className="flex items-center gap-2">
@@ -193,7 +201,13 @@ export function AnalyticsItemBreakdownTable({
                   Item name
                 </th>
                 <th scope="col" className="px-4 py-3">
-                  <button type="button" className="hover:text-[var(--admin-on-surface)]" onClick={() => toggleSort("attempts")}>
+                  <button
+                    type="button"
+                    className="hover:text-[var(--admin-on-surface)]"
+                    onClick={() => {
+                      toggleSort("attempts");
+                    }}
+                  >
                     Attempts
                   </button>
                 </th>
@@ -201,7 +215,13 @@ export function AnalyticsItemBreakdownTable({
                   Correct
                 </th>
                 <th scope="col" className="px-4 py-3">
-                  <button type="button" className="hover:text-[var(--admin-on-surface)]" onClick={() => toggleSort("accuracy")}>
+                  <button
+                    type="button"
+                    className="hover:text-[var(--admin-on-surface)]"
+                    onClick={() => {
+                      toggleSort("accuracy");
+                    }}
+                  >
                     Accuracy
                   </button>
                 </th>
@@ -220,7 +240,13 @@ export function AnalyticsItemBreakdownTable({
                   </th>
                 ) : null}
                 <th scope="col" className="px-4 py-3">
-                  <button type="button" className="hover:text-[var(--admin-on-surface)]" onClick={() => toggleSort("latency")}>
+                  <button
+                    type="button"
+                    className="hover:text-[var(--admin-on-surface)]"
+                    onClick={() => {
+                      toggleSort("latency");
+                    }}
+                  >
                     Avg. latency
                   </button>
                 </th>
@@ -254,7 +280,9 @@ export function AnalyticsItemBreakdownTable({
                         </span>
                       </div>
                     </td>
-                    <td className="px-4 py-4 tabular-nums">{item.attemptsCount.toLocaleString()}</td>
+                    <td className="px-4 py-4 tabular-nums">
+                      {item.attemptsCount.toLocaleString()}
+                    </td>
                     <td className="px-4 py-4 tabular-nums">{item.correctCount.toLocaleString()}</td>
                     <td className="px-4 py-4">
                       <span
@@ -299,7 +327,8 @@ export function AnalyticsItemBreakdownTable({
       {!loading && sortedItems.length > 0 ? (
         <div className="flex items-center justify-between border-t border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-4 py-3 text-[11px] text-[var(--admin-on-surface-variant)]">
           <span>
-            Showing {sortedItems.length} item{sortedItems.length === 1 ? "" : "s"} · rolling 30-day window
+            Showing {sortedItems.length} item{sortedItems.length === 1 ? "" : "s"} · rolling 30-day
+            window
           </span>
         </div>
       ) : null}

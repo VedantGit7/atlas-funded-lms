@@ -110,7 +110,7 @@ function snapshotsEqual(a: EditorSnapshot, b: EditorSnapshot): boolean {
   return JSON.stringify(a) === JSON.stringify(b);
 }
 
-function FieldError({ message }: { message?: string }) {
+function FieldError({ message }: { message?: string | undefined }) {
   if (!message) return null;
   return (
     <p className="text-xs text-[var(--admin-danger)]" role="alert">
@@ -131,14 +131,17 @@ function FlowNode({
   label: string;
   sublabel: string;
   tone: "neutral" | "warning" | "success" | "danger";
-  badge?: string;
-  dimmed?: boolean;
+  badge?: string | undefined;
+  dimmed?: boolean | undefined;
 }) {
   const toneClasses = {
     neutral: "border-[var(--admin-outline)] text-[var(--admin-outline)]",
-    warning: "border-[var(--admin-warning)] text-[var(--admin-warning)] shadow-[var(--admin-warning)]/10",
-    success: "border-[var(--admin-success)] text-[var(--admin-success)] shadow-[var(--admin-success)]/10",
-    danger: "border-[var(--admin-danger)] text-[var(--admin-danger)] shadow-[var(--admin-danger)]/10",
+    warning:
+      "border-[var(--admin-warning)] text-[var(--admin-warning)] shadow-[var(--admin-warning)]/10",
+    success:
+      "border-[var(--admin-success)] text-[var(--admin-success)] shadow-[var(--admin-success)]/10",
+    danger:
+      "border-[var(--admin-danger)] text-[var(--admin-danger)] shadow-[var(--admin-danger)]/10",
   } as const;
 
   return (
@@ -167,7 +170,9 @@ function WorkflowStateFlowDiagram({ form }: { form: WorkflowStageForm }) {
   return (
     <div className={workflowCanvasWrapperClassName}>
       <div className={workflowCanvasHeaderClassName}>
-        <span className="text-sm font-semibold text-[var(--admin-on-surface)]">Visual state flow</span>
+        <span className="text-sm font-semibold text-[var(--admin-on-surface)]">
+          Visual state flow
+        </span>
         <span className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[var(--admin-on-surface-variant)]">
           <Info className="h-3.5 w-3.5" aria-hidden="true" />
           Read-only visualization
@@ -238,7 +243,9 @@ export function WorkflowsAdmin({
   const [definitionJson, setDefinitionJson] = useState("{}");
   const [savedSnapshot, setSavedSnapshot] = useState<EditorSnapshot>(defaultCreateSnapshot());
 
-  const [roleOptions, setRoleOptions] = useState<RoleOption[]>([{ value: "admin", label: "admin" }]);
+  const [roleOptions, setRoleOptions] = useState<RoleOption[]>([
+    { value: "admin", label: "admin" },
+  ]);
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<string, string>>>({});
   const [message, setMessage] = useState<string | null>(null);
   const [requestId, setRequestId] = useState<string | null>(null);
@@ -271,7 +278,11 @@ export function WorkflowsAdmin({
     return definitionList.filter((item) => {
       if (statusFilter !== "all" && item.status !== statusFilter) return false;
       if (!query) return true;
-      const haystack = [item.key, item.name, formatTargetTypeLabel(parseDefinition(item.definitionJson).targetType)]
+      const haystack = [
+        item.key,
+        item.name,
+        formatTargetTypeLabel(parseDefinition(item.definitionJson).targetType),
+      ]
         .join(" ")
         .toLowerCase();
       return haystack.includes(query);
@@ -299,14 +310,14 @@ export function WorkflowsAdmin({
 
   useEffect(() => {
     if (initialDefinitions !== undefined) return;
-    let cancelled = false;
+    const ac = new AbortController();
     void (async () => {
       try {
         const data = await refreshDefinitions();
-        if (cancelled) return;
+        if (ac.signal.aborted) return;
         setSelectedId((current) => current ?? data[0]?.id ?? null);
       } catch (error) {
-        if (cancelled) return;
+        if (ac.signal.aborted) return;
         if (error instanceof ClientApiError && (error.status === 401 || error.status === 403)) {
           setAuthDenied(true);
           return;
@@ -318,11 +329,11 @@ export function WorkflowsAdmin({
         }
         setLoadError("Failed to load workflow definitions.");
       } finally {
-        if (!cancelled) setLoadingInitial(false);
+        if (!ac.signal.aborted) setLoadingInitial(false);
       }
     })();
     return () => {
-      cancelled = true;
+      ac.abort();
     };
   }, [initialDefinitions, refreshDefinitions]);
 
@@ -473,7 +484,7 @@ export function WorkflowsAdmin({
       );
       const data = await refreshDefinitions();
       setCreatingNew(false);
-      setSelectedId(response.data.id ?? data.find((item) => item.key === draftKey.trim())?.id ?? null);
+      setSelectedId(response.data.id);
       const created = data.find((item) => item.key === draftKey.trim()) ?? response.data;
       const next = snapshotFromDefinition(created);
       setSavedSnapshot(next);
@@ -547,9 +558,9 @@ export function WorkflowsAdmin({
                   { value: "DRAFT", label: "Draft" },
                   { value: "ARCHIVED", label: "Archived" },
                 ]}
-                onChange={(value) =>
-                  setStatusFilter(value as "all" | WorkflowDefinitionItem["status"])
-                }
+                onChange={(value) => {
+                  setStatusFilter(value as "all" | WorkflowDefinitionItem["status"]);
+                }}
                 className="w-[140px]"
               />
             </div>
@@ -561,7 +572,9 @@ export function WorkflowsAdmin({
               <input
                 type="search"
                 value={searchQuery}
-                onChange={(event) => setSearchQuery(event.target.value)}
+                onChange={(event) => {
+                  setSearchQuery(event.target.value);
+                }}
                 placeholder="Search definitions..."
                 className={`${workflowSearchFieldClassName} pl-9`}
               />
@@ -589,8 +602,13 @@ export function WorkflowsAdmin({
               </div>
             ) : filteredDefinitions.length === 0 ? (
               <div className="py-10 text-center">
-                <Filter className="mx-auto mb-3 h-10 w-10 text-[var(--admin-outline)]" aria-hidden="true" />
-                <p className="text-sm font-semibold text-[var(--admin-on-surface)]">No definitions found</p>
+                <Filter
+                  className="mx-auto mb-3 h-10 w-10 text-[var(--admin-outline)]"
+                  aria-hidden="true"
+                />
+                <p className="text-sm font-semibold text-[var(--admin-on-surface)]">
+                  No definitions found
+                </p>
                 <p className="mt-1 text-xs text-[var(--admin-on-surface-variant)]">
                   {searchQuery.trim() || statusFilter !== "all"
                     ? "Try adjusting your search or filter."
@@ -611,7 +629,9 @@ export function WorkflowsAdmin({
                         className={`${workflowListItemClassName} w-full text-left ${
                           isSelected ? workflowListItemSelectedClassName : ""
                         } ${item.status === "ARCHIVED" ? "opacity-70" : ""}`}
-                        onClick={() => selectDefinition(item)}
+                        onClick={() => {
+                          selectDefinition(item);
+                        }}
                       >
                         <div className="mb-2 flex items-start justify-between gap-2">
                           <span className="text-sm font-semibold text-[var(--admin-on-surface)]">
@@ -640,7 +660,11 @@ export function WorkflowsAdmin({
           </div>
 
           <div className={workflowListFooterClassName}>
-            <button type="button" className={workflowNewDefinitionButtonClassName} onClick={startCreateDefinition}>
+            <button
+              type="button"
+              className={workflowNewDefinitionButtonClassName}
+              onClick={startCreateDefinition}
+            >
               <PlusCircle className="h-4 w-4" aria-hidden="true" />
               New definition
             </button>
@@ -650,13 +674,19 @@ export function WorkflowsAdmin({
         <div className={workflowEditorPanelClassName}>
           {!selected && !creatingNew ? (
             <div className="flex flex-1 flex-col items-center justify-center p-8 text-center">
-              <ClipboardCheck className="mb-3 h-12 w-12 text-[var(--admin-outline)]" aria-hidden="true" />
+              <ClipboardCheck
+                className="mb-3 h-12 w-12 text-[var(--admin-outline)]"
+                aria-hidden="true"
+              />
               <p className="text-base font-semibold text-[var(--admin-on-surface)]">
                 Select a workflow to configure
               </p>
               <p className="mt-1 max-w-sm text-sm text-[var(--admin-on-surface-variant)]">
                 Human review transitions run on the{" "}
-                <Link href="/review" className="font-semibold text-[var(--admin-primary)] hover:underline">
+                <Link
+                  href="/review"
+                  className="font-semibold text-[var(--admin-primary)] hover:underline"
+                >
                   Review &amp; Approvals
                 </Link>{" "}
                 screen.
@@ -678,9 +708,9 @@ export function WorkflowsAdmin({
                       setMessage(null);
                     }}
                     disabled={!creatingNew || busy}
-                    aria-invalid={Boolean(fieldErrors.key)}
+                    aria-invalid={Boolean(fieldErrors["key"])}
                   />
-                  <FieldError message={fieldErrors.key} />
+                  <FieldError message={fieldErrors["key"]} />
                 </div>
                 <div className="space-y-1.5 sm:col-span-5">
                   <span className="text-[11px] font-semibold uppercase tracking-widest text-[var(--admin-on-surface-variant)]">
@@ -695,9 +725,9 @@ export function WorkflowsAdmin({
                       setMessage(null);
                     }}
                     disabled={busy}
-                    aria-invalid={Boolean(fieldErrors.name)}
+                    aria-invalid={Boolean(fieldErrors["name"])}
                   />
-                  <FieldError message={fieldErrors.name} />
+                  <FieldError message={fieldErrors["name"]} />
                 </div>
                 <div className="space-y-1.5 sm:col-span-4">
                   <GamificationSelectField
@@ -708,7 +738,9 @@ export function WorkflowsAdmin({
                     }
                     value={stageForm.targetType}
                     options={targetTypeOptions()}
-                    onChange={(value) => updateStageForm((current) => ({ ...current, targetType: value }))}
+                    onChange={(value) => {
+                      updateStageForm((current) => ({ ...current, targetType: value }));
+                    }}
                     disabled={busy || showAdvancedJson}
                   />
                 </div>
@@ -719,7 +751,9 @@ export function WorkflowsAdmin({
 
                 <div className="grid gap-8 xl:grid-cols-2">
                   <section className="space-y-4">
-                    <h3 className={`${workflowSectionHeadingClassName} border-[var(--admin-primary)]`}>
+                    <h3
+                      className={`${workflowSectionHeadingClassName} border-[var(--admin-primary)]`}
+                    >
                       State assignments
                     </h3>
                     <div className="grid gap-4">
@@ -736,9 +770,9 @@ export function WorkflowsAdmin({
                           label={labelText}
                           value={stageForm[field]}
                           options={stateOptionsForValue(stageForm[field])}
-                          onChange={(value) =>
-                            updateStageForm((current) => ({ ...current, [field]: value }))
-                          }
+                          onChange={(value) => {
+                            updateStageForm((current) => ({ ...current, [field]: value }));
+                          }}
                           disabled={busy || showAdvancedJson}
                         />
                       ))}
@@ -746,7 +780,9 @@ export function WorkflowsAdmin({
                   </section>
 
                   <section className="space-y-4">
-                    <h3 className={`${workflowSectionHeadingClassName} border-[var(--admin-warning)]`}>
+                    <h3
+                      className={`${workflowSectionHeadingClassName} border-[var(--admin-warning)]`}
+                    >
                       Workflow logic
                     </h3>
                     <div className={workflowLogicPanelClassName}>
@@ -763,12 +799,12 @@ export function WorkflowsAdmin({
                           type="checkbox"
                           className="h-5 w-5 accent-[var(--admin-primary)]"
                           checked={stageForm.requiresReview}
-                          onChange={(event) =>
+                          onChange={(event) => {
                             updateStageForm((current) => ({
                               ...current,
                               requiresReview: event.target.checked,
-                            }))
-                          }
+                            }));
+                          }}
                           disabled={busy || showAdvancedJson}
                         />
                       </label>
@@ -777,12 +813,12 @@ export function WorkflowsAdmin({
                         label="Assignee role"
                         value={stageForm.assigneeRoleKey}
                         options={roleOptions}
-                        onChange={(value) =>
-                          updateStageForm((current) => ({ ...current, assigneeRoleKey: value }))
-                        }
+                        onChange={(value) => {
+                          updateStageForm((current) => ({ ...current, assigneeRoleKey: value }));
+                        }}
                         disabled={busy || showAdvancedJson || !stageForm.requiresReview}
                       />
-                      <FieldError message={fieldErrors.assigneeRoleKey} />
+                      <FieldError message={fieldErrors["assigneeRoleKey"]} />
 
                       <div className="border-t border-[var(--admin-border)] pt-4">
                         <span className={labelClassName}>Allowed actions</span>
@@ -796,21 +832,21 @@ export function WorkflowsAdmin({
                                 type="checkbox"
                                 className="rounded border-[var(--admin-border)] accent-[var(--admin-primary)]"
                                 checked={stageForm.actions.includes(action)}
-                                onChange={(event) =>
+                                onChange={(event) => {
                                   updateStageForm((current) => ({
                                     ...current,
                                     actions: event.target.checked
                                       ? [...current.actions, action]
                                       : current.actions.filter((value) => value !== action),
-                                  }))
-                                }
+                                  }));
+                                }}
                                 disabled={busy || showAdvancedJson}
                               />
                               {formatActionLabel(action)}
                             </label>
                           ))}
                         </div>
-                        <FieldError message={fieldErrors.actions} />
+                        <FieldError message={fieldErrors["actions"]} />
                       </div>
                     </div>
                   </section>
@@ -840,12 +876,16 @@ export function WorkflowsAdmin({
                       spellCheck={false}
                       aria-label="Workflow definition JSON"
                     />
-                    <FieldError message={fieldErrors.definitionJson} />
+                    <FieldError message={fieldErrors["definitionJson"]} />
                   </div>
                 </details>
 
                 {message ? (
-                  <p className="text-sm text-[var(--admin-danger)]" role="status" aria-live="polite">
+                  <p
+                    className="text-sm text-[var(--admin-danger)]"
+                    role="status"
+                    aria-live="polite"
+                  >
                     {message}
                     {requestId ? ` (Request ID: ${requestId})` : ""}
                   </p>
@@ -857,7 +897,9 @@ export function WorkflowsAdmin({
                   <button
                     type="button"
                     className={`${outlineButtonClassName} inline-flex items-center gap-2 border-[var(--admin-danger)] text-[var(--admin-danger)] hover:bg-[color-mix(in_srgb,var(--admin-danger)_8%,transparent)]`}
-                    onClick={() => setConfirmArchiveOpen(true)}
+                    onClick={() => {
+                      setConfirmArchiveOpen(true);
+                    }}
                     disabled={busy}
                   >
                     <Trash2 className="h-4 w-4" aria-hidden="true" />
@@ -884,11 +926,7 @@ export function WorkflowsAdmin({
                     }}
                   >
                     <Save className="h-4 w-4" aria-hidden="true" />
-                    {busy
-                      ? "Saving..."
-                      : creatingNew
-                        ? "Create definition"
-                        : "Save configuration"}
+                    {busy ? "Saving..." : creatingNew ? "Create definition" : "Save configuration"}
                   </button>
                 </div>
               </div>
@@ -907,7 +945,9 @@ export function WorkflowsAdmin({
         icon={Trash2}
         busy={busy}
         onConfirm={() => void archiveDefinition()}
-        onCancel={() => setConfirmArchiveOpen(false)}
+        onCancel={() => {
+          setConfirmArchiveOpen(false);
+        }}
       />
     </>
   );

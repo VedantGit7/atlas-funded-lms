@@ -5,7 +5,7 @@ import {
   exportSuperLiveInsightsRosterResponseSchema,
 } from "@atlas/domain/reports/super-live-insights-roster.dto";
 import { exportSuperLiveInsightsRosterMetadata } from "@atlas/domain/reports/super-live-insights-roster.route-metadata";
-import { exportSuperLiveInsightsRoster } from "../../../../../../../server/reports/super-live-insights-roster-actions.service";
+import { exportSuperLiveInsightsRoster } from "@atlas/api-server/reports/super-live-insights-roster-actions.service";
 
 export const POST = createTenantRoute<
   z.output<typeof exportSuperLiveInsightsRosterBodySchema>,

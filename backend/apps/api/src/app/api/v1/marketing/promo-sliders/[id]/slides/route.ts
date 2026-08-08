@@ -19,5 +19,5 @@ export const PUT = createTenantRoute<
   params: paramsSchema,
   body: replacePromoSlidesBodySchema,
   output: promoSliderResponseSchema,
-  handler: async ({ tx, ctx, params, input }) => replacePromoSlides(tx, ctx, params.id, input),
+  handler: async ({ tx, ctx, params, input }) => replacePromoSlides(tx, ctx, params["id"], input),
 });

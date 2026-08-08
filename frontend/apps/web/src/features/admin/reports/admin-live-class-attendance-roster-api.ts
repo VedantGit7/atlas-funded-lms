@@ -11,8 +11,7 @@ export const LIVE_ATTENDANCE_COLUMN_OPTIONS = [
   { key: "duration_seconds", label: "Duration" },
 ] as const;
 
-export type LiveAttendanceColumnKey =
-  (typeof LIVE_ATTENDANCE_COLUMN_OPTIONS)[number]["key"];
+export type LiveAttendanceColumnKey = (typeof LIVE_ATTENDANCE_COLUMN_OPTIONS)[number]["key"];
 
 export type LiveSessionListItem = {
   id: string;
@@ -78,13 +77,13 @@ function buildQuery(params: Record<string, string | number | undefined>): string
 }
 
 export async function fetchLiveClassSessionsRoster(filters?: {
-  q?: string;
-  status?: string;
-  startedFrom?: string;
-  startedTo?: string;
-  sortBy?: string;
-  sortDir?: "asc" | "desc";
-  page?: number;
+  q?: string | undefined;
+  status?: string | undefined;
+  startedFrom?: string | undefined;
+  startedTo?: string | undefined;
+  sortBy?: string | undefined;
+  sortDir?: "asc" | "desc" | undefined;
+  page?: number | undefined;
 }) {
   return clientApi.get<{
     data: {
@@ -114,15 +113,15 @@ export async function fetchLiveClassSessionDetail(sessionId: string) {
 export async function fetchLiveClassSessionAttendees(
   sessionId: string,
   filters: {
-    learnerName?: string;
-    email?: string;
-    status?: string;
-    joinedFrom?: string;
-    joinedTo?: string;
-    sortBy?: string;
-    sortDir?: "asc" | "desc";
-    columns?: LiveAttendanceColumnKey[];
-    page?: number;
+    learnerName?: string | undefined;
+    email?: string | undefined;
+    status?: string | undefined;
+    joinedFrom?: string | undefined;
+    joinedTo?: string | undefined;
+    sortBy?: string | undefined;
+    sortDir?: "asc" | "desc" | undefined;
+    columns?: LiveAttendanceColumnKey[] | undefined;
+    page?: number | undefined;
   },
 ) {
   return clientApi.get<{

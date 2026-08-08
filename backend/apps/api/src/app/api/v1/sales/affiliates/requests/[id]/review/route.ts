@@ -20,5 +20,5 @@ export const POST = createTenantRoute<
   body: reviewAffiliateRequestBodySchema,
   output: reviewAffiliateRequestResponseSchema,
   handler: async ({ tx, ctx, input, params }) =>
-    reviewAffiliateRequest(tx, ctx, params.id, input),
+    reviewAffiliateRequest(tx, ctx, params["id"], input),
 });

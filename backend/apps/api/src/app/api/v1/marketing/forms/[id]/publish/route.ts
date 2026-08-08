@@ -16,5 +16,5 @@ export const POST = createTenantRoute<
   params: paramsSchema,
   body: noBodySchema,
   output: marketingFormResponseSchema,
-  handler: async ({ tx, ctx, params }) => publishMarketingForm(tx, ctx, params.id),
+  handler: async ({ tx, ctx, params }) => publishMarketingForm(tx, ctx, params["id"]),
 });

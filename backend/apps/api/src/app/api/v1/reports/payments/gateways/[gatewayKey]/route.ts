@@ -18,5 +18,5 @@ export const GET = createTenantRoute<
   params: paymentGatewayKeyParamsSchema,
   output: paymentGatewayDetailResponseSchema,
   handler: async ({ tx, ctx, input, params }) =>
-    getPaymentGatewayDetail(tx, ctx, params.gatewayKey, input),
+    getPaymentGatewayDetail(tx, ctx, params["gatewayKey"], input),
 });

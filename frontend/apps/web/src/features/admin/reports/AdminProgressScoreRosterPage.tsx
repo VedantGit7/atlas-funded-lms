@@ -13,9 +13,7 @@ import {
   ghostButtonClassName,
   primaryButtonClassName,
 } from "../../analytics/analytics-admin-shared";
-import {
-  generalSettingsFormCardClassName,
-} from "../general-settings/general-settings-shared";
+import { generalSettingsFormCardClassName } from "../general-settings/general-settings-shared";
 import { ClientApiError } from "../../../lib/client-api";
 import {
   createProgressGroup,
@@ -44,7 +42,7 @@ import { downloadReportExport, pollReportRunUntilComplete } from "./admin-report
 import { ProgressScoreReportTabs } from "./ProgressScoreReportTabs";
 import { AdminProgressProductPicker } from "./AdminProgressProductPicker";
 import { AdminScoresProductPicker } from "./AdminScoresProductPicker";
-import type { ScoreProductItem } from "./admin-progress-score-roster-api";
+import type { ScoreLearnerResultStatus } from "./admin-progress-score-roster-api";
 
 type MainTab = "progress" | "scores";
 type ProgressProduct = ProgressProductType;
@@ -56,27 +54,6 @@ function scoreApiProductType(scoreProduct: ScoreProduct): ScoreProductType {
 
 function scoreUiProduct(type: ScoreProductType): ScoreProduct {
   return type === "course" ? "course_quiz" : type;
-}
-
-function scoreProductToSelectable(product: ScoreProductItem): ProgressProductItem {
-  return {
-    id: product.id,
-    title: product.title,
-    slug: product.slug,
-    status: product.status,
-    enrolledCount: product.learnersAttempted,
-    quizCount: product.assessmentCount,
-    avgCompletionPct: product.avgScorePct,
-    completionBands: {
-      not_started: 0,
-      early: 0,
-      in_progress: 0,
-      nearly_done: 0,
-      complete: 0,
-    },
-    notStartedCount: 0,
-    lastActivityAt: product.lastAttemptAt,
-  };
 }
 
 const ENROLLED_TYPE_OPTIONS = [
@@ -106,7 +83,7 @@ export function AdminProgressScoreRosterPage({
   initialMainTab?: MainTab;
 }) {
   const router = useRouter();
-  const [mainTab, setMainTab] = useState<MainTab>(initialMainTab);
+  const [mainTab] = useState<MainTab>(initialMainTab);
   const [progressProduct, setProgressProduct] = useState<ProgressProduct>("course");
   const [scoreProduct, setScoreProduct] = useState<ScoreProduct>("course_quiz");
 
@@ -114,7 +91,7 @@ export function AdminProgressScoreRosterPage({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [products, setProducts] = useState<ProgressProductItem[]>([]);
+  const [products] = useState<ProgressProductItem[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<ProgressProductItem | null>(null);
   const [quizzes, setQuizzes] = useState<ScoreQuizItem[]>([]);
   const [selectedQuiz, setSelectedQuiz] = useState<ScoreQuizItem | null>(null);
@@ -134,7 +111,7 @@ export function AdminProgressScoreRosterPage({
   const [submittedTo, setSubmittedTo] = useState("");
   const [learnerName, setLearnerName] = useState("");
   const [enrolledType, setEnrolledType] = useState("");
-  const [resultStatus, setResultStatus] = useState("");
+  const [resultStatus, setResultStatus] = useState<"" | ScoreLearnerResultStatus>("");
   const [sortBy, setSortBy] = useState("enrolled_at");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
   const [progressColumns, setProgressColumns] = useState<ProgressLearnerColumnKey[]>(
@@ -229,10 +206,14 @@ export function AdminProgressScoreRosterPage({
     setError(null);
     try {
       const response = await fetchScoreLearners(selectedQuiz.assessmentId, {
-        submittedFrom: dateInputToStartIso(submittedFrom),
-        submittedTo: dateInputToEndIso(submittedTo),
-        learnerName: learnerName.trim() || undefined,
-        resultStatus: resultStatus || undefined,
+        ...(dateInputToStartIso(submittedFrom) !== undefined
+          ? { submittedFrom: dateInputToStartIso(submittedFrom) }
+          : {}),
+        ...(dateInputToEndIso(submittedTo) !== undefined
+          ? { submittedTo: dateInputToEndIso(submittedTo) }
+          : {}),
+        ...(learnerName.trim() ? { learnerName: learnerName.trim() } : {}),
+        ...(resultStatus ? { resultStatus } : {}),
         sortBy: sortBy === "enrolled_at" ? "submitted_at" : sortBy,
         sortDir,
         columns: scoreColumns,
@@ -297,14 +278,6 @@ export function AdminProgressScoreRosterPage({
     setQuizzes([]);
     setPage(1);
     setActionsOpen(false);
-  }
-
-  function switchMainTab(tab: MainTab) {
-    router.push(
-      tab === "scores"
-        ? "/admin/reports/progress-score/scores"
-        : "/admin/reports/progress-score/progress",
-    );
   }
 
   async function handleExport() {
@@ -441,9 +414,7 @@ export function AdminProgressScoreRosterPage({
     }
   }
 
-  const showLearnerRoster =
-    selectedProduct &&
-    (mainTab === "progress" || (mainTab === "scores" && selectedQuiz));
+  const showLearnerRoster = selectedProduct && (mainTab === "progress" || Boolean(selectedQuiz));
 
   const productNoun =
     mainTab === "progress"
@@ -474,9 +445,7 @@ export function AdminProgressScoreRosterPage({
             resetDrill();
           }}
           onSelectProduct={(product) => {
-            router.push(
-              `/admin/reports/progress-score/progress/${progressProduct}/${product.id}`,
-            );
+            router.push(`/admin/reports/progress-score/progress/${progressProduct}/${product.id}`);
           }}
         />
       ) : mainTab === "scores" && !selectedProduct ? (
@@ -494,18 +463,18 @@ export function AdminProgressScoreRosterPage({
         />
       ) : (
         <>
-      <div>
-        <h1 className="text-2xl font-semibold tracking-[-0.01em] text-[var(--admin-on-surface)]">
-          {mainTab === "progress" ? "Progress" : "Scores"}
-        </h1>
-        <p className="mt-1 text-sm text-[var(--admin-on-surface-variant)]">
-          {mainTab === "progress"
-            ? "Learner-by-learner completion for the selected product."
-            : "Pick an assessment to review attempt results."}
-        </p>
-      </div>
+          <div>
+            <h1 className="text-2xl font-semibold tracking-[-0.01em] text-[var(--admin-on-surface)]">
+              {mainTab === "progress" ? "Progress" : "Scores"}
+            </h1>
+            <p className="mt-1 text-sm text-[var(--admin-on-surface-variant)]">
+              {mainTab === "progress"
+                ? "Learner-by-learner completion for the selected product."
+                : "Pick an assessment to review attempt results."}
+            </p>
+          </div>
 
-      {error ? <div className={analyticsAlertErrorClassName}>{error}</div> : null}
+          {error ? <div className={analyticsAlertErrorClassName}>{error}</div> : null}
 
           {showLearnerRoster ? (
             <section className={generalSettingsFormCardClassName}>
@@ -513,8 +482,8 @@ export function AdminProgressScoreRosterPage({
                 <div>
                   <p className="text-sm text-neutral-600">
                     {mainTab === "progress"
-                      ? courseTitle || selectedProduct?.title
-                      : `${quizTitle}${passMark != null ? ` · Pass mark ${passMark}%` : ""}`}
+                      ? courseTitle || selectedProduct.title
+                      : `${quizTitle}${passMark != null ? ` · Pass mark ${String(passMark)}%` : ""}`}
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -522,11 +491,7 @@ export function AdminProgressScoreRosterPage({
                     type="button"
                     className={ghostButtonClassName}
                     onClick={() => {
-                      if (
-                        mainTab === "scores" &&
-                        selectedQuiz &&
-                        scoreProduct !== "mock_test"
-                      ) {
+                      if (mainTab === "scores" && selectedQuiz && scoreProduct !== "mock_test") {
                         setSelectedQuiz(null);
                         setScoreLearners([]);
                         setPage(1);
@@ -548,7 +513,9 @@ export function AdminProgressScoreRosterPage({
                   <button
                     type="button"
                     className={ghostButtonClassName}
-                    onClick={() => setActionsOpen((open) => !open)}
+                    onClick={() => {
+                      setActionsOpen((open) => !open);
+                    }}
                   >
                     {actionsOpen ? "Hide actions" : "Create group / Message"}
                   </button>
@@ -632,7 +599,7 @@ export function AdminProgressScoreRosterPage({
                         className={fieldClassName}
                         value={resultStatus}
                         onChange={(event) => {
-                          setResultStatus(event.target.value);
+                          setResultStatus(event.target.value as "" | ScoreLearnerResultStatus);
                           setPage(1);
                         }}
                       >
@@ -737,7 +704,9 @@ export function AdminProgressScoreRosterPage({
                       className={fieldClassName}
                       placeholder="Group title"
                       value={groupTitle}
-                      onChange={(event) => setGroupTitle(event.target.value)}
+                      onChange={(event) => {
+                        setGroupTitle(event.target.value);
+                      }}
                     />
                     <button
                       type="button"
@@ -753,14 +722,18 @@ export function AdminProgressScoreRosterPage({
                       className={fieldClassName}
                       placeholder="Message subject"
                       value={messageSubject}
-                      onChange={(event) => setMessageSubject(event.target.value)}
+                      onChange={(event) => {
+                        setMessageSubject(event.target.value);
+                      }}
                     />
                     <textarea
                       className={fieldClassName}
                       placeholder="Message body"
                       rows={3}
                       value={messageBody}
-                      onChange={(event) => setMessageBody(event.target.value)}
+                      onChange={(event) => {
+                        setMessageBody(event.target.value);
+                      }}
                     />
                     <button
                       type="button"
@@ -785,9 +758,7 @@ export function AdminProgressScoreRosterPage({
                   <tr>
                     <th className="px-4 py-3">Product</th>
                     <th className="px-4 py-3">Enrolled</th>
-                    <th className="px-4 py-3">
-                      {mainTab === "scores" ? "Quizzes" : "Items"}
-                    </th>
+                    <th className="px-4 py-3">{mainTab === "scores" ? "Quizzes" : "Items"}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -885,18 +856,20 @@ export function AdminProgressScoreRosterPage({
                       <tr
                         key={learner.enrollmentId}
                         className={`${analyticsTableRowClassName} cursor-pointer`}
-                        onClick={() =>
+                        onClick={() => {
                           router.push(
                             `/admin/reports/progress-score/progress/${progressProduct}/${learner.productId}/learners/${learner.enrollmentId}`,
-                          )
-                        }
+                          );
+                        }}
                       >
                         {progressColumns.includes("learner_name") ? (
                           <td className="px-4 py-3">
                             <Link
                               href={`/admin/reports/progress-score/progress/${progressProduct}/${learner.productId}/learners/${learner.enrollmentId}`}
                               className="underline"
-                              onClick={(event) => event.stopPropagation()}
+                              onClick={(event) => {
+                                event.stopPropagation();
+                              }}
                             >
                               {learner.learnerName ?? learner.email ?? "Learner"}
                             </Link>
@@ -958,7 +931,9 @@ export function AdminProgressScoreRosterPage({
                       <tr
                         key={`${learner.membershipId}-${learner.latestAttemptId ?? "none"}`}
                         className={`${analyticsTableRowClassName} cursor-pointer`}
-                        onClick={() => router.push(`/admin/members/${learner.membershipId}`)}
+                        onClick={() => {
+                          router.push(`/admin/members/${learner.membershipId}`);
+                        }}
                       >
                         {scoreColumns.includes("learner_name") ? (
                           <td className="px-4 py-3">
@@ -973,7 +948,7 @@ export function AdminProgressScoreRosterPage({
                         ) : null}
                         {scoreColumns.includes("score_pct") ? (
                           <td className="px-4 py-3">
-                            {learner.scorePct == null ? "—" : `${Number(learner.scorePct).toFixed(1)}%`}
+                            {learner.scorePct == null ? "—" : `${learner.scorePct.toFixed(1)}%`}
                           </td>
                         ) : null}
                         {scoreColumns.includes("answered_count") ? (
@@ -1000,7 +975,9 @@ export function AdminProgressScoreRosterPage({
                   type="button"
                   className={ghostButtonClassName}
                   disabled={page <= 1 || loading}
-                  onClick={() => setPage((current) => Math.max(1, current - 1))}
+                  onClick={() => {
+                    setPage((current) => Math.max(1, current - 1));
+                  }}
                 >
                   Previous
                 </button>
@@ -1008,7 +985,9 @@ export function AdminProgressScoreRosterPage({
                   type="button"
                   className={ghostButtonClassName}
                   disabled={page >= totalPages || loading}
-                  onClick={() => setPage((current) => current + 1)}
+                  onClick={() => {
+                    setPage((current) => current + 1);
+                  }}
                 >
                   Next
                 </button>

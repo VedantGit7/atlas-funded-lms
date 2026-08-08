@@ -43,8 +43,8 @@ import type {
 type TenantCommunityConfigJson = {
   community?: {
     hallOfFame?: {
-      recognitionSpaceSlug?: string;
-      leaderboardKey?: string;
+      recognitionSpaceSlug?: string | undefined;
+      leaderboardKey?: string | undefined;
     };
   };
 };

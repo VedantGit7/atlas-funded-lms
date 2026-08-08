@@ -15,5 +15,5 @@ export const POST = createTenantRoute<
   metadata: mutateCustomFieldSegmentMetadata,
   params: customFieldSegmentParamsSchema,
   output: customFieldSegmentMutationResponseSchema,
-  handler: async ({ tx, ctx, params }) => duplicateCustomFieldSegment(tx, ctx, params.segmentId),
+  handler: async ({ tx, ctx, params }) => duplicateCustomFieldSegment(tx, ctx, params["segmentId"]),
 });

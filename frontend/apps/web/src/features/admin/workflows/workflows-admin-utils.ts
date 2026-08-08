@@ -78,7 +78,10 @@ export function formatRelativeTime(iso: string): string {
   const date = new Date(iso);
   const diffMinutes = Math.round((date.getTime() - Date.now()) / (1000 * 60));
   if (Math.abs(diffMinutes) < 60) {
-    return new Intl.RelativeTimeFormat(undefined, { numeric: "auto" }).format(diffMinutes, "minute");
+    return new Intl.RelativeTimeFormat(undefined, { numeric: "auto" }).format(
+      diffMinutes,
+      "minute",
+    );
   }
   const diffHours = Math.round((date.getTime() - Date.now()) / (1000 * 60 * 60));
   if (Math.abs(diffHours) < 48) {
@@ -88,7 +91,10 @@ export function formatRelativeTime(iso: string): string {
 }
 
 export function stateOptionsForValue(value: string) {
-  const options = WORKFLOW_STATE_OPTIONS.map((state) => ({ value: state, label: state }));
+  const options: { value: string; label: string }[] = WORKFLOW_STATE_OPTIONS.map((state) => ({
+    value: state,
+    label: state,
+  }));
   if (value && !WORKFLOW_STATE_OPTIONS.includes(value as (typeof WORKFLOW_STATE_OPTIONS)[number])) {
     options.unshift({ value, label: value });
   }
@@ -111,16 +117,23 @@ export function parseDefinition(definitionJson: Record<string, unknown>): Workfl
   return {
     targetType:
       typeof definitionJson["targetType"] === "string" ? definitionJson["targetType"] : "course",
-    fromState: typeof definitionJson["fromState"] === "string" ? definitionJson["fromState"] : "DRAFT",
+    fromState:
+      typeof definitionJson["fromState"] === "string" ? definitionJson["fromState"] : "DRAFT",
     reviewState:
       typeof definitionJson["reviewState"] === "string" ? definitionJson["reviewState"] : "REVIEW",
     approvedState:
-      typeof definitionJson["approvedState"] === "string" ? definitionJson["approvedState"] : "PUBLISHED",
+      typeof definitionJson["approvedState"] === "string"
+        ? definitionJson["approvedState"]
+        : "PUBLISHED",
     rejectedState:
-      typeof definitionJson["rejectedState"] === "string" ? definitionJson["rejectedState"] : "REJECTED",
+      typeof definitionJson["rejectedState"] === "string"
+        ? definitionJson["rejectedState"]
+        : "REJECTED",
     requiresReview: definitionJson["requiresReview"] === true,
     assigneeRoleKey:
-      typeof definitionJson["assigneeRoleKey"] === "string" ? definitionJson["assigneeRoleKey"] : "admin",
+      typeof definitionJson["assigneeRoleKey"] === "string"
+        ? definitionJson["assigneeRoleKey"]
+        : "admin",
     actions: actions.length > 0 ? actions : ["approve", "reject", "return"],
   };
 }

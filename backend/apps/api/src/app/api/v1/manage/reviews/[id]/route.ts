@@ -23,7 +23,7 @@ export const PATCH = createTenantRoute<
   params: paramsSchema,
   body: updateManageReviewBodySchema,
   output: manageReviewResponseSchema,
-  handler: async ({ tx, ctx, params, input }) => updateManageReview(tx, ctx, params.id, input),
+  handler: async ({ tx, ctx, params, input }) => updateManageReview(tx, ctx, params["id"], input),
 });
 
 export const DELETE = createTenantRoute<
@@ -34,5 +34,5 @@ export const DELETE = createTenantRoute<
   metadata: mutateManageReviewsMetadata,
   params: paramsSchema,
   output: deleteManageReviewResponseSchema,
-  handler: async ({ tx, ctx, params }) => deleteManageReview(tx, ctx, params.id),
+  handler: async ({ tx, ctx, params }) => deleteManageReview(tx, ctx, params["id"]),
 });

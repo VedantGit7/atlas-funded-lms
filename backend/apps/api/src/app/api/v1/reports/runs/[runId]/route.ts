@@ -32,7 +32,7 @@ export const GET = createTenantRoute<
   params: paramsSchema,
   output: reportRunResponseSchema,
   handler: async ({ tx, ctx, params }) => {
-    const result = await getReportRun(tx, ctx, params.runId);
+    const result = await getReportRun(tx, ctx, params["runId"]);
 
     return {
       data: {

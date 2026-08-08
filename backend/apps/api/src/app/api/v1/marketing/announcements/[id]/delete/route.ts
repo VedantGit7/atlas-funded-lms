@@ -19,6 +19,5 @@ export const POST = createTenantRoute<
   params: paramsSchema,
   body: deleteAnnouncementBodySchema,
   output: deleteAnnouncementResponseSchema,
-  handler: async ({ tx, ctx, params, input }) =>
-    deleteAnnouncement(tx, ctx, params.id, input),
+  handler: async ({ tx, ctx, params, input }) => deleteAnnouncement(tx, ctx, params["id"], input),
 });

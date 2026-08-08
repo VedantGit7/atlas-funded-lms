@@ -18,5 +18,5 @@ export const POST = createTenantRoute<
   params: assessmentIdParamsSchema,
   output: regradeScoreAttemptsResponseSchema,
   handler: async ({ tx, ctx, input, params }) =>
-    regradeScoreAttempts(tx, ctx, params.assessmentId, input),
+    regradeScoreAttempts(tx, ctx, params["assessmentId"], input),
 });

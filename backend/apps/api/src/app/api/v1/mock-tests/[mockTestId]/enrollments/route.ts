@@ -18,5 +18,5 @@ export const POST = createTenantRoute<
   body: productEnrollBodySchema,
   output: productEnrollmentResponseSchema,
   handler: async ({ tx, ctx, params, input }) =>
-    enrollMockTest(tx, ctx, params.mockTestId, input),
+    enrollMockTest(tx, ctx, params["mockTestId"], input),
 });

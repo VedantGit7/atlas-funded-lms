@@ -15,5 +15,5 @@ export const GET = createTenantRoute<
   metadata: listPaymentsRosterMetadata,
   params: paymentInvoiceDetailParamsSchema,
   output: paymentInvoiceDetailResponseSchema,
-  handler: async ({ tx, ctx, params }) => getPaymentInvoiceDetail(tx, ctx, params.orderId),
+  handler: async ({ tx, ctx, params }) => getPaymentInvoiceDetail(tx, ctx, params["orderId"]),
 });

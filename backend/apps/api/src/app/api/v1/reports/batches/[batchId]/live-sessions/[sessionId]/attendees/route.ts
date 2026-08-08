@@ -18,5 +18,5 @@ export const GET = createTenantRoute<
   params: batchLiveSessionParamsSchema,
   output: batchLiveSessionAttendeesListResponseSchema,
   handler: async ({ tx, ctx, input, params }) =>
-    listBatchLiveSessionAttendees(tx, ctx, params.batchId, params.sessionId, input),
+    listBatchLiveSessionAttendees(tx, ctx, params["batchId"], params["sessionId"], input),
 });

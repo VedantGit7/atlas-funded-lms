@@ -34,7 +34,7 @@ function readMediaSection(configJson: unknown): Record<string, unknown> {
   if (!configJson || typeof configJson !== "object" || Array.isArray(configJson)) {
     return {};
   }
-  const media = (configJson as Record<string, unknown>).media;
+  const media = (configJson as Record<string, unknown>)["media"];
   if (!media || typeof media !== "object" || Array.isArray(media)) {
     return {};
   }
@@ -48,7 +48,7 @@ export async function readTenantDefaultVideoQuality(tx: TenantTx): Promise<Video
     limit 1
   `;
 
-  const quality = readMediaSection(rows[0]?.config_json).defaultVideoQuality;
+  const quality = readMediaSection(rows[0]?.config_json)["defaultVideoQuality"];
   return isVideoQuality(quality) ? quality : DEFAULT_VIDEO_QUALITY;
 }
 
@@ -63,7 +63,9 @@ export async function updateTenantDefaultVideoQuality(
   `;
 
   const existing =
-    rows[0]?.config_json && typeof rows[0].config_json === "object" && !Array.isArray(rows[0].config_json)
+    rows[0]?.config_json &&
+    typeof rows[0].config_json === "object" &&
+    !Array.isArray(rows[0].config_json)
       ? (rows[0].config_json as Record<string, unknown>)
       : {};
 
@@ -123,7 +125,10 @@ async function readTenantConfigRoot(tx: TenantTx): Promise<Record<string, unknow
   return readConfigRoot(rows[0]?.config_json);
 }
 
-async function writeTenantConfigRoot(tx: TenantTx, configJson: Record<string, unknown>): Promise<void> {
+async function writeTenantConfigRoot(
+  tx: TenantTx,
+  configJson: Record<string, unknown>,
+): Promise<void> {
   await tx.$executeRaw`
     insert into tenant_config (
       id,
@@ -207,7 +212,9 @@ export async function readTenantLearnerEmailVerification(
   tx: TenantTx,
 ): Promise<{ verificationDays: number }> {
   const security = readConfigSection(await readTenantConfigRoot(tx), "security");
-  return { verificationDays: clamp(readIntField(security, "learnerEmailVerificationDays", 1), 0, 365) };
+  return {
+    verificationDays: clamp(readIntField(security, "learnerEmailVerificationDays", 1), 0, 365),
+  };
 }
 
 export async function updateTenantLearnerEmailVerification(
@@ -256,8 +263,16 @@ export async function readTenantDeviceMonitor(tx: TenantTx): Promise<{
 
 export async function updateTenantDeviceMonitor(
   tx: TenantTx,
-  input: { restrictionsEnabled: boolean; registrationLimit: number; restrictParallelLogins: boolean },
-): Promise<{ restrictionsEnabled: boolean; registrationLimit: number; restrictParallelLogins: boolean }> {
+  input: {
+    restrictionsEnabled: boolean;
+    registrationLimit: number;
+    restrictParallelLogins: boolean;
+  },
+): Promise<{
+  restrictionsEnabled: boolean;
+  registrationLimit: number;
+  restrictParallelLogins: boolean;
+}> {
   const registrationLimit = clamp(Math.trunc(input.registrationLimit), 1, 10);
   await mergeConfigSection(tx, "security", {
     deviceRestrictionsEnabled: input.restrictionsEnabled,

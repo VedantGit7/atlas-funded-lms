@@ -18,5 +18,5 @@ export const POST = createTenantRoute<
   params: scoreAttemptReviewParamsSchema,
   output: voidAttemptResponseSchema,
   handler: async ({ tx, ctx, input, params }) =>
-    voidScoreAttempt(tx, ctx, params.assessmentId, params.attemptId, input),
+    voidScoreAttempt(tx, ctx, params["assessmentId"], params["attemptId"], input),
 });

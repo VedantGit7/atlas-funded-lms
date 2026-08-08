@@ -18,5 +18,5 @@ export const GET = createTenantRoute<
   params: batchIdParamsSchema,
   output: batchLiveSessionsMatrixResponseSchema,
   handler: async ({ tx, ctx, input, params }) =>
-    getBatchLiveSessionsMatrix(tx, ctx, params.batchId, input),
+    getBatchLiveSessionsMatrix(tx, ctx, params["batchId"], input),
 });

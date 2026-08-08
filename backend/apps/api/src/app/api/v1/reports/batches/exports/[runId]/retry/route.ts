@@ -16,5 +16,5 @@ export const POST = createTenantRoute<
   params: batchExportRunParamsSchema,
   input: noBodySchema,
   output: retryBatchExportResponseSchema,
-  handler: async ({ tx, ctx, params }) => retryBatchExport(tx, ctx, params.runId),
+  handler: async ({ tx, ctx, params }) => retryBatchExport(tx, ctx, params["runId"]),
 });

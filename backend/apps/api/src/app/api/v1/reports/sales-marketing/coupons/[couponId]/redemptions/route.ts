@@ -18,5 +18,5 @@ export const GET = createTenantRoute<
   params: couponIdParamsSchema,
   output: couponRedemptionsListResponseSchema,
   handler: async ({ tx, ctx, input, params }) =>
-    listCouponRedemptions(tx, ctx, params.couponId, input),
+    listCouponRedemptions(tx, ctx, params["couponId"], input),
 });

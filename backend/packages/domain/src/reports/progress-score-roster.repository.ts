@@ -10,6 +10,13 @@ import type {
   ScoreQuizzesQuery,
 } from "./progress-score-roster.dto";
 
+function asUnknownString(value: unknown, fallback = ""): string {
+  if (typeof value === "string") return value;
+  if (typeof value === "number" || typeof value === "boolean") return String(value);
+  if (value == null) return fallback;
+  return fallback;
+}
+
 export type { ProgressProductType, ScoreProductType };
 
 export type ProgressCourseRow = {
@@ -51,13 +58,12 @@ function productListFilters(query: ProductListQuery): {
   return {
     ...(query.q ? { q: query.q } : {}),
     ...("status" in query && query.status ? { status: query.status } : {}),
-    sortBy: "sortBy" in query && query.sortBy ? query.sortBy : "title",
-    sortDir: "sortDir" in query && query.sortDir ? query.sortDir : "asc",
+    sortBy: "sortBy" in query ? query.sortBy : "title",
+    sortDir: "sortDir" in query ? query.sortDir : "asc",
     limit: query.limit,
     page: query.page,
   };
 }
-
 
 export type ProgressLearnerRow = {
   enrollment_id: string;
@@ -183,20 +189,20 @@ export type ScoreLearnerSummaryRow = {
 
 function mapProgressLearnerRows(rows: Array<Record<string, unknown>>): ProgressLearnerRow[] {
   return rows.map((row) => ({
-    enrollment_id: String(row["enrollment_id"]),
-    membership_id: String(row["membership_id"]),
-    course_id: String(row["course_id"]),
+    enrollment_id: asUnknownString(row["enrollment_id"]),
+    membership_id: asUnknownString(row["membership_id"]),
+    course_id: asUnknownString(row["course_id"]),
     learner_name: typeof row["learner_name"] === "string" ? row["learner_name"] : null,
     email: typeof row["email"] === "string" ? row["email"] : null,
     completion_pct: Number(row["completion_pct"] ?? 0),
     completed_lessons: Number(row["completed_lessons"] ?? 0),
     total_lessons: Number(row["total_lessons"] ?? 0),
-    enrolled_type: String(row["enrolled_type"] ?? "free"),
-    status: String(row["status"]),
+    enrolled_type: asUnknownString(row["enrolled_type"], "free"),
+    status: asUnknownString(row["status"]),
     activity_status: (["active", "stalled", "not_started"].includes(
-      String(row["activity_status"] ?? ""),
+      asUnknownString(row["activity_status"], ""),
     )
-      ? String(row["activity_status"])
+      ? asUnknownString(row["activity_status"])
       : Number(row["completion_pct"] ?? 0) === 0
         ? "not_started"
         : "active") as ProgressLearnerRow["activity_status"],
@@ -258,17 +264,14 @@ export const progressScoreRosterRepository = {
       `;
       return rows[0]?.title ?? null;
     }
-    if (productType === "mock_test") {
-      const rows = await tx.$queryRaw<Array<{ title: string }>>`
-        select title
-        from mock_tests
-        where id = ${productId}::uuid
-          and deleted_at is null
-        limit 1
-      `;
-      return rows[0]?.title ?? null;
-    }
-    return null;
+    const rows = await tx.$queryRaw<Array<{ title: string }>>`
+      select title
+      from mock_tests
+      where id = ${productId}::uuid
+        and deleted_at is null
+      limit 1
+    `;
+    return rows[0]?.title ?? null;
   },
 
   async getLearnerRosterProduct(
@@ -379,36 +382,32 @@ export const progressScoreRosterRepository = {
       return rows[0] ?? null;
     }
 
-    if (productType === "subscription") {
-      const rows = await tx.$queryRaw<ProgressLearnerRosterProductRow[]>`
-        select
-          p.id::text as id,
-          p.title,
-          p.slug,
-          p.status::text as status,
-          coalesce(items.item_count, 0)::int as lesson_count,
-          0::int as assessment_count,
-          coalesce(enr.enrolled_count, 0)::int as enrolled_count
-        from learner_subscription_plans p
-        left join lateral (
-          select count(*)::int as item_count
-          from learner_subscription_plan_items lspi
-          where lspi.plan_id = p.id and lspi.tenant_id = p.tenant_id
-        ) items on true
-        left join lateral (
-          select count(*)::int as enrolled_count
-          from learner_subscription_enrollments lse
-          where lse.plan_id = p.id and lse.tenant_id = p.tenant_id
-        ) enr on true
-        where p.id = ${productId}::uuid
-          and p.tenant_id = current_setting('app.tenant_id', true)::uuid
-          and p.deleted_at is null
-        limit 1
-      `;
-      return rows[0] ?? null;
-    }
-
-    return null;
+    const rows = await tx.$queryRaw<ProgressLearnerRosterProductRow[]>`
+      select
+        p.id::text as id,
+        p.title,
+        p.slug,
+        p.status::text as status,
+        coalesce(items.item_count, 0)::int as lesson_count,
+        0::int as assessment_count,
+        coalesce(enr.enrolled_count, 0)::int as enrolled_count
+      from learner_subscription_plans p
+      left join lateral (
+        select count(*)::int as item_count
+        from learner_subscription_plan_items lspi
+        where lspi.plan_id = p.id and lspi.tenant_id = p.tenant_id
+      ) items on true
+      left join lateral (
+        select count(*)::int as enrolled_count
+        from learner_subscription_enrollments lse
+        where lse.plan_id = p.id and lse.tenant_id = p.tenant_id
+      ) enr on true
+      where p.id = ${productId}::uuid
+        and p.tenant_id = current_setting('app.tenant_id', true)::uuid
+        and p.deleted_at is null
+      limit 1
+    `;
+    return rows[0] ?? null;
   },
 
   async getLearnerRosterSummary(
@@ -492,12 +491,11 @@ export const progressScoreRosterRepository = {
 
     const row = rows[0];
     return {
-      avg_completion_pct:
-        row?.avg_completion_pct == null ? null : Number(row.avg_completion_pct),
-      completed_count: Number(row?.completed_count ?? 0),
-      stalled_count: Number(row?.stalled_count ?? 0),
-      not_started_count: Number(row?.not_started_count ?? 0),
-      expiring_within_30d_count: Number(row?.expiring_within_30d_count ?? 0),
+      avg_completion_pct: row?.avg_completion_pct == null ? null : row.avg_completion_pct,
+      completed_count: row?.completed_count ?? 0,
+      stalled_count: row?.stalled_count ?? 0,
+      not_started_count: row?.not_started_count ?? 0,
+      expiring_within_30d_count: row?.expiring_within_30d_count ?? 0,
     };
   },
 
@@ -712,7 +710,7 @@ export const progressScoreRosterRepository = {
   async countProducts(
     tx: TenantTx,
     productType: ProgressProductType | ScoreProductType,
-    filters?: { q?: string; status?: ProductPublishStatus },
+    filters?: { q?: string | undefined; status?: ProductPublishStatus | undefined },
   ): Promise<number> {
     const q = filters?.q;
     const status = filters?.status ?? null;
@@ -776,22 +774,19 @@ export const progressScoreRosterRepository = {
       `;
       return Number(rows[0]?.count ?? 0);
     }
-    if (productType === "mock_test") {
-      const rows = await tx.$queryRaw<Array<{ count: bigint }>>`
-        select count(*)::bigint as count
-        from mock_tests mt
-        where mt.tenant_id = current_setting('app.tenant_id', true)::uuid
-          and mt.deleted_at is null
-          and (${status}::text is null or mt.status::text = ${status})
-          and (
-            ${q ?? null}::text is null
-            or lower(mt.title) like '%' || lower(${q ?? null}) || '%'
-            or lower(mt.slug) like '%' || lower(${q ?? null}) || '%'
-          )
-      `;
-      return Number(rows[0]?.count ?? 0);
-    }
-    return 0;
+    const rows = await tx.$queryRaw<Array<{ count: bigint }>>`
+      select count(*)::bigint as count
+      from mock_tests mt
+      where mt.tenant_id = current_setting('app.tenant_id', true)::uuid
+        and mt.deleted_at is null
+        and (${status}::text is null or mt.status::text = ${status})
+        and (
+          ${q ?? null}::text is null
+          or lower(mt.title) like '%' || lower(${q ?? null}) || '%'
+          or lower(mt.slug) like '%' || lower(${q ?? null}) || '%'
+        )
+    `;
+    return Number(rows[0]?.count ?? 0);
   },
 
   async summarizeProducts(
@@ -823,8 +818,8 @@ export const progressScoreRosterRepository = {
           )
       `;
       return {
-        productCount: Number(rows[0]?.product_count ?? 0),
-        enrolmentCount: Number(rows[0]?.enrolment_count ?? 0),
+        productCount: rows[0]?.product_count ?? 0,
+        enrolmentCount: rows[0]?.enrolment_count ?? 0,
       };
     }
     if (productType === "test_series") {
@@ -849,8 +844,8 @@ export const progressScoreRosterRepository = {
           )
       `;
       return {
-        productCount: Number(rows[0]?.product_count ?? 0),
-        enrolmentCount: Number(rows[0]?.enrolment_count ?? 0),
+        productCount: rows[0]?.product_count ?? 0,
+        enrolmentCount: rows[0]?.enrolment_count ?? 0,
       };
     }
     if (productType === "bundle") {
@@ -875,8 +870,8 @@ export const progressScoreRosterRepository = {
           )
       `;
       return {
-        productCount: Number(rows[0]?.product_count ?? 0),
-        enrolmentCount: Number(rows[0]?.enrolment_count ?? 0),
+        productCount: rows[0]?.product_count ?? 0,
+        enrolmentCount: rows[0]?.enrolment_count ?? 0,
       };
     }
     if (productType === "subscription") {
@@ -901,37 +896,34 @@ export const progressScoreRosterRepository = {
           )
       `;
       return {
-        productCount: Number(rows[0]?.product_count ?? 0),
-        enrolmentCount: Number(rows[0]?.enrolment_count ?? 0),
+        productCount: rows[0]?.product_count ?? 0,
+        enrolmentCount: rows[0]?.enrolment_count ?? 0,
       };
     }
-    if (productType === "mock_test") {
-      const rows = await tx.$queryRaw<Array<{ product_count: number; enrolment_count: number }>>`
-        select
-          count(*)::int as product_count,
-          coalesce(sum(enr.enrolled_count), 0)::int as enrolment_count
-        from mock_tests mt
-        left join lateral (
-          select count(*)::int as enrolled_count
-          from mock_test_enrollments mte
-          where mte.mock_test_id = mt.id
-            and mte.tenant_id = mt.tenant_id
-        ) enr on true
-        where mt.tenant_id = current_setting('app.tenant_id', true)::uuid
-          and mt.deleted_at is null
-          and (${status}::text is null or mt.status::text = ${status})
-          and (
-            ${q ?? null}::text is null
-            or lower(mt.title) like '%' || lower(${q ?? null}) || '%'
-            or lower(mt.slug) like '%' || lower(${q ?? null}) || '%'
-          )
-      `;
-      return {
-        productCount: Number(rows[0]?.product_count ?? 0),
-        enrolmentCount: Number(rows[0]?.enrolment_count ?? 0),
-      };
-    }
-    return { productCount: 0, enrolmentCount: 0 };
+    const rows = await tx.$queryRaw<Array<{ product_count: number; enrolment_count: number }>>`
+      select
+        count(*)::int as product_count,
+        coalesce(sum(enr.enrolled_count), 0)::int as enrolment_count
+      from mock_tests mt
+      left join lateral (
+        select count(*)::int as enrolled_count
+        from mock_test_enrollments mte
+        where mte.mock_test_id = mt.id
+          and mte.tenant_id = mt.tenant_id
+      ) enr on true
+      where mt.tenant_id = current_setting('app.tenant_id', true)::uuid
+        and mt.deleted_at is null
+        and (${status}::text is null or mt.status::text = ${status})
+        and (
+          ${q ?? null}::text is null
+          or lower(mt.title) like '%' || lower(${q ?? null}) || '%'
+          or lower(mt.slug) like '%' || lower(${q ?? null}) || '%'
+        )
+    `;
+    return {
+      productCount: rows[0]?.product_count ?? 0,
+      enrolmentCount: rows[0]?.enrolment_count ?? 0,
+    };
   },
 
   async listProducts(
@@ -1220,50 +1212,47 @@ export const progressScoreRosterRepository = {
       `;
     }
 
-    if (productType === "mock_test") {
-      return tx.$queryRaw<ProgressProductRow[]>`
-        select
-          mt.id::text as id,
-          mt.title,
-          mt.slug,
-          mt.status::text as status,
-          coalesce(enr.enrolled_count, 0)::int as enrolled_count,
-          1::int as quiz_count,
-          mt.assessment_id::text as assessment_id,
-          null::float as avg_completion_pct,
-          0::int as band_not_started,
-          0::int as band_early,
-          0::int as band_in_progress,
-          0::int as band_nearly_done,
-          0::int as band_complete,
-          0::int as not_started_count,
-          null::timestamptz as last_activity_at
-        from mock_tests mt
-        left join lateral (
-          select count(*)::int as enrolled_count
-          from mock_test_enrollments mte
-          where mte.mock_test_id = mt.id
-            and mte.tenant_id = mt.tenant_id
-        ) enr on true
-        where mt.tenant_id = current_setting('app.tenant_id', true)::uuid
-          and mt.deleted_at is null
-          and (${status}::text is null or mt.status::text = ${status})
-          and (
-            ${q}::text is null
-            or lower(mt.title) like '%' || lower(${q}) || '%'
-            or lower(mt.slug) like '%' || lower(${q}) || '%'
-          )
-        order by
-          case when ${sortBy} = 'enrolled_count' and ${sortDir} = 'asc' then coalesce(enr.enrolled_count, 0) end asc nulls last,
-          case when ${sortBy} = 'enrolled_count' and ${sortDir} = 'desc' then coalesce(enr.enrolled_count, 0) end desc nulls last,
-          case when ${sortBy} = 'title' and ${sortDir} = 'asc' then mt.title end asc,
-          case when ${sortBy} = 'title' and ${sortDir} = 'desc' then mt.title end desc,
-          mt.title asc
-        limit ${filters.limit}
-        offset ${skip}
-      `;
-    }
-    return [];
+    return tx.$queryRaw<ProgressProductRow[]>`
+      select
+        mt.id::text as id,
+        mt.title,
+        mt.slug,
+        mt.status::text as status,
+        coalesce(enr.enrolled_count, 0)::int as enrolled_count,
+        1::int as quiz_count,
+        mt.assessment_id::text as assessment_id,
+        null::float as avg_completion_pct,
+        0::int as band_not_started,
+        0::int as band_early,
+        0::int as band_in_progress,
+        0::int as band_nearly_done,
+        0::int as band_complete,
+        0::int as not_started_count,
+        null::timestamptz as last_activity_at
+      from mock_tests mt
+      left join lateral (
+        select count(*)::int as enrolled_count
+        from mock_test_enrollments mte
+        where mte.mock_test_id = mt.id
+          and mte.tenant_id = mt.tenant_id
+      ) enr on true
+      where mt.tenant_id = current_setting('app.tenant_id', true)::uuid
+        and mt.deleted_at is null
+        and (${status}::text is null or mt.status::text = ${status})
+        and (
+          ${q}::text is null
+          or lower(mt.title) like '%' || lower(${q}) || '%'
+          or lower(mt.slug) like '%' || lower(${q}) || '%'
+        )
+      order by
+        case when ${sortBy} = 'enrolled_count' and ${sortDir} = 'asc' then coalesce(enr.enrolled_count, 0) end asc nulls last,
+        case when ${sortBy} = 'enrolled_count' and ${sortDir} = 'desc' then coalesce(enr.enrolled_count, 0) end desc nulls last,
+        case when ${sortBy} = 'title' and ${sortDir} = 'asc' then mt.title end asc,
+        case when ${sortBy} = 'title' and ${sortDir} = 'desc' then mt.title end desc,
+        mt.title asc
+      limit ${filters.limit}
+      offset ${skip}
+    `;
   },
 
   async countProgressLearners(tx: TenantTx, filter: ProgressLearnersFilter): Promise<number> {
@@ -1276,16 +1265,10 @@ export const progressScoreRosterRepository = {
     if (filter.productType === "bundle") {
       return this.countBundleProgressLearners(tx, filter);
     }
-    if (filter.productType === "subscription") {
-      return this.countSubscriptionProgressLearners(tx, filter);
-    }
-    return 0;
+    return this.countSubscriptionProgressLearners(tx, filter);
   },
 
-  async countCourseProgressLearners(
-    tx: TenantTx,
-    filter: ProgressLearnersFilter,
-  ): Promise<number> {
+  async countCourseProgressLearners(tx: TenantTx, filter: ProgressLearnersFilter): Promise<number> {
     const view = filter.view ?? "all";
     const completionBand = filter.completionBand ?? null;
     const activityStatus = filter.activityStatus ?? null;
@@ -1412,10 +1395,7 @@ export const progressScoreRosterRepository = {
     return Number(rows[0]?.count ?? 0);
   },
 
-  async countBundleProgressLearners(
-    tx: TenantTx,
-    filter: ProgressLearnersFilter,
-  ): Promise<number> {
+  async countBundleProgressLearners(tx: TenantTx, filter: ProgressLearnersFilter): Promise<number> {
     const rows = await tx.$queryRaw<Array<{ count: bigint }>>`
       select count(*)::bigint as count
       from bundle_enrollments e
@@ -1491,10 +1471,7 @@ export const progressScoreRosterRepository = {
     if (productType === "bundle") {
       return this.listBundleProgressLearners(tx, productId, query);
     }
-    if (productType === "subscription") {
-      return this.listSubscriptionProgressLearners(tx, productId, query);
-    }
-    return [];
+    return this.listSubscriptionProgressLearners(tx, productId, query);
   },
 
   async listCourseProgressLearners(
@@ -1503,7 +1480,7 @@ export const progressScoreRosterRepository = {
     query: ProgressLearnersQuery,
   ): Promise<ProgressLearnerRow[]> {
     const skip = (query.page - 1) * query.limit;
-    const view = query.view ?? "all";
+    const view = query.view;
     const completionBand = query.completionBand ?? null;
     const activityStatus = query.activityStatus ?? null;
     const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
@@ -2053,10 +2030,7 @@ export const progressScoreRosterRepository = {
     return mapProgressLearnerRows(rows);
   },
 
-  async listProgressMembershipIds(
-    tx: TenantTx,
-    filter: ProgressLearnersFilter,
-  ): Promise<string[]> {
+  async listProgressMembershipIds(tx: TenantTx, filter: ProgressLearnersFilter): Promise<string[]> {
     if (filter.productType === "test_series") {
       const rows = await tx.$queryRaw<Array<{ membership_id: string }>>`
         select distinct e.membership_id::text as membership_id
@@ -2240,51 +2214,48 @@ export const progressScoreRosterRepository = {
       `;
       return Number(rows[0]?.count ?? 0);
     }
-    if (productType === "bundle") {
-      const rows = await tx.$queryRaw<Array<{ count: bigint }>>`
-        with bundle_assessments as (
-          select distinct a.id
-          from bundle_items bi
-          join assessments a on a.tenant_id = bi.tenant_id and a.deleted_at is null
-          left join lessons l on bi.item_kind = 'course'
-            and l.deleted_at is null
-            and l.tenant_id = bi.tenant_id
-            and coalesce(l.content_json->'content'->>'assessmentId', l.content_json->>'assessmentId') = a.id::text
-          left join course_modules cm on bi.item_kind = 'course'
-            and cm.id = l.module_id
-            and cm.tenant_id = l.tenant_id
-            and cm.deleted_at is null
-            and cm.course_id = bi.ref_id
-          left join mock_tests mt on bi.item_kind = 'mock_test'
-            and mt.id = bi.ref_id
-            and mt.deleted_at is null
-            and mt.assessment_id = a.id
-          left join test_series_items tsi on bi.item_kind = 'test_series'
-            and tsi.test_series_id = bi.ref_id
-            and tsi.tenant_id = bi.tenant_id
-            and a.id = coalesce(
-              tsi.assessment_id,
-              (select mt2.assessment_id from mock_tests mt2 where mt2.id = tsi.mock_test_id and mt2.deleted_at is null)
-            )
-          where bi.bundle_id = ${productId}::uuid
-            and bi.tenant_id = current_setting('app.tenant_id', true)::uuid
-            and (
-              (bi.item_kind = 'course' and cm.id is not null)
-              or (bi.item_kind = 'mock_test' and mt.id is not null)
-              or (bi.item_kind = 'test_series' and tsi.id is not null)
-            )
-        )
-        select count(*)::bigint as count
-        from bundle_assessments ba
-        join assessments a on a.id = ba.id
-        where (
-          ${q ?? null}::text is null
-          or lower(a.title) like '%' || lower(${q ?? null}) || '%'
-        )
-      `;
-      return Number(rows[0]?.count ?? 0);
-    }
-    return 0;
+    const rows = await tx.$queryRaw<Array<{ count: bigint }>>`
+      with bundle_assessments as (
+        select distinct a.id
+        from bundle_items bi
+        join assessments a on a.tenant_id = bi.tenant_id and a.deleted_at is null
+        left join lessons l on bi.item_kind = 'course'
+          and l.deleted_at is null
+          and l.tenant_id = bi.tenant_id
+          and coalesce(l.content_json->'content'->>'assessmentId', l.content_json->>'assessmentId') = a.id::text
+        left join course_modules cm on bi.item_kind = 'course'
+          and cm.id = l.module_id
+          and cm.tenant_id = l.tenant_id
+          and cm.deleted_at is null
+          and cm.course_id = bi.ref_id
+        left join mock_tests mt on bi.item_kind = 'mock_test'
+          and mt.id = bi.ref_id
+          and mt.deleted_at is null
+          and mt.assessment_id = a.id
+        left join test_series_items tsi on bi.item_kind = 'test_series'
+          and tsi.test_series_id = bi.ref_id
+          and tsi.tenant_id = bi.tenant_id
+          and a.id = coalesce(
+            tsi.assessment_id,
+            (select mt2.assessment_id from mock_tests mt2 where mt2.id = tsi.mock_test_id and mt2.deleted_at is null)
+          )
+        where bi.bundle_id = ${productId}::uuid
+          and bi.tenant_id = current_setting('app.tenant_id', true)::uuid
+          and (
+            (bi.item_kind = 'course' and cm.id is not null)
+            or (bi.item_kind = 'mock_test' and mt.id is not null)
+            or (bi.item_kind = 'test_series' and tsi.id is not null)
+          )
+      )
+      select count(*)::bigint as count
+      from bundle_assessments ba
+      join assessments a on a.id = ba.id
+      where (
+        ${q ?? null}::text is null
+        or lower(a.title) like '%' || lower(${q ?? null}) || '%'
+      )
+    `;
+    return Number(rows[0]?.count ?? 0);
   },
 
   async listQuizzes(
@@ -2407,74 +2378,71 @@ export const progressScoreRosterRepository = {
         offset ${skip}
       `;
     }
-    if (productType === "bundle") {
-      return tx.$queryRaw<ScoreQuizRow[]>`
-        with bundle_assessments as (
-          select distinct on (a.id)
-            a.id as assessment_id,
-            a.title,
-            a.assessment_type,
-            case when bi.item_kind = 'course' then l.id::text else null end as lesson_id,
-            coalesce(l.title, mt.title, tsi.title, a.title) as lesson_title
-          from bundle_items bi
-          join assessments a on a.tenant_id = bi.tenant_id and a.deleted_at is null
-          left join lessons l on bi.item_kind = 'course'
-            and l.deleted_at is null
-            and l.tenant_id = bi.tenant_id
-            and coalesce(l.content_json->'content'->>'assessmentId', l.content_json->>'assessmentId') = a.id::text
-          left join course_modules cm on bi.item_kind = 'course'
-            and cm.id = l.module_id
-            and cm.tenant_id = l.tenant_id
-            and cm.deleted_at is null
-            and cm.course_id = bi.ref_id
-          left join mock_tests mt on bi.item_kind = 'mock_test'
-            and mt.id = bi.ref_id
-            and mt.deleted_at is null
-            and mt.assessment_id = a.id
-          left join test_series_items tsi on bi.item_kind = 'test_series'
-            and tsi.test_series_id = bi.ref_id
-            and tsi.tenant_id = bi.tenant_id
-            and a.id = coalesce(
-              tsi.assessment_id,
-              (select mt2.assessment_id from mock_tests mt2 where mt2.id = tsi.mock_test_id and mt2.deleted_at is null)
-            )
-          where bi.bundle_id = ${productId}::uuid
-            and bi.tenant_id = current_setting('app.tenant_id', true)::uuid
-            and (
-              (bi.item_kind = 'course' and cm.id is not null)
-              or (bi.item_kind = 'mock_test' and mt.id is not null)
-              or (bi.item_kind = 'test_series' and tsi.id is not null)
-            )
-          order by a.id, bi.position asc
-        )
+    return tx.$queryRaw<ScoreQuizRow[]>`
+      with bundle_assessments as (
+        select distinct on (a.id)
+          a.id as assessment_id,
+          a.title,
+          a.assessment_type,
+          case when bi.item_kind = 'course' then l.id::text else null end as lesson_id,
+          coalesce(l.title, mt.title, tsi.title, a.title) as lesson_title
+        from bundle_items bi
+        join assessments a on a.tenant_id = bi.tenant_id and a.deleted_at is null
+        left join lessons l on bi.item_kind = 'course'
+          and l.deleted_at is null
+          and l.tenant_id = bi.tenant_id
+          and coalesce(l.content_json->'content'->>'assessmentId', l.content_json->>'assessmentId') = a.id::text
+        left join course_modules cm on bi.item_kind = 'course'
+          and cm.id = l.module_id
+          and cm.tenant_id = l.tenant_id
+          and cm.deleted_at is null
+          and cm.course_id = bi.ref_id
+        left join mock_tests mt on bi.item_kind = 'mock_test'
+          and mt.id = bi.ref_id
+          and mt.deleted_at is null
+          and mt.assessment_id = a.id
+        left join test_series_items tsi on bi.item_kind = 'test_series'
+          and tsi.test_series_id = bi.ref_id
+          and tsi.tenant_id = bi.tenant_id
+          and a.id = coalesce(
+            tsi.assessment_id,
+            (select mt2.assessment_id from mock_tests mt2 where mt2.id = tsi.mock_test_id and mt2.deleted_at is null)
+          )
+        where bi.bundle_id = ${productId}::uuid
+          and bi.tenant_id = current_setting('app.tenant_id', true)::uuid
+          and (
+            (bi.item_kind = 'course' and cm.id is not null)
+            or (bi.item_kind = 'mock_test' and mt.id is not null)
+            or (bi.item_kind = 'test_series' and tsi.id is not null)
+          )
+        order by a.id, bi.position asc
+      )
+      select
+        ba.assessment_id::text as assessment_id,
+        ba.title,
+        ba.assessment_type,
+        ba.lesson_id,
+        ba.lesson_title,
+        coalesce(stats.attempt_count, 0)::int as attempt_count,
+        coalesce(stats.learner_count, 0)::int as learner_count
+      from bundle_assessments ba
+      join assessments a on a.id = ba.assessment_id
+      left join lateral (
         select
-          ba.assessment_id::text as assessment_id,
-          ba.title,
-          ba.assessment_type,
-          ba.lesson_id,
-          ba.lesson_title,
-          coalesce(stats.attempt_count, 0)::int as attempt_count,
-          coalesce(stats.learner_count, 0)::int as learner_count
-        from bundle_assessments ba
-        join assessments a on a.id = ba.assessment_id
-        left join lateral (
-          select
-            count(*)::int as attempt_count,
-            count(distinct membership_id)::int as learner_count
-          from attempts at
-          where at.assessment_id = ba.assessment_id
-            and at.tenant_id = a.tenant_id
-        ) stats on true
-        where (
-          ${query.q ?? null}::text is null
-          or lower(ba.title) like '%' || lower(${query.q ?? null}) || '%'
-        )
-        order by ba.title asc
-        limit ${query.limit}
-        offset ${skip}
-      `;
-    }
-    return [];
+          count(*)::int as attempt_count,
+          count(distinct membership_id)::int as learner_count
+        from attempts at
+        where at.assessment_id = ba.assessment_id
+          and at.tenant_id = a.tenant_id
+      ) stats on true
+      where (
+        ${query.q ?? null}::text is null
+        or lower(ba.title) like '%' || lower(${query.q ?? null}) || '%'
+      )
+      order by ba.title asc
+      limit ${query.limit}
+      offset ${skip}
+    `;
   },
 
   async countScoreLearners(tx: TenantTx, filter: ScoreLearnersFilter): Promise<number> {
@@ -2591,7 +2559,7 @@ export const progressScoreRosterRepository = {
     query: ScoreLearnersQuery,
   ): Promise<ScoreLearnerRow[]> {
     const skip = (query.page - 1) * query.limit;
-    const view = query.view ?? "all";
+    const view = query.view;
     const attemptsFilter = query.attemptsFilter ?? null;
     const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
       with question_count as (
@@ -2746,18 +2714,17 @@ export const progressScoreRosterRepository = {
     `;
 
     return rows.map((row) => ({
-      membership_id: String(row["membership_id"]),
-      assessment_id: String(row["assessment_id"]),
+      membership_id: asUnknownString(row["membership_id"]),
+      assessment_id: asUnknownString(row["assessment_id"]),
       learner_name: typeof row["learner_name"] === "string" ? row["learner_name"] : null,
       email: typeof row["email"] === "string" ? row["email"] : null,
-      result_status: String(row["result_status"]) as ScoreLearnerRow["result_status"],
+      result_status: asUnknownString(row["result_status"]) as ScoreLearnerRow["result_status"],
       attempt_count: Number(row["attempt_count"] ?? 0),
       score_pct: row["score_pct"] == null ? null : Number(row["score_pct"]),
       best_score_pct: row["best_score_pct"] == null ? null : Number(row["best_score_pct"]),
       answered_count: Number(row["answered_count"] ?? 0),
       question_count: row["question_count"] == null ? null : Number(row["question_count"]),
-      duration_seconds:
-        row["duration_seconds"] == null ? null : Number(row["duration_seconds"]),
+      duration_seconds: row["duration_seconds"] == null ? null : Number(row["duration_seconds"]),
       submitted_at: row["submitted_at"] instanceof Date ? row["submitted_at"] : null,
       started_at: row["started_at"] instanceof Date ? row["started_at"] : null,
       latest_attempt_id:
@@ -3062,33 +3029,32 @@ export const progressScoreRosterRepository = {
     const grading = gradingRows[0];
     const bands = bandRows[0];
 
-    const scoredCount = Number(scores?.scored_count ?? 0);
-    const passCount = Number(scores?.pass_count ?? 0);
+    const scoredCount = scores?.scored_count ?? 0;
+    const passCount = scores?.pass_count ?? 0;
 
     return {
       averageCompletionPct:
         completion?.avg_completion_pct == null
           ? null
-          : Math.round(Number(completion.avg_completion_pct) * 10) / 10,
+          : Math.round(completion.avg_completion_pct * 10) / 10,
       previousAverageCompletionPct:
         previous?.avg_completion_pct == null
           ? null
-          : Math.round(Number(previous.avg_completion_pct) * 10) / 10,
-      activeEnrolmentCount: Number(completion?.active_count ?? 0),
-      learnersAtRiskCount: Number(activity?.at_risk_count ?? 0),
+          : Math.round(previous.avg_completion_pct * 10) / 10,
+      activeEnrolmentCount: completion?.active_count ?? 0,
+      learnersAtRiskCount: activity?.at_risk_count ?? 0,
       assessmentPassRatePct:
         scoredCount > 0 ? Math.round((passCount / scoredCount) * 1000) / 10 : null,
-      assessmentAttemptCount: Number(scores?.attempt_count ?? 0),
-      awaitingGradingCount: Number(grading?.awaiting_count ?? 0),
-      enrolmentActivityCount: Number(activity?.activity_count ?? 0),
+      assessmentAttemptCount: scores?.attempt_count ?? 0,
+      awaitingGradingCount: grading?.awaiting_count ?? 0,
+      enrolmentActivityCount: activity?.activity_count ?? 0,
       completionBands: {
-        not_started: Number(bands?.not_started ?? 0),
-        early: Number(bands?.early ?? 0),
-        in_progress: Number(bands?.in_progress ?? 0),
-        nearly_done: Number(bands?.nearly_done ?? 0),
-        complete: Number(bands?.complete ?? 0),
+        not_started: bands?.not_started ?? 0,
+        early: bands?.early ?? 0,
+        in_progress: bands?.in_progress ?? 0,
+        nearly_done: bands?.nearly_done ?? 0,
+        complete: bands?.complete ?? 0,
       },
     };
   },
 };
-

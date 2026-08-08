@@ -20,5 +20,5 @@ export const POST = createTenantRoute<
   body: deleteMarketingWorkflowBodySchema,
   output: deleteMarketingWorkflowResponseSchema,
   handler: async ({ tx, ctx, params, input }) =>
-    deleteMarketingWorkflow(tx, ctx, params.id, input),
+    deleteMarketingWorkflow(tx, ctx, params["id"], input),
 });

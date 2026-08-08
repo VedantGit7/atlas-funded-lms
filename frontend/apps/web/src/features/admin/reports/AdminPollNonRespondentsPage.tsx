@@ -30,6 +30,13 @@ import {
   type PollNonRespondentsSummary,
 } from "./admin-polls-roster-api";
 
+function defined<T>(value: T, message = "Expected value to be defined"): NonNullable<T> {
+  if (value == null) {
+    throw new Error(message);
+  }
+  return value;
+}
+
 const PAGE_SIZE = 25;
 const EXPORT_PAGE_SIZE = 100;
 
@@ -88,17 +95,17 @@ function formatDateTime(value: string | null | undefined): string {
 function formatWatchSeconds(value: number | null | undefined): string {
   if (value == null || Number.isNaN(value)) return "-";
   const total = Math.max(0, Math.floor(value));
-  if (total < 60) return `${total}s`;
+  if (total < 60) return `${String(total)}s`;
   const minutes = Math.floor(total / 60);
   const seconds = total % 60;
-  return `${minutes}:${String(seconds).padStart(2, "0")}`;
+  return `${String(minutes)}:${String(seconds).padStart(2, "0")}`;
 }
 
 function learnerInitials(name: string | null, email: string | null): string {
   const source = (name?.trim() || email?.trim() || "?").replace(/\s+/g, " ");
   const parts = source.split(" ").filter(Boolean);
   if (parts.length >= 2) {
-    return `${parts[0]![0] ?? ""}${parts[1]![0] ?? ""}`.toUpperCase();
+    return `${defined(parts[0])[0] ?? ""}${defined(parts[1])[0] ?? ""}`.toUpperCase();
   }
   return source.slice(0, 2).toUpperCase();
 }
@@ -360,7 +367,9 @@ function MessageNonRespondentsDrawer({
       }
     }
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+    };
   }, [open, onClose]);
 
   useEffect(() => {
@@ -377,8 +386,8 @@ function MessageNonRespondentsDrawer({
       onBodyChange(`${body}${token}`);
       return;
     }
-    const start = el.selectionStart ?? body.length;
-    const end = el.selectionEnd ?? body.length;
+    const start = el.selectionStart;
+    const end = el.selectionEnd;
     const next = `${body.slice(0, start)}${token}${body.slice(end)}`;
     onBodyChange(next);
     requestAnimationFrame(() => {
@@ -394,8 +403,8 @@ function MessageNonRespondentsDrawer({
       onBodyChange(`${wrapper}${body}${wrapper}`);
       return;
     }
-    const start = el.selectionStart ?? 0;
-    const end = el.selectionEnd ?? 0;
+    const start = el.selectionStart;
+    const end = el.selectionEnd;
     const { next, cursor } = wrapSelection(body, start, end, wrapper);
     onBodyChange(next);
     requestAnimationFrame(() => {
@@ -468,7 +477,9 @@ function MessageNonRespondentsDrawer({
                 type="checkbox"
                 className="h-4 w-4 accent-[var(--admin-primary)]"
                 checked={channelEmail}
-                onChange={(event) => onChannelEmailChange(event.target.checked)}
+                onChange={(event) => {
+                  onChannelEmailChange(event.target.checked);
+                }}
               />
               Email
             </label>
@@ -477,7 +488,9 @@ function MessageNonRespondentsDrawer({
                 type="checkbox"
                 className="h-4 w-4 accent-[var(--admin-primary)]"
                 checked={channelInApp}
-                onChange={(event) => onChannelInAppChange(event.target.checked)}
+                onChange={(event) => {
+                  onChannelInAppChange(event.target.checked);
+                }}
               />
               In-app
             </label>
@@ -488,7 +501,9 @@ function MessageNonRespondentsDrawer({
             <input
               className={fieldClassName}
               value={subject}
-              onChange={(event) => onSubjectChange(event.target.value)}
+              onChange={(event) => {
+                onSubjectChange(event.target.value);
+              }}
               maxLength={200}
               placeholder={`We missed your answer: ${pollTitle}`}
             />
@@ -502,7 +517,9 @@ function MessageNonRespondentsDrawer({
                   key={item.token}
                   type="button"
                   className="inline-flex h-7 items-center rounded-md border border-[var(--admin-outline)] bg-[var(--admin-surface-low)] px-2.5 font-mono text-[11px] text-[var(--admin-on-surface)] hover:bg-[var(--admin-surface-high)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]/30"
-                  onClick={() => insertToken(item.token)}
+                  onClick={() => {
+                    insertToken(item.token);
+                  }}
                 >
                   {item.label}
                 </button>
@@ -517,7 +534,9 @@ function MessageNonRespondentsDrawer({
                 <button
                   type="button"
                   className="inline-flex h-7 min-w-7 items-center justify-center rounded-md border border-[var(--admin-outline)] bg-[var(--admin-surface-low)] px-2 text-xs font-semibold text-[var(--admin-on-surface)] hover:bg-[var(--admin-surface-high)]"
-                  onClick={() => applyWrap("**")}
+                  onClick={() => {
+                    applyWrap("**");
+                  }}
                   aria-label="Bold selection"
                 >
                   B
@@ -525,7 +544,9 @@ function MessageNonRespondentsDrawer({
                 <button
                   type="button"
                   className="inline-flex h-7 min-w-7 items-center justify-center rounded-md border border-[var(--admin-outline)] bg-[var(--admin-surface-low)] px-2 text-xs italic text-[var(--admin-on-surface)] hover:bg-[var(--admin-surface-high)]"
-                  onClick={() => applyWrap("_")}
+                  onClick={() => {
+                    applyWrap("_");
+                  }}
                   aria-label="Italic selection"
                 >
                   I
@@ -537,7 +558,9 @@ function MessageNonRespondentsDrawer({
               className={`${fieldClassName} h-auto min-h-[180px] w-full py-2`}
               rows={8}
               value={body}
-              onChange={(event) => onBodyChange(event.target.value)}
+              onChange={(event) => {
+                onBodyChange(event.target.value);
+              }}
               maxLength={10000}
             />
           </div>
@@ -547,7 +570,9 @@ function MessageNonRespondentsDrawer({
               type="checkbox"
               className="mt-0.5 h-4 w-4 accent-[var(--admin-primary)]"
               checked={excludeAbsent}
-              onChange={(event) => onExcludeAbsentChange(event.target.checked)}
+              onChange={(event) => {
+                onExcludeAbsentChange(event.target.checked);
+              }}
             />
             <span>
               <span className="block text-sm text-[var(--admin-on-surface)]">
@@ -585,10 +610,7 @@ function MessageNonRespondentsDrawer({
             type="button"
             className={primaryButtonClassName}
             disabled={
-              sendCount === 0 ||
-              !subject.trim() ||
-              !body.trim() ||
-              (!channelEmail && !channelInApp)
+              sendCount === 0 || !subject.trim() || !body.trim() || (!channelEmail && !channelInApp)
             }
             onClick={onSend}
           >
@@ -698,8 +720,7 @@ export function AdminPollNonRespondentsPage({ pollId }: { pollId: string }) {
   }, [excludeAbsent, selectedIds.length, summary]);
 
   const pageIds = useMemo(() => items.map((row) => row.membershipId), [items]);
-  const allPageSelected =
-    pageIds.length > 0 && pageIds.every((id) => selectedIds.includes(id));
+  const allPageSelected = pageIds.length > 0 && pageIds.every((id) => selectedIds.includes(id));
 
   function toggleSelectAll() {
     if (pageIds.length === 0) return;
@@ -762,10 +783,7 @@ export function AdminPollNonRespondentsPage({ pollId }: { pollId: string }) {
           ? collected.filter((row) => selectedIds.includes(row.membershipId))
           : collected;
 
-      downloadCsvBlob(
-        `poll-${pollId}-non-respondents.csv`,
-        buildCsv(filtered),
-      );
+      downloadCsvBlob(`poll-${pollId}-non-respondents.csv`, buildCsv(filtered));
       setNotice(
         `Exported ${filtered.length.toLocaleString()} non-respondent${filtered.length === 1 ? "" : "s"}.`,
       );
@@ -920,7 +938,9 @@ export function AdminPollNonRespondentsPage({ pollId }: { pollId: string }) {
           <button
             type="button"
             className={ghostButtonClassName}
-            onClick={() => setNotice(null)}
+            onClick={() => {
+              setNotice(null);
+            }}
             aria-label="Dismiss notice"
           >
             <X className="h-4 w-4" aria-hidden="true" />
@@ -940,9 +960,7 @@ export function AdminPollNonRespondentsPage({ pollId }: { pollId: string }) {
               <p className="font-mono text-[32px] font-semibold leading-none text-[var(--admin-on-surface)]">
                 {summary.eligibleCount.toLocaleString()}
               </p>
-              <p className="text-xs text-[var(--admin-on-surface-variant)]">
-                Known audience size
-              </p>
+              <p className="text-xs text-[var(--admin-on-surface-variant)]">Known audience size</p>
             </div>
             <div className="space-y-3 bg-[var(--admin-surface)] p-5">
               <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-[var(--admin-success)]">
@@ -951,9 +969,7 @@ export function AdminPollNonRespondentsPage({ pollId }: { pollId: string }) {
               <p className="font-mono text-2xl font-semibold text-[var(--admin-success)]">
                 {summary.respondentCount.toLocaleString()}
               </p>
-              <p className="text-xs text-[var(--admin-on-surface-variant)]">
-                Submitted an answer
-              </p>
+              <p className="text-xs text-[var(--admin-on-surface-variant)]">Submitted an answer</p>
             </div>
             <div className="space-y-3 bg-[var(--admin-surface)] p-5">
               <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-[var(--admin-warning)]">
@@ -993,7 +1009,9 @@ export function AdminPollNonRespondentsPage({ pollId }: { pollId: string }) {
                     className={`${fieldClassName} w-full pl-9`}
                     placeholder="Name or email"
                     value={draftQ}
-                    onChange={(event) => setDraftQ(event.target.value)}
+                    onChange={(event) => {
+                      setDraftQ(event.target.value);
+                    }}
                     onKeyDown={(event) => {
                       if (event.key === "Enter") applySearch();
                     }}
@@ -1005,9 +1023,7 @@ export function AdminPollNonRespondentsPage({ pollId }: { pollId: string }) {
                     className={selectClassName}
                     value={presence}
                     onValueChange={(value) => {
-                      setPresence(
-                        value === "present" || value === "absent" ? value : "any",
-                      );
+                      setPresence(value === "present" || value === "absent" ? value : "any");
                       setPage(1);
                     }}
                     options={[
@@ -1059,11 +1075,7 @@ export function AdminPollNonRespondentsPage({ pollId }: { pollId: string }) {
                   ]}
                   ariaLabel="Sort direction"
                 />
-                <button
-                  type="button"
-                  className={secondaryButtonClassName}
-                  onClick={applySearch}
-                >
+                <button type="button" className={secondaryButtonClassName} onClick={applySearch}>
                   Apply
                 </button>
                 {selectedIds.length > 0 ? (
@@ -1101,7 +1113,9 @@ export function AdminPollNonRespondentsPage({ pollId }: { pollId: string }) {
                   <button
                     type="button"
                     className={ghostButtonClassName}
-                    onClick={() => setSelectedIds([])}
+                    onClick={() => {
+                      setSelectedIds([]);
+                    }}
                   >
                     Clear
                   </button>
@@ -1134,10 +1148,7 @@ export function AdminPollNonRespondentsPage({ pollId }: { pollId: string }) {
                 <tbody>
                   {loading && items.length === 0 ? (
                     Array.from({ length: 6 }).map((_, index) => (
-                      <tr
-                        key={index}
-                        className="h-11 border-b border-[var(--admin-border)]"
-                      >
+                      <tr key={index} className="h-11 border-b border-[var(--admin-border)]">
                         <td className="px-3 py-3">
                           <Shimmer className="h-4 w-4" />
                         </td>
@@ -1174,7 +1185,9 @@ export function AdminPollNonRespondentsPage({ pollId }: { pollId: string }) {
                               type="checkbox"
                               className="h-4 w-4 accent-[var(--admin-primary)]"
                               checked={selected}
-                              onChange={() => toggleSelectRow(row.membershipId)}
+                              onChange={() => {
+                                toggleSelectRow(row.membershipId);
+                              }}
                               aria-label={`Select ${row.learnerName ?? row.email ?? "learner"}`}
                             />
                           </td>
@@ -1239,27 +1252,31 @@ export function AdminPollNonRespondentsPage({ pollId }: { pollId: string }) {
               <p>
                 {totalCount === 0
                   ? emptyMessage
-                  : `Showing ${rangeStart}-${rangeEnd} of ${totalCount.toLocaleString()}`}
+                  : `Showing ${String(rangeStart)}-${String(rangeEnd)} of ${totalCount.toLocaleString()}`}
               </p>
               <div className="flex items-center gap-2">
                 <button
                   type="button"
                   className={ghostButtonClassName}
                   disabled={page <= 1 || loading}
-                  onClick={() => setPage((current) => Math.max(1, current - 1))}
+                  onClick={() => {
+                    setPage((current) => Math.max(1, current - 1));
+                  }}
                   aria-label="Previous page"
                 >
                   <ChevronLeft className="h-4 w-4" aria-hidden="true" />
                 </button>
                 <span className="font-mono">
                   {page}
-                  {totalPages > 0 ? ` / ${totalPages}` : ""}
+                  {totalPages > 0 ? ` / ${String(totalPages)}` : ""}
                 </span>
                 <button
                   type="button"
                   className={ghostButtonClassName}
                   disabled={page >= totalPages || loading || totalPages === 0}
-                  onClick={() => setPage((current) => current + 1)}
+                  onClick={() => {
+                    setPage((current) => current + 1);
+                  }}
                   aria-label="Next page"
                 >
                   <ChevronRight className="h-4 w-4" aria-hidden="true" />
@@ -1286,7 +1303,9 @@ export function AdminPollNonRespondentsPage({ pollId }: { pollId: string }) {
         onChannelEmailChange={setChannelEmail}
         channelInApp={channelInApp}
         onChannelInAppChange={setChannelInApp}
-        onClose={() => setMessageOpen(false)}
+        onClose={() => {
+          setMessageOpen(false);
+        }}
         onTestSend={() => {
           setNotice("Test send is not available yet.");
         }}

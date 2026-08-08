@@ -19,5 +19,5 @@ export const POST = createTenantRoute<
   params: paramsSchema,
   body: sendWhatsappCampaignBodySchema,
   output: whatsappCampaignResponseSchema,
-  handler: async ({ tx, ctx, params, input }) => sendWhatsappCampaign(tx, ctx, params.id, input),
+  handler: async ({ tx, ctx, params, input }) => sendWhatsappCampaign(tx, ctx, params["id"], input),
 });

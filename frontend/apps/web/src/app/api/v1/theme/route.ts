@@ -22,5 +22,6 @@ export const PUT = createTenantRoute<UpdateTenantThemeRequest, ThemeResponse>({
 
   output: ThemeResponseSchema,
 
-  handler: async ({ tx, input }) => updateTenantThemeDraft(tx, input),
+  handler: async ({ tx, input }) =>
+    (await updateTenantThemeDraft(tx, input)) as unknown as ThemeResponse,
 });

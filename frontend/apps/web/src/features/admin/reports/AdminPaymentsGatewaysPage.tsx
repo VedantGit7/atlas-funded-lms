@@ -188,16 +188,13 @@ export function AdminPaymentsGatewaysPage() {
     void load();
   }, [load]);
 
-  const activeShareItems = useMemo(
-    () => items.filter((item) => item.paidAmountCents > 0),
-    [items],
-  );
+  const activeShareItems = useMemo(() => items.filter((item) => item.paidAmountCents > 0), [items]);
 
   const isEmpty = !loading && !error && items.length === 0;
   const dateLabel =
     paidFrom && paidTo
       ? `${formatShortDate(paidFrom)} – ${formatShortDate(paidTo)}`
-      : summary?.windowLabel ?? "Selected range";
+      : (summary?.windowLabel ?? "Selected range");
 
   return (
     <div className="flex flex-col gap-6">
@@ -235,7 +232,9 @@ export function AdminPaymentsGatewaysPage() {
               <input
                 type="date"
                 value={paidFrom}
-                onChange={(event) => setPaidFrom(event.target.value)}
+                onChange={(event) => {
+                  setPaidFrom(event.target.value);
+                }}
                 className="bg-transparent outline-none"
               />
               <span className="text-[var(--admin-on-surface-variant)]">–</span>
@@ -243,7 +242,9 @@ export function AdminPaymentsGatewaysPage() {
               <input
                 type="date"
                 value={paidTo}
-                onChange={(event) => setPaidTo(event.target.value)}
+                onChange={(event) => {
+                  setPaidTo(event.target.value);
+                }}
                 className="bg-transparent outline-none"
               />
             </label>
@@ -354,8 +355,8 @@ export function AdminPaymentsGatewaysPage() {
                   <div
                     key={item.id}
                     className={`h-full motion-safe:transition-all motion-safe:duration-700 motion-safe:ease-out ${shareBarTone(index)}`}
-                    style={{ width: `${Math.max(item.volumeSharePercent, 0.5)}%` }}
-                    title={`${item.displayName}: ${item.volumeSharePercent}%`}
+                    style={{ width: `${String(Math.max(item.volumeSharePercent, 0.5))}%` }}
+                    title={`${item.displayName}: ${String(item.volumeSharePercent)}%`}
                   />
                 ))
               )}
@@ -368,7 +369,10 @@ export function AdminPaymentsGatewaysPage() {
               ) : (
                 activeShareItems.map((item, index) => (
                   <div key={item.id} className="flex min-w-max items-center gap-2">
-                    <div className={`h-3 w-3 rounded-sm ${shareBarTone(index)}`} aria-hidden="true" />
+                    <div
+                      className={`h-3 w-3 rounded-sm ${shareBarTone(index)}`}
+                      aria-hidden="true"
+                    />
                     <span className="font-mono text-xs text-[var(--admin-on-surface)]">
                       {item.displayName}{" "}
                       <span className="text-[var(--admin-on-surface-variant)]">
@@ -395,7 +399,9 @@ export function AdminPaymentsGatewaysPage() {
                   key={gateway.id}
                   className={[
                     "relative overflow-hidden rounded border border-[var(--admin-border)] bg-[var(--admin-surface)] transition-colors hover:border-[color-mix(in_srgb,var(--admin-primary)_40%,var(--admin-border))]",
-                    status.muted ? "bg-[var(--admin-surface-low)] opacity-80 hover:opacity-100" : "",
+                    status.muted
+                      ? "bg-[var(--admin-surface-low)] opacity-80 hover:opacity-100"
+                      : "",
                   ].join(" ")}
                 >
                   <div
@@ -515,9 +521,9 @@ export function AdminPaymentsGatewaysPage() {
                     Payout reconciliation is not available yet
                   </p>
                   <p className="mt-1 max-w-2xl text-sm text-[var(--admin-on-surface-variant)]">
-                    Settlement rows (gross, fees, net, expected date) will appear here once
-                    provider payout feeds are connected. Volume and success above already
-                    reflect paid ledger activity for {dateLabel}.
+                    Settlement rows (gross, fees, net, expected date) will appear here once provider
+                    payout feeds are connected. Volume and success above already reflect paid ledger
+                    activity for {dateLabel}.
                   </p>
                 </div>
               </div>

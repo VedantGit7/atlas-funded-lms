@@ -5,7 +5,7 @@ import {
   exportLiveClassAttendanceRosterResponseSchema,
 } from "@atlas/domain/reports/live-class-attendance-roster.dto";
 import { exportLiveClassAttendanceRosterMetadata } from "@atlas/domain/reports/live-class-attendance-roster.route-metadata";
-import { exportLiveClassAttendanceRoster } from "../../../../../../../server/reports/live-class-attendance-roster-actions.service";
+import { exportLiveClassAttendanceRoster } from "@atlas/api-server/reports/live-class-attendance-roster-actions.service";
 
 export const POST = createTenantRoute<
   z.output<typeof exportLiveClassAttendanceRosterBodySchema>,

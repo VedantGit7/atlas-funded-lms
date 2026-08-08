@@ -18,5 +18,5 @@ export const GET = createTenantRoute<
   params: progressProductTypeParamsSchema,
   output: progressProductsListResponseSchema,
   handler: async ({ tx, ctx, input, params }) =>
-    listProgressProducts(tx, ctx, params.productType, input),
+    listProgressProducts(tx, ctx, params["productType"], input),
 });

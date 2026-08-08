@@ -6,6 +6,20 @@ import {
   type FieldTypeLookup,
 } from "./custom-field-segments.conditions";
 
+function defined<T>(value: T, message = "Expected value to be defined"): NonNullable<T> {
+  if (value == null) {
+    throw new Error(message);
+  }
+  return value;
+}
+
+function asUnknownString(value: unknown, fallback = ""): string {
+  if (typeof value === "string") return value;
+  if (typeof value === "number" || typeof value === "boolean") return String(value);
+  if (value == null) return fallback;
+  return fallback;
+}
+
 export type SegmentRow = {
   id: string;
   tenant_id: string;
@@ -26,23 +40,24 @@ export type SegmentRow = {
 
 function mapSegmentRow(row: Record<string, unknown>): SegmentRow {
   return {
-    id: String(row["id"]),
-    tenant_id: String(row["tenant_id"]),
-    name: String(row["name"]),
-    description: row["description"] == null ? null : String(row["description"]),
-    visibility: String(row["visibility"]),
-    refresh_mode: String(row["refresh_mode"]),
+    id: asUnknownString(row["id"]),
+    tenant_id: asUnknownString(row["tenant_id"]),
+    name: asUnknownString(row["name"]),
+    description: row["description"] == null ? null : asUnknownString(row["description"]),
+    visibility: asUnknownString(row["visibility"]),
+    refresh_mode: asUnknownString(row["refresh_mode"]),
     conditions_json: row["conditions_json"],
     matched_count: row["matched_count"] == null ? null : Number(row["matched_count"]),
     previous_matched_count:
       row["previous_matched_count"] == null ? null : Number(row["previous_matched_count"]),
     matched_count_at: (row["matched_count_at"] as Date | null) ?? null,
     snapshot_batch_id:
-      row["snapshot_batch_id"] == null ? null : String(row["snapshot_batch_id"]),
-    created_by_membership_id: String(row["created_by_membership_id"]),
+      row["snapshot_batch_id"] == null ? null : asUnknownString(row["snapshot_batch_id"]),
+    created_by_membership_id: asUnknownString(row["created_by_membership_id"]),
     created_at: row["created_at"] as Date,
     updated_at: row["updated_at"] as Date,
-    created_by_name: row["created_by_name"] == null ? null : String(row["created_by_name"]),
+    created_by_name:
+      row["created_by_name"] == null ? null : asUnknownString(row["created_by_name"]),
   };
 }
 
@@ -221,22 +236,22 @@ export const customFieldSegmentsRepository = {
         updated_at,
         null::text as created_by_name
     `;
-    return mapSegmentRow(rows[0]!);
+    return mapSegmentRow(defined(rows[0]));
   },
 
   async updateSegment(
     tx: TenantTx,
     args: {
       id: string;
-      name?: string;
-      description?: string | null;
-      visibility?: string;
-      refreshMode?: string;
+      name?: string | undefined;
+      description?: string | null | undefined;
+      visibility?: string | undefined;
+      refreshMode?: string | undefined;
       conditionsJson?: unknown;
-      matchedCount?: number | null;
-      previousMatchedCount?: number | null;
-      matchedCountAt?: Date | null;
-      snapshotBatchId?: string | null;
+      matchedCount?: number | null | undefined;
+      previousMatchedCount?: number | null | undefined;
+      matchedCountAt?: Date | null | undefined;
+      snapshotBatchId?: string | null | undefined;
     },
   ): Promise<SegmentRow | null> {
     const existing = await tx.$queryRaw<Array<Record<string, unknown>>>`
@@ -281,9 +296,7 @@ export const customFieldSegmentsRepository = {
           args.matchedCountAt === undefined ? current.matched_count_at : args.matchedCountAt
         },
         snapshot_batch_id = ${
-          args.snapshotBatchId === undefined
-            ? current.snapshot_batch_id
-            : args.snapshotBatchId
+          args.snapshotBatchId === undefined ? current.snapshot_batch_id : args.snapshotBatchId
         }::uuid,
         updated_at = now()
       where tenant_id = current_setting('app.tenant_id', true)::uuid
@@ -393,15 +406,15 @@ export const customFieldSegmentsRepository = {
       where m.tenant_id = current_setting('app.tenant_id', true)::uuid
         and (${predicate.sql})
       order by coalesce(mp.display_name, ap.email, m.invited_email_normalized) asc nulls last
-      limit $${predicate.params.length + 1}::int
+      limit $${String(predicate.params.length + 1)}::int
       `,
       ...predicate.params,
       limit,
     );
     return rows.map((row) => ({
-      membership_id: String(row["membership_id"]),
-      learner_name: row["learner_name"] == null ? null : String(row["learner_name"]),
-      email: row["email"] == null ? null : String(row["email"]),
+      membership_id: asUnknownString(row["membership_id"]),
+      learner_name: row["learner_name"] == null ? null : asUnknownString(row["learner_name"]),
+      email: row["email"] == null ? null : asUnknownString(row["email"]),
     }));
   },
 
@@ -423,7 +436,7 @@ export const customFieldSegmentsRepository = {
       where m.tenant_id = current_setting('app.tenant_id', true)::uuid
         and (${predicate.sql})
       order by coalesce(m.joined_at, m.created_at) desc
-      limit $${predicate.params.length + 1}::int
+      limit $${String(predicate.params.length + 1)}::int
       `,
       ...predicate.params,
       limit,
@@ -524,9 +537,9 @@ export const customFieldSegmentsRepository = {
     const row = rows[0];
     return {
       average_total_spent_cents:
-        row?.average_total_spent_cents == null ? null : Number(row.average_total_spent_cents),
+        row?.average_total_spent_cents == null ? null : row.average_total_spent_cents,
       average_enrollment_count:
-        row?.average_enrollment_count == null ? null : Number(row.average_enrollment_count),
+        row?.average_enrollment_count == null ? null : row.average_enrollment_count,
       active_last_30_days: Number(row?.active_last_30_days ?? 0),
       currency: row?.currency ?? "INR",
     };
@@ -540,8 +553,21 @@ export const customFieldSegmentsRepository = {
     tenantMedianCents: number | null;
     tenantMedianBucketIndex: number | null;
   }> {
-    const edges = [0, 500000, 1000000, 1500000, 2000000, 2500000, 3500000, 5000000, 7500000, 10000000];
-    const labels = ["0–5k", "5–10k", "10–15k", "15–20k", "20–25k", "25–35k", "35–50k", "50–75k", "75–100k", "100k+"];
+    const edges = [
+      0, 500000, 1000000, 1500000, 2000000, 2500000, 3500000, 5000000, 7500000, 10000000,
+    ];
+    const labels = [
+      "0–5k",
+      "5–10k",
+      "10–15k",
+      "15–20k",
+      "20–25k",
+      "25–35k",
+      "35–50k",
+      "50–75k",
+      "75–100k",
+      "100k+",
+    ];
 
     const tenantMedianRows = await tx.$queryRaw<Array<{ median_cents: number | null }>>`
       with spent as (
@@ -556,7 +582,7 @@ export const customFieldSegmentsRepository = {
       from spent
     `;
     const tenantMedianCents =
-      tenantMedianRows[0]?.median_cents == null ? null : Number(tenantMedianRows[0].median_cents);
+      tenantMedianRows[0]?.median_cents == null ? null : tenantMedianRows[0].median_cents;
 
     if (membershipIds.length === 0) {
       return {
@@ -595,11 +621,11 @@ export const customFieldSegmentsRepository = {
 
     const counts = labels.map(() => 0);
     for (const row of spentRows) {
-      const cents = Number(row.total_spent_cents);
+      const cents = row.total_spent_cents;
       let bucket = edges.length - 1;
       for (let i = 0; i < edges.length; i += 1) {
         const next = edges[i + 1] ?? Number.POSITIVE_INFINITY;
-        if (cents >= edges[i]! && cents < next) {
+        if (cents >= defined(edges[i]) && cents < next) {
           bucket = i;
           break;
         }
@@ -612,7 +638,7 @@ export const customFieldSegmentsRepository = {
       tenantMedianBucketIndex = edges.length - 1;
       for (let i = 0; i < edges.length; i += 1) {
         const next = edges[i + 1] ?? Number.POSITIVE_INFINITY;
-        if (tenantMedianCents >= edges[i]! && tenantMedianCents < next) {
+        if (tenantMedianCents >= defined(edges[i]) && tenantMedianCents < next) {
           tenantMedianBucketIndex = i;
           break;
         }
@@ -646,9 +672,9 @@ export const customFieldSegmentsRepository = {
       membershipIds,
     );
     return rows.map((row) => {
-      const raw = String(row.label); // e.g. 2023-Q2
+      const raw = row.label; // e.g. 2023-Q2
       const match = /^(\d{4})-Q(\d)$/.exec(raw);
-      const label = match ? `Q${match[2]} '${match[1]!.slice(2)}` : raw;
+      const label = match ? `Q${String(match[2])} '${defined(match[1]).slice(2)}` : raw;
       return { label, count: Number(row.count) };
     });
   },
@@ -711,10 +737,10 @@ export const customFieldSegmentsRepository = {
       membershipIds.length > 0 ? membershipIds : ["00000000-0000-0000-0000-000000000000"],
     );
     return rows.map((row) => ({
-      field_key: String(row.field_key),
-      field_label: String(row.field_label),
-      field_type: String(row.field_type),
-      value: String(row.value),
+      field_key: row.field_key,
+      field_label: row.field_label,
+      field_type: row.field_type,
+      value: row.value,
       segment_count: Number(row.segment_count),
       tenant_count: Number(row.tenant_count),
     }));
@@ -724,7 +750,7 @@ export const customFieldSegmentsRepository = {
     tx: TenantTx,
     tree: SegmentConditionsTree,
     fieldTypes: FieldTypeLookup,
-    args: { q?: string; page: number; limit: number },
+    args: { q?: string | undefined; page: number; limit: number },
   ): Promise<{
     total: number;
     rows: Array<{
@@ -758,9 +784,9 @@ export const customFieldSegmentsRepository = {
       where m.tenant_id = current_setting('app.tenant_id', true)::uuid
         and (${predicate.sql})
         and (
-          $${qParamIndex}::text is null
+          $${String(qParamIndex)}::text is null
           or lower(coalesce(mp.display_name, ap.email, m.invited_email_normalized, ''))
-            like '%' || lower($${qParamIndex}) || '%'
+            like '%' || lower($${String(qParamIndex)}) || '%'
         )
       `,
       ...predicate.params,
@@ -797,13 +823,13 @@ export const customFieldSegmentsRepository = {
       where m.tenant_id = current_setting('app.tenant_id', true)::uuid
         and (${predicate.sql})
         and (
-          $${qParamIndex}::text is null
+          $${String(qParamIndex)}::text is null
           or lower(coalesce(mp.display_name, ap.email, m.invited_email_normalized, ''))
-            like '%' || lower($${qParamIndex}) || '%'
+            like '%' || lower($${String(qParamIndex)}) || '%'
         )
       order by coalesce(mp.display_name, ap.email, m.invited_email_normalized) asc nulls last
-      limit $${limitIndex}::int
-      offset $${offsetIndex}::int
+      limit $${String(limitIndex)}::int
+      offset $${String(offsetIndex)}::int
       `,
       ...predicate.params,
       q,
@@ -814,13 +840,13 @@ export const customFieldSegmentsRepository = {
     return {
       total: Number(countRows[0]?.count ?? 0),
       rows: rows.map((row) => ({
-        membership_id: String(row["membership_id"]),
-        learner_name: row["learner_name"] == null ? null : String(row["learner_name"]),
-        email: row["email"] == null ? null : String(row["email"]),
-        status: String(row["status"]),
+        membership_id: asUnknownString(row["membership_id"]),
+        learner_name: row["learner_name"] == null ? null : asUnknownString(row["learner_name"]),
+        email: row["email"] == null ? null : asUnknownString(row["email"]),
+        status: asUnknownString(row["status"]),
         enrollment_count: Number(row["enrollment_count"] ?? 0),
         total_spent_cents: Number(row["total_spent_cents"] ?? 0),
-        currency: String(row["currency"] ?? "INR"),
+        currency: asUnknownString(row["currency"], "INR"),
         last_active_at: (row["last_active_at"] as Date | null) ?? null,
         signed_up_at: (row["signed_up_at"] as Date | null) ?? null,
       })),

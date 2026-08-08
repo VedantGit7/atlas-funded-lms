@@ -16,5 +16,5 @@ export const GET = createTenantRoute<
   params: customFieldExportRunParamsSchema,
   input: noBodySchema,
   output: customFieldExportRunDetailResponseSchema,
-  handler: async ({ tx, ctx, params }) => getCustomFieldExportRun(tx, ctx, params.runId),
+  handler: async ({ tx, ctx, params }) => getCustomFieldExportRun(tx, ctx, params["runId"]),
 });

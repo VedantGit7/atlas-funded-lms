@@ -6,7 +6,7 @@ import { statCardClassName, statLabelClassName } from "../analytics-studio-share
 
 type AnalyticsStudioStatsProps = {
   metrics: StudioSummaryMetrics;
-  loading?: boolean;
+  loading?: boolean | undefined;
   hasAssessmentSelected: boolean;
 };
 

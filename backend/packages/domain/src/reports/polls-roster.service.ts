@@ -20,7 +20,7 @@ import {
 import {
   liveSessionPollReportNotFound,
   pollCompareInsufficient,
-  pollOptionNotFound,
+  pollRosterOptionNotFound,
   pollRosterNotFound,
   pollRosterRespondentsHidden,
 } from "./polls-roster.errors";
@@ -29,6 +29,13 @@ import {
   type PollListRow,
   type PollRespondentsFilter,
 } from "./polls-roster.repository";
+
+function defined<T>(value: T, message = "Expected value to be defined"): NonNullable<T> {
+  if (value == null) {
+    throw new Error(message);
+  }
+  return value;
+}
 
 function pageInfo(totalCount: number, page: number, limit: number) {
   const totalPages = totalCount === 0 ? 0 : Math.ceil(totalCount / limit);
@@ -92,8 +99,7 @@ function buildPollTimeline(input: {
   offsets: number[];
   totalResponses: number;
 }) {
-  const maxOffset =
-    input.offsets.length > 0 ? Math.max(...input.offsets, 0) : 0;
+  const maxOffset = input.offsets.length > 0 ? Math.max(...input.offsets, 0) : 0;
   const configuredDuration = input.durationSeconds ?? null;
   const closedOffset =
     input.closedAt != null
@@ -101,11 +107,7 @@ function buildPollTimeline(input: {
       : null;
   const durationSeconds = Math.max(
     1,
-    Math.ceil(
-      configuredDuration ??
-        closedOffset ??
-        (maxOffset > 0 ? maxOffset : 60),
-    ),
+    Math.ceil(configuredDuration ?? closedOffset ?? (maxOffset > 0 ? maxOffset : 60)),
   );
   const bucketCount = Math.min(12, Math.max(4, Math.ceil(durationSeconds / 5)));
   const bucketSeconds = durationSeconds / bucketCount;
@@ -123,9 +125,7 @@ function buildPollTimeline(input: {
   const earlyWindow = Math.min(20, durationSeconds);
   const earlyCount = input.offsets.filter((offset) => offset <= earlyWindow).length;
   const earlySharePct =
-    input.offsets.length > 0
-      ? Math.round((earlyCount / input.offsets.length) * 1000) / 10
-      : null;
+    input.offsets.length > 0 ? Math.round((earlyCount / input.offsets.length) * 1000) / 10 : null;
 
   const events: Array<{
     kind: "opened" | "half" | "closed";
@@ -157,7 +157,7 @@ function buildPollTimeline(input: {
         kind: "half",
         at: new Date(input.openedAt.getTime() + halfOffset * 1000).toISOString(),
         label: "50% participation reached",
-        detail: `${halfTarget} of ${input.totalResponses} responses`,
+        detail: `${String(halfTarget)} of ${String(input.totalResponses)} responses`,
       });
     }
   }
@@ -196,9 +196,7 @@ function buildOptionTiming(input: {
       : null;
   const durationSeconds = Math.max(
     1,
-    Math.ceil(
-      configuredDuration ?? closedOffset ?? (maxOffset > 0 ? maxOffset : 60),
-    ),
+    Math.ceil(configuredDuration ?? closedOffset ?? (maxOffset > 0 ? maxOffset : 60)),
   );
   const bucketCount = Math.min(10, Math.max(5, Math.ceil(durationSeconds / 5)));
   const bucketSeconds = durationSeconds / bucketCount;
@@ -246,11 +244,7 @@ function buildTimingInsight(
   return `Median response time matches the poll average (${optionLabel}).`;
 }
 
-export async function listPollsRoster(
-  tx: TenantTx,
-  _ctx: ServiceCtx,
-  query: PollsListQuery,
-) {
+export async function listPollsRoster(tx: TenantTx, _ctx: ServiceCtx, query: PollsListQuery) {
   const [totalCount, rows, summary] = await Promise.all([
     pollsRosterRepository.countPolls(tx, query),
     pollsRosterRepository.listPolls(tx, query),
@@ -280,11 +274,7 @@ export async function listPollsRoster(
   });
 }
 
-export async function getPollDetailedReport(
-  tx: TenantTx,
-  _ctx: ServiceCtx,
-  pollId: string,
-) {
+export async function getPollDetailedReport(tx: TenantTx, _ctx: ServiceCtx, pollId: string) {
   const meta = await pollsRosterRepository.findPollById(tx, pollId);
   if (!meta) throw pollRosterNotFound();
 
@@ -330,10 +320,7 @@ export async function getPollDetailedReport(
         sortOrder: option.sort_order,
         isCorrect: option.is_correct,
         count: option.count,
-        percent:
-          totalResponses > 0
-            ? Math.round((option.count / totalResponses) * 1000) / 10
-            : 0,
+        percent: totalResponses > 0 ? Math.round((option.count / totalResponses) * 1000) / 10 : 0,
       })),
       timeline,
     },
@@ -366,7 +353,7 @@ export async function listPollRespondents(
   const filter = toRespondentFilter(pollId, {
     ...(query.learnerName ? { learnerName: query.learnerName } : {}),
     ...(query.optionId ? { optionId: query.optionId } : {}),
-    ...(query.isCorrect ? { isCorrect: query.isCorrect } : {}),
+    ...(query.isCorrect !== "any" ? { isCorrect: query.isCorrect } : {}),
     ...(query.respondedFrom ? { respondedFrom: query.respondedFrom } : {}),
     ...(query.respondedTo ? { respondedTo: query.respondedTo } : {}),
   });
@@ -390,9 +377,7 @@ export async function listPollRespondents(
         optionLabel: row.option_label,
         isCorrect: meta.quiz_mode ? row.is_correct : null,
         responseSeconds:
-          row.response_seconds == null
-            ? null
-            : Math.round(row.response_seconds * 10) / 10,
+          row.response_seconds == null ? null : Math.round(row.response_seconds * 10) / 10,
         respondedAt: row.responded_at.toISOString(),
       })),
       pageInfo: pageInfo(totalCount, query.page, query.limit),
@@ -425,7 +410,7 @@ export async function getPollOptionDetail(
   ]);
 
   const target = options.find((option) => option.option_id === optionId);
-  if (!target) throw pollOptionNotFound();
+  if (!target) throw pollRosterOptionNotFound();
 
   const totalResponses = options.reduce((sum, option) => sum + option.count, 0);
   const mappedOptions = options.map((option) => ({
@@ -434,10 +419,7 @@ export async function getPollOptionDetail(
     sortOrder: option.sort_order,
     isCorrect: option.is_correct,
     count: option.count,
-    percent:
-      totalResponses > 0
-        ? Math.round((option.count / totalResponses) * 1000) / 10
-        : 0,
+    percent: totalResponses > 0 ? Math.round((option.count / totalResponses) * 1000) / 10 : 0,
   }));
 
   const ranked = [...mappedOptions].sort((a, b) => {
@@ -447,8 +429,7 @@ export async function getPollOptionDetail(
   const rankIndex = ranked.findIndex((option) => option.optionId === optionId);
   const rank = rankIndex < 0 ? 1 : rankIndex + 1;
   const next = ranked[rankIndex + 1];
-  const votesAheadOfNext =
-    next == null ? null : Math.max(0, target.count - next.count);
+  const votesAheadOfNext = next == null ? null : Math.max(0, target.count - next.count);
 
   const optionMedian =
     extras.option_median_response_seconds == null
@@ -467,7 +448,7 @@ export async function getPollOptionDetail(
     overallOffsets: extras.overall_offsets,
   });
 
-  const optionMapped = mappedOptions.find((option) => option.optionId === optionId)!;
+  const optionMapped = defined(mappedOptions.find((option) => option.optionId === optionId));
 
   return pollOptionDetailResponseSchema.parse({
     data: {
@@ -493,10 +474,7 @@ export async function getPollOptionDetail(
         key: segment.key,
         label: segment.label,
         count: segment.count,
-        percent:
-          target.count > 0
-            ? Math.round((segment.count / target.count) * 1000) / 10
-            : 0,
+        percent: target.count > 0 ? Math.round((segment.count / target.count) * 1000) / 10 : 0,
       })),
       siblings: mappedOptions.filter((option) => option.optionId !== optionId),
     },
@@ -602,11 +580,7 @@ function mean(values: number[]): number | null {
   return Math.round((sum / values.length) * 10) / 10;
 }
 
-export async function getPollLiveMonitor(
-  tx: TenantTx,
-  _ctx: ServiceCtx,
-  pollId: string,
-) {
+export async function getPollLiveMonitor(tx: TenantTx, _ctx: ServiceCtx, pollId: string) {
   const meta = await pollsRosterRepository.findPollById(tx, pollId);
   if (!meta) throw pollRosterNotFound();
 
@@ -633,10 +607,7 @@ export async function getPollLiveMonitor(
   });
 
   const serverNow = new Date();
-  const elapsedSeconds = Math.max(
-    0,
-    (serverNow.getTime() - meta.created_at.getTime()) / 1000,
-  );
+  const elapsedSeconds = Math.max(0, (serverNow.getTime() - meta.created_at.getTime()) / 1000);
   const recentResponseCount = extras.response_offsets.filter(
     (offset) => offset >= elapsedSeconds - 10 && offset <= elapsedSeconds + 1,
   ).length;
@@ -650,16 +621,13 @@ export async function getPollLiveMonitor(
     ? Math.round(
         Math.max(
           0,
-          ((meta.closes_at?.getTime() ?? serverNow.getTime()) -
-            meta.created_at.getTime()) /
-            1000,
+          ((meta.closes_at?.getTime() ?? serverNow.getTime()) - meta.created_at.getTime()) / 1000,
         ),
       )
     : null;
 
   const showCorrectAnswers =
-    meta.quiz_mode &&
-    (!meta.is_open || meta.result_visibility !== "after_poll_ends");
+    meta.quiz_mode && (!meta.is_open || meta.result_visibility !== "after_poll_ends");
 
   const eligibleCount = extras.eligible_count;
   const participationPct =
@@ -698,10 +666,7 @@ export async function getPollLiveMonitor(
         sortOrder: option.sort_order,
         isCorrect: option.is_correct,
         count: option.count,
-        percent:
-          totalResponses > 0
-            ? Math.round((option.count / totalResponses) * 1000) / 10
-            : 0,
+        percent: totalResponses > 0 ? Math.round((option.count / totalResponses) * 1000) / 10 : 0,
       })),
       timeline: {
         bucketSeconds: timeline.bucketSeconds,
@@ -720,11 +685,7 @@ export async function getPollLiveMonitor(
   });
 }
 
-export async function closePollLive(
-  tx: TenantTx,
-  ctx: ServiceCtx,
-  pollId: string,
-) {
+export async function closePollLive(tx: TenantTx, ctx: ServiceCtx, pollId: string) {
   const meta = await pollsRosterRepository.findPollById(tx, pollId);
   if (!meta) throw pollRosterNotFound();
   const closed = await pollsRosterRepository.setPollClosesAt(tx, pollId, new Date());
@@ -742,10 +703,7 @@ export async function extendPollLive(
   if (!meta) throw pollRosterNotFound();
 
   const now = Date.now();
-  const base =
-    meta.closes_at && meta.closes_at.getTime() > now
-      ? meta.closes_at.getTime()
-      : now;
+  const base = meta.closes_at && meta.closes_at.getTime() > now ? meta.closes_at.getTime() : now;
   const nextClosesAt = new Date(base + body.seconds * 1000);
   const updated = await pollsRosterRepository.setPollClosesAt(tx, pollId, nextClosesAt);
   if (!updated) throw pollRosterNotFound();
@@ -823,10 +781,7 @@ export async function getLiveSessionPollReport(
           sortOrder: option.sort_order,
           isCorrect: option.is_correct,
           count: option.count,
-          percent:
-            responseCount > 0
-              ? Math.round((option.count / responseCount) * 1000) / 10
-              : 0,
+          percent: responseCount > 0 ? Math.round((option.count / responseCount) * 1000) / 10 : 0,
         })),
       };
     }),
@@ -859,23 +814,20 @@ export async function getLiveSessionPollReport(
   const leastAnswered =
     sortedByResponses.length > 0
       ? {
-          pollId: sortedByResponses[sortedByResponses.length - 1]!.pollId,
-          title: sortedByResponses[sortedByResponses.length - 1]!.title,
-          responseCount: sortedByResponses[sortedByResponses.length - 1]!.responseCount,
+          pollId: defined(sortedByResponses[sortedByResponses.length - 1]).pollId,
+          title: defined(sortedByResponses[sortedByResponses.length - 1]).title,
+          responseCount: defined(sortedByResponses[sortedByResponses.length - 1]).responseCount,
         }
       : null;
 
-  const answeredEveryPollCount =
-    pollBlocks.some((poll) => !poll.anonymousVote)
-      ? await pollsRosterRepository.countAnsweredEveryTrackedPoll(tx, liveSessionId)
-      : 0;
+  const answeredEveryPollCount = pollBlocks.some((poll) => !poll.anonymousVote)
+    ? await pollsRosterRepository.countAnsweredEveryTrackedPoll(tx, liveSessionId)
+    : 0;
 
   const sessionStart =
     session.started_at ?? session.scheduled_at ?? polls[0]?.created_at ?? new Date();
   const plannedSeconds =
-    session.planned_duration_minutes != null
-      ? session.planned_duration_minutes * 60
-      : null;
+    session.planned_duration_minutes != null ? session.planned_duration_minutes * 60 : null;
   const endedAt = session.ended_at;
   const derivedDuration =
     endedAt != null
@@ -890,9 +842,7 @@ export async function getLiveSessionPollReport(
     60,
     plannedSeconds ??
       derivedDuration ??
-      (lastPollClose != null
-        ? Math.round((lastPollClose - sessionStart.getTime()) / 1000)
-        : 3600),
+      (lastPollClose != null ? Math.round((lastPollClose - sessionStart.getTime()) / 1000) : 3600),
   );
 
   const intervals = await pollsRosterRepository.listLiveSessionAttendanceIntervals(
@@ -926,15 +876,15 @@ export async function getLiveSessionPollReport(
 
   let insight: string | null = null;
   if (pollBlocks.length >= 2) {
-    const first = pollBlocks[0]!;
-    const last = pollBlocks[pollBlocks.length - 1]!;
+    const first = defined(pollBlocks[0]);
+    const last = defined(pollBlocks[pollBlocks.length - 1]);
     if (first.participationPct != null && last.participationPct != null) {
       if (last.participationPct < first.participationPct - 5) {
-        insight = `Participation fell with each poll — ${first.participationPct}% on the first, ${last.participationPct}% on the last.`;
+        insight = `Participation fell with each poll — ${String(first.participationPct)}% on the first, ${String(last.participationPct)}% on the last.`;
       } else if (last.participationPct > first.participationPct + 5) {
-        insight = `Participation rose across polls — ${first.participationPct}% on the first, ${last.participationPct}% on the last.`;
+        insight = `Participation rose across polls — ${String(first.participationPct)}% on the first, ${String(last.participationPct)}% on the last.`;
       } else {
-        insight = `Participation stayed near ${avgParticipationPct ?? first.participationPct}% across ${pollBlocks.length} polls.`;
+        insight = `Participation stayed near ${String(avgParticipationPct ?? first.participationPct)}% across ${String(pollBlocks.length)} polls.`;
       }
     }
   }
@@ -1084,9 +1034,7 @@ function normalizeOptionLabel(label: string): string {
 function earlyShareFromOffsets(offsets: number[], durationSeconds: number | null): number | null {
   if (offsets.length === 0) return null;
   const duration =
-    durationSeconds != null && durationSeconds > 0
-      ? durationSeconds
-      : Math.max(...offsets, 20);
+    durationSeconds != null && durationSeconds > 0 ? durationSeconds : Math.max(...offsets, 20);
   const earlyWindow = Math.min(20, duration);
   const earlyCount = offsets.filter((offset) => offset <= earlyWindow).length;
   return Math.round((earlyCount / offsets.length) * 1000) / 10;
@@ -1097,7 +1045,7 @@ function optionsAreAligned(
   alignBy: "label" | "order",
 ): boolean {
   if (polls.length < 2) return false;
-  const first = polls[0]!;
+  const first = defined(polls[0]);
   if (alignBy === "order") {
     return polls.every(
       (poll) =>
@@ -1130,21 +1078,19 @@ function buildTrendInsight(
   optionsAligned: boolean,
 ): string | null {
   if (!optionsAligned || polls.length < 3) return null;
-  const titleKey = normalizeOptionLabel(polls[0]!.title);
+  const titleKey = normalizeOptionLabel(defined(polls[0]).title);
   if (!polls.every((poll) => normalizeOptionLabel(poll.title) === titleKey)) return null;
 
   const chronological = [...polls].sort(
     (a, b) => new Date(a.openedAt).getTime() - new Date(b.openedAt).getTime(),
   );
-  const earliest = chronological[0]!;
-  const latest = chronological[chronological.length - 1]!;
+  const earliest = defined(chronological[0]);
+  const latest = defined(chronological[chronological.length - 1]);
   let bestLabel = "";
   let bestDelta = 0;
   for (const option of earliest.options) {
     const key = normalizeOptionLabel(option.label);
-    const later = latest.options.find(
-      (candidate) => normalizeOptionLabel(candidate.label) === key,
-    );
+    const later = latest.options.find((candidate) => normalizeOptionLabel(candidate.label) === key);
     if (!later) continue;
     const delta = later.percent - option.percent;
     if (Math.abs(delta) > Math.abs(bestDelta)) {
@@ -1157,14 +1103,10 @@ function buildTrendInsight(
     new Date(iso).toLocaleDateString("en-GB", { month: "long", year: "numeric" });
   const direction = bestDelta > 0 ? "rose" : "fell";
   const pts = Math.round(Math.abs(bestDelta) * 10) / 10;
-  return `${bestLabel} ${direction} ${pts} points between ${fmt(earliest.openedAt)} and ${fmt(latest.openedAt)}.`;
+  return `${bestLabel} ${direction} ${String(pts)} points between ${fmt(earliest.openedAt)} and ${fmt(latest.openedAt)}.`;
 }
 
-export async function comparePolls(
-  tx: TenantTx,
-  _ctx: ServiceCtx,
-  query: PollsCompareQuery,
-) {
+export async function comparePolls(tx: TenantTx, _ctx: ServiceCtx, query: PollsCompareQuery) {
   if (query.pollIds.length < 2 || query.pollIds.length > 4) {
     throw pollCompareInsufficient();
   }
@@ -1184,10 +1126,7 @@ export async function comparePolls(
         sortOrder: option.sort_order,
         isCorrect: option.is_correct,
         count: option.count,
-        percent:
-          totalResponses > 0
-            ? Math.round((option.count / totalResponses) * 1000) / 10
-            : 0,
+        percent: totalResponses > 0 ? Math.round((option.count / totalResponses) * 1000) / 10 : 0,
       }));
       const correctPct =
         meta.quiz_mode && totalResponses > 0
@@ -1208,7 +1147,7 @@ export async function comparePolls(
         index,
         id: meta.id,
         title: meta.title,
-        shortName: `Poll ${index + 1}`,
+        shortName: `Poll ${String(index + 1)}`,
         quizMode: meta.quiz_mode,
         anonymousVote: meta.anonymous_vote,
         liveSessionId: meta.live_session_id,
@@ -1224,10 +1163,7 @@ export async function comparePolls(
             ? null
             : Math.round(extras.median_response_seconds * 10) / 10,
         correctPct,
-        earlySharePct: earlyShareFromOffsets(
-          extras.response_offsets,
-          meta.duration_seconds,
-        ),
+        earlySharePct: earlyShareFromOffsets(extras.response_offsets, meta.duration_seconds),
         nonRespondentCount,
         options,
       };
@@ -1235,7 +1171,7 @@ export async function comparePolls(
   );
 
   const optionsAligned = optionsAreAligned(loaded, query.alignBy);
-  const left = loaded[0]!;
+  const left = defined(loaded[0]);
 
   const optionRows = optionsAligned
     ? (() => {
@@ -1259,7 +1195,7 @@ export async function comparePolls(
               };
             });
             return {
-              key: `order:${optionIndex}`,
+              key: `order:${String(optionIndex)}`,
               label: leftOption.label,
               cells,
             };
@@ -1270,9 +1206,8 @@ export async function comparePolls(
           const key = normalizeOptionLabel(leftOption.label);
           const cells = loaded.map((poll, pollIndex) => {
             const option =
-              poll.options.find(
-                (candidate) => normalizeOptionLabel(candidate.label) === key,
-              ) ?? null;
+              poll.options.find((candidate) => normalizeOptionLabel(candidate.label) === key) ??
+              null;
             const percent = option?.percent ?? null;
             return {
               pollId: poll.id,
@@ -1302,12 +1237,11 @@ export async function comparePolls(
     data: {
       alignBy: query.alignBy,
       optionsAligned,
-      polls: loaded.map(
-        ({
-          index: _index,
-          ...poll
-        }) => poll,
-      ),
+      polls: loaded.map((entry) => {
+        const { index, ...poll } = entry;
+        void index;
+        return poll;
+      }),
       optionRows,
       trendInsight,
     },

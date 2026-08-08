@@ -70,11 +70,7 @@ function Shimmer({ className }: { className?: string }) {
 
 function CohortsSkeleton() {
   return (
-    <div
-      className="flex flex-col gap-6 lg:flex-row"
-      aria-busy="true"
-      aria-label="Loading cohorts"
-    >
+    <div className="flex flex-col gap-6 lg:flex-row" aria-busy="true" aria-label="Loading cohorts">
       <div className="flex min-h-[360px] flex-[58] flex-col overflow-hidden rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)]">
         <div className="flex h-11 items-center border-b border-[var(--admin-border)] bg-[var(--admin-surface-high)] px-5">
           <Shimmer className="h-4 w-48" />
@@ -123,21 +119,21 @@ function DeliveryBar({ msg }: { msg: CustomFieldCohortMessageItem }) {
     <div
       className="flex h-1.5 w-full overflow-hidden rounded-full bg-[var(--admin-surface-high)]"
       role="img"
-      aria-label={`Delivered ${deliveredPct}%, failed ${failedPct}%, other ${skippedPct}%`}
+      aria-label={`Delivered ${String(deliveredPct)}%, failed ${String(failedPct)}%, other ${String(skippedPct)}%`}
     >
       <div
         className="h-full bg-[var(--admin-success)]"
-        style={{ width: `${deliveredPct}%` }}
+        style={{ width: `${String(deliveredPct)}%` }}
         title="Delivered"
       />
       <div
         className="h-full bg-[var(--admin-danger)]"
-        style={{ width: `${failedPct}%` }}
+        style={{ width: `${String(failedPct)}%` }}
         title="Failed"
       />
       <div
         className="h-full bg-[var(--admin-outline)]"
-        style={{ width: `${skippedPct}%` }}
+        style={{ width: `${String(skippedPct)}%` }}
         title="Skipped / remaining"
       />
     </div>
@@ -237,7 +233,9 @@ export function AdminCustomFieldCohortsPage() {
           <button
             type="button"
             className={`${ghostButtonClassName} inline-flex h-10 items-center gap-2`}
-            onClick={() => openDrawer("group")}
+            onClick={() => {
+              openDrawer("group");
+            }}
           >
             <Users className="h-4 w-4" aria-hidden="true" />
             New group
@@ -245,7 +243,9 @@ export function AdminCustomFieldCohortsPage() {
           <button
             type="button"
             className={`${primaryButtonClassName} inline-flex h-10 items-center gap-2`}
-            onClick={() => openDrawer("message")}
+            onClick={() => {
+              openDrawer("message");
+            }}
           >
             <Send className="h-4 w-4" aria-hidden="true" />
             New message
@@ -288,7 +288,9 @@ export function AdminCustomFieldCohortsPage() {
                   className="w-40 rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface)] py-1.5 pl-8 pr-2 font-mono text-[11px] text-[var(--admin-on-surface)] outline-none focus:border-[var(--admin-primary)] sm:w-48"
                   placeholder="Filter groups…"
                   value={qDraft}
-                  onChange={(e) => setQDraft(e.target.value)}
+                  onChange={(e) => {
+                    setQDraft(e.target.value);
+                  }}
                   aria-label="Filter groups"
                 />
               </form>
@@ -309,7 +311,9 @@ export function AdminCustomFieldCohortsPage() {
                 <button
                   type="button"
                   className={primaryButtonClassName}
-                  onClick={() => openDrawer("group")}
+                  onClick={() => {
+                    openDrawer("group");
+                  }}
                 >
                   Define first cohort
                 </button>
@@ -341,13 +345,17 @@ export function AdminCustomFieldCohortsPage() {
                                 ? "border-l-2 border-l-[var(--admin-primary)] bg-[color-mix(in_srgb,var(--admin-primary)_8%,transparent)]"
                                 : "",
                             ].join(" ")}
-                            onClick={() => setSelectedGroupId(group.batchId)}
+                            onClick={() => {
+                              setSelectedGroupId(group.batchId);
+                            }}
                           >
                             <td className="px-4">
                               <Link
                                 href={groupHref(group)}
                                 className="font-medium text-[var(--admin-primary)] hover:underline"
-                                onClick={(e) => e.stopPropagation()}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                }}
                               >
                                 {group.name}
                               </Link>
@@ -401,14 +409,18 @@ export function AdminCustomFieldCohortsPage() {
                                   <Link
                                     href="/admin/batches"
                                     className="block px-3 py-2 text-left text-xs text-[var(--admin-on-surface)] hover:bg-[var(--admin-surface-high)]"
-                                    onClick={() => setMenuOpenId(null)}
+                                    onClick={() => {
+                                      setMenuOpenId(null);
+                                    }}
                                   >
                                     View members
                                   </Link>
                                   <Link
                                     href={groupHref(group)}
                                     className="block px-3 py-2 text-left text-xs text-[var(--admin-on-surface)] hover:bg-[var(--admin-surface-high)]"
-                                    onClick={() => setMenuOpenId(null)}
+                                    onClick={() => {
+                                      setMenuOpenId(null);
+                                    }}
                                   >
                                     Open source
                                   </Link>
@@ -431,7 +443,9 @@ export function AdminCustomFieldCohortsPage() {
                       type="button"
                       className="flex h-6 w-6 items-center justify-center rounded hover:bg-[var(--admin-surface-high)] disabled:opacity-40"
                       disabled={!groupsHasPrev}
-                      onClick={() => setGroupsPage((p) => Math.max(1, p - 1))}
+                      onClick={() => {
+                        setGroupsPage((p) => Math.max(1, p - 1));
+                      }}
                       aria-label="Previous groups page"
                     >
                       <ChevronLeft className="h-4 w-4" />
@@ -440,7 +454,9 @@ export function AdminCustomFieldCohortsPage() {
                       type="button"
                       className="flex h-6 w-6 items-center justify-center rounded hover:bg-[var(--admin-surface-high)] disabled:opacity-40"
                       disabled={!groupsHasNext}
-                      onClick={() => setGroupsPage((p) => p + 1)}
+                      onClick={() => {
+                        setGroupsPage((p) => p + 1);
+                      }}
                       aria-label="Next groups page"
                     >
                       <ChevronRight className="h-4 w-4" />
@@ -460,7 +476,9 @@ export function AdminCustomFieldCohortsPage() {
               <button
                 type="button"
                 className="inline-flex items-center gap-1 text-sm font-semibold text-[var(--admin-primary)] hover:underline"
-                onClick={() => openDrawer("message")}
+                onClick={() => {
+                  openDrawer("message");
+                }}
               >
                 View all <ArrowRight className="h-4 w-4" />
               </button>
@@ -480,7 +498,9 @@ export function AdminCustomFieldCohortsPage() {
                 <button
                   type="button"
                   className={ghostButtonClassName}
-                  onClick={() => openDrawer("message")}
+                  onClick={() => {
+                    openDrawer("message");
+                  }}
                 >
                   <Mail className="mr-2 h-4 w-4" aria-hidden="true" />
                   Draft broadcast
@@ -582,7 +602,9 @@ export function AdminCustomFieldCohortsPage() {
                     type="button"
                     className={ghostButtonClassName}
                     disabled={messagesPage <= 1}
-                    onClick={() => setMessagesPage((p) => Math.max(1, p - 1))}
+                    onClick={() => {
+                      setMessagesPage((p) => Math.max(1, p - 1));
+                    }}
                   >
                     Newer
                   </button>
@@ -590,7 +612,9 @@ export function AdminCustomFieldCohortsPage() {
                     type="button"
                     className={ghostButtonClassName}
                     disabled={!messagesHasNext}
-                    onClick={() => setMessagesPage((p) => p + 1)}
+                    onClick={() => {
+                      setMessagesPage((p) => p + 1);
+                    }}
                   >
                     Older
                   </button>
@@ -604,7 +628,9 @@ export function AdminCustomFieldCohortsPage() {
       <CustomFieldCohortActionsDrawer
         open={drawerOpen}
         initialMode={drawerMode}
-        onClose={() => setDrawerOpen(false)}
+        onClose={() => {
+          setDrawerOpen(false);
+        }}
         onSuccess={() => void load()}
       />
     </div>

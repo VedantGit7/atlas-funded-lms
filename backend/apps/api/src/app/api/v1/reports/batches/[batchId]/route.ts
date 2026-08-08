@@ -16,5 +16,5 @@ export const GET = createTenantRoute<
   input: noBodySchema,
   params: batchIdParamsSchema,
   output: batchDetailResponseSchema,
-  handler: async ({ tx, ctx, params }) => getBatchDetailedReport(tx, ctx, params.batchId),
+  handler: async ({ tx, ctx, params }) => getBatchDetailedReport(tx, ctx, params["batchId"]),
 });

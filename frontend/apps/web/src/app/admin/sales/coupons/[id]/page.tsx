@@ -1,6 +1,6 @@
-import { AdminPageGate } from "../../../../../../components/patterns/AdminPageGate";
-import { CouponBuilderPanel } from "../../../../../../features/admin/grow/CouponBuilderPanel";
-import { runTenantStateGate } from "../../../../../../lib/server/tenant-state-gate";
+import { AdminPageGate } from "@/components/patterns/AdminPageGate";
+import { CouponBuilderPanel } from "@/features/admin/grow/CouponBuilderPanel";
+import { runTenantStateGate } from "@/lib/server/tenant-state-gate";
 
 type AdminCouponEditPageProps = {
   params: Promise<{ id: string }>;

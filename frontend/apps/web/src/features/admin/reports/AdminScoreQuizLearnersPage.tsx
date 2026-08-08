@@ -51,6 +51,13 @@ import { downloadReportExport, pollReportRunUntilComplete } from "./admin-report
 import { CohortActionsDrawer, type CohortDrawerMode } from "./CohortActionsDrawer";
 import { ProgressScoreReportTabs } from "./ProgressScoreReportTabs";
 
+function defined<T>(value: T, message = "Expected value to be defined"): NonNullable<T> {
+  if (value == null) {
+    throw new Error(message);
+  }
+  return value;
+}
+
 type DetailTab = "learners" | "items" | "attempts";
 
 const VIEW_TABS: Array<{ value: ScoreLearnerView; label: string }> = [
@@ -112,7 +119,7 @@ function formatDuration(seconds: number | null): string {
   const secs = total % 60;
   if (mins >= 60) {
     const hours = Math.floor(mins / 60);
-    return `${hours}h ${mins % 60}m`;
+    return `${String(hours)}h ${String(mins % 60)}m`;
   }
   return `${String(mins).padStart(2, "0")}m ${String(secs).padStart(2, "0")}s`;
 }
@@ -151,7 +158,7 @@ function learnerInitials(learner: { learnerName: string | null; email: string | 
   const source = (learner.learnerName ?? learner.email ?? "?").trim();
   const parts = source.split(/\s+/).filter(Boolean);
   if (parts.length >= 2) {
-    return `${parts[0]![0] ?? ""}${parts[1]![0] ?? ""}`.toUpperCase();
+    return `${defined(parts[0])[0] ?? ""}${defined(parts[1])[0] ?? ""}`.toUpperCase();
   }
   return source.slice(0, 2).toUpperCase() || "?";
 }
@@ -202,11 +209,11 @@ function ScoreBar({
     : "bg-[var(--admin-primary)]";
   return (
     <div className="relative h-1.5 w-20 overflow-hidden rounded-full border border-[var(--admin-border)] bg-[var(--admin-surface-low)]">
-      <div className={`absolute inset-y-0 left-0 ${fill}`} style={{ width: `${pct}%` }} />
+      <div className={`absolute inset-y-0 left-0 ${fill}`} style={{ width: `${String(pct)}%` }} />
       {passMark != null ? (
         <span
           className="absolute inset-y-0 w-px bg-[var(--admin-on-surface)]/50"
-          style={{ left: `${Math.max(0, Math.min(100, passMark))}%` }}
+          style={{ left: `${String(Math.max(0, Math.min(100, passMark)))}%` }}
         />
       ) : null}
     </div>
@@ -301,7 +308,9 @@ function RegradeModal({
         aria-modal="true"
         aria-labelledby={titleId}
         className="flex w-full max-w-xl flex-col border border-[var(--admin-border)] bg-[var(--admin-surface)] shadow-2xl"
-        onClick={(event) => event.stopPropagation()}
+        onClick={(event) => {
+          event.stopPropagation();
+        }}
       >
         <div className="flex items-start justify-between border-b border-[var(--admin-border)] px-6 py-6">
           <div>
@@ -333,11 +342,13 @@ function RegradeModal({
             />
             <p className="text-base leading-relaxed text-[var(--admin-on-surface)]">
               <strong className="text-[var(--admin-on-surface)]">
-                {scope === "selected" ? `${selectedCount} attempt${selectedCount === 1 ? "" : "s"}` : "All attempts"}
+                {scope === "selected"
+                  ? `${String(selectedCount)} attempt${selectedCount === 1 ? "" : "s"}`
+                  : "All attempts"}
               </strong>{" "}
               will be regraded against{" "}
-              <strong className="text-[var(--admin-on-surface)]">Version {answerKeyVersion}</strong> of
-              the answer key.
+              <strong className="text-[var(--admin-on-surface)]">Version {answerKeyVersion}</strong>{" "}
+              of the answer key.
             </p>
           </div>
 
@@ -350,12 +361,14 @@ function RegradeModal({
                 name="regrade-scope"
                 checked={scope === "selected"}
                 disabled={selectedCount === 0}
-                onChange={() => setScope("selected")}
+                onChange={() => {
+                  setScope("selected");
+                }}
                 className="accent-[var(--admin-primary)]"
               />
               <span className="text-sm text-[var(--admin-on-surface)]">
                 Regrade selected attempts
-                {selectedCount === 0 ? " (none selected)" : ` (${selectedCount})`}
+                {selectedCount === 0 ? " (none selected)" : ` (${String(selectedCount)})`}
               </span>
             </label>
             <label className="flex cursor-pointer items-center gap-3">
@@ -363,7 +376,9 @@ function RegradeModal({
                 type="radio"
                 name="regrade-scope"
                 checked={scope === "all"}
-                onChange={() => setScope("all")}
+                onChange={() => {
+                  setScope("all");
+                }}
                 className="accent-[var(--admin-primary)]"
               />
               <span className="text-sm text-[var(--admin-on-surface)]">
@@ -386,7 +401,9 @@ function RegradeModal({
             <input
               type="checkbox"
               checked={notify}
-              onChange={(event) => setNotify(event.target.checked)}
+              onChange={(event) => {
+                setNotify(event.target.checked);
+              }}
               className="accent-[var(--admin-primary)]"
             />
             <span className="text-sm text-[var(--admin-on-surface)]">Notify affected learners</span>
@@ -406,9 +423,11 @@ function RegradeModal({
             type="button"
             className={`${primaryButtonClassName} uppercase tracking-[0.1em]`}
             disabled={busy || (scope === "selected" && selectedCount === 0)}
-            onClick={() => onConfirm({ scope, notifyLearners: notify })}
+            onClick={() => {
+              onConfirm({ scope, notifyLearners: notify });
+            }}
           >
-            {busy ? "Regrading…" : `Regrade ${countLabel} attempts`}
+            {busy ? "Regrading…" : `Regrade ${String(countLabel)} attempts`}
           </button>
         </div>
       </div>
@@ -474,7 +493,9 @@ export function AdminScoreQuizLearnersPage({ assessmentId }: { assessmentId: str
       setDebouncedSearch(searchInput.trim());
       setPage(1);
     }, 300);
-    return () => window.clearTimeout(timer);
+    return () => {
+      window.clearTimeout(timer);
+    };
   }, [searchInput]);
 
   useEffect(() => {
@@ -482,7 +503,9 @@ export function AdminScoreQuizLearnersPage({ assessmentId }: { assessmentId: str
       setDebouncedAttemptSearch(attemptSearch.trim());
       setAttemptsPage(1);
     }, 300);
-    return () => window.clearTimeout(timer);
+    return () => {
+      window.clearTimeout(timer);
+    };
   }, [attemptSearch]);
 
   const parsedMinScore = useMemo(() => {
@@ -750,8 +773,8 @@ export function AdminScoreQuizLearnersPage({ assessmentId }: { assessmentId: str
     const chips: string[] = [title];
     if (debouncedSearch) chips.push(`Name: ${debouncedSearch}`);
     if (resultStatus) chips.push(`Result: ${resultStatus.replace(/_/g, " ")}`);
-    if (parsedMinScore != null) chips.push(`Min score: ${parsedMinScore}`);
-    if (parsedMaxScore != null) chips.push(`Max score: ${parsedMaxScore}`);
+    if (parsedMinScore != null) chips.push(`Min score: ${String(parsedMinScore)}`);
+    if (parsedMaxScore != null) chips.push(`Max score: ${String(parsedMaxScore)}`);
     if (attemptsFilter !== "any") chips.push(`Attempts: ${attemptsFilter.replace(/_/g, " ")}`);
     if (view !== "all") chips.push(`View: ${view.replace(/_/g, " ")}`);
     if (submittedFrom) chips.push(`From: ${submittedFrom}`);
@@ -799,7 +822,10 @@ export function AdminScoreQuizLearnersPage({ assessmentId }: { assessmentId: str
           Reports
         </Link>
         <ChevronRight className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-        <Link href="/admin/reports/progress-score/scores" className="hover:text-[var(--admin-primary)]">
+        <Link
+          href="/admin/reports/progress-score/scores"
+          className="hover:text-[var(--admin-primary)]"
+        >
           Progress & Score
         </Link>
         <ChevronRight className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
@@ -858,7 +884,9 @@ export function AdminScoreQuizLearnersPage({ assessmentId }: { assessmentId: str
             <button
               type="button"
               className={`${ghostButtonClassName} inline-flex items-center gap-2`}
-              onClick={() => setColumnsOpen((o) => !o)}
+              onClick={() => {
+                setColumnsOpen((o) => !o);
+              }}
             >
               <Columns3 className="h-4 w-4" aria-hidden="true" />
               Columns
@@ -903,7 +931,9 @@ export function AdminScoreQuizLearnersPage({ assessmentId }: { assessmentId: str
           <button
             type="button"
             className={`${ghostButtonClassName} inline-flex items-center gap-2`}
-            onClick={() => openCohortDrawer("group")}
+            onClick={() => {
+              openCohortDrawer("group");
+            }}
           >
             <Users className="h-4 w-4" aria-hidden="true" />
             Cohort actions
@@ -911,7 +941,9 @@ export function AdminScoreQuizLearnersPage({ assessmentId }: { assessmentId: str
           <button
             type="button"
             className={`${ghostButtonClassName} inline-flex items-center gap-2`}
-            onClick={() => setRegradeOpen(true)}
+            onClick={() => {
+              setRegradeOpen(true);
+            }}
           >
             <RefreshCw className="h-4 w-4" aria-hidden="true" />
             Regrade
@@ -925,7 +957,11 @@ export function AdminScoreQuizLearnersPage({ assessmentId }: { assessmentId: str
             <AlertTriangle className="h-4 w-4" aria-hidden="true" />
             <span className="text-sm">{error}</span>
           </div>
-          <button type="button" className={ghostButtonClassName} onClick={() => void loadLearners()}>
+          <button
+            type="button"
+            className={ghostButtonClassName}
+            onClick={() => void loadLearners()}
+          >
             Retry
           </button>
         </div>
@@ -945,19 +981,21 @@ export function AdminScoreQuizLearnersPage({ assessmentId }: { assessmentId: str
             <div className="relative h-4 w-full overflow-hidden rounded-full border border-[var(--admin-border)] bg-[var(--admin-surface-low)]">
               <div
                 className="absolute inset-y-0 left-0 bg-[var(--admin-primary)]"
-                style={{ width: `${Math.max(0, Math.min(100, summary.avgScorePct ?? 0))}%` }}
+                style={{
+                  width: `${String(Math.max(0, Math.min(100, summary.avgScorePct ?? 0)))}%`,
+                }}
               />
               {passMark != null ? (
                 <div
                   className="absolute inset-y-0 z-10 w-0.5 bg-[var(--admin-on-surface)]"
-                  style={{ left: `${passMark}%` }}
+                  style={{ left: `${String(passMark)}%` }}
                 />
               ) : null}
             </div>
             <div className="relative mt-2 flex justify-between font-mono text-[11px] text-[var(--admin-on-surface-variant)]">
               <span>0%</span>
               {passMark != null ? (
-                <span className="absolute" style={{ left: `calc(${passMark}% - 24px)` }}>
+                <span className="absolute" style={{ left: `calc(${String(passMark)}% - 24px)` }}>
                   {formatPct(passMark)} Pass
                 </span>
               ) : null}
@@ -989,7 +1027,7 @@ export function AdminScoreQuizLearnersPage({ assessmentId }: { assessmentId: str
               </div>
               <div className="font-mono text-[11px] text-[var(--admin-on-surface-variant)]">
                 {summary.attemptsPerLearner != null
-                  ? `${summary.attemptsPerLearner} avg / learner`
+                  ? `${String(summary.attemptsPerLearner)} avg / learner`
                   : "—"}
               </div>
             </div>
@@ -1034,7 +1072,10 @@ export function AdminScoreQuizLearnersPage({ assessmentId }: { assessmentId: str
       <div className="flex gap-8 border-b border-[var(--admin-border)]" role="tablist">
         {(
           [
-            { id: "learners" as const, label: `Learners (${formatCount(summary?.learnerCount ?? totalCount)})` },
+            {
+              id: "learners" as const,
+              label: `Learners (${formatCount(summary?.learnerCount ?? totalCount)})`,
+            },
             { id: "items" as const, label: "Item analysis" },
             {
               id: "attempts" as const,
@@ -1053,7 +1094,9 @@ export function AdminScoreQuizLearnersPage({ assessmentId }: { assessmentId: str
                 ? "border-b-2 border-[var(--admin-primary)] text-[var(--admin-primary)]"
                 : "text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-on-surface)]",
             ].join(" ")}
-            onClick={() => setTab(entry.id)}
+            onClick={() => {
+              setTab(entry.id);
+            }}
           >
             {entry.label}
           </button>
@@ -1162,7 +1205,9 @@ export function AdminScoreQuizLearnersPage({ assessmentId }: { assessmentId: str
                   className={`${fieldClassName} w-48 pl-8`}
                   placeholder="Search learner…"
                   value={searchInput}
-                  onChange={(event) => setSearchInput(event.target.value)}
+                  onChange={(event) => {
+                    setSearchInput(event.target.value);
+                  }}
                 />
               </div>
             </div>
@@ -1180,28 +1225,36 @@ export function AdminScoreQuizLearnersPage({ assessmentId }: { assessmentId: str
                 <button
                   type="button"
                   className={ghostButtonClassName}
-                  onClick={() => openCohortDrawer("group")}
+                  onClick={() => {
+                    openCohortDrawer("group");
+                  }}
                 >
                   Create group
                 </button>
                 <button
                   type="button"
                   className={ghostButtonClassName}
-                  onClick={() => openCohortDrawer("message")}
+                  onClick={() => {
+                    openCohortDrawer("message");
+                  }}
                 >
                   Message
                 </button>
                 <button
                   type="button"
                   className={ghostButtonClassName}
-                  onClick={() => setRegradeOpen(true)}
+                  onClick={() => {
+                    setRegradeOpen(true);
+                  }}
                 >
                   Regrade
                 </button>
                 <button
                   type="button"
                   className={`${ghostButtonClassName} inline-flex items-center gap-1`}
-                  onClick={() => setSelectedIds(new Set())}
+                  onClick={() => {
+                    setSelectedIds(new Set());
+                  }}
                 >
                   <X className="h-4 w-4" aria-hidden="true" />
                   Clear
@@ -1282,7 +1335,9 @@ export function AdminScoreQuizLearnersPage({ assessmentId }: { assessmentId: str
                                 <input
                                   type="checkbox"
                                   checked={selected}
-                                  onChange={() => toggleLearnerSelection(learner.membershipId)}
+                                  onChange={() => {
+                                    toggleLearnerSelection(learner.membershipId);
+                                  }}
                                   aria-label={`Select ${learner.learnerName ?? learner.email ?? "learner"}`}
                                   className="opacity-0 transition-opacity group-hover:opacity-100 checked:opacity-100 focus:opacity-100"
                                 />
@@ -1352,7 +1407,7 @@ export function AdminScoreQuizLearnersPage({ assessmentId }: { assessmentId: str
                               <td className="p-4 text-right font-mono tabular-nums">
                                 {learner.answeredCount}
                                 {learner.questionCount != null
-                                  ? `/${learner.questionCount}`
+                                  ? `/${String(learner.questionCount)}`
                                   : ""}
                               </td>
                               <td className="p-4 font-mono text-[13px] text-[var(--admin-on-surface-variant)]">
@@ -1366,11 +1421,11 @@ export function AdminScoreQuizLearnersPage({ assessmentId }: { assessmentId: str
                                   type="button"
                                   className="text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-primary)]"
                                   aria-label="Row actions"
-                                  onClick={() =>
+                                  onClick={() => {
                                     setRowMenuId((id) =>
                                       id === learner.membershipId ? null : learner.membershipId,
-                                    )
-                                  }
+                                    );
+                                  }}
                                 >
                                   <MoreVertical className="h-5 w-5" aria-hidden="true" />
                                 </button>
@@ -1387,7 +1442,7 @@ export function AdminScoreQuizLearnersPage({ assessmentId }: { assessmentId: str
                                         type="button"
                                         className="block w-full px-3 py-2 text-left text-xs hover:bg-[var(--admin-surface-high)]"
                                         onClick={() => {
-                                          void copyAttemptId(learner.latestAttemptId!);
+                                          void copyAttemptId(defined(learner.latestAttemptId));
                                           setRowMenuId(null);
                                         }}
                                       >
@@ -1424,20 +1479,24 @@ export function AdminScoreQuizLearnersPage({ assessmentId }: { assessmentId: str
                     type="button"
                     className="flex h-8 w-8 items-center justify-center rounded-sm border border-[var(--admin-border)] disabled:opacity-40"
                     disabled={page <= 1 || loading}
-                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    onClick={() => {
+                      setPage((p) => Math.max(1, p - 1));
+                    }}
                     aria-label="Previous page"
                   >
                     <ChevronLeft className="h-4 w-4" aria-hidden="true" />
                   </button>
                   <span className="tabular-nums">
                     {page}
-                    {totalPages > 0 ? ` / ${totalPages}` : ""}
+                    {totalPages > 0 ? ` / ${String(totalPages)}` : ""}
                   </span>
                   <button
                     type="button"
                     className="flex h-8 w-8 items-center justify-center rounded-sm border border-[var(--admin-border)] disabled:opacity-40"
                     disabled={page >= totalPages || loading}
-                    onClick={() => setPage((p) => p + 1)}
+                    onClick={() => {
+                      setPage((p) => p + 1);
+                    }}
                     aria-label="Next page"
                   >
                     <ChevronRight className="h-4 w-4" aria-hidden="true" />
@@ -1454,7 +1513,11 @@ export function AdminScoreQuizLearnersPage({ assessmentId }: { assessmentId: str
           {itemsError ? (
             <div className="flex flex-wrap items-center justify-between gap-3 rounded-sm border border-[var(--admin-border)] bg-[color-mix(in_srgb,var(--admin-danger)_10%,var(--admin-surface))] px-4 py-3">
               <span className="text-sm text-[var(--admin-danger)]">{itemsError}</span>
-              <button type="button" className={ghostButtonClassName} onClick={() => void loadItems()}>
+              <button
+                type="button"
+                className={ghostButtonClassName}
+                onClick={() => void loadItems()}
+              >
                 Retry
               </button>
             </div>
@@ -1468,8 +1531,8 @@ export function AdminScoreQuizLearnersPage({ assessmentId }: { assessmentId: str
                   Attention Required
                 </p>
                 <p className="text-[var(--admin-on-surface)]">
-                  {belowFortyCount} question{belowFortyCount === 1 ? "" : "s"} fall below 40% correct
-                  — review wording or coverage.
+                  {belowFortyCount} question{belowFortyCount === 1 ? "" : "s"} fall below 40%
+                  correct — review wording or coverage.
                 </p>
               </div>
             </div>
@@ -1509,17 +1572,15 @@ export function AdminScoreQuizLearnersPage({ assessmentId }: { assessmentId: str
                 ) : (
                   itemAnalysis.map((item) => {
                     const expanded = expandedItemId === item.assessmentItemId;
-                    const low =
-                      item.correctRatePct != null && item.correctRatePct < 40;
-                    const discLow =
-                      item.discrimination != null && item.discrimination < 0.2;
+                    const low = item.correctRatePct != null && item.correctRatePct < 40;
+                    const discLow = item.discrimination != null && item.discrimination < 0.2;
                     return (
                       <Fragment key={item.assessmentItemId}>
                         <tr
                           className="cursor-pointer transition-colors hover:bg-[var(--admin-surface-high)]"
-                          onClick={() =>
-                            setExpandedItemId(expanded ? null : item.assessmentItemId)
-                          }
+                          onClick={() => {
+                            setExpandedItemId(expanded ? null : item.assessmentItemId);
+                          }}
                         >
                           <td className="px-4 py-4 text-center font-mono text-[var(--admin-on-surface)]">
                             Q{item.position + 1}
@@ -1545,7 +1606,7 @@ export function AdminScoreQuizLearnersPage({ assessmentId }: { assessmentId: str
                                 <div
                                   className={`absolute inset-y-0 left-0 ${low ? "bg-[var(--admin-warning)]" : "bg-[var(--admin-primary)]"}`}
                                   style={{
-                                    width: `${Math.max(0, Math.min(100, item.correctRatePct ?? 0))}%`,
+                                    width: `${String(Math.max(0, Math.min(100, item.correctRatePct ?? 0)))}%`,
                                   }}
                                 />
                               </div>
@@ -1563,9 +1624,7 @@ export function AdminScoreQuizLearnersPage({ assessmentId }: { assessmentId: str
                               }
                               title={discLow ? "Low discrimination" : undefined}
                             >
-                              {item.discrimination == null
-                                ? "—"
-                                : item.discrimination.toFixed(2)}
+                              {item.discrimination == null ? "—" : item.discrimination.toFixed(2)}
                             </span>
                           </td>
                           <td className="px-4 py-4 text-center text-[var(--admin-on-surface-variant)]">
@@ -1593,8 +1652,7 @@ export function AdminScoreQuizLearnersPage({ assessmentId }: { assessmentId: str
                                     {item.options.map((option, index) => {
                                       const letter = String.fromCharCode(65 + index);
                                       const mostWrong =
-                                        !option.isCorrect &&
-                                        item.mostWrongOption === option.label;
+                                        !option.isCorrect && item.mostWrongOption === option.label;
                                       return (
                                         <div
                                           key={option.optionId}
@@ -1648,7 +1706,7 @@ export function AdminScoreQuizLearnersPage({ assessmentId }: { assessmentId: str
                                                       ? "bg-[var(--admin-warning)]"
                                                       : "bg-[var(--admin-outline)]"
                                                 }`}
-                                                style={{ width: `${option.sharePct}%` }}
+                                                style={{ width: `${String(option.sharePct)}%` }}
                                               />
                                             </div>
                                           </div>
@@ -1683,7 +1741,9 @@ export function AdminScoreQuizLearnersPage({ assessmentId }: { assessmentId: str
                 className={`${fieldClassName} w-64 pl-8`}
                 placeholder="Search attempts…"
                 value={attemptSearch}
-                onChange={(event) => setAttemptSearch(event.target.value)}
+                onChange={(event) => {
+                  setAttemptSearch(event.target.value);
+                }}
               />
             </div>
             <button
@@ -1802,7 +1862,9 @@ export function AdminScoreQuizLearnersPage({ assessmentId }: { assessmentId: str
                         </div>
                         <p className="mt-1 font-mono text-[11px] text-[var(--admin-on-surface-variant)]">
                           {attempt.answeredCount}
-                          {attempt.questionCount != null ? `/${attempt.questionCount}` : ""}{" "}
+                          {attempt.questionCount != null
+                            ? `/${String(attempt.questionCount)}`
+                            : ""}{" "}
                           Answered
                         </p>
                       </td>
@@ -1868,29 +1930,32 @@ export function AdminScoreQuizLearnersPage({ assessmentId }: { assessmentId: str
 
           <div className="flex items-center justify-between border-t border-[var(--admin-border)] bg-[var(--admin-surface-low)] p-4 font-mono text-[12px] text-[var(--admin-on-surface-variant)]">
             <span>
-              Showing{" "}
-              {attemptsTotalCount === 0 ? 0 : (attemptsPage - 1) * 25 + 1}–
-              {Math.min(attemptsPage * 25, attemptsTotalCount)} of{" "}
-              {formatCount(attemptsTotalCount)} entries
+              Showing {attemptsTotalCount === 0 ? 0 : (attemptsPage - 1) * 25 + 1}–
+              {Math.min(attemptsPage * 25, attemptsTotalCount)} of {formatCount(attemptsTotalCount)}{" "}
+              entries
             </span>
             <div className="flex items-center gap-2">
               <button
                 type="button"
                 className={ghostButtonClassName}
                 disabled={attemptsPage <= 1 || attemptsLoading}
-                onClick={() => setAttemptsPage((p) => Math.max(1, p - 1))}
+                onClick={() => {
+                  setAttemptsPage((p) => Math.max(1, p - 1));
+                }}
               >
                 Prev
               </button>
               <span className="tabular-nums">
                 {attemptsPage}
-                {attemptsTotalPages > 0 ? ` / ${attemptsTotalPages}` : ""}
+                {attemptsTotalPages > 0 ? ` / ${String(attemptsTotalPages)}` : ""}
               </span>
               <button
                 type="button"
                 className={ghostButtonClassName}
                 disabled={attemptsPage >= attemptsTotalPages || attemptsLoading}
-                onClick={() => setAttemptsPage((p) => p + 1)}
+                onClick={() => {
+                  setAttemptsPage((p) => p + 1);
+                }}
               >
                 Next
               </button>
@@ -1905,7 +1970,9 @@ export function AdminScoreQuizLearnersPage({ assessmentId }: { assessmentId: str
         selectedCount={selectedAttemptIds.length || selectedMembershipIds.length}
         answerKeyVersion="current"
         busy={busy}
-        onClose={() => setRegradeOpen(false)}
+        onClose={() => {
+          setRegradeOpen(false);
+        }}
         onConfirm={(args) => void handleRegrade(args)}
       />
 
@@ -1918,9 +1985,7 @@ export function AdminScoreQuizLearnersPage({ assessmentId }: { assessmentId: str
           assessmentTitle: title,
           productTitle: assessment?.productTitle ?? courseTitle,
           matchCount: selectedMembershipIds.length > 0 ? selectedMembershipIds.length : totalCount,
-          ...(selectedMembershipIds.length > 0
-            ? { membershipIds: selectedMembershipIds }
-            : {}),
+          ...(selectedMembershipIds.length > 0 ? { membershipIds: selectedMembershipIds } : {}),
           filterChips,
           suggestedGroupName: `${view !== "all" ? view.replace(/_/g, " ") : "Cohort"} — ${title}`,
           audienceFilters: {
@@ -1938,7 +2003,9 @@ export function AdminScoreQuizLearnersPage({ assessmentId }: { assessmentId: str
               : {}),
           },
         }}
-        onClose={() => setDrawerOpen(false)}
+        onClose={() => {
+          setDrawerOpen(false);
+        }}
         onSuccess={() => void loadLearners()}
       />
     </div>

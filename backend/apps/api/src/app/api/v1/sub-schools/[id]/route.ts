@@ -27,7 +27,7 @@ export const GET = createTenantRoute<
   metadata: getSubSchoolMetadata,
   params: paramsSchema,
   output: subSchoolResponseSchema,
-  handler: async ({ tx, ctx, params }) => getSubSchool(tx, ctx, params.id),
+  handler: async ({ tx, ctx, params }) => getSubSchool(tx, ctx, params["id"]),
 });
 
 export const PATCH = createTenantRoute<
@@ -39,7 +39,7 @@ export const PATCH = createTenantRoute<
   params: paramsSchema,
   body: updateSubSchoolBodySchema,
   output: subSchoolResponseSchema,
-  handler: async ({ tx, ctx, params, input }) => updateSubSchool(tx, ctx, params.id, input),
+  handler: async ({ tx, ctx, params, input }) => updateSubSchool(tx, ctx, params["id"], input),
 });
 
 export const DELETE = createTenantRoute<
@@ -50,5 +50,5 @@ export const DELETE = createTenantRoute<
   metadata: deleteSubSchoolMetadata,
   params: paramsSchema,
   output: deleteSubSchoolResponseSchema,
-  handler: async ({ tx, ctx, params }) => deleteSubSchool(tx, ctx, params.id),
+  handler: async ({ tx, ctx, params }) => deleteSubSchool(tx, ctx, params["id"]),
 });

@@ -5,13 +5,16 @@ import type {
   gamificationMetricsResponseSchema,
   gamificationRulesResponseSchema,
   leaderboardListResponseSchema,
-  questAdminListResponseSchema,
-  rewardsAdminResponseSchema,
-  seasonalEventsListResponseSchema,
 } from "@atlas/contracts/gamification/gamification.schemas";
 import type { z } from "zod";
 import { AdminPageGate } from "../../../components/patterns/AdminPageGate";
 import { AdminGamificationEditor } from "../../../features/gamification/components/AdminGamificationEditor";
+import type { AdminQuest } from "../../../features/gamification/components/QuestsAdminPanel";
+import type {
+  RewardCurrency,
+  RewardItem,
+} from "../../../features/gamification/components/RewardsShopPanel";
+import type { SeasonalEventDto } from "../../../features/gamification/components/SeasonalEventsPanel";
 import { ServerApiError, serverApi } from "../../../lib/server-api";
 
 type MemberListItem = MembersListResponse["data"]["items"][number];
@@ -20,9 +23,9 @@ type BadgeListResponse = z.infer<typeof badgeListResponseSchema>;
 type GamificationMetricsResponse = z.infer<typeof gamificationMetricsResponseSchema>;
 type GamificationRulesResponse = z.infer<typeof gamificationRulesResponseSchema>;
 type GamificationEventsResponse = z.infer<typeof gamificationEventsResponseSchema>;
-type QuestAdminListResponse = z.infer<typeof questAdminListResponseSchema>;
-type RewardsAdminResponse = z.infer<typeof rewardsAdminResponseSchema>;
-type SeasonalEventsListResponse = z.infer<typeof seasonalEventsListResponseSchema>;
+type QuestAdminListResponse = { data: { items: AdminQuest[] } };
+type RewardsAdminResponse = { data: { currencies: RewardCurrency[]; items: RewardItem[] } };
+type SeasonalEventsListResponse = { data: { items: SeasonalEventDto[] } };
 type CourseListResponse = {
   data: { items: Array<{ id: string; title: string }> };
 };
@@ -46,25 +49,17 @@ export default async function AdminGamificationPage() {
     );
     const badgesResult = await serverApi.get<BadgeListResponse>("/api/v1/badges");
 
-    const [
-      leaderboards,
-      metrics,
-      courses,
-      rules,
-      events,
-      quests,
-      rewards,
-      seasonalEvents,
-    ] = await Promise.all([
-      softGet(serverApi.get<LeaderboardListResponse>("/api/v1/leaderboards")),
-      softGet(serverApi.get<GamificationMetricsResponse>("/api/v1/gamification/metrics")),
-      softGet(serverApi.get<CourseListResponse>("/api/v1/courses?limit=100")),
-      softGet(serverApi.get<GamificationRulesResponse>("/api/v1/gamification/rules")),
-      softGet(serverApi.get<GamificationEventsResponse>("/api/v1/gamification/events")),
-      softGet(serverApi.get<QuestAdminListResponse>("/api/v1/quests")),
-      softGet(serverApi.get<RewardsAdminResponse>("/api/v1/rewards")),
-      softGet(serverApi.get<SeasonalEventsListResponse>("/api/v1/seasonal-events")),
-    ]);
+    const [leaderboards, metrics, courses, rules, events, quests, rewards, seasonalEvents] =
+      await Promise.all([
+        softGet(serverApi.get<LeaderboardListResponse>("/api/v1/leaderboards")),
+        softGet(serverApi.get<GamificationMetricsResponse>("/api/v1/gamification/metrics")),
+        softGet(serverApi.get<CourseListResponse>("/api/v1/courses?limit=100")),
+        softGet(serverApi.get<GamificationRulesResponse>("/api/v1/gamification/rules")),
+        softGet(serverApi.get<GamificationEventsResponse>("/api/v1/gamification/events")),
+        softGet(serverApi.get<QuestAdminListResponse>("/api/v1/quests")),
+        softGet(serverApi.get<RewardsAdminResponse>("/api/v1/rewards")),
+        softGet(serverApi.get<SeasonalEventsListResponse>("/api/v1/seasonal-events")),
+      ]);
 
     const memberOptions = membersResult.data.items.map((member) => ({
       id: member.id,

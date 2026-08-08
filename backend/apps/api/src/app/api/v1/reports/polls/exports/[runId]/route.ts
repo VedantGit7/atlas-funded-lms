@@ -16,5 +16,5 @@ export const GET = createTenantRoute<
   params: pollExportRunParamsSchema,
   input: noBodySchema,
   output: pollExportRunDetailResponseSchema,
-  handler: async ({ tx, ctx, params }) => getPollExportRun(tx, ctx, params.runId),
+  handler: async ({ tx, ctx, params }) => getPollExportRun(tx, ctx, params["runId"]),
 });

@@ -65,16 +65,16 @@ export type CreateDeviceExportBody = {
   format: DeviceExportFormat;
   window: DeviceExportWindow;
   overLimitOnly: boolean;
-  platform?: string;
+  platform?: string | undefined;
   useCurrentFilters: boolean;
   delivery: DeviceExportDelivery;
-  recipients?: string[];
-  webhookUrl?: string | null;
+  recipients?: string[] | undefined;
+  webhookUrl?: string | null | undefined;
   scheduleEnabled: boolean;
-  scheduleName?: string;
-  cadence?: DeviceExportCadence;
-  time?: string;
-  timezone?: string;
+  scheduleName?: string | undefined;
+  cadence?: DeviceExportCadence | undefined;
+  time?: string | undefined;
+  timezone?: string | undefined;
 };
 
 export async function fetchDeviceExports() {
@@ -106,7 +106,7 @@ export async function retryDeviceExport(runId: string) {
 
 export async function updateDeviceExportSchedule(
   scheduleId: string,
-  body: { isActive?: boolean; name?: string },
+  body: { isActive?: boolean | undefined; name?: string | undefined },
 ) {
   return clientApi.patch<{ data: DeviceExportScheduleItem }>(
     `/api/v1/reports/active-devices/exports/schedules/${scheduleId}`,

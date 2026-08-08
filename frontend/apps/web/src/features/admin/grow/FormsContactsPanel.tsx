@@ -36,7 +36,9 @@ export function FormsContactsPanel() {
       setDebounced(query.trim());
       setPage(1);
     }, 250);
-    return () => { window.clearTimeout(timer); };
+    return () => {
+      window.clearTimeout(timer);
+    };
   }, [query]);
 
   const load = useCallback(async () => {
@@ -86,7 +88,11 @@ export function FormsContactsPanel() {
             aria-label="Breadcrumb"
             className="mb-1 flex items-center gap-2 text-sm text-[var(--admin-on-surface-variant)]"
           >
-            <Link href={FORMS_LIST_HREF} prefetch={false} className="hover:text-[var(--admin-primary)]">
+            <Link
+              href={FORMS_LIST_HREF}
+              prefetch={false}
+              className="hover:text-[var(--admin-primary)]"
+            >
               Directory
             </Link>
             <ChevronRight className="h-3.5 w-3.5" aria-hidden="true" />
@@ -97,10 +103,7 @@ export function FormsContactsPanel() {
           </h1>
           <p className="mt-1 text-sm text-[var(--admin-on-surface-variant)]">
             Manage prospects captured from forms
-            {summary.totalCount > 0
-              ? ` (${formatFormCount(summary.totalCount)} total)`
-              : ""}
-            .
+            {summary.totalCount > 0 ? ` (${formatFormCount(summary.totalCount)} total)` : ""}.
           </p>
         </div>
         <Link

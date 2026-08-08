@@ -123,12 +123,12 @@ export type ActiveDevicesSessionDetail = {
 };
 
 export type ActiveDevicesRosterFilters = {
-  email?: string;
-  platform?: string;
-  window?: ActiveDevicesWindow;
-  view?: ActiveDevicesView;
-  page?: number;
-  limit?: number;
+  email?: string | undefined;
+  platform?: string | undefined;
+  window?: ActiveDevicesWindow | undefined;
+  view?: ActiveDevicesView | undefined;
+  page?: number | undefined;
+  limit?: number | undefined;
 };
 
 export type ActiveDevicesOverview = {
@@ -153,9 +153,9 @@ export type ActiveDevicesOverview = {
 };
 
 export type ActiveDevicesOverviewFilters = {
-  window?: ActiveDevicesWindow;
-  email?: string;
-  platform?: string;
+  window?: ActiveDevicesWindow | undefined;
+  email?: string | undefined;
+  platform?: string | undefined;
 };
 
 function buildQuery(filters: ActiveDevicesRosterFilters): string {

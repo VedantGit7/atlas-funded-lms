@@ -20,5 +20,5 @@ export const PATCH = createTenantRoute<
   body: updateMarketingCtaTargetingBodySchema,
   output: marketingCtaResponseSchema,
   handler: async ({ tx, ctx, params, input }) =>
-    updateMarketingCtaTargeting(tx, ctx, params.id, input),
+    updateMarketingCtaTargeting(tx, ctx, params["id"], input),
 });

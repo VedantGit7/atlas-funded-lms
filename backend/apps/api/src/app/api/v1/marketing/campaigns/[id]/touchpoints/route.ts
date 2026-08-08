@@ -20,5 +20,5 @@ export const POST = createTenantRoute<
   body: updateMarketingCampaignTouchpointsBodySchema,
   output: marketingCampaignResponseSchema,
   handler: async ({ tx, ctx, params, input }) =>
-    updateMarketingCampaignTouchpoints(tx, ctx, params.id, input),
+    updateMarketingCampaignTouchpoints(tx, ctx, params["id"], input),
 });

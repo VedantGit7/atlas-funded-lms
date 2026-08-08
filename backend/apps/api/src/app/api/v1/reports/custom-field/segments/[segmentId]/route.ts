@@ -25,7 +25,7 @@ export const GET = createTenantRoute<
   metadata: listCustomFieldSegmentsMetadata,
   params: customFieldSegmentParamsSchema,
   output: customFieldSegmentDetailResponseSchema,
-  handler: async ({ tx, ctx, params }) => getCustomFieldSegment(tx, ctx, params.segmentId),
+  handler: async ({ tx, ctx, params }) => getCustomFieldSegment(tx, ctx, params["segmentId"]),
 });
 
 export const PATCH = createTenantRoute<
@@ -38,7 +38,7 @@ export const PATCH = createTenantRoute<
   body: updateCustomFieldSegmentBodySchema,
   output: customFieldSegmentMutationResponseSchema,
   handler: async ({ tx, ctx, params, input }) =>
-    updateCustomFieldSegment(tx, ctx, params.segmentId, input),
+    updateCustomFieldSegment(tx, ctx, params["segmentId"], input),
 });
 
 export const DELETE = createTenantRoute<
@@ -49,5 +49,5 @@ export const DELETE = createTenantRoute<
   metadata: mutateCustomFieldSegmentMetadata,
   params: customFieldSegmentParamsSchema,
   output: customFieldSegmentDeleteResponseSchema,
-  handler: async ({ tx, ctx, params }) => deleteCustomFieldSegment(tx, ctx, params.segmentId),
+  handler: async ({ tx, ctx, params }) => deleteCustomFieldSegment(tx, ctx, params["segmentId"]),
 });

@@ -32,10 +32,7 @@ import {
   type PaymentTransactionColumnKey,
   type PaymentTransactionItem,
 } from "./admin-payments-roster-api";
-import {
-  downloadReportExport,
-  pollReportRunUntilComplete,
-} from "./admin-reports-api";
+import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
 import { AdminPaymentTransactionDrawer } from "./AdminPaymentTransactionDrawer";
 import { PaymentsReportTabs } from "./PaymentsReportTabs";
 
@@ -98,12 +95,12 @@ function formatRelative(iso: string | null): string {
   const diffMs = Date.now() - date.getTime();
   const mins = Math.floor(diffMs / 60_000);
   if (mins < 1) return "Just now";
-  if (mins < 60) return `${mins} min${mins === 1 ? "" : "s"} ago`;
+  if (mins < 60) return `${String(mins)} min${mins === 1 ? "" : "s"} ago`;
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours} hr${hours === 1 ? "" : "s"} ago`;
+  if (hours < 24) return `${String(hours)} hr${hours === 1 ? "" : "s"} ago`;
   const days = Math.floor(hours / 24);
   if (days === 1) return "Yesterday";
-  if (days < 7) return `${days} days ago`;
+  if (days < 7) return `${String(days)} days ago`;
   return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
 }
 
@@ -373,7 +370,9 @@ export function AdminPaymentsTransactionsLedgerPage() {
       setRowMenuId(null);
     }
     document.addEventListener("click", onDocClick);
-    return () => document.removeEventListener("click", onDocClick);
+    return () => {
+      document.removeEventListener("click", onDocClick);
+    };
   }, []);
 
   function applyView(next: SavedView) {
@@ -431,14 +430,16 @@ export function AdminPaymentsTransactionsLedgerPage() {
         columns,
         emailDownloadLink: true,
         ...(selectedOnly && selectedIds.size > 0
-          ? { /* selection exported via filtered list when possible */ }
+          ? {
+              /* selection exported via filtered list when possible */
+            }
           : {}),
       });
       const completed = await pollReportRunUntilComplete(response.data.runId);
-      if (completed.status !== "succeeded") {
+      if (completed.status !== "completed") {
         throw new Error(completed.errorMessage ?? "Export failed.");
       }
-      await downloadReportExport(completed.id);
+      await downloadReportExport(completed.id, "csv");
     } catch (exportError) {
       setError(
         exportError instanceof ClientApiError
@@ -490,7 +491,7 @@ export function AdminPaymentsTransactionsLedgerPage() {
   }
 
   async function copyExternalId(value: string | null) {
-    if (!value || !navigator.clipboard) return;
+    if (!value) return;
     await navigator.clipboard.writeText(value);
   }
 
@@ -577,7 +578,9 @@ export function AdminPaymentsTransactionsLedgerPage() {
               {columnsOpen ? (
                 <div
                   className="absolute right-0 top-[calc(100%+8px)] z-40 flex w-[min(480px,calc(100vw-2rem))] flex-col border border-[var(--admin-border)] bg-[var(--admin-surface-high)] shadow-2xl"
-                  onClick={(event) => event.stopPropagation()}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                  }}
                 >
                   <div className="flex items-center justify-between border-b border-[var(--admin-border)] bg-[var(--admin-surface)] p-4">
                     <h3 className="text-base font-semibold text-[var(--admin-on-surface)]">
@@ -586,7 +589,9 @@ export function AdminPaymentsTransactionsLedgerPage() {
                     <button
                       type="button"
                       className="text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-on-surface)]"
-                      onClick={() => setColumnsOpen(false)}
+                      onClick={() => {
+                        setColumnsOpen(false);
+                      }}
                     >
                       <X className="h-4 w-4" aria-hidden="true" />
                     </button>
@@ -622,7 +627,9 @@ export function AdminPaymentsTransactionsLedgerPage() {
                     <button
                       type="button"
                       className="font-mono text-xs font-bold uppercase tracking-wide text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-on-surface)]"
-                      onClick={() => setDraftColumns(DEFAULT_COLUMNS)}
+                      onClick={() => {
+                        setDraftColumns(DEFAULT_COLUMNS);
+                      }}
                     >
                       Reset to default
                     </button>
@@ -654,7 +661,9 @@ export function AdminPaymentsTransactionsLedgerPage() {
             <button
               type="button"
               className="inline-flex h-9 items-center gap-2 rounded bg-[var(--admin-primary)] px-4 font-mono text-xs font-bold uppercase tracking-wide text-[var(--admin-on-primary)]"
-              onClick={() => router.push("/admin/reports/payments?tab=instalment")}
+              onClick={() => {
+                router.push("/admin/reports/payments?tab=instalment");
+              }}
             >
               <Plus className="h-4 w-4" aria-hidden="true" />
               Record payment
@@ -680,7 +689,9 @@ export function AdminPaymentsTransactionsLedgerPage() {
                   ? "border-b-2 border-[var(--admin-primary)] font-bold text-[var(--admin-primary)]"
                   : "text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-primary)]",
               ].join(" ")}
-              onClick={() => applyView(item.key)}
+              onClick={() => {
+                applyView(item.key);
+              }}
             >
               {item.label}
             </button>
@@ -696,7 +707,9 @@ export function AdminPaymentsTransactionsLedgerPage() {
               className="w-full bg-transparent py-1.5 pl-8 pr-2 font-mono text-xs outline-none placeholder:text-[var(--admin-on-surface-variant)]"
               placeholder="Search learner..."
               value={search}
-              onChange={(event) => setSearch(event.target.value)}
+              onChange={(event) => {
+                setSearch(event.target.value);
+              }}
               onKeyDown={(event) => {
                 if (event.key === "Enter") {
                   setSearchApplied(search.trim());
@@ -796,7 +809,10 @@ export function AdminPaymentsTransactionsLedgerPage() {
       ) : null}
 
       {loading ? (
-        <div className="border border-[var(--admin-border)] bg-[var(--admin-surface)]" aria-busy="true">
+        <div
+          className="border border-[var(--admin-border)] bg-[var(--admin-surface)]"
+          aria-busy="true"
+        >
           <div className="grid grid-cols-12 gap-4 border-b border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-4 py-3">
             {Array.from({ length: 6 }).map((_, index) => (
               <Shimmer key={index} className="col-span-2 h-3" />
@@ -863,7 +879,10 @@ export function AdminPaymentsTransactionsLedgerPage() {
         <div className="flex min-h-[360px] flex-col items-center justify-center rounded-lg border border-dashed border-[var(--admin-border)] bg-[var(--admin-surface)] p-8">
           <div className="relative mb-6 flex h-28 w-28 items-center justify-center">
             <div className="absolute inset-0 rounded-full bg-[var(--admin-surface-low)] opacity-60 blur-xl" />
-            <Search className="relative z-10 h-16 w-16 text-[var(--admin-outline)]" strokeWidth={1.25} />
+            <Search
+              className="relative z-10 h-16 w-16 text-[var(--admin-outline)]"
+              strokeWidth={1.25}
+            />
           </div>
           <h2 className="mb-2 text-center text-xl font-semibold text-[var(--admin-on-surface)]">
             No transactions match these filters
@@ -970,13 +989,22 @@ export function AdminPaymentsTransactionsLedgerPage() {
                           ? "bg-[color-mix(in_srgb,var(--admin-danger)_3%,transparent)] hover:bg-[color-mix(in_srgb,var(--admin-danger)_6%,transparent)]"
                           : "hover:bg-[var(--admin-surface-low)]",
                       ].join(" ")}
-                      onClick={() => setDrawerOrderId(item.id)}
+                      onClick={() => {
+                        setDrawerOrderId(item.id);
+                      }}
                     >
-                      <td className="p-2 text-center" onClick={(event) => event.stopPropagation()}>
+                      <td
+                        className="p-2 text-center"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                        }}
+                      >
                         <input
                           type="checkbox"
                           checked={selectedIds.has(item.id)}
-                          onChange={() => toggleSelect(item.id)}
+                          onChange={() => {
+                            toggleSelect(item.id);
+                          }}
                           className="h-4 w-4 accent-[var(--admin-primary)]"
                           aria-label={`Select ${item.learnerName ?? item.id}`}
                         />
@@ -998,9 +1026,7 @@ export function AdminPaymentsTransactionsLedgerPage() {
                       {showCol("product_title") || showCol("product_type") ? (
                         <td className={`p-2 ${isRefunded ? "opacity-70" : ""}`}>
                           {showCol("product_title") ? (
-                            <div className="max-w-[160px] truncate">
-                              {item.productTitle ?? "-"}
-                            </div>
+                            <div className="max-w-[160px] truncate">{item.productTitle ?? "-"}</div>
                           ) : null}
                           {showCol("product_type") && item.productType ? (
                             <span className="mt-1 inline-block rounded bg-[var(--admin-surface-variant)] px-1.5 py-0.5 font-mono text-[10px] text-[var(--admin-on-surface-variant)]">
@@ -1096,7 +1122,12 @@ export function AdminPaymentsTransactionsLedgerPage() {
                           </div>
                         </td>
                       ) : null}
-                      <td className="relative p-2 text-right" onClick={(event) => event.stopPropagation()}>
+                      <td
+                        className="relative p-2 text-right"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                        }}
+                      >
                         <button
                           type="button"
                           className="text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-on-surface)]"
@@ -1182,7 +1213,9 @@ export function AdminPaymentsTransactionsLedgerPage() {
               <button
                 type="button"
                 className="text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-on-surface)]"
-                onClick={() => setSelectedIds(new Set())}
+                onClick={() => {
+                  setSelectedIds(new Set());
+                }}
                 aria-label="Clear selection"
               >
                 <X className="h-4 w-4" aria-hidden="true" />
@@ -1231,7 +1264,9 @@ export function AdminPaymentsTransactionsLedgerPage() {
                 type="button"
                 className="p-1 text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-primary)] disabled:opacity-40"
                 disabled={page <= 1}
-                onClick={() => setPage((current) => Math.max(1, current - 1))}
+                onClick={() => {
+                  setPage((current) => Math.max(1, current - 1));
+                }}
                 aria-label="Previous page"
               >
                 <ChevronLeft className="h-5 w-5" aria-hidden="true" />
@@ -1240,7 +1275,9 @@ export function AdminPaymentsTransactionsLedgerPage() {
                 type="button"
                 className="p-1 text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-primary)] disabled:opacity-40"
                 disabled={page >= totalPages || totalPages === 0}
-                onClick={() => setPage((current) => current + 1)}
+                onClick={() => {
+                  setPage((current) => current + 1);
+                }}
                 aria-label="Next page"
               >
                 <ChevronRight className="h-5 w-5" aria-hidden="true" />
@@ -1252,7 +1289,9 @@ export function AdminPaymentsTransactionsLedgerPage() {
 
       <AdminPaymentTransactionDrawer
         orderId={drawerOrderId}
-        onClose={() => setDrawerOrderId(null)}
+        onClose={() => {
+          setDrawerOrderId(null);
+        }}
       />
     </div>
   );

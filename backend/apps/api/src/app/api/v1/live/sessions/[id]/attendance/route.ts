@@ -22,7 +22,7 @@ export const GET = createTenantRoute<
   metadata: listLiveAttendanceMetadata,
   params: paramsSchema,
   output: liveAttendanceListResponseSchema,
-  handler: async ({ tx, ctx, params }) => listLiveAttendance(tx, ctx, params.id),
+  handler: async ({ tx, ctx, params }) => listLiveAttendance(tx, ctx, params["id"]),
 });
 
 export const POST = createTenantRoute<
@@ -34,5 +34,6 @@ export const POST = createTenantRoute<
   params: paramsSchema,
   input: checkInAttendanceBodySchema,
   output: checkInAttendanceResponseSchema,
-  handler: async ({ tx, ctx, params, input }) => checkInLiveAttendance(tx, ctx, params.id, input),
+  handler: async ({ tx, ctx, params, input }) =>
+    checkInLiveAttendance(tx, ctx, params["id"], input),
 });

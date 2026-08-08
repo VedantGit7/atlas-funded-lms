@@ -1,4 +1,4 @@
-import type { z } from "zod";
+import { z } from "zod";
 import { createTenantRoute } from "@atlas/api";
 import { AssetReferenceViewSchema } from "@atlas/storage/schemas/asset-reference";
 import { confirmLessonAssetUploadService } from "../../../../../../../server/lessons/lesson-asset-upload.service";

@@ -16,10 +16,7 @@ function capRows(result: ReportDatasetResult): ReportDatasetResult {
   return result;
 }
 
-function mapRows(
-  rows: Array<Record<string, unknown>>,
-  columns: string[],
-): ReportDatasetResult {
+function mapRows(rows: Array<Record<string, unknown>>, columns: string[]): ReportDatasetResult {
   return capRows({
     columns,
     rows: rows.map((row) => {
@@ -536,14 +533,7 @@ async function queryResourceUsage(
     limit ${REPORT_ROW_CAP}
   `;
 
-  return mapRows(rows, [
-    "metric_key",
-    "metric_label",
-    "period",
-    "value",
-    "unit",
-    "calculated_at",
-  ]);
+  return mapRows(rows, ["metric_key", "metric_label", "period", "value", "unit", "calculated_at"]);
 }
 
 async function queryExports(
@@ -652,7 +642,10 @@ async function queryExports(
   ]);
 }
 
-async function queryActiveDevices(tx: TenantTx, params: DatasetParams): Promise<ReportDatasetResult> {
+async function queryActiveDevices(
+  tx: TenantTx,
+  params: DatasetParams,
+): Promise<ReportDatasetResult> {
   const membershipId = asString(params["membershipId"]);
   const platform = asString(params["platform"]);
   const email = asString(params["email"]);
@@ -681,16 +674,12 @@ async function queryActiveDevices(tx: TenantTx, params: DatasetParams): Promise<
       ? (configRows[0].config_json as Record<string, unknown>)
       : {};
   const security =
-    root.security && typeof root.security === "object" && !Array.isArray(root.security)
-      ? (root.security as Record<string, unknown>)
+    root["security"] && typeof root["security"] === "object" && !Array.isArray(root["security"])
+      ? (root["security"] as Record<string, unknown>)
       : {};
-  const rawLimit = security.deviceRegistrationLimit;
+  const rawLimit = security["deviceRegistrationLimit"];
   const parsedLimit =
-    typeof rawLimit === "number"
-      ? rawLimit
-      : typeof rawLimit === "string"
-        ? Number(rawLimit)
-        : 1;
+    typeof rawLimit === "number" ? rawLimit : typeof rawLimit === "string" ? Number(rawLimit) : 1;
   const deviceLimit = Number.isFinite(parsedLimit)
     ? Math.min(10, Math.max(1, Math.trunc(parsedLimit)))
     : 1;
@@ -845,8 +834,7 @@ async function queryPayments(tx: TenantTx, params: DatasetParams): Promise<Repor
     return mapRows(rows, columns.length > 0 ? columns : allColumns);
   }
 
-  const status =
-    asString(params["status"]) ?? (reportTab === "invoices" ? "paid" : undefined);
+  const status = asString(params["status"]) ?? (reportTab === "invoices" ? "paid" : undefined);
   const gatewayKey = asString(params["gatewayKey"]);
   const productType = asString(params["productType"]);
   const learnerName = asString(params["learnerName"]);
@@ -1054,10 +1042,7 @@ async function queryBatches(
   ]);
 }
 
-async function queryPolls(
-  tx: TenantTx,
-  params: DatasetParams = {},
-): Promise<ReportDatasetResult> {
+async function queryPolls(tx: TenantTx, params: DatasetParams = {}): Promise<ReportDatasetResult> {
   const pollId = asString(params["pollId"]);
   const learnerName = asString(params["learnerName"]);
   const optionId = asString(params["optionId"]);
@@ -1605,8 +1590,7 @@ async function querySuperLiveInsights(
       : typeof minAttendedRaw === "string" && minAttendedRaw.length > 0
         ? Number(minAttendedRaw)
         : null;
-  const minAttendedValue =
-    minAttended != null && Number.isFinite(minAttended) ? minAttended : null;
+  const minAttendedValue = minAttended != null && Number.isFinite(minAttended) ? minAttended : null;
 
   const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
     select
@@ -1742,7 +1726,10 @@ async function queryCertificates(tx: TenantTx): Promise<ReportDatasetResult> {
   ]);
 }
 
-async function queryAtRiskRoster(tx: TenantTx, params: DatasetParams): Promise<ReportDatasetResult> {
+async function queryAtRiskRoster(
+  tx: TenantTx,
+  params: DatasetParams,
+): Promise<ReportDatasetResult> {
   const status = asString(params["status"]) ?? "open";
 
   const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`

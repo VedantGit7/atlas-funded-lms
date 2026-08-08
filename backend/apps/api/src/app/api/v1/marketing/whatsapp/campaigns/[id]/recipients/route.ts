@@ -15,5 +15,5 @@ export const GET = createTenantRoute<
   metadata: listWhatsappMetadata,
   params: paramsSchema,
   output: whatsappRecipientsResponseSchema,
-  handler: async ({ tx, ctx, params }) => listWhatsappCampaignRecipients(tx, ctx, params.id),
+  handler: async ({ tx, ctx, params }) => listWhatsappCampaignRecipients(tx, ctx, params["id"]),
 });

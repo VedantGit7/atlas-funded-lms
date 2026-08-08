@@ -57,7 +57,9 @@ export function LearnerAffiliatePanel() {
       setPayoutAccountName(response.data.payoutAccountName ?? "");
       setError(null);
     } catch (caught) {
-      setError(caught instanceof ClientApiError ? caught.message : "Could not load affiliate program.");
+      setError(
+        caught instanceof ClientApiError ? caught.message : "Could not load affiliate program.",
+      );
     } finally {
       setLoading(false);
     }
@@ -115,7 +117,9 @@ export function LearnerAffiliatePanel() {
       );
       setAffiliate(response.data);
     } catch (caught) {
-      toast.error(caught instanceof ClientApiError ? caught.message : "Could not save payout details.");
+      toast.error(
+        caught instanceof ClientApiError ? caught.message : "Could not save payout details.",
+      );
     } finally {
       setSavingPayout(false);
     }
@@ -178,7 +182,8 @@ export function LearnerAffiliatePanel() {
   if (affiliate.status === "inactive") {
     return (
       <div className="rounded-lg border border-dashed p-6 text-sm opacity-80">
-        Your affiliate account is inactive. Contact your school admin if you believe this is a mistake.
+        Your affiliate account is inactive. Contact your school admin if you believe this is a
+        mistake.
       </div>
     );
   }
@@ -189,9 +194,7 @@ export function LearnerAffiliatePanel() {
         <div className="rounded-lg border p-4">
           <p className="text-xs uppercase tracking-wide opacity-60">Your code</p>
           <p className="mt-1 font-mono text-xl font-semibold">{affiliate.code}</p>
-          {affiliate.tier ? (
-            <p className="mt-1 text-xs opacity-60">{affiliate.tier} tier</p>
-          ) : null}
+          {affiliate.tier ? <p className="mt-1 text-xs opacity-60">{affiliate.tier} tier</p> : null}
         </div>
         <div className="rounded-lg border p-4">
           <p className="text-xs uppercase tracking-wide opacity-60">Unpaid commissions</p>
@@ -228,7 +231,7 @@ export function LearnerAffiliatePanel() {
               </button>
               <a
                 className="rounded-md border px-3 py-2 text-sm font-medium"
-                href={`https://wa.me/?text=${encodeURIComponent(`Use my affiliate code ${affiliate.code}: ${shareUrl}`)}`}
+                href={`https://wa.me/?text=${encodeURIComponent(`Use my affiliate code ${String(affiliate.code)}: ${shareUrl}`)}`}
                 target="_blank"
                 rel="noreferrer"
               >
@@ -236,7 +239,7 @@ export function LearnerAffiliatePanel() {
               </a>
               <a
                 className="rounded-md border px-3 py-2 text-sm font-medium"
-                href={`https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(`Use my affiliate code ${affiliate.code}`)}`}
+                href={`https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(`Use my affiliate code ${String(affiliate.code)}`)}`}
                 target="_blank"
                 rel="noreferrer"
               >
@@ -283,13 +286,21 @@ export function LearnerAffiliatePanel() {
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <label className="mb-1.5 block text-xs font-medium">UPI ID</label>
-            <input value={payoutUpi} onChange={(e) => setPayoutUpi(e.target.value)} className={FIELD} />
+            <input
+              value={payoutUpi}
+              onChange={(e) => {
+                setPayoutUpi(e.target.value);
+              }}
+              className={FIELD}
+            />
           </div>
           <div>
             <label className="mb-1.5 block text-xs font-medium">Account holder name</label>
             <input
               value={payoutAccountName}
-              onChange={(e) => setPayoutAccountName(e.target.value)}
+              onChange={(e) => {
+                setPayoutAccountName(e.target.value);
+              }}
               className={FIELD}
             />
           </div>
@@ -297,13 +308,21 @@ export function LearnerAffiliatePanel() {
             <label className="mb-1.5 block text-xs font-medium">Bank account number</label>
             <input
               value={payoutBankAccount}
-              onChange={(e) => setPayoutBankAccount(e.target.value)}
+              onChange={(e) => {
+                setPayoutBankAccount(e.target.value);
+              }}
               className={FIELD}
             />
           </div>
           <div>
             <label className="mb-1.5 block text-xs font-medium">IFSC</label>
-            <input value={payoutIfsc} onChange={(e) => setPayoutIfsc(e.target.value)} className={FIELD} />
+            <input
+              value={payoutIfsc}
+              onChange={(e) => {
+                setPayoutIfsc(e.target.value);
+              }}
+              className={FIELD}
+            />
           </div>
         </div>
         <button

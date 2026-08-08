@@ -35,7 +35,9 @@ function defaultDateRange(): { from: string; to: string } {
 }
 
 function downloadCsv(filename: string, rows: string[][]) {
-  const csv = rows.map((row) => row.map((cell) => `"${cell.replaceAll('"', '""')}"`).join(",")).join("\n");
+  const csv = rows
+    .map((row) => row.map((cell) => `"${cell.replaceAll('"', '""')}"`).join(","))
+    .join("\n");
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");
@@ -49,8 +51,8 @@ export function StudioAnalyticsClient({
   initialCourses = [],
   initialAssessments = [],
 }: {
-  initialCourses?: CourseOption[];
-  initialAssessments?: AssessmentOption[];
+  initialCourses?: CourseOption[] | undefined;
+  initialAssessments?: AssessmentOption[] | undefined;
 }) {
   const initialRange = useMemo(() => defaultDateRange(), []);
   const [from, setFrom] = useState(initialRange.from);
@@ -167,7 +169,10 @@ export function StudioAnalyticsClient({
           className="flex flex-col items-center justify-center rounded-xl border border-dashed border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-6 py-14 text-center"
           aria-label="Studio analytics"
         >
-          <BarChart3 className="mb-3 h-10 w-10 text-[var(--admin-on-surface-variant)] opacity-50" aria-hidden="true" />
+          <BarChart3
+            className="mb-3 h-10 w-10 text-[var(--admin-on-surface-variant)] opacity-50"
+            aria-hidden="true"
+          />
           <h1 className="text-[22px] font-bold tracking-tight text-[var(--admin-on-surface)]">
             Studio Analytics
           </h1>

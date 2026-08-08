@@ -26,10 +26,7 @@ import {
   dropdownPanelSurfaceClassName,
   memberInitials,
 } from "../../studio/courses/admin-form-dropdown-shared";
-import {
-  MESSENGER_WIZARD_FIELD_CLASS,
-  MESSENGER_WIZARD_LABEL_CLASS,
-} from "./push-wizard-chrome";
+import { MESSENGER_WIZARD_FIELD_CLASS, MESSENGER_WIZARD_LABEL_CLASS } from "./push-wizard-chrome";
 import {
   emailBody,
   emailSubject,
@@ -66,8 +63,7 @@ const FIELD_CLASS = MESSENGER_WIZARD_FIELD_CLASS;
 const LABEL_CLASS = `${MESSENGER_WIZARD_LABEL_CLASS} !mb-2 text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--admin-on-surface-variant)]`;
 
 function StatusPill({ status }: { status: WorkflowDto["status"] }) {
-  const tone =
-    status === "PUBLISHED" ? "success" : status === "DRAFT" ? "neutral" : "warning";
+  const tone = status === "PUBLISHED" ? "success" : status === "DRAFT" ? "neutral" : "warning";
   return (
     <span
       className={[
@@ -172,13 +168,15 @@ function NodeCard({
       aria-pressed={selected}
       aria-label={`${nodeTypeMetaLabel(node.type)}: ${node.title}`}
     >
-      <NodeGlyph type={node.type} selected={selected} size={node.type === "trigger" ? "lg" : "md"} />
+      <NodeGlyph
+        type={node.type}
+        selected={selected}
+        size={node.type === "trigger" ? "lg" : "md"}
+      />
       <div
         className={[
           "mt-2 min-w-[9rem] max-w-[14rem] rounded-lg border bg-[var(--admin-surface)] px-4 py-2 shadow-sm",
-          selected
-            ? "border-[var(--admin-primary)] shadow-lg"
-            : "border-[var(--admin-border)]",
+          selected ? "border-[var(--admin-primary)] shadow-lg" : "border-[var(--admin-border)]",
           node.type === "condition" ? "mt-8" : "",
         ].join(" ")}
       >
@@ -227,7 +225,9 @@ function FlowBranch({
         <NodeCard
           node={node}
           selected={node.id === selectedNodeId}
-          onSelect={() => { onSelect(node.id); }}
+          onSelect={() => {
+            onSelect(node.id);
+          }}
         />
         <div className="mt-6 flex flex-col items-center gap-2 sm:mt-10 sm:flex-row sm:items-start sm:gap-16 lg:gap-24">
           <div className="flex flex-col items-center">
@@ -266,7 +266,9 @@ function FlowBranch({
       <NodeCard
         node={node}
         selected={node.id === selectedNodeId}
-        onSelect={() => { onSelect(node.id); }}
+        onSelect={() => {
+          onSelect(node.id);
+        }}
       />
       {node.next ? (
         <>
@@ -394,9 +396,7 @@ export function WorkflowsBuilderPanel({ workflowId }: { workflowId: string }) {
       const first = orderedGraphNodes(wf.data.graph)[0];
       setSelectedNodeId((prev) => prev ?? first?.id ?? null);
     } catch (caught) {
-      toast.error(
-        caught instanceof ClientApiError ? caught.message : "Could not load workflow.",
-      );
+      toast.error(caught instanceof ClientApiError ? caught.message : "Could not load workflow.");
     } finally {
       setLoading(false);
     }
@@ -407,7 +407,7 @@ export function WorkflowsBuilderPanel({ workflowId }: { workflowId: string }) {
   }, [load]);
 
   const selectedNode = useMemo(
-    () => (workflow && selectedNodeId ? workflow.graph.nodes[selectedNodeId] ?? null : null),
+    () => (workflow && selectedNodeId ? (workflow.graph.nodes[selectedNodeId] ?? null) : null),
     [workflow, selectedNodeId],
   );
 
@@ -479,9 +479,7 @@ export function WorkflowsBuilderPanel({ workflowId }: { workflowId: string }) {
       const first = orderedGraphNodes(response.data.graph)[0];
       setSelectedNodeId(first?.id ?? null);
     } catch (caught) {
-      toast.error(
-        caught instanceof ClientApiError ? caught.message : "Could not apply use case.",
-      );
+      toast.error(caught instanceof ClientApiError ? caught.message : "Could not apply use case.");
     } finally {
       setBusy(false);
     }
@@ -691,7 +689,9 @@ export function WorkflowsBuilderPanel({ workflowId }: { workflowId: string }) {
               id="wf-form-label"
               value={formLabel}
               disabled={published}
-              onChange={(event) => { setFormLabel(event.target.value); }}
+              onChange={(event) => {
+                setFormLabel(event.target.value);
+              }}
               className={FIELD_CLASS}
             />
           </div>
@@ -705,7 +705,9 @@ export function WorkflowsBuilderPanel({ workflowId }: { workflowId: string }) {
               id="wf-product-label"
               value={productLabel}
               disabled={published}
-              onChange={(event) => { setProductLabel(event.target.value); }}
+              onChange={(event) => {
+                setProductLabel(event.target.value);
+              }}
               className={FIELD_CLASS}
             />
           </div>
@@ -719,7 +721,9 @@ export function WorkflowsBuilderPanel({ workflowId }: { workflowId: string }) {
               id="wf-test-label"
               value={testLabel}
               disabled={published}
-              onChange={(event) => { setTestLabel(event.target.value); }}
+              onChange={(event) => {
+                setTestLabel(event.target.value);
+              }}
               className={FIELD_CLASS}
             />
           </div>
@@ -736,7 +740,9 @@ export function WorkflowsBuilderPanel({ workflowId }: { workflowId: string }) {
               max={90}
               value={daysBeforeExpiry}
               disabled={published}
-              onChange={(event) => { setDaysBeforeExpiry(event.target.value); }}
+              onChange={(event) => {
+                setDaysBeforeExpiry(event.target.value);
+              }}
               className={FIELD_CLASS}
             />
           </div>
@@ -757,7 +763,9 @@ export function WorkflowsBuilderPanel({ workflowId }: { workflowId: string }) {
             max={365}
             value={delayDays}
             disabled={published}
-            onChange={(event) => { setDelayDays(event.target.value); }}
+            onChange={(event) => {
+              setDelayDays(event.target.value);
+            }}
             className={FIELD_CLASS}
           />
         </div>
@@ -772,7 +780,9 @@ export function WorkflowsBuilderPanel({ workflowId }: { workflowId: string }) {
             max={23}
             value={delayHours}
             disabled={published}
-            onChange={(event) => { setDelayHours(event.target.value); }}
+            onChange={(event) => {
+              setDelayHours(event.target.value);
+            }}
             className={FIELD_CLASS}
           />
         </div>
@@ -787,7 +797,9 @@ export function WorkflowsBuilderPanel({ workflowId }: { workflowId: string }) {
             max={59}
             value={delayMinutes}
             disabled={published}
-            onChange={(event) => { setDelayMinutes(event.target.value); }}
+            onChange={(event) => {
+              setDelayMinutes(event.target.value);
+            }}
             className={FIELD_CLASS}
           />
         </div>
@@ -825,7 +837,9 @@ export function WorkflowsBuilderPanel({ workflowId }: { workflowId: string }) {
             max={100}
             value={conditionValue}
             disabled={published}
-            onChange={(event) => { setConditionValue(event.target.value); }}
+            onChange={(event) => {
+              setConditionValue(event.target.value);
+            }}
             className={FIELD_CLASS}
           />
           <p className="mt-2 text-[11px] italic text-[var(--admin-on-surface-variant)]">
@@ -855,7 +869,9 @@ export function WorkflowsBuilderPanel({ workflowId }: { workflowId: string }) {
               id="wf-coupon"
               value={couponCode}
               disabled={published}
-              onChange={(event) => { setCouponCode(event.target.value); }}
+              onChange={(event) => {
+                setCouponCode(event.target.value);
+              }}
               className={FIELD_CLASS}
             />
           </div>
@@ -869,7 +885,9 @@ export function WorkflowsBuilderPanel({ workflowId }: { workflowId: string }) {
               id="wf-resource"
               value={resourceLabel}
               disabled={published}
-              onChange={(event) => { setResourceLabel(event.target.value); }}
+              onChange={(event) => {
+                setResourceLabel(event.target.value);
+              }}
               className={FIELD_CLASS}
             />
           </div>
@@ -883,7 +901,9 @@ export function WorkflowsBuilderPanel({ workflowId }: { workflowId: string }) {
               id="wf-action-product"
               value={actionProductLabel}
               disabled={published}
-              onChange={(event) => { setActionProductLabel(event.target.value); }}
+              onChange={(event) => {
+                setActionProductLabel(event.target.value);
+              }}
               className={FIELD_CLASS}
             />
           </div>
@@ -897,7 +917,9 @@ export function WorkflowsBuilderPanel({ workflowId }: { workflowId: string }) {
               id="wf-event-label"
               value={eventLabel}
               disabled={published}
-              onChange={(event) => { setEventLabel(event.target.value); }}
+              onChange={(event) => {
+                setEventLabel(event.target.value);
+              }}
               className={FIELD_CLASS}
             />
           </div>
@@ -911,7 +933,9 @@ export function WorkflowsBuilderPanel({ workflowId }: { workflowId: string }) {
               id="wf-webinar-label"
               value={webinarLabel}
               disabled={published}
-              onChange={(event) => { setWebinarLabel(event.target.value); }}
+              onChange={(event) => {
+                setWebinarLabel(event.target.value);
+              }}
               className={FIELD_CLASS}
             />
           </div>
@@ -924,7 +948,9 @@ export function WorkflowsBuilderPanel({ workflowId }: { workflowId: string }) {
             id="wf-email-subject"
             value={subject}
             disabled={published}
-            onChange={(event) => { setSubject(event.target.value); }}
+            onChange={(event) => {
+              setSubject(event.target.value);
+            }}
             className={FIELD_CLASS}
           />
         </div>
@@ -936,7 +962,9 @@ export function WorkflowsBuilderPanel({ workflowId }: { workflowId: string }) {
             id="wf-email-body"
             value={bodyHtml}
             disabled={published}
-            onChange={(event) => { setBodyHtml(event.target.value); }}
+            onChange={(event) => {
+              setBodyHtml(event.target.value);
+            }}
             className={`${FIELD_CLASS} min-h-32 font-mono text-xs`}
           />
         </div>
@@ -969,15 +997,13 @@ export function WorkflowsBuilderPanel({ workflowId }: { workflowId: string }) {
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-          <LiveToggle
-            published={published}
-            disabled={busy}
-            onToggle={() => void togglePublish()}
-          />
+          <LiveToggle published={published} disabled={busy} onToggle={() => void togglePublish()} />
           <button
             type="button"
             disabled={busy || published}
-            onClick={() => { setShowUseCases(true); }}
+            onClick={() => {
+              setShowUseCases(true);
+            }}
             className="rounded-lg border border-[color-mix(in_srgb,var(--admin-primary)_20%,transparent)] px-3 py-2 text-sm font-bold text-[var(--admin-primary)] transition-colors hover:bg-[color-mix(in_srgb,var(--admin-primary)_6%,transparent)] disabled:opacity-50"
           >
             Use cases
@@ -998,10 +1024,15 @@ export function WorkflowsBuilderPanel({ workflowId }: { workflowId: string }) {
           >
             Save
           </button>
-          <div className="mx-1 hidden h-8 w-px bg-[var(--admin-border)] sm:block" aria-hidden="true" />
+          <div
+            className="mx-1 hidden h-8 w-px bg-[var(--admin-border)] sm:block"
+            aria-hidden="true"
+          />
           <button
             type="button"
-            onClick={() => { setInspectorTab("basics"); }}
+            onClick={() => {
+              setInspectorTab("basics");
+            }}
             className="rounded-lg p-2 text-[var(--admin-on-surface-variant)] transition-colors hover:text-[var(--admin-primary)]"
             aria-label="Workflow settings"
           >
@@ -1026,7 +1057,10 @@ export function WorkflowsBuilderPanel({ workflowId }: { workflowId: string }) {
           <div className="relative flex min-h-full w-full flex-col items-center px-4 pb-24 pt-10">
             {Object.keys(workflow.graph.nodes).length === 0 ? (
               <div className="mt-16 max-w-sm rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)] p-6 text-center shadow-sm">
-                <Library className="mx-auto h-8 w-8 text-[var(--admin-primary)]" aria-hidden="true" />
+                <Library
+                  className="mx-auto h-8 w-8 text-[var(--admin-primary)]"
+                  aria-hidden="true"
+                />
                 <p className="mt-3 font-semibold text-[var(--admin-on-surface)]">No flow yet</p>
                 <p className="mt-1 text-sm text-[var(--admin-on-surface-variant)]">
                   Apply a use case to seed a starter graph you can edit.
@@ -1034,7 +1068,9 @@ export function WorkflowsBuilderPanel({ workflowId }: { workflowId: string }) {
                 <button
                   type="button"
                   disabled={busy || published}
-                  onClick={() => { setShowUseCases(true); }}
+                  onClick={() => {
+                    setShowUseCases(true);
+                  }}
                   className="mt-4 rounded-lg bg-[var(--admin-primary)] px-4 py-2 text-sm font-bold text-[var(--admin-on-primary)] disabled:opacity-50"
                 >
                   Choose use case
@@ -1062,7 +1098,9 @@ export function WorkflowsBuilderPanel({ workflowId }: { workflowId: string }) {
                 <button
                   type="button"
                   className="text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-on-surface)]"
-                  onClick={() => { setInspectorTab("node"); }}
+                  onClick={() => {
+                    setInspectorTab("node");
+                  }}
                   aria-label="Close workflow settings"
                 >
                   <X className="h-5 w-5" aria-hidden="true" />
@@ -1072,7 +1110,7 @@ export function WorkflowsBuilderPanel({ workflowId }: { workflowId: string }) {
             <div className="flex items-center gap-3 rounded-lg bg-[var(--admin-surface-low)] p-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--admin-primary)_12%,var(--admin-surface))] text-[var(--admin-primary)]">
                 <InspectorIcon
-                  type={inspectorTab === "basics" ? "basics" : selectedNode?.type ?? "basics"}
+                  type={inspectorTab === "basics" ? "basics" : (selectedNode?.type ?? "basics")}
                 />
               </div>
               <div className="min-w-0">
@@ -1097,7 +1135,9 @@ export function WorkflowsBuilderPanel({ workflowId }: { workflowId: string }) {
                     id="wf-edit-title"
                     value={title}
                     disabled={published}
-                    onChange={(event) => { setTitle(event.target.value); }}
+                    onChange={(event) => {
+                      setTitle(event.target.value);
+                    }}
                     className={FIELD_CLASS}
                   />
                 </div>
@@ -1109,7 +1149,9 @@ export function WorkflowsBuilderPanel({ workflowId }: { workflowId: string }) {
                     id="wf-edit-description"
                     value={description}
                     disabled={published}
-                    onChange={(event) => { setDescription(event.target.value); }}
+                    onChange={(event) => {
+                      setDescription(event.target.value);
+                    }}
                     className={`${FIELD_CLASS} min-h-20`}
                   />
                 </div>
@@ -1118,7 +1160,9 @@ export function WorkflowsBuilderPanel({ workflowId }: { workflowId: string }) {
                     type="checkbox"
                     checked={allowResubscribe}
                     disabled={published}
-                    onChange={(event) => { setAllowResubscribe(event.target.checked); }}
+                    onChange={(event) => {
+                      setAllowResubscribe(event.target.checked);
+                    }}
                     className="mt-1"
                   />
                   Allow re-entry for learners who already completed this journey
@@ -1139,7 +1183,9 @@ export function WorkflowsBuilderPanel({ workflowId }: { workflowId: string }) {
                     id="wf-node-title"
                     value={nodeTitle}
                     disabled={published}
-                    onChange={(event) => { setNodeTitle(event.target.value); }}
+                    onChange={(event) => {
+                      setNodeTitle(event.target.value);
+                    }}
                     className={FIELD_CLASS}
                   />
                 </div>
@@ -1160,11 +1206,7 @@ export function WorkflowsBuilderPanel({ workflowId }: { workflowId: string }) {
           <div className="border-t border-[var(--admin-border)] p-5">
             <button
               type="button"
-              disabled={
-                busy ||
-                published ||
-                (inspectorTab === "node" && !selectedNode)
-              }
+              disabled={busy || published || (inspectorTab === "node" && !selectedNode)}
               onClick={() => void saveAll()}
               className="flex w-full items-center justify-center gap-2 rounded-lg bg-[var(--admin-primary)] py-3 text-sm font-bold text-[var(--admin-on-primary)] transition-colors hover:bg-[var(--admin-primary-strong)] disabled:opacity-50"
             >
@@ -1182,7 +1224,9 @@ export function WorkflowsBuilderPanel({ workflowId }: { workflowId: string }) {
           <button
             type="button"
             className="flex h-12 w-full items-center justify-between px-4 transition-colors hover:bg-[var(--admin-surface-low)] sm:px-6"
-            onClick={() => { setRunsOpen((open) => !open); }}
+            onClick={() => {
+              setRunsOpen((open) => !open);
+            }}
             aria-expanded={runsOpen}
           >
             <div className="flex items-center gap-3">
@@ -1195,9 +1239,15 @@ export function WorkflowsBuilderPanel({ workflowId }: { workflowId: string }) {
               </span>
             </div>
             {runsOpen ? (
-              <ChevronDown className="h-5 w-5 text-[var(--admin-on-surface-variant)]" aria-hidden="true" />
+              <ChevronDown
+                className="h-5 w-5 text-[var(--admin-on-surface-variant)]"
+                aria-hidden="true"
+              />
             ) : (
-              <ChevronUp className="h-5 w-5 text-[var(--admin-on-surface-variant)]" aria-hidden="true" />
+              <ChevronUp
+                className="h-5 w-5 text-[var(--admin-on-surface-variant)]"
+                aria-hidden="true"
+              />
             )}
           </button>
           <div className="h-64 overflow-y-auto px-4 pb-5 sm:px-6">
@@ -1228,7 +1278,9 @@ export function WorkflowsBuilderPanel({ workflowId }: { workflowId: string }) {
                             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--admin-primary)_12%,var(--admin-surface))] text-xs font-bold text-[var(--admin-primary)]">
                               {memberInitials(run.learnerName, run.learnerEmail)}
                             </div>
-                            <span className="font-bold text-[var(--admin-on-surface)]">{label}</span>
+                            <span className="font-bold text-[var(--admin-on-surface)]">
+                              {label}
+                            </span>
                           </div>
                         </td>
                         <td className="py-3">
@@ -1260,7 +1312,10 @@ export function WorkflowsBuilderPanel({ workflowId }: { workflowId: string }) {
           >
             <div className="flex items-start justify-between gap-3">
               <div>
-                <h2 id="wf-use-cases-title" className="text-lg font-semibold text-[var(--admin-on-surface)]">
+                <h2
+                  id="wf-use-cases-title"
+                  className="text-lg font-semibold text-[var(--admin-on-surface)]"
+                >
                   Choose a use case
                 </h2>
                 <p className="mt-1 text-sm text-[var(--admin-on-surface-variant)]">
@@ -1270,7 +1325,9 @@ export function WorkflowsBuilderPanel({ workflowId }: { workflowId: string }) {
               <button
                 type="button"
                 className="rounded-lg p-2 text-[var(--admin-on-surface-variant)] hover:bg-[var(--admin-surface-high)]"
-                onClick={() => { setShowUseCases(false); }}
+                onClick={() => {
+                  setShowUseCases(false);
+                }}
                 aria-label="Close use cases"
               >
                 <X className="h-5 w-5" aria-hidden="true" />
@@ -1307,17 +1364,22 @@ export function WorkflowsBuilderPanel({ workflowId }: { workflowId: string }) {
             aria-modal="true"
             aria-labelledby="wf-delete-title"
           >
-            <h2 id="wf-delete-title" className="text-lg font-semibold text-[var(--admin-on-surface)]">
+            <h2
+              id="wf-delete-title"
+              className="text-lg font-semibold text-[var(--admin-on-surface)]"
+            >
               Delete workflow
             </h2>
             <p className="text-sm text-[var(--admin-on-surface-variant)]">
               Type{" "}
-              <span className="font-semibold text-[var(--admin-on-surface)]">{workflow.title}</span> to
-              confirm.
+              <span className="font-semibold text-[var(--admin-on-surface)]">{workflow.title}</span>{" "}
+              to confirm.
             </p>
             <input
               value={deleteConfirm}
-              onChange={(event) => { setDeleteConfirm(event.target.value); }}
+              onChange={(event) => {
+                setDeleteConfirm(event.target.value);
+              }}
               className={FIELD_CLASS}
               aria-label="Confirm workflow title"
             />
@@ -1325,7 +1387,9 @@ export function WorkflowsBuilderPanel({ workflowId }: { workflowId: string }) {
               <button
                 type="button"
                 className="rounded-xl border border-[var(--admin-border)] px-4 py-2 text-sm font-semibold text-[var(--admin-on-surface)]"
-                onClick={() => { setDeleteOpen(false); }}
+                onClick={() => {
+                  setDeleteOpen(false);
+                }}
               >
                 Cancel
               </button>

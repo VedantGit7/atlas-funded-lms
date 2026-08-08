@@ -37,10 +37,7 @@ import {
   type PaymentGatewayDetail,
   type PaymentTransactionItem,
 } from "./admin-payments-roster-api";
-import {
-  downloadReportExport,
-  pollReportRunUntilComplete,
-} from "./admin-reports-api";
+import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
 import { PaymentsReportTabs } from "./PaymentsReportTabs";
 
 type DetailTab = "transactions" | "payouts" | "webhooks" | "configuration";
@@ -160,7 +157,10 @@ function DisableGatewayModal({
       <div className="admin-theme flex w-full max-w-lg flex-col border border-[var(--admin-border)] bg-[var(--admin-surface-low)] shadow-2xl">
         <div className="flex items-center gap-4 border-b border-[var(--admin-border)] bg-[var(--admin-surface)] p-6">
           <AlertTriangle className="h-5 w-5 text-[var(--admin-danger)]" aria-hidden="true" />
-          <h2 id="disable-gateway-title" className="text-xl font-semibold text-[var(--admin-on-surface)]">
+          <h2
+            id="disable-gateway-title"
+            className="text-xl font-semibold text-[var(--admin-on-surface)]"
+          >
             Disable {displayName}
           </h2>
           <button
@@ -174,7 +174,10 @@ function DisableGatewayModal({
         </div>
         <div className="flex flex-col gap-6 p-6">
           <div className="flex gap-4 border-l-[3px] border-[var(--admin-warning)] bg-[var(--admin-surface-high)] p-4">
-            <Info className="mt-0.5 h-4 w-4 shrink-0 text-[var(--admin-warning)]" aria-hidden="true" />
+            <Info
+              className="mt-0.5 h-4 w-4 shrink-0 text-[var(--admin-warning)]"
+              aria-hidden="true"
+            />
             <p className="text-sm leading-relaxed text-[var(--admin-on-surface-variant)]">
               Disabling this gateway will stop new checkouts from routing through {displayName}.
               In-flight payments and pending refunds will continue to process.
@@ -194,7 +197,9 @@ function DisableGatewayModal({
               id="gateway-confirm"
               autoComplete="off"
               value={confirmName}
-              onChange={(event) => setConfirmName(event.target.value)}
+              onChange={(event) => {
+                setConfirmName(event.target.value);
+              }}
               placeholder={displayName}
               className="w-full border-0 border-b border-[var(--admin-border)] bg-[var(--admin-surface)] px-3 py-3 font-mono text-sm text-[var(--admin-on-surface)] outline-none focus:border-[var(--admin-danger)]"
             />
@@ -261,8 +266,10 @@ export function AdminPaymentsGatewayDetailPage({ gatewayKey }: { gatewayKey: str
     setDetailError(null);
     try {
       const response = await fetchPaymentGatewayDetail(gatewayKey, {
-        paidFrom: dateInputToStartIso(paidFrom),
-        paidTo: dateInputToEndIso(paidTo),
+        ...(dateInputToStartIso(paidFrom) !== undefined
+          ? { paidFrom: dateInputToStartIso(paidFrom) }
+          : {}),
+        ...(dateInputToEndIso(paidTo) !== undefined ? { paidTo: dateInputToEndIso(paidTo) } : {}),
       });
       setDetail(response.data);
     } catch (error) {
@@ -403,7 +410,9 @@ export function AdminPaymentsGatewayDetailPage({ gatewayKey }: { gatewayKey: str
     try {
       await navigator.clipboard.writeText(detail.gateway.gatewayKey);
       setCopied(true);
-      window.setTimeout(() => setCopied(false), 1500);
+      window.setTimeout(() => {
+        setCopied(false);
+      }, 1500);
     } catch {
       /* ignore */
     }
@@ -432,7 +441,10 @@ export function AdminPaymentsGatewayDetailPage({ gatewayKey }: { gatewayKey: str
             Payments
           </Link>
           <span>/</span>
-          <Link href="/admin/reports/payments/gateways" className="hover:text-[var(--admin-primary)]">
+          <Link
+            href="/admin/reports/payments/gateways"
+            className="hover:text-[var(--admin-primary)]"
+          >
             Gateways
           </Link>
         </nav>
@@ -525,7 +537,10 @@ export function AdminPaymentsGatewayDetailPage({ gatewayKey }: { gatewayKey: str
                   {copied ? (
                     <Check className="h-3.5 w-3.5 text-[var(--admin-success)]" aria-hidden="true" />
                   ) : (
-                    <Copy className="h-3.5 w-3.5 text-[var(--admin-on-surface-variant)]" aria-hidden="true" />
+                    <Copy
+                      className="h-3.5 w-3.5 text-[var(--admin-on-surface-variant)]"
+                      aria-hidden="true"
+                    />
                   )}
                 </button>
                 <span className="text-[var(--admin-border)]">|</span>
@@ -536,7 +551,10 @@ export function AdminPaymentsGatewayDetailPage({ gatewayKey }: { gatewayKey: str
             </div>
             <div className="flex flex-wrap gap-2">
               <label className="inline-flex h-9 items-center gap-2 rounded border border-[var(--admin-border)] bg-[var(--admin-surface)] px-3 font-mono text-xs text-[var(--admin-on-surface)]">
-                <CalendarDays className="h-4 w-4 text-[var(--admin-on-surface-variant)]" aria-hidden="true" />
+                <CalendarDays
+                  className="h-4 w-4 text-[var(--admin-on-surface-variant)]"
+                  aria-hidden="true"
+                />
                 <span className="sr-only">From</span>
                 <input
                   type="date"
@@ -679,7 +697,9 @@ export function AdminPaymentsGatewayDetailPage({ gatewayKey }: { gatewayKey: str
                       ? "border-b-2 border-[var(--admin-primary)] text-[var(--admin-primary)]"
                       : "border-b-2 border-transparent text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-on-surface)]",
                   ].join(" ")}
-                  onClick={() => setTab(item.key)}
+                  onClick={() => {
+                    setTab(item.key);
+                  }}
                 >
                   <Icon className="h-4 w-4" aria-hidden="true" />
                   {item.label}
@@ -699,7 +719,9 @@ export function AdminPaymentsGatewayDetailPage({ gatewayKey }: { gatewayKey: str
                     />
                     <input
                       value={search}
-                      onChange={(event) => setSearch(event.target.value)}
+                      onChange={(event) => {
+                        setSearch(event.target.value);
+                      }}
                       onKeyDown={(event) => {
                         if (event.key === "Enter") {
                           setSearchApplied(search.trim());
@@ -748,7 +770,7 @@ export function AdminPaymentsGatewayDetailPage({ gatewayKey }: { gatewayKey: str
                     onClick={() => {
                       const ids = Array.from(selectedIds);
                       router.push(
-                        `/admin/reports/payments/transactions/${ids[0]}${
+                        `/admin/reports/payments/transactions/${String(ids[0])}${
                           ids.length > 1 ? `?selected=${ids.join(",")}` : ""
                         }`,
                       );
@@ -830,7 +852,9 @@ export function AdminPaymentsGatewayDetailPage({ gatewayKey }: { gatewayKey: str
                             key={item.id}
                             className={[
                               "transition-colors hover:bg-[var(--admin-surface-high)]",
-                              selected ? "bg-[color-mix(in_srgb,var(--admin-primary)_6%,transparent)]" : "",
+                              selected
+                                ? "bg-[color-mix(in_srgb,var(--admin-primary)_6%,transparent)]"
+                                : "",
                             ].join(" ")}
                           >
                             <td className="px-4 py-3">
@@ -912,7 +936,9 @@ export function AdminPaymentsGatewayDetailPage({ gatewayKey }: { gatewayKey: str
                     type="button"
                     disabled={page <= 1 || txLoading}
                     className="inline-flex h-8 w-8 items-center justify-center rounded border border-[var(--admin-border)] disabled:opacity-40"
-                    onClick={() => setPage((current) => Math.max(1, current - 1))}
+                    onClick={() => {
+                      setPage((current) => Math.max(1, current - 1));
+                    }}
                     aria-label="Previous page"
                   >
                     <ChevronLeft className="h-4 w-4" aria-hidden="true" />
@@ -924,7 +950,9 @@ export function AdminPaymentsGatewayDetailPage({ gatewayKey }: { gatewayKey: str
                     type="button"
                     disabled={page >= totalPages || txLoading}
                     className="inline-flex h-8 w-8 items-center justify-center rounded border border-[var(--admin-border)] disabled:opacity-40"
-                    onClick={() => setPage((current) => current + 1)}
+                    onClick={() => {
+                      setPage((current) => current + 1);
+                    }}
                     aria-label="Next page"
                   >
                     <ChevronRight className="h-4 w-4" aria-hidden="true" />
@@ -1022,9 +1050,7 @@ export function AdminPaymentsGatewayDetailPage({ gatewayKey }: { gatewayKey: str
                     Secret key
                   </span>
                   <span className="mt-1 font-mono text-sm text-[var(--admin-on-surface)]">
-                    {gateway.hasSecret
-                      ? `••••••••${gateway.secretLast4 ?? ""}`
-                      : "Not set"}
+                    {gateway.hasSecret ? `••••••••${gateway.secretLast4 ?? ""}` : "Not set"}
                   </span>
                 </div>
                 <div className="flex flex-col gap-1">
@@ -1054,7 +1080,9 @@ export function AdminPaymentsGatewayDetailPage({ gatewayKey }: { gatewayKey: str
           displayName={gateway.displayName}
           busy={busy}
           error={disableError}
-          onClose={() => setDisableOpen(false)}
+          onClose={() => {
+            setDisableOpen(false);
+          }}
           onConfirm={() => void handleDisable()}
         />
       ) : null}

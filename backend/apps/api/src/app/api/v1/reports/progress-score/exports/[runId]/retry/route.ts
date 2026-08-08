@@ -16,5 +16,5 @@ export const POST = createTenantRoute<
   params: progressScoreExportRunParamsSchema,
   input: noBodySchema,
   output: retryProgressScoreExportResponseSchema,
-  handler: async ({ tx, ctx, params }) => retryProgressScoreExport(tx, ctx, params.runId),
+  handler: async ({ tx, ctx, params }) => retryProgressScoreExport(tx, ctx, params["runId"]),
 });

@@ -5,7 +5,7 @@ import {
   analyticsDashboardDrillDownResponseSchema,
 } from "@atlas/domain/analytics/analytics.dto";
 import { queryDashboardDrillDown } from "@atlas/domain/analytics/analytics.service";
-import { analyticsDashboardDrillDownMetadata } from "../../../../../server/analytics/analytics.route-metadata";
+import { analyticsDashboardDrillDownMetadata } from "@atlas/api-server/analytics/analytics.route-metadata";
 
 export const GET = createTenantRoute<
   z.output<typeof analyticsDashboardDrillDownQuerySchema>,

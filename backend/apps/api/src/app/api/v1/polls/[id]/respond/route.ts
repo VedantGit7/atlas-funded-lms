@@ -16,5 +16,5 @@ export const POST = createTenantRoute<
   params: paramsSchema,
   input: respondPollBodySchema,
   output: respondPollResponseSchema,
-  handler: async ({ tx, ctx, params, input }) => respondToPoll(tx, ctx, params.id, input),
+  handler: async ({ tx, ctx, params, input }) => respondToPoll(tx, ctx, params["id"], input),
 });

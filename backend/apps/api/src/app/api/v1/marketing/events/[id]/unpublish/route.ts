@@ -16,5 +16,5 @@ export const POST = createTenantRoute<
   params: paramsSchema,
   body: noBodySchema,
   output: marketingEventResponseSchema,
-  handler: async ({ tx, ctx, params }) => unpublishMarketingEvent(tx, ctx, params.id),
+  handler: async ({ tx, ctx, params }) => unpublishMarketingEvent(tx, ctx, params["id"]),
 });

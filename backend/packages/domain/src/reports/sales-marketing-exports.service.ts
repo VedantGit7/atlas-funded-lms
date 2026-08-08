@@ -34,8 +34,8 @@ const DEFINITION_KEY = "sales-marketing";
 type SmExportDataset = (typeof SM_EXPORT_DATASETS)[number];
 
 function formatBytes(bytes: number): string {
-  if (bytes < 1024) return `${bytes}B`;
-  if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))}KB`;
+  if (bytes < 1024) return `${String(bytes)}B`;
+  if (bytes < 1024 * 1024) return `${String(Math.max(1, Math.round(bytes / 1024)))}KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)}MB`;
 }
 
@@ -54,10 +54,7 @@ function datasetLabel(dataset: SmExportDataset): string {
 }
 
 function normalizeDataset(value: unknown): SmExportDataset {
-  if (
-    typeof value === "string" &&
-    (SM_EXPORT_DATASETS as readonly string[]).includes(value)
-  ) {
+  if (typeof value === "string" && (SM_EXPORT_DATASETS as readonly string[]).includes(value)) {
     return value as SmExportDataset;
   }
   // Legacy runs used `section` without dataset alias
@@ -141,9 +138,9 @@ function cronFromCadence(cadence: "daily" | "weekly" | "monthly", time: string):
   const [hourRaw, minuteRaw] = time.split(":");
   const hour = Math.min(23, Math.max(0, Number(hourRaw) || 0));
   const minute = Math.min(59, Math.max(0, Number(minuteRaw) || 0));
-  if (cadence === "weekly") return `${minute} ${hour} * * 1`;
-  if (cadence === "monthly") return `${minute} ${hour} 1 * *`;
-  return `${minute} ${hour} * * *`;
+  if (cadence === "weekly") return `${String(minute)} ${String(hour)} * * 1`;
+  if (cadence === "monthly") return `${String(minute)} ${String(hour)} 1 * *`;
+  return `${String(minute)} ${String(hour)} * * *`;
 }
 
 function cadenceLabel(cron: string, timezone: string): string {
@@ -162,9 +159,9 @@ function nextRunLabel(nextRunAt: string): string {
   const diffMs = date.getTime() - Date.now();
   if (diffMs <= 0) return "Due now";
   const hours = Math.floor(diffMs / (60 * 60 * 1000));
-  if (hours < 48) return `Next run in ${Math.max(1, hours)}h`;
+  if (hours < 48) return `Next run in ${String(Math.max(1, hours))}h`;
   const days = Math.floor(hours / 24);
-  return `Next run in ${days} day${days === 1 ? "" : "s"}`;
+  return `Next run in ${String(days)} day${days === 1 ? "" : "s"}`;
 }
 
 function isExpired(expiresAt: string | null | undefined): boolean {
@@ -401,8 +398,7 @@ export async function getSalesMarketingExports(tx: TenantTx, ctx: ServiceCtx) {
         canSchedule: true,
         canEmailDelivery: true,
         canWebhookDelivery: true,
-        note:
-          "Exports generate from Sales & Marketing datasets (purchasers, coupons, referrals, affiliate products, and affiliates). Email and webhook delivery run after the artifact is ready. Ready files expire after the signed download TTL (typically 7 days).",
+        note: "Exports generate from Sales & Marketing datasets (purchasers, coupons, referrals, affiliate products, and affiliates). Email and webhook delivery run after the artifact is ready. Ready files expire after the signed download TTL (typically 7 days).",
       },
     },
   });
@@ -444,9 +440,7 @@ export async function createSalesMarketingExport(
     const timezone = body.timezone ?? "Asia/Kolkata";
     const scheduleResult = await createReportSchedule(tx, ctx, {
       definitionKey: DEFINITION_KEY,
-      name:
-        body.scheduleName?.trim() ||
-        `Scheduled ${datasetLabel(body.dataset)} export`,
+      name: body.scheduleName?.trim() || `Scheduled ${datasetLabel(body.dataset)} export`,
       cronExpression: cronFromCadence(cadence, time),
       timezone,
       params,
@@ -498,11 +492,7 @@ export async function createSalesMarketingExport(
   });
 }
 
-export async function getSalesMarketingExportRun(
-  tx: TenantTx,
-  ctx: ServiceCtx,
-  runId: string,
-) {
+export async function getSalesMarketingExportRun(tx: TenantTx, ctx: ServiceCtx, runId: string) {
   const result = await getReportRun(tx, ctx, runId);
   if (result.data.definitionKey !== DEFINITION_KEY) {
     throw new AtlasHttpError({
@@ -535,11 +525,7 @@ export async function getSalesMarketingExportRun(
   });
 }
 
-export async function retrySalesMarketingExport(
-  tx: TenantTx,
-  ctx: ServiceCtx,
-  runId: string,
-) {
+export async function retrySalesMarketingExport(tx: TenantTx, ctx: ServiceCtx, runId: string) {
   const existing = await getReportRun(tx, ctx, runId);
   if (existing.data.definitionKey !== DEFINITION_KEY) {
     throw new AtlasHttpError({
@@ -587,7 +573,7 @@ export async function updateSalesMarketingExportSchedule(
   tx: TenantTx,
   ctx: ServiceCtx,
   scheduleId: string,
-  input: { isActive?: boolean; name?: string },
+  input: { isActive?: boolean | undefined; name?: string | undefined },
 ) {
   const body = updateSalesMarketingExportScheduleBodySchema.parse(input);
   const schedules = await listReportSchedules(tx, ctx);

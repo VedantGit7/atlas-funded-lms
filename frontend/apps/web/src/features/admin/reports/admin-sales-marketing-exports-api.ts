@@ -13,12 +13,7 @@ export type SmExportDataset =
 export type SmExportDelivery = "download" | "email_me" | "recipients";
 export type SmExportCadence = "daily" | "weekly" | "monthly";
 export type SmExportGrouping = "none" | "product" | "month" | "currency";
-export type SmExportStatus =
-  | "QUEUED"
-  | "RUNNING"
-  | "SUCCEEDED"
-  | "FAILED"
-  | "CANCELLED";
+export type SmExportStatus = "QUEUED" | "RUNNING" | "SUCCEEDED" | "FAILED" | "CANCELLED";
 
 export type SmExportColumn = {
   key: string;
@@ -84,25 +79,25 @@ export type CreateSalesMarketingExportBody = {
   dataset: SmExportDataset;
   columns: string[];
   format: SmExportFormat;
-  courseId?: string;
-  couponId?: string;
-  purchasedFrom?: string;
-  purchasedTo?: string;
-  learnerName?: string;
-  email?: string;
-  q?: string;
-  grouping?: SmExportGrouping;
-  includeSubtotals?: boolean;
+  courseId?: string | undefined;
+  couponId?: string | undefined;
+  purchasedFrom?: string | undefined;
+  purchasedTo?: string | undefined;
+  learnerName?: string | undefined;
+  email?: string | undefined;
+  q?: string | undefined;
+  grouping?: SmExportGrouping | undefined;
+  includeSubtotals?: boolean | undefined;
   useCurrentFilters: boolean;
-  filterSummary?: string;
+  filterSummary?: string | undefined;
   delivery: SmExportDelivery;
-  recipients?: string[];
-  webhookUrl?: string | null;
+  recipients?: string[] | undefined;
+  webhookUrl?: string | null | undefined;
   scheduleEnabled: boolean;
-  scheduleName?: string;
-  cadence?: SmExportCadence;
-  time?: string;
-  timezone?: string;
+  scheduleName?: string | undefined;
+  cadence?: SmExportCadence | undefined;
+  time?: string | undefined;
+  timezone?: string | undefined;
 };
 
 export async function fetchSalesMarketingExports() {
@@ -139,7 +134,7 @@ export async function retrySalesMarketingExport(runId: string) {
 
 export async function updateSalesMarketingExportSchedule(
   scheduleId: string,
-  body: { isActive?: boolean; name?: string },
+  body: { isActive?: boolean | undefined; name?: string | undefined },
 ) {
   return clientApi.patch<{ data: SmExportScheduleItem }>(
     `/api/v1/reports/sales-marketing/exports/schedules/${scheduleId}`,

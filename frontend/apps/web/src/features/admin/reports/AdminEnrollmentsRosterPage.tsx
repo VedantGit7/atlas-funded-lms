@@ -42,10 +42,14 @@ import {
   type EnrollmentRosterColumnKey,
   type EnrollmentRosterItem,
 } from "./admin-enrollments-roster-api";
-import {
-  downloadReportExport,
-  pollReportRunUntilComplete,
-} from "./admin-reports-api";
+import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
+
+function defined<T>(value: T, message = "Expected value to be defined"): NonNullable<T> {
+  if (value == null) {
+    throw new Error(message);
+  }
+  return value;
+}
 
 const ENROLLED_TYPE_OPTIONS = [
   { value: "", label: "All types" },
@@ -120,8 +124,8 @@ function titleCase(value: string): string {
 function learnerInitials(name: string | null, email: string | null): string {
   const source = (name?.trim() || email?.trim() || "?").split(/\s+/).filter(Boolean);
   if (source.length === 0) return "?";
-  if (source.length === 1) return source[0]!.slice(0, 2).toUpperCase();
-  return `${source[0]![0] ?? ""}${source[1]![0] ?? ""}`.toUpperCase();
+  if (source.length === 1) return defined(source[0]).slice(0, 2).toUpperCase();
+  return `${defined(source[0])[0] ?? ""}${defined(source[1])[0] ?? ""}`.toUpperCase();
 }
 
 function statusTone(status: string): string {
@@ -151,19 +155,19 @@ function EnrollmentTrendChart({
   const coords = points.map((point, index) => {
     const x = points.length <= 1 ? width / 2 : (index / (points.length - 1)) * width;
     const y = height - (point.total / max) * (height - 4) - 2;
-    return `${x},${y}`;
+    return `${String(x)},${String(y)}`;
   });
   const linePath =
     coords.length === 0
       ? ""
-      : `M${coords[0]}${coords
+      : `M${String(coords[0])}${coords
           .slice(1)
           .map((coord) => ` L${coord}`)
           .join("")}`;
   const areaPath =
     coords.length === 0
       ? ""
-      : `${linePath} L${width},${height} L0,${height} Z`;
+      : `${linePath} L${String(width)},${String(height)} L0,${String(height)} Z`;
 
   if (points.length === 0) {
     return (
@@ -177,7 +181,7 @@ function EnrollmentTrendChart({
     <div className="relative mt-auto flex min-h-[140px] items-end overflow-hidden rounded-lg">
       <svg
         className="h-full w-full"
-        viewBox={`0 0 ${width} ${height}`}
+        viewBox={`0 0 ${String(width)} ${String(height)}`}
         preserveAspectRatio="none"
         role="img"
         aria-label={label}
@@ -195,11 +199,7 @@ function EnrollmentTrendChart({
   );
 }
 
-function TypeDonut({
-  items,
-}: {
-  items: EnrollmentOverview["byType"];
-}) {
+function TypeDonut({ items }: { items: EnrollmentOverview["byType"] }) {
   const radius = 15.915;
   const circumference = 2 * Math.PI * radius;
   let offset = 0;
@@ -215,7 +215,12 @@ function TypeDonut({
 
   return (
     <div className="relative h-36 w-36">
-      <svg className="h-full w-full -rotate-90" viewBox="0 0 36 36" role="img" aria-label="Enrollment type breakdown">
+      <svg
+        className="h-full w-full -rotate-90"
+        viewBox="0 0 36 36"
+        role="img"
+        aria-label="Enrollment type breakdown"
+      >
         <circle
           cx="18"
           cy="18"
@@ -226,7 +231,7 @@ function TypeDonut({
         />
         {segments.map((item) => {
           const length = (item.percent / 100) * circumference;
-          const dashArray = `${length} ${circumference - length}`;
+          const dashArray = `${String(length)} ${String(circumference - length)}`;
           const dashOffset = -offset;
           offset += length;
           return (
@@ -294,8 +299,7 @@ export function AdminEnrollmentsRosterPage() {
     [extraFilters],
   );
   const activeEnrolledType = useMemo(
-    () =>
-      extraFilters.find((filter) => filter.field === "enrolledType")?.value.trim() || undefined,
+    () => extraFilters.find((filter) => filter.field === "enrolledType")?.value.trim() || undefined,
     [extraFilters],
   );
   const activeStatus = useMemo(
@@ -464,7 +468,9 @@ export function AdminEnrollmentsRosterPage() {
       );
     } finally {
       setBusy(false);
-      window.setTimeout(() => setExportProgress(null), 900);
+      window.setTimeout(() => {
+        setExportProgress(null);
+      }, 900);
     }
   }
 
@@ -620,12 +626,14 @@ export function AdminEnrollmentsRosterPage() {
               </div>
             )}
             <div className="grid w-full grid-cols-2 gap-3 text-[13px] font-semibold text-[var(--admin-on-surface)]">
-              {(overview?.byType ?? [
-                { type: "paid", label: "Paid", percent: 0, count: 0 },
-                { type: "free", label: "Free", percent: 0, count: 0 },
-                { type: "trial", label: "Trial", percent: 0, count: 0 },
-                { type: "offline", label: "Offline", percent: 0, count: 0 },
-              ]).map((item) => (
+              {(
+                overview?.byType ?? [
+                  { type: "paid", label: "Paid", percent: 0, count: 0 },
+                  { type: "free", label: "Free", percent: 0, count: 0 },
+                  { type: "trial", label: "Trial", percent: 0, count: 0 },
+                  { type: "offline", label: "Offline", percent: 0, count: 0 },
+                ]
+              ).map((item) => (
                 <div key={item.type} className="flex items-center gap-2">
                   <span
                     className="h-3 w-3 rounded-sm"
@@ -646,7 +654,10 @@ export function AdminEnrollmentsRosterPage() {
         <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[var(--admin-border)] bg-[var(--admin-surface)] p-4">
           <div className="flex flex-wrap items-center gap-3">
             <div className="flex flex-wrap items-center gap-2 rounded-md border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-3 py-1.5">
-              <CalendarDays className="h-4 w-4 text-[var(--admin-on-surface-variant)]" aria-hidden="true" />
+              <CalendarDays
+                className="h-4 w-4 text-[var(--admin-on-surface-variant)]"
+                aria-hidden="true"
+              />
               <span className="text-[13px] font-semibold text-[var(--admin-on-surface)]">
                 {formatDateInputLabel(enrolledFrom, enrolledTo)}
               </span>
@@ -696,7 +707,9 @@ export function AdminEnrollmentsRosterPage() {
                 aria-expanded={columnsOpen}
                 aria-controls={columnsMenuId}
                 className="inline-flex items-center gap-2 rounded-md border border-[color-mix(in_srgb,var(--admin-success)_25%,var(--admin-border))] bg-[color-mix(in_srgb,var(--admin-success)_10%,var(--admin-surface))] px-3 py-1.5 text-[13px] font-bold text-[var(--admin-success)] transition-colors hover:bg-[color-mix(in_srgb,var(--admin-success)_18%,var(--admin-surface))] motion-safe:active:scale-[0.98]"
-                onClick={() => setColumnsOpen((open) => !open)}
+                onClick={() => {
+                  setColumnsOpen((open) => !open);
+                }}
               >
                 <Columns3 className="h-4 w-4" aria-hidden="true" />
                 Columns
@@ -730,7 +743,9 @@ export function AdminEnrollmentsRosterPage() {
                           dropdownItemClassName,
                           checked ? "bg-[var(--admin-surface-high)] font-semibold" : "",
                         ].join(" ")}
-                        onClick={() => toggleColumn(column.key)}
+                        onClick={() => {
+                          toggleColumn(column.key);
+                        }}
                       >
                         <span className="min-w-0 flex-1 truncate text-left">{column.label}</span>
                         {checked ? (
@@ -752,7 +767,9 @@ export function AdminEnrollmentsRosterPage() {
               type="button"
               className="rounded-md border border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 py-1.5 text-[13px] font-semibold text-[var(--admin-primary)] transition-colors hover:bg-[color-mix(in_srgb,var(--admin-primary)_6%,var(--admin-surface))] disabled:opacity-50"
               disabled={busy || totalCount === 0}
-              onClick={() => setMessageOpen(true)}
+              onClick={() => {
+                setMessageOpen(true);
+              }}
             >
               Send message
             </button>
@@ -760,7 +777,9 @@ export function AdminEnrollmentsRosterPage() {
               type="button"
               className="rounded-md border border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 py-1.5 text-[13px] font-semibold text-[var(--admin-primary)] transition-colors hover:bg-[color-mix(in_srgb,var(--admin-primary)_6%,var(--admin-surface))] disabled:opacity-50"
               disabled={busy || totalCount === 0}
-              onClick={() => setGroupOpen(true)}
+              onClick={() => {
+                setGroupOpen(true);
+              }}
             >
               Create group
             </button>
@@ -794,12 +813,12 @@ export function AdminEnrollmentsRosterPage() {
               <div key={filter.id} className="grid gap-2 sm:grid-cols-[180px_1fr_auto]">
                 <Select
                   value={filter.field}
-                  onValueChange={(value) =>
+                  onValueChange={(value) => {
                     updateFilter(filter.id, {
                       field: value as ExtraFilter["field"],
                       value: "",
-                    })
-                  }
+                    });
+                  }}
                   options={[...FILTER_FIELD_OPTIONS]}
                   ariaLabel="Filter field"
                   className={selectTriggerClassName}
@@ -807,7 +826,9 @@ export function AdminEnrollmentsRosterPage() {
                 {filter.field === "enrolledType" ? (
                   <Select
                     value={filter.value}
-                    onValueChange={(value) => updateFilter(filter.id, { value })}
+                    onValueChange={(value) => {
+                      updateFilter(filter.id, { value });
+                    }}
                     options={[...ENROLLED_TYPE_OPTIONS]}
                     ariaLabel="Enrolled type"
                     className={selectTriggerClassName}
@@ -817,13 +838,17 @@ export function AdminEnrollmentsRosterPage() {
                     className={fieldClassName}
                     placeholder={filter.field === "email" ? "learner@example.com" : "active"}
                     value={filter.value}
-                    onChange={(event) => updateFilter(filter.id, { value: event.target.value })}
+                    onChange={(event) => {
+                      updateFilter(filter.id, { value: event.target.value });
+                    }}
                   />
                 )}
                 <button
                   type="button"
                   className={ghostButtonClassName}
-                  onClick={() => removeFilter(filter.id)}
+                  onClick={() => {
+                    removeFilter(filter.id);
+                  }}
                 >
                   <X className="h-4 w-4" aria-hidden="true" />
                   Remove
@@ -864,8 +889,7 @@ export function AdminEnrollmentsRosterPage() {
             <thead>
               <tr className="border-b border-[var(--admin-border)] bg-[var(--admin-surface)]">
                 {visibleColumns.map((column) => {
-                  const sortable =
-                    column.key === "enrolled_at" || column.key === "expires_at";
+                  const sortable = column.key === "enrolled_at" || column.key === "expires_at";
                   return (
                     <th
                       key={column.key}
@@ -875,7 +899,9 @@ export function AdminEnrollmentsRosterPage() {
                         <button
                           type="button"
                           className="inline-flex items-center gap-1 transition-colors hover:text-[var(--admin-primary)]"
-                          onClick={() => toggleSort(column.key)}
+                          onClick={() => {
+                            toggleSort(column.key);
+                          }}
                         >
                           {column.label}
                           <span aria-hidden="true">
@@ -893,7 +919,7 @@ export function AdminEnrollmentsRosterPage() {
             <tbody className="divide-y divide-[color-mix(in_srgb,var(--admin-border)_70%,transparent)] text-[13px]">
               {loading
                 ? Array.from({ length: 6 }).map((_, index) => (
-                    <tr key={`skeleton-${index}`}>
+                    <tr key={`skeleton-${String(index)}`}>
                       <td colSpan={visibleColumns.length} className="px-4 py-3">
                         <div className="h-8 animate-pulse rounded-md bg-[var(--admin-surface-high)]" />
                       </td>
@@ -908,7 +934,10 @@ export function AdminEnrollmentsRosterPage() {
                     className="px-4 py-16 text-center text-[var(--admin-on-surface-variant)]"
                   >
                     <div className="mx-auto flex max-w-sm flex-col items-center gap-3">
-                      <UsersRound className="h-8 w-8 text-[var(--admin-outline)]" aria-hidden="true" />
+                      <UsersRound
+                        className="h-8 w-8 text-[var(--admin-outline)]"
+                        aria-hidden="true"
+                      />
                       <p className="font-semibold text-[var(--admin-on-surface)]">
                         No enrollments match the current filters
                       </p>
@@ -925,7 +954,9 @@ export function AdminEnrollmentsRosterPage() {
                     <tr
                       key={item.id}
                       className="group cursor-pointer transition-colors hover:bg-[var(--admin-surface-low)]"
-                      onClick={() => router.push(`/admin/members/${item.membershipId}`)}
+                      onClick={() => {
+                        router.push(`/admin/members/${item.membershipId}`);
+                      }}
                     >
                       {visibleColumns.map((column) => {
                         if (column.key === "learner_name") {
@@ -938,7 +969,9 @@ export function AdminEnrollmentsRosterPage() {
                                 <Link
                                   href={`/admin/members/${item.membershipId}`}
                                   className="font-semibold text-[var(--admin-primary)] group-hover:underline"
-                                  onClick={(event) => event.stopPropagation()}
+                                  onClick={(event) => {
+                                    event.stopPropagation();
+                                  }}
                                 >
                                   {item.learnerName ?? "-"}
                                 </Link>
@@ -1016,26 +1049,30 @@ export function AdminEnrollmentsRosterPage() {
           <span className="text-[13px] font-semibold text-[var(--admin-on-surface-variant)]">
             {loading
               ? "Loading enrollments..."
-              : `Showing ${rangeStart} to ${rangeEnd} of ${totalCount.toLocaleString()} entries`}
+              : `Showing ${String(rangeStart)} to ${String(rangeEnd)} of ${totalCount.toLocaleString()} entries`}
           </span>
           <div className="flex items-center gap-2">
             <button
               type="button"
               className="px-3 py-1 text-[13px] font-bold text-[var(--admin-on-surface-variant)] transition-colors hover:text-[var(--admin-primary)] disabled:opacity-50"
               disabled={busy || page <= 1}
-              onClick={() => setPage((current) => Math.max(1, current - 1))}
+              onClick={() => {
+                setPage((current) => Math.max(1, current - 1));
+              }}
             >
               Previous
             </button>
             <span className="rounded bg-[var(--admin-surface-low)] px-2 py-1 text-[13px] font-bold text-[var(--admin-on-surface)]">
               Page {page}
-              {totalPages > 0 ? ` of ${totalPages}` : ""}
+              {totalPages > 0 ? ` of ${String(totalPages)}` : ""}
             </span>
             <button
               type="button"
               className="px-3 py-1 text-[13px] font-bold text-[var(--admin-on-surface-variant)] transition-colors hover:text-[var(--admin-primary)] disabled:opacity-50"
               disabled={busy || page >= totalPages || totalPages === 0}
-              onClick={() => setPage((current) => current + 1)}
+              onClick={() => {
+                setPage((current) => current + 1);
+              }}
             >
               Next
             </button>
@@ -1050,7 +1087,10 @@ export function AdminEnrollmentsRosterPage() {
           aria-live="polite"
         >
           {exportProgress < 100 ? (
-            <Loader2 className="h-4 w-4 animate-spin text-[var(--admin-primary)]" aria-hidden="true" />
+            <Loader2
+              className="h-4 w-4 animate-spin text-[var(--admin-primary)]"
+              aria-hidden="true"
+            />
           ) : (
             <Download className="h-4 w-4 text-[var(--admin-success)]" aria-hidden="true" />
           )}
@@ -1064,7 +1104,7 @@ export function AdminEnrollmentsRosterPage() {
             <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-[var(--admin-surface-high)]">
               <div
                 className="h-full rounded-full bg-[var(--admin-primary)] transition-[width] duration-300"
-                style={{ width: `${exportProgress}%` }}
+                style={{ width: `${String(exportProgress)}%` }}
               />
             </div>
           </div>
@@ -1076,7 +1116,9 @@ export function AdminEnrollmentsRosterPage() {
           <div className="w-full max-w-lg space-y-4 rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)] p-5 shadow-xl">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <h2 className="text-lg font-semibold text-[var(--admin-on-surface)]">Send message</h2>
+                <h2 className="text-lg font-semibold text-[var(--admin-on-surface)]">
+                  Send message
+                </h2>
                 <p className="mt-1 text-sm text-[var(--admin-on-surface-variant)]">
                   Sends email to learners in the current filtered enrollment set ({totalCount}).
                 </p>
@@ -1088,7 +1130,9 @@ export function AdminEnrollmentsRosterPage() {
               <input
                 className={fieldClassName}
                 value={messageSubject}
-                onChange={(event) => setMessageSubject(event.target.value)}
+                onChange={(event) => {
+                  setMessageSubject(event.target.value);
+                }}
               />
             </label>
             <label className="block text-sm">
@@ -1096,7 +1140,9 @@ export function AdminEnrollmentsRosterPage() {
               <textarea
                 className={`${fieldClassName} min-h-32`}
                 value={messageBody}
-                onChange={(event) => setMessageBody(event.target.value)}
+                onChange={(event) => {
+                  setMessageBody(event.target.value);
+                }}
               />
             </label>
             <div className="flex justify-end gap-2">
@@ -1104,7 +1150,9 @@ export function AdminEnrollmentsRosterPage() {
                 type="button"
                 className={ghostButtonClassName}
                 disabled={busy}
-                onClick={() => setMessageOpen(false)}
+                onClick={() => {
+                  setMessageOpen(false);
+                }}
               >
                 Cancel
               </button>
@@ -1131,19 +1179,27 @@ export function AdminEnrollmentsRosterPage() {
               Saves the current filtered learners as a batch group for messaging and marketing.
             </p>
             <label className="block text-sm">
-              <span className="mb-1 block font-medium text-[var(--admin-on-surface)]">Group title</span>
+              <span className="mb-1 block font-medium text-[var(--admin-on-surface)]">
+                Group title
+              </span>
               <input
                 className={fieldClassName}
                 value={groupTitle}
-                onChange={(event) => setGroupTitle(event.target.value)}
+                onChange={(event) => {
+                  setGroupTitle(event.target.value);
+                }}
               />
             </label>
             <label className="block text-sm">
-              <span className="mb-1 block font-medium text-[var(--admin-on-surface)]">Description</span>
+              <span className="mb-1 block font-medium text-[var(--admin-on-surface)]">
+                Description
+              </span>
               <textarea
                 className={`${fieldClassName} min-h-24`}
                 value={groupDescription}
-                onChange={(event) => setGroupDescription(event.target.value)}
+                onChange={(event) => {
+                  setGroupDescription(event.target.value);
+                }}
               />
             </label>
             <div className="flex justify-end gap-2">
@@ -1151,7 +1207,9 @@ export function AdminEnrollmentsRosterPage() {
                 type="button"
                 className={ghostButtonClassName}
                 disabled={busy}
-                onClick={() => setGroupOpen(false)}
+                onClick={() => {
+                  setGroupOpen(false);
+                }}
               >
                 Cancel
               </button>

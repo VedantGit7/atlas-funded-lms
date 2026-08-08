@@ -8,7 +8,9 @@ describe("F3 public + auth forms", () => {
   it("includes public landing slug route and API module", () => {
     expect(existsSync(resolve(webRoot, "app/(public)/p/[slug]/page.tsx"))).toBe(true);
     expect(existsSync(resolve(webRoot, "modules/public/public-landing.server-api.ts"))).toBe(true);
-    expect(existsSync(resolve(webRoot, "features/public/components/PublicLandingView.tsx"))).toBe(true);
+    expect(existsSync(resolve(webRoot, "features/public/components/PublicLandingView.tsx"))).toBe(
+      true,
+    );
 
     const landingSource = readFileSync(
       resolve(webRoot, "features/public/components/PublicLandingView.tsx"),
@@ -22,7 +24,6 @@ describe("F3 public + auth forms", () => {
       "app/(auth)/login/_components/LoginForm.tsx",
       "app/(auth)/signup/_components/SignupForm.tsx",
       "app/(auth)/reset-password/_components/PasswordResetForm.tsx",
-      "app/(auth)/invite/accept/_components/InviteAcceptCard.tsx",
       "features/diagnostics/components/DiagnosticIdentityGate.tsx",
     ];
 
@@ -31,6 +32,13 @@ describe("F3 public + auth forms", () => {
       expect(source).toContain("useZodForm");
       expect(source).toContain("@atlas/contracts/domain-identity/schemas");
     }
+
+    const inviteSource = readFileSync(
+      resolve(webRoot, "app/(auth)/invite/accept/_components/InviteAcceptCard.tsx"),
+      "utf8",
+    );
+    expect(inviteSource).toContain("useActionState");
+    expect(inviteSource).toContain('name="token"');
   });
 
   it("validates auth server actions with @atlas/contracts schemas", () => {
@@ -53,7 +61,6 @@ describe("F3 public + auth forms", () => {
     const hiddenFieldForms = [
       "app/(auth)/login/_components/LoginForm.tsx",
       "app/(auth)/signup/_components/SignupForm.tsx",
-      "app/(auth)/invite/accept/_components/InviteAcceptCard.tsx",
     ];
 
     for (const relativePath of hiddenFieldForms) {
@@ -79,6 +86,7 @@ describe("F3 public + auth forms", () => {
       "utf8",
     );
     expect(inviteSource).toContain('name="token"');
+    expect(inviteSource).toContain('<input type="hidden"');
   });
 
   it("uses safe redirect helpers in login actions", () => {

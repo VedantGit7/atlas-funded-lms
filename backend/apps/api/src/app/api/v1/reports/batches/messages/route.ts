@@ -5,7 +5,7 @@ import {
   sendBatchMessageResponseSchema,
 } from "@atlas/domain/reports/batches-roster.dto";
 import { mutateBatchesRosterMetadata } from "@atlas/domain/reports/batches-roster.route-metadata";
-import { sendBatchRosterMessage } from "../../../../../../../server/reports/batches-roster-actions.service";
+import { sendBatchRosterMessage } from "@atlas/api-server/reports/batches-roster-actions.service";
 
 export const POST = createTenantRoute<
   z.output<typeof sendBatchMessageBodySchema>,

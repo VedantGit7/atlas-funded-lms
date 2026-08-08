@@ -20,5 +20,5 @@ export const POST = createTenantRoute<
   body: deleteWhatsappCampaignBodySchema,
   output: deleteWhatsappCampaignResponseSchema,
   handler: async ({ tx, ctx, params, input }) =>
-    deleteWhatsappCampaign(tx, ctx, params.id, input),
+    deleteWhatsappCampaign(tx, ctx, params["id"], input),
 });

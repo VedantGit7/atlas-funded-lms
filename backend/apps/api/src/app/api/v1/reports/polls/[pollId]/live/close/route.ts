@@ -16,5 +16,5 @@ export const POST = createTenantRoute<
   params: pollIdParamsSchema,
   body: noBodySchema,
   output: pollLiveMonitorResponseSchema,
-  handler: async ({ tx, ctx, params }) => closePollLive(tx, ctx, params.pollId),
+  handler: async ({ tx, ctx, params }) => closePollLive(tx, ctx, params["pollId"]),
 });

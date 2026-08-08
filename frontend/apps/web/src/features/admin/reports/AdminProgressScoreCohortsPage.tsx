@@ -56,7 +56,11 @@ function Shimmer({ className }: { className?: string }) {
 
 function CohortsSkeleton() {
   return (
-    <div className="grid grid-cols-1 gap-6 lg:grid-cols-12" aria-busy="true" aria-label="Loading cohorts">
+    <div
+      className="grid grid-cols-1 gap-6 lg:grid-cols-12"
+      aria-busy="true"
+      aria-label="Loading cohorts"
+    >
       <div className="flex flex-col gap-4 lg:col-span-7">
         <div className="flex justify-between border-b border-[var(--admin-border)] pb-4">
           <div className="w-1/2 space-y-3">
@@ -137,7 +141,7 @@ export function AdminProgressScoreCohortsPage() {
     setError(null);
     try {
       const [groupsRes, messagesRes] = await Promise.all([
-        fetchCohortGroups({ q: q || undefined, page: groupsPage, limit: 10 }),
+        fetchCohortGroups({ ...(q ? { q } : {}), page: groupsPage, limit: 10 }),
         fetchCohortMessages({ page: messagesPage, limit: 10 }),
       ]);
       setGroups(groupsRes.data.items);
@@ -220,7 +224,9 @@ export function AdminProgressScoreCohortsPage() {
           <button
             type="button"
             className={`${ghostButtonClassName} inline-flex h-11 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-sm border-2 border-[var(--admin-on-surface)] px-6 uppercase tracking-wider`}
-            onClick={() => openDrawer("group")}
+            onClick={() => {
+              openDrawer("group");
+            }}
           >
             <Users className="h-4 w-4 shrink-0" aria-hidden="true" />
             New group
@@ -228,7 +234,9 @@ export function AdminProgressScoreCohortsPage() {
           <button
             type="button"
             className={`${primaryButtonClassName} h-11 px-6 uppercase tracking-wider`}
-            onClick={() => openDrawer("message")}
+            onClick={() => {
+              openDrawer("message");
+            }}
           >
             <Send className="h-4 w-4 shrink-0" aria-hidden="true" />
             New message
@@ -270,7 +278,9 @@ export function AdminProgressScoreCohortsPage() {
                   className="w-full rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface-low)] py-2 pl-9 pr-3 font-mono text-xs text-[var(--admin-on-surface)] outline-none focus:border-[var(--admin-primary)] sm:w-56"
                   placeholder="Search groups…"
                   value={qDraft}
-                  onChange={(e) => setQDraft(e.target.value)}
+                  onChange={(e) => {
+                    setQDraft(e.target.value);
+                  }}
                 />
               </form>
             </div>
@@ -288,7 +298,9 @@ export function AdminProgressScoreCohortsPage() {
                 <button
                   type="button"
                   className={primaryButtonClassName}
-                  onClick={() => openDrawer("group")}
+                  onClick={() => {
+                    openDrawer("group");
+                  }}
                 >
                   New group
                 </button>
@@ -356,9 +368,11 @@ export function AdminProgressScoreCohortsPage() {
                               type="button"
                               className="p-1 text-[var(--admin-on-surface-variant)] opacity-0 transition-opacity hover:text-[var(--admin-on-surface)] group-hover:opacity-100"
                               aria-label={`Actions for ${group.name}`}
-                              onClick={() =>
-                                setMenuOpenId((id) => (id === group.batchId ? null : group.batchId))
-                              }
+                              onClick={() => {
+                                setMenuOpenId((id) =>
+                                  id === group.batchId ? null : group.batchId,
+                                );
+                              }}
                             >
                               <MoreVertical className="h-4 w-4" />
                             </button>
@@ -367,14 +381,18 @@ export function AdminProgressScoreCohortsPage() {
                                 <Link
                                   href={`/admin/batches`}
                                   className="block px-3 py-2 text-left text-xs text-[var(--admin-on-surface)] hover:bg-[var(--admin-surface-high)]"
-                                  onClick={() => setMenuOpenId(null)}
+                                  onClick={() => {
+                                    setMenuOpenId(null);
+                                  }}
                                 >
                                   View members
                                 </Link>
                                 <Link
                                   href={groupHref(group)}
                                   className="block px-3 py-2 text-left text-xs text-[var(--admin-on-surface)] hover:bg-[var(--admin-surface-high)]"
-                                  onClick={() => setMenuOpenId(null)}
+                                  onClick={() => {
+                                    setMenuOpenId(null);
+                                  }}
                                 >
                                   Open source roster
                                 </Link>
@@ -395,7 +413,9 @@ export function AdminProgressScoreCohortsPage() {
                       type="button"
                       className="rounded-sm border border-[var(--admin-border)] p-1 hover:bg-[var(--admin-surface-high)] hover:text-[var(--admin-on-surface)] disabled:opacity-40"
                       disabled={!groupsHasPrev}
-                      onClick={() => setGroupsPage((p) => Math.max(1, p - 1))}
+                      onClick={() => {
+                        setGroupsPage((p) => Math.max(1, p - 1));
+                      }}
                       aria-label="Previous page"
                     >
                       <ChevronLeft className="h-4 w-4" />
@@ -404,7 +424,9 @@ export function AdminProgressScoreCohortsPage() {
                       type="button"
                       className="rounded-sm border border-[var(--admin-border)] p-1 hover:bg-[var(--admin-surface-high)] hover:text-[var(--admin-on-surface)] disabled:opacity-40"
                       disabled={!groupsHasNext}
-                      onClick={() => setGroupsPage((p) => p + 1)}
+                      onClick={() => {
+                        setGroupsPage((p) => p + 1);
+                      }}
                       aria-label="Next page"
                     >
                       <ChevronRight className="h-4 w-4" />
@@ -429,7 +451,9 @@ export function AdminProgressScoreCohortsPage() {
                     aria-hidden="true"
                   />
                 </div>
-                <h3 className="mb-2 text-xl font-bold text-[var(--admin-on-surface)]">No Messages</h3>
+                <h3 className="mb-2 text-xl font-bold text-[var(--admin-on-surface)]">
+                  No Messages
+                </h3>
                 <p className="mb-8 max-w-xs text-sm text-[var(--admin-on-surface-variant)]">
                   No messages sent from this report yet. Start a conversation to keep your cohort
                   informed.
@@ -437,7 +461,9 @@ export function AdminProgressScoreCohortsPage() {
                 <button
                   type="button"
                   className={`${primaryButtonClassName} w-full uppercase tracking-widest sm:w-auto`}
-                  onClick={() => openDrawer("message")}
+                  onClick={() => {
+                    openDrawer("message");
+                  }}
                 >
                   <Mail className="mr-2 h-4 w-4" aria-hidden="true" />
                   New Message
@@ -536,12 +562,12 @@ export function AdminProgressScoreCohortsPage() {
                       <div className="mb-4 flex h-1 w-full overflow-hidden rounded-full bg-[var(--admin-surface-high)]">
                         <div
                           className="h-full bg-[var(--admin-primary)]"
-                          style={{ width: `${deliveredPct}%` }}
+                          style={{ width: `${String(deliveredPct)}%` }}
                         />
                         {failedPct > 0 ? (
                           <div
                             className="h-full bg-[var(--admin-warning)]"
-                            style={{ width: `${failedPct}%` }}
+                            style={{ width: `${String(failedPct)}%` }}
                           />
                         ) : null}
                       </div>
@@ -581,7 +607,9 @@ export function AdminProgressScoreCohortsPage() {
                     type="button"
                     className={ghostButtonClassName}
                     disabled={messagesPage <= 1}
-                    onClick={() => setMessagesPage((p) => Math.max(1, p - 1))}
+                    onClick={() => {
+                      setMessagesPage((p) => Math.max(1, p - 1));
+                    }}
                   >
                     Newer
                   </button>
@@ -589,7 +617,9 @@ export function AdminProgressScoreCohortsPage() {
                     type="button"
                     className={ghostButtonClassName}
                     disabled={messages.length < 10}
-                    onClick={() => setMessagesPage((p) => p + 1)}
+                    onClick={() => {
+                      setMessagesPage((p) => p + 1);
+                    }}
                   >
                     Older
                   </button>
@@ -604,7 +634,9 @@ export function AdminProgressScoreCohortsPage() {
         open={drawerOpen}
         initialMode={drawerMode}
         audience={null}
-        onClose={() => setDrawerOpen(false)}
+        onClose={() => {
+          setDrawerOpen(false);
+        }}
         onSuccess={() => void load()}
       />
     </div>

@@ -18,5 +18,5 @@ export const GET = createTenantRoute<
   params: scoreProductTypeParamsSchema,
   output: scoreProductsListResponseSchema,
   handler: async ({ tx, ctx, input, params }) =>
-    listScoreProducts(tx, ctx, params.productType, input),
+    listScoreProducts(tx, ctx, params["productType"], input),
 });

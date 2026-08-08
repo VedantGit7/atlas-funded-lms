@@ -16,5 +16,5 @@ export const GET = createTenantRoute<
   metadata: listSystemEmailsMetadata,
   params: paramsSchema,
   output: previewSystemEmailResponseSchema,
-  handler: async ({ tx, ctx, params }) => previewSystemEmail(tx, ctx, params.key),
+  handler: async ({ tx, ctx, params }) => previewSystemEmail(tx, ctx, params["key"]),
 });

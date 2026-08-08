@@ -5,7 +5,7 @@ import {
   exportZoomInsightsRosterResponseSchema,
 } from "@atlas/domain/reports/zoom-insights-roster.dto";
 import { exportZoomInsightsRosterMetadata } from "@atlas/domain/reports/zoom-insights-roster.route-metadata";
-import { exportZoomInsightsRoster } from "../../../../../../../server/reports/zoom-insights-roster-actions.service";
+import { exportZoomInsightsRoster } from "@atlas/api-server/reports/zoom-insights-roster-actions.service";
 
 export const POST = createTenantRoute<
   z.output<typeof exportZoomInsightsRosterBodySchema>,

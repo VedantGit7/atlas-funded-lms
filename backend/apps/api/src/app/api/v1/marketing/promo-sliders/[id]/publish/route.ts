@@ -16,5 +16,5 @@ export const POST = createTenantRoute<
   params: paramsSchema,
   body: noBodySchema,
   output: promoSliderResponseSchema,
-  handler: async ({ tx, ctx, params }) => publishPromoSlider(tx, ctx, params.id),
+  handler: async ({ tx, ctx, params }) => publishPromoSlider(tx, ctx, params["id"]),
 });

@@ -24,5 +24,5 @@ export function resolveGeneralSettingsNavItem(pathname: string): GeneralSettings
   const match = GENERAL_SETTINGS_NAV_ITEMS.find(
     (item) => pathname === item.href || pathname.startsWith(`${item.href}/`),
   );
-  return match ?? GENERAL_SETTINGS_NAV_ITEMS[0];
+  return match ?? (GENERAL_SETTINGS_NAV_ITEMS[0] as GeneralSettingsNavItem);
 }

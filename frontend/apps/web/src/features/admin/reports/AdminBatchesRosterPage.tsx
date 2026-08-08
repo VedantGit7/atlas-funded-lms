@@ -79,7 +79,7 @@ function Shimmer({ className }: { className?: string }) {
 
 function formatPct(value: number | null | undefined): string {
   if (value == null || Number.isNaN(value)) return "-";
-  return `${Number(value).toFixed(value % 1 === 0 ? 0 : 1)}%`;
+  return `${value.toFixed(value % 1 === 0 ? 0 : 1)}%`;
 }
 
 function formatDate(value: string | null): string {
@@ -114,9 +114,9 @@ function formatRelative(value: string | null): string {
   const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
   if (days < 1) return "Today";
   if (days === 1) return "1 day ago";
-  if (days < 30) return `${days} days ago`;
+  if (days < 30) return `${String(days)} days ago`;
   const months = Math.floor(days / 30);
-  return months === 1 ? "1 month ago" : `${months} months ago`;
+  return months === 1 ? "1 month ago" : `${String(months)} months ago`;
 }
 
 function titleCase(value: string): string {
@@ -153,7 +153,7 @@ function windowCaption(batch: BatchListItem): string {
     const ends = new Date(batch.endsAt).getTime();
     if (!Number.isNaN(ends) && ends < now) {
       const days = Math.max(1, Math.floor((now - ends) / (1000 * 60 * 60 * 24)));
-      return `Ended ${days} day${days === 1 ? "" : "s"} ago`;
+      return `Ended ${String(days)} day${days === 1 ? "" : "s"} ago`;
     }
   }
   if (batch.startsAt && batch.endsAt) {
@@ -166,7 +166,7 @@ function windowCaption(batch: BatchListItem): string {
         Math.max(1, Math.round((now - start) / (1000 * 60 * 60 * 24 * 7))),
       );
       if (now >= start && now <= end) {
-        return `Week ${elapsedWeeks} of ${totalWeeks}`;
+        return `Week ${String(elapsedWeeks)} of ${String(totalWeeks)}`;
       }
     }
   }
@@ -210,11 +210,13 @@ function TripleMetricCell({
   const pct = Math.max(0, Math.min(100, value));
   return (
     <div className="min-w-[7rem]">
-      <p className="font-mono text-sm font-medium text-[var(--admin-on-surface)]">{formatPct(value)}</p>
+      <p className="font-mono text-sm font-medium text-[var(--admin-on-surface)]">
+        {formatPct(value)}
+      </p>
       <div className="mt-1 h-[3px] w-full overflow-hidden rounded-full bg-[var(--admin-surface-high)]">
         <div
           className={`h-full rounded-full transition-[width] duration-200 ${metricBarTone(value)}`}
-          style={{ width: `${pct}%` }}
+          style={{ width: `${String(pct)}%` }}
         />
       </div>
       <p className="mt-1 text-[11px] text-[var(--admin-on-surface-variant)]">{caption}</p>
@@ -255,7 +257,7 @@ function BatchesLoadingSkeleton() {
           <div
             key={index}
             className="relative grid grid-cols-12 items-center gap-3 border-b border-[var(--admin-border)] px-4 py-3 last:border-b-0"
-            style={{ animationDelay: `${index * 40}ms` }}
+            style={{ animationDelay: `${String(index * 40)}ms` }}
           >
             <div className="absolute bottom-0 left-0 top-0 w-1 bg-[var(--admin-surface-high)]" />
             <div className="col-span-3 flex items-center gap-3">
@@ -305,7 +307,11 @@ function EmptyBatchesState({
   return (
     <div className="flex flex-1 flex-col items-center justify-center bg-gradient-to-b from-transparent to-[color-mix(in_srgb,var(--admin-primary)_4%,transparent)] px-6 py-16 text-center">
       <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-full border border-dashed border-[var(--admin-border)] bg-[var(--admin-surface-low)]">
-        <Users className="h-10 w-10 text-[var(--admin-primary)]" aria-hidden="true" strokeWidth={1.5} />
+        <Users
+          className="h-10 w-10 text-[var(--admin-primary)]"
+          aria-hidden="true"
+          strokeWidth={1.5}
+        />
       </div>
       <h3 className="text-base font-semibold text-[var(--admin-on-surface)]">
         {hasFilters ? "No batches match these filters" : "No batches yet"}
@@ -380,10 +386,10 @@ export function AdminBatchesRosterPage() {
   const hasActiveFilters = useMemo(() => {
     return Boolean(
       searchQ ||
-        statusFilter !== "ACTIVE" ||
-        windowFilter !== "any" ||
-        healthFilter !== "any" ||
-        savedView !== "active",
+      statusFilter !== "ACTIVE" ||
+      windowFilter !== "any" ||
+      healthFilter !== "any" ||
+      savedView !== "active",
     );
   }, [healthFilter, savedView, searchQ, statusFilter, windowFilter]);
 
@@ -549,7 +555,7 @@ export function AdminBatchesRosterPage() {
       .then((response) => {
         if (!cancelled) setLearnerDetail(response.data);
       })
-      .catch((loadError) => {
+      .catch((loadError: unknown) => {
         if (cancelled) return;
         setError(
           loadError instanceof ClientApiError
@@ -614,7 +620,13 @@ export function AdminBatchesRosterPage() {
   function openLearner(learner: BatchLearnerItem) {
     setLearnerDetail({
       batchId: selectedBatch?.id ?? "",
+      batchKey: "",
       batchName: selectedBatch?.name ?? "",
+      courseId: null,
+      courseTitle: null,
+      batchStartsAt: null,
+      batchEndsAt: null,
+      health: "on_track",
       membershipId: learner.membershipId,
       learnerName: learner.learnerName,
       email: learner.email,
@@ -623,14 +635,41 @@ export function AdminBatchesRosterPage() {
       summary: {
         liveAttendancePct: learner.liveAttendancePct,
         liveAttendedCount: learner.liveAttendedCount,
+        livePartialCount: 0,
+        liveAbsentCount: 0,
         liveSessionCount: learner.liveSessionCount,
         testScorePct: learner.testScorePct,
+        bestTestScorePct: null,
         testAttemptCount: learner.testAttemptCount,
         contentCompletionPct: learner.contentCompletionPct,
+        completedLessons: 0,
+        totalLessons: 0,
+        daysInBatch: 0,
+        targetDays: null,
+        passMarkPct: null,
+        lastActivityLabel: null,
+      },
+      cohortAverages: { contentCompletionPct: null, liveAttendancePct: null, testScorePct: null },
+      standing: {
+        completionPercentile: null,
+        testPercentile: null,
+        attendancePercentile: null,
+        completionLabel: "",
+        testLabel: "",
+        attendanceLabel: "",
+      },
+      activityHeatmap: { cells: [], longestGapDays: null },
+      membership: {
+        membershipId: learner.membershipId,
+        joinedAt: learner.joinedAt,
+        role: "",
+        source: "",
+        addedBy: "",
       },
       liveAttendance: [],
       exams: [],
       courseProgress: [],
+      lessonStrip: [],
     });
     setLearnerTab("live");
     setLevel("learner_detail");
@@ -842,8 +881,8 @@ export function AdminBatchesRosterPage() {
                 Compare selected cohorts
               </h2>
               <p className="mx-auto mt-2 max-w-md text-sm text-[var(--admin-on-surface-variant)]">
-                Select two to four batches, then open the comparison matrix to line up
-                completion, attendance, and test scores side by side.
+                Select two to four batches, then open the comparison matrix to line up completion,
+                attendance, and test scores side by side.
               </p>
               <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
                 <button
@@ -860,14 +899,18 @@ export function AdminBatchesRosterPage() {
                 <button
                   type="button"
                   className={secondaryButtonClassName}
-                  onClick={() => router.push("/admin/reports/batches/compare")}
+                  onClick={() => {
+                    router.push("/admin/reports/batches/compare");
+                  }}
                 >
                   Open empty compare
                 </button>
                 <button
                   type="button"
                   className={ghostButtonClassName}
-                  onClick={() => setModuleTab("batches")}
+                  onClick={() => {
+                    setModuleTab("batches");
+                  }}
                 >
                   Back to batches
                 </button>
@@ -892,7 +935,9 @@ export function AdminBatchesRosterPage() {
                 <button
                   type="button"
                   className={primaryButtonClassName}
-                  onClick={() => router.push("/admin/reports/batches/exports")}
+                  onClick={() => {
+                    router.push("/admin/reports/batches/exports");
+                  }}
                 >
                   Open exports
                 </button>
@@ -907,7 +952,9 @@ export function AdminBatchesRosterPage() {
                 <button
                   type="button"
                   className={ghostButtonClassName}
-                  onClick={() => setModuleTab("batches")}
+                  onClick={() => {
+                    setModuleTab("batches");
+                  }}
                 >
                   Back to batches
                 </button>
@@ -955,7 +1002,9 @@ export function AdminBatchesRosterPage() {
                     <button
                       type="button"
                       className="col-span-2 rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] p-4 text-left transition-colors hover:bg-[var(--admin-surface-high)]"
-                      onClick={() => applySavedView("active")}
+                      onClick={() => {
+                        applySavedView("active");
+                      }}
                     >
                       <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-[var(--admin-on-surface-variant)]">
                         Active batches
@@ -981,7 +1030,7 @@ export function AdminBatchesRosterPage() {
                         <div
                           className={`h-full rounded-full ${metricBarTone(summary?.avgContentCompletionPct)}`}
                           style={{
-                            width: `${Math.max(0, Math.min(100, summary?.avgContentCompletionPct ?? 0))}%`,
+                            width: `${String(Math.max(0, Math.min(100, summary?.avgContentCompletionPct ?? 0)))}%`,
                           }}
                         />
                       </div>
@@ -997,7 +1046,7 @@ export function AdminBatchesRosterPage() {
                         <div
                           className={`h-full rounded-full ${metricBarTone(summary?.avgLiveAttendancePct)}`}
                           style={{
-                            width: `${Math.max(0, Math.min(100, summary?.avgLiveAttendancePct ?? 0))}%`,
+                            width: `${String(Math.max(0, Math.min(100, summary?.avgLiveAttendancePct ?? 0)))}%`,
                           }}
                         />
                       </div>
@@ -1005,7 +1054,9 @@ export function AdminBatchesRosterPage() {
                     <button
                       type="button"
                       className="rounded-lg border border-[color-mix(in_srgb,var(--admin-warning)_30%,var(--admin-border))] bg-[var(--admin-surface)] p-4 text-left transition-colors hover:bg-[color-mix(in_srgb,var(--admin-warning)_8%,var(--admin-surface))]"
-                      onClick={() => applySavedView("at_risk")}
+                      onClick={() => {
+                        applySavedView("at_risk");
+                      }}
                     >
                       <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-[var(--admin-warning)]">
                         Batches at risk
@@ -1017,7 +1068,9 @@ export function AdminBatchesRosterPage() {
                     <button
                       type="button"
                       className="rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] p-4 text-left transition-colors hover:bg-[var(--admin-surface-high)]"
-                      onClick={() => applySavedView("ending_soon")}
+                      onClick={() => {
+                        applySavedView("ending_soon");
+                      }}
                     >
                       <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-[var(--admin-on-surface-variant)]">
                         Ending in 30 days
@@ -1046,7 +1099,9 @@ export function AdminBatchesRosterPage() {
                             ? "bg-[color-mix(in_srgb,var(--admin-primary)_12%,var(--admin-surface))] text-[var(--admin-primary)]"
                             : "bg-[var(--admin-surface-low)] text-[var(--admin-on-surface-variant)] hover:bg-[var(--admin-surface-high)]",
                         ].join(" ")}
-                        onClick={() => applySavedView(value)}
+                        onClick={() => {
+                          applySavedView(value);
+                        }}
                       >
                         {label}
                       </button>
@@ -1055,7 +1110,10 @@ export function AdminBatchesRosterPage() {
 
                   <div className="rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] p-3 shadow-[0_1px_0_color-mix(in_srgb,var(--admin-on-surface)_4%,transparent)]">
                     <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
-                      <label className="relative flex min-w-0 flex-1 items-center" htmlFor={searchId}>
+                      <label
+                        className="relative flex min-w-0 flex-1 items-center"
+                        htmlFor={searchId}
+                      >
                         <Search
                           className="pointer-events-none absolute left-3 h-4 w-4 text-[var(--admin-on-surface-variant)]"
                           aria-hidden="true"
@@ -1065,7 +1123,9 @@ export function AdminBatchesRosterPage() {
                           className={`${fieldClassName} w-full pl-9`}
                           placeholder="Search batch name or key"
                           value={draftSearch}
-                          onChange={(event) => setDraftSearch(event.target.value)}
+                          onChange={(event) => {
+                            setDraftSearch(event.target.value);
+                          }}
                           onKeyDown={(event) => {
                             if (event.key === "Enter") {
                               setSearchQ(draftSearch.trim());
@@ -1151,7 +1211,7 @@ export function AdminBatchesRosterPage() {
                       >
                         <Filter className="h-3.5 w-3.5" aria-hidden="true" />
                         Apply
-                        {appliedChips.length > 0 ? ` (${appliedChips.length})` : ""}
+                        {appliedChips.length > 0 ? ` (${String(appliedChips.length)})` : ""}
                       </button>
                     </div>
                     {appliedChips.length > 0 ? (
@@ -1211,7 +1271,9 @@ export function AdminBatchesRosterPage() {
                         <button
                           type="button"
                           className={ghostButtonClassName}
-                          onClick={() => setSelectedIds([])}
+                          onClick={() => {
+                            setSelectedIds([]);
+                          }}
                         >
                           Clear
                         </button>
@@ -1272,7 +1334,9 @@ export function AdminBatchesRosterPage() {
                                   <EmptyBatchesState
                                     hasFilters={hasActiveFilters}
                                     onClear={clearAllFilters}
-                                    onManage={() => router.push("/admin/batches")}
+                                    onManage={() => {
+                                      router.push("/admin/batches");
+                                    }}
                                   />
                                 )}
                               </td>
@@ -1292,10 +1356,19 @@ export function AdminBatchesRosterPage() {
                                       : "hover:bg-[var(--admin-surface-high)]",
                                     batch.status === "ARCHIVED" ? "opacity-70" : "",
                                   ].join(" ")}
-                                  style={{ animationDelay: `${Math.min(index, 11) * 20}ms` }}
-                                  onClick={() => openBatch(batch)}
+                                  style={{
+                                    animationDelay: `${String(Math.min(index, 11) * 20)}ms`,
+                                  }}
+                                  onClick={() => {
+                                    openBatch(batch);
+                                  }}
                                 >
-                                  <td className="relative px-3" onClick={(event) => event.stopPropagation()}>
+                                  <td
+                                    className="relative px-3"
+                                    onClick={(event) => {
+                                      event.stopPropagation();
+                                    }}
+                                  >
                                     <span
                                       className={`absolute bottom-0 left-0 top-0 w-1 ${healthRailClass(batch.health)}`}
                                       aria-hidden="true"
@@ -1304,7 +1377,9 @@ export function AdminBatchesRosterPage() {
                                       type="checkbox"
                                       className="h-4 w-4 accent-[var(--admin-primary)]"
                                       checked={selected}
-                                      onChange={() => toggleSelect(batch.id)}
+                                      onChange={() => {
+                                        toggleSelect(batch.id);
+                                      }}
                                       aria-label={`Select ${batch.name}`}
                                     />
                                   </td>
@@ -1366,7 +1441,7 @@ export function AdminBatchesRosterPage() {
                                       <div className="mt-1 h-[3px] w-28 overflow-hidden rounded-full bg-[var(--admin-surface-high)]">
                                         <div
                                           className="h-full rounded-full bg-[var(--admin-primary)]"
-                                          style={{ width: `${progress}%` }}
+                                          style={{ width: `${String(progress)}%` }}
                                         />
                                       </div>
                                     ) : null}
@@ -1381,17 +1456,19 @@ export function AdminBatchesRosterPage() {
                                   </td>
                                   <td
                                     className="relative px-3"
-                                    onClick={(event) => event.stopPropagation()}
+                                    onClick={(event) => {
+                                      event.stopPropagation();
+                                    }}
                                   >
                                     <button
                                       type="button"
                                       className="inline-flex h-8 w-8 items-center justify-center rounded-md text-[var(--admin-on-surface-variant)] transition-colors hover:bg-[var(--admin-surface-high)] hover:text-[var(--admin-on-surface)]"
                                       aria-label={`Actions for ${batch.name}`}
-                                      onClick={() =>
+                                      onClick={() => {
                                         setRowMenuId((current) =>
                                           current === batch.id ? null : batch.id,
-                                        )
-                                      }
+                                        );
+                                      }}
                                     >
                                       <MoreVertical className="h-4 w-4" aria-hidden="true" />
                                     </button>
@@ -1400,7 +1477,9 @@ export function AdminBatchesRosterPage() {
                                         <button
                                           type="button"
                                           className="block w-full px-3 py-2 text-left text-xs text-[var(--admin-on-surface)] hover:bg-[var(--admin-surface-high)]"
-                                          onClick={() => openBatch(batch)}
+                                          onClick={() => {
+                                            openBatch(batch);
+                                          }}
                                         >
                                           Open report
                                         </button>
@@ -1435,8 +1514,8 @@ export function AdminBatchesRosterPage() {
                             Showing {rangeStart}-{rangeEnd} of {totalCount.toLocaleString()} batches
                           </p>
                           <p className="mt-1 text-[11px] text-[var(--admin-on-surface-variant)]">
-                            At risk: any metric below 40% or no activity in 14 days. Critical: two or
-                            more metrics below 40%.
+                            At risk: any metric below 40% or no activity in 14 days. Critical: two
+                            or more metrics below 40%.
                           </p>
                         </div>
                         <div className="flex items-center gap-2">
@@ -1444,7 +1523,9 @@ export function AdminBatchesRosterPage() {
                             type="button"
                             className={ghostButtonClassName}
                             disabled={page <= 1 || loading}
-                            onClick={() => setPage((current) => Math.max(1, current - 1))}
+                            onClick={() => {
+                              setPage((current) => Math.max(1, current - 1));
+                            }}
                             aria-label="Previous page"
                           >
                             <ChevronLeft className="h-4 w-4" aria-hidden="true" />
@@ -1456,7 +1537,9 @@ export function AdminBatchesRosterPage() {
                             type="button"
                             className={ghostButtonClassName}
                             disabled={page >= totalPages || loading || totalPages === 0}
-                            onClick={() => setPage((current) => current + 1)}
+                            onClick={() => {
+                              setPage((current) => current + 1);
+                            }}
                             aria-label="Next page"
                           >
                             <ChevronRight className="h-4 w-4" aria-hidden="true" />
@@ -1581,7 +1664,9 @@ export function AdminBatchesRosterPage() {
                 <button
                   type="button"
                   className={ghostButtonClassName}
-                  onClick={() => setActionsOpen((open) => !open)}
+                  onClick={() => {
+                    setActionsOpen((open) => !open);
+                  }}
                 >
                   {actionsOpen ? "Hide message" : "Send message"}
                 </button>
@@ -1708,7 +1793,9 @@ export function AdminBatchesRosterPage() {
                   <input
                     className={fieldClassName}
                     value={messageSubject}
-                    onChange={(event) => setMessageSubject(event.target.value)}
+                    onChange={(event) => {
+                      setMessageSubject(event.target.value);
+                    }}
                   />
                 </label>
                 <label className="grid gap-1 text-xs text-[var(--admin-on-surface-variant)]">
@@ -1717,7 +1804,9 @@ export function AdminBatchesRosterPage() {
                     className={`${fieldClassName} h-auto py-2`}
                     rows={4}
                     value={messageBody}
-                    onChange={(event) => setMessageBody(event.target.value)}
+                    onChange={(event) => {
+                      setMessageBody(event.target.value);
+                    }}
                   />
                 </label>
                 <button
@@ -1759,9 +1848,7 @@ export function AdminBatchesRosterPage() {
                       {columns.includes("content_completion_pct") ? (
                         <th className="px-4 py-3">Content</th>
                       ) : null}
-                      {columns.includes("joined_at") ? (
-                        <th className="px-4 py-3">Joined</th>
-                      ) : null}
+                      {columns.includes("joined_at") ? <th className="px-4 py-3">Joined</th> : null}
                     </tr>
                   </thead>
                   <tbody>
@@ -1779,7 +1866,9 @@ export function AdminBatchesRosterPage() {
                         <tr
                           key={learner.membershipId}
                           className="h-11 cursor-pointer border-b border-[var(--admin-border)] transition-colors last:border-b-0 hover:bg-[var(--admin-surface-high)]"
-                          onClick={() => openLearner(learner)}
+                          onClick={() => {
+                            openLearner(learner);
+                          }}
                         >
                           {columns.includes("learner_name") ? (
                             <td className="px-4 py-3 text-[var(--admin-on-surface)]">
@@ -1800,7 +1889,7 @@ export function AdminBatchesRosterPage() {
                             <td className="px-4 py-3">
                               <TripleMetricCell
                                 value={learner.liveAttendancePct}
-                                caption={`${learner.liveAttendedCount} of ${learner.liveSessionCount} sessions`}
+                                caption={`${String(learner.liveAttendedCount)} of ${String(learner.liveSessionCount)} sessions`}
                               />
                             </td>
                           ) : null}
@@ -1808,7 +1897,7 @@ export function AdminBatchesRosterPage() {
                             <td className="px-4 py-3">
                               <TripleMetricCell
                                 value={learner.testScorePct}
-                                caption={`${learner.testAttemptCount} attempts`}
+                                caption={`${String(learner.testAttemptCount)} attempts`}
                               />
                             </td>
                           ) : null}
@@ -1816,7 +1905,7 @@ export function AdminBatchesRosterPage() {
                             <td className="px-4 py-3">
                               <TripleMetricCell
                                 value={learner.contentCompletionPct}
-                                caption={`${learner.completedLessons} of ${learner.totalLessons} lessons`}
+                                caption={`${String(learner.completedLessons)} of ${String(learner.totalLessons)} lessons`}
                               />
                             </td>
                           ) : null}
@@ -1844,7 +1933,9 @@ export function AdminBatchesRosterPage() {
                   type="button"
                   className={ghostButtonClassName}
                   disabled={page <= 1 || loading}
-                  onClick={() => setPage((current) => Math.max(1, current - 1))}
+                  onClick={() => {
+                    setPage((current) => Math.max(1, current - 1));
+                  }}
                 >
                   Previous
                 </button>
@@ -1852,7 +1943,9 @@ export function AdminBatchesRosterPage() {
                   type="button"
                   className={ghostButtonClassName}
                   disabled={page >= totalPages || loading}
-                  onClick={() => setPage((current) => current + 1)}
+                  onClick={() => {
+                    setPage((current) => current + 1);
+                  }}
                 >
                   Next
                 </button>
@@ -1877,7 +1970,9 @@ export function AdminBatchesRosterPage() {
             <button
               type="button"
               className={ghostButtonClassName}
-              onClick={() => router.push(`/admin/members/${learnerDetail.membershipId}`)}
+              onClick={() => {
+                router.push(`/admin/members/${learnerDetail.membershipId}`);
+              }}
             >
               Open profile
             </button>
@@ -1922,7 +2017,9 @@ export function AdminBatchesRosterPage() {
                 key={key}
                 type="button"
                 className={learnerTab === key ? primaryButtonClassName : ghostButtonClassName}
-                onClick={() => setLearnerTab(key)}
+                onClick={() => {
+                  setLearnerTab(key);
+                }}
               >
                 {label}
               </button>
@@ -1950,10 +2047,7 @@ export function AdminBatchesRosterPage() {
                 <tbody>
                   {learnerDetail.liveAttendance.length === 0 ? (
                     <tr>
-                      <td
-                        className="px-4 py-8 text-[var(--admin-on-surface-variant)]"
-                        colSpan={5}
-                      >
+                      <td className="px-4 py-8 text-[var(--admin-on-surface-variant)]" colSpan={5}>
                         No live sessions linked to this batch/course yet.
                       </td>
                     </tr>
@@ -1974,7 +2068,7 @@ export function AdminBatchesRosterPage() {
                           {formatDateTime(row.joinedAt)}
                         </td>
                         <td className="px-4 py-3 font-mono text-[12px] text-[var(--admin-on-surface)]">
-                          {row.durationSeconds == null ? "-" : `${row.durationSeconds}s`}
+                          {row.durationSeconds == null ? "-" : `${String(row.durationSeconds)}s`}
                         </td>
                       </tr>
                     ))
@@ -1996,10 +2090,7 @@ export function AdminBatchesRosterPage() {
                 <tbody>
                   {learnerDetail.exams.length === 0 ? (
                     <tr>
-                      <td
-                        className="px-4 py-8 text-[var(--admin-on-surface-variant)]"
-                        colSpan={4}
-                      >
+                      <td className="px-4 py-8 text-[var(--admin-on-surface-variant)]" colSpan={4}>
                         No exam attempts found for this learner in the batch scope.
                       </td>
                     </tr>
@@ -2041,10 +2132,7 @@ export function AdminBatchesRosterPage() {
                 <tbody>
                   {learnerDetail.courseProgress.length === 0 ? (
                     <tr>
-                      <td
-                        className="px-4 py-8 text-[var(--admin-on-surface-variant)]"
-                        colSpan={4}
-                      >
+                      <td className="px-4 py-8 text-[var(--admin-on-surface-variant)]" colSpan={4}>
                         No course progress found for this learner.
                       </td>
                     </tr>
@@ -2066,7 +2154,7 @@ export function AdminBatchesRosterPage() {
                         <td className="px-4 py-3">
                           <TripleMetricCell
                             value={row.completionPct}
-                            caption={`${row.completedLessons} of ${row.totalLessons} lessons`}
+                            caption={`${String(row.completedLessons)} of ${String(row.totalLessons)} lessons`}
                           />
                         </td>
                       </tr>

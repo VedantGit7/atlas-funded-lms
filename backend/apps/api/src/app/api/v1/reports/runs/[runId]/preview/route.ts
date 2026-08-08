@@ -2,11 +2,14 @@ import { z } from "zod";
 import type { z as Zod } from "zod";
 import { createTenantRoute } from "@atlas/api";
 import { buildReportDataset } from "@atlas/domain/reports/reports.datasets";
-import { extractSelectedColumns, filterDatasetByColumns } from "@atlas/domain/reports/reports.allowed-columns";
+import {
+  extractSelectedColumns,
+  filterDatasetByColumns,
+} from "@atlas/domain/reports/reports.allowed-columns";
 import { reportsRepository } from "@atlas/domain/reports/reports.repository";
 import { getReportRun } from "@atlas/domain/reports/reports.service";
 import { getReportRunMetadata } from "@atlas/domain/reports/reports.route-metadata";
-import { reportPreviewResponseSchema } from "../../../../../../server/reports/reports.schemas";
+import { reportPreviewResponseSchema } from "@atlas/api-server/reports/reports.schemas";
 
 const paramsSchema = z.object({ runId: z.string().uuid() });
 
@@ -19,7 +22,7 @@ export const GET = createTenantRoute<
   params: paramsSchema,
   output: reportPreviewResponseSchema,
   handler: async ({ tx, ctx, params }) => {
-    const result = await getReportRun(tx, ctx, params.runId);
+    const result = await getReportRun(tx, ctx, params["runId"]);
     const run = result.data;
 
     const definition = await reportsRepository.findDefinitionByKey(tx, run.definitionKey);
@@ -33,10 +36,7 @@ export const GET = createTenantRoute<
       };
     }
 
-    const paramsJson =
-      run.params && typeof run.params === "object" && !Array.isArray(run.params)
-        ? (run.params as Record<string, unknown>)
-        : {};
+    const paramsJson = run.params;
 
     const dataset = await buildReportDataset(tx, {
       datasetKey: definition.dataset_key,

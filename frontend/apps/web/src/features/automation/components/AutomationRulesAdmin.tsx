@@ -2,16 +2,7 @@
 
 import Link from "next/link";
 import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
-import {
-  Bolt,
-  Filter,
-  FolderOpen,
-  Plus,
-  RefreshCw,
-  Search,
-  Trash2,
-  Zap,
-} from "lucide-react";
+import { Bolt, Filter, FolderOpen, Plus, RefreshCw, Search, Trash2, Zap } from "lucide-react";
 import type { z } from "zod";
 import { AdminConfirmDialog } from "../../../components/shells/admin/AdminConfirmDialog";
 import { ClientApiError, clientApi } from "../../../lib/client-api";
@@ -162,7 +153,7 @@ function draftsEqual(a: AutomationDraft, b: AutomationDraft): boolean {
   return JSON.stringify(a) === JSON.stringify(b);
 }
 
-function FieldError({ message }: { message?: string }) {
+function FieldError({ message }: { message?: string | undefined }) {
   if (!message) return null;
   return (
     <p className="text-xs text-[var(--admin-danger)]" role="alert">
@@ -263,15 +254,15 @@ export function AutomationRulesAdmin({
 
   useEffect(() => {
     if (initialRules !== undefined) return;
-    let cancelled = false;
+    const cancelled = { current: false };
 
     void (async () => {
       try {
         const data = await refreshRules();
-        if (cancelled) return;
+        if (cancelled.current) return;
         setSelectedId((current) => current ?? data[0]?.id ?? null);
       } catch (caught) {
-        if (cancelled) return;
+        if (cancelled.current) return;
         if (caught instanceof ClientApiError && caught.status === 403) {
           setAuthDenied(true);
           setCanManage(false);
@@ -288,12 +279,12 @@ export function AutomationRulesAdmin({
         }
         setLoadError("Failed to load automation rules.");
       } finally {
-        if (!cancelled) setLoadingInitial(false);
+        if (!cancelled.current) setLoadingInitial(false);
       }
     })();
 
     return () => {
-      cancelled = true;
+      cancelled.current = true;
     };
   }, [initialRules, refreshRules]);
 
@@ -327,7 +318,9 @@ export function AutomationRulesAdmin({
     const next = loadDraftFromRule(selected);
     setDraft(next);
     setSavedDraft(next);
-    void refreshRuns(selected.id).catch(() => setRuns([]));
+    void refreshRuns(selected.id).catch(() => {
+      setRuns([]);
+    });
   }, [creatingNew, selected, refreshRuns]);
 
   function selectRule(rule: RuleDto) {
@@ -431,8 +424,8 @@ export function AutomationRulesAdmin({
     setDraft((current) => ({ ...current, [key]: value }));
     setFieldErrors((current) => {
       if (!current[key]) return current;
-      const next = { ...current };
-      delete next[key];
+      const { [key]: _removed, ...next } = current;
+      void _removed;
       return next;
     });
     setMessage(null);
@@ -495,7 +488,9 @@ export function AutomationRulesAdmin({
               <input
                 type="search"
                 value={searchQuery}
-                onChange={(event) => setSearchQuery(event.target.value)}
+                onChange={(event) => {
+                  setSearchQuery(event.target.value);
+                }}
                 placeholder="Search rules..."
                 className={`${automationSearchFieldClassName} pl-9`}
               />
@@ -555,12 +550,18 @@ export function AutomationRulesAdmin({
                         role="option"
                         aria-selected={isSelected}
                         className={`${automationListItemClassName} w-full text-left ${
-                          isSelected ? automationListItemSelectedClassName : "hover:bg-[var(--admin-surface-low)]"
+                          isSelected
+                            ? automationListItemSelectedClassName
+                            : "hover:bg-[var(--admin-surface-low)]"
                         }`}
-                        onClick={() => selectRule(rule)}
+                        onClick={() => {
+                          selectRule(rule);
+                        }}
                       >
                         <div className="mb-2 flex items-start justify-between gap-2">
-                          <span className={automationRuleCodeClassName}>{formatRuleCode(rule)}</span>
+                          <span className={automationRuleCodeClassName}>
+                            {formatRuleCode(rule)}
+                          </span>
                           <span className={automationStatusBadgeClassName(rule.status)}>
                             {automationStatusLabel(rule.status)}
                           </span>
@@ -598,7 +599,9 @@ export function AutomationRulesAdmin({
                 <p className="text-xs font-semibold uppercase tracking-wide text-[var(--admin-on-surface-variant)]">
                   {creatingNew ? "New automation" : "Editing rule"}
                 </p>
-                <h2 className="text-xl font-semibold text-[var(--admin-on-surface)]">{editorTitle}</h2>
+                <h2 className="text-xl font-semibold text-[var(--admin-on-surface)]">
+                  {editorTitle}
+                </h2>
               </header>
 
               <div className="space-y-12">
@@ -618,25 +621,31 @@ export function AutomationRulesAdmin({
                         <input
                           className={`${fieldClassName} font-mono text-[13px]`}
                           value={draft.key}
-                          onChange={(event) => updateDraft("key", event.target.value)}
+                          onChange={(event) => {
+                            updateDraft("key", event.target.value);
+                          }}
                           disabled={!canManage}
                           placeholder="completion.notify"
-                          aria-invalid={Boolean(fieldErrors.key)}
+                          aria-invalid={Boolean(fieldErrors["key"])}
                         />
-                        <FieldError message={fieldErrors.key} />
+                        <FieldError message={fieldErrors["key"]} />
                       </div>
                       <GamificationSelectField
                         label="Trigger event type"
                         value={draft.trigger}
                         options={TRIGGER_OPTIONS}
-                        onChange={(value) => updateDraft("trigger", value as TriggerType)}
+                        onChange={(value) => {
+                          updateDraft("trigger", value as TriggerType);
+                        }}
                         disabled={!canManage}
                       />
                       <GamificationSelectField
                         label="Rule status"
                         value={draft.status}
                         options={[...STATUS_OPTIONS]}
-                        onChange={(value) => updateDraft("status", value as EntityStatus)}
+                        onChange={(value) => {
+                          updateDraft("status", value as EntityStatus);
+                        }}
                         disabled={!canManage}
                       />
                     </div>
@@ -660,7 +669,9 @@ export function AutomationRulesAdmin({
                           type="radio"
                           name="automation-condition"
                           checked={draft.conditionType === "always"}
-                          onChange={() => updateDraft("conditionType", "always")}
+                          onChange={() => {
+                            updateDraft("conditionType", "always");
+                          }}
                           disabled={!canManage}
                           className="h-4 w-4 accent-[var(--admin-primary)]"
                         />
@@ -671,7 +682,9 @@ export function AutomationRulesAdmin({
                           type="radio"
                           name="automation-condition"
                           checked={draft.conditionType === "assessmentPassed"}
-                          onChange={() => updateDraft("conditionType", "assessmentPassed")}
+                          onChange={() => {
+                            updateDraft("conditionType", "assessmentPassed");
+                          }}
                           disabled={!canManage}
                           className="h-4 w-4 accent-[var(--admin-primary)]"
                         />
@@ -688,13 +701,13 @@ export function AutomationRulesAdmin({
                             max={100}
                             className={`${fieldClassName} w-32`}
                             value={draft.minScore}
-                            onChange={(event) =>
-                              updateDraft("minScore", Number(event.target.value))
-                            }
+                            onChange={(event) => {
+                              updateDraft("minScore", Number(event.target.value));
+                            }}
                             disabled={!canManage}
-                            aria-invalid={Boolean(fieldErrors.minScore)}
+                            aria-invalid={Boolean(fieldErrors["minScore"])}
                           />
-                          <FieldError message={fieldErrors.minScore} />
+                          <FieldError message={fieldErrors["minScore"]} />
                         </div>
                       ) : null}
                     </fieldset>
@@ -725,7 +738,9 @@ export function AutomationRulesAdmin({
                             ? automationActionToggleActiveClassName
                             : automationActionToggleInactiveClassName
                         }
-                        onClick={() => updateDraft("actionType", "notification.request")}
+                        onClick={() => {
+                          updateDraft("actionType", "notification.request");
+                        }}
                         disabled={!canManage}
                       >
                         Send notification
@@ -739,7 +754,9 @@ export function AutomationRulesAdmin({
                             ? automationActionToggleActiveClassName
                             : automationActionToggleInactiveClassName
                         }
-                        onClick={() => updateDraft("actionType", "certificate.issue")}
+                        onClick={() => {
+                          updateDraft("actionType", "certificate.issue");
+                        }}
                         disabled={!canManage}
                       >
                         Issue certificate
@@ -753,22 +770,24 @@ export function AutomationRulesAdmin({
                           <input
                             className={`${fieldClassName} font-mono text-[13px]`}
                             value={draft.templateKey}
-                            onChange={(event) => updateDraft("templateKey", event.target.value)}
+                            onChange={(event) => {
+                              updateDraft("templateKey", event.target.value);
+                            }}
                             disabled={!canManage}
-                            aria-invalid={Boolean(fieldErrors.templateKey)}
+                            aria-invalid={Boolean(fieldErrors["templateKey"])}
                           />
-                          <FieldError message={fieldErrors.templateKey} />
+                          <FieldError message={fieldErrors["templateKey"]} />
                         </div>
                         <GamificationSelectField
                           label="Membership ID field"
                           value={draft.membershipIdField}
                           options={[...MEMBERSHIP_FIELD_OPTIONS]}
-                          onChange={(value) =>
+                          onChange={(value) => {
                             updateDraft(
                               "membershipIdField",
                               value as "membershipId" | "learnerMembershipId",
-                            )
-                          }
+                            );
+                          }}
                           disabled={!canManage}
                         />
                       </div>
@@ -781,10 +800,12 @@ export function AutomationRulesAdmin({
                               value={draft.certificateTemplateId}
                               options={certificateTemplateOptions}
                               placeholder="Select certificate template…"
-                              onChange={(value) => updateDraft("certificateTemplateId", value)}
+                              onChange={(value) => {
+                                updateDraft("certificateTemplateId", value);
+                              }}
                               disabled={!canManage}
                             />
-                            <FieldError message={fieldErrors.certificateTemplateId} />
+                            <FieldError message={fieldErrors["certificateTemplateId"]} />
                           </div>
                         ) : (
                           <div className="space-y-1.5 md:col-span-2">
@@ -792,14 +813,14 @@ export function AutomationRulesAdmin({
                             <input
                               className={`${fieldClassName} font-mono text-[13px]`}
                               value={draft.certificateTemplateId}
-                              onChange={(event) =>
-                                updateDraft("certificateTemplateId", event.target.value)
-                              }
+                              onChange={(event) => {
+                                updateDraft("certificateTemplateId", event.target.value);
+                              }}
                               disabled={!canManage}
                               placeholder="UUID of published certificate template"
-                              aria-invalid={Boolean(fieldErrors.certificateTemplateId)}
+                              aria-invalid={Boolean(fieldErrors["certificateTemplateId"])}
                             />
-                            <FieldError message={fieldErrors.certificateTemplateId} />
+                            <FieldError message={fieldErrors["certificateTemplateId"]} />
                             <p className="text-xs text-[var(--admin-on-surface-variant)]">
                               No published certificate templates were found.{" "}
                               <Link
@@ -816,24 +837,24 @@ export function AutomationRulesAdmin({
                           label="Recipient field"
                           value={draft.recipientMembershipIdField}
                           options={[...MEMBERSHIP_FIELD_OPTIONS]}
-                          onChange={(value) =>
+                          onChange={(value) => {
                             updateDraft(
                               "recipientMembershipIdField",
                               value as "membershipId" | "learnerMembershipId",
-                            )
-                          }
+                            );
+                          }}
                           disabled={!canManage}
                         />
                         <GamificationSelectField
                           label="Source type"
                           value={draft.sourceType}
                           options={[...SOURCE_TYPE_OPTIONS]}
-                          onChange={(value) =>
+                          onChange={(value) => {
                             updateDraft(
                               "sourceType",
                               value as "course" | "learning_path" | "assessment",
-                            )
-                          }
+                            );
+                          }}
                           disabled={!canManage}
                         />
                         <div className="space-y-1.5">
@@ -841,12 +862,14 @@ export function AutomationRulesAdmin({
                           <input
                             className={`${fieldClassName} font-mono text-[13px]`}
                             value={draft.sourceIdField}
-                            onChange={(event) => updateDraft("sourceIdField", event.target.value)}
+                            onChange={(event) => {
+                              updateDraft("sourceIdField", event.target.value);
+                            }}
                             disabled={!canManage}
                             placeholder="assessmentId"
-                            aria-invalid={Boolean(fieldErrors.sourceIdField)}
+                            aria-invalid={Boolean(fieldErrors["sourceIdField"])}
                           />
-                          <FieldError message={fieldErrors.sourceIdField} />
+                          <FieldError message={fieldErrors["sourceIdField"]} />
                         </div>
                       </div>
                     )}
@@ -860,7 +883,9 @@ export function AutomationRulesAdmin({
                     <button
                       type="button"
                       className={`${outlineButtonClassName} border-[var(--admin-danger)] text-[var(--admin-danger)] hover:bg-[color-mix(in_srgb,var(--admin-danger)_8%,transparent)]`}
-                      onClick={() => setConfirmDeleteOpen(true)}
+                      onClick={() => {
+                        setConfirmDeleteOpen(true);
+                      }}
                       disabled={saving}
                     >
                       Delete rule
@@ -986,9 +1011,9 @@ export function AutomationRulesAdmin({
                                     <button
                                       type="button"
                                       className="text-xs font-semibold text-[var(--admin-primary)] hover:underline"
-                                      onClick={() =>
-                                        setExpandedRunId(expanded ? null : run.id)
-                                      }
+                                      onClick={() => {
+                                        setExpandedRunId(expanded ? null : run.id);
+                                      }}
                                       aria-expanded={expanded}
                                     >
                                       {expanded ? "Hide JSON" : "View JSON"}
@@ -1038,7 +1063,9 @@ export function AutomationRulesAdmin({
         icon={Trash2}
         busy={saving}
         onConfirm={() => void deleteRule()}
-        onCancel={() => setConfirmDeleteOpen(false)}
+        onCancel={() => {
+          setConfirmDeleteOpen(false);
+        }}
       />
     </>
   );

@@ -41,6 +41,13 @@ import {
   type MarketingCampaignRow,
 } from "./marketing-campaigns.repository";
 
+function defined<T>(value: T, message = "Expected value to be defined"): NonNullable<T> {
+  if (value == null) {
+    throw new Error(message);
+  }
+  return value;
+}
+
 type Touchpoint = CampaignTouchpoint;
 
 function validationError(message: string) {
@@ -53,7 +60,7 @@ function validationError(message: string) {
 
 function notFoundError(message: string) {
   return new AtlasHttpError({
-    code: "NOT_FOUND",
+    code: "PERMISSION_DENIED",
     status: 404,
     message,
   });
@@ -120,11 +127,7 @@ function addDays(base: Date, days: number) {
   return new Date(base.getTime() + days * 24 * 60 * 60 * 1000);
 }
 
-export async function listMarketingCampaigns(
-  tx: TenantTx,
-  _ctx: ServiceCtx,
-  rawQuery: unknown,
-) {
+export async function listMarketingCampaigns(tx: TenantTx, _ctx: ServiceCtx, rawQuery: unknown) {
   const query = marketingCampaignsListQuerySchema.parse(rawQuery ?? {});
   const [items, summary] = await Promise.all([
     marketingCampaignsRepository.list(tx, {
@@ -154,11 +157,7 @@ export async function getMarketingCampaign(tx: TenantTx, _ctx: ServiceCtx, id: s
   return marketingCampaignResponseSchema.parse({ data: toDto(row) });
 }
 
-export async function createMarketingCampaign(
-  tx: TenantTx,
-  ctx: ServiceCtx,
-  rawBody: unknown,
-) {
+export async function createMarketingCampaign(tx: TenantTx, ctx: ServiceCtx, rawBody: unknown) {
   const body = createMarketingCampaignBodySchema.parse(rawBody);
   const id = await marketingCampaignsRepository.insertDraft(tx, {
     title: body.title,
@@ -203,7 +202,10 @@ export async function setMarketingCampaignAudience(
   let audienceBatchId: string | null = null;
   if (body.audienceType === "GROUP") {
     audienceBatchId = body.audienceBatchId ?? null;
-    if (!audienceBatchId || !(await marketingCampaignsRepository.batchExists(tx, audienceBatchId))) {
+    if (
+      !audienceBatchId ||
+      !(await marketingCampaignsRepository.batchExists(tx, audienceBatchId))
+    ) {
       throw validationError("Selected group was not found.");
     }
   }
@@ -265,7 +267,10 @@ export async function estimateMarketingCampaignAudience(
   let audienceBatchId: string | null = null;
   if (query.audienceType === "GROUP") {
     audienceBatchId = query.audienceBatchId ?? null;
-    if (!audienceBatchId || !(await marketingCampaignsRepository.batchExists(tx, audienceBatchId))) {
+    if (
+      !audienceBatchId ||
+      !(await marketingCampaignsRepository.batchExists(tx, audienceBatchId))
+    ) {
       throw validationError("Selected group was not found.");
     }
   }
@@ -300,9 +305,11 @@ export async function launchMarketingCampaign(
     throw validationError("Add at least one touchpoint before launch.");
   }
 
-  const launchBase =
-    body.mode === "schedule" ? new Date(body.scheduledAt!) : new Date();
-  if (Number.isNaN(launchBase.getTime()) || (body.mode === "schedule" && launchBase.getTime() <= Date.now())) {
+  const launchBase = body.mode === "schedule" ? new Date(defined(body.scheduledAt)) : new Date();
+  if (
+    Number.isNaN(launchBase.getTime()) ||
+    (body.mode === "schedule" && launchBase.getTime() <= Date.now())
+  ) {
     throw validationError("scheduledAt must be a future date.");
   }
 
@@ -315,13 +322,8 @@ export async function launchMarketingCampaign(
     const sendNow = when.getTime() <= Date.now() + 5_000;
     if (!sendNow) anyScheduled = true;
 
-    const subject =
-      point.subject?.trim() ||
-      point.title ||
-      `${dto.title} · ${point.channel}`;
-    const bodyText =
-      point.body?.trim() ||
-      defaultBodyForGoal(dto.goal, point.channel);
+    const subject = point.subject?.trim() || point.title || `${dto.title} · ${point.channel}`;
+    const bodyText = point.body?.trim() || defaultBodyForGoal(dto.goal, point.channel);
 
     if (point.channel === "email") {
       const created = await createMarketingEmailCampaign(tx, ctx, {
@@ -337,9 +339,14 @@ export async function launchMarketingCampaign(
         bodyHtml: bodyText.includes("<") ? bodyText : `<p>${bodyText}</p>`,
         templateKey: null,
       });
-      const sendResult = await sendMarketingEmail(tx, ctx, emailId, sendNow
-        ? { mode: "now", acknowledgeSpam: true }
-        : { mode: "schedule", scheduledAt: when.toISOString(), acknowledgeSpam: true });
+      const sendResult = await sendMarketingEmail(
+        tx,
+        ctx,
+        emailId,
+        sendNow
+          ? { mode: "now", acknowledgeSpam: true }
+          : { mode: "schedule", scheduledAt: when.toISOString(), acknowledgeSpam: true },
+      );
       if (sendResult.data.status === "SENT") anySent = true;
       nextTouchpoints.push({
         ...point,
@@ -365,9 +372,12 @@ export async function launchMarketingCampaign(
         imageUrl: null,
         channels: { android: true, ios: true, web: true },
       });
-      const sendResult = await sendPushMessage(tx, ctx, pushId, sendNow
-        ? { mode: "now" }
-        : { mode: "schedule", scheduledAt: when.toISOString() });
+      const sendResult = await sendPushMessage(
+        tx,
+        ctx,
+        pushId,
+        sendNow ? { mode: "now" } : { mode: "schedule", scheduledAt: when.toISOString() },
+      );
       if (sendResult.data.status === "SENT") anySent = true;
       nextTouchpoints.push({
         ...point,
@@ -438,19 +448,15 @@ export async function deleteMarketingCampaign(
   });
 }
 
-export async function getMarketingCampaignAnalytics(
-  tx: TenantTx,
-  _ctx: ServiceCtx,
-  id: string,
-) {
+export async function getMarketingCampaignAnalytics(tx: TenantTx, _ctx: ServiceCtx, id: string) {
   const row = await requireCampaign(tx, id);
   const dto = toDto(row);
   const channels = [];
 
   for (const point of dto.touchpoints) {
     let recipientCount = 0;
-    let deliveredCount: number | null = null;
-    let failedCount: number | null = null;
+    const deliveredCount: number | null = null;
+    const failedCount: number | null = null;
     let scheduledAt: string | null = null;
     let sentAt: string | null = null;
     let linkedStatus = point.linkedStatus ?? null;
@@ -462,7 +468,7 @@ export async function getMarketingCampaignAnalytics(
         recipientCount = linked.recipient_count;
         scheduledAt = linked.scheduled_at?.toISOString() ?? null;
         sentAt = linked.sent_at?.toISOString() ?? null;
-        linkedStatus = linked.status as Touchpoint["linkedStatus"];
+        linkedStatus = (linked.status as Touchpoint["linkedStatus"]) ?? null;
         href = `/admin/marketing/messenger/email/${point.linkedCampaignId}`;
       }
     } else if (point.channel === "push" && point.linkedCampaignId) {
@@ -471,7 +477,7 @@ export async function getMarketingCampaignAnalytics(
         recipientCount = linked.recipient_count;
         scheduledAt = linked.scheduled_at?.toISOString() ?? null;
         sentAt = linked.sent_at?.toISOString() ?? null;
-        linkedStatus = linked.status as Touchpoint["linkedStatus"];
+        linkedStatus = (linked.status as Touchpoint["linkedStatus"]) ?? null;
         href = `/admin/marketing/messenger/push/${point.linkedCampaignId}`;
       }
     } else if (point.channel === "announcement" && point.linkedCampaignId) {
@@ -506,9 +512,7 @@ export async function getMarketingCampaignAnalytics(
       goal: dto.goal,
       launchedAt: dto.launchedAt,
       audienceLabel:
-        dto.audienceType === "ALL"
-          ? "All learners"
-          : dto.audienceLabel ?? "Selected group",
+        dto.audienceType === "ALL" ? "All learners" : (dto.audienceLabel ?? "Selected group"),
       totalReach: totalReach || dto.recipientCount,
       touchpointCount: dto.touchpoints.length,
       channels,

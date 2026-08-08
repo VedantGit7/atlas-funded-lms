@@ -23,8 +23,7 @@ export const GET = createTenantRoute<
   input: noBodySchema,
   params: batchIdParamsSchema,
   output: batchMessagesNudgesResponseSchema,
-  handler: async ({ tx, ctx, params }) =>
-    listBatchMessageNudges(tx, ctx, params.batchId),
+  handler: async ({ tx, ctx, params }) => listBatchMessageNudges(tx, ctx, params["batchId"]),
 });
 
 export const PATCH = createTenantRoute<
@@ -37,5 +36,5 @@ export const PATCH = createTenantRoute<
   params: batchIdParamsSchema,
   output: batchMessagesNudgesResponseSchema,
   handler: async ({ tx, ctx, input, params }) =>
-    updateBatchMessageNudges(tx, ctx, params.batchId, input.nudges),
+    updateBatchMessageNudges(tx, ctx, params["batchId"], input.nudges),
 });

@@ -16,5 +16,5 @@ export const POST = createTenantRoute<
   params: notificationParamsSchema,
   body: noBodySchema,
   output: markNotificationReadResponseSchema,
-  handler: async ({ tx, ctx, params }) => markNotificationRead(tx, ctx, params.id),
+  handler: async ({ tx, ctx, params }) => markNotificationRead(tx, ctx, params["id"]),
 });

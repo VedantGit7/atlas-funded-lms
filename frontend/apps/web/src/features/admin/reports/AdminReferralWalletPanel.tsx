@@ -37,10 +37,14 @@ import {
   type ReferredLearnerItem,
   type ReferredLearnersPayload,
 } from "./admin-sales-marketing-roster-api";
-import {
-  downloadReportExport,
-  pollReportRunUntilComplete,
-} from "./admin-reports-api";
+import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
+
+function defined<T>(value: T, message = "Expected value to be defined"): NonNullable<T> {
+  if (value == null) {
+    throw new Error(message);
+  }
+  return value;
+}
 
 type CohortTab = "group" | "message";
 type MembershipMode = "static" | "live";
@@ -90,7 +94,7 @@ function initials(name: string | null, email: string | null): string {
   const source = (name?.trim() || email?.trim() || "?").replace(/\s+/g, " ");
   const parts = source.split(" ").filter(Boolean);
   if (parts.length >= 2) {
-    return `${parts[0]![0] ?? ""}${parts[1]![0] ?? ""}`.toUpperCase();
+    return `${defined(parts[0])[0] ?? ""}${defined(parts[1])[0] ?? ""}`.toUpperCase();
   }
   return source.slice(0, 2).toUpperCase();
 }
@@ -102,10 +106,7 @@ function referralStatusPillClass(status: ReferredLearnerItem["status"]): string 
   if (status === "PENDING") {
     return "bg-[color-mix(in_srgb,var(--admin-warning)_12%,transparent)] text-[var(--admin-warning)]";
   }
-  if (status === "DISQUALIFIED") {
-    return "bg-[color-mix(in_srgb,var(--admin-danger)_12%,transparent)] text-[var(--admin-danger)]";
-  }
-  return "bg-[var(--admin-surface-high)] text-[var(--admin-on-surface-variant)]";
+  return "bg-[color-mix(in_srgb,var(--admin-danger)_12%,transparent)] text-[var(--admin-danger)]";
 }
 
 function referralStatusLabel(status: ReferredLearnerItem["status"]): string {
@@ -138,11 +139,8 @@ function ChangePill({ value, windowLabel }: { value: number | null; windowLabel?
   if (value == null) {
     return (
       <span className="inline-flex items-center gap-0.5 rounded bg-[var(--admin-surface-high)] px-1.5 py-0.5 font-mono text-[11px] text-[var(--admin-on-surface-variant)]">
-        <Minus className="h-3 w-3" aria-hidden="true" />
-        —
-        {windowLabel ? (
-          <span className="sr-only"> vs previous {windowLabel}</span>
-        ) : null}
+        <Minus className="h-3 w-3" aria-hidden="true" />—
+        {windowLabel ? <span className="sr-only"> vs previous {windowLabel}</span> : null}
       </span>
     );
   }
@@ -170,7 +168,11 @@ function ChangePill({ value, windowLabel }: { value: number | null; windowLabel?
 
 function ReferralWalletSkeleton() {
   return (
-    <div className="flex flex-col gap-6" aria-busy="true" aria-label="Loading referral and wallet data">
+    <div
+      className="flex flex-col gap-6"
+      aria-busy="true"
+      aria-label="Loading referral and wallet data"
+    >
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
         <div className="space-y-2">
           <Shimmer className="h-8 w-52" />
@@ -263,10 +265,7 @@ export function AdminReferralWalletPanel() {
   const [referredError, setReferredError] = useState<string | null>(null);
   const [referredPage, setReferredPage] = useState(1);
 
-  const filtersActive =
-    Boolean(searchQ.trim()) ||
-    Boolean(signedUpFrom) ||
-    Boolean(signedUpTo);
+  const filtersActive = Boolean(searchQ.trim()) || Boolean(signedUpFrom) || Boolean(signedUpTo);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -331,7 +330,9 @@ export function AdminReferralWalletPanel() {
       if (event.key === "Escape") setCohortDrawerOpen(false);
     }
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+    };
   }, [cohortDrawerOpen]);
 
   useEffect(() => {
@@ -340,7 +341,9 @@ export function AdminReferralWalletPanel() {
       if (event.key === "Escape") setReferralsDrawerOpen(false);
     }
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+    };
   }, [referralsDrawerOpen]);
 
   useEffect(() => {
@@ -379,13 +382,6 @@ export function AdminReferralWalletPanel() {
     setSortBy("successful_referrals");
     setPage(1);
     setSelectedIds(new Set());
-  }
-
-  function resetActivityRange() {
-    const next = defaultActivityRange(30);
-    setActivityFrom(next.from);
-    setActivityTo(next.to);
-    setPage(1);
   }
 
   function openReferralsDrawer(item: ReferralWalletItem, event?: MouseEvent) {
@@ -432,10 +428,9 @@ export function AdminReferralWalletPanel() {
     const ok = await copyToClipboard(code);
     if (ok) {
       setCopiedCodeId(item.membershipId);
-      window.setTimeout(
-        () => setCopiedCodeId((current) => (current === item.membershipId ? null : current)),
-        1500,
-      );
+      window.setTimeout(() => {
+        setCopiedCodeId((current) => (current === item.membershipId ? null : current));
+      }, 1500);
     }
   }
 
@@ -579,7 +574,10 @@ export function AdminReferralWalletPanel() {
 
         <div className="flex flex-wrap items-center gap-2">
           <label className="inline-flex h-9 items-center gap-2 rounded border border-[var(--admin-outline)] bg-[var(--admin-surface)] px-3 text-xs text-[var(--admin-on-surface)] transition-colors hover:bg-[var(--admin-surface-high)]">
-            <CalendarDays className="h-4 w-4 text-[var(--admin-on-surface-variant)]" aria-hidden="true" />
+            <CalendarDays
+              className="h-4 w-4 text-[var(--admin-on-surface-variant)]"
+              aria-hidden="true"
+            />
             <span className="sr-only">Activity from</span>
             <input
               type="date"
@@ -624,7 +622,9 @@ export function AdminReferralWalletPanel() {
           <button
             type="button"
             className="inline-flex h-9 items-center gap-2 rounded bg-[var(--admin-primary-strong)] px-4 text-xs font-medium text-[var(--admin-on-primary)] transition-colors hover:bg-[var(--admin-primary)] active:translate-y-px disabled:opacity-50"
-            onClick={() => openCohortDrawer("group")}
+            onClick={() => {
+              openCohortDrawer("group");
+            }}
             disabled={!payload || Boolean(error)}
           >
             <Users className="h-4 w-4" aria-hidden="true" />
@@ -639,7 +639,10 @@ export function AdminReferralWalletPanel() {
           role="alert"
         >
           <div className="flex items-start gap-3">
-            <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-[var(--admin-danger)]" aria-hidden="true" />
+            <AlertTriangle
+              className="mt-0.5 h-5 w-5 shrink-0 text-[var(--admin-danger)]"
+              aria-hidden="true"
+            />
             <div>
               <h2 className="text-base font-semibold text-[var(--admin-danger)]">
                 Couldn&apos;t load referral and wallet data.
@@ -680,7 +683,8 @@ export function AdminReferralWalletPanel() {
                 <ChangePill value={summary.changePercent} windowLabel={summary.windowLabel} />
               </div>
               <p className="mt-2 text-[11px] text-[var(--admin-on-surface-variant)]">
-                {summary.previousSuccessfulReferrals.toLocaleString()} in previous {summary.windowLabel}
+                {summary.previousSuccessfulReferrals.toLocaleString()} in previous{" "}
+                {summary.windowLabel}
               </p>
             </div>
 
@@ -698,7 +702,9 @@ export function AdminReferralWalletPanel() {
             </div>
 
             <div className="border-l-4 border-[var(--admin-warning)] bg-[var(--admin-surface)] p-4 pl-3">
-              <p className="mb-1 text-xs text-[var(--admin-on-surface-variant)]">Credit outstanding</p>
+              <p className="mb-1 text-xs text-[var(--admin-on-surface-variant)]">
+                Credit outstanding
+              </p>
               <p className="font-mono text-2xl font-semibold text-[var(--admin-warning)]">
                 {formatCredits(summary.creditOutstanding)}
                 <span className="ml-1.5 text-sm font-normal text-[var(--admin-on-surface-variant)]">
@@ -712,7 +718,9 @@ export function AdminReferralWalletPanel() {
             </div>
 
             <div className="col-span-2 bg-[var(--admin-surface)] p-4 sm:col-span-1 lg:col-span-1">
-              <p className="mb-1 text-xs text-[var(--admin-on-surface-variant)]">Referred revenue</p>
+              <p className="mb-1 text-xs text-[var(--admin-on-surface-variant)]">
+                Referred revenue
+              </p>
               <p className="font-mono text-2xl font-semibold text-[var(--admin-on-surface)]">
                 {formatMoneyAmount(summary.referredRevenueCents)}
                 <span className="ml-1.5 text-sm font-normal text-[var(--admin-on-surface-variant)]">
@@ -738,7 +746,9 @@ export function AdminReferralWalletPanel() {
                     />
                     <input
                       value={draftQ}
-                      onChange={(event) => setDraftQ(event.target.value)}
+                      onChange={(event) => {
+                        setDraftQ(event.target.value);
+                      }}
                       onKeyDown={(event) => {
                         if (event.key === "Enter") applyFilters();
                       }}
@@ -748,20 +758,28 @@ export function AdminReferralWalletPanel() {
                   </span>
                 </label>
                 <label className="flex flex-col gap-1.5">
-                  <span className="text-xs text-[var(--admin-on-surface-variant)]">Signed up from</span>
+                  <span className="text-xs text-[var(--admin-on-surface-variant)]">
+                    Signed up from
+                  </span>
                   <input
                     type="date"
                     value={draftSignedUpFrom}
-                    onChange={(event) => setDraftSignedUpFrom(event.target.value)}
+                    onChange={(event) => {
+                      setDraftSignedUpFrom(event.target.value);
+                    }}
                     className="h-9 rounded border border-[var(--admin-outline)] bg-[var(--admin-surface)] px-3 text-sm text-[var(--admin-on-surface)] outline-none focus:border-[var(--admin-primary)] focus:ring-1 focus:ring-[var(--admin-primary)]"
                   />
                 </label>
                 <label className="flex flex-col gap-1.5">
-                  <span className="text-xs text-[var(--admin-on-surface-variant)]">Signed up to</span>
+                  <span className="text-xs text-[var(--admin-on-surface-variant)]">
+                    Signed up to
+                  </span>
                   <input
                     type="date"
                     value={draftSignedUpTo}
-                    onChange={(event) => setDraftSignedUpTo(event.target.value)}
+                    onChange={(event) => {
+                      setDraftSignedUpTo(event.target.value);
+                    }}
                     className="h-9 rounded border border-[var(--admin-outline)] bg-[var(--admin-surface)] px-3 text-sm text-[var(--admin-on-surface)] outline-none focus:border-[var(--admin-primary)] focus:ring-1 focus:ring-[var(--admin-primary)]"
                   />
                 </label>
@@ -769,7 +787,9 @@ export function AdminReferralWalletPanel() {
                   <span className="text-xs text-[var(--admin-on-surface-variant)]">Sort by</span>
                   <Select
                     value={draftSortBy}
-                    onValueChange={(value) => setDraftSortBy(value as ReferralSortBy)}
+                    onValueChange={(value) => {
+                      setDraftSortBy(value as ReferralSortBy);
+                    }}
                     options={SORT_OPTIONS}
                     ariaLabel="Sort referrers"
                     className="h-9 min-w-[180px]"
@@ -804,7 +824,9 @@ export function AdminReferralWalletPanel() {
                   <button
                     type="button"
                     className="inline-flex h-8 items-center gap-1.5 rounded border border-[var(--admin-outline)] px-3 text-xs text-[var(--admin-on-surface)] transition-colors hover:bg-[var(--admin-surface-high)] active:translate-y-px"
-                    onClick={() => openCohortDrawer("message")}
+                    onClick={() => {
+                      openCohortDrawer("message");
+                    }}
                   >
                     <Mail className="h-3.5 w-3.5" aria-hidden="true" />
                     Email
@@ -812,7 +834,9 @@ export function AdminReferralWalletPanel() {
                   <button
                     type="button"
                     className="inline-flex h-8 items-center gap-1.5 rounded border border-[var(--admin-outline)] px-3 text-xs text-[var(--admin-on-surface)] transition-colors hover:bg-[var(--admin-surface-high)] active:translate-y-px"
-                    onClick={() => openCohortDrawer("group")}
+                    onClick={() => {
+                      openCohortDrawer("group");
+                    }}
                   >
                     <Users className="h-3.5 w-3.5" aria-hidden="true" />
                     Create group
@@ -820,7 +844,9 @@ export function AdminReferralWalletPanel() {
                   <button
                     type="button"
                     className="inline-flex h-8 items-center rounded border border-[var(--admin-outline)] px-3 text-xs text-[var(--admin-on-surface)] transition-colors hover:bg-[var(--admin-surface-high)] active:translate-y-px"
-                    onClick={() => setSelectedIds(new Set())}
+                    onClick={() => {
+                      setSelectedIds(new Set());
+                    }}
                   >
                     Clear
                   </button>
@@ -831,7 +857,11 @@ export function AdminReferralWalletPanel() {
             {isTrulyEmpty ? (
               <div className="flex min-h-[360px] flex-col items-center justify-center px-6 py-12 text-center">
                 <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-full border border-[var(--admin-border)] bg-[var(--admin-surface-low)] shadow-sm">
-                  <Gift className="h-8 w-8 text-[var(--admin-on-surface-variant)]" strokeWidth={1.5} aria-hidden="true" />
+                  <Gift
+                    className="h-8 w-8 text-[var(--admin-on-surface-variant)]"
+                    strokeWidth={1.5}
+                    aria-hidden="true"
+                  />
                 </div>
                 <h2 className="text-base font-semibold text-[var(--admin-on-surface)]">
                   No referral activity in this window
@@ -851,7 +881,11 @@ export function AdminReferralWalletPanel() {
             ) : isFilteredEmpty ? (
               <div className="flex min-h-[360px] flex-col items-center justify-center px-6 py-12 text-center">
                 <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-full border border-[var(--admin-border)] bg-[var(--admin-surface-low)] shadow-sm">
-                  <Search className="h-8 w-8 text-[var(--admin-on-surface-variant)]" strokeWidth={1.5} aria-hidden="true" />
+                  <Search
+                    className="h-8 w-8 text-[var(--admin-on-surface-variant)]"
+                    strokeWidth={1.5}
+                    aria-hidden="true"
+                  />
                 </div>
                 <h2 className="text-base font-semibold text-[var(--admin-on-surface)]">
                   No referrers matched these filters
@@ -878,7 +912,9 @@ export function AdminReferralWalletPanel() {
                             type="checkbox"
                             className="h-4 w-4 accent-[var(--admin-primary)]"
                             checked={allOnPageSelected}
-                            onChange={() => toggleSelectAllOnPage(items)}
+                            onChange={() => {
+                              toggleSelectAllOnPage(items);
+                            }}
                             aria-label="Select all on page"
                           />
                         </th>
@@ -918,14 +954,23 @@ export function AdminReferralWalletPanel() {
                                 ? "bg-[color-mix(in_srgb,var(--admin-primary)_6%,var(--admin-surface))]"
                                 : "hover:bg-[color-mix(in_srgb,var(--admin-surface-low)_70%,transparent)]",
                             ].join(" ")}
-                            onClick={() => openReferralsDrawer(item)}
+                            onClick={() => {
+                              openReferralsDrawer(item);
+                            }}
                           >
-                            <td className="h-11 px-4" onClick={(event) => event.stopPropagation()}>
+                            <td
+                              className="h-11 px-4"
+                              onClick={(event) => {
+                                event.stopPropagation();
+                              }}
+                            >
                               <input
                                 type="checkbox"
                                 className="h-4 w-4 accent-[var(--admin-primary)]"
                                 checked={selected}
-                                onChange={() => toggleRow(item.membershipId)}
+                                onChange={() => {
+                                  toggleRow(item.membershipId);
+                                }}
                                 aria-label={`Select ${item.learnerName ?? item.email ?? "referrer"}`}
                               />
                             </td>
@@ -969,7 +1014,9 @@ export function AdminReferralWalletPanel() {
                               <button
                                 type="button"
                                 className="font-mono text-sm font-medium text-[var(--admin-primary)] underline-offset-2 hover:underline"
-                                onClick={(event) => openReferralsDrawer(item, event)}
+                                onClick={(event) => {
+                                  openReferralsDrawer(item, event);
+                                }}
                               >
                                 {item.successfulReferrals.toLocaleString()}
                               </button>
@@ -993,7 +1040,9 @@ export function AdminReferralWalletPanel() {
                               <button
                                 type="button"
                                 className="text-xs font-medium text-[var(--admin-primary)] opacity-0 transition-opacity group-hover:opacity-100"
-                                onClick={(event) => openReferralsDrawer(item, event)}
+                                onClick={(event) => {
+                                  openReferralsDrawer(item, event);
+                                }}
                               >
                                 View referrals
                               </button>
@@ -1017,7 +1066,9 @@ export function AdminReferralWalletPanel() {
                         type="button"
                         className="rounded border border-[var(--admin-outline)] px-3 py-1 transition-colors hover:bg-[var(--admin-surface-high)] active:translate-y-px disabled:opacity-50"
                         disabled={!pageInfo.hasPreviousPage || loading}
-                        onClick={() => setPage((current) => Math.max(1, current - 1))}
+                        onClick={() => {
+                          setPage((current) => Math.max(1, current - 1));
+                        }}
                       >
                         Previous
                       </button>
@@ -1028,7 +1079,9 @@ export function AdminReferralWalletPanel() {
                         type="button"
                         className="rounded border border-[var(--admin-outline)] px-3 py-1 transition-colors hover:bg-[var(--admin-surface-high)] active:translate-y-px disabled:opacity-50"
                         disabled={!pageInfo.hasNextPage || loading}
-                        onClick={() => setPage((current) => current + 1)}
+                        onClick={() => {
+                          setPage((current) => current + 1);
+                        }}
                       >
                         Next
                       </button>
@@ -1047,7 +1100,9 @@ export function AdminReferralWalletPanel() {
             type="button"
             className="absolute inset-0 bg-[color-mix(in_srgb,var(--admin-on-surface)_35%,transparent)] backdrop-blur-[2px]"
             aria-label="Close referred learners drawer"
-            onClick={() => setReferralsDrawerOpen(false)}
+            onClick={() => {
+              setReferralsDrawerOpen(false);
+            }}
           />
           <aside
             className="relative flex h-full w-full max-w-[560px] flex-col border-l border-[var(--admin-border)] bg-[var(--admin-surface)] shadow-xl"
@@ -1096,7 +1151,9 @@ export function AdminReferralWalletPanel() {
               <button
                 type="button"
                 className="rounded p-1 text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-on-surface)]"
-                onClick={() => setReferralsDrawerOpen(false)}
+                onClick={() => {
+                  setReferralsDrawerOpen(false);
+                }}
                 aria-label="Close"
               >
                 <X className="h-5 w-5" aria-hidden="true" />
@@ -1132,7 +1189,11 @@ export function AdminReferralWalletPanel() {
                 </div>
               ) : referredPayload && referredPayload.items.length === 0 ? (
                 <div className="flex min-h-[240px] flex-col items-center justify-center px-6 py-10 text-center">
-                  <Wallet className="mb-4 h-10 w-10 text-[var(--admin-on-surface-variant)]" strokeWidth={1.5} aria-hidden="true" />
+                  <Wallet
+                    className="mb-4 h-10 w-10 text-[var(--admin-on-surface-variant)]"
+                    strokeWidth={1.5}
+                    aria-hidden="true"
+                  />
                   <p className="text-sm text-[var(--admin-on-surface-variant)]">
                     No referred learners for this referrer yet.
                   </p>
@@ -1224,7 +1285,9 @@ export function AdminReferralWalletPanel() {
                       type="button"
                       className="rounded border border-[var(--admin-outline)] px-2 py-1 disabled:opacity-50"
                       disabled={!referredPayload.pageInfo.hasPreviousPage || referredLoading}
-                      onClick={() => setReferredPage((current) => Math.max(1, current - 1))}
+                      onClick={() => {
+                        setReferredPage((current) => Math.max(1, current - 1));
+                      }}
                     >
                       Previous
                     </button>
@@ -1232,7 +1295,9 @@ export function AdminReferralWalletPanel() {
                       type="button"
                       className="rounded border border-[var(--admin-outline)] px-2 py-1 disabled:opacity-50"
                       disabled={!referredPayload.pageInfo.hasNextPage || referredLoading}
-                      onClick={() => setReferredPage((current) => current + 1)}
+                      onClick={() => {
+                        setReferredPage((current) => current + 1);
+                      }}
                     >
                       Next
                     </button>
@@ -1265,7 +1330,9 @@ export function AdminReferralWalletPanel() {
             type="button"
             className="absolute inset-0 bg-[color-mix(in_srgb,var(--admin-on-surface)_35%,transparent)] backdrop-blur-[2px]"
             aria-label="Close cohort drawer"
-            onClick={() => setCohortDrawerOpen(false)}
+            onClick={() => {
+              setCohortDrawerOpen(false);
+            }}
           />
           <aside
             className="relative flex h-full w-full max-w-[560px] flex-col border-l border-[var(--admin-border)] bg-[var(--admin-surface)] shadow-xl"
@@ -1297,7 +1364,9 @@ export function AdminReferralWalletPanel() {
               <button
                 type="button"
                 className="rounded p-1 text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-on-surface)]"
-                onClick={() => setCohortDrawerOpen(false)}
+                onClick={() => {
+                  setCohortDrawerOpen(false);
+                }}
                 aria-label="Close"
               >
                 <X className="h-5 w-5" aria-hidden="true" />
@@ -1320,7 +1389,9 @@ export function AdminReferralWalletPanel() {
                       ? "border-[var(--admin-primary)] text-[var(--admin-primary)]"
                       : "border-transparent text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-on-surface)]",
                   ].join(" ")}
-                  onClick={() => setCohortTab(key)}
+                  onClick={() => {
+                    setCohortTab(key);
+                  }}
                 >
                   {label}
                 </button>
@@ -1337,10 +1408,14 @@ export function AdminReferralWalletPanel() {
               {cohortTab === "group" ? (
                 <div className="space-y-4">
                   <label className="flex flex-col gap-1.5">
-                    <span className="text-xs text-[var(--admin-on-surface-variant)]">Group name</span>
+                    <span className="text-xs text-[var(--admin-on-surface-variant)]">
+                      Group name
+                    </span>
                     <input
                       value={groupName}
-                      onChange={(event) => setGroupName(event.target.value)}
+                      onChange={(event) => {
+                        setGroupName(event.target.value);
+                      }}
                       className="h-10 rounded border border-[var(--admin-outline)] bg-[var(--admin-surface-low)] px-3 text-sm text-[var(--admin-on-surface)] outline-none focus:border-[var(--admin-primary)] focus:ring-1 focus:ring-[var(--admin-primary)]"
                     />
                   </label>
@@ -1350,7 +1425,9 @@ export function AdminReferralWalletPanel() {
                     </span>
                     <textarea
                       value={groupDescription}
-                      onChange={(event) => setGroupDescription(event.target.value)}
+                      onChange={(event) => {
+                        setGroupDescription(event.target.value);
+                      }}
                       rows={3}
                       className="rounded border border-[var(--admin-outline)] bg-[var(--admin-surface-low)] px-3 py-2 text-sm text-[var(--admin-on-surface)] outline-none focus:border-[var(--admin-primary)] focus:ring-1 focus:ring-[var(--admin-primary)]"
                     />
@@ -1365,7 +1442,9 @@ export function AdminReferralWalletPanel() {
                         name="referral-membership-mode"
                         className="mt-0.5 accent-[var(--admin-primary)]"
                         checked={membershipMode === "static"}
-                        onChange={() => setMembershipMode("static")}
+                        onChange={() => {
+                          setMembershipMode("static");
+                        }}
                       />
                       <span>
                         <span className="block text-sm font-medium text-[var(--admin-on-surface)]">
@@ -1382,7 +1461,9 @@ export function AdminReferralWalletPanel() {
                         name="referral-membership-mode"
                         className="mt-0.5 accent-[var(--admin-primary)]"
                         checked={membershipMode === "live"}
-                        onChange={() => setMembershipMode("live")}
+                        onChange={() => {
+                          setMembershipMode("live");
+                        }}
                       />
                       <span>
                         <span className="block text-sm font-medium text-[var(--admin-on-surface)]">
@@ -1407,7 +1488,9 @@ export function AdminReferralWalletPanel() {
                     <span className="text-xs text-[var(--admin-on-surface-variant)]">Subject</span>
                     <input
                       value={messageSubject}
-                      onChange={(event) => setMessageSubject(event.target.value)}
+                      onChange={(event) => {
+                        setMessageSubject(event.target.value);
+                      }}
                       className="h-10 rounded border border-[var(--admin-outline)] bg-[var(--admin-surface-low)] px-3 text-sm text-[var(--admin-on-surface)] outline-none focus:border-[var(--admin-primary)] focus:ring-1 focus:ring-[var(--admin-primary)]"
                     />
                   </label>
@@ -1415,7 +1498,9 @@ export function AdminReferralWalletPanel() {
                     <span className="text-xs text-[var(--admin-on-surface-variant)]">Message</span>
                     <textarea
                       value={messageBody}
-                      onChange={(event) => setMessageBody(event.target.value)}
+                      onChange={(event) => {
+                        setMessageBody(event.target.value);
+                      }}
                       rows={8}
                       className="rounded border border-[var(--admin-outline)] bg-[var(--admin-surface-low)] px-3 py-2 text-sm text-[var(--admin-on-surface)] outline-none focus:border-[var(--admin-primary)] focus:ring-1 focus:ring-[var(--admin-primary)]"
                     />
@@ -1428,7 +1513,9 @@ export function AdminReferralWalletPanel() {
               <button
                 type="button"
                 className="inline-flex h-9 items-center rounded border border-[var(--admin-outline)] px-4 text-xs font-medium text-[var(--admin-on-surface)] transition-colors hover:bg-[var(--admin-surface-high)] active:translate-y-px"
-                onClick={() => setCohortDrawerOpen(false)}
+                onClick={() => {
+                  setCohortDrawerOpen(false);
+                }}
                 disabled={busy}
               >
                 Cancel

@@ -24,7 +24,7 @@ export const GET = createTenantRoute<
   metadata: listPushMessagesMetadata,
   params: paramsSchema,
   output: pushMessageResponseSchema,
-  handler: async ({ tx, ctx, params }) => getPushMessage(tx, ctx, params.id),
+  handler: async ({ tx, ctx, params }) => getPushMessage(tx, ctx, params["id"]),
 });
 
 export const PATCH = createTenantRoute<
@@ -37,5 +37,5 @@ export const PATCH = createTenantRoute<
   body: updatePushMessageTitleBodySchema,
   output: pushMessageResponseSchema,
   handler: async ({ tx, ctx, params, input }) =>
-    updatePushMessageTitle(tx, ctx, params.id, input),
+    updatePushMessageTitle(tx, ctx, params["id"], input),
 });

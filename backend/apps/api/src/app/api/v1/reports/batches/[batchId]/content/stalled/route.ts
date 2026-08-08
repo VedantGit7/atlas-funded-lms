@@ -16,6 +16,5 @@ export const GET = createTenantRoute<
   input: noBodySchema,
   params: batchIdParamsSchema,
   output: batchContentStalledResponseSchema,
-  handler: async ({ tx, ctx, params }) =>
-    listBatchContentStalled(tx, ctx, params.batchId),
+  handler: async ({ tx, ctx, params }) => listBatchContentStalled(tx, ctx, params["batchId"]),
 });

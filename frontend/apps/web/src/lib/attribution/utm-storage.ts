@@ -17,7 +17,9 @@ const UTM_PARAM_MAP: Record<string, keyof StoredUtmAttribution> = {
   utm_content: "utmContent",
 };
 
-export function captureUtmFromSearchParams(searchParams: URLSearchParams): StoredUtmAttribution | null {
+export function captureUtmFromSearchParams(
+  searchParams: URLSearchParams,
+): StoredUtmAttribution | null {
   const attribution: Partial<StoredUtmAttribution> = {};
   let hasUtm = false;
 
@@ -36,7 +38,7 @@ export function captureUtmFromSearchParams(searchParams: URLSearchParams): Store
   return {
     ...attribution,
     capturedAt: new Date().toISOString(),
-  } as StoredUtmAttribution;
+  };
 }
 
 export function persistUtmAttribution(attribution: StoredUtmAttribution): void {
@@ -109,7 +111,7 @@ export async function sendSignupAttributionEvent(args?: {
 
   await sendAttributionEvent({
     eventType: args?.eventType ?? "signup",
-    membershipId: args?.membershipId,
+    ...(args?.membershipId !== undefined ? { membershipId: args.membershipId } : {}),
     clearAfterSend: true,
   });
 }

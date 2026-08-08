@@ -27,20 +27,24 @@ function parseImportPayload(raw: string): Array<{ key: string; value: string }> 
   const parsed = JSON.parse(raw) as unknown;
   if (Array.isArray(parsed)) {
     return parsed.map((entry) => {
-      if (
-        typeof entry === "object" &&
-        entry !== null &&
-        "key" in entry &&
-        "value" in entry &&
-        typeof entry.key === "string" &&
-        typeof entry.value === "string"
-      ) {
-        return { key: entry.key, value: entry.value };
+      if (typeof entry !== "object" || entry === null) {
+        throw new Error("Each import item must include key and value.");
       }
-      throw new Error("Each import item must include key and value.");
+      const record = entry as Record<string, unknown>;
+      const key = record["key"];
+      const value = record["value"];
+      if (typeof key !== "string" || typeof value !== "string") {
+        throw new Error("Each import item must include key and value.");
+      }
+      return { key, value };
     });
   }
-  if (typeof parsed === "object" && parsed !== null && "resources" in parsed && Array.isArray(parsed.resources)) {
+  if (
+    typeof parsed === "object" &&
+    parsed !== null &&
+    "resources" in parsed &&
+    Array.isArray(parsed.resources)
+  ) {
     return parseImportPayload(JSON.stringify(parsed.resources));
   }
   throw new Error("Import JSON must be an array of { key, value } objects.");
@@ -48,11 +52,15 @@ function parseImportPayload(raw: string): Array<{ key: string; value: string }> 
 
 export function LocalesImportExportTab({ canManage }: LocalesImportExportTabProps) {
   const [locale, setLocale] = useState("en");
-  const [importJson, setImportJson] = useState("[\n  { \"key\": \"welcome.title\", \"value\": \"Welcome\" }\n]");
-  const [preview, setPreview] = useState<ImportPreviewEntry[]>([]);
-  const [previewSummary, setPreviewSummary] = useState<{ add: number; update: number; unchanged: number } | null>(
-    null,
+  const [importJson, setImportJson] = useState(
+    '[\n  { "key": "welcome.title", "value": "Welcome" }\n]',
   );
+  const [preview, setPreview] = useState<ImportPreviewEntry[]>([]);
+  const [previewSummary, setPreviewSummary] = useState<{
+    add: number;
+    update: number;
+    unchanged: number;
+  } | null>(null);
   const [exportJson, setExportJson] = useState("");
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -93,9 +101,9 @@ export function LocalesImportExportTab({ canManage }: LocalesImportExportTabProp
       const response = await clientApi.post<{ data: { applied: number } }>(
         "/api/v1/locales/import",
         { locale, resources },
-        `locale-import-${locale}-${Date.now()}`,
+        `locale-import-${locale}-${String(Date.now())}`,
       );
-      setMessage(`Imported ${response.data.applied} string(s).`);
+      setMessage(`Imported ${String(response.data.applied)} string(s).`);
       setMessageTone("success");
       setPreview([]);
       setPreviewSummary(null);
@@ -130,7 +138,9 @@ export function LocalesImportExportTab({ canManage }: LocalesImportExportTabProp
       {message ? (
         <div
           role="alert"
-          className={messageTone === "success" ? localesAlertSuccessClassName : localesAlertErrorClassName}
+          className={
+            messageTone === "success" ? localesAlertSuccessClassName : localesAlertErrorClassName
+          }
         >
           {message}
         </div>
@@ -145,24 +155,35 @@ export function LocalesImportExportTab({ canManage }: LocalesImportExportTabProp
           <LocalePicker value={locale} onChange={setLocale} existingLocales={[locale]} />
           <textarea
             value={importJson}
-            onChange={(event) => setImportJson(event.target.value)}
+            onChange={(event) => {
+              setImportJson(event.target.value);
+            }}
             className={localesTextareaClassName}
             disabled={!canManage || busy}
             aria-label="Import JSON"
           />
           {canManage ? (
             <div className="flex flex-wrap gap-2">
-              <Button className={localesPrimaryButtonClassName} disabled={busy} onClick={() => void handlePreview()}>
+              <Button
+                className={localesPrimaryButtonClassName}
+                disabled={busy}
+                onClick={() => void handlePreview()}
+              >
                 Preview diff
               </Button>
-              <Button variant="ghost" disabled={busy || preview.length === 0} onClick={() => void handleImport()}>
+              <Button
+                variant="ghost"
+                disabled={busy || preview.length === 0}
+                onClick={() => void handleImport()}
+              >
                 Apply import
               </Button>
             </div>
           ) : null}
           {previewSummary ? (
             <p className="text-xs text-[var(--admin-on-surface-variant)]">
-              Preview: {previewSummary.add} add, {previewSummary.update} update, {previewSummary.unchanged} unchanged
+              Preview: {previewSummary.add} add, {previewSummary.update} update,{" "}
+              {previewSummary.unchanged} unchanged
             </p>
           ) : null}
         </div>
@@ -172,7 +193,11 @@ export function LocalesImportExportTab({ canManage }: LocalesImportExportTabProp
         <h2 className="text-sm font-semibold text-[var(--admin-on-surface)]">Export bundle</h2>
         <div className="mt-4 space-y-4">
           <LocalePicker value={locale} onChange={setLocale} existingLocales={[locale]} />
-          <Button className={localesPrimaryButtonClassName} disabled={busy} onClick={() => void handleExport()}>
+          <Button
+            className={localesPrimaryButtonClassName}
+            disabled={busy}
+            onClick={() => void handleExport()}
+          >
             Export JSON
           </Button>
           {exportJson ? (
@@ -183,7 +208,12 @@ export function LocalesImportExportTab({ canManage }: LocalesImportExportTabProp
               aria-label="Export JSON"
             />
           ) : (
-            <Input className={fieldClassName} readOnly value="" placeholder="Exported JSON will appear here" />
+            <Input
+              className={fieldClassName}
+              readOnly
+              value=""
+              placeholder="Exported JSON will appear here"
+            />
           )}
         </div>
       </section>

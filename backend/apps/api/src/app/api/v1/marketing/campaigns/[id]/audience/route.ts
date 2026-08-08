@@ -20,5 +20,5 @@ export const POST = createTenantRoute<
   body: setMarketingCampaignAudienceBodySchema,
   output: marketingCampaignResponseSchema,
   handler: async ({ tx, ctx, params, input }) =>
-    setMarketingCampaignAudience(tx, ctx, params.id, input),
+    setMarketingCampaignAudience(tx, ctx, params["id"], input),
 });

@@ -24,7 +24,7 @@ export const PATCH = createTenantRoute<
   body: updateMarketingIntegrationWebhookBodySchema,
   output: marketingIntegrationWebhookResponseSchema,
   handler: async ({ tx, ctx, params, input }) =>
-    updateMarketingIntegrationWebhook(tx, ctx, params.id, input),
+    updateMarketingIntegrationWebhook(tx, ctx, params["id"], input),
 });
 
 export const DELETE = createTenantRoute<
@@ -35,6 +35,5 @@ export const DELETE = createTenantRoute<
   metadata: mutateMarketingIntegrationsMetadata,
   params: paramsSchema,
   output: deleteMarketingIntegrationWebhookResponseSchema,
-  handler: async ({ tx, ctx, params }) =>
-    deleteMarketingIntegrationWebhook(tx, ctx, params.id),
+  handler: async ({ tx, ctx, params }) => deleteMarketingIntegrationWebhook(tx, ctx, params["id"]),
 });

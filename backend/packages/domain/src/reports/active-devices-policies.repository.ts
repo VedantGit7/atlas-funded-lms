@@ -6,6 +6,13 @@ import type {
   DevicePolicyTargetsQuery,
 } from "./active-devices-policies.dto";
 
+function defined<T>(value: T, message = "Expected value to be defined"): NonNullable<T> {
+  if (value == null) {
+    throw new Error(message);
+  }
+  return value;
+}
+
 export type DevicePolicyOverrideRow = {
   id: string;
   scope_type: string;
@@ -70,12 +77,20 @@ export function mapTenantDefaults(security: Record<string, unknown>): DevicePoli
     restrictionsEnabled: readBool(security, "deviceRestrictionsEnabled", false),
     devicesAllowed: clamp(readInt(security, "deviceRegistrationLimit", 1), 1, 10),
     restrictParallelLogins: readBool(security, "restrictParallelLogins", false),
-    idleSessionExpiryDays: parseIdleDays(security.deviceIdleSessionExpiryDays),
-    onLimitReached: parseOnLimit(security.deviceOnLimitReached),
-    requireReverificationOnNewDevice: readBool(security, "deviceRequireReverificationOnNewDevice", true),
+    idleSessionExpiryDays: parseIdleDays(security["deviceIdleSessionExpiryDays"]),
+    onLimitReached: parseOnLimit(security["deviceOnLimitReached"]),
+    requireReverificationOnNewDevice: readBool(
+      security,
+      "deviceRequireReverificationOnNewDevice",
+      true,
+    ),
     notifyLearnerOnNewDevice: readBool(security, "deviceNotifyLearnerOnNewDevice", true),
     sharedFingerprintAlertEnabled: readBool(security, "deviceSharedFingerprintAlertEnabled", true),
-    sharedFingerprintThreshold: clamp(readInt(security, "deviceSharedFingerprintThreshold", 2), 2, 50),
+    sharedFingerprintThreshold: clamp(
+      readInt(security, "deviceSharedFingerprintThreshold", 2),
+      2,
+      50,
+    ),
   };
 }
 
@@ -126,10 +141,12 @@ export const activeDevicesPoliciesRepository = {
       limit 1
     `;
     const root =
-      rows[0]?.config_json && typeof rows[0].config_json === "object" && !Array.isArray(rows[0].config_json)
+      rows[0]?.config_json &&
+      typeof rows[0].config_json === "object" &&
+      !Array.isArray(rows[0].config_json)
         ? (rows[0].config_json as Record<string, unknown>)
         : {};
-    const security = root.security;
+    const security = root["security"];
     if (!security || typeof security !== "object" || Array.isArray(security)) return {};
     return security as Record<string, unknown>;
   },
@@ -142,12 +159,16 @@ export const activeDevicesPoliciesRepository = {
       limit 1
     `;
     const existing =
-      rows[0]?.config_json && typeof rows[0].config_json === "object" && !Array.isArray(rows[0].config_json)
+      rows[0]?.config_json &&
+      typeof rows[0].config_json === "object" &&
+      !Array.isArray(rows[0].config_json)
         ? (rows[0].config_json as Record<string, unknown>)
         : {};
     const security =
-      existing.security && typeof existing.security === "object" && !Array.isArray(existing.security)
-        ? (existing.security as Record<string, unknown>)
+      existing["security"] &&
+      typeof existing["security"] === "object" &&
+      !Array.isArray(existing["security"])
+        ? (existing["security"] as Record<string, unknown>)
         : {};
     const nextConfig = {
       ...existing,
@@ -332,7 +353,7 @@ export const activeDevicesPoliciesRepository = {
         updated_at = now()
       returning id::text as id
     `;
-    return rows[0]!.id;
+    return defined(rows[0]).id;
   },
 
   async updateOverride(
@@ -356,7 +377,7 @@ export const activeDevicesPoliciesRepository = {
       where tenant_id = current_setting('app.tenant_id', true)::uuid
         and id = ${overrideId}::uuid
     `;
-    return Number(result) > 0;
+    return result > 0;
   },
 
   async deleteOverride(tx: TenantTx, overrideId: string): Promise<boolean> {
@@ -365,7 +386,7 @@ export const activeDevicesPoliciesRepository = {
       where tenant_id = current_setting('app.tenant_id', true)::uuid
         and id = ${overrideId}::uuid
     `;
-    return Number(result) > 0;
+    return result > 0;
   },
 
   async listBlockedFingerprints(tx: TenantTx): Promise<DeviceBlockedFingerprintRow[]> {
@@ -416,10 +437,13 @@ export const activeDevicesPoliciesRepository = {
         updated_at = now()
       returning id::text as id
     `;
-    return rows[0]!.id;
+    return defined(rows[0]).id;
   },
 
-  async findBlockedFingerprint(tx: TenantTx, blockId: string): Promise<DeviceBlockedFingerprintRow | null> {
+  async findBlockedFingerprint(
+    tx: TenantTx,
+    blockId: string,
+  ): Promise<DeviceBlockedFingerprintRow | null> {
     const rows = await tx.$queryRaw<DeviceBlockedFingerprintRow[]>`
       select
         b.id::text as id,
@@ -445,7 +469,7 @@ export const activeDevicesPoliciesRepository = {
       where tenant_id = current_setting('app.tenant_id', true)::uuid
         and id = ${blockId}::uuid
     `;
-    return Number(result) > 0;
+    return result > 0;
   },
 
   async scopeExists(tx: TenantTx, scopeType: string, scopeId: string): Promise<boolean> {
@@ -485,7 +509,9 @@ export const activeDevicesPoliciesRepository = {
     const limit = query.limit;
 
     if (query.scopeType === "role") {
-      const rows = await tx.$queryRaw<Array<{ id: string; label: string; secondary: string | null }>>`
+      const rows = await tx.$queryRaw<
+        Array<{ id: string; label: string; secondary: string | null }>
+      >`
         select
           r.id::text as id,
           r.name as label,
@@ -505,7 +531,9 @@ export const activeDevicesPoliciesRepository = {
     }
 
     if (query.scopeType === "batch") {
-      const rows = await tx.$queryRaw<Array<{ id: string; label: string; secondary: string | null }>>`
+      const rows = await tx.$queryRaw<
+        Array<{ id: string; label: string; secondary: string | null }>
+      >`
         select
           b.id::text as id,
           b.name as label,

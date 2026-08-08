@@ -16,5 +16,5 @@ export const GET = createTenantRoute<
   input: noBodySchema,
   params: pollIdParamsSchema,
   output: pollLiveMonitorResponseSchema,
-  handler: async ({ tx, ctx, params }) => getPollLiveMonitor(tx, ctx, params.pollId),
+  handler: async ({ tx, ctx, params }) => getPollLiveMonitor(tx, ctx, params["pollId"]),
 });

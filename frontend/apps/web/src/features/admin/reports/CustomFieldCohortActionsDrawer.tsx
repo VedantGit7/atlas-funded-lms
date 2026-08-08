@@ -33,8 +33,8 @@ type Props = {
   onSuccess?: () => void;
 };
 
-function formatCount(n: number) {
-  return new Intl.NumberFormat().format(n);
+function formatCount(n: number | null) {
+  return n == null ? "—" : new Intl.NumberFormat().format(n);
 }
 
 export function CustomFieldCohortActionsDrawer({
@@ -75,7 +75,9 @@ export function CustomFieldCohortActionsDrawer({
           setSegmentId(res.data.items[0].id);
         }
       })
-      .catch(() => setSegments([]));
+      .catch(() => {
+        setSegments([]);
+      });
   }, [open, initialMode]);
 
   useEffect(() => {
@@ -84,7 +86,9 @@ export function CustomFieldCohortActionsDrawer({
       if (e.key === "Escape") onClose();
     };
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+    };
   }, [open, onClose]);
 
   useEffect(() => {
@@ -96,8 +100,7 @@ export function CustomFieldCohortActionsDrawer({
     [segments, segmentId],
   );
 
-  const matchCount =
-    audienceKind === "segment" ? (selectedSegment?.matchedCount ?? 0) : 0;
+  const matchCount = audienceKind === "segment" ? (selectedSegment?.matchedCount ?? 0) : 0;
 
   const filterChips = useMemo(() => {
     if (audienceKind === "segment" && selectedSegment) {
@@ -113,8 +116,7 @@ export function CustomFieldCohortActionsDrawer({
   }, [audienceKind, selectedSegment]);
 
   const effectiveExclude = excludeRecent ? 7 : 0;
-  const estimatedSendCount =
-    excludeRecent && matchCount > 0 ? Math.max(0, matchCount) : matchCount;
+  const estimatedSendCount = excludeRecent && matchCount > 0 ? Math.max(0, matchCount) : matchCount;
 
   if (!open) return null;
 
@@ -303,7 +305,9 @@ export function CustomFieldCohortActionsDrawer({
                       ? "border-[var(--admin-primary)] bg-[color-mix(in_srgb,var(--admin-primary)_8%,transparent)]"
                       : "border-[var(--admin-border)] hover:bg-[var(--admin-surface-high)]",
                   ].join(" ")}
-                  onClick={() => setAudienceKind("segment")}
+                  onClick={() => {
+                    setAudienceKind("segment");
+                  }}
                 >
                   Segment
                 </button>
@@ -315,7 +319,9 @@ export function CustomFieldCohortActionsDrawer({
                       ? "border-[var(--admin-primary)] bg-[color-mix(in_srgb,var(--admin-primary)_8%,transparent)]"
                       : "border-[var(--admin-border)] hover:bg-[var(--admin-surface-high)]",
                   ].join(" ")}
-                  onClick={() => setAudienceKind("adhoc")}
+                  onClick={() => {
+                    setAudienceKind("adhoc");
+                  }}
                 >
                   Ad-hoc filters
                 </button>
@@ -324,7 +330,9 @@ export function CustomFieldCohortActionsDrawer({
                 <select
                   className={fieldClassName}
                   value={segmentId}
-                  onChange={(e) => setSegmentId(e.target.value)}
+                  onChange={(e) => {
+                    setSegmentId(e.target.value);
+                  }}
                 >
                   {segments.length === 0 ? (
                     <option value="">No segments yet</option>
@@ -354,7 +362,9 @@ export function CustomFieldCohortActionsDrawer({
                     id="cf-cohort-group-name"
                     className={fieldClassName}
                     value={groupName}
-                    onChange={(e) => setGroupName(e.target.value)}
+                    onChange={(e) => {
+                      setGroupName(e.target.value);
+                    }}
                     placeholder="e.g. Experienced traders"
                   />
                 </div>
@@ -367,7 +377,9 @@ export function CustomFieldCohortActionsDrawer({
                     className={`${fieldClassName} resize-none`}
                     rows={3}
                     value={description}
-                    onChange={(e) => setDescription(e.target.value)}
+                    onChange={(e) => {
+                      setDescription(e.target.value);
+                    }}
                   />
                 </div>
                 {audienceKind === "adhoc" ? (
@@ -378,7 +390,9 @@ export function CustomFieldCohortActionsDrawer({
                         type="radio"
                         className="mt-1"
                         checked={syncType === "static"}
-                        onChange={() => setSyncType("static")}
+                        onChange={() => {
+                          setSyncType("static");
+                        }}
                       />
                       <span>
                         <span className="block text-sm text-[var(--admin-on-surface)]">
@@ -394,7 +408,9 @@ export function CustomFieldCohortActionsDrawer({
                         type="radio"
                         className="mt-1"
                         checked={syncType === "live"}
-                        onChange={() => setSyncType("live")}
+                        onChange={() => {
+                          setSyncType("live");
+                        }}
                       />
                       <span>
                         <span className="block text-sm text-[var(--admin-on-surface)]">
@@ -450,7 +466,9 @@ export function CustomFieldCohortActionsDrawer({
                     type="checkbox"
                     className="mt-1"
                     checked={excludeRecent}
-                    onChange={(e) => setExcludeRecent(e.target.checked)}
+                    onChange={(e) => {
+                      setExcludeRecent(e.target.checked);
+                    }}
                   />
                   <span>
                     <span className="block text-sm font-medium text-[var(--admin-on-surface)]">
@@ -502,7 +520,12 @@ export function CustomFieldCohortActionsDrawer({
             Send test to myself
           </button>
           <div className="flex items-center gap-3">
-            <button type="button" className={ghostButtonClassName} onClick={onClose} disabled={busy}>
+            <button
+              type="button"
+              className={ghostButtonClassName}
+              onClick={onClose}
+              disabled={busy}
+            >
               Cancel
             </button>
             <button

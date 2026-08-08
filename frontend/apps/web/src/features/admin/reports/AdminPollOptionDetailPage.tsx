@@ -33,6 +33,13 @@ import {
 } from "./admin-polls-roster-api";
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
 
+function defined<T>(value: T, message = "Expected value to be defined"): NonNullable<T> {
+  if (value == null) {
+    throw new Error(message);
+  }
+  return value;
+}
+
 const PAGE_SIZE = 25;
 const DRAWER_PREVIEW = 10;
 
@@ -57,7 +64,7 @@ function Shimmer({ className }: { className?: string }) {
 
 function formatPct(value: number | null | undefined): string {
   if (value == null || Number.isNaN(value)) return "-";
-  return `${Number(value).toFixed(value % 1 === 0 ? 0 : 1)}%`;
+  return `${value.toFixed(value % 1 === 0 ? 0 : 1)}%`;
 }
 
 function formatDateTime(value: string | null | undefined): string {
@@ -81,17 +88,17 @@ function formatRelative(value: string | null | undefined): string {
   if (diffMs < 0) return formatDateTime(value);
   const mins = Math.floor(diffMs / 60000);
   if (mins < 1) return "just now";
-  if (mins < 60) return `${mins}m ago`;
+  if (mins < 60) return `${String(mins)}m ago`;
   const hours = Math.floor(mins / 60);
-  if (hours < 48) return `${hours}h ago`;
+  if (hours < 48) return `${String(hours)}h ago`;
   const days = Math.floor(hours / 24);
-  return `${days}d ago`;
+  return `${String(days)}d ago`;
 }
 
 function formatSeconds(value: number | null | undefined): string {
   if (value == null || Number.isNaN(value)) return "-";
-  const rounded = Number(value);
-  if (rounded % 1 === 0) return `${rounded}s`;
+  const rounded = value;
+  if (rounded % 1 === 0) return `${String(rounded)}s`;
   return `${rounded.toFixed(1)}s`;
 }
 
@@ -99,7 +106,7 @@ function learnerInitials(name: string | null, email: string | null): string {
   const source = (name?.trim() || email?.trim() || "?").replace(/\s+/g, " ");
   const parts = source.split(" ").filter(Boolean);
   if (parts.length >= 2) {
-    return `${parts[0]![0] ?? ""}${parts[1]![0] ?? ""}`.toUpperCase();
+    return `${defined(parts[0])[0] ?? ""}${defined(parts[1])[0] ?? ""}`.toUpperCase();
   }
   return source.slice(0, 2).toUpperCase();
 }
@@ -109,7 +116,7 @@ function withoutEmDash(value: string): string {
 }
 
 function rankCopy(detail: PollOptionDetail): string {
-  const base = `Ranked ${detail.rank} of ${detail.optionCount} options`;
+  const base = `Ranked ${String(detail.rank)} of ${String(detail.optionCount)} options`;
   if (detail.votesAheadOfNext == null) return base;
   if (detail.votesAheadOfNext === 0) {
     return `${base} · Tied with the next option`;
@@ -212,10 +219,7 @@ function AnonymousPanel({ compact }: { compact?: boolean }) {
       ].join(" ")}
     >
       <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full border border-dashed border-[var(--admin-border)] bg-[var(--admin-surface-low)]">
-        <EyeOff
-          className="h-7 w-7 text-[var(--admin-on-surface-variant)]"
-          aria-hidden="true"
-        />
+        <EyeOff className="h-7 w-7 text-[var(--admin-on-surface-variant)]" aria-hidden="true" />
       </div>
       <h3 className="text-base font-semibold text-[var(--admin-on-surface)]">
         Responses are anonymous
@@ -256,7 +260,7 @@ function SummaryBand({ detail }: { detail: PollOptionDetail }) {
               ? "bg-[var(--admin-success)]"
               : "bg-[var(--admin-primary)]",
           ].join(" ")}
-          style={{ width: `${Math.max(0, Math.min(100, option.percent))}%` }}
+          style={{ width: `${String(Math.max(0, Math.min(100, option.percent)))}%` }}
         />
       </div>
       <p className="flex items-start gap-1.5 text-xs text-[var(--admin-on-surface-variant)]">
@@ -267,14 +271,8 @@ function SummaryBand({ detail }: { detail: PollOptionDetail }) {
   );
 }
 
-function AudienceSegments({
-  detail,
-  compact,
-}: {
-  detail: PollOptionDetail;
-  compact?: boolean;
-}) {
-  const segments = detail.segments ?? [];
+function AudienceSegments({ detail, compact }: { detail: PollOptionDetail; compact?: boolean }) {
+  const segments = detail.segments;
   return (
     <section>
       <h3 className="mb-3 text-sm font-semibold text-[var(--admin-on-surface)]">
@@ -304,7 +302,7 @@ function AudienceSegments({
               <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[var(--admin-surface-high)]">
                 <div
                   className="h-full rounded-full bg-[color-mix(in_srgb,var(--admin-primary)_70%,var(--admin-surface-high))]"
-                  style={{ width: `${Math.max(0, Math.min(100, segment.percent))}%` }}
+                  style={{ width: `${String(Math.max(0, Math.min(100, segment.percent)))}%` }}
                 />
               </div>
               <p className="mt-1.5 font-mono text-[11px] text-[var(--admin-on-surface-variant)]">
@@ -335,9 +333,7 @@ function VelocityChart({
   return (
     <section className="rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)]">
       <div className="border-b border-[var(--admin-border)] px-4 py-3">
-        <h3 className="text-sm font-semibold text-[var(--admin-on-surface)]">
-          Response velocity
-        </h3>
+        <h3 className="text-sm font-semibold text-[var(--admin-on-surface)]">Response velocity</h3>
         <p className="mt-0.5 text-xs text-[var(--admin-on-surface-variant)]">
           This option versus overall poll timing ({formatSeconds(bucketSeconds)} buckets)
         </p>
@@ -372,15 +368,15 @@ function VelocityChart({
                       <div className="h-2 overflow-hidden rounded-full bg-[var(--admin-surface-high)]">
                         <div
                           className="h-full rounded-full bg-[var(--admin-primary)]"
-                          style={{ width: `${optionPct}%` }}
-                          title={`${bucket.optionCount} for this option`}
+                          style={{ width: `${String(optionPct)}%` }}
+                          title={`${String(bucket.optionCount)} for this option`}
                         />
                       </div>
                       <div className="h-2 overflow-hidden rounded-full bg-[var(--admin-surface-high)]">
                         <div
                           className="h-full rounded-full bg-[color-mix(in_srgb,var(--admin-on-surface-variant)_45%,var(--admin-surface-high))]"
-                          style={{ width: `${overallPct}%` }}
-                          title={`${bucket.overallCount} overall`}
+                          style={{ width: `${String(overallPct)}%` }}
+                          title={`${String(bucket.overallCount)} overall`}
                         />
                       </div>
                     </div>
@@ -402,7 +398,7 @@ function VelocityChart({
 
 function PerformanceBars({ detail }: { detail: PollOptionDetail }) {
   const rows = useMemo(() => {
-    const all = [detail.option, ...(detail.siblings ?? [])];
+    const all = [detail.option, ...detail.siblings];
     return [...all].sort((a, b) => {
       if (b.count !== a.count) return b.count - a.count;
       return a.sortOrder - b.sortOrder;
@@ -464,7 +460,7 @@ function PerformanceBars({ detail }: { detail: PollOptionDetail }) {
               <div className="h-2 overflow-hidden rounded-full bg-[var(--admin-surface-high)]">
                 <div
                   className={`h-full rounded-full ${barColor}`}
-                  style={{ width: `${Math.max(0, Math.min(100, row.percent))}%` }}
+                  style={{ width: `${String(Math.max(0, Math.min(100, row.percent)))}%` }}
                 />
               </div>
               <div className="shrink-0 text-right font-mono text-xs text-[var(--admin-on-surface)]">
@@ -507,8 +503,7 @@ function RespondentsTable({
   const pageIds = respondents
     .map((row) => row.membershipId)
     .filter((id): id is string => Boolean(id));
-  const allSelected =
-    pageIds.length > 0 && pageIds.every((id) => selected.includes(id));
+  const allSelected = pageIds.length > 0 && pageIds.every((id) => selected.includes(id));
 
   return (
     <div className="overflow-x-auto">
@@ -556,7 +551,7 @@ function RespondentsTable({
               const isSelected = membershipId ? selected.includes(membershipId) : false;
               return (
                 <tr
-                  key={`${membershipId ?? "row"}-${row.respondedAt}-${index}`}
+                  key={`${membershipId ?? "row"}-${row.respondedAt}-${String(index)}`}
                   className={[
                     "h-11 border-b border-[var(--admin-border)] last:border-b-0",
                     isSelected
@@ -646,7 +641,9 @@ function MessageNoticeDialog({
       }
     }
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+    };
   }, [open, onClose]);
 
   if (!open) return null;
@@ -742,12 +739,7 @@ function OptionActionButtons({
         <Copy className="h-4 w-4" aria-hidden="true" />
         {copied ? "Copied" : "Copy option ID"}
       </button>
-      <button
-        type="button"
-        className={secondaryButtonClassName}
-        disabled={busy}
-        onClick={onExport}
-      >
+      <button type="button" className={secondaryButtonClassName} disabled={busy} onClick={onExport}>
         <Download className="h-4 w-4" aria-hidden="true" />
         {busy ? "Exporting..." : "Export this option"}
       </button>
@@ -771,7 +763,9 @@ function useOptionActions(pollId: string, optionId: string) {
     try {
       await navigator.clipboard.writeText(optionId);
       setCopied(true);
-      window.setTimeout(() => setCopied(false), 2000);
+      window.setTimeout(() => {
+        setCopied(false);
+      }, 2000);
     } catch {
       setActionError("Unable to copy option ID to the clipboard.");
     }
@@ -939,7 +933,9 @@ export function AdminPollOptionDetailDrawer({
       }
     }
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+    };
   }, [open, onClose]);
 
   if (!open || !optionId) return null;
@@ -964,10 +960,7 @@ export function AdminPollOptionDetailDrawer({
           <div className="sticky top-0 z-10 flex items-start justify-between gap-3 border-b border-[var(--admin-border)] bg-[var(--admin-surface)] px-5 py-4">
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
-                <h2
-                  id={titleId}
-                  className="text-base font-semibold text-[var(--admin-on-surface)]"
-                >
+                <h2 id={titleId} className="text-base font-semibold text-[var(--admin-on-surface)]">
                   {detail?.option.label ?? "Option detail"}
                 </h2>
                 {detail?.quizMode && detail.option.isCorrect ? (
@@ -996,7 +989,9 @@ export function AdminPollOptionDetailDrawer({
               <ErrorDetailPanel
                 message={actions.actionError}
                 title="Action failed"
-                onRetry={() => actions.setActionError(null)}
+                onRetry={() => {
+                  actions.setActionError(null);
+                }}
               />
             ) : null}
 
@@ -1066,9 +1061,7 @@ export function AdminPollOptionDetailDrawer({
                                 type="button"
                                 className="text-sm font-medium text-[var(--admin-primary)] hover:underline"
                                 onClick={() => {
-                                  router.push(
-                                    `/admin/reports/polls/${pollId}/options/${optionId}`,
-                                  );
+                                  router.push(`/admin/reports/polls/${pollId}/options/${optionId}`);
                                   onClose();
                                 }}
                               >
@@ -1093,7 +1086,9 @@ export function AdminPollOptionDetailDrawer({
                 copied: actions.copied,
                 onCopy: () => void actions.onCopy(),
                 onExport: () => void actions.onExport(),
-                onMessage: () => actions.onMessage(respondentTotalCount),
+                onMessage: () => {
+                  actions.onMessage(respondentTotalCount);
+                },
               }}
             />
           </div>
@@ -1102,7 +1097,9 @@ export function AdminPollOptionDetailDrawer({
 
       <MessageNoticeDialog
         open={actions.messageOpen}
-        onClose={() => actions.setMessageOpen(false)}
+        onClose={() => {
+          actions.setMessageOpen(false);
+        }}
         count={actions.messageCount}
       />
     </>
@@ -1215,8 +1212,7 @@ export function AdminPollOptionDetailPage({
     );
   }
 
-  const rangeStart =
-    respondentTotalCount === 0 ? 0 : (respondentPage - 1) * PAGE_SIZE + 1;
+  const rangeStart = respondentTotalCount === 0 ? 0 : (respondentPage - 1) * PAGE_SIZE + 1;
   const rangeEnd = Math.min(respondentPage * PAGE_SIZE, respondentTotalCount);
 
   if (loading && !detail && !error) {
@@ -1304,10 +1300,9 @@ export function AdminPollOptionDetailPage({
             copied: actions.copied,
             onCopy: () => void actions.onCopy(),
             onExport: () => void actions.onExport(),
-            onMessage: () =>
-              actions.onMessage(
-                selectedIds.length > 0 ? selectedIds.length : respondentTotalCount,
-              ),
+            onMessage: () => {
+              actions.onMessage(selectedIds.length > 0 ? selectedIds.length : respondentTotalCount);
+            },
           }}
         />
       </div>
@@ -1380,7 +1375,9 @@ export function AdminPollOptionDetailPage({
                             className={`${fieldClassName} w-full pl-9`}
                             placeholder="Name or email"
                             value={draftLearnerName}
-                            onChange={(event) => setDraftLearnerName(event.target.value)}
+                            onChange={(event) => {
+                              setDraftLearnerName(event.target.value);
+                            }}
                             onKeyDown={(event) => {
                               if (event.key === "Enter") applySearch();
                             }}
@@ -1420,7 +1417,9 @@ export function AdminPollOptionDetailPage({
                           <button
                             type="button"
                             className={secondaryButtonClassName}
-                            onClick={() => actions.onMessage(selectedIds.length)}
+                            onClick={() => {
+                              actions.onMessage(selectedIds.length);
+                            }}
                           >
                             <Mail className="h-4 w-4" aria-hidden="true" />
                             Message
@@ -1428,7 +1427,9 @@ export function AdminPollOptionDetailPage({
                           <button
                             type="button"
                             className={ghostButtonClassName}
-                            onClick={() => setSelectedIds([])}
+                            onClick={() => {
+                              setSelectedIds([]);
+                            }}
                           >
                             Clear
                           </button>
@@ -1456,23 +1457,23 @@ export function AdminPollOptionDetailPage({
                       <p>
                         {respondentTotalCount === 0
                           ? "No results"
-                          : `Showing ${rangeStart}-${rangeEnd} of ${respondentTotalCount.toLocaleString()}`}
+                          : `Showing ${String(rangeStart)}-${String(rangeEnd)} of ${respondentTotalCount.toLocaleString()}`}
                       </p>
                       <div className="flex items-center gap-2">
                         <button
                           type="button"
                           className={ghostButtonClassName}
                           disabled={respondentPage <= 1 || respondentsLoading}
-                          onClick={() =>
-                            setRespondentPage((current) => Math.max(1, current - 1))
-                          }
+                          onClick={() => {
+                            setRespondentPage((current) => Math.max(1, current - 1));
+                          }}
                           aria-label="Previous page"
                         >
                           <ChevronLeft className="h-4 w-4" aria-hidden="true" />
                         </button>
                         <span className="font-mono">
                           {respondentPage}
-                          {respondentTotalPages > 0 ? ` / ${respondentTotalPages}` : ""}
+                          {respondentTotalPages > 0 ? ` / ${String(respondentTotalPages)}` : ""}
                         </span>
                         <button
                           type="button"
@@ -1482,7 +1483,9 @@ export function AdminPollOptionDetailPage({
                             respondentsLoading ||
                             respondentTotalPages === 0
                           }
-                          onClick={() => setRespondentPage((current) => current + 1)}
+                          onClick={() => {
+                            setRespondentPage((current) => current + 1);
+                          }}
                           aria-label="Next page"
                         >
                           <ChevronRight className="h-4 w-4" aria-hidden="true" />
@@ -1499,7 +1502,9 @@ export function AdminPollOptionDetailPage({
 
       <MessageNoticeDialog
         open={actions.messageOpen}
-        onClose={() => actions.setMessageOpen(false)}
+        onClose={() => {
+          actions.setMessageOpen(false);
+        }}
         count={actions.messageCount}
       />
     </div>

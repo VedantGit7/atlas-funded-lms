@@ -15,5 +15,5 @@ export const GET = createTenantRoute<
   metadata: getActiveDevicesAlertDetailMetadata,
   params: activeDevicesAlertParamsSchema,
   output: activeDevicesAlertDetailResponseSchema,
-  handler: async ({ tx, ctx, params }) => getActiveDevicesAlertDetail(tx, ctx, params.alertId),
+  handler: async ({ tx, ctx, params }) => getActiveDevicesAlertDetail(tx, ctx, params["alertId"]),
 });

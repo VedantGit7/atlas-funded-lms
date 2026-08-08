@@ -24,6 +24,11 @@ export const POST = createTenantRoute<
     const workflowId = params["id"];
     if (!workflowId) throw new Error("Missing workflow transition id");
 
-    return actOnWorkflowTransition(tx, ctx, workflowId, input);
+    return actOnWorkflowTransition(
+      tx,
+      ctx,
+      workflowId,
+      input,
+    ) as unknown as Promise<WorkflowTransitionResponse>;
   },
 });

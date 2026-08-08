@@ -13,7 +13,7 @@ import {
 } from "../repositories/domain.repository";
 import type { TenantDomainRow } from "../repositories/types";
 
-function normalizeDomainType(type: string): TenantDomainRow["type"] {
+function normalizeDomainType(type: string): "ATLAS_SUBDOMAIN" | "CUSTOM_DOMAIN" {
   const normalized = type.toUpperCase();
   if (normalized === "ATLAS_SUBDOMAIN" || normalized === "CUSTOM_DOMAIN") {
     return normalized;
@@ -22,7 +22,18 @@ function normalizeDomainType(type: string): TenantDomainRow["type"] {
   throw new Error(`UNSUPPORTED_DOMAIN_TYPE:${type}`);
 }
 
-function mapDomain(row: TenantDomainRow) {
+function mapDomain(row: TenantDomainRow): {
+  id: string;
+  hostname: string;
+  type: "ATLAS_SUBDOMAIN" | "CUSTOM_DOMAIN";
+  status: TenantDomainRow["status"];
+  isPrimary: boolean;
+  verificationTxtName: string | null;
+  verificationTxtValue: string | null;
+  failureReason: string | null;
+  createdAt: string;
+  updatedAt: string;
+} {
   return {
     id: row.id,
     hostname: row.hostname,

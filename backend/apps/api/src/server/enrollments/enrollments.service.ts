@@ -32,8 +32,8 @@ export type EnrollmentCreateBody = {
 
 export type CourseManageEnrollmentBody = {
   membershipId: string;
-  purchasedCertificate?: boolean;
-  paymentMethod?: "manual" | "complimentary" | "offline";
+  purchasedCertificate?: boolean | undefined;
+  paymentMethod?: "manual" | "complimentary" | "offline" | undefined;
 };
 
 function resolveEnrollmentExpiry(metadata: Record<string, unknown> | null): Date | null {
@@ -42,10 +42,10 @@ function resolveEnrollmentExpiry(metadata: Record<string, unknown> | null): Date
     return null;
   }
 
-  const preferred =
+  const preferred: unknown =
     plans.find(
-      (plan) =>
-        plan &&
+      (plan): plan is Record<string, unknown> =>
+        !!plan &&
         typeof plan === "object" &&
         !Array.isArray(plan) &&
         (plan as Record<string, unknown>)["isDefault"] === true,
@@ -249,11 +249,7 @@ export async function enrollMemberInCourseByInstructor(
     membershipId: input.membershipId,
   });
 
-  if (
-    !membership ||
-    membership.status === "SUSPENDED" ||
-    membership.status === "REMOVED"
-  ) {
+  if (!membership || membership.status === "SUSPENDED" || membership.status === "REMOVED") {
     throw new AtlasHttpError({
       code: "VALIDATION_ERROR",
       status: 400,
@@ -341,11 +337,7 @@ export async function loadEnrollmentManageResourceRef(args: {
   });
 }
 
-export async function cancelEnrollmentById(
-  tx: TenantTx,
-  ctx: ServiceCtx,
-  enrollmentId: string,
-) {
+export async function cancelEnrollmentById(tx: TenantTx, ctx: ServiceCtx, enrollmentId: string) {
   const enrollment = await findEnrollmentById({ tx, enrollmentId });
 
   if (!enrollment || enrollment.tenantId !== ctx.tenantId) {

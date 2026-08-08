@@ -95,8 +95,8 @@ export async function fetchResourceUsageOverview() {
 }
 
 export async function fetchResourceUsageHistory(filters?: {
-  metricKey?: string;
-  page?: number;
+  metricKey?: string | undefined;
+  page?: number | undefined;
 }) {
   return clientApi.get<{
     data: {
@@ -113,7 +113,10 @@ export async function fetchResourceUsageHistory(filters?: {
   );
 }
 
-export async function fetchResourceUsageDormant(filters?: { q?: string; page?: number }) {
+export async function fetchResourceUsageDormant(filters?: {
+  q?: string | undefined;
+  page?: number | undefined;
+}) {
   return clientApi.get<{
     data: {
       items: ResourceUsageDormantItem[];
@@ -128,7 +131,10 @@ export async function fetchResourceUsageDormant(filters?: { q?: string; page?: n
   );
 }
 
-export async function fetchResourceUsageInactive(filters?: { q?: string; page?: number }) {
+export async function fetchResourceUsageInactive(filters?: {
+  q?: string | undefined;
+  page?: number | undefined;
+}) {
   return clientApi.get<{
     data: {
       items: ResourceUsageInactiveItem[];
@@ -145,9 +151,9 @@ export async function fetchResourceUsageInactive(filters?: { q?: string; page?: 
 
 export async function exportResourceUsageReport(body: {
   reportTab: "history" | "dormant" | "inactive";
-  metricKey?: string;
-  q?: string;
-  emailDownloadLink?: boolean;
+  metricKey?: string | undefined;
+  q?: string | undefined;
+  emailDownloadLink?: boolean | undefined;
 }) {
   return clientApi.post<{ data: { runId: string; status: string; emailed: boolean } }>(
     "/api/v1/reports/resource-usage/export",

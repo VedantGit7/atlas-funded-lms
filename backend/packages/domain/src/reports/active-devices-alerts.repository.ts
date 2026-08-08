@@ -1,6 +1,13 @@
 import { randomUUID } from "node:crypto";
 import type { TenantTx } from "@atlas/db";
 
+function asUnknownString(value: unknown, fallback = ""): string {
+  if (typeof value === "string") return value;
+  if (typeof value === "number" || typeof value === "boolean") return String(value);
+  if (value == null) return fallback;
+  return fallback;
+}
+
 export type DeviceSecurityAlertRow = {
   id: string;
   tenant_id: string;
@@ -33,14 +40,14 @@ export type DetectedAlertCandidate = {
 
 function mapRow(row: Record<string, unknown>): DeviceSecurityAlertRow {
   return {
-    id: String(row["id"]),
-    tenant_id: String(row["tenant_id"]),
-    membership_id: String(row["membership_id"]),
-    alert_key: String(row["alert_key"]),
-    alert_type: String(row["alert_type"]),
-    severity: String(row["severity"]),
-    status: String(row["status"]),
-    title: String(row["title"]),
+    id: asUnknownString(row["id"]),
+    tenant_id: asUnknownString(row["tenant_id"]),
+    membership_id: asUnknownString(row["membership_id"]),
+    alert_key: asUnknownString(row["alert_key"]),
+    alert_type: asUnknownString(row["alert_type"]),
+    severity: asUnknownString(row["severity"]),
+    status: asUnknownString(row["status"]),
+    title: asUnknownString(row["title"]),
     evidence_json: row["evidence_json"] ?? null,
     session_ids: row["session_ids"] ?? [],
     detected_at: row["detected_at"] as Date,
@@ -89,8 +96,8 @@ export const activeDevicesAlertsRepository = {
       limit 5000
     `;
     return rows.map((row) => ({
-      id: String(row["id"]),
-      membership_id: String(row["membership_id"]),
+      id: asUnknownString(row["id"]),
+      membership_id: asUnknownString(row["membership_id"]),
       device_fingerprint:
         typeof row["device_fingerprint"] === "string" ? row["device_fingerprint"] : null,
       user_agent: typeof row["user_agent"] === "string" ? row["user_agent"] : null,
@@ -146,7 +153,7 @@ export const activeDevicesAlertsRepository = {
 
   async listAlerts(
     tx: TenantTx,
-    args: { status: string; type?: string; limit: number; offset: number },
+    args: { status: string; type?: string | undefined; limit: number; offset: number },
   ): Promise<DeviceSecurityAlertRow[]> {
     const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
       select *
@@ -166,7 +173,7 @@ export const activeDevicesAlertsRepository = {
 
   async countAlerts(
     tx: TenantTx,
-    args: { status: string; type?: string },
+    args: { status: string; type?: string | undefined },
   ): Promise<number> {
     const rows = await tx.$queryRaw<Array<{ count: bigint }>>`
       select count(*)::bigint as count
@@ -230,7 +237,7 @@ export const activeDevicesAlertsRepository = {
       where id = any(${args.alertIds}::uuid[])
         and status = 'open'
     `;
-    return Number(count);
+    return count;
   },
 
   async appendNote(
@@ -248,8 +255,17 @@ export const activeDevicesAlertsRepository = {
   ): Promise<DeviceSecurityAlertRow | null> {
     const existing = await this.findById(tx, args.alertId);
     if (!existing) return null;
-    const notes = Array.isArray(existing.notes_json) ? [...existing.notes_json] : [];
-    notes.push(args.note);
+    type AlertNote = {
+      id: string;
+      body: string;
+      createdAt: string;
+      authorMembershipId: string | null;
+      authorLabel: string | null;
+    };
+    const existingNotes: AlertNote[] = Array.isArray(existing.notes_json)
+      ? (existing.notes_json as AlertNote[])
+      : [];
+    const notes: AlertNote[] = [...existingNotes, args.note];
     const notesJson = JSON.stringify(notes);
     await tx.$executeRaw`
       update device_security_alerts

@@ -18,5 +18,5 @@ export const POST = createTenantRoute<
   body: activeDevicesAlertNoteBodySchema,
   output: activeDevicesAlertNoteResponseSchema,
   handler: async ({ tx, ctx, params, input }) =>
-    addActiveDevicesAlertNote(tx, ctx, params.alertId, input),
+    addActiveDevicesAlertNote(tx, ctx, params["alertId"], input),
 });

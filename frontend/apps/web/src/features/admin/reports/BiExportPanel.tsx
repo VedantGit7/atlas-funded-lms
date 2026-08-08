@@ -10,15 +10,11 @@ import {
   primaryButtonClassName,
 } from "../../analytics/analytics-admin-shared";
 import { generalSettingsFormCardClassName } from "../general-settings/general-settings-shared";
-import {
-  createBiExportJob,
-  fetchBiExportJobs,
-  type BiExportJob,
-} from "./admin-reports-api";
+import { createBiExportJob, fetchBiExportJobs, type BiExportJob } from "./admin-reports-api";
 import { APPROVED_REPORT_DATASETS } from "./report-dataset-catalog";
 
 export function BiExportPanel() {
-  const [datasetKey, setDatasetKey] = useState(APPROVED_REPORT_DATASETS[0]?.key ?? "enrollments");
+  const [datasetKey, setDatasetKey] = useState<string>(APPROVED_REPORT_DATASETS[0].key);
   const [format, setFormat] = useState<"csv" | "jsonl">("csv");
   const [jobs, setJobs] = useState<BiExportJob[]>([]);
   const [loading, setLoading] = useState(true);
@@ -68,11 +64,15 @@ export function BiExportPanel() {
 
       <div className="mt-4 flex flex-col gap-4 lg:flex-row lg:items-end">
         <label className="block min-w-[220px] text-sm">
-          <span className="mb-1 block font-medium text-[var(--admin-on-surface-variant)]">Dataset</span>
+          <span className="mb-1 block font-medium text-[var(--admin-on-surface-variant)]">
+            Dataset
+          </span>
           <select
             className={fieldClassName}
             value={datasetKey}
-            onChange={(event) => setDatasetKey(event.target.value)}
+            onChange={(event) => {
+              setDatasetKey(event.target.value);
+            }}
           >
             {APPROVED_REPORT_DATASETS.map((dataset) => (
               <option key={dataset.key} value={dataset.key}>
@@ -83,11 +83,15 @@ export function BiExportPanel() {
         </label>
 
         <label className="block min-w-[160px] text-sm">
-          <span className="mb-1 block font-medium text-[var(--admin-on-surface-variant)]">Format</span>
+          <span className="mb-1 block font-medium text-[var(--admin-on-surface-variant)]">
+            Format
+          </span>
           <select
             className={fieldClassName}
             value={format}
-            onChange={(event) => setFormat(event.target.value as "csv" | "jsonl")}
+            onChange={(event) => {
+              setFormat(event.target.value as "csv" | "jsonl");
+            }}
           >
             <option value="csv">CSV</option>
             <option value="jsonl">JSONL</option>
@@ -103,7 +107,12 @@ export function BiExportPanel() {
           >
             {requesting ? "Requesting…" : "Request BI drop"}
           </button>
-          <button type="button" className={ghostButtonClassName} disabled={loading} onClick={() => void loadJobs()}>
+          <button
+            type="button"
+            className={ghostButtonClassName}
+            disabled={loading}
+            onClick={() => void loadJobs()}
+          >
             Refresh
           </button>
         </div>

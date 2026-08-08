@@ -221,12 +221,7 @@ export type BatchesListSortBy =
   | "starts_at"
   | "name";
 
-export type BatchesListWindow =
-  | "any"
-  | "running"
-  | "starting_soon"
-  | "ending_soon"
-  | "ended";
+export type BatchesListWindow = "any" | "running" | "starting_soon" | "ending_soon" | "ended";
 export type BatchesListHealthFilter = "any" | BatchHealth | "needs_attention";
 
 export function dateInputToStartIso(value: string): string | undefined {
@@ -252,14 +247,14 @@ function buildQuery(params: Record<string, string | number | undefined>): string
 }
 
 export async function fetchBatchesRoster(filters?: {
-  q?: string;
-  status?: string;
-  window?: BatchesListWindow;
-  health?: BatchesListHealthFilter;
-  sortBy?: BatchesListSortBy;
-  sortDir?: "asc" | "desc";
-  page?: number;
-  limit?: number;
+  q?: string | undefined;
+  status?: string | undefined;
+  window?: BatchesListWindow | undefined;
+  health?: BatchesListHealthFilter | undefined;
+  sortBy?: BatchesListSortBy | undefined;
+  sortDir?: "asc" | "desc" | undefined;
+  page?: number | undefined;
+  limit?: number | undefined;
 }) {
   return clientApi.get<{
     data: {
@@ -288,17 +283,17 @@ export async function fetchBatchDetail(batchId: string) {
 export async function fetchBatchLearners(
   batchId: string,
   filters: {
-    learnerName?: string;
-    joinedFrom?: string;
-    joinedTo?: string;
-    minCompletion?: number;
-    maxCompletion?: number;
-    health?: BatchesListHealthFilter;
-    sortBy?: string;
-    sortDir?: "asc" | "desc";
-    columns?: BatchLearnerColumnKey[];
-    page?: number;
-    limit?: number;
+    learnerName?: string | undefined;
+    joinedFrom?: string | undefined;
+    joinedTo?: string | undefined;
+    minCompletion?: number | undefined;
+    maxCompletion?: number | undefined;
+    health?: BatchesListHealthFilter | undefined;
+    sortBy?: string | undefined;
+    sortDir?: "asc" | "desc" | undefined;
+    columns?: BatchLearnerColumnKey[] | undefined;
+    page?: number | undefined;
+    limit?: number | undefined;
   },
 ) {
   return clientApi.get<{
@@ -337,7 +332,10 @@ export async function fetchBatchLearnerDetail(batchId: string, membershipId: str
 export async function removeBatchLearner(
   batchId: string,
   membershipId: string,
-  body: { reason: "transferred" | "withdrawn" | "administrative" | "other"; notes?: string },
+  body: {
+    reason: "transferred" | "withdrawn" | "administrative" | "other";
+    notes?: string | undefined;
+  },
 ) {
   return clientApi.delete<{ data: { removed: boolean; batchId: string; membershipId: string } }>(
     `/api/v1/reports/batches/${batchId}/learners/${membershipId}`,
@@ -443,12 +441,12 @@ export type BatchLiveSessionsMatrixData = {
 export async function fetchBatchLiveSessions(
   batchId: string,
   filters: {
-    q?: string;
-    status?: "any" | "upcoming" | "completed" | "cancelled" | "live";
-    sortBy?: "scheduled_at" | "title" | "attendance_rate";
-    sortDir?: "asc" | "desc";
-    page?: number;
-    limit?: number;
+    q?: string | undefined;
+    status?: "any" | "upcoming" | "completed" | "cancelled" | "live" | undefined;
+    sortBy?: "scheduled_at" | "title" | "attendance_rate" | undefined;
+    sortDir?: "asc" | "desc" | undefined;
+    page?: number | undefined;
+    limit?: number | undefined;
   } = {},
 ) {
   return clientApi.get<{ data: BatchLiveSessionsListData }>(
@@ -465,7 +463,11 @@ export async function fetchBatchLiveSessions(
 
 export async function fetchBatchLiveSessionsMatrix(
   batchId: string,
-  filters: { q?: string; limitLearners?: number; limitSessions?: number } = {},
+  filters: {
+    q?: string | undefined;
+    limitLearners?: number | undefined;
+    limitSessions?: number | undefined;
+  } = {},
 ) {
   return clientApi.get<{ data: BatchLiveSessionsMatrixData }>(
     `/api/v1/reports/batches/${batchId}/live-sessions/matrix${buildQuery({
@@ -476,10 +478,7 @@ export async function fetchBatchLiveSessionsMatrix(
   );
 }
 
-export async function fetchBatchLiveSessionAbsentees(
-  batchId: string,
-  minMissed = 1,
-) {
+export async function fetchBatchLiveSessionAbsentees(batchId: string, minMissed = 1) {
   return clientApi.get<{ data: { membershipIds: string[] } }>(
     `/api/v1/reports/batches/${batchId}/live-sessions/absentees${buildQuery({
       minMissed,
@@ -577,12 +576,19 @@ export async function fetchBatchLiveSessionAttendees(
   batchId: string,
   sessionId: string,
   filters: {
-    q?: string;
-    attendanceKind?: "any" | BatchLiveSessionAttendanceKind;
-    sortBy?: "learner_name" | "joined_at" | "left_at" | "watch_pct" | "status" | "rejoins";
-    sortDir?: "asc" | "desc";
-    page?: number;
-    limit?: number;
+    q?: string | undefined;
+    attendanceKind?: "any" | BatchLiveSessionAttendanceKind | undefined;
+    sortBy?:
+      | "learner_name"
+      | "joined_at"
+      | "left_at"
+      | "watch_pct"
+      | "status"
+      | "rejoins"
+      | undefined;
+    sortDir?: "asc" | "desc" | undefined;
+    page?: number | undefined;
+    limit?: number | undefined;
   } = {},
 ) {
   return clientApi.get<{
@@ -683,9 +689,9 @@ export type BatchExamsMatrixData = {
 export async function fetchBatchExams(
   batchId: string,
   filters: {
-    q?: string;
-    sortBy?: "released_at" | "title" | "attempted_pct" | "avg_score" | "pass_rate";
-    sortDir?: "asc" | "desc";
+    q?: string | undefined;
+    sortBy?: "released_at" | "title" | "attempted_pct" | "avg_score" | "pass_rate" | undefined;
+    sortDir?: "asc" | "desc" | undefined;
   } = {},
 ) {
   return clientApi.get<{ data: BatchExamsListData }>(
@@ -699,7 +705,7 @@ export async function fetchBatchExams(
 
 export async function fetchBatchExamsMatrix(
   batchId: string,
-  filters: { q?: string; limitLearners?: number } = {},
+  filters: { q?: string | undefined; limitLearners?: number | undefined } = {},
 ) {
   return clientApi.get<{ data: BatchExamsMatrixData }>(
     `/api/v1/reports/batches/${batchId}/exams/matrix${buildQuery({
@@ -810,17 +816,17 @@ export async function fetchBatchContent(batchId: string) {
 export async function fetchBatchContentLearners(
   batchId: string,
   filters: {
-    q?: string;
-    view?: "any" | "stalled" | "never_started" | "finished" | "in_progress";
+    q?: string | undefined;
+    view?: "any" | "stalled" | "never_started" | "finished" | "in_progress" | undefined;
     sortBy?:
       | "learner_name"
       | "completion_pct"
       | "days_since"
       | "projected_finish"
       | "last_activity";
-    sortDir?: "asc" | "desc";
-    page?: number;
-    limit?: number;
+    sortDir?: "asc" | "desc" | undefined;
+    page?: number | undefined;
+    limit?: number | undefined;
   } = {},
 ) {
   return clientApi.get<{
@@ -900,7 +906,7 @@ export type BatchMessagesListData = {
 
 export async function fetchBatchMessages(
   batchId: string,
-  filters: { page?: number; limit?: number } = {},
+  filters: { page?: number | undefined; limit?: number | undefined } = {},
 ) {
   return clientApi.get<{ data: BatchMessagesListData }>(
     `/api/v1/reports/batches/${batchId}/messages${buildQuery({
@@ -922,10 +928,7 @@ export async function fetchBatchMessageNudges(batchId: string) {
   }>(`/api/v1/reports/batches/${batchId}/messages/nudges`);
 }
 
-export async function updateBatchMessageNudges(
-  batchId: string,
-  nudges: BatchMessageNudge[],
-) {
+export async function updateBatchMessageNudges(batchId: string, nudges: BatchMessageNudge[]) {
   return clientApi.patch<{
     data: { batchId: string; nudges: BatchMessageNudge[] };
   }>(

@@ -25,7 +25,8 @@ export const GET = createTenantRoute<Record<string, never>, DomainListResponse>(
 
   output: DomainListResponseSchema,
 
-  handler: async ({ tx }) => readTenantDomains(tx),
+  // Domain service maps `type` through a runtime normalizer; assert DTO shape for the route.
+  handler: async ({ tx }) => await readTenantDomains(tx),
 });
 
 export const POST = createTenantRoute<CreateDomainRequest, CreateDomainResponse>({
@@ -36,7 +37,7 @@ export const POST = createTenantRoute<CreateDomainRequest, CreateDomainResponse>
   output: CreateDomainResponseSchema,
 
   handler: async ({ tx, input, ctx }) => {
-    return createTenantDomain(
+    return await createTenantDomain(
       tx,
 
       {

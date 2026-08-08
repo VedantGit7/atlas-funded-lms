@@ -22,7 +22,7 @@ export const PATCH = createTenantRoute<
   body: updateDevicePolicyOverrideBodySchema,
   output: devicePolicyOverrideMutationResponseSchema,
   handler: async ({ tx, ctx, params, input }) =>
-    updateDevicePolicyOverride(tx, ctx, params.overrideId, input),
+    updateDevicePolicyOverride(tx, ctx, params["overrideId"], input),
 });
 
 export const DELETE = createTenantRoute<
@@ -34,5 +34,5 @@ export const DELETE = createTenantRoute<
   params: devicePolicyOverrideParamsSchema,
   input: noBodySchema,
   output: devicePolicyMutationResponseSchema,
-  handler: async ({ tx, ctx, params }) => deleteDevicePolicyOverride(tx, ctx, params.overrideId),
+  handler: async ({ tx, ctx, params }) => deleteDevicePolicyOverride(tx, ctx, params["overrideId"]),
 });

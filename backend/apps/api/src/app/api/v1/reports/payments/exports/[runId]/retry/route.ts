@@ -18,7 +18,7 @@ export const POST = createTenantRoute<
   input: noBodySchema,
   output: retryPaymentExportResponseSchema,
   handler: async ({ tx, ctx, params }) => {
-    const result = await retryPaymentExport(tx, ctx, params.runId);
+    const result = await retryPaymentExport(tx, ctx, params["runId"]);
     schedulePaymentExportProcessing({
       tenantId: ctx.tenantId,
       requestId: ctx.requestId,

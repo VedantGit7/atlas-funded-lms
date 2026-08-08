@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { ClientApiError, clientApi, toast } from "../../../lib/client-api";
-import type { PublicNewsfeedPostDto } from "../../admin/grow/newsfeed-shared";
+import { ClientApiError, clientApi, toast } from "@/lib/client-api";
+import type { PublicNewsfeedPostDto } from "@/features/admin/grow/newsfeed-shared";
 
 type FeedResponse = {
   data: {
@@ -55,9 +55,7 @@ export function LearnerNewsfeedFeed() {
       setCategories(response.data.categories);
       setPromoIndex(0);
     } catch (caught) {
-      toast.error(
-        caught instanceof ClientApiError ? caught.message : "Could not load newsfeed.",
-      );
+      toast.error(caught instanceof ClientApiError ? caught.message : "Could not load newsfeed.");
       setEnabled(false);
       setArticles([]);
       setPromos([]);
@@ -103,16 +101,18 @@ export function LearnerNewsfeedFeed() {
                 <button
                   type="button"
                   className="rounded-md border border-[var(--border)] px-2 py-1 text-xs"
-                  onClick={() =>
-                    setPromoIndex((index) => (index - 1 + promos.length) % promos.length)
-                  }
+                  onClick={() => {
+                    setPromoIndex((index) => (index - 1 + promos.length) % promos.length);
+                  }}
                 >
                   Prev
                 </button>
                 <button
                   type="button"
                   className="rounded-md border border-[var(--border)] px-2 py-1 text-xs"
-                  onClick={() => setPromoIndex((index) => (index + 1) % promos.length)}
+                  onClick={() => {
+                    setPromoIndex((index) => (index + 1) % promos.length);
+                  }}
                 >
                   Next
                 </button>
@@ -130,7 +130,6 @@ export function LearnerNewsfeedFeed() {
               className="block overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--card)]"
             >
               {activePromo.coverImageUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={activePromo.coverImageUrl}
                   alt=""
@@ -157,7 +156,9 @@ export function LearnerNewsfeedFeed() {
                 <button
                   key={promo.id}
                   type="button"
-                  onClick={() => setPromoIndex(index)}
+                  onClick={() => {
+                    setPromoIndex(index);
+                  }}
                   className={[
                     "h-14 w-20 shrink-0 overflow-hidden rounded-md border",
                     index === promoIndex
@@ -167,7 +168,6 @@ export function LearnerNewsfeedFeed() {
                   aria-label={`Show promo ${promo.title}`}
                 >
                   {promo.coverImageUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
                     <img src={promo.coverImageUrl} alt="" className="h-full w-full object-cover" />
                   ) : null}
                 </button>
@@ -183,7 +183,9 @@ export function LearnerNewsfeedFeed() {
             <div className="flex flex-wrap gap-2">
               <button
                 type="button"
-                onClick={() => setCategory(null)}
+                onClick={() => {
+                  setCategory(null);
+                }}
                 className={[
                   "rounded-full border px-3 py-1 text-xs font-medium",
                   category == null
@@ -197,7 +199,9 @@ export function LearnerNewsfeedFeed() {
                 <button
                   key={entry}
                   type="button"
-                  onClick={() => setCategory(entry)}
+                  onClick={() => {
+                    setCategory(entry);
+                  }}
                   className={[
                     "rounded-full border px-3 py-1 text-xs font-medium",
                     category === entry
@@ -214,7 +218,9 @@ export function LearnerNewsfeedFeed() {
             <div className="flex flex-wrap gap-2">
               <button
                 type="button"
-                onClick={() => setTag(null)}
+                onClick={() => {
+                  setTag(null);
+                }}
                 className={[
                   "rounded-full border px-3 py-1 text-xs font-medium",
                   tag == null
@@ -228,7 +234,9 @@ export function LearnerNewsfeedFeed() {
                 <button
                   key={entry}
                   type="button"
-                  onClick={() => setTag(entry)}
+                  onClick={() => {
+                    setTag(entry);
+                  }}
                   className={[
                     "rounded-full border px-3 py-1 text-xs font-medium",
                     tag === entry
@@ -262,12 +270,7 @@ export function LearnerNewsfeedFeed() {
                 className="overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--card)] transition-colors hover:border-[var(--foreground)]/30"
               >
                 {article.coverImageUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={article.coverImageUrl}
-                    alt=""
-                    className="h-40 w-full object-cover"
-                  />
+                  <img src={article.coverImageUrl} alt="" className="h-40 w-full object-cover" />
                 ) : null}
                 <div className="space-y-2 p-4">
                   <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--muted-foreground)]">

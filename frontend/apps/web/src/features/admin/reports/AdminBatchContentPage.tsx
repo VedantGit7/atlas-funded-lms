@@ -2,14 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import {
-  useCallback,
-  useEffect,
-  useId,
-  useRef,
-  useState,
-  type ReactNode,
-} from "react";
+import { useCallback, useEffect, useId, useRef, useState, type ReactNode } from "react";
 import {
   AlertTriangle,
   BookOpen,
@@ -79,7 +72,12 @@ const SPREAD_BANDS = [
   { key: "0-25", label: "0-25", tone: "bg-[var(--admin-danger)]", field: "band0to25" as const },
   { key: "26-50", label: "26-50", tone: "bg-[var(--admin-warning)]", field: "band26to50" as const },
   { key: "51-75", label: "51-75", tone: "bg-[var(--admin-primary)]", field: "band51to75" as const },
-  { key: "76-100", label: "76-100", tone: "bg-[var(--admin-success)]", field: "band76to100" as const },
+  {
+    key: "76-100",
+    label: "76-100",
+    tone: "bg-[var(--admin-success)]",
+    field: "band76to100" as const,
+  },
 ];
 
 function Shimmer({ className }: { className?: string }) {
@@ -97,7 +95,7 @@ function Shimmer({ className }: { className?: string }) {
 
 function formatPct(v: number | null | undefined) {
   if (v == null || Number.isNaN(v)) return "-";
-  return `${Number(v).toFixed(v % 1 === 0 ? 0 : 1)}%`;
+  return `${v.toFixed(v % 1 === 0 ? 0 : 1)}%`;
 }
 
 function formatDateTime(v: string | null | undefined) {
@@ -193,7 +191,10 @@ function MiniBar({ value }: { value: number | null | undefined }) {
   if (value == null) return null;
   return (
     <div className="mt-1 h-[3px] w-full max-w-[88px] overflow-hidden rounded-full bg-[var(--admin-surface-high)]">
-      <div className={`h-full rounded-full ${barTone(value)}`} style={{ width: `${clampPct(value)}%` }} />
+      <div
+        className={`h-full rounded-full ${barTone(value)}`}
+        style={{ width: `${String(clampPct(value))}%` }}
+      />
     </div>
   );
 }
@@ -210,10 +211,16 @@ function EmptyState({
   return (
     <div className="rounded-lg border border-dashed border-[var(--admin-border)] bg-[var(--admin-surface)] px-6 py-16 text-center">
       <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full border border-[var(--admin-border)] bg-[var(--admin-surface-high)]">
-        <BookOpen className="h-8 w-8 text-[var(--admin-outline)]" aria-hidden="true" strokeWidth={1.5} />
+        <BookOpen
+          className="h-8 w-8 text-[var(--admin-outline)]"
+          aria-hidden="true"
+          strokeWidth={1.5}
+        />
       </div>
       <h3 className="text-base font-semibold text-[var(--admin-on-surface)]">{title}</h3>
-      <p className="mx-auto mt-2 max-w-md text-sm text-[var(--admin-on-surface-variant)]">{description}</p>
+      <p className="mx-auto mt-2 max-w-md text-sm text-[var(--admin-on-surface-variant)]">
+        {description}
+      </p>
       {action ? <div className="mt-5 flex justify-center">{action}</div> : null}
     </div>
   );
@@ -236,7 +243,10 @@ function ErrorStrip({
       role="alert"
     >
       <div className="flex items-start gap-3">
-        <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-[var(--admin-danger)]" aria-hidden="true" />
+        <AlertTriangle
+          className="mt-0.5 h-5 w-5 shrink-0 text-[var(--admin-danger)]"
+          aria-hidden="true"
+        />
         <div>
           <p className="text-sm font-medium text-[var(--admin-danger)]">{title}</p>
           {detail ? (
@@ -328,7 +338,11 @@ function CompletionSpread({
   rosterCount: number;
 }) {
   const bands = SPREAD_BANDS.map((b) => ({ ...b, count: spread[b.field] }));
-  const total = Math.max(rosterCount, bands.reduce((s, b) => s + b.count, 0), 1);
+  const total = Math.max(
+    rosterCount,
+    bands.reduce((s, b) => s + b.count, 0),
+    1,
+  );
   return (
     <section className="rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] p-4">
       <h2 className="text-sm font-semibold text-[var(--admin-on-surface)]">Completion spread</h2>
@@ -343,8 +357,8 @@ function CompletionSpread({
             <div
               key={band.key}
               className={`h-full ${band.tone}`}
-              style={{ width: `${width}%` }}
-              title={`${band.label}: ${band.count}`}
+              style={{ width: `${String(width)}%` }}
+              title={`${band.label}: ${String(band.count)}`}
             />
           );
         })}
@@ -401,14 +415,16 @@ function PacePanel({
         {paceLabel ?? "Cumulative completion across the batch window."}
       </p>
       {paceSeries.length === 0 ? (
-        <p className="mt-6 text-center text-xs text-[var(--admin-on-surface-variant)]">No pace data yet.</p>
+        <p className="mt-6 text-center text-xs text-[var(--admin-on-surface-variant)]">
+          No pace data yet.
+        </p>
       ) : (
         <>
           <div className="relative mt-4 h-28">
             {latestExpected != null ? (
               <div
                 className="pointer-events-none absolute inset-x-0 z-10 border-t border-dashed border-[var(--admin-on-surface-variant)]"
-                style={{ bottom: `${(latestExpected / maxPct) * 100}%` }}
+                style={{ bottom: `${String((latestExpected / maxPct) * 100)}%` }}
                 title={`Expected ${formatPct(latestExpected)}`}
                 aria-hidden="true"
               />
@@ -428,13 +444,13 @@ function PacePanel({
                     {point.expectedPct != null ? (
                       <span
                         className="absolute inset-x-0 z-10 border-t border-dashed border-[var(--admin-outline)]"
-                        style={{ bottom: `${(point.expectedPct / maxPct) * 100}%` }}
+                        style={{ bottom: `${String((point.expectedPct / maxPct) * 100)}%` }}
                         aria-hidden="true"
                       />
                     ) : null}
                     <div
                       className="w-full rounded-t-sm bg-[var(--admin-primary)] group-hover:opacity-90"
-                      style={{ height: `${Math.max(height, pct > 0 ? 4 : 0)}%` }}
+                      style={{ height: `${String(Math.max(height, pct > 0 ? 4 : 0))}%` }}
                     />
                   </div>
                 );
@@ -498,7 +514,9 @@ function MessageDrawer({
       }
     }
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+    };
   }, [open, busy, onClose]);
 
   if (!open) return null;
@@ -532,8 +550,8 @@ function MessageDrawer({
             </h2>
             <p className="mt-1 text-sm text-[var(--admin-on-surface-variant)]">
               {mode === "stalled"
-                ? `${count} learner${count === 1 ? "" : "s"} with no lesson completed in ${stalledDays} days`
-                : `Sending to ${count} selected learner${count === 1 ? "" : "s"}`}
+                ? `${String(count)} learner${count === 1 ? "" : "s"} with no lesson completed in ${String(stalledDays)} days`
+                : `Sending to ${String(count)} selected learner${count === 1 ? "" : "s"}`}
             </p>
           </div>
           <button
@@ -552,7 +570,9 @@ function MessageDrawer({
             <input
               className={fieldClassName}
               value={subject}
-              onChange={(e) => onSubjectChange(e.target.value)}
+              onChange={(e) => {
+                onSubjectChange(e.target.value);
+              }}
               maxLength={200}
             />
           </label>
@@ -562,7 +582,9 @@ function MessageDrawer({
               className={`${fieldClassName} h-auto min-h-[180px] py-2`}
               rows={8}
               value={body}
-              onChange={(e) => onBodyChange(e.target.value)}
+              onChange={(e) => {
+                onBodyChange(e.target.value);
+              }}
               maxLength={10000}
             />
           </label>
@@ -578,7 +600,7 @@ function MessageDrawer({
             onClick={onSend}
           >
             <Mail className="h-4 w-4" aria-hidden="true" />
-            {busy ? "Sending…" : `Send to ${count}`}
+            {busy ? "Sending…" : `Send to ${String(count)}`}
           </button>
         </div>
       </aside>
@@ -631,7 +653,9 @@ export function AdminBatchContentPage({ batchId }: { batchId: string }) {
     [basePath, router, searchParams],
   );
 
-  useEffect(() => setDraftQ(q), [q]);
+  useEffect(() => {
+    setDraftQ(q);
+  }, [q]);
 
   useEffect(() => {
     const t = window.setTimeout(() => {
@@ -639,7 +663,9 @@ export function AdminBatchContentPage({ batchId }: { batchId: string }) {
       if (next === q) return;
       replaceParams({ q: next || null, page: "1" });
     }, 300);
-    return () => window.clearTimeout(t);
+    return () => {
+      window.clearTimeout(t);
+    };
   }, [draftQ, q, replaceParams]);
 
   useEffect(() => {
@@ -722,7 +748,8 @@ export function AdminBatchContentPage({ batchId }: { batchId: string }) {
     try {
       const response = await exportBatchReport({ batchId, emailDownloadLink: true });
       const completed = await pollReportRunUntilComplete(response.data.runId);
-      if (completed.status === "failed") throw new Error(completed.errorMessage ?? "Export failed.");
+      if (completed.status === "failed")
+        throw new Error(completed.errorMessage ?? "Export failed.");
       if (completed.status === "completed") await downloadReportExport(completed.id, "csv");
     } catch (e) {
       setActionError(errMsg(e, "Unable to export report."));
@@ -747,7 +774,7 @@ export function AdminBatchContentPage({ batchId }: { batchId: string }) {
       setMessageIds(ids);
       setMessageSubject("Catch up on your course progress");
       setMessageBody(
-        `We noticed you have not completed a lesson in ${days} days. Please return to the course when you can, and reach out if you need help getting back on track.`,
+        `We noticed you have not completed a lesson in ${String(days)} days. Please return to the course when you can, and reach out if you need help getting back on track.`,
       );
       setMessageOpen(true);
     } catch (e) {
@@ -822,10 +849,10 @@ export function AdminBatchContentPage({ batchId }: { batchId: string }) {
   const rangeEnd = Math.min(page * PAGE_SIZE, totalCount);
   const avgLessonsCaption =
     summary?.avgCompletedLessons == null || Number.isNaN(summary.avgCompletedLessons)
-      ? `- of ${summary?.totalLessons ?? 0} lessons on average`
-      : `${Number(summary.avgCompletedLessons).toFixed(
+      ? `- of ${String(summary?.totalLessons ?? 0)} lessons on average`
+      : `${summary.avgCompletedLessons.toFixed(
           summary.avgCompletedLessons % 1 === 0 ? 0 : 1,
-        )} of ${summary.totalLessons} lessons on average`;
+        )} of ${String(summary.totalLessons)} lessons on average`;
 
   if (loading && !report) {
     return (
@@ -868,7 +895,10 @@ export function AdminBatchContentPage({ batchId }: { batchId: string }) {
           Batches
         </Link>
         <ChevronRight className="h-3.5 w-3.5" aria-hidden="true" />
-        <Link href={`/admin/reports/batches/${batchId}`} className="hover:text-[var(--admin-primary)]">
+        <Link
+          href={`/admin/reports/batches/${batchId}`}
+          className="hover:text-[var(--admin-primary)]"
+        >
           {batchName}
         </Link>
         <ChevronRight className="h-3.5 w-3.5" aria-hidden="true" />
@@ -938,7 +968,12 @@ export function AdminBatchContentPage({ batchId }: { batchId: string }) {
       </div>
 
       {actionError ? (
-        <ErrorStrip title={actionError} onDismiss={() => setActionError(null)} />
+        <ErrorStrip
+          title={actionError}
+          onDismiss={() => {
+            setActionError(null);
+          }}
+        />
       ) : null}
 
       {noCourse ? (
@@ -977,15 +1012,19 @@ export function AdminBatchContentPage({ batchId }: { batchId: string }) {
                 <div className="mt-3 h-[3px] overflow-hidden rounded-full bg-[var(--admin-surface-high)]">
                   <div
                     className={`h-full rounded-full ${barTone(summary.avgCompletionPct)}`}
-                    style={{ width: `${clampPct(summary.avgCompletionPct ?? 0)}%` }}
+                    style={{ width: `${String(clampPct(summary.avgCompletionPct ?? 0))}%` }}
                   />
                 </div>
-                <p className="mt-2 text-xs text-[var(--admin-on-surface-variant)]">{avgLessonsCaption}</p>
+                <p className="mt-2 text-xs text-[var(--admin-on-surface-variant)]">
+                  {avgLessonsCaption}
+                </p>
               </div>
               <button
                 type="button"
                 className="flex flex-col justify-between bg-[var(--admin-surface)] p-5 text-left transition-colors hover:bg-[var(--admin-surface-low)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]/30"
-                onClick={() => toggleView(view === "finished" ? "any" : "finished")}
+                onClick={() => {
+                  toggleView(view === "finished" ? "any" : "finished");
+                }}
               >
                 <p className="mb-3 font-mono text-[11px] font-medium uppercase tracking-[0.1em] text-[var(--admin-success)]">
                   Finished the course
@@ -998,9 +1037,14 @@ export function AdminBatchContentPage({ batchId }: { batchId: string }) {
               <button
                 type="button"
                 className="relative flex flex-col justify-between bg-[var(--admin-surface)] p-5 text-left transition-colors hover:bg-[var(--admin-surface-low)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]/30"
-                onClick={() => toggleView(view === "stalled" ? "any" : "stalled")}
+                onClick={() => {
+                  toggleView(view === "stalled" ? "any" : "stalled");
+                }}
               >
-                <span className="absolute inset-y-0 left-0 w-1 bg-[var(--admin-warning)]" aria-hidden="true" />
+                <span
+                  className="absolute inset-y-0 left-0 w-1 bg-[var(--admin-warning)]"
+                  aria-hidden="true"
+                />
                 <p className="mb-3 pl-2 font-mono text-[11px] font-medium uppercase tracking-[0.1em] text-[var(--admin-warning)]">
                   Stalled
                 </p>
@@ -1014,7 +1058,9 @@ export function AdminBatchContentPage({ batchId }: { batchId: string }) {
               <button
                 type="button"
                 className="flex flex-col justify-between bg-[var(--admin-surface)] p-5 text-left transition-colors hover:bg-[var(--admin-surface-low)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]/30"
-                onClick={() => toggleView(view === "never_started" ? "any" : "never_started")}
+                onClick={() => {
+                  toggleView(view === "never_started" ? "any" : "never_started");
+                }}
               >
                 <p className="mb-3 font-mono text-[11px] font-medium uppercase tracking-[0.1em] text-[var(--admin-on-surface-variant)]">
                   Never started
@@ -1039,7 +1085,9 @@ export function AdminBatchContentPage({ batchId }: { batchId: string }) {
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
             <section className="overflow-hidden rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] lg:col-span-2">
               <div className="border-b border-[var(--admin-border)] px-4 py-3">
-                <h2 className="text-sm font-semibold text-[var(--admin-on-surface)]">Curriculum funnel</h2>
+                <h2 className="text-sm font-semibold text-[var(--admin-on-surface)]">
+                  Curriculum funnel
+                </h2>
                 <p className="mt-0.5 text-xs text-[var(--admin-on-surface-variant)]">
                   Lesson completion across the linked course, in sequence.
                 </p>
@@ -1071,7 +1119,9 @@ export function AdminBatchContentPage({ batchId }: { batchId: string }) {
                                 ? "bg-[color-mix(in_srgb,var(--admin-warning)_8%,var(--admin-surface))]"
                                 : "",
                             ].join(" ")}
-                            onClick={() => toggleView("in_progress")}
+                            onClick={() => {
+                              toggleView("in_progress");
+                            }}
                           >
                             <span
                               className={`absolute inset-y-0 left-0 w-1 ${healthRailClass(lesson.healthRail)}`}
@@ -1100,7 +1150,9 @@ export function AdminBatchContentPage({ batchId }: { batchId: string }) {
                                 <div className="h-[3px] flex-1 overflow-hidden rounded-full bg-[var(--admin-surface-high)]">
                                   <div
                                     className={`h-full rounded-full ${barTone(lesson.completionPct)}`}
-                                    style={{ width: `${clampPct(lesson.completionPct ?? 0)}%` }}
+                                    style={{
+                                      width: `${String(clampPct(lesson.completionPct ?? 0))}%`,
+                                    }}
                                   />
                                 </div>
                                 <span className="shrink-0 font-mono text-[11px] text-[var(--admin-on-surface)]">
@@ -1154,12 +1206,20 @@ export function AdminBatchContentPage({ batchId }: { batchId: string }) {
                 <button
                   type="button"
                   className={secondaryButtonClassName}
-                  onClick={() => openMessageSelected(selectedIds)}
+                  onClick={() => {
+                    openMessageSelected(selectedIds);
+                  }}
                 >
                   <Mail className="h-4 w-4" aria-hidden="true" />
                   Message selected
                 </button>
-                <button type="button" className={ghostButtonClassName} onClick={() => setSelectedIds([])}>
+                <button
+                  type="button"
+                  className={ghostButtonClassName}
+                  onClick={() => {
+                    setSelectedIds([]);
+                  }}
+                >
                   Clear
                 </button>
               </div>
@@ -1182,7 +1242,9 @@ export function AdminBatchContentPage({ batchId }: { batchId: string }) {
                     className={`${fieldClassName} w-full pl-9`}
                     placeholder="Search name or email"
                     value={draftQ}
-                    onChange={(e) => setDraftQ(e.target.value)}
+                    onChange={(e) => {
+                      setDraftQ(e.target.value);
+                    }}
                   />
                 </div>
                 <div
@@ -1202,7 +1264,9 @@ export function AdminBatchContentPage({ batchId }: { batchId: string }) {
                           ? "bg-[var(--admin-surface)] text-[var(--admin-on-surface)] shadow-sm"
                           : "text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-on-surface)]",
                       ].join(" ")}
-                      onClick={() => toggleView(opt.value)}
+                      onClick={() => {
+                        toggleView(opt.value);
+                      }}
                     >
                       {opt.label}
                     </button>
@@ -1239,7 +1303,9 @@ export function AdminBatchContentPage({ batchId }: { batchId: string }) {
               </div>
             ) : !learnersError && learners.length === 0 ? (
               <div className="px-6 py-14 text-center">
-                <p className="text-sm font-medium text-[var(--admin-on-surface)]">No learners match</p>
+                <p className="text-sm font-medium text-[var(--admin-on-surface)]">
+                  No learners match
+                </p>
                 <p className="mt-1 text-sm text-[var(--admin-on-surface-variant)]">
                   Try clearing search or changing the view filter.
                 </p>
@@ -1291,7 +1357,9 @@ export function AdminBatchContentPage({ batchId }: { batchId: string }) {
                               type="checkbox"
                               className="ml-2 h-4 w-4 accent-[var(--admin-primary)]"
                               checked={selectedIds.includes(row.membershipId)}
-                              onChange={() => toggleSelect(row.membershipId)}
+                              onChange={() => {
+                                toggleSelect(row.membershipId);
+                              }}
                               aria-label={`Select ${name}`}
                             />
                           </td>
@@ -1357,11 +1425,11 @@ export function AdminBatchContentPage({ batchId }: { batchId: string }) {
                               className="rounded p-1.5 text-[var(--admin-on-surface-variant)] hover:bg-[var(--admin-surface-high)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]/30"
                               aria-label={`Actions for ${name}`}
                               aria-expanded={rowMenuId === row.membershipId}
-                              onClick={() =>
+                              onClick={() => {
                                 setRowMenuId((c) =>
                                   c === row.membershipId ? null : row.membershipId,
-                                )
-                              }
+                                );
+                              }}
                             >
                               <MoreVertical className="h-4 w-4" aria-hidden="true" />
                             </button>
@@ -1380,7 +1448,9 @@ export function AdminBatchContentPage({ batchId }: { batchId: string }) {
                                 <Link
                                   href={`/admin/reports/batches/${batchId}/learners/${row.membershipId}`}
                                   className="block px-3 py-2 text-left text-xs text-[var(--admin-on-surface)] hover:bg-[var(--admin-surface-high)]"
-                                  onClick={() => setRowMenuId(null)}
+                                  onClick={() => {
+                                    setRowMenuId(null);
+                                  }}
                                 >
                                   Open learner
                                 </Link>
@@ -1405,7 +1475,9 @@ export function AdminBatchContentPage({ batchId }: { batchId: string }) {
                     type="button"
                     className={secondaryButtonClassName}
                     disabled={page <= 1}
-                    onClick={() => replaceParams({ page: String(page - 1) })}
+                    onClick={() => {
+                      replaceParams({ page: String(page - 1) });
+                    }}
                   >
                     Previous
                   </button>
@@ -1413,7 +1485,9 @@ export function AdminBatchContentPage({ batchId }: { batchId: string }) {
                     type="button"
                     className={secondaryButtonClassName}
                     disabled={page >= totalPages}
-                    onClick={() => replaceParams({ page: String(page + 1) })}
+                    onClick={() => {
+                      replaceParams({ page: String(page + 1) });
+                    }}
                   >
                     Next
                   </button>

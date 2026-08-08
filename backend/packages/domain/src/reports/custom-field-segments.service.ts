@@ -36,10 +36,7 @@ import {
   customFieldSegmentInvalidConditions,
   customFieldSegmentNotFound,
 } from "./custom-field-segments.errors";
-import {
-  customFieldSegmentsRepository,
-  type SegmentRow,
-} from "./custom-field-segments.repository";
+import { customFieldSegmentsRepository, type SegmentRow } from "./custom-field-segments.repository";
 import { customFieldRosterRepository } from "./custom-field-roster.repository";
 const STALE_MS = 30 * 24 * 60 * 60 * 1000;
 
@@ -79,10 +76,7 @@ async function mapSegmentItem(
     matchedCount != null && previousMatchedCount != null
       ? matchedCount - previousMatchedCount
       : null;
-  const dependencyCount = await customFieldSegmentsRepository.countScheduleDependencies(
-    tx,
-    row.id,
-  );
+  const dependencyCount = await customFieldSegmentsRepository.countScheduleDependencies(tx, row.id);
 
   return customFieldSegmentItemSchema.parse({
     id: row.id,
@@ -155,26 +149,15 @@ export async function listCustomFieldSegments(tx: TenantTx, ctx: ServiceCtx) {
   });
 }
 
-export async function getCustomFieldSegment(
-  tx: TenantTx,
-  ctx: ServiceCtx,
-  segmentId: string,
-) {
-  const row = await customFieldSegmentsRepository.getSegment(
-    tx,
-    segmentId,
-    ctx.actorMembershipId,
-  );
+export async function getCustomFieldSegment(tx: TenantTx, ctx: ServiceCtx, segmentId: string) {
+  const row = await customFieldSegmentsRepository.getSegment(tx, segmentId, ctx.actorMembershipId);
   if (!row) throw customFieldSegmentNotFound();
   const fieldLabels = await customFieldSegmentsRepository.listFieldLabels(tx);
   const item = await mapSegmentItem(tx, row, fieldLabels);
   return customFieldSegmentDetailResponseSchema.parse({ data: item });
 }
 
-async function computeMatchCount(
-  tx: TenantTx,
-  conditions: SegmentConditionsTree,
-): Promise<number> {
+async function computeMatchCount(tx: TenantTx, conditions: SegmentConditionsTree): Promise<number> {
   const fieldTypes = await customFieldSegmentsRepository.listFieldTypes(tx);
   const completeness = assessConditionsCompleteness(conditions, fieldTypes);
   if (!completeness.complete) {
@@ -258,9 +241,7 @@ export async function updateCustomFieldSegment(
   );
   if (!existing) throw customFieldSegmentNotFound();
 
-  const nextConditions = input.conditions
-    ? input.conditions
-    : parseTree(existing.conditions_json);
+  const nextConditions = input.conditions ? input.conditions : parseTree(existing.conditions_json);
   const nextRefreshMode = input.refreshMode ?? (existing.refresh_mode as "live" | "snapshot");
   const conditionsChanged = input.conditions !== undefined;
   const refreshChanged = input.refreshMode !== undefined;
@@ -345,11 +326,7 @@ export async function duplicateCustomFieldSegment(
   });
 }
 
-export async function deleteCustomFieldSegment(
-  tx: TenantTx,
-  ctx: ServiceCtx,
-  segmentId: string,
-) {
+export async function deleteCustomFieldSegment(tx: TenantTx, ctx: ServiceCtx, segmentId: string) {
   const existing = await customFieldSegmentsRepository.getSegment(
     tx,
     segmentId,
@@ -530,16 +507,8 @@ function round1(value: number): number {
   return Math.round(value * 10) / 10;
 }
 
-export async function getCustomFieldSegmentView(
-  tx: TenantTx,
-  ctx: ServiceCtx,
-  segmentId: string,
-) {
-  const row = await customFieldSegmentsRepository.getSegment(
-    tx,
-    segmentId,
-    ctx.actorMembershipId,
-  );
+export async function getCustomFieldSegmentView(tx: TenantTx, ctx: ServiceCtx, segmentId: string) {
+  const row = await customFieldSegmentsRepository.getSegment(tx, segmentId, ctx.actorMembershipId);
   if (!row) throw customFieldSegmentNotFound();
 
   const [fieldLabels, fieldTypes] = await Promise.all([
@@ -653,7 +622,7 @@ export async function getCustomFieldSegmentView(
         caption:
           buckets.length === 0
             ? "No filled values yet"
-            : `${captionSegment}% prefer ${captionValue}, versus ${captionTenant}% of all learners`,
+            : `${String(captionSegment)}% prefer ${captionValue}, versus ${String(captionTenant)}% of all learners`,
         maxDivergencePct: round1(maxDivergencePct),
         buckets,
       };
@@ -723,16 +692,12 @@ export async function getCustomFieldSegmentView(
             : Math.round(stats.average_total_spent_cents),
         currency: stats.currency,
         averageEnrollmentCount:
-          stats.average_enrollment_count == null
-            ? null
-            : round1(stats.average_enrollment_count),
+          stats.average_enrollment_count == null ? null : round1(stats.average_enrollment_count),
         activeLast30DaysCount: stats.active_last_30_days,
         activeLast30DaysPct,
         spendHistogram,
         tenantMedianSpentCents:
-          histogram.tenantMedianCents == null
-            ? null
-            : Math.round(histogram.tenantMedianCents),
+          histogram.tenantMedianCents == null ? null : Math.round(histogram.tenantMedianCents),
         tenantMedianBucketIndex: histogram.tenantMedianBucketIndex,
         signupCohorts: signupCohortsOut,
         fieldDivergences,
@@ -750,11 +715,7 @@ export async function listCustomFieldSegmentLearners(
   segmentId: string,
   query: CustomFieldSegmentLearnersQuery,
 ) {
-  const row = await customFieldSegmentsRepository.getSegment(
-    tx,
-    segmentId,
-    ctx.actorMembershipId,
-  );
+  const row = await customFieldSegmentsRepository.getSegment(tx, segmentId, ctx.actorMembershipId);
   if (!row) throw customFieldSegmentNotFound();
 
   const fieldTypes = await customFieldSegmentsRepository.listFieldTypes(tx);
@@ -824,11 +785,7 @@ export async function exportCustomFieldSegmentLearnersCsv(
   segmentId: string,
 ) {
   const fieldTypes = await customFieldSegmentsRepository.listFieldTypes(tx);
-  const row = await customFieldSegmentsRepository.getSegment(
-    tx,
-    segmentId,
-    ctx.actorMembershipId,
-  );
+  const row = await customFieldSegmentsRepository.getSegment(tx, segmentId, ctx.actorMembershipId);
   if (!row) throw customFieldSegmentNotFound();
   const conditions = parseTree(row.conditions_json);
   const definitions = await customFieldRosterRepository.listFieldDefinitions(tx);

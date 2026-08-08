@@ -73,7 +73,7 @@ function addMonthsIsoDate(base: Date, months: number): string {
   const y = d.getUTCFullYear();
   const m = String(d.getUTCMonth() + 1).padStart(2, "0");
   const day = String(d.getUTCDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
+  return `${String(y)}-${m}-${day}`;
 }
 
 function todayIsoDate(): string {
@@ -89,7 +89,10 @@ function splitEvenly(totalCents: number, count: number): number[] {
   const parts = Array.from({ length: count }, () => base);
   let remainder = totalCents - base * count;
   for (let i = parts.length - 1; i >= 0 && remainder > 0; i -= 1) {
-    parts[i] += 1;
+    const cur = parts[i];
+    if (cur !== undefined) {
+      parts[i] = cur + 1;
+    }
     remainder -= 1;
   }
   return parts;
@@ -133,7 +136,9 @@ function Toggle({
         role="switch"
         aria-checked={checked}
         disabled={disabled}
-        onClick={() => onChange(!checked)}
+        onClick={() => {
+          onChange(!checked);
+        }}
         className={[
           "relative h-5 w-10 shrink-0 border transition-colors disabled:opacity-40",
           checked
@@ -200,11 +205,7 @@ export function AdminPaymentsInstalmentPlanCreatePage() {
   const scheduleValid = totalCents > 0 && schedule.length >= 2 && deltaCents === 0;
   const datesValid = schedule.every((row) => Boolean(row.dueDate));
   const canSubmit =
-    Boolean(learner) &&
-    Boolean(productTitle.trim()) &&
-    scheduleValid &&
-    datesValid &&
-    !busy;
+    Boolean(learner) && Boolean(productTitle.trim()) && scheduleValid && datesValid && !busy;
 
   useEffect(() => {
     let cancelled = false;
@@ -239,8 +240,7 @@ export function AdminPaymentsInstalmentPlanCreatePage() {
     })
       .then((response) => {
         if (cancelled) return;
-        const count = response.data.items.filter((item) => item.membershipId === learner.id)
-          .length;
+        const count = response.data.items.filter((item) => item.membershipId === learner.id).length;
         setExistingPlanCount(count);
       })
       .catch(() => {
@@ -268,13 +268,12 @@ export function AdminPaymentsInstalmentPlanCreatePage() {
             profile: { displayName: string | null } | null;
           }>;
         };
-      }>(
-        `/api/v1/members?search=${encodeURIComponent(term.trim())}&limit=10&status=ACTIVE`,
-      );
+      }>(`/api/v1/members?search=${encodeURIComponent(term.trim())}&limit=10&status=ACTIVE`);
       setMemberResults(
         response.data.items.map((member) => ({
           id: member.id,
-          label: member.profile?.displayName ?? member.invitedEmail ?? member.accountEmail ?? member.id,
+          label:
+            member.profile?.displayName ?? member.invitedEmail ?? member.accountEmail ?? member.id,
           email: member.accountEmail ?? member.invitedEmail,
         })),
       );
@@ -308,7 +307,7 @@ export function AdminPaymentsInstalmentPlanCreatePage() {
     setSchedule(buildSchedule(schedule.length, totalCents, start));
     setCountPreset(
       schedule.length === 2 || schedule.length === 3 || schedule.length === 6
-        ? (schedule.length as 2 | 3 | 6)
+        ? schedule.length
         : "custom",
     );
   }
@@ -355,7 +354,7 @@ export function AdminPaymentsInstalmentPlanCreatePage() {
         productTitle: productTitle.trim(),
         productType,
         productId: productId || undefined,
-        pricingPlanLabel: `${count} instalments`,
+        pricingPlanLabel: `${String(count)} instalments`,
         totalAmountCents: totalCents,
         currency,
         instalments,
@@ -580,7 +579,7 @@ export function AdminPaymentsInstalmentPlanCreatePage() {
                     ? "Checking existing plans…"
                     : existingPlanCount === 0
                       ? "No existing active plans found for this learner."
-                      : `${existingPlanCount} active plan${existingPlanCount === 1 ? "" : "s"} already on this learner.`}
+                      : `${String(existingPlanCount)} active plan${existingPlanCount === 1 ? "" : "s"} already on this learner.`}
                 </span>
               </div>
             ) : null}
@@ -600,7 +599,9 @@ export function AdminPaymentsInstalmentPlanCreatePage() {
                   className="mb-3 w-full border-b border-[var(--admin-border)] bg-transparent py-2 font-mono text-xs outline-none focus:border-[var(--admin-primary)]"
                   value={productId}
                   disabled={coursesLoading}
-                  onChange={(event) => onSelectCourse(event.target.value)}
+                  onChange={(event) => {
+                    onSelectCourse(event.target.value);
+                  }}
                 >
                   <option value="">
                     {coursesLoading ? "Loading courses…" : "Choose a course or enter manually"}
@@ -637,7 +638,9 @@ export function AdminPaymentsInstalmentPlanCreatePage() {
                   <input
                     className="w-full bg-transparent px-3 py-3 text-right font-mono text-sm text-[var(--admin-primary)] outline-none"
                     value={totalMajor}
-                    onChange={(event) => setTotalMajor(event.target.value)}
+                    onChange={(event) => {
+                      setTotalMajor(event.target.value);
+                    }}
                     onBlur={onTotalBlur}
                     placeholder="0.00"
                   />
@@ -646,7 +649,9 @@ export function AdminPaymentsInstalmentPlanCreatePage() {
                   <select
                     className="bg-transparent font-mono text-xs text-[var(--admin-on-surface-variant)] outline-none"
                     value={currency}
-                    onChange={(event) => setCurrency(event.target.value.toUpperCase())}
+                    onChange={(event) => {
+                      setCurrency(event.target.value.toUpperCase());
+                    }}
                   >
                     {["USD", "INR", "EUR", "GBP", "AUD", "CAD"].map((code) => (
                       <option key={code} value={code}>
@@ -658,9 +663,7 @@ export function AdminPaymentsInstalmentPlanCreatePage() {
                     Divided into {schedule.length} instalments
                   </span>
                 </div>
-                {listPriceCents != null &&
-                totalCents > 0 &&
-                listPriceCents !== totalCents ? (
+                {listPriceCents != null && totalCents > 0 && listPriceCents !== totalCents ? (
                   <p className="mt-2 font-mono text-[11px] text-[var(--admin-warning,var(--admin-on-surface-variant))]">
                     Differs from course list price ({formatMoney(listPriceCents, currency)}).
                   </p>
@@ -693,7 +696,9 @@ export function AdminPaymentsInstalmentPlanCreatePage() {
                         ? "border border-[color-mix(in_srgb,var(--admin-primary)_50%,transparent)] bg-[color-mix(in_srgb,var(--admin-primary)_10%,transparent)] text-[var(--admin-primary)]"
                         : "text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-on-surface)]",
                     ].join(" ")}
-                    onClick={() => applyPreset(preset)}
+                    onClick={() => {
+                      applyPreset(preset);
+                    }}
                   >
                     {preset}
                   </button>
@@ -706,7 +711,9 @@ export function AdminPaymentsInstalmentPlanCreatePage() {
                       ? "text-[var(--admin-primary)]"
                       : "text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-on-surface)]",
                   ].join(" ")}
-                  onClick={() => applyPreset("custom")}
+                  onClick={() => {
+                    applyPreset("custom");
+                  }}
                 >
                   Custom
                 </button>
@@ -785,10 +792,12 @@ export function AdminPaymentsInstalmentPlanCreatePage() {
                           className="text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-danger)] disabled:opacity-30"
                           disabled={schedule.length <= 2}
                           onClick={() => {
-                            setSchedule((current) => current.filter((item) => item.key !== row.key));
+                            setSchedule((current) =>
+                              current.filter((item) => item.key !== row.key),
+                            );
                             setCountPreset("custom");
                           }}
-                          aria-label={`Remove instalment ${index + 1}`}
+                          aria-label={`Remove instalment ${String(index + 1)}`}
                         >
                           <Trash2 className="h-4 w-4" aria-hidden="true" />
                         </button>
@@ -869,7 +878,9 @@ export function AdminPaymentsInstalmentPlanCreatePage() {
                   type="radio"
                   name="access"
                   checked={accessPolicy === "immediate"}
-                  onChange={() => setAccessPolicy("immediate")}
+                  onChange={() => {
+                    setAccessPolicy("immediate");
+                  }}
                   className="mt-1 accent-[var(--admin-primary)]"
                 />
                 <span>
@@ -886,7 +897,9 @@ export function AdminPaymentsInstalmentPlanCreatePage() {
                   type="radio"
                   name="access"
                   checked={accessPolicy === "after_first_payment"}
-                  onChange={() => setAccessPolicy("after_first_payment")}
+                  onChange={() => {
+                    setAccessPolicy("after_first_payment");
+                  }}
                   className="mt-1 accent-[var(--admin-primary)]"
                 />
                 <span>
@@ -1023,7 +1036,9 @@ export function AdminPaymentsInstalmentPlanCreatePage() {
             <button
               type="button"
               className="w-full py-2 font-mono text-xs text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-on-surface)]"
-              onClick={() => router.push("/admin/reports/payments/instalments")}
+              onClick={() => {
+                router.push("/admin/reports/payments/instalments");
+              }}
             >
               Cancel
             </button>

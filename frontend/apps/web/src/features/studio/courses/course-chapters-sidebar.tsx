@@ -370,7 +370,7 @@ export function CourseChaptersSidebar({
               const sectionSummary =
                 moduleLessons && moduleLessons.length > 0
                   ? formatSectionSummary(moduleLessons)
-                  : `${module.lessonCount} ${module.lessonCount === 1 ? "Lesson" : "Lessons"} • 0 Quizzes`;
+                  : `${String(module.lessonCount)} ${module.lessonCount === 1 ? "Lesson" : "Lessons"} • 0 Quizzes`;
 
               return (
                 <li key={module.id}>
@@ -415,9 +415,7 @@ export function CourseChaptersSidebar({
                       <DropdownMenu
                         label={`Actions for ${module.title}`}
                         align="end"
-                        trigger={
-                          <MoreHorizontal className="h-4 w-4" aria-hidden="true" />
-                        }
+                        trigger={<MoreHorizontal className="h-4 w-4" aria-hidden="true" />}
                         triggerClassName="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-[var(--admin-on-surface-variant)] transition-colors hover:bg-[var(--admin-surface-high)] hover:text-[var(--admin-on-surface)]"
                         items={sectionMenuItems(module)}
                       />
@@ -481,11 +479,7 @@ export function CourseChaptersSidebar({
                                         <MoreHorizontal className="h-4 w-4" aria-hidden="true" />
                                       }
                                       triggerClassName="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-[var(--admin-on-surface-variant)] transition-colors hover:bg-[var(--admin-surface)] hover:text-[var(--admin-on-surface)]"
-                                      items={lessonMenuItems(
-                                        module,
-                                        lesson,
-                                        moduleLessons ?? [],
-                                      )}
+                                      items={lessonMenuItems(module, lesson, moduleLessons)}
                                     />
                                   ) : null}
                                 </div>
@@ -563,9 +557,9 @@ export function CourseChaptersSidebar({
               return next;
             });
             setLessonsByModule((current) => {
-              const next = { ...current };
-              delete next[deleteModuleState.moduleId];
-              return next;
+              const { [deleteModuleState.moduleId]: _removed, ...rest } = current;
+              void _removed;
+              return rest;
             });
           }
           void refreshModules();
@@ -602,7 +596,10 @@ export function CourseChaptersSidebar({
         }}
         onDeleted={() => {
           if (!deleteLessonState) return;
-          void handleLessonDeletedFromSidebar(deleteLessonState.moduleId, deleteLessonState.lessonId);
+          void handleLessonDeletedFromSidebar(
+            deleteLessonState.moduleId,
+            deleteLessonState.lessonId,
+          );
           setDeleteLessonState(null);
         }}
       />

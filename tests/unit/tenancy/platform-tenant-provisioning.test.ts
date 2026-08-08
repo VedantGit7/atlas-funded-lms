@@ -23,6 +23,7 @@ const {
   readPlatformTenantDetailMock,
   seedTenantSystemRolesFromCatalogueMock,
   seedOwnerInvitationFromExistingHelperMock,
+  seedTenantWorkflowDefinitionsFromCatalogueMock,
   auditWriterWriteMock,
   outboxPublishMock,
 } = vi.hoisted(() => ({
@@ -37,6 +38,7 @@ const {
   readPlatformTenantDetailMock: vi.fn(),
   seedTenantSystemRolesFromCatalogueMock: vi.fn(),
   seedOwnerInvitationFromExistingHelperMock: vi.fn(),
+  seedTenantWorkflowDefinitionsFromCatalogueMock: vi.fn(),
   auditWriterWriteMock: vi.fn(),
   outboxPublishMock: vi.fn(),
 }));
@@ -72,6 +74,8 @@ vi.mock("@atlas/domain-tenancy/services/platform-tenant-provisioning.helpers", (
     seedTenantSystemRolesFromCatalogueMock(...args),
   seedOwnerInvitationFromExistingHelper: (...args: unknown[]) =>
     seedOwnerInvitationFromExistingHelperMock(...args),
+  seedTenantWorkflowDefinitionsFromCatalogue: (...args: unknown[]) =>
+    seedTenantWorkflowDefinitionsFromCatalogueMock(...args),
 }));
 
 vi.mock("@atlas/audit", () => ({
@@ -232,6 +236,9 @@ describe("platform tenant provisioning", () => {
     await provisionTenant(tx, ctx, validInput);
 
     expect(seedTenantSystemRolesFromCatalogueMock).toHaveBeenCalledWith(tx, { tenantId });
+    expect(seedTenantWorkflowDefinitionsFromCatalogueMock).toHaveBeenCalledWith(tx, {
+      tenantId,
+    });
     expect(seedOwnerInvitationFromExistingHelperMock).toHaveBeenCalledWith(tx, {
       tenantId,
       email: validInput.owner.email,

@@ -13,12 +13,7 @@ export type BatchExportDataset =
 export type BatchExportDelivery = "download" | "email_me" | "recipients";
 export type BatchExportCadence = "daily" | "weekly" | "monthly";
 export type BatchExportGrouping = "none" | "batch" | "course" | "health";
-export type BatchExportStatus =
-  | "QUEUED"
-  | "RUNNING"
-  | "SUCCEEDED"
-  | "FAILED"
-  | "CANCELLED";
+export type BatchExportStatus = "QUEUED" | "RUNNING" | "SUCCEEDED" | "FAILED" | "CANCELLED";
 
 export type BatchExportColumn = {
   key: string;
@@ -85,30 +80,28 @@ export type CreateBatchExportBody = {
   dataset: BatchExportDataset;
   columns: string[];
   format: BatchExportFormat;
-  batchIds?: string[];
-  allActiveBatches?: boolean;
-  joinedFrom?: string;
-  joinedTo?: string;
-  learnerName?: string;
-  status?: "ACTIVE" | "INACTIVE" | "ARCHIVED";
-  grouping?: BatchExportGrouping;
-  includeSubtotals?: boolean;
+  batchIds?: string[] | undefined;
+  allActiveBatches?: boolean | undefined;
+  joinedFrom?: string | undefined;
+  joinedTo?: string | undefined;
+  learnerName?: string | undefined;
+  status?: "ACTIVE" | "INACTIVE" | "ARCHIVED" | undefined;
+  grouping?: BatchExportGrouping | undefined;
+  includeSubtotals?: boolean | undefined;
   useCurrentFilters: boolean;
-  filterSummary?: string;
+  filterSummary?: string | undefined;
   delivery: BatchExportDelivery;
-  recipients?: string[];
-  webhookUrl?: string | null;
+  recipients?: string[] | undefined;
+  webhookUrl?: string | null | undefined;
   scheduleEnabled: boolean;
-  scheduleName?: string;
-  cadence?: BatchExportCadence;
-  time?: string;
-  timezone?: string;
+  scheduleName?: string | undefined;
+  cadence?: BatchExportCadence | undefined;
+  time?: string | undefined;
+  timezone?: string | undefined;
 };
 
 export async function fetchBatchesExports() {
-  return clientApi.get<{ data: BatchesExportsPayload }>(
-    "/api/v1/reports/batches/exports",
-  );
+  return clientApi.get<{ data: BatchesExportsPayload }>("/api/v1/reports/batches/exports");
 }
 
 export async function createBatchExport(body: CreateBatchExportBody) {
@@ -139,7 +132,7 @@ export async function retryBatchExport(runId: string) {
 
 export async function updateBatchExportSchedule(
   scheduleId: string,
-  body: { isActive?: boolean; name?: string },
+  body: { isActive?: boolean | undefined; name?: string | undefined },
 ) {
   return clientApi.patch<{ data: BatchExportScheduleItem }>(
     `/api/v1/reports/batches/exports/schedules/${scheduleId}`,

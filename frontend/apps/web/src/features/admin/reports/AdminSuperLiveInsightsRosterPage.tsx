@@ -46,9 +46,9 @@ function formatDuration(seconds: number | null | undefined): string {
   const hours = Math.floor(total / 3600);
   const minutes = Math.floor((total % 3600) / 60);
   const secs = total % 60;
-  if (hours > 0) return `${hours}h ${minutes}m`;
-  if (minutes > 0) return `${minutes}m ${secs}s`;
-  return `${secs}s`;
+  if (hours > 0) return `${String(hours)}h ${String(minutes)}m`;
+  if (minutes > 0) return `${String(minutes)}m ${String(secs)}s`;
+  return `${String(secs)}s`;
 }
 
 function titleCase(value: string): string {
@@ -127,17 +127,7 @@ export function AdminSuperLiveInsightsRosterPage() {
     } finally {
       setLoading(false);
     }
-  }, [
-    columns,
-    minAttended,
-    page,
-    searchQ,
-    sessionStatus,
-    sortBy,
-    sortDir,
-    startedFrom,
-    startedTo,
-  ]);
+  }, [columns, minAttended, page, searchQ, sessionStatus, sortBy, sortDir, startedFrom, startedTo]);
 
   const loadDetail = useCallback(async () => {
     if (!selectedSession) return;
@@ -234,8 +224,8 @@ export function AdminSuperLiveInsightsRosterPage() {
       <div>
         <h1 className={generalSettingsPageTitleClassName}>Super Live Insights</h1>
         <p className={generalSettingsPageDescClassName}>
-          Review live session engagement metrics — duration, attended vs registered, attendance
-          rate — then export CSV or open the attendance roster.
+          Review live session engagement metrics — duration, attended vs registered, attendance rate
+          — then export CSV or open the attendance roster.
         </p>
       </div>
 
@@ -268,9 +258,7 @@ export function AdminSuperLiveInsightsRosterPage() {
               </div>
               <div className="rounded-lg border border-neutral-200 p-3">
                 <p className="text-xs text-neutral-500">Avg attendance</p>
-                <p className="text-xl font-semibold">
-                  {formatRate(summary?.avgAttendanceRate)}
-                </p>
+                <p className="text-xl font-semibold">{formatRate(summary?.avgAttendanceRate)}</p>
               </div>
             </div>
 
@@ -280,7 +268,9 @@ export function AdminSuperLiveInsightsRosterPage() {
                 <input
                   className={fieldClassName}
                   value={searchQ}
-                  onChange={(event) => setSearchQ(event.target.value)}
+                  onChange={(event) => {
+                    setSearchQ(event.target.value);
+                  }}
                   placeholder="Session title"
                 />
               </label>
@@ -289,7 +279,9 @@ export function AdminSuperLiveInsightsRosterPage() {
                 <select
                   className={fieldClassName}
                   value={sessionStatus}
-                  onChange={(event) => setSessionStatus(event.target.value)}
+                  onChange={(event) => {
+                    setSessionStatus(event.target.value);
+                  }}
                 >
                   <option value="">All</option>
                   <option value="scheduled">Scheduled</option>
@@ -304,7 +296,9 @@ export function AdminSuperLiveInsightsRosterPage() {
                   type="date"
                   className={fieldClassName}
                   value={startedFrom}
-                  onChange={(event) => setStartedFrom(event.target.value)}
+                  onChange={(event) => {
+                    setStartedFrom(event.target.value);
+                  }}
                 />
               </label>
               <label className="grid gap-1 text-sm">
@@ -313,7 +307,9 @@ export function AdminSuperLiveInsightsRosterPage() {
                   type="date"
                   className={fieldClassName}
                   value={startedTo}
-                  onChange={(event) => setStartedTo(event.target.value)}
+                  onChange={(event) => {
+                    setStartedTo(event.target.value);
+                  }}
                 />
               </label>
               <label className="grid gap-1 text-sm">
@@ -321,7 +317,9 @@ export function AdminSuperLiveInsightsRosterPage() {
                 <input
                   className={fieldClassName}
                   value={minAttended}
-                  onChange={(event) => setMinAttended(event.target.value)}
+                  onChange={(event) => {
+                    setMinAttended(event.target.value);
+                  }}
                   placeholder="0"
                   inputMode="numeric"
                 />
@@ -331,7 +329,9 @@ export function AdminSuperLiveInsightsRosterPage() {
                 <select
                   className={fieldClassName}
                   value={sortBy}
-                  onChange={(event) => setSortBy(event.target.value)}
+                  onChange={(event) => {
+                    setSortBy(event.target.value);
+                  }}
                 >
                   <option value="scheduled_at">Scheduled</option>
                   <option value="started_at">Started</option>
@@ -348,9 +348,9 @@ export function AdminSuperLiveInsightsRosterPage() {
                 <select
                   className={fieldClassName}
                   value={sortDir}
-                  onChange={(event) =>
-                    setSortDir(event.target.value === "asc" ? "asc" : "desc")
-                  }
+                  onChange={(event) => {
+                    setSortDir(event.target.value === "asc" ? "asc" : "desc");
+                  }}
                 >
                   <option value="desc">Desc</option>
                   <option value="asc">Asc</option>
@@ -387,7 +387,9 @@ export function AdminSuperLiveInsightsRosterPage() {
                     <input
                       type="checkbox"
                       checked={checked}
-                      onChange={() => toggleColumn(column.key)}
+                      onChange={() => {
+                        toggleColumn(column.key);
+                      }}
                     />
                     {column.label}
                   </label>
@@ -402,27 +404,19 @@ export function AdminSuperLiveInsightsRosterPage() {
                 <table className="w-full text-left text-sm">
                   <thead className={analyticsTableHeadClassName}>
                     <tr>
-                      {columns.includes("title") ? (
-                        <th className="px-4 py-3">Live class</th>
-                      ) : null}
-                      {columns.includes("status") ? (
-                        <th className="px-4 py-3">Status</th>
-                      ) : null}
+                      {columns.includes("title") ? <th className="px-4 py-3">Live class</th> : null}
+                      {columns.includes("status") ? <th className="px-4 py-3">Status</th> : null}
                       {columns.includes("course_title") ? (
                         <th className="px-4 py-3">Course</th>
                       ) : null}
-                      {columns.includes("batch_name") ? (
-                        <th className="px-4 py-3">Batch</th>
-                      ) : null}
+                      {columns.includes("batch_name") ? <th className="px-4 py-3">Batch</th> : null}
                       {columns.includes("scheduled_at") ? (
                         <th className="px-4 py-3">Scheduled</th>
                       ) : null}
                       {columns.includes("started_at") ? (
                         <th className="px-4 py-3">Started</th>
                       ) : null}
-                      {columns.includes("ended_at") ? (
-                        <th className="px-4 py-3">Ended</th>
-                      ) : null}
+                      {columns.includes("ended_at") ? <th className="px-4 py-3">Ended</th> : null}
                       {columns.includes("duration_seconds") ? (
                         <th className="px-4 py-3">Duration</th>
                       ) : null}
@@ -453,8 +447,8 @@ export function AdminSuperLiveInsightsRosterPage() {
                           className="px-4 py-6 text-neutral-500"
                           colSpan={Math.max(1, columns.length)}
                         >
-                          No live sessions found. Create sessions and check in attendees to
-                          populate engagement metrics.
+                          No live sessions found. Create sessions and check in attendees to populate
+                          engagement metrics.
                         </td>
                       </tr>
                     ) : (
@@ -462,7 +456,9 @@ export function AdminSuperLiveInsightsRosterPage() {
                         <tr
                           key={session.id}
                           className={`${analyticsTableRowClassName} cursor-pointer`}
-                          onClick={() => openSession(session)}
+                          onClick={() => {
+                            openSession(session);
+                          }}
                         >
                           {columns.includes("title") ? (
                             <td className="px-4 py-3 font-medium">{session.title}</td>
@@ -477,22 +473,16 @@ export function AdminSuperLiveInsightsRosterPage() {
                             <td className="px-4 py-3">{session.batchName ?? "—"}</td>
                           ) : null}
                           {columns.includes("scheduled_at") ? (
-                            <td className="px-4 py-3 text-xs">
-                              {formatDate(session.scheduledAt)}
-                            </td>
+                            <td className="px-4 py-3 text-xs">{formatDate(session.scheduledAt)}</td>
                           ) : null}
                           {columns.includes("started_at") ? (
-                            <td className="px-4 py-3 text-xs">
-                              {formatDate(session.startedAt)}
-                            </td>
+                            <td className="px-4 py-3 text-xs">{formatDate(session.startedAt)}</td>
                           ) : null}
                           {columns.includes("ended_at") ? (
                             <td className="px-4 py-3 text-xs">{formatDate(session.endedAt)}</td>
                           ) : null}
                           {columns.includes("duration_seconds") ? (
-                            <td className="px-4 py-3">
-                              {formatDuration(session.durationSeconds)}
-                            </td>
+                            <td className="px-4 py-3">{formatDuration(session.durationSeconds)}</td>
                           ) : null}
                           {columns.includes("attended_count") ? (
                             <td className="px-4 py-3">{session.attendedCount}</td>
@@ -512,9 +502,7 @@ export function AdminSuperLiveInsightsRosterPage() {
                             </td>
                           ) : null}
                           {columns.includes("attendance_rate") ? (
-                            <td className="px-4 py-3">
-                              {formatRate(session.attendanceRate)}
-                            </td>
+                            <td className="px-4 py-3">{formatRate(session.attendanceRate)}</td>
                           ) : null}
                         </tr>
                       ))
@@ -530,7 +518,9 @@ export function AdminSuperLiveInsightsRosterPage() {
                   type="button"
                   className={ghostButtonClassName}
                   disabled={page <= 1 || loading}
-                  onClick={() => setPage((current) => Math.max(1, current - 1))}
+                  onClick={() => {
+                    setPage((current) => Math.max(1, current - 1));
+                  }}
                 >
                   Previous
                 </button>
@@ -541,7 +531,9 @@ export function AdminSuperLiveInsightsRosterPage() {
                   type="button"
                   className={ghostButtonClassName}
                   disabled={page >= totalPages || loading}
-                  onClick={() => setPage((current) => current + 1)}
+                  onClick={() => {
+                    setPage((current) => current + 1);
+                  }}
                 >
                   Next
                 </button>
@@ -563,10 +555,7 @@ export function AdminSuperLiveInsightsRosterPage() {
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
-              <Link
-                href="/admin/reports/live-class-attendance"
-                className={ghostButtonClassName}
-              >
+              <Link href="/admin/reports/live-class-attendance" className={ghostButtonClassName}>
                 Open attendance roster
               </Link>
               <button
@@ -587,9 +576,7 @@ export function AdminSuperLiveInsightsRosterPage() {
               <div className="mb-4 grid gap-3 sm:grid-cols-4">
                 <div className="rounded-lg border border-neutral-200 p-3">
                   <p className="text-xs text-neutral-500">Duration</p>
-                  <p className="text-xl font-semibold">
-                    {formatDuration(active.durationSeconds)}
-                  </p>
+                  <p className="text-xl font-semibold">{formatDuration(active.durationSeconds)}</p>
                 </div>
                 <div className="rounded-lg border border-neutral-200 p-3">
                   <p className="text-xs text-neutral-500">Attended</p>
@@ -603,9 +590,7 @@ export function AdminSuperLiveInsightsRosterPage() {
                 </div>
                 <div className="rounded-lg border border-neutral-200 p-3">
                   <p className="text-xs text-neutral-500">Attendance rate</p>
-                  <p className="text-xl font-semibold">
-                    {formatRate(active.attendanceRate)}
-                  </p>
+                  <p className="text-xl font-semibold">{formatRate(active.attendanceRate)}</p>
                 </div>
               </div>
 

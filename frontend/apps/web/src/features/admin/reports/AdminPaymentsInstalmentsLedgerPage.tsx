@@ -28,10 +28,7 @@ import {
   type PaymentInstalmentScheduleItem,
   type PaymentInstalmentSummary,
 } from "./admin-payments-roster-api";
-import {
-  downloadReportExport,
-  pollReportRunUntilComplete,
-} from "./admin-reports-api";
+import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
 import { PaymentsReportTabs } from "./PaymentsReportTabs";
 
 const PAGE_SIZE_OPTIONS = [
@@ -288,7 +285,9 @@ export function AdminPaymentsInstalmentsLedgerPage() {
       }
     }
     document.addEventListener("click", onDocClick);
-    return () => document.removeEventListener("click", onDocClick);
+    return () => {
+      document.removeEventListener("click", onDocClick);
+    };
   }, []);
 
   async function openPlan(planId: string) {
@@ -337,10 +336,10 @@ export function AdminPaymentsInstalmentsLedgerPage() {
         emailDownloadLink: true,
       });
       const completed = await pollReportRunUntilComplete(response.data.runId);
-      if (completed.status !== "succeeded") {
+      if (completed.status !== "completed") {
         throw new Error(completed.errorMessage ?? "Export failed.");
       }
-      await downloadReportExport(completed.id);
+      await downloadReportExport(completed.id, "csv");
     } catch (exportError) {
       setError(
         exportError instanceof ClientApiError
@@ -432,7 +431,9 @@ export function AdminPaymentsInstalmentsLedgerPage() {
               {columnsOpen ? (
                 <div
                   className="absolute right-0 top-[calc(100%+8px)] z-40 w-[min(420px,calc(100vw-2rem))] border border-[var(--admin-border)] bg-[var(--admin-surface-high)] shadow-2xl"
-                  onClick={(event) => event.stopPropagation()}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                  }}
                 >
                   <div className="grid max-h-[320px] grid-cols-1 gap-1 overflow-y-auto p-4 sm:grid-cols-2">
                     {PAYMENT_INSTALMENT_COLUMN_OPTIONS.map((column) => (
@@ -573,7 +574,9 @@ export function AdminPaymentsInstalmentsLedgerPage() {
                 className="w-full bg-transparent py-2 pl-6 font-mono text-xs outline-none"
                 placeholder="Learner, email, or product"
                 value={search}
-                onChange={(event) => setSearch(event.target.value)}
+                onChange={(event) => {
+                  setSearch(event.target.value);
+                }}
                 onKeyDown={(event) => {
                   if (event.key === "Enter") applyTextFilters();
                 }}
@@ -603,7 +606,9 @@ export function AdminPaymentsInstalmentsLedgerPage() {
               className="h-9 w-36 border-b border-[var(--admin-border)] bg-transparent font-mono text-xs outline-none focus:border-[var(--admin-primary)]"
               placeholder="Any"
               value={pricingPlanLabel}
-              onChange={(event) => setPricingPlanLabel(event.target.value)}
+              onChange={(event) => {
+                setPricingPlanLabel(event.target.value);
+              }}
               onKeyDown={(event) => {
                 if (event.key === "Enter") applyTextFilters();
               }}
@@ -617,7 +622,9 @@ export function AdminPaymentsInstalmentsLedgerPage() {
               className="h-9 w-40 border-b border-[var(--admin-border)] bg-transparent font-mono text-xs outline-none focus:border-[var(--admin-primary)]"
               placeholder="All products"
               value={productTitle}
-              onChange={(event) => setProductTitle(event.target.value)}
+              onChange={(event) => {
+                setProductTitle(event.target.value);
+              }}
               onKeyDown={(event) => {
                 if (event.key === "Enter") applyTextFilters();
               }}
@@ -692,7 +699,10 @@ export function AdminPaymentsInstalmentsLedgerPage() {
       ) : null}
 
       {loading ? (
-        <div className="border border-[var(--admin-border)] bg-[var(--admin-surface)]" aria-busy="true">
+        <div
+          className="border border-[var(--admin-border)] bg-[var(--admin-surface)]"
+          aria-busy="true"
+        >
           <div className="grid grid-cols-6 gap-4 border-b border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-4 py-3">
             {Array.from({ length: 6 }).map((_, index) => (
               <Shimmer key={index} className="h-3" />
@@ -825,7 +835,9 @@ export function AdminPaymentsInstalmentsLedgerPage() {
                             <Link
                               href={`/admin/reports/payments/instalments/${plan.id}`}
                               className="text-sm font-medium text-[var(--admin-primary)] hover:underline"
-                              onClick={(event) => event.stopPropagation()}
+                              onClick={(event) => {
+                                event.stopPropagation();
+                              }}
                             >
                               {plan.learnerName ?? "Learner"}
                             </Link>
@@ -853,7 +865,7 @@ export function AdminPaymentsInstalmentsLedgerPage() {
                           <div className="h-1.5 w-28 overflow-hidden rounded-full bg-[var(--admin-surface-variant)]">
                             <div
                               className="h-full bg-[var(--admin-primary)]"
-                              style={{ width: `${progress}%` }}
+                              style={{ width: `${String(progress)}%` }}
                             />
                           </div>
                         </td>
@@ -915,7 +927,9 @@ export function AdminPaymentsInstalmentsLedgerPage() {
                   type="button"
                   className="p-1 disabled:opacity-40"
                   disabled={page <= 1}
-                  onClick={() => setPage((current) => Math.max(1, current - 1))}
+                  onClick={() => {
+                    setPage((current) => Math.max(1, current - 1));
+                  }}
                   aria-label="Previous page"
                 >
                   <ChevronLeft className="h-5 w-5" aria-hidden="true" />
@@ -924,7 +938,9 @@ export function AdminPaymentsInstalmentsLedgerPage() {
                   type="button"
                   className="p-1 disabled:opacity-40"
                   disabled={totalPages === 0 || page >= totalPages}
-                  onClick={() => setPage((current) => current + 1)}
+                  onClick={() => {
+                    setPage((current) => current + 1);
+                  }}
                   aria-label="Next page"
                 >
                   <ChevronRight className="h-5 w-5" aria-hidden="true" />
@@ -979,7 +995,8 @@ export function AdminPaymentsInstalmentsLedgerPage() {
                     >
                       <div>
                         <div className="font-mono text-xs text-[var(--admin-on-surface)]">
-                          #{item.sequenceNo} · {formatMoney(item.amountCents, selectedPlan?.currency ?? "USD")}
+                          #{item.sequenceNo} ·{" "}
+                          {formatMoney(item.amountCents, selectedPlan?.currency ?? "USD")}
                         </div>
                         <div className="font-mono text-[10px] text-[var(--admin-on-surface-variant)]">
                           Due {formatDate(item.dueAt)}

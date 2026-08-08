@@ -37,10 +37,14 @@ import {
   type AffiliatesPayload,
   type AffiliatesSummary,
 } from "./admin-sales-marketing-roster-api";
-import {
-  downloadReportExport,
-  pollReportRunUntilComplete,
-} from "./admin-reports-api";
+import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
+
+function defined<T>(value: T, message = "Expected value to be defined"): NonNullable<T> {
+  if (value == null) {
+    throw new Error(message);
+  }
+  return value;
+}
 
 type StatusFilter = "all" | "ACTIVE" | "INACTIVE";
 type TierFilter = "any" | "STANDARD" | "PREMIUM";
@@ -78,7 +82,7 @@ function initials(name: string | null, email: string | null): string {
   const source = (name?.trim() || email?.trim() || "?").replace(/\s+/g, " ");
   const parts = source.split(" ").filter(Boolean);
   if (parts.length >= 2) {
-    return `${parts[0]![0] ?? ""}${parts[1]![0] ?? ""}`.toUpperCase();
+    return `${defined(parts[0])[0] ?? ""}${defined(parts[1])[0] ?? ""}`.toUpperCase();
   }
   return source.slice(0, 2).toUpperCase();
 }
@@ -375,8 +379,12 @@ export function AdminAffiliatesPanel() {
 
   useEffect(() => {
     if (!toast) return;
-    const timer = window.setTimeout(() => setToast(null), 3200);
-    return () => window.clearTimeout(timer);
+    const timer = window.setTimeout(() => {
+      setToast(null);
+    }, 3200);
+    return () => {
+      window.clearTimeout(timer);
+    };
   }, [toast]);
 
   useEffect(() => {
@@ -388,18 +396,22 @@ export function AdminAffiliatesPanel() {
       }
     }
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+    };
   }, [drawerOpen]);
 
   useEffect(() => {
     if (!menuOpenId) return;
     function onPointer(event: Event) {
       const target = event.target as HTMLElement | null;
-      if (target?.closest?.("[data-row-menu]")) return;
+      if (target?.closest("[data-row-menu]")) return;
       setMenuOpenId(null);
     }
     window.addEventListener("mousedown", onPointer);
-    return () => window.removeEventListener("mousedown", onPointer);
+    return () => {
+      window.removeEventListener("mousedown", onPointer);
+    };
   }, [menuOpenId]);
 
   const applyFilters = () => {
@@ -595,7 +607,9 @@ export function AdminAffiliatesPanel() {
     const ok = await copyToClipboard(code);
     if (ok) {
       setCopiedCodeId(id);
-      window.setTimeout(() => setCopiedCodeId(null), 1800);
+      window.setTimeout(() => {
+        setCopiedCodeId(null);
+      }, 1800);
     } else {
       setToast("Couldn't copy coupon.");
     }
@@ -616,8 +630,7 @@ export function AdminAffiliatesPanel() {
     payload != null &&
     pageInfo != null &&
     pageInfo.totalCount === 0;
-  const isTrulyEmpty =
-    isEmpty && !filtersActive && (summary?.totalCount ?? 0) === 0;
+  const isTrulyEmpty = isEmpty && !filtersActive && (summary?.totalCount ?? 0) === 0;
   const isFilteredEmpty = isEmpty && !isTrulyEmpty;
 
   const allOnPageSelected =
@@ -692,7 +705,10 @@ export function AdminAffiliatesPanel() {
 
         <div className="flex flex-wrap items-center gap-2">
           <label className="inline-flex h-9 items-center gap-2 rounded border border-[var(--admin-outline)] bg-[var(--admin-surface)] px-3 text-xs text-[var(--admin-on-surface)] transition-colors hover:bg-[var(--admin-surface-high)]">
-            <CalendarDays className="h-4 w-4 text-[var(--admin-on-surface-variant)]" aria-hidden="true" />
+            <CalendarDays
+              className="h-4 w-4 text-[var(--admin-on-surface-variant)]"
+              aria-hidden="true"
+            />
             <span className="sr-only">Activity from</span>
             <input
               type="date"
@@ -737,7 +753,9 @@ export function AdminAffiliatesPanel() {
           <button
             type="button"
             className="inline-flex h-9 items-center gap-2 rounded bg-[var(--admin-primary-strong)] px-4 text-xs font-medium text-[var(--admin-on-primary)] transition-colors hover:bg-[var(--admin-primary)] active:translate-y-px disabled:opacity-50"
-            onClick={() => openPayout(null)}
+            onClick={() => {
+              openPayout(null);
+            }}
             disabled={Boolean(error) || viewTab === "pending"}
           >
             <Banknote className="h-4 w-4" aria-hidden="true" />
@@ -770,7 +788,10 @@ export function AdminAffiliatesPanel() {
           role="alert"
         >
           <div className="flex items-start gap-3">
-            <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-[var(--admin-danger)]" aria-hidden="true" />
+            <AlertTriangle
+              className="mt-0.5 h-5 w-5 shrink-0 text-[var(--admin-danger)]"
+              aria-hidden="true"
+            />
             <div>
               <h2 className="text-base font-semibold text-[var(--admin-danger)]">
                 Failed to load affiliates.
@@ -822,7 +843,9 @@ export function AdminAffiliatesPanel() {
                 </p>
                 <p className="font-mono text-lg font-medium text-[var(--admin-on-surface)]">
                   {formatMoneyAmount(summary.commissionCents)}
-                  <span className="ml-1 text-[11px] font-normal opacity-70">{summary.currency}</span>
+                  <span className="ml-1 text-[11px] font-normal opacity-70">
+                    {summary.currency}
+                  </span>
                 </p>
               </div>
 
@@ -832,7 +855,9 @@ export function AdminAffiliatesPanel() {
                 </p>
                 <p className="font-mono text-lg font-medium text-[var(--admin-warning)]">
                   {formatMoneyAmount(summary.unpaidCents)}
-                  <span className="ml-1 text-[11px] font-normal opacity-70">{summary.currency}</span>
+                  <span className="ml-1 text-[11px] font-normal opacity-70">
+                    {summary.currency}
+                  </span>
                 </p>
                 <p className="mt-2 text-[11px] text-[var(--admin-on-surface-variant)]">
                   across {summary.unpaidAffiliateCount.toLocaleString()} affiliate
@@ -846,7 +871,9 @@ export function AdminAffiliatesPanel() {
                 </p>
                 <p className="font-mono text-lg font-medium text-[var(--admin-success)]">
                   {formatMoneyAmount(summary.paidCents)}
-                  <span className="ml-1 text-[11px] font-normal opacity-70">{summary.currency}</span>
+                  <span className="ml-1 text-[11px] font-normal opacity-70">
+                    {summary.currency}
+                  </span>
                 </p>
               </div>
 
@@ -876,7 +903,9 @@ export function AdminAffiliatesPanel() {
                   className="h-9 w-full rounded border border-[var(--admin-outline)] bg-[var(--admin-surface)] pl-8 pr-3 text-sm text-[var(--admin-on-surface)] outline-none transition-colors focus:border-[var(--admin-primary)] focus:ring-1 focus:ring-[var(--admin-primary)]"
                   placeholder="Name, email, or coupon"
                   value={draftQ}
-                  onChange={(event) => setDraftQ(event.target.value)}
+                  onChange={(event) => {
+                    setDraftQ(event.target.value);
+                  }}
                   onKeyDown={(event) => {
                     if (event.key === "Enter") applyFilters();
                   }}
@@ -887,7 +916,9 @@ export function AdminAffiliatesPanel() {
                 <Select
                   ariaLabel="Status"
                   value={draftStatus}
-                  onValueChange={(value) => setDraftStatus(value as StatusFilter)}
+                  onValueChange={(value) => {
+                    setDraftStatus(value as StatusFilter);
+                  }}
                   options={[
                     { value: "all", label: "Status: All" },
                     { value: "ACTIVE", label: "Active" },
@@ -901,7 +932,9 @@ export function AdminAffiliatesPanel() {
                 <Select
                   ariaLabel="Tier"
                   value={draftTier}
-                  onValueChange={(value) => setDraftTier(value as TierFilter)}
+                  onValueChange={(value) => {
+                    setDraftTier(value as TierFilter);
+                  }}
                   options={[
                     { value: "any", label: "Tier: Any" },
                     { value: "STANDARD", label: "Standard" },
@@ -915,7 +948,9 @@ export function AdminAffiliatesPanel() {
                 <Select
                   ariaLabel="Unpaid band"
                   value={draftUnpaidBand}
-                  onValueChange={(value) => setDraftUnpaidBand(value as UnpaidBand)}
+                  onValueChange={(value) => {
+                    setDraftUnpaidBand(value as UnpaidBand);
+                  }}
                   options={[
                     { value: "any", label: "Unpaid: Any" },
                     { value: "has_unpaid", label: "Has unpaid" },
@@ -931,7 +966,9 @@ export function AdminAffiliatesPanel() {
                 <input
                   type="date"
                   value={draftSignedUpFrom}
-                  onChange={(event) => setDraftSignedUpFrom(event.target.value)}
+                  onChange={(event) => {
+                    setDraftSignedUpFrom(event.target.value);
+                  }}
                   className="h-9 rounded border border-[var(--admin-outline)] bg-[var(--admin-surface)] px-3 text-sm text-[var(--admin-on-surface)] outline-none focus:border-[var(--admin-primary)] focus:ring-1 focus:ring-[var(--admin-primary)]"
                   aria-label="Signed up from"
                 />
@@ -942,7 +979,9 @@ export function AdminAffiliatesPanel() {
                 <input
                   type="date"
                   value={draftSignedUpTo}
-                  onChange={(event) => setDraftSignedUpTo(event.target.value)}
+                  onChange={(event) => {
+                    setDraftSignedUpTo(event.target.value);
+                  }}
                   className="h-9 rounded border border-[var(--admin-outline)] bg-[var(--admin-surface)] px-3 text-sm text-[var(--admin-on-surface)] outline-none focus:border-[var(--admin-primary)] focus:ring-1 focus:ring-[var(--admin-primary)]"
                   aria-label="Signed up to"
                 />
@@ -959,7 +998,9 @@ export function AdminAffiliatesPanel() {
 
             {filterChips.length > 0 ? (
               <div className="mt-3 flex flex-wrap items-center gap-2">
-                <span className="text-xs text-[var(--admin-on-surface-variant)]">Active filters:</span>
+                <span className="text-xs text-[var(--admin-on-surface-variant)]">
+                  Active filters:
+                </span>
                 {filterChips.map((chip) => (
                   <span
                     key={chip.key}
@@ -991,7 +1032,9 @@ export function AdminAffiliatesPanel() {
             ).map((tab) => {
               const active = viewTab === tab.key;
               const badge =
-                tab.key === "pending" ? (summary?.pendingApprovalCount ?? pendingItems.length) : null;
+                tab.key === "pending"
+                  ? (summary?.pendingApprovalCount ?? pendingItems.length)
+                  : null;
               return (
                 <button
                   key={tab.key}
@@ -1045,7 +1088,10 @@ export function AdminAffiliatesPanel() {
                 </div>
               ) : pendingItems.length === 0 ? (
                 <div className="flex min-h-[240px] flex-col items-center justify-center p-8 text-center">
-                  <Users className="mb-4 h-8 w-8 text-[var(--admin-on-surface-variant)]" aria-hidden="true" />
+                  <Users
+                    className="mb-4 h-8 w-8 text-[var(--admin-on-surface-variant)]"
+                    aria-hidden="true"
+                  />
                   <h2 className="text-base font-semibold text-[var(--admin-on-surface)]">
                     No pending affiliate requests
                   </h2>
@@ -1118,7 +1164,10 @@ export function AdminAffiliatesPanel() {
           {viewTab !== "pending" && isTrulyEmpty ? (
             <div className="flex min-h-[360px] flex-col items-center justify-center rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] p-8 text-center">
               <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--admin-surface-high)]">
-                <Users className="h-8 w-8 text-[var(--admin-on-surface-variant)]" aria-hidden="true" />
+                <Users
+                  className="h-8 w-8 text-[var(--admin-on-surface-variant)]"
+                  aria-hidden="true"
+                />
               </div>
               <h2 className="text-base font-semibold text-[var(--admin-on-surface)]">
                 No affiliates yet
@@ -1139,7 +1188,10 @@ export function AdminAffiliatesPanel() {
 
           {viewTab !== "pending" && isFilteredEmpty ? (
             <div className="flex min-h-[240px] flex-col items-center justify-center rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] p-8 text-center">
-              <Search className="mb-4 h-8 w-8 text-[var(--admin-on-surface-variant)]" aria-hidden="true" />
+              <Search
+                className="mb-4 h-8 w-8 text-[var(--admin-on-surface-variant)]"
+                aria-hidden="true"
+              />
               <h2 className="text-base font-semibold text-[var(--admin-on-surface)]">
                 No affiliates match these filters
               </h2>
@@ -1194,7 +1246,10 @@ export function AdminAffiliatesPanel() {
                       const muted = isSuspendedStatus(row.status);
                       const share =
                         maxRevenue > 0
-                          ? Math.max(4, Math.round((row.revenueContributionCents / maxRevenue) * 100))
+                          ? Math.max(
+                              4,
+                              Math.round((row.revenueContributionCents / maxRevenue) * 100),
+                            )
                           : 0;
                       const selected = selectedIds.has(row.affiliateId);
                       return (
@@ -1207,11 +1262,15 @@ export function AdminAffiliatesPanel() {
                               ? "bg-[color-mix(in_srgb,var(--admin-primary)_6%,var(--admin-surface))]"
                               : "",
                           ].join(" ")}
-                          onClick={() => openDrawer(row)}
+                          onClick={() => {
+                            openDrawer(row);
+                          }}
                         >
                           <td
                             className="px-4 text-center"
-                            onClick={(event) => event.stopPropagation()}
+                            onClick={(event) => {
+                              event.stopPropagation();
+                            }}
                           >
                             <input
                               type="checkbox"
@@ -1263,7 +1322,9 @@ export function AdminAffiliatesPanel() {
                           </td>
                           <td
                             className="px-4 py-2"
-                            onClick={(event) => event.stopPropagation()}
+                            onClick={(event) => {
+                              event.stopPropagation();
+                            }}
                           >
                             <button
                               type="button"
@@ -1273,9 +1334,15 @@ export function AdminAffiliatesPanel() {
                             >
                               {row.couponCode || "—"}
                               {copiedCodeId === row.affiliateId ? (
-                                <Check className="h-3 w-3 text-[var(--admin-success)]" aria-hidden="true" />
+                                <Check
+                                  className="h-3 w-3 text-[var(--admin-success)]"
+                                  aria-hidden="true"
+                                />
                               ) : (
-                                <Copy className="h-3 w-3 text-[var(--admin-on-surface-variant)]" aria-hidden="true" />
+                                <Copy
+                                  className="h-3 w-3 text-[var(--admin-on-surface-variant)]"
+                                  aria-hidden="true"
+                                />
                               )}
                             </button>
                           </td>
@@ -1287,7 +1354,7 @@ export function AdminAffiliatesPanel() {
                               <div className="hidden h-1.5 w-14 overflow-hidden rounded-full bg-[var(--admin-surface-high)] xl:flex">
                                 <div
                                   className="h-full rounded-full bg-[var(--admin-on-surface)]"
-                                  style={{ width: `${share}%` }}
+                                  style={{ width: `${String(share)}%` }}
                                 />
                               </div>
                             </div>
@@ -1312,7 +1379,9 @@ export function AdminAffiliatesPanel() {
                           </td>
                           <td
                             className="relative px-2 py-2 text-right"
-                            onClick={(event) => event.stopPropagation()}
+                            onClick={(event) => {
+                              event.stopPropagation();
+                            }}
                             data-row-menu
                           >
                             <div className="inline-flex items-center gap-0.5">
@@ -1320,11 +1389,11 @@ export function AdminAffiliatesPanel() {
                                 type="button"
                                 className="rounded p-1 text-[var(--admin-on-surface-variant)] hover:bg-[var(--admin-surface-high)] hover:text-[var(--admin-on-surface)]"
                                 aria-label="More actions"
-                                onClick={() =>
+                                onClick={() => {
                                   setMenuOpenId((current) =>
                                     current === row.affiliateId ? null : row.affiliateId,
-                                  )
-                                }
+                                  );
+                                }}
                               >
                                 <MoreHorizontal className="h-4 w-4" aria-hidden="true" />
                               </button>
@@ -1332,7 +1401,9 @@ export function AdminAffiliatesPanel() {
                                 type="button"
                                 className="rounded p-1 text-[var(--admin-on-surface-variant)] hover:bg-[var(--admin-surface-high)] hover:text-[var(--admin-on-surface)]"
                                 aria-label={`Open ${row.learnerName ?? "affiliate"} detail`}
-                                onClick={() => openDrawer(row)}
+                                onClick={() => {
+                                  openDrawer(row);
+                                }}
                               >
                                 <ChevronRight className="h-4 w-4" aria-hidden="true" />
                               </button>
@@ -1342,7 +1413,9 @@ export function AdminAffiliatesPanel() {
                                 <button
                                   type="button"
                                   className="flex w-full px-3 py-2 text-left text-xs text-[var(--admin-on-surface)] hover:bg-[var(--admin-surface-high)]"
-                                  onClick={() => openDrawer(row)}
+                                  onClick={() => {
+                                    openDrawer(row);
+                                  }}
                                 >
                                   View detail
                                 </button>
@@ -1350,7 +1423,9 @@ export function AdminAffiliatesPanel() {
                                   type="button"
                                   className="flex w-full px-3 py-2 text-left text-xs text-[var(--admin-on-surface)] hover:bg-[var(--admin-surface-high)] disabled:opacity-40"
                                   disabled={row.unpaidCents <= 0}
-                                  onClick={() => openPayout(row)}
+                                  onClick={() => {
+                                    openPayout(row);
+                                  }}
                                 >
                                   Record payout
                                 </button>
@@ -1366,7 +1441,9 @@ export function AdminAffiliatesPanel() {
                                   <button
                                     type="button"
                                     className="flex w-full px-3 py-2 text-left text-xs text-[var(--admin-danger)] hover:bg-[color-mix(in_srgb,var(--admin-danger)_8%,transparent)]"
-                                    onClick={() => openSuspend(row)}
+                                    onClick={() => {
+                                      openSuspend(row);
+                                    }}
                                   >
                                     Suspend
                                   </button>
@@ -1407,7 +1484,7 @@ export function AdminAffiliatesPanel() {
                     {pageInfo.totalCount.toLocaleString()} affiliate
                     {pageInfo.totalCount === 1 ? "" : "s"}
                     {pageInfo.totalPages > 1
-                      ? ` · Page ${pageInfo.page} of ${pageInfo.totalPages}`
+                      ? ` · Page ${String(pageInfo.page)} of ${String(pageInfo.totalPages)}`
                       : null}
                   </span>
                   {pageInfo.totalPages > 1 ? (
@@ -1416,7 +1493,9 @@ export function AdminAffiliatesPanel() {
                         type="button"
                         className="rounded border border-[var(--admin-outline)] px-3 py-1.5 disabled:opacity-40"
                         disabled={!pageInfo.hasPreviousPage || loading}
-                        onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+                        onClick={() => {
+                          setPage((prev) => Math.max(1, prev - 1));
+                        }}
                       >
                         Previous
                       </button>
@@ -1424,7 +1503,9 @@ export function AdminAffiliatesPanel() {
                         type="button"
                         className="rounded border border-[var(--admin-outline)] px-3 py-1.5 disabled:opacity-40"
                         disabled={!pageInfo.hasNextPage || loading}
-                        onClick={() => setPage((prev) => prev + 1)}
+                        onClick={() => {
+                          setPage((prev) => prev + 1);
+                        }}
                       >
                         Next
                       </button>
@@ -1468,7 +1549,9 @@ export function AdminAffiliatesPanel() {
               type="button"
               className="inline-flex h-8 items-center gap-1.5 rounded bg-[var(--admin-primary-strong)] px-3 text-xs font-medium text-[var(--admin-on-primary)] disabled:opacity-50"
               disabled={busy || selectedUnpaidCents <= 0}
-              onClick={() => openPayout(null)}
+              onClick={() => {
+                openPayout(null);
+              }}
             >
               <Banknote className="h-3.5 w-3.5" aria-hidden="true" />
               Record payout
@@ -1477,7 +1560,9 @@ export function AdminAffiliatesPanel() {
               type="button"
               className="inline-flex h-8 w-8 items-center justify-center rounded border border-[var(--admin-outline)] text-[var(--admin-on-surface-variant)] hover:bg-[var(--admin-surface-high)]"
               aria-label="Clear selection"
-              onClick={() => setSelectedIds(new Set())}
+              onClick={() => {
+                setSelectedIds(new Set());
+              }}
             >
               <X className="h-4 w-4" aria-hidden="true" />
             </button>
@@ -1549,7 +1634,10 @@ export function AdminAffiliatesPanel() {
                         >
                           {detail.affiliate.couponCode}
                           {copiedCodeId === `drawer-${detail.affiliate.affiliateId}` ? (
-                            <Check className="h-3 w-3 text-[var(--admin-success)]" aria-hidden="true" />
+                            <Check
+                              className="h-3 w-3 text-[var(--admin-success)]"
+                              aria-hidden="true"
+                            />
                           ) : (
                             <Copy className="h-3 w-3" aria-hidden="true" />
                           )}
@@ -1625,7 +1713,11 @@ export function AdminAffiliatesPanel() {
                         <p className="text-[11px] uppercase tracking-wider text-[var(--admin-on-surface-variant)]">
                           {metric.label}
                         </p>
-                        <p className={["mt-1 font-mono text-base font-semibold", metric.tone].join(" ")}>
+                        <p
+                          className={["mt-1 font-mono text-base font-semibold", metric.tone].join(
+                            " ",
+                          )}
+                        >
                           {metric.value}
                           <span className="ml-1 text-[10px] font-normal opacity-70">
                             {detail.affiliate.currency}
@@ -1640,7 +1732,9 @@ export function AdminAffiliatesPanel() {
                       Earnings over time
                     </h3>
                     {detail.earningsTrend.length === 0 ? (
-                      <p className="text-sm text-[var(--admin-on-surface-variant)]">No earnings yet.</p>
+                      <p className="text-sm text-[var(--admin-on-surface-variant)]">
+                        No earnings yet.
+                      </p>
                     ) : (
                       <div className="flex h-28 items-end gap-1.5 rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-3 py-3">
                         {detail.earningsTrend.map((point) => {
@@ -1656,7 +1750,7 @@ export function AdminAffiliatesPanel() {
                             >
                               <div
                                 className="w-full rounded-t bg-[var(--admin-primary)] transition-opacity group-hover:opacity-80"
-                                style={{ height: `${height}%` }}
+                                style={{ height: `${String(height)}%` }}
                               />
                               <span className="mt-1 truncate text-[9px] text-[var(--admin-on-surface-variant)]">
                                 {point.month.slice(5) || point.month}
@@ -1678,7 +1772,9 @@ export function AdminAffiliatesPanel() {
                       ) : null}
                     </h3>
                     {detail.orders.length === 0 ? (
-                      <p className="text-sm text-[var(--admin-on-surface-variant)]">No attributed orders.</p>
+                      <p className="text-sm text-[var(--admin-on-surface-variant)]">
+                        No attributed orders.
+                      </p>
                     ) : (
                       <div className="overflow-hidden rounded-lg border border-[var(--admin-border)]">
                         <table className="w-full text-left text-xs">
@@ -1718,7 +1814,9 @@ export function AdminAffiliatesPanel() {
                       Payout history
                     </h3>
                     {detail.payouts.length === 0 ? (
-                      <p className="text-sm text-[var(--admin-on-surface-variant)]">No payouts recorded.</p>
+                      <p className="text-sm text-[var(--admin-on-surface-variant)]">
+                        No payouts recorded.
+                      </p>
                     ) : (
                       <ul className="space-y-2">
                         {detail.payouts.map((payout) => (
@@ -1776,7 +1874,9 @@ export function AdminAffiliatesPanel() {
                   type="button"
                   className="inline-flex h-9 items-center gap-1.5 rounded bg-[var(--admin-primary-strong)] px-3 text-xs font-medium text-[var(--admin-on-primary)] disabled:opacity-50"
                   disabled={detail.affiliate.unpaidCents <= 0 || busy}
-                  onClick={() => openPayout(detail.affiliate)}
+                  onClick={() => {
+                    openPayout(detail.affiliate);
+                  }}
                 >
                   <Banknote className="h-3.5 w-3.5" aria-hidden="true" />
                   Record payout
@@ -1785,7 +1885,9 @@ export function AdminAffiliatesPanel() {
                   <button
                     type="button"
                     className="ml-auto inline-flex h-9 items-center rounded border border-[color-mix(in_srgb,var(--admin-danger)_40%,var(--admin-outline))] px-3 text-xs text-[var(--admin-danger)] hover:bg-[color-mix(in_srgb,var(--admin-danger)_8%,transparent)]"
-                    onClick={() => openSuspend(detail.affiliate)}
+                    onClick={() => {
+                      openSuspend(detail.affiliate);
+                    }}
                   >
                     Suspend
                   </button>
@@ -1799,14 +1901,18 @@ export function AdminAffiliatesPanel() {
       {payoutTarget ? (
         <div
           className="fixed inset-0 z-[60] flex items-center justify-center bg-[color-mix(in_srgb,var(--admin-on-surface)_45%,transparent)] p-4 backdrop-blur-sm"
-          onClick={() => !busy && setPayoutTarget(null)}
+          onClick={() => {
+            if (!busy) setPayoutTarget(null);
+          }}
         >
           <div
             role="dialog"
             aria-modal="true"
             aria-labelledby="record-payout-title"
             className="flex w-full max-w-[480px] flex-col overflow-hidden rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)] shadow-[0_8px_30px_color-mix(in_srgb,var(--admin-on-surface)_8%,transparent)]"
-            onClick={(event) => event.stopPropagation()}
+            onClick={(event) => {
+              event.stopPropagation();
+            }}
           >
             <div className="flex items-center justify-between border-b border-[var(--admin-border)] px-6 py-5">
               <h2
@@ -1818,7 +1924,9 @@ export function AdminAffiliatesPanel() {
               <button
                 type="button"
                 className="text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-on-surface)]"
-                onClick={() => setPayoutTarget(null)}
+                onClick={() => {
+                  setPayoutTarget(null);
+                }}
                 aria-label="Close"
                 disabled={busy}
               >
@@ -1855,7 +1963,9 @@ export function AdminAffiliatesPanel() {
                 Method
                 <input
                   value={payoutMethod}
-                  onChange={(event) => setPayoutMethod(event.target.value)}
+                  onChange={(event) => {
+                    setPayoutMethod(event.target.value);
+                  }}
                   placeholder="Bank transfer, PayPal…"
                   className="h-9 rounded border border-[var(--admin-outline)] bg-[var(--admin-surface)] px-3 text-sm text-[var(--admin-on-surface)] outline-none focus:border-[var(--admin-primary)] focus:ring-1 focus:ring-[var(--admin-primary)]"
                 />
@@ -1866,7 +1976,9 @@ export function AdminAffiliatesPanel() {
                 <input
                   type="date"
                   value={payoutDate}
-                  onChange={(event) => setPayoutDate(event.target.value)}
+                  onChange={(event) => {
+                    setPayoutDate(event.target.value);
+                  }}
                   className="h-9 rounded border border-[var(--admin-outline)] bg-[var(--admin-surface)] px-3 text-sm text-[var(--admin-on-surface)] outline-none focus:border-[var(--admin-primary)] focus:ring-1 focus:ring-[var(--admin-primary)]"
                 />
               </label>
@@ -1875,7 +1987,9 @@ export function AdminAffiliatesPanel() {
                 Reference
                 <input
                   value={payoutReference}
-                  onChange={(event) => setPayoutReference(event.target.value)}
+                  onChange={(event) => {
+                    setPayoutReference(event.target.value);
+                  }}
                   placeholder="Transaction ID or memo"
                   className="h-9 rounded border border-[var(--admin-outline)] bg-[var(--admin-surface)] px-3 text-sm text-[var(--admin-on-surface)] outline-none focus:border-[var(--admin-primary)] focus:ring-1 focus:ring-[var(--admin-primary)]"
                 />
@@ -1885,7 +1999,9 @@ export function AdminAffiliatesPanel() {
                 <input
                   type="checkbox"
                   checked={payoutNotify}
-                  onChange={(event) => setPayoutNotify(event.target.checked)}
+                  onChange={(event) => {
+                    setPayoutNotify(event.target.checked);
+                  }}
                   className="rounded border-[var(--admin-outline)] text-[var(--admin-primary)] focus:ring-[var(--admin-primary)]"
                 />
                 Notify affiliate (informational — saved in payout note)
@@ -1902,7 +2018,9 @@ export function AdminAffiliatesPanel() {
                 type="button"
                 className="inline-flex h-9 items-center rounded border border-[var(--admin-outline)] px-4 text-xs text-[var(--admin-on-surface)] disabled:opacity-50"
                 disabled={busy}
-                onClick={() => setPayoutTarget(null)}
+                onClick={() => {
+                  setPayoutTarget(null);
+                }}
               >
                 Cancel
               </button>
@@ -1922,14 +2040,18 @@ export function AdminAffiliatesPanel() {
       {suspendTarget ? (
         <div
           className="fixed inset-0 z-[60] flex items-center justify-center bg-[color-mix(in_srgb,var(--admin-on-surface)_45%,transparent)] p-4 backdrop-blur-sm"
-          onClick={() => !busy && setSuspendTarget(null)}
+          onClick={() => {
+            if (!busy) setSuspendTarget(null);
+          }}
         >
           <div
             role="dialog"
             aria-modal="true"
             aria-labelledby="suspend-affiliate-title"
             className="flex w-full max-w-[480px] flex-col overflow-hidden rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)] shadow-[0_8px_30px_color-mix(in_srgb,var(--admin-on-surface)_8%,transparent)]"
-            onClick={(event) => event.stopPropagation()}
+            onClick={(event) => {
+              event.stopPropagation();
+            }}
           >
             <div className="flex items-center justify-between border-b border-[var(--admin-border)] px-6 py-5">
               <h2
@@ -1941,7 +2063,9 @@ export function AdminAffiliatesPanel() {
               <button
                 type="button"
                 className="text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-on-surface)]"
-                onClick={() => setSuspendTarget(null)}
+                onClick={() => {
+                  setSuspendTarget(null);
+                }}
                 aria-label="Close"
                 disabled={busy}
               >
@@ -1950,7 +2074,10 @@ export function AdminAffiliatesPanel() {
             </div>
             <div className="space-y-4 p-6">
               <div className="flex items-start gap-3 rounded-lg border border-[color-mix(in_srgb,var(--admin-warning)_30%,var(--admin-border))] bg-[color-mix(in_srgb,var(--admin-warning)_8%,var(--admin-surface))] p-3">
-                <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-[var(--admin-warning)]" aria-hidden="true" />
+                <AlertTriangle
+                  className="mt-0.5 h-5 w-5 shrink-0 text-[var(--admin-warning)]"
+                  aria-hidden="true"
+                />
                 <p className="text-sm text-[var(--admin-on-surface)]">
                   Suspending{" "}
                   <span className="font-semibold">
@@ -1963,7 +2090,9 @@ export function AdminAffiliatesPanel() {
                 Reason (optional)
                 <textarea
                   value={suspendReason}
-                  onChange={(event) => setSuspendReason(event.target.value)}
+                  onChange={(event) => {
+                    setSuspendReason(event.target.value);
+                  }}
                   rows={3}
                   placeholder="Why is this affiliate being suspended?"
                   className="rounded border border-[var(--admin-outline)] bg-[var(--admin-surface)] px-3 py-2 text-sm text-[var(--admin-on-surface)] outline-none focus:border-[var(--admin-primary)] focus:ring-1 focus:ring-[var(--admin-primary)]"
@@ -1980,7 +2109,9 @@ export function AdminAffiliatesPanel() {
                 type="button"
                 className="inline-flex h-9 items-center rounded border border-[var(--admin-outline)] px-4 text-xs text-[var(--admin-on-surface)] disabled:opacity-50"
                 disabled={busy}
-                onClick={() => setSuspendTarget(null)}
+                onClick={() => {
+                  setSuspendTarget(null);
+                }}
               >
                 Cancel
               </button>

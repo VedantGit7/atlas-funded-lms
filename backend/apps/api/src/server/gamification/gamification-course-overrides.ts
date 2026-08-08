@@ -1,7 +1,7 @@
 import type { TenantTx } from "@atlas/db";
 import type { GamificationRulesConfig } from "./gamification.types";
 
-type CourseGamificationOverrides = Pick<GamificationRulesConfig, "xpRules">;
+type CourseGamificationOverrides = Partial<Pick<GamificationRulesConfig, "xpRules">>;
 
 export async function readCourseGamificationOverrides(
   tx: TenantTx,

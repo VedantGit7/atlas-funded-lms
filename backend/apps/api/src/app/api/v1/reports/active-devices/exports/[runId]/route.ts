@@ -16,5 +16,5 @@ export const GET = createTenantRoute<
   params: deviceExportRunParamsSchema,
   input: noBodySchema,
   output: deviceExportRunDetailResponseSchema,
-  handler: async ({ tx, ctx, params }) => getActiveDevicesExportRun(tx, ctx, params.runId),
+  handler: async ({ tx, ctx, params }) => getActiveDevicesExportRun(tx, ctx, params["runId"]),
 });

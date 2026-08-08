@@ -24,7 +24,7 @@ export const GET = createTenantRoute<
   metadata: listWhatsappMetadata,
   params: paramsSchema,
   output: whatsappConversationDetailResponseSchema,
-  handler: async ({ tx, ctx, params }) => getWhatsappConversation(tx, ctx, params.id),
+  handler: async ({ tx, ctx, params }) => getWhatsappConversation(tx, ctx, params["id"]),
 });
 
 export const POST = createTenantRoute<
@@ -37,5 +37,5 @@ export const POST = createTenantRoute<
   body: replyWhatsappInboxBodySchema,
   output: whatsappConversationDetailResponseSchema,
   handler: async ({ tx, ctx, params, input }) =>
-    replyWhatsappConversation(tx, ctx, params.id, input),
+    replyWhatsappConversation(tx, ctx, params["id"], input),
 });

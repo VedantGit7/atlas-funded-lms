@@ -24,7 +24,7 @@ export const GET = createTenantRoute<
   params: paramsSchema,
   input: listMessagesQuerySchema,
   output: messageListResponseSchema,
-  handler: async ({ tx, ctx, params, input }) => listMessages(tx, ctx, params.id, input),
+  handler: async ({ tx, ctx, params, input }) => listMessages(tx, ctx, params["id"], input),
 });
 
 export const POST = createTenantRoute<
@@ -36,5 +36,5 @@ export const POST = createTenantRoute<
   params: paramsSchema,
   input: sendMessageBodySchema,
   output: messageResponseSchema,
-  handler: async ({ tx, ctx, params, input }) => sendMessage(tx, ctx, params.id, input),
+  handler: async ({ tx, ctx, params, input }) => sendMessage(tx, ctx, params["id"], input),
 });

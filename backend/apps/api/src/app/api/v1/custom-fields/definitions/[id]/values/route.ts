@@ -25,7 +25,7 @@ export const GET = createTenantRoute<
   metadata: listCustomFieldValuesMetadata,
   params: paramsSchema,
   output: customFieldValueListResponseSchema,
-  handler: async ({ tx, ctx, params }) => listCustomFieldValues(tx, ctx, params.id),
+  handler: async ({ tx, ctx, params }) => listCustomFieldValues(tx, ctx, params["id"]),
 });
 
 export const POST = createTenantRoute<
@@ -37,5 +37,5 @@ export const POST = createTenantRoute<
   params: paramsSchema,
   input: setCustomFieldValueBodySchema,
   output: customFieldValueResponseSchema,
-  handler: async ({ tx, ctx, params, input }) => setCustomFieldValue(tx, ctx, params.id, input),
+  handler: async ({ tx, ctx, params, input }) => setCustomFieldValue(tx, ctx, params["id"], input),
 });

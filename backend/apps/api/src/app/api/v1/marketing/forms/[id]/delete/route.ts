@@ -19,5 +19,5 @@ export const POST = createTenantRoute<
   params: paramsSchema,
   body: deleteMarketingFormBodySchema,
   output: deleteMarketingFormResponseSchema,
-  handler: async ({ tx, ctx, params, input }) => deleteMarketingForm(tx, ctx, params.id, input),
+  handler: async ({ tx, ctx, params, input }) => deleteMarketingForm(tx, ctx, params["id"], input),
 });

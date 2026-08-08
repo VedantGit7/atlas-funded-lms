@@ -1,10 +1,9 @@
 import type { z } from "zod";
 import type {
-  createCourseTagResponseSchema,
-  createLessonTagResponseSchema,
   createTagBodySchema,
   courseTagsResponseSchema,
   lessonTagsResponseSchema,
+  tagDetailSchema,
   tagListResponseSchema,
 } from "@atlas/contracts/tags/tag-schemas";
 import { ClientApiError, clientApi } from "../../../../lib/client-api";
@@ -14,8 +13,13 @@ export type StudioTagScope = "lesson" | "course";
 type CreateTagBody = z.infer<typeof createTagBodySchema>;
 type LessonTagsResponse = z.infer<typeof lessonTagsResponseSchema>;
 type CourseTagsResponse = z.infer<typeof courseTagsResponseSchema>;
-type CreateLessonTagResponse = z.infer<typeof createLessonTagResponseSchema>;
-type CreateCourseTagResponse = z.infer<typeof createCourseTagResponseSchema>;
+type TagDetail = z.infer<typeof tagDetailSchema>;
+type CreateLessonTagResponse = {
+  data: { tag: TagDetail; lessonTags: LessonTagsResponse["data"] };
+};
+type CreateCourseTagResponse = {
+  data: { tag: TagDetail; courseTags: CourseTagsResponse["data"] };
+};
 type TagListResponse = z.infer<typeof tagListResponseSchema>;
 type TagItems = LessonTagsResponse["data"]["items"];
 
@@ -29,10 +33,7 @@ export function formatTagError(error: unknown): string {
   return "Tag request failed.";
 }
 
-export async function fetchEntityTags(
-  scope: StudioTagScope,
-  entityId: string,
-): Promise<TagItems> {
+export async function fetchEntityTags(scope: StudioTagScope, entityId: string): Promise<TagItems> {
   const response = await clientApi.get<LessonTagsResponse | CourseTagsResponse>(
     `${tagsPath(scope, entityId)}?view=studio`,
   );
@@ -111,13 +112,11 @@ export async function attachTagToEntity(
 
 // Lesson-specific aliases kept for existing call sites.
 export const fetchLessonTags = (lessonId: string) => fetchEntityTags("lesson", lessonId);
-export const createLessonTag = (
-  lessonId: string,
-  body: CreateTagBody,
-) => createEntityTag("lesson", lessonId, body).then((result) => ({
-  tag: result.tag,
-  lessonTags: { items: result.attachedTags },
-}));
+export const createLessonTag = (lessonId: string, body: CreateTagBody) =>
+  createEntityTag("lesson", lessonId, body).then((result) => ({
+    tag: result.tag,
+    lessonTags: { items: result.attachedTags },
+  }));
 export const detachLessonTag = (lessonId: string, tagId: string) =>
   detachEntityTag("lesson", lessonId, tagId);
 export const attachExistingTags = (lessonId: string, tagIds: string[]) =>

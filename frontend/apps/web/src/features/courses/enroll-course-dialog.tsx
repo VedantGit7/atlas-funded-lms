@@ -130,7 +130,6 @@ export function EnrollCourseDialog({
     void loadPublicCoupons();
     const initialCode = urlPrefillCode || null;
     void refreshQuote(initialCode, useWallet ? walletCreditsInput : 0);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- open once
   }, [open, isPaid, loadPublicCoupons]);
 
   async function handleFreeEnroll() {
@@ -302,7 +301,9 @@ export function EnrollCourseDialog({
                           key={coupon.id}
                           type="button"
                           className="rounded border px-2 py-1 text-xs font-medium hover:bg-slate-50"
-                          onClick={() => selectPublicCoupon(coupon.code)}
+                          onClick={() => {
+                            selectPublicCoupon(coupon.code);
+                          }}
                         >
                           {coupon.code}
                         </button>
@@ -314,7 +315,9 @@ export function EnrollCourseDialog({
                 <div className="flex gap-2">
                   <input
                     value={couponCode}
-                    onChange={(event) => setCouponCode(event.target.value.toUpperCase())}
+                    onChange={(event) => {
+                      setCouponCode(event.target.value.toUpperCase());
+                    }}
                     placeholder="Coupon code"
                     className="min-w-0 flex-1 rounded-md border px-3 py-2 text-sm font-mono"
                     maxLength={64}
@@ -352,10 +355,7 @@ export function EnrollCourseDialog({
                         onChange={(e) => {
                           const next = e.target.checked;
                           setUseWallet(next);
-                          void refreshQuote(
-                            appliedCode,
-                            next ? walletCreditsInput : 0,
-                          );
+                          void refreshQuote(appliedCode, next ? walletCreditsInput : 0);
                         }}
                       />
                       Use wallet credits ({quote.walletAvailableBalance} available)
@@ -367,7 +367,9 @@ export function EnrollCourseDialog({
                           min={0}
                           max={quote.walletAvailableBalance}
                           value={walletCreditsInput}
-                          onChange={(e) => setWalletCreditsInput(Number(e.target.value) || 0)}
+                          onChange={(e) => {
+                            setWalletCreditsInput(Number(e.target.value) || 0);
+                          }}
                           className="w-28 rounded-md border px-2 py-1.5 text-sm"
                         />
                         <button
@@ -381,8 +383,7 @@ export function EnrollCourseDialog({
                           Update
                         </button>
                         <span className="text-xs opacity-70">
-                          1 credit ={" "}
-                          {formatMoney(quote.walletCreditValueCents, quote.currency)}
+                          1 credit = {formatMoney(quote.walletCreditValueCents, quote.currency)}
                         </span>
                       </div>
                     ) : null}

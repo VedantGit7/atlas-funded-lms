@@ -48,8 +48,7 @@ export const PAYMENT_INSTALMENT_COLUMN_OPTIONS = [
   { key: "next_due_at", label: "Next due" },
 ] as const;
 
-export type PaymentInstalmentColumnKey =
-  (typeof PAYMENT_INSTALMENT_COLUMN_OPTIONS)[number]["key"];
+export type PaymentInstalmentColumnKey = (typeof PAYMENT_INSTALMENT_COLUMN_OPTIONS)[number]["key"];
 
 export type PaymentTransactionItem = {
   id: string;
@@ -400,10 +399,10 @@ function buildQuery(params: Record<string, string | number | undefined>): string
 }
 
 export async function fetchPaymentOverview(filters: {
-  paidFrom?: string;
-  paidTo?: string;
-  currency?: string;
-  grain?: PaymentOverviewGrain;
+  paidFrom?: string | undefined;
+  paidTo?: string | undefined;
+  currency?: string | undefined;
+  grain?: PaymentOverviewGrain | undefined;
 }) {
   return clientApi.get<{ data: PaymentOverview }>(
     `/api/v1/reports/payments/overview${buildQuery({
@@ -416,19 +415,19 @@ export async function fetchPaymentOverview(filters: {
 }
 
 export async function fetchPaymentTransactions(filters: {
-  paidFrom?: string;
-  paidTo?: string;
-  learnerName?: string;
-  productType?: string;
-  gatewayKey?: string;
-  status?: string;
-  amountMinCents?: number;
-  dateField?: "paid_at" | "created_at";
-  sortBy?: string;
-  sortDir?: "asc" | "desc";
-  columns?: PaymentTransactionColumnKey[];
-  page?: number;
-  limit?: number;
+  paidFrom?: string | undefined;
+  paidTo?: string | undefined;
+  learnerName?: string | undefined;
+  productType?: string | undefined;
+  gatewayKey?: string | undefined;
+  status?: string | undefined;
+  amountMinCents?: number | undefined;
+  dateField?: "paid_at" | "created_at" | undefined;
+  sortBy?: string | undefined;
+  sortDir?: "asc" | "desc" | undefined;
+  columns?: PaymentTransactionColumnKey[] | undefined;
+  page?: number | undefined;
+  limit?: number | undefined;
 }) {
   return clientApi.get<{
     data: {
@@ -461,8 +460,8 @@ export async function fetchPaymentTransactions(filters: {
 }
 
 export async function fetchPaymentGateways(filters?: {
-  paidFrom?: string;
-  paidTo?: string;
+  paidFrom?: string | undefined;
+  paidTo?: string | undefined;
 }) {
   return clientApi.get<{ data: PaymentGatewaysList }>(
     `/api/v1/reports/payments/gateways${buildQuery({
@@ -474,7 +473,7 @@ export async function fetchPaymentGateways(filters?: {
 
 export async function fetchPaymentGatewayDetail(
   gatewayKey: string,
-  filters?: { paidFrom?: string; paidTo?: string },
+  filters?: { paidFrom?: string | undefined; paidTo?: string | undefined },
 ) {
   return clientApi.get<{ data: PaymentGatewayDetail }>(
     `/api/v1/reports/payments/gateways/${encodeURIComponent(gatewayKey)}${buildQuery({
@@ -485,15 +484,15 @@ export async function fetchPaymentGatewayDetail(
 }
 
 export async function fetchPaymentRefunds(filters: {
-  queue?: PaymentRefundsQueue;
-  paidFrom?: string;
-  paidTo?: string;
-  q?: string;
-  gatewayKey?: string;
-  sortBy?: string;
-  sortDir?: "asc" | "desc";
-  page?: number;
-  limit?: number;
+  queue?: PaymentRefundsQueue | undefined;
+  paidFrom?: string | undefined;
+  paidTo?: string | undefined;
+  q?: string | undefined;
+  gatewayKey?: string | undefined;
+  sortBy?: string | undefined;
+  sortDir?: "asc" | "desc" | undefined;
+  page?: number | undefined;
+  limit?: number | undefined;
 }) {
   return clientApi.get<{ data: PaymentRefundsList }>(
     `/api/v1/reports/payments/refunds${buildQuery({
@@ -513,16 +512,16 @@ export async function fetchPaymentRefunds(filters: {
 export async function fetchGatewayTransactions(
   gatewayKey: string,
   filters: {
-    paidFrom?: string;
-    paidTo?: string;
-    learnerName?: string;
-    productType?: string;
-    status?: string;
-    sortBy?: string;
-    sortDir?: "asc" | "desc";
-    columns?: PaymentTransactionColumnKey[];
-    page?: number;
-    limit?: number;
+    paidFrom?: string | undefined;
+    paidTo?: string | undefined;
+    learnerName?: string | undefined;
+    productType?: string | undefined;
+    status?: string | undefined;
+    sortBy?: string | undefined;
+    sortDir?: "asc" | "desc" | undefined;
+    columns?: PaymentTransactionColumnKey[] | undefined;
+    page?: number | undefined;
+    limit?: number | undefined;
   },
 ) {
   return clientApi.get<{
@@ -571,17 +570,17 @@ export async function setPaymentGatewayPublished(gatewayId: string, published: b
 }
 
 export async function fetchPaymentInvoices(filters: {
-  paidFrom?: string;
-  paidTo?: string;
-  learnerName?: string;
-  email?: string;
-  q?: string;
-  currency?: string;
-  sortBy?: string;
-  sortDir?: "asc" | "desc";
-  columns?: PaymentInvoiceColumnKey[];
-  page?: number;
-  limit?: number;
+  paidFrom?: string | undefined;
+  paidTo?: string | undefined;
+  learnerName?: string | undefined;
+  email?: string | undefined;
+  q?: string | undefined;
+  currency?: string | undefined;
+  sortBy?: string | undefined;
+  sortDir?: "asc" | "desc" | undefined;
+  columns?: PaymentInvoiceColumnKey[] | undefined;
+  page?: number | undefined;
+  limit?: number | undefined;
 }) {
   return clientApi.get<{
     data: {
@@ -730,11 +729,11 @@ export async function refundPaymentTransaction(
   orderId: string,
   body: {
     mode: "full" | "partial";
-    amountCents?: number;
+    amountCents?: number | undefined;
     reason: "duplicate" | "fraudulent" | "customer_requested" | "other";
     note: string;
-    revokeAccess?: boolean;
-    notifyLearner?: boolean;
+    revokeAccess?: boolean | undefined;
+    notifyLearner?: boolean | undefined;
   },
 ) {
   return clientApi.post<{
@@ -757,18 +756,18 @@ export async function refundPaymentTransaction(
 }
 
 export async function fetchPaymentInstalments(filters: {
-  learnerName?: string;
-  email?: string;
-  q?: string;
-  status?: string;
-  productTitle?: string;
-  pricingPlanLabel?: string;
-  nextDue?: "overdue" | "7days" | "30days";
-  sortBy?: string;
-  sortDir?: "asc" | "desc";
-  columns?: PaymentInstalmentColumnKey[];
-  page?: number;
-  limit?: number;
+  learnerName?: string | undefined;
+  email?: string | undefined;
+  q?: string | undefined;
+  status?: string | undefined;
+  productTitle?: string | undefined;
+  pricingPlanLabel?: string | undefined;
+  nextDue?: "overdue" | "7days" | "30days" | undefined;
+  sortBy?: string | undefined;
+  sortDir?: "asc" | "desc" | undefined;
+  columns?: PaymentInstalmentColumnKey[] | undefined;
+  page?: number | undefined;
+  limit?: number | undefined;
 }) {
   return clientApi.get<{
     data: {
@@ -804,16 +803,16 @@ export async function fetchPaymentInstalmentDetail(planId: string) {
 export async function createPaymentInstalmentPlan(body: {
   membershipId: string;
   productTitle: string;
-  productType?: string;
-  productId?: string;
-  pricingPlanLabel?: string;
+  productType?: string | undefined;
+  productId?: string | undefined;
+  pricingPlanLabel?: string | undefined;
   totalAmountCents: number;
-  currency?: string;
+  currency?: string | undefined;
   instalments: Array<{ amountCents: number; dueAt: string }>;
-  accessPolicy?: "immediate" | "after_first_payment";
-  automatedReminders?: boolean;
-  autoRevokeOnDefault?: boolean;
-  sendConfirmationEmail?: boolean;
+  accessPolicy?: "immediate" | "after_first_payment" | undefined;
+  automatedReminders?: boolean | undefined;
+  autoRevokeOnDefault?: boolean | undefined;
+  sendConfirmationEmail?: boolean | undefined;
 }) {
   return clientApi.post<{ data: PaymentInstalmentPlanItem }>(
     "/api/v1/reports/payments/instalments",
@@ -826,12 +825,12 @@ export async function createPaymentInstalmentPlan(body: {
 export async function payPaymentInstalment(
   planId: string,
   body?: {
-    instalmentId?: string;
-    paymentMethod?: "gateway" | "bank" | "cash" | "adjustment";
-    gatewayKey?: string;
-    reference?: string;
-    paidAt?: string;
-    sendReceipt?: boolean;
+    instalmentId?: string | undefined;
+    paymentMethod?: "gateway" | "bank" | "cash" | "adjustment" | undefined;
+    gatewayKey?: string | undefined;
+    reference?: string | undefined;
+    paidAt?: string | undefined;
+    sendReceipt?: boolean | undefined;
   },
 ) {
   return clientApi.post<{
@@ -864,12 +863,9 @@ export async function cancelPaymentInstalmentPlan(
       accessOption: "keep" | "revoke";
       voidedInstalmentCount: number;
     };
-  }>(
-    `/api/v1/reports/payments/instalments/${planId}/cancel`,
-    body,
-    "payments-instalment-cancel",
-    { successMessage: "Instalment plan cancelled." },
-  );
+  }>(`/api/v1/reports/payments/instalments/${planId}/cancel`, body, "payments-instalment-cancel", {
+    successMessage: "Instalment plan cancelled.",
+  });
 }
 
 export async function exportPaymentTransactions(body: Record<string, unknown>) {
@@ -899,10 +895,7 @@ export async function exportPaymentInstalments(body: Record<string, unknown>) {
   );
 }
 
-export async function exportGatewayTransactions(
-  gatewayKey: string,
-  body: Record<string, unknown>,
-) {
+export async function exportGatewayTransactions(gatewayKey: string, body: Record<string, unknown>) {
   return clientApi.post<{ data: { runId: string; status: string; emailed: boolean } }>(
     `/api/v1/reports/payments/gateways/${encodeURIComponent(gatewayKey)}/export`,
     body,

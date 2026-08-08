@@ -14,10 +14,7 @@ import type { AssetPurpose } from "@atlas/storage/schemas/storage-policy";
 import { assertAllowedSize } from "@atlas/storage/size-policy";
 import { findLessonWithModuleAndCourse } from "./lessons.repository";
 import { lessonNotFound } from "./lessons.errors";
-import {
-  lessonAssetBlobBodySchema,
-  type LessonAssetBlobBody,
-} from "./lesson-schemas";
+import { lessonAssetBlobBodySchema, type LessonAssetBlobBody } from "./lesson-schemas";
 
 type ServiceCtx = {
   tenantId: string;
@@ -36,7 +33,7 @@ export type LessonAssetUploadBody = {
   fileName: string;
   contentType: string;
   sizeBytes: number;
-  checksumSha256?: string | null;
+  checksumSha256?: string | null | undefined;
 };
 
 export type LessonAssetConfirmBody = {
@@ -74,13 +71,18 @@ export async function parseLessonAssetBlobRequest(req: NextRequest): Promise<Les
     for (;;) {
       const { done, value } = await reader.read();
       if (done) break;
-      if (value) chunks.push(value);
+      chunks.push(value);
     }
     contentBuffer = Buffer.concat(chunks);
   } else {
     contentBuffer = Buffer.alloc(0);
   }
-  console.log("[blob-upload] content-length header:", contentLength, "| buffer received:", contentBuffer.byteLength);
+  console.log(
+    "[blob-upload] content-length header:",
+    contentLength,
+    "| buffer received:",
+    contentBuffer.byteLength,
+  );
 
   if (contentBuffer.byteLength === 0) {
     throw new AtlasHttpError({
@@ -126,15 +128,19 @@ export async function createLessonAssetUploadService(
 ) {
   await requireEditableStudioLesson(tx, ctx, lessonId);
 
-  return createLessonAssetUpload(tx, { tenantId: ctx.tenantId }, {
-    lessonId,
-    purpose: input.purpose,
-    fileName: input.fileName,
-    contentType: input.contentType,
-    sizeBytes: input.sizeBytes,
-    checksumSha256: input.checksumSha256 ?? null,
-    visibility: input.purpose === "lesson.thumbnail" ? "public-safe" : "private",
-  });
+  return createLessonAssetUpload(
+    tx,
+    { tenantId: ctx.tenantId },
+    {
+      lessonId,
+      purpose: input.purpose,
+      fileName: input.fileName,
+      contentType: input.contentType,
+      sizeBytes: input.sizeBytes,
+      checksumSha256: input.checksumSha256 ?? null,
+      visibility: input.purpose === "lesson.thumbnail" ? "public-safe" : "private",
+    },
+  );
 }
 
 export async function storeLessonAssetBlobService(
@@ -155,7 +161,7 @@ export async function storeLessonAssetBlobService(
     });
   }
 
-  if (!LESSON_UPLOAD_PURPOSES.has(asset.purpose as AssetPurpose)) {
+  if (!LESSON_UPLOAD_PURPOSES.has(asset.purpose)) {
     throw new AtlasHttpError({
       code: "VALIDATION_ERROR",
       status: 400,
@@ -196,13 +202,18 @@ export async function storeLessonAssetBlobService(
   const env = parseStorageEnv(process.env);
 
   assertAllowedSize({
-    purpose: asset.purpose as AssetPurpose,
+    purpose: asset.purpose,
     sizeBytes: receivedSize,
     env,
   });
 
   if (receivedSize < declaredSize) {
-    console.log("[blob-upload] SIZE MISMATCH — received:", receivedSize, "| declared:", declaredSize);
+    console.log(
+      "[blob-upload] SIZE MISMATCH — received:",
+      receivedSize,
+      "| declared:",
+      declaredSize,
+    );
     throw new AtlasHttpError({
       code: "VALIDATION_ERROR",
       status: 400,
@@ -248,7 +259,7 @@ export async function confirmLessonAssetUploadService(
     });
   }
 
-  if (!LESSON_UPLOAD_PURPOSES.has(asset.purpose as AssetPurpose)) {
+  if (!LESSON_UPLOAD_PURPOSES.has(asset.purpose)) {
     throw new AtlasHttpError({
       code: "VALIDATION_ERROR",
       status: 400,

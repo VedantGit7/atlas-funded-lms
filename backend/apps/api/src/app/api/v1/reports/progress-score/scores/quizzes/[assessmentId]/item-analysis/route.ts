@@ -19,5 +19,5 @@ export const GET = createTenantRoute<
   input: emptyQuery,
   params: assessmentIdParamsSchema,
   output: scoreItemAnalysisResponseSchema,
-  handler: async ({ tx, ctx, params }) => listScoreItemAnalysis(tx, ctx, params.assessmentId),
+  handler: async ({ tx, ctx, params }) => listScoreItemAnalysis(tx, ctx, params["assessmentId"]),
 });

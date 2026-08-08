@@ -1,4 +1,4 @@
-import type { ElementType } from "react";
+import type { LucideIcon } from "lucide-react";
 import {
   AlignLeft,
   ArrowUpDown,
@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 
 export type ItemTypeVisualConfig = {
-  icon: ElementType;
+  icon: LucideIcon;
   badgeClassName: string;
   chipClassName: string;
 };
@@ -56,8 +56,7 @@ const liveChip =
 
 export const DEFAULT_ITEM_TYPE_VISUAL: ItemTypeVisualConfig = {
   icon: HelpCircle,
-  badgeClassName:
-    "bg-[var(--admin-surface-high)] text-[var(--admin-on-surface-variant)]",
+  badgeClassName: "bg-[var(--admin-surface-high)] text-[var(--admin-on-surface-variant)]",
   chipClassName:
     "border-[var(--admin-border)] bg-[var(--admin-surface-high)] text-[var(--admin-on-surface-variant)]",
 };

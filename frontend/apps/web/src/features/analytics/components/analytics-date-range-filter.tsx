@@ -6,7 +6,7 @@ type AnalyticsDateRangeFilterProps = {
   onFromChange: (value: string) => void;
   onToChange: (value: string) => void;
   onApply: () => void;
-  disabled?: boolean;
+  disabled?: boolean | undefined;
 };
 
 export function AnalyticsDateRangeFilter({

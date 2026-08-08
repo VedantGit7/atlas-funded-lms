@@ -1,12 +1,7 @@
 import { z } from "zod";
 import { rejectClientTenantFields } from "../shared/domain.dto";
 
-export const PROGRESS_PRODUCT_TYPES = [
-  "course",
-  "test_series",
-  "bundle",
-  "subscription",
-] as const;
+export const PROGRESS_PRODUCT_TYPES = ["course", "test_series", "bundle", "subscription"] as const;
 
 export type ProgressProductType = (typeof PROGRESS_PRODUCT_TYPES)[number];
 
@@ -279,14 +274,9 @@ export const scoreProductQuizzesParamsSchema = z
   })
   .strict();
 
-export const PROGRESS_LEARNER_ACTIVITY_STATUSES = [
-  "active",
-  "stalled",
-  "not_started",
-] as const;
+export const PROGRESS_LEARNER_ACTIVITY_STATUSES = ["active", "stalled", "not_started"] as const;
 
-export type ProgressLearnerActivityStatus =
-  (typeof PROGRESS_LEARNER_ACTIVITY_STATUSES)[number];
+export type ProgressLearnerActivityStatus = (typeof PROGRESS_LEARNER_ACTIVITY_STATUSES)[number];
 
 export const PROGRESS_LEARNER_VIEWS = [
   "all",
@@ -319,13 +309,7 @@ export const progressLearnersQuerySchema = rejectClientTenantFields
     completionBand: z.enum(PROGRESS_COMPLETION_BANDS).optional(),
     activityStatus: z.enum(PROGRESS_LEARNER_ACTIVITY_STATUSES).optional(),
     sortBy: z
-      .enum([
-        "enrolled_at",
-        "expires_at",
-        "completion_pct",
-        "learner_name",
-        "last_activity_at",
-      ])
+      .enum(["enrolled_at", "expires_at", "completion_pct", "learner_name", "last_activity_at"])
       .default("last_activity_at"),
     sortDir: z.enum(["asc", "desc"]).default("desc"),
     columns: z.preprocess(
@@ -535,7 +519,9 @@ export const scoreLearnersQuerySchema = rejectClientTenantFields
     minAttempts: z.coerce.number().int().min(0).max(1000).optional(),
     attemptsFilter: z.enum(SCORE_ATTEMPTS_FILTERS).optional(),
     view: z.enum(SCORE_LEARNER_VIEWS).default("all"),
-    sortBy: z.enum(["submitted_at", "score_pct", "attempt_count", "learner_name"]).default("submitted_at"),
+    sortBy: z
+      .enum(["submitted_at", "score_pct", "attempt_count", "learner_name"])
+      .default("submitted_at"),
     sortDir: z.enum(["asc", "desc"]).default("desc"),
     columns: z.preprocess(
       (value) => parseColumns(SCORE_LEARNER_COLUMNS, value),
@@ -651,7 +637,9 @@ export const scoreAttemptHistoryQuerySchema = rejectClientTenantFields
     submittedTo: z.string().datetime().optional(),
     flag: z.enum(["tab_switched", "after_time_limit", "graded_manually"]).optional(),
     learnerName: z.string().trim().min(1).max(200).optional(),
-    sortBy: z.enum(["submitted_at", "started_at", "score_pct", "attempt_number"]).default("submitted_at"),
+    sortBy: z
+      .enum(["submitted_at", "started_at", "score_pct", "attempt_number"])
+      .default("submitted_at"),
     sortDir: z.enum(["asc", "desc"]).default("desc"),
     limit: z.coerce.number().int().min(1).max(100).default(25),
     page: z.coerce.number().int().min(1).max(1000).default(1),
@@ -1074,7 +1062,7 @@ export const exportProgressScoreResponseSchema = z.object({
 
 export const progressLearnerDetailParamsSchema = z
   .object({
-    productType: z.enum(["course", "test_series", "bundle", "subscription", "mock_test"]),
+    productType: z.enum(PROGRESS_PRODUCT_TYPES),
     productId: z.string().uuid(),
     enrollmentId: z.string().uuid(),
   })
@@ -1137,7 +1125,7 @@ export const progressLearnerAssessmentSchema = z.object({
 export const progressLearnerDetailResponseSchema = z.object({
   data: z.object({
     product: z.object({
-      productType: z.enum(["course", "test_series", "bundle", "subscription", "mock_test"]),
+      productType: z.enum(PROGRESS_PRODUCT_TYPES),
       productId: z.string().uuid(),
       title: z.string(),
     }),

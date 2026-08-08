@@ -31,10 +31,10 @@ export const iconButtonClassName =
 
 export const inlineExpandClassName = dropdownPanelEnterClassName;
 
-export const dropdownPanelSurfaceClassName =
-  `overflow-hidden rounded-xl border border-[var(--admin-border)] ${dropdownPanelEnterClassName}`;
+export const dropdownPanelSurfaceClassName = `overflow-hidden rounded-xl border border-[var(--admin-border)] ${dropdownPanelEnterClassName}`;
 
-export {  alertErrorClassName,
+export {
+  alertErrorClassName,
   alertInfoClassName,
   collapseEase,
   fieldClassName,
@@ -112,7 +112,12 @@ export type GamificationRules = {
     condition?: "pass" | undefined;
   }>;
   levelThresholds: Array<{ levelKey: string; minXp: number }>;
-  streaks: Array<{ streakKey: string; eventTypes: string[]; cadence?: "daily" | "weekly" }>;
+  streaks: Array<{
+    streakKey: string;
+    eventTypes: string[];
+    cadence?: "daily" | "weekly" | undefined;
+    groupScoped?: boolean | undefined;
+  }>;
   defaultFreezeInventory: number;
   leaderboardsPublic: boolean;
   streakBonuses: Array<{ days: number; bonusXp: number }>;

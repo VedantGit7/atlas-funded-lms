@@ -17,5 +17,5 @@ export const POST = createTenantRoute<
   params: bundleParamsSchema,
   body: productEnrollBodySchema,
   output: productEnrollmentResponseSchema,
-  handler: async ({ tx, ctx, params, input }) => enrollBundle(tx, ctx, params.bundleId, input),
+  handler: async ({ tx, ctx, params, input }) => enrollBundle(tx, ctx, params["bundleId"], input),
 });

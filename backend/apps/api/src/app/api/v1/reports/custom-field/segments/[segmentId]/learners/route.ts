@@ -18,5 +18,5 @@ export const GET = createTenantRoute<
   input: customFieldSegmentLearnersQuerySchema,
   output: customFieldSegmentLearnersResponseSchema,
   handler: async ({ tx, ctx, params, input }) =>
-    listCustomFieldSegmentLearners(tx, ctx, params.segmentId, input),
+    listCustomFieldSegmentLearners(tx, ctx, params["segmentId"], input),
 });

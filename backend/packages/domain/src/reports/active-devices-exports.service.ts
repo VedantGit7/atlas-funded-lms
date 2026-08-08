@@ -27,8 +27,8 @@ import {
 const DEFINITION_KEY = "active-devices";
 
 function formatBytes(bytes: number): string {
-  if (bytes < 1024) return `${bytes}B`;
-  if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))}KB`;
+  if (bytes < 1024) return `${String(bytes)}B`;
+  if (bytes < 1024 * 1024) return `${String(Math.max(1, Math.round(bytes / 1024)))}KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)}MB`;
 }
 
@@ -40,9 +40,7 @@ function estimateSizeLabel(rowCount: number | null, format: string): string | nu
 
 function fileNameFor(createdAt: string, format: string): string {
   const date = new Date(createdAt);
-  const stamp = Number.isNaN(date.getTime())
-    ? "export"
-    : date.toISOString().slice(0, 10);
+  const stamp = Number.isNaN(date.getTime()) ? "export" : date.toISOString().slice(0, 10);
   return `device-roster-${stamp}.${format === "json" ? "json" : format}`;
 }
 
@@ -79,9 +77,9 @@ function cronFromCadence(cadence: "daily" | "weekly" | "monthly", time: string):
   const [hourRaw, minuteRaw] = time.split(":");
   const hour = Math.min(23, Math.max(0, Number(hourRaw) || 0));
   const minute = Math.min(59, Math.max(0, Number(minuteRaw) || 0));
-  if (cadence === "weekly") return `${minute} ${hour} * * 1`;
-  if (cadence === "monthly") return `${minute} ${hour} 1 * *`;
-  return `${minute} ${hour} * * *`;
+  if (cadence === "weekly") return `${String(minute)} ${String(hour)} * * 1`;
+  if (cadence === "monthly") return `${String(minute)} ${String(hour)} 1 * *`;
+  return `${String(minute)} ${String(hour)} * * *`;
 }
 
 function cadenceLabel(cron: string, timezone: string): string {
@@ -100,9 +98,9 @@ function nextRunLabel(nextRunAt: string): string {
   const diffMs = date.getTime() - Date.now();
   if (diffMs <= 0) return "Due now";
   const hours = Math.floor(diffMs / (60 * 60 * 1000));
-  if (hours < 48) return `Next run in ${Math.max(1, hours)}h`;
+  if (hours < 48) return `Next run in ${String(Math.max(1, hours))}h`;
   const days = Math.floor(hours / 24);
-  return `Next run in ${days} day${days === 1 ? "" : "s"}`;
+  return `Next run in ${String(days)} day${days === 1 ? "" : "s"}`;
 }
 
 function mapHistoryItem(run: {
@@ -211,8 +209,7 @@ export async function getActiveDevicesExports(tx: TenantTx, ctx: ServiceCtx) {
         canEmailDelivery: false,
         canWebhookDelivery: false,
         geoColumnsAvailable: false,
-        note:
-          "Exports generate from current device sessions. Email and webhook delivery settings are stored for schedules; delivery workers are not wired yet. City and country columns are unavailable without IP geolocation.",
+        note: "Exports generate from current device sessions. Email and webhook delivery settings are stored for schedules; delivery workers are not wired yet. City and country columns are unavailable without IP geolocation.",
       },
     },
   });
@@ -349,7 +346,7 @@ export async function updateActiveDevicesExportSchedule(
   tx: TenantTx,
   ctx: ServiceCtx,
   scheduleId: string,
-  input: { isActive?: boolean; name?: string },
+  input: { isActive?: boolean | undefined; name?: string | undefined },
 ) {
   const body = updateDeviceExportScheduleBodySchema.parse(input);
   const schedules = await listReportSchedules(tx, ctx);

@@ -6,9 +6,9 @@ import { createUuid } from "../create-uuid";
 
 export type ClientApiMutationOptions = {
   /** Full toast message override */
-  successMessage?: string;
+  successMessage?: string | undefined;
   /** Skip success toast for background or multi-step mutations */
-  silent?: boolean;
+  silent?: boolean | undefined;
 };
 
 function randomUuid(): string {
@@ -99,15 +99,18 @@ function notifyMutationSuccess(
 }
 
 export const clientApi = {
-  get: <T>(path: string) =>
-    request<T>(path, {
+  // Optional unused label kept for call-site ergonomics / future logging
+  get: <T>(path: string, _label?: string) => {
+    void _label;
+    return request<T>(path, {
       method: "GET",
-    }),
+    });
+  },
 
   put: async <T>(
     path: string,
     body: object,
-    idempotencyKeyPrefix: string,
+    idempotencyKeyPrefix: string = "mutation",
     options?: ClientApiMutationOptions,
   ) => {
     const result = await request<T>(path, {
@@ -122,7 +125,7 @@ export const clientApi = {
   patch: async <T>(
     path: string,
     body: object,
-    idempotencyKeyPrefix: string,
+    idempotencyKeyPrefix: string = "mutation",
     options?: ClientApiMutationOptions,
   ) => {
     const result = await request<T>(path, {
@@ -137,7 +140,7 @@ export const clientApi = {
   post: async <T>(
     path: string,
     body: object | null,
-    idempotencyKeyPrefix: string,
+    idempotencyKeyPrefix: string = "mutation",
     options?: ClientApiMutationOptions,
   ) => {
     const result = await request<T>(path, {
@@ -166,7 +169,7 @@ export const clientApi = {
 
   delete: async <T>(
     path: string,
-    idempotencyKeyPrefix: string,
+    idempotencyKeyPrefix: string = "mutation",
     body?: object,
     options?: ClientApiMutationOptions,
   ) => {

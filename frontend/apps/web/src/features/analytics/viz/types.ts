@@ -32,9 +32,9 @@ export type NormalizedSeries = {
 export type NormalizedResult = {
   columns: NormalizedColumn[];
   rows: NormalizedRow[];
-  dimensions?: string[];
-  measures?: string[];
-  series?: NormalizedSeries[];
+  dimensions?: string[] | undefined;
+  measures?: string[] | undefined;
+  series?: NormalizedSeries[] | undefined;
 };
 
 export const ALL_VIZ_TYPES: VizType[] = [

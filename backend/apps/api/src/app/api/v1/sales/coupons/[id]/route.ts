@@ -24,7 +24,7 @@ export const GET = createTenantRoute<
   metadata: listCouponsMetadata,
   params: paramsSchema,
   output: couponResponseSchema,
-  handler: async ({ tx, ctx, params }) => getCoupon(tx, ctx, params.id),
+  handler: async ({ tx, ctx, params }) => getCoupon(tx, ctx, params["id"]),
 });
 
 export const PATCH = createTenantRoute<
@@ -36,5 +36,5 @@ export const PATCH = createTenantRoute<
   params: paramsSchema,
   body: updateCouponBodySchema,
   output: couponResponseSchema,
-  handler: async ({ tx, ctx, params, input }) => updateCoupon(tx, ctx, params.id, input),
+  handler: async ({ tx, ctx, params, input }) => updateCoupon(tx, ctx, params["id"], input),
 });

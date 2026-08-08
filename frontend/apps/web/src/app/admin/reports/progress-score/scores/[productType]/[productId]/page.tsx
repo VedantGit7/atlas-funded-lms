@@ -1,9 +1,9 @@
 export const dynamic = "force-dynamic";
 
 import { notFound } from "next/navigation";
-import { AdminPageGate } from "../../../../../../components/patterns/AdminPageGate";
-import { AdminScoresAssessmentListPage } from "../../../../../../features/admin/reports/AdminScoresAssessmentListPage";
-import { runTenantStateGate } from "../../../../../../lib/server/tenant-state-gate";
+import { AdminPageGate } from "@/components/patterns/AdminPageGate";
+import { AdminScoresAssessmentListPage } from "@/features/admin/reports/AdminScoresAssessmentListPage";
+import { runTenantStateGate } from "@/lib/server/tenant-state-gate";
 
 const PRODUCT_TYPES = new Set(["course", "test_series", "bundle", "mock_test"]);
 

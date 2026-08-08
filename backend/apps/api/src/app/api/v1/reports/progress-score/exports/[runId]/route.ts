@@ -16,5 +16,5 @@ export const GET = createTenantRoute<
   params: progressScoreExportRunParamsSchema,
   input: noBodySchema,
   output: progressScoreExportRunDetailResponseSchema,
-  handler: async ({ tx, ctx, params }) => getProgressScoreExportRun(tx, ctx, params.runId),
+  handler: async ({ tx, ctx, params }) => getProgressScoreExportRun(tx, ctx, params["runId"]),
 });

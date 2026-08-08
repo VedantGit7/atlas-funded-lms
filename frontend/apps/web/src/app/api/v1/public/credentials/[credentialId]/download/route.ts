@@ -14,7 +14,7 @@ import { routeMetadata } from "./route.metadata";
  * certificate (HTML). This is the target of the `downloadUrl` surfaced by the
  * public verify response.
  */
-export const GET = createPublicRouteHandler<unknown>(routeMetadata, async ({ req, requestId }) => {
+export const GET = createPublicRouteHandler(routeMetadata, async ({ req, requestId }) => {
   return withGlobalDb(async (db) => {
     const tenant = await resolveTenantFromRequest({ req, db });
     const url = new URL(req.url);

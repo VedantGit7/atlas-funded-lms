@@ -35,7 +35,9 @@ function namesMatch(input: string, courseTitle: string): boolean {
   return input.trim() === courseTitle.trim();
 }
 
-export function CourseSettingsRemoveLearnersPanel({ course }: CourseSettingsRemoveLearnersPanelProps) {
+export function CourseSettingsRemoveLearnersPanel({
+  course,
+}: CourseSettingsRemoveLearnersPanelProps) {
   const [confirmationName, setConfirmationName] = useState("");
   const [error, setError] = useState<string | null>(null);
   const confirmed = namesMatch(confirmationName, course.title);
@@ -68,10 +70,7 @@ export function CourseSettingsRemoveLearnersPanel({ course }: CourseSettingsRemo
       toast.mutationSuccess({
         idempotencyKeyPrefix: "course-remove-learners",
         method: "DELETE",
-        message:
-          removedCount === 0
-            ? "No learners were enrolled in this course."
-            : undefined,
+        ...(removedCount === 0 ? { message: "No learners were enrolled in this course." } : {}),
       });
     },
     onError: (submitError) => {
@@ -139,9 +138,7 @@ export function CourseSettingsRemoveLearnersPanel({ course }: CourseSettingsRemo
                 Once you remove the learners, existing learners will no longer have access to their
                 data.
               </li>
-              <li>
-                Existing learners will have to enroll/buy the course again as new learners.
-              </li>
+              <li>Existing learners will have to enroll/buy the course again as new learners.</li>
               <li>The course will be available to new learners.</li>
             </ul>
           </div>

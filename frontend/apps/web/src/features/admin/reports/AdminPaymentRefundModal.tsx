@@ -54,7 +54,9 @@ export function AdminPaymentRefundModal({ open, detail, onClose, onRefunded }: P
       if (event.key === "Escape" && !busy) onClose();
     }
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+    };
   }, [open, busy, onClose]);
 
   if (!open) return null;
@@ -111,7 +113,10 @@ export function AdminPaymentRefundModal({ open, detail, onClose, onRefunded }: P
         aria-labelledby={titleId}
         className="relative flex w-full max-w-lg flex-col overflow-hidden border border-[var(--admin-border)] bg-[var(--admin-surface)] shadow-2xl shadow-[0_0_24px_color-mix(in_srgb,var(--admin-danger)_8%,transparent)]"
       >
-        <div className="absolute inset-x-0 top-0 z-10 h-1 bg-[var(--admin-danger)]" aria-hidden="true" />
+        <div
+          className="absolute inset-x-0 top-0 z-10 h-1 bg-[var(--admin-danger)]"
+          aria-hidden="true"
+        />
 
         {busy ? (
           <div className="absolute inset-x-0 top-1 z-10 h-0.5 overflow-hidden bg-[var(--admin-surface-high)]">
@@ -165,10 +170,7 @@ export function AdminPaymentRefundModal({ open, detail, onClose, onRefunded }: P
                 Amount
               </span>
               <span className="font-mono text-xs text-[var(--admin-on-surface)]">
-                {formatMoney(
-                  amountValid ? amountCents : refundableCents,
-                  detail.currency,
-                )}
+                {formatMoney(amountValid ? amountCents : refundableCents, detail.currency)}
               </span>
             </div>
             <div className="space-y-1">
@@ -227,7 +229,9 @@ export function AdminPaymentRefundModal({ open, detail, onClose, onRefunded }: P
                 inputMode="decimal"
                 disabled={busy || mode === "full"}
                 value={amountInput}
-                onChange={(event) => setAmountInput(event.target.value)}
+                onChange={(event) => {
+                  setAmountInput(event.target.value);
+                }}
                 className="w-full border-0 border-b border-[var(--admin-border)] bg-[var(--admin-bg)] px-4 py-3 font-mono text-sm text-[var(--admin-on-surface)] outline-none focus:border-[var(--admin-primary)] disabled:opacity-60"
               />
               {mode === "full" ? (
@@ -249,7 +253,9 @@ export function AdminPaymentRefundModal({ open, detail, onClose, onRefunded }: P
               id="refund-reason"
               disabled={busy}
               value={reason}
-              onChange={(event) => setReason(event.target.value as RefundReason)}
+              onChange={(event) => {
+                setReason(event.target.value as RefundReason);
+              }}
               className="w-full appearance-none border-0 border-b border-[var(--admin-border)] bg-[var(--admin-bg)] px-4 py-3 text-sm text-[var(--admin-on-surface)] outline-none focus:border-[var(--admin-primary)] disabled:opacity-60"
             >
               {REASONS.map((item) => (
@@ -272,7 +278,9 @@ export function AdminPaymentRefundModal({ open, detail, onClose, onRefunded }: P
               rows={3}
               disabled={busy}
               value={note}
-              onChange={(event) => setNote(event.target.value)}
+              onChange={(event) => {
+                setNote(event.target.value);
+              }}
               placeholder="Required explanation for the refund…"
               className="w-full resize-none border-0 border-b border-[var(--admin-border)] bg-[var(--admin-bg)] px-4 py-3 text-sm text-[var(--admin-on-surface)] outline-none placeholder:text-[color-mix(in_srgb,var(--admin-on-surface-variant)_50%,transparent)] focus:border-[var(--admin-primary)] disabled:opacity-60"
             />
@@ -283,11 +291,7 @@ export function AdminPaymentRefundModal({ open, detail, onClose, onRefunded }: P
               checked={revokeAccess}
               disabled={busy || !detail.product.courseId}
               label="Revoke course access"
-              hint={
-                detail.product.courseId
-                  ? undefined
-                  : "No linked course ID on this order"
-              }
+              hint={detail.product.courseId ? undefined : "No linked course ID on this order"}
               onChange={setRevokeAccess}
             />
             <CheckboxRow
@@ -300,7 +304,10 @@ export function AdminPaymentRefundModal({ open, detail, onClose, onRefunded }: P
           </div>
 
           <div className="flex items-start gap-3 border border-[color-mix(in_srgb,var(--admin-danger)_25%,transparent)] bg-[color-mix(in_srgb,var(--admin-danger)_10%,transparent)] p-4">
-            <Info className="mt-0.5 h-5 w-5 shrink-0 text-[var(--admin-danger)]" aria-hidden="true" />
+            <Info
+              className="mt-0.5 h-5 w-5 shrink-0 text-[var(--admin-danger)]"
+              aria-hidden="true"
+            />
             <p className="text-sm text-[var(--admin-danger)]">
               Recording a refund on the ledger is permanent for audit. Reverse the charge in your
               payment gateway separately if required — automated gateway refunds are not wired yet.
@@ -370,7 +377,7 @@ function CheckboxRow({
   checked: boolean;
   disabled?: boolean;
   label: string;
-  hint?: string;
+  hint?: string | undefined;
   onChange: (value: boolean) => void;
 }) {
   return (
@@ -393,7 +400,9 @@ function CheckboxRow({
           className="sr-only"
           checked={checked}
           disabled={disabled}
-          onChange={(event) => onChange(event.target.checked)}
+          onChange={(event) => {
+            onChange(event.target.checked);
+          }}
         />
         {checked ? <Check className="h-3.5 w-3.5 text-[var(--admin-on-primary)]" /> : null}
       </span>

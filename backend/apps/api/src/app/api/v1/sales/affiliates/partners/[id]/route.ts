@@ -19,5 +19,5 @@ export const PUT = createTenantRoute<
   params: paramsSchema,
   body: updateAffiliateBodySchema,
   output: affiliatePartnerResponseSchema,
-  handler: async ({ tx, ctx, input, params }) => updateAffiliate(tx, ctx, params.id, input),
+  handler: async ({ tx, ctx, input, params }) => updateAffiliate(tx, ctx, params["id"], input),
 });

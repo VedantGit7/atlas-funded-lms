@@ -16,5 +16,5 @@ export const GET = createTenantRoute<
   params: paymentExportRunParamsSchema,
   input: noBodySchema,
   output: paymentExportRunDetailResponseSchema,
-  handler: async ({ tx, ctx, params }) => getPaymentExportRun(tx, ctx, params.runId),
+  handler: async ({ tx, ctx, params }) => getPaymentExportRun(tx, ctx, params["runId"]),
 });

@@ -16,5 +16,5 @@ export const POST = createTenantRoute<
   params: pollExportRunParamsSchema,
   input: noBodySchema,
   output: retryPollExportResponseSchema,
-  handler: async ({ tx, ctx, params }) => retryPollExport(tx, ctx, params.runId),
+  handler: async ({ tx, ctx, params }) => retryPollExport(tx, ctx, params["runId"]),
 });

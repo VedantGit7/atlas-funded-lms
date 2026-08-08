@@ -51,16 +51,19 @@ function formatRelative(value: string): string {
   const diffMs = Date.now() - date.getTime();
   if (diffMs < 60_000) return "Just now";
   const mins = Math.floor(diffMs / 60_000);
-  if (mins < 60) return `${mins}m ago`;
+  if (mins < 60) return `${String(mins)}m ago`;
   const hours = Math.floor(mins / 60);
-  if (hours < 48) return `${hours}h ago`;
-  return `${Math.floor(hours / 24)}d ago`;
+  if (hours < 48) return `${String(hours)}h ago`;
+  return `${String(Math.floor(hours / 24))}d ago`;
 }
 
 function formatUtc(value: string): string {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return date.toISOString().replace("T", " ").replace(/\.\d{3}Z$/, "Z");
+  return date
+    .toISOString()
+    .replace("T", " ")
+    .replace(/\.\d{3}Z$/, "Z");
 }
 
 function statusChip(status: DeviceExportHistoryItem["status"]) {
@@ -70,10 +73,7 @@ function statusChip(status: DeviceExportHistoryItem["status"]) {
   if (status === "FAILED" || status === "CANCELLED") {
     return "bg-[color-mix(in_srgb,var(--admin-danger)_12%,var(--admin-surface))] text-[var(--admin-danger)]";
   }
-  if (status === "RUNNING" || status === "QUEUED") {
-    return "bg-[var(--admin-surface-high)] text-[var(--admin-on-surface)] animate-pulse";
-  }
-  return "bg-[var(--admin-surface-high)] text-[var(--admin-on-surface-variant)]";
+  return "bg-[var(--admin-surface-high)] text-[var(--admin-on-surface)] animate-pulse";
 }
 
 function statusLabel(status: DeviceExportHistoryItem["status"]) {
@@ -102,7 +102,9 @@ function PolicyToggle({
       aria-checked={checked}
       aria-label={label}
       disabled={disabled}
-      onClick={() => onChange(!checked)}
+      onClick={() => {
+        onChange(!checked);
+      }}
       className={`relative h-5 w-9 shrink-0 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]/40 disabled:opacity-50 ${
         checked ? "bg-[var(--admin-primary)]" : "bg-[var(--admin-outline)]"
       }`}
@@ -208,7 +210,9 @@ function NewExportModal({
 
   useEffect(() => {
     if (!open) return;
-    setSelected(new Set(columns.filter((column) => column.defaultSelected).map((column) => column.key)));
+    setSelected(
+      new Set(columns.filter((column) => column.defaultSelected).map((column) => column.key)),
+    );
     setFormat("csv");
     setWindowFilter("7d");
     setOverLimitOnly(true);
@@ -257,13 +261,13 @@ function NewExportModal({
         overLimitOnly: useCurrentFilters ? overLimitOnly : false,
         useCurrentFilters,
         delivery,
-        recipients: delivery === "recipients" ? recipients : undefined,
+        ...(delivery === "recipients" ? { recipients } : {}),
         webhookUrl: delivery === "recipients" && webhookUrl.trim() ? webhookUrl.trim() : null,
         scheduleEnabled,
-        scheduleName: scheduleEnabled ? "Weekly device audit" : undefined,
-        cadence: scheduleEnabled ? cadence : undefined,
-        time: scheduleEnabled ? time : undefined,
-        timezone: scheduleEnabled ? timezone : undefined,
+        ...(scheduleEnabled ? { scheduleName: "Weekly device audit" } : {}),
+        ...(scheduleEnabled ? { cadence } : {}),
+        ...(scheduleEnabled ? { time } : {}),
+        ...(scheduleEnabled ? { timezone } : {}),
       };
       const response = await createDeviceExport(body);
       onCreated(response.data.run, response.data.schedule);
@@ -284,7 +288,10 @@ function NewExportModal({
         className="flex max-h-[90vh] w-full max-w-[800px] flex-col border border-[var(--admin-border)] bg-[var(--admin-surface)]"
       >
         <header className="flex h-16 shrink-0 items-center justify-between border-b border-[var(--admin-border)] px-6">
-          <h2 id={titleId} className="text-2xl font-semibold tracking-tight text-[var(--admin-on-surface)]">
+          <h2
+            id={titleId}
+            className="text-2xl font-semibold tracking-tight text-[var(--admin-on-surface)]"
+          >
             New export
           </h2>
           <button
@@ -304,19 +311,26 @@ function NewExportModal({
               <button
                 type="button"
                 className="text-sm text-[var(--admin-primary)] hover:underline"
-                onClick={() => setSelected(new Set(columns.map((column) => column.key)))}
+                onClick={() => {
+                  setSelected(new Set(columns.map((column) => column.key)));
+                }}
               >
                 Select all
               </button>
             </div>
             <div className="grid grid-cols-1 gap-x-8 gap-y-3 border border-[var(--admin-border)] bg-[var(--admin-surface-low)] p-4 sm:grid-cols-2">
               {columns.map((column) => (
-                <label key={column.key} className="group flex cursor-pointer items-start justify-between gap-3">
+                <label
+                  key={column.key}
+                  className="group flex cursor-pointer items-start justify-between gap-3"
+                >
                   <span className="flex items-center gap-3">
                     <input
                       type="checkbox"
                       checked={selected.has(column.key)}
-                      onChange={() => toggleColumn(column.key)}
+                      onChange={() => {
+                        toggleColumn(column.key);
+                      }}
                       className="h-4 w-4 rounded border-[var(--admin-outline)] text-[var(--admin-primary)] focus:ring-[var(--admin-primary)]"
                     />
                     <span className="text-sm text-[var(--admin-on-surface)] group-hover:text-[var(--admin-primary)]">
@@ -372,7 +386,9 @@ function NewExportModal({
                   </span>
                   <Select
                     value={windowFilter}
-                    onValueChange={(value) => setWindowFilter(value as DeviceExportWindow)}
+                    onValueChange={(value) => {
+                      setWindowFilter(value as DeviceExportWindow);
+                    }}
                     options={[
                       { value: "24h", label: "Last 24 hours" },
                       { value: "7d", label: "Last 7 days" },
@@ -383,7 +399,9 @@ function NewExportModal({
                   />
                 </label>
                 <label className="flex items-center justify-between gap-3 border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-3 py-2">
-                  <span className="text-sm text-[var(--admin-on-surface)]">Over device limit only</span>
+                  <span className="text-sm text-[var(--admin-on-surface)]">
+                    Over device limit only
+                  </span>
                   <PolicyToggle
                     checked={overLimitOnly}
                     onChange={setOverLimitOnly}
@@ -401,7 +419,9 @@ function NewExportModal({
                 <button
                   key={value}
                   type="button"
-                  onClick={() => setFormat(value)}
+                  onClick={() => {
+                    setFormat(value);
+                  }}
                   className={`rounded px-6 py-2 text-[12px] font-semibold tracking-[0.06em] uppercase transition-all ${
                     format === value
                       ? "bg-[var(--admin-surface)] text-[var(--admin-primary)] shadow-sm"
@@ -415,7 +435,9 @@ function NewExportModal({
           </section>
 
           <section>
-            <h3 className="mb-4 text-base font-semibold text-[var(--admin-on-surface)]">Delivery</h3>
+            <h3 className="mb-4 text-base font-semibold text-[var(--admin-on-surface)]">
+              Delivery
+            </h3>
             <div className="space-y-3">
               {(
                 [
@@ -429,7 +451,9 @@ function NewExportModal({
                     type="radio"
                     name="delivery"
                     checked={delivery === value}
-                    onChange={() => setDelivery(value)}
+                    onChange={() => {
+                      setDelivery(value);
+                    }}
                     className="h-4 w-4 border-[var(--admin-outline)] text-[var(--admin-primary)] focus:ring-[var(--admin-primary)]"
                   />
                   <span className="text-sm text-[var(--admin-on-surface)]">{label}</span>
@@ -451,9 +475,9 @@ function NewExportModal({
                           <button
                             type="button"
                             className="ml-2 text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-danger)]"
-                            onClick={() =>
-                              setRecipients((current) => current.filter((item) => item !== email))
-                            }
+                            onClick={() => {
+                              setRecipients((current) => current.filter((item) => item !== email));
+                            }}
                           >
                             <X className="h-3.5 w-3.5" aria-hidden="true" />
                           </button>
@@ -461,7 +485,9 @@ function NewExportModal({
                       ))}
                       <input
                         value={recipientInput}
-                        onChange={(event) => setRecipientInput(event.target.value)}
+                        onChange={(event) => {
+                          setRecipientInput(event.target.value);
+                        }}
                         onKeyDown={(event) => {
                           if (event.key === "Enter") {
                             event.preventDefault();
@@ -480,7 +506,9 @@ function NewExportModal({
                     </label>
                     <input
                       value={webhookUrl}
-                      onChange={(event) => setWebhookUrl(event.target.value)}
+                      onChange={(event) => {
+                        setWebhookUrl(event.target.value);
+                      }}
                       placeholder="https://"
                       className="h-10 w-full border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-3 font-mono text-[13px] text-[var(--admin-on-surface)] outline-none focus:border-[var(--admin-primary)]"
                     />
@@ -494,7 +522,9 @@ function NewExportModal({
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-base font-semibold text-[var(--admin-on-surface)]">Schedule</h3>
               <label className="flex items-center gap-3">
-                <span className="text-sm text-[var(--admin-on-surface-variant)]">Schedule this export</span>
+                <span className="text-sm text-[var(--admin-on-surface-variant)]">
+                  Schedule this export
+                </span>
                 <PolicyToggle
                   checked={scheduleEnabled}
                   onChange={setScheduleEnabled}
@@ -510,7 +540,9 @@ function NewExportModal({
                   </span>
                   <Select
                     value={cadence}
-                    onValueChange={(value) => setCadence(value as DeviceExportCadence)}
+                    onValueChange={(value) => {
+                      setCadence(value as DeviceExportCadence);
+                    }}
                     options={[
                       { value: "daily", label: "Daily" },
                       { value: "weekly", label: "Weekly" },
@@ -526,7 +558,9 @@ function NewExportModal({
                   <input
                     type="time"
                     value={time}
-                    onChange={(event) => setTime(event.target.value)}
+                    onChange={(event) => {
+                      setTime(event.target.value);
+                    }}
                     className="h-10 border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-3 font-mono text-[13px] text-[var(--admin-on-surface)] outline-none focus:border-[var(--admin-primary)]"
                   />
                 </label>
@@ -552,7 +586,10 @@ function NewExportModal({
           </section>
 
           <div className="flex items-start gap-2 rounded border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-4 py-3 text-sm text-[var(--admin-on-surface-variant)]">
-            <Info className="mt-0.5 h-4 w-4 shrink-0 text-[var(--admin-primary)]" aria-hidden="true" />
+            <Info
+              className="mt-0.5 h-4 w-4 shrink-0 text-[var(--admin-primary)]"
+              aria-hidden="true"
+            />
             <span>{capabilitiesNote}</span>
           </div>
 
@@ -573,7 +610,11 @@ function NewExportModal({
             disabled={saving}
             className={`${primaryButtonClassName} h-10 gap-2`}
           >
-            {saving ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Download className="h-4 w-4" aria-hidden="true" />}
+            {saving ? (
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+            ) : (
+              <Download className="h-4 w-4" aria-hidden="true" />
+            )}
             Create export
           </button>
         </footer>
@@ -644,7 +685,9 @@ export function AdminActiveDevicesExportsPage() {
         }
       })();
     }, 2000);
-    return () => window.clearInterval(timer);
+    return () => {
+      window.clearInterval(timer);
+    };
   }, [buildingIds]);
 
   async function onDownload(item: DeviceExportHistoryItem) {
@@ -664,7 +707,10 @@ export function AdminActiveDevicesExportsPage() {
       const response = await retryDeviceExport(item.id);
       setPayload((current) =>
         current
-          ? { ...current, history: [response.data, ...current.history.filter((row) => row.id !== item.id)] }
+          ? {
+              ...current,
+              history: [response.data, ...current.history.filter((row) => row.id !== item.id)],
+            }
           : current,
       );
       setFailureItem(null);
@@ -741,7 +787,10 @@ export function AdminActiveDevicesExportsPage() {
               Admin
             </Link>
             <span aria-hidden="true">/</span>
-            <Link href="/admin/reports/active-devices" className="hover:text-[var(--admin-primary)]">
+            <Link
+              href="/admin/reports/active-devices"
+              className="hover:text-[var(--admin-primary)]"
+            >
               Active Devices
             </Link>
             <span aria-hidden="true">/</span>
@@ -765,7 +814,9 @@ export function AdminActiveDevicesExportsPage() {
           </button>
           <button
             type="button"
-            onClick={() => setModalOpen(true)}
+            onClick={() => {
+              setModalOpen(true);
+            }}
             className={`${primaryButtonClassName} h-10 gap-2`}
           >
             <Plus className="h-4 w-4" aria-hidden="true" />
@@ -788,30 +839,37 @@ export function AdminActiveDevicesExportsPage() {
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
         <section className="flex flex-col overflow-hidden rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] lg:col-span-7">
           <div className="border-b border-[var(--admin-border)] bg-[var(--admin-surface-low)] p-4">
-            <h2 className="text-base font-semibold text-[var(--admin-on-surface)]">Export history</h2>
+            <h2 className="text-base font-semibold text-[var(--admin-on-surface)]">
+              Export history
+            </h2>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full border-collapse text-left">
               <thead className="sticky top-0 border-b border-[var(--admin-border)] bg-[var(--admin-surface-low)]">
                 <tr>
-                  {["File", "Scope", "Rows", "Size", "Created", "Status", "Action"].map((heading) => (
-                    <th
-                      key={heading}
-                      className={`h-11 px-4 text-[12px] font-semibold tracking-[0.06em] text-[var(--admin-on-surface-variant)] uppercase ${
-                        heading === "Rows" || heading === "Size" || heading === "Action"
-                          ? "text-right"
-                          : ""
-                      }`}
-                    >
-                      {heading}
-                    </th>
-                  ))}
+                  {["File", "Scope", "Rows", "Size", "Created", "Status", "Action"].map(
+                    (heading) => (
+                      <th
+                        key={heading}
+                        className={`h-11 px-4 text-[12px] font-semibold tracking-[0.06em] text-[var(--admin-on-surface-variant)] uppercase ${
+                          heading === "Rows" || heading === "Size" || heading === "Action"
+                            ? "text-right"
+                            : ""
+                        }`}
+                      >
+                        {heading}
+                      </th>
+                    ),
+                  )}
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--admin-border)]">
                 {payload.history.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="px-4 py-12 text-center text-sm text-[var(--admin-on-surface-variant)]">
+                    <td
+                      colSpan={7}
+                      className="px-4 py-12 text-center text-sm text-[var(--admin-on-surface-variant)]"
+                    >
                       No exports yet. Create one to download the device roster.
                     </td>
                   </tr>
@@ -882,13 +940,17 @@ export function AdminActiveDevicesExportsPage() {
                           ) : item.status === "FAILED" ? (
                             <button
                               type="button"
-                              onClick={() => setFailureItem(item)}
+                              onClick={() => {
+                                setFailureItem(item);
+                              }}
                               className="text-sm font-semibold text-[var(--admin-danger)] opacity-0 transition-opacity group-hover:opacity-100"
                             >
                               Details
                             </button>
                           ) : (
-                            <span className="text-sm text-[var(--admin-on-surface-variant)]">-</span>
+                            <span className="text-sm text-[var(--admin-on-surface-variant)]">
+                              -
+                            </span>
                           )}
                         </td>
                       </tr>
@@ -901,7 +963,9 @@ export function AdminActiveDevicesExportsPage() {
         </section>
 
         <section className="flex flex-col gap-4 lg:col-span-5">
-          <h2 className="text-base font-semibold text-[var(--admin-on-surface)]">Scheduled exports</h2>
+          <h2 className="text-base font-semibold text-[var(--admin-on-surface)]">
+            Scheduled exports
+          </h2>
           {payload.schedules.length === 0 ? (
             <div className="rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] p-8 text-center">
               <p className="text-sm text-[var(--admin-on-surface-variant)]">
@@ -922,9 +986,9 @@ export function AdminActiveDevicesExportsPage() {
                     <button
                       type="button"
                       aria-label="Schedule actions"
-                      onClick={() =>
-                        setMenuOpenId((current) => (current === schedule.id ? null : schedule.id))
-                      }
+                      onClick={() => {
+                        setMenuOpenId((current) => (current === schedule.id ? null : schedule.id));
+                      }}
                       className="text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-on-surface)]"
                     >
                       <MoreVertical className="h-5 w-5" aria-hidden="true" />
@@ -992,7 +1056,9 @@ export function AdminActiveDevicesExportsPage() {
         open={modalOpen}
         columns={payload.columns}
         capabilitiesNote={payload.capabilities.note}
-        onClose={() => setModalOpen(false)}
+        onClose={() => {
+          setModalOpen(false);
+        }}
         onCreated={(run, schedule) => {
           setPayload((current) =>
             current
@@ -1011,7 +1077,9 @@ export function AdminActiveDevicesExportsPage() {
         <FailureModal
           item={failureItem}
           busy={busyId === failureItem.id}
-          onClose={() => setFailureItem(null)}
+          onClose={() => {
+            setFailureItem(null);
+          }}
           onRetry={() => void onRetry(failureItem)}
         />
       ) : null}
@@ -1032,7 +1100,9 @@ export function AdminActiveDevicesExportsPage() {
           <button
             type="button"
             aria-label="Dismiss"
-            onClick={() => setToastRun(null)}
+            onClick={() => {
+              setToastRun(null);
+            }}
             className="text-[var(--admin-outline)] hover:text-[var(--admin-surface)]"
           >
             <X className="h-4 w-4" aria-hidden="true" />

@@ -8,24 +8,24 @@ import {
 describe("notification preferences catalog", () => {
   it("defaults all categories to enabled", () => {
     const defaults = buildDefaultNotificationPreferences();
-    expect(defaults["certificate.issued"]).toBe(true);
-    expect(defaults["security.password_changed"]).toBe(true);
-    expect(defaults["security.mfa_disabled"]).toBe(true);
+    expect(defaults["certificate.issued"]).toEqual({ email: true, inApp: true });
+    expect(defaults["security.password_changed"]).toEqual({ email: true, inApp: true });
+    expect(defaults["security.mfa_disabled"]).toEqual({ email: true, inApp: true });
   });
 
   it("merges overrides while keeping defaults for unspecified keys", () => {
     const merged = mergeNotificationPreferences({
-      "security.password_changed": false,
+      "security.password_changed": { email: false, inApp: false },
     });
-    expect(merged["security.password_changed"]).toBe(false);
-    expect(merged["certificate.issued"]).toBe(true);
+    expect(merged["security.password_changed"]).toEqual({ email: false, inApp: false });
+    expect(merged["certificate.issued"]).toEqual({ email: true, inApp: true });
   });
 
   it("rejects unknown preference keys", () => {
     const validated = validateNotificationPreferenceInput({
-      "security.email_changed": false,
-      "not.a.real.key": true,
+      "security.email_changed": { email: false },
+      "not.a.real.key": { email: true },
     });
-    expect(validated).toEqual({ "security.email_changed": false });
+    expect(validated).toEqual({ "security.email_changed": { email: false } });
   });
 });

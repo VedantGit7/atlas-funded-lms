@@ -24,7 +24,7 @@ export const GET = createTenantRoute<
   metadata: listWhatsappMetadata,
   params: paramsSchema,
   output: whatsappCampaignResponseSchema,
-  handler: async ({ tx, ctx, params }) => getWhatsappCampaign(tx, ctx, params.id),
+  handler: async ({ tx, ctx, params }) => getWhatsappCampaign(tx, ctx, params["id"]),
 });
 
 export const PATCH = createTenantRoute<
@@ -37,5 +37,5 @@ export const PATCH = createTenantRoute<
   body: updateWhatsappCampaignTitleBodySchema,
   output: whatsappCampaignResponseSchema,
   handler: async ({ tx, ctx, params, input }) =>
-    updateWhatsappCampaignTitle(tx, ctx, params.id, input),
+    updateWhatsappCampaignTitle(tx, ctx, params["id"], input),
 });

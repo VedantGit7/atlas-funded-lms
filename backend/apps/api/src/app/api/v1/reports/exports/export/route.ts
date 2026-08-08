@@ -5,7 +5,7 @@ import {
   exportExportsHistoryResponseSchema,
 } from "@atlas/domain/reports/exports-roster.dto";
 import { exportExportsRosterMetadata } from "@atlas/domain/reports/exports-roster.route-metadata";
-import { exportExportsHistory } from "../../../../../../../server/reports/exports-roster-actions.service";
+import { exportExportsHistory } from "@atlas/api-server/reports/exports-roster-actions.service";
 
 export const POST = createTenantRoute<
   z.output<typeof exportExportsHistoryBodySchema>,

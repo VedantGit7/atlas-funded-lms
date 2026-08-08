@@ -15,6 +15,13 @@ import {
 } from "../analytics-admin-shared";
 import { aggregatePivot, firstMeasureLabel, firstMeasureValue } from "./normalize";
 
+function defined<T>(value: T, message = "Expected value to be defined"): NonNullable<T> {
+  if (value == null) {
+    throw new Error(message);
+  }
+  return value;
+}
+
 const CHART_WIDTH = 720;
 const CHART_HEIGHT = 220;
 const CHART_PADDING = 20;
@@ -31,7 +38,9 @@ function resolveAxes(data: NormalizedResult): {
 } | null {
   const dimensionKey =
     data.dimensions?.[0] ??
-    data.columns.find((column) => column.kind === "dimension" || column.kind === "string" || column.kind === "date")?.key;
+    data.columns.find(
+      (column) => column.kind === "dimension" || column.kind === "string" || column.kind === "date",
+    )?.key;
   const measureKey =
     data.measures?.[0] ??
     data.columns.find((column) => column.kind === "measure" || column.kind === "number")?.key;
@@ -41,7 +50,8 @@ function resolveAxes(data: NormalizedResult): {
   return {
     dimensionKey,
     measureKey,
-    dimensionLabel: data.columns.find((column) => column.key === dimensionKey)?.label ?? dimensionKey,
+    dimensionLabel:
+      data.columns.find((column) => column.key === dimensionKey)?.label ?? dimensionKey,
     measureLabel: data.columns.find((column) => column.key === measureKey)?.label ?? measureKey,
   };
 }
@@ -145,7 +155,9 @@ function buildSeriesPoints(data: NormalizedResult) {
   return data.rows.map((row, index) => {
     const x =
       CHART_PADDING +
-      (data.rows.length === 1 ? innerWidth / 2 : (index / Math.max(data.rows.length - 1, 1)) * innerWidth);
+      (data.rows.length === 1
+        ? innerWidth / 2
+        : (index / Math.max(data.rows.length - 1, 1)) * innerWidth);
     const value = numericValue(row[axes.measureKey]);
     const y = CHART_PADDING + innerHeight - (value / maxValue) * innerHeight;
     return {
@@ -160,37 +172,56 @@ function buildSeriesPoints(data: NormalizedResult) {
 function buildLinePath(points: Array<{ x: number; y: number }>): string {
   if (points.length === 0) return "";
   if (points.length === 1) {
-    const only = points[0]!;
-    return `M ${only.x} ${only.y}`;
+    const only = defined(points[0]);
+    return `M ${String(only.x)} ${String(only.y)}`;
   }
-  let path = `M ${points[0]!.x} ${points[0]!.y}`;
+  const first = defined(points[0]);
+  let path = `M ${String(first.x)} ${String(first.y)}`;
   for (let index = 1; index < points.length; index += 1) {
-    const prev = points[index - 1]!;
-    const current = points[index]!;
+    const prev = defined(points[index - 1]);
+    const current = defined(points[index]);
     const cx = (prev.x + current.x) / 2;
-    path += ` C ${cx} ${prev.y}, ${cx} ${current.y}, ${current.x} ${current.y}`;
+    path += ` C ${String(cx)} ${String(prev.y)}, ${String(cx)} ${String(current.y)}, ${String(current.x)} ${String(current.y)}`;
   }
   return path;
 }
 
 export function LineChartView({ data }: ChartCommonProps) {
   const points = buildSeriesPoints(data);
-  if (!points || points.length === 0) return <ChartEmpty message="Need a dimension and measure for line charts." />;
+  if (!points || points.length === 0)
+    return <ChartEmpty message="Need a dimension and measure for line charts." />;
 
   const linePath = buildLinePath(points);
-  const lastX = points[points.length - 1]!.x;
-  const areaPath = `${linePath} L ${lastX} ${CHART_HEIGHT - CHART_PADDING} L ${CHART_PADDING} ${CHART_HEIGHT - CHART_PADDING} Z`;
+  const lastX = defined(points[points.length - 1]).x;
+  const areaPath = `${linePath} L ${String(lastX)} ${String(CHART_HEIGHT - CHART_PADDING)} L ${String(CHART_PADDING)} ${String(CHART_HEIGHT - CHART_PADDING)} Z`;
 
   return (
-    <svg viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT + 24}`} className="h-64 w-full" role="img" aria-label="Line chart">
+    <svg
+      viewBox={`0 0 ${String(CHART_WIDTH)} ${String(CHART_HEIGHT + 24)}`}
+      className="h-64 w-full"
+      role="img"
+      aria-label="Line chart"
+    >
       <GridLines />
       <path d={areaPath} fill={chartFill} />
-      <path d={linePath} fill="none" stroke={chartLineStroke} strokeWidth={2.5} strokeLinecap="round" />
+      <path
+        d={linePath}
+        fill="none"
+        stroke={chartLineStroke}
+        strokeWidth={2.5}
+        strokeLinecap="round"
+      />
       {points.map((point, index) => (
-        <g key={`${point.label}-${index}`}>
+        <g key={`${point.label}-${String(index)}`}>
           <circle cx={point.x} cy={point.y} r={3} fill={chartLineStroke} />
           {(points.length <= 8 || index === 0 || index === points.length - 1) && (
-            <text x={point.x} y={CHART_HEIGHT + 16} textAnchor="middle" fill="var(--admin-on-surface-variant)" fontSize={10}>
+            <text
+              x={point.x}
+              y={CHART_HEIGHT + 16}
+              textAnchor="middle"
+              fill="var(--admin-on-surface-variant)"
+              fontSize={10}
+            >
               {point.label}
             </text>
           )}
@@ -202,22 +233,40 @@ export function LineChartView({ data }: ChartCommonProps) {
 
 export function AreaChartView({ data }: ChartCommonProps) {
   const points = buildSeriesPoints(data);
-  if (!points || points.length === 0) return <ChartEmpty message="Need a dimension and measure for area charts." />;
+  if (!points || points.length === 0)
+    return <ChartEmpty message="Need a dimension and measure for area charts." />;
 
   const linePath = buildLinePath(points);
   const baselineY = CHART_HEIGHT - CHART_PADDING;
-  const firstX = points[0]!.x;
-  const lastX = points[points.length - 1]!.x;
-  const areaPath = `${linePath} L ${lastX} ${baselineY} L ${firstX} ${baselineY} Z`;
+  const firstX = defined(points[0]).x;
+  const lastX = defined(points[points.length - 1]).x;
+  const areaPath = `${linePath} L ${String(lastX)} ${String(baselineY)} L ${String(firstX)} ${String(baselineY)} Z`;
 
   return (
-    <svg viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT + 24}`} className="h-64 w-full" role="img" aria-label="Area chart">
+    <svg
+      viewBox={`0 0 ${String(CHART_WIDTH)} ${String(CHART_HEIGHT + 24)}`}
+      className="h-64 w-full"
+      role="img"
+      aria-label="Area chart"
+    >
       <GridLines />
-      <path d={areaPath} fill={chartFill} stroke={chartLineStroke} strokeWidth={1} strokeOpacity={0.35} />
+      <path
+        d={areaPath}
+        fill={chartFill}
+        stroke={chartLineStroke}
+        strokeWidth={1}
+        strokeOpacity={0.35}
+      />
       {points.map((point, index) => (
-        <g key={`${point.label}-${index}`}>
+        <g key={`${point.label}-${String(index)}`}>
           {(points.length <= 8 || index === 0 || index === points.length - 1) && (
-            <text x={point.x} y={CHART_HEIGHT + 16} textAnchor="middle" fill="var(--admin-on-surface-variant)" fontSize={10}>
+            <text
+              x={point.x}
+              y={CHART_HEIGHT + 16}
+              textAnchor="middle"
+              fill="var(--admin-on-surface-variant)"
+              fontSize={10}
+            >
               {point.label}
             </text>
           )}
@@ -229,22 +278,42 @@ export function AreaChartView({ data }: ChartCommonProps) {
 
 export function BarChartView({ data }: ChartCommonProps) {
   const points = buildSeriesPoints(data);
-  if (!points || points.length === 0) return <ChartEmpty message="Need a dimension and measure for bar charts." />;
+  if (!points || points.length === 0)
+    return <ChartEmpty message="Need a dimension and measure for bar charts." />;
 
   const maxValue = Math.max(...points.map((point) => point.value), 1);
   const barWidth = Math.min(48, (CHART_WIDTH - CHART_PADDING * 2) / Math.max(points.length, 1) - 8);
 
   return (
-    <svg viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT + 24}`} className="h-64 w-full" role="img" aria-label="Bar chart">
+    <svg
+      viewBox={`0 0 ${String(CHART_WIDTH)} ${String(CHART_HEIGHT + 24)}`}
+      className="h-64 w-full"
+      role="img"
+      aria-label="Bar chart"
+    >
       <GridLines />
       {points.map((point, index) => {
-        const barHeight = ((point.value / maxValue) * (CHART_HEIGHT - CHART_PADDING * 2));
+        const barHeight = (point.value / maxValue) * (CHART_HEIGHT - CHART_PADDING * 2);
         const x = point.x - barWidth / 2;
         const y = CHART_HEIGHT - CHART_PADDING - barHeight;
         return (
-          <g key={`${point.label}-${index}`}>
-            <rect x={x} y={y} width={barWidth} height={barHeight} rx={4} fill={chartLineStroke} opacity={0.85} />
-            <text x={point.x} y={CHART_HEIGHT + 16} textAnchor="middle" fill="var(--admin-on-surface-variant)" fontSize={10}>
+          <g key={`${point.label}-${String(index)}`}>
+            <rect
+              x={x}
+              y={y}
+              width={barWidth}
+              height={barHeight}
+              rx={4}
+              fill={chartLineStroke}
+              opacity={0.85}
+            />
+            <text
+              x={point.x}
+              y={CHART_HEIGHT + 16}
+              textAnchor="middle"
+              fill="var(--admin-on-surface-variant)"
+              fontSize={10}
+            >
               {point.label}
             </text>
           </g>
@@ -263,7 +332,10 @@ export function ComboChartView({ data }: ChartCommonProps) {
   );
 }
 
-export function PieChartView({ data, donut = false }: ChartCommonProps & { donut?: boolean }) {
+export function PieChartView({
+  data,
+  donut = false,
+}: ChartCommonProps & { donut?: boolean | undefined }) {
   const axes = resolveAxes(data);
   if (!axes) return <ChartEmpty message="Need a dimension and measure for pie charts." />;
 
@@ -297,7 +369,7 @@ export function PieChartView({ data, donut = false }: ChartCommonProps & { donut
       const ix2 = cx + innerRadius * Math.cos(start);
       const iy2 = cy + innerRadius * Math.sin(start);
       return {
-        path: `M ${x1} ${y1} A ${radius} ${radius} 0 ${largeArc} 1 ${x2} ${y2} L ${ix1} ${iy1} A ${innerRadius} ${innerRadius} 0 ${largeArc} 0 ${ix2} ${iy2} Z`,
+        path: `M ${String(x1)} ${String(y1)} A ${String(radius)} ${String(radius)} 0 ${String(largeArc)} 1 ${String(x2)} ${String(y2)} L ${String(ix1)} ${String(iy1)} A ${String(innerRadius)} ${String(innerRadius)} 0 ${String(largeArc)} 0 ${String(ix2)} ${String(iy2)} Z`,
         fill,
         label: entry.label,
         value: entry.value,
@@ -305,7 +377,7 @@ export function PieChartView({ data, donut = false }: ChartCommonProps & { donut
     }
 
     return {
-      path: `M ${cx} ${cy} L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArc} 1 ${x2} ${y2} Z`,
+      path: `M ${String(cx)} ${String(cy)} L ${String(x1)} ${String(y1)} A ${String(radius)} ${String(radius)} 0 ${String(largeArc)} 1 ${String(x2)} ${String(y2)} Z`,
       fill,
       label: entry.label,
       value: entry.value,
@@ -314,16 +386,32 @@ export function PieChartView({ data, donut = false }: ChartCommonProps & { donut
 
   return (
     <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
-      <svg viewBox="0 0 320 240" className="mx-auto h-56 w-full max-w-sm" role="img" aria-label={donut ? "Donut chart" : "Pie chart"}>
+      <svg
+        viewBox="0 0 320 240"
+        className="mx-auto h-56 w-full max-w-sm"
+        role="img"
+        aria-label={donut ? "Donut chart" : "Pie chart"}
+      >
         {slices.map((slice, index) => (
-          <path key={`${slice.label}-${index}`} d={slice.path} fill={slice.fill} stroke="var(--admin-surface)" strokeWidth={1} />
+          <path
+            key={`${slice.label}-${String(index)}`}
+            d={slice.path}
+            fill={slice.fill}
+            stroke="var(--admin-surface)"
+            strokeWidth={1}
+          />
         ))}
       </svg>
       <ul className="flex-1 space-y-2 text-sm">
         {slices.map((slice) => (
-          <li key={slice.label} className="flex items-center justify-between gap-3 text-[var(--admin-on-surface-variant)]">
+          <li
+            key={slice.label}
+            className="flex items-center justify-between gap-3 text-[var(--admin-on-surface-variant)]"
+          >
             <span>{slice.label}</span>
-            <span className="font-semibold text-[var(--admin-on-surface)]">{formatNumber(slice.value)}</span>
+            <span className="font-semibold text-[var(--admin-on-surface)]">
+              {formatNumber(slice.value)}
+            </span>
           </li>
         ))}
       </ul>
@@ -343,15 +431,17 @@ export function FunnelChartView({ data }: ChartCommonProps) {
         const value = numericValue(row[axes.measureKey]);
         const widthPct = Math.max(18, (value / maxValue) * 100);
         return (
-          <div key={`${String(row[axes.dimensionKey])}-${index}`} className="space-y-1">
+          <div key={`${String(row[axes.dimensionKey])}-${String(index)}`} className="space-y-1">
             <div className="flex items-center justify-between text-xs text-[var(--admin-on-surface-variant)]">
               <span>{String(row[axes.dimensionKey] ?? "")}</span>
-              <span className="font-semibold text-[var(--admin-on-surface)]">{formatNumber(value)}</span>
+              <span className="font-semibold text-[var(--admin-on-surface)]">
+                {formatNumber(value)}
+              </span>
             </div>
             <div className="h-8 rounded-md bg-[var(--admin-surface-low)]">
               <div
                 className="flex h-full items-center rounded-md bg-[color-mix(in_srgb,var(--admin-primary)_75%,var(--admin-surface))] px-3 text-xs font-semibold text-[var(--admin-on-primary,var(--admin-on-surface))]"
-                style={{ width: `${widthPct}%` }}
+                style={{ width: `${String(widthPct)}%` }}
               >
                 {Math.round((value / maxValue) * 100)}%
               </div>
@@ -375,13 +465,18 @@ export function ProgressChartView({ data }: ChartCommonProps) {
         const value = numericValue(row[axes.measureKey]);
         const pct = Math.round((value / maxValue) * 100);
         return (
-          <div key={`${String(row[axes.dimensionKey])}-${index}`}>
+          <div key={`${String(row[axes.dimensionKey])}-${String(index)}`}>
             <div className="mb-1 flex justify-between text-xs">
-              <span className="font-medium text-[var(--admin-on-surface)]">{String(row[axes.dimensionKey] ?? "")}</span>
+              <span className="font-medium text-[var(--admin-on-surface)]">
+                {String(row[axes.dimensionKey] ?? "")}
+              </span>
               <span className="text-[var(--admin-on-surface-variant)]">{formatNumber(value)}</span>
             </div>
             <div className="h-2 overflow-hidden rounded-full bg-[var(--admin-surface-low)]">
-              <div className="h-full rounded-full bg-[var(--admin-primary)]" style={{ width: `${pct}%` }} />
+              <div
+                className="h-full rounded-full bg-[var(--admin-primary)]"
+                style={{ width: `${String(pct)}%` }}
+              />
             </div>
           </div>
         );
@@ -391,10 +486,13 @@ export function ProgressChartView({ data }: ChartCommonProps) {
 }
 
 export function ScatterChartView({ data }: ChartCommonProps) {
-  const numericColumns = data.columns.filter((column) => column.kind === "number" || column.kind === "measure");
+  const numericColumns = data.columns.filter(
+    (column) => column.kind === "number" || column.kind === "measure",
+  );
   const xKey = numericColumns[0]?.key;
   const yKey = numericColumns[1]?.key ?? data.measures?.[1];
-  if (!xKey || !yKey) return <ChartEmpty message="Need at least two numeric columns for scatter charts." />;
+  if (!xKey || !yKey)
+    return <ChartEmpty message="Need at least two numeric columns for scatter charts." />;
 
   const points = data.rows.map((row) => ({
     x: numericValue(row[xKey]),
@@ -404,11 +502,17 @@ export function ScatterChartView({ data }: ChartCommonProps) {
   const maxY = Math.max(...points.map((point) => point.y), 1);
 
   return (
-    <svg viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`} className="h-64 w-full" role="img" aria-label="Scatter chart">
+    <svg
+      viewBox={`0 0 ${String(CHART_WIDTH)} ${String(CHART_HEIGHT)}`}
+      className="h-64 w-full"
+      role="img"
+      aria-label="Scatter chart"
+    >
       <GridLines />
       {points.map((point, index) => {
         const x = CHART_PADDING + (point.x / maxX) * (CHART_WIDTH - CHART_PADDING * 2);
-        const y = CHART_HEIGHT - CHART_PADDING - (point.y / maxY) * (CHART_HEIGHT - CHART_PADDING * 2);
+        const y =
+          CHART_HEIGHT - CHART_PADDING - (point.y / maxY) * (CHART_HEIGHT - CHART_PADDING * 2);
         return <circle key={index} cx={x} cy={y} r={4} fill={chartLineStroke} opacity={0.85} />;
       })}
     </svg>
@@ -417,7 +521,9 @@ export function ScatterChartView({ data }: ChartCommonProps) {
 
 export function HeatmapChartView({ data }: ChartCommonProps) {
   const dimensionKey = data.dimensions?.[0] ?? data.columns[0]?.key;
-  const measureColumns = data.columns.filter((column) => column.kind === "number" || column.kind === "measure");
+  const measureColumns = data.columns.filter(
+    (column) => column.kind === "number" || column.kind === "measure",
+  );
   if (!dimensionKey || measureColumns.length === 0) {
     return <ChartEmpty message="Need a label column and numeric columns for heatmaps." />;
   }
@@ -432,9 +538,14 @@ export function HeatmapChartView({ data }: ChartCommonProps) {
       <table className="min-w-full text-xs">
         <thead>
           <tr>
-            <th className="px-2 py-2 text-left text-[var(--admin-on-surface-variant)]">{dimensionKey}</th>
+            <th className="px-2 py-2 text-left text-[var(--admin-on-surface-variant)]">
+              {dimensionKey}
+            </th>
             {measureColumns.map((column) => (
-              <th key={column.key} className="px-2 py-2 text-left text-[var(--admin-on-surface-variant)]">
+              <th
+                key={column.key}
+                className="px-2 py-2 text-left text-[var(--admin-on-surface-variant)]"
+              >
                 {column.label}
               </th>
             ))}
@@ -443,7 +554,9 @@ export function HeatmapChartView({ data }: ChartCommonProps) {
         <tbody>
           {data.rows.map((row, rowIndex) => (
             <tr key={rowIndex}>
-              <td className="px-2 py-2 font-medium text-[var(--admin-on-surface)]">{String(row[dimensionKey] ?? "")}</td>
+              <td className="px-2 py-2 font-medium text-[var(--admin-on-surface)]">
+                {String(row[dimensionKey] ?? "")}
+              </td>
               {measureColumns.map((column) => {
                 const value = numericValue(row[column.key]);
                 const intensity = value / maxValue;
@@ -469,7 +582,8 @@ export function HeatmapChartView({ data }: ChartCommonProps) {
 
 export function SparklineChartView({ data }: ChartCommonProps) {
   const points = buildSeriesPoints(data);
-  if (!points || points.length === 0) return <ChartEmpty message="Need time-series values for sparklines." />;
+  if (!points || points.length === 0)
+    return <ChartEmpty message="Need time-series values for sparklines." />;
 
   const width = 240;
   const height = 56;
@@ -490,7 +604,7 @@ export function SparklineChartView({ data }: ChartCommonProps) {
           {formatNumber(points[points.length - 1]?.value ?? 0)}
         </p>
       </div>
-      <svg viewBox={`0 0 ${width} ${height}`} className="h-14 w-40" aria-hidden>
+      <svg viewBox={`0 0 ${String(width)} ${String(height)}`} className="h-14 w-40" aria-hidden>
         <path d={path} fill="none" stroke={chartLineStroke} strokeWidth={2} strokeLinecap="round" />
       </svg>
     </div>

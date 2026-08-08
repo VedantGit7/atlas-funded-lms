@@ -15,6 +15,5 @@ export const GET = createTenantRoute<
   metadata: listMarketingEventsMetadata,
   params: paramsSchema,
   output: marketingEventRegistrationsListResponseSchema,
-  handler: async ({ tx, ctx, params }) =>
-    listMarketingEventRegistrations(tx, ctx, params.id),
+  handler: async ({ tx, ctx, params }) => listMarketingEventRegistrations(tx, ctx, params["id"]),
 });

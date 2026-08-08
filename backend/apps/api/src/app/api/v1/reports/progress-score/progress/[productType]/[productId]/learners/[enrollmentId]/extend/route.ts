@@ -21,9 +21,9 @@ export const POST = createTenantRoute<
     extendProgressLearnerAccess(
       tx,
       ctx,
-      params.productType,
-      params.productId,
-      params.enrollmentId,
+      params["productType"],
+      params["productId"],
+      params["enrollmentId"],
       input,
     ),
 });

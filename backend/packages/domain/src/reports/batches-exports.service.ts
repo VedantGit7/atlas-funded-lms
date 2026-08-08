@@ -31,8 +31,8 @@ const DEFINITION_KEY = "batches";
 type BatchExportDataset = (typeof BATCH_EXPORT_DATASETS)[number];
 
 function formatBytes(bytes: number): string {
-  if (bytes < 1024) return `${bytes}B`;
-  if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))}KB`;
+  if (bytes < 1024) return `${String(bytes)}B`;
+  if (bytes < 1024 * 1024) return `${String(Math.max(1, Math.round(bytes / 1024)))}KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)}MB`;
 }
 
@@ -51,10 +51,7 @@ function datasetLabel(dataset: BatchExportDataset): string {
 }
 
 function normalizeDataset(value: unknown): BatchExportDataset {
-  if (
-    typeof value === "string" &&
-    (BATCH_EXPORT_DATASETS as readonly string[]).includes(value)
-  ) {
+  if (typeof value === "string" && (BATCH_EXPORT_DATASETS as readonly string[]).includes(value)) {
     return value as BatchExportDataset;
   }
   return "batch_learners";
@@ -98,11 +95,7 @@ function scopeLabelFromParams(params: Record<string, unknown>): string {
     const batchIds = params["batchIds"];
     const batchId = params["batchId"];
     if (Array.isArray(batchIds) && batchIds.length > 0) {
-      parts.push(
-        batchIds.length === 1
-          ? "1 batch"
-          : `${batchIds.length} batches`,
-      );
+      parts.push(batchIds.length === 1 ? "1 batch" : `${String(batchIds.length)} batches`);
     } else if (typeof batchId === "string" && batchId.trim()) {
       parts.push("1 batch");
     } else {
@@ -142,9 +135,9 @@ function cronFromCadence(cadence: "daily" | "weekly" | "monthly", time: string):
   const [hourRaw, minuteRaw] = time.split(":");
   const hour = Math.min(23, Math.max(0, Number(hourRaw) || 0));
   const minute = Math.min(59, Math.max(0, Number(minuteRaw) || 0));
-  if (cadence === "weekly") return `${minute} ${hour} * * 1`;
-  if (cadence === "monthly") return `${minute} ${hour} 1 * *`;
-  return `${minute} ${hour} * * *`;
+  if (cadence === "weekly") return `${String(minute)} ${String(hour)} * * 1`;
+  if (cadence === "monthly") return `${String(minute)} ${String(hour)} 1 * *`;
+  return `${String(minute)} ${String(hour)} * * *`;
 }
 
 function cadenceLabel(cron: string, timezone: string): string {
@@ -163,9 +156,9 @@ function nextRunLabel(nextRunAt: string): string {
   const diffMs = date.getTime() - Date.now();
   if (diffMs <= 0) return "Due now";
   const hours = Math.floor(diffMs / (60 * 60 * 1000));
-  if (hours < 48) return `Next run in ${Math.max(1, hours)}h`;
+  if (hours < 48) return `Next run in ${String(Math.max(1, hours))}h`;
   const days = Math.floor(hours / 24);
-  return `Next run in ${days} day${days === 1 ? "" : "s"}`;
+  return `Next run in ${String(days)} day${days === 1 ? "" : "s"}`;
 }
 
 function isExpired(expiresAt: string | null | undefined): boolean {
@@ -372,8 +365,7 @@ export async function getBatchesExports(tx: TenantTx, ctx: ServiceCtx) {
         canSchedule: true,
         canEmailDelivery: true,
         canWebhookDelivery: true,
-        note:
-          "Exports generate from the batches dataset. Live attendance, exams, and content currently share the learner membership rows until dedicated SQL lands. Ready files expire after the signed download TTL (typically 7 days).",
+        note: "Exports generate from the batches dataset. Live attendance, exams, and content currently share the learner membership rows until dedicated SQL lands. Ready files expire after the signed download TTL (typically 7 days).",
       },
     },
   });
@@ -423,9 +415,7 @@ export async function createBatchExport(
     const timezone = body.timezone ?? "Asia/Kolkata";
     const scheduleResult = await createReportSchedule(tx, ctx, {
       definitionKey: DEFINITION_KEY,
-      name:
-        body.scheduleName?.trim() ||
-        `Weekly ${datasetLabel(body.dataset)} export`,
+      name: body.scheduleName?.trim() || `Weekly ${datasetLabel(body.dataset)} export`,
       cronExpression: cronFromCadence(cadence, time),
       timezone,
       params,
@@ -558,7 +548,7 @@ export async function updateBatchExportSchedule(
   tx: TenantTx,
   ctx: ServiceCtx,
   scheduleId: string,
-  input: { isActive?: boolean; name?: string },
+  input: { isActive?: boolean | undefined; name?: string | undefined },
 ) {
   const body = updateBatchExportScheduleBodySchema.parse(input);
   const schedules = await listReportSchedules(tx, ctx);
@@ -588,11 +578,7 @@ export async function updateBatchExportSchedule(
   });
 }
 
-export async function deleteBatchExportSchedule(
-  tx: TenantTx,
-  ctx: ServiceCtx,
-  scheduleId: string,
-) {
+export async function deleteBatchExportSchedule(tx: TenantTx, ctx: ServiceCtx, scheduleId: string) {
   const schedules = await listReportSchedules(tx, ctx);
   const existing = schedules.data.items.find((item) => item.id === scheduleId);
   if (!existing || existing.definitionKey !== DEFINITION_KEY) {

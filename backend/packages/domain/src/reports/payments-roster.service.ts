@@ -30,7 +30,6 @@ import {
   type PaymentInvoiceVoidReason,
   type PaymentOverviewQuery,
   type PaymentTransactionsQuery,
-  type RefundPaymentTransactionBody,
 } from "./payments-roster.dto";
 import {
   paymentGatewayNotFound,
@@ -54,9 +53,7 @@ import {
   type PaymentTransactionsFilter,
 } from "./payments-roster.repository";
 
-function toTransactionsFilter(
-  input: Partial<PaymentTransactionsQuery>,
-): PaymentTransactionsFilter {
+function toTransactionsFilter(input: Partial<PaymentTransactionsQuery>): PaymentTransactionsFilter {
   const filter: PaymentTransactionsFilter = {};
   if (input.paidFrom) filter.paidFrom = input.paidFrom;
   if (input.paidTo) filter.paidTo = input.paidTo;
@@ -80,9 +77,7 @@ function toInvoicesFilter(input: Partial<PaymentInvoicesQuery>): PaymentInvoices
   return filter;
 }
 
-function toInstalmentsFilter(
-  input: Partial<PaymentInstalmentsQuery>,
-): PaymentInstalmentsFilter {
+function toInstalmentsFilter(input: Partial<PaymentInstalmentsQuery>): PaymentInstalmentsFilter {
   const filter: PaymentInstalmentsFilter = {};
   if (input.learnerName) filter.learnerName = input.learnerName;
   if (input.email) filter.email = input.email;
@@ -276,7 +271,7 @@ function resolvePaymentGatewaysWindow(query: PaymentGatewaysQuery): {
   const windowLabel =
     query.paidFrom || query.paidTo
       ? days <= 40
-        ? `${days} days`
+        ? `${String(days)} days`
         : "Selected range"
       : "30 days";
   return { windowFrom, windowTo, windowLabel };
@@ -310,9 +305,7 @@ export async function listPaymentReportGateways(
       items: rows.map((row) => {
         const decided = row.paid_transaction_count + row.failed_count;
         const successPercent =
-          decided === 0
-            ? null
-            : Math.round((row.paid_transaction_count / decided) * 1000) / 10;
+          decided === 0 ? null : Math.round((row.paid_transaction_count / decided) * 1000) / 10;
         const volumeSharePercent =
           totalPaidCents === 0
             ? 0
@@ -490,11 +483,7 @@ export async function listPaymentInvoices(
   });
 }
 
-export async function getPaymentInvoiceDetail(
-  tx: TenantTx,
-  _ctx: ServiceCtx,
-  orderId: string,
-) {
+export async function getPaymentInvoiceDetail(tx: TenantTx, _ctx: ServiceCtx, orderId: string) {
   await paymentsRosterRepository.ensurePaidOrderInvoiceNumber(tx, orderId);
   const invoice = await paymentsRosterRepository.findInvoiceByOrderId(tx, orderId);
   if (!invoice) throw paymentInvoiceNotFound();
@@ -566,7 +555,7 @@ export async function getPaymentInvoiceDetail(
     timeline.push({
       key: "voided",
       label: "Voided",
-      voidReason: voidReason
+      description: voidReason
         ? `Voided (${voidReason.replace(/_/g, " ")}). Number remains reserved.`
         : "Voided. Invoice number remains reserved for audit.",
       occurredAt: invoice.voided_at.toISOString(),
@@ -721,7 +710,7 @@ export async function getPaymentInstalmentPlanDetail(
       activity.push({
         id: `paid-${row.id}`,
         kind: "paid",
-        label: `Instalment ${row.sequence_no} paid`,
+        label: `Instalment ${String(row.sequence_no)} paid`,
         detail: row.payment_order_id
           ? `Payment ${row.payment_order_id.slice(0, 8).toUpperCase()}`
           : null,
@@ -741,8 +730,7 @@ export async function getPaymentInstalmentPlanDetail(
   } | null = null;
   if (cancelMeta && typeof cancelMeta === "object" && !Array.isArray(cancelMeta)) {
     const record = cancelMeta as Record<string, unknown>;
-    const cancelledAt =
-      typeof record["cancelledAt"] === "string" ? record["cancelledAt"] : null;
+    const cancelledAt = typeof record["cancelledAt"] === "string" ? record["cancelledAt"] : null;
     const reason = typeof record["reason"] === "string" ? record["reason"] : null;
     const accessOption =
       record["accessOption"] === "revoke" || record["accessOption"] === "keep"
@@ -753,8 +741,7 @@ export async function getPaymentInstalmentPlanDetail(
         cancelledAt,
         reason,
         accessOption,
-        accessNote:
-          typeof record["accessNote"] === "string" ? record["accessNote"] : null,
+        accessNote: typeof record["accessNote"] === "string" ? record["accessNote"] : null,
       };
       activity.push({
         id: `cancelled-${plan.id}`,
@@ -868,7 +855,7 @@ export async function payPaymentInstalment(
       gatewayKey: body.gatewayKey ?? null,
       reference: body.reference ?? null,
       sendReceipt: body.sendReceipt,
-      recordedByMembershipId: ctx.actorMembershipId ?? null,
+      recordedByMembershipId: ctx.actorMembershipId,
     },
   });
 
@@ -915,7 +902,7 @@ export async function cancelPaymentInstalmentPlan(
     reason: body.reason,
     accessOption: body.accessOption,
     cancelledAt,
-    cancelledByMembershipId: ctx.actorMembershipId ?? null,
+    cancelledByMembershipId: ctx.actorMembershipId,
   });
   if (!updated) {
     throw paymentInstalmentPlanNotCancellable("Unable to cancel this plan.");
@@ -950,7 +937,7 @@ function resolvePaymentOverviewWindow(query: PaymentOverviewQuery): {
   const windowLabel =
     query.paidFrom || query.paidTo
       ? days <= 40
-        ? `${days} days`
+        ? `${String(days)} days`
         : "Selected range"
       : "35 days";
 
@@ -963,7 +950,10 @@ function resolvePaymentOverviewWindow(query: PaymentOverviewQuery): {
   return { windowFrom, windowTo, windowLabel, filter };
 }
 
-function previousPaymentWindow(windowFrom: Date, windowTo: Date): {
+function previousPaymentWindow(
+  windowFrom: Date,
+  windowTo: Date,
+): {
   from: Date;
   to: Date;
 } {
@@ -1025,11 +1015,7 @@ export async function getPaymentOverview(
     }),
   ]);
 
-  const currency =
-    filter.currency ??
-    summary.currencies[0] ??
-    recentRows[0]?.currency ??
-    "USD";
+  const currency = filter.currency ?? summary.currencies[0] ?? recentRows[0]?.currency ?? "USD";
 
   const averageOrderCents =
     summary.transaction_count === 0
@@ -1089,10 +1075,7 @@ export async function getPaymentOverview(
         gatewayKey: row.gateway_key,
         displayName: row.display_name,
         amountCents: row.amount_cents,
-        percent:
-          gatewayTotal === 0
-            ? 0
-            : Math.round((row.amount_cents / gatewayTotal) * 1000) / 10,
+        percent: gatewayTotal === 0 ? 0 : Math.round((row.amount_cents / gatewayTotal) * 1000) / 10,
       })),
       topProducts: topProducts.map((row) => ({
         productTitle: row.product_title,
@@ -1201,14 +1184,11 @@ function buildTransactionDetailPayload(row: PaymentTransactionDetailRow) {
   const statusLower = row.status.toLowerCase();
   const isFailed = statusLower === "failed" || statusLower === "cancelled";
   const isRefunded = statusLower.includes("refund");
-  const refundableAmountCents = isFailed
-    ? 0
-    : Math.max(0, row.amount_cents - refundedAmountCents);
+  const refundableAmountCents = isFailed ? 0 : Math.max(0, row.amount_cents - refundedAmountCents);
   const canRefund = refundableAmountCents > 0 && (statusLower === "paid" || isRefunded);
   const couponAmountCents = row.coupon_amount_cents;
   const taxAmountCents = row.tax_amount_cents;
-  const subtotalCents =
-    row.amount_cents + (couponAmountCents ?? 0) - (taxAmountCents ?? 0);
+  const subtotalCents = row.amount_cents + (couponAmountCents ?? 0) - (taxAmountCents ?? 0);
   const gatewayFeeCents =
     asNumber(metadata["gatewayFeeCents"]) ??
     asNumber(metadata["gateway_fee_cents"]) ??
@@ -1217,19 +1197,13 @@ function buildTransactionDetailPayload(row: PaymentTransactionDetailRow) {
   const netSettledCents =
     gatewayFeeCents == null ? null : Math.max(0, row.amount_cents - Math.abs(gatewayFeeCents));
 
-  const courseId =
-    asString(metadata["courseId"]) ??
-    asString(metadata["course_id"]) ??
-    null;
+  const courseId = asString(metadata["courseId"]) ?? asString(metadata["course_id"]) ?? null;
   const sku =
     asString(metadata["sku"]) ??
     asString(metadata["productSku"]) ??
     asString(metadata["product_sku"]) ??
     null;
-  const couponCode =
-    asString(metadata["couponCode"]) ??
-    asString(metadata["coupon_code"]) ??
-    null;
+  const couponCode = asString(metadata["couponCode"]) ?? asString(metadata["coupon_code"]) ?? null;
   const last4 =
     asString(metadata["last4"]) ??
     asString(metadata["cardLast4"]) ??
@@ -1245,7 +1219,9 @@ function buildTransactionDetailPayload(row: PaymentTransactionDetailRow) {
     (brand && last4 ? `${brand} ending in ${last4}` : brand) ??
     asString(metadata["paymentMethod"]) ??
     null;
-  const envRaw = (asString(metadata["environment"]) ?? asString(metadata["livemode"]))?.toLowerCase();
+  const envRaw = (
+    asString(metadata["environment"]) ?? asString(metadata["livemode"])
+  )?.toLowerCase();
   const environment =
     envRaw === "live" || envRaw === "true" || envRaw === "1"
       ? ("live" as const)
@@ -1262,9 +1238,7 @@ function buildTransactionDetailPayload(row: PaymentTransactionDetailRow) {
     asString(asRecord(metadata["risk"])["label"]) ??
     (riskScore != null ? (riskScore <= 20 ? "Pass" : "Review") : null);
   const riskSummary =
-    asString(metadata["riskSummary"]) ??
-    asString(asRecord(metadata["risk"])["summary"]) ??
-    null;
+    asString(metadata["riskSummary"]) ?? asString(asRecord(metadata["risk"])["summary"]) ?? null;
   const risk =
     riskLabel || riskScore != null || riskSummary
       ? {
@@ -1283,9 +1257,7 @@ function buildTransactionDetailPayload(row: PaymentTransactionDetailRow) {
     label: string;
     status: "complete" | "current" | "pending" | "skipped";
     occurredAt: string | null;
-  }> = [
-    { key: "created", label: "Created", status: "complete", occurredAt: createdAt },
-  ];
+  }> = [{ key: "created", label: "Created", status: "complete", occurredAt: createdAt }];
 
   if (isFailed) {
     flow.push(
@@ -1405,7 +1377,7 @@ function buildTransactionDetailPayload(row: PaymentTransactionDetailRow) {
       id: refund.id,
       kind: "payment.refunded",
       label: refund.mode === "full" ? "Full refund recorded" : "Partial refund recorded",
-      description: `Ledger refund of ${refund.amountCents} ${row.currency.toUpperCase()} (${refund.reason}).`,
+      description: `Ledger refund of ${String(refund.amountCents)} ${row.currency.toUpperCase()} (${refund.reason}).`,
       occurredAt: refund.createdAt,
       highlight: true,
     });
@@ -1462,8 +1434,7 @@ function buildTransactionDetailPayload(row: PaymentTransactionDetailRow) {
       title: row.product_title,
       type: row.product_type,
       sku,
-      courseId:
-        courseId && /^[0-9a-fA-F-]{36}$/.test(courseId) ? courseId : null,
+      courseId: courseId && /^[0-9a-fA-F-]{36}$/.test(courseId) ? courseId : null,
       accessStatus,
     },
     billing: {
@@ -1481,9 +1452,7 @@ function buildTransactionDetailPayload(row: PaymentTransactionDetailRow) {
       brand,
       last4,
       networkRef:
-        asString(metadata["chargeId"]) ??
-        asString(metadata["charge_id"]) ??
-        row.external_id,
+        asString(metadata["chargeId"]) ?? asString(metadata["charge_id"]) ?? row.external_id,
     },
     risk,
     flow,
@@ -1497,11 +1466,7 @@ function buildTransactionDetailPayload(row: PaymentTransactionDetailRow) {
   };
 }
 
-export async function getPaymentTransactionDetail(
-  tx: TenantTx,
-  _ctx: ServiceCtx,
-  orderId: string,
-) {
+export async function getPaymentTransactionDetail(tx: TenantTx, _ctx: ServiceCtx, orderId: string) {
   const row = await paymentsRosterRepository.findTransactionDetailByOrderId(tx, orderId);
   if (!row) throw paymentTransactionNotFound();
   return paymentTransactionDetailResponseSchema.parse({
@@ -1568,7 +1533,7 @@ export async function listPaymentRefunds(
         const latestRefund =
           refunds.length === 0
             ? null
-            : [...refunds].sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0] ?? null;
+            : ([...refunds].sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0] ?? null);
         return {
           orderId: row.id,
           membershipId: row.membership_id,
@@ -1612,7 +1577,7 @@ export async function refundPaymentTransaction(
   orderId: string,
   rawBody: unknown,
 ) {
-  const body = refundPaymentTransactionBodySchema.parse(rawBody) as RefundPaymentTransactionBody;
+  const body = refundPaymentTransactionBodySchema.parse(rawBody);
   const row = await paymentsRosterRepository.findTransactionDetailByOrderId(tx, orderId);
   if (!row) throw paymentTransactionNotFound();
 
@@ -1626,7 +1591,7 @@ export async function refundPaymentTransaction(
 
   if (amountCents > detail.refundableAmountCents) {
     throw paymentTransactionNotRefundable(
-      `Refund amount exceeds refundable balance (${detail.refundableAmountCents} cents).`,
+      `Refund amount exceeds refundable balance (${String(detail.refundableAmountCents)} cents).`,
     );
   }
 
@@ -1649,7 +1614,7 @@ export async function refundPaymentTransaction(
     notifyLearner: body.notifyLearner,
     accessRevoked,
     notifyQueued,
-    actorMembershipId: ctx.actorMembershipId ?? null,
+    actorMembershipId: ctx.actorMembershipId,
     createdAt: new Date().toISOString(),
   };
 

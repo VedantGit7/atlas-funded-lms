@@ -20,5 +20,5 @@ export const POST = createTenantRoute<
   body: applyUseCaseBodySchema,
   output: marketingWorkflowResponseSchema,
   handler: async ({ tx, ctx, params, input }) =>
-    applyMarketingUseCase(tx, ctx, params.id, input),
+    applyMarketingUseCase(tx, ctx, params["id"], input),
 });

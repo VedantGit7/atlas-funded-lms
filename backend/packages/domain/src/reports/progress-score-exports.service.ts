@@ -31,8 +31,8 @@ const DEFINITION_KEY = "progress-score";
 type ProgressScoreDataset = (typeof PROGRESS_SCORE_EXPORT_DATASETS)[number];
 
 function formatBytes(bytes: number): string {
-  if (bytes < 1024) return `${bytes}B`;
-  if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))}KB`;
+  if (bytes < 1024) return `${String(bytes)}B`;
+  if (bytes < 1024 * 1024) return `${String(Math.max(1, Math.round(bytes / 1024)))}KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)}MB`;
 }
 
@@ -89,7 +89,9 @@ function scopeLabelFromParams(params: Record<string, unknown>): string {
   const productType = params["productType"];
   const productId = params["productId"] ?? params["courseId"];
   if (typeof productId === "string" && productId.trim()) {
-    parts.push(typeof productType === "string" && productType.trim() ? productType.trim() : "Product");
+    parts.push(
+      typeof productType === "string" && productType.trim() ? productType.trim() : "Product",
+    );
   } else {
     parts.push("All products");
   }
@@ -126,9 +128,9 @@ function cronFromCadence(cadence: "daily" | "weekly" | "monthly", time: string):
   const [hourRaw, minuteRaw] = time.split(":");
   const hour = Math.min(23, Math.max(0, Number(hourRaw) || 0));
   const minute = Math.min(59, Math.max(0, Number(minuteRaw) || 0));
-  if (cadence === "weekly") return `${minute} ${hour} * * 1`;
-  if (cadence === "monthly") return `${minute} ${hour} 1 * *`;
-  return `${minute} ${hour} * * *`;
+  if (cadence === "weekly") return `${String(minute)} ${String(hour)} * * 1`;
+  if (cadence === "monthly") return `${String(minute)} ${String(hour)} 1 * *`;
+  return `${String(minute)} ${String(hour)} * * *`;
 }
 
 function cadenceLabel(cron: string, timezone: string): string {
@@ -147,9 +149,9 @@ function nextRunLabel(nextRunAt: string): string {
   const diffMs = date.getTime() - Date.now();
   if (diffMs <= 0) return "Due now";
   const hours = Math.floor(diffMs / (60 * 60 * 1000));
-  if (hours < 48) return `Next run in ${Math.max(1, hours)}h`;
+  if (hours < 48) return `Next run in ${String(Math.max(1, hours))}h`;
   const days = Math.floor(hours / 24);
-  return `Next run in ${days} day${days === 1 ? "" : "s"}`;
+  return `Next run in ${String(days)} day${days === 1 ? "" : "s"}`;
 }
 
 function isExpired(expiresAt: string | null | undefined): boolean {
@@ -326,8 +328,7 @@ export async function getProgressScoreExports(tx: TenantTx, ctx: ServiceCtx) {
         canSchedule: true,
         canEmailDelivery: true,
         canWebhookDelivery: true,
-        note:
-          "Exports generate from progress & score datasets. Attempts and item analysis currently use the scores query until dedicated SQL exists. Email and webhook delivery run after the artifact is ready. Ready files expire after the signed download TTL.",
+        note: "Exports generate from progress & score datasets. Attempts and item analysis currently use the scores query until dedicated SQL exists. Email and webhook delivery run after the artifact is ready. Ready files expire after the signed download TTL.",
       },
     },
   });
@@ -369,9 +370,7 @@ export async function createProgressScoreExport(
     const timezone = body.timezone ?? "UTC";
     const scheduleResult = await createReportSchedule(tx, ctx, {
       definitionKey: DEFINITION_KEY,
-      name:
-        body.scheduleName?.trim() ||
-        `Weekly ${datasetLabel(body.dataset)} export`,
+      name: body.scheduleName?.trim() || `Weekly ${datasetLabel(body.dataset)} export`,
       cronExpression: cronFromCadence(cadence, time),
       timezone,
       params,
@@ -489,7 +488,7 @@ export async function updateProgressScoreExportSchedule(
   tx: TenantTx,
   ctx: ServiceCtx,
   scheduleId: string,
-  input: { isActive?: boolean; name?: string },
+  input: { isActive?: boolean | undefined; name?: string | undefined },
 ) {
   const body = updateProgressScoreExportScheduleBodySchema.parse(input);
   const schedules = await listReportSchedules(tx, ctx);

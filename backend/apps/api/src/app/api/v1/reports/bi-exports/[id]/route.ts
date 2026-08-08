@@ -15,5 +15,5 @@ export const GET = createTenantRoute<
   metadata: getBiExportMetadata,
   params: paramsSchema,
   output: biExportDetailResponseSchema,
-  handler: async ({ tx, ctx, params }) => getBiExportJob(tx, ctx, params.id),
+  handler: async ({ tx, ctx, params }) => getBiExportJob(tx, ctx, params["id"]),
 });

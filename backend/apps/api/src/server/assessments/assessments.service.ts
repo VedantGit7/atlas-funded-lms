@@ -338,7 +338,7 @@ export async function updateAssessment(
     ...(input.config ?? {}),
   };
   if (input.config?.timeLimitSeconds === null) {
-    delete mergedConfig.timeLimitSeconds;
+    delete mergedConfig["timeLimitSeconds"];
   }
   const nextConfig = AssessmentConfigSchema.parse(mergedConfig);
   const currentDescription = readDescription(assessment.config_json);

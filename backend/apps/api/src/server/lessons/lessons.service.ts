@@ -7,7 +7,12 @@ import { findModuleWithCourse } from "../courses/course-authoring.repository";
 import { moduleNotFound } from "../courses/courses.errors";
 import { findEnrollmentForMembership } from "../courses/courses.repository";
 import { assertLessonEditable, validateLessonPositions } from "../courses/course-state-guards";
-import type { CreateLessonBody, LessonDetailQuery, StudioLessonType, UpdateLessonBody } from "./lesson-schemas";
+import type {
+  CreateLessonBody,
+  LessonDetailQuery,
+  StudioLessonType,
+  UpdateLessonBody,
+} from "./lesson-schemas";
 import { studioLessonTypeSchema } from "./lesson-schemas";
 import { lessonEnrollmentRequired, lessonNotFound } from "./lessons.errors";
 import {
@@ -36,10 +41,7 @@ import {
   computeProgressPct,
 } from "./lesson-progress-guards";
 import { listTagIdsForLessons, listTagsForLesson, mapTagSummary } from "../tags/tags.service";
-import {
-  parseContentMetadata,
-  getEffectiveFeatures,
-} from "./lesson-content-metadata";
+import { parseContentMetadata, getEffectiveFeatures } from "./lesson-content-metadata";
 
 type ServiceCtx = {
   tenantId: string;
@@ -158,24 +160,17 @@ function mapStudioLessonOutlineItem(item: {
 }) {
   const lessonType =
     normalizeLessonType(item.lessonType) ??
-    normalizeLessonType(
-      item.videoUrl?.trim()
-        ? "video"
-        : null,
-    );
+    normalizeLessonType(item.videoUrl?.trim() ? "video" : null);
 
   return {
     id: item.id,
     slug: item.slug,
     title: item.title,
     position: item.position,
-    status: item.status,
-    lessonType,
+    status: item.status as "DRAFT" | "REVIEW" | "PUBLISHED" | "ARCHIVED",
+    ...(lessonType != null ? { lessonType } : { lessonType: null as StudioLessonType | null }),
     videoUrl: item.videoUrl ?? null,
     durationSeconds: item.durationSeconds,
-    ...(item.hiddenFromSyllabus !== undefined
-      ? { hiddenFromSyllabus: item.hiddenFromSyllabus }
-      : {}),
   };
 }
 
@@ -187,7 +182,7 @@ export async function listLessonsForModule(
 ) {
   if (query?.view === "studio") {
     await requireOwnedModule(tx, ctx, moduleId);
-    const items = await listLessonsForModuleBuilder({ tx, moduleId, tagId: query?.tagId });
+    const items = await listLessonsForModuleBuilder({ tx, moduleId, tagId: query.tagId });
     const tagMap = await listTagIdsForLessons({
       tx,
       tenantId: ctx.tenantId,
@@ -330,6 +325,7 @@ export async function createLesson(
           position,
           status: "DRAFT" as const,
           lessonType: normalizeLessonType(input.lessonType ?? null),
+          videoUrl: null as string | null,
           durationSeconds: input.durationSeconds ?? null,
         },
   };
@@ -393,7 +389,7 @@ export async function getLessonForPlayer(tx: TenantTx, ctx: ServiceCtx, lessonId
   const content = mapContentFields(lesson.contentJson);
   const contentMetadata = parseContentMetadata(lesson.contentJson);
   const features = getEffectiveFeatures(contentMetadata);
-  
+
   // Resolve thumbnail URL if thumbnailAssetReferenceId exists
   let thumbnailUrl: string | null = null;
   if (contentMetadata.thumbnailAssetReferenceId) {
@@ -408,7 +404,7 @@ export async function getLessonForPlayer(tx: TenantTx, ctx: ServiceCtx, lessonId
       thumbnailUrl = null;
     }
   }
-  
+
   const progress = await findLessonProgress({
     tx,
     lessonId,
@@ -562,8 +558,8 @@ export async function updateLesson(
 
   const assetFileHint =
     input.content && typeof input.content === "object" && !Array.isArray(input.content)
-      ? typeof (input.content as Record<string, unknown>)["primaryAssetFileName"] === "string"
-        ? ((input.content as Record<string, unknown>)["primaryAssetFileName"] as string)
+      ? typeof input.content["primaryAssetFileName"] === "string"
+        ? input.content["primaryAssetFileName"]
         : null
       : null;
 

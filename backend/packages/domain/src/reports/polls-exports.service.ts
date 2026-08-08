@@ -33,8 +33,8 @@ const DEFINITION_KEY = "polls";
 type PollExportDataset = (typeof POLL_EXPORT_DATASETS)[number];
 
 function formatBytes(bytes: number): string {
-  if (bytes < 1024) return `${bytes}B`;
-  if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))}KB`;
+  if (bytes < 1024) return `${String(bytes)}B`;
+  if (bytes < 1024 * 1024) return `${String(Math.max(1, Math.round(bytes / 1024)))}KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)}MB`;
 }
 
@@ -52,10 +52,7 @@ function datasetLabel(dataset: PollExportDataset): string {
 }
 
 function normalizeDataset(value: unknown): PollExportDataset {
-  if (
-    typeof value === "string" &&
-    (POLL_EXPORT_DATASETS as readonly string[]).includes(value)
-  ) {
+  if (typeof value === "string" && (POLL_EXPORT_DATASETS as readonly string[]).includes(value)) {
     return value as PollExportDataset;
   }
   return "respondents";
@@ -99,7 +96,7 @@ function scopeLabelFromParams(params: Record<string, unknown>): string {
     const pollIds = params["pollIds"];
     const pollId = params["pollId"];
     if (Array.isArray(pollIds) && pollIds.length > 0) {
-      parts.push(pollIds.length === 1 ? "1 poll" : `${pollIds.length} polls`);
+      parts.push(pollIds.length === 1 ? "1 poll" : `${String(pollIds.length)} polls`);
     } else if (typeof pollId === "string" && pollId.trim()) {
       parts.push("1 poll");
     } else {
@@ -139,9 +136,9 @@ function cronFromCadence(cadence: "daily" | "weekly" | "monthly", time: string):
   const [hourRaw, minuteRaw] = time.split(":");
   const hour = Math.min(23, Math.max(0, Number(hourRaw) || 0));
   const minute = Math.min(59, Math.max(0, Number(minuteRaw) || 0));
-  if (cadence === "weekly") return `${minute} ${hour} * * 5`;
-  if (cadence === "monthly") return `${minute} ${hour} 1 * *`;
-  return `${minute} ${hour} * * *`;
+  if (cadence === "weekly") return `${String(minute)} ${String(hour)} * * 5`;
+  if (cadence === "monthly") return `${String(minute)} ${String(hour)} 1 * *`;
+  return `${String(minute)} ${String(hour)} * * *`;
 }
 
 function cadenceLabel(cron: string, timezone: string): string {
@@ -161,9 +158,9 @@ function nextRunLabel(nextRunAt: string): string {
   const diffMs = date.getTime() - Date.now();
   if (diffMs <= 0) return "Due now";
   const hours = Math.floor(diffMs / (60 * 60 * 1000));
-  if (hours < 48) return `Next run in ${Math.max(1, hours)}h`;
+  if (hours < 48) return `Next run in ${String(Math.max(1, hours))}h`;
   const days = Math.floor(hours / 24);
-  return `Next run in ${days} day${days === 1 ? "" : "s"}`;
+  return `Next run in ${String(days)} day${days === 1 ? "" : "s"}`;
 }
 
 function isExpired(expiresAt: string | null | undefined): boolean {
@@ -384,18 +381,13 @@ export async function getPollsExports(tx: TenantTx, ctx: ServiceCtx) {
         canSchedule: true,
         canEmailDelivery: true,
         canWebhookDelivery: true,
-        note:
-          "Exports generate from the polls dataset. Anonymous polls never produce identity columns for Respondents. Ready files expire after the signed download TTL (typically 7 days).",
+        note: "Exports generate from the polls dataset. Anonymous polls never produce identity columns for Respondents. Ready files expire after the signed download TTL (typically 7 days).",
       },
     },
   });
 }
 
-export async function createPollExport(
-  tx: TenantTx,
-  ctx: ServiceCtx,
-  input: CreatePollExportBody,
-) {
+export async function createPollExport(tx: TenantTx, ctx: ServiceCtx, input: CreatePollExportBody) {
   const body = createPollExportBodySchema.parse(input);
   await ensureTenantReportDefinitions(tx);
 
@@ -435,9 +427,7 @@ export async function createPollExport(
     const timezone = body.timezone ?? "Asia/Kolkata";
     const scheduleResult = await createReportSchedule(tx, ctx, {
       definitionKey: DEFINITION_KEY,
-      name:
-        body.scheduleName?.trim() ||
-        `Weekly ${datasetLabel(body.dataset)} export`,
+      name: body.scheduleName?.trim() || `Weekly ${datasetLabel(body.dataset)} export`,
       cronExpression: cronFromCadence(cadence, time),
       timezone,
       params,
@@ -570,7 +560,7 @@ export async function updatePollExportSchedule(
   tx: TenantTx,
   ctx: ServiceCtx,
   scheduleId: string,
-  input: { isActive?: boolean; name?: string },
+  input: { isActive?: boolean | undefined; name?: string | undefined },
 ) {
   const body = updatePollExportScheduleBodySchema.parse(input);
   const schedules = await listReportSchedules(tx, ctx);
@@ -600,11 +590,7 @@ export async function updatePollExportSchedule(
   });
 }
 
-export async function deletePollExportSchedule(
-  tx: TenantTx,
-  ctx: ServiceCtx,
-  scheduleId: string,
-) {
+export async function deletePollExportSchedule(tx: TenantTx, ctx: ServiceCtx, scheduleId: string) {
   const schedules = await listReportSchedules(tx, ctx);
   const existing = schedules.data.items.find((item) => item.id === scheduleId);
   if (!existing || existing.definitionKey !== DEFINITION_KEY) {

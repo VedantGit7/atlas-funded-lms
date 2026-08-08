@@ -24,7 +24,7 @@ export const GET = createTenantRoute<
   metadata: listMarketingWorkflowsMetadata,
   params: paramsSchema,
   output: marketingWorkflowResponseSchema,
-  handler: async ({ tx, ctx, params }) => getMarketingWorkflow(tx, ctx, params.id),
+  handler: async ({ tx, ctx, params }) => getMarketingWorkflow(tx, ctx, params["id"]),
 });
 
 export const PATCH = createTenantRoute<
@@ -37,5 +37,5 @@ export const PATCH = createTenantRoute<
   body: updateMarketingWorkflowBasicsBodySchema,
   output: marketingWorkflowResponseSchema,
   handler: async ({ tx, ctx, params, input }) =>
-    updateMarketingWorkflowBasics(tx, ctx, params.id, input),
+    updateMarketingWorkflowBasics(tx, ctx, params["id"], input),
 });

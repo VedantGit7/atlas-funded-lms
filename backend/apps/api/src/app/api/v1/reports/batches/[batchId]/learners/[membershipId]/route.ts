@@ -25,7 +25,7 @@ export const GET = createTenantRoute<
   params: batchLearnerParamsSchema,
   output: batchLearnerDetailResponseSchema,
   handler: async ({ tx, ctx, params }) =>
-    getBatchLearnerDetail(tx, ctx, params.batchId, params.membershipId),
+    getBatchLearnerDetail(tx, ctx, params["batchId"], params["membershipId"]),
 });
 
 export const DELETE = createTenantRoute<
@@ -38,5 +38,5 @@ export const DELETE = createTenantRoute<
   input: removeBatchLearnerBodySchema,
   output: removeBatchLearnerResponseSchema,
   handler: async ({ tx, ctx, params, input }) =>
-    removeBatchLearner(tx, ctx, params.batchId, params.membershipId, input),
+    removeBatchLearner(tx, ctx, params["batchId"], params["membershipId"], input),
 });

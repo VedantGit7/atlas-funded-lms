@@ -7,7 +7,7 @@ import type {
   AnalyticsFunnelResponse,
   AnalyticsItemStatisticsResponse,
 } from "@atlas/domain/analytics/analytics.contract";
-import type { ChartGranularity } from "../analytics-studio-shared";
+import type { ChartGranularity, TrendPoint } from "../analytics-studio-shared";
 import {
   analyticsAlertErrorClassName,
   analyticsContentClassName,
@@ -61,8 +61,8 @@ type AnalyticsAdminViewProps = {
   canViewFunnel: boolean;
   onExportCsv: () => void;
   exportDisabled: boolean;
-  onMetricDrillDown?: (metric: HeroMetric) => void;
-  onChartPointDrillDown?: (point: TrendPoint) => void;
+  onMetricDrillDown?: ((metric: HeroMetric) => void) | undefined;
+  onChartPointDrillDown?: ((point: TrendPoint) => void) | undefined;
 };
 
 const ADMIN_TABS: Array<{ id: AdminTab; label: string; icon: typeof GraduationCap }> = [
@@ -110,7 +110,9 @@ export function AnalyticsAdminView({
       <div className={analyticsMainClassName}>
         <header className={analyticsTopBarClassName}>
           <div className="flex flex-wrap items-center gap-4">
-            <h1 className="text-xl font-extrabold tracking-tight text-[var(--admin-primary)]">Analytics</h1>
+            <h1 className="text-xl font-extrabold tracking-tight text-[var(--admin-primary)]">
+              Analytics
+            </h1>
             <AnalyticsAdminDateRange
               from={from}
               to={to}
@@ -145,7 +147,9 @@ export function AnalyticsAdminView({
                   type="button"
                   role="tab"
                   aria-selected={active}
-                  className={active ? analyticsTabButtonActiveClassName : analyticsTabButtonClassName}
+                  className={
+                    active ? analyticsTabButtonActiveClassName : analyticsTabButtonClassName
+                  }
                   onClick={() => {
                     onAdminTabChange(id);
                   }}

@@ -19,5 +19,5 @@ export const POST = createTenantRoute<
   params: paramsSchema,
   body: deletePromoSliderBodySchema,
   output: deletePromoSliderResponseSchema,
-  handler: async ({ tx, ctx, params, input }) => deletePromoSlider(tx, ctx, params.id, input),
+  handler: async ({ tx, ctx, params, input }) => deletePromoSlider(tx, ctx, params["id"], input),
 });

@@ -11,10 +11,10 @@ export function emptyNormalizedResult(): NormalizedResult {
 }
 
 export function normalizeTabularData(args: {
-  columns: Array<{ key: string; label: string; kind?: NormalizedColumn["kind"] }>;
+  columns: Array<{ key: string; label: string; kind?: NormalizedColumn["kind"] | undefined }>;
   rows: NormalizedRow[];
-  dimensions?: string[];
-  measures?: string[];
+  dimensions?: string[] | undefined;
+  measures?: string[] | undefined;
 }): NormalizedResult {
   const columns: NormalizedColumn[] = args.columns.map((column) => ({
     key: column.key,
@@ -23,9 +23,13 @@ export function normalizeTabularData(args: {
   }));
 
   const dimensions =
-    args.dimensions ?? columns.filter((column) => column.kind === "dimension").map((column) => column.key);
+    args.dimensions ??
+    columns.filter((column) => column.kind === "dimension").map((column) => column.key);
   const measures =
-    args.measures ?? columns.filter((column) => column.kind === "measure" || column.kind === "number").map((column) => column.key);
+    args.measures ??
+    columns
+      .filter((column) => column.kind === "measure" || column.kind === "number")
+      .map((column) => column.key);
 
   return {
     columns,
@@ -46,7 +50,8 @@ export function normalizeFromRecords(
   const keys = Object.keys(records[0] ?? {});
   const columns = keys.map((key) => ({
     key,
-    label: columnLabels?.[key] ?? key.replace(/_/g, " ").replace(/\b\w/g, (char) => char.toUpperCase()),
+    label:
+      columnLabels?.[key] ?? key.replace(/_/g, " ").replace(/\b\w/g, (char) => char.toUpperCase()),
     kind: inferKind(records[0]?.[key]),
   }));
 
@@ -58,8 +63,14 @@ export function aggregatePivot(
   dimensionKey?: string,
   measureKey?: string,
 ): NormalizedResult {
-  const dimension = dimensionKey ?? data.dimensions?.[0] ?? data.columns.find((column) => column.kind === "dimension")?.key;
-  const measure = measureKey ?? data.measures?.[0] ?? data.columns.find((column) => column.kind === "measure" || column.kind === "number")?.key;
+  const dimension =
+    dimensionKey ??
+    data.dimensions?.[0] ??
+    data.columns.find((column) => column.kind === "dimension")?.key;
+  const measure =
+    measureKey ??
+    data.measures?.[0] ??
+    data.columns.find((column) => column.kind === "measure" || column.kind === "number")?.key;
 
   if (!dimension || !measure) {
     return data;
@@ -81,8 +92,16 @@ export function aggregatePivot(
 
   return normalizeTabularData({
     columns: [
-      { key: dimension, label: data.columns.find((column) => column.key === dimension)?.label ?? dimension, kind: "dimension" },
-      { key: measure, label: data.columns.find((column) => column.key === measure)?.label ?? measure, kind: "measure" },
+      {
+        key: dimension,
+        label: data.columns.find((column) => column.key === dimension)?.label ?? dimension,
+        kind: "dimension",
+      },
+      {
+        key: measure,
+        label: data.columns.find((column) => column.key === measure)?.label ?? measure,
+        kind: "measure",
+      },
     ],
     rows,
     dimensions: [dimension],

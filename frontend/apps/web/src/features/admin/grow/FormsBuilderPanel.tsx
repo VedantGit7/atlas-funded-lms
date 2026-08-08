@@ -17,10 +17,7 @@ import {
 import { ClientApiError, clientApi, toast } from "../../../lib/client-api";
 import { AdminSelectDropdown } from "../../readiness/components/AdminSelectDropdown";
 import { dropdownPanelSurfaceClassName } from "../../studio/courses/admin-form-dropdown-shared";
-import {
-  MESSENGER_WIZARD_FIELD_CLASS,
-  MESSENGER_WIZARD_LABEL_CLASS,
-} from "./push-wizard-chrome";
+import { MESSENGER_WIZARD_FIELD_CLASS, MESSENGER_WIZARD_LABEL_CLASS } from "./push-wizard-chrome";
 import {
   FORM_FIELD_TYPE_OPTIONS,
   FORMS_LIST_HREF,
@@ -38,8 +35,7 @@ type ConfigTab = "field" | "appearance";
 const LABEL_CLASS = `${MESSENGER_WIZARD_LABEL_CLASS} !mb-1.5 text-[11px] font-bold uppercase tracking-wider text-[var(--admin-on-surface-variant)]`;
 
 function StatusPill({ status }: { status: FormDto["status"] }) {
-  const tone =
-    status === "LIVE" ? "success" : status === "UNPUBLISHED" ? "warning" : "neutral";
+  const tone = status === "LIVE" ? "success" : status === "UNPUBLISHED" ? "warning" : "neutral";
   return (
     <span
       className={[
@@ -429,7 +425,10 @@ export function FormsBuilderPanel({ formId }: { formId: string }) {
                   ].join(" ")}
                 >
                   {field.isSystem ? (
-                    <Lock className="h-4 w-4 shrink-0 text-[var(--admin-outline)]" aria-hidden="true" />
+                    <Lock
+                      className="h-4 w-4 shrink-0 text-[var(--admin-outline)]"
+                      aria-hidden="true"
+                    />
                   ) : (
                     <GripVertical
                       className="h-4 w-4 shrink-0 text-[var(--admin-outline)]"
@@ -769,9 +768,7 @@ export function FormsBuilderPanel({ formId }: { formId: string }) {
                     }}
                     className={[
                       "relative h-5 w-9 rounded-full transition-colors disabled:opacity-50",
-                      redirectEnabled
-                        ? "bg-[var(--admin-primary)]"
-                        : "bg-[var(--admin-outline)]",
+                      redirectEnabled ? "bg-[var(--admin-primary)]" : "bg-[var(--admin-outline)]",
                     ].join(" ")}
                   >
                     <span

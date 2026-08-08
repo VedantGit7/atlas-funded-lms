@@ -20,5 +20,5 @@ export const POST = createTenantRoute<
   body: deleteMarketingEmailBodySchema,
   output: deleteMarketingEmailResponseSchema,
   handler: async ({ tx, ctx, params, input }) =>
-    deleteMarketingEmailCampaign(tx, ctx, params.id, input),
+    deleteMarketingEmailCampaign(tx, ctx, params["id"], input),
 });

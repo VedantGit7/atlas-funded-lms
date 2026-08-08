@@ -18,5 +18,5 @@ export const GET = createTenantRoute<
   params: assessmentIdParamsSchema,
   output: scoreAttemptHistoryResponseSchema,
   handler: async ({ tx, ctx, input, params }) =>
-    listScoreAttemptHistory(tx, ctx, params.assessmentId, input),
+    listScoreAttemptHistory(tx, ctx, params["assessmentId"], input),
 });

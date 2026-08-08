@@ -22,7 +22,7 @@ export const PATCH = createTenantRoute<
   body: updatePaymentExportScheduleBodySchema,
   output: updatePaymentExportScheduleResponseSchema,
   handler: async ({ tx, ctx, params, input }) =>
-    updatePaymentExportSchedule(tx, ctx, params.scheduleId, input),
+    updatePaymentExportSchedule(tx, ctx, params["scheduleId"], input),
 });
 
 export const DELETE = createTenantRoute<
@@ -35,5 +35,5 @@ export const DELETE = createTenantRoute<
   input: noBodySchema,
   output: deletePaymentExportScheduleResponseSchema,
   handler: async ({ tx, ctx, params }) =>
-    deletePaymentExportSchedule(tx, ctx, params.scheduleId),
+    deletePaymentExportSchedule(tx, ctx, params["scheduleId"]),
 });

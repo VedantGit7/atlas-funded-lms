@@ -18,5 +18,5 @@ export const POST = createTenantRoute<
   params: paymentTransactionDetailParamsSchema,
   output: refundPaymentTransactionResponseSchema,
   handler: async ({ tx, ctx, input, params }) =>
-    refundPaymentTransaction(tx, ctx, params.orderId, input),
+    refundPaymentTransaction(tx, ctx, params["orderId"], input),
 });

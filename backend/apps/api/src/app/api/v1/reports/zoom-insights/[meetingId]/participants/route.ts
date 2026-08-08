@@ -18,5 +18,5 @@ export const GET = createTenantRoute<
   params: zoomMeetingIdParamsSchema,
   output: zoomParticipantsListResponseSchema,
   handler: async ({ tx, ctx, input, params }) =>
-    listZoomMeetingParticipants(tx, ctx, params.meetingId, input),
+    listZoomMeetingParticipants(tx, ctx, params["meetingId"], input),
 });

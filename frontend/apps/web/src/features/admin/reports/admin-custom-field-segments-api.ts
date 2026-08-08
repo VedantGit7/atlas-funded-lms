@@ -1,7 +1,10 @@
 "use client";
 
 import { clientApi } from "../../../lib/client-api";
-import { fetchCustomFieldCatalogue, type CustomFieldCatalogueItem } from "./admin-custom-field-roster-api";
+import {
+  fetchCustomFieldCatalogue,
+  type CustomFieldCatalogueItem,
+} from "./admin-custom-field-roster-api";
 
 export type SegmentConditionOperator =
   | "is"
@@ -129,7 +132,9 @@ export const LEARNER_SEGMENT_FIELDS: SegmentFieldOption[] = [
   },
 ];
 
-export function operatorsForFieldType(fieldType: string): Array<{ value: SegmentConditionOperator; label: string }> {
+export function operatorsForFieldType(
+  fieldType: string,
+): Array<{ value: SegmentConditionOperator; label: string }> {
   switch (fieldType) {
     case "number":
       return [
@@ -192,7 +197,7 @@ export function isSegmentConditionComplete(
   }
   if (op === "in_last_n_days") {
     if (condition.value && typeof condition.value === "object" && "days" in condition.value) {
-      return Number((condition.value as { days: unknown }).days) > 0;
+      return Number(condition.value.days) > 0;
     }
     return typeof condition.value === "number" && condition.value > 0;
   }
@@ -305,7 +310,7 @@ export async function fetchCustomFieldSegmentView(segmentId: string) {
 
 export async function fetchCustomFieldSegmentLearners(
   segmentId: string,
-  filters: { q?: string; page?: number; limit?: number },
+  filters: { q?: string | undefined; page?: number | undefined; limit?: number | undefined },
 ) {
   const search = new URLSearchParams();
   if (filters.q) search.set("q", filters.q);
@@ -330,9 +335,7 @@ export async function fetchCustomFieldSegmentLearners(
         fieldType: string;
       }>;
     };
-  }>(
-    `/api/v1/reports/custom-field/segments/${segmentId}/learners${query ? `?${query}` : ""}`,
-  );
+  }>(`/api/v1/reports/custom-field/segments/${segmentId}/learners${query ? `?${query}` : ""}`);
 }
 
 export async function exportCustomFieldSegmentLearnersCsv(segmentId: string) {
@@ -348,7 +351,7 @@ export async function exportCustomFieldSegmentLearnersCsv(segmentId: string) {
 
 export async function createCustomFieldSegment(body: {
   name: string;
-  description?: string | null;
+  description?: string | null | undefined;
   visibility: "shared" | "private";
   refreshMode: "live" | "snapshot";
   conditions: SegmentConditionsTree;
@@ -364,11 +367,11 @@ export async function createCustomFieldSegment(body: {
 export async function updateCustomFieldSegment(
   segmentId: string,
   body: {
-    name?: string;
-    description?: string | null;
-    visibility?: "shared" | "private";
-    refreshMode?: "live" | "snapshot";
-    conditions?: SegmentConditionsTree;
+    name?: string | undefined;
+    description?: string | null | undefined;
+    visibility?: "shared" | "private" | undefined;
+    refreshMode?: "live" | "snapshot" | undefined;
+    conditions?: SegmentConditionsTree | undefined;
   },
 ) {
   return clientApi.patch<{ data: CustomFieldSegmentItem }>(
@@ -399,7 +402,7 @@ export async function duplicateCustomFieldSegment(segmentId: string) {
 
 export async function previewCustomFieldSegment(body: {
   conditions: SegmentConditionsTree;
-  limit?: number;
+  limit?: number | undefined;
 }) {
   return clientApi.post<{
     data: {
@@ -423,7 +426,7 @@ export async function exportCustomFieldSegmentsCsv() {
 
 export async function createGroupFromSegment(
   segmentId: string,
-  body?: { title?: string; description?: string },
+  body?: { title?: string | undefined; description?: string | undefined },
 ) {
   return clientApi.post<{
     data: { batchId: string; key: string; name: string; memberCount: number };
@@ -446,7 +449,7 @@ export async function fetchSegmentFieldOptions(): Promise<SegmentFieldOption[]> 
       key: item.key,
       label: item.label,
       fieldType: item.fieldType,
-      options: item.options ?? [],
+      options: item.options,
     }),
   );
   return [...LEARNER_SEGMENT_FIELDS, ...custom];

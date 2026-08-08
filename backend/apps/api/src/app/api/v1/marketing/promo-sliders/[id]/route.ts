@@ -24,7 +24,7 @@ export const GET = createTenantRoute<
   metadata: listPromoSlidersMetadata,
   params: paramsSchema,
   output: promoSliderResponseSchema,
-  handler: async ({ tx, ctx, params }) => getPromoSlider(tx, ctx, params.id),
+  handler: async ({ tx, ctx, params }) => getPromoSlider(tx, ctx, params["id"]),
 });
 
 export const PATCH = createTenantRoute<
@@ -37,5 +37,5 @@ export const PATCH = createTenantRoute<
   body: updatePromoSliderBasicsBodySchema,
   output: promoSliderResponseSchema,
   handler: async ({ tx, ctx, params, input }) =>
-    updatePromoSliderBasics(tx, ctx, params.id, input),
+    updatePromoSliderBasics(tx, ctx, params["id"], input),
 });

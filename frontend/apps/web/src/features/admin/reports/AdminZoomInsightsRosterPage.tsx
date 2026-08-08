@@ -47,9 +47,9 @@ function formatDuration(seconds: number | null | undefined): string {
   const hours = Math.floor(total / 3600);
   const minutes = Math.floor((total % 3600) / 60);
   const secs = total % 60;
-  if (hours > 0) return `${hours}h ${minutes}m`;
-  if (minutes > 0) return `${minutes}m ${secs}s`;
-  return `${secs}s`;
+  if (hours > 0) return `${String(hours)}h ${String(minutes)}m`;
+  if (minutes > 0) return `${String(minutes)}m ${String(secs)}s`;
+  return `${String(secs)}s`;
 }
 
 export function AdminZoomInsightsRosterPage() {
@@ -146,17 +146,7 @@ export function AdminZoomInsightsRosterPage() {
     } finally {
       setLoading(false);
     }
-  }, [
-    columns,
-    displayName,
-    email,
-    joinedFrom,
-    joinedTo,
-    page,
-    selectedMeeting,
-    sortBy,
-    sortDir,
-  ]);
+  }, [columns, displayName, email, joinedFrom, joinedTo, page, selectedMeeting, sortBy, sortDir]);
 
   useEffect(() => {
     if (level === "meetings") {
@@ -256,8 +246,7 @@ export function AdminZoomInsightsRosterPage() {
         <section className={generalSettingsFormCardClassName}>
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
             <p className="text-sm text-neutral-600">
-              Zoom connection:{" "}
-              <span className="font-medium capitalize">{connectionStatus}</span>
+              Zoom connection: <span className="font-medium capitalize">{connectionStatus}</span>
             </p>
           </div>
           <div className="mb-3 flex flex-wrap items-end gap-3">
@@ -266,7 +255,9 @@ export function AdminZoomInsightsRosterPage() {
               <input
                 className={fieldClassName}
                 value={searchQ}
-                onChange={(event) => setSearchQ(event.target.value)}
+                onChange={(event) => {
+                  setSearchQ(event.target.value);
+                }}
                 placeholder="Topic or meeting ID"
               />
             </label>
@@ -276,7 +267,9 @@ export function AdminZoomInsightsRosterPage() {
                 type="date"
                 className={fieldClassName}
                 value={startedFrom}
-                onChange={(event) => setStartedFrom(event.target.value)}
+                onChange={(event) => {
+                  setStartedFrom(event.target.value);
+                }}
               />
             </label>
             <label className="grid gap-1 text-sm">
@@ -285,7 +278,9 @@ export function AdminZoomInsightsRosterPage() {
                 type="date"
                 className={fieldClassName}
                 value={startedTo}
-                onChange={(event) => setStartedTo(event.target.value)}
+                onChange={(event) => {
+                  setStartedTo(event.target.value);
+                }}
               />
             </label>
             <button
@@ -328,7 +323,9 @@ export function AdminZoomInsightsRosterPage() {
                       <tr
                         key={meeting.id}
                         className={`${analyticsTableRowClassName} cursor-pointer`}
-                        onClick={() => openMeeting(meeting)}
+                        onClick={() => {
+                          openMeeting(meeting);
+                        }}
                       >
                         <td className="px-4 py-3">
                           <div className="font-medium">{meeting.topic ?? "Untitled meeting"}</div>
@@ -352,7 +349,9 @@ export function AdminZoomInsightsRosterPage() {
                 type="button"
                 className={ghostButtonClassName}
                 disabled={meetingsPage <= 1 || loading}
-                onClick={() => setMeetingsPage((current) => Math.max(1, current - 1))}
+                onClick={() => {
+                  setMeetingsPage((current) => Math.max(1, current - 1));
+                }}
               >
                 Previous
               </button>
@@ -363,7 +362,9 @@ export function AdminZoomInsightsRosterPage() {
                 type="button"
                 className={ghostButtonClassName}
                 disabled={meetingsPage >= meetingsTotalPages || loading}
-                onClick={() => setMeetingsPage((current) => current + 1)}
+                onClick={() => {
+                  setMeetingsPage((current) => current + 1);
+                }}
               >
                 Next
               </button>
@@ -437,7 +438,9 @@ export function AdminZoomInsightsRosterPage() {
                 <input
                   className={fieldClassName}
                   value={displayName}
-                  onChange={(event) => setDisplayName(event.target.value)}
+                  onChange={(event) => {
+                    setDisplayName(event.target.value);
+                  }}
                   placeholder="Display name"
                 />
               </label>
@@ -446,7 +449,9 @@ export function AdminZoomInsightsRosterPage() {
                 <input
                   className={fieldClassName}
                   value={email}
-                  onChange={(event) => setEmail(event.target.value)}
+                  onChange={(event) => {
+                    setEmail(event.target.value);
+                  }}
                   placeholder="Learner email"
                 />
               </label>
@@ -456,7 +461,9 @@ export function AdminZoomInsightsRosterPage() {
                   type="date"
                   className={fieldClassName}
                   value={joinedFrom}
-                  onChange={(event) => setJoinedFrom(event.target.value)}
+                  onChange={(event) => {
+                    setJoinedFrom(event.target.value);
+                  }}
                 />
               </label>
               <label className="grid gap-1 text-sm">
@@ -465,7 +472,9 @@ export function AdminZoomInsightsRosterPage() {
                   type="date"
                   className={fieldClassName}
                   value={joinedTo}
-                  onChange={(event) => setJoinedTo(event.target.value)}
+                  onChange={(event) => {
+                    setJoinedTo(event.target.value);
+                  }}
                 />
               </label>
               <label className="grid gap-1 text-sm">
@@ -473,7 +482,9 @@ export function AdminZoomInsightsRosterPage() {
                 <select
                   className={fieldClassName}
                   value={sortBy}
-                  onChange={(event) => setSortBy(event.target.value)}
+                  onChange={(event) => {
+                    setSortBy(event.target.value);
+                  }}
                 >
                   <option value="join_time">Join time</option>
                   <option value="leave_time">Leave time</option>
@@ -487,9 +498,9 @@ export function AdminZoomInsightsRosterPage() {
                 <select
                   className={fieldClassName}
                   value={sortDir}
-                  onChange={(event) =>
-                    setSortDir(event.target.value === "asc" ? "asc" : "desc")
-                  }
+                  onChange={(event) => {
+                    setSortDir(event.target.value === "asc" ? "asc" : "desc");
+                  }}
                 >
                   <option value="asc">Asc</option>
                   <option value="desc">Desc</option>
@@ -518,7 +529,9 @@ export function AdminZoomInsightsRosterPage() {
                     <input
                       type="checkbox"
                       checked={checked}
-                      onChange={() => toggleColumn(column.key)}
+                      onChange={() => {
+                        toggleColumn(column.key);
+                      }}
                     />
                     {column.label}
                   </label>
@@ -598,7 +611,9 @@ export function AdminZoomInsightsRosterPage() {
                   type="button"
                   className={ghostButtonClassName}
                   disabled={page <= 1 || loading}
-                  onClick={() => setPage((current) => Math.max(1, current - 1))}
+                  onClick={() => {
+                    setPage((current) => Math.max(1, current - 1));
+                  }}
                 >
                   Previous
                 </button>
@@ -609,7 +624,9 @@ export function AdminZoomInsightsRosterPage() {
                   type="button"
                   className={ghostButtonClassName}
                   disabled={page >= totalPages || loading}
-                  onClick={() => setPage((current) => current + 1)}
+                  onClick={() => {
+                    setPage((current) => current + 1);
+                  }}
                 >
                   Next
                 </button>

@@ -20,5 +20,5 @@ export const PATCH = createTenantRoute<
   body: updateWorkflowNodeBodySchema,
   output: marketingWorkflowResponseSchema,
   handler: async ({ tx, ctx, params, input }) =>
-    updateMarketingWorkflowNode(tx, ctx, params.id, input),
+    updateMarketingWorkflowNode(tx, ctx, params["id"], input),
 });

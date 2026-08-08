@@ -15,5 +15,5 @@ export const GET = createTenantRoute<
   metadata: listMarketingWorkflowsMetadata,
   params: paramsSchema,
   output: marketingWorkflowRunsResponseSchema,
-  handler: async ({ tx, ctx, params }) => listMarketingWorkflowRuns(tx, ctx, params.id),
+  handler: async ({ tx, ctx, params }) => listMarketingWorkflowRuns(tx, ctx, params["id"]),
 });

@@ -18,5 +18,5 @@ export const GET = createTenantRoute<
   params: courseIdParamsSchema,
   output: progressLearnersListResponseSchema,
   handler: async ({ tx, ctx, input, params }) =>
-    listProgressLearners(tx, ctx, params.courseId, input),
+    listProgressLearners(tx, ctx, params["courseId"], input),
 });

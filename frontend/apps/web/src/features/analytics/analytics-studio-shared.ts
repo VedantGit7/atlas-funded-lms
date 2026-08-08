@@ -1,5 +1,12 @@
 import type { AnalyticsDashboardResponse } from "@atlas/domain/analytics/analytics.contract";
 
+function defined<T>(value: T, message = "Expected value to be defined"): NonNullable<T> {
+  if (value == null) {
+    throw new Error(message);
+  }
+  return value;
+}
+
 export {
   panelClassName,
   sectionHeaderClassName,
@@ -66,11 +73,11 @@ export type ItemStatisticRow = {
   correctCount: number;
   accuracy: number | null;
   averageLatencyMs: number | null;
-  difficulty?: number | null;
-  discrimination?: number | null;
+  difficulty?: number | null | undefined;
+  discrimination?: number | null | undefined;
   distractorRates?: Array<{ optionId: string; rate: number }> | null;
-  sampleSizeWarning?: boolean;
-  qualityFlag?: "bad" | "fair" | "good";
+  sampleSizeWarning?: boolean | undefined;
+  qualityFlag?: "bad" | "fair" | "good" | undefined;
 };
 
 const ACCURACY_GOAL = 0.75;
@@ -100,7 +107,8 @@ export function computeStudioSummary(
   const avgAccuracy =
     withAccuracy.length > 0
       ? Math.round(
-          (withAccuracy.reduce((sum, item) => sum + item.accuracy!, 0) / withAccuracy.length) *
+          (withAccuracy.reduce((sum, item) => sum + defined(item.accuracy), 0) /
+            withAccuracy.length) *
             1000,
         ) / 10
       : null;
@@ -108,10 +116,10 @@ export function computeStudioSummary(
   const withLatency = items.filter((item) => item.averageLatencyMs != null);
   const avgLatencyMs =
     withLatency.length > 0
-      ? withLatency.reduce((sum, item) => sum + item.averageLatencyMs!, 0) / withLatency.length
+      ? withLatency.reduce((sum, item) => sum + defined(item.averageLatencyMs), 0) /
+        withLatency.length
       : null;
-  const avgLatencySec =
-    avgLatencyMs != null ? Math.round((avgLatencyMs / 1000) * 10) / 10 : null;
+  const avgLatencySec = avgLatencyMs != null ? Math.round((avgLatencyMs / 1000) * 10) / 10 : null;
 
   return {
     totalSubmissions,
@@ -217,13 +225,16 @@ export function highlightRowKind(
 
   const ranked = items
     .filter((entry) => entry.accuracy != null && entry.attemptsCount >= 5)
-    .sort((a, b) => b.accuracy! - a.accuracy!);
+    .sort((a, b) => defined(b.accuracy) - defined(a.accuracy));
 
-  if (ranked[0]?.itemReference.itemId === item.itemReference.itemId && item.accuracy! >= ACCURACY_GOAL) {
+  if (
+    ranked[0]?.itemReference.itemId === item.itemReference.itemId &&
+    item.accuracy >= ACCURACY_GOAL
+  ) {
     return "top";
   }
 
-  if (item.accuracy! < 0.5 && item.attemptsCount >= 10) {
+  if (item.accuracy < 0.5 && item.attemptsCount >= 10) {
     return "alert";
   }
 

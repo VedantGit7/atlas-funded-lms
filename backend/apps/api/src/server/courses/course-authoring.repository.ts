@@ -424,7 +424,7 @@ export async function insertCourseModule(args: {
   courseId: string;
   title: string;
   position: number;
-  contentKind?: "standard" | "scorm";
+  contentKind?: "standard" | "scorm" | undefined;
 }): Promise<{ id: string }> {
   const moduleId = randomUUID();
   const contentKind = args.contentKind === "scorm" ? "SCORM" : "STANDARD";

@@ -17,6 +17,7 @@ const routeMetadataRule = {
   },
   create(context) {
     let hasRouteMetadataExport = false;
+    let hasCreateTenantRouteMetadata = false;
 
     function isRouteMetadataVariableDeclaration(node) {
       return (
@@ -28,7 +29,73 @@ const routeMetadataRule = {
       );
     }
 
+    function unwrapCallee(node) {
+      let current = node;
+
+      while (current?.type === "TSInstantiationExpression" || current?.type === "ChainExpression") {
+        current = current.expression;
+      }
+
+      return current;
+    }
+
+    function isRouteFactoryCallee(node) {
+      const callee = unwrapCallee(node);
+
+      return (
+        callee?.type === "Identifier" &&
+        (callee.name === "createTenantRoute" ||
+          callee.name === "createPublicRoute" ||
+          callee.name === "createPublicRouteHandler" ||
+          callee.name === "createPlatformRoute")
+      );
+    }
+
+    function isPublicRouteHandlerCallee(node) {
+      const callee = unwrapCallee(node);
+
+      return callee?.type === "Identifier" && callee.name === "createPublicRouteHandler";
+    }
+
+    function objectHasMetadataProperty(objectExpression) {
+      if (!objectExpression || objectExpression.type !== "ObjectExpression") {
+        return false;
+      }
+
+      return objectExpression.properties.some((property) => {
+        if (property.type !== "Property") {
+          return false;
+        }
+
+        if (property.key?.type === "Identifier") {
+          return property.key.name === "metadata";
+        }
+
+        if (property.key?.type === "Literal") {
+          return property.key.value === "metadata";
+        }
+
+        return false;
+      });
+    }
+
     return {
+      CallExpression(node) {
+        if (!isRouteFactoryCallee(node.callee)) {
+          return;
+        }
+
+        // createPublicRouteHandler(metadata, handler) — metadata is the first argument
+        if (isPublicRouteHandlerCallee(node.callee) && node.arguments[0]) {
+          hasCreateTenantRouteMetadata = true;
+          return;
+        }
+
+        if (objectHasMetadataProperty(node.arguments[0])) {
+          hasCreateTenantRouteMetadata = true;
+        }
+      },
+
       ExportNamedDeclaration(node) {
         if (isRouteMetadataVariableDeclaration(node.declaration)) {
           hasRouteMetadataExport = true;
@@ -50,9 +117,10 @@ const routeMetadataRule = {
 
         const isApiRouteFile =
           /(?:apps\/web\/)?src\/app\/api\/.*\/route\.(ts|tsx)$/.test(fileName) ||
-          /apps\/web\/app\/api\/.*\/route\.(ts|tsx)$/.test(fileName);
+          /apps\/web\/app\/api\/.*\/route\.(ts|tsx)$/.test(fileName) ||
+          /backend\/apps\/api\/src\/app\/api\/.*\/route\.(ts|tsx)$/.test(fileName);
 
-        if (!isApiRouteFile || hasRouteMetadataExport) {
+        if (!isApiRouteFile || hasRouteMetadataExport || hasCreateTenantRouteMetadata) {
           return;
         }
 
@@ -63,7 +131,8 @@ const routeMetadataRule = {
 
           if (
             /export\s+const\s+routeMetadata\s*(?::[^=]+)?=/.test(metadataContent) ||
-            /export\s*\{\s*routeMetadata\s*\}/.test(metadataContent)
+            /export\s+const\s+\w*Metadata\s*(?::[^=]+)?=/.test(metadataContent) ||
+            /export\s*\{[^}]*\brouteMetadata\b[^}]*\}/.test(metadataContent)
           ) {
             return;
           }
@@ -215,6 +284,17 @@ export default tseslint.config(
       "@typescript-eslint/no-floating-promises": "error",
       "@typescript-eslint/no-misused-promises": "error",
       "@typescript-eslint/switch-exhaustiveness-check": "error",
+      // Numbers/booleans in template strings are intentional and safe in this codebase.
+      "@typescript-eslint/restrict-template-expressions": [
+        "error",
+        {
+          allowNumber: true,
+          allowBoolean: true,
+          allowNullish: false,
+          allowAny: false,
+          allowRegExp: false,
+        },
+      ],
       "atlas/no-hardcoded-tenant-strings": "error",
       "atlas/require-route-metadata": "error",
     },

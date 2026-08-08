@@ -25,7 +25,7 @@ export const GET = createTenantRoute<
   params: customFieldLearnerParamsSchema,
   output: customFieldLearnerDetailResponseSchema,
   handler: async ({ tx, ctx, params }) =>
-    getCustomFieldLearnerDetail(tx, ctx, params.membershipId),
+    getCustomFieldLearnerDetail(tx, ctx, params["membershipId"]),
 });
 
 export const PATCH = createTenantRoute<
@@ -38,5 +38,5 @@ export const PATCH = createTenantRoute<
   input: updateCustomFieldLearnerValuesBodySchema,
   output: updateCustomFieldLearnerValuesResponseSchema,
   handler: async ({ tx, ctx, params, input }) =>
-    updateCustomFieldLearnerValues(tx, ctx, params.membershipId, input),
+    updateCustomFieldLearnerValues(tx, ctx, params["membershipId"], input),
 });

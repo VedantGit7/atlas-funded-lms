@@ -18,5 +18,5 @@ export const GET = createTenantRoute<
   params: courseIdParamsSchema,
   output: scoreQuizzesListResponseSchema,
   handler: async ({ tx, ctx, input, params }) =>
-    listScoreQuizzes(tx, ctx, params.courseId, input),
+    listScoreQuizzes(tx, ctx, params["courseId"], input),
 });

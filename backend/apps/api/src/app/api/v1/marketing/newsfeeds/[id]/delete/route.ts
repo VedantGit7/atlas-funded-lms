@@ -20,5 +20,5 @@ export const POST = createTenantRoute<
   body: deleteNewsfeedPostBodySchema,
   output: deleteNewsfeedPostResponseSchema,
   handler: async ({ tx, ctx, params, input }) =>
-    deleteMarketingNewsfeedPost(tx, ctx, params.id, input),
+    deleteMarketingNewsfeedPost(tx, ctx, params["id"], input),
 });

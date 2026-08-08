@@ -40,11 +40,7 @@ async function buildInternalApiRequest(
   };
 }
 
-async function request<T>(
-  path: string,
-  init?: RequestInit,
-  options?: RequestOptions,
-): Promise<T> {
+async function request<T>(path: string, init?: RequestInit, options?: RequestOptions): Promise<T> {
   const { url, forwardedHost } = await buildInternalApiRequest(path);
   const cookie = options?.cookieHeader ?? (await resolveCookieHeaderForInternalApi());
   const requestHeaders = new Headers(init?.headers);
@@ -116,7 +112,11 @@ export const serverApi = {
 
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
       try {
-        return await request<T>(path, undefined, { cookieHeader: cookieOverride });
+        return await request<T>(
+          path,
+          undefined,
+          cookieOverride !== undefined ? { cookieHeader: cookieOverride } : undefined,
+        );
       } catch (error) {
         lastError = error;
 

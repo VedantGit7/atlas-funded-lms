@@ -53,16 +53,16 @@ function pageInfo(totalCount: number, page: number, limit: number) {
 function toProgressFilter(
   productType: ProgressProductType,
   productId: string,
-  input: Partial<{
-    enrolledFrom?: string;
-    enrolledTo?: string;
-    learnerName?: string;
-    enrolledType?: string;
-    status?: string;
-    view?: ProgressLearnersQuery["view"];
-    completionBand?: ProgressLearnersQuery["completionBand"];
-    activityStatus?: ProgressLearnersQuery["activityStatus"];
-  }>,
+  input: {
+    enrolledFrom?: string | undefined;
+    enrolledTo?: string | undefined;
+    learnerName?: string | undefined;
+    enrolledType?: string | undefined;
+    status?: string | undefined;
+    view?: ProgressLearnersQuery["view"] | undefined;
+    completionBand?: ProgressLearnersQuery["completionBand"] | undefined;
+    activityStatus?: ProgressLearnersQuery["activityStatus"] | undefined;
+  },
 ): ProgressLearnersFilter {
   const filter: ProgressLearnersFilter = { productType, productId };
   if (input.enrolledFrom) filter.enrolledFrom = input.enrolledFrom;
@@ -77,13 +77,12 @@ function toProgressFilter(
 }
 
 function resolveProgressProductContext(input: {
-  productType?: ProgressProductType;
+  productType?: ProgressProductType | undefined;
   productId?: string | undefined;
   courseId?: string | undefined;
 }): { productType: ProgressProductType; productId: string } {
   const productType = input.productType ?? "course";
-  const productId =
-    input.productId ?? (productType === "course" ? input.courseId : undefined);
+  const productId = input.productId ?? (productType === "course" ? input.courseId : undefined);
   if (!productId) {
     throw progressScoreProductNotFound(productType);
   }
@@ -187,7 +186,7 @@ function mapProgressLearnersResponse(
         avgCompletionPct:
           summary.avg_completion_pct == null
             ? null
-            : Math.round(Number(summary.avg_completion_pct) * 10) / 10,
+            : Math.round(summary.avg_completion_pct * 10) / 10,
         completedCount: summary.completed_count,
         stalledCount: summary.stalled_count,
         notStartedCount: summary.not_started_count,
@@ -203,17 +202,17 @@ function mapProgressLearnersResponse(
 
 function toScoreFilter(
   assessmentId: string,
-  input: Partial<{
-    submittedFrom?: string;
-    submittedTo?: string;
-    learnerName?: string;
-    resultStatus?: string;
-    minScore?: number;
-    maxScore?: number;
-    minAttempts?: number;
-    attemptsFilter?: ScoreLearnersQuery["attemptsFilter"];
-    view?: ScoreLearnersQuery["view"];
-  }>,
+  input: {
+    submittedFrom?: string | undefined;
+    submittedTo?: string | undefined;
+    learnerName?: string | undefined;
+    resultStatus?: string | undefined;
+    minScore?: number | undefined;
+    maxScore?: number | undefined;
+    minAttempts?: number | undefined;
+    attemptsFilter?: ScoreLearnersQuery["attemptsFilter"] | undefined;
+    view?: ScoreLearnersQuery["view"] | undefined;
+  },
 ): ScoreLearnersFilter {
   const filter: ScoreLearnersFilter = { assessmentId };
   if (input.submittedFrom) filter.submittedFrom = input.submittedFrom;
@@ -238,16 +237,16 @@ function slugifyKey(title: string, prefix: string): string {
 }
 
 function buildProgressCriteriaSummary(input: {
-  membershipIds?: string[];
-  enrolledFrom?: string;
-  enrolledTo?: string;
-  learnerName?: string;
-  enrolledType?: string;
-  status?: string;
+  membershipIds?: string[] | undefined;
+  enrolledFrom?: string | undefined;
+  enrolledTo?: string | undefined;
+  learnerName?: string | undefined;
+  enrolledType?: string | undefined;
+  status?: string | undefined;
 }): string | null {
   const parts: string[] = [];
   if (input.membershipIds?.length) {
-    parts.push(`${input.membershipIds.length} selected learners`);
+    parts.push(`${String(input.membershipIds.length)} selected learners`);
   }
   if (input.learnerName) parts.push(`name contains “${input.learnerName}”`);
   if (input.enrolledType) parts.push(`enrolment ${input.enrolledType}`);
@@ -258,22 +257,22 @@ function buildProgressCriteriaSummary(input: {
 }
 
 function buildScoreCriteriaSummary(input: {
-  membershipIds?: string[];
-  submittedFrom?: string;
-  submittedTo?: string;
-  learnerName?: string;
-  resultStatus?: string;
-  minScore?: number;
-  maxScore?: number;
+  membershipIds?: string[] | undefined;
+  submittedFrom?: string | undefined;
+  submittedTo?: string | undefined;
+  learnerName?: string | undefined;
+  resultStatus?: string | undefined;
+  minScore?: number | undefined;
+  maxScore?: number | undefined;
 }): string | null {
   const parts: string[] = [];
   if (input.membershipIds?.length) {
-    parts.push(`${input.membershipIds.length} selected learners`);
+    parts.push(`${String(input.membershipIds.length)} selected learners`);
   }
   if (input.learnerName) parts.push(`name contains “${input.learnerName}”`);
   if (input.resultStatus) parts.push(`result ${input.resultStatus}`);
-  if (input.minScore != null) parts.push(`score ≥ ${input.minScore}%`);
-  if (input.maxScore != null) parts.push(`score ≤ ${input.maxScore}%`);
+  if (input.minScore != null) parts.push(`score ≥ ${String(input.minScore)}%`);
+  if (input.maxScore != null) parts.push(`score ≤ ${String(input.maxScore)}%`);
   if (input.submittedFrom) parts.push(`submitted from ${input.submittedFrom.slice(0, 10)}`);
   if (input.submittedTo) parts.push(`submitted to ${input.submittedTo.slice(0, 10)}`);
   return parts.length > 0 ? parts.join(" · ") : null;
@@ -318,9 +317,7 @@ function mapProductRow(row: {
     quizCount: row.quiz_count,
     ...(row.assessment_id ? { assessmentId: row.assessment_id } : {}),
     avgCompletionPct:
-      row.avg_completion_pct == null
-        ? null
-        : Math.round(Number(row.avg_completion_pct) * 10) / 10,
+      row.avg_completion_pct == null ? null : Math.round(row.avg_completion_pct * 10) / 10,
     completionBands: {
       not_started: row.band_not_started,
       early: row.band_early,
@@ -341,8 +338,8 @@ export async function listProgressCourses(
   return listProgressProducts(tx, ctx, "course", {
     limit: query.limit,
     page: query.page,
-    sortBy: "sortBy" in query && query.sortBy ? query.sortBy : "title",
-    sortDir: "sortDir" in query && query.sortDir ? query.sortDir : "asc",
+    sortBy: "sortBy" in query ? query.sortBy : "title",
+    sortDir: "sortDir" in query ? query.sortDir : "asc",
     ...(query.q ? { q: query.q } : {}),
     ...("status" in query && query.status ? { status: query.status } : {}),
   });
@@ -441,18 +438,12 @@ export async function listScoreCourses(
   const scoreQuery: ScoreProductsQuery = {
     limit: query.limit,
     page: query.page,
-    sortBy: "sortBy" in query && query.sortBy && ["title", "attempts", "avg_score", "pass_rate", "last_attempt", "ungraded"].includes(query.sortBy)
-      ? (query.sortBy as ScoreProductsQuery["sortBy"])
-      : "attempts",
-    sortDir: "sortDir" in query && query.sortDir ? query.sortDir : "desc",
+    sortBy: "sortBy" in query ? query.sortBy : "attempts",
+    sortDir: "sortDir" in query ? query.sortDir : "desc",
     ...(query.q ? { q: query.q } : {}),
     ...("status" in query && query.status ? { status: query.status } : {}),
-    ...("passRateBand" in query && query.passRateBand
-      ? { passRateBand: query.passRateBand }
-      : {}),
-    ...("hasUngraded" in query && query.hasUngraded === true
-      ? { hasUngraded: true }
-      : {}),
+    ...("passRateBand" in query && query.passRateBand ? { passRateBand: query.passRateBand } : {}),
+    ...("hasUngraded" in query && query.hasUngraded === true ? { hasUngraded: true } : {}),
   };
   return listScoreProducts(tx, ctx, "course", scoreQuery);
 }
@@ -494,18 +485,9 @@ export async function listScoreProducts(
         assessmentCount: row.assessment_count,
         learnersAttempted: row.learners_attempted,
         attemptCount: row.attempt_count,
-        avgScorePct:
-          row.avg_score_pct == null
-            ? null
-            : Math.round(Number(row.avg_score_pct) * 10) / 10,
-        passMarkPct:
-          row.pass_mark_pct == null
-            ? null
-            : Math.round(Number(row.pass_mark_pct) * 10) / 10,
-        passRatePct:
-          row.pass_rate_pct == null
-            ? null
-            : Math.round(Number(row.pass_rate_pct) * 10) / 10,
+        avgScorePct: row.avg_score_pct == null ? null : Math.round(row.avg_score_pct * 10) / 10,
+        passMarkPct: row.pass_mark_pct == null ? null : Math.round(row.pass_mark_pct * 10) / 10,
+        passRatePct: row.pass_rate_pct == null ? null : Math.round(row.pass_rate_pct * 10) / 10,
         ungradedCount: row.ungraded_count,
         lastAttemptAt: row.last_attempt_at ? row.last_attempt_at.toISOString() : null,
       })),
@@ -536,14 +518,14 @@ function formatMedianTimeLabel(seconds: number | null): string | null {
   if (mins >= 60) {
     const hours = Math.floor(mins / 60);
     const remMins = mins % 60;
-    return `${hours}h ${remMins}m`;
+    return `${String(hours)}h ${String(remMins)}m`;
   }
-  return `${mins}m ${String(secs).padStart(2, "0")}s`;
+  return `${String(mins)}m ${String(secs).padStart(2, "0")}s`;
 }
 
 function roundPct(value: number | null): number | null {
   if (value == null || !Number.isFinite(value)) return null;
-  return Math.round(Number(value) * 10) / 10;
+  return Math.round(value * 10) / 10;
 }
 
 function toScoreSpread(row: {
@@ -725,11 +707,7 @@ export async function listScoreLearners(
   });
 }
 
-export async function listScoreItemAnalysis(
-  tx: TenantTx,
-  _ctx: ServiceCtx,
-  assessmentId: string,
-) {
+export async function listScoreItemAnalysis(tx: TenantTx, _ctx: ServiceCtx, assessmentId: string) {
   const meta = await progressScoreRosterRepository.findAssessmentMeta(tx, assessmentId);
   if (!meta) throw progressScoreAssessmentNotFound();
 
@@ -788,15 +766,15 @@ export async function listScoreAttemptHistory(
 export async function resolveProgressMembershipIds(
   tx: TenantTx,
   input: {
-    productType?: ProgressProductType;
+    productType?: ProgressProductType | undefined;
     productId?: string | undefined;
     courseId?: string | undefined;
-    membershipIds?: string[];
-    enrolledFrom?: string;
-    enrolledTo?: string;
-    learnerName?: string;
-    enrolledType?: string;
-    status?: string;
+    membershipIds?: string[] | undefined;
+    enrolledFrom?: string | undefined;
+    enrolledTo?: string | undefined;
+    learnerName?: string | undefined;
+    enrolledType?: string | undefined;
+    status?: string | undefined;
   },
 ): Promise<string[]> {
   if (input.membershipIds && input.membershipIds.length > 0) {
@@ -815,13 +793,13 @@ export async function resolveScoreMembershipIds(
   tx: TenantTx,
   input: {
     assessmentId: string;
-    membershipIds?: string[];
-    submittedFrom?: string;
-    submittedTo?: string;
-    learnerName?: string;
-    resultStatus?: string;
-    minScore?: number;
-    maxScore?: number;
+    membershipIds?: string[] | undefined;
+    submittedFrom?: string | undefined;
+    submittedTo?: string | undefined;
+    learnerName?: string | undefined;
+    resultStatus?: string | undefined;
+    minScore?: number | undefined;
+    maxScore?: number | undefined;
   },
 ): Promise<string[]> {
   if (input.membershipIds && input.membershipIds.length > 0) {
@@ -866,7 +844,7 @@ export async function createProgressGroup(tx: TenantTx, _ctx: ServiceCtx, rawBod
       productType,
       productId,
       productTitle,
-      courseId: productType === "course" ? productId : body.courseId ?? null,
+      courseId: productType === "course" ? productId : (body.courseId ?? null),
       createdFrom: "reports.progress-score.progress",
       syncType: "static",
       criteriaSummary,

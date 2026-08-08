@@ -88,18 +88,18 @@ function buildQuery(params: Record<string, string | number | undefined>): string
 }
 
 export async function fetchCustomFieldRoster(filters: {
-  q?: string;
-  email?: string;
-  status?: string;
-  signedUpFrom?: string;
-  signedUpTo?: string;
-  minTotalSpentCents?: number;
-  maxTotalSpentCents?: number;
-  sortBy?: string;
-  sortDir?: "asc" | "desc";
-  columns?: string[];
-  page?: number;
-  limit?: number;
+  q?: string | undefined;
+  email?: string | undefined;
+  status?: string | undefined;
+  signedUpFrom?: string | undefined;
+  signedUpTo?: string | undefined;
+  minTotalSpentCents?: number | undefined;
+  maxTotalSpentCents?: number | undefined;
+  sortBy?: string | undefined;
+  sortDir?: "asc" | "desc" | undefined;
+  columns?: string[] | undefined;
+  page?: number | undefined;
+  limit?: number | undefined;
 }) {
   return clientApi.get<{
     data: {
@@ -205,9 +205,9 @@ function buildCohortQuery(filters: Record<string, string | number | undefined>) 
 }
 
 export async function fetchCustomFieldCohortGroups(filters?: {
-  q?: string;
-  page?: number;
-  limit?: number;
+  q?: string | undefined;
+  page?: number | undefined;
+  limit?: number | undefined;
 }) {
   return clientApi.get<{
     data: {
@@ -231,8 +231,8 @@ export async function fetchCustomFieldCohortGroups(filters?: {
 }
 
 export async function fetchCustomFieldCohortMessages(filters?: {
-  page?: number;
-  limit?: number;
+  page?: number | undefined;
+  limit?: number | undefined;
 }) {
   return clientApi.get<{
     data: {
@@ -302,11 +302,11 @@ export type CustomFieldCatalogueSummary = {
 };
 
 export async function fetchCustomFieldCatalogue(filters: {
-  q?: string;
-  fieldType?: string;
-  status?: string;
-  coverage?: string;
-  sortBy?: string;
+  q?: string | undefined;
+  fieldType?: string | undefined;
+  status?: string | undefined;
+  coverage?: string | undefined;
+  sortBy?: string | undefined;
 }) {
   return clientApi.get<{
     data: {
@@ -473,13 +473,13 @@ export type CustomFieldDetailData = {
 export async function fetchCustomFieldDetail(
   fieldKey: string,
   filters: {
-    q?: string;
-    valueFilter?: string;
-    minValue?: number;
-    maxValue?: number;
-    compareWith?: string;
-    page?: number;
-    limit?: number;
+    q?: string | undefined;
+    valueFilter?: string | undefined;
+    minValue?: number | undefined;
+    maxValue?: number | undefined;
+    compareWith?: string | undefined;
+    page?: number | undefined;
+    limit?: number | undefined;
   },
 ) {
   return clientApi.get<{ data: CustomFieldDetailData }>(
@@ -523,7 +523,7 @@ export type CustomFieldLearnerField = {
   status: string;
   options: string[];
   value: string | null;
-  valueJson: unknown | null;
+  valueJson: unknown;
   filled: boolean;
   updatedAt: string | null;
   updatedByName: string | null;
@@ -554,7 +554,7 @@ export type CustomFieldLearnerDetailData = {
 export type UpdateCustomFieldLearnerValuesBody = {
   values: Array<{
     definitionId: string;
-    valueJson: unknown | null;
+    valueJson: unknown;
   }>;
 };
 

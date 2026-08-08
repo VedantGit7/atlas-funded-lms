@@ -3,22 +3,10 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import {
-  AlertTriangle,
-  ChevronLeft,
-  ChevronRight,
-  RefreshCw,
-  Search,
-  Video,
-} from "lucide-react";
-import {
-  ghostButtonClassName,
-} from "../../analytics/analytics-admin-shared";
+import { AlertTriangle, ChevronLeft, ChevronRight, RefreshCw, Search, Video } from "lucide-react";
+import { ghostButtonClassName } from "../../analytics/analytics-admin-shared";
 import { ClientApiError } from "../../../lib/client-api";
-import {
-  fetchLiveSessionsWithPolls,
-  type LiveSessionPollListItem,
-} from "./admin-polls-roster-api";
+import { fetchLiveSessionsWithPolls, type LiveSessionPollListItem } from "./admin-polls-roster-api";
 
 const secondaryButtonClassName =
   "inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-[var(--admin-outline)] bg-[var(--admin-surface)] px-4 text-sm font-medium text-[var(--admin-on-surface)] transition-all hover:bg-[var(--admin-surface-high)] active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]/30 disabled:cursor-not-allowed disabled:opacity-50";
@@ -28,7 +16,7 @@ const fieldClassName =
 
 function formatPct(value: number | null | undefined): string {
   if (value == null || Number.isNaN(value)) return "-";
-  return `${Number(value).toFixed(value % 1 === 0 ? 0 : 1)}%`;
+  return `${value.toFixed(value % 1 === 0 ? 0 : 1)}%`;
 }
 
 function formatWhen(iso: string | null): string {
@@ -173,7 +161,9 @@ export function AdminPollsLiveSessionsPage() {
             className={`${fieldClassName} w-full pl-9`}
             placeholder="Search session title or host…"
             value={draftQ}
-            onChange={(event) => setDraftQ(event.target.value)}
+            onChange={(event) => {
+              setDraftQ(event.target.value);
+            }}
             onKeyDown={(event) => {
               if (event.key === "Enter") {
                 setPage(1);
@@ -277,9 +267,9 @@ export function AdminPollsLiveSessionsPage() {
                   <tr
                     key={item.id}
                     className="cursor-pointer border-b border-[var(--admin-border)] transition-colors last:border-b-0 hover:bg-[var(--admin-surface-high)]"
-                    onClick={() =>
-                      router.push(`/admin/reports/polls/live-sessions/${item.id}`)
-                    }
+                    onClick={() => {
+                      router.push(`/admin/reports/polls/live-sessions/${item.id}`);
+                    }}
                   >
                     <td className="px-4 py-3">
                       <div className="font-medium text-[var(--admin-primary)]">{item.title}</div>
@@ -325,14 +315,17 @@ export function AdminPollsLiveSessionsPage() {
           <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[var(--admin-border)] px-4 py-3 text-xs text-[var(--admin-on-surface-variant)]">
             <span>
               Showing page {page}
-              {totalPages > 0 ? ` of ${totalPages}` : ""} · {totalCount.toLocaleString()} sessions
+              {totalPages > 0 ? ` of ${String(totalPages)}` : ""} · {totalCount.toLocaleString()}{" "}
+              sessions
             </span>
             <div className="flex items-center gap-2">
               <button
                 type="button"
                 className={ghostButtonClassName}
                 disabled={page <= 1}
-                onClick={() => setPage((value) => Math.max(1, value - 1))}
+                onClick={() => {
+                  setPage((value) => Math.max(1, value - 1));
+                }}
               >
                 <ChevronLeft className="h-4 w-4" aria-hidden="true" />
                 Previous
@@ -341,7 +334,9 @@ export function AdminPollsLiveSessionsPage() {
                 type="button"
                 className={ghostButtonClassName}
                 disabled={totalPages === 0 || page >= totalPages}
-                onClick={() => setPage((value) => value + 1)}
+                onClick={() => {
+                  setPage((value) => value + 1);
+                }}
               >
                 Next
                 <ChevronRight className="h-4 w-4" aria-hidden="true" />

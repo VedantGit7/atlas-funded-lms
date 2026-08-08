@@ -4,19 +4,11 @@ import { clientApi } from "../../../lib/client-api";
 import { downloadReportExport } from "./admin-reports-api";
 
 export type CustomFieldExportFormat = "csv" | "xlsx" | "json";
-export type CustomFieldExportDataset =
-  | "learner_roster"
-  | "field_coverage"
-  | "segment_members";
+export type CustomFieldExportDataset = "learner_roster" | "field_coverage" | "segment_members";
 export type CustomFieldExportDelivery = "download" | "email_me" | "recipients";
 export type CustomFieldExportCadence = "daily" | "weekly" | "monthly";
 export type CustomFieldExportEmptyValue = "blank" | "emdash";
-export type CustomFieldExportStatus =
-  | "QUEUED"
-  | "RUNNING"
-  | "SUCCEEDED"
-  | "FAILED"
-  | "CANCELLED";
+export type CustomFieldExportStatus = "QUEUED" | "RUNNING" | "SUCCEEDED" | "FAILED" | "CANCELLED";
 
 export type CustomFieldExportColumn = {
   key: string;
@@ -86,30 +78,28 @@ export type CreateCustomFieldExportBody = {
   columns: string[];
   format: CustomFieldExportFormat;
   emptyValueMode: CustomFieldExportEmptyValue;
-  q?: string;
-  email?: string;
-  status?: "INVITED" | "ACTIVE" | "SUSPENDED" | "REMOVED";
-  signedUpFrom?: string;
-  signedUpTo?: string;
-  minTotalSpentCents?: number;
-  maxTotalSpentCents?: number;
-  segmentId?: string;
-  segmentName?: string;
+  q?: string | undefined;
+  email?: string | undefined;
+  status?: "INVITED" | "ACTIVE" | "SUSPENDED" | "REMOVED" | undefined;
+  signedUpFrom?: string | undefined;
+  signedUpTo?: string | undefined;
+  minTotalSpentCents?: number | undefined;
+  maxTotalSpentCents?: number | undefined;
+  segmentId?: string | undefined;
+  segmentName?: string | undefined;
   useCurrentFilters: boolean;
   delivery: CustomFieldExportDelivery;
-  recipients?: string[];
-  webhookUrl?: string | null;
+  recipients?: string[] | undefined;
+  webhookUrl?: string | null | undefined;
   scheduleEnabled: boolean;
-  scheduleName?: string;
-  cadence?: CustomFieldExportCadence;
-  time?: string;
-  timezone?: string;
+  scheduleName?: string | undefined;
+  cadence?: CustomFieldExportCadence | undefined;
+  time?: string | undefined;
+  timezone?: string | undefined;
 };
 
 export async function fetchCustomFieldExports() {
-  return clientApi.get<{ data: CustomFieldExportsPayload }>(
-    "/api/v1/reports/custom-field/exports",
-  );
+  return clientApi.get<{ data: CustomFieldExportsPayload }>("/api/v1/reports/custom-field/exports");
 }
 
 export async function createCustomFieldExport(body: CreateCustomFieldExportBody) {
@@ -140,7 +130,7 @@ export async function retryCustomFieldExport(runId: string) {
 
 export async function updateCustomFieldExportSchedule(
   scheduleId: string,
-  body: { isActive?: boolean; name?: string },
+  body: { isActive?: boolean | undefined; name?: string | undefined },
 ) {
   return clientApi.patch<{ data: CustomFieldExportScheduleItem }>(
     `/api/v1/reports/custom-field/exports/schedules/${scheduleId}`,

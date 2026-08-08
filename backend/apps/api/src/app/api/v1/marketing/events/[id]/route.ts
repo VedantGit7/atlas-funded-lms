@@ -24,7 +24,7 @@ export const GET = createTenantRoute<
   metadata: listMarketingEventsMetadata,
   params: paramsSchema,
   output: marketingEventResponseSchema,
-  handler: async ({ tx, ctx, params }) => getMarketingEvent(tx, ctx, params.id),
+  handler: async ({ tx, ctx, params }) => getMarketingEvent(tx, ctx, params["id"]),
 });
 
 export const PATCH = createTenantRoute<
@@ -36,6 +36,5 @@ export const PATCH = createTenantRoute<
   params: paramsSchema,
   body: updateMarketingEventBodySchema,
   output: marketingEventResponseSchema,
-  handler: async ({ tx, ctx, params, input }) =>
-    updateMarketingEvent(tx, ctx, params.id, input),
+  handler: async ({ tx, ctx, params, input }) => updateMarketingEvent(tx, ctx, params["id"], input),
 });

@@ -15,5 +15,5 @@ export const GET = createTenantRoute<
   metadata: getPollResultsMetadata,
   params: paramsSchema,
   output: pollResultsResponseSchema,
-  handler: async ({ tx, ctx, params }) => getPollResults(tx, ctx, params.id),
+  handler: async ({ tx, ctx, params }) => getPollResults(tx, ctx, params["id"]),
 });

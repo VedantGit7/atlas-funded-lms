@@ -10,8 +10,7 @@ export const ZOOM_PARTICIPANT_COLUMN_OPTIONS = [
   { key: "duration_seconds", label: "Duration" },
 ] as const;
 
-export type ZoomParticipantColumnKey =
-  (typeof ZOOM_PARTICIPANT_COLUMN_OPTIONS)[number]["key"];
+export type ZoomParticipantColumnKey = (typeof ZOOM_PARTICIPANT_COLUMN_OPTIONS)[number]["key"];
 
 export type ZoomMeetingListItem = {
   id: string;
@@ -71,12 +70,12 @@ function buildQuery(params: Record<string, string | number | undefined>): string
 }
 
 export async function fetchZoomMeetingsRoster(filters?: {
-  q?: string;
-  startedFrom?: string;
-  startedTo?: string;
-  sortBy?: string;
-  sortDir?: "asc" | "desc";
-  page?: number;
+  q?: string | undefined;
+  startedFrom?: string | undefined;
+  startedTo?: string | undefined;
+  sortBy?: string | undefined;
+  sortDir?: "asc" | "desc" | undefined;
+  page?: number | undefined;
 }) {
   return clientApi.get<{
     data: {
@@ -98,22 +97,20 @@ export async function fetchZoomMeetingsRoster(filters?: {
 }
 
 export async function fetchZoomMeetingDetail(meetingId: string) {
-  return clientApi.get<{ data: ZoomMeetingDetail }>(
-    `/api/v1/reports/zoom-insights/${meetingId}`,
-  );
+  return clientApi.get<{ data: ZoomMeetingDetail }>(`/api/v1/reports/zoom-insights/${meetingId}`);
 }
 
 export async function fetchZoomMeetingParticipants(
   meetingId: string,
   filters: {
-    displayName?: string;
-    email?: string;
-    joinedFrom?: string;
-    joinedTo?: string;
-    sortBy?: string;
-    sortDir?: "asc" | "desc";
-    columns?: ZoomParticipantColumnKey[];
-    page?: number;
+    displayName?: string | undefined;
+    email?: string | undefined;
+    joinedFrom?: string | undefined;
+    joinedTo?: string | undefined;
+    sortBy?: string | undefined;
+    sortDir?: "asc" | "desc" | undefined;
+    columns?: ZoomParticipantColumnKey[] | undefined;
+    page?: number | undefined;
   },
 ) {
   return clientApi.get<{

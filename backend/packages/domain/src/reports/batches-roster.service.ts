@@ -39,10 +39,14 @@ import {
   batchRosterNotFound,
   batchRosterEmptyAudience,
 } from "./batches-roster.errors";
-import {
-  batchesRosterRepository,
-  type BatchLearnersFilter,
-} from "./batches-roster.repository";
+import { batchesRosterRepository, type BatchLearnersFilter } from "./batches-roster.repository";
+
+function defined<T>(value: T, message = "Expected value to be defined"): NonNullable<T> {
+  if (value == null) {
+    throw new Error(message);
+  }
+  return value;
+}
 
 function pageInfo(totalCount: number, page: number, limit: number) {
   const totalPages = totalCount === 0 ? 0 : Math.ceil(totalCount / limit);
@@ -98,11 +102,7 @@ function mapBatchListItem(
   };
 }
 
-export async function listBatchesRoster(
-  tx: TenantTx,
-  _ctx: ServiceCtx,
-  query: BatchesListQuery,
-) {
+export async function listBatchesRoster(tx: TenantTx, _ctx: ServiceCtx, query: BatchesListQuery) {
   const [totalCount, rows, summary] = await Promise.all([
     batchesRosterRepository.countBatches(tx, query),
     batchesRosterRepository.listBatches(tx, query),
@@ -132,24 +132,21 @@ function learnerAttentionReason(row: {
   test_score_pct: number | null;
 }): string {
   const inactive =
-    row.activity_at == null ||
-    row.activity_at.getTime() < Date.now() - 14 * 24 * 60 * 60 * 1000;
+    row.activity_at == null || row.activity_at.getTime() < Date.now() - 14 * 24 * 60 * 60 * 1000;
   if (inactive) return "Inactive for 14+ days";
   if (row.test_score_pct != null && row.test_score_pct < 40) {
-    return `Test score ${Math.round(row.test_score_pct)}%`;
+    return `Test score ${String(Math.round(row.test_score_pct))}%`;
   }
   if (row.content_completion_pct < 40) {
-    return `Content completion ${Math.round(row.content_completion_pct)}%`;
+    return `Content completion ${String(Math.round(row.content_completion_pct))}%`;
   }
   if (row.live_attendance_pct != null && row.live_attendance_pct < 40) {
-    return `Live attendance ${Math.round(row.live_attendance_pct)}%`;
+    return `Live attendance ${String(Math.round(row.live_attendance_pct))}%`;
   }
   return "Needs attention";
 }
 
-function scoreDistributionFromLearners(
-  rows: Array<{ test_score_pct: number | null }>,
-) {
+function scoreDistributionFromLearners(rows: Array<{ test_score_pct: number | null }>) {
   let below60 = 0;
   let from60to80 = 0;
   let above80 = 0;
@@ -166,11 +163,7 @@ function scoreDistributionFromLearners(
   ];
 }
 
-export async function getBatchDetailedReport(
-  tx: TenantTx,
-  _ctx: ServiceCtx,
-  batchId: string,
-) {
+export async function getBatchDetailedReport(tx: TenantTx, _ctx: ServiceCtx, batchId: string) {
   const meta = await batchesRosterRepository.findBatchMeta(tx, batchId);
   if (!meta) throw batchRosterNotFound();
 
@@ -271,7 +264,7 @@ export async function getBatchDetailedReport(
         })),
         scoreDistribution: scoreDistributionFromLearners(learners),
         cohortTrend: cohortTrend.map((point, index) => ({
-          weekLabel: point.week_label || `W${index + 1}`,
+          weekLabel: point.week_label || `W${String(index + 1)}`,
           weekStart: point.week_start.toISOString(),
           contentCompletionPct: point.content_completion_pct,
           liveAttendancePct: point.live_attendance_pct,
@@ -363,21 +356,11 @@ export async function getBatchLearnerDetail(
   };
 
   const [liveAttendance, exams, courseProgress, peers, activityDays, listed] = await Promise.all([
-    batchesRosterRepository.listLiveAttendanceForMember(
-      tx,
-      batchId,
-      meta.course_id,
-      membershipId,
-    ),
+    batchesRosterRepository.listLiveAttendanceForMember(tx, batchId, meta.course_id, membershipId),
     batchesRosterRepository.listExamsForMember(tx, meta.course_id, membershipId),
     batchesRosterRepository.listCourseProgressForMember(tx, meta.course_id, membershipId),
     batchesRosterRepository.listLearners(tx, batchId, meta.course_id, learnerQuery),
-    batchesRosterRepository.listActivityDaysForMember(
-      tx,
-      membershipId,
-      meta.course_id,
-      batchId,
-    ),
+    batchesRosterRepository.listActivityDaysForMember(tx, membershipId, meta.course_id, batchId),
     batchesRosterRepository.listBatches(tx, {
       page: 1,
       limit: 100,
@@ -391,11 +374,7 @@ export async function getBatchLearnerDetail(
   const batchRow = listed.find((item) => item.id === batchId);
   const primaryCourseId = courseProgress[0]?.course_id ?? meta.course_id;
   const lessonStripRows = primaryCourseId
-    ? await batchesRosterRepository.listLessonStripForCourse(
-        tx,
-        primaryCourseId,
-        membershipId,
-      )
+    ? await batchesRosterRepository.listLessonStripForCourse(tx, primaryCourseId, membershipId)
     : [];
 
   function classifyAttendance(row: (typeof liveAttendance)[number]) {
@@ -403,9 +382,7 @@ export async function getBatchLearnerDetail(
     if (
       status === "upcoming" ||
       row.session_status === "scheduled" ||
-      (row.scheduled_at != null &&
-        row.scheduled_at.getTime() > Date.now() &&
-        row.joined_at == null)
+      (row.scheduled_at != null && row.scheduled_at.getTime() > Date.now() && row.joined_at == null)
     ) {
       return "upcoming" as const;
     }
@@ -424,11 +401,7 @@ export async function getBatchLearnerDetail(
     if (status === "partial" || status === "late") return "partial" as const;
     if (row.joined_at != null) {
       const planned = (row.planned_duration_minutes ?? 0) * 60;
-      if (
-        planned > 0 &&
-        row.duration_seconds != null &&
-        row.duration_seconds < planned * 0.5
-      ) {
+      if (planned > 0 && row.duration_seconds != null && row.duration_seconds < planned * 0.5) {
         return "partial" as const;
       }
       return "attended" as const;
@@ -455,15 +428,13 @@ export async function getBatchLearnerDetail(
     scoredAttempts.length > 0
       ? Number(
           (
-            scoredAttempts.reduce((sum, row) => sum + Number(row.score_pct ?? 0), 0) /
+            scoredAttempts.reduce((sum, row) => sum + (row.score_pct ?? 0), 0) /
             scoredAttempts.length
           ).toFixed(1),
         )
       : null;
   const bestTestScorePct =
-    scoredAttempts.length > 0
-      ? Math.max(...scoredAttempts.map((row) => Number(row.score_pct ?? 0)))
-      : null;
+    scoredAttempts.length > 0 ? Math.max(...scoredAttempts.map((row) => row.score_pct ?? 0)) : null;
 
   const primaryProgress = courseProgress[0];
   const contentCompletionPct = primaryProgress?.completion_pct ?? 0;
@@ -478,40 +449,37 @@ export async function getBatchLearnerDetail(
     meta.starts_at && meta.ends_at
       ? Math.max(
           1,
-          Math.round(
-            (meta.ends_at.getTime() - meta.starts_at.getTime()) / (1000 * 60 * 60 * 24),
-          ),
+          Math.round((meta.ends_at.getTime() - meta.starts_at.getTime()) / (1000 * 60 * 60 * 24)),
         )
       : null;
 
   const peer = peers.find((row) => row.membership_id === membershipId);
-  const health = peer?.health ?? (() => {
-    const flags =
-      (contentCompletionPct < 40 ? 1 : 0) +
-      (liveAttendancePct != null && liveAttendancePct < 40 ? 1 : 0) +
-      (testScorePct != null && testScorePct < 40 ? 1 : 0);
-    if (flags >= 2) return "critical" as const;
-    if (flags >= 1) return "at_risk" as const;
-    if (
-      member.activity_at == null ||
-      member.activity_at.getTime() < Date.now() - 14 * 24 * 60 * 60 * 1000
-    ) {
-      return "at_risk" as const;
-    }
-    return "on_track" as const;
-  })();
+  const health =
+    peer?.health ??
+    (() => {
+      const flags =
+        (contentCompletionPct < 40 ? 1 : 0) +
+        (liveAttendancePct != null && liveAttendancePct < 40 ? 1 : 0) +
+        (testScorePct != null && testScorePct < 40 ? 1 : 0);
+      if (flags >= 2) return "critical" as const;
+      if (flags >= 1) return "at_risk" as const;
+      if (
+        member.activity_at == null ||
+        member.activity_at.getTime() < Date.now() - 14 * 24 * 60 * 60 * 1000
+      ) {
+        return "at_risk" as const;
+      }
+      return "on_track" as const;
+    })();
 
   function percentileLabel(percentile: number | null): string {
     if (percentile == null) return "No data";
-    if (percentile >= 80) return `Top ${Math.max(1, 100 - percentile)}%`;
-    if (percentile >= 40) return `Average (${percentile}%)`;
-    return `Bottom ${Math.max(1, percentile)}%`;
+    if (percentile >= 80) return `Top ${String(Math.max(1, 100 - percentile))}%`;
+    if (percentile >= 40) return `Average (${String(percentile)}%)`;
+    return `Bottom ${String(Math.max(1, percentile))}%`;
   }
 
-  function computePercentile(
-    value: number | null,
-    values: Array<number | null>,
-  ): number | null {
+  function computePercentile(value: number | null, values: Array<number | null>): number | null {
     if (value == null) return null;
     const numeric = values.filter((item): item is number => item != null);
     if (numeric.length === 0) return null;
@@ -533,10 +501,7 @@ export async function getBatchLearnerDetail(
   );
 
   const activityMap = new Map(
-    activityDays.map((row) => [
-      row.activity_date.toISOString().slice(0, 10),
-      row.event_count,
-    ]),
+    activityDays.map((row) => [row.activity_date.toISOString().slice(0, 10), row.event_count]),
   );
   const heatmapCells: Array<{ date: string; count: number }> = [];
   const start = new Date();
@@ -560,8 +525,7 @@ export async function getBatchLearnerDetail(
   }
 
   const lastActivityLabel =
-    classified.find((item) => item.kind === "attended" || item.kind === "partial")?.row
-      .title ??
+    classified.find((item) => item.kind === "attended" || item.kind === "partial")?.row.title ??
     exams[0]?.assessment_title ??
     primaryProgress?.last_lesson_title ??
     null;
@@ -578,9 +542,7 @@ export async function getBatchLearnerDetail(
     return "failed";
   }
 
-  function courseStatusLabel(
-    pct: number,
-  ): "completed" | "in_progress" | "behind" | "not_started" {
+  function courseStatusLabel(pct: number): "completed" | "in_progress" | "behind" | "not_started" {
     if (pct >= 100) return "completed";
     if (pct <= 0) return "not_started";
     if (pct < 40) return "behind";
@@ -674,7 +636,7 @@ export async function getBatchLearnerDetail(
         assessmentTitle: row.assessment_title,
         attemptId: row.attempt_id,
         attemptStatus: row.attempt_status,
-        scorePct: row.score_pct == null ? null : Number(row.score_pct),
+        scorePct: row.score_pct == null ? null : row.score_pct,
         submittedAt: row.submitted_at?.toISOString() ?? null,
         startedAt: row.started_at.toISOString(),
         durationSeconds: row.duration_seconds,
@@ -700,8 +662,9 @@ export async function removeBatchLearner(
   _ctx: ServiceCtx,
   batchId: string,
   membershipId: string,
-  _input: { reason: string; notes?: string },
+  _input: { reason: string; notes?: string | undefined },
 ) {
+  void _input;
   const meta = await batchesRosterRepository.findBatchMeta(tx, batchId);
   if (!meta) throw batchRosterNotFound();
   const member = await batchesRosterRepository.findBatchMember(tx, batchId, membershipId);
@@ -789,12 +752,7 @@ export async function listBatchLiveSessions(
   const [totalCount, items, summary] = await Promise.all([
     batchesRosterRepository.countBatchLiveSessions(tx, batchId, meta.course_id, listQuery),
     batchesRosterRepository.listBatchLiveSessions(tx, batchId, meta.course_id, listQuery),
-    batchesRosterRepository.summarizeBatchLiveSessions(
-      tx,
-      batchId,
-      meta.course_id,
-      rosterCount,
-    ),
+    batchesRosterRepository.summarizeBatchLiveSessions(tx, batchId, meta.course_id, rosterCount),
   ]);
 
   return batchLiveSessionsListResponseSchema.parse({
@@ -874,13 +832,12 @@ export async function listBatchLiveSessionAbsentees(
   const meta = await batchesRosterRepository.findBatchMeta(tx, batchId);
   if (!meta) throw batchRosterNotFound();
 
-  const membershipIds =
-    await batchesRosterRepository.listBatchLiveSessionAbsenteeMembershipIds(
-      tx,
-      batchId,
-      meta.course_id,
-      query.minMissed,
-    );
+  const membershipIds = await batchesRosterRepository.listBatchLiveSessionAbsenteeMembershipIds(
+    tx,
+    batchId,
+    meta.course_id,
+    query.minMissed,
+  );
 
   return batchLiveSessionsAbsenteesResponseSchema.parse({
     data: { membershipIds },
@@ -978,8 +935,8 @@ function buildAttendanceTimeline(
   } | null = null;
   let bestDrop = 0;
   for (let i = 1; i < points.length; i += 1) {
-    const prev = points[i - 1]!;
-    const curr = points[i]!;
+    const prev = defined(points[i - 1]);
+    const curr = defined(points[i]);
     const drop = prev.concurrent - curr.concurrent;
     if (drop > bestDrop && drop >= 3) {
       bestDrop = drop;
@@ -989,7 +946,7 @@ function buildAttendanceTimeline(
         fromOffsetMinutes,
         toOffsetMinutes,
         learnersLeft: drop,
-        message: `${drop} learners left between ${String(Math.floor(fromOffsetMinutes / 60)).padStart(1, "0")}:${String(fromOffsetMinutes % 60).padStart(2, "0")} and ${String(Math.floor(toOffsetMinutes / 60)).padStart(1, "0")}:${String(toOffsetMinutes % 60).padStart(2, "0")}.`,
+        message: `${String(drop)} learners left between ${String(Math.floor(fromOffsetMinutes / 60)).padStart(1, "0")}:${String(fromOffsetMinutes % 60).padStart(2, "0")} and ${String(Math.floor(toOffsetMinutes / 60)).padStart(1, "0")}:${String(toOffsetMinutes % 60).padStart(2, "0")}.`,
       };
     }
   }
@@ -1064,8 +1021,9 @@ export async function getBatchLiveSessionDetail(
     .filter((value): value is number => value != null && value > 0);
   const avgWatchMinutes =
     watchValues.length > 0
-      ? Math.round((watchValues.reduce((sum, value) => sum + value, 0) / watchValues.length / 60) * 10) /
-        10
+      ? Math.round(
+          (watchValues.reduce((sum, value) => sum + value, 0) / watchValues.length / 60) * 10,
+        ) / 10
       : null;
   const lateJoinCount = attendees.filter((row) => row.late).length;
   const leftEarlyCount = attendees.filter((row) => row.left_early).length;
@@ -1116,9 +1074,8 @@ export async function getBatchLiveSessionDetail(
         leftEarlyCount: isCancelled || isUpcoming ? 0 : leftEarlyCount,
         peakConcurrent: isCancelled || isUpcoming ? null : timeline.peakConcurrent,
         peakConcurrentAt: peakAt?.toISOString() ?? null,
-        peakConcurrentOffsetMinutes: isCancelled || isUpcoming
-          ? null
-          : timeline.peakConcurrentOffsetMinutes,
+        peakConcurrentOffsetMinutes:
+          isCancelled || isUpcoming ? null : timeline.peakConcurrentOffsetMinutes,
       },
       timeline: {
         bucketMinutes: timeline.bucketMinutes,
@@ -1195,9 +1152,7 @@ export async function listBatchLiveSessionAttendees(
         leftAt: row.left_at?.toISOString() ?? null,
         watchSeconds: row.duration_seconds,
         watchMinutes:
-          row.duration_seconds == null
-            ? null
-            : Math.round((row.duration_seconds / 60) * 10) / 10,
+          row.duration_seconds == null ? null : Math.round((row.duration_seconds / 60) * 10) / 10,
         plannedMinutes,
         watchPct: row.watch_pct,
         late: row.late,
@@ -1305,15 +1260,10 @@ export async function getBatchExamsMatrix(
   const meta = await batchesRosterRepository.findBatchMeta(tx, batchId);
   if (!meta) throw batchRosterNotFound();
 
-  const matrix = await batchesRosterRepository.listBatchExamsMatrix(
-    tx,
-    batchId,
-    meta.course_id,
-    {
-      limitLearners: query.limitLearners,
-      ...(query.q ? { q: query.q } : {}),
-    },
-  );
+  const matrix = await batchesRosterRepository.listBatchExamsMatrix(tx, batchId, meta.course_id, {
+    limitLearners: query.limitLearners,
+    ...(query.q ? { q: query.q } : {}),
+  });
 
   const learnerAvgs = matrix.learners
     .map((l) => l.avg_score_pct)
@@ -1352,22 +1302,17 @@ export async function getBatchExamsMatrix(
   });
 }
 
-export async function listBatchExamsBelowPass(
-  tx: TenantTx,
-  _ctx: ServiceCtx,
-  batchId: string,
-) {
+export async function listBatchExamsBelowPass(tx: TenantTx, _ctx: ServiceCtx, batchId: string) {
   const meta = await batchesRosterRepository.findBatchMeta(tx, batchId);
   if (!meta) throw batchRosterNotFound();
 
   const passMarkPct = 70;
-  const membershipIds =
-    await batchesRosterRepository.listBatchExamsBelowPassMembershipIds(
-      tx,
-      batchId,
-      meta.course_id,
-      passMarkPct,
-    );
+  const membershipIds = await batchesRosterRepository.listBatchExamsBelowPassMembershipIds(
+    tx,
+    batchId,
+    meta.course_id,
+    passMarkPct,
+  );
 
   return batchExamsBelowPassResponseSchema.parse({
     data: { membershipIds, passMarkPct },
@@ -1384,9 +1329,9 @@ function formatDurationLabel(seconds: number | null): string | null {
   if (mins >= 60) {
     const hours = Math.floor(mins / 60);
     const remMins = mins % 60;
-    return `${hours}h ${remMins.toString().padStart(2, "0")}m`;
+    return `${String(hours)}h ${remMins.toString().padStart(2, "0")}m`;
   }
-  return `${mins}m ${secs.toString().padStart(2, "0")}s`;
+  return `${String(mins)}m ${secs.toString().padStart(2, "0")}s`;
 }
 
 function lessonTypeLabel(
@@ -1421,21 +1366,17 @@ function computeWeeksBehind(
   if (weeksBehind > 0) {
     return {
       weeksBehind,
-      paceLabel: `Cohort is ${weeksBehind} week${weeksBehind === 1 ? "" : "s"} behind schedule.`,
+      paceLabel: `Cohort is ${String(weeksBehind)} week${weeksBehind === 1 ? "" : "s"} behind schedule.`,
     };
   }
   const ahead = Math.abs(weeksBehind);
   return {
     weeksBehind,
-    paceLabel: `Cohort is ${ahead} week${ahead === 1 ? "" : "s"} ahead of schedule.`,
+    paceLabel: `Cohort is ${String(ahead)} week${ahead === 1 ? "" : "s"} ahead of schedule.`,
   };
 }
 
-export async function getBatchContentReport(
-  tx: TenantTx,
-  _ctx: ServiceCtx,
-  batchId: string,
-) {
+export async function getBatchContentReport(tx: TenantTx, _ctx: ServiceCtx, batchId: string) {
   const meta = await batchesRosterRepository.findBatchMeta(tx, batchId);
   if (!meta) throw batchRosterNotFound();
 
@@ -1449,12 +1390,7 @@ export async function getBatchContentReport(
       STALLED_DAYS,
     ),
     meta.course_id
-      ? batchesRosterRepository.listBatchContentFunnel(
-          tx,
-          batchId,
-          meta.course_id,
-          rosterCount,
-        )
+      ? batchesRosterRepository.listBatchContentFunnel(tx, batchId, meta.course_id, rosterCount)
       : Promise.resolve([]),
     batchesRosterRepository.listBatchContentPaceSeries(
       tx,
@@ -1501,9 +1437,7 @@ export async function getBatchContentReport(
   let previousPct: number | null = null;
   for (const row of funnel) {
     const completionPct =
-      rosterCount > 0
-        ? Math.round((row.completed_count / rosterCount) * 1000) / 10
-        : null;
+      rosterCount > 0 ? Math.round((row.completed_count / rosterCount) * 1000) / 10 : null;
     const dropOffPct =
       previousPct != null && completionPct != null
         ? Math.round((previousPct - completionPct) * 10) / 10
@@ -1621,8 +1555,7 @@ export async function listBatchContentLearners(
         let projectedFinishAt: string | null = null;
         let projectedFinishLabel = "-";
         let willFinishInWindow: boolean | null = null;
-        let activityStatus: "active" | "stalled" | "never_started" | "finished" =
-          "active";
+        let activityStatus: "active" | "stalled" | "never_started" | "finished";
 
         if (row.total_lessons > 0 && row.completed_lessons >= row.total_lessons) {
           activityStatus = "finished";
@@ -1632,10 +1565,7 @@ export async function listBatchContentLearners(
           activityStatus = "never_started";
           projectedFinishLabel = "Not started";
           willFinishInWindow = null;
-        } else if (
-          row.days_since_activity != null &&
-          row.days_since_activity >= STALLED_DAYS
-        ) {
+        } else if (row.days_since_activity != null && row.days_since_activity >= STALLED_DAYS) {
           activityStatus = "stalled";
         } else {
           activityStatus = "active";
@@ -1670,9 +1600,8 @@ export async function listBatchContentLearners(
         if (activityStatus === "finished" || row.completion_pct >= 76) {
           healthRail = "success";
         } else if (willFinishInWindow === false || activityStatus === "stalled") {
-          healthRail = row.days_since_activity != null && row.days_since_activity >= 21
-            ? "danger"
-            : "warning";
+          healthRail =
+            row.days_since_activity != null && row.days_since_activity >= 21 ? "danger" : "warning";
         } else if (row.completion_pct < 40) {
           healthRail = "warning";
         }
@@ -1700,21 +1629,16 @@ export async function listBatchContentLearners(
   });
 }
 
-export async function listBatchContentStalled(
-  tx: TenantTx,
-  _ctx: ServiceCtx,
-  batchId: string,
-) {
+export async function listBatchContentStalled(tx: TenantTx, _ctx: ServiceCtx, batchId: string) {
   const meta = await batchesRosterRepository.findBatchMeta(tx, batchId);
   if (!meta) throw batchRosterNotFound();
 
-  const membershipIds =
-    await batchesRosterRepository.listBatchContentStalledMembershipIds(
-      tx,
-      batchId,
-      meta.course_id,
-      STALLED_DAYS,
-    );
+  const membershipIds = await batchesRosterRepository.listBatchContentStalledMembershipIds(
+    tx,
+    batchId,
+    meta.course_id,
+    STALLED_DAYS,
+  );
 
   return batchContentStalledResponseSchema.parse({
     data: {
@@ -1761,10 +1685,8 @@ function readNudgesFromMetadata(metadata: unknown) {
       const row = item as Record<string, unknown>;
       const id = typeof row["id"] === "string" ? row["id"] : null;
       const title = typeof row["title"] === "string" ? row["title"] : null;
-      const triggerKey =
-        typeof row["triggerKey"] === "string" ? row["triggerKey"] : null;
-      const triggerLabel =
-        typeof row["triggerLabel"] === "string" ? row["triggerLabel"] : null;
+      const triggerKey = typeof row["triggerKey"] === "string" ? row["triggerKey"] : null;
+      const triggerLabel = typeof row["triggerLabel"] === "string" ? row["triggerLabel"] : null;
       if (!id || !title || !triggerKey || !triggerLabel) return null;
       return {
         id,
@@ -1787,11 +1709,10 @@ export async function listBatchMessages(
   if (!meta) throw batchRosterNotFound();
 
   const rosterCount = await batchesRosterRepository.countLearners(tx, { batchId });
-  const { items, totalCount } = await batchesRosterRepository.listBatchMessageHistory(
-    tx,
-    batchId,
-    { page: query.page, limit: query.limit },
-  );
+  const { items, totalCount } = await batchesRosterRepository.listBatchMessageHistory(tx, batchId, {
+    page: query.page,
+    limit: query.limit,
+  });
 
   return batchMessagesListResponseSchema.parse({
     data: {
@@ -1812,8 +1733,7 @@ export async function listBatchMessages(
         openedCount: null,
         clickedCount: null,
         channels: row.channels.filter(
-          (channel): channel is "email" | "in_app" =>
-            channel === "email" || channel === "in_app",
+          (channel): channel is "email" | "in_app" => channel === "email" || channel === "in_app",
         ),
         status: row.status,
         sentAt: row.sent_at?.toISOString() ?? null,
@@ -1826,34 +1746,15 @@ export async function listBatchMessages(
   });
 }
 
-export async function listBatchMessageAudiences(
-  tx: TenantTx,
-  _ctx: ServiceCtx,
-  batchId: string,
-) {
+export async function listBatchMessageAudiences(tx: TenantTx, _ctx: ServiceCtx, batchId: string) {
   const meta = await batchesRosterRepository.findBatchMeta(tx, batchId);
   if (!meta) throw batchRosterNotFound();
 
-  const [
-    wholeBatch,
-    atRisk,
-    missedLast,
-    belowPass,
-    stalled,
-  ] = await Promise.all([
+  const [wholeBatch, atRisk, missedLast, belowPass, stalled] = await Promise.all([
     batchesRosterRepository.listLearnerMembershipIds(tx, { batchId }),
     batchesRosterRepository.listBatchAtRiskMembershipIds(tx, batchId, meta.course_id),
-    batchesRosterRepository.listMissedLastSessionMembershipIds(
-      tx,
-      batchId,
-      meta.course_id,
-    ),
-    batchesRosterRepository.listBatchExamsBelowPassMembershipIds(
-      tx,
-      batchId,
-      meta.course_id,
-      70,
-    ),
+    batchesRosterRepository.listMissedLastSessionMembershipIds(tx, batchId, meta.course_id),
+    batchesRosterRepository.listBatchExamsBelowPassMembershipIds(tx, batchId, meta.course_id, 70),
     batchesRosterRepository.listBatchContentStalledMembershipIds(
       tx,
       batchId,
@@ -1868,31 +1769,31 @@ export async function listBatchMessageAudiences(
       audiences: [
         {
           key: "whole_batch",
-          label: `Whole batch (${wholeBatch.length})`,
+          label: `Whole batch (${String(wholeBatch.length)})`,
           count: wholeBatch.length,
           membershipIds: wholeBatch,
         },
         {
           key: "at_risk",
-          label: `At risk (${atRisk.length})`,
+          label: `At risk (${String(atRisk.length)})`,
           count: atRisk.length,
           membershipIds: atRisk,
         },
         {
           key: "missed_last_session",
-          label: `Missed last session (${missedLast.length})`,
+          label: `Missed last session (${String(missedLast.length)})`,
           count: missedLast.length,
           membershipIds: missedLast,
         },
         {
           key: "below_pass",
-          label: `Below pass mark (${belowPass.length})`,
+          label: `Below pass mark (${String(belowPass.length)})`,
           count: belowPass.length,
           membershipIds: belowPass,
         },
         {
           key: "stalled",
-          label: `Stalled on content (${stalled.length})`,
+          label: `Stalled on content (${String(stalled.length)})`,
           count: stalled.length,
           membershipIds: stalled,
         },
@@ -1901,11 +1802,7 @@ export async function listBatchMessageAudiences(
   });
 }
 
-export async function listBatchMessageNudges(
-  tx: TenantTx,
-  _ctx: ServiceCtx,
-  batchId: string,
-) {
+export async function listBatchMessageNudges(tx: TenantTx, _ctx: ServiceCtx, batchId: string) {
   const meta = await batchesRosterRepository.findBatchMeta(tx, batchId);
   if (!meta) throw batchRosterNotFound();
 
@@ -1965,54 +1862,35 @@ async function loadBatchCompareItem(
   if (!meta) throw batchRosterNotFound();
 
   const rosterCount = await batchesRosterRepository.countLearners(tx, { batchId });
-  const [content, exams, live, activeLast14Days, atRiskIds, paceSeries] =
-    await Promise.all([
-      batchesRosterRepository.summarizeBatchContent(
-        tx,
-        batchId,
-        meta.course_id,
-        rosterCount,
-        STALLED_DAYS,
-      ),
-      batchesRosterRepository.summarizeBatchExams(
-        tx,
-        batchId,
-        meta.course_id,
-        rosterCount,
-      ),
-      batchesRosterRepository.summarizeBatchLiveSessions(
-        tx,
-        batchId,
-        meta.course_id,
-        rosterCount,
-      ),
-      batchesRosterRepository.countActiveLearners(tx, batchId),
-      batchesRosterRepository.listBatchAtRiskMembershipIds(
-        tx,
-        batchId,
-        meta.course_id,
-      ),
-      batchesRosterRepository.listBatchContentPaceSeries(
-        tx,
-        batchId,
-        meta.course_id,
-        meta.starts_at,
-        meta.ends_at,
-      ),
-    ]);
+  const [content, exams, live, activeLast14Days, atRiskIds, paceSeries] = await Promise.all([
+    batchesRosterRepository.summarizeBatchContent(
+      tx,
+      batchId,
+      meta.course_id,
+      rosterCount,
+      STALLED_DAYS,
+    ),
+    batchesRosterRepository.summarizeBatchExams(tx, batchId, meta.course_id, rosterCount),
+    batchesRosterRepository.summarizeBatchLiveSessions(tx, batchId, meta.course_id, rosterCount),
+    batchesRosterRepository.countActiveLearners(tx, batchId),
+    batchesRosterRepository.listBatchAtRiskMembershipIds(tx, batchId, meta.course_id),
+    batchesRosterRepository.listBatchContentPaceSeries(
+      tx,
+      batchId,
+      meta.course_id,
+      meta.starts_at,
+      meta.ends_at,
+    ),
+  ]);
 
   const now = Date.now();
   const startsMs = meta.starts_at?.getTime() ?? null;
   const endsMs = meta.ends_at?.getTime() ?? null;
-  const isRunning =
-    (startsMs == null || startsMs <= now) && (endsMs == null || endsMs >= now);
+  const isRunning = (startsMs == null || startsMs <= now) && (endsMs == null || endsMs >= now);
 
   let currentWeekIndex: number | null = null;
   if (isRunning && startsMs != null) {
-    currentWeekIndex = Math.max(
-      0,
-      Math.floor((now - startsMs) / (7 * 24 * 60 * 60 * 1000)),
-    );
+    currentWeekIndex = Math.max(0, Math.floor((now - startsMs) / (7 * 24 * 60 * 60 * 1000)));
   }
 
   const trend = paceSeries.map((point, index) => {
@@ -2020,7 +1898,7 @@ async function loadBatchCompareItem(
     const weekLabel =
       normalize === "absolute_dates"
         ? formatAbsoluteWeekLabel(point.week_start)
-        : `Week ${weekIndex + 1}`;
+        : `Week ${String(weekIndex + 1)}`;
     return {
       weekIndex,
       weekLabel,
@@ -2029,11 +1907,7 @@ async function loadBatchCompareItem(
     };
   });
 
-  if (
-    currentWeekIndex != null &&
-    trend.length > 0 &&
-    currentWeekIndex >= trend.length
-  ) {
+  if (currentWeekIndex != null && trend.length > 0 && currentWeekIndex >= trend.length) {
     currentWeekIndex = trend.length - 1;
   }
 
@@ -2068,11 +1942,7 @@ async function loadBatchCompareItem(
   };
 }
 
-export async function compareBatches(
-  tx: TenantTx,
-  _ctx: ServiceCtx,
-  query: BatchesCompareQuery,
-) {
+export async function compareBatches(tx: TenantTx, _ctx: ServiceCtx, query: BatchesCompareQuery) {
   const items = [];
   for (const batchId of query.batchIds) {
     items.push(await loadBatchCompareItem(tx, batchId, query.normalize));

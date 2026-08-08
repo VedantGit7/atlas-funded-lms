@@ -68,13 +68,7 @@ function AssociatedContentNavigationRow({
   );
 }
 
-function NewsfeedsAssociatedPanel({
-  courseId,
-  onBack,
-}: {
-  courseId: string;
-  onBack: () => void;
-}) {
+function NewsfeedsAssociatedPanel({ courseId, onBack }: { courseId: string; onBack: () => void }) {
   const [loading, setLoading] = useState(true);
   const [items, setItems] = useState<NewsfeedPostDto[]>([]);
 
@@ -94,9 +88,7 @@ function NewsfeedsAssociatedPanel({
     } catch (caught) {
       setItems([]);
       toast.error(
-        caught instanceof ClientApiError
-          ? caught.message
-          : "Could not load associated newsfeeds.",
+        caught instanceof ClientApiError ? caught.message : "Could not load associated newsfeeds.",
       );
     } finally {
       setLoading(false);
@@ -153,13 +145,7 @@ function NewsfeedsAssociatedPanel({
   );
 }
 
-function AssociatedContentDetailPanel({
-  title,
-  onBack,
-}: {
-  title: string;
-  onBack: () => void;
-}) {
+function AssociatedContentDetailPanel({ title, onBack }: { title: string; onBack: () => void }) {
   return (
     <div className="min-w-0 w-full">
       <button
@@ -194,7 +180,7 @@ export function CourseSettingsAssociatedContentsPanel({
   const [newsfeedCount, setNewsfeedCount] = useState(0);
 
   useEffect(() => {
-    let cancelled = false;
+    const cancelled = { current: false };
     void (async () => {
       try {
         const params = new URLSearchParams({
@@ -206,13 +192,13 @@ export function CourseSettingsAssociatedContentsPanel({
           `/api/v1/marketing/newsfeeds?${params.toString()}`,
           "course-associated-newsfeeds-count",
         );
-        if (!cancelled) setNewsfeedCount(response.data.items.length);
+        if (!cancelled.current) setNewsfeedCount(response.data.items.length);
       } catch {
-        if (!cancelled) setNewsfeedCount(0);
+        if (!cancelled.current) setNewsfeedCount(0);
       }
     })();
     return () => {
-      cancelled = true;
+      cancelled.current = true;
     };
   }, [course.id]);
 

@@ -40,7 +40,7 @@ function thresholdLabelForRule(rule: AtRiskRule): string {
   }
 }
 
-export function AnalyticsAtRiskRulesPanel({ enabled = true }: { enabled?: boolean }) {
+export function AnalyticsAtRiskRulesPanel({ enabled = true }: { enabled?: boolean | undefined }) {
   const [rules, setRules] = useState<AtRiskRule[]>([]);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -118,21 +118,31 @@ export function AnalyticsAtRiskRulesPanel({ enabled = true }: { enabled?: boolea
           onClick={() => void loadRules()}
           disabled={loading}
         >
-          <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} aria-hidden="true" />
+          <RefreshCw
+            className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`}
+            aria-hidden="true"
+          />
           Refresh
         </button>
       </div>
 
       {errorMessage ? (
-        <div className="mx-4 mb-3 rounded-md border border-[var(--admin-danger)] px-3 py-2 text-sm text-[var(--admin-danger)]" role="alert">
+        <div
+          className="mx-4 mb-3 rounded-md border border-[var(--admin-danger)] px-3 py-2 text-sm text-[var(--admin-danger)]"
+          role="alert"
+        >
           {errorMessage}
         </div>
       ) : null}
 
       {loading ? (
-        <div className="px-4 py-10 text-center text-sm text-[var(--admin-on-surface-variant)]">Loading rules…</div>
+        <div className="px-4 py-10 text-center text-sm text-[var(--admin-on-surface-variant)]">
+          Loading rules…
+        </div>
       ) : rules.length === 0 ? (
-        <div className="px-4 py-10 text-center text-sm text-[var(--admin-on-surface-variant)]">No rules configured.</div>
+        <div className="px-4 py-10 text-center text-sm text-[var(--admin-on-surface-variant)]">
+          No rules configured.
+        </div>
       ) : (
         <div className="overflow-x-auto">
           <table className="min-w-[720px] w-full text-left text-sm">
@@ -157,7 +167,9 @@ export function AnalyticsAtRiskRulesPanel({ enabled = true }: { enabled?: boolea
                   <tr key={rule.id}>
                     <td className="px-4 py-3">
                       <div className="font-medium text-[var(--admin-on-surface)]">{rule.name}</div>
-                      <div className="text-xs text-[var(--admin-on-surface-variant)]">{rule.ruleType}</div>
+                      <div className="text-xs text-[var(--admin-on-surface-variant)]">
+                        {rule.ruleType}
+                      </div>
                     </td>
                     <td className="px-4 py-3">
                       {thresholdKey ? (

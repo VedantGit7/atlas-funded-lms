@@ -15,6 +15,7 @@ import {
 import { z as zod } from "zod";
 
 const paramsSchema = zod.object({ id: zod.string().uuid() });
+const deletedResponseSchema = zod.object({ data: zod.object({ deleted: zod.boolean() }) });
 
 export const PATCH = createTenantRoute<
   z.output<typeof updateCustomFieldDefinitionBodySchema>,
@@ -26,15 +27,16 @@ export const PATCH = createTenantRoute<
   input: updateCustomFieldDefinitionBodySchema,
   output: customFieldDefinitionResponseSchema,
   handler: async ({ tx, ctx, params, input }) =>
-    updateCustomFieldDefinition(tx, ctx, params.id, input),
+    updateCustomFieldDefinition(tx, ctx, params["id"], input),
 });
 
 export const DELETE = createTenantRoute<
   Record<string, never>,
-  { data: { deleted: boolean } },
+  z.output<typeof deletedResponseSchema>,
   typeof paramsSchema
 >({
   metadata: deleteCustomFieldDefinitionMetadata,
   params: paramsSchema,
-  handler: async ({ tx, ctx, params }) => deleteCustomFieldDefinition(tx, ctx, params.id),
+  output: deletedResponseSchema,
+  handler: async ({ tx, ctx, params }) => deleteCustomFieldDefinition(tx, ctx, params["id"]),
 });

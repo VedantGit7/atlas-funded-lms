@@ -37,10 +37,14 @@ import {
   encryptWhatsappSecret,
   whatsappSecretLast4,
 } from "./whatsapp-secret-crypto";
-import {
-  getWhatsappProvider,
-  type WhatsappProviderCredentials,
-} from "./whatsapp.provider";
+import { getWhatsappProvider, type WhatsappProviderCredentials } from "./whatsapp.provider";
+
+function defined<T>(value: T, message = "Expected value to be defined"): NonNullable<T> {
+  if (value == null) {
+    throw new Error(message);
+  }
+  return value;
+}
 
 function notFound(message = "Not found.") {
   return new AtlasHttpError({
@@ -58,20 +62,23 @@ function validationError(message: string) {
   });
 }
 
-function parseButtons(raw: unknown): Array<{ type: "QUICK_REPLY" | "URL"; text: string; url?: string }> {
+function parseButtons(
+  raw: unknown,
+): Array<{ type: "QUICK_REPLY" | "URL"; text: string; url?: string | undefined }> {
   if (!Array.isArray(raw)) return [];
   return raw
     .map((item) => {
       if (!item || typeof item !== "object") return null;
       const record = item as Record<string, unknown>;
-      const type = record.type === "URL" ? "URL" : "QUICK_REPLY";
-      const text = typeof record.text === "string" ? record.text : "";
+      const type = record["type"] === "URL" ? "URL" : "QUICK_REPLY";
+      const text = typeof record["text"] === "string" ? record["text"] : "";
       if (!text) return null;
-      const url = typeof record.url === "string" ? record.url : undefined;
+      const url = typeof record["url"] === "string" ? record["url"] : undefined;
       return type === "URL" ? { type, text, url } : { type, text };
     })
-    .filter((item): item is { type: "QUICK_REPLY" | "URL"; text: string; url?: string } =>
-      Boolean(item),
+    .filter(
+      (item): item is { type: "QUICK_REPLY" | "URL"; text: string; url?: string | undefined } =>
+        Boolean(item),
     );
 }
 
@@ -79,7 +86,7 @@ function toConnectionDto(row: WhatsappConnectionRow | null) {
   if (!row || row.status !== "CONNECTED") {
     return {
       status: "DISCONNECTED" as const,
-      providerMode: (row?.provider_mode === "meta" ? "meta" : "mock") as "mock" | "meta",
+      providerMode: row?.provider_mode === "meta" ? "meta" : "mock",
       displayName: row?.display_name ?? null,
       phoneNumber: row?.phone_number ?? null,
       phoneNumberId: row?.phone_number_id ?? null,
@@ -93,7 +100,7 @@ function toConnectionDto(row: WhatsappConnectionRow | null) {
   }
   return {
     status: "CONNECTED" as const,
-    providerMode: (row.provider_mode === "meta" ? "meta" : "mock") as "mock" | "meta",
+    providerMode: row.provider_mode === "meta" ? "meta" : "mock",
     displayName: row.display_name,
     phoneNumber: row.phone_number,
     phoneNumberId: row.phone_number_id,
@@ -185,11 +192,13 @@ async function requireCampaign(tx: TenantTx, id: string) {
 }
 
 export async function getWhatsappConnection(tx: TenantTx, _ctx: ServiceCtx) {
+  void _ctx;
   const row = await whatsappRepository.getConnection(tx);
   return whatsappConnectionResponseSchema.parse({ data: toConnectionDto(row) });
 }
 
 export async function connectWhatsappMock(tx: TenantTx, _ctx: ServiceCtx, rawBody: unknown) {
+  void _ctx;
   const body = connectWhatsappMockBodySchema.parse(rawBody);
   await whatsappRepository.upsertConnection(tx, {
     status: "CONNECTED",
@@ -206,6 +215,7 @@ export async function connectWhatsappMock(tx: TenantTx, _ctx: ServiceCtx, rawBod
 }
 
 export async function connectWhatsappMeta(tx: TenantTx, _ctx: ServiceCtx, rawBody: unknown) {
+  void _ctx;
   const body = connectWhatsappMetaBodySchema.parse(rawBody);
   const ciphertext = encryptWhatsappSecret(body.accessToken);
   await whatsappRepository.upsertConnection(tx, {
@@ -223,12 +233,14 @@ export async function connectWhatsappMeta(tx: TenantTx, _ctx: ServiceCtx, rawBod
 }
 
 export async function disconnectWhatsapp(tx: TenantTx, _ctx: ServiceCtx) {
+  void _ctx;
   await whatsappRepository.disconnect(tx);
   const row = await whatsappRepository.getConnection(tx);
   return whatsappConnectionResponseSchema.parse({ data: toConnectionDto(row) });
 }
 
 export async function listWhatsappTemplates(tx: TenantTx, _ctx: ServiceCtx) {
+  void _ctx;
   await requireConnected(tx);
   const rows = await whatsappRepository.listTemplates(tx);
   return whatsappTemplatesListResponseSchema.parse({
@@ -279,7 +291,7 @@ export async function listWhatsappCampaigns(tx: TenantTx, ctx: ServiceCtx, rawQu
   await processDueScheduledCampaigns(tx, ctx);
   const query = whatsappCampaignsListQuerySchema.parse(rawQuery ?? {});
   const rows = await whatsappRepository.listCampaigns(tx, {
-    ...(query.status ? { status: query.status } : {}),
+    status: query.status,
     ...(query.q ? { q: query.q } : {}),
     ...(query.createdOn ? { createdOn: query.createdOn } : {}),
     limit: query.limit,
@@ -290,6 +302,7 @@ export async function listWhatsappCampaigns(tx: TenantTx, ctx: ServiceCtx, rawQu
 }
 
 export async function getWhatsappCampaign(tx: TenantTx, _ctx: ServiceCtx, id: string) {
+  void _ctx;
   const row = await requireCampaign(tx, id);
   return whatsappCampaignResponseSchema.parse({ data: toCampaignDto(row) });
 }
@@ -311,6 +324,7 @@ export async function updateWhatsappCampaignTitle(
   id: string,
   rawBody: unknown,
 ) {
+  void _ctx;
   const body = updateWhatsappCampaignTitleBodySchema.parse(rawBody);
   await requireCampaign(tx, id);
   await whatsappRepository.updateCampaignTitle(tx, id, body.title);
@@ -324,6 +338,7 @@ export async function setWhatsappCampaignAudience(
   id: string,
   rawBody: unknown,
 ) {
+  void _ctx;
   const body = setWhatsappCampaignAudienceBodySchema.parse(rawBody);
   const existing = await requireCampaign(tx, id);
   if (existing.status !== "DRAFT") {
@@ -357,11 +372,8 @@ export async function setWhatsappCampaignAudience(
   return whatsappCampaignResponseSchema.parse({ data: toCampaignDto(row) });
 }
 
-export async function listWhatsappCampaignRecipients(
-  tx: TenantTx,
-  _ctx: ServiceCtx,
-  id: string,
-) {
+export async function listWhatsappCampaignRecipients(tx: TenantTx, _ctx: ServiceCtx, id: string) {
+  void _ctx;
   const existing = await requireCampaign(tx, id);
   if (!existing.audience_type) {
     return whatsappRecipientsResponseSchema.parse({
@@ -393,6 +405,7 @@ export async function selectWhatsappCampaignTemplate(
   id: string,
   rawBody: unknown,
 ) {
+  void _ctx;
   const body = selectWhatsappTemplateBodySchema.parse(rawBody);
   const existing = await requireCampaign(tx, id);
   if (!existing.audience_type) {
@@ -539,7 +552,7 @@ export async function sendWhatsappCampaign(
     const provider = getWhatsappProvider(connection.provider_mode === "meta" ? "meta" : "mock");
     const credentials = resolveCredentials(connection);
     await provider.sendTemplate(credentials, {
-      toPhone: body.testPhone!,
+      toPhone: defined(body.testPhone),
       templateName: existing.template_name,
       language: existing.template_language ?? "en",
       body: existing.template_body,
@@ -549,7 +562,7 @@ export async function sendWhatsappCampaign(
   }
 
   if (body.mode === "schedule") {
-    const scheduledAt = new Date(body.scheduledAt!);
+    const scheduledAt = new Date(defined(body.scheduledAt));
     if (Number.isNaN(scheduledAt.getTime()) || scheduledAt.getTime() <= Date.now()) {
       throw validationError("scheduledAt must be a future time.");
     }
@@ -570,6 +583,7 @@ export async function deleteWhatsappCampaign(
   id: string,
   rawBody: unknown,
 ) {
+  void _ctx;
   const body = deleteWhatsappCampaignBodySchema.parse(rawBody);
   const existing = await requireCampaign(tx, id);
   if (existing.title.trim() !== body.titleConfirmation.trim()) {
@@ -583,6 +597,7 @@ export async function deleteWhatsappCampaign(
 }
 
 export async function listWhatsappConversations(tx: TenantTx, _ctx: ServiceCtx) {
+  void _ctx;
   await requireConnected(tx);
   const rows = await whatsappRepository.listConversations(tx);
   return whatsappConversationsListResponseSchema.parse({
@@ -601,6 +616,7 @@ export async function listWhatsappConversations(tx: TenantTx, _ctx: ServiceCtx) 
 }
 
 export async function getWhatsappConversation(tx: TenantTx, _ctx: ServiceCtx, id: string) {
+  void _ctx;
   await requireConnected(tx);
   const conversation = await whatsappRepository.findConversation(tx, id);
   if (!conversation) throw notFound("Conversation not found.");
@@ -664,11 +680,7 @@ export async function replyWhatsappConversation(
   return getWhatsappConversation(tx, ctx, id);
 }
 
-export async function simulateWhatsappInbound(
-  tx: TenantTx,
-  ctx: ServiceCtx,
-  rawBody: unknown,
-) {
+export async function simulateWhatsappInbound(tx: TenantTx, ctx: ServiceCtx, rawBody: unknown) {
   await requireConnected(tx);
   const body = simulateWhatsappInboundBodySchema.parse(rawBody);
   const conversationId = await whatsappRepository.upsertConversation(tx, {

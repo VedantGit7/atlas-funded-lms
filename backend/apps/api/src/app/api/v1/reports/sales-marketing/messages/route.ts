@@ -5,7 +5,7 @@ import {
   sendSalesMessageResponseSchema,
 } from "@atlas/domain/reports/sales-marketing-roster.dto";
 import { mutateSalesMarketingRosterMetadata } from "@atlas/domain/reports/sales-marketing-roster.route-metadata";
-import { sendSalesMarketingMessage } from "../../../../../../../server/reports/sales-marketing-roster-actions.service";
+import { sendSalesMarketingMessage } from "@atlas/api-server/reports/sales-marketing-roster-actions.service";
 
 export const POST = createTenantRoute<
   z.output<typeof sendSalesMessageBodySchema>,

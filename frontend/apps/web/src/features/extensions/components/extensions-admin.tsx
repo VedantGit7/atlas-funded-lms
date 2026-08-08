@@ -29,6 +29,7 @@ import {
 } from "@atlas/design-system";
 import { AdminConfirmDialog } from "../../../components/shells/admin/AdminConfirmDialog";
 import {
+  extensionsAlertErrorClassName,
   extensionsAlertSuccessClassName,
   extensionsContentClassName,
   extensionsGridClassName,
@@ -254,7 +255,9 @@ export function ExtensionsAdmin({
           aria-label="Registrations"
           aria-current={view === "registrations" ? "page" : undefined}
           className={`${extensionsRailButtonClassName} ${view === "registrations" ? extensionsRailButtonActiveClassName : ""}`}
-          onClick={() => setView("registrations")}
+          onClick={() => {
+            setView("registrations");
+          }}
         >
           <Puzzle className="h-5 w-5" aria-hidden="true" />
         </button>
@@ -264,7 +267,9 @@ export function ExtensionsAdmin({
           aria-label="Extension points catalogue"
           aria-current={view === "catalogue" ? "page" : undefined}
           className={`${extensionsRailButtonClassName} ${view === "catalogue" ? extensionsRailButtonActiveClassName : ""}`}
-          onClick={() => setView("catalogue")}
+          onClick={() => {
+            setView("catalogue");
+          }}
         >
           <Terminal className="h-5 w-5" aria-hidden="true" />
         </button>
@@ -280,14 +285,18 @@ export function ExtensionsAdmin({
               <button
                 type="button"
                 className={`${extensionsNavTabClassName} ${view === "registrations" ? extensionsNavTabActiveClassName : ""}`}
-                onClick={() => setView("registrations")}
+                onClick={() => {
+                  setView("registrations");
+                }}
               >
                 Registrations
               </button>
               <button
                 type="button"
                 className={`${extensionsNavTabClassName} ${view === "catalogue" ? extensionsNavTabActiveClassName : ""}`}
-                onClick={() => setView("catalogue")}
+                onClick={() => {
+                  setView("catalogue");
+                }}
               >
                 Definitions
               </button>
@@ -301,7 +310,9 @@ export function ExtensionsAdmin({
             <input
               type="search"
               value={searchQuery}
-              onChange={(event) => setSearchQuery(event.target.value)}
+              onChange={(event) => {
+                setSearchQuery(event.target.value);
+              }}
               placeholder="Search registrations…"
               className={extensionsSearchInputClassName}
               aria-label="Search registrations"
@@ -360,23 +371,32 @@ export function ExtensionsAdmin({
                     onConfigJsonChange={setConfigJson}
                     onStatusChange={setStatus}
                     onFormatJson={formatJsonField}
-                    onSave={() => void (editingId ? onUpdateRegistration() : onCreateRegistration())}
+                    onSave={() =>
+                      void (editingId ? onUpdateRegistration() : onCreateRegistration())
+                    }
                     onCancel={resetForm}
                   />
 
-                  <aside className={extensionsHealthCardClassName} aria-label="Registration summary">
+                  <aside
+                    className={extensionsHealthCardClassName}
+                    aria-label="Registration summary"
+                  >
                     <h2 className="text-[11px] font-semibold uppercase tracking-wider text-[var(--admin-on-surface-variant)]">
                       Registration summary
                     </h2>
                     <div className="mt-4 space-y-3">
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-[var(--admin-on-surface-variant)]">Extension points</span>
+                        <span className="text-[var(--admin-on-surface-variant)]">
+                          Extension points
+                        </span>
                         <span className="font-semibold text-[var(--admin-on-surface)]">
                           {extensionPoints.length}
                         </span>
                       </div>
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-[var(--admin-on-surface-variant)]">Active registrations</span>
+                        <span className="text-[var(--admin-on-surface-variant)]">
+                          Active registrations
+                        </span>
                         <span className="rounded bg-[color-mix(in_srgb,var(--admin-success)_16%,var(--admin-surface))] px-2 py-0.5 text-[10px] font-bold uppercase text-[var(--admin-success)]">
                           {activeCount} active
                         </span>
@@ -392,14 +412,14 @@ export function ExtensionsAdmin({
                             width:
                               registrations.length === 0
                                 ? "0%"
-                                : `${Math.round((activeCount / registrations.length) * 100)}%`,
+                                : `${String(Math.round((activeCount / registrations.length) * 100))}%`,
                           }}
                         />
                       </div>
                       <p className="text-sm italic leading-relaxed text-[var(--admin-on-surface-variant)]">
                         {registrations.length === 0
                           ? "No registrations yet. Create one using the form."
-                          : `${registrations.length} registration${registrations.length === 1 ? "" : "s"} configured for this tenant.`}
+                          : `${String(registrations.length)} registration${registrations.length === 1 ? "" : "s"} configured for this tenant.`}
                       </p>
                     </div>
                   </aside>
@@ -418,7 +438,9 @@ export function ExtensionsAdmin({
         tone="danger"
         busy={pending}
         onConfirm={() => void onDeleteRegistration()}
-        onCancel={() => setDeleteTarget(null)}
+        onCancel={() => {
+          setDeleteTarget(null);
+        }}
       />
     </section>
   );
@@ -448,7 +470,9 @@ function ExtensionPointsSection({
       <div className={extensionsSectionHeaderClassName}>
         <div className="flex items-center gap-2">
           <Terminal className="h-4 w-4 text-[var(--admin-on-surface-variant)]" aria-hidden="true" />
-          <h2 className="text-base font-semibold text-[var(--admin-on-surface)]">Extension Points</h2>
+          <h2 className="text-base font-semibold text-[var(--admin-on-surface)]">
+            Extension Points
+          </h2>
         </div>
         <span className="rounded bg-[var(--admin-surface-high)] px-2 py-0.5 text-[11px] font-medium text-[var(--admin-on-surface-variant)]">
           Read only
@@ -458,15 +482,24 @@ function ExtensionPointsSection({
         <Table>
           <TableHead>
             <TableRow className={`${extensionsTableRowClassName} hover:bg-transparent`}>
-              <TableHeaderCell className={`${extensionsTableHeadClassName} px-4 py-2`}>Key</TableHeaderCell>
-              <TableHeaderCell className={`${extensionsTableHeadClassName} px-4 py-2`}>Point type</TableHeaderCell>
-              <TableHeaderCell className={`${extensionsTableHeadClassName} px-4 py-2`}>Status</TableHeaderCell>
+              <TableHeaderCell className={`${extensionsTableHeadClassName} px-4 py-2`}>
+                Key
+              </TableHeaderCell>
+              <TableHeaderCell className={`${extensionsTableHeadClassName} px-4 py-2`}>
+                Point type
+              </TableHeaderCell>
+              <TableHeaderCell className={`${extensionsTableHeadClassName} px-4 py-2`}>
+                Status
+              </TableHeaderCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {filtered.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={3} className="px-4 py-8 text-center text-sm text-[var(--admin-on-surface-variant)]">
+                <TableCell
+                  colSpan={3}
+                  className="px-4 py-8 text-center text-sm text-[var(--admin-on-surface-variant)]"
+                >
                   No extension points match your search.
                 </TableCell>
               </TableRow>
@@ -539,7 +572,10 @@ function RegistrationsSection({
             disabled={refreshing}
             onClick={onRefresh}
           >
-            <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} aria-hidden="true" />
+            <RefreshCw
+              className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`}
+              aria-hidden="true"
+            />
           </button>
         </div>
       </div>
@@ -571,10 +607,16 @@ function RegistrationsSection({
                 <TableHeaderCell className={`${extensionsTableHeadClassName} px-4 py-3`}>
                   Extension point
                 </TableHeaderCell>
-                <TableHeaderCell className={`${extensionsTableHeadClassName} px-4 py-3`}>Status</TableHeaderCell>
-                <TableHeaderCell className={`${extensionsTableHeadClassName} px-4 py-3`}>Updated</TableHeaderCell>
+                <TableHeaderCell className={`${extensionsTableHeadClassName} px-4 py-3`}>
+                  Status
+                </TableHeaderCell>
+                <TableHeaderCell className={`${extensionsTableHeadClassName} px-4 py-3`}>
+                  Updated
+                </TableHeaderCell>
                 {canManage ? (
-                  <TableHeaderCell className={`${extensionsTableHeadClassName} px-4 py-3 text-right`}>
+                  <TableHeaderCell
+                    className={`${extensionsTableHeadClassName} px-4 py-3 text-right`}
+                  >
                     Actions
                   </TableHeaderCell>
                 ) : null}
@@ -589,7 +631,9 @@ function RegistrationsSection({
                     className={`${extensionsTableRowClassName} group ${isEditing ? "bg-[color-mix(in_srgb,var(--admin-primary)_6%,var(--admin-surface))]" : ""}`}
                   >
                     <TableCell className="px-4 py-3">
-                      <code className={extensionsMonoKeyClassName}>{registration.registrationKey}</code>
+                      <code className={extensionsMonoKeyClassName}>
+                        {registration.registrationKey}
+                      </code>
                     </TableCell>
                     <TableCell className="px-4 py-3">
                       <span className="rounded-full bg-[color-mix(in_srgb,var(--admin-primary)_10%,var(--admin-surface))] px-2 py-1 text-[11px] font-medium text-[var(--admin-primary)]">
@@ -607,7 +651,9 @@ function RegistrationsSection({
                       </span>
                     </TableCell>
                     <TableCell className="px-4 py-3 text-sm text-[var(--admin-on-surface-variant)]">
-                      <time dateTime={registration.updatedAt}>{formatRelativeTime(registration.updatedAt)}</time>
+                      <time dateTime={registration.updatedAt}>
+                        {formatRelativeTime(registration.updatedAt)}
+                      </time>
                     </TableCell>
                     {canManage ? (
                       <TableCell className="px-4 py-3 text-right">
@@ -617,7 +663,9 @@ function RegistrationsSection({
                             className="rounded p-1.5 text-[var(--admin-on-surface-variant)] hover:bg-[var(--admin-surface-high)] hover:text-[var(--admin-primary)]"
                             aria-label={`Edit ${registration.registrationKey}`}
                             disabled={pending}
-                            onClick={() => onEdit(registration)}
+                            onClick={() => {
+                              onEdit(registration);
+                            }}
                           >
                             <Edit3 className="h-4 w-4" aria-hidden="true" />
                           </button>
@@ -626,7 +674,9 @@ function RegistrationsSection({
                             className="rounded p-1.5 text-[var(--admin-on-surface-variant)] hover:bg-[color-mix(in_srgb,var(--admin-danger)_10%,var(--admin-surface))] hover:text-[var(--admin-danger)]"
                             aria-label={`Delete ${registration.registrationKey}`}
                             disabled={pending}
-                            onClick={() => onDelete(registration)}
+                            onClick={() => {
+                              onDelete(registration);
+                            }}
                           >
                             <Trash2 className="h-4 w-4" aria-hidden="true" />
                           </button>
@@ -691,7 +741,10 @@ function RegistrationFormPanel({
         <h2 className="text-base font-semibold text-[var(--admin-on-surface)]">
           {editingId ? "Edit registration" : "Create registration"}
         </h2>
-        <ClipboardList className="h-4 w-4 text-[var(--admin-on-surface-variant)]" aria-hidden="true" />
+        <ClipboardList
+          className="h-4 w-4 text-[var(--admin-on-surface-variant)]"
+          aria-hidden="true"
+        />
       </div>
 
       {!canManage ? (
@@ -718,7 +771,9 @@ function RegistrationFormPanel({
           <Input
             id="extension-registration-key"
             value={registrationKey}
-            onChange={(event) => onRegistrationKeyChange(event.target.value)}
+            onChange={(event) => {
+              onRegistrationKeyChange(event.target.value);
+            }}
             disabled={Boolean(editingId) || !canManage || pending}
             placeholder="e.g. swipe-renderer"
             className={`${fieldClassName} font-mono text-[13px]`}
@@ -739,7 +794,9 @@ function RegistrationFormPanel({
                   ? extensionsStatusToggleActiveClassName
                   : extensionsStatusToggleInactiveClassName
               }
-              onClick={() => onStatusChange("ACTIVE")}
+              onClick={() => {
+                onStatusChange("ACTIVE");
+              }}
             >
               <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
               Active
@@ -752,7 +809,9 @@ function RegistrationFormPanel({
                   ? extensionsStatusToggleActiveClassName
                   : extensionsStatusToggleInactiveClassName
               }
-              onClick={() => onStatusChange("DISABLED")}
+              onClick={() => {
+                onStatusChange("DISABLED");
+              }}
             >
               <PauseCircle className="h-4 w-4" aria-hidden="true" />
               Disabled
@@ -767,7 +826,9 @@ function RegistrationFormPanel({
                   ? extensionsStatusToggleActiveClassName
                   : extensionsStatusToggleInactiveClassName
               }`}
-              onClick={() => onStatusChange("ARCHIVED")}
+              onClick={() => {
+                onStatusChange("ARCHIVED");
+              }}
             >
               Archive registration
             </button>
@@ -794,7 +855,9 @@ function RegistrationFormPanel({
             <textarea
               id="extension-config-json"
               value={configJson}
-              onChange={(event) => onConfigJsonChange(event.target.value)}
+              onChange={(event) => {
+                onConfigJsonChange(event.target.value);
+              }}
               disabled={!canManage || pending}
               spellCheck={false}
               className={extensionsJsonTextareaClassName}
@@ -810,15 +873,17 @@ function RegistrationFormPanel({
 
         {canManage ? (
           <div className="flex flex-col gap-2 pt-1">
-            <Button
-              type="submit"
-              className={primaryButtonClassName}
-              disabled={pending}
-            >
+            <Button type="submit" className={primaryButtonClassName} disabled={pending}>
               {pending ? "Saving…" : editingId ? "Save registration" : "Save registration"}
             </Button>
             {editingId ? (
-              <Button type="button" variant="ghost" className={ghostButtonClassName} disabled={pending} onClick={onCancel}>
+              <Button
+                type="button"
+                variant="ghost"
+                className={ghostButtonClassName}
+                disabled={pending}
+                onClick={onCancel}
+              >
                 Cancel
               </Button>
             ) : null}

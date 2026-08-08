@@ -3,9 +3,15 @@ import type { z as Zod } from "zod";
 import { createTenantRoute } from "@atlas/api";
 import { AtlasHttpError } from "@atlas/core/http/errors";
 import { getStorageProvider, parseStorageEnv } from "@atlas/storage";
-import { extractSelectedColumns, filterDatasetByColumns } from "@atlas/domain/reports/reports.allowed-columns";
+import {
+  extractSelectedColumns,
+  filterDatasetByColumns,
+} from "@atlas/domain/reports/reports.allowed-columns";
 import { buildReportDataset } from "@atlas/domain/reports/reports.datasets";
-import { renderReportArtifact, storeReportArtifact } from "@atlas/domain/reports/reports-export-runner";
+import {
+  renderReportArtifact,
+  storeReportArtifact,
+} from "@atlas/domain/reports/reports-export-runner";
 import { getSystemReportDefinition } from "@atlas/domain/reports/reports.registry";
 import { reportsRepository } from "@atlas/domain/reports/reports.repository";
 import { getReportRunMetadata } from "@atlas/domain/reports/reports.route-metadata";
@@ -45,16 +51,16 @@ export const GET = createTenantRoute<
   params: paramsSchema,
   output: downloadResponseSchema,
   handler: async ({ tx, ctx, params }) => {
-    const result = await getReportRun(tx, ctx, params.runId);
+    const result = await getReportRun(tx, ctx, params["runId"]);
     const run = result.data;
     const baseName = `report-${run.definitionKey}-${run.id.slice(0, 8)}`;
 
-    if (run.format === params.format && result.data.download?.url) {
+    if (run.format === params["format"] && result.data.download?.url) {
       return {
         data: {
-          format: params.format,
-          filename: `${baseName}.${params.format}`,
-          contentType: contentTypeFor(params.format),
+          format: params["format"],
+          filename: `${baseName}.${params["format"]}`,
+          contentType: contentTypeFor(params["format"]),
           content: "",
           contentEncoding: "utf8" as const,
           url: result.data.download.url,
@@ -62,13 +68,12 @@ export const GET = createTenantRoute<
       };
     }
 
-    const row = await reportsRepository.findReportRunById(tx, params.runId);
+    const row = await reportsRepository.findReportRunById(tx, params["runId"]);
     if (!row) {
       throw new AtlasHttpError({
         status: 404,
-        code: "REPORT_RUN_NOT_FOUND",
+        code: "PERMISSION_DENIED",
         message: "Report run not found.",
-        requestId: ctx.requestId,
       });
     }
 
@@ -76,9 +81,8 @@ export const GET = createTenantRoute<
     if (!definition) {
       throw new AtlasHttpError({
         status: 404,
-        code: "REPORT_DEFINITION_NOT_FOUND",
+        code: "PERMISSION_DENIED",
         message: "Report definition not found.",
-        requestId: ctx.requestId,
       });
     }
 
@@ -95,47 +99,45 @@ export const GET = createTenantRoute<
     const filtered =
       definition.scope === "tenant" && selectedColumns.length > 0
         ? filterDatasetByColumns(dataset, selectedColumns)
-        : Array.isArray(paramsJson.columns)
+        : Array.isArray(paramsJson["columns"])
           ? filterDatasetByColumns(
               dataset,
-              paramsJson.columns.filter((value): value is string => typeof value === "string"),
+              paramsJson["columns"].filter((value): value is string => typeof value === "string"),
             )
           : dataset;
 
     const title = getSystemReportDefinition(definition.key)?.title ?? definition.title;
-    const rendered = await renderReportArtifact(params.format, filtered, title);
+    const rendered = await renderReportArtifact(params["format"], filtered, title);
 
-    let url: string | null = null;
     try {
       const stored = await storeReportArtifact(ctx, {
-        reportRunId: `${params.runId}-${params.format}`,
+        reportRunId: `${params["runId"]}-${params["format"]}`,
         content: rendered.content,
         contentType: rendered.contentType,
         fileExtension: rendered.fileExtension,
       });
       const env = parseStorageEnv(process.env);
       const provider = getStorageProvider();
-      const signed = await provider.createSignedDownloadUrl({
+      await provider.createSignedDownloadUrl({
         bucket: env.R2_BUCKET_NAME,
         key: stored.objectKey,
         expiresInSeconds: 60 * 15,
       });
-      url = signed.url;
     } catch {
-      url = null;
+      // Best-effort artifact storage; download still returns inline content.
     }
 
-    const isBinary = params.format === "xlsx" || params.format === "pdf";
+    const isBinary = params["format"] === "xlsx" || params["format"] === "pdf";
     return {
       data: {
-        format: params.format,
-        filename: `${baseName}.${params.format}`,
+        format: params["format"],
+        filename: `${baseName}.${params["format"]}`,
         contentType: rendered.contentType,
         content: isBinary
           ? Buffer.from(rendered.content).toString("base64")
           : new TextDecoder().decode(rendered.content),
         contentEncoding: isBinary ? ("base64" as const) : ("utf8" as const),
-        url,
+        url: null,
       },
     };
   },

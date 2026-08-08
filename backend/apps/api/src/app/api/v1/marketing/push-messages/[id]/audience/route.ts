@@ -20,5 +20,5 @@ export const POST = createTenantRoute<
   body: setPushMessageAudienceBodySchema,
   output: pushMessageResponseSchema,
   handler: async ({ tx, ctx, params, input }) =>
-    setPushMessageAudience(tx, ctx, params.id, input),
+    setPushMessageAudience(tx, ctx, params["id"], input),
 });

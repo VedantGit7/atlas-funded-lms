@@ -23,10 +23,14 @@ import {
   type PaymentOverviewGrain,
   type PaymentTransactionItem,
 } from "./admin-payments-roster-api";
-import {
-  downloadReportExport,
-  pollReportRunUntilComplete,
-} from "./admin-reports-api";
+import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
+
+function defined<T>(value: T, message = "Expected value to be defined"): NonNullable<T> {
+  if (value == null) {
+    throw new Error(message);
+  }
+  return value;
+}
 
 type OverviewTabAction = "transactions" | "instalment" | "invoices";
 
@@ -177,7 +181,7 @@ function OverviewLoadingSkeleton() {
               <div
                 key={index}
                 className="relative w-full overflow-hidden rounded-t bg-[var(--admin-surface-high)] after:absolute after:inset-0 after:-translate-x-full after:animate-[shimmer_1.8s_infinite] after:bg-gradient-to-r after:from-transparent after:via-[color-mix(in_srgb,var(--admin-on-surface)_8%,transparent)] after:to-transparent"
-                style={{ height: `${height}%` }}
+                style={{ height: `${String(height)}%` }}
               />
             ))}
           </div>
@@ -250,7 +254,9 @@ function RevenueChart({
                     ? "bg-[var(--admin-surface-variant)] text-[var(--admin-on-surface)]"
                     : "text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-on-surface)]",
                 ].join(" ")}
-                onClick={() => onGrainChange(option.value)}
+                onClick={() => {
+                  onGrainChange(option.value);
+                }}
               >
                 {option.label}
               </button>
@@ -275,10 +281,7 @@ function RevenueChart({
       <div className="relative flex flex-1 items-end gap-1.5 border-b border-l border-[var(--admin-border)] px-2 pt-2">
         <div className="pointer-events-none absolute inset-0 flex flex-col justify-between">
           {Array.from({ length: 5 }).map((_, index) => (
-            <div
-              key={index}
-              className="w-full border-t border-[var(--admin-border)] opacity-30"
-            />
+            <div key={index} className="w-full border-t border-[var(--admin-border)] opacity-30" />
           ))}
         </div>
         {points.length === 0 ? (
@@ -287,10 +290,11 @@ function RevenueChart({
           </div>
         ) : (
           points.map((point) => {
-            const segments = PRODUCT_STACK.map((stack) => ({
-              ...stack,
-              value: point[stack.key],
-            })).filter((segment) => segment.value > 0);
+            const segments: Array<{ key: string; label: string; color: string; value: number }> =
+              PRODUCT_STACK.map((stack) => ({
+                ...stack,
+                value: point[stack.key],
+              })).filter((segment) => segment.value > 0);
             const other = point.otherCents;
             if (other > 0) {
               segments.push({
@@ -306,15 +310,15 @@ function RevenueChart({
               <div
                 key={point.date}
                 className="group relative flex h-full min-w-0 flex-1 flex-col justify-end"
-                title={`${formatShortDate(point.date)}: ${formatCompact(point.totalCents)} (${point.orderCount} orders)`}
+                title={`${formatShortDate(point.date)}: ${formatCompact(point.totalCents)} (${String(point.orderCount)} orders)`}
               >
                 <div
                   className="absolute left-1/2 z-10 h-1.5 w-1.5 -translate-x-1/2 rounded-full border-2 border-[var(--admin-outline)] bg-[var(--admin-surface)]"
-                  style={{ top: `${orderY}%` }}
+                  style={{ top: `${String(orderY)}%` }}
                 />
                 <div
                   className="flex w-full flex-col justify-end overflow-hidden rounded-t-sm transition-[filter] group-hover:brightness-110"
-                  style={{ height: `${heightPct}%` }}
+                  style={{ height: `${String(heightPct)}%` }}
                 >
                   {segments.map((segment) => (
                     <div
@@ -322,7 +326,7 @@ function RevenueChart({
                       className="w-full"
                       style={{
                         backgroundColor: segment.color,
-                        height: `${(segment.value / Math.max(point.totalCents, 1)) * 100}%`,
+                        height: `${String((segment.value / Math.max(point.totalCents, 1)) * 100)}%`,
                       }}
                     />
                   ))}
@@ -339,7 +343,7 @@ function RevenueChart({
           : [points[0], points[Math.floor(points.length / 2)], points[points.length - 1]]
               .filter(Boolean)
               .map((point) => (
-                <span key={point!.date}>{formatShortDate(point!.date)}</span>
+                <span key={defined(point).date}>{formatShortDate(defined(point).date)}</span>
               ))}
       </div>
     </div>
@@ -358,7 +362,9 @@ function RecentTransactionsTable({
   return (
     <div className="flex flex-col overflow-hidden rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)]">
       <div className="flex items-center justify-between border-b border-[var(--admin-border)] bg-[var(--admin-surface-high)] p-4">
-        <h2 className="text-lg font-semibold text-[var(--admin-on-surface)]">Recent transactions</h2>
+        <h2 className="text-lg font-semibold text-[var(--admin-on-surface)]">
+          Recent transactions
+        </h2>
         <button
           type="button"
           className="font-mono text-xs text-[var(--admin-primary)] hover:underline"
@@ -496,10 +502,10 @@ export function AdminPaymentsOverviewPanel({ onNavigateTab, onRecordPayment }: P
         emailDownloadLink: true,
       });
       const completed = await pollReportRunUntilComplete(response.data.runId);
-      if (completed.status !== "succeeded") {
+      if (completed.status !== "completed") {
         throw new Error(completed.errorMessage ?? "Export failed.");
       }
-      await downloadReportExport(completed.id);
+      await downloadReportExport(completed.id, "csv");
     } catch (exportError) {
       setError(
         exportError instanceof ClientApiError
@@ -530,12 +536,15 @@ export function AdminPaymentsOverviewPanel({ onNavigateTab, onRecordPayment }: P
   const dateLabel =
     paidFrom && paidTo
       ? `${formatShortDate(`${paidFrom}T00:00:00.000Z`)} – ${formatShortDate(`${paidTo}T00:00:00.000Z`)}`
-      : summary?.windowLabel ?? "Selected range";
+      : (summary?.windowLabel ?? "Selected range");
 
   const currencyOptions = useMemo(() => {
     const values = overview?.summary.currencies ?? [];
     const unique = Array.from(new Set(values.map((value) => value.toUpperCase())));
-    return [{ value: "", label: "All currencies" }, ...unique.map((value) => ({ value, label: value }))];
+    return [
+      { value: "", label: "All currencies" },
+      ...unique.map((value) => ({ value, label: value })),
+    ];
   }, [overview?.summary.currencies]);
 
   return (
@@ -559,12 +568,17 @@ export function AdminPaymentsOverviewPanel({ onNavigateTab, onRecordPayment }: P
 
         <div className="flex flex-wrap items-center gap-2">
           <label className="inline-flex h-10 items-center gap-2 rounded border border-[var(--admin-border)] bg-[var(--admin-surface)] px-3 font-mono text-xs text-[var(--admin-on-surface)]">
-            <CalendarDays className="h-4 w-4 text-[var(--admin-on-surface-variant)]" aria-hidden="true" />
+            <CalendarDays
+              className="h-4 w-4 text-[var(--admin-on-surface-variant)]"
+              aria-hidden="true"
+            />
             <span className="sr-only">From</span>
             <input
               type="date"
               value={paidFrom}
-              onChange={(event) => setPaidFrom(event.target.value)}
+              onChange={(event) => {
+                setPaidFrom(event.target.value);
+              }}
               className="bg-transparent outline-none"
             />
             <span className="text-[var(--admin-on-surface-variant)]">–</span>
@@ -572,7 +586,9 @@ export function AdminPaymentsOverviewPanel({ onNavigateTab, onRecordPayment }: P
             <input
               type="date"
               value={paidTo}
-              onChange={(event) => setPaidTo(event.target.value)}
+              onChange={(event) => {
+                setPaidTo(event.target.value);
+              }}
               className="bg-transparent outline-none"
             />
           </label>
@@ -655,7 +671,7 @@ export function AdminPaymentsOverviewPanel({ onNavigateTab, onRecordPayment }: P
                 <div
                   key={index}
                   className="flex-1 animate-pulse rounded-t bg-[var(--admin-surface-high)]"
-                  style={{ height: `${height}%` }}
+                  style={{ height: `${String(height)}%` }}
                 />
               ))}
             </div>
@@ -731,14 +747,15 @@ export function AdminPaymentsOverviewPanel({ onNavigateTab, onRecordPayment }: P
                     Collected this period
                   </h2>
                   <div className="mb-2 font-mono text-3xl font-bold text-[var(--admin-on-surface)]">
-                    {formatMoney(summary!.collectedCents, summary!.currency)}
+                    {formatMoney(defined(summary).collectedCents, defined(summary).currency)}
                   </div>
-                  {summary!.changePercent != null ? (
+                  {defined(summary).changePercent != null ? (
                     <div className="inline-flex items-center gap-1 rounded bg-[color-mix(in_srgb,var(--admin-primary)_10%,transparent)] px-2 py-1 font-mono text-xs text-[var(--admin-primary)]">
                       <TrendingUp className="h-3.5 w-3.5" aria-hidden="true" />
                       <span>
-                        {summary!.changePercent >= 0 ? "+" : ""}
-                        {summary!.changePercent}% vs previous {summary!.windowLabel}
+                        {(defined(summary).changePercent ?? 0) >= 0 ? "+" : ""}
+                        {defined(summary).changePercent ?? 0}% vs previous{" "}
+                        {defined(summary).windowLabel}
                       </span>
                     </div>
                   ) : (
@@ -755,7 +772,7 @@ export function AdminPaymentsOverviewPanel({ onNavigateTab, onRecordPayment }: P
                     Transactions
                   </h3>
                   <div className="font-mono text-xl font-semibold text-[var(--admin-on-surface)]">
-                    {summary!.transactionCount.toLocaleString()}
+                    {defined(summary).transactionCount.toLocaleString()}
                   </div>
                 </div>
                 <div className="flex flex-col justify-between border-b border-[var(--admin-border)] p-6 lg:border-b-0 lg:border-r">
@@ -763,7 +780,7 @@ export function AdminPaymentsOverviewPanel({ onNavigateTab, onRecordPayment }: P
                     Average order
                   </h3>
                   <div className="font-mono text-xl font-semibold text-[var(--admin-on-surface)]">
-                    {formatMoney(summary!.averageOrderCents, summary!.currency)}
+                    {formatMoney(defined(summary).averageOrderCents, defined(summary).currency)}
                   </div>
                 </div>
                 <div className="flex flex-col justify-between border-b border-[var(--admin-border)] bg-[color-mix(in_srgb,var(--admin-warning)_5%,transparent)] p-6 md:border-r md:border-b-0">
@@ -772,10 +789,13 @@ export function AdminPaymentsOverviewPanel({ onNavigateTab, onRecordPayment }: P
                   </h3>
                   <div>
                     <div className="mb-1 font-mono text-xl font-semibold text-[var(--admin-warning)]">
-                      {formatMoney(summary!.outstandingInstalmentCents, summary!.currency)}
+                      {formatMoney(
+                        defined(summary).outstandingInstalmentCents,
+                        defined(summary).currency,
+                      )}
                     </div>
                     <div className="font-mono text-xs text-[color-mix(in_srgb,var(--admin-warning)_70%,transparent)]">
-                      {summary!.outstandingPlanCount} plans
+                      {defined(summary).outstandingPlanCount} plans
                     </div>
                   </div>
                 </div>
@@ -785,10 +805,10 @@ export function AdminPaymentsOverviewPanel({ onNavigateTab, onRecordPayment }: P
                   </h3>
                   <div>
                     <div className="mb-1 font-mono text-xl font-semibold text-[var(--admin-danger)]">
-                      {summary!.failedCount}
+                      {defined(summary).failedCount}
                     </div>
                     <div className="font-mono text-xs text-[color-mix(in_srgb,var(--admin-danger)_70%,transparent)]">
-                      {summary!.failedPercent}% of attempts
+                      {defined(summary).failedPercent}% of attempts
                     </div>
                   </div>
                 </div>
@@ -798,15 +818,13 @@ export function AdminPaymentsOverviewPanel({ onNavigateTab, onRecordPayment }: P
 
           <div className="grid grid-cols-1 gap-8 xl:grid-cols-12">
             <div className="flex flex-col gap-8 xl:col-span-7">
-              <RevenueChart
-                points={overview.revenueTrend}
-                grain={grain}
-                onGrainChange={setGrain}
-              />
+              <RevenueChart points={overview.revenueTrend} grain={grain} onGrainChange={setGrain} />
               <RecentTransactionsTable
                 items={overview.recentTransactions}
-                currency={summary!.currency}
-                onViewAll={() => onNavigateTab("transactions")}
+                currency={defined(summary).currency}
+                onViewAll={() => {
+                  onNavigateTab("transactions");
+                }}
               />
             </div>
 
@@ -830,7 +848,7 @@ export function AdminPaymentsOverviewPanel({ onNavigateTab, onRecordPayment }: P
                           <div
                             className="h-full rounded-full"
                             style={{
-                              width: `${Math.max(gateway.percent, 2)}%`,
+                              width: `${String(Math.max(gateway.percent, 2))}%`,
                               backgroundColor:
                                 index === 0 ? "var(--admin-primary)" : "var(--admin-outline)",
                               opacity: index === 0 ? 1 : Math.max(0.45, 1 - index * 0.15),
@@ -858,7 +876,7 @@ export function AdminPaymentsOverviewPanel({ onNavigateTab, onRecordPayment }: P
                   ) : (
                     overview.topProducts.map((product, index) => (
                       <div
-                        key={`${product.productTitle}-${index}`}
+                        key={`${product.productTitle}-${String(index)}`}
                         className="-mx-6 flex items-center justify-between border-b border-[var(--admin-border)] px-6 py-3 transition-colors hover:bg-[color-mix(in_srgb,var(--admin-surface-high)_40%,transparent)]"
                       >
                         <div className="flex items-center gap-4">
@@ -896,7 +914,9 @@ export function AdminPaymentsOverviewPanel({ onNavigateTab, onRecordPayment }: P
                   <button
                     type="button"
                     className="group flex items-center justify-between p-4 text-left transition-colors hover:bg-[color-mix(in_srgb,var(--admin-surface-high)_40%,transparent)]"
-                    onClick={() => onNavigateTab("invoices")}
+                    onClick={() => {
+                      onNavigateTab("invoices");
+                    }}
                   >
                     <span className="text-sm text-[var(--admin-on-surface)]">
                       <span className="font-bold">{overview.attention.unsentInvoiceCount}</span>{" "}
@@ -907,7 +927,9 @@ export function AdminPaymentsOverviewPanel({ onNavigateTab, onRecordPayment }: P
                   <button
                     type="button"
                     className="group flex items-center justify-between p-4 text-left transition-colors hover:bg-[color-mix(in_srgb,var(--admin-surface-high)_40%,transparent)]"
-                    onClick={() => onNavigateTab("instalment")}
+                    onClick={() => {
+                      onNavigateTab("instalment");
+                    }}
                   >
                     <span className="text-sm text-[var(--admin-on-surface)]">
                       <span className="font-bold text-[var(--admin-danger)]">
@@ -920,7 +942,9 @@ export function AdminPaymentsOverviewPanel({ onNavigateTab, onRecordPayment }: P
                   <button
                     type="button"
                     className="group flex items-center justify-between p-4 text-left transition-colors hover:bg-[color-mix(in_srgb,var(--admin-surface-high)_40%,transparent)]"
-                    onClick={() => onNavigateTab("transactions")}
+                    onClick={() => {
+                      onNavigateTab("transactions");
+                    }}
                   >
                     <span className="text-sm text-[var(--admin-on-surface)]">
                       <span className="font-bold text-[var(--admin-danger)]">

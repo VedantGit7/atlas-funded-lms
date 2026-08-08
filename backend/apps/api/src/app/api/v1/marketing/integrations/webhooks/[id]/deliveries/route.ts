@@ -16,5 +16,5 @@ export const GET = createTenantRoute<
   params: paramsSchema,
   output: marketingIntegrationDeliveriesListResponseSchema,
   handler: async ({ tx, ctx, params }) =>
-    listMarketingIntegrationWebhookDeliveries(tx, ctx, params.id),
+    listMarketingIntegrationWebhookDeliveries(tx, ctx, params["id"]),
 });

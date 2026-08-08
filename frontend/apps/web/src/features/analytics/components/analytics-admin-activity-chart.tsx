@@ -9,12 +9,19 @@ import {
   chartLineStroke,
 } from "../analytics-admin-shared";
 
+function defined<T>(value: T, message = "Expected value to be defined"): NonNullable<T> {
+  if (value == null) {
+    throw new Error(message);
+  }
+  return value;
+}
+
 type AnalyticsAdminActivityChartProps = {
   points: TrendPoint[];
   granularity: ChartGranularity;
   onGranularityChange: (value: ChartGranularity) => void;
-  onPointClick?: (point: TrendPoint) => void;
-  loading?: boolean;
+  onPointClick?: ((point: TrendPoint) => void) | undefined;
+  loading?: boolean | undefined;
 };
 
 const GRANULARITY_OPTIONS: Array<{ value: ChartGranularity; label: string }> = [
@@ -29,20 +36,21 @@ function buildPath(points: TrendPoint[], width: number, height: number, padding:
   const innerWidth = width - padding * 2;
   const innerHeight = height - padding * 2;
   const coords = points.map((point, index) => {
-    const x = padding + (points.length === 1 ? innerWidth / 2 : (index / (points.length - 1)) * innerWidth);
+    const x =
+      padding + (points.length === 1 ? innerWidth / 2 : (index / (points.length - 1)) * innerWidth);
     const y = padding + innerHeight - (point.count / maxCount) * innerHeight;
     return { x, y };
   });
   if (coords.length === 1) {
-    const only = coords[0]!;
-    return `M ${only.x} ${only.y}`;
+    const only = defined(coords[0]);
+    return `M ${String(only.x)} ${String(only.y)}`;
   }
-  let path = `M ${coords[0]!.x} ${coords[0]!.y}`;
+  let path = `M ${String(defined(coords[0]).x)} ${String(defined(coords[0]).y)}`;
   for (let index = 1; index < coords.length; index += 1) {
-    const prev = coords[index - 1]!;
-    const current = coords[index]!;
+    const prev = defined(coords[index - 1]);
+    const current = defined(coords[index]);
     const cx = (prev.x + current.x) / 2;
-    path += ` C ${cx} ${prev.y}, ${cx} ${current.y}, ${current.x} ${current.y}`;
+    path += ` C ${String(cx)} ${String(prev.y)}, ${String(cx)} ${String(current.y)}, ${String(current.x)} ${String(current.y)}`;
   }
   return path;
 }
@@ -65,14 +73,17 @@ export function AnalyticsAdminActivityChart({
       points.length === 1
         ? padding + (width - padding * 2) / 2
         : padding + ((points.length - 1) / Math.max(points.length - 1, 1)) * (width - padding * 2);
-    return `${linePath} L ${lastX} ${height - padding} L ${padding} ${height - padding} Z`;
+    return `${linePath} L ${String(lastX)} ${String(height - padding)} L ${String(padding)} ${String(height - padding)} Z`;
   }, [linePath, points.length, width]);
 
   return (
     <section className={analyticsChartPanelClassName} aria-labelledby="activity-chart-heading">
       <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h2 id="activity-chart-heading" className="text-lg font-semibold text-[var(--admin-on-surface)]">
+          <h2
+            id="activity-chart-heading"
+            className="text-lg font-semibold text-[var(--admin-on-surface)]"
+          >
             Daily learning activity
           </h2>
           <p className="mt-1 text-sm text-[var(--admin-on-surface-variant)]">
@@ -93,7 +104,9 @@ export function AnalyticsAdminActivityChart({
                     ? "bg-[var(--admin-primary)] text-[var(--admin-on-primary)] shadow-sm"
                     : "border border-[var(--admin-border)] bg-[var(--admin-surface)] text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-on-surface)]"
                 }`}
-                onClick={() => onGranularityChange(option.value)}
+                onClick={() => {
+                  onGranularityChange(option.value);
+                }}
               >
                 {option.label}
               </button>
@@ -113,7 +126,7 @@ export function AnalyticsAdminActivityChart({
           </div>
         ) : (
           <svg
-            viewBox={`0 0 ${width} ${height + 20}`}
+            viewBox={`0 0 ${String(width)} ${String(height + 20)}`}
             className="h-full w-full overflow-visible"
             role="img"
             aria-label="Lessons completed trend chart"
@@ -134,7 +147,13 @@ export function AnalyticsAdminActivityChart({
             })}
             {areaPath ? <path d={areaPath} fill={chartFill} /> : null}
             {linePath ? (
-              <path d={linePath} fill="none" stroke={chartLineStroke} strokeWidth={2.5} strokeLinecap="round" />
+              <path
+                d={linePath}
+                fill="none"
+                stroke={chartLineStroke}
+                strokeWidth={2.5}
+                strokeLinecap="round"
+              />
             ) : null}
             {points.map((point, index) => {
               const maxCount = Math.max(...points.map((entry) => entry.count), 1);
@@ -145,7 +164,10 @@ export function AnalyticsAdminActivityChart({
                 (points.length === 1 ? innerWidth / 2 : (index / (points.length - 1)) * innerWidth);
               const y = padding + innerHeight - (point.count / maxCount) * innerHeight;
               const showLabel =
-                points.length <= 6 || index === 0 || index === points.length - 1 || index % Math.ceil(points.length / 5) === 0;
+                points.length <= 6 ||
+                index === 0 ||
+                index === points.length - 1 ||
+                index % Math.ceil(points.length / 5) === 0;
               return (
                 <g key={point.sortKey}>
                   <circle
@@ -155,7 +177,9 @@ export function AnalyticsAdminActivityChart({
                     fill={chartLineStroke}
                     className={onPointClick ? "cursor-pointer" : undefined}
                     role={onPointClick ? "button" : undefined}
-                    aria-label={onPointClick ? `${point.label}: ${String(point.count)} lessons` : undefined}
+                    aria-label={
+                      onPointClick ? `${point.label}: ${String(point.count)} lessons` : undefined
+                    }
                     onClick={
                       onPointClick
                         ? () => {

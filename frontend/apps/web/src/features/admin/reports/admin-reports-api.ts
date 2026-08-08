@@ -8,8 +8,8 @@ export type ReportParamDefinition = {
   label: string;
   type: "date" | "string" | "select";
   required: boolean;
-  options?: Array<{ value: string; label: string }>;
-  defaultValue?: string;
+  options?: Array<{ value: string; label: string }> | undefined;
+  defaultValue?: string | undefined;
 };
 
 export type ReportDefinition = {
@@ -20,8 +20,8 @@ export type ReportDefinition = {
   description: string;
   defaultViz: VizType;
   params: ReportParamDefinition[];
-  columns?: string[];
-  scope?: "system" | "tenant";
+  columns?: string[] | undefined;
+  scope?: "system" | "tenant" | undefined;
 };
 
 export type CustomReportDefinition = {
@@ -70,9 +70,9 @@ type DomainDefinition = {
   description: string | null;
   paramSchema: Record<string, unknown>;
   datasetKey: string;
-  columns?: string[];
+  columns?: string[] | undefined;
   defaultFormat: "csv" | "xlsx" | "pdf";
-  scope?: "system" | "tenant";
+  scope?: "system" | "tenant" | undefined;
 };
 
 type DomainRun = {
@@ -83,7 +83,7 @@ type DomainRun = {
   createdAt: string;
   completedAt: string | null;
   errorCode: string | null;
-  download?: { url: string; expiresAt: string } | null;
+  download?: { url: string; expiresAt: string } | null | undefined;
 };
 
 function mapLegacyStatus(status: string): ReportRun["status"] {
@@ -103,7 +103,10 @@ function mapLegacyStatus(status: string): ReportRun["status"] {
 }
 
 function labelize(key: string): string {
-  return key.replace(/([A-Z])/g, " $1").replace(/_/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
+  return key
+    .replace(/([A-Z])/g, " $1")
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
 function parseParamSchema(paramSchema: Record<string, unknown>): ReportParamDefinition[] {
@@ -114,7 +117,9 @@ function parseParamSchema(paramSchema: Record<string, unknown>): ReportParamDefi
 
   return Object.entries(properties).map(([key, schema]) => {
     const format = typeof schema["format"] === "string" ? schema["format"] : null;
-    const enumValues = Array.isArray(schema["enum"]) ? schema["enum"].filter((value): value is string => typeof value === "string") : null;
+    const enumValues = Array.isArray(schema["enum"])
+      ? schema["enum"].filter((value): value is string => typeof value === "string")
+      : null;
 
     if (enumValues) {
       return {
@@ -143,8 +148,8 @@ function mapDefinition(definition: DomainDefinition): ReportDefinition {
     description: definition.description ?? "",
     defaultViz: "table",
     params: parseParamSchema(definition.paramSchema),
-    columns: definition.columns,
-    scope: definition.scope,
+    ...(definition.columns !== undefined ? { columns: definition.columns } : {}),
+    ...(definition.scope !== undefined ? { scope: definition.scope } : {}),
   };
 }
 
@@ -167,10 +172,10 @@ export async function fetchReportDefinitions(category: string) {
 
 export async function createCustomReportDefinition(body: {
   title: string;
-  description?: string;
+  description?: string | undefined;
   datasetKey: string;
   columns: string[];
-  key?: string;
+  key?: string | undefined;
 }) {
   const response = await clientApi.post<{ data: DomainDefinition }>(
     "/api/v1/reports/definitions",
@@ -214,7 +219,7 @@ export async function fetchBiExportJobs() {
         status: string;
         createdAt: string;
         completedAt: string | null;
-        download?: { url: string } | null;
+        download?: { url: string } | null | undefined;
       }>;
     };
   }>("/api/v1/reports/bi-exports");
@@ -238,8 +243,8 @@ export async function fetchBiExportJobs() {
 
 export async function createBiExportJob(body: {
   datasetKey: string;
-  format?: "csv" | "jsonl";
-  params?: Record<string, string>;
+  format?: "csv" | "jsonl" | undefined;
+  params?: Record<string, string | undefined> | undefined;
 }) {
   return clientApi.post("/api/v1/reports/bi-exports", body, `bi-export-${body.datasetKey}`);
 }
@@ -298,17 +303,22 @@ export async function fetchReportPreview(runId: string) {
 
 export async function createReportSchedule(body: {
   definitionKey: string;
-  name?: string;
+  name?: string | undefined;
   cronExpression: string;
-  timezone?: string;
-  formats?: Array<"csv" | "xlsx" | "pdf">;
-  isActive?: boolean;
+  timezone?: string | undefined;
+  formats?: Array<"csv" | "xlsx" | "pdf"> | undefined;
+  isActive?: boolean | undefined;
 }) {
-  return clientApi.post<{ data: { id: string; definitionKey: string; name: string | null; cronExpression: string; formats: string[]; isActive: boolean } }>(
-    "/api/v1/reports/schedules",
-    body,
-    `report-schedule-${body.definitionKey}`,
-  );
+  return clientApi.post<{
+    data: {
+      id: string;
+      definitionKey: string;
+      name: string | null;
+      cronExpression: string;
+      formats: string[];
+      isActive: boolean;
+    };
+  }>("/api/v1/reports/schedules", body, `report-schedule-${body.definitionKey}`);
 }
 
 export async function fetchReportSchedules(category: string) {
@@ -327,7 +337,10 @@ export async function fetchReportSchedules(category: string) {
   }>("/api/v1/reports/schedules");
 
   const schedules = response.data.items
-    .filter((schedule) => schedule.definitionKey === category || schedule.definitionKey.startsWith(category))
+    .filter(
+      (schedule) =>
+        schedule.definitionKey === category || schedule.definitionKey.startsWith(category),
+    )
     .map(
       (schedule): ReportSchedule => ({
         id: schedule.id,
@@ -360,7 +373,7 @@ export async function downloadReportExport(runId: string, format: "csv" | "xlsx"
       filename: string;
       contentType: string;
       content: string;
-      contentEncoding?: "utf8" | "base64";
+      contentEncoding?: "utf8" | "base64" | undefined;
       url: string | null;
     };
   }>(reportDownloadPath(runId, format));
@@ -394,9 +407,9 @@ export async function downloadReportExport(runId: string, format: "csv" | "xlsx"
 export async function pollReportRunUntilComplete(
   runId: string,
   options?: {
-    intervalMs?: number;
-    maxAttempts?: number;
-    onPoll?: (attempt: number) => void;
+    intervalMs?: number | undefined;
+    maxAttempts?: number | undefined;
+    onPoll?: ((attempt: number) => void) | undefined;
   },
 ): Promise<ReportRun> {
   const intervalMs = options?.intervalMs ?? 800;

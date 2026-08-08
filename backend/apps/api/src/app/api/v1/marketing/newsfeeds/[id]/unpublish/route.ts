@@ -16,5 +16,5 @@ export const POST = createTenantRoute<
   params: paramsSchema,
   body: noBodySchema,
   output: newsfeedPostResponseSchema,
-  handler: async ({ tx, ctx, params }) => unpublishMarketingNewsfeedPost(tx, ctx, params.id),
+  handler: async ({ tx, ctx, params }) => unpublishMarketingNewsfeedPost(tx, ctx, params["id"]),
 });

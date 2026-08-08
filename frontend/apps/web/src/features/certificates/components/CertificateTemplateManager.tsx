@@ -31,7 +31,7 @@ import {
 
 function isStudioDesignTemplate(template: TemplateDto): boolean {
   const json = template.templateJson as { schemaVersion?: number };
-  return json?.schemaVersion === 1;
+  return json.schemaVersion === 1;
 }
 
 function legacyFields(template: TemplateDto): {
@@ -50,7 +50,7 @@ function legacyFields(template: TemplateDto): {
     headline: json.headline ?? "",
     subheadline: json.subheadline ?? "",
     bodyLines: json.bodyLines ?? [],
-    accentColor: json.accentColor,
+    ...(json.accentColor !== undefined ? { accentColor: json.accentColor } : {}),
   };
 }
 
@@ -138,7 +138,9 @@ export function CertificateTemplateManager({ initialTemplates }: CertificateTemp
   async function refreshTemplates() {
     setRefreshing(true);
     try {
-      const response = await clientApi.get<{ data: TemplateDto[] }>("/api/v1/certificate-templates");
+      const response = await clientApi.get<{ data: TemplateDto[] }>(
+        "/api/v1/certificate-templates",
+      );
       setTemplates(response.data);
     } finally {
       setRefreshing(false);
@@ -181,7 +183,9 @@ export function CertificateTemplateManager({ initialTemplates }: CertificateTemp
           templateJson: {
             headline,
             ...(subheadline.trim() ? { subheadline } : {}),
-            bodyLines: bodyLines.map((line) => line.value).filter((value) => value.trim().length > 0),
+            bodyLines: bodyLines
+              .map((line) => line.value)
+              .filter((value) => value.trim().length > 0),
             ...(HEX_PATTERN.test(accentColor) ? { accentColor } : {}),
           },
         },
@@ -201,7 +205,11 @@ export function CertificateTemplateManager({ initialTemplates }: CertificateTemp
     setRequestId(null);
     setPublishing(true);
     try {
-      await clientApi.post(`/api/v1/certificate-templates/${selected.id}/publish`, {}, "template-publish");
+      await clientApi.post(
+        `/api/v1/certificate-templates/${selected.id}/publish`,
+        {},
+        "template-publish",
+      );
       await refreshTemplates();
       setConfirmPublishOpen(false);
     } catch (caught) {
@@ -217,7 +225,9 @@ export function CertificateTemplateManager({ initialTemplates }: CertificateTemp
     setRequestId(null);
     setDeleting(true);
     try {
-      await clientApi.delete("/api/v1/certificate-templates", "template-delete", { id: selected.id });
+      await clientApi.delete("/api/v1/certificate-templates", "template-delete", {
+        id: selected.id,
+      });
       await refreshTemplates();
       setSelectedId(null);
       setConfirmDeleteOpen(false);
@@ -238,10 +248,13 @@ export function CertificateTemplateManager({ initialTemplates }: CertificateTemp
   }
 
   function updateBodyLine(key: string, value: string) {
-    setBodyLines((current) => current.map((line) => (line.key === key ? { ...line, value } : line)));
+    setBodyLines((current) =>
+      current.map((line) => (line.key === key ? { ...line, value } : line)),
+    );
   }
 
-  const canCreate = KEY_PATTERN.test(draftKey) && draftKey.length >= 2 && draftName.trim().length > 0;
+  const canCreate =
+    KEY_PATTERN.test(draftKey) && draftKey.length >= 2 && draftName.trim().length > 0;
 
   return (
     <div className="grid gap-6 lg:grid-cols-[320px_1fr]">
@@ -333,7 +346,10 @@ export function CertificateTemplateManager({ initialTemplates }: CertificateTemp
             </>
           ) : templates.length === 0 ? (
             <div className="flex flex-col items-center gap-2 px-4 py-10 text-center">
-              <Sparkles className="h-6 w-6 text-[var(--admin-on-surface-variant)]" aria-hidden="true" />
+              <Sparkles
+                className="h-6 w-6 text-[var(--admin-on-surface-variant)]"
+                aria-hidden="true"
+              />
               <p className="text-sm font-medium text-[var(--admin-on-surface)]">No templates yet</p>
               <p className={helperClassName}>Create a draft to design your first certificate.</p>
             </div>
@@ -458,222 +474,239 @@ export function CertificateTemplateManager({ initialTemplates }: CertificateTemp
               </div>
             ) : (
               <>
-            {!editable ? (
-              <div className="mx-6 mt-5">
-                <p className={infoBannerClassName}>
-                  This template is {selected.status.toLowerCase()} and can no longer be edited. Create a
-                  new draft to make changes.
-                </p>
-              </div>
-            ) : null}
+                {!editable ? (
+                  <div className="mx-6 mt-5">
+                    <p className={infoBannerClassName}>
+                      This template is {selected.status.toLowerCase()} and can no longer be edited.
+                      Create a new draft to make changes.
+                    </p>
+                  </div>
+                ) : null}
 
-            <div className="grid gap-6 p-6 lg:grid-cols-[3fr_2fr]">
-              {/* Form */}
-              <div className="space-y-6">
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="space-y-1.5">
-                    <label htmlFor="template-key" className={labelClassName}>
-                      Template key
-                    </label>
-                    <input id="template-key" className={monoFieldClassName} value={selected.key} readOnly />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label htmlFor="template-name" className={labelClassName}>
-                      Internal name
-                    </label>
-                    <input
-                      id="template-name"
-                      className={fieldClassName}
-                      value={name}
-                      disabled={!editable}
-                      onChange={(event) => {
-                        setName(event.target.value);
-                      }}
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <label htmlFor="template-headline" className={labelClassName}>
-                      Headline
-                    </label>
-                    <span className={helperClassName}>{headline.length}/160</span>
-                  </div>
-                  <input
-                    id="template-headline"
-                    className={fieldClassName}
-                    value={headline}
-                    disabled={!editable}
-                    maxLength={160}
-                    onChange={(event) => {
-                      setHeadline(event.target.value);
-                    }}
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <label htmlFor="template-subheadline" className={labelClassName}>
-                      Subheadline (optional)
-                    </label>
-                    <span className={helperClassName}>{subheadline.length}/240</span>
-                  </div>
-                  <textarea
-                    id="template-subheadline"
-                    className={fieldClassName}
-                    rows={2}
-                    value={subheadline}
-                    disabled={!editable}
-                    maxLength={240}
-                    onChange={(event) => {
-                      setSubheadline(event.target.value);
-                    }}
-                  />
-                </div>
-
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className={labelClassName}>Body lines (max {MAX_BODY_LINES})</span>
-                    <button
-                      type="button"
-                      className={ghostButtonClassName}
-                      disabled={!editable || bodyLines.length >= MAX_BODY_LINES}
-                      onClick={addBodyLine}
-                    >
-                      <Plus className="h-3.5 w-3.5" aria-hidden="true" strokeWidth={2.5} />
-                      Add line
-                    </button>
-                  </div>
-                  <div className="space-y-2">
-                    {bodyLines.map((line, index) => (
-                      <div key={line.key} className="group flex items-center gap-3">
-                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded bg-[var(--admin-surface-high)] text-xs font-semibold text-[var(--admin-on-surface-variant)]">
-                          {index + 1}
-                        </span>
+                <div className="grid gap-6 p-6 lg:grid-cols-[3fr_2fr]">
+                  {/* Form */}
+                  <div className="space-y-6">
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div className="space-y-1.5">
+                        <label htmlFor="template-key" className={labelClassName}>
+                          Template key
+                        </label>
                         <input
-                          className={`${fieldClassName} flex-1`}
-                          value={line.value}
+                          id="template-key"
+                          className={monoFieldClassName}
+                          value={selected.key}
+                          readOnly
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label htmlFor="template-name" className={labelClassName}>
+                          Internal name
+                        </label>
+                        <input
+                          id="template-name"
+                          className={fieldClassName}
+                          value={name}
                           disabled={!editable}
-                          maxLength={500}
                           onChange={(event) => {
-                            updateBodyLine(line.key, event.target.value);
+                            setName(event.target.value);
                           }}
                         />
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <label htmlFor="template-headline" className={labelClassName}>
+                          Headline
+                        </label>
+                        <span className={helperClassName}>{headline.length}/160</span>
+                      </div>
+                      <input
+                        id="template-headline"
+                        className={fieldClassName}
+                        value={headline}
+                        disabled={!editable}
+                        maxLength={160}
+                        onChange={(event) => {
+                          setHeadline(event.target.value);
+                        }}
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <label htmlFor="template-subheadline" className={labelClassName}>
+                          Subheadline (optional)
+                        </label>
+                        <span className={helperClassName}>{subheadline.length}/240</span>
+                      </div>
+                      <textarea
+                        id="template-subheadline"
+                        className={fieldClassName}
+                        rows={2}
+                        value={subheadline}
+                        disabled={!editable}
+                        maxLength={240}
+                        onChange={(event) => {
+                          setSubheadline(event.target.value);
+                        }}
+                      />
+                    </div>
+
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className={labelClassName}>Body lines (max {MAX_BODY_LINES})</span>
                         <button
                           type="button"
-                          aria-label="Remove line"
-                          disabled={!editable}
-                          className="shrink-0 rounded-md p-1.5 text-[var(--admin-on-surface-variant)] opacity-0 transition-opacity hover:bg-[var(--admin-danger)]/10 hover:text-[var(--admin-danger)] disabled:opacity-0 group-hover:opacity-100"
-                          onClick={() => {
-                            removeBodyLine(line.key);
-                          }}
+                          className={ghostButtonClassName}
+                          disabled={!editable || bodyLines.length >= MAX_BODY_LINES}
+                          onClick={addBodyLine}
                         >
-                          <Trash2 className="h-4 w-4" aria-hidden="true" />
+                          <Plus className="h-3.5 w-3.5" aria-hidden="true" strokeWidth={2.5} />
+                          Add line
                         </button>
                       </div>
-                    ))}
-                  </div>
-                </div>
+                      <div className="space-y-2">
+                        {bodyLines.map((line, index) => (
+                          <div key={line.key} className="group flex items-center gap-3">
+                            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded bg-[var(--admin-surface-high)] text-xs font-semibold text-[var(--admin-on-surface-variant)]">
+                              {index + 1}
+                            </span>
+                            <input
+                              className={`${fieldClassName} flex-1`}
+                              value={line.value}
+                              disabled={!editable}
+                              maxLength={500}
+                              onChange={(event) => {
+                                updateBodyLine(line.key, event.target.value);
+                              }}
+                            />
+                            <button
+                              type="button"
+                              aria-label="Remove line"
+                              disabled={!editable}
+                              className="shrink-0 rounded-md p-1.5 text-[var(--admin-on-surface-variant)] opacity-0 transition-opacity hover:bg-[var(--admin-danger)]/10 hover:text-[var(--admin-danger)] disabled:opacity-0 group-hover:opacity-100"
+                              onClick={() => {
+                                removeBodyLine(line.key);
+                              }}
+                            >
+                              <Trash2 className="h-4 w-4" aria-hidden="true" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
 
-                <div className={`${cardClassName} p-5`}>
-                  <label className={`${labelClassName} mb-3 block`}>Accent styling</label>
-                  <div className="flex items-center gap-4">
-                    <input
-                      type="color"
-                      aria-label="Accent color"
-                      value={HEX_PATTERN.test(accentColor) ? accentColor : DEFAULT_ACCENT}
-                      disabled={!editable}
-                      className="h-11 w-11 shrink-0 cursor-pointer rounded-full border border-[var(--admin-border)] bg-transparent p-0 disabled:cursor-not-allowed"
-                      onChange={(event) => {
-                        setAccentColor(event.target.value);
-                      }}
-                    />
-                    <div className="min-w-0 flex-1 space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className={helperClassName}>Hex code</span>
+                    <div className={`${cardClassName} p-5`}>
+                      <label className={`${labelClassName} mb-3 block`}>Accent styling</label>
+                      <div className="flex items-center gap-4">
                         <input
-                          className={`${monoFieldClassName} w-28 py-1.5`}
-                          value={accentColor}
+                          type="color"
+                          aria-label="Accent color"
+                          value={HEX_PATTERN.test(accentColor) ? accentColor : DEFAULT_ACCENT}
                           disabled={!editable}
+                          className="h-11 w-11 shrink-0 cursor-pointer rounded-full border border-[var(--admin-border)] bg-transparent p-0 disabled:cursor-not-allowed"
                           onChange={(event) => {
                             setAccentColor(event.target.value);
                           }}
                         />
+                        <div className="min-w-0 flex-1 space-y-1">
+                          <div className="flex items-center gap-2">
+                            <span className={helperClassName}>Hex code</span>
+                            <input
+                              className={`${monoFieldClassName} w-28 py-1.5`}
+                              value={accentColor}
+                              disabled={!editable}
+                              onChange={(event) => {
+                                setAccentColor(event.target.value);
+                              }}
+                            />
+                          </div>
+                          <p className={helperClassName}>
+                            Applies to the certificate&apos;s ornamental border.
+                          </p>
+                        </div>
                       </div>
-                      <p className={helperClassName}>Applies to the certificate&apos;s ornamental border.</p>
+                    </div>
+                  </div>
+
+                  {/* Live preview */}
+                  <div className="lg:sticky lg:top-6 lg:self-start">
+                    <div className="space-y-3">
+                      <h4 className="text-sm font-semibold text-[var(--admin-on-surface)]">
+                        Live preview
+                      </h4>
+                      <CertificateLivePreview
+                        headline={headline}
+                        subheadline={subheadline}
+                        bodyLines={bodyLines
+                          .map((line) => line.value)
+                          .filter((value) => value.trim().length > 0)}
+                        accentColor={HEX_PATTERN.test(accentColor) ? accentColor : DEFAULT_ACCENT}
+                      />
+                      <p className="text-xs italic leading-relaxed text-[var(--admin-on-surface-variant)]">
+                        Dynamic recipient fields (name, course, date) are not yet supported by this
+                        template system.
+                      </p>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Live preview */}
-              <div className="lg:sticky lg:top-6 lg:self-start">
-                <div className="space-y-3">
-                  <h4 className="text-sm font-semibold text-[var(--admin-on-surface)]">Live preview</h4>
-                  <CertificateLivePreview
-                    headline={headline}
-                    subheadline={subheadline}
-                    bodyLines={bodyLines.map((line) => line.value).filter((value) => value.trim().length > 0)}
-                    accentColor={HEX_PATTERN.test(accentColor) ? accentColor : DEFAULT_ACCENT}
-                  />
-                  <p className="text-xs italic leading-relaxed text-[var(--admin-on-surface-variant)]">
-                    Dynamic recipient fields (name, course, date) are not yet supported by this template
-                    system.
-                  </p>
+                {message ? (
+                  <div className="mx-6 mb-4 space-y-1">
+                    <p className={errorBannerClassName}>{message}</p>
+                    {requestId ? <p className={helperClassName}>Request ID: {requestId}</p> : null}
+                  </div>
+                ) : null}
+
+                <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[var(--admin-border)] px-6 py-4">
+                  <button
+                    type="button"
+                    className={dangerOutlineButtonClassName}
+                    disabled={deleting}
+                    onClick={() => {
+                      setConfirmDeleteOpen(true);
+                    }}
+                  >
+                    <Trash2 className="h-4 w-4" aria-hidden="true" />
+                    Delete template
+                  </button>
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      className={outlineButtonClassName}
+                      disabled={!editable || saving}
+                      onClick={() => void saveSelected()}
+                    >
+                      {saving ? "Saving…" : "Save draft"}
+                    </button>
+                    <button
+                      type="button"
+                      className={primaryButtonClassName}
+                      disabled={!editable || publishing}
+                      onClick={() => {
+                        setConfirmPublishOpen(true);
+                      }}
+                    >
+                      Publish changes
+                    </button>
+                  </div>
                 </div>
-              </div>
-            </div>
-
-            {message ? (
-              <div className="mx-6 mb-4 space-y-1">
-                <p className={errorBannerClassName}>{message}</p>
-                {requestId ? <p className={helperClassName}>Request ID: {requestId}</p> : null}
-              </div>
-            ) : null}
-
-            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[var(--admin-border)] px-6 py-4">
-              <button
-                type="button"
-                className={dangerOutlineButtonClassName}
-                disabled={deleting}
-                onClick={() => {
-                  setConfirmDeleteOpen(true);
-                }}
-              >
-                <Trash2 className="h-4 w-4" aria-hidden="true" />
-                Delete template
-              </button>
-              <div className="flex items-center gap-3">
-                <button
-                  type="button"
-                  className={outlineButtonClassName}
-                  disabled={!editable || saving}
-                  onClick={() => void saveSelected()}
-                >
-                  {saving ? "Saving…" : "Save draft"}
-                </button>
-                <button
-                  type="button"
-                  className={primaryButtonClassName}
-                  disabled={!editable || publishing}
-                  onClick={() => {
-                    setConfirmPublishOpen(true);
-                  }}
-                >
-                  Publish changes
-                </button>
-              </div>
-            </div>
               </>
             )}
           </div>
         ) : (
           <div className="flex flex-col items-center gap-3 px-6 py-20 text-center">
-            <Sparkles className="h-8 w-8 text-[var(--admin-on-surface-variant)]" aria-hidden="true" />
-            <h3 className="text-base font-semibold text-[var(--admin-on-surface)]">No template selected</h3>
+            <Sparkles
+              className="h-8 w-8 text-[var(--admin-on-surface-variant)]"
+              aria-hidden="true"
+            />
+            <h3 className="text-base font-semibold text-[var(--admin-on-surface)]">
+              No template selected
+            </h3>
             <p className={`${helperClassName} max-w-sm`}>
-              Select an existing template from the list to edit its properties, or create a new draft.
+              Select an existing template from the list to edit its properties, or create a new
+              draft.
             </p>
             <div className="mt-2 flex flex-wrap items-center justify-center gap-2">
               <Link

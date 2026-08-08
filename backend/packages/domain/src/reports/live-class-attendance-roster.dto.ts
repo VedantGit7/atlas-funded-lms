@@ -83,7 +83,7 @@ export const liveSessionsListResponseSchema = z.object({
   }),
 });
 
-export const liveSessionIdParamsSchema = z
+export const liveClassSessionIdParamsSchema = z
   .object({
     sessionId: z.string().uuid(),
   })

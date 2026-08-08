@@ -16,5 +16,5 @@ export const GET = createTenantRoute<
   input: noBodySchema,
   params: batchIdParamsSchema,
   output: batchExamsBelowPassResponseSchema,
-  handler: async ({ tx, ctx, params }) => listBatchExamsBelowPass(tx, ctx, params.batchId),
+  handler: async ({ tx, ctx, params }) => listBatchExamsBelowPass(tx, ctx, params["batchId"]),
 });

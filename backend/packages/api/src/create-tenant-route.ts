@@ -17,6 +17,14 @@ import { loadResourceRefOrDefault } from "./load-resource-ref";
 import type { RouteMetadata, TenantRouteContext } from "./route-metadata";
 import { noBodySchema } from "./schemas";
 
+type InferParams<TParams extends z.ZodTypeAny | undefined> = TParams extends z.ZodTypeAny
+  ? z.infer<TParams>
+  : Record<string, never>;
+
+function asParamRecord(params: object): Record<string, string> {
+  return params as Record<string, string>;
+}
+
 export async function runProtectedTenantRoutePipeline<TInput>(args: {
   tx: TenantTx;
   ctx: TenantRouteContext;
@@ -59,27 +67,31 @@ export async function runProtectedTenantRoutePipeline<TInput>(args: {
   return resource;
 }
 
-export type ProtectedTenantRouteHandler<TInput, TOutput> = (args: {
+export type ProtectedTenantRouteHandler<TInput, TOutput, TParams = Record<string, never>> = (args: {
   tx: TenantTx;
   ctx: TenantRouteContext;
   input: TInput;
   resource: ResourceRef;
-  params: Record<string, string>;
+  params: TParams;
 }) => Promise<TOutput>;
 
-export async function runProtectedTenantRouteHandler<TInput, TOutput>(args: {
+export async function runProtectedTenantRouteHandler<
+  TInput,
+  TOutput,
+  TParams extends object = Record<string, never>,
+>(args: {
   tx: TenantTx;
   ctx: TenantRouteContext;
   metadata: RouteMetadata<TInput>;
-  params: Record<string, string>;
+  params: TParams;
   input: TInput;
-  handler: ProtectedTenantRouteHandler<TInput, TOutput>;
+  handler: ProtectedTenantRouteHandler<TInput, TOutput, TParams>;
 }): Promise<TOutput> {
   const resource = await runProtectedTenantRoutePipeline({
     tx: args.tx,
     ctx: args.ctx,
     metadata: args.metadata,
-    params: args.params,
+    params: asParamRecord(args.params),
     input: args.input,
   });
 
@@ -142,7 +154,7 @@ type TenantRouteConfig<TInput, TOutput, TParams extends z.ZodTypeAny | undefined
   body?: z.ZodTypeAny;
   readBody?: (req: NextRequest) => Promise<unknown>;
   params?: TParams;
-  handler: ProtectedTenantRouteHandler<TInput, TOutput>;
+  handler: ProtectedTenantRouteHandler<TInput, TOutput, InferParams<TParams>>;
 };
 
 export function createTenantRoute<TInput = Record<string, never>, TOutput = unknown>(
@@ -205,13 +217,12 @@ export function createTenantRoute<
               input = {} as TInput;
             }
 
-            const params: Record<string, string> =
+            const params: InferParams<TParams> =
               config.params != null
-                ? (config.params.parse(routeContext ? await routeContext.params : {}) as Record<
-                    string,
-                    string
-                  >)
-                : {};
+                ? (config.params.parse(
+                    routeContext ? await routeContext.params : {},
+                  ) as InferParams<TParams>)
+                : ({} as InferParams<TParams>);
 
             const idempotencyKey = req.headers.get("idempotency-key")?.trim() ?? undefined;
 

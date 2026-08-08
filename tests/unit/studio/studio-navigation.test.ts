@@ -21,7 +21,7 @@ describe("studio navigation projection", () => {
       canAccessWorkflowReview: false,
     });
 
-    expect(items.some((item) => item.href === "/review")).toBe(false);
+    expect(items.some((item) => item.href === "/studio/review")).toBe(false);
     expect(items.some((item) => item.href === "/studio/analytics")).toBe(true);
   });
 
@@ -31,7 +31,7 @@ describe("studio navigation projection", () => {
       canAccessWorkflowReview: true,
     });
 
-    expect(items.some((item) => item.href === "/review")).toBe(true);
+    expect(items.some((item) => item.href === "/studio/review")).toBe(true);
   });
 
   it("does not branch on role names", () => {

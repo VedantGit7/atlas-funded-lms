@@ -19,8 +19,7 @@ export const SUPER_LIVE_INSIGHT_COLUMN_OPTIONS = [
   { key: "attendance_rate", label: "Attendance %" },
 ] as const;
 
-export type SuperLiveInsightColumnKey =
-  (typeof SUPER_LIVE_INSIGHT_COLUMN_OPTIONS)[number]["key"];
+export type SuperLiveInsightColumnKey = (typeof SUPER_LIVE_INSIGHT_COLUMN_OPTIONS)[number]["key"];
 
 export type SuperLiveInsightItem = {
   id: string;
@@ -81,15 +80,15 @@ function buildQuery(params: Record<string, string | number | undefined>): string
 }
 
 export async function fetchSuperLiveInsightsRoster(filters?: {
-  q?: string;
-  status?: string;
-  startedFrom?: string;
-  startedTo?: string;
-  minAttended?: number;
-  sortBy?: string;
-  sortDir?: "asc" | "desc";
-  columns?: SuperLiveInsightColumnKey[];
-  page?: number;
+  q?: string | undefined;
+  status?: string | undefined;
+  startedFrom?: string | undefined;
+  startedTo?: string | undefined;
+  minAttended?: number | undefined;
+  sortBy?: string | undefined;
+  sortDir?: "asc" | "desc" | undefined;
+  columns?: SuperLiveInsightColumnKey[] | undefined;
+  page?: number | undefined;
 }) {
   return clientApi.get<{
     data: {

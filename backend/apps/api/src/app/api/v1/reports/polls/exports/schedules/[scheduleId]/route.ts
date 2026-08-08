@@ -22,7 +22,7 @@ export const PATCH = createTenantRoute<
   body: updatePollExportScheduleBodySchema,
   output: updatePollExportScheduleResponseSchema,
   handler: async ({ tx, ctx, params, input }) =>
-    updatePollExportSchedule(tx, ctx, params.scheduleId, input),
+    updatePollExportSchedule(tx, ctx, params["scheduleId"], input),
 });
 
 export const DELETE = createTenantRoute<
@@ -34,6 +34,5 @@ export const DELETE = createTenantRoute<
   params: pollExportScheduleParamsSchema,
   input: noBodySchema,
   output: deletePollExportScheduleResponseSchema,
-  handler: async ({ tx, ctx, params }) =>
-    deletePollExportSchedule(tx, ctx, params.scheduleId),
+  handler: async ({ tx, ctx, params }) => deletePollExportSchedule(tx, ctx, params["scheduleId"]),
 });

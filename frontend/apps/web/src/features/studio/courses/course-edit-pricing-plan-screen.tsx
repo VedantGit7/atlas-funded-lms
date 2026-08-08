@@ -23,7 +23,6 @@ import {
   type CoursePricingPlanItem,
   type CoursePricingPlanKind,
   type CoursePricingPlanStatus,
-  type CoursePricingPlanType,
 } from "./course-pricing-plan-settings";
 import {
   formatCoursePricingPlanError,
@@ -50,12 +49,7 @@ type CourseEditPricingPlanScreenProps = {
 
 type PricingPlanDraft = Omit<CoursePricingPlanItem, "id" | "position">;
 
-const STATUS_OPTIONS: CoursePricingPlanStatus[] = [
-  "DRAFT",
-  "PUBLISHED",
-  "UNPUBLISHED",
-  "ARCHIVED",
-];
+const STATUS_OPTIONS: CoursePricingPlanStatus[] = ["DRAFT", "PUBLISHED", "UNPUBLISHED", "ARCHIVED"];
 
 const ACCESSIBILITY_OPTIONS: CoursePricingPlanAccessibility[] = ["PUBLIC", "PRIVATE"];
 
@@ -137,7 +131,7 @@ type CourseEditStandardPricingPlanScreenProps = CourseEditPricingPlanScreenProps
 
 function CourseEditStandardPricingPlanScreen({
   course,
-  planId,
+  planId: _planId,
   disabled,
   onBack,
   onSaved,
@@ -145,6 +139,7 @@ function CourseEditStandardPricingPlanScreen({
   editingPlan,
   planKind,
 }: CourseEditStandardPricingPlanScreenProps) {
+  void _planId;
   const titleId = useId();
   const isEditing = Boolean(editingPlan);
   const selectedKind = editingPlan?.planKind ?? planKind ?? "ONE_TIME";
@@ -229,7 +224,11 @@ function CourseEditStandardPricingPlanScreen({
 
       if (isEditing && editingPlan) {
         nextItems = existingPlans.map((item) =>
-          item.id === editingPlan.id ? normalized : draft.isDefault ? { ...item, isDefault: false } : item,
+          item.id === editingPlan.id
+            ? normalized
+            : draft.isDefault
+              ? { ...item, isDefault: false }
+              : item,
         );
       } else {
         nextItems = [
@@ -292,7 +291,7 @@ function CourseEditStandardPricingPlanScreen({
 
           <div className="space-y-5 rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)] p-5">
             <div className="space-y-2">
-              <LessonSettingsFieldLabel htmlFor={titleId}>Title</LessonSettingsFieldLabel>
+              <LessonSettingsFieldLabel htmlFor={titleId} label="Title" />
               <input
                 id={titleId}
                 className={lessonInputClassName}
@@ -316,7 +315,9 @@ function CourseEditStandardPricingPlanScreen({
                       draft.type === tier
                         ? "bg-[var(--admin-surface)] text-[var(--admin-on-surface)] shadow-sm"
                         : "text-[var(--admin-on-surface-variant)]",
-                      disabled || saving || draft.planKind === "FREE" ? "cursor-not-allowed opacity-60" : "",
+                      disabled || saving || draft.planKind === "FREE"
+                        ? "cursor-not-allowed opacity-60"
+                        : "",
                     ].join(" ")}
                   >
                     <input
@@ -327,7 +328,10 @@ function CourseEditStandardPricingPlanScreen({
                       disabled={disabled || saving || draft.planKind === "FREE"}
                       className="sr-only"
                       onChange={() => {
-                        setDraft((current) => ({ ...current, type: tier as CoursePricingPlanType }));
+                        setDraft((current) => ({
+                          ...current,
+                          type: tier,
+                        }));
                       }}
                     />
                     {tier === "FREE" ? "Free" : "Paid"}
@@ -342,7 +346,7 @@ function CourseEditStandardPricingPlanScreen({
             {draft.type === "PAID" ? (
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <LessonSettingsFieldLabel htmlFor="pricing-plan-price">Price</LessonSettingsFieldLabel>
+                  <LessonSettingsFieldLabel htmlFor="pricing-plan-price" label="Price" />
                   <input
                     id="pricing-plan-price"
                     type="number"
@@ -355,7 +359,9 @@ function CourseEditStandardPricingPlanScreen({
                       const parsed = Number(event.target.value);
                       setDraft((current) => ({
                         ...current,
-                        priceCents: Number.isFinite(parsed) ? Math.max(0, Math.round(parsed * 100)) : 0,
+                        priceCents: Number.isFinite(parsed)
+                          ? Math.max(0, Math.round(parsed * 100))
+                          : 0,
                       }));
                     }}
                   />
@@ -372,9 +378,7 @@ function CourseEditStandardPricingPlanScreen({
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <LessonSettingsFieldLabel htmlFor="pricing-plan-validity">
-                  Validity (days)
-                </LessonSettingsFieldLabel>
+                <LessonSettingsFieldLabel htmlFor="pricing-plan-validity" label="Validity (days)" />
                 <input
                   id="pricing-plan-validity"
                   type="number"
@@ -391,7 +395,7 @@ function CourseEditStandardPricingPlanScreen({
                 />
               </div>
               <div className="space-y-2">
-                <LessonSettingsFieldLabel htmlFor="pricing-plan-location">Location</LessonSettingsFieldLabel>
+                <LessonSettingsFieldLabel htmlFor="pricing-plan-location" label="Location" />
                 <input
                   id="pricing-plan-location"
                   className={lessonInputClassName}
@@ -406,9 +410,7 @@ function CourseEditStandardPricingPlanScreen({
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <LessonSettingsFieldLabel htmlFor="pricing-plan-template">
-                  1:1 Template
-                </LessonSettingsFieldLabel>
+                <LessonSettingsFieldLabel htmlFor="pricing-plan-template" label="1:1 Template" />
                 <input
                   id="pricing-plan-template"
                   className={lessonInputClassName}
@@ -424,9 +426,7 @@ function CourseEditStandardPricingPlanScreen({
                 />
               </div>
               <div className="space-y-2">
-                <LessonSettingsFieldLabel htmlFor="pricing-plan-gateway">
-                  Payment Gateway
-                </LessonSettingsFieldLabel>
+                <LessonSettingsFieldLabel htmlFor="pricing-plan-gateway" label="Payment Gateway" />
                 <input
                   id="pricing-plan-gateway"
                   className={lessonInputClassName}
@@ -444,9 +444,10 @@ function CourseEditStandardPricingPlanScreen({
             </div>
 
             <div className="space-y-2">
-              <LessonSettingsFieldLabel htmlFor="pricing-plan-checkout">
-                Fast checkout link
-              </LessonSettingsFieldLabel>
+              <LessonSettingsFieldLabel
+                htmlFor="pricing-plan-checkout"
+                label="Fast checkout link"
+              />
               <input
                 id="pricing-plan-checkout"
                 className={lessonInputClassName}

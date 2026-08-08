@@ -16,8 +16,7 @@ export const EXPORTS_HISTORY_COLUMN_OPTIONS = [
   { key: "has_file", label: "Has file" },
 ] as const;
 
-export type ExportsHistoryColumnKey =
-  (typeof EXPORTS_HISTORY_COLUMN_OPTIONS)[number]["key"];
+export type ExportsHistoryColumnKey = (typeof EXPORTS_HISTORY_COLUMN_OPTIONS)[number]["key"];
 
 export type ExportsHistoryItem = {
   sourceType: "report_run" | "export_job";
@@ -74,14 +73,14 @@ function buildQuery(params: Record<string, string | number | undefined>): string
 }
 
 export async function fetchExportsHistory(filters?: {
-  sourceType?: string;
-  status?: string;
-  definitionKey?: string;
-  createdFrom?: string;
-  createdTo?: string;
-  q?: string;
-  columns?: ExportsHistoryColumnKey[];
-  page?: number;
+  sourceType?: string | undefined;
+  status?: string | undefined;
+  definitionKey?: string | undefined;
+  createdFrom?: string | undefined;
+  createdTo?: string | undefined;
+  q?: string | undefined;
+  columns?: ExportsHistoryColumnKey[] | undefined;
+  page?: number | undefined;
 }) {
   return clientApi.get<{
     data: {
@@ -106,14 +105,14 @@ export async function fetchExportsHistory(filters?: {
 }
 
 export async function exportExportsHistoryReport(body: {
-  sourceType?: string;
-  status?: string;
-  definitionKey?: string;
-  createdFrom?: string;
-  createdTo?: string;
-  q?: string;
-  columns?: string[];
-  emailDownloadLink?: boolean;
+  sourceType?: string | undefined;
+  status?: string | undefined;
+  definitionKey?: string | undefined;
+  createdFrom?: string | undefined;
+  createdTo?: string | undefined;
+  q?: string | undefined;
+  columns?: string[] | undefined;
+  emailDownloadLink?: boolean | undefined;
 }) {
   return clientApi.post<{ data: { runId: string; status: string; emailed: boolean } }>(
     "/api/v1/reports/exports/export",

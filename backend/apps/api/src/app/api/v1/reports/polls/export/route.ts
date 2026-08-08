@@ -5,7 +5,7 @@ import {
   exportPollRosterResponseSchema,
 } from "@atlas/domain/reports/polls-roster.dto";
 import { exportPollsRosterMetadata } from "@atlas/domain/reports/polls-roster.route-metadata";
-import { exportPollRoster } from "../../../../../../../server/reports/polls-roster-actions.service";
+import { exportPollRoster } from "@atlas/api-server/reports/polls-roster-actions.service";
 
 export const POST = createTenantRoute<
   z.output<typeof exportPollRosterBodySchema>,

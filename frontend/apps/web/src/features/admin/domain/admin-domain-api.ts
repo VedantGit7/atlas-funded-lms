@@ -137,7 +137,9 @@ export async function createPoll(body: {
 }
 
 export async function fetchPollResults(pollId: string) {
-  return clientApi.get<{ data: PollResults }>(`/api/v1/polls/${encodeURIComponent(pollId)}/results`);
+  return clientApi.get<{ data: PollResults }>(
+    `/api/v1/polls/${encodeURIComponent(pollId)}/results`,
+  );
 }
 
 export async function fetchLiveSessions() {
@@ -153,13 +155,15 @@ export async function createLiveSession(body: { title: string; scheduledAt?: str
 }
 
 export async function fetchLiveAttendance(sessionId: string) {
-  return clientApi.get<{ data: { items: Array<{ id: string; membershipId: string; status: string }> } }>(
-    `/api/v1/live/sessions/${encodeURIComponent(sessionId)}/attendance`,
-  );
+  return clientApi.get<{
+    data: { items: Array<{ id: string; membershipId: string; status: string }> };
+  }>(`/api/v1/live/sessions/${encodeURIComponent(sessionId)}/attendance`);
 }
 
 export async function fetchCustomFieldDefinitions() {
-  return clientApi.get<{ data: { items: CustomFieldDefinition[] } }>("/api/v1/custom-fields/definitions");
+  return clientApi.get<{ data: { items: CustomFieldDefinition[] } }>(
+    "/api/v1/custom-fields/definitions",
+  );
 }
 
 export async function createCustomFieldDefinition(body: {

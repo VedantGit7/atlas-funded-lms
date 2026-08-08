@@ -5,7 +5,7 @@ import {
   sendCustomFieldMessageResponseSchema,
 } from "@atlas/domain/reports/custom-field-roster.dto";
 import { mutateCustomFieldRosterMetadata } from "@atlas/domain/reports/custom-field-roster.route-metadata";
-import { sendCustomFieldRosterMessage } from "../../../../../../../server/reports/custom-field-roster-actions.service";
+import { sendCustomFieldRosterMessage } from "@atlas/api-server/reports/custom-field-roster-actions.service";
 
 export const POST = createTenantRoute<
   z.output<typeof sendCustomFieldMessageBodySchema>,

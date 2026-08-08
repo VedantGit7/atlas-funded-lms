@@ -29,10 +29,7 @@ import {
   type PaymentInvoiceColumnKey,
   type PaymentInvoiceItem,
 } from "./admin-payments-roster-api";
-import {
-  downloadReportExport,
-  pollReportRunUntilComplete,
-} from "./admin-reports-api";
+import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
 import { PaymentsReportTabs } from "./PaymentsReportTabs";
 
 const PAGE_SIZE_OPTIONS = [
@@ -239,7 +236,9 @@ export function AdminPaymentsInvoicesLedgerPage() {
       setRowMenuId(null);
     }
     document.addEventListener("click", onDocClick);
-    return () => document.removeEventListener("click", onDocClick);
+    return () => {
+      document.removeEventListener("click", onDocClick);
+    };
   }, []);
 
   function clearAllFilters() {
@@ -271,10 +270,10 @@ export function AdminPaymentsInvoicesLedgerPage() {
         emailDownloadLink: true,
       });
       const completed = await pollReportRunUntilComplete(response.data.runId);
-      if (completed.status !== "succeeded") {
+      if (completed.status !== "completed") {
         throw new Error(completed.errorMessage ?? "Export failed.");
       }
-      await downloadReportExport(completed.id);
+      await downloadReportExport(completed.id, "csv");
     } catch (exportError) {
       setError(
         exportError instanceof ClientApiError
@@ -406,7 +405,9 @@ export function AdminPaymentsInvoicesLedgerPage() {
               {columnsOpen ? (
                 <div
                   className="absolute right-0 top-[calc(100%+8px)] z-40 flex w-[min(420px,calc(100vw-2rem))] flex-col border border-[var(--admin-border)] bg-[var(--admin-surface-high)] shadow-2xl"
-                  onClick={(event) => event.stopPropagation()}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                  }}
                 >
                   <div className="flex items-center justify-between border-b border-[var(--admin-border)] bg-[var(--admin-surface)] p-4">
                     <h3 className="text-base font-semibold text-[var(--admin-on-surface)]">
@@ -415,7 +416,9 @@ export function AdminPaymentsInvoicesLedgerPage() {
                     <button
                       type="button"
                       className="text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-on-surface)]"
-                      onClick={() => setColumnsOpen(false)}
+                      onClick={() => {
+                        setColumnsOpen(false);
+                      }}
                     >
                       <X className="h-4 w-4" aria-hidden="true" />
                     </button>
@@ -451,7 +454,9 @@ export function AdminPaymentsInvoicesLedgerPage() {
                     <button
                       type="button"
                       className="font-mono text-xs font-bold uppercase tracking-wide text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-on-surface)]"
-                      onClick={() => setDraftColumns(DEFAULT_COLUMNS)}
+                      onClick={() => {
+                        setDraftColumns(DEFAULT_COLUMNS);
+                      }}
                     >
                       Reset
                     </button>
@@ -492,7 +497,9 @@ export function AdminPaymentsInvoicesLedgerPage() {
             <button
               type="button"
               className="inline-flex h-9 items-center gap-2 rounded bg-[var(--admin-primary)] px-4 font-mono text-xs font-bold uppercase tracking-wide text-[var(--admin-on-primary)]"
-              onClick={() => router.push("/admin/reports/payments/transactions")}
+              onClick={() => {
+                router.push("/admin/reports/payments/transactions");
+              }}
               title="Invoices are issued automatically when an order is paid"
             >
               <Receipt className="h-4 w-4" aria-hidden="true" />
@@ -514,7 +521,9 @@ export function AdminPaymentsInvoicesLedgerPage() {
                 className="w-full bg-transparent py-2 pl-8 pr-2 font-mono text-xs outline-none placeholder:text-[var(--admin-on-surface-variant)]"
                 placeholder="Invoice #, learner, email, or billing name"
                 value={search}
-                onChange={(event) => setSearch(event.target.value)}
+                onChange={(event) => {
+                  setSearch(event.target.value);
+                }}
                 onKeyDown={(event) => {
                   if (event.key === "Enter") applySearch();
                 }}
@@ -590,7 +599,10 @@ export function AdminPaymentsInvoicesLedgerPage() {
       ) : null}
 
       {loading ? (
-        <div className="border border-[var(--admin-border)] bg-[var(--admin-surface)]" aria-busy="true">
+        <div
+          className="border border-[var(--admin-border)] bg-[var(--admin-surface)]"
+          aria-busy="true"
+        >
           <div className="grid grid-cols-6 gap-4 border-b border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-4 py-3">
             {Array.from({ length: 6 }).map((_, index) => (
               <Shimmer key={index} className="h-3" />
@@ -670,7 +682,9 @@ export function AdminPaymentsInvoicesLedgerPage() {
                 <button
                   type="button"
                   className="inline-flex items-center gap-1 rounded px-3 py-1.5 font-mono text-xs text-[var(--admin-danger)] hover:bg-[color-mix(in_srgb,var(--admin-danger)_10%,transparent)]"
-                  onClick={() => setSelectedIds(new Set())}
+                  onClick={() => {
+                    setSelectedIds(new Set());
+                  }}
                 >
                   <X className="h-3.5 w-3.5" aria-hidden="true" />
                   Clear
@@ -770,7 +784,9 @@ export function AdminPaymentsInvoicesLedgerPage() {
                         <input
                           type="checkbox"
                           checked={selected}
-                          onChange={() => toggleSelect(invoice.id)}
+                          onChange={() => {
+                            toggleSelect(invoice.id);
+                          }}
                           className="h-4 w-4 accent-[var(--admin-primary)]"
                           aria-label={`Select ${invoice.invoiceNumber}`}
                         />
@@ -885,20 +901,23 @@ export function AdminPaymentsInvoicesLedgerPage() {
                           className="text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-on-surface)]"
                           onClick={(event) => {
                             event.stopPropagation();
-                            setRowMenuId((current) =>
-                              current === invoice.id ? null : invoice.id,
-                            );
+                            setRowMenuId((current) => (current === invoice.id ? null : invoice.id));
                           }}
                           aria-label="Row actions"
                         >
-                          <MoreVertical className="inline h-5 w-5 align-middle" aria-hidden="true" />
+                          <MoreVertical
+                            className="inline h-5 w-5 align-middle"
+                            aria-hidden="true"
+                          />
                         </button>
                         {rowMenuId === invoice.id ? (
                           <div className="absolute right-2 top-10 z-20 min-w-[180px] rounded border border-[var(--admin-border)] bg-[var(--admin-surface-high)] py-1 shadow-lg">
                             <Link
                               href={`/admin/reports/payments/invoices/${invoice.id}`}
                               className="block w-full px-3 py-2 text-left font-mono text-xs hover:bg-[var(--admin-surface)]"
-                              onClick={() => setRowMenuId(null)}
+                              onClick={() => {
+                                setRowMenuId(null);
+                              }}
                             >
                               Open preview
                             </Link>
@@ -916,9 +935,7 @@ export function AdminPaymentsInvoicesLedgerPage() {
                               className="block w-full px-3 py-2 text-left font-mono text-xs hover:bg-[var(--admin-surface)]"
                               onClick={() => {
                                 setRowMenuId(null);
-                                router.push(
-                                  `/admin/reports/payments/transactions/${invoice.id}`,
-                                );
+                                router.push(`/admin/reports/payments/transactions/${invoice.id}`);
                               }}
                             >
                               Open order
@@ -927,7 +944,9 @@ export function AdminPaymentsInvoicesLedgerPage() {
                               <Link
                                 href={`/admin/members/${invoice.membershipId}`}
                                 className="block w-full px-3 py-2 text-left font-mono text-xs hover:bg-[var(--admin-surface)]"
-                                onClick={() => setRowMenuId(null)}
+                                onClick={() => {
+                                  setRowMenuId(null);
+                                }}
                               >
                                 View learner
                               </Link>
@@ -993,7 +1012,9 @@ export function AdminPaymentsInvoicesLedgerPage() {
                   type="button"
                   className="p-1 text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-primary)] disabled:opacity-40"
                   disabled={page <= 1}
-                  onClick={() => setPage((current) => Math.max(1, current - 1))}
+                  onClick={() => {
+                    setPage((current) => Math.max(1, current - 1));
+                  }}
                   aria-label="Previous page"
                 >
                   <ChevronLeft className="h-5 w-5" aria-hidden="true" />
@@ -1002,7 +1023,9 @@ export function AdminPaymentsInvoicesLedgerPage() {
                   type="button"
                   className="p-1 text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-primary)] disabled:opacity-40"
                   disabled={totalPages === 0 || page >= totalPages}
-                  onClick={() => setPage((current) => current + 1)}
+                  onClick={() => {
+                    setPage((current) => current + 1);
+                  }}
                   aria-label="Next page"
                 >
                   <ChevronRight className="h-5 w-5" aria-hidden="true" />

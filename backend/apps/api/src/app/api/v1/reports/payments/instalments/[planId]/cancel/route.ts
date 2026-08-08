@@ -18,5 +18,5 @@ export const POST = createTenantRoute<
   params: paymentInstalmentPlanParamsSchema,
   output: cancelPaymentInstalmentPlanResponseSchema,
   handler: async ({ tx, ctx, input, params }) =>
-    cancelPaymentInstalmentPlan(tx, ctx, params.planId, input),
+    cancelPaymentInstalmentPlan(tx, ctx, params["planId"], input),
 });

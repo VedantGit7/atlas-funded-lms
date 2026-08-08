@@ -15,6 +15,5 @@ export const POST = createTenantRoute<
   metadata: mutateMarketingIntegrationsMetadata,
   params: paramsSchema,
   output: testMarketingIntegrationWebhookResponseSchema,
-  handler: async ({ tx, ctx, params }) =>
-    testMarketingIntegrationWebhook(tx, ctx, params.id),
+  handler: async ({ tx, ctx, params }) => testMarketingIntegrationWebhook(tx, ctx, params["id"]),
 });

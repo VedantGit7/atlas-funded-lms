@@ -10,7 +10,7 @@ describe("F5 wire gaps", () => {
       resolve(webRoot, "features/community/components/AdminSpacesEditor.tsx"),
       "utf8",
     );
-    expect(spacesEditor).toContain('clientApi.put');
+    expect(spacesEditor).toContain("clientApi.put");
     expect(spacesEditor).toContain('"/api/v1/spaces"');
 
     const itemApi = readFileSync(resolve(webRoot, "features/item-registry/api.ts"), "utf8");
@@ -21,8 +21,14 @@ describe("F5 wire gaps", () => {
       resolve(webRoot, "features/gamification/components/AdminGamificationEditor.tsx"),
       "utf8",
     );
-    expect(gamificationEditor).toContain("updateLeaderboard");
-    expect(gamificationEditor).toContain('"/api/v1/leaderboards"');
+    expect(gamificationEditor).toContain("LeaderboardConfigForm");
+
+    const leaderboardForm = readFileSync(
+      resolve(webRoot, "features/gamification/components/LeaderboardConfigForm.tsx"),
+      "utf8",
+    );
+    expect(leaderboardForm).toContain("clientApi.put");
+    expect(leaderboardForm).toContain('"/api/v1/leaderboards"');
 
     const workflowsAdmin = readFileSync(
       resolve(webRoot, "features/admin/workflows/WorkflowsAdmin.tsx"),
@@ -46,12 +52,19 @@ describe("F5 wire gaps", () => {
   });
 
   it("closes F5 backlog: multi-target review, roster depth, access settings, lazy builders", () => {
+    const reviewShared = readFileSync(
+      resolve(webRoot, "features/workflows/review-studio-shared.ts"),
+      "utf8",
+    );
+    expect(reviewShared).toContain("learning_path");
+    expect(reviewShared).toContain("assessment");
+
     const reviewClient = readFileSync(
       resolve(webRoot, "features/workflows/review-approvals-client.tsx"),
       "utf8",
     );
-    expect(reviewClient).toContain("learning_path");
-    expect(reviewClient).toContain("assessment");
+    expect(reviewClient).toContain("targetFilter");
+    expect(reviewClient).toContain("onTargetFilterChange");
 
     const roster = readFileSync(
       resolve(webRoot, "features/studio/learners/course-learner-roster.tsx"),

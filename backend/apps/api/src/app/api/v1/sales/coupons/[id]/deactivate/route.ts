@@ -16,5 +16,5 @@ export const POST = createTenantRoute<
   params: paramsSchema,
   body: noBodySchema,
   output: couponResponseSchema,
-  handler: async ({ tx, ctx, params }) => deactivateCoupon(tx, ctx, params.id),
+  handler: async ({ tx, ctx, params }) => deactivateCoupon(tx, ctx, params["id"]),
 });

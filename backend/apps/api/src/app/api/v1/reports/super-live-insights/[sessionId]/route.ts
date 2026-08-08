@@ -16,6 +16,5 @@ export const GET = createTenantRoute<
   input: noBodySchema,
   params: superLiveSessionIdParamsSchema,
   output: superLiveInsightDetailResponseSchema,
-  handler: async ({ tx, ctx, params }) =>
-    getSuperLiveInsightDetail(tx, ctx, params.sessionId),
+  handler: async ({ tx, ctx, params }) => getSuperLiveInsightDetail(tx, ctx, params["sessionId"]),
 });

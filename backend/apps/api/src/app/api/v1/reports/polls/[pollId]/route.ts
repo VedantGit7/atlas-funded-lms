@@ -16,5 +16,5 @@ export const GET = createTenantRoute<
   input: noBodySchema,
   params: pollIdParamsSchema,
   output: pollDetailResponseSchema,
-  handler: async ({ tx, ctx, params }) => getPollDetailedReport(tx, ctx, params.pollId),
+  handler: async ({ tx, ctx, params }) => getPollDetailedReport(tx, ctx, params["pollId"]),
 });

@@ -13,7 +13,11 @@ import { LessonProgressPanel } from "./lesson-progress-panel";
 import { LessonProgressProvider } from "./lesson-progress-context";
 import { MarkCompleteButton } from "./mark-complete-button";
 
-type LearnerLessonDetail = z.infer<typeof learnerLessonDetailSchema>;
+type LearnerLessonDetail = z.infer<typeof learnerLessonDetailSchema> & {
+  features?: { allowComments?: boolean; enableDownloads?: boolean; showTranscript?: boolean };
+  thumbnailUrl?: string | null;
+  transcriptText?: string | null;
+};
 
 type LessonPlayerShellProps = {
   courseTitle: string;

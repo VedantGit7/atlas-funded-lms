@@ -12,12 +12,7 @@ export type PollExportDataset =
 export type PollExportDelivery = "download" | "email_me" | "recipients";
 export type PollExportCadence = "daily" | "weekly" | "monthly";
 export type PollExportGrouping = "none" | "poll" | "live_session" | "option";
-export type PollExportStatus =
-  | "QUEUED"
-  | "RUNNING"
-  | "SUCCEEDED"
-  | "FAILED"
-  | "CANCELLED";
+export type PollExportStatus = "QUEUED" | "RUNNING" | "SUCCEEDED" | "FAILED" | "CANCELLED";
 
 export type PollExportColumn = {
   key: string;
@@ -87,24 +82,24 @@ export type CreatePollExportBody = {
   dataset: PollExportDataset;
   columns: string[];
   format: PollExportFormat;
-  pollIds?: string[];
-  liveSessionId?: string;
-  allPollsInSession?: boolean;
-  allPollsInRange?: boolean;
-  respondedFrom?: string;
-  respondedTo?: string;
-  grouping?: PollExportGrouping;
-  includeSubtotals?: boolean;
+  pollIds?: string[] | undefined;
+  liveSessionId?: string | undefined;
+  allPollsInSession?: boolean | undefined;
+  allPollsInRange?: boolean | undefined;
+  respondedFrom?: string | undefined;
+  respondedTo?: string | undefined;
+  grouping?: PollExportGrouping | undefined;
+  includeSubtotals?: boolean | undefined;
   useCurrentFilters: boolean;
-  filterSummary?: string;
+  filterSummary?: string | undefined;
   delivery: PollExportDelivery;
-  recipients?: string[];
-  webhookUrl?: string | null;
+  recipients?: string[] | undefined;
+  webhookUrl?: string | null | undefined;
   scheduleEnabled: boolean;
-  scheduleName?: string;
-  cadence?: PollExportCadence;
-  time?: string;
-  timezone?: string;
+  scheduleName?: string | undefined;
+  cadence?: PollExportCadence | undefined;
+  time?: string | undefined;
+  timezone?: string | undefined;
 };
 
 export async function fetchPollsExports() {
@@ -123,9 +118,7 @@ export async function createPollExport(body: CreatePollExportBody) {
 }
 
 export async function fetchPollExportRun(runId: string) {
-  return clientApi.get<{ data: PollExportHistoryItem }>(
-    `/api/v1/reports/polls/exports/${runId}`,
-  );
+  return clientApi.get<{ data: PollExportHistoryItem }>(`/api/v1/reports/polls/exports/${runId}`);
 }
 
 export async function retryPollExport(runId: string) {
@@ -139,7 +132,7 @@ export async function retryPollExport(runId: string) {
 
 export async function updatePollExportSchedule(
   scheduleId: string,
-  body: { isActive?: boolean; name?: string },
+  body: { isActive?: boolean | undefined; name?: string | undefined },
 ) {
   return clientApi.patch<{ data: PollExportScheduleItem }>(
     `/api/v1/reports/polls/exports/schedules/${scheduleId}`,

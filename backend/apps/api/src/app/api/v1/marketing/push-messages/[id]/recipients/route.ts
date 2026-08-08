@@ -15,5 +15,5 @@ export const GET = createTenantRoute<
   metadata: listPushMessagesMetadata,
   params: paramsSchema,
   output: pushMessageRecipientsResponseSchema,
-  handler: async ({ tx, ctx, params }) => listPushMessageRecipients(tx, ctx, params.id),
+  handler: async ({ tx, ctx, params }) => listPushMessageRecipients(tx, ctx, params["id"]),
 });

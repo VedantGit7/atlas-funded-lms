@@ -16,5 +16,5 @@ export const POST = createTenantRoute<
   params: deviceExportRunParamsSchema,
   input: noBodySchema,
   output: retryActiveDevicesExportResponseSchema,
-  handler: async ({ tx, ctx, params }) => retryActiveDevicesExport(tx, ctx, params.runId),
+  handler: async ({ tx, ctx, params }) => retryActiveDevicesExport(tx, ctx, params["runId"]),
 });

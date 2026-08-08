@@ -3,7 +3,7 @@ import { createPublicRouteHandler } from "@atlas/api";
 import { withGlobalDb } from "@atlas/db/global-db";
 import { withTenantTx } from "@atlas/db/with-tenant-tx";
 import { resolveTenantFromRequest } from "@atlas/tenancy";
-import { recordPublicMarketingCtaView } from "../../../../../../../server/marketing-cta/marketing-cta.service";
+import { recordPublicMarketingCtaView } from "@atlas/api-server/marketing-cta/marketing-cta.service";
 import { routeMetadata } from "./route.metadata";
 
 export const runtime = "nodejs";

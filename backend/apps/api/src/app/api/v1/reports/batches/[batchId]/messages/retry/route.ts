@@ -18,5 +18,5 @@ export const POST = createTenantRoute<
   params: batchIdParamsSchema,
   output: sendBatchMessageResponseSchema,
   handler: async ({ tx, ctx, input, params }) =>
-    retryBatchRosterMessage(tx, ctx, params.batchId, input.sendGroupId),
+    retryBatchRosterMessage(tx, ctx, params["batchId"], input.sendGroupId),
 });

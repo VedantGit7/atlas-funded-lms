@@ -64,6 +64,13 @@ import {
   type MarketingCampaignDto,
 } from "./campaigns-shared";
 
+function defined<T>(value: T, message = "Expected value to be defined"): NonNullable<T> {
+  if (value == null) {
+    throw new Error(message);
+  }
+  return value;
+}
+
 type CampaignResponse = { data: MarketingCampaignDto };
 type EstimateResponse = {
   data: { audienceType: CampaignAudienceType; audienceBatchId: string | null; totalCount: number };
@@ -165,14 +172,14 @@ export function CampaignBuilderPanel({ campaignId }: CampaignBuilderPanelProps) 
       setChannels(next.channels);
       setTouchpoints(next.touchpoints);
       if (next.touchpoints.length > 0 && !selectedTouchpointId) {
-        setSelectedTouchpointId(next.touchpoints[0].id);
+        setSelectedTouchpointId(defined(next.touchpoints[0]).id);
       }
       if (next.scheduledAt) {
         const date = new Date(next.scheduledAt);
         if (!Number.isNaN(date.getTime())) {
           const pad = (n: number) => String(n).padStart(2, "0");
           setScheduleLocal(
-            `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`,
+            `${String(date.getFullYear())}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`,
           );
           setDeliveryMode("schedule");
         }
@@ -186,28 +193,28 @@ export function CampaignBuilderPanel({ campaignId }: CampaignBuilderPanelProps) 
 
   useEffect(() => {
     if (!campaignId) return;
-    let cancelled = false;
+    const cancelled = { current: false };
     setLoading(true);
     void (async () => {
       try {
         const response = await clientApi.get<CampaignResponse>(
           `/api/v1/marketing/campaigns/${campaignId}`,
         );
-        if (cancelled) return;
+        if (cancelled.current) return;
         hydrateFromCampaign(response.data);
       } catch (caught) {
-        if (!cancelled) {
+        if (!cancelled.current) {
           toast.error(
             caught instanceof ClientApiError ? caught.message : "Could not load campaign.",
           );
           router.replace(CAMPAIGNS_HREF);
         }
       } finally {
-        if (!cancelled) setLoading(false);
+        if (!cancelled.current) setLoading(false);
       }
     })();
     return () => {
-      cancelled = true;
+      cancelled.current = true;
     };
   }, [campaignId, hydrateFromCampaign, router]);
 
@@ -223,23 +230,21 @@ export function CampaignBuilderPanel({ campaignId }: CampaignBuilderPanelProps) 
 
   useEffect(() => {
     if (step !== "audience") return;
-    let cancelled = false;
+    const cancelled = { current: false };
     setEstimateBusy(true);
     void clientApi
-      .get<EstimateResponse>(
-        "/api/v1/marketing/campaigns-audience-estimate?audienceType=ALL",
-      )
+      .get<EstimateResponse>("/api/v1/marketing/campaigns-audience-estimate?audienceType=ALL")
       .then((response) => {
-        if (!cancelled) setAllEstimate(response.data.totalCount);
+        if (!cancelled.current) setAllEstimate(response.data.totalCount);
       })
       .catch(() => {
-        if (!cancelled) setAllEstimate(null);
+        if (!cancelled.current) setAllEstimate(null);
       })
       .finally(() => {
-        if (!cancelled) setEstimateBusy(false);
+        if (!cancelled.current) setEstimateBusy(false);
       });
     return () => {
-      cancelled = true;
+      cancelled.current = true;
     };
   }, [step]);
 
@@ -248,23 +253,23 @@ export function CampaignBuilderPanel({ campaignId }: CampaignBuilderPanelProps) 
       setGroupEstimate(null);
       return;
     }
-    let cancelled = false;
+    const cancelled = { current: false };
     setEstimateBusy(true);
     void clientApi
       .get<EstimateResponse>(
         `/api/v1/marketing/campaigns-audience-estimate?audienceType=GROUP&audienceBatchId=${encodeURIComponent(batchId)}`,
       )
       .then((response) => {
-        if (!cancelled) setGroupEstimate(response.data.totalCount);
+        if (!cancelled.current) setGroupEstimate(response.data.totalCount);
       })
       .catch(() => {
-        if (!cancelled) setGroupEstimate(null);
+        if (!cancelled.current) setGroupEstimate(null);
       })
       .finally(() => {
-        if (!cancelled) setEstimateBusy(false);
+        if (!cancelled.current) setEstimateBusy(false);
       });
     return () => {
-      cancelled = true;
+      cancelled.current = true;
     };
   }, [step, audienceType, batchId]);
 
@@ -278,8 +283,7 @@ export function CampaignBuilderPanel({ campaignId }: CampaignBuilderPanelProps) 
     [batches, batchId],
   );
 
-  const activeEstimate =
-    audienceType === "ALL" ? allEstimate : audienceType === "GROUP" && batchId ? groupEstimate : null;
+  const activeEstimate = audienceType === "ALL" ? allEstimate : batchId ? groupEstimate : null;
 
   const selectedTouchpoint = useMemo(
     () => touchpoints.find((point) => point.id === selectedTouchpointId) ?? null,
@@ -293,24 +297,26 @@ export function CampaignBuilderPanel({ campaignId }: CampaignBuilderPanelProps) 
   const checklist = useMemo(() => {
     const hasTitle = title.trim().length > 0;
     const hasGoal = goal != null;
-    const hasAudience =
-      audienceType === "ALL" || (audienceType === "GROUP" && batchId.trim().length > 0);
+    const hasAudience = audienceType === "ALL" || batchId.trim().length > 0;
     const enabled = enabledChannelList(channels);
     const hasChannels = enabled.length > 0;
     const hasTouchpoints = touchpoints.length > 0;
     const touchpointsValid = touchpoints.every((point) => point.title.trim().length > 0);
     const scheduleValid =
       deliveryMode === "now" ||
-      (deliveryMode === "schedule" &&
-        scheduleLocal.trim().length > 0 &&
-        (localDateTimeToIso(scheduleLocal)?.valueOf() ?? 0) > Date.now());
+      (scheduleLocal.trim().length > 0 &&
+        (Date.parse(localDateTimeToIso(scheduleLocal) ?? "") || 0) > Date.now());
 
     return [
       { id: "title", label: "Campaign title", done: hasTitle },
       { id: "goal", label: "Campaign goal", done: hasGoal },
       { id: "audience", label: "Audience selected", done: hasAudience },
       { id: "channels", label: "At least one channel", done: hasChannels },
-      { id: "touchpoints", label: "Touchpoints configured", done: hasTouchpoints && touchpointsValid },
+      {
+        id: "touchpoints",
+        label: "Touchpoints configured",
+        done: hasTouchpoints && touchpointsValid,
+      },
       { id: "schedule", label: "Launch timing valid", done: scheduleValid },
     ];
   }, [title, goal, audienceType, batchId, channels, touchpoints, deliveryMode, scheduleLocal]);
@@ -452,9 +458,7 @@ export function CampaignBuilderPanel({ campaignId }: CampaignBuilderPanelProps) 
       await persistTouchpoints({ silent: true });
       return;
     }
-    if (step === "review") {
-      await persistTouchpoints({ silent: true });
-    }
+    await persistTouchpoints({ silent: true });
   }
 
   async function goNext() {
@@ -479,7 +483,7 @@ export function CampaignBuilderPanel({ campaignId }: CampaignBuilderPanelProps) 
 
   function goPrev() {
     if (stepIndex <= 0) return;
-    setStep(BUILDER_STEPS[stepIndex - 1].id);
+    setStep(defined(BUILDER_STEPS[stepIndex - 1]).id);
   }
 
   async function launchCampaign() {
@@ -510,7 +514,10 @@ export function CampaignBuilderPanel({ campaignId }: CampaignBuilderPanelProps) 
           ...(deliveryMode === "schedule" ? { scheduledAt } : {}),
         },
         `marketing-campaign-launch-${campaign.id}`,
-        { successMessage: deliveryMode === "schedule" ? "Campaign scheduled." : "Campaign launched." },
+        {
+          successMessage:
+            deliveryMode === "schedule" ? "Campaign scheduled." : "Campaign launched.",
+        },
       );
       hydrateFromCampaign(response.data, { keepStep: true });
       setLaunchSuccessOpen(true);
@@ -536,7 +543,7 @@ export function CampaignBuilderPanel({ campaignId }: CampaignBuilderPanelProps) 
     const lastDelay = touchpoints.reduce((max, point) => Math.max(max, point.delayDays), 0);
     const next: CampaignTouchpoint = {
       id: createLocalTouchpointId(),
-      channel: enabled[0],
+      channel: defined(enabled[0]),
       title: `Step ${String(touchpoints.length + 1)}`,
       subject: null,
       body: null,
@@ -603,25 +610,23 @@ export function CampaignBuilderPanel({ campaignId }: CampaignBuilderPanelProps) 
       </Link>
 
       <header className="space-y-2">
-        <h1 className={managePageTitleClassName}>
-          {campaign ? campaign.title : "New campaign"}
-        </h1>
+        <h1 className={managePageTitleClassName}>{campaign ? campaign.title : "New campaign"}</h1>
         <p className={`${managePageDescClassName} max-w-2xl`}>
           {readOnly
-            ? `This campaign is ${campaignStatusLabel(campaign!.status).toLowerCase()}. Review the plan or open analytics.`
+            ? `This campaign is ${campaignStatusLabel(defined(campaign).status).toLowerCase()}. Review the plan or open analytics.`
             : "Set a goal, choose an audience, plan touchpoints across channels, then launch or schedule."}
         </p>
-        {readOnly && campaign ? (
+        {readOnly ? (
           <div className="flex flex-wrap gap-3 pt-1">
             <Link
-              href={campaignAnalyticsHref(campaign.id)}
+              href={campaignAnalyticsHref(defined(campaign).id)}
               prefetch={false}
               className="text-sm font-semibold text-[var(--admin-primary)] hover:underline"
             >
               View analytics
             </Link>
             <Link
-              href={campaignHref(campaign.id)}
+              href={campaignHref(defined(campaign).id)}
               prefetch={false}
               className="text-sm font-semibold text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-primary)] hover:underline"
             >
@@ -702,9 +707,14 @@ export function CampaignBuilderPanel({ campaignId }: CampaignBuilderPanelProps) 
 
           <aside className="rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)] p-5">
             <div className="flex items-start gap-3">
-              <Target className="mt-0.5 h-5 w-5 shrink-0 text-[var(--admin-primary)]" aria-hidden="true" />
+              <Target
+                className="mt-0.5 h-5 w-5 shrink-0 text-[var(--admin-primary)]"
+                aria-hidden="true"
+              />
               <div>
-                <h3 className="text-[13px] font-bold text-[var(--admin-on-surface)]">Why goals matter</h3>
+                <h3 className="text-[13px] font-bold text-[var(--admin-on-surface)]">
+                  Why goals matter
+                </h3>
                 <p className="mt-2 text-[13px] leading-relaxed text-[var(--admin-on-surface-variant)]">
                   Clear goals help teams prioritize touchpoints and measure whether the campaign
                   addressed the right learner moment. Pick the outcome that best matches this
@@ -783,9 +793,7 @@ export function CampaignBuilderPanel({ campaignId }: CampaignBuilderPanelProps) 
                     value={batchId}
                     options={batchOptions}
                     disabled={
-                      readOnly ||
-                      Boolean(campaign?.audienceType) ||
-                      batchOptions.length === 0
+                      readOnly || Boolean(campaign?.audienceType) || batchOptions.length === 0
                     }
                     onChange={(value) => {
                       setBatchId(value);
@@ -800,7 +808,10 @@ export function CampaignBuilderPanel({ campaignId }: CampaignBuilderPanelProps) 
               ) : null}
 
               <div className="flex items-start gap-3 rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface-high)] p-3">
-                <Info className="mt-0.5 h-4 w-4 shrink-0 text-[var(--admin-primary)]" aria-hidden="true" />
+                <Info
+                  className="mt-0.5 h-4 w-4 shrink-0 text-[var(--admin-primary)]"
+                  aria-hidden="true"
+                />
                 <p className="text-[13px] leading-relaxed text-[var(--admin-on-surface-variant)]">
                   Reach estimates respect academy membership filters. Learners without email or push
                   opt-in may still be counted but will not receive every channel.
@@ -872,7 +883,10 @@ export function CampaignBuilderPanel({ campaignId }: CampaignBuilderPanelProps) 
                       />
                       <span>
                         <span className="flex items-center gap-2 text-[14px] font-bold text-[var(--admin-on-surface)]">
-                          <Icon className="h-4 w-4 text-[var(--admin-primary)]" aria-hidden="true" />
+                          <Icon
+                            className="h-4 w-4 text-[var(--admin-primary)]"
+                            aria-hidden="true"
+                          />
                           {entry.label}
                         </span>
                         <span className="mt-1 block text-[12px] text-[var(--admin-on-surface-variant)]">
@@ -1069,14 +1083,20 @@ export function CampaignBuilderPanel({ campaignId }: CampaignBuilderPanelProps) 
 
             <div className="space-y-3 rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)] p-5">
               <div className="flex items-start gap-3">
-                <Info className="mt-0.5 h-4 w-4 shrink-0 text-[var(--admin-primary)]" aria-hidden="true" />
+                <Info
+                  className="mt-0.5 h-4 w-4 shrink-0 text-[var(--admin-primary)]"
+                  aria-hidden="true"
+                />
                 <p className="text-[12px] leading-relaxed text-[var(--admin-on-surface-variant)]">
                   WhatsApp touchpoints are saved as planned steps. Finish template selection and
                   approval in Messenger before sending.
                 </p>
               </div>
               <div className="flex items-start gap-3">
-                <Info className="mt-0.5 h-4 w-4 shrink-0 text-[var(--admin-warning)]" aria-hidden="true" />
+                <Info
+                  className="mt-0.5 h-4 w-4 shrink-0 text-[var(--admin-warning)]"
+                  aria-hidden="true"
+                />
                 <p className="text-[12px] leading-relaxed text-[var(--admin-on-surface-variant)]">
                   Announcement steps with a delay cannot auto-schedule. Send them manually on the
                   planned day or launch as day-zero only.
@@ -1096,14 +1116,16 @@ export function CampaignBuilderPanel({ campaignId }: CampaignBuilderPanelProps) 
                 <p className="text-[16px] font-bold text-[var(--admin-on-surface)]">
                   {campaignGoalLabel(goal)}
                 </p>
-                <p className="mt-1 text-[13px] text-[var(--admin-on-surface-variant)]">{title.trim() || "Untitled"}</p>
+                <p className="mt-1 text-[13px] text-[var(--admin-on-surface-variant)]">
+                  {title.trim() || "Untitled"}
+                </p>
               </MessengerWizardCard>
               <MessengerWizardCard className="p-5">
                 <span className={META_LABEL_CLASS}>Audience</span>
                 <p className="text-[16px] font-bold text-[var(--admin-on-surface)]">
                   {audienceType === "ALL"
                     ? "All learners"
-                    : selectedBatch?.name ?? campaign?.audienceLabel ?? "Group"}
+                    : (selectedBatch?.name ?? campaign?.audienceLabel ?? "Group")}
                 </p>
                 <p className="mt-1 text-[13px] text-[var(--admin-on-surface-variant)]">
                   {campaign?.recipientCount
@@ -1119,14 +1141,17 @@ export function CampaignBuilderPanel({ campaignId }: CampaignBuilderPanelProps) 
                   {String(touchpoints.length)} steps
                 </p>
                 <p className="mt-1 text-[13px] text-[var(--admin-on-surface-variant)]">
-                  {enabledChannelList(channels).map(campaignChannelLabel).join(", ") || "No channels"}
+                  {enabledChannelList(channels).map(campaignChannelLabel).join(", ") ||
+                    "No channels"}
                 </p>
               </MessengerWizardCard>
             </div>
 
             <MessengerWizardCard>
               <div className="border-b border-[var(--admin-border)] px-6 py-5">
-                <h2 className="text-lg font-bold text-[var(--admin-on-surface)]">Sequence preview</h2>
+                <h2 className="text-lg font-bold text-[var(--admin-on-surface)]">
+                  Sequence preview
+                </h2>
               </div>
               <ol className="divide-y divide-[var(--admin-border)]">
                 {timelineTouchpoints.map((point, index) => (
@@ -1150,7 +1175,9 @@ export function CampaignBuilderPanel({ campaignId }: CampaignBuilderPanelProps) 
             {!readOnly ? (
               <MessengerWizardCard>
                 <div className="border-b border-[var(--admin-border)] px-6 py-5">
-                  <h2 className="text-lg font-bold text-[var(--admin-on-surface)]">Launch timing</h2>
+                  <h2 className="text-lg font-bold text-[var(--admin-on-surface)]">
+                    Launch timing
+                  </h2>
                 </div>
                 <div className="space-y-4 px-6 py-6">
                   <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -1167,7 +1194,10 @@ export function CampaignBuilderPanel({ campaignId }: CampaignBuilderPanelProps) 
                       ].join(" ")}
                     >
                       <span className="flex items-center gap-2 text-[14px] font-bold text-[var(--admin-on-surface)]">
-                        <Rocket className="h-4 w-4 text-[var(--admin-primary)]" aria-hidden="true" />
+                        <Rocket
+                          className="h-4 w-4 text-[var(--admin-primary)]"
+                          aria-hidden="true"
+                        />
                         Launch now
                       </span>
                       <p className="mt-2 text-[12px] text-[var(--admin-on-surface-variant)]">
@@ -1187,7 +1217,10 @@ export function CampaignBuilderPanel({ campaignId }: CampaignBuilderPanelProps) 
                       ].join(" ")}
                     >
                       <span className="flex items-center gap-2 text-[14px] font-bold text-[var(--admin-on-surface)]">
-                        <Calendar className="h-4 w-4 text-[var(--admin-primary)]" aria-hidden="true" />
+                        <Calendar
+                          className="h-4 w-4 text-[var(--admin-primary)]"
+                          aria-hidden="true"
+                        />
                         Schedule later
                       </span>
                       <p className="mt-2 text-[12px] text-[var(--admin-on-surface-variant)]">
@@ -1266,15 +1299,15 @@ export function CampaignBuilderPanel({ campaignId }: CampaignBuilderPanelProps) 
                 )}
                 {deliveryMode === "schedule" ? "Schedule campaign" : "Launch campaign"}
               </button>
-            ) : campaign ? (
+            ) : (
               <Link
-                href={campaignAnalyticsHref(campaign.id)}
+                href={campaignAnalyticsHref(defined(campaign).id)}
                 prefetch={false}
                 className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[var(--admin-primary)] px-4 py-3 text-[12px] font-bold uppercase tracking-[0.04em] text-[var(--admin-on-primary)] transition-opacity hover:opacity-90"
               >
                 View analytics
               </Link>
-            ) : null}
+            )}
           </aside>
         </div>
       ) : null}
@@ -1337,10 +1370,7 @@ export function CampaignBuilderPanel({ campaignId }: CampaignBuilderPanelProps) 
             className="w-full max-w-md rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)] p-6 shadow-lg"
           >
             <div className="flex flex-col items-center text-center">
-              <CheckCircle2
-                className="h-12 w-12 text-[var(--admin-success)]"
-                aria-hidden="true"
-              />
+              <CheckCircle2 className="h-12 w-12 text-[var(--admin-success)]" aria-hidden="true" />
               <h2
                 id="campaign-launch-success-title"
                 className="mt-4 text-lg font-semibold text-[var(--admin-on-surface)]"

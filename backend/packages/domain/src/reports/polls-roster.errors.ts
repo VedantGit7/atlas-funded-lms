@@ -18,13 +18,13 @@ export function liveSessionPollReportNotFound() {
 
 export function pollCompareInsufficient() {
   return new AtlasHttpError({
-    code: "VALIDATION_FAILED",
+    code: "VALIDATION_ERROR",
     status: 400,
     message: "Select between 2 and 4 polls to compare.",
   });
 }
 
-export function pollOptionNotFound() {
+export function pollRosterOptionNotFound() {
   return new AtlasHttpError({
     code: "PERMISSION_DENIED",
     status: 404,

@@ -69,7 +69,6 @@ export type SalesProductsSortBy =
   | "discount_cents"
   | "net_cents";
 
-
 export type SalesPurchaserItem = {
   membershipId: string;
   learnerName: string | null;
@@ -522,10 +521,10 @@ export function formatMoney(cents: number, currency = "INR"): string {
 }
 
 export async function fetchSalesMarketingOverview(filters: {
-  paidFrom?: string;
-  paidTo?: string;
-  currency?: string;
-  grain?: SalesMarketingOverviewGrain;
+  paidFrom?: string | undefined;
+  paidTo?: string | undefined;
+  currency?: string | undefined;
+  grain?: SalesMarketingOverviewGrain | undefined;
 }) {
   return clientApi.get<{ data: SalesMarketingOverview }>(
     `/api/v1/reports/sales-marketing/overview${buildQuery({
@@ -538,15 +537,15 @@ export async function fetchSalesMarketingOverview(filters: {
 }
 
 export async function fetchSalesProducts(filters?: {
-  q?: string;
-  paidFrom?: string;
-  paidTo?: string;
-  productType?: string;
-  currency?: string;
-  sortBy?: SalesProductsSortBy;
-  sortDir?: "asc" | "desc";
-  page?: number;
-  limit?: number;
+  q?: string | undefined;
+  paidFrom?: string | undefined;
+  paidTo?: string | undefined;
+  productType?: string | undefined;
+  currency?: string | undefined;
+  sortBy?: SalesProductsSortBy | undefined;
+  sortDir?: "asc" | "desc" | undefined;
+  page?: number | undefined;
+  limit?: number | undefined;
 }) {
   return clientApi.get<{ data: SalesProductsList }>(
     `/api/v1/reports/sales-marketing/sales${buildQuery({
@@ -566,17 +565,17 @@ export async function fetchSalesProducts(filters?: {
 export async function fetchSalesPurchasers(
   courseId: string,
   filters: {
-    learnerName?: string;
-    email?: string;
-    q?: string;
-    enrolledType?: string;
-    purchasedFrom?: string;
-    purchasedTo?: string;
-    sortBy?: string;
-    sortDir?: "asc" | "desc";
-    columns?: SalesPurchaserColumnKey[];
-    page?: number;
-    limit?: number;
+    learnerName?: string | undefined;
+    email?: string | undefined;
+    q?: string | undefined;
+    enrolledType?: string | undefined;
+    purchasedFrom?: string | undefined;
+    purchasedTo?: string | undefined;
+    sortBy?: string | undefined;
+    sortDir?: "asc" | "desc" | undefined;
+    columns?: SalesPurchaserColumnKey[] | undefined;
+    page?: number | undefined;
+    limit?: number | undefined;
   },
 ) {
   return clientApi.get<{ data: SalesPurchasersList }>(
@@ -597,14 +596,14 @@ export async function fetchSalesPurchasers(
 }
 
 export async function fetchSalesCoupons(filters?: {
-  q?: string;
-  status?: string;
-  discountType?: string;
-  view?: CouponsListView;
-  sortBy?: CouponsListSortBy;
-  sortDir?: "asc" | "desc";
-  page?: number;
-  limit?: number;
+  q?: string | undefined;
+  status?: string | undefined;
+  discountType?: string | undefined;
+  view?: CouponsListView | undefined;
+  sortBy?: CouponsListSortBy | undefined;
+  sortDir?: "asc" | "desc" | undefined;
+  page?: number | undefined;
+  limit?: number | undefined;
 }) {
   return clientApi.get<{ data: CouponsList }>(
     `/api/v1/reports/sales-marketing/coupons${buildQuery({
@@ -623,17 +622,17 @@ export async function fetchSalesCoupons(filters?: {
 export async function fetchCouponRedemptions(
   couponId: string,
   filters?: {
-    learnerName?: string;
-    q?: string;
-    courseId?: string;
-    appliedFrom?: string;
-    appliedTo?: string;
-    minFinalAmountCents?: number;
-    maxFinalAmountCents?: number;
-    sortBy?: CouponRedemptionsSortBy;
-    sortDir?: "asc" | "desc";
-    page?: number;
-    limit?: number;
+    learnerName?: string | undefined;
+    q?: string | undefined;
+    courseId?: string | undefined;
+    appliedFrom?: string | undefined;
+    appliedTo?: string | undefined;
+    minFinalAmountCents?: number | undefined;
+    maxFinalAmountCents?: number | undefined;
+    sortBy?: CouponRedemptionsSortBy | undefined;
+    sortDir?: "asc" | "desc" | undefined;
+    page?: number | undefined;
+    limit?: number | undefined;
   },
 ) {
   return clientApi.get<{ data: CouponRedemptionsPayload }>(
@@ -654,17 +653,17 @@ export async function fetchCouponRedemptions(
 }
 
 export async function fetchReferralWallet(filters?: {
-  q?: string;
-  signedUpFrom?: string;
-  signedUpTo?: string;
-  activityFrom?: string;
-  activityTo?: string;
-  minCreditEarned?: number;
-  minWalletBalance?: number;
-  sortBy?: string;
-  sortDir?: "asc" | "desc";
-  page?: number;
-  limit?: number;
+  q?: string | undefined;
+  signedUpFrom?: string | undefined;
+  signedUpTo?: string | undefined;
+  activityFrom?: string | undefined;
+  activityTo?: string | undefined;
+  minCreditEarned?: number | undefined;
+  minWalletBalance?: number | undefined;
+  sortBy?: string | undefined;
+  sortDir?: "asc" | "desc" | undefined;
+  page?: number | undefined;
+  limit?: number | undefined;
 }) {
   return clientApi.get<{ data: ReferralWalletPayload }>(
     `/api/v1/reports/sales-marketing/referral-wallet${buildQuery({
@@ -685,7 +684,7 @@ export async function fetchReferralWallet(filters?: {
 
 export async function fetchReferredLearners(
   membershipId: string,
-  filters?: { page?: number; limit?: number },
+  filters?: { page?: number | undefined; limit?: number | undefined },
 ) {
   return clientApi.get<{ data: ReferredLearnersPayload }>(
     `/api/v1/reports/sales-marketing/referral-wallet/${membershipId}/referred${buildQuery({
@@ -696,15 +695,15 @@ export async function fetchReferredLearners(
 }
 
 export async function fetchAffiliateProducts(filters?: {
-  q?: string;
-  enabled?: "all" | "enabled" | "disabled";
-  commissionBand?: "any" | "below_10" | "10_20" | "above_20";
-  activityFrom?: string;
-  activityTo?: string;
-  sortBy?: string;
-  sortDir?: "asc" | "desc";
-  page?: number;
-  limit?: number;
+  q?: string | undefined;
+  enabled?: "all" | "enabled" | "disabled" | undefined;
+  commissionBand?: "any" | "below_10" | "10_20" | "above_20" | undefined;
+  activityFrom?: string | undefined;
+  activityTo?: string | undefined;
+  sortBy?: string | undefined;
+  sortDir?: "asc" | "desc" | undefined;
+  page?: number | undefined;
+  limit?: number | undefined;
 }) {
   return clientApi.get<{ data: AffiliateProductsPayload }>(
     `/api/v1/reports/sales-marketing/affiliate-products${buildQuery({
@@ -724,10 +723,10 @@ export async function fetchAffiliateProducts(filters?: {
 export async function upsertAffiliateProduct(body: {
   courseId: string;
   enabled: boolean;
-  standardCommissionPct?: number | null;
-  standardDiscountPct?: number | null;
-  premiumCommissionPct?: number | null;
-  premiumDiscountPct?: number | null;
+  standardCommissionPct?: number | null | undefined;
+  standardDiscountPct?: number | null | undefined;
+  premiumCommissionPct?: number | null | undefined;
+  premiumDiscountPct?: number | null | undefined;
 }) {
   return clientApi.put<{
     data: {
@@ -748,19 +747,19 @@ export async function upsertAffiliateProduct(body: {
 }
 
 export async function fetchAffiliates(filters?: {
-  q?: string;
-  status?: string;
-  tier?: string;
-  unpaidBand?: string;
-  view?: string;
-  activityFrom?: string;
-  activityTo?: string;
-  signedUpFrom?: string;
-  signedUpTo?: string;
-  sortBy?: string;
-  sortDir?: "asc" | "desc";
-  page?: number;
-  limit?: number;
+  q?: string | undefined;
+  status?: string | undefined;
+  tier?: string | undefined;
+  unpaidBand?: string | undefined;
+  view?: string | undefined;
+  activityFrom?: string | undefined;
+  activityTo?: string | undefined;
+  signedUpFrom?: string | undefined;
+  signedUpTo?: string | undefined;
+  sortBy?: string | undefined;
+  sortDir?: "asc" | "desc" | undefined;
+  page?: number | undefined;
+  limit?: number | undefined;
 }) {
   return clientApi.get<{ data: AffiliatesPayload }>(
     `/api/v1/reports/sales-marketing/affiliates${buildQuery({
@@ -783,7 +782,7 @@ export async function fetchAffiliates(filters?: {
 
 export async function fetchAffiliateDetail(
   affiliateId: string,
-  filters?: { ordersLimit?: number; payoutsLimit?: number },
+  filters?: { ordersLimit?: number | undefined; payoutsLimit?: number | undefined },
 ) {
   return clientApi.get<{ data: AffiliateDetailPayload }>(
     `/api/v1/reports/sales-marketing/affiliates/${affiliateId}${buildQuery({
@@ -812,7 +811,7 @@ export async function reviewAffiliateRequest(requestId: string, action: "approve
 
 export async function updateAffiliatePartner(
   affiliateId: string,
-  body: { status?: "ACTIVE" | "INACTIVE"; tier?: "STANDARD" | "PREMIUM" },
+  body: { status?: "ACTIVE" | "INACTIVE" | undefined; tier?: "STANDARD" | "PREMIUM" | undefined },
 ) {
   return clientApi.put(
     `/api/v1/sales/affiliates/partners/${affiliateId}`,
@@ -831,14 +830,11 @@ export async function updateAffiliatePartner(
 
 export async function recordAffiliatePayout(body: {
   affiliateId: string;
-  note?: string | null;
+  note?: string | null | undefined;
 }) {
-  return clientApi.post(
-    "/api/v1/sales/affiliates/payouts",
-    body,
-    "affiliate-payout-record",
-    { successMessage: "Payout recorded." },
-  );
+  return clientApi.post("/api/v1/sales/affiliates/payouts", body, "affiliate-payout-record", {
+    successMessage: "Payout recorded.",
+  });
 }
 
 export async function exportSalesMarketingReport(body: Record<string, unknown>) {

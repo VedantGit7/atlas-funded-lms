@@ -1,7 +1,7 @@
 type AnalyticsMetricCardProps = {
   label: string;
   value: number;
-  description?: string;
+  description?: string | undefined;
 };
 
 export function AnalyticsMetricCard({ label, value, description }: AnalyticsMetricCardProps) {

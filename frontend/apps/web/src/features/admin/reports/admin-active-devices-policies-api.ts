@@ -77,7 +77,7 @@ export async function createDevicePolicyOverride(body: {
   scopeId: string;
   devicesAllowed: number;
   onLimitReached: DevicePolicyOverrideOnLimit;
-  expiresAt?: string | null;
+  expiresAt?: string | null | undefined;
 }) {
   return clientApi.post<{ data: DevicePolicyOverride }>(
     "/api/v1/reports/active-devices/policies/overrides",
@@ -92,7 +92,7 @@ export async function updateDevicePolicyOverride(
   body: {
     devicesAllowed: number;
     onLimitReached: DevicePolicyOverrideOnLimit;
-    expiresAt?: string | null;
+    expiresAt?: string | null | undefined;
   },
 ) {
   return clientApi.patch<{ data: DevicePolicyOverride }>(

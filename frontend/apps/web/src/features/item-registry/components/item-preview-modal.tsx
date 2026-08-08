@@ -1,15 +1,7 @@
 "use client";
 
 import { useEffect, useId, useMemo, useRef, useState } from "react";
-import {
-  CheckCircle2,
-  Eye,
-  Info,
-  RotateCcw,
-  Sparkles,
-  X,
-  XCircle,
-} from "lucide-react";
+import { CheckCircle2, Eye, Info, RotateCcw, Sparkles, X, XCircle } from "lucide-react";
 import {
   buildPreviewOptions,
   parseAnswerKeyText,
@@ -64,11 +56,7 @@ function FeedbackBanner({ result }: { result: PreviewScoreResult }) {
           : "border-[var(--admin-border)] bg-[var(--admin-surface-high)] text-[var(--admin-on-surface-variant)]";
 
   const Icon =
-    result.kind === "correct"
-      ? CheckCircle2
-      : result.kind === "incorrect"
-        ? XCircle
-        : Info;
+    result.kind === "correct" ? CheckCircle2 : result.kind === "incorrect" ? XCircle : Info;
 
   return (
     <div className={`flex items-start gap-2.5 rounded-xl border px-4 py-3 ${styles}`}>
@@ -121,7 +109,9 @@ export function ItemPreviewModal({
   const TypeIcon = typeVisual.icon;
   const canAutoCheck = supportsAutoCheck(itemTypeKey);
   const isManual = isManualGradingType(itemTypeKey);
-  const answerExplanation = parsedAnswerKey.ok ? readAnswerKeyExplanation(parsedAnswerKey.value) : "";
+  const answerExplanation = parsedAnswerKey.ok
+    ? readAnswerKeyExplanation(parsedAnswerKey.value)
+    : "";
 
   function resetPreview() {
     setCurrentWire(null);
@@ -262,7 +252,9 @@ export function ItemPreviewModal({
             <p className="mt-3 text-center text-xs text-[var(--admin-on-surface-variant)]">
               Answer key expects{" "}
               <span className="font-semibold text-[var(--admin-on-surface)]">
-                {parsedAnswerKey.value["direction"] === "left" ? "Unknown (swipe left)" : "Known (swipe right)"}
+                {parsedAnswerKey.value["direction"] === "left"
+                  ? "Unknown (swipe left)"
+                  : "Known (swipe right)"}
               </span>
             </p>
           ) : null}
@@ -274,7 +266,9 @@ export function ItemPreviewModal({
           {result ? (
             <div className="mt-4 motion-safe:animate-[admin-banner-in_0.22s_ease-out]">
               <FeedbackBanner result={result} />
-              {answerExplanation.trim() ? <ExplanationPanel text={answerExplanation.trim()} /> : null}
+              {answerExplanation.trim() ? (
+                <ExplanationPanel text={answerExplanation.trim()} />
+              ) : null}
             </div>
           ) : null}
 
@@ -309,7 +303,13 @@ export function ItemPreviewModal({
               disabled={!parsedAnswerKey.ok || (itemTypeKey === "swipe" && !currentWire)}
               className={`${primaryButtonClassName} px-5 py-2.5 motion-safe:active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50`}
             >
-              {isManual ? "Review grading flow" : canAutoCheck ? (itemTypeKey === "swipe" ? "Check swipe" : "Check answer") : "Validate preview"}
+              {isManual
+                ? "Review grading flow"
+                : canAutoCheck
+                  ? itemTypeKey === "swipe"
+                    ? "Check swipe"
+                    : "Check answer"
+                  : "Validate preview"}
             </button>
           </div>
         </div>

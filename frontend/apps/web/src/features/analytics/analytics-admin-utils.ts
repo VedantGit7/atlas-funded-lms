@@ -32,7 +32,10 @@ export const FUNNEL_STAGE_ORDER = [
   "community_post_created",
 ] as const;
 
-export const COMMUNITY_ROLLUP_KEYS = new Set(["community_posts_created", "moderation_cases_opened"]);
+export const COMMUNITY_ROLLUP_KEYS = new Set([
+  "community_posts_created",
+  "moderation_cases_opened",
+]);
 
 export const DRILL_DOWN_ROLLUP_ALIASES: Record<string, string> = {
   pass_rate: "assessments_passed",
@@ -144,7 +147,7 @@ export function buildHeroMetrics(
     return [
       buildHero("community_posts_created", "Community posts", totals, tabMetrics),
       buildHero("moderation_cases_opened", "Moderation cases", totals, tabMetrics),
-    ].filter(Boolean) as HeroMetric[];
+    ].filter(Boolean);
   }
 
   if (tab === "assessment") {
@@ -158,13 +161,15 @@ export function buildHeroMetrics(
         key: "pass_rate",
         label: "Pass rate",
         value: rate,
-        displayValue: submitted > 0 ? `${rate}%` : "—",
+        displayValue: submitted > 0 ? `${String(rate)}%` : "—",
         deltaPercent: null,
         tone: rate >= 70 ? "up" : rate >= 50 ? "neutral" : "down",
-        sparkline: dailySeries(tabMetrics, "assessments_passed").map((count, index, arr) => {
-          const sub = dailySeries(tabMetrics, "assessments_submitted")[index] ?? 0;
-          return sub > 0 ? Math.round((count / sub) * 100) : 0;
-        }).slice(-5),
+        sparkline: dailySeries(tabMetrics, "assessments_passed")
+          .map((count, index) => {
+            const sub = dailySeries(tabMetrics, "assessments_submitted")[index] ?? 0;
+            return sub > 0 ? Math.round((count / sub) * 100) : 0;
+          })
+          .slice(-5),
       },
     ];
   }
@@ -180,7 +185,7 @@ export function buildHeroMetrics(
       key: "completion_rate",
       label: "Completion rate",
       value: completionRate,
-      displayValue: submitted > 0 ? `${completionRate}%` : "—",
+      displayValue: submitted > 0 ? `${String(completionRate)}%` : "—",
       deltaPercent: null,
       tone: completionRate >= 60 ? "up" : completionRate >= 40 ? "neutral" : "down",
       sparkline: [],
@@ -193,7 +198,7 @@ function buildHero(
   label: string,
   totals: Map<string, number>,
   tabMetrics: AnalyticsDashboardResponse["data"]["metrics"],
-): HeroMetric | null {
+): HeroMetric {
   const value = totals.get(key) ?? 0;
   const series = dailySeries(tabMetrics, key);
   const deltaPercent = computePeriodDelta(series);
@@ -259,7 +264,7 @@ export function buildFunnelStages(
   if (stages.length === 0) return [];
   const maxCount = Math.max(...stages.map((stage) => stage.count), 1);
   return stages.map((stage, index) => {
-    const previous = index > 0 ? stages[index - 1]?.count ?? 0 : null;
+    const previous = index > 0 ? (stages[index - 1]?.count ?? 0) : null;
     const dropPercent =
       previous != null && previous > 0
         ? Math.round(((previous - stage.count) / previous) * 1000) / 10

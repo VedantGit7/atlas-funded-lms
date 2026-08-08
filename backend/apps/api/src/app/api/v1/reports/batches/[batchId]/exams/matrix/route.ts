@@ -18,5 +18,5 @@ export const GET = createTenantRoute<
   params: batchIdParamsSchema,
   output: batchExamsMatrixResponseSchema,
   handler: async ({ tx, ctx, input, params }) =>
-    getBatchExamsMatrix(tx, ctx, params.batchId, input),
+    getBatchExamsMatrix(tx, ctx, params["batchId"], input),
 });

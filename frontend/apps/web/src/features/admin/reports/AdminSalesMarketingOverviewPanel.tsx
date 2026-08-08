@@ -23,10 +23,14 @@ import {
   type SalesMarketingOverview,
   type SalesMarketingOverviewGrain,
 } from "./admin-sales-marketing-roster-api";
-import {
-  downloadReportExport,
-  pollReportRunUntilComplete,
-} from "./admin-reports-api";
+import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
+
+function defined<T>(value: T, message = "Expected value to be defined"): NonNullable<T> {
+  if (value == null) {
+    throw new Error(message);
+  }
+  return value;
+}
 
 type Props = {
   onNavigateTab: (tab: "sales" | "coupons" | "referral-wallet" | "affiliates" | "exports") => void;
@@ -97,8 +101,8 @@ function productTypeLabel(type: string): string {
 function initials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
   if (parts.length === 0) return "?";
-  if (parts.length === 1) return parts[0]!.slice(0, 2).toUpperCase();
-  return `${parts[0]![0] ?? ""}${parts[1]![0] ?? ""}`.toUpperCase();
+  if (parts.length === 1) return defined(parts[0]).slice(0, 2).toUpperCase();
+  return `${defined(parts[0])[0] ?? ""}${defined(parts[1])[0] ?? ""}`.toUpperCase();
 }
 
 function defaultDateRange(): { from: string; to: string } {
@@ -115,10 +119,10 @@ function sparklinePath(points: number[]): string {
     .map((value, index) => {
       const x = points.length === 1 ? 50 : index * step;
       const y = 28 - (value / max) * 22;
-      return `${index === 0 ? "L" : "L"}${x},${y}`;
+      return `${index === 0 ? "L" : "L"}${String(x)},${String(y)}`;
     })
     .join(" ");
-  return `M0,30 L0,${28 - (points[0]! / max) * 22} ${line} L100,30 Z`;
+  return `M0,30 L0,${String(28 - (defined(points[0]) / max) * 22)} ${line} L100,30 Z`;
 }
 
 function Shimmer({ className }: { className?: string }) {
@@ -136,7 +140,11 @@ function Shimmer({ className }: { className?: string }) {
 
 function OverviewLoadingSkeleton() {
   return (
-    <div className="flex flex-col gap-8" aria-busy="true" aria-label="Loading sales and marketing overview">
+    <div
+      className="flex flex-col gap-8"
+      aria-busy="true"
+      aria-label="Loading sales and marketing overview"
+    >
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
         <div className="space-y-2">
           <Shimmer className="h-8 w-56" />
@@ -180,7 +188,7 @@ function OverviewLoadingSkeleton() {
                 <div
                   key={index}
                   className="w-8 rounded-t bg-[var(--admin-surface-high)]"
-                  style={{ height: `${height}%` }}
+                  style={{ height: `${String(height)}%` }}
                 />
               ))}
             </div>
@@ -257,7 +265,9 @@ function AttributionChart({
                     ? "bg-[var(--admin-surface)] text-[var(--admin-on-surface)] shadow-sm"
                     : "text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-on-surface)]",
                 ].join(" ")}
-                onClick={() => onGrainChange(option.value)}
+                onClick={() => {
+                  onGrainChange(option.value);
+                }}
               >
                 {option.label}
               </button>
@@ -293,11 +303,11 @@ function AttributionChart({
               <div
                 key={point.date}
                 className="group ml-1 flex h-full min-w-0 flex-1 flex-col justify-end first:ml-8"
-                title={`${formatShortDate(point.date)}: ${formatCompact(point.totalCents)} (${point.orderCount} orders)`}
+                title={`${formatShortDate(point.date)}: ${formatCompact(point.totalCents)} (${String(point.orderCount)} orders)`}
               >
                 <div
                   className="flex w-full max-w-8 flex-col justify-end self-center overflow-hidden transition-opacity group-hover:opacity-80"
-                  style={{ height: `${heightPct}%` }}
+                  style={{ height: `${String(heightPct)}%` }}
                 >
                   {[...CHANNEL_STACK].reverse().map((channel) => {
                     const value = point[channel.key];
@@ -308,7 +318,7 @@ function AttributionChart({
                         className="w-full"
                         style={{
                           backgroundColor: channel.color,
-                          height: `${(value / Math.max(point.totalCents, 1)) * 100}%`,
+                          height: `${String((value / Math.max(point.totalCents, 1)) * 100)}%`,
                         }}
                       />
                     );
@@ -376,7 +386,9 @@ export function AdminSalesMarketingOverviewPanel({ onNavigateTab }: Props) {
       }
     }
     document.addEventListener("mousedown", onPointerDown);
-    return () => document.removeEventListener("mousedown", onPointerDown);
+    return () => {
+      document.removeEventListener("mousedown", onPointerDown);
+    };
   }, [actionsOpen]);
 
   async function handleExport() {
@@ -455,12 +467,17 @@ export function AdminSalesMarketingOverviewPanel({ onNavigateTab }: Props) {
 
         <div className="flex flex-wrap items-center gap-2">
           <label className="inline-flex h-9 items-center gap-2 rounded border border-[var(--admin-outline)] bg-[var(--admin-surface)] px-3 text-xs text-[var(--admin-on-surface)] transition-colors hover:bg-[var(--admin-surface-high)]">
-            <CalendarDays className="h-4 w-4 text-[var(--admin-on-surface-variant)]" aria-hidden="true" />
+            <CalendarDays
+              className="h-4 w-4 text-[var(--admin-on-surface-variant)]"
+              aria-hidden="true"
+            />
             <span className="sr-only">From</span>
             <input
               type="date"
               value={paidFrom}
-              onChange={(event) => setPaidFrom(event.target.value)}
+              onChange={(event) => {
+                setPaidFrom(event.target.value);
+              }}
               className="bg-transparent outline-none"
             />
             <span className="text-[var(--admin-on-surface-variant)]">–</span>
@@ -468,7 +485,9 @@ export function AdminSalesMarketingOverviewPanel({ onNavigateTab }: Props) {
             <input
               type="date"
               value={paidTo}
-              onChange={(event) => setPaidTo(event.target.value)}
+              onChange={(event) => {
+                setPaidTo(event.target.value);
+              }}
               className="bg-transparent outline-none"
             />
           </label>
@@ -496,7 +515,9 @@ export function AdminSalesMarketingOverviewPanel({ onNavigateTab }: Props) {
             <button
               type="button"
               className="inline-flex h-9 items-center gap-1 rounded bg-[var(--admin-primary-strong)] px-4 text-xs font-medium text-[var(--admin-on-primary)] transition-colors hover:bg-[var(--admin-primary)] active:translate-y-px"
-              onClick={() => setActionsOpen((open) => !open)}
+              onClick={() => {
+                setActionsOpen((open) => !open);
+              }}
               aria-expanded={actionsOpen}
             >
               Cohort actions
@@ -544,7 +565,10 @@ export function AdminSalesMarketingOverviewPanel({ onNavigateTab }: Props) {
         <div className="flex flex-col gap-6">
           <div className="flex items-center justify-between gap-4 rounded border border-[color-mix(in_srgb,var(--admin-danger)_35%,var(--admin-border))] bg-[color-mix(in_srgb,var(--admin-danger)_10%,var(--admin-surface))] p-4">
             <div className="flex items-center gap-3">
-              <AlertTriangle className="h-5 w-5 shrink-0 text-[var(--admin-danger)]" aria-hidden="true" />
+              <AlertTriangle
+                className="h-5 w-5 shrink-0 text-[var(--admin-danger)]"
+                aria-hidden="true"
+              />
               <div>
                 <p className="text-sm text-[var(--admin-on-surface)]">
                   Couldn&apos;t load sales and marketing data.
@@ -576,7 +600,10 @@ export function AdminSalesMarketingOverviewPanel({ onNavigateTab }: Props) {
               <div className="flex flex-col gap-1">
                 <span className="text-xs text-[var(--admin-on-surface-variant)]">Date range</span>
                 <span className="inline-flex items-center gap-2 rounded border border-[var(--admin-border)] bg-[var(--admin-surface)] px-3 py-1.5 text-sm">
-                  <CalendarDays className="h-4 w-4 text-[var(--admin-on-surface-variant)]" aria-hidden="true" />
+                  <CalendarDays
+                    className="h-4 w-4 text-[var(--admin-on-surface-variant)]"
+                    aria-hidden="true"
+                  />
                   {formatShortDate(`${paidFrom}T00:00:00.000Z`)} –{" "}
                   {formatShortDate(`${paidTo}T00:00:00.000Z`)}
                 </span>
@@ -697,7 +724,9 @@ export function AdminSalesMarketingOverviewPanel({ onNavigateTab }: Props) {
                   <span className="mr-1 font-mono text-sm text-[var(--admin-on-surface)]">
                     {summary.referralCredit.toLocaleString()}
                   </span>
-                  <span className="text-[11px] text-[var(--admin-on-surface-variant)]">credits</span>
+                  <span className="text-[11px] text-[var(--admin-on-surface-variant)]">
+                    credits
+                  </span>
                 </div>
               </div>
               <div className="flex flex-1 flex-col justify-between bg-[color-mix(in_srgb,var(--admin-surface-low)_50%,transparent)] p-5">
@@ -730,8 +759,8 @@ export function AdminSalesMarketingOverviewPanel({ onNavigateTab }: Props) {
                       <div
                         key={channel.key}
                         className="h-full"
-                        style={{ width: `${pct}%`, backgroundColor: channel.color }}
-                        title={`${channel.label}: ${pct}%`}
+                        style={{ width: `${String(pct)}%`, backgroundColor: channel.color }}
+                        title={`${channel.label}: ${String(pct)}%`}
                       />
                     );
                   })}
@@ -753,7 +782,11 @@ export function AdminSalesMarketingOverviewPanel({ onNavigateTab }: Props) {
                     </div>
                   ))}
                 </div>
-                <AttributionChart points={overview.revenueTrend} grain={grain} onGrainChange={setGrain} />
+                <AttributionChart
+                  points={overview.revenueTrend}
+                  grain={grain}
+                  onGrainChange={setGrain}
+                />
               </section>
 
               <section className="overflow-hidden rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)]">
@@ -764,7 +797,9 @@ export function AdminSalesMarketingOverviewPanel({ onNavigateTab }: Props) {
                   <button
                     type="button"
                     className="text-xs font-medium text-[var(--admin-primary)] hover:text-[var(--admin-primary-strong)]"
-                    onClick={() => onNavigateTab("sales")}
+                    onClick={() => {
+                      onNavigateTab("sales");
+                    }}
                   >
                     View all
                   </button>
@@ -795,7 +830,7 @@ export function AdminSalesMarketingOverviewPanel({ onNavigateTab }: Props) {
                         const isLeader = index === 0;
                         return (
                           <tr
-                            key={`${product.courseId ?? product.productTitle}-${index}`}
+                            key={`${product.courseId ?? product.productTitle}-${String(index)}`}
                             className={[
                               "border-b border-[var(--admin-border)] transition-colors last:border-b-0 hover:bg-[var(--admin-surface-high)]",
                               isLeader
@@ -847,7 +882,7 @@ export function AdminSalesMarketingOverviewPanel({ onNavigateTab }: Props) {
                                   <div
                                     className="h-full rounded-full"
                                     style={{
-                                      width: `${Math.max(4, (product.netCents / maxProductNet) * 100)}%`,
+                                      width: `${String(Math.max(4, (product.netCents / maxProductNet) * 100))}%`,
                                       backgroundColor: isLeader
                                         ? "var(--admin-success)"
                                         : "var(--admin-primary-strong)",
@@ -938,7 +973,9 @@ export function AdminSalesMarketingOverviewPanel({ onNavigateTab }: Props) {
                   <button
                     type="button"
                     className="text-xs font-medium text-[var(--admin-primary)] hover:text-[var(--admin-primary-strong)]"
-                    onClick={() => onNavigateTab("affiliates")}
+                    onClick={() => {
+                      onNavigateTab("affiliates");
+                    }}
                   >
                     Manage
                   </button>
@@ -1006,7 +1043,10 @@ export function AdminSalesMarketingOverviewPanel({ onNavigateTab }: Props) {
                 <section className="relative overflow-hidden rounded-lg border border-[color-mix(in_srgb,var(--admin-warning)_30%,var(--admin-border))] bg-[var(--admin-surface)] shadow-[0_2px_8px_color-mix(in_srgb,var(--admin-warning)_5%,transparent)]">
                   <div className="absolute bottom-0 left-0 top-0 w-1 bg-[color-mix(in_srgb,var(--admin-warning)_80%,transparent)]" />
                   <div className="flex items-center border-b border-[var(--admin-border)] bg-[color-mix(in_srgb,var(--admin-warning)_5%,transparent)] p-4">
-                    <AlertTriangle className="mr-2 h-5 w-5 text-[var(--admin-warning)]" aria-hidden="true" />
+                    <AlertTriangle
+                      className="mr-2 h-5 w-5 text-[var(--admin-warning)]"
+                      aria-hidden="true"
+                    />
                     <h2 className="text-base font-semibold text-[var(--admin-on-surface)]">
                       Needs attention
                     </h2>

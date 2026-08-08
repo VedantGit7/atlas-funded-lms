@@ -5,7 +5,6 @@ import {
   exportCustomFieldRosterBodySchema,
   exportCustomFieldRosterResponseSchema,
   retryCustomFieldCohortMessageBodySchema,
-  retryCustomFieldCohortMessageResponseSchema,
   sendCustomFieldMessageBodySchema,
   sendCustomFieldMessageResponseSchema,
 } from "@atlas/domain/reports/custom-field-roster.dto";
@@ -40,15 +39,15 @@ async function resolveAudienceMembershipIds(
   tx: TenantTx,
   ctx: ServiceCtx,
   body: {
-    membershipIds?: string[];
-    q?: string;
-    email?: string;
-    status?: string;
-    signedUpFrom?: string;
-    signedUpTo?: string;
-    minTotalSpentCents?: number;
-    maxTotalSpentCents?: number;
-    segmentId?: string;
+    membershipIds?: string[] | undefined;
+    q?: string | undefined;
+    email?: string | undefined;
+    status?: string | undefined;
+    signedUpFrom?: string | undefined;
+    signedUpTo?: string | undefined;
+    minTotalSpentCents?: number | undefined;
+    maxTotalSpentCents?: number | undefined;
+    segmentId?: string | undefined;
   },
 ): Promise<string[]> {
   if (body.segmentId) {
@@ -75,12 +74,8 @@ async function resolveAudienceMembershipIds(
     ...(body.status ? { status: body.status } : {}),
     ...(body.signedUpFrom ? { signedUpFrom: body.signedUpFrom } : {}),
     ...(body.signedUpTo ? { signedUpTo: body.signedUpTo } : {}),
-    ...(body.minTotalSpentCents != null
-      ? { minTotalSpentCents: body.minTotalSpentCents }
-      : {}),
-    ...(body.maxTotalSpentCents != null
-      ? { maxTotalSpentCents: body.maxTotalSpentCents }
-      : {}),
+    ...(body.minTotalSpentCents != null ? { minTotalSpentCents: body.minTotalSpentCents } : {}),
+    ...(body.maxTotalSpentCents != null ? { maxTotalSpentCents: body.maxTotalSpentCents } : {}),
   });
 }
 
@@ -138,7 +133,7 @@ async function sendCustomFieldAudienceMessage(
     source: "reports.custom-field",
     audienceCaption:
       args.audienceCaption ??
-      `${args.membershipIds.length} learner${args.membershipIds.length === 1 ? "" : "s"} from custom field report`,
+      `${String(args.membershipIds.length)} learner${args.membershipIds.length === 1 ? "" : "s"} from custom field report`,
     segmentId: args.segmentId ?? null,
     segmentName: args.segmentName ?? null,
     recipientCount: args.membershipIds.length,
@@ -284,20 +279,12 @@ export async function createCustomFieldRosterGroup(
     ...(body.status ? { status: body.status } : {}),
     ...(body.signedUpFrom ? { signedUpFrom: body.signedUpFrom } : {}),
     ...(body.signedUpTo ? { signedUpTo: body.signedUpTo } : {}),
-    ...(body.minTotalSpentCents != null
-      ? { minTotalSpentCents: body.minTotalSpentCents }
-      : {}),
-    ...(body.maxTotalSpentCents != null
-      ? { maxTotalSpentCents: body.maxTotalSpentCents }
-      : {}),
+    ...(body.minTotalSpentCents != null ? { minTotalSpentCents: body.minTotalSpentCents } : {}),
+    ...(body.maxTotalSpentCents != null ? { maxTotalSpentCents: body.maxTotalSpentCents } : {}),
   });
 }
 
-export async function exportCustomFieldRoster(
-  tx: TenantTx,
-  ctx: ServiceCtx,
-  rawBody: unknown,
-) {
+export async function exportCustomFieldRoster(tx: TenantTx, ctx: ServiceCtx, rawBody: unknown) {
   const body = exportCustomFieldRosterBodySchema.parse(rawBody);
   const params: Record<string, unknown> = {};
   if (body.q) params["q"] = body.q;

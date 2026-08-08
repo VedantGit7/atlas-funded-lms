@@ -19,7 +19,7 @@ type AnalyticsFilterToolbarProps = {
   assessmentId: string;
   from: string;
   to: string;
-  loading?: boolean;
+  loading?: boolean | undefined;
   onCourseChange: (value: string) => void;
   onAssessmentChange: (value: string) => void;
   onFromChange: (value: string) => void;
@@ -40,7 +40,7 @@ function FilterDate({
   label: string;
   value: string;
   ariaLabel: string;
-  disabled?: boolean;
+  disabled?: boolean | undefined;
   onChange: (value: string) => void;
 }) {
   return (

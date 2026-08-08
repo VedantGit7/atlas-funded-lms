@@ -5,15 +5,15 @@ import {
   whatsappCampaignsListResponseSchema,
   createWhatsappCampaignBodySchema,
   whatsappCampaignResponseSchema,
-} from "../../../../../server/whatsapp/whatsapp.schemas";
+} from "@atlas/api-server/whatsapp/whatsapp.schemas";
 import {
   listWhatsappMetadata,
   mutateWhatsappMetadata,
-} from "../../../../../server/whatsapp/whatsapp.route-metadata";
+} from "@atlas/api-server/whatsapp/whatsapp.route-metadata";
 import {
   createWhatsappCampaign,
   listWhatsappCampaigns,
-} from "../../../../../server/whatsapp/whatsapp.service";
+} from "@atlas/api-server/whatsapp/whatsapp.service";
 
 export const GET = createTenantRoute<
   z.output<typeof whatsappCampaignsListQuerySchema>,

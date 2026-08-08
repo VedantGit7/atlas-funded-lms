@@ -73,6 +73,11 @@ const DOMAIN_ISOLATION_TEST_MAP: Record<string, string> = {
   branding: "branding-domain.isolation.test.ts",
   tenancy: "branding-domain.isolation.test.ts",
   "permission-overrides": "admin-member-role-management.test.ts",
+  admin: "admin-shell.test.ts",
+  "learner-billing": "tenant-config.isolation.test.ts",
+  decks: "practice.test.ts",
+  reports: "analytics.test.ts",
+  tags: "course-manager-builder.test.ts",
 };
 
 const COLLECTION_ONLY_DOMAINS = new Set(["members", "roles", "enrollments", "workflows"]);
@@ -199,10 +204,9 @@ export function buildTenantResourceRegistry(options?: {
         domain,
       }),
       isolationTestFile,
-      rationale:
-        isolationTestFile == null && (hasResourceLoader || idParam)
-          ? `No mapped isolation test for domain '${domain}'`
-          : undefined,
+      ...(isolationTestFile == null && (hasResourceLoader || idParam)
+        ? { rationale: `No mapped isolation test for domain '${domain}'` }
+        : {}),
     });
   }
 

@@ -24,7 +24,7 @@ export const GET = createTenantRoute<
   metadata: listMarketingEmailMetadata,
   params: paramsSchema,
   output: marketingEmailCampaignResponseSchema,
-  handler: async ({ tx, ctx, params }) => getMarketingEmailCampaign(tx, ctx, params.id),
+  handler: async ({ tx, ctx, params }) => getMarketingEmailCampaign(tx, ctx, params["id"]),
 });
 
 export const PATCH = createTenantRoute<
@@ -37,5 +37,5 @@ export const PATCH = createTenantRoute<
   body: updateMarketingEmailCampaignTitleBodySchema,
   output: marketingEmailCampaignResponseSchema,
   handler: async ({ tx, ctx, params, input }) =>
-    updateMarketingEmailCampaignTitle(tx, ctx, params.id, input),
+    updateMarketingEmailCampaignTitle(tx, ctx, params["id"], input),
 });

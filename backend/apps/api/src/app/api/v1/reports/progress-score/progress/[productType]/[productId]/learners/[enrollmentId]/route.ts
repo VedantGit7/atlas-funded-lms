@@ -20,8 +20,8 @@ export const GET = createTenantRoute<
     getProgressLearnerDetail(
       tx,
       ctx,
-      params.productType,
-      params.productId,
-      params.enrollmentId,
+      params["productType"],
+      params["productId"],
+      params["enrollmentId"],
     ),
 });

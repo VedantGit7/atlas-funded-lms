@@ -63,7 +63,7 @@ function Shimmer({ className }: { className?: string }) {
 
 function formatPct(value: number | null | undefined): string {
   if (value == null || Number.isNaN(value)) return "-";
-  return `${Number(value).toFixed(value % 1 === 0 ? 0 : 1)}%`;
+  return `${value.toFixed(value % 1 === 0 ? 0 : 1)}%`;
 }
 
 function formatDate(value: string | null): string {
@@ -74,19 +74,6 @@ function formatDate(value: string | null): string {
     month: "short",
     day: "numeric",
     year: "numeric",
-  });
-}
-
-function formatDateTime(value: string | null): string {
-  if (!value) return "-";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleString(undefined, {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
   });
 }
 
@@ -208,7 +195,7 @@ function PollsLoadingSkeleton() {
                   <td className="p-4">
                     <div
                       className="relative h-4 overflow-hidden rounded-sm bg-[var(--admin-surface-high)] after:absolute after:inset-0 after:-translate-x-full after:animate-[shimmer_1.8s_infinite] after:bg-gradient-to-r after:from-transparent after:via-[color-mix(in_srgb,var(--admin-on-surface)_8%,transparent)] after:to-transparent"
-                      style={{ width: `${55 + ((rowIndex * 13) % 30)}%` }}
+                      style={{ width: `${String(55 + ((rowIndex * 13) % 30))}%` }}
                     />
                   </td>
                   <td className="p-4">
@@ -279,13 +266,7 @@ function EmptyPollsState({
   );
 }
 
-function ErrorPollsPanel({
-  message,
-  onRetry,
-}: {
-  message: string;
-  onRetry: () => void;
-}) {
+function ErrorPollsPanel({ message, onRetry }: { message: string; onRetry: () => void }) {
   return (
     <div className="overflow-hidden rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)]">
       <div
@@ -326,7 +307,7 @@ function ErrorPollsPanel({
             <div className="min-w-0 flex-[2]">
               <div
                 className="h-4 rounded bg-[var(--admin-surface-high)]"
-                style={{ width: `${70 - index * 12}%` }}
+                style={{ width: `${String(70 - index * 12)}%` }}
               />
             </div>
             <div className="flex min-w-0 flex-1 justify-end">
@@ -372,14 +353,7 @@ export function AdminPollsRosterPage() {
 
   const hasActiveFilters = useMemo(
     () =>
-      Boolean(
-        searchQ ||
-          statusFilter ||
-          pollType ||
-          view !== "all" ||
-          createdFrom ||
-          createdTo,
-      ),
+      Boolean(searchQ || statusFilter || pollType || view !== "all" || createdFrom || createdTo),
     [createdFrom, createdTo, pollType, searchQ, statusFilter, view],
   );
 
@@ -495,15 +469,17 @@ export function AdminPollsRosterPage() {
             Polls
           </h1>
           <p className="mt-1 text-sm text-[var(--admin-on-surface-variant)]">
-            Live and standalone poll results, option tallies, and respondent detail where voting
-            is identified.
+            Live and standalone poll results, option tallies, and respondent detail where voting is
+            identified.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
             className={secondaryButtonClassName}
-            onClick={() => router.push("/admin/reports/polls/compare")}
+            onClick={() => {
+              router.push("/admin/reports/polls/compare");
+            }}
           >
             <GitCompareArrows className="h-4 w-4" aria-hidden="true" />
             Compare polls
@@ -558,11 +534,8 @@ export function AdminPollsRosterPage() {
                   router.push("/admin/reports/polls/exports");
                   return;
                 }
-                if (value === "polls") {
-                  setModuleTab("polls");
-                  return;
-                }
-                setModuleTab(value);
+                setModuleTab("polls");
+                return;
               }}
             >
               {label}
@@ -612,7 +585,7 @@ export function AdminPollsRosterPage() {
                       <div
                         className="h-full rounded-full bg-[var(--admin-primary)]"
                         style={{
-                          width: `${Math.max(0, Math.min(100, summary?.avgParticipationPct ?? 0))}%`,
+                          width: `${String(Math.max(0, Math.min(100, summary?.avgParticipationPct ?? 0)))}%`,
                         }}
                       />
                     </div>
@@ -625,7 +598,9 @@ export function AdminPollsRosterPage() {
                 <button
                   type="button"
                   className="rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] p-5 text-left transition-colors hover:bg-[var(--admin-surface-high)]"
-                  onClick={() => applyView("quiz")}
+                  onClick={() => {
+                    applyView("quiz");
+                  }}
                 >
                   <p className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-[var(--admin-on-surface-variant)]">
                     Quiz Polls
@@ -642,7 +617,9 @@ export function AdminPollsRosterPage() {
                   <button
                     type="button"
                     className="group flex flex-1 items-center justify-between rounded-lg border border-[color-mix(in_srgb,var(--admin-success)_30%,var(--admin-border))] bg-[var(--admin-surface)] p-4 text-left transition-colors hover:bg-[color-mix(in_srgb,var(--admin-success)_6%,var(--admin-surface))]"
-                    onClick={() => applyView("open")}
+                    onClick={() => {
+                      applyView("open");
+                    }}
                   >
                     <div>
                       <p className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-[var(--admin-success)]">
@@ -660,7 +637,9 @@ export function AdminPollsRosterPage() {
                   <button
                     type="button"
                     className="flex flex-1 items-center justify-between rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface-low)] p-4 text-left transition-colors hover:bg-[var(--admin-surface-high)]"
-                    onClick={() => applyView("anonymous")}
+                    onClick={() => {
+                      applyView("anonymous");
+                    }}
                     title="No respondent detail"
                   >
                     <div>
@@ -699,7 +678,9 @@ export function AdminPollsRosterPage() {
                         ? "bg-[color-mix(in_srgb,var(--admin-primary)_12%,var(--admin-surface))] text-[var(--admin-primary)]"
                         : "bg-[var(--admin-surface-low)] text-[var(--admin-on-surface-variant)] hover:bg-[var(--admin-surface-high)]",
                     ].join(" ")}
-                    onClick={() => applyView(value)}
+                    onClick={() => {
+                      applyView(value);
+                    }}
                   >
                     {label}
                   </button>
@@ -718,7 +699,9 @@ export function AdminPollsRosterPage() {
                       className={`${fieldClassName} w-full pl-9`}
                       placeholder="Search poll title or description"
                       value={draftSearch}
-                      onChange={(event) => setDraftSearch(event.target.value)}
+                      onChange={(event) => {
+                        setDraftSearch(event.target.value);
+                      }}
                       onKeyDown={(event) => {
                         if (event.key === "Enter") {
                           setSearchQ(draftSearch.trim());
@@ -760,7 +743,9 @@ export function AdminPollsRosterPage() {
                   <button
                     type="button"
                     className={secondaryButtonClassName}
-                    onClick={() => setShowMoreFilters((current) => !current)}
+                    onClick={() => {
+                      setShowMoreFilters((current) => !current);
+                    }}
                   >
                     <Filter className="h-4 w-4" aria-hidden="true" />
                     More Filters
@@ -860,7 +845,9 @@ export function AdminPollsRosterPage() {
                             <EmptyPollsState
                               hasFilters={hasActiveFilters}
                               onClear={clearAllFilters}
-                              onManage={() => router.push("/admin/polls")}
+                              onManage={() => {
+                                router.push("/admin/polls");
+                              }}
                             />
                           </td>
                         </tr>
@@ -870,9 +857,11 @@ export function AdminPollsRosterPage() {
                             key={poll.id}
                             className="group h-11 cursor-pointer border-b border-[var(--admin-border)] transition-colors last:border-b-0 hover:bg-[var(--admin-surface-high)]"
                             style={{
-                              animationDelay: `${Math.min(index, 11) * 20}ms`,
+                              animationDelay: `${String(Math.min(index, 11) * 20)}ms`,
                             }}
-                            onClick={() => openPoll(poll)}
+                            onClick={() => {
+                              openPoll(poll);
+                            }}
                           >
                             <td className="px-4 py-3">
                               <div className="font-medium text-[var(--admin-primary)]">
@@ -887,9 +876,7 @@ export function AdminPollsRosterPage() {
                                   </span>
                                 ) : null}
                                 {poll.quizMode ? <span>Quiz</span> : null}
-                                {poll.allowMultipleAnswers ? (
-                                  <span>Multi-answer</span>
-                                ) : null}
+                                {poll.allowMultipleAnswers ? <span>Multi-answer</span> : null}
                               </div>
                             </td>
                             <td className="px-4 py-3 text-[var(--admin-on-surface)]">
@@ -906,7 +893,9 @@ export function AdminPollsRosterPage() {
                                 <Link
                                   href={`/admin/reports/polls/live-sessions/${poll.liveSessionId}`}
                                   className="inline-flex items-center gap-1.5 text-[var(--admin-primary)] hover:underline"
-                                  onClick={(event) => event.stopPropagation()}
+                                  onClick={(event) => {
+                                    event.stopPropagation();
+                                  }}
                                 >
                                   <Video className="h-3.5 w-3.5" aria-hidden="true" />
                                   <span className="line-clamp-1 max-w-[160px]">
@@ -949,27 +938,31 @@ export function AdminPollsRosterPage() {
                     <p>
                       {totalCount === 0
                         ? "No results"
-                        : `Showing ${rangeStart}-${rangeEnd} of ${totalCount.toLocaleString()}`}
+                        : `Showing ${String(rangeStart)}-${String(rangeEnd)} of ${totalCount.toLocaleString()}`}
                     </p>
                     <div className="flex items-center gap-2">
                       <button
                         type="button"
                         className={ghostButtonClassName}
                         disabled={page <= 1 || loading}
-                        onClick={() => setPage((current) => Math.max(1, current - 1))}
+                        onClick={() => {
+                          setPage((current) => Math.max(1, current - 1));
+                        }}
                         aria-label="Previous page"
                       >
                         <ChevronLeft className="h-4 w-4" aria-hidden="true" />
                       </button>
                       <span className="font-mono">
                         {page}
-                        {totalPages > 0 ? ` / ${totalPages}` : ""}
+                        {totalPages > 0 ? ` / ${String(totalPages)}` : ""}
                       </span>
                       <button
                         type="button"
                         className={ghostButtonClassName}
                         disabled={page >= totalPages || loading || totalPages === 0}
-                        onClick={() => setPage((current) => current + 1)}
+                        onClick={() => {
+                          setPage((current) => current + 1);
+                        }}
                         aria-label="Next page"
                       >
                         <ChevronRight className="h-4 w-4" aria-hidden="true" />
@@ -978,7 +971,6 @@ export function AdminPollsRosterPage() {
                   </div>
                 ) : null}
               </div>
-
             </>
           ) : null}
         </>

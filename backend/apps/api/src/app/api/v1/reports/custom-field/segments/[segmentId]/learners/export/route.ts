@@ -16,5 +16,5 @@ export const POST = createTenantRoute<
   params: customFieldSegmentParamsSchema,
   output: customFieldSegmentLearnersExportResponseSchema,
   handler: async ({ tx, ctx, params }) =>
-    exportCustomFieldSegmentLearnersCsv(tx, ctx, params.segmentId),
+    exportCustomFieldSegmentLearnersCsv(tx, ctx, params["segmentId"]),
 });

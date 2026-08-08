@@ -18,5 +18,5 @@ export const POST = createTenantRoute<
   params: paymentInvoiceDetailParamsSchema,
   output: voidPaymentInvoiceResponseSchema,
   handler: async ({ tx, ctx, input, params }) =>
-    voidPaymentInvoice(tx, ctx, params.orderId, input.reason),
+    voidPaymentInvoice(tx, ctx, params["orderId"], input.reason),
 });

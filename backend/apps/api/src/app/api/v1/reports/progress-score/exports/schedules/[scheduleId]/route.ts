@@ -22,7 +22,7 @@ export const PATCH = createTenantRoute<
   body: updateProgressScoreExportScheduleBodySchema,
   output: updateProgressScoreExportScheduleResponseSchema,
   handler: async ({ tx, ctx, params, input }) =>
-    updateProgressScoreExportSchedule(tx, ctx, params.scheduleId, input),
+    updateProgressScoreExportSchedule(tx, ctx, params["scheduleId"], input),
 });
 
 export const DELETE = createTenantRoute<
@@ -35,5 +35,5 @@ export const DELETE = createTenantRoute<
   input: noBodySchema,
   output: deleteProgressScoreExportScheduleResponseSchema,
   handler: async ({ tx, ctx, params }) =>
-    deleteProgressScoreExportSchedule(tx, ctx, params.scheduleId),
+    deleteProgressScoreExportSchedule(tx, ctx, params["scheduleId"]),
 });

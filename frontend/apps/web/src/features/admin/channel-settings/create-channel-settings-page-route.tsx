@@ -23,8 +23,8 @@ export function createChannelSettingsPageRoute(config: ChannelSettingsPageConfig
             <ChannelSettingsPlaceholderPage
               title={config.title}
               description={config.description}
-              relatedHref={config.relatedHref}
-              relatedLabel={config.relatedLabel}
+              {...(config.relatedHref !== undefined ? { relatedHref: config.relatedHref } : {})}
+              {...(config.relatedLabel !== undefined ? { relatedLabel: config.relatedLabel } : {})}
             />
           </ChannelSettingsShell>
         </AdminPageGate>

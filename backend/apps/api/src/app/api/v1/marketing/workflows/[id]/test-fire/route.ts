@@ -20,5 +20,5 @@ export const POST = createTenantRoute<
   body: testFireWorkflowBodySchema,
   output: testFireWorkflowResponseSchema,
   handler: async ({ tx, ctx, params, input }) =>
-    testFireMarketingWorkflow(tx, ctx, params.id, input),
+    testFireMarketingWorkflow(tx, ctx, params["id"], input),
 });

@@ -15,10 +15,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState, type MouseEvent } from "react";
 import { Select } from "@atlas/design-system";
 import { ClientApiError } from "../../../lib/client-api";
-import {
-  COUPONS_CREATE_HREF,
-  COUPONS_LIST_HREF,
-} from "../grow/coupons-shared";
+import { COUPONS_CREATE_HREF, COUPONS_LIST_HREF } from "../grow/coupons-shared";
 import {
   exportSalesMarketingReport,
   fetchSalesCoupons,
@@ -28,10 +25,7 @@ import {
   type CouponsListSummary,
   type CouponsListView,
 } from "./admin-sales-marketing-roster-api";
-import {
-  downloadReportExport,
-  pollReportRunUntilComplete,
-} from "./admin-reports-api";
+import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
 
 const VIEW_TABS: Array<{ key: CouponsListView; label: string }> = [
   { key: "all", label: "All coupons" },
@@ -78,7 +72,7 @@ function formatShortDate(iso: string): string {
 
 function discountLabel(type: string, value: number, currency: string): string {
   if (type.toUpperCase() === "PERCENT") {
-    return `${value}% OFF`;
+    return `${String(value)}% OFF`;
   }
   return `${formatMoneyAmount(value)} ${currency} OFF`;
 }
@@ -281,7 +275,9 @@ export function AdminCouponsPanel() {
     const ok = await copyToClipboard(item.code);
     if (ok) {
       setCopiedId(item.id);
-      window.setTimeout(() => setCopiedId((current) => (current === item.id ? null : current)), 1500);
+      window.setTimeout(() => {
+        setCopiedId((current) => (current === item.id ? null : current));
+      }, 1500);
     }
   }
 
@@ -314,16 +310,13 @@ export function AdminCouponsPanel() {
   const hasAnyCoupons = (summary?.couponCount ?? 0) > 0 || items.length > 0;
   const isEmpty = !loading && !error && payload != null && items.length === 0;
   const isTrulyEmpty = isEmpty && !filtersActive && (summary?.couponCount ?? 0) === 0;
-  const allOnPageSelected =
-    items.length > 0 && items.every((item) => selectedIds.has(item.id));
+  const allOnPageSelected = items.length > 0 && items.every((item) => selectedIds.has(item.id));
 
   const revenueFill =
     summary && summary.totalRevenueCents > 0
       ? Math.min(
           100,
-          Math.round(
-            (summary.totalNetCents / Math.max(summary.totalRevenueCents, 1)) * 100,
-          ),
+          Math.round((summary.totalNetCents / Math.max(summary.totalRevenueCents, 1)) * 100),
         )
       : 0;
 
@@ -374,7 +367,10 @@ export function AdminCouponsPanel() {
           role="alert"
         >
           <div className="flex items-start gap-3">
-            <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-[var(--admin-danger)]" aria-hidden="true" />
+            <AlertTriangle
+              className="mt-0.5 h-5 w-5 shrink-0 text-[var(--admin-danger)]"
+              aria-hidden="true"
+            />
             <div>
               <h2 className="text-base font-semibold text-[var(--admin-danger)]">
                 Couldn&apos;t load coupons data.
@@ -418,7 +414,7 @@ export function AdminCouponsPanel() {
             <div className="mt-auto h-1 overflow-hidden rounded-full bg-[var(--admin-surface-high)]">
               <div
                 className="h-full rounded-full bg-[var(--admin-primary)]"
-                style={{ width: `${Math.max(4, revenueFill)}%` }}
+                style={{ width: `${String(Math.max(4, revenueFill))}%` }}
               />
             </div>
           </div>
@@ -455,9 +451,7 @@ export function AdminCouponsPanel() {
           </div>
 
           <div className="flex flex-col rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] p-5 shadow-sm">
-            <span className="mb-1 text-xs text-[var(--admin-on-surface-variant)]">
-              Redemptions
-            </span>
+            <span className="mb-1 text-xs text-[var(--admin-on-surface-variant)]">Redemptions</span>
             <span className="mb-1 font-mono text-2xl font-bold tracking-tight text-[var(--admin-on-surface)]">
               {summary.totalRedemptions.toLocaleString()}
             </span>
@@ -472,7 +466,11 @@ export function AdminCouponsPanel() {
         <div className="overflow-hidden rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)]">
           <div className="flex min-h-[360px] flex-col items-center justify-center px-6 py-12 text-center">
             <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-full border border-[var(--admin-border)] bg-[var(--admin-surface-low)] shadow-sm">
-              <Tag className="h-8 w-8 text-[var(--admin-on-surface-variant)]" strokeWidth={1.5} aria-hidden="true" />
+              <Tag
+                className="h-8 w-8 text-[var(--admin-on-surface-variant)]"
+                strokeWidth={1.5}
+                aria-hidden="true"
+              />
             </div>
             <h2 className="text-base font-semibold text-[var(--admin-on-surface)]">
               {isTrulyEmpty ? "No coupons yet" : "No coupons match these filters"}
@@ -607,7 +605,9 @@ export function AdminCouponsPanel() {
                       type="checkbox"
                       className="h-4 w-4 accent-[var(--admin-primary)]"
                       checked={allOnPageSelected}
-                      onChange={() => toggleSelectAllOnPage(items)}
+                      onChange={() => {
+                        toggleSelectAllOnPage(items);
+                      }}
                       aria-label="Select all on page"
                     />
                   </th>
@@ -655,16 +655,18 @@ export function AdminCouponsPanel() {
                           ? "bg-[color-mix(in_srgb,var(--admin-primary)_6%,var(--admin-surface))]"
                           : "",
                       ].join(" ")}
-                      onClick={() =>
-                        router.push(`/admin/reports/sales-marketing/coupons/${coupon.id}`)
-                      }
+                      onClick={() => {
+                        router.push(`/admin/reports/sales-marketing/coupons/${coupon.id}`);
+                      }}
                     >
                       <td className="h-12 px-4">
                         <input
                           type="checkbox"
                           className="h-4 w-4 accent-[var(--admin-primary)]"
                           checked={selected}
-                          onClick={(event) => toggleRow(coupon.id, event)}
+                          onClick={(event) => {
+                            toggleRow(coupon.id, event);
+                          }}
                           onChange={() => undefined}
                           aria-label={`Select ${coupon.code}`}
                         />
@@ -718,7 +720,9 @@ export function AdminCouponsPanel() {
                           <div className="h-1 w-20 overflow-hidden rounded-full bg-[var(--admin-surface-high)]">
                             <div
                               className="h-full rounded-full bg-[var(--admin-primary)]"
-                              style={{ width: `${Math.max(progress > 0 ? 4 : 0, progress)}%` }}
+                              style={{
+                                width: `${String(Math.max(progress > 0 ? 4 : 0, progress))}%`,
+                              }}
                             />
                           </div>
                         </div>
@@ -749,9 +753,7 @@ export function AdminCouponsPanel() {
           </div>
 
           <div className="flex flex-col gap-3 border-t border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-4 py-3 text-sm text-[var(--admin-on-surface-variant)] sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-xs">
-              Revenue driven counts the full order value before discount.
-            </p>
+            <p className="text-xs">Revenue driven counts the full order value before discount.</p>
             {pageInfo && pageInfo.totalPages > 0 ? (
               <div className="flex flex-wrap items-center gap-3">
                 <p>
@@ -764,7 +766,9 @@ export function AdminCouponsPanel() {
                     type="button"
                     className="rounded border border-[var(--admin-outline)] px-3 py-1 transition-colors hover:bg-[var(--admin-surface-high)] disabled:opacity-50"
                     disabled={!pageInfo.hasPreviousPage || loading}
-                    onClick={() => setPage((current) => Math.max(1, current - 1))}
+                    onClick={() => {
+                      setPage((current) => Math.max(1, current - 1));
+                    }}
                   >
                     Previous
                   </button>
@@ -775,7 +779,9 @@ export function AdminCouponsPanel() {
                     type="button"
                     className="rounded border border-[var(--admin-outline)] px-3 py-1 transition-colors hover:bg-[var(--admin-surface-high)] disabled:opacity-50"
                     disabled={!pageInfo.hasNextPage || loading}
-                    onClick={() => setPage((current) => current + 1)}
+                    onClick={() => {
+                      setPage((current) => current + 1);
+                    }}
                   >
                     Next
                   </button>

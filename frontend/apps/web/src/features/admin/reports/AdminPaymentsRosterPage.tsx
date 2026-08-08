@@ -48,10 +48,7 @@ import {
   type PaymentTransactionItem,
 } from "./admin-payments-roster-api";
 import { AdminPaymentsOverviewPanel } from "./AdminPaymentsOverviewPanel";
-import {
-  downloadReportExport,
-  pollReportRunUntilComplete,
-} from "./admin-reports-api";
+import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
 import { PaymentsReportTabs } from "./PaymentsReportTabs";
 
 type TabKey = "overview" | "transactions" | "instalment" | "gateways" | "invoices";
@@ -117,7 +114,7 @@ export function AdminPaymentsRosterPage() {
   const [invoiceColumns, setInvoiceColumns] = useState<PaymentInvoiceColumnKey[]>(
     PAYMENT_INVOICE_COLUMN_OPTIONS.map((column) => column.key),
   );
-  const [instalmentColumns, setInstalmentColumns] = useState<PaymentInstalmentColumnKey[]>(
+  const [instalmentColumns] = useState<PaymentInstalmentColumnKey[]>(
     PAYMENT_INSTALMENT_COLUMN_OPTIONS.map((column) => column.key),
   );
 
@@ -159,8 +156,8 @@ export function AdminPaymentsRosterPage() {
           ? await fetchGatewayTransactions(selectedGateway.gatewayKey, {
               paidFrom: dateInputToStartIso(paidFrom),
               paidTo: dateInputToEndIso(paidTo),
-              learnerName: filterValues.learnerName,
-              productType: filterValues.productType,
+              learnerName: filterValues["learnerName"],
+              productType: filterValues["productType"],
               sortBy,
               sortDir,
               columns: txColumns,
@@ -170,9 +167,9 @@ export function AdminPaymentsRosterPage() {
           : await fetchPaymentTransactions({
               paidFrom: dateInputToStartIso(paidFrom),
               paidTo: dateInputToEndIso(paidTo),
-              learnerName: filterValues.learnerName,
-              productType: filterValues.productType,
-              status: filterValues.status,
+              learnerName: filterValues["learnerName"],
+              productType: filterValues["productType"],
+              status: filterValues["status"],
               sortBy,
               sortDir,
               columns: txColumns,
@@ -191,8 +188,8 @@ export function AdminPaymentsRosterPage() {
         const response = await fetchPaymentInvoices({
           paidFrom: dateInputToStartIso(paidFrom),
           paidTo: dateInputToEndIso(paidTo),
-          learnerName: filterValues.learnerName,
-          email: filterValues.email,
+          learnerName: filterValues["learnerName"],
+          email: filterValues["email"],
           sortBy,
           sortDir,
           columns: invoiceColumns,
@@ -202,11 +199,11 @@ export function AdminPaymentsRosterPage() {
         setInvoices(response.data.items);
         setTotalCount(response.data.pageInfo.totalCount);
         setTotalPages(response.data.pageInfo.totalPages);
-      } else if (tab === "instalment") {
+      } else {
         const response = await fetchPaymentInstalments({
-          learnerName: filterValues.learnerName,
-          email: filterValues.email,
-          status: filterValues.status,
+          learnerName: filterValues["learnerName"],
+          email: filterValues["email"],
+          status: filterValues["status"],
           sortBy: sortBy === "paid_at" ? "created_at" : sortBy,
           sortDir,
           columns: instalmentColumns,
@@ -235,10 +232,10 @@ export function AdminPaymentsRosterPage() {
       setLoading(false);
     }
   }, [
-    filterValues.email,
-    filterValues.learnerName,
-    filterValues.productType,
-    filterValues.status,
+    filterValues["email"],
+    filterValues["learnerName"],
+    filterValues["productType"],
+    filterValues["status"],
     instalmentColumns,
     invoiceColumns,
     page,
@@ -300,14 +297,8 @@ export function AdminPaymentsRosterPage() {
     setSelectedPlan(null);
     setPlanSchedule([]);
     setExtraFilters([]);
-    if (next === "instalment") setSortBy("created_at");
-    else if (next === "invoices") setSortBy("paid_at");
-    else setSortBy("paid_at");
-    const url =
-      next === "overview"
-        ? "/admin/reports/payments"
-        : `/admin/reports/payments?tab=${next}`;
-    router.replace(url);
+    setSortBy("paid_at");
+    router.replace("/admin/reports/payments");
   }
 
   async function handleExport() {
@@ -317,10 +308,10 @@ export function AdminPaymentsRosterPage() {
       const common = {
         paidFrom: dateInputToStartIso(paidFrom),
         paidTo: dateInputToEndIso(paidTo),
-        learnerName: filterValues.learnerName,
-        email: filterValues.email,
-        productType: filterValues.productType,
-        status: filterValues.status,
+        learnerName: filterValues["learnerName"],
+        email: filterValues["email"],
+        productType: filterValues["productType"],
+        status: filterValues["status"],
         sortBy,
         sortDir,
         emailDownloadLink: true,
@@ -416,9 +407,7 @@ export function AdminPaymentsRosterPage() {
     }
     const half = Math.floor(total / 2);
     const second = total - half;
-    const due1 = createDue1.trim()
-      ? `${createDue1}T00:00:00.000Z`
-      : new Date().toISOString();
+    const due1 = createDue1.trim() ? `${createDue1}T00:00:00.000Z` : new Date().toISOString();
     const due2 = createDue2.trim()
       ? `${createDue2}T00:00:00.000Z`
       : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
@@ -492,598 +481,630 @@ export function AdminPaymentsRosterPage() {
 
       {tab === "overview" ? (
         <AdminPaymentsOverviewPanel
-            onNavigateTab={(next) => {
-              if (next === "transactions") {
-                router.push("/admin/reports/payments/transactions");
-                return;
-              }
-              switchTab(next);
-            }}
-            onRecordPayment={() => {
-              switchTab("instalment");
-              setCreatePlanOpen(true);
-            }}
-          />
+          onNavigateTab={(next) => {
+            if (next === "transactions") {
+              router.push("/admin/reports/payments/transactions");
+              return;
+            }
+            switchTab(next);
+          }}
+          onRecordPayment={() => {
+            switchTab("instalment");
+            setCreatePlanOpen(true);
+          }}
+        />
       ) : (
         <>
-      <div>
-        <h1 className={generalSettingsPageTitleClassName}>Payments</h1>
-        <p className={generalSettingsPageDescClassName}>
-          Review transactions, instalment plans, gateway activity, and invoices.
-        </p>
-      </div>
+          <div>
+            <h1 className={generalSettingsPageTitleClassName}>Payments</h1>
+            <p className={generalSettingsPageDescClassName}>
+              Review transactions, instalment plans, gateway activity, and invoices.
+            </p>
+          </div>
 
-      {error ? <div className={analyticsAlertErrorClassName}>{error}</div> : null}
+          {error ? <div className={analyticsAlertErrorClassName}>{error}</div> : null}
 
-      <section className={generalSettingsFormCardClassName}>
-        <div className="flex flex-wrap items-end gap-3">
-          {(tab === "invoices" || (tab === "gateways" && selectedGateway)) && (
-            <>
-              <label className="grid gap-1 text-sm">
-                From
-                <input
-                  type="date"
-                  className={fieldClassName}
-                  value={paidFrom}
-                  onChange={(event) => {
-                    setPaidFrom(event.target.value);
-                    setPage(1);
-                  }}
-                />
-              </label>
-              <label className="grid gap-1 text-sm">
-                To
-                <input
-                  type="date"
-                  className={fieldClassName}
-                  value={paidTo}
-                  onChange={(event) => {
-                    setPaidTo(event.target.value);
-                    setPage(1);
-                  }}
-                />
-              </label>
-            </>
-          )}
+          <section className={generalSettingsFormCardClassName}>
+            <div className="flex flex-wrap items-end gap-3">
+              {(tab === "invoices" || (tab === "gateways" && selectedGateway)) && (
+                <>
+                  <label className="grid gap-1 text-sm">
+                    From
+                    <input
+                      type="date"
+                      className={fieldClassName}
+                      value={paidFrom}
+                      onChange={(event) => {
+                        setPaidFrom(event.target.value);
+                        setPage(1);
+                      }}
+                    />
+                  </label>
+                  <label className="grid gap-1 text-sm">
+                    To
+                    <input
+                      type="date"
+                      className={fieldClassName}
+                      value={paidTo}
+                      onChange={(event) => {
+                        setPaidTo(event.target.value);
+                        setPage(1);
+                      }}
+                    />
+                  </label>
+                </>
+              )}
 
-          <button
-            type="button"
-            className={ghostButtonClassName}
-            onClick={() =>
-              setExtraFilters((current) => [
-                ...current,
-                {
-                  id: `${Date.now()}`,
-                  field: tab === "invoices" || tab === "instalment" ? "email" : "learnerName",
-                  value: "",
-                },
-              ])
-            }
-          >
-            Add filter
-          </button>
-
-          {(tab === "gateways" && selectedGateway) && (
-            <label className="grid gap-1 text-sm">
-              Sort
-              <select
-                className={fieldClassName}
-                value={`${sortBy}:${sortDir}`}
-                onChange={(event) => {
-                  const [nextSort, nextDir] = event.target.value.split(":") as [
-                    string,
-                    "asc" | "desc",
-                  ];
-                  setSortBy(nextSort);
-                  setSortDir(nextDir);
+              <button
+                type="button"
+                className={ghostButtonClassName}
+                onClick={() => {
+                  setExtraFilters((current) => [
+                    ...current,
+                    {
+                      id: String(Date.now()),
+                      field: tab === "invoices" || tab === "instalment" ? "email" : "learnerName",
+                      value: "",
+                    },
+                  ]);
                 }}
               >
-                <option value="paid_at:desc">Transaction date ↓</option>
-                <option value="paid_at:asc">Transaction date ↑</option>
-                <option value="coupon_amount_cents:desc">Coupon amount ↓</option>
-                <option value="coupon_amount_cents:asc">Coupon amount ↑</option>
-                <option value="amount_cents:desc">Amount ↓</option>
-                <option value="amount_cents:asc">Amount ↑</option>
-              </select>
-            </label>
-          )}
+                Add filter
+              </button>
 
-          {tab !== "gateways" || selectedGateway ? (
-            <button
-              type="button"
-              className={analyticsExportButtonClassName}
-              disabled={busy || loading}
-              onClick={() => void handleExport()}
-            >
-              Export CSV
-            </button>
-          ) : null}
+              {tab === "gateways" && selectedGateway && (
+                <label className="grid gap-1 text-sm">
+                  Sort
+                  <select
+                    className={fieldClassName}
+                    value={`${sortBy}:${sortDir}`}
+                    onChange={(event) => {
+                      const [nextSort, nextDir] = event.target.value.split(":") as [
+                        string,
+                        "asc" | "desc",
+                      ];
+                      setSortBy(nextSort);
+                      setSortDir(nextDir);
+                    }}
+                  >
+                    <option value="paid_at:desc">Transaction date ↓</option>
+                    <option value="paid_at:asc">Transaction date ↑</option>
+                    <option value="coupon_amount_cents:desc">Coupon amount ↓</option>
+                    <option value="coupon_amount_cents:asc">Coupon amount ↑</option>
+                    <option value="amount_cents:desc">Amount ↓</option>
+                    <option value="amount_cents:asc">Amount ↑</option>
+                  </select>
+                </label>
+              )}
 
-          {tab === "instalment" ? (
-            <button
-              type="button"
-              className={primaryButtonClassName}
-              onClick={() => setCreatePlanOpen((open) => !open)}
-            >
-              {createPlanOpen ? "Close create" : "Create plan"}
-            </button>
-          ) : null}
-
-          {tab === "gateways" && selectedGateway ? (
-            <button
-              type="button"
-              className={ghostButtonClassName}
-              onClick={() => {
-                setSelectedGateway(null);
-                setPage(1);
-              }}
-            >
-              Back to gateways
-            </button>
-          ) : null}
-        </div>
-
-        {extraFilters.length > 0 ? (
-          <div className="mt-4 grid gap-3">
-            {extraFilters.map((filter) => (
-              <div key={filter.id} className="flex flex-wrap items-end gap-2">
-                <select
-                  className={fieldClassName}
-                  value={filter.field}
-                  onChange={(event) =>
-                    setExtraFilters((current) =>
-                      current.map((item) =>
-                        item.id === filter.id
-                          ? {
-                              ...item,
-                              field: event.target.value as ExtraFilter["field"],
-                            }
-                          : item,
-                      ),
-                    )
-                  }
+              {tab !== "gateways" || selectedGateway ? (
+                <button
+                  type="button"
+                  className={analyticsExportButtonClassName}
+                  disabled={busy || loading}
+                  onClick={() => void handleExport()}
                 >
-                  <option value="learnerName">Name</option>
-                  <option value="email">Email</option>
-                  <option value="productType">Product type</option>
-                  <option value="status">Status</option>
-                </select>
-                <input
-                  className={fieldClassName}
-                  value={filter.value}
-                  placeholder="Filter value"
-                  onChange={(event) =>
-                    setExtraFilters((current) =>
-                      current.map((item) =>
-                        item.id === filter.id ? { ...item, value: event.target.value } : item,
-                      ),
-                    )
-                  }
-                />
+                  Export CSV
+                </button>
+              ) : null}
+
+              {tab === "instalment" ? (
+                <button
+                  type="button"
+                  className={primaryButtonClassName}
+                  onClick={() => {
+                    setCreatePlanOpen((open) => !open);
+                  }}
+                >
+                  {createPlanOpen ? "Close create" : "Create plan"}
+                </button>
+              ) : null}
+
+              {tab === "gateways" && selectedGateway ? (
                 <button
                   type="button"
                   className={ghostButtonClassName}
-                  onClick={() =>
-                    setExtraFilters((current) => current.filter((item) => item.id !== filter.id))
-                  }
+                  onClick={() => {
+                    setSelectedGateway(null);
+                    setPage(1);
+                  }}
                 >
-                  Remove
+                  Back to gateways
+                </button>
+              ) : null}
+            </div>
+
+            {extraFilters.length > 0 ? (
+              <div className="mt-4 grid gap-3">
+                {extraFilters.map((filter) => (
+                  <div key={filter.id} className="flex flex-wrap items-end gap-2">
+                    <select
+                      className={fieldClassName}
+                      value={filter.field}
+                      onChange={(event) => {
+                        setExtraFilters((current) =>
+                          current.map((item) =>
+                            item.id === filter.id
+                              ? {
+                                  ...item,
+                                  field: event.target.value as ExtraFilter["field"],
+                                }
+                              : item,
+                          ),
+                        );
+                      }}
+                    >
+                      <option value="learnerName">Name</option>
+                      <option value="email">Email</option>
+                      <option value="productType">Product type</option>
+                      <option value="status">Status</option>
+                    </select>
+                    <input
+                      className={fieldClassName}
+                      value={filter.value}
+                      placeholder="Filter value"
+                      onChange={(event) => {
+                        setExtraFilters((current) =>
+                          current.map((item) =>
+                            item.id === filter.id ? { ...item, value: event.target.value } : item,
+                          ),
+                        );
+                      }}
+                    />
+                    <button
+                      type="button"
+                      className={ghostButtonClassName}
+                      onClick={() => {
+                        setExtraFilters((current) =>
+                          current.filter((item) => item.id !== filter.id),
+                        );
+                      }}
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ) : null}
+
+            {(tab === "transactions" || (tab === "gateways" && selectedGateway)) && (
+              <div className="mt-4 flex flex-wrap gap-2">
+                {PAYMENT_TRANSACTION_COLUMN_OPTIONS.map((column) => (
+                  <label key={column.key} className="flex items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={txColumns.includes(column.key)}
+                      onChange={() => {
+                        toggleColumn(
+                          txColumns,
+                          column.key,
+                          setTxColumns,
+                          PAYMENT_TRANSACTION_COLUMN_OPTIONS.map((item) => item.key),
+                        );
+                      }}
+                    />
+                    {column.label}
+                  </label>
+                ))}
+              </div>
+            )}
+
+            {tab === "invoices" ? (
+              <div className="mt-4 flex flex-wrap gap-2">
+                {PAYMENT_INVOICE_COLUMN_OPTIONS.map((column) => (
+                  <label key={column.key} className="flex items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={invoiceColumns.includes(column.key)}
+                      onChange={() => {
+                        toggleColumn(
+                          invoiceColumns,
+                          column.key,
+                          setInvoiceColumns,
+                          PAYMENT_INVOICE_COLUMN_OPTIONS.map((item) => item.key),
+                        );
+                      }}
+                    />
+                    {column.label}
+                  </label>
+                ))}
+              </div>
+            ) : null}
+
+            {tab === "instalment" && createPlanOpen ? (
+              <div className="mt-4 grid gap-3 md:grid-cols-2">
+                <input
+                  className={fieldClassName}
+                  placeholder="Membership ID (UUID)"
+                  value={createMembershipId}
+                  onChange={(event) => {
+                    setCreateMembershipId(event.target.value);
+                  }}
+                />
+                <input
+                  className={fieldClassName}
+                  placeholder="Product title"
+                  value={createProductTitle}
+                  onChange={(event) => {
+                    setCreateProductTitle(event.target.value);
+                  }}
+                />
+                <input
+                  className={fieldClassName}
+                  placeholder="Pricing plan label"
+                  value={createPricingLabel}
+                  onChange={(event) => {
+                    setCreatePricingLabel(event.target.value);
+                  }}
+                />
+                <input
+                  className={fieldClassName}
+                  placeholder="Total amount (cents)"
+                  value={createTotalCents}
+                  onChange={(event) => {
+                    setCreateTotalCents(event.target.value);
+                  }}
+                />
+                <input
+                  type="date"
+                  className={fieldClassName}
+                  value={createDue1}
+                  onChange={(event) => {
+                    setCreateDue1(event.target.value);
+                  }}
+                />
+                <input
+                  type="date"
+                  className={fieldClassName}
+                  value={createDue2}
+                  onChange={(event) => {
+                    setCreateDue2(event.target.value);
+                  }}
+                />
+                <button
+                  type="button"
+                  className={primaryButtonClassName}
+                  disabled={busy}
+                  onClick={() => void handleCreatePlan()}
+                >
+                  Save plan
                 </button>
               </div>
-            ))}
-          </div>
-        ) : null}
+            ) : null}
+          </section>
 
-        {(tab === "transactions" || (tab === "gateways" && selectedGateway)) && (
-          <div className="mt-4 flex flex-wrap gap-2">
-            {PAYMENT_TRANSACTION_COLUMN_OPTIONS.map((column) => (
-              <label key={column.key} className="flex items-center gap-2 text-sm">
-                <input
-                  type="checkbox"
-                  checked={txColumns.includes(column.key)}
-                  onChange={() =>
-                    toggleColumn(
-                      txColumns,
-                      column.key,
-                      setTxColumns,
-                      PAYMENT_TRANSACTION_COLUMN_OPTIONS.map((item) => item.key),
-                    )
-                  }
-                />
-                {column.label}
-              </label>
-            ))}
-          </div>
-        )}
-
-        {tab === "invoices" ? (
-          <div className="mt-4 flex flex-wrap gap-2">
-            {PAYMENT_INVOICE_COLUMN_OPTIONS.map((column) => (
-              <label key={column.key} className="flex items-center gap-2 text-sm">
-                <input
-                  type="checkbox"
-                  checked={invoiceColumns.includes(column.key)}
-                  onChange={() =>
-                    toggleColumn(
-                      invoiceColumns,
-                      column.key,
-                      setInvoiceColumns,
-                      PAYMENT_INVOICE_COLUMN_OPTIONS.map((item) => item.key),
-                    )
-                  }
-                />
-                {column.label}
-              </label>
-            ))}
-          </div>
-        ) : null}
-
-        {tab === "instalment" && createPlanOpen ? (
-          <div className="mt-4 grid gap-3 md:grid-cols-2">
-            <input
-              className={fieldClassName}
-              placeholder="Membership ID (UUID)"
-              value={createMembershipId}
-              onChange={(event) => setCreateMembershipId(event.target.value)}
-            />
-            <input
-              className={fieldClassName}
-              placeholder="Product title"
-              value={createProductTitle}
-              onChange={(event) => setCreateProductTitle(event.target.value)}
-            />
-            <input
-              className={fieldClassName}
-              placeholder="Pricing plan label"
-              value={createPricingLabel}
-              onChange={(event) => setCreatePricingLabel(event.target.value)}
-            />
-            <input
-              className={fieldClassName}
-              placeholder="Total amount (cents)"
-              value={createTotalCents}
-              onChange={(event) => setCreateTotalCents(event.target.value)}
-            />
-            <input
-              type="date"
-              className={fieldClassName}
-              value={createDue1}
-              onChange={(event) => setCreateDue1(event.target.value)}
-            />
-            <input
-              type="date"
-              className={fieldClassName}
-              value={createDue2}
-              onChange={(event) => setCreateDue2(event.target.value)}
-            />
-            <button
-              type="button"
-              className={primaryButtonClassName}
-              disabled={busy}
-              onClick={() => void handleCreatePlan()}
-            >
-              Save plan
-            </button>
-          </div>
-        ) : null}
-      </section>
-
-      <section className={analyticsTableShellClassName}>
-        {loading ? (
-          <p className="p-4 text-sm text-neutral-600">Loading…</p>
-        ) : tab === "gateways" && !selectedGateway ? (
-          <table className="w-full text-left text-sm">
-            <thead className={analyticsTableHeadClassName}>
-              <tr>
-                <th className="px-4 py-3">Gateway</th>
-                <th className="px-4 py-3">Status</th>
-                <th className="px-4 py-3">Transactions</th>
-                <th className="px-4 py-3">Paid volume</th>
-              </tr>
-            </thead>
-            <tbody>
-              {gateways.length === 0 ? (
-                <tr>
-                  <td className="px-4 py-6 text-neutral-500" colSpan={4}>
-                    No payment gateways configured yet.
-                  </td>
-                </tr>
-              ) : (
-                gateways.map((gateway) => (
-                  <tr
-                    key={gateway.id}
-                    className={`${analyticsTableRowClassName} cursor-pointer`}
-                    onClick={() => {
-                      setSelectedGateway(gateway);
-                      setPage(1);
-                    }}
-                  >
-                    <td className="px-4 py-3">
-                      {gateway.displayName}
-                      {gateway.isDefault ? " (default)" : ""}
-                    </td>
-                    <td className="px-4 py-3">
-                      {gateway.isPublished
-                        ? "Published"
-                        : gateway.isConfigured
-                          ? "Configured"
-                          : "Draft"}
-                    </td>
-                    <td className="px-4 py-3">{gateway.transactionCount}</td>
-                    <td className="px-4 py-3">{formatMoney(gateway.paidAmountCents)}</td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        ) : tab === "invoices" ? (
-          <table className="w-full text-left text-sm">
-            <thead className={analyticsTableHeadClassName}>
-              <tr>
-                {invoiceColumns.includes("invoice_number") ? (
-                  <th className="px-4 py-3">Invoice #</th>
-                ) : null}
-                {invoiceColumns.includes("learner_name") ? (
-                  <th className="px-4 py-3">Learner</th>
-                ) : null}
-                {invoiceColumns.includes("product_title") ? (
-                  <th className="px-4 py-3">Product</th>
-                ) : null}
-                {invoiceColumns.includes("amount_cents") ? (
-                  <th className="px-4 py-3">Price</th>
-                ) : null}
-                {invoiceColumns.includes("tax_amount_cents") ? (
-                  <th className="px-4 py-3">Tax</th>
-                ) : null}
-                {invoiceColumns.includes("paid_at") ? <th className="px-4 py-3">Date</th> : null}
-                <th className="px-4 py-3">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {invoices.length === 0 ? (
-                <tr>
-                  <td className="px-4 py-6 text-neutral-500" colSpan={7}>
-                    No invoices yet. Paid orders receive invoice numbers automatically.
-                  </td>
-                </tr>
-              ) : (
-                invoices.map((invoice) => (
-                  <tr key={invoice.id} className={analyticsTableRowClassName}>
-                    {invoiceColumns.includes("invoice_number") ? (
-                      <td className="px-4 py-3">{invoice.invoiceNumber}</td>
-                    ) : null}
-                    {invoiceColumns.includes("learner_name") ? (
-                      <td className="px-4 py-3">
-                        {invoice.membershipId ? (
-                          <Link
-                            href={`/admin/members/${invoice.membershipId}`}
-                            className="underline"
-                          >
-                            {invoice.learnerName ?? invoice.email ?? "Learner"}
-                          </Link>
-                        ) : (
-                          (invoice.learnerName ?? "—")
-                        )}
-                      </td>
-                    ) : null}
-                    {invoiceColumns.includes("product_title") ? (
-                      <td className="px-4 py-3">{invoice.productTitle ?? "—"}</td>
-                    ) : null}
-                    {invoiceColumns.includes("amount_cents") ? (
-                      <td className="px-4 py-3">
-                        {formatMoney(invoice.amountCents, invoice.currency)}
-                      </td>
-                    ) : null}
-                    {invoiceColumns.includes("tax_amount_cents") ? (
-                      <td className="px-4 py-3">
-                        {formatMoney(invoice.taxAmountCents, invoice.currency)}
-                      </td>
-                    ) : null}
-                    {invoiceColumns.includes("paid_at") ? (
-                      <td className="px-4 py-3">{formatDate(invoice.paidAt)}</td>
-                    ) : null}
-                    <td className="px-4 py-3">
-                      <button
-                        type="button"
-                        className={ghostButtonClassName}
-                        disabled={busy}
-                        onClick={() => void handleDownloadInvoice(invoice.id)}
-                      >
-                        Download
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        ) : tab === "instalment" ? (
-          selectedPlan ? (
-            <div className="space-y-4 p-4">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <h2 className="text-lg font-medium">{selectedPlan.productTitle}</h2>
-                  <p className="text-sm text-neutral-600">
-                    {selectedPlan.learnerName ?? selectedPlan.email} · Remaining{" "}
-                    {formatMoney(selectedPlan.remainingAmountCents, selectedPlan.currency)}
-                  </p>
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    className={ghostButtonClassName}
-                    onClick={() => {
-                      setSelectedPlan(null);
-                      setPlanSchedule([]);
-                    }}
-                  >
-                    Back
-                  </button>
-                  <button
-                    type="button"
-                    className={primaryButtonClassName}
-                    disabled={busy || selectedPlan.status === "completed"}
-                    onClick={() => void handlePayNextInstalment()}
-                  >
-                    Record next payment
-                  </button>
-                </div>
-              </div>
+          <section className={analyticsTableShellClassName}>
+            {loading ? (
+              <p className="p-4 text-sm text-neutral-600">Loading…</p>
+            ) : tab === "gateways" && !selectedGateway ? (
               <table className="w-full text-left text-sm">
                 <thead className={analyticsTableHeadClassName}>
                   <tr>
-                    <th className="px-4 py-3">#</th>
-                    <th className="px-4 py-3">Amount</th>
-                    <th className="px-4 py-3">Due</th>
-                    <th className="px-4 py-3">Paid</th>
+                    <th className="px-4 py-3">Gateway</th>
                     <th className="px-4 py-3">Status</th>
+                    <th className="px-4 py-3">Transactions</th>
+                    <th className="px-4 py-3">Paid volume</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {planSchedule.map((item) => (
-                    <tr key={item.id} className={analyticsTableRowClassName}>
-                      <td className="px-4 py-3">{item.sequenceNo}</td>
-                      <td className="px-4 py-3">
-                        {formatMoney(item.amountCents, selectedPlan.currency)}
+                  {gateways.length === 0 ? (
+                    <tr>
+                      <td className="px-4 py-6 text-neutral-500" colSpan={4}>
+                        No payment gateways configured yet.
                       </td>
-                      <td className="px-4 py-3">{formatDate(item.dueAt)}</td>
-                      <td className="px-4 py-3">{formatDate(item.paidAt)}</td>
-                      <td className="px-4 py-3">{titleCase(item.status)}</td>
                     </tr>
-                  ))}
+                  ) : (
+                    gateways.map((gateway) => (
+                      <tr
+                        key={gateway.id}
+                        className={`${analyticsTableRowClassName} cursor-pointer`}
+                        onClick={() => {
+                          setSelectedGateway(gateway);
+                          setPage(1);
+                        }}
+                      >
+                        <td className="px-4 py-3">
+                          {gateway.displayName}
+                          {gateway.isDefault ? " (default)" : ""}
+                        </td>
+                        <td className="px-4 py-3">
+                          {gateway.isPublished
+                            ? "Published"
+                            : gateway.isConfigured
+                              ? "Configured"
+                              : "Draft"}
+                        </td>
+                        <td className="px-4 py-3">{gateway.transactionCount}</td>
+                        <td className="px-4 py-3">{formatMoney(gateway.paidAmountCents)}</td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
-            </div>
-          ) : (
-            <table className="w-full text-left text-sm">
-              <thead className={analyticsTableHeadClassName}>
-                <tr>
-                  <th className="px-4 py-3">Learner</th>
-                  <th className="px-4 py-3">Product</th>
-                  <th className="px-4 py-3">Pricing</th>
-                  <th className="px-4 py-3">Remaining</th>
-                  <th className="px-4 py-3">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {instalments.length === 0 ? (
+            ) : tab === "invoices" ? (
+              <table className="w-full text-left text-sm">
+                <thead className={analyticsTableHeadClassName}>
                   <tr>
-                    <td className="px-4 py-6 text-neutral-500" colSpan={5}>
-                      No instalment plans yet. Create a plan to track remaining balances.
-                    </td>
+                    {invoiceColumns.includes("invoice_number") ? (
+                      <th className="px-4 py-3">Invoice #</th>
+                    ) : null}
+                    {invoiceColumns.includes("learner_name") ? (
+                      <th className="px-4 py-3">Learner</th>
+                    ) : null}
+                    {invoiceColumns.includes("product_title") ? (
+                      <th className="px-4 py-3">Product</th>
+                    ) : null}
+                    {invoiceColumns.includes("amount_cents") ? (
+                      <th className="px-4 py-3">Price</th>
+                    ) : null}
+                    {invoiceColumns.includes("tax_amount_cents") ? (
+                      <th className="px-4 py-3">Tax</th>
+                    ) : null}
+                    {invoiceColumns.includes("paid_at") ? (
+                      <th className="px-4 py-3">Date</th>
+                    ) : null}
+                    <th className="px-4 py-3">Actions</th>
                   </tr>
-                ) : (
-                  instalments.map((plan) => (
-                    <tr
-                      key={plan.id}
-                      className={`${analyticsTableRowClassName} cursor-pointer`}
-                      onClick={() => void openPlan(plan)}
-                    >
-                      <td className="px-4 py-3">{plan.learnerName ?? plan.email ?? "—"}</td>
-                      <td className="px-4 py-3">{plan.productTitle}</td>
-                      <td className="px-4 py-3">{plan.pricingPlanLabel ?? "—"}</td>
-                      <td className="px-4 py-3">
-                        {formatMoney(plan.remainingAmountCents, plan.currency)} /{" "}
-                        {formatMoney(plan.totalAmountCents, plan.currency)}
+                </thead>
+                <tbody>
+                  {invoices.length === 0 ? (
+                    <tr>
+                      <td className="px-4 py-6 text-neutral-500" colSpan={7}>
+                        No invoices yet. Paid orders receive invoice numbers automatically.
                       </td>
-                      <td className="px-4 py-3">{titleCase(plan.status)}</td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          )
-        ) : (
-          <table className="w-full text-left text-sm">
-            <thead className={analyticsTableHeadClassName}>
-              <tr>
-                {txColumns.includes("learner_name") ? <th className="px-4 py-3">Learner</th> : null}
-                {txColumns.includes("product_title") ? <th className="px-4 py-3">Product</th> : null}
-                {txColumns.includes("product_type") ? <th className="px-4 py-3">Type</th> : null}
-                {txColumns.includes("gateway_key") ? <th className="px-4 py-3">Gateway</th> : null}
-                {txColumns.includes("coupon_amount_cents") ? (
-                  <th className="px-4 py-3">Coupon</th>
-                ) : null}
-                {txColumns.includes("amount_cents") ? <th className="px-4 py-3">Amount</th> : null}
-                {txColumns.includes("status") ? <th className="px-4 py-3">Status</th> : null}
-                {txColumns.includes("paid_at") ? <th className="px-4 py-3">Date</th> : null}
-              </tr>
-            </thead>
-            <tbody>
-              {transactions.length === 0 ? (
-                <tr>
-                  <td className="px-4 py-6 text-neutral-500" colSpan={8}>
-                    No transactions found for the selected filters.
-                  </td>
-                </tr>
+                  ) : (
+                    invoices.map((invoice) => (
+                      <tr key={invoice.id} className={analyticsTableRowClassName}>
+                        {invoiceColumns.includes("invoice_number") ? (
+                          <td className="px-4 py-3">{invoice.invoiceNumber}</td>
+                        ) : null}
+                        {invoiceColumns.includes("learner_name") ? (
+                          <td className="px-4 py-3">
+                            {invoice.membershipId ? (
+                              <Link
+                                href={`/admin/members/${invoice.membershipId}`}
+                                className="underline"
+                              >
+                                {invoice.learnerName ?? invoice.email ?? "Learner"}
+                              </Link>
+                            ) : (
+                              (invoice.learnerName ?? "—")
+                            )}
+                          </td>
+                        ) : null}
+                        {invoiceColumns.includes("product_title") ? (
+                          <td className="px-4 py-3">{invoice.productTitle ?? "—"}</td>
+                        ) : null}
+                        {invoiceColumns.includes("amount_cents") ? (
+                          <td className="px-4 py-3">
+                            {formatMoney(invoice.amountCents, invoice.currency)}
+                          </td>
+                        ) : null}
+                        {invoiceColumns.includes("tax_amount_cents") ? (
+                          <td className="px-4 py-3">
+                            {formatMoney(invoice.taxAmountCents, invoice.currency)}
+                          </td>
+                        ) : null}
+                        {invoiceColumns.includes("paid_at") ? (
+                          <td className="px-4 py-3">{formatDate(invoice.paidAt)}</td>
+                        ) : null}
+                        <td className="px-4 py-3">
+                          <button
+                            type="button"
+                            className={ghostButtonClassName}
+                            disabled={busy}
+                            onClick={() => void handleDownloadInvoice(invoice.id)}
+                          >
+                            Download
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            ) : tab === "instalment" ? (
+              selectedPlan ? (
+                <div className="space-y-4 p-4">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      <h2 className="text-lg font-medium">{selectedPlan.productTitle}</h2>
+                      <p className="text-sm text-neutral-600">
+                        {selectedPlan.learnerName ?? selectedPlan.email} · Remaining{" "}
+                        {formatMoney(selectedPlan.remainingAmountCents, selectedPlan.currency)}
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        className={ghostButtonClassName}
+                        onClick={() => {
+                          setSelectedPlan(null);
+                          setPlanSchedule([]);
+                        }}
+                      >
+                        Back
+                      </button>
+                      <button
+                        type="button"
+                        className={primaryButtonClassName}
+                        disabled={busy || selectedPlan.status === "completed"}
+                        onClick={() => void handlePayNextInstalment()}
+                      >
+                        Record next payment
+                      </button>
+                    </div>
+                  </div>
+                  <table className="w-full text-left text-sm">
+                    <thead className={analyticsTableHeadClassName}>
+                      <tr>
+                        <th className="px-4 py-3">#</th>
+                        <th className="px-4 py-3">Amount</th>
+                        <th className="px-4 py-3">Due</th>
+                        <th className="px-4 py-3">Paid</th>
+                        <th className="px-4 py-3">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {planSchedule.map((item) => (
+                        <tr key={item.id} className={analyticsTableRowClassName}>
+                          <td className="px-4 py-3">{item.sequenceNo}</td>
+                          <td className="px-4 py-3">
+                            {formatMoney(item.amountCents, selectedPlan.currency)}
+                          </td>
+                          <td className="px-4 py-3">{formatDate(item.dueAt)}</td>
+                          <td className="px-4 py-3">{formatDate(item.paidAt)}</td>
+                          <td className="px-4 py-3">{titleCase(item.status)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               ) : (
-                transactions.map((tx) => (
-                  <tr
-                    key={tx.id}
-                    className={`${analyticsTableRowClassName} cursor-pointer`}
-                    onClick={() => {
-                      if (tx.membershipId) router.push(`/admin/members/${tx.membershipId}`);
-                    }}
-                  >
+                <table className="w-full text-left text-sm">
+                  <thead className={analyticsTableHeadClassName}>
+                    <tr>
+                      <th className="px-4 py-3">Learner</th>
+                      <th className="px-4 py-3">Product</th>
+                      <th className="px-4 py-3">Pricing</th>
+                      <th className="px-4 py-3">Remaining</th>
+                      <th className="px-4 py-3">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {instalments.length === 0 ? (
+                      <tr>
+                        <td className="px-4 py-6 text-neutral-500" colSpan={5}>
+                          No instalment plans yet. Create a plan to track remaining balances.
+                        </td>
+                      </tr>
+                    ) : (
+                      instalments.map((plan) => (
+                        <tr
+                          key={plan.id}
+                          className={`${analyticsTableRowClassName} cursor-pointer`}
+                          onClick={() => void openPlan(plan)}
+                        >
+                          <td className="px-4 py-3">{plan.learnerName ?? plan.email ?? "—"}</td>
+                          <td className="px-4 py-3">{plan.productTitle}</td>
+                          <td className="px-4 py-3">{plan.pricingPlanLabel ?? "—"}</td>
+                          <td className="px-4 py-3">
+                            {formatMoney(plan.remainingAmountCents, plan.currency)} /{" "}
+                            {formatMoney(plan.totalAmountCents, plan.currency)}
+                          </td>
+                          <td className="px-4 py-3">{titleCase(plan.status)}</td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              )
+            ) : (
+              <table className="w-full text-left text-sm">
+                <thead className={analyticsTableHeadClassName}>
+                  <tr>
                     {txColumns.includes("learner_name") ? (
-                      <td className="px-4 py-3">{tx.learnerName ?? tx.email ?? "—"}</td>
+                      <th className="px-4 py-3">Learner</th>
                     ) : null}
                     {txColumns.includes("product_title") ? (
-                      <td className="px-4 py-3">{tx.productTitle ?? "—"}</td>
+                      <th className="px-4 py-3">Product</th>
                     ) : null}
                     {txColumns.includes("product_type") ? (
-                      <td className="px-4 py-3">{titleCase(tx.productType)}</td>
+                      <th className="px-4 py-3">Type</th>
                     ) : null}
                     {txColumns.includes("gateway_key") ? (
-                      <td className="px-4 py-3">{tx.gatewayKey ?? "—"}</td>
+                      <th className="px-4 py-3">Gateway</th>
                     ) : null}
                     {txColumns.includes("coupon_amount_cents") ? (
-                      <td className="px-4 py-3">
-                        {formatMoney(tx.couponAmountCents, tx.currency)}
-                      </td>
+                      <th className="px-4 py-3">Coupon</th>
                     ) : null}
                     {txColumns.includes("amount_cents") ? (
-                      <td className="px-4 py-3">{formatMoney(tx.amountCents, tx.currency)}</td>
+                      <th className="px-4 py-3">Amount</th>
                     ) : null}
-                    {txColumns.includes("status") ? (
-                      <td className="px-4 py-3">{titleCase(tx.status)}</td>
-                    ) : null}
-                    {txColumns.includes("paid_at") ? (
-                      <td className="px-4 py-3">{formatDate(tx.paidAt ?? tx.createdAt)}</td>
-                    ) : null}
+                    {txColumns.includes("status") ? <th className="px-4 py-3">Status</th> : null}
+                    {txColumns.includes("paid_at") ? <th className="px-4 py-3">Date</th> : null}
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        )}
-      </section>
+                </thead>
+                <tbody>
+                  {transactions.length === 0 ? (
+                    <tr>
+                      <td className="px-4 py-6 text-neutral-500" colSpan={8}>
+                        No transactions found for the selected filters.
+                      </td>
+                    </tr>
+                  ) : (
+                    transactions.map((tx) => (
+                      <tr
+                        key={tx.id}
+                        className={`${analyticsTableRowClassName} cursor-pointer`}
+                        onClick={() => {
+                          if (tx.membershipId) router.push(`/admin/members/${tx.membershipId}`);
+                        }}
+                      >
+                        {txColumns.includes("learner_name") ? (
+                          <td className="px-4 py-3">{tx.learnerName ?? tx.email ?? "—"}</td>
+                        ) : null}
+                        {txColumns.includes("product_title") ? (
+                          <td className="px-4 py-3">{tx.productTitle ?? "—"}</td>
+                        ) : null}
+                        {txColumns.includes("product_type") ? (
+                          <td className="px-4 py-3">{titleCase(tx.productType)}</td>
+                        ) : null}
+                        {txColumns.includes("gateway_key") ? (
+                          <td className="px-4 py-3">{tx.gatewayKey ?? "—"}</td>
+                        ) : null}
+                        {txColumns.includes("coupon_amount_cents") ? (
+                          <td className="px-4 py-3">
+                            {formatMoney(tx.couponAmountCents, tx.currency)}
+                          </td>
+                        ) : null}
+                        {txColumns.includes("amount_cents") ? (
+                          <td className="px-4 py-3">{formatMoney(tx.amountCents, tx.currency)}</td>
+                        ) : null}
+                        {txColumns.includes("status") ? (
+                          <td className="px-4 py-3">{titleCase(tx.status)}</td>
+                        ) : null}
+                        {txColumns.includes("paid_at") ? (
+                          <td className="px-4 py-3">{formatDate(tx.paidAt ?? tx.createdAt)}</td>
+                        ) : null}
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            )}
+          </section>
 
-      {totalPages > 1 ? (
-        <div className="flex items-center justify-between gap-3">
-          <p className="text-sm text-neutral-600">
-            Page {page} of {totalPages} · {totalCount} rows
-          </p>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              className={ghostButtonClassName}
-              disabled={page <= 1 || loading}
-              onClick={() => setPage((current) => Math.max(1, current - 1))}
-            >
-              Previous
-            </button>
-            <button
-              type="button"
-              className={ghostButtonClassName}
-              disabled={page >= totalPages || loading}
-              onClick={() => setPage((current) => current + 1)}
-            >
-              Next
-            </button>
-          </div>
-        </div>
-      ) : null}
+          {totalPages > 1 ? (
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-sm text-neutral-600">
+                Page {page} of {totalPages} · {totalCount} rows
+              </p>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  className={ghostButtonClassName}
+                  disabled={page <= 1 || loading}
+                  onClick={() => {
+                    setPage((current) => Math.max(1, current - 1));
+                  }}
+                >
+                  Previous
+                </button>
+                <button
+                  type="button"
+                  className={ghostButtonClassName}
+                  disabled={page >= totalPages || loading}
+                  onClick={() => {
+                    setPage((current) => current + 1);
+                  }}
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          ) : null}
         </>
       )}
     </div>

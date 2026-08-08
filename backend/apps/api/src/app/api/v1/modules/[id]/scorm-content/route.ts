@@ -23,7 +23,7 @@ const scormContentQuerySchema = z
   })
   .strict();
 
-const routeMetadata = {
+export const routeMetadata = {
   permission: "course.read",
   entitlement: null,
   audit: "none",
@@ -50,10 +50,7 @@ const routeMetadata = {
   },
 } satisfies RouteMetadata;
 
-export async function GET(
-  req: NextRequest,
-  context: { params: Promise<{ id: string }> },
-) {
+export async function GET(req: NextRequest, context: { params: Promise<{ id: string }> }) {
   const requestId = getOrCreateRequestId(req.headers);
   const params = uuidParamSchema.parse(await context.params);
   const moduleId = params.id;
@@ -96,7 +93,7 @@ export async function GET(
             tx,
             ctx: {
               tenantId: tenant.tenantId,
-              actorMembershipId: membership.id,
+              actorMembershipId: membership.membershipId,
               requestId,
             },
             metadata: routeMetadata,
@@ -109,7 +106,7 @@ export async function GET(
       );
 
       return attachRequestIdHeader(
-        new NextResponse(result.body, {
+        new NextResponse(new Uint8Array(result.body), {
           status: 200,
           headers: {
             "content-type": result.contentType,

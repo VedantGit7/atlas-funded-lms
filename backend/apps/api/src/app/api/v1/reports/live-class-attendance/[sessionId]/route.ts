@@ -2,7 +2,7 @@ import type { z } from "zod";
 import { createTenantRoute, noBodySchema } from "@atlas/api";
 import {
   liveSessionDetailResponseSchema,
-  liveSessionIdParamsSchema,
+  liveClassSessionIdParamsSchema,
 } from "@atlas/domain/reports/live-class-attendance-roster.dto";
 import { listLiveClassAttendanceRosterMetadata } from "@atlas/domain/reports/live-class-attendance-roster.route-metadata";
 import { getLiveClassSessionDetailedReport } from "@atlas/domain/reports/live-class-attendance-roster.service";
@@ -10,12 +10,12 @@ import { getLiveClassSessionDetailedReport } from "@atlas/domain/reports/live-cl
 export const GET = createTenantRoute<
   Record<string, never>,
   z.output<typeof liveSessionDetailResponseSchema>,
-  typeof liveSessionIdParamsSchema
+  typeof liveClassSessionIdParamsSchema
 >({
   metadata: listLiveClassAttendanceRosterMetadata,
   input: noBodySchema,
-  params: liveSessionIdParamsSchema,
+  params: liveClassSessionIdParamsSchema,
   output: liveSessionDetailResponseSchema,
   handler: async ({ tx, ctx, params }) =>
-    getLiveClassSessionDetailedReport(tx, ctx, params.sessionId),
+    getLiveClassSessionDetailedReport(tx, ctx, params["sessionId"]),
 });

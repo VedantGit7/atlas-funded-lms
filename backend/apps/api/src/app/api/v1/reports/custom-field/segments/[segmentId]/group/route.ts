@@ -18,5 +18,5 @@ export const POST = createTenantRoute<
   body: createSegmentGroupBodySchema,
   output: customFieldSegmentGroupResponseSchema,
   handler: async ({ tx, ctx, params, input }) =>
-    createGroupFromCustomFieldSegment(tx, ctx, params.segmentId, input),
+    createGroupFromCustomFieldSegment(tx, ctx, params["segmentId"], input),
 });

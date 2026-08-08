@@ -63,9 +63,9 @@ function inferLessonTypeFromFileName(fileName: string): string | null {
 
 export function resolveLessonType(args: {
   contentJson: unknown;
-  videoUrl?: string | null;
-  videoProvider?: string | null;
-  assetFileHint?: string | null;
+  videoUrl?: string | null | undefined;
+  videoProvider?: string | null | undefined;
+  assetFileHint?: string | null | undefined;
 }): string | null {
   const contentJson = parseLessonContentJson(args.contentJson);
   const stored = resolveStoredLessonType(contentJson);
@@ -73,13 +73,13 @@ export function resolveLessonType(args: {
 
   if (args.videoUrl?.trim() || args.videoProvider?.trim()) return "video";
 
-  const fileName =
-    (typeof contentJson?.["primaryAssetFileName"] === "string"
+  const fileName = (
+    typeof contentJson?.["primaryAssetFileName"] === "string"
       ? contentJson["primaryAssetFileName"]
       : typeof args.assetFileHint === "string"
         ? args.assetFileHint
         : ""
-    ).toLowerCase();
+  ).toLowerCase();
 
   const inferredFromFile = inferLessonTypeFromFileName(fileName);
   if (inferredFromFile) return inferredFromFile;
@@ -99,9 +99,9 @@ export function resolveLessonType(args: {
 
 export function ensureLessonTypeInContentJson(args: {
   contentJson: Record<string, unknown> | null;
-  videoUrl?: string | null;
-  videoProvider?: string | null;
-  assetFileHint?: string | null;
+  videoUrl?: string | null | undefined;
+  videoProvider?: string | null | undefined;
+  assetFileHint?: string | null | undefined;
 }): Record<string, unknown> | null {
   const resolved = resolveLessonType({
     contentJson: args.contentJson,
@@ -189,7 +189,11 @@ export function mergeLessonContentJson(
   if (input.content !== undefined) {
     if (typeof input.content === "string") {
       merged["body"] = input.content;
-    } else if (input.content && typeof input.content === "object" && !Array.isArray(input.content)) {
+    } else if (
+      input.content &&
+      typeof input.content === "object" &&
+      !Array.isArray(input.content)
+    ) {
       for (const [key, value] of Object.entries(input.content as Record<string, unknown>)) {
         if (value === undefined) continue;
         merged[key] = value;
@@ -272,7 +276,11 @@ export async function findLessonWithModuleAndCourse(args: {
   };
 }
 
-export async function listLessonsForModuleBuilder(args: { tx: Tx; moduleId: string; tagId?: string }) {
+export async function listLessonsForModuleBuilder(args: {
+  tx: Tx;
+  moduleId: string;
+  tagId?: string | undefined;
+}) {
   type LessonOutlineRow = {
     id: string;
     slug: string;
@@ -464,8 +472,8 @@ export async function moveLessonToModule(args: {
 export async function listPublishedLessonsForModule(args: {
   tx: Tx;
   moduleId: string;
-  tagId?: string;
-  publicTagFilter?: boolean;
+  tagId?: string | undefined;
+  publicTagFilter?: boolean | undefined;
 }) {
   if (args.tagId && args.publicTagFilter) {
     const rows = await args.tx.$queryRaw<

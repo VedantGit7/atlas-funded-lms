@@ -15,5 +15,5 @@ export const GET = createTenantRoute<
   metadata: listAnnouncementsMetadata,
   params: paramsSchema,
   output: announcementResponseSchema,
-  handler: async ({ tx, ctx, params }) => getAnnouncement(tx, ctx, params.id),
+  handler: async ({ tx, ctx, params }) => getAnnouncement(tx, ctx, params["id"]),
 });

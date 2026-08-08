@@ -34,9 +34,9 @@ export type ProgressScoreOverview = {
 };
 
 export async function fetchProgressScoreOverview(params?: {
-  window?: ProgressScoreOverviewWindow;
-  from?: string;
-  to?: string;
+  window?: ProgressScoreOverviewWindow | undefined;
+  from?: string | undefined;
+  to?: string | undefined;
 }) {
   const search = new URLSearchParams();
   if (params?.window) search.set("window", params.window);

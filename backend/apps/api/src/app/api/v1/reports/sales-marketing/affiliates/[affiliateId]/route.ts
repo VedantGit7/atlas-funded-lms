@@ -18,5 +18,5 @@ export const GET = createTenantRoute<
   params: affiliateIdParamsSchema,
   output: affiliateDetailResponseSchema,
   handler: async ({ tx, ctx, input, params }) =>
-    getAffiliateDetail(tx, ctx, params.affiliateId, input),
+    getAffiliateDetail(tx, ctx, params["affiliateId"], input),
 });

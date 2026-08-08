@@ -15,5 +15,5 @@ export const GET = createTenantRoute<
   metadata: listCustomFieldSegmentsMetadata,
   params: customFieldSegmentParamsSchema,
   output: customFieldSegmentViewResponseSchema,
-  handler: async ({ tx, ctx, params }) => getCustomFieldSegmentView(tx, ctx, params.segmentId),
+  handler: async ({ tx, ctx, params }) => getCustomFieldSegmentView(tx, ctx, params["segmentId"]),
 });

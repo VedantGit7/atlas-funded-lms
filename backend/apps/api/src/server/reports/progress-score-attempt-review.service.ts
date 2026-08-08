@@ -2,7 +2,6 @@ import type { TenantTx } from "@atlas/db";
 import type { ServiceCtx } from "@atlas/domain/shared/domain.types";
 import {
   grantExtraAttemptResponseSchema,
-  resetAttemptResponseSchema,
   saveAttemptGradingResponseSchema,
   scoreAttemptReviewResponseSchema,
   voidAttemptResponseSchema,
@@ -51,9 +50,11 @@ function readConfig(configJson: unknown) {
         ? Math.floor(record["attemptsAllowed"])
         : 1,
     timeLimitSeconds:
-      typeof record["timeLimitSeconds"] === "number" ? Math.floor(record["timeLimitSeconds"]) : null,
+      typeof record["timeLimitSeconds"] === "number"
+        ? Math.floor(record["timeLimitSeconds"])
+        : null,
     passMarkPercent:
-      typeof record["passMarkPercent"] === "number" ? Number(record["passMarkPercent"]) : null,
+      typeof record["passMarkPercent"] === "number" ? record["passMarkPercent"] : null,
   };
 }
 
@@ -83,11 +84,7 @@ export async function getScoreAttemptReview(
   const effectiveAttemptsAllowed = config.attemptsAllowed + extraAttemptsGranted;
 
   const [siblings, questions] = await Promise.all([
-    progressScoreAttemptReviewRepository.listSiblingAttempts(
-      tx,
-      assessmentId,
-      core.membership_id,
-    ),
+    progressScoreAttemptReviewRepository.listSiblingAttempts(tx, assessmentId, core.membership_id),
     progressScoreAttemptReviewRepository.listQuestionsWithAnswers(tx, assessmentId, attemptId),
   ]);
 
@@ -95,7 +92,16 @@ export async function getScoreAttemptReview(
   const attemptNumber = currentSibling?.attempt_number ?? 1;
   const siblingIndex = siblings.findIndex((s) => s.attempt_id === attemptId);
 
-  const history = siblings.map((sibling, index) => {
+  const history: Array<{
+    attemptId: string | null;
+    attemptNumber: number;
+    scorePct: number | null;
+    scoreDelta: number | null;
+    resultStatus: ReturnType<typeof resultStatus> | "pending";
+    submittedAt: string | null;
+    isCurrent: boolean;
+    isAvailableSlot: boolean;
+  }> = siblings.map((sibling, index) => {
     const prev = index > 0 ? siblings[index - 1] : null;
     const scorePct = sibling.score_pct == null ? null : roundPct(sibling.score_pct);
     const prevScore = prev?.score_pct == null ? null : roundPct(prev.score_pct);
@@ -132,10 +138,7 @@ export async function getScoreAttemptReview(
   const needsGradingCount = questions.filter((q) => q.outcome === "needs_grading").length;
   const durationSeconds =
     core.submitted_at && core.started_at
-      ? Math.max(
-          0,
-          Math.round((core.submitted_at.getTime() - core.started_at.getTime()) / 1000),
-        )
+      ? Math.max(0, Math.round((core.submitted_at.getTime() - core.started_at.getTime()) / 1000))
       : null;
 
   let pointsShortfall: number | null = null;
@@ -250,7 +253,7 @@ export async function saveAttemptGrading(
     }
     if (item.pointsAwarded > question.pointsMax) {
       throw progressScoreAttemptActionFailed(
-        `Points for question ${question.position + 1} exceed max ${question.pointsMax}.`,
+        `Points for question ${String(question.position + 1)} exceed max ${String(question.pointsMax)}.`,
       );
     }
 
@@ -259,10 +262,9 @@ export async function saveAttemptGrading(
       ...existingAnswer,
       ...(item.feedback !== undefined ? { instructorFeedback: item.feedback } : {}),
     };
-    const isCorrect =
-      question.isManual
-        ? item.pointsAwarded >= question.pointsMax
-        : item.pointsAwarded >= question.pointsMax;
+    const isCorrect = question.isManual
+      ? item.pointsAwarded >= question.pointsMax
+      : item.pointsAwarded >= question.pointsMax;
 
     if (!question.hasAnswer) {
       await tx.$executeRaw`
@@ -308,7 +310,9 @@ export async function saveAttemptGrading(
   const earned = refreshed.reduce((sum, q) => sum + (q.pointsAwarded ?? 0), 0);
   const possible = refreshed.reduce((sum, q) => sum + q.pointsMax, 0);
   const scorePct = possible > 0 ? roundPct((earned / possible) * 100) : null;
-  const stillNeedsGrading = refreshed.some((q) => q.outcome === "needs_grading" || (q.isManual && q.pointsAwarded == null));
+  const stillNeedsGrading = refreshed.some(
+    (q) => q.outcome === "needs_grading" || (q.isManual && q.pointsAwarded == null),
+  );
   const nextStatus = stillNeedsGrading ? "SUBMITTED" : "GRADED";
   const config = readConfig(core.config_json);
 
@@ -334,7 +338,7 @@ export async function saveAttemptGrading(
         assessmentId,
         membershipIds: [core.membership_id],
         subject: `Your ${core.assessment_title} score was updated`,
-        message: `Your attempt for "${core.assessment_title}" was graded. Updated score: ${scorePct ?? "pending"}%.`,
+        message: `Your attempt for "${core.assessment_title}" was graded. Updated score: ${String(scorePct ?? "pending")}%.`,
       });
       notified = true;
     } catch {

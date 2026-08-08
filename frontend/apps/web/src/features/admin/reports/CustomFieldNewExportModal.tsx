@@ -55,7 +55,9 @@ function PolicyToggle({
       aria-checked={checked}
       aria-label={label}
       disabled={disabled}
-      onClick={() => onChange(!checked)}
+      onClick={() => {
+        onChange(!checked);
+      }}
       className={`relative h-5 w-9 shrink-0 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]/40 disabled:opacity-50 ${
         checked ? "bg-[var(--admin-primary)]" : "bg-[var(--admin-outline)]"
       }`}
@@ -104,8 +106,7 @@ export function CustomFieldNewExportModal({
   const [columnQuery, setColumnQuery] = useState("");
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [format, setFormat] = useState<CustomFieldExportFormat>("csv");
-  const [emptyValueMode, setEmptyValueMode] =
-    useState<CustomFieldExportEmptyValue>("blank");
+  const [emptyValueMode, setEmptyValueMode] = useState<CustomFieldExportEmptyValue>("blank");
   const [delivery, setDelivery] = useState<CustomFieldExportDelivery>("download");
   const [recipientInput, setRecipientInput] = useState("");
   const [recipients, setRecipients] = useState<string[]>([]);
@@ -143,16 +144,16 @@ export function CustomFieldNewExportModal({
       if (event.key === "Escape") onClose();
     };
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+    };
   }, [open, onClose]);
 
   useEffect(() => {
     if (!open) return;
     setDataset("learner_roster");
     setColumnQuery("");
-    setSelected(
-      new Set(learnerColumns.filter((c) => c.defaultSelected).map((c) => c.key)),
-    );
+    setSelected(new Set(learnerColumns.filter((c) => c.defaultSelected).map((c) => c.key)));
     setFormat("csv");
     setEmptyValueMode("blank");
     setDelivery("download");
@@ -170,7 +171,9 @@ export function CustomFieldNewExportModal({
         setSegments(res.data.items);
         if (res.data.items[0]) setSegmentId(res.data.items[0].id);
       })
-      .catch(() => setSegments([]));
+      .catch(() => {
+        setSegments([]);
+      });
   }, [open, learnerColumns, initialScheduleEnabled]);
 
   function toggleColumn(key: string) {
@@ -227,7 +230,7 @@ export function CustomFieldNewExportModal({
         ...(dataset === "segment_members" && segmentId
           ? {
               segmentId,
-              segmentName: selectedSegment?.name,
+              ...(selectedSegment?.name ? { segmentName: selectedSegment.name } : {}),
             }
           : {}),
         ...(delivery === "recipients" ? { recipients } : {}),
@@ -261,8 +264,7 @@ export function CustomFieldNewExportModal({
 
   const learnerAllOn =
     filteredLearner.length > 0 && filteredLearner.every((c) => selected.has(c.key));
-  const customAllOn =
-    filteredCustom.length > 0 && filteredCustom.every((c) => selected.has(c.key));
+  const customAllOn = filteredCustom.length > 0 && filteredCustom.every((c) => selected.has(c.key));
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[color-mix(in_srgb,var(--admin-on-surface)_45%,transparent)] p-4 backdrop-blur-sm">
@@ -274,7 +276,10 @@ export function CustomFieldNewExportModal({
       >
         <header className="flex items-start justify-between border-b border-[var(--admin-border)] bg-[var(--admin-surface-high)] px-6 py-4">
           <div>
-            <h2 id={titleId} className="text-2xl font-semibold tracking-[-0.01em] text-[var(--admin-on-surface)]">
+            <h2
+              id={titleId}
+              className="text-2xl font-semibold tracking-[-0.01em] text-[var(--admin-on-surface)]"
+            >
               New export
             </h2>
             <p className="mt-1 text-xs text-[var(--admin-on-surface-variant)]">
@@ -307,7 +312,9 @@ export function CustomFieldNewExportModal({
                           ? "bg-[var(--admin-surface)] font-semibold text-[var(--admin-on-surface)] shadow-sm"
                           : "text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-on-surface)]",
                       ].join(" ")}
-                      onClick={() => setDataset(option.value)}
+                      onClick={() => {
+                        setDataset(option.value);
+                      }}
                     >
                       {option.label}
                     </button>
@@ -325,14 +332,16 @@ export function CustomFieldNewExportModal({
                   id="cf-export-segment"
                   className={fieldClassName}
                   value={segmentId}
-                  onChange={(e) => setSegmentId(e.target.value)}
+                  onChange={(e) => {
+                    setSegmentId(e.target.value);
+                  }}
                 >
                   {segments.length === 0 ? (
                     <option value="">No segments yet</option>
                   ) : (
                     segments.map((s) => (
                       <option key={s.id} value={s.id}>
-                        {s.name} ({s.matchedCount.toLocaleString()})
+                        {s.name} ({(s.matchedCount ?? 0).toLocaleString()})
                       </option>
                     ))
                   )}
@@ -353,7 +362,9 @@ export function CustomFieldNewExportModal({
                   className={`${fieldClassName} bg-[var(--admin-surface-high)] pl-10`}
                   placeholder="Search columns…"
                   value={columnQuery}
-                  onChange={(e) => setColumnQuery(e.target.value)}
+                  onChange={(e) => {
+                    setColumnQuery(e.target.value);
+                  }}
                 />
               </div>
               <div className="flex min-h-[280px] flex-1 flex-col overflow-hidden rounded border border-[var(--admin-border)]">
@@ -366,7 +377,9 @@ export function CustomFieldNewExportModal({
                       <input
                         type="checkbox"
                         checked={learnerAllOn}
-                        onChange={(e) => toggleGroup(filteredLearner, e.target.checked)}
+                        onChange={(e) => {
+                          toggleGroup(filteredLearner, e.target.checked);
+                        }}
                       />
                       All
                     </label>
@@ -381,7 +394,9 @@ export function CustomFieldNewExportModal({
                           type="checkbox"
                           className="mt-1"
                           checked={selected.has(col.key)}
-                          onChange={() => toggleColumn(col.key)}
+                          onChange={() => {
+                            toggleColumn(col.key);
+                          }}
                         />
                         <span className="flex flex-col">
                           <span className="flex items-center gap-2 font-mono text-[13px] text-[var(--admin-on-surface)]">
@@ -412,7 +427,9 @@ export function CustomFieldNewExportModal({
                       <input
                         type="checkbox"
                         checked={customAllOn}
-                        onChange={(e) => toggleGroup(filteredCustom, e.target.checked)}
+                        onChange={(e) => {
+                          toggleGroup(filteredCustom, e.target.checked);
+                        }}
                       />
                       All
                     </label>
@@ -430,7 +447,9 @@ export function CustomFieldNewExportModal({
                         <input
                           type="checkbox"
                           checked={selected.has(col.key)}
-                          onChange={() => toggleColumn(col.key)}
+                          onChange={() => {
+                            toggleColumn(col.key);
+                          }}
                         />
                         <span className="flex items-center gap-2">
                           {col.typeBadge ? (
@@ -476,7 +495,7 @@ export function CustomFieldNewExportModal({
                 <div className="mt-2 border-t border-[var(--admin-border)] pt-2 text-xs text-[var(--admin-on-surface-variant)]">
                   Est. output rows:{" "}
                   {dataset === "segment_members" && selectedSegment
-                    ? `~${selectedSegment.matchedCount.toLocaleString()}`
+                    ? `~${(selectedSegment.matchedCount ?? 0).toLocaleString()}`
                     : "depends on filters"}
                 </div>
               </div>
@@ -488,7 +507,9 @@ export function CustomFieldNewExportModal({
                 <input
                   type="radio"
                   checked={emptyValueMode === "blank"}
-                  onChange={() => setEmptyValueMode("blank")}
+                  onChange={() => {
+                    setEmptyValueMode("blank");
+                  }}
                 />
                 <span className="text-sm">Leave blank (null)</span>
               </label>
@@ -496,7 +517,9 @@ export function CustomFieldNewExportModal({
                 <input
                   type="radio"
                   checked={emptyValueMode === "emdash"}
-                  onChange={() => setEmptyValueMode("emdash")}
+                  onChange={() => {
+                    setEmptyValueMode("emdash");
+                  }}
                 />
                 <span className="text-sm">Use literal string &quot;—&quot;</span>
               </label>
@@ -509,7 +532,9 @@ export function CustomFieldNewExportModal({
                   <button
                     key={fmt}
                     type="button"
-                    onClick={() => setFormat(fmt)}
+                    onClick={() => {
+                      setFormat(fmt);
+                    }}
                     className={[
                       "flex flex-1 flex-col items-center rounded border p-3 font-mono text-[13px] font-bold uppercase transition-colors",
                       format === fmt
@@ -528,7 +553,9 @@ export function CustomFieldNewExportModal({
               <select
                 className={fieldClassName}
                 value={delivery}
-                onChange={(e) => setDelivery(e.target.value as CustomFieldExportDelivery)}
+                onChange={(e) => {
+                  setDelivery(e.target.value as CustomFieldExportDelivery);
+                }}
               >
                 <option value="download">Download now</option>
                 {capabilities.canEmailDelivery ? (
@@ -545,7 +572,9 @@ export function CustomFieldNewExportModal({
                       className={fieldClassName}
                       placeholder="ops@company.com"
                       value={recipientInput}
-                      onChange={(e) => setRecipientInput(e.target.value)}
+                      onChange={(e) => {
+                        setRecipientInput(e.target.value);
+                      }}
                       onKeyDown={(e) => {
                         if (e.key === "Enter") {
                           e.preventDefault();
@@ -563,9 +592,9 @@ export function CustomFieldNewExportModal({
                         key={email}
                         type="button"
                         className="rounded border border-[var(--admin-border)] bg-[var(--admin-surface)] px-2 py-0.5 font-mono text-[10px]"
-                        onClick={() =>
-                          setRecipients((prev) => prev.filter((item) => item !== email))
-                        }
+                        onClick={() => {
+                          setRecipients((prev) => prev.filter((item) => item !== email));
+                        }}
                       >
                         {email} ×
                       </button>
@@ -578,7 +607,9 @@ export function CustomFieldNewExportModal({
                   className={fieldClassName}
                   placeholder="Optional webhook URL"
                   value={webhookUrl}
-                  onChange={(e) => setWebhookUrl(e.target.value)}
+                  onChange={(e) => {
+                    setWebhookUrl(e.target.value);
+                  }}
                 />
               ) : null}
             </div>
@@ -600,7 +631,9 @@ export function CustomFieldNewExportModal({
                   <select
                     className={fieldClassName}
                     value={cadence}
-                    onChange={(e) => setCadence(e.target.value as CustomFieldExportCadence)}
+                    onChange={(e) => {
+                      setCadence(e.target.value as CustomFieldExportCadence);
+                    }}
                   >
                     <option value="daily">Daily</option>
                     <option value="weekly">Weekly</option>
@@ -610,12 +643,16 @@ export function CustomFieldNewExportModal({
                     type="time"
                     className={fieldClassName}
                     value={time}
-                    onChange={(e) => setTime(e.target.value)}
+                    onChange={(e) => {
+                      setTime(e.target.value);
+                    }}
                   />
                   <input
                     className={`${fieldClassName} col-span-2`}
                     value={timezone}
-                    onChange={(e) => setTimezone(e.target.value)}
+                    onChange={(e) => {
+                      setTimezone(e.target.value);
+                    }}
                     placeholder="Timezone"
                   />
                 </div>
@@ -635,7 +672,12 @@ export function CustomFieldNewExportModal({
         ) : null}
 
         <footer className="flex items-center justify-between border-t border-[var(--admin-border)] px-6 py-4">
-          <button type="button" className={ghostButtonClassName} onClick={onClose} disabled={saving}>
+          <button
+            type="button"
+            className={ghostButtonClassName}
+            onClick={onClose}
+            disabled={saving}
+          >
             Cancel
           </button>
           <button

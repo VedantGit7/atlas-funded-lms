@@ -31,8 +31,8 @@ const DEFINITION_KEY = "custom-field";
 type CustomFieldDataset = (typeof CUSTOM_FIELD_EXPORT_DATASETS)[number];
 
 function formatBytes(bytes: number): string {
-  if (bytes < 1024) return `${bytes}B`;
-  if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))}KB`;
+  if (bytes < 1024) return `${String(bytes)}B`;
+  if (bytes < 1024 * 1024) return `${String(Math.max(1, Math.round(bytes / 1024)))}KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)}MB`;
 }
 
@@ -89,7 +89,7 @@ function scopeLabelFromParams(params: Record<string, unknown>): string {
   } else if (typeof segmentId === "string" && segmentId.trim()) {
     parts.push("Segment scoped");
   } else if (typeof params["status"] === "string" && params["status"].trim()) {
-    parts.push(`Status · ${String(params["status"])}`);
+    parts.push(`Status · ${params["status"]}`);
   } else {
     parts.push("All learners");
   }
@@ -117,9 +117,9 @@ function cronFromCadence(cadence: "daily" | "weekly" | "monthly", time: string):
   const [hourRaw, minuteRaw] = time.split(":");
   const hour = Math.min(23, Math.max(0, Number(hourRaw) || 0));
   const minute = Math.min(59, Math.max(0, Number(minuteRaw) || 0));
-  if (cadence === "weekly") return `${minute} ${hour} * * 1`;
-  if (cadence === "monthly") return `${minute} ${hour} 1 * *`;
-  return `${minute} ${hour} * * *`;
+  if (cadence === "weekly") return `${String(minute)} ${String(hour)} * * 1`;
+  if (cadence === "monthly") return `${String(minute)} ${String(hour)} 1 * *`;
+  return `${String(minute)} ${String(hour)} * * *`;
 }
 
 function cadenceLabel(cron: string, timezone: string): string {
@@ -138,9 +138,9 @@ function nextRunLabel(nextRunAt: string): string {
   const diffMs = date.getTime() - Date.now();
   if (diffMs <= 0) return "Due now";
   const hours = Math.floor(diffMs / (60 * 60 * 1000));
-  if (hours < 48) return `Next run in ${Math.max(1, hours)}h`;
+  if (hours < 48) return `Next run in ${String(Math.max(1, hours))}h`;
   const days = Math.floor(hours / 24);
-  return `Next run in ${days} day${days === 1 ? "" : "s"}`;
+  return `Next run in ${String(days)} day${days === 1 ? "" : "s"}`;
 }
 
 function isExpired(expiresAt: string | null | undefined): boolean {
@@ -337,8 +337,7 @@ export async function getCustomFieldExports(tx: TenantTx, ctx: ServiceCtx) {
         canSchedule: true,
         canEmailDelivery: true,
         canWebhookDelivery: true,
-        note:
-          "Exports generate from custom-field learner datasets. Field coverage and segment member scopes use the same report runner. Email and webhook delivery run after the artifact is ready. Ready files expire after the signed download TTL.",
+        note: "Exports generate from custom-field learner datasets. Field coverage and segment member scopes use the same report runner. Email and webhook delivery run after the artifact is ready. Ready files expire after the signed download TTL.",
       },
     },
   });
@@ -388,9 +387,7 @@ export async function createCustomFieldExport(
     const timezone = body.timezone ?? "Asia/Kolkata";
     const scheduleResult = await createReportSchedule(tx, ctx, {
       definitionKey: DEFINITION_KEY,
-      name:
-        body.scheduleName?.trim() ||
-        `Weekly ${datasetLabel(body.dataset)} export`,
+      name: body.scheduleName?.trim() || `Weekly ${datasetLabel(body.dataset)} export`,
       cronExpression: cronFromCadence(cadence, time),
       timezone,
       params,
@@ -508,7 +505,7 @@ export async function updateCustomFieldExportSchedule(
   tx: TenantTx,
   ctx: ServiceCtx,
   scheduleId: string,
-  input: { isActive?: boolean; name?: string },
+  input: { isActive?: boolean | undefined; name?: string | undefined },
 ) {
   const body = updateCustomFieldExportScheduleBodySchema.parse(input);
   const schedules = await listReportSchedules(tx, ctx);

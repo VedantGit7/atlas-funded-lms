@@ -7,12 +7,12 @@ import type {
 } from "@atlas/domain/analytics/analytics.contract";
 
 export async function fetchAnalyticsDashboard(params: {
-  dashboardKey?: string;
-  courseId?: string;
-  from?: string;
-  to?: string;
-  cursor?: string;
-  limit?: number;
+  dashboardKey?: string | undefined;
+  courseId?: string | undefined;
+  from?: string | undefined;
+  to?: string | undefined;
+  cursor?: string | undefined;
+  limit?: number | undefined;
 }): Promise<AnalyticsDashboardResponse> {
   const searchParams = new URLSearchParams();
   if (params.dashboardKey) searchParams.set("dashboardKey", params.dashboardKey);
@@ -30,9 +30,9 @@ export async function fetchAnalyticsDashboard(params: {
 }
 
 export async function fetchAnalyticsFunnel(params: {
-  funnelKey?: string;
-  from?: string;
-  to?: string;
+  funnelKey?: string | undefined;
+  from?: string | undefined;
+  to?: string | undefined;
 }): Promise<AnalyticsFunnelResponse> {
   const searchParams = new URLSearchParams();
   if (params.funnelKey) searchParams.set("funnelKey", params.funnelKey);
@@ -47,9 +47,9 @@ export async function fetchAnalyticsFunnel(params: {
 
 export async function fetchItemStatistics(params: {
   assessmentId: string;
-  windowKey?: string;
-  cursor?: string;
-  limit?: number;
+  windowKey?: string | undefined;
+  cursor?: string | undefined;
+  limit?: number | undefined;
 }): Promise<AnalyticsItemStatisticsResponse> {
   const searchParams = new URLSearchParams({ assessmentId: params.assessmentId });
   if (params.windowKey) searchParams.set("windowKey", params.windowKey);
@@ -64,8 +64,8 @@ export async function fetchItemStatistics(params: {
 export async function fetchDashboardDrillDown(params: {
   rollupKey: string;
   day: string;
-  courseId?: string;
-  limit?: number;
+  courseId?: string | undefined;
+  limit?: number | undefined;
 }): Promise<AnalyticsDashboardDrillDownResponse> {
   const searchParams = new URLSearchParams({
     rollupKey: params.rollupKey,
@@ -93,17 +93,22 @@ export type AtRiskAlert = {
 };
 
 export async function fetchAtRiskAlerts(params?: {
-  status?: "open" | "acknowledged";
-  cursor?: string;
-  limit?: number;
-}): Promise<{ data: { alerts: AtRiskAlert[]; pageInfo: { nextCursor: string | null; hasNextPage: boolean } } }> {
+  status?: "open" | "acknowledged" | undefined;
+  cursor?: string | undefined;
+  limit?: number | undefined;
+}): Promise<{
+  data: { alerts: AtRiskAlert[]; pageInfo: { nextCursor: string | null; hasNextPage: boolean } };
+}> {
   const searchParams = new URLSearchParams();
   if (params?.status) searchParams.set("status", params.status);
   if (params?.cursor) searchParams.set("cursor", params.cursor);
   if (params?.limit) searchParams.set("limit", String(params.limit));
 
   const query = searchParams.toString();
-  const path = query.length > 0 ? `/api/v1/analytics/at-risk/alerts?${query}` : "/api/v1/analytics/at-risk/alerts";
+  const path =
+    query.length > 0
+      ? `/api/v1/analytics/at-risk/alerts?${query}`
+      : "/api/v1/analytics/at-risk/alerts";
   return clientApi.get(path);
 }
 

@@ -21,5 +21,5 @@ export const POST = createTenantRoute<
   body: setSystemEmailEnabledBodySchema,
   output: systemEmailResponseSchema,
   handler: async ({ tx, ctx, params, input }) =>
-    setSystemEmailEnabled(tx, ctx, params.key, input),
+    setSystemEmailEnabled(tx, ctx, params["key"], input),
 });

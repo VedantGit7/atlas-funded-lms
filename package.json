@@ -41,7 +41,7 @@
     "format": "prettier . --write",
     "format:check": "prettier . --check",
     "prepare": "husky",
-    "precommit": "pnpm check:env && pnpm exec lint-staged && pnpm typecheck",
+    "precommit": "pnpm check:env && pnpm exec lint-staged --concurrent 1 && pnpm typecheck",
     "prepush": "pnpm test:unit && pnpm check:route-metadata && pnpm check:prisma-boundary",
     "check:env": "node scripts/guards/prevent-env-commit.mjs",
     "check:route-metadata": "node scripts/guards/check-route-metadata.mjs",

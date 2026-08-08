@@ -12,7 +12,6 @@ import {
   activeDevicesAlertNoteResponseSchema,
   activeDevicesAlertsListResponseSchema,
   activeDevicesAlertsQuerySchema,
-  type ActiveDevicesAlertsQuery,
 } from "./active-devices-alerts.dto";
 import {
   activeDevicesAlertsRepository,
@@ -22,6 +21,13 @@ import {
   activeDevicesPoliciesRepository,
   mapTenantDefaults,
 } from "./active-devices-policies.repository";
+
+function defined<T>(value: T, message = "Expected value to be defined"): NonNullable<T> {
+  if (value == null) {
+    throw new Error(message);
+  }
+  return value;
+}
 
 function parseUserAgent(userAgent: string | null, platform: string | null): string {
   const ua = (userAgent ?? "").toLowerCase();
@@ -67,14 +73,15 @@ function parseNotes(value: unknown): Array<{
     .map((item) => {
       if (!item || typeof item !== "object" || Array.isArray(item)) return null;
       const row = item as Record<string, unknown>;
-      if (typeof row.body !== "string" || typeof row.id !== "string") return null;
+      if (typeof row["body"] !== "string" || typeof row["id"] !== "string") return null;
       return {
-        id: row.id,
-        body: row.body,
-        createdAt: typeof row.createdAt === "string" ? row.createdAt : new Date().toISOString(),
+        id: row["id"],
+        body: row["body"],
+        createdAt:
+          typeof row["createdAt"] === "string" ? row["createdAt"] : new Date().toISOString(),
         authorMembershipId:
-          typeof row.authorMembershipId === "string" ? row.authorMembershipId : null,
-        authorLabel: typeof row.authorLabel === "string" ? row.authorLabel : null,
+          typeof row["authorMembershipId"] === "string" ? row["authorMembershipId"] : null,
+        authorLabel: typeof row["authorLabel"] === "string" ? row["authorLabel"] : null,
       };
     })
     .filter((item): item is NonNullable<typeof item> => Boolean(item));
@@ -113,20 +120,18 @@ function detectCandidates(
         membershipId,
         alertType: "device_limit_exceeded",
         severity: "warn",
-        title: `Device limit exceeded (${memberSessions.length} of ${deviceLimit} allowed)`,
+        title: `Device limit exceeded (${String(memberSessions.length)} of ${String(deviceLimit)} allowed)`,
         evidence: {
           deviceCount: memberSessions.length,
           deviceLimit,
           ips: [
             ...new Set(
-              memberSessions
-                .map((row) => row.ip_address)
-                .filter((ip): ip is string => Boolean(ip)),
+              memberSessions.map((row) => row.ip_address).filter((ip): ip is string => Boolean(ip)),
             ),
           ],
         },
         sessionIds,
-        detectedAt: memberSessions[0]!.last_seen_at,
+        detectedAt: defined(memberSessions[0]).last_seen_at,
       });
     }
 
@@ -142,8 +147,8 @@ function detectCandidates(
       const sortedRecent = [...recent].sort(
         (a, b) => a.last_seen_at.getTime() - b.last_seen_at.getTime(),
       );
-      const first = sortedRecent[0]!;
-      const last = sortedRecent[sortedRecent.length - 1]!;
+      const first = defined(sortedRecent[0]);
+      const last = defined(sortedRecent[sortedRecent.length - 1]);
       const deltaMins = Math.max(
         1,
         Math.round((last.last_seen_at.getTime() - first.last_seen_at.getTime()) / 60_000),
@@ -154,7 +159,7 @@ function detectCandidates(
         membershipId,
         alertType: "concurrent_sessions",
         severity: "critical",
-        title: `${recent.length} active sessions across ${ips.length} IPs within ${deltaMins} minutes`,
+        title: `${String(recent.length)} active sessions across ${String(ips.length)} IPs within ${String(deltaMins)} minutes`,
         evidence: {
           ips,
           deltaMinutes: deltaMins,
@@ -182,7 +187,7 @@ function detectCandidates(
           membershipId,
           alertType: "shared_fingerprint",
           severity: otherCount >= 2 ? "critical" : "warn",
-          title: `Shared device fingerprint seen on ${otherCount} other learner${otherCount === 1 ? "" : "s"}`,
+          title: `Shared device fingerprint seen on ${String(otherCount)} other learner${otherCount === 1 ? "" : "s"}`,
           evidence: {
             fingerprint: row.device_fingerprint,
             otherLearnerCount: otherCount,
@@ -220,20 +225,22 @@ async function refreshOpenAlerts(tx: TenantTx): Promise<void> {
 
 function evidenceSummary(alertType: string, evidence: Record<string, unknown>): string[] {
   if (alertType === "concurrent_sessions") {
-    const ips = Array.isArray(evidence.ips)
-      ? evidence.ips.filter((ip): ip is string => typeof ip === "string")
+    const ips = Array.isArray(evidence["ips"])
+      ? evidence["ips"].filter((ip): ip is string => typeof ip === "string")
       : [];
     const delta =
-      typeof evidence.deltaMinutes === "number" ? `Δ ${evidence.deltaMinutes} min` : null;
+      typeof evidence["deltaMinutes"] === "number"
+        ? `Δ ${String(evidence["deltaMinutes"])} min`
+        : null;
     return [...ips.map((ip) => ip), ...(delta ? [delta] : [])];
   }
   if (alertType === "device_limit_exceeded") {
-    const count = evidence.deviceCount;
-    const limit = evidence.deviceLimit;
+    const count = evidence["deviceCount"];
+    const limit = evidence["deviceLimit"];
     return [`${String(count)} devices`, `Limit ${String(limit)}`];
   }
   if (alertType === "shared_fingerprint") {
-    const other = evidence.otherLearnerCount;
+    const other = evidence["otherLearnerCount"];
     return [`Shared with ${String(other)} other learner(s)`];
   }
   return [];
@@ -258,12 +265,8 @@ function ruleMeta(alertType: string): { ruleLabel: string; thresholdLabel: strin
   };
 }
 
-export async function listActiveDevicesAlerts(
-  tx: TenantTx,
-  ctx: ServiceCtx,
-  rawQuery: unknown,
-) {
-  const query = activeDevicesAlertsQuerySchema.parse(rawQuery) as ActiveDevicesAlertsQuery;
+export async function listActiveDevicesAlerts(tx: TenantTx, ctx: ServiceCtx, rawQuery: unknown) {
+  const query = activeDevicesAlertsQuerySchema.parse(rawQuery);
   await refreshOpenAlerts(tx);
 
   const offset = (query.page - 1) * query.limit;
@@ -287,15 +290,19 @@ export async function listActiveDevicesAlerts(
   for (const row of rows) {
     let identity = identityCache.get(row.membership_id);
     if (!identity) {
-      identity =
-        (await activeDevicesRosterRepository.findLearnerIdentity(tx, row.membership_id)) ?? {
-          learner_name: null,
-          email: null,
-        };
+      identity = (await activeDevicesRosterRepository.findLearnerIdentity(
+        tx,
+        row.membership_id,
+      )) ?? {
+        learner_name: null,
+        email: null,
+      };
       identityCache.set(row.membership_id, identity);
     }
     const evidence =
-      row.evidence_json && typeof row.evidence_json === "object" && !Array.isArray(row.evidence_json)
+      row.evidence_json &&
+      typeof row.evidence_json === "object" &&
+      !Array.isArray(row.evidence_json)
         ? (row.evidence_json as Record<string, unknown>)
         : {};
     items.push({
@@ -325,14 +332,14 @@ export async function listActiveDevicesAlerts(
     data: {
       items,
       summary: {
-        openTotal: byStatus.open ?? 0,
+        openTotal: byStatus["open"] ?? 0,
         byType: {
-          concurrent_sessions: byType.concurrent_sessions ?? 0,
-          device_limit_exceeded: byType.device_limit_exceeded ?? 0,
-          shared_fingerprint: byType.shared_fingerprint ?? 0,
+          concurrent_sessions: byType["concurrent_sessions"] ?? 0,
+          device_limit_exceeded: byType["device_limit_exceeded"] ?? 0,
+          shared_fingerprint: byType["shared_fingerprint"] ?? 0,
         },
-        resolvedCount: byStatus.resolved ?? 0,
-        dismissedCount: byStatus.dismissed ?? 0,
+        resolvedCount: byStatus["resolved"] ?? 0,
+        dismissedCount: byStatus["dismissed"] ?? 0,
         unsupportedRules: [
           {
             key: "impossible_travel",
@@ -358,11 +365,7 @@ export async function listActiveDevicesAlerts(
   });
 }
 
-export async function getActiveDevicesAlertDetail(
-  tx: TenantTx,
-  _ctx: ServiceCtx,
-  alertId: string,
-) {
+export async function getActiveDevicesAlertDetail(tx: TenantTx, _ctx: ServiceCtx, alertId: string) {
   await refreshOpenAlerts(tx);
   const row = await activeDevicesAlertsRepository.findById(tx, alertId);
   if (!row) {
@@ -424,11 +427,7 @@ export async function getActiveDevicesAlertDetail(
   });
 }
 
-export async function resolveActiveDevicesAlerts(
-  tx: TenantTx,
-  ctx: ServiceCtx,
-  rawBody: unknown,
-) {
+export async function resolveActiveDevicesAlerts(tx: TenantTx, ctx: ServiceCtx, rawBody: unknown) {
   const body = activeDevicesAlertActionBodySchema.parse(rawBody);
   const updatedCount = await activeDevicesAlertsRepository.updateStatus(tx, {
     alertIds: body.alertIds,
@@ -438,11 +437,7 @@ export async function resolveActiveDevicesAlerts(
   return activeDevicesAlertActionResponseSchema.parse({ data: { updatedCount } });
 }
 
-export async function dismissActiveDevicesAlerts(
-  tx: TenantTx,
-  ctx: ServiceCtx,
-  rawBody: unknown,
-) {
+export async function dismissActiveDevicesAlerts(tx: TenantTx, ctx: ServiceCtx, rawBody: unknown) {
   const body = activeDevicesAlertActionBodySchema.parse(rawBody);
   const updatedCount = await activeDevicesAlertsRepository.updateStatus(tx, {
     alertIds: body.alertIds,

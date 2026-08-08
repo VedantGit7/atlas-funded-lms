@@ -7,8 +7,10 @@ const SUBTOTAL_FLAG = "_is_subtotal";
 
 function asString(value: unknown): string {
   if (value == null) return "";
+  if (typeof value === "string") return value;
+  if (typeof value === "number" || typeof value === "boolean") return String(value);
   if (value instanceof Date) return value.toISOString();
-  return String(value);
+  return "";
 }
 
 function monthKey(value: unknown): string {
@@ -24,15 +26,15 @@ function groupKeyForRow(
   grouping: Exclude<PaymentExportGrouping, "none">,
 ): string {
   if (grouping === "gateway") {
-    return asString(row.gateway_key) || "Unknown gateway";
+    return asString(row["gateway_key"]) || "Unknown gateway";
   }
   if (grouping === "product") {
-    return asString(row.product_title) || "Unknown product";
+    return asString(row["product_title"]) || "Unknown product";
   }
   if (grouping === "currency") {
-    return (asString(row.currency) || "UNK").toUpperCase();
+    return (asString(row["currency"]) || "UNK").toUpperCase();
   }
-  return monthKey(row.paid_at ?? row.created_at);
+  return monthKey(row["paid_at"] ?? row["created_at"]);
 }
 
 function sumCents(rows: Array<Record<string, unknown>>, column: string): number {
@@ -101,7 +103,7 @@ export function applyPaymentExportGrouping(
 
     const currencies = new Set(
       groupRows
-        .map((row) => asString(row.currency).toUpperCase())
+        .map((row) => asString(row["currency"]).toUpperCase())
         .filter((value) => value.length > 0),
     );
     const singleCurrency = currencies.size <= 1;
@@ -113,12 +115,12 @@ export function applyPaymentExportGrouping(
       subtotal[column] = null;
     }
     if (dataset.columns.includes("learner_name")) {
-      subtotal.learner_name = `SUBTOTAL · ${key}`;
+      subtotal["learner_name"] = `SUBTOTAL · ${key}`;
     } else if (dataset.columns.includes("product_title")) {
-      subtotal.product_title = `SUBTOTAL · ${key}`;
+      subtotal["product_title"] = `SUBTOTAL · ${key}`;
     }
     if (dataset.columns.includes("status")) {
-      subtotal.status = `${groupRows.length} rows`;
+      subtotal["status"] = `${String(groupRows.length)} rows`;
     }
     if (singleCurrency && amountColumn) {
       subtotal[amountColumn] = sumCents(groupRows, amountColumn);
@@ -133,7 +135,7 @@ export function applyPaymentExportGrouping(
       subtotal[remainingColumn] = sumCents(groupRows, remainingColumn);
     }
     if (singleCurrency && currencies.size === 1 && dataset.columns.includes("currency")) {
-      subtotal.currency = [...currencies][0];
+      subtotal["currency"] = [...currencies][0];
     }
     rows.push(subtotal);
   }

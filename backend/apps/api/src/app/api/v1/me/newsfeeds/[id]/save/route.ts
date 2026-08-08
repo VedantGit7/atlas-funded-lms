@@ -19,7 +19,7 @@ export const POST = createTenantRoute<
   params: paramsSchema,
   body: noBodySchema,
   output: saveNewsfeedPostResponseSchema,
-  handler: async ({ tx, ctx, params }) => savePublicNewsfeedPost(tx, ctx, params.id),
+  handler: async ({ tx, ctx, params }) => savePublicNewsfeedPost(tx, ctx, params["id"]),
 });
 
 export const DELETE = createTenantRoute<
@@ -31,5 +31,5 @@ export const DELETE = createTenantRoute<
   params: paramsSchema,
   body: noBodySchema,
   output: saveNewsfeedPostResponseSchema,
-  handler: async ({ tx, ctx, params }) => unsavePublicNewsfeedPost(tx, ctx, params.id),
+  handler: async ({ tx, ctx, params }) => unsavePublicNewsfeedPost(tx, ctx, params["id"]),
 });

@@ -18,5 +18,5 @@ export const GET = createTenantRoute<
   params: batchIdParamsSchema,
   output: batchMessagesListResponseSchema,
   handler: async ({ tx, ctx, input, params }) =>
-    listBatchMessages(tx, ctx, params.batchId, input),
+    listBatchMessages(tx, ctx, params["batchId"], input),
 });

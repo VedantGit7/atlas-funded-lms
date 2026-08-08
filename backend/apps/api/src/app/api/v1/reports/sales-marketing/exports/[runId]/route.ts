@@ -16,5 +16,5 @@ export const GET = createTenantRoute<
   params: smExportRunParamsSchema,
   input: noBodySchema,
   output: smExportRunDetailResponseSchema,
-  handler: async ({ tx, ctx, params }) => getSalesMarketingExportRun(tx, ctx, params.runId),
+  handler: async ({ tx, ctx, params }) => getSalesMarketingExportRun(tx, ctx, params["runId"]),
 });

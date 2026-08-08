@@ -5,7 +5,7 @@ import {
   createSalesGroupResponseSchema,
 } from "@atlas/domain/reports/sales-marketing-roster.dto";
 import { mutateSalesMarketingRosterMetadata } from "@atlas/domain/reports/sales-marketing-roster.route-metadata";
-import { createSalesMarketingGroup } from "../../../../../../../server/reports/sales-marketing-roster-actions.service";
+import { createSalesMarketingGroup } from "@atlas/api-server/reports/sales-marketing-roster-actions.service";
 
 export const POST = createTenantRoute<
   z.output<typeof createSalesGroupBodySchema>,

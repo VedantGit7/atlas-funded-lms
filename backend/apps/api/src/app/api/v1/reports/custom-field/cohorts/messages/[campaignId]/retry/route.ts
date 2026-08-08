@@ -6,7 +6,7 @@ import {
   retryCustomFieldCohortMessageResponseSchema,
 } from "@atlas/domain/reports/custom-field-roster.dto";
 import { mutateCustomFieldRosterMetadata } from "@atlas/domain/reports/custom-field-roster.route-metadata";
-import { retryCustomFieldCohortMessage } from "../../../../../../../../server/reports/custom-field-roster-actions.service";
+import { retryCustomFieldCohortMessage } from "@atlas/api-server/reports/custom-field-roster-actions.service";
 
 export const POST = createTenantRoute<
   z.output<typeof retryCustomFieldCohortMessageBodySchema>,
@@ -18,5 +18,5 @@ export const POST = createTenantRoute<
   params: retryCustomFieldCohortMessageParamsSchema,
   output: retryCustomFieldCohortMessageResponseSchema,
   handler: async ({ tx, ctx, input, params }) =>
-    retryCustomFieldCohortMessage(tx, ctx, params.campaignId, input),
+    retryCustomFieldCohortMessage(tx, ctx, params["campaignId"], input),
 });

@@ -20,5 +20,5 @@ export const POST = createTenantRoute<
   params: paramsSchema,
   body: testSystemEmailBodySchema,
   output: testSystemEmailResponseSchema,
-  handler: async ({ tx, ctx, params, input }) => testSystemEmail(tx, ctx, params.key, input),
+  handler: async ({ tx, ctx, params, input }) => testSystemEmail(tx, ctx, params["key"], input),
 });

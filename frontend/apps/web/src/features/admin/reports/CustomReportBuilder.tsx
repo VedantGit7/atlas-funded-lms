@@ -12,10 +12,7 @@ import {
   startReportRun,
   type CustomReportDefinition,
 } from "./admin-reports-api";
-import {
-  APPROVED_REPORT_DATASETS,
-  getColumnsForDataset,
-} from "./report-dataset-catalog";
+import { APPROVED_REPORT_DATASETS, getColumnsForDataset } from "./report-dataset-catalog";
 
 type CustomReportBuilderProps = {
   onSaved?: (definition: CustomReportDefinition) => void;
@@ -23,7 +20,7 @@ type CustomReportBuilderProps = {
 };
 
 export function CustomReportBuilder({ onSaved, onRunStarted }: CustomReportBuilderProps) {
-  const [datasetKey, setDatasetKey] = useState(APPROVED_REPORT_DATASETS[0]?.key ?? "enrollments");
+  const [datasetKey, setDatasetKey] = useState<string>(APPROVED_REPORT_DATASETS[0].key);
   const [title, setTitle] = useState("");
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
   const [savedDefinition, setSavedDefinition] = useState<CustomReportDefinition | null>(null);
@@ -95,8 +92,14 @@ export function CustomReportBuilder({ onSaved, onRunStarted }: CustomReportBuild
   }
 
   return (
-    <section className={generalSettingsFormCardClassName} aria-labelledby="custom-report-builder-heading">
-      <h2 id="custom-report-builder-heading" className="text-lg font-semibold text-[var(--admin-on-surface)]">
+    <section
+      className={generalSettingsFormCardClassName}
+      aria-labelledby="custom-report-builder-heading"
+    >
+      <h2
+        id="custom-report-builder-heading"
+        className="text-lg font-semibold text-[var(--admin-on-surface)]"
+      >
         Custom report builder
       </h2>
       <p className="mt-2 text-sm text-[var(--admin-on-surface-variant)]">
@@ -108,7 +111,9 @@ export function CustomReportBuilder({ onSaved, onRunStarted }: CustomReportBuild
 
       <div className="mt-4 grid gap-4 lg:grid-cols-2">
         <label className="block text-sm">
-          <span className="mb-1 block font-medium text-[var(--admin-on-surface-variant)]">Dataset</span>
+          <span className="mb-1 block font-medium text-[var(--admin-on-surface-variant)]">
+            Dataset
+          </span>
           <select
             className={fieldClassName}
             value={datasetKey}
@@ -127,11 +132,15 @@ export function CustomReportBuilder({ onSaved, onRunStarted }: CustomReportBuild
         </label>
 
         <label className="block text-sm">
-          <span className="mb-1 block font-medium text-[var(--admin-on-surface-variant)]">Report title</span>
+          <span className="mb-1 block font-medium text-[var(--admin-on-surface-variant)]">
+            Report title
+          </span>
           <input
             className={fieldClassName}
             value={title}
-            onChange={(event) => setTitle(event.target.value)}
+            onChange={(event) => {
+              setTitle(event.target.value);
+            }}
             placeholder="Monthly enrollment extract"
           />
         </label>
@@ -139,7 +148,9 @@ export function CustomReportBuilder({ onSaved, onRunStarted }: CustomReportBuild
 
       <div className="mt-4">
         <div className="mb-2 flex items-center justify-between gap-2">
-          <span className="text-sm font-medium text-[var(--admin-on-surface-variant)]">Columns</span>
+          <span className="text-sm font-medium text-[var(--admin-on-surface-variant)]">
+            Columns
+          </span>
           <button type="button" className={ghostButtonClassName} onClick={selectAllColumns}>
             Select all
           </button>
@@ -150,7 +161,9 @@ export function CustomReportBuilder({ onSaved, onRunStarted }: CustomReportBuild
               <input
                 type="checkbox"
                 checked={selectedColumns.includes(column.key)}
-                onChange={() => toggleColumn(column.key)}
+                onChange={() => {
+                  toggleColumn(column.key);
+                }}
               />
               <span>{column.label}</span>
             </label>

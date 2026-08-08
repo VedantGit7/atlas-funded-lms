@@ -24,10 +24,7 @@ import {
   type PaymentRefundsQueue,
   type PaymentTransactionDetail,
 } from "./admin-payments-roster-api";
-import {
-  downloadReportExport,
-  pollReportRunUntilComplete,
-} from "./admin-reports-api";
+import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
 import { AdminPaymentRefundModal } from "./AdminPaymentRefundModal";
 import { PaymentsReportTabs } from "./PaymentsReportTabs";
 
@@ -59,9 +56,9 @@ function formatRelative(iso: string | null): string {
   const deltaMs = Date.now() - date.getTime();
   const hours = Math.floor(deltaMs / (60 * 60 * 1000));
   if (hours < 1) return "just now";
-  if (hours < 48) return `${hours}h ago`;
+  if (hours < 48) return `${String(hours)}h ago`;
   const days = Math.floor(hours / 24);
-  return `${days}d ago`;
+  return `${String(days)}d ago`;
 }
 
 function formatDateTime(iso: string | null): string {
@@ -124,7 +121,7 @@ function RefundDetailDrawer({
       .then((response) => {
         if (!cancelled) setDetail(response.data);
       })
-      .catch((err) => {
+      .catch((err: unknown) => {
         if (!cancelled) {
           setDetail(null);
           setError(
@@ -149,7 +146,9 @@ function RefundDetailDrawer({
       if (event.key === "Escape") onClose();
     }
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+    };
   }, [onClose]);
 
   return (
@@ -167,9 +166,7 @@ function RefundDetailDrawer({
         className="admin-theme relative z-10 flex h-full w-full max-w-[600px] flex-col border-l border-[var(--admin-border)] bg-[var(--admin-surface)] shadow-2xl motion-safe:animate-[admin-dropdown-in_0.2s_cubic-bezier(0.16,1,0.3,1)]"
       >
         <div className="flex items-center justify-between border-b border-[var(--admin-border)] bg-[var(--admin-surface-low)] p-6">
-          <h2 className="text-xl font-semibold text-[var(--admin-on-surface)]">
-            Refund details
-          </h2>
+          <h2 className="text-xl font-semibold text-[var(--admin-on-surface)]">Refund details</h2>
           <button
             type="button"
             className="rounded border border-transparent p-2 text-[var(--admin-on-surface-variant)] hover:border-[var(--admin-border)] hover:text-[var(--admin-on-surface)]"
@@ -349,7 +346,9 @@ function RefundDetailDrawer({
               <button
                 type="button"
                 className="flex-[2] rounded bg-[var(--admin-danger)] py-3 font-mono text-xs font-bold uppercase tracking-wide text-[var(--admin-on-primary)] shadow-[0_0_12px_color-mix(in_srgb,var(--admin-danger)_25%,transparent)]"
-                onClick={() => onIssueRefund(detail)}
+                onClick={() => {
+                  onIssueRefund(detail);
+                }}
               >
                 Issue refund — {formatMoney(detail.refundableAmountCents, detail.currency)}
               </button>
@@ -579,10 +578,7 @@ export function AdminPaymentsRefundsLedgerPage() {
             </p>
             <p className="font-mono text-xs font-bold text-[var(--admin-warning)]">
               Refundable{" "}
-              {formatMoney(
-                summary?.refundableAmountCents ?? 0,
-                summary?.currency ?? "USD",
-              )}
+              {formatMoney(summary?.refundableAmountCents ?? 0, summary?.currency ?? "USD")}
             </p>
           </div>
         </aside>
@@ -605,7 +601,9 @@ export function AdminPaymentsRefundsLedgerPage() {
                 />
                 <input
                   value={search}
-                  onChange={(event) => setSearch(event.target.value)}
+                  onChange={(event) => {
+                    setSearch(event.target.value);
+                  }}
                   onKeyDown={(event) => {
                     if (event.key === "Enter") {
                       setSearchApplied(search.trim());
@@ -645,7 +643,10 @@ export function AdminPaymentsRefundsLedgerPage() {
           {queue === "disputes" ? (
             <div className="flex flex-1 items-center justify-center p-8">
               <div className="max-w-md border border-dashed border-[var(--admin-border)] bg-[var(--admin-surface-low)] p-8 text-center">
-                <Undo2 className="mx-auto mb-4 h-10 w-10 text-[var(--admin-on-surface-variant)]" aria-hidden="true" />
+                <Undo2
+                  className="mx-auto mb-4 h-10 w-10 text-[var(--admin-on-surface-variant)]"
+                  aria-hidden="true"
+                />
                 <h3 className="text-lg font-semibold text-[var(--admin-on-surface)]">
                   Disputes are not available yet
                 </h3>
@@ -741,7 +742,9 @@ export function AdminPaymentsRefundsLedgerPage() {
                         return next;
                       });
                     }}
-                    onOpen={() => setDrawerOrderId(item.orderId)}
+                    onOpen={() => {
+                      setDrawerOrderId(item.orderId);
+                    }}
                     onIssue={() => {
                       void (async () => {
                         try {
@@ -765,14 +768,16 @@ export function AdminPaymentsRefundsLedgerPage() {
               <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[var(--admin-border)] bg-[var(--admin-surface-low)] p-3">
                 <span className="font-mono text-xs text-[var(--admin-on-surface-variant)]">
                   {totalCount.toLocaleString()} rows
-                  {selectedIds.size > 0 ? ` · ${selectedIds.size} selected` : ""}
+                  {selectedIds.size > 0 ? ` · ${String(selectedIds.size)} selected` : ""}
                 </span>
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
                     disabled={page <= 1 || loading}
                     className="inline-flex h-8 w-8 items-center justify-center rounded border border-[var(--admin-border)] disabled:opacity-40"
-                    onClick={() => setPage((current) => Math.max(1, current - 1))}
+                    onClick={() => {
+                      setPage((current) => Math.max(1, current - 1));
+                    }}
                     aria-label="Previous page"
                   >
                     <ChevronLeft className="h-4 w-4" aria-hidden="true" />
@@ -784,7 +789,9 @@ export function AdminPaymentsRefundsLedgerPage() {
                     type="button"
                     disabled={page >= totalPages || loading}
                     className="inline-flex h-8 w-8 items-center justify-center rounded border border-[var(--admin-border)] disabled:opacity-40"
-                    onClick={() => setPage((current) => current + 1)}
+                    onClick={() => {
+                      setPage((current) => current + 1);
+                    }}
                     aria-label="Next page"
                   >
                     <ChevronRight className="h-4 w-4" aria-hidden="true" />
@@ -799,7 +806,9 @@ export function AdminPaymentsRefundsLedgerPage() {
       {drawerOrderId ? (
         <RefundDetailDrawer
           orderId={drawerOrderId}
-          onClose={() => setDrawerOrderId(null)}
+          onClose={() => {
+            setDrawerOrderId(null);
+          }}
           onIssueRefund={(detail) => {
             setDrawerOrderId(null);
             setRefundDetail(detail);
@@ -811,7 +820,9 @@ export function AdminPaymentsRefundsLedgerPage() {
         <AdminPaymentRefundModal
           open
           detail={refundDetail}
-          onClose={() => setRefundDetail(null)}
+          onClose={() => {
+            setRefundDetail(null);
+          }}
           onRefunded={() => {
             setRefundDetail(null);
             setDrawerOrderId(null);
@@ -836,8 +847,7 @@ function RefundRow({
   onOpen: () => void;
   onIssue: () => void;
 }) {
-  const isFullyRefunded =
-    item.refundableAmountCents === 0 && item.refundedAmountCents > 0;
+  const isFullyRefunded = item.refundableAmountCents === 0 && item.refundedAmountCents > 0;
   const isPartial = item.refundedAmountCents > 0 && item.refundableAmountCents > 0;
 
   return (
@@ -855,7 +865,9 @@ function RefundRow({
         <input
           type="checkbox"
           checked={selected}
-          onChange={(event) => onSelect(event.target.checked)}
+          onChange={(event) => {
+            onSelect(event.target.checked);
+          }}
           className="h-4 w-4 accent-[var(--admin-primary)]"
           aria-label={`Select ${item.learnerName ?? item.orderId}`}
         />
@@ -874,11 +886,7 @@ function RefundRow({
           </span>
         )}
       </div>
-      <button
-        type="button"
-        className="flex w-full flex-col text-left md:w-48"
-        onClick={onOpen}
-      >
+      <button type="button" className="flex w-full flex-col text-left md:w-48" onClick={onOpen}>
         <span className="truncate text-sm text-[var(--admin-on-surface)]">
           {item.learnerName ?? "—"}
         </span>

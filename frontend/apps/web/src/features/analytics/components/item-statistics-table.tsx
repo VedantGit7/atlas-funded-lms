@@ -9,18 +9,18 @@ type ItemStatisticRow = {
   correctCount: number;
   accuracy: number | null;
   averageLatencyMs: number | null;
-  difficulty?: number | null;
-  discrimination?: number | null;
+  difficulty?: number | null | undefined;
+  discrimination?: number | null | undefined;
   distractorRates?: Array<{ optionId: string; rate: number }> | null;
-  sampleSizeWarning?: boolean;
-  qualityFlag?: PsychometricQualityFlag;
+  sampleSizeWarning?: boolean | undefined;
+  qualityFlag?: PsychometricQualityFlag | undefined;
 };
 
 type ItemStatisticsTableProps = {
   items: ItemStatisticRow[];
   caption: string;
-  headClassName?: string;
-  rowClassName?: string;
+  headClassName?: string | undefined;
+  rowClassName?: string | undefined;
 };
 
 function formatRate(value: number | null | undefined): string {
@@ -74,10 +74,16 @@ export function ItemStatisticsTable({
   rowClassName = "border-b",
 }: ItemStatisticsTableProps) {
   if (items.length === 0) {
-    return <p className="px-4 py-6 text-sm text-[var(--admin-on-surface-variant)]">No item performance data is available for this assessment yet.</p>;
+    return (
+      <p className="px-4 py-6 text-sm text-[var(--admin-on-surface-variant)]">
+        No item performance data is available for this assessment yet.
+      </p>
+    );
   }
 
-  const showDistractors = items.some((item) => item.distractorRates && item.distractorRates.length > 0);
+  const showDistractors = items.some(
+    (item) => item.distractorRates && item.distractorRates.length > 0,
+  );
 
   return (
     <div className="overflow-x-auto">
@@ -123,7 +129,9 @@ export function ItemStatisticsTable({
                 <div className="flex flex-col gap-0.5">
                   <span>{item.itemReference.label}</span>
                   {item.sampleSizeWarning ? (
-                    <span className="text-[11px] text-[var(--admin-warning)]">Low sample (&lt;50)</span>
+                    <span className="text-[11px] text-[var(--admin-warning)]">
+                      Low sample (&lt;50)
+                    </span>
                   ) : null}
                 </div>
               </td>

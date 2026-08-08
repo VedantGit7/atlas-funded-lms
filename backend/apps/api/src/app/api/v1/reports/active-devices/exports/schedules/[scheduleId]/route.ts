@@ -22,7 +22,7 @@ export const PATCH = createTenantRoute<
   body: updateDeviceExportScheduleBodySchema,
   output: updateDeviceExportScheduleResponseSchema,
   handler: async ({ tx, ctx, params, input }) =>
-    updateActiveDevicesExportSchedule(tx, ctx, params.scheduleId, input),
+    updateActiveDevicesExportSchedule(tx, ctx, params["scheduleId"], input),
 });
 
 export const DELETE = createTenantRoute<
@@ -35,5 +35,5 @@ export const DELETE = createTenantRoute<
   input: noBodySchema,
   output: deleteDeviceExportScheduleResponseSchema,
   handler: async ({ tx, ctx, params }) =>
-    deleteActiveDevicesExportSchedule(tx, ctx, params.scheduleId),
+    deleteActiveDevicesExportSchedule(tx, ctx, params["scheduleId"]),
 });

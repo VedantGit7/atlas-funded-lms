@@ -42,6 +42,13 @@ import {
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
 import { AdminPollOptionDetailDrawer } from "./AdminPollOptionDetailPage";
 
+function defined<T>(value: T, message = "Expected value to be defined"): NonNullable<T> {
+  if (value == null) {
+    throw new Error(message);
+  }
+  return value;
+}
+
 const PAGE_SIZE = 25;
 
 const selectClassName =
@@ -72,18 +79,7 @@ function Shimmer({ className }: { className?: string }) {
 
 function formatPct(value: number | null | undefined): string {
   if (value == null || Number.isNaN(value)) return "-";
-  return `${Number(value).toFixed(value % 1 === 0 ? 0 : 1)}%`;
-}
-
-function formatDate(value: string | null | undefined): string {
-  if (!value) return "-";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleString(undefined, {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
+  return `${value.toFixed(value % 1 === 0 ? 0 : 1)}%`;
 }
 
 function formatDateTime(value: string | null | undefined): string {
@@ -107,24 +103,24 @@ function learnerInitials(name: string | null, email: string | null): string {
   const source = (name?.trim() || email?.trim() || "?").replace(/\s+/g, " ");
   const parts = source.split(" ").filter(Boolean);
   if (parts.length >= 2) {
-    return `${parts[0]![0] ?? ""}${parts[1]![0] ?? ""}`.toUpperCase();
+    return `${defined(parts[0])[0] ?? ""}${defined(parts[1])[0] ?? ""}`.toUpperCase();
   }
   return source.slice(0, 2).toUpperCase();
 }
 
 function formatSeconds(value: number | null | undefined): string {
   if (value == null || Number.isNaN(value)) return "-";
-  const rounded = Number(value);
-  if (rounded % 1 === 0) return `${rounded}s`;
+  const rounded = value;
+  if (rounded % 1 === 0) return `${String(rounded)}s`;
   return `${rounded.toFixed(1)}s`;
 }
 
 function formatDurationSeconds(value: number | null | undefined): string {
   if (value == null || value <= 0) return "No time limit";
-  if (value < 60) return `${value}s`;
+  if (value < 60) return `${String(value)}s`;
   const minutes = Math.floor(value / 60);
   const seconds = value % 60;
-  return seconds > 0 ? `${minutes}m ${seconds}s` : `${minutes}m`;
+  return seconds > 0 ? `${String(minutes)}m ${String(seconds)}s` : `${String(minutes)}m`;
 }
 
 function resultVisibilityLabel(value: string): string {
@@ -167,14 +163,14 @@ function ResponseTimelineChart({
 
   const areaPath =
     points.length > 0
-      ? `${linePath} L ${xAt(points[points.length - 1]!.offsetSeconds).toFixed(1)} ${(padT + plotH).toFixed(1)} L ${xAt(points[0]!.offsetSeconds).toFixed(1)} ${(padT + plotH).toFixed(1)} Z`
+      ? `${linePath} L ${xAt(defined(points[points.length - 1]).offsetSeconds).toFixed(1)} ${(padT + plotH).toFixed(1)} L ${xAt(defined(points[0]).offsetSeconds).toFixed(1)} ${(padT + plotH).toFixed(1)} Z`
       : "";
 
   const midX = Math.round(maxX / 2);
 
   return (
     <svg
-      viewBox={`0 0 ${width} ${height}`}
+      viewBox={`0 0 ${String(width)} ${String(height)}`}
       className="h-auto w-full"
       role="img"
       aria-label="Response timeline"
@@ -188,7 +184,7 @@ function ResponseTimelineChart({
         strokeWidth={1}
       />
       {[0, maxY].map((tick) => (
-        <g key={`y-${tick}`}>
+        <g key={`y-${String(tick)}`}>
           <line
             x1={padL}
             x2={padL + plotW}
@@ -201,10 +197,7 @@ function ResponseTimelineChart({
         </g>
       ))}
       {areaPath ? (
-        <path
-          d={areaPath}
-          fill="color-mix(in srgb, var(--admin-primary) 22%, transparent)"
-        />
+        <path d={areaPath} fill="color-mix(in srgb, var(--admin-primary) 22%, transparent)" />
       ) : null}
       {linePath ? (
         <path
@@ -218,7 +211,7 @@ function ResponseTimelineChart({
       ) : null}
       {[0, midX, maxX].map((tick, index) => (
         <text
-          key={`x-${tick}-${index}`}
+          key={`x-${String(tick)}-${String(index)}`}
           x={xAt(tick)}
           y={height - 8}
           textAnchor="middle"
@@ -241,7 +234,7 @@ function TimelineEventsList({ events }: { events: PollTimelineEvent[] }) {
   return (
     <ul className="space-y-3">
       {events.map((event, index) => (
-        <li key={`${event.kind}-${event.at}-${index}`} className="flex gap-3">
+        <li key={`${event.kind}-${event.at}-${String(index)}`} className="flex gap-3">
           <div className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-[var(--admin-primary)]" />
           <div className="min-w-0 flex-1">
             <p className="text-xs font-medium text-[var(--admin-on-surface)]">{event.label}</p>
@@ -296,13 +289,7 @@ function DetailLoadingSkeleton() {
   );
 }
 
-function ErrorDetailPanel({
-  message,
-  onRetry,
-}: {
-  message: string;
-  onRetry: () => void;
-}) {
+function ErrorDetailPanel({ message, onRetry }: { message: string; onRetry: () => void }) {
   return (
     <>
       <div
@@ -505,7 +492,9 @@ export function AdminPollDetailPage({ pollId }: { pollId: string }) {
       }
     }
     document.addEventListener("mousedown", handlePointerDown);
-    return () => document.removeEventListener("mousedown", handlePointerDown);
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+    };
   }, [columnsOpen]);
 
   function applyRespondentFilters() {
@@ -528,14 +517,7 @@ export function AdminPollDetailPage({ pollId }: { pollId: string }) {
   }
 
   const hasRespondentFilters = useMemo(
-    () =>
-      Boolean(
-        learnerName ||
-          optionId ||
-          isCorrect !== "any" ||
-          respondedFrom ||
-          respondedTo,
-      ),
+    () => Boolean(learnerName || optionId || isCorrect !== "any" || respondedFrom || respondedTo),
     [isCorrect, learnerName, optionId, respondedFrom, respondedTo],
   );
 
@@ -628,11 +610,9 @@ export function AdminPollDetailPage({ pollId }: { pollId: string }) {
   const showLearnerColumn = columns.includes("learner_name") || columns.includes("email");
   const showOptionColumn = columns.includes("option_label");
   const showCorrectColumn = Boolean(detail?.quizMode) && columns.includes("is_correct");
-  const showTimeColumn = true;
   const showRespondedColumn = columns.includes("responded_at");
 
-  const rangeStart =
-    respondentTotalCount === 0 ? 0 : (respondentPage - 1) * PAGE_SIZE + 1;
+  const rangeStart = respondentTotalCount === 0 ? 0 : (respondentPage - 1) * PAGE_SIZE + 1;
   const rangeEnd = Math.min(respondentPage * PAGE_SIZE, respondentTotalCount);
 
   const answerModeLabel = detail?.allowMultipleAnswers ? "Multi-answer" : "Single answer";
@@ -749,7 +729,9 @@ export function AdminPollDetailPage({ pollId }: { pollId: string }) {
                     <button
                       type="button"
                       className="rounded p-1 text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-on-surface)]"
-                      onClick={() => setColumnsOpen(false)}
+                      onClick={() => {
+                        setColumnsOpen(false);
+                      }}
                       aria-label="Close columns panel"
                     >
                       <X className="h-4 w-4" aria-hidden="true" />
@@ -765,7 +747,9 @@ export function AdminPollDetailPage({ pollId }: { pollId: string }) {
                             type="checkbox"
                             className="h-4 w-4 accent-[var(--admin-primary)]"
                             checked={draftColumns.includes(column.key)}
-                            onChange={() => toggleDraftColumn(column.key)}
+                            onChange={() => {
+                              toggleDraftColumn(column.key);
+                            }}
                           />
                           <span className="text-xs text-[var(--admin-on-surface)]">
                             {column.label}
@@ -778,7 +762,9 @@ export function AdminPollDetailPage({ pollId }: { pollId: string }) {
                     <button
                       type="button"
                       className="text-xs font-medium text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-on-surface)]"
-                      onClick={() => setDraftColumns(DEFAULT_COLUMNS)}
+                      onClick={() => {
+                        setDraftColumns(DEFAULT_COLUMNS);
+                      }}
                     >
                       Reset
                     </button>
@@ -894,7 +880,7 @@ export function AdminPollDetailPage({ pollId }: { pollId: string }) {
               Responses
             </p>
             <p className="font-mono text-[32px] font-semibold leading-none text-[var(--admin-on-surface)]">
-              {(detail.totalResponses ?? 0).toLocaleString()}
+              {detail.totalResponses.toLocaleString()}
             </p>
             <p className="text-xs text-[var(--admin-on-surface-variant)]">
               {detail.eligibleCount != null
@@ -906,7 +892,7 @@ export function AdminPollDetailPage({ pollId }: { pollId: string }) {
                 <div
                   className="h-full rounded-full bg-[var(--admin-primary)]"
                   style={{
-                    width: `${Math.max(0, Math.min(100, participationPct))}%`,
+                    width: `${String(Math.max(0, Math.min(100, participationPct)))}%`,
                   }}
                 />
               </div>
@@ -931,7 +917,7 @@ export function AdminPollDetailPage({ pollId }: { pollId: string }) {
                   <div
                     className="h-full rounded-full bg-[var(--admin-success)]"
                     style={{
-                      width: `${Math.max(0, Math.min(100, detail.correctPct))}%`,
+                      width: `${String(Math.max(0, Math.min(100, detail.correctPct)))}%`,
                     }}
                   />
                 </div>
@@ -986,7 +972,7 @@ export function AdminPollDetailPage({ pollId }: { pollId: string }) {
               </h2>
             </div>
             <div className="space-y-4 p-4">
-              {(detail.options ?? []).map((option) => {
+              {detail.options.map((option) => {
                 const isActive = optionId === option.optionId;
                 const barColor = option.isCorrect
                   ? "bg-[var(--admin-success)]"
@@ -1032,7 +1018,7 @@ export function AdminPollDetailPage({ pollId }: { pollId: string }) {
                     <div className="mt-2 h-2 overflow-hidden rounded-full bg-[var(--admin-surface-high)]">
                       <div
                         className={`h-full rounded-full ${barColor}`}
-                        style={{ width: `${Math.min(100, option.percent)}%` }}
+                        style={{ width: `${String(Math.min(100, option.percent))}%` }}
                       />
                     </div>
                   </button>
@@ -1061,8 +1047,8 @@ export function AdminPollDetailPage({ pollId }: { pollId: string }) {
                   />
                   {detail.timeline.earlySharePct != null ? (
                     <div className="rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-3 py-2 text-xs text-[var(--admin-on-surface-variant)]">
-                      {formatPct(detail.timeline.earlySharePct)} of responses arrived in the
-                      first 20 seconds.
+                      {formatPct(detail.timeline.earlySharePct)} of responses arrived in the first
+                      20 seconds.
                     </div>
                   ) : null}
                 </>
@@ -1086,9 +1072,7 @@ export function AdminPollDetailPage({ pollId }: { pollId: string }) {
         <section className="overflow-hidden rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)]">
           <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--admin-border)] px-4 py-3">
             <div>
-              <h2 className="text-sm font-semibold text-[var(--admin-on-surface)]">
-                Respondents
-              </h2>
+              <h2 className="text-sm font-semibold text-[var(--admin-on-surface)]">Respondents</h2>
               <p className="text-xs text-[var(--admin-on-surface-variant)]">
                 {isAnonymous
                   ? "Individual voter rows are not available for anonymous polls."
@@ -1125,8 +1109,8 @@ export function AdminPollDetailPage({ pollId }: { pollId: string }) {
                 Responses are anonymous
               </h3>
               <p className="mt-2 max-w-lg text-sm text-[var(--admin-on-surface-variant)]">
-                Voter identity is not recorded for this poll. Option tallies and timing above
-                remain available.
+                Voter identity is not recorded for this poll. Option tallies and timing above remain
+                available.
               </p>
               <button
                 type="button"
@@ -1137,9 +1121,9 @@ export function AdminPollDetailPage({ pollId }: { pollId: string }) {
                     ? "Requires a known live-session audience"
                     : undefined
                 }
-                onClick={() =>
-                  router.push(`/admin/reports/polls/${pollId}/non-respondents`)
-                }
+                onClick={() => {
+                  router.push(`/admin/reports/polls/${pollId}/non-respondents`);
+                }}
               >
                 View non-respondents
               </button>
@@ -1168,7 +1152,9 @@ export function AdminPollDetailPage({ pollId }: { pollId: string }) {
                       className={`${fieldClassName} w-full pl-9`}
                       placeholder="Name or email"
                       value={draftLearnerName}
-                      onChange={(event) => setDraftLearnerName(event.target.value)}
+                      onChange={(event) => {
+                        setDraftLearnerName(event.target.value);
+                      }}
                       onKeyDown={(event) => {
                         if (event.key === "Enter") applyRespondentFilters();
                       }}
@@ -1185,7 +1171,7 @@ export function AdminPollDetailPage({ pollId }: { pollId: string }) {
                       }}
                       options={[
                         { value: "", label: "All options" },
-                        ...(detail.options ?? []).map((option) => ({
+                        ...detail.options.map((option) => ({
                           value: option.optionId,
                           label: option.label,
                         })),
@@ -1256,9 +1242,9 @@ export function AdminPollDetailPage({ pollId }: { pollId: string }) {
                   <Select
                     className={selectClassName}
                     value={sortDir}
-                    onValueChange={(value) =>
-                      setSortDir(value === "asc" ? "asc" : "desc")
-                    }
+                    onValueChange={(value) => {
+                      setSortDir(value === "asc" ? "asc" : "desc");
+                    }}
                     options={[
                       { value: "desc", label: "Desc" },
                       { value: "asc", label: "Asc" },
@@ -1341,14 +1327,16 @@ export function AdminPollDetailPage({ pollId }: { pollId: string }) {
               {selectedIds.length > 0 ? (
                 <div className="mx-4 mb-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-[color-mix(in_srgb,var(--admin-primary)_28%,var(--admin-border))] bg-[color-mix(in_srgb,var(--admin-primary)_8%,var(--admin-surface))] px-4 py-3">
                   <p className="text-sm text-[var(--admin-on-surface)]">
-                    <span className="font-mono font-medium">{selectedIds.length}</span>{" "}
-                    respondent{selectedIds.length === 1 ? "" : "s"} selected
+                    <span className="font-mono font-medium">{selectedIds.length}</span> respondent
+                    {selectedIds.length === 1 ? "" : "s"} selected
                   </p>
                   <div className="flex flex-wrap gap-2">
                     <button
                       type="button"
                       className={secondaryButtonClassName}
-                      onClick={() => openMessageModal(selectedIds)}
+                      onClick={() => {
+                        openMessageModal(selectedIds);
+                      }}
                     >
                       <Mail className="h-4 w-4" aria-hidden="true" />
                       Message
@@ -1365,7 +1353,9 @@ export function AdminPollDetailPage({ pollId }: { pollId: string }) {
                     <button
                       type="button"
                       className={ghostButtonClassName}
-                      onClick={() => setSelectedIds([])}
+                      onClick={() => {
+                        setSelectedIds([]);
+                      }}
                     >
                       Clear
                     </button>
@@ -1386,8 +1376,7 @@ export function AdminPollDetailPage({ pollId }: { pollId: string }) {
                               respondents.length > 0 &&
                               respondents.every(
                                 (row) =>
-                                  !row.membershipId ||
-                                  selectedIds.includes(row.membershipId),
+                                  !row.membershipId || selectedIds.includes(row.membershipId),
                               )
                             }
                             onChange={toggleSelectAll}
@@ -1398,7 +1387,7 @@ export function AdminPollDetailPage({ pollId }: { pollId: string }) {
                       {showLearnerColumn ? <th className="px-4 py-3">Learner</th> : null}
                       {showOptionColumn ? <th className="px-4 py-3">Option</th> : null}
                       {showCorrectColumn ? <th className="px-4 py-3">Status</th> : null}
-                      {showTimeColumn ? <th className="px-4 py-3 text-right">Time</th> : null}
+                      <th className="px-4 py-3 text-right">Time</th>
                       {showRespondedColumn ? (
                         <th className="px-4 py-3 text-right">Responded on</th>
                       ) : null}
@@ -1407,10 +1396,7 @@ export function AdminPollDetailPage({ pollId }: { pollId: string }) {
                   <tbody>
                     {respondentsLoading && respondents.length === 0 ? (
                       Array.from({ length: 5 }).map((_, index) => (
-                        <tr
-                          key={index}
-                          className="h-11 border-b border-[var(--admin-border)]"
-                        >
+                        <tr key={index} className="h-11 border-b border-[var(--admin-border)]">
                           <td className="px-3 py-3">
                             <Shimmer className="h-4 w-4" />
                           </td>
@@ -1442,12 +1428,10 @@ export function AdminPollDetailPage({ pollId }: { pollId: string }) {
                     ) : (
                       respondents.map((row, index) => {
                         const membershipId = row.membershipId;
-                        const selected = membershipId
-                          ? selectedIds.includes(membershipId)
-                          : false;
+                        const selected = membershipId ? selectedIds.includes(membershipId) : false;
                         return (
                           <tr
-                            key={`${membershipId ?? "anon"}-${row.optionId}-${index}`}
+                            key={`${membershipId ?? "anon"}-${row.optionId}-${String(index)}`}
                             className={[
                               "h-11 border-b border-[var(--admin-border)] last:border-b-0",
                               selected
@@ -1461,7 +1445,9 @@ export function AdminPollDetailPage({ pollId }: { pollId: string }) {
                                   type="checkbox"
                                   className="h-4 w-4 accent-[var(--admin-primary)]"
                                   checked={selected}
-                                  onChange={() => toggleSelectRow(membershipId)}
+                                  onChange={() => {
+                                    toggleSelectRow(membershipId);
+                                  }}
                                   aria-label={`Select ${row.learnerName ?? row.email ?? "respondent"}`}
                                 />
                               ) : null}
@@ -1510,11 +1496,9 @@ export function AdminPollDetailPage({ pollId }: { pollId: string }) {
                                 )}
                               </td>
                             ) : null}
-                            {showTimeColumn ? (
-                              <td className="px-4 py-3 text-right font-mono text-xs text-[var(--admin-on-surface)]">
-                                {formatSeconds(row.responseSeconds)}
-                              </td>
-                            ) : null}
+                            <td className="px-4 py-3 text-right font-mono text-xs text-[var(--admin-on-surface)]">
+                              {formatSeconds(row.responseSeconds)}
+                            </td>
                             {showRespondedColumn ? (
                               <td className="px-4 py-3 text-right font-mono text-xs text-[var(--admin-on-surface-variant)]">
                                 {formatDateTime(row.respondedAt)}
@@ -1535,21 +1519,23 @@ export function AdminPollDetailPage({ pollId }: { pollId: string }) {
                       ? detail.eligibleCount != null
                         ? `0 / ${detail.eligibleCount.toLocaleString()} eligible`
                         : "No results"
-                      : `Showing ${rangeStart}-${rangeEnd} of ${respondentTotalCount.toLocaleString()}`}
+                      : `Showing ${String(rangeStart)}-${String(rangeEnd)} of ${respondentTotalCount.toLocaleString()}`}
                   </p>
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
                       className={ghostButtonClassName}
                       disabled={respondentPage <= 1 || respondentsLoading}
-                      onClick={() => setRespondentPage((current) => Math.max(1, current - 1))}
+                      onClick={() => {
+                        setRespondentPage((current) => Math.max(1, current - 1));
+                      }}
                       aria-label="Previous page"
                     >
                       <ChevronLeft className="h-4 w-4" aria-hidden="true" />
                     </button>
                     <span className="font-mono">
                       {respondentPage}
-                      {respondentTotalPages > 0 ? ` / ${respondentTotalPages}` : ""}
+                      {respondentTotalPages > 0 ? ` / ${String(respondentTotalPages)}` : ""}
                     </span>
                     <button
                       type="button"
@@ -1559,7 +1545,9 @@ export function AdminPollDetailPage({ pollId }: { pollId: string }) {
                         respondentsLoading ||
                         respondentTotalPages === 0
                       }
-                      onClick={() => setRespondentPage((current) => current + 1)}
+                      onClick={() => {
+                        setRespondentPage((current) => current + 1);
+                      }}
                       aria-label="Next page"
                     >
                       <ChevronRight className="h-4 w-4" aria-hidden="true" />
@@ -1590,7 +1578,9 @@ export function AdminPollDetailPage({ pollId }: { pollId: string }) {
               <button
                 type="button"
                 className="rounded p-1 text-[var(--admin-on-surface-variant)] hover:bg-[var(--admin-surface-high)]"
-                onClick={() => setMessageOpen(false)}
+                onClick={() => {
+                  setMessageOpen(false);
+                }}
                 aria-label="Close message dialog"
               >
                 <X className="h-4 w-4" aria-hidden="true" />
@@ -1599,7 +1589,7 @@ export function AdminPollDetailPage({ pollId }: { pollId: string }) {
             <div className="space-y-3 px-5 py-4">
               <p className="text-sm text-[var(--admin-on-surface-variant)]">
                 {messageMembershipIds
-                  ? `Sending to ${messageMembershipIds.length} selected respondent${messageMembershipIds.length === 1 ? "" : "s"}.`
+                  ? `Sending to ${String(messageMembershipIds.length)} selected respondent${messageMembershipIds.length === 1 ? "" : "s"}.`
                   : "Sending to respondents matching the current filters."}
               </p>
               <label className="grid gap-1 text-xs text-[var(--admin-on-surface-variant)]">
@@ -1607,7 +1597,9 @@ export function AdminPollDetailPage({ pollId }: { pollId: string }) {
                 <input
                   className={fieldClassName}
                   value={messageSubject}
-                  onChange={(event) => setMessageSubject(event.target.value)}
+                  onChange={(event) => {
+                    setMessageSubject(event.target.value);
+                  }}
                   maxLength={200}
                 />
               </label>
@@ -1617,7 +1609,9 @@ export function AdminPollDetailPage({ pollId }: { pollId: string }) {
                   className={`${fieldClassName} h-auto min-h-[120px] py-2`}
                   rows={5}
                   value={messageBody}
-                  onChange={(event) => setMessageBody(event.target.value)}
+                  onChange={(event) => {
+                    setMessageBody(event.target.value);
+                  }}
                   maxLength={10000}
                 />
               </label>
@@ -1626,7 +1620,9 @@ export function AdminPollDetailPage({ pollId }: { pollId: string }) {
               <button
                 type="button"
                 className={ghostButtonClassName}
-                onClick={() => setMessageOpen(false)}
+                onClick={() => {
+                  setMessageOpen(false);
+                }}
               >
                 Cancel
               </button>
@@ -1651,7 +1647,9 @@ export function AdminPollDetailPage({ pollId }: { pollId: string }) {
       <AdminPollOptionDetailDrawer
         pollId={pollId}
         optionId={drawerOptionId}
-        onClose={() => setDrawerOptionId(null)}
+        onClose={() => {
+          setDrawerOptionId(null);
+        }}
       />
     </div>
   );

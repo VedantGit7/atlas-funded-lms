@@ -42,7 +42,7 @@ function asJson(value: unknown) {
 export const marketingCampaignsRepository = {
   async list(
     tx: TenantTx,
-    args: { status?: string; q?: string; limit: number; offset: number },
+    args: { status?: string | undefined; q?: string | undefined; limit: number; offset: number },
   ): Promise<MarketingCampaignRow[]> {
     const status = args.status && args.status !== "ALL" ? args.status : null;
     const q = args.q?.trim() ? `%${args.q.trim()}%` : null;
@@ -159,11 +159,7 @@ export const marketingCampaignsRepository = {
     return id;
   },
 
-  async updateIdentity(
-    tx: TenantTx,
-    id: string,
-    args: { title: string; goal: string },
-  ) {
+  async updateIdentity(tx: TenantTx, id: string, args: { title: string; goal: string }) {
     await tx.$executeRawUnsafe(
       `
       update marketing_campaigns
@@ -255,10 +251,7 @@ export const marketingCampaignsRepository = {
   },
 
   async delete(tx: TenantTx, id: string) {
-    await tx.$executeRawUnsafe(
-      `delete from marketing_campaigns where id = $1::uuid`,
-      id,
-    );
+    await tx.$executeRawUnsafe(`delete from marketing_campaigns where id = $1::uuid`, id);
   },
 
   async batchExists(tx: TenantTx, batchId: string): Promise<boolean> {

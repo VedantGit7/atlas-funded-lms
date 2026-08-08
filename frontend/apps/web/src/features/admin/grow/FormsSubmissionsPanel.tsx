@@ -2,14 +2,7 @@
 
 import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import {
-  ChevronLeft,
-  ChevronRight,
-  Download,
-  FileText,
-  Search,
-  Share2,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, Download, FileText, Search, Share2 } from "lucide-react";
 import { ClientApiError, clientApi, toast } from "../../../lib/client-api";
 import { memberInitials } from "../../studio/courses/admin-form-dropdown-shared";
 import {
@@ -156,7 +149,11 @@ export function FormsSubmissionsPanel({ formId }: { formId: string }) {
             aria-label="Breadcrumb"
             className="mb-2 flex flex-wrap items-center gap-2 text-[12px] font-bold text-[var(--admin-on-surface-variant)]"
           >
-            <Link href={FORMS_LIST_HREF} prefetch={false} className="hover:text-[var(--admin-primary)]">
+            <Link
+              href={FORMS_LIST_HREF}
+              prefetch={false}
+              className="hover:text-[var(--admin-primary)]"
+            >
               Forms
             </Link>
             <ChevronRight className="h-3.5 w-3.5" aria-hidden="true" />
@@ -295,7 +292,9 @@ export function FormsSubmissionsPanel({ formId }: { formId: string }) {
                       <tr
                         className={[
                           "transition-colors hover:bg-[var(--admin-surface-low)]",
-                          expanded ? "bg-[color-mix(in_srgb,var(--admin-surface-low)_30%,transparent)]" : "",
+                          expanded
+                            ? "bg-[color-mix(in_srgb,var(--admin-surface-low)_30%,transparent)]"
+                            : "",
                         ].join(" ")}
                       >
                         <td className="px-6 py-4">
@@ -304,7 +303,9 @@ export function FormsSubmissionsPanel({ formId }: { formId: string }) {
                               {memberInitials(row.displayName, row.email)}
                             </div>
                             <div>
-                              <p className="font-semibold text-[var(--admin-on-surface)]">{label}</p>
+                              <p className="font-semibold text-[var(--admin-on-surface)]">
+                                {label}
+                              </p>
                               <p className="text-xs text-[var(--admin-on-surface-variant)]">
                                 ID: {row.id.slice(0, 8)}
                               </p>
@@ -320,7 +321,9 @@ export function FormsSubmissionsPanel({ formId }: { formId: string }) {
                           </span>
                         </td>
                         <td className="px-6 py-4 text-[var(--admin-on-surface-variant)]">
-                          <time dateTime={row.createdAt}>{formatFormRelativeTime(row.createdAt)}</time>
+                          <time dateTime={row.createdAt}>
+                            {formatFormRelativeTime(row.createdAt)}
+                          </time>
                         </td>
                         <td className="px-6 py-4 text-right">
                           <button

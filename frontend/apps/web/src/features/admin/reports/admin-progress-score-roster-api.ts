@@ -14,8 +14,7 @@ export const PROGRESS_LEARNER_COLUMN_OPTIONS = [
   { key: "expires_at", label: "Expiry date" },
 ] as const;
 
-export type ProgressLearnerColumnKey =
-  (typeof PROGRESS_LEARNER_COLUMN_OPTIONS)[number]["key"];
+export type ProgressLearnerColumnKey = (typeof PROGRESS_LEARNER_COLUMN_OPTIONS)[number]["key"];
 
 export const SCORE_LEARNER_COLUMN_OPTIONS = [
   { key: "learner_name", label: "Learner" },
@@ -29,15 +28,16 @@ export const SCORE_LEARNER_COLUMN_OPTIONS = [
 
 export type ScoreLearnerColumnKey = (typeof SCORE_LEARNER_COLUMN_OPTIONS)[number]["key"];
 
-export type ProgressProductType = "course" | "test_series" | "bundle" | "subscription" | "mock_test";
+export type ProgressProductType =
+  | "course"
+  | "test_series"
+  | "bundle"
+  | "subscription"
+  | "mock_test";
 export type ScoreProductType = "course" | "test_series" | "bundle" | "mock_test";
 
 export type ProductPublishStatus = "DRAFT" | "REVIEW" | "PUBLISHED" | "ARCHIVED";
-export type ProgressProductSortBy =
-  | "title"
-  | "enrolled_count"
-  | "avg_completion"
-  | "last_activity";
+export type ProgressProductSortBy = "title" | "enrolled_count" | "avg_completion" | "last_activity";
 
 export type ScoreProductSortBy =
   | "title"
@@ -64,7 +64,7 @@ export type ProgressProductItem = {
   status: ProductPublishStatus;
   enrolledCount: number;
   quizCount: number;
-  assessmentId?: string | null;
+  assessmentId?: string | null | undefined;
   avgCompletionPct: number | null;
   completionBands: ProgressCompletionBands;
   notStartedCount: number;
@@ -102,12 +102,7 @@ export type ScoreProductsSummary = {
 };
 
 export type ProgressLearnerActivityStatus = "active" | "stalled" | "not_started";
-export type ProgressLearnerView =
-  | "all"
-  | "stalled"
-  | "not_started"
-  | "nearly_done"
-  | "completed";
+export type ProgressLearnerView = "all" | "stalled" | "not_started" | "nearly_done" | "completed";
 export type ProgressCompletionBandKey =
   | "not_started"
   | "early"
@@ -119,7 +114,7 @@ export type ProgressLearnerItem = {
   enrollmentId: string;
   membershipId: string;
   productId: string;
-  productType?: ProgressProductType;
+  productType?: ProgressProductType | undefined;
   courseId: string;
   learnerName: string | null;
   email: string | null;
@@ -339,12 +334,12 @@ function buildQuery(params: Record<string, string | number | undefined>): string
 export async function fetchProgressProducts(
   productType: ProgressProductType,
   filters?: {
-    q?: string;
-    page?: number;
-    limit?: number;
-    status?: ProductPublishStatus | "";
-    sortBy?: ProgressProductSortBy;
-    sortDir?: "asc" | "desc";
+    q?: string | undefined;
+    page?: number | undefined;
+    limit?: number | undefined;
+    status?: ProductPublishStatus | "" | undefined;
+    sortBy?: ProgressProductSortBy | undefined;
+    sortDir?: "asc" | "desc" | undefined;
   },
 ) {
   return clientApi.get<{
@@ -365,7 +360,10 @@ export async function fetchProgressProducts(
   );
 }
 
-export async function fetchProgressCourses(filters?: { q?: string; page?: number }) {
+export async function fetchProgressCourses(filters?: {
+  q?: string | undefined;
+  page?: number | undefined;
+}) {
   return fetchProgressProducts("course", filters);
 }
 
@@ -373,26 +371,26 @@ export async function fetchProgressLearners(
   productType: ProgressProductType,
   productId: string,
   filters: {
-    enrolledFrom?: string;
-    enrolledTo?: string;
-    learnerName?: string;
-    enrolledType?: string;
-    status?: string;
-    view?: ProgressLearnerView;
-    completionBand?: ProgressCompletionBandKey | "";
-    activityStatus?: ProgressLearnerActivityStatus | "";
-    sortBy?: string;
-    sortDir?: "asc" | "desc";
-    columns?: ProgressLearnerColumnKey[];
-    page?: number;
-    limit?: number;
+    enrolledFrom?: string | undefined;
+    enrolledTo?: string | undefined;
+    learnerName?: string | undefined;
+    enrolledType?: string | undefined;
+    status?: string | undefined;
+    view?: ProgressLearnerView | undefined;
+    completionBand?: ProgressCompletionBandKey | "" | undefined;
+    activityStatus?: ProgressLearnerActivityStatus | "" | undefined;
+    sortBy?: string | undefined;
+    sortDir?: "asc" | "desc" | undefined;
+    columns?: ProgressLearnerColumnKey[] | undefined;
+    page?: number | undefined;
+    limit?: number | undefined;
   },
 ) {
   return clientApi.get<{
     data: {
       productId: string;
       productTitle: string;
-      productType?: ProgressProductType;
+      productType?: ProgressProductType | undefined;
       courseId: string;
       courseTitle: string;
       product: ProgressLearnerRosterProduct;
@@ -424,14 +422,14 @@ export async function fetchProgressLearners(
 export async function fetchScoreProducts(
   productType: ScoreProductType,
   filters?: {
-    q?: string;
-    page?: number;
-    limit?: number;
-    status?: ProductPublishStatus | "";
-    passRateBand?: ScorePassRateBand | "";
-    hasUngraded?: boolean;
-    sortBy?: ScoreProductSortBy;
-    sortDir?: "asc" | "desc";
+    q?: string | undefined;
+    page?: number | undefined;
+    limit?: number | undefined;
+    status?: ProductPublishStatus | "" | undefined;
+    passRateBand?: ScorePassRateBand | "" | undefined;
+    hasUngraded?: boolean | undefined;
+    sortBy?: ScoreProductSortBy | undefined;
+    sortDir?: "asc" | "desc" | undefined;
   },
 ) {
   return clientApi.get<{
@@ -454,7 +452,10 @@ export async function fetchScoreProducts(
   );
 }
 
-export async function fetchScoreCourses(filters?: { q?: string; page?: number }) {
+export async function fetchScoreCourses(filters?: {
+  q?: string | undefined;
+  page?: number | undefined;
+}) {
   return fetchScoreProducts("course", filters);
 }
 
@@ -462,15 +463,15 @@ export async function fetchScoreQuizzes(
   productType: ScoreProductType,
   productId: string,
   filters?: {
-    q?: string;
-    assessmentType?: string;
-    lessonId?: string;
-    passRateBand?: ScorePassRateBand | "";
-    hasUngraded?: boolean;
-    sortBy?: ScoreQuizSortBy;
-    sortDir?: "asc" | "desc";
-    page?: number;
-    limit?: number;
+    q?: string | undefined;
+    assessmentType?: string | undefined;
+    lessonId?: string | undefined;
+    passRateBand?: ScorePassRateBand | "" | undefined;
+    hasUngraded?: boolean | undefined;
+    sortBy?: ScoreQuizSortBy | undefined;
+    sortDir?: "asc" | "desc" | undefined;
+    page?: number | undefined;
+    limit?: number | undefined;
   },
 ) {
   return clientApi.get<{
@@ -500,20 +501,20 @@ export async function fetchScoreQuizzes(
 export async function fetchScoreLearners(
   assessmentId: string,
   filters: {
-    submittedFrom?: string;
-    submittedTo?: string;
-    learnerName?: string;
-    resultStatus?: ScoreLearnerResultStatus | "";
-    minScore?: number;
-    maxScore?: number;
-    minAttempts?: number;
-    attemptsFilter?: ScoreAttemptsFilter;
-    view?: ScoreLearnerView;
-    sortBy?: string;
-    sortDir?: "asc" | "desc";
-    columns?: ScoreLearnerColumnKey[];
-    page?: number;
-    limit?: number;
+    submittedFrom?: string | undefined;
+    submittedTo?: string | undefined;
+    learnerName?: string | undefined;
+    resultStatus?: ScoreLearnerResultStatus | "" | undefined;
+    minScore?: number | undefined;
+    maxScore?: number | undefined;
+    minAttempts?: number | undefined;
+    attemptsFilter?: ScoreAttemptsFilter | undefined;
+    view?: ScoreLearnerView | undefined;
+    sortBy?: string | undefined;
+    sortDir?: "asc" | "desc" | undefined;
+    columns?: ScoreLearnerColumnKey[] | undefined;
+    page?: number | undefined;
+    limit?: number | undefined;
   },
 ) {
   return clientApi.get<{
@@ -565,15 +566,15 @@ export async function fetchScoreItemAnalysis(assessmentId: string) {
 export async function fetchScoreAttemptHistory(
   assessmentId: string,
   filters?: {
-    resultStatus?: ScoreLearnerResultStatus | "";
-    submittedFrom?: string;
-    submittedTo?: string;
-    flag?: "tab_switched" | "after_time_limit" | "graded_manually" | "";
-    learnerName?: string;
-    sortBy?: "submitted_at" | "started_at" | "score_pct" | "attempt_number";
-    sortDir?: "asc" | "desc";
-    page?: number;
-    limit?: number;
+    resultStatus?: ScoreLearnerResultStatus | "" | undefined;
+    submittedFrom?: string | undefined;
+    submittedTo?: string | undefined;
+    flag?: "tab_switched" | "after_time_limit" | "graded_manually" | "" | undefined;
+    learnerName?: string | undefined;
+    sortBy?: "submitted_at" | "started_at" | "score_pct" | "attempt_number" | undefined;
+    sortDir?: "asc" | "desc" | undefined;
+    page?: number | undefined;
+    limit?: number | undefined;
   },
 ) {
   return clientApi.get<{
@@ -601,9 +602,9 @@ export async function regradeScoreAttempts(
   assessmentId: string,
   body: {
     scope: "selected" | "all";
-    attemptIds?: string[];
-    membershipIds?: string[];
-    notifyLearners?: boolean;
+    attemptIds?: string[] | undefined;
+    membershipIds?: string[] | undefined;
+    notifyLearners?: boolean | undefined;
   },
 ) {
   return clientApi.post<{
@@ -723,8 +724,12 @@ export async function saveAttemptGrading(
   assessmentId: string,
   attemptId: string,
   body: {
-    items: Array<{ assessmentItemId: string; pointsAwarded: number; feedback?: string }>;
-    notifyLearner?: boolean;
+    items: Array<{
+      assessmentItemId: string;
+      pointsAwarded: number;
+      feedback?: string | undefined;
+    }>;
+    notifyLearner?: boolean | undefined;
   },
 ) {
   return clientApi.post<{
@@ -759,7 +764,7 @@ export async function voidScoreAttempt(
 export async function resetScoreAttempt(
   assessmentId: string,
   attemptId: string,
-  body?: { reason?: string },
+  body?: { reason?: string | undefined },
 ) {
   return clientApi.post<{ data: { attemptId: string; status: "VOIDED" } }>(
     `/api/v1/reports/progress-score/scores/quizzes/${assessmentId}/attempts/${attemptId}/reset`,
@@ -772,7 +777,7 @@ export async function resetScoreAttempt(
 export async function grantExtraScoreAttempt(
   assessmentId: string,
   attemptId: string,
-  body?: { count?: number; reason?: string },
+  body?: { count?: number | undefined; reason?: string | undefined },
 ) {
   return clientApi.post<{
     data: {
@@ -790,12 +795,11 @@ export async function grantExtraScoreAttempt(
 }
 
 export async function createProgressGroup(body: Record<string, unknown>) {
-  return clientApi.post<{ data: { batchId: string; key: string; name: string; memberCount: number } }>(
-    "/api/v1/reports/progress-score/progress/groups",
-    body,
-    "progress-score-progress-group",
-    { successMessage: "Group created from progress report." },
-  );
+  return clientApi.post<{
+    data: { batchId: string; key: string; name: string; memberCount: number };
+  }>("/api/v1/reports/progress-score/progress/groups", body, "progress-score-progress-group", {
+    successMessage: "Group created from progress report.",
+  });
 }
 
 export async function sendProgressMessage(body: Record<string, unknown>) {
@@ -822,12 +826,11 @@ export async function exportProgressReport(body: Record<string, unknown>) {
 }
 
 export async function createScoreGroup(body: Record<string, unknown>) {
-  return clientApi.post<{ data: { batchId: string; key: string; name: string; memberCount: number } }>(
-    "/api/v1/reports/progress-score/scores/groups",
-    body,
-    "progress-score-scores-group",
-    { successMessage: "Group created from scores report." },
-  );
+  return clientApi.post<{
+    data: { batchId: string; key: string; name: string; memberCount: number };
+  }>("/api/v1/reports/progress-score/scores/groups", body, "progress-score-scores-group", {
+    successMessage: "Group created from scores report.",
+  });
 }
 
 export async function sendScoreMessage(body: Record<string, unknown>) {
@@ -882,7 +885,11 @@ export type CohortMessageItem = {
   reportHref: string | null;
 };
 
-export async function fetchCohortGroups(filters?: { q?: string; page?: number; limit?: number }) {
+export async function fetchCohortGroups(filters?: {
+  q?: string | undefined;
+  page?: number | undefined;
+  limit?: number | undefined;
+}) {
   return clientApi.get<{
     data: { items: CohortGroupItem[]; pageInfo: PageInfo };
   }>(
@@ -894,7 +901,10 @@ export async function fetchCohortGroups(filters?: { q?: string; page?: number; l
   );
 }
 
-export async function fetchCohortMessages(filters?: { page?: number; limit?: number }) {
+export async function fetchCohortMessages(filters?: {
+  page?: number | undefined;
+  limit?: number | undefined;
+}) {
   return clientApi.get<{
     data: { items: CohortMessageItem[]; pageInfo: PageInfo };
   }>(
@@ -934,12 +944,7 @@ export async function exportScoreReport(body: Record<string, unknown>) {
 /* ── Individual learner progress detail ─────────────────────────────── */
 
 export type ProgressLearnerLessonStatus = "completed" | "in_progress" | "not_started";
-export type ProgressLearnerLessonType =
-  | "video"
-  | "quiz"
-  | "reading"
-  | "interactive"
-  | "other";
+export type ProgressLearnerLessonType = "video" | "quiz" | "reading" | "interactive" | "other";
 
 export type ProgressLearnerDetail = {
   product: {
@@ -1048,7 +1053,7 @@ export async function extendProgressLearnerAccess(
   productType: ProgressProductType,
   productId: string,
   enrollmentId: string,
-  body: { expiresAt: string; reason?: string },
+  body: { expiresAt: string; reason?: string | undefined },
 ) {
   return clientApi.post<{
     data: { enrollmentId: string; expiresAt: string | null };

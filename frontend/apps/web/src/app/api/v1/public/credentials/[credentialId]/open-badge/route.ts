@@ -8,7 +8,7 @@ import { getPublicOpenBadgeCredential } from "../../../../../../../server/certif
 import { resolveRequestOriginFromHeaders } from "../../../../../../../lib/server/resolve-request-origin";
 import { routeMetadata } from "./route.metadata";
 
-export const GET = createPublicRouteHandler<unknown>(routeMetadata, async ({ req, requestId }) => {
+export const GET = createPublicRouteHandler(routeMetadata, async ({ req, requestId }) => {
   return withGlobalDb(async (db) => {
     const tenant = await resolveTenantFromRequest({ req, db });
     const url = new URL(req.url);

@@ -16,6 +16,13 @@ import {
 } from "./active-devices-roster.repository";
 import { AtlasHttpError } from "@atlas/core/http/errors";
 
+function defined<T>(value: T, message = "Expected value to be defined"): NonNullable<T> {
+  if (value == null) {
+    throw new Error(message);
+  }
+  return value;
+}
+
 function toFilter(
   query: Pick<ActiveDevicesRosterQuery, "email" | "platform" | "window" | "view">,
   registrationLimit: number,
@@ -46,12 +53,7 @@ export async function getActiveDevicesOverview(
 
   const [activeDevicesCount, learnersSignedIn, overDeviceLimit, previousPeriodCount, trend] =
     await Promise.all([
-      activeDevicesRosterRepository.countSessionsInWindow(
-        tx,
-        filter,
-        windowFromIso,
-        windowToIso,
-      ),
+      activeDevicesRosterRepository.countSessionsInWindow(tx, filter, windowFromIso, windowToIso),
       activeDevicesRosterRepository.countDistinctLearnersInWindow(
         tx,
         filter,
@@ -167,7 +169,10 @@ function shortDeviceId(value: string | null | undefined, fallbackId: string): st
   return `${source.slice(0, 4).toUpperCase()}...`;
 }
 
-function parseUserAgent(userAgent: string | null, platform: string | null): {
+function parseUserAgent(
+  userAgent: string | null,
+  platform: string | null,
+): {
   deviceLabel: string;
   browserLabel: string | null;
   osLabel: string | null;
@@ -182,7 +187,8 @@ function parseUserAgent(userAgent: string | null, platform: string | null): {
 
   let osLabel: string | null = platform ? platform.replace(/_/g, " ") : null;
   if (!osLabel) {
-    if (lower.includes("iphone") || lower.includes("ipad") || lower.includes("ios")) osLabel = "iOS";
+    if (lower.includes("iphone") || lower.includes("ipad") || lower.includes("ios"))
+      osLabel = "iOS";
     else if (lower.includes("android")) osLabel = "Android";
     else if (lower.includes("mac os") || lower.includes("macintosh")) osLabel = "macOS";
     else if (lower.includes("windows")) osLabel = "Windows";
@@ -224,16 +230,12 @@ function buildLearnerDeviceDetail(
   const ACTIVE_MS = 24 * 60 * 60 * 1000;
   const CONCURRENT_MS = 2 * 60 * 60 * 1000;
 
-  const sorted = [...sessions].sort(
-    (a, b) => b.last_seen_at.getTime() - a.last_seen_at.getTime(),
-  );
+  const sorted = [...sessions].sort((a, b) => b.last_seen_at.getTime() - a.last_seen_at.getTime());
   const recentConcurrent = sorted.filter(
     (row) => now - row.last_seen_at.getTime() <= CONCURRENT_MS,
   );
   const concurrentIps = new Set(
-    recentConcurrent
-      .map((row) => row.ip_address?.trim())
-      .filter((ip): ip is string => Boolean(ip)),
+    recentConcurrent.map((row) => row.ip_address?.trim()).filter((ip): ip is string => Boolean(ip)),
   );
   const concurrentLocationFail = concurrentIps.size >= 2;
 
@@ -272,24 +274,23 @@ function buildLearnerDeviceDetail(
 
   const distinctIps = [
     ...new Set(
-      sorted
-        .map((row) => row.ip_address?.trim())
-        .filter((ip): ip is string => Boolean(ip)),
+      sorted.map((row) => row.ip_address?.trim()).filter((ip): ip is string => Boolean(ip)),
     ),
   ];
   const firstSeenAt =
     sorted.length > 0
-      ? [...sorted].sort((a, b) => a.created_at.getTime() - b.created_at.getTime())[0]!
-          .created_at.toISOString()
+      ? defined(
+          [...sorted].sort((a, b) => a.created_at.getTime() - b.created_at.getTime())[0],
+        ).created_at.toISOString()
       : null;
   const lastActivityAt = sorted[0]?.last_seen_at.toISOString() ?? null;
   const overLimit = sorted.length > deviceLimit;
 
   let flagSummary: string | null = null;
   if (concurrentLocationFail) {
-    flagSummary = `1 - concurrent sessions across ${concurrentIps.size} IPs`;
+    flagSummary = `1 - concurrent sessions across ${String(concurrentIps.size)} IPs`;
   } else if (overLimit) {
-    flagSummary = `Over device limit (${sorted.length} of ${deviceLimit} allowed)`;
+    flagSummary = `Over device limit (${String(sorted.length)} of ${String(deviceLimit)} allowed)`;
   }
 
   const recognisedCount = sorted.filter((row) => Boolean(row.device_fingerprint)).length;
@@ -299,14 +300,16 @@ function buildLearnerDeviceDetail(
       label: "Concurrent locations",
       status: concurrentLocationFail ? ("fail" as const) : ("pass" as const),
       detail: concurrentLocationFail
-        ? `${concurrentIps.size} distinct IPs active in the last 2 hours`
+        ? `${String(concurrentIps.size)} distinct IPs active in the last 2 hours`
         : null,
     },
     {
       key: "device_count" as const,
       label: "Device count",
       status: overLimit ? ("warn" as const) : ("pass" as const),
-      detail: overLimit ? `${sorted.length} devices vs ${deviceLimit} allowed` : null,
+      detail: overLimit
+        ? `${String(sorted.length)} devices vs ${String(deviceLimit)} allowed`
+        : null,
     },
     {
       key: "recognised_devices" as const,
@@ -320,7 +323,7 @@ function buildLearnerDeviceDetail(
       detail:
         sorted.length === 0
           ? null
-          : `${recognisedCount} of ${sorted.length} have fingerprints`,
+          : `${String(recognisedCount)} of ${String(sorted.length)} have fingerprints`,
     },
     {
       key: "no_shared_ip" as const,
@@ -345,7 +348,7 @@ function buildLearnerDeviceDetail(
       at: lastActivityAt ?? new Date().toISOString(),
       kind: "over_limit",
       label: "Sign-in blocked risk (limit reached)",
-      detail: `${sorted.length} of ${deviceLimit} devices allowed`,
+      detail: `${String(sorted.length)} of ${String(deviceLimit)} devices allowed`,
       severity: "warning",
     });
   }
@@ -442,14 +445,14 @@ export async function getActiveDevicesLearnerDetail(
 function formatSessionAge(createdAt: Date, nowMs: number): string {
   const diffMs = Math.max(0, nowMs - createdAt.getTime());
   const mins = Math.floor(diffMs / 60_000);
-  if (mins < 60) return `${mins}m`;
+  if (mins < 60) return `${String(mins)}m`;
   const hours = Math.floor(mins / 60);
   if (hours < 48) {
     const remMins = mins % 60;
-    return remMins > 0 ? `${hours}h ${remMins}m` : `${hours}h`;
+    return remMins > 0 ? `${String(hours)}h ${String(remMins)}m` : `${String(hours)}h`;
   }
   const days = Math.floor(hours / 24);
-  return `${days}d`;
+  return `${String(days)}d`;
 }
 
 function buildPresenceHeatstrip(createdAt: Date, lastSeenAt: Date, now: Date) {
@@ -577,7 +580,7 @@ export async function getActiveDevicesSessionDetail(
       id: `flag-${session.id}`,
       at: session.last_seen_at.toISOString(),
       label: "Flagged for concurrent IPs",
-      detail: enriched.summary.flagSummary,
+      detail: enriched.summary.flagSummary ?? "Flagged device",
       result: "flagged" as const,
       ipAddress: session.ip_address,
     });

@@ -1,5 +1,5 @@
 import type { z } from "zod";
-import { createTenantRoute } from "@atlas/api/create-tenant-route";
+import { createTenantRoute, noBodySchema } from "@atlas/api";
 import {
   DomainParamsSchema,
   SetPrimaryDomainResponseSchema,
@@ -9,13 +9,16 @@ import { routeMetadata } from "./route.metadata";
 
 type SetPrimaryDomainResponse = z.output<typeof SetPrimaryDomainResponseSchema>;
 
-export const PUT = createTenantRoute<Record<string, never>, SetPrimaryDomainResponse>({
+export const PUT = createTenantRoute<
+  Record<string, never>,
+  SetPrimaryDomainResponse,
+  typeof DomainParamsSchema
+>({
   metadata: routeMetadata,
+  input: noBodySchema,
   params: DomainParamsSchema,
   output: SetPrimaryDomainResponseSchema,
   handler: async ({ tx, params, ctx }) => {
-    const { id } = DomainParamsSchema.parse(params);
-
     return setTenantDomainPrimary(
       tx,
       {
@@ -23,7 +26,7 @@ export const PUT = createTenantRoute<Record<string, never>, SetPrimaryDomainResp
         actorMembershipId: ctx.actorMembershipId,
         requestId: ctx.requestId,
       },
-      id,
+      params.id,
     );
   },
 });

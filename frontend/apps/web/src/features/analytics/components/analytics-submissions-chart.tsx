@@ -2,13 +2,25 @@
 
 import { useMemo } from "react";
 import type { ChartGranularity, TrendPoint } from "../analytics-studio-shared";
-import { chartFill, chartGridStroke, chartLineStroke, panelHeaderClassName } from "../analytics-studio-shared";
+import {
+  chartFill,
+  chartGridStroke,
+  chartLineStroke,
+  panelHeaderClassName,
+} from "../analytics-studio-shared";
+
+function defined<T>(value: T, message = "Expected value to be defined"): NonNullable<T> {
+  if (value == null) {
+    throw new Error(message);
+  }
+  return value;
+}
 
 type AnalyticsSubmissionsChartProps = {
   points: TrendPoint[];
   granularity: ChartGranularity;
   onGranularityChange: (value: ChartGranularity) => void;
-  loading?: boolean;
+  loading?: boolean | undefined;
 };
 
 const GRANULARITY_OPTIONS: Array<{ value: ChartGranularity; label: string }> = [
@@ -25,22 +37,23 @@ function buildPath(points: TrendPoint[], width: number, height: number, padding:
   const innerHeight = height - padding * 2;
 
   const coords = points.map((point, index) => {
-    const x = padding + (points.length === 1 ? innerWidth / 2 : (index / (points.length - 1)) * innerWidth);
+    const x =
+      padding + (points.length === 1 ? innerWidth / 2 : (index / (points.length - 1)) * innerWidth);
     const y = padding + innerHeight - (point.count / maxCount) * innerHeight;
     return { x, y };
   });
 
   if (coords.length === 1) {
-    const only = coords[0]!;
-    return `M ${only.x} ${only.y}`;
+    const only = defined(coords[0]);
+    return `M ${String(only.x)} ${String(only.y)}`;
   }
 
-  let path = `M ${coords[0]!.x} ${coords[0]!.y}`;
+  let path = `M ${String(defined(coords[0]).x)} ${String(defined(coords[0]).y)}`;
   for (let index = 1; index < coords.length; index += 1) {
-    const prev = coords[index - 1]!;
-    const current = coords[index]!;
+    const prev = defined(coords[index - 1]);
+    const current = defined(coords[index]);
     const cx = (prev.x + current.x) / 2;
-    path += ` C ${cx} ${prev.y}, ${cx} ${current.y}, ${current.x} ${current.y}`;
+    path += ` C ${String(cx)} ${String(prev.y)}, ${String(cx)} ${String(current.y)}, ${String(current.x)} ${String(current.y)}`;
   }
   return path;
 }
@@ -62,7 +75,7 @@ export function AnalyticsSubmissionsChart({
       points.length === 1
         ? padding + (width - padding * 2) / 2
         : padding + ((points.length - 1) / Math.max(points.length - 1, 1)) * (width - padding * 2);
-    return `${linePath} L ${lastX} ${height - padding} L ${padding} ${height - padding} Z`;
+    return `${linePath} L ${String(lastX)} ${String(height - padding)} L ${String(padding)} ${String(height - padding)} Z`;
   }, [linePath, points.length, width]);
 
   const gridLines = [0, 0.25, 0.5, 0.75, 1];
@@ -114,7 +127,7 @@ export function AnalyticsSubmissionsChart({
           </div>
         ) : (
           <svg
-            viewBox={`0 0 ${width} ${height + 20}`}
+            viewBox={`0 0 ${String(width)} ${String(height + 20)}`}
             className="h-full w-full overflow-visible"
             role="img"
             aria-label="Assessment submissions trend chart"
@@ -152,7 +165,10 @@ export function AnalyticsSubmissionsChart({
                 (points.length === 1 ? innerWidth / 2 : (index / (points.length - 1)) * innerWidth);
               const y = padding + innerHeight - (point.count / maxCount) * innerHeight;
               const showLabel =
-                points.length <= 8 || index === 0 || index === points.length - 1 || index % Math.ceil(points.length / 7) === 0;
+                points.length <= 8 ||
+                index === 0 ||
+                index === points.length - 1 ||
+                index % Math.ceil(points.length / 7) === 0;
               return (
                 <g key={point.sortKey}>
                   <circle cx={x} cy={y} r={3} fill={chartLineStroke} />

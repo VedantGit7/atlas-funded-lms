@@ -11,8 +11,9 @@ import { processReportsOutboxBatch } from "../../server/reports/reports-worker-r
 export async function tickReportSchedulesForActiveTenants(
   requestId: string,
 ): Promise<{ tenants: number; claimed: number; drained: number }> {
-  const tenants = await withGlobalDb((db) =>
-    db.$queryRaw<{ id: string }[]>`
+  const tenants = await withGlobalDb(
+    (db) =>
+      db.$queryRaw<{ id: string }[]>`
       SELECT id FROM tenants WHERE state = 'ACTIVE' AND deleted_at IS NULL
     `,
   );
@@ -30,7 +31,7 @@ export async function tickReportSchedulesForActiveTenants(
           requestId,
         }),
     );
-    claimed += tickResult.data.claimed;
+    claimed += tickResult.data.schedulesClaimed;
 
     const drainResult = await processReportsOutboxBatch({
       tenantId: tenant.id,

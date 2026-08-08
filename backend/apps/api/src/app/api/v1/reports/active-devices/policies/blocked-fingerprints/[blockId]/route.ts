@@ -16,5 +16,5 @@ export const DELETE = createTenantRoute<
   params: blockedFingerprintParamsSchema,
   input: noBodySchema,
   output: devicePolicyMutationResponseSchema,
-  handler: async ({ tx, ctx, params }) => unblockFingerprint(tx, ctx, params.blockId),
+  handler: async ({ tx, ctx, params }) => unblockFingerprint(tx, ctx, params["blockId"]),
 });

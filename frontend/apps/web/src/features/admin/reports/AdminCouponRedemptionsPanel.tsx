@@ -29,10 +29,14 @@ import {
   type CouponRedemptionsPayload,
   type CouponRedemptionsSortBy,
 } from "./admin-sales-marketing-roster-api";
-import {
-  downloadReportExport,
-  pollReportRunUntilComplete,
-} from "./admin-reports-api";
+import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
+
+function defined<T>(value: T, message = "Expected value to be defined"): NonNullable<T> {
+  if (value == null) {
+    throw new Error(message);
+  }
+  return value;
+}
 
 type Props = { couponId: string };
 
@@ -90,14 +94,14 @@ function initials(name: string | null, email: string | null): string {
   const source = (name?.trim() || email?.trim() || "?").replace(/\s+/g, " ");
   const parts = source.split(" ").filter(Boolean);
   if (parts.length >= 2) {
-    return `${parts[0]![0] ?? ""}${parts[1]![0] ?? ""}`.toUpperCase();
+    return `${defined(parts[0])[0] ?? ""}${defined(parts[1])[0] ?? ""}`.toUpperCase();
   }
   return source.slice(0, 2).toUpperCase();
 }
 
 function discountLabel(type: string, value: number, currency: string): string {
   if (type.toUpperCase() === "PERCENT") {
-    return `${value}% OFF`;
+    return `${String(value)}% OFF`;
   }
   return `${formatMoneyAmount(value)} ${currency} OFF`;
 }
@@ -248,7 +252,8 @@ function RedemptionsTrendChart({
   const maxCount = Math.max(...trend.map((point) => point.redemptionCount), 1);
   const maxRevenue = Math.max(...trend.map((point) => point.revenueCents), 1);
   const peakIndex = trend.reduce(
-    (best, point, index) => (point.redemptionCount > trend[best]!.redemptionCount ? index : best),
+    (best, point, index) =>
+      point.redemptionCount > defined(trend[best]).redemptionCount ? index : best,
     0,
   );
 
@@ -261,7 +266,7 @@ function RedemptionsTrendChart({
   const linePoints = trend.map((point, index) => {
     const x = padding + (index / Math.max(trend.length - 1, 1)) * innerWidth;
     const y = padding + innerHeight - (point.revenueCents / maxRevenue) * innerHeight;
-    return `${x},${y}`;
+    return `${String(x)},${String(y)}`;
   });
 
   let expiryIndex: number | null = null;
@@ -272,10 +277,13 @@ function RedemptionsTrendChart({
       const idx = trend.findIndex((point) => point.date.slice(0, 10) === expiryDay);
       if (idx >= 0) expiryIndex = idx;
       else {
-        const first = trend[0]!.date.slice(0, 10);
-        const last = trend[trend.length - 1]!.date.slice(0, 10);
+        const first = defined(trend[0]).date.slice(0, 10);
+        const last = defined(trend[trend.length - 1]).date.slice(0, 10);
         if (expiryDay >= first && expiryDay <= last) {
-          expiryIndex = Math.round(((trend.length - 1) * (new Date(expiryDay).getTime() - new Date(first).getTime())) / Math.max(new Date(last).getTime() - new Date(first).getTime(), 1));
+          expiryIndex = Math.round(
+            ((trend.length - 1) * (new Date(expiryDay).getTime() - new Date(first).getTime())) /
+              Math.max(new Date(last).getTime() - new Date(first).getTime(), 1),
+          );
         }
       }
     }
@@ -291,21 +299,23 @@ function RedemptionsTrendChart({
             <div
               key={point.date}
               className="group relative flex flex-1 flex-col items-center justify-end"
-              title={`${formatShortDate(point.date)}: ${point.redemptionCount} redemptions, ${formatMoneyAmount(point.revenueCents)} ${currency}`}
+              title={`${formatShortDate(point.date)}: ${String(point.redemptionCount)} redemptions, ${formatMoneyAmount(point.revenueCents)} ${currency}`}
             >
               <div
                 className={[
                   "w-full max-w-[28px] rounded-t transition-colors",
-                  isPeak ? "bg-[var(--admin-primary)]" : "bg-[color-mix(in_srgb,var(--admin-primary)_35%,var(--admin-surface-high))]",
+                  isPeak
+                    ? "bg-[var(--admin-primary)]"
+                    : "bg-[color-mix(in_srgb,var(--admin-primary)_35%,var(--admin-surface-high))]",
                 ].join(" ")}
-                style={{ height: `${heightPct}%` }}
+                style={{ height: `${String(heightPct)}%` }}
               />
             </div>
           );
         })}
       </div>
       <svg
-        viewBox={`0 0 ${chartWidth} ${chartHeight}`}
+        viewBox={`0 0 ${String(chartWidth)} ${String(chartHeight)}`}
         className="pointer-events-none absolute inset-x-0 bottom-6 h-36 w-full px-1"
         preserveAspectRatio="none"
         aria-hidden="true"
@@ -337,8 +347,8 @@ function RedemptionsTrendChart({
         </p>
       ) : null}
       <div className="mt-3 flex justify-between font-mono text-[10px] text-[var(--admin-on-surface-variant)]">
-        <span>{formatShortDate(trend[0]!.date)}</span>
-        <span>{formatShortDate(trend[trend.length - 1]!.date)}</span>
+        <span>{formatShortDate(defined(trend[0]).date)}</span>
+        <span>{formatShortDate(defined(trend[trend.length - 1]).date)}</span>
       </div>
     </div>
   );
@@ -440,7 +450,9 @@ export function AdminCouponRedemptionsPanel({ couponId }: Props) {
       if (event.key === "Escape") setDrawerOpen(false);
     }
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+    };
   }, [drawerOpen]);
 
   useEffect(() => {
@@ -618,7 +630,9 @@ export function AdminCouponRedemptionsPanel({ couponId }: Props) {
     const ok = await copyToClipboard(value);
     if (ok) {
       setCopiedKey(key);
-      window.setTimeout(() => setCopiedKey((current) => (current === key ? null : current)), 1500);
+      window.setTimeout(() => {
+        setCopiedKey((current) => (current === key ? null : current));
+      }, 1500);
     }
   }
 
@@ -670,11 +684,7 @@ export function AdminCouponRedemptionsPanel({ couponId }: Props) {
   }, [appliedFrom, appliedTo, courseFilterId, maxAmount, minAmount, products, searchQ, sortBy]);
 
   const isTrulyEmpty =
-    !loading &&
-    !error &&
-    payload != null &&
-    payload.redemptionCount === 0 &&
-    !filtersActive;
+    !loading && !error && payload != null && payload.redemptionCount === 0 && !filtersActive;
   const isFilteredEmpty =
     !loading &&
     !error &&
@@ -682,25 +692,21 @@ export function AdminCouponRedemptionsPanel({ couponId }: Props) {
     pageInfo?.totalCount === 0 &&
     items.length === 0 &&
     filtersActive;
-  const isEmpty = isTrulyEmpty || isFilteredEmpty;
 
   const allOnPageSelected =
     items.length > 0 && items.every((item) => selectedIds.has(item.membershipId));
   const selectedCount = selectedIds.size;
   const matchCount = selectedCount > 0 ? selectedCount : (pageInfo?.totalCount ?? 0);
 
-  const capLabel =
-    payload?.totalUsageLimit == null ? "UNL" : String(payload.totalUsageLimit);
-  const usagePct = payload
-    ? usagePercent(payload.redemptionCount, payload.totalUsageLimit)
-    : 0;
+  const capLabel = payload?.totalUsageLimit == null ? "UNL" : String(payload.totalUsageLimit);
+  const usagePct = payload ? usagePercent(payload.redemptionCount, payload.totalUsageLimit) : 0;
   const redemptionBarPct = payload?.totalUsageLimit
     ? usagePercent(summary?.redemptionCount ?? payload.redemptionCount, payload.totalUsageLimit)
     : 0;
 
-  const buyerTotal =
-    (summary?.firstTimeBuyerCount ?? 0) + (summary?.returningBuyerCount ?? 0);
-  const newPct = buyerTotal > 0 ? Math.round(((summary?.firstTimeBuyerCount ?? 0) / buyerTotal) * 100) : 0;
+  const buyerTotal = (summary?.firstTimeBuyerCount ?? 0) + (summary?.returningBuyerCount ?? 0);
+  const newPct =
+    buyerTotal > 0 ? Math.round(((summary?.firstTimeBuyerCount ?? 0) / buyerTotal) * 100) : 0;
   const returnPct = buyerTotal > 0 ? 100 - newPct : 0;
 
   if (loading && !payload) {
@@ -789,7 +795,7 @@ export function AdminCouponRedemptionsPanel({ couponId }: Props) {
                 <span className="h-1 w-16 overflow-hidden rounded-full bg-[var(--admin-border)]">
                   <span
                     className="block h-full rounded-full bg-[var(--admin-primary)]"
-                    style={{ width: `${Math.max(usagePct > 0 ? 4 : 0, usagePct)}%` }}
+                    style={{ width: `${String(Math.max(usagePct > 0 ? 4 : 0, usagePct))}%` }}
                   />
                 </span>
               </span>
@@ -822,7 +828,9 @@ export function AdminCouponRedemptionsPanel({ couponId }: Props) {
           <button
             type="button"
             className="inline-flex h-9 items-center gap-2 rounded bg-[var(--admin-primary-strong)] px-4 text-xs font-medium text-[var(--admin-on-primary)] transition-colors hover:bg-[var(--admin-primary)] active:translate-y-px disabled:opacity-50"
-            onClick={() => openDrawer("group")}
+            onClick={() => {
+              openDrawer("group");
+            }}
             disabled={!payload || isTrulyEmpty}
           >
             <Users className="h-4 w-4" aria-hidden="true" />
@@ -837,7 +845,10 @@ export function AdminCouponRedemptionsPanel({ couponId }: Props) {
           role="alert"
         >
           <div className="flex items-start gap-3">
-            <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-[var(--admin-danger)]" aria-hidden="true" />
+            <AlertTriangle
+              className="mt-0.5 h-5 w-5 shrink-0 text-[var(--admin-danger)]"
+              aria-hidden="true"
+            />
             <div>
               <h2 className="text-base font-semibold text-[var(--admin-danger)]">
                 Couldn&apos;t load coupon redemptions.
@@ -903,7 +914,9 @@ export function AdminCouponRedemptionsPanel({ couponId }: Props) {
                 <div className="mt-2 h-1 overflow-hidden rounded-full bg-[var(--admin-surface-high)]">
                   <div
                     className="h-full rounded-full bg-[var(--admin-primary)]"
-                    style={{ width: `${Math.max(redemptionBarPct > 0 ? 4 : 0, redemptionBarPct)}%` }}
+                    style={{
+                      width: `${String(Math.max(redemptionBarPct > 0 ? 4 : 0, redemptionBarPct))}%`,
+                    }}
                   />
                 </div>
               ) : null}
@@ -918,7 +931,9 @@ export function AdminCouponRedemptionsPanel({ couponId }: Props) {
               </p>
             </div>
             <div className="bg-[var(--admin-surface)] p-4">
-              <p className="mb-1 text-xs text-[var(--admin-on-surface-variant)]">First-Time Buyers</p>
+              <p className="mb-1 text-xs text-[var(--admin-on-surface-variant)]">
+                First-Time Buyers
+              </p>
               <p className="font-mono text-2xl font-semibold text-[var(--admin-on-surface)]">
                 {summary.firstTimeBuyerCount.toLocaleString()}
               </p>
@@ -933,7 +948,11 @@ export function AdminCouponRedemptionsPanel({ couponId }: Props) {
               <h2 className="mb-4 text-xs font-semibold uppercase tracking-[0.06em] text-[var(--admin-on-surface-variant)]">
                 Redemptions over time
               </h2>
-              <RedemptionsTrendChart trend={trend} endsAt={payload.endsAt} currency={summary.currency} />
+              <RedemptionsTrendChart
+                trend={trend}
+                endsAt={payload.endsAt}
+                currency={summary.currency}
+              />
             </div>
 
             <div className="rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] p-5 shadow-sm">
@@ -965,7 +984,9 @@ export function AdminCouponRedemptionsPanel({ couponId }: Props) {
                       <div className="mb-1 h-1 overflow-hidden rounded-full bg-[var(--admin-surface-high)]">
                         <div
                           className="h-full rounded-full bg-[var(--admin-primary)]"
-                          style={{ width: `${Math.max(product.sharePercent > 0 ? 4 : 0, product.sharePercent)}%` }}
+                          style={{
+                            width: `${String(Math.max(product.sharePercent > 0 ? 4 : 0, product.sharePercent))}%`,
+                          }}
                         />
                       </div>
                       <p className="font-mono text-[11px] text-[var(--admin-on-surface-variant)]">
@@ -1012,7 +1033,11 @@ export function AdminCouponRedemptionsPanel({ couponId }: Props) {
         <div className="overflow-hidden rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)]">
           <div className="flex min-h-[360px] flex-col items-center justify-center px-6 py-12 text-center">
             <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-full border border-[var(--admin-border)] bg-[var(--admin-surface-low)] shadow-sm">
-              <Tag className="h-8 w-8 text-[var(--admin-on-surface-variant)]" strokeWidth={1.5} aria-hidden="true" />
+              <Tag
+                className="h-8 w-8 text-[var(--admin-on-surface-variant)]"
+                strokeWidth={1.5}
+                aria-hidden="true"
+              />
             </div>
             <h2 className="text-base font-semibold text-[var(--admin-on-surface)]">
               This coupon has not been redeemed yet
@@ -1039,7 +1064,9 @@ export function AdminCouponRedemptionsPanel({ couponId }: Props) {
           <div className="flex flex-col gap-3 border-b border-[var(--admin-border)] bg-[var(--admin-surface-low)] p-4 md:flex-row md:flex-wrap md:items-end md:justify-between">
             <div className="flex flex-wrap gap-3">
               <label className="relative flex flex-col gap-1.5">
-                <span className="text-xs text-[var(--admin-on-surface-variant)]">Search learner</span>
+                <span className="text-xs text-[var(--admin-on-surface-variant)]">
+                  Search learner
+                </span>
                 <span className="relative">
                   <Search
                     className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--admin-on-surface-variant)]"
@@ -1047,7 +1074,9 @@ export function AdminCouponRedemptionsPanel({ couponId }: Props) {
                   />
                   <input
                     value={draftQ}
-                    onChange={(event) => setDraftQ(event.target.value)}
+                    onChange={(event) => {
+                      setDraftQ(event.target.value);
+                    }}
                     onKeyDown={(event) => {
                       if (event.key === "Enter") applyFilters();
                     }}
@@ -1071,7 +1100,9 @@ export function AdminCouponRedemptionsPanel({ couponId }: Props) {
                 <input
                   type="date"
                   value={draftFrom}
-                  onChange={(event) => setDraftFrom(event.target.value)}
+                  onChange={(event) => {
+                    setDraftFrom(event.target.value);
+                  }}
                   className="h-9 rounded border border-[var(--admin-outline)] bg-[var(--admin-surface)] px-3 text-sm text-[var(--admin-on-surface)] outline-none focus:border-[var(--admin-primary)] focus:ring-1 focus:ring-[var(--admin-primary)]"
                 />
               </label>
@@ -1080,7 +1111,9 @@ export function AdminCouponRedemptionsPanel({ couponId }: Props) {
                 <input
                   type="date"
                   value={draftTo}
-                  onChange={(event) => setDraftTo(event.target.value)}
+                  onChange={(event) => {
+                    setDraftTo(event.target.value);
+                  }}
                   className="h-9 rounded border border-[var(--admin-outline)] bg-[var(--admin-surface)] px-3 text-sm text-[var(--admin-on-surface)] outline-none focus:border-[var(--admin-primary)] focus:ring-1 focus:ring-[var(--admin-primary)]"
                 />
               </label>
@@ -1091,7 +1124,9 @@ export function AdminCouponRedemptionsPanel({ couponId }: Props) {
                   min="0"
                   step="0.01"
                   value={draftMinAmount}
-                  onChange={(event) => setDraftMinAmount(event.target.value)}
+                  onChange={(event) => {
+                    setDraftMinAmount(event.target.value);
+                  }}
                   placeholder="0.00"
                   className="h-9 w-28 rounded border border-[var(--admin-outline)] bg-[var(--admin-surface)] px-3 font-mono text-sm text-[var(--admin-on-surface)] outline-none placeholder:text-[var(--admin-on-surface-variant)] focus:border-[var(--admin-primary)] focus:ring-1 focus:ring-[var(--admin-primary)]"
                 />
@@ -1103,7 +1138,9 @@ export function AdminCouponRedemptionsPanel({ couponId }: Props) {
                   min="0"
                   step="0.01"
                   value={draftMaxAmount}
-                  onChange={(event) => setDraftMaxAmount(event.target.value)}
+                  onChange={(event) => {
+                    setDraftMaxAmount(event.target.value);
+                  }}
                   placeholder="0.00"
                   className="h-9 w-28 rounded border border-[var(--admin-outline)] bg-[var(--admin-surface)] px-3 font-mono text-sm text-[var(--admin-on-surface)] outline-none placeholder:text-[var(--admin-on-surface-variant)] focus:border-[var(--admin-primary)] focus:ring-1 focus:ring-[var(--admin-primary)]"
                 />
@@ -1112,7 +1149,9 @@ export function AdminCouponRedemptionsPanel({ couponId }: Props) {
                 <span className="text-xs text-[var(--admin-on-surface-variant)]">Sort</span>
                 <Select
                   value={draftSortBy}
-                  onValueChange={(value) => setDraftSortBy(value as CouponRedemptionsSortBy)}
+                  onValueChange={(value) => {
+                    setDraftSortBy(value as CouponRedemptionsSortBy);
+                  }}
                   options={SORT_OPTIONS}
                   ariaLabel="Sort redemptions"
                   className="h-9 min-w-[160px]"
@@ -1162,7 +1201,11 @@ export function AdminCouponRedemptionsPanel({ couponId }: Props) {
           {isFilteredEmpty ? (
             <div className="flex min-h-[320px] flex-col items-center justify-center px-6 py-12 text-center">
               <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-full border border-[var(--admin-border)] bg-[var(--admin-surface-low)] shadow-sm">
-                <Tag className="h-8 w-8 text-[var(--admin-on-surface-variant)]" strokeWidth={1.5} aria-hidden="true" />
+                <Tag
+                  className="h-8 w-8 text-[var(--admin-on-surface-variant)]"
+                  strokeWidth={1.5}
+                  aria-hidden="true"
+                />
               </div>
               <h2 className="text-base font-semibold text-[var(--admin-on-surface)]">
                 No redemptions match these filters
@@ -1190,7 +1233,9 @@ export function AdminCouponRedemptionsPanel({ couponId }: Props) {
                           type="checkbox"
                           className="h-4 w-4 accent-[var(--admin-primary)]"
                           checked={allOnPageSelected}
-                          onChange={() => toggleSelectAllOnPage(items)}
+                          onChange={() => {
+                            toggleSelectAllOnPage(items);
+                          }}
                           aria-label="Select all on page"
                         />
                       </th>
@@ -1234,7 +1279,9 @@ export function AdminCouponRedemptionsPanel({ couponId }: Props) {
                               type="checkbox"
                               className="h-4 w-4 accent-[var(--admin-primary)]"
                               checked={selected}
-                              onChange={() => toggleRow(item.membershipId)}
+                              onChange={() => {
+                                toggleRow(item.membershipId);
+                              }}
                               aria-label={`Select ${item.learnerName ?? item.email ?? "learner"}`}
                             />
                           </td>
@@ -1324,7 +1371,9 @@ export function AdminCouponRedemptionsPanel({ couponId }: Props) {
                       type="button"
                       className="rounded border border-[var(--admin-outline)] px-3 py-1 transition-colors hover:bg-[var(--admin-surface-high)] active:translate-y-px disabled:opacity-50"
                       disabled={!pageInfo.hasPreviousPage || loading}
-                      onClick={() => setPage((current) => Math.max(1, current - 1))}
+                      onClick={() => {
+                        setPage((current) => Math.max(1, current - 1));
+                      }}
                     >
                       Previous
                     </button>
@@ -1335,7 +1384,9 @@ export function AdminCouponRedemptionsPanel({ couponId }: Props) {
                       type="button"
                       className="rounded border border-[var(--admin-outline)] px-3 py-1 transition-colors hover:bg-[var(--admin-surface-high)] active:translate-y-px disabled:opacity-50"
                       disabled={!pageInfo.hasNextPage || loading}
-                      onClick={() => setPage((current) => current + 1)}
+                      onClick={() => {
+                        setPage((current) => current + 1);
+                      }}
                     >
                       Next
                     </button>
@@ -1365,14 +1416,18 @@ export function AdminCouponRedemptionsPanel({ couponId }: Props) {
             <button
               type="button"
               className="inline-flex h-8 items-center gap-1.5 rounded border border-[var(--admin-outline)] px-3 text-xs text-[var(--admin-on-surface)] transition-colors hover:bg-[var(--admin-surface-high)] active:translate-y-px"
-              onClick={() => setSelectedIds(new Set())}
+              onClick={() => {
+                setSelectedIds(new Set());
+              }}
             >
               Clear
             </button>
             <button
               type="button"
               className="inline-flex h-8 items-center gap-1.5 rounded border border-[var(--admin-outline)] px-3 text-xs font-medium text-[var(--admin-on-surface)] transition-colors hover:bg-[var(--admin-surface-high)] active:translate-y-px"
-              onClick={() => openDrawer("message")}
+              onClick={() => {
+                openDrawer("message");
+              }}
             >
               <Mail className="h-3.5 w-3.5" aria-hidden="true" />
               Email
@@ -1380,7 +1435,9 @@ export function AdminCouponRedemptionsPanel({ couponId }: Props) {
             <button
               type="button"
               className="inline-flex h-8 items-center gap-1.5 rounded bg-[var(--admin-primary-strong)] px-3 text-xs font-medium text-[var(--admin-on-primary)] transition-colors hover:bg-[var(--admin-primary)] active:translate-y-px"
-              onClick={() => openDrawer("group")}
+              onClick={() => {
+                openDrawer("group");
+              }}
             >
               <Users className="h-3.5 w-3.5" aria-hidden="true" />
               Create group
@@ -1395,7 +1452,9 @@ export function AdminCouponRedemptionsPanel({ couponId }: Props) {
             type="button"
             className="absolute inset-0 bg-[color-mix(in_srgb,var(--admin-on-surface)_35%,transparent)] backdrop-blur-[2px]"
             aria-label="Close cohort drawer"
-            onClick={() => setDrawerOpen(false)}
+            onClick={() => {
+              setDrawerOpen(false);
+            }}
           />
           <aside
             className="relative flex h-full w-full max-w-[560px] flex-col border-l border-[var(--admin-border)] bg-[var(--admin-surface)] shadow-xl"
@@ -1432,7 +1491,9 @@ export function AdminCouponRedemptionsPanel({ couponId }: Props) {
               <button
                 type="button"
                 className="rounded p-1 text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-on-surface)]"
-                onClick={() => setDrawerOpen(false)}
+                onClick={() => {
+                  setDrawerOpen(false);
+                }}
                 aria-label="Close"
               >
                 <X className="h-5 w-5" aria-hidden="true" />
@@ -1455,7 +1516,9 @@ export function AdminCouponRedemptionsPanel({ couponId }: Props) {
                       ? "border-[var(--admin-primary)] text-[var(--admin-primary)]"
                       : "border-transparent text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-on-surface)]",
                   ].join(" ")}
-                  onClick={() => setCohortTab(key)}
+                  onClick={() => {
+                    setCohortTab(key);
+                  }}
                 >
                   {label}
                 </button>
@@ -1472,10 +1535,14 @@ export function AdminCouponRedemptionsPanel({ couponId }: Props) {
               {cohortTab === "group" ? (
                 <div className="space-y-4">
                   <label className="flex flex-col gap-1.5">
-                    <span className="text-xs text-[var(--admin-on-surface-variant)]">Group name</span>
+                    <span className="text-xs text-[var(--admin-on-surface-variant)]">
+                      Group name
+                    </span>
                     <input
                       value={groupName}
-                      onChange={(event) => setGroupName(event.target.value)}
+                      onChange={(event) => {
+                        setGroupName(event.target.value);
+                      }}
                       className="h-10 rounded border border-[var(--admin-outline)] bg-[var(--admin-surface-low)] px-3 text-sm text-[var(--admin-on-surface)] outline-none focus:border-[var(--admin-primary)] focus:ring-1 focus:ring-[var(--admin-primary)]"
                     />
                   </label>
@@ -1485,7 +1552,9 @@ export function AdminCouponRedemptionsPanel({ couponId }: Props) {
                     </span>
                     <textarea
                       value={groupDescription}
-                      onChange={(event) => setGroupDescription(event.target.value)}
+                      onChange={(event) => {
+                        setGroupDescription(event.target.value);
+                      }}
                       rows={3}
                       className="rounded border border-[var(--admin-outline)] bg-[var(--admin-surface-low)] px-3 py-2 text-sm text-[var(--admin-on-surface)] outline-none focus:border-[var(--admin-primary)] focus:ring-1 focus:ring-[var(--admin-primary)]"
                     />
@@ -1500,7 +1569,9 @@ export function AdminCouponRedemptionsPanel({ couponId }: Props) {
                         name="membership-mode"
                         className="mt-0.5 accent-[var(--admin-primary)]"
                         checked={membershipMode === "static"}
-                        onChange={() => setMembershipMode("static")}
+                        onChange={() => {
+                          setMembershipMode("static");
+                        }}
                       />
                       <span>
                         <span className="block text-sm font-medium text-[var(--admin-on-surface)]">
@@ -1518,7 +1589,9 @@ export function AdminCouponRedemptionsPanel({ couponId }: Props) {
                         className="mt-0.5 accent-[var(--admin-primary)]"
                         checked={membershipMode === "live"}
                         disabled
-                        onChange={() => setMembershipMode("live")}
+                        onChange={() => {
+                          setMembershipMode("live");
+                        }}
                       />
                       <span>
                         <span className="block text-sm font-medium text-[var(--admin-on-surface)]">
@@ -1541,7 +1614,9 @@ export function AdminCouponRedemptionsPanel({ couponId }: Props) {
                     <span className="text-xs text-[var(--admin-on-surface-variant)]">Subject</span>
                     <input
                       value={messageSubject}
-                      onChange={(event) => setMessageSubject(event.target.value)}
+                      onChange={(event) => {
+                        setMessageSubject(event.target.value);
+                      }}
                       className="h-10 rounded border border-[var(--admin-outline)] bg-[var(--admin-surface-low)] px-3 text-sm text-[var(--admin-on-surface)] outline-none focus:border-[var(--admin-primary)] focus:ring-1 focus:ring-[var(--admin-primary)]"
                     />
                   </label>
@@ -1549,7 +1624,9 @@ export function AdminCouponRedemptionsPanel({ couponId }: Props) {
                     <span className="text-xs text-[var(--admin-on-surface-variant)]">Message</span>
                     <textarea
                       value={messageBody}
-                      onChange={(event) => setMessageBody(event.target.value)}
+                      onChange={(event) => {
+                        setMessageBody(event.target.value);
+                      }}
                       rows={8}
                       className="rounded border border-[var(--admin-outline)] bg-[var(--admin-surface-low)] px-3 py-2 text-sm text-[var(--admin-on-surface)] outline-none focus:border-[var(--admin-primary)] focus:ring-1 focus:ring-[var(--admin-primary)]"
                     />
@@ -1562,7 +1639,9 @@ export function AdminCouponRedemptionsPanel({ couponId }: Props) {
               <button
                 type="button"
                 className="inline-flex h-9 items-center rounded border border-[var(--admin-outline)] px-4 text-xs font-medium text-[var(--admin-on-surface)] transition-colors hover:bg-[var(--admin-surface-high)] active:translate-y-px"
-                onClick={() => setDrawerOpen(false)}
+                onClick={() => {
+                  setDrawerOpen(false);
+                }}
                 disabled={busy}
               >
                 Cancel

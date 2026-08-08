@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
-import { toast } from "../../../lib/client-api";
-import type { FormField, FormKind } from "../../admin/grow/forms-shared";
+import { useEffect, useState, type SyntheticEvent } from "react";
+import { toast } from "@/lib/client-api";
+import type { FormField, FormKind } from "@/features/admin/grow/forms-shared";
 
 type PublicForm = {
   title: string;
@@ -40,10 +40,13 @@ export function PublicMarketingFormClient({
     async function load() {
       setLoading(true);
       try {
-        const response = await fetch(`/api/v1/public/marketing/forms/${encodeURIComponent(token)}`, {
-          method: "GET",
-          credentials: "include",
-        });
+        const response = await fetch(
+          `/api/v1/public/marketing/forms/${encodeURIComponent(token)}`,
+          {
+            method: "GET",
+            credentials: "include",
+          },
+        );
         const json = (await response.json()) as { data?: PublicForm; error?: { message?: string } };
         if (!response.ok) {
           throw new Error(json.error?.message ?? "Form not available.");
@@ -66,7 +69,7 @@ export function PublicMarketingFormClient({
     };
   }, [token]);
 
-  async function onSubmit(event: FormEvent) {
+  async function onSubmit(event: SyntheticEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!form) return;
     setBusy(true);
@@ -137,7 +140,9 @@ export function PublicMarketingFormClient({
                 required={field.required}
                 placeholder={field.placeholder ?? undefined}
                 value={answers[field.key] ?? ""}
-                onChange={(e) => setAnswers((prev) => ({ ...prev, [field.key]: e.target.value }))}
+                onChange={(e) => {
+                  setAnswers((prev) => ({ ...prev, [field.key]: e.target.value }));
+                }}
                 className="min-h-24 w-full rounded-lg border border-neutral-300 px-3 py-2.5 text-sm"
               />
             ) : (
@@ -157,7 +162,9 @@ export function PublicMarketingFormClient({
                 required={field.required}
                 placeholder={field.placeholder ?? undefined}
                 value={answers[field.key] ?? ""}
-                onChange={(e) => setAnswers((prev) => ({ ...prev, [field.key]: e.target.value }))}
+                onChange={(e) => {
+                  setAnswers((prev) => ({ ...prev, [field.key]: e.target.value }));
+                }}
                 className="w-full rounded-lg border border-neutral-300 px-3 py-2.5 text-sm"
               />
             )}
