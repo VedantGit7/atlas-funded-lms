@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { withTenantTx } from "@atlas/db";
-import { enrollmentCreateBodySchema } from "../../apps/web/src/server/enrollments/schemas";
+import { enrollmentCreateBodySchema } from "../../backend/apps/api/src/server/enrollments/schemas";
 import {
   createCourseEnrollmentFixture,
   seedPublishedCourseForTenantB,
@@ -10,9 +10,9 @@ import {
   listPublishedCourses,
   getPublishedCourseDetail,
   getPublishedCourseModules,
-} from "../../apps/web/src/server/courses/courses.service";
-import { enrollCurrentMemberInCourse } from "../../apps/web/src/server/enrollments/enrollments.service";
-import { courseListQuerySchema } from "../../apps/web/src/server/courses/schemas";
+} from "../../backend/apps/api/src/server/courses/courses.service";
+import { enrollCurrentMemberInCourse } from "../../backend/apps/api/src/server/enrollments/enrollments.service";
+import { courseListQuerySchema } from "../../backend/apps/api/src/server/courses/schemas";
 
 const describeWithDb =
   process.env["DATABASE_URL"] && process.env["PLATFORM_DATABASE_URL"] ? describe : describe.skip;

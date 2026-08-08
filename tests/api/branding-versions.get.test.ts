@@ -91,7 +91,7 @@ vi.mock("@atlas/domain-branding", async (importOriginal) => {
   };
 });
 
-import { GET } from "../../apps/web/src/app/api/v1/branding/versions/route";
+import { GET } from "../../backend/apps/api/src/app/api/v1/branding/versions/route";
 
 function createGetRequest(path = "/api/v1/branding/versions") {
   return new NextRequest(`https://tenant-a.example.com${path}`, {

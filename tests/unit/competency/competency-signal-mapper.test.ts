@@ -2,13 +2,13 @@ import { describe, expect, it, vi } from "vitest";
 import {
   mapAssessmentAttemptToSignals,
   mapPracticeSessionToSignals,
-} from "../../../apps/web/src/server/competency/competency-signal-mapper.service";
+} from "../../../backend/apps/api/src/server/competency/competency-signal-mapper.service";
 
 const loadAttemptAnswerRows = vi.fn();
 const loadPracticeResponseRows = vi.fn();
 const loadItemDimensionWeights = vi.fn();
 
-vi.mock("../../../apps/web/src/server/competency/competency-projection.repository", () => ({
+vi.mock("../../../backend/apps/api/src/server/competency/competency-projection.repository", () => ({
   loadAttemptAnswerRows: (...args: unknown[]) => loadAttemptAnswerRows(...args),
   loadPracticeResponseRows: (...args: unknown[]) => loadPracticeResponseRows(...args),
   loadItemDimensionWeights: (...args: unknown[]) => loadItemDimensionWeights(...args),

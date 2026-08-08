@@ -4,7 +4,7 @@ import {
   getGradingTaskDetail,
   gradeGradingTask,
   listGradingTasks,
-} from "../../apps/web/src/server/grading/grading.service";
+} from "../../backend/apps/api/src/server/grading/grading.service";
 import {
   createAssessmentFixture,
   instructorCtx,
@@ -17,7 +17,7 @@ import {
   saveAttemptAnswer,
   startAttempt,
   submitAttempt,
-} from "../../apps/web/src/server/attempts/attempts.service";
+} from "../../backend/apps/api/src/server/attempts/attempts.service";
 
 const describeWithDb =
   process.env["DATABASE_URL"] && process.env["PLATFORM_DATABASE_URL"] ? describe : describe.skip;

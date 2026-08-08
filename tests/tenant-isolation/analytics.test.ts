@@ -4,7 +4,7 @@ import { withTenantTx } from "@atlas/db";
 import { queryAnalyticsDashboard } from "@atlas/domain/analytics/analytics.service";
 import { analyticsDashboardQuerySchema } from "@atlas/domain/analytics/analytics.dto";
 import { processAnalyticsSourceEvent } from "@atlas/domain/analytics/analytics.worker";
-import "../../apps/web/src/server/analytics/analytics-source-adapters";
+import "../../backend/apps/api/src/server/analytics/analytics-source-adapters";
 import {
   authoringTenantTx,
   createCourseAuthoringFixture,

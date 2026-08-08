@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { withTenantTx } from "@atlas/db";
-import { submitCourseForReview } from "../../apps/web/src/server/courses/course-authoring.service";
-import { createCourseModule } from "../../apps/web/src/server/courses/course-authoring.service";
+import { submitCourseForReview } from "../../backend/apps/api/src/server/courses/course-authoring.service";
+import { createCourseModule } from "../../backend/apps/api/src/server/courses/course-authoring.service";
 import {
   actOnWorkflowTransition,
   listReviewQueue,
-} from "../../apps/web/src/server/workflows/workflows.service";
+} from "../../backend/apps/api/src/server/workflows/workflows.service";
 import {
   adminCtx,
   authoringTenantTx,

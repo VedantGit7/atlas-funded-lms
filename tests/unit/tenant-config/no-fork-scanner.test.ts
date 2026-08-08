@@ -6,7 +6,7 @@ import { scanSourceForForkViolations } from "@atlas/tenant-config";
 describe("tenant config no-fork scanner", () => {
   it("flags tenant slug conditionals in runtime source", () => {
     const findings = scanSourceForForkViolations(
-      "apps/web/src/example.ts",
+      "frontend/apps/web/src/example.ts",
       'if (tenant.slug === "fundedbeyond") { return true; }',
     );
     expect(findings.length).toBeGreaterThan(0);
@@ -26,11 +26,11 @@ describe("tenant config no-fork scanner", () => {
 
   it("does not flag the no-fork scanner source file", () => {
     const source = readFileSync(
-      resolve(import.meta.dirname, "../../../packages/tenant-config/src/security-scan.ts"),
+      resolve(import.meta.dirname, "../../../backend/packages/tenant-config/src/security-scan.ts"),
       "utf8",
     );
     const findings = scanSourceForForkViolations(
-      "packages/tenant-config/src/security-scan.ts",
+      "backend/packages/tenant-config/src/security-scan.ts",
       source,
     );
     expect(findings).toEqual([]);
@@ -40,12 +40,12 @@ describe("tenant config no-fork scanner", () => {
     const source = readFileSync(
       resolve(
         import.meta.dirname,
-        "../../../packages/domain/tenancy/src/services/platform-tenant-provisioning.service.ts",
+        "../../../backend/packages/domain/tenancy/src/services/platform-tenant-provisioning.service.ts",
       ),
       "utf8",
     );
     const findings = scanSourceForForkViolations(
-      "packages/domain/tenancy/src/services/platform-tenant-provisioning.service.ts",
+      "backend/packages/domain/tenancy/src/services/platform-tenant-provisioning.service.ts",
       source,
     );
     expect(findings).toEqual([]);

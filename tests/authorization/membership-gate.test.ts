@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import * as membershipRepository from "../../packages/membership/src/membership.repository";
-import { requireActiveMembership } from "../../packages/membership/src/membership-gate";
+import * as membershipRepository from "../../backend/packages/membership/src/membership.repository";
+import { requireActiveMembership } from "../../backend/packages/membership/src/membership-gate";
 
 describe("membership gate authorization", () => {
   afterEach(() => {

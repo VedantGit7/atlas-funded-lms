@@ -3,7 +3,7 @@ import { can, createTenantResourceRef } from "@atlas/authorization";
 import {
   createLearningPathBodySchema,
   updateLearningPathBodySchema,
-} from "../../apps/web/src/server/learning-paths/learning-path.schemas";
+} from "../../backend/apps/api/src/server/learning-paths/learning-path.schemas";
 
 function instructorTx() {
   return {

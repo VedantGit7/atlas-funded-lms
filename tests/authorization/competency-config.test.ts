@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { can, createTenantResourceRef } from "@atlas/authorization";
-import { createDimensionBodySchema } from "../../apps/web/src/server/competency/competency-config.schemas";
+import { createDimensionBodySchema } from "../../backend/apps/api/src/server/competency/competency-config.schemas";
 
 function adminTx() {
   return {

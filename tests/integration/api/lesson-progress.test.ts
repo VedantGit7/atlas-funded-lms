@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { withTenantTx } from "@atlas/db";
-import { recordLessonProgress } from "../../../apps/web/src/server/lessons/lesson-progress.service";
+import { recordLessonProgress } from "../../../backend/apps/api/src/server/lessons/lesson-progress.service";
 import {
   countOutboxLessonCompletedEvents,
   findLessonProgress,
-} from "../../../apps/web/src/server/lessons/lesson-progress.repository";
+} from "../../../backend/apps/api/src/server/lessons/lesson-progress.repository";
 import {
   createLessonEngineFixture,
   learnerCtx,

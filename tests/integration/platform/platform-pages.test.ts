@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
-const webRoot = resolve(import.meta.dirname, "../../../apps/web/src");
+const webRoot = resolve(import.meta.dirname, "../../../frontend/apps/web/src");
 
 describe("platform console integration wiring", () => {
   const pages = [
@@ -19,6 +19,24 @@ describe("platform console integration wiring", () => {
   it("includes all P1-P8 page files", () => {
     for (const page of pages) {
       expect(existsSync(resolve(webRoot, page))).toBe(true);
+    }
+  });
+
+  it("gates each platform page with capability checks", () => {
+    const capabilityByPage: Record<string, string> = {
+      "app/platform/tenants/new/page.tsx": "canTenantManage",
+      "app/platform/tenants/[id]/page.tsx": "canTenantRead",
+      "app/platform/feature-flags/page.tsx": "canFeatureFlagManage",
+      "app/platform/catalog/page.tsx": "canCatalogManage",
+      "app/platform/audit/page.tsx": "canAuditRead",
+      "app/platform/support/page.tsx": "canSupportAccess",
+      "app/platform/eventing/page.tsx": "canEventingReplay",
+    };
+
+    for (const [page, capability] of Object.entries(capabilityByPage)) {
+      const source = readFileSync(resolve(webRoot, page), "utf8");
+      expect(source).toContain("PlatformPageGate");
+      expect(source).toContain(capability);
     }
   });
 
@@ -53,5 +71,14 @@ describe("platform console integration wiring", () => {
   it("wires platform API client with reason header transport", () => {
     const api = readFileSync(resolve(webRoot, "features/platform/platform-api.ts"), "utf8");
     expect(api).toContain("ATLAS_PLATFORM_REASON_HEADER");
+  });
+
+  it("exposes shared platform page access loader", () => {
+    const access = readFileSync(
+      resolve(webRoot, "lib/server/platform-page-access.ts"),
+      "utf8",
+    );
+    expect(access).toContain("loadPlatformPageAccess");
+    expect(access).toContain("loadPlatformShellContext");
   });
 });

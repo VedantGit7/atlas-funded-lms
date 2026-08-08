@@ -3,7 +3,7 @@ import { can, createTenantResourceRef } from "@atlas/authorization";
 import {
   createAttributionTokenBodySchema,
   updateReadinessPolicyBodySchema,
-} from "../../apps/web/src/server/readiness/readiness.schemas";
+} from "../../backend/apps/api/src/server/readiness/readiness.schemas";
 
 function adminTx() {
   return {

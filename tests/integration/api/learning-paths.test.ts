@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { withTenantTx } from "@atlas/db";
-import { learningPathListQuerySchema } from "../../../apps/web/src/server/learning-paths/learning-path.schemas";
+import { learningPathListQuerySchema } from "../../../backend/apps/api/src/server/learning-paths/learning-path.schemas";
 import {
   createLearningPathDraft,
   deleteLearningPath,
@@ -10,7 +10,7 @@ import {
   listLearningPaths,
   submitLearningPathForReview,
   updateLearningPath,
-} from "../../../apps/web/src/server/learning-paths/learning-path.service";
+} from "../../../backend/apps/api/src/server/learning-paths/learning-path.service";
 import {
   authoringTenantTx,
   createLearningPathFixture,

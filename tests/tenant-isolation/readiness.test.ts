@@ -1,11 +1,11 @@
 import { randomUUID } from "node:crypto";
 import { describe, expect, it } from "vitest";
 import { withTenantTx } from "@atlas/db";
-import { createAttributionToken } from "../../apps/web/src/server/readiness/cta-attribution.service";
+import { createAttributionToken } from "../../backend/apps/api/src/server/readiness/cta-attribution.service";
 import {
   getReadinessPolicy,
   updateReadinessPolicy,
-} from "../../apps/web/src/server/readiness/readiness-policy.service";
+} from "../../backend/apps/api/src/server/readiness/readiness-policy.service";
 import {
   adminCtx,
   authoringTenantTx,

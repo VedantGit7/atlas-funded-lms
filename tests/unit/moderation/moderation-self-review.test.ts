@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isAppealSelfReviewBlocked } from "../../../apps/web/src/features/moderation/moderation-self-review";
+import { isAppealSelfReviewBlocked } from "../../../frontend/apps/web/src/features/moderation/moderation-self-review";
 
 describe("appeal self-review helper", () => {
   it("blocks review when viewer submitted the appeal", () => {

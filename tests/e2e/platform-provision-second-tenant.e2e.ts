@@ -242,14 +242,14 @@ describeWithE2E("platform provision second tenant smoke", () => {
     const serviceSource = readFileSync(
       resolve(
         import.meta.dirname,
-        "../../packages/domain/tenancy/src/services/platform-tenant-provisioning.service.ts",
+        "../../backend/packages/domain/tenancy/src/services/platform-tenant-provisioning.service.ts",
       ),
       "utf8",
     );
     const helpersSource = readFileSync(
       resolve(
         import.meta.dirname,
-        "../../packages/domain/tenancy/src/services/platform-tenant-provisioning.helpers.ts",
+        "../../backend/packages/domain/tenancy/src/services/platform-tenant-provisioning.helpers.ts",
       ),
       "utf8",
     );

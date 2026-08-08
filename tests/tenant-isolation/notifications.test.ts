@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { withTenantTx } from "@atlas/db";
-import { notificationRepository } from "../../apps/web/src/server/notifications/notification.repository";
+import { notificationRepository } from "../../backend/apps/api/src/server/notifications/notification.repository";
 import {
   createNotificationTemplate,
   markNotificationRead,
-} from "../../apps/web/src/server/notifications/notification.service";
+} from "../../backend/apps/api/src/server/notifications/notification.service";
 import {
   adminCtx,
   authoringTenantTx,

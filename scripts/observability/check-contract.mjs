@@ -31,10 +31,10 @@ for (const pattern of requiredPatterns) {
 }
 
 const clientRoots = [
-  "apps/web/src/components",
-  "apps/web/src/features",
-  "apps/web/src/app",
-  "apps/web/src/observability",
+  "frontend/apps/web/src/components",
+  "frontend/apps/web/src/features",
+  "frontend/apps/web/src/app",
+  "frontend/apps/web/src/observability",
 ];
 
 function walkSync(directory) {

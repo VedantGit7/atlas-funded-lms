@@ -1,15 +1,15 @@
 import { randomUUID } from "node:crypto";
 import { describe, expect, it } from "vitest";
 import { withTenantTx } from "@atlas/db";
-import { courseListQuerySchema } from "../../../apps/web/src/server/courses/schemas";
+import { courseListQuerySchema } from "../../../backend/apps/api/src/server/courses/schemas";
 import {
   createCourseDraft,
   getCourseForBuilder,
   listStudioCourses,
   updateCourse,
   archiveOrDeleteCourse,
-} from "../../../apps/web/src/server/courses/course-authoring.service";
-import { listPublishedCourses } from "../../../apps/web/src/server/courses/courses.service";
+} from "../../../backend/apps/api/src/server/courses/course-authoring.service";
+import { listPublishedCourses } from "../../../backend/apps/api/src/server/courses/courses.service";
 import {
   createCourseAuthoringFixture,
   instructorCtx,

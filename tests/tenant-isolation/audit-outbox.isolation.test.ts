@@ -118,8 +118,8 @@ vi.mock("@atlas/audit", async (importOriginal) => {
   };
 });
 
-import { GET as getTenantAudit } from "../../apps/web/src/app/api/v1/audit/route";
-import { GET as getPlatformAudit } from "../../apps/web/src/app/api/v1/platform/audit/route";
+import { GET as getTenantAudit } from "../../backend/apps/api/src/app/api/v1/audit/route";
+import { GET as getPlatformAudit } from "../../backend/apps/api/src/app/api/v1/platform/audit/route";
 
 const describeWithDb =
   process.env["DATABASE_URL"] && process.env["PLATFORM_DATABASE_URL"] ? describe : describe.skip;

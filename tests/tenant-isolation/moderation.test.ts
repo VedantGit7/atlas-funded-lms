@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { randomUUID } from "node:crypto";
 import { withTenantTx } from "@atlas/db";
-import { listModerationCases } from "../../apps/web/src/server/moderation/moderation.service";
+import { listModerationCases } from "../../backend/apps/api/src/server/moderation/moderation.service";
 import { authoringTenantTx, createCommunityFixture } from "../fixtures/community-fixture";
 import { createTenantIsolationFixture, tenantCtx } from "./tenant-isolation-fixture";
 

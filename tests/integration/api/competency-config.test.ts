@@ -8,13 +8,13 @@ import {
   updateCompetencyDimension,
   createScoringProfile,
   updateScoringProfile,
-} from "../../../apps/web/src/server/competency/competency-config.service";
+} from "../../../backend/apps/api/src/server/competency/competency-config.service";
 import {
   listProfileBands,
   publishScoringConfig,
   replaceProfileBands,
   getNextPublishVersionForTest,
-} from "../../../apps/web/src/server/competency/scoring-config.service";
+} from "../../../backend/apps/api/src/server/competency/scoring-config.service";
 import {
   adminCtx,
   authoringTenantTx,

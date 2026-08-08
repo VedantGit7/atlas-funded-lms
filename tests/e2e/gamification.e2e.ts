@@ -1,8 +1,6 @@
-import { existsSync, readFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-
-const webRoot = resolve(import.meta.dirname, "../../apps/web/src");
+import { resolveSplitPath, splitPathExists } from "./split-layout-paths";
 
 const gamificationPaths = [
   "app/(learner)/achievements/page.tsx",
@@ -33,19 +31,19 @@ const gamificationPaths = [
 describe("gamification e2e wiring", () => {
   it("includes approved screens, APIs, and worker wiring", () => {
     for (const relativePath of gamificationPaths) {
-      expect(existsSync(resolve(webRoot, relativePath))).toBe(true);
+      expect(splitPathExists(relativePath)).toBe(true);
     }
   });
 
   it("achievements page uses approved APIs", () => {
-    const source = readFileSync(resolve(webRoot, "app/(learner)/achievements/page.tsx"), "utf8");
+    const source = readFileSync(resolveSplitPath("app/(learner)/achievements/page.tsx"), "utf8");
     expect(source).toContain("gamificationServerApi");
     expect(source).toContain("StreakPanel");
   });
 
   it("worker consumes practice.session_completed without point award routes", () => {
     const workerSource = readFileSync(
-      resolve(webRoot, "server/gamification/gamification.worker.ts"),
+      resolveSplitPath("server/gamification/gamification.worker.ts"),
       "utf8",
     );
     expect(workerSource).toContain("practice.session_completed");
@@ -53,14 +51,14 @@ describe("gamification e2e wiring", () => {
   });
 
   it("learner shell links to achievements and leaderboards", () => {
-    const source = readFileSync(resolve(webRoot, "components/shells/LearnerShell.tsx"), "utf8");
+    const source = readFileSync(resolveSplitPath("components/shells/LearnerShell.tsx"), "utf8");
     expect(source).toContain("/achievements");
     expect(source).toContain("/leaderboards");
   });
 
   it("leaderboard table masks other learners", () => {
     const source = readFileSync(
-      resolve(webRoot, "features/gamification/components/LeaderboardTable.tsx"),
+      resolveSplitPath("features/gamification/components/LeaderboardTable.tsx"),
       "utf8",
     );
     expect(source).toContain("entry.label");

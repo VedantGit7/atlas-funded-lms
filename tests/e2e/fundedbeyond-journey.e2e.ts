@@ -1,10 +1,10 @@
-import { existsSync, readFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { loadTenantManifest } from "@atlas/tenant-config";
 import { scanRuntimeForFundedBeyondFork } from "@atlas/tenant-config/security-scan";
+import { resolveSplitPath, splitPathExists } from "./split-layout-paths";
 
-const webRoot = resolve(import.meta.dirname, "../../apps/web/src");
 const configsRoot = resolve(import.meta.dirname, "../../configs/tenants");
 
 const fundedBeyondJourneyPaths = [
@@ -31,13 +31,13 @@ describe("FundedBeyond journey e2e wiring", () => {
 
   it("includes diagnostic → path → swipe → readiness → external CTA loop", () => {
     for (const relativePath of fundedBeyondJourneyPaths) {
-      expect(existsSync(resolve(webRoot, relativePath))).toBe(true);
+      expect(splitPathExists(relativePath)).toBe(true);
     }
   });
 
   it("does not wire checkout, payment, or trading account flows", () => {
     const readinessCta = readFileSync(
-      resolve(webRoot, "features/readiness/components/ReadinessCtaCard.tsx"),
+      resolveSplitPath("features/readiness/components/ReadinessCtaCard.tsx"),
       "utf8",
     );
     expect(readinessCta).not.toMatch(/checkout|payment|trading account/i);
@@ -46,7 +46,7 @@ describe("FundedBeyond journey e2e wiring", () => {
 
   it("passes no-fork scanner for runtime product code", () => {
     const violations = scanRuntimeForFundedBeyondFork({
-      roots: ["apps/web/src"],
+      roots: ["frontend/apps/web/src"],
     });
     expect(violations).toEqual([]);
   });

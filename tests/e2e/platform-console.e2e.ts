@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
-const webRoot = resolve(import.meta.dirname, "../../apps/web/src");
+const webRoot = resolve(import.meta.dirname, "../../frontend/apps/web/src");
 
 describe("platform console e2e wiring", () => {
   it("includes all P1-P8 page files", () => {
@@ -40,5 +40,20 @@ describe("platform console e2e wiring", () => {
     expect(platformCache).toContain("clearPlatformClientDataCache");
     expect(tenantCache).toContain("clearClientDataCache");
     expect(platformCache).not.toContain("tenantQueryKey");
+  });
+
+  it("platform feature flags editor supports update via PUT", () => {
+    const source = readFileSync(
+      resolve(webRoot, "features/platform/components/GlobalFeatureFlagEditor.tsx"),
+      "utf8",
+    );
+    expect(source).toContain("platformApi.put");
+    expect(source).toContain("Edit");
+  });
+
+  it("platform pages use server-side page gates", () => {
+    const page = readFileSync(resolve(webRoot, "app/platform/feature-flags/page.tsx"), "utf8");
+    expect(page).toContain("PlatformPageGate");
+    expect(page).toContain("canFeatureFlagManage");
   });
 });

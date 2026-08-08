@@ -65,7 +65,7 @@ vi.mock("@atlas/domain-config/services/entitlement.service", () => ({
   listTenantEntitlements: (...args: unknown[]) => mockListTenantEntitlements(...args),
 }));
 
-import { GET } from "../../apps/web/src/app/api/v1/entitlements/route";
+import { GET } from "../../backend/apps/api/src/app/api/v1/entitlements/route";
 
 const tenantA = {
   tenantId: "tenant-a-id",

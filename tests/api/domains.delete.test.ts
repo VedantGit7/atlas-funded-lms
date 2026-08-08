@@ -119,8 +119,8 @@ vi.mock("@atlas/events", () => ({
   },
 }));
 
-import { DELETE } from "../../apps/web/src/app/api/v1/domains/[id]/route";
-import { routeMetadata } from "../../apps/web/src/app/api/v1/domains/[id]/route.metadata";
+import { DELETE } from "../../backend/apps/api/src/app/api/v1/domains/[id]/route";
+import { routeMetadata } from "../../backend/apps/api/src/app/api/v1/domains/[id]/route.metadata";
 
 function setupAuthenticatedAdmin() {
   mockResolveTenant.mockResolvedValue(tenantA);

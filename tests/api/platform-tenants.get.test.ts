@@ -53,7 +53,7 @@ vi.mock("@atlas/domain-tenancy", async (importOriginal) => {
   };
 });
 
-import { GET } from "../../apps/web/src/app/api/v1/platform/tenants/route";
+import { GET } from "../../backend/apps/api/src/app/api/v1/platform/tenants/route";
 
 const tenantId = "018f0000-0000-7000-8000-000000000001";
 

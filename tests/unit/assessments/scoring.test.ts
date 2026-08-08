@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { scoreAttempt } from "../../../apps/web/src/server/assessments/scoring.service";
+import { scoreAttempt } from "../../../backend/apps/api/src/server/assessments/scoring.service";
 
 function buildRunnerItems() {
   return {

@@ -74,7 +74,7 @@ vi.mock("@atlas/authorization", async (importOriginal) => {
   };
 });
 
-import { GET, POST } from "../../../apps/web/src/app/api/v1/roles/route";
+import { GET, POST } from "../../../backend/apps/api/src/app/api/v1/roles/route";
 
 describe("roles API", () => {
   beforeEach(() => {

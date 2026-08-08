@@ -51,7 +51,7 @@ describe("local-mock storage provider integration", () => {
   it("follows same interface as R2 provider", () => {
     assertStorageProviderShape(provider);
 
-    const providersDir = resolve(import.meta.dirname, "../../../packages/storage/src/providers");
+    const providersDir = resolve(import.meta.dirname, "../../../backend/packages/storage/src/providers");
     const r2Source = readFileSync(resolve(providersDir, "r2-storage-provider.ts"), "utf8");
     const mockSource = readFileSync(
       resolve(providersDir, "local-mock-storage-provider.ts"),

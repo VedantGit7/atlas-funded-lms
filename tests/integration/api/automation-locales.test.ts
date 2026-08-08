@@ -5,14 +5,14 @@ import {
   deleteAutomationRule,
   listAutomationRules,
   updateAutomationRule,
-} from "../../../apps/web/src/server/automation/automation.service";
-import { handleAutomationOutboxEvent } from "../../../apps/web/src/server/automation/automation.worker";
+} from "../../../backend/apps/api/src/server/automation/automation.service";
+import { handleAutomationOutboxEvent } from "../../../backend/apps/api/src/server/automation/automation.worker";
 import {
   listLocaleResources,
   upsertLocaleResources,
-} from "../../../apps/web/src/server/locales/locale.service";
-import { issueCertificate } from "../../../apps/web/src/server/certificates/certificate.service";
-import { publishAssessmentForTests } from "../../../apps/web/src/server/assessments/assessments.service";
+} from "../../../backend/apps/api/src/server/locales/locale.service";
+import { issueCertificate } from "../../../backend/apps/api/src/server/certificates/certificate.service";
+import { publishAssessmentForTests } from "../../../backend/apps/api/src/server/assessments/assessments.service";
 import {
   adminCtx,
   authoringTenantTx,

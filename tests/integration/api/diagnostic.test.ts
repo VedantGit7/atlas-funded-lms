@@ -6,9 +6,9 @@ import { authoringTenantTx } from "../../fixtures/assessment-fixture";
 import {
   completePublicDiagnosticSession,
   startPublicDiagnosticSession,
-} from "../../apps/web/src/modules/diagnostics/diagnostic-public-session.service";
-import { mergeAnonymousDiagnosticSession } from "../../apps/web/src/modules/diagnostics/diagnostic-merge.service";
-import { handleCompetencyOutboxEvent } from "../../apps/web/src/server/competency/competency.worker";
+} from "../../backend/apps/api/src/server/diagnostics/diagnostic-public-session.service";
+import { mergeAnonymousDiagnosticSession } from "../../backend/apps/api/src/server/diagnostics/diagnostic-merge.service";
+import { handleCompetencyOutboxEvent } from "../../backend/apps/api/src/server/competency/competency.worker";
 
 const describeWithDb =
   process.env["DATABASE_URL"] && process.env["PLATFORM_DATABASE_URL"] ? describe : describe.skip;

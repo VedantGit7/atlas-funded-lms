@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   STUDIO_PRIMARY_NAV,
   filterStudioNavigation,
-} from "../../../apps/web/src/features/studio/studio-navigation";
+} from "../../../frontend/apps/web/src/features/studio/studio-navigation";
 
 describe("studio navigation projection", () => {
   it("filters analytics when entitlement disabled", () => {
@@ -21,7 +21,7 @@ describe("studio navigation projection", () => {
       canAccessWorkflowReview: false,
     });
 
-    expect(items.some((item) => item.href === "/review")).toBe(false);
+    expect(items.some((item) => item.href === "/studio/review")).toBe(false);
     expect(items.some((item) => item.href === "/studio/analytics")).toBe(true);
   });
 
@@ -31,7 +31,7 @@ describe("studio navigation projection", () => {
       canAccessWorkflowReview: true,
     });
 
-    expect(items.some((item) => item.href === "/review")).toBe(true);
+    expect(items.some((item) => item.href === "/studio/review")).toBe(true);
   });
 
   it("does not branch on role names", () => {

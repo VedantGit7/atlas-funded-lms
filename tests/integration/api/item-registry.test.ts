@@ -1,8 +1,8 @@
 import { randomUUID } from "node:crypto";
 import { describe, expect, it } from "vitest";
 import { withTenantTx } from "@atlas/db";
-import { itemRegistryService } from "../../../apps/web/src/server/item-registry/item-registry.service";
-import { extensionsService } from "../../../apps/web/src/server/extensions/extensions.service";
+import { itemRegistryService } from "../../../backend/apps/api/src/server/item-registry/item-registry.service";
+import { extensionsService } from "../../../backend/apps/api/src/server/extensions/extensions.service";
 import {
   adminCtx,
   authoringTenantTx,

@@ -9,7 +9,7 @@ import {
   authoringTenantTx,
   type ItemRegistryFixture,
 } from "./item-registry-fixture";
-import { publishAssessmentForTests } from "../../apps/web/src/server/assessments/assessments.service";
+import { publishAssessmentForTests } from "../../backend/apps/api/src/server/assessments/assessments.service";
 
 export type AssessmentFixture = ItemRegistryFixture & {
   assessmentId: string;

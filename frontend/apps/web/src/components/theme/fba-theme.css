@@ -1,0 +1,122 @@
+/* FundedBeyond brand theme scope.
+   Any element carrying `.fba-scope` exposes the brand design tokens below and
+   inherits the brand typography. Toggling `.fba-dark` on the same element (or an
+   ancestor) swaps the palette. Consumers reference the tokens via
+   `var(--fba-*)`; no brand color should ever be hardcoded in markup. */
+
+.fba-scope {
+  --fba-bg: #fffdf9;
+  --fba-bg2: #ede9e0;
+  --fba-surf: #ffffff;
+  --fba-bdr: #e8e3d8;
+  --fba-bdr2: #d0ccc0;
+  --fba-tx: #1a1714;
+  --fba-tx2: #706860;
+  --fba-tx3: #a09888;
+  --fba-ind: #3730a3;
+  --fba-ind-d: #2e2789;
+  --fba-ind-l: #eef2ff;
+  --fba-gld: #c9a84c;
+  --fba-gld-l: #fef3c7;
+  --fba-gld-b: #fde68a;
+  --fba-grn: #16a34a;
+  --fba-red: #dc2626;
+  --fba-nav-bg: rgba(255, 253, 249, 0.97);
+  --fba-footer-bg: #1a1714;
+
+  background: var(--fba-bg);
+  color: var(--fba-tx);
+  font-family: var(--font-plus-jakarta), "Plus Jakarta Sans", system-ui, sans-serif;
+  transition:
+    background-color 0.3s ease,
+    color 0.25s ease;
+}
+
+.fba-scope.fba-dark,
+.fba-dark .fba-scope,
+.dark .fba-scope {
+  --fba-bg: #0f0e1a;
+  --fba-bg2: #171626;
+  --fba-surf: #1e1d2e;
+  --fba-bdr: #2a2840;
+  --fba-bdr2: #343254;
+  --fba-tx: #f0eef8;
+  --fba-tx2: #9896b0;
+  --fba-tx3: #5e5c78;
+  --fba-ind: #6366f1;
+  --fba-ind-d: #5558e8;
+  --fba-ind-l: #1e1d3a;
+  --fba-gld-l: color-mix(in srgb, var(--fba-gld) 18%, var(--fba-surf));
+  --fba-nav-bg: rgba(15, 14, 26, 0.97);
+  --fba-footer-bg: #07060f;
+  color-scheme: dark;
+}
+
+/* Keep the page chrome (body) in sync when a brand screen toggles dark mode. */
+html:has(.fba-scope.fba-dark) body {
+  background-color: #0f0e1a;
+  color-scheme: dark;
+}
+
+.fba-scope.fba-theme-transitioning,
+.fba-scope.fba-theme-transitioning * {
+  transition:
+    background-color 0.3s ease,
+    color 0.25s ease,
+    border-color 0.3s ease,
+    box-shadow 0.3s ease !important;
+}
+
+/* Neutralise the browser autofill overlay (Chrome/Edge/Safari paint a grey or
+   pale-blue background and swap the text colour on autofilled fields). The
+   large inset shadow repaints the brand surface, and the very long transition
+   prevents the UA colour from flashing back in. Token-based so it stays correct
+   in light and dark. */
+.fba-scope input:-webkit-autofill,
+.fba-scope input:-webkit-autofill:hover,
+.fba-scope input:-webkit-autofill:focus,
+.fba-scope input:-webkit-autofill:active {
+  -webkit-text-fill-color: var(--fba-tx);
+  -webkit-box-shadow: 0 0 0 1000px var(--fba-surf) inset;
+  box-shadow: 0 0 0 1000px var(--fba-surf) inset;
+  caret-color: var(--fba-tx);
+  border-color: var(--fba-bdr);
+  transition: background-color 100000s ease-in-out 0s;
+}
+
+.fba-scope input:-webkit-autofill:focus {
+  border-color: var(--fba-ind);
+}
+
+/* Keep scroll behavior while hiding the scrollbar chrome. Firefox + IE/Edge
+   legacy use standard properties; WebKit/Blink need the pseudo-element. */
+.fba-scroll-invisible {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.fba-scroll-invisible::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
+/* Subtle scrollbar for inline panel scrolling inside brand screens. */
+.fba-scroll-subtle {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--fba-bdr) 85%, var(--fba-tx3)) transparent;
+}
+
+.fba-scroll-subtle::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.fba-scroll-subtle::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.fba-scroll-subtle::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--fba-bdr) 85%, var(--fba-tx3));
+  border-radius: 999px;
+}

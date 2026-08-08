@@ -1,8 +1,6 @@
-import { existsSync, readFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-
-const webRoot = resolve(import.meta.dirname, "../../apps/web/src");
+import { resolveSplitPath, splitPathExists } from "./split-layout-paths";
 
 const communityPaths = [
   "app/(learner)/community/page.tsx",
@@ -21,7 +19,10 @@ const communityPaths = [
   "app/api/v1/reactions/route.ts",
   "server/community/community.service.ts",
   "server/community/community.hall-of-fame-service.ts",
-  "features/community/components/CommunityHub.tsx",
+  "features/community/components/CommunityExperience.tsx",
+  "features/community/components/SpaceFeed.tsx",
+  "features/community/components/PostCard.tsx",
+  "features/community/components/CommentTree.tsx",
   "features/community/components/HallOfFameView.tsx",
   "features/community/components/AdminSpacesEditor.tsx",
   "modules/community/community.server-api.ts",
@@ -30,18 +31,18 @@ const communityPaths = [
 describe("community e2e wiring", () => {
   it("includes approved screens, APIs, and services", () => {
     for (const relativePath of communityPaths) {
-      expect(existsSync(resolve(webRoot, relativePath))).toBe(true);
+      expect(splitPathExists(relativePath)).toBe(true);
     }
   });
 
   it("community hub uses approved server API", () => {
-    const source = readFileSync(resolve(webRoot, "app/(learner)/community/page.tsx"), "utf8");
+    const source = readFileSync(resolveSplitPath("app/(learner)/community/page.tsx"), "utf8");
     expect(source).toContain("communityServerApi");
-    expect(source).toContain("CommunityHub");
+    expect(source).toContain("CommunityExperience");
   });
 
   it("hall of fame resolves config server-side without client ids", () => {
-    const source = readFileSync(resolve(webRoot, "app/(learner)/hall-of-fame/page.tsx"), "utf8");
+    const source = readFileSync(resolveSplitPath("app/(learner)/hall-of-fame/page.tsx"), "utf8");
     expect(source).toContain("loadHallOfFamePageData");
     expect(source).not.toContain("searchParams");
     expect(source).not.toContain("leaderboardId");
@@ -49,7 +50,7 @@ describe("community e2e wiring", () => {
 
   it("hall of fame view avoids funded language and dangerouslySetInnerHTML", () => {
     const source = readFileSync(
-      resolve(webRoot, "features/community/components/HallOfFameView.tsx"),
+      resolveSplitPath("features/community/components/HallOfFameView.tsx"),
       "utf8",
     );
     expect(source).not.toContain("dangerouslySetInnerHTML");
@@ -58,13 +59,13 @@ describe("community e2e wiring", () => {
   });
 
   it("learner shell links to community and hall of fame", () => {
-    const source = readFileSync(resolve(webRoot, "components/shells/LearnerShell.tsx"), "utf8");
+    const source = readFileSync(resolveSplitPath("components/shells/LearnerShell.tsx"), "utf8");
     expect(source).toContain("/community");
     expect(source).toContain("/hall-of-fame");
   });
 
   it("community service emits community.post.created only", () => {
-    const source = readFileSync(resolve(webRoot, "server/community/community.service.ts"), "utf8");
+    const source = readFileSync(resolveSplitPath("server/community/community.service.ts"), "utf8");
     expect(source).toContain("community.post.created");
     expect(source).not.toContain("notification_dispatches");
     expect(source).not.toContain("search_index_entries");

@@ -2,11 +2,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mockFindMembership = vi.fn();
 
-vi.mock("../../../packages/membership/src/membership.repository", () => ({
+vi.mock("../../../backend/packages/membership/src/membership.repository", () => ({
   findMembershipByPrincipal: (...args: unknown[]) => mockFindMembership(...args),
 }));
 
-import { requireActiveMembership } from "../../../packages/membership/src/membership-gate";
+import { requireActiveMembership } from "../../../backend/packages/membership/src/membership-gate";
 
 describe("GET /me membership gate", () => {
   beforeEach(() => {

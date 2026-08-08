@@ -3,14 +3,14 @@ import {
   LEARNER_ROUTE_REGISTRY,
   getLearnerRouteByScreenId,
   listLearnerScreenIds,
-} from "../../../apps/web/src/features/learner/learner-route-registry";
+} from "../../../frontend/apps/web/src/features/learner/learner-route-registry";
 
 describe("learner route registry", () => {
-  it("defines exact L1-L25 contract registry", () => {
+  it("defines exact L1-L30 contract registry", () => {
     const screenIds = listLearnerScreenIds();
-    expect(screenIds).toHaveLength(25);
+    expect(screenIds).toHaveLength(30);
     expect(screenIds[0]).toBe("L1");
-    expect(screenIds[24]).toBe("L25");
+    expect(screenIds[29]).toBe("L30");
   });
 
   it("maps known screens to approved paths", () => {
@@ -18,6 +18,8 @@ describe("learner route registry", () => {
     expect(getLearnerRouteByScreenId("L21").pathPattern).toBe("/resources");
     expect(getLearnerRouteByScreenId("L24").pathPattern).toBe("/profile");
     expect(getLearnerRouteByScreenId("L25").pathPattern).toBe("/settings");
+    expect(getLearnerRouteByScreenId("L29").pathPattern).toBe("/newsfeed");
+    expect(getLearnerRouteByScreenId("L30").pathPattern).toBe("/newsfeed/:slug");
   });
 
   it("declares route-level entitlements only for approved screens", () => {

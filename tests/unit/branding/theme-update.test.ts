@@ -142,4 +142,17 @@ describe("theme update", () => {
     expect(result.data.status).toBe("DRAFT");
     expect(result.data.tokens).toEqual(validTokens);
   });
+
+  it("rejects low-contrast theme tokens", async () => {
+    await expect(
+      updateTenantThemeDraft(tx, {
+        tokens: {
+          ...validTokens,
+          primary: "#ffff00",
+        },
+      }),
+    ).rejects.toThrow("THEME_CONTRAST_FAILED");
+
+    expect(upsertTenantThemeDraftMock).not.toHaveBeenCalled();
+  });
 });

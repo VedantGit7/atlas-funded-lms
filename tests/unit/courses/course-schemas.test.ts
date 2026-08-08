@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   courseIdParamsSchema,
   courseListQuerySchema,
-} from "../../../apps/web/src/server/courses/schemas";
+} from "../../../backend/apps/api/src/server/courses/schemas";
 
 describe("course list query schema", () => {
   it("accepts allow-listed filters", () => {

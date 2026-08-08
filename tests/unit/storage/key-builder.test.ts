@@ -86,6 +86,20 @@ describe("buildTenantStorageKey", () => {
     );
   });
 
+  it("uses module scorm path for scorm packages", () => {
+    const moduleId = "018f0000-0000-7000-8000-000000000099";
+    const key = buildTenantStorageKey({
+      tenantId: TENANT_ID,
+      purpose: "module.scorm",
+      resourceId: moduleId,
+      fileName: "package.zip",
+    });
+
+    expect(key).toMatch(
+      new RegExp(`^tenants/${TENANT_ID}/modules/${moduleId}/scorm/[0-9a-f-]+-package\\.zip$`),
+    );
+  });
+
   it("uses temp/uploads for temp upload assets", () => {
     const key = buildTenantStorageKey({
       tenantId: TENANT_ID,

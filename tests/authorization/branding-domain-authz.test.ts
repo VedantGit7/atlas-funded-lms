@@ -39,14 +39,14 @@ import { EntitlementRequiredError } from "@atlas/authorization";
 import {
   routeMetadata as getBrandingRouteMetadata,
   putRouteMetadata as putBrandingRouteMetadata,
-} from "../../apps/web/src/app/api/v1/branding/route.metadata";
-import { routeMetadata as publishBrandingRouteMetadata } from "../../apps/web/src/app/api/v1/branding/publish/route.metadata";
-import { routeMetadata as putThemeRouteMetadata } from "../../apps/web/src/app/api/v1/theme/route.metadata";
+} from "../../backend/apps/api/src/app/api/v1/branding/route.metadata";
+import { routeMetadata as publishBrandingRouteMetadata } from "../../backend/apps/api/src/app/api/v1/branding/publish/route.metadata";
+import { routeMetadata as putThemeRouteMetadata } from "../../backend/apps/api/src/app/api/v1/theme/route.metadata";
 import {
   getRouteMetadata as getDomainsRouteMetadata,
   postRouteMetadata as postDomainsRouteMetadata,
-} from "../../apps/web/src/app/api/v1/domains/route.metadata";
-import { routeMetadata as deleteDomainRouteMetadata } from "../../apps/web/src/app/api/v1/domains/[id]/route.metadata";
+} from "../../backend/apps/api/src/app/api/v1/domains/route.metadata";
+import { routeMetadata as deleteDomainRouteMetadata } from "../../backend/apps/api/src/app/api/v1/domains/[id]/route.metadata";
 
 async function getRealCreateTenantDomain() {
   const mod = await vi.importActual<typeof DomainAdminModule>(

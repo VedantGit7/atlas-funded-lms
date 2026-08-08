@@ -1,16 +1,16 @@
 import { describe, expect, it } from "vitest";
 import { withTenantTx } from "@atlas/db";
-import { handleGamificationOutboxEvent } from "../../../apps/web/src/server/gamification/gamification.worker";
+import { handleGamificationOutboxEvent } from "../../../backend/apps/api/src/server/gamification/gamification.worker";
 import {
   completePracticeSession,
   startPracticeSession,
   submitPracticeResponse,
-} from "../../../apps/web/src/server/practice/practice.service";
+} from "../../../backend/apps/api/src/server/practice/practice.service";
 import {
   getMyGamificationProfile,
   listMyStreaks,
   mutateBadges,
-} from "../../../apps/web/src/server/gamification/gamification.service";
+} from "../../../backend/apps/api/src/server/gamification/gamification.service";
 import {
   adminCtx,
   authoringTenantTx,

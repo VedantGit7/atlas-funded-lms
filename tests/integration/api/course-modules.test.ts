@@ -5,8 +5,8 @@ import {
   deleteCourseModule,
   listCourseModulesForBuilderService,
   updateCourseModule,
-} from "../../../apps/web/src/server/courses/course-authoring.service";
-import { getPublishedCourseModules } from "../../../apps/web/src/server/courses/courses.service";
+} from "../../../backend/apps/api/src/server/courses/course-authoring.service";
+import { getPublishedCourseModules } from "../../../backend/apps/api/src/server/courses/courses.service";
 import {
   createCourseAuthoringFixture,
   instructorCtx,

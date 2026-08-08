@@ -4,8 +4,8 @@ import { withTenantTx } from "@atlas/db";
 import {
   getMemberCompetency,
   listTenantCompetencySignals,
-} from "../../apps/web/src/server/competency/competency-query.service";
-import { handleCompetencyOutboxEvent } from "../../apps/web/src/server/competency/competency.worker";
+} from "../../backend/apps/api/src/server/competency/competency-query.service";
+import { handleCompetencyOutboxEvent } from "../../backend/apps/api/src/server/competency/competency.worker";
 import {
   authoringTenantTx,
   createCompetencyProjectionFixture,

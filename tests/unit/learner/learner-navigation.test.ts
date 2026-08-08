@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   LEARNER_PRIMARY_NAV,
   filterLearnerNavigation,
-} from "../../../apps/web/src/features/learner/learner-navigation";
+} from "../../../frontend/apps/web/src/features/learner/learner-navigation";
 
 describe("learner navigation projection", () => {
   it("filters entitlement-gated nav items", () => {

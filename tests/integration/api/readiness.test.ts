@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { withTenantTx } from "@atlas/db";
-import { createAttributionToken } from "../../../apps/web/src/server/readiness/cta-attribution.service";
+import { createAttributionToken } from "../../../backend/apps/api/src/server/readiness/cta-attribution.service";
 import {
   getReadinessPolicy,
   updateReadinessPolicy,
-} from "../../../apps/web/src/server/readiness/readiness-policy.service";
-import { handleReadinessOutboxEvent } from "../../../apps/web/src/server/readiness/readiness.worker";
+} from "../../../backend/apps/api/src/server/readiness/readiness-policy.service";
+import { handleReadinessOutboxEvent } from "../../../backend/apps/api/src/server/readiness/readiness.worker";
 import {
   adminCtx,
   authoringTenantTx,

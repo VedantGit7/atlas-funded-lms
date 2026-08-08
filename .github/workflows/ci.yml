@@ -532,6 +532,71 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm audit --audit-level high
 
+  learner-bundle-boundary:
+    name: learner-bundle-boundary
+    runs-on: ubuntu-latest
+    needs: install
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.13.1
+      - uses: pnpm/action-setup@v6
+      - run: pnpm install --frozen-lockfile
+      - *generate-prisma-client
+      - run: pnpm --filter @atlas/web build
+      - run: pnpm ci:learner-bundle-boundary
+
+  frontend-api-closure:
+    name: frontend-api-closure
+    runs-on: ubuntu-latest
+    needs: install
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.13.1
+      - uses: pnpm/action-setup@v6
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm ci:frontend-api-closure
+        env:
+          STRICT_API_CLOSURE: "1"
+
+  browser-smoke:
+    name: browser-smoke
+    runs-on: ubuntu-latest
+    needs: install
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: atlas
+          POSTGRES_PASSWORD: atlas_dev_password
+          POSTGRES_DB: atlas_lms_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U atlas -d atlas_lms_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: ${{ env.CI_DATABASE_URL }}
+      PLATFORM_DATABASE_URL: ${{ env.CI_DATABASE_URL }}
+      BROWSER_E2E: "1"
+      CI: "true"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.13.1
+      - uses: pnpm/action-setup@v6
+      - run: pnpm install --frozen-lockfile
+      - *generate-prisma-client
+      - run: node scripts/db/ci-migrate-validate.mjs
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm exec playwright test tests/browser/journeys/01-public-diagnostic-signup.spec.ts tests/browser/accessibility
+
   build:
     name: build
     runs-on: ubuntu-latest
@@ -556,6 +621,9 @@ jobs:
       - tenant-resource-registry-check
       - security-check
       - e2e-tests
+      - frontend-api-closure
+      - learner-bundle-boundary
+      - browser-smoke
       - release-evidence-validation
       - observability-contract-check
       - secret-scan

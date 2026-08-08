@@ -1,0 +1,3889 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../packages/db/src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum TenantState {
+  PROVISIONING
+  ACTIVE
+  SUSPENDED
+  ARCHIVED
+  DELETED
+}
+
+enum DomainStatus {
+  PENDING
+  ACTIVE
+  FAILED
+  DISABLED
+}
+
+enum MembershipStatus {
+  INVITED
+  ACTIVE
+  SUSPENDED
+  REMOVED
+}
+
+enum ProfileVisibility {
+  PUBLIC
+  PRIVATE
+}
+
+enum DispatchStatus {
+  QUEUED
+  SENT
+  FAILED
+  CANCELLED
+}
+
+enum JobStatus {
+  QUEUED
+  RUNNING
+  SUCCEEDED
+  FAILED
+  CANCELLED
+}
+
+enum PublishStatus {
+  DRAFT
+  REVIEW
+  PUBLISHED
+  ARCHIVED
+}
+
+enum CourseModuleContentKind {
+  STANDARD
+  SCORM
+}
+
+enum EntityStatus {
+  ACTIVE
+  INACTIVE
+  ARCHIVED
+}
+
+enum AttemptStatus {
+  STARTED
+  SUBMITTED
+  GRADED
+  ABANDONED
+  VOIDED
+}
+
+enum Visibility {
+  PRIVATE
+  TENANT
+  PUBLIC
+  UNLISTED
+}
+
+enum ModerationStatus {
+  OPEN
+  REVIEWING
+  ACTIONED
+  REJECTED
+  CLOSED
+}
+
+model Tenant {
+  id                   String      @id @db.Uuid
+  slug                 String      @unique
+  legal_name           String?
+  display_name         String
+  state                TenantState @default(PROVISIONING)
+  default_locale       String      @default("en")
+  default_timezone     String      @default("UTC")
+  statement_timeout_ms Int         @default(5000)
+  query_budget_json    Json?
+  created_at           DateTime    @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime    @updatedAt @db.Timestamptz(6)
+  deleted_at           DateTime?   @db.Timestamptz(6)
+
+  domains         TenantDomain[]
+  memberships                      Membership[]
+  member_profiles                  MemberProfile[]
+  member_notification_preferences  MemberNotificationPreference[]
+
+  @@map("tenants")
+}
+
+model TenantDomain {
+  id                String       @id @db.Uuid
+  tenant_id         String       @db.Uuid
+  hostname          String
+  type              String
+  status            DomainStatus @default(PENDING)
+  is_primary        Boolean      @default(false)
+  verification_json Json?
+  created_at        DateTime     @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime     @updatedAt @db.Timestamptz(6)
+  deleted_at        DateTime?    @db.Timestamptz(6)
+
+  tenant Tenant @relation(fields: [tenant_id], references: [id], onDelete: Restrict)
+
+  @@index([tenant_id, status])
+  @@map("tenant_domains")
+}
+
+model AuthPrincipal {
+  id               String    @id @db.Uuid
+  supabase_user_id String    @unique @db.Uuid
+  email            String    @unique
+  email_normalized String    @unique
+  global_status    String    @default("active")
+  mfa_enabled      Boolean   @default(false)
+  last_login_at    DateTime? @db.Timestamptz(6)
+  created_at       DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime  @updatedAt @db.Timestamptz(6)
+
+  memberships Membership[]
+
+  @@map("auth_principals")
+}
+
+model Membership {
+  id                       String           @id @db.Uuid
+  tenant_id                String           @db.Uuid
+  auth_principal_id        String?          @db.Uuid
+  status                   MembershipStatus @default(INVITED)
+  invited_email_normalized String?
+  invite_token_hash        String?
+  invite_expires_at        DateTime?        @db.Timestamptz(6)
+  accepted_at              DateTime?        @db.Timestamptz(6)
+  joined_at                DateTime?        @db.Timestamptz(6)
+  suspended_at             DateTime?        @db.Timestamptz(6)
+  removed_at               DateTime?        @db.Timestamptz(6)
+  archived_at              DateTime?        @db.Timestamptz(6)
+  last_active_at           DateTime?        @db.Timestamptz(6)
+  created_at               DateTime         @default(now()) @db.Timestamptz(6)
+  updated_at               DateTime         @updatedAt @db.Timestamptz(6)
+
+  tenant                    Tenant                         @relation(fields: [tenant_id], references: [id], onDelete: Restrict)
+  auth_principal            AuthPrincipal?                 @relation(fields: [auth_principal_id], references: [id], onDelete: Restrict)
+  profile                   MemberProfile?
+  notification_preferences  MemberNotificationPreference[]
+
+  @@unique([tenant_id, auth_principal_id])
+  @@index([tenant_id, status])
+  @@index([tenant_id, invite_token_hash])
+  @@index([tenant_id, last_active_at])
+  @@index([auth_principal_id])
+  @@map("memberships")
+}
+
+model MemberProfile {
+  id                  String             @id @db.Uuid
+  tenant_id           String             @db.Uuid
+  membership_id       String             @unique @db.Uuid
+  display_name        String?
+  avatar_key          String?
+  bio                 String?
+  timezone            String?
+  profile_visibility  ProfileVisibility  @default(PUBLIC)
+  metadata_json       Json?
+  created_at          DateTime           @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime           @updatedAt @db.Timestamptz(6)
+  deleted_at          DateTime?          @db.Timestamptz(6)
+
+  tenant     Tenant     @relation(fields: [tenant_id], references: [id], onDelete: Restrict)
+  membership Membership @relation(fields: [membership_id], references: [id], onDelete: Restrict)
+
+  @@index([tenant_id, display_name])
+  @@map("member_profiles")
+}
+
+model MemberNotificationPreference {
+  id              String   @id @db.Uuid
+  tenant_id       String   @db.Uuid
+  membership_id   String   @db.Uuid
+  category_key    String
+  enabled         Boolean  @default(true)
+  email_enabled   Boolean  @default(true)
+  in_app_enabled  Boolean  @default(true)
+  created_at      DateTime @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime @updatedAt @db.Timestamptz(6)
+
+  tenant     Tenant     @relation(fields: [tenant_id], references: [id], onDelete: Restrict)
+  membership Membership @relation(fields: [membership_id], references: [id], onDelete: Restrict)
+
+  @@unique([tenant_id, membership_id, category_key])
+  @@index([tenant_id, membership_id])
+  @@map("member_notification_preferences")
+}
+
+model Permission {
+  id          String   @id @db.Uuid
+  key         String   @unique
+  description String?
+  created_at  DateTime @default(now()) @db.Timestamptz(6)
+
+  @@map("permissions")
+}
+
+model PermissionBundle {
+  id          String   @id @db.Uuid
+  key         String   @unique
+  name        String
+  permissions Json
+  created_at  DateTime @default(now()) @db.Timestamptz(6)
+
+  @@map("permission_bundles")
+}
+
+model Role {
+  id         String    @id @db.Uuid
+  tenant_id  String    @db.Uuid
+  key        String
+  name       String
+  is_system  Boolean   @default(false)
+  created_at DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at DateTime  @updatedAt @db.Timestamptz(6)
+  deleted_at DateTime? @db.Timestamptz(6)
+
+  @@index([tenant_id, key])
+  @@map("roles")
+}
+
+model RolePermission {
+  id             String   @id @db.Uuid
+  tenant_id      String   @db.Uuid
+  role_id        String   @db.Uuid
+  permission_key String
+  created_at     DateTime @default(now()) @db.Timestamptz(6)
+
+  @@unique([tenant_id, role_id, permission_key])
+  @@index([tenant_id, permission_key])
+  @@map("role_permissions")
+}
+
+model UserRole {
+  id                        String   @id @db.Uuid
+  tenant_id                 String   @db.Uuid
+  membership_id             String   @db.Uuid
+  role_id                   String   @db.Uuid
+  assigned_by_membership_id String?  @db.Uuid
+  created_at                DateTime @default(now()) @db.Timestamptz(6)
+
+  @@unique([tenant_id, membership_id, role_id])
+  @@index([tenant_id, role_id])
+  @@map("user_roles")
+}
+
+model PermissionOverride {
+  id             String    @id @db.Uuid
+  tenant_id      String    @db.Uuid
+  membership_id  String    @db.Uuid
+  permission_key String
+  effect         String
+  reason         String?
+  expires_at     DateTime? @db.Timestamptz(6)
+  created_at     DateTime  @default(now()) @db.Timestamptz(6)
+
+  @@unique([tenant_id, membership_id, permission_key])
+  @@index([tenant_id, permission_key, effect])
+  @@map("permission_overrides")
+}
+
+model TenantConfig {
+  id                 String   @id @db.Uuid
+  tenant_id          String   @unique @db.Uuid
+  config_json        Json
+  current_version_id String?  @db.Uuid
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime @updatedAt @db.Timestamptz(6)
+
+  @@map("tenant_config")
+}
+
+model TenantConfigVersion {
+  id                       String   @id @db.Uuid
+  tenant_id                String   @db.Uuid
+  version                  Int
+  snapshot_json            Json
+  created_by_membership_id String?  @db.Uuid
+  created_at               DateTime @default(now()) @db.Timestamptz(6)
+
+  @@unique([tenant_id, version])
+  @@index([tenant_id, created_at])
+  @@map("tenant_config_version")
+}
+
+model FeatureFlag {
+  id            String   @id @db.Uuid
+  key           String   @unique
+  default_value Json
+  description   String?
+  created_at    DateTime @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime @updatedAt @db.Timestamptz(6)
+
+  @@map("feature_flags")
+}
+
+model FeatureFlagOverride {
+  id              String   @id @db.Uuid
+  tenant_id       String   @db.Uuid
+  feature_flag_id String   @db.Uuid
+  value_json      Json
+  created_at      DateTime @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenant_id, feature_flag_id])
+  @@map("feature_flag_overrides")
+}
+
+model Entitlement {
+  id         String    @id @db.Uuid
+  tenant_id  String    @db.Uuid
+  key        String
+  value_json Json
+  source     String
+  starts_at  DateTime  @default(now()) @db.Timestamptz(6)
+  expires_at DateTime? @db.Timestamptz(6)
+  created_at DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at DateTime  @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenant_id, key])
+  @@index([tenant_id, key, expires_at])
+  @@map("entitlements")
+}
+
+model EntitlementGrantHistory {
+  id                       String   @id @db.Uuid
+  tenant_id                String   @db.Uuid
+  entitlement_key          String
+  old_value_json           Json?
+  new_value_json           Json
+  changed_by_membership_id String?  @db.Uuid
+  reason                   String?
+  occurred_at              DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([tenant_id, entitlement_key, occurred_at])
+  @@map("entitlement_grant_history")
+}
+
+model TenantSubscription {
+  id              String    @id @db.Uuid
+  tenant_id       String    @db.Uuid
+  plan_name       String
+  currency        String    @db.VarChar(3)
+  status          String
+  duration_type   String
+  next_billing_at DateTime? @db.Timestamptz(6)
+  created_at      DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime  @updatedAt @db.Timestamptz(6)
+
+  @@index([tenant_id, status])
+  @@map("tenant_subscriptions")
+}
+
+model TenantActiveDay {
+  tenant_id     String   @db.Uuid
+  membership_id String   @db.Uuid
+  day           DateTime @db.Date
+
+  @@id([tenant_id, membership_id, day])
+  @@index([tenant_id, day])
+  @@map("tenant_active_days")
+}
+
+model LearnerBillingConfig {
+  tenant_id             String   @id @db.Uuid
+  pricing_model         String?
+  home_currency         String?
+  gst_enabled           Boolean  @default(false)
+  gst_number            String?
+  gst_percentage        Decimal? @db.Decimal(6, 3)
+  invoice_prefix        String?
+  invoice_next_number   Int?
+  invoice_business_name String?
+  request_billing_address  Boolean @default(false)
+  request_shipping_address Boolean @default(false)
+  request_gstin            Boolean @default(false)
+  request_mobile           Boolean @default(false)
+  updated_at            DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+
+  @@map("learner_billing_config")
+}
+
+model LearnerBillingLocation {
+  id          String   @id @db.Uuid
+  tenant_id   String   @db.Uuid
+  name        String
+  country     String
+  currency    String
+  description String?
+  status      String   @default("published")
+  is_default  Boolean  @default(false)
+  created_at  DateTime @default(now()) @db.Timestamptz(6)
+  updated_at  DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+
+  @@index([tenant_id])
+  @@map("learner_billing_locations")
+}
+
+model FxRate {
+  tenant_id      String   @db.Uuid
+  base_currency  String
+  quote_currency String
+  rate           Decimal  @db.Decimal(18, 8)
+  as_of          DateTime @db.Date
+  fetched_at     DateTime @default(now()) @db.Timestamptz(6)
+
+  @@id([tenant_id, base_currency, quote_currency])
+  @@index([tenant_id])
+  @@map("fx_rates")
+}
+
+model PaymentGateway {
+  id                  String   @id @db.Uuid
+  tenant_id           String   @db.Uuid
+  gateway_key         String
+  display_name        String
+  user_id             String?
+  publishable_key     String?
+  secret_ciphertext   String?
+  secret_last4        String?
+  billing_location_id String?  @db.Uuid
+  is_default          Boolean  @default(false)
+  is_configured       Boolean  @default(false)
+  is_published        Boolean  @default(false)
+  created_at          DateTime @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenant_id, gateway_key])
+  @@index([tenant_id])
+  @@map("payment_gateways")
+}
+
+model AuditEntry {
+  id                  String   @id @db.Uuid
+  tenant_id           String?  @db.Uuid
+  actor_membership_id String?  @db.Uuid
+  actor_principal_id  String?  @db.Uuid
+  action              String
+  target_type         String
+  target_id           String?
+  request_id          String?
+  ip_hash             String?
+  user_agent_hash     String?
+  before_json         Json?
+  after_json          Json?
+  metadata_json       Json?
+  previous_hash       String?
+  entry_hash          String
+  occurred_at         DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([tenant_id, occurred_at], map: "audit_entries_tenant_occurred_at_idx")
+  @@index([tenant_id, action, occurred_at], map: "audit_entries_tenant_action_occurred_at_idx")
+  @@map("audit_entries")
+}
+
+model SecretRef {
+  id              String    @id @db.Uuid
+  tenant_id       String    @db.Uuid
+  key             String
+  provider        String
+  external_ref    String
+  purpose         String
+  rotation_due_at DateTime? @db.Timestamptz(6)
+  created_at      DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime  @updatedAt @db.Timestamptz(6)
+  deleted_at      DateTime? @db.Timestamptz(6)
+
+  @@unique([tenant_id, key])
+  @@map("secret_refs")
+}
+
+model OutboxEvent {
+  id              String   @id @db.Uuid
+  tenant_id       String?  @db.Uuid
+  event_type      String
+  aggregate_type  String
+  aggregate_id    String
+  idempotency_key String?
+  payload_json    Json
+  metadata_json   Json?
+  occurred_at     DateTime @default(now()) @db.Timestamptz(6)
+  available_at    DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([tenant_id, event_type, occurred_at])
+  @@index([available_at])
+  @@map("outbox_events")
+}
+
+model EventDelivery {
+  id              String         @id @db.Uuid
+  tenant_id       String?        @db.Uuid
+  outbox_event_id String         @db.Uuid
+  destination_key String
+  status          DispatchStatus @default(QUEUED)
+  attempt_count   Int            @default(0)
+  last_attempt_at DateTime?      @db.Timestamptz(6)
+  next_attempt_at DateTime?      @db.Timestamptz(6)
+  response_json   Json?
+  created_at      DateTime       @default(now()) @db.Timestamptz(6)
+
+  @@unique([outbox_event_id, destination_key])
+  @@index([tenant_id, status, next_attempt_at])
+  @@map("event_deliveries")
+}
+
+model DeadLetterEvent {
+  id              String   @id @db.Uuid
+  tenant_id       String?  @db.Uuid
+  outbox_event_id String   @db.Uuid
+  destination_key String?
+  error_json      Json
+  failed_at       DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([tenant_id, failed_at])
+  @@map("dead_letter_events")
+}
+
+model ProvisioningJob {
+  id              String    @id @db.Uuid
+  tenant_id       String    @db.Uuid
+  idempotency_key String
+  status          JobStatus @default(QUEUED)
+  step_key        String?
+  request_json    Json
+  result_json     Json?
+  error_json      Json?
+  created_at      DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime  @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenant_id, idempotency_key])
+  @@index([tenant_id, status, created_at])
+  @@map("provisioning_jobs")
+}
+
+model TenantBranding {
+  id                 String   @id @db.Uuid
+  tenant_id          String   @unique @db.Uuid
+  display_name       String
+  logo_light_key     String?
+  logo_dark_key      String?
+  favicon_key        String?
+  support_email      String?
+  social_links_json  Json?
+  legal_footer_text  String?
+  current_version_id String?  @db.Uuid
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime @updatedAt @db.Timestamptz(6)
+
+  @@map("tenant_branding")
+}
+
+model TenantTheme {
+  id                 String   @id @db.Uuid
+  tenant_id          String   @unique @db.Uuid
+  primary_color      String
+  secondary_color    String?
+  accent_color       String?
+  font_family        String?
+  token_json         Json
+  current_version_id String?  @db.Uuid
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime @updatedAt @db.Timestamptz(6)
+
+  @@map("tenant_theme")
+}
+
+model TenantBrandingVersion {
+  id                       String   @id @db.Uuid
+  tenant_id                String   @db.Uuid
+  version                  Int
+  snapshot_json            Json
+  created_by_membership_id String?  @db.Uuid
+  created_at               DateTime @default(now()) @db.Timestamptz(6)
+
+  @@unique([tenant_id, version])
+  @@index([tenant_id, created_at])
+  @@map("tenant_branding_version")
+}
+
+model TenantThemeVersion {
+  id                       String   @id @db.Uuid
+  tenant_id                String   @db.Uuid
+  version                  Int
+  snapshot_json            Json
+  created_by_membership_id String?  @db.Uuid
+  created_at               DateTime @default(now()) @db.Timestamptz(6)
+
+  @@unique([tenant_id, version])
+  @@index([tenant_id, created_at])
+  @@map("tenant_theme_version")
+}
+
+model LessonAsset {
+  id                String    @id @db.Uuid
+  tenant_id         String    @db.Uuid
+  lesson_id         String    @db.Uuid
+  asset_type        String
+  provider          String
+  object_key_or_url String
+  metadata_json     Json?
+  created_at        DateTime  @default(now()) @db.Timestamptz(6)
+  deleted_at        DateTime? @db.Timestamptz(6)
+
+  @@index([tenant_id, lesson_id])
+  @@map("lesson_assets")
+}
+
+model StorageReference {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenant_id       String    @db.Uuid
+  bucket          String
+  object_key      String
+  purpose         String
+  resource_type   String
+  resource_id     String?   @db.Uuid
+  file_name       String
+  content_type    String
+  size_bytes      BigInt
+  checksum_sha256 String?
+  visibility      String
+  status          String
+  created_at      DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
+  deleted_at      DateTime? @db.Timestamptz(6)
+
+  @@index([tenant_id, status])
+  @@index([tenant_id, purpose])
+  @@map("storage_references")
+}
+
+model Course {
+  id                       String        @id @db.Uuid
+  tenant_id                String        @db.Uuid
+  slug                     String
+  title                    String
+  description              String?
+  status                   PublishStatus @default(DRAFT)
+  metadata_json            Json?
+  created_by_membership_id String?       @db.Uuid
+  created_at               DateTime      @default(now()) @db.Timestamptz(6)
+  updated_at               DateTime      @updatedAt @db.Timestamptz(6)
+  deleted_at               DateTime?     @db.Timestamptz(6)
+
+  @@index([tenant_id, slug])
+  @@index([tenant_id, status, updated_at])
+  @@map("courses")
+}
+
+model CourseModule {
+  id                         String                  @id @db.Uuid
+  tenant_id                  String                  @db.Uuid
+  course_id                  String                  @db.Uuid
+  title                      String
+  position                   Int
+  status                     PublishStatus           @default(DRAFT)
+  content_kind               CourseModuleContentKind @default(STANDARD)
+  scorm_package_reference_id String?                 @db.Uuid
+  scorm_launch_path          String?
+  scorm_version              String?
+  created_at                 DateTime                @default(now()) @db.Timestamptz(6)
+  updated_at                 DateTime                @updatedAt @db.Timestamptz(6)
+  deleted_at                 DateTime?               @db.Timestamptz(6)
+
+  @@unique([tenant_id, course_id, position])
+  @@index([tenant_id, course_id])
+  @@index([tenant_id, content_kind])
+  @@map("course_modules")
+}
+
+model ModuleScormProgress {
+  id            String    @id @db.Uuid
+  tenant_id     String    @db.Uuid
+  module_id     String    @db.Uuid
+  membership_id String    @db.Uuid
+  status        String    @default("not_started")
+  progress_pct  Int       @default(0)
+  cmi_json      Json?
+  completed_at  DateTime? @db.Timestamptz(6)
+  last_seen_at  DateTime? @db.Timestamptz(6)
+  updated_at    DateTime  @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenant_id, module_id, membership_id])
+  @@index([tenant_id, membership_id, updated_at])
+  @@map("module_scorm_progress")
+}
+
+model Lesson {
+  id               String        @id @db.Uuid
+  tenant_id        String        @db.Uuid
+  module_id        String        @db.Uuid
+  slug             String
+  title            String
+  content_json     Json?
+  video_provider   String?
+  video_url        String?
+  duration_seconds Int?
+  position         Int
+  status           PublishStatus @default(DRAFT)
+  created_at       DateTime      @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime      @updatedAt @db.Timestamptz(6)
+  deleted_at       DateTime?     @db.Timestamptz(6)
+
+  @@unique([tenant_id, module_id, position])
+  @@index([tenant_id, slug])
+  @@index([tenant_id, status])
+  @@map("lessons")
+}
+
+enum LessonTagVisibility {
+  PUBLIC
+  PRIVATE
+  CLASSIFICATION
+}
+
+model Tag {
+  id          String              @id @db.Uuid
+  tenant_id   String              @db.Uuid
+  title       String
+  slug        String
+  description String?
+  visibility  LessonTagVisibility @default(PUBLIC)
+  created_at  DateTime            @default(now()) @db.Timestamptz(6)
+  updated_at  DateTime            @updatedAt @db.Timestamptz(6)
+  deleted_at  DateTime?           @db.Timestamptz(6)
+
+  @@unique([tenant_id, slug])
+  @@index([tenant_id, visibility])
+  @@index([tenant_id, deleted_at])
+  @@map("tags")
+}
+
+model LessonTag {
+  id         String   @id @db.Uuid
+  tenant_id  String   @db.Uuid
+  lesson_id  String   @db.Uuid
+  tag_id     String   @db.Uuid
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+
+  @@unique([tenant_id, lesson_id, tag_id])
+  @@index([tenant_id, tag_id])
+  @@index([tenant_id, lesson_id])
+  @@map("lesson_tags")
+}
+
+model CourseTag {
+  id         String   @id @db.Uuid
+  tenant_id  String   @db.Uuid
+  course_id  String   @db.Uuid
+  tag_id     String   @db.Uuid
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+
+  @@unique([tenant_id, course_id, tag_id])
+  @@index([tenant_id, tag_id])
+  @@index([tenant_id, course_id])
+  @@map("course_tags")
+}
+
+model Enrollment {
+  id            String    @id @db.Uuid
+  tenant_id     String    @db.Uuid
+  course_id     String    @db.Uuid
+  membership_id String    @db.Uuid
+  status        String    @default("active")
+  enrolled_type String    @default("free")
+  enrolled_at   DateTime  @default(now()) @db.Timestamptz(6)
+  expires_at    DateTime? @db.Timestamptz(6)
+  completed_at  DateTime? @db.Timestamptz(6)
+
+  @@unique([tenant_id, course_id, membership_id])
+  @@index([tenant_id, membership_id, status])
+  @@index([tenant_id, enrolled_at(sort: Desc)])
+  @@index([tenant_id, enrolled_type])
+  @@index([tenant_id, expires_at])
+  @@map("enrollments")
+}
+
+/// Learnyst-style sellable mock test product wrapping an Assessment.
+model MockTest {
+  id                       String        @id @db.Uuid
+  tenant_id                String        @db.Uuid
+  slug                     String
+  title                    String
+  description              String?
+  assessment_id            String        @db.Uuid
+  status                   PublishStatus @default(DRAFT)
+  metadata_json            Json?
+  created_by_membership_id String?       @db.Uuid
+  created_at               DateTime      @default(now()) @db.Timestamptz(6)
+  updated_at               DateTime      @updatedAt @db.Timestamptz(6)
+  deleted_at               DateTime?     @db.Timestamptz(6)
+
+  enrollments MockTestEnrollment[]
+
+  @@unique([tenant_id, slug])
+  @@index([tenant_id, status, updated_at])
+  @@index([tenant_id, assessment_id])
+  @@map("mock_tests")
+}
+
+model MockTestEnrollment {
+  id            String    @id @db.Uuid
+  tenant_id     String    @db.Uuid
+  mock_test_id  String    @db.Uuid
+  membership_id String    @db.Uuid
+  status        String    @default("active")
+  enrolled_type String    @default("free")
+  enrolled_at   DateTime  @default(now()) @db.Timestamptz(6)
+  expires_at    DateTime? @db.Timestamptz(6)
+  completed_at  DateTime? @db.Timestamptz(6)
+
+  mock_test MockTest @relation(fields: [mock_test_id], references: [id], onDelete: Cascade)
+
+  @@unique([tenant_id, mock_test_id, membership_id])
+  @@index([tenant_id, membership_id, status])
+  @@index([tenant_id, enrolled_at(sort: Desc)])
+  @@map("mock_test_enrollments")
+}
+
+/// Learnyst-style test series: ordered collection of mock tests / assessments.
+model TestSeries {
+  id                       String        @id @db.Uuid
+  tenant_id                String        @db.Uuid
+  slug                     String
+  title                    String
+  description              String?
+  status                   PublishStatus @default(DRAFT)
+  metadata_json            Json?
+  created_by_membership_id String?       @db.Uuid
+  created_at               DateTime      @default(now()) @db.Timestamptz(6)
+  updated_at               DateTime      @updatedAt @db.Timestamptz(6)
+  deleted_at               DateTime?     @db.Timestamptz(6)
+
+  items       TestSeriesItem[]
+  enrollments TestSeriesEnrollment[]
+
+  @@unique([tenant_id, slug])
+  @@index([tenant_id, status, updated_at])
+  @@map("test_series")
+}
+
+model TestSeriesItem {
+  id             String   @id @db.Uuid
+  tenant_id      String   @db.Uuid
+  test_series_id String   @db.Uuid
+  position       Int
+  title          String?
+  mock_test_id   String?  @db.Uuid
+  assessment_id  String?  @db.Uuid
+  config_json    Json?
+  created_at     DateTime @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime @updatedAt @db.Timestamptz(6)
+
+  test_series TestSeries              @relation(fields: [test_series_id], references: [id], onDelete: Cascade)
+  progress    TestSeriesItemProgress[]
+
+  @@unique([tenant_id, test_series_id, position])
+  @@index([tenant_id, test_series_id])
+  @@index([tenant_id, mock_test_id])
+  @@index([tenant_id, assessment_id])
+  @@map("test_series_items")
+}
+
+model TestSeriesEnrollment {
+  id             String    @id @db.Uuid
+  tenant_id      String    @db.Uuid
+  test_series_id String    @db.Uuid
+  membership_id  String    @db.Uuid
+  status         String    @default("active")
+  enrolled_type  String    @default("free")
+  enrolled_at    DateTime  @default(now()) @db.Timestamptz(6)
+  expires_at     DateTime? @db.Timestamptz(6)
+  completed_at   DateTime? @db.Timestamptz(6)
+
+  test_series TestSeries @relation(fields: [test_series_id], references: [id], onDelete: Cascade)
+
+  @@unique([tenant_id, test_series_id, membership_id])
+  @@index([tenant_id, membership_id, status])
+  @@index([tenant_id, enrolled_at(sort: Desc)])
+  @@map("test_series_enrollments")
+}
+
+model TestSeriesItemProgress {
+  id                  String    @id @db.Uuid
+  tenant_id           String    @db.Uuid
+  test_series_item_id String    @db.Uuid
+  membership_id       String    @db.Uuid
+  status              String    @default("not_started")
+  score_pct           Decimal?  @db.Decimal(8, 4)
+  attempt_id          String?   @db.Uuid
+  completed_at        DateTime? @db.Timestamptz(6)
+  updated_at          DateTime  @updatedAt @db.Timestamptz(6)
+
+  item TestSeriesItem @relation(fields: [test_series_item_id], references: [id], onDelete: Cascade)
+
+  @@unique([tenant_id, test_series_item_id, membership_id])
+  @@index([tenant_id, membership_id, updated_at])
+  @@map("test_series_item_progress")
+}
+
+/// Learnyst-style bundle: pack of courses, mock tests, and/or test series.
+model Bundle {
+  id                       String        @id @db.Uuid
+  tenant_id                String        @db.Uuid
+  slug                     String
+  title                    String
+  description              String?
+  status                   PublishStatus @default(DRAFT)
+  metadata_json            Json?
+  created_by_membership_id String?       @db.Uuid
+  created_at               DateTime      @default(now()) @db.Timestamptz(6)
+  updated_at               DateTime      @updatedAt @db.Timestamptz(6)
+  deleted_at               DateTime?     @db.Timestamptz(6)
+
+  items       BundleItem[]
+  enrollments BundleEnrollment[]
+
+  @@unique([tenant_id, slug])
+  @@index([tenant_id, status, updated_at])
+  @@map("bundles")
+}
+
+model BundleItem {
+  id         String   @id @db.Uuid
+  tenant_id  String   @db.Uuid
+  bundle_id  String   @db.Uuid
+  /// course | mock_test | test_series
+  item_kind  String
+  ref_id     String   @db.Uuid
+  position   Int
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+
+  bundle Bundle @relation(fields: [bundle_id], references: [id], onDelete: Cascade)
+
+  @@unique([tenant_id, bundle_id, position])
+  @@unique([tenant_id, bundle_id, item_kind, ref_id])
+  @@index([tenant_id, bundle_id])
+  @@map("bundle_items")
+}
+
+model BundleEnrollment {
+  id            String    @id @db.Uuid
+  tenant_id     String    @db.Uuid
+  bundle_id     String    @db.Uuid
+  membership_id String    @db.Uuid
+  status        String    @default("active")
+  enrolled_type String    @default("free")
+  enrolled_at   DateTime  @default(now()) @db.Timestamptz(6)
+  expires_at    DateTime? @db.Timestamptz(6)
+  completed_at  DateTime? @db.Timestamptz(6)
+
+  bundle Bundle @relation(fields: [bundle_id], references: [id], onDelete: Cascade)
+
+  @@unique([tenant_id, bundle_id, membership_id])
+  @@index([tenant_id, membership_id, status])
+  @@index([tenant_id, enrolled_at(sort: Desc)])
+  @@map("bundle_enrollments")
+}
+
+/// Learner-facing subscription product (not tenant SaaS TenantSubscription).
+model LearnerSubscriptionPlan {
+  id                       String        @id @db.Uuid
+  tenant_id                String        @db.Uuid
+  slug                     String
+  title                    String
+  description              String?
+  /// monthly | yearly | custom
+  billing_interval         String        @default("monthly")
+  status                   PublishStatus @default(DRAFT)
+  metadata_json            Json?
+  created_by_membership_id String?       @db.Uuid
+  created_at               DateTime      @default(now()) @db.Timestamptz(6)
+  updated_at               DateTime      @updatedAt @db.Timestamptz(6)
+  deleted_at               DateTime?     @db.Timestamptz(6)
+
+  items       LearnerSubscriptionPlanItem[]
+  enrollments LearnerSubscriptionEnrollment[]
+
+  @@unique([tenant_id, slug])
+  @@index([tenant_id, status, updated_at])
+  @@map("learner_subscription_plans")
+}
+
+model LearnerSubscriptionPlanItem {
+  id         String   @id @db.Uuid
+  tenant_id  String   @db.Uuid
+  plan_id    String   @db.Uuid
+  /// course | mock_test | test_series | bundle
+  item_kind  String
+  ref_id     String   @db.Uuid
+  position   Int
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+
+  plan LearnerSubscriptionPlan @relation(fields: [plan_id], references: [id], onDelete: Cascade)
+
+  @@unique([tenant_id, plan_id, position])
+  @@unique([tenant_id, plan_id, item_kind, ref_id])
+  @@index([tenant_id, plan_id])
+  @@map("learner_subscription_plan_items")
+}
+
+model LearnerSubscriptionEnrollment {
+  id                  String    @id @db.Uuid
+  tenant_id           String    @db.Uuid
+  plan_id             String    @db.Uuid
+  membership_id       String    @db.Uuid
+  status              String    @default("active")
+  enrolled_type       String    @default("free")
+  enrolled_at         DateTime  @default(now()) @db.Timestamptz(6)
+  current_period_start DateTime? @db.Timestamptz(6)
+  current_period_end   DateTime? @db.Timestamptz(6)
+  expires_at          DateTime? @db.Timestamptz(6)
+  cancelled_at        DateTime? @db.Timestamptz(6)
+  completed_at        DateTime? @db.Timestamptz(6)
+
+  plan LearnerSubscriptionPlan @relation(fields: [plan_id], references: [id], onDelete: Cascade)
+
+  @@unique([tenant_id, plan_id, membership_id])
+  @@index([tenant_id, membership_id, status])
+  @@index([tenant_id, enrolled_at(sort: Desc)])
+  @@map("learner_subscription_enrollments")
+}
+
+model LessonProgress {
+  id            String    @id @db.Uuid
+  tenant_id     String    @db.Uuid
+  lesson_id     String    @db.Uuid
+  membership_id String    @db.Uuid
+  status        String    @default("not_started")
+  progress_pct  Int       @default(0)
+  last_seen_at  DateTime? @db.Timestamptz(6)
+  completed_at  DateTime? @db.Timestamptz(6)
+  updated_at    DateTime  @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenant_id, lesson_id, membership_id])
+  @@index([tenant_id, membership_id, updated_at])
+  @@map("lesson_progress")
+}
+
+model CourseReview {
+  id            String   @id @db.Uuid
+  tenant_id     String   @db.Uuid
+  course_id     String   @db.Uuid
+  membership_id String   @db.Uuid
+  rating        Int      @db.SmallInt
+  comment       String?
+  status        String   @default("APPROVED")
+  admin_note    String?
+  created_at    DateTime @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenant_id, course_id, membership_id])
+  @@index([tenant_id, course_id])
+  @@index([tenant_id, membership_id])
+  @@index([tenant_id, status, created_at])
+  @@map("course_reviews")
+}
+
+model WorkflowDefinition {
+  id              String       @id @db.Uuid
+  tenant_id       String       @db.Uuid
+  key             String
+  name            String
+  definition_json Json
+  status          EntityStatus @default(ACTIVE)
+  created_at      DateTime     @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime     @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenant_id, key])
+  @@map("workflow_definitions")
+}
+
+model WorkflowTransition {
+  id                     String   @id @db.Uuid
+  tenant_id              String   @db.Uuid
+  workflow_definition_id String   @db.Uuid
+  target_type            String
+  target_id              String   @db.Uuid
+  from_state             String
+  to_state               String
+  actor_membership_id    String   @db.Uuid
+  reason                 String?
+  metadata_json          Json?
+  occurred_at            DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([tenant_id, target_type, target_id, occurred_at])
+  @@index([tenant_id, actor_membership_id, occurred_at])
+  @@map("workflow_transitions")
+}
+
+model LearningPath {
+  id                       String        @id @db.Uuid
+  tenant_id                String        @db.Uuid
+  slug                     String
+  title                    String
+  description              String?
+  path_type                String        @default("program")
+  metadata_json            Json?
+  status                   PublishStatus @default(DRAFT)
+  created_by_membership_id String?       @db.Uuid
+  created_at               DateTime      @default(now()) @db.Timestamptz(6)
+  updated_at               DateTime      @updatedAt @db.Timestamptz(6)
+  deleted_at               DateTime?     @db.Timestamptz(6)
+
+  @@index([tenant_id, slug])
+  @@index([tenant_id, status])
+  @@index([tenant_id, path_type, status])
+  @@map("learning_paths")
+}
+
+model PathStep {
+  id         String   @id @db.Uuid
+  tenant_id  String   @db.Uuid
+  path_id    String   @db.Uuid
+  step_type  String
+  ref_id     String?
+  title      String
+  position   Int
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  updated_at DateTime @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenant_id, path_id, position])
+  @@index([tenant_id, path_id])
+  @@map("path_steps")
+}
+
+model PathStepGate {
+  id           String   @id @db.Uuid
+  tenant_id    String   @db.Uuid
+  path_step_id String   @db.Uuid
+  gate_type    String
+  config_json  Json
+  created_at   DateTime @default(now()) @db.Timestamptz(6)
+  updated_at   DateTime @updatedAt @db.Timestamptz(6)
+
+  @@index([tenant_id, path_step_id])
+  @@map("path_step_gates")
+}
+
+model PathEnrollment {
+  id            String    @id @db.Uuid
+  tenant_id     String    @db.Uuid
+  path_id       String    @db.Uuid
+  membership_id String    @db.Uuid
+  status        String    @default("active")
+  enrolled_at   DateTime  @default(now()) @db.Timestamptz(6)
+  completed_at  DateTime? @db.Timestamptz(6)
+
+  @@unique([tenant_id, path_id, membership_id])
+  @@index([tenant_id, membership_id, status])
+  @@map("path_enrollments")
+}
+
+model PathStepProgress {
+  id            String    @id @db.Uuid
+  tenant_id     String    @db.Uuid
+  path_step_id  String    @db.Uuid
+  membership_id String    @db.Uuid
+  status        String    @default("locked")
+  completed_at  DateTime? @db.Timestamptz(6)
+  updated_at    DateTime  @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenant_id, path_step_id, membership_id])
+  @@index([tenant_id, membership_id, updated_at])
+  @@map("path_step_progress")
+}
+
+model ItemType {
+  id           String   @id @db.Uuid
+  key          String   @unique
+  name         String
+  schema_json  Json
+  grading_json Json?
+  renderer_key String
+  is_builtin   Boolean  @default(true)
+  created_at   DateTime @default(now()) @db.Timestamptz(6)
+  updated_at   DateTime @updatedAt @db.Timestamptz(6)
+
+  @@map("item_types")
+}
+
+model Item {
+  id                       String        @id @db.Uuid
+  tenant_id                String        @db.Uuid
+  item_type_key            String
+  stem_json                Json
+  explanation_json         Json?
+  difficulty               Int?
+  status                   PublishStatus @default(DRAFT)
+  tags                     String[]
+  created_by_membership_id String?       @db.Uuid
+  created_at               DateTime      @default(now()) @db.Timestamptz(6)
+  updated_at               DateTime      @updatedAt @db.Timestamptz(6)
+  deleted_at               DateTime?     @db.Timestamptz(6)
+
+  @@index([tenant_id, item_type_key, status])
+  @@index([tags], type: Gin)
+  @@map("items")
+}
+
+model ItemOption {
+  id          String   @id @db.Uuid
+  tenant_id   String   @db.Uuid
+  item_id     String   @db.Uuid
+  option_json Json
+  is_correct  Boolean?
+  position    Int
+  created_at  DateTime @default(now()) @db.Timestamptz(6)
+  updated_at  DateTime @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenant_id, item_id, position])
+  @@index([tenant_id, item_id])
+  @@map("item_options")
+}
+
+model ItemDimensionWeight {
+  id           String   @id @db.Uuid
+  tenant_id    String   @db.Uuid
+  item_id      String   @db.Uuid
+  dimension_id String   @db.Uuid
+  weight       Decimal  @db.Decimal(8, 4)
+  created_at   DateTime @default(now()) @db.Timestamptz(6)
+
+  @@unique([tenant_id, item_id, dimension_id])
+  @@index([tenant_id, dimension_id])
+  @@map("item_dimension_weights")
+}
+
+model ItemCollection {
+  id              String        @id @db.Uuid
+  tenant_id       String        @db.Uuid
+  slug            String
+  title           String
+  collection_type String
+  status          PublishStatus @default(DRAFT)
+  metadata_json   Json?
+  /// Null for tenant/studio-authored collections; set for learner-owned decks.
+  created_by_membership_id String? @db.Uuid
+  created_at      DateTime      @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime      @updatedAt @db.Timestamptz(6)
+  deleted_at      DateTime?     @db.Timestamptz(6)
+
+  @@index([tenant_id, slug])
+  @@index([tenant_id, collection_type, status])
+  @@index([tenant_id, created_by_membership_id])
+  @@map("item_collections")
+}
+
+model ItemCollectionItem {
+  id            String   @id @db.Uuid
+  tenant_id     String   @db.Uuid
+  collection_id String   @db.Uuid
+  item_id       String   @db.Uuid
+  position      Int
+  weight        Decimal? @db.Decimal(8, 4)
+  created_at    DateTime @default(now()) @db.Timestamptz(6)
+
+  @@unique([tenant_id, collection_id, item_id])
+  @@unique([tenant_id, collection_id, position])
+  @@map("item_collection_items")
+}
+
+model Assessment {
+  id              String        @id @db.Uuid
+  tenant_id       String        @db.Uuid
+  slug            String
+  title           String
+  assessment_type String
+  status          PublishStatus @default(DRAFT)
+  config_json     Json
+  created_at      DateTime      @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime      @updatedAt @db.Timestamptz(6)
+  deleted_at      DateTime?     @db.Timestamptz(6)
+
+  @@unique([tenant_id, slug])
+  @@index([tenant_id, assessment_type, status])
+  @@map("assessments")
+}
+
+model AssessmentItem {
+  id            String   @id @db.Uuid
+  tenant_id     String   @db.Uuid
+  assessment_id String   @db.Uuid
+  item_id       String   @db.Uuid
+  position      Int
+  points        Decimal  @db.Decimal(10, 2)
+  config_json   Json?
+  created_at    DateTime @default(now()) @db.Timestamptz(6)
+
+  @@unique([tenant_id, assessment_id, item_id])
+  @@unique([tenant_id, assessment_id, position])
+  @@map("assessment_items")
+}
+
+model Attempt {
+  id              String        @id @db.Uuid
+  tenant_id       String        @db.Uuid
+  assessment_id   String        @db.Uuid
+  membership_id   String        @db.Uuid
+  status          AttemptStatus @default(STARTED)
+  started_at      DateTime      @default(now()) @db.Timestamptz(6)
+  submitted_at    DateTime?     @db.Timestamptz(6)
+  graded_at       DateTime?     @db.Timestamptz(6)
+  score_pct       Decimal?      @db.Decimal(8, 4)
+  metadata_json   Json?
+  idempotency_key String?
+
+  @@unique([tenant_id, idempotency_key])
+  @@index([tenant_id, assessment_id, membership_id, started_at])
+  @@index([tenant_id, membership_id, status])
+  @@map("attempts")
+}
+
+model AttemptAnswer {
+  id                 String   @id @db.Uuid
+  tenant_id          String   @db.Uuid
+  attempt_id         String   @db.Uuid
+  assessment_item_id String   @db.Uuid
+  answer_json        Json
+  is_correct         Boolean?
+  points_awarded     Decimal? @db.Decimal(10, 2)
+  occurred_at        DateTime @default(now()) @db.Timestamptz(6)
+  idempotency_key    String
+
+  @@unique([tenant_id, idempotency_key])
+  @@unique([tenant_id, attempt_id, assessment_item_id])
+  @@index([tenant_id, attempt_id])
+  @@map("attempt_answers")
+}
+
+model GradingTask {
+  id                        String   @id @db.Uuid
+  tenant_id                 String   @db.Uuid
+  attempt_id                String   @db.Uuid
+  assigned_to_membership_id String?  @db.Uuid
+  status                    String   @default("open")
+  rubric_json               Json?
+  result_json               Json?
+  created_at                DateTime @default(now()) @db.Timestamptz(6)
+  updated_at                DateTime @updatedAt @db.Timestamptz(6)
+
+  @@index([tenant_id, status, created_at])
+  @@index([tenant_id, assigned_to_membership_id, status])
+  @@map("grading_tasks")
+}
+
+model PracticeSession {
+  id              String    @id @db.Uuid
+  tenant_id       String    @db.Uuid
+  membership_id   String    @db.Uuid
+  collection_id   String?   @db.Uuid
+  session_type    String
+  status          String    @default("started")
+  started_at      DateTime  @default(now()) @db.Timestamptz(6)
+  completed_at    DateTime? @db.Timestamptz(6)
+  summary_json    Json?
+  idempotency_key String?
+
+  @@unique([tenant_id, idempotency_key])
+  @@index([tenant_id, membership_id, started_at])
+  @@map("practice_sessions")
+}
+
+model PracticeResponse {
+  id                  String   @id @db.Uuid
+  tenant_id           String   @db.Uuid
+  practice_session_id String   @db.Uuid
+  membership_id       String   @db.Uuid
+  item_id             String   @db.Uuid
+  response_json       Json
+  is_correct          Boolean?
+  latency_ms          Int?
+  occurred_at         DateTime @default(now()) @db.Timestamptz(6)
+  idempotency_key     String
+
+  @@unique([tenant_id, idempotency_key])
+  @@index([tenant_id, membership_id, occurred_at])
+  @@index([tenant_id, item_id, occurred_at])
+  @@map("practice_responses")
+}
+
+model SrsState {
+  id            String   @id @db.Uuid
+  tenant_id     String   @db.Uuid
+  membership_id String   @db.Uuid
+  item_id       String   @db.Uuid
+  ease_factor   Decimal  @db.Decimal(8, 4)
+  interval_days Int
+  due_at        DateTime @db.Timestamptz(6)
+  updated_at    DateTime @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenant_id, membership_id, item_id])
+  @@index([tenant_id, membership_id, due_at])
+  @@map("srs_state")
+}
+
+model CompetencyDimension {
+  id          String   @id @db.Uuid
+  tenant_id   String   @db.Uuid
+  key         String
+  name        String
+  description String?
+  created_at  DateTime @default(now()) @db.Timestamptz(6)
+  updated_at  DateTime @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenant_id, key])
+  @@map("competency_dimensions")
+}
+
+model ScoringProfile {
+  id                       String       @id @db.Uuid
+  tenant_id                String       @db.Uuid
+  key                      String
+  name                     String
+  status                   EntityStatus @default(ACTIVE)
+  active_config_version_id String?      @db.Uuid
+  created_at               DateTime     @default(now()) @db.Timestamptz(6)
+  updated_at               DateTime     @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenant_id, key])
+  @@map("scoring_profiles")
+}
+
+model ScoringConfigVersion {
+  id                       String    @id @db.Uuid
+  tenant_id                String    @db.Uuid
+  scoring_profile_id       String    @db.Uuid
+  version                  Int
+  config_json              Json
+  activated_at             DateTime? @db.Timestamptz(6)
+  created_by_membership_id String?   @db.Uuid
+  created_at               DateTime  @default(now()) @db.Timestamptz(6)
+
+  @@unique([tenant_id, scoring_profile_id, version])
+  @@index([tenant_id, scoring_profile_id, activated_at])
+  @@map("scoring_config_versions")
+}
+
+model CompetencyBand {
+  id                 String   @id @db.Uuid
+  tenant_id          String   @db.Uuid
+  scoring_profile_id String   @db.Uuid
+  key                String
+  label              String
+  min_score          Decimal  @db.Decimal(8, 4)
+  max_score          Decimal  @db.Decimal(8, 4)
+  sort_order         Int
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenant_id, scoring_profile_id, key])
+  @@map("competency_bands")
+}
+
+model SignalSource {
+  id             String   @id @db.Uuid
+  tenant_id      String   @db.Uuid
+  key            String
+  source_context String
+  config_json    Json?
+  created_at     DateTime @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenant_id, key])
+  @@map("signal_sources")
+}
+
+model CompetencySignal {
+  id                String   @id @db.Uuid
+  tenant_id         String   @db.Uuid
+  membership_id     String   @db.Uuid
+  dimension_id      String   @db.Uuid
+  signal_source_key String
+  source_event_id   String?  @db.Uuid
+  raw_score         Decimal  @db.Decimal(10, 4)
+  weight            Decimal  @db.Decimal(10, 4)
+  metadata_json     Json?
+  occurred_at       DateTime @default(now()) @db.Timestamptz(6)
+  idempotency_key   String
+
+  @@unique([tenant_id, idempotency_key])
+  @@index([tenant_id, membership_id, dimension_id, occurred_at])
+  @@index([tenant_id, signal_source_key, occurred_at])
+  @@map("competency_signals")
+}
+
+model CompetencyScore {
+  id                 String   @id @db.Uuid
+  tenant_id          String   @db.Uuid
+  membership_id      String   @db.Uuid
+  dimension_id       String   @db.Uuid
+  scoring_profile_id String   @db.Uuid
+  score              Decimal  @db.Decimal(10, 4)
+  band_key           String?
+  calculated_at      DateTime @default(now()) @db.Timestamptz(6)
+  config_version_id  String   @db.Uuid
+
+  @@unique([tenant_id, membership_id, dimension_id, scoring_profile_id])
+  @@index([tenant_id, dimension_id, band_key])
+  @@map("competency_scores")
+}
+
+model CompositeReadinessState {
+  id                 String   @id @db.Uuid
+  tenant_id          String   @db.Uuid
+  membership_id      String   @db.Uuid
+  scoring_profile_id String   @db.Uuid
+  composite_key      String
+  score              Decimal  @db.Decimal(10, 4)
+  band_key           String
+  hard_gates_json    Json?
+  calculated_at      DateTime @default(now()) @db.Timestamptz(6)
+  config_version_id  String   @db.Uuid
+
+  @@unique([tenant_id, membership_id, scoring_profile_id, composite_key])
+  @@index([tenant_id, composite_key, band_key])
+  @@map("composite_readiness_state")
+}
+
+model CompetencyScoreSnapshot {
+  id                 String   @id @db.Uuid
+  tenant_id          String   @db.Uuid
+  membership_id      String   @db.Uuid
+  scoring_profile_id String   @db.Uuid
+  snapshot_json      Json
+  occurred_at        DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([tenant_id, membership_id, occurred_at])
+  @@map("competency_score_snapshots")
+}
+
+model DiagnosticSession {
+  id              String    @id @db.Uuid
+  tenant_id       String    @db.Uuid
+  anonymous_id    String?
+  membership_id   String?   @db.Uuid
+  assessment_id   String?   @db.Uuid
+  attempt_id      String?   @db.Uuid
+  status          String    @default("started")
+  ip_hash         String?
+  user_agent_hash String?
+  started_at      DateTime  @default(now()) @db.Timestamptz(6)
+  completed_at    DateTime? @db.Timestamptz(6)
+  merge_json      Json?
+  metadata_json   Json?
+
+  @@index([tenant_id, anonymous_id, started_at])
+  @@index([tenant_id, membership_id, started_at])
+  @@map("diagnostic_sessions")
+}
+
+model ReadinessPolicy {
+  id                 String       @id @db.Uuid
+  tenant_id          String       @db.Uuid
+  key                String
+  scoring_profile_id String       @db.Uuid
+  cta_policy_json    Json
+  legal_copy_json    Json?
+  status             EntityStatus @default(ACTIVE)
+  created_at         DateTime     @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime     @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenant_id, key])
+  @@map("readiness_policies")
+}
+
+model AttributionToken {
+  id                 String    @id @db.Uuid
+  tenant_id          String    @db.Uuid
+  membership_id      String?   @db.Uuid
+  anonymous_id       String?
+  token_hash         String    @unique
+  destination_url    String
+  source_surface     String
+  readiness_band_key String?
+  metadata_json      Json?
+  created_at         DateTime  @default(now()) @db.Timestamptz(6)
+  expires_at         DateTime  @db.Timestamptz(6)
+  consumed_at        DateTime? @db.Timestamptz(6)
+
+  @@index([tenant_id, membership_id, created_at])
+  @@index([tenant_id, anonymous_id, created_at])
+  @@map("attribution_tokens")
+}
+
+model CertificateTemplate {
+  id            String        @id @db.Uuid
+  tenant_id     String        @db.Uuid
+  key           String
+  name          String
+  template_json Json
+  status        PublishStatus @default(DRAFT)
+  created_at    DateTime      @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime      @updatedAt @db.Timestamptz(6)
+  deleted_at    DateTime?     @db.Timestamptz(6)
+
+  @@index([tenant_id, key])
+  @@map("certificate_templates")
+}
+
+model Certificate {
+  id                   String    @id @db.Uuid
+  tenant_id            String    @db.Uuid
+  template_id          String    @db.Uuid
+  membership_id        String    @db.Uuid
+  credential_id        String    @unique
+  status               String    @default("issued")
+  issued_at            DateTime  @default(now()) @db.Timestamptz(6)
+  revoked_at           DateTime? @db.Timestamptz(6)
+  r2_object_key        String?
+  metadata_json        Json?
+  expires_at           DateTime? @db.Timestamptz(6)
+  suspended_at         DateTime? @db.Timestamptz(6)
+  serial_number        String?
+  design_snapshot_json Json?
+  design_snapshot_hash String?
+  recipient_name       String?
+  course_title         String?
+  status_list_index    Int?
+  vc_json              Json?
+  vc_object_key        String?
+  blockchain_anchor    String?
+  created_at           DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime  @updatedAt @db.Timestamptz(6)
+
+  @@index([tenant_id, membership_id, issued_at])
+  @@index([tenant_id, template_id, status])
+  @@index([tenant_id, serial_number])
+  @@index([tenant_id, status, expires_at])
+  @@map("certificates")
+}
+
+model CertificateBrandKit {
+  id          String    @id @db.Uuid
+  tenant_id   String    @db.Uuid
+  name        String
+  logo_url    String?
+  colors_json Json?
+  fonts_json  Json?
+  assets_json Json?
+  created_at  DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at  DateTime  @updatedAt @db.Timestamptz(6)
+  deleted_at  DateTime? @db.Timestamptz(6)
+
+  @@index([tenant_id, name])
+  @@map("certificate_brand_kits")
+}
+
+model CertificateStatusList {
+  id           String   @id @db.Uuid
+  tenant_id    String   @db.Uuid
+  purpose      String
+  encoded_list String
+  bit_length   Int
+  version      Int      @default(1)
+  created_at   DateTime @default(now()) @db.Timestamptz(6)
+  updated_at   DateTime @updatedAt @db.Timestamptz(6)
+
+  @@index([tenant_id, purpose])
+  @@map("certificate_status_lists")
+}
+
+model CertificateRenderJob {
+  id             String    @id @db.Uuid
+  tenant_id      String    @db.Uuid
+  certificate_id String?   @db.Uuid
+  template_id    String?   @db.Uuid
+  status         JobStatus @default(QUEUED)
+  error_message  String?
+  r2_object_key  String?
+  format         String
+  created_at     DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime  @updatedAt @db.Timestamptz(6)
+  completed_at   DateTime? @db.Timestamptz(6)
+
+  @@index([tenant_id, status, created_at])
+  @@index([tenant_id, certificate_id])
+  @@map("certificate_render_jobs")
+}
+
+model CertificateWalletPass {
+  id              String   @id @db.Uuid
+  tenant_id       String   @db.Uuid
+  certificate_id  String   @db.Uuid
+  platform        String
+  pass_object_key String?
+  external_id     String?
+  status          String   @default("active")
+  created_at      DateTime @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime @updatedAt @db.Timestamptz(6)
+  revoked_at      DateTime? @db.Timestamptz(6)
+
+  @@index([tenant_id, certificate_id])
+  @@unique([tenant_id, certificate_id, platform])
+  @@map("certificate_wallet_passes")
+}
+
+model CredentialVerification {
+  id              String   @id @db.Uuid
+  tenant_id       String   @db.Uuid
+  certificate_id  String   @db.Uuid
+  ip_hash         String?
+  user_agent_hash String?
+  occurred_at     DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([tenant_id, certificate_id, occurred_at])
+  @@map("credential_verifications")
+}
+
+model GamificationProfile {
+  id            String   @id @db.Uuid
+  tenant_id     String   @db.Uuid
+  membership_id String   @db.Uuid
+  xp_total      Int      @default(0)
+  level_key     String?
+  created_at    DateTime @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenant_id, membership_id])
+  @@index([tenant_id, xp_total])
+  @@map("gamification_profiles")
+}
+
+model PointLedger {
+  id              String   @id @db.Uuid
+  tenant_id       String   @db.Uuid
+  membership_id   String   @db.Uuid
+  points          Int
+  reason_key      String
+  source_event_id String?  @db.Uuid
+  idempotency_key String
+  metadata_json   Json?
+  occurred_at     DateTime @default(now()) @db.Timestamptz(6)
+
+  @@unique([tenant_id, idempotency_key])
+  @@index([tenant_id, membership_id, occurred_at])
+  @@map("point_ledger")
+}
+
+model Badge {
+  id            String       @id @db.Uuid
+  tenant_id     String       @db.Uuid
+  key           String
+  name          String
+  icon_key      String?
+  criteria_json Json
+  status        EntityStatus @default(ACTIVE)
+  created_at    DateTime     @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime     @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenant_id, key])
+  @@map("badges")
+}
+
+model BadgeAward {
+  id              String   @id @db.Uuid
+  tenant_id       String   @db.Uuid
+  badge_id        String   @db.Uuid
+  membership_id   String   @db.Uuid
+  awarded_at      DateTime @default(now()) @db.Timestamptz(6)
+  source_event_id String?  @db.Uuid
+
+  @@unique([tenant_id, badge_id, membership_id])
+  @@index([tenant_id, membership_id, awarded_at])
+  @@map("badge_awards")
+}
+
+model StreakState {
+  id                 String    @id @db.Uuid
+  tenant_id          String    @db.Uuid
+  membership_id      String    @db.Uuid
+  streak_key         String
+  current_count      Int       @default(0)
+  longest_count      Int       @default(0)
+  last_activity_date DateTime? @db.Date
+  updated_at         DateTime  @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenant_id, membership_id, streak_key])
+  @@map("streak_states")
+}
+
+model StreakFreeze {
+  id            String    @id @db.Uuid
+  tenant_id     String    @db.Uuid
+  membership_id String    @db.Uuid
+  streak_key    String
+  status        String    @default("available")
+  used_for_date DateTime? @db.Date
+  created_at    DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime  @updatedAt @db.Timestamptz(6)
+
+  @@index([tenant_id, membership_id, streak_key, status])
+  @@map("streak_freezes")
+}
+
+model GroupStreakState {
+  id                   String   @id @db.Uuid
+  tenant_id            String   @db.Uuid
+  space_id             String   @db.Uuid
+  streak_key           String
+  current_count        Int      @default(0)
+  longest_count        Int      @default(0)
+  last_activity_period String?
+  updated_at           DateTime @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenant_id, space_id, streak_key])
+  @@index([tenant_id, space_id])
+  @@map("group_streak_states")
+}
+
+model LeaderboardDefinition {
+  id          String       @id @db.Uuid
+  tenant_id   String       @db.Uuid
+  key         String
+  name        String
+  metric_key  String
+  window_key  String
+  config_json Json?
+  status      EntityStatus @default(ACTIVE)
+  created_at  DateTime     @default(now()) @db.Timestamptz(6)
+  updated_at  DateTime     @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenant_id, key])
+  @@map("leaderboard_definitions")
+}
+
+model LeaderboardSnapshot {
+  id             String   @id @db.Uuid
+  tenant_id      String   @db.Uuid
+  leaderboard_id String   @db.Uuid
+  period_key     String
+  snapshot_json  Json
+  calculated_at  DateTime @default(now()) @db.Timestamptz(6)
+
+  @@unique([tenant_id, leaderboard_id, period_key])
+  @@index([tenant_id, leaderboard_id, calculated_at])
+  @@map("leaderboard_snapshots")
+}
+
+model QuestDefinition {
+  id            String       @id @db.Uuid
+  tenant_id     String       @db.Uuid
+  key           String
+  name          String
+  description   String?
+  status        EntityStatus @default(ACTIVE)
+  quest_type    String       @default("single_step")
+  criteria_json Json
+  rewards_json  Json
+  starts_at     DateTime?    @db.Timestamptz(6)
+  ends_at       DateTime?    @db.Timestamptz(6)
+  course_id     String?      @db.Uuid
+  created_at    DateTime     @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime     @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenant_id, key])
+  @@index([tenant_id, status])
+  @@map("quest_definitions")
+}
+
+model QuestProgress {
+  id            String    @id @db.Uuid
+  tenant_id     String    @db.Uuid
+  quest_id      String    @db.Uuid
+  membership_id String    @db.Uuid
+  status        String    @default("in_progress")
+  progress_json Json
+  completed_at  DateTime? @db.Timestamptz(6)
+  created_at    DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime  @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenant_id, quest_id, membership_id])
+  @@index([tenant_id, membership_id, status])
+  @@map("quest_progress")
+}
+
+model GamificationCurrency {
+  id              String   @id @db.Uuid
+  tenant_id       String   @db.Uuid
+  key             String
+  name            String
+  symbol          String?
+  earn_rules_json Json?
+  created_at      DateTime @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenant_id, key])
+  @@map("gamification_currencies")
+}
+
+model MemberBalance {
+  id            String   @id @db.Uuid
+  tenant_id     String   @db.Uuid
+  membership_id String   @db.Uuid
+  currency_key  String
+  balance       Int      @default(0)
+  updated_at    DateTime @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenant_id, membership_id, currency_key])
+  @@map("member_balances")
+}
+
+model RewardItem {
+  id                  String       @id @db.Uuid
+  tenant_id           String       @db.Uuid
+  key                 String
+  name                String
+  description         String?
+  cost_currency_key   String
+  cost_amount         Int
+  reward_type         String
+  reward_payload_json Json
+  stock               Int?
+  status              EntityStatus @default(ACTIVE)
+  created_at          DateTime     @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime     @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenant_id, key])
+  @@index([tenant_id, status])
+  @@map("reward_items")
+}
+
+model RewardRedemption {
+  id             String   @id @db.Uuid
+  tenant_id      String   @db.Uuid
+  membership_id  String   @db.Uuid
+  reward_item_id String   @db.Uuid
+  cost_amount    Int
+  status         String
+  redeemed_at    DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([tenant_id, membership_id, redeemed_at])
+  @@index([tenant_id, redeemed_at])
+  @@map("reward_redemptions")
+}
+
+model SeasonalEvent {
+  id                     String   @id @db.Uuid
+  tenant_id              String   @db.Uuid
+  key                    String
+  name                   String
+  status                 String   @default("draft")
+  starts_at              DateTime @db.Timestamptz(6)
+  ends_at                DateTime @db.Timestamptz(6)
+  multiplier_json        Json
+  linked_quest_ids       Json?
+  linked_leaderboard_key String?
+  theme_json             Json?
+  created_at             DateTime @default(now()) @db.Timestamptz(6)
+  updated_at             DateTime @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenant_id, key])
+  @@index([tenant_id, status, starts_at])
+  @@map("seasonal_events")
+}
+
+model NotificationTemplate {
+  id             String       @id @db.Uuid
+  tenant_id      String       @db.Uuid
+  key            String
+  channel        String
+  locale         String       @default("en")
+  subject        String?
+  body           String
+  variables_json Json?
+  status         EntityStatus @default(ACTIVE)
+  created_at     DateTime     @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime     @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenant_id, key, channel, locale])
+  @@map("notification_templates")
+}
+
+model NotificationDispatch {
+  id              String         @id @db.Uuid
+  tenant_id       String         @db.Uuid
+  membership_id   String?        @db.Uuid
+  channel         String
+  template_key    String?
+  destination     String?
+  idempotency_key String
+  status          DispatchStatus @default(QUEUED)
+  payload_json    Json
+  error_json      Json?
+  created_at      DateTime       @default(now()) @db.Timestamptz(6)
+  sent_at         DateTime?      @db.Timestamptz(6)
+
+  @@unique([tenant_id, idempotency_key])
+  @@index([tenant_id, membership_id, created_at])
+  @@index([tenant_id, status, created_at], map: "notification_dispatches_tenant_status_created_at_idx")
+  @@map("notification_dispatches")
+}
+
+model CommunitySpace {
+  id          String     @id @db.Uuid
+  tenant_id   String     @db.Uuid
+  slug        String
+  name        String
+  visibility  Visibility @default(TENANT)
+  config_json Json?
+  created_at  DateTime   @default(now()) @db.Timestamptz(6)
+  updated_at  DateTime   @updatedAt @db.Timestamptz(6)
+  deleted_at  DateTime?  @db.Timestamptz(6)
+
+  @@index([tenant_id, slug])
+  @@index([tenant_id, visibility])
+  @@map("community_spaces")
+}
+
+model GroupMembership {
+  id            String   @id @db.Uuid
+  tenant_id     String   @db.Uuid
+  space_id      String   @db.Uuid
+  membership_id String   @db.Uuid
+  role_key      String   @default("member")
+  joined_at     DateTime @default(now()) @db.Timestamptz(6)
+
+  @@unique([tenant_id, space_id, membership_id])
+  @@index([tenant_id, membership_id])
+  @@map("group_memberships")
+}
+
+model Post {
+  id                   String    @id @db.Uuid
+  tenant_id            String    @db.Uuid
+  space_id             String    @db.Uuid
+  author_membership_id String    @db.Uuid
+  title                String?
+  body_json            Json
+  status               String    @default("published")
+  created_at           DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime  @updatedAt @db.Timestamptz(6)
+  deleted_at           DateTime? @db.Timestamptz(6)
+
+  @@index([tenant_id, space_id, created_at])
+  @@index([tenant_id, author_membership_id, created_at])
+  @@map("posts")
+}
+
+model Comment {
+  id                   String    @id @db.Uuid
+  tenant_id            String    @db.Uuid
+  post_id              String    @db.Uuid
+  parent_comment_id    String?   @db.Uuid
+  author_membership_id String    @db.Uuid
+  body_json            Json
+  status               String    @default("published")
+  created_at           DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime  @updatedAt @db.Timestamptz(6)
+  deleted_at           DateTime? @db.Timestamptz(6)
+
+  @@index([tenant_id, post_id, created_at])
+  @@map("comments")
+}
+
+model Reaction {
+  id            String   @id @db.Uuid
+  tenant_id     String   @db.Uuid
+  membership_id String   @db.Uuid
+  target_type   String
+  target_id     String   @db.Uuid
+  reaction_key  String
+  created_at    DateTime @default(now()) @db.Timestamptz(6)
+
+  @@unique([tenant_id, membership_id, target_type, target_id, reaction_key])
+  @@index([tenant_id, target_type, target_id])
+  @@map("reactions")
+}
+
+model Mention {
+  id                      String   @id @db.Uuid
+  tenant_id               String   @db.Uuid
+  mentioned_membership_id String   @db.Uuid
+  source_type             String
+  source_id               String   @db.Uuid
+  created_at              DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([tenant_id, mentioned_membership_id, created_at])
+  @@map("mentions")
+}
+
+model ModerationCase {
+  id                      String           @id @db.Uuid
+  tenant_id               String           @db.Uuid
+  target_type             String
+  target_id               String           @db.Uuid
+  status                  ModerationStatus @default(OPEN)
+  reason_key              String?
+  opened_by_membership_id String?          @db.Uuid
+  created_at              DateTime         @default(now()) @db.Timestamptz(6)
+  updated_at              DateTime         @updatedAt @db.Timestamptz(6)
+
+  @@index([tenant_id, status, created_at])
+  @@map("moderation_cases")
+}
+
+model ModerationDecision {
+  id                       String   @id @db.Uuid
+  tenant_id                String   @db.Uuid
+  moderation_case_id       String   @db.Uuid
+  decided_by_membership_id String?  @db.Uuid
+  decision_key             String
+  decision_json            Json?
+  occurred_at              DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([tenant_id, moderation_case_id, occurred_at])
+  @@map("moderation_decisions")
+}
+
+model Appeal {
+  id                         String   @id @db.Uuid
+  tenant_id                  String   @db.Uuid
+  moderation_case_id         String   @db.Uuid
+  submitted_by_membership_id String   @db.Uuid
+  status                     String   @default("open")
+  body                       String
+  created_at                 DateTime @default(now()) @db.Timestamptz(6)
+  updated_at                 DateTime @updatedAt @db.Timestamptz(6)
+
+  @@index([tenant_id, status, created_at])
+  @@map("appeals")
+}
+
+model SearchIndexEntry {
+  id             String     @id @db.Uuid
+  tenant_id      String     @db.Uuid
+  source_context String
+  source_type    String
+  source_id      String     @db.Uuid
+  title          String
+  body           String?
+  visibility     Visibility @default(TENANT)
+  access_json    Json?
+  vector_ref     String?
+  updated_at     DateTime   @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenant_id, source_context, source_type, source_id])
+  @@index([tenant_id, source_type])
+  @@map("search_index_entries")
+}
+
+model AnalyticsRollup {
+  id            String   @id @db.Uuid
+  tenant_id     String   @db.Uuid
+  rollup_key    String
+  subject_type  String
+  subject_id    String?
+  period_start  DateTime @db.Timestamptz(6)
+  period_end    DateTime @db.Timestamptz(6)
+  metrics_json  Json
+  calculated_at DateTime @default(now()) @db.Timestamptz(6)
+
+  @@unique([tenant_id, rollup_key, subject_type, subject_id, period_start])
+  @@index([tenant_id, rollup_key, period_start])
+  @@map("analytics_rollups")
+}
+
+model FunnelDailyRollup {
+  id            String   @id @db.Uuid
+  tenant_id     String   @db.Uuid
+  funnel_key    String
+  stage_key     String
+  day           DateTime @db.Date
+  count         Int      @default(0)
+  metrics_json  Json?
+  calculated_at DateTime @default(now()) @db.Timestamptz(6)
+
+  @@unique([tenant_id, funnel_key, stage_key, day])
+  @@index([tenant_id, funnel_key, day])
+  @@map("funnel_daily_rollups")
+}
+
+model ItemStatistic {
+  id             String   @id @db.Uuid
+  tenant_id      String   @db.Uuid
+  item_id        String   @db.Uuid
+  window_key     String
+  attempts_count Int      @default(0)
+  correct_count  Int      @default(0)
+  avg_latency_ms Int?
+  metrics_json   Json?
+  calculated_at  DateTime @default(now()) @db.Timestamptz(6)
+
+  @@unique([tenant_id, item_id, window_key])
+  @@index([tenant_id, calculated_at])
+  @@map("item_statistics")
+}
+
+model MaterializedViewRegistry {
+  id                  String    @id @db.Uuid
+  view_name           String    @unique
+  owner_context       String
+  refresh_policy_json Json
+  last_refresh_at     DateTime? @db.Timestamptz(6)
+  created_at          DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime  @updatedAt @db.Timestamptz(6)
+
+  @@map("materialized_view_registry")
+}
+
+model AutomationRule {
+  id                 String       @id @db.Uuid
+  tenant_id          String       @db.Uuid
+  key                String
+  trigger_event_type String
+  condition_json     Json?
+  action_json        Json
+  status             EntityStatus @default(ACTIVE)
+  created_at         DateTime     @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime     @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenant_id, key])
+  @@index([tenant_id, trigger_event_type, status])
+  @@map("automation_rules")
+}
+
+model AutomationRun {
+  id                 String    @id @db.Uuid
+  tenant_id          String    @db.Uuid
+  automation_rule_id String    @db.Uuid
+  source_event_id    String    @db.Uuid
+  status             JobStatus @default(QUEUED)
+  result_json        Json?
+  occurred_at        DateTime  @default(now()) @db.Timestamptz(6)
+
+  @@unique([tenant_id, automation_rule_id, source_event_id])
+  @@index([tenant_id, status, occurred_at])
+  @@map("automation_runs")
+}
+
+model LocaleResource {
+  id            String    @id @db.Uuid
+  tenant_id     String    @db.Uuid
+  locale        String
+  key           String
+  value         String
+  review_status String    @default("pending")
+  reviewed_at   DateTime? @db.Timestamptz(6)
+  reviewed_by   String?   @db.Uuid
+  updated_at    DateTime  @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenant_id, locale, key])
+  @@index([tenant_id, review_status])
+  @@map("locale_resources")
+}
+
+model LocaleMetadata {
+  id          String   @id @db.Uuid
+  tenant_id   String   @db.Uuid
+  locale      String
+  native_name String?
+  is_rtl      Boolean  @default(false)
+  is_default  Boolean  @default(false)
+  is_fallback Boolean  @default(false)
+  created_at  DateTime @default(now()) @db.Timestamptz(6)
+  updated_at  DateTime @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenant_id, locale])
+  @@index([tenant_id, is_default])
+  @@map("locale_metadata")
+}
+
+model LocaleCanonicalKey {
+  id            String   @id @db.Uuid
+  tenant_id     String   @db.Uuid
+  key           String
+  source_locale String
+  description   String?
+  created_at    DateTime @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenant_id, key])
+  @@index([tenant_id, source_locale])
+  @@map("locale_canonical_keys")
+}
+
+model LocaleQaCheckRun {
+  id           String   @id @db.Uuid
+  tenant_id    String   @db.Uuid
+  issue_count  Int      @default(0)
+  started_at   DateTime @default(now()) @db.Timestamptz(6)
+  completed_at DateTime @default(now()) @db.Timestamptz(6)
+  started_by   String   @db.Uuid
+
+  issues LocaleQaIssue[]
+
+  @@index([tenant_id, completed_at])
+  @@map("locale_qa_check_runs")
+}
+
+model LocaleQaIssue {
+  id         String   @id @db.Uuid
+  tenant_id  String   @db.Uuid
+  run_id     String   @db.Uuid
+  locale     String
+  key        String
+  severity   String
+  issue_type String
+  message    String
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+
+  run LocaleQaCheckRun @relation(fields: [run_id], references: [id], onDelete: Cascade)
+
+  @@index([tenant_id, run_id])
+  @@index([tenant_id, locale, key])
+  @@map("locale_qa_issues")
+}
+
+model ExtensionPoint {
+  id          String       @id @db.Uuid
+  key         String       @unique
+  point_type  String
+  schema_json Json
+  status      EntityStatus @default(ACTIVE)
+  created_at  DateTime     @default(now()) @db.Timestamptz(6)
+  updated_at  DateTime     @updatedAt @db.Timestamptz(6)
+
+  @@map("extension_points")
+}
+
+model ExtensionRegistration {
+  id                  String       @id @db.Uuid
+  tenant_id           String       @db.Uuid
+  extension_point_key String
+  registration_key    String
+  config_json         Json
+  status              EntityStatus @default(ACTIVE)
+  created_at          DateTime     @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime     @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenant_id, extension_point_key, registration_key])
+  @@map("extension_registrations")
+}
+
+model ExportJob {
+  id                         String    @id @db.Uuid
+  tenant_id                  String    @db.Uuid
+  requested_by_membership_id String    @db.Uuid
+  status                     JobStatus @default(QUEUED)
+  scope_json                 Json
+  r2_object_key              String?
+  error_json                 Json?
+  expires_at                 DateTime? @db.Timestamptz(6)
+  created_at                 DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at                 DateTime  @updatedAt @db.Timestamptz(6)
+
+  @@index([tenant_id, status, created_at], map: "export_jobs_tenant_status_created_at_idx")
+  @@map("export_jobs")
+}
+
+model DeletionRequest {
+  id                         String    @id @db.Uuid
+  tenant_id                  String    @db.Uuid
+  requested_by_membership_id String?   @db.Uuid
+  target_type                String
+  target_id                  String
+  status                     JobStatus @default(QUEUED)
+  reason                     String?
+  scheduled_at               DateTime? @db.Timestamptz(6)
+  completed_at               DateTime? @db.Timestamptz(6)
+  created_at                 DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at                 DateTime  @updatedAt @db.Timestamptz(6)
+
+  @@index([tenant_id, target_type, target_id], map: "deletion_requests_tenant_target_idx")
+  @@map("deletion_requests")
+}
+
+model ReportDefinition {
+  id                String   @id @db.Uuid
+  tenant_id         String   @db.Uuid
+  key               String
+  category          String
+  title             String
+  description       String?
+  param_schema_json Json
+  dataset_key       String
+  default_format    String   @default("csv")
+  scope             String   @default("system")
+  created_at        DateTime @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime @updatedAt @db.Timestamptz(6)
+
+  schedules ReportSchedule[]
+  runs      ReportRun[]
+
+  @@unique([tenant_id, key])
+  @@index([tenant_id, category])
+  @@map("report_definitions")
+}
+
+model ReportSchedule {
+  id                       String   @id @db.Uuid
+  tenant_id                String   @db.Uuid
+  report_definition_id     String   @db.Uuid
+  created_by_membership_id String   @db.Uuid
+  name                     String?
+  cron_expression          String
+  timezone                 String   @default("UTC")
+  params_json              Json     @default("{}")
+  formats_json             Json     @default("[\"csv\"]")
+  delivery_json            Json?
+  next_run_at              DateTime @db.Timestamptz(6)
+  is_active                Boolean  @default(true)
+  created_at               DateTime @default(now()) @db.Timestamptz(6)
+  updated_at               DateTime @updatedAt @db.Timestamptz(6)
+
+  definition ReportDefinition @relation(fields: [report_definition_id], references: [id], onDelete: Cascade)
+  runs       ReportRun[]
+
+  @@index([tenant_id, next_run_at, is_active])
+  @@map("report_schedules")
+}
+
+model ReportRun {
+  id                         String    @id @db.Uuid
+  tenant_id                  String    @db.Uuid
+  report_definition_id       String    @db.Uuid
+  report_schedule_id         String?   @db.Uuid
+  requested_by_membership_id String    @db.Uuid
+  status                     JobStatus @default(QUEUED)
+  params_json                Json
+  format                     String
+  row_count                  Int?
+  r2_object_key              String?
+  error_json                 Json?
+  progress_percent           Int?
+  started_at                 DateTime? @db.Timestamptz(6)
+  completed_at               DateTime? @db.Timestamptz(6)
+  expires_at                 DateTime? @db.Timestamptz(6)
+  created_at                 DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at                 DateTime  @updatedAt @db.Timestamptz(6)
+
+  definition ReportDefinition @relation(fields: [report_definition_id], references: [id])
+  schedule   ReportSchedule?  @relation(fields: [report_schedule_id], references: [id])
+
+  @@index([tenant_id, status, created_at])
+  @@map("report_runs")
+}
+
+model AtRiskRule {
+  id          String       @id @db.Uuid
+  tenant_id   String       @db.Uuid
+  key         String
+  name        String
+  rule_type   String
+  config_json Json
+  status      EntityStatus @default(ACTIVE)
+  created_at  DateTime     @default(now()) @db.Timestamptz(6)
+  updated_at  DateTime     @updatedAt @db.Timestamptz(6)
+
+  alerts AtRiskAlert[]
+
+  @@unique([tenant_id, key])
+  @@index([tenant_id, status])
+  @@map("at_risk_rules")
+}
+
+model AtRiskAlert {
+  id              String    @id @db.Uuid
+  tenant_id       String    @db.Uuid
+  at_risk_rule_id String    @db.Uuid
+  membership_id   String    @db.Uuid
+  status          String    @default("open")
+  context_json    Json?
+  triggered_at    DateTime  @default(now()) @db.Timestamptz(6)
+  acknowledged_at DateTime? @db.Timestamptz(6)
+  created_at      DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime  @updatedAt @db.Timestamptz(6)
+
+  rule AtRiskRule @relation(fields: [at_risk_rule_id], references: [id], onDelete: Cascade)
+
+  @@index([tenant_id, status, triggered_at])
+  @@index([tenant_id, membership_id])
+  @@map("at_risk_alerts")
+}
+
+model DeviceSecurityAlert {
+  id              String    @id @db.Uuid
+  tenant_id       String    @db.Uuid
+  membership_id   String    @db.Uuid
+  alert_key       String
+  alert_type      String
+  severity        String
+  status          String    @default("open")
+  title           String
+  evidence_json   Json?
+  session_ids     Json
+  detected_at     DateTime  @default(now()) @db.Timestamptz(6)
+  resolved_at     DateTime? @db.Timestamptz(6)
+  resolved_by     String?   @db.Uuid
+  notes_json      Json?
+  created_at      DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime  @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenant_id, alert_key])
+  @@index([tenant_id, status, detected_at])
+  @@index([tenant_id, alert_type, status])
+  @@index([tenant_id, membership_id])
+  @@map("device_security_alerts")
+}
+
+model DevicePolicyOverride {
+  id                       String    @id @db.Uuid
+  tenant_id                String    @db.Uuid
+  scope_type               String
+  scope_id                 String    @db.Uuid
+  devices_allowed          Int
+  on_limit_reached         String    @default("inherit")
+  expires_at               DateTime? @db.Timestamptz(6)
+  updated_by_membership_id String?   @db.Uuid
+  created_at               DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at               DateTime  @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenant_id, scope_type, scope_id])
+  @@index([tenant_id, updated_at])
+  @@map("device_policy_overrides")
+}
+
+model DeviceBlockedFingerprint {
+  id                       String   @id @db.Uuid
+  tenant_id                String   @db.Uuid
+  fingerprint              String
+  reason                   String
+  blocked_by_membership_id String?  @db.Uuid
+  created_at               DateTime @default(now()) @db.Timestamptz(6)
+  updated_at               DateTime @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenant_id, fingerprint])
+  @@index([tenant_id, created_at])
+  @@map("device_blocked_fingerprints")
+}
+
+model DeviceSession {
+  id                 String   @id @db.Uuid
+  tenant_id          String   @db.Uuid
+  membership_id      String   @db.Uuid
+  device_fingerprint String?
+  user_agent         String?
+  ip_address         String?
+  platform           String?
+  last_seen_at       DateTime @default(now()) @db.Timestamptz(6)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime @updatedAt @db.Timestamptz(6)
+
+  @@index([tenant_id, membership_id, last_seen_at])
+  @@index([tenant_id, last_seen_at])
+  @@map("device_sessions")
+}
+
+model PaymentOrder {
+  id                  String    @id @db.Uuid
+  tenant_id           String    @db.Uuid
+  membership_id       String?   @db.Uuid
+  external_id         String?
+  amount_cents        Int
+  currency            String    @default("USD")
+  status              String
+  metadata_json       Json?
+  gateway_key         String?
+  product_title       String?
+  product_type        String?
+  coupon_amount_cents Int?
+  tax_amount_cents    Int?
+  invoice_number      String?
+  billing_name        String?
+  paid_at             DateTime? @db.Timestamptz(6)
+  created_at          DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime  @updatedAt @db.Timestamptz(6)
+
+  @@index([tenant_id, status, created_at])
+  @@index([tenant_id, membership_id])
+  @@index([tenant_id, paid_at])
+  @@index([tenant_id, gateway_key])
+  @@index([tenant_id, invoice_number])
+  @@map("payment_orders")
+}
+
+/// Learner product instalment / EMI plan (Reports → Payments → Instalment).
+model PaymentInstalmentPlan {
+  id                     String   @id @db.Uuid
+  tenant_id              String   @db.Uuid
+  membership_id          String   @db.Uuid
+  product_title          String
+  product_type           String   @default("course")
+  pricing_plan_label     String?
+  total_amount_cents     Int
+  currency               String   @default("USD")
+  remaining_amount_cents Int
+  status                 String   @default("active")
+  metadata_json          Json?
+  created_at             DateTime @default(now()) @db.Timestamptz(6)
+  updated_at             DateTime @updatedAt @db.Timestamptz(6)
+
+  instalments PaymentInstalment[]
+
+  @@index([tenant_id, status, created_at])
+  @@index([tenant_id, membership_id])
+  @@map("payment_instalment_plans")
+}
+
+model PaymentInstalment {
+  id               String    @id @db.Uuid
+  tenant_id        String    @db.Uuid
+  plan_id          String    @db.Uuid
+  sequence_no      Int
+  amount_cents     Int
+  due_at           DateTime  @db.Timestamptz(6)
+  paid_at          DateTime? @db.Timestamptz(6)
+  status           String    @default("scheduled")
+  payment_order_id String?   @db.Uuid
+  created_at       DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime  @updatedAt @db.Timestamptz(6)
+
+  plan PaymentInstalmentPlan @relation(fields: [plan_id], references: [id], onDelete: Cascade)
+
+  @@unique([tenant_id, plan_id, sequence_no])
+  @@index([tenant_id, plan_id, due_at])
+  @@index([tenant_id, status, due_at])
+  @@map("payment_instalments")
+}
+
+model Batch {
+  id            String       @id @db.Uuid
+  tenant_id     String       @db.Uuid
+  key           String
+  name          String
+  description   String?
+  course_id     String?      @db.Uuid
+  status        EntityStatus @default(ACTIVE)
+  /// Cohort window (Learnyst-style batch start/end).
+  starts_at     DateTime?    @db.Timestamptz(6)
+  ends_at       DateTime?    @db.Timestamptz(6)
+  metadata_json Json?
+  created_at    DateTime     @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime     @updatedAt @db.Timestamptz(6)
+
+  memberships BatchMembership[]
+
+  @@unique([tenant_id, key])
+  @@index([tenant_id, status])
+  @@index([tenant_id, starts_at])
+  @@map("batches")
+}
+
+model BatchMembership {
+  id            String   @id @db.Uuid
+  tenant_id     String   @db.Uuid
+  batch_id      String   @db.Uuid
+  membership_id String   @db.Uuid
+  joined_at     DateTime @default(now()) @db.Timestamptz(6)
+  created_at    DateTime @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime @updatedAt @db.Timestamptz(6)
+
+  batch Batch @relation(fields: [batch_id], references: [id], onDelete: Cascade)
+
+  @@unique([tenant_id, batch_id, membership_id])
+  @@index([tenant_id, membership_id])
+  @@map("batch_memberships")
+}
+
+model Poll {
+  id                     String       @id @db.Uuid
+  tenant_id              String       @db.Uuid
+  title                  String
+  description            String?
+  /// yes_no | multiple_choice
+  poll_type              String       @default("multiple_choice")
+  status                 EntityStatus @default(ACTIVE)
+  quiz_mode              Boolean      @default(false)
+  allow_multiple_answers Boolean      @default(false)
+  anonymous_vote         Boolean      @default(false)
+  /// after_vote | after_poll_ends
+  result_visibility      String       @default("after_vote")
+  /// list | grid | card
+  layout                 String       @default("list")
+  duration_seconds       Int?
+  live_session_id        String?      @db.Uuid
+  context_json           Json?
+  closes_at              DateTime?    @db.Timestamptz(6)
+  created_at             DateTime     @default(now()) @db.Timestamptz(6)
+  updated_at             DateTime     @updatedAt @db.Timestamptz(6)
+
+  options   PollOption[]
+  responses PollResponse[]
+
+  @@index([tenant_id, status])
+  @@index([tenant_id, live_session_id])
+  @@map("polls")
+}
+
+model PollOption {
+  id         String   @id @db.Uuid
+  tenant_id  String   @db.Uuid
+  poll_id    String   @db.Uuid
+  label      String
+  sort_order Int      @default(0)
+  is_correct Boolean  @default(false)
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  updated_at DateTime @updatedAt @db.Timestamptz(6)
+
+  poll      Poll           @relation(fields: [poll_id], references: [id], onDelete: Cascade)
+  responses PollResponse[]
+
+  @@index([tenant_id, poll_id])
+  @@map("poll_options")
+}
+
+model PollResponse {
+  id             String   @id @db.Uuid
+  tenant_id      String   @db.Uuid
+  poll_id        String   @db.Uuid
+  poll_option_id String   @db.Uuid
+  membership_id  String   @db.Uuid
+  created_at     DateTime @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime @updatedAt @db.Timestamptz(6)
+
+  poll   Poll       @relation(fields: [poll_id], references: [id], onDelete: Cascade)
+  option PollOption @relation(fields: [poll_option_id], references: [id], onDelete: Cascade)
+
+  @@unique([tenant_id, poll_id, membership_id])
+  @@index([tenant_id, poll_id])
+  @@map("poll_responses")
+}
+
+model SalesAttributionEvent {
+  id            String   @id @db.Uuid
+  tenant_id     String   @db.Uuid
+  membership_id String?  @db.Uuid
+  event_type    String
+  utm_source    String?
+  utm_medium    String?
+  utm_campaign  String?
+  utm_term      String?
+  utm_content   String?
+  revenue_cents Int?
+  currency      String?
+  metadata_json Json?
+  occurred_at   DateTime @default(now()) @db.Timestamptz(6)
+  created_at    DateTime @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime @updatedAt @db.Timestamptz(6)
+
+  @@index([tenant_id, occurred_at])
+  @@index([tenant_id, utm_source, utm_campaign])
+  @@map("sales_attribution_events")
+}
+
+/// Discount coupons for course checkout (Learnyst-style Sales → Coupons).
+model SalesCoupon {
+  id                       String    @id @db.Uuid
+  tenant_id                String    @db.Uuid
+  /// Normalized uppercase unique code per tenant.
+  code                     String
+  name                     String
+  /// DRAFT | ACTIVE | INACTIVE
+  status                   String    @default("DRAFT")
+  /// PERCENT | FIXED
+  discount_type            String
+  /// Percent 1–100, or fixed amount in cents.
+  discount_value           Int
+  max_discount_cents       Int?
+  currency                 String    @default("USD")
+  starts_at                DateTime? @db.Timestamptz(6)
+  ends_at                  DateTime? @db.Timestamptz(6)
+  total_usage_limit        Int?
+  per_learner_limit        Int       @default(1)
+  min_purchase_cents       Int?
+  /// PUBLIC | PRIVATE
+  visibility               String    @default("PRIVATE")
+  /// ALL | WEB | MOBILE
+  device_type              String    @default("ALL")
+  applies_to_all_courses   Boolean   @default(true)
+  created_by_membership_id String    @db.Uuid
+  activated_at             DateTime? @db.Timestamptz(6)
+  metadata_json            Json?
+  created_at               DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at               DateTime  @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenant_id, code])
+  @@index([tenant_id, status, created_at])
+  @@index([tenant_id, visibility, status])
+  @@map("sales_coupons")
+}
+
+model SalesCouponCourse {
+  id         String   @id @db.Uuid
+  tenant_id  String   @db.Uuid
+  coupon_id  String   @db.Uuid
+  course_id  String   @db.Uuid
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+
+  @@unique([tenant_id, coupon_id, course_id])
+  @@index([tenant_id, course_id])
+  @@index([tenant_id, coupon_id])
+  @@map("sales_coupon_courses")
+}
+
+model SalesCouponRedemption {
+  id                    String   @id @db.Uuid
+  tenant_id             String   @db.Uuid
+  coupon_id             String   @db.Uuid
+  membership_id         String   @db.Uuid
+  course_id             String?  @db.Uuid
+  payment_order_id      String?  @db.Uuid
+  discount_cents        Int
+  original_amount_cents Int
+  final_amount_cents    Int
+  currency              String
+  code_snapshot         String
+  created_at            DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([tenant_id, coupon_id, created_at])
+  @@index([tenant_id, membership_id, coupon_id])
+  @@index([tenant_id, payment_order_id])
+  @@map("sales_coupon_redemptions")
+}
+
+/// School-level wallet settings (Learnyst Sales → Wallets).
+model SalesWalletConfig {
+  id                       String   @id @db.Uuid
+  tenant_id                String   @unique @db.Uuid
+  enabled                  Boolean  @default(false)
+  /// Money value of 1 credit point, in minor units (cents).
+  credit_value_cents       Int      @default(100)
+  currency                 String   @default("USD")
+  max_balance_credits      Int?
+  max_credits_per_order    Int?
+  updated_by_membership_id String?  @db.Uuid
+  created_at               DateTime @default(now()) @db.Timestamptz(6)
+  updated_at               DateTime @updatedAt @db.Timestamptz(6)
+
+  @@map("sales_wallet_configs")
+}
+
+model SalesWallet {
+  id              String   @id @db.Uuid
+  tenant_id       String   @db.Uuid
+  membership_id   String   @db.Uuid
+  balance_credits Int      @default(0)
+  earned_credits  Int      @default(0)
+  used_credits    Int      @default(0)
+  created_at      DateTime @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenant_id, membership_id])
+  @@index([tenant_id, balance_credits])
+  @@map("sales_wallets")
+}
+
+model SalesWalletTransaction {
+  id                       String   @id @db.Uuid
+  tenant_id                String   @db.Uuid
+  wallet_id                String   @db.Uuid
+  membership_id            String   @db.Uuid
+  /// CREDIT | DEBIT
+  direction                String
+  /// REFERRAL_SIGNUP | REFERRAL_PURCHASE | CHECKOUT_SPEND | ADMIN_ADJUST | OTHER
+  reason                   String
+  credits                  Int
+  balance_after            Int
+  money_cents              Int?
+  currency                 String?
+  payment_order_id         String?  @db.Uuid
+  course_id                String?  @db.Uuid
+  note                     String?
+  created_by_membership_id String?  @db.Uuid
+  created_at               DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([tenant_id, membership_id, created_at])
+  @@index([tenant_id, wallet_id, created_at])
+  @@index([tenant_id, reason, created_at])
+  @@map("sales_wallet_transactions")
+}
+
+/// School-level referral settings (Learnyst Sales → Referral Code / Refer & Earn).
+model SalesReferralConfig {
+  id                        String   @id @db.Uuid
+  tenant_id                 String   @unique @db.Uuid
+  enabled                   Boolean  @default(false)
+  referrer_signup_credits   Int      @default(0)
+  referee_signup_credits    Int      @default(0)
+  referrer_purchase_credits Int      @default(0)
+  max_referrals             Int?
+  updated_by_membership_id  String?  @db.Uuid
+  created_at                DateTime @default(now()) @db.Timestamptz(6)
+  updated_at                DateTime @updatedAt @db.Timestamptz(6)
+
+  @@map("sales_referral_configs")
+}
+
+model SalesReferralCode {
+  id            String   @id @db.Uuid
+  tenant_id     String   @db.Uuid
+  membership_id String   @db.Uuid
+  code          String
+  created_at    DateTime @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenant_id, membership_id])
+  @@unique([tenant_id, code])
+  @@index([tenant_id, created_at])
+  @@map("sales_referral_codes")
+}
+
+model SalesReferralAttribution {
+  id                     String    @id @db.Uuid
+  tenant_id              String    @db.Uuid
+  referral_code_id       String    @db.Uuid
+  referrer_membership_id String    @db.Uuid
+  referee_membership_id  String    @db.Uuid
+  code_snapshot          String
+  signup_credited_at     DateTime? @db.Timestamptz(6)
+  created_at             DateTime  @default(now()) @db.Timestamptz(6)
+
+  @@unique([tenant_id, referee_membership_id])
+  @@index([tenant_id, referrer_membership_id, created_at])
+  @@index([tenant_id, referral_code_id, created_at])
+  @@map("sales_referral_attributions")
+}
+
+model SalesReferralPurchaseCredit {
+  id                     String   @id @db.Uuid
+  tenant_id              String   @db.Uuid
+  attribution_id         String   @db.Uuid
+  payment_order_id       String   @db.Uuid
+  referrer_membership_id String   @db.Uuid
+  referee_membership_id  String   @db.Uuid
+  credits_applied        Int
+  created_at             DateTime @default(now()) @db.Timestamptz(6)
+
+  @@unique([tenant_id, payment_order_id])
+  @@index([tenant_id, referrer_membership_id, created_at])
+  @@map("sales_referral_purchase_credits")
+}
+
+model SalesReferralPending {
+  id               String   @id @db.Uuid
+  tenant_id        String   @db.Uuid
+  email_normalized String
+  code             String
+  expires_at       DateTime @db.Timestamptz(6)
+  created_at       DateTime @default(now()) @db.Timestamptz(6)
+
+  @@unique([tenant_id, email_normalized])
+  @@index([tenant_id, expires_at])
+  @@map("sales_referral_pending")
+}
+
+/// School-level affiliate program (Learnyst Sales → Affiliates).
+model SalesAffiliateConfig {
+  id                       String   @id @db.Uuid
+  tenant_id                String   @unique @db.Uuid
+  enabled                  Boolean  @default(false)
+  /// PUBLIC | PRIVATE
+  access_mode              String   @default("PRIVATE")
+  ask_admin                Boolean  @default(true)
+  standard_discount_pct    Int      @default(0)
+  standard_commission_pct  Int      @default(10)
+  premium_discount_pct     Int      @default(0)
+  premium_commission_pct   Int      @default(20)
+  updated_by_membership_id String?  @db.Uuid
+  created_at               DateTime @default(now()) @db.Timestamptz(6)
+  updated_at               DateTime @updatedAt @db.Timestamptz(6)
+
+  @@map("sales_affiliate_configs")
+}
+
+model SalesAffiliate {
+  id                       String   @id @db.Uuid
+  tenant_id                String   @db.Uuid
+  membership_id            String   @db.Uuid
+  /// STANDARD | PREMIUM
+  tier                     String   @default("STANDARD")
+  /// ACTIVE | INACTIVE
+  status                   String   @default("ACTIVE")
+  coupon_code              String
+  payout_upi               String?
+  payout_bank_account      String?
+  payout_ifsc              String?
+  payout_account_name      String?
+  created_by_membership_id String?  @db.Uuid
+  created_at               DateTime @default(now()) @db.Timestamptz(6)
+  updated_at               DateTime @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenant_id, membership_id])
+  @@unique([tenant_id, coupon_code])
+  @@index([tenant_id, status])
+  @@map("sales_affiliates")
+}
+
+model SalesAffiliateProduct {
+  id                      String   @id @db.Uuid
+  tenant_id               String   @db.Uuid
+  course_id               String   @db.Uuid
+  enabled                 Boolean  @default(true)
+  standard_discount_pct   Int?
+  standard_commission_pct Int?
+  premium_discount_pct    Int?
+  premium_commission_pct  Int?
+  created_at              DateTime @default(now()) @db.Timestamptz(6)
+  updated_at              DateTime @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenant_id, course_id])
+  @@index([tenant_id, enabled])
+  @@map("sales_affiliate_products")
+}
+
+model SalesAffiliateRequest {
+  id                       String    @id @db.Uuid
+  tenant_id                String    @db.Uuid
+  membership_id            String    @db.Uuid
+  /// PENDING | APPROVED | REJECTED
+  status                   String    @default("PENDING")
+  note                     String?
+  reviewed_by_membership_id String?  @db.Uuid
+  reviewed_at              DateTime? @db.Timestamptz(6)
+  created_at               DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at               DateTime  @updatedAt @db.Timestamptz(6)
+
+  @@index([tenant_id, status, created_at])
+  @@map("sales_affiliate_requests")
+}
+
+model SalesAffiliateCommission {
+  id                      String   @id @db.Uuid
+  tenant_id               String   @db.Uuid
+  affiliate_id            String   @db.Uuid
+  affiliate_membership_id String   @db.Uuid
+  buyer_membership_id     String   @db.Uuid
+  course_id               String   @db.Uuid
+  payment_order_id        String   @db.Uuid
+  coupon_code_snapshot    String
+  tier_snapshot           String
+  order_amount_cents      Int
+  discount_cents          Int
+  commission_cents        Int
+  currency                String
+  /// UNPAID | PAID
+  status                  String   @default("UNPAID")
+  payout_id               String?  @db.Uuid
+  created_at              DateTime @default(now()) @db.Timestamptz(6)
+
+  @@unique([tenant_id, payment_order_id])
+  @@index([tenant_id, affiliate_id, status])
+  @@map("sales_affiliate_commissions")
+}
+
+model SalesAffiliatePayout {
+  id                       String   @id @db.Uuid
+  tenant_id                String   @db.Uuid
+  affiliate_id             String   @db.Uuid
+  affiliate_membership_id  String   @db.Uuid
+  amount_cents             Int
+  currency                 String
+  status                   String   @default("PAID")
+  note                     String?
+  marked_by_membership_id  String?  @db.Uuid
+  paid_at                  DateTime @default(now()) @db.Timestamptz(6)
+  created_at               DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([tenant_id, affiliate_id, paid_at])
+  @@map("sales_affiliate_payouts")
+}
+
+model CustomFieldDefinition {
+  id           String       @id @db.Uuid
+  tenant_id    String       @db.Uuid
+  key          String
+  label        String
+  field_type   String
+  options_json Json?
+  status       EntityStatus @default(ACTIVE)
+  created_at   DateTime     @default(now()) @db.Timestamptz(6)
+  updated_at   DateTime     @updatedAt @db.Timestamptz(6)
+
+  values  CustomFieldValue[]
+  history CustomFieldValueHistory[]
+
+  @@unique([tenant_id, key])
+  @@index([tenant_id, status])
+  @@map("custom_field_definitions")
+}
+
+model CustomFieldValue {
+  id                         String   @id @db.Uuid
+  tenant_id                  String   @db.Uuid
+  custom_field_definition_id String   @db.Uuid
+  membership_id              String   @db.Uuid
+  value_json                 Json
+  updated_by_membership_id   String?  @db.Uuid
+  created_at                 DateTime @default(now()) @db.Timestamptz(6)
+  updated_at                 DateTime @updatedAt @db.Timestamptz(6)
+
+  definition CustomFieldDefinition @relation(fields: [custom_field_definition_id], references: [id], onDelete: Cascade)
+
+  @@unique([tenant_id, custom_field_definition_id, membership_id])
+  @@index([tenant_id, membership_id])
+  @@index([tenant_id, updated_by_membership_id])
+  @@map("custom_field_values")
+}
+
+model CustomFieldValueHistory {
+  id                         String   @id @db.Uuid
+  tenant_id                  String   @db.Uuid
+  custom_field_definition_id String   @db.Uuid
+  membership_id              String   @db.Uuid
+  old_value_json             Json?
+  new_value_json             Json?
+  changed_by_membership_id   String?  @db.Uuid
+  changed_at                 DateTime @default(now()) @db.Timestamptz(6)
+
+  definition CustomFieldDefinition @relation(fields: [custom_field_definition_id], references: [id], onDelete: Cascade)
+
+  @@index([tenant_id, membership_id, changed_at(sort: Desc)])
+  @@index([tenant_id, custom_field_definition_id, changed_at(sort: Desc)])
+  @@map("custom_field_value_history")
+}
+
+model CustomFieldSegment {
+  id                         String    @id @db.Uuid
+  tenant_id                  String    @db.Uuid
+  name                       String
+  description                String?
+  visibility                 String    @default("shared")
+  refresh_mode               String    @default("live")
+  conditions_json            Json
+  matched_count              Int?
+  previous_matched_count     Int?
+  matched_count_at           DateTime? @db.Timestamptz(6)
+  snapshot_batch_id          String?   @db.Uuid
+  created_by_membership_id   String    @db.Uuid
+  created_at                 DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at                 DateTime  @updatedAt @db.Timestamptz(6)
+
+  @@index([tenant_id])
+  @@index([tenant_id, visibility])
+  @@index([tenant_id, matched_count_at])
+  @@index([tenant_id, created_by_membership_id])
+  @@map("custom_field_segments")
+}
+
+model ZoomConnection {
+  id                String    @id @db.Uuid
+  tenant_id         String    @db.Uuid
+  account_id        String?
+  access_token_ref  String?
+  refresh_token_ref String?
+  status            String    @default("disconnected")
+  connected_at      DateTime? @db.Timestamptz(6)
+  metadata_json     Json?
+  created_at        DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime  @updatedAt @db.Timestamptz(6)
+
+  meetings ZoomMeeting[]
+
+  @@unique([tenant_id])
+  @@map("zoom_connections")
+}
+
+model ZoomMeeting {
+  id                  String    @id @db.Uuid
+  tenant_id           String    @db.Uuid
+  zoom_connection_id  String    @db.Uuid
+  external_meeting_id String
+  topic               String?
+  started_at          DateTime? @db.Timestamptz(6)
+  ended_at            DateTime? @db.Timestamptz(6)
+  metadata_json       Json?
+  created_at          DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime  @updatedAt @db.Timestamptz(6)
+
+  connection   ZoomConnection           @relation(fields: [zoom_connection_id], references: [id], onDelete: Cascade)
+  participants ZoomMeetingParticipant[]
+
+  @@unique([tenant_id, external_meeting_id])
+  @@index([tenant_id, started_at])
+  @@map("zoom_meetings")
+}
+
+model ZoomMeetingParticipant {
+  id               String    @id @db.Uuid
+  tenant_id        String    @db.Uuid
+  zoom_meeting_id  String    @db.Uuid
+  membership_id    String?   @db.Uuid
+  external_user_id String?
+  display_name     String?
+  join_time        DateTime? @db.Timestamptz(6)
+  leave_time       DateTime? @db.Timestamptz(6)
+  duration_seconds Int?
+  created_at       DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime  @updatedAt @db.Timestamptz(6)
+
+  meeting ZoomMeeting @relation(fields: [zoom_meeting_id], references: [id], onDelete: Cascade)
+
+  @@index([tenant_id, zoom_meeting_id])
+  @@map("zoom_meeting_participants")
+}
+
+model LiveSession {
+  id            String    @id @db.Uuid
+  tenant_id     String    @db.Uuid
+  title         String
+  course_id     String?   @db.Uuid
+  /// Optional link to a Learnyst-style cohort batch for attendance reports.
+  batch_id      String?   @db.Uuid
+  status        String    @default("scheduled")
+  scheduled_at  DateTime? @db.Timestamptz(6)
+  started_at    DateTime? @db.Timestamptz(6)
+  ended_at      DateTime? @db.Timestamptz(6)
+  metadata_json Json?
+  created_at    DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime  @updatedAt @db.Timestamptz(6)
+
+  attendance LiveAttendance[]
+
+  @@index([tenant_id, status, scheduled_at])
+  @@index([tenant_id, batch_id])
+  @@index([tenant_id, course_id])
+  @@map("live_sessions")
+}
+
+model LiveAttendance {
+  id               String    @id @db.Uuid
+  tenant_id        String    @db.Uuid
+  live_session_id  String    @db.Uuid
+  membership_id    String    @db.Uuid
+  status           String    @default("registered")
+  joined_at        DateTime? @db.Timestamptz(6)
+  left_at          DateTime? @db.Timestamptz(6)
+  duration_seconds Int?
+  created_at       DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime  @updatedAt @db.Timestamptz(6)
+
+  session LiveSession @relation(fields: [live_session_id], references: [id], onDelete: Cascade)
+
+  @@unique([tenant_id, live_session_id, membership_id])
+  @@index([tenant_id, live_session_id])
+  @@map("live_attendance")
+}
+
+model MessengerConversation {
+  id            String   @id @db.Uuid
+  tenant_id     String   @db.Uuid
+  subject       String?
+  status        String   @default("open")
+  metadata_json Json?
+  created_at    DateTime @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime @updatedAt @db.Timestamptz(6)
+
+  messages MessengerMessage[]
+
+  @@index([tenant_id, status, updated_at])
+  @@map("messenger_conversations")
+}
+
+model MessengerMessage {
+  id                   String   @id @db.Uuid
+  tenant_id            String   @db.Uuid
+  conversation_id      String   @db.Uuid
+  sender_membership_id String   @db.Uuid
+  body                 String
+  metadata_json        Json?
+  sent_at              DateTime @default(now()) @db.Timestamptz(6)
+  created_at           DateTime @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime @updatedAt @db.Timestamptz(6)
+
+  conversation MessengerConversation @relation(fields: [conversation_id], references: [id], onDelete: Cascade)
+
+  @@index([tenant_id, conversation_id, sent_at])
+  @@map("messenger_messages")
+}
+
+model BiExportJob {
+  id                         String    @id @db.Uuid
+  tenant_id                  String    @db.Uuid
+  requested_by_membership_id String    @db.Uuid
+  status                     JobStatus @default(QUEUED)
+  dataset_key                String
+  params_json                Json?
+  r2_object_key              String?
+  error_json                 Json?
+  completed_at               DateTime? @db.Timestamptz(6)
+  expires_at                 DateTime? @db.Timestamptz(6)
+  created_at                 DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at                 DateTime  @updatedAt @db.Timestamptz(6)
+
+  @@index([tenant_id, status, created_at])
+  @@map("bi_export_jobs")
+}
+
+model SubSchool {
+  id            String       @id @db.Uuid
+  tenant_id     String       @db.Uuid
+  key           String
+  name          String
+  description   String?
+  mobile_number String?
+  email         String?
+  password_hash String?
+  status        EntityStatus @default(ACTIVE)
+  created_at    DateTime     @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime     @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenant_id, key])
+  @@unique([tenant_id, email])
+  @@index([tenant_id, status])
+  @@index([tenant_id, name])
+  @@map("sub_schools")
+}
+
+model ProductCopyJob {
+  id                         String    @id @db.Uuid
+  tenant_id                  String    @db.Uuid
+  destination_sub_school_id  String    @db.Uuid
+  requested_by_membership_id String    @db.Uuid
+  product_type               String
+  source_product_id          String    @db.Uuid
+  source_product_title       String
+  destination_product_name   String
+  section_ids_json           Json?
+  result_product_id          String?   @db.Uuid
+  status                     JobStatus @default(QUEUED)
+  error_json                 Json?
+  started_at                 DateTime? @db.Timestamptz(6)
+  completed_at               DateTime? @db.Timestamptz(6)
+  created_at                 DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at                 DateTime  @updatedAt @db.Timestamptz(6)
+
+  @@index([tenant_id, destination_sub_school_id, created_at])
+  @@index([tenant_id, status, created_at])
+  @@map("product_copy_jobs")
+}
+
+model CourseBackupJob {
+  id                         String    @id @db.Uuid
+  tenant_id                  String    @db.Uuid
+  course_id                  String    @db.Uuid
+  requested_by_membership_id String    @db.Uuid
+  course_title               String
+  scope_json                 Json?
+  status                     JobStatus @default(QUEUED)
+  r2_object_key              String?
+  download_token             String?
+  error_json                 Json?
+  otp_verified_at            DateTime? @db.Timestamptz(6)
+  started_at                 DateTime? @db.Timestamptz(6)
+  completed_at               DateTime? @db.Timestamptz(6)
+  expires_at                 DateTime? @db.Timestamptz(6)
+  created_at                 DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at                 DateTime  @updatedAt @db.Timestamptz(6)
+
+  @@index([tenant_id, status, created_at])
+  @@index([tenant_id, course_id, created_at])
+  @@map("course_backup_jobs")
+}
+
+model PushMessage {
+  id                         String    @id @db.Uuid
+  tenant_id                  String    @db.Uuid
+  title                      String
+  status                     String    @default("DRAFT")
+  audience_type              String?
+  audience_batch_id          String?   @db.Uuid
+  subject                    String?
+  body                       String?
+  deep_link                  String?
+  image_url                  String?
+  channel_android            Boolean   @default(true)
+  channel_ios                Boolean   @default(true)
+  channel_web                Boolean   @default(true)
+  recipient_count            Int       @default(0)
+  scheduled_at               DateTime? @db.Timestamptz(6)
+  sent_at                    DateTime? @db.Timestamptz(6)
+  created_by_membership_id   String    @db.Uuid
+  created_at                 DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at                 DateTime  @updatedAt @db.Timestamptz(6)
+
+  @@index([tenant_id, status, created_at])
+  @@index([tenant_id, scheduled_at])
+  @@map("push_messages")
+}
+
+model MarketingEmailCampaign {
+  id                         String    @id @db.Uuid
+  tenant_id                  String    @db.Uuid
+  title                      String
+  status                     String    @default("DRAFT")
+  audience_type              String?
+  audience_batch_id          String?   @db.Uuid
+  subject                    String?
+  body_html                  String?
+  template_key               String?
+  recipient_count            Int       @default(0)
+  scheduled_at               DateTime? @db.Timestamptz(6)
+  sent_at                    DateTime? @db.Timestamptz(6)
+  created_by_membership_id   String    @db.Uuid
+  created_at                 DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at                 DateTime  @updatedAt @db.Timestamptz(6)
+
+  @@index([tenant_id, status, created_at])
+  @@index([tenant_id, scheduled_at])
+  @@map("marketing_email_campaigns")
+}
+
+/// Multi-channel campaign orchestration (Goal → Audience → Touchpoints → Launch).
+model MarketingCampaign {
+  id                         String    @id @db.Uuid
+  tenant_id                  String    @db.Uuid
+  title                      String
+  goal                       String?
+  status                     String    @default("DRAFT")
+  audience_type              String?
+  audience_batch_id          String?   @db.Uuid
+  recipient_count            Int       @default(0)
+  channels_json              Json      @default("{}")
+  touchpoints_json           Json      @default("[]")
+  launched_at                DateTime? @db.Timestamptz(6)
+  scheduled_at               DateTime? @db.Timestamptz(6)
+  created_by_membership_id   String    @db.Uuid
+  created_at                 DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at                 DateTime  @updatedAt @db.Timestamptz(6)
+
+  @@index([tenant_id, status, created_at])
+  @@index([tenant_id, updated_at])
+  @@map("marketing_campaigns")
+}
+
+model Announcement {
+  id                         String    @id @db.Uuid
+  tenant_id                  String    @db.Uuid
+  title                      String
+  message                    String
+  type                       String
+  audience_batch_id          String?   @db.Uuid
+  deep_link                  String?
+  image_url                  String?
+  status                     String    @default("SENT")
+  recipient_count            Int       @default(0)
+  sent_at                    DateTime? @db.Timestamptz(6)
+  created_by_membership_id   String    @db.Uuid
+  created_at                 DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at                 DateTime  @updatedAt @db.Timestamptz(6)
+
+  @@index([tenant_id, type, created_at])
+  @@index([tenant_id, created_at])
+  @@map("announcements")
+}
+
+model WhatsappConnection {
+  id                      String    @id @db.Uuid
+  tenant_id               String    @db.Uuid
+  status                  String    @default("DISCONNECTED")
+  provider_mode           String    @default("mock")
+  display_name            String?
+  phone_number            String?
+  phone_number_id         String?
+  waba_id                 String?
+  access_token_ciphertext String?
+  access_token_last4      String?
+  quality_rating          String?
+  messaging_limit         Int       @default(250)
+  connected_at            DateTime? @db.Timestamptz(6)
+  created_at              DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at              DateTime  @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenant_id])
+  @@map("whatsapp_connections")
+}
+
+model WhatsappTemplate {
+  id                 String   @id @db.Uuid
+  tenant_id          String   @db.Uuid
+  name               String
+  category           String
+  language           String   @default("en")
+  header_type        String   @default("NONE")
+  header_text        String?
+  header_image_url   String?
+  body               String
+  footer             String?
+  buttons_json       Json?
+  status             String   @default("DRAFT")
+  meta_template_id   String?
+  rejection_reason   String?
+  created_by_membership_id String @db.Uuid
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenant_id, name])
+  @@index([tenant_id, status, created_at])
+  @@map("whatsapp_templates")
+}
+
+model WhatsappCampaign {
+  id                       String    @id @db.Uuid
+  tenant_id                String    @db.Uuid
+  title                    String
+  status                   String    @default("DRAFT")
+  audience_type            String?
+  audience_batch_id        String?   @db.Uuid
+  template_id              String?   @db.Uuid
+  recipient_count          Int       @default(0)
+  delivered_count          Int       @default(0)
+  failed_count             Int       @default(0)
+  scheduled_at             DateTime? @db.Timestamptz(6)
+  sent_at                  DateTime? @db.Timestamptz(6)
+  created_by_membership_id String    @db.Uuid
+  created_at               DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at               DateTime  @updatedAt @db.Timestamptz(6)
+
+  @@index([tenant_id, status, created_at])
+  @@index([tenant_id, scheduled_at])
+  @@map("whatsapp_campaigns")
+}
+
+model WhatsappConversation {
+  id              String   @id @db.Uuid
+  tenant_id       String   @db.Uuid
+  wa_phone        String
+  membership_id   String?  @db.Uuid
+  learner_name    String?
+  last_message_at DateTime @default(now()) @db.Timestamptz(6)
+  unread_count    Int      @default(0)
+  created_at      DateTime @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenant_id, wa_phone])
+  @@index([tenant_id, last_message_at])
+  @@map("whatsapp_conversations")
+}
+
+model WhatsappInboxMessage {
+  id              String   @id @db.Uuid
+  tenant_id       String   @db.Uuid
+  conversation_id String   @db.Uuid
+  direction       String
+  body            String
+  status          String   @default("SENT")
+  meta_message_id String?
+  created_at      DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([tenant_id, conversation_id, created_at])
+  @@map("whatsapp_inbox_messages")
+}
+
+model MarketingWorkflow {
+  id                       String    @id @db.Uuid
+  tenant_id                String    @db.Uuid
+  title                    String
+  description              String?
+  status                   String    @default("DRAFT")
+  allow_resubscribe        Boolean   @default(false)
+  use_case_key             String?
+  graph_json               Json      @default("{}")
+  created_by_membership_id String    @db.Uuid
+  published_at             DateTime? @db.Timestamptz(6)
+  created_at               DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at               DateTime  @updatedAt @db.Timestamptz(6)
+
+  @@index([tenant_id, status, created_at])
+  @@index([tenant_id, use_case_key])
+  @@map("marketing_workflows")
+}
+
+model MarketingWorkflowRun {
+  id                 String    @id @db.Uuid
+  tenant_id          String    @db.Uuid
+  workflow_id        String    @db.Uuid
+  membership_id      String?   @db.Uuid
+  status             String    @default("RUNNING")
+  trigger_event_type String
+  trigger_payload_json Json    @default("{}")
+  current_node_id    String?
+  wait_until         DateTime? @db.Timestamptz(6)
+  idempotency_key    String
+  error_message      String?
+  created_at         DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime  @updatedAt @db.Timestamptz(6)
+  completed_at       DateTime? @db.Timestamptz(6)
+
+  @@unique([tenant_id, idempotency_key])
+  @@index([tenant_id, workflow_id, created_at])
+  @@index([tenant_id, status, wait_until])
+  @@map("marketing_workflow_runs")
+}
+
+model MarketingWorkflowRunLog {
+  id         String   @id @db.Uuid
+  tenant_id  String   @db.Uuid
+  run_id     String   @db.Uuid
+  node_id    String?
+  node_type  String?
+  status     String
+  message    String?
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([tenant_id, run_id, created_at])
+  @@map("marketing_workflow_run_logs")
+}
+
+model MarketingForm {
+  id                       String    @id @db.Uuid
+  tenant_id                String    @db.Uuid
+  title                    String
+  description              String?
+  status                   String    @default("DRAFT")
+  kind                     String    @default("LEAD")
+  share_token              String
+  google_signup_enabled    Boolean   @default(false)
+  button_text              String    @default("Submit")
+  button_color             String    @default("#5B5BD6")
+  button_text_color        String    @default("#FFFFFF")
+  thank_you_html           String?
+  redirect_enabled         Boolean   @default(false)
+  redirect_url             String?
+  fields_json              Json      @default("[]")
+  created_by_membership_id String    @db.Uuid
+  published_at             DateTime? @db.Timestamptz(6)
+  created_at               DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at               DateTime  @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenant_id, share_token])
+  @@index([tenant_id, status, created_at])
+  @@map("marketing_forms")
+}
+
+model MarketingContact {
+  id             String   @id @db.Uuid
+  tenant_id      String   @db.Uuid
+  email          String
+  display_name   String?
+  phone          String?
+  password_hash  String?
+  source_form_id String?  @db.Uuid
+  source         String   @default("FORM")
+  metadata_json  Json     @default("{}")
+  created_at     DateTime @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenant_id, email])
+  @@index([tenant_id, created_at])
+  @@index([tenant_id, source_form_id])
+  @@map("marketing_contacts")
+}
+
+model MarketingFormSubmission {
+  id          String   @id @db.Uuid
+  tenant_id   String   @db.Uuid
+  form_id     String   @db.Uuid
+  contact_id  String   @db.Uuid
+  answers_json Json    @default("{}")
+  source      String   @default("LINK")
+  created_at  DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([tenant_id, form_id, created_at])
+  @@index([tenant_id, contact_id, created_at])
+  @@map("marketing_form_submissions")
+}
+
+model MarketingCta {
+  id                       String    @id @db.Uuid
+  tenant_id                String    @db.Uuid
+  title                    String
+  description              String?
+  cta_type                 String
+  status                   String    @default("DRAFT")
+  headline                 String    @default("")
+  body_html                String?
+  image_url                String?
+  button_text              String    @default("Learn more")
+  button_color             String    @default("#5B5BD6")
+  button_text_color        String    @default("#FFFFFF")
+  background_color         String    @default("#FFFFFF")
+  link_url                 String?
+  form_id                  String?   @db.Uuid
+  linked_popup_cta_id      String?   @db.Uuid
+  targeting_json           Json      @default("{}")
+  view_count               Int       @default(0)
+  click_count              Int       @default(0)
+  created_by_membership_id String    @db.Uuid
+  published_at             DateTime? @db.Timestamptz(6)
+  created_at               DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at               DateTime  @updatedAt @db.Timestamptz(6)
+
+  @@index([tenant_id, status, created_at])
+  @@index([tenant_id, cta_type, status])
+  @@index([tenant_id, form_id])
+  @@map("marketing_ctas")
+}
+
+model MarketingPromoSlider {
+  id                       String    @id @db.Uuid
+  tenant_id                String    @db.Uuid
+  title                    String
+  description              String?
+  status                   String    @default("DRAFT")
+  created_by_membership_id String    @db.Uuid
+  published_at             DateTime? @db.Timestamptz(6)
+  created_at               DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at               DateTime  @updatedAt @db.Timestamptz(6)
+
+  @@index([tenant_id, status, created_at])
+  @@map("marketing_promo_sliders")
+}
+
+model MarketingPromoSlide {
+  id          String    @id @db.Uuid
+  tenant_id   String    @db.Uuid
+  slider_id   String    @db.Uuid
+  name        String
+  image_url   String?
+  image_fit   String    @default("COVER")
+  link_url    String?
+  starts_at   DateTime? @db.Timestamptz(6)
+  ends_at     DateTime? @db.Timestamptz(6)
+  sort_order  Int       @default(0)
+  created_at  DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at  DateTime  @updatedAt @db.Timestamptz(6)
+
+  @@index([tenant_id, slider_id, sort_order])
+  @@index([tenant_id, ends_at])
+  @@map("marketing_promo_slides")
+}
+
+model MarketingEvent {
+  id                       String    @id @db.Uuid
+  tenant_id                String    @db.Uuid
+  title                    String
+  description              String?
+  status                   String    @default("DRAFT")
+  starts_at                DateTime  @db.Timestamptz(6)
+  ends_at                  DateTime? @db.Timestamptz(6)
+  location                 String?
+  link_url                 String?
+  join_url                 String?
+  cover_image_url          String?
+  reminder_minutes_before  Int?
+  created_by_membership_id String    @db.Uuid
+  published_at             DateTime? @db.Timestamptz(6)
+  created_at               DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at               DateTime  @updatedAt @db.Timestamptz(6)
+
+  @@index([tenant_id, status, starts_at])
+  @@index([tenant_id, status, created_at])
+  @@map("marketing_events")
+}
+
+model MarketingEventRegistration {
+  id            String   @id @db.Uuid
+  tenant_id     String   @db.Uuid
+  event_id      String   @db.Uuid
+  contact_id    String?  @db.Uuid
+  membership_id String?  @db.Uuid
+  email         String
+  name          String?
+  source        String   @default("LINK")
+  created_at    DateTime @default(now()) @db.Timestamptz(6)
+
+  @@unique([tenant_id, event_id, email])
+  @@index([tenant_id, event_id, created_at])
+  @@map("marketing_event_registrations")
+}
+
+model MarketingIntegrationSettings {
+  tenant_id            String    @id @db.Uuid
+  site_body_html       String?
+  order_tracking_html  String?
+  signup_tracking_html String?
+  api_key_hash         String?
+  api_key_prefix       String?
+  api_key_created_at   DateTime? @db.Timestamptz(6)
+  created_at           DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime  @updatedAt @db.Timestamptz(6)
+
+  @@map("marketing_integration_settings")
+}
+
+model MarketingIntegrationWebhook {
+  id                   String    @id @db.Uuid
+  tenant_id            String    @db.Uuid
+  event_key            String
+  url                  String
+  enabled              Boolean   @default(true)
+  last_tested_at       DateTime? @db.Timestamptz(6)
+  last_delivery_at     DateTime? @db.Timestamptz(6)
+  last_delivery_status String?
+  created_at           DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime  @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenant_id, event_key, url])
+  @@index([tenant_id, event_key, enabled])
+  @@map("marketing_integration_webhooks")
+}
+
+model MarketingIntegrationWebhookDelivery {
+  id           String   @id @db.Uuid
+  tenant_id    String   @db.Uuid
+  webhook_id   String   @db.Uuid
+  event_key    String
+  url          String
+  ok           Boolean
+  status_code  Int?
+  message      String
+  request_body String?
+  source       String   @default("dispatch")
+  created_at   DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([tenant_id, webhook_id, created_at(sort: Desc)])
+  @@index([tenant_id, created_at(sort: Desc)])
+  @@map("marketing_integration_webhook_deliveries")
+}
+
+model MarketingNewsfeedSettings {
+  tenant_id  String   @id @db.Uuid
+  enabled    Boolean  @default(false)
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  updated_at DateTime @updatedAt @db.Timestamptz(6)
+
+  @@map("marketing_newsfeed_settings")
+}
+
+model MarketingNewsfeedPost {
+  id                       String    @id @db.Uuid
+  tenant_id                String    @db.Uuid
+  title                    String
+  slug                     String
+  post_type                String
+  status                   String    @default("DRAFT")
+  body_html                String?
+  cover_image_url          String?
+  seo_title                String?
+  seo_description          String?
+  author_name              String?
+  tags_json                Json      @default("[]")
+  categories_json          Json      @default("[]")
+  pinned                   Boolean   @default(false)
+  product_id               String?   @db.Uuid
+  product_title            String?
+  created_by_membership_id String    @db.Uuid
+  published_at             DateTime? @db.Timestamptz(6)
+  created_at               DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at               DateTime  @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenant_id, slug])
+  @@index([tenant_id, status, created_at])
+  @@index([tenant_id, post_type, status])
+  @@index([tenant_id, product_id])
+  @@index([tenant_id, pinned, published_at])
+  @@map("marketing_newsfeed_posts")
+}
+
+model MarketingNewsfeedSave {
+  id            String   @id @db.Uuid
+  tenant_id     String   @db.Uuid
+  post_id       String   @db.Uuid
+  membership_id String   @db.Uuid
+  created_at    DateTime @default(now()) @db.Timestamptz(6)
+
+  @@unique([tenant_id, post_id, membership_id])
+  @@index([tenant_id, membership_id, created_at])
+  @@map("marketing_newsfeed_saves")
+}

@@ -1,8 +1,8 @@
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 
-const rootsToScan = ["apps", "packages", "src"];
-const allowedPrismaRoot = "packages/db/src/";
+const rootsToScan = ["frontend", "backend/apps", "backend/packages", "src"];
+const allowedPrismaRoot = "backend/packages/db/src/";
 
 function walkFiles(directory) {
   try {

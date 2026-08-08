@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { enrollmentCreateBodySchema } from "../../../apps/web/src/server/enrollments/schemas";
+import { enrollmentCreateBodySchema } from "../../../backend/apps/api/src/server/enrollments/schemas";
 
 const courseId = "018f0000-0000-7000-8000-000000000001";
 

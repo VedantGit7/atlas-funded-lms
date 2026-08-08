@@ -67,7 +67,7 @@ vi.mock("@atlas/events/services/outbox.service", () => ({
   },
 }));
 
-import { POST } from "../../apps/web/src/app/api/v1/internal/outbox/dead-letter/[id]/replay/route";
+import { POST } from "../../backend/apps/api/src/app/api/v1/internal/outbox/dead-letter/[id]/replay/route";
 import { replayDeadLetterEvent } from "@atlas/events/services/dead-letter-replay.service";
 
 const platformPrincipal = {

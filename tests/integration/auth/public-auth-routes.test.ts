@@ -4,7 +4,7 @@ import { loginWithPassword, signupWithPassword } from "@atlas/auth";
 const mockSignInWithPassword = vi.fn();
 const mockSignUp = vi.fn();
 
-vi.mock("../../../packages/auth/src/supabase-server", () => ({
+vi.mock("../../../backend/packages/auth/src/supabase-server", () => ({
   createSupabasePublicServerClient: () => ({
     auth: {
       signInWithPassword: mockSignInWithPassword,
@@ -100,6 +100,7 @@ describe("public auth routes service layer", () => {
           id: "018f0000-0000-7000-8000-000000000001",
           email: "user@example.com",
           factors: [],
+          identities: [{ identity_id: "id-1" }],
         },
         session: null,
       },
@@ -131,5 +132,37 @@ describe("public auth routes service layer", () => {
       authenticated: true,
       emailNormalized: "user@example.com",
     });
+  });
+
+  it("signup does not mirror an obfuscated already-registered user", async () => {
+    // Supabase anti-enumeration: existing email returns a user with empty
+    // identities and sends no email. We must not write this fabricated user.
+    mockSignUp.mockResolvedValue({
+      data: {
+        user: {
+          id: "00000000-0000-0000-0000-000000000000",
+          email: "user@example.com",
+          factors: [],
+          identities: [],
+        },
+        session: null,
+      },
+      error: null,
+    });
+
+    const db = mockDb([]);
+
+    const result = await signupWithPassword({
+      db,
+      input: {
+        email: "user@example.com",
+        password: "password123",
+      },
+    });
+
+    expect(result.status).toBe("verification_required");
+    expect(result.identity).toBeUndefined();
+    expect(result.session).toBeUndefined();
+    expect(db.$queryRaw).not.toHaveBeenCalled();
   });
 });

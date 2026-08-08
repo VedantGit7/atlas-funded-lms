@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
+import { buildTestTenantSlug } from "../../scripts/db/test-tenant-slugs.mjs";
 import { withPlatformScope } from "@atlas/db";
 import type {
   withPlatformScope as WithPlatformScopeFn,
@@ -136,8 +137,8 @@ vi.mock("@atlas/domain-config/services/entitlement.service", () => ({
   listTenantEntitlements: (...args: unknown[]) => mockListTenantEntitlements(...args),
 }));
 
-import { GET as getPlatformTenantDetail } from "../../apps/web/src/app/api/v1/platform/tenants/[id]/route";
-import { GET as getEntitlements } from "../../apps/web/src/app/api/v1/entitlements/route";
+import { GET as getPlatformTenantDetail } from "../../backend/apps/api/src/app/api/v1/platform/tenants/[id]/route";
+import { GET as getEntitlements } from "../../backend/apps/api/src/app/api/v1/entitlements/route";
 
 const describeWithDb =
   process.env["DATABASE_URL"] && process.env["PLATFORM_DATABASE_URL"] ? describe : describe.skip;
@@ -236,7 +237,7 @@ async function provisionIsolationTenant(
   label: "a" | "b",
   runId: string,
 ): Promise<ProvisionedTenantFixture> {
-  const slug = `iso-prov-${label}-${runId}`;
+  const slug = buildTestTenantSlug(`iso-prov-${label}`, runId);
   const hostname = `${slug}.${tenantBaseDomain}`;
   const tenantId = randomUUID();
   const platformPrincipalId = randomUUID();

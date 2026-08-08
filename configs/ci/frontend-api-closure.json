@@ -1,0 +1,30 @@
+{
+  "opsOnly": [
+    "/api/v1/health",
+    "/api/v1/search/reindex",
+    "/api/v1/internal/",
+    "/api/v1/platform/eventing/dead-letters",
+    "/api/v1/platform/shell",
+    "/api/v1/public/auth/",
+    "/api/v1/public/bootstrap",
+    "/api/v1/public/diagnostic/",
+    "/api/v1/public/invitations/",
+    "/api/v1/public/landing/",
+    "/api/v1/public/verify/"
+  ],
+  "uiWiredRequired": [
+    "/api/v1/me",
+    "/api/v1/courses",
+    "/api/v1/enrollments",
+    "/api/v1/branding",
+    "/api/v1/theme",
+    "/api/v1/members",
+    "/api/v1/roles",
+    "/api/v1/platform/tenants",
+    "/api/v1/platform/feature-flags",
+    "/api/v1/platform/audit",
+    "/api/v1/workflows",
+    "/api/v1/moderation/cases",
+    "/api/v1/search/reindex"
+  ]
+}

@@ -1,8 +1,8 @@
 import { randomUUID } from "node:crypto";
 import { withPlatformScope } from "@atlas/db";
 import { seedTenantAccessControl } from "@atlas/access";
-import { itemTypesSeed } from "../../prisma/seeds/04-item-types";
-import { extensionPointsSeed } from "../../prisma/seeds/05-extension-points";
+import { itemTypesSeed } from "../../backend/prisma/seeds/04-item-types";
+import { extensionPointsSeed } from "../../backend/prisma/seeds/05-extension-points";
 import { withTenantTx } from "@atlas/db";
 import {
   createCourseAuthoringFixture,

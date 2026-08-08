@@ -6,7 +6,7 @@ import {
   tenantQueryKey,
   writeClientDataCache,
   readClientDataCache,
-} from "../../../apps/web/src/lib/query/client-data-cache";
+} from "../../../frontend/apps/web/src/lib/query/client-data-cache";
 
 describe("tenant query keys", () => {
   it("scopes keys by tenant host scope", () => {

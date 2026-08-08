@@ -6,9 +6,9 @@ import {
   tenantQueryKey,
   writeClientDataCache,
   readClientDataCache,
-} from "../../apps/web/src/lib/query/client-data-cache";
+} from "../../frontend/apps/web/src/lib/query/client-data-cache";
 
-const webRoot = resolve(import.meta.dirname, "../../apps/web/src");
+const webRoot = resolve(import.meta.dirname, "../../frontend/apps/web/src");
 
 describe("learner tenant isolation frontend guards", () => {
   it("does not send tenant_id from learner pages or shell", () => {

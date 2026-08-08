@@ -7,7 +7,7 @@ import {
   getLessonForPlayer,
   listLessonsForModule,
   updateLesson,
-} from "../../../apps/web/src/server/lessons/lessons.service";
+} from "../../../backend/apps/api/src/server/lessons/lessons.service";
 import {
   createLessonEngineFixture,
   instructorCtx,
@@ -91,5 +91,45 @@ describeWithDb("lessons integration", () => {
         getLesson(tx, instructorCtx(fixture), created.data.id, { view: "studio" }),
       ),
     ).rejects.toMatchObject({ status: 404 });
+  });
+
+  it("creates a lesson at position 1 after the previous lesson was soft-deleted", async () => {
+    const fixture = await createLessonEngineFixture();
+
+    const created = await withTenantTx(lessonTenantTx(fixture), async (tx) =>
+      createLesson(tx, instructorCtx(fixture), fixture.draftModuleId, { title: "Temp Lesson" }),
+    );
+
+    await withTenantTx(lessonTenantTx(fixture), async (tx) =>
+      archiveOrDeleteLesson(tx, instructorCtx(fixture), created.data.id),
+    );
+
+    const recreated = await withTenantTx(lessonTenantTx(fixture), async (tx) =>
+      createLesson(tx, instructorCtx(fixture, "req_lesson_recreate"), fixture.draftModuleId, {
+        title: "Replacement Lesson",
+        lessonType: "video",
+      }),
+    );
+
+    expect(recreated.data.title).toBe("Replacement Lesson");
+    expect(recreated.data.position).toBeGreaterThanOrEqual(1);
+  });
+
+  it("returns lessonType in studio module lesson list", async () => {
+    const fixture = await createLessonEngineFixture();
+
+    const created = await withTenantTx(lessonTenantTx(fixture), async (tx) =>
+      createLesson(tx, instructorCtx(fixture, "req_lesson_type_list"), fixture.draftModuleId, {
+        title: "Typed Lesson",
+        lessonType: "pdf",
+      }),
+    );
+
+    const result = await withTenantTx(lessonTenantTx(fixture), async (tx) =>
+      listLessonsForModule(tx, instructorCtx(fixture), fixture.draftModuleId, { view: "studio" }),
+    );
+
+    const item = result.data.items.find((lesson) => lesson.id === created.data.id);
+    expect(item?.lessonType).toBe("pdf");
   });
 });

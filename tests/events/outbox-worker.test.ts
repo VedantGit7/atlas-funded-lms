@@ -162,7 +162,7 @@ describe("processOutboxBatch", () => {
 
   it("does not update or delete outbox events in the worker service", () => {
     const workerSource = readFileSync(
-      resolve(import.meta.dirname, "../../packages/events/src/services/outbox-worker.service.ts"),
+      resolve(import.meta.dirname, "../../backend/packages/events/src/services/outbox-worker.service.ts"),
       "utf8",
     );
 

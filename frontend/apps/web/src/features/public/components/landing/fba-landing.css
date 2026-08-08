@@ -1,0 +1,8 @@
+/* Landing-only styling. Brand color tokens live in the shared `.fba-scope`
+   theme (components/theme/fba-theme.css); the landing root carries both
+   `.fba-scope` and `.fba-landing`. */
+
+html:has(.fba-landing) {
+  scroll-behavior: smooth;
+  scroll-padding-top: 62px;
+}

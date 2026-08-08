@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
-const webRoot = resolve(import.meta.dirname, "../../apps/web/src");
+const webRoot = resolve(import.meta.dirname, "../../frontend/apps/web/src");
 
 const learnerPages = [
   "app/page.tsx",
@@ -58,7 +58,7 @@ describe("learner shell component expectations", () => {
       "/roadmap",
       "/progress",
       "/readiness",
-      "/swipe",
+      "/practice",
       "/community",
       "/hall-of-fame",
       "/achievements",

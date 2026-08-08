@@ -24,6 +24,11 @@ const themePayload = {
   },
 };
 
+const themeResponse = {
+  ...themePayload,
+  publishedBaselineTokens: null,
+};
+
 const validPutBody = {
   tokens: {
     primary: "#112233",
@@ -40,6 +45,7 @@ const {
   mockRequireActiveMembership,
   mockCan,
   mockUpdateTenantThemeDraft,
+  mockReadTenantTheme,
   mockWithGlobalDb,
   mockWithTenantTx,
 } = vi.hoisted(() => ({
@@ -49,6 +55,7 @@ const {
   mockRequireActiveMembership: vi.fn(),
   mockCan: vi.fn(),
   mockUpdateTenantThemeDraft: vi.fn(),
+  mockReadTenantTheme: vi.fn(),
   mockWithGlobalDb: vi.fn((fn: (db: unknown) => unknown) => fn({ $queryRaw: vi.fn() })),
   mockWithTenantTx: vi.fn((_ctx: unknown, fn: (tx: unknown) => unknown) =>
     fn({ $queryRaw: vi.fn(), $executeRaw: vi.fn() }),
@@ -98,10 +105,11 @@ vi.mock("@atlas/domain-branding", async (importOriginal) => {
   return {
     ...actual,
     updateTenantThemeDraft: (...args: unknown[]) => mockUpdateTenantThemeDraft(...args),
+    readTenantTheme: (...args: unknown[]) => mockReadTenantTheme(...args),
   };
 });
 
-import { PUT } from "../../apps/web/src/app/api/v1/theme/route";
+import { PUT } from "../../backend/apps/api/src/app/api/v1/theme/route";
 
 function createPutRequest(
   headers: Record<string, string> = {},
@@ -139,6 +147,7 @@ describe("PUT /api/v1/theme", () => {
       status: "ACTIVE",
     });
     mockUpdateTenantThemeDraft.mockResolvedValue(themePayload);
+    mockReadTenantTheme.mockResolvedValue(themeResponse);
     mockCan.mockResolvedValue({
       allowed: true,
       permission: "branding.update",
@@ -153,7 +162,7 @@ describe("PUT /api/v1/theme", () => {
     const body: unknown = await response.json();
 
     expect(response.status).toBe(200);
-    expect(body).toEqual(themePayload);
+    expect(body).toEqual(themeResponse);
     expect(mockCan).toHaveBeenCalledWith(
       expect.objectContaining({
         permission: "branding.update",
@@ -164,6 +173,7 @@ describe("PUT /api/v1/theme", () => {
       }),
     );
     expect(mockUpdateTenantThemeDraft).toHaveBeenCalledTimes(1);
+    expect(mockReadTenantTheme).toHaveBeenCalledTimes(1);
   });
 
   it("rejects invalid color values", async () => {

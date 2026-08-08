@@ -1,9 +1,9 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
-import { projectAdminOwnerCapabilities } from "../../../apps/web/src/features/admin/admin-owner-projection";
+import { projectAdminOwnerCapabilities } from "../../../frontend/apps/web/src/features/admin/admin-owner-projection";
 
-const webRoot = resolve(import.meta.dirname, "../../../apps/web/src");
+const webRoot = resolve(import.meta.dirname, "../../../frontend/apps/web/src");
 
 describe("admin owner capability projection", () => {
   it("defaults owner-only controls to hidden for non-owner actors", () => {

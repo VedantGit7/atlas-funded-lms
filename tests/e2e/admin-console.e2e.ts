@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
-const webRoot = resolve(import.meta.dirname, "../../apps/web/src");
+const webRoot = resolve(import.meta.dirname, "../../frontend/apps/web/src");
 
 describe("admin console e2e wiring", () => {
   it("includes all T1-T24 page files", () => {
@@ -21,6 +21,7 @@ describe("admin console e2e wiring", () => {
       "app/admin/certificates/templates/page.tsx",
       "app/admin/certificates/page.tsx",
       "app/admin/gamification/page.tsx",
+      "app/admin/notifications/page.tsx",
       "app/admin/notifications/templates/page.tsx",
       "app/admin/automation/page.tsx",
       "app/admin/workflows/page.tsx",
@@ -31,6 +32,10 @@ describe("admin console e2e wiring", () => {
       "app/admin/audit/page.tsx",
       "app/admin/exports/page.tsx",
       "app/admin/deletion-requests/page.tsx",
+      "app/admin/review/page.tsx",
+      "app/admin/moderation/cases/page.tsx",
+      "app/admin/moderation/cases/[id]/page.tsx",
+      "app/admin/moderation/appeals/page.tsx",
     ];
 
     for (const page of pages) {
@@ -41,9 +46,9 @@ describe("admin console e2e wiring", () => {
   it("admin dashboard links reuse studio, moderation, and review routes", () => {
     const source = readFileSync(resolve(webRoot, "app/admin/page.tsx"), "utf8");
     expect(source).toContain('href="/studio/courses"');
-    expect(source).toContain('href="/moderate/cases"');
-    expect(source).toContain('href="/review"');
-    expect(source).not.toMatch(/\/admin\/courses|\/admin\/moderation|\/admin\/review/);
+    expect(source).toContain("ADMIN_MODERATION_CASES_PATH");
+    expect(source).toContain('href="/admin/review"');
+    expect(source).not.toMatch(/\/admin\/courses/);
   });
 
   it("tenant admin shell exposes mobile navigation affordances", () => {
@@ -53,5 +58,12 @@ describe("admin console e2e wiring", () => {
     );
     expect(source).toContain("admin-mobile-nav");
     expect(source).toContain("Mobile admin navigation");
+  });
+
+  it("dashboard includes active learner and content status summaries", () => {
+    const source = readFileSync(resolve(webRoot, "app/admin/page.tsx"), "utf8");
+    expect(source).toContain("Active learners");
+    expect(source).toContain("Content status");
+    expect(source).toContain("Recent audit activity");
   });
 });

@@ -4,7 +4,7 @@ import {
   moderationCaseDetailQueryKey,
   moderationCasesQueryKey,
   moderationSpacesQueryKey,
-} from "../../../apps/web/src/features/moderation/moderation-query-keys";
+} from "../../../frontend/apps/web/src/features/moderation/moderation-query-keys";
 
 describe("moderation tenant query keys", () => {
   it("scopes moderation keys by tenant host scope", () => {

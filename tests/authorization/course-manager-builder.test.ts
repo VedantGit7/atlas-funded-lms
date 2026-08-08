@@ -3,7 +3,7 @@ import { can, createTenantResourceRef } from "@atlas/authorization";
 import {
   createCourseBodySchema,
   updateCourseBodySchema,
-} from "../../apps/web/src/server/courses/course-authoring-schemas";
+} from "../../backend/apps/api/src/server/courses/course-authoring-schemas";
 
 function instructorTx() {
   return {

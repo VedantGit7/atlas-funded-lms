@@ -1,0 +1,46 @@
+{
+  "name": "@atlas/api-app",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --port 3001",
+    "build": "next build",
+    "start": "next start --port 3001",
+    "lint": "eslint . --max-warnings=0",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "echo \"No api-app tests configured yet.\""
+  },
+  "dependencies": {
+    "@atlas/access": "workspace:*",
+    "@atlas/api": "workspace:*",
+    "@atlas/audit": "workspace:*",
+    "@atlas/auth": "workspace:*",
+    "@atlas/authorization": "workspace:*",
+    "@atlas/core": "workspace:*",
+    "@atlas/db": "workspace:*",
+    "@atlas/domain-access": "workspace:*",
+    "@atlas/domain-branding": "workspace:*",
+    "@atlas/domain-config": "workspace:*",
+    "@atlas/domain-identity": "workspace:*",
+    "@atlas/domain-tenancy": "workspace:*",
+    "@atlas/events": "workspace:*",
+    "@atlas/membership": "workspace:*",
+    "@atlas/observability": "workspace:*",
+    "@atlas/security": "workspace:*",
+    "@atlas/storage": "workspace:*",
+    "@atlas/tenancy": "workspace:*",
+    "@sentry/nextjs": "^9.47.0",
+    "@supabase/supabase-js": "^2.108.2",
+    "next": "^16.2.9",
+    "qrcode": "^1.5.4",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@types/qrcode": "^1.5.6",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0"
+  }
+}

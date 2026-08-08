@@ -133,7 +133,7 @@ vi.mock("@atlas/events", () => ({
   outbox: { publish: vi.fn().mockResolvedValue({ id: "018f0000-0000-7000-8000-000000000099" }) },
 }));
 
-import { GET, POST } from "../../apps/web/src/app/api/v1/domains/route";
+import { GET, POST } from "../../backend/apps/api/src/app/api/v1/domains/route";
 
 function setupAuthenticatedAdmin(permission: string) {
   mockResolveTenant.mockResolvedValue(tenantA);

@@ -3,7 +3,7 @@ import { resolve } from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { PlatformTx } from "@atlas/db";
 import { ProvisionTenantRequestSchema } from "@atlas/domain-tenancy/schemas/platform-tenants";
-import { postRouteMetadata } from "../../../apps/web/src/app/api/v1/platform/tenants/route.metadata";
+import { postRouteMetadata } from "../../../backend/apps/api/src/app/api/v1/platform/tenants/route.metadata";
 
 const tenantId = "018f0000-0000-7000-8000-000000000001";
 const jobId = "018f0000-0000-7000-8000-000000000002";
@@ -23,6 +23,7 @@ const {
   readPlatformTenantDetailMock,
   seedTenantSystemRolesFromCatalogueMock,
   seedOwnerInvitationFromExistingHelperMock,
+  seedTenantWorkflowDefinitionsFromCatalogueMock,
   auditWriterWriteMock,
   outboxPublishMock,
 } = vi.hoisted(() => ({
@@ -37,6 +38,7 @@ const {
   readPlatformTenantDetailMock: vi.fn(),
   seedTenantSystemRolesFromCatalogueMock: vi.fn(),
   seedOwnerInvitationFromExistingHelperMock: vi.fn(),
+  seedTenantWorkflowDefinitionsFromCatalogueMock: vi.fn(),
   auditWriterWriteMock: vi.fn(),
   outboxPublishMock: vi.fn(),
 }));
@@ -72,6 +74,8 @@ vi.mock("@atlas/domain-tenancy/services/platform-tenant-provisioning.helpers", (
     seedTenantSystemRolesFromCatalogueMock(...args),
   seedOwnerInvitationFromExistingHelper: (...args: unknown[]) =>
     seedOwnerInvitationFromExistingHelperMock(...args),
+  seedTenantWorkflowDefinitionsFromCatalogue: (...args: unknown[]) =>
+    seedTenantWorkflowDefinitionsFromCatalogueMock(...args),
 }));
 
 vi.mock("@atlas/audit", () => ({
@@ -232,6 +236,9 @@ describe("platform tenant provisioning", () => {
     await provisionTenant(tx, ctx, validInput);
 
     expect(seedTenantSystemRolesFromCatalogueMock).toHaveBeenCalledWith(tx, { tenantId });
+    expect(seedTenantWorkflowDefinitionsFromCatalogueMock).toHaveBeenCalledWith(tx, {
+      tenantId,
+    });
     expect(seedOwnerInvitationFromExistingHelperMock).toHaveBeenCalledWith(tx, {
       tenantId,
       email: validInput.owner.email,
@@ -314,14 +321,14 @@ describe("platform tenant provisioning", () => {
     const serviceSource = readFileSync(
       resolve(
         import.meta.dirname,
-        "../../../packages/domain/tenancy/src/services/platform-tenant-provisioning.service.ts",
+        "../../../backend/packages/domain/tenancy/src/services/platform-tenant-provisioning.service.ts",
       ),
       "utf8",
     );
     const helpersSource = readFileSync(
       resolve(
         import.meta.dirname,
-        "../../../packages/domain/tenancy/src/services/platform-tenant-provisioning.helpers.ts",
+        "../../../backend/packages/domain/tenancy/src/services/platform-tenant-provisioning.helpers.ts",
       ),
       "utf8",
     );

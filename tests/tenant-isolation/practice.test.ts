@@ -4,7 +4,7 @@ import {
   getDueQueue,
   startPracticeSession,
   submitPracticeResponse,
-} from "../../apps/web/src/server/practice/practice.service";
+} from "../../backend/apps/api/src/server/practice/practice.service";
 import { learnerCtx, createPracticeFixture, authoringTenantTx } from "../fixtures/practice-fixture";
 import { createTenantIsolationFixture, tenantCtx } from "./tenant-isolation-fixture";
 

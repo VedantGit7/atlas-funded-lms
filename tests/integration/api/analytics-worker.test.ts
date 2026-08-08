@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { processAnalyticsOutboxBatch } from "../../../apps/web/src/server/analytics/analytics-worker-router";
-import { createAnalyticsOutboxConsumers } from "../../../apps/web/src/events/outbox-consumers";
+import { processAnalyticsOutboxBatch } from "../../../backend/apps/api/src/server/analytics/analytics-worker-router";
+import { createAnalyticsOutboxConsumers } from "../../../backend/apps/api/src/events/outbox-consumers";
 
 describe("analytics worker wiring", () => {
   it("exposes analytics outbox consumers for approved source events", () => {

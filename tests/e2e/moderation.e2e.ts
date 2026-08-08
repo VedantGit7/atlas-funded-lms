@@ -1,14 +1,12 @@
-import { existsSync, readFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-
-const webRoot = resolve(import.meta.dirname, "../../apps/web/src");
+import { resolveSplitPath, splitPathExists } from "./split-layout-paths";
 
 const moderationPaths = [
   "app/(moderation)/layout.tsx",
-  "app/(moderation)/moderate/cases/page.tsx",
-  "app/(moderation)/moderate/cases/[id]/page.tsx",
-  "app/(moderation)/moderate/appeals/page.tsx",
+  "app/admin/moderation/cases/page.tsx",
+  "app/admin/moderation/cases/[id]/page.tsx",
+  "app/admin/moderation/appeals/page.tsx",
   "app/(moderation)/moderate/spaces/page.tsx",
   "app/api/v1/moderation/cases/route.ts",
   "app/api/v1/moderation/cases/[id]/decide/route.ts",
@@ -29,21 +27,21 @@ const moderationPaths = [
 describe("ATL-STORY-040 moderation e2e wiring", () => {
   it("includes approved moderation screens, APIs, and services", () => {
     for (const relativePath of moderationPaths) {
-      expect(existsSync(resolve(webRoot, relativePath))).toBe(true);
+      expect(splitPathExists(relativePath)).toBe(true);
     }
   });
 
   it("uses gated ModerationShell in moderation layout", () => {
-    const layout = readFileSync(resolve(webRoot, "app/(moderation)/layout.tsx"), "utf8");
+    const layout = readFileSync(resolveSplitPath("app/(moderation)/layout.tsx"), "utf8");
     expect(layout).toContain("ModerationShell");
-    expect(
-      readFileSync(resolve(webRoot, "components/shells/ModerationShell.tsx"), "utf8"),
-    ).toContain("ModerationShellGate");
+    expect(readFileSync(resolveSplitPath("components/shells/ModerationShell.tsx"), "utf8")).toContain(
+      "ModerationShellGate",
+    );
   });
 
   it("moderation shell exposes accessible mobile navigation", () => {
     const source = readFileSync(
-      resolve(webRoot, "components/shells/ModerationShellClient.tsx"),
+      resolveSplitPath("components/shells/ModerationShellClient.tsx"),
       "utf8",
     );
     expect(source).toContain('aria-label="Mobile moderation navigation"');
@@ -52,15 +50,15 @@ describe("ATL-STORY-040 moderation e2e wiring", () => {
   });
 
   it("M2 reads case detail through approved list selector", () => {
-    const api = readFileSync(resolve(webRoot, "features/moderation/api.ts"), "utf8");
+    const api = readFileSync(resolveSplitPath("features/moderation/api.ts"), "utf8");
     expect(api).toContain("/api/v1/moderation/cases?caseId=");
     expect(api).not.toMatch(/fetch\(`\/api\/v1\/moderation\/cases\/\$\{caseId\}`\)/);
   });
 
   it("M3 reads appeals through moderation cases view projection", () => {
-    const api = readFileSync(resolve(webRoot, "features/moderation/api.ts"), "utf8");
+    const api = readFileSync(resolveSplitPath("features/moderation/api.ts"), "utf8");
     const client = readFileSync(
-      resolve(webRoot, "features/moderation/components/AppealsReviewClient.tsx"),
+      resolveSplitPath("features/moderation/components/AppealsReviewClient.tsx"),
       "utf8",
     );
     expect(api).toContain('view?: "cases" | "appeals"');
@@ -70,7 +68,7 @@ describe("ATL-STORY-040 moderation e2e wiring", () => {
 
   it("does not expose learner report routes or permissions", () => {
     const serviceSource = readFileSync(
-      resolve(webRoot, "server/moderation/moderation.service.ts"),
+      resolveSplitPath("server/moderation/moderation.service.ts"),
       "utf8",
     );
     expect(serviceSource).not.toContain("report.create");
@@ -82,11 +80,11 @@ describe("ATL-STORY-040 moderation e2e wiring", () => {
 
   it("registers approved moderation audit actions", () => {
     const eventsSource = readFileSync(
-      resolve(webRoot, "server/moderation/moderation.events.ts"),
+      resolveSplitPath("server/moderation/moderation.events.ts"),
       "utf8",
     );
     const serviceSource = readFileSync(
-      resolve(webRoot, "server/moderation/moderation.service.ts"),
+      resolveSplitPath("server/moderation/moderation.service.ts"),
       "utf8",
     );
     expect(eventsSource).toContain("moderation.case_opened");
@@ -97,7 +95,7 @@ describe("ATL-STORY-040 moderation e2e wiring", () => {
 
   it("blocks self-review in appeal review service", () => {
     const source = readFileSync(
-      resolve(webRoot, "server/moderation/moderation.service.ts"),
+      resolveSplitPath("server/moderation/moderation.service.ts"),
       "utf8",
     );
     expect(source).toContain("appealSelfReviewBlocked");
@@ -105,7 +103,7 @@ describe("ATL-STORY-040 moderation e2e wiring", () => {
 
   it("M2 decision dialog requires confirmation with cancel focus", () => {
     const source = readFileSync(
-      resolve(webRoot, "features/moderation/components/ModerationCaseDetailClient.tsx"),
+      resolveSplitPath("features/moderation/components/ModerationCaseDetailClient.tsx"),
       "utf8",
     );
     expect(source).toContain('role="dialog"');
@@ -115,7 +113,7 @@ describe("ATL-STORY-040 moderation e2e wiring", () => {
 
   it("M4 delete confirmation focuses cancel by default", () => {
     const source = readFileSync(
-      resolve(webRoot, "features/community/components/AdminSpacesEditor.tsx"),
+      resolveSplitPath("features/community/components/AdminSpacesEditor.tsx"),
       "utf8",
     );
     expect(source).toContain("cancelRef");
@@ -124,7 +122,7 @@ describe("ATL-STORY-040 moderation e2e wiring", () => {
 
   it("does not expose audit navigation for moderators", () => {
     const nav = readFileSync(
-      resolve(webRoot, "features/moderation/moderation-navigation.ts"),
+      resolveSplitPath("features/moderation/moderation-navigation.ts"),
       "utf8",
     );
     expect(nav).not.toMatch(/\/moderate\/audit|audit\.read|\/admin|\/platform/);

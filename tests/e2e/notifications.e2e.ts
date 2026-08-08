@@ -1,8 +1,6 @@
-import { existsSync, readFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-
-const webRoot = resolve(import.meta.dirname, "../../apps/web/src");
+import { resolveSplitPath, splitPathExists } from "./split-layout-paths";
 
 const notificationPaths = [
   "app/admin/notifications/templates/page.tsx",
@@ -19,13 +17,13 @@ const notificationPaths = [
 describe("notification e2e wiring", () => {
   it("includes approved screens, APIs, and worker wiring", () => {
     for (const relativePath of notificationPaths) {
-      expect(existsSync(resolve(webRoot, relativePath))).toBe(true);
+      expect(splitPathExists(relativePath)).toBe(true);
     }
   });
 
   it("learner inbox marks read before navigation", () => {
     const source = readFileSync(
-      resolve(webRoot, "features/notifications/components/LearnerNotificationsClient.tsx"),
+      resolveSplitPath("features/notifications/components/LearnerNotificationsClient.tsx"),
       "utf8",
     );
     expect(source).toContain("/read");
@@ -33,9 +31,19 @@ describe("notification e2e wiring", () => {
     expect(source).not.toContain("dangerouslySetInnerHTML");
   });
 
+  it("mark-read route binds notification id from path params", () => {
+    const source = readFileSync(
+      resolveSplitPath("app/api/v1/me/notifications/[id]/read/route.ts"),
+      "utf8",
+    );
+    expect(source).toContain("notificationParamsSchema");
+    expect(source).toContain("params: notificationParamsSchema");
+    expect(source).toContain("params.id");
+  });
+
   it("worker sends email only through provider abstraction", () => {
     const workerSource = readFileSync(
-      resolve(webRoot, "server/notifications/notification.worker.ts"),
+      resolveSplitPath("server/notifications/notification.worker.ts"),
       "utf8",
     );
     expect(workerSource).toContain("getEmailProvider");
@@ -45,7 +53,7 @@ describe("notification e2e wiring", () => {
 
   it("source worker excludes notification.queued recursion", () => {
     const workerSource = readFileSync(
-      resolve(webRoot, "server/notifications/notification.worker.ts"),
+      resolveSplitPath("server/notifications/notification.worker.ts"),
       "utf8",
     );
     expect(workerSource).toContain("if (event.eventType === NOTIFICATION_QUEUED_EVENT)");

@@ -17,6 +17,7 @@ const routeMetadataRule = {
   },
   create(context) {
     let hasRouteMetadataExport = false;
+    let hasCreateTenantRouteMetadata = false;
 
     function isRouteMetadataVariableDeclaration(node) {
       return (
@@ -28,7 +29,73 @@ const routeMetadataRule = {
       );
     }
 
+    function unwrapCallee(node) {
+      let current = node;
+
+      while (current?.type === "TSInstantiationExpression" || current?.type === "ChainExpression") {
+        current = current.expression;
+      }
+
+      return current;
+    }
+
+    function isRouteFactoryCallee(node) {
+      const callee = unwrapCallee(node);
+
+      return (
+        callee?.type === "Identifier" &&
+        (callee.name === "createTenantRoute" ||
+          callee.name === "createPublicRoute" ||
+          callee.name === "createPublicRouteHandler" ||
+          callee.name === "createPlatformRoute")
+      );
+    }
+
+    function isPublicRouteHandlerCallee(node) {
+      const callee = unwrapCallee(node);
+
+      return callee?.type === "Identifier" && callee.name === "createPublicRouteHandler";
+    }
+
+    function objectHasMetadataProperty(objectExpression) {
+      if (!objectExpression || objectExpression.type !== "ObjectExpression") {
+        return false;
+      }
+
+      return objectExpression.properties.some((property) => {
+        if (property.type !== "Property") {
+          return false;
+        }
+
+        if (property.key?.type === "Identifier") {
+          return property.key.name === "metadata";
+        }
+
+        if (property.key?.type === "Literal") {
+          return property.key.value === "metadata";
+        }
+
+        return false;
+      });
+    }
+
     return {
+      CallExpression(node) {
+        if (!isRouteFactoryCallee(node.callee)) {
+          return;
+        }
+
+        // createPublicRouteHandler(metadata, handler) — metadata is the first argument
+        if (isPublicRouteHandlerCallee(node.callee) && node.arguments[0]) {
+          hasCreateTenantRouteMetadata = true;
+          return;
+        }
+
+        if (objectHasMetadataProperty(node.arguments[0])) {
+          hasCreateTenantRouteMetadata = true;
+        }
+      },
+
       ExportNamedDeclaration(node) {
         if (isRouteMetadataVariableDeclaration(node.declaration)) {
           hasRouteMetadataExport = true;
@@ -50,9 +117,10 @@ const routeMetadataRule = {
 
         const isApiRouteFile =
           /(?:apps\/web\/)?src\/app\/api\/.*\/route\.(ts|tsx)$/.test(fileName) ||
-          /apps\/web\/app\/api\/.*\/route\.(ts|tsx)$/.test(fileName);
+          /apps\/web\/app\/api\/.*\/route\.(ts|tsx)$/.test(fileName) ||
+          /backend\/apps\/api\/src\/app\/api\/.*\/route\.(ts|tsx)$/.test(fileName);
 
-        if (!isApiRouteFile || hasRouteMetadataExport) {
+        if (!isApiRouteFile || hasRouteMetadataExport || hasCreateTenantRouteMetadata) {
           return;
         }
 
@@ -63,7 +131,8 @@ const routeMetadataRule = {
 
           if (
             /export\s+const\s+routeMetadata\s*(?::[^=]+)?=/.test(metadataContent) ||
-            /export\s*\{\s*routeMetadata\s*\}/.test(metadataContent)
+            /export\s+const\s+\w*Metadata\s*(?::[^=]+)?=/.test(metadataContent) ||
+            /export\s*\{[^}]*\brouteMetadata\b[^}]*\}/.test(metadataContent)
           ) {
             return;
           }
@@ -151,13 +220,13 @@ export default tseslint.config(
       "**/out/**",
       "**/pnpm-lock.yaml",
       "docs/locked/**",
-      "apps/web/next-env.d.ts",
+      "frontend/apps/web/next-env.d.ts",
       "prisma.config.ts",
-      "packages/db/src/generated/**",
-      "packages/**/src/**/*.d.ts",
-      "packages/domain/config/src/schemas/**",
-      "packages/domain/config/src/services/**",
-      "packages/domain/config/src/repositories/feature-flag.repository.ts",
+      "backend/packages/db/src/generated/**",
+      "backend/packages/**/src/**/*.d.ts",
+      "backend/packages/domain/config/src/schemas/**",
+      "backend/packages/domain/config/src/services/**",
+      "backend/packages/domain/config/src/repositories/feature-flag.repository.ts",
     ],
   },
 
@@ -215,6 +284,17 @@ export default tseslint.config(
       "@typescript-eslint/no-floating-promises": "error",
       "@typescript-eslint/no-misused-promises": "error",
       "@typescript-eslint/switch-exhaustiveness-check": "error",
+      // Numbers/booleans in template strings are intentional and safe in this codebase.
+      "@typescript-eslint/restrict-template-expressions": [
+        "error",
+        {
+          allowNumber: true,
+          allowBoolean: true,
+          allowNullish: false,
+          allowAny: false,
+          allowRegExp: false,
+        },
+      ],
       "atlas/no-hardcoded-tenant-strings": "error",
       "atlas/require-route-metadata": "error",
     },
@@ -222,7 +302,7 @@ export default tseslint.config(
 
   {
     files: ["**/*.{ts,tsx}"],
-    ignores: ["packages/db/src/**/*.{ts,tsx}"],
+    ignores: ["backend/packages/db/src/**/*.{ts,tsx}"],
     rules: {
       "no-restricted-imports": [
         "error",
@@ -241,7 +321,7 @@ export default tseslint.config(
   },
 
   {
-    files: ["packages/db/src/**/*.{ts,tsx}"],
+    files: ["backend/packages/db/src/**/*.{ts,tsx}"],
     rules: {
       "no-restricted-imports": [
         "error",
@@ -253,7 +333,7 @@ export default tseslint.config(
   },
 
   {
-    files: ["apps/web/src/app/api/**/*.{ts,tsx}"],
+    files: ["frontend/apps/web/src/app/api/**/*.{ts,tsx}"],
     rules: {
       "no-restricted-imports": [
         "error",
@@ -300,10 +380,10 @@ export default tseslint.config(
   },
 
   {
-    files: ["apps/web/**/*.{ts,tsx}"],
+    files: ["frontend/apps/web/**/*.{ts,tsx}"],
     ignores: [
-      "apps/web/src/app/api/**/*.{ts,tsx}",
-      "apps/web/src/modules/diagnostics/**/*.{ts,tsx}",
+      "frontend/apps/web/src/app/api/**/*.{ts,tsx}",
+      "frontend/apps/web/src/modules/diagnostics/**/*.{ts,tsx}",
     ],
     rules: {
       "no-restricted-imports": [
@@ -323,6 +403,11 @@ export default tseslint.config(
           ],
           patterns: [
             ...genericForbiddenImportPatterns,
+            {
+              group: ["backend/**"],
+              message:
+                "Frontend code must not import backend source paths. Use /api/v1 HTTP contracts only.",
+            },
             {
               group: [
                 "@atlas/db/*",
@@ -350,7 +435,7 @@ export default tseslint.config(
   },
 
   {
-    files: ["apps/web/src/lib/server/**/*.{ts,tsx}"],
+    files: ["frontend/apps/web/src/lib/server/**/*.{ts,tsx}"],
     rules: {
       "no-restricted-imports": [
         "error",
@@ -369,7 +454,7 @@ export default tseslint.config(
   },
 
   {
-    files: ["apps/web/src/server/**/*.{ts,tsx}"],
+    files: ["frontend/apps/web/src/server/**/*.{ts,tsx}"],
     rules: {
       "no-restricted-imports": [
         "error",
@@ -388,12 +473,12 @@ export default tseslint.config(
   },
 
   {
-    files: ["apps/web/src/modules/diagnostics/**/*.{ts,tsx}"],
+    files: ["frontend/apps/web/src/modules/diagnostics/**/*.{ts,tsx}"],
     ignores: [
-      "apps/web/src/modules/diagnostics/diagnostic.api-client.ts",
-      "apps/web/src/modules/diagnostics/diagnostic.server-api.ts",
-      "apps/web/src/modules/diagnostics/diagnostic.types.ts",
-      "apps/web/src/modules/diagnostics/diagnostic.schemas.ts",
+      "frontend/apps/web/src/modules/diagnostics/diagnostic.api-client.ts",
+      "frontend/apps/web/src/modules/diagnostics/diagnostic.server-api.ts",
+      "frontend/apps/web/src/modules/diagnostics/diagnostic.types.ts",
+      "frontend/apps/web/src/modules/diagnostics/diagnostic.schemas.ts",
     ],
     rules: {
       "no-restricted-imports": [
@@ -413,10 +498,43 @@ export default tseslint.config(
   },
 
   {
+    files: ["frontend/packages/**/*.{ts,tsx}"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            {
+              name: "@prisma/client",
+              message: "Frontend packages must never import Prisma directly.",
+            },
+            {
+              name: "@atlas/db",
+              message: "Frontend packages must not import the DB package directly.",
+            },
+          ],
+          patterns: [
+            ...genericForbiddenImportPatterns,
+            {
+              group: ["backend/**"],
+              message:
+                "Frontend packages must not import backend source paths. Use @atlas/contracts only.",
+            },
+            {
+              group: ["@atlas/db/*"],
+              message: "Frontend packages must not import DB internals.",
+            },
+          ],
+        },
+      ],
+    },
+  },
+
+  {
     files: [
-      "apps/web/src/app/platform/**/*.{ts,tsx}",
-      "apps/web/src/components/shells/PlatformConsoleShell*.{ts,tsx}",
-      "apps/web/src/lib/server/platform-*.{ts,tsx}",
+      "frontend/apps/web/src/app/platform/**/*.{ts,tsx}",
+      "frontend/apps/web/src/components/shells/PlatformConsoleShell*.{ts,tsx}",
+      "frontend/apps/web/src/lib/server/platform-*.{ts,tsx}",
     ],
     rules: {
       "no-restricted-imports": "off",

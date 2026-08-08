@@ -3,7 +3,7 @@ import {
   buildNotificationIdempotencyKey,
   createNotificationTemplateBodySchema,
   plainTextBodySchema,
-} from "../../../apps/web/src/server/notifications/notification.dto";
+} from "../../../backend/apps/api/src/server/notifications/notification.dto";
 
 describe("notification validation", () => {
   it("requires email subject", () => {

@@ -1,8 +1,6 @@
-import { existsSync, readFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-
-const webRoot = resolve(import.meta.dirname, "../../apps/web/src");
+import { resolveSplitPath, splitPathExists, webRoot } from "./split-layout-paths";
 
 const swipePaths = [
   "app/(learner)/swipe/page.tsx",
@@ -24,12 +22,12 @@ const swipePaths = [
 describe("swipe e2e wiring", () => {
   it("includes approved learner screen and APIs", () => {
     for (const relativePath of swipePaths) {
-      expect(existsSync(resolve(webRoot, relativePath))).toBe(true);
+      expect(splitPathExists(relativePath)).toBe(true);
     }
   });
 
   it("learner swipe page uses PageGate and approved APIs", () => {
-    const source = readFileSync(resolve(webRoot, "app/(learner)/swipe/page.tsx"), "utf8");
+    const source = readFileSync(resolveSplitPath("app/(learner)/swipe/page.tsx"), "utf8");
     expect(source).toContain("PageGate");
     expect(source).toContain("practiceServerApi");
     expect(source).toContain("SwipePracticeClient");
@@ -37,10 +35,10 @@ describe("swipe e2e wiring", () => {
 
   it("swipe client uses approved practice APIs and preserves retry idempotency key", () => {
     const source = readFileSync(
-      resolve(webRoot, "features/practice/components/SwipePracticeClient.tsx"),
+      resolveSplitPath("features/practice/components/SwipePracticeClient.tsx"),
       "utf8",
     );
-    const clientApiSource = readFileSync(resolve(webRoot, "lib/client-api.ts"), "utf8");
+    const clientApiSource = readFileSync(resolveSplitPath("lib/client-api.ts"), "utf8");
 
     expect(source).toContain("/api/v1/practice-sessions");
     expect(source).toContain("postWithKey");
@@ -53,7 +51,7 @@ describe("swipe e2e wiring", () => {
 
   it("completion modal avoids fake XP totals", () => {
     const source = readFileSync(
-      resolve(webRoot, "features/practice/components/SwipeSessionSummaryDialog.tsx"),
+      resolveSplitPath("features/practice/components/SwipeSessionSummaryDialog.tsx"),
       "utf8",
     );
     expect(source).toContain("Practice recorded");
@@ -61,7 +59,7 @@ describe("swipe e2e wiring", () => {
   });
 
   it("learner shell links to swipe route", () => {
-    const source = readFileSync(resolve(webRoot, "components/shells/LearnerShell.tsx"), "utf8");
+    const source = readFileSync(resolveSplitPath("components/shells/LearnerShell.tsx"), "utf8");
     expect(source).toContain("/swipe");
   });
 });

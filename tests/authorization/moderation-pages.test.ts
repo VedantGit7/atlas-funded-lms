@@ -2,12 +2,12 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
-const webRoot = resolve(import.meta.dirname, "../../apps/web/src");
+const webRoot = resolve(import.meta.dirname, "../../frontend/apps/web/src");
 
 const moderationPages = [
-  "app/(moderation)/moderate/cases/page.tsx",
-  "app/(moderation)/moderate/cases/[id]/page.tsx",
-  "app/(moderation)/moderate/appeals/page.tsx",
+  "app/admin/moderation/cases/page.tsx",
+  "app/admin/moderation/cases/[id]/page.tsx",
+  "app/admin/moderation/appeals/page.tsx",
   "app/(moderation)/moderate/spaces/page.tsx",
 ];
 
@@ -22,7 +22,7 @@ describe("moderation page authorization patterns", () => {
 
   it("M2 uses approved case detail read via list selector", () => {
     const source = readFileSync(
-      resolve(webRoot, "app/(moderation)/moderate/cases/[id]/page.tsx"),
+      resolve(webRoot, "app/admin/moderation/cases/[id]/page.tsx"),
       "utf8",
     );
     expect(source).toContain("/api/v1/moderation/cases?caseId=");
@@ -31,7 +31,7 @@ describe("moderation page authorization patterns", () => {
 
   it("M3 uses approved appeals projection without GET /appeals", () => {
     const source = readFileSync(
-      resolve(webRoot, "app/(moderation)/moderate/appeals/page.tsx"),
+      resolve(webRoot, "app/admin/moderation/appeals/page.tsx"),
       "utf8",
     );
     expect(source).toContain("/api/v1/moderation/cases?view=appeals");
@@ -61,14 +61,20 @@ describe("moderation shell component expectations", () => {
       "utf8",
     );
 
-    for (const href of ["/moderate/cases", "/moderate/appeals", "/moderate/spaces", "/review"]) {
+    for (const href of [
+      "/moderate/cases",
+      "/moderate/appeals",
+      "/moderate/spaces",
+      "/admin/review",
+    ]) {
       expect(navSource).toContain(`"${href}"`);
     }
 
-    expect(navSource + shellSource).not.toMatch(/\/admin|\/platform|\/moderate\/audit/);
+    expect(navSource + shellSource).not.toMatch(/\/platform|\/moderate\/audit/);
+    expect(navSource + shellSource).not.toMatch(/\/admin\/(?!review)/);
     expect(shellSource).not.toContain('href="/community"');
-    expect(shellSource).toContain('aria-label="Moderation sidebar"');
-    expect(shellSource).toContain('aria-label="Mobile moderation navigation"');
+    expect(shellSource).toContain('sidebarAriaLabel="Moderation sidebar"');
+    expect(shellSource).toContain('bottomNavAriaLabel="Mobile moderation navigation"');
   });
 
   it("M2 does not expose foreign content body editor", () => {

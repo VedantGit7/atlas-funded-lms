@@ -1,8 +1,6 @@
-import { existsSync, readFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-
-const webRoot = resolve(import.meta.dirname, "../../apps/web/src");
+import { resolveSplitPath, splitPathExists } from "./split-layout-paths";
 
 const diagnosticPaths = [
   "app/(public)/diagnostic/page.tsx",
@@ -15,8 +13,8 @@ const diagnosticPaths = [
   "app/api/v1/public/diagnostic/[anonId]/merge/route.ts",
   "app/api/v1/diagnostic/start/route.ts",
   "app/api/v1/diagnostic/[id]/result/route.ts",
-  "modules/diagnostics/diagnostic-public-session.service.ts",
-  "modules/diagnostics/diagnostic-merge.service.ts",
+  "server/diagnostics/diagnostic-public-session.service.ts",
+  "server/diagnostics/diagnostic-merge.service.ts",
   "features/diagnostics/components/PublicDiagnosticRunner.tsx",
   "features/diagnostics/components/DiagnosticIdentityGate.tsx",
   "features/diagnostics/components/AnonymousDiagnosticScorecard.tsx",
@@ -25,13 +23,13 @@ const diagnosticPaths = [
 describe("diagnostic e2e wiring", () => {
   it("includes approved public and learner diagnostic screens and APIs", () => {
     for (const relativePath of diagnosticPaths) {
-      expect(existsSync(resolve(webRoot, relativePath))).toBe(true);
+      expect(splitPathExists(relativePath)).toBe(true);
     }
   });
 
   it("public runner does not persist answers in browser storage", () => {
     const source = readFileSync(
-      resolve(webRoot, "features/diagnostics/components/PublicDiagnosticRunner.tsx"),
+      resolveSplitPath("features/diagnostics/components/PublicDiagnosticRunner.tsx"),
       "utf8",
     );
     expect(source).not.toMatch(/localStorage|sessionStorage/);
@@ -39,7 +37,7 @@ describe("diagnostic e2e wiring", () => {
 
   it("identity gate does not expose merge token in URL or storage", () => {
     const source = readFileSync(
-      resolve(webRoot, "features/diagnostics/components/DiagnosticIdentityGate.tsx"),
+      resolveSplitPath("features/diagnostics/components/DiagnosticIdentityGate.tsx"),
       "utf8",
     );
     expect(source).not.toMatch(/localStorage|sessionStorage/);
@@ -48,7 +46,7 @@ describe("diagnostic e2e wiring", () => {
 
   it("public scorecard components avoid answer key fields", () => {
     const source = readFileSync(
-      resolve(webRoot, "features/diagnostics/components/DiagnosticResultScorecard.tsx"),
+      resolveSplitPath("features/diagnostics/components/DiagnosticResultScorecard.tsx"),
       "utf8",
     );
     expect(source).not.toMatch(/correct_answer|answer_key|is_correct/);

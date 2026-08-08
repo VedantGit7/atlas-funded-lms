@@ -7,7 +7,7 @@ import {
 } from "@atlas/auth";
 import { resolveTenantFromRequest } from "@atlas/tenancy";
 
-vi.mock("../../../packages/auth/src/session", () => ({
+vi.mock("../../../backend/packages/auth/src/session", () => ({
   extractAccessToken: vi.fn(),
   requireSupabaseUser: vi.fn(),
 }));

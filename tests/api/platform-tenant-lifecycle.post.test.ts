@@ -91,9 +91,9 @@ vi.mock("@atlas/events", () => ({
   },
 }));
 
-import { POST as suspendPost } from "../../apps/web/src/app/api/v1/platform/tenants/[id]/suspend/route";
-import { POST as resumePost } from "../../apps/web/src/app/api/v1/platform/tenants/[id]/resume/route";
-import { POST as archivePost } from "../../apps/web/src/app/api/v1/platform/tenants/[id]/archive/route";
+import { POST as suspendPost } from "../../backend/apps/api/src/app/api/v1/platform/tenants/[id]/suspend/route";
+import { POST as resumePost } from "../../backend/apps/api/src/app/api/v1/platform/tenants/[id]/resume/route";
+import { POST as archivePost } from "../../backend/apps/api/src/app/api/v1/platform/tenants/[id]/archive/route";
 
 const platformPrincipal = {
   platformPrincipalId: "018f0000-0000-7000-8000-000000000010",

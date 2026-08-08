@@ -1,0 +1,44 @@
+{
+  "name": "@atlas/observability",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts",
+    "./env": "./src/env.ts",
+    "./health-schema": "./src/health-schema.ts",
+    "./logger": "./src/logger.ts",
+    "./redaction": "./src/redaction.ts",
+    "./request-context": "./src/request-context.ts",
+    "./safe-identifiers": "./src/safe-identifiers.ts",
+    "./release": "./src/release.ts",
+    "./sentry/tags": "./src/sentry/tags.ts",
+    "./sentry/capture": "./src/sentry/capture.ts",
+    "./sentry/expected-errors": "./src/sentry/expected-errors.ts",
+    "./posthog/taxonomy": "./src/posthog/taxonomy.ts",
+    "./posthog/server": "./src/posthog/server.ts",
+    "./posthog/outbox-mapper": "./src/posthog/outbox-mapper.ts",
+    "./better-stack/heartbeat": "./src/better-stack/heartbeat.ts",
+    "./worker/context": "./src/worker/context.ts",
+    "./route-lifecycle": "./src/route-lifecycle.ts"
+  },
+  "dependencies": {
+    "@atlas/core": "workspace:*",
+    "@sentry/nextjs": "^9.47.0",
+    "posthog-node": "^5.0.0",
+    "zod": "^3.25.76"
+  },
+  "scripts": {
+    "build": "echo \"No observability build configured yet.\"",
+    "lint": "echo \"No observability lint configured yet.\"",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "echo \"No observability tests configured yet.\"",
+    "test:unit": "echo \"No observability unit tests configured yet.\"",
+    "test:integration": "echo \"No observability integration tests configured yet.\"",
+    "test:authorization": "echo \"No observability authorization tests configured yet.\"",
+    "test:tenant-isolation": "echo \"No observability tenant-isolation tests configured yet.\"",
+    "test:e2e": "echo \"No observability e2e tests configured yet.\""
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0"
+  }
+}

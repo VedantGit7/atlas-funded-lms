@@ -69,7 +69,7 @@ vi.mock("@atlas/authorization", async (importOriginal) => {
   };
 });
 
-import { GET } from "../../../apps/web/src/app/api/v1/members/route";
+import { GET } from "../../../backend/apps/api/src/app/api/v1/members/route";
 
 describe("GET /api/v1/members", () => {
   beforeEach(() => {

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { withTenantTx } from "@atlas/db";
-import { getMyGamificationProfile } from "../../apps/web/src/server/gamification/gamification.service";
-import { gamificationRepository } from "../../apps/web/src/server/gamification/gamification.repository";
+import { getMyGamificationProfile } from "../../backend/apps/api/src/server/gamification/gamification.service";
+import { gamificationRepository } from "../../backend/apps/api/src/server/gamification/gamification.repository";
 import { authoringTenantTx, createGamificationFixture } from "../fixtures/gamification-fixture";
 import { createTenantIsolationFixture, tenantCtx } from "./tenant-isolation-fixture";
 

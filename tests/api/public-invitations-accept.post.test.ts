@@ -72,7 +72,7 @@ vi.mock("@atlas/db/with-tenant-tx", () => ({
   withTenantTx: (ctx: unknown, fn: (tx: unknown) => unknown) => mockWithTenantTx(ctx, fn),
 }));
 
-import { POST } from "../../apps/web/src/app/api/v1/public/invitations/accept/route";
+import { POST } from "../../backend/apps/api/src/app/api/v1/public/invitations/accept/route";
 
 function createRequest(body: object) {
   return new NextRequest("https://tenant-a.example.com/api/v1/public/invitations/accept", {

@@ -2,12 +2,11 @@ import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
-const webRoot = resolve(import.meta.dirname, "../../apps/web/src");
+const webRoot = resolve(import.meta.dirname, "../../frontend/apps/web/src");
 
 const studioPages = [
   "app/studio/page.tsx",
   "app/studio/courses/page.tsx",
-  "app/studio/courses/[id]/page.tsx",
   "app/studio/courses/[id]/learners/page.tsx",
   "app/studio/courses/[id]/lessons/[lessonId]/page.tsx",
   "app/studio/items/page.tsx",
@@ -30,6 +29,12 @@ describe("studio page authorization patterns", () => {
       expect(source).toMatch(/401|403|denied|not_found/);
     });
   }
+
+  it("app/studio/courses/[id]/layout.tsx handles denied auth states for tabbed course routes", () => {
+    const source = readFileSync(resolve(webRoot, "app/studio/courses/[id]/layout.tsx"), "utf8");
+    expect(source).toMatch(/ServerApiError|PageGate/);
+    expect(source).toMatch(/403|404|not_found/);
+  });
 
   it("I13 checks analytics entitlement before loading dashboard content", () => {
     const source = readFileSync(resolve(webRoot, "app/studio/analytics/page.tsx"), "utf8");
@@ -54,7 +59,7 @@ describe("studio shell component expectations", () => {
       "utf8",
     );
     const shellSource = readFileSync(
-      resolve(webRoot, "components/shells/StudioShellClient.tsx"),
+      resolve(webRoot, "components/shells/studio/StudioShell.tsx"),
       "utf8",
     );
 
@@ -71,9 +76,10 @@ describe("studio shell component expectations", () => {
       expect(navSource).toContain(`"${href}"`);
     }
 
-    expect(navSource + shellSource).not.toMatch(/\/admin|\/moderate|\/platform/);
-    expect(shellSource).toContain('aria-label="Studio sidebar"');
-    expect(shellSource).toContain('aria-label="Mobile studio navigation"');
+    expect(navSource).not.toMatch(/\/admin\/|\/moderate|\/platform/);
+    expect(shellSource).toContain('href="/admin"');
+    expect(shellSource).toContain('aria-label="Studio sections"');
+    expect(shellSource).toContain('id="studio-main"');
   });
 
   it("includes I1 and I12 route files", () => {

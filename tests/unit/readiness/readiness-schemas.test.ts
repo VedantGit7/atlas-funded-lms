@@ -7,8 +7,8 @@ import {
   ctaPolicyConfigSchema,
   deriveProminence,
   updateReadinessPolicyBodySchema,
-} from "../../../apps/web/src/server/readiness/readiness.schemas";
-import { mintAttributionTokenValue } from "../../../apps/web/src/server/readiness/cta-attribution.service";
+} from "../../../backend/apps/api/src/server/readiness/readiness.schemas";
+import { mintAttributionTokenValue } from "../../../backend/apps/api/src/server/readiness/cta-attribution.service";
 
 describe("readiness schemas", () => {
   it("rejects tenant_id and client targetUrl", () => {

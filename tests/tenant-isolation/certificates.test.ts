@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { withTenantTx } from "@atlas/db";
-import { certificateRepository } from "../../apps/web/src/server/certificates/certificate.repository";
+import { certificateRepository } from "../../backend/apps/api/src/server/certificates/certificate.repository";
 import {
   issueCertificate,
   revokeCertificate,
   verifyCredentialPublic,
-} from "../../apps/web/src/server/certificates/certificate.service";
-import { publishAssessmentForTests } from "../../apps/web/src/server/assessments/assessments.service";
+} from "../../backend/apps/api/src/server/certificates/certificate.service";
+import { publishAssessmentForTests } from "../../backend/apps/api/src/server/assessments/assessments.service";
 import {
   adminCtx,
   authoringTenantTx,

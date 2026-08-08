@@ -15,14 +15,17 @@ import { buildApplyPlan, formatApplyPlan } from "@atlas/tenant-config";
 import {
   createCompetencyDimension,
   createScoringProfile,
-} from "../../apps/web/src/server/competency/competency-config.service";
-import { replaceProfileBands } from "../../apps/web/src/server/competency/scoring-config.service";
-import { createLearningPathDraft } from "../../apps/web/src/server/learning-paths/learning-path.service";
-import { createCertificateTemplate } from "../../apps/web/src/server/certificates/certificate.service";
-import { createSpace } from "../../apps/web/src/server/community/community.service";
-import { createBadgeFromPost } from "../../apps/web/src/server/gamification/gamification.service";
-import { updateReadinessPolicy } from "../../apps/web/src/server/readiness/readiness-policy.service";
-import { createExtensionRegistration } from "../../apps/web/src/server/extensions/extensions.service";
+} from "../../backend/apps/api/src/server/competency/competency-config.service";
+import { replaceProfileBands } from "../../backend/apps/api/src/server/competency/scoring-config.service";
+import { createLearningPathDraft } from "../../backend/apps/api/src/server/learning-paths/learning-path.service";
+import { createCertificateTemplate } from "../../backend/apps/api/src/server/certificates/certificate.service";
+import { createSpace } from "../../backend/apps/api/src/server/community/community.service";
+import {
+  createBadgeFromPost,
+  createLeaderboard,
+} from "../../backend/apps/api/src/server/gamification/gamification.service";
+import { updateReadinessPolicy } from "../../backend/apps/api/src/server/readiness/readiness-policy.service";
+import { createExtensionRegistration } from "../../backend/apps/api/src/server/extensions/extensions.service";
 
 export type ApplyContext = {
   environment: ApplyEnvironment;
@@ -426,6 +429,31 @@ async function applyTenantScopedConfiguration(
       `;
       if (existing.length === 0) {
         await createBadgeFromPost(tx, serviceCtx, badge);
+      }
+    }
+
+    for (const leaderboard of manifest.gamification.leaderboards) {
+      const existing = await tx.$queryRaw<Array<{ id: string }>>`
+        SELECT id::text FROM leaderboard_definitions
+        WHERE tenant_id = ${tenantId}::uuid AND key = ${leaderboard.key}
+        LIMIT 1
+      `;
+      if (existing.length === 0) {
+        await createLeaderboard(tx, serviceCtx, {
+          operation: "create",
+          leaderboard: {
+            key: leaderboard.key,
+            name: leaderboard.name,
+            metricKey: leaderboard.metricKey,
+            windowKey: leaderboard.windowKey,
+            config: {
+              scopeType: "tenant",
+              privacyMode: "anonymous_rank",
+              maxEntries: leaderboard.maxEntries,
+            },
+            status: leaderboard.status,
+          },
+        });
       }
     }
 

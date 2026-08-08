@@ -1,0 +1,22 @@
+/** Canonical workflow API schemas — keep in sync via @atlas/contracts. */
+export {
+  createWorkflowDefinitionBodySchema,
+  updateWorkflowDefinitionBodySchema,
+  workflowDefinitionListResponseSchema,
+  workflowDefinitionResponseSchema,
+  workflowDefinitionViewSchema,
+  workflowHistoryItemSchema,
+  workflowHistoryQuerySchema,
+  workflowHistoryResponseSchema,
+  workflowListQuerySchema,
+  workflowListResponseSchema,
+  workflowQueueItemSchema,
+  workflowTargetSchema,
+  workflowTargetTypeSchema,
+  workflowTransitionBodySchema,
+  workflowTransitionParamsSchema,
+  workflowTransitionResultSchema,
+  type WorkflowHistoryQuery,
+  type WorkflowListQuery,
+  type WorkflowTransitionBody,
+} from "@atlas/contracts/workflows/workflow-schemas";

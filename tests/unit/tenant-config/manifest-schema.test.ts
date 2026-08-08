@@ -8,6 +8,7 @@ describe("tenant manifest schema", () => {
     expect(manifest.entitlements.map((entry) => entry.key)).toEqual([
       "branding.custom_domain.enable",
       "community.enable",
+      "community.private_spaces.enable",
       "certification.enable",
       "gamification.enable",
       "analytics.dashboard.view",

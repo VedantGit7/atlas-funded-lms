@@ -2,11 +2,11 @@ import { describe, expect, it } from "vitest";
 import {
   buildChartTableFallback,
   shouldUseChartTableFallback,
-} from "../../../apps/web/src/features/learner/helpers/chart-fallback";
+} from "../../../frontend/apps/web/src/features/learner/helpers/chart-fallback";
 import {
   EDUCATIONAL_READINESS_COPY,
   HALL_OF_FAME_DISCLAIMER,
-} from "../../../apps/web/src/features/learner/copy/learner-copy";
+} from "../../../frontend/apps/web/src/features/learner/copy/learner-copy";
 
 describe("learner copy and chart fallback helpers", () => {
   it("uses educational readiness copy without guarantee language", () => {

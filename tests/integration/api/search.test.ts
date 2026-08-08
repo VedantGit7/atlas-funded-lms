@@ -8,7 +8,7 @@ import {
   searchReindexMetadata,
 } from "@atlas/domain/search/search.route-metadata";
 import { processSearchSourceEvent } from "@atlas/domain/search/search.worker";
-import "../../../apps/web/src/server/search/search-source-adapters";
+import "../../../backend/apps/api/src/server/search/search-source-adapters";
 import {
   adminCtx,
   authoringTenantTx,

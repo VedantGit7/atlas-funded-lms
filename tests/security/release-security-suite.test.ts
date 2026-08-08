@@ -4,7 +4,7 @@ import { scanRuntimeForFundedBeyondFork } from "@atlas/tenant-config/security-sc
 describe("release security suite", () => {
   it("forbidden-scope runtime scan passes for tenant web code", () => {
     const violations = scanRuntimeForFundedBeyondFork({
-      roots: ["apps/web/src"],
+      roots: ["frontend/apps/web/src"],
       allowPaths: ["tests/e2e/fundedbeyond-journey.e2e.ts"],
     });
     expect(violations).toEqual([]);

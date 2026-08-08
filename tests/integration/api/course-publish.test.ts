@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { withTenantTx } from "@atlas/db";
-import { submitCourseForReview } from "../../../apps/web/src/server/courses/course-authoring.service";
-import { createCourseModule } from "../../../apps/web/src/server/courses/course-authoring.service";
-import { findCourseAuthProjection } from "../../../apps/web/src/server/courses/courses.repository";
+import { submitCourseForReview } from "../../../backend/apps/api/src/server/courses/course-authoring.service";
+import { createCourseModule } from "../../../backend/apps/api/src/server/courses/course-authoring.service";
+import { findCourseAuthProjection } from "../../../backend/apps/api/src/server/courses/courses.repository";
 import {
   createCourseAuthoringFixture,
   instructorCtx,

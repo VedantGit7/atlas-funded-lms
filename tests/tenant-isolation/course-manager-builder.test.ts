@@ -8,8 +8,8 @@ import {
   submitCourseForReview,
   updateCourse,
   updateCourseModule,
-} from "../../apps/web/src/server/courses/course-authoring.service";
-import { createCourseBodySchema } from "../../apps/web/src/server/courses/course-authoring-schemas";
+} from "../../backend/apps/api/src/server/courses/course-authoring.service";
+import { createCourseBodySchema } from "../../backend/apps/api/src/server/courses/course-authoring-schemas";
 import {
   createCourseAuthoringFixture,
   instructorCtx,

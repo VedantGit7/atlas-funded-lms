@@ -25,8 +25,11 @@ Thumbs.db
 .idea/
 
 # local generated files
+.storage/
 coverage/
-.playwright/
+.test-results/
+playwright-report/
+lhci-reports/
 release-evidence.json
 packages/**/src/**/*.d.ts
 packages/**/tsconfig.tsbuildinfo

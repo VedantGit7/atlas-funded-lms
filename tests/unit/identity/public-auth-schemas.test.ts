@@ -6,6 +6,7 @@ import {
   rejectClientTenantId,
   resolvePublicAuthStatus,
   resolveRoleHomePath,
+  resolvePostInviteRedirect,
   resolveRedirectForAuthStatus,
 } from "@atlas/domain-identity";
 
@@ -87,5 +88,21 @@ describe("public auth ui helpers", () => {
     expect(resolveRoleHomePath(["instructor"])).toBe("/studio");
     expect(resolveRoleHomePath(["moderator"])).toBe("/moderate");
     expect(resolveRoleHomePath(["learner"])).toBe("/");
+  });
+
+  it("routes privileged invite completions through MFA setup when needed", () => {
+    expect(
+      resolvePostInviteRedirect({
+        roleHome: "/admin",
+        mfaEnabled: false,
+      }),
+    ).toBe("/invite/security?next=%2Fadmin");
+
+    expect(
+      resolvePostInviteRedirect({
+        roleHome: "/",
+        mfaEnabled: false,
+      }),
+    ).toBe("/");
   });
 });

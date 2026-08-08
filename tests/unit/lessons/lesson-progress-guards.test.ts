@@ -7,7 +7,7 @@ import {
   isFirstCompletion,
   resolveProgressStatus,
   shouldAdvanceProgressPct,
-} from "../../../apps/web/src/server/lessons/lesson-progress-guards";
+} from "../../../backend/apps/api/src/server/lessons/lesson-progress-guards";
 
 describe("lesson progress guards", () => {
   it("computes progress pct from position and duration", () => {

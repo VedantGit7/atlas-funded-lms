@@ -107,13 +107,13 @@ describe("enforceEntitlement", () => {
 
   it("never checks plan_name, plan, or subscription fields", () => {
     const enforceSource = readFileSync(
-      resolve(import.meta.dirname, "../../../packages/authorization/src/enforce-entitlement.ts"),
+      resolve(import.meta.dirname, "../../../backend/packages/authorization/src/enforce-entitlement.ts"),
       "utf8",
     );
     const repositorySource = readFileSync(
       resolve(
         import.meta.dirname,
-        "../../../packages/domain/config/src/repositories/entitlement.repository.ts",
+        "../../../backend/packages/domain/config/src/repositories/entitlement.repository.ts",
       ),
       "utf8",
     );

@@ -5,7 +5,8 @@ import {
   CreateAssessmentBodySchema,
   SaveAnswerBodySchema,
   SubmitAttemptBodySchema,
-} from "../../../apps/web/src/features/assessments/schemas";
+  UpdateAssessmentBodySchema,
+} from "../../../frontend/apps/web/src/features/assessments/schemas";
 
 describe("assessment schemas", () => {
   it("accepts valid quiz config", () => {
@@ -50,6 +51,27 @@ describe("assessment schemas", () => {
         passMarkPercent: 120,
       }),
     ).toThrow();
+  });
+
+  it("accepts update config with null time limit to clear it", () => {
+    const parsed = UpdateAssessmentBodySchema.parse({
+      title: "Quiz 1",
+      config: {
+        attemptsAllowed: 1,
+        timeLimitSeconds: null,
+        passMarkPercent: 70,
+      },
+      items: [
+        {
+          itemId: "018f0000-0000-7000-8000-000000000001",
+          position: 1,
+          points: 1,
+          required: true,
+        },
+      ],
+    });
+
+    expect(parsed.config?.timeLimitSeconds).toBeNull();
   });
 
   it("validates item positions", () => {

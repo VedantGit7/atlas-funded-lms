@@ -1,7 +1,7 @@
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 
-const apiRoots = ["apps/web/src/app/api", "apps/web/app/api"];
+const apiRoots = ["backend/apps/api/src/app/api"];
 
 function walkFiles(directory) {
   try {
@@ -33,6 +33,14 @@ function hasRouteMetadataExport(content) {
   );
 }
 
+function hasCreateRouteWithMetadata(content) {
+  return (
+    /create(?:Tenant|Public|Platform)Route[\s\S]*?metadata\s*:/.test(content) ||
+    /metadata\s*:[\s\S]*?create(?:Tenant|Public|Platform)Route/.test(content) ||
+    /createPublicRouteHandler\s*[<(]/.test(content)
+  );
+}
+
 function hasCoLocatedRouteMetadata(routeFile) {
   const metadataFile = routeFile.replace(/route\.(ts|tsx)$/, "route.metadata.$1");
 
@@ -40,7 +48,8 @@ function hasCoLocatedRouteMetadata(routeFile) {
     return false;
   }
 
-  return hasRouteMetadataExport(readFileSync(metadataFile, "utf8"));
+  const content = readFileSync(metadataFile, "utf8");
+  return hasRouteMetadataExport(content) || /export\s+const\s+\w*Metadata\s*=/.test(content);
 }
 
 const routeFiles = apiRoots
@@ -51,7 +60,10 @@ const failures = [];
 
 for (const file of routeFiles) {
   const content = readFileSync(file, "utf8");
-  const hasRouteMetadata = hasRouteMetadataExport(content) || hasCoLocatedRouteMetadata(file);
+  const hasRouteMetadata =
+    hasRouteMetadataExport(content) ||
+    hasCreateRouteWithMetadata(content) ||
+    hasCoLocatedRouteMetadata(file);
 
   if (!hasRouteMetadata) {
     failures.push(file);

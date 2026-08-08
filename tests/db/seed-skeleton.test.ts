@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { stableSeedId } from "../../prisma/seeds/ids";
-import { runSeeds, seedModules } from "../../prisma/seeds/index";
+import { stableSeedId } from "../../backend/prisma/seeds/ids";
+import { runSeeds, seedModules } from "../../backend/prisma/seeds/index";
 
 describe("seed skeleton", () => {
   it("registers the approved Sprint 0 seed modules in deterministic order", () => {

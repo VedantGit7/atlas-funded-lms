@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   computeScorePercent,
   distributeManualScore,
-} from "../../../apps/web/src/server/grading/grading.service";
+} from "../../../backend/apps/api/src/server/grading/grading.service";
 
 describe("grading service helpers", () => {
   it("distributes manual score across weighted items", () => {

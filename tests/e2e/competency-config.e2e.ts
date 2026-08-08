@@ -1,8 +1,6 @@
-import { existsSync, readFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-
-const webRoot = resolve(import.meta.dirname, "../../apps/web/src");
+import { resolveSplitPath, splitPathExists } from "./split-layout-paths";
 
 const competencyPaths = [
   "app/admin/competency/page.tsx",
@@ -23,22 +21,22 @@ const competencyPaths = [
 describe("competency config e2e wiring", () => {
   it("includes approved admin screen and APIs", () => {
     for (const relativePath of competencyPaths) {
-      expect(existsSync(resolve(webRoot, relativePath))).toBe(true);
+      expect(splitPathExists(relativePath)).toBe(true);
     }
   });
 
   it("admin competency page handles denied state", () => {
-    const source = readFileSync(resolve(webRoot, "app/admin/competency/page.tsx"), "utf8");
+    const source = readFileSync(resolveSplitPath("app/admin/competency/page.tsx"), "utf8");
     expect(source).toContain("denied");
   });
 
   it("signal inspector uses competency-signals API", () => {
     const tableSource = readFileSync(
-      resolve(webRoot, "features/competency/components/CompetencySignalTable.tsx"),
+      resolveSplitPath("features/competency/components/CompetencySignalTable.tsx"),
       "utf8",
     );
     const clientSource = readFileSync(
-      resolve(webRoot, "modules/competency/competency.api-client.ts"),
+      resolveSplitPath("modules/competency/competency.api-client.ts"),
       "utf8",
     );
     expect(tableSource).toContain("competencyApiClient.listCompetencySignals");
@@ -47,7 +45,7 @@ describe("competency config e2e wiring", () => {
 
   it("dimension editor supports generic keys", () => {
     const source = readFileSync(
-      resolve(webRoot, "features/competency/components/DimensionEditor.tsx"),
+      resolveSplitPath("features/competency/components/DimensionEditor.tsx"),
       "utf8",
     );
     expect(source).toContain("execution_skill");
@@ -56,14 +54,14 @@ describe("competency config e2e wiring", () => {
 
   it("publish panel uses confirmation", () => {
     const source = readFileSync(
-      resolve(webRoot, "features/competency/components/ScoringPublishPanel.tsx"),
+      resolveSplitPath("features/competency/components/ScoringPublishPanel.tsx"),
       "utf8",
     );
     expect(source).toContain("Confirm publish");
   });
 
   it("admin dashboard links to competency config", () => {
-    const source = readFileSync(resolve(webRoot, "app/admin/page.tsx"), "utf8");
+    const source = readFileSync(resolveSplitPath("app/admin/page.tsx"), "utf8");
     expect(source).toContain("/admin/competency");
   });
 });

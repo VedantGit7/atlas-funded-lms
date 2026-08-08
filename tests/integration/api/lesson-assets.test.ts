@@ -4,7 +4,7 @@ import {
   attachLessonAsset,
   listLessonAssetsForLesson,
   removeLessonAsset,
-} from "../../../apps/web/src/server/lessons/lesson-assets.service";
+} from "../../../backend/apps/api/src/server/lessons/lesson-assets.service";
 import {
   createLessonEngineFixture,
   instructorCtx,

@@ -1,7 +1,14 @@
 {
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
-    "noEmit": true
+    "noEmit": true,
+    "types": ["node"]
   },
-  "include": ["**/*.ts"]
+  "include": [
+    "./**/*",
+    "../backend/apps/api/src/**/*",
+    "../backend/packages/**/*",
+    "../frontend/apps/web/src/**/*",
+    "../frontend/packages/contracts/src/**/*"
+  ]
 }

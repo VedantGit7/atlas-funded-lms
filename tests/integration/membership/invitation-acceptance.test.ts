@@ -5,20 +5,20 @@ const mockActivate = vi.fn();
 const mockCreateProfile = vi.fn();
 const mockWriteAudit = vi.fn();
 
-vi.mock("../../../packages/membership/src/membership.repository", () => ({
+vi.mock("../../../backend/packages/membership/src/membership.repository", () => ({
   findInvitedMembershipByTokenHash: (...args: unknown[]) => mockFindInvited(...args),
   activateInvitedMembership: (...args: unknown[]) => mockActivate(...args),
 }));
 
-vi.mock("../../../packages/membership/src/member-profile.repository", () => ({
+vi.mock("../../../backend/packages/membership/src/member-profile.repository", () => ({
   createMemberProfileIfMissing: (...args: unknown[]) => mockCreateProfile(...args),
 }));
 
-vi.mock("../../../packages/membership/src/membership-audit.repository", () => ({
+vi.mock("../../../backend/packages/membership/src/membership-audit.repository", () => ({
   writeMembershipStatusAudit: (...args: unknown[]) => mockWriteAudit(...args),
 }));
 
-import { acceptInvitation } from "../../../packages/membership/src/invitation.service";
+import { acceptInvitation } from "../../../backend/packages/membership/src/invitation.service";
 
 describe("acceptInvitation", () => {
   beforeEach(() => {

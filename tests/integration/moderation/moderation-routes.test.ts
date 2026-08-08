@@ -4,14 +4,14 @@ import { describe, expect, it } from "vitest";
 import {
   MODERATION_ROUTE_REGISTRY,
   type ModerationScreenId,
-} from "../../../apps/web/src/features/moderation/moderation-route-registry";
+} from "../../../frontend/apps/web/src/features/moderation/moderation-route-registry";
 
-const webRoot = resolve(import.meta.dirname, "../../../apps/web/src");
+const webRoot = resolve(import.meta.dirname, "../../../frontend/apps/web/src");
 
 const pageByScreen: Record<ModerationScreenId, string> = {
-  M1: "app/(moderation)/moderate/cases/page.tsx",
-  M2: "app/(moderation)/moderate/cases/[id]/page.tsx",
-  M3: "app/(moderation)/moderate/appeals/page.tsx",
+  M1: "app/admin/moderation/cases/page.tsx",
+  M2: "app/admin/moderation/cases/[id]/page.tsx",
+  M3: "app/admin/moderation/appeals/page.tsx",
   M4: "app/(moderation)/moderate/spaces/page.tsx",
 };
 

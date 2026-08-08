@@ -3,16 +3,16 @@ import { withTenantTx } from "@atlas/db";
 import {
   attachLessonAsset,
   listLessonAssetsForLesson,
-} from "../../apps/web/src/server/lessons/lesson-assets.service";
+} from "../../backend/apps/api/src/server/lessons/lesson-assets.service";
 import {
   archiveOrDeleteLesson,
   createLesson,
   getLessonForPlayer,
   listLessonsForModule,
   updateLesson,
-} from "../../apps/web/src/server/lessons/lessons.service";
-import { recordLessonProgress } from "../../apps/web/src/server/lessons/lesson-progress.service";
-import { lessonProgressBodySchema } from "../../apps/web/src/server/lessons/lesson-schemas";
+} from "../../backend/apps/api/src/server/lessons/lessons.service";
+import { recordLessonProgress } from "../../backend/apps/api/src/server/lessons/lesson-progress.service";
+import { lessonProgressBodySchema } from "../../backend/apps/api/src/server/lessons/lesson-schemas";
 import {
   createLessonEngineFixture,
   instructorCtx,

@@ -125,12 +125,12 @@ describe("branding update", () => {
     const serviceSource = readFileSync(
       resolve(
         import.meta.dirname,
-        "../../../packages/domain/branding/src/services/branding-update.service.ts",
+        "../../../backend/packages/domain/branding/src/services/branding-update.service.ts",
       ),
       "utf8",
     );
     const schemaSource = readFileSync(
-      resolve(import.meta.dirname, "../../../packages/domain/branding/src/schemas/branding.ts"),
+      resolve(import.meta.dirname, "../../../backend/packages/domain/branding/src/schemas/branding.ts"),
       "utf8",
     );
 

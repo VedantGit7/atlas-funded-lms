@@ -2,19 +2,19 @@ import { describe, expect, it } from "vitest";
 import {
   buildAutomationActionIdempotencyKey,
   buildAutomationRunIdempotencyKey,
-} from "../../../apps/web/src/server/automation/automation.dto";
+} from "../../../backend/apps/api/src/server/automation/automation.dto";
 import {
   assertAutomationTriggerEventType,
   automationActionSchema,
   evaluateAutomationCondition,
   parseAutomationAction,
   parseAutomationCondition,
-} from "../../../apps/web/src/server/automation/automation.registry";
-import { isAutomationCycleEvent } from "../../../apps/web/src/server/automation/automation.events";
+} from "../../../backend/apps/api/src/server/automation/automation.registry";
+import { isAutomationCycleEvent } from "../../../backend/apps/api/src/server/automation/automation.events";
 import {
   localeResourceValueSchema,
   upsertLocaleResourcesBodySchema,
-} from "../../../apps/web/src/server/locales/locale.dto";
+} from "../../../backend/apps/api/src/server/locales/locale.dto";
 
 describe("automation trigger validation", () => {
   it("accepts approved non-cycle triggers", () => {

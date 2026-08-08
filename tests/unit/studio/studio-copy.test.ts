@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
-const webRoot = resolve(import.meta.dirname, "../../../apps/web/src");
+const webRoot = resolve(import.meta.dirname, "../../../frontend/apps/web/src");
 
 describe("studio publish copy semantics", () => {
   it("uses submit-for-review labels in studio builders", () => {

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   gradeTaskBodySchema,
   gradingListQuerySchema,
-} from "../../../apps/web/src/server/grading/grading-schemas";
+} from "../../../backend/apps/api/src/server/grading/grading-schemas";
 
 describe("GradeTaskBodySchema", () => {
   it("accepts valid score and feedback", () => {
