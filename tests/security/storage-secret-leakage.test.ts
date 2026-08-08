@@ -205,7 +205,7 @@ describe("storage secret leakage", () => {
     expect(clientUploadShape).not.toContain("R2_ACCESS_KEY_ID");
 
     const providerSource = readFileSync(
-      resolve(import.meta.dirname, "../../packages/storage/src/providers/r2-storage-provider.ts"),
+      resolve(import.meta.dirname, "../../backend/packages/storage/src/providers/r2-storage-provider.ts"),
       "utf8",
     );
 

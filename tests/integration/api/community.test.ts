@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { runProtectedTenantRoutePipeline } from "@atlas/api/create-tenant-route";
 import { withTenantTx } from "@atlas/db";
-import { listSpacePostsMetadata } from "../../../apps/web/src/server/community/community.route-metadata";
+import { listSpacePostsMetadata } from "../../../backend/apps/api/src/server/community/community.route-metadata";
 import {
   createComment,
   createPost,
@@ -15,8 +15,8 @@ import {
   listSpaces,
   resolveHallOfFameConfig,
   updateComment,
-} from "../../../apps/web/src/server/community/community.service";
-import { buildHallOfFameProjection } from "../../../apps/web/src/server/community/community.hall-of-fame-service";
+} from "../../../backend/apps/api/src/server/community/community.service";
+import { buildHallOfFameProjection } from "../../../backend/apps/api/src/server/community/community.hall-of-fame-service";
 import {
   adminCtx,
   authoringTenantTx,

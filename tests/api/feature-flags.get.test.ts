@@ -64,7 +64,7 @@ vi.mock("@atlas/domain-config/services/feature-flag.service", () => ({
   listTenantFeatureFlags: (...args: unknown[]) => mockListTenantFeatureFlags(...args),
 }));
 
-import { GET } from "../../apps/web/src/app/api/v1/feature-flags/route";
+import { GET } from "../../backend/apps/api/src/app/api/v1/feature-flags/route";
 
 const tenantA = {
   tenantId: "tenant-a-id",

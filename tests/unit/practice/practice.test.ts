@@ -3,9 +3,9 @@ import {
   DueQueueQuerySchema,
   StartPracticeSessionBodySchema,
   SubmitPracticeResponseBodySchema,
-} from "../../../apps/web/src/server/practice/practice.schemas";
-import { scheduleSrsUpdate } from "../../../apps/web/src/server/practice/srs.service";
-import { scoreSwipeResponse } from "../../../apps/web/src/server/practice/swipe-scoring.service";
+} from "../../../backend/apps/api/src/server/practice/practice.schemas";
+import { scheduleSrsUpdate } from "../../../backend/apps/api/src/server/practice/srs.service";
+import { scoreSwipeResponse } from "../../../backend/apps/api/src/server/practice/swipe-scoring.service";
 
 describe("practice schemas", () => {
   it("rejects tenant_id, membershipId, score, isCorrect, and client item selection on session start", () => {
@@ -91,6 +91,19 @@ describe("practice schemas", () => {
         tenant_id: "018f0000-0000-7000-8000-000000000006",
       }),
     ).toThrow();
+  });
+
+  it("coerces a string limit from the query string", () => {
+    // Query params always arrive as strings; the schema must coerce, not 400.
+    expect(DueQueueQuerySchema.parse({ limit: "20" })).toEqual({ limit: 20 });
+  });
+
+  it("defaults the limit when omitted", () => {
+    expect(DueQueueQuerySchema.parse({})).toEqual({ limit: 20 });
+  });
+
+  it("rejects unknown keys on due queue query", () => {
+    expect(() => DueQueueQuerySchema.parse({ limit: "20", foo: "bar" })).toThrow();
   });
 });
 

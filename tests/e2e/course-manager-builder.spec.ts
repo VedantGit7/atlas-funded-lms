@@ -2,13 +2,15 @@ import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
-const webRoot = resolve(import.meta.dirname, "../../apps/web/src");
+const webRoot = resolve(import.meta.dirname, "../../frontend/apps/web/src");
 
 const studioPaths = [
   "app/studio/layout.tsx",
   "app/studio/page.tsx",
   "app/studio/courses/page.tsx",
   "app/studio/courses/[id]/page.tsx",
+  "app/studio/courses/[id]/editor/page.tsx",
+  "app/studio/courses/[id]/dashboard/page.tsx",
   "app/studio/courses/[id]/learners/page.tsx",
   "components/shells/StudioShell.tsx",
   "components/shells/StudioShellGate.tsx",
@@ -20,7 +22,8 @@ const studioPaths = [
   "features/studio/courses/create-course-dialog.tsx",
   "features/studio/courses/course-builder.tsx",
   "features/studio/courses/course-settings-form.tsx",
-  "features/studio/courses/course-module-tree.tsx",
+  "features/studio/courses/course-chapters-sidebar.tsx",
+  "features/studio/courses/add-chapter-dialog.tsx",
   "features/studio/courses/builder-validation-panel.tsx",
   "features/studio/courses/course-status-badge.tsx",
   "app/api/v1/courses/route.ts",
@@ -55,18 +58,25 @@ describe("course manager builder e2e wiring", () => {
   });
 
   it("submits course for review from builder", () => {
-    const source = readFileSync(
+    const builder = readFileSync(
       resolve(webRoot, "features/studio/courses/course-builder.tsx"),
       "utf8",
     );
-    expect(source).toContain("/publish");
-    expect(source).toContain("Submit for review");
+    const validation = readFileSync(
+      resolve(webRoot, "features/studio/courses/builder-validation-panel.tsx"),
+      "utf8",
+    );
+    expect(builder).toContain("/publish");
+    expect(validation).toContain("Submit for review");
   });
 
   it("handles denied/not-found states on studio pages", () => {
     const manager = readFileSync(resolve(webRoot, "app/studio/courses/page.tsx"), "utf8");
-    const builder = readFileSync(resolve(webRoot, "app/studio/courses/[id]/page.tsx"), "utf8");
+    const shellLayout = readFileSync(
+      resolve(webRoot, "app/studio/courses/[id]/layout.tsx"),
+      "utf8",
+    );
     expect(manager).toContain("denied");
-    expect(builder).toContain("not_found");
+    expect(shellLayout).toContain("not_found");
   });
 });

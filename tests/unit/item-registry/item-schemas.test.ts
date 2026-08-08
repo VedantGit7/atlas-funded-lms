@@ -5,11 +5,11 @@ import {
   ItemOptionInputSchema,
   CollectionTypeSchema,
   PutDimensionWeightsBodySchema,
-} from "../../../apps/web/src/features/item-registry/schemas";
+} from "../../../frontend/apps/web/src/features/item-registry/schemas";
 import {
   CreateExtensionRegistrationBodySchema,
   UpdateExtensionRegistrationBodySchema,
-} from "../../../apps/web/src/features/extensions/schemas";
+} from "../../../frontend/apps/web/src/features/extensions/schemas";
 
 describe("item registry schemas", () => {
   it("accepts valid swipe item", () => {

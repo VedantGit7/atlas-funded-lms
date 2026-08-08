@@ -1,8 +1,6 @@
-import { existsSync, readFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-
-const webRoot = resolve(import.meta.dirname, "../../apps/web/src");
+import { resolveSplitPath, splitPathExists } from "./split-layout-paths";
 
 const readinessPaths = [
   "app/(learner)/readiness/page.tsx",
@@ -24,12 +22,12 @@ const readinessPaths = [
 describe("readiness e2e wiring", () => {
   it("includes approved learner/admin screens and APIs", () => {
     for (const relativePath of readinessPaths) {
-      expect(existsSync(resolve(webRoot, relativePath))).toBe(true);
+      expect(splitPathExists(relativePath)).toBe(true);
     }
   });
 
   it("learner readiness page uses PageGate and approved APIs", () => {
-    const source = readFileSync(resolve(webRoot, "app/(learner)/readiness/page.tsx"), "utf8");
+    const source = readFileSync(resolveSplitPath("app/(learner)/readiness/page.tsx"), "utf8");
     expect(source).toContain("PageGate");
     expect(source).toContain("competencyServerApi");
     expect(source).toContain("readinessServerApi");
@@ -38,11 +36,11 @@ describe("readiness e2e wiring", () => {
 
   it("CTA card confirms external redirect and uses attribution token API", () => {
     const source = readFileSync(
-      resolve(webRoot, "features/readiness/components/ReadinessCtaCard.tsx"),
+      resolveSplitPath("features/readiness/components/ReadinessCtaCard.tsx"),
       "utf8",
     );
     const clientSource = readFileSync(
-      resolve(webRoot, "modules/readiness/readiness.api-client.ts"),
+      resolveSplitPath("modules/readiness/readiness.api-client.ts"),
       "utf8",
     );
 
@@ -54,17 +52,18 @@ describe("readiness e2e wiring", () => {
 
   it("admin policy editor saves through readiness-policy API", () => {
     const source = readFileSync(
-      resolve(webRoot, "features/readiness/components/ReadinessPolicyEditor.tsx"),
+      resolveSplitPath("features/readiness/components/ReadinessPolicyEditor.tsx"),
       "utf8",
     );
     expect(source).toContain("readinessApiClient.updateReadinessPolicy");
-    expect(source).toContain("Legal review checklist completed");
+    expect(source).toContain("LegalReviewChecklistPanel");
+    expect(source).toContain("Publish policy");
   });
 
   it("worker consumes competency.score_changed only", () => {
-    const consumersSource = readFileSync(resolve(webRoot, "events/outbox-consumers.ts"), "utf8");
+    const consumersSource = readFileSync(resolveSplitPath("events/outbox-consumers.ts"), "utf8");
     const workerSource = readFileSync(
-      resolve(webRoot, "server/readiness/readiness.worker.ts"),
+      resolveSplitPath("server/readiness/readiness.worker.ts"),
       "utf8",
     );
     expect(workerSource).toContain("competency.score_changed");
@@ -75,12 +74,12 @@ describe("readiness e2e wiring", () => {
   });
 
   it("learner shell links to readiness route", () => {
-    const source = readFileSync(resolve(webRoot, "components/shells/LearnerShell.tsx"), "utf8");
+    const source = readFileSync(resolveSplitPath("components/shells/LearnerShell.tsx"), "utf8");
     expect(source).toContain("/readiness");
   });
 
   it("attribution route does not accept client targetUrl in schema module", () => {
-    const source = readFileSync(resolve(webRoot, "server/readiness/readiness.schemas.ts"), "utf8");
+    const source = readFileSync(resolveSplitPath("server/readiness/readiness.schemas.ts"), "utf8");
     expect(source).toContain("targetUrl: z.never()");
   });
 });

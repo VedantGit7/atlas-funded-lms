@@ -4,9 +4,9 @@ import { describe, expect, it } from "vitest";
 import {
   LEARNER_ROUTE_REGISTRY,
   type LearnerScreenId,
-} from "../../../apps/web/src/features/learner/learner-route-registry";
+} from "../../../frontend/apps/web/src/features/learner/learner-route-registry";
 
-const webRoot = resolve(import.meta.dirname, "../../../apps/web/src");
+const webRoot = resolve(import.meta.dirname, "../../../frontend/apps/web/src");
 
 const pageByScreen: Record<LearnerScreenId, string> = {
   L1: "app/page.tsx",
@@ -18,7 +18,7 @@ const pageByScreen: Record<LearnerScreenId, string> = {
   L7: "app/assessments/[id]/page.tsx",
   L8: "app/attempts/[id]/page.tsx",
   L9: "app/attempts/[id]/result/page.tsx",
-  L10: "app/(learner)/swipe/page.tsx",
+  L10: "app/(learner)/practice/page.tsx",
   L11: "app/(learner)/diagnostic/me/page.tsx",
   L12: "app/(learner)/readiness/page.tsx",
   L13: "app/(learner)/progress/page.tsx",

@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
-const webRoot = resolve(import.meta.dirname, "../../apps/web/src");
+const webRoot = resolve(import.meta.dirname, "../../frontend/apps/web/src");
 
 const reviewPaths = [
   "app/review/page.tsx",
@@ -40,12 +40,16 @@ describe("review approvals e2e wiring", () => {
   });
 
   it("submits for review from course builder instead of direct publish", () => {
-    const source = readFileSync(
+    const builder = readFileSync(
       resolve(webRoot, "features/studio/courses/course-builder.tsx"),
       "utf8",
     );
-    expect(source).toContain("Submit for review");
-    expect(source).toContain("/publish");
+    const validation = readFileSync(
+      resolve(webRoot, "features/studio/courses/builder-validation-panel.tsx"),
+      "utf8",
+    );
+    expect(validation).toContain("Submit for review");
+    expect(builder).toContain("/publish");
   });
 
   it("calls workflow transition API from decision controls", () => {

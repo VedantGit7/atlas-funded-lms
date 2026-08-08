@@ -3,7 +3,7 @@ import {
   assertCoursePublishable,
   canApproveCourseReview,
   canSubmitCourseForReview,
-} from "../../../apps/web/src/server/courses/course-state-guards";
+} from "../../../backend/apps/api/src/server/courses/course-state-guards";
 
 describe("workflow course state helpers", () => {
   it("allows DRAFT to submit for review", () => {

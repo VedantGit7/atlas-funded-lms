@@ -5,7 +5,7 @@ import {
   PublicDiagnosticStartOperationSchema,
   assertPublicScorecardSafe,
   diagnosticScorecardSchema,
-} from "../../../apps/web/src/modules/diagnostics/diagnostic.schemas";
+} from "../../../frontend/apps/web/src/modules/diagnostics/diagnostic.schemas";
 
 describe("diagnostic schemas", () => {
   it("rejects client identity fields", () => {

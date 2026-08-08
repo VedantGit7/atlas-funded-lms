@@ -1,7 +1,7 @@
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 
-const apiRoots = ["apps/web/src/app/api", "apps/web/app/api"];
+const apiRoots = ["backend/apps/api/src/app/api"];
 
 function walkFiles(directory) {
   try {

@@ -1,8 +1,6 @@
-import { existsSync, readFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-
-const webRoot = resolve(import.meta.dirname, "../../apps/web/src");
+import { resolveSplitPath, splitPathExists } from "./split-layout-paths";
 
 const competencyProjectionPaths = [
   "app/(learner)/progress/page.tsx",
@@ -23,12 +21,12 @@ const competencyProjectionPaths = [
 describe("competency projection e2e wiring", () => {
   it("includes approved learner progress screen and APIs", () => {
     for (const relativePath of competencyProjectionPaths) {
-      expect(existsSync(resolve(webRoot, relativePath))).toBe(true);
+      expect(splitPathExists(relativePath)).toBe(true);
     }
   });
 
   it("progress page uses PageGate and competency server API", () => {
-    const source = readFileSync(resolve(webRoot, "app/(learner)/progress/page.tsx"), "utf8");
+    const source = readFileSync(resolveSplitPath("app/(learner)/progress/page.tsx"), "utf8");
     expect(source).toContain("PageGate");
     expect(source).toContain("competencyServerApi");
     expect(source).toContain("ProgressDashboard");
@@ -37,11 +35,11 @@ describe("competency projection e2e wiring", () => {
 
   it("signal inspector uses competency-signals API with pagination", () => {
     const tableSource = readFileSync(
-      resolve(webRoot, "features/competency/components/CompetencySignalTable.tsx"),
+      resolveSplitPath("features/competency/components/CompetencySignalTable.tsx"),
       "utf8",
     );
     const clientSource = readFileSync(
-      resolve(webRoot, "modules/competency/competency.api-client.ts"),
+      resolveSplitPath("modules/competency/competency.api-client.ts"),
       "utf8",
     );
     expect(tableSource).toContain("competencyApiClient.listCompetencySignals");
@@ -50,7 +48,7 @@ describe("competency projection e2e wiring", () => {
   });
 
   it("worker consumes assessment and practice events only", () => {
-    const source = readFileSync(resolve(webRoot, "events/outbox-consumers.ts"), "utf8");
+    const source = readFileSync(resolveSplitPath("events/outbox-consumers.ts"), "utf8");
     expect(source).toContain("assessment.submitted");
     expect(source).toContain("assessment.graded");
     expect(source).toContain("practice.session_completed");
@@ -60,13 +58,12 @@ describe("competency projection e2e wiring", () => {
   });
 
   it("learner shell links to progress route", () => {
-    const source = readFileSync(resolve(webRoot, "components/shells/LearnerShell.tsx"), "utf8");
+    const source = readFileSync(resolveSplitPath("components/shells/LearnerShell.tsx"), "utf8");
     expect(source).toContain("/progress");
   });
 
   it("does not expose POST competency-signals route", () => {
-    const routePath = resolve(webRoot, "app/api/v1/competency-signals/route.ts");
-    const source = readFileSync(routePath, "utf8");
+    const source = readFileSync(resolveSplitPath("app/api/v1/competency-signals/route.ts"), "utf8");
     expect(source).not.toMatch(/export const POST/);
   });
 });

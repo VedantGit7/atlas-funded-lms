@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { computeCompositeScore } from "../../../apps/web/src/server/readiness/readiness-evaluator.service";
-import { deriveProminence } from "../../../apps/web/src/server/readiness/readiness.schemas";
+import { computeCompositeScore } from "../../../backend/apps/api/src/server/readiness/readiness-evaluator.service";
+import { deriveProminence } from "../../../backend/apps/api/src/server/readiness/readiness.schemas";
 
 describe("readiness evaluator helpers", () => {
   it("computes composite score as average", () => {

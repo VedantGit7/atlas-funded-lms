@@ -44,11 +44,11 @@ vi.mock("@atlas/authorization", async (importOriginal) => {
   };
 });
 
-vi.mock("../../../packages/api/src/load-resource-ref", () => ({
+vi.mock("../../../backend/packages/api/src/load-resource-ref", () => ({
   loadResourceRefOrDefault: loadResourceMock,
 }));
 
-vi.mock("../../../packages/authorization/src/authorization-errors", () => ({
+vi.mock("../../../backend/packages/authorization/src/authorization-errors", () => ({
   toAuthorizationError: vi.fn((decision) => new Error(decision.reason)),
   permissionDenied: vi.fn(),
 }));

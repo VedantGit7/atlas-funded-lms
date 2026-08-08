@@ -5,7 +5,7 @@ import { authoringTenantTx, learnerCtx } from "../fixtures/assessment-fixture";
 import {
   getAuthenticatedDiagnosticResult,
   startAuthenticatedDiagnostic,
-} from "../../apps/web/src/modules/diagnostics/diagnostic-authenticated.service";
+} from "../../backend/apps/api/src/server/diagnostics/diagnostic-authenticated.service";
 
 const describeWithDb =
   process.env["DATABASE_URL"] && process.env["PLATFORM_DATABASE_URL"] ? describe : describe.skip;

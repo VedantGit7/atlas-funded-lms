@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   STUDIO_PRIMARY_NAV,
   filterStudioNavigation,
-} from "../../../apps/web/src/features/studio/studio-navigation";
+} from "../../../frontend/apps/web/src/features/studio/studio-navigation";
 
 describe("studio navigation projection", () => {
   it("filters analytics when entitlement disabled", () => {

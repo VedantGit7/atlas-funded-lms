@@ -1,0 +1,920 @@
+import { randomUUID } from "node:crypto";
+import { AtlasHttpError } from "@atlas/core/http/errors";
+import type { TenantTx } from "@atlas/db";
+import type { ServiceCtx } from "@atlas/domain/shared/domain.types";
+import { findCourseAuthProjection, readCoursePricing } from "../courses/courses.repository";
+import { courseNotFound, coursePurchaseRequired } from "../courses/courses.errors";
+import {
+  findActiveEnrollment,
+  insertEnrollment,
+  publishEnrollmentCreatedEvent,
+} from "../enrollments/enrollments.repository";
+import {
+  checkoutPurchaseResponseSchema,
+  checkoutQuoteBodySchema,
+  checkoutQuoteResponseSchema,
+  couponDtoSchema,
+  couponPerformanceQuerySchema,
+  couponPerformanceResponseSchema,
+  couponRedemptionsListResponseSchema,
+  couponRedemptionsQuerySchema,
+  couponResponseSchema,
+  couponsListQuerySchema,
+  couponsListResponseSchema,
+  createBulkCouponsBodySchema,
+  createBulkCouponsResponseSchema,
+  createCouponBodySchema,
+  deleteCouponBodySchema,
+  deleteCouponResponseSchema,
+  publicCouponsForCourseQuerySchema,
+  publicCouponsForCourseResponseSchema,
+  updateCouponBodySchema,
+  validateCouponBodySchema,
+  validateCouponResponseSchema,
+} from "./sales-coupons.schemas";
+import {
+  salesCouponsRepository,
+  type CouponRow,
+} from "./sales-coupons.repository";
+import { previewWalletSpend, spendWalletCredits } from "../sales-wallet/sales-wallet.service";
+import { applyReferralPurchaseCredits } from "../sales-referrals/sales-referrals.service";
+import {
+  applyAffiliateCommission,
+  resolveAffiliateForCheckout,
+} from "../sales-affiliates/sales-affiliates.service";
+import type { ResolveAffiliateCheckoutResult } from "../sales-affiliates/sales-affiliates.schemas";
+
+function notFound(message = "Coupon not found.") {
+  return new AtlasHttpError({ code: "PERMISSION_DENIED", status: 404, message });
+}
+
+function validationError(message: string) {
+  return new AtlasHttpError({ code: "VALIDATION_ERROR", status: 400, message });
+}
+
+function normalizeCode(code: string) {
+  return code.trim().toUpperCase();
+}
+
+function parseOptionalDate(value: string | null | undefined): Date | null {
+  if (!value) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) throw validationError("Invalid date.");
+  return date;
+}
+
+function computeDiscountCents(args: {
+  originalAmountCents: number;
+  discountType: string;
+  discountValue: number;
+  maxDiscountCents: number | null;
+}): number {
+  let discount =
+    args.discountType === "PERCENT"
+      ? Math.floor((args.originalAmountCents * args.discountValue) / 100)
+      : args.discountValue;
+
+  if (args.maxDiscountCents != null) {
+    discount = Math.min(discount, args.maxDiscountCents);
+  }
+  discount = Math.max(0, Math.min(discount, args.originalAmountCents));
+  return discount;
+}
+
+async function toCouponDto(tx: TenantTx, row: CouponRow) {
+  const courseIds = await salesCouponsRepository.listCourseIds(tx, row.id);
+  return couponDtoSchema.parse({
+    id: row.id,
+    code: row.code,
+    name: row.name,
+    status: row.status as "DRAFT" | "ACTIVE" | "INACTIVE",
+    discountType: row.discount_type as "PERCENT" | "FIXED",
+    discountValue: row.discount_value,
+    maxDiscountCents: row.max_discount_cents,
+    currency: row.currency,
+    startsAt: row.starts_at?.toISOString() ?? null,
+    endsAt: row.ends_at?.toISOString() ?? null,
+    totalUsageLimit: row.total_usage_limit,
+    perLearnerLimit: row.per_learner_limit,
+    minPurchaseCents: row.min_purchase_cents,
+    visibility: row.visibility as "PUBLIC" | "PRIVATE",
+    deviceType: row.device_type as "ALL" | "WEB" | "MOBILE",
+    appliesToAllCourses: row.applies_to_all_courses,
+    courseIds,
+    courseCount: row.applies_to_all_courses
+      ? 0
+      : Number(row.course_count ?? courseIds.length),
+    redemptionCount: Number(row.redemption_count ?? 0),
+    activatedAt: row.activated_at?.toISOString() ?? null,
+    createdAt: row.created_at.toISOString(),
+    updatedAt: row.updated_at.toISOString(),
+  });
+}
+
+function randomCodeSuffix(length = 6) {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let result = "";
+  for (let i = 0; i < length; i += 1) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+}
+
+async function requireCoupon(tx: TenantTx, id: string) {
+  const row = await salesCouponsRepository.findById(tx, id);
+  if (!row) throw notFound();
+  return row;
+}
+
+function assertEditableWhileActive(row: CouponRow) {
+  // Active coupons can still be edited (Learnyst allows config after create),
+  // but code collisions and usage limits are validated on save.
+  void row;
+}
+
+async function assertValidCourseIds(tx: TenantTx, courseIds: string[]) {
+  for (const courseId of courseIds) {
+    const course = await findCourseAuthProjection({ tx, courseId });
+    if (!course) {
+      throw validationError(`Course not found: ${courseId}`);
+    }
+  }
+}
+
+function mapCreateFields(body: {
+  code: string;
+  name: string;
+  discountType: "PERCENT" | "FIXED";
+  discountValue: number;
+  maxDiscountCents?: number | null | undefined;
+  currency?: string | undefined;
+  startsAt?: string | null | undefined;
+  endsAt?: string | null | undefined;
+  totalUsageLimit?: number | null | undefined;
+  perLearnerLimit?: number | undefined;
+  minPurchaseCents?: number | null | undefined;
+  visibility?: "PUBLIC" | "PRIVATE" | undefined;
+  deviceType?: "ALL" | "WEB" | "MOBILE" | undefined;
+  appliesToAllCourses?: boolean | undefined;
+}) {
+  const startsAt = parseOptionalDate(body.startsAt);
+  const endsAt = parseOptionalDate(body.endsAt);
+  if (startsAt && endsAt && endsAt <= startsAt) {
+    throw validationError("End date must be after start date.");
+  }
+  return {
+    code: normalizeCode(body.code),
+    name: body.name.trim(),
+    discountType: body.discountType,
+    discountValue: body.discountValue,
+    maxDiscountCents: body.maxDiscountCents ?? null,
+    currency: (body.currency ?? "USD").toUpperCase(),
+    startsAt,
+    endsAt,
+    totalUsageLimit: body.totalUsageLimit ?? null,
+    perLearnerLimit: body.perLearnerLimit ?? 1,
+    minPurchaseCents: body.minPurchaseCents ?? null,
+    visibility: body.visibility ?? "PRIVATE",
+    deviceType: body.deviceType ?? "ALL",
+    appliesToAllCourses: body.appliesToAllCourses ?? true,
+  };
+}
+
+export async function listCoupons(tx: TenantTx, _ctx: ServiceCtx, rawQuery: unknown) {
+  const query = couponsListQuerySchema.parse(rawQuery ?? {});
+  const [rows, summary] = await Promise.all([
+    salesCouponsRepository.list(tx, {
+      ...(query.status ? { status: query.status } : {}),
+      ...(query.q ? { q: query.q } : {}),
+      limit: query.limit,
+    }),
+    salesCouponsRepository.summary(tx),
+  ]);
+  const items = [];
+  for (const row of rows) {
+    items.push(await toCouponDto(tx, row));
+  }
+  return couponsListResponseSchema.parse({
+    data: {
+      items,
+      summary: {
+        activeCount: summary.active_count,
+        draftCount: summary.draft_count,
+        inactiveCount: summary.inactive_count,
+        totalCount: summary.total_count,
+        totalRedemptions: summary.total_redemptions,
+        totalDiscountCents: summary.total_discount_cents,
+        totalRevenueCents: summary.total_revenue_cents,
+      },
+    },
+  });
+}
+
+export async function getCoupon(tx: TenantTx, _ctx: ServiceCtx, id: string) {
+  return couponResponseSchema.parse({
+    data: await toCouponDto(tx, await requireCoupon(tx, id)),
+  });
+}
+
+export async function createCoupon(tx: TenantTx, ctx: ServiceCtx, rawBody: unknown) {
+  const body = createCouponBodySchema.parse(rawBody);
+  const fields = mapCreateFields(body);
+  const existing = await salesCouponsRepository.findByCode(tx, fields.code);
+  if (existing) throw validationError("A coupon with this code already exists.");
+
+  const courseIds = body.appliesToAllCourses ? [] : (body.courseIds ?? []);
+  await assertValidCourseIds(tx, courseIds);
+
+  const id = await salesCouponsRepository.insert(tx, {
+    ...fields,
+    createdByMembershipId: ctx.actorMembershipId,
+  });
+  await salesCouponsRepository.replaceCourses(tx, id, courseIds);
+  return couponResponseSchema.parse({
+    data: await toCouponDto(tx, await requireCoupon(tx, id)),
+  });
+}
+
+export async function createBulkCoupons(tx: TenantTx, ctx: ServiceCtx, rawBody: unknown) {
+  const body = createBulkCouponsBodySchema.parse(rawBody);
+  const prefix = normalizeCode(body.prefix).replace(/-+$/g, "");
+  const createdIds: string[] = [];
+  const usedCodes = new Set<string>();
+
+  for (let attempt = 0; attempt < body.count * 8 && createdIds.length < body.count; attempt += 1) {
+    const code = `${prefix}-${randomCodeSuffix(6)}`;
+    if (usedCodes.has(code)) continue;
+    usedCodes.add(code);
+    const existing = await salesCouponsRepository.findByCode(tx, code);
+    if (existing) continue;
+
+    const id = await salesCouponsRepository.insert(tx, {
+      code,
+      name: body.name.trim(),
+      discountType: body.discountType,
+      discountValue: body.discountValue,
+      maxDiscountCents: body.maxDiscountCents ?? null,
+      currency: (body.currency ?? "USD").toUpperCase(),
+      startsAt: null,
+      endsAt: null,
+      totalUsageLimit: null,
+      perLearnerLimit: 1,
+      minPurchaseCents: null,
+      visibility: "PRIVATE",
+      deviceType: "ALL",
+      appliesToAllCourses: true,
+      createdByMembershipId: ctx.actorMembershipId,
+    });
+    createdIds.push(id);
+  }
+
+  if (createdIds.length < body.count) {
+    throw validationError(
+      `Could only generate ${createdIds.length} of ${body.count} unique codes. Try a different prefix.`,
+    );
+  }
+
+  const items = [];
+  for (const id of createdIds) {
+    items.push(await toCouponDto(tx, await requireCoupon(tx, id)));
+  }
+  return createBulkCouponsResponseSchema.parse({
+    data: { createdCount: items.length, items },
+  });
+}
+
+export async function listCouponRedemptions(
+  tx: TenantTx,
+  _ctx: ServiceCtx,
+  couponId: string,
+  rawQuery: unknown,
+) {
+  await requireCoupon(tx, couponId);
+  const query = couponRedemptionsQuerySchema.parse(rawQuery ?? {});
+  const [rows, totalCount] = await Promise.all([
+    salesCouponsRepository.listRedemptions(tx, { couponId, limit: query.limit }),
+    salesCouponsRepository.countRedemptions(tx, couponId),
+  ]);
+  return couponRedemptionsListResponseSchema.parse({
+    data: {
+      items: rows.map((row) => ({
+        id: row.id,
+        learnerName: row.learner_name,
+        courseTitle: row.course_title,
+        discountCents: row.discount_cents,
+        originalAmountCents: row.original_amount_cents,
+        finalAmountCents: row.final_amount_cents,
+        currency: row.currency,
+        createdAt: row.created_at.toISOString(),
+      })),
+      totalCount,
+    },
+  });
+}
+
+export async function updateCoupon(
+  tx: TenantTx,
+  _ctx: ServiceCtx,
+  id: string,
+  rawBody: unknown,
+) {
+  const body = updateCouponBodySchema.parse(rawBody);
+  const existing = await requireCoupon(tx, id);
+  assertEditableWhileActive(existing);
+  const fields = mapCreateFields(body);
+
+  if (fields.code !== existing.code) {
+    const collision = await salesCouponsRepository.findByCode(tx, fields.code);
+    if (collision) throw validationError("A coupon with this code already exists.");
+  }
+
+  const courseIds = body.appliesToAllCourses ? [] : (body.courseIds ?? []);
+  await assertValidCourseIds(tx, courseIds);
+
+  await salesCouponsRepository.update(tx, id, fields);
+  await salesCouponsRepository.replaceCourses(tx, id, courseIds);
+  return couponResponseSchema.parse({
+    data: await toCouponDto(tx, await requireCoupon(tx, id)),
+  });
+}
+
+export async function activateCoupon(tx: TenantTx, _ctx: ServiceCtx, id: string) {
+  const existing = await requireCoupon(tx, id);
+  if (!existing.applies_to_all_courses) {
+    const courseIds = await salesCouponsRepository.listCourseIds(tx, id);
+    if (courseIds.length === 0) {
+      throw validationError("Associate at least one course before activating.");
+    }
+  }
+  await salesCouponsRepository.setStatus(tx, id, "ACTIVE");
+  return couponResponseSchema.parse({
+    data: await toCouponDto(tx, await requireCoupon(tx, id)),
+  });
+}
+
+export async function deactivateCoupon(tx: TenantTx, _ctx: ServiceCtx, id: string) {
+  await requireCoupon(tx, id);
+  await salesCouponsRepository.setStatus(tx, id, "INACTIVE");
+  return couponResponseSchema.parse({
+    data: await toCouponDto(tx, await requireCoupon(tx, id)),
+  });
+}
+
+export async function deleteCoupon(
+  tx: TenantTx,
+  _ctx: ServiceCtx,
+  id: string,
+  rawBody: unknown,
+) {
+  const body = deleteCouponBodySchema.parse(rawBody);
+  const existing = await requireCoupon(tx, id);
+  if (existing.status === "ACTIVE") {
+    throw validationError("Deactivate the coupon before deleting it.");
+  }
+  if (body.nameConfirmation.trim() !== existing.name.trim()) {
+    throw validationError("Type the coupon name to confirm delete.");
+  }
+  await salesCouponsRepository.delete(tx, id);
+  return deleteCouponResponseSchema.parse({ data: { id, deleted: true as const } });
+}
+
+type ApplyCouponResult = {
+  coupon: CouponRow;
+  discountCents: number;
+  originalAmountCents: number;
+  finalAmountCents: number;
+  currency: string;
+};
+
+async function resolveCoursePrice(tx: TenantTx, courseId: string) {
+  const course = await findCourseAuthProjection({ tx, courseId });
+  if (!course) throw courseNotFound();
+  if (course.status !== "PUBLISHED") {
+    throw validationError("Course is not available for purchase.");
+  }
+  const pricing = readCoursePricing(course.metadataJson);
+  if (pricing.accessTier !== "PAID") {
+    throw validationError("This course is free and does not require checkout.");
+  }
+  if (pricing.priceCents == null || pricing.priceCents < 0) {
+    throw validationError("Course price is not configured.");
+  }
+  const currency = (pricing.currency ?? "USD").toUpperCase();
+  return {
+    course,
+    originalAmountCents: pricing.priceCents,
+    currency,
+  };
+}
+
+async function applyCouponToPrice(
+  tx: TenantTx,
+  ctx: ServiceCtx,
+  args: {
+    code: string;
+    courseId: string;
+    originalAmountCents: number;
+    currency: string;
+    deviceType: "ALL" | "WEB" | "MOBILE";
+  },
+): Promise<ApplyCouponResult> {
+  const code = normalizeCode(args.code);
+  const coupon = await salesCouponsRepository.findByCode(tx, code);
+  if (!coupon || coupon.status !== "ACTIVE") {
+    throw validationError("Invalid or inactive coupon code.");
+  }
+
+  const now = new Date();
+  if (coupon.starts_at && coupon.starts_at > now) {
+    throw validationError("This coupon is not active yet.");
+  }
+  if (coupon.ends_at && coupon.ends_at < now) {
+    throw validationError("This coupon has expired.");
+  }
+
+  if (coupon.device_type !== "ALL" && coupon.device_type !== args.deviceType) {
+    throw validationError("This coupon cannot be used on this device.");
+  }
+
+  if (coupon.currency.toUpperCase() !== args.currency.toUpperCase()) {
+    throw validationError("This coupon does not apply to this currency.");
+  }
+
+  if (
+    coupon.min_purchase_cents != null &&
+    args.originalAmountCents < coupon.min_purchase_cents
+  ) {
+    throw validationError("Order total is below the coupon minimum purchase.");
+  }
+
+  const applies = await salesCouponsRepository.couponAppliesToCourse(tx, {
+    couponId: coupon.id,
+    courseId: args.courseId,
+    appliesToAll: coupon.applies_to_all_courses,
+  });
+  if (!applies) {
+    throw validationError("This coupon does not apply to this course.");
+  }
+
+  const totalUsed = Number(coupon.redemption_count ?? 0);
+  if (coupon.total_usage_limit != null && totalUsed >= coupon.total_usage_limit) {
+    throw validationError("This coupon has reached its usage limit.");
+  }
+
+  const memberUsed = await salesCouponsRepository.countRedemptionsForMembership(tx, {
+    couponId: coupon.id,
+    membershipId: ctx.actorMembershipId,
+  });
+  if (memberUsed >= coupon.per_learner_limit) {
+    throw validationError("You have already used this coupon the maximum number of times.");
+  }
+
+  const discountCents = computeDiscountCents({
+    originalAmountCents: args.originalAmountCents,
+    discountType: coupon.discount_type,
+    discountValue: coupon.discount_value,
+    maxDiscountCents: coupon.max_discount_cents,
+  });
+
+  return {
+    coupon,
+    discountCents,
+    originalAmountCents: args.originalAmountCents,
+    finalAmountCents: args.originalAmountCents - discountCents,
+    currency: args.currency,
+  };
+}
+
+function toBreakdown(args: {
+  courseId: string;
+  courseTitle: string;
+  currency: string;
+  originalAmountCents: number;
+  discountCents: number;
+  walletCreditsApplied?: number;
+  walletDiscountCents?: number;
+  finalAmountCents: number;
+  coupon: CouponRow | null;
+  affiliateCode?: string | null;
+}) {
+  return {
+    courseId: args.courseId,
+    courseTitle: args.courseTitle,
+    currency: args.currency,
+    originalAmountCents: args.originalAmountCents,
+    discountCents: args.discountCents,
+    walletCreditsApplied: args.walletCreditsApplied ?? 0,
+    walletDiscountCents: args.walletDiscountCents ?? 0,
+    finalAmountCents: args.finalAmountCents,
+    affiliateCode: args.affiliateCode ?? null,
+    coupon: args.coupon
+      ? {
+          id: args.coupon.id,
+          code: args.coupon.code,
+          name: args.coupon.name,
+          discountType: args.coupon.discount_type as "PERCENT" | "FIXED",
+          discountValue: args.coupon.discount_value,
+        }
+      : null,
+  };
+}
+
+type CheckoutDiscountResult = {
+  discountCents: number;
+  amountAfterDiscount: number;
+  coupon: CouponRow | null;
+  affiliate: ResolveAffiliateCheckoutResult | null;
+};
+
+async function resolveCheckoutDiscount(
+  tx: TenantTx,
+  ctx: ServiceCtx,
+  args: {
+    courseId: string;
+    originalAmountCents: number;
+    currency: string;
+    deviceType: "ALL" | "WEB" | "MOBILE";
+    couponCode?: string | null;
+    affiliateCode?: string | null;
+  },
+): Promise<CheckoutDiscountResult> {
+  const effectiveCode = args.affiliateCode ?? args.couponCode ?? null;
+  let discountCents = 0;
+  let amountAfterDiscount = args.originalAmountCents;
+  let coupon: CouponRow | null = null;
+
+  if (effectiveCode) {
+    const affiliate = await resolveAffiliateForCheckout(tx, {
+      code: effectiveCode,
+      courseId: args.courseId,
+      buyerMembershipId: ctx.actorMembershipId,
+      originalAmountCents: args.originalAmountCents,
+    });
+
+    if (affiliate) {
+      return {
+        discountCents: affiliate.discountCents,
+        amountAfterDiscount: args.originalAmountCents - affiliate.discountCents,
+        coupon: null,
+        affiliate,
+      };
+    }
+
+    // Explicit affiliateCode that did not resolve (inactive / wrong product).
+    if (args.affiliateCode) {
+      throw validationError(
+        "This affiliate code is invalid or cannot be used for this product.",
+      );
+    }
+
+    if (args.couponCode) {
+      const applied = await applyCouponToPrice(tx, ctx, {
+        code: args.couponCode,
+        courseId: args.courseId,
+        originalAmountCents: args.originalAmountCents,
+        currency: args.currency,
+        deviceType: args.deviceType,
+      });
+      discountCents = applied.discountCents;
+      amountAfterDiscount = applied.finalAmountCents;
+      coupon = applied.coupon;
+    }
+  }
+
+  return { discountCents, amountAfterDiscount, coupon, affiliate: null };
+}
+
+export async function validateCouponForLearner(
+  tx: TenantTx,
+  ctx: ServiceCtx,
+  rawBody: unknown,
+) {
+  const body = validateCouponBodySchema.parse(rawBody);
+  const { course, originalAmountCents, currency } = await resolveCoursePrice(tx, body.courseId);
+  const applied = await applyCouponToPrice(tx, ctx, {
+    code: body.code,
+    courseId: body.courseId,
+    originalAmountCents,
+    currency,
+    deviceType: body.deviceType,
+  });
+  return validateCouponResponseSchema.parse({
+    data: toBreakdown({
+      courseId: course.id,
+      courseTitle: course.title,
+      currency,
+      originalAmountCents: applied.originalAmountCents,
+      discountCents: applied.discountCents,
+      finalAmountCents: applied.finalAmountCents,
+      coupon: applied.coupon,
+    }),
+  });
+}
+
+export async function listPublicCouponsForCourse(
+  tx: TenantTx,
+  _ctx: ServiceCtx,
+  rawQuery: unknown,
+) {
+  const query = publicCouponsForCourseQuerySchema.parse(rawQuery);
+  const course = await findCourseAuthProjection({ tx, courseId: query.courseId });
+  if (!course) throw courseNotFound();
+  const rows = await salesCouponsRepository.listPublicForCourse(tx, query.courseId);
+  return publicCouponsForCourseResponseSchema.parse({
+    data: {
+      items: rows.map((row) => ({
+        id: row.id,
+        code: row.code,
+        name: row.name,
+        discountType: row.discount_type as "PERCENT" | "FIXED",
+        discountValue: row.discount_value,
+        maxDiscountCents: row.max_discount_cents,
+        currency: row.currency,
+      })),
+    },
+  });
+}
+
+export async function quoteCheckout(tx: TenantTx, ctx: ServiceCtx, rawBody: unknown) {
+  const body = checkoutQuoteBodySchema.parse(rawBody);
+  const { course, originalAmountCents, currency } = await resolveCoursePrice(tx, body.courseId);
+
+  const existing = await findActiveEnrollment({
+    tx,
+    courseId: body.courseId,
+    membershipId: ctx.actorMembershipId,
+  });
+
+  let discountCents = 0;
+  let amountAfterCoupon = originalAmountCents;
+  let coupon: CouponRow | null = null;
+  let affiliate: ResolveAffiliateCheckoutResult | null = null;
+
+  const resolved = await resolveCheckoutDiscount(tx, ctx, {
+    courseId: body.courseId,
+    originalAmountCents,
+    currency,
+    deviceType: body.deviceType,
+    ...(body.couponCode != null ? { couponCode: body.couponCode } : {}),
+    ...(body.affiliateCode != null ? { affiliateCode: body.affiliateCode } : {}),
+  });
+  discountCents = resolved.discountCents;
+  amountAfterCoupon = resolved.amountAfterDiscount;
+  coupon = resolved.coupon;
+  affiliate = resolved.affiliate;
+
+  const walletPreview = await previewWalletSpend(tx, {
+    membershipId: ctx.actorMembershipId,
+    creditsRequested: body.walletCreditsToSpend ?? 0,
+    maxSpendableMoneyCents: amountAfterCoupon,
+  });
+
+  const finalAmountCents = Math.max(0, amountAfterCoupon - walletPreview.discountCents);
+
+  return checkoutQuoteResponseSchema.parse({
+    data: {
+      ...toBreakdown({
+        courseId: course.id,
+        courseTitle: course.title,
+        currency,
+        originalAmountCents,
+        discountCents,
+        walletCreditsApplied: walletPreview.creditsApplied,
+        walletDiscountCents: walletPreview.discountCents,
+        finalAmountCents,
+        coupon,
+        affiliateCode: affiliate?.affiliate.coupon_code ?? null,
+      }),
+      alreadyEnrolled: Boolean(existing),
+      couponsAllowed: true,
+      walletEnabled: walletPreview.enabled,
+      walletAvailableBalance: walletPreview.availableBalance,
+      walletCreditValueCents: walletPreview.creditValueCents,
+      walletMaxCreditsPerOrder: walletPreview.maxCreditsPerOrder,
+    },
+  });
+}
+
+export async function purchaseCheckout(tx: TenantTx, ctx: ServiceCtx, rawBody: unknown) {
+  const body = checkoutQuoteBodySchema.parse(rawBody);
+  const { course, originalAmountCents, currency } = await resolveCoursePrice(tx, body.courseId);
+
+  const existing = await findActiveEnrollment({
+    tx,
+    courseId: body.courseId,
+    membershipId: ctx.actorMembershipId,
+  });
+  if (existing) {
+    throw validationError("You are already enrolled in this course.");
+  }
+
+  let discountCents = 0;
+  let amountAfterCoupon = originalAmountCents;
+  let coupon: CouponRow | null = null;
+  let affiliate: ResolveAffiliateCheckoutResult | null = null;
+
+  const resolved = await resolveCheckoutDiscount(tx, ctx, {
+    courseId: body.courseId,
+    originalAmountCents,
+    currency,
+    deviceType: body.deviceType,
+    ...(body.couponCode != null ? { couponCode: body.couponCode } : {}),
+    ...(body.affiliateCode != null ? { affiliateCode: body.affiliateCode } : {}),
+  });
+  discountCents = resolved.discountCents;
+  amountAfterCoupon = resolved.amountAfterDiscount;
+  coupon = resolved.coupon;
+  affiliate = resolved.affiliate;
+
+  let walletCreditsApplied = 0;
+  let walletDiscountCents = 0;
+  const requestedWallet = body.walletCreditsToSpend ?? 0;
+  if (requestedWallet > 0) {
+    const preview = await previewWalletSpend(tx, {
+      membershipId: ctx.actorMembershipId,
+      creditsRequested: requestedWallet,
+      maxSpendableMoneyCents: amountAfterCoupon,
+    });
+    if (!preview.enabled || preview.creditsApplied <= 0) {
+      throw validationError("No wallet credits can be applied to this order.");
+    }
+    walletCreditsApplied = preview.creditsApplied;
+    walletDiscountCents = preview.discountCents;
+  }
+
+  const finalAmountCents = Math.max(0, amountAfterCoupon - walletDiscountCents);
+
+  // Paid checkout completion path: create a paid payment order, optionally
+  // redeem the coupon, then enroll. Gateway charge can replace the paid insert later.
+  const paymentOrderId = randomUUID();
+  const metadata = {
+    kind: "course_checkout",
+    courseId: course.id,
+    courseTitle: course.title,
+    productTitle: course.title,
+    productType: "course",
+    couponId: coupon?.id ?? null,
+    couponCode: coupon?.code ?? null,
+    affiliateId: affiliate?.affiliate.id ?? null,
+    affiliateCode: affiliate?.affiliate.coupon_code ?? null,
+    affiliateCommissionPct: affiliate?.commissionPct ?? null,
+    originalAmountCents,
+    discountCents,
+    walletCreditsApplied,
+    walletDiscountCents,
+    finalAmountCents,
+  };
+
+  const invoiceRows = await tx.$queryRawUnsafe<
+    Array<{ prefix: string | null; next_number: number | null }>
+  >(
+    `
+    update learner_billing_config
+    set
+      invoice_next_number = coalesce(invoice_next_number, 1) + 1,
+      updated_at = now()
+    where tenant_id = app.current_tenant_id()
+    returning
+      invoice_prefix as prefix,
+      (invoice_next_number - 1) as next_number
+    `,
+  );
+  const invoiceRow = invoiceRows[0];
+  const invoicePrefix =
+    (invoiceRow?.prefix?.trim() || "INV").replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 16) || "INV";
+  const invoiceNumber =
+    invoiceRow?.next_number != null
+      ? `${invoicePrefix}-${String(invoiceRow.next_number).padStart(5, "0")}`
+      : `INV-${paymentOrderId.slice(0, 8).toUpperCase()}`;
+
+  await tx.$executeRawUnsafe(
+    `
+    insert into payment_orders (
+      id, tenant_id, membership_id, external_id, amount_cents, currency, status,
+      metadata_json, product_title, product_type, coupon_amount_cents, invoice_number,
+      paid_at, created_at, updated_at
+    ) values (
+      $1::uuid, app.current_tenant_id(), $2::uuid, $3, $4, $5, 'paid',
+      $6::jsonb, $7, 'course', $8, $9,
+      now(), now(), now()
+    )
+    `,
+    paymentOrderId,
+    ctx.actorMembershipId,
+    `checkout_${paymentOrderId}`,
+    finalAmountCents,
+    currency,
+    JSON.stringify(metadata),
+    course.title,
+    discountCents,
+    invoiceNumber,
+  );
+
+  if (walletCreditsApplied > 0) {
+    await spendWalletCredits(tx, {
+      membershipId: ctx.actorMembershipId,
+      credits: walletCreditsApplied,
+      maxSpendableMoneyCents: amountAfterCoupon,
+      paymentOrderId,
+      courseId: course.id,
+    });
+  }
+
+  if (coupon) {
+    await salesCouponsRepository.insertRedemption(tx, {
+      couponId: coupon.id,
+      membershipId: ctx.actorMembershipId,
+      courseId: course.id,
+      paymentOrderId,
+      discountCents,
+      originalAmountCents,
+      finalAmountCents,
+      currency,
+      codeSnapshot: coupon.code,
+    });
+  }
+
+  const created = await insertEnrollment({
+    tx,
+    tenantId: ctx.tenantId,
+    courseId: course.id,
+    membershipId: ctx.actorMembershipId,
+    enrolledType: "paid",
+  });
+
+  if (created.created) {
+    await publishEnrollmentCreatedEvent({
+      tx,
+      ctx,
+      enrollmentId: created.id,
+      courseId: course.id,
+      membershipId: ctx.actorMembershipId,
+    });
+  }
+
+  await applyReferralPurchaseCredits(tx, {
+    refereeMembershipId: ctx.actorMembershipId,
+    paymentOrderId,
+  });
+
+  if (affiliate) {
+    await applyAffiliateCommission(tx, {
+      paymentOrderId,
+      buyerMembershipId: ctx.actorMembershipId,
+      courseId: course.id,
+      code: affiliate.affiliate.coupon_code,
+      orderAmountCents: amountAfterCoupon,
+      discountCents,
+      currency,
+    });
+  }
+
+  return checkoutPurchaseResponseSchema.parse({
+    data: {
+      enrollmentId: created.id,
+      paymentOrderId,
+      created: created.created,
+      pricing: toBreakdown({
+        courseId: course.id,
+        courseTitle: course.title,
+        currency,
+        originalAmountCents,
+        discountCents,
+        walletCreditsApplied,
+        walletDiscountCents,
+        finalAmountCents,
+        coupon,
+        affiliateCode: affiliate?.affiliate.coupon_code ?? null,
+      }),
+    },
+  });
+}
+
+export async function getCouponPerformance(
+  tx: TenantTx,
+  _ctx: ServiceCtx,
+  rawQuery: unknown,
+) {
+  const query = couponPerformanceQuerySchema.parse(rawQuery ?? {});
+  const rows = await salesCouponsRepository.listPerformance(tx, {
+    ...(query.couponId ? { couponId: query.couponId } : {}),
+    limit: query.limit,
+  });
+  return couponPerformanceResponseSchema.parse({
+    data: {
+      items: rows.map((row) => ({
+        couponId: row.coupon_id,
+        code: row.code,
+        name: row.name,
+        status: row.status as "DRAFT" | "ACTIVE" | "INACTIVE",
+        redemptionCount: Number(row.redemption_count),
+        totalDiscountCents: Number(row.total_discount_cents),
+        totalRevenueCents: Number(row.total_revenue_cents),
+        currency: row.currency,
+      })),
+    },
+  });
+}
+
+// Re-export for callers that need the purchase-required error shape when free enroll hits paid.
+export { coursePurchaseRequired };

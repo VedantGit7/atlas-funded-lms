@@ -74,7 +74,7 @@ vi.mock("@atlas/audit", async (importOriginal) => {
   };
 });
 
-import { GET } from "../../apps/web/src/app/api/v1/audit/route";
+import { GET } from "../../backend/apps/api/src/app/api/v1/audit/route";
 
 const tenantA = {
   tenantId: "tenant-a-id",

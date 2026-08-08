@@ -10,8 +10,8 @@ import {
 import {
   publishScoringConfig,
   replaceProfileBands,
-} from "../../apps/web/src/server/competency/scoring-config.service";
-import { updateReadinessPolicy } from "../../apps/web/src/server/readiness/readiness-policy.service";
+} from "../../backend/apps/api/src/server/competency/scoring-config.service";
+import { updateReadinessPolicy } from "../../backend/apps/api/src/server/readiness/readiness-policy.service";
 
 export { adminCtx, authoringTenantTx } from "./competency-config-fixture";
 

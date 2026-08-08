@@ -3,8 +3,8 @@ import { withTenantTx } from "@atlas/db";
 import {
   getAssessment,
   updateAssessment,
-} from "../../apps/web/src/server/assessments/assessments.service";
-import { startAttempt, getAttempt } from "../../apps/web/src/server/attempts/attempts.service";
+} from "../../backend/apps/api/src/server/assessments/assessments.service";
+import { startAttempt, getAttempt } from "../../backend/apps/api/src/server/attempts/attempts.service";
 import {
   createAssessmentFixture,
   instructorCtx,

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   MODERATION_PRIMARY_NAV,
   filterModerationNavigation,
-} from "../../../apps/web/src/features/moderation/moderation-navigation";
+} from "../../../frontend/apps/web/src/features/moderation/moderation-navigation";
 
 describe("moderation navigation projection", () => {
   it("hides appeals when appeal review is unavailable", () => {
@@ -25,7 +25,7 @@ describe("moderation navigation projection", () => {
       canAccessWorkflowReview: false,
     });
 
-    expect(items.some((item) => item.href === "/review")).toBe(false);
+    expect(items.some((item) => item.href === "/admin/review")).toBe(false);
   });
 
   it("shows review link only with workflow capability", () => {
@@ -36,7 +36,7 @@ describe("moderation navigation projection", () => {
       canAccessWorkflowReview: true,
     });
 
-    expect(items.some((item) => item.href === "/review")).toBe(true);
+    expect(items.some((item) => item.href === "/admin/review")).toBe(true);
   });
 
   it("does not branch on role names", () => {
@@ -44,8 +44,11 @@ describe("moderation navigation projection", () => {
     expect(source).not.toMatch(/role\.name|membership\.role/);
   });
 
-  it("does not expose audit admin or platform navigation", () => {
-    const hrefs = MODERATION_PRIMARY_NAV.map((item) => item.href).join("\n");
-    expect(hrefs).not.toMatch(/\/admin|\/platform|\/moderate\/audit/);
+  it("does not expose general admin or platform navigation", () => {
+    const hrefs = MODERATION_PRIMARY_NAV.map((item) => item.href);
+    expect(hrefs.join("\n")).not.toMatch(/\/platform|\/moderate\/audit/);
+    expect(hrefs.filter((href) => href.startsWith("/admin") && href !== "/admin/review")).toEqual(
+      [],
+    );
   });
 });

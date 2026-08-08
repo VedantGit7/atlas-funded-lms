@@ -151,13 +151,13 @@ export default tseslint.config(
       "**/out/**",
       "**/pnpm-lock.yaml",
       "docs/locked/**",
-      "apps/web/next-env.d.ts",
+      "frontend/apps/web/next-env.d.ts",
       "prisma.config.ts",
-      "packages/db/src/generated/**",
-      "packages/**/src/**/*.d.ts",
-      "packages/domain/config/src/schemas/**",
-      "packages/domain/config/src/services/**",
-      "packages/domain/config/src/repositories/feature-flag.repository.ts",
+      "backend/packages/db/src/generated/**",
+      "backend/packages/**/src/**/*.d.ts",
+      "backend/packages/domain/config/src/schemas/**",
+      "backend/packages/domain/config/src/services/**",
+      "backend/packages/domain/config/src/repositories/feature-flag.repository.ts",
     ],
   },
 
@@ -222,7 +222,7 @@ export default tseslint.config(
 
   {
     files: ["**/*.{ts,tsx}"],
-    ignores: ["packages/db/src/**/*.{ts,tsx}"],
+    ignores: ["backend/packages/db/src/**/*.{ts,tsx}"],
     rules: {
       "no-restricted-imports": [
         "error",
@@ -241,7 +241,7 @@ export default tseslint.config(
   },
 
   {
-    files: ["packages/db/src/**/*.{ts,tsx}"],
+    files: ["backend/packages/db/src/**/*.{ts,tsx}"],
     rules: {
       "no-restricted-imports": [
         "error",
@@ -253,7 +253,7 @@ export default tseslint.config(
   },
 
   {
-    files: ["apps/web/src/app/api/**/*.{ts,tsx}"],
+    files: ["frontend/apps/web/src/app/api/**/*.{ts,tsx}"],
     rules: {
       "no-restricted-imports": [
         "error",
@@ -300,10 +300,10 @@ export default tseslint.config(
   },
 
   {
-    files: ["apps/web/**/*.{ts,tsx}"],
+    files: ["frontend/apps/web/**/*.{ts,tsx}"],
     ignores: [
-      "apps/web/src/app/api/**/*.{ts,tsx}",
-      "apps/web/src/modules/diagnostics/**/*.{ts,tsx}",
+      "frontend/apps/web/src/app/api/**/*.{ts,tsx}",
+      "frontend/apps/web/src/modules/diagnostics/**/*.{ts,tsx}",
     ],
     rules: {
       "no-restricted-imports": [
@@ -323,6 +323,11 @@ export default tseslint.config(
           ],
           patterns: [
             ...genericForbiddenImportPatterns,
+            {
+              group: ["backend/**"],
+              message:
+                "Frontend code must not import backend source paths. Use /api/v1 HTTP contracts only.",
+            },
             {
               group: [
                 "@atlas/db/*",
@@ -350,7 +355,7 @@ export default tseslint.config(
   },
 
   {
-    files: ["apps/web/src/lib/server/**/*.{ts,tsx}"],
+    files: ["frontend/apps/web/src/lib/server/**/*.{ts,tsx}"],
     rules: {
       "no-restricted-imports": [
         "error",
@@ -369,7 +374,7 @@ export default tseslint.config(
   },
 
   {
-    files: ["apps/web/src/server/**/*.{ts,tsx}"],
+    files: ["frontend/apps/web/src/server/**/*.{ts,tsx}"],
     rules: {
       "no-restricted-imports": [
         "error",
@@ -388,12 +393,12 @@ export default tseslint.config(
   },
 
   {
-    files: ["apps/web/src/modules/diagnostics/**/*.{ts,tsx}"],
+    files: ["frontend/apps/web/src/modules/diagnostics/**/*.{ts,tsx}"],
     ignores: [
-      "apps/web/src/modules/diagnostics/diagnostic.api-client.ts",
-      "apps/web/src/modules/diagnostics/diagnostic.server-api.ts",
-      "apps/web/src/modules/diagnostics/diagnostic.types.ts",
-      "apps/web/src/modules/diagnostics/diagnostic.schemas.ts",
+      "frontend/apps/web/src/modules/diagnostics/diagnostic.api-client.ts",
+      "frontend/apps/web/src/modules/diagnostics/diagnostic.server-api.ts",
+      "frontend/apps/web/src/modules/diagnostics/diagnostic.types.ts",
+      "frontend/apps/web/src/modules/diagnostics/diagnostic.schemas.ts",
     ],
     rules: {
       "no-restricted-imports": [
@@ -413,10 +418,43 @@ export default tseslint.config(
   },
 
   {
+    files: ["frontend/packages/**/*.{ts,tsx}"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            {
+              name: "@prisma/client",
+              message: "Frontend packages must never import Prisma directly.",
+            },
+            {
+              name: "@atlas/db",
+              message: "Frontend packages must not import the DB package directly.",
+            },
+          ],
+          patterns: [
+            ...genericForbiddenImportPatterns,
+            {
+              group: ["backend/**"],
+              message:
+                "Frontend packages must not import backend source paths. Use @atlas/contracts only.",
+            },
+            {
+              group: ["@atlas/db/*"],
+              message: "Frontend packages must not import DB internals.",
+            },
+          ],
+        },
+      ],
+    },
+  },
+
+  {
     files: [
-      "apps/web/src/app/platform/**/*.{ts,tsx}",
-      "apps/web/src/components/shells/PlatformConsoleShell*.{ts,tsx}",
-      "apps/web/src/lib/server/platform-*.{ts,tsx}",
+      "frontend/apps/web/src/app/platform/**/*.{ts,tsx}",
+      "frontend/apps/web/src/components/shells/PlatformConsoleShell*.{ts,tsx}",
+      "frontend/apps/web/src/lib/server/platform-*.{ts,tsx}",
     ],
     rules: {
       "no-restricted-imports": "off",

@@ -4,12 +4,12 @@ import {
   pathGateInputSchema,
   pathStepInputSchema,
   updateLearningPathBodySchema,
-} from "../../../apps/web/src/server/learning-paths/learning-path.schemas";
+} from "../../../backend/apps/api/src/server/learning-paths/learning-path.schemas";
 import {
   compareBandKeys,
   evaluateGateState,
   readCompetencyBandConfig,
-} from "../../../apps/web/src/server/learning-paths/path-gate.service";
+} from "../../../backend/apps/api/src/server/learning-paths/path-gate.service";
 
 describe("learning path schemas", () => {
   it("rejects tenant_id and membership identifiers", () => {

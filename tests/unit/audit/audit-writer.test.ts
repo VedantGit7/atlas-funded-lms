@@ -126,7 +126,7 @@ describe("auditWriter", () => {
 describe("audit repository immutability", () => {
   it("does not update or delete audit rows", () => {
     const repositorySource = readFileSync(
-      resolve(import.meta.dirname, "../../../packages/audit/src/repositories/audit.repository.ts"),
+      resolve(import.meta.dirname, "../../../backend/packages/audit/src/repositories/audit.repository.ts"),
       "utf8",
     );
 

@@ -1,17 +1,17 @@
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
-import { PLATFORM_ROUTE_REGISTRY } from "../../../apps/web/src/features/platform/platform-route-registry";
+import { PLATFORM_ROUTE_REGISTRY } from "../../../frontend/apps/web/src/features/platform/platform-route-registry";
 import {
   PLATFORM_PRIMARY_NAV,
   filterPlatformNavigation,
-} from "../../../apps/web/src/features/platform/platform-navigation";
-import { projectPlatformCapabilities } from "../../../apps/web/src/features/platform/platform-capability-projection";
-import { platformQueryKey } from "../../../apps/web/src/features/platform/platform-query-keys";
-import { tenantQueryKey } from "../../../apps/web/src/lib/query/client-data-cache";
-import { platformReasonSchema } from "../../../apps/web/src/features/platform/platform-reason-schema";
+} from "../../../frontend/apps/web/src/features/platform/platform-navigation";
+import { projectPlatformCapabilities } from "../../../frontend/apps/web/src/features/platform/platform-capability-projection";
+import { platformQueryKey } from "../../../frontend/apps/web/src/features/platform/platform-query-keys";
+import { tenantQueryKey } from "../../../frontend/apps/web/src/lib/query/client-data-cache";
+import { platformReasonSchema } from "../../../frontend/apps/web/src/features/platform/platform-reason-schema";
 
-const webRoot = resolve(import.meta.dirname, "../../../apps/web/src");
+const webRoot = resolve(import.meta.dirname, "../../../frontend/apps/web/src");
 
 describe("platform route registry", () => {
   it("maps P1-P8 only", () => {

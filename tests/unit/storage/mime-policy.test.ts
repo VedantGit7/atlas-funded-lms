@@ -28,6 +28,11 @@ describe("assertAllowedMimeType", () => {
       "text/plain",
       "text/csv",
       "application/zip",
+      "audio/mpeg",
+      "audio/wav",
+      "audio/mp4",
+      "application/vnd.ms-powerpoint",
+      "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     ])("allows %s", (contentType) => {
       expect(() => assertAllowedMimeType({ purpose: "lesson.asset", contentType })).not.toThrow();
     });
@@ -36,6 +41,24 @@ describe("assertAllowedMimeType", () => {
       expect(() => assertAllowedMimeType({ purpose: "lesson.asset", contentType })).toThrow(
         "SELF_HOSTED_VIDEO_FORBIDDEN",
       );
+    });
+
+    it("rejects unsupported lesson asset types", () => {
+      expect(() =>
+        assertAllowedMimeType({ purpose: "lesson.asset", contentType: "application/octet-stream" }),
+      ).toThrow("UNSUPPORTED_LESSON_ASSET_TYPE");
+    });
+  });
+
+  describe("module scorm packages", () => {
+    it.each(["application/zip", "application/x-zip-compressed"])("allows %s", (contentType) => {
+      expect(() => assertAllowedMimeType({ purpose: "module.scorm", contentType })).not.toThrow();
+    });
+
+    it("rejects application/pdf", () => {
+      expect(() =>
+        assertAllowedMimeType({ purpose: "module.scorm", contentType: "application/pdf" }),
+      ).toThrow("UNSUPPORTED_SCORM_PACKAGE_TYPE");
     });
   });
 

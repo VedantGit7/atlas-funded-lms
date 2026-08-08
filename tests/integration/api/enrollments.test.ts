@@ -70,7 +70,7 @@ vi.mock("@atlas/authorization", async (importOriginal) => {
   };
 });
 
-vi.mock("../../../apps/web/src/server/courses/load-course-resource-ref", () => ({
+vi.mock("../../../backend/apps/api/src/server/courses/load-course-resource-ref", () => ({
   loadCourseForEnrollmentResourceRef: vi.fn(async () => ({
     type: "course",
     id: "018f0000-0000-7000-8000-000000000030",
@@ -80,11 +80,11 @@ vi.mock("../../../apps/web/src/server/courses/load-course-resource-ref", () => (
   })),
 }));
 
-vi.mock("../../../apps/web/src/server/enrollments/enrollments.service", () => ({
+vi.mock("../../../backend/apps/api/src/server/enrollments/enrollments.service", () => ({
   enrollCurrentMemberInCourse: (...args: unknown[]) => mockEnrollCurrentMemberInCourse(...args),
 }));
 
-import { POST as createEnrollment } from "../../../apps/web/src/app/api/v1/enrollments/route";
+import { POST as createEnrollment } from "../../../backend/apps/api/src/app/api/v1/enrollments/route";
 
 describe("POST /api/v1/enrollments", () => {
   beforeEach(() => {

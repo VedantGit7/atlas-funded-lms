@@ -4,12 +4,12 @@ import {
   saveAttemptAnswer,
   startAttempt,
   submitAttempt,
-} from "../../../apps/web/src/server/attempts/attempts.service";
+} from "../../../backend/apps/api/src/server/attempts/attempts.service";
 import {
   getGradingTaskDetail,
   gradeGradingTask,
   listGradingTasks,
-} from "../../../apps/web/src/server/grading/grading.service";
+} from "../../../backend/apps/api/src/server/grading/grading.service";
 import {
   adminCtx,
   createAssessmentFixture,

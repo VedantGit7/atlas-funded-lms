@@ -3,15 +3,15 @@ import {
   assertRegisteredContentAction,
   resolveCaseStatusAfterAppealUphold,
   resolveCaseStatusAfterDecision,
-} from "../../../apps/web/src/server/moderation/moderation.contract";
+} from "../../../backend/apps/api/src/server/moderation/moderation.contract";
 import {
   createAppealBodySchema,
   createModerationCaseBodySchema,
   decideModerationCaseBodySchema,
   rejectUnsafePlainText,
   reviewAppealBodySchema,
-} from "../../../apps/web/src/server/moderation/moderation.dto";
-import { MODERATION_ROUTE_REGISTRY } from "../../../apps/web/src/features/moderation/moderation-route-registry";
+} from "../../../backend/apps/api/src/server/moderation/moderation.dto";
+import { MODERATION_ROUTE_REGISTRY } from "../../../frontend/apps/web/src/features/moderation/moderation-route-registry";
 
 describe("moderation command validation", () => {
   it("accepts valid case creation input", () => {

@@ -15,21 +15,30 @@ const {
   mockResolveTenant,
   mockSignupWithPassword,
   mockBuildPublicAuthResponse,
+  mockGlobalQueryRaw,
   mockWithGlobalDb,
   mockWithTenantTx,
   mockRejectClientTenantId,
-} = vi.hoisted(() => ({
-  mockResolveTenant: vi.fn(),
-  mockSignupWithPassword: vi.fn(),
-  mockBuildPublicAuthResponse: vi.fn(),
-  mockWithGlobalDb: vi.fn((fn: (db: unknown) => unknown) =>
-    fn({ $queryRaw: vi.fn().mockResolvedValue([]) }),
-  ),
-  mockWithTenantTx: vi.fn((_ctx: unknown, fn: (tx: unknown) => unknown) =>
-    fn({ $queryRaw: vi.fn() }),
-  ),
-  mockRejectClientTenantId: vi.fn(),
-}));
+  mockFindMembership,
+  mockEnsureSelfServiceLearnerMembership,
+} = vi.hoisted(() => {
+  const mockGlobalQueryRaw = vi.fn().mockResolvedValue([]);
+  return {
+    mockResolveTenant: vi.fn(),
+    mockSignupWithPassword: vi.fn(),
+    mockBuildPublicAuthResponse: vi.fn(),
+    mockGlobalQueryRaw,
+    mockWithGlobalDb: vi.fn((fn: (db: unknown) => unknown) =>
+      fn({ $queryRaw: mockGlobalQueryRaw }),
+    ),
+    mockWithTenantTx: vi.fn((_ctx: unknown, fn: (tx: unknown) => unknown) =>
+      fn({ $queryRaw: vi.fn() }),
+    ),
+    mockRejectClientTenantId: vi.fn(),
+    mockFindMembership: vi.fn(),
+    mockEnsureSelfServiceLearnerMembership: vi.fn(),
+  };
+});
 
 vi.mock("@atlas/tenancy", () => ({
   resolveTenantFromRequest: (...args: unknown[]) => mockResolveTenant(...args),
@@ -53,6 +62,16 @@ vi.mock("@atlas/domain-identity", async (importOriginal) => {
   };
 });
 
+vi.mock("@atlas/membership", async (importOriginal) => {
+  const actual = await importOriginal<Record<string, unknown>>();
+  return {
+    ...actual,
+    findMembershipByPrincipal: (...args: unknown[]) => mockFindMembership(...args),
+    ensureSelfServiceLearnerMembership: (...args: unknown[]) =>
+      mockEnsureSelfServiceLearnerMembership(...args),
+  };
+});
+
 vi.mock("@atlas/db/global-db", () => ({
   withGlobalDb: (fn: (db: unknown) => unknown) => mockWithGlobalDb(fn),
 }));
@@ -61,7 +80,7 @@ vi.mock("@atlas/db/with-tenant-tx", () => ({
   withTenantTx: (ctx: unknown, fn: (tx: unknown) => unknown) => mockWithTenantTx(ctx, fn),
 }));
 
-import { POST } from "../../apps/web/src/app/api/v1/public/auth/signup/route";
+import { POST } from "../../backend/apps/api/src/app/api/v1/public/auth/signup/route";
 
 function createRequest(body: object) {
   return new NextRequest("https://tenant-a.example.com/api/v1/public/auth/signup", {
@@ -75,6 +94,12 @@ describe("POST /api/v1/public/auth/signup", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockResolveTenant.mockResolvedValue(tenantA);
+    mockGlobalQueryRaw.mockResolvedValue([]);
+    mockFindMembership.mockResolvedValue(null);
+    mockEnsureSelfServiceLearnerMembership.mockResolvedValue({
+      membershipId: "new-membership",
+      created: true,
+    });
     mockSignupWithPassword.mockResolvedValue({
       status: "verification_required",
       identity: { mfaEnabled: false },
@@ -99,5 +124,74 @@ describe("POST /api/v1/public/auth/signup", () => {
     expect(body).toEqual({
       data: { status: "EMAIL_VERIFICATION_REQUIRED", redirectTo: null },
     });
+  });
+
+  it("does not provision a membership while email verification is pending", async () => {
+    // A principal exists but there is no session yet, so provisioning must wait
+    // for the first login after verification.
+    mockGlobalQueryRaw.mockResolvedValue([{ id: "principal-id" }]);
+
+    await POST(
+      createRequest({
+        email: "user@example.com",
+        password: "password123",
+        displayName: "Atlas User",
+      }),
+    );
+
+    expect(mockEnsureSelfServiceLearnerMembership).not.toHaveBeenCalled();
+  });
+
+  it("provisions a learner membership when signup returns an immediate session", async () => {
+    mockSignupWithPassword.mockResolvedValue({
+      status: "signed_in",
+      identity: { mfaEnabled: false },
+      session: { accessToken: "access", refreshToken: "refresh", expiresIn: 3600 },
+    });
+    mockGlobalQueryRaw.mockResolvedValue([{ id: "principal-id" }]);
+    mockFindMembership
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce({ id: "new-membership", status: "ACTIVE" });
+    mockBuildPublicAuthResponse.mockResolvedValue({
+      data: { status: "AUTHENTICATED", redirectTo: "/" },
+    });
+
+    const response = await POST(
+      createRequest({
+        email: "user@example.com",
+        password: "password123",
+        displayName: "Atlas User",
+      }),
+    );
+    const body: unknown = await response.json();
+
+    expect(mockEnsureSelfServiceLearnerMembership).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tenantId: tenantA.tenantId,
+        authPrincipalId: "principal-id",
+        email: "user@example.com",
+        displayName: "Atlas User",
+      }),
+    );
+    expect(body).toEqual({ data: { status: "AUTHENTICATED", redirectTo: "/" } });
+  });
+
+  it("forwards the tenant emailRedirectTo to the signup service", async () => {
+    await POST(
+      createRequest({
+        email: "user@example.com",
+        password: "password123",
+        displayName: "Atlas User",
+        emailRedirectTo: "https://tenant-a.example.com/auth/confirm",
+      }),
+    );
+
+    expect(mockSignupWithPassword).toHaveBeenCalledWith(
+      expect.objectContaining({
+        input: expect.objectContaining({
+          emailRedirectTo: "https://tenant-a.example.com/auth/confirm",
+        }),
+      }),
+    );
   });
 });

@@ -1,9 +1,7 @@
-import { existsSync, readFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
-
-const repoRoot = resolve(import.meta.dirname, "../..");
-const webRoot = resolve(repoRoot, "apps/web/src");
+import { repoRoot, resolveSplitPath, splitPathExists } from "./split-layout-paths";
 
 const searchPaths = [
   "app/(learner)/search/page.tsx",
@@ -24,12 +22,12 @@ const searchPaths = [
 describe("search e2e wiring", () => {
   it("includes approved screen, APIs, and search feature files", () => {
     for (const relativePath of searchPaths) {
-      expect(existsSync(resolve(webRoot, relativePath))).toBe(true);
+      expect(splitPathExists(relativePath)).toBe(true);
     }
   });
 
   it("search page loads results through server API", () => {
-    const source = readFileSync(resolve(webRoot, "app/(learner)/search/page.tsx"), "utf8");
+    const source = readFileSync(resolveSplitPath("app/(learner)/search/page.tsx"), "utf8");
     expect(source).toContain("serverApi.get");
     expect(source).toContain("SearchResultsPage");
     expect(source).not.toContain("access_json");
@@ -37,7 +35,7 @@ describe("search e2e wiring", () => {
 
   it("result cards navigate through safe internal action paths", () => {
     const source = readFileSync(
-      resolve(webRoot, "features/search/components/search-result-card.tsx"),
+      resolveSplitPath("features/search/components/search-result-card.tsx"),
       "utf8",
     );
     expect(source).toContain("result.actionPath");
@@ -46,7 +44,7 @@ describe("search e2e wiring", () => {
 
   it("reindex API emits worker-owned outbox event only", () => {
     const serviceSource = readFileSync(
-      resolve(repoRoot, "packages/domain/src/search/search.service.ts"),
+      resolve(repoRoot, "backend/packages/domain/src/search/search.service.ts"),
       "utf8",
     );
     expect(serviceSource).toContain("SEARCH_REINDEX_REQUESTED_EVENT");
@@ -55,7 +53,7 @@ describe("search e2e wiring", () => {
 
   it("search service does not emit analytics events", () => {
     const serviceSource = readFileSync(
-      resolve(repoRoot, "packages/domain/src/search/search.service.ts"),
+      resolve(repoRoot, "backend/packages/domain/src/search/search.service.ts"),
       "utf8",
     );
     expect(serviceSource).not.toContain("analytics");
@@ -63,16 +61,13 @@ describe("search e2e wiring", () => {
   });
 
   it("worker router registers search consumers", () => {
-    const consumersSource = readFileSync(resolve(webRoot, "events/outbox-consumers.ts"), "utf8");
+    const consumersSource = readFileSync(resolveSplitPath("events/outbox-consumers.ts"), "utf8");
     expect(consumersSource).toContain("createSearchOutboxConsumers");
     expect(consumersSource).toContain("SEARCH_OUTBOX_EVENTS");
   });
 
   it("learner shell exposes topbar search entry", () => {
-    const shellSource = readFileSync(
-      resolve(webRoot, "components/shells/LearnerShell.tsx"),
-      "utf8",
-    );
+    const shellSource = readFileSync(resolveSplitPath("components/shells/LearnerShell.tsx"), "utf8");
     expect(shellSource).toContain('href="/search"');
   });
 });

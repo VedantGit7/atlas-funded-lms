@@ -88,10 +88,10 @@ vi.mock("@atlas/domain-branding", async (importOriginal) => {
   };
 });
 
-import { GET as getBranding } from "../../apps/web/src/app/api/v1/branding/route";
-import { GET as getDomains } from "../../apps/web/src/app/api/v1/domains/route";
-import { GET as getBrandingVersions } from "../../apps/web/src/app/api/v1/branding/versions/route";
-import { DELETE as deleteDomain } from "../../apps/web/src/app/api/v1/domains/[id]/route";
+import { GET as getBranding } from "../../backend/apps/api/src/app/api/v1/branding/route";
+import { GET as getDomains } from "../../backend/apps/api/src/app/api/v1/domains/route";
+import { GET as getBrandingVersions } from "../../backend/apps/api/src/app/api/v1/branding/versions/route";
+import { DELETE as deleteDomain } from "../../backend/apps/api/src/app/api/v1/domains/[id]/route";
 
 const describeWithDb =
   process.env["DATABASE_URL"] && process.env["PLATFORM_DATABASE_URL"] ? describe : describe.skip;

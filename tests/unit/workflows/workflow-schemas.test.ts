@@ -2,15 +2,20 @@ import { describe, expect, it } from "vitest";
 import {
   workflowListQuerySchema,
   workflowTransitionBodySchema,
-} from "../../../apps/web/src/server/workflows/workflow-schemas";
+} from "../../../backend/apps/api/src/server/workflows/workflow-schemas";
 
 describe("WorkflowListQuerySchema", () => {
   it("defaults status to pending", () => {
     expect(workflowListQuerySchema.parse({}).status).toBe("pending");
   });
 
-  it("rejects unsupported targetType values", () => {
-    expect(() => workflowListQuerySchema.parse({ targetType: "assessment" })).toThrow();
+  it("accepts optional targetType filter values", () => {
+    expect(workflowListQuerySchema.parse({ targetType: "assessment" }).targetType).toBe(
+      "assessment",
+    );
+    expect(workflowListQuerySchema.parse({ targetType: "learning_path" }).targetType).toBe(
+      "learning_path",
+    );
   });
 
   it("caps limit at 100", () => {

@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { routeMetadata } from "../../../apps/web/src/app/api/v1/branding/publish/route.metadata";
+import { routeMetadata } from "../../../backend/apps/api/src/app/api/v1/branding/publish/route.metadata";
 
 const tenantId = "018f0000-0000-7000-8000-000000000001";
 const actorMembershipId = "018f0000-0000-7000-8000-000000000002";
@@ -203,7 +203,7 @@ describe("branding publish", () => {
     const routeSource = readFileSync(
       resolve(
         import.meta.dirname,
-        "../../../apps/web/src/app/api/v1/branding/publish/route.metadata.ts",
+        "../../../backend/apps/api/src/app/api/v1/branding/publish/route.metadata.ts",
       ),
       "utf8",
     );
@@ -212,7 +212,7 @@ describe("branding publish", () => {
     expect(routeSource).not.toContain("branding.update");
 
     const handlerSource = readFileSync(
-      resolve(import.meta.dirname, "../../../apps/web/src/app/api/v1/branding/publish/route.ts"),
+      resolve(import.meta.dirname, "../../../backend/apps/api/src/app/api/v1/branding/publish/route.ts"),
       "utf8",
     );
 

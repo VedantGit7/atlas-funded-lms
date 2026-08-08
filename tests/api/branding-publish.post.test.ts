@@ -143,8 +143,8 @@ vi.mock("@atlas/events", () => ({
   },
 }));
 
-import { POST } from "../../apps/web/src/app/api/v1/branding/publish/route";
-import { routeMetadata } from "../../apps/web/src/app/api/v1/branding/publish/route.metadata";
+import { POST } from "../../backend/apps/api/src/app/api/v1/branding/publish/route";
+import { routeMetadata } from "../../backend/apps/api/src/app/api/v1/branding/publish/route.metadata";
 
 function createPostRequest(headers: Record<string, string> = {}) {
   return new NextRequest("https://tenant-a.example.com/api/v1/branding/publish", {

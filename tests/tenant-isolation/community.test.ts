@@ -4,7 +4,7 @@ import { withTenantTx } from "@atlas/db";
 import {
   listPostsInSpace,
   listSpaces,
-} from "../../apps/web/src/server/community/community.service";
+} from "../../backend/apps/api/src/server/community/community.service";
 import { authoringTenantTx, createCommunityFixture } from "../fixtures/community-fixture";
 import { createTenantIsolationFixture, tenantCtx } from "./tenant-isolation-fixture";
 

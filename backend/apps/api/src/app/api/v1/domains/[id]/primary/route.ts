@@ -1,0 +1,29 @@
+import type { z } from "zod";
+import { createTenantRoute } from "@atlas/api/create-tenant-route";
+import {
+  DomainParamsSchema,
+  SetPrimaryDomainResponseSchema,
+} from "@atlas/domain-branding/schemas/domains";
+import { setTenantDomainPrimary } from "@atlas/domain-branding";
+import { routeMetadata } from "./route.metadata";
+
+type SetPrimaryDomainResponse = z.output<typeof SetPrimaryDomainResponseSchema>;
+
+export const PUT = createTenantRoute<Record<string, never>, SetPrimaryDomainResponse>({
+  metadata: routeMetadata,
+  params: DomainParamsSchema,
+  output: SetPrimaryDomainResponseSchema,
+  handler: async ({ tx, params, ctx }) => {
+    const { id } = DomainParamsSchema.parse(params);
+
+    return setTenantDomainPrimary(
+      tx,
+      {
+        tenantId: ctx.tenantId,
+        actorMembershipId: ctx.actorMembershipId,
+        requestId: ctx.requestId,
+      },
+      id,
+    );
+  },
+});

@@ -43,6 +43,26 @@ describe("outbox.publish", () => {
     expect(insertOutboxEventMock).toHaveBeenCalledTimes(1);
   });
 
+  it("publishes security notification event types", async () => {
+    await expect(
+      outbox.publish(tx, {
+        ctx: {
+          tenantId,
+          actorMembershipId: membershipId,
+          requestId,
+        },
+        eventType: "security.mfa_enabled",
+        aggregateType: "security_notification",
+        aggregateId: membershipId,
+        payload: {
+          membershipId,
+          email: "member@example.com",
+        },
+        idempotencyKey: `${idempotencyKey}:mfa`,
+      }),
+    ).resolves.toEqual({ id: "018f0000-0000-7000-8000-000000000099" });
+  });
+
   it("rejects an unapproved event type", async () => {
     await expect(
       outbox.publish(tx, {
@@ -88,7 +108,7 @@ describe("outbox.publish", () => {
 
   it("does not run direct side effects", () => {
     const serviceSource = readFileSync(
-      resolve(import.meta.dirname, "../../../packages/events/src/services/outbox.service.ts"),
+      resolve(import.meta.dirname, "../../../backend/packages/events/src/services/outbox.service.ts"),
       "utf8",
     );
 

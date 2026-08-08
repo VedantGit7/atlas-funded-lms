@@ -5,7 +5,7 @@ import {
   createReactionBodySchema,
   extractMentionMembershipIds,
   structuredBodySchema,
-} from "../../../apps/web/src/server/community/community.dto";
+} from "../../../backend/apps/api/src/server/community/community.dto";
 
 describe("community structured body validation", () => {
   it("accepts safe structured paragraphs", () => {

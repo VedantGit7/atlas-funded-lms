@@ -1,8 +1,14 @@
-import { existsSync, readFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import { resolveSplitPath, splitPathExists } from "./split-layout-paths";
 
-const webRoot = resolve(import.meta.dirname, "../../apps/web/src");
+// NOTE: Additional certificate surfaces exist beyond the smoke list below:
+//   - app/api/v1/certificate-templates/[id]/approve/route.ts (REVIEW → PUBLISHED)
+//   - app/api/v1/certificates/[id]/download/route.ts (HTML attachment / 409)
+//   - server/certificates/certificate-feature-flags.ts (extensibility toggles)
+//   - server/certificates/learning-path-certificates-settings.ts (stub)
+// The PDF worker / render pipeline may exist only as a stub (gated behind the
+// CERTIFICATE_PDF_WORKER feature flag); do not assume a full PDF render here.
 
 const certificatePaths = [
   "app/(public)/verify/[credentialId]/page.tsx",
@@ -29,13 +35,13 @@ const certificatePaths = [
 describe("certificate e2e wiring", () => {
   it("includes approved screens, APIs, and worker wiring", () => {
     for (const relativePath of certificatePaths) {
-      expect(existsSync(resolve(webRoot, relativePath))).toBe(true);
+      expect(splitPathExists(relativePath)).toBe(true);
     }
   });
 
   it("public verify page uses minimal projection", () => {
     const source = readFileSync(
-      resolve(webRoot, "features/certificates/components/VerificationCard.tsx"),
+      resolveSplitPath("features/certificates/components/VerificationCard.tsx"),
       "utf8",
     );
     expect(source).toContain("credentialId");
@@ -45,7 +51,7 @@ describe("certificate e2e wiring", () => {
 
   it("worker validates certificate events without notification side effects", () => {
     const workerSource = readFileSync(
-      resolve(webRoot, "server/certificates/certificate.worker.ts"),
+      resolveSplitPath("server/certificates/certificate.worker.ts"),
       "utf8",
     );
     expect(workerSource).toContain("certificateIssuedOutboxPayloadSchema");
@@ -53,7 +59,7 @@ describe("certificate e2e wiring", () => {
   });
 
   it("learner certificates page uses list API only", () => {
-    const source = readFileSync(resolve(webRoot, "app/(learner)/certificates/page.tsx"), "utf8");
+    const source = readFileSync(resolveSplitPath("app/(learner)/certificates/page.tsx"), "utf8");
     expect(source).toContain("/api/v1/certificates");
     expect(source).not.toContain("/issue");
     expect(source).not.toContain("/revoke");

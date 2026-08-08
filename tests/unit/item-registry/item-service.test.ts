@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { duplicateDimensionWeight } from "../../../apps/web/src/server/item-registry/item-registry.errors";
+import { duplicateDimensionWeight } from "../../../backend/apps/api/src/server/item-registry/item-registry.errors";
 
 describe("item registry service helpers", () => {
   it("detects duplicate dimension ids before replace", () => {

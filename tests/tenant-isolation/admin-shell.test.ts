@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
-const webRoot = resolve(import.meta.dirname, "../../apps/web/src");
+const webRoot = resolve(import.meta.dirname, "../../frontend/apps/web/src");
 
 describe("tenant admin shell wiring", () => {
   it("includes tenant admin shell gate and route registry", () => {
@@ -28,8 +28,8 @@ describe("tenant admin shell wiring", () => {
       resolve(webRoot, "components/shells/TenantAdminShellClient.tsx"),
       "utf8",
     );
-    expect(source).toContain('aria-label="Admin sidebar"');
-    expect(source).toContain('aria-label="Mobile admin navigation"');
+    expect(source).toContain('sidebarAriaLabel="Admin sidebar"');
+    expect(source).toContain('bottomNavAriaLabel="Mobile admin navigation"');
     expect(source).not.toMatch(/\/platform/);
   });
 });

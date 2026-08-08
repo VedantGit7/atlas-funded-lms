@@ -1,0 +1,79 @@
+---
+description: Frontend workflow guardrails: always use the design-frontend skill and never hardcode colors or tenant values
+alwaysApply: true
+---
+
+# Frontend Work: Design Skill + Zero Hardcoding
+
+Applies to ALL frontend work (pages, components, shells, styling, layout, redesigns).
+Read and follow this BEFORE starting any frontend task.
+
+## 1. Always use the design-frontend skill
+
+Before writing or changing any UI, read and follow the design skill at
+`.agents/skills/design-taste-frontend/SKILL.md` (anti-slop rules, theme/color/shape
+locks, icon-library usage, `next/font`, accessibility, em-dash ban, pre-flight check).
+Do not freelance UI without it.
+
+## 2. Never hardcode (colors, theme, tenant values)
+
+Mirror how the landing page, login, and signup were built: nothing hardcoded.
+
+- **Colors / theme**: components reference design tokens only. Define token VALUES once
+  in `globals.css` (`:root`, `.dark`, and scoped blocks like `.admin-theme`), then use
+  `var(--token)` everywhere. No raw hex, `rgb()`, or palette utilities (`slate-*`,
+  `indigo-*`, `bg-black`, `text-white`) inside components.
+- **Tenant-specific values**: never hardcode brand names, logos, copy, domains, etc.
+  Pull them from tenant config / branding props (e.g. `branding.publicName`). The
+  `atlas/no-hardcoded-tenant-strings` lint rule enforces this.
+- **Light + dark**: every surface must support both modes via the `.dark` toggle, like
+  the rest of the app. Never ship a mode-locked screen.
+
+## 3. Dropdown & overlay transitions
+
+Custom dropdowns, menus, popovers, and similar overlay panels must animate open/close.
+Do not use unstyled native `<select>` on studio/admin form surfaces when a custom picker
+is appropriate.
+
+- **Shared primitives**: use `DropdownField`, `dropdownPanelClassName`, and
+  `inlineExpandClassName` from `admin-form-dropdown-shared.tsx`.
+- **Portaled panels**: `DropdownField` renders menus via `createPortal` on `document.body`.
+  The panel root MUST include `admin-theme admin-dropdown-panel` so `--admin-*` tokens
+  resolve (portals sit outside the shell). Default `portalZIndex` is `100`; use `85` inside
+  modals (`z-[70]` overlays).
+- **Enter motion**: panels use `motion-safe:animate-[admin-dropdown-in_0.18s_cubic-bezier(0.16,1,0.3,1)]`
+  with `motion-safe:origin-top` (defined in `globals.css`).
+- **Trigger affordance**: chevrons rotate with `transition-transform duration-200`.
+- **Inline expand**: forms that reveal below a trigger (e.g. add-lesson) reuse
+  `inlineExpandClassName` for the same motion language.
+- **Respect `prefers-reduced-motion`**: always gate with `motion-safe:`; never ship
+  animation-only feedback without a static fallback.
+
+```tsx
+// BAD: native select with no transition on studio form
+<select className={selectClassName}>...</select>
+
+// GOOD: custom picker with shared dropdown panel animation
+<DropdownField ...>
+  <div className={dropdownPanelClassName} role="listbox">...</div>
+</DropdownField>
+```
+
+```tsx
+// BAD: hardcoded color + tenant string
+<div className="bg-[#6366F1] text-white">FundedBeyond Admin</div>
+
+// GOOD: tokens + tenant config
+<div className="bg-[var(--admin-primary)] text-[var(--admin-on-primary)]">
+  {`${branding.publicName} Admin`}
+</div>
+```
+
+## Pre-finish checklist (frontend)
+
+- [ ] design-frontend skill consulted and applied
+- [ ] no raw hex / palette colors / `bg-black` / `text-white` in components (tokens only)
+- [ ] no hardcoded tenant strings (use branding/config)
+- [ ] works in BOTH light and dark mode
+- [ ] dropdowns/menus/popovers use shared transition primitives (`dropdownPanelClassName`, `inlineExpandClassName`)
+- [ ] `pnpm typecheck` and `pnpm lint` pass for changed files

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   deriveProgressStatus,
   stepLockedFromGates,
-} from "../../../apps/web/src/server/learning-paths/path-gate.service";
+} from "../../../backend/apps/api/src/server/learning-paths/path-gate.service";
 
 describe("path progress calculation", () => {
   it("marks step locked when any gate is not satisfied", () => {

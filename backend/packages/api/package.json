@@ -1,0 +1,29 @@
+{
+  "name": "@atlas/api",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "echo \"No api build configured yet.\"",
+    "lint": "echo \"No api lint configured yet.\"",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "echo \"No api tests configured yet.\"",
+    "test:unit": "echo \"No api unit tests configured yet.\"",
+    "test:integration": "echo \"No api integration tests configured yet.\"",
+    "test:authorization": "echo \"No api authorization tests configured yet.\"",
+    "test:tenant-isolation": "echo \"No api tenant-isolation tests configured yet.\"",
+    "test:e2e": "echo \"No api e2e tests configured yet.\""
+  },
+  "dependencies": {
+    "@atlas/auth": "workspace:*",
+    "@atlas/authorization": "workspace:*",
+    "@atlas/core": "workspace:*",
+    "@atlas/db": "workspace:*",
+    "@atlas/domain-config": "workspace:*",
+    "@atlas/membership": "workspace:*",
+    "@atlas/observability": "workspace:*",
+    "@atlas/tenancy": "workspace:*",
+    "next": "^16.2.9",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {}
+}

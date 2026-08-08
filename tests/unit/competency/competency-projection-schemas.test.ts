@@ -5,7 +5,7 @@ import {
   competencyHistoryQuerySchema,
   competencySignalsQuerySchema,
   practiceSessionCompletedPayloadSchema,
-} from "../../../apps/web/src/server/competency/competency-projection.schemas";
+} from "../../../backend/apps/api/src/server/competency/competency-projection.schemas";
 
 describe("competency projection schemas", () => {
   it("rejects tenant_id in assessment submitted payload", () => {
@@ -63,5 +63,17 @@ describe("competency projection schemas", () => {
         tenant_id: "018f0000-0000-7000-8000-000000000001",
       }),
     ).toThrow();
+  });
+
+  it("coerces string limit query params for competency signals", () => {
+    const parsed = competencySignalsQuerySchema.parse({ limit: "25" });
+
+    expect(parsed.limit).toBe(25);
+  });
+
+  it("coerces string limit query params for competency history", () => {
+    const parsed = competencyHistoryQuerySchema.parse({ limit: "20" });
+
+    expect(parsed.limit).toBe(20);
   });
 });

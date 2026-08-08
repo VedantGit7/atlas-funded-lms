@@ -9,6 +9,12 @@ const allowedDirectories = new Set([
   "prisma/sql/indexes",
   "prisma/sql/grants",
   "prisma/sql/partitions",
+  "backend/prisma/sql/setup",
+  "backend/prisma/sql/rls",
+  "backend/prisma/sql/triggers",
+  "backend/prisma/sql/indexes",
+  "backend/prisma/sql/grants",
+  "backend/prisma/sql/partitions",
 ]);
 
 const directoryArg = process.argv[2];

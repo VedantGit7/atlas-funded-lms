@@ -1,13 +1,11 @@
 packages:
-  - "apps/*"
-  - "packages/*"
-  - "packages/domain/config"
-  - "packages/domain/tenancy"
-  - "packages/domain/branding"
-  - "packages/domain/identity"
-  - "packages/domain/access"
-  - "packages/tenant-config"
-  - "packages/release-readiness"
+  - "frontend/apps/*"
+  - "frontend/packages/*"
+  - "backend/apps/*"
+  - "backend/packages/*"
+  - "backend/packages/domain/*"
+  - "backend/packages/tenant-config"
+  - "backend/packages/release-readiness"
 
 minimumReleaseAge: 1440
 minimumReleaseAgeExclude:

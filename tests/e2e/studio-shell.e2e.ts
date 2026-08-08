@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
-const webRoot = resolve(import.meta.dirname, "../../apps/web/src");
+const webRoot = resolve(import.meta.dirname, "../../frontend/apps/web/src");
 
 describe("ATL-STORY-039 studio shell e2e wiring", () => {
   it("includes studio shell gate and route registry", () => {
@@ -21,10 +21,10 @@ describe("ATL-STORY-039 studio shell e2e wiring", () => {
 
   it("studio shell exposes accessible mobile navigation", () => {
     const source = readFileSync(
-      resolve(webRoot, "components/shells/StudioShellClient.tsx"),
+      resolve(webRoot, "components/shells/studio/StudioShell.tsx"),
       "utf8",
     );
-    expect(source).toContain('aria-label="Mobile studio navigation"');
+    expect(source).toContain('aria-label="Studio sections"');
     expect(source).toContain('aria-controls="studio-mobile-nav"');
   });
 
@@ -68,9 +68,9 @@ describe("ATL-STORY-039 studio shell e2e wiring", () => {
     expect(source).not.toMatch(/prisma|repository/);
   });
 
-  it("review handoff links to existing S1 route", () => {
+  it("review handoff links to studio review route", () => {
     const nav = readFileSync(resolve(webRoot, "features/studio/studio-navigation.ts"), "utf8");
-    expect(nav).toContain('"/review"');
+    expect(nav).toContain('"/studio/review"');
     expect(nav).not.toContain("/review/approvals");
   });
 });

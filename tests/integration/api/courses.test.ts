@@ -72,7 +72,7 @@ vi.mock("@atlas/authorization", async (importOriginal) => {
   };
 });
 
-vi.mock("../../../apps/web/src/server/courses/load-course-resource-ref", () => ({
+vi.mock("../../../backend/apps/api/src/server/courses/load-course-resource-ref", () => ({
   loadCourseResourceRef: vi.fn(async () => ({
     type: "course",
     id: "018f0000-0000-7000-8000-000000000030",
@@ -89,15 +89,15 @@ vi.mock("../../../apps/web/src/server/courses/load-course-resource-ref", () => (
   })),
 }));
 
-vi.mock("../../../apps/web/src/server/courses/courses.service", () => ({
+vi.mock("../../../backend/apps/api/src/server/courses/courses.service", () => ({
   listPublishedCourses: (...args: unknown[]) => mockListPublishedCourses(...args),
   getPublishedCourseDetail: (...args: unknown[]) => mockGetPublishedCourseDetail(...args),
   getPublishedCourseModules: (...args: unknown[]) => mockGetPublishedCourseModules(...args),
 }));
 
-import { GET as listCourses } from "../../../apps/web/src/app/api/v1/courses/route";
-import { GET as getCourse } from "../../../apps/web/src/app/api/v1/courses/[id]/route";
-import { GET as getCourseModules } from "../../../apps/web/src/app/api/v1/courses/[id]/modules/route";
+import { GET as listCourses } from "../../../backend/apps/api/src/app/api/v1/courses/route";
+import { GET as getCourse } from "../../../backend/apps/api/src/app/api/v1/courses/[id]/route";
+import { GET as getCourseModules } from "../../../backend/apps/api/src/app/api/v1/courses/[id]/modules/route";
 
 const publishedCourseId = "018f0000-0000-7000-8000-000000000030";
 
@@ -121,6 +121,10 @@ describe("courses API integration", () => {
             title: "Published Course",
             description: "Visible",
             status: "PUBLISHED",
+            accessTier: "FREE",
+            priceCents: null,
+            currency: null,
+            locked: false,
             enrollmentStatus: "not_enrolled",
             updatedAt: new Date().toISOString(),
           },
@@ -135,6 +139,10 @@ describe("courses API integration", () => {
         title: "Published Course",
         description: "Visible",
         status: "PUBLISHED",
+        accessTier: "FREE",
+        priceCents: null,
+        currency: null,
+        locked: false,
         enrollmentStatus: "not_enrolled",
         enrolledAt: null,
         updatedAt: new Date().toISOString(),

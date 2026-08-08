@@ -3,7 +3,7 @@ import {
   STUDIO_ROUTE_REGISTRY,
   getStudioRouteByScreenId,
   listStudioScreenIds,
-} from "../../../apps/web/src/features/studio/studio-route-registry";
+} from "../../../frontend/apps/web/src/features/studio/studio-route-registry";
 
 describe("studio route registry", () => {
   it("defines exact I1-I13 contract registry", () => {
@@ -16,6 +16,8 @@ describe("studio route registry", () => {
   it("maps known screens to approved paths", () => {
     expect(getStudioRouteByScreenId("I1").pathPattern).toBe("/studio");
     expect(getStudioRouteByScreenId("I2").pathPattern).toBe("/studio/courses");
+    expect(getStudioRouteByScreenId("I8").detailPathPattern).toBe("/studio/assessments/:id");
+    expect(getStudioRouteByScreenId("I9").detailPathPattern).toBe("/studio/learning-paths/:id");
     expect(getStudioRouteByScreenId("I12").pathPattern).toBe("/studio/courses/:id/learners");
     expect(getStudioRouteByScreenId("I13").pathPattern).toBe("/studio/analytics");
   });

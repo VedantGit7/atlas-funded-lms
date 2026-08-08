@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { withTenantTx } from "@atlas/db";
-import { handleCompetencyOutboxEvent } from "../../../apps/web/src/server/competency/competency.worker";
+import { handleCompetencyOutboxEvent } from "../../../backend/apps/api/src/server/competency/competency.worker";
 import {
   completePracticeSession,
   getDueQueue,
   startPracticeSession,
   submitPracticeResponse,
-} from "../../../apps/web/src/server/practice/practice.service";
+} from "../../../backend/apps/api/src/server/practice/practice.service";
 import {
   authoringTenantTx,
   createPracticeFixture,

@@ -50,6 +50,45 @@ describe("certificate authorization", () => {
     expect(decision.allowed).toBe(true);
   });
 
+  it("allows learner to list the self-filtered certificate catalog", async () => {
+    // Regression: the list endpoint (`GET /api/v1/certificates`) uses a
+    // `certificate_catalog` resource that has no single certificate to relate to.
+    // Its loader asserts `selfCertificate` for the actor so a learner can browse
+    // their own wallet; per-row ownership stays enforced by the SQL query.
+    const decision = await can({
+      tx: learnerTx(),
+      actor: { tenantId: "tenant-a", membershipId: "learner-a" },
+      permission: "certificate.read",
+      resource: createTenantResourceRef({
+        type: "certificate_catalog",
+        id: "tenant-a",
+        tenantId: "tenant-a",
+        relationships: { selfCertificate: "learner-a" },
+      }),
+      ctx: { tenantId: "tenant-a", requestId: "req_auth_cert_catalog" },
+    });
+
+    expect(decision.allowed).toBe(true);
+  });
+
+  it("denies certificate catalog read when no relationship is asserted", async () => {
+    const decision = await can({
+      tx: learnerTx(),
+      actor: { tenantId: "tenant-a", membershipId: "learner-a" },
+      permission: "certificate.read",
+      resource: createTenantResourceRef({
+        type: "certificate_catalog",
+        id: "tenant-a",
+        tenantId: "tenant-a",
+        relationships: {},
+      }),
+      ctx: { tenantId: "tenant-a", requestId: "req_auth_cert_catalog_denied" },
+    });
+
+    expect(decision.allowed).toBe(false);
+    expect(decision.reason).toBe("RELATIONSHIP_REQUIRED");
+  });
+
   it("denies issue when relationship missing", async () => {
     const decision = await can({
       tx: instructorWithoutRelationshipTx(),

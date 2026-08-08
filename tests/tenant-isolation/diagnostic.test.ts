@@ -6,7 +6,7 @@ import { createTenantIsolationFixture, tenantCtx } from "./tenant-isolation-fixt
 import {
   getPublicDiagnosticResult,
   startPublicDiagnosticSession,
-} from "../../apps/web/src/modules/diagnostics/diagnostic-public-session.service";
+} from "../../backend/apps/api/src/server/diagnostics/diagnostic-public-session.service";
 
 const describeWithDb =
   process.env["DATABASE_URL"] && process.env["PLATFORM_DATABASE_URL"] ? describe : describe.skip;

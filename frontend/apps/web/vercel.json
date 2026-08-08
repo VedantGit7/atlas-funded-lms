@@ -1,0 +1,17 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "crons": [
+    {
+      "path": "/api/v1/internal/fx/refresh",
+      "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/v1/internal/certificates/expire",
+      "schedule": "0 2 * * *"
+    },
+    {
+      "path": "/api/v1/internal/reports/tick",
+      "schedule": "*/15 * * * *"
+    }
+  ]
+}

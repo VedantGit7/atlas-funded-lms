@@ -8,8 +8,8 @@ import {
   decideModerationCase,
   listModerationCases,
   reviewAppeal,
-} from "../../../apps/web/src/server/moderation/moderation.service";
-import { createPost } from "../../../apps/web/src/server/community/community.service";
+} from "../../../backend/apps/api/src/server/moderation/moderation.service";
+import { createPost } from "../../../backend/apps/api/src/server/community/community.service";
 import {
   authoringTenantTx,
   createCommunityFixture,

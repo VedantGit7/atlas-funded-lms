@@ -5,7 +5,7 @@ import {
   assertCoursePublishable,
   assertModuleEditable,
   validateModulePositions,
-} from "../../../apps/web/src/server/courses/course-state-guards";
+} from "../../../backend/apps/api/src/server/courses/course-state-guards";
 
 describe("course state guards", () => {
   it("blocks editing review and published courses", () => {

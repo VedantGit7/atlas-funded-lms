@@ -1,18 +1,35 @@
 import { describe, expect, it } from "vitest";
+import { randomUUID } from "node:crypto";
 import { withTenantTx } from "@atlas/db";
-import { submitCourseForReview } from "../../../apps/web/src/server/courses/course-authoring.service";
-import { createCourseModule } from "../../../apps/web/src/server/courses/course-authoring.service";
-import { findCourseAuthProjection } from "../../../apps/web/src/server/courses/courses.repository";
+import { submitAssessmentForReview } from "../../../backend/apps/api/src/server/assessments/assessments.service";
+import { submitCourseForReview } from "../../../backend/apps/api/src/server/courses/course-authoring.service";
+import { createCourseModule } from "../../../backend/apps/api/src/server/courses/course-authoring.service";
+import { findCourseAuthProjection } from "../../../backend/apps/api/src/server/courses/courses.repository";
+import {
+  submitLearningPathForReview,
+  updateLearningPath,
+} from "../../../backend/apps/api/src/server/learning-paths/learning-path.service";
 import {
   actOnWorkflowTransition,
   listReviewQueue,
-} from "../../../apps/web/src/server/workflows/workflows.service";
+} from "../../../backend/apps/api/src/server/workflows/workflows.service";
 import {
   adminCtx,
   authoringTenantTx,
   createCourseAuthoringFixture,
   instructorCtx,
 } from "../../fixtures/course-authoring-fixture";
+import {
+  createAssessmentFixture,
+  instructorCtx as assessmentInstructorCtx,
+  adminCtx as assessmentAdminCtx,
+  authoringTenantTx as assessmentAuthoringTenantTx,
+} from "../../fixtures/assessment-fixture";
+import {
+  createLearningPathFixture,
+  instructorCtx as pathInstructorCtx,
+  authoringTenantTx as pathAuthoringTenantTx,
+} from "../../fixtures/learning-path-fixture";
 
 const describeWithDb =
   process.env["DATABASE_URL"] && process.env["PLATFORM_DATABASE_URL"] ? describe : describe.skip;
@@ -57,7 +74,7 @@ describeWithDb("workflow integration", () => {
         }),
     );
 
-    expect(approved.data.courseStatus).toBe("PUBLISHED");
+    expect(approved.data.targetStatus).toBe("PUBLISHED");
 
     await withTenantTx(authoringTenantTx(fixture, fixture.adminMembershipId), async (tx) => {
       const course = await findCourseAuthProjection({ tx, courseId: fixture.draftCourseId });
@@ -84,7 +101,7 @@ describeWithDb("workflow integration", () => {
         }),
     );
 
-    expect(returned.data.courseStatus).toBe("DRAFT");
+    expect(returned.data.targetStatus).toBe("DRAFT");
   });
 
   it("returns conflict when workflow already acted on", async () => {
@@ -147,5 +164,68 @@ describeWithDb("workflow integration", () => {
       expect(eventTypes).toContain("workflow.transitioned");
       expect(eventTypes).toContain("course.published");
     });
+  });
+
+  it("lists pending assessment review items filtered by targetType", async () => {
+    const fixture = await createAssessmentFixture();
+    const instructor = assessmentInstructorCtx(fixture, "req_assessment_queue");
+    const admin = assessmentAdminCtx(fixture, "req_assessment_queue_admin");
+
+    await withTenantTx(assessmentAuthoringTenantTx(fixture), async (tx) => {
+      await submitAssessmentForReview(tx, instructor, fixture.assessmentId, {});
+    });
+
+    const queue = await withTenantTx(
+      assessmentAuthoringTenantTx(fixture, fixture.adminMembershipId),
+      async (tx) =>
+        listReviewQueue(tx, admin, { status: "pending", targetType: "assessment", limit: 25 }),
+    );
+
+    expect(queue.data.length).toBeGreaterThan(0);
+    expect(queue.data.every((item) => item.target.type === "assessment")).toBe(true);
+    expect(queue.data[0]?.target.status).toBe("REVIEW");
+  });
+
+  it("lists pending learning path review items filtered by targetType", async () => {
+    const fixture = await createLearningPathFixture();
+    const instructor = pathInstructorCtx(fixture, "req_path_queue");
+    const admin = {
+      tenantId: fixture.tenantId,
+      actorMembershipId: fixture.adminMembershipId,
+      requestId: "req_path_queue_admin",
+    };
+
+    await withTenantTx(pathAuthoringTenantTx(fixture), async (tx) => {
+      await updateLearningPath(tx, instructor, fixture.draftPathId, {
+        steps: [
+          {
+            stepType: "course",
+            refId: fixture.publishedCourseId,
+            title: "Step 1",
+            position: 1,
+            gates: [{ gateType: "open", config: {} }],
+          },
+        ],
+      });
+      await submitLearningPathForReview(tx, instructor, fixture.draftPathId, {});
+    });
+
+    const queue = await withTenantTx(
+      {
+        tenantId: fixture.tenantId,
+        actorMembershipId: fixture.adminMembershipId,
+        requestId: randomUUID(),
+      },
+      async (tx) =>
+        listReviewQueue(tx, admin, {
+          status: "pending",
+          targetType: "learning_path",
+          limit: 25,
+        }),
+    );
+
+    expect(queue.data.length).toBeGreaterThan(0);
+    expect(queue.data.every((item) => item.target.type === "learning_path")).toBe(true);
+    expect(queue.data[0]?.target.status).toBe("REVIEW");
   });
 });

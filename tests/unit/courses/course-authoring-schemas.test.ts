@@ -6,13 +6,13 @@ import {
   studioCourseListQuerySchema,
   updateCourseBodySchema,
   updateModuleBodySchema,
-} from "../../../apps/web/src/server/courses/course-authoring-schemas";
-import { courseListQuerySchema } from "../../../apps/web/src/server/courses/schemas";
+} from "../../../backend/apps/api/src/server/courses/course-authoring-schemas";
+import { courseListQuerySchema } from "../../../backend/apps/api/src/server/courses/schemas";
 import {
   assertCourseEditable,
   assertCoursePublishable,
   validateModulePositions,
-} from "../../../apps/web/src/server/courses/course-state-guards";
+} from "../../../backend/apps/api/src/server/courses/course-state-guards";
 
 describe("course authoring schemas", () => {
   it("accepts valid course create body", () => {
@@ -51,6 +51,9 @@ describe("course authoring schemas", () => {
 
   it("accepts module create and update bodies", () => {
     expect(createModuleBodySchema.parse({ title: "Module 1" }).title).toBe("Module 1");
+    expect(createModuleBodySchema.parse({ title: "SCORM", contentKind: "scorm" }).contentKind).toBe(
+      "scorm",
+    );
     expect(updateModuleBodySchema.parse({ position: 2 }).position).toBe(2);
   });
 

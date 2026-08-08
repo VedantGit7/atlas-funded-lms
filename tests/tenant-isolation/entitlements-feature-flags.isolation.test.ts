@@ -3,8 +3,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
 import { withPlatformScope } from "@atlas/db";
 import type { withTenantTx as WithTenantTxFn } from "@atlas/db";
-import * as membershipRepository from "../../packages/membership/src/membership.repository";
-import { requireActiveMembership } from "../../packages/membership/src/membership-gate";
+import * as membershipRepository from "../../backend/packages/membership/src/membership.repository";
+import { requireActiveMembership } from "../../backend/packages/membership/src/membership-gate";
 import { createTenantIsolationFixture, tenantCtx } from "./tenant-isolation-fixture";
 
 const {
@@ -81,8 +81,8 @@ vi.mock("@atlas/domain-config/services/feature-flag.service", () => ({
   listTenantFeatureFlags: (...args: unknown[]) => mockListTenantFeatureFlags(...args),
 }));
 
-import { GET as getEntitlements } from "../../apps/web/src/app/api/v1/entitlements/route";
-import { GET as getFeatureFlags } from "../../apps/web/src/app/api/v1/feature-flags/route";
+import { GET as getEntitlements } from "../../backend/apps/api/src/app/api/v1/entitlements/route";
+import { GET as getFeatureFlags } from "../../backend/apps/api/src/app/api/v1/feature-flags/route";
 
 const describeWithDb =
   process.env["DATABASE_URL"] && process.env["PLATFORM_DATABASE_URL"] ? describe : describe.skip;

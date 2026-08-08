@@ -3,16 +3,16 @@ import { withTenantTx } from "@atlas/db";
 import {
   handleNotificationQueuedOutboxEvent,
   handleNotificationSourceOutboxEvent,
-} from "../../../apps/web/src/server/notifications/notification.worker";
+} from "../../../backend/apps/api/src/server/notifications/notification.worker";
 import {
   createNotificationTemplate,
   deleteNotificationTemplate,
   listMyNotifications,
   listNotificationTemplates,
   markNotificationRead,
-} from "../../../apps/web/src/server/notifications/notification.service";
-import { issueCertificate } from "../../../apps/web/src/server/certificates/certificate.service";
-import { publishAssessmentForTests } from "../../../apps/web/src/server/assessments/assessments.service";
+} from "../../../backend/apps/api/src/server/notifications/notification.service";
+import { issueCertificate } from "../../../backend/apps/api/src/server/certificates/certificate.service";
+import { publishAssessmentForTests } from "../../../backend/apps/api/src/server/assessments/assessments.service";
 import {
   adminCtx,
   authoringTenantTx,

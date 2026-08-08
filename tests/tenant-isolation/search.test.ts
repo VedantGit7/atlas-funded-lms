@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { withTenantTx } from "@atlas/db";
 import { requestSearchReindex } from "@atlas/domain/search/search.service";
 import { searchRepository } from "@atlas/domain/search/search.repository";
-import "../../apps/web/src/server/search/search-source-adapters";
+import "../../backend/apps/api/src/server/search/search-source-adapters";
 import {
   adminCtx,
   authoringTenantTx,

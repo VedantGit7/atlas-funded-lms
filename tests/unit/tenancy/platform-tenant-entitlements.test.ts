@@ -130,14 +130,14 @@ describe("platform tenant entitlements", () => {
     const routeSource = readFileSync(
       resolve(
         import.meta.dirname,
-        "../../../apps/web/src/app/api/v1/platform/tenants/[id]/entitlements/route.ts",
+        "../../../backend/apps/api/src/app/api/v1/platform/tenants/[id]/entitlements/route.ts",
       ),
       "utf8",
     );
     const metadataSource = readFileSync(
       resolve(
         import.meta.dirname,
-        "../../../apps/web/src/app/api/v1/platform/tenants/[id]/entitlements/route.metadata.ts",
+        "../../../backend/apps/api/src/app/api/v1/platform/tenants/[id]/entitlements/route.metadata.ts",
       ),
       "utf8",
     );

@@ -17,13 +17,13 @@ import {
 import {
   publishScoringConfig,
   replaceProfileBands,
-} from "../../apps/web/src/server/competency/scoring-config.service";
+} from "../../backend/apps/api/src/server/competency/scoring-config.service";
 import {
   saveAttemptAnswer,
   startAttempt,
   submitAttempt,
-} from "../../apps/web/src/server/attempts/attempts.service";
-import { handleCompetencyOutboxEvent } from "../../apps/web/src/server/competency/competency.worker";
+} from "../../backend/apps/api/src/server/attempts/attempts.service";
+import { handleCompetencyOutboxEvent } from "../../backend/apps/api/src/server/competency/competency.worker";
 
 export type CompetencyProjectionFixture = AssessmentFixture & {
   dimensionId: string;

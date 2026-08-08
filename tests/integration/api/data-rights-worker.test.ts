@@ -8,7 +8,7 @@ import {
   dataExportRequestedPayloadSchema,
 } from "@atlas/domain/data-rights/data-rights.events";
 import { processExportRequestedEvent } from "@atlas/domain/data-rights/data-rights.worker";
-import { createDataRightsOutboxConsumers } from "../../../apps/web/src/events/outbox-consumers";
+import { createDataRightsOutboxConsumers } from "../../../backend/apps/api/src/events/outbox-consumers";
 import {
   adminCtx,
   authoringTenantTx,

@@ -1,0 +1,33 @@
+{
+  "name": "@atlas/auth",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts",
+    "./cookies": "./src/cookies.ts",
+    "./cookie-store": "./src/cookie-store.ts",
+    "./session": "./src/session.ts",
+    "./public-auth.service": "./src/public-auth.service.ts",
+    "./schemas": "./src/schemas.ts"
+  },
+  "scripts": {
+    "build": "echo \"No auth build configured yet.\"",
+    "lint": "echo \"No auth lint configured yet.\"",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "echo \"No auth tests configured yet.\"",
+    "test:unit": "echo \"No auth unit tests configured yet.\"",
+    "test:integration": "echo \"No auth integration tests configured yet.\"",
+    "test:authorization": "echo \"No auth authorization tests configured yet.\"",
+    "test:tenant-isolation": "echo \"No auth tenant-isolation tests configured yet.\"",
+    "test:e2e": "echo \"No auth e2e tests configured yet.\""
+  },
+  "dependencies": {
+    "@atlas/core": "workspace:*",
+    "@supabase/supabase-js": "^2.108.2",
+    "next": "^16.2.9",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0"
+  }
+}

@@ -40,7 +40,7 @@ describe("platform authorization matrix", () => {
 describe("platform shell host restriction", () => {
   it("blocks platform layout on tenant host messaging", () => {
     const source = readFileSync(
-      resolve(import.meta.dirname, "../../apps/web/src/lib/server/platform-host-gate.ts"),
+      resolve(import.meta.dirname, "../../frontend/apps/web/src/lib/server/platform-host-gate.ts"),
       "utf8",
     );
     expect(source).toContain("PLATFORM_HOST");

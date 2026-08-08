@@ -4,7 +4,7 @@ import { withTenantTx } from "@atlas/db";
 import { processSearchSourceEvent } from "@atlas/domain/search/search.worker";
 import { searchRepository } from "@atlas/domain/search/search.repository";
 import { runSearchReindex } from "@atlas/domain/search/search-reindex-runner";
-import "../../../apps/web/src/server/search/search-source-adapters";
+import "../../../backend/apps/api/src/server/search/search-source-adapters";
 import {
   authoringTenantTx,
   createCourseAuthoringFixture,

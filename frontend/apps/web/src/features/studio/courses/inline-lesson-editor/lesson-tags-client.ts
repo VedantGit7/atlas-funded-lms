@@ -1,0 +1,15 @@
+export {
+  attachExistingEntityTags,
+  attachExistingTags,
+  attachTagToEntity,
+  attachTagToLesson,
+  createEntityTag,
+  createLessonTag,
+  detachEntityTag,
+  detachLessonTag,
+  fetchEntityTags,
+  fetchLessonTags,
+  fetchTenantTags,
+  formatTagError,
+  type StudioTagScope,
+} from "./studio-tags-client";

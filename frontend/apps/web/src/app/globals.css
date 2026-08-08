@@ -1,0 +1,1126 @@
+@import "tailwindcss";
+
+/* Tailwind's automatic content scan doesn't reach outside apps/web into
+   sibling monorepo packages, so the design-system primitives need to be
+   registered explicitly. */
+@source "../../../../packages/design-system/src";
+@source "../components/ui";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  color-scheme: light;
+
+  --background: #ffffff;
+  --foreground: #0a0a0a;
+  --card: #ffffff;
+  --card-foreground: #0a0a0a;
+  --border: #e5e5e5;
+  --input: #e5e5e5;
+  --ring: #224466;
+  --muted: #f5f5f5;
+  --muted-foreground: #737373;
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  --success: #16a34a;
+  --warning: #d97706;
+
+  /* League tier accents (gamification). Metallic hues tuned to read on the
+     light surface; the dark block re-tunes them for the dark chassis. */
+  --league-gold: #b8860b;
+  --league-silver: #8a8f98;
+  --league-bronze: #a66a34;
+
+  --brand-primary: #224466;
+  --brand-accent: #8899aa;
+  --brand-header: #112233;
+  --tenant-background: #ffffff;
+  --tenant-foreground: #0a0a0a;
+  --primary: var(--brand-primary);
+  --primary-foreground: #ffffff;
+  --accent: var(--brand-accent);
+  --accent-foreground: var(--foreground);
+  --radius: 0.5rem;
+
+  --background: var(--tenant-background);
+  --foreground: var(--tenant-foreground);
+
+  /* Personal preference layer: never overrides brand/logo elements. */
+  --user-accent: var(--brand-primary);
+  --user-font-scale: 1;
+}
+
+.dark {
+  color-scheme: dark;
+
+  /* Dark chassis is fixed; tenant background/foreground tokens apply in light mode only. */
+  --background: #0a0a0a;
+  --foreground: #fafafa;
+  --card: #171717;
+  --card-foreground: #fafafa;
+  --border: #262626;
+  --input: #262626;
+  --ring: #8899aa;
+  --muted: #1a1a1a;
+  --muted-foreground: #a3a3a3;
+  --destructive: #f87171;
+  --destructive-foreground: #0a0a0a;
+  --success: #4ade80;
+  --warning: #fbbf24;
+
+  --league-gold: #eab308;
+  --league-silver: #c7ccd4;
+  --league-bronze: #cf8b52;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-brand-primary: var(--brand-primary);
+  --color-brand-accent: var(--brand-accent);
+  --color-brand-header: var(--brand-header);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-user-accent: var(--user-accent);
+  --radius-DEFAULT: var(--radius);
+}
+
+html,
+body {
+  min-height: 100%;
+  margin: 0;
+}
+
+html {
+  font-size: calc(16px * var(--user-font-scale));
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Branded loading screen motion (BrandLoadingScreen). Limited to transform/
+   opacity and neutralised by the prefers-reduced-motion rule below. */
+@keyframes fba-loader-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes fba-loader-dot {
+  0%,
+  80%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.5;
+  }
+  40% {
+    transform: translateY(-6px);
+    opacity: 1;
+  }
+}
+
+@keyframes fba-loader-reveal {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.fba-loader-spin {
+  animation: fba-loader-spin 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.fba-loader-dot {
+  animation: fba-loader-dot 1.4s ease-in-out infinite both;
+}
+
+.fba-loader-reveal {
+  animation: fba-loader-reveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Post-MFA verification success screen motion. */
+@keyframes fba-success-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  60% {
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes fba-pulse-halo {
+  0%,
+  100% {
+    transform: scale(0.9);
+    opacity: 0.55;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0.15;
+  }
+}
+
+.fba-success-pop {
+  animation: fba-success-pop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.fba-pulse-halo {
+  animation: fba-pulse-halo 2.4s ease-in-out infinite;
+}
+
+/* Skeleton shimmer for Suspense fallbacks (e.g. the auth form loading state).
+   Token-based so it adapts to light/dark; neutralised by the reduced-motion
+   rules below. */
+@keyframes fba-skeleton-shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.fba-skeleton {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--fba-bg2, #ede9e0);
+}
+
+.fba-skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--fba-surf, #ffffff) 55%, transparent),
+    transparent
+  );
+  animation: fba-skeleton-shimmer 1.8s infinite cubic-bezier(0.4, 0, 0.6, 1);
+}
+
+@keyframes fba-pulse-soft {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(0.9);
+  }
+}
+
+.fba-pulse-soft {
+  animation: fba-pulse-soft 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* ------------------------------------------------------------------ */
+/* Email-verification screen: premium glass hero with a floating       */
+/* envelope, orbital rings, drifting particles and an ambient glow.    */
+/* Everything is token-based (adapts to light/dark) and automatically  */
+/* neutralised by the global prefers-reduced-motion rule further down. */
+/* ------------------------------------------------------------------ */
+@keyframes fba-ve-float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-1.5deg);
+  }
+  50% {
+    transform: translateY(-14px) rotate(1.5deg);
+  }
+}
+
+.fba-ve-float {
+  animation: fba-ve-float 5s ease-in-out infinite;
+}
+
+@keyframes fba-ve-orbit {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.fba-ve-orbit {
+  animation: fba-ve-orbit 16s linear infinite;
+}
+
+.fba-ve-orbit-rev {
+  animation: fba-ve-orbit 24s linear infinite reverse;
+}
+
+@keyframes fba-ve-glow {
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.08);
+  }
+}
+
+.fba-ve-glow {
+  animation: fba-ve-glow 4.5s ease-in-out infinite;
+}
+
+/* Each particle sets its own --ve-dx/--ve-dy/--ve-dur/--ve-delay inline. */
+@keyframes fba-ve-particle {
+  0% {
+    transform: translate3d(0, 0, 0);
+    opacity: 0;
+  }
+  15%,
+  80% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(var(--ve-dx, 0), var(--ve-dy, -42px), 0);
+    opacity: 0;
+  }
+}
+
+.fba-ve-particle {
+  animation: fba-ve-particle var(--ve-dur, 6s) ease-in-out var(--ve-delay, 0s) infinite;
+}
+
+@keyframes fba-ve-shimmer {
+  0% {
+    transform: translateX(-160%);
+  }
+  100% {
+    transform: translateX(260%);
+  }
+}
+
+.fba-ve-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.fba-ve-shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-160%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--fba-ind) 70%, transparent),
+    transparent
+  );
+  animation: fba-ve-shimmer 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+/* Card entrance — a one-shot rise/fade on mount. */
+@keyframes fba-ve-rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fba-ve-rise {
+  animation: fba-ve-rise 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes fba-lock-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.9;
+  }
+}
+
+/* Frosted glass surface for the verification hero/card. Solid-ish fallback
+   stays legible where backdrop-filter is unsupported. */
+.fba-ve-glass {
+  background: color-mix(in srgb, var(--fba-surf) 78%, transparent);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid color-mix(in srgb, var(--fba-bdr) 70%, transparent);
+}
+
+/* Success state: gold sparkles, a spring-in check badge, and the thin
+   auto-redirect progress line. Each sparkle sets its own --ve-delay inline. */
+@keyframes fba-ve-sparkle {
+  0%,
+  100% {
+    transform: scale(0.3) rotate(0deg);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1) rotate(180deg);
+    opacity: 1;
+  }
+}
+
+.fba-ve-sparkle {
+  animation: fba-ve-sparkle 2.6s ease-in-out var(--ve-delay, 0s) infinite;
+}
+
+@keyframes fba-ve-pop {
+  0% {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.08);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.fba-ve-pop {
+  animation: fba-ve-pop 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes fba-ve-progress {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+.fba-ve-progress {
+  width: 0%;
+  animation: fba-ve-progress var(--ve-progress-dur, 3s) linear forwards;
+}
+
+/* ------------------------------------------------------------------ */
+/* Admin surface theme (indigo accent, dual light/dark).               */
+/* Scoped to `.admin-theme` so the operational studio/moderation/      */
+/* learner shells keep their own tokens. Light values are the default; */
+/* the `.dark` class on <html> (driven by ThemeInitScript / tenant +   */
+/* personal preference) swaps in the dark palette, matching the        */
+/* landing page and the rest of the app.                               */
+/* ------------------------------------------------------------------ */
+.admin-theme {
+  color-scheme: light;
+
+  --admin-bg: #f5f5fb;
+  --admin-surface: #ffffff;
+  --admin-surface-low: #f0f0f7;
+  --admin-surface-high: #e9e8f4;
+  --admin-surface-variant: #edecf6;
+  --admin-border: #e3e2ef;
+  --admin-outline: #cac8da;
+  --admin-primary: #6366f1;
+  --admin-primary-strong: #4f46e5;
+  --admin-primary-container: #e0e7ff;
+  --admin-on-primary: #ffffff;
+  --admin-on-primary-container: #312e81;
+  --admin-on-surface: #1b1924;
+  --admin-on-surface-variant: #565469;
+  --admin-success: #15803d;
+  --admin-warning: #b45309;
+  --admin-danger: #dc2626;
+  /* Lesson-type accent tokens (icon + selected card tint). */
+  --admin-lesson-video: #16a34a;
+  --admin-lesson-audio: #ea580c;
+  --admin-lesson-pdf: #dc2626;
+  --admin-lesson-slides: #ca8a04;
+  --admin-lesson-live: #db2777;
+  --admin-lesson-article: #64748b;
+  --admin-lesson-scorm: #0284c7;
+  --admin-lesson-quiz: #7c3aed;
+  --admin-lesson-assignment: #1d4ed8;
+  /* Drawer/modal scrim stays dark in both modes (darkens content behind). */
+  --admin-scrim: rgb(0 0 0 / 0.6);
+  /* Certificate artifact "paper": stays a fixed light surface in both app  */
+  /* themes since it previews the printed/downloaded certificate, not app  */
+  /* chrome. Only slightly dims in dark mode so it doesn't glare. */
+  --admin-certificate-paper: #fffdf8;
+  --admin-certificate-ink: #1f1b16;
+
+  background-color: var(--admin-bg);
+  color: var(--admin-on-surface);
+  font-family: var(--font-jakarta), system-ui, -apple-system, sans-serif;
+}
+
+.dark .admin-theme {
+  color-scheme: dark;
+
+  --admin-bg: #0f0e1a;
+  --admin-surface: #1e1d2e;
+  --admin-surface-low: #16151f;
+  --admin-surface-high: #2d2b44;
+  --admin-surface-variant: #2a283e;
+  --admin-border: #2a283e;
+  --admin-outline: #464553;
+  --admin-primary: #6366f1;
+  --admin-primary-strong: #4f46e5;
+  --admin-primary-container: #3730a3;
+  --admin-on-primary: #ffffff;
+  --admin-on-primary-container: #e0e7ff;
+  --admin-on-surface: #f7efea;
+  --admin-on-surface-variant: #c8c4d5;
+  --admin-success: #62df7d;
+  --admin-warning: #e6c364;
+  --admin-danger: #ff8a80;
+  --admin-lesson-video: #4ade80;
+  --admin-lesson-audio: #fb923c;
+  --admin-lesson-pdf: #f87171;
+  --admin-lesson-slides: #facc15;
+  --admin-lesson-live: #f472b6;
+  --admin-lesson-article: #94a3b8;
+  --admin-lesson-scorm: #38bdf8;
+  --admin-lesson-quiz: #a78bfa;
+  --admin-lesson-assignment: #60a5fa;
+  --admin-certificate-paper: #f3efe6;
+  --admin-certificate-ink: #211d17;
+
+  background-color: var(--admin-bg);
+  color: var(--admin-on-surface);
+}
+
+.admin-theme ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.admin-theme ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.admin-theme ::-webkit-scrollbar-thumb {
+  background: var(--admin-surface-high);
+  border-radius: 9999px;
+}
+
+.admin-theme ::-webkit-scrollbar-thumb:hover {
+  background: var(--admin-outline);
+}
+
+/* Workflow builder canvas dotted grid (token-based for light + dark). */
+.admin-theme .workflow-builder-grid {
+  background-color: var(--admin-bg);
+  background-image: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--admin-border) 85%, transparent) 1px,
+    transparent 1px
+  );
+  background-size: 24px 24px;
+}
+
+.admin-theme .workflow-node-selected {
+  outline: 2px solid var(--admin-primary);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--admin-primary) 14%, transparent);
+}
+
+.admin-theme .drag-handle:hover {
+  cursor: grab;
+}
+
+.admin-theme .drag-handle:active {
+  cursor: grabbing;
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Ceremonial serif for certificate artifact previews (diploma-style headline). */
+.font-ceremonial {
+  font-family: var(--font-cormorant), "Times New Roman", serif;
+}
+
+/* Portaled dropdown panels mount on document.body outside the shell tree. */
+.admin-theme.admin-dropdown-panel {
+  background-color: var(--admin-surface);
+  color: var(--admin-on-surface);
+  box-shadow:
+    0 18px 45px color-mix(in srgb, var(--admin-on-surface) 14%, transparent),
+    0 0 0 1px var(--admin-border);
+}
+
+.admin-theme .admin-dropdown-item {
+  color: var(--admin-on-surface);
+}
+
+.admin-theme .admin-dropdown-item:hover,
+.admin-theme .admin-dropdown-item:focus-visible {
+  background-color: var(--admin-surface-high);
+  outline: none;
+}
+
+.admin-theme .admin-dropdown-item[aria-selected="true"] {
+  background-color: var(--admin-surface-high);
+  font-weight: 600;
+}
+
+.admin-theme .lesson-editor-locked-pattern {
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 10px,
+    color-mix(in srgb, var(--admin-border) 40%, transparent) 10px,
+    color-mix(in srgb, var(--admin-border) 40%, transparent) 11px
+  );
+}
+
+/* Frosted hero panel. Solid fallback under reduced-transparency. */
+.admin-glass {
+  background: color-mix(in srgb, var(--admin-surface) 72%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid color-mix(in srgb, var(--admin-outline) 55%, transparent);
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .admin-glass {
+    background: var(--admin-surface);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+
+/* Admin confirmation dialog entrance. Gated via motion-safe at call sites. */
+@keyframes admin-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes admin-dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes admin-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes admin-banner-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes admin-dropdown-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes admin-toast-in {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes admin-toast-out {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+}
+
+@keyframes admin-dropdown-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+}
+
+/* Swipe card preview — Tinder-style stack and fly-off. Gated via motion-safe at call sites. */
+@keyframes swipe-card-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes swipe-card-idle {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes swipe-ambient-shift {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.03);
+  }
+}
+
+@keyframes swipe-action-pop {
+  0% {
+    transform: scale(1);
+  }
+  45% {
+    transform: scale(1.12);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Studio surface theme (warm canvas, dual light/dark).                  */
+/* Scoped to `.studio-shell` for instructor authoring surfaces.        */
+/* ------------------------------------------------------------------ */
+.studio-shell {
+  color-scheme: light;
+
+  --studio-bg: #fff8f4;
+  --studio-surface: #ffffff;
+  --studio-surface-low: #faf2ed;
+  --studio-surface-high: #efe7e1;
+  --studio-border: #e8e3d8;
+  --studio-outline: #777584;
+  --studio-primary: #1f108e;
+  --studio-primary-container: #3730a3;
+  --studio-on-primary: #ffffff;
+  --studio-on-primary-container: #a9a7ff;
+  --studio-on-surface: #1e1b18;
+  --studio-on-surface-variant: #464553;
+  --studio-secondary: #655d55;
+  --studio-tertiary: #511c00;
+  --studio-success: #16a34a;
+  --studio-warning: #b45309;
+  --studio-danger: #ba1a1a;
+  --studio-danger-container: #ffdad6;
+  --studio-on-danger-container: #93000a;
+
+  background-color: var(--studio-bg);
+  color: var(--studio-on-surface);
+  font-family: var(--font-jakarta), system-ui, -apple-system, sans-serif;
+}
+
+.dark .studio-shell {
+  color-scheme: dark;
+
+  --studio-bg: #141210;
+  --studio-surface: #1f1c19;
+  --studio-surface-low: #1a1714;
+  --studio-surface-high: #2d2924;
+  --studio-border: #3d3832;
+  --studio-outline: #8a847c;
+  --studio-primary: #c3c0ff;
+  --studio-primary-container: #3730a3;
+  --studio-on-primary: #0f0069;
+  --studio-on-primary-container: #e2dfff;
+  --studio-on-surface: #f7efea;
+  --studio-on-surface-variant: #c8c4d5;
+  --studio-secondary: #cfc5bb;
+  --studio-tertiary: #ffb694;
+  --studio-success: #62df7d;
+  --studio-warning: #e6c364;
+  --studio-danger: #ff8a80;
+  --studio-danger-container: #5c1512;
+  --studio-on-danger-container: #ffdad6;
+
+  background-color: var(--studio-bg);
+  color: var(--studio-on-surface);
+}
+
+.studio-shell ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.studio-shell ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.studio-shell ::-webkit-scrollbar-thumb {
+  background: var(--studio-border);
+  border-radius: 10px;
+}
+
+@keyframes studio-pulse-danger {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--studio-danger) 70%, transparent);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 6px color-mix(in srgb, var(--studio-danger) 0%, transparent);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--studio-danger) 0%, transparent);
+  }
+}
+
+.studio-pulse-danger {
+  animation: studio-pulse-danger 2s infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .studio-pulse-danger {
+    animation: none;
+  }
+}
+
+/* Explicit personal override, independent of OS-level prefers-reduced-motion. */
+.reduce-motion *,
+.reduce-motion *::before,
+.reduce-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* Hide scrollbars while preserving scroll (used by settings nav rails). */
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Explicit personal high-contrast override for accessibility. Strengthens
+   borders, de-mutes secondary text, and forces a visible focus ring. */
+.high-contrast {
+  --border: var(--foreground);
+  --muted-foreground: var(--foreground);
+  --acct-border: var(--acct-on-surface);
+  --acct-outline: var(--acct-on-surface);
+  --acct-on-surface-variant: var(--acct-on-surface);
+}
+
+.high-contrast *:focus-visible {
+  outline: 2px solid var(--acct-primary, var(--foreground));
+  outline-offset: 2px;
+}
+
+/* ------------------------------------------------------------------ */
+/* Account settings theme (Material-3-inspired workspace settings).    */
+/* Scoped to `.account-settings-theme` on /profile routes.             */
+/* ------------------------------------------------------------------ */
+.account-settings-theme {
+  color-scheme: light;
+
+  --acct-bg: #faf9fc;
+  --acct-surface: #faf9fc;
+  --acct-surface-lowest: #ffffff;
+  --acct-surface-low: #f4f3f6;
+  --acct-surface-container: #eeedf1;
+  --acct-surface-high: #e8e8eb;
+  --acct-surface-variant: #e3e2e5;
+  --acct-border: #c3c7cf;
+  --acct-outline: #73777f;
+  --acct-on-surface: #1a1c1e;
+  --acct-on-surface-variant: #43474e;
+  --acct-primary: #042e4e;
+  --acct-primary-container: #224466;
+  --acct-on-primary: #ffffff;
+  --acct-on-primary-container: #91b1d9;
+  --acct-danger: #ba1a1a;
+  --acct-danger-strong: #93000a;
+  --acct-danger-container: #ffdad6;
+  --acct-on-danger-container: #93000a;
+  --acct-danger-surface: #fef2f2;
+  --acct-danger-border: #dc2626;
+  --acct-inverse-surface: #2f3033;
+  --acct-inverse-on-surface: #f1f0f3;
+  --acct-inverse-primary: #a9c9f2;
+  --acct-scrim: rgb(0 0 0 / 0.4);
+  --acct-overlay: color-mix(in srgb, var(--acct-on-surface) 40%, transparent);
+  --acct-toggle-knob: #ffffff;
+
+  background-color: var(--acct-bg);
+  color: var(--acct-on-surface);
+}
+
+.dark .account-settings-theme {
+  color-scheme: dark;
+
+  --acct-bg: #101214;
+  --acct-surface: #14161a;
+  --acct-surface-lowest: #0c0d10;
+  --acct-surface-low: #1a1c21;
+  --acct-surface-container: #1f2228;
+  --acct-surface-high: #282b32;
+  --acct-surface-variant: #2f333b;
+  --acct-border: #3d424c;
+  --acct-outline: #8b919c;
+  --acct-on-surface: #e8eaed;
+  --acct-on-surface-variant: #a8adb8;
+  --acct-primary: #91b1d9;
+  --acct-primary-container: #224466;
+  --acct-on-primary: #001d36;
+  --acct-on-primary-container: #d1e4ff;
+  --acct-danger: #ffb4ab;
+  --acct-danger-strong: #ff8a80;
+  --acct-danger-container: #5c1512;
+  --acct-on-danger-container: #ffdad6;
+  --acct-danger-surface: color-mix(in srgb, var(--acct-danger-container) 35%, var(--acct-surface));
+  --acct-danger-border: color-mix(in srgb, var(--acct-danger) 55%, transparent);
+  --acct-inverse-surface: #e3e2e5;
+  --acct-inverse-on-surface: #1a1c1e;
+  --acct-inverse-primary: #224466;
+  --acct-scrim: rgb(0 0 0 / 0.55);
+  --acct-overlay: color-mix(in srgb, var(--acct-primary-container) 55%, transparent);
+  --acct-toggle-knob: #f1f0f3;
+}
+
+.account-settings-theme ::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.account-settings-theme ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.account-settings-theme ::-webkit-scrollbar-thumb {
+  background: var(--acct-border);
+  border-radius: 10px;
+}
+
+.account-settings-theme.account-dropdown-panel {
+  background-color: var(--acct-surface-lowest);
+  color: var(--acct-on-surface);
+  box-shadow:
+    0 18px 45px color-mix(in srgb, var(--acct-on-surface) 14%, transparent),
+    0 0 0 1px var(--acct-border);
+}
+
+.account-settings-theme .account-dropdown-item {
+  color: var(--acct-on-surface);
+}
+
+.account-settings-theme .account-dropdown-item:hover,
+.account-settings-theme .account-dropdown-item:focus-visible {
+  background-color: var(--acct-surface-low);
+  outline: none;
+}
+
+.account-settings-theme .account-dropdown-item[aria-selected="true"] {
+  background-color: var(--acct-surface-container);
+  font-weight: 600;
+}
+
+@keyframes account-toast-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 24px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@keyframes account-toast-out {
+  from {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, 24px);
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Certificate Builder boot splash — logo + soft breathing glow.       */
+/* Glow is a separate layer animated via opacity (GPU-friendly).       */
+/* ------------------------------------------------------------------ */
+@keyframes cert-builder-glow-breathe {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: translate(-50%, -42%) scale(0.92);
+  }
+  50% {
+    opacity: 0.85;
+    transform: translate(-50%, -42%) scale(1.08);
+  }
+}
+
+@keyframes cert-builder-logo-settle {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes cert-builder-splash-exit {
+  to {
+    opacity: 0;
+  }
+}
+
+#certificate-builder-boot {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #05080a;
+  transition: opacity 0.35s ease-out;
+}
+
+#certificate-builder-boot[data-exiting="true"] {
+  pointer-events: none;
+  animation: cert-builder-splash-exit 0.35s ease-out forwards;
+}
+
+#certificate-builder-boot .cert-builder-boot-mark {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 5.5rem;
+  height: 5.5rem;
+  animation: cert-builder-logo-settle 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Soft glow pool under/around the logo — “glow down” bloom */
+#certificate-builder-boot .cert-builder-boot-glow {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 11rem;
+  height: 11rem;
+  border-radius: 9999px;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--brand-primary, #224466) 65%, transparent) 0%,
+    color-mix(in srgb, var(--brand-primary, #224466) 22%, transparent) 42%,
+    transparent 72%
+  );
+  filter: blur(20px);
+  pointer-events: none;
+  animation: cert-builder-glow-breathe 2.4s ease-in-out infinite;
+}
+
+#certificate-builder-boot .cert-builder-boot-logo {
+  position: relative;
+  z-index: 1;
+  width: 4.5rem;
+  height: 4.5rem;
+  object-fit: contain;
+  border-radius: 9999px;
+}

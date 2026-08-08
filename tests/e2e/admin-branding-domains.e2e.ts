@@ -26,21 +26,21 @@ const blockedTenantSlug = ["funded", "beyond"].join("");
 
 const adminBrandingPagePath = resolve(
   import.meta.dirname,
-  "../../apps/web/src/app/admin/branding/page.tsx",
+  "../../frontend/apps/web/src/app/admin/branding/page.tsx",
 );
 const adminDomainsPagePath = resolve(
   import.meta.dirname,
-  "../../apps/web/src/app/admin/domains/page.tsx",
+  "../../frontend/apps/web/src/app/admin/domains/page.tsx",
 );
 const adminComponentPaths = [
-  "../../apps/web/src/app/admin/branding/_components/BrandingEditor.tsx",
-  "../../apps/web/src/app/admin/branding/_components/BrandPreview.tsx",
-  "../../apps/web/src/app/admin/branding/_components/BrandingVersionHistory.tsx",
-  "../../apps/web/src/app/admin/domains/_components/DomainStatusPanel.tsx",
-  "../../apps/web/src/app/admin/domains/_components/AddDomainDialog.tsx",
-  "../../apps/web/src/lib/server-api.ts",
-  "../../apps/web/src/lib/client-api.ts",
-  "../../apps/web/src/app/admin/branding/_components/default-theme.ts",
+  "../../frontend/apps/web/src/app/admin/branding/_components/BrandingEditor.tsx",
+  "../../frontend/apps/web/src/app/admin/branding/_components/BrandPreview.tsx",
+  "../../frontend/apps/web/src/app/admin/branding/_components/BrandingVersionHistory.tsx",
+  "../../frontend/apps/web/src/app/admin/domains/_components/DomainStatusPanel.tsx",
+  "../../frontend/apps/web/src/app/admin/domains/_components/AddDomainDialog.tsx",
+  "../../frontend/apps/web/src/lib/server-api.ts",
+  "../../frontend/apps/web/src/lib/client-api.ts",
+  "../../frontend/apps/web/src/app/admin/branding/_components/ThemeTokenEditor.tsx",
 ];
 
 const draftThemeTokens = {

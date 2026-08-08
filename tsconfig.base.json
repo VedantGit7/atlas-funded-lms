@@ -24,80 +24,97 @@
     "ignoreDeprecations": "6.0",
     "baseUrl": ".",
     "paths": {
-      "@atlas/api": ["packages/api/src/index.ts"],
-      "@atlas/api/*": ["packages/api/src/*"],
+      "@/*": ["frontend/apps/web/src/*"],
 
-      "@atlas/audit": ["packages/audit/src/index.ts"],
-      "@atlas/audit/*": ["packages/audit/src/*"],
+      "@atlas/api": ["backend/packages/api/src/index.ts"],
+      "@atlas/api/*": ["backend/packages/api/src/*"],
 
-      "@atlas/access": ["packages/access/src/index.ts"],
-      "@atlas/access/*": ["packages/access/src/*"],
+      "@atlas/audit": ["backend/packages/audit/src/index.ts"],
+      "@atlas/audit/*": ["backend/packages/audit/src/*"],
 
-      "@atlas/auth": ["packages/auth/src/index.ts"],
-      "@atlas/auth/*": ["packages/auth/src/*"],
+      "@atlas/access": ["backend/packages/access/src/index.ts"],
+      "@atlas/access/*": ["backend/packages/access/src/*"],
 
-      "@atlas/authorization": ["packages/authorization/src/index.ts"],
-      "@atlas/authorization/*": ["packages/authorization/src/*"],
+      "@atlas/auth": ["backend/packages/auth/src/index.ts"],
+      "@atlas/auth/*": ["backend/packages/auth/src/*"],
 
-      "@atlas/config": ["packages/config/src/index.ts"],
-      "@atlas/config/*": ["packages/config/src/*"],
+      "@atlas/authorization": ["backend/packages/authorization/src/index.ts"],
+      "@atlas/authorization/*": ["backend/packages/authorization/src/*"],
 
-      "@atlas/core": ["packages/core/src/index.ts"],
-      "@atlas/core/*": ["packages/core/src/*"],
+      "@atlas/config": ["backend/packages/config/src/index.ts"],
+      "@atlas/config/*": ["backend/packages/config/src/*"],
 
-      "@atlas/db": ["packages/db/src/index.ts"],
-      "@atlas/db/*": ["packages/db/src/*"],
+      "@atlas/contracts": ["frontend/packages/contracts/src/index.ts"],
+      "@atlas/contracts/*": ["frontend/packages/contracts/src/*"],
 
-      "@atlas/design-system": ["packages/design-system/src/index.ts"],
-      "@atlas/design-system/*": ["packages/design-system/src/*"],
+      "@atlas/contracts-modules/*": ["frontend/apps/web/src/modules/*"],
 
-      "@atlas/domain": ["packages/domain/src/index.ts"],
-      "@atlas/domain/*": ["packages/domain/src/*"],
+      "@atlas/api-server/*": ["backend/apps/api/src/server/*"],
 
-      "@atlas/domain-config": ["packages/domain/config/src/index.ts"],
-      "@atlas/domain-config/*": ["packages/domain/config/src/*"],
+      "@atlas/tenant-branding": ["frontend/apps/web/src/lib/tenant-branding.ts"],
+      "@atlas/tenant-gate": ["frontend/apps/web/src/lib/tenant-gate.ts"],
+      "@atlas/tenant-theme": ["frontend/apps/web/src/lib/tenant-theme.ts"],
 
-      "@atlas/domain-tenancy": ["packages/domain/tenancy/src/index.ts"],
-      "@atlas/domain-tenancy/*": ["packages/domain/tenancy/src/*"],
+      "@atlas/auth/cookies": ["backend/packages/auth/src/cookies.ts"],
+      "@atlas/auth/session": ["backend/packages/auth/src/session.ts"],
+      "@atlas/auth/supabase-server": ["backend/packages/auth/src/supabase-server.ts"],
 
-      "@atlas/domain-branding": ["packages/domain/branding/src/index.ts"],
-      "@atlas/domain-branding/*": ["packages/domain/branding/src/*"],
+      "@atlas/core": ["backend/packages/core/src/index.ts"],
+      "@atlas/core/*": ["backend/packages/core/src/*"],
 
-      "@atlas/domain-access": ["packages/domain/access/src/index.ts"],
-      "@atlas/domain-access/*": ["packages/domain/access/src/*"],
+      "@atlas/db": ["backend/packages/db/src/index.ts"],
+      "@atlas/db/*": ["backend/packages/db/src/*"],
 
-      "@atlas/domain-identity": ["packages/domain/identity/src/index.ts"],
-      "@atlas/domain-identity/*": ["packages/domain/identity/src/*"],
+      "@atlas/design-system": ["frontend/packages/design-system/src/index.ts"],
+      "@atlas/design-system/*": ["frontend/packages/design-system/src/*"],
 
-      "@atlas/membership": ["packages/membership/src/index.ts"],
-      "@atlas/membership/*": ["packages/membership/src/*"],
+      "@atlas/domain": ["backend/packages/domain/src/index.ts"],
+      "@atlas/domain/*": ["backend/packages/domain/src/*"],
 
-      "@atlas/events": ["packages/events/src/index.ts"],
-      "@atlas/events/*": ["packages/events/src/*"],
+      "@atlas/domain-config": ["backend/packages/domain/config/src/index.ts"],
+      "@atlas/domain-config/*": ["backend/packages/domain/config/src/*"],
 
-      "@atlas/observability": ["packages/observability/src/index.ts"],
-      "@atlas/observability/*": ["packages/observability/src/*"],
+      "@atlas/domain-tenancy": ["backend/packages/domain/tenancy/src/index.ts"],
+      "@atlas/domain-tenancy/*": ["backend/packages/domain/tenancy/src/*"],
 
-      "@atlas/security": ["packages/security/src/index.ts"],
-      "@atlas/security/*": ["packages/security/src/*"],
+      "@atlas/domain-branding": ["backend/packages/domain/branding/src/index.ts"],
+      "@atlas/domain-branding/*": ["backend/packages/domain/branding/src/*"],
 
-      "@atlas/storage": ["packages/storage/src/index.ts"],
-      "@atlas/storage/*": ["packages/storage/src/*"],
+      "@atlas/domain-access": ["backend/packages/domain/access/src/index.ts"],
+      "@atlas/domain-access/*": ["backend/packages/domain/access/src/*"],
 
-      "@atlas/tenancy": ["packages/tenancy/src/index.ts"],
-      "@atlas/tenancy/*": ["packages/tenancy/src/*"],
+      "@atlas/domain-identity": ["backend/packages/domain/identity/src/index.ts"],
+      "@atlas/domain-identity/*": ["backend/packages/domain/identity/src/*"],
 
-      "@atlas/testing": ["packages/testing/src/index.ts"],
-      "@atlas/testing/*": ["packages/testing/src/*"],
+      "@atlas/events": ["backend/packages/events/src/index.ts"],
+      "@atlas/events/*": ["backend/packages/events/src/*"],
 
-      "@atlas/utils": ["packages/utils/src/index.ts"],
-      "@atlas/utils/*": ["packages/utils/src/*"],
+      "@atlas/membership": ["backend/packages/membership/src/index.ts"],
+      "@atlas/membership/*": ["backend/packages/membership/src/*"],
 
-      "@atlas/validation": ["packages/validation/src/index.ts"],
-      "@atlas/validation/*": ["packages/validation/src/*"],
+      "@atlas/observability": ["backend/packages/observability/src/index.ts"],
+      "@atlas/observability/*": ["backend/packages/observability/src/*"],
 
-      "@atlas/tenant-config": ["packages/tenant-config/src/index.ts"],
-      "@atlas/tenant-config/*": ["packages/tenant-config/src/*"]
+      "@atlas/security": ["backend/packages/security/src/index.ts"],
+      "@atlas/security/*": ["backend/packages/security/src/*"],
+
+      "@atlas/storage": ["backend/packages/storage/src/index.ts"],
+      "@atlas/storage/*": ["backend/packages/storage/src/*"],
+
+      "@atlas/tenancy": ["backend/packages/tenancy/src/index.ts"],
+      "@atlas/tenancy/*": ["backend/packages/tenancy/src/*"],
+
+      "@atlas/testing": ["backend/packages/testing/src/index.ts"],
+      "@atlas/testing/*": ["backend/packages/testing/src/*"],
+
+      "@atlas/utils": ["backend/packages/utils/src/index.ts"],
+      "@atlas/utils/*": ["backend/packages/utils/src/*"],
+
+      "@atlas/validation": ["backend/packages/validation/src/index.ts"],
+      "@atlas/validation/*": ["backend/packages/validation/src/*"],
+
+      "@atlas/tenant-config": ["backend/packages/tenant-config/src/index.ts"],
+      "@atlas/tenant-config/*": ["backend/packages/tenant-config/src/*"]
     }
   }
 }

@@ -132,7 +132,7 @@ vi.mock("@atlas/events", () => ({
   },
 }));
 
-import { POST } from "../../apps/web/src/app/api/v1/platform/tenants/route";
+import { POST } from "../../backend/apps/api/src/app/api/v1/platform/tenants/route";
 
 const platformPrincipal = {
   platformPrincipalId: "018f0000-0000-7000-8000-000000000010",

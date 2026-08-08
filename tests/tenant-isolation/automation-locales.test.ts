@@ -3,8 +3,8 @@ import { withTenantTx } from "@atlas/db";
 import {
   createAutomationRule,
   listAutomationRules,
-} from "../../apps/web/src/server/automation/automation.service";
-import { upsertLocaleResources } from "../../apps/web/src/server/locales/locale.service";
+} from "../../backend/apps/api/src/server/automation/automation.service";
+import { upsertLocaleResources } from "../../backend/apps/api/src/server/locales/locale.service";
 import {
   adminCtx,
   authoringTenantTx,

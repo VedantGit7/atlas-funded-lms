@@ -4,17 +4,44 @@ import {
   createLessonBodySchema,
   lessonProgressBodySchema,
   updateLessonBodySchema,
-} from "../../../apps/web/src/server/lessons/lesson-schemas";
+} from "../../../backend/apps/api/src/server/lessons/lesson-schemas";
 
 describe("lesson schemas", () => {
+  it("accepts all studio lesson types on create", () => {
+    for (const lessonType of [
+      "video",
+      "audio",
+      "pdf",
+      "slides",
+      "live",
+      "article",
+      "scorm",
+      "section_quiz",
+      "assignment",
+    ] as const) {
+      const parsed = createLessonBodySchema.parse({
+        title: "Intro",
+        lessonType,
+      });
+      expect(parsed.lessonType).toBe(lessonType);
+    }
+  });
+
   it("accepts valid lesson create body", () => {
     const parsed = createLessonBodySchema.parse({
       title: "Intro",
-      lessonType: "text",
+      lessonType: "article",
       content: "Hello",
       durationSeconds: 300,
     });
     expect(parsed.title).toBe("Intro");
+  });
+
+  it("accepts legacy lesson types on update", () => {
+    const parsed = updateLessonBodySchema.parse({
+      lessonType: "text",
+    });
+    expect(parsed.lessonType).toBe("text");
   });
 
   it("rejects tenant_id on lesson create", () => {

@@ -2,7 +2,7 @@ import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
 
 const root = process.cwd();
-const apiRoot = join(root, "apps/web/src/app/api");
+const apiRoot = join(root, "backend/apps/api/src/app/api");
 
 const EXEMPT_ROUTE_PATTERNS = [
   /\/health\/route\.ts$/,

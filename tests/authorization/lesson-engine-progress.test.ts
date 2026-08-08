@@ -3,7 +3,7 @@ import { can, createTenantResourceRef } from "@atlas/authorization";
 import {
   createLessonBodySchema,
   lessonProgressBodySchema,
-} from "../../apps/web/src/server/lessons/lesson-schemas";
+} from "../../backend/apps/api/src/server/lessons/lesson-schemas";
 
 function learnerTx() {
   return {

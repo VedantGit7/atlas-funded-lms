@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { can, createTenantResourceRef } from "@atlas/authorization";
-import { enrollmentCreateBodySchema } from "../../apps/web/src/server/enrollments/schemas";
+import { enrollmentCreateBodySchema } from "../../backend/apps/api/src/server/enrollments/schemas";
 
 function learnerTx() {
   return {

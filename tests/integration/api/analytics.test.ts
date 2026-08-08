@@ -11,8 +11,8 @@ import {
   analyticsFunnelQuerySchema,
 } from "@atlas/domain/analytics/analytics.dto";
 import { processAnalyticsSourceEvent } from "@atlas/domain/analytics/analytics.worker";
-import { createAnalyticsOutboxConsumers } from "../../../apps/web/src/events/outbox-consumers";
-import "../../../apps/web/src/server/analytics/analytics-source-adapters";
+import { createAnalyticsOutboxConsumers } from "../../../backend/apps/api/src/events/outbox-consumers";
+import "../../../backend/apps/api/src/server/analytics/analytics-source-adapters";
 import {
   adminCtx,
   authoringTenantTx,

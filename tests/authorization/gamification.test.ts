@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { can, createTenantResourceRef } from "@atlas/authorization";
-import { postBadgesBodySchema } from "../../apps/web/src/server/gamification/gamification.schemas";
+import { postBadgesBodySchema } from "../../backend/apps/api/src/server/gamification/gamification.schemas";
 
 function adminTx() {
   return {

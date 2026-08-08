@@ -55,6 +55,7 @@
   "entitlements": [
     { "key": "branding.custom_domain.enable", "enabled": true },
     { "key": "community.enable", "enabled": true },
+    { "key": "community.private_spaces.enable", "enabled": true },
     { "key": "certification.enable", "enabled": true },
     { "key": "gamification.enable", "enabled": true },
     { "key": "analytics.dashboard.view", "enabled": true },
@@ -277,7 +278,24 @@
         "status": "INACTIVE"
       }
     ],
-    "leaderboards": []
+    "leaderboards": [
+      {
+        "key": "weekly-academy-xp",
+        "name": "Weekly Academy XP",
+        "metricKey": "xp_total",
+        "windowKey": "weekly",
+        "maxEntries": 25,
+        "status": "ACTIVE"
+      },
+      {
+        "key": "all-time-academy-xp",
+        "name": "All-Time Academy XP",
+        "metricKey": "xp_total",
+        "windowKey": "all_time",
+        "maxEntries": 25,
+        "status": "ACTIVE"
+      }
+    ]
   },
   "communitySpaces": [
     {

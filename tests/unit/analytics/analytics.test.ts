@@ -11,6 +11,11 @@ import {
   parseBoundedDateRange,
 } from "@atlas/domain/analytics/analytics-definition-registry";
 import { isDeferredAnalyticsEvent } from "@atlas/domain/analytics/analytics.worker";
+import {
+  isRollingItemStatisticWindow,
+  itemStatisticWindowCutoff,
+  liveItemStatisticWindowKeys,
+} from "@atlas/domain/analytics/analytics-window";
 
 describe("analytics query validation", () => {
   it("accepts registered dashboard query fields", () => {
@@ -99,9 +104,28 @@ describe("analytics query validation", () => {
   });
 });
 
+describe("analytics item statistic windows", () => {
+  it("live writes only all_time", () => {
+    expect(liveItemStatisticWindowKeys()).toEqual(["all_time"]);
+  });
+
+  it("identifies rolling windows and cutoffs", () => {
+    expect(isRollingItemStatisticWindow("rolling_30d")).toBe(true);
+    expect(isRollingItemStatisticWindow("rolling_90d")).toBe(true);
+    expect(isRollingItemStatisticWindow("all_time")).toBe(false);
+
+    const now = new Date("2026-07-24T12:00:00.000Z");
+    const cutoff30 = itemStatisticWindowCutoff("rolling_30d", now);
+    const cutoff90 = itemStatisticWindowCutoff("rolling_90d", now);
+    expect(cutoff30?.toISOString()).toBe("2026-06-24T12:00:00.000Z");
+    expect(cutoff90?.toISOString()).toBe("2026-04-25T12:00:00.000Z");
+    expect(itemStatisticWindowCutoff("all_time", now)).toBeNull();
+  });
+});
+
 describe("analytics source registry", () => {
   it("does not register wildcard analytics source events by default", async () => {
-    await import("../../../apps/web/src/server/analytics/analytics-source-adapters");
+    await import("../../../backend/apps/api/src/server/analytics/analytics-source-adapters");
     const { listRegisteredAnalyticsSourceEvents } =
       await import("@atlas/domain/analytics/analytics-source-registry");
     const events = listRegisteredAnalyticsSourceEvents();
@@ -114,7 +138,7 @@ describe("analytics source registry", () => {
 describe("progress dashboard composition", () => {
   it("does not reference advanced analytics API paths", async () => {
     const source = await import("node:fs/promises").then((fs) =>
-      fs.readFile("apps/web/src/app/(learner)/progress/page.tsx", "utf8"),
+      fs.readFile("frontend/apps/web/src/app/(learner)/progress/page.tsx", "utf8"),
     );
 
     expect(source).not.toContain("/api/v1/analytics/");

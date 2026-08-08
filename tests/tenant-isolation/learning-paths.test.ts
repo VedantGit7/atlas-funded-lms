@@ -1,14 +1,14 @@
 import { randomUUID } from "node:crypto";
 import { describe, expect, it } from "vitest";
 import { withTenantTx } from "@atlas/db";
-import { createLearningPathBodySchema } from "../../apps/web/src/server/learning-paths/learning-path.schemas";
+import { createLearningPathBodySchema } from "../../backend/apps/api/src/server/learning-paths/learning-path.schemas";
 import {
   enrollCurrentMemberInPath,
   getLearningPathById,
   getLearningPathProgress,
   listLearningPaths,
   updateLearningPath,
-} from "../../apps/web/src/server/learning-paths/learning-path.service";
+} from "../../backend/apps/api/src/server/learning-paths/learning-path.service";
 import {
   createLearningPathFixture,
   instructorCtx,

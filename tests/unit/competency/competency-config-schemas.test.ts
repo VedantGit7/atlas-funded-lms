@@ -4,7 +4,7 @@ import {
   publishScoringConfigBodySchema,
   replaceBandsBodySchema,
   validateBandInputs,
-} from "../../../apps/web/src/server/competency/competency-config.schemas";
+} from "../../../backend/apps/api/src/server/competency/competency-config.schemas";
 
 describe("competency config schemas", () => {
   it("rejects tenant_id", () => {
@@ -22,6 +22,23 @@ describe("competency config schemas", () => {
       createDimensionBodySchema.parse({
         key: "risk_management",
         name: "Technical Analysis",
+      }),
+    ).toBeTruthy();
+  });
+
+  it("accepts hyphenated scoring profile keys from tenant manifests", async () => {
+    const { scoringProfileSchema } =
+      await import("../../../backend/apps/api/src/server/competency/competency-config.schemas");
+    expect(
+      scoringProfileSchema.parse({
+        id: "018f0000-0000-7000-8000-000000000099",
+        key: "academy-readiness",
+        name: "Academy Readiness Profile",
+        status: "ACTIVE",
+        activeConfigVersionId: null,
+        activeVersion: null,
+        createdAt: "2026-01-01T00:00:00.000Z",
+        updatedAt: "2026-01-01T00:00:00.000Z",
       }),
     ).toBeTruthy();
   });
@@ -75,7 +92,7 @@ describe("competency config schemas", () => {
 describe("publish snapshot prerequisites", () => {
   it("requires dimensions and bands before publish in service validation", async () => {
     const { publishScoringConfig } =
-      await import("../../../apps/web/src/server/competency/scoring-config.service");
+      await import("../../../backend/apps/api/src/server/competency/scoring-config.service");
     expect(typeof publishScoringConfig).toBe("function");
   });
 });

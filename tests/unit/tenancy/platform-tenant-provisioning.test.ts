@@ -3,7 +3,7 @@ import { resolve } from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { PlatformTx } from "@atlas/db";
 import { ProvisionTenantRequestSchema } from "@atlas/domain-tenancy/schemas/platform-tenants";
-import { postRouteMetadata } from "../../../apps/web/src/app/api/v1/platform/tenants/route.metadata";
+import { postRouteMetadata } from "../../../backend/apps/api/src/app/api/v1/platform/tenants/route.metadata";
 
 const tenantId = "018f0000-0000-7000-8000-000000000001";
 const jobId = "018f0000-0000-7000-8000-000000000002";
@@ -314,14 +314,14 @@ describe("platform tenant provisioning", () => {
     const serviceSource = readFileSync(
       resolve(
         import.meta.dirname,
-        "../../../packages/domain/tenancy/src/services/platform-tenant-provisioning.service.ts",
+        "../../../backend/packages/domain/tenancy/src/services/platform-tenant-provisioning.service.ts",
       ),
       "utf8",
     );
     const helpersSource = readFileSync(
       resolve(
         import.meta.dirname,
-        "../../../packages/domain/tenancy/src/services/platform-tenant-provisioning.helpers.ts",
+        "../../../backend/packages/domain/tenancy/src/services/platform-tenant-provisioning.helpers.ts",
       ),
       "utf8",
     );

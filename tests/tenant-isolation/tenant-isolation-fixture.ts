@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { withPlatformScope, withTenantTx } from "@atlas/db";
+import { buildTestTenantSlug } from "../../scripts/db/test-tenant-slugs.mjs";
 
 export type IsolationTenantFixture = {
   tenantId: string;
@@ -25,7 +26,7 @@ function suffix(): string {
 function makeTenant(label: "a" | "b", runId: string): IsolationTenantFixture {
   return {
     tenantId: randomUUID(),
-    slug: `sprint0-${label}-${runId}`,
+    slug: buildTestTenantSlug(`sprint0-${label}`, runId),
     principalId: randomUUID(),
     membershipId: randomUUID(),
     courseId: randomUUID(),

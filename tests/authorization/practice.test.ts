@@ -4,7 +4,7 @@ import {
   completePracticeSession,
   startPracticeSession,
   submitPracticeResponse,
-} from "../../apps/web/src/server/practice/practice.service";
+} from "../../backend/apps/api/src/server/practice/practice.service";
 import {
   authoringTenantTx,
   createPracticeFixture,

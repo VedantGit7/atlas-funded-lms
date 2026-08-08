@@ -81,6 +81,8 @@ function createProvider(
           }
         : null,
     ),
+    getObjectBody: vi.fn().mockResolvedValue(null),
+    putObject: vi.fn().mockResolvedValue(undefined),
     deleteObject: vi.fn(),
   };
 }
@@ -149,7 +151,7 @@ describe("asset reference lifecycle", () => {
 
   it("does not store binary file content in Postgres", async () => {
     const repositorySource = readFileSync(
-      resolve(import.meta.dirname, "../../../packages/storage/src/asset-reference.repository.ts"),
+      resolve(import.meta.dirname, "../../../backend/packages/storage/src/asset-reference.repository.ts"),
       "utf8",
     );
 

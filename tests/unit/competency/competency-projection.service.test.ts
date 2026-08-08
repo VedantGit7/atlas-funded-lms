@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   aggregateWeightedScore,
   assignBandKey,
-} from "../../../apps/web/src/server/competency/competency-projection.service";
-import { buildSignalIdempotencyKey } from "../../../apps/web/src/server/competency/competency-projection.repository";
+} from "../../../backend/apps/api/src/server/competency/competency-projection.service";
+import { buildSignalIdempotencyKey } from "../../../backend/apps/api/src/server/competency/competency-projection.repository";
 
 describe("competency projection service helpers", () => {
   it("aggregates weighted values", () => {
