@@ -19,6 +19,10 @@ export async function exportExportsHistory(tx: TenantTx, ctx: ServiceCtx, rawBod
   if (body.sourceType) params["sourceType"] = body.sourceType;
   if (body.status) params["status"] = body.status;
   if (body.definitionKey) params["definitionKey"] = body.definitionKey;
+  if (body.format) params["format"] = body.format;
+  if (body.fileState) params["fileState"] = body.fileState;
+  if (body.mine === true) params["mine"] = true;
+  if (body.pendingOnly === true) params["pendingOnly"] = true;
   if (body.createdFrom) params["createdFrom"] = body.createdFrom;
   if (body.createdTo) params["createdTo"] = body.createdTo;
   if (body.q) params["q"] = body.q;
@@ -33,10 +37,7 @@ export async function exportExportsHistory(tx: TenantTx, ctx: ServiceCtx, rawBod
   let emailed = false;
   if (body.emailDownloadLink) {
     const provider = getEmailProvider();
-    const adminEmail = await notificationRepository.findMembershipEmail(
-      tx,
-      ctx.actorMembershipId,
-    );
+    const adminEmail = await notificationRepository.findMembershipEmail(tx, ctx.actorMembershipId);
     if (provider.isConfigured() && adminEmail) {
       await provider.send({
         to: adminEmail,

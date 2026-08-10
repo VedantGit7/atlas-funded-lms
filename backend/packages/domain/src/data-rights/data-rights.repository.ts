@@ -196,6 +196,34 @@ export const dataRightsRepository = {
     `;
   },
 
+  async clearExportJobFile(tx: TenantTx, exportJobId: string): Promise<ExportJobRow | null> {
+    const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
+      update export_jobs
+      set
+        r2_object_key = null,
+        updated_at = now()
+      where id = ${exportJobId}::uuid
+        and r2_object_key is not null
+      returning *
+    `;
+    const row = rows[0];
+    return row ? mapExportJobRow(row) : null;
+  },
+
+  async cancelExportJob(tx: TenantTx, exportJobId: string): Promise<ExportJobRow | null> {
+    const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
+      update export_jobs
+      set
+        status = 'CANCELLED',
+        updated_at = now()
+      where id = ${exportJobId}::uuid
+        and status in ('QUEUED', 'RUNNING')
+      returning *
+    `;
+    const row = rows[0];
+    return row ? mapExportJobRow(row) : null;
+  },
+
   async insertDeletionRequest(
     tx: TenantTx,
     args: {

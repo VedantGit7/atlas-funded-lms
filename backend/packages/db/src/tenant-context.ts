@@ -16,4 +16,11 @@ export type TenantRequestContext = {
    * - login/signup/invite acceptance where tenant context is needed
    */
   allowAnonymousTenantRead?: boolean;
+
+  /**
+   * Optional override for Postgres `statement_timeout` (ms) inside the
+   * tenant transaction. Defaults to `tenants.statement_timeout_ms` schema
+   * default (5000) when omitted.
+   */
+  statementTimeoutMs?: number | null;
 };

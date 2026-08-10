@@ -180,4 +180,33 @@ export const biExportRepository = {
       where id = ${args.jobId}::uuid
     `;
   },
+
+  async clearFile(tx: TenantTx, jobId: string): Promise<BiExportJobRow | null> {
+    const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
+      update bi_export_jobs
+      set
+        r2_object_key = null,
+        updated_at = now()
+      where id = ${jobId}::uuid
+        and r2_object_key is not null
+      returning *
+    `;
+    const row = rows[0];
+    return row ? mapBiExportRow(row) : null;
+  },
+
+  async cancelJob(tx: TenantTx, jobId: string): Promise<BiExportJobRow | null> {
+    const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
+      update bi_export_jobs
+      set
+        status = 'CANCELLED',
+        completed_at = coalesce(completed_at, now()),
+        updated_at = now()
+      where id = ${jobId}::uuid
+        and status in ('QUEUED', 'RUNNING')
+      returning *
+    `;
+    const row = rows[0];
+    return row ? mapBiExportRow(row) : null;
+  },
 };

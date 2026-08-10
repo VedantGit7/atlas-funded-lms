@@ -1,5 +1,8 @@
 import type { TenantTx } from "@atlas/db";
 import type { ServiceCtx } from "../shared/domain.types";
+import { zoomInsightsConnectionRepository } from "../reports/zoom-insights-connection.repository";
+import { zoomInsightsUnmatchedRepository } from "../reports/zoom-insights-unmatched.repository";
+import { bulkMatchZoomUnmatched } from "../reports/zoom-insights-unmatched.service";
 import {
   connectZoomBodySchema,
   connectZoomResponseSchema,
@@ -14,9 +17,22 @@ export async function connectZoom(tx: TenantTx, _ctx: ServiceCtx, rawBody: unkno
   const body = connectZoomBodySchema.parse(rawBody);
   const row = await zoomRepository.upsertConnection(tx, {
     accountId: body.accountId ?? null,
+    accountName: body.accountName ?? null,
+    accountEmail: body.accountEmail ?? null,
+    appId: body.appId ?? null,
     accessTokenRef: body.accessTokenRef ?? null,
     refreshTokenRef: body.refreshTokenRef ?? null,
   });
+
+  await zoomInsightsConnectionRepository.createSyncRun(tx, {
+    connectionId: row.id,
+    trigger: "manual",
+    status: "completed",
+    meetingsCount: 0,
+    participantsCount: 0,
+    logLines: ["Zoom account connected", "Initial connection health check passed"],
+  });
+  await zoomInsightsConnectionRepository.touchLastSynced(tx, row.id);
 
   return connectZoomResponseSchema.parse({
     data: {
@@ -29,6 +45,7 @@ export async function connectZoom(tx: TenantTx, _ctx: ServiceCtx, rawBody: unkno
 }
 
 export async function listZoomMeetings(tx: TenantTx, _ctx: ServiceCtx) {
+  void _ctx;
   const rows = await zoomRepository.listMeetings(tx);
   return listZoomMeetingsResponseSchema.parse({
     data: {
@@ -59,6 +76,7 @@ export async function handleZoomWebhook(tx: TenantTx, _ctx: ServiceCtx, rawBody:
           participants: body.participants.map((participant) => ({
             ...(participant.externalUserId ? { externalUserId: participant.externalUserId } : {}),
             ...(participant.displayName ? { displayName: participant.displayName } : {}),
+            ...(participant.email ? { email: participant.email } : {}),
             joinTime: participant.joinTime ? new Date(participant.joinTime) : null,
             leaveTime: participant.leaveTime ? new Date(participant.leaveTime) : null,
             durationSeconds: participant.durationSeconds ?? null,
@@ -66,6 +84,39 @@ export async function handleZoomWebhook(tx: TenantTx, _ctx: ServiceCtx, rawBody:
         }
       : {}),
   });
+
+  await zoomInsightsConnectionRepository.createWebhookEvent(tx, {
+    connectionId: connection.id,
+    eventType: body.endedAt ? "meeting.ended" : "meeting.updated",
+    topic: body.topic ?? body.externalMeetingId,
+    statusCode: 200,
+    payload: { externalMeetingId: body.externalMeetingId },
+  });
+
+  await zoomInsightsConnectionRepository.createSyncRun(tx, {
+    connectionId: connection.id,
+    trigger: "webhook",
+    status: "completed",
+    meetingsCount: 1,
+    participantsCount: result.participantCount,
+    logLines: [
+      `Webhook received for ${body.externalMeetingId}`,
+      `Upserted meeting with ${result.participantCount} participants`,
+    ],
+  });
+  await zoomInsightsConnectionRepository.touchLastSynced(tx, connection.id);
+
+  const rules = await zoomInsightsUnmatchedRepository.getMatchingRules(tx);
+  if (rules.autoMatchHighConfidenceOnImport && rules.matchOnExactEmail) {
+    try {
+      await bulkMatchZoomUnmatched(tx, _ctx, {
+        mode: "all_high",
+        applyToOtherMeetings: true,
+      });
+    } catch {
+      // Import should succeed even if auto-match finds nothing to apply.
+    }
+  }
 
   return zoomWebhookResponseSchema.parse({
     data: {

@@ -23,8 +23,11 @@ function getPlatformPool(): Pool {
     );
   }
 
+  const max = Number.parseInt(process.env["PLATFORM_DATABASE_POOL_MAX"] ?? "10", 10);
+
   globalThis.__atlasPlatformPgPool ??= new Pool({
     connectionString: platformDatabaseUrl,
+    max: Number.isFinite(max) && max > 0 ? max : 10,
   });
   return globalThis.__atlasPlatformPgPool;
 }

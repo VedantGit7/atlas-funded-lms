@@ -489,7 +489,11 @@ body {
 
   background-color: var(--admin-bg);
   color: var(--admin-on-surface);
-  font-family: var(--font-jakarta), system-ui, -apple-system, sans-serif;
+  font-family:
+    var(--font-jakarta),
+    system-ui,
+    -apple-system,
+    sans-serif;
 }
 
 .dark .admin-theme {
@@ -685,6 +689,29 @@ body {
   }
 }
 
+@keyframes admin-pipeline-pulse {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--admin-primary-strong) 40%, transparent);
+  }
+  70% {
+    box-shadow: 0 0 0 6px transparent;
+  }
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+@keyframes admin-drawer-in {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
 @keyframes admin-toast-in {
   from {
     opacity: 0;
@@ -804,7 +831,11 @@ body {
 
   background-color: var(--studio-bg);
   color: var(--studio-on-surface);
-  font-family: var(--font-jakarta), system-ui, -apple-system, sans-serif;
+  font-family:
+    var(--font-jakarta),
+    system-ui,
+    -apple-system,
+    sans-serif;
 }
 
 .dark .studio-shell {

@@ -2,6 +2,7 @@ import { auditWriter } from "@atlas/audit/services/audit-writer";
 import type { Prisma } from "./generated/prisma/client";
 import { getPlatformPrisma } from "./platform-client";
 import type { PlatformContext, PlatformPermission } from "./platform-context";
+import { DEFAULT_PLATFORM_TX_TIMEOUT_MS, interactiveTxOptions } from "./transaction-options";
 
 export type PlatformTx = Prisma.TransactionClient;
 
@@ -173,5 +174,5 @@ export async function withPlatformScope<T>(
 
       throw error;
     }
-  });
+  }, interactiveTxOptions(DEFAULT_PLATFORM_TX_TIMEOUT_MS));
 }

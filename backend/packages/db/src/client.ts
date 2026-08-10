@@ -8,8 +8,13 @@ declare global {
 }
 
 function getPool(): Pool {
+  const max = Number.parseInt(process.env["DATABASE_POOL_MAX"] ?? "20", 10);
+
   globalThis.__atlasPgPool ??= new Pool({
     connectionString: process.env["DATABASE_URL"],
+    // Admin/studio shells fire several parallel authenticated probes; the default
+    // pg pool size of 10 starves under that fan-out and cascades into ITX timeouts.
+    max: Number.isFinite(max) && max > 0 ? max : 20,
   });
   return globalThis.__atlasPgPool;
 }

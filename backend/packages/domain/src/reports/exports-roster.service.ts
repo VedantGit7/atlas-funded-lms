@@ -5,10 +5,7 @@ import {
   exportsHistoryListResponseSchema,
   type ExportsHistoryListQuery,
 } from "./exports-roster.dto";
-import {
-  exportsRosterRepository,
-  type ExportsHistoryRow,
-} from "./exports-roster.repository";
+import { exportsRosterRepository, type ExportsHistoryRow } from "./exports-roster.repository";
 
 function pageInfo(totalCount: number, page: number, limit: number) {
   const totalPages = totalCount === 0 ? 0 : Math.ceil(totalCount / limit);
@@ -31,9 +28,7 @@ function asJobStatus(value: string): JobStatus {
 
 function mapItem(row: ExportsHistoryRow) {
   const status = asJobStatus(row.status);
-  const canDownload =
-    status === "SUCCEEDED" &&
-    (row.source_type === "report_run" || row.has_file);
+  const canDownload = status === "SUCCEEDED" && (row.source_type === "report_run" || row.has_file);
 
   return {
     sourceType: row.source_type,
@@ -49,17 +44,20 @@ function mapItem(row: ExportsHistoryRow) {
     expiresAt: row.expires_at?.toISOString() ?? null,
     hasFile: row.has_file,
     canDownload,
+    progressPercent: row.progress_percent,
+    errorMessage: row.error_message,
   };
 }
 
 export async function listExportsHistory(
   tx: TenantTx,
-  _ctx: ServiceCtx,
+  ctx: ServiceCtx,
   query: ExportsHistoryListQuery,
 ) {
+  const actorMembershipId = ctx.actorMembershipId;
   const [summary, rows] = await Promise.all([
-    exportsRosterRepository.summarize(tx, query),
-    exportsRosterRepository.listHistory(tx, query),
+    exportsRosterRepository.summarize(tx, query, actorMembershipId),
+    exportsRosterRepository.listHistory(tx, query, actorMembershipId),
   ]);
 
   return exportsHistoryListResponseSchema.parse({
@@ -72,6 +70,9 @@ export async function listExportsHistory(
         succeededCount: summary.succeededCount,
         failedCount: summary.failedCount,
         pendingCount: summary.pendingCount,
+        filesAvailableCount: summary.filesAvailableCount,
+        expiringSoonCount: summary.expiringSoonCount,
+        oldestPendingTitle: summary.oldestPendingTitle,
       },
     },
   });

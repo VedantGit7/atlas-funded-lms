@@ -373,9 +373,78 @@ async function queryResourceUsage(
   tx: TenantTx,
   params: DatasetParams = {},
 ): Promise<ReportDatasetResult> {
-  const reportTab = asString(params["reportTab"]) ?? "history";
+  const dataset = asString(params["dataset"]);
+  const reportTab =
+    asString(params["reportTab"]) ??
+    (dataset === "metric_history"
+      ? "history"
+      : dataset === "storage_breakdown"
+        ? "storage"
+        : dataset === "inactive_learners"
+          ? "inactive"
+          : dataset === "dormant_content"
+            ? "dormant"
+            : dataset === "meter_snapshot"
+              ? "meter_snapshot"
+              : "history");
   const metricKey = asString(params["metricKey"]);
   const q = asString(params["q"]);
+
+  if (reportTab === "meter_snapshot") {
+    const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
+      select distinct on (ar.rollup_key)
+        ar.rollup_key as metric_key,
+        case ar.rollup_key
+          when 'usage.storage_gb' then 'Storage'
+          when 'usage.total_learners' then 'Total learners'
+          when 'usage.products' then 'Products'
+          when 'usage.questions' then 'Questions'
+          when 'usage.test_submits' then 'Tests taken'
+          when 'usage.message_sends' then 'Message sends'
+          when 'usage.email_validations' then 'Email validations'
+          else ar.rollup_key
+        end as metric_label,
+        coalesce(
+          (ar.metrics_json->>'value')::float8,
+          (ar.metrics_json->>'count')::float8,
+          0
+        ) as value,
+        case
+          when ar.rollup_key = 'usage.storage_gb' then 'GB'
+          else 'count'
+        end as unit,
+        ar.calculated_at
+      from analytics_rollups ar
+      where ar.tenant_id = current_setting('app.tenant_id', true)::uuid
+        and ar.rollup_key like 'usage.%'
+        and (${metricKey}::text is null or ar.rollup_key = ${metricKey})
+      order by ar.rollup_key asc, ar.calculated_at desc
+      limit ${REPORT_ROW_CAP}
+    `;
+
+    return mapRows(rows, ["metric_key", "metric_label", "value", "unit", "calculated_at"]);
+  }
+
+  if (reportTab === "storage") {
+    const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
+      select
+        coalesce(sr.resource_type, 'unknown') as resource_type,
+        count(*)::int as object_count,
+        round((coalesce(sum(sr.size_bytes), 0)::float8 / 1e9)::numeric, 3)::float8 as storage_gb
+      from storage_references sr
+      where sr.tenant_id = current_setting('app.tenant_id', true)::uuid
+        and sr.deleted_at is null
+        and (
+          ${q}::text is null
+          or lower(coalesce(sr.resource_type, '')) like '%' || lower(${q}) || '%'
+        )
+      group by coalesce(sr.resource_type, 'unknown')
+      order by storage_gb desc, resource_type asc
+      limit ${REPORT_ROW_CAP}
+    `;
+
+    return mapRows(rows, ["resource_type", "object_count", "storage_gb"]);
+  }
 
   if (reportTab === "dormant") {
     const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
@@ -470,7 +539,7 @@ async function queryResourceUsage(
       left join auth_principals ap on ap.id = m.auth_principal_id
       where m.tenant_id = current_setting('app.tenant_id', true)::uuid
         and m.status = 'ACTIVE'
-        and (m.last_active_at is null or m.last_active_at < now() - interval '30 days')
+        and (m.last_active_at is null or m.last_active_at < now() - interval '90 days')
         and (
           ${q}::text is null
           or lower(coalesce(mp.display_name, '')) like '%' || lower(${q}) || '%'
@@ -1425,11 +1494,101 @@ async function queryZoomInsights(
   tx: TenantTx,
   params: DatasetParams = {},
 ): Promise<ReportDatasetResult> {
+  const dataset = asString(params["dataset"]) ?? asString(params["reportTab"]) ?? "participants";
   const meetingId = asString(params["meetingId"]);
   const displayName = asString(params["displayName"]);
   const email = asString(params["email"]);
-  const joinedFrom = asString(params["joinedFrom"]);
-  const joinedTo = asString(params["joinedTo"]);
+  const startedFrom = asString(params["startedFrom"]) ?? asString(params["joinedFrom"]);
+  const startedTo = asString(params["startedTo"]) ?? asString(params["joinedTo"]);
+  const joinedFrom = asString(params["joinedFrom"]) ?? startedFrom;
+  const joinedTo = asString(params["joinedTo"]) ?? startedTo;
+
+  if (dataset === "connection") {
+    const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
+      select
+        zsr.id::text as sync_run_id,
+        zsr.trigger,
+        zsr.status,
+        zsr.started_at,
+        zsr.finished_at,
+        zsr.meetings_count,
+        zsr.participants_count,
+        zsr.skipped_count,
+        zsr.error_message
+      from zoom_sync_runs zsr
+      where zsr.tenant_id = current_setting('app.tenant_id', true)::uuid
+        and (
+          ${startedFrom}::timestamptz is null
+          or zsr.started_at >= ${startedFrom}::timestamptz
+        )
+        and (
+          ${startedTo}::timestamptz is null
+          or zsr.started_at <= ${startedTo}::timestamptz
+        )
+      order by zsr.started_at desc nulls last
+      limit ${REPORT_ROW_CAP}
+    `;
+    return mapRows(rows, [
+      "sync_run_id",
+      "trigger",
+      "status",
+      "started_at",
+      "finished_at",
+      "meetings_count",
+      "participants_count",
+      "skipped_count",
+      "error_message",
+    ]);
+  }
+
+  if (dataset === "meetings") {
+    const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
+      select
+        zm.id::text as meeting_id,
+        zm.external_meeting_id,
+        zm.topic,
+        zm.started_at,
+        zm.ended_at,
+        case
+          when zm.started_at is not null and zm.ended_at is not null
+            then greatest(0, extract(epoch from (zm.ended_at - zm.started_at))::int)
+          else null
+        end as duration_seconds,
+        count(zmp.id)::int as attendance_count,
+        count(zmp.id) filter (where zmp.membership_id is not null)::int as matched_count,
+        count(zmp.id) filter (where zmp.membership_id is null)::int as unmatched_count
+      from zoom_meetings zm
+      left join zoom_meeting_participants zmp
+        on zmp.zoom_meeting_id = zm.id
+        and zmp.tenant_id = zm.tenant_id
+      where zm.tenant_id = current_setting('app.tenant_id', true)::uuid
+        and (${meetingId}::uuid is null or zm.id = ${meetingId}::uuid)
+        and (
+          ${startedFrom}::timestamptz is null
+          or zm.started_at >= ${startedFrom}::timestamptz
+        )
+        and (
+          ${startedTo}::timestamptz is null
+          or zm.started_at <= ${startedTo}::timestamptz
+        )
+      group by zm.id
+      order by zm.started_at desc nulls last
+      limit ${REPORT_ROW_CAP}
+    `;
+    return mapRows(rows, [
+      "meeting_id",
+      "external_meeting_id",
+      "topic",
+      "started_at",
+      "ended_at",
+      "duration_seconds",
+      "attendance_count",
+      "matched_count",
+      "unmatched_count",
+    ]);
+  }
+
+  const unmatchedOnly = dataset === "unmatched";
 
   const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
     select
@@ -1473,6 +1632,18 @@ async function queryZoomInsights(
         ${joinedTo}::timestamptz is null
         or zmp.join_time <= ${joinedTo}::timestamptz
       )
+      and (
+        ${startedFrom}::timestamptz is null
+        or zm.started_at >= ${startedFrom}::timestamptz
+      )
+      and (
+        ${startedTo}::timestamptz is null
+        or zm.started_at <= ${startedTo}::timestamptz
+      )
+      and (
+        ${unmatchedOnly}::boolean is not true
+        or (zmp.id is not null and zmp.membership_id is null)
+      )
     order by zm.started_at desc nulls last, zmp.join_time asc nulls last
     limit ${REPORT_ROW_CAP}
   `;
@@ -1496,12 +1667,204 @@ async function queryLiveClassAttendance(
   tx: TenantTx,
   params: DatasetParams = {},
 ): Promise<ReportDatasetResult> {
+  const datasetRaw = asString(params["dataset"]) ?? asString(params["reportTab"]) ?? "attendees";
+  const dataset =
+    datasetRaw === "sessions" || datasetRaw === "learner_summary" || datasetRaw === "series_rollup"
+      ? datasetRaw
+      : "attendees";
+
   const sessionId = asString(params["sessionId"]);
+  const courseId = asString(params["courseId"]);
+  const batchId = asString(params["batchId"]);
   const learnerName = asString(params["learnerName"]);
   const email = asString(params["email"]);
   const status = asString(params["status"]);
-  const joinedFrom = asString(params["joinedFrom"]);
-  const joinedTo = asString(params["joinedTo"]);
+  const joinedFrom = asString(params["joinedFrom"]) ?? asString(params["scheduledFrom"]);
+  const joinedTo = asString(params["joinedTo"]) ?? asString(params["scheduledTo"]);
+  const registrationMode = asString(params["registrationMode"]) ?? "include_never_joined";
+  const attendeesOnlyStatus = registrationMode === "attendees_only" ? "attended" : null;
+
+  if (dataset === "sessions") {
+    const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
+      select
+        ls.id::text as session_id,
+        ls.title as session_title,
+        ls.status as session_status,
+        ls.status,
+        ls.course_id::text as course_id,
+        c.title as course_title,
+        ls.batch_id::text as batch_id,
+        b.name as batch_name,
+        ls.scheduled_at,
+        ls.started_at,
+        ls.ended_at,
+        case
+          when ls.started_at is not null and ls.ended_at is not null
+            then greatest(0, floor(extract(epoch from (ls.ended_at - ls.started_at)))::int)
+          else null
+        end as duration_seconds,
+        count(la.id)::int as registered_count,
+        count(la.id) filter (where la.status = 'attended')::int as attended_count,
+        count(la.id) filter (where la.status in ('registered', 'absent'))::int as never_joined_count,
+        case
+          when count(la.id) = 0 then null
+          else round(
+            (count(la.id) filter (where la.status = 'attended')::numeric / nullif(count(la.id), 0)) * 100,
+            1
+          )::float8
+        end as coverage_pct
+      from live_sessions ls
+      left join live_attendance la on la.live_session_id = ls.id and la.tenant_id = ls.tenant_id
+      left join courses c on c.id = ls.course_id and c.tenant_id = ls.tenant_id
+      left join batches b on b.id = ls.batch_id and b.tenant_id = ls.tenant_id
+      where ls.tenant_id = current_setting('app.tenant_id', true)::uuid
+        and (${sessionId}::uuid is null or ls.id = ${sessionId}::uuid)
+        and (${courseId}::uuid is null or ls.course_id = ${courseId}::uuid)
+        and (${batchId}::uuid is null or ls.batch_id = ${batchId}::uuid)
+        and (
+          ${joinedFrom}::timestamptz is null
+          or coalesce(ls.started_at, ls.scheduled_at) >= ${joinedFrom}::timestamptz
+        )
+        and (
+          ${joinedTo}::timestamptz is null
+          or coalesce(ls.started_at, ls.scheduled_at) <= ${joinedTo}::timestamptz
+        )
+      group by ls.id, c.title, b.name
+      order by ls.scheduled_at desc nulls last
+      limit ${REPORT_ROW_CAP}
+    `;
+
+    return mapRows(rows, [
+      "session_id",
+      "session_title",
+      "session_status",
+      "status",
+      "course_id",
+      "course_title",
+      "batch_id",
+      "batch_name",
+      "scheduled_at",
+      "started_at",
+      "ended_at",
+      "duration_seconds",
+      "registered_count",
+      "attended_count",
+      "never_joined_count",
+      "coverage_pct",
+    ]);
+  }
+
+  if (dataset === "learner_summary") {
+    const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
+      select
+        la.membership_id::text as membership_id,
+        coalesce(mp.display_name, ap.email, m.invited_email_normalized) as learner_name,
+        coalesce(ap.email, m.invited_email_normalized) as email,
+        count(distinct la.live_session_id)::int as sessions_registered,
+        count(distinct la.live_session_id) filter (where la.status = 'attended')::int as sessions_attended,
+        coalesce(sum(la.duration_seconds) filter (where la.status = 'attended'), 0)::int as duration_seconds,
+        case
+          when count(distinct la.live_session_id) = 0 then null
+          else round(
+            (count(distinct la.live_session_id) filter (where la.status = 'attended')::numeric
+              / nullif(count(distinct la.live_session_id), 0)) * 100,
+            1
+          )::float8
+        end as coverage_pct,
+        min(c.title) as course_title,
+        min(b.name) as batch_name
+      from live_attendance la
+      join live_sessions ls on ls.id = la.live_session_id and ls.tenant_id = la.tenant_id
+      left join memberships m on m.id = la.membership_id and m.tenant_id = la.tenant_id
+      left join member_profiles mp
+        on mp.membership_id = m.id and mp.tenant_id = m.tenant_id and mp.deleted_at is null
+      left join auth_principals ap on ap.id = m.auth_principal_id
+      left join courses c on c.id = ls.course_id and c.tenant_id = ls.tenant_id
+      left join batches b on b.id = ls.batch_id and b.tenant_id = ls.tenant_id
+      where la.tenant_id = current_setting('app.tenant_id', true)::uuid
+        and (${sessionId}::uuid is null or ls.id = ${sessionId}::uuid)
+        and (${courseId}::uuid is null or ls.course_id = ${courseId}::uuid)
+        and (${batchId}::uuid is null or ls.batch_id = ${batchId}::uuid)
+        and (
+          ${joinedFrom}::timestamptz is null
+          or coalesce(ls.started_at, ls.scheduled_at, la.joined_at) >= ${joinedFrom}::timestamptz
+        )
+        and (
+          ${joinedTo}::timestamptz is null
+          or coalesce(ls.started_at, ls.scheduled_at, la.joined_at) <= ${joinedTo}::timestamptz
+        )
+        and (
+          ${attendeesOnlyStatus}::text is null
+          or la.status = ${attendeesOnlyStatus}
+        )
+      group by la.membership_id, mp.display_name, ap.email, m.invited_email_normalized
+      order by sessions_attended desc, learner_name asc
+      limit ${REPORT_ROW_CAP}
+    `;
+
+    return mapRows(rows, [
+      "membership_id",
+      "learner_name",
+      "email",
+      "sessions_registered",
+      "sessions_attended",
+      "duration_seconds",
+      "coverage_pct",
+      "course_title",
+      "batch_name",
+    ]);
+  }
+
+  if (dataset === "series_rollup") {
+    const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
+      select
+        coalesce(c.id::text, 'uncategorized') as course_id,
+        coalesce(c.title, 'Uncategorized') as course_title,
+        coalesce(b.id::text, 'none') as batch_id,
+        coalesce(b.name, 'No batch') as batch_name,
+        count(distinct ls.id)::int as sessions_count,
+        count(la.id)::int as registered_count,
+        count(la.id) filter (where la.status = 'attended')::int as attended_count,
+        coalesce(sum(la.duration_seconds) filter (where la.status = 'attended'), 0)::int as duration_seconds,
+        case
+          when count(la.id) = 0 then null
+          else round(
+            (count(la.id) filter (where la.status = 'attended')::numeric / nullif(count(la.id), 0)) * 100,
+            1
+          )::float8
+        end as coverage_pct
+      from live_sessions ls
+      left join live_attendance la on la.live_session_id = ls.id and la.tenant_id = ls.tenant_id
+      left join courses c on c.id = ls.course_id and c.tenant_id = ls.tenant_id
+      left join batches b on b.id = ls.batch_id and b.tenant_id = ls.tenant_id
+      where ls.tenant_id = current_setting('app.tenant_id', true)::uuid
+        and (${courseId}::uuid is null or ls.course_id = ${courseId}::uuid)
+        and (${batchId}::uuid is null or ls.batch_id = ${batchId}::uuid)
+        and (
+          ${joinedFrom}::timestamptz is null
+          or coalesce(ls.started_at, ls.scheduled_at) >= ${joinedFrom}::timestamptz
+        )
+        and (
+          ${joinedTo}::timestamptz is null
+          or coalesce(ls.started_at, ls.scheduled_at) <= ${joinedTo}::timestamptz
+        )
+      group by c.id, c.title, b.id, b.name
+      order by sessions_count desc, course_title asc
+      limit ${REPORT_ROW_CAP}
+    `;
+
+    return mapRows(rows, [
+      "course_id",
+      "course_title",
+      "batch_id",
+      "batch_name",
+      "sessions_count",
+      "registered_count",
+      "attended_count",
+      "duration_seconds",
+      "coverage_pct",
+    ]);
+  }
 
   const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
     select
@@ -1518,7 +1881,19 @@ async function queryLiveClassAttendance(
       la.status,
       la.joined_at,
       la.left_at,
-      la.duration_seconds
+      la.duration_seconds,
+      la.created_at as registered_at,
+      case
+        when ls.started_at is null or ls.ended_at is null or la.duration_seconds is null then null
+        when extract(epoch from (ls.ended_at - ls.started_at)) <= 0 then null
+        else round(
+          least(
+            100,
+            (la.duration_seconds::numeric / nullif(extract(epoch from (ls.ended_at - ls.started_at)), 0)) * 100
+          ),
+          1
+        )::float8
+      end as coverage_pct
     from live_sessions ls
     left join live_attendance la
       on la.live_session_id = ls.id and la.tenant_id = ls.tenant_id
@@ -1530,8 +1905,15 @@ async function queryLiveClassAttendance(
     left join courses c on c.id = ls.course_id and c.tenant_id = ls.tenant_id
     left join batches b on b.id = ls.batch_id and b.tenant_id = ls.tenant_id
     where ls.tenant_id = current_setting('app.tenant_id', true)::uuid
+      and la.id is not null
       and (${sessionId}::uuid is null or ls.id = ${sessionId}::uuid)
+      and (${courseId}::uuid is null or ls.course_id = ${courseId}::uuid)
+      and (${batchId}::uuid is null or ls.batch_id = ${batchId}::uuid)
       and (${status}::text is null or la.status = ${status})
+      and (
+        ${attendeesOnlyStatus}::text is null
+        or la.status = ${attendeesOnlyStatus}
+      )
       and (
         ${learnerName}::text is null
         or lower(coalesce(mp.display_name, ap.email, m.invited_email_normalized, ''))
@@ -1544,11 +1926,11 @@ async function queryLiveClassAttendance(
       )
       and (
         ${joinedFrom}::timestamptz is null
-        or la.joined_at >= ${joinedFrom}::timestamptz
+        or coalesce(la.joined_at, ls.scheduled_at) >= ${joinedFrom}::timestamptz
       )
       and (
         ${joinedTo}::timestamptz is null
-        or la.joined_at <= ${joinedTo}::timestamptz
+        or coalesce(la.joined_at, ls.scheduled_at) <= ${joinedTo}::timestamptz
       )
     order by ls.scheduled_at desc nulls last, la.joined_at asc nulls last
     limit ${REPORT_ROW_CAP}
@@ -1569,6 +1951,8 @@ async function queryLiveClassAttendance(
     "joined_at",
     "left_at",
     "duration_seconds",
+    "registered_at",
+    "coverage_pct",
   ]);
 }
 
@@ -1576,13 +1960,33 @@ async function querySuperLiveInsights(
   tx: TenantTx,
   params: DatasetParams = {},
 ): Promise<ReportDatasetResult> {
+  const datasetRaw =
+    asString(params["dataset"]) ?? asString(params["reportTab"]) ?? "session_metrics";
+  const dataset =
+    datasetRaw === "trend_series" ||
+    datasetRaw === "series_rollup" ||
+    datasetRaw === "outlier_findings"
+      ? datasetRaw
+      : "session_metrics";
+
   const sessionId = asString(params["sessionId"]);
   const status = asString(params["status"]);
   const q = asString(params["q"]);
   const courseId = asString(params["courseId"]);
   const batchId = asString(params["batchId"]);
-  const startedFrom = asString(params["startedFrom"]);
-  const startedTo = asString(params["startedTo"]);
+  const startedFrom = asString(params["startedFrom"]) ?? asString(params["scheduledFrom"]);
+  const startedTo = asString(params["startedTo"]) ?? asString(params["scheduledTo"]);
+  const includeBenchmarks = params["includeBenchmarks"] === true;
+  const seriesKind = asString(params["seriesKind"]) === "batch" ? "batch" : "course";
+  const granularityRaw = asString(params["granularity"]) ?? "week";
+  const truncUnit =
+    granularityRaw === "day" ? "day" : granularityRaw === "month" ? "month" : "week";
+
+  const sessionIds = Array.isArray(params["sessionIds"])
+    ? params["sessionIds"].filter((id): id is string => typeof id === "string")
+    : [];
+  const sessionIdsCsv = sessionIds.length > 0 ? sessionIds.join(",") : null;
+
   const minAttendedRaw = params["minAttended"];
   const minAttended =
     typeof minAttendedRaw === "number"
@@ -1592,70 +1996,388 @@ async function querySuperLiveInsights(
         : null;
   const minAttendedValue = minAttended != null && Number.isFinite(minAttended) ? minAttended : null;
 
+  if (dataset === "trend_series") {
+    const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
+      with session_metrics as (
+        select
+          date_trunc(${truncUnit}, coalesce(ls.started_at, ls.scheduled_at)) as period_start,
+          ls.id,
+          count(la.id) filter (where la.status = 'attended')::int as attended_count,
+          count(la.id)::int as total_count
+        from live_sessions ls
+        left join live_attendance la on la.live_session_id = ls.id and la.tenant_id = ls.tenant_id
+        where ls.tenant_id = current_setting('app.tenant_id', true)::uuid
+          and ls.status <> 'cancelled'
+          and (${courseId}::uuid is null or ls.course_id = ${courseId}::uuid)
+          and (${batchId}::uuid is null or ls.batch_id = ${batchId}::uuid)
+          and (
+            ${startedFrom}::timestamptz is null
+            or coalesce(ls.started_at, ls.scheduled_at) >= ${startedFrom}::timestamptz
+          )
+          and (
+            ${startedTo}::timestamptz is null
+            or coalesce(ls.started_at, ls.scheduled_at) <= ${startedTo}::timestamptz
+          )
+        group by 1, ls.id
+      )
+      select
+        period_start,
+        count(*)::int as session_count,
+        coalesce(sum(attended_count), 0)::int as attended_count,
+        coalesce(sum(total_count), 0)::int as total_count,
+        case
+          when coalesce(sum(total_count), 0) = 0 then null
+          else round((sum(attended_count)::numeric / nullif(sum(total_count), 0)) * 100, 1)::float8
+        end as attendance_rate
+      from session_metrics
+      where period_start is not null
+      group by period_start
+      order by period_start asc
+      limit ${REPORT_ROW_CAP}
+    `;
+    return mapRows(rows, [
+      "period_start",
+      "session_count",
+      "attended_count",
+      "total_count",
+      "attendance_rate",
+    ]);
+  }
+
+  if (dataset === "series_rollup") {
+    if (seriesKind === "batch") {
+      const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
+        select
+          coalesce(b.name, 'Unassigned batch') as series_title,
+          ls.batch_id::text as series_id,
+          count(distinct ls.id)::int as session_count,
+          count(la.id) filter (where la.status = 'attended')::int as attended_count,
+          count(la.id) filter (where la.status = 'registered')::int as registered_count,
+          count(la.id) filter (where la.status = 'absent')::int as absent_count,
+          count(la.id)::int as total_count,
+          case
+            when count(la.id) = 0 then null
+            else round(
+              (count(la.id) filter (where la.status = 'attended')::numeric / nullif(count(la.id), 0)) * 100,
+              1
+            )::float8
+          end as attendance_rate
+        from live_sessions ls
+        left join live_attendance la on la.live_session_id = ls.id and la.tenant_id = ls.tenant_id
+        left join batches b on b.id = ls.batch_id and b.tenant_id = ls.tenant_id
+        where ls.tenant_id = current_setting('app.tenant_id', true)::uuid
+          and ls.status <> 'cancelled'
+          and (
+            ${startedFrom}::timestamptz is null
+            or coalesce(ls.started_at, ls.scheduled_at) >= ${startedFrom}::timestamptz
+          )
+          and (
+            ${startedTo}::timestamptz is null
+            or coalesce(ls.started_at, ls.scheduled_at) <= ${startedTo}::timestamptz
+          )
+        group by ls.batch_id, b.name
+        order by attendance_rate desc nulls last
+        limit ${REPORT_ROW_CAP}
+      `;
+      return mapRows(rows, [
+        "series_title",
+        "series_id",
+        "session_count",
+        "attended_count",
+        "registered_count",
+        "absent_count",
+        "total_count",
+        "attendance_rate",
+      ]);
+    }
+
+    const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
+      select
+        coalesce(c.title, 'Unassigned course') as series_title,
+        ls.course_id::text as series_id,
+        count(distinct ls.id)::int as session_count,
+        count(la.id) filter (where la.status = 'attended')::int as attended_count,
+        count(la.id) filter (where la.status = 'registered')::int as registered_count,
+        count(la.id) filter (where la.status = 'absent')::int as absent_count,
+        count(la.id)::int as total_count,
+        case
+          when count(la.id) = 0 then null
+          else round(
+            (count(la.id) filter (where la.status = 'attended')::numeric / nullif(count(la.id), 0)) * 100,
+            1
+          )::float8
+        end as attendance_rate
+      from live_sessions ls
+      left join live_attendance la on la.live_session_id = ls.id and la.tenant_id = ls.tenant_id
+      left join courses c on c.id = ls.course_id and c.tenant_id = ls.tenant_id
+      where ls.tenant_id = current_setting('app.tenant_id', true)::uuid
+        and ls.status <> 'cancelled'
+        and (
+          ${startedFrom}::timestamptz is null
+          or coalesce(ls.started_at, ls.scheduled_at) >= ${startedFrom}::timestamptz
+        )
+        and (
+          ${startedTo}::timestamptz is null
+          or coalesce(ls.started_at, ls.scheduled_at) <= ${startedTo}::timestamptz
+        )
+      group by ls.course_id, c.title
+      order by attendance_rate desc nulls last
+      limit ${REPORT_ROW_CAP}
+    `;
+    return mapRows(rows, [
+      "series_title",
+      "series_id",
+      "session_count",
+      "attended_count",
+      "registered_count",
+      "absent_count",
+      "total_count",
+      "attendance_rate",
+    ]);
+  }
+
+  if (dataset === "outlier_findings") {
+    const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
+      with session_base as (
+        select
+          ls.id,
+          ls.title,
+          c.title as course_title,
+          b.name as batch_name,
+          ls.scheduled_at,
+          count(la.id) filter (where la.status = 'attended')::int as attended_count,
+          count(la.id) filter (where la.status = 'registered')::int as registered_count,
+          count(la.id) filter (where la.status = 'absent')::int as absent_count,
+          count(la.id)::int as total_count,
+          case
+            when count(la.id) = 0 then null
+            else round(
+              (count(la.id) filter (where la.status = 'attended')::numeric / nullif(count(la.id), 0)) * 100,
+              1
+            )::float8
+          end as attendance_rate,
+          case
+            when ls.started_at is not null and ls.scheduled_at is not null
+              then floor(extract(epoch from (ls.started_at - ls.scheduled_at)))::int
+            else null
+          end as start_delay_seconds,
+          round(avg(la.duration_seconds) filter (
+            where la.status = 'attended' and la.duration_seconds is not null
+          ))::int as avg_duration_seconds,
+          case
+            when ls.started_at is not null and ls.ended_at is not null
+              then greatest(0, floor(extract(epoch from (ls.ended_at - ls.started_at)))::int)
+            else null
+          end as duration_seconds,
+          ls.course_id
+        from live_sessions ls
+        left join live_attendance la on la.live_session_id = ls.id and la.tenant_id = ls.tenant_id
+        left join courses c on c.id = ls.course_id and c.tenant_id = ls.tenant_id
+        left join batches b on b.id = ls.batch_id and b.tenant_id = ls.tenant_id
+        where ls.tenant_id = current_setting('app.tenant_id', true)::uuid
+          and ls.status <> 'cancelled'
+          and (
+            ${startedFrom}::timestamptz is null
+            or coalesce(ls.started_at, ls.scheduled_at) >= ${startedFrom}::timestamptz
+          )
+          and (
+            ${startedTo}::timestamptz is null
+            or coalesce(ls.started_at, ls.scheduled_at) <= ${startedTo}::timestamptz
+          )
+        group by ls.id, ls.title, c.title, b.name, ls.scheduled_at, ls.started_at, ls.ended_at, ls.course_id
+      ),
+      course_rates as (
+        select
+          course_id,
+          case
+            when coalesce(sum(total_count), 0) = 0 then null
+            else round((sum(attended_count)::numeric / nullif(sum(total_count), 0)) * 100, 1)::float8
+          end as course_avg_rate
+        from session_base
+        where course_id is not null
+        group by course_id
+      )
+      select
+        case
+          when sb.total_count = 0 then 'no_records'
+          when sb.start_delay_seconds is not null and sb.start_delay_seconds >= 900 then 'started_late'
+          when sb.total_count > 0 and (sb.registered_count::numeric / nullif(sb.total_count, 0)) * 100 >= 20
+            then 'unresolved'
+          when sb.avg_duration_seconds is not null and sb.duration_seconds is not null and sb.duration_seconds > 0
+            and (sb.avg_duration_seconds::numeric / sb.duration_seconds) * 100 < 25
+            then 'short_duration'
+          when sb.attendance_rate is not null and cr.course_avg_rate is not null
+            and (cr.course_avg_rate - sb.attendance_rate) >= 20
+            then 'far_below'
+          when sb.attendance_rate is not null and cr.course_avg_rate is not null
+            and (sb.attendance_rate - cr.course_avg_rate) >= 20
+            then 'far_above'
+          else null
+        end as category,
+        case
+          when sb.total_count = 0 then 'worth_checking'
+          when sb.start_delay_seconds is not null and sb.start_delay_seconds >= 900 then 'data_quality'
+          when sb.total_count > 0 and (sb.registered_count::numeric / nullif(sb.total_count, 0)) * 100 >= 20
+            then 'notable'
+          when sb.avg_duration_seconds is not null and sb.duration_seconds is not null and sb.duration_seconds > 0
+            and (sb.avg_duration_seconds::numeric / sb.duration_seconds) * 100 < 25
+            then 'notable'
+          when sb.attendance_rate is not null and cr.course_avg_rate is not null
+            and (cr.course_avg_rate - sb.attendance_rate) >= 20
+            then 'data_quality'
+          when sb.attendance_rate is not null and cr.course_avg_rate is not null
+            and (sb.attendance_rate - cr.course_avg_rate) >= 20
+            then 'worth_checking'
+          else null
+        end as severity,
+        sb.title as session_title,
+        sb.course_title,
+        sb.batch_name,
+        sb.scheduled_at,
+        sb.attendance_rate,
+        cr.course_avg_rate,
+        sb.title as title
+      from session_base sb
+      left join course_rates cr on cr.course_id = sb.course_id
+      where (
+        sb.total_count = 0
+        or (sb.start_delay_seconds is not null and sb.start_delay_seconds >= 900)
+        or (sb.total_count > 0 and (sb.registered_count::numeric / nullif(sb.total_count, 0)) * 100 >= 20)
+        or (
+          sb.avg_duration_seconds is not null and sb.duration_seconds is not null and sb.duration_seconds > 0
+          and (sb.avg_duration_seconds::numeric / sb.duration_seconds) * 100 < 25
+        )
+        or (
+          sb.attendance_rate is not null and cr.course_avg_rate is not null
+          and abs(sb.attendance_rate - cr.course_avg_rate) >= 20
+        )
+      )
+      order by sb.scheduled_at desc nulls last
+      limit ${REPORT_ROW_CAP}
+    `;
+    return mapRows(rows, [
+      "category",
+      "severity",
+      "title",
+      "session_title",
+      "course_title",
+      "batch_name",
+      "scheduled_at",
+      "attendance_rate",
+      "course_avg_rate",
+    ]);
+  }
+
   const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
-    select
-      ls.id::text as session_id,
-      ls.title,
-      ls.status,
-      ls.course_id::text as course_id,
-      c.title as course_title,
-      ls.batch_id::text as batch_id,
-      b.name as batch_name,
-      ls.scheduled_at,
-      ls.started_at,
-      ls.ended_at,
-      case
-        when ls.started_at is not null and ls.ended_at is not null
-          then greatest(0, floor(extract(epoch from (ls.ended_at - ls.started_at)))::int)
-        else null
-      end as duration_seconds,
-      count(la.id) filter (where la.status = 'attended')::int as attended_count,
-      count(la.id) filter (where la.status = 'registered')::int as registered_count,
-      count(la.id) filter (where la.status = 'absent')::int as absent_count,
-      count(la.id)::int as total_count,
-      round(avg(la.duration_seconds) filter (
-        where la.status = 'attended' and la.duration_seconds is not null
-      ))::int as avg_duration_seconds,
-      case
-        when count(la.id) = 0 then null
-        else round(
-          (count(la.id) filter (where la.status = 'attended')::numeric / nullif(count(la.id), 0)) * 100,
-          1
-        )::float8
-      end as attendance_rate
-    from live_sessions ls
-    left join live_attendance la on la.live_session_id = ls.id and la.tenant_id = ls.tenant_id
-    left join courses c on c.id = ls.course_id and c.tenant_id = ls.tenant_id
-    left join batches b on b.id = ls.batch_id and b.tenant_id = ls.tenant_id
-    where ls.tenant_id = current_setting('app.tenant_id', true)::uuid
-      and (${sessionId}::uuid is null or ls.id = ${sessionId}::uuid)
-      and (${status}::text is null or ls.status = ${status})
-      and (${courseId}::uuid is null or ls.course_id = ${courseId}::uuid)
-      and (${batchId}::uuid is null or ls.batch_id = ${batchId}::uuid)
-      and (
-        ${q}::text is null
-        or lower(ls.title) like '%' || lower(${q}) || '%'
+    with session_rows as (
+      select
+        ls.id::text as session_id,
+        ls.title,
+        ls.status,
+        ls.course_id::text as course_id,
+        c.title as course_title,
+        ls.batch_id::text as batch_id,
+        b.name as batch_name,
+        ls.scheduled_at,
+        ls.started_at,
+        ls.ended_at,
+        case
+          when ls.started_at is not null and ls.ended_at is not null
+            then greatest(0, floor(extract(epoch from (ls.ended_at - ls.started_at)))::int)
+          else null
+        end as duration_seconds,
+        count(la.id) filter (where la.status = 'attended')::int as attended_count,
+        count(la.id) filter (where la.status = 'registered')::int as registered_count,
+        count(la.id) filter (where la.status = 'absent')::int as absent_count,
+        count(la.id)::int as total_count,
+        round(avg(la.duration_seconds) filter (
+          where la.status = 'attended' and la.duration_seconds is not null
+        ))::int as avg_duration_seconds,
+        case
+          when count(la.id) = 0 then null
+          else round(
+            (count(la.id) filter (where la.status = 'attended')::numeric / nullif(count(la.id), 0)) * 100,
+            1
+          )::float8
+        end as attendance_rate,
+        ls.course_id as course_uuid
+      from live_sessions ls
+      left join live_attendance la on la.live_session_id = ls.id and la.tenant_id = ls.tenant_id
+      left join courses c on c.id = ls.course_id and c.tenant_id = ls.tenant_id
+      left join batches b on b.id = ls.batch_id and b.tenant_id = ls.tenant_id
+      where ls.tenant_id = current_setting('app.tenant_id', true)::uuid
+        and (${sessionId}::uuid is null or ls.id = ${sessionId}::uuid)
+        and (${sessionIdsCsv}::text is null or ls.id::text = any(string_to_array(${sessionIdsCsv}, ',')))
+        and (${status}::text is null or ls.status = ${status})
+        and (${courseId}::uuid is null or ls.course_id = ${courseId}::uuid)
+        and (${batchId}::uuid is null or ls.batch_id = ${batchId}::uuid)
+        and (
+          ${q}::text is null
+          or lower(ls.title) like '%' || lower(${q}) || '%'
+        )
+        and (
+          ${startedFrom}::timestamptz is null
+          or coalesce(ls.started_at, ls.scheduled_at) >= ${startedFrom}::timestamptz
+        )
+        and (
+          ${startedTo}::timestamptz is null
+          or coalesce(ls.started_at, ls.scheduled_at) <= ${startedTo}::timestamptz
+        )
+      group by
+        ls.id, ls.title, ls.status, ls.course_id, c.title, ls.batch_id, b.name,
+        ls.scheduled_at, ls.started_at, ls.ended_at
+      having (
+        ${minAttendedValue}::int is null
+        or count(la.id) filter (where la.status = 'attended') >= ${minAttendedValue}::int
       )
-      and (
-        ${startedFrom}::timestamptz is null
-        or coalesce(ls.started_at, ls.scheduled_at) >= ${startedFrom}::timestamptz
-      )
-      and (
-        ${startedTo}::timestamptz is null
-        or coalesce(ls.started_at, ls.scheduled_at) <= ${startedTo}::timestamptz
-      )
-    group by
-      ls.id, ls.title, ls.status, ls.course_id, c.title, ls.batch_id, b.name,
-      ls.scheduled_at, ls.started_at, ls.ended_at
-    having (
-      ${minAttendedValue}::int is null
-      or count(la.id) filter (where la.status = 'attended') >= ${minAttendedValue}::int
+    ),
+    tenant_avg as (
+      select
+        case
+          when coalesce(sum(total_count), 0) = 0 then null
+          else round((sum(attended_count)::numeric / nullif(sum(total_count), 0)) * 100, 1)::float8
+        end as tenant_avg_rate
+      from session_rows
+    ),
+    course_avg as (
+      select
+        course_uuid,
+        case
+          when coalesce(sum(total_count), 0) = 0 then null
+          else round((sum(attended_count)::numeric / nullif(sum(total_count), 0)) * 100, 1)::float8
+        end as course_avg_rate
+      from session_rows
+      where course_uuid is not null
+      group by course_uuid
     )
-    order by ls.scheduled_at desc nulls last
+    select
+      sr.session_id,
+      sr.title,
+      sr.status,
+      sr.course_id,
+      sr.course_title,
+      sr.batch_id,
+      sr.batch_name,
+      sr.scheduled_at,
+      sr.started_at,
+      sr.ended_at,
+      sr.duration_seconds,
+      sr.attended_count,
+      sr.registered_count,
+      sr.absent_count,
+      sr.total_count,
+      sr.avg_duration_seconds,
+      sr.attendance_rate,
+      ta.tenant_avg_rate,
+      ca.course_avg_rate
+    from session_rows sr
+    cross join tenant_avg ta
+    left join course_avg ca on ca.course_uuid = sr.course_uuid
+    order by sr.scheduled_at desc nulls last
     limit ${REPORT_ROW_CAP}
   `;
 
-  return mapRows(rows, [
+  const columns = [
     "session_id",
     "title",
     "status",
@@ -1673,7 +2395,11 @@ async function querySuperLiveInsights(
     "total_count",
     "avg_duration_seconds",
     "attendance_rate",
-  ]);
+  ];
+  if (includeBenchmarks) {
+    columns.push("tenant_avg_rate", "course_avg_rate");
+  }
+  return mapRows(rows, columns);
 }
 
 async function queryAssessmentItems(tx: TenantTx): Promise<ReportDatasetResult> {

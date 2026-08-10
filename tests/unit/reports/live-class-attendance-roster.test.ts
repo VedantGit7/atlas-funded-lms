@@ -15,6 +15,11 @@ describe("live class attendance roster dto", () => {
     expect(parsed.status).toBe("ended");
   });
 
+  it("parses attendance rate band filter", () => {
+    const parsed = liveSessionsListQuerySchema.parse({ attendanceRateBand: "below_40" });
+    expect(parsed.attendanceRateBand).toBe("below_40");
+  });
+
   it("parses attendee columns and sort", () => {
     const parsed = liveAttendeesQuerySchema.parse({
       columns: "learner_name,email",

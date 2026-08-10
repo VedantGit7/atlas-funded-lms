@@ -2465,6 +2465,38 @@ model ReportRun {
   @@map("report_runs")
 }
 
+model ReportDeliveryDestination {
+  id                       String    @id @db.Uuid
+  tenant_id                String    @db.Uuid
+  created_by_membership_id String    @db.Uuid
+  name                     String
+  kind                     String
+  config_json              Json      @default("{}")
+  secrets_json             Json?
+  is_active                Boolean   @default(true)
+  last_delivery_at         DateTime? @db.Timestamptz(6)
+  last_delivery_status     String?
+  last_error               String?
+  consecutive_failures     Int       @default(0)
+  health_30d_json          Json      @default("[]")
+  created_at               DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at               DateTime  @updatedAt @db.Timestamptz(6)
+
+  @@index([tenant_id, kind, is_active], map: "report_delivery_destinations_tenant_kind_active_idx")
+  @@index([tenant_id, updated_at], map: "report_delivery_destinations_tenant_updated_idx")
+  @@map("report_delivery_destinations")
+}
+
+model ReportExportSettings {
+  tenant_id                  String   @id @db.Uuid
+  settings_json              Json     @default("{}")
+  updated_by_membership_id   String?  @db.Uuid
+  created_at                 DateTime @default(now()) @db.Timestamptz(6)
+  updated_at                 DateTime @updatedAt @db.Timestamptz(6)
+
+  @@map("report_export_settings")
+}
+
 model AtRiskRule {
   id          String       @id @db.Uuid
   tenant_id   String       @db.Uuid
@@ -3167,21 +3199,73 @@ model CustomFieldSegment {
 }
 
 model ZoomConnection {
-  id                String    @id @db.Uuid
-  tenant_id         String    @db.Uuid
-  account_id        String?
-  access_token_ref  String?
-  refresh_token_ref String?
-  status            String    @default("disconnected")
-  connected_at      DateTime? @db.Timestamptz(6)
-  metadata_json     Json?
-  created_at        DateTime  @default(now()) @db.Timestamptz(6)
-  updated_at        DateTime  @updatedAt @db.Timestamptz(6)
+  id                        String    @id @db.Uuid
+  tenant_id                 String    @db.Uuid
+  account_id                String?
+  account_name              String?
+  account_email             String?
+  app_id                    String?
+  scopes_json               Json?
+  access_token_ref          String?
+  refresh_token_ref         String?
+  webhook_secret_ref        String?
+  status                    String    @default("disconnected")
+  connected_at              DateTime? @db.Timestamptz(6)
+  disconnected_at           DateTime? @db.Timestamptz(6)
+  last_synced_at            DateTime? @db.Timestamptz(6)
+  token_expires_at          DateTime? @db.Timestamptz(6)
+  schedule_enabled          Boolean   @default(true)
+  schedule_interval_minutes Int       @default(30)
+  coverage_gap_count        Int       @default(0)
+  metadata_json             Json?
+  created_at                DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at                DateTime  @updatedAt @db.Timestamptz(6)
 
   meetings ZoomMeeting[]
+  syncRuns ZoomSyncRun[]
 
   @@unique([tenant_id])
   @@map("zoom_connections")
+}
+
+model ZoomSyncRun {
+  id                 String    @id @db.Uuid
+  tenant_id          String    @db.Uuid
+  zoom_connection_id String    @db.Uuid
+  trigger            String
+  status             String
+  started_at         DateTime  @default(now()) @db.Timestamptz(6)
+  finished_at        DateTime? @db.Timestamptz(6)
+  meetings_count     Int       @default(0)
+  participants_count Int       @default(0)
+  skipped_count      Int       @default(0)
+  error_message      String?
+  log_json           Json?
+  range_from         DateTime? @db.Timestamptz(6)
+  range_to           DateTime? @db.Timestamptz(6)
+  created_at         DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime  @updatedAt @db.Timestamptz(6)
+
+  connection ZoomConnection @relation(fields: [zoom_connection_id], references: [id], onDelete: Cascade)
+
+  @@index([tenant_id, started_at])
+  @@index([tenant_id, zoom_connection_id, started_at])
+  @@map("zoom_sync_runs")
+}
+
+model ZoomWebhookEvent {
+  id                 String    @id @db.Uuid
+  tenant_id          String    @db.Uuid
+  zoom_connection_id String?   @db.Uuid
+  event_type         String
+  topic              String?
+  status_code        Int       @default(200)
+  received_at        DateTime  @default(now()) @db.Timestamptz(6)
+  payload_json       Json?
+  created_at         DateTime  @default(now()) @db.Timestamptz(6)
+
+  @@index([tenant_id, received_at])
+  @@map("zoom_webhook_events")
 }
 
 model ZoomMeeting {
@@ -3211,6 +3295,7 @@ model ZoomMeetingParticipant {
   membership_id    String?   @db.Uuid
   external_user_id String?
   display_name     String?
+  email            String?
   join_time        DateTime? @db.Timestamptz(6)
   leave_time       DateTime? @db.Timestamptz(6)
   duration_seconds Int?
@@ -3247,21 +3332,25 @@ model LiveSession {
 }
 
 model LiveAttendance {
-  id               String    @id @db.Uuid
-  tenant_id        String    @db.Uuid
-  live_session_id  String    @db.Uuid
-  membership_id    String    @db.Uuid
-  status           String    @default("registered")
-  joined_at        DateTime? @db.Timestamptz(6)
-  left_at          DateTime? @db.Timestamptz(6)
-  duration_seconds Int?
-  created_at       DateTime  @default(now()) @db.Timestamptz(6)
-  updated_at       DateTime  @updatedAt @db.Timestamptz(6)
+  id                           String    @id @db.Uuid
+  tenant_id                    String    @db.Uuid
+  live_session_id              String    @db.Uuid
+  membership_id                String    @db.Uuid
+  status                       String    @default("registered")
+  joined_at                    DateTime? @db.Timestamptz(6)
+  left_at                      DateTime? @db.Timestamptz(6)
+  duration_seconds             Int?
+  override_reason              String?
+  overridden_at                DateTime? @db.Timestamptz(6)
+  overridden_by_membership_id  String?   @db.Uuid
+  created_at                   DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at                   DateTime  @updatedAt @db.Timestamptz(6)
 
   session LiveSession @relation(fields: [live_session_id], references: [id], onDelete: Cascade)
 
   @@unique([tenant_id, live_session_id, membership_id])
   @@index([tenant_id, live_session_id])
+  @@index([tenant_id, membership_id, created_at])
   @@map("live_attendance")
 }
 

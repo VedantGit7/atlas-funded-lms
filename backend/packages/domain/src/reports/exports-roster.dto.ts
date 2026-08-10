@@ -19,6 +19,10 @@ export const EXPORTS_HISTORY_COLUMNS = [
 
 export type ExportsHistoryColumn = (typeof EXPORTS_HISTORY_COLUMNS)[number];
 
+export const EXPORTS_FILE_STATES = ["available", "removed", "expired", "expiring_soon"] as const;
+
+export type ExportsFileState = (typeof EXPORTS_FILE_STATES)[number];
+
 function parseColumns(allowed: readonly string[], value: unknown): string[] {
   const allowedSet = new Set<string>(allowed);
   if (Array.isArray(value)) {
@@ -51,6 +55,24 @@ export const exportsHistoryListQuerySchema = rejectClientTenantFields
     sourceType: z.enum(["report_run", "export_job"]).optional(),
     status: z.enum(JOB_STATUSES).optional(),
     definitionKey: z.string().trim().min(1).max(120).optional(),
+    format: z.enum(REPORT_FORMATS).optional(),
+    fileState: z.enum(EXPORTS_FILE_STATES).optional(),
+    mine: z
+      .union([z.boolean(), z.enum(["true", "false", "1", "0"])])
+      .optional()
+      .transform((value) => {
+        if (value === undefined) return undefined;
+        if (typeof value === "boolean") return value;
+        return value === "true" || value === "1";
+      }),
+    pendingOnly: z
+      .union([z.boolean(), z.enum(["true", "false", "1", "0"])])
+      .optional()
+      .transform((value) => {
+        if (value === undefined) return undefined;
+        if (typeof value === "boolean") return value;
+        return value === "true" || value === "1";
+      }),
     createdFrom: z.string().datetime().optional(),
     createdTo: z.string().datetime().optional(),
     q: z.string().trim().min(1).max(200).optional(),
@@ -80,6 +102,8 @@ export const exportsHistoryItemSchema = z
     expiresAt: z.string().datetime().nullable(),
     hasFile: z.boolean(),
     canDownload: z.boolean(),
+    progressPercent: z.number().int().min(0).max(100).nullable(),
+    errorMessage: z.string().nullable(),
   })
   .strict();
 
@@ -93,6 +117,9 @@ export const exportsHistoryListResponseSchema = z.object({
       succeededCount: z.number().int().nonnegative(),
       failedCount: z.number().int().nonnegative(),
       pendingCount: z.number().int().nonnegative(),
+      filesAvailableCount: z.number().int().nonnegative(),
+      expiringSoonCount: z.number().int().nonnegative(),
+      oldestPendingTitle: z.string().nullable(),
     }),
   }),
 });
@@ -102,6 +129,10 @@ export const exportExportsHistoryBodySchema = rejectClientTenantFields
     sourceType: z.enum(["report_run", "export_job"]).optional(),
     status: z.enum(JOB_STATUSES).optional(),
     definitionKey: z.string().trim().min(1).max(120).optional(),
+    format: z.enum(REPORT_FORMATS).optional(),
+    fileState: z.enum(EXPORTS_FILE_STATES).optional(),
+    mine: z.boolean().optional(),
+    pendingOnly: z.boolean().optional(),
     createdFrom: z.string().datetime().optional(),
     createdTo: z.string().datetime().optional(),
     q: z.string().trim().min(1).max(200).optional(),

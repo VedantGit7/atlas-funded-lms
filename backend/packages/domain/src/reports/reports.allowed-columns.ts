@@ -1,7 +1,7 @@
 import { DATASET_BUILDERS } from "./reports.datasets";
 import type { ReportDatasetResult } from "./reports.types";
 
-export const APPROVED_DATASET_KEYS = Object.keys(DATASET_BUILDERS) as ApprovedDatasetKey[];
+export const APPROVED_DATASET_KEYS = Object.keys(DATASET_BUILDERS);
 
 export type ApprovedDatasetKey = keyof typeof DATASET_BUILDERS;
 
@@ -52,6 +52,8 @@ export const ALLOWED_COLUMNS: Record<ApprovedDatasetKey, readonly string[]> = {
     "value",
     "unit",
     "calculated_at",
+    "resource_type",
+    "object_count",
     "course_id",
     "title",
     "status",
@@ -204,12 +206,23 @@ export const ALLOWED_COLUMNS: Record<ApprovedDatasetKey, readonly string[]> = {
     "topic",
     "started_at",
     "ended_at",
+    "duration_seconds",
+    "attendance_count",
+    "matched_count",
+    "unmatched_count",
     "membership_id",
     "display_name",
     "email",
     "join_time",
     "leave_time",
-    "duration_seconds",
+    "sync_run_id",
+    "trigger",
+    "status",
+    "finished_at",
+    "meetings_count",
+    "participants_count",
+    "skipped_count",
+    "error_message",
   ],
   "live-class-attendance": [
     "session_id",
@@ -226,6 +239,17 @@ export const ALLOWED_COLUMNS: Record<ApprovedDatasetKey, readonly string[]> = {
     "joined_at",
     "left_at",
     "duration_seconds",
+    "registered_at",
+    "coverage_pct",
+    "scheduled_at",
+    "started_at",
+    "ended_at",
+    "registered_count",
+    "attended_count",
+    "never_joined_count",
+    "sessions_registered",
+    "sessions_attended",
+    "sessions_count",
   ],
   "super-live-insights": [
     "session_id",
@@ -245,6 +269,15 @@ export const ALLOWED_COLUMNS: Record<ApprovedDatasetKey, readonly string[]> = {
     "total_count",
     "avg_duration_seconds",
     "attendance_rate",
+    "tenant_avg_rate",
+    "course_avg_rate",
+    "period_start",
+    "session_count",
+    "series_title",
+    "series_id",
+    "category",
+    "severity",
+    "session_title",
   ],
   "assessment-items": [
     "item_id",
