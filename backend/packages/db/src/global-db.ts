@@ -1,4 +1,5 @@
 import { prisma } from "./client";
+import { DEFAULT_GLOBAL_TX_TIMEOUT_MS, interactiveTxOptions } from "./transaction-options";
 
 type GlobalDbClient = Pick<typeof prisma, "$queryRaw" | "$executeRaw" | "$executeRawUnsafe">;
 
@@ -10,5 +11,5 @@ export async function withGlobalDb<T>(fn: (db: GlobalDbClient) => Promise<T>): P
   return await prisma.$transaction(async (tx) => {
     await tx.$executeRawUnsafe("SET LOCAL ROLE atlas_app");
     return fn(tx);
-  });
+  }, interactiveTxOptions(DEFAULT_GLOBAL_TX_TIMEOUT_MS));
 }

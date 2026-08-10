@@ -57,6 +57,14 @@ export const superLiveInsightsListQuerySchema = rejectClientTenantFields
     startedFrom: z.string().datetime().optional(),
     startedTo: z.string().datetime().optional(),
     minAttended: z.coerce.number().int().min(0).max(100000).optional(),
+    hasUnresolved: z
+      .union([z.boolean(), z.enum(["true", "false", "1", "0"])])
+      .optional()
+      .transform((value) => {
+        if (value === undefined) return undefined;
+        if (typeof value === "boolean") return value;
+        return value === "true" || value === "1";
+      }),
     sortBy: z
       .enum([
         "scheduled_at",
@@ -112,7 +120,10 @@ export const superLiveInsightsListResponseSchema = z.object({
       sessionCount: z.number().int().nonnegative(),
       totalAttended: z.number().int().nonnegative(),
       totalRegistered: z.number().int().nonnegative(),
+      totalAbsent: z.number().int().nonnegative(),
+      totalRecords: z.number().int().nonnegative(),
       avgAttendanceRate: z.number().min(0).max(100).nullable(),
+      avgDurationSeconds: z.number().int().nonnegative().nullable(),
     }),
   }),
 });
@@ -123,8 +134,50 @@ export const superLiveSessionIdParamsSchema = z
   })
   .strict();
 
+const superLiveInsightSeriesItemSchema = z
+  .object({
+    id: z.string().uuid(),
+    title: z.string(),
+    scheduledAt: z.string().datetime().nullable(),
+    attendanceRate: z.number().min(0).max(100).nullable(),
+    isCurrent: z.boolean(),
+  })
+  .strict();
+
+const superLiveInsightTrendItemSchema = z
+  .object({
+    id: z.string().uuid().nullable(),
+    title: z.string(),
+    label: z.string(),
+    attendanceRate: z.number().min(0).max(100).nullable(),
+    isCurrent: z.boolean(),
+    isFuture: z.boolean(),
+  })
+  .strict();
+
+export const superLiveInsightContextSchema = z
+  .object({
+    courseAvgAttendanceRate: z.number().min(0).max(100).nullable(),
+    tenantAvgAttendanceRate: z.number().min(0).max(100).nullable(),
+    courseRateP25: z.number().min(0).max(100).nullable(),
+    courseRateP75: z.number().min(0).max(100).nullable(),
+    courseAvgDurationSeconds: z.number().int().nonnegative().nullable(),
+    durationCoveragePct: z.number().min(0).max(100).nullable(),
+    rateDeltaVsCourse: z.number().nullable(),
+    courseRankCaption: z.string().nullable(),
+    estimatedTurnout: z.number().int().nonnegative().nullable(),
+    cancelledAt: z.string().datetime().nullable(),
+    series: z.array(superLiveInsightSeriesItemSchema),
+    trend: z.array(superLiveInsightTrendItemSchema),
+    trendDeltaPoints: z.number().nullable(),
+  })
+  .strict();
+
 export const superLiveInsightDetailResponseSchema = z.object({
-  data: superLiveInsightItemSchema,
+  data: z.object({
+    session: superLiveInsightItemSchema,
+    context: superLiveInsightContextSchema,
+  }),
 });
 
 export const exportSuperLiveInsightsRosterBodySchema = rejectClientTenantFields

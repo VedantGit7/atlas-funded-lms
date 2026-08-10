@@ -47,6 +47,7 @@ export const liveSessionsListQuerySchema = rejectClientTenantFields
     batchId: z.string().uuid().optional(),
     startedFrom: z.string().datetime().optional(),
     startedTo: z.string().datetime().optional(),
+    attendanceRateBand: z.enum(["below_40", "mid_40_75", "above_75"]).optional(),
     sortBy: z
       .enum(["started_at", "scheduled_at", "title", "attendance_count", "duration_seconds"])
       .default("scheduled_at"),
@@ -73,13 +74,31 @@ export const liveSessionListItemSchema = z
     durationSeconds: z.number().int().nonnegative().nullable(),
     attendanceCount: z.number().int().nonnegative(),
     registeredCount: z.number().int().nonnegative(),
+    avgCoverageSeconds: z.number().int().nonnegative().nullable().optional(),
   })
   .strict();
+
+export const liveSessionsListSummarySchema = z
+  .object({
+    sessionsHeld: z.number().int().nonnegative(),
+    cancelledCount: z.number().int().nonnegative(),
+    scheduledAheadCount: z.number().int().nonnegative(),
+    avgAttendancePct: z.number().nullable(),
+    totalAttendedCount: z.number().int().nonnegative(),
+    totalRegisteredCount: z.number().int().nonnegative(),
+    totalTimeSeconds: z.number().int().nonnegative(),
+    avgCoveragePct: z.number().nullable(),
+    lowTurnoutCount: z.number().int().nonnegative(),
+  })
+  .strict();
+
+export type LiveSessionsListSummary = z.output<typeof liveSessionsListSummarySchema>;
 
 export const liveSessionsListResponseSchema = z.object({
   data: z.object({
     items: z.array(liveSessionListItemSchema),
     pageInfo: pageInfoSchema,
+    summary: liveSessionsListSummarySchema,
   }),
 });
 
@@ -93,6 +112,89 @@ export const liveSessionDetailResponseSchema = z.object({
   data: liveSessionListItemSchema.extend({
     totalAttendanceSeconds: z.number().int().nonnegative(),
     avgDurationSeconds: z.number().int().nonnegative().nullable(),
+    absentCount: z.number().int().nonnegative(),
+    avgCoveragePct: z.number().nullable(),
+    startDelayMinutes: z.number().int().nullable(),
+    cancelledAt: z.string().datetime().nullable(),
+    nextSessionAt: z.string().datetime().nullable(),
+    nextSessionTitle: z.string().nullable(),
+    expectedTurnoutCount: z.number().int().nonnegative().nullable(),
+    expectedTurnoutPct: z.number().nullable(),
+    recordingUrl: z.string().url().nullable().optional(),
+    peakConcurrent: z.number().int().nonnegative().nullable(),
+    peakConcurrentAt: z.string().datetime().nullable(),
+    peakConcurrentOffsetMinutes: z.number().int().nullable(),
+    timeline: z.object({
+      bucketMinutes: z.number().int().positive(),
+      points: z.array(
+        z.object({
+          offsetMinutes: z.number().int().nonnegative(),
+          concurrent: z.number().int().nonnegative(),
+        }),
+      ),
+      dropInsight: z
+        .object({
+          fromOffsetMinutes: z.number().int().nonnegative(),
+          toOffsetMinutes: z.number().int().nonnegative(),
+          learnersLeft: z.number().int().nonnegative(),
+          message: z.string(),
+        })
+        .nullable(),
+    }),
+  }),
+});
+
+export const sendLiveClassAttendanceMessageBodySchema = rejectClientTenantFields
+  .extend({
+    sessionId: z.string().uuid().optional(),
+    membershipIds: z.array(z.string().uuid()).min(1).max(500).optional(),
+    audience: z
+      .enum(["absentees", "selected", "registrants", "low_attendance"])
+      .default("absentees"),
+    subject: z.string().trim().min(1).max(200),
+    message: z.string().trim().min(1).max(10000),
+    channels: z
+      .array(z.enum(["email", "in_app"]))
+      .min(1)
+      .max(2)
+      .default(["email"]),
+    sendTestToSelf: z.boolean().default(false),
+  })
+  .strict()
+  .superRefine((value, ctx) => {
+    if (!value.sessionId && value.audience !== "selected" && value.audience !== "low_attendance") {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "sessionId is required unless messaging selected or low-attendance learners.",
+        path: ["sessionId"],
+      });
+    }
+    if (
+      !value.sessionId &&
+      value.audience === "selected" &&
+      (!value.membershipIds || value.membershipIds.length === 0) &&
+      !value.sendTestToSelf
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "membershipIds are required when messaging selected learners without a session.",
+        path: ["membershipIds"],
+      });
+    }
+  });
+
+export type SendLiveClassAttendanceMessageBody = z.output<
+  typeof sendLiveClassAttendanceMessageBodySchema
+>;
+
+export const sendLiveClassAttendanceMessageResponseSchema = z.object({
+  data: z.object({
+    sendGroupId: z.string().uuid(),
+    deliveredCount: z.number().int().nonnegative(),
+    skippedCount: z.number().int().nonnegative(),
+    failedCount: z.number().int().nonnegative(),
+    recipientCount: z.number().int().nonnegative(),
+    status: z.enum(["sent", "partially_failed", "failed"]),
   }),
 });
 
@@ -159,5 +261,579 @@ export const exportLiveClassAttendanceRosterResponseSchema = z.object({
     runId: z.string().uuid(),
     status: z.string(),
     emailed: z.boolean(),
+  }),
+});
+
+export const liveClassAttendeeParamsSchema = z
+  .object({
+    sessionId: z.string().uuid(),
+    attendeeId: z.string().uuid(),
+  })
+  .strict();
+
+export const liveAttendeePresenceSegmentSchema = z
+  .object({
+    id: z.string().uuid(),
+    index: z.number().int().positive(),
+    joinedAt: z.string().datetime().nullable(),
+    leftAt: z.string().datetime().nullable(),
+    durationSeconds: z.number().int().nonnegative().nullable(),
+    shareOfSessionPct: z.number().nullable(),
+    clientLabel: z.string().nullable(),
+  })
+  .strict();
+
+export const liveAttendeeHistoryItemSchema = z
+  .object({
+    sessionId: z.string().uuid(),
+    attendeeId: z.string().uuid().nullable(),
+    title: z.string(),
+    scheduledAt: z.string().datetime().nullable(),
+    status: z.string(),
+    coveragePct: z.number().nullable(),
+    durationSeconds: z.number().int().nullable(),
+    isCurrent: z.boolean(),
+  })
+  .strict();
+
+export const liveAttendeeDetailResponseSchema = z.object({
+  data: z.object({
+    id: z.string().uuid(),
+    sessionId: z.string().uuid(),
+    sessionTitle: z.string(),
+    sessionStatus: z.string(),
+    sessionScheduledAt: z.string().datetime().nullable(),
+    sessionStartedAt: z.string().datetime().nullable(),
+    sessionEndedAt: z.string().datetime().nullable(),
+    sessionDurationSeconds: z.number().int().nonnegative().nullable(),
+    membershipId: z.string().uuid(),
+    learnerName: z.string().nullable(),
+    email: z.string().nullable(),
+    status: z.enum(["registered", "attended", "absent"]),
+    systemInferredStatus: z.enum(["registered", "attended", "absent"]),
+    contradictsSystemData: z.boolean(),
+    registeredAt: z.string().datetime().nullable(),
+    batchId: z.string().uuid().nullable(),
+    batchName: z.string().nullable(),
+    courseId: z.string().uuid().nullable(),
+    courseTitle: z.string().nullable(),
+    joinedAt: z.string().datetime().nullable(),
+    leftAt: z.string().datetime().nullable(),
+    durationSeconds: z.number().int().nullable(),
+    coveragePct: z.number().nullable(),
+    joinDelayMinutes: z.number().int().nullable(),
+    rejoinCount: z.number().int().nonnegative(),
+    longestGapSeconds: z.number().int().nonnegative().nullable(),
+    overrideReason: z.string().nullable(),
+    overriddenAt: z.string().datetime().nullable(),
+    segments: z.array(liveAttendeePresenceSegmentSchema),
+    standing: z.object({
+      band: z.enum(["above_median", "at_median", "below_median", "absent", "unavailable"]),
+      label: z.string(),
+      learnerDurationSeconds: z.number().int().nullable(),
+      medianDurationSeconds: z.number().int().nullable(),
+      cohortSize: z.number().int().nonnegative(),
+      histogram: z.array(z.number().int().nonnegative()),
+      learnerBucketIndex: z.number().int().nullable(),
+      medianBucketIndex: z.number().int().nullable(),
+    }),
+    historySummary: z.object({
+      attendedCount: z.number().int().nonnegative(),
+      totalSessions: z.number().int().nonnegative(),
+      attendanceRatePct: z.number().nullable(),
+    }),
+    history: z.array(liveAttendeeHistoryItemSchema),
+  }),
+});
+
+export const updateLiveClassAttendeeStatusBodySchema = rejectClientTenantFields
+  .extend({
+    status: z.enum(["registered", "attended", "absent"]),
+    reason: z.string().trim().min(1).max(1000).optional(),
+  })
+  .strict();
+
+export type UpdateLiveClassAttendeeStatusBody = z.output<
+  typeof updateLiveClassAttendeeStatusBodySchema
+>;
+
+export const updateLiveClassAttendeeStatusResponseSchema = z.object({
+  data: z.object({
+    id: z.string().uuid(),
+    status: z.enum(["registered", "attended", "absent"]),
+    contradictsSystemData: z.boolean(),
+    overrideReason: z.string().nullable(),
+    overriddenAt: z.string().datetime().nullable(),
+  }),
+});
+
+export const liveClassSessionLiveMonitorResponseSchema = z.object({
+  data: z.object({
+    sessionId: z.string().uuid(),
+    title: z.string(),
+    status: z.string(),
+    courseId: z.string().uuid().nullable(),
+    courseTitle: z.string().nullable(),
+    batchId: z.string().uuid().nullable(),
+    batchName: z.string().nullable(),
+    scheduledAt: z.string().datetime().nullable(),
+    startedAt: z.string().datetime().nullable(),
+    endedAt: z.string().datetime().nullable(),
+    scheduledDurationSeconds: z.number().int().nonnegative().nullable(),
+    serverNow: z.string().datetime(),
+    elapsedSeconds: z.number().int().nonnegative().nullable(),
+    ranForSeconds: z.number().int().nonnegative().nullable(),
+    frozen: z.boolean(),
+    turnout: z.object({
+      joinedCount: z.number().int().nonnegative(),
+      registeredCount: z.number().int().nonnegative(),
+      presentCount: z.number().int().nonnegative(),
+      leftCount: z.number().int().nonnegative(),
+      notJoinedCount: z.number().int().nonnegative(),
+      ratePct: z.number().nullable(),
+      joinedLast5Min: z.number().int().nonnegative(),
+    }),
+    timeline: z.object({
+      bucketMinutes: z.number().int().positive(),
+      plannedMinutes: z.number().int().positive(),
+      asOfOffsetMinutes: z.number().int().nonnegative(),
+      points: z.array(
+        z.object({
+          offsetMinutes: z.number().int().nonnegative(),
+          concurrent: z.number().int().nonnegative(),
+        }),
+      ),
+      currentConcurrent: z.number().int().nonnegative(),
+      peakConcurrent: z.number().int().nonnegative().nullable(),
+      peakConcurrentOffsetMinutes: z.number().int().nullable(),
+      peakConcurrentAt: z.string().datetime().nullable(),
+    }),
+    recentEvents: z.array(
+      z.object({
+        kind: z.enum(["joined", "left"]),
+        at: z.string().datetime(),
+        membershipId: z.string().uuid(),
+        attendeeId: z.string().uuid(),
+        learnerName: z.string().nullable(),
+        email: z.string().nullable(),
+        durationSeconds: z.number().int().nullable(),
+      }),
+    ),
+    presence: z.array(
+      z.object({
+        membershipId: z.string().uuid(),
+        attendeeId: z.string().uuid(),
+        learnerName: z.string().nullable(),
+        email: z.string().nullable(),
+        state: z.enum(["present", "left", "not_joined"]),
+        joinedAt: z.string().datetime().nullable(),
+        leftAt: z.string().datetime().nullable(),
+        durationSeconds: z.number().int().nullable(),
+      }),
+    ),
+    notYetJoined: z.array(
+      z.object({
+        membershipId: z.string().uuid(),
+        attendeeId: z.string().uuid(),
+        learnerName: z.string().nullable(),
+        email: z.string().nullable(),
+        batchId: z.string().uuid().nullable(),
+        batchName: z.string().nullable(),
+        lastSessionStatus: z.string().nullable(),
+        attendanceRatePct: z.number().nullable(),
+      }),
+    ),
+  }),
+});
+
+export type LiveClassSessionLiveMonitor = z.output<
+  typeof liveClassSessionLiveMonitorResponseSchema
+>["data"];
+
+export const LIVE_LEARNER_ATTENDANCE_COLUMNS = [
+  "learner_name",
+  "email",
+  "batch",
+  "registered_count",
+  "attended_count",
+  "attendance_rate",
+  "absent_count",
+  "total_time",
+  "avg_coverage",
+  "last_attended",
+  "streak",
+] as const;
+
+export type LiveLearnerAttendanceColumn = (typeof LIVE_LEARNER_ATTENDANCE_COLUMNS)[number];
+
+export const liveLearnersListQuerySchema = rejectClientTenantFields
+  .extend({
+    q: z.string().trim().min(1).max(200).optional(),
+    courseId: z.string().uuid().optional(),
+    batchId: z.string().uuid().optional(),
+    scheduledFrom: z.string().datetime().optional(),
+    scheduledTo: z.string().datetime().optional(),
+    attendanceRateBand: z
+      .enum(["below_40", "mid_40_75", "above_75", "never_attended", "perfect"])
+      .optional(),
+    sessionsRegisteredBand: z.enum(["1", "2_5", "gt_5"]).optional(),
+    lastAttended: z.enum(["last_7d", "last_30d", "never", "not_in_30d"]).optional(),
+    sortBy: z
+      .enum([
+        "attendance_rate",
+        "sessions_attended",
+        "total_time",
+        "last_attended",
+        "learner_name",
+        "registered_count",
+      ])
+      .default("attendance_rate"),
+    sortDir: z.enum(["asc", "desc"]).default("asc"),
+    columns: z.preprocess(
+      (value) => parseColumns(LIVE_LEARNER_ATTENDANCE_COLUMNS, value),
+      z.array(z.string().min(1)).min(1),
+    ),
+    limit: z.coerce.number().int().min(1).max(100).default(25),
+    page: z.coerce.number().int().min(1).max(1000).default(1),
+  })
+  .strict();
+
+export type LiveLearnersListQuery = z.output<typeof liveLearnersListQuerySchema>;
+
+export const liveLearnerListItemSchema = z
+  .object({
+    membershipId: z.string().uuid(),
+    learnerName: z.string().nullable(),
+    email: z.string().nullable(),
+    batchId: z.string().uuid().nullable(),
+    batchName: z.string().nullable(),
+    registeredCount: z.number().int().nonnegative(),
+    attendedCount: z.number().int().nonnegative(),
+    absentCount: z.number().int().nonnegative(),
+    attendanceRatePct: z.number().nullable(),
+    totalTimeSeconds: z.number().int().nonnegative(),
+    avgCoveragePct: z.number().nullable(),
+    lastAttendedAt: z.string().datetime().nullable(),
+    lastAttendedSessionId: z.string().uuid().nullable(),
+    lastAttendedSessionTitle: z.string().nullable(),
+    streakKind: z.enum(["attended", "missed", "none"]),
+    streakCount: z.number().int().nonnegative(),
+    streakLabel: z.string(),
+    health: z.enum(["danger", "warning", "ok"]),
+  })
+  .strict();
+
+export const liveLearnersListSummarySchema = z
+  .object({
+    learnersRegistered: z.number().int().nonnegative(),
+    avgAttendanceRatePct: z.number().nullable(),
+    neverAttendedCount: z.number().int().nonnegative(),
+    perfectAttendanceCount: z.number().int().nonnegative(),
+    avgCoveragePct: z.number().nullable(),
+  })
+  .strict();
+
+export const liveLearnersListResponseSchema = z.object({
+  data: z.object({
+    items: z.array(liveLearnerListItemSchema),
+    pageInfo: pageInfoSchema,
+    summary: liveLearnersListSummarySchema,
+    columns: z.array(z.string()),
+  }),
+});
+
+export type LiveLearnersListSummary = z.output<typeof liveLearnersListSummarySchema>;
+export type LiveLearnerListItem = z.output<typeof liveLearnerListItemSchema>;
+
+export const liveLearnersMatrixQuerySchema = rejectClientTenantFields
+  .extend({
+    q: z.string().trim().min(1).max(200).optional(),
+    courseId: z.string().uuid().optional(),
+    batchId: z.string().uuid().optional(),
+    scheduledFrom: z.string().datetime().optional(),
+    scheduledTo: z.string().datetime().optional(),
+    attendanceRateBand: z
+      .enum(["below_40", "mid_40_75", "above_75", "never_attended", "perfect"])
+      .optional(),
+    sessionsRegisteredBand: z.enum(["1", "2_5", "gt_5"]).optional(),
+    lastAttended: z.enum(["last_7d", "last_30d", "never", "not_in_30d"]).optional(),
+    learnerLimit: z.coerce.number().int().min(1).max(200).default(80),
+    sessionLimit: z.coerce.number().int().min(1).max(60).default(24),
+  })
+  .strict();
+
+export type LiveLearnersMatrixQuery = z.output<typeof liveLearnersMatrixQuerySchema>;
+
+export const liveLearnersMatrixResponseSchema = z.object({
+  data: z.object({
+    sessions: z.array(
+      z.object({
+        sessionId: z.string().uuid(),
+        title: z.string(),
+        scheduledAt: z.string().datetime().nullable(),
+        turnoutRatePct: z.number().nullable(),
+      }),
+    ),
+    learners: z.array(
+      z.object({
+        membershipId: z.string().uuid(),
+        learnerName: z.string().nullable(),
+        email: z.string().nullable(),
+        attendanceRatePct: z.number().nullable(),
+        attendedCount: z.number().int().nonnegative(),
+        registeredCount: z.number().int().nonnegative(),
+        cells: z.array(
+          z.object({
+            sessionId: z.string().uuid(),
+            cell: z.enum(["attended", "absent", "registered", "not_registered"]),
+            attendeeId: z.string().uuid().nullable(),
+          }),
+        ),
+      }),
+    ),
+    attentionRequired: z.boolean(),
+  }),
+});
+
+export type LiveLearnersMatrix = z.output<typeof liveLearnersMatrixResponseSchema>["data"];
+
+export const liveLearnerMembershipIdParamsSchema = z
+  .object({
+    membershipId: z.string().uuid(),
+  })
+  .strict();
+
+export const liveLearnerDetailQuerySchema = rejectClientTenantFields
+  .extend({
+    scheduledFrom: z.string().datetime().optional(),
+    scheduledTo: z.string().datetime().optional(),
+    courseId: z.string().uuid().optional(),
+    batchId: z.string().uuid().optional(),
+  })
+  .strict();
+
+export type LiveLearnerDetailQuery = z.output<typeof liveLearnerDetailQuerySchema>;
+
+export const liveLearnerDetailResponseSchema = z.object({
+  data: z.object({
+    membershipId: z.string().uuid(),
+    learnerName: z.string().nullable(),
+    email: z.string().nullable(),
+    batchId: z.string().uuid().nullable(),
+    batchName: z.string().nullable(),
+    courseId: z.string().uuid().nullable(),
+    courseTitle: z.string().nullable(),
+    registeredCount: z.number().int().nonnegative(),
+    attendedCount: z.number().int().nonnegative(),
+    absentCount: z.number().int().nonnegative(),
+    attendanceRatePct: z.number().nullable(),
+    cohortAvgAttendanceRatePct: z.number().nullable(),
+    totalTimeSeconds: z.number().int().nonnegative(),
+    avgCoveragePct: z.number().nullable(),
+    lastAttendedAt: z.string().datetime().nullable(),
+    lastAttendedSessionId: z.string().uuid().nullable(),
+    lastAttendedSessionTitle: z.string().nullable(),
+    streakKind: z.enum(["attended", "missed", "none"]),
+    streakCount: z.number().int().nonnegative(),
+    streakLabel: z.string(),
+    atRisk: z.boolean(),
+    neverAttended: z.boolean(),
+    longestGap: z
+      .object({
+        missedCount: z.number().int().nonnegative(),
+        label: z.string(),
+        fromScheduledAt: z.string().datetime().nullable(),
+        toScheduledAt: z.string().datetime().nullable(),
+      })
+      .nullable(),
+    timing: z.object({
+      avgJoinDelayMinutes: z.number().nullable(),
+      avgLeaveEarlyMinutes: z.number().nullable(),
+      cohortAvgJoinDelayMinutes: z.number().nullable(),
+      cohortAvgLeaveEarlyMinutes: z.number().nullable(),
+    }),
+    monthlyPattern: z.array(
+      z.object({
+        monthKey: z.string(),
+        label: z.string(),
+        attendanceRatePct: z.number().nullable(),
+        cohortAvgRatePct: z.number().nullable(),
+        registeredCount: z.number().int().nonnegative(),
+        attendedCount: z.number().int().nonnegative(),
+      }),
+    ),
+    strip: z.array(
+      z.object({
+        sessionId: z.string().uuid(),
+        attendeeId: z.string().uuid().nullable(),
+        title: z.string(),
+        scheduledAt: z.string().datetime().nullable(),
+        status: z.enum(["present", "absent", "partial", "registered"]),
+        coveragePct: z.number().nullable(),
+      }),
+    ),
+    sessions: z.array(
+      z.object({
+        sessionId: z.string().uuid(),
+        attendeeId: z.string().uuid().nullable(),
+        title: z.string(),
+        courseTitle: z.string().nullable(),
+        batchName: z.string().nullable(),
+        scheduledAt: z.string().datetime().nullable(),
+        status: z.enum(["present", "absent", "partial", "registered"]),
+        joinedAt: z.string().datetime().nullable(),
+        leftAt: z.string().datetime().nullable(),
+        durationSeconds: z.number().int().nullable(),
+        coveragePct: z.number().nullable(),
+        joinDelayMinutes: z.number().int().nullable(),
+        leaveEarlyMinutes: z.number().int().nullable(),
+        cohortAvgDurationSeconds: z.number().int().nullable(),
+        note: z.string().nullable(),
+      }),
+    ),
+    related: z.object({
+      batchId: z.string().uuid().nullable(),
+      batchName: z.string().nullable(),
+      courseId: z.string().uuid().nullable(),
+      courseTitle: z.string().nullable(),
+    }),
+  }),
+});
+
+export type LiveLearnerDetail = z.output<typeof liveLearnerDetailResponseSchema>["data"];
+
+export const liveSeriesListQuerySchema = rejectClientTenantFields
+  .extend({
+    groupBy: z.enum(["course", "batch"]).default("course"),
+    scheduledFrom: z.string().datetime().optional(),
+    scheduledTo: z.string().datetime().optional(),
+    q: z.string().trim().min(1).max(200).optional(),
+    sortBy: z
+      .enum(["avg_turnout", "sessions_held", "registrations", "never_attending", "title"])
+      .default("avg_turnout"),
+    sortDir: z.enum(["asc", "desc"]).default("asc"),
+    limit: z.coerce.number().int().min(1).max(100).default(25),
+    page: z.coerce.number().int().min(1).max(1000).default(1),
+  })
+  .strict();
+
+export type LiveSeriesListQuery = z.output<typeof liveSeriesListQuerySchema>;
+
+export const liveSeriesSessionPointSchema = z.object({
+  sessionId: z.string().uuid(),
+  ordinal: z.number().int().positive(),
+  title: z.string(),
+  scheduledAt: z.string().datetime().nullable(),
+  status: z.string(),
+  cancelled: z.boolean(),
+  registeredCount: z.number().int().nonnegative(),
+  attendedCount: z.number().int().nonnegative(),
+  turnoutPct: z.number().nullable(),
+  avgCoveragePct: z.number().nullable(),
+});
+
+export const liveSeriesListItemSchema = z.object({
+  seriesId: z.string().uuid(),
+  groupBy: z.enum(["course", "batch"]),
+  title: z.string(),
+  subtitle: z.string().nullable(),
+  secondaryId: z.string().uuid().nullable(),
+  sessionsHeld: z.number().int().nonnegative(),
+  sessionsTotal: z.number().int().nonnegative(),
+  cancelledCount: z.number().int().nonnegative(),
+  registrations: z.number().int().nonnegative(),
+  avgTurnoutPct: z.number().nullable(),
+  avgCoveragePct: z.number().nullable(),
+  neverAttendingCount: z.number().int().nonnegative(),
+  trendDeltaPts: z.number().nullable(),
+  sparkline: z.array(z.number().nullable()),
+  nextSessionId: z.string().uuid().nullable(),
+  nextSessionAt: z.string().datetime().nullable(),
+  nextSessionTitle: z.string().nullable(),
+  status: z.enum(["running", "finished"]),
+});
+
+export const liveSeriesListResponseSchema = z.object({
+  data: z.object({
+    groupBy: z.enum(["course", "batch"]),
+    items: z.array(liveSeriesListItemSchema),
+    pageInfo: pageInfoSchema,
+    summary: z.object({
+      seriesCount: z.number().int().nonnegative(),
+      runningCount: z.number().int().nonnegative(),
+      finishedCount: z.number().int().nonnegative(),
+      sessionsCount: z.number().int().nonnegative(),
+      registrationsCount: z.number().int().nonnegative(),
+      avgTurnoutPct: z.number().nullable(),
+      bestSeries: z
+        .object({
+          seriesId: z.string().uuid(),
+          title: z.string(),
+          avgTurnoutPct: z.number(),
+        })
+        .nullable(),
+      weakestSeries: z
+        .object({
+          seriesId: z.string().uuid(),
+          title: z.string(),
+          avgTurnoutPct: z.number(),
+        })
+        .nullable(),
+      turnoutTrendPts: z.number().nullable(),
+    }),
+    dropOff: z.object({
+      stages: z.array(
+        z.object({
+          ordinal: z.number().int().positive(),
+          label: z.string(),
+          retentionPct: z.number().nullable(),
+        }),
+      ),
+      biggestDrop: z
+        .object({
+          fromOrdinal: z.number().int().positive(),
+          toOrdinal: z.number().int().positive(),
+          dropPts: z.number(),
+          label: z.string(),
+        })
+        .nullable(),
+    }),
+  }),
+});
+
+export type LiveSeriesListItem = z.output<typeof liveSeriesListItemSchema>;
+
+export const liveSeriesDetailParamsSchema = z
+  .object({
+    seriesId: z.string().uuid(),
+  })
+  .strict();
+
+export const liveSeriesDetailQuerySchema = rejectClientTenantFields
+  .extend({
+    groupBy: z.enum(["course", "batch"]).default("course"),
+    scheduledFrom: z.string().datetime().optional(),
+    scheduledTo: z.string().datetime().optional(),
+  })
+  .strict();
+
+export type LiveSeriesDetailQuery = z.output<typeof liveSeriesDetailQuerySchema>;
+
+export const liveSeriesDetailResponseSchema = z.object({
+  data: z.object({
+    seriesId: z.string().uuid(),
+    groupBy: z.enum(["course", "batch"]),
+    title: z.string(),
+    subtitle: z.string().nullable(),
+    avgTurnoutPct: z.number().nullable(),
+    steepestDrop: z
+      .object({
+        fromOrdinal: z.number().int().positive(),
+        toOrdinal: z.number().int().positive(),
+        dropPts: z.number(),
+        message: z.string(),
+      })
+      .nullable(),
+    sessions: z.array(liveSeriesSessionPointSchema),
   }),
 });

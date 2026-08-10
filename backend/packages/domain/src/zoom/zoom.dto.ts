@@ -4,6 +4,9 @@ import { rejectClientTenantFields } from "../shared/domain.dto";
 export const connectZoomBodySchema = rejectClientTenantFields
   .extend({
     accountId: z.string().max(128).optional(),
+    accountName: z.string().trim().max(200).optional(),
+    accountEmail: z.string().trim().email().max(320).optional(),
+    appId: z.string().max(128).optional(),
     accessTokenRef: z.string().max(256).optional(),
     refreshTokenRef: z.string().max(256).optional(),
   })
@@ -20,6 +23,7 @@ export const zoomWebhookBodySchema = z
         z.object({
           externalUserId: z.string().optional(),
           displayName: z.string().optional(),
+          email: z.string().email().max(320).optional(),
           joinTime: z.string().datetime().optional(),
           leaveTime: z.string().datetime().optional(),
           durationSeconds: z.number().int().min(0).optional(),

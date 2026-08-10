@@ -18,6 +18,39 @@ export const EXPORTS_HISTORY_COLUMN_OPTIONS = [
 
 export type ExportsHistoryColumnKey = (typeof EXPORTS_HISTORY_COLUMN_OPTIONS)[number]["key"];
 
+export const EXPORTS_REPORT_DEFINITIONS = [
+  { key: "enrollments", title: "Enrollments" },
+  { key: "progress-score", title: "Progress & Score" },
+  { key: "resource-usage", title: "Resource Usage" },
+  { key: "exports", title: "Exports" },
+  { key: "active-devices", title: "Active Devices" },
+  { key: "payments", title: "Payments" },
+  { key: "batches", title: "Batches" },
+  { key: "polls", title: "Polls" },
+  { key: "sales-marketing", title: "Sales & Marketing" },
+  { key: "custom-field", title: "Custom Field" },
+  { key: "zoom-insights", title: "Zoom Insights" },
+  { key: "live-class-attendance", title: "Live Class Attendance" },
+  { key: "super-live-insights", title: "Super Live Insights" },
+  { key: "assessment-items", title: "Assessment Items" },
+  { key: "certificates", title: "Certificates" },
+  { key: "at-risk-roster", title: "At-Risk Roster" },
+] as const;
+
+export const PII_DEFINITION_KEYS = new Set<string>([
+  "enrollments",
+  "progress-score",
+  "payments",
+  "active-devices",
+  "custom-field",
+  "sales-marketing",
+  "certificates",
+  "at-risk-roster",
+  "live-class-attendance",
+  "zoom-insights",
+  "super-live-insights",
+]);
+
 export type ExportsHistoryItem = {
   sourceType: "report_run" | "export_job";
   id: string;
@@ -32,6 +65,8 @@ export type ExportsHistoryItem = {
   expiresAt: string | null;
   hasFile: boolean;
   canDownload: boolean;
+  progressPercent: number | null;
+  errorMessage: string | null;
 };
 
 export type ExportsHistorySummary = {
@@ -39,7 +74,12 @@ export type ExportsHistorySummary = {
   succeededCount: number;
   failedCount: number;
   pendingCount: number;
+  filesAvailableCount: number;
+  expiringSoonCount: number;
+  oldestPendingTitle: string | null;
 };
+
+export type ExportsFileState = "available" | "removed" | "expired" | "expiring_soon";
 
 type PageInfo = {
   page: number;
@@ -62,7 +102,7 @@ export function dateInputToEndIso(value: string): string | undefined {
   return `${trimmed}T23:59:59.999Z`;
 }
 
-function buildQuery(params: Record<string, string | number | undefined>): string {
+function buildQuery(params: Record<string, string | number | boolean | undefined>): string {
   const search = new URLSearchParams();
   for (const [key, value] of Object.entries(params)) {
     if (value === undefined || value === "") continue;
@@ -72,16 +112,23 @@ function buildQuery(params: Record<string, string | number | undefined>): string
   return query ? `?${query}` : "";
 }
 
-export async function fetchExportsHistory(filters?: {
+export type ExportsHistoryFilters = {
   sourceType?: string | undefined;
   status?: string | undefined;
   definitionKey?: string | undefined;
+  format?: string | undefined;
+  fileState?: ExportsFileState | undefined;
+  mine?: boolean | undefined;
+  pendingOnly?: boolean | undefined;
   createdFrom?: string | undefined;
   createdTo?: string | undefined;
   q?: string | undefined;
   columns?: ExportsHistoryColumnKey[] | undefined;
   page?: number | undefined;
-}) {
+  limit?: number | undefined;
+};
+
+export async function fetchExportsHistory(filters?: ExportsHistoryFilters) {
   return clientApi.get<{
     data: {
       items: ExportsHistoryItem[];
@@ -94,12 +141,16 @@ export async function fetchExportsHistory(filters?: {
       sourceType: filters?.sourceType,
       status: filters?.status,
       definitionKey: filters?.definitionKey,
+      format: filters?.format,
+      fileState: filters?.fileState,
+      mine: filters?.mine === true ? true : undefined,
+      pendingOnly: filters?.pendingOnly === true ? true : undefined,
       createdFrom: filters?.createdFrom,
       createdTo: filters?.createdTo,
       q: filters?.q,
       columns: filters?.columns?.join(","),
       page: filters?.page ?? 1,
-      limit: 50,
+      limit: filters?.limit ?? 50,
     })}`,
   );
 }
@@ -108,6 +159,10 @@ export async function exportExportsHistoryReport(body: {
   sourceType?: string | undefined;
   status?: string | undefined;
   definitionKey?: string | undefined;
+  format?: string | undefined;
+  fileState?: ExportsFileState | undefined;
+  mine?: boolean | undefined;
+  pendingOnly?: boolean | undefined;
   createdFrom?: string | undefined;
   createdTo?: string | undefined;
   q?: string | undefined;

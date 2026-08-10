@@ -1,5 +1,6 @@
-import { randomUUID } from "node:crypto";
+import { randomBytes, randomUUID } from "node:crypto";
 import type { TenantTx } from "@atlas/db";
+import { ZOOM_DEFAULT_SCOPES } from "../reports/zoom-insights-connection.dto";
 
 export type ZoomConnectionRow = {
   id: string;
@@ -21,6 +22,9 @@ export const zoomRepository = {
     tx: TenantTx,
     args: {
       accountId?: string | null;
+      accountName?: string | null;
+      accountEmail?: string | null;
+      appId?: string | null;
       accessTokenRef?: string | null;
       refreshTokenRef?: string | null;
     },
@@ -29,16 +33,32 @@ export const zoomRepository = {
       select id from zoom_connections limit 1
     `;
 
+    const accountId = args.accountId?.trim() || `zoom_${randomUUID().slice(0, 8)}`;
+    const accountName = args.accountName?.trim() || "Zoom account";
+    const accountEmail = args.accountEmail?.trim() || null;
+    const appId = args.appId?.trim() || `app_${randomUUID().slice(0, 4)}`;
+    const scopesJson = JSON.stringify([...ZOOM_DEFAULT_SCOPES]);
+    const webhookSecretRef = `whsec_${randomBytes(12).toString("hex")}`;
+    const tokenExpiresAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString();
+
     if (existing[0]) {
       const connectionId = String(existing[0]["id"]);
       const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
         update zoom_connections
         set
-          account_id = coalesce(${args.accountId ?? null}, account_id),
+          account_id = coalesce(${args.accountId ?? null}, account_id, ${accountId}),
+          account_name = coalesce(${args.accountName ?? null}, account_name, ${accountName}),
+          account_email = coalesce(${args.accountEmail ?? null}, account_email, ${accountEmail}),
+          app_id = coalesce(${args.appId ?? null}, app_id, ${appId}),
+          scopes_json = coalesce(scopes_json, ${scopesJson}::jsonb),
           access_token_ref = coalesce(${args.accessTokenRef ?? null}, access_token_ref),
           refresh_token_ref = coalesce(${args.refreshTokenRef ?? null}, refresh_token_ref),
+          webhook_secret_ref = coalesce(webhook_secret_ref, ${webhookSecretRef}),
+          token_expires_at = coalesce(token_expires_at, ${tokenExpiresAt}::timestamptz),
           status = 'connected',
-          connected_at = now(),
+          connected_at = coalesce(connected_at, now()),
+          disconnected_at = null,
+          schedule_enabled = true,
           updated_at = now()
         where id = ${connectionId}::uuid
         returning id, account_id, status, connected_at
@@ -55,15 +75,29 @@ export const zoomRepository = {
 
     const id = randomUUID();
     const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
-      insert into zoom_connections (id, tenant_id, account_id, access_token_ref, refresh_token_ref, status, connected_at, created_at, updated_at)
+      insert into zoom_connections (
+        id, tenant_id, account_id, account_name, account_email, app_id, scopes_json,
+        access_token_ref, refresh_token_ref, webhook_secret_ref, status,
+        connected_at, token_expires_at, schedule_enabled, schedule_interval_minutes,
+        coverage_gap_count, created_at, updated_at
+      )
       values (
         ${id}::uuid,
         current_setting('app.tenant_id', true)::uuid,
-        ${args.accountId ?? null},
+        ${accountId},
+        ${accountName},
+        ${accountEmail},
+        ${appId},
+        ${scopesJson}::jsonb,
         ${args.accessTokenRef ?? null},
         ${args.refreshTokenRef ?? null},
+        ${webhookSecretRef},
         'connected',
         now(),
+        ${tokenExpiresAt}::timestamptz,
+        true,
+        30,
+        0,
         now(),
         now()
       )
@@ -107,20 +141,22 @@ export const zoomRepository = {
     args: {
       connectionId: string;
       externalMeetingId: string;
-      topic?: string | null;
-      startedAt?: Date | null;
-      endedAt?: Date | null;
+      topic: string | null;
+      startedAt: Date | null;
+      endedAt: Date | null;
       participants?: Array<{
         externalUserId?: string;
         displayName?: string;
-        joinTime?: Date | null;
-        leaveTime?: Date | null;
-        durationSeconds?: number | null;
+        email?: string;
+        joinTime: Date | null;
+        leaveTime: Date | null;
+        durationSeconds: number | null;
       }>;
     },
   ): Promise<{ meetingId: string; participantCount: number }> {
     const existing = await tx.$queryRaw<Array<{ id: string }>>`
-      select id::text as id from zoom_meetings
+      select id::text as id
+      from zoom_meetings
       where external_meeting_id = ${args.externalMeetingId}
       limit 1
     `;
@@ -131,9 +167,9 @@ export const zoomRepository = {
       await tx.$executeRaw`
         update zoom_meetings
         set
-          topic = coalesce(${args.topic ?? null}, topic),
-          started_at = coalesce(${args.startedAt ?? null}::timestamptz, started_at),
-          ended_at = coalesce(${args.endedAt ?? null}::timestamptz, ended_at),
+          topic = coalesce(${args.topic}, topic),
+          started_at = coalesce(${args.startedAt}::timestamptz, started_at),
+          ended_at = coalesce(${args.endedAt}::timestamptz, ended_at),
           updated_at = now()
         where id = ${meetingId}::uuid
       `;
@@ -160,7 +196,7 @@ export const zoomRepository = {
       const participantId = randomUUID();
       await tx.$executeRaw`
         insert into zoom_meeting_participants (
-          id, tenant_id, zoom_meeting_id, external_user_id, display_name,
+          id, tenant_id, zoom_meeting_id, external_user_id, display_name, email,
           join_time, leave_time, duration_seconds, created_at, updated_at
         )
         values (
@@ -169,6 +205,7 @@ export const zoomRepository = {
           ${meetingId}::uuid,
           ${participant.externalUserId ?? null},
           ${participant.displayName ?? null},
+          ${participant.email ?? null},
           ${participant.joinTime ?? null}::timestamptz,
           ${participant.leaveTime ?? null}::timestamptz,
           ${participant.durationSeconds ?? null},

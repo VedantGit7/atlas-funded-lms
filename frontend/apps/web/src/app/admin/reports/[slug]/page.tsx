@@ -48,7 +48,9 @@ export default async function AdminReportSlugPage({ params }: AdminReportPagePro
     content = <AdminActiveDevicesRosterPage />;
   } else if (slug === "payments") {
     content = (
-      <Suspense fallback={<p className="text-sm text-[var(--admin-on-surface-variant)]">Loading…</p>}>
+      <Suspense
+        fallback={<p className="text-sm text-[var(--admin-on-surface-variant)]">Loading…</p>}
+      >
         <AdminPaymentsRosterPage />
       </Suspense>
     );
@@ -60,7 +62,9 @@ export default async function AdminReportSlugPage({ params }: AdminReportPagePro
     content = <AdminPollsRosterPage />;
   } else if (slug === "sales-marketing") {
     content = (
-      <Suspense fallback={<p className="text-sm text-[var(--admin-on-surface-variant)]">Loading…</p>}>
+      <Suspense
+        fallback={<p className="text-sm text-[var(--admin-on-surface-variant)]">Loading…</p>}
+      >
         <AdminSalesMarketingRosterPage />
       </Suspense>
     );
@@ -71,7 +75,13 @@ export default async function AdminReportSlugPage({ params }: AdminReportPagePro
   } else if (slug === "live-class-attendance") {
     content = <AdminLiveClassAttendanceRosterPage />;
   } else if (slug === "super-live-insights") {
-    content = <AdminSuperLiveInsightsRosterPage />;
+    content = (
+      <Suspense
+        fallback={<p className="text-sm text-[var(--admin-on-surface-variant)]">Loading…</p>}
+      >
+        <AdminSuperLiveInsightsRosterPage />
+      </Suspense>
+    );
   } else if (slug === "resource-usage") {
     content = <AdminResourceUsageRosterPage />;
   } else if (slug === "exports") {

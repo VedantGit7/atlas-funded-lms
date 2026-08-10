@@ -66,15 +66,43 @@ export async function listSuperLiveInsights(
   });
 }
 
-export async function getSuperLiveInsightDetail(
-  tx: TenantTx,
-  _ctx: ServiceCtx,
-  sessionId: string,
-) {
+export async function getSuperLiveInsightDetail(tx: TenantTx, _ctx: ServiceCtx, sessionId: string) {
   const meta = await superLiveInsightsRosterRepository.findSessionById(tx, sessionId);
   if (!meta) throw superLiveSessionNotFound();
 
+  const context = await superLiveInsightsRosterRepository.getSessionInsightContext(tx, meta);
+
   return superLiveInsightDetailResponseSchema.parse({
-    data: mapInsightItem(meta),
+    data: {
+      session: mapInsightItem(meta),
+      context: {
+        courseAvgAttendanceRate: context.courseAvgAttendanceRate,
+        tenantAvgAttendanceRate: context.tenantAvgAttendanceRate,
+        courseRateP25: context.courseRateP25,
+        courseRateP75: context.courseRateP75,
+        courseAvgDurationSeconds: context.courseAvgDurationSeconds,
+        durationCoveragePct: context.durationCoveragePct,
+        rateDeltaVsCourse: context.rateDeltaVsCourse,
+        courseRankCaption: context.courseRankCaption,
+        estimatedTurnout: context.estimatedTurnout,
+        cancelledAt: context.cancelledAt?.toISOString() ?? null,
+        series: context.series.map((item) => ({
+          id: item.id,
+          title: item.title,
+          scheduledAt: item.scheduledAt?.toISOString() ?? null,
+          attendanceRate: item.attendanceRate,
+          isCurrent: item.isCurrent,
+        })),
+        trend: context.trend.map((item) => ({
+          id: item.id,
+          title: item.title,
+          label: item.label,
+          attendanceRate: item.attendanceRate,
+          isCurrent: item.isCurrent,
+          isFuture: item.isFuture,
+        })),
+        trendDeltaPoints: context.trendDeltaPoints,
+      },
+    },
   });
 }

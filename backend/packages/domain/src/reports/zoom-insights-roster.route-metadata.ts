@@ -23,3 +23,30 @@ export const exportZoomInsightsRosterMetadata = {
   resourceLoader: async ({ ctx }: { ctx: LoaderCtx }) =>
     loadReportCatalogResourceRef({ tenantId: ctx.tenantId }),
 } satisfies RouteMetadata;
+
+export const mutateZoomInsightsRosterMetadata = {
+  permission: "reports.run",
+  audit: "required",
+  rateLimit: "authenticatedTenantWrite",
+  idempotency: "required",
+  resourceLoader: async ({ ctx }: { ctx: LoaderCtx }) =>
+    loadReportCatalogResourceRef({ tenantId: ctx.tenantId }),
+} satisfies RouteMetadata;
+
+export const updateZoomMatchingRulesMetadata = {
+  permission: "reports.run",
+  audit: "required",
+  rateLimit: "authenticatedTenantWrite",
+  idempotency: "required",
+  resourceLoader: async ({ ctx }: { ctx: LoaderCtx }) =>
+    loadReportCatalogResourceRef({ tenantId: ctx.tenantId }),
+} satisfies RouteMetadata;
+
+export const mutateZoomConnectionMetadata = {
+  permission: "config.update",
+  audit: "required",
+  rateLimit: "authenticatedTenantWrite",
+  idempotency: "required",
+  resourceLoader: async ({ ctx }: { ctx: LoaderCtx }) =>
+    loadReportCatalogResourceRef({ tenantId: ctx.tenantId }),
+} satisfies RouteMetadata;

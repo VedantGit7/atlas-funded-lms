@@ -23,3 +23,21 @@ export const exportLiveClassAttendanceRosterMetadata = {
   resourceLoader: async ({ ctx }: { ctx: LoaderCtx }) =>
     loadReportCatalogResourceRef({ tenantId: ctx.tenantId }),
 } satisfies RouteMetadata;
+
+export const messageLiveClassAttendanceRosterMetadata = {
+  permission: "reports.run",
+  audit: "required",
+  rateLimit: "authenticatedTenantWrite",
+  idempotency: "required",
+  resourceLoader: async ({ ctx }: { ctx: LoaderCtx }) =>
+    loadReportCatalogResourceRef({ tenantId: ctx.tenantId }),
+} satisfies RouteMetadata;
+
+export const mutateLiveClassAttendanceRosterMetadata = {
+  permission: "reports.run",
+  audit: "required",
+  rateLimit: "authenticatedTenantWrite",
+  idempotency: "required",
+  resourceLoader: async ({ ctx }: { ctx: LoaderCtx }) =>
+    loadReportCatalogResourceRef({ tenantId: ctx.tenantId }),
+} satisfies RouteMetadata;

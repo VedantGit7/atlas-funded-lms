@@ -123,4 +123,28 @@ describe("withTenantTx", () => {
       ),
     ).resolves.toBe(true);
   });
+
+  it("applies transaction-local statement_timeout", async () => {
+    const tenantId = randomUUID();
+    const actorMembershipId = randomUUID();
+    const requestId = randomUUID();
+
+    const result = await withTenantTx(
+      {
+        tenantId,
+        actorMembershipId,
+        requestId,
+        statementTimeoutMs: 7_500,
+      },
+      async (tx) => {
+        const rows = await tx.$queryRaw<{ statement_timeout: string }[]>`
+          SELECT current_setting('statement_timeout', true) AS statement_timeout
+        `;
+        return rows[0]?.statement_timeout ?? null;
+      },
+    );
+
+    // Postgres may render ms as '7500ms' or '7.5s' depending on version/settings.
+    expect(result === "7500ms" || result === "7.5s" || result === "7500").toBe(true);
+  });
 });

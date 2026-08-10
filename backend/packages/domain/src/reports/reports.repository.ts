@@ -634,7 +634,7 @@ export const reportsRepository = {
       timezone?: string;
       paramsJson?: unknown;
       formatsJson?: unknown;
-      deliveryJson?: unknown | null;
+      deliveryJson?: unknown;
       nextRunAt?: Date;
       isActive?: boolean;
     },
@@ -713,5 +713,59 @@ export const reportsRepository = {
       set next_run_at = ${args.nextRunAt}, updated_at = now()
       where id = ${args.scheduleId}::uuid
     `;
+  },
+
+  async clearReportRunFile(tx: TenantTx, reportRunId: string): Promise<ReportRunRow | null> {
+    const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
+      update report_runs
+      set
+        r2_object_key = null,
+        updated_at = now()
+      where id = ${reportRunId}::uuid
+        and r2_object_key is not null
+      returning *
+    `;
+    const row = rows[0];
+    return row ? mapRunRow(row) : null;
+  },
+
+  async cancelReportRun(tx: TenantTx, reportRunId: string): Promise<ReportRunRow | null> {
+    const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
+      update report_runs
+      set
+        status = 'CANCELLED',
+        completed_at = coalesce(completed_at, now()),
+        updated_at = now()
+      where id = ${reportRunId}::uuid
+        and status in ('QUEUED', 'RUNNING')
+      returning *
+    `;
+    const row = rows[0];
+    return row ? mapRunRow(row) : null;
+  },
+
+  async findRequesterProfile(
+    tx: TenantTx,
+    membershipId: string,
+  ): Promise<{ name: string | null; email: string | null }> {
+    const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
+      select
+        coalesce(mp.display_name, ap.email, m.invited_email_normalized) as name,
+        coalesce(ap.email, m.invited_email_normalized) as email
+      from memberships m
+      left join member_profiles mp
+        on mp.membership_id = m.id and mp.tenant_id = m.tenant_id and mp.deleted_at is null
+      left join auth_principals ap on ap.id = m.auth_principal_id
+      where m.id = ${membershipId}::uuid
+      limit 1
+    `;
+    const row = rows[0];
+    if (!row) {
+      return { name: null, email: null };
+    }
+    return {
+      name: typeof row["name"] === "string" ? row["name"] : null,
+      email: typeof row["email"] === "string" ? row["email"] : null,
+    };
   },
 };

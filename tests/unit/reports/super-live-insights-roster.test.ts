@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   SUPER_LIVE_INSIGHT_COLUMNS,
   exportSuperLiveInsightsRosterBodySchema,
+  superLiveInsightDetailResponseSchema,
   superLiveInsightsListQuerySchema,
 } from "@atlas/domain/reports/super-live-insights-roster.dto";
 
@@ -27,6 +28,58 @@ describe("super live insights roster dto", () => {
 
     const fallback = superLiveInsightsListQuerySchema.parse({ columns: "nope" });
     expect(fallback.columns).toEqual([...SUPER_LIVE_INSIGHT_COLUMNS]);
+  });
+
+  it("parses hasUnresolved boolean query flags", () => {
+    expect(superLiveInsightsListQuerySchema.parse({ hasUnresolved: "true" }).hasUnresolved).toBe(
+      true,
+    );
+    expect(superLiveInsightsListQuerySchema.parse({ hasUnresolved: "0" }).hasUnresolved).toBe(
+      false,
+    );
+  });
+
+  it("accepts session detail response with context", () => {
+    const parsed = superLiveInsightDetailResponseSchema.parse({
+      data: {
+        session: {
+          id: "11111111-1111-4111-8111-111111111111",
+          title: "Week 6 live",
+          status: "ended",
+          courseId: null,
+          courseTitle: null,
+          batchId: null,
+          batchName: null,
+          scheduledAt: "2026-08-01T10:00:00.000Z",
+          startedAt: "2026-08-01T10:02:00.000Z",
+          endedAt: "2026-08-01T11:06:00.000Z",
+          durationSeconds: 3840,
+          attendedCount: 24,
+          registeredCount: 11,
+          absentCount: 3,
+          totalCount: 38,
+          avgDurationSeconds: 2892,
+          attendanceRate: 63.2,
+        },
+        context: {
+          courseAvgAttendanceRate: 74.6,
+          tenantAvgAttendanceRate: 68.1,
+          courseRateP25: 55,
+          courseRateP75: 82,
+          courseAvgDurationSeconds: 3000,
+          durationCoveragePct: 75.3,
+          rateDeltaVsCourse: -11.4,
+          courseRankCaption: "Bottom third of sessions in this course.",
+          estimatedTurnout: null,
+          cancelledAt: null,
+          series: [],
+          trend: [],
+          trendDeltaPoints: -19,
+        },
+      },
+    });
+    expect(parsed.data.session.attendanceRate).toBe(63.2);
+    expect(parsed.data.context.rateDeltaVsCourse).toBe(-11.4);
   });
 
   it("accepts export body and rejects tenant fields", () => {

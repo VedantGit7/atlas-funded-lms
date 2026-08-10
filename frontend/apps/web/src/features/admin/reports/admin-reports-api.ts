@@ -80,9 +80,13 @@ type DomainRun = {
   definitionKey: string;
   definitionTitle: string;
   status: string;
+  format?: string | undefined;
+  rowCount?: number | null | undefined;
+  progressPercent?: number | null | undefined;
   createdAt: string;
   completedAt: string | null;
   errorCode: string | null;
+  errorMessage?: string | null | undefined;
   download?: { url: string; expiresAt: string } | null | undefined;
 };
 
@@ -168,6 +172,50 @@ export async function fetchReportDefinitions(category: string) {
     .map(mapDefinition);
 
   return { data: { category, definitions } };
+}
+
+export async function fetchAllReportDefinitions() {
+  const response = await clientApi.get<{ data: { items: DomainDefinition[] } }>(
+    "/api/v1/reports/definitions",
+  );
+  return {
+    data: {
+      definitions: response.data.items.map(mapDefinition),
+      raw: response.data.items,
+    },
+  };
+}
+
+export async function startReportExportRun(body: {
+  definitionKey: string;
+  format?: "csv" | "xlsx" | "pdf" | "json";
+  params?: Record<string, unknown>;
+}) {
+  const response = await clientApi.post<{ data: DomainRun }>(
+    "/api/v1/reports/runs",
+    {
+      definitionKey: body.definitionKey,
+      format: body.format ?? "csv",
+      params: body.params ?? {},
+    },
+    `report-export-run-${body.definitionKey}`,
+  );
+
+  return {
+    data: {
+      id: response.data.id,
+      definitionKey: response.data.definitionKey,
+      status: response.data.status,
+      format: response.data.format,
+      rowCount: response.data.rowCount,
+      progressPercent: response.data.progressPercent,
+      createdAt: response.data.createdAt,
+      completedAt: response.data.completedAt,
+      errorCode: response.data.errorCode,
+      errorMessage: response.data.errorMessage,
+      download: response.data.download ?? null,
+    },
+  };
 }
 
 export async function createCustomReportDefinition(body: {
@@ -306,7 +354,9 @@ export async function createReportSchedule(body: {
   name?: string | undefined;
   cronExpression: string;
   timezone?: string | undefined;
-  formats?: Array<"csv" | "xlsx" | "pdf"> | undefined;
+  formats?: Array<"csv" | "xlsx" | "pdf" | "json"> | undefined;
+  params?: Record<string, unknown> | undefined;
+  delivery?: Record<string, unknown> | undefined;
   isActive?: boolean | undefined;
 }) {
   return clientApi.post<{
