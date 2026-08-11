@@ -449,6 +449,11 @@ body {
 /* personal preference) swaps in the dark palette, matching the        */
 /* landing page and the rest of the app.                               */
 /* ------------------------------------------------------------------ */
+.admin-theme .font-data {
+  font-family: var(--font-jetbrains), ui-monospace, "Cascadia Code", monospace;
+  font-variant-numeric: tabular-nums;
+}
+
 .admin-theme {
   color-scheme: light;
 

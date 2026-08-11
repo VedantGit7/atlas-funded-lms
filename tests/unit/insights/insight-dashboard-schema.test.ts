@@ -8,6 +8,8 @@ describe("insight dashboard schema", () => {
         slug: "dashboard",
         title: "Dashboard",
         currency: "INR",
+        range: "12m",
+        generatedAt: "2026-08-11T06:35:00.000Z",
         alerts: [
           {
             id: "failed-payments",
@@ -23,6 +25,8 @@ describe("insight dashboard schema", () => {
             title: "Revenue",
             defaultViz: "kpi",
             span: "third",
+            deltaPct: 12.4,
+            sparkline: [2100, 4800, 9200, 18400],
             data: {
               columns: [
                 { key: "metric", label: "Metric", kind: "dimension" },
@@ -37,8 +41,12 @@ describe("insight dashboard schema", () => {
     });
 
     expect(parsed.data.slug).toBe("dashboard");
+    expect(parsed.data.range).toBe("12m");
+    expect(parsed.data.generatedAt).toBe("2026-08-11T06:35:00.000Z");
     expect(parsed.data.alerts).toHaveLength(1);
     expect(parsed.data.widgets[0]?.id).toBe("revenue");
+    expect(parsed.data.widgets[0]?.deltaPct).toBe(12.4);
+    expect(parsed.data.widgets[0]?.sparkline).toEqual([2100, 4800, 9200, 18400]);
   });
 
   it("defaults alerts to empty array when omitted", () => {
@@ -138,7 +146,7 @@ describe("insight dashboard schema", () => {
             id: "failed-payments",
             severity: "warning",
             title: "Failed payments",
-            message: "2 failed payments — recover revenue from Reports → Payments.",
+            message: "2 failed payments. Recover revenue from Reports → Payments.",
             href: "/admin/reports/payments",
           },
         ],
@@ -353,9 +361,6 @@ describe("insight dashboard schema", () => {
 
     expect(parsed.data.slug).toBe("messenger-insight");
     expect(parsed.data.alerts).toHaveLength(1);
-    expect(parsed.data.widgets.map((widget) => widget.id)).toEqual([
-      "email-sent",
-      "daily-volume",
-    ]);
+    expect(parsed.data.widgets.map((widget) => widget.id)).toEqual(["email-sent", "daily-volume"]);
   });
 });

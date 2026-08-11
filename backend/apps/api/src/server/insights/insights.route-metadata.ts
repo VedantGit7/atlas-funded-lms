@@ -24,3 +24,16 @@ export const insightDashboardMetadata = {
   idempotency: "none",
   resourceLoader: async ({ ctx }: { ctx: LoaderCtx }) => loadInsightsResourceRef({ ctx }),
 } satisfies RouteMetadata;
+
+export const insightAlertsMutateMetadata = {
+  permission: "insights.view",
+  entitlement: "analytics.dashboard.view",
+  audit: "required",
+  rateLimit: "authenticatedTenantWrite",
+  idempotency: "required",
+  resourceLoader: async ({ ctx }: { ctx: LoaderCtx }) => loadInsightsResourceRef({ ctx }),
+} satisfies RouteMetadata;
+
+export const insightLayoutMutateMetadata = insightAlertsMutateMetadata;
+export const insightDigestsMutateMetadata = insightAlertsMutateMetadata;
+export const insightSettingsMutateMetadata = insightAlertsMutateMetadata;
