@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, Plus_Jakarta_Sans } from "next/font/google";
+import { Cormorant_Garamond, JetBrains_Mono, Plus_Jakarta_Sans } from "next/font/google";
 
 import "./globals.css";
 
@@ -16,15 +16,19 @@ const cormorant = Cormorant_Garamond({
   display: "swap",
   variable: "--font-cormorant",
 });
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  display: "swap",
+  variable: "--font-jetbrains",
+});
 import { AppProviders } from "@/components/providers/AppProviders";
 import { AnalyticsConsentBridge } from "../observability/AnalyticsConsentBridge";
 import { MarketingSnippetsInjector } from "../features/marketing/MarketingSnippetsInjector";
 import { loadTenantThemeRuntime } from "@atlas/tenant-theme";
 import { ThemeInitScript } from "../components/ThemeInitScript";
-import {
-  resolveDocumentDescription,
-  resolveDocumentTitle,
-} from "../lib/branding/document-title";
+import { resolveDocumentDescription, resolveDocumentTitle } from "../lib/branding/document-title";
 import { loadPublicBootstrap } from "../lib/server/bootstrap";
 import { resolveAppearanceHtmlProps } from "../lib/server/resolve-appearance-html";
 
@@ -63,7 +67,7 @@ type RootLayoutProps = Readonly<{
 
 export default async function RootLayout({ children }: RootLayoutProps) {
   const theme = await loadTenantThemeRuntime();
-  const baseClassName = `${jakarta.variable} ${cormorant.variable}`;
+  const baseClassName = `${jakarta.variable} ${cormorant.variable} ${jetbrainsMono.variable}`;
   const appearance = await resolveAppearanceHtmlProps(
     baseClassName,
     theme.style ?? undefined,

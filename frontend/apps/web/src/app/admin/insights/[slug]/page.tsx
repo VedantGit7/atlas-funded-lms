@@ -6,10 +6,15 @@ import { runTenantStateGate } from "../../../../lib/server/tenant-state-gate";
 
 type AdminInsightPageProps = {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ preview?: string }>;
 };
 
-export default async function AdminInsightSectionPage({ params }: AdminInsightPageProps) {
+export default async function AdminInsightSectionPage({
+  params,
+  searchParams,
+}: AdminInsightPageProps) {
   const { slug } = await params;
+  const query = await searchParams;
   const section = getAdminInsightSection(slug);
   if (!section) {
     notFound();
@@ -29,7 +34,11 @@ export default async function AdminInsightSectionPage({ params }: AdminInsightPa
 
   return (
     <AdminPageGate screenId="T51" state="ready" title={section.title}>
-      <AdminInsightDashboardPage slug={slug} title={section.title} />
+      <AdminInsightDashboardPage
+        slug={slug}
+        title={section.title}
+        preview={query.preview === "1"}
+      />
     </AdminPageGate>
   );
 }

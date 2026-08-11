@@ -1,4 +1,9 @@
 import type { TenantTx } from "@atlas/db";
+import {
+  resolveInsightRangeWindow,
+  type InsightDashboardRange,
+  type InsightRangeWindow,
+} from "./insights-range";
 
 export async function countSalesEventsByType(tx: TenantTx) {
   const rows = await tx.$queryRaw<Array<{ event_type: string; count: bigint }>>`
@@ -30,6 +35,108 @@ export async function countSalesEventsTotal(tx: TenantTx): Promise<number> {
     select count(*) as count from sales_attribution_events
   `;
   return Number(rows[0]?.count ?? 0);
+}
+
+export type SalesAttributionSourceRow = {
+  source: string;
+  medium: string;
+  count: number;
+  revenueCents: number;
+};
+
+export type SalesOpportunityEvidence = {
+  paidProductCount: number;
+  trialExpiring7d: number;
+  trialLapsed: number;
+  freeActive30d: number;
+  freeDormant: number;
+};
+
+export async function loadSalesOpportunityEvidence(
+  tx: TenantTx,
+): Promise<SalesOpportunityEvidence> {
+  const rows = await tx.$queryRaw<
+    Array<{
+      paid_product_count: bigint;
+      trial_expiring_7d: bigint;
+      trial_lapsed: bigint;
+      free_active_30d: bigint;
+      free_dormant: bigint;
+    }>
+  >`
+    select
+      (
+        select count(distinct course_id)::bigint
+        from enrollments
+        where status = 'active' and enrolled_type = 'paid'
+      ) as paid_product_count,
+      (
+        select count(*)::bigint
+        from enrollments
+        where status = 'active'
+          and enrolled_type = 'trial'
+          and expires_at is not null
+          and expires_at >= now()
+          and expires_at < now() + interval '7 days'
+      ) as trial_expiring_7d,
+      (
+        select count(*)::bigint
+        from enrollments
+        where status = 'active'
+          and enrolled_type = 'trial'
+          and expires_at is not null
+          and expires_at < now()
+      ) as trial_lapsed,
+      (
+        select count(*)::bigint
+        from enrollments e
+        join memberships m on m.id = e.membership_id and m.tenant_id = e.tenant_id
+        where e.status = 'active'
+          and e.enrolled_type = 'free'
+          and m.last_active_at is not null
+          and m.last_active_at >= now() - interval '30 days'
+      ) as free_active_30d,
+      (
+        select count(*)::bigint
+        from enrollments e
+        join memberships m on m.id = e.membership_id and m.tenant_id = e.tenant_id
+        where e.status = 'active'
+          and e.enrolled_type = 'free'
+          and (m.last_active_at is null or m.last_active_at < now() - interval '30 days')
+      ) as free_dormant
+  `;
+  const row = rows[0];
+  return {
+    paidProductCount: asNumber(row?.paid_product_count),
+    trialExpiring7d: asNumber(row?.trial_expiring_7d),
+    trialLapsed: asNumber(row?.trial_lapsed),
+    freeActive30d: asNumber(row?.free_active_30d),
+    freeDormant: asNumber(row?.free_dormant),
+  };
+}
+
+export async function loadSalesAttributionSources(
+  tx: TenantTx,
+): Promise<SalesAttributionSourceRow[]> {
+  const rows = await tx.$queryRaw<
+    Array<{ source: string; medium: string; count: bigint; revenue_cents: bigint }>
+  >`
+    select
+      coalesce(nullif(utm_source, ''), 'direct') as source,
+      coalesce(nullif(utm_medium, ''), 'none') as medium,
+      count(*)::bigint as count,
+      coalesce(sum(coalesce(revenue_cents, 0)), 0)::bigint as revenue_cents
+    from sales_attribution_events
+    group by 1, 2
+    order by revenue_cents desc, count desc
+    limit 100
+  `;
+  return rows.map((row) => ({
+    source: row.source,
+    medium: row.medium,
+    count: asNumber(row.count),
+    revenueCents: asNumber(row.revenue_cents),
+  }));
 }
 
 export async function getLiveSessionAggregates(tx: TenantTx) {
@@ -90,19 +197,29 @@ export type InsightDashboardSnapshot = {
   currency: string;
   enrollmentValueCents: number;
   paidPaymentRevenueCents: number;
+  paidPaymentRevenueCentsInRange: number;
+  previousPaidPaymentRevenueCents: number;
   productCount: number;
+  newProductCountInRange: number;
   learnerCount: number;
+  newLearnerCountInRange: number;
+  previousNewLearnerCount: number;
   enrollmentCount: number;
+  enrollmentsInRange: number;
+  previousEnrollmentsInRange: number;
   currentMau: number;
   activeUsers30d: number;
+  previousActiveUsers30d: number;
   paidEnrollmentCount: number;
   freeEnrollmentCount: number;
   paymentStatusCounts: Array<{ status: string; count: number; amountCents: number }>;
   monthlyPaymentRevenue: Array<{ period: string; amountCents: number }>;
   monthlyEnrollments: Array<{ period: string; paid: number; free: number }>;
+  activeUsersSpark: number[];
   topProducts: Array<{
     id: string;
     title: string;
+    productType: string;
     studentCount: number;
     revenueEstimateCents: number;
   }>;
@@ -112,6 +229,8 @@ export type InsightDashboardSnapshot = {
     productTitle: string | null;
     amountCents: number;
     currency: string;
+    gatewayKey: string | null;
+    failureReason: string | null;
     createdAt: string;
   }>;
   upcomingLiveSessions: Array<{
@@ -134,16 +253,131 @@ export type InsightDashboardSnapshot = {
   }>;
 };
 
+function loadPaymentBuckets(tx: TenantTx, window: InsightRangeWindow) {
+  if (window.grain === "day") {
+    return tx.$queryRaw<Array<{ period: string; amount_cents: bigint }>>`
+      with buckets as (
+        select generate_series(
+          date_trunc('day', ${window.from}::timestamptz),
+          date_trunc('day', ${window.to}::timestamptz),
+          interval '1 day'
+        ) as bucket
+      )
+      select
+        to_char(b.bucket, 'YYYY-MM-DD') as period,
+        coalesce(sum(po.amount_cents), 0)::bigint as amount_cents
+      from buckets b
+      left join payment_orders po
+        on po.status = 'paid'
+        and date_trunc('day', coalesce(po.paid_at, po.created_at)) = b.bucket
+      group by b.bucket
+      order by b.bucket asc
+    `;
+  }
+
+  return tx.$queryRaw<Array<{ period: string; amount_cents: bigint }>>`
+    with buckets as (
+      select generate_series(
+        date_trunc('month', ${window.from}::timestamptz),
+        date_trunc('month', ${window.to}::timestamptz),
+        interval '1 month'
+      ) as bucket
+    )
+    select
+      to_char(b.bucket, 'YYYY-MM-DD') as period,
+      coalesce(sum(po.amount_cents), 0)::bigint as amount_cents
+    from buckets b
+    left join payment_orders po
+      on po.status = 'paid'
+      and date_trunc('month', coalesce(po.paid_at, po.created_at)) = b.bucket
+    group by b.bucket
+    order by b.bucket asc
+  `;
+}
+
+function loadEnrollmentBuckets(tx: TenantTx, window: InsightRangeWindow) {
+  if (window.grain === "day") {
+    return tx.$queryRaw<Array<{ period: string; paid: bigint; free: bigint }>>`
+      with course_pricing as (
+        select
+          c.id,
+          case
+            when coalesce(c.metadata_json->>'accessTier', 'FREE') = 'PAID'
+              then greatest(coalesce((c.metadata_json->>'priceCents')::int, 0), 0)
+            else 0
+          end as price_cents
+        from courses c
+        where c.deleted_at is null
+      ),
+      buckets as (
+        select generate_series(
+          date_trunc('day', ${window.from}::timestamptz),
+          date_trunc('day', ${window.to}::timestamptz),
+          interval '1 day'
+        ) as bucket
+      )
+      select
+        to_char(b.bucket, 'YYYY-MM-DD') as period,
+        coalesce(sum(case when cp.price_cents > 0 then 1 else 0 end), 0)::bigint as paid,
+        coalesce(sum(case when cp.price_cents = 0 then 1 else 0 end), 0)::bigint as free
+      from buckets b
+      left join enrollments e
+        on e.status = 'active'
+        and date_trunc('day', e.enrolled_at) = b.bucket
+      left join course_pricing cp on cp.id = e.course_id
+      group by b.bucket
+      order by b.bucket asc
+    `;
+  }
+
+  return tx.$queryRaw<Array<{ period: string; paid: bigint; free: bigint }>>`
+    with course_pricing as (
+      select
+        c.id,
+        case
+          when coalesce(c.metadata_json->>'accessTier', 'FREE') = 'PAID'
+            then greatest(coalesce((c.metadata_json->>'priceCents')::int, 0), 0)
+          else 0
+        end as price_cents
+      from courses c
+      where c.deleted_at is null
+    ),
+    buckets as (
+      select generate_series(
+        date_trunc('month', ${window.from}::timestamptz),
+        date_trunc('month', ${window.to}::timestamptz),
+        interval '1 month'
+      ) as bucket
+    )
+    select
+      to_char(b.bucket, 'YYYY-MM-DD') as period,
+      coalesce(sum(case when cp.price_cents > 0 then 1 else 0 end), 0)::bigint as paid,
+      coalesce(sum(case when cp.price_cents = 0 then 1 else 0 end), 0)::bigint as free
+    from buckets b
+    left join enrollments e
+      on e.status = 'active'
+      and date_trunc('month', e.enrolled_at) = b.bucket
+    left join course_pricing cp on cp.id = e.course_id
+    group by b.bucket
+    order by b.bucket asc
+  `;
+}
+
 /** Commerce + ops snapshot for Insights → Dashboard (Learnyst-style overview). */
 export async function loadInsightDashboardSnapshot(
   tx: TenantTx,
+  range: InsightDashboardRange = "12m",
 ): Promise<InsightDashboardSnapshot> {
+  const window = resolveInsightRangeWindow(range);
+
   const [
     kpiRows,
     mauRows,
     paymentStatusRows,
     monthlyPaymentRows,
     monthlyEnrollmentRows,
+    rangeMetricRows,
+    sparkRows,
     topProductRows,
     failedPaymentRows,
     upcomingLiveRows,
@@ -215,7 +449,9 @@ export async function loadInsightDashboardSnapshot(
           where e.status = 'active' and cp.price_cents = 0
         ) as free_enrollment_count
     `,
-    tx.$queryRaw<Array<{ current_mau: number; active_users_30d: number }>>`
+    tx.$queryRaw<
+      Array<{ current_mau: number; active_users_30d: number; previous_active_users_30d: number }>
+    >`
       select
         (
           select count(*)::int
@@ -227,7 +463,13 @@ export async function loadInsightDashboardSnapshot(
           select count(distinct membership_id)::int
           from tenant_active_days
           where day >= current_date - 29
-        ) as active_users_30d
+        ) as active_users_30d,
+        (
+          select count(distinct membership_id)::int
+          from tenant_active_days
+          where day >= current_date - 59
+            and day < current_date - 29
+        ) as previous_active_users_30d
     `,
     tx.$queryRaw<Array<{ status: string; count: bigint; amount_cents: bigint }>>`
       select
@@ -238,59 +480,90 @@ export async function loadInsightDashboardSnapshot(
       group by status
       order by count desc
     `,
-    tx.$queryRaw<Array<{ period: string; amount_cents: bigint }>>`
-      with months as (
-        select generate_series(
-          date_trunc('month', now()) - interval '11 months',
-          date_trunc('month', now()),
-          interval '1 month'
-        ) as month
-      )
+    loadPaymentBuckets(tx, window),
+    loadEnrollmentBuckets(tx, window),
+    tx.$queryRaw<
+      Array<{
+        paid_in_range: bigint;
+        paid_previous: bigint;
+        enrollments_in_range: bigint;
+        enrollments_previous: bigint;
+        new_products: bigint;
+        new_learners: bigint;
+        previous_new_learners: bigint;
+      }>
+    >`
       select
-        to_char(m.month, 'YYYY-MM-DD') as period,
-        coalesce(sum(po.amount_cents), 0)::bigint as amount_cents
-      from months m
-      left join payment_orders po
-        on po.status = 'paid'
-        and date_trunc('month', coalesce(po.paid_at, po.created_at)) = m.month
-      group by m.month
-      order by m.month asc
+        coalesce((
+          select sum(po.amount_cents)::bigint
+          from payment_orders po
+          where po.status = 'paid'
+            and coalesce(po.paid_at, po.created_at) >= ${window.from}::timestamptz
+            and coalesce(po.paid_at, po.created_at) <= ${window.to}::timestamptz
+        ), 0)::bigint as paid_in_range,
+        coalesce((
+          select sum(po.amount_cents)::bigint
+          from payment_orders po
+          where po.status = 'paid'
+            and coalesce(po.paid_at, po.created_at) >= ${window.previousFrom}::timestamptz
+            and coalesce(po.paid_at, po.created_at) < ${window.previousTo}::timestamptz
+        ), 0)::bigint as paid_previous,
+        (
+          select count(*)::bigint
+          from enrollments e
+          where e.status = 'active'
+            and e.enrolled_at >= ${window.from}::timestamptz
+            and e.enrolled_at <= ${window.to}::timestamptz
+        ) as enrollments_in_range,
+        (
+          select count(*)::bigint
+          from enrollments e
+          where e.status = 'active'
+            and e.enrolled_at >= ${window.previousFrom}::timestamptz
+            and e.enrolled_at < ${window.previousTo}::timestamptz
+        ) as enrollments_previous,
+        (
+          select count(*)::bigint
+          from courses c
+          where c.deleted_at is null
+            and c.status = 'PUBLISHED'
+            and c.created_at >= ${window.from}::timestamptz
+            and c.created_at <= ${window.to}::timestamptz
+        ) as new_products,
+        (
+          select count(*)::bigint
+          from memberships m
+          where m.status = 'ACTIVE'
+            and m.archived_at is null
+            and m.created_at >= ${window.from}::timestamptz
+            and m.created_at <= ${window.to}::timestamptz
+        ) as new_learners,
+        (
+          select count(*)::bigint
+          from memberships m
+          where m.status = 'ACTIVE'
+            and m.archived_at is null
+            and m.created_at >= ${window.previousFrom}::timestamptz
+            and m.created_at < ${window.previousTo}::timestamptz
+        ) as previous_new_learners
     `,
-    tx.$queryRaw<Array<{ period: string; paid: bigint; free: bigint }>>`
-      with course_pricing as (
-        select
-          c.id,
-          case
-            when coalesce(c.metadata_json->>'accessTier', 'FREE') = 'PAID'
-              then greatest(coalesce((c.metadata_json->>'priceCents')::int, 0), 0)
-            else 0
-          end as price_cents
-        from courses c
-        where c.deleted_at is null
-      ),
-      months as (
-        select generate_series(
-          date_trunc('month', now()) - interval '11 months',
-          date_trunc('month', now()),
-          interval '1 month'
-        ) as month
+    tx.$queryRaw<Array<{ period: string; value: number }>>`
+      with days as (
+        select generate_series(current_date - 29, current_date, interval '1 day') as day
       )
       select
-        to_char(m.month, 'YYYY-MM-DD') as period,
-        coalesce(sum(case when cp.price_cents > 0 then 1 else 0 end), 0)::bigint as paid,
-        coalesce(sum(case when cp.price_cents = 0 then 1 else 0 end), 0)::bigint as free
-      from months m
-      left join enrollments e
-        on e.status = 'active'
-        and date_trunc('month', e.enrolled_at) = m.month
-      left join course_pricing cp on cp.id = e.course_id
-      group by m.month
-      order by m.month asc
+        to_char(d.day, 'YYYY-MM-DD') as period,
+        coalesce(count(distinct tad.membership_id), 0)::int as value
+      from days d
+      left join tenant_active_days tad on tad.day = d.day::date
+      group by d.day
+      order by d.day asc
     `,
     tx.$queryRaw<
       Array<{
         id: string;
         title: string;
+        product_type: string;
         student_count: bigint;
         revenue_estimate_cents: bigint;
       }>
@@ -298,6 +571,11 @@ export async function loadInsightDashboardSnapshot(
       select
         c.id::text as id,
         c.title,
+        coalesce(
+          nullif(c.metadata_json->>'productType', ''),
+          nullif(c.metadata_json->>'type', ''),
+          'Course'
+        ) as product_type,
         count(e.id)::bigint as student_count,
         (
           count(e.id) * case
@@ -321,6 +599,8 @@ export async function loadInsightDashboardSnapshot(
         product_title: string | null;
         amount_cents: number;
         currency: string;
+        gateway_key: string | null;
+        failure_reason: string | null;
         created_at: Date;
       }>
     >`
@@ -330,6 +610,15 @@ export async function loadInsightDashboardSnapshot(
         po.product_title,
         po.amount_cents,
         po.currency,
+        po.gateway_key,
+        coalesce(
+          nullif(po.metadata_json->>'failureReason', ''),
+          nullif(po.metadata_json->>'failure_reason', ''),
+          nullif(po.metadata_json->>'errorMessage', ''),
+          nullif(po.metadata_json->>'error', ''),
+          nullif(po.metadata_json->>'decline_code', ''),
+          'Payment declined'
+        ) as failure_reason,
         po.created_at
       from payment_orders po
       left join memberships m on m.id = po.membership_id and m.tenant_id = po.tenant_id
@@ -340,9 +629,7 @@ export async function loadInsightDashboardSnapshot(
       order by po.created_at desc
       limit 10
     `,
-    tx.$queryRaw<
-      Array<{ id: string; title: string; status: string; scheduled_at: Date | null }>
-    >`
+    tx.$queryRaw<Array<{ id: string; title: string; status: string; scheduled_at: Date | null }>>`
       select
         ls.id::text as id,
         ls.title,
@@ -384,9 +671,7 @@ export async function loadInsightDashboardSnapshot(
             and created_at >= now() - interval '30 days'
         ) as course_reviews
     `,
-    tx.$queryRaw<
-      Array<{ id: string; name: string; status: string; starts_at: Date }>
-    >`
+    tx.$queryRaw<Array<{ id: string; name: string; status: string; starts_at: Date }>>`
       select id::text as id, name, status, starts_at
       from seasonal_events
       where status in ('scheduled', 'active')
@@ -399,16 +684,25 @@ export async function loadInsightDashboardSnapshot(
   const kpi = kpiRows[0];
   const mau = mauRows[0];
   const tasks = taskRows[0];
+  const rangeMetrics = rangeMetricRows[0];
 
   return {
     currency: kpi?.currency?.trim() || "INR",
     enrollmentValueCents: asNumber(kpi?.enrollment_value_cents),
     paidPaymentRevenueCents: asNumber(kpi?.paid_payment_revenue_cents),
+    paidPaymentRevenueCentsInRange: asNumber(rangeMetrics?.paid_in_range),
+    previousPaidPaymentRevenueCents: asNumber(rangeMetrics?.paid_previous),
     productCount: asNumber(kpi?.product_count),
+    newProductCountInRange: asNumber(rangeMetrics?.new_products),
     learnerCount: asNumber(kpi?.learner_count),
+    newLearnerCountInRange: asNumber(rangeMetrics?.new_learners),
+    previousNewLearnerCount: asNumber(rangeMetrics?.previous_new_learners),
     enrollmentCount: asNumber(kpi?.enrollment_count),
+    enrollmentsInRange: asNumber(rangeMetrics?.enrollments_in_range),
+    previousEnrollmentsInRange: asNumber(rangeMetrics?.enrollments_previous),
     currentMau: mau?.current_mau ?? 0,
     activeUsers30d: mau?.active_users_30d ?? 0,
+    previousActiveUsers30d: mau?.previous_active_users_30d ?? 0,
     paidEnrollmentCount: asNumber(kpi?.paid_enrollment_count),
     freeEnrollmentCount: asNumber(kpi?.free_enrollment_count),
     paymentStatusCounts: paymentStatusRows.map((row) => ({
@@ -425,9 +719,11 @@ export async function loadInsightDashboardSnapshot(
       paid: asNumber(row.paid),
       free: asNumber(row.free),
     })),
+    activeUsersSpark: sparkRows.map((row) => row.value),
     topProducts: topProductRows.map((row) => ({
       id: row.id,
       title: row.title,
+      productType: row.product_type,
       studentCount: asNumber(row.student_count),
       revenueEstimateCents: asNumber(row.revenue_estimate_cents),
     })),
@@ -435,9 +731,12 @@ export async function loadInsightDashboardSnapshot(
       id: row.id,
       learnerName: row.learner_name,
       productTitle: row.product_title,
-      amountCents: row.amount_cents,
+      amountCents: asNumber(row.amount_cents),
       currency: row.currency,
-      createdAt: row.created_at.toISOString(),
+      gatewayKey: row.gateway_key,
+      failureReason: row.failure_reason,
+      createdAt:
+        row.created_at instanceof Date ? row.created_at.toISOString() : String(row.created_at),
     })),
     upcomingLiveSessions: upcomingLiveRows.map((row) => ({
       id: row.id,
@@ -539,7 +838,7 @@ export async function loadLearningRollupBundle(
   rangeDays = 30,
 ): Promise<LearningRollupBundle> {
   const keys = [...SCHOOL_VITALS_ROLLUP_KEYS];
-  const span = Math.max(1, Math.min(rangeDays, 90));
+  const span = Math.max(1, Math.min(rangeDays, 366));
 
   const [boundRows, totalRows, seriesRows] = await Promise.all([
     tx.$queryRaw<Array<{ from_day: Date; to_day: Date }>>`
@@ -602,10 +901,7 @@ export async function loadLearningRollupBundle(
     bound?.from_day instanceof Date
       ? bound.from_day.toISOString().slice(0, 10)
       : new Date().toISOString().slice(0, 10);
-  const to =
-    bound?.to_day instanceof Date
-      ? bound.to_day.toISOString().slice(0, 10)
-      : from;
+  const to = bound?.to_day instanceof Date ? bound.to_day.toISOString().slice(0, 10) : from;
 
   return {
     from,
@@ -619,7 +915,11 @@ export async function loadLearningRollupBundle(
 }
 
 /** Engagement + content health snapshot for Insights → School Vitals. */
-export async function loadSchoolVitalsSnapshot(tx: TenantTx): Promise<SchoolVitalsSnapshot> {
+export async function loadSchoolVitalsSnapshot(
+  tx: TenantTx,
+  rangeDays = 30,
+): Promise<SchoolVitalsSnapshot> {
+  const span = Math.max(1, Math.min(rangeDays, 366));
   const [kpiRows, healthRows, dailyActiveRows, topCourseRows] = await Promise.all([
     tx.$queryRaw<
       Array<{
@@ -705,7 +1005,7 @@ export async function loadSchoolVitalsSnapshot(tx: TenantTx): Promise<SchoolVita
     tx.$queryRaw<Array<{ period: string; value: number }>>`
       with days as (
         select generate_series(
-          current_date - 29,
+          current_date - (${span}::int - 1),
           current_date,
           interval '1 day'
         )::date as day
@@ -732,15 +1032,15 @@ export async function loadSchoolVitalsSnapshot(tx: TenantTx): Promise<SchoolVita
         c.title,
         count(lp.id) filter (
           where lp.completed_at is not null
-            and lp.completed_at >= now() - interval '30 days'
+            and lp.completed_at >= (current_date - (${span}::int - 1))::timestamptz
         )::bigint as completions_30d,
         count(distinct lp.membership_id) filter (
           where lp.last_seen_at is not null
-            and lp.last_seen_at >= now() - interval '30 days'
+            and lp.last_seen_at >= (current_date - (${span}::int - 1))::timestamptz
         )::bigint as active_learners,
         coalesce(avg(lp.progress_pct) filter (
           where lp.last_seen_at is not null
-            and lp.last_seen_at >= now() - interval '30 days'
+            and lp.last_seen_at >= (current_date - (${span}::int - 1))::timestamptz
         ), 0)::float8 as avg_progress_pct
       from courses c
       join course_modules cm
@@ -755,11 +1055,11 @@ export async function loadSchoolVitalsSnapshot(tx: TenantTx): Promise<SchoolVita
       having
         count(lp.id) filter (
           where lp.completed_at is not null
-            and lp.completed_at >= now() - interval '30 days'
+            and lp.completed_at >= (current_date - (${span}::int - 1))::timestamptz
         ) > 0
         or count(distinct lp.membership_id) filter (
           where lp.last_seen_at is not null
-            and lp.last_seen_at >= now() - interval '30 days'
+            and lp.last_seen_at >= (current_date - (${span}::int - 1))::timestamptz
         ) > 0
       order by completions_30d desc, active_learners desc, c.title asc
       limit 8
@@ -787,7 +1087,184 @@ export async function loadSchoolVitalsSnapshot(tx: TenantTx): Promise<SchoolVita
       title: row.title,
       completions30d: asNumber(row.completions_30d),
       activeLearners: asNumber(row.active_learners),
-      avgProgressPct: Math.round(Number(row.avg_progress_pct) || 0),
+      avgProgressPct: Math.round(row.avg_progress_pct || 0),
+    })),
+  };
+}
+
+export type ContentHealthSession = {
+  id: string;
+  title: string;
+  status: string;
+  scheduledAt: string | null;
+  registeredCount: number;
+};
+
+export type ContentHealthDetail = {
+  dormantLessonCount: number;
+  neverActiveLearnerCount: number;
+  inactivePaidCount: number;
+  inactiveEnrollmentCount: number;
+  moderationOldestOpenDays: number | null;
+  moderationOver72hCount: number;
+  moderationReviewingCount: number;
+  liveNowCount: number;
+  upcomingRegisteredCount: number;
+  upcomingSessions: ContentHealthSession[];
+};
+
+export async function loadContentHealthDetail(tx: TenantTx): Promise<ContentHealthDetail> {
+  const [extraRows, sessionRows] = await Promise.all([
+    tx.$queryRaw<
+      Array<{
+        dormant_lesson_count: number;
+        never_active_learner_count: number;
+        inactive_paid_count: number;
+        inactive_enrollment_count: number;
+        moderation_oldest_open_days: number | null;
+        moderation_over_72h_count: number;
+        moderation_reviewing_count: number;
+        live_now_count: number;
+        upcoming_registered_count: number;
+      }>
+    >`
+      with course_activity as (
+        select
+          c.id as course_id,
+          max(lp.last_seen_at) as last_activity_at
+        from courses c
+        left join course_modules cm
+          on cm.course_id = c.id and cm.tenant_id = c.tenant_id and cm.deleted_at is null
+        left join lessons l
+          on l.module_id = cm.id and l.tenant_id = c.tenant_id and l.deleted_at is null
+        left join lesson_progress lp
+          on lp.lesson_id = l.id and lp.tenant_id = c.tenant_id
+        where c.deleted_at is null
+          and c.status = 'PUBLISHED'
+        group by c.id
+      ),
+      dormant as (
+        select course_id
+        from course_activity
+        where last_activity_at is null
+           or last_activity_at < now() - interval '30 days'
+      ),
+      inactive as (
+        select m.id, m.last_active_at
+        from memberships m
+        join user_roles ur on ur.membership_id = m.id and ur.tenant_id = m.tenant_id
+        join roles r on r.id = ur.role_id and r.tenant_id = m.tenant_id and r.key = 'learner'
+        where m.status = 'ACTIVE'
+          and m.archived_at is null
+          and (m.last_active_at is null or m.last_active_at < now() - interval '30 days')
+      )
+      select
+        (
+          select count(l.id)::int
+          from dormant d
+          join course_modules cm
+            on cm.course_id = d.course_id and cm.deleted_at is null
+          join lessons l
+            on l.module_id = cm.id and l.deleted_at is null
+        ) as dormant_lesson_count,
+        (
+          select count(*)::int from inactive where last_active_at is null
+        ) as never_active_learner_count,
+        (
+          select count(distinct i.id)::int
+          from inactive i
+          join enrollments e on e.membership_id = i.id and e.status = 'active' and e.enrolled_type = 'paid'
+        ) as inactive_paid_count,
+        (
+          select count(e.id)::int
+          from inactive i
+          join enrollments e on e.membership_id = i.id and e.status = 'active'
+        ) as inactive_enrollment_count,
+        (
+          select
+            case
+              when min(mc.created_at) is null then null
+              else greatest(0, floor(extract(epoch from (now() - min(mc.created_at))) / 86400))::int
+            end
+          from moderation_cases mc
+          where mc.status in ('OPEN', 'REVIEWING')
+        ) as moderation_oldest_open_days,
+        (
+          select count(*)::int
+          from moderation_cases
+          where status in ('OPEN', 'REVIEWING')
+            and created_at < now() - interval '72 hours'
+        ) as moderation_over_72h_count,
+        (
+          select count(*)::int from moderation_cases where status = 'REVIEWING'
+        ) as moderation_reviewing_count,
+        (
+          select count(*)::int from live_sessions where status = 'live'
+        ) as live_now_count,
+        (
+          select count(la.id)::int
+          from live_sessions ls
+          join live_attendance la
+            on la.live_session_id = ls.id and la.tenant_id = ls.tenant_id
+          where ls.status in ('scheduled', 'live')
+            and (
+              ls.scheduled_at is null
+              or ls.scheduled_at >= now() - interval '1 day'
+            )
+            and la.status in ('registered', 'attended', 'absent')
+        ) as upcoming_registered_count
+    `,
+    tx.$queryRaw<
+      Array<{
+        id: string;
+        title: string;
+        status: string;
+        scheduled_at: Date | null;
+        registered_count: bigint;
+      }>
+    >`
+      select
+        ls.id::text as id,
+        ls.title,
+        ls.status,
+        ls.scheduled_at,
+        (
+          select count(*)::bigint
+          from live_attendance la
+          where la.live_session_id = ls.id
+            and la.tenant_id = ls.tenant_id
+            and la.status in ('registered', 'attended', 'absent')
+        ) as registered_count
+      from live_sessions ls
+      where ls.status in ('scheduled', 'live')
+        and (
+          ls.scheduled_at is null
+          or ls.scheduled_at >= now() - interval '1 day'
+        )
+      order by
+        case when ls.status = 'live' then 0 else 1 end,
+        ls.scheduled_at asc nulls last
+      limit 8
+    `,
+  ]);
+
+  const extra = extraRows[0];
+  return {
+    dormantLessonCount: extra?.dormant_lesson_count ?? 0,
+    neverActiveLearnerCount: extra?.never_active_learner_count ?? 0,
+    inactivePaidCount: extra?.inactive_paid_count ?? 0,
+    inactiveEnrollmentCount: extra?.inactive_enrollment_count ?? 0,
+    moderationOldestOpenDays: extra?.moderation_oldest_open_days ?? null,
+    moderationOver72hCount: extra?.moderation_over_72h_count ?? 0,
+    moderationReviewingCount: extra?.moderation_reviewing_count ?? 0,
+    liveNowCount: extra?.live_now_count ?? 0,
+    upcomingRegisteredCount: extra?.upcoming_registered_count ?? 0,
+    upcomingSessions: sessionRows.map((row) => ({
+      id: row.id,
+      title: row.title,
+      status: row.status,
+      scheduledAt: row.scheduled_at instanceof Date ? row.scheduled_at.toISOString() : null,
+      registeredCount: asNumber(row.registered_count),
     })),
   };
 }
@@ -837,6 +1314,8 @@ export type SalesInsightSnapshot = {
     productTitle: string | null;
     amountCents: number;
     currency: string;
+    gatewayKey: string | null;
+    failureReason: string | null;
     createdAt: string;
   }>;
   paymentStatusCounts: Array<{ status: string; count: number; amountCents: number }>;
@@ -1047,6 +1526,8 @@ export async function loadSalesInsightSnapshot(tx: TenantTx): Promise<SalesInsig
         product_title: string | null;
         amount_cents: number;
         currency: string;
+        gateway_key: string | null;
+        failure_reason: string | null;
         created_at: Date;
       }>
     >`
@@ -1056,6 +1537,15 @@ export async function loadSalesInsightSnapshot(tx: TenantTx): Promise<SalesInsig
         po.product_title,
         po.amount_cents,
         po.currency,
+        po.gateway_key,
+        coalesce(
+          nullif(po.metadata_json->>'failureReason', ''),
+          nullif(po.metadata_json->>'failure_reason', ''),
+          nullif(po.metadata_json->>'errorMessage', ''),
+          nullif(po.metadata_json->>'error', ''),
+          nullif(po.metadata_json->>'decline_code', ''),
+          'Payment declined'
+        ) as failure_reason,
         po.created_at
       from payment_orders po
       left join memberships m on m.id = po.membership_id and m.tenant_id = po.tenant_id
@@ -1136,6 +1626,8 @@ export async function loadSalesInsightSnapshot(tx: TenantTx): Promise<SalesInsig
       productTitle: row.product_title,
       amountCents: row.amount_cents,
       currency: row.currency,
+      gatewayKey: row.gateway_key,
+      failureReason: row.failure_reason,
       createdAt: row.created_at.toISOString(),
     })),
     paymentStatusCounts: paymentStatusRows.map((row) => ({
@@ -1269,9 +1761,7 @@ export async function loadLiveDashboardSnapshot(tx: TenantTx): Promise<LiveDashb
                 >= now() - interval '30 days'
           ) as registered_30d
       `,
-      tx.$queryRaw<
-        Array<{ status: string; session_count: bigint; attended_count: bigint }>
-      >`
+      tx.$queryRaw<Array<{ status: string; session_count: bigint; attended_count: bigint }>>`
         select
           ls.status,
           count(distinct ls.id)::bigint as session_count,
@@ -1723,9 +2213,7 @@ export async function loadMarketingInsightSnapshot(
       from days d
       order by d.day asc
     `,
-    tx.$queryRaw<
-      Array<{ id: string; title: string; status: string; submissions: bigint }>
-    >`
+    tx.$queryRaw<Array<{ id: string; title: string; status: string; submissions: bigint }>>`
       select
         f.id::text as id,
         f.title,
@@ -1955,38 +2443,32 @@ export type MessengerInsightSnapshot = {
 export async function loadMessengerInsightSnapshot(
   tx: TenantTx,
 ): Promise<MessengerInsightSnapshot> {
-  const [
-    kpiRows,
-    dailyRows,
-    emailRows,
-    pushRows,
-    whatsappRows,
-    announcementRows,
-  ] = await Promise.all([
-    tx.$queryRaw<
-      Array<{
-        email_sent: bigint;
-        email_scheduled: bigint;
-        email_draft: bigint;
-        email_recipients: bigint;
-        email_recipients_30d: bigint;
-        push_sent: bigint;
-        push_scheduled: bigint;
-        push_recipients: bigint;
-        push_recipients_30d: bigint;
-        wa_sent: bigint;
-        wa_scheduled: bigint;
-        wa_recipients: bigint;
-        wa_delivered: bigint;
-        wa_failed: bigint;
-        wa_connected: boolean;
-        announcement_count: bigint;
-        announcement_recipients: bigint;
-        inbox_messages: bigint;
-        inbox_messages_30d: bigint;
-        open_conversations: bigint;
-      }>
-    >`
+  const [kpiRows, dailyRows, emailRows, pushRows, whatsappRows, announcementRows] =
+    await Promise.all([
+      tx.$queryRaw<
+        Array<{
+          email_sent: bigint;
+          email_scheduled: bigint;
+          email_draft: bigint;
+          email_recipients: bigint;
+          email_recipients_30d: bigint;
+          push_sent: bigint;
+          push_scheduled: bigint;
+          push_recipients: bigint;
+          push_recipients_30d: bigint;
+          wa_sent: bigint;
+          wa_scheduled: bigint;
+          wa_recipients: bigint;
+          wa_delivered: bigint;
+          wa_failed: bigint;
+          wa_connected: boolean;
+          announcement_count: bigint;
+          announcement_recipients: bigint;
+          inbox_messages: bigint;
+          inbox_messages_30d: bigint;
+          open_conversations: bigint;
+        }>
+      >`
       select
         (
           select count(*)::bigint from marketing_email_campaigns where status = 'SENT'
@@ -2052,15 +2534,15 @@ export async function loadMessengerInsightSnapshot(
           select count(*)::bigint from messenger_conversations where status = 'open'
         ) as open_conversations
     `,
-    tx.$queryRaw<
-      Array<{
-        period: string;
-        email_recipients: number;
-        push_recipients: number;
-        whatsapp_recipients: number;
-        inbox_messages: number;
-      }>
-    >`
+      tx.$queryRaw<
+        Array<{
+          period: string;
+          email_recipients: number;
+          push_recipients: number;
+          whatsapp_recipients: number;
+          inbox_messages: number;
+        }>
+      >`
       with days as (
         select generate_series(
           current_date - 29,
@@ -2095,15 +2577,15 @@ export async function loadMessengerInsightSnapshot(
       from days d
       order by d.day asc
     `,
-    tx.$queryRaw<
-      Array<{
-        id: string;
-        title: string;
-        status: string;
-        recipient_count: number;
-        sent_at: Date | null;
-      }>
-    >`
+      tx.$queryRaw<
+        Array<{
+          id: string;
+          title: string;
+          status: string;
+          recipient_count: number;
+          sent_at: Date | null;
+        }>
+      >`
       select
         id::text as id,
         title,
@@ -2114,18 +2596,18 @@ export async function loadMessengerInsightSnapshot(
       order by coalesce(sent_at, created_at) desc
       limit 8
     `,
-    tx.$queryRaw<
-      Array<{
-        id: string;
-        title: string;
-        status: string;
-        recipient_count: number;
-        channel_android: boolean;
-        channel_ios: boolean;
-        channel_web: boolean;
-        sent_at: Date | null;
-      }>
-    >`
+      tx.$queryRaw<
+        Array<{
+          id: string;
+          title: string;
+          status: string;
+          recipient_count: number;
+          channel_android: boolean;
+          channel_ios: boolean;
+          channel_web: boolean;
+          sent_at: Date | null;
+        }>
+      >`
       select
         id::text as id,
         title,
@@ -2139,17 +2621,17 @@ export async function loadMessengerInsightSnapshot(
       order by coalesce(sent_at, created_at) desc
       limit 8
     `,
-    tx.$queryRaw<
-      Array<{
-        id: string;
-        title: string;
-        status: string;
-        recipient_count: number;
-        delivered_count: number;
-        failed_count: number;
-        sent_at: Date | null;
-      }>
-    >`
+      tx.$queryRaw<
+        Array<{
+          id: string;
+          title: string;
+          status: string;
+          recipient_count: number;
+          delivered_count: number;
+          failed_count: number;
+          sent_at: Date | null;
+        }>
+      >`
       select
         id::text as id,
         title,
@@ -2162,15 +2644,15 @@ export async function loadMessengerInsightSnapshot(
       order by coalesce(sent_at, created_at) desc
       limit 8
     `,
-    tx.$queryRaw<
-      Array<{
-        id: string;
-        title: string;
-        type: string;
-        recipient_count: number;
-        sent_at: Date | null;
-      }>
-    >`
+      tx.$queryRaw<
+        Array<{
+          id: string;
+          title: string;
+          type: string;
+          recipient_count: number;
+          sent_at: Date | null;
+        }>
+      >`
       select
         id::text as id,
         title,
@@ -2181,7 +2663,7 @@ export async function loadMessengerInsightSnapshot(
       order by coalesce(sent_at, created_at) desc
       limit 8
     `,
-  ]);
+    ]);
 
   const kpi = kpiRows[0];
   const emailSent = asNumber(kpi?.email_sent);
@@ -2202,7 +2684,7 @@ export async function loadMessengerInsightSnapshot(
     if (row.channel_android) parts.push("Android");
     if (row.channel_ios) parts.push("iOS");
     if (row.channel_web) parts.push("Web");
-    return parts.length > 0 ? parts.join(", ") : "—";
+    return parts.length > 0 ? parts.join(", ") : "None";
   }
 
   return {
@@ -2282,4 +2764,253 @@ export async function loadMessengerInsightSnapshot(
       sentAt: row.sent_at?.toISOString() ?? null,
     })),
   };
+}
+
+export async function loadInsightAlertStateJson(tx: TenantTx): Promise<unknown> {
+  const rows = await tx.$queryRaw<Array<{ config_json: unknown }>>`
+    select config_json
+    from tenant_config
+    limit 1
+  `;
+  const config = rows[0]?.config_json;
+  if (!config || typeof config !== "object") return null;
+  return (config as Record<string, unknown>)["insightAlerts"] ?? null;
+}
+
+export async function saveInsightAlertStateJson(tx: TenantTx, state: unknown): Promise<void> {
+  await tx.$executeRaw`
+    insert into tenant_config (
+      id,
+      tenant_id,
+      config_json,
+      created_at,
+      updated_at
+    )
+    values (
+      gen_random_uuid(),
+      app.current_tenant_id(),
+      jsonb_build_object('insightAlerts', ${JSON.stringify(state)}::jsonb),
+      now(),
+      now()
+    )
+    on conflict (tenant_id)
+    do update set
+      config_json = jsonb_set(
+        coalesce(tenant_config.config_json, '{}'::jsonb),
+        '{insightAlerts}',
+        ${JSON.stringify(state)}::jsonb
+      ),
+      updated_at = now()
+  `;
+}
+
+export async function loadInsightLayoutStateJson(tx: TenantTx): Promise<unknown> {
+  const rows = await tx.$queryRaw<Array<{ config_json: unknown }>>`
+    select config_json
+    from tenant_config
+    limit 1
+  `;
+  const config = rows[0]?.config_json;
+  if (!config || typeof config !== "object") return null;
+  return (config as Record<string, unknown>)["insightLayouts"] ?? null;
+}
+
+export async function saveInsightLayoutStateJson(tx: TenantTx, state: unknown): Promise<void> {
+  await tx.$executeRaw`
+    insert into tenant_config (
+      id,
+      tenant_id,
+      config_json,
+      created_at,
+      updated_at
+    )
+    values (
+      gen_random_uuid(),
+      app.current_tenant_id(),
+      jsonb_build_object('insightLayouts', ${JSON.stringify(state)}::jsonb),
+      now(),
+      now()
+    )
+    on conflict (tenant_id)
+    do update set
+      config_json = jsonb_set(
+        coalesce(tenant_config.config_json, '{}'::jsonb),
+        '{insightLayouts}',
+        ${JSON.stringify(state)}::jsonb
+      ),
+      updated_at = now()
+  `;
+}
+
+export async function loadInsightDigestStateJson(tx: TenantTx): Promise<unknown> {
+  const rows = await tx.$queryRaw<Array<{ config_json: unknown }>>`
+    select config_json
+    from tenant_config
+    limit 1
+  `;
+  const config = rows[0]?.config_json;
+  if (!config || typeof config !== "object") return null;
+  return (config as Record<string, unknown>)["insightDigests"] ?? null;
+}
+
+export async function saveInsightDigestStateJson(tx: TenantTx, state: unknown): Promise<void> {
+  await tx.$executeRaw`
+    insert into tenant_config (
+      id,
+      tenant_id,
+      config_json,
+      created_at,
+      updated_at
+    )
+    values (
+      gen_random_uuid(),
+      app.current_tenant_id(),
+      jsonb_build_object('insightDigests', ${JSON.stringify(state)}::jsonb),
+      now(),
+      now()
+    )
+    on conflict (tenant_id)
+    do update set
+      config_json = jsonb_set(
+        coalesce(tenant_config.config_json, '{}'::jsonb),
+        '{insightDigests}',
+        ${JSON.stringify(state)}::jsonb
+      ),
+      updated_at = now()
+  `;
+}
+
+export async function loadMembershipEmail(
+  tx: TenantTx,
+  membershipId: string,
+): Promise<string | null> {
+  const rows = await tx.$queryRaw<Array<{ email: string | null }>>`
+    select coalesce(ap.email, m.invited_email_normalized) as email
+    from memberships m
+    left join auth_principals ap on ap.id = m.auth_principal_id
+    where m.id = ${membershipId}::uuid
+    limit 1
+  `;
+  const email = rows[0]?.email?.trim().toLowerCase() ?? "";
+  return email.includes("@") ? email : null;
+}
+
+export async function loadTenantEmailDomains(tx: TenantTx): Promise<string[]> {
+  const rows = await tx.$queryRaw<Array<{ hostname: string }>>`
+    select hostname
+    from tenant_domains
+    where deleted_at is null
+      and status = 'ACTIVE'
+    order by is_primary desc, hostname asc
+  `;
+  return rows
+    .map((row) => {
+      const host = row.hostname.toLowerCase().replace(/^www\./, "");
+      const parts = host.split(".").filter(Boolean);
+      if (parts.length >= 2) return parts.slice(-2).join(".");
+      return host;
+    })
+    .filter(Boolean);
+}
+
+export async function loadTenantAcademyName(tx: TenantTx): Promise<string> {
+  const rows = await tx.$queryRaw<Array<{ name: string | null }>>`
+    select coalesce(public_name, display_name) as name
+    from tenant_branding
+    limit 1
+  `;
+  const name = rows[0]?.name?.trim() ?? "";
+  return name.length > 0 ? name : "Insights";
+}
+
+export async function loadMembershipDisplayName(
+  tx: TenantTx,
+  membershipId: string,
+): Promise<string> {
+  const rows = await tx.$queryRaw<Array<{ name: string | null }>>`
+    select coalesce(mp.display_name, ap.email, m.invited_email_normalized, 'Operator') as name
+    from memberships m
+    left join member_profiles mp
+      on mp.membership_id = m.id and mp.tenant_id = m.tenant_id and mp.deleted_at is null
+    left join auth_principals ap on ap.id = m.auth_principal_id
+    where m.id = ${membershipId}::uuid
+    limit 1
+  `;
+  return rows[0]?.name ?? "Operator";
+}
+
+export async function loadInsightSettingsJson(tx: TenantTx): Promise<unknown> {
+  const rows = await tx.$queryRaw<Array<{ config_json: unknown }>>`
+    select config_json
+    from tenant_config
+    limit 1
+  `;
+  const config = rows[0]?.config_json;
+  if (!config || typeof config !== "object") return null;
+  return (config as Record<string, unknown>)["insightSettings"] ?? null;
+}
+
+export async function saveInsightSettingsJson(tx: TenantTx, state: unknown): Promise<void> {
+  await tx.$executeRaw`
+    insert into tenant_config (
+      id,
+      tenant_id,
+      config_json,
+      created_at,
+      updated_at
+    )
+    values (
+      gen_random_uuid(),
+      app.current_tenant_id(),
+      jsonb_build_object('insightSettings', ${JSON.stringify(state)}::jsonb),
+      now(),
+      now()
+    )
+    on conflict (tenant_id)
+    do update set
+      config_json = jsonb_set(
+        coalesce(tenant_config.config_json, '{}'::jsonb),
+        '{insightSettings}',
+        ${JSON.stringify(state)}::jsonb
+      ),
+      updated_at = now()
+  `;
+}
+
+export async function loadInsightDisplayCurrency(tx: TenantTx): Promise<string> {
+  const rows = await tx.$queryRaw<Array<{ currency: string | null }>>`
+    select coalesce(
+      (select nullif(po.currency, '') from payment_orders po where po.status = 'paid' limit 1),
+      (select nullif(c.metadata_json->>'currency', '') from courses c where c.deleted_at is null limit 1),
+      'INR'
+    ) as currency
+  `;
+  return rows[0]?.currency?.trim() || "INR";
+}
+
+export async function loadInsightViewerRoles(
+  tx: TenantTx,
+): Promise<Array<{ key: string; name: string; memberCount: number }>> {
+  const rows = await tx.$queryRaw<Array<{ key: string; name: string; member_count: number }>>`
+    select
+      r.key,
+      r.name,
+      count(distinct ur.membership_id)::int as member_count
+    from roles r
+    inner join role_permissions rp
+      on rp.role_id = r.id
+      and rp.permission_key = 'insights.view'
+    left join user_roles ur on ur.role_id = r.id
+    left join memberships m
+      on m.id = ur.membership_id
+      and m.status = 'ACTIVE'
+    where r.deleted_at is null
+    group by r.key, r.name
+    order by r.name asc
+  `;
+  return rows.map((row) => ({
+    key: row.key,
+    name: row.name,
+    memberCount: row.member_count,
+  }));
 }
