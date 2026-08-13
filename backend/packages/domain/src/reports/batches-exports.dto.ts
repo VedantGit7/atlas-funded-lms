@@ -39,7 +39,7 @@ export const batchExportColumnKeySchema = z.string().min(1).max(64);
 
 export const batchExportHistoryItemSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     fileName: z.string(),
     format: z.enum(REPORT_FORMATS),
     dataset: z.enum(BATCH_EXPORT_DATASETS),
@@ -50,9 +50,9 @@ export const batchExportHistoryItemSchema = z
     requestedByLabel: z.string(),
     status: z.enum(["QUEUED", "RUNNING", "SUCCEEDED", "FAILED", "CANCELLED"]),
     expired: z.boolean(),
-    expiresAt: z.string().datetime().nullable(),
-    createdAt: z.string().datetime(),
-    completedAt: z.string().datetime().nullable(),
+    expiresAt: z.iso.datetime().nullable(),
+    createdAt: z.iso.datetime(),
+    completedAt: z.iso.datetime().nullable(),
     errorCode: z.string().nullable(),
     errorMessage: z.string().nullable(),
     errorTrace: z.array(z.string()).nullable(),
@@ -64,7 +64,7 @@ export const batchExportHistoryItemSchema = z
 
 export const batchExportScheduleItemSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     name: z.string(),
     datasetLabel: z.string(),
     cadenceLabel: z.string(),
@@ -72,7 +72,7 @@ export const batchExportScheduleItemSchema = z
     timezone: z.string(),
     formats: z.array(z.enum(REPORT_FORMATS)),
     isActive: z.boolean(),
-    nextRunAt: z.string().datetime(),
+    nextRunAt: z.iso.datetime(),
     nextRunLabel: z.string(),
     recipients: z.array(z.string()),
     webhookLabel: z.string().nullable(),
@@ -111,10 +111,10 @@ export const createBatchExportBodySchema = rejectClientTenantFields
     dataset: z.enum(BATCH_EXPORT_DATASETS).default("batch_learners"),
     columns: z.array(batchExportColumnKeySchema).min(1).max(30),
     format: z.enum(BATCH_EXPORT_FORMATS).default("csv"),
-    batchIds: z.array(z.string().uuid()).max(50).optional(),
+    batchIds: z.array(z.uuid()).max(50).optional(),
     allActiveBatches: z.boolean().default(false),
-    joinedFrom: z.string().datetime().optional(),
-    joinedTo: z.string().datetime().optional(),
+    joinedFrom: z.iso.datetime().optional(),
+    joinedTo: z.iso.datetime().optional(),
     learnerName: z.string().trim().min(1).max(200).optional(),
     status: z.enum(["ACTIVE", "INACTIVE", "ARCHIVED"]).optional(),
     grouping: z.enum(BATCH_EXPORT_GROUPING).default("none"),
@@ -122,8 +122,8 @@ export const createBatchExportBodySchema = rejectClientTenantFields
     useCurrentFilters: z.boolean().default(true),
     filterSummary: z.string().trim().max(500).optional(),
     delivery: z.enum(BATCH_EXPORT_DELIVERY).default("download"),
-    recipients: z.array(z.string().email()).max(20).optional(),
-    webhookUrl: z.string().url().max(500).nullable().optional(),
+    recipients: z.array(z.email()).max(20).optional(),
+    webhookUrl: z.url().max(500).nullable().optional(),
     scheduleEnabled: z.boolean().default(false),
     scheduleName: z.string().trim().max(120).optional(),
     cadence: z.enum(BATCH_EXPORT_CADENCE).optional(),
@@ -146,7 +146,7 @@ export const createBatchExportResponseSchema = z.object({
 
 export const batchExportRunParamsSchema = z
   .object({
-    runId: z.string().uuid(),
+    runId: z.uuid(),
   })
   .strict();
 
@@ -160,7 +160,7 @@ export const retryBatchExportResponseSchema = z.object({
 
 export const batchExportScheduleParamsSchema = z
   .object({
-    scheduleId: z.string().uuid(),
+    scheduleId: z.uuid(),
   })
   .strict();
 
@@ -178,6 +178,6 @@ export const updateBatchExportScheduleResponseSchema = z.object({
 export const deleteBatchExportScheduleResponseSchema = z.object({
   data: z.object({
     deleted: z.literal(true),
-    id: z.string().uuid(),
+    id: z.uuid(),
   }),
 });

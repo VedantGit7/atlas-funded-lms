@@ -9,29 +9,74 @@ export const CUSTOM_FIELD_EXPORT_DATASETS = [
 ] as const;
 
 export const CUSTOM_FIELD_EXPORT_FORMATS = ["csv", "xlsx", "json"] as const;
-export const CUSTOM_FIELD_EXPORT_DELIVERY = [
-  "download",
-  "email_me",
-  "recipients",
-] as const;
+export const CUSTOM_FIELD_EXPORT_DELIVERY = ["download", "email_me", "recipients"] as const;
 export const CUSTOM_FIELD_EXPORT_CADENCE = ["daily", "weekly", "monthly"] as const;
 export const CUSTOM_FIELD_EXPORT_EMPTY_VALUES = ["blank", "emdash"] as const;
 
 export const LEARNER_CORE_EXPORT_COLUMNS = [
-  { key: "learner_name", label: "Full name", sensitive: false, defaultSelected: true, group: "learner" as const, typeBadge: null },
-  { key: "email", label: "Email address", sensitive: true, defaultSelected: true, group: "learner" as const, typeBadge: null },
-  { key: "status", label: "Status", sensitive: false, defaultSelected: true, group: "learner" as const, typeBadge: null },
-  { key: "enrollment_count", label: "Enrolments", sensitive: false, defaultSelected: true, group: "learner" as const, typeBadge: null },
-  { key: "total_spent_cents", label: "Total spent", sensitive: false, defaultSelected: true, group: "learner" as const, typeBadge: null },
-  { key: "last_active_at", label: "Last active", sensitive: false, defaultSelected: true, group: "learner" as const, typeBadge: null },
-  { key: "signed_up_at", label: "Signed up", sensitive: false, defaultSelected: true, group: "learner" as const, typeBadge: null },
+  {
+    key: "learner_name",
+    label: "Full name",
+    sensitive: false,
+    defaultSelected: true,
+    group: "learner" as const,
+    typeBadge: null,
+  },
+  {
+    key: "email",
+    label: "Email address",
+    sensitive: true,
+    defaultSelected: true,
+    group: "learner" as const,
+    typeBadge: null,
+  },
+  {
+    key: "status",
+    label: "Status",
+    sensitive: false,
+    defaultSelected: true,
+    group: "learner" as const,
+    typeBadge: null,
+  },
+  {
+    key: "enrollment_count",
+    label: "Enrolments",
+    sensitive: false,
+    defaultSelected: true,
+    group: "learner" as const,
+    typeBadge: null,
+  },
+  {
+    key: "total_spent_cents",
+    label: "Total spent",
+    sensitive: false,
+    defaultSelected: true,
+    group: "learner" as const,
+    typeBadge: null,
+  },
+  {
+    key: "last_active_at",
+    label: "Last active",
+    sensitive: false,
+    defaultSelected: true,
+    group: "learner" as const,
+    typeBadge: null,
+  },
+  {
+    key: "signed_up_at",
+    label: "Signed up",
+    sensitive: false,
+    defaultSelected: true,
+    group: "learner" as const,
+    typeBadge: null,
+  },
 ] as const;
 
 export const customFieldExportColumnKeySchema = z.string().min(1).max(96);
 
 export const customFieldExportHistoryItemSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     fileName: z.string(),
     format: z.enum(REPORT_FORMATS),
     dataset: z.enum(CUSTOM_FIELD_EXPORT_DATASETS),
@@ -41,9 +86,9 @@ export const customFieldExportHistoryItemSchema = z
     sizeLabel: z.string().nullable(),
     status: z.enum(["QUEUED", "RUNNING", "SUCCEEDED", "FAILED", "CANCELLED"]),
     expired: z.boolean(),
-    expiresAt: z.string().datetime().nullable(),
-    createdAt: z.string().datetime(),
-    completedAt: z.string().datetime().nullable(),
+    expiresAt: z.iso.datetime().nullable(),
+    createdAt: z.iso.datetime(),
+    completedAt: z.iso.datetime().nullable(),
     errorCode: z.string().nullable(),
     errorMessage: z.string().nullable(),
     errorTrace: z.array(z.string()).nullable(),
@@ -55,7 +100,7 @@ export const customFieldExportHistoryItemSchema = z
 
 export const customFieldExportScheduleItemSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     name: z.string(),
     datasetLabel: z.string(),
     cadenceLabel: z.string(),
@@ -63,7 +108,7 @@ export const customFieldExportScheduleItemSchema = z
     timezone: z.string(),
     formats: z.array(z.enum(REPORT_FORMATS)),
     isActive: z.boolean(),
-    nextRunAt: z.string().datetime(),
+    nextRunAt: z.iso.datetime(),
     nextRunLabel: z.string(),
     recipients: z.array(z.string()),
     webhookLabel: z.string().nullable(),
@@ -109,16 +154,16 @@ export const createCustomFieldExportBodySchema = rejectClientTenantFields
     q: z.string().trim().min(1).max(200).optional(),
     email: z.string().trim().min(1).max(320).optional(),
     status: z.enum(["INVITED", "ACTIVE", "SUSPENDED", "REMOVED"]).optional(),
-    signedUpFrom: z.string().datetime().optional(),
-    signedUpTo: z.string().datetime().optional(),
+    signedUpFrom: z.iso.datetime().optional(),
+    signedUpTo: z.iso.datetime().optional(),
     minTotalSpentCents: z.coerce.number().int().min(0).optional(),
     maxTotalSpentCents: z.coerce.number().int().min(0).optional(),
-    segmentId: z.string().uuid().optional(),
+    segmentId: z.uuid().optional(),
     segmentName: z.string().trim().max(160).optional(),
     useCurrentFilters: z.boolean().default(true),
     delivery: z.enum(CUSTOM_FIELD_EXPORT_DELIVERY).default("download"),
-    recipients: z.array(z.string().email()).max(20).optional(),
-    webhookUrl: z.string().url().max(500).nullable().optional(),
+    recipients: z.array(z.email()).max(20).optional(),
+    webhookUrl: z.url().max(500).nullable().optional(),
     scheduleEnabled: z.boolean().default(false),
     scheduleName: z.string().trim().max(120).optional(),
     cadence: z.enum(CUSTOM_FIELD_EXPORT_CADENCE).optional(),
@@ -141,7 +186,7 @@ export const createCustomFieldExportResponseSchema = z.object({
 
 export const customFieldExportRunParamsSchema = z
   .object({
-    runId: z.string().uuid(),
+    runId: z.uuid(),
   })
   .strict();
 
@@ -155,7 +200,7 @@ export const retryCustomFieldExportResponseSchema = z.object({
 
 export const customFieldExportScheduleParamsSchema = z
   .object({
-    scheduleId: z.string().uuid(),
+    scheduleId: z.uuid(),
   })
   .strict();
 
@@ -173,6 +218,6 @@ export const updateCustomFieldExportScheduleResponseSchema = z.object({
 export const deleteCustomFieldExportScheduleResponseSchema = z.object({
   data: z.object({
     deleted: z.literal(true),
-    id: z.string().uuid(),
+    id: z.uuid(),
   }),
 });

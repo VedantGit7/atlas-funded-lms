@@ -12,10 +12,7 @@ export type PublicAuthStatus = z.infer<typeof publicAuthStatusSchema>;
 
 export const PublicLoginRequestSchema = z
   .object({
-    email: z
-      .string()
-      .email()
-      .transform((value) => value.trim().toLowerCase()),
+    email: z.email().transform((value) => value.trim().toLowerCase()),
     password: z.string().min(8).max(200),
     redirectTo: z.string().max(300).optional(),
     rememberMe: z.boolean().optional(),
@@ -29,14 +26,14 @@ export type PublicOAuthProvider = z.infer<typeof PublicOAuthProviderSchema>;
 export const PublicOAuthStartRequestSchema = z
   .object({
     provider: PublicOAuthProviderSchema,
-    redirectTo: z.string().url().max(500),
+    redirectTo: z.url().max(500),
     rememberMe: z.boolean().optional(),
   })
   .strict();
 
 export const PublicOAuthStartResponseSchema = z.object({
   data: z.object({
-    url: z.string().url(),
+    url: z.url(),
     codeVerifier: z.string().min(1),
   }),
 });
@@ -52,10 +49,7 @@ export const PublicOAuthCallbackRequestSchema = z
 
 export const PublicSignupRequestSchema = z
   .object({
-    email: z
-      .string()
-      .email()
-      .transform((value) => value.trim().toLowerCase()),
+    email: z.email().transform((value) => value.trim().toLowerCase()),
     password: z.string().min(8).max(200),
     displayName: z.string().trim().min(2).max(120),
     inviteToken: z.string().min(20).max(500).optional(),
@@ -73,7 +67,7 @@ export const PublicSignupRequestSchema = z
     // Tenant-specific URL Supabase should send the email-verification link back
     // to. Computed server-side from the tenant origin, never trusted from the
     // browser form.
-    emailRedirectTo: z.string().url().max(500).optional(),
+    emailRedirectTo: z.url().max(500).optional(),
   })
   .strict();
 
@@ -102,14 +96,11 @@ export const PublicAuthConfirmRequestSchema = z
 
 export const PublicAuthResendRequestSchema = z
   .object({
-    email: z
-      .string()
-      .email()
-      .transform((value) => value.trim().toLowerCase()),
+    email: z.email().transform((value) => value.trim().toLowerCase()),
     // Tenant-specific URL Supabase should send the new verification link back
     // to. Computed server-side from the tenant origin, never trusted from the
     // browser form.
-    emailRedirectTo: z.string().url().max(500).optional(),
+    emailRedirectTo: z.url().max(500).optional(),
   })
   .strict();
 
@@ -128,10 +119,7 @@ export const PublicMfaVerifyRequestSchema = z
 
 export const PublicPasswordResetRequestSchema = z
   .object({
-    email: z
-      .string()
-      .email()
-      .transform((value) => value.trim().toLowerCase()),
+    email: z.email().transform((value) => value.trim().toLowerCase()),
   })
   .strict();
 

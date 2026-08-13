@@ -11,22 +11,22 @@ const rejectIdentityFields = z
     authPrincipalId: z.never().optional(),
     attemptId: z.never().optional(),
   })
-  .passthrough();
+  .loose();
 
 export const DiagnosticAnonParamsSchema = z
   .object({
-    anonId: z.string().uuid(),
+    anonId: z.uuid(),
   })
   .strict();
 
 export const DiagnosticSessionParamsSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
   })
   .strict();
 
 export const PublicDiagnosticAnswerSchema = z.object({
-  itemId: z.string().uuid(),
+  itemId: z.uuid(),
   answerJson: z.record(z.string(), z.unknown()),
 });
 
@@ -40,7 +40,7 @@ export const PublicDiagnosticStartOperationSchema = z
 export const PublicDiagnosticCompleteOperationSchema = z
   .object({
     operation: z.literal("complete"),
-    anonymousId: z.string().uuid(),
+    anonymousId: z.uuid(),
     answers: z.array(PublicDiagnosticAnswerSchema).min(1).max(500),
   })
   .strict()
@@ -48,7 +48,7 @@ export const PublicDiagnosticCompleteOperationSchema = z
     const itemIds = value.answers.map((answer) => answer.itemId);
     if (new Set(itemIds).size !== itemIds.length) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         message: "Duplicate answer item IDs are not allowed.",
         path: ["answers"],
       });
@@ -69,14 +69,14 @@ export const AuthenticatedDiagnosticStartBodySchema = z
   .and(rejectIdentityFields);
 
 const diagnosticQuestionOptionSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   optionJson: z.record(z.string(), z.unknown()),
   position: z.number().int(),
 });
 
 const diagnosticQuestionSchema = z.object({
-  assessmentItemId: z.string().uuid(),
-  itemId: z.string().uuid(),
+  assessmentItemId: z.uuid(),
+  itemId: z.uuid(),
   itemTypeKey: z.string(),
   position: z.number().int(),
   points: z.number(),
@@ -86,7 +86,7 @@ const diagnosticQuestionSchema = z.object({
 });
 
 const diagnosticDimensionScoreSchema = z.object({
-  dimensionId: z.string().uuid(),
+  dimensionId: z.uuid(),
   dimensionKey: z.string(),
   dimensionName: z.string(),
   score: z.number(),
@@ -122,7 +122,7 @@ export const diagnosticScorecardSchema = z
     for (const text of texts) {
       if (containsUnsafeCopy(text)) {
         ctx.addIssue({
-          code: z.ZodIssueCode.custom,
+          code: "custom",
           message: "Diagnostic copy must not include guaranteed outcomes or financial advice.",
           path: ["interpretation"],
         });
@@ -132,9 +132,9 @@ export const diagnosticScorecardSchema = z
 
 export const publicDiagnosticStartResponseSchema = z.object({
   data: z.object({
-    anonymousId: z.string().uuid(),
-    sessionId: z.string().uuid(),
-    assessmentId: z.string().uuid(),
+    anonymousId: z.uuid(),
+    sessionId: z.uuid(),
+    assessmentId: z.uuid(),
     title: z.string(),
     items: z.array(diagnosticQuestionSchema),
     totalQuestions: z.number().int(),
@@ -143,8 +143,8 @@ export const publicDiagnosticStartResponseSchema = z.object({
 
 export const publicDiagnosticCompleteResponseSchema = z.object({
   data: z.object({
-    anonymousId: z.string().uuid(),
-    sessionId: z.string().uuid(),
+    anonymousId: z.uuid(),
+    sessionId: z.uuid(),
     status: z.literal("completed"),
     resultPath: z.string(),
   }),
@@ -157,17 +157,17 @@ export const publicDiagnosticStartUnionResponseSchema = z.union([
 
 export const publicDiagnosticResultResponseSchema = z.object({
   data: z.object({
-    anonymousId: z.string().uuid(),
-    sessionId: z.string().uuid(),
+    anonymousId: z.uuid(),
+    sessionId: z.uuid(),
     scorecard: diagnosticScorecardSchema,
   }),
 });
 
 export const publicDiagnosticMergeResponseSchema = z.object({
   data: z.object({
-    sessionId: z.string().uuid(),
-    attemptId: z.string().uuid(),
-    membershipId: z.string().uuid(),
+    sessionId: z.uuid(),
+    attemptId: z.uuid(),
+    membershipId: z.uuid(),
     resultPath: z.string(),
     alreadyMerged: z.boolean(),
   }),
@@ -175,9 +175,9 @@ export const publicDiagnosticMergeResponseSchema = z.object({
 
 export const authenticatedDiagnosticStartResponseSchema = z.object({
   data: z.object({
-    sessionId: z.string().uuid(),
-    attemptId: z.string().uuid(),
-    assessmentId: z.string().uuid(),
+    sessionId: z.uuid(),
+    attemptId: z.uuid(),
+    assessmentId: z.uuid(),
     title: z.string(),
     status: z.literal("started"),
     items: z.array(diagnosticQuestionSchema),
@@ -187,13 +187,13 @@ export const authenticatedDiagnosticStartResponseSchema = z.object({
 
 export const authenticatedDiagnosticResultResponseSchema = z.object({
   data: z.object({
-    sessionId: z.string().uuid(),
-    attemptId: z.string().uuid().nullable(),
+    sessionId: z.uuid(),
+    attemptId: z.uuid().nullable(),
     status: z.string(),
     scorecard: diagnosticScorecardSchema.nullable(),
     runner: z
       .object({
-        attemptId: z.string().uuid(),
+        attemptId: z.uuid(),
         items: z.array(diagnosticQuestionSchema),
         totalQuestions: z.number().int(),
       })
@@ -201,20 +201,16 @@ export const authenticatedDiagnosticResultResponseSchema = z.object({
   }),
 });
 
-export const diagnosticCatalogStatusSchema = z.enum([
-  "not_started",
-  "in_progress",
-  "completed",
-]);
+export const diagnosticCatalogStatusSchema = z.enum(["not_started", "in_progress", "completed"]);
 
 export const diagnosticCatalogItemSchema = z.object({
-  assessmentId: z.string().uuid(),
+  assessmentId: z.uuid(),
   title: z.string(),
   description: z.string().nullable(),
   questionCount: z.number().int().nonnegative(),
   estimatedMinutes: z.number().int().positive(),
   status: diagnosticCatalogStatusSchema,
-  sessionId: z.string().uuid().nullable(),
+  sessionId: z.uuid().nullable(),
   overallScore: z.number().nullable(),
   overallBandLabel: z.string().nullable(),
   lastActivityAt: z.string().nullable(),

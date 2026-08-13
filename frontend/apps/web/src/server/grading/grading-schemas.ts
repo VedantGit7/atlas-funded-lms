@@ -5,18 +5,18 @@ export const gradingTaskStatusSchema = z.enum(["PENDING", "IN_PROGRESS", "GRADED
 export const gradingListQuerySchema = z
   .object({
     status: gradingTaskStatusSchema.optional(),
-    assessmentId: z.string().uuid().optional(),
-    learnerMembershipId: z.string().uuid().optional(),
+    assessmentId: z.uuid().optional(),
+    learnerMembershipId: z.uuid().optional(),
     assignedTo: z.enum(["me", "all"]).default("me"),
     q: z.string().trim().min(1).max(200).optional(),
     limit: z.coerce.number().int().min(1).max(100).default(25),
-    cursor: z.string().uuid().optional(),
+    cursor: z.uuid().optional(),
   })
   .strict();
 
 export const gradingTaskParamsSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
   })
   .strict();
 
@@ -26,14 +26,14 @@ export const gradeTaskBodySchema = z
   .object({
     score: z.number().min(0),
     feedback: z.string().trim().min(1).max(10000),
-    rubricJson: z.record(z.unknown()).optional(),
-    graderNotesJson: z.record(z.unknown()).optional(),
+    rubricJson: z.record(z.string(), z.unknown()).optional(),
+    graderNotesJson: z.record(z.string(), z.unknown()).optional(),
     idempotencyKey: idempotencyKeySchema.optional(),
   })
   .strict();
 
 export const gradingQueueItemSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   status: gradingTaskStatusSchema,
   assessmentTitle: z.string(),
   learnerDisplayName: z.string(),
@@ -47,13 +47,13 @@ export const gradingQueueItemSchema = z.object({
 export const gradingListResponseSchema = z.object({
   data: z.array(gradingQueueItemSchema),
   page: z.object({
-    nextCursor: z.string().uuid().nullable(),
+    nextCursor: z.uuid().nullable(),
     hasMore: z.boolean(),
   }),
 });
 
 export const gradingAnswerItemSchema = z.object({
-  assessmentItemId: z.string().uuid(),
+  assessmentItemId: z.uuid(),
   itemType: z.string(),
   prompt: z.string(),
   content: z.unknown().nullable(),
@@ -63,7 +63,7 @@ export const gradingAnswerItemSchema = z.object({
 });
 
 export const gradingProctoringEventSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   occurredAt: z.string(),
   eventType: z.string(),
   severity: z.string(),
@@ -72,28 +72,30 @@ export const gradingProctoringEventSchema = z.object({
 
 export const gradingProctoringReportSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     summary: z.string(),
+    riskScore: z.number().nullable(),
+    riskBand: z.enum(["clean", "mild", "elevated", "egregious"]).nullable(),
     generatedAt: z.string(),
   })
   .nullable();
 
 export const gradingTaskDetailSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   status: gradingTaskStatusSchema,
   assessment: z.object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     title: z.string(),
     assessmentType: z.string(),
   }),
   attempt: z.object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     status: z.string(),
     submittedAt: z.string().nullable(),
     scorePercent: z.number().nullable(),
   }),
   learner: z.object({
-    membershipId: z.string().uuid(),
+    membershipId: z.uuid(),
     displayName: z.string(),
   }),
   answers: z.array(gradingAnswerItemSchema),
@@ -102,8 +104,8 @@ export const gradingTaskDetailSchema = z.object({
     .object({
       score: z.number(),
       feedback: z.string(),
-      rubricJson: z.record(z.unknown()).optional(),
-      graderNotesJson: z.record(z.unknown()).optional(),
+      rubricJson: z.record(z.string(), z.unknown()).optional(),
+      graderNotesJson: z.record(z.string(), z.unknown()).optional(),
       gradedAt: z.string(),
     })
     .nullable(),
@@ -119,12 +121,12 @@ export const gradingTaskDetailResponseSchema = z.object({
 
 export const gradeTaskResultSchema = z.object({
   data: z.object({
-    gradingTaskId: z.string().uuid(),
+    gradingTaskId: z.uuid(),
     status: gradingTaskStatusSchema,
     score: z.number(),
     possiblePoints: z.number(),
     feedback: z.string(),
-    attemptId: z.string().uuid(),
+    attemptId: z.uuid(),
     attemptStatus: z.string(),
     scorePercent: z.number().nullable(),
     gradedAt: z.string(),

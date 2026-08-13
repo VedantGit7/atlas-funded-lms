@@ -9,7 +9,7 @@ type ModuleScormPackageBlobBody = z.output<typeof moduleScormPackageBlobBodySche
 
 const blobResponseSchema = z.object({
   data: z.object({
-    assetReferenceId: z.string().uuid(),
+    assetReferenceId: z.uuid(),
     stored: z.literal(true),
   }),
 });

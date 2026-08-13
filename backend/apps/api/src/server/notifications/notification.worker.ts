@@ -1,5 +1,9 @@
 import { withTenantTx } from "@atlas/db";
-import { isMemberOptedOutOfCategory, isMemberOptedOutOfChannel } from "@atlas/membership";
+import {
+  getMemberPreferences,
+  isMemberOptedOutOfCategory,
+  isMemberOptedOutOfChannel,
+} from "@atlas/membership";
 import type { NotificationPreferenceCategory } from "@atlas/membership";
 import {
   buildNotificationIdempotencyKey,
@@ -34,6 +38,7 @@ import type { ServiceCtx } from "./notification.types";
 import { resolveSystemEmailForSend } from "../system-email/system-email.service";
 import { readTenantEmailChannel } from "../tenant-settings/tenant-settings.service";
 import type { NotificationTemplateRow } from "./notification.types";
+import { localeRepository } from "../locales/locale.repository";
 
 export const NOTIFICATION_SOURCE_WORKER_DESTINATION = "notifications.source";
 export const NOTIFICATION_QUEUED_WORKER_DESTINATION = "notifications.queued";
@@ -147,7 +152,7 @@ async function processSecurityNotificationSourceEvent(
     const emailHtml = buildSecurityEmailHtml({
       eventType: event.eventType,
       email,
-      siteUrl: siteUrl ?? "https://fundedbeyond.com",
+      siteUrl: siteUrl ?? "https://example.com",
       title: rendered.title,
       body: rendered.body,
       emailSubject: rendered.emailSubject,
@@ -199,6 +204,22 @@ async function isOptedOutOfCategory(
   });
 }
 
+async function resolveRecipientLocale(
+  tx: Parameters<typeof notificationRepository.insertDispatch>[0],
+  args: { tenantId: string; membershipId: string; requestId: string },
+): Promise<string> {
+  const prefs = await getMemberPreferences(tx, {
+    tenantId: args.tenantId,
+    actorMembershipId: args.membershipId,
+    requestId: args.requestId,
+  });
+  if (prefs.data.locale) {
+    return prefs.data.locale;
+  }
+
+  return localeRepository.getTenantDefaultLocale(tx, args.tenantId);
+}
+
 export async function processNotificationSourceEvent(
   tx: Parameters<typeof notificationRepository.insertDispatch>[0],
   ctx: ServiceCtx,
@@ -237,14 +258,16 @@ export async function processNotificationSourceEvent(
     return;
   }
 
+  const locale = await resolveRecipientLocale(tx, {
+    tenantId: ctx.tenantId,
+    membershipId,
+    requestId: ctx.requestId,
+  });
+
   let templates = await notificationRepository.listActiveTemplatesForEvent(tx, {
     tenantId: ctx.tenantId,
     key: event.eventType,
-    // TODO: resolve the recipient's preferred locale from their membership /
-    // member profile and pass it here so certificate.issued (and other)
-    // notifications localise per learner. Defaulting to "en" until locale
-    // preferences are wired into the notification pipeline.
-    locale: "en",
+    locale,
   });
 
   // Learnyst System Email defaults: ensure an email template is available when
@@ -259,7 +282,7 @@ export async function processNotificationSourceEvent(
         tenant_id: ctx.tenantId,
         key: event.eventType,
         channel: "email",
-        locale: "en",
+        locale,
         subject: systemEmail.subject,
         body: systemEmail.body,
         variables_json: { variables: [] },
@@ -427,8 +450,8 @@ export async function processNotificationQueuedEvent(
     subject: rendered.emailSubject ?? rendered.title,
     body: rendered.body,
     requestId: ctx.requestId,
-    fromName: channel.fromName?.trim() || "Academy",
-    fromEmail: channel.fromEmail?.trim() || "noreply@localhost.test",
+    fromName: channel.fromName.trim() || "Academy",
+    fromEmail: channel.fromEmail.trim() || "noreply@localhost.test",
     replyToEmail: channel.replyToEmail,
   });
 

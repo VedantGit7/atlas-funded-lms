@@ -6,14 +6,14 @@ export const DeadLetterListQuerySchema = z.object({
 });
 
 export const DeadLetterListItemSchema = z.object({
-  id: z.string().uuid(),
-  tenantId: z.string().uuid().nullable(),
-  outboxEventId: z.string().uuid(),
+  id: z.uuid(),
+  tenantId: z.uuid().nullable(),
+  outboxEventId: z.uuid(),
   destinationKey: z.string().nullable(),
   eventType: z.string(),
   errorCode: z.string().nullable(),
   safeErrorMessage: z.string().nullable(),
-  failedAt: z.string().datetime(),
+  failedAt: z.iso.datetime(),
 });
 
 export const DeadLetterListResponseSchema = z.object({

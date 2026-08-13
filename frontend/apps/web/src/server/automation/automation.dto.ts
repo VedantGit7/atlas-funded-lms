@@ -19,14 +19,14 @@ export type JobStatus = (typeof JOB_STATUSES)[number];
 export const entityStatusSchema = z.enum(ENTITY_STATUSES);
 
 export const automationRuleDtoSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   key: automationRuleKeySchema,
   triggerEventType: automationTriggerEventTypeSchema,
   conditionJson: z.unknown(),
   actionJson: z.unknown(),
   status: entityStatusSchema,
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 
 export const automationRuleListResponseSchema = z.object({
@@ -39,7 +39,7 @@ export const automationRuleDetailResponseSchema = z.object({
 
 export const automationRuleDeleteResponseSchema = z.object({
   data: z.object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     deleted: z.literal(true),
   }),
 });
@@ -47,17 +47,17 @@ export const automationRuleDeleteResponseSchema = z.object({
 export const automationRunListQuerySchema = z
   .object({
     limit: z.coerce.number().int().min(1).max(100).default(25),
-    automationRuleId: z.string().uuid().optional(),
+    automationRuleId: z.uuid().optional(),
   })
   .strict();
 
 export const automationRunDtoSchema = z.object({
-  id: z.string().uuid(),
-  automationRuleId: z.string().uuid(),
-  sourceEventId: z.string().uuid(),
+  id: z.uuid(),
+  automationRuleId: z.uuid(),
+  sourceEventId: z.uuid(),
   status: z.enum(JOB_STATUSES),
   resultJson: z.unknown().nullable(),
-  occurredAt: z.string().datetime(),
+  occurredAt: z.iso.datetime(),
 });
 
 export const automationRunListResponseSchema = z.object({
@@ -81,7 +81,7 @@ export const createAutomationRuleBodySchema = z
       parseAutomationAction(value.actionJson);
     } catch (error) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         message: error instanceof Error ? error.message : "Invalid automation configuration.",
         path: ["actionJson"],
       });
@@ -90,7 +90,7 @@ export const createAutomationRuleBodySchema = z
 
 export const updateAutomationRuleBodySchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     key: automationRuleKeySchema.optional(),
     triggerEventType: automationTriggerEventTypeSchema.optional(),
     conditionJson: z.unknown().optional(),
@@ -106,7 +106,7 @@ export const updateAutomationRuleBodySchema = z
         parseAutomationCondition(value.conditionJson);
       } catch (error) {
         ctx.addIssue({
-          code: z.ZodIssueCode.custom,
+          code: "custom",
           message: error instanceof Error ? error.message : "Invalid condition_json.",
           path: ["conditionJson"],
         });
@@ -117,7 +117,7 @@ export const updateAutomationRuleBodySchema = z
         parseAutomationAction(value.actionJson);
       } catch (error) {
         ctx.addIssue({
-          code: z.ZodIssueCode.custom,
+          code: "custom",
           message: error instanceof Error ? error.message : "Invalid action_json.",
           path: ["actionJson"],
         });
@@ -127,7 +127,7 @@ export const updateAutomationRuleBodySchema = z
 
 export const deleteAutomationRuleBodySchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     tenant_id: z.never().optional(),
     tenantId: z.never().optional(),
   })

@@ -6,8 +6,13 @@ import {
 } from "@atlas/domain-config/repositories/usage.repository";
 import type { NotificationDispatchRow, NotificationTemplateRow } from "./notification.types";
 
-/** Sentinel template used to persist inbox read receipts; never a real send. */
+/** Sentinel templates used to persist inbox receipts; never a real send. */
 const INBOX_READ_TEMPLATE_KEY = "__inbox_read__";
+const INBOX_ARCHIVE_TEMPLATE_KEY = "__inbox_archive__";
+
+function isInboxSentinelTemplateKey(templateKey: string): boolean {
+  return templateKey === INBOX_READ_TEMPLATE_KEY || templateKey === INBOX_ARCHIVE_TEMPLATE_KEY;
+}
 
 export const notificationRepository = {
   async listTemplates(tx: TenantTx, tenantId: string): Promise<NotificationTemplateRow[]> {
@@ -297,9 +302,9 @@ export const notificationRepository = {
       throw new Error("Failed to create notification dispatch.");
     }
 
-    // Best-effort usage metering: count real outbound messages, never the inbox
-    // read-receipt sentinel. A metering failure must not break delivery.
-    if (args.templateKey !== INBOX_READ_TEMPLATE_KEY) {
+    // Best-effort usage metering: count real outbound messages, never inbox
+    // receipt sentinels. A metering failure must not break delivery.
+    if (!isInboxSentinelTemplateKey(args.templateKey)) {
       try {
         await incrementUsageCounter(tx, USAGE_COUNTER_KEYS.messageSends);
       } catch {
@@ -324,7 +329,7 @@ export const notificationRepository = {
       tenantId: args.tenantId,
       membershipId: args.membershipId,
       channel: "in_app",
-      templateKey: "__inbox_read__",
+      templateKey: INBOX_READ_TEMPLATE_KEY,
       destination: null,
       idempotencyKey: args.idempotencyKey,
       status: "SENT",
@@ -359,8 +364,64 @@ export const notificationRepository = {
       from notification_dispatches
       where tenant_id = ${args.tenantId}::uuid
         and membership_id = ${args.membershipId}::uuid
-        and template_key = '__inbox_read__'
+        and template_key = ${INBOX_READ_TEMPLATE_KEY}
         and payload_json->>'readForDispatchId' = ${args.dispatchId}
+      limit 1
+    `;
+    return rows[0] ?? null;
+  },
+
+  async insertArchiveReceipt(
+    tx: TenantTx,
+    args: {
+      tenantId: string;
+      membershipId: string;
+      dispatchId: string;
+      archivedAt: Date;
+      idempotencyKey: string;
+    },
+  ): Promise<NotificationDispatchRow> {
+    return notificationRepository.insertDispatch(tx, {
+      tenantId: args.tenantId,
+      membershipId: args.membershipId,
+      channel: "in_app",
+      templateKey: INBOX_ARCHIVE_TEMPLATE_KEY,
+      destination: null,
+      idempotencyKey: args.idempotencyKey,
+      status: "SENT",
+      payloadJson: {
+        archiveForDispatchId: args.dispatchId,
+        inbox: {
+          archivedAt: args.archivedAt.toISOString(),
+        },
+      },
+      sentAt: args.archivedAt,
+    });
+  },
+
+  async findArchiveReceiptForDispatch(
+    tx: TenantTx,
+    args: { tenantId: string; membershipId: string; dispatchId: string },
+  ): Promise<NotificationDispatchRow | null> {
+    const rows = await tx.$queryRaw<NotificationDispatchRow[]>`
+      select
+        id::text,
+        tenant_id::text,
+        membership_id::text,
+        channel,
+        template_key,
+        destination,
+        idempotency_key,
+        status::text as status,
+        payload_json,
+        error_json,
+        created_at,
+        sent_at
+      from notification_dispatches
+      where tenant_id = ${args.tenantId}::uuid
+        and membership_id = ${args.membershipId}::uuid
+        and template_key = ${INBOX_ARCHIVE_TEMPLATE_KEY}
+        and payload_json->>'archiveForDispatchId' = ${args.dispatchId}
       limit 1
     `;
     return rows[0] ?? null;
@@ -373,8 +434,13 @@ export const notificationRepository = {
       membershipId: string;
       limit: number;
       cursor?: string;
+      includeArchived?: boolean;
     },
-  ): Promise<Array<NotificationDispatchRow & { read_at: string | null }>> {
+  ): Promise<
+    Array<NotificationDispatchRow & { read_at: string | null; archived_at: string | null }>
+  > {
+    const includeArchived = args.includeArchived === true;
+
     if (args.cursor) {
       return tx.$queryRaw`
         select
@@ -390,18 +456,31 @@ export const notificationRepository = {
           d.error_json,
           d.created_at,
           d.sent_at,
-          rr.payload_json->'inbox'->>'readAt' as read_at
+          rr.payload_json->'inbox'->>'readAt' as read_at,
+          ar.payload_json->'inbox'->>'archivedAt' as archived_at
         from notification_dispatches d
         left join notification_dispatches rr
           on rr.tenant_id = d.tenant_id
           and rr.membership_id = d.membership_id
-          and rr.template_key = '__inbox_read__'
+          and rr.template_key = ${INBOX_READ_TEMPLATE_KEY}
           and rr.payload_json->>'readForDispatchId' = d.id::text
+        left join notification_dispatches ar
+          on ar.tenant_id = d.tenant_id
+          and ar.membership_id = d.membership_id
+          and ar.template_key = ${INBOX_ARCHIVE_TEMPLATE_KEY}
+          and ar.payload_json->>'archiveForDispatchId' = d.id::text
         where d.tenant_id = ${args.tenantId}::uuid
           and d.membership_id = ${args.membershipId}::uuid
           and d.channel = 'in_app'
           and d.status = 'SENT'::"DispatchStatus"
-          and d.template_key <> '__inbox_read__'
+          and d.template_key <> ${INBOX_READ_TEMPLATE_KEY}
+          and d.template_key <> ${INBOX_ARCHIVE_TEMPLATE_KEY}
+          and (
+            case
+              when ${includeArchived} then ar.id is not null
+              else ar.id is null
+            end
+          )
           and d.created_at < (
             select created_at from notification_dispatches where id = ${args.cursor}::uuid
           )
@@ -424,18 +503,31 @@ export const notificationRepository = {
         d.error_json,
         d.created_at,
         d.sent_at,
-        rr.payload_json->'inbox'->>'readAt' as read_at
+        rr.payload_json->'inbox'->>'readAt' as read_at,
+        ar.payload_json->'inbox'->>'archivedAt' as archived_at
       from notification_dispatches d
       left join notification_dispatches rr
         on rr.tenant_id = d.tenant_id
         and rr.membership_id = d.membership_id
-        and rr.template_key = '__inbox_read__'
+        and rr.template_key = ${INBOX_READ_TEMPLATE_KEY}
         and rr.payload_json->>'readForDispatchId' = d.id::text
+      left join notification_dispatches ar
+        on ar.tenant_id = d.tenant_id
+        and ar.membership_id = d.membership_id
+        and ar.template_key = ${INBOX_ARCHIVE_TEMPLATE_KEY}
+        and ar.payload_json->>'archiveForDispatchId' = d.id::text
       where d.tenant_id = ${args.tenantId}::uuid
         and d.membership_id = ${args.membershipId}::uuid
         and d.channel = 'in_app'
         and d.status = 'SENT'::"DispatchStatus"
-        and d.template_key <> '__inbox_read__'
+        and d.template_key <> ${INBOX_READ_TEMPLATE_KEY}
+        and d.template_key <> ${INBOX_ARCHIVE_TEMPLATE_KEY}
+        and (
+          case
+            when ${includeArchived} then ar.id is not null
+            else ar.id is null
+          end
+        )
       order by d.created_at desc
       limit ${args.limit}
     `;

@@ -20,6 +20,7 @@ WITH required_append_only(table_name) AS (
     ('audit_entries'),
     ('workflow_transitions'),
     ('attempt_answers'),
+    ('proctoring_events'),
     ('practice_responses'),
     ('scoring_config_versions'),
     ('competency_signals'),

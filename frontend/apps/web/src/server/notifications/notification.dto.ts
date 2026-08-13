@@ -7,7 +7,7 @@ const rejectClientTenantFields = z
     tenant_id: z.never().optional(),
     tenantId: z.never().optional(),
   })
-  .passthrough();
+  .loose();
 
 const htmlTagPattern = /<[^>]*>/g;
 const scriptPattern = /javascript:/i;
@@ -82,7 +82,7 @@ export const createNotificationTemplateBodySchema = templateBaseSchema
   .superRefine((value, ctx) => {
     if (value.channel === "email" && !value.subject) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         message: "Email templates require a subject.",
         path: ["subject"],
       });
@@ -93,7 +93,7 @@ export const createNotificationTemplateBodySchema = templateBaseSchema
 
 export const updateNotificationTemplateBodySchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     key: notificationSourceEventKeySchema.optional(),
     channel: notificationChannelSchema.optional(),
     locale: z.string().min(2).max(16).optional(),
@@ -112,13 +112,13 @@ export const updateNotificationTemplateBodySchema = z
 
 export const deleteNotificationTemplateBodySchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
   })
   .strict()
   .and(rejectClientTenantFields);
 
 export const notificationTemplateDtoSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   key: notificationSourceEventKeySchema,
   channel: notificationChannelSchema,
   locale: z.string(),
@@ -126,8 +126,8 @@ export const notificationTemplateDtoSchema = z.object({
   body: z.string(),
   variablesJson: notificationVariablesJsonSchema,
   status: z.enum(["ACTIVE", "INACTIVE", "ARCHIVED"]),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 
 export const notificationTemplateListResponseSchema = z.object({
@@ -140,25 +140,36 @@ export const notificationTemplateDetailResponseSchema = z.object({
 
 export const deleteNotificationTemplateResponseSchema = z.object({
   data: z.object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     deleted: z.literal(true),
   }),
 });
 
 export const notificationInboxItemSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   title: z.string(),
   body: z.string(),
   actionPath: z.string(),
   read: z.boolean(),
-  readAt: z.string().datetime().nullable(),
-  createdAt: z.string().datetime(),
+  readAt: z.iso.datetime().nullable(),
+  archived: z.boolean(),
+  archivedAt: z.iso.datetime().nullable(),
+  createdAt: z.iso.datetime(),
 });
 
 export const notificationInboxListQuerySchema = z
   .object({
     limit: z.coerce.number().int().min(1).max(50).default(25),
-    cursor: z.string().uuid().optional(),
+    cursor: z.uuid().optional(),
+    /** When true, return archived items only; default list excludes archived. */
+    includeArchived: z
+      .union([z.boolean(), z.enum(["true", "false", "1", "0"])])
+      .optional()
+      .transform((value) => {
+        if (value === undefined) return false;
+        if (typeof value === "boolean") return value;
+        return value === "true" || value === "1";
+      }),
     tenant_id: z.never().optional(),
     tenantId: z.never().optional(),
   })
@@ -167,26 +178,34 @@ export const notificationInboxListQuerySchema = z
 export const notificationInboxListResponseSchema = z.object({
   data: z.array(notificationInboxItemSchema),
   page: z.object({
-    nextCursor: z.string().uuid().nullable(),
+    nextCursor: z.uuid().nullable(),
     hasMore: z.boolean(),
   }),
 });
 
 export const markNotificationReadResponseSchema = z.object({
   data: z.object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     read: z.literal(true),
-    readAt: z.string().datetime(),
+    readAt: z.iso.datetime(),
+  }),
+});
+
+export const markNotificationArchivedResponseSchema = z.object({
+  data: z.object({
+    id: z.uuid(),
+    archived: z.literal(true),
+    archivedAt: z.iso.datetime(),
   }),
 });
 
 export const notificationQueuedOutboxPayloadSchema = z.object({
-  dispatchId: z.string().uuid().optional(),
+  dispatchId: z.uuid().optional(),
   channel: notificationChannelSchema,
-  templateId: z.string().uuid(),
+  templateId: z.uuid(),
   templateKey: notificationSourceEventKeySchema,
-  membershipId: z.string().uuid(),
-  sourceEventId: z.string().uuid(),
+  membershipId: z.uuid(),
+  sourceEventId: z.uuid(),
   renderedPayload: z
     .object({
       title: z.string(),
@@ -199,7 +218,7 @@ export const notificationQueuedOutboxPayloadSchema = z.object({
 
 export const notificationParamsSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
   })
   .strict();
 
@@ -215,7 +234,7 @@ function validateDeclaredVariables(
     const name = match.slice(2, -2);
     if (!declared.has(name)) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         message: `Undeclared template variable: ${name}`,
         path: ["body"],
       });
@@ -224,12 +243,29 @@ function validateDeclaredVariables(
 }
 
 export const NOTIFICATION_READ_RECEIPT_TEMPLATE_KEY = "__inbox_read__" as const;
+export const NOTIFICATION_ARCHIVE_TEMPLATE_KEY = "__inbox_archive__" as const;
+
+export function isInboxSentinelTemplateKey(templateKey: string | null | undefined): boolean {
+  return (
+    templateKey === NOTIFICATION_READ_RECEIPT_TEMPLATE_KEY ||
+    templateKey === NOTIFICATION_ARCHIVE_TEMPLATE_KEY
+  );
+}
 
 export function buildReadReceiptIdempotencyKey(args: {
   dispatchId: string;
   membershipId: string;
 }): string {
   return createHash("sha256").update(`read:${args.dispatchId}:${args.membershipId}`).digest("hex");
+}
+
+export function buildArchiveReceiptIdempotencyKey(args: {
+  dispatchId: string;
+  membershipId: string;
+}): string {
+  return createHash("sha256")
+    .update(`archive:${args.dispatchId}:${args.membershipId}`)
+    .digest("hex");
 }
 
 export function buildNotificationIdempotencyKey(args: {
@@ -258,6 +294,12 @@ export function extractReadReceiptAt(payloadJson: unknown): string | null {
   if (!payloadJson || typeof payloadJson !== "object") return null;
   const inbox = (payloadJson as { inbox?: { readAt?: unknown } }).inbox;
   return typeof inbox?.readAt === "string" ? inbox.readAt : null;
+}
+
+export function extractArchiveReceiptAt(payloadJson: unknown): string | null {
+  if (!payloadJson || typeof payloadJson !== "object") return null;
+  const inbox = (payloadJson as { inbox?: { archivedAt?: unknown } }).inbox;
+  return typeof inbox?.archivedAt === "string" ? inbox.archivedAt : null;
 }
 
 export function extractInboxPayload(payloadJson: unknown): {

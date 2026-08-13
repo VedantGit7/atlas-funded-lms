@@ -8,7 +8,7 @@ import { getEncodedStatusListCredential } from "../../../../../../../server/cert
 import { resolveRequestOriginFromHeaders } from "../../../../../../../lib/server/resolve-request-origin";
 import { routeMetadata } from "./route.metadata";
 
-const statusListIdSchema = z.string().uuid();
+const statusListIdSchema = z.uuid();
 
 export const GET = createPublicRouteHandler(routeMetadata, async ({ req, requestId }) => {
   return withGlobalDb(async (db) => {

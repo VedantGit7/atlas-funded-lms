@@ -32,7 +32,7 @@ const createLessonTagResponseSchema = z.object({
 
 const detachLessonTagQuerySchema = z
   .object({
-    tagId: z.string().uuid(),
+    tagId: z.uuid(),
   })
   .strict();
 

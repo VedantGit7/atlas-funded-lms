@@ -54,7 +54,7 @@ export async function parseLessonAssetBlobRequest(req: NextRequest): Promise<Les
   }
 
   const assetReferenceId = req.headers.get("x-asset-reference-id")?.trim() ?? "";
-  const parsedAssetReferenceId = z.string().uuid().safeParse(assetReferenceId);
+  const parsedAssetReferenceId = z.uuid().safeParse(assetReferenceId);
   if (!parsedAssetReferenceId.success) {
     throw new AtlasHttpError({
       code: "VALIDATION_ERROR",

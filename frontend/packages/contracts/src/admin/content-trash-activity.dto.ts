@@ -1,14 +1,14 @@
 import { z } from "zod";
 
 export const contentTrashActivityItemSchema = z.object({
-  id: z.string().uuid(),
-  occurredAt: z.string().datetime(),
+  id: z.uuid(),
+  occurredAt: z.iso.datetime(),
   action: z.string(),
   actionLabel: z.string(),
   targetType: z.string(),
-  targetId: z.string().uuid().nullable(),
+  targetId: z.uuid().nullable(),
   adminName: z.string(),
-  actorMembershipId: z.string().uuid().nullable(),
+  actorMembershipId: z.uuid().nullable(),
 });
 
 export const contentTrashActivityResponseSchema = z.object({

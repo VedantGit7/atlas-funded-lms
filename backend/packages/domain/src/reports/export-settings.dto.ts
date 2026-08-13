@@ -102,8 +102,8 @@ export const exportSettingsStorageStatsSchema = z
 
 export const exportSettingsAuditEventSchema = z
   .object({
-    id: z.string().uuid(),
-    occurredAt: z.string().datetime(),
+    id: z.uuid(),
+    occurredAt: z.iso.datetime(),
     summary: z.string(),
     actorName: z.string().nullable(),
   })
@@ -117,7 +117,7 @@ export const exportSettingsResponseSchema = z.object({
     externalDestinationCount: z.number().int().nonnegative(),
     personalDataFields: z.array(piiFieldMetaSchema),
     recentAudit: z.array(exportSettingsAuditEventSchema),
-    updatedAt: z.string().datetime().nullable(),
+    updatedAt: z.iso.datetime().nullable(),
     updatedByName: z.string().nullable(),
   }),
 });

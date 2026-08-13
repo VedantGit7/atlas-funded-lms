@@ -1,13 +1,13 @@
 import { z } from "zod";
 
 export const PlatformFeatureFlagViewSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   key: z.string(),
   defaultValue: z.unknown(),
   description: z.string().nullable(),
   rolloutType: z.enum(["BOOLEAN", "JSON"]),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 
 export const PlatformFeatureFlagListResponseSchema = z.object({

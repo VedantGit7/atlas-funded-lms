@@ -46,10 +46,7 @@ export type CourseSettingsCardId =
   | "associated-contents"
   | "remove-learners";
 
-export type CourseSettingsFormSection =
-  | "pricing-plans"
-  | "content-dripping"
-  | "learning-path";
+export type CourseSettingsFormSection = "pricing-plans" | "content-dripping" | "learning-path";
 
 export type CourseSettingsCard = {
   id: CourseSettingsCardId;
@@ -130,14 +127,14 @@ export const COURSE_SETTINGS_GROUPS: CourseSettingsGroup[] = [
         title: "Android Pricing",
         description: "Set Android app pricing for your course",
         icon: Smartphone,
-        available: false,
+        available: true,
       },
       {
         id: "ios-pricing",
         title: "iOS Pricing",
         description: "Set iOS app pricing for your course",
         icon: Apple,
-        available: false,
+        available: true,
       },
       {
         id: "permissions",
@@ -307,9 +304,7 @@ export function isCoursePublishDeleteSettingsSection(
   return sectionId != null && PUBLISH_DELETE_SECTION_IDS.has(sectionId as CourseSettingsCardId);
 }
 
-export function findCourseSettingsCard(
-  cardId: string,
-): CourseSettingsCard | undefined {
+export function findCourseSettingsCard(cardId: string): CourseSettingsCard | undefined {
   for (const group of COURSE_SETTINGS_GROUPS) {
     const card = group.cards.find((item) => item.id === cardId);
     if (card) return card;

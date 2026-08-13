@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const AuditTargetSchema = z.object({
   type: z.string().min(1).max(120),
-  id: z.string().uuid().nullable(),
+  id: z.uuid().nullable(),
 });
 
 export const AuditWriteInputSchema = z.object({
@@ -15,13 +15,13 @@ export const AuditWriteInputSchema = z.object({
 });
 
 export const AuditEntryViewSchema = z.object({
-  id: z.string().uuid(),
-  occurredAt: z.string().datetime(),
+  id: z.uuid(),
+  occurredAt: z.iso.datetime(),
   action: z.string(),
   targetType: z.string(),
-  targetId: z.string().uuid().nullable(),
-  actorMembershipId: z.string().uuid().nullable(),
-  platformPrincipalId: z.string().uuid().nullable(),
+  targetId: z.uuid().nullable(),
+  actorMembershipId: z.uuid().nullable(),
+  platformPrincipalId: z.uuid().nullable(),
   requestId: z.string(),
   reason: z.string().nullable(),
   metadata: z.record(z.string(), z.unknown()).nullable(),

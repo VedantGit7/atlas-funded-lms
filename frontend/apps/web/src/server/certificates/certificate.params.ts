@@ -1,11 +1,11 @@
 import { z } from "zod";
 
 export const certificateTemplateParamsSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
 });
 
 export const certificateParamsSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
 });
 
 export const publicCredentialParamsSchema = z.object({

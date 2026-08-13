@@ -50,6 +50,23 @@ describe("assertAllowedMimeType", () => {
     });
   });
 
+  describe("certificate wallet passes", () => {
+    it("allows application/vnd.apple.pkpass", () => {
+      expect(() =>
+        assertAllowedMimeType({
+          purpose: "certificate.wallet",
+          contentType: "application/vnd.apple.pkpass",
+        }),
+      ).not.toThrow();
+    });
+
+    it("rejects application/pdf", () => {
+      expect(() =>
+        assertAllowedMimeType({ purpose: "certificate.wallet", contentType: "application/pdf" }),
+      ).toThrow("UNSUPPORTED_CERTIFICATE_WALLET_TYPE");
+    });
+  });
+
   describe("module scorm packages", () => {
     it.each(["application/zip", "application/x-zip-compressed"])("allows %s", (contentType) => {
       expect(() => assertAllowedMimeType({ purpose: "module.scorm", contentType })).not.toThrow();

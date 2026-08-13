@@ -30,14 +30,14 @@ const rejectSecrets = z
     tenant_id: z.never().optional(),
     tenantId: z.never().optional(),
   })
-  .passthrough();
+  .loose();
 
 export const entitlementGrantSchema = z
   .object({
     key: z.enum(KNOWN_ENTITLEMENT_KEYS),
     enabled: z.boolean().default(true),
     value: z.unknown().nullable().optional(),
-    expiresAt: z.string().datetime().nullable().optional(),
+    expiresAt: z.iso.datetime().nullable().optional(),
   })
   .strict();
 
@@ -114,7 +114,7 @@ export const readinessManifestSchema = z
       .superRefine((value, ctx) => {
         if (value.status === "approved" && !value.reference) {
           ctx.addIssue({
-            code: z.ZodIssueCode.custom,
+            code: "custom",
             message: "Legal approval reference is required when status is approved.",
             path: ["reference"],
           });
@@ -123,7 +123,6 @@ export const readinessManifestSchema = z
     ctaPolicy: z
       .object({
         outboundTargetUrl: z
-          .string()
           .url()
           .refine((url) => url.startsWith("https://"), "CTA target must use HTTPS."),
         tokenTtlSeconds: z.number().int().min(60).max(86_400),
@@ -152,7 +151,7 @@ export const readinessManifestSchema = z
     if (value.legalApproval.status === "pending_approval") {
       if (value.ctaPolicy.ctaCopy !== undefined || value.legalCopy !== undefined) {
         ctx.addIssue({
-          code: z.ZodIssueCode.custom,
+          code: "custom",
           message:
             "CTA and legal copy must not be supplied while legal approval is pending_approval.",
         });
@@ -162,7 +161,7 @@ export const readinessManifestSchema = z
 
     if (!value.ctaPolicy.ctaCopy) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         message: "ctaPolicy.ctaCopy is required when legal approval is approved.",
         path: ["ctaPolicy", "ctaCopy"],
       });
@@ -170,7 +169,7 @@ export const readinessManifestSchema = z
 
     if (!value.legalCopy) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         message: "legalCopy is required when legal approval is approved.",
         path: ["legalCopy"],
       });
@@ -286,9 +285,9 @@ export const brandingManifestSchema = z
     publicName: z.string().min(2).max(120),
     issuerName: z.string().min(2).max(160).nullable().optional(),
     publicLandingCopy: z.record(z.string(), z.unknown()).nullable().optional(),
-    logoLightStorageRefId: z.string().uuid().nullable().optional(),
-    logoDarkStorageRefId: z.string().uuid().nullable().optional(),
-    faviconStorageRefId: z.string().uuid().nullable().optional(),
+    logoLightStorageRefId: z.uuid().nullable().optional(),
+    logoDarkStorageRefId: z.uuid().nullable().optional(),
+    faviconStorageRefId: z.uuid().nullable().optional(),
   })
   .strict();
 
@@ -321,7 +320,7 @@ export const tenantIdentitySchema = z
 
 export const testOwnerSchema = z
   .object({
-    email: z.string().email(),
+    email: z.email(),
     displayName: z.string().min(2).max(120),
   })
   .strict();

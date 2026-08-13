@@ -23,13 +23,13 @@ export type ActiveDevicesAlertsQuery = z.output<typeof activeDevicesAlertsQueryS
 
 export const activeDevicesAlertSessionSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     deviceLabel: z.string(),
     shortId: z.string(),
     ipAddress: z.string().nullable(),
     platform: z.string().nullable(),
-    lastSeenAt: z.string().datetime(),
-    createdAt: z.string().datetime(),
+    lastSeenAt: z.iso.datetime(),
+    createdAt: z.iso.datetime(),
   })
   .strict();
 
@@ -37,25 +37,25 @@ export const activeDevicesAlertNoteSchema = z
   .object({
     id: z.string(),
     body: z.string(),
-    createdAt: z.string().datetime(),
-    authorMembershipId: z.string().uuid().nullable(),
+    createdAt: z.iso.datetime(),
+    authorMembershipId: z.uuid().nullable(),
     authorLabel: z.string().nullable(),
   })
   .strict();
 
 export const activeDevicesAlertListItemSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     alertKey: z.string(),
     alertType: z.enum(DEVICE_ALERT_TYPES),
     severity: z.enum(DEVICE_ALERT_SEVERITIES),
     status: z.enum(DEVICE_ALERT_STATUSES),
     title: z.string(),
-    membershipId: z.string().uuid(),
+    membershipId: z.uuid(),
     learnerName: z.string().nullable(),
     email: z.string().nullable(),
-    detectedAt: z.string().datetime(),
-    resolvedAt: z.string().datetime().nullable(),
+    detectedAt: z.iso.datetime(),
+    resolvedAt: z.iso.datetime().nullable(),
     evidenceSummary: z.array(z.string()),
     sessionCount: z.number().int().nonnegative(),
   })
@@ -98,23 +98,23 @@ export const activeDevicesAlertsListResponseSchema = z.object({
 
 export const activeDevicesAlertParamsSchema = z
   .object({
-    alertId: z.string().uuid(),
+    alertId: z.uuid(),
   })
   .strict();
 
 export const activeDevicesAlertDetailResponseSchema = z.object({
   data: z.object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     alertKey: z.string(),
     alertType: z.enum(DEVICE_ALERT_TYPES),
     severity: z.enum(DEVICE_ALERT_SEVERITIES),
     status: z.enum(DEVICE_ALERT_STATUSES),
     title: z.string(),
-    membershipId: z.string().uuid(),
+    membershipId: z.uuid(),
     learnerName: z.string().nullable(),
     email: z.string().nullable(),
-    detectedAt: z.string().datetime(),
-    resolvedAt: z.string().datetime().nullable(),
+    detectedAt: z.iso.datetime(),
+    resolvedAt: z.iso.datetime().nullable(),
     ruleLabel: z.string(),
     thresholdLabel: z.string(),
     evidence: z.record(z.string(), z.unknown()),
@@ -131,7 +131,7 @@ export const activeDevicesAlertDetailResponseSchema = z.object({
 
 export const activeDevicesAlertActionBodySchema = rejectClientTenantFields
   .extend({
-    alertIds: z.array(z.string().uuid()).min(1).max(100),
+    alertIds: z.array(z.uuid()).min(1).max(100),
   })
   .strict();
 

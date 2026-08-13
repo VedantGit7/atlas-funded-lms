@@ -20,7 +20,7 @@ export const createMockTestBodySchema = rejectClientTenantFields
     slug: z.string().trim().min(1).max(128),
     title: z.string().trim().min(1).max(512),
     description: z.string().trim().max(4096).optional(),
-    assessmentId: z.string().uuid(),
+    assessmentId: z.uuid(),
     status: z.enum(PUBLISH_STATUSES).default("DRAFT"),
   })
   .strict();
@@ -29,14 +29,14 @@ export const testSeriesItemBodySchema = z
   .object({
     position: z.number().int().min(0),
     title: z.string().trim().min(1).max(512).optional(),
-    mockTestId: z.string().uuid().optional(),
-    assessmentId: z.string().uuid().optional(),
+    mockTestId: z.uuid().optional(),
+    assessmentId: z.uuid().optional(),
   })
   .strict()
   .superRefine((item, ctx) => {
     if (!item.mockTestId && !item.assessmentId) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         message: "Each test series item must include mockTestId or assessmentId.",
       });
     }
@@ -55,7 +55,7 @@ export const createTestSeriesBodySchema = rejectClientTenantFields
 export const bundleItemBodySchema = z
   .object({
     itemKind: z.enum(BUNDLE_ITEM_KINDS),
-    refId: z.string().uuid(),
+    refId: z.uuid(),
     position: z.number().int().min(0),
   })
   .strict();
@@ -73,7 +73,7 @@ export const createBundleBodySchema = rejectClientTenantFields
 export const subscriptionPlanItemBodySchema = z
   .object({
     itemKind: z.enum(SUBSCRIPTION_ITEM_KINDS),
-    refId: z.string().uuid(),
+    refId: z.uuid(),
     position: z.number().int().min(0),
   })
   .strict();
@@ -91,106 +91,106 @@ export const createLearnerSubscriptionPlanBodySchema = rejectClientTenantFields
 
 export const productEnrollBodySchema = rejectClientTenantFields
   .extend({
-    membershipId: z.string().uuid(),
+    membershipId: z.uuid(),
     enrolledType: z.string().trim().min(1).max(64).default("free"),
-    expiresAt: z.string().datetime().optional(),
+    expiresAt: z.iso.datetime().optional(),
   })
   .strict();
 
-export const mockTestParamsSchema = z.object({ mockTestId: z.string().uuid() }).strict();
-export const testSeriesParamsSchema = z.object({ testSeriesId: z.string().uuid() }).strict();
-export const bundleParamsSchema = z.object({ bundleId: z.string().uuid() }).strict();
-export const learnerSubscriptionPlanParamsSchema = z.object({ planId: z.string().uuid() }).strict();
+export const mockTestParamsSchema = z.object({ mockTestId: z.uuid() }).strict();
+export const testSeriesParamsSchema = z.object({ testSeriesId: z.uuid() }).strict();
+export const bundleParamsSchema = z.object({ bundleId: z.uuid() }).strict();
+export const learnerSubscriptionPlanParamsSchema = z.object({ planId: z.uuid() }).strict();
 
 export const mockTestDtoSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     slug: z.string(),
     title: z.string(),
     description: z.string().nullable(),
-    assessmentId: z.string().uuid(),
+    assessmentId: z.uuid(),
     status: z.enum(PUBLISH_STATUSES),
-    createdAt: z.string().datetime(),
-    updatedAt: z.string().datetime(),
+    createdAt: z.iso.datetime(),
+    updatedAt: z.iso.datetime(),
   })
   .strict();
 
 export const testSeriesItemDtoSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     position: z.number().int(),
     title: z.string().nullable(),
-    mockTestId: z.string().uuid().nullable(),
-    assessmentId: z.string().uuid().nullable(),
+    mockTestId: z.uuid().nullable(),
+    assessmentId: z.uuid().nullable(),
   })
   .strict();
 
 export const testSeriesDtoSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     slug: z.string(),
     title: z.string(),
     description: z.string().nullable(),
     status: z.enum(PUBLISH_STATUSES),
     items: z.array(testSeriesItemDtoSchema),
-    createdAt: z.string().datetime(),
-    updatedAt: z.string().datetime(),
+    createdAt: z.iso.datetime(),
+    updatedAt: z.iso.datetime(),
   })
   .strict();
 
 export const bundleItemDtoSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     itemKind: z.enum(BUNDLE_ITEM_KINDS),
-    refId: z.string().uuid(),
+    refId: z.uuid(),
     position: z.number().int(),
   })
   .strict();
 
 export const bundleDtoSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     slug: z.string(),
     title: z.string(),
     description: z.string().nullable(),
     status: z.enum(PUBLISH_STATUSES),
     items: z.array(bundleItemDtoSchema),
-    createdAt: z.string().datetime(),
-    updatedAt: z.string().datetime(),
+    createdAt: z.iso.datetime(),
+    updatedAt: z.iso.datetime(),
   })
   .strict();
 
 export const learnerSubscriptionPlanItemDtoSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     itemKind: z.enum(SUBSCRIPTION_ITEM_KINDS),
-    refId: z.string().uuid(),
+    refId: z.uuid(),
     position: z.number().int(),
   })
   .strict();
 
 export const learnerSubscriptionPlanDtoSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     slug: z.string(),
     title: z.string(),
     description: z.string().nullable(),
     billingInterval: z.enum(BILLING_INTERVALS),
     status: z.enum(PUBLISH_STATUSES),
     items: z.array(learnerSubscriptionPlanItemDtoSchema),
-    createdAt: z.string().datetime(),
-    updatedAt: z.string().datetime(),
+    createdAt: z.iso.datetime(),
+    updatedAt: z.iso.datetime(),
   })
   .strict();
 
 export const productEnrollmentDtoSchema = z
   .object({
-    id: z.string().uuid(),
-    membershipId: z.string().uuid(),
+    id: z.uuid(),
+    membershipId: z.uuid(),
     status: z.string(),
     enrolledType: z.string(),
-    enrolledAt: z.string().datetime(),
-    expiresAt: z.string().datetime().nullable(),
+    enrolledAt: z.iso.datetime(),
+    expiresAt: z.iso.datetime().nullable(),
   })
   .strict();
 
@@ -241,5 +241,7 @@ export type LearnerProductListQuery = z.output<typeof learnerProductListQuerySch
 export type CreateMockTestBody = z.output<typeof createMockTestBodySchema>;
 export type CreateTestSeriesBody = z.output<typeof createTestSeriesBodySchema>;
 export type CreateBundleBody = z.output<typeof createBundleBodySchema>;
-export type CreateLearnerSubscriptionPlanBody = z.output<typeof createLearnerSubscriptionPlanBodySchema>;
+export type CreateLearnerSubscriptionPlanBody = z.output<
+  typeof createLearnerSubscriptionPlanBodySchema
+>;
 export type ProductEnrollBody = z.output<typeof productEnrollBodySchema>;

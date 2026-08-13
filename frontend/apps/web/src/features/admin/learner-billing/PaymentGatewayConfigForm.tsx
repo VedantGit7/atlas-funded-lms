@@ -15,6 +15,7 @@ const labelClassName = "block text-sm font-bold text-[var(--admin-on-surface)]";
 
 export function PaymentGatewayConfigForm({ gateway }: { gateway: PaymentGatewayView }) {
   const router = useRouter();
+  const isRazorpay = gateway.gatewayKey === "razorpay";
   const [userId, setUserId] = useState(gateway.userId ?? "");
   const [publishableKey, setPublishableKey] = useState(gateway.publishableKey ?? "");
   const [secretKey, setSecretKey] = useState("");
@@ -86,7 +87,8 @@ export function PaymentGatewayConfigForm({ gateway }: { gateway: PaymentGatewayV
 
         <div className="space-y-2">
           <label htmlFor="pg-publishable-key" className={labelClassName}>
-            Publishable Key<span className="text-[var(--admin-danger)]">*</span>
+            {isRazorpay ? "Key ID" : "Publishable Key"}
+            <span className="text-[var(--admin-danger)]">*</span>
           </label>
           <input
             id="pg-publishable-key"
@@ -94,14 +96,15 @@ export function PaymentGatewayConfigForm({ gateway }: { gateway: PaymentGatewayV
             onChange={(event) => {
               setPublishableKey(event.target.value);
             }}
-            placeholder="Enter publishable key"
+            placeholder={isRazorpay ? "Enter Razorpay Key ID" : "Enter publishable key"}
             className={inputClassName}
           />
         </div>
 
         <div className="space-y-2">
           <label htmlFor="pg-secret-key" className={labelClassName}>
-            Secret Key{secretRequired ? <span className="text-[var(--admin-danger)]">*</span> : null}
+            {isRazorpay ? "Key Secret" : "Secret Key"}
+            {secretRequired ? <span className="text-[var(--admin-danger)]">*</span> : null}
           </label>
           <input
             id="pg-secret-key"
@@ -114,7 +117,9 @@ export function PaymentGatewayConfigForm({ gateway }: { gateway: PaymentGatewayV
             placeholder={
               gateway.hasSecret
                 ? `Saved securely, ends in ${gateway.secretLast4 ?? "••••"}`
-                : "Enter client secret"
+                : isRazorpay
+                  ? "Enter Razorpay Key Secret"
+                  : "Enter client secret"
             }
             className={inputClassName}
           />
@@ -187,7 +192,10 @@ export function PaymentGatewayConfigForm({ gateway }: { gateway: PaymentGatewayV
         >
           {saving ? (
             <>
-              <RefreshCw className="h-4 w-4 animate-spin motion-reduce:animate-none" aria-hidden="true" />
+              <RefreshCw
+                className="h-4 w-4 animate-spin motion-reduce:animate-none"
+                aria-hidden="true"
+              />
               Saving
             </>
           ) : (

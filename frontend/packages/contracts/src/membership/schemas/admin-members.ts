@@ -3,27 +3,27 @@ import { membershipStatusSchema } from "../schemas";
 import { mutationBodySchema, pageInfoSchema } from "./shared";
 
 export const memberProfileViewSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   displayName: z.string().nullable(),
   avatarUrl: z.string().nullable(),
   bio: z.string().nullable().optional(),
 });
 
 export const memberRoleViewSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   key: z.string(),
   name: z.string(),
   isSystem: z.boolean(),
 });
 
 export const memberListItemSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   status: membershipStatusSchema,
-  invitedEmail: z.string().email().nullable().optional(),
-  accountEmail: z.string().email().nullable().optional(),
-  joinedAt: z.string().datetime().nullable().optional(),
-  lastActiveAt: z.string().datetime().nullable().optional(),
-  archivedAt: z.string().datetime().nullable().optional(),
+  invitedEmail: z.email().nullable().optional(),
+  accountEmail: z.email().nullable().optional(),
+  joinedAt: z.iso.datetime().nullable().optional(),
+  lastActiveAt: z.iso.datetime().nullable().optional(),
+  archivedAt: z.iso.datetime().nullable().optional(),
   profile: memberProfileViewSchema.nullable(),
   roles: z.array(memberRoleViewSchema).optional(),
 });
@@ -39,12 +39,12 @@ export const memberListQuerySchema = z
   .strict();
 
 export const memberDetailViewSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   status: membershipStatusSchema,
-  invitedEmail: z.string().email().nullable(),
-  joinedAt: z.string().datetime().nullable(),
-  suspendedAt: z.string().datetime().nullable(),
-  removedAt: z.string().datetime().nullable(),
+  invitedEmail: z.email().nullable(),
+  joinedAt: z.iso.datetime().nullable(),
+  suspendedAt: z.iso.datetime().nullable(),
+  removedAt: z.iso.datetime().nullable(),
   profile: memberProfileViewSchema.nullable(),
   roles: z.array(memberRoleViewSchema),
 });
@@ -80,45 +80,42 @@ export const memberDetailResponseSchema = z.object({
 export const INVITE_EXPIRY_DAYS = 7;
 
 export const inviteMemberBodySchema = mutationBodySchema({
-  email: z
-    .string()
-    .email()
-    .transform((value) => value.trim().toLowerCase()),
+  email: z.email().transform((value) => value.trim().toLowerCase()),
   displayName: z.string().trim().min(1).max(120).optional(),
-  roleId: z.string().uuid().optional(),
+  roleId: z.uuid().optional(),
 });
 
 export const inviteMemberResponseSchema = z.object({
   data: z.object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     status: z.literal("INVITED"),
-    invitedEmail: z.string().email(),
-    inviteExpiresAt: z.string().datetime(),
+    invitedEmail: z.email(),
+    inviteExpiresAt: z.iso.datetime(),
   }),
 });
 
 export const resendInviteResponseSchema = z.object({
   data: z.object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     status: z.literal("INVITED"),
-    invitedEmail: z.string().email(),
-    inviteExpiresAt: z.string().datetime(),
+    invitedEmail: z.email(),
+    inviteExpiresAt: z.iso.datetime(),
   }),
 });
 
 export const suspendMemberResponseSchema = z.object({
   data: z.object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     status: z.literal("SUSPENDED"),
-    suspendedAt: z.string().datetime(),
+    suspendedAt: z.iso.datetime(),
   }),
 });
 
 export const removeMemberResponseSchema = z.object({
   data: z.object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     status: z.literal("REMOVED"),
-    removedAt: z.string().datetime(),
+    removedAt: z.iso.datetime(),
   }),
 });
 
@@ -136,7 +133,7 @@ export const memberProfileResponseSchema = z.object({
 export const updateMemberProfileBodySchema = mutationBodySchema({
   displayName: z.string().trim().min(1).max(120).nullable().optional(),
   bio: z.string().trim().max(2000).nullable().optional(),
-  avatarUrl: z.string().url().nullable().optional(),
+  avatarUrl: z.url().nullable().optional(),
   timezone: z.string().trim().min(1).max(100).nullable().optional(),
   profileVisibility: profileVisibilitySchema.optional(),
 });

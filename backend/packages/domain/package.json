@@ -23,11 +23,14 @@
     "@atlas/authorization": "workspace:*",
     "@atlas/core": "workspace:*",
     "@atlas/db": "workspace:*",
+    "@atlas/domain-config": "workspace:*",
     "@atlas/events": "workspace:*",
     "@atlas/membership": "workspace:*",
     "@atlas/storage": "workspace:*",
+    "cron-parser": "^5.8.1",
     "exceljs": "^4.4.0",
-    "zod": "^3.25.76"
+    "stripe": "^22.5.0",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/node": "^24.0.0"

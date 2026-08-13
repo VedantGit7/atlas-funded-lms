@@ -10,7 +10,7 @@ export const FxRatesResponseSchema = z.object({
   data: z.object({
     base: z.string(),
     asOf: z.string().nullable(),
-    fetchedAt: z.string().datetime().nullable(),
+    fetchedAt: z.iso.datetime().nullable(),
     rates: z.record(z.string(), z.number()),
   }),
 });

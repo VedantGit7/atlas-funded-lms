@@ -6,7 +6,7 @@ import { avatarMutationMetadata } from "../route.metadata";
 
 const confirmAvatarBodySchema = z
   .object({
-    assetReferenceId: z.string().uuid(),
+    assetReferenceId: z.uuid(),
   })
   .strict();
 
@@ -14,7 +14,7 @@ type ConfirmAvatarBody = z.output<typeof confirmAvatarBodySchema>;
 
 const confirmAvatarResponseSchema = z.object({
   data: z.object({
-    avatarUrl: z.string().url().nullable(),
+    avatarUrl: z.url().nullable(),
   }),
 });
 

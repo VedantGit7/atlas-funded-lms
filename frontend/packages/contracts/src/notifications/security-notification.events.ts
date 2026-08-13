@@ -13,9 +13,9 @@ export const SECURITY_NOTIFICATION_EVENT_KEYS = [
 export type SecurityNotificationEventKey = (typeof SECURITY_NOTIFICATION_EVENT_KEYS)[number];
 
 export const securityNotificationOutboxPayloadSchema = z.object({
-  membershipId: z.string().uuid(),
-  email: z.string().email(),
-  siteUrl: z.string().url().optional(),
+  membershipId: z.uuid(),
+  email: z.email(),
+  siteUrl: z.url().optional(),
   metadata: z.record(z.string(), z.string()).optional(),
 });
 

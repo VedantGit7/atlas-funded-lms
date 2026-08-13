@@ -55,8 +55,8 @@ export const pollsListQuerySchema = rejectClientTenantFields
     status: z.enum(["ACTIVE", "INACTIVE", "ARCHIVED"]).optional(),
     pollType: z.enum(["yes_no", "multiple_choice"]).optional(),
     view: pollsListViewSchema.default("all"),
-    createdFrom: z.string().datetime().optional(),
-    createdTo: z.string().datetime().optional(),
+    createdFrom: z.iso.datetime().optional(),
+    createdTo: z.iso.datetime().optional(),
     limit: z.coerce.number().int().min(1).max(100).default(25),
     page: z.coerce.number().int().min(1).max(1000).default(1),
   })
@@ -66,7 +66,7 @@ export type PollsListQuery = z.output<typeof pollsListQuerySchema>;
 
 export const pollListItemSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     title: z.string(),
     description: z.string().nullable(),
     pollType: z.string(),
@@ -77,14 +77,14 @@ export const pollListItemSchema = z
     resultVisibility: z.string(),
     layout: z.string(),
     durationSeconds: z.number().int().nullable(),
-    liveSessionId: z.string().uuid().nullable(),
+    liveSessionId: z.uuid().nullable(),
     liveSessionTitle: z.string().nullable(),
-    closesAt: z.string().datetime().nullable(),
+    closesAt: z.iso.datetime().nullable(),
     isOpen: z.boolean(),
     responseCount: z.number().int().nonnegative(),
     optionCount: z.number().int().nonnegative(),
     participationPct: z.number().nullable(),
-    createdAt: z.string().datetime(),
+    createdAt: z.iso.datetime(),
   })
   .strict();
 
@@ -110,20 +110,20 @@ export const pollsListResponseSchema = z.object({
 
 export const pollIdParamsSchema = z
   .object({
-    pollId: z.string().uuid(),
+    pollId: z.uuid(),
   })
   .strict();
 
 export const pollOptionParamsSchema = z
   .object({
-    pollId: z.string().uuid(),
-    optionId: z.string().uuid(),
+    pollId: z.uuid(),
+    optionId: z.uuid(),
   })
   .strict();
 
 export const pollOptionBreakdownSchema = z
   .object({
-    optionId: z.string().uuid(),
+    optionId: z.uuid(),
     label: z.string(),
     sortOrder: z.number().int(),
     isCorrect: z.boolean(),
@@ -142,7 +142,7 @@ export const pollTimelinePointSchema = z
 export const pollTimelineEventSchema = z
   .object({
     kind: z.enum(["opened", "half", "closed"]),
-    at: z.string().datetime(),
+    at: z.iso.datetime(),
     label: z.string(),
     detail: z.string().nullable(),
   })
@@ -156,10 +156,10 @@ export const pollDetailResponseSchema = z.object({
     correctCount: z.number().int().nonnegative().nullable(),
     correctPct: z.number().nullable(),
     medianResponseSeconds: z.number().nullable(),
-    openedAt: z.string().datetime(),
-    closedAt: z.string().datetime().nullable(),
-    firstResponseAt: z.string().datetime().nullable(),
-    lastResponseAt: z.string().datetime().nullable(),
+    openedAt: z.iso.datetime(),
+    closedAt: z.iso.datetime().nullable(),
+    firstResponseAt: z.iso.datetime().nullable(),
+    lastResponseAt: z.iso.datetime().nullable(),
     options: z.array(pollOptionBreakdownSchema),
     respondentsHidden: z.boolean(),
     timeline: z.object({
@@ -175,10 +175,10 @@ export const pollDetailResponseSchema = z.object({
 export const pollRespondentsQuerySchema = rejectClientTenantFields
   .extend({
     learnerName: z.string().trim().min(1).max(200).optional(),
-    optionId: z.string().uuid().optional(),
+    optionId: z.uuid().optional(),
     isCorrect: z.enum(["any", "correct", "incorrect"]).default("any"),
-    respondedFrom: z.string().datetime().optional(),
-    respondedTo: z.string().datetime().optional(),
+    respondedFrom: z.iso.datetime().optional(),
+    respondedTo: z.iso.datetime().optional(),
     sortBy: z
       .enum(["responded_at", "learner_name", "option_label", "response_seconds"])
       .default("responded_at"),
@@ -196,20 +196,20 @@ export type PollRespondentsQuery = z.output<typeof pollRespondentsQuerySchema>;
 
 export const pollRespondentItemSchema = z
   .object({
-    membershipId: z.string().uuid().nullable(),
+    membershipId: z.uuid().nullable(),
     learnerName: z.string().nullable(),
     email: z.string().nullable(),
-    optionId: z.string().uuid(),
+    optionId: z.uuid(),
     optionLabel: z.string(),
     isCorrect: z.boolean().nullable(),
     responseSeconds: z.number().nullable(),
-    respondedAt: z.string().datetime(),
+    respondedAt: z.iso.datetime(),
   })
   .strict();
 
 export const pollRespondentsListResponseSchema = z.object({
   data: z.object({
-    pollId: z.string().uuid(),
+    pollId: z.uuid(),
     pollTitle: z.string(),
     anonymousVote: z.boolean(),
     respondentsHidden: z.boolean(),
@@ -221,11 +221,11 @@ export const pollRespondentsListResponseSchema = z.object({
 
 export const exportPollRosterBodySchema = rejectClientTenantFields
   .extend({
-    pollId: z.string().uuid().optional(),
+    pollId: z.uuid().optional(),
     learnerName: z.string().trim().min(1).max(200).optional(),
-    optionId: z.string().uuid().optional(),
-    respondedFrom: z.string().datetime().optional(),
-    respondedTo: z.string().datetime().optional(),
+    optionId: z.uuid().optional(),
+    respondedFrom: z.iso.datetime().optional(),
+    respondedTo: z.iso.datetime().optional(),
     columns: z.array(z.string().min(1)).min(1).max(30).optional(),
     emailDownloadLink: z.boolean().default(true),
   })
@@ -233,7 +233,7 @@ export const exportPollRosterBodySchema = rejectClientTenantFields
 
 export const exportPollRosterResponseSchema = z.object({
   data: z.object({
-    runId: z.string().uuid(),
+    runId: z.uuid(),
     status: z.string(),
     emailed: z.boolean(),
   }),
@@ -258,14 +258,14 @@ export const pollOptionTimingBucketSchema = z
 
 export const pollOptionDetailResponseSchema = z.object({
   data: z.object({
-    pollId: z.string().uuid(),
+    pollId: z.uuid(),
     pollTitle: z.string(),
     pollDescription: z.string().nullable(),
     quizMode: z.boolean(),
     anonymousVote: z.boolean(),
     isOpen: z.boolean(),
-    openedAt: z.string().datetime(),
-    closedAt: z.string().datetime().nullable(),
+    openedAt: z.iso.datetime(),
+    closedAt: z.iso.datetime().nullable(),
     respondentsHidden: z.boolean(),
     option: pollOptionBreakdownSchema,
     totalResponses: z.number().int().nonnegative(),
@@ -293,7 +293,14 @@ export const pollNonRespondentsQuerySchema = rejectClientTenantFields
     presence: z.enum(["any", "present", "absent"]).default("any"),
     excludeAbsent: z.coerce.boolean().default(false),
     sortBy: z
-      .enum(["learner_name", "batch_name", "presence", "watch_seconds", "polls_answered", "last_response_at"])
+      .enum([
+        "learner_name",
+        "batch_name",
+        "presence",
+        "watch_seconds",
+        "polls_answered",
+        "last_response_at",
+      ])
       .default("learner_name"),
     sortDir: z.enum(["asc", "desc"]).default("asc"),
     limit: z.coerce.number().int().min(1).max(100).default(25),
@@ -305,15 +312,15 @@ export type PollNonRespondentsQuery = z.output<typeof pollNonRespondentsQuerySch
 
 export const pollNonRespondentItemSchema = z
   .object({
-    membershipId: z.string().uuid(),
+    membershipId: z.uuid(),
     learnerName: z.string().nullable(),
     email: z.string().nullable(),
-    batchId: z.string().uuid().nullable(),
+    batchId: z.uuid().nullable(),
     batchName: z.string().nullable(),
     presence: z.enum(["present", "absent"]),
     watchSeconds: z.number().int().nonnegative().nullable(),
     pollsAnswered: z.number().int().nonnegative(),
-    lastResponseAt: z.string().datetime().nullable(),
+    lastResponseAt: z.iso.datetime().nullable(),
   })
   .strict();
 
@@ -321,9 +328,9 @@ export const pollNonRespondentsSummarySchema = z
   .object({
     audienceKnown: z.boolean(),
     audienceSource: z.enum(["none", "live_session", "batch"]),
-    liveSessionId: z.string().uuid().nullable(),
+    liveSessionId: z.uuid().nullable(),
     liveSessionTitle: z.string().nullable(),
-    batchId: z.string().uuid().nullable(),
+    batchId: z.uuid().nullable(),
     batchName: z.string().nullable(),
     pollTitle: z.string(),
     pollIsOpen: z.boolean(),
@@ -338,7 +345,7 @@ export const pollNonRespondentsSummarySchema = z
 
 export const pollNonRespondentsListResponseSchema = z.object({
   data: z.object({
-    pollId: z.string().uuid(),
+    pollId: z.uuid(),
     summary: pollNonRespondentsSummarySchema,
     items: z.array(pollNonRespondentItemSchema),
     pageInfo: pageInfoSchema,
@@ -358,17 +365,17 @@ export type PollLiveExtendBody = z.output<typeof pollLiveExtendBodySchema>;
 
 export const pollLiveRecentAnswerSchema = z
   .object({
-    membershipId: z.string().uuid().nullable(),
+    membershipId: z.uuid().nullable(),
     learnerName: z.string().nullable(),
-    optionId: z.string().uuid(),
+    optionId: z.uuid(),
     optionLabel: z.string(),
-    respondedAt: z.string().datetime(),
+    respondedAt: z.iso.datetime(),
   })
   .strict();
 
 export const pollLiveMonitorResponseSchema = z.object({
   data: z.object({
-    pollId: z.string().uuid(),
+    pollId: z.uuid(),
     title: z.string(),
     description: z.string().nullable(),
     quizMode: z.boolean(),
@@ -376,12 +383,12 @@ export const pollLiveMonitorResponseSchema = z.object({
     resultVisibility: z.string(),
     isOpen: z.boolean(),
     durationSeconds: z.number().int().nullable(),
-    openedAt: z.string().datetime(),
-    closedAt: z.string().datetime().nullable(),
-    closesAt: z.string().datetime().nullable(),
-    liveSessionId: z.string().uuid().nullable(),
+    openedAt: z.iso.datetime(),
+    closedAt: z.iso.datetime().nullable(),
+    closesAt: z.iso.datetime().nullable(),
+    liveSessionId: z.uuid().nullable(),
     liveSessionTitle: z.string().nullable(),
-    serverNow: z.string().datetime(),
+    serverNow: z.iso.datetime(),
     secondsRemaining: z.number().nullable(),
     ranForSeconds: z.number().nullable(),
     totalResponses: z.number().int().nonnegative(),
@@ -406,7 +413,7 @@ export type PollLiveMonitor = z.output<typeof pollLiveMonitorResponseSchema>["da
 
 export const liveSessionIdParamsSchema = z
   .object({
-    liveSessionId: z.string().uuid(),
+    liveSessionId: z.uuid(),
   })
   .strict();
 
@@ -414,15 +421,15 @@ export const liveSessionPollOptionSchema = pollOptionBreakdownSchema;
 
 export const liveSessionPollBlockSchema = z
   .object({
-    pollId: z.string().uuid(),
+    pollId: z.uuid(),
     title: z.string(),
     description: z.string().nullable(),
     quizMode: z.boolean(),
     anonymousVote: z.boolean(),
     isOpen: z.boolean(),
     pollType: z.string(),
-    openedAt: z.string().datetime(),
-    closedAt: z.string().datetime().nullable(),
+    openedAt: z.iso.datetime(),
+    closedAt: z.iso.datetime().nullable(),
     responseCount: z.number().int().nonnegative(),
     eligibleCount: z.number().int().nonnegative().nullable(),
     participationPct: z.number().nullable(),
@@ -433,7 +440,7 @@ export const liveSessionPollBlockSchema = z
 
 export const liveSessionPollTimelineBandSchema = z
   .object({
-    pollId: z.string().uuid(),
+    pollId: z.uuid(),
     title: z.string(),
     offsetStartSeconds: z.number().nonnegative(),
     offsetEndSeconds: z.number().nonnegative(),
@@ -461,18 +468,18 @@ export const liveSessionPollReportResponseSchema = z.object({
   data: z.object({
     session: z
       .object({
-        id: z.string().uuid(),
+        id: z.uuid(),
         title: z.string(),
         status: z.string(),
-        scheduledAt: z.string().datetime().nullable(),
-        startedAt: z.string().datetime().nullable(),
-        endedAt: z.string().datetime().nullable(),
+        scheduledAt: z.iso.datetime().nullable(),
+        startedAt: z.iso.datetime().nullable(),
+        endedAt: z.iso.datetime().nullable(),
         durationSeconds: z.number().int().nonnegative().nullable(),
         attendanceCount: z.number().int().nonnegative(),
         hostLabel: z.string().nullable(),
-        courseId: z.string().uuid().nullable(),
+        courseId: z.uuid().nullable(),
         courseTitle: z.string().nullable(),
-        batchId: z.string().uuid().nullable(),
+        batchId: z.uuid().nullable(),
         batchName: z.string().nullable(),
         recordingUrl: z.string().nullable(),
         hasRecording: z.boolean(),
@@ -487,14 +494,14 @@ export const liveSessionPollReportResponseSchema = z.object({
         avgParticipationPct: z.number().nullable(),
         mostAnswered: z
           .object({
-            pollId: z.string().uuid(),
+            pollId: z.uuid(),
             title: z.string(),
             responseCount: z.number().int().nonnegative(),
           })
           .nullable(),
         leastAnswered: z
           .object({
-            pollId: z.string().uuid(),
+            pollId: z.uuid(),
             title: z.string(),
             responseCount: z.number().int().nonnegative(),
           })
@@ -519,9 +526,9 @@ export const liveSessionPollReportResponseSchema = z.object({
         polls: z.array(
           z
             .object({
-              pollId: z.string().uuid(),
+              pollId: z.uuid(),
               title: z.string(),
-              openedAt: z.string().datetime(),
+              openedAt: z.iso.datetime(),
               anonymousVote: z.boolean(),
               quizMode: z.boolean(),
               participationPct: z.number().nullable(),
@@ -531,13 +538,13 @@ export const liveSessionPollReportResponseSchema = z.object({
         learners: z.array(
           z
             .object({
-              membershipId: z.string().uuid(),
+              membershipId: z.uuid(),
               learnerName: z.string().nullable(),
               email: z.string().nullable(),
               cells: z.array(
                 z
                   .object({
-                    pollId: z.string().uuid(),
+                    pollId: z.uuid(),
                     kind: liveSessionMatrixCellKindSchema,
                   })
                   .strict(),
@@ -553,9 +560,7 @@ export const liveSessionPollReportResponseSchema = z.object({
   }),
 });
 
-export type LiveSessionPollReport = z.output<
-  typeof liveSessionPollReportResponseSchema
->["data"];
+export type LiveSessionPollReport = z.output<typeof liveSessionPollReportResponseSchema>["data"];
 export type LiveSessionPollBlock = z.output<typeof liveSessionPollBlockSchema>;
 export type LiveSessionMatrixCellKind = z.output<typeof liveSessionMatrixCellKindSchema>;
 
@@ -571,19 +576,19 @@ export type LiveSessionsPollsListQuery = z.output<typeof liveSessionsPollsListQu
 
 export const liveSessionPollListItemSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     title: z.string(),
     status: z.string(),
-    scheduledAt: z.string().datetime().nullable(),
-    startedAt: z.string().datetime().nullable(),
-    endedAt: z.string().datetime().nullable(),
+    scheduledAt: z.iso.datetime().nullable(),
+    startedAt: z.iso.datetime().nullable(),
+    endedAt: z.iso.datetime().nullable(),
     hostLabel: z.string().nullable(),
     attendanceCount: z.number().int().nonnegative(),
     pollCount: z.number().int().nonnegative(),
     quizPollCount: z.number().int().nonnegative(),
     totalResponses: z.number().int().nonnegative(),
     avgParticipationPct: z.number().nullable(),
-    batchId: z.string().uuid().nullable(),
+    batchId: z.uuid().nullable(),
     batchName: z.string().nullable(),
     courseTitle: z.string().nullable(),
   })
@@ -624,10 +629,7 @@ export const POLL_COMPARE_ALIGN_OPTIONS = ["label", "order"] as const;
 
 export const pollsCompareQuerySchema = rejectClientTenantFields
   .extend({
-    pollIds: z.preprocess(
-      parseComparePollIds,
-      z.array(z.string().uuid()).min(2).max(4),
-    ),
+    pollIds: z.preprocess(parseComparePollIds, z.array(z.uuid()).min(2).max(4)),
     alignBy: z.enum(POLL_COMPARE_ALIGN_OPTIONS).default("label"),
   })
   .strict();
@@ -636,8 +638,8 @@ export type PollsCompareQuery = z.output<typeof pollsCompareQuerySchema>;
 
 export const pollCompareOptionCellSchema = z
   .object({
-    pollId: z.string().uuid(),
-    optionId: z.string().uuid().nullable(),
+    pollId: z.uuid(),
+    optionId: z.uuid().nullable(),
     label: z.string().nullable(),
     count: z.number().int().nonnegative().nullable(),
     percent: z.number().nullable(),
@@ -656,16 +658,16 @@ export const pollCompareOptionRowSchema = z
 
 export const pollCompareItemSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     title: z.string(),
     shortName: z.string(),
     quizMode: z.boolean(),
     anonymousVote: z.boolean(),
-    liveSessionId: z.string().uuid().nullable(),
+    liveSessionId: z.uuid().nullable(),
     liveSessionTitle: z.string().nullable(),
-    createdAt: z.string().datetime(),
-    openedAt: z.string().datetime(),
-    closedAt: z.string().datetime().nullable(),
+    createdAt: z.iso.datetime(),
+    openedAt: z.iso.datetime(),
+    closedAt: z.iso.datetime().nullable(),
     responseCount: z.number().int().nonnegative(),
     eligibleCount: z.number().int().nonnegative().nullable(),
     participationPct: z.number().nullable(),

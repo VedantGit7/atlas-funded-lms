@@ -6,7 +6,7 @@ export const EntitlementViewSchema = z.object({
   key: z.string(),
   value: z.unknown().nullable(),
   enabled: z.boolean(),
-  expiresAt: z.string().datetime().nullable(),
+  expiresAt: z.iso.datetime().nullable(),
 });
 
 export const EntitlementListResponseSchema = z.object({

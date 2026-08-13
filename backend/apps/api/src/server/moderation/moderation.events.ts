@@ -8,22 +8,22 @@ export const MODERATION_DECIDED_EVENT = "moderation.decided" as const;
 
 export const moderationReportedPayloadSchema = z
   .object({
-    caseId: z.string().uuid(),
+    caseId: z.uuid(),
     targetType: z.enum(["post", "comment"]),
-    targetId: z.string().uuid(),
-    openedByMembershipId: z.string().uuid(),
+    targetId: z.uuid(),
+    openedByMembershipId: z.uuid(),
     reasonKey: z.string().nullable(),
   })
   .strict();
 
 export const moderationDecidedPayloadSchema = z
   .object({
-    caseId: z.string().uuid(),
+    caseId: z.uuid(),
     decisionKey: z.string(),
     caseStatus: z.enum(["OPEN", "REVIEWING", "ACTIONED", "REJECTED", "CLOSED"]),
-    decidedByMembershipId: z.string().uuid(),
+    decidedByMembershipId: z.uuid(),
     contentAction: z.enum(["delete"]).nullable().optional(),
-    appealId: z.string().uuid().nullable().optional(),
+    appealId: z.uuid().nullable().optional(),
     appealOutcome: z.enum(["uphold", "reject"]).nullable().optional(),
   })
   .strict();

@@ -28,7 +28,7 @@ function getPostHogServerClient(): PostHogServerClient | null {
     return cachedClient;
   }
 
-  const host = process.env["POSTHOG_SERVER_HOST"]?.trim() || "https://us.i.posthog.com";
+  const host = process.env["POSTHOG_SERVER_HOST"]?.trim() || "https://eu.i.posthog.com";
 
   try {
     // eslint-disable-next-line @typescript-eslint/no-require-imports

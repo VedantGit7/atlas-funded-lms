@@ -8,7 +8,7 @@ const rejectClientTenantFields = z
     r2_key: z.never().optional(),
     r2_object_key: z.never().optional(),
   })
-  .passthrough();
+  .loose();
 
 export const BI_EXPORT_FORMATS = ["csv", "jsonl"] as const;
 
@@ -18,13 +18,13 @@ export const createBiExportBodySchema = rejectClientTenantFields
   .extend({
     datasetKey: z.string().min(1),
     format: z.enum(BI_EXPORT_FORMATS).default("csv"),
-    params: z.record(z.unknown()).optional(),
+    params: z.record(z.string(), z.unknown()).optional(),
   })
   .strict();
 
 export const biExportListQuerySchema = rejectClientTenantFields
   .extend({
-    cursor: z.string().uuid().optional(),
+    cursor: z.uuid().optional(),
     limit: z.coerce.number().int().min(1).max(50).default(20),
     status: z.enum(JOB_STATUSES).optional(),
   })
@@ -32,27 +32,27 @@ export const biExportListQuerySchema = rejectClientTenantFields
 
 export const biExportParamsSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
   })
   .strict();
 
 export const biExportJobDtoSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     datasetKey: z.string(),
     format: z.enum(BI_EXPORT_FORMATS),
     status: z.enum(JOB_STATUSES),
-    params: z.record(z.unknown()),
-    requestedByMembershipId: z.string().uuid(),
-    createdAt: z.string().datetime(),
-    updatedAt: z.string().datetime(),
-    completedAt: z.string().datetime().nullable(),
-    expiresAt: z.string().datetime().nullable(),
+    params: z.record(z.string(), z.unknown()),
+    requestedByMembershipId: z.uuid(),
+    createdAt: z.iso.datetime(),
+    updatedAt: z.iso.datetime(),
+    completedAt: z.iso.datetime().nullable(),
+    expiresAt: z.iso.datetime().nullable(),
     errorCode: z.string().nullable(),
     download: z
       .object({
-        url: z.string().url(),
-        expiresAt: z.string().datetime(),
+        url: z.url(),
+        expiresAt: z.iso.datetime(),
       })
       .nullable(),
   })
@@ -66,7 +66,7 @@ export const biExportListResponseSchema = z.object({
   data: z.object({
     items: z.array(biExportJobDtoSchema.omit({ download: true })),
     pageInfo: z.object({
-      nextCursor: z.string().uuid().nullable(),
+      nextCursor: z.uuid().nullable(),
       hasNextPage: z.boolean(),
     }),
   }),

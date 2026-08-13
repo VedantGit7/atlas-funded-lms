@@ -18,7 +18,7 @@ import { getReportRunMetadata } from "@atlas/domain/reports/reports.route-metada
 import { getReportRun } from "@atlas/domain/reports/reports.service";
 
 const paramsSchema = z.object({
-  runId: z.string().uuid(),
+  runId: z.uuid(),
   format: z.enum(["csv", "xlsx", "pdf", "json"]),
 });
 
@@ -29,7 +29,7 @@ const downloadResponseSchema = z.object({
     contentType: z.string(),
     content: z.string(),
     contentEncoding: z.enum(["utf8", "base64"]),
-    url: z.string().url().nullable(),
+    url: z.url().nullable(),
   }),
 });
 

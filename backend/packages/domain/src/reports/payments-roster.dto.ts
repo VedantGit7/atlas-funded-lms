@@ -77,15 +77,17 @@ const pageInfoSchema = z.object({
 
 export const paymentTransactionsQuerySchema = rejectClientTenantFields
   .extend({
-    paidFrom: z.string().datetime().optional(),
-    paidTo: z.string().datetime().optional(),
+    paidFrom: z.iso.datetime().optional(),
+    paidTo: z.iso.datetime().optional(),
     learnerName: z.string().trim().min(1).max(200).optional(),
     productType: z.string().trim().min(1).max(64).optional(),
     gatewayKey: z.string().trim().min(1).max(64).optional(),
     status: z.string().trim().min(1).max(64).optional(),
     amountMinCents: z.coerce.number().int().min(0).optional(),
     dateField: z.enum(["paid_at", "created_at"]).default("paid_at"),
-    sortBy: z.enum(["paid_at", "created_at", "coupon_amount_cents", "amount_cents"]).default("paid_at"),
+    sortBy: z
+      .enum(["paid_at", "created_at", "coupon_amount_cents", "amount_cents"])
+      .default("paid_at"),
     sortDir: z.enum(["asc", "desc"]).default("desc"),
     columns: z.preprocess(
       (value) => parseColumns(PAYMENT_ROSTER_COLUMNS, value),
@@ -100,8 +102,8 @@ export type PaymentTransactionsQuery = z.output<typeof paymentTransactionsQueryS
 
 export const paymentTransactionItemSchema = z
   .object({
-    id: z.string().uuid(),
-    membershipId: z.string().uuid().nullable(),
+    id: z.uuid(),
+    membershipId: z.uuid().nullable(),
     learnerName: z.string().nullable(),
     email: z.string().nullable(),
     productTitle: z.string().nullable(),
@@ -114,8 +116,8 @@ export const paymentTransactionItemSchema = z
     status: z.string(),
     invoiceNumber: z.string().nullable(),
     externalId: z.string().nullable(),
-    paidAt: z.string().datetime().nullable(),
-    createdAt: z.string().datetime(),
+    paidAt: z.iso.datetime().nullable(),
+    createdAt: z.iso.datetime(),
   })
   .strict();
 
@@ -134,8 +136,8 @@ export const paymentTransactionsListResponseSchema = z.object({
 
 export const paymentGatewaysQuerySchema = rejectClientTenantFields
   .extend({
-    paidFrom: z.string().datetime().optional(),
-    paidTo: z.string().datetime().optional(),
+    paidFrom: z.iso.datetime().optional(),
+    paidTo: z.iso.datetime().optional(),
   })
   .strict();
 
@@ -146,14 +148,14 @@ export const paymentGatewaysListResponseSchema = z.object({
     summary: z.object({
       totalPaidCents: z.number().int().nonnegative(),
       currency: z.string(),
-      windowFrom: z.string().datetime(),
-      windowTo: z.string().datetime(),
+      windowFrom: z.iso.datetime(),
+      windowTo: z.iso.datetime(),
       windowLabel: z.string(),
     }),
     items: z.array(
       z
         .object({
-          id: z.string().uuid(),
+          id: z.uuid(),
           gatewayKey: z.string(),
           displayName: z.string(),
           isConfigured: z.boolean(),
@@ -180,8 +182,8 @@ export const paymentGatewayKeyParamsSchema = z
 
 export const paymentGatewayDetailQuerySchema = rejectClientTenantFields
   .extend({
-    paidFrom: z.string().datetime().optional(),
-    paidTo: z.string().datetime().optional(),
+    paidFrom: z.iso.datetime().optional(),
+    paidTo: z.iso.datetime().optional(),
   })
   .strict();
 
@@ -191,7 +193,7 @@ export const paymentGatewayDetailResponseSchema = z.object({
   data: z.object({
     gateway: z
       .object({
-        id: z.string().uuid(),
+        id: z.uuid(),
         gatewayKey: z.string(),
         displayName: z.string(),
         isConfigured: z.boolean(),
@@ -200,8 +202,8 @@ export const paymentGatewayDetailResponseSchema = z.object({
         publishableKeyMasked: z.string().nullable(),
         secretLast4: z.string().nullable(),
         hasSecret: z.boolean(),
-        createdAt: z.string().datetime(),
-        updatedAt: z.string().datetime(),
+        createdAt: z.iso.datetime(),
+        updatedAt: z.iso.datetime(),
       })
       .strict(),
     summary: z
@@ -215,8 +217,8 @@ export const paymentGatewayDetailResponseSchema = z.object({
         refundedCount: z.number().int().nonnegative(),
         successPercent: z.number().nonnegative().nullable(),
         currency: z.string(),
-        windowFrom: z.string().datetime(),
-        windowTo: z.string().datetime(),
+        windowFrom: z.iso.datetime(),
+        windowTo: z.iso.datetime(),
         windowLabel: z.string(),
       })
       .strict(),
@@ -232,8 +234,8 @@ export const paymentGatewayDetailResponseSchema = z.object({
 
 export const paymentInvoicesQuerySchema = rejectClientTenantFields
   .extend({
-    paidFrom: z.string().datetime().optional(),
-    paidTo: z.string().datetime().optional(),
+    paidFrom: z.iso.datetime().optional(),
+    paidTo: z.iso.datetime().optional(),
     learnerName: z.string().trim().min(1).max(200).optional(),
     email: z.string().trim().min(1).max(320).optional(),
     q: z.string().trim().min(1).max(200).optional(),
@@ -253,8 +255,8 @@ export type PaymentInvoicesQuery = z.output<typeof paymentInvoicesQuerySchema>;
 
 export const paymentInvoiceItemSchema = z
   .object({
-    id: z.string().uuid(),
-    membershipId: z.string().uuid().nullable(),
+    id: z.uuid(),
+    membershipId: z.uuid().nullable(),
     invoiceNumber: z.string(),
     learnerName: z.string().nullable(),
     email: z.string().nullable(),
@@ -264,10 +266,10 @@ export const paymentInvoiceItemSchema = z
     amountCents: z.number().int(),
     taxAmountCents: z.number().int().nullable(),
     currency: z.string(),
-    paidAt: z.string().datetime().nullable(),
-    createdAt: z.string().datetime(),
+    paidAt: z.iso.datetime().nullable(),
+    createdAt: z.iso.datetime(),
     status: z.enum(["issued", "void"]),
-    voidedAt: z.string().datetime().nullable(),
+    voidedAt: z.iso.datetime().nullable(),
   })
   .strict();
 
@@ -295,7 +297,7 @@ export const paymentInvoicesListResponseSchema = z.object({
 
 export const paymentInvoiceDetailParamsSchema = z
   .object({
-    orderId: z.string().uuid(),
+    orderId: z.uuid(),
   })
   .strict();
 
@@ -310,9 +312,9 @@ export type PaymentInvoiceVoidReason = (typeof PAYMENT_INVOICE_VOID_REASONS)[num
 
 export const paymentInvoiceDetailResponseSchema = z.object({
   data: z.object({
-    orderId: z.string().uuid(),
+    orderId: z.uuid(),
     displayId: z.string(),
-    membershipId: z.string().uuid().nullable(),
+    membershipId: z.uuid().nullable(),
     invoiceNumber: z.string(),
     status: z.enum(["issued", "void"]),
     orderStatus: z.string(),
@@ -331,10 +333,10 @@ export const paymentInvoiceDetailResponseSchema = z.object({
     amountPaidCents: z.number().int().nonnegative(),
     balanceDueCents: z.number().int().nonnegative(),
     currency: z.string(),
-    paidAt: z.string().datetime().nullable(),
-    createdAt: z.string().datetime(),
-    issuedAt: z.string().datetime().nullable(),
-    voidedAt: z.string().datetime().nullable(),
+    paidAt: z.iso.datetime().nullable(),
+    createdAt: z.iso.datetime(),
+    issuedAt: z.iso.datetime().nullable(),
+    voidedAt: z.iso.datetime().nullable(),
     voidReason: z.enum(PAYMENT_INVOICE_VOID_REASONS).nullable(),
     canVoid: z.boolean(),
     canDownload: z.boolean(),
@@ -343,7 +345,7 @@ export const paymentInvoiceDetailResponseSchema = z.object({
         key: z.string(),
         label: z.string(),
         description: z.string(),
-        occurredAt: z.string().datetime(),
+        occurredAt: z.iso.datetime(),
         highlight: z.boolean(),
       }),
     ),
@@ -361,10 +363,10 @@ export const voidPaymentInvoiceBodySchema = rejectClientTenantFields
 
 export const voidPaymentInvoiceResponseSchema = z.object({
   data: z.object({
-    orderId: z.string().uuid(),
+    orderId: z.uuid(),
     invoiceNumber: z.string(),
     status: z.literal("void"),
-    voidedAt: z.string().datetime(),
+    voidedAt: z.iso.datetime(),
     voidReason: z.enum(PAYMENT_INVOICE_VOID_REASONS),
   }),
 });
@@ -395,8 +397,8 @@ export type PaymentInstalmentsQuery = z.output<typeof paymentInstalmentsQuerySch
 
 export const paymentInstalmentPlanItemSchema = z
   .object({
-    id: z.string().uuid(),
-    membershipId: z.string().uuid(),
+    id: z.uuid(),
+    membershipId: z.uuid(),
     learnerName: z.string().nullable(),
     email: z.string().nullable(),
     productTitle: z.string(),
@@ -406,8 +408,8 @@ export const paymentInstalmentPlanItemSchema = z
     remainingAmountCents: z.number().int(),
     currency: z.string(),
     status: z.string(),
-    createdAt: z.string().datetime(),
-    nextDueAt: z.string().datetime().nullable(),
+    createdAt: z.iso.datetime(),
+    nextDueAt: z.iso.datetime().nullable(),
     instalmentCount: z.number().int().nonnegative(),
     paidCount: z.number().int().nonnegative(),
     overdueCount: z.number().int().nonnegative(),
@@ -433,19 +435,19 @@ export const paymentInstalmentsListResponseSchema = z.object({
 
 export const paymentInstalmentPlanParamsSchema = z
   .object({
-    planId: z.string().uuid(),
+    planId: z.uuid(),
   })
   .strict();
 
 export const paymentInstalmentScheduleItemSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     sequenceNo: z.number().int(),
     amountCents: z.number().int(),
-    dueAt: z.string().datetime(),
-    paidAt: z.string().datetime().nullable(),
+    dueAt: z.iso.datetime(),
+    paidAt: z.iso.datetime().nullable(),
     status: z.string(),
-    paymentOrderId: z.string().uuid().nullable(),
+    paymentOrderId: z.uuid().nullable(),
   })
   .strict();
 
@@ -460,7 +462,7 @@ export const paymentInstalmentPlanDetailResponseSchema = z.object({
           kind: z.enum(["created", "paid", "cancelled", "note"]),
           label: z.string(),
           detail: z.string().nullable(),
-          occurredAt: z.string().datetime(),
+          occurredAt: z.iso.datetime(),
           actorLabel: z.string().nullable(),
           tone: z.enum(["neutral", "success", "danger"]).default("neutral"),
         })
@@ -468,7 +470,7 @@ export const paymentInstalmentPlanDetailResponseSchema = z.object({
     ),
     cancel: z
       .object({
-        cancelledAt: z.string().datetime(),
+        cancelledAt: z.iso.datetime(),
         reason: z.string(),
         accessOption: z.enum(["keep", "revoke"]),
         accessNote: z.string().nullable(),
@@ -479,10 +481,10 @@ export const paymentInstalmentPlanDetailResponseSchema = z.object({
 
 export const createPaymentInstalmentPlanBodySchema = rejectClientTenantFields
   .extend({
-    membershipId: z.string().uuid(),
+    membershipId: z.uuid(),
     productTitle: z.string().trim().min(1).max(256),
     productType: z.string().trim().min(1).max(64).default("course"),
-    productId: z.string().uuid().optional(),
+    productId: z.uuid().optional(),
     pricingPlanLabel: z.string().trim().min(1).max(128).optional(),
     totalAmountCents: z.number().int().min(1),
     currency: z.string().length(3).default("USD"),
@@ -491,15 +493,13 @@ export const createPaymentInstalmentPlanBodySchema = rejectClientTenantFields
         z
           .object({
             amountCents: z.number().int().min(1),
-            dueAt: z.string().datetime(),
+            dueAt: z.iso.datetime(),
           })
           .strict(),
       )
       .min(2)
       .max(36),
-    accessPolicy: z
-      .enum(["immediate", "after_first_payment"])
-      .default("after_first_payment"),
+    accessPolicy: z.enum(["immediate", "after_first_payment"]).default("after_first_payment"),
     automatedReminders: z.boolean().default(false),
     autoRevokeOnDefault: z.boolean().default(false),
     sendConfirmationEmail: z.boolean().default(false),
@@ -509,7 +509,7 @@ export const createPaymentInstalmentPlanBodySchema = rejectClientTenantFields
     const sum = body.instalments.reduce((acc, item) => acc + item.amountCents, 0);
     if (sum !== body.totalAmountCents) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         message: "Instalment amounts must sum to the plan total.",
         path: ["instalments"],
       });
@@ -522,22 +522,20 @@ export const createPaymentInstalmentPlanResponseSchema = z.object({
 
 export const payPaymentInstalmentBodySchema = rejectClientTenantFields
   .extend({
-    instalmentId: z.string().uuid().optional(),
-    paymentMethod: z
-      .enum(["gateway", "bank", "cash", "adjustment"])
-      .default("gateway"),
+    instalmentId: z.uuid().optional(),
+    paymentMethod: z.enum(["gateway", "bank", "cash", "adjustment"]).default("gateway"),
     gatewayKey: z.string().trim().min(1).max(64).optional(),
     reference: z.string().trim().min(1).max(128).optional(),
-    paidAt: z.string().datetime().optional(),
+    paidAt: z.iso.datetime().optional(),
     sendReceipt: z.boolean().default(false),
   })
   .strict();
 
 export const payPaymentInstalmentResponseSchema = z.object({
   data: z.object({
-    planId: z.string().uuid(),
-    instalmentId: z.string().uuid(),
-    paymentOrderId: z.string().uuid(),
+    planId: z.uuid(),
+    instalmentId: z.uuid(),
+    paymentOrderId: z.uuid(),
     remainingAmountCents: z.number().int().nonnegative(),
     planStatus: z.string(),
     receiptQueued: z.boolean(),
@@ -552,8 +550,7 @@ export const PAYMENT_INSTALMENT_CANCEL_REASONS = [
   "admin_correction",
   "other",
 ] as const;
-export type PaymentInstalmentCancelReason =
-  (typeof PAYMENT_INSTALMENT_CANCEL_REASONS)[number];
+export type PaymentInstalmentCancelReason = (typeof PAYMENT_INSTALMENT_CANCEL_REASONS)[number];
 
 export const cancelPaymentInstalmentPlanBodySchema = rejectClientTenantFields
   .extend({
@@ -568,9 +565,9 @@ export type CancelPaymentInstalmentPlanBody = z.output<
 
 export const cancelPaymentInstalmentPlanResponseSchema = z.object({
   data: z.object({
-    planId: z.string().uuid(),
+    planId: z.uuid(),
     status: z.literal("cancelled"),
-    cancelledAt: z.string().datetime(),
+    cancelledAt: z.iso.datetime(),
     reason: z.enum(PAYMENT_INSTALMENT_CANCEL_REASONS),
     accessOption: z.enum(["keep", "revoke"]),
     voidedInstalmentCount: z.number().int().nonnegative(),
@@ -582,8 +579,8 @@ export const exportPaymentRosterBodySchema = rejectClientTenantFields
     tab: z
       .enum(["transactions", "invoices", "instalments", "gateways", "refunds"])
       .default("transactions"),
-    paidFrom: z.string().datetime().optional(),
-    paidTo: z.string().datetime().optional(),
+    paidFrom: z.iso.datetime().optional(),
+    paidTo: z.iso.datetime().optional(),
     learnerName: z.string().trim().min(1).max(200).optional(),
     email: z.string().trim().min(1).max(320).optional(),
     q: z.string().trim().min(1).max(200).optional(),
@@ -600,7 +597,7 @@ export const exportPaymentRosterBodySchema = rejectClientTenantFields
 
 export const exportPaymentRosterResponseSchema = z.object({
   data: z.object({
-    runId: z.string().uuid(),
+    runId: z.uuid(),
     status: z.string(),
     emailed: z.boolean(),
   }),
@@ -611,8 +608,8 @@ export type PaymentOverviewGrain = (typeof PAYMENT_OVERVIEW_GRAINS)[number];
 
 export const paymentOverviewQuerySchema = rejectClientTenantFields
   .extend({
-    paidFrom: z.string().datetime().optional(),
-    paidTo: z.string().datetime().optional(),
+    paidFrom: z.iso.datetime().optional(),
+    paidTo: z.iso.datetime().optional(),
     currency: z.string().trim().min(1).max(8).optional(),
     grain: z.enum(PAYMENT_OVERVIEW_GRAINS).default("day"),
   })
@@ -636,8 +633,8 @@ export const paymentOverviewResponseSchema = z.object({
       previousCollectedCents: z.number().int().nonnegative(),
       changePercent: z.number().nullable(),
       windowLabel: z.string(),
-      windowFrom: z.string().datetime(),
-      windowTo: z.string().datetime(),
+      windowFrom: z.iso.datetime(),
+      windowTo: z.iso.datetime(),
     }),
     revenueTrend: z.array(
       z.object({
@@ -678,7 +675,7 @@ export const paymentOverviewResponseSchema = z.object({
 
 export const paymentTransactionDetailParamsSchema = z
   .object({
-    orderId: z.string().uuid(),
+    orderId: z.uuid(),
   })
   .strict();
 
@@ -697,7 +694,7 @@ const paymentTransactionEventSchema = z
     kind: z.string(),
     label: z.string(),
     description: z.string(),
-    occurredAt: z.string().datetime(),
+    occurredAt: z.iso.datetime(),
     highlight: z.boolean(),
   })
   .strict();
@@ -707,7 +704,7 @@ const paymentTransactionFlowStepSchema = z
     key: z.enum(["created", "authorized", "captured", "settled", "refunded", "failed"]),
     label: z.string(),
     status: z.enum(["complete", "current", "pending", "skipped"]),
-    occurredAt: z.string().datetime().nullable(),
+    occurredAt: z.iso.datetime().nullable(),
   })
   .strict();
 
@@ -722,16 +719,16 @@ const paymentTransactionRefundRecordSchema = z
     notifyLearner: z.boolean(),
     accessRevoked: z.boolean(),
     notifyQueued: z.boolean(),
-    actorMembershipId: z.string().uuid().nullable(),
-    createdAt: z.string().datetime(),
+    actorMembershipId: z.uuid().nullable(),
+    createdAt: z.iso.datetime(),
   })
   .strict();
 
 export const paymentTransactionDetailResponseSchema = z.object({
   data: z.object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     displayId: z.string(),
-    membershipId: z.string().uuid().nullable(),
+    membershipId: z.uuid().nullable(),
     status: z.string(),
     currency: z.string(),
     amountCents: z.number().int(),
@@ -744,12 +741,12 @@ export const paymentTransactionDetailResponseSchema = z.object({
     gatewayKey: z.string().nullable(),
     externalId: z.string().nullable(),
     invoiceNumber: z.string().nullable(),
-    paidAt: z.string().datetime().nullable(),
-    createdAt: z.string().datetime(),
-    updatedAt: z.string().datetime(),
+    paidAt: z.iso.datetime().nullable(),
+    createdAt: z.iso.datetime(),
+    updatedAt: z.iso.datetime(),
     environment: z.enum(["live", "test", "unknown"]),
     learner: z.object({
-      membershipId: z.string().uuid().nullable(),
+      membershipId: z.uuid().nullable(),
       name: z.string().nullable(),
       email: z.string().nullable(),
     }),
@@ -757,7 +754,7 @@ export const paymentTransactionDetailResponseSchema = z.object({
       title: z.string().nullable(),
       type: z.string().nullable(),
       sku: z.string().nullable(),
-      courseId: z.string().uuid().nullable(),
+      courseId: z.uuid().nullable(),
       accessStatus: z.string().nullable(),
     }),
     billing: z.object({
@@ -786,7 +783,7 @@ export const paymentTransactionDetailResponseSchema = z.object({
     refundableAmountCents: z.number().int().nonnegative(),
     canRefund: z.boolean(),
     canDownloadInvoice: z.boolean(),
-    metadata: z.record(z.unknown()).nullable(),
+    metadata: z.record(z.string(), z.unknown()).nullable(),
   }),
 });
 
@@ -807,7 +804,7 @@ export const refundPaymentTransactionBodySchema = rejectClientTenantFields
   .superRefine((body, ctx) => {
     if (body.mode === "partial" && body.amountCents == null) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         message: "Partial refunds require amountCents.",
         path: ["amountCents"],
       });
@@ -818,7 +815,7 @@ export type RefundPaymentTransactionBody = z.output<typeof refundPaymentTransact
 
 export const refundPaymentTransactionResponseSchema = z.object({
   data: z.object({
-    orderId: z.string().uuid(),
+    orderId: z.uuid(),
     status: z.string(),
     refund: paymentTransactionRefundRecordSchema,
     refundedAmountCents: z.number().int().nonnegative(),
@@ -829,20 +826,15 @@ export const refundPaymentTransactionResponseSchema = z.object({
   }),
 });
 
-export const PAYMENT_REFUNDS_QUEUES = [
-  "refundable",
-  "partial",
-  "refunded",
-  "all",
-] as const;
+export const PAYMENT_REFUNDS_QUEUES = ["refundable", "partial", "refunded", "all"] as const;
 
 export type PaymentRefundsQueue = (typeof PAYMENT_REFUNDS_QUEUES)[number];
 
 export const paymentRefundsQuerySchema = rejectClientTenantFields
   .extend({
     queue: z.enum(PAYMENT_REFUNDS_QUEUES).default("refundable"),
-    paidFrom: z.string().datetime().optional(),
-    paidTo: z.string().datetime().optional(),
+    paidFrom: z.iso.datetime().optional(),
+    paidTo: z.iso.datetime().optional(),
     q: z.string().trim().min(1).max(200).optional(),
     gatewayKey: z.string().trim().min(1).max(64).optional(),
     sortBy: z.enum(["paid_at", "created_at", "amount_cents"]).default("paid_at"),
@@ -864,15 +856,15 @@ export const paymentRefundsListResponseSchema = z.object({
         refundableAmountCents: z.number().int().nonnegative(),
         refundedAmountCents: z.number().int().nonnegative(),
         currency: z.string(),
-        windowFrom: z.string().datetime().nullable(),
-        windowTo: z.string().datetime().nullable(),
+        windowFrom: z.iso.datetime().nullable(),
+        windowTo: z.iso.datetime().nullable(),
       })
       .strict(),
     items: z.array(
       z
         .object({
-          orderId: z.string().uuid(),
-          membershipId: z.string().uuid().nullable(),
+          orderId: z.uuid(),
+          membershipId: z.uuid().nullable(),
           learnerName: z.string().nullable(),
           email: z.string().nullable(),
           productTitle: z.string().nullable(),
@@ -883,8 +875,8 @@ export const paymentRefundsListResponseSchema = z.object({
           currency: z.string(),
           status: z.string(),
           invoiceNumber: z.string().nullable(),
-          paidAt: z.string().datetime().nullable(),
-          createdAt: z.string().datetime(),
+          paidAt: z.iso.datetime().nullable(),
+          createdAt: z.iso.datetime(),
           canRefund: z.boolean(),
           refundCount: z.number().int().nonnegative(),
           latestRefund: paymentTransactionRefundRecordSchema.nullable(),

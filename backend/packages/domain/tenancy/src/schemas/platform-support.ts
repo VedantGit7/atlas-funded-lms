@@ -1,17 +1,17 @@
 import { z } from "zod";
 
 export const OpenSupportSessionRequestSchema = z.object({
-  tenantId: z.string().uuid(),
+  tenantId: z.uuid(),
   reason: z.string().min(10).max(1000),
 });
 
 export const SupportSessionViewSchema = z.object({
-  sessionId: z.string().uuid(),
-  tenantId: z.string().uuid(),
+  sessionId: z.uuid(),
+  tenantId: z.uuid(),
   tenantSlug: z.string(),
   tenantDisplayName: z.string(),
-  openedAt: z.string().datetime(),
-  expiresAt: z.string().datetime(),
+  openedAt: z.iso.datetime(),
+  expiresAt: z.iso.datetime(),
   status: z.enum(["ACTIVE", "EXPIRED"]),
 });
 

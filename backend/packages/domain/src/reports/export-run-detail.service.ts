@@ -228,11 +228,30 @@ function extractDelivery(params: Record<string, unknown>): {
 } {
   const delivery = asRecord(params["delivery"]);
   const kindRaw = typeof delivery["kind"] === "string" ? delivery["kind"] : null;
+  const destinationId =
+    typeof delivery["destinationId"] === "string"
+      ? delivery["destinationId"]
+      : typeof params["destinationId"] === "string"
+        ? params["destinationId"]
+        : null;
   const recipients = Array.isArray(delivery["recipients"])
     ? delivery["recipients"].filter((item): item is string => typeof item === "string")
     : typeof delivery["email"] === "string"
       ? [delivery["email"]]
       : [];
+
+  if (destinationId) {
+    const destKind =
+      kindRaw === "email" || kindRaw === "webhook" || kindRaw === "storage" ? kindRaw : "storage";
+    return {
+      kind: destKind,
+      label: "Destination",
+      recipients: [destinationId],
+      status: typeof delivery["status"] === "string" ? delivery["status"] : null,
+      deliveredAt: typeof delivery["deliveredAt"] === "string" ? delivery["deliveredAt"] : null,
+      error: typeof delivery["error"] === "string" ? delivery["error"] : null,
+    };
+  }
 
   if (kindRaw === "email" || recipients.length > 0) {
     return {
@@ -624,13 +643,17 @@ async function loadExportJobDetail(tx: TenantTx, ctx: ServiceCtx, jobId: string)
 async function resolveSource(tx: TenantTx, ctx: ServiceCtx, runId: string, preferred?: SourceType) {
   if (preferred === "report_run") {
     const detail = await loadReportRunDetail(tx, ctx, runId);
-    if (!detail) throw reportRunNotFound();
-    return detail;
+    if (detail) return detail;
+    const fallback = await loadExportJobDetail(tx, ctx, runId);
+    if (fallback) return fallback;
+    throw reportRunNotFound();
   }
   if (preferred === "export_job") {
     const detail = await loadExportJobDetail(tx, ctx, runId);
-    if (!detail) throw reportRunNotFound();
-    return detail;
+    if (detail) return detail;
+    const fallback = await loadReportRunDetail(tx, ctx, runId);
+    if (fallback) return fallback;
+    throw reportRunNotFound();
   }
 
   const reportRun = await loadReportRunDetail(tx, ctx, runId);

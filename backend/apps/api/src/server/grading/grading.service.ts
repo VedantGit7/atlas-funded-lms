@@ -16,6 +16,7 @@ import {
   parseGradingResult,
   type GradingResultJson,
 } from "./grading.repository";
+import { getTimelineForAttempt } from "../proctoring/proctoring.service";
 
 type ServiceCtx = {
   tenantId: string;
@@ -159,6 +160,7 @@ export async function getGradingTaskDetail(tx: TenantTx, ctx: ServiceCtx, taskId
     tx,
     attempt.membershipId,
   );
+  const proctoring = await getTimelineForAttempt(tx, ctx, attempt.id);
 
   return {
     data: {
@@ -205,8 +207,16 @@ export async function getGradingTaskDetail(tx: TenantTx, ctx: ServiceCtx, taskId
             gradedAt: existingResult.gradedAt,
           }
         : null,
-      proctoringTimeline: [],
-      proctoringReport: null,
+      proctoringTimeline: proctoring.timeline,
+      proctoringReport: proctoring.report
+        ? {
+            id: proctoring.report.id,
+            summary: proctoring.report.summary ?? "Advisory proctoring report.",
+            riskScore: proctoring.report.riskScore,
+            riskBand: proctoring.report.riskBand,
+            generatedAt: proctoring.report.generatedAt,
+          }
+        : null,
       createdAt: task.created_at.toISOString(),
       updatedAt: task.updated_at.toISOString(),
     },

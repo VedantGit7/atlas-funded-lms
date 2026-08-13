@@ -59,8 +59,8 @@ export const DEFAULT_OUTLIER_THRESHOLDS: OutlierThresholds = {
 
 export const superLiveInsightsOutliersQuerySchema = rejectClientTenantFields
   .extend({
-    startedFrom: z.string().datetime(),
-    startedTo: z.string().datetime(),
+    startedFrom: z.iso.datetime(),
+    startedTo: z.iso.datetime(),
     category: z.enum(OUTLIER_CATEGORIES).default("all"),
     rateDeltaPts: z.coerce.number().min(1).max(100).optional(),
     unresolvedPct: z.coerce.number().min(1).max(100).optional(),
@@ -87,14 +87,14 @@ const evidenceChipSchema = z.object({
 
 const findingSchema = z.object({
   id: z.string(),
-  sessionId: z.string().uuid(),
+  sessionId: z.uuid(),
   category: z.enum(OUTLIER_FINDING_CATEGORIES),
   severity: z.enum(OUTLIER_SEVERITIES),
   title: z.string(),
   sessionTitle: z.string(),
   courseTitle: z.string().nullable(),
   batchName: z.string().nullable(),
-  scheduledAt: z.string().datetime().nullable(),
+  scheduledAt: z.iso.datetime().nullable(),
   evidence: z.array(evidenceChipSchema),
   composition: z.object({
     attendedCount: z.number().int().nonnegative(),
@@ -137,8 +137,8 @@ export type SuperLiveInsightsOutliersResponse = z.output<
 
 export const superLiveInsightsOutliersPreviewQuerySchema = rejectClientTenantFields
   .extend({
-    startedFrom: z.string().datetime(),
-    startedTo: z.string().datetime(),
+    startedFrom: z.iso.datetime(),
+    startedTo: z.iso.datetime(),
     rateDeltaPts: z.coerce.number().min(1).max(100).optional(),
     unresolvedPct: z.coerce.number().min(1).max(100).optional(),
     shortDurationPct: z.coerce.number().min(1).max(100).optional(),

@@ -1,10 +1,6 @@
 import { z } from "zod";
 
-export const emailSchema = z
-  .string()
-  .trim()
-  .email()
-  .transform((value) => value.toLowerCase());
+export const emailSchema = z.email().transform((value) => value.trim().toLowerCase());
 
 export const publicSignupInputSchema = z.object({
   email: emailSchema,
@@ -21,7 +17,7 @@ export const publicSignupInputSchema = z.object({
       .regex(/^[A-Za-z0-9_-]+$/)
       .optional(),
   ),
-  emailRedirectTo: z.string().url().max(500).optional(),
+  emailRedirectTo: z.url().max(500).optional(),
 });
 
 export const publicLoginInputSchema = z.object({
@@ -35,8 +31,8 @@ export const publicAuthOutputSchema = z.object({
     identity: z
       .object({
         authenticated: z.literal(true),
-        email: z.string().email(),
-        emailNormalized: z.string().email(),
+        email: z.email(),
+        emailNormalized: z.email(),
         mfaEnabled: z.boolean(),
         globalStatus: z.string(),
       })
@@ -57,8 +53,8 @@ export const meOutputSchema = z.object({
       }),
       z.object({
         authenticated: z.literal(true),
-        email: z.string().email(),
-        emailNormalized: z.string().email(),
+        email: z.email(),
+        emailNormalized: z.email(),
         mfaEnabled: z.boolean(),
         globalStatus: z.string(),
       }),

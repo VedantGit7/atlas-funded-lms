@@ -13,13 +13,7 @@ export const PAYMENT_EXPORT_DATASETS = [
 export const PAYMENT_EXPORT_FORMATS = ["csv", "xlsx", "json"] as const;
 export const PAYMENT_EXPORT_DELIVERY = ["download", "email_me", "recipients"] as const;
 export const PAYMENT_EXPORT_CADENCE = ["daily", "weekly", "monthly"] as const;
-export const PAYMENT_EXPORT_GROUPING = [
-  "none",
-  "gateway",
-  "product",
-  "currency",
-  "month",
-] as const;
+export const PAYMENT_EXPORT_GROUPING = ["none", "gateway", "product", "currency", "month"] as const;
 
 export const PAYMENT_EXPORT_COLUMNS = [
   { key: "learner_name", label: "Learner name", sensitive: false, defaultSelected: true },
@@ -55,7 +49,7 @@ export const paymentExportColumnKeySchema = z.enum([
 
 export const paymentExportHistoryItemSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     fileName: z.string(),
     format: z.enum(REPORT_FORMATS),
     dataset: z.enum(PAYMENT_EXPORT_DATASETS),
@@ -65,9 +59,9 @@ export const paymentExportHistoryItemSchema = z
     sizeLabel: z.string().nullable(),
     status: z.enum(["QUEUED", "RUNNING", "SUCCEEDED", "FAILED", "CANCELLED"]),
     expired: z.boolean(),
-    expiresAt: z.string().datetime().nullable(),
-    createdAt: z.string().datetime(),
-    completedAt: z.string().datetime().nullable(),
+    expiresAt: z.iso.datetime().nullable(),
+    createdAt: z.iso.datetime(),
+    completedAt: z.iso.datetime().nullable(),
     errorCode: z.string().nullable(),
     errorMessage: z.string().nullable(),
     errorTrace: z.array(z.string()).nullable(),
@@ -79,7 +73,7 @@ export const paymentExportHistoryItemSchema = z
 
 export const paymentExportScheduleItemSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     name: z.string(),
     datasetLabel: z.string(),
     cadenceLabel: z.string(),
@@ -87,7 +81,7 @@ export const paymentExportScheduleItemSchema = z
     timezone: z.string(),
     formats: z.array(z.enum(REPORT_FORMATS)),
     isActive: z.boolean(),
-    nextRunAt: z.string().datetime(),
+    nextRunAt: z.iso.datetime(),
     nextRunLabel: z.string(),
     recipients: z.array(z.string()),
     webhookLabel: z.string().nullable(),
@@ -126,16 +120,16 @@ export const createPaymentExportBodySchema = rejectClientTenantFields
     dataset: z.enum(PAYMENT_EXPORT_DATASETS).default("transactions"),
     columns: z.array(paymentExportColumnKeySchema).min(1).max(20),
     format: z.enum(PAYMENT_EXPORT_FORMATS).default("csv"),
-    paidFrom: z.string().datetime().optional(),
-    paidTo: z.string().datetime().optional(),
+    paidFrom: z.iso.datetime().optional(),
+    paidTo: z.iso.datetime().optional(),
     gatewayKey: z.string().trim().min(1).max(64).optional(),
     status: z.string().trim().min(1).max(64).optional(),
     useCurrentFilters: z.boolean().default(true),
     grouping: z.enum(PAYMENT_EXPORT_GROUPING).default("none"),
     includeSubtotals: z.boolean().default(false),
     delivery: z.enum(PAYMENT_EXPORT_DELIVERY).default("download"),
-    recipients: z.array(z.string().email()).max(20).optional(),
-    webhookUrl: z.string().url().max(500).nullable().optional(),
+    recipients: z.array(z.email()).max(20).optional(),
+    webhookUrl: z.url().max(500).nullable().optional(),
     scheduleEnabled: z.boolean().default(false),
     scheduleName: z.string().trim().max(120).optional(),
     cadence: z.enum(PAYMENT_EXPORT_CADENCE).optional(),
@@ -158,7 +152,7 @@ export const createPaymentExportResponseSchema = z.object({
 
 export const paymentExportRunParamsSchema = z
   .object({
-    runId: z.string().uuid(),
+    runId: z.uuid(),
   })
   .strict();
 
@@ -172,7 +166,7 @@ export const retryPaymentExportResponseSchema = z.object({
 
 export const paymentExportScheduleParamsSchema = z
   .object({
-    scheduleId: z.string().uuid(),
+    scheduleId: z.uuid(),
   })
   .strict();
 
@@ -190,6 +184,6 @@ export const updatePaymentExportScheduleResponseSchema = z.object({
 export const deletePaymentExportScheduleResponseSchema = z.object({
   data: z.object({
     deleted: z.literal(true),
-    id: z.string().uuid(),
+    id: z.uuid(),
   }),
 });

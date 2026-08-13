@@ -19,7 +19,7 @@ export const ProvisionTenantRequestSchema = z.object({
   defaultLocale: z.string().min(2).max(12).default("en"),
   defaultTimezone: z.string().min(1).max(80).default("UTC"),
   owner: z.object({
-    email: z.string().email(),
+    email: z.email(),
     displayName: z.string().min(2).max(120),
   }),
   initialEntitlements: z
@@ -28,7 +28,7 @@ export const ProvisionTenantRequestSchema = z.object({
         key: z.string().min(1).max(120),
         value: z.unknown().nullable().optional(),
         enabled: z.boolean().default(true),
-        expiresAt: z.string().datetime().nullable().optional(),
+        expiresAt: z.iso.datetime().nullable().optional(),
       }),
     )
     .default([]),
@@ -36,7 +36,7 @@ export const ProvisionTenantRequestSchema = z.object({
 });
 
 export const PlatformTenantViewSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   slug: z.string(),
   displayName: z.string(),
   legalName: z.string().nullable(),
@@ -45,18 +45,18 @@ export const PlatformTenantViewSchema = z.object({
   defaultTimezone: z.string(),
   primaryDomain: z
     .object({
-      id: z.string().uuid(),
+      id: z.uuid(),
       hostname: z.string(),
       status: z.string(),
       type: z.string(),
     })
     .nullable(),
   provisioning: z.object({
-    latestJobId: z.string().uuid().nullable(),
+    latestJobId: z.uuid().nullable(),
     latestStatus: z.string().nullable(),
   }),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 
 export const PlatformTenantListQuerySchema = z.object({
@@ -83,7 +83,7 @@ export const ProvisionTenantResponseSchema = z.object({
 });
 
 export const PlatformTenantParamsSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
 });
 
 export const TenantLifecycleRequestSchema = z.object({
@@ -91,15 +91,15 @@ export const TenantLifecycleRequestSchema = z.object({
 });
 
 export const ProvisioningJobViewSchema = z.object({
-  id: z.string().uuid(),
-  tenantId: z.string().uuid(),
+  id: z.uuid(),
+  tenantId: z.uuid(),
   status: z.string(),
   step: z.string().nullable(),
   errorCode: z.string().nullable(),
   safeErrorMessage: z.string().nullable(),
   idempotencyKey: z.string().nullable(),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 
 export const ProvisioningJobListResponseSchema = z.object({
@@ -110,7 +110,7 @@ export const PlatformTenantEntitlementViewSchema = z.object({
   key: z.string(),
   enabled: z.boolean(),
   value: z.unknown().nullable(),
-  expiresAt: z.string().datetime().nullable(),
+  expiresAt: z.iso.datetime().nullable(),
 });
 
 export const PlatformTenantEntitlementListResponseSchema = z.object({

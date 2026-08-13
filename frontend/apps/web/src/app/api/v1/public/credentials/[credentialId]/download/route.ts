@@ -38,7 +38,10 @@ export const GET = createPublicRouteHandler(routeMetadata, async ({ req, request
         }),
     );
 
-    return new NextResponse(result.body, {
+    const responseBody: BodyInit =
+      typeof result.body === "string" ? result.body : new Uint8Array(result.body);
+
+    return new NextResponse(responseBody, {
       status: 200,
       headers: {
         "content-type": result.contentType,

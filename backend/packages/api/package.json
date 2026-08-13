@@ -23,7 +23,7 @@
     "@atlas/observability": "workspace:*",
     "@atlas/tenancy": "workspace:*",
     "next": "^16.2.9",
-    "zod": "^3.25.76"
+    "zod": "^4.4.3"
   },
   "devDependencies": {}
 }

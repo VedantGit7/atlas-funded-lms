@@ -1,14 +1,14 @@
 import { z } from "zod";
 
-const rejectTenantId = z.object({ tenant_id: z.never().optional() }).passthrough();
+const rejectTenantId = z.object({ tenant_id: z.never().optional() }).loose();
 
 export const lessonCompletedPayloadSchema = z
   .object({
-    lessonId: z.string().uuid(),
-    courseId: z.string().uuid(),
-    moduleId: z.string().uuid(),
-    membershipId: z.string().uuid(),
-    enrollmentId: z.string().uuid(),
+    lessonId: z.uuid(),
+    courseId: z.uuid(),
+    moduleId: z.uuid(),
+    membershipId: z.uuid(),
+    enrollmentId: z.uuid(),
     completedAt: z.string(),
   })
   .strict()
@@ -16,9 +16,9 @@ export const lessonCompletedPayloadSchema = z
 
 export const pathStepCompletedPayloadSchema = z
   .object({
-    pathId: z.string().uuid(),
-    stepId: z.string().uuid(),
-    membershipId: z.string().uuid(),
+    pathId: z.uuid(),
+    stepId: z.uuid(),
+    membershipId: z.uuid(),
     completedAt: z.string(),
   })
   .strict()
@@ -26,9 +26,9 @@ export const pathStepCompletedPayloadSchema = z
 
 export const gamificationAssessmentSubmittedPayloadSchema = z
   .object({
-    attemptId: z.string().uuid(),
-    assessmentId: z.string().uuid(),
-    membershipId: z.string().uuid(),
+    attemptId: z.uuid(),
+    assessmentId: z.uuid(),
+    membershipId: z.uuid(),
     status: z.string(),
     scorePercent: z.number().nullable(),
     requiresManualGrading: z.boolean(),
@@ -38,12 +38,12 @@ export const gamificationAssessmentSubmittedPayloadSchema = z
 
 export const gamificationAssessmentGradedPayloadSchema = z
   .object({
-    assessmentId: z.string().uuid(),
-    attemptId: z.string().uuid(),
-    gradingTaskId: z.string().uuid(),
-    itemId: z.string().uuid().nullable(),
-    learnerMembershipId: z.string().uuid(),
-    graderMembershipId: z.string().uuid(),
+    assessmentId: z.uuid(),
+    attemptId: z.uuid(),
+    gradingTaskId: z.uuid(),
+    itemId: z.uuid().nullable(),
+    learnerMembershipId: z.uuid(),
+    graderMembershipId: z.uuid(),
     score: z.number(),
     possiblePoints: z.number(),
     attemptState: z.string(),
@@ -54,9 +54,9 @@ export const gamificationAssessmentGradedPayloadSchema = z
 
 export const gamificationPracticeSessionCompletedPayloadSchema = z
   .object({
-    practiceSessionId: z.string().uuid(),
-    membershipId: z.string().uuid(),
-    collectionId: z.string().uuid().nullable().optional(),
+    practiceSessionId: z.uuid(),
+    membershipId: z.uuid(),
+    collectionId: z.uuid().nullable().optional(),
     sessionType: z.string(),
   })
   .strict()

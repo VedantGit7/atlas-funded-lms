@@ -12,11 +12,11 @@ const rejectClientTenantFields = z
     r2_object_key: z.never().optional(),
     object_key: z.never().optional(),
   })
-  .passthrough();
+  .loose();
 
 export const exportListQuerySchema = rejectClientTenantFields
   .extend({
-    cursor: z.string().uuid().optional(),
+    cursor: z.uuid().optional(),
     limit: z.coerce.number().int().min(1).max(50).default(20),
     status: z.enum(JOB_STATUSES).optional(),
   })
@@ -24,7 +24,7 @@ export const exportListQuerySchema = rejectClientTenantFields
 
 export const exportJobParamsSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
   })
   .strict();
 
@@ -32,17 +32,17 @@ export const createExportBodySchema = rejectClientTenantFields.strict();
 
 export const exportJobDtoSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     status: z.enum(JOB_STATUSES),
-    requestedByMembershipId: z.string().uuid(),
-    createdAt: z.string().datetime(),
-    updatedAt: z.string().datetime(),
-    expiresAt: z.string().datetime().nullable(),
+    requestedByMembershipId: z.uuid(),
+    createdAt: z.iso.datetime(),
+    updatedAt: z.iso.datetime(),
+    expiresAt: z.iso.datetime().nullable(),
     errorCode: z.string().nullable(),
     download: z
       .object({
-        url: z.string().url(),
-        expiresAt: z.string().datetime(),
+        url: z.url(),
+        expiresAt: z.iso.datetime(),
       })
       .nullable(),
   })
@@ -52,7 +52,7 @@ export const exportListResponseSchema = z.object({
   data: z.object({
     items: z.array(exportJobDtoSchema.omit({ download: true })),
     pageInfo: z.object({
-      nextCursor: z.string().uuid().nullable(),
+      nextCursor: z.uuid().nullable(),
       hasNextPage: z.boolean(),
     }),
   }),
@@ -68,7 +68,7 @@ export const exportJobDetailResponseSchema = z.object({
 
 export const deletionListQuerySchema = rejectClientTenantFields
   .extend({
-    cursor: z.string().uuid().optional(),
+    cursor: z.uuid().optional(),
     limit: z.coerce.number().int().min(1).max(50).default(20),
     status: z.enum(JOB_STATUSES).optional(),
   })
@@ -76,14 +76,14 @@ export const deletionListQuerySchema = rejectClientTenantFields
 
 export const deletionRequestParamsSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
   })
   .strict();
 
 export const createDeletionRequestBodySchema = rejectClientTenantFields
   .extend({
     confirm: z.literal(true),
-    targetMembershipId: z.string().uuid().optional(),
+    targetMembershipId: z.uuid().optional(),
     reason: z.string().max(500).optional(),
   })
   .strict();
@@ -96,16 +96,16 @@ export const processDeletionRequestBodySchema = rejectClientTenantFields
 
 export const deletionRequestDtoSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     status: z.enum(JOB_STATUSES),
     targetType: z.literal("membership"),
-    targetId: z.string().uuid(),
-    requestedByMembershipId: z.string().uuid().nullable(),
+    targetId: z.uuid(),
+    requestedByMembershipId: z.uuid().nullable(),
     reason: z.string().nullable(),
-    scheduledAt: z.string().datetime().nullable(),
-    completedAt: z.string().datetime().nullable(),
-    createdAt: z.string().datetime(),
-    updatedAt: z.string().datetime(),
+    scheduledAt: z.iso.datetime().nullable(),
+    completedAt: z.iso.datetime().nullable(),
+    createdAt: z.iso.datetime(),
+    updatedAt: z.iso.datetime(),
   })
   .strict();
 
@@ -113,7 +113,7 @@ export const deletionListResponseSchema = z.object({
   data: z.object({
     items: z.array(deletionRequestDtoSchema),
     pageInfo: z.object({
-      nextCursor: z.string().uuid().nullable(),
+      nextCursor: z.uuid().nullable(),
       hasNextPage: z.boolean(),
     }),
   }),

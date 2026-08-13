@@ -52,10 +52,10 @@ export const superLiveInsightsListQuerySchema = rejectClientTenantFields
   .extend({
     q: z.string().trim().min(1).max(200).optional(),
     status: z.enum(["scheduled", "live", "ended", "cancelled"]).optional(),
-    courseId: z.string().uuid().optional(),
-    batchId: z.string().uuid().optional(),
-    startedFrom: z.string().datetime().optional(),
-    startedTo: z.string().datetime().optional(),
+    courseId: z.uuid().optional(),
+    batchId: z.uuid().optional(),
+    startedFrom: z.iso.datetime().optional(),
+    startedTo: z.iso.datetime().optional(),
     minAttended: z.coerce.number().int().min(0).max(100000).optional(),
     hasUnresolved: z
       .union([z.boolean(), z.enum(["true", "false", "1", "0"])])
@@ -91,16 +91,16 @@ export type SuperLiveInsightsListQuery = z.output<typeof superLiveInsightsListQu
 
 export const superLiveInsightItemSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     title: z.string(),
     status: z.string(),
-    courseId: z.string().uuid().nullable(),
+    courseId: z.uuid().nullable(),
     courseTitle: z.string().nullable(),
-    batchId: z.string().uuid().nullable(),
+    batchId: z.uuid().nullable(),
     batchName: z.string().nullable(),
-    scheduledAt: z.string().datetime().nullable(),
-    startedAt: z.string().datetime().nullable(),
-    endedAt: z.string().datetime().nullable(),
+    scheduledAt: z.iso.datetime().nullable(),
+    startedAt: z.iso.datetime().nullable(),
+    endedAt: z.iso.datetime().nullable(),
     durationSeconds: z.number().int().nonnegative().nullable(),
     attendedCount: z.number().int().nonnegative(),
     registeredCount: z.number().int().nonnegative(),
@@ -130,15 +130,15 @@ export const superLiveInsightsListResponseSchema = z.object({
 
 export const superLiveSessionIdParamsSchema = z
   .object({
-    sessionId: z.string().uuid(),
+    sessionId: z.uuid(),
   })
   .strict();
 
 const superLiveInsightSeriesItemSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     title: z.string(),
-    scheduledAt: z.string().datetime().nullable(),
+    scheduledAt: z.iso.datetime().nullable(),
     attendanceRate: z.number().min(0).max(100).nullable(),
     isCurrent: z.boolean(),
   })
@@ -146,7 +146,7 @@ const superLiveInsightSeriesItemSchema = z
 
 const superLiveInsightTrendItemSchema = z
   .object({
-    id: z.string().uuid().nullable(),
+    id: z.uuid().nullable(),
     title: z.string(),
     label: z.string(),
     attendanceRate: z.number().min(0).max(100).nullable(),
@@ -166,7 +166,7 @@ export const superLiveInsightContextSchema = z
     rateDeltaVsCourse: z.number().nullable(),
     courseRankCaption: z.string().nullable(),
     estimatedTurnout: z.number().int().nonnegative().nullable(),
-    cancelledAt: z.string().datetime().nullable(),
+    cancelledAt: z.iso.datetime().nullable(),
     series: z.array(superLiveInsightSeriesItemSchema),
     trend: z.array(superLiveInsightTrendItemSchema),
     trendDeltaPoints: z.number().nullable(),
@@ -182,13 +182,13 @@ export const superLiveInsightDetailResponseSchema = z.object({
 
 export const exportSuperLiveInsightsRosterBodySchema = rejectClientTenantFields
   .extend({
-    sessionId: z.string().uuid().optional(),
+    sessionId: z.uuid().optional(),
     q: z.string().trim().min(1).max(200).optional(),
     status: z.enum(["scheduled", "live", "ended", "cancelled"]).optional(),
-    courseId: z.string().uuid().optional(),
-    batchId: z.string().uuid().optional(),
-    startedFrom: z.string().datetime().optional(),
-    startedTo: z.string().datetime().optional(),
+    courseId: z.uuid().optional(),
+    batchId: z.uuid().optional(),
+    startedFrom: z.iso.datetime().optional(),
+    startedTo: z.iso.datetime().optional(),
     minAttended: z.number().int().min(0).max(100000).optional(),
     columns: z.array(z.string().min(1)).min(1).max(30).optional(),
     emailDownloadLink: z.boolean().default(true),
@@ -197,7 +197,7 @@ export const exportSuperLiveInsightsRosterBodySchema = rejectClientTenantFields
 
 export const exportSuperLiveInsightsRosterResponseSchema = z.object({
   data: z.object({
-    runId: z.string().uuid(),
+    runId: z.uuid(),
     status: z.string(),
     emailed: z.boolean(),
   }),

@@ -46,8 +46,8 @@ export const activeDevicesOverviewResponseSchema = z.object({
       deviceLimitPolicy: z.number().int().positive(),
       restrictionsEnabled: z.boolean(),
       windowLabel: z.string(),
-      windowFrom: z.string().datetime().nullable(),
-      windowTo: z.string().datetime(),
+      windowFrom: z.iso.datetime().nullable(),
+      windowTo: z.iso.datetime(),
     }),
     trend: z.array(
       z.object({
@@ -61,11 +61,11 @@ export const activeDevicesOverviewResponseSchema = z.object({
 
 export const activeDevicesLearnerSchema = z
   .object({
-    membershipId: z.string().uuid(),
+    membershipId: z.uuid(),
     learnerName: z.string().nullable(),
     email: z.string().nullable(),
     deviceCount: z.number().int().nonnegative(),
-    lastSeenAt: z.string().datetime().nullable(),
+    lastSeenAt: z.iso.datetime().nullable(),
     platforms: z.array(z.string()),
     ipAddresses: z.array(z.string()),
     status: z.enum(["active", "over_limit"]),
@@ -90,7 +90,7 @@ export const activeDevicesRosterListResponseSchema = z.object({
 
 export const activeDevicesLearnerParamsSchema = z
   .object({
-    membershipId: z.string().uuid(),
+    membershipId: z.uuid(),
   })
   .strict();
 
@@ -114,12 +114,7 @@ export const activeDevicesRiskSignalStatusSchema = z.enum(["pass", "warn", "fail
 
 export const activeDevicesRiskSignalSchema = z
   .object({
-    key: z.enum([
-      "concurrent_locations",
-      "device_count",
-      "recognised_devices",
-      "no_shared_ip",
-    ]),
+    key: z.enum(["concurrent_locations", "device_count", "recognised_devices", "no_shared_ip"]),
     label: z.string(),
     status: activeDevicesRiskSignalStatusSchema,
     detail: z.string().nullable(),
@@ -129,7 +124,7 @@ export const activeDevicesRiskSignalSchema = z
 export const activeDevicesActivityEventSchema = z
   .object({
     id: z.string(),
-    at: z.string().datetime(),
+    at: z.iso.datetime(),
     kind: z.enum(["signed_in", "last_seen", "over_limit"]),
     label: z.string(),
     detail: z.string().nullable(),
@@ -139,7 +134,7 @@ export const activeDevicesActivityEventSchema = z
 
 export const activeDevicesLearnerDetailResponseSchema = z.object({
   data: z.object({
-    membershipId: z.string().uuid(),
+    membershipId: z.uuid(),
     learnerName: z.string().nullable(),
     email: z.string().nullable(),
     roleLabel: z.string(),
@@ -147,8 +142,8 @@ export const activeDevicesLearnerDetailResponseSchema = z.object({
       activeDevices: z.number().int().nonnegative(),
       deviceLimit: z.number().int().positive(),
       overLimit: z.boolean(),
-      firstSeenAt: z.string().datetime().nullable(),
-      lastActivityAt: z.string().datetime().nullable(),
+      firstSeenAt: z.iso.datetime().nullable(),
+      lastActivityAt: z.iso.datetime().nullable(),
       distinctIpCount: z.number().int().nonnegative(),
       flagSummary: z.string().nullable(),
     }),
@@ -166,8 +161,8 @@ export const activeDevicesLearnerDetailResponseSchema = z.object({
 
 export const activeDevicesSessionParamsSchema = z
   .object({
-    membershipId: z.string().uuid(),
-    deviceId: z.string().uuid(),
+    membershipId: z.uuid(),
+    deviceId: z.uuid(),
   })
   .strict();
 
@@ -183,7 +178,7 @@ export const activeDevicesSessionHeatHourSchema = z
 export const activeDevicesSessionActivitySchema = z
   .object({
     id: z.string(),
-    at: z.string().datetime(),
+    at: z.iso.datetime(),
     label: z.string(),
     detail: z.string().nullable(),
     result: z.enum(["ok", "flagged", "info"]),
@@ -193,7 +188,7 @@ export const activeDevicesSessionActivitySchema = z
 
 export const activeDevicesSessionDetailResponseSchema = z.object({
   data: z.object({
-    membershipId: z.string().uuid(),
+    membershipId: z.uuid(),
     learnerName: z.string().nullable(),
     email: z.string().nullable(),
     roleLabel: z.string(),

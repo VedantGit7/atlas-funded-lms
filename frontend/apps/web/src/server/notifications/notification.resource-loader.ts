@@ -1,5 +1,6 @@
 import { createTenantResourceRef } from "@atlas/authorization";
 import type { TenantTx } from "@atlas/db";
+import { isInboxSentinelTemplateKey } from "./notification.dto";
 import { notificationDispatchNotFound, notificationTemplateNotFound } from "./notification.errors";
 import { notificationRepository } from "./notification.repository";
 
@@ -71,7 +72,7 @@ export async function loadSelfNotificationDispatchResourceRef(args: {
     dispatch.tenant_id !== args.ctx.tenantId ||
     dispatch.membership_id !== args.ctx.actorMembershipId ||
     dispatch.channel !== "in_app" ||
-    dispatch.template_key === "__inbox_read__" ||
+    isInboxSentinelTemplateKey(dispatch.template_key) ||
     dispatch.status !== "SENT"
   ) {
     throw notificationDispatchNotFound();

@@ -14,7 +14,7 @@ const pageInfoSchema = z.object({
 
 export const scheduleDetailParamsSchema = z
   .object({
-    scheduleId: z.string().uuid(),
+    scheduleId: z.uuid(),
   })
   .strict();
 
@@ -56,7 +56,7 @@ export const scheduleDetailConfigSchema = z
 
 export const scheduleDetailStatsSchema = z
   .object({
-    nextRunAt: z.string().datetime().nullable(),
+    nextRunAt: z.iso.datetime().nullable(),
     totalRuns: z.number().int().nonnegative(),
     succeededRuns: z.number().int().nonnegative(),
     failedRuns: z.number().int().nonnegative(),
@@ -71,23 +71,23 @@ export const scheduleDetailTroubleSchema = z
   .object({
     consecutiveFailures: z.number().int().positive(),
     lastErrorMessage: z.string(),
-    failingSinceAt: z.string().datetime().nullable(),
-    failingRunId: z.string().uuid().nullable(),
+    failingSinceAt: z.iso.datetime().nullable(),
+    failingRunId: z.uuid().nullable(),
     retriesRemainingBeforePause: z.number().int().nonnegative().nullable(),
   })
   .nullable();
 
 export const scheduleDetailRunSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     fileName: z.string().nullable(),
     status: z.enum(JOB_STATUSES),
     rowCount: z.number().int().nullable(),
     rowDelta: z.number().int().nullable(),
     durationMs: z.number().int().nullable(),
     durationLabel: z.string().nullable(),
-    startedAt: z.string().datetime().nullable(),
-    completedAt: z.string().datetime().nullable(),
+    startedAt: z.iso.datetime().nullable(),
+    completedAt: z.iso.datetime().nullable(),
     format: z.enum(REPORT_FORMATS).nullable(),
     hasFile: z.boolean(),
     canDownload: z.boolean(),
@@ -101,7 +101,7 @@ export const scheduleDetailRunSchema = z
 
 export const scheduleDetailResponseSchema = z.object({
   data: z.object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     name: z.string(),
     definitionKey: z.string(),
     definitionTitle: z.string(),
@@ -111,9 +111,9 @@ export const scheduleDetailResponseSchema = z.object({
     primaryFormat: z.enum(REPORT_FORMATS),
     destinations: z.array(scheduleDestinationChipSchema),
     isExternal: z.boolean(),
-    nextRunAt: z.string().datetime().nullable(),
-    createdAt: z.string().datetime(),
-    updatedAt: z.string().datetime(),
+    nextRunAt: z.iso.datetime().nullable(),
+    createdAt: z.iso.datetime(),
+    updatedAt: z.iso.datetime(),
     ownerName: z.string().nullable(),
     stats: scheduleDetailStatsSchema,
     config: scheduleDetailConfigSchema,
@@ -125,7 +125,7 @@ export const scheduleDetailResponseSchema = z.object({
 
 export const duplicateScheduleResponseSchema = z.object({
   data: z.object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     name: z.string(),
   }),
 });

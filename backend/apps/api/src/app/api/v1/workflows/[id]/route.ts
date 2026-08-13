@@ -11,7 +11,7 @@ export const PUT = createTenantRoute({
   metadata: putRouteMetadata,
   body: updateWorkflowDefinitionBodySchema,
   output: workflowDefinitionResponseSchema,
-  params: z.object({ id: z.string().uuid() }),
+  params: z.object({ id: z.uuid() }),
   handler: async ({ tx, ctx, input, params }) =>
-    updateWorkflowDefinitionRecord(tx, ctx, params["id"] ?? "", input),
+    updateWorkflowDefinitionRecord(tx, ctx, params["id"], input),
 });

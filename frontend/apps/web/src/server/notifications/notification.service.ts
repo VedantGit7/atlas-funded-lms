@@ -7,9 +7,12 @@ import type {
   UpdateNotificationTemplateBody,
 } from "./notification.contract";
 import {
+  buildArchiveReceiptIdempotencyKey,
   buildReadReceiptIdempotencyKey,
+  extractArchiveReceiptAt,
   extractInboxPayload,
   extractReadReceiptAt,
+  isInboxSentinelTemplateKey,
   notificationSourceEventKeySchema,
   notificationVariablesJsonSchema,
   renderNotificationPlainText,
@@ -58,12 +61,14 @@ function mapInboxItem(row: {
   payload_json: unknown;
   created_at: Date;
   read_at?: string | null;
+  archived_at?: string | null;
 }) {
   const inbox = extractInboxPayload(row.payload_json);
   if (!inbox) {
     return null;
   }
   const readAt = normalizeReadAt(row.read_at ?? inbox.readAt);
+  const archivedAt = normalizeReadAt(row.archived_at);
   return {
     id: row.id,
     title: inbox.title,
@@ -71,6 +76,8 @@ function mapInboxItem(row: {
     actionPath: inbox.actionPath,
     read: readAt != null,
     readAt,
+    archived: archivedAt != null,
+    archivedAt,
     createdAt: row.created_at.toISOString(),
   };
 }
@@ -181,6 +188,7 @@ export async function listMyNotifications(
     tenantId: ctx.tenantId,
     membershipId: ctx.actorMembershipId,
     limit,
+    includeArchived: query.includeArchived,
     ...(query.cursor !== undefined ? { cursor: query.cursor } : {}),
   });
 
@@ -206,7 +214,7 @@ export async function markNotificationRead(tx: TenantTx, ctx: ServiceCtx, dispat
     dispatch.tenant_id !== ctx.tenantId ||
     dispatch.membership_id !== ctx.actorMembershipId ||
     dispatch.channel !== "in_app" ||
-    dispatch.template_key === "__inbox_read__" ||
+    isInboxSentinelTemplateKey(dispatch.template_key) ||
     dispatch.status !== "SENT"
   ) {
     throw notificationDispatchNotFound();
@@ -267,6 +275,79 @@ export async function markNotificationRead(tx: TenantTx, ctx: ServiceCtx, dispat
       id: dispatch.id,
       read: true as const,
       readAt: readAt.toISOString(),
+    },
+  };
+}
+
+export async function markNotificationArchived(tx: TenantTx, ctx: ServiceCtx, dispatchId: string) {
+  const dispatch = await notificationRepository.findDispatchById(tx, dispatchId);
+  if (
+    !dispatch ||
+    dispatch.tenant_id !== ctx.tenantId ||
+    dispatch.membership_id !== ctx.actorMembershipId ||
+    dispatch.channel !== "in_app" ||
+    isInboxSentinelTemplateKey(dispatch.template_key) ||
+    dispatch.status !== "SENT"
+  ) {
+    throw notificationDispatchNotFound();
+  }
+
+  const inbox = extractInboxPayload(dispatch.payload_json);
+  if (!inbox) {
+    throw notificationDispatchNotFound();
+  }
+
+  const existingReceipt = await notificationRepository.findArchiveReceiptForDispatch(tx, {
+    tenantId: ctx.tenantId,
+    membershipId: ctx.actorMembershipId,
+    dispatchId,
+  });
+
+  if (existingReceipt) {
+    return {
+      data: {
+        id: dispatch.id,
+        archived: true as const,
+        archivedAt:
+          extractArchiveReceiptAt(existingReceipt.payload_json) ?? new Date().toISOString(),
+      },
+    };
+  }
+
+  const archivedAt = new Date();
+  const receiptKey = buildArchiveReceiptIdempotencyKey({
+    dispatchId,
+    membershipId: ctx.actorMembershipId,
+  });
+
+  const existingByKey = await notificationRepository.findDispatchByIdempotencyKey(tx, {
+    tenantId: ctx.tenantId,
+    idempotencyKey: receiptKey,
+  });
+
+  if (existingByKey) {
+    return {
+      data: {
+        id: dispatch.id,
+        archived: true as const,
+        archivedAt: extractArchiveReceiptAt(existingByKey.payload_json) ?? archivedAt.toISOString(),
+      },
+    };
+  }
+
+  await notificationRepository.insertArchiveReceipt(tx, {
+    tenantId: ctx.tenantId,
+    membershipId: ctx.actorMembershipId,
+    dispatchId,
+    archivedAt,
+    idempotencyKey: receiptKey,
+  });
+
+  return {
+    data: {
+      id: dispatch.id,
+      archived: true as const,
+      archivedAt: archivedAt.toISOString(),
     },
   };
 }

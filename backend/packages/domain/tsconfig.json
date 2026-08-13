@@ -16,6 +16,7 @@
     { "path": "../api" },
     { "path": "../authorization" },
     { "path": "../db" },
+    { "path": "./config" },
     { "path": "../events" },
     { "path": "../membership" },
     { "path": "../storage" }

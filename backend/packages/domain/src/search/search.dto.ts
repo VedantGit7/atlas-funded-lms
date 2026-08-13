@@ -10,7 +10,7 @@ const rejectClientTenantFields = z
     source_context: z.never().optional(),
     sourceContext: z.never().optional(),
   })
-  .passthrough();
+  .loose();
 
 export const SEARCH_SOURCE_TYPES = ["course", "post", "certificate"] as const;
 
@@ -22,14 +22,14 @@ export const searchQuerySchema = rejectClientTenantFields
       .optional()
       .transform((value) => (value && value.length > 0 ? value : undefined)),
     type: z.enum(SEARCH_SOURCE_TYPES).optional(),
-    cursor: z.string().uuid().optional(),
+    cursor: z.uuid().optional(),
     limit: z.coerce.number().int().min(1).max(50).default(20),
   })
   .strict()
   .superRefine((value, ctx) => {
     if (value.q !== undefined && value.q.length < 2) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         message: "Query must be at least 2 characters when provided.",
         path: ["q"],
       });
@@ -54,7 +54,7 @@ export const searchListResponseSchema = z.object({
   data: z.object({
     items: z.array(searchResultItemSchema),
     pageInfo: z.object({
-      nextCursor: z.string().uuid().nullable(),
+      nextCursor: z.uuid().nullable(),
       hasNextPage: z.boolean(),
     }),
   }),

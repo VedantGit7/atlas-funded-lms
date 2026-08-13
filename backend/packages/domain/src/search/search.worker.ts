@@ -8,16 +8,16 @@ import {
 
 const moderationDecidedPayloadSchema = z
   .object({
-    caseId: z.string().uuid(),
+    caseId: z.uuid(),
     contentAction: z.enum(["delete"]).nullable().optional(),
   })
-  .passthrough();
+  .loose();
 
 const certificateRevokedPayloadSchema = z
   .object({
-    certificateId: z.string().uuid(),
+    certificateId: z.uuid(),
   })
-  .passthrough();
+  .loose();
 import { searchRepository } from "./search.repository";
 import { runSearchReindex } from "./search-reindex-runner";
 import { getSearchAdaptersForEvent, getSearchSourceAdapter } from "./search-source-registry";

@@ -44,8 +44,8 @@ const pageInfoSchema = z.object({
 export const zoomMeetingsListQuerySchema = rejectClientTenantFields
   .extend({
     q: z.string().trim().min(1).max(200).optional(),
-    startedFrom: z.string().datetime().optional(),
-    startedTo: z.string().datetime().optional(),
+    startedFrom: z.iso.datetime().optional(),
+    startedTo: z.iso.datetime().optional(),
     view: z.enum(["all", "has_unmatched", "no_participants"]).default("all"),
     sortBy: z
       .enum(["started_at", "topic", "attendance_count", "duration_seconds"])
@@ -60,11 +60,11 @@ export type ZoomMeetingsListQuery = z.output<typeof zoomMeetingsListQuerySchema>
 
 export const zoomMeetingListItemSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     externalMeetingId: z.string(),
     topic: z.string().nullable(),
-    startedAt: z.string().datetime().nullable(),
-    endedAt: z.string().datetime().nullable(),
+    startedAt: z.iso.datetime().nullable(),
+    endedAt: z.iso.datetime().nullable(),
     durationSeconds: z.number().int().nonnegative().nullable(),
     attendanceCount: z.number().int().nonnegative(),
     matchedCount: z.number().int().nonnegative(),
@@ -75,8 +75,8 @@ export const zoomMeetingListItemSchema = z
 
 export const zoomConnectionMetaSchema = z.object({
   status: z.enum(["connected", "disconnected", "unknown"]),
-  connectedAt: z.string().datetime().nullable(),
-  lastSyncedAt: z.string().datetime().nullable(),
+  connectedAt: z.iso.datetime().nullable(),
+  lastSyncedAt: z.iso.datetime().nullable(),
   meetingsImportedToday: z.number().int().nonnegative(),
   hasConnectionRecord: z.boolean(),
 });
@@ -103,13 +103,13 @@ export const zoomMeetingsListResponseSchema = z.object({
 
 export const zoomMeetingIdParamsSchema = z
   .object({
-    meetingId: z.string().uuid(),
+    meetingId: z.uuid(),
   })
   .strict();
 
 export const zoomTimelinePointSchema = z.object({
   minuteOffset: z.number().int().nonnegative(),
-  at: z.string().datetime(),
+  at: z.iso.datetime(),
   concurrent: z.number().int().nonnegative(),
 });
 
@@ -119,10 +119,10 @@ export const zoomMeetingDetailResponseSchema = z.object({
     connection: zoomConnectionMetaSchema,
     timeline: z.array(zoomTimelinePointSchema),
     peakConcurrent: z.number().int().nonnegative(),
-    peakAt: z.string().datetime().nullable(),
+    peakAt: z.iso.datetime().nullable(),
     biggestDropCount: z.number().int().nonnegative(),
-    biggestDropFrom: z.string().datetime().nullable(),
-    biggestDropTo: z.string().datetime().nullable(),
+    biggestDropFrom: z.iso.datetime().nullable(),
+    biggestDropTo: z.iso.datetime().nullable(),
     linkedSession: z
       .object({
         id: z.string(),
@@ -137,8 +137,8 @@ export const zoomParticipantsQuerySchema = rejectClientTenantFields
   .extend({
     displayName: z.string().trim().min(1).max(200).optional(),
     email: z.string().trim().min(1).max(200).optional(),
-    joinedFrom: z.string().datetime().optional(),
-    joinedTo: z.string().datetime().optional(),
+    joinedFrom: z.iso.datetime().optional(),
+    joinedTo: z.iso.datetime().optional(),
     matchState: z.enum(["all", "matched", "unmatched", "guest"]).default("all"),
     durationBucket: z.enum(["any", "under_10", "10_to_30", "over_30"]).default("any"),
     rejoinedOnly: z.coerce.boolean().default(false),
@@ -159,14 +159,14 @@ export type ZoomParticipantsQuery = z.output<typeof zoomParticipantsQuerySchema>
 
 export const zoomParticipantItemSchema = z
   .object({
-    id: z.string().uuid(),
-    membershipId: z.string().uuid().nullable(),
+    id: z.uuid(),
+    membershipId: z.uuid().nullable(),
     externalUserId: z.string().nullable(),
     displayName: z.string().nullable(),
     zoomDisplayName: z.string().nullable(),
     email: z.string().nullable(),
-    joinTime: z.string().datetime().nullable(),
-    leaveTime: z.string().datetime().nullable(),
+    joinTime: z.iso.datetime().nullable(),
+    leaveTime: z.iso.datetime().nullable(),
     durationSeconds: z.number().int().nullable(),
     matchState: z.enum(["matched", "unmatched", "guest"]),
     sessionCount: z.number().int().positive(),
@@ -176,7 +176,7 @@ export const zoomParticipantItemSchema = z
 
 export const zoomParticipantsListResponseSchema = z.object({
   data: z.object({
-    meetingId: z.string().uuid(),
+    meetingId: z.uuid(),
     topic: z.string().nullable(),
     meetingDurationSeconds: z.number().int().nonnegative().nullable(),
     items: z.array(zoomParticipantItemSchema),
@@ -192,11 +192,11 @@ export const zoomParticipantsListResponseSchema = z.object({
 
 export const exportZoomInsightsRosterBodySchema = rejectClientTenantFields
   .extend({
-    meetingId: z.string().uuid().optional(),
+    meetingId: z.uuid().optional(),
     displayName: z.string().trim().min(1).max(200).optional(),
     email: z.string().trim().min(1).max(200).optional(),
-    joinedFrom: z.string().datetime().optional(),
-    joinedTo: z.string().datetime().optional(),
+    joinedFrom: z.iso.datetime().optional(),
+    joinedTo: z.iso.datetime().optional(),
     columns: z.array(z.string().min(1)).min(1).max(30).optional(),
     emailDownloadLink: z.boolean().default(true),
   })
@@ -204,7 +204,7 @@ export const exportZoomInsightsRosterBodySchema = rejectClientTenantFields
 
 export const exportZoomInsightsRosterResponseSchema = z.object({
   data: z.object({
-    runId: z.string().uuid(),
+    runId: z.uuid(),
     status: z.string(),
     emailed: z.boolean(),
   }),
@@ -212,17 +212,17 @@ export const exportZoomInsightsRosterResponseSchema = z.object({
 
 export const zoomParticipantParamsSchema = z
   .object({
-    meetingId: z.string().uuid(),
-    participantId: z.string().uuid(),
+    meetingId: z.uuid(),
+    participantId: z.uuid(),
   })
   .strict();
 
 export const zoomParticipantSessionSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     index: z.number().int().positive(),
-    joinTime: z.string().datetime().nullable(),
-    leaveTime: z.string().datetime().nullable(),
+    joinTime: z.iso.datetime().nullable(),
+    leaveTime: z.iso.datetime().nullable(),
     durationSeconds: z.number().int().nonnegative().nullable(),
     shareOfMeeting: z.number().nullable(),
     deviceHint: z.enum(["mobile", "tablet", "desktop", "unknown"]),
@@ -231,9 +231,9 @@ export const zoomParticipantSessionSchema = z
 
 export const zoomParticipantHistoryItemSchema = z
   .object({
-    meetingId: z.string().uuid(),
+    meetingId: z.uuid(),
     topic: z.string().nullable(),
-    startedAt: z.string().datetime().nullable(),
+    startedAt: z.iso.datetime().nullable(),
     coveragePercent: z.number().nullable(),
     isCurrent: z.boolean(),
   })
@@ -241,14 +241,14 @@ export const zoomParticipantHistoryItemSchema = z
 
 export const zoomParticipantDetailResponseSchema = z.object({
   data: z.object({
-    id: z.string().uuid(),
-    meetingId: z.string().uuid(),
+    id: z.uuid(),
+    meetingId: z.uuid(),
     meetingTopic: z.string().nullable(),
     meetingExternalId: z.string(),
-    meetingStartedAt: z.string().datetime().nullable(),
-    meetingEndedAt: z.string().datetime().nullable(),
+    meetingStartedAt: z.iso.datetime().nullable(),
+    meetingEndedAt: z.iso.datetime().nullable(),
     meetingDurationSeconds: z.number().int().nonnegative().nullable(),
-    membershipId: z.string().uuid().nullable(),
+    membershipId: z.uuid().nullable(),
     externalUserId: z.string().nullable(),
     displayName: z.string().nullable(),
     zoomDisplayName: z.string().nullable(),
@@ -258,8 +258,8 @@ export const zoomParticipantDetailResponseSchema = z.object({
     coveragePercent: z.number().nullable(),
     sessionCount: z.number().int().positive(),
     rejoinCount: z.number().int().nonnegative(),
-    firstJoinedAt: z.string().datetime().nullable(),
-    lastLeftAt: z.string().datetime().nullable(),
+    firstJoinedAt: z.iso.datetime().nullable(),
+    lastLeftAt: z.iso.datetime().nullable(),
     longestGapSeconds: z.number().int().nonnegative().nullable(),
     deviceHint: z.enum(["mobile", "tablet", "desktop", "unknown"]),
     sessions: z.array(zoomParticipantSessionSchema),
@@ -278,14 +278,14 @@ export const zoomParticipantDetailResponseSchema = z.object({
 export const zoomParticipantMatchBodySchema = rejectClientTenantFields
   .extend({
     action: z.enum(["match", "unlink", "mark_guest"]),
-    membershipId: z.string().uuid().optional(),
+    membershipId: z.uuid().optional(),
     applyToOtherMeetings: z.boolean().default(false),
   })
   .strict()
   .superRefine((value, ctx) => {
     if (value.action === "match" && !value.membershipId) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         message: "membershipId is required when matching a learner.",
         path: ["membershipId"],
       });
@@ -296,9 +296,9 @@ export type ZoomParticipantMatchBody = z.output<typeof zoomParticipantMatchBodyS
 
 export const zoomParticipantMatchResponseSchema = z.object({
   data: z.object({
-    participantId: z.string().uuid(),
+    participantId: z.uuid(),
     matchState: z.enum(["matched", "unmatched", "guest"]),
-    membershipId: z.string().uuid().nullable(),
+    membershipId: z.uuid().nullable(),
     updatedRowCount: z.number().int().nonnegative(),
     updatedMeetingCount: z.number().int().nonnegative(),
   }),
@@ -308,8 +308,8 @@ export const zoomParticipantMatchResponseSchema = z.object({
 export const zoomPeopleListQuerySchema = rejectClientTenantFields
   .extend({
     q: z.string().trim().min(1).max(200).optional(),
-    attendedFrom: z.string().datetime().optional(),
-    attendedTo: z.string().datetime().optional(),
+    attendedFrom: z.iso.datetime().optional(),
+    attendedTo: z.iso.datetime().optional(),
     matchState: z.enum(["all", "matched", "unmatched", "guest"]).default("all"),
     meetingsMin: z.coerce.number().int().min(0).max(10_000).optional(),
     meetingsMax: z.coerce.number().int().min(0).max(10_000).optional(),
@@ -337,7 +337,7 @@ export type ZoomPeopleListQuery = z.output<typeof zoomPeopleListQuerySchema>;
 export const zoomPersonListItemSchema = z
   .object({
     identityKey: z.string().min(1),
-    membershipId: z.string().uuid().nullable(),
+    membershipId: z.uuid().nullable(),
     externalUserId: z.string().nullable(),
     displayName: z.string().nullable(),
     zoomDisplayName: z.string().nullable(),
@@ -348,10 +348,10 @@ export const zoomPersonListItemSchema = z
     totalDurationSeconds: z.number().int().nonnegative(),
     avgDurationSeconds: z.number().int().nonnegative().nullable(),
     avgCoveragePercent: z.number().nullable(),
-    firstSeenAt: z.string().datetime().nullable(),
-    lastSeenAt: z.string().datetime().nullable(),
-    representativeMeetingId: z.string().uuid(),
-    representativeParticipantId: z.string().uuid(),
+    firstSeenAt: z.iso.datetime().nullable(),
+    lastSeenAt: z.iso.datetime().nullable(),
+    representativeMeetingId: z.uuid(),
+    representativeParticipantId: z.uuid(),
   })
   .strict();
 
@@ -375,8 +375,8 @@ export const zoomPeopleListResponseSchema = z.object({
     connection: zoomConnectionMetaSchema,
     summary: zoomPeopleListSummarySchema,
     range: z.object({
-      attendedFrom: z.string().datetime().nullable(),
-      attendedTo: z.string().datetime().nullable(),
+      attendedFrom: z.iso.datetime().nullable(),
+      attendedTo: z.iso.datetime().nullable(),
     }),
   }),
 });
@@ -384,8 +384,8 @@ export const zoomPeopleListResponseSchema = z.object({
 export const zoomPersonMeetingsQuerySchema = rejectClientTenantFields
   .extend({
     identityKey: z.string().trim().min(1).max(500),
-    attendedFrom: z.string().datetime().optional(),
-    attendedTo: z.string().datetime().optional(),
+    attendedFrom: z.iso.datetime().optional(),
+    attendedTo: z.iso.datetime().optional(),
   })
   .strict();
 
@@ -393,11 +393,11 @@ export type ZoomPersonMeetingsQuery = z.output<typeof zoomPersonMeetingsQuerySch
 
 export const zoomPersonMeetingItemSchema = z
   .object({
-    meetingId: z.string().uuid(),
-    participantId: z.string().uuid(),
+    meetingId: z.uuid(),
+    participantId: z.uuid(),
     topic: z.string().nullable(),
     externalMeetingId: z.string(),
-    startedAt: z.string().datetime().nullable(),
+    startedAt: z.iso.datetime().nullable(),
     durationSeconds: z.number().int().nonnegative().nullable(),
     coveragePercent: z.number().nullable(),
     rejoinCount: z.number().int().nonnegative(),
@@ -414,7 +414,7 @@ export const zoomPersonAttendancePulseCellSchema = z.object({
 export const zoomPersonMeetingsResponseSchema = z.object({
   data: z.object({
     identityKey: z.string().min(1),
-    membershipId: z.string().uuid().nullable(),
+    membershipId: z.uuid().nullable(),
     displayName: z.string().nullable(),
     email: z.string().nullable(),
     matchState: z.enum(["matched", "unmatched", "guest"]),
@@ -423,8 +423,8 @@ export const zoomPersonMeetingsResponseSchema = z.object({
     avgCoveragePercent: z.number().nullable(),
     meetings: z.array(zoomPersonMeetingItemSchema),
     attendancePulse: z.array(zoomPersonAttendancePulseCellSchema),
-    representativeMeetingId: z.string().uuid().nullable(),
-    representativeParticipantId: z.string().uuid().nullable(),
+    representativeMeetingId: z.uuid().nullable(),
+    representativeParticipantId: z.uuid().nullable(),
   }),
 });
 
@@ -432,8 +432,8 @@ export const zoomPersonMeetingsResponseSchema = z.object({
 export const zoomUnmatchedListQuerySchema = rejectClientTenantFields
   .extend({
     q: z.string().trim().min(1).max(200).optional(),
-    attendedFrom: z.string().datetime().optional(),
-    attendedTo: z.string().datetime().optional(),
+    attendedFrom: z.iso.datetime().optional(),
+    attendedTo: z.iso.datetime().optional(),
     group: z.enum(["all", "high", "medium", "guest", "none"]).default("all"),
     limit: z.coerce.number().int().min(1).max(100).default(50),
     page: z.coerce.number().int().min(1).max(1000).default(1),
@@ -444,7 +444,7 @@ export type ZoomUnmatchedListQuery = z.output<typeof zoomUnmatchedListQuerySchem
 
 export const zoomMatchSuggestionSchema = z
   .object({
-    membershipId: z.string().uuid(),
+    membershipId: z.uuid(),
     displayName: z.string().nullable(),
     email: z.string().nullable(),
     confidence: z.enum(["high", "medium", "low"]),
@@ -461,10 +461,10 @@ export const zoomUnmatchedIdentitySchema = z
     externalUserId: z.string().nullable(),
     meetingsAttended: z.number().int().nonnegative(),
     totalDurationSeconds: z.number().int().nonnegative(),
-    firstSeenAt: z.string().datetime().nullable(),
-    lastSeenAt: z.string().datetime().nullable(),
-    representativeMeetingId: z.string().uuid(),
-    representativeParticipantId: z.string().uuid(),
+    firstSeenAt: z.iso.datetime().nullable(),
+    lastSeenAt: z.iso.datetime().nullable(),
+    representativeMeetingId: z.uuid(),
+    representativeParticipantId: z.uuid(),
     otherUnmatchedMeetingCount: z.number().int().nonnegative(),
     group: z.enum(["high", "medium", "guest", "none"]),
     suggestions: z.array(zoomMatchSuggestionSchema),
@@ -533,9 +533,9 @@ export const zoomUnmatchedBulkMatchBodySchema = rejectClientTenantFields
         z
           .object({
             identityKey: z.string().min(1).max(500),
-            membershipId: z.string().uuid(),
-            representativeMeetingId: z.string().uuid(),
-            representativeParticipantId: z.string().uuid(),
+            membershipId: z.uuid(),
+            representativeMeetingId: z.uuid(),
+            representativeParticipantId: z.uuid(),
           })
           .strict(),
       )
@@ -546,7 +546,7 @@ export const zoomUnmatchedBulkMatchBodySchema = rejectClientTenantFields
   .superRefine((value, ctx) => {
     if (value.mode === "selected" && (!value.items || value.items.length === 0)) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         message: "items are required when mode is selected.",
         path: ["items"],
       });
@@ -563,7 +563,7 @@ export const zoomUnmatchedBulkMatchResponseSchema = z.object({
     results: z.array(
       z.object({
         identityKey: z.string(),
-        membershipId: z.string().uuid().nullable(),
+        membershipId: z.uuid().nullable(),
         matchState: z.enum(["matched", "unmatched", "guest"]),
         updatedRowCount: z.number().int().nonnegative(),
         updatedMeetingCount: z.number().int().nonnegative(),

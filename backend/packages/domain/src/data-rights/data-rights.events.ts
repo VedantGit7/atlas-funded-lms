@@ -18,9 +18,9 @@ export const exportScopeSchema = z
 
 export const dataExportRequestedPayloadSchema = z
   .object({
-    exportJobId: z.string().uuid(),
-    requestedAt: z.string().datetime(),
-    requestedByMembershipId: z.string().uuid(),
+    exportJobId: z.uuid(),
+    requestedAt: z.iso.datetime(),
+    requestedByMembershipId: z.uuid(),
     schemaVersion: z.literal(1),
   })
   .strict();

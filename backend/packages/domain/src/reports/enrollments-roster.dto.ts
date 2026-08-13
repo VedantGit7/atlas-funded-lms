@@ -42,12 +42,12 @@ function parseRosterColumns(value: unknown): string[] {
 
 export const enrollmentRosterQuerySchema = rejectClientTenantFields
   .extend({
-    enrolledFrom: z.string().datetime().optional(),
-    enrolledTo: z.string().datetime().optional(),
+    enrolledFrom: z.iso.datetime().optional(),
+    enrolledTo: z.iso.datetime().optional(),
     email: z.string().trim().min(1).max(320).optional(),
     enrolledType: z.enum(ENROLLMENT_REPORT_TYPES).optional(),
     status: z.string().trim().min(1).max(64).optional(),
-    courseId: z.string().uuid().optional(),
+    courseId: z.uuid().optional(),
     sortBy: z.enum(["enrolled_at", "expires_at"]).default("enrolled_at"),
     sortDir: z.enum(["asc", "desc"]).default("desc"),
     columns: z.preprocess(parseRosterColumns, z.array(z.string().min(1)).min(1)),
@@ -60,12 +60,12 @@ export type EnrollmentRosterQuery = z.output<typeof enrollmentRosterQuerySchema>
 
 export const enrollmentOverviewQuerySchema = rejectClientTenantFields
   .extend({
-    enrolledFrom: z.string().datetime().optional(),
-    enrolledTo: z.string().datetime().optional(),
+    enrolledFrom: z.iso.datetime().optional(),
+    enrolledTo: z.iso.datetime().optional(),
     email: z.string().trim().min(1).max(320).optional(),
     enrolledType: z.enum(ENROLLMENT_REPORT_TYPES).optional(),
     status: z.string().trim().min(1).max(64).optional(),
-    courseId: z.string().uuid().optional(),
+    courseId: z.uuid().optional(),
   })
   .strict();
 
@@ -80,8 +80,8 @@ export const enrollmentOverviewResponseSchema = z.object({
       previousPeriodCount: z.number().int().nonnegative(),
       changePercent: z.number().nullable(),
       windowLabel: z.string(),
-      windowFrom: z.string().datetime(),
-      windowTo: z.string().datetime(),
+      windowFrom: z.iso.datetime(),
+      windowTo: z.iso.datetime(),
     }),
     byType: z.array(
       z.object({
@@ -106,16 +106,16 @@ export const enrollmentOverviewResponseSchema = z.object({
 
 export const enrollmentRosterItemSchema = z
   .object({
-    id: z.string().uuid(),
-    courseId: z.string().uuid(),
-    membershipId: z.string().uuid(),
+    id: z.uuid(),
+    courseId: z.uuid(),
+    membershipId: z.uuid(),
     learnerName: z.string().nullable(),
     email: z.string().nullable(),
     productTitle: z.string(),
     enrolledType: z.string(),
     status: z.string(),
-    enrolledAt: z.string().datetime(),
-    expiresAt: z.string().datetime().nullable(),
+    enrolledAt: z.iso.datetime(),
+    expiresAt: z.iso.datetime().nullable(),
   })
   .strict();
 
@@ -140,19 +140,19 @@ export const createEnrollmentGroupBodySchema = rejectClientTenantFields
   .extend({
     title: z.string().trim().min(1).max(256),
     description: z.string().trim().max(2000).optional(),
-    membershipIds: z.array(z.string().uuid()).min(1).max(2000).optional(),
-    enrolledFrom: z.string().datetime().optional(),
-    enrolledTo: z.string().datetime().optional(),
+    membershipIds: z.array(z.uuid()).min(1).max(2000).optional(),
+    enrolledFrom: z.iso.datetime().optional(),
+    enrolledTo: z.iso.datetime().optional(),
     email: z.string().trim().min(1).max(320).optional(),
     enrolledType: z.enum(ENROLLMENT_REPORT_TYPES).optional(),
     status: z.string().trim().min(1).max(64).optional(),
-    courseId: z.string().uuid().optional(),
+    courseId: z.uuid().optional(),
   })
   .strict();
 
 export const createEnrollmentGroupResponseSchema = z.object({
   data: z.object({
-    batchId: z.string().uuid(),
+    batchId: z.uuid(),
     key: z.string(),
     name: z.string(),
     memberCount: z.number().int().nonnegative(),
@@ -163,13 +163,13 @@ export const sendEnrollmentMessageBodySchema = rejectClientTenantFields
   .extend({
     subject: z.string().trim().min(1).max(200),
     message: z.string().trim().min(1).max(10000),
-    membershipIds: z.array(z.string().uuid()).min(1).max(2000).optional(),
-    enrolledFrom: z.string().datetime().optional(),
-    enrolledTo: z.string().datetime().optional(),
+    membershipIds: z.array(z.uuid()).min(1).max(2000).optional(),
+    enrolledFrom: z.iso.datetime().optional(),
+    enrolledTo: z.iso.datetime().optional(),
     email: z.string().trim().min(1).max(320).optional(),
     enrolledType: z.enum(ENROLLMENT_REPORT_TYPES).optional(),
     status: z.string().trim().min(1).max(64).optional(),
-    courseId: z.string().uuid().optional(),
+    courseId: z.uuid().optional(),
   })
   .strict();
 
@@ -183,12 +183,12 @@ export const sendEnrollmentMessageResponseSchema = z.object({
 
 export const exportEnrollmentRosterBodySchema = rejectClientTenantFields
   .extend({
-    enrolledFrom: z.string().datetime().optional(),
-    enrolledTo: z.string().datetime().optional(),
+    enrolledFrom: z.iso.datetime().optional(),
+    enrolledTo: z.iso.datetime().optional(),
     email: z.string().trim().min(1).max(320).optional(),
     enrolledType: z.enum(ENROLLMENT_REPORT_TYPES).optional(),
     status: z.string().trim().min(1).max(64).optional(),
-    courseId: z.string().uuid().optional(),
+    courseId: z.uuid().optional(),
     sortBy: z.enum(["enrolled_at", "expires_at"]).optional(),
     sortDir: z.enum(["asc", "desc"]).optional(),
     columns: z.array(z.enum(ENROLLMENT_ROSTER_COLUMNS)).min(1).max(20).optional(),
@@ -198,7 +198,7 @@ export const exportEnrollmentRosterBodySchema = rejectClientTenantFields
 
 export const exportEnrollmentRosterResponseSchema = z.object({
   data: z.object({
-    runId: z.string().uuid(),
+    runId: z.uuid(),
     status: z.string(),
     emailed: z.boolean(),
   }),

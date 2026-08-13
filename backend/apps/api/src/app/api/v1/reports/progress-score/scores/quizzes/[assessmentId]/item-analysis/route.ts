@@ -8,7 +8,7 @@ import {
 import { listProgressScoreRosterMetadata } from "@atlas/domain/reports/progress-score-roster.route-metadata";
 import { listScoreItemAnalysis } from "@atlas/domain/reports/progress-score-roster.service";
 
-const emptyQuery = zodEmpty.object({}).passthrough();
+const emptyQuery = zodEmpty.object({}).loose();
 
 export const GET = createTenantRoute<
   z.output<typeof emptyQuery>,

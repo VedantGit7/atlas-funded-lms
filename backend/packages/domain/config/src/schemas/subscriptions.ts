@@ -6,9 +6,9 @@ export const SubscriptionViewSchema = z.object({
   currency: z.string(),
   status: z.string(),
   durationType: z.string(),
-  nextBillingAt: z.string().datetime().nullable(),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  nextBillingAt: z.iso.datetime().nullable(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 
 export const SubscriptionListResponseSchema = z.object({

@@ -15,11 +15,9 @@ import { downloadCertificateMetadata } from "../../../../../../server/certificat
 /**
  * GET /api/v1/certificates/[id]/download
  *
- * Returns the certificate as a downloadable attachment. When no stored render
- * exists yet, a generated HTML preview is served; when neither a render nor a
- * usable design snapshot is available, the service throws 409 asking the client
- * to render first. Uses the bespoke tenant pipeline (rather than
- * `createTenantRoute`) so it can return a non-JSON attachment response.
+ * Returns the certificate as a downloadable attachment. Prefers the stored PDF
+ * from R2 when `r2_object_key` is set; otherwise serves a generated HTML
+ * preview. When neither is available, the service throws 409.
  */
 export async function GET(req: NextRequest, context: { params: Promise<{ id: string }> }) {
   const requestId = getOrCreateRequestId(req.headers);
@@ -68,8 +66,11 @@ export async function GET(req: NextRequest, context: { params: Promise<{ id: str
         },
       );
 
+      const responseBody: BodyInit =
+        typeof result.body === "string" ? result.body : new Uint8Array(result.body);
+
       return attachRequestIdHeader(
-        new NextResponse(result.body, {
+        new NextResponse(responseBody, {
           status: 200,
           headers: {
             "content-type": result.contentType,

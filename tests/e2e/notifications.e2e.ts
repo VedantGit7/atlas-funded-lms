@@ -8,10 +8,12 @@ const notificationPaths = [
   "app/api/v1/notification-templates/route.ts",
   "app/api/v1/me/notifications/route.ts",
   "app/api/v1/me/notifications/[id]/read/route.ts",
+  "app/api/v1/me/notifications/[id]/archive/route.ts",
   "server/notifications/notification.service.ts",
   "server/notifications/notification.worker.ts",
   "features/notifications/components/NotificationTemplateManager.tsx",
   "features/notifications/components/LearnerNotificationsClient.tsx",
+  "features/notifications/components/AdminNotificationsInbox.tsx",
 ];
 
 describe("notification e2e wiring", () => {
@@ -38,7 +40,28 @@ describe("notification e2e wiring", () => {
     );
     expect(source).toContain("notificationParamsSchema");
     expect(source).toContain("params: notificationParamsSchema");
-    expect(source).toContain("params.id");
+    expect(source).toMatch(/params\[["']id["']\]|params\.id/);
+  });
+
+  it("archive route binds notification id from path params", () => {
+    const source = readFileSync(
+      resolveSplitPath("app/api/v1/me/notifications/[id]/archive/route.ts"),
+      "utf8",
+    );
+    expect(source).toContain("markNotificationArchived");
+    expect(source).toContain("notificationParamsSchema");
+    expect(source).toContain("params: notificationParamsSchema");
+  });
+
+  it("admin inbox archives via API and hides more-actions placeholder", () => {
+    const source = readFileSync(
+      resolveSplitPath("features/notifications/components/AdminNotificationsInbox.tsx"),
+      "utf8",
+    );
+    expect(source).toContain("/archive");
+    expect(source).toContain("Show archived");
+    expect(source).not.toContain("More actions coming soon");
+    expect(source).not.toContain("Archive coming soon");
   });
 
   it("worker sends email only through provider abstraction", () => {

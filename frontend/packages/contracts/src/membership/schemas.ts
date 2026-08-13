@@ -21,8 +21,8 @@ export const meMembershipOutputSchema = z.object({
     }),
     identity: z.object({
       authenticated: z.literal(true),
-      email: z.string().email(),
-      emailNormalized: z.string().email(),
+      email: z.email(),
+      emailNormalized: z.email(),
       mfaEnabled: z.boolean(),
       globalStatus: z.string(),
     }),

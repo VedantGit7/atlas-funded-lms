@@ -6,17 +6,18 @@ import { AccountSecurityOkResponseSchema } from "@atlas/domain-identity";
 import { emitSecurityNotification } from "../../../../../../../lib/account-security-orchestrator";
 import { securityMutationMetadata } from "../../route.metadata";
 
-const mfaParamsSchema = z.object({ id: z.string().uuid() }).strict();
+const mfaParamsSchema = z.object({ id: z.uuid() }).strict();
 
 export const DELETE = createTenantRoute<
   Record<string, never>,
-  Zod.output<typeof AccountSecurityOkResponseSchema>
+  Zod.output<typeof AccountSecurityOkResponseSchema>,
+  typeof mfaParamsSchema
 >({
   metadata: securityMutationMetadata,
   params: mfaParamsSchema,
   output: AccountSecurityOkResponseSchema,
   handler: async ({ tx, ctx, params }) => {
-    const factorId = params["id"] ?? "";
+    const factorId: string = params.id;
     await unenrollMfaFactor({ factorId });
 
     const emailRows = await tx.$queryRaw<Array<{ email: string }>>`

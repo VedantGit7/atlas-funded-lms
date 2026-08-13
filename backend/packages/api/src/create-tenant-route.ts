@@ -17,8 +17,10 @@ import { loadResourceRefOrDefault } from "./load-resource-ref";
 import type { RouteMetadata, TenantRouteContext } from "./route-metadata";
 import { noBodySchema } from "./schemas";
 
-type InferParams<TParams extends z.ZodTypeAny | undefined> = TParams extends z.ZodTypeAny
-  ? z.infer<TParams>
+type InferParams<TParams extends z.ZodType | undefined> = TParams extends z.ZodType
+  ? z.infer<TParams> extends object
+    ? z.infer<TParams>
+    : Record<string, never>
   : Record<string, never>;
 
 function asParamRecord(params: object): Record<string, string> {
@@ -104,7 +106,7 @@ export async function runProtectedTenantRouteHandler<
   });
 }
 
-function readGetInput(req: NextRequest, schema: z.ZodTypeAny): unknown {
+function readGetInput(req: NextRequest, schema: z.ZodType): unknown {
   const url = new URL(req.url);
   const query: Record<string, string> = {};
 
@@ -115,7 +117,7 @@ function readGetInput(req: NextRequest, schema: z.ZodTypeAny): unknown {
   return schema.parse(query);
 }
 
-async function readBodyInput(req: NextRequest, schema: z.ZodTypeAny): Promise<unknown> {
+async function readBodyInput(req: NextRequest, schema: z.ZodType): Promise<unknown> {
   const raw: unknown = await req.json();
   return schema.parse(raw);
 }
@@ -147,11 +149,11 @@ type TenantRouteWithParams = (
 
 type TenantRouteWithoutParams = (req: NextRequest) => Promise<NextResponse>;
 
-type TenantRouteConfig<TInput, TOutput, TParams extends z.ZodTypeAny | undefined = undefined> = {
+type TenantRouteConfig<TInput, TOutput, TParams extends z.ZodType | undefined = undefined> = {
   metadata: RouteMetadata<TInput>;
-  output: z.ZodTypeAny;
-  input?: z.ZodTypeAny;
-  body?: z.ZodTypeAny;
+  output: z.ZodType;
+  input?: z.ZodType;
+  body?: z.ZodType;
   readBody?: (req: NextRequest) => Promise<unknown>;
   params?: TParams;
   handler: ProtectedTenantRouteHandler<TInput, TOutput, InferParams<TParams>>;
@@ -164,13 +166,13 @@ export function createTenantRoute<TInput = Record<string, never>, TOutput = unkn
 export function createTenantRoute<
   TInput = Record<string, never>,
   TOutput = unknown,
-  TParams extends z.ZodTypeAny = z.ZodTypeAny,
+  TParams extends z.ZodType = z.ZodType,
 >(config: TenantRouteConfig<TInput, TOutput, TParams> & { params: TParams }): TenantRouteWithParams;
 
 export function createTenantRoute<
   TInput = Record<string, never>,
   TOutput = unknown,
-  TParams extends z.ZodTypeAny | undefined = undefined,
+  TParams extends z.ZodType | undefined = undefined,
 >(
   config: TenantRouteConfig<TInput, TOutput, TParams>,
 ): TenantRouteWithParams | TenantRouteWithoutParams {

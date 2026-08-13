@@ -11,7 +11,7 @@ import { getReportRun } from "@atlas/domain/reports/reports.service";
 import { getReportRunMetadata } from "@atlas/domain/reports/reports.route-metadata";
 import { reportPreviewResponseSchema } from "@atlas/api-server/reports/reports.schemas";
 
-const paramsSchema = z.object({ runId: z.string().uuid() });
+const paramsSchema = z.object({ runId: z.uuid() });
 
 export const GET = createTenantRoute<
   Record<string, never>,

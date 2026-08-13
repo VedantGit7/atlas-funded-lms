@@ -135,6 +135,8 @@ export const revokeCertificateMetadata = {
     }),
 } satisfies RouteMetadata;
 
+export const certificateLifecycleMetadata = revokeCertificateMetadata;
+
 export const certificateWalletPassMetadata = {
   permission: "certificate.read",
   entitlement: "certification.enable",
@@ -149,7 +151,10 @@ export const certificateWalletPassMetadata = {
     }),
 } satisfies RouteMetadata;
 
-export const certificateLifecycleMetadata = revokeCertificateMetadata;
+export const downloadAppleWalletPassMetadata = {
+  ...certificateWalletPassMetadata,
+  rateLimit: "authenticatedTenantRead",
+} satisfies RouteMetadata;
 
 export const reissueCertificateMetadata = {
   ...revokeCertificateMetadata,

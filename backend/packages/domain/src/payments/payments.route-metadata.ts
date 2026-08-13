@@ -36,3 +36,10 @@ export const stripeWebhookMetadata = {
   rateLimit: "publicRead",
   idempotency: "none",
 } as const;
+
+export const razorpayWebhookMetadata = {
+  public: true,
+  permission: "pub",
+  rateLimit: "publicRead",
+  idempotency: "none",
+} as const;

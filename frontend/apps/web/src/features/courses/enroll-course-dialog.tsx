@@ -30,14 +30,61 @@ type QuoteResponse = {
   };
 };
 
+type RazorpayClientCheckout = {
+  provider: "razorpay";
+  keyId: string;
+  orderId: string;
+  amountCents: number;
+  currency: string;
+  name: string;
+  description?: string;
+  notes?: Record<string, string>;
+};
+
 type PurchaseResponse = {
   data: {
-    enrollmentId: string;
+    enrollmentId: string | null;
     paymentOrderId: string;
     created: boolean;
+    checkoutUrl?: string | null;
+    clientCheckout?: RazorpayClientCheckout | null;
     pricing: PriceBreakdown;
   };
 };
+
+type RazorpayCheckoutInstance = {
+  open: () => void;
+  on: (event: string, handler: (response: unknown) => void) => void;
+};
+
+type RazorpayCheckoutConstructor = new (
+  options: Record<string, unknown>,
+) => RazorpayCheckoutInstance;
+
+function loadRazorpayCheckoutScript(): Promise<RazorpayCheckoutConstructor> {
+  return new Promise((resolve, reject) => {
+    const existing = (window as unknown as { Razorpay?: RazorpayCheckoutConstructor }).Razorpay;
+    if (existing) {
+      resolve(existing);
+      return;
+    }
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    script.onload = () => {
+      const ctor = (window as unknown as { Razorpay?: RazorpayCheckoutConstructor }).Razorpay;
+      if (!ctor) {
+        reject(new Error("Razorpay Checkout failed to load."));
+        return;
+      }
+      resolve(ctor);
+    };
+    script.onerror = () => {
+      reject(new Error("Unable to load Razorpay Checkout."));
+    };
+    document.body.appendChild(script);
+  });
+}
 
 export function EnrollCourseDialog({
   courseId,
@@ -159,7 +206,12 @@ export function EnrollCourseDialog({
     setSubmitting(true);
     setError(null);
     try {
-      await clientApi.post<PurchaseResponse>(
+      const origin = typeof window !== "undefined" ? window.location.origin : "";
+      const returnPath =
+        typeof window !== "undefined"
+          ? `${window.location.pathname}${window.location.search}`
+          : "/";
+      const response = await clientApi.post<PurchaseResponse>(
         "/api/v1/checkout/purchase",
         {
           courseId,
@@ -167,15 +219,56 @@ export function EnrollCourseDialog({
           ...(affiliateFromUrl ? { affiliateCode: affiliateFromUrl } : {}),
           walletCreditsToSpend: useWallet ? walletCreditsInput : null,
           deviceType: "WEB",
+          successUrl: `${origin}${returnPath}${returnPath.includes("?") ? "&" : "?"}checkout=success`,
+          cancelUrl: `${origin}${returnPath}${returnPath.includes("?") ? "&" : "?"}checkout=cancelled`,
         },
         "checkout-purchase",
-        { successMessage: "Purchase complete. You are enrolled." },
       );
+
+      if (response.data.checkoutUrl) {
+        window.location.assign(response.data.checkoutUrl);
+        return;
+      }
+
+      const clientCheckout = response.data.clientCheckout;
+      if (clientCheckout?.provider === "razorpay") {
+        const RazorpayCtor = await loadRazorpayCheckoutScript();
+        const successUrl = `${origin}${returnPath}${returnPath.includes("?") ? "&" : "?"}checkout=success`;
+        await new Promise<void>((resolve, reject) => {
+          const rzp = new RazorpayCtor({
+            key: clientCheckout.keyId,
+            amount: clientCheckout.amountCents,
+            currency: clientCheckout.currency,
+            name: clientCheckout.name,
+            description: clientCheckout.description ?? clientCheckout.name,
+            order_id: clientCheckout.orderId,
+            notes: clientCheckout.notes ?? {},
+            handler: () => {
+              // Enrollment is fulfilled by the Razorpay webhook; navigate to success.
+              window.location.assign(successUrl);
+              resolve();
+            },
+            modal: {
+              ondismiss: () => {
+                reject(new Error("Payment cancelled."));
+              },
+            },
+          });
+          rzp.on("payment.failed", () => {
+            reject(new Error("Payment failed. Please try again."));
+          });
+          rzp.open();
+        });
+        return;
+      }
+
       void sendAttributionEvent({ eventType: "enrolled", clearAfterSend: true });
       setOpen(false);
       router.refresh();
     } catch (err) {
       if (err instanceof ClientApiError) {
+        setError(err.message);
+      } else if (err instanceof Error) {
         setError(err.message);
       } else {
         setError("Unable to complete purchase.");
@@ -251,7 +344,7 @@ export function EnrollCourseDialog({
               <div className="mt-4 space-y-4">
                 <div className="rounded-md border bg-slate-50 p-3 text-sm">
                   {quoting && !quote ? (
-                    <p>Loading price…</p>
+                    <p>Loading priceâ€¦</p>
                   ) : (
                     <>
                       {original != null ? (
@@ -278,6 +371,12 @@ export function EnrollCourseDialog({
                         <div className="mt-1 flex justify-between gap-3 text-emerald-700">
                           <span>Wallet ({walletCreditsApplied} credits)</span>
                           <span>-{formatMoney(walletDiscount, displayCurrency)}</span>
+                        </div>
+                      ) : null}
+                      {(quote?.taxAmountCents ?? 0) > 0 ? (
+                        <div className="mt-1 flex justify-between gap-3">
+                          <span>Tax (GST)</span>
+                          <span>{formatMoney(quote?.taxAmountCents ?? 0, displayCurrency)}</span>
                         </div>
                       ) : null}
                       {final != null ? (

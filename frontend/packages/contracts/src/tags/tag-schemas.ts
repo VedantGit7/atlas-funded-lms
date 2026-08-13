@@ -4,7 +4,7 @@ import { mutationBodySchema } from "../membership/schemas/shared";
 export const tagVisibilitySchema = z.enum(["public", "private", "classification"]);
 
 export const tagSummarySchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   title: z.string(),
   slug: z.string(),
   description: z.string().nullable().optional(),
@@ -12,8 +12,8 @@ export const tagSummarySchema = z.object({
 });
 
 export const tagDetailSchema = tagSummarySchema.extend({
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 
 export const tagListQuerySchema = z
@@ -36,11 +36,11 @@ export const updateTagBodySchema = mutationBodySchema({
 });
 
 export const replaceLessonTagsBodySchema = mutationBodySchema({
-  tagIds: z.array(z.string().uuid()).max(100),
+  tagIds: z.array(z.uuid()).max(100),
 });
 
 export const replaceCourseTagsBodySchema = mutationBodySchema({
-  tagIds: z.array(z.string().uuid()).max(100),
+  tagIds: z.array(z.uuid()).max(100),
 });
 
 export const tagListResponseSchema = z.object({

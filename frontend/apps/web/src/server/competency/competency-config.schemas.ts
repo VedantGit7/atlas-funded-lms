@@ -18,34 +18,34 @@ export const scoringProfileKeySchema = z
 export const entityStatusSchema = z.enum(["ACTIVE", "INACTIVE", "ARCHIVED"]);
 
 export const competencyDimensionSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   key: dimensionKeySchema,
   name: z.string(),
   description: z.string().nullable(),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 
 export const scoringProfileSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   key: scoringProfileKeySchema,
   name: z.string(),
   status: entityStatusSchema,
-  activeConfigVersionId: z.string().uuid().nullable(),
+  activeConfigVersionId: z.uuid().nullable(),
   activeVersion: z.number().int().nullable(),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 
 export const competencyBandSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   key: z.string().trim().min(1).max(64),
   label: z.string().trim().min(1).max(200),
   minScore: z.number().min(0).max(100),
   maxScore: z.number().min(0).max(100),
   sortOrder: z.number().int().min(0).max(1000),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 
 export const bandInputSchema = z
@@ -97,7 +97,7 @@ export const replaceBandsBodySchema = mutationBodySchema({
     validateBandInputs(value.bands);
   } catch (error) {
     ctx.addIssue({
-      code: z.ZodIssueCode.custom,
+      code: "custom",
       message: error instanceof Error ? error.message : "Invalid band configuration.",
       path: ["bands"],
     });
@@ -144,7 +144,7 @@ export const competencyDimensionDetailResponseSchema = z.object({
 
 export const deleteDimensionResponseSchema = z.object({
   data: z.object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     deleted: z.literal(true),
   }),
 });
@@ -163,11 +163,11 @@ export const competencyBandListResponseSchema = z.object({
 
 export const publishScoringConfigResponseSchema = z.object({
   data: z.object({
-    profileId: z.string().uuid(),
-    configVersionId: z.string().uuid(),
+    profileId: z.uuid(),
+    configVersionId: z.uuid(),
     version: z.number().int(),
-    activatedAt: z.string().datetime(),
-    activeConfigVersionId: z.string().uuid(),
+    activatedAt: z.iso.datetime(),
+    activeConfigVersionId: z.uuid(),
   }),
 });
 

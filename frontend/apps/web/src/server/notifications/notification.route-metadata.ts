@@ -68,3 +68,16 @@ export const markNotificationReadMetadata = {
       dispatchId: params["id"] ?? "",
     }),
 } satisfies RouteMetadata;
+
+export const markNotificationArchivedMetadata = {
+  permission: "notification.read.self",
+  audit: "none",
+  rateLimit: "authenticatedTenantWrite",
+  idempotency: "required",
+  resourceLoader: async ({ tx, ctx, params }) =>
+    loadSelfNotificationDispatchResourceRef({
+      tx,
+      ctx,
+      dispatchId: params["id"] ?? "",
+    }),
+} satisfies RouteMetadata;

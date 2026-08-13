@@ -119,10 +119,16 @@ export function buildAssessmentConfigJson(args: {
   description?: string | null;
   config: AssessmentConfig;
 }): Record<string, unknown> {
+  let proctoringLevel = args.config.proctoringLevel;
+  if (args.config.l1ProctoringEnabled && proctoringLevel === 0) {
+    proctoringLevel = 1;
+  }
   return {
     createdByMembershipId: args.createdByMembershipId,
     ...(args.description != null ? { description: args.description } : {}),
     ...args.config,
+    proctoringLevel,
+    l1ProctoringEnabled: proctoringLevel >= 1,
   };
 }
 
@@ -140,7 +146,21 @@ export function extractAssessmentConfig(configJson: unknown): AssessmentConfig {
     shuffleItems: base["shuffleItems"] === true,
     shuffleOptions: base["shuffleOptions"] === true,
     secureMode: base["secureMode"] === true,
-    l1ProctoringEnabled: base["l1ProctoringEnabled"] === true,
+    ...(() => {
+      const rawLevel =
+        typeof base["proctoringLevel"] === "number" &&
+        Number.isInteger(base["proctoringLevel"]) &&
+        base["proctoringLevel"] >= 0 &&
+        base["proctoringLevel"] <= 3
+          ? (base["proctoringLevel"] as 0 | 1 | 2 | 3)
+          : 0;
+      const legacyL1 = base["l1ProctoringEnabled"] === true;
+      const proctoringLevel = legacyL1 && rawLevel === 0 ? (1 as const) : rawLevel;
+      return {
+        proctoringLevel,
+        l1ProctoringEnabled: proctoringLevel >= 1,
+      };
+    })(),
     showAnswersPolicy:
       base["showAnswersPolicy"] === "never" ||
       base["showAnswersPolicy"] === "after_submit" ||

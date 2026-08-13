@@ -14,13 +14,13 @@ export const rolePermissionViewSchema = z.object({
 });
 
 export const roleViewSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   key: z.string(),
   name: z.string(),
   isSystem: z.boolean(),
   permissions: z.array(z.string()),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 
 export const roleListResponseSchema = z.object({
@@ -58,22 +58,22 @@ export const roleDetailResponseSchema = z.object({
 });
 
 export const assignRoleBodySchema = mutationBodySchema({
-  roleId: z.string().uuid(),
+  roleId: z.uuid(),
 });
 
 export const permissionOverrideViewSchema = z.object({
-  id: z.string().uuid(),
-  membershipId: z.string().uuid(),
+  id: z.uuid(),
+  membershipId: z.uuid(),
   permissionKey: z.string(),
   effect: z.enum(["ALLOW", "DENY"]),
   reason: z.string().nullable(),
-  expiresAt: z.string().datetime().nullable(),
-  createdAt: z.string().datetime(),
+  expiresAt: z.iso.datetime().nullable(),
+  createdAt: z.iso.datetime(),
 });
 
 export const permissionOverrideListQuerySchema = z
   .object({
-    membershipId: z.string().uuid().optional(),
+    membershipId: z.uuid().optional(),
     limit: z.coerce.number().int().min(1).max(100).default(25),
     cursor: z.string().optional(),
   })
@@ -87,11 +87,11 @@ export const permissionOverrideListResponseSchema = z.object({
 });
 
 export const createPermissionOverrideBodySchema = mutationBodySchema({
-  membershipId: z.string().uuid(),
+  membershipId: z.uuid(),
   permissionKey: tenantPermissionKeySchema,
   effect: z.enum(["ALLOW", "DENY"]),
   reason: z.string().trim().max(500).nullable().optional(),
-  expiresAt: z.string().datetime().nullable().optional(),
+  expiresAt: z.iso.datetime().nullable().optional(),
 });
 
 export const permissionOverrideResponseSchema = z.object({
@@ -100,7 +100,7 @@ export const permissionOverrideResponseSchema = z.object({
 
 export const deletePermissionOverrideResponseSchema = z.object({
   data: z.object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     deleted: z.literal(true),
   }),
 });

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const IdSchema = z.string().uuid();
+export const IdSchema = z.uuid();
 
 export const PublishStatusSchema = z.enum(["DRAFT", "REVIEW", "PUBLISHED", "ARCHIVED"]);
 
@@ -28,6 +28,7 @@ export const AssessmentConfigSchema = z
     shuffleItems: z.boolean().default(false),
     shuffleOptions: z.boolean().default(false),
     secureMode: z.boolean().default(false),
+    proctoringLevel: z.union([z.literal(0), z.literal(1), z.literal(2), z.literal(3)]).default(0),
     l1ProctoringEnabled: z.boolean().default(false),
     showAnswersPolicy: ShowAnswersPolicySchema.default("after_submit"),
   })
@@ -49,7 +50,7 @@ export const CreateAssessmentBodySchema = z.object({
   title: z.string().trim().min(2).max(180),
   description: z.string().trim().max(2000).optional(),
   assessmentType: AssessmentTypeSchema.default("quiz"),
-  config: AssessmentConfigSchema.default({}),
+  config: AssessmentConfigSchema.default({} as z.infer<typeof AssessmentConfigSchema>),
 });
 
 export const UpdateAssessmentBodySchema = z.object({
@@ -80,7 +81,16 @@ export const PublishAssessmentBodySchema = z.object({
   reason: z.string().trim().max(500).optional(),
 });
 
-export const StartAttemptBodySchema = z.object({}).strict();
+export const StartAttemptBodySchema = z
+  .object({
+    consent: z
+      .object({
+        consentedAt: z.iso.datetime(),
+        level: z.union([z.literal(1), z.literal(2), z.literal(3)]),
+      })
+      .optional(),
+  })
+  .strict();
 
 export const SaveAnswerBodySchema = z.object({
   itemId: IdSchema,

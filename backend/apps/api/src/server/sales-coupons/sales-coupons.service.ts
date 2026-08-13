@@ -1,6 +1,11 @@
 import { randomUUID } from "node:crypto";
 import { AtlasHttpError } from "@atlas/core/http/errors";
 import type { TenantTx } from "@atlas/db";
+import { getLearnerBillingConfigRow } from "@atlas/domain-config/repositories/learner-billing.repository";
+import {
+  PaymentProviderNotConfiguredError,
+  resolvePaymentProvider,
+} from "@atlas/domain/payments/payment-provider.registry";
 import type { ServiceCtx } from "@atlas/domain/shared/domain.types";
 import { findCourseAuthProjection, readCoursePricing } from "../courses/courses.repository";
 import { courseNotFound, coursePurchaseRequired } from "../courses/courses.errors";
@@ -10,6 +15,7 @@ import {
   publishEnrollmentCreatedEvent,
 } from "../enrollments/enrollments.repository";
 import {
+  checkoutPurchaseBodySchema,
   checkoutPurchaseResponseSchema,
   checkoutQuoteBodySchema,
   checkoutQuoteResponseSchema,
@@ -32,10 +38,7 @@ import {
   validateCouponBodySchema,
   validateCouponResponseSchema,
 } from "./sales-coupons.schemas";
-import {
-  salesCouponsRepository,
-  type CouponRow,
-} from "./sales-coupons.repository";
+import { salesCouponsRepository, type CouponRow } from "./sales-coupons.repository";
 import { previewWalletSpend, spendWalletCredits } from "../sales-wallet/sales-wallet.service";
 import { applyReferralPurchaseCredits } from "../sales-referrals/sales-referrals.service";
 import {
@@ -101,9 +104,7 @@ async function toCouponDto(tx: TenantTx, row: CouponRow) {
     deviceType: row.device_type as "ALL" | "WEB" | "MOBILE",
     appliesToAllCourses: row.applies_to_all_courses,
     courseIds,
-    courseCount: row.applies_to_all_courses
-      ? 0
-      : Number(row.course_count ?? courseIds.length),
+    courseCount: row.applies_to_all_courses ? 0 : Number(row.course_count ?? courseIds.length),
     redemptionCount: Number(row.redemption_count ?? 0),
     activatedAt: row.activated_at?.toISOString() ?? null,
     createdAt: row.created_at.toISOString(),
@@ -184,7 +185,7 @@ export async function listCoupons(tx: TenantTx, _ctx: ServiceCtx, rawQuery: unkn
   const query = couponsListQuerySchema.parse(rawQuery ?? {});
   const [rows, summary] = await Promise.all([
     salesCouponsRepository.list(tx, {
-      ...(query.status ? { status: query.status } : {}),
+      status: query.status,
       ...(query.q ? { q: query.q } : {}),
       limit: query.limit,
     }),
@@ -222,7 +223,7 @@ export async function createCoupon(tx: TenantTx, ctx: ServiceCtx, rawBody: unkno
   const existing = await salesCouponsRepository.findByCode(tx, fields.code);
   if (existing) throw validationError("A coupon with this code already exists.");
 
-  const courseIds = body.appliesToAllCourses ? [] : (body.courseIds ?? []);
+  const courseIds = body.appliesToAllCourses ? [] : body.courseIds;
   await assertValidCourseIds(tx, courseIds);
 
   const id = await salesCouponsRepository.insert(tx, {
@@ -254,7 +255,7 @@ export async function createBulkCoupons(tx: TenantTx, ctx: ServiceCtx, rawBody: 
       discountType: body.discountType,
       discountValue: body.discountValue,
       maxDiscountCents: body.maxDiscountCents ?? null,
-      currency: (body.currency ?? "USD").toUpperCase(),
+      currency: body.currency.toUpperCase(),
       startsAt: null,
       endsAt: null,
       totalUsageLimit: null,
@@ -312,12 +313,7 @@ export async function listCouponRedemptions(
   });
 }
 
-export async function updateCoupon(
-  tx: TenantTx,
-  _ctx: ServiceCtx,
-  id: string,
-  rawBody: unknown,
-) {
+export async function updateCoupon(tx: TenantTx, _ctx: ServiceCtx, id: string, rawBody: unknown) {
   const body = updateCouponBodySchema.parse(rawBody);
   const existing = await requireCoupon(tx, id);
   assertEditableWhileActive(existing);
@@ -328,7 +324,7 @@ export async function updateCoupon(
     if (collision) throw validationError("A coupon with this code already exists.");
   }
 
-  const courseIds = body.appliesToAllCourses ? [] : (body.courseIds ?? []);
+  const courseIds = body.appliesToAllCourses ? [] : body.courseIds;
   await assertValidCourseIds(tx, courseIds);
 
   await salesCouponsRepository.update(tx, id, fields);
@@ -360,12 +356,7 @@ export async function deactivateCoupon(tx: TenantTx, _ctx: ServiceCtx, id: strin
   });
 }
 
-export async function deleteCoupon(
-  tx: TenantTx,
-  _ctx: ServiceCtx,
-  id: string,
-  rawBody: unknown,
-) {
+export async function deleteCoupon(tx: TenantTx, _ctx: ServiceCtx, id: string, rawBody: unknown) {
   const body = deleteCouponBodySchema.parse(rawBody);
   const existing = await requireCoupon(tx, id);
   if (existing.status === "ACTIVE") {
@@ -440,10 +431,7 @@ async function applyCouponToPrice(
     throw validationError("This coupon does not apply to this currency.");
   }
 
-  if (
-    coupon.min_purchase_cents != null &&
-    args.originalAmountCents < coupon.min_purchase_cents
-  ) {
+  if (coupon.min_purchase_cents != null && args.originalAmountCents < coupon.min_purchase_cents) {
     throw validationError("Order total is below the coupon minimum purchase.");
   }
 
@@ -485,6 +473,30 @@ async function applyCouponToPrice(
   };
 }
 
+function computeTaxCents(args: {
+  amountCents: number;
+  gstEnabled: boolean;
+  gstPercentage: number | null;
+}): number {
+  if (!args.gstEnabled || args.gstPercentage == null || args.gstPercentage <= 0) {
+    return 0;
+  }
+  return Math.max(0, Math.round((args.amountCents * args.gstPercentage) / 100));
+}
+
+async function resolveCheckoutTax(tx: TenantTx, amountAfterDiscountsCents: number) {
+  const billing = await getLearnerBillingConfigRow(tx);
+  const taxAmountCents = computeTaxCents({
+    amountCents: amountAfterDiscountsCents,
+    gstEnabled: billing?.gst_enabled ?? false,
+    gstPercentage: billing?.gst_percentage ?? null,
+  });
+  return {
+    taxAmountCents,
+    finalAmountCents: Math.max(0, amountAfterDiscountsCents + taxAmountCents),
+  };
+}
+
 function toBreakdown(args: {
   courseId: string;
   courseTitle: string;
@@ -493,6 +505,7 @@ function toBreakdown(args: {
   discountCents: number;
   walletCreditsApplied?: number;
   walletDiscountCents?: number;
+  taxAmountCents?: number;
   finalAmountCents: number;
   coupon: CouponRow | null;
   affiliateCode?: string | null;
@@ -505,6 +518,7 @@ function toBreakdown(args: {
     discountCents: args.discountCents,
     walletCreditsApplied: args.walletCreditsApplied ?? 0,
     walletDiscountCents: args.walletDiscountCents ?? 0,
+    taxAmountCents: args.taxAmountCents ?? 0,
     finalAmountCents: args.finalAmountCents,
     affiliateCode: args.affiliateCode ?? null,
     coupon: args.coupon
@@ -517,6 +531,301 @@ function toBreakdown(args: {
         }
       : null,
   };
+}
+
+type CourseCheckoutMetadata = {
+  kind: "course_checkout";
+  courseId: string;
+  courseTitle: string;
+  productTitle: string;
+  productType: "course";
+  couponId: string | null;
+  couponCode: string | null;
+  affiliateId: string | null;
+  affiliateCode: string | null;
+  affiliateCommissionPct: number | null;
+  originalAmountCents: number;
+  discountCents: number;
+  walletCreditsApplied: number;
+  walletDiscountCents: number;
+  taxAmountCents: number;
+  amountAfterCouponCents: number;
+  finalAmountCents: number;
+  fulfillmentApplied?: boolean;
+};
+
+function asCheckoutMetadata(value: unknown): CourseCheckoutMetadata | null {
+  if (!value || typeof value !== "object") return null;
+  const record = value as Record<string, unknown>;
+  if (record["kind"] !== "course_checkout") return null;
+  if (typeof record["courseId"] !== "string") return null;
+  return {
+    kind: "course_checkout",
+    courseId: record["courseId"],
+    courseTitle: typeof record["courseTitle"] === "string" ? record["courseTitle"] : "",
+    productTitle: typeof record["productTitle"] === "string" ? record["productTitle"] : "",
+    productType: "course",
+    couponId: typeof record["couponId"] === "string" ? record["couponId"] : null,
+    couponCode: typeof record["couponCode"] === "string" ? record["couponCode"] : null,
+    affiliateId: typeof record["affiliateId"] === "string" ? record["affiliateId"] : null,
+    affiliateCode: typeof record["affiliateCode"] === "string" ? record["affiliateCode"] : null,
+    affiliateCommissionPct:
+      typeof record["affiliateCommissionPct"] === "number"
+        ? record["affiliateCommissionPct"]
+        : null,
+    originalAmountCents: Number(record["originalAmountCents"] ?? 0),
+    discountCents: Number(record["discountCents"] ?? 0),
+    walletCreditsApplied: Number(record["walletCreditsApplied"] ?? 0),
+    walletDiscountCents: Number(record["walletDiscountCents"] ?? 0),
+    taxAmountCents: Number(record["taxAmountCents"] ?? 0),
+    amountAfterCouponCents: Number(
+      record["amountAfterCouponCents"] ??
+        Number(record["originalAmountCents"] ?? 0) - Number(record["discountCents"] ?? 0),
+    ),
+    finalAmountCents: Number(record["finalAmountCents"] ?? 0),
+    fulfillmentApplied: record["fulfillmentApplied"] === true,
+  };
+}
+
+async function allocateInvoiceNumber(tx: TenantTx, paymentOrderId: string): Promise<string> {
+  const invoiceRows = await tx.$queryRawUnsafe<
+    Array<{ prefix: string | null; next_number: number | null }>
+  >(
+    `
+    update learner_billing_config
+    set
+      invoice_next_number = coalesce(invoice_next_number, 1) + 1,
+      updated_at = now()
+    where tenant_id = app.current_tenant_id()
+    returning
+      invoice_prefix as prefix,
+      (invoice_next_number - 1) as next_number
+    `,
+  );
+  const invoiceRow = invoiceRows[0];
+  const invoicePrefix =
+    (invoiceRow?.prefix?.trim() || "INV").replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 16) || "INV";
+  return invoiceRow?.next_number != null
+    ? `${invoicePrefix}-${String(invoiceRow.next_number).padStart(5, "0")}`
+    : `INV-${paymentOrderId.slice(0, 8).toUpperCase()}`;
+}
+
+type PaymentOrderFulfillRow = {
+  id: string;
+  membership_id: string | null;
+  external_id: string | null;
+  amount_cents: number;
+  currency: string;
+  status: string;
+  metadata_json: unknown;
+  invoice_number: string | null;
+  tax_amount_cents: number | null;
+  coupon_amount_cents: number | null;
+};
+
+async function findPaymentOrderById(
+  tx: TenantTx,
+  paymentOrderId: string,
+): Promise<PaymentOrderFulfillRow | null> {
+  const rows = await tx.$queryRawUnsafe<PaymentOrderFulfillRow[]>(
+    `
+    select
+      id::text,
+      membership_id::text,
+      external_id,
+      amount_cents,
+      currency,
+      status,
+      metadata_json,
+      invoice_number,
+      tax_amount_cents,
+      coupon_amount_cents
+    from payment_orders
+    where id = $1::uuid
+    limit 1
+    `,
+    paymentOrderId,
+  );
+  return rows[0] ?? null;
+}
+
+async function findPaymentOrderByExternalId(
+  tx: TenantTx,
+  externalId: string,
+): Promise<PaymentOrderFulfillRow | null> {
+  const rows = await tx.$queryRawUnsafe<PaymentOrderFulfillRow[]>(
+    `
+    select
+      id::text,
+      membership_id::text,
+      external_id,
+      amount_cents,
+      currency,
+      status,
+      metadata_json,
+      invoice_number,
+      tax_amount_cents,
+      coupon_amount_cents
+    from payment_orders
+    where external_id = $1
+    limit 1
+    `,
+    externalId,
+  );
+  return rows[0] ?? null;
+}
+
+/**
+ * Marks a course PaymentOrder paid and enrolls the learner.
+ * Idempotent on already-paid orders / existing enrollments.
+ */
+export async function fulfillPaidCourseOrder(
+  tx: TenantTx,
+  ctx: ServiceCtx,
+  order: PaymentOrderFulfillRow,
+): Promise<{ enrollmentId: string; created: boolean; paymentOrderId: string }> {
+  const metadata = asCheckoutMetadata(order.metadata_json);
+  if (!metadata) {
+    throw validationError("Payment order is missing course checkout metadata.");
+  }
+  if (!order.membership_id) {
+    throw validationError("Payment order has no buyer membership.");
+  }
+
+  const membershipId = order.membership_id;
+  const alreadyPaid = order.status === "paid" || metadata.fulfillmentApplied === true;
+
+  if (!alreadyPaid) {
+    const invoiceNumber = order.invoice_number ?? (await allocateInvoiceNumber(tx, order.id));
+
+    const claimed = await tx.$queryRawUnsafe<Array<{ id: string }>>(
+      `
+      update payment_orders
+      set
+        status = 'paid',
+        paid_at = coalesce(paid_at, now()),
+        invoice_number = coalesce(invoice_number, $2),
+        metadata_json = coalesce(metadata_json, '{}'::jsonb) || $3::jsonb,
+        updated_at = now()
+      where id = $1::uuid
+        and status <> 'paid'
+      returning id::text
+      `,
+      order.id,
+      invoiceNumber,
+      JSON.stringify({ fulfillmentApplied: true }),
+    );
+
+    // Only the winner of the claim applies one-time side effects (wallet/coupon/affiliates).
+    if (claimed.length > 0) {
+      if (metadata.walletCreditsApplied > 0) {
+        await spendWalletCredits(tx, {
+          membershipId,
+          credits: metadata.walletCreditsApplied,
+          maxSpendableMoneyCents: metadata.amountAfterCouponCents,
+          paymentOrderId: order.id,
+          courseId: metadata.courseId,
+        });
+      }
+
+      if (metadata.couponId && metadata.couponCode) {
+        const existingRedemption = await tx.$queryRawUnsafe<Array<{ id: string }>>(
+          `
+          select id::text
+          from sales_coupon_redemptions
+          where payment_order_id = $1::uuid
+          limit 1
+          `,
+          order.id,
+        );
+        if (existingRedemption.length === 0) {
+          await salesCouponsRepository.insertRedemption(tx, {
+            couponId: metadata.couponId,
+            membershipId,
+            courseId: metadata.courseId,
+            paymentOrderId: order.id,
+            discountCents: metadata.discountCents,
+            originalAmountCents: metadata.originalAmountCents,
+            finalAmountCents: metadata.finalAmountCents,
+            currency: order.currency,
+            codeSnapshot: metadata.couponCode,
+          });
+        }
+      }
+
+      await applyReferralPurchaseCredits(tx, {
+        refereeMembershipId: membershipId,
+        paymentOrderId: order.id,
+      });
+
+      if (metadata.affiliateCode) {
+        await applyAffiliateCommission(tx, {
+          paymentOrderId: order.id,
+          buyerMembershipId: membershipId,
+          courseId: metadata.courseId,
+          code: metadata.affiliateCode,
+          orderAmountCents: metadata.amountAfterCouponCents,
+          discountCents: metadata.discountCents,
+          currency: order.currency,
+        });
+      }
+    }
+  }
+
+  const created = await insertEnrollment({
+    tx,
+    tenantId: ctx.tenantId,
+    courseId: metadata.courseId,
+    membershipId,
+    enrolledType: "paid",
+  });
+
+  if (created.created) {
+    await publishEnrollmentCreatedEvent({
+      tx,
+      ctx: {
+        ...ctx,
+        actorMembershipId: membershipId,
+      },
+      enrollmentId: created.id,
+      courseId: metadata.courseId,
+      membershipId,
+    });
+  }
+
+  return {
+    enrollmentId: created.id,
+    created: created.created,
+    paymentOrderId: order.id,
+  };
+}
+
+export async function fulfillPaidCourseOrderByExternalId(
+  tx: TenantTx,
+  ctx: ServiceCtx,
+  args: { externalId: string; paymentOrderId?: string | null },
+): Promise<{ enrollmentId: string; created: boolean; paymentOrderId: string } | null> {
+  let order =
+    (args.paymentOrderId ? await findPaymentOrderById(tx, args.paymentOrderId) : null) ??
+    (await findPaymentOrderByExternalId(tx, args.externalId));
+
+  if (!order) return null;
+
+  if (order.external_id !== args.externalId) {
+    await tx.$executeRawUnsafe(
+      `
+      update payment_orders
+      set external_id = $2, updated_at = now()
+      where id = $1::uuid
+        and (external_id is null or external_id <> $2)
+      `,
+      order.id,
+      args.externalId,
+    );
+    order = { ...order, external_id: args.externalId };
+  }
+
+  return fulfillPaidCourseOrder(tx, ctx, order);
 }
 
 type CheckoutDiscountResult = {
@@ -562,9 +871,7 @@ async function resolveCheckoutDiscount(
 
     // Explicit affiliateCode that did not resolve (inactive / wrong product).
     if (args.affiliateCode) {
-      throw validationError(
-        "This affiliate code is invalid or cannot be used for this product.",
-      );
+      throw validationError("This affiliate code is invalid or cannot be used for this product.");
     }
 
     if (args.couponCode) {
@@ -584,11 +891,7 @@ async function resolveCheckoutDiscount(
   return { discountCents, amountAfterDiscount, coupon, affiliate: null };
 }
 
-export async function validateCouponForLearner(
-  tx: TenantTx,
-  ctx: ServiceCtx,
-  rawBody: unknown,
-) {
+export async function validateCouponForLearner(tx: TenantTx, ctx: ServiceCtx, rawBody: unknown) {
   const body = validateCouponBodySchema.parse(rawBody);
   const { course, originalAmountCents, currency } = await resolveCoursePrice(tx, body.courseId);
   const applied = await applyCouponToPrice(tx, ctx, {
@@ -645,12 +948,12 @@ export async function quoteCheckout(tx: TenantTx, ctx: ServiceCtx, rawBody: unkn
     membershipId: ctx.actorMembershipId,
   });
 
-  let discountCents = 0;
-  let amountAfterCoupon = originalAmountCents;
-  let coupon: CouponRow | null = null;
-  let affiliate: ResolveAffiliateCheckoutResult | null = null;
-
-  const resolved = await resolveCheckoutDiscount(tx, ctx, {
+  const {
+    discountCents,
+    amountAfterDiscount: amountAfterCoupon,
+    coupon,
+    affiliate,
+  } = await resolveCheckoutDiscount(tx, ctx, {
     courseId: body.courseId,
     originalAmountCents,
     currency,
@@ -658,10 +961,6 @@ export async function quoteCheckout(tx: TenantTx, ctx: ServiceCtx, rawBody: unkn
     ...(body.couponCode != null ? { couponCode: body.couponCode } : {}),
     ...(body.affiliateCode != null ? { affiliateCode: body.affiliateCode } : {}),
   });
-  discountCents = resolved.discountCents;
-  amountAfterCoupon = resolved.amountAfterDiscount;
-  coupon = resolved.coupon;
-  affiliate = resolved.affiliate;
 
   const walletPreview = await previewWalletSpend(tx, {
     membershipId: ctx.actorMembershipId,
@@ -669,7 +968,8 @@ export async function quoteCheckout(tx: TenantTx, ctx: ServiceCtx, rawBody: unkn
     maxSpendableMoneyCents: amountAfterCoupon,
   });
 
-  const finalAmountCents = Math.max(0, amountAfterCoupon - walletPreview.discountCents);
+  const amountAfterWallet = Math.max(0, amountAfterCoupon - walletPreview.discountCents);
+  const { taxAmountCents, finalAmountCents } = await resolveCheckoutTax(tx, amountAfterWallet);
 
   return checkoutQuoteResponseSchema.parse({
     data: {
@@ -681,6 +981,7 @@ export async function quoteCheckout(tx: TenantTx, ctx: ServiceCtx, rawBody: unkn
         discountCents,
         walletCreditsApplied: walletPreview.creditsApplied,
         walletDiscountCents: walletPreview.discountCents,
+        taxAmountCents,
         finalAmountCents,
         coupon,
         affiliateCode: affiliate?.affiliate.coupon_code ?? null,
@@ -696,7 +997,7 @@ export async function quoteCheckout(tx: TenantTx, ctx: ServiceCtx, rawBody: unkn
 }
 
 export async function purchaseCheckout(tx: TenantTx, ctx: ServiceCtx, rawBody: unknown) {
-  const body = checkoutQuoteBodySchema.parse(rawBody);
+  const body = checkoutPurchaseBodySchema.parse(rawBody);
   const { course, originalAmountCents, currency } = await resolveCoursePrice(tx, body.courseId);
 
   const existing = await findActiveEnrollment({
@@ -708,12 +1009,12 @@ export async function purchaseCheckout(tx: TenantTx, ctx: ServiceCtx, rawBody: u
     throw validationError("You are already enrolled in this course.");
   }
 
-  let discountCents = 0;
-  let amountAfterCoupon = originalAmountCents;
-  let coupon: CouponRow | null = null;
-  let affiliate: ResolveAffiliateCheckoutResult | null = null;
-
-  const resolved = await resolveCheckoutDiscount(tx, ctx, {
+  const {
+    discountCents,
+    amountAfterDiscount: amountAfterCoupon,
+    coupon,
+    affiliate,
+  } = await resolveCheckoutDiscount(tx, ctx, {
     courseId: body.courseId,
     originalAmountCents,
     currency,
@@ -721,10 +1022,6 @@ export async function purchaseCheckout(tx: TenantTx, ctx: ServiceCtx, rawBody: u
     ...(body.couponCode != null ? { couponCode: body.couponCode } : {}),
     ...(body.affiliateCode != null ? { affiliateCode: body.affiliateCode } : {}),
   });
-  discountCents = resolved.discountCents;
-  amountAfterCoupon = resolved.amountAfterDiscount;
-  coupon = resolved.coupon;
-  affiliate = resolved.affiliate;
 
   let walletCreditsApplied = 0;
   let walletDiscountCents = 0;
@@ -742,12 +1039,11 @@ export async function purchaseCheckout(tx: TenantTx, ctx: ServiceCtx, rawBody: u
     walletDiscountCents = preview.discountCents;
   }
 
-  const finalAmountCents = Math.max(0, amountAfterCoupon - walletDiscountCents);
+  const amountAfterWallet = Math.max(0, amountAfterCoupon - walletDiscountCents);
+  const { taxAmountCents, finalAmountCents } = await resolveCheckoutTax(tx, amountAfterWallet);
 
-  // Paid checkout completion path: create a paid payment order, optionally
-  // redeem the coupon, then enroll. Gateway charge can replace the paid insert later.
   const paymentOrderId = randomUUID();
-  const metadata = {
+  const metadata: CourseCheckoutMetadata = {
     kind: "course_checkout",
     courseId: course.id,
     courseTitle: course.title,
@@ -762,139 +1058,149 @@ export async function purchaseCheckout(tx: TenantTx, ctx: ServiceCtx, rawBody: u
     discountCents,
     walletCreditsApplied,
     walletDiscountCents,
+    taxAmountCents,
+    amountAfterCouponCents: amountAfterCoupon,
     finalAmountCents,
   };
 
-  const invoiceRows = await tx.$queryRawUnsafe<
-    Array<{ prefix: string | null; next_number: number | null }>
-  >(
-    `
-    update learner_billing_config
-    set
-      invoice_next_number = coalesce(invoice_next_number, 1) + 1,
-      updated_at = now()
-    where tenant_id = app.current_tenant_id()
-    returning
-      invoice_prefix as prefix,
-      (invoice_next_number - 1) as next_number
-    `,
-  );
-  const invoiceRow = invoiceRows[0];
-  const invoicePrefix =
-    (invoiceRow?.prefix?.trim() || "INV").replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 16) || "INV";
-  const invoiceNumber =
-    invoiceRow?.next_number != null
-      ? `${invoicePrefix}-${String(invoiceRow.next_number).padStart(5, "0")}`
-      : `INV-${paymentOrderId.slice(0, 8).toUpperCase()}`;
+  const pricing = toBreakdown({
+    courseId: course.id,
+    courseTitle: course.title,
+    currency,
+    originalAmountCents,
+    discountCents,
+    walletCreditsApplied,
+    walletDiscountCents,
+    taxAmountCents,
+    finalAmountCents,
+    coupon,
+    affiliateCode: affiliate?.affiliate.coupon_code ?? null,
+  });
+
+  // $0 due (full coupon/wallet coverage): fulfill immediately without a gateway.
+  if (finalAmountCents === 0) {
+    const invoiceNumber = await allocateInvoiceNumber(tx, paymentOrderId);
+    await tx.$executeRawUnsafe(
+      `
+      insert into payment_orders (
+        id, tenant_id, membership_id, external_id, amount_cents, currency, status,
+        metadata_json, product_title, product_type, coupon_amount_cents, tax_amount_cents,
+        invoice_number, paid_at, created_at, updated_at
+      ) values (
+        $1::uuid, app.current_tenant_id(), $2::uuid, $3, $4, $5, 'pending',
+        $6::jsonb, $7, 'course', $8, $9,
+        $10, null, now(), now()
+      )
+      `,
+      paymentOrderId,
+      ctx.actorMembershipId,
+      `checkout_${paymentOrderId}`,
+      finalAmountCents,
+      currency,
+      JSON.stringify(metadata),
+      course.title,
+      discountCents,
+      taxAmountCents,
+      invoiceNumber,
+    );
+
+    const order = await findPaymentOrderById(tx, paymentOrderId);
+    if (!order) throw validationError("Failed to create payment order.");
+
+    const fulfilled = await fulfillPaidCourseOrder(tx, ctx, order);
+    return checkoutPurchaseResponseSchema.parse({
+      data: {
+        enrollmentId: fulfilled.enrollmentId,
+        paymentOrderId,
+        created: fulfilled.created,
+        checkoutUrl: null,
+        clientCheckout: null,
+        pricing,
+      },
+    });
+  }
+
+  // Amount due > $0: create pending order and redirect to PaymentProvider checkout.
+  if (!body.successUrl || !body.cancelUrl) {
+    throw validationError("successUrl and cancelUrl are required for paid checkout.");
+  }
+
+  let gatewayKey: string;
+  let provider;
+  try {
+    const resolvedProvider = await resolvePaymentProvider(tx);
+    gatewayKey = resolvedProvider.gatewayKey;
+    provider = resolvedProvider.provider;
+  } catch (error) {
+    if (error instanceof PaymentProviderNotConfiguredError) {
+      throw validationError(
+        "No published payment gateway is configured. Ask an admin to configure a payment gateway (Stripe or Razorpay).",
+      );
+    }
+    throw error;
+  }
 
   await tx.$executeRawUnsafe(
     `
     insert into payment_orders (
       id, tenant_id, membership_id, external_id, amount_cents, currency, status,
-      metadata_json, product_title, product_type, coupon_amount_cents, invoice_number,
-      paid_at, created_at, updated_at
+      metadata_json, gateway_key, product_title, product_type, coupon_amount_cents,
+      tax_amount_cents, invoice_number, paid_at, created_at, updated_at
     ) values (
-      $1::uuid, app.current_tenant_id(), $2::uuid, $3, $4, $5, 'paid',
-      $6::jsonb, $7, 'course', $8, $9,
-      now(), now(), now()
+      $1::uuid, app.current_tenant_id(), $2::uuid, $3, $4, $5, 'pending',
+      $6::jsonb, $7, $8, 'course', $9,
+      $10, null, null, now(), now()
     )
     `,
     paymentOrderId,
     ctx.actorMembershipId,
-    `checkout_${paymentOrderId}`,
+    `pending_${paymentOrderId}`,
     finalAmountCents,
     currency,
     JSON.stringify(metadata),
+    gatewayKey,
     course.title,
     discountCents,
-    invoiceNumber,
+    taxAmountCents,
   );
 
-  if (walletCreditsApplied > 0) {
-    await spendWalletCredits(tx, {
-      membershipId: ctx.actorMembershipId,
-      credits: walletCreditsApplied,
-      maxSpendableMoneyCents: amountAfterCoupon,
-      paymentOrderId,
-      courseId: course.id,
-    });
-  }
-
-  if (coupon) {
-    await salesCouponsRepository.insertRedemption(tx, {
-      couponId: coupon.id,
-      membershipId: ctx.actorMembershipId,
-      courseId: course.id,
-      paymentOrderId,
-      discountCents,
-      originalAmountCents,
-      finalAmountCents,
-      currency,
-      codeSnapshot: coupon.code,
-    });
-  }
-
-  const created = await insertEnrollment({
-    tx,
+  const checkout = await provider.createCheckout({
     tenantId: ctx.tenantId,
-    courseId: course.id,
-    membershipId: ctx.actorMembershipId,
-    enrolledType: "paid",
-  });
-
-  if (created.created) {
-    await publishEnrollmentCreatedEvent({
-      tx,
-      ctx,
-      enrollmentId: created.id,
+    paymentOrderId,
+    amountCents: finalAmountCents,
+    currency,
+    courseTitle: course.title,
+    successUrl: body.successUrl,
+    cancelUrl: body.cancelUrl,
+    metadata: {
       courseId: course.id,
       membershipId: ctx.actorMembershipId,
-    });
-  }
-
-  await applyReferralPurchaseCredits(tx, {
-    refereeMembershipId: ctx.actorMembershipId,
-    paymentOrderId,
+    },
   });
 
-  if (affiliate) {
-    await applyAffiliateCommission(tx, {
-      paymentOrderId,
-      buyerMembershipId: ctx.actorMembershipId,
-      courseId: course.id,
-      code: affiliate.affiliate.coupon_code,
-      orderAmountCents: amountAfterCoupon,
-      discountCents,
-      currency,
-    });
-  }
+  await tx.$executeRawUnsafe(
+    `
+    update payment_orders
+    set external_id = $2, updated_at = now()
+    where id = $1::uuid
+    `,
+    paymentOrderId,
+    checkout.externalId,
+  );
 
   return checkoutPurchaseResponseSchema.parse({
     data: {
-      enrollmentId: created.id,
+      enrollmentId: null,
       paymentOrderId,
-      created: created.created,
-      pricing: toBreakdown({
-        courseId: course.id,
-        courseTitle: course.title,
-        currency,
-        originalAmountCents,
-        discountCents,
-        walletCreditsApplied,
-        walletDiscountCents,
-        finalAmountCents,
-        coupon,
-        affiliateCode: affiliate?.affiliate.coupon_code ?? null,
-      }),
+      created: false,
+      checkoutUrl: checkout.checkoutUrl ?? null,
+      clientCheckout: checkout.clientCheckout ?? null,
+      pricing,
     },
   });
 }
 
-export async function getCouponPerformance(
-  tx: TenantTx,
-  _ctx: ServiceCtx,
-  rawQuery: unknown,
-) {
+export async function getCouponPerformance(tx: TenantTx, _ctx: ServiceCtx, rawQuery: unknown) {
   const query = couponPerformanceQuerySchema.parse(rawQuery ?? {});
   const rows = await salesCouponsRepository.listPerformance(tx, {
     ...(query.couponId ? { couponId: query.couponId } : {}),

@@ -75,6 +75,7 @@ export type PriceBreakdown = {
   discountCents: number;
   walletCreditsApplied?: number;
   walletDiscountCents?: number;
+  taxAmountCents?: number;
   finalAmountCents: number;
   coupon: {
     id: string;

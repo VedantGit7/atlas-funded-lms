@@ -11,6 +11,8 @@ import { CourseSettingsGeneralPage } from "./course-settings-general-page";
 import { CourseSettingsHub } from "./course-settings-hub";
 import { CourseSettingsPricingPlansFlow } from "./course-settings-pricing-plans-flow";
 import { CourseSettingsPermissionsPanel } from "./course-settings-permissions-panel";
+import { CourseSettingsAndroidPricingPanel } from "./course-settings-android-pricing-panel";
+import { CourseSettingsIosPricingPanel } from "./course-settings-ios-pricing-panel";
 import { CourseSettingsFeaturesPage } from "./course-settings-features-page";
 import {
   findCourseSettingsCard,
@@ -90,6 +92,26 @@ function CourseSettingsPageInner({ course: initialCourse }: CourseSettingsPagePr
     return (
       <CourseSettingsDetailShell card={card} courseId={course.id}>
         <CourseSettingsPermissionsPanel course={course} editable={editable} onSaved={setCourse} />
+      </CourseSettingsDetailShell>
+    );
+  }
+
+  if (card.id === "ios-pricing") {
+    return (
+      <CourseSettingsDetailShell card={card} courseId={course.id}>
+        <CourseSettingsIosPricingPanel course={course} editable={editable} onSaved={setCourse} />
+      </CourseSettingsDetailShell>
+    );
+  }
+
+  if (card.id === "android-pricing") {
+    return (
+      <CourseSettingsDetailShell card={card} courseId={course.id}>
+        <CourseSettingsAndroidPricingPanel
+          course={course}
+          editable={editable}
+          onSaved={setCourse}
+        />
       </CourseSettingsDetailShell>
     );
   }

@@ -146,7 +146,7 @@ export type ScoreProductsQuery = z.output<typeof scoreProductsQuerySchema>;
 
 export const scoreProductItemSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     title: z.string(),
     slug: z.string(),
     status: z.enum(PRODUCT_PUBLISH_STATUSES),
@@ -158,7 +158,7 @@ export const scoreProductItemSchema = z
     passMarkPct: z.number().min(0).max(100).nullable(),
     passRatePct: z.number().min(0).max(100).nullable(),
     ungradedCount: z.number().int().nonnegative(),
-    lastAttemptAt: z.string().datetime().nullable(),
+    lastAttemptAt: z.iso.datetime().nullable(),
   })
   .strict();
 
@@ -190,7 +190,7 @@ export const progressCompletionBandsSchema = z
 
 export const progressCourseItemSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     title: z.string(),
     slug: z.string(),
     enrolledCount: z.number().int().nonnegative(),
@@ -200,17 +200,17 @@ export const progressCourseItemSchema = z
 
 export const progressProductItemSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     title: z.string(),
     slug: z.string(),
     status: z.enum(PRODUCT_PUBLISH_STATUSES),
     enrolledCount: z.number().int().nonnegative(),
     quizCount: z.number().int().nonnegative(),
-    assessmentId: z.string().uuid().nullable().optional(),
+    assessmentId: z.uuid().nullable().optional(),
     avgCompletionPct: z.number().min(0).max(100).nullable(),
     completionBands: progressCompletionBandsSchema,
     notStartedCount: z.number().int().nonnegative(),
-    lastActivityAt: z.string().datetime().nullable(),
+    lastActivityAt: z.iso.datetime().nullable(),
   })
   .strict();
 
@@ -238,13 +238,13 @@ export const progressProductsListResponseSchema = z.object({
 
 export const courseIdParamsSchema = z
   .object({
-    courseId: z.string().uuid(),
+    courseId: z.uuid(),
   })
   .strict();
 
 export const productIdParamsSchema = z
   .object({
-    productId: z.string().uuid(),
+    productId: z.uuid(),
   })
   .strict();
 
@@ -257,7 +257,7 @@ export const progressProductTypeParamsSchema = z
 export const progressProductLearnersParamsSchema = z
   .object({
     productType: z.enum(PROGRESS_PRODUCT_TYPES),
-    productId: z.string().uuid(),
+    productId: z.uuid(),
   })
   .strict();
 
@@ -270,7 +270,7 @@ export const scoreProductTypeParamsSchema = z
 export const scoreProductQuizzesParamsSchema = z
   .object({
     productType: z.enum(SCORE_PRODUCT_TYPES),
-    productId: z.string().uuid(),
+    productId: z.uuid(),
   })
   .strict();
 
@@ -300,8 +300,8 @@ export type ProgressCompletionBandKey = (typeof PROGRESS_COMPLETION_BANDS)[numbe
 
 export const progressLearnersQuerySchema = rejectClientTenantFields
   .extend({
-    enrolledFrom: z.string().datetime().optional(),
-    enrolledTo: z.string().datetime().optional(),
+    enrolledFrom: z.iso.datetime().optional(),
+    enrolledTo: z.iso.datetime().optional(),
     learnerName: z.string().trim().min(1).max(200).optional(),
     enrolledType: z.enum(ENROLLMENT_TYPES).optional(),
     status: z.string().trim().min(1).max(64).optional(),
@@ -325,11 +325,11 @@ export type ProgressLearnersQuery = z.output<typeof progressLearnersQuerySchema>
 
 export const progressLearnerItemSchema = z
   .object({
-    enrollmentId: z.string().uuid(),
-    membershipId: z.string().uuid(),
-    productId: z.string().uuid(),
+    enrollmentId: z.uuid(),
+    membershipId: z.uuid(),
+    productId: z.uuid(),
     productType: z.enum(PROGRESS_PRODUCT_TYPES).optional(),
-    courseId: z.string().uuid(),
+    courseId: z.uuid(),
     learnerName: z.string().nullable(),
     email: z.string().nullable(),
     completionPct: z.number().int().min(0).max(100),
@@ -339,15 +339,15 @@ export const progressLearnerItemSchema = z
     status: z.string(),
     activityStatus: z.enum(PROGRESS_LEARNER_ACTIVITY_STATUSES),
     lastLessonTitle: z.string().nullable(),
-    lastActivityAt: z.string().datetime().nullable(),
-    enrolledAt: z.string().datetime(),
-    expiresAt: z.string().datetime().nullable(),
+    lastActivityAt: z.iso.datetime().nullable(),
+    enrolledAt: z.iso.datetime(),
+    expiresAt: z.iso.datetime().nullable(),
   })
   .strict();
 
 export const progressLearnerRosterProductSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     title: z.string(),
     slug: z.string(),
     productType: z.enum(PROGRESS_PRODUCT_TYPES),
@@ -370,7 +370,7 @@ export const progressLearnerRosterSummarySchema = z
 
 export const progressCurriculumLessonSchema = z
   .object({
-    lessonId: z.string().uuid(),
+    lessonId: z.uuid(),
     title: z.string(),
     position: z.number().int().nonnegative(),
     completionPct: z.number().int().min(0).max(100),
@@ -383,7 +383,7 @@ export const progressCurriculumStripSchema = z
     lessons: z.array(progressCurriculumLessonSchema),
     steepestDropOff: z
       .object({
-        lessonId: z.string().uuid(),
+        lessonId: z.uuid(),
         title: z.string(),
         completionPct: z.number().int().min(0).max(100),
         dropPct: z.number().int(),
@@ -394,10 +394,10 @@ export const progressCurriculumStripSchema = z
 
 export const progressLearnersListResponseSchema = z.object({
   data: z.object({
-    productId: z.string().uuid(),
+    productId: z.uuid(),
     productTitle: z.string(),
     productType: z.enum(PROGRESS_PRODUCT_TYPES).optional(),
-    courseId: z.string().uuid(),
+    courseId: z.uuid(),
     courseTitle: z.string(),
     product: progressLearnerRosterProductSchema,
     summary: progressLearnerRosterSummarySchema,
@@ -412,7 +412,7 @@ export const scoreQuizzesQuerySchema = rejectClientTenantFields
   .extend({
     q: z.string().trim().min(1).max(200).optional(),
     assessmentType: z.string().trim().min(1).max(64).optional(),
-    lessonId: z.string().uuid().optional(),
+    lessonId: z.uuid().optional(),
     passRateBand: z.enum(SCORE_PASS_RATE_BANDS).optional(),
     hasUngraded: z
       .union([z.literal("true"), z.literal("false"), z.boolean()])
@@ -435,10 +435,10 @@ export type ScoreQuizzesQuery = z.output<typeof scoreQuizzesQuerySchema>;
 
 export const scoreQuizItemSchema = z
   .object({
-    assessmentId: z.string().uuid(),
+    assessmentId: z.uuid(),
     title: z.string(),
     assessmentType: z.string(),
-    lessonId: z.string().uuid().nullable(),
+    lessonId: z.uuid().nullable(),
     lessonTitle: z.string().nullable(),
     questionCount: z.number().int().nonnegative().nullable(),
     passMarkPct: z.number().min(0).max(100).nullable(),
@@ -447,7 +447,7 @@ export const scoreQuizItemSchema = z
     avgScorePct: z.number().min(0).max(100).nullable(),
     passRatePct: z.number().min(0).max(100).nullable(),
     ungradedCount: z.number().int().nonnegative(),
-    lastAttemptAt: z.string().datetime().nullable(),
+    lastAttemptAt: z.iso.datetime().nullable(),
     scoreSpread: z
       .object({
         min: z.number().min(0).max(100),
@@ -463,7 +463,7 @@ export const scoreQuizItemSchema = z
 export const scoreQuizzesProductSchema = z
   .object({
     productType: z.enum(SCORE_PRODUCT_TYPES),
-    productId: z.string().uuid(),
+    productId: z.uuid(),
     title: z.string(),
     slug: z.string().nullable(),
     status: z.enum(PRODUCT_PUBLISH_STATUSES).nullable(),
@@ -486,7 +486,7 @@ export const scoreQuizzesSummarySchema = z
 export const scoreQuizzesListResponseSchema = z.object({
   data: z.object({
     product: scoreQuizzesProductSchema,
-    courseId: z.string().uuid(),
+    courseId: z.uuid(),
     courseTitle: z.string(),
     summary: scoreQuizzesSummarySchema,
     items: z.array(scoreQuizItemSchema),
@@ -496,7 +496,7 @@ export const scoreQuizzesListResponseSchema = z.object({
 
 export const assessmentIdParamsSchema = z
   .object({
-    assessmentId: z.string().uuid(),
+    assessmentId: z.uuid(),
   })
   .strict();
 
@@ -510,8 +510,8 @@ export type ScoreAttemptsFilter = (typeof SCORE_ATTEMPTS_FILTERS)[number];
 
 export const scoreLearnersQuerySchema = rejectClientTenantFields
   .extend({
-    submittedFrom: z.string().datetime().optional(),
-    submittedTo: z.string().datetime().optional(),
+    submittedFrom: z.iso.datetime().optional(),
+    submittedTo: z.iso.datetime().optional(),
     learnerName: z.string().trim().min(1).max(200).optional(),
     resultStatus: z.enum(["pass", "fail", "pending", "in_progress"]).optional(),
     minScore: z.coerce.number().min(0).max(100).optional(),
@@ -536,8 +536,8 @@ export type ScoreLearnersQuery = z.output<typeof scoreLearnersQuerySchema>;
 
 export const scoreLearnerItemSchema = z
   .object({
-    membershipId: z.string().uuid(),
-    assessmentId: z.string().uuid(),
+    membershipId: z.uuid(),
+    assessmentId: z.uuid(),
     learnerName: z.string().nullable(),
     email: z.string().nullable(),
     resultStatus: z.enum(["pass", "fail", "pending", "in_progress"]),
@@ -547,24 +547,24 @@ export const scoreLearnerItemSchema = z
     answeredCount: z.number().int().nonnegative(),
     questionCount: z.number().int().nonnegative().nullable(),
     durationSeconds: z.number().nonnegative().nullable(),
-    submittedAt: z.string().datetime().nullable(),
-    startedAt: z.string().datetime().nullable(),
-    latestAttemptId: z.string().uuid().nullable(),
+    submittedAt: z.iso.datetime().nullable(),
+    startedAt: z.iso.datetime().nullable(),
+    latestAttemptId: z.uuid().nullable(),
     improvedOnRetry: z.boolean(),
   })
   .strict();
 
 export const scoreLearnersAssessmentSchema = z
   .object({
-    assessmentId: z.string().uuid(),
+    assessmentId: z.uuid(),
     title: z.string(),
     assessmentType: z.string(),
     passMarkPercent: z.number().nullable(),
     questionCount: z.number().int().nonnegative(),
-    lessonId: z.string().uuid().nullable(),
+    lessonId: z.uuid().nullable(),
     lessonTitle: z.string().nullable(),
     productType: z.enum(SCORE_PRODUCT_TYPES).nullable(),
-    productId: z.string().uuid().nullable(),
+    productId: z.uuid().nullable(),
     productTitle: z.string().nullable(),
   })
   .strict();
@@ -585,9 +585,9 @@ export const scoreLearnersSummarySchema = z
 export const scoreLearnersListResponseSchema = z.object({
   data: z.object({
     assessment: scoreLearnersAssessmentSchema,
-    assessmentId: z.string().uuid(),
+    assessmentId: z.uuid(),
     assessmentTitle: z.string(),
-    courseId: z.string().uuid().nullable(),
+    courseId: z.uuid().nullable(),
     courseTitle: z.string().nullable(),
     passMarkPercent: z.number().nullable(),
     summary: scoreLearnersSummarySchema,
@@ -608,8 +608,8 @@ export const scoreItemAnalysisOptionSchema = z
 
 export const scoreItemAnalysisItemSchema = z
   .object({
-    assessmentItemId: z.string().uuid(),
-    itemId: z.string().uuid(),
+    assessmentItemId: z.uuid(),
+    itemId: z.uuid(),
     position: z.number().int().nonnegative(),
     stem: z.string(),
     itemTypeKey: z.string(),
@@ -624,7 +624,7 @@ export const scoreItemAnalysisItemSchema = z
 
 export const scoreItemAnalysisResponseSchema = z.object({
   data: z.object({
-    assessmentId: z.string().uuid(),
+    assessmentId: z.uuid(),
     belowFortyCount: z.number().int().nonnegative(),
     items: z.array(scoreItemAnalysisItemSchema),
   }),
@@ -633,8 +633,8 @@ export const scoreItemAnalysisResponseSchema = z.object({
 export const scoreAttemptHistoryQuerySchema = rejectClientTenantFields
   .extend({
     resultStatus: z.enum(["pass", "fail", "pending", "in_progress"]).optional(),
-    submittedFrom: z.string().datetime().optional(),
-    submittedTo: z.string().datetime().optional(),
+    submittedFrom: z.iso.datetime().optional(),
+    submittedTo: z.iso.datetime().optional(),
     flag: z.enum(["tab_switched", "after_time_limit", "graded_manually"]).optional(),
     learnerName: z.string().trim().min(1).max(200).optional(),
     sortBy: z
@@ -650,8 +650,8 @@ export type ScoreAttemptHistoryQuery = z.output<typeof scoreAttemptHistoryQueryS
 
 export const scoreAttemptHistoryItemSchema = z
   .object({
-    attemptId: z.string().uuid(),
-    membershipId: z.string().uuid(),
+    attemptId: z.uuid(),
+    membershipId: z.uuid(),
     learnerName: z.string().nullable(),
     email: z.string().nullable(),
     attemptNumber: z.number().int().positive(),
@@ -659,8 +659,8 @@ export const scoreAttemptHistoryItemSchema = z
     resultStatus: z.enum(["pass", "fail", "pending", "in_progress"]),
     answeredCount: z.number().int().nonnegative(),
     questionCount: z.number().int().nonnegative().nullable(),
-    startedAt: z.string().datetime().nullable(),
-    submittedAt: z.string().datetime().nullable(),
+    startedAt: z.iso.datetime().nullable(),
+    submittedAt: z.iso.datetime().nullable(),
     durationSeconds: z.number().nonnegative().nullable(),
     flags: z.array(z.string()),
   })
@@ -668,7 +668,7 @@ export const scoreAttemptHistoryItemSchema = z
 
 export const scoreAttemptHistoryResponseSchema = z.object({
   data: z.object({
-    assessmentId: z.string().uuid(),
+    assessmentId: z.uuid(),
     items: z.array(scoreAttemptHistoryItemSchema),
     pageInfo: pageInfoSchema,
   }),
@@ -677,8 +677,8 @@ export const scoreAttemptHistoryResponseSchema = z.object({
 export const regradeScoreAttemptsBodySchema = rejectClientTenantFields
   .extend({
     scope: z.enum(["selected", "all"]),
-    attemptIds: z.array(z.string().uuid()).max(2000).optional(),
-    membershipIds: z.array(z.string().uuid()).max(2000).optional(),
+    attemptIds: z.array(z.uuid()).max(2000).optional(),
+    membershipIds: z.array(z.uuid()).max(2000).optional(),
     notifyLearners: z.boolean().default(false),
   })
   .strict()
@@ -688,7 +688,7 @@ export const regradeScoreAttemptsBodySchema = rejectClientTenantFields
       const hasMembers = (value.membershipIds?.length ?? 0) > 0;
       if (!hasAttempts && !hasMembers) {
         ctx.addIssue({
-          code: z.ZodIssueCode.custom,
+          code: "custom",
           message: "attemptIds or membershipIds required when scope is selected",
           path: ["attemptIds"],
         });
@@ -700,7 +700,7 @@ export type RegradeScoreAttemptsBody = z.output<typeof regradeScoreAttemptsBodyS
 
 export const regradeScoreAttemptsResponseSchema = z.object({
   data: z.object({
-    assessmentId: z.string().uuid(),
+    assessmentId: z.uuid(),
     regradedCount: z.number().int().nonnegative(),
     skippedCount: z.number().int().nonnegative(),
     answerKeyVersion: z.string(),
@@ -710,8 +710,8 @@ export const regradeScoreAttemptsResponseSchema = z.object({
 
 export const scoreAttemptReviewParamsSchema = z
   .object({
-    assessmentId: z.string().uuid(),
-    attemptId: z.string().uuid(),
+    assessmentId: z.uuid(),
+    attemptId: z.uuid(),
   })
   .strict();
 
@@ -728,7 +728,7 @@ export type ScoreQuestionOutcome = (typeof SCORE_QUESTION_OUTCOMES)[number];
 
 export const scoreAttemptReviewOptionSchema = z
   .object({
-    optionId: z.string().uuid(),
+    optionId: z.uuid(),
     label: z.string(),
     isCorrect: z.boolean(),
     selectedByLearner: z.boolean(),
@@ -737,8 +737,8 @@ export const scoreAttemptReviewOptionSchema = z
 
 export const scoreAttemptReviewQuestionSchema = z
   .object({
-    assessmentItemId: z.string().uuid(),
-    itemId: z.string().uuid(),
+    assessmentItemId: z.uuid(),
+    itemId: z.uuid(),
     position: z.number().int().nonnegative(),
     stem: z.string(),
     itemTypeKey: z.string(),
@@ -758,12 +758,12 @@ export const scoreAttemptReviewQuestionSchema = z
 
 export const scoreAttemptReviewHistoryItemSchema = z
   .object({
-    attemptId: z.string().uuid().nullable(),
+    attemptId: z.uuid().nullable(),
     attemptNumber: z.number().int().positive(),
     scorePct: z.number().nullable(),
     scoreDelta: z.number().nullable(),
     resultStatus: z.enum(["pass", "fail", "pending", "in_progress", "voided"]),
-    submittedAt: z.string().datetime().nullable(),
+    submittedAt: z.iso.datetime().nullable(),
     isCurrent: z.boolean(),
     isAvailableSlot: z.boolean(),
   })
@@ -774,7 +774,7 @@ export const scoreAttemptReviewIntegrityItemSchema = z
     key: z.string(),
     label: z.string(),
     severity: z.enum(["clear", "low", "medium", "high"]),
-    recordedAt: z.string().datetime().nullable(),
+    recordedAt: z.iso.datetime().nullable(),
   })
   .strict();
 
@@ -782,36 +782,36 @@ export const scoreAttemptReviewResponseSchema = z.object({
   data: z.object({
     assessment: z
       .object({
-        assessmentId: z.string().uuid(),
+        assessmentId: z.uuid(),
         title: z.string(),
         assessmentType: z.string(),
         passMarkPercent: z.number().nullable(),
         timeLimitSeconds: z.number().int().nullable(),
         attemptsAllowed: z.number().int().positive(),
         productType: z.enum(SCORE_PRODUCT_TYPES).nullable(),
-        productId: z.string().uuid().nullable(),
+        productId: z.uuid().nullable(),
         productTitle: z.string().nullable(),
-        courseId: z.string().uuid().nullable(),
+        courseId: z.uuid().nullable(),
         courseTitle: z.string().nullable(),
       })
       .strict(),
     learner: z
       .object({
-        membershipId: z.string().uuid(),
+        membershipId: z.uuid(),
         learnerName: z.string().nullable(),
         email: z.string().nullable(),
       })
       .strict(),
     attempt: z
       .object({
-        attemptId: z.string().uuid(),
+        attemptId: z.uuid(),
         attemptNumber: z.number().int().positive(),
         ofAllowed: z.number().int().positive(),
         status: z.string(),
         resultStatus: z.enum(["pass", "fail", "pending", "in_progress", "voided"]),
         scorePct: z.number().nullable(),
-        startedAt: z.string().datetime().nullable(),
-        submittedAt: z.string().datetime().nullable(),
+        startedAt: z.iso.datetime().nullable(),
+        submittedAt: z.iso.datetime().nullable(),
         durationSeconds: z.number().nonnegative().nullable(),
         shortId: z.string(),
       })
@@ -832,8 +832,8 @@ export const scoreAttemptReviewResponseSchema = z.object({
     integrity: z.array(scoreAttemptReviewIntegrityItemSchema),
     nav: z
       .object({
-        prevAttemptId: z.string().uuid().nullable(),
-        nextAttemptId: z.string().uuid().nullable(),
+        prevAttemptId: z.uuid().nullable(),
+        nextAttemptId: z.uuid().nullable(),
       })
       .strict(),
     grants: z
@@ -853,7 +853,7 @@ export const saveAttemptGradingBodySchema = rejectClientTenantFields
       .array(
         z
           .object({
-            assessmentItemId: z.string().uuid(),
+            assessmentItemId: z.uuid(),
             pointsAwarded: z.number().min(0).max(10000),
             feedback: z.string().trim().max(5000).optional(),
           })
@@ -869,7 +869,7 @@ export type SaveAttemptGradingBody = z.output<typeof saveAttemptGradingBodySchem
 
 export const saveAttemptGradingResponseSchema = z.object({
   data: z.object({
-    attemptId: z.string().uuid(),
+    attemptId: z.uuid(),
     scorePct: z.number().nullable(),
     resultStatus: z.enum(["pass", "fail", "pending", "in_progress", "voided"]),
     gradedItemCount: z.number().int().nonnegative(),
@@ -887,7 +887,7 @@ export type VoidAttemptBody = z.output<typeof voidAttemptBodySchema>;
 
 export const voidAttemptResponseSchema = z.object({
   data: z.object({
-    attemptId: z.string().uuid(),
+    attemptId: z.uuid(),
     status: z.literal("VOIDED"),
   }),
 });
@@ -902,7 +902,7 @@ export type ResetAttemptBody = z.output<typeof resetAttemptBodySchema>;
 
 export const resetAttemptResponseSchema = z.object({
   data: z.object({
-    attemptId: z.string().uuid(),
+    attemptId: z.uuid(),
     status: z.literal("VOIDED"),
   }),
 });
@@ -918,8 +918,8 @@ export type GrantExtraAttemptBody = z.output<typeof grantExtraAttemptBodySchema>
 
 export const grantExtraAttemptResponseSchema = z.object({
   data: z.object({
-    assessmentId: z.string().uuid(),
-    membershipId: z.string().uuid(),
+    assessmentId: z.uuid(),
+    membershipId: z.uuid(),
     extraAttemptsGranted: z.number().int().nonnegative(),
     effectiveAttemptsAllowed: z.number().int().positive(),
   }),
@@ -928,11 +928,11 @@ export const grantExtraAttemptResponseSchema = z.object({
 const progressAudienceFieldsSchema = rejectClientTenantFields
   .extend({
     productType: z.enum(PROGRESS_PRODUCT_TYPES).default("course"),
-    productId: z.string().uuid().optional(),
-    courseId: z.string().uuid().optional(),
-    membershipIds: z.array(z.string().uuid()).min(1).max(2000).optional(),
-    enrolledFrom: z.string().datetime().optional(),
-    enrolledTo: z.string().datetime().optional(),
+    productId: z.uuid().optional(),
+    courseId: z.uuid().optional(),
+    membershipIds: z.array(z.uuid()).min(1).max(2000).optional(),
+    enrolledFrom: z.iso.datetime().optional(),
+    enrolledTo: z.iso.datetime().optional(),
     learnerName: z.string().trim().min(1).max(200).optional(),
     enrolledType: z.enum(ENROLLMENT_TYPES).optional(),
     status: z.string().trim().min(1).max(64).optional(),
@@ -947,7 +947,7 @@ function refineProgressAudienceProduct(
     value.productId ?? (value.productType === "course" ? value.courseId : undefined);
   if (!resolvedProductId) {
     ctx.addIssue({
-      code: z.ZodIssueCode.custom,
+      code: "custom",
       message: "productId or courseId is required",
       path: ["productId"],
     });
@@ -962,14 +962,14 @@ export const createProgressGroupBodySchema = progressAudienceFieldsSchema
   .extend({
     title: z.string().trim().min(1).max(256),
     description: z.string().trim().max(2000).optional(),
-    alsoAddToBatchId: z.string().uuid().optional(),
+    alsoAddToBatchId: z.uuid().optional(),
   })
   .strict()
   .superRefine(refineProgressAudienceProduct);
 
 export const createProgressGroupResponseSchema = z.object({
   data: z.object({
-    batchId: z.string().uuid(),
+    batchId: z.uuid(),
     key: z.string(),
     name: z.string(),
     memberCount: z.number().int().nonnegative(),
@@ -988,7 +988,7 @@ export const sendProgressMessageBodySchema = progressAudienceFieldsSchema
 
 export const sendProgressMessageResponseSchema = z.object({
   data: z.object({
-    campaignId: z.string().uuid(),
+    campaignId: z.uuid(),
     deliveredCount: z.number().int().nonnegative(),
     skippedCount: z.number().int().nonnegative(),
     failedCount: z.number().int().nonnegative(),
@@ -998,10 +998,10 @@ export const sendProgressMessageResponseSchema = z.object({
 
 export const scoreAudienceBodySchema = rejectClientTenantFields
   .extend({
-    assessmentId: z.string().uuid(),
-    membershipIds: z.array(z.string().uuid()).min(1).max(2000).optional(),
-    submittedFrom: z.string().datetime().optional(),
-    submittedTo: z.string().datetime().optional(),
+    assessmentId: z.uuid(),
+    membershipIds: z.array(z.uuid()).min(1).max(2000).optional(),
+    submittedFrom: z.iso.datetime().optional(),
+    submittedTo: z.iso.datetime().optional(),
     learnerName: z.string().trim().min(1).max(200).optional(),
     resultStatus: z.enum(["pass", "fail", "pending", "in_progress"]).optional(),
     minScore: z.number().min(0).max(100).optional(),
@@ -1013,7 +1013,7 @@ export const createScoreGroupBodySchema = scoreAudienceBodySchema
   .extend({
     title: z.string().trim().min(1).max(256),
     description: z.string().trim().max(2000).optional(),
-    alsoAddToBatchId: z.string().uuid().optional(),
+    alsoAddToBatchId: z.uuid().optional(),
   })
   .strict();
 
@@ -1032,13 +1032,13 @@ export const exportProgressScoreBodySchema = rejectClientTenantFields
     productType: z
       .enum(["course", "test_series", "bundle", "subscription", "mock_test"])
       .optional(),
-    productId: z.string().uuid().optional(),
-    courseId: z.string().uuid().optional(),
-    assessmentId: z.string().uuid().optional(),
-    enrolledFrom: z.string().datetime().optional(),
-    enrolledTo: z.string().datetime().optional(),
-    submittedFrom: z.string().datetime().optional(),
-    submittedTo: z.string().datetime().optional(),
+    productId: z.uuid().optional(),
+    courseId: z.uuid().optional(),
+    assessmentId: z.uuid().optional(),
+    enrolledFrom: z.iso.datetime().optional(),
+    enrolledTo: z.iso.datetime().optional(),
+    submittedFrom: z.iso.datetime().optional(),
+    submittedTo: z.iso.datetime().optional(),
     learnerName: z.string().trim().min(1).max(200).optional(),
     enrolledType: z.enum(ENROLLMENT_TYPES).optional(),
     status: z.string().trim().min(1).max(64).optional(),
@@ -1052,7 +1052,7 @@ export const exportProgressScoreBodySchema = rejectClientTenantFields
 
 export const exportProgressScoreResponseSchema = z.object({
   data: z.object({
-    runId: z.string().uuid(),
+    runId: z.uuid(),
     status: z.string(),
     emailed: z.boolean(),
   }),
@@ -1063,8 +1063,8 @@ export const exportProgressScoreResponseSchema = z.object({
 export const progressLearnerDetailParamsSchema = z
   .object({
     productType: z.enum(PROGRESS_PRODUCT_TYPES),
-    productId: z.string().uuid(),
-    enrollmentId: z.string().uuid(),
+    productId: z.uuid(),
+    enrollmentId: z.uuid(),
   })
   .strict();
 
@@ -1083,22 +1083,22 @@ export const progressLearnerLessonTypeSchema = z.enum([
 ]);
 
 export const progressLearnerLessonRowSchema = z.object({
-  lessonId: z.string().uuid(),
+  lessonId: z.uuid(),
   title: z.string(),
   lessonType: progressLearnerLessonTypeSchema,
   position: z.number().int().nonnegative(),
   status: progressLearnerLessonStatusSchema,
   progressPct: z.number().min(0).max(100),
   durationLabel: z.string().nullable(),
-  completedAt: z.string().datetime().nullable(),
-  lastSeenAt: z.string().datetime().nullable(),
+  completedAt: z.iso.datetime().nullable(),
+  lastSeenAt: z.iso.datetime().nullable(),
   outOfOrder: z.boolean(),
   quizScorePct: z.number().min(0).max(100).nullable(),
-  quizAttemptId: z.string().uuid().nullable(),
+  quizAttemptId: z.uuid().nullable(),
 });
 
 export const progressLearnerModuleSchema = z.object({
-  moduleId: z.string().uuid(),
+  moduleId: z.uuid(),
   title: z.string(),
   position: z.number().int().nonnegative(),
   completedLessons: z.number().int().nonnegative(),
@@ -1113,38 +1113,38 @@ export const progressLearnerActivityDaySchema = z.object({
 });
 
 export const progressLearnerAssessmentSchema = z.object({
-  assessmentId: z.string().uuid(),
+  assessmentId: z.uuid(),
   title: z.string(),
   scorePct: z.number().min(0).max(100).nullable(),
   resultStatus: z.enum(["pass", "fail", "pending", "in_progress"]),
   attemptNumber: z.number().int().positive().nullable(),
-  attemptId: z.string().uuid().nullable(),
-  submittedAt: z.string().datetime().nullable(),
+  attemptId: z.uuid().nullable(),
+  submittedAt: z.iso.datetime().nullable(),
 });
 
 export const progressLearnerDetailResponseSchema = z.object({
   data: z.object({
     product: z.object({
       productType: z.enum(PROGRESS_PRODUCT_TYPES),
-      productId: z.string().uuid(),
+      productId: z.uuid(),
       title: z.string(),
     }),
     learner: z.object({
-      enrollmentId: z.string().uuid(),
-      membershipId: z.string().uuid(),
+      enrollmentId: z.uuid(),
+      membershipId: z.uuid(),
       displayName: z.string(),
       email: z.string().nullable(),
       avatarUrl: z.string().nullable(),
       paymentStatus: z.enum(["paid", "comped", "trial", "unknown"]),
       accessStatus: z.enum(["active", "expired", "revoked", "pending"]),
-      expiresAt: z.string().datetime().nullable(),
+      expiresAt: z.iso.datetime().nullable(),
     }),
     summary: z.object({
       completionPct: z.number().min(0).max(100),
       completedLessons: z.number().int().nonnegative(),
       totalLessons: z.number().int().nonnegative(),
       timeOnContentLabel: z.string().nullable(),
-      lastActiveAt: z.string().datetime().nullable(),
+      lastActiveAt: z.iso.datetime().nullable(),
       assessmentsPassed: z.number().int().nonnegative(),
       assessmentsTotal: z.number().int().nonnegative(),
     }),
@@ -1156,11 +1156,11 @@ export const progressLearnerDetailResponseSchema = z.object({
     }),
     assessments: z.array(progressLearnerAssessmentSchema),
     enrolment: z.object({
-      enrollmentId: z.string().uuid(),
+      enrollmentId: z.uuid(),
       enrolledType: z.string(),
       sourceLabel: z.string().nullable(),
       grantedByLabel: z.string().nullable(),
-      enrolledAt: z.string().datetime(),
+      enrolledAt: z.iso.datetime(),
       certificateIssued: z.boolean(),
       certificateLabel: z.string().nullable(),
     }),
@@ -1182,7 +1182,7 @@ export const resetProgressLearnerBodySchema = rejectClientTenantFields
 
 export const resetProgressLearnerResponseSchema = z.object({
   data: z.object({
-    enrollmentId: z.string().uuid(),
+    enrollmentId: z.uuid(),
     lessonsCleared: z.number().int().nonnegative(),
     attemptsCleared: z.number().int().nonnegative(),
   }),
@@ -1190,15 +1190,15 @@ export const resetProgressLearnerResponseSchema = z.object({
 
 export const extendProgressLearnerBodySchema = rejectClientTenantFields
   .extend({
-    expiresAt: z.string().datetime(),
+    expiresAt: z.iso.datetime(),
     reason: z.string().trim().max(2000).optional(),
   })
   .strict();
 
 export const extendProgressLearnerResponseSchema = z.object({
   data: z.object({
-    enrollmentId: z.string().uuid(),
-    expiresAt: z.string().datetime().nullable(),
+    enrollmentId: z.uuid(),
+    expiresAt: z.iso.datetime().nullable(),
   }),
 });
 
@@ -1220,20 +1220,20 @@ export type CohortGroupsQuery = z.output<typeof cohortGroupsQuerySchema>;
 
 export const cohortGroupItemSchema = z
   .object({
-    batchId: z.string().uuid(),
+    batchId: z.uuid(),
     key: z.string(),
     name: z.string(),
     description: z.string().nullable(),
     sourceKind: z.enum(["progress", "scores"]),
     productType: z.string().nullable(),
-    productId: z.string().uuid().nullable(),
+    productId: z.uuid().nullable(),
     productTitle: z.string().nullable(),
-    assessmentId: z.string().uuid().nullable(),
+    assessmentId: z.uuid().nullable(),
     assessmentTitle: z.string().nullable(),
     criteriaSummary: z.string().nullable(),
     memberCount: z.number().int().nonnegative(),
     syncType: z.enum(["static", "live"]),
-    createdAt: z.string().datetime(),
+    createdAt: z.iso.datetime(),
     createdByLabel: z.string().nullable(),
   })
   .strict();
@@ -1258,7 +1258,7 @@ export type CohortMessagesQuery = z.output<typeof cohortMessagesQuerySchema>;
 
 export const cohortMessageItemSchema = z
   .object({
-    campaignId: z.string().uuid(),
+    campaignId: z.uuid(),
     subject: z.string(),
     audienceCaption: z.string().nullable(),
     sourceKind: z.enum(["progress", "scores"]),
@@ -1271,7 +1271,7 @@ export const cohortMessageItemSchema = z
     recipientCount: z.number().int().nonnegative(),
     status: z.enum(["sent", "partially_failed", "failed"]),
     sentByLabel: z.string().nullable(),
-    sentAt: z.string().datetime(),
+    sentAt: z.iso.datetime(),
     reportHref: z.string().nullable(),
   })
   .strict();
@@ -1287,7 +1287,7 @@ export type CohortMessagesResponse = z.infer<typeof cohortMessagesResponseSchema
 
 export const retryCohortMessageParamsSchema = z
   .object({
-    campaignId: z.string().uuid(),
+    campaignId: z.uuid(),
   })
   .strict();
 
@@ -1299,7 +1299,7 @@ export type RetryCohortMessageBody = z.output<typeof retryCohortMessageBodySchem
 
 export const retryCohortMessageResponseSchema = z.object({
   data: z.object({
-    campaignId: z.string().uuid(),
+    campaignId: z.uuid(),
     deliveredCount: z.number().int().nonnegative(),
     skippedCount: z.number().int().nonnegative(),
     failedCount: z.number().int().nonnegative(),

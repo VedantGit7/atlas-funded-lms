@@ -29,7 +29,7 @@ export const PreviewInvitationQuerySchema = z
 
 export const PreviewInvitationResponseSchema = z.object({
   data: z.object({
-    invitedEmail: z.string().email(),
+    invitedEmail: z.email(),
   }),
 });
 

@@ -3,6 +3,7 @@ import { createTenantResourceRef } from "@atlas/authorization";
 import type { TenantTx } from "@atlas/db";
 import { outbox } from "@atlas/events";
 import { assertTenantKeyPrefix, getStorageProvider, parseStorageEnv } from "@atlas/storage";
+import { CronExpressionParser } from "cron-parser";
 import type { ReportFormat } from "./reports.contract";
 import {
   createCustomReportDefinitionBodySchema,
@@ -42,10 +43,13 @@ import {
   reportDefinitionNotFound,
   reportRunNotFound,
   reportScheduleNotFound,
-  unsupportedReportFormat,
 } from "./reports.errors";
 import { reportsRepository } from "./reports.repository";
-import { SYSTEM_REPORT_DEFINITIONS, getSystemReportDefinition, getSystemReportDefinitionByDatasetKey } from "./reports.registry";
+import {
+  SYSTEM_REPORT_DEFINITIONS,
+  getSystemReportDefinition,
+  getSystemReportDefinitionByDatasetKey,
+} from "./reports.registry";
 import {
   extractSelectedColumns,
   getAllowedColumnsForDataset,
@@ -103,24 +107,35 @@ function asStringArray(value: unknown): ReportFormat[] {
   );
 }
 
-function computeNextRunAt(cronExpression: string, from: Date): Date {
-  const normalized = cronExpression.trim().toLowerCase();
-  const hourMs = 60 * 60 * 1000;
-  const dayMs = 24 * hourMs;
+const CADENCE_ALIAS_TO_CRON: Record<string, string> = {
+  hourly: "0 * * * *",
+  daily: "0 0 * * *",
+  weekly: "0 0 * * 1",
+  monthly: "0 0 1 * *",
+};
 
-  if (normalized === "hourly" || normalized === "0 * * * *") {
-    return new Date(from.getTime() + hourMs);
+function normalizeCronExpression(cronExpression: string): string {
+  const trimmed = cronExpression.trim();
+  const alias = CADENCE_ALIAS_TO_CRON[trimmed.toLowerCase()];
+  return alias ?? trimmed;
+}
+
+/**
+ * Compute the next fire time for a 5-field cron expression (or cadence alias),
+ * respecting the schedule timezone when provided.
+ */
+export function computeNextRunAt(cronExpression: string, from: Date, timezone = "UTC"): Date {
+  const expr = normalizeCronExpression(cronExpression);
+  try {
+    const interval = CronExpressionParser.parse(expr, {
+      currentDate: from,
+      tz: timezone.trim() || "UTC",
+    });
+    return interval.next().toDate();
+  } catch {
+    // Invalid cron — keep schedules moving rather than stalling forever.
+    return new Date(from.getTime() + 24 * 60 * 60 * 1000);
   }
-  if (normalized === "weekly" || normalized === "0 0 * * 1") {
-    return new Date(from.getTime() + 7 * dayMs);
-  }
-  if (normalized === "monthly" || normalized === "0 0 1 * *") {
-    const next = new Date(from.getTime());
-    next.setUTCMonth(next.getUTCMonth() + 1);
-    return next;
-  }
-  // daily / default / unknown cron → +1 day
-  return new Date(from.getTime() + dayMs);
 }
 
 function mapDefinitionDto(definition: ReportDefinitionRow) {
@@ -147,9 +162,7 @@ function mapDefinitionDto(definition: ReportDefinitionRow) {
   };
 }
 
-function mapRunBaseDto(
-  run: ReportRunRow & { definition_key: string; definition_title: string },
-) {
+function mapRunBaseDto(run: ReportRunRow & { definition_key: string; definition_title: string }) {
   return {
     id: run.id,
     definitionKey: run.definition_key,
@@ -340,9 +353,6 @@ export async function createReportRun(
   }
 
   const format = body.format ?? (definition.default_format as ReportFormat);
-  if (format !== "csv" && format !== "xlsx" && format !== "pdf" && format !== "json") {
-    throw unsupportedReportFormat();
-  }
 
   const params = body.params ?? {};
   if (typeof params !== "object" || Array.isArray(params)) {
@@ -458,7 +468,7 @@ export async function createReportSchedule(tx: TenantTx, ctx: ServiceCtx, rawBod
     throw reportDefinitionNotFound();
   }
 
-  const nextRunAt = computeNextRunAt(body.cronExpression, new Date());
+  const nextRunAt = computeNextRunAt(body.cronExpression, new Date(), body.timezone);
   const created = await reportsRepository.insertSchedule(tx, {
     reportDefinitionId: definition.id,
     createdByMembershipId: ctx.actorMembershipId,
@@ -517,8 +527,10 @@ export async function updateReportSchedule(
 
   const nextRunAt =
     body.cronExpression !== undefined
-      ? computeNextRunAt(body.cronExpression, new Date())
-      : undefined;
+      ? computeNextRunAt(body.cronExpression, new Date(), body.timezone ?? existing.timezone)
+      : body.timezone !== undefined
+        ? computeNextRunAt(existing.cron_expression, new Date(), body.timezone)
+        : undefined;
 
   const updated = await reportsRepository.updateSchedule(tx, {
     scheduleId,
@@ -622,7 +634,10 @@ export async function tickReportSchedules(tx: TenantTx, ctx: ServiceCtx) {
   let runsEnqueued = 0;
 
   for (const schedule of dueSchedules) {
-    const definition = await reportsRepository.findDefinitionById(tx, schedule.report_definition_id);
+    const definition = await reportsRepository.findDefinitionById(
+      tx,
+      schedule.report_definition_id,
+    );
     if (!definition) {
       continue;
     }
@@ -663,7 +678,7 @@ export async function tickReportSchedules(tx: TenantTx, ctx: ServiceCtx) {
 
     await reportsRepository.advanceScheduleNextRun(tx, {
       scheduleId: schedule.id,
-      nextRunAt: computeNextRunAt(schedule.cron_expression, asOf),
+      nextRunAt: computeNextRunAt(schedule.cron_expression, asOf, schedule.timezone),
     });
 
     runsEnqueued += 1;
@@ -714,7 +729,7 @@ export async function loadReportScheduleResourceRef(args: {
   });
 }
 
-export async function loadReportCatalogResourceRef(args: { tenantId: string }) {
+export function loadReportCatalogResourceRef(args: { tenantId: string }) {
   return createTenantResourceRef({
     type: "report_definition",
     id: args.tenantId,

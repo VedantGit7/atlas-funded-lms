@@ -38,6 +38,7 @@ import {
   type ReportDefinition,
   type ReportParamDefinition,
 } from "./admin-reports-api";
+import { fetchDestinationsRoster, type DestinationItem } from "./admin-export-destinations-api";
 
 type Phase = "configure" | "running" | "succeeded" | "failed";
 type FormatOption = "csv" | "xlsx" | "json";
@@ -306,6 +307,10 @@ export function AdminNewExportPage() {
   const [jsonShape, setJsonShape] = useState<"flat" | "nested">("flat");
 
   const [delivery, setDelivery] = useState<DeliveryMode>("download");
+  const [selectedDestinationId, setSelectedDestinationId] = useState<string>("");
+  const [destinations, setDestinations] = useState<DestinationItem[]>([]);
+  const [destinationsLoading, setDestinationsLoading] = useState(false);
+  const [destinationOpen, setDestinationOpen] = useState(false);
   const [scheduleEnabled, setScheduleEnabled] = useState(false);
   const [scheduleCadence, setScheduleCadence] = useState("daily");
   const [scheduleCadenceOpen, setScheduleCadenceOpen] = useState(false);
@@ -325,6 +330,7 @@ export function AdminNewExportPage() {
   const operatorLabelId = useId();
   const dateLabelId = useId();
   const cadenceLabelId = useId();
+  const destinationLabelId = useId();
 
   const selected = useMemo(
     () => definitions.find((d) => d.key === selectedKey) ?? null,
@@ -407,10 +413,27 @@ export function AdminNewExportPage() {
     if (format === "json") {
       params["jsonShape"] = jsonShape;
     }
+    const selectedDest =
+      delivery === "destination"
+        ? destinations.find((item) => item.id === selectedDestinationId)
+        : null;
     params["delivery"] = {
       kind:
-        delivery === "email" ? "email" : delivery === "destination" ? "storage" : "download_only",
+        delivery === "email"
+          ? "email"
+          : delivery === "destination"
+            ? (selectedDest?.kind ?? "storage")
+            : "download_only",
+      ...(delivery === "destination" && selectedDestinationId
+        ? { destinationId: selectedDestinationId }
+        : {}),
     };
+    if (delivery === "destination" && selectedDestinationId) {
+      params["destinationId"] = selectedDestinationId;
+      params["deliveryMode"] = "destination";
+    } else if (delivery === "email") {
+      params["deliveryMode"] = "email_me";
+    }
     if (filters.length > 0) {
       params["filterSummary"] = filters
         .map((f) => `${f.field} ${f.operator === "eq" ? "is" : "contains"} ${f.value}`)
@@ -433,6 +456,8 @@ export function AdminNewExportPage() {
     xlsxOneSheet,
     jsonShape,
     delivery,
+    selectedDestinationId,
+    destinations,
   ]);
 
   const filterChips = useMemo(() => {
@@ -452,7 +477,15 @@ export function AdminNewExportPage() {
   }, [filters, datePreset, customFrom, customTo]);
 
   const canRun =
-    Boolean(selectedKey) && selectedColumns.length > 0 && delivery !== "destination" && !runBusy;
+    Boolean(selectedKey) &&
+    selectedColumns.length > 0 &&
+    (delivery !== "destination" || Boolean(selectedDestinationId)) &&
+    !runBusy;
+
+  const selectedDestination = useMemo(
+    () => destinations.find((item) => item.id === selectedDestinationId) ?? null,
+    [destinations, selectedDestinationId],
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -489,6 +522,30 @@ export function AdminNewExportPage() {
       cancelled = true;
     };
   }, [prefillKey]);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function loadDestinations() {
+      setDestinationsLoading(true);
+      try {
+        const response = await fetchDestinationsRoster({
+          status: "enabled",
+          limit: 100,
+          sort: "name_asc",
+        });
+        if (cancelled) return;
+        setDestinations(response.data.items.filter((item) => item.isActive));
+      } catch {
+        if (!cancelled) setDestinations([]);
+      } finally {
+        if (!cancelled) setDestinationsLoading(false);
+      }
+    }
+    void loadDestinations();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     if (!selected) return;
@@ -613,6 +670,21 @@ export function AdminNewExportPage() {
     }
   }
 
+  function buildDeliveryPayload(): Record<string, unknown> {
+    if (delivery === "destination" && selectedDestinationId) {
+      const dest = destinations.find((item) => item.id === selectedDestinationId);
+      return {
+        kind: dest?.kind ?? "storage",
+        destinationId: selectedDestinationId,
+        mode: "destination",
+      };
+    }
+    if (delivery === "email") {
+      return { kind: "email", mode: "email_me" };
+    }
+    return { kind: "download_only" };
+  }
+
   async function handleRun() {
     if (!selectedKey || !canRun) return;
     setRunBusy(true);
@@ -626,7 +698,7 @@ export function AdminNewExportPage() {
           timezone: scheduleTimezone,
           formats: [format],
           params: buildParams(),
-          delivery: { kind: delivery === "email" ? "email" : "download_only" },
+          delivery: buildDeliveryPayload(),
           isActive: true,
         });
       }
@@ -658,6 +730,10 @@ export function AdminNewExportPage() {
 
   async function handleScheduleOnly() {
     if (!selectedKey) return;
+    if (delivery === "destination" && !selectedDestinationId) {
+      setError("Select a destination before scheduling.");
+      return;
+    }
     setRunBusy(true);
     setError(null);
     try {
@@ -668,7 +744,7 @@ export function AdminNewExportPage() {
         timezone: scheduleTimezone,
         formats: [format],
         params: buildParams(),
-        delivery: { kind: delivery === "email" ? "email" : "download_only" },
+        delivery: buildDeliveryPayload(),
         isActive: true,
       });
       router.push("/admin/reports/exports");
@@ -1646,7 +1722,7 @@ export function AdminNewExportPage() {
                   [
                     ["download", "Download when ready"],
                     ["email", "Email me when ready"],
-                    ["destination", "Send to a destination (coming soon)"],
+                    ["destination", "Send to a destination"],
                   ] as const
                 ).map(([value, label]) => (
                   <label
@@ -1655,13 +1731,12 @@ export function AdminNewExportPage() {
                       delivery === value
                         ? "border-[var(--admin-primary-strong)] bg-[var(--admin-primary-container)]"
                         : "border-[var(--admin-border)]"
-                    } ${value === "destination" ? "opacity-60" : ""}`}
+                    }`}
                   >
                     <input
                       type="radio"
                       name="delivery"
                       checked={delivery === value}
-                      disabled={value === "destination"}
                       onChange={() => {
                         setDelivery(value);
                       }}
@@ -1669,6 +1744,71 @@ export function AdminNewExportPage() {
                     {label}
                   </label>
                 ))}
+
+                {delivery === "destination" ? (
+                  <div className={`space-y-2 ${inlineExpandClassName}`}>
+                    <label
+                      className="block text-[12px] text-[var(--admin-on-surface-variant)]"
+                      htmlFor={destinationLabelId}
+                    >
+                      Destination
+                    </label>
+                    <DropdownField
+                      label={<span className="sr-only">Destination</span>}
+                      labelId={destinationLabelId}
+                      open={destinationOpen}
+                      onToggle={() => {
+                        setDestinationOpen((o) => !o);
+                      }}
+                      triggerContent={
+                        <span className="flex w-full items-center justify-between gap-2">
+                          {destinationsLoading
+                            ? "Loading destinations…"
+                            : selectedDestination
+                              ? `${selectedDestination.name} (${selectedDestination.kind})`
+                              : destinations.length === 0
+                                ? "No destinations configured"
+                                : "Select a destination"}
+                          <ChevronDown
+                            className={`h-4 w-4 transition-transform duration-200 ${destinationOpen ? "rotate-180" : ""}`}
+                          />
+                        </span>
+                      }
+                    >
+                      <div className="max-h-56 overflow-y-auto p-1" role="listbox">
+                        {destinations.map((item) => (
+                          <button
+                            key={item.id}
+                            type="button"
+                            role="option"
+                            className={dropdownItemClassName}
+                            onClick={() => {
+                              setSelectedDestinationId(item.id);
+                              setDestinationOpen(false);
+                            }}
+                          >
+                            <span className="font-medium">{item.name}</span>
+                            <span className="ml-2 text-[12px] text-[var(--admin-on-surface-variant)]">
+                              {item.kind}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    </DropdownField>
+                    {destinations.length === 0 && !destinationsLoading ? (
+                      <p className="text-[12px] text-[var(--admin-on-surface-variant)]">
+                        Create one under{" "}
+                        <Link
+                          href="/admin/reports/exports/destinations"
+                          className="underline underline-offset-2"
+                        >
+                          Destinations
+                        </Link>
+                        .
+                      </p>
+                    ) : null}
+                  </div>
+                ) : null}
 
                 <div className="border-t border-[var(--admin-border)] pt-4">
                   <label className="flex items-center justify-between gap-3 text-sm">

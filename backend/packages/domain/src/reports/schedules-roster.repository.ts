@@ -110,6 +110,10 @@ export function parseDelivery(deliveryJson: unknown): DeliveryParsed {
     };
   }
   const delivery = deliveryJson as Record<string, unknown>;
+  const destinationId =
+    typeof delivery["destinationId"] === "string" && delivery["destinationId"].trim()
+      ? delivery["destinationId"].trim()
+      : null;
   const emails = Array.isArray(delivery["emails"])
     ? delivery["emails"].filter((e): e is string => typeof e === "string" && e.trim().length > 0)
     : [];
@@ -122,6 +126,7 @@ export function parseDelivery(deliveryJson: unknown): DeliveryParsed {
     }
   }
   const mode = typeof delivery["mode"] === "string" ? delivery["mode"].toLowerCase() : "";
+  const kind = typeof delivery["kind"] === "string" ? delivery["kind"].toLowerCase() : "";
   const storageLabel =
     typeof delivery["bucket"] === "string"
       ? delivery["bucket"]
@@ -129,12 +134,14 @@ export function parseDelivery(deliveryJson: unknown): DeliveryParsed {
         ? delivery["path"]
         : mode.includes("s3") || mode.includes("sftp") || mode.includes("storage")
           ? mode
-          : null;
+          : kind === "storage" || destinationId
+            ? (destinationId ?? "destination")
+            : null;
 
   const kinds: DeliveryParsed["kinds"] = [];
-  if (emails.length > 0) kinds.push("email");
-  if (webhookHost) kinds.push("webhook");
-  if (storageLabel) kinds.push("storage");
+  if (emails.length > 0 || kind === "email") kinds.push("email");
+  if (webhookHost || kind === "webhook") kinds.push("webhook");
+  if (storageLabel || kind === "storage" || Boolean(destinationId)) kinds.push("storage");
   if (kinds.length === 0) kinds.push("download");
 
   const isExternal = kinds.some((k) => k === "email" || k === "webhook" || k === "storage");

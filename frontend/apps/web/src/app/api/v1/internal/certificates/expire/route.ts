@@ -10,9 +10,8 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /**
- * Expire due certificates across all active tenants. Triggered on a schedule by
- * a cron (Vercel Cron issues GET) and authorised with a static CRON_SECRET
- * rather than a user session. Also callable manually with the same bearer token.
+ * Expire due certificates across all active tenants and best-effort drain
+ * certificate PDF outbox events. Triggered by cron with CRON_SECRET.
  */
 async function handle(req: NextRequest): Promise<NextResponse> {
   const secret = process.env["CRON_SECRET"];

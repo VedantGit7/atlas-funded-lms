@@ -23,7 +23,7 @@ export const createSubSchoolBodySchema = rejectClientTenantFields
     name: z.string().min(1, "Sub-school name is required.").max(60),
     key: urlSlugSchema,
     mobileNumber: mobileNumberSchema,
-    email: z.string().trim().email("Enter a valid email address.").max(320),
+    email: z.email("Enter a valid email address.").max(320),
     password: passwordSchema,
     description: z.string().max(1000).optional(),
     status: z.enum(ENTITY_STATUSES).default("ACTIVE"),
@@ -34,26 +34,26 @@ export const updateSubSchoolBodySchema = rejectClientTenantFields
   .extend({
     name: z.string().min(1).max(60).optional(),
     mobileNumber: mobileNumberSchema.optional(),
-    email: z.string().trim().email().max(320).optional(),
+    email: z.email().max(320).optional(),
     password: passwordSchema.optional(),
     description: z.string().max(1000).nullable().optional(),
     status: z.enum(ENTITY_STATUSES).optional(),
   })
   .strict();
 
-export const subSchoolParamsSchema = z.object({ id: z.string().uuid() }).strict();
+export const subSchoolParamsSchema = z.object({ id: z.uuid() }).strict();
 
 export const subSchoolDtoSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     key: z.string(),
     name: z.string(),
     description: z.string().nullable(),
     mobileNumber: z.string().nullable(),
     email: z.string().nullable(),
     status: z.enum(ENTITY_STATUSES),
-    createdAt: z.string().datetime(),
-    updatedAt: z.string().datetime(),
+    createdAt: z.iso.datetime(),
+    updatedAt: z.iso.datetime(),
   })
   .strict();
 

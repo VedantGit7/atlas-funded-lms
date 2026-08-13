@@ -115,7 +115,7 @@ export const updateTenantDeviceMonitorBodySchema = z
 
 // Email channel (shared shape for transactional + marketing sender config).
 const emailChannelFromName = z.string().trim().min(1).max(120);
-const emailChannelEmail = z.string().trim().email().max(254);
+const emailChannelEmail = z.email().max(254);
 
 export const tenantEmailChannelResponseSchema = z.object({
   data: z.object({
@@ -152,14 +152,14 @@ const SEO_META_KEYWORDS_MAX = 2000;
 export const tenantSeoSettingsSchema = z.object({
   metaDescription: z.string().max(SEO_META_DESCRIPTION_MAX),
   metaKeywords: z.string().max(SEO_META_KEYWORDS_MAX),
-  metaImageRefId: z.string().uuid().nullable(),
+  metaImageRefId: z.uuid().nullable(),
 });
 
 export const tenantSeoResponseSchema = z.object({
   data: z.object({
     metaDescription: z.string().max(SEO_META_DESCRIPTION_MAX),
     metaKeywords: z.string().max(SEO_META_KEYWORDS_MAX),
-    metaImageRefId: z.string().uuid().nullable(),
+    metaImageRefId: z.uuid().nullable(),
     metaImageUrl: z.string().nullable(),
   }),
 });

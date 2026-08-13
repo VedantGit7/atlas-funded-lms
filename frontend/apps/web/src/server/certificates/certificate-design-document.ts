@@ -122,7 +122,7 @@ export const certificateDesignRuleSchema = z
       .object({
         action: z.enum(["show", "hide", "setStyle"]),
         elementId: z.string().min(1),
-        style: z.record(z.unknown()).optional(),
+        style: z.record(z.string(), z.unknown()).optional(),
       })
       .strict(),
   })

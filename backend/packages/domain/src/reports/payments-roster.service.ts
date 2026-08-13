@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import type { TenantTx } from "@atlas/db";
 import type { ServiceCtx } from "../shared/domain.types";
 import { paymentsRepository } from "../payments/payments.repository";
+import { resolvePaymentProvider } from "../payments/payment-provider.registry";
 import {
   createPaymentInstalmentPlanBodySchema,
   createPaymentInstalmentPlanResponseSchema,
@@ -1128,6 +1129,7 @@ type StoredRefund = {
   notifyQueued: boolean;
   actorMembershipId: string | null;
   createdAt: string;
+  gatewayRefundId?: string;
 };
 
 function readRefunds(metadata: Record<string, unknown>): StoredRefund[] {
@@ -1603,6 +1605,29 @@ export async function refundPaymentTransaction(
     });
   }
 
+  let gatewayRefundId: string | null = null;
+  let gatewayNote =
+    "Refund recorded on the LMS ledger. Process the matching reverse on your payment gateway if required; automated gateway refunds are not wired yet.";
+
+  if (row.external_id && row.gateway_key) {
+    try {
+      const { provider } = await resolvePaymentProvider(tx, {
+        gatewayKey: row.gateway_key,
+      });
+      if (provider.refund) {
+        const gatewayRefund = await provider.refund({
+          externalId: row.external_id,
+          ...(body.mode === "full" ? {} : { amountCents }),
+        });
+        gatewayRefundId = gatewayRefund.refundId;
+        gatewayNote = `Refund submitted to ${row.gateway_key} (${gatewayRefund.refundId}).`;
+      }
+    } catch {
+      gatewayNote =
+        "Refund recorded on the LMS ledger, but the payment gateway refund failed. Process the reverse on your gateway manually.";
+    }
+  }
+
   const notifyQueued = Boolean(body.notifyLearner && row.email);
   const refund: StoredRefund = {
     id: randomUUID(),
@@ -1616,6 +1641,7 @@ export async function refundPaymentTransaction(
     notifyQueued,
     actorMembershipId: ctx.actorMembershipId,
     createdAt: new Date().toISOString(),
+    ...(gatewayRefundId ? { gatewayRefundId } : {}),
   };
 
   const metadata = asRecord(row.metadata_json);
@@ -1644,8 +1670,7 @@ export async function refundPaymentTransaction(
       refundableAmountCents: updatedDetail.refundableAmountCents,
       accessRevoked,
       notifyQueued,
-      gatewayNote:
-        "Refund recorded on the LMS ledger. Process the matching reverse on your payment gateway if required; automated gateway refunds are not wired yet.",
+      gatewayNote,
     },
   });
 }

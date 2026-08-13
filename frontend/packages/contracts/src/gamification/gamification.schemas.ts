@@ -23,7 +23,7 @@ const rejectClientGamificationFields = z
     sourceEventId: z.never().optional(),
     source_event_id: z.never().optional(),
   })
-  .passthrough();
+  .loose();
 
 export const primitiveBadgeCriteriaSchema = z.discriminatedUnion("type", [
   z
@@ -62,8 +62,8 @@ export const badgeCriteriaSchema = z.discriminatedUnion("type", [
 export const leaderboardConfigSchema = z
   .object({
     scopeType: z.enum(["tenant", "course", "group"]),
-    courseId: z.string().uuid().optional(),
-    spaceId: z.string().uuid().optional(),
+    courseId: z.uuid().optional(),
+    spaceId: z.uuid().optional(),
     privacyMode: z.literal("anonymous_rank"),
     maxEntries: z.number().int().min(1).max(100),
   })
@@ -71,35 +71,35 @@ export const leaderboardConfigSchema = z
   .superRefine((value, ctx) => {
     if (value.scopeType === "course" && !value.courseId) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         message: "courseId is required when scopeType is course.",
         path: ["courseId"],
       });
     }
     if (value.scopeType === "group" && !value.spaceId) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         message: "spaceId is required when scopeType is group.",
         path: ["spaceId"],
       });
     }
     if (value.scopeType === "tenant" && (value.courseId || value.spaceId)) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         message: "courseId and spaceId must not be set when scopeType is tenant.",
         path: ["scopeType"],
       });
     }
     if (value.scopeType === "course" && value.spaceId) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         message: "spaceId must not be set when scopeType is course.",
         path: ["spaceId"],
       });
     }
     if (value.scopeType === "group" && value.courseId) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         message: "courseId must not be set when scopeType is group.",
         path: ["courseId"],
       });
@@ -107,14 +107,14 @@ export const leaderboardConfigSchema = z
   });
 
 export const badgeDtoSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   key: z.string(),
   name: z.string(),
   iconKey: z.string().nullable(),
   criteria: badgeCriteriaSchema,
   status: entityStatusSchema,
   awarded: z.boolean().optional(),
-  awardedAt: z.string().datetime().nullable().optional(),
+  awardedAt: z.iso.datetime().nullable().optional(),
 });
 
 export const gamificationLevelProgressDtoSchema = z.object({
@@ -129,7 +129,7 @@ export const gamificationLevelProgressDtoSchema = z.object({
 });
 
 export const gamificationProfileDtoSchema = z.object({
-  membershipId: z.string().uuid(),
+  membershipId: z.uuid(),
   xpTotal: z.number().int(),
   levelKey: z.string().nullable(),
   badgeCount: z.number().int(),
@@ -146,12 +146,12 @@ export const badgeProgressResponseSchema = z.object({
   data: z.object({
     items: z.array(
       z.object({
-        id: z.string().uuid(),
+        id: z.uuid(),
         key: z.string(),
         name: z.string(),
         iconKey: z.string().nullable(),
         awarded: z.boolean(),
-        awardedAt: z.string().datetime().nullable(),
+        awardedAt: z.iso.datetime().nullable(),
         operator: z.enum(["all", "any"]),
         progress: z.array(
           z.object({
@@ -223,7 +223,7 @@ function assertUnique(
 ): void {
   if (!values) return;
   if (new Set(values).size !== values.length) {
-    ctx.addIssue({ code: z.ZodIssueCode.custom, message, path: [path] });
+    ctx.addIssue({ code: "custom", message, path: [path] });
   }
 }
 
@@ -309,7 +309,7 @@ export const updateGamificationRulesBodySchema = z
     );
     if (value.levelThresholds && !value.levelThresholds.some((entry) => entry.minXp === 0)) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         message: "One level threshold must start at 0 XP.",
         path: ["levelThresholds"],
       });
@@ -331,7 +331,7 @@ export const gamificationEventsResponseSchema = z.object({
 
 export const simulateBodySchema = z
   .object({
-    membershipId: z.string().uuid(),
+    membershipId: z.uuid(),
     eventType: consumedEventTypeSchema,
   })
   .strict();
@@ -366,7 +366,7 @@ export const simulateResponseSchema = z.object({
 
 export const gamificationExportResponseSchema = z.object({
   data: z.object({
-    exportedAt: z.string().datetime(),
+    exportedAt: z.iso.datetime(),
     rules: gamificationRulesDtoSchema,
     badges: z.array(z.record(z.string(), z.unknown())),
     leaderboards: z.array(z.record(z.string(), z.unknown())),
@@ -390,7 +390,7 @@ export const myLedgerItemSchema = z.object({
   points: z.number().int(),
   reasonKey: z.string(),
   eventType: z.string().nullable(),
-  occurredAt: z.string().datetime(),
+  occurredAt: z.iso.datetime(),
 });
 
 export const myLedgerResponseSchema = z.object({
@@ -446,7 +446,7 @@ export const createBadgeInputSchema = z
 
 export const updateBadgeBodySchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     name: z.string().min(1).max(160).optional(),
     iconKey: z.string().min(1).max(64).nullable().optional(),
     criteria: badgeCriteriaSchema.optional(),
@@ -458,8 +458,8 @@ export const updateBadgeBodySchema = z
 export const postBadgesManualAwardBodySchema = z
   .object({
     operation: z.literal("manual_award"),
-    badgeId: z.string().uuid(),
-    membershipId: z.string().uuid(),
+    badgeId: z.uuid(),
+    membershipId: z.uuid(),
     reason: z.string().min(1).max(500),
     tenant_id: z.never().optional(),
     tenantId: z.never().optional(),
@@ -476,8 +476,8 @@ export const postBadgesManualAwardBodySchema = z
 export const postBadgesManualAwardBulkBodySchema = z
   .object({
     operation: z.literal("manual_award_bulk"),
-    badgeId: z.string().uuid(),
-    membershipIds: z.array(z.string().uuid()).min(1).max(100),
+    badgeId: z.uuid(),
+    membershipIds: z.array(z.uuid()).min(1).max(100),
     reason: z.string().min(1).max(500),
     tenant_id: z.never().optional(),
     tenantId: z.never().optional(),
@@ -501,8 +501,8 @@ export const postBadgesCreateBodySchema = z
 export const postBadgesRevokeAwardBodySchema = z
   .object({
     operation: z.literal("revoke_award"),
-    badgeId: z.string().uuid(),
-    membershipId: z.string().uuid(),
+    badgeId: z.uuid(),
+    membershipId: z.uuid(),
     reason: z.string().min(1).max(500),
     tenant_id: z.never().optional(),
     tenantId: z.never().optional(),
@@ -525,11 +525,11 @@ export const postBadgesBodySchema = z.union([
 
 export const manualAwardBulkResponseSchema = z.object({
   data: z.object({
-    awarded: z.array(z.string().uuid()),
-    skipped: z.array(z.string().uuid()),
+    awarded: z.array(z.uuid()),
+    skipped: z.array(z.uuid()),
     failures: z.array(
       z.object({
-        membershipId: z.string().uuid(),
+        membershipId: z.uuid(),
         reason: z.string(),
       }),
     ),
@@ -538,20 +538,20 @@ export const manualAwardBulkResponseSchema = z.object({
 
 export const badgeAwardsQuerySchema = z
   .object({
-    badgeId: z.string().uuid().optional(),
-    membershipId: z.string().uuid().optional(),
+    badgeId: z.uuid().optional(),
+    membershipId: z.uuid().optional(),
     limit: z.coerce.number().int().min(1).max(100).default(25),
     cursor: z.string().max(200).optional(),
   })
   .strict();
 
 export const badgeAwardListItemSchema = z.object({
-  badgeId: z.string().uuid(),
+  badgeId: z.uuid(),
   badgeKey: z.string(),
   badgeName: z.string(),
-  membershipId: z.string().uuid(),
+  membershipId: z.uuid(),
   memberLabel: z.string(),
-  awardedAt: z.string().datetime(),
+  awardedAt: z.iso.datetime(),
   manual: z.boolean(),
 });
 
@@ -582,7 +582,7 @@ export const gamificationMetricsResponseSchema = z.object({
 });
 
 export const leaderboardDefinitionDtoSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   key: z.string(),
   name: z.string(),
   metricKey: z.literal("xp_total"),
@@ -608,7 +608,7 @@ export const leaderboardDetailResponseSchema = z.object({
   data: z.object({
     leaderboard: leaderboardDefinitionDtoSchema,
     periodKey: z.string(),
-    calculatedAt: z.string().datetime(),
+    calculatedAt: z.iso.datetime(),
     entries: z.array(sanitizedLeaderboardEntrySchema),
     callerRank: z.number().int().nullable(),
     callerMetricValue: z.number().int().nullable(),
@@ -629,7 +629,7 @@ export const createLeaderboardInputSchema = z
 
 export const updateLeaderboardBodySchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     name: z.string().min(1).max(160).optional(),
     windowKey: z.enum(["all_time", "weekly", "monthly"]).optional(),
     config: leaderboardConfigSchema.optional(),
@@ -653,7 +653,7 @@ export const streakFreezeParamsSchema = z.object({
 });
 
 export const leaderboardIdParamsSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
 });
 
 export const leaderboardDetailQuerySchema = z

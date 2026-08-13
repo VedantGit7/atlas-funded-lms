@@ -1,12 +1,18 @@
 ---
 name: Open Signup, Freemium Courses and Payments
-status: draft
-updated: 2026-06-28
+status: in-progress
+updated: 2026-08-13
 depends-on: []
 blocks: []
 ---
 
 # Open Signup, Freemium Courses and Payments
+
+## Implementation status (2026-08-13)
+
+- Phase 1 Open signup — **done**
+- Phase 2 Free vs paid / freemium — **done** (via courses.metadata_json)
+- Phase 3 Live gateway checkout — **done** (PaymentProvider + Stripe adapter; PaymentOrder + `/api/v1/checkout/purchase` + Stripe webhook; no Purchase table / `/commerce/*`)
 
 Execution roadmap for moving Atlas / Funded Beyond from an invite-only access model to an
 open-signup freemium model:
@@ -75,7 +81,7 @@ Verified during exploration of the codebase:
    or `currency`. See [backend/prisma/schema.prisma](backend/prisma/schema.prisma).
 3. No payment integration anywhere in the codebase (no Stripe/commerce/checkout).
 4. `displayName` is collected at signup but never persisted. See
-   [frontend/apps/web/src/app/(auth)/signup/_actions/signup-action.ts](frontend/apps/web/src/app/(auth)/signup/_actions/signup-action.ts).
+   [frontend/apps/web/src/app/(auth)/signup/\_actions/signup-action.ts](<frontend/apps/web/src/app/(auth)/signup/_actions/signup-action.ts>).
 
 ---
 
@@ -123,7 +129,7 @@ flowchart TD
    (`upsertAuthPrincipal`).
 5. Frontend signup action: on `EMAIL_VERIFICATION_REQUIRED` keep the "check your email"
    screen; on `AUTHENTICATED` redirect to `/`. See
-   [frontend/apps/web/src/app/(auth)/signup/_actions/signup-action.ts](frontend/apps/web/src/app/(auth)/signup/_actions/signup-action.ts).
+   [frontend/apps/web/src/app/(auth)/signup/\_actions/signup-action.ts](<frontend/apps/web/src/app/(auth)/signup/_actions/signup-action.ts>).
 
 ### Result
 

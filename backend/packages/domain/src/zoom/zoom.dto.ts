@@ -5,7 +5,7 @@ export const connectZoomBodySchema = rejectClientTenantFields
   .extend({
     accountId: z.string().max(128).optional(),
     accountName: z.string().trim().max(200).optional(),
-    accountEmail: z.string().trim().email().max(320).optional(),
+    accountEmail: z.email().max(320).optional(),
     appId: z.string().max(128).optional(),
     accessTokenRef: z.string().max(256).optional(),
     refreshTokenRef: z.string().max(256).optional(),
@@ -16,16 +16,16 @@ export const zoomWebhookBodySchema = z
   .object({
     externalMeetingId: z.string().min(1),
     topic: z.string().max(512).optional(),
-    startedAt: z.string().datetime().optional(),
-    endedAt: z.string().datetime().optional(),
+    startedAt: z.iso.datetime().optional(),
+    endedAt: z.iso.datetime().optional(),
     participants: z
       .array(
         z.object({
           externalUserId: z.string().optional(),
           displayName: z.string().optional(),
-          email: z.string().email().max(320).optional(),
-          joinTime: z.string().datetime().optional(),
-          leaveTime: z.string().datetime().optional(),
+          email: z.email().max(320).optional(),
+          joinTime: z.iso.datetime().optional(),
+          leaveTime: z.iso.datetime().optional(),
           durationSeconds: z.number().int().min(0).optional(),
         }),
       )
@@ -35,20 +35,20 @@ export const zoomWebhookBodySchema = z
 
 export const zoomConnectionDtoSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     accountId: z.string().nullable(),
     status: z.string(),
-    connectedAt: z.string().datetime().nullable(),
+    connectedAt: z.iso.datetime().nullable(),
   })
   .strict();
 
 export const zoomMeetingDtoSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     externalMeetingId: z.string(),
     topic: z.string().nullable(),
-    startedAt: z.string().datetime().nullable(),
-    endedAt: z.string().datetime().nullable(),
+    startedAt: z.iso.datetime().nullable(),
+    endedAt: z.iso.datetime().nullable(),
   })
   .strict();
 
@@ -57,5 +57,5 @@ export const listZoomMeetingsResponseSchema = z.object({
   data: z.object({ items: z.array(zoomMeetingDtoSchema) }),
 });
 export const zoomWebhookResponseSchema = z.object({
-  data: z.object({ meetingId: z.string().uuid(), participantCount: z.number().int() }),
+  data: z.object({ meetingId: z.uuid(), participantCount: z.number().int() }),
 });

@@ -352,4 +352,4 @@ export const rejectedAnalyticsPayloadSchema = z
   .object({
     tenant_id: z.never().optional(),
   })
-  .passthrough();
+  .loose();

@@ -931,6 +931,9 @@ function DestinationDrawer({
               <Send className="h-4 w-4" aria-hidden="true" />
               {testBusy ? "Sending..." : "Send a test delivery"}
             </button>
+            <p className="mt-1.5 text-xs text-[var(--admin-on-surface-variant)]">
+              Live probe: sends a test email, signed webhook ping, or storage write/delete.
+            </p>
             {testResult ? (
               <p
                 className={`mt-2 flex items-center gap-1.5 text-sm ${

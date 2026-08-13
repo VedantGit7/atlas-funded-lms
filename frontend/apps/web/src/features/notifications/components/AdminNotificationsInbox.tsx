@@ -2,16 +2,8 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
-import {
-  Archive,
-  Bell,
-  CheckCheck,
-  ChevronDown,
-  MoreVertical,
-  Search,
-  Settings2,
-} from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Archive, Bell, CheckCheck, ChevronDown, Search, Settings2 } from "lucide-react";
 import type { z } from "zod";
 import { ClientApiError, clientApi } from "../../../lib/client-api";
 import type { notificationInboxItemSchema } from "@atlas/contracts/notifications/notification.dto";
@@ -21,6 +13,7 @@ import {
   getNotificationCategory,
   getNotificationVisual,
   groupNotificationsByDate,
+  inboxListQuery,
   type NotificationFilter,
   type NotificationPriority,
 } from "../notifications-inbox-utils";
@@ -121,11 +114,13 @@ export function AdminNotificationsInbox({
   const [hasMore, setHasMore] = useState(initialHasMore);
   const [loadingInitial, setLoadingInitial] = useState(initialItems === undefined);
   const [filter, setFilter] = useState<NotificationFilter>("all");
+  const [showArchived, setShowArchived] = useState(false);
   const [query, setQuery] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const [requestId, setRequestId] = useState<string | null>(null);
   const [loadingMore, setLoadingMore] = useState(false);
   const [markingAllRead, setMarkingAllRead] = useState(false);
+  const [archivingId, setArchivingId] = useState<string | null>(null);
   const [focusedId, setFocusedId] = useState<string | null>(null);
 
   function setError(caught: unknown) {
@@ -138,8 +133,24 @@ export function AdminNotificationsInbox({
     setRequestId(null);
   }
 
+  async function fetchInboxPage(args: {
+    cursor?: string | null;
+    includeArchived: boolean;
+  }): Promise<NotificationListResponse> {
+    return clientApi.get<NotificationListResponse>(
+      inboxListQuery({
+        limit: 25,
+        ...(args.cursor !== undefined ? { cursor: args.cursor } : {}),
+        includeArchived: args.includeArchived,
+      }),
+    );
+  }
+
+  const skipNextDefaultFetch = useRef(initialItems !== undefined);
+
   useEffect(() => {
-    if (initialItems !== undefined) {
+    if (!showArchived && skipNextDefaultFetch.current) {
+      skipNextDefaultFetch.current = false;
       return;
     }
 
@@ -151,9 +162,7 @@ export function AdminNotificationsInbox({
       setRequestId(null);
 
       try {
-        const response = await clientApi.get<NotificationListResponse>(
-          "/api/v1/me/notifications?limit=25",
-        );
+        const response = await fetchInboxPage({ includeArchived: showArchived });
         if (cancelled) return;
         setItems(response.data);
         setNextCursor(response.page.nextCursor);
@@ -173,9 +182,12 @@ export function AdminNotificationsInbox({
     return () => {
       cancelled = true;
     };
-  }, [initialItems]);
+  }, [showArchived]);
 
-  const unreadCount = useMemo(() => items.filter((item) => !item.read).length, [items]);
+  const unreadCount = useMemo(
+    () => items.filter((item) => !item.read && !item.archived).length,
+    [items],
+  );
 
   const visibleItems = useMemo(
     () => filterNotifications(items, filter, query),
@@ -190,9 +202,7 @@ export function AdminNotificationsInbox({
     setRequestId(null);
 
     try {
-      const response = await clientApi.get<NotificationListResponse>(
-        "/api/v1/me/notifications?limit=25",
-      );
+      const response = await fetchInboxPage({ includeArchived: showArchived });
       setItems(response.data);
       setNextCursor(response.page.nextCursor);
       setHasMore(response.page.hasMore);
@@ -208,10 +218,10 @@ export function AdminNotificationsInbox({
     setLoadingMore(true);
     setMessage(null);
     try {
-      const response = await clientApi.get<{
-        data: InboxItem[];
-        page: { nextCursor: string | null; hasMore: boolean };
-      }>(`/api/v1/me/notifications?limit=25&cursor=${nextCursor}`);
+      const response = await fetchInboxPage({
+        cursor: nextCursor,
+        includeArchived: showArchived,
+      });
       setItems((current) => [...current, ...response.data]);
       setNextCursor(response.page.nextCursor);
       setHasMore(response.page.hasMore);
@@ -230,6 +240,49 @@ export function AdminNotificationsInbox({
     const updated = { ...item, read: true, readAt: response.data.readAt };
     setItems((current) => current.map((entry) => (entry.id === item.id ? updated : entry)));
     return updated;
+  }
+
+  async function archiveItem(item: InboxItem) {
+    if (item.archived || archivingId === item.id) return;
+
+    setArchivingId(item.id);
+    setMessage(null);
+    setRequestId(null);
+
+    const previous = items;
+    const archivedAt = new Date().toISOString();
+
+    // Optimistic: leave the default inbox immediately; keep in archived view.
+    if (showArchived) {
+      setItems((current) =>
+        current.map((entry) =>
+          entry.id === item.id ? { ...entry, archived: true, archivedAt } : entry,
+        ),
+      );
+    } else {
+      setItems((current) => current.filter((entry) => entry.id !== item.id));
+    }
+
+    try {
+      const response = await clientApi.post<{
+        data: { id: string; archived: true; archivedAt: string };
+      }>(`/api/v1/me/notifications/${item.id}/archive`, {}, `notification-archive-${item.id}`);
+
+      if (showArchived) {
+        setItems((current) =>
+          current.map((entry) =>
+            entry.id === item.id
+              ? { ...entry, archived: true, archivedAt: response.data.archivedAt }
+              : entry,
+          ),
+        );
+      }
+    } catch (caught) {
+      setItems(previous);
+      setError(caught);
+    } finally {
+      setArchivingId(null);
+    }
   }
 
   async function openNotification(item: InboxItem) {
@@ -316,36 +369,53 @@ export function AdminNotificationsInbox({
       </div>
 
       <div className={notificationsToolbarClassName}>
-        <div className="flex gap-4" role="tablist" aria-label="Notification filters">
-          {FILTER_OPTIONS.map((option) => {
-            const active = filter === option.id;
-            return (
-              <button
-                key={option.id}
-                type="button"
-                role="tab"
-                aria-selected={active}
-                className={[
-                  notificationsFilterTabClassName,
-                  active
-                    ? notificationsFilterTabActiveClassName
-                    : notificationsFilterTabInactiveClassName,
-                ].join(" ")}
-                onClick={() => {
-                  setFilter(option.id);
-                }}
-              >
-                {option.label}
-                {option.id === "unread" && unreadCount > 0 ? ` (${String(unreadCount)})` : null}
-              </button>
-            );
-          })}
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="flex gap-4" role="tablist" aria-label="Notification filters">
+            {FILTER_OPTIONS.map((option) => {
+              const active = filter === option.id;
+              return (
+                <button
+                  key={option.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={active}
+                  className={[
+                    notificationsFilterTabClassName,
+                    active
+                      ? notificationsFilterTabActiveClassName
+                      : notificationsFilterTabInactiveClassName,
+                  ].join(" ")}
+                  onClick={() => {
+                    setFilter(option.id);
+                  }}
+                >
+                  {option.label}
+                  {option.id === "unread" && unreadCount > 0 ? ` (${String(unreadCount)})` : null}
+                </button>
+              );
+            })}
+          </div>
+
+          <label className="inline-flex cursor-pointer items-center gap-2 text-[12px] font-medium text-[var(--admin-on-surface-variant)]">
+            <input
+              type="checkbox"
+              checked={showArchived}
+              onChange={(event) => {
+                setShowArchived(event.target.checked);
+                setFilter("all");
+                setNextCursor(null);
+                setHasMore(false);
+              }}
+              className="h-3.5 w-3.5 rounded border-[var(--admin-border)] accent-[var(--admin-primary)]"
+            />
+            Show archived
+          </label>
         </div>
 
         <button
           type="button"
           className={`${ghostButtonClassName} inline-flex items-center gap-2 px-0 py-1 text-[12px] font-medium`}
-          disabled={unreadCount === 0 || markingAllRead}
+          disabled={unreadCount === 0 || markingAllRead || showArchived}
           onClick={() => void markAllRead()}
         >
           <CheckCheck className="h-4 w-4" aria-hidden="true" />
@@ -386,7 +456,9 @@ export function AdminNotificationsInbox({
               ? "Could not load notifications"
               : query.trim() || filter === "unread"
                 ? "No matching notifications"
-                : "No notifications yet"}
+                : showArchived
+                  ? "No archived notifications"
+                  : "No notifications yet"}
           </h2>
           <p className="mt-2 max-w-sm text-sm leading-5 text-[var(--admin-on-surface-variant)]">
             {message
@@ -395,7 +467,9 @@ export function AdminNotificationsInbox({
                 ? "Try a different search term or switch back to All."
                 : filter === "unread"
                   ? "You are caught up. New alerts will appear here."
-                  : "When something needs your attention, it will show up in this inbox."}
+                  : showArchived
+                    ? "Archived alerts will appear here when you archive them from the inbox."
+                    : "When something needs your attention, it will show up in this inbox."}
           </p>
         </div>
       ) : (
@@ -438,7 +512,11 @@ export function AdminNotificationsInbox({
                           onClick={() => void openNotification(item)}
                         >
                           <div className={iconShellClassName(visual.priority)}>
-                            <Icon className="h-5 w-5" aria-hidden="true" strokeWidth={visual.filledIcon ? 2.25 : 2} />
+                            <Icon
+                              className="h-5 w-5"
+                              aria-hidden="true"
+                              strokeWidth={visual.filledIcon ? 2.25 : 2}
+                            />
                           </div>
 
                           <div className="min-w-0 flex-1">
@@ -454,6 +532,7 @@ export function AdminNotificationsInbox({
                             <p className={notificationsCardBodyClassName}>{item.body}</p>
                             <p className={notificationsCardMetaClassName}>
                               {formatNotificationTimestamp(item.createdAt)} · {category}
+                              {item.archived ? " · Archived" : null}
                             </p>
 
                             {showPrimaryAction ? (
@@ -465,24 +544,20 @@ export function AdminNotificationsInbox({
                         </button>
 
                         <div className={notificationsCardActionsClassName}>
-                          <button
-                            type="button"
-                            className={iconButtonClassName}
-                            aria-label="Archive notification"
-                            disabled
-                            title="Archive coming soon"
-                          >
-                            <Archive className="h-4 w-4" aria-hidden="true" />
-                          </button>
-                          <button
-                            type="button"
-                            className={iconButtonClassName}
-                            aria-label="More actions"
-                            disabled
-                            title="More actions coming soon"
-                          >
-                            <MoreVertical className="h-4 w-4" aria-hidden="true" />
-                          </button>
+                          {!item.archived ? (
+                            <button
+                              type="button"
+                              className={iconButtonClassName}
+                              aria-label="Archive notification"
+                              disabled={archivingId === item.id}
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                void archiveItem(item);
+                              }}
+                            >
+                              <Archive className="h-4 w-4" aria-hidden="true" />
+                            </button>
+                          ) : null}
                         </div>
                       </article>
                     </li>

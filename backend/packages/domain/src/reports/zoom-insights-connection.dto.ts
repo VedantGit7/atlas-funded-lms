@@ -10,11 +10,11 @@ export const zoomSyncTriggerSchema = z.enum(["manual", "scheduled", "webhook", "
 
 export const zoomSyncRunSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     trigger: zoomSyncTriggerSchema,
     status: zoomSyncRunStatusSchema,
-    startedAt: z.string().datetime(),
-    finishedAt: z.string().datetime().nullable(),
+    startedAt: z.iso.datetime(),
+    finishedAt: z.iso.datetime().nullable(),
     meetingsCount: z.number().int().nonnegative(),
     participantsCount: z.number().int().nonnegative(),
     skippedCount: z.number().int().nonnegative(),
@@ -27,34 +27,34 @@ export const zoomSyncPulseCellSchema = z
   .object({
     index: z.number().int().nonnegative(),
     status: z.enum(["success", "partial", "failed", "none"]),
-    runId: z.string().uuid().nullable(),
+    runId: z.uuid().nullable(),
   })
   .strict();
 
 export const zoomWebhookEventSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     eventType: z.string(),
     topic: z.string().nullable(),
     statusCode: z.number().int(),
-    receivedAt: z.string().datetime(),
+    receivedAt: z.iso.datetime(),
   })
   .strict();
 
 export const zoomConnectionDetailSchema = z
   .object({
     connection: zoomConnectionMetaSchema.extend({
-      id: z.string().uuid().nullable(),
+      id: z.uuid().nullable(),
       accountId: z.string().nullable(),
       accountName: z.string().nullable(),
       accountEmail: z.string().nullable(),
       appId: z.string().nullable(),
       scopes: z.array(z.string()),
-      tokenExpiresAt: z.string().datetime().nullable(),
-      disconnectedAt: z.string().datetime().nullable(),
+      tokenExpiresAt: z.iso.datetime().nullable(),
+      disconnectedAt: z.iso.datetime().nullable(),
       scheduleEnabled: z.boolean(),
       scheduleIntervalMinutes: z.number().int().positive(),
-      nextRunAt: z.string().datetime().nullable(),
+      nextRunAt: z.iso.datetime().nullable(),
       nextRunInSeconds: z.number().int().nonnegative().nullable(),
       coverageGapCount: z.number().int().nonnegative(),
       meetingsImported: z.number().int().nonnegative(),
@@ -65,7 +65,7 @@ export const zoomConnectionDetailSchema = z
     syncPulse: z.array(zoomSyncPulseCellSchema),
     syncRuns: z.array(zoomSyncRunSchema),
     webhookEvents: z.array(zoomWebhookEventSchema),
-    lastWebhookAt: z.string().datetime().nullable(),
+    lastWebhookAt: z.iso.datetime().nullable(),
   })
   .strict();
 
@@ -84,15 +84,15 @@ export const zoomConnectionSyncResponseSchema = z.object({
 
 export const zoomConnectionBackfillBodySchema = rejectClientTenantFields
   .extend({
-    rangeFrom: z.string().datetime(),
-    rangeTo: z.string().datetime(),
+    rangeFrom: z.iso.datetime(),
+    rangeTo: z.iso.datetime(),
     skipAlreadyImported: z.boolean().default(true),
   })
   .strict()
   .superRefine((value, ctx) => {
     if (new Date(value.rangeFrom).getTime() > new Date(value.rangeTo).getTime()) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         message: "rangeFrom must be on or before rangeTo.",
         path: ["rangeFrom"],
       });
@@ -103,8 +103,8 @@ export type ZoomConnectionBackfillBody = z.output<typeof zoomConnectionBackfillB
 
 export const zoomConnectionBackfillEstimateQuerySchema = rejectClientTenantFields
   .extend({
-    rangeFrom: z.string().datetime(),
-    rangeTo: z.string().datetime(),
+    rangeFrom: z.iso.datetime(),
+    rangeTo: z.iso.datetime(),
   })
   .strict();
 
@@ -134,7 +134,7 @@ export type ZoomConnectionDisconnectBody = z.output<typeof zoomConnectionDisconn
 export const zoomConnectionDisconnectResponseSchema = z.object({
   data: z.object({
     status: z.literal("disconnected"),
-    disconnectedAt: z.string().datetime(),
+    disconnectedAt: z.iso.datetime(),
   }),
 });
 
@@ -151,7 +151,7 @@ export const zoomConnectionScheduleResponseSchema = z.object({
   data: z.object({
     scheduleEnabled: z.boolean(),
     scheduleIntervalMinutes: z.number().int().positive(),
-    nextRunAt: z.string().datetime().nullable(),
+    nextRunAt: z.iso.datetime().nullable(),
     nextRunInSeconds: z.number().int().nonnegative().nullable(),
   }),
 });

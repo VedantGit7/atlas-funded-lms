@@ -27,11 +27,17 @@ import {
   decodeExplanationJson,
   itemRegistryRepository,
 } from "../item-registry/item-registry.repository";
+import { finalizeProctoringReport, startProctoringSession } from "../proctoring/proctoring.service";
 
 type ServiceCtx = {
   tenantId: string;
   actorMembershipId: string;
   requestId: string;
+};
+
+type StartAttemptConsent = {
+  consentedAt: string;
+  level: 1 | 2 | 3;
 };
 
 type AttemptLifecycleStatus = "STARTED" | "SUBMITTED" | "GRADED" | "ABANDONED" | "VOIDED";
@@ -153,6 +159,7 @@ export async function startAttempt(
   ctx: ServiceCtx,
   assessmentId: string,
   idempotencyKey: string,
+  consent?: StartAttemptConsent | null,
 ) {
   const existing = await attemptsRepository.findByIdempotencyKey(tx, idempotencyKey);
   if (existing) {
@@ -187,9 +194,7 @@ export async function startAttempt(
     typeof (grantsRaw as Record<string, unknown>)[ctx.actorMembershipId] === "number"
       ? Math.max(
           0,
-          Math.floor(
-            (grantsRaw as Record<string, unknown>)[ctx.actorMembershipId] as number,
-          ),
+          Math.floor((grantsRaw as Record<string, unknown>)[ctx.actorMembershipId] as number),
         )
       : 0;
   const attemptsUsed = await attemptsRepository.countAttemptsForMembership(tx, {
@@ -213,6 +218,16 @@ export async function startAttempt(
     idempotencyKey,
     dueAt,
   });
+
+  if (config.proctoringLevel >= 1) {
+    await startProctoringSession(tx, ctx, {
+      attemptId: attempt.id,
+      membershipId: ctx.actorMembershipId,
+      level: config.proctoringLevel,
+      consentedAt: consent?.consentedAt ?? null,
+      consentLevel: consent?.level ?? config.proctoringLevel,
+    });
+  }
 
   await outbox.publish(tx, {
     ctx: {
@@ -275,6 +290,7 @@ export async function getAttempt(tx: TenantTx, ctx: ServiceCtx, attemptId: strin
     dueAt: metadata.dueAt ?? null,
     serverNow,
     secureMode: config.secureMode,
+    proctoringLevel: config.proctoringLevel,
     l1ProctoringEnabled: config.l1ProctoringEnabled,
     passMarkPercent: config.passMarkPercent,
   };
@@ -513,6 +529,8 @@ export async function submitAttempt(
     scorePercent: scoring.scorePercent,
     metadata: nextMetadata,
   });
+
+  await finalizeProctoringReport(tx, ctx, attemptId);
 
   await auditWriter.write(
     tx,

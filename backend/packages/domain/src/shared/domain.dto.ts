@@ -8,13 +8,19 @@ export const rejectClientTenantFields = z
     sort: z.never().optional(),
     offset: z.never().optional(),
   })
-  .passthrough();
+  .loose();
 
 export const pageInfoSchema = z.object({
-  nextCursor: z.string().uuid().nullable(),
+  nextCursor: z.uuid().nullable(),
   hasNextPage: z.boolean(),
 });
 
 export const ENTITY_STATUSES = ["ACTIVE", "INACTIVE", "ARCHIVED"] as const;
 
-export const PAYMENT_ORDER_STATUSES = ["pending", "paid", "failed", "refunded", "cancelled"] as const;
+export const PAYMENT_ORDER_STATUSES = [
+  "pending",
+  "paid",
+  "failed",
+  "refunded",
+  "cancelled",
+] as const;

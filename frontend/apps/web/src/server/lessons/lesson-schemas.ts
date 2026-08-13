@@ -16,14 +16,13 @@ const forbiddenIdentityFields = {
 };
 
 const safeUrlSchema = z
-  .string()
   .url()
   .refine((value) => !value.trim().toLowerCase().startsWith("javascript:"), {
     message: "javascript: URLs are not allowed.",
   });
 
 const lessonContentSchema = z
-  .union([z.string().trim().max(500_000), z.record(z.unknown())])
+  .union([z.string().trim().max(500_000), z.record(z.string(), z.unknown())])
   .optional();
 
 function rejectUnsafeHtml(value: string): boolean {
@@ -81,7 +80,7 @@ export const updateLessonBodySchema = mutationBodySchema({
 }).superRefine((value, ctx) => {
   if (typeof value.content === "string" && !rejectUnsafeHtml(value.content)) {
     ctx.addIssue({
-      code: z.ZodIssueCode.custom,
+      code: "custom",
       message: "Content contains unsafe HTML.",
       path: ["content"],
     });
@@ -91,7 +90,7 @@ export const updateLessonBodySchema = mutationBodySchema({
 export type UpdateLessonBody = z.output<typeof updateLessonBodySchema>;
 
 export const learnerLessonOutlineItemSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   slug: z.string(),
   title: z.string(),
   position: z.number().int(),
@@ -99,7 +98,7 @@ export const learnerLessonOutlineItemSchema = z.object({
 });
 
 export const studioLessonOutlineItemSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   slug: z.string(),
   title: z.string(),
   position: z.number().int(),
@@ -127,41 +126,41 @@ export const lessonProgressStateSchema = z.object({
   status: z.enum(["not_started", "in_progress", "completed"]),
   progressPct: z.number().int().min(0).max(100),
   positionSeconds: z.number().int().min(0).nullable(),
-  completedAt: z.string().datetime().nullable(),
-  lastSeenAt: z.string().datetime().nullable(),
+  completedAt: z.iso.datetime().nullable(),
+  lastSeenAt: z.iso.datetime().nullable(),
 });
 
 export const learnerLessonDetailSchema = z.object({
-  id: z.string().uuid(),
-  courseId: z.string().uuid(),
-  moduleId: z.string().uuid(),
+  id: z.uuid(),
+  courseId: z.uuid(),
+  moduleId: z.uuid(),
   slug: z.string(),
   title: z.string(),
   description: z.string().nullable().optional(),
   lessonType: z.string().nullable().optional(),
   content: z.unknown().nullable().optional(),
   videoProvider: videoProviderSchema.nullable().optional(),
-  videoUrl: z.string().url().nullable().optional(),
+  videoUrl: z.url().nullable().optional(),
   durationSeconds: z.number().int().nullable().optional(),
   position: z.number().int(),
   progress: lessonProgressStateSchema.nullable().optional(),
   navigation: z.object({
-    previousLessonId: z.string().uuid().nullable(),
-    nextLessonId: z.string().uuid().nullable(),
+    previousLessonId: z.uuid().nullable(),
+    nextLessonId: z.uuid().nullable(),
   }),
 });
 
 export const studioLessonDetailSchema = z.object({
-  id: z.string().uuid(),
-  courseId: z.string().uuid(),
-  moduleId: z.string().uuid(),
+  id: z.uuid(),
+  courseId: z.uuid(),
+  moduleId: z.uuid(),
   slug: z.string(),
   title: z.string(),
   description: z.string().nullable().optional(),
   lessonType: z.string().nullable().optional(),
   content: z.unknown().nullable().optional(),
   videoProvider: videoProviderSchema.nullable().optional(),
-  videoUrl: z.string().url().nullable().optional(),
+  videoUrl: z.url().nullable().optional(),
   durationSeconds: z.number().int().nullable().optional(),
   position: z.number().int(),
   status: publishStatusStudioSchema,
@@ -178,7 +177,7 @@ export const studioLessonDetailResponseSchema = z.object({
 
 export const deleteLessonResponseSchema = z.object({
   data: z.object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     deleted: z.literal(true),
   }),
 });
@@ -186,10 +185,10 @@ export const deleteLessonResponseSchema = z.object({
 export const createLessonAssetBodySchema = mutationBodySchema({
   assetType: z.string().trim().min(1).max(80),
   provider: z.string().trim().min(1).max(80),
-  storageReferenceId: z.string().uuid().optional(),
+  storageReferenceId: z.uuid().optional(),
   objectKeyOrUrl: z.string().trim().min(1).max(2000).optional(),
   displayOrder: z.coerce.number().int().min(0).max(500).optional(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
   ...forbiddenIdentityFields,
 });
 
@@ -197,7 +196,7 @@ export type CreateLessonAssetBody = z.output<typeof createLessonAssetBodySchema>
 
 export const deleteLessonAssetQuerySchema = z
   .object({
-    assetId: z.string().uuid(),
+    assetId: z.uuid(),
     tenant_id: z.never().optional(),
     tenantId: z.never().optional(),
   })
@@ -206,15 +205,15 @@ export const deleteLessonAssetQuerySchema = z
 export type DeleteLessonAssetQuery = z.output<typeof deleteLessonAssetQuerySchema>;
 
 export const lessonAssetItemSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   assetType: z.string(),
   provider: z.string(),
   fileName: z.string().nullable().optional(),
   contentType: z.string().nullable().optional(),
   displayOrder: z.number().int().nullable().optional(),
-  downloadUrl: z.string().url().nullable().optional(),
-  downloadExpiresAt: z.string().datetime().nullable().optional(),
-  externalUrl: z.string().url().nullable().optional(),
+  downloadUrl: z.url().nullable().optional(),
+  downloadExpiresAt: z.iso.datetime().nullable().optional(),
+  externalUrl: z.url().nullable().optional(),
 });
 
 export const lessonAssetsResponseSchema = z.object({
@@ -225,7 +224,7 @@ export const lessonAssetsResponseSchema = z.object({
 
 export const deleteLessonAssetResponseSchema = z.object({
   data: z.object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     deleted: z.literal(true),
   }),
 });

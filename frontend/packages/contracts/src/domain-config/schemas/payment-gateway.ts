@@ -16,7 +16,7 @@ export const PaymentGatewayViewSchema = z.object({
   isDefault: z.boolean(),
   isConfigured: z.boolean(),
   isPublished: z.boolean(),
-  updatedAt: z.string().datetime(),
+  updatedAt: z.iso.datetime(),
 });
 
 export const PaymentGatewayListResponseSchema = z.object({
@@ -34,7 +34,7 @@ export const AddPaymentGatewayRequestSchema = z.object({
 });
 
 export const PaymentGatewayIdParamSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
 });
 
 export const UpdatePaymentGatewayConfigRequestSchema = z.object({
@@ -42,7 +42,7 @@ export const UpdatePaymentGatewayConfigRequestSchema = z.object({
   publishableKey: z.string().trim().min(1).max(2000),
   /** Only sent when setting or rotating the secret; omitted keeps the existing one. */
   secretKey: z.string().trim().min(1).max(4000).optional(),
-  billingLocationId: z.string().uuid().nullable().optional(),
+  billingLocationId: z.uuid().nullable().optional(),
   isDefault: z.boolean(),
 });
 

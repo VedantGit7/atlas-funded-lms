@@ -42,6 +42,12 @@ export function buildTenantStorageKey(input: BuildStorageKeyInput): string {
       return `tenants/${input.tenantId}/modules/${input.resourceId}/scorm/${objectId}-${safeFileName}`;
     case "certificate.template":
       return `tenants/${input.tenantId}/certificates/templates/${objectId}-${safeFileName}`;
+    case "certificate.render":
+      if (!input.resourceId) throw new Error("RESOURCE_ID_REQUIRED_FOR_CERTIFICATE_RENDER");
+      return `tenants/${input.tenantId}/certificates/${input.resourceId}/${safeFileName}`;
+    case "certificate.wallet":
+      if (!input.resourceId) throw new Error("RESOURCE_ID_REQUIRED_FOR_CERTIFICATE_WALLET");
+      return `tenants/${input.tenantId}/certificates/${input.resourceId}/${safeFileName}`;
     case "member.avatar":
       if (!input.resourceId) throw new Error("RESOURCE_ID_REQUIRED_FOR_MEMBER_AVATAR");
       return `tenants/${input.tenantId}/members/${input.resourceId}/avatar/${objectId}-${safeFileName}`;

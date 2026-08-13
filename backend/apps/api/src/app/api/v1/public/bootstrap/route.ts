@@ -14,26 +14,24 @@ import { routeMetadata } from "./route.metadata";
 
 const bootstrapResponseSchema = z.object({
   data: z.object({
-    tenantId: z.string().uuid().nullable(),
+    tenantId: z.uuid().nullable(),
     tenantSlug: z.string().nullable(),
-    tenantDomainId: z.string().uuid().nullable(),
-    tenantState: z
-      .enum(["ACTIVE", "PROVISIONING", "SUSPENDED", "ARCHIVED", "DELETED"])
-      .nullable(),
+    tenantDomainId: z.uuid().nullable(),
+    tenantState: z.enum(["ACTIVE", "PROVISIONING", "SUSPENDED", "ARCHIVED", "DELETED"]).nullable(),
     tenantDomainStatus: z
       .enum(["PENDING", "VERIFYING", "ACTIVE", "FAILED", "REMOVED", "ERROR"])
       .nullable(),
     publicName: z.string().nullable(),
     issuerName: z.string().nullable(),
-    logoLightUrl: z.string().url().nullable(),
-    logoDarkUrl: z.string().url().nullable(),
-    faviconUrl: z.string().url().nullable(),
+    logoLightUrl: z.url().nullable(),
+    logoDarkUrl: z.url().nullable(),
+    faviconUrl: z.url().nullable(),
     themeTokens: TenantThemeTokensSchema.nullable(),
     modeDefault: z.enum(["system", "light", "dark"]).nullable(),
-    themeCssVars: z.record(z.string()).nullable(),
+    themeCssVars: z.record(z.string(), z.string()).nullable(),
     homeCurrency: z.string().nullable(),
     fxBase: z.string().nullable(),
-    fxRates: z.record(z.number()).nullable(),
+    fxRates: z.record(z.string(), z.number()).nullable(),
   }),
 });
 
@@ -43,9 +41,7 @@ export const dynamic = "force-dynamic";
 export const GET = createPublicRouteHandler(routeMetadata, async ({ req, requestId }) => {
   const host = resolveRequestHostFromHeaders(req.headers);
 
-  const tenant = await withGlobalDb(async (db) =>
-    lookupTenantFromHost({ host, requestId, db }),
-  );
+  const tenant = await withGlobalDb(async (db) => lookupTenantFromHost({ host, requestId, db }));
 
   if (!tenant || tenant.tenantState === "DELETED") {
     return NextResponse.json(
@@ -75,37 +71,35 @@ export const GET = createPublicRouteHandler(routeMetadata, async ({ req, request
 
   const { branding, logoLightUrl, logoDarkUrl, faviconUrl, homeCurrency, fxBase, fxRates } =
     await withTenantTx(
-    {
-      tenantId: tenant.tenantId,
-      requestId,
-      allowAnonymousTenantRead: true,
-    },
-    async (tx) => {
-      const projection = await readRuntimeBrandingProjection(tx);
-      const [lightUrl, darkUrl, iconUrl, billingConfig, fx] = await Promise.all([
-        resolveBrandingAssetUrl(tx, { tenantId: tenant.tenantId }, projection.logoLightRefId),
-        resolveBrandingAssetUrl(tx, { tenantId: tenant.tenantId }, projection.logoDarkRefId),
-        resolveBrandingAssetUrl(tx, { tenantId: tenant.tenantId }, projection.faviconRefId),
-        getLearnerBillingConfigRow(tx),
-        getCachedFxRates(tx),
-      ]);
+      {
+        tenantId: tenant.tenantId,
+        requestId,
+        allowAnonymousTenantRead: true,
+      },
+      async (tx) => {
+        const projection = await readRuntimeBrandingProjection(tx);
+        const [lightUrl, darkUrl, iconUrl, billingConfig, fx] = await Promise.all([
+          resolveBrandingAssetUrl(tx, { tenantId: tenant.tenantId }, projection.logoLightRefId),
+          resolveBrandingAssetUrl(tx, { tenantId: tenant.tenantId }, projection.logoDarkRefId),
+          resolveBrandingAssetUrl(tx, { tenantId: tenant.tenantId }, projection.faviconRefId),
+          getLearnerBillingConfigRow(tx),
+          getCachedFxRates(tx),
+        ]);
 
-      return {
-        branding: projection,
-        logoLightUrl: lightUrl,
-        logoDarkUrl: darkUrl,
-        faviconUrl: iconUrl,
-        homeCurrency: billingConfig?.home_currency ?? null,
-        fxBase: fx.data.base,
-        fxRates: Object.keys(fx.data.rates).length > 0 ? fx.data.rates : null,
-      };
-    },
-  );
+        return {
+          branding: projection,
+          logoLightUrl: lightUrl,
+          logoDarkUrl: darkUrl,
+          faviconUrl: iconUrl,
+          homeCurrency: billingConfig?.home_currency ?? null,
+          fxBase: fx.data.base,
+          fxRates: Object.keys(fx.data.rates).length > 0 ? fx.data.rates : null,
+        };
+      },
+    );
 
   const parsedTheme = TenantThemeTokensSchema.safeParse(branding.themeTokens);
-  const semantic = parsedTheme.success
-    ? mapTenantThemeToSemanticPayload(parsedTheme.data)
-    : null;
+  const semantic = parsedTheme.success ? mapTenantThemeToSemanticPayload(parsedTheme.data) : null;
 
   const themeCssVars = semantic ? buildThemeCssVars(semantic) : null;
 

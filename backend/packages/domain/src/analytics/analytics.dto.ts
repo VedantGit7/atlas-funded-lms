@@ -26,17 +26,17 @@ const rejectForbiddenQueryFields = z
     stage_key: z.never().optional(),
     window_key: z.never().optional(),
   })
-  .passthrough();
+  .loose();
 
 const isoDateString = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Expected YYYY-MM-DD date.");
 
 export const analyticsDashboardQuerySchema = rejectForbiddenQueryFields
   .extend({
     dashboardKey: z.enum(ANALYTICS_DASHBOARD_KEYS).optional(),
-    courseId: z.string().uuid().optional(),
+    courseId: z.uuid().optional(),
     from: isoDateString.optional(),
     to: isoDateString.optional(),
-    cursor: z.string().uuid().optional(),
+    cursor: z.uuid().optional(),
     limit: z.coerce.number().int().min(1).max(100).default(50),
   })
   .strict();
@@ -51,9 +51,9 @@ export const analyticsFunnelQuerySchema = rejectForbiddenQueryFields
 
 export const analyticsItemStatisticsQuerySchema = rejectForbiddenQueryFields
   .extend({
-    assessmentId: z.string().uuid(),
+    assessmentId: z.uuid(),
     windowKey: z.enum(ITEM_STATISTICS_WINDOW_KEYS).default("rolling_30d"),
-    cursor: z.string().uuid().optional(),
+    cursor: z.uuid().optional(),
     limit: z.coerce.number().int().min(1).max(100).default(50),
   })
   .strict();
@@ -70,7 +70,7 @@ export const analyticsMetricPointSchema = z
 export const analyticsDashboardResponseSchema = z.object({
   data: z.object({
     dashboardKey: z.enum(ANALYTICS_DASHBOARD_KEYS),
-    courseId: z.string().uuid().nullable(),
+    courseId: z.uuid().nullable(),
     from: z.string(),
     to: z.string(),
     metrics: z.array(analyticsMetricPointSchema),
@@ -78,7 +78,7 @@ export const analyticsDashboardResponseSchema = z.object({
       totalEvents: z.number().int().nonnegative(),
     }),
     pageInfo: z.object({
-      nextCursor: z.string().uuid().nullable(),
+      nextCursor: z.uuid().nullable(),
       hasNextPage: z.boolean(),
     }),
   }),
@@ -119,7 +119,7 @@ export const analyticsPsychometricQualityFlagSchema = z.enum(["bad", "fair", "go
 export const analyticsItemStatisticSchema = z
   .object({
     itemReference: z.object({
-      itemId: z.string().uuid(),
+      itemId: z.uuid(),
       label: z.string(),
     }),
     attemptsCount: z.number().int().nonnegative(),
@@ -140,14 +140,14 @@ export const analyticsDashboardDrillDownQuerySchema = rejectForbiddenQueryFields
   .extend({
     rollupKey: z.string().min(1),
     day: isoDateString,
-    courseId: z.string().uuid().optional(),
+    courseId: z.uuid().optional(),
     limit: z.coerce.number().int().min(1).max(200).default(50),
   })
   .strict();
 
 export const analyticsDashboardDrillDownMemberSchema = z
   .object({
-    membershipId: z.string().uuid(),
+    membershipId: z.uuid(),
     displayName: z.string(),
   })
   .strict();
@@ -163,11 +163,11 @@ export const analyticsDashboardDrillDownResponseSchema = z.object({
 
 export const analyticsItemStatisticsResponseSchema = z.object({
   data: z.object({
-    assessmentId: z.string().uuid(),
+    assessmentId: z.uuid(),
     windowKey: z.enum(ITEM_STATISTICS_WINDOW_KEYS),
     items: z.array(analyticsItemStatisticSchema),
     pageInfo: z.object({
-      nextCursor: z.string().uuid().nullable(),
+      nextCursor: z.uuid().nullable(),
       hasNextPage: z.boolean(),
     }),
   }),
@@ -176,4 +176,6 @@ export const analyticsItemStatisticsResponseSchema = z.object({
 export type AnalyticsDashboardQuery = z.output<typeof analyticsDashboardQuerySchema>;
 export type AnalyticsFunnelQuery = z.output<typeof analyticsFunnelQuerySchema>;
 export type AnalyticsItemStatisticsQuery = z.output<typeof analyticsItemStatisticsQuerySchema>;
-export type AnalyticsDashboardDrillDownQuery = z.output<typeof analyticsDashboardDrillDownQuerySchema>;
+export type AnalyticsDashboardDrillDownQuery = z.output<
+  typeof analyticsDashboardDrillDownQuerySchema
+>;

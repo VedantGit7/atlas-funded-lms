@@ -4,8 +4,8 @@ export const SEARCH_REINDEX_REQUESTED_EVENT = "search.reindex_requested" as cons
 
 export const searchReindexRequestedPayloadSchema = z
   .object({
-    requestedAt: z.string().datetime(),
-    requestedByMembershipId: z.string().uuid(),
+    requestedAt: z.iso.datetime(),
+    requestedByMembershipId: z.uuid(),
   })
   .strict();
 
@@ -13,17 +13,17 @@ export type SearchReindexRequestedPayload = z.output<typeof searchReindexRequest
 
 export const coursePublishedPayloadSchema = z
   .object({
-    courseId: z.string().uuid(),
-    publishedAt: z.string().datetime(),
-    workflowTransitionId: z.string().uuid().optional(),
+    courseId: z.uuid(),
+    publishedAt: z.iso.datetime(),
+    workflowTransitionId: z.uuid().optional(),
   })
-  .passthrough();
+  .loose();
 
 export const communityPostCreatedPayloadSchema = z
   .object({
-    postId: z.string().uuid(),
-    spaceId: z.string().uuid(),
-    authorMembershipId: z.string().uuid(),
-    mentionMembershipIds: z.array(z.string().uuid()),
+    postId: z.uuid(),
+    spaceId: z.uuid(),
+    authorMembershipId: z.uuid(),
+    mentionMembershipIds: z.array(z.uuid()),
   })
   .strict();

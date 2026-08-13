@@ -57,7 +57,7 @@ export const automationActionNotificationRequestSchema = z
 export const automationActionCertificateIssueSchema = z
   .object({
     type: z.literal("certificate.issue"),
-    templateId: z.string().uuid(),
+    templateId: z.uuid(),
     recipientMembershipIdField: z
       .enum(["membershipId", "learnerMembershipId"])
       .default("learnerMembershipId"),

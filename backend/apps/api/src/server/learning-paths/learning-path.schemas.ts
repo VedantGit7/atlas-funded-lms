@@ -16,17 +16,17 @@ export const pathGateTypeSchema = z.enum([
 
 export const pathGateInputSchema = z
   .object({
-    id: z.string().uuid().optional(),
+    id: z.uuid().optional(),
     gateType: pathGateTypeSchema,
-    config: z.record(z.unknown()).default({}),
+    config: z.record(z.string(), z.unknown()).default({}),
   })
   .strict();
 
 export const pathStepInputSchema = z
   .object({
-    id: z.string().uuid().optional(),
+    id: z.uuid().optional(),
     stepType: pathStepTypeSchema,
-    refId: z.string().uuid().nullable().optional(),
+    refId: z.uuid().nullable().optional(),
     title: z.string().trim().min(1).max(200),
     position: z.number().int().min(1).max(500),
     gates: z.array(pathGateInputSchema).max(20).default([]),
@@ -46,7 +46,7 @@ export const learningPathListQuerySchema = z
   .superRefine((value, ctx) => {
     if (value.status != null && value.view !== "studio") {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         message: "status filter requires view=studio",
         path: ["status"],
       });
@@ -56,7 +56,7 @@ export const learningPathListQuerySchema = z
 export type LearningPathListQuery = z.output<typeof learningPathListQuerySchema>;
 
 export const learningPathIdParamsSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
 });
 
 export const pathDetailQuerySchema = z
@@ -78,7 +78,7 @@ export const createLearningPathBodySchema = mutationBodySchema({
     .optional(),
   description: z.string().trim().max(5000).nullable().optional(),
   pathType: pathTypeSchema.default("program"),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
   memberId: z.never().optional(),
   userId: z.never().optional(),
   membershipId: z.never().optional(),
@@ -97,7 +97,7 @@ export const updateLearningPathBodySchema = mutationBodySchema({
     .optional(),
   description: z.string().trim().max(5000).nullable().optional(),
   pathType: pathTypeSchema.optional(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
   steps: z.array(pathStepInputSchema).max(200).optional(),
   status: z.never().optional(),
   memberId: z.never().optional(),
@@ -124,29 +124,29 @@ export const enrollLearningPathBodySchema = mutationBodySchema({
 export type EnrollLearningPathBody = z.output<typeof enrollLearningPathBodySchema>;
 
 export const pathGateResponseSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   gateType: pathGateTypeSchema,
-  config: z.record(z.unknown()),
+  config: z.record(z.string(), z.unknown()),
 });
 
 export const pathStepResponseSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   stepType: pathStepTypeSchema,
-  refId: z.string().uuid().nullable(),
+  refId: z.uuid().nullable(),
   title: z.string(),
   position: z.number().int(),
   gates: z.array(pathGateResponseSchema),
 });
 
 export const learningPathListItemSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   slug: z.string(),
   title: z.string(),
   description: z.string().nullable(),
   pathType: pathTypeSchema,
   status: z.union([publishStatusLearnerSchema, publishStatusStudioSchema]),
-  updatedAt: z.string().datetime(),
-  createdAt: z.string().datetime(),
+  updatedAt: z.iso.datetime(),
+  createdAt: z.iso.datetime(),
 });
 
 export const learningPathListResponseSchema = z.object({
@@ -171,52 +171,52 @@ export const createLearningPathResponseSchema = z.object({
 
 export const publishLearningPathResponseSchema = z.object({
   data: z.object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     status: z.literal("REVIEW"),
-    submittedAt: z.string().datetime(),
-    workflowTransitionId: z.string().uuid(),
+    submittedAt: z.iso.datetime(),
+    workflowTransitionId: z.uuid(),
   }),
 });
 
 export const enrollLearningPathResponseSchema = z.object({
   data: z.object({
-    id: z.string().uuid(),
-    pathId: z.string().uuid(),
+    id: z.uuid(),
+    pathId: z.uuid(),
     status: z.literal("active"),
-    enrolledAt: z.string().datetime(),
+    enrolledAt: z.iso.datetime(),
     created: z.boolean(),
   }),
 });
 
 export const pathProgressResponseSchema = z.object({
   data: z.object({
-    pathId: z.string().uuid(),
+    pathId: z.uuid(),
     enrolled: z.boolean(),
-    enrollmentId: z.string().uuid().nullable(),
-    enrolledAt: z.string().datetime().nullable(),
+    enrollmentId: z.uuid().nullable(),
+    enrolledAt: z.iso.datetime().nullable(),
     completedStepCount: z.number().int().nonnegative(),
     totalStepCount: z.number().int().nonnegative(),
-    currentStepId: z.string().uuid().nullable(),
+    currentStepId: z.uuid().nullable(),
     nextAction: z.object({
       type: z.enum(["enroll", "continue", "complete", "wait_for_gate"]),
-      stepId: z.string().uuid().nullable(),
+      stepId: z.uuid().nullable(),
       label: z.string(),
     }),
     steps: z.array(
       z.object({
-        stepId: z.string().uuid(),
+        stepId: z.uuid(),
         position: z.number().int(),
         title: z.string(),
         stepType: pathStepTypeSchema,
-        refId: z.string().uuid().nullable(),
+        refId: z.uuid().nullable(),
         progressStatus: z.enum(["locked", "unlocked", "in_progress", "completed"]),
         locked: z.boolean(),
         gates: z.array(
           z.object({
-            id: z.string().uuid(),
+            id: z.uuid(),
             gateType: pathGateTypeSchema,
             state: z.enum(["satisfied", "locked", "pending"]),
-            config: z.record(z.unknown()),
+            config: z.record(z.string(), z.unknown()),
           }),
         ),
         href: z.string().nullable(),
@@ -227,7 +227,7 @@ export const pathProgressResponseSchema = z.object({
 
 export const deleteLearningPathResponseSchema = z.object({
   data: z.object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     deleted: z.literal(true),
   }),
 });

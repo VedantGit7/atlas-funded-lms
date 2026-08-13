@@ -12,7 +12,7 @@ const rejectClientTenantFields = z
     space_id: z.never().optional(),
     spaceId: z.never().optional(),
   })
-  .passthrough();
+  .loose();
 
 const htmlTagPattern = /<[^>]*>/g;
 const scriptPattern = /javascript:/i;
@@ -35,7 +35,7 @@ export const structuredTextNodeSchema = z
 export const structuredMentionNodeSchema = z
   .object({
     type: z.literal("mention"),
-    membershipId: z.string().uuid(),
+    membershipId: z.uuid(),
   })
   .strict();
 
@@ -107,7 +107,7 @@ export const createSpaceBodySchema = z
 
 export const updateSpaceBodySchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     slug: z
       .string()
       .min(2)
@@ -123,7 +123,7 @@ export const updateSpaceBodySchema = z
 
 export const deleteSpaceBodySchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     confirm: z.literal(true),
   })
   .strict()
@@ -142,7 +142,7 @@ export const createCommentBodySchema = z
     bodyJson: structuredBodySchema,
     // Optional parent for threaded replies. When present it must reference a
     // live comment on the same post (validated server-side).
-    parentCommentId: z.string().uuid().optional(),
+    parentCommentId: z.uuid().optional(),
   })
   .strict()
   .and(rejectClientTenantFields);
@@ -159,7 +159,7 @@ export const reactionTargetTypeSchema = z.enum(["post", "comment"]);
 export const createReactionBodySchema = z
   .object({
     targetType: reactionTargetTypeSchema,
-    targetId: z.string().uuid(),
+    targetId: z.uuid(),
     reactionKey: z
       .string()
       .min(1)
@@ -176,21 +176,21 @@ export const deleteReactionBodySchema = createReactionBodySchema;
 // because a member may not have a profile yet; role_key is the author's role in
 // the space the content belongs to (e.g. "moderator"), null when not a member.
 export const communityAuthorSchema = z.object({
-  membershipId: z.string().uuid(),
+  membershipId: z.uuid(),
   displayName: z.string().nullable(),
   roleKey: z.string().nullable(),
 });
 
 export const spaceDtoSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   slug: z.string(),
   name: z.string(),
   visibility: visibilitySchema,
   isMember: z.boolean(),
   postCount: z.number().int().nonnegative().optional(),
   memberCount: z.number().int().nonnegative().optional(),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 
 export const spaceListResponseSchema = z.object({
@@ -204,19 +204,19 @@ export const spaceDetailResponseSchema = z.object({
 });
 
 export const postDtoSchema = z.object({
-  id: z.string().uuid(),
-  spaceId: z.string().uuid(),
-  authorMembershipId: z.string().uuid(),
+  id: z.uuid(),
+  spaceId: z.uuid(),
+  authorMembershipId: z.uuid(),
   author: communityAuthorSchema.optional(),
   title: z.string().nullable(),
   bodyJson: structuredBodySchema,
   status: z.string(),
   reactionCounts: z.record(z.string(), z.number().int().nonnegative()).optional(),
   viewerReactionKeys: z.array(z.string()).optional(),
-  appealableModerationCaseId: z.string().uuid().nullable().optional(),
+  appealableModerationCaseId: z.uuid().nullable().optional(),
   commentCount: z.number().int().nonnegative().optional(),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 
 export const postListResponseSchema = z.object({
@@ -230,18 +230,18 @@ export const postDetailResponseSchema = z.object({
 });
 
 export const commentDtoSchema = z.object({
-  id: z.string().uuid(),
-  postId: z.string().uuid(),
-  parentCommentId: z.string().uuid().nullable().optional(),
-  authorMembershipId: z.string().uuid(),
+  id: z.uuid(),
+  postId: z.uuid(),
+  parentCommentId: z.uuid().nullable().optional(),
+  authorMembershipId: z.uuid(),
   author: communityAuthorSchema.optional(),
   bodyJson: structuredBodySchema,
   status: z.string(),
   reactionCounts: z.record(z.string(), z.number().int().nonnegative()).optional(),
   viewerReactionKeys: z.array(z.string()).optional(),
-  appealableModerationCaseId: z.string().uuid().nullable().optional(),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  appealableModerationCaseId: z.uuid().nullable().optional(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 
 export const commentListResponseSchema = z.object({
@@ -256,29 +256,29 @@ export const commentDetailResponseSchema = z.object({
 
 export const deleteCommentResponseSchema = z.object({
   data: z.object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     deleted: z.literal(true),
   }),
 });
 
 export const deletePostResponseSchema = z.object({
   data: z.object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     deleted: z.literal(true),
   }),
 });
 
 export const joinSpaceResponseSchema = z.object({
   data: z.object({
-    spaceId: z.string().uuid(),
-    membershipId: z.string().uuid(),
+    spaceId: z.uuid(),
+    membershipId: z.uuid(),
     joined: z.boolean(),
   }),
 });
 
 export const deleteSpaceResponseSchema = z.object({
   data: z.object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     deleted: z.literal(true),
   }),
 });
@@ -286,7 +286,7 @@ export const deleteSpaceResponseSchema = z.object({
 export const reactionResponseSchema = z.object({
   data: z.object({
     targetType: reactionTargetTypeSchema,
-    targetId: z.string().uuid(),
+    targetId: z.uuid(),
     reactionKey: z.string(),
     created: z.boolean(),
     removed: z.boolean().optional(),
@@ -294,15 +294,15 @@ export const reactionResponseSchema = z.object({
 });
 
 export const spaceIdParamsSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
 });
 
 export const postIdParamsSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
 });
 
 export const commentIdParamsSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
 });
 
 export { communityPostCreatedPayloadSchema };
