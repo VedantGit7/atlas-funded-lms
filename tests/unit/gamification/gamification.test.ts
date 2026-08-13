@@ -43,15 +43,15 @@ describe("gamification schemas", () => {
           name: "Starter",
           criteria: { type: "xp_total", minXp: 10 },
           status: "ACTIVE",
-          tenant_id: "00000000-0000-0000-0000-000000000001",
+          tenant_id: "00000000-0000-4000-8000-000000000001",
         },
       }),
     ).toThrow();
 
     expect(() =>
       updateBadgeBodySchema.parse({
-        id: "00000000-0000-0000-0000-000000000001",
-        membershipId: "00000000-0000-0000-0000-000000000002",
+        id: "00000000-0000-4000-8000-000000000001",
+        membershipId: "00000000-0000-4000-8000-000000000002",
       }),
     ).toThrow();
   });
@@ -115,8 +115,8 @@ describe("gamification schemas", () => {
     expect(
       postBadgesBodySchema.parse({
         operation: "revoke_award",
-        badgeId: "00000000-0000-0000-0000-000000000001",
-        membershipId: "00000000-0000-0000-0000-000000000002",
+        badgeId: "00000000-0000-4000-8000-000000000001",
+        membershipId: "00000000-0000-4000-8000-000000000002",
         reason: "Awarded in error",
       }),
     ).toBeTruthy();
@@ -124,8 +124,8 @@ describe("gamification schemas", () => {
     expect(() =>
       postBadgesBodySchema.parse({
         operation: "revoke_award",
-        badgeId: "00000000-0000-0000-0000-000000000001",
-        membershipId: "00000000-0000-0000-0000-000000000002",
+        badgeId: "00000000-0000-4000-8000-000000000001",
+        membershipId: "00000000-0000-4000-8000-000000000002",
       }),
     ).toThrow();
   });
@@ -215,7 +215,7 @@ describe("gamification schemas", () => {
         key: "bad",
         name: "Bad",
         criteria: { steps: [{ type: "earn_xp", amount: 10 }] },
-        tenantId: "00000000-0000-0000-0000-000000000001",
+        tenantId: "00000000-0000-4000-8000-000000000001",
       }),
     ).toThrow();
   });
@@ -258,7 +258,7 @@ describe("gamification schemas", () => {
     expect(() =>
       postRewardsBodySchema.parse({
         operation: "grant_balance",
-        membershipId: "00000000-0000-0000-0000-000000000001",
+        membershipId: "00000000-0000-4000-8000-000000000001",
         currencyKey: "coins",
         amount: 10,
       }),
@@ -395,10 +395,10 @@ describe("gamification rules", () => {
     expect(
       postBadgesBodySchema.parse({
         operation: "manual_award_bulk",
-        badgeId: "00000000-0000-0000-0000-000000000001",
+        badgeId: "00000000-0000-4000-8000-000000000001",
         membershipIds: [
-          "00000000-0000-0000-0000-000000000002",
-          "00000000-0000-0000-0000-000000000003",
+          "00000000-0000-4000-8000-000000000002",
+          "00000000-0000-4000-8000-000000000003",
         ],
         reason: "Cohort award",
       }),
@@ -407,7 +407,7 @@ describe("gamification rules", () => {
     expect(() =>
       postBadgesBodySchema.parse({
         operation: "manual_award_bulk",
-        badgeId: "00000000-0000-0000-0000-000000000001",
+        badgeId: "00000000-0000-4000-8000-000000000001",
         membershipIds: [],
         reason: "Too few",
       }),
@@ -427,7 +427,7 @@ describe("gamification rules", () => {
     expect(
       leaderboardConfigSchema.parse({
         scopeType: "group",
-        spaceId: "00000000-0000-0000-0000-000000000001",
+        spaceId: "00000000-0000-4000-8000-000000000001",
         privacyMode: "anonymous_rank",
         maxEntries: 10,
       }),

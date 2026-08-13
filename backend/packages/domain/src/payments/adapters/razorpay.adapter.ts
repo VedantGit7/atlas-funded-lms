@@ -156,17 +156,21 @@ export function createRazorpayPaymentProvider(config: RazorpayAdapterConfig): Pa
     },
 
     parseWebhook(args: { rawBody: string; signature: string }): Promise<ParsedWebhook> {
-      verifyRazorpayWebhookSignature({
-        rawBody: args.rawBody,
-        signature: args.signature,
-        webhookSecret: config.webhookSecret,
-      });
+      try {
+        verifyRazorpayWebhookSignature({
+          rawBody: args.rawBody,
+          signature: args.signature,
+          webhookSecret: config.webhookSecret,
+        });
+      } catch (error) {
+        return Promise.reject(error instanceof Error ? error : new Error(String(error)));
+      }
 
       let event: RazorpayWebhookPayload;
       try {
         event = JSON.parse(args.rawBody) as RazorpayWebhookPayload;
       } catch {
-        throw new Error("Invalid Razorpay webhook JSON body.");
+        return Promise.reject(new Error("Invalid Razorpay webhook JSON body."));
       }
 
       const rawType = typeof event.event === "string" ? event.event : "unknown";
@@ -180,7 +184,7 @@ export function createRazorpayPaymentProvider(config: RazorpayAdapterConfig): Pa
           (typeof payment?.id === "string" && payment.id) ||
           "";
         if (!externalId) {
-          throw new Error(`Razorpay ${rawType} webhook missing order/payment id.`);
+          return Promise.reject(new Error(`Razorpay ${rawType} webhook missing order/payment id.`));
         }
         const paymentOrderId =
           payment?.notes?.["paymentOrderId"] ?? order?.notes?.["paymentOrderId"] ?? null;

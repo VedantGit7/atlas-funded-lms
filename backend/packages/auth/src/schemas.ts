@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const emailSchema = z.email().transform((value) => value.trim().toLowerCase());
+export const emailSchema = z.string().trim().toLowerCase().pipe(z.email());
 
 export const publicSignupInputSchema = z.object({
   email: emailSchema,
