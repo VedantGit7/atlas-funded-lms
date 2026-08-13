@@ -165,21 +165,38 @@ function severityFromFingerprint(fingerprint: string): InsightAlertSeverity {
   return "info";
 }
 
-function salesRuleCaption(
+function insightRuleCaption(
   rule: InsightAlertRuleDef,
   reading: { firing: boolean; severity: InsightAlertSeverity; value: number },
 ): string | null {
-  if (rule.slug !== "sales-insight") return null;
-  if (rule.id === "failed-payments") {
-    if (!reading.firing) return "Current data would not produce an alert.";
-    return `Current data would produce 1 ${reading.severity} alert.`;
+  if (rule.slug === "sales-insight") {
+    if (rule.id === "failed-payments") {
+      if (!reading.firing) return "Current data would not produce an alert.";
+      return `Current data would produce 1 ${reading.severity} alert.`;
+    }
+    if (rule.id === "pending-orders") {
+      if (!reading.firing) return "No pending orders at or above the threshold.";
+      return "Current data would produce 1 info alert.";
+    }
+    if (rule.id === "low-conversion") {
+      return `Current 30-day rate is ${reading.value}%.`;
+    }
+    return null;
   }
-  if (rule.id === "pending-orders") {
-    if (!reading.firing) return "No pending orders at or above the threshold.";
-    return "Current data would produce 1 info alert.";
+  if (rule.slug === "marketing-insight") {
+    if (rule.id === "no-form-submissions-30d") {
+      if (!reading.firing) return "Current data would not produce an alert.";
+      return "Current data would produce 1 warning alert.";
+    }
+    if (rule.id === "low-cta-click-rate") {
+      return `Current click-through rate is ${reading.value}%.`;
+    }
   }
-  if (rule.id === "low-conversion") {
-    return `Current 30-day rate is ${reading.value}%.`;
+  if (rule.slug === "messenger-insight") {
+    if (rule.id === "whatsapp-failures") {
+      if (!reading.firing) return "Current data would not produce an alert.";
+      return `Current data would produce 1 ${reading.severity} alert.`;
+    }
   }
   return null;
 }
@@ -612,14 +629,15 @@ export const INSIGHT_ALERT_RULES: InsightAlertRuleDef[] = [
     min: 1,
     max: 200,
     thresholdKind: "count",
-    description: "Raise a warning when failed WhatsApp sends reach {threshold}.",
+    description: "Notify on any failed send; raise it to a warning at {threshold} or more.",
+    declaredSeverities: ["info", "warning"],
     evaluate: (metrics, threshold) => {
       const count = metric(metrics, "whatsappFailed");
       return {
         firing: count > 0,
         severity: count >= threshold ? "warning" : "info",
         message: `${count} failed WhatsApp send${plural(count, "", "s")} across campaigns.`,
-        href: "/admin/marketing/messenger/whatsapp",
+        href: "/admin/insights/messenger-insight/whatsapp",
         value: count,
       };
     },
@@ -635,17 +653,20 @@ export const INSIGHT_ALERT_RULES: InsightAlertRuleDef[] = [
     min: 0,
     max: 0,
     thresholdKind: "none",
-    description:
-      "Raise an info notice when WhatsApp Business is disconnected and no sends have gone out.",
+    description: "Fires whenever the integration is disconnected.",
+    declaredSeverities: ["info"],
     evaluate: (metrics) => {
       const connected = metric(metrics, "whatsappConnected");
       const sent = metric(metrics, "whatsappSent");
-      const firing = connected === 0 && sent === 0;
+      const firing = connected === 0;
       return {
         firing,
         severity: "info",
-        message: "Connect WhatsApp Business to send template campaigns and track delivery.",
-        href: "/admin/marketing/messenger/whatsapp",
+        message:
+          sent > 0
+            ? "Live syncing is paused. WhatsApp metrics shown are historical and read-only until you reconnect."
+            : "Connect WhatsApp Business to send template campaigns and track delivery.",
+        href: "/admin/insights/messenger-insight/whatsapp",
         value: connected,
       };
     },
@@ -951,7 +972,7 @@ export function projectInsightAlertBoard(args: {
       health,
       severities: uniqueSeverities(rule, args.metrics),
       currentValue: reading.value,
-      currentCaption: salesRuleCaption(rule, reading),
+      currentCaption: insightRuleCaption(rule, reading),
     };
   });
 

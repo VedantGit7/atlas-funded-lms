@@ -9,6 +9,9 @@ import {
   type InsightDashboardRange,
 } from "./admin-insights-api";
 import { InsightAlertsView, type InsightAlertsTab } from "./InsightAlertsView";
+import { LiveDashboardAlertsView } from "./LiveDashboardAlertsView";
+import { MarketingInsightAlertsView } from "./MarketingInsightAlertsView";
+import { MessengerInsightAlertsView } from "./MessengerInsightAlertsView";
 import { SalesInsightAlertsView } from "./SalesInsightAlertsView";
 
 type AdminInsightAlertsPageProps = {
@@ -33,6 +36,9 @@ export function AdminInsightAlertsPage({
   initialTab,
 }: AdminInsightAlertsPageProps) {
   const sales = slug === "sales-insight";
+  const liveDashboard = slug === "live-dashboard";
+  const marketing = slug === "marketing-insight";
+  const messenger = slug === "messenger-insight";
   const [board, setBoard] = useState<InsightAlertsBoard | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -88,6 +94,63 @@ export function AdminInsightAlertsPage({
   if (sales) {
     return (
       <SalesInsightAlertsView
+        slug={slug}
+        sectionTitle={sectionTitle}
+        board={board}
+        loading={loading}
+        mutating={mutating}
+        error={error}
+        tab={tab}
+        onTabChange={onTabChange}
+        onRefresh={() => {
+          void loadBoard();
+        }}
+        onMutate={onMutate}
+      />
+    );
+  }
+
+  if (liveDashboard) {
+    return (
+      <LiveDashboardAlertsView
+        slug={slug}
+        sectionTitle={sectionTitle}
+        board={board}
+        loading={loading}
+        mutating={mutating}
+        error={error}
+        tab={tab}
+        onTabChange={onTabChange}
+        onRefresh={() => {
+          void loadBoard();
+        }}
+        onMutate={onMutate}
+      />
+    );
+  }
+
+  if (marketing) {
+    return (
+      <MarketingInsightAlertsView
+        slug={slug}
+        sectionTitle={sectionTitle}
+        board={board}
+        loading={loading}
+        mutating={mutating}
+        error={error}
+        tab={tab}
+        onTabChange={onTabChange}
+        onRefresh={() => {
+          void loadBoard();
+        }}
+        onMutate={onMutate}
+      />
+    );
+  }
+
+  if (messenger) {
+    return (
+      <MessengerInsightAlertsView
         slug={slug}
         sectionTitle={sectionTitle}
         board={board}

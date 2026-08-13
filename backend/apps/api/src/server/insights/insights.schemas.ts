@@ -130,6 +130,9 @@ export const insightWidgetDetailResponseSchema = z.object({
     splits: z.record(z.string(), z.array(insightWidgetSplitRowSchema)),
     related: z.array(insightWidgetRelatedSchema),
     failureRate: insightWidgetFailureRateSchema.nullable(),
+    pairedWidget: insightWidgetSchema.nullable().optional(),
+    secondaryAverage: z.number().nullable().optional(),
+    secondaryTotal: z.number().nullable().optional(),
   }),
 });
 
@@ -245,6 +248,241 @@ export const insightSalesPipelineResponseSchema = z.object({
   }),
 });
 
+export const insightMessengerChannelsOutboundIdSchema = z.enum([
+  "email",
+  "push",
+  "whatsapp",
+  "announcements",
+]);
+
+export const insightMessengerChannelsComparisonRowSchema = z.object({
+  id: insightMessengerChannelsOutboundIdSchema,
+  label: z.string(),
+  sends: z.number(),
+  recipients: z.number(),
+  recipientsPerSend: z.number().nullable(),
+  sendSharePct: z.number(),
+  reachSharePct: z.number(),
+  href: z.string(),
+});
+
+export const insightMessengerChannelsVolumePointSchema = z.object({
+  period: z.string(),
+  email: z.number(),
+  push: z.number(),
+  whatsapp: z.number(),
+  inbox: z.number(),
+  outboundTotal: z.number(),
+});
+
+export const insightMessengerChannelsOutboundRowSchema = z.object({
+  id: insightMessengerChannelsOutboundIdSchema,
+  label: z.string(),
+  direction: z.literal("outbound"),
+  sends: z.number(),
+  recipients: z.number(),
+  recipientsPerSend: z.number().nullable(),
+  sendSharePct: z.number(),
+  reachSharePct: z.number(),
+  lastSentAt: z.string().nullable(),
+  href: z.string(),
+});
+
+export const insightMessengerChannelsInboundRowSchema = z.object({
+  id: z.literal("inbox"),
+  label: z.literal("Inbox messages"),
+  direction: z.literal("inbound"),
+  messageCount: z.number(),
+  openConversations: z.number(),
+  href: z.string(),
+});
+
+export const insightMessengerChannelsResponseSchema = z.object({
+  data: z.object({
+    slug: z.literal("messenger-insight"),
+    title: z.string(),
+    subtitle: z.string(),
+    generatedAt: z.string(),
+    manageCampaignsHref: z.string(),
+    inboxHref: z.string(),
+    caveat: z.string(),
+    volumeCaption: z.string(),
+    empty: z.boolean(),
+    singleChannel: z.boolean(),
+    unusedChannels: z.array(z.string()),
+    unusedCaption: z.string().nullable(),
+    headline: z.object({
+      outboundReach: z.number(),
+      campaignsSent: z.number(),
+      avgReachPerCampaign: z.number().nullable(),
+      channelsUsed: z.number(),
+      scheduledTotal: z.number(),
+      scheduledCaption: z.literal("Email, push, and WhatsApp combined"),
+    }),
+    comparison: z.object({
+      caption: z.string().nullable(),
+      rows: z.array(insightMessengerChannelsComparisonRowSchema),
+    }),
+    volume: z.object({
+      averageOutbound: z.number().nullable(),
+      points: z.array(insightMessengerChannelsVolumePointSchema),
+    }),
+    table: z.object({
+      outbound: z.array(insightMessengerChannelsOutboundRowSchema),
+      inbound: z.array(insightMessengerChannelsInboundRowSchema),
+    }),
+  }),
+});
+
+export const insightMessengerWhatsappGuidanceItemSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  description: z.string(),
+  href: z.string(),
+});
+
+export const insightMessengerWhatsappFailurePointSchema = z.object({
+  period: z.string(),
+  delivered: z.number(),
+  failed: z.number(),
+});
+
+export const insightMessengerWhatsappCampaignRowSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  status: z.string(),
+  recipients: z.number(),
+  delivered: z.number(),
+  failed: z.number(),
+  deliveryRatePct: z.number().nullable(),
+  belowAverage: z.boolean(),
+  fullyFailed: z.boolean(),
+  sentAt: z.string().nullable(),
+  href: z.string(),
+});
+
+export const insightMessengerWhatsappResponseSchema = z.object({
+  data: z.object({
+    slug: z.literal("messenger-insight"),
+    title: z.string(),
+    subtitle: z.string(),
+    generatedAt: z.string(),
+    settingsHref: z.string(),
+    connected: z.boolean(),
+    lastSentAt: z.string().nullable(),
+    empty: z.boolean(),
+    perfectDelivery: z.boolean(),
+    historical: z.boolean(),
+    headline: z.object({
+      deliveryRatePct: z.number().nullable(),
+      deliveryRateCaption: z.string().nullable(),
+      campaignsSent: z.number(),
+      delivered: z.number(),
+      failed: z.number(),
+      failedSharePct: z.number().nullable(),
+      scheduled: z.number(),
+    }),
+    composition: z.object({
+      delivered: z.number(),
+      failed: z.number(),
+      pending: z.number(),
+      recipients: z.number(),
+      caption: z.string(),
+    }),
+    failures: z.object({
+      caption: z.string().nullable(),
+      points: z.array(insightMessengerWhatsappFailurePointSchema),
+    }),
+    guidance: z.object({
+      caption: z.string(),
+      items: z.array(insightMessengerWhatsappGuidanceItemSchema),
+    }),
+    campaigns: z.object({
+      averageDeliveryRatePct: z.number().nullable(),
+      rows: z.array(insightMessengerWhatsappCampaignRowSchema),
+    }),
+  }),
+});
+
+export const insightMessengerInboxVolumePointSchema = z.object({
+  period: z.string(),
+  count: z.number(),
+  isWeekend: z.boolean(),
+});
+
+export const insightMessengerInboxConversationRowSchema = z.object({
+  id: z.string(),
+  learnerName: z.string(),
+  lastMessagePreview: z.string(),
+  messageCount: z.number(),
+  lastMessageAt: z.string(),
+  waitingOn: z.enum(["us", "learner"]),
+  waitingPast48h: z.boolean(),
+  href: z.string(),
+});
+
+export const insightMessengerInboxResponseBucketSchema = z.object({
+  id: z.enum(["0-1h", "1-4h", "4-24h", "24h+"]),
+  label: z.string(),
+  count: z.number(),
+  sharePct: z.number().nullable(),
+});
+
+export const insightMessengerInboxResponseSchema = z.object({
+  data: z.object({
+    slug: z.literal("messenger-insight"),
+    title: z.string(),
+    subtitle: z.string(),
+    generatedAt: z.string(),
+    inboxHref: z.string(),
+    alertsHref: z.string(),
+    directionNote: z.string(),
+    empty: z.boolean(),
+    allClear: z.boolean(),
+    headline: z.object({
+      inboxMessages: z.number(),
+      inboxMessages30d: z.number(),
+      inboxMessagesCaption: z.string(),
+      openConversations: z.number(),
+      messages30d: z.number(),
+      averagePerDay: z.number().nullable(),
+      busiestDay: z
+        .object({
+          period: z.string(),
+          count: z.number(),
+        })
+        .nullable(),
+      quietestDay: z
+        .object({
+          period: z.string(),
+          count: z.number(),
+        })
+        .nullable(),
+    }),
+    volume: z.object({
+      mean: z.number().nullable(),
+      caption: z.string().nullable(),
+      points: z.array(insightMessengerInboxVolumePointSchema),
+    }),
+    conversations: z.object({
+      totalOpen: z.number(),
+      rows: z.array(insightMessengerInboxConversationRowSchema),
+    }),
+    responseTime: z.object({
+      available: z.boolean(),
+      medianFirstReplySeconds: z.number().nullable(),
+      longestFirstReplySeconds: z.number().nullable(),
+      longestWaitingSeconds: z.number().nullable(),
+      caption: z.string().nullable(),
+      buckets: z.array(insightMessengerInboxResponseBucketSchema),
+    }),
+    noAlerting: z.object({
+      caption: z.string(),
+      href: z.string(),
+    }),
+  }),
+});
+
 export const insightSalesAttributionPatternSchema = z.enum([
   "high-volume low-value",
   "low-volume high-value",
@@ -296,6 +534,260 @@ export const insightSalesAttributionResponseSchema = z.object({
     maxRevenue: z.number(),
     composition: z.array(insightSalesAttributionCompositionSchema),
     sources: z.array(insightSalesAttributionSourceSchema),
+  }),
+});
+
+export const insightMarketingAttributionPatternSchema = z.enum([
+  "high-volume low-value",
+  "low-volume high-value",
+]);
+
+export const insightMarketingAttributionRowSchema = z.object({
+  id: z.string(),
+  value: z.string(),
+  events: z.number(),
+  revenueMajor: z.number(),
+  eventSharePct: z.number().nullable(),
+  revenueSharePct: z.number().nullable(),
+  revenuePerEvent: z.number().nullable(),
+  residual: z.number().nullable(),
+  unstable: z.boolean(),
+  href: z.string(),
+  pattern: insightMarketingAttributionPatternSchema.nullable(),
+});
+
+export const insightMarketingAttributionCompositionSchema = z.object({
+  id: z.string(),
+  label: z.string(),
+  kind: z.enum(["named", "other", "not-set"]),
+  events: z.number(),
+  sharePct: z.number().nullable(),
+});
+
+export const insightMarketingAttributionDimensionSchema = z.object({
+  id: z.enum(["source", "medium", "campaign"]),
+  label: z.string(),
+  composition: z.array(insightMarketingAttributionCompositionSchema),
+  rows: z.array(insightMarketingAttributionRowSchema),
+  caption: z.string(),
+  maxEvents: z.number(),
+  maxRevenue: z.number(),
+  revenuePerEvent: z.number().nullable(),
+});
+
+export const insightMarketingAttributionCrossPairSchema = z.object({
+  source: z.string(),
+  medium: z.string(),
+  events: z.number(),
+  sharePct: z.number(),
+});
+
+export const insightMarketingAttributionResponseSchema = z.object({
+  data: z.object({
+    slug: z.literal("marketing-insight"),
+    title: z.string(),
+    subtitle: z.string(),
+    generatedAt: z.string(),
+    currency: z.string(),
+    reportHref: z.string(),
+    salesAttributionHref: z.string(),
+    trackingHref: z.string(),
+    caveat: z.string(),
+    empty: z.boolean(),
+    caption: z.string(),
+    events: z.number(),
+    events30d: z.number(),
+    attributedRevenue: z.number(),
+    sourceCount: z.number(),
+    mediumCount: z.number(),
+    campaignCount: z.number(),
+    campaignsWithRevenue: z.number(),
+    unstableEventThreshold: z.number(),
+    dimensions: z.object({
+      source: insightMarketingAttributionDimensionSchema,
+      medium: insightMarketingAttributionDimensionSchema,
+      campaign: insightMarketingAttributionDimensionSchema,
+    }),
+    crossPairs: z.array(insightMarketingAttributionCrossPairSchema),
+    crossCaption: z.string().nullable(),
+  }),
+});
+
+export const insightAttributionResponseSchema = z.object({
+  data: z.discriminatedUnion("slug", [
+    insightSalesAttributionResponseSchema.shape.data,
+    insightMarketingAttributionResponseSchema.shape.data,
+  ]),
+});
+
+export const insightMarketingCaptureChainStepSchema = z.object({
+  id: z.string(),
+  label: z.string(),
+  count: z.number(),
+  barSharePct: z.number(),
+  connectorRatePct: z.number().nullable(),
+  connectorIsLargestDrop: z.boolean(),
+});
+
+export const insightMarketingCaptureChainSchema = z.object({
+  steps: z.array(insightMarketingCaptureChainStepSchema),
+  caption: z.string(),
+  dropCaption: z.string().nullable(),
+});
+
+export const insightMarketingCaptureFormRowSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  status: z.string(),
+  submissions: z.number(),
+  submissionSharePct: z.number().nullable(),
+  submissions30d: z.number(),
+  submissions30dWarning: z.boolean(),
+  lastSubmissionAt: z.string().nullable(),
+  href: z.string(),
+  isDraft: z.boolean(),
+  warningRail: z.boolean(),
+});
+
+export const insightMarketingCaptureCtaRowSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  ctaType: z.string(),
+  status: z.string(),
+  views: z.number(),
+  clicks: z.number(),
+  clickRatePct: z.number().nullable(),
+  clickRateWarning: z.boolean(),
+  noViews: z.boolean(),
+  href: z.string(),
+});
+
+export const insightMarketingCaptureClickRateByTypeRowSchema = z.object({
+  type: z.string(),
+  views: z.number(),
+  clicks: z.number(),
+  clickRatePct: z.number().nullable(),
+  unstable: z.boolean(),
+});
+
+export const insightMarketingCaptureClickRateByTypeSchema = z.object({
+  rows: z.array(insightMarketingCaptureClickRateByTypeRowSchema),
+  overallRatePct: z.number().nullable(),
+  caption: z.string().nullable(),
+});
+
+export const insightMarketingCaptureResponseSchema = z.object({
+  data: z.object({
+    slug: z.literal("marketing-insight"),
+    title: z.string(),
+    subtitle: z.string(),
+    generatedAt: z.string(),
+    empty: z.boolean(),
+    zeroSubmissionWarning: z.boolean(),
+    warningMessage: z.string().nullable(),
+    warningTitle: z.string().nullable(),
+    chainCaption: z.string(),
+    formsCaption: z.string(),
+    manageFormsHref: z.string(),
+    manageCtasHref: z.string(),
+    createFormHref: z.string(),
+    emptyCaption: z.string(),
+    clickRateWarnThreshold: z.number(),
+    unstableViewThreshold: z.number(),
+    overallClickRatePct: z.number().nullable(),
+    ctaViews: z.number(),
+    ctaClicks: z.number(),
+    submissionCount: z.number(),
+    submissions30d: z.number(),
+    submissions30dWarning: z.boolean(),
+    formCount: z.number(),
+    liveFormCount: z.number(),
+    ctaCount: z.number(),
+    liveCtaCount: z.number(),
+    contactCount: z.number(),
+    chain: insightMarketingCaptureChainSchema,
+    forms: z.array(insightMarketingCaptureFormRowSchema),
+    ctas: z.array(insightMarketingCaptureCtaRowSchema),
+    clickRateByType: insightMarketingCaptureClickRateByTypeSchema,
+  }),
+});
+
+export const insightMarketingWorkflowsDailyVolumeSchema = z.object({
+  period: z.string(),
+  completed: z.number(),
+  failed: z.number(),
+  total: z.number(),
+});
+
+export const insightMarketingWorkflowsByWorkflowRowSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  status: z.string(),
+  runs30d: z.number(),
+  failed30d: z.number(),
+  runSharePct: z.number().nullable(),
+  successRatePct: z.number().nullable(),
+  lastRunAt: z.string().nullable(),
+  publishedAt: z.string().nullable(),
+  href: z.string(),
+  warningRail: z.boolean(),
+});
+
+export const insightMarketingWorkflowsTriggerRowSchema = z.object({
+  trigger: z.string(),
+  runs: z.number(),
+  sharePct: z.number().nullable(),
+});
+
+export const insightMarketingWorkflowsNeverRunRowSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  publishedAt: z.string().nullable(),
+  href: z.string(),
+});
+
+export const insightMarketingWorkflowsLedgerRowSchema = z.object({
+  id: z.string(),
+  workflowId: z.string(),
+  workflowTitle: z.string(),
+  status: z.string(),
+  triggerEventType: z.string(),
+  createdAt: z.string(),
+  errorMessage: z.string().nullable(),
+  errorPreview: z.string().nullable(),
+  href: z.string(),
+  workflowHref: z.string(),
+  isFailed: z.boolean(),
+});
+
+export const insightMarketingWorkflowsResponseSchema = z.object({
+  data: z.object({
+    slug: z.literal("marketing-insight"),
+    title: z.string(),
+    subtitle: z.string(),
+    generatedAt: z.string(),
+    empty: z.boolean(),
+    allHealthy: z.boolean(),
+    emptyCaption: z.string(),
+    manageWorkflowsHref: z.string(),
+    failureShareWarnThreshold: z.number(),
+    failureMinRuns: z.number(),
+    workflowCount: z.number(),
+    publishedWorkflowCount: z.number(),
+    runs30d: z.number(),
+    runsCompleted30d: z.number(),
+    runsFailed30d: z.number(),
+    successRatePct: z.number().nullable(),
+    lastRunAt: z.string().nullable(),
+    runsCaption: z.string(),
+    volumeCaption: z.string(),
+    volumeAllHealthyCaption: z.string().nullable(),
+    neverRunCaption: z.string(),
+    dailyVolume: z.array(insightMarketingWorkflowsDailyVolumeSchema),
+    byWorkflow: z.array(insightMarketingWorkflowsByWorkflowRowSchema),
+    triggers: z.array(insightMarketingWorkflowsTriggerRowSchema),
+    neverRun: z.array(insightMarketingWorkflowsNeverRunRowSchema),
+    ledger: z.array(insightMarketingWorkflowsLedgerRowSchema),
   }),
 });
 
@@ -404,6 +896,273 @@ export const insightContentHealthResponseSchema = z.object({
     openedSeries: z.array(z.object({ period: z.string(), value: z.number() })),
     openedSparkline: z.array(z.number()),
     progressHref: z.string(),
+  }),
+});
+
+export const insightLiveNowSessionSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  status: z.string(),
+  scheduledAt: z.string().nullable(),
+  startedAt: z.string().nullable(),
+  endedAt: z.string().nullable(),
+  attendedCount: z.number(),
+  registeredCount: z.number(),
+  rosteredCount: z.number(),
+  attendanceRate: z.number(),
+  expectedAttended: z.number().nullable(),
+  fillRate: z.number().nullable(),
+  batchId: z.string().nullable(),
+  batchKey: z.string().nullable(),
+  batchLabel: z.string().nullable(),
+  href: z.string(),
+  watchHref: z.string(),
+});
+
+export const insightLiveNowNextGroupSchema = z.object({
+  id: z.enum(["within-hour", "later-today", "later"]),
+  label: z.string(),
+  count: z.number(),
+  sessions: z.array(insightLiveNowSessionSchema),
+});
+
+export const insightLiveNowResponseSchema = z.object({
+  data: z.object({
+    slug: z.literal("live-dashboard"),
+    title: z.string(),
+    generatedAt: z.string(),
+    caveat: z.string(),
+    quiet: z.boolean(),
+    attendanceHref: z.string(),
+    sessionsHref: z.string(),
+    dashboardHref: z.string(),
+    attendanceRate30d: z.number(),
+    liveSessions: z.array(insightLiveNowSessionSchema),
+    nextUpGroups: z.array(insightLiveNowNextGroupSchema),
+    nextUpCount: z.number(),
+    endedToday: z.array(insightLiveNowSessionSchema),
+    endedTodayTotal: z.number(),
+    nextSession: z
+      .object({
+        id: z.string(),
+        title: z.string(),
+        scheduledAt: z.string().nullable(),
+        href: z.string(),
+      })
+      .nullable(),
+  }),
+});
+
+export const insightLiveSessionsQuerySchema = z.object({
+  view: z.enum(["all", "low-turnout", "upcoming", "live"]).default("all"),
+  q: z.string().optional().default(""),
+  status: z.enum(["all", "live", "scheduled", "ended", "cancelled"]).default("all"),
+  turnout: z.enum(["all", "below-50", "above-50", "no-roster"]).default("all"),
+  watch: z.enum(["all", "short", "long"]).default("all"),
+  sort: z
+    .enum(["scheduled_desc", "scheduled_asc", "rate_asc", "rate_desc", "attended_desc"])
+    .default("scheduled_desc"),
+  page: z.coerce.number().int().min(1).default(1),
+  pageSize: z.coerce.number().int().min(1).max(50).default(12),
+});
+
+export const insightLiveSessionsRowSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  status: z.string(),
+  statusLabel: z.string(),
+  scheduledAt: z.string().nullable(),
+  startedAt: z.string().nullable(),
+  endedAt: z.string().nullable(),
+  attendedCount: z.number(),
+  registeredCount: z.number(),
+  rosteredCount: z.number(),
+  attendanceRate: z.number().nullable(),
+  avgWatchMinutes: z.number().nullable(),
+  durationMinutes: z.number().nullable(),
+  batchId: z.string().nullable(),
+  batchLabel: z.string().nullable(),
+  courseLabel: z.string().nullable(),
+  href: z.string(),
+  accent: z.enum(["live", "low", "none"]),
+  selectable: z.boolean(),
+});
+
+export const insightLiveSessionsHistogramBucketSchema = z.object({
+  id: z.string(),
+  label: z.string(),
+  from: z.number(),
+  to: z.number(),
+  count: z.number(),
+  belowThreshold: z.boolean(),
+});
+
+export const insightLiveSessionsResponseSchema = z.object({
+  data: z.object({
+    slug: z.literal("live-dashboard"),
+    title: z.string(),
+    generatedAt: z.string(),
+    days: z.number(),
+    windowLabel: z.string(),
+    caveat: z.string(),
+    empty: z.boolean(),
+    allHealthy: z.boolean(),
+    attendanceHref: z.string(),
+    sessionsHref: z.string(),
+    dashboardHref: z.string(),
+    nowHref: z.string(),
+    query: z.object({
+      view: z.enum(["all", "low-turnout", "upcoming", "live"]),
+      q: z.string(),
+      status: z.enum(["all", "live", "scheduled", "ended", "cancelled"]),
+      turnout: z.enum(["all", "below-50", "above-50", "no-roster"]),
+      watch: z.enum(["all", "short", "long"]),
+      sort: z.enum(["scheduled_desc", "scheduled_asc", "rate_asc", "rate_desc", "attended_desc"]),
+      page: z.number(),
+      pageSize: z.number(),
+    }),
+    summary: z.object({
+      sessionCount: z.number(),
+      endedCount: z.number(),
+      upcomingCount: z.number(),
+      liveCount: z.number(),
+      cancelledCount: z.number(),
+      attendanceRate: z.number(),
+      below50Count: z.number(),
+      endedWithRosterCount: z.number(),
+      avgWatchMinutes: z.number(),
+      totalWatchHours: z.number(),
+    }),
+    histogram: z.object({
+      buckets: z.array(insightLiveSessionsHistogramBucketSchema),
+      maxCount: z.number(),
+      median: z.number().nullable(),
+      mean: z.number().nullable(),
+      belowThresholdCount: z.number(),
+      belowThresholdSharePct: z.number().nullable(),
+      caption: z.string(),
+    }),
+    sessions: z.array(insightLiveSessionsRowSchema),
+    totalFiltered: z.number(),
+    page: z.number(),
+    pageSize: z.number(),
+    pageCount: z.number(),
+  }),
+});
+
+export const insightLiveAttendanceQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  pageSize: z.coerce.number().int().min(1).max(30).default(8),
+});
+
+export const insightLiveAttendanceDaySchema = z.object({
+  period: z.string(),
+  label: z.string(),
+  attended: z.number(),
+  registered: z.number(),
+  gap: z.number(),
+  rate: z.number().nullable(),
+  sessionCount: z.number(),
+  weekday: z.number(),
+  isWeekend: z.boolean(),
+  gapAlert: z.boolean(),
+});
+
+export const insightLiveAttendanceResponseSchema = z.object({
+  data: z.object({
+    slug: z.literal("live-dashboard"),
+    title: z.string(),
+    generatedAt: z.string(),
+    days: z.number(),
+    windowLabel: z.string(),
+    caveat: z.string(),
+    empty: z.boolean(),
+    attendanceHref: z.string(),
+    sessionsHref: z.string(),
+    dashboardHref: z.string(),
+    sessionsBoardHref: z.string(),
+    nowHref: z.string(),
+    query: z.object({
+      page: z.number(),
+      pageSize: z.number(),
+    }),
+    summary: z.object({
+      attendanceRate: z.number(),
+      attended: z.number(),
+      rostered: z.number(),
+      noShowGap: z.number(),
+      noShowPct: z.number(),
+      avgDailyGap: z.number(),
+      bestDay: z
+        .object({
+          period: z.string(),
+          label: z.string(),
+          rate: z.number(),
+        })
+        .nullable(),
+      worstDay: z
+        .object({
+          period: z.string(),
+          label: z.string(),
+          rate: z.number(),
+        })
+        .nullable(),
+    }),
+    trend: z.object({
+      points: z.array(
+        z.object({
+          period: z.string(),
+          label: z.string(),
+          attended: z.number(),
+          registered: z.number(),
+          gap: z.number(),
+          rate: z.number().nullable(),
+          isWeekend: z.boolean(),
+        }),
+      ),
+      maxValue: z.number(),
+      meanAttended: z.number(),
+      caption: z.string(),
+    }),
+    weekdayGaps: z.array(
+      z.object({
+        weekday: z.number(),
+        label: z.string(),
+        gapRate: z.number().nullable(),
+        sampleDays: z.number(),
+        highlight: z.boolean(),
+      }),
+    ),
+    weekdayCaption: z.string(),
+    topGapSessions: z.array(
+      z.object({
+        id: z.string(),
+        title: z.string(),
+        rostered: z.number(),
+        attended: z.number(),
+        gap: z.number(),
+        href: z.string(),
+      }),
+    ),
+    scatter: z.object({
+      points: z.array(
+        z.object({
+          id: z.string(),
+          title: z.string(),
+          rostered: z.number(),
+          rate: z.number(),
+          x: z.number(),
+          y: z.number(),
+          href: z.string(),
+        }),
+      ),
+      caption: z.string(),
+    }),
+    daily: z.array(insightLiveAttendanceDaySchema),
+    totalDaily: z.number(),
+    page: z.number(),
+    pageSize: z.number(),
+    pageCount: z.number(),
   }),
 });
 
@@ -791,13 +1550,41 @@ export type InsightEngagementFunnelBoard = z.infer<
   typeof insightEngagementFunnelResponseSchema
 >["data"];
 export type InsightSalesPipelineBoard = z.infer<typeof insightSalesPipelineResponseSchema>["data"];
+export type InsightMessengerChannelsBoard = z.infer<
+  typeof insightMessengerChannelsResponseSchema
+>["data"];
+export type InsightMessengerWhatsappBoard = z.infer<
+  typeof insightMessengerWhatsappResponseSchema
+>["data"];
+export type InsightMessengerInboxBoard = z.infer<
+  typeof insightMessengerInboxResponseSchema
+>["data"];
 export type InsightSalesAttributionBoard = z.infer<
   typeof insightSalesAttributionResponseSchema
 >["data"];
+export type InsightMarketingAttributionBoard = z.infer<
+  typeof insightMarketingAttributionResponseSchema
+>["data"];
+export type InsightMarketingCaptureBoard = z.infer<
+  typeof insightMarketingCaptureResponseSchema
+>["data"];
+export type InsightMarketingWorkflowsBoard = z.infer<
+  typeof insightMarketingWorkflowsResponseSchema
+>["data"];
+export type InsightAttributionBoard =
+  | InsightSalesAttributionBoard
+  | InsightMarketingAttributionBoard;
 export type InsightSalesOpportunityBoard = z.infer<
   typeof insightSalesOpportunityResponseSchema
 >["data"];
 export type InsightContentHealthBoard = z.infer<typeof insightContentHealthResponseSchema>["data"];
+export type InsightLiveNowBoard = z.infer<typeof insightLiveNowResponseSchema>["data"];
+export type InsightLiveSessionsBoard = z.infer<typeof insightLiveSessionsResponseSchema>["data"];
+export type InsightLiveSessionsQuery = z.infer<typeof insightLiveSessionsQuerySchema>;
+export type InsightLiveAttendanceBoard = z.infer<
+  typeof insightLiveAttendanceResponseSchema
+>["data"];
+export type InsightLiveAttendanceQuery = z.infer<typeof insightLiveAttendanceQuerySchema>;
 export type InsightAlertsBoard = z.infer<typeof insightAlertsResponseSchema>["data"];
 export type InsightAlertsMutationBody = z.infer<typeof insightAlertsMutationBodySchema>;
 export type InsightLayout = z.infer<typeof insightLayoutSchema>;

@@ -137,6 +137,9 @@ export type InsightWidgetDetail = {
     deltaPct: number | null;
     note: string | null;
   } | null;
+  pairedWidget?: InsightWidget | null;
+  secondaryAverage?: number | null;
+  secondaryTotal?: number | null;
 };
 
 export async function fetchInsightWidgetDetail(
@@ -270,6 +273,238 @@ export async function fetchInsightSalesPipeline(slug: string) {
   );
 }
 
+export type InsightMessengerChannelsOutboundId = "email" | "push" | "whatsapp" | "announcements";
+
+export type InsightMessengerChannelsComparisonRow = {
+  id: InsightMessengerChannelsOutboundId;
+  label: string;
+  sends: number;
+  recipients: number;
+  recipientsPerSend: number | null;
+  sendSharePct: number;
+  reachSharePct: number;
+  href: string;
+};
+
+export type InsightMessengerChannelsVolumePoint = {
+  period: string;
+  email: number;
+  push: number;
+  whatsapp: number;
+  inbox: number;
+  outboundTotal: number;
+};
+
+export type InsightMessengerChannelsOutboundRow = {
+  id: InsightMessengerChannelsOutboundId;
+  label: string;
+  direction: "outbound";
+  sends: number;
+  recipients: number;
+  recipientsPerSend: number | null;
+  sendSharePct: number;
+  reachSharePct: number;
+  lastSentAt: string | null;
+  href: string;
+};
+
+export type InsightMessengerChannelsInboundRow = {
+  id: "inbox";
+  label: "Inbox messages";
+  direction: "inbound";
+  messageCount: number;
+  openConversations: number;
+  href: string;
+};
+
+export type InsightMessengerChannelsBoard = {
+  slug: "messenger-insight";
+  title: string;
+  subtitle: string;
+  generatedAt: string;
+  manageCampaignsHref: string;
+  inboxHref: string;
+  caveat: string;
+  volumeCaption: string;
+  empty: boolean;
+  singleChannel: boolean;
+  unusedChannels: string[];
+  unusedCaption: string | null;
+  headline: {
+    outboundReach: number;
+    campaignsSent: number;
+    avgReachPerCampaign: number | null;
+    channelsUsed: number;
+    scheduledTotal: number;
+    scheduledCaption: "Email, push, and WhatsApp combined";
+  };
+  comparison: {
+    caption: string | null;
+    rows: InsightMessengerChannelsComparisonRow[];
+  };
+  volume: {
+    averageOutbound: number | null;
+    points: InsightMessengerChannelsVolumePoint[];
+  };
+  table: {
+    outbound: InsightMessengerChannelsOutboundRow[];
+    inbound: InsightMessengerChannelsInboundRow[];
+  };
+};
+
+export async function fetchInsightMessengerChannels(slug: string) {
+  return clientApi.get<{ data: InsightMessengerChannelsBoard }>(
+    `/api/v1/insights/${encodeURIComponent(slug)}/channels`,
+  );
+}
+
+export type InsightMessengerWhatsappGuidanceItem = {
+  id: string;
+  title: string;
+  description: string;
+  href: string;
+};
+
+export type InsightMessengerWhatsappFailurePoint = {
+  period: string;
+  delivered: number;
+  failed: number;
+};
+
+export type InsightMessengerWhatsappCampaignRow = {
+  id: string;
+  title: string;
+  status: string;
+  recipients: number;
+  delivered: number;
+  failed: number;
+  deliveryRatePct: number | null;
+  belowAverage: boolean;
+  fullyFailed: boolean;
+  sentAt: string | null;
+  href: string;
+};
+
+export type InsightMessengerWhatsappBoard = {
+  slug: "messenger-insight";
+  title: string;
+  subtitle: string;
+  generatedAt: string;
+  settingsHref: string;
+  connected: boolean;
+  lastSentAt: string | null;
+  empty: boolean;
+  perfectDelivery: boolean;
+  historical: boolean;
+  headline: {
+    deliveryRatePct: number | null;
+    deliveryRateCaption: string | null;
+    campaignsSent: number;
+    delivered: number;
+    failed: number;
+    failedSharePct: number | null;
+    scheduled: number;
+  };
+  composition: {
+    delivered: number;
+    failed: number;
+    pending: number;
+    recipients: number;
+    caption: string;
+  };
+  failures: {
+    caption: string | null;
+    points: InsightMessengerWhatsappFailurePoint[];
+  };
+  guidance: {
+    caption: string;
+    items: InsightMessengerWhatsappGuidanceItem[];
+  };
+  campaigns: {
+    averageDeliveryRatePct: number | null;
+    rows: InsightMessengerWhatsappCampaignRow[];
+  };
+};
+
+export async function fetchInsightMessengerWhatsapp(slug: string) {
+  return clientApi.get<{ data: InsightMessengerWhatsappBoard }>(
+    `/api/v1/insights/${encodeURIComponent(slug)}/whatsapp`,
+  );
+}
+
+export type InsightMessengerInboxVolumePoint = {
+  period: string;
+  count: number;
+  isWeekend: boolean;
+};
+
+export type InsightMessengerInboxConversationRow = {
+  id: string;
+  learnerName: string;
+  lastMessagePreview: string;
+  messageCount: number;
+  lastMessageAt: string;
+  waitingOn: "us" | "learner";
+  waitingPast48h: boolean;
+  href: string;
+};
+
+export type InsightMessengerInboxResponseBucket = {
+  id: "0-1h" | "1-4h" | "4-24h" | "24h+";
+  label: string;
+  count: number;
+  sharePct: number | null;
+};
+
+export type InsightMessengerInboxBoard = {
+  slug: "messenger-insight";
+  title: string;
+  subtitle: string;
+  generatedAt: string;
+  inboxHref: string;
+  alertsHref: string;
+  directionNote: string;
+  empty: boolean;
+  allClear: boolean;
+  headline: {
+    inboxMessages: number;
+    inboxMessages30d: number;
+    inboxMessagesCaption: string;
+    openConversations: number;
+    messages30d: number;
+    averagePerDay: number | null;
+    busiestDay: { period: string; count: number } | null;
+    quietestDay: { period: string; count: number } | null;
+  };
+  volume: {
+    mean: number | null;
+    caption: string | null;
+    points: InsightMessengerInboxVolumePoint[];
+  };
+  conversations: {
+    totalOpen: number;
+    rows: InsightMessengerInboxConversationRow[];
+  };
+  responseTime: {
+    available: boolean;
+    medianFirstReplySeconds: number | null;
+    longestFirstReplySeconds: number | null;
+    longestWaitingSeconds: number | null;
+    caption: string | null;
+    buckets: InsightMessengerInboxResponseBucket[];
+  };
+  noAlerting: {
+    caption: string;
+    href: string;
+  };
+};
+
+export async function fetchInsightMessengerInbox(slug: string) {
+  return clientApi.get<{ data: InsightMessengerInboxBoard }>(
+    `/api/v1/insights/${encodeURIComponent(slug)}/inbox`,
+  );
+}
+
 export type InsightSalesAttributionPattern = "high-volume low-value" | "low-volume high-value";
 
 export type InsightSalesAttributionSource = {
@@ -319,9 +554,258 @@ export type InsightSalesAttributionBoard = {
   sources: InsightSalesAttributionSource[];
 };
 
+export type InsightMarketingAttributionPattern = "high-volume low-value" | "low-volume high-value";
+
+export type InsightMarketingAttributionRow = {
+  id: string;
+  value: string;
+  events: number;
+  revenueMajor: number;
+  eventSharePct: number | null;
+  revenueSharePct: number | null;
+  revenuePerEvent: number | null;
+  residual: number | null;
+  unstable: boolean;
+  href: string;
+  pattern: InsightMarketingAttributionPattern | null;
+};
+
+export type InsightMarketingAttributionComposition = {
+  id: string;
+  label: string;
+  kind: "named" | "other" | "not-set";
+  events: number;
+  sharePct: number | null;
+};
+
+export type InsightMarketingAttributionDimension = {
+  id: "source" | "medium" | "campaign";
+  label: string;
+  composition: InsightMarketingAttributionComposition[];
+  rows: InsightMarketingAttributionRow[];
+  caption: string;
+  maxEvents: number;
+  maxRevenue: number;
+  revenuePerEvent: number | null;
+};
+
+export type InsightMarketingAttributionBoard = {
+  slug: "marketing-insight";
+  title: string;
+  subtitle: string;
+  generatedAt: string;
+  currency: string;
+  reportHref: string;
+  salesAttributionHref: string;
+  trackingHref: string;
+  caveat: string;
+  empty: boolean;
+  caption: string;
+  events: number;
+  events30d: number;
+  attributedRevenue: number;
+  sourceCount: number;
+  mediumCount: number;
+  campaignCount: number;
+  campaignsWithRevenue: number;
+  unstableEventThreshold: number;
+  dimensions: {
+    source: InsightMarketingAttributionDimension;
+    medium: InsightMarketingAttributionDimension;
+    campaign: InsightMarketingAttributionDimension;
+  };
+  crossPairs: Array<{ source: string; medium: string; events: number; sharePct: number }>;
+  crossCaption: string | null;
+};
+
+export type InsightAttributionBoard =
+  | InsightSalesAttributionBoard
+  | InsightMarketingAttributionBoard;
+
 export async function fetchInsightSalesAttribution(slug: string) {
-  return clientApi.get<{ data: InsightSalesAttributionBoard }>(
+  return clientApi.get<{ data: InsightAttributionBoard }>(
     `/api/v1/insights/${encodeURIComponent(slug)}/attribution`,
+  );
+}
+
+export async function fetchInsightMarketingAttribution(slug: string) {
+  return clientApi.get<{ data: InsightMarketingAttributionBoard }>(
+    `/api/v1/insights/${encodeURIComponent(slug)}/attribution`,
+  );
+}
+
+export type InsightMarketingCaptureChainStep = {
+  id: string;
+  label: string;
+  count: number;
+  barSharePct: number;
+  connectorRatePct: number | null;
+  connectorIsLargestDrop: boolean;
+};
+
+export type InsightMarketingCaptureFormRow = {
+  id: string;
+  title: string;
+  status: string;
+  submissions: number;
+  submissionSharePct: number | null;
+  submissions30d: number;
+  submissions30dWarning: boolean;
+  lastSubmissionAt: string | null;
+  href: string;
+  isDraft: boolean;
+  warningRail: boolean;
+};
+
+export type InsightMarketingCaptureCtaRow = {
+  id: string;
+  title: string;
+  ctaType: string;
+  status: string;
+  views: number;
+  clicks: number;
+  clickRatePct: number | null;
+  clickRateWarning: boolean;
+  noViews: boolean;
+  href: string;
+};
+
+export type InsightMarketingCaptureClickRateByTypeRow = {
+  type: string;
+  views: number;
+  clicks: number;
+  clickRatePct: number | null;
+  unstable: boolean;
+};
+
+export type InsightMarketingCaptureBoard = {
+  slug: "marketing-insight";
+  title: string;
+  subtitle: string;
+  generatedAt: string;
+  empty: boolean;
+  zeroSubmissionWarning: boolean;
+  warningMessage: string | null;
+  warningTitle: string | null;
+  chainCaption: string;
+  formsCaption: string;
+  manageFormsHref: string;
+  manageCtasHref: string;
+  createFormHref: string;
+  emptyCaption: string;
+  clickRateWarnThreshold: number;
+  unstableViewThreshold: number;
+  overallClickRatePct: number | null;
+  ctaViews: number;
+  ctaClicks: number;
+  submissionCount: number;
+  submissions30d: number;
+  submissions30dWarning: boolean;
+  formCount: number;
+  liveFormCount: number;
+  ctaCount: number;
+  liveCtaCount: number;
+  contactCount: number;
+  chain: {
+    steps: InsightMarketingCaptureChainStep[];
+    caption: string;
+    dropCaption: string | null;
+  };
+  forms: InsightMarketingCaptureFormRow[];
+  ctas: InsightMarketingCaptureCtaRow[];
+  clickRateByType: {
+    rows: InsightMarketingCaptureClickRateByTypeRow[];
+    overallRatePct: number | null;
+    caption: string | null;
+  };
+};
+
+export async function fetchInsightMarketingCapture(slug: string) {
+  return clientApi.get<{ data: InsightMarketingCaptureBoard }>(
+    `/api/v1/insights/${encodeURIComponent(slug)}/capture`,
+  );
+}
+
+export type InsightMarketingWorkflowsDailyVolume = {
+  period: string;
+  completed: number;
+  failed: number;
+  total: number;
+};
+
+export type InsightMarketingWorkflowsByWorkflowRow = {
+  id: string;
+  title: string;
+  status: string;
+  runs30d: number;
+  failed30d: number;
+  runSharePct: number | null;
+  successRatePct: number | null;
+  lastRunAt: string | null;
+  publishedAt: string | null;
+  href: string;
+  warningRail: boolean;
+};
+
+export type InsightMarketingWorkflowsTriggerRow = {
+  trigger: string;
+  runs: number;
+  sharePct: number | null;
+};
+
+export type InsightMarketingWorkflowsNeverRunRow = {
+  id: string;
+  title: string;
+  publishedAt: string | null;
+  href: string;
+};
+
+export type InsightMarketingWorkflowsLedgerRow = {
+  id: string;
+  workflowId: string;
+  workflowTitle: string;
+  status: string;
+  triggerEventType: string;
+  createdAt: string;
+  errorMessage: string | null;
+  errorPreview: string | null;
+  href: string;
+  workflowHref: string;
+  isFailed: boolean;
+};
+
+export type InsightMarketingWorkflowsBoard = {
+  slug: "marketing-insight";
+  title: string;
+  subtitle: string;
+  generatedAt: string;
+  empty: boolean;
+  allHealthy: boolean;
+  emptyCaption: string;
+  manageWorkflowsHref: string;
+  failureShareWarnThreshold: number;
+  failureMinRuns: number;
+  workflowCount: number;
+  publishedWorkflowCount: number;
+  runs30d: number;
+  runsCompleted30d: number;
+  runsFailed30d: number;
+  successRatePct: number | null;
+  lastRunAt: string | null;
+  runsCaption: string;
+  volumeCaption: string;
+  volumeAllHealthyCaption: string | null;
+  neverRunCaption: string;
+  dailyVolume: InsightMarketingWorkflowsDailyVolume[];
+  byWorkflow: InsightMarketingWorkflowsByWorkflowRow[];
+  triggers: InsightMarketingWorkflowsTriggerRow[];
+  neverRun: InsightMarketingWorkflowsNeverRunRow[];
+  ledger: InsightMarketingWorkflowsLedgerRow[];
+};
+
+export async function fetchInsightMarketingWorkflows(slug: string) {
+  return clientApi.get<{ data: InsightMarketingWorkflowsBoard }>(
+    `/api/v1/insights/${encodeURIComponent(slug)}/workflows`,
   );
 }
 
@@ -444,6 +928,282 @@ export async function fetchInsightContentHealth(
   const params = new URLSearchParams({ range });
   return clientApi.get<{ data: InsightContentHealthBoard }>(
     `/api/v1/insights/${encodeURIComponent(slug)}/content-health?${params.toString()}`,
+  );
+}
+
+export type InsightLiveNowSession = {
+  id: string;
+  title: string;
+  status: string;
+  scheduledAt: string | null;
+  startedAt: string | null;
+  endedAt: string | null;
+  attendedCount: number;
+  registeredCount: number;
+  rosteredCount: number;
+  attendanceRate: number;
+  expectedAttended: number | null;
+  fillRate: number | null;
+  batchId: string | null;
+  batchKey: string | null;
+  batchLabel: string | null;
+  href: string;
+  watchHref: string;
+};
+
+export type InsightLiveNowNextGroup = {
+  id: "within-hour" | "later-today" | "later";
+  label: string;
+  count: number;
+  sessions: InsightLiveNowSession[];
+};
+
+export type InsightLiveNowBoard = {
+  slug: "live-dashboard";
+  title: string;
+  generatedAt: string;
+  caveat: string;
+  quiet: boolean;
+  attendanceHref: string;
+  sessionsHref: string;
+  dashboardHref: string;
+  attendanceRate30d: number;
+  liveSessions: InsightLiveNowSession[];
+  nextUpGroups: InsightLiveNowNextGroup[];
+  nextUpCount: number;
+  endedToday: InsightLiveNowSession[];
+  endedTodayTotal: number;
+  nextSession: {
+    id: string;
+    title: string;
+    scheduledAt: string | null;
+    href: string;
+  } | null;
+};
+
+export async function fetchInsightLiveNow(slug: string) {
+  return clientApi.get<{ data: InsightLiveNowBoard }>(
+    `/api/v1/insights/${encodeURIComponent(slug)}/now`,
+  );
+}
+
+export type InsightLiveSessionsView = "all" | "low-turnout" | "upcoming" | "live";
+export type InsightLiveSessionsStatusFilter = "all" | "live" | "scheduled" | "ended" | "cancelled";
+export type InsightLiveSessionsTurnoutFilter = "all" | "below-50" | "above-50" | "no-roster";
+export type InsightLiveSessionsWatchFilter = "all" | "short" | "long";
+export type InsightLiveSessionsSort =
+  | "scheduled_desc"
+  | "scheduled_asc"
+  | "rate_asc"
+  | "rate_desc"
+  | "attended_desc";
+
+export type InsightLiveSessionsQuery = {
+  view?: InsightLiveSessionsView;
+  q?: string;
+  status?: InsightLiveSessionsStatusFilter;
+  turnout?: InsightLiveSessionsTurnoutFilter;
+  watch?: InsightLiveSessionsWatchFilter;
+  sort?: InsightLiveSessionsSort;
+  page?: number;
+  pageSize?: number;
+};
+
+export type InsightLiveSessionsRow = {
+  id: string;
+  title: string;
+  status: string;
+  statusLabel: string;
+  scheduledAt: string | null;
+  startedAt: string | null;
+  endedAt: string | null;
+  attendedCount: number;
+  registeredCount: number;
+  rosteredCount: number;
+  attendanceRate: number | null;
+  avgWatchMinutes: number | null;
+  durationMinutes: number | null;
+  batchId: string | null;
+  batchLabel: string | null;
+  courseLabel: string | null;
+  href: string;
+  accent: "live" | "low" | "none";
+  selectable: boolean;
+};
+
+export type InsightLiveSessionsBoard = {
+  slug: "live-dashboard";
+  title: string;
+  generatedAt: string;
+  days: number;
+  windowLabel: string;
+  caveat: string;
+  empty: boolean;
+  allHealthy: boolean;
+  attendanceHref: string;
+  sessionsHref: string;
+  dashboardHref: string;
+  nowHref: string;
+  query: {
+    view: InsightLiveSessionsView;
+    q: string;
+    status: InsightLiveSessionsStatusFilter;
+    turnout: InsightLiveSessionsTurnoutFilter;
+    watch: InsightLiveSessionsWatchFilter;
+    sort: InsightLiveSessionsSort;
+    page: number;
+    pageSize: number;
+  };
+  summary: {
+    sessionCount: number;
+    endedCount: number;
+    upcomingCount: number;
+    liveCount: number;
+    cancelledCount: number;
+    attendanceRate: number;
+    below50Count: number;
+    endedWithRosterCount: number;
+    avgWatchMinutes: number;
+    totalWatchHours: number;
+  };
+  histogram: {
+    buckets: Array<{
+      id: string;
+      label: string;
+      from: number;
+      to: number;
+      count: number;
+      belowThreshold: boolean;
+    }>;
+    maxCount: number;
+    median: number | null;
+    mean: number | null;
+    belowThresholdCount: number;
+    belowThresholdSharePct: number | null;
+    caption: string;
+  };
+  sessions: InsightLiveSessionsRow[];
+  totalFiltered: number;
+  page: number;
+  pageSize: number;
+  pageCount: number;
+};
+
+export async function fetchInsightLiveSessions(slug: string, query: InsightLiveSessionsQuery = {}) {
+  const params = new URLSearchParams();
+  if (query.view) params.set("view", query.view);
+  if (query.q) params.set("q", query.q);
+  if (query.status) params.set("status", query.status);
+  if (query.turnout) params.set("turnout", query.turnout);
+  if (query.watch) params.set("watch", query.watch);
+  if (query.sort) params.set("sort", query.sort);
+  if (query.page) params.set("page", String(query.page));
+  if (query.pageSize) params.set("pageSize", String(query.pageSize));
+  const qs = params.toString();
+  return clientApi.get<{ data: InsightLiveSessionsBoard }>(
+    `/api/v1/insights/${encodeURIComponent(slug)}/sessions${qs ? `?${qs}` : ""}`,
+  );
+}
+
+export type InsightLiveAttendanceQuery = {
+  page?: number;
+  pageSize?: number;
+};
+
+export type InsightLiveAttendanceBoard = {
+  slug: "live-dashboard";
+  title: string;
+  generatedAt: string;
+  days: number;
+  windowLabel: string;
+  caveat: string;
+  empty: boolean;
+  attendanceHref: string;
+  sessionsHref: string;
+  dashboardHref: string;
+  sessionsBoardHref: string;
+  nowHref: string;
+  query: { page: number; pageSize: number };
+  summary: {
+    attendanceRate: number;
+    attended: number;
+    rostered: number;
+    noShowGap: number;
+    noShowPct: number;
+    avgDailyGap: number;
+    bestDay: { period: string; label: string; rate: number } | null;
+    worstDay: { period: string; label: string; rate: number } | null;
+  };
+  trend: {
+    points: Array<{
+      period: string;
+      label: string;
+      attended: number;
+      registered: number;
+      gap: number;
+      rate: number | null;
+      isWeekend: boolean;
+    }>;
+    maxValue: number;
+    meanAttended: number;
+    caption: string;
+  };
+  weekdayGaps: Array<{
+    weekday: number;
+    label: string;
+    gapRate: number | null;
+    sampleDays: number;
+    highlight: boolean;
+  }>;
+  weekdayCaption: string;
+  topGapSessions: Array<{
+    id: string;
+    title: string;
+    rostered: number;
+    attended: number;
+    gap: number;
+    href: string;
+  }>;
+  scatter: {
+    points: Array<{
+      id: string;
+      title: string;
+      rostered: number;
+      rate: number;
+      x: number;
+      y: number;
+      href: string;
+    }>;
+    caption: string;
+  };
+  daily: Array<{
+    period: string;
+    label: string;
+    attended: number;
+    registered: number;
+    gap: number;
+    rate: number | null;
+    sessionCount: number;
+    weekday: number;
+    isWeekend: boolean;
+    gapAlert: boolean;
+  }>;
+  totalDaily: number;
+  page: number;
+  pageSize: number;
+  pageCount: number;
+};
+
+export async function fetchInsightLiveAttendance(
+  slug: string,
+  query: InsightLiveAttendanceQuery = {},
+) {
+  const params = new URLSearchParams();
+  if (query.page) params.set("page", String(query.page));
+  if (query.pageSize) params.set("pageSize", String(query.pageSize));
+  const qs = params.toString();
+  return clientApi.get<{ data: InsightLiveAttendanceBoard }>(
+    `/api/v1/insights/${encodeURIComponent(slug)}/attendance${qs ? `?${qs}` : ""}`,
   );
 }
 

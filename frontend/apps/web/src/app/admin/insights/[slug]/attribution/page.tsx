@@ -11,7 +11,7 @@ type PageProps = {
 export default async function AdminInsightAttributionRoutePage({ params }: PageProps) {
   const { slug } = await params;
   const section = getAdminInsightSection(slug);
-  if (!section || slug !== "sales-insight") {
+  if (!section || (slug !== "sales-insight" && slug !== "marketing-insight")) {
     notFound();
   }
 

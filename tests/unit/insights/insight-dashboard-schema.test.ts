@@ -321,7 +321,7 @@ describe("insight dashboard schema", () => {
             severity: "warning",
             title: "WhatsApp delivery failures",
             message: "12 failed WhatsApp sends across campaigns.",
-            href: "/admin/marketing/messenger/whatsapp",
+            href: "/admin/insights/messenger-insight/whatsapp",
           },
         ],
         widgets: [

@@ -136,13 +136,13 @@ export function dashboardDescription(slug: string): string {
     return "Where revenue comes from, and where it leaks.";
   }
   if (slug === "live-dashboard") {
-    return "Live class ops: sessions, attendance, watch time, and upcoming classes.";
+    return "Real-time session monitoring and attendance metrics.";
   }
   if (slug === "marketing-insight") {
-    return "Lead generation and channels: attribution, forms, campaigns, and events.";
+    return "Where traffic is attributed from, what captures it, and whether the automation is running.";
   }
   if (slug === "messenger-insight") {
-    return "Messaging performance: email, push, WhatsApp, and delivery health.";
+    return "What the academy is sending, whether it arrived, and what is coming back.";
   }
   return "Live insight widgets across your academy.";
 }

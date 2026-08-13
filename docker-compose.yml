@@ -8,7 +8,8 @@ services:
       POSTGRES_PASSWORD: atlas_dev_password
       POSTGRES_DB: atlas_lms_dev
     ports:
-      - "54329:5432"
+      # Avoid 5432x — Windows Hyper-V often reserves 54270-54669, which blocks bind.
+      - "15432:5432"
     volumes:
       - atlas_postgres_data:/var/lib/postgresql/data
     healthcheck:

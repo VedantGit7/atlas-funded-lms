@@ -1,8 +1,8 @@
 import { z } from "zod";
 import type { z as Zod } from "zod";
 import { createTenantRoute, noBodySchema } from "@atlas/api";
-import { insightSalesAttributionResponseSchema } from "../../../../../../server/insights/insights.schemas";
-import { getInsightSalesAttribution } from "../../../../../../server/insights/insights.service";
+import { insightAttributionResponseSchema } from "../../../../../../server/insights/insights.schemas";
+import { getInsightAttribution } from "../../../../../../server/insights/insights.service";
 import { insightDashboardMetadata } from "../../../../../../server/insights/insights.route-metadata";
 
 const paramsSchema = z.object({
@@ -11,14 +11,14 @@ const paramsSchema = z.object({
 
 export const GET = createTenantRoute<
   Zod.output<typeof noBodySchema>,
-  Zod.output<typeof insightSalesAttributionResponseSchema>,
+  Zod.output<typeof insightAttributionResponseSchema>,
   typeof paramsSchema
 >({
   metadata: insightDashboardMetadata,
   params: paramsSchema,
   input: noBodySchema,
-  output: insightSalesAttributionResponseSchema,
+  output: insightAttributionResponseSchema,
   handler: async ({ tx, params }) => ({
-    data: await getInsightSalesAttribution(tx, params.slug),
+    data: await getInsightAttribution(tx, params.slug),
   }),
 });

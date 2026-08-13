@@ -36,12 +36,44 @@ export function adminInsightAttributionHref(slug: string): string {
   return `${adminInsightHref(slug)}/attribution`;
 }
 
+export function adminInsightCaptureHref(slug: string): string {
+  return `${adminInsightHref(slug)}/capture`;
+}
+
+export function adminInsightChannelsHref(slug: string): string {
+  return `${adminInsightHref(slug)}/channels`;
+}
+
+export function adminInsightWhatsappHref(slug: string): string {
+  return `${adminInsightHref(slug)}/whatsapp`;
+}
+
+export function adminInsightInboxHref(slug: string): string {
+  return `${adminInsightHref(slug)}/inbox`;
+}
+
+export function adminInsightWorkflowsHref(slug: string): string {
+  return `${adminInsightHref(slug)}/workflows`;
+}
+
 export function adminInsightOpportunityHref(slug: string): string {
   return `${adminInsightHref(slug)}/opportunity`;
 }
 
 export function adminInsightContentHealthHref(slug: string): string {
   return `${adminInsightHref(slug)}/content-health`;
+}
+
+export function adminInsightNowHref(slug: string): string {
+  return `${adminInsightHref(slug)}/now`;
+}
+
+export function adminInsightSessionsHref(slug: string): string {
+  return `${adminInsightHref(slug)}/sessions`;
+}
+
+export function adminInsightAttendanceHref(slug: string): string {
+  return `${adminInsightHref(slug)}/attendance`;
 }
 
 export function adminInsightAlertsHref(slug: string): string {
