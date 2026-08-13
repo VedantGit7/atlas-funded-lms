@@ -19,23 +19,23 @@ export const itemTypeListResponseSchema = z.object({
 });
 
 export const itemOptionDtoSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   optionJson: z.unknown(),
   isCorrect: z.boolean().nullable(),
   position: z.number().int(),
 });
 
 export const itemDtoSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   itemTypeKey: ItemTypeKeySchema,
   contentJson: z.unknown(),
   answerKeyJson: z.unknown().nullable(),
   status: PublishStatusSchema,
   tags: z.array(z.string()),
   metadataJson: z.unknown().nullable(),
-  createdByMembershipId: z.string().uuid().nullable(),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdByMembershipId: z.uuid().nullable(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
   options: z.array(itemOptionDtoSchema).optional(),
 });
 
@@ -50,15 +50,15 @@ export const itemDetailResponseSchema = z.object({
 
 export const itemDeleteResponseSchema = z.object({
   data: z.object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     deleted: z.literal(true),
   }),
 });
 
 export const dimensionWeightDtoSchema = z.object({
-  id: z.string().uuid(),
-  itemId: z.string().uuid(),
-  dimensionId: z.string().uuid(),
+  id: z.uuid(),
+  itemId: z.uuid(),
+  dimensionId: z.uuid(),
   weight: z.string(),
 });
 
@@ -67,14 +67,14 @@ export const dimensionWeightListResponseSchema = z.object({
 });
 
 export const itemCollectionDtoSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   slug: z.string(),
   title: z.string(),
   collectionType: CollectionTypeSchema,
   status: PublishStatusSchema,
   metadataJson: z.unknown().nullable(),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
   itemCount: z.number().int().optional(),
 });
 
@@ -89,15 +89,15 @@ export const itemCollectionDetailResponseSchema = z.object({
 
 export const itemCollectionDeleteResponseSchema = z.object({
   data: z.object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     deleted: z.literal(true),
   }),
 });
 
 export const collectionItemDtoSchema = z.object({
-  id: z.string().uuid(),
-  collectionId: z.string().uuid(),
-  itemId: z.string().uuid(),
+  id: z.uuid(),
+  collectionId: z.uuid(),
+  itemId: z.uuid(),
   position: z.number().int(),
   weight: z.string().nullable(),
 });
@@ -108,8 +108,8 @@ export const collectionItemResponseSchema = z.object({
 
 export const collectionItemRemoveResponseSchema = z.object({
   data: z.object({
-    collectionId: z.string().uuid(),
-    itemId: z.string().uuid(),
+    collectionId: z.uuid(),
+    itemId: z.uuid(),
     removed: z.literal(true),
   }),
 });

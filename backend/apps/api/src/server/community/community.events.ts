@@ -6,10 +6,10 @@ export const COMMUNITY_AUDIT_SPACE_DELETED = "community.space.deleted" as const;
 
 export const communityPostCreatedPayloadSchema = z
   .object({
-    postId: z.string().uuid(),
-    spaceId: z.string().uuid(),
-    authorMembershipId: z.string().uuid(),
-    mentionMembershipIds: z.array(z.string().uuid()),
+    postId: z.uuid(),
+    spaceId: z.uuid(),
+    authorMembershipId: z.uuid(),
+    mentionMembershipIds: z.array(z.uuid()),
   })
   .strict();
 

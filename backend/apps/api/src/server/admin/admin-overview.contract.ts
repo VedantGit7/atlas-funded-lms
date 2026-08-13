@@ -7,7 +7,7 @@ export const adminOverviewMonthlyPointSchema = z.object({
 });
 
 export const adminOverviewTopProductSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   title: z.string(),
   studentCount: z.number().int().nonnegative(),
   priceCents: z.number().int().nonnegative().nullable(),
@@ -16,11 +16,11 @@ export const adminOverviewTopProductSchema = z.object({
 });
 
 export const adminOverviewScheduledEventSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   name: z.string(),
   status: z.string(),
-  startsAt: z.string().datetime(),
-  endsAt: z.string().datetime(),
+  startsAt: z.iso.datetime(),
+  endsAt: z.iso.datetime(),
 });
 
 export const adminOverviewPendingTasksSchema = z.object({

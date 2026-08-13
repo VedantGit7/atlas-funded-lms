@@ -5,6 +5,7 @@ import type {
   CertificateRow,
   CertificateStatusListRow,
   CertificateTemplateRow,
+  CertificateWalletPassRow,
 } from "./certificate.types";
 
 export type WorkflowDefinitionRow = {
@@ -838,9 +839,9 @@ export const certificateRepository = {
       name: string | null;
       logoUrl: string | null | undefined;
       logoProvided: boolean;
-      colors: unknown | undefined;
-      fonts: unknown | undefined;
-      assets: unknown | undefined;
+      colors: unknown;
+      fonts: unknown;
+      assets: unknown;
     },
   ): Promise<CertificateBrandKitRow | null> {
     await tx.$executeRaw`
@@ -872,6 +873,35 @@ export const certificateRepository = {
         and deleted_at is null
     `;
     return affected > 0;
+  },
+
+  async findWalletPass(
+    tx: TenantTx,
+    args: {
+      tenantId: string;
+      certificateId: string;
+      platform: "apple" | "google";
+    },
+  ): Promise<CertificateWalletPassRow | null> {
+    const rows = await tx.$queryRaw<CertificateWalletPassRow[]>`
+      select
+        id,
+        tenant_id,
+        certificate_id,
+        platform,
+        pass_object_key,
+        external_id,
+        status,
+        created_at,
+        updated_at,
+        revoked_at
+      from certificate_wallet_passes
+      where tenant_id = ${args.tenantId}::uuid
+        and certificate_id = ${args.certificateId}::uuid
+        and platform = ${args.platform}
+      limit 1
+    `;
+    return rows[0] ?? null;
   },
 
   async upsertWalletPass(
@@ -906,6 +936,77 @@ export const certificateRepository = {
         external_id = excluded.external_id,
         status = excluded.status,
         updated_at = now()
+    `;
+  },
+
+  async setCertificateR2ObjectKey(
+    tx: TenantTx,
+    args: { certificateId: string; objectKey: string },
+  ): Promise<void> {
+    await tx.$executeRaw`
+      update certificates
+      set r2_object_key = ${args.objectKey}, updated_at = now()
+      where id = ${args.certificateId}::uuid
+    `;
+  },
+
+  async insertRenderJob(
+    tx: TenantTx,
+    args: {
+      tenantId: string;
+      certificateId: string;
+      templateId: string;
+      format?: string;
+    },
+  ): Promise<string> {
+    const id = randomUUID();
+    await tx.$executeRaw`
+      insert into certificate_render_jobs (
+        id,
+        tenant_id,
+        certificate_id,
+        template_id,
+        status,
+        format,
+        created_at,
+        updated_at
+      )
+      values (
+        ${id}::uuid,
+        ${args.tenantId}::uuid,
+        ${args.certificateId}::uuid,
+        ${args.templateId}::uuid,
+        'RUNNING'::"JobStatus",
+        ${args.format ?? "pdf"},
+        now(),
+        now()
+      )
+    `;
+    return id;
+  },
+
+  async completeRenderJob(tx: TenantTx, args: { jobId: string; objectKey: string }): Promise<void> {
+    await tx.$executeRaw`
+      update certificate_render_jobs
+      set
+        status = 'SUCCEEDED'::"JobStatus",
+        r2_object_key = ${args.objectKey},
+        completed_at = now(),
+        updated_at = now(),
+        error_message = null
+      where id = ${args.jobId}::uuid
+    `;
+  },
+
+  async failRenderJob(tx: TenantTx, args: { jobId: string; errorMessage: string }): Promise<void> {
+    await tx.$executeRaw`
+      update certificate_render_jobs
+      set
+        status = 'FAILED'::"JobStatus",
+        error_message = ${args.errorMessage.slice(0, 500)},
+        completed_at = now(),
+        updated_at = now()
+      where id = ${args.jobId}::uuid
     `;
   },
 };

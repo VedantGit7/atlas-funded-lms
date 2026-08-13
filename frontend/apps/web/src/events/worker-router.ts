@@ -31,3 +31,5 @@ export {
   REPORTS_OUTBOX_EVENTS,
 } from "@atlas/domain/reports/reports.worker";
 export { processReportsOutboxBatch } from "../server/reports/reports-worker-router";
+export { processCertificateOutboxBatch } from "../server/certificates/certificate-worker-router";
+export { CERTIFICATE_WORKER_DESTINATION } from "../server/certificates/certificate.worker";

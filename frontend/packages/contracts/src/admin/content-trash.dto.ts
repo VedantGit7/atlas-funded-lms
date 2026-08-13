@@ -6,12 +6,12 @@ export const contentTrashKindSchema = z.enum(["courses", "sections", "lessons"])
 export type ContentTrashKind = z.infer<typeof contentTrashKindSchema>;
 
 export const contentTrashItemSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   kind: contentTrashKindSchema,
   title: z.string(),
   subtitle: z.string().nullable(),
-  deletedAt: z.string().datetime(),
-  expiresAt: z.string().datetime(),
+  deletedAt: z.iso.datetime(),
+  expiresAt: z.iso.datetime(),
   daysRemaining: z.number().int(),
   restoreEligible: z.boolean(),
 });

@@ -45,25 +45,20 @@ Pin policy: `^` ranges in `package.json`; run `npm view <pkg> version` before ea
 
 ### 2.1 Runtime
 
-
 | Requirement | Version    |
 | ----------- | ---------- |
 | Node.js     | `>=22.0.0` |
 | pnpm        | `11.6.0`   |
 | TypeScript  | `^6.0.3`   |
 
-
 ### 2.2 Core
-
 
 | Package               | Version   |
 | --------------------- | --------- |
 | `next`                | `^16.2.9` |
 | `react` / `react-dom` | `^19.2.7` |
 
-
 ### 2.3 UI & styling
-
 
 | Package                    | Version                               |
 | -------------------------- | ------------------------------------- |
@@ -76,9 +71,7 @@ Pin policy: `^` ranges in `package.json`; run `npm view <pkg> version` before ea
 | `lucide-react`             | `^1.21.0`                             |
 | `@atlas/design-system`     | workspace                             |
 
-
 ### 2.4 Data & forms
-
 
 | Package                          | Version                               |
 | -------------------------------- | ------------------------------------- |
@@ -89,9 +82,7 @@ Pin policy: `^` ranges in `package.json`; run `npm view <pkg> version` before ea
 | `zod`                            | `^3.25.76` (F0–F8); `^4.4.3` post-F8  |
 | `@atlas/contracts`               | workspace (shared schemas, no Prisma) |
 
-
 ### 2.5 Auth & observability
-
 
 | Package                 | Version    |
 | ----------------------- | ---------- |
@@ -99,9 +90,7 @@ Pin policy: `^` ranges in `package.json`; run `npm view <pkg> version` before ea
 | `@sentry/nextjs`        | `^10.60.0` |
 | `posthog-js`            | `^1.393.0` |
 
-
 ### 2.6 Testing & quality
-
 
 | Package                | Version    |
 | ---------------------- | ---------- |
@@ -113,9 +102,7 @@ Pin policy: `^` ranges in `package.json`; run `npm view <pkg> version` before ea
 | `@types/react`         | `^19.2.17` |
 | `@types/node`          | `^26.0.0`  |
 
-
 ### 2.7 Architecture patterns
-
 
 | Concern           | Choice                                                      |
 | ----------------- | ----------------------------------------------------------- |
@@ -129,7 +116,6 @@ Pin policy: `^` ranges in `package.json`; run `npm view <pkg> version` before ea
 | Auth              | Supabase client + thin server actions → backend API         |
 | Deploy            | Vercel (frontend) + Cloudflare (edge)                       |
 
-
 ### 2.8 Forbidden frontend dependencies
 
 - `@atlas/db`, Prisma, `pg`
@@ -142,14 +128,12 @@ Full dependency block: [tech-stack.md](tech-stack.md).
 
 Current UI is too slow. Rebuild must be **measurably faster**. See [performance.md](performance.md).
 
-
 | Target                    | Value                                                               |
 | ------------------------- | ------------------------------------------------------------------- |
 | LCP (learner, p75 mobile) | < 2.5s                                                              |
 | INP                       | < 200ms                                                             |
 | Learner initial JS (gzip) | < 150 kB per route group                                            |
 | L1 dashboard API depth    | ≤ 1 waterfall (parallel `Promise.all` or single dashboard endpoint) |
-
 
 **From F0:** React Query caching, parallel RSC loaders, Suspense/skeletons, lazy builders/charts, Next 16 + Turbopack, bundle budget CI.
 
@@ -188,8 +172,6 @@ flowchart LR
   RQ --> API
 ```
 
-
-
 ---
 
 ## 4. Folder structure (frontend app)
@@ -211,7 +193,6 @@ frontend/apps/web/src/
 
 ## 5. Current baseline
 
-
 | Asset             | Today                              | After F-1            |
 | ----------------- | ---------------------------------- | -------------------- |
 | Routes            | ~85 `page.tsx` in `apps/web`       | `frontend/apps/web`  |
@@ -219,7 +200,6 @@ frontend/apps/web/src/
 | UI                | Minimal Tailwind, 11 DS primitives | Full shadcn rebuild  |
 | React Query / RHF | Not installed                      | Required             |
 | Next.js           | `^15.0.0`                          | Upgrade to `^16.2.9` |
-
 
 **Greenfield rule:** Rebuild components/shells/forms; keep route URLs and screen IDs from locked Frontend Architecture Package.
 
@@ -232,7 +212,7 @@ frontend/apps/web/src/
 **Interim rule (all tenant-branded shells):**
 
 1. **Reserved logo slot** — fixed dimensions in header/auth/public chrome (e.g. `min-h-8`, `max-w-[10rem]`, `aspect-auto`) so layout does not shift when a real logo is uploaded later (CLS-safe).
-2. **Text fallback** — when `logoLight` / `logoDark` URLs are null (from bootstrap / `GET /branding`), render `**publicName`** as a wordmark (semibold, truncate on narrow mobile). Use `issuerName` only where PRD distinguishes issuer vs public name (e.g. certificates).
+2. **Text fallback** — when `logoLight` / `logoDark` URLs are null (from bootstrap / `GET /branding`), render `**publicName`\*\* as a wordmark (semibold, truncate on narrow mobile). Use `issuerName` only where PRD distinguishes issuer vs public name (e.g. certificates).
 3. **No placeholder image files** — do not commit a fake FundedBeyond logo or generic stock mark in the repo.
 4. **When logo is ready** — operator uploads via **T6 Branding** (`logoLight` + optional `logoDark` via signed upload → `PUT /branding` → publish). Same component switches from text to `next/image` with `alt={publicName}`; no shell rewrite required.
 
@@ -285,7 +265,6 @@ else → <span className="wordmark">{publicName}</span>
 - [x] Every tenant-branded shell header uses `TenantLogo` (§5.1)
 - [x] Platform shell never tenant-branded
 
-
 | Shell                | Bootstrap APIs                         |
 | -------------------- | -------------------------------------- |
 | PublicSiteShell      | bootstrap, `GET /public/landing/:slug` |
@@ -297,7 +276,6 @@ else → <span className="wordmark">{publicName}</span>
 | ReviewShell          | pending workflows                      |
 | PlatformConsoleShell | never tenant-branded                   |
 
-
 ---
 
 ## 9. Phase F3 — Public + Auth (1 week)
@@ -308,7 +286,6 @@ else → <span className="wordmark">{publicName}</span>
 - [x] A5 verify, A10 tenant-unavailable (existing)
 - [x] Auth forms: RHF + Zod from `@atlas/contracts` (login, signup, reset, invite, diagnostic identity gate)
 
-
 | ID    | Route                    | APIs                                  |
 | ----- | ------------------------ | ------------------------------------- |
 | A1    | `/`                      | root resolver                         |
@@ -318,18 +295,16 @@ else → <span className="wordmark">{publicName}</span>
 | A6–A9 | auth routes              | login, signup, reset, invite          |
 | A10   | `/tenant-unavailable`    | tenant state                          |
 
-
 Forms: RHF + Zod from `@atlas/contracts`.
 
 ---
 
 ## 10. Phase F4 — Learner L1–L25 (3 weeks)
 
-
 | Area        | Routes                                                         | Key endpoints                                   |
 | ----------- | -------------------------------------------------------------- | ----------------------------------------------- |
 | Dashboard   | `/`                                                            | `/me`, competency, gamification, streaks, paths |
-| Courses     | `/courses/`**                                                  | courses, enrollments, lessons, progress         |
+| Courses     | `/courses/`\*\*                                                | courses, enrollments, lessons, progress         |
 | Paths       | `/roadmap`, `/paths/[id]`                                      | learning-paths, enroll, progress                |
 | Assessments | `/assessments/**`, `/attempts/**`                              | attempts, answers, submit                       |
 | Swipe       | `/swipe`                                                       | SRS, practice-sessions                          |
@@ -339,7 +314,6 @@ Forms: RHF + Zod from `@atlas/contracts`.
 | Community   | `/community/**`, `/hall-of-fame`                               | spaces, posts, comments, reactions              |
 | Discovery   | `/resources`, `/search`, `/notifications`                      | search, notifications                           |
 | Account     | `/profile`, `/settings`                                        | profile, preferences, locales, deletion         |
-
 
 **Wire gaps:** `POST /moderation/cases`, `POST /appeals`, `DELETE /reactions`.
 
@@ -359,22 +333,22 @@ Forms: RHF + Zod from `@atlas/contracts`.
 
 #### Remaining backlog (inventory depth — optional polish; not blocking F6)
 
-| ID | Screen | Gap | Priority |
-|----|--------|-----|----------|
-| F4-R01 | L3 | Course outline: no lesson links, no progress meter | P1 |
-| F4-R02 | L8 | L1 proctoring: blur warning only; no server signals / fullscreen / copy-paste | P1 |
-| F4-R03 | L13 | Missing assessment history, swipe-accuracy trend, stage timeline | P1 |
-| F4-R04 | L7 | No proctoring consent modal before start | P1 |
-| F4-R05 | L2 | No roadmap lock badges on catalog cards | P2 |
-| F4-R06 | L2 / L21 | `GET /search` not used; course-list filters only | P2 |
-| F4-R07 | L25 | Locale picker read-only; no user locale selection | P2 |
-| F4-R08 | L1 | Dashboard API waterfall depth = 2; no `GET /me/dashboard` aggregate | P3 / F8 |
-| F4-R09 | L1 | API errors use `PublicSiteShell`, not `PageGate error` | P3 |
-| F4-R10 | L1 | No Suspense islands on dashboard | F8 |
-| F4-R11 | L9 | No per-dimension contribution on attempt result | P3 |
-| F4-R12 | L17 | No stage/band space recommendations | P3 |
-| F4-R13 | L11 | Diagnostic landing thin (acceptable per user-flows §13.3) | Optional |
-| F4-R14 | — | Missing `courses/[id]/loading.tsx` | P3 |
+| ID     | Screen   | Gap                                                                           | Priority |
+| ------ | -------- | ----------------------------------------------------------------------------- | -------- |
+| F4-R01 | L3       | Course outline: no lesson links, no progress meter                            | P1       |
+| F4-R02 | L8       | L1 proctoring: blur warning only; no server signals / fullscreen / copy-paste | P1       |
+| F4-R03 | L13      | Missing assessment history, swipe-accuracy trend, stage timeline              | P1       |
+| F4-R04 | L7       | No proctoring consent modal before start                                      | P1       |
+| F4-R05 | L2       | No roadmap lock badges on catalog cards                                       | P2       |
+| F4-R06 | L2 / L21 | `GET /search` not used; course-list filters only                              | P2       |
+| F4-R07 | L25      | Locale picker read-only; no user locale selection                             | P2       |
+| F4-R08 | L1       | Dashboard API waterfall depth = 2; no `GET /me/dashboard` aggregate           | P3 / F8  |
+| F4-R09 | L1       | API errors use `PublicSiteShell`, not `PageGate error`                        | P3       |
+| F4-R10 | L1       | No Suspense islands on dashboard                                              | F8       |
+| F4-R11 | L9       | No per-dimension contribution on attempt result                               | P3       |
+| F4-R12 | L17      | No stage/band space recommendations                                           | P3       |
+| F4-R13 | L11      | Diagnostic landing thin (acceptable per user-flows §13.3)                     | Optional |
+| F4-R14 | —        | Missing `courses/[id]/loading.tsx`                                            | P3       |
 
 **Recommendation:** Start **F6** (tenant admin). Address **F4-R01** (L3 lesson links) opportunistically if touching courses; defer proctoring/analytics depth to **F8**.
 
@@ -384,13 +358,11 @@ Forms: RHF + Zod from `@atlas/contracts`.
 
 **Status:** **Complete** (2026-06-23). All wire gaps and F5-R01–F5-R18 backlog items delivered.
 
-
-| Plane            | Routes                                                                |
-| ---------------- | --------------------------------------------------------------------- |
-| Studio I1–I13    | `/studio/`** — courses, items, assessments, paths, grading, analytics |
-| Moderation M1–M4 | `/moderate/**`                                                        |
-| Review S1        | `/review`                                                             |
-
+| Plane            | Routes                                                                  |
+| ---------------- | ----------------------------------------------------------------------- |
+| Studio I1–I13    | `/studio/`\*\* — courses, items, assessments, paths, grading, analytics |
+| Moderation M1–M4 | `/moderate/**`                                                          |
+| Review S1        | `/review`                                                               |
 
 Lazy-load builders; React Query mutations with rollback.
 
@@ -416,31 +388,31 @@ Lazy-load builders; React Query mutations with rollback.
 
 #### Backlog (done — 2026-06-23)
 
-| ID | Area | Delivered |
-|----|------|-----------|
-| F5-R01 | S1 | Multi-target review queue (`course`, `assessment`, `learning_path`) backend + frontend filter |
-| F5-R02 | I12 | Roster drill-in (grading tasks), `DELETE /enrollments/:id`, certificate issue |
-| F5-R03 | I3 | Access/drip/prerequisite settings via `tags.studioAccess` |
-| F5-R04 | I7 | `GET /item-collections/:id/items` + remove-item UI with rollback |
-| F5-R05 | Builders | `next/dynamic` lazy wrappers for course/assessment/lesson/path builders |
-| F5-R06 | Studio/mod | React Query `useMutation` with optimistic rollback (roster, collections) |
-| F5-R07 | Studio | Nested `loading.tsx` under studio course/assessment/path/item routes |
-| F5-R08 | Tests | `tests/integration/studio/studio-routes.test.ts` |
+| ID     | Area       | Delivered                                                                                     |
+| ------ | ---------- | --------------------------------------------------------------------------------------------- |
+| F5-R01 | S1         | Multi-target review queue (`course`, `assessment`, `learning_path`) backend + frontend filter |
+| F5-R02 | I12        | Roster drill-in (grading tasks), `DELETE /enrollments/:id`, certificate issue                 |
+| F5-R03 | I3         | Access/drip/prerequisite settings via `tags.studioAccess`                                     |
+| F5-R04 | I7         | `GET /item-collections/:id/items` + remove-item UI with rollback                              |
+| F5-R05 | Builders   | `next/dynamic` lazy wrappers for course/assessment/lesson/path builders                       |
+| F5-R06 | Studio/mod | React Query `useMutation` with optimistic rollback (roster, collections)                      |
+| F5-R07 | Studio     | Nested `loading.tsx` under studio course/assessment/path/item routes                          |
+| F5-R08 | Tests      | `tests/integration/studio/studio-routes.test.ts`                                              |
 
 #### Polish backlog (done — 2026-06-23)
 
-| ID | Area | Delivered |
-|----|------|-----------|
-| F5-R09 | S1 | Review SSR gate without `targetType=course` filter; multi-target copy |
-| F5-R10 | S1 | `GET /workflows/history` + real history panel (replaces stub) |
-| F5-R11 | I12 | Attempt drill-in via `GET /attempts/:id` from grading task detail |
-| F5-R12 | I6 | Editable dimension weights with `PUT /items/:id/dimension-weights` |
-| F5-R13 | Registry | `detailPathPattern` for I8/I9 assessment and path builders |
-| F5-R14 | Studio | Nested `error.tsx` under course/assessment/path/item detail routes |
-| F5-R15 | Studio/mod | `useMutation` on course publish/archive, settings, spaces, moderation |
-| F5-R16 | Tests | Assessment + learning_path `listReviewQueue` integration coverage |
-| F5-R17 | Docs | Plan status synced (`plan/README.md`) |
-| F5-R18 | SSR | Grading page passes SSR queue to client; learners page drops dead prefetch |
+| ID     | Area       | Delivered                                                                  |
+| ------ | ---------- | -------------------------------------------------------------------------- |
+| F5-R09 | S1         | Review SSR gate without `targetType=course` filter; multi-target copy      |
+| F5-R10 | S1         | `GET /workflows/history` + real history panel (replaces stub)              |
+| F5-R11 | I12        | Attempt drill-in via `GET /attempts/:id` from grading task detail          |
+| F5-R12 | I6         | Editable dimension weights with `PUT /items/:id/dimension-weights`         |
+| F5-R13 | Registry   | `detailPathPattern` for I8/I9 assessment and path builders                 |
+| F5-R14 | Studio     | Nested `error.tsx` under course/assessment/path/item detail routes         |
+| F5-R15 | Studio/mod | `useMutation` on course publish/archive, settings, spaces, moderation      |
+| F5-R16 | Tests      | Assessment + learning_path `listReviewQueue` integration coverage          |
+| F5-R17 | Docs       | Plan status synced (`plan/README.md`)                                      |
+| F5-R18 | SSR        | Grading page passes SSR queue to client; learners page drops dead prefetch |
 
 ---
 
@@ -463,25 +435,25 @@ Entitlements page stays read-only.
 - [x] `tests/unit/frontend/f6-admin.test.ts` + `tests/integration/admin/admin-routes.test.ts`
 - [x] `@atlas/web` build passes
 
-| ID | Area | Deliverable | Pri |
-|----|------|-------------|-----|
-| F6-R01 | T8 | Section-tab config editor, version display, search reindex button | P0 |
-| F6-R02 | T2/T3 | Owner detection via `roles[]` from API (not display-name heuristic) | P0 |
-| F6-R03 | T5 | `GET /roles/:id`, grouped permission catalogue, grant-up error surfacing | P0 |
-| F6-R04 | T1 | Provisioning jobs + review/moderation counts on dashboard | P1 |
-| F6-R05 | T6 | Logo upload wiring, restore-version modal | P1 |
-| F6-R06 | T16 | Automation runs log panel | P1 |
-| F6-R07 | T14 | SSR `GET /badges`, badge editor | P1 |
-| F6-R08 | T19 | Extension registration PUT UI | P1 |
-| F6-R09 | T21 | Analytics tabs, CSV export, community slice | P1 |
-| F6-R10 | T22 | Audit action filter + cursor pagination | P1 |
-| F6-R11 | T17 | Workflow stage editor (replace raw JSON) | P1 |
-| F6-R12 | T12/T13 | Certificate issue source + template preview depth | P1 |
-| F6-R13 | T11 | Competency editors without full-page reload | P1 |
-| F6-R14 | All | Replace `window.confirm` with design-system modals | P2 |
-| F6-R15 | T10 | Upgrade-prompt copy for disabled entitlements | P2 |
-| F6-R16 | T2/T22 | Virtualized DataTables (`performance.md`) | P2 |
-| F6-R17 | E2E | Admin journey tests (may overlap F8) | P2 |
+| ID     | Area    | Deliverable                                                              | Pri |
+| ------ | ------- | ------------------------------------------------------------------------ | --- |
+| F6-R01 | T8      | Section-tab config editor, version display, search reindex button        | P0  |
+| F6-R02 | T2/T3   | Owner detection via `roles[]` from API (not display-name heuristic)      | P0  |
+| F6-R03 | T5      | `GET /roles/:id`, grouped permission catalogue, grant-up error surfacing | P0  |
+| F6-R04 | T1      | Provisioning jobs + review/moderation counts on dashboard                | P1  |
+| F6-R05 | T6      | Logo upload wiring, restore-version modal                                | P1  |
+| F6-R06 | T16     | Automation runs log panel                                                | P1  |
+| F6-R07 | T14     | SSR `GET /badges`, badge editor                                          | P1  |
+| F6-R08 | T19     | Extension registration PUT UI                                            | P1  |
+| F6-R09 | T21     | Analytics tabs, CSV export, community slice                              | P1  |
+| F6-R10 | T22     | Audit action filter + cursor pagination                                  | P1  |
+| F6-R11 | T17     | Workflow stage editor (replace raw JSON)                                 | P1  |
+| F6-R12 | T12/T13 | Certificate issue source + template preview depth                        | P1  |
+| F6-R13 | T11     | Competency editors without full-page reload                              | P1  |
+| F6-R14 | All     | Replace `window.confirm` with design-system modals                       | P2  |
+| F6-R15 | T10     | Upgrade-prompt copy for disabled entitlements                            | P2  |
+| F6-R16 | T2/T22  | Virtualized DataTables (`performance.md`)                                | P2  |
+| F6-R17 | E2E     | Admin journey tests (may overlap F8)                                     | P2  |
 
 ---
 
@@ -502,30 +474,30 @@ Tenant provision, lifecycle, entitlements, global flags, catalog, audit, support
 
 ### 13.2 Phase F7 — backlog (done)
 
-| ID | Screen | Item | Status |
-|----|--------|------|--------|
-| F7-R01 | P4 | Wire `PUT /platform/feature-flags/:key` with edit UI + reason modal | Done |
-| F7-R02 | P1 | Tenant list primary host column + cursor pagination | Done |
-| F7-R03 | P5 | Catalog POST create flows (permissions, item-types, extension-points) | Done |
-| F7-R04 | P6 | Platform audit action filter + cursor pagination | Done |
-| F7-R05 | P2/P3 | Provision reason gate; separate lifecycle vs entitlement confirm dialogs | Done |
-| F7-R06 | All | `PlatformReasonGate` prompts via provider (not no-op) | Done |
-| F7-R07 | E2E | Platform console wiring + PUT route regression tests | Done |
+| ID     | Screen | Item                                                                     | Status |
+| ------ | ------ | ------------------------------------------------------------------------ | ------ |
+| F7-R01 | P4     | Wire `PUT /platform/feature-flags/:key` with edit UI + reason modal      | Done   |
+| F7-R02 | P1     | Tenant list primary host column + cursor pagination                      | Done   |
+| F7-R03 | P5     | Catalog POST create flows (permissions, item-types, extension-points)    | Done   |
+| F7-R04 | P6     | Platform audit action filter + cursor pagination                         | Done   |
+| F7-R05 | P2/P3  | Provision reason gate; separate lifecycle vs entitlement confirm dialogs | Done   |
+| F7-R06 | All    | `PlatformReasonGate` prompts via provider (not no-op)                    | Done   |
+| F7-R07 | E2E    | Platform console wiring + PUT route regression tests                     | Done   |
 
 ### 13.3 Phase F7 — polish (audit closure, done)
 
-| ID | Screen | Item | Status |
-|----|--------|------|--------|
-| F7-P01 | P1 | Tenant list `state` filter (API-supported) | Done |
-| F7-P02 | P2 | `initialEntitlements` editor on provision wizard | Done |
-| F7-P03 | P3 | Full entitlement editor; lifecycle state guards; richer overview | Done |
-| F7-P04 | P4 | Description column; backend `rolloutType` vs `defaultValue` validation | Done |
-| F7-P05 | P5 | Richer catalog tables; `schemaJson` on item-types/extension-points | Done |
-| F7-P06 | P6 | `targetType` filter; scope-transition highlight; richer detail panel | Done |
-| F7-P07 | P7 | Error surfacing on failed support session open | Done |
-| F7-P08 | P8 | Dead-letter `tenantId` column; pagination; replay feedback | Done |
-| F7-P09 | All | `PlatformPageGate` + `loadPlatformPageAccess` on P1–P8 deep links | Done |
-| F7-P10 | E2E | `platform-journey.e2e.ts` + extended F7 unit/integration tests | Done |
+| ID     | Screen | Item                                                                   | Status |
+| ------ | ------ | ---------------------------------------------------------------------- | ------ |
+| F7-P01 | P1     | Tenant list `state` filter (API-supported)                             | Done   |
+| F7-P02 | P2     | `initialEntitlements` editor on provision wizard                       | Done   |
+| F7-P03 | P3     | Full entitlement editor; lifecycle state guards; richer overview       | Done   |
+| F7-P04 | P4     | Description column; backend `rolloutType` vs `defaultValue` validation | Done   |
+| F7-P05 | P5     | Richer catalog tables; `schemaJson` on item-types/extension-points     | Done   |
+| F7-P06 | P6     | `targetType` filter; scope-transition highlight; richer detail panel   | Done   |
+| F7-P07 | P7     | Error surfacing on failed support session open                         | Done   |
+| F7-P08 | P8     | Dead-letter `tenantId` column; pagination; replay feedback             | Done   |
+| F7-P09 | All    | `PlatformPageGate` + `loadPlatformPageAccess` on P1–P8 deep links      | Done   |
+| F7-P10 | E2E    | `platform-journey.e2e.ts` + extended F7 unit/integration tests         | Done   |
 
 ---
 
@@ -547,19 +519,19 @@ Tenant provision, lifecycle, entitlements, global flags, catalog, audit, support
 
 ### 14.2 Phase F8 — backlog (done)
 
-| ID | Area | Item | Status |
-|----|------|------|--------|
-| F8-R01 | E2E | Playwright setup + 11 journey specs (§25.4) | Done |
-| F8-R02 | E2E | Authenticated journey depth with seeded E2E credentials | Done |
-| F8-R03 | A11y | axe CI on public + learner critical routes | Done |
-| F8-R04 | A11y | Keyboard flows (assessment, swipe, tables, modals) | Done |
-| F8-R05 | Visual | Light/dark + FundedBeyond/second-smoke branding snapshots | Done |
-| F8-R06 | Perf | Lighthouse CI gates (LCP, INP, CLS) on `/`, `/courses`, `/login` | Done |
-| F8-R07 | Perf | Learner bundle budget CI (< 150 kB gzip) + import boundary | Done |
-| F8-R08 | Closure | `ci:frontend-api-closure` — required UI endpoints + ops-only manifest | Done |
-| F8-R09 | Closure | `STRICT_API_CLOSURE=1` full handler audit | Done |
-| F8-R10 | Perf | L1 Suspense islands / dashboard aggregate endpoint (optional) | Done |
-| F8-R11 | DX | Trim `pnpm dev` startup URLs ([local-dev-urls.md](local-dev-urls.md) §7) | Done |
+| ID     | Area    | Item                                                                     | Status |
+| ------ | ------- | ------------------------------------------------------------------------ | ------ |
+| F8-R01 | E2E     | Playwright setup + 11 journey specs (§25.4)                              | Done   |
+| F8-R02 | E2E     | Authenticated journey depth with seeded E2E credentials                  | Done   |
+| F8-R03 | A11y    | axe CI on public + learner critical routes                               | Done   |
+| F8-R04 | A11y    | Keyboard flows (assessment, swipe, tables, modals)                       | Done   |
+| F8-R05 | Visual  | Light/dark + FundedBeyond/second-smoke branding snapshots                | Done   |
+| F8-R06 | Perf    | Lighthouse CI gates (LCP, INP, CLS) on `/`, `/courses`, `/login`         | Done   |
+| F8-R07 | Perf    | Learner bundle budget CI (< 150 kB gzip) + import boundary               | Done   |
+| F8-R08 | Closure | `ci:frontend-api-closure` — required UI endpoints + ops-only manifest    | Done   |
+| F8-R09 | Closure | `STRICT_API_CLOSURE=1` full handler audit                                | Done   |
+| F8-R10 | Perf    | L1 Suspense islands / dashboard aggregate endpoint (optional)            | Done   |
+| F8-R11 | DX      | Trim `pnpm dev` startup URLs ([local-dev-urls.md](local-dev-urls.md) §7) | Done   |
 
 ### Testing
 
@@ -586,20 +558,19 @@ Tenant provision, lifecycle, entitlements, global flags, catalog, audit, support
 
 ## 15. Post-F8 — Zod 4 migration (monorepo)
 
-Scheduled **after F8 completes**, not during F0–F8. Full checklist: [zod-4-migration.md](zod-4-migration.md).
+**Done** 2026-08-13. Full checklist: [zod-4-migration.md](zod-4-migration.md).
 
-- [ ] Bump `zod` to `^4.4.3` in all workspace packages (root, contracts, web, api-app, backend packages)
+- [x] Bump `zod` to `^4.4.3` in all workspace packages (root, contracts, web, api-app, backend packages)
 - [ ] Migrate `@atlas/contracts` + backend schema sources; run `pnpm sync:contracts`
-- [ ] Apply Zod 4 API updates (e.g. `z.uuid()`, `z.email()`, object strictness)
-- [ ] Simplify frontend `useZodForm` (drop Zod 3 compat casts)
+- [x] Apply Zod 4 API updates (e.g. `z.uuid()`, `z.email()`, object strictness)
+- [x] Simplify frontend `useZodForm` (drop Zod 3 compat casts)
 - [ ] Verify: `typecheck`, `test:unit`, API tests, `ci:zod-boundaries`, both app builds
 
-**During F0–F8:** new validation schemas go in `@atlas/contracts` (Zod 3); no frontend-only Zod 4.
+Schemas migrated to Zod 4 APIs; still run `pnpm sync:contracts` and full verify as needed.
 
 ---
 
 ## 16. Sprint schedule
-
 
 | Sprint      | Focus                          | Exit                                                                     |
 | ----------- | ------------------------------ | ------------------------------------------------------------------------ |
@@ -609,12 +580,11 @@ Scheduled **after F8 completes**, not during F0–F8. Full checklist: [zod-4-mig
 | **F2**      | Shells                         | 8 responsive shells, mobile learner nav                                  |
 | **F3**      | Public + auth                  | A1–A10, incl. `/p/[slug]`                                                |
 | **F4**      | Learner                        | L1–L25 + community/moderation wire gaps — **done** (see §10.1 backlog)   |
-| **F5**      | Studio + moderation + review   | I*, M*, S1 — **done** (see §11.1)                                      |
-| **F6**      | Tenant admin                   | T1–T24 — **done** (see §12.1)                                        |
-| **F7**      | Platform                       | P1–P8 — **done** (see §13.1–§13.3)                                   |
-| **F8**      | Hardening                      | E2E, a11y, CWV/bundle CI, endpoint closure — **done** (see §14.1–§14.2) |
-| **Post-F8** | Zod 4 migration                | Monorepo on Zod 4; contracts + backend + frontend aligned                |
-
+| **F5**      | Studio + moderation + review   | I*, M*, S1 — **done** (see §11.1)                                        |
+| **F6**      | Tenant admin                   | T1–T24 — **done** (see §12.1)                                            |
+| **F7**      | Platform                       | P1–P8 — **done** (see §13.1–§13.3)                                       |
+| **F8**      | Hardening                      | E2E, a11y, CWV/bundle CI, endpoint closure — **done** (see §14.1–§14.2)  |
+| **Post-F8** | Zod 4 migration                | Monorepo on Zod 4; contracts + backend + frontend aligned — **done**     |
 
 **Estimate:** ~15 weeks total (F0–F8); Post-F8 Zod 4 ~0.5–1 day.
 
@@ -636,7 +606,6 @@ Scheduled **after F8 completes**, not during F0–F8. Full checklist: [zod-4-mig
 
 ## 18. Reference docs
 
-
 | Doc                      | Path                                                        |
 | ------------------------ | ----------------------------------------------------------- |
 | Local dev URLs & tenancy | [local-dev-urls.md](local-dev-urls.md)                      |
@@ -645,7 +614,6 @@ Scheduled **after F8 completes**, not during F0–F8. Full checklist: [zod-4-mig
 | Wireframes               | `docs/locked/Atlas-LMS-Wireframes-v1-Phase0-1A-1B.md`       |
 | User flows               | `docs/locked/Atlas-User-Flows-and-Journey-Maps-v1-FINAL.md` |
 | Post-F8 Zod 4 migration  | [zod-4-migration.md](zod-4-migration.md)                    |
-
 
 ---
 
@@ -661,4 +629,4 @@ Scheduled **after F8 completes**, not during F0–F8. Full checklist: [zod-4-mig
 - [x] **F6** Tenant admin T1–T24
 - [x] **F7** Platform P1–P8
 - [x] **F8** Hardening, E2E, a11y, performance budgets (see §14.1–§14.2; dev URL trim in `scripts/dev/print-essential-urls.mjs`)
-- [ ] **Post-F8** Zod 4 monorepo migration (see [§15](#15-post-f8--zod-4-migration-monorepo))
+- [x] **Post-F8** Zod 4 monorepo migration (see [§15](#15-post-f8--zod-4-migration-monorepo))

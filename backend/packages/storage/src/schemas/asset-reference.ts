@@ -4,7 +4,7 @@ import { AssetPurposeSchema, AssetStatusSchema, AssetVisibilitySchema } from "./
 export const CreateAssetReferenceInputSchema = z.object({
   purpose: AssetPurposeSchema,
   resourceType: z.string().min(1).max(80),
-  resourceId: z.string().uuid().nullable(),
+  resourceId: z.uuid().nullable(),
   fileName: z.string().min(1).max(240),
   contentType: z.string().min(1).max(180),
   sizeBytes: z.number().int().min(1),
@@ -17,21 +17,21 @@ export const CreateAssetReferenceInputSchema = z.object({
 });
 
 export const AssetReferenceViewSchema = z.object({
-  id: z.string().uuid(),
-  tenantId: z.string().uuid(),
+  id: z.uuid(),
+  tenantId: z.uuid(),
   bucket: z.string(),
   key: z.string(),
   purpose: AssetPurposeSchema,
   resourceType: z.string(),
-  resourceId: z.string().uuid().nullable(),
+  resourceId: z.uuid().nullable(),
   fileName: z.string(),
   contentType: z.string(),
   sizeBytes: z.number().int(),
   checksumSha256: z.string().nullable(),
   visibility: AssetVisibilitySchema,
   status: AssetStatusSchema,
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 
 export const SignedUploadResponseSchema = z.object({
@@ -39,8 +39,8 @@ export const SignedUploadResponseSchema = z.object({
     asset: AssetReferenceViewSchema,
     upload: z.object({
       method: z.literal("PUT"),
-      url: z.string().url(),
-      expiresAt: z.string().datetime(),
+      url: z.url(),
+      expiresAt: z.iso.datetime(),
       requiredHeaders: z.record(z.string(), z.string()),
     }),
   }),
@@ -48,8 +48,8 @@ export const SignedUploadResponseSchema = z.object({
 
 export const SignedDownloadResponseSchema = z.object({
   data: z.object({
-    url: z.string().url(),
-    expiresAt: z.string().datetime(),
+    url: z.url(),
+    expiresAt: z.iso.datetime(),
   }),
 });
 

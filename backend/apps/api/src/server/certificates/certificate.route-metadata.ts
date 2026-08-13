@@ -151,6 +151,11 @@ export const certificateWalletPassMetadata = {
     }),
 } satisfies RouteMetadata;
 
+export const downloadAppleWalletPassMetadata = {
+  ...certificateWalletPassMetadata,
+  rateLimit: "authenticatedTenantRead",
+} satisfies RouteMetadata;
+
 export const reissueCertificateMetadata = {
   ...revokeCertificateMetadata,
   permission: "certificate.issue",

@@ -22,3 +22,4 @@ docs/locked/**
 
 # Generated/cache files
 *.tsbuildinfo
+backend/packages/db/src/generated/**

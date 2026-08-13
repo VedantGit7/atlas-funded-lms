@@ -1,13 +1,13 @@
 import { z } from "zod";
-import { ENTITY_STATUSES, pageInfoSchema, rejectClientTenantFields } from "../shared/domain.dto";
+import { ENTITY_STATUSES, rejectClientTenantFields } from "../shared/domain.dto";
 
 export const createBatchBodySchema = rejectClientTenantFields
   .extend({
     key: z.string().min(1).max(64),
     name: z.string().min(1).max(256),
-    courseId: z.string().uuid().optional(),
+    courseId: z.uuid().optional(),
     status: z.enum(ENTITY_STATUSES).default("ACTIVE"),
-    metadataJson: z.record(z.unknown()).optional(),
+    metadataJson: z.record(z.string(), z.unknown()).optional(),
   })
   .strict();
 
@@ -15,26 +15,26 @@ export const updateBatchBodySchema = rejectClientTenantFields
   .extend({
     name: z.string().min(1).max(256).optional(),
     status: z.enum(ENTITY_STATUSES).optional(),
-    metadataJson: z.record(z.unknown()).optional(),
+    metadataJson: z.record(z.string(), z.unknown()).optional(),
   })
   .strict();
 
 export const assignBatchMemberBodySchema = rejectClientTenantFields
   .extend({
-    membershipId: z.string().uuid(),
+    membershipId: z.uuid(),
   })
   .strict();
 
-export const batchParamsSchema = z.object({ id: z.string().uuid() }).strict();
+export const batchParamsSchema = z.object({ id: z.uuid() }).strict();
 
 export const batchDtoSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     key: z.string(),
     name: z.string(),
-    courseId: z.string().uuid().nullable(),
+    courseId: z.uuid().nullable(),
     status: z.enum(ENTITY_STATUSES),
-    createdAt: z.string().datetime(),
+    createdAt: z.iso.datetime(),
   })
   .strict();
 
@@ -45,8 +45,8 @@ export const batchListResponseSchema = z.object({
 
 export const assignBatchMemberResponseSchema = z.object({
   data: z.object({
-    batchId: z.string().uuid(),
-    membershipId: z.string().uuid(),
-    joinedAt: z.string().datetime(),
+    batchId: z.uuid(),
+    membershipId: z.uuid(),
+    joinedAt: z.iso.datetime(),
   }),
 });

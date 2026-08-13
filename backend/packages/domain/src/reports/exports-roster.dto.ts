@@ -73,8 +73,8 @@ export const exportsHistoryListQuerySchema = rejectClientTenantFields
         if (typeof value === "boolean") return value;
         return value === "true" || value === "1";
       }),
-    createdFrom: z.string().datetime().optional(),
-    createdTo: z.string().datetime().optional(),
+    createdFrom: z.iso.datetime().optional(),
+    createdTo: z.iso.datetime().optional(),
     q: z.string().trim().min(1).max(200).optional(),
     columns: z.preprocess(
       (value) => parseColumns(EXPORTS_HISTORY_COLUMNS, value),
@@ -90,16 +90,16 @@ export type ExportsHistoryListQuery = z.output<typeof exportsHistoryListQuerySch
 export const exportsHistoryItemSchema = z
   .object({
     sourceType: z.enum(["report_run", "export_job"]),
-    id: z.string().uuid(),
+    id: z.uuid(),
     definitionKey: z.string().nullable(),
     definitionTitle: z.string().nullable(),
     status: z.enum(JOB_STATUSES),
     format: z.string().nullable(),
     rowCount: z.number().int().nullable(),
     requestedByName: z.string().nullable(),
-    createdAt: z.string().datetime(),
-    completedAt: z.string().datetime().nullable(),
-    expiresAt: z.string().datetime().nullable(),
+    createdAt: z.iso.datetime(),
+    completedAt: z.iso.datetime().nullable(),
+    expiresAt: z.iso.datetime().nullable(),
     hasFile: z.boolean(),
     canDownload: z.boolean(),
     progressPercent: z.number().int().min(0).max(100).nullable(),
@@ -133,8 +133,8 @@ export const exportExportsHistoryBodySchema = rejectClientTenantFields
     fileState: z.enum(EXPORTS_FILE_STATES).optional(),
     mine: z.boolean().optional(),
     pendingOnly: z.boolean().optional(),
-    createdFrom: z.string().datetime().optional(),
-    createdTo: z.string().datetime().optional(),
+    createdFrom: z.iso.datetime().optional(),
+    createdTo: z.iso.datetime().optional(),
     q: z.string().trim().min(1).max(200).optional(),
     columns: z.array(z.string().min(1)).min(1).max(30).optional(),
     emailDownloadLink: z.boolean().default(true),
@@ -143,7 +143,7 @@ export const exportExportsHistoryBodySchema = rejectClientTenantFields
 
 export const exportExportsHistoryResponseSchema = z.object({
   data: z.object({
-    runId: z.string().uuid(),
+    runId: z.uuid(),
     status: z.string(),
     emailed: z.boolean(),
   }),

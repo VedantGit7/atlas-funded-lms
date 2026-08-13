@@ -36,7 +36,11 @@ export function assertAllowedMimeType(args: { purpose: AssetPurpose; contentType
     throw new Error("SELF_HOSTED_VIDEO_FORBIDDEN");
   }
 
-  if (args.purpose === "branding.logo" || args.purpose === "branding.favicon" || args.purpose === "branding.og-image") {
+  if (
+    args.purpose === "branding.logo" ||
+    args.purpose === "branding.favicon" ||
+    args.purpose === "branding.og-image"
+  ) {
     if (!BRANDING_MIME_TYPES.has(contentType)) {
       throw new Error("UNSUPPORTED_BRANDING_ASSET_TYPE");
     }
@@ -67,6 +71,20 @@ export function assertAllowedMimeType(args: { purpose: AssetPurpose; contentType
   if (args.purpose === "module.scorm") {
     if (contentType !== "application/zip" && contentType !== "application/x-zip-compressed") {
       throw new Error("UNSUPPORTED_SCORM_PACKAGE_TYPE");
+    }
+    return;
+  }
+
+  if (args.purpose === "certificate.render") {
+    if (contentType !== "application/pdf") {
+      throw new Error("UNSUPPORTED_CERTIFICATE_RENDER_TYPE");
+    }
+    return;
+  }
+
+  if (args.purpose === "certificate.wallet") {
+    if (contentType !== "application/vnd.apple.pkpass" && contentType !== "application/zip") {
+      throw new Error("UNSUPPORTED_CERTIFICATE_WALLET_TYPE");
     }
     return;
   }

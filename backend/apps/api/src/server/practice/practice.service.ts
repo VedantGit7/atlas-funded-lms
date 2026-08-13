@@ -96,7 +96,11 @@ export function isChoiceEngine(engine: PracticeEngine): boolean {
 export const TEST_SECONDS_PER_ITEM = 45;
 
 /** Timed engines get a server-set deadline; everything else is untimed. */
-export function deadlineForEngine(engine: PracticeEngine, itemCount: number, now: Date): string | null {
+export function deadlineForEngine(
+  engine: PracticeEngine,
+  itemCount: number,
+  now: Date,
+): string | null {
   if (engine !== "test" || itemCount === 0) return null;
   return new Date(now.getTime() + itemCount * TEST_SECONDS_PER_ITEM * 1000).toISOString();
 }
@@ -149,7 +153,8 @@ function toSafeCard(
 
   if (isChoiceEngine(engine)) {
     const choices = choiceOptionsForItem(item.item_type_key, options);
-    const itemTypeKey = item.item_type_key === "true_false" ? ("true_false" as const) : ("mcq_single" as const);
+    const itemTypeKey =
+      item.item_type_key === "true_false" ? ("true_false" as const) : ("mcq_single" as const);
     return {
       itemId: item.id,
       itemTypeKey,
@@ -539,7 +544,7 @@ export async function submitPracticeResponse(
     throw invalidPracticeItem();
   }
 
-  // The zod union already validated one of these two shapes; the `.passthrough()`
+  // The zod union already validated one of these two shapes; the `.loose()`
   // guards in the schema widen the inferred type, so narrow through it explicitly.
   const body = input as unknown as SubmittedPracticeResponse;
   const submittedPairs = "pairs" in body ? body.pairs : undefined;

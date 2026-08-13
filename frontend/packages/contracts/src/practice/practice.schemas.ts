@@ -1,7 +1,7 @@
 import { z } from "zod";
 
-const rejectTenantId = z.object({ tenant_id: z.never().optional() }).passthrough();
-const rejectMembershipId = z.object({ membershipId: z.never().optional() }).passthrough();
+const rejectTenantId = z.object({ tenant_id: z.never().optional() }).loose();
+const rejectMembershipId = z.object({ membershipId: z.never().optional() }).loose();
 const rejectClientScoring = z
   .object({
     isCorrect: z.never().optional(),
@@ -10,11 +10,11 @@ const rejectClientScoring = z
     itemIds: z.never().optional(),
     selectedItemIds: z.never().optional(),
   })
-  .passthrough();
+  .loose();
 
 export const PracticeSessionParamsSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
   })
   .strict();
 
@@ -30,7 +30,7 @@ export const StartPracticeSessionBodySchema = z
   .object({
     mode: z.enum(["due", "collection"]),
     engine: practiceEngineSchema.default("swipe"),
-    collectionId: z.string().uuid().optional(),
+    collectionId: z.uuid().optional(),
     maxItems: z.number().int().min(1).max(30).optional(),
   })
   .strict()
@@ -40,7 +40,7 @@ export const StartPracticeSessionBodySchema = z
   .superRefine((value, ctx) => {
     if (value.mode === "collection" && !value.collectionId) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         message: "collectionId is required when mode is collection.",
         path: ["collectionId"],
       });
@@ -48,7 +48,7 @@ export const StartPracticeSessionBodySchema = z
 
     if (value.mode === "due" && value.collectionId) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         message: "collectionId is not allowed when mode is due.",
         path: ["collectionId"],
       });
@@ -58,7 +58,7 @@ export const StartPracticeSessionBodySchema = z
 /** Self-rated response used by the swipe and flashcards engines. */
 export const submitSwipeResponseSchema = z
   .object({
-    itemId: z.string().uuid(),
+    itemId: z.uuid(),
     action: z.enum(["known", "unknown"]),
     latencyMs: z.number().int().min(0).max(300_000).optional(),
   })
@@ -67,7 +67,7 @@ export const submitSwipeResponseSchema = z
 /** Server-graded response used by the match engine: leftId -> rightId. */
 export const submitMatchResponseSchema = z
   .object({
-    itemId: z.string().uuid(),
+    itemId: z.uuid(),
     pairs: z.record(z.string().min(1), z.string().min(1)),
     latencyMs: z.number().int().min(0).max(300_000).optional(),
   })
@@ -76,7 +76,7 @@ export const submitMatchResponseSchema = z
 /** Server-graded response used by the learn engine. */
 export const submitChoiceResponseSchema = z
   .object({
-    itemId: z.string().uuid(),
+    itemId: z.uuid(),
     selectedOptionId: z.string().min(1),
     latencyMs: z.number().int().min(0).max(300_000).optional(),
   })
@@ -92,9 +92,9 @@ export const CompletePracticeSessionBodySchema = z.object({}).strict().and(rejec
 
 export const DueQueueQuerySchema = z
   .object({
-    cursor: z.string().uuid().optional(),
+    cursor: z.uuid().optional(),
     limit: z.coerce.number().int().min(1).max(50).default(20),
-    collectionId: z.string().uuid().optional(),
+    collectionId: z.uuid().optional(),
   })
   // Do not `.and(rejectTenantId)` here: `.strict()` already rejects unknown keys
   // (including tenant_id), and intersecting a passthrough schema breaks the
@@ -103,7 +103,7 @@ export const DueQueueQuerySchema = z
   .strict();
 
 export const safeSwipeCardSchema = z.object({
-  itemId: z.string().uuid(),
+  itemId: z.uuid(),
   itemTypeKey: z.literal("swipe"),
   rendererKey: z.enum(["swipe", "flashcard"]),
   contentJson: z.record(z.string(), z.unknown()),
@@ -125,7 +125,7 @@ export const matchOptionSchema = z.object({
  * cannot be used to infer the answer.
  */
 export const safeMatchCardSchema = z.object({
-  itemId: z.string().uuid(),
+  itemId: z.uuid(),
   itemTypeKey: z.literal("matching"),
   rendererKey: z.literal("matching"),
   contentJson: z.record(z.string(), z.unknown()),
@@ -139,7 +139,7 @@ export const choiceOptionSchema = z.object({
 });
 
 const choiceCardFields = {
-  itemId: z.string().uuid(),
+  itemId: z.uuid(),
   rendererKey: z.literal("choice"),
   contentJson: z.record(z.string(), z.unknown()),
   /** Selectable options. `isCorrect` is deliberately never included. */
@@ -164,7 +164,7 @@ export const safePracticeCardSchema = z.discriminatedUnion("itemTypeKey", [
 ]);
 
 export const practiceDeckOptionSchema = z.object({
-  collectionId: z.string().uuid(),
+  collectionId: z.uuid(),
   title: z.string(),
   itemCount: z.number().int().nonnegative(),
   category: z.string().nullable(),
@@ -175,7 +175,7 @@ export const practiceDeckOptionSchema = z.object({
 });
 
 export const dueQueueItemSchema = z.object({
-  itemId: z.string().uuid(),
+  itemId: z.uuid(),
   dueAt: z.string(),
   card: safePracticeCardSchema,
 });
@@ -183,7 +183,7 @@ export const dueQueueItemSchema = z.object({
 export const dueQueueResponseSchema = z.object({
   data: z.object({
     items: z.array(dueQueueItemSchema),
-    nextCursor: z.string().uuid().nullable(),
+    nextCursor: z.uuid().nullable(),
     availableDecks: z.array(practiceDeckOptionSchema),
     dueTotal: z.number().int().nonnegative(),
   }),
@@ -195,13 +195,13 @@ export const practiceSessionSummarySchema = z.object({
   engine: practiceEngineSchema.default("swipe"),
   /** Server-set deadline for timed engines (test). ISO string. */
   expiresAt: z.string().optional(),
-  selectedItemIds: z.array(z.string().uuid()),
-  answeredItemIds: z.array(z.string().uuid()),
+  selectedItemIds: z.array(z.uuid()),
+  answeredItemIds: z.array(z.uuid()),
   responseIdempotency: z
     .record(
       z.string(),
       z.object({
-        itemId: z.string().uuid(),
+        itemId: z.uuid(),
         isCorrect: z.boolean(),
         // Absent for graded engines (match) which submit pairs, not an action.
         action: z.enum(["known", "unknown"]).optional(),
@@ -224,11 +224,11 @@ export const practiceSessionSummarySchema = z.object({
 export const startPracticeSessionResponseSchema = z.object({
   data: z.object({
     session: z.object({
-      id: z.string().uuid(),
+      id: z.uuid(),
       status: z.enum(["started", "completed"]),
       mode: z.enum(["due", "collection"]),
       engine: practiceEngineSchema,
-      collectionId: z.string().uuid().nullable(),
+      collectionId: z.uuid().nullable(),
       totalItems: z.number().int().nonnegative(),
       answeredCount: z.number().int().nonnegative(),
       startedAt: z.string(),
@@ -241,7 +241,7 @@ export const startPracticeSessionResponseSchema = z.object({
 export const submitPracticeResponseResponseSchema = z.object({
   data: z.object({
     response: z.object({
-      itemId: z.string().uuid(),
+      itemId: z.uuid(),
       /** Null while a timed test is in progress: results are revealed on submit. */
       isCorrect: z.boolean().nullable(),
       feedbackLabel: z.string(),
@@ -259,7 +259,7 @@ export const submitPracticeResponseResponseSchema = z.object({
 
 export const completePracticeSessionResponseSchema = z.object({
   data: z.object({
-    sessionId: z.string().uuid(),
+    sessionId: z.uuid(),
     status: z.literal("completed"),
     completedAt: z.string(),
     summary: z.object({

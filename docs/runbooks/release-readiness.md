@@ -16,6 +16,8 @@ Writes `release-evidence.json` with:
 - `productionApproved`: always `false`
 - automated gate results and manual gate placeholders
 
+> **Stale evidence:** A committed `release-evidence.json` in the repo root may lag the current branch (e.g. older `READY_FOR_STAGING` run). Never promote on that file alone — regenerate with `pnpm release:suite` and do not invent a `READY_FOR_PRODUCTION_REVIEW` verdict without a green suite + staging health.
+
 ### Local flags
 
 | Flag              | Effect                                                                   |

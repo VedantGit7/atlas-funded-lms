@@ -67,3 +67,33 @@ describe("mark-read idempotence", () => {
     expect(payload.inbox.readAt).toBe(readAt);
   });
 });
+
+describe("mark-archive helpers", () => {
+  it("builds deterministic archive idempotency keys", async () => {
+    const { buildArchiveReceiptIdempotencyKey } =
+      await import("../../../backend/apps/api/src/server/notifications/notification.dto");
+    const args = {
+      dispatchId: "11111111-1111-1111-1111-111111111111",
+      membershipId: "33333333-3333-3333-3333-333333333333",
+    };
+    expect(buildArchiveReceiptIdempotencyKey(args)).toBe(buildArchiveReceiptIdempotencyKey(args));
+    expect(buildArchiveReceiptIdempotencyKey(args)).not.toBe(
+      buildArchiveReceiptIdempotencyKey({
+        ...args,
+        membershipId: "44444444-4444-4444-4444-444444444444",
+      }),
+    );
+  });
+
+  it("extracts archivedAt from archive receipt payload", async () => {
+    const { extractArchiveReceiptAt } =
+      await import("../../../backend/apps/api/src/server/notifications/notification.dto");
+    const archivedAt = "2026-06-20T12:00:00.000Z";
+    expect(
+      extractArchiveReceiptAt({
+        archiveForDispatchId: "11111111-1111-1111-1111-111111111111",
+        inbox: { archivedAt },
+      }),
+    ).toBe(archivedAt);
+  });
+});

@@ -12,7 +12,7 @@ export const workflowListQuerySchema = z.object({
 export type WorkflowListQuery = z.output<typeof workflowListQuerySchema>;
 
 export const workflowTransitionParamsSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
 });
 
 export const workflowTransitionBodySchema = z
@@ -24,7 +24,7 @@ export const workflowTransitionBodySchema = z
   .superRefine((value, ctx) => {
     if ((value.action === "reject" || value.action === "return") && !value.comment) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         path: ["comment"],
         message: "Comment is required for reject/return",
       });
@@ -36,10 +36,10 @@ export type WorkflowTransitionBody = z.output<typeof workflowTransitionBodySchem
 const publishLifecycleStatusSchema = z.enum(["DRAFT", "REVIEW", "PUBLISHED", "ARCHIVED"]);
 
 const workflowTargetBaseSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   title: z.string(),
   status: publishLifecycleStatusSchema,
-  createdByMembershipId: z.string().uuid().optional(),
+  createdByMembershipId: z.uuid().optional(),
 });
 
 export const workflowTargetSchema = z.discriminatedUnion("type", [
@@ -49,13 +49,13 @@ export const workflowTargetSchema = z.discriminatedUnion("type", [
 ]);
 
 export const workflowQueueItemSchema = z.object({
-  id: z.string().uuid(),
-  workflowDefinitionId: z.string().uuid(),
+  id: z.uuid(),
+  workflowDefinitionId: z.uuid(),
   target: workflowTargetSchema,
   fromState: z.string(),
   toState: z.string(),
-  submittedByMembershipId: z.string().uuid(),
-  submittedAt: z.string().datetime(),
+  submittedByMembershipId: z.uuid(),
+  submittedAt: z.iso.datetime(),
   comment: z.string().nullable(),
   availableActions: z.array(z.enum(["approve", "reject", "return"])),
 });
@@ -70,26 +70,26 @@ export const workflowListResponseSchema = z.object({
 
 export const workflowTransitionResultSchema = z.object({
   data: z.object({
-    id: z.string().uuid(),
-    workflowDefinitionId: z.string().uuid(),
+    id: z.uuid(),
+    workflowDefinitionId: z.uuid(),
     targetType: workflowTargetTypeSchema,
-    targetId: z.string().uuid(),
+    targetId: z.uuid(),
     action: z.enum(["approve", "reject", "return"]),
     fromState: z.string(),
     toState: z.string(),
     targetStatus: publishLifecycleStatusSchema,
-    occurredAt: z.string().datetime(),
+    occurredAt: z.iso.datetime(),
     comment: z.string().nullable(),
   }),
 });
 
 export const workflowHistoryItemSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   fromState: z.string(),
   toState: z.string(),
-  actorMembershipId: z.string().uuid(),
+  actorMembershipId: z.uuid(),
   reason: z.string().nullable(),
-  occurredAt: z.string().datetime(),
+  occurredAt: z.iso.datetime(),
   action: z.enum(["submit", "approve", "reject", "return"]).nullable(),
 });
 
@@ -100,12 +100,12 @@ export const workflowHistoryResponseSchema = z.object({
 });
 
 export const workflowDefinitionViewSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   key: z.string(),
   name: z.string(),
   definitionJson: z.record(z.string(), z.unknown()),
   status: z.enum(["ACTIVE", "ARCHIVED", "DRAFT"]),
-  updatedAt: z.string().datetime(),
+  updatedAt: z.iso.datetime(),
 });
 
 export const workflowDefinitionListResponseSchema = z.object({
@@ -135,7 +135,7 @@ export const workflowDefinitionResponseSchema = z.object({
 export const workflowHistoryQuerySchema = z
   .object({
     targetType: workflowTargetTypeSchema,
-    targetId: z.string().uuid(),
+    targetId: z.uuid(),
   })
   .strict();
 

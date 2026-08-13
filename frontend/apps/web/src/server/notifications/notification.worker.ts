@@ -1,4 +1,5 @@
 import { withTenantTx } from "@atlas/db";
+import { getMemberPreferences } from "@atlas/membership";
 import {
   buildNotificationIdempotencyKey,
   notificationQueuedOutboxPayloadSchema,
@@ -20,6 +21,7 @@ import {
   publishNotificationQueuedEvent,
 } from "./notification.service";
 import type { ServiceCtx } from "./notification.types";
+import { localeRepository } from "../locales/locale.repository";
 
 export const NOTIFICATION_SOURCE_WORKER_DESTINATION = "notifications.source";
 export const NOTIFICATION_QUEUED_WORKER_DESTINATION = "notifications.queued";
@@ -45,6 +47,22 @@ async function extractRecipientMembershipId(
   return null;
 }
 
+async function resolveRecipientLocale(
+  tx: Parameters<typeof notificationRepository.insertDispatch>[0],
+  args: { tenantId: string; membershipId: string; requestId: string },
+): Promise<string> {
+  const prefs = await getMemberPreferences(tx, {
+    tenantId: args.tenantId,
+    actorMembershipId: args.membershipId,
+    requestId: args.requestId,
+  });
+  if (prefs.data.locale) {
+    return prefs.data.locale;
+  }
+
+  return localeRepository.getTenantDefaultLocale(tx, args.tenantId);
+}
+
 export async function processNotificationSourceEvent(
   tx: Parameters<typeof notificationRepository.insertDispatch>[0],
   ctx: ServiceCtx,
@@ -64,14 +82,16 @@ export async function processNotificationSourceEvent(
     return;
   }
 
+  const locale = await resolveRecipientLocale(tx, {
+    tenantId: ctx.tenantId,
+    membershipId,
+    requestId: ctx.requestId,
+  });
+
   const templates = await notificationRepository.listActiveTemplatesForEvent(tx, {
     tenantId: ctx.tenantId,
     key: event.eventType,
-    // TODO: resolve the recipient's preferred locale from their membership /
-    // member profile and pass it here so certificate.issued (and other)
-    // notifications localise per learner. Defaulting to "en" until locale
-    // preferences are wired into the notification pipeline.
-    locale: "en",
+    locale,
   });
 
   for (const template of templates) {

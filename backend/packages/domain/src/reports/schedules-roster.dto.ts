@@ -51,7 +51,7 @@ export const schedulesRosterListQuerySchema = rejectClientTenantFields
     status: z.enum(SCHEDULE_STATUS_FILTERS).optional().default("all"),
     cadence: z.enum(SCHEDULE_CADENCE_FILTERS).optional().default("any"),
     destination: z.enum(SCHEDULE_DESTINATION_FILTERS).optional().default("any"),
-    ownerMembershipId: z.string().uuid().optional(),
+    ownerMembershipId: z.uuid().optional(),
     sort: z.enum(SCHEDULE_SORTS).optional().default("next_run_asc"),
     limit: z.coerce.number().int().min(1).max(100).default(50),
     page: z.coerce.number().int().min(1).max(1000).default(1),
@@ -70,7 +70,7 @@ export const scheduleDestinationChipSchema = z
 
 export const schedulesRosterItemSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     name: z.string(),
     definitionKey: z.string(),
     definitionTitle: z.string(),
@@ -85,17 +85,17 @@ export const schedulesRosterItemSchema = z
     isActive: z.boolean(),
     isFailing: z.boolean(),
     consecutiveFailures: z.number().int().nonnegative(),
-    nextRunAt: z.string().datetime().nullable(),
-    lastRunAt: z.string().datetime().nullable(),
+    nextRunAt: z.iso.datetime().nullable(),
+    lastRunAt: z.iso.datetime().nullable(),
     lastRunStatus: z.enum(JOB_STATUSES).nullable(),
     lastRunRowCount: z.number().int().nullable(),
     lastRunErrorMessage: z.string().nullable(),
     pastRunCount: z.number().int().nonnegative(),
-    ownerMembershipId: z.string().uuid(),
+    ownerMembershipId: z.uuid(),
     ownerName: z.string().nullable(),
     ownerInitials: z.string(),
-    createdAt: z.string().datetime(),
-    updatedAt: z.string().datetime(),
+    createdAt: z.iso.datetime(),
+    updatedAt: z.iso.datetime(),
   })
   .strict();
 
@@ -107,7 +107,7 @@ export const schedulesRosterSummarySchema = z
     runsThisMonth: z.number().int().nonnegative(),
     runsSucceededThisMonth: z.number().int().nonnegative(),
     runsFailedThisMonth: z.number().int().nonnegative(),
-    nextRunAt: z.string().datetime().nullable(),
+    nextRunAt: z.iso.datetime().nullable(),
     nextScheduleName: z.string().nullable(),
     failingCount: z.number().int().nonnegative(),
     maxConsecutiveFailures: z.number().int().nonnegative(),
@@ -126,7 +126,7 @@ export const schedulesRosterListResponseSchema = z.object({
 export const schedulesRosterBulkBodySchema = rejectClientTenantFields
   .extend({
     action: z.enum(["pause", "enable", "delete", "run_now"]),
-    ids: z.array(z.string().uuid()).min(1).max(50),
+    ids: z.array(z.uuid()).min(1).max(50),
   })
   .strict();
 
@@ -137,20 +137,20 @@ export const schedulesRosterBulkResponseSchema = z.object({
     action: z.enum(["pause", "enable", "delete", "run_now"]),
     processed: z.number().int().nonnegative(),
     failed: z.number().int().nonnegative(),
-    runIds: z.array(z.string().uuid()).optional(),
+    runIds: z.array(z.uuid()).optional(),
   }),
 });
 
 export const runScheduleNowResponseSchema = z.object({
   data: z.object({
-    scheduleId: z.string().uuid(),
-    runId: z.string().uuid(),
+    scheduleId: z.uuid(),
+    runId: z.uuid(),
     status: z.enum(JOB_STATUSES),
   }),
 });
 
 export const scheduleParamsSchema = z
   .object({
-    scheduleId: z.string().uuid(),
+    scheduleId: z.uuid(),
   })
   .strict();

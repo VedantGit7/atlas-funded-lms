@@ -2,13 +2,13 @@ import { z } from "zod";
 import { EntityStatusSchema } from "./schemas";
 
 export const extensionPointDtoSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   key: z.string(),
   pointType: z.string(),
   schemaJson: z.unknown(),
   status: EntityStatusSchema,
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 
 export const extensionPointListResponseSchema = z.object({
@@ -16,13 +16,13 @@ export const extensionPointListResponseSchema = z.object({
 });
 
 export const extensionRegistrationDtoSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   extensionPointKey: z.string(),
   registrationKey: z.string(),
   configJson: z.unknown(),
   status: EntityStatusSchema,
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 
 export const extensionRegistrationListResponseSchema = z.object({
@@ -39,7 +39,7 @@ export const extensionRegistrationDetailResponseSchema = z.object({
 
 export const extensionRegistrationDeleteResponseSchema = z.object({
   data: z.object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     deleted: z.literal(true),
   }),
 });

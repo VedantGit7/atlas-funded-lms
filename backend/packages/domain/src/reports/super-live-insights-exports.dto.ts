@@ -38,7 +38,7 @@ export const SLI_EXPORT_COLUMNS = [
 
 export const sliExportHistoryItemSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     fileName: z.string(),
     format: z.enum(REPORT_FORMATS),
     dataset: z.enum(SLI_EXPORT_DATASETS),
@@ -49,9 +49,9 @@ export const sliExportHistoryItemSchema = z
     requestedByLabel: z.string(),
     status: z.enum(["QUEUED", "RUNNING", "SUCCEEDED", "FAILED", "CANCELLED"]),
     expired: z.boolean(),
-    expiresAt: z.string().datetime().nullable(),
-    createdAt: z.string().datetime(),
-    completedAt: z.string().datetime().nullable(),
+    expiresAt: z.iso.datetime().nullable(),
+    createdAt: z.iso.datetime(),
+    completedAt: z.iso.datetime().nullable(),
     errorCode: z.string().nullable(),
     errorMessage: z.string().nullable(),
     errorTrace: z.array(z.string()).nullable(),
@@ -62,7 +62,7 @@ export const sliExportHistoryItemSchema = z
 
 export const sliExportScheduleItemSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     name: z.string(),
     dataset: z.enum(SLI_EXPORT_DATASETS),
     datasetLabel: z.string(),
@@ -71,7 +71,7 @@ export const sliExportScheduleItemSchema = z
     timezone: z.string(),
     formats: z.array(z.enum(REPORT_FORMATS)),
     isActive: z.boolean(),
-    nextRunAt: z.string().datetime(),
+    nextRunAt: z.iso.datetime(),
     nextRunLabel: z.string(),
     recipients: z.array(z.string()),
     delivery: z.record(z.string(), z.unknown()).nullable(),
@@ -103,19 +103,19 @@ export const createSuperLiveInsightsExportBodySchema = rejectClientTenantFields
     format: z.enum(SLI_EXPORT_FORMATS).default("csv"),
     scopeMode: z.enum(SLI_EXPORT_SCOPE_MODES).default("date_range"),
     datePreset: z.enum(SLI_EXPORT_DATE_PRESETS).default("30d"),
-    startedFrom: z.string().datetime().optional(),
-    startedTo: z.string().datetime().optional(),
-    courseId: z.string().uuid().optional(),
-    batchId: z.string().uuid().optional(),
-    sessionIds: z.array(z.string().uuid()).max(200).optional(),
+    startedFrom: z.iso.datetime().optional(),
+    startedTo: z.iso.datetime().optional(),
+    courseId: z.uuid().optional(),
+    batchId: z.uuid().optional(),
+    sessionIds: z.array(z.uuid()).max(200).optional(),
     columns: z.array(z.enum(SLI_EXPORT_COLUMNS)).min(1).max(30).optional(),
     includeBenchmarks: z.boolean().default(true),
     granularity: z.enum(SLI_EXPORT_GRANULARITIES).default("week"),
     seriesKind: z.enum(SLI_EXPORT_SERIES_KINDS).default("course"),
     filterSummary: z.string().trim().max(500).optional(),
     delivery: z.enum(SLI_EXPORT_DELIVERY).default("download"),
-    recipients: z.array(z.string().email()).max(20).optional(),
-    webhookUrl: z.string().url().max(500).optional(),
+    recipients: z.array(z.email()).max(20).optional(),
+    webhookUrl: z.url().max(500).optional(),
     scheduleEnabled: z.boolean().default(false),
     scheduleName: z.string().trim().max(120).optional(),
     cadence: z.enum(SLI_EXPORT_CADENCE).optional(),
@@ -140,7 +140,7 @@ export const createSuperLiveInsightsExportResponseSchema = z.object({
 
 export const superLiveInsightsExportRunParamsSchema = z
   .object({
-    runId: z.string().uuid(),
+    runId: z.uuid(),
   })
   .strict();
 
@@ -160,7 +160,7 @@ export const retrySuperLiveInsightsExportBodySchema = rejectClientTenantFields
 
 export const superLiveInsightsExportScheduleParamsSchema = z
   .object({
-    scheduleId: z.string().uuid(),
+    scheduleId: z.uuid(),
   })
   .strict();
 
@@ -178,6 +178,6 @@ export const updateSuperLiveInsightsExportScheduleResponseSchema = z.object({
 export const deleteSuperLiveInsightsExportScheduleResponseSchema = z.object({
   data: z.object({
     deleted: z.literal(true),
-    id: z.string().uuid(),
+    id: z.uuid(),
   }),
 });

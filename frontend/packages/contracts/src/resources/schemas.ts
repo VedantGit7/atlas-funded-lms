@@ -33,7 +33,7 @@ export const resourceListQuerySchema = z
 export type ResourceListQuery = z.output<typeof resourceListQuerySchema>;
 
 export const resourceItemSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   kind: resourceKindSchema,
   title: z.string(),
   description: z.string().nullable(),
@@ -41,9 +41,9 @@ export const resourceItemSchema = z.object({
   sizeBytes: z.number().int().nonnegative().nullable(),
   contentType: z.string().nullable(),
   createdAt: z.string(),
-  courseId: z.string().uuid(),
+  courseId: z.uuid(),
   courseTitle: z.string(),
-  lessonId: z.string().uuid(),
+  lessonId: z.uuid(),
   lessonTitle: z.string(),
   /** Signed download URL (stored files) or the external URL (links/videos). */
   href: z.string().nullable(),

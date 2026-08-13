@@ -32,7 +32,7 @@ export const CreateExtensionRegistrationBodySchema = z.object({
 
 export const UpdateExtensionRegistrationBodySchema = z
   .object({
-    id: z.string().uuid().optional(),
+    id: z.uuid().optional(),
     extensionPointKey: ExtensionPointKeySchema.optional(),
     registrationKey: RegistrationKeySchema.optional(),
     configJson: z.record(z.string(), z.unknown()).optional(),
@@ -44,7 +44,7 @@ export const UpdateExtensionRegistrationBodySchema = z
 
 export const DeleteExtensionRegistrationBodySchema = z
   .object({
-    id: z.string().uuid().optional(),
+    id: z.uuid().optional(),
     extensionPointKey: ExtensionPointKeySchema.optional(),
     registrationKey: RegistrationKeySchema.optional(),
   })

@@ -54,8 +54,8 @@ export const UsageSummaryResponseSchema = z.object({
   data: z.object({
     plan: z.object({
       name: z.string().nullable(),
-      startedAt: z.string().datetime().nullable(),
-      nextBillingAt: z.string().datetime().nullable(),
+      startedAt: z.iso.datetime().nullable(),
+      nextBillingAt: z.iso.datetime().nullable(),
     }),
     limits: UsageLimitsSchema,
     kpis: z.object({

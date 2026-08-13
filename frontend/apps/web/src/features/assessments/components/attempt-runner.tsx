@@ -9,6 +9,10 @@ import { captureProductEvent } from "../../../observability/capture-product-even
 import type { attemptRunnerResponseSchema } from "../assessment-response-schemas";
 import { ItemResponseRenderer } from "../../item-registry/components/renderers/item-response-renderer";
 import { getItemTypeVisual } from "../../item-registry/components/item-type-config";
+import {
+  attachProctoringSignalCapture,
+  submitFixtureIdentityVerification,
+} from "../lib/proctoring-signal-capture";
 
 type AttemptRunner = z.infer<typeof attemptRunnerResponseSchema>["data"];
 type RunnerItem = AttemptRunner["items"][number];
@@ -74,17 +78,20 @@ export function AttemptRunner({ initialAttempt }: AttemptRunnerProps) {
   }, [activeItem?.assessmentItemId]);
 
   useEffect(() => {
-    function handleVisibilityChange() {
-      if (document.hidden && attempt.l1ProctoringEnabled) {
+    const level =
+      typeof attempt.proctoringLevel === "number"
+        ? attempt.proctoringLevel
+        : attempt.l1ProctoringEnabled
+          ? 1
+          : 0;
+    return attachProctoringSignalCapture(attempt.id, {
+      enabled: level >= 1 || attempt.l1ProctoringEnabled,
+      level: level >= 1 ? level : 1,
+      onTabHidden: () => {
         setError("Focus warning: tab blur detected.");
-      }
-    }
-
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-    };
-  }, [attempt.l1ProctoringEnabled]);
+      },
+    });
+  }, [attempt.id, attempt.l1ProctoringEnabled, attempt.proctoringLevel]);
 
   async function saveAnswer(item: RunnerItem, answerJson: Record<string, unknown>) {
     setAutosaveState("saving");
@@ -137,7 +144,9 @@ export function AttemptRunner({ initialAttempt }: AttemptRunnerProps) {
       <header className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)] p-4 shadow-sm">
         <div>
           <p className="text-sm text-[var(--admin-on-surface-variant)]">Attempt in progress</p>
-          <h1 className="text-2xl font-semibold text-[var(--admin-on-surface)]">Assessment attempt</h1>
+          <h1 className="text-2xl font-semibold text-[var(--admin-on-surface)]">
+            Assessment attempt
+          </h1>
         </div>
         <div className="text-right text-sm text-[var(--admin-on-surface-variant)]">
           {timerLabel ? <p>Time remaining: {timerLabel}</p> : null}
@@ -251,6 +260,17 @@ export function AttemptRunner({ initialAttempt }: AttemptRunnerProps) {
         >
           {submitting ? "Submitting..." : "Submit attempt"}
         </button>
+        {attempt.proctoringLevel >= 3 ? (
+          <button
+            type="button"
+            className="rounded-xl border border-dashed border-[var(--admin-border)] px-4 py-2.5 text-sm text-[var(--admin-on-surface-variant)]"
+            onClick={() => {
+              void submitFixtureIdentityVerification(attempt.id, "passed");
+            }}
+          >
+            Run fixture identity check
+          </button>
+        ) : null}
         <Link
           href={`/assessments/${attempt.assessmentId}`}
           className="rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 py-2.5 text-sm font-semibold text-[var(--admin-on-surface)] transition-colors hover:bg-[var(--admin-surface-high)]"

@@ -26,6 +26,7 @@ export function useZodForm<TFieldValues extends FieldValues>({
   return useForm<TFieldValues>({
     ...formProps,
     ...(defaultValues === undefined ? {} : { defaultValues }),
-    resolver: zodResolver(schema as unknown as Parameters<typeof zodResolver>[0]) as Resolver<TFieldValues>,
+    // Zod 4 + @hookform/resolvers: schema generics don't line up with FieldValues cleanly.
+    resolver: zodResolver(schema as never) as Resolver<TFieldValues>,
   });
 }

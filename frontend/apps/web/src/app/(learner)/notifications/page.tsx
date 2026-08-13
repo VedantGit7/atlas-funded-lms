@@ -1,4 +1,4 @@
-import { PageGate, PageHeader } from "../../../components/patterns/PageGate";
+import { PageGate } from "../../../components/patterns/PageGate";
 import { LearnerNotificationsClient } from "../../../features/notifications/components/LearnerNotificationsClient";
 import { ServerApiError, serverApi } from "../../../lib/server-api";
 import type { z } from "zod";
@@ -14,17 +14,11 @@ export default async function LearnerNotificationsPage() {
 
     return (
       <PageGate state="ready" title="Notifications">
-        <main className="space-y-6">
-          <PageHeader
-            title="Notifications"
-            description="Read in-app notifications from your learning activity."
-          />
-          <LearnerNotificationsClient
-            initialItems={response.data}
-            initialNextCursor={response.page.nextCursor}
-            initialHasMore={response.page.hasMore}
-          />
-        </main>
+        <LearnerNotificationsClient
+          initialItems={response.data}
+          initialNextCursor={response.page.nextCursor}
+          initialHasMore={response.page.hasMore}
+        />
       </PageGate>
     );
   } catch (error) {

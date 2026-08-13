@@ -47,7 +47,7 @@ export const progressScoreExportColumnKeySchema = z.string().min(1).max(64);
 
 export const progressScoreExportHistoryItemSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     fileName: z.string(),
     format: z.enum(REPORT_FORMATS),
     dataset: z.enum(PROGRESS_SCORE_EXPORT_DATASETS),
@@ -57,9 +57,9 @@ export const progressScoreExportHistoryItemSchema = z
     sizeLabel: z.string().nullable(),
     status: z.enum(["QUEUED", "RUNNING", "SUCCEEDED", "FAILED", "CANCELLED"]),
     expired: z.boolean(),
-    expiresAt: z.string().datetime().nullable(),
-    createdAt: z.string().datetime(),
-    completedAt: z.string().datetime().nullable(),
+    expiresAt: z.iso.datetime().nullable(),
+    createdAt: z.iso.datetime(),
+    completedAt: z.iso.datetime().nullable(),
     errorCode: z.string().nullable(),
     errorMessage: z.string().nullable(),
     errorTrace: z.array(z.string()).nullable(),
@@ -71,7 +71,7 @@ export const progressScoreExportHistoryItemSchema = z
 
 export const progressScoreExportScheduleItemSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     name: z.string(),
     datasetLabel: z.string(),
     cadenceLabel: z.string(),
@@ -79,7 +79,7 @@ export const progressScoreExportScheduleItemSchema = z
     timezone: z.string(),
     formats: z.array(z.enum(REPORT_FORMATS)),
     isActive: z.boolean(),
-    nextRunAt: z.string().datetime(),
+    nextRunAt: z.iso.datetime(),
     nextRunLabel: z.string(),
     recipients: z.array(z.string()),
     webhookLabel: z.string().nullable(),
@@ -119,19 +119,19 @@ export const createProgressScoreExportBodySchema = rejectClientTenantFields
     columns: z.array(progressScoreExportColumnKeySchema).min(1).max(30),
     format: z.enum(PROGRESS_SCORE_EXPORT_FORMATS).default("csv"),
     productType: z.enum(PROGRESS_SCORE_EXPORT_PRODUCT_TYPES).optional(),
-    productId: z.string().uuid().optional(),
-    courseId: z.string().uuid().optional(),
-    assessmentId: z.string().uuid().optional(),
-    dateFrom: z.string().datetime().optional(),
-    dateTo: z.string().datetime().optional(),
+    productId: z.uuid().optional(),
+    courseId: z.uuid().optional(),
+    assessmentId: z.uuid().optional(),
+    dateFrom: z.iso.datetime().optional(),
+    dateTo: z.iso.datetime().optional(),
     learnerName: z.string().trim().min(1).max(200).optional(),
     enrolledType: z.string().trim().min(1).max(64).optional(),
     status: z.string().trim().min(1).max(64).optional(),
     resultStatus: z.enum(["pass", "fail", "pending", "in_progress"]).optional(),
     useCurrentFilters: z.boolean().default(true),
     delivery: z.enum(PROGRESS_SCORE_EXPORT_DELIVERY).default("download"),
-    recipients: z.array(z.string().email()).max(20).optional(),
-    webhookUrl: z.string().url().max(500).nullable().optional(),
+    recipients: z.array(z.email()).max(20).optional(),
+    webhookUrl: z.url().max(500).nullable().optional(),
     scheduleEnabled: z.boolean().default(false),
     scheduleName: z.string().trim().max(120).optional(),
     cadence: z.enum(PROGRESS_SCORE_EXPORT_CADENCE).optional(),
@@ -154,7 +154,7 @@ export const createProgressScoreExportResponseSchema = z.object({
 
 export const progressScoreExportRunParamsSchema = z
   .object({
-    runId: z.string().uuid(),
+    runId: z.uuid(),
   })
   .strict();
 
@@ -168,7 +168,7 @@ export const retryProgressScoreExportResponseSchema = z.object({
 
 export const progressScoreExportScheduleParamsSchema = z
   .object({
-    scheduleId: z.string().uuid(),
+    scheduleId: z.uuid(),
   })
   .strict();
 
@@ -186,6 +186,6 @@ export const updateProgressScoreExportScheduleResponseSchema = z.object({
 export const deleteProgressScoreExportScheduleResponseSchema = z.object({
   data: z.object({
     deleted: z.literal(true),
-    id: z.string().uuid(),
+    id: z.uuid(),
   }),
 });

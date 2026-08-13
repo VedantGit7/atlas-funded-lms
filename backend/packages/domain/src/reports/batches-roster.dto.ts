@@ -84,22 +84,22 @@ export const batchHealthSchema = z.enum(["on_track", "at_risk", "critical"]);
 
 export const batchListItemSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     key: z.string(),
     name: z.string(),
     description: z.string().nullable(),
-    courseId: z.string().uuid().nullable(),
+    courseId: z.uuid().nullable(),
     courseTitle: z.string().nullable(),
     status: z.string(),
-    startsAt: z.string().datetime().nullable(),
-    endsAt: z.string().datetime().nullable(),
+    startsAt: z.iso.datetime().nullable(),
+    endsAt: z.iso.datetime().nullable(),
     memberCount: z.number().int().nonnegative(),
     avgContentCompletionPct: z.number().nullable(),
     avgLiveAttendancePct: z.number().nullable(),
     avgTestScorePct: z.number().nullable(),
-    lastActivityAt: z.string().datetime().nullable(),
+    lastActivityAt: z.iso.datetime().nullable(),
     health: batchHealthSchema,
-    createdAt: z.string().datetime(),
+    createdAt: z.iso.datetime(),
   })
   .strict();
 
@@ -122,7 +122,7 @@ export const batchesListResponseSchema = z.object({
 
 export const batchIdParamsSchema = z
   .object({
-    batchId: z.string().uuid(),
+    batchId: z.uuid(),
   })
   .strict();
 
@@ -141,7 +141,7 @@ export const batchDetailResponseSchema = z.object({
     overview: z.object({
       needsAttention: z.array(
         z.object({
-          membershipId: z.string().uuid(),
+          membershipId: z.uuid(),
           learnerName: z.string().nullable(),
           email: z.string().nullable(),
           reason: z.string(),
@@ -153,9 +153,9 @@ export const batchDetailResponseSchema = z.object({
       ),
       upcomingSessions: z.array(
         z.object({
-          liveSessionId: z.string().uuid(),
+          liveSessionId: z.uuid(),
           title: z.string(),
-          scheduledAt: z.string().datetime().nullable(),
+          scheduledAt: z.iso.datetime().nullable(),
           status: z.string(),
           durationMinutes: z.number().nullable(),
         }),
@@ -170,7 +170,7 @@ export const batchDetailResponseSchema = z.object({
       cohortTrend: z.array(
         z.object({
           weekLabel: z.string(),
-          weekStart: z.string().datetime(),
+          weekStart: z.iso.datetime(),
           contentCompletionPct: z.number().nullable(),
           liveAttendancePct: z.number().nullable(),
           testScorePct: z.number().nullable(),
@@ -183,8 +183,8 @@ export const batchDetailResponseSchema = z.object({
 export const batchLearnersQuerySchema = rejectClientTenantFields
   .extend({
     learnerName: z.string().trim().min(1).max(200).optional(),
-    joinedFrom: z.string().datetime().optional(),
-    joinedTo: z.string().datetime().optional(),
+    joinedFrom: z.iso.datetime().optional(),
+    joinedTo: z.iso.datetime().optional(),
     minCompletion: z.coerce.number().min(0).max(100).optional(),
     maxCompletion: z.coerce.number().min(0).max(100).optional(),
     health: z.enum(["any", "on_track", "at_risk", "critical", "needs_attention"]).default("any"),
@@ -212,10 +212,10 @@ export type BatchLearnersQuery = z.output<typeof batchLearnersQuerySchema>;
 
 export const batchLearnerItemSchema = z
   .object({
-    membershipId: z.string().uuid(),
+    membershipId: z.uuid(),
     learnerName: z.string().nullable(),
     email: z.string().nullable(),
-    activityAt: z.string().datetime().nullable(),
+    activityAt: z.iso.datetime().nullable(),
     liveAttendancePct: z.number().nullable(),
     liveAttendedCount: z.number().int().nonnegative(),
     liveSessionCount: z.number().int().nonnegative(),
@@ -224,16 +224,16 @@ export const batchLearnerItemSchema = z
     contentCompletionPct: z.number().int().min(0).max(100),
     completedLessons: z.number().int().nonnegative(),
     totalLessons: z.number().int().nonnegative(),
-    joinedAt: z.string().datetime(),
+    joinedAt: z.iso.datetime(),
     health: batchHealthSchema,
   })
   .strict();
 
 export const batchLearnersListResponseSchema = z.object({
   data: z.object({
-    batchId: z.string().uuid(),
+    batchId: z.uuid(),
     batchName: z.string(),
-    courseId: z.string().uuid().nullable(),
+    courseId: z.uuid().nullable(),
     courseTitle: z.string().nullable(),
     items: z.array(batchLearnerItemSchema),
     pageInfo: pageInfoSchema,
@@ -243,21 +243,21 @@ export const batchLearnersListResponseSchema = z.object({
 
 export const batchLearnerParamsSchema = z
   .object({
-    batchId: z.string().uuid(),
-    membershipId: z.string().uuid(),
+    batchId: z.uuid(),
+    membershipId: z.uuid(),
   })
   .strict();
 
 export const batchLearnerLiveAttendanceItemSchema = z
   .object({
-    liveSessionId: z.string().uuid(),
+    liveSessionId: z.uuid(),
     title: z.string(),
-    scheduledAt: z.string().datetime().nullable(),
+    scheduledAt: z.iso.datetime().nullable(),
     status: z.string(),
     sessionStatus: z.string(),
     sessionKind: z.string().nullable(),
-    joinedAt: z.string().datetime().nullable(),
-    leftAt: z.string().datetime().nullable(),
+    joinedAt: z.iso.datetime().nullable(),
+    leftAt: z.iso.datetime().nullable(),
     durationSeconds: z.number().int().nullable(),
     plannedDurationMinutes: z.number().int().nullable(),
     attendanceKind: z.enum(["attended", "partial", "absent", "upcoming"]),
@@ -266,13 +266,13 @@ export const batchLearnerLiveAttendanceItemSchema = z
 
 export const batchLearnerExamItemSchema = z
   .object({
-    assessmentId: z.string().uuid(),
+    assessmentId: z.uuid(),
     assessmentTitle: z.string(),
-    attemptId: z.string().uuid(),
+    attemptId: z.uuid(),
     attemptStatus: z.string(),
     scorePct: z.number().nullable(),
-    submittedAt: z.string().datetime().nullable(),
-    startedAt: z.string().datetime(),
+    submittedAt: z.iso.datetime().nullable(),
+    startedAt: z.iso.datetime(),
     durationSeconds: z.number().int().nullable(),
     passMarkPct: z.number().nullable(),
     outcome: z.enum(["passed", "borderline", "failed", "in_progress", "other"]),
@@ -281,7 +281,7 @@ export const batchLearnerExamItemSchema = z
 
 export const batchLearnerCourseProgressItemSchema = z
   .object({
-    courseId: z.string().uuid(),
+    courseId: z.uuid(),
     courseTitle: z.string(),
     completedLessons: z.number().int().nonnegative(),
     totalLessons: z.number().int().nonnegative(),
@@ -293,7 +293,7 @@ export const batchLearnerCourseProgressItemSchema = z
 
 export const batchLearnerLessonStripItemSchema = z
   .object({
-    lessonId: z.string().uuid(),
+    lessonId: z.uuid(),
     title: z.string(),
     sortOrder: z.number().int(),
     completed: z.boolean(),
@@ -303,18 +303,18 @@ export const batchLearnerLessonStripItemSchema = z
 
 export const batchLearnerDetailResponseSchema = z.object({
   data: z.object({
-    batchId: z.string().uuid(),
+    batchId: z.uuid(),
     batchKey: z.string(),
     batchName: z.string(),
-    courseId: z.string().uuid().nullable(),
+    courseId: z.uuid().nullable(),
     courseTitle: z.string().nullable(),
-    batchStartsAt: z.string().datetime().nullable(),
-    batchEndsAt: z.string().datetime().nullable(),
-    membershipId: z.string().uuid(),
+    batchStartsAt: z.iso.datetime().nullable(),
+    batchEndsAt: z.iso.datetime().nullable(),
+    membershipId: z.uuid(),
     learnerName: z.string().nullable(),
     email: z.string().nullable(),
-    joinedAt: z.string().datetime(),
-    activityAt: z.string().datetime().nullable(),
+    joinedAt: z.iso.datetime(),
+    activityAt: z.iso.datetime().nullable(),
     health: batchHealthSchema,
     summary: z.object({
       liveAttendancePct: z.number().nullable(),
@@ -356,8 +356,8 @@ export const batchLearnerDetailResponseSchema = z.object({
       longestGapDays: z.number().int().nullable(),
     }),
     membership: z.object({
-      membershipId: z.string().uuid(),
-      joinedAt: z.string().datetime(),
+      membershipId: z.uuid(),
+      joinedAt: z.iso.datetime(),
       role: z.string(),
       source: z.string(),
       addedBy: z.string(),
@@ -379,8 +379,8 @@ export const removeBatchLearnerBodySchema = rejectClientTenantFields
 export const removeBatchLearnerResponseSchema = z.object({
   data: z.object({
     removed: z.boolean(),
-    batchId: z.string().uuid(),
-    membershipId: z.string().uuid(),
+    batchId: z.uuid(),
+    membershipId: z.uuid(),
   }),
 });
 
@@ -399,14 +399,14 @@ export type BatchLiveSessionsQuery = z.output<typeof batchLiveSessionsQuerySchem
 
 export const batchLiveSessionItemSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     title: z.string(),
     kind: z.string().nullable(),
     status: z.string(),
     hostLabel: z.string().nullable(),
-    scheduledAt: z.string().datetime().nullable(),
-    startedAt: z.string().datetime().nullable(),
-    endedAt: z.string().datetime().nullable(),
+    scheduledAt: z.iso.datetime().nullable(),
+    startedAt: z.iso.datetime().nullable(),
+    endedAt: z.iso.datetime().nullable(),
     plannedDurationMinutes: z.number().int().nullable(),
     actualDurationMinutes: z.number().int().nullable(),
     rosterCount: z.number().int().nonnegative(),
@@ -432,10 +432,10 @@ export const batchLiveSessionsSummarySchema = z.object({
 
 export const batchLiveSessionsListResponseSchema = z.object({
   data: z.object({
-    batchId: z.string().uuid(),
+    batchId: z.uuid(),
     batchKey: z.string(),
     batchName: z.string(),
-    courseId: z.string().uuid().nullable(),
+    courseId: z.uuid().nullable(),
     courseTitle: z.string().nullable(),
     items: z.array(batchLiveSessionItemSchema),
     pageInfo: pageInfoSchema,
@@ -455,24 +455,24 @@ export type BatchLiveSessionsMatrixQuery = z.output<typeof batchLiveSessionsMatr
 
 export const batchLiveSessionsMatrixResponseSchema = z.object({
   data: z.object({
-    batchId: z.string().uuid(),
+    batchId: z.uuid(),
     batchName: z.string(),
     sessions: z.array(
       z.object({
-        id: z.string().uuid(),
+        id: z.uuid(),
         title: z.string(),
-        scheduledAt: z.string().datetime().nullable(),
+        scheduledAt: z.iso.datetime().nullable(),
         status: z.string(),
       }),
     ),
     learners: z.array(
       z.object({
-        membershipId: z.string().uuid(),
+        membershipId: z.uuid(),
         learnerName: z.string().nullable(),
         email: z.string().nullable(),
         cells: z.array(
           z.object({
-            liveSessionId: z.string().uuid(),
+            liveSessionId: z.uuid(),
             kind: z.enum(["attended", "partial", "absent", "upcoming", "cancelled", "none"]),
           }),
         ),
@@ -495,31 +495,31 @@ export type BatchLiveSessionsAbsenteesQuery = z.output<
 
 export const batchLiveSessionsAbsenteesResponseSchema = z.object({
   data: z.object({
-    membershipIds: z.array(z.string().uuid()),
+    membershipIds: z.array(z.uuid()),
   }),
 });
 
 export const batchLiveSessionParamsSchema = z
   .object({
-    batchId: z.string().uuid(),
-    sessionId: z.string().uuid(),
+    batchId: z.uuid(),
+    sessionId: z.uuid(),
   })
   .strict();
 
 export const batchLiveSessionDetailResponseSchema = z.object({
   data: z.object({
-    batchId: z.string().uuid(),
+    batchId: z.uuid(),
     batchKey: z.string(),
     batchName: z.string(),
     session: z.object({
-      id: z.string().uuid(),
+      id: z.uuid(),
       title: z.string(),
       kind: z.string().nullable(),
       status: z.string(),
       hostLabel: z.string().nullable(),
-      scheduledAt: z.string().datetime().nullable(),
-      startedAt: z.string().datetime().nullable(),
-      endedAt: z.string().datetime().nullable(),
+      scheduledAt: z.iso.datetime().nullable(),
+      startedAt: z.iso.datetime().nullable(),
+      endedAt: z.iso.datetime().nullable(),
       plannedDurationMinutes: z.number().int().nullable(),
       actualDurationMinutes: z.number().int().nullable(),
       recordingUrl: z.string().nullable(),
@@ -528,9 +528,9 @@ export const batchLiveSessionDetailResponseSchema = z.object({
     }),
     nextSession: z
       .object({
-        id: z.string().uuid(),
+        id: z.uuid(),
         title: z.string(),
-        scheduledAt: z.string().datetime().nullable(),
+        scheduledAt: z.iso.datetime().nullable(),
       })
       .nullable(),
     summary: z.object({
@@ -543,7 +543,7 @@ export const batchLiveSessionDetailResponseSchema = z.object({
       lateJoinCount: z.number().int().nonnegative(),
       leftEarlyCount: z.number().int().nonnegative(),
       peakConcurrent: z.number().int().nonnegative().nullable(),
-      peakConcurrentAt: z.string().datetime().nullable(),
+      peakConcurrentAt: z.iso.datetime().nullable(),
       peakConcurrentOffsetMinutes: z.number().int().nullable(),
     }),
     timeline: z.object({
@@ -587,19 +587,17 @@ export const batchLiveSessionAttendeesQuerySchema = rejectClientTenantFields
   })
   .strict();
 
-export type BatchLiveSessionAttendeesQuery = z.output<
-  typeof batchLiveSessionAttendeesQuerySchema
->;
+export type BatchLiveSessionAttendeesQuery = z.output<typeof batchLiveSessionAttendeesQuerySchema>;
 
 export const batchLiveSessionAttendeeItemSchema = z
   .object({
-    membershipId: z.string().uuid(),
+    membershipId: z.uuid(),
     learnerName: z.string().nullable(),
     email: z.string().nullable(),
     attendanceKind: z.enum(["attended", "partial", "absent", "excused", "upcoming"]),
     healthRail: z.enum(["none", "warning", "danger"]),
-    joinedAt: z.string().datetime().nullable(),
-    leftAt: z.string().datetime().nullable(),
+    joinedAt: z.iso.datetime().nullable(),
+    leftAt: z.iso.datetime().nullable(),
     watchSeconds: z.number().int().nullable(),
     watchMinutes: z.number().nullable(),
     plannedMinutes: z.number().int().nullable(),
@@ -613,7 +611,7 @@ export const batchLiveSessionAttendeeItemSchema = z
 
 export const batchLiveSessionAttendeesListResponseSchema = z.object({
   data: z.object({
-    sessionId: z.string().uuid(),
+    sessionId: z.uuid(),
     sessionTitle: z.string(),
     items: z.array(batchLiveSessionAttendeeItemSchema),
     pageInfo: pageInfoSchema,
@@ -634,11 +632,11 @@ export type BatchExamsQuery = z.output<typeof batchExamsQuerySchema>;
 
 export const batchExamAssessmentItemSchema = z
   .object({
-    assessmentId: z.string().uuid(),
+    assessmentId: z.uuid(),
     title: z.string(),
     assessmentType: z.string(),
     typeLabel: z.enum(["exam", "quiz", "other"]),
-    releasedAt: z.string().datetime().nullable(),
+    releasedAt: z.iso.datetime().nullable(),
     passMarkPct: z.number().nullable(),
     rosterCount: z.number().int().nonnegative(),
     attemptedCount: z.number().int().nonnegative(),
@@ -674,10 +672,10 @@ export const batchExamsSummarySchema = z.object({
 
 export const batchExamsListResponseSchema = z.object({
   data: z.object({
-    batchId: z.string().uuid(),
+    batchId: z.uuid(),
     batchKey: z.string(),
     batchName: z.string(),
-    courseId: z.string().uuid().nullable(),
+    courseId: z.uuid().nullable(),
     courseTitle: z.string().nullable(),
     summary: batchExamsSummarySchema,
     assessments: z.array(batchExamAssessmentItemSchema),
@@ -695,12 +693,12 @@ export type BatchExamsMatrixQuery = z.output<typeof batchExamsMatrixQuerySchema>
 
 export const batchExamsMatrixResponseSchema = z.object({
   data: z.object({
-    batchId: z.string().uuid(),
+    batchId: z.uuid(),
     batchName: z.string(),
     passMarkPct: z.number(),
     assessments: z.array(
       z.object({
-        assessmentId: z.string().uuid(),
+        assessmentId: z.uuid(),
         title: z.string(),
         shortTitle: z.string(),
         avgScorePct: z.number().nullable(),
@@ -708,14 +706,14 @@ export const batchExamsMatrixResponseSchema = z.object({
     ),
     learners: z.array(
       z.object({
-        membershipId: z.string().uuid(),
+        membershipId: z.uuid(),
         learnerName: z.string().nullable(),
         email: z.string().nullable(),
         avgScorePct: z.number().nullable(),
         healthRail: z.enum(["none", "success", "warning", "danger"]),
         cells: z.array(
           z.object({
-            assessmentId: z.string().uuid(),
+            assessmentId: z.uuid(),
             kind: z.enum(["passed", "failed", "awaiting", "not_attempted"]),
             scorePct: z.number().nullable(),
             attemptCount: z.number().int().nonnegative(),
@@ -729,7 +727,7 @@ export const batchExamsMatrixResponseSchema = z.object({
 
 export const batchExamsBelowPassResponseSchema = z.object({
   data: z.object({
-    membershipIds: z.array(z.string().uuid()),
+    membershipIds: z.array(z.uuid()),
     passMarkPct: z.number(),
   }),
 });
@@ -749,8 +747,8 @@ export const batchContentLessonTypeSchema = z.enum([
 
 export const batchContentFunnelLessonSchema = z
   .object({
-    lessonId: z.string().uuid(),
-    moduleId: z.string().uuid(),
+    lessonId: z.uuid(),
+    moduleId: z.uuid(),
     moduleTitle: z.string(),
     modulePosition: z.number().int().nonnegative(),
     lessonPosition: z.number().int().nonnegative(),
@@ -784,13 +782,13 @@ export const batchContentSummarySchema = z.object({
 
 export const batchContentResponseSchema = z.object({
   data: z.object({
-    batchId: z.string().uuid(),
+    batchId: z.uuid(),
     batchKey: z.string(),
     batchName: z.string(),
-    courseId: z.string().uuid().nullable(),
+    courseId: z.uuid().nullable(),
     courseTitle: z.string().nullable(),
-    startsAt: z.string().datetime().nullable(),
-    endsAt: z.string().datetime().nullable(),
+    startsAt: z.iso.datetime().nullable(),
+    endsAt: z.iso.datetime().nullable(),
     summary: batchContentSummarySchema,
     completionSpread: z.object({
       band0to25: z.number().int().nonnegative(),
@@ -801,14 +799,14 @@ export const batchContentResponseSchema = z.object({
     paceSeries: z.array(
       z.object({
         weekLabel: z.string(),
-        weekStart: z.string().datetime(),
+        weekStart: z.iso.datetime(),
         completionPct: z.number().nullable(),
         expectedPct: z.number().nullable(),
       }),
     ),
     modules: z.array(
       z.object({
-        moduleId: z.string().uuid(),
+        moduleId: z.uuid(),
         title: z.string(),
         position: z.number().int().nonnegative(),
         lessons: z.array(batchContentFunnelLessonSchema),
@@ -820,17 +818,9 @@ export const batchContentResponseSchema = z.object({
 export const batchContentLearnersQuerySchema = rejectClientTenantFields
   .extend({
     q: z.string().trim().min(1).max(200).optional(),
-    view: z
-      .enum(["any", "stalled", "never_started", "finished", "in_progress"])
-      .default("any"),
+    view: z.enum(["any", "stalled", "never_started", "finished", "in_progress"]).default("any"),
     sortBy: z
-      .enum([
-        "learner_name",
-        "completion_pct",
-        "days_since",
-        "projected_finish",
-        "last_activity",
-      ])
+      .enum(["learner_name", "completion_pct", "days_since", "projected_finish", "last_activity"])
       .default("completion_pct"),
     sortDir: z.enum(["asc", "desc"]).default("asc"),
     limit: z.coerce.number().int().min(1).max(100).default(25),
@@ -842,7 +832,7 @@ export type BatchContentLearnersQuery = z.output<typeof batchContentLearnersQuer
 
 export const batchContentLearnerItemSchema = z
   .object({
-    membershipId: z.string().uuid(),
+    membershipId: z.uuid(),
     learnerName: z.string().nullable(),
     email: z.string().nullable(),
     completionPct: z.number().int().min(0).max(100),
@@ -850,9 +840,9 @@ export const batchContentLearnerItemSchema = z
     totalLessons: z.number().int().nonnegative(),
     lastLessonTitle: z.string().nullable(),
     lastLessonSequence: z.number().nullable(),
-    lastActivityAt: z.string().datetime().nullable(),
+    lastActivityAt: z.iso.datetime().nullable(),
     daysSinceActivity: z.number().int().nullable(),
-    projectedFinishAt: z.string().datetime().nullable(),
+    projectedFinishAt: z.iso.datetime().nullable(),
     projectedFinishLabel: z.string(),
     willFinishInWindow: z.boolean().nullable(),
     activityStatus: z.enum(["active", "stalled", "never_started", "finished"]),
@@ -862,7 +852,7 @@ export const batchContentLearnerItemSchema = z
 
 export const batchContentLearnersResponseSchema = z.object({
   data: z.object({
-    batchId: z.string().uuid(),
+    batchId: z.uuid(),
     items: z.array(batchContentLearnerItemSchema),
     pageInfo: pageInfoSchema,
   }),
@@ -870,18 +860,18 @@ export const batchContentLearnersResponseSchema = z.object({
 
 export const batchContentStalledResponseSchema = z.object({
   data: z.object({
-    membershipIds: z.array(z.string().uuid()),
+    membershipIds: z.array(z.uuid()),
     stalledDaysThreshold: z.number().int().positive(),
   }),
 });
 
 export const batchAudienceBodySchema = rejectClientTenantFields
   .extend({
-    batchId: z.string().uuid(),
-    membershipIds: z.array(z.string().uuid()).min(1).max(2000).optional(),
+    batchId: z.uuid(),
+    membershipIds: z.array(z.uuid()).min(1).max(2000).optional(),
     learnerName: z.string().trim().min(1).max(200).optional(),
-    joinedFrom: z.string().datetime().optional(),
-    joinedTo: z.string().datetime().optional(),
+    joinedFrom: z.iso.datetime().optional(),
+    joinedTo: z.iso.datetime().optional(),
     minCompletion: z.number().min(0).max(100).optional(),
     maxCompletion: z.number().min(0).max(100).optional(),
   })
@@ -898,13 +888,13 @@ export const sendBatchMessageBodySchema = batchAudienceBodySchema
       .max(2)
       .default(["email"]),
     excludeMessagedWithinDays: z.coerce.number().int().min(0).max(90).optional(),
-    scheduleAt: z.string().datetime().optional(),
+    scheduleAt: z.iso.datetime().optional(),
   })
   .strict();
 
 export const sendBatchMessageResponseSchema = z.object({
   data: z.object({
-    sendGroupId: z.string().uuid(),
+    sendGroupId: z.uuid(),
     deliveredCount: z.number().int().nonnegative(),
     skippedCount: z.number().int().nonnegative(),
     failedCount: z.number().int().nonnegative(),
@@ -935,8 +925,8 @@ export const batchMessageHistoryItemSchema = z
     clickedCount: z.number().nullable(),
     channels: z.array(z.enum(["email", "in_app"])),
     status: z.enum(["sent", "partially_failed", "scheduled", "failed"]),
-    sentAt: z.string().datetime().nullable(),
-    scheduledAt: z.string().datetime().nullable(),
+    sentAt: z.iso.datetime().nullable(),
+    scheduledAt: z.iso.datetime().nullable(),
     sentByLabel: z.string().nullable(),
     isAutomated: z.boolean(),
   })
@@ -944,10 +934,10 @@ export const batchMessageHistoryItemSchema = z
 
 export const batchMessagesListResponseSchema = z.object({
   data: z.object({
-    batchId: z.string().uuid(),
+    batchId: z.uuid(),
     batchKey: z.string(),
     batchName: z.string(),
-    courseId: z.string().uuid().nullable(),
+    courseId: z.uuid().nullable(),
     courseTitle: z.string().nullable(),
     rosterCount: z.number().int().nonnegative(),
     items: z.array(batchMessageHistoryItemSchema),
@@ -965,13 +955,13 @@ export const batchMessageAudienceKeySchema = z.enum([
 
 export const batchMessagesAudiencesResponseSchema = z.object({
   data: z.object({
-    batchId: z.string().uuid(),
+    batchId: z.uuid(),
     audiences: z.array(
       z.object({
         key: batchMessageAudienceKeySchema,
         label: z.string(),
         count: z.number().int().nonnegative(),
-        membershipIds: z.array(z.string().uuid()),
+        membershipIds: z.array(z.uuid()),
       }),
     ),
   }),
@@ -989,7 +979,7 @@ export const batchMessageNudgeSchema = z
 
 export const batchMessagesNudgesResponseSchema = z.object({
   data: z.object({
-    batchId: z.string().uuid(),
+    batchId: z.uuid(),
     nudges: z.array(batchMessageNudgeSchema),
   }),
 });
@@ -1002,16 +992,16 @@ export const updateBatchMessagesNudgesBodySchema = rejectClientTenantFields
 
 export const retryBatchMessageBodySchema = rejectClientTenantFields
   .extend({
-    sendGroupId: z.string().uuid(),
+    sendGroupId: z.uuid(),
   })
   .strict();
 
 export const exportBatchRosterBodySchema = rejectClientTenantFields
   .extend({
-    batchId: z.string().uuid().optional(),
+    batchId: z.uuid().optional(),
     learnerName: z.string().trim().min(1).max(200).optional(),
-    joinedFrom: z.string().datetime().optional(),
-    joinedTo: z.string().datetime().optional(),
+    joinedFrom: z.iso.datetime().optional(),
+    joinedTo: z.iso.datetime().optional(),
     columns: z.array(z.string().min(1)).min(1).max(30).optional(),
     emailDownloadLink: z.boolean().default(true),
   })
@@ -1019,7 +1009,7 @@ export const exportBatchRosterBodySchema = rejectClientTenantFields
 
 export const exportBatchRosterResponseSchema = z.object({
   data: z.object({
-    runId: z.string().uuid(),
+    runId: z.uuid(),
     status: z.string(),
     emailed: z.boolean(),
   }),
@@ -1047,17 +1037,11 @@ function parseCompareBatchIds(value: unknown): string[] {
   return ids;
 }
 
-export const BATCH_COMPARE_NORMALIZE_OPTIONS = [
-  "week_of_batch",
-  "absolute_dates",
-] as const;
+export const BATCH_COMPARE_NORMALIZE_OPTIONS = ["week_of_batch", "absolute_dates"] as const;
 
 export const batchesCompareQuerySchema = rejectClientTenantFields
   .extend({
-    batchIds: z.preprocess(
-      parseCompareBatchIds,
-      z.array(z.string().uuid()).min(2).max(4),
-    ),
+    batchIds: z.preprocess(parseCompareBatchIds, z.array(z.uuid()).min(2).max(4)),
     normalize: z.enum(BATCH_COMPARE_NORMALIZE_OPTIONS).default("week_of_batch"),
   })
   .strict();
@@ -1077,19 +1061,19 @@ export const batchCompareTrendPointSchema = z
   .object({
     weekIndex: z.number().int().nonnegative(),
     weekLabel: z.string(),
-    weekStart: z.string().datetime().nullable(),
+    weekStart: z.iso.datetime().nullable(),
     contentCompletionPct: z.number().nullable(),
   })
   .strict();
 
 export const batchCompareItemSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     key: z.string(),
     name: z.string(),
     status: z.string(),
-    startsAt: z.string().datetime().nullable(),
-    endsAt: z.string().datetime().nullable(),
+    startsAt: z.iso.datetime().nullable(),
+    endsAt: z.iso.datetime().nullable(),
     isRunning: z.boolean(),
     currentWeekIndex: z.number().int().nonnegative().nullable(),
     metrics: z

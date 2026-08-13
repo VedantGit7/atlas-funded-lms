@@ -147,6 +147,7 @@ export async function createAssessmentFixture(): Promise<AssessmentFixture> {
           shuffleItems: false,
           shuffleOptions: false,
           secureMode: false,
+          proctoringLevel: 0,
           l1ProctoringEnabled: false,
           showAnswersPolicy: "after_submit",
         })}::jsonb,

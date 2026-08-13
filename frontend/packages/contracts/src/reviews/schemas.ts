@@ -2,7 +2,7 @@ import { z } from "zod";
 import { pageInfoSchema } from "../membership/schemas/shared";
 
 export const courseReviewIdParamsSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
 });
 
 export const submitReviewBodySchema = z
@@ -20,13 +20,13 @@ export const courseReviewsQuerySchema = z
   .strict();
 
 export const courseReviewItemSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   rating: z.number().int().min(1).max(5),
   comment: z.string().nullable(),
   authorName: z.string().nullable(),
   mine: z.boolean(),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 
 export const courseReviewAggregateSchema = z.object({
@@ -45,11 +45,11 @@ export const courseReviewsResponseSchema = z.object({
 
 export const submitReviewResponseSchema = z.object({
   data: z.object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     rating: z.number().int().min(1).max(5),
     comment: z.string().nullable(),
-    createdAt: z.string().datetime(),
-    updatedAt: z.string().datetime(),
+    createdAt: z.iso.datetime(),
+    updatedAt: z.iso.datetime(),
     created: z.boolean(),
   }),
 });

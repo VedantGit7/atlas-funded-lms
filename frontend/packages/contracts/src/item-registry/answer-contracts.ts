@@ -15,9 +15,7 @@ export const BUILTIN_ITEM_TYPE_KEYS = [
 
 export type BuiltinItemTypeKey = (typeof BUILTIN_ITEM_TYPE_KEYS)[number];
 
-export type ParseResult<T> =
-  | { ok: true; value: T }
-  | { ok: false; error: string };
+export type ParseResult<T> = { ok: true; value: T } | { ok: false; error: string };
 
 export type PreviewScoreKind = "correct" | "incorrect" | "manual" | "neutral";
 
@@ -75,9 +73,11 @@ export const McqMultiAnswerKeySchema = z.object({
   correctOptionIds: z.array(uuidLike).optional(),
 });
 
-export const TrueFalseAnswerKeySchema = z.object({
-  value: z.boolean(),
-}).passthrough();
+export const TrueFalseAnswerKeySchema = z
+  .object({
+    value: z.boolean(),
+  })
+  .loose();
 
 export const FillBlankAnswerKeySchema = z.object({
   value: z.string().optional(),
@@ -89,9 +89,11 @@ export const StructuredAnswerKeySchema = z.object({
   order: z.array(z.string()).optional(),
 });
 
-export const SwipeAnswerKeySchema = z.object({
-  direction: z.enum(["left", "right"]),
-}).passthrough();
+export const SwipeAnswerKeySchema = z
+  .object({
+    direction: z.enum(["left", "right"]),
+  })
+  .loose();
 
 export const ManualAnswerKeySchema = z.object({
   rubric: z.string().optional(),
@@ -189,7 +191,7 @@ export function parseAnswerKeyJson(
     return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid answer key shape." };
   }
 
-  return { ok: true, value: parsed.data as Record<string, unknown> };
+  return { ok: true, value: parsed.data };
 }
 
 export function parseAnswerKeyText(text: string): ParseResult<Record<string, unknown>> {
@@ -212,34 +214,36 @@ export function parseAnswerKeyText(text: string): ParseResult<Record<string, unk
 function answerKeySchemaForType(itemTypeKey: string): z.ZodType<Record<string, unknown>> {
   switch (itemTypeKey) {
     case "mcq_single":
-      return McqSingleAnswerKeySchema.passthrough();
+      return McqSingleAnswerKeySchema.loose();
     case "mcq_multi":
-      return McqMultiAnswerKeySchema.passthrough();
+      return McqMultiAnswerKeySchema.loose();
     case "true_false":
       return TrueFalseAnswerKeySchema;
     case "fill_blank":
-      return FillBlankAnswerKeySchema.passthrough();
+      return FillBlankAnswerKeySchema.loose();
     case "matching":
     case "ordering":
-      return StructuredAnswerKeySchema.passthrough();
+      return StructuredAnswerKeySchema.loose();
     case "swipe":
       return SwipeAnswerKeySchema;
     case "short_answer":
     case "long_answer":
     case "file_upload":
-      return ManualAnswerKeySchema.passthrough();
+      return ManualAnswerKeySchema.loose();
     default:
       return z.record(z.string(), z.unknown());
   }
 }
 
-export function answerKeyToUiState(itemTypeKey: string, raw: Record<string, unknown>): ItemAnswerKeyUiState {
+export function answerKeyToUiState(
+  itemTypeKey: string,
+  raw: Record<string, unknown>,
+): ItemAnswerKeyUiState {
   switch (itemTypeKey) {
     case "mcq_single":
       return {
         type: "mcq_single",
-        correctOptionId:
-          typeof raw["correctOptionId"] === "string" ? raw["correctOptionId"] : null,
+        correctOptionId: typeof raw["correctOptionId"] === "string" ? raw["correctOptionId"] : null,
       };
     case "mcq_multi":
       return {
@@ -392,7 +396,7 @@ export function responseFromWire(
       return {
         type: itemTypeKey,
         value: typeof wire["value"] === "string" ? wire["value"] : "",
-      } as ItemResponseUiState;
+      };
     case "matching":
       return {
         type: "matching",
@@ -411,8 +415,7 @@ export function responseFromWire(
     case "swipe":
       return {
         type: "swipe",
-        action:
-          wire["action"] === "known" || wire["action"] === "unknown" ? wire["action"] : null,
+        action: wire["action"] === "known" || wire["action"] === "unknown" ? wire["action"] : null,
       };
     case "file_upload":
       return {
@@ -449,12 +452,17 @@ export function responseToWire(state: ItemResponseUiState): Record<string, unkno
   }
 }
 
-export function isResponseComplete(itemTypeKey: string, wire: Record<string, unknown> | null): boolean {
+export function isResponseComplete(
+  itemTypeKey: string,
+  wire: Record<string, unknown> | null,
+): boolean {
   return responseToWire(responseFromWire(itemTypeKey, wire)) !== null;
 }
 
 export function isManualGradingType(itemTypeKey: string): boolean {
-  return itemTypeKey === "short_answer" || itemTypeKey === "long_answer" || itemTypeKey === "file_upload";
+  return (
+    itemTypeKey === "short_answer" || itemTypeKey === "long_answer" || itemTypeKey === "file_upload"
+  );
 }
 
 export function supportsAutoCheck(itemTypeKey: string): boolean {
@@ -582,13 +590,21 @@ export function scorePreviewAnswer(args: {
       const correct = compareSets(selected, correctIds);
       return correct
         ? { kind: "correct", title: "Correct", detail: "All correct options selected." }
-        : { kind: "incorrect", title: "Incorrect", detail: "Selection does not match the answer key." };
+        : {
+            kind: "incorrect",
+            title: "Incorrect",
+            detail: "Selection does not match the answer key.",
+          };
     }
     case "true_false": {
       const isCorrect = answerJson["value"] === answerKey["value"];
       return isCorrect
         ? { kind: "correct", title: "Correct", detail: "Response matches the answer key value." }
-        : { kind: "incorrect", title: "Incorrect", detail: "Response does not match the answer key value." };
+        : {
+            kind: "incorrect",
+            title: "Incorrect",
+            detail: "Response does not match the answer key value.",
+          };
     }
     case "fill_blank": {
       const value = normalizeString(answerJson["value"]);
@@ -598,7 +614,11 @@ export function scorePreviewAnswer(args: {
       const isCorrect = accepted.includes(value) && value.length > 0;
       return isCorrect
         ? { kind: "correct", title: "Correct", detail: "Response matches an accepted value." }
-        : { kind: "incorrect", title: "Incorrect", detail: "Response is not among accepted values." };
+        : {
+            kind: "incorrect",
+            title: "Incorrect",
+            detail: "Response is not among accepted values.",
+          };
     }
     case "matching":
     case "ordering": {
@@ -608,8 +628,16 @@ export function scorePreviewAnswer(args: {
         answerJson[field] != null &&
         answerKey[field] != null;
       return isCorrect
-        ? { kind: "correct", title: "Correct", detail: "Structured response matches the answer key." }
-        : { kind: "incorrect", title: "Incorrect", detail: "Structured response does not match the answer key." };
+        ? {
+            kind: "correct",
+            title: "Correct",
+            detail: "Structured response matches the answer key.",
+          }
+        : {
+            kind: "incorrect",
+            title: "Incorrect",
+            detail: "Structured response does not match the answer key.",
+          };
     }
     case "swipe": {
       const action = answerJson["action"];

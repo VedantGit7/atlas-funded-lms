@@ -12,7 +12,7 @@ const uuidList = z
           .filter(Boolean);
     return [...new Set(parts)];
   })
-  .pipe(z.array(z.string().uuid()).min(1).max(4));
+  .pipe(z.array(z.uuid()).min(1).max(4));
 
 export const superLiveInsightsCompareQuerySchema = rejectClientTenantFields
   .extend({
@@ -24,7 +24,7 @@ export const superLiveInsightsCompareQuerySchema = rejectClientTenantFields
   .superRefine((value, ctx) => {
     if (value.mode === "series" && !value.seriesKind) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         message: "seriesKind is required when mode is series",
         path: ["seriesKind"],
       });
@@ -51,7 +51,7 @@ const itemSchema = z.object({
   id: z.string(),
   title: z.string(),
   subtitle: z.string().nullable(),
-  scheduledAt: z.string().datetime().nullable(),
+  scheduledAt: z.iso.datetime().nullable(),
   courseTitle: z.string().nullable(),
   batchName: z.string().nullable(),
   colorIndex: z.number().int().min(0).max(3),
@@ -130,7 +130,7 @@ export const superLiveInsightsCompareCandidatesResponseSchema = z
           title: z.string(),
           subtitle: z.string().nullable(),
           groupLabel: z.string().nullable(),
-          scheduledAt: z.string().datetime().nullable(),
+          scheduledAt: z.iso.datetime().nullable(),
           attendanceRate: z.number().nullable(),
           sessionCount: z.number().int().nonnegative().nullable(),
         }),

@@ -156,6 +156,7 @@ export const extensionsService = {
         {
           action: "extension.registration.created",
           target: { type: "extension_registration", id: registration.id },
+          before: null,
           after: {
             extensionPointKey: input.extensionPointKey,
             registrationKey: input.registrationKey,

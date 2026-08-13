@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const IdSchema = z.string().uuid();
+export const IdSchema = z.uuid();
 
 export const PublishStatusSchema = z.enum(["DRAFT", "REVIEW", "PUBLISHED", "ARCHIVED"]);
 

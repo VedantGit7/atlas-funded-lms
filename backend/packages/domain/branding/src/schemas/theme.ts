@@ -15,12 +15,12 @@ export const TenantThemeTokensSchema = z
   .strict();
 
 export const TenantThemeViewSchema = z.object({
-  tenantId: z.string().uuid(),
+  tenantId: z.uuid(),
   tokens: TenantThemeTokensSchema,
   status: z.enum(["DRAFT", "PUBLISHED"]),
   version: z.number().int().min(0),
-  updatedAt: z.string().datetime(),
-  publishedAt: z.string().datetime().nullable(),
+  updatedAt: z.iso.datetime(),
+  publishedAt: z.iso.datetime().nullable(),
 });
 
 export const UpdateTenantThemeRequestSchema = z.object({

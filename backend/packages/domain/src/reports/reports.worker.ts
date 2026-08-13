@@ -1,10 +1,7 @@
 import { withTenantTx, type TenantTx } from "@atlas/db";
 import { outbox } from "@atlas/events";
 import { renderReportArtifact, storeReportArtifact } from "./reports-export-runner";
-import {
-  applyPaymentExportGrouping,
-  type PaymentExportGrouping,
-} from "./reports-group-subtotals";
+import { applyPaymentExportGrouping, type PaymentExportGrouping } from "./reports-group-subtotals";
 import { buildReportDataset } from "./reports.datasets";
 import {
   REPORT_GENERATE_REQUESTED_EVENT,
@@ -78,7 +75,13 @@ export async function processReportGenerate(
   const trace: string[] = [stamp(`Claimed export job ${payload.reportRunId}`)];
   const definition = await reportsRepository.findDefinitionById(tx, claimed.report_definition_id);
   if (!definition) {
-    await failRun(tx, payload.reportRunId, "REPORT_DEFINITION_NOT_FOUND", "Report definition was not found.", trace);
+    await failRun(
+      tx,
+      payload.reportRunId,
+      "REPORT_DEFINITION_NOT_FOUND",
+      "Report definition was not found.",
+      trace,
+    );
     return;
   }
 
@@ -86,7 +89,9 @@ export async function processReportGenerate(
 
   try {
     const params =
-      claimed.params_json && typeof claimed.params_json === "object" && !Array.isArray(claimed.params_json)
+      claimed.params_json &&
+      typeof claimed.params_json === "object" &&
+      !Array.isArray(claimed.params_json)
         ? (claimed.params_json as Record<string, unknown>)
         : {};
 
@@ -156,7 +161,7 @@ export async function processReportGenerate(
   } catch (error) {
     const message = error instanceof Error ? error.message : "Export generation failed.";
     await failRun(tx, payload.reportRunId, "REPORT_GENERATION_FAILED", message, trace);
-    throw new Error("REPORT_GENERATION_FAILED");
+    throw new Error("REPORT_GENERATION_FAILED", { cause: error });
   }
 }
 
@@ -168,7 +173,9 @@ function filterAndGroup(
 ): ReportDatasetResult {
   const selectedColumns = extractSelectedColumns(definition.param_schema_json);
   const paramColumns = Array.isArray(params["columns"])
-    ? params["columns"].filter((value): value is string => typeof value === "string" && value.length > 0)
+    ? params["columns"].filter(
+        (value): value is string => typeof value === "string" && value.length > 0,
+      )
     : [];
   let filtered =
     definition.scope === "tenant" && selectedColumns.length > 0
@@ -237,7 +244,7 @@ export async function processReportGenerateStandalone(args: {
   const payload = reportGenerateRequestedPayloadSchema.parse(args.event.payload);
   const ctx: ServiceCtx = {
     tenantId: args.tenantId,
-    actorMembershipId: args.actorMembershipId ?? "00000000-0000-0000-0000-000000000000",
+    actorMembershipId: args.actorMembershipId ?? payload.requestedByMembershipId,
     requestId: args.requestId,
   };
   const txOpts = {
@@ -321,11 +328,7 @@ export async function processReportGenerateStandalone(args: {
           trace: [...trace, stamp(`Rendering ${claimed.format}…`)],
         });
       });
-      const artifact = await renderReportArtifact(
-        claimed.format,
-        prepared.dataset,
-        prepared.title,
-      );
+      const artifact = await renderReportArtifact(claimed.format, prepared.dataset, prepared.title);
       trace.push(stamp(`Render complete · ${artifact.content.byteLength} bytes`));
       return artifact;
     })();
@@ -369,7 +372,7 @@ export async function processReportGenerateStandalone(args: {
     await withTenantTx(txOpts, async (tx) => {
       await failRun(tx, payload.reportRunId, "REPORT_GENERATION_FAILED", message, trace);
     });
-    throw new Error("REPORT_GENERATION_FAILED");
+    throw new Error("REPORT_GENERATION_FAILED", { cause: error });
   }
 }
 
@@ -392,9 +395,7 @@ export async function handleReportsOutboxEvent(event: {
   await processReportGenerateStandalone({
     tenantId: event.tenantId,
     requestId: event.requestId,
-    ...(parsed?.success
-      ? { actorMembershipId: parsed.data.requestedByMembershipId }
-      : {}),
+    ...(parsed?.success ? { actorMembershipId: parsed.data.requestedByMembershipId } : {}),
     event,
   });
 }

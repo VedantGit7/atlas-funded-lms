@@ -49,14 +49,14 @@ export type DestinationsRosterListQuery = z.output<typeof destinationsRosterList
 
 const emailTargetSchema = z
   .object({
-    address: z.string().email(),
+    address: z.email(),
     isExternal: z.boolean(),
   })
   .strict();
 
 export const destinationItemSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     name: z.string(),
     kind: z.enum(DESTINATION_KINDS),
     isActive: z.boolean(),
@@ -74,21 +74,21 @@ export const destinationItemSchema = z
     storagePrefix: z.string().nullable(),
     hasCredentials: z.boolean(),
     credentialsMasked: z.string().nullable(),
-    lastDeliveryAt: z.string().datetime().nullable(),
+    lastDeliveryAt: z.iso.datetime().nullable(),
     lastDeliveryStatus: z.enum(["succeeded", "failed", "pending"]).nullable(),
     lastError: z.string().nullable(),
     consecutiveFailures: z.number().int().nonnegative(),
     scheduleCount: z.number().int().nonnegative(),
     linkedSchedules: z.array(
       z.object({
-        id: z.string().uuid(),
+        id: z.uuid(),
         name: z.string(),
       }),
     ),
     health30d: z.array(z.enum(HEALTH_DAY_STATUSES)),
     externalRecipientCount: z.number().int().nonnegative(),
-    createdAt: z.string().datetime(),
-    updatedAt: z.string().datetime(),
+    createdAt: z.iso.datetime(),
+    updatedAt: z.iso.datetime(),
   })
   .strict();
 
@@ -103,7 +103,7 @@ export const destinationsRosterSummarySchema = z
     failingCount: z.number().int().nonnegative(),
     failingCaption: z.string().nullable(),
     externalRecipientCount: z.number().int().nonnegative(),
-    lastDeliveryAt: z.string().datetime().nullable(),
+    lastDeliveryAt: z.iso.datetime().nullable(),
     tenantEmailDomains: z.array(z.string()),
   })
   .strict();
@@ -120,7 +120,7 @@ const createEmailBodySchema = z
   .object({
     kind: z.literal("email"),
     name: z.string().trim().min(1).max(120),
-    emails: z.array(z.string().email()).min(1).max(50),
+    emails: z.array(z.email()).min(1).max(50),
   })
   .strict();
 
@@ -128,7 +128,7 @@ const createWebhookBodySchema = z
   .object({
     kind: z.literal("webhook"),
     name: z.string().trim().min(1).max(120),
-    url: z.string().url().max(2000),
+    url: z.url().max(2000),
     signingSecret: z.string().trim().min(8).max(256).optional(),
     retryPolicy: z.enum(WEBHOOK_RETRY_POLICIES).default("3x"),
     payloadFormat: z.enum(WEBHOOK_PAYLOAD_FORMATS).default("multipart"),
@@ -160,7 +160,7 @@ export const createDestinationResponseSchema = z.object({
 
 export const destinationParamsSchema = z
   .object({
-    destinationId: z.string().uuid(),
+    destinationId: z.uuid(),
   })
   .strict();
 
@@ -168,8 +168,8 @@ export const updateDestinationBodySchema = z
   .object({
     name: z.string().trim().min(1).max(120).optional(),
     isActive: z.boolean().optional(),
-    emails: z.array(z.string().email()).min(1).max(50).optional(),
-    url: z.string().url().max(2000).optional(),
+    emails: z.array(z.email()).min(1).max(50).optional(),
+    url: z.url().max(2000).optional(),
     signingSecret: z.string().trim().min(8).max(256).optional(),
     retryPolicy: z.enum(WEBHOOK_RETRY_POLICIES).optional(),
     payloadFormat: z.enum(WEBHOOK_PAYLOAD_FORMATS).optional(),
@@ -192,10 +192,10 @@ export const updateDestinationResponseSchema = z.object({
 export const deleteDestinationResponseSchema = z.object({
   data: z.object({
     deleted: z.literal(true),
-    id: z.string().uuid(),
+    id: z.uuid(),
     affectedSchedules: z.array(
       z.object({
-        id: z.string().uuid(),
+        id: z.uuid(),
         name: z.string(),
       }),
     ),
@@ -206,7 +206,7 @@ export const testDestinationResponseSchema = z.object({
   data: z.object({
     ok: z.boolean(),
     message: z.string(),
-    testedAt: z.string().datetime(),
+    testedAt: z.iso.datetime(),
     destination: destinationItemSchema,
   }),
 });

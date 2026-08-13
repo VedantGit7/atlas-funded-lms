@@ -13,7 +13,7 @@ export const courseProgressListQuerySchema = z
 export type CourseProgressListQuery = z.output<typeof courseProgressListQuerySchema>;
 
 export const courseProgressItemSchema = z.object({
-  membershipId: z.string().uuid(),
+  membershipId: z.uuid(),
   displayName: z.string().nullable(),
   progressPct: z.number().int().min(0).max(100),
   completedLessons: z.number().int().nonnegative(),

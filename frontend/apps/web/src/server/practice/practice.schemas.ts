@@ -1,7 +1,7 @@
 import { z } from "zod";
 
-const rejectTenantId = z.object({ tenant_id: z.never().optional() }).passthrough();
-const rejectMembershipId = z.object({ membershipId: z.never().optional() }).passthrough();
+const rejectTenantId = z.object({ tenant_id: z.never().optional() }).loose();
+const rejectMembershipId = z.object({ membershipId: z.never().optional() }).loose();
 const rejectClientScoring = z
   .object({
     isCorrect: z.never().optional(),
@@ -10,18 +10,18 @@ const rejectClientScoring = z
     itemIds: z.never().optional(),
     selectedItemIds: z.never().optional(),
   })
-  .passthrough();
+  .loose();
 
 export const PracticeSessionParamsSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
   })
   .strict();
 
 export const StartPracticeSessionBodySchema = z
   .object({
     mode: z.enum(["due", "collection"]),
-    collectionId: z.string().uuid().optional(),
+    collectionId: z.uuid().optional(),
     maxItems: z.number().int().min(1).max(30).optional(),
   })
   .strict()
@@ -31,7 +31,7 @@ export const StartPracticeSessionBodySchema = z
   .superRefine((value, ctx) => {
     if (value.mode === "collection" && !value.collectionId) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         message: "collectionId is required when mode is collection.",
         path: ["collectionId"],
       });
@@ -39,7 +39,7 @@ export const StartPracticeSessionBodySchema = z
 
     if (value.mode === "due" && value.collectionId) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         message: "collectionId is not allowed when mode is due.",
         path: ["collectionId"],
       });
@@ -48,7 +48,7 @@ export const StartPracticeSessionBodySchema = z
 
 export const SubmitPracticeResponseBodySchema = z
   .object({
-    itemId: z.string().uuid(),
+    itemId: z.uuid(),
     action: z.enum(["known", "unknown"]),
     latencyMs: z.number().int().min(0).max(300_000).optional(),
   })
@@ -61,9 +61,9 @@ export const CompletePracticeSessionBodySchema = z.object({}).strict().and(rejec
 
 export const DueQueueQuerySchema = z
   .object({
-    cursor: z.string().uuid().optional(),
+    cursor: z.uuid().optional(),
     limit: z.coerce.number().int().min(1).max(50).default(20),
-    collectionId: z.string().uuid().optional(),
+    collectionId: z.uuid().optional(),
   })
   // Do not `.and(rejectTenantId)` here: `.strict()` already rejects unknown keys
   // (including tenant_id), and intersecting a passthrough schema breaks the
@@ -72,20 +72,20 @@ export const DueQueueQuerySchema = z
   .strict();
 
 export const safePracticeCardSchema = z.object({
-  itemId: z.string().uuid(),
+  itemId: z.uuid(),
   itemTypeKey: z.literal("swipe"),
   rendererKey: z.literal("swipe"),
   contentJson: z.record(z.string(), z.unknown()),
 });
 
 export const practiceDeckOptionSchema = z.object({
-  collectionId: z.string().uuid(),
+  collectionId: z.uuid(),
   title: z.string(),
   itemCount: z.number().int().nonnegative(),
 });
 
 export const dueQueueItemSchema = z.object({
-  itemId: z.string().uuid(),
+  itemId: z.uuid(),
   dueAt: z.string(),
   card: safePracticeCardSchema,
 });
@@ -93,20 +93,20 @@ export const dueQueueItemSchema = z.object({
 export const dueQueueResponseSchema = z.object({
   data: z.object({
     items: z.array(dueQueueItemSchema),
-    nextCursor: z.string().uuid().nullable(),
+    nextCursor: z.uuid().nullable(),
     availableDecks: z.array(practiceDeckOptionSchema),
   }),
 });
 
 export const practiceSessionSummarySchema = z.object({
   mode: z.enum(["due", "collection"]),
-  selectedItemIds: z.array(z.string().uuid()),
-  answeredItemIds: z.array(z.string().uuid()),
+  selectedItemIds: z.array(z.uuid()),
+  answeredItemIds: z.array(z.uuid()),
   responseIdempotency: z
     .record(
       z.string(),
       z.object({
-        itemId: z.string().uuid(),
+        itemId: z.uuid(),
         isCorrect: z.boolean(),
         action: z.enum(["known", "unknown"]),
         occurredAt: z.string(),
@@ -128,10 +128,10 @@ export const practiceSessionSummarySchema = z.object({
 export const startPracticeSessionResponseSchema = z.object({
   data: z.object({
     session: z.object({
-      id: z.string().uuid(),
+      id: z.uuid(),
       status: z.enum(["started", "completed"]),
       mode: z.enum(["due", "collection"]),
-      collectionId: z.string().uuid().nullable(),
+      collectionId: z.uuid().nullable(),
       totalItems: z.number().int().nonnegative(),
       answeredCount: z.number().int().nonnegative(),
       startedAt: z.string(),
@@ -143,7 +143,7 @@ export const startPracticeSessionResponseSchema = z.object({
 export const submitPracticeResponseResponseSchema = z.object({
   data: z.object({
     response: z.object({
-      itemId: z.string().uuid(),
+      itemId: z.uuid(),
       isCorrect: z.boolean(),
       feedbackLabel: z.string(),
       occurredAt: z.string(),
@@ -158,7 +158,7 @@ export const submitPracticeResponseResponseSchema = z.object({
 
 export const completePracticeSessionResponseSchema = z.object({
   data: z.object({
-    sessionId: z.string().uuid(),
+    sessionId: z.uuid(),
     status: z.literal("completed"),
     completedAt: z.string(),
     summary: z.object({

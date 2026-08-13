@@ -120,7 +120,6 @@ export function VerificationCard({
   return (
     <article className="mx-auto max-w-xl overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm print:shadow-none">
       <header className="flex items-start gap-4 border-b border-neutral-200 bg-neutral-50/60 p-6">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={data.issuer.logoUrl ?? FALLBACK_LOGO}
           alt={`${displayIssuer} logo`}
@@ -182,7 +181,6 @@ export function VerificationCard({
 
         {qrDataUrl ? (
           <div className="flex flex-col items-center justify-start gap-2">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={qrDataUrl}
               alt="Verification QR code"
@@ -200,6 +198,7 @@ export function VerificationCard({
           verificationUrl={verificationUrl}
           shareTitle={`${courseTitle} — ${displayIssuer}`}
           downloadUrl={data.downloadUrl ?? null}
+          certificateId={data.certificateId ?? null}
         />
 
         <div className="mt-4 flex flex-wrap items-center gap-4 text-sm print:hidden">

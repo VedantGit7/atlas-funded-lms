@@ -16,14 +16,14 @@ export const seasonalMultiplierSchema = z
   .strict();
 
 export const seasonalEventDtoSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   key: z.string(),
   name: z.string(),
   status: z.enum(SEASONAL_STATUSES),
-  startsAt: z.string().datetime(),
-  endsAt: z.string().datetime(),
+  startsAt: z.iso.datetime(),
+  endsAt: z.iso.datetime(),
   multiplier: seasonalMultiplierSchema,
-  linkedQuestIds: z.array(z.string().uuid()),
+  linkedQuestIds: z.array(z.uuid()),
   linkedLeaderboardKey: z.string().nullable(),
 });
 
@@ -32,17 +32,17 @@ export const createSeasonalEventInputSchema = z
     key: seasonalKeySchema,
     name: z.string().min(1).max(160),
     status: z.enum(["draft", "scheduled"]).default("scheduled"),
-    startsAt: z.string().datetime(),
-    endsAt: z.string().datetime(),
+    startsAt: z.iso.datetime(),
+    endsAt: z.iso.datetime(),
     multiplier: seasonalMultiplierSchema,
-    linkedQuestIds: z.array(z.string().uuid()).max(20).default([]),
+    linkedQuestIds: z.array(z.uuid()).max(20).default([]),
     linkedLeaderboardKey: z.string().max(64).nullable().optional(),
   })
   .strict()
   .superRefine((value, ctx) => {
     if (new Date(value.endsAt) <= new Date(value.startsAt)) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         message: "endsAt must be after startsAt.",
         path: ["endsAt"],
       });
@@ -59,24 +59,24 @@ export const postSeasonalEventsBodySchema = z.discriminatedUnion("operation", [
   z
     .object({
       operation: z.literal("clone"),
-      id: z.string().uuid(),
+      id: z.uuid(),
       key: seasonalKeySchema,
       name: z.string().min(1).max(160),
-      startsAt: z.string().datetime(),
-      endsAt: z.string().datetime(),
+      startsAt: z.iso.datetime(),
+      endsAt: z.iso.datetime(),
     })
     .strict(),
 ]);
 
 export const updateSeasonalEventBodySchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     name: z.string().min(1).max(160).optional(),
     status: z.enum(SEASONAL_STATUSES).optional(),
-    startsAt: z.string().datetime().optional(),
-    endsAt: z.string().datetime().optional(),
+    startsAt: z.iso.datetime().optional(),
+    endsAt: z.iso.datetime().optional(),
     multiplier: seasonalMultiplierSchema.optional(),
-    linkedQuestIds: z.array(z.string().uuid()).max(20).optional(),
+    linkedQuestIds: z.array(z.uuid()).max(20).optional(),
     linkedLeaderboardKey: z.string().max(64).nullable().optional(),
   })
   .strict();
@@ -97,7 +97,7 @@ export const myActiveSeasonalEventResponseSchema = z.object({
       .object({
         key: z.string(),
         name: z.string(),
-        endsAt: z.string().datetime(),
+        endsAt: z.iso.datetime(),
         xpMultiplier: z.number(),
       })
       .nullable(),

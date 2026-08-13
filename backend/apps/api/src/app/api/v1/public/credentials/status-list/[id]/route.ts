@@ -7,7 +7,7 @@ import { withTenantTx } from "@atlas/db/with-tenant-tx";
 import { getEncodedStatusListCredential } from "../../../../../../../server/certificates/certificate-status-list.service";
 import { routeMetadata } from "./route.metadata";
 
-const statusListIdSchema = z.string().uuid();
+const statusListIdSchema = z.uuid();
 
 function resolveOrigin(headers: Headers): string {
   const host = headers.get("x-forwarded-host") ?? headers.get("host") ?? "localhost:3000";

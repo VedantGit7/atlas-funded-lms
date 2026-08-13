@@ -37,7 +37,7 @@ export function initPostHogBrowser(options?: { analyticsConsent?: boolean }): vo
 
   consentGranted = options?.analyticsConsent ?? false;
 
-  const host = process.env["NEXT_PUBLIC_POSTHOG_HOST"]?.trim() || "https://us.i.posthog.com";
+  const host = process.env["NEXT_PUBLIC_POSTHOG_HOST"]?.trim() || "https://eu.i.posthog.com";
 
   posthog.init(key, {
     api_host: host,

@@ -5,7 +5,7 @@ export const DomainTypeSchema = z.enum(["ATLAS_SUBDOMAIN", "CUSTOM_DOMAIN"]);
 export const DomainStatusSchema = z.enum(["PENDING", "VERIFYING", "ACTIVE", "FAILED", "DISABLED"]);
 
 export const TenantDomainViewSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   hostname: z.string(),
   type: DomainTypeSchema,
   status: DomainStatusSchema,
@@ -13,8 +13,8 @@ export const TenantDomainViewSchema = z.object({
   verificationTxtName: z.string().nullable(),
   verificationTxtValue: z.string().nullable(),
   failureReason: z.string().nullable(),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 
 export const DomainListResponseSchema = z.object({
@@ -36,12 +36,12 @@ export const CreateDomainResponseSchema = z.object({
 });
 
 export const DomainParamsSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
 });
 
 export const DeleteDomainResponseSchema = z.object({
   data: z.object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     status: DomainStatusSchema,
   }),
 });

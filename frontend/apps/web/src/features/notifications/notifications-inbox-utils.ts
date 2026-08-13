@@ -30,10 +30,21 @@ export type NotificationDateGroup = {
   items: InboxItem[];
 };
 
+export function inboxListQuery(args: {
+  limit?: number;
+  cursor?: string | null;
+  includeArchived?: boolean;
+}): string {
+  const params = new URLSearchParams();
+  params.set("limit", String(args.limit ?? 25));
+  if (args.cursor) params.set("cursor", args.cursor);
+  if (args.includeArchived) params.set("includeArchived", "true");
+  return `/api/v1/me/notifications?${params.toString()}`;
+}
+
 const DANGER_KEYWORDS =
   /\b(renewal|payment|subscription|failed|error|urgent|expir|overdue|suspended)\b/i;
-const WARNING_KEYWORDS =
-  /\b(warning|review|pending|action required|attention|verify|confirm)\b/i;
+const WARNING_KEYWORDS = /\b(warning|review|pending|action required|attention|verify|confirm)\b/i;
 
 export function getNotificationPriority(title: string, body: string): NotificationPriority {
   const text = `${title} ${body}`;
@@ -149,7 +160,10 @@ function groupLabelForDate(date: Date, now: Date): string {
   }).format(date);
 }
 
-export function groupNotificationsByDate(items: InboxItem[], now = new Date()): NotificationDateGroup[] {
+export function groupNotificationsByDate(
+  items: InboxItem[],
+  now = new Date(),
+): NotificationDateGroup[] {
   const groups = new Map<string, NotificationDateGroup>();
 
   for (const item of items) {
@@ -182,7 +196,8 @@ export function filterNotifications(
     if (filter === "unread" && item.read) return false;
     if (!normalizedQuery) return true;
 
-    const haystack = `${item.title} ${item.body} ${getNotificationCategory(item.actionPath)}`.toLowerCase();
+    const haystack =
+      `${item.title} ${item.body} ${getNotificationCategory(item.actionPath)}`.toLowerCase();
     return haystack.includes(normalizedQuery);
   });
 }

@@ -28,11 +28,11 @@ export const createCourseBodySchema = mutationBodySchema({
   description: z.string().trim().max(5000).nullable().optional(),
   shortDescription: z.string().trim().max(500).optional(),
   coverKey: z.string().trim().min(1).max(500).optional(),
-  thumbnailAssetId: z.string().uuid().optional(),
+  thumbnailAssetId: z.uuid().optional(),
   estimatedDuration: z.coerce.number().int().min(0).max(100000).optional(),
   level: z.string().trim().min(1).max(100).optional(),
   stage: z.string().trim().min(1).max(100).optional(),
-  tags: z.record(z.unknown()).optional(),
+  tags: z.record(z.string(), z.unknown()).optional(),
 });
 
 export type CreateCourseBody = z.output<typeof createCourseBodySchema>;
@@ -49,11 +49,11 @@ export const updateCourseBodySchema = mutationBodySchema({
   description: z.string().trim().max(5000).nullable().optional(),
   shortDescription: z.string().trim().max(500).optional(),
   coverKey: z.string().trim().min(1).max(500).optional(),
-  thumbnailAssetId: z.string().uuid().optional(),
+  thumbnailAssetId: z.uuid().optional(),
   estimatedDuration: z.coerce.number().int().min(0).max(100000).optional(),
   level: z.string().trim().min(1).max(100).optional(),
   stage: z.string().trim().min(1).max(100).optional(),
-  tags: z.record(z.unknown()).optional(),
+  tags: z.record(z.string(), z.unknown()).optional(),
   status: z.never().optional(),
   userId: z.never().optional(),
   memberId: z.never().optional(),
@@ -65,15 +65,15 @@ export const updateCourseBodySchema = mutationBodySchema({
 export type UpdateCourseBody = z.output<typeof updateCourseBodySchema>;
 
 export const studioCourseListItemSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   slug: z.string(),
   title: z.string(),
   description: z.string().nullable(),
   status: publishStatusStudioSchema,
   coverKey: z.string().nullable().optional(),
-  tags: z.record(z.unknown()).optional(),
-  updatedAt: z.string().datetime(),
-  createdAt: z.string().datetime(),
+  tags: z.record(z.string(), z.unknown()).optional(),
+  updatedAt: z.iso.datetime(),
+  createdAt: z.iso.datetime(),
 });
 
 export const studioCourseListResponseSchema = z.object({
@@ -84,15 +84,15 @@ export const studioCourseListResponseSchema = z.object({
 });
 
 export const studioCourseDetailSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   slug: z.string(),
   title: z.string(),
   description: z.string().nullable(),
   status: publishStatusStudioSchema,
   coverKey: z.string().nullable().optional(),
-  tags: z.record(z.unknown()).optional(),
-  updatedAt: z.string().datetime(),
-  createdAt: z.string().datetime(),
+  tags: z.record(z.string(), z.unknown()).optional(),
+  updatedAt: z.iso.datetime(),
+  createdAt: z.iso.datetime(),
 });
 
 export const studioCourseDetailResponseSchema = z.object({
@@ -118,7 +118,7 @@ export const updateModuleBodySchema = mutationBodySchema({
 export type UpdateModuleBody = z.output<typeof updateModuleBodySchema>;
 
 export const studioModuleOutlineItemSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   title: z.string(),
   position: z.number().int(),
   status: publishStatusStudioSchema,
@@ -143,18 +143,18 @@ export type PublishCourseBody = z.output<typeof publishCourseBodySchema>;
 
 export const publishCourseResponseSchema = z.object({
   data: z.object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     status: publishStatusStudioSchema,
-    submittedAt: z.string().datetime(),
-    workflowTransitionId: z.string().uuid(),
+    submittedAt: z.iso.datetime(),
+    workflowTransitionId: z.uuid(),
   }),
 });
 
 export const archiveCourseResponseSchema = z.object({
   data: z.object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     status: z.literal("ARCHIVED"),
-    archivedAt: z.string().datetime(),
+    archivedAt: z.iso.datetime(),
   }),
 });
 

@@ -5,7 +5,7 @@ import { rejectClientTenantFields } from "../shared/domain.dto";
 export const exportBuilderPreviewBodySchema = rejectClientTenantFields
   .extend({
     definitionKey: z.string().trim().min(1).max(120),
-    params: z.record(z.unknown()).default({}),
+    params: z.record(z.string(), z.unknown()).default({}),
     columns: z.array(z.string().min(1)).max(80).optional(),
     format: z.enum(REPORT_FORMATS).optional(),
     rowLimit: z.coerce.number().int().min(1).max(10_000).optional(),
@@ -27,7 +27,7 @@ export const exportBuilderPreviewResponseSchema = z.object({
       estimatedSizeLabel: z.string().nullable(),
       columns: z.array(z.string()),
       piiColumns: z.array(z.string()),
-      sampleRows: z.array(z.record(z.unknown())),
+      sampleRows: z.array(z.record(z.string(), z.unknown())),
       sampleLimit: z.number().int().positive(),
     })
     .strict(),

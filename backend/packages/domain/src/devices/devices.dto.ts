@@ -12,22 +12,22 @@ export const captureDeviceSessionBodySchema = rejectClientTenantFields
 
 export const listDeviceSessionsQuerySchema = rejectClientTenantFields
   .extend({
-    cursor: z.string().uuid().optional(),
+    cursor: z.uuid().optional(),
     limit: z.coerce.number().int().min(1).max(100).default(50),
-    membershipId: z.string().uuid().optional(),
+    membershipId: z.uuid().optional(),
   })
   .strict();
 
 export const deviceSessionDtoSchema = z
   .object({
-    id: z.string().uuid(),
-    membershipId: z.string().uuid(),
+    id: z.uuid(),
+    membershipId: z.uuid(),
     deviceFingerprint: z.string().nullable(),
     userAgent: z.string().nullable(),
     ipAddress: z.string().nullable(),
     platform: z.string().nullable(),
-    lastSeenAt: z.string().datetime(),
-    createdAt: z.string().datetime(),
+    lastSeenAt: z.iso.datetime(),
+    createdAt: z.iso.datetime(),
   })
   .strict();
 
@@ -44,7 +44,7 @@ export const listDeviceSessionsResponseSchema = z.object({
 
 export const deleteDeviceSessionsBodySchema = rejectClientTenantFields
   .extend({
-    sessionIds: z.array(z.string().uuid()).min(1).max(200),
+    sessionIds: z.array(z.uuid()).min(1).max(200),
   })
   .strict();
 
@@ -56,13 +56,13 @@ export const deleteDeviceSessionsResponseSchema = z.object({
 
 export const forceSignOutBodySchema = rejectClientTenantFields
   .extend({
-    membershipId: z.string().uuid(),
+    membershipId: z.uuid(),
   })
   .strict();
 
 export const forceSignOutResponseSchema = z.object({
   data: z.object({
-    membershipId: z.string().uuid(),
+    membershipId: z.uuid(),
     deletedCount: z.number().int().nonnegative(),
   }),
 });

@@ -1,16 +1,9 @@
 import { z } from "zod";
 import { rejectClientTenantFields } from "../shared/domain.dto";
 
-export const DEVICE_POLICY_ON_LIMIT = [
-  "block",
-  "sign_out_oldest",
-  "allow_and_alert",
-] as const;
+export const DEVICE_POLICY_ON_LIMIT = ["block", "sign_out_oldest", "allow_and_alert"] as const;
 
-export const DEVICE_POLICY_OVERRIDE_ON_LIMIT = [
-  "inherit",
-  ...DEVICE_POLICY_ON_LIMIT,
-] as const;
+export const DEVICE_POLICY_OVERRIDE_ON_LIMIT = ["inherit", ...DEVICE_POLICY_ON_LIMIT] as const;
 
 export const DEVICE_POLICY_SCOPE_TYPES = ["role", "batch", "learner"] as const;
 
@@ -21,7 +14,13 @@ export const devicePolicyTenantDefaultsSchema = z
     restrictionsEnabled: z.boolean(),
     devicesAllowed: z.number().int().min(1).max(10),
     restrictParallelLogins: z.boolean(),
-    idleSessionExpiryDays: z.union([z.literal(7), z.literal(14), z.literal(30), z.literal(90), z.null()]),
+    idleSessionExpiryDays: z.union([
+      z.literal(7),
+      z.literal(14),
+      z.literal(30),
+      z.literal(90),
+      z.null(),
+    ]),
     onLimitReached: z.enum(DEVICE_POLICY_ON_LIMIT),
     requireReverificationOnNewDevice: z.boolean(),
     notifyLearnerOnNewDevice: z.boolean(),
@@ -34,16 +33,16 @@ export type DevicePolicyTenantDefaults = z.output<typeof devicePolicyTenantDefau
 
 export const devicePolicyOverrideSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     scopeType: z.enum(DEVICE_POLICY_SCOPE_TYPES),
-    scopeId: z.string().uuid(),
+    scopeId: z.uuid(),
     scopeLabel: z.string(),
     devicesAllowed: z.number().int().min(1).max(99),
     onLimitReached: z.enum(DEVICE_POLICY_OVERRIDE_ON_LIMIT),
     appliesToCount: z.number().int().nonnegative(),
     updatedByLabel: z.string().nullable(),
-    updatedAt: z.string().datetime(),
-    expiresAt: z.string().datetime().nullable(),
+    updatedAt: z.iso.datetime(),
+    expiresAt: z.iso.datetime().nullable(),
   })
   .strict();
 
@@ -51,11 +50,11 @@ export type DevicePolicyOverrideItem = z.output<typeof devicePolicyOverrideSchem
 
 export const deviceBlockedFingerprintSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     fingerprint: z.string(),
     fingerprintShort: z.string(),
     reason: z.string(),
-    blockedAt: z.string().datetime(),
+    blockedAt: z.iso.datetime(),
     blockedByLabel: z.string().nullable(),
   })
   .strict();
@@ -83,7 +82,13 @@ export const updateActiveDevicesPoliciesBodySchema = rejectClientTenantFields
     restrictionsEnabled: z.boolean(),
     devicesAllowed: z.number().int().min(1).max(10),
     restrictParallelLogins: z.boolean(),
-    idleSessionExpiryDays: z.union([z.literal(7), z.literal(14), z.literal(30), z.literal(90), z.null()]),
+    idleSessionExpiryDays: z.union([
+      z.literal(7),
+      z.literal(14),
+      z.literal(30),
+      z.literal(90),
+      z.null(),
+    ]),
     onLimitReached: z.enum(DEVICE_POLICY_ON_LIMIT),
     requireReverificationOnNewDevice: z.boolean(),
     notifyLearnerOnNewDevice: z.boolean(),
@@ -92,15 +97,17 @@ export const updateActiveDevicesPoliciesBodySchema = rejectClientTenantFields
   })
   .strict();
 
-export type UpdateActiveDevicesPoliciesBody = z.output<typeof updateActiveDevicesPoliciesBodySchema>;
+export type UpdateActiveDevicesPoliciesBody = z.output<
+  typeof updateActiveDevicesPoliciesBodySchema
+>;
 
 export const createDevicePolicyOverrideBodySchema = rejectClientTenantFields
   .extend({
     scopeType: z.enum(DEVICE_POLICY_SCOPE_TYPES),
-    scopeId: z.string().uuid(),
+    scopeId: z.uuid(),
     devicesAllowed: z.number().int().min(1).max(99),
     onLimitReached: z.enum(DEVICE_POLICY_OVERRIDE_ON_LIMIT).default("inherit"),
-    expiresAt: z.string().datetime().nullable().optional(),
+    expiresAt: z.iso.datetime().nullable().optional(),
   })
   .strict();
 
@@ -110,7 +117,7 @@ export const updateDevicePolicyOverrideBodySchema = rejectClientTenantFields
   .extend({
     devicesAllowed: z.number().int().min(1).max(99),
     onLimitReached: z.enum(DEVICE_POLICY_OVERRIDE_ON_LIMIT),
-    expiresAt: z.string().datetime().nullable().optional(),
+    expiresAt: z.iso.datetime().nullable().optional(),
   })
   .strict();
 
@@ -118,7 +125,7 @@ export type UpdateDevicePolicyOverrideBody = z.output<typeof updateDevicePolicyO
 
 export const devicePolicyOverrideParamsSchema = z
   .object({
-    overrideId: z.string().uuid(),
+    overrideId: z.uuid(),
   })
   .strict();
 
@@ -133,7 +140,7 @@ export type CreateBlockedFingerprintBody = z.output<typeof createBlockedFingerpr
 
 export const blockedFingerprintParamsSchema = z
   .object({
-    blockId: z.string().uuid(),
+    blockId: z.uuid(),
   })
   .strict();
 
@@ -152,7 +159,7 @@ export const devicePolicyTargetsResponseSchema = z.object({
     items: z.array(
       z
         .object({
-          id: z.string().uuid(),
+          id: z.uuid(),
           label: z.string(),
           secondary: z.string().nullable(),
         })

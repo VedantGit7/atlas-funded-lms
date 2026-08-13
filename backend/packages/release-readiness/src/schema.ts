@@ -36,7 +36,7 @@ export type ReleaseGateResult = z.infer<typeof releaseGateResultSchema>;
 export const releaseEvidenceSchema = z.object({
   schemaVersion: z.literal("1"),
   storyId: z.literal("ATL-STORY-045"),
-  generatedAt: z.string().datetime(),
+  generatedAt: z.iso.datetime(),
   branch: z.string().optional(),
   commitSha: z.string().optional(),
   environment: z.string().optional(),

@@ -7,8 +7,8 @@ export type ProgressScoreOverviewWindow = (typeof PROGRESS_SCORE_OVERVIEW_WINDOW
 export const progressScoreOverviewQuerySchema = rejectClientTenantFields
   .extend({
     window: z.enum(PROGRESS_SCORE_OVERVIEW_WINDOWS).default("30d"),
-    from: z.string().datetime().optional(),
-    to: z.string().datetime().optional(),
+    from: z.iso.datetime().optional(),
+    to: z.iso.datetime().optional(),
   })
   .strict();
 
@@ -18,10 +18,10 @@ export const progressScoreOverviewResponseSchema = z.object({
   data: z
     .object({
       windowLabel: z.string(),
-      windowFrom: z.string().datetime(),
-      windowTo: z.string().datetime(),
-      previousWindowFrom: z.string().datetime(),
-      previousWindowTo: z.string().datetime(),
+      windowFrom: z.iso.datetime(),
+      windowTo: z.iso.datetime(),
+      previousWindowFrom: z.iso.datetime(),
+      previousWindowTo: z.iso.datetime(),
       empty: z.boolean(),
       summary: z
         .object({

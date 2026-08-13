@@ -4,7 +4,7 @@ import { unarchiveOwnMembership } from "@atlas/membership";
 import { archiveMutationMetadata } from "../archive/route.metadata";
 
 const unarchiveResponseSchema = z.object({
-  data: z.object({ archivedAt: z.string().datetime().nullable() }),
+  data: z.object({ archivedAt: z.iso.datetime().nullable() }),
 });
 
 export const POST = createTenantRoute<

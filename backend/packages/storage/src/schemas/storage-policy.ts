@@ -11,6 +11,8 @@ export const AssetPurposeSchema = z.enum([
   "lesson.thumbnail",
   "module.scorm",
   "certificate.template",
+  "certificate.render",
+  "certificate.wallet",
   "community.attachment",
   "export.file",
   "temp.upload",

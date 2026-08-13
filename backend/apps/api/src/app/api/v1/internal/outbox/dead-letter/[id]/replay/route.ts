@@ -5,12 +5,12 @@ import { replayDeadLetterEvent } from "@atlas/events";
 import { routeMetadata } from "./route.metadata";
 
 const ParamsSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
 });
 
 const ReplayResponseSchema = z.object({
   data: z.object({
-    replayedOutboxEventId: z.string().uuid(),
+    replayedOutboxEventId: z.uuid(),
   }),
 });
 

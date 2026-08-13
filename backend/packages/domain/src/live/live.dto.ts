@@ -4,10 +4,10 @@ import { rejectClientTenantFields } from "../shared/domain.dto";
 export const createLiveSessionBodySchema = rejectClientTenantFields
   .extend({
     title: z.string().min(1).max(512),
-    courseId: z.string().uuid().optional(),
+    courseId: z.uuid().optional(),
     status: z.enum(["scheduled", "live", "ended", "cancelled"]).default("scheduled"),
-    scheduledAt: z.string().datetime().optional(),
-    metadataJson: z.record(z.unknown()).optional(),
+    scheduledAt: z.iso.datetime().optional(),
+    metadataJson: z.record(z.string(), z.unknown()).optional(),
   })
   .strict();
 
@@ -15,10 +15,10 @@ export const updateLiveSessionBodySchema = rejectClientTenantFields
   .extend({
     title: z.string().min(1).max(512).optional(),
     status: z.enum(["scheduled", "live", "ended", "cancelled"]).optional(),
-    scheduledAt: z.string().datetime().nullable().optional(),
-    startedAt: z.string().datetime().nullable().optional(),
-    endedAt: z.string().datetime().nullable().optional(),
-    metadataJson: z.record(z.unknown()).optional(),
+    scheduledAt: z.iso.datetime().nullable().optional(),
+    startedAt: z.iso.datetime().nullable().optional(),
+    endedAt: z.iso.datetime().nullable().optional(),
+    metadataJson: z.record(z.string(), z.unknown()).optional(),
   })
   .strict();
 
@@ -30,26 +30,26 @@ export const checkInAttendanceBodySchema = rejectClientTenantFields
 
 export const liveSessionDtoSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     title: z.string(),
-    courseId: z.string().uuid().nullable(),
+    courseId: z.uuid().nullable(),
     status: z.string(),
-    scheduledAt: z.string().datetime().nullable(),
-    startedAt: z.string().datetime().nullable(),
-    endedAt: z.string().datetime().nullable(),
+    scheduledAt: z.iso.datetime().nullable(),
+    startedAt: z.iso.datetime().nullable(),
+    endedAt: z.iso.datetime().nullable(),
     metadataJson: z.unknown().nullable(),
-    createdAt: z.string().datetime(),
+    createdAt: z.iso.datetime(),
   })
   .strict();
 
 export const liveAttendanceDtoSchema = z
   .object({
-    id: z.string().uuid(),
-    liveSessionId: z.string().uuid(),
-    membershipId: z.string().uuid(),
+    id: z.uuid(),
+    liveSessionId: z.uuid(),
+    membershipId: z.uuid(),
     status: z.string(),
-    joinedAt: z.string().datetime().nullable(),
-    leftAt: z.string().datetime().nullable(),
+    joinedAt: z.iso.datetime().nullable(),
+    leftAt: z.iso.datetime().nullable(),
     durationSeconds: z.number().int().nullable(),
   })
   .strict();

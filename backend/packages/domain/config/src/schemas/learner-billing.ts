@@ -1,11 +1,6 @@
 import { z } from "zod";
 
-export const PricingModelSchema = z.enum([
-  "pay_per_course",
-  "subscription",
-  "cohort",
-  "free",
-]);
+export const PricingModelSchema = z.enum(["pay_per_course", "subscription", "cohort", "free"]);
 
 /** ISO 4217 three-letter currency code, e.g. "INR", "USD". */
 export const CurrencyCodeSchema = z
@@ -40,7 +35,7 @@ export const LearnerBillingConfigResponseSchema = z.object({
     gst: GstConfigSchema,
     invoice: InvoiceConfigSchema,
     learnerConfig: LearnerCheckoutConfigSchema,
-    updatedAt: z.string().datetime().nullable(),
+    updatedAt: z.iso.datetime().nullable(),
   }),
 });
 
@@ -66,7 +61,7 @@ export const BillingLocationViewSchema = z.object({
   description: z.string().nullable(),
   status: z.string(),
   isDefault: z.boolean(),
-  updatedAt: z.string().datetime(),
+  updatedAt: z.iso.datetime(),
 });
 
 export const BillingLocationListResponseSchema = z.object({

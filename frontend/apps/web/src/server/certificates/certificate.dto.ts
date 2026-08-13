@@ -6,7 +6,7 @@ const rejectClientTenantFields = z
     tenant_id: z.never().optional(),
     tenantId: z.never().optional(),
   })
-  .passthrough();
+  .loose();
 
 const htmlTagPattern = /<[^>]*>/g;
 const scriptPattern = /javascript:/i;
@@ -48,55 +48,55 @@ export const certificateTemplateJsonInputSchema = z.union([
 export const certificateIssueSourceSchema = z
   .object({
     type: z.enum(["course", "learning_path", "assessment"]),
-    id: z.string().uuid(),
+    id: z.uuid(),
   })
   .strict();
 
 export const certificateStatusSchema = z.enum(["issued", "revoked", "expired", "suspended"]);
 
 export const certificateTemplateDtoSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   key: z.string(),
   name: z.string(),
   templateJson: certificateTemplateJsonUnionSchema,
   status: z.enum(["DRAFT", "REVIEW", "PUBLISHED", "ARCHIVED"]),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 
 export const certificateDtoSchema = z.object({
-  id: z.string().uuid(),
-  templateId: z.string().uuid(),
+  id: z.uuid(),
+  templateId: z.uuid(),
   templateName: z.string(),
-  membershipId: z.string().uuid(),
+  membershipId: z.uuid(),
   credentialId: z.string(),
   status: certificateStatusSchema,
-  issuedAt: z.string().datetime(),
-  revokedAt: z.string().datetime().nullable(),
+  issuedAt: z.iso.datetime(),
+  revokedAt: z.iso.datetime().nullable(),
   verificationUrl: z.string(),
   recipientLabel: z.string().nullable().optional(),
-  expiresAt: z.string().datetime().optional(),
+  expiresAt: z.iso.datetime().optional(),
   serialNumber: z.string().optional(),
   downloadUrl: z.string().optional(),
   courseTitle: z.string().optional(),
   recipientName: z.string().optional(),
   designSnapshotHash: z.string().optional(),
-  suspendedAt: z.string().datetime().nullable().optional(),
+  suspendedAt: z.iso.datetime().nullable().optional(),
 });
 
 export const certificateListQuerySchema = z
   .object({
     limit: z.coerce.number().int().min(1).max(50).default(25),
-    cursor: z.string().uuid().optional(),
+    cursor: z.uuid().optional(),
     status: certificateStatusSchema.optional(),
-    membershipId: z.string().uuid().optional(),
+    membershipId: z.uuid().optional(),
   })
   .strict();
 
 export const certificateListResponseSchema = z.object({
   data: z.array(certificateDtoSchema),
   page: z.object({
-    nextCursor: z.string().uuid().nullable(),
+    nextCursor: z.uuid().nullable(),
     hasMore: z.boolean(),
   }),
 });
@@ -128,7 +128,7 @@ export const createCertificateTemplateBodySchema = z
 
 export const updateCertificateTemplateBodySchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     key: z
       .string()
       .min(2)
@@ -143,7 +143,7 @@ export const updateCertificateTemplateBodySchema = z
 
 export const deleteCertificateTemplateBodySchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
   })
   .strict()
   .and(rejectClientTenantFields);
@@ -157,10 +157,10 @@ export const publishCertificateTemplateBodySchema = z
 
 export const certificateIssueBodySchema = z
   .object({
-    templateId: z.string().uuid(),
-    recipientMembershipId: z.string().uuid(),
+    templateId: z.uuid(),
+    recipientMembershipId: z.uuid(),
     source: certificateIssueSourceSchema,
-    expiresAt: z.string().datetime().optional(),
+    expiresAt: z.iso.datetime().optional(),
     validityDays: z.number().int().positive().max(36_500).optional(),
   })
   .strict()
@@ -168,23 +168,23 @@ export const certificateIssueBodySchema = z
 
 export const certificateBulkIssueRecipientSchema = z
   .object({
-    recipientMembershipId: z.string().uuid(),
+    recipientMembershipId: z.uuid(),
     source: certificateIssueSourceSchema,
   })
   .strict();
 
 export const certificateBulkIssueBodySchema = z
   .object({
-    templateId: z.string().uuid(),
+    templateId: z.uuid(),
     recipients: z.array(certificateBulkIssueRecipientSchema).min(1).max(100),
-    expiresAt: z.string().datetime().optional(),
+    expiresAt: z.iso.datetime().optional(),
     validityDays: z.number().int().positive().max(36_500).optional(),
   })
   .strict()
   .and(rejectClientTenantFields);
 
 export const certificateBulkIssueFailureSchema = z.object({
-  recipientMembershipId: z.string().uuid(),
+  recipientMembershipId: z.uuid(),
   error: z.string(),
 });
 
@@ -221,7 +221,7 @@ export const certificateAnalyticsResponseSchema = z.object({
 
 export const deleteCertificateTemplateResponseSchema = z.object({
   data: z.object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     deleted: z.literal(true),
   }),
 });
@@ -229,12 +229,13 @@ export const deleteCertificateTemplateResponseSchema = z.object({
 export const publicVerifyResponseSchema = z.object({
   data: z.object({
     credentialId: z.string(),
+    certificateId: z.uuid().optional(),
     status: certificateStatusSchema,
-    issuedAt: z.string().datetime(),
-    verifiedAt: z.string().datetime(),
+    issuedAt: z.iso.datetime(),
+    verifiedAt: z.iso.datetime(),
     recipientName: z.string().optional(),
     courseTitle: z.string().optional(),
-    expiresAt: z.string().datetime().optional(),
+    expiresAt: z.iso.datetime().optional(),
     serialNumber: z.string().optional(),
     downloadUrl: z.string().optional(),
     issuer: z.object({
@@ -245,24 +246,24 @@ export const publicVerifyResponseSchema = z.object({
 });
 
 export const certificateIssuedOutboxPayloadSchema = z.object({
-  certificateId: z.string().uuid(),
+  certificateId: z.uuid(),
   credentialId: z.string(),
-  templateId: z.string().uuid(),
-  membershipId: z.string().uuid(),
-  issuedAt: z.string().datetime(),
-  workflowTransitionId: z.string().uuid().nullable(),
+  templateId: z.uuid(),
+  membershipId: z.uuid(),
+  issuedAt: z.iso.datetime(),
+  workflowTransitionId: z.uuid().nullable(),
 });
 
 export const certificateRevokedOutboxPayloadSchema = z.object({
-  certificateId: z.string().uuid(),
+  certificateId: z.uuid(),
   credentialId: z.string(),
-  revokedAt: z.string().datetime(),
+  revokedAt: z.iso.datetime(),
 });
 
 export const certificateRenderPreviewBodySchema = z
   .object({
     templateJson: certificateDesignDocumentSchema,
-    data: z.record(z.string()).optional(),
+    data: z.record(z.string(), z.string()).optional(),
     watermark: z.boolean().optional(),
     showBleedSafe: z.boolean().optional(),
   })
@@ -278,6 +279,7 @@ export const certificateWalletPassResponseSchema = z.object({
     platform: z.enum(["apple", "google"]),
     status: z.enum(["not_configured", "active"]),
     saveUrl: z.string().optional(),
+    downloadUrl: z.string().optional(),
     passObjectKey: z.string().optional(),
     message: z.string(),
   }),
@@ -313,14 +315,14 @@ export const certificateBrandKitAssetSchema = z
   .strict();
 
 export const certificateBrandKitDtoSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   name: z.string(),
   logoUrl: z.string().nullable(),
   colors: z.array(certificateBrandKitColorSchema),
   fonts: z.array(certificateBrandKitFontSchema),
   assets: z.array(certificateBrandKitAssetSchema),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 
 export const certificateBrandKitListResponseSchema = z.object({
@@ -344,7 +346,7 @@ export const createCertificateBrandKitBodySchema = z
 
 export const updateCertificateBrandKitBodySchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     name: z.string().min(1).max(160).optional(),
     logoUrl: brandAssetUrlSchema.nullish(),
     colors: z.array(certificateBrandKitColorSchema).max(24).optional(),
@@ -356,14 +358,14 @@ export const updateCertificateBrandKitBodySchema = z
 
 export const deleteCertificateBrandKitBodySchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
   })
   .strict()
   .and(rejectClientTenantFields);
 
 export const deleteCertificateBrandKitResponseSchema = z.object({
   data: z.object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     deleted: z.literal(true),
   }),
 });

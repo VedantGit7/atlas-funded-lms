@@ -15,8 +15,7 @@ export type CustomFieldRosterBaseColumn = (typeof CUSTOM_FIELD_ROSTER_BASE_COLUM
 
 function parseColumns(value: unknown): string[] {
   const allowedBase = new Set<string>(CUSTOM_FIELD_ROSTER_BASE_COLUMNS);
-  const parseOne = (column: string) =>
-    allowedBase.has(column) || column.startsWith("cf:");
+  const parseOne = (column: string) => allowedBase.has(column) || column.startsWith("cf:");
 
   if (Array.isArray(value)) {
     const selected = value.filter(
@@ -48,8 +47,8 @@ export const customFieldRosterQuerySchema = rejectClientTenantFields
     q: z.string().trim().min(1).max(200).optional(),
     email: z.string().trim().min(1).max(320).optional(),
     status: z.enum(["INVITED", "ACTIVE", "SUSPENDED", "REMOVED"]).optional(),
-    signedUpFrom: z.string().datetime().optional(),
-    signedUpTo: z.string().datetime().optional(),
+    signedUpFrom: z.iso.datetime().optional(),
+    signedUpTo: z.iso.datetime().optional(),
     minTotalSpentCents: z.coerce.number().int().min(0).optional(),
     maxTotalSpentCents: z.coerce.number().int().min(0).optional(),
     sortBy: z
@@ -66,7 +65,7 @@ export type CustomFieldRosterQuery = z.output<typeof customFieldRosterQuerySchem
 
 export const customFieldDefinitionColumnSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     key: z.string(),
     label: z.string(),
     fieldType: z.string(),
@@ -75,15 +74,15 @@ export const customFieldDefinitionColumnSchema = z
 
 export const customFieldRosterItemSchema = z
   .object({
-    membershipId: z.string().uuid(),
+    membershipId: z.uuid(),
     learnerName: z.string().nullable(),
     email: z.string().nullable(),
     status: z.string(),
     enrollmentCount: z.number().int().nonnegative(),
     totalSpentCents: z.number().int().nonnegative(),
     currency: z.string(),
-    lastActiveAt: z.string().datetime().nullable(),
-    signedUpAt: z.string().datetime().nullable(),
+    lastActiveAt: z.iso.datetime().nullable(),
+    signedUpAt: z.iso.datetime().nullable(),
     customFields: z.record(z.string(), z.string().nullable()),
   })
   .strict();
@@ -123,9 +122,7 @@ export const customFieldCatalogueQuerySchema = rejectClientTenantFields
     q: z.string().trim().min(1).max(200).optional(),
     fieldType: z.enum(["text", "number", "boolean", "select", "date"]).optional(),
     status: z.enum(["ACTIVE", "INACTIVE", "ARCHIVED", "ALL"]).default("ALL"),
-    coverage: z
-      .enum(["any", "below_40", "40_80", "above_80", "never_used"])
-      .default("any"),
+    coverage: z.enum(["any", "below_40", "40_80", "above_80", "never_used"]).default("any"),
     sortBy: z
       .enum(["coverage_asc", "coverage_desc", "label_asc", "created_desc"])
       .default("coverage_asc"),
@@ -136,7 +133,7 @@ export type CustomFieldCatalogueQuery = z.output<typeof customFieldCatalogueQuer
 
 export const customFieldCatalogueItemSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     key: z.string(),
     label: z.string(),
     fieldType: z.string(),
@@ -150,8 +147,8 @@ export const customFieldCatalogueItemSchema = z
     unusedOptions: z.array(z.string()),
     mostCommonValue: z.string().nullable(),
     mostCommonSharePct: z.number().nullable(),
-    lastUpdatedAt: z.string().datetime().nullable(),
-    createdAt: z.string().datetime(),
+    lastUpdatedAt: z.iso.datetime().nullable(),
+    createdAt: z.iso.datetime(),
   })
   .strict();
 
@@ -183,8 +180,8 @@ export const exportCustomFieldRosterBodySchema = rejectClientTenantFields
     q: z.string().trim().min(1).max(200).optional(),
     email: z.string().trim().min(1).max(320).optional(),
     status: z.enum(["INVITED", "ACTIVE", "SUSPENDED", "REMOVED"]).optional(),
-    signedUpFrom: z.string().datetime().optional(),
-    signedUpTo: z.string().datetime().optional(),
+    signedUpFrom: z.iso.datetime().optional(),
+    signedUpTo: z.iso.datetime().optional(),
     minTotalSpentCents: z.coerce.number().int().min(0).optional(),
     maxTotalSpentCents: z.coerce.number().int().min(0).optional(),
     columns: z.array(z.string().min(1)).min(1).max(50).optional(),
@@ -194,7 +191,7 @@ export const exportCustomFieldRosterBodySchema = rejectClientTenantFields
 
 export const exportCustomFieldRosterResponseSchema = z.object({
   data: z.object({
-    runId: z.string().uuid(),
+    runId: z.uuid(),
     status: z.string(),
     emailed: z.boolean(),
   }),
@@ -206,15 +203,15 @@ export const sendCustomFieldMessageBodySchema = rejectClientTenantFields
     message: z.string().trim().min(1).max(10000),
     audienceCaption: z.string().trim().min(1).max(500).optional(),
     excludeMessagedWithinDays: z.coerce.number().int().min(0).max(365).optional(),
-    membershipIds: z.array(z.string().uuid()).min(1).max(2000).optional(),
+    membershipIds: z.array(z.uuid()).min(1).max(2000).optional(),
     q: z.string().trim().min(1).max(200).optional(),
     email: z.string().trim().min(1).max(320).optional(),
     status: z.enum(["INVITED", "ACTIVE", "SUSPENDED", "REMOVED"]).optional(),
-    signedUpFrom: z.string().datetime().optional(),
-    signedUpTo: z.string().datetime().optional(),
+    signedUpFrom: z.iso.datetime().optional(),
+    signedUpTo: z.iso.datetime().optional(),
     minTotalSpentCents: z.coerce.number().int().min(0).optional(),
     maxTotalSpentCents: z.coerce.number().int().min(0).optional(),
-    segmentId: z.string().uuid().optional(),
+    segmentId: z.uuid().optional(),
     segmentName: z.string().trim().min(1).max(160).optional(),
   })
   .strict();
@@ -235,12 +232,12 @@ export const createCustomFieldGroupBodySchema = rejectClientTenantFields
     description: z.string().trim().max(2000).optional(),
     syncType: z.enum(["static", "live"]).optional(),
     criteriaSummary: z.string().trim().max(500).optional(),
-    membershipIds: z.array(z.string().uuid()).min(1).max(2000).optional(),
+    membershipIds: z.array(z.uuid()).min(1).max(2000).optional(),
     q: z.string().trim().min(1).max(200).optional(),
     email: z.string().trim().min(1).max(320).optional(),
     status: z.enum(["INVITED", "ACTIVE", "SUSPENDED", "REMOVED"]).optional(),
-    signedUpFrom: z.string().datetime().optional(),
-    signedUpTo: z.string().datetime().optional(),
+    signedUpFrom: z.iso.datetime().optional(),
+    signedUpTo: z.iso.datetime().optional(),
     minTotalSpentCents: z.coerce.number().int().min(0).optional(),
     maxTotalSpentCents: z.coerce.number().int().min(0).optional(),
   })
@@ -248,7 +245,7 @@ export const createCustomFieldGroupBodySchema = rejectClientTenantFields
 
 export const createCustomFieldGroupResponseSchema = z.object({
   data: z.object({
-    batchId: z.string().uuid(),
+    batchId: z.uuid(),
     key: z.string(),
     name: z.string(),
     memberCount: z.number().int().nonnegative(),
@@ -286,13 +283,13 @@ export type CustomFieldDetailQuery = z.output<typeof customFieldDetailQuerySchem
 
 export const customFieldDetailFieldSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     key: z.string(),
     label: z.string(),
     fieldType: z.string(),
     status: z.string(),
     options: z.array(z.string()),
-    createdAt: z.string().datetime(),
+    createdAt: z.iso.datetime(),
   })
   .strict();
 
@@ -305,7 +302,7 @@ export const customFieldDetailSummarySchema = z
     distinctValueCount: z.number().int().nonnegative(),
     mostCommonValue: z.string().nullable(),
     mostCommonSharePct: z.number().nullable(),
-    lastUpdatedAt: z.string().datetime().nullable(),
+    lastUpdatedAt: z.iso.datetime().nullable(),
   })
   .strict();
 
@@ -344,7 +341,7 @@ export const customFieldDetailNumberBucketSchema = z
 
 export const customFieldDetailNumberOutlierSchema = z
   .object({
-    membershipId: z.string().uuid(),
+    membershipId: z.uuid(),
     learnerName: z.string().nullable(),
     email: z.string().nullable(),
     value: z.number(),
@@ -370,7 +367,7 @@ export const customFieldDetailNumberSchema = z
 
 export const customFieldDetailBooleanTrendPointSchema = z
   .object({
-    weekStart: z.string().datetime(),
+    weekStart: z.iso.datetime(),
     yesCount: z.number().int().nonnegative(),
     noCount: z.number().int().nonnegative(),
     yesSharePct: z.number().nullable(),
@@ -423,15 +420,15 @@ export const customFieldDetailCrossTabSchema = z
 
 export const customFieldDetailLearnerSchema = z
   .object({
-    membershipId: z.string().uuid(),
+    membershipId: z.uuid(),
     learnerName: z.string().nullable(),
     email: z.string().nullable(),
     status: z.string(),
     enrollmentCount: z.number().int().nonnegative(),
     totalSpentCents: z.number().int().nonnegative(),
     currency: z.string(),
-    lastActiveAt: z.string().datetime().nullable(),
-    signedUpAt: z.string().datetime().nullable(),
+    lastActiveAt: z.iso.datetime().nullable(),
+    signedUpAt: z.iso.datetime().nullable(),
     fieldValue: z.string().nullable(),
   })
   .strict();
@@ -464,7 +461,7 @@ export type CustomFieldDetailResponse = z.output<typeof customFieldDetailRespons
 
 export const customFieldLearnerParamsSchema = z
   .object({
-    membershipId: z.string().uuid(),
+    membershipId: z.uuid(),
   })
   .strict();
 
@@ -472,7 +469,7 @@ export type CustomFieldLearnerParams = z.output<typeof customFieldLearnerParamsS
 
 export const customFieldLearnerFieldSchema = z
   .object({
-    definitionId: z.string().uuid(),
+    definitionId: z.uuid(),
     key: z.string(),
     label: z.string(),
     fieldType: z.string(),
@@ -481,7 +478,7 @@ export const customFieldLearnerFieldSchema = z
     value: z.string().nullable(),
     valueJson: z.unknown().nullable(),
     filled: z.boolean(),
-    updatedAt: z.string().datetime().nullable(),
+    updatedAt: z.iso.datetime().nullable(),
     updatedByName: z.string().nullable(),
     auditCaption: z.string(),
   })
@@ -489,14 +486,14 @@ export const customFieldLearnerFieldSchema = z
 
 export const customFieldLearnerHistoryItemSchema = z
   .object({
-    id: z.string().uuid(),
-    definitionId: z.string().uuid(),
+    id: z.uuid(),
+    definitionId: z.uuid(),
     fieldKey: z.string(),
     fieldLabel: z.string(),
     fieldType: z.string(),
     oldValue: z.string().nullable(),
     newValue: z.string().nullable(),
-    changedAt: z.string().datetime(),
+    changedAt: z.iso.datetime(),
     changedByName: z.string().nullable(),
   })
   .strict();
@@ -504,7 +501,7 @@ export const customFieldLearnerHistoryItemSchema = z
 export const customFieldLearnerDetailResponseSchema = z.object({
   data: z.object({
     learner: z.object({
-      membershipId: z.string().uuid(),
+      membershipId: z.uuid(),
       learnerName: z.string().nullable(),
       email: z.string().nullable(),
       status: z.string(),
@@ -512,8 +509,8 @@ export const customFieldLearnerDetailResponseSchema = z.object({
       enrollmentCount: z.number().int().nonnegative(),
       totalSpentCents: z.number().int().nonnegative(),
       currency: z.string(),
-      lastActiveAt: z.string().datetime().nullable(),
-      signedUpAt: z.string().datetime().nullable(),
+      lastActiveAt: z.iso.datetime().nullable(),
+      signedUpAt: z.iso.datetime().nullable(),
     }),
     summary: z.object({
       fieldCount: z.number().int().nonnegative(),
@@ -538,7 +535,7 @@ export const updateCustomFieldLearnerValuesBodySchema = rejectClientTenantFields
       .array(
         z
           .object({
-            definitionId: z.string().uuid(),
+            definitionId: z.uuid(),
             /** Pass `null` to clear the value. */
             valueJson: z.unknown().nullable(),
           })
@@ -574,18 +571,18 @@ export type CustomFieldCohortGroupsQuery = z.output<typeof customFieldCohortGrou
 
 export const customFieldCohortGroupItemSchema = z
   .object({
-    batchId: z.string().uuid(),
+    batchId: z.uuid(),
     key: z.string(),
     name: z.string(),
     description: z.string().nullable(),
     sourceKind: z.enum(["segment", "ad_hoc", "segment_snapshot"]),
     sourceLabel: z.string(),
-    segmentId: z.string().uuid().nullable(),
+    segmentId: z.uuid().nullable(),
     segmentName: z.string().nullable(),
     criteriaSummary: z.string().nullable(),
     memberCount: z.number().int().nonnegative(),
     syncType: z.enum(["static", "live"]),
-    createdAt: z.string().datetime(),
+    createdAt: z.iso.datetime(),
     createdByLabel: z.string().nullable(),
   })
   .strict();
@@ -597,9 +594,7 @@ export const customFieldCohortGroupsResponseSchema = z.object({
   }),
 });
 
-export type CustomFieldCohortGroupsResponse = z.infer<
-  typeof customFieldCohortGroupsResponseSchema
->;
+export type CustomFieldCohortGroupsResponse = z.infer<typeof customFieldCohortGroupsResponseSchema>;
 
 export const customFieldCohortMessagesQuerySchema = rejectClientTenantFields
   .extend({
@@ -608,9 +603,7 @@ export const customFieldCohortMessagesQuerySchema = rejectClientTenantFields
   })
   .strict();
 
-export type CustomFieldCohortMessagesQuery = z.output<
-  typeof customFieldCohortMessagesQuerySchema
->;
+export type CustomFieldCohortMessagesQuery = z.output<typeof customFieldCohortMessagesQuerySchema>;
 
 export const customFieldCohortMessageItemSchema = z
   .object({
@@ -619,7 +612,7 @@ export const customFieldCohortMessageItemSchema = z
     audienceCaption: z.string().nullable(),
     sourceKind: z.enum(["segment", "ad_hoc"]),
     sourceLabel: z.string(),
-    segmentId: z.string().uuid().nullable(),
+    segmentId: z.uuid().nullable(),
     segmentName: z.string().nullable(),
     deliveredCount: z.number().int().nonnegative(),
     skippedCount: z.number().int().nonnegative(),
@@ -629,7 +622,7 @@ export const customFieldCohortMessageItemSchema = z
     recipientCount: z.number().int().nonnegative(),
     status: z.enum(["sent", "partially_failed", "failed"]),
     sentByLabel: z.string().nullable(),
-    sentAt: z.string().datetime(),
+    sentAt: z.iso.datetime(),
     reportHref: z.string().nullable(),
   })
   .strict();
@@ -655,9 +648,7 @@ export type RetryCustomFieldCohortMessageParams = z.output<
   typeof retryCustomFieldCohortMessageParamsSchema
 >;
 
-export const retryCustomFieldCohortMessageBodySchema = rejectClientTenantFields
-  .extend({})
-  .strict();
+export const retryCustomFieldCohortMessageBodySchema = rejectClientTenantFields.extend({}).strict();
 
 export type RetryCustomFieldCohortMessageBody = z.output<
   typeof retryCustomFieldCohortMessageBodySchema
@@ -672,4 +663,3 @@ export const retryCustomFieldCohortMessageResponseSchema = z.object({
     recipientCount: z.number().int().nonnegative(),
   }),
 });
-

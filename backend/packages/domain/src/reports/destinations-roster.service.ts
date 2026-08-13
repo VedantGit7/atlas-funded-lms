@@ -1,7 +1,8 @@
-import { createHash, randomBytes } from "node:crypto";
+import { createHmac, randomBytes } from "node:crypto";
 import { auditWriter } from "@atlas/audit";
 import { AtlasHttpError } from "@atlas/core/http/errors";
 import type { TenantTx } from "@atlas/db";
+import { assertTenantKeyPrefix, getStorageProvider, parseStorageEnv } from "@atlas/storage";
 import type { ServiceCtx } from "./reports.types";
 import {
   createDestinationResponseSchema,
@@ -24,6 +25,13 @@ import {
   pushHealthDay,
   type DestinationRow,
 } from "./destinations-roster.repository";
+
+export type DestinationTestEmailSender = (input: {
+  to: string;
+  subject: string;
+  body: string;
+  requestId: string;
+}) => Promise<void>;
 
 function destinationNotFound(): AtlasHttpError {
   return new AtlasHttpError({
@@ -378,7 +386,12 @@ export async function deleteDestination(tx: TenantTx, ctx: ServiceCtx, destinati
   });
 }
 
-export async function testDestination(tx: TenantTx, ctx: ServiceCtx, destinationId: string) {
+export async function testDestination(
+  tx: TenantTx,
+  ctx: ServiceCtx,
+  destinationId: string,
+  deps: { sendEmail?: DestinationTestEmailSender | null } = {},
+) {
   const existing = await destinationsRosterRepository.getById(tx, destinationId);
   if (!existing) {
     throw destinationNotFound();
@@ -400,39 +413,136 @@ export async function testDestination(tx: TenantTx, ctx: ServiceCtx, destination
     if (emails.length === 0) {
       ok = false;
       message = "No email recipients configured.";
+    } else if (!deps.sendEmail) {
+      ok = false;
+      message = "Email provider is not configured; cannot send a live test.";
     } else {
-      const external = emails.filter((address) => isExternalEmail(address, tenantDomains));
-      message =
-        external.length > 0
-          ? `Test accepted for ${emails.length} recipient(s); ${external.length} outside ${tenantDomains[0] ?? "your tenant domain"}.`
-          : `Test accepted for ${emails.length} recipient(s).`;
+      try {
+        const [probeTo] = emails;
+        if (probeTo == null) {
+          ok = false;
+          message = "No email recipients configured.";
+        } else {
+          await deps.sendEmail({
+            to: probeTo,
+            subject: `Atlas export destination test: ${existing.name}`,
+            body: [
+              "This is a live probe from Atlas LMS export destinations.",
+              "",
+              `Destination: ${existing.name}`,
+              `Recipients configured: ${emails.length}`,
+              `Request: ${ctx.requestId}`,
+            ].join("\n"),
+            requestId: `${ctx.requestId}:destination-test:${destinationId}`,
+          });
+          const external = emails.filter((address) => isExternalEmail(address, tenantDomains));
+          message =
+            external.length > 0
+              ? `Test email sent to ${probeTo} (${emails.length} recipient(s); ${external.length} external).`
+              : `Test email sent to ${probeTo} (${emails.length} recipient(s)).`;
+        }
+      } catch (err) {
+        ok = false;
+        message = err instanceof Error ? err.message : "Email test failed.";
+      }
     }
   } else if (existing.kind === "webhook") {
     const url = typeof config["url"] === "string" ? config["url"] : "";
     try {
       assertHttpsUrl(url);
-      if (!secrets["signingSecret"]) {
+      const signingSecret =
+        typeof secrets["signingSecret"] === "string" ? secrets["signingSecret"] : null;
+      if (!signingSecret) {
         ok = false;
         message = "Signing secret is missing.";
       } else {
-        // Deterministic dry-run: hash URL as a stand-in for a signed ping without outbound I/O.
-        const fingerprint = createHash("sha256").update(url).digest("hex").slice(0, 8);
-        message = `Webhook dry-run accepted (${parseWebhookParts(url).host}, ref ${fingerprint}).`;
+        const payload = {
+          event: "report.destination_test",
+          destinationId,
+          destinationName: existing.name,
+          testedAt: testedAt.toISOString(),
+          requestId: ctx.requestId,
+        };
+        const body = JSON.stringify(payload);
+        const signature = createHmac("sha256", signingSecret).update(body).digest("hex");
+        const response = await fetch(url, {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+            "x-atlas-event": "report.destination_test",
+            "x-atlas-signature": signature,
+            "x-atlas-signature-alg": "hmac-sha256",
+            "x-request-id": ctx.requestId,
+          },
+          body,
+          signal: AbortSignal.timeout(15_000),
+        });
+        if (!response.ok) {
+          ok = false;
+          message = `Webhook probe failed with status ${response.status} (${parseWebhookParts(url).host}).`;
+        } else {
+          message = `Webhook probe succeeded (${parseWebhookParts(url).host}).`;
+        }
       }
     } catch (err) {
       ok = false;
       message = err instanceof Error ? err.message : "Webhook test failed.";
     }
   } else {
-    const bucket = typeof config["bucket"] === "string" ? config["bucket"] : "";
+    const bucket = typeof config["bucket"] === "string" ? config["bucket"].trim() : "";
+    const prefix =
+      typeof config["prefix"] === "string" ? config["prefix"].replace(/^\/+|\/+$/g, "") : "";
     if (!bucket) {
       ok = false;
       message = "Storage bucket is missing.";
-    } else if (!secrets["credentials"]) {
-      ok = false;
-      message = "Storage credentials are missing.";
     } else {
-      message = `Storage dry-run accepted for ${typeof config["provider"] === "string" ? config["provider"] : "s3"}://${bucket}.`;
+      try {
+        // Live probe against Atlas-managed object storage (R2/local). External
+        // provider credentials are validated for presence; object I/O uses tenant R2.
+        if (!secrets["credentials"]) {
+          ok = false;
+          message = "Storage credentials are missing.";
+        } else {
+          const env = parseStorageEnv(process.env);
+          const provider = getStorageProvider();
+          const probeKey = [
+            `tenants/${ctx.tenantId}`,
+            "exports",
+            "destinations",
+            destinationId,
+            prefix,
+            ".atlas-probe",
+          ]
+            .filter(Boolean)
+            .join("/");
+          assertTenantKeyPrefix({ tenantId: ctx.tenantId, key: probeKey });
+          await provider.putObject({
+            bucket: env.R2_BUCKET_NAME,
+            key: probeKey,
+            body: Buffer.from(`atlas-destination-probe:${destinationId}:${testedAt.toISOString()}`),
+            contentType: "text/plain",
+          });
+          const head = await provider.headObject({
+            bucket: env.R2_BUCKET_NAME,
+            key: probeKey,
+          });
+          await provider.deleteObject({
+            bucket: env.R2_BUCKET_NAME,
+            key: probeKey,
+          });
+          if (!head) {
+            ok = false;
+            message = `Storage probe could not verify object in ${bucket}.`;
+          } else {
+            const providerLabel =
+              typeof config["provider"] === "string" ? config["provider"] : "s3";
+            message = `Storage probe succeeded via Atlas object storage for ${providerLabel}://${bucket}${prefix ? `/${prefix}` : ""} (config bucket noted; live write used tenant store).`;
+          }
+        }
+      } catch (err) {
+        ok = false;
+        message = err instanceof Error ? err.message : "Storage test failed.";
+      }
     }
   }
 

@@ -76,7 +76,7 @@ export const resourceUsageOverviewResponseSchema = z.object({
     trends: z.object({
       storageSparkline: z.array(z.number().nonnegative()).max(24),
       storageDeltaGb: z.number(),
-      generatedAt: z.string().datetime(),
+      generatedAt: z.iso.datetime(),
     }),
     optimization: z.object({
       dormantContentCount: z.number().int().nonnegative(),
@@ -128,7 +128,7 @@ export const resourceUsageHistoryItemSchema = z
     previousValue: z.number().nullable(),
     changeAbsolute: z.number().nullable(),
     changePercent: z.number().nullable(),
-    calculatedAt: z.string().datetime().nullable(),
+    calculatedAt: z.iso.datetime().nullable(),
   })
   .strict();
 
@@ -169,7 +169,7 @@ export const resourceUsageHistorySummarySchema = z
     periodsRecorded: z.number().int().nonnegative(),
     earliestPeriod: z.string().nullable(),
     latestPeriod: z.string().nullable(),
-    lastCalculatedAt: z.string().datetime().nullable(),
+    lastCalculatedAt: z.iso.datetime().nullable(),
     largestMovement: resourceUsageHistoryMovementSchema.nullable(),
     smallestMovement: resourceUsageHistoryMovementSchema.nullable(),
   })
@@ -219,7 +219,7 @@ export type ResourceUsageDormantQuery = z.output<typeof resourceUsageDormantQuer
 
 export const resourceUsageDormantItemSchema = z
   .object({
-    courseId: z.string().uuid(),
+    courseId: z.uuid(),
     title: z.string(),
     status: z.string(),
     shortCode: z.string(),
@@ -229,9 +229,9 @@ export const resourceUsageDormantItemSchema = z
     activeEnrolmentCount: z.number().int().nonnegative(),
     inactiveEnrolmentCount: z.number().int().nonnegative(),
     totalEnrolmentCount: z.number().int().nonnegative(),
-    lastLearnerActivityAt: z.string().datetime().nullable(),
+    lastLearnerActivityAt: z.iso.datetime().nullable(),
     dormantDays: z.number().int().nonnegative(),
-    createdAt: z.string().datetime().nullable(),
+    createdAt: z.iso.datetime().nullable(),
     selectable: z.boolean(),
   })
   .strict();
@@ -246,7 +246,7 @@ export const resourceUsageDormantSummarySchema = z
     totalStorageGb: z.number().nonnegative(),
     unpublishedDormantCount: z.number().int().nonnegative(),
     longestDormantDays: z.number().int().nonnegative().nullable(),
-    longestDormantCourseId: z.string().uuid().nullable(),
+    longestDormantCourseId: z.uuid().nullable(),
     longestDormantTitle: z.string().nullable(),
     longestDormantShortCode: z.string().nullable(),
     lessonsAffected: z.number().int().nonnegative(),
@@ -278,7 +278,7 @@ export type ResourceUsageDormantResponse = z.output<typeof resourceUsageDormantR
 
 export const resourceUsageDormantArchiveBodySchema = rejectClientTenantFields
   .extend({
-    courseIds: z.array(z.string().uuid()).min(1).max(50),
+    courseIds: z.array(z.uuid()).min(1).max(50),
     action: z.enum(["archive", "unpublish"]).default("archive"),
     reason: z.enum(["outdated", "consolidated", "low_engagement", "other"]),
     deleteAssets: z.boolean().default(false),
@@ -295,8 +295,8 @@ export const resourceUsageDormantArchiveResponseSchema = z.object({
     processedCount: z.number().int().nonnegative(),
     skippedCount: z.number().int().nonnegative(),
     deletedAssetsGb: z.number().nonnegative(),
-    courseIds: z.array(z.string().uuid()),
-    skippedCourseIds: z.array(z.string().uuid()),
+    courseIds: z.array(z.uuid()),
+    skippedCourseIds: z.array(z.uuid()),
   }),
 });
 
@@ -306,7 +306,7 @@ export type ResourceUsageDormantArchiveResponse = z.output<
 
 export const resourceUsageDormantCourseParamsSchema = z
   .object({
-    courseId: z.string().uuid(),
+    courseId: z.uuid(),
   })
   .strict();
 
@@ -328,13 +328,13 @@ export const resourceUsageDormantCourseDetailResponseSchema = z.object({
   data: z.object({
     course: z
       .object({
-        courseId: z.string().uuid(),
+        courseId: z.uuid(),
         title: z.string(),
         status: z.string(),
         shortCode: z.string(),
         dormantDays: z.number().int().nonnegative(),
         neverOpened: z.boolean(),
-        createdAt: z.string().datetime().nullable(),
+        createdAt: z.iso.datetime().nullable(),
         selectable: z.boolean(),
         openCourseHref: z.string(),
       })
@@ -347,7 +347,7 @@ export const resourceUsageDormantCourseDetailResponseSchema = z.object({
         lessonCount: z.number().int().nonnegative(),
         lessonsWithAssetsCount: z.number().int().nonnegative(),
         fileCount: z.number().int().nonnegative(),
-        lastLearnerActivityAt: z.string().datetime().nullable(),
+        lastLearnerActivityAt: z.iso.datetime().nullable(),
         enrolmentTotal: z.number().int().nonnegative(),
         enrolmentActive: z.number().int().nonnegative(),
         enrolmentActiveIn90d: z.number().int().nonnegative(),
@@ -372,9 +372,9 @@ export const resourceUsageDormantCourseDetailResponseSchema = z.object({
           assetTypeLabel: z.string(),
           sizeBytes: z.number().nonnegative(),
           sizeLabel: z.string(),
-          lessonId: z.string().uuid().nullable(),
+          lessonId: z.uuid().nullable(),
           lessonTitle: z.string().nullable(),
-          uploadedAt: z.string().datetime().nullable(),
+          uploadedAt: z.iso.datetime().nullable(),
         })
         .strict(),
     ),
@@ -389,14 +389,14 @@ export const resourceUsageDormantCourseDetailResponseSchema = z.object({
     lessons: z.array(
       z
         .object({
-          lessonId: z.string().uuid(),
+          lessonId: z.uuid(),
           position: z.number().int().nonnegative(),
           title: z.string(),
           lessonTypeLabel: z.string(),
           durationLabel: z.string().nullable(),
           storageGb: z.number().nonnegative(),
           neverOpened: z.boolean(),
-          lastOpenedAt: z.string().datetime().nullable(),
+          lastOpenedAt: z.iso.datetime().nullable(),
         })
         .strict(),
     ),
@@ -437,15 +437,15 @@ export type ResourceUsageInactiveQuery = z.output<typeof resourceUsageInactiveQu
 
 export const resourceUsageInactiveItemSchema = z
   .object({
-    membershipId: z.string().uuid(),
+    membershipId: z.uuid(),
     learnerName: z.string().nullable(),
     email: z.string().nullable(),
     status: z.string(),
     activityLabel: z.enum(["inactive", "dormant", "never_active"]),
     enrolmentCount: z.number().int().nonnegative(),
-    lastActiveAt: z.string().datetime().nullable(),
+    lastActiveAt: z.iso.datetime().nullable(),
     inactiveDays: z.number().int().nonnegative(),
-    createdAt: z.string().datetime(),
+    createdAt: z.iso.datetime(),
     hasPaid: z.boolean(),
     selectable: z.boolean(),
   })
@@ -490,7 +490,7 @@ export type ResourceUsageInactiveResponse = z.output<typeof resourceUsageInactiv
 
 export const resourceUsageInactiveDeactivateBodySchema = rejectClientTenantFields
   .extend({
-    membershipIds: z.array(z.string().uuid()).min(1).max(200),
+    membershipIds: z.array(z.uuid()).min(1).max(200),
     reason: z.enum(["subscription_ended", "course_completed", "inactivity", "violation", "other"]),
     excludePaid: z.boolean().default(true),
   })
@@ -505,8 +505,8 @@ export const resourceUsageInactiveDeactivateResponseSchema = z.object({
     processedCount: z.number().int().nonnegative(),
     skippedCount: z.number().int().nonnegative(),
     excludedPaidCount: z.number().int().nonnegative(),
-    membershipIds: z.array(z.string().uuid()),
-    skippedMembershipIds: z.array(z.string().uuid()),
+    membershipIds: z.array(z.uuid()),
+    skippedMembershipIds: z.array(z.uuid()),
   }),
 });
 
@@ -516,7 +516,7 @@ export type ResourceUsageInactiveDeactivateResponse = z.output<
 
 export const resourceUsageInactiveMessageBodySchema = rejectClientTenantFields
   .extend({
-    membershipIds: z.array(z.string().uuid()).min(1).max(500),
+    membershipIds: z.array(z.uuid()).min(1).max(500),
     subject: z.string().trim().min(1).max(200),
     message: z.string().trim().min(1).max(10000),
     channels: z
@@ -558,7 +558,7 @@ export const exportResourceUsageRosterBodySchema = rejectClientTenantFields
 
 export const exportResourceUsageRosterResponseSchema = z.object({
   data: z.object({
-    runId: z.string().uuid(),
+    runId: z.uuid(),
     status: z.string(),
     emailed: z.boolean(),
   }),
@@ -600,7 +600,7 @@ export const resourceUsageMetricPeriodSchema = z
     period: z.string(),
     value: z.number(),
     changeAbsolute: z.number().nullable(),
-    calculatedAt: z.string().datetime().nullable(),
+    calculatedAt: z.iso.datetime().nullable(),
   })
   .strict();
 
@@ -619,7 +619,7 @@ export const resourceUsageMetricContributorSchema = z
     title: z.string(),
     value: z.number().nonnegative(),
     unit: z.string(),
-    lastUpdatedAt: z.string().datetime().nullable(),
+    lastUpdatedAt: z.iso.datetime().nullable(),
   })
   .strict();
 
@@ -645,7 +645,7 @@ export const resourceUsageMetricDetailResponseSchema = z.object({
     changeAbsolute: z.number().nullable(),
     changePercent: z.number().nullable(),
     previousPeriodLabel: z.string().nullable(),
-    calculatedAt: z.string().datetime().nullable(),
+    calculatedAt: z.iso.datetime().nullable(),
     limit: z.number().positive().nullable(),
     limitPct: z.number().nonnegative().nullable(),
     change12Month: z.number().nullable(),
@@ -699,14 +699,14 @@ export const resourceUsageStorageSegmentSchema = z
 
 export const resourceUsageStorageHolderSchema = z
   .object({
-    courseId: z.string().uuid(),
+    courseId: z.uuid(),
     title: z.string(),
     status: z.string(),
     storageGb: z.number().nonnegative(),
     sharePct: z.number().nonnegative(),
     fileCount: z.number().int().nonnegative(),
-    lastLearnerActivityAt: z.string().datetime().nullable(),
-    createdAt: z.string().datetime().nullable(),
+    lastLearnerActivityAt: z.iso.datetime().nullable(),
+    createdAt: z.iso.datetime().nullable(),
     dormant: z.boolean(),
   })
   .strict();
@@ -733,7 +733,7 @@ export const resourceUsageStorageResponseSchema = z.object({
       dormantPct: z.number().nonnegative(),
       largestCourse: z
         .object({
-          courseId: z.string().uuid(),
+          courseId: z.uuid(),
           title: z.string(),
           storageGb: z.number().nonnegative(),
         })

@@ -33,8 +33,8 @@ export const AboutSchoolDataSchema = z.object({
   schoolName: z.string().trim().max(60).nullable().default(null),
   browserTitle: z.string().trim().max(60).nullable().default(null),
   about: z.string().trim().max(300).nullable().default(null),
-  imageRefId: z.string().uuid().nullable().default(null),
-  social: AboutSchoolSocialSchema.default({}),
+  imageRefId: z.uuid().nullable().default(null),
+  social: AboutSchoolSocialSchema.default({} as z.infer<typeof AboutSchoolSocialSchema>),
 });
 
 /** GET view: adds the resolved public URL for the stored school image. */
@@ -51,8 +51,8 @@ export const UpdateAboutSchoolRequestSchema = z.object({
   schoolName: z.string().trim().min(1).max(60),
   browserTitle: z.string().trim().min(1).max(60),
   about: z.string().trim().max(300).nullable().default(null),
-  imageRefId: z.string().uuid().nullable().default(null),
-  social: AboutSchoolSocialSchema.default({}),
+  imageRefId: z.uuid().nullable().default(null),
+  social: AboutSchoolSocialSchema.default({} as z.infer<typeof AboutSchoolSocialSchema>),
 });
 
 export type AboutSchoolSocial = z.infer<typeof AboutSchoolSocialSchema>;

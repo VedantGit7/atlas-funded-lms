@@ -20,7 +20,7 @@ export const POST = createTenantRoute<
   params: AssessmentParamsSchema,
   body: StartAttemptBodySchema,
   output: startAttemptResponseSchema,
-  handler: async ({ tx, ctx, params }) => {
+  handler: async ({ tx, ctx, params, input }) => {
     const assessmentId = params["id"];
     if (!assessmentId) throw new Error("Missing assessment id");
     const idempotencyKey = ctx.idempotencyKey;
@@ -32,6 +32,6 @@ export const POST = createTenantRoute<
       });
     }
 
-    return startAttempt(tx, ctx, assessmentId, idempotencyKey);
+    return startAttempt(tx, ctx, assessmentId, idempotencyKey, input.consent ?? null);
   },
 });

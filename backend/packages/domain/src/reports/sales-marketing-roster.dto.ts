@@ -99,8 +99,8 @@ export const SALES_PRODUCTS_SORT = [
 export const salesProductsQuerySchema = rejectClientTenantFields
   .extend({
     q: z.string().trim().min(1).max(200).optional(),
-    paidFrom: z.string().datetime().optional(),
-    paidTo: z.string().datetime().optional(),
+    paidFrom: z.iso.datetime().optional(),
+    paidTo: z.iso.datetime().optional(),
     productType: z.string().trim().min(1).max(64).optional(),
     currency: z.string().trim().min(1).max(8).optional(),
     sortBy: z.enum(SALES_PRODUCTS_SORT).default("revenue_cents"),
@@ -114,7 +114,7 @@ export type SalesProductsQuery = z.output<typeof salesProductsQuerySchema>;
 
 export const salesProductItemSchema = z
   .object({
-    courseId: z.string().uuid(),
+    courseId: z.uuid(),
     productTitle: z.string(),
     productType: z.string(),
     revenueCents: z.number().int().nonnegative(),
@@ -147,8 +147,8 @@ export const salesProductsListResponseSchema = z.object({
       previousTotalUnitsSold: z.number().int().nonnegative(),
       revenueChangePercent: z.number().nullable(),
       unitsChangePercent: z.number().nullable(),
-      windowFrom: z.string().datetime().nullable(),
-      windowTo: z.string().datetime().nullable(),
+      windowFrom: z.iso.datetime().nullable(),
+      windowTo: z.iso.datetime().nullable(),
     }),
     productTypes: z.array(z.string()),
   }),
@@ -156,7 +156,7 @@ export const salesProductsListResponseSchema = z.object({
 
 export const salesCourseIdParamsSchema = z
   .object({
-    courseId: z.string().uuid(),
+    courseId: z.uuid(),
   })
   .strict();
 
@@ -166,8 +166,8 @@ export const salesPurchasersQuerySchema = rejectClientTenantFields
     email: z.string().trim().min(1).max(320).optional(),
     q: z.string().trim().min(1).max(200).optional(),
     enrolledType: z.string().trim().min(1).max(40).optional(),
-    purchasedFrom: z.string().datetime().optional(),
-    purchasedTo: z.string().datetime().optional(),
+    purchasedFrom: z.iso.datetime().optional(),
+    purchasedTo: z.iso.datetime().optional(),
     sortBy: z.enum(["purchased_at", "amount_cents", "learner_name"]).default("purchased_at"),
     sortDir: z.enum(["asc", "desc"]).default("desc"),
     columns: z.preprocess(
@@ -183,7 +183,7 @@ export type SalesPurchasersQuery = z.output<typeof salesPurchasersQuerySchema>;
 
 export const salesPurchaserItemSchema = z
   .object({
-    membershipId: z.string().uuid(),
+    membershipId: z.uuid(),
     learnerName: z.string().nullable(),
     email: z.string().nullable(),
     amountCents: z.number().int().nonnegative(),
@@ -191,15 +191,15 @@ export const salesPurchaserItemSchema = z
     currency: z.string(),
     enrolledType: z.string().nullable(),
     couponCode: z.string().nullable(),
-    purchasedAt: z.string().datetime(),
-    paymentOrderId: z.string().uuid().nullable(),
+    purchasedAt: z.iso.datetime(),
+    paymentOrderId: z.uuid().nullable(),
     invoiceNumber: z.string().nullable(),
   })
   .strict();
 
 export const salesPurchasersListResponseSchema = z.object({
   data: z.object({
-    courseId: z.string().uuid(),
+    courseId: z.uuid(),
     productTitle: z.string(),
     productType: z.string(),
     productStatus: z.string(),
@@ -254,7 +254,7 @@ export type CouponsListQuery = z.output<typeof couponsListQuerySchema>;
 
 export const couponListItemSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     code: z.string(),
     name: z.string(),
     status: z.string(),
@@ -267,9 +267,9 @@ export const couponListItemSchema = z
     totalDiscountCents: z.number().int().nonnegative(),
     totalRevenueCents: z.number().int().nonnegative(),
     netCents: z.number().int(),
-    endsAt: z.string().datetime().nullable(),
-    startsAt: z.string().datetime().nullable(),
-    createdAt: z.string().datetime(),
+    endsAt: z.iso.datetime().nullable(),
+    startsAt: z.iso.datetime().nullable(),
+    createdAt: z.iso.datetime(),
   })
   .strict();
 
@@ -297,7 +297,7 @@ export const couponsListResponseSchema = z.object({
 
 export const couponIdParamsSchema = z
   .object({
-    couponId: z.string().uuid(),
+    couponId: z.uuid(),
   })
   .strict();
 
@@ -305,9 +305,9 @@ export const couponRedemptionsQuerySchema = rejectClientTenantFields
   .extend({
     learnerName: z.string().trim().min(1).max(200).optional(),
     q: z.string().trim().min(1).max(200).optional(),
-    courseId: z.string().uuid().optional(),
-    appliedFrom: z.string().datetime().optional(),
-    appliedTo: z.string().datetime().optional(),
+    courseId: z.uuid().optional(),
+    appliedFrom: z.iso.datetime().optional(),
+    appliedTo: z.iso.datetime().optional(),
     minFinalAmountCents: z.coerce.number().int().min(0).optional(),
     maxFinalAmountCents: z.coerce.number().int().min(0).optional(),
     couponApplied: z.boolean().optional(),
@@ -328,25 +328,25 @@ export type CouponRedemptionsQuery = z.output<typeof couponRedemptionsQuerySchem
 
 export const couponRedemptionItemSchema = z
   .object({
-    id: z.string().uuid(),
-    membershipId: z.string().uuid(),
+    id: z.uuid(),
+    membershipId: z.uuid(),
     learnerName: z.string().nullable(),
     email: z.string().nullable(),
     productTitle: z.string().nullable(),
-    courseId: z.string().uuid().nullable(),
+    courseId: z.uuid().nullable(),
     discountCents: z.number().int().nonnegative(),
     originalAmountCents: z.number().int().nonnegative(),
     finalAmountCents: z.number().int().nonnegative(),
     currency: z.string(),
-    paymentOrderId: z.string().uuid().nullable(),
+    paymentOrderId: z.uuid().nullable(),
     invoiceNumber: z.string().nullable(),
-    appliedAt: z.string().datetime(),
+    appliedAt: z.iso.datetime(),
   })
   .strict();
 
 export const couponRedemptionProductBreakdownSchema = z
   .object({
-    courseId: z.string().uuid().nullable(),
+    courseId: z.uuid().nullable(),
     productTitle: z.string(),
     redemptionCount: z.number().int().nonnegative(),
     revenueCents: z.number().int().nonnegative(),
@@ -380,7 +380,7 @@ export const couponRedemptionsSummarySchema = z
 
 export const couponRedemptionsListResponseSchema = z.object({
   data: z.object({
-    couponId: z.string().uuid(),
+    couponId: z.uuid(),
     code: z.string(),
     name: z.string(),
     status: z.string(),
@@ -390,9 +390,9 @@ export const couponRedemptionsListResponseSchema = z.object({
     currency: z.string(),
     totalUsageLimit: z.number().int().positive().nullable(),
     redemptionCount: z.number().int().nonnegative(),
-    endsAt: z.string().datetime().nullable(),
-    startsAt: z.string().datetime().nullable(),
-    createdAt: z.string().datetime(),
+    endsAt: z.iso.datetime().nullable(),
+    startsAt: z.iso.datetime().nullable(),
+    createdAt: z.iso.datetime(),
     summary: couponRedemptionsSummarySchema,
     products: z.array(couponRedemptionProductBreakdownSchema),
     trend: z.array(couponRedemptionTrendPointSchema),
@@ -407,10 +407,10 @@ export const couponRedemptionsListResponseSchema = z.object({
 export const referralWalletQuerySchema = rejectClientTenantFields
   .extend({
     q: z.string().trim().min(1).max(200).optional(),
-    signedUpFrom: z.string().datetime().optional(),
-    signedUpTo: z.string().datetime().optional(),
-    activityFrom: z.string().datetime().optional(),
-    activityTo: z.string().datetime().optional(),
+    signedUpFrom: z.iso.datetime().optional(),
+    signedUpTo: z.iso.datetime().optional(),
+    activityFrom: z.iso.datetime().optional(),
+    activityTo: z.iso.datetime().optional(),
     minCreditEarned: z.coerce.number().int().min(0).optional(),
     minWalletBalance: z.coerce.number().int().min(0).optional(),
     sortBy: z
@@ -437,7 +437,7 @@ export type ReferralWalletQuery = z.output<typeof referralWalletQuerySchema>;
 
 export const referralWalletItemSchema = z
   .object({
-    membershipId: z.string().uuid(),
+    membershipId: z.uuid(),
     learnerName: z.string().nullable(),
     email: z.string().nullable(),
     referralCode: z.string().nullable(),
@@ -445,7 +445,7 @@ export const referralWalletItemSchema = z
     creditEarned: z.number().int().nonnegative(),
     walletBalance: z.number().int().nonnegative(),
     referredRevenueCents: z.number().int().nonnegative(),
-    signedUpAt: z.string().datetime().nullable(),
+    signedUpAt: z.iso.datetime().nullable(),
   })
   .strict();
 
@@ -461,8 +461,8 @@ export const referralWalletSummarySchema = z
     referrerCount: z.number().int().nonnegative(),
     totalLearners: z.number().int().nonnegative(),
     currency: z.string(),
-    windowFrom: z.string().datetime(),
-    windowTo: z.string().datetime(),
+    windowFrom: z.iso.datetime(),
+    windowTo: z.iso.datetime(),
     windowLabel: z.string(),
   })
   .strict();
@@ -478,7 +478,7 @@ export const referralWalletListResponseSchema = z.object({
 
 export const referrerMembershipIdParamsSchema = z
   .object({
-    membershipId: z.string().uuid(),
+    membershipId: z.uuid(),
   })
   .strict();
 
@@ -493,10 +493,10 @@ export type ReferredLearnersQuery = z.output<typeof referredLearnersQuerySchema>
 
 export const referredLearnerItemSchema = z
   .object({
-    membershipId: z.string().uuid(),
+    membershipId: z.uuid(),
     learnerName: z.string().nullable(),
     email: z.string().nullable(),
-    signedUpAt: z.string().datetime(),
+    signedUpAt: z.iso.datetime(),
     firstPurchaseTitle: z.string().nullable(),
     revenueAttributedCents: z.number().int().nonnegative(),
     creditAwarded: z.number().int().nonnegative(),
@@ -508,7 +508,7 @@ export const referredLearnerItemSchema = z
 export const referredLearnersListResponseSchema = z.object({
   data: z.object({
     referrer: z.object({
-      membershipId: z.string().uuid(),
+      membershipId: z.uuid(),
       learnerName: z.string().nullable(),
       email: z.string().nullable(),
       referralCode: z.string().nullable(),
@@ -538,10 +538,10 @@ export const affiliateProductsQuerySchema = rejectClientTenantFields
     q: z.string().trim().min(1).max(200).optional(),
     enabled: z.enum(["all", "enabled", "disabled"]).default("all"),
     commissionBand: z.enum(["any", "below_10", "10_20", "above_20"]).default("any"),
-    activityFrom: z.string().datetime().optional(),
-    activityTo: z.string().datetime().optional(),
-    publishedFrom: z.string().datetime().optional(),
-    publishedTo: z.string().datetime().optional(),
+    activityFrom: z.iso.datetime().optional(),
+    activityTo: z.iso.datetime().optional(),
+    publishedFrom: z.iso.datetime().optional(),
+    publishedTo: z.iso.datetime().optional(),
     sortBy: z.enum(AFFILIATE_PRODUCTS_SORT).default("revenue_cents"),
     sortDir: z.enum(["asc", "desc"]).default("desc"),
     columns: z.preprocess(
@@ -557,7 +557,7 @@ export type AffiliateProductsQuery = z.output<typeof affiliateProductsQuerySchem
 
 export const affiliateProductItemSchema = z
   .object({
-    courseId: z.string().uuid(),
+    courseId: z.uuid(),
     productTitle: z.string(),
     productType: z.string(),
     enabled: z.boolean(),
@@ -571,7 +571,7 @@ export const affiliateProductItemSchema = z
     effectiveRatePct: z.number().nonnegative(),
     activeAffiliateCount: z.number().int().nonnegative(),
     unpaidCommissionCents: z.number().int().nonnegative(),
-    publishedAt: z.string().datetime().nullable(),
+    publishedAt: z.iso.datetime().nullable(),
     currency: z.string(),
   })
   .strict();
@@ -589,8 +589,8 @@ export const affiliateProductsSummarySchema = z
     productsTotal: z.number().int().nonnegative(),
     tenantDefaultCommissionPct: z.number().nonnegative(),
     currency: z.string(),
-    windowFrom: z.string().datetime(),
-    windowTo: z.string().datetime(),
+    windowFrom: z.iso.datetime(),
+    windowTo: z.iso.datetime(),
     windowLabel: z.string(),
   })
   .strict();
@@ -622,10 +622,10 @@ export const affiliatesQuerySchema = rejectClientTenantFields
     tier: z.enum(["STANDARD", "PREMIUM"]).optional(),
     unpaidBand: z.enum(["any", "has_unpaid", "zero", "above_1000"]).default("any"),
     view: z.enum(["all", "owed", "top", "suspended"]).default("all"),
-    activityFrom: z.string().datetime().optional(),
-    activityTo: z.string().datetime().optional(),
-    signedUpFrom: z.string().datetime().optional(),
-    signedUpTo: z.string().datetime().optional(),
+    activityFrom: z.iso.datetime().optional(),
+    activityTo: z.iso.datetime().optional(),
+    signedUpFrom: z.iso.datetime().optional(),
+    signedUpTo: z.iso.datetime().optional(),
     sortBy: z.enum(AFFILIATES_SORT).default("commission_earned_cents"),
     sortDir: z.enum(["asc", "desc"]).default("desc"),
     columns: z.preprocess(
@@ -641,8 +641,8 @@ export type AffiliatesQuery = z.output<typeof affiliatesQuerySchema>;
 
 export const affiliateItemSchema = z
   .object({
-    affiliateId: z.string().uuid(),
-    membershipId: z.string().uuid(),
+    affiliateId: z.uuid(),
+    membershipId: z.uuid(),
     learnerName: z.string().nullable(),
     email: z.string().nullable(),
     tier: z.string(),
@@ -652,7 +652,7 @@ export const affiliateItemSchema = z
     commissionEarnedCents: z.number().int().nonnegative(),
     unpaidCents: z.number().int().nonnegative(),
     paidCents: z.number().int().nonnegative(),
-    signedUpAt: z.string().datetime(),
+    signedUpAt: z.iso.datetime(),
     currency: z.string(),
   })
   .strict();
@@ -668,8 +668,8 @@ export const affiliatesSummarySchema = z
     totalCount: z.number().int().nonnegative(),
     pendingApprovalCount: z.number().int().nonnegative(),
     currency: z.string(),
-    windowFrom: z.string().datetime(),
-    windowTo: z.string().datetime(),
+    windowFrom: z.iso.datetime(),
+    windowTo: z.iso.datetime(),
     windowLabel: z.string(),
   })
   .strict();
@@ -685,7 +685,7 @@ export const affiliatesListResponseSchema = z.object({
 
 export const affiliateIdParamsSchema = z
   .object({
-    affiliateId: z.string().uuid(),
+    affiliateId: z.uuid(),
   })
   .strict();
 
@@ -700,8 +700,8 @@ export type AffiliateDetailQuery = z.output<typeof affiliateDetailQuerySchema>;
 
 export const affiliateAttributedOrderSchema = z
   .object({
-    commissionId: z.string().uuid(),
-    paymentOrderId: z.string().uuid(),
+    commissionId: z.uuid(),
+    paymentOrderId: z.uuid(),
     invoiceNumber: z.string().nullable(),
     learnerName: z.string().nullable(),
     learnerEmail: z.string().nullable(),
@@ -710,18 +710,18 @@ export const affiliateAttributedOrderSchema = z
     commissionCents: z.number().int().nonnegative(),
     currency: z.string(),
     status: z.string(),
-    createdAt: z.string().datetime(),
+    createdAt: z.iso.datetime(),
   })
   .strict();
 
 export const affiliatePayoutHistoryItemSchema = z
   .object({
-    payoutId: z.string().uuid(),
+    payoutId: z.uuid(),
     amountCents: z.number().int().nonnegative(),
     currency: z.string(),
     status: z.string(),
     note: z.string().nullable(),
-    paidAt: z.string().datetime(),
+    paidAt: z.iso.datetime(),
   })
   .strict();
 
@@ -747,20 +747,14 @@ export const affiliateDetailResponseSchema = z.object({
 
 export const exportSalesMarketingBodySchema = rejectClientTenantFields
   .extend({
-    section: z.enum([
-      "sales",
-      "coupons",
-      "referral-wallet",
-      "affiliate-products",
-      "affiliates",
-    ]),
-    courseId: z.string().uuid().optional(),
-    couponId: z.string().uuid().optional(),
+    section: z.enum(["sales", "coupons", "referral-wallet", "affiliate-products", "affiliates"]),
+    courseId: z.uuid().optional(),
+    couponId: z.uuid().optional(),
     q: z.string().trim().min(1).max(200).optional(),
     learnerName: z.string().trim().min(1).max(200).optional(),
     email: z.string().trim().min(1).max(320).optional(),
-    purchasedFrom: z.string().datetime().optional(),
-    purchasedTo: z.string().datetime().optional(),
+    purchasedFrom: z.iso.datetime().optional(),
+    purchasedTo: z.iso.datetime().optional(),
     columns: z.array(z.string().min(1)).min(1).max(30).optional(),
     emailDownloadLink: z.boolean().default(true),
   })
@@ -768,7 +762,7 @@ export const exportSalesMarketingBodySchema = rejectClientTenantFields
 
 export const exportSalesMarketingResponseSchema = z.object({
   data: z.object({
-    runId: z.string().uuid(),
+    runId: z.uuid(),
     status: z.string(),
     emailed: z.boolean(),
   }),
@@ -776,27 +770,27 @@ export const exportSalesMarketingResponseSchema = z.object({
 
 export const sendSalesMessageBodySchema = rejectClientTenantFields
   .extend({
-    courseId: z.string().uuid().optional(),
-    couponId: z.string().uuid().optional(),
+    courseId: z.uuid().optional(),
+    couponId: z.uuid().optional(),
     subject: z.string().trim().min(1).max(200),
     message: z.string().trim().min(1).max(10000),
-    membershipIds: z.array(z.string().uuid()).min(1).max(2000).optional(),
+    membershipIds: z.array(z.uuid()).min(1).max(2000).optional(),
     learnerName: z.string().trim().min(1).max(200).optional(),
     email: z.string().trim().min(1).max(320).optional(),
     q: z.string().trim().min(1).max(200).optional(),
     enrolledType: z.string().trim().min(1).max(40).optional(),
-    purchasedFrom: z.string().datetime().optional(),
-    purchasedTo: z.string().datetime().optional(),
-    appliedFrom: z.string().datetime().optional(),
-    appliedTo: z.string().datetime().optional(),
-    courseFilterId: z.string().uuid().optional(),
+    purchasedFrom: z.iso.datetime().optional(),
+    purchasedTo: z.iso.datetime().optional(),
+    appliedFrom: z.iso.datetime().optional(),
+    appliedTo: z.iso.datetime().optional(),
+    courseFilterId: z.uuid().optional(),
   })
   .strict()
   .superRefine((value, ctx) => {
     const hasSelection = (value.membershipIds?.length ?? 0) > 0;
     if (!hasSelection && !value.courseId && !value.couponId) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         message: "Provide courseId, couponId, or membershipIds.",
         path: ["courseId"],
       });
@@ -813,27 +807,27 @@ export const sendSalesMessageResponseSchema = z.object({
 
 export const createSalesGroupBodySchema = rejectClientTenantFields
   .extend({
-    courseId: z.string().uuid().optional(),
-    couponId: z.string().uuid().optional(),
+    courseId: z.uuid().optional(),
+    couponId: z.uuid().optional(),
     title: z.string().trim().min(1).max(256),
     description: z.string().trim().max(2000).optional(),
-    membershipIds: z.array(z.string().uuid()).min(1).max(2000).optional(),
+    membershipIds: z.array(z.uuid()).min(1).max(2000).optional(),
     learnerName: z.string().trim().min(1).max(200).optional(),
     email: z.string().trim().min(1).max(320).optional(),
     q: z.string().trim().min(1).max(200).optional(),
     enrolledType: z.string().trim().min(1).max(40).optional(),
-    purchasedFrom: z.string().datetime().optional(),
-    purchasedTo: z.string().datetime().optional(),
-    appliedFrom: z.string().datetime().optional(),
-    appliedTo: z.string().datetime().optional(),
-    courseFilterId: z.string().uuid().optional(),
+    purchasedFrom: z.iso.datetime().optional(),
+    purchasedTo: z.iso.datetime().optional(),
+    appliedFrom: z.iso.datetime().optional(),
+    appliedTo: z.iso.datetime().optional(),
+    courseFilterId: z.uuid().optional(),
   })
   .strict()
   .superRefine((value, ctx) => {
     const hasSelection = (value.membershipIds?.length ?? 0) > 0;
     if (!hasSelection && !value.courseId && !value.couponId) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         message: "Provide courseId, couponId, or membershipIds.",
         path: ["courseId"],
       });
@@ -842,7 +836,7 @@ export const createSalesGroupBodySchema = rejectClientTenantFields
 
 export const createSalesGroupResponseSchema = z.object({
   data: z.object({
-    batchId: z.string().uuid(),
+    batchId: z.uuid(),
     key: z.string(),
     name: z.string(),
     memberCount: z.number().int().nonnegative(),
@@ -856,8 +850,8 @@ export type SalesMarketingOverviewGrain = (typeof SALES_MARKETING_OVERVIEW_GRAIN
 
 export const salesMarketingOverviewQuerySchema = rejectClientTenantFields
   .extend({
-    paidFrom: z.string().datetime().optional(),
-    paidTo: z.string().datetime().optional(),
+    paidFrom: z.iso.datetime().optional(),
+    paidTo: z.iso.datetime().optional(),
     currency: z.string().trim().min(1).max(8).optional(),
     grain: z.enum(SALES_MARKETING_OVERVIEW_GRAINS).default("week"),
   })
@@ -879,8 +873,8 @@ export const salesMarketingOverviewResponseSchema = z.object({
       previousAttributedRevenueCents: z.number().int().nonnegative(),
       changePercent: z.number().nullable(),
       windowLabel: z.string(),
-      windowFrom: z.string().datetime(),
-      windowTo: z.string().datetime(),
+      windowFrom: z.iso.datetime(),
+      windowTo: z.iso.datetime(),
     }),
     attribution: z.object({
       directCents: z.number().int().nonnegative(),
@@ -905,7 +899,7 @@ export const salesMarketingOverviewResponseSchema = z.object({
     ),
     topProducts: z.array(
       z.object({
-        courseId: z.string().uuid().nullable(),
+        courseId: z.uuid().nullable(),
         productTitle: z.string(),
         productType: z.string(),
         purchaserCount: z.number().int().nonnegative(),
@@ -916,7 +910,7 @@ export const salesMarketingOverviewResponseSchema = z.object({
     ),
     topCoupons: z.array(
       z.object({
-        id: z.string().uuid(),
+        id: z.uuid(),
         code: z.string(),
         uses: z.number().int().nonnegative(),
         generatedCents: z.number().int().nonnegative(),
@@ -924,7 +918,7 @@ export const salesMarketingOverviewResponseSchema = z.object({
     ),
     topAffiliates: z.array(
       z.object({
-        affiliateId: z.string().uuid(),
+        affiliateId: z.uuid(),
         name: z.string(),
         commissionCents: z.number().int().nonnegative(),
         unpaidCents: z.number().int().nonnegative(),

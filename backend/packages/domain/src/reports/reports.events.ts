@@ -12,10 +12,10 @@ export const REPORT_SCHEDULE_DELETED_AUDIT = "report.schedule.deleted" as const;
 
 export const reportGenerateRequestedPayloadSchema = z
   .object({
-    reportRunId: z.string().uuid(),
+    reportRunId: z.uuid(),
     reportDefinitionKey: z.string().min(1),
-    requestedAt: z.string().datetime(),
-    requestedByMembershipId: z.string().uuid(),
+    requestedAt: z.iso.datetime(),
+    requestedByMembershipId: z.uuid(),
     format: z.enum(["csv", "xlsx", "pdf", "json"]),
     schemaVersion: z.literal(1),
   })
@@ -25,11 +25,11 @@ export type ReportGenerateRequestedPayload = z.output<typeof reportGenerateReque
 
 export const reportRunSucceededPayloadSchema = z
   .object({
-    reportRunId: z.string().uuid(),
+    reportRunId: z.uuid(),
     reportDefinitionKey: z.string().min(1),
     format: z.enum(["csv", "xlsx", "pdf", "json"]),
     rowCount: z.number().int().nonnegative(),
-    completedAt: z.string().datetime(),
+    completedAt: z.iso.datetime(),
     schemaVersion: z.literal(1),
   })
   .strict();

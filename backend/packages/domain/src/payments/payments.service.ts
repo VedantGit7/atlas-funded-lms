@@ -62,6 +62,8 @@ export async function listPaymentOrders(tx: TenantTx, _ctx: ServiceCtx, rawQuery
 }
 
 export async function handleStripeWebhook(tx: TenantTx, _ctx: ServiceCtx, rawBody: unknown) {
+  // Legacy JSON stub retained for typed contract compatibility.
+  // Live Stripe webhooks use raw body + PaymentProvider.parseWebhook in the route handler.
   const body = stripeWebhookBodySchema.parse(rawBody);
   const current = await paymentsRepository.findByExternalId(tx, body.externalId);
   if (!current) {

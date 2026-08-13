@@ -22,37 +22,38 @@ plan/
 
 ## Active plans
 
-| Plan | Folder | Status |
-|------|--------|--------|
-| [Complete frontend plan](frontend-planning/complete-frontend-rebuild.md) | frontend-planning | draft |
-| [Frontend tech stack](frontend-planning/tech-stack.md) | frontend-planning | draft |
-| [Frontend performance strategy](frontend-planning/performance.md) | frontend-planning | draft |
-| [Local dev URLs & multi-tenant hosts](frontend-planning/local-dev-urls.md) | frontend-planning | draft |
-| [Cursor Build workflow](frontend-planning/cursor-build-workflow.md) | frontend-planning | approved |
-| [Monorepo split & API extraction](backend-planning/monorepo-split-and-api-extraction.md) | backend-planning | draft |
-| [Future backend flexibility](backend-planning/future-backend-flexibility.md) | backend-planning | draft |
-| [Open signup, freemium courses & payments](backend-planning/open-signup-freemium-and-payments.md) | backend-planning | draft |
-| [Zod 4 migration (post-F8)](frontend-planning/zod-4-migration.md) | frontend-planning | draft |
+| Plan                                                                                              | Folder            | Status            |
+| ------------------------------------------------------------------------------------------------- | ----------------- | ----------------- |
+| [Complete frontend plan](frontend-planning/complete-frontend-rebuild.md)                          | frontend-planning | draft             |
+| [Frontend tech stack](frontend-planning/tech-stack.md)                                            | frontend-planning | draft             |
+| [Frontend performance strategy](frontend-planning/performance.md)                                 | frontend-planning | draft             |
+| [Local dev URLs & multi-tenant hosts](frontend-planning/local-dev-urls.md)                        | frontend-planning | draft             |
+| [Cursor Build workflow](frontend-planning/cursor-build-workflow.md)                               | frontend-planning | approved          |
+| [Monorepo split & API extraction](backend-planning/monorepo-split-and-api-extraction.md)          | backend-planning  | draft             |
+| [Future backend flexibility](backend-planning/future-backend-flexibility.md)                      | backend-planning  | draft             |
+| [Open signup, freemium courses & payments](backend-planning/open-signup-freemium-and-payments.md) | backend-planning  | done (phases 1–3) |
+| [Zod 4 migration (post-F8)](frontend-planning/zod-4-migration.md)                                 | frontend-planning | done              |
 
 ## Sprint order (current roadmap)
 
 1. **Backend F-1** — [monorepo split](backend-planning/monorepo-split-and-api-extraction.md) — **done**
 2. **Frontend F0–F8** — [complete frontend rebuild](frontend-planning/complete-frontend-rebuild.md) — **F0–F8 done**
-3. **Post-F8** — [Zod 4 monorepo migration](frontend-planning/zod-4-migration.md) ([§15](frontend-planning/complete-frontend-rebuild.md#15-post-f8--zod-4-migration-monorepo) of master plan) — **next**
-4. **Post-frontend (optional)** — [future backend flexibility](backend-planning/future-backend-flexibility.md) — keep, refactor, or replace backend without rewriting UI
+3. **Post-F8** — [Zod 4 monorepo migration](frontend-planning/zod-4-migration.md) ([§15](frontend-planning/complete-frontend-rebuild.md#15-post-f8--zod-4-migration-monorepo) of master plan) — **done**
+4. **P0/P1 completion program** — finish remaining product gaps (open-signup phase 3 live PaymentProvider gateway, plus other P0/P1 backlog)
+5. **Post-frontend (optional)** — [future backend flexibility](backend-planning/future-backend-flexibility.md) — keep, refactor, or replace backend without rewriting UI
 
 ### Frontend phase status
 
-| Phase | Status |
-|-------|--------|
-| F-1 | done |
-| F0 | done |
-| F1 | done |
-| F2 | done |
-| F3 | done |
-| **F4** | **done** — [remaining backlog](frontend-planning/complete-frontend-rebuild.md#101-phase-f4--completion--remaining-backlog) |
-| **F5** | **done** — [§11 F5 complete](frontend-planning/complete-frontend-rebuild.md#11-phase-f5--studio--moderation--review-2-weeks) |
-| **F6** | **done** — [§12.1 backlog](frontend-planning/complete-frontend-rebuild.md#121-phase-f6--backlog) |
-| **F7** | **done** — [§13 complete](frontend-planning/complete-frontend-rebuild.md#13-phase-f7--platform-p1p8-1-week) |
-| F8 | **done** — [§14 complete](frontend-planning/complete-frontend-rebuild.md#14-phase-f8--hardening-2-weeks) |
-| Post-F8 | pending — **next** |
+| Phase   | Status                                                                                                                       |
+| ------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| F-1     | done                                                                                                                         |
+| F0      | done                                                                                                                         |
+| F1      | done                                                                                                                         |
+| F2      | done                                                                                                                         |
+| F3      | done                                                                                                                         |
+| **F4**  | **done** — [remaining backlog](frontend-planning/complete-frontend-rebuild.md#101-phase-f4--completion--remaining-backlog)   |
+| **F5**  | **done** — [§11 F5 complete](frontend-planning/complete-frontend-rebuild.md#11-phase-f5--studio--moderation--review-2-weeks) |
+| **F6**  | **done** — [§12.1 backlog](frontend-planning/complete-frontend-rebuild.md#121-phase-f6--backlog)                             |
+| **F7**  | **done** — [§13 complete](frontend-planning/complete-frontend-rebuild.md#13-phase-f7--platform-p1p8-1-week)                  |
+| F8      | **done** — [§14 complete](frontend-planning/complete-frontend-rebuild.md#14-phase-f8--hardening-2-weeks)                     |
+| Post-F8 | **done** — Zod `^4.4.3` monorepo-wide                                                                                        |

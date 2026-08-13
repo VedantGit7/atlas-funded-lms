@@ -22,14 +22,7 @@ export const SEGMENT_TEXT_OPERATORS = [
   "is_not_empty",
 ] as const;
 
-export const SEGMENT_NUMBER_OPERATORS = [
-  "eq",
-  "neq",
-  "gt",
-  "lt",
-  "between",
-  "is_empty",
-] as const;
+export const SEGMENT_NUMBER_OPERATORS = ["eq", "neq", "gt", "lt", "between", "is_empty"] as const;
 
 export const SEGMENT_BOOLEAN_OPERATORS = ["is_true", "is_false", "is_empty"] as const;
 
@@ -145,7 +138,7 @@ export type PreviewCustomFieldSegmentBody = z.output<typeof previewCustomFieldSe
 
 export const customFieldSegmentParamsSchema = z
   .object({
-    segmentId: z.string().uuid(),
+    segmentId: z.uuid(),
   })
   .strict();
 
@@ -162,7 +155,7 @@ export type CreateSegmentGroupBody = z.output<typeof createSegmentGroupBodySchem
 
 export const customFieldSegmentItemSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     name: z.string(),
     description: z.string().nullable(),
     visibility: z.enum(["shared", "private"]),
@@ -174,13 +167,13 @@ export const customFieldSegmentItemSchema = z
     matchedCount: z.number().int().nonnegative().nullable(),
     previousMatchedCount: z.number().int().nonnegative().nullable(),
     matchedDelta: z.number().int().nullable(),
-    matchedCountAt: z.string().datetime().nullable(),
+    matchedCountAt: z.iso.datetime().nullable(),
     isStale: z.boolean(),
-    createdByMembershipId: z.string().uuid(),
+    createdByMembershipId: z.uuid(),
     createdByName: z.string().nullable(),
     dependencyCount: z.number().int().nonnegative(),
-    createdAt: z.string().datetime(),
-    updatedAt: z.string().datetime(),
+    createdAt: z.iso.datetime(),
+    updatedAt: z.iso.datetime(),
   })
   .strict();
 
@@ -239,7 +232,7 @@ export const customFieldSegmentFieldDivergenceSchema = z
 
 export const customFieldSegmentOverlapItemSchema = z
   .object({
-    segmentId: z.string().uuid(),
+    segmentId: z.uuid(),
     name: z.string(),
     overlapCount: z.number().int().nonnegative(),
     overlapPct: z.number(),
@@ -251,7 +244,7 @@ export const customFieldSegmentAnalyticsSchema = z
     matchedCount: z.number().int().nonnegative(),
     previousMatchedCount: z.number().int().nonnegative().nullable(),
     matchedDelta: z.number().int().nullable(),
-    matchedCountAt: z.string().datetime().nullable(),
+    matchedCountAt: z.iso.datetime().nullable(),
     totalLearnerCount: z.number().int().nonnegative(),
     shareOfLearnersPct: z.number().nullable(),
     averageTotalSpentCents: z.number().nullable(),
@@ -307,15 +300,15 @@ export type CustomFieldSegmentLearnersQuery = z.output<
 
 export const customFieldSegmentLearnerSchema = z
   .object({
-    membershipId: z.string().uuid(),
+    membershipId: z.uuid(),
     learnerName: z.string().nullable(),
     email: z.string().nullable(),
     status: z.string(),
     enrollmentCount: z.number().int().nonnegative(),
     totalSpentCents: z.number().int().nonnegative(),
     currency: z.string(),
-    lastActiveAt: z.string().datetime().nullable(),
-    signedUpAt: z.string().datetime().nullable(),
+    lastActiveAt: z.iso.datetime().nullable(),
+    signedUpAt: z.iso.datetime().nullable(),
     customFields: z.record(z.string(), z.string().nullable()),
   })
   .strict();
@@ -333,7 +326,7 @@ export const customFieldSegmentLearnersResponseSchema = z.object({
     }),
     fieldDefinitions: z.array(
       z.object({
-        id: z.string().uuid(),
+        id: z.uuid(),
         key: z.string(),
         label: z.string(),
         fieldType: z.string(),
@@ -364,7 +357,7 @@ export type CustomFieldSegmentMutationResponse = z.output<
 
 export const customFieldSegmentPreviewLearnerSchema = z
   .object({
-    membershipId: z.string().uuid(),
+    membershipId: z.uuid(),
     learnerName: z.string().nullable(),
     email: z.string().nullable(),
   })
@@ -385,14 +378,14 @@ export type CustomFieldSegmentPreviewResponse = z.output<
 
 export const customFieldSegmentDeleteResponseSchema = z.object({
   data: z.object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     deleted: z.literal(true),
   }),
 });
 
 export const customFieldSegmentGroupResponseSchema = z.object({
   data: z.object({
-    batchId: z.string().uuid(),
+    batchId: z.uuid(),
     key: z.string(),
     name: z.string(),
     memberCount: z.number().int().nonnegative(),

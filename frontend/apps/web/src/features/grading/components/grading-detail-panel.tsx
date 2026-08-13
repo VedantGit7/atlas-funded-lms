@@ -52,7 +52,9 @@ function AnswerBody({ value }: { value: unknown }) {
   }
 
   return (
-    <p className="text-sm leading-relaxed text-[var(--admin-on-surface-variant)]">{formatted.text}</p>
+    <p className="text-sm leading-relaxed text-[var(--admin-on-surface-variant)]">
+      {formatted.text}
+    </p>
   );
 }
 
@@ -78,7 +80,8 @@ export function GradingDetailPanel({ task }: GradingDetailPanelProps) {
   const remainingQueue = useMemo(
     () =>
       queueItems.filter(
-        (item) => item.id !== task.id && (item.status === "PENDING" || item.status === "IN_PROGRESS"),
+        (item) =>
+          item.id !== task.id && (item.status === "PENDING" || item.status === "IN_PROGRESS"),
       ),
     [queueItems, task.id],
   );
@@ -139,12 +142,17 @@ export function GradingDetailPanel({ task }: GradingDetailPanelProps) {
             aria-label="Breadcrumb"
             className="mb-2 flex flex-wrap items-center gap-1 text-xs text-[var(--admin-on-surface-variant)]"
           >
-            <Link href="/studio/grading" className="inline-flex items-center gap-1 hover:text-[var(--admin-primary)]">
+            <Link
+              href="/studio/grading"
+              className="inline-flex items-center gap-1 hover:text-[var(--admin-primary)]"
+            >
               <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
               Grading queue
             </Link>
             <ChevronRight className="h-3 w-3 opacity-50" aria-hidden="true" />
-            <span className="truncate text-[var(--admin-on-surface)]">{task.learner.displayName}</span>
+            <span className="truncate text-[var(--admin-on-surface)]">
+              {task.learner.displayName}
+            </span>
           </nav>
           <h1 className="text-[22px] font-bold tracking-tight text-[var(--admin-on-surface)]">
             Grading detail
@@ -189,7 +197,10 @@ export function GradingDetailPanel({ task }: GradingDetailPanelProps) {
                 </div>
               </div>
               <div className="inline-flex items-center gap-2 rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-3 py-2">
-                <Clock3 className="h-4 w-4 text-[var(--admin-on-surface-variant)]" aria-hidden="true" />
+                <Clock3
+                  className="h-4 w-4 text-[var(--admin-on-surface-variant)]"
+                  aria-hidden="true"
+                />
                 <span className="font-mono text-xs text-[var(--admin-on-surface-variant)]">
                   Attempt {task.attempt.status.toLowerCase().replaceAll("_", " ")}
                 </span>
@@ -221,20 +232,30 @@ export function GradingDetailPanel({ task }: GradingDetailPanelProps) {
             </div>
             <div className="grid gap-3 p-5 sm:grid-cols-3">
               <div className="rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface-low)] p-3">
+                <p className={panelHeaderEyebrowClassName}>Risk score</p>
+                <p className="mt-1 text-sm text-[var(--admin-on-surface)]">
+                  {task.proctoringReport?.riskScore != null
+                    ? `${String(task.proctoringReport.riskScore)}/100 (${task.proctoringReport.riskBand ?? "unknown"})`
+                    : "No score"}
+                </p>
+              </div>
+              <div className="rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface-low)] p-3">
                 <p className={panelHeaderEyebrowClassName}>Events recorded</p>
                 <p className="mt-1 text-sm text-[var(--admin-on-surface)]">
                   {task.proctoringTimeline.length > 0
                     ? `${String(task.proctoringTimeline.length)} timeline event${task.proctoringTimeline.length === 1 ? "" : "s"}`
-                    : "No L1 proctoring events"}
+                    : "No proctoring events"}
                 </p>
               </div>
               <div className="rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface-low)] p-3">
                 <p className={panelHeaderEyebrowClassName}>Severity flags</p>
                 <p className="mt-1 text-sm text-[var(--admin-on-surface)]">
-                  {proctoringFlags > 0 ? `${String(proctoringFlags)} require review` : "None detected"}
+                  {proctoringFlags > 0
+                    ? `${String(proctoringFlags)} require review`
+                    : "None detected"}
                 </p>
               </div>
-              <div className="rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface-low)] p-3">
+              <div className="rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface-low)] p-3 sm:col-span-3">
                 <p className={panelHeaderEyebrowClassName}>Report summary</p>
                 <p className="mt-1 text-sm text-[var(--admin-on-surface-variant)]">
                   {task.proctoringReport?.summary ?? "No generated report for this attempt."}
@@ -249,7 +270,9 @@ export function GradingDetailPanel({ task }: GradingDetailPanelProps) {
                     className="rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface-low)] p-3 text-sm"
                   >
                     <div className="flex flex-wrap items-center justify-between gap-2">
-                      <p className="font-semibold text-[var(--admin-on-surface)]">{event.eventType}</p>
+                      <p className="font-semibold text-[var(--admin-on-surface)]">
+                        {event.eventType}
+                      </p>
                       <span className="text-xs text-[var(--admin-on-surface-variant)]">
                         {event.severity}
                       </span>
@@ -258,7 +281,9 @@ export function GradingDetailPanel({ task }: GradingDetailPanelProps) {
                       {new Date(event.occurredAt).toLocaleString()}
                     </p>
                     {event.summary ? (
-                      <p className="mt-2 text-sm text-[var(--admin-on-surface-variant)]">{event.summary}</p>
+                      <p className="mt-2 text-sm text-[var(--admin-on-surface-variant)]">
+                        {event.summary}
+                      </p>
                     ) : null}
                   </li>
                 ))}
@@ -289,7 +314,9 @@ export function GradingDetailPanel({ task }: GradingDetailPanelProps) {
                   </div>
                 </div>
                 <div className="p-4">
-                  <span className={itemTypeChipClassName}>{answer.itemType.replaceAll("_", " ")}</span>
+                  <span className={itemTypeChipClassName}>
+                    {answer.itemType.replaceAll("_", " ")}
+                  </span>
                   <div className="mt-3">
                     <AnswerBody value={answer.learnerAnswer} />
                   </div>
@@ -424,8 +451,10 @@ export function GradingDetailPanel({ task }: GradingDetailPanelProps) {
         description={
           <>
             Submit score {score || "0"} / {String(task.possiblePoints)} with feedback for{" "}
-            <span className="font-medium text-[var(--admin-on-surface)]">{task.learner.displayName}</span>.
-            This action cannot be undone.
+            <span className="font-medium text-[var(--admin-on-surface)]">
+              {task.learner.displayName}
+            </span>
+            . This action cannot be undone.
           </>
         }
         confirmLabel="Finalize grade"

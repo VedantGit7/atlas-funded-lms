@@ -3,12 +3,12 @@ import { rejectClientTenantFields } from "../shared/domain.dto";
 
 export const superLiveInsightsTrendsQuerySchema = rejectClientTenantFields
   .extend({
-    startedFrom: z.string().datetime(),
-    startedTo: z.string().datetime(),
+    startedFrom: z.iso.datetime(),
+    startedTo: z.iso.datetime(),
     granularity: z.enum(["day", "week", "month"]).default("week"),
     breakDownBy: z.enum(["none", "course", "batch", "status"]).default("none"),
-    courseId: z.string().uuid().optional(),
-    batchId: z.string().uuid().optional(),
+    courseId: z.uuid().optional(),
+    batchId: z.uuid().optional(),
   })
   .strict();
 
@@ -28,8 +28,8 @@ const periodSegmentSchema = z.object({
 const periodSchema = z.object({
   key: z.string(),
   label: z.string(),
-  from: z.string().datetime(),
-  to: z.string().datetime(),
+  from: z.iso.datetime(),
+  to: z.iso.datetime(),
   sessionCount: z.number().int().nonnegative(),
   attendedCount: z.number().int().nonnegative(),
   registeredCount: z.number().int().nonnegative(),
@@ -65,8 +65,8 @@ export const superLiveInsightsTrendsResponseSchema = z
       granularity: z.enum(["day", "week", "month"]),
       breakDownBy: z.enum(["none", "course", "batch", "status"]),
       range: z.object({
-        from: z.string().datetime(),
-        to: z.string().datetime(),
+        from: z.iso.datetime(),
+        to: z.iso.datetime(),
       }),
       summary: z.object({
         attendanceRate: z.number().nullable(),
@@ -80,8 +80,8 @@ export const superLiveInsightsTrendsResponseSchema = z
         bestPeriod: z
           .object({
             label: z.string(),
-            from: z.string().datetime(),
-            to: z.string().datetime(),
+            from: z.iso.datetime(),
+            to: z.iso.datetime(),
             attendanceRate: z.number(),
           })
           .nullable(),

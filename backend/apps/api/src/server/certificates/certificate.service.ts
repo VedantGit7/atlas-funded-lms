@@ -507,7 +507,7 @@ export async function approveCertificateTemplate(
 export type CertificateDownload = {
   filename: string;
   contentType: string;
-  body: string;
+  body: string | Buffer;
   /** True when served from a stored render (r2); false for a generated HTML preview. */
   fromStorage: boolean;
 };
@@ -515,10 +515,9 @@ export type CertificateDownload = {
 /**
  * Resolve a downloadable representation of an issued certificate.
  *
- * When the certificate has a stored render (`r2_object_key`) the caller should
- * stream that object; this method currently returns a generated HTML preview
- * attachment as a fallback. When neither a stored render nor a design snapshot
- * is available, throws 409 so the client can trigger a render first.
+ * When `r2_object_key` is set, streams the PDF from object storage. Otherwise
+ * falls back to a generated HTML preview from the design snapshot. When neither
+ * a stored render nor a usable design is available, throws 409.
  */
 export async function getCertificateDownload(
   tx: TenantTx,
@@ -535,16 +534,18 @@ export async function getCertificateDownload(
   }
 
   const safeCredential = certificate.credential_id.replace(/[^a-zA-Z0-9_-]/g, "");
-  const filename = `certificate-${safeCredential || certificate.id}.html`;
 
-  // A stored render exists — signal the caller to serve it from object storage.
   if (certificate.r2_object_key) {
-    return {
-      filename,
-      contentType: "text/html; charset=utf-8",
-      body: renderStoredCertificatePlaceholder(certificate.r2_object_key),
-      fromStorage: true,
-    };
+    const { loadCertificatePdfArtifact } = await import("./certificate-pdf-store");
+    const pdf = await loadCertificatePdfArtifact(certificate.r2_object_key);
+    if (pdf) {
+      return {
+        filename: `certificate-${safeCredential || certificate.id}.pdf`,
+        contentType: "application/pdf",
+        body: pdf,
+        fromStorage: true,
+      };
+    }
   }
 
   const snapshot =
@@ -553,7 +554,6 @@ export async function getCertificateDownload(
 
   const parsed = certificateDesignDocumentSchema.safeParse(snapshot);
   if (!parsed.success) {
-    // No stored render and no usable design snapshot — ask the client to render first.
     throw certificateDownloadNotReady();
   }
 
@@ -569,16 +569,11 @@ export async function getCertificateDownload(
   });
 
   return {
-    filename,
+    filename: `certificate-${safeCredential || certificate.id}.html`,
     contentType: "text/html; charset=utf-8",
     body: html,
     fromStorage: false,
   };
-}
-
-function renderStoredCertificatePlaceholder(objectKey: string): string {
-  const safeKey = objectKey.replace(/[<>&"]/g, "");
-  return `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8" /><title>Certificate</title></head><body><p>Stored certificate render: ${safeKey}</p></body></html>`;
 }
 
 export async function listCertificates(tx: TenantTx, ctx: ServiceCtx, query: CertificateListQuery) {
@@ -768,7 +763,7 @@ export async function issueCertificate(
     try {
       await anchorCertificateHash(tx, ctx, certificate.id);
     } catch {
-      // Local/on-chain anchor is best-effort behind CERTIFICATE_BLOCKCHAIN_ANCHOR.
+      // Local/on-chain anchor is best-effort (CERTIFICATE_BLOCKCHAIN_ANCHOR + adapter).
     }
   } catch {
     // VC/status-list enrichment is non-critical for issuance success.
@@ -1179,6 +1174,7 @@ export async function verifyCredentialPublic(args: {
   return {
     data: {
       credentialId: certificate.credential_id,
+      certificateId: certificate.id,
       status: certificate.status,
       issuedAt: certificate.issued_at.toISOString(),
       verifiedAt: verifiedAt.toISOString(),
@@ -1228,15 +1224,18 @@ export async function getPublicCredentialDownload(args: {
   }
 
   const safeCredential = certificate.credential_id.replace(/[^a-zA-Z0-9_-]/g, "");
-  const filename = `certificate-${safeCredential || certificate.id}.html`;
 
   if (certificate.r2_object_key) {
-    return {
-      filename,
-      contentType: "text/html; charset=utf-8",
-      body: renderStoredCertificatePlaceholder(certificate.r2_object_key),
-      fromStorage: true,
-    };
+    const { loadCertificatePdfArtifact } = await import("./certificate-pdf-store");
+    const pdf = await loadCertificatePdfArtifact(certificate.r2_object_key);
+    if (pdf) {
+      return {
+        filename: `certificate-${safeCredential || certificate.id}.pdf`,
+        contentType: "application/pdf",
+        body: pdf,
+        fromStorage: true,
+      };
+    }
   }
 
   const snapshot =
@@ -1260,7 +1259,7 @@ export async function getPublicCredentialDownload(args: {
   });
 
   return {
-    filename,
+    filename: `certificate-${safeCredential || certificate.id}.html`,
     contentType: "text/html; charset=utf-8",
     body: html,
     fromStorage: false,

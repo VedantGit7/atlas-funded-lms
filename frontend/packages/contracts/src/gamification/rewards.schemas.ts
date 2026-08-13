@@ -34,14 +34,14 @@ export const REWARD_TYPES = ["CONTENT_UNLOCK", "DISCOUNT_CODE", "CERTIFICATE", "
 
 export const rewardPayloadSchema = z
   .object({
-    courseId: z.string().uuid().optional(),
+    courseId: z.uuid().optional(),
     code: z.string().min(1).max(120).optional(),
     note: z.string().max(500).optional(),
   })
   .strict();
 
 export const rewardItemDtoSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   key: z.string(),
   name: z.string(),
   description: z.string().nullable(),
@@ -69,14 +69,14 @@ export const createRewardItemInputSchema = z
   .superRefine((value, ctx) => {
     if (value.rewardType === "CONTENT_UNLOCK" && !value.rewardPayload.courseId) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         message: "CONTENT_UNLOCK rewards need rewardPayload.courseId.",
         path: ["rewardPayload", "courseId"],
       });
     }
     if (value.rewardType === "DISCOUNT_CODE" && !value.rewardPayload.code) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         message: "DISCOUNT_CODE rewards need rewardPayload.code.",
         path: ["rewardPayload", "code"],
       });
@@ -99,7 +99,7 @@ export const postRewardsBodySchema = z.discriminatedUnion("operation", [
   z
     .object({
       operation: z.literal("grant_balance"),
-      membershipId: z.string().uuid(),
+      membershipId: z.uuid(),
       currencyKey: rewardKeySchema,
       amount: z.number().int().min(1).max(1000000),
       reason: z.string().min(1).max(500),
@@ -108,7 +108,7 @@ export const postRewardsBodySchema = z.discriminatedUnion("operation", [
   z
     .object({
       operation: z.literal("revoke_balance"),
-      membershipId: z.string().uuid(),
+      membershipId: z.uuid(),
       currencyKey: rewardKeySchema,
       amount: z.number().int().min(1).max(1000000),
       reason: z.string().min(1).max(500),
@@ -117,14 +117,14 @@ export const postRewardsBodySchema = z.discriminatedUnion("operation", [
   z
     .object({
       operation: z.literal("fulfill_redemption"),
-      redemptionId: z.string().uuid(),
+      redemptionId: z.uuid(),
     })
     .strict(),
 ]);
 
 export const updateRewardItemBodySchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     name: z.string().min(1).max(160).optional(),
     description: z.string().max(2000).nullable().optional(),
     costAmount: z.number().int().min(1).max(1000000).optional(),
@@ -147,14 +147,14 @@ export const rewardsMutationResponseSchema = z.object({
     item: rewardItemDtoSchema.optional(),
     balance: z
       .object({
-        membershipId: z.string().uuid(),
+        membershipId: z.uuid(),
         currencyKey: z.string(),
         balance: z.number().int(),
       })
       .optional(),
     redemption: z
       .object({
-        id: z.string().uuid(),
+        id: z.uuid(),
         status: z.string(),
       })
       .optional(),
@@ -170,15 +170,15 @@ export const redemptionLogQuerySchema = z
   .strict();
 
 export const redemptionLogItemSchema = z.object({
-  id: z.string().uuid(),
-  rewardItemId: z.string().uuid(),
+  id: z.uuid(),
+  rewardItemId: z.uuid(),
   rewardName: z.string(),
   rewardType: z.string(),
-  membershipId: z.string().uuid(),
+  membershipId: z.uuid(),
   memberLabel: z.string(),
   costAmount: z.number().int(),
   status: z.string(),
-  redeemedAt: z.string().datetime(),
+  redeemedAt: z.iso.datetime(),
 });
 
 export const redemptionLogResponseSchema = z.object({
@@ -201,12 +201,12 @@ export const myRewardsResponseSchema = z.object({
     items: z.array(rewardItemDtoSchema),
     redemptions: z.array(
       z.object({
-        id: z.string().uuid(),
+        id: z.uuid(),
         rewardName: z.string(),
         rewardType: z.string(),
         costAmount: z.number().int(),
         status: z.string(),
-        redeemedAt: z.string().datetime(),
+        redeemedAt: z.iso.datetime(),
       }),
     ),
   }),
@@ -214,13 +214,13 @@ export const myRewardsResponseSchema = z.object({
 
 export const redeemBodySchema = z
   .object({
-    rewardItemId: z.string().uuid(),
+    rewardItemId: z.uuid(),
   })
   .strict();
 
 export const redeemResponseSchema = z.object({
   data: z.object({
-    redemptionId: z.string().uuid(),
+    redemptionId: z.uuid(),
     status: z.string(),
     balance: z.number().int(),
     code: z.string().nullable(),

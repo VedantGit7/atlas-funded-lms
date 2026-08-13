@@ -15,7 +15,7 @@ const rejectClientTenantFields = z
     membership_id: z.never().optional(),
     membershipId: z.never().optional(),
   })
-  .passthrough();
+  .loose();
 
 const htmlTagPattern = /<[^>]*>/g;
 const scriptPattern = /javascript:/i;
@@ -71,11 +71,11 @@ export function structuredBodyToPlainText(bodyJson: unknown): string {
 
 export const moderationListQuerySchema = z
   .object({
-    cursor: z.string().uuid().optional(),
+    cursor: z.uuid().optional(),
     limit: z.coerce.number().int().min(1).max(100).default(25),
     status: z.enum(MODERATION_CASE_STATUSES).optional(),
     targetType: z.enum(MODERATION_TARGET_TYPES).optional(),
-    caseId: z.string().uuid().optional(),
+    caseId: z.uuid().optional(),
     view: z.enum(["cases", "appeals"]).default("cases"),
   })
   .strict();
@@ -83,7 +83,7 @@ export const moderationListQuerySchema = z
 export const createModerationCaseBodySchema = rejectClientTenantFields
   .extend({
     targetType: z.enum(MODERATION_TARGET_TYPES),
-    targetId: z.string().uuid(),
+    targetId: z.uuid(),
     reasonKey: z
       .string()
       .min(1)
@@ -95,7 +95,7 @@ export const createModerationCaseBodySchema = rejectClientTenantFields
 
 export const moderationCaseIdParamsSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
   })
   .strict();
 
@@ -114,7 +114,7 @@ export const decideModerationCaseBodySchema = rejectClientTenantFields
 
 export const createAppealBodySchema = rejectClientTenantFields
   .extend({
-    moderationCaseId: z.string().uuid(),
+    moderationCaseId: z.uuid(),
     body: z
       .string()
       .min(1)
@@ -125,7 +125,7 @@ export const createAppealBodySchema = rejectClientTenantFields
 
 export const appealIdParamsSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
   })
   .strict();
 
@@ -144,7 +144,7 @@ export const reviewAppealBodySchema = rejectClientTenantFields
   .superRefine((value, ctx) => {
     if (value.outcome === "uphold" && value.nextCaseStatus == null) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         message: "nextCaseStatus is required when upholding an appeal",
         path: ["nextCaseStatus"],
       });
@@ -152,27 +152,27 @@ export const reviewAppealBodySchema = rejectClientTenantFields
   });
 
 export const moderationDecisionViewSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   decisionKey: z.string(),
-  decidedByMembershipId: z.string().uuid().nullable(),
-  occurredAt: z.string().datetime(),
+  decidedByMembershipId: z.uuid().nullable(),
+  occurredAt: z.iso.datetime(),
   metadata: z.record(z.string(), z.unknown()).nullable(),
 });
 
 export const moderationCaseViewSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   status: z.enum(MODERATION_CASE_STATUSES),
   targetType: z.enum(MODERATION_TARGET_TYPES),
-  targetId: z.string().uuid(),
+  targetId: z.uuid(),
   reasonKey: z.string().nullable(),
-  openedByMembershipId: z.string().uuid().nullable(),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  openedByMembershipId: z.uuid().nullable(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
   target: z
     .object({
       targetType: z.enum(MODERATION_TARGET_TYPES),
-      targetId: z.string().uuid(),
-      authorMembershipId: z.string().uuid(),
+      targetId: z.uuid(),
+      authorMembershipId: z.uuid(),
       previewText: z.string(),
       title: z.string().nullable(),
       deleted: z.boolean(),
@@ -182,11 +182,11 @@ export const moderationCaseViewSchema = z.object({
   appeals: z
     .array(
       z.object({
-        id: z.string().uuid(),
+        id: z.uuid(),
         status: z.enum(APPEAL_STATUSES),
-        submittedByMembershipId: z.string().uuid(),
+        submittedByMembershipId: z.uuid(),
         body: z.string(),
-        createdAt: z.string().datetime(),
+        createdAt: z.iso.datetime(),
       }),
     )
     .optional(),
@@ -197,7 +197,7 @@ export const moderationCaseListResponseSchema = z.object({
     items: z.array(moderationCaseViewSchema),
   }),
   page: z.object({
-    nextCursor: z.string().uuid().nullable(),
+    nextCursor: z.uuid().nullable(),
     hasMore: z.boolean(),
   }),
 });
@@ -212,17 +212,17 @@ export const decideModerationCaseResponseSchema = moderationCaseDetailResponseSc
 
 export const createAppealResponseSchema = z.object({
   data: z.object({
-    id: z.string().uuid(),
-    moderationCaseId: z.string().uuid(),
+    id: z.uuid(),
+    moderationCaseId: z.uuid(),
     status: z.enum(APPEAL_STATUSES),
     body: z.string(),
-    createdAt: z.string().datetime(),
+    createdAt: z.iso.datetime(),
   }),
 });
 
 export const reviewAppealResponseSchema = z.object({
   data: z.object({
-    appealId: z.string().uuid(),
+    appealId: z.uuid(),
     outcome: z.enum(APPEAL_REVIEW_OUTCOMES),
     appealStatus: z.enum(APPEAL_STATUSES),
     caseStatus: z.enum(MODERATION_CASE_STATUSES),

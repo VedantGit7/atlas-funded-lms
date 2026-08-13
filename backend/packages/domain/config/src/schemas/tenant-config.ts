@@ -1,11 +1,11 @@
 import { z } from "zod";
 
 export const TenantConfigViewSchema = z.object({
-  tenantId: z.string().uuid(),
+  tenantId: z.uuid(),
   configJson: z.record(z.string(), z.unknown()),
   version: z.number().int().nonnegative(),
-  updatedAt: z.string().datetime(),
-  currentVersionId: z.string().uuid().nullable(),
+  updatedAt: z.iso.datetime(),
+  currentVersionId: z.uuid().nullable(),
 });
 
 export const TenantConfigResponseSchema = z.object({
@@ -31,10 +31,10 @@ export const UpdateFeatureFlagRequestSchema = z
 export type UpdateFeatureFlagRequest = z.infer<typeof UpdateFeatureFlagRequestSchema>;
 
 export const TenantConfigVersionViewSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   version: z.number().int().positive(),
-  createdByMembershipId: z.string().uuid().nullable(),
-  createdAt: z.string().datetime(),
+  createdByMembershipId: z.uuid().nullable(),
+  createdAt: z.iso.datetime(),
   isCurrent: z.boolean(),
 });
 

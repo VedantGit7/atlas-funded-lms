@@ -17,7 +17,7 @@ export const ZOOM_EXPORT_DATE_PRESETS = ["7d", "30d", "90d", "custom"] as const;
 
 export const zoomExportHistoryItemSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     fileName: z.string(),
     format: z.enum(REPORT_FORMATS),
     dataset: z.enum(ZOOM_EXPORT_DATASETS),
@@ -28,9 +28,9 @@ export const zoomExportHistoryItemSchema = z
     requestedByLabel: z.string(),
     status: z.enum(["QUEUED", "RUNNING", "SUCCEEDED", "FAILED", "CANCELLED"]),
     expired: z.boolean(),
-    expiresAt: z.string().datetime().nullable(),
-    createdAt: z.string().datetime(),
-    completedAt: z.string().datetime().nullable(),
+    expiresAt: z.iso.datetime().nullable(),
+    createdAt: z.iso.datetime(),
+    completedAt: z.iso.datetime().nullable(),
     errorCode: z.string().nullable(),
     errorMessage: z.string().nullable(),
     errorTrace: z.array(z.string()).nullable(),
@@ -41,7 +41,7 @@ export const zoomExportHistoryItemSchema = z
 
 export const zoomExportScheduleItemSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     name: z.string(),
     dataset: z.enum(ZOOM_EXPORT_DATASETS),
     datasetLabel: z.string(),
@@ -50,7 +50,7 @@ export const zoomExportScheduleItemSchema = z
     timezone: z.string(),
     formats: z.array(z.enum(REPORT_FORMATS)),
     isActive: z.boolean(),
-    nextRunAt: z.string().datetime(),
+    nextRunAt: z.iso.datetime(),
     nextRunLabel: z.string(),
     recipients: z.array(z.string()),
     delivery: z.record(z.string(), z.unknown()).nullable(),
@@ -77,10 +77,10 @@ export const createZoomExportBodySchema = rejectClientTenantFields
     dataset: z.enum(ZOOM_EXPORT_DATASETS).default("meetings"),
     format: z.enum(ZOOM_EXPORT_FORMATS).default("csv"),
     datePreset: z.enum(ZOOM_EXPORT_DATE_PRESETS).default("30d"),
-    startedFrom: z.string().datetime().optional(),
-    startedTo: z.string().datetime().optional(),
+    startedFrom: z.iso.datetime().optional(),
+    startedTo: z.iso.datetime().optional(),
     allMeetingsInRange: z.boolean().default(true),
-    meetingId: z.string().uuid().optional(),
+    meetingId: z.uuid().optional(),
     filterSummary: z.string().trim().max(500).optional(),
     delivery: z.enum(ZOOM_EXPORT_DELIVERY).default("download"),
     scheduleEnabled: z.boolean().default(false),
@@ -91,7 +91,7 @@ export const createZoomExportBodySchema = rejectClientTenantFields
       .regex(/^\d{2}:\d{2}$/)
       .optional(),
     timezone: z.string().trim().min(1).max(64).optional(),
-    recipients: z.array(z.string().email()).max(20).optional(),
+    recipients: z.array(z.email()).max(20).optional(),
   })
   .strict();
 
@@ -106,7 +106,7 @@ export const createZoomExportResponseSchema = z.object({
 
 export const zoomExportRunParamsSchema = z
   .object({
-    runId: z.string().uuid(),
+    runId: z.uuid(),
   })
   .strict();
 
@@ -120,7 +120,7 @@ export const retryZoomExportResponseSchema = z.object({
 
 export const zoomExportScheduleParamsSchema = z
   .object({
-    scheduleId: z.string().uuid(),
+    scheduleId: z.uuid(),
   })
   .strict();
 
@@ -138,6 +138,6 @@ export const updateZoomExportScheduleResponseSchema = z.object({
 export const deleteZoomExportScheduleResponseSchema = z.object({
   data: z.object({
     deleted: z.literal(true),
-    id: z.string().uuid(),
+    id: z.uuid(),
   }),
 });

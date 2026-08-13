@@ -40,7 +40,7 @@ export const RU_EXPORT_COLUMNS = [
 
 export const ruExportHistoryItemSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     fileName: z.string(),
     format: z.enum(REPORT_FORMATS),
     dataset: z.enum(RU_EXPORT_DATASETS),
@@ -51,9 +51,9 @@ export const ruExportHistoryItemSchema = z
     requestedByLabel: z.string(),
     status: z.enum(["QUEUED", "RUNNING", "SUCCEEDED", "FAILED", "CANCELLED"]),
     expired: z.boolean(),
-    expiresAt: z.string().datetime().nullable(),
-    createdAt: z.string().datetime(),
-    completedAt: z.string().datetime().nullable(),
+    expiresAt: z.iso.datetime().nullable(),
+    createdAt: z.iso.datetime(),
+    completedAt: z.iso.datetime().nullable(),
     errorCode: z.string().nullable(),
     errorMessage: z.string().nullable(),
     errorTrace: z.array(z.string()).nullable(),
@@ -64,7 +64,7 @@ export const ruExportHistoryItemSchema = z
 
 export const ruExportScheduleItemSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     name: z.string(),
     dataset: z.enum(RU_EXPORT_DATASETS),
     datasetLabel: z.string(),
@@ -73,7 +73,7 @@ export const ruExportScheduleItemSchema = z
     timezone: z.string(),
     formats: z.array(z.enum(REPORT_FORMATS)),
     isActive: z.boolean(),
-    nextRunAt: z.string().datetime(),
+    nextRunAt: z.iso.datetime(),
     nextRunLabel: z.string(),
     recipients: z.array(z.string()),
     delivery: z.record(z.string(), z.unknown()).nullable(),
@@ -106,15 +106,15 @@ export const createResourceUsageExportBodySchema = rejectClientTenantFields
     format: z.enum(RU_EXPORT_FORMATS).default("csv"),
     scopeMode: z.enum(RU_EXPORT_SCOPE_MODES).default("all"),
     datePreset: z.enum(RU_EXPORT_DATE_PRESETS).default("30d"),
-    startedFrom: z.string().datetime().optional(),
-    startedTo: z.string().datetime().optional(),
+    startedFrom: z.iso.datetime().optional(),
+    startedTo: z.iso.datetime().optional(),
     metricKey: z.string().trim().max(120).optional(),
     q: z.string().trim().max(200).optional(),
     columns: z.array(z.enum(RU_EXPORT_COLUMNS)).min(1).max(30).optional(),
     filterSummary: z.string().trim().max(500).optional(),
     delivery: z.enum(RU_EXPORT_DELIVERY).default("download"),
-    recipients: z.array(z.string().email()).max(20).optional(),
-    webhookUrl: z.string().url().max(500).optional(),
+    recipients: z.array(z.email()).max(20).optional(),
+    webhookUrl: z.url().max(500).optional(),
     scheduleEnabled: z.boolean().default(false),
     scheduleName: z.string().trim().max(120).optional(),
     cadence: z.enum(RU_EXPORT_CADENCE).optional(),
@@ -137,7 +137,7 @@ export const createResourceUsageExportResponseSchema = z.object({
 
 export const resourceUsageExportRunParamsSchema = z
   .object({
-    runId: z.string().uuid(),
+    runId: z.uuid(),
   })
   .strict();
 
@@ -151,7 +151,7 @@ export const retryResourceUsageExportResponseSchema = z.object({
 
 export const resourceUsageExportScheduleParamsSchema = z
   .object({
-    scheduleId: z.string().uuid(),
+    scheduleId: z.uuid(),
   })
   .strict();
 
@@ -169,6 +169,6 @@ export const updateResourceUsageExportScheduleResponseSchema = z.object({
 export const deleteResourceUsageExportScheduleResponseSchema = z.object({
   data: z.object({
     deleted: z.literal(true),
-    id: z.string().uuid(),
+    id: z.uuid(),
   }),
 });

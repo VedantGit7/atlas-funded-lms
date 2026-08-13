@@ -2,11 +2,12 @@
 
 ## Required env
 
-| Variable | Where | Purpose |
-|----------|--------|---------|
-| `NEXT_PUBLIC_POSTHOG_KEY` | Frontend | Browser SDK project key |
-| `NEXT_PUBLIC_POSTHOG_HOST` | Frontend | e.g. `https://eu.i.posthog.com` |
-| `POSTHOG_API_KEY` / `POSTHOG_HOST` | Backend worker | Server outbox → PostHog (see `@atlas/observability` posthog server) |
+| Variable                                     | Where    | Purpose                                                     |
+| -------------------------------------------- | -------- | ----------------------------------------------------------- |
+| `NEXT_PUBLIC_POSTHOG_KEY`                    | Frontend | Browser SDK project key                                     |
+| `NEXT_PUBLIC_POSTHOG_HOST`                   | Frontend | Default `https://eu.i.posthog.com` (EU project)             |
+| `POSTHOG_SERVER_KEY` / `POSTHOG_SERVER_HOST` | Backend  | Server capture; host defaults to `https://eu.i.posthog.com` |
+| `POSTHOG_HOST` (legacy)                      | Backend  | Prefer `POSTHOG_SERVER_HOST`; document EU in `.env.example` |
 
 ## Consent
 

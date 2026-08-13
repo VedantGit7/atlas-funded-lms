@@ -6,7 +6,6 @@ import { useState, type ReactNode } from "react";
 import {
   Award,
   BarChart3,
-  Bell,
   ClipboardList,
   Crown,
   Dumbbell,
@@ -35,8 +34,8 @@ import { DeviceSessionCapture } from "../observability/DeviceSessionCapture";
 import { LearnerConfirmDialog } from "./LearnerConfirmDialog";
 import { ThemeModeToggle } from "../ThemeModeToggle";
 import { MarketingCtaRuntime } from "../../features/marketing/MarketingCtaRuntime";
+import { LearnerNotificationPopover } from "../../features/notifications/components/LearnerNotificationPopover";
 import { ShellBottomNav } from "./shared/ShellBottomNav";
-import { ShellNavBadge } from "./shared/ShellNavBadge";
 import { ShellSkipLink } from "./shared/ShellSkipLink";
 import { isLearnerNavActive } from "./shared/shell-utils";
 
@@ -85,12 +84,19 @@ function Sidebar({
   signingOut: boolean;
 }) {
   // Only surface real destinations in the sidebar; Search / Notifications live in the header.
-  const items = navigationItems.filter((item) => item.href !== "/search" && item.href !== "/notifications");
+  const items = navigationItems.filter(
+    (item) => item.href !== "/search" && item.href !== "/notifications",
+  );
 
   return (
     <div className="flex h-full flex-col">
       <div className="px-5 pb-4 pt-1">
-        <Link href="/" prefetch={false} onClick={onNavigate} className="inline-flex text-brand-primary">
+        <Link
+          href="/"
+          prefetch={false}
+          onClick={onNavigate}
+          className="inline-flex text-brand-primary"
+        >
           <TenantLogo
             publicName={branding.publicName ?? "Learn"}
             logoLightUrl={branding.logoLightUrl}
@@ -127,7 +133,9 @@ function Sidebar({
       <div className="space-y-2 px-3 pb-1 pt-3">
         <div className="rounded-xl bg-primary p-4 text-center text-primary-foreground">
           <p className="text-[11px] font-bold uppercase tracking-wide opacity-80">Keep it up</p>
-          <p className="mt-1 text-sm font-bold leading-snug">A little practice every day builds mastery.</p>
+          <p className="mt-1 text-sm font-bold leading-snug">
+            A little practice every day builds mastery.
+          </p>
           <Link
             href="/practice"
             prefetch={false}
@@ -281,21 +289,7 @@ export function LearnerShellClient({
           </Link>
 
           <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
-            <Link
-              href="/notifications"
-              prefetch={false}
-              aria-label={
-                unreadNotificationCount != null && unreadNotificationCount > 0
-                  ? `Notifications, ${String(unreadNotificationCount)} unread`
-                  : "Notifications"
-              }
-              className="relative flex h-10 w-10 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-            >
-              <Bell className="h-5 w-5" aria-hidden="true" />
-              {unreadNotificationCount != null && unreadNotificationCount > 0 ? (
-                <ShellNavBadge count={unreadNotificationCount} />
-              ) : null}
-            </Link>
+            <LearnerNotificationPopover initialUnreadCount={unreadNotificationCount} />
             <ThemeModeToggle className="inline-flex h-10 w-10 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground" />
             <Link
               href="/profile"

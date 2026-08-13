@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const deckIdParamsSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
 });
 
 export const createDeckBodySchema = z
@@ -18,13 +18,13 @@ export const updateDeckBodySchema = z
 
 export const addDeckItemBodySchema = z
   .object({
-    itemId: z.string().uuid(),
+    itemId: z.uuid(),
   })
   .strict();
 
 export const deckItemQuerySchema = z
   .object({
-    itemId: z.string().uuid(),
+    itemId: z.uuid(),
   })
   .strict();
 
@@ -32,7 +32,7 @@ export const practiceItemTypeSchema = z.enum(["swipe", "matching", "mcq_single",
 
 /** Browsable item summary. Stems only: answer keys never reach the client. */
 export const practiceItemSchema = z.object({
-  itemId: z.string().uuid(),
+  itemId: z.uuid(),
   stem: z.string(),
   itemTypeKey: practiceItemTypeSchema,
 });
@@ -51,12 +51,12 @@ export const practiceItemsResponseSchema = z.object({
 });
 
 export const myDeckSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   title: z.string(),
   slug: z.string(),
   itemCount: z.number().int().nonnegative(),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 
 export const myDecksResponseSchema = z.object({
@@ -71,7 +71,7 @@ export const deckResponseSchema = z.object({
 
 export const deckDeletedResponseSchema = z.object({
   data: z.object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     deleted: z.literal(true),
   }),
 });

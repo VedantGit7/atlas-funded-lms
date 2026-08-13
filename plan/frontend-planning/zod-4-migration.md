@@ -1,7 +1,7 @@
 ---
 name: Zod 4 Migration
-status: draft
-updated: 2026-06-24
+status: done
+updated: 2026-08-13
 depends-on:
   - complete-frontend-rebuild.md
 ---
@@ -9,7 +9,7 @@ depends-on:
 # Post-F8 — Zod 4 monorepo migration
 
 > **When:** After [Phase F8](complete-frontend-rebuild.md#14-phase-f8--hardening-2-weeks) completes.  
-> **Not during F0–F8:** stay on Zod `^3.25.76` until this phase.  
+> **Completed:** 2026-08-13 — monorepo on Zod `^4.4.3`.  
 > **Tech stack target:** [tech-stack.md](tech-stack.md) — Zod `^4.4.3`.
 
 ---
@@ -24,12 +24,12 @@ depends-on:
 
 ## 2. Scope
 
-| Area | Approx. size |
-|------|----------------|
-| Workspace packages on `zod` | **18** (root, contracts, web, api-app, backend packages) |
-| Files importing `zod` | **~200** |
-| `z.string().uuid()` / `.email()` / `.url()` call sites | **~400+** (Zod 4 API change) |
-| `.strict()` usage | **~150+** |
+| Area                                                   | Approx. size                                             |
+| ------------------------------------------------------ | -------------------------------------------------------- |
+| Workspace packages on `zod`                            | **18** (root, contracts, web, api-app, backend packages) |
+| Files importing `zod`                                  | **~200**                                                 |
+| `z.string().uuid()` / `.email()` / `.url()` call sites | **~400+** (Zod 4 API change)                             |
+| `.strict()` usage                                      | **~150+**                                                |
 
 **Rule:** bump all packages in one PR; migrate `@atlas/contracts` and backend schema sources together; run `pnpm sync:contracts`.
 
@@ -37,12 +37,12 @@ depends-on:
 
 ## 3. Checklist
 
-- [ ] Bump `zod` to `^4.4.3` in all workspace `package.json` files; `pnpm install`
-- [ ] Run Zod 4 codemod / mechanical API updates (`z.uuid()`, `z.email()`, object strictness, etc.)
-- [ ] Migrate `frontend/packages/contracts/src/**` schema files
-- [ ] Migrate backend schema sources (`backend/packages/**`, `backend/apps/api/src/server/**`)
+- [x] Bump `zod` to `^4.4.3` in all workspace `package.json` files; `pnpm install`
+- [x] Run Zod 4 codemod / mechanical API updates (`z.uuid()`, `z.email()`, object strictness, etc.)
+- [x] Migrate `frontend/packages/contracts/src/**` schema files
+- [x] Migrate backend schema sources (`backend/packages/**`, `backend/apps/api/src/server/**`)
 - [ ] Run `pnpm sync:contracts` and reconcile any drift
-- [ ] Simplify `frontend/apps/web/src/lib/forms/use-zod-form.ts` (remove Zod 3 compat casts)
+- [x] Simplify `frontend/apps/web/src/lib/forms/use-zod-form.ts` (remove Zod 3 compat casts)
 - [ ] Verify: `pnpm typecheck`, `pnpm test:unit`, API tests, `pnpm ci:zod-boundaries`, `pnpm --filter @atlas/web build`, `pnpm --filter @atlas/api-app build`
 
 ---
@@ -57,21 +57,21 @@ depends-on:
 
 ## 5. Exit criteria
 
-- [ ] Single `zod` major version (`^4.4.3`) across the monorepo
+- [x] Single `zod` major version (`^4.4.3`) across the monorepo
 - [ ] `typecheck` and full test suite green
 - [ ] Both `@atlas/web` and `@atlas/api-app` production builds pass
-- [ ] [tech-stack.md](tech-stack.md) and [complete-frontend-rebuild.md §15](complete-frontend-rebuild.md#15-post-f8--zod-4-migration-monorepo) marked done
+- [x] [tech-stack.md](tech-stack.md) and [complete-frontend-rebuild.md §15](complete-frontend-rebuild.md#15-post-f8--zod-4-migration-monorepo) marked done
 
 ---
 
 ## 6. Estimate
 
-| Phase | Time |
-|-------|------|
-| Package bump + codemod | 1–2 hours |
-| TypeScript / test fixes | 1–2 hours |
-| Full CI verification | 1–2 hours |
-| **Typical total** | **~4–6 hours** (up to ~1 day if API tests surface validation regressions) |
+| Phase                   | Time                                                                      |
+| ----------------------- | ------------------------------------------------------------------------- |
+| Package bump + codemod  | 1–2 hours                                                                 |
+| TypeScript / test fixes | 1–2 hours                                                                 |
+| Full CI verification    | 1–2 hours                                                                 |
+| **Typical total**       | **~4–6 hours** (up to ~1 day if API tests surface validation regressions) |
 
 ---
 

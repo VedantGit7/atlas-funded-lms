@@ -18,12 +18,12 @@ export function mutationBodySchema<T extends z.ZodRawShape>(shape: T) {
 }
 
 export const uuidParamSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
 });
 
 export const memberRoleParamsSchema = z.object({
-  id: z.string().uuid(),
-  roleId: z.string().uuid(),
+  id: z.uuid(),
+  roleId: z.uuid(),
 });
 
 export function decodeListCursor(cursor: string): { createdAt: Date; id: string } {

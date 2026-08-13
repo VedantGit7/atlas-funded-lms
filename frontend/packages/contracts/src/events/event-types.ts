@@ -55,6 +55,7 @@ export const APPROVED_EVENT_TYPES = new Set<string>([
   "security.signin_method_removed",
   "security.mfa_enabled",
   "security.mfa_disabled",
+  "marketing.form_submitted",
 ]);
 
 export function assertApprovedEventType(eventType: string): void {

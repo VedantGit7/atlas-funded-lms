@@ -19,7 +19,12 @@ import {
   primaryButtonClassName,
 } from "../../../app/admin/branding/_components/branding-admin-shared";
 import { AdminConfirmDialog } from "../../../components/shells/admin/AdminConfirmDialog";
-import { ClientApiError, clientApi, createClientUuid, type ClientApiMutationOptions } from "../../../lib/client-api";
+import {
+  ClientApiError,
+  clientApi,
+  createClientUuid,
+  type ClientApiMutationOptions,
+} from "../../../lib/client-api";
 import type { assessmentDetailSchema } from "../assessment-response-schemas";
 import {
   ASSESSMENT_TYPE_CONFIG,
@@ -101,12 +106,10 @@ export function AssessmentBuilder({ initialAssessment, availableItems }: Assessm
   const [shuffleItems, setShuffleItems] = useState(assessment.config.shuffleItems);
   const [shuffleOptions, setShuffleOptions] = useState(assessment.config.shuffleOptions);
   const [secureMode, setSecureMode] = useState(assessment.config.secureMode);
-  const [l1ProctoringEnabled, setL1ProctoringEnabled] = useState(
-    assessment.config.l1ProctoringEnabled,
+  const [proctoringLevel, setProctoringLevel] = useState<0 | 1 | 2 | 3>(
+    assessment.config.proctoringLevel,
   );
-  const [showAnswersPolicy, setShowAnswersPolicy] = useState(
-    assessment.config.showAnswersPolicy,
-  );
+  const [showAnswersPolicy, setShowAnswersPolicy] = useState(assessment.config.showAnswersPolicy);
   const [selectedItemId, setSelectedItemId] = useState(availableItems[0]?.id ?? "");
   const [items, setItems] = useState(assessment.items);
   const [saving, setSaving] = useState(false);
@@ -145,7 +148,8 @@ export function AssessmentBuilder({ initialAssessment, availableItems }: Assessm
         shuffleItems,
         shuffleOptions,
         secureMode,
-        l1ProctoringEnabled,
+        proctoringLevel,
+        l1ProctoringEnabled: proctoringLevel >= 1,
         showAnswersPolicy,
       },
       items: items.map((item) => ({
@@ -596,12 +600,25 @@ export function AssessmentBuilder({ initialAssessment, availableItems }: Assessm
                 disabled={!editable}
                 onChange={setSecureMode}
               />
-              <ToggleRow
-                label="L1 proctoring"
-                checked={l1ProctoringEnabled}
-                disabled={!editable}
-                onChange={setL1ProctoringEnabled}
-              />
+              <label className="flex items-center justify-between gap-3 text-sm">
+                <span className="text-[var(--admin-on-surface)]">Proctoring level</span>
+                <select
+                  className="rounded border border-[var(--admin-border)] bg-[var(--admin-surface)] px-2 py-1 text-sm"
+                  disabled={!editable}
+                  value={String(proctoringLevel)}
+                  onChange={(event) => {
+                    const next = Number(event.target.value);
+                    if (next === 0 || next === 1 || next === 2 || next === 3) {
+                      setProctoringLevel(next);
+                    }
+                  }}
+                >
+                  <option value="0">Off</option>
+                  <option value="1">L1</option>
+                  <option value="2">L2</option>
+                  <option value="3">L3</option>
+                </select>
+              </label>
             </div>
           </div>
 
@@ -620,7 +637,7 @@ export function AssessmentBuilder({ initialAssessment, availableItems }: Assessm
                   />
                   <span className="text-[var(--admin-on-surface)]">
                     {check.label}
-                    {"detail" in check && check.detail ? (
+                    {"detail" in check ? (
                       <span className="text-[var(--admin-on-surface-variant)]">
                         {" "}
                         ({check.detail})

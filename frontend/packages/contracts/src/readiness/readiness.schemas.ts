@@ -5,14 +5,14 @@ import {
   READINESS_POLICY_KEY,
 } from "./readiness.types";
 
-const rejectTenantId = z.object({ tenant_id: z.never().optional() }).passthrough();
+const rejectTenantId = z.object({ tenant_id: z.never().optional() }).loose();
 const rejectClientTargetUrl = z
   .object({
     targetUrl: z.never().optional(),
     destinationUrl: z.never().optional(),
     outboundTargetUrl: z.never().optional(),
   })
-  .passthrough();
+  .loose();
 
 const UNSAFE_COPY_PATTERNS = [
   /guaranteed\s+pass/i,
@@ -54,12 +54,9 @@ export const bandProminenceRuleSchema = z.object({
 
 export const ctaPolicyConfigSchema = z
   .object({
-    outboundTargetUrl: z
-      .string()
-      .url()
-      .refine((url) => url.startsWith("https://"), {
-        message: "CTA target URL must use HTTPS.",
-      }),
+    outboundTargetUrl: z.url().refine((url) => url.startsWith("https://"), {
+      message: "CTA target URL must use HTTPS.",
+    }),
     tokenTtlSeconds: z.number().int().min(60).max(86_400),
     bandProminenceRules: z.array(bandProminenceRuleSchema).min(1),
     ctaCopy: z.object({
@@ -72,7 +69,7 @@ export const ctaPolicyConfigSchema = z
     const bandKeys = value.bandProminenceRules.map((rule) => rule.bandKey);
     if (new Set(bandKeys).size !== bandKeys.length) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         message: "Band prominence rules must use unique band keys.",
         path: ["bandProminenceRules"],
       });
@@ -87,7 +84,7 @@ export const ctaPolicyConfigSchema = z
       });
     } catch (error) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         message: error instanceof Error ? error.message : "Unsafe CTA copy.",
         path: ["ctaCopy"],
       });
@@ -105,7 +102,7 @@ export const legalCopyConfigSchema = z
       validateLegalCopySafety(value);
     } catch (error) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         message: error instanceof Error ? error.message : "Unsafe legal copy.",
       });
     }
@@ -113,7 +110,7 @@ export const legalCopyConfigSchema = z
 
 export const updateReadinessPolicyBodySchema = z
   .object({
-    scoringProfileId: z.string().uuid(),
+    scoringProfileId: z.uuid(),
     ctaPolicy: ctaPolicyConfigSchema,
     legalCopy: legalCopyConfigSchema,
     status: z.enum(["ACTIVE", "INACTIVE"]).optional(),
@@ -132,9 +129,9 @@ export const createAttributionTokenBodySchema = z
   .and(rejectClientTargetUrl);
 
 export const readinessPolicyDtoSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   key: z.string(),
-  scoringProfileId: z.string().uuid(),
+  scoringProfileId: z.uuid(),
   ctaPolicy: ctaPolicyConfigSchema,
   legalCopy: legalCopyConfigSchema.nullable(),
   status: z.enum(["ACTIVE", "INACTIVE", "ARCHIVED"]),
@@ -148,18 +145,18 @@ export const readinessPolicyResponseSchema = z.object({
 
 export const attributionTokenResponseSchema = z.object({
   data: z.object({
-    outboundUrl: z.string().url(),
+    outboundUrl: z.url(),
     expiresAt: z.string(),
-    tokenId: z.string().uuid(),
+    tokenId: z.uuid(),
   }),
 });
 
 export const competencyScoreChangedPayloadSchema = z
   .object({
-    membershipId: z.string().uuid(),
-    dimensionId: z.string().uuid(),
+    membershipId: z.uuid(),
+    dimensionId: z.uuid(),
     dimensionKey: z.string(),
-    scoringProfileId: z.string().uuid(),
+    scoringProfileId: z.uuid(),
     scoringProfileKey: z.string(),
     score: z.number(),
     bandKey: z.string().nullable(),

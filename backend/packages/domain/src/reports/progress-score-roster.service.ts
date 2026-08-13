@@ -12,6 +12,7 @@ import {
   scoreQuizzesListResponseSchema,
   scoreItemAnalysisResponseSchema,
   scoreAttemptHistoryResponseSchema,
+  SCORE_PRODUCT_SORT_BY,
   type ProgressCoursesQuery,
   type ProgressLearnersQuery,
   type ProgressProductsQuery,
@@ -435,15 +436,18 @@ export async function listScoreCourses(
   ctx: ServiceCtx,
   query: ScoreProductsQuery | ProgressCoursesQuery,
 ) {
+  const scoreSortBy =
+    SCORE_PRODUCT_SORT_BY.find((value) => "sortBy" in query && query.sortBy === value) ??
+    "attempts";
   const scoreQuery: ScoreProductsQuery = {
     limit: query.limit,
     page: query.page,
-    sortBy: "sortBy" in query ? query.sortBy : "attempts",
+    sortBy: scoreSortBy,
     sortDir: "sortDir" in query ? query.sortDir : "desc",
+    hasUngraded: "hasUngraded" in query && query.hasUngraded === true ? true : undefined,
     ...(query.q ? { q: query.q } : {}),
     ...("status" in query && query.status ? { status: query.status } : {}),
     ...("passRateBand" in query && query.passRateBand ? { passRateBand: query.passRateBand } : {}),
-    ...("hasUngraded" in query && query.hasUngraded === true ? { hasUngraded: true } : {}),
   };
   return listScoreProducts(tx, ctx, "course", scoreQuery);
 }

@@ -10,11 +10,8 @@ export const ChangePasswordRequestSchema = z
 
 export const ChangeEmailRequestSchema = z
   .object({
-    newEmail: z
-      .string()
-      .email()
-      .transform((value) => value.trim().toLowerCase()),
-    emailRedirectTo: z.string().url().max(500).optional(),
+    newEmail: z.email().transform((value) => value.trim().toLowerCase()),
+    emailRedirectTo: z.url().max(500).optional(),
   })
   .strict();
 
@@ -76,23 +73,20 @@ export const IdentitiesListResponseSchema = z.object({
 export const LinkIdentityRequestSchema = z
   .object({
     provider: PublicOAuthProviderSchema,
-    redirectTo: z.string().url().max(500),
+    redirectTo: z.url().max(500),
   })
   .strict();
 
 export const LinkIdentityResponseSchema = z.object({
   data: z.object({
-    url: z.string().url(),
+    url: z.url(),
   }),
 });
 
 export const MagicLinkRequestSchema = z
   .object({
-    email: z
-      .string()
-      .email()
-      .transform((value) => value.trim().toLowerCase()),
-    emailRedirectTo: z.string().url().max(500).optional(),
+    email: z.email().transform((value) => value.trim().toLowerCase()),
+    emailRedirectTo: z.url().max(500).optional(),
   })
   .strict();
 

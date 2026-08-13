@@ -12,13 +12,13 @@ const rejectClientTenantFields = z
     r2_object_key: z.never().optional(),
     object_key: z.never().optional(),
   })
-  .passthrough();
+  .loose();
 
-export const reportParamsSchema = z.record(z.unknown()).default({});
+export const reportParamsSchema = z.record(z.string(), z.unknown()).default({});
 
 export const reportListQuerySchema = rejectClientTenantFields
   .extend({
-    cursor: z.string().uuid().optional(),
+    cursor: z.uuid().optional(),
     limit: z.coerce.number().int().min(1).max(50).default(20),
     status: z.enum(JOB_STATUSES).optional(),
     definitionKey: z.string().min(1).optional(),
@@ -27,7 +27,7 @@ export const reportListQuerySchema = rejectClientTenantFields
 
 export const reportRunParamsSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
   })
   .strict();
 
@@ -41,45 +41,45 @@ export const createReportRunBodySchema = rejectClientTenantFields
 
 export const reportDefinitionDtoSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     key: z.string(),
     category: z.string(),
     title: z.string(),
     description: z.string().nullable(),
-    paramSchema: z.record(z.unknown()),
+    paramSchema: z.record(z.string(), z.unknown()),
     datasetKey: z.string(),
     columns: z.array(z.string()).optional(),
     defaultFormat: z.enum(REPORT_FORMATS),
     scope: z.enum(["system", "tenant"]),
-    createdAt: z.string().datetime(),
-    updatedAt: z.string().datetime(),
+    createdAt: z.iso.datetime(),
+    updatedAt: z.iso.datetime(),
   })
   .strict();
 
 export const reportRunDtoSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     definitionKey: z.string(),
     definitionTitle: z.string(),
     status: z.enum(JOB_STATUSES),
     format: z.enum(REPORT_FORMATS),
-    params: z.record(z.unknown()),
+    params: z.record(z.string(), z.unknown()),
     rowCount: z.number().int().nullable(),
     progressPercent: z.number().int().min(0).max(100).nullable(),
-    requestedByMembershipId: z.string().uuid(),
-    scheduleId: z.string().uuid().nullable(),
-    createdAt: z.string().datetime(),
-    updatedAt: z.string().datetime(),
-    startedAt: z.string().datetime().nullable(),
-    completedAt: z.string().datetime().nullable(),
-    expiresAt: z.string().datetime().nullable(),
+    requestedByMembershipId: z.uuid(),
+    scheduleId: z.uuid().nullable(),
+    createdAt: z.iso.datetime(),
+    updatedAt: z.iso.datetime(),
+    startedAt: z.iso.datetime().nullable(),
+    completedAt: z.iso.datetime().nullable(),
+    expiresAt: z.iso.datetime().nullable(),
     errorCode: z.string().nullable(),
     errorMessage: z.string().nullable(),
     errorTrace: z.array(z.string()).nullable(),
     download: z
       .object({
-        url: z.string().url(),
-        expiresAt: z.string().datetime(),
+        url: z.url(),
+        expiresAt: z.iso.datetime(),
       })
       .nullable(),
   })
@@ -89,7 +89,7 @@ export const reportRunListResponseSchema = z.object({
   data: z.object({
     items: z.array(reportRunDtoSchema.omit({ download: true })),
     pageInfo: z.object({
-      nextCursor: z.string().uuid().nullable(),
+      nextCursor: z.uuid().nullable(),
       hasNextPage: z.boolean(),
     }),
   }),
@@ -130,7 +130,7 @@ export const createCustomReportDefinitionResponseSchema = z.object({
 
 export const reportScheduleParamsSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
   })
   .strict();
 
@@ -142,7 +142,7 @@ export const createReportScheduleBodySchema = rejectClientTenantFields
     timezone: z.string().min(1).max(64).default("UTC"),
     params: reportParamsSchema.optional(),
     formats: z.array(z.enum(REPORT_FORMATS)).min(1).default(["csv"]),
-    delivery: z.record(z.unknown()).optional(),
+    delivery: z.record(z.string(), z.unknown()).optional(),
     isActive: z.boolean().default(true),
   })
   .strict();
@@ -154,27 +154,27 @@ export const updateReportScheduleBodySchema = rejectClientTenantFields
     timezone: z.string().min(1).max(64).optional(),
     params: reportParamsSchema.optional(),
     formats: z.array(z.enum(REPORT_FORMATS)).min(1).optional(),
-    delivery: z.record(z.unknown()).nullable().optional(),
+    delivery: z.record(z.string(), z.unknown()).nullable().optional(),
     isActive: z.boolean().optional(),
   })
   .strict();
 
 export const reportScheduleDtoSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     definitionKey: z.string(),
     definitionTitle: z.string(),
     name: z.string().nullable(),
     cronExpression: z.string(),
     timezone: z.string(),
-    params: z.record(z.unknown()),
+    params: z.record(z.string(), z.unknown()),
     formats: z.array(z.enum(REPORT_FORMATS)),
-    delivery: z.record(z.unknown()).nullable(),
-    nextRunAt: z.string().datetime(),
+    delivery: z.record(z.string(), z.unknown()).nullable(),
+    nextRunAt: z.iso.datetime(),
     isActive: z.boolean(),
-    createdByMembershipId: z.string().uuid(),
-    createdAt: z.string().datetime(),
-    updatedAt: z.string().datetime(),
+    createdByMembershipId: z.uuid(),
+    createdAt: z.iso.datetime(),
+    updatedAt: z.iso.datetime(),
   })
   .strict();
 
@@ -195,7 +195,7 @@ export const updateReportScheduleResponseSchema = z.object({
 export const deleteReportScheduleResponseSchema = z.object({
   data: z.object({
     deleted: z.literal(true),
-    id: z.string().uuid(),
+    id: z.uuid(),
   }),
 });
 

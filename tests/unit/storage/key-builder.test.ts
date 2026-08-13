@@ -100,6 +100,18 @@ describe("buildTenantStorageKey", () => {
     );
   });
 
+  it("uses certificates/{id}/apple.pkpass for wallet passes", () => {
+    const certificateId = "018f0000-0000-7000-8000-000000000055";
+    const key = buildTenantStorageKey({
+      tenantId: TENANT_ID,
+      purpose: "certificate.wallet",
+      resourceId: certificateId,
+      fileName: "apple.pkpass",
+    });
+
+    expect(key).toBe(`tenants/${TENANT_ID}/certificates/${certificateId}/apple.pkpass`);
+  });
+
   it("uses temp/uploads for temp upload assets", () => {
     const key = buildTenantStorageKey({
       tenantId: TENANT_ID,

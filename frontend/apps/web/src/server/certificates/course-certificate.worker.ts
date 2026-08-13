@@ -5,6 +5,8 @@ import {
   lessonCompletedPayloadSchema,
 } from "../gamification/gamification-event.schemas";
 import { handleCourseCertificateSourceEvent } from "./course-certificate-issuance.service";
+import { isCertificateFeatureEnabled } from "./certificate-feature-flags";
+import { processCertificateOutboxBatch } from "./certificate-worker-router";
 
 export const COURSE_CERTIFICATE_WORKER_DESTINATION = "course.certificates";
 
@@ -24,6 +26,7 @@ export async function handleCourseCertificateOutboxEvent(event: {
   if (event.tenantId == null) {
     throw new Error("Course certificate worker requires tenant-scoped events.");
   }
+  const tenantId = event.tenantId;
 
   if (
     event.eventType !== "lesson.completed" &&
@@ -44,14 +47,14 @@ export async function handleCourseCertificateOutboxEvent(event: {
 
   await withTenantTx(
     {
-      tenantId: event.tenantId,
+      tenantId,
       requestId: event.requestId,
       allowAnonymousTenantRead: true,
     },
     async (tx) => {
       await handleCourseCertificateSourceEvent(
         tx,
-        { tenantId: event.tenantId!, requestId: event.requestId },
+        { tenantId, requestId: event.requestId },
         {
           id: event.id,
           eventType: event.eventType,
@@ -60,6 +63,21 @@ export async function handleCourseCertificateOutboxEvent(event: {
       );
     },
   );
+
+  // Drain any certificate.issued events published above (already off-request).
+  if (isCertificateFeatureEnabled("pdfWorker")) {
+    await processCertificateOutboxBatch({
+      tenantId,
+      requestId: `${event.requestId}:certificate-pdf`,
+      limit: 10,
+    }).catch((error: unknown) => {
+      console.error("[course.certificates] PDF outbox drain failed", {
+        tenantId,
+        requestId: event.requestId,
+        message: error instanceof Error ? error.message : "unknown",
+      });
+    });
+  }
 }
 
 export const courseCertificateOutboxHandlers = [

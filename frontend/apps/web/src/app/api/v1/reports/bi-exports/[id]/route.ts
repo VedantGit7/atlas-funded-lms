@@ -5,7 +5,7 @@ import { biExportDetailResponseSchema } from "@atlas/domain/reports/bi-export.dt
 import { getBiExportJob } from "@atlas/domain/reports/bi-export.service";
 import { getBiExportMetadata } from "@atlas/domain/reports/reports.route-metadata";
 
-const paramsSchema = z.object({ id: z.string().uuid() });
+const paramsSchema = z.object({ id: z.uuid() });
 
 export const GET = createTenantRoute<
   Record<string, never>,

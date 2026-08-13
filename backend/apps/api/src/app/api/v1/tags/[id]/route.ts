@@ -6,17 +6,13 @@ import {
   tagDetailResponseSchema,
   updateTagBodySchema,
 } from "../../../../../server/tags/tag-schemas";
-import {
-  deleteRouteMetadata,
-  getRouteMetadata,
-  putRouteMetadata,
-} from "./route.metadata";
+import { deleteRouteMetadata, getRouteMetadata, putRouteMetadata } from "./route.metadata";
 
 type UpdateTagBody = z.output<typeof updateTagBodySchema>;
 
 const deleteTagResponseSchema = z.object({
   data: z.object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     deleted: z.literal(true),
   }),
 });

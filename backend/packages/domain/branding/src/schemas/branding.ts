@@ -1,12 +1,12 @@
 import { z } from "zod";
 
 export const BrandingAssetRefSchema = z.object({
-  storageRefId: z.string().uuid().nullable(),
+  storageRefId: z.uuid().nullable(),
   altText: z.string().max(180).nullable(),
 });
 
 export const TenantBrandingViewSchema = z.object({
-  tenantId: z.string().uuid(),
+  tenantId: z.uuid(),
   displayName: z.string(),
   publicName: z.string().nullable(),
   logoLight: BrandingAssetRefSchema.nullable(),
@@ -16,8 +16,8 @@ export const TenantBrandingViewSchema = z.object({
   publicLandingCopy: z.record(z.string(), z.unknown()).nullable(),
   status: z.enum(["DRAFT", "PUBLISHED"]),
   version: z.number().int().min(0),
-  updatedAt: z.string().datetime(),
-  publishedAt: z.string().datetime().nullable(),
+  updatedAt: z.iso.datetime(),
+  publishedAt: z.iso.datetime().nullable(),
 });
 
 export const UpdateTenantBrandingRequestSchema = z.object({
@@ -34,11 +34,11 @@ export const BrandingResponseSchema = z.object({
 });
 
 export const BrandingVersionViewSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   version: z.number().int(),
   snapshot: z.unknown(),
-  publishedByMembershipId: z.string().uuid().nullable(),
-  publishedAt: z.string().datetime(),
+  publishedByMembershipId: z.uuid().nullable(),
+  publishedAt: z.iso.datetime(),
 });
 
 export const BrandingVersionsResponseSchema = z.object({

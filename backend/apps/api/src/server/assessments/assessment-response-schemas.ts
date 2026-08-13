@@ -8,13 +8,14 @@ export const assessmentConfigResponseSchema = z.object({
   shuffleItems: z.boolean(),
   shuffleOptions: z.boolean(),
   secureMode: z.boolean(),
+  proctoringLevel: z.union([z.literal(0), z.literal(1), z.literal(2), z.literal(3)]),
   l1ProctoringEnabled: z.boolean(),
   showAnswersPolicy: ShowAnswersPolicySchema,
 });
 
 export const assessmentItemResponseSchema = z.object({
-  id: z.string().uuid(),
-  itemId: z.string().uuid(),
+  id: z.uuid(),
+  itemId: z.uuid(),
   position: z.number().int(),
   points: z.number(),
   required: z.boolean(),
@@ -23,7 +24,7 @@ export const assessmentItemResponseSchema = z.object({
   options: z
     .array(
       z.object({
-        id: z.string().uuid(),
+        id: z.uuid(),
         optionJson: z.record(z.string(), z.unknown()),
         position: z.number().int(),
       }),
@@ -32,7 +33,7 @@ export const assessmentItemResponseSchema = z.object({
 });
 
 export const assessmentSummarySchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   slug: z.string(),
   title: z.string(),
   description: z.string().nullable(),
@@ -61,22 +62,22 @@ export const assessmentDetailResponseSchema = z.object({
 
 export const assessmentDeleteResponseSchema = z.object({
   data: z.object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     deleted: z.literal(true),
   }),
 });
 
 export const assessmentPublishResponseSchema = z.object({
   data: z.object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     status: z.literal("REVIEW"),
     submittedAt: z.string(),
-    workflowTransitionId: z.string().uuid(),
+    workflowTransitionId: z.uuid(),
   }),
 });
 
 export const learnerAssessmentOverviewSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   title: z.string(),
   description: z.string().nullable(),
   assessmentType: AssessmentTypeSchema,
@@ -93,8 +94,8 @@ export const learnerAssessmentOverviewResponseSchema = z.object({
 
 export const startAttemptResponseSchema = z.object({
   data: z.object({
-    id: z.string().uuid(),
-    assessmentId: z.string().uuid(),
+    id: z.uuid(),
+    assessmentId: z.uuid(),
     status: z.literal("STARTED"),
     startedAt: z.string(),
     dueAt: z.string().nullable(),
@@ -102,15 +103,15 @@ export const startAttemptResponseSchema = z.object({
 });
 
 const safeOptionSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   optionJson: z.record(z.string(), z.unknown()),
   position: z.number().int(),
 });
 
 const runnerItemSchema = z.object({
-  id: z.string().uuid(),
-  assessmentItemId: z.string().uuid(),
-  itemId: z.string().uuid(),
+  id: z.uuid(),
+  assessmentItemId: z.uuid(),
+  itemId: z.uuid(),
   itemTypeKey: z.string(),
   position: z.number().int(),
   points: z.number(),
@@ -122,14 +123,15 @@ const runnerItemSchema = z.object({
 
 export const attemptRunnerResponseSchema = z.object({
   data: z.object({
-    id: z.string().uuid(),
-    assessmentId: z.string().uuid(),
+    id: z.uuid(),
+    assessmentId: z.uuid(),
     status: z.enum(["STARTED", "SUBMITTED", "GRADED", "ABANDONED", "VOIDED"]),
     startedAt: z.string(),
     submittedAt: z.string().nullable(),
     dueAt: z.string().nullable(),
     serverNow: z.string(),
     secureMode: z.boolean(),
+    proctoringLevel: z.union([z.literal(0), z.literal(1), z.literal(2), z.literal(3)]),
     l1ProctoringEnabled: z.boolean(),
     items: z.array(runnerItemSchema),
     canReviewAnswers: z.boolean().optional(),
@@ -142,14 +144,14 @@ export const attemptRunnerResponseSchema = z.object({
 
 export const saveAnswerResponseSchema = z.object({
   data: z.object({
-    assessmentItemId: z.string().uuid(),
+    assessmentItemId: z.uuid(),
     savedAt: z.string(),
   }),
 });
 
 export const submitAttemptResponseSchema = z.object({
   data: z.object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     status: z.enum(["SUBMITTED", "GRADED"]),
     submittedAt: z.string(),
     scorePercent: z.number().nullable(),

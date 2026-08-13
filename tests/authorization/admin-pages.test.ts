@@ -106,42 +106,6 @@ const adminPages: Record<string, string> = {
   T98: "app/admin/marketing/newsfeed/[id]/page.tsx",
 };
 
-const learnerBillingFactoryPath =
-  "features/admin/learner-billing/create-learner-billing-page-route.tsx";
-
-const securitySettingsFactoryPath =
-  "features/admin/security-settings/create-security-settings-page-route.tsx";
-
-const channelSettingsFactoryPath =
-  "features/admin/channel-settings/create-channel-settings-page-route.tsx";
-
-const learnerBillingScreenIds = new Set([
-  "T32",
-  "T33",
-  "T34",
-  "T35",
-  "T36",
-  "T37",
-  "T38",
-]);
-
-const securitySettingsScreenIds = new Set(["T40", "T41", "T42"]);
-
-const channelSettingsScreenIds = new Set(["T43", "T44", "T45"]);
-
-function resolvePageSource(screenId: string, relativePath: string): string {
-  if (learnerBillingScreenIds.has(screenId)) {
-    return readFileSync(resolve(webRoot, learnerBillingFactoryPath), "utf8");
-  }
-  if (securitySettingsScreenIds.has(screenId)) {
-    return readFileSync(resolve(webRoot, securitySettingsFactoryPath), "utf8");
-  }
-  if (channelSettingsScreenIds.has(screenId)) {
-    return readFileSync(resolve(webRoot, channelSettingsFactoryPath), "utf8");
-  }
-  return readFileSync(resolve(webRoot, relativePath), "utf8");
-}
-
 describe("admin page authorization patterns", () => {
   for (const screenId of listAdminScreenIds()) {
     it(`${screenId} uses AdminPageGate and handles denied auth states`, () => {
@@ -151,7 +115,7 @@ describe("admin page authorization patterns", () => {
         throw new Error(`Missing page mapping for ${screenId}`);
       }
       expect(existsSync(resolve(webRoot, relativePath))).toBe(true);
-      const source = resolvePageSource(screenId, relativePath);
+      const source = readFileSync(resolve(webRoot, relativePath), "utf8");
       expect(source).toContain("AdminPageGate");
       expect(source).toMatch(/ServerApiError|401|403|denied|not_found/);
     });

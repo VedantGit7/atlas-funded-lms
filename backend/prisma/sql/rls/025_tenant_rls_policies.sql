@@ -90,6 +90,12 @@ DECLARE
     'attempts',
     'attempt_answers',
     'grading_tasks',
+    'exam_security_policies',
+    'proctoring_sessions',
+    'proctoring_events',
+    'proctoring_reports',
+    'identity_verifications',
+    'proctoring_media_artifacts',
 
     'practice_sessions',
     'practice_responses',

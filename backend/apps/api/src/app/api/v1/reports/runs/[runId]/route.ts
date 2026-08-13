@@ -5,7 +5,7 @@ import { getReportRun } from "@atlas/domain/reports/reports.service";
 import { getReportRunMetadata } from "@atlas/domain/reports/reports.route-metadata";
 import { reportRunResponseSchema } from "../../../../../../server/reports/reports.schemas";
 
-const paramsSchema = z.object({ runId: z.string().uuid() });
+const paramsSchema = z.object({ runId: z.uuid() });
 
 function mapLegacyStatus(status: string): "queued" | "running" | "completed" | "failed" {
   switch (status) {

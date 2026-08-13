@@ -1,13 +1,13 @@
 import { z } from "zod";
 
 export const OutboxEventEnvelopeSchema = z.object({
-  eventId: z.string().uuid(),
-  tenantId: z.string().uuid().nullable(),
+  eventId: z.uuid(),
+  tenantId: z.uuid().nullable(),
   eventType: z.string().min(1).max(160),
   aggregateType: z.string().min(1).max(120),
-  aggregateId: z.string().uuid(),
-  actorMembershipId: z.string().uuid().nullable().optional(),
-  occurredAt: z.string().datetime(),
+  aggregateId: z.uuid(),
+  actorMembershipId: z.uuid().nullable().optional(),
+  occurredAt: z.iso.datetime(),
   schemaVersion: z.number().int().min(1),
   payloadJson: z.unknown(),
   metadataJson: z.object({

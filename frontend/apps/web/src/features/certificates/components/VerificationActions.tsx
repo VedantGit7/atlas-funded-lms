@@ -1,13 +1,24 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import { clientApi, ClientApiError } from "@/lib/client-api";
+
+type WalletPassResponse = {
+  data: {
+    platform: "apple" | "google";
+    status: "not_configured" | "active";
+    saveUrl?: string;
+    downloadUrl?: string;
+    passObjectKey?: string;
+    message: string;
+  };
+};
 
 type VerificationActionsProps = {
   verificationUrl: string;
   shareTitle: string;
   downloadUrl?: string | null;
-  appleWalletHref?: string | null;
-  googleWalletHref?: string | null;
+  certificateId?: string | null;
 };
 
 const buttonBase =
@@ -17,8 +28,7 @@ export function VerificationActions({
   verificationUrl,
   shareTitle,
   downloadUrl,
-  appleWalletHref,
-  googleWalletHref,
+  certificateId,
 }: VerificationActionsProps) {
   const [copied, setCopied] = useState(false);
 
@@ -33,11 +43,13 @@ export function VerificationActions({
       }
     }
 
-    if (typeof navigator !== "undefined" && navigator.clipboard) {
+    if (typeof navigator !== "undefined") {
       try {
         await navigator.clipboard.writeText(verificationUrl);
         setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
+        setTimeout(() => {
+          setCopied(false);
+        }, 2000);
       } catch {
         // Ignore clipboard failures (permissions, insecure context).
       }
@@ -48,7 +60,9 @@ export function VerificationActions({
     <div className="mt-6 flex flex-wrap gap-3 print:hidden">
       <button
         type="button"
-        onClick={handleShare}
+        onClick={() => {
+          void handleShare();
+        }}
         className={`${buttonBase} bg-neutral-900 text-white hover:bg-neutral-800 focus-visible:ring-neutral-900`}
       >
         {copied ? "Link copied" : "Share"}
@@ -64,33 +78,94 @@ export function VerificationActions({
         </a>
       ) : null}
 
-      <WalletButton
+      <WalletIssueButton
         label="Add to Apple Wallet"
-        href={appleWalletHref ?? null}
+        platform="apple"
+        certificateId={certificateId ?? null}
       />
-      <WalletButton
+      <WalletIssueButton
         label="Add to Google Wallet"
-        href={googleWalletHref ?? null}
+        platform="google"
+        certificateId={certificateId ?? null}
       />
     </div>
   );
 }
 
-function WalletButton({ label, href }: { label: string; href: string | null }) {
-  // Wallet issuance requires an authenticated certificate owner, so the public
-  // verify page renders a disabled affordance while the endpoints are stubbed.
+function WalletIssueButton({
+  label,
+  platform,
+  certificateId,
+}: {
+  label: string;
+  platform: "apple" | "google";
+  certificateId: string | null;
+}) {
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+
+  const handleClick = useCallback(async () => {
+    if (!certificateId) {
+      setMessage("Sign in as the certificate owner to add this to your wallet.");
+      return;
+    }
+
+    setBusy(true);
+    setMessage(null);
+    try {
+      const response = await clientApi.post<WalletPassResponse>(
+        `/api/v1/certificates/${certificateId}/wallet/${platform}`,
+        null,
+        `cert-wallet-${platform}`,
+        { silent: true },
+      );
+
+      if (response.data.status === "not_configured") {
+        setMessage(
+          response.data.message === "WALLET_FEATURE_DISABLED"
+            ? "Wallet passes are not enabled for this school."
+            : response.data.message,
+        );
+        return;
+      }
+
+      if (response.data.saveUrl) {
+        window.open(response.data.saveUrl, "_blank", "noopener,noreferrer");
+        return;
+      }
+
+      if (response.data.downloadUrl) {
+        window.location.assign(response.data.downloadUrl);
+        return;
+      }
+
+      setMessage(response.data.message);
+    } catch (error) {
+      if (error instanceof ClientApiError && (error.status === 401 || error.status === 403)) {
+        setMessage("Sign in as the certificate owner to add this to your wallet.");
+      } else if (error instanceof ClientApiError) {
+        setMessage(error.message);
+      } else {
+        setMessage("Could not issue wallet pass. Try again later.");
+      }
+    } finally {
+      setBusy(false);
+    }
+  }, [certificateId, platform]);
+
   return (
     <span className="inline-flex flex-col items-start">
       <button
         type="button"
-        disabled
-        data-wallet-endpoint={href ?? undefined}
-        title="Coming soon"
-        className={`${buttonBase} cursor-not-allowed border border-dashed border-neutral-300 bg-neutral-50 text-neutral-400`}
+        onClick={() => void handleClick()}
+        disabled={busy}
+        className={`${buttonBase} border border-neutral-300 bg-white text-neutral-900 hover:bg-neutral-50 focus-visible:ring-neutral-400 disabled:cursor-wait disabled:opacity-60`}
       >
-        {label}
+        {busy ? "Working…" : label}
       </button>
-      <span className="mt-1 text-[11px] uppercase tracking-wide text-neutral-400">Coming soon</span>
+      {message ? (
+        <span className="mt-1 max-w-xs text-[11px] leading-snug text-neutral-500">{message}</span>
+      ) : null}
     </span>
   );
 }

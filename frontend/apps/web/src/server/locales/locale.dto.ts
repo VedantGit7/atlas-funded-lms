@@ -33,7 +33,7 @@ export const localeResourceDtoSchema = z.object({
   locale: localeCodeSchema,
   key: localeResourceKeySchema,
   value: localeResourceValueSchema,
-  updatedAt: z.string().datetime(),
+  updatedAt: z.iso.datetime(),
   reviewStatus: localeReviewStatusSchema.optional(),
 });
 
@@ -60,7 +60,7 @@ export const upsertLocaleResourcesBodySchema = z
     const unique = new Set(keys);
     if (unique.size !== keys.length) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         message: "Duplicate locale keys in request body.",
         path: ["resources"],
       });
@@ -85,7 +85,7 @@ export const localeMetadataDtoSchema = z.object({
   isRtl: z.boolean(),
   isDefault: z.boolean(),
   isFallback: z.boolean(),
-  updatedAt: z.string().datetime(),
+  updatedAt: z.iso.datetime(),
 });
 
 export const localeMetadataListResponseSchema = z.object({
@@ -118,7 +118,7 @@ export const localeCanonicalKeyDtoSchema = z.object({
   key: localeResourceKeySchema,
   sourceLocale: localeCodeSchema,
   description: z.string().max(512).nullable(),
-  updatedAt: z.string().datetime(),
+  updatedAt: z.iso.datetime(),
 });
 
 export const localeCanonicalKeyListResponseSchema = z.object({
@@ -144,7 +144,7 @@ export const localeOverviewResponseSchema = z.object({
     canonicalKeyCount: z.number().int().nonnegative(),
     pendingReviewCount: z.number().int().nonnegative(),
     qaIssueCount: z.number().int().nonnegative(),
-    lastQaRunAt: z.string().datetime().nullable(),
+    lastQaRunAt: z.iso.datetime().nullable(),
     defaultLocale: localeCodeSchema,
     fallbackLocale: localeCodeSchema.nullable(),
   }),
@@ -156,7 +156,7 @@ export const localeReviewQueueItemSchema = z.object({
   value: localeResourceValueSchema,
   reviewStatus: localeReviewStatusSchema,
   sourceValue: z.string().nullable(),
-  updatedAt: z.string().datetime(),
+  updatedAt: z.iso.datetime(),
 });
 
 export const localeReviewQueueResponseSchema = z.object({
@@ -185,20 +185,20 @@ export const localeQaIssueTypeSchema = z.enum([
 ]);
 
 export const localeQaIssueDtoSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   locale: localeCodeSchema,
   key: localeResourceKeySchema,
   severity: localeQaIssueSeveritySchema,
   issueType: localeQaIssueTypeSchema,
   message: z.string(),
-  createdAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
 });
 
 export const localeQaCheckRunDtoSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   issueCount: z.number().int().nonnegative(),
-  startedAt: z.string().datetime(),
-  completedAt: z.string().datetime(),
+  startedAt: z.iso.datetime(),
+  completedAt: z.iso.datetime(),
 });
 
 export const localeQaChecksResponseSchema = z.object({
@@ -235,7 +235,7 @@ export const localeImportPreviewBodySchema = z
     const unique = new Set(keys);
     if (unique.size !== keys.length) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         message: "Duplicate locale keys in import body.",
         path: ["resources"],
       });
@@ -283,7 +283,7 @@ export const localeExportResponseSchema = z.object({
     locale: localeCodeSchema,
     format: localeExportFormatSchema,
     resources: z.array(localeImportItemSchema),
-    exportedAt: z.string().datetime(),
+    exportedAt: z.iso.datetime(),
   }),
 });
 

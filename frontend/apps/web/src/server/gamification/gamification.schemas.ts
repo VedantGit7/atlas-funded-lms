@@ -15,7 +15,7 @@ const rejectClientGamificationFields = z
     sourceEventId: z.never().optional(),
     source_event_id: z.never().optional(),
   })
-  .passthrough();
+  .loose();
 
 export const badgeCriteriaSchema = z.discriminatedUnion("type", [
   z
@@ -43,7 +43,7 @@ export const badgeCriteriaSchema = z.discriminatedUnion("type", [
 export const leaderboardConfigSchema = z
   .object({
     scopeType: z.enum(["tenant", "course"]),
-    courseId: z.string().uuid().optional(),
+    courseId: z.uuid().optional(),
     privacyMode: z.literal("anonymous_rank"),
     maxEntries: z.number().int().min(1).max(100),
   })
@@ -51,14 +51,14 @@ export const leaderboardConfigSchema = z
   .superRefine((value, ctx) => {
     if (value.scopeType === "course" && !value.courseId) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         message: "courseId is required when scopeType is course.",
         path: ["courseId"],
       });
     }
     if (value.scopeType === "tenant" && value.courseId) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         message: "courseId must not be set when scopeType is tenant.",
         path: ["courseId"],
       });
@@ -66,18 +66,18 @@ export const leaderboardConfigSchema = z
   });
 
 export const badgeDtoSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   key: z.string(),
   name: z.string(),
   iconKey: z.string().nullable(),
   criteria: badgeCriteriaSchema,
   status: entityStatusSchema,
   awarded: z.boolean().optional(),
-  awardedAt: z.string().datetime().nullable().optional(),
+  awardedAt: z.iso.datetime().nullable().optional(),
 });
 
 export const gamificationProfileDtoSchema = z.object({
-  membershipId: z.string().uuid(),
+  membershipId: z.uuid(),
   xpTotal: z.number().int(),
   levelKey: z.string().nullable(),
   badgeCount: z.number().int(),
@@ -124,7 +124,7 @@ export const createBadgeInputSchema = z
 
 export const updateBadgeBodySchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     name: z.string().min(1).max(160).optional(),
     iconKey: z.string().min(1).max(64).nullable().optional(),
     criteria: badgeCriteriaSchema.optional(),
@@ -136,8 +136,8 @@ export const updateBadgeBodySchema = z
 export const postBadgesManualAwardBodySchema = z
   .object({
     operation: z.literal("manual_award"),
-    badgeId: z.string().uuid(),
-    membershipId: z.string().uuid(),
+    badgeId: z.uuid(),
+    membershipId: z.uuid(),
     reason: z.string().min(1).max(500),
     tenant_id: z.never().optional(),
     tenantId: z.never().optional(),
@@ -164,7 +164,7 @@ export const postBadgesBodySchema = z.union([
 ]);
 
 export const leaderboardDefinitionDtoSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   key: z.string(),
   name: z.string(),
   metricKey: z.literal("xp_total"),
@@ -190,7 +190,7 @@ export const leaderboardDetailResponseSchema = z.object({
   data: z.object({
     leaderboard: leaderboardDefinitionDtoSchema,
     periodKey: z.string(),
-    calculatedAt: z.string().datetime(),
+    calculatedAt: z.iso.datetime(),
     entries: z.array(sanitizedLeaderboardEntrySchema),
     callerRank: z.number().int().nullable(),
     callerMetricValue: z.number().int().nullable(),
@@ -211,7 +211,7 @@ export const createLeaderboardInputSchema = z
 
 export const updateLeaderboardBodySchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     name: z.string().min(1).max(160).optional(),
     windowKey: z.enum(["all_time", "weekly", "monthly"]).optional(),
     config: leaderboardConfigSchema.optional(),
@@ -235,7 +235,7 @@ export const streakFreezeParamsSchema = z.object({
 });
 
 export const leaderboardIdParamsSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
 });
 
 export const streakFreezeResponseSchema = z.object({
