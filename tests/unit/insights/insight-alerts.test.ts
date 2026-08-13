@@ -306,4 +306,25 @@ describe("insight alerts board", () => {
     expect(resolved?.peakSeverity).toBe("critical");
     expect(resolved?.resolvedByLabel).toBe("Automatically");
   });
+
+  it("returns marketing rule captions for the rules tab", () => {
+    const board = projectInsightAlertBoard({
+      slug: "marketing-insight",
+      metrics: {
+        liveForms: 2,
+        submissions30d: 0,
+        liveCtas: 1,
+        ctaViews: 40,
+        ctaClickRate: 3,
+      },
+      state: emptyInsightAlertState(),
+      now: NOW,
+    });
+
+    const formRule = board.rules.find((rule) => rule.id === "no-form-submissions-30d");
+    const ctaRule = board.rules.find((rule) => rule.id === "low-cta-click-rate");
+
+    expect(formRule?.currentCaption).toBe("Current data would produce 1 warning alert.");
+    expect(ctaRule?.currentCaption).toBe("Current click-through rate is 3%.");
+  });
 });

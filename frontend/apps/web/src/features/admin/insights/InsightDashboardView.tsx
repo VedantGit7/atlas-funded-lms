@@ -52,6 +52,9 @@ import {
   renderSpecializedWidget,
   widgetSpanClassName,
 } from "./InsightDashboardWidgets";
+import { LiveDashboardView } from "./LiveDashboardView";
+import { MarketingInsightDashboardView } from "./MarketingInsightDashboardView";
+import { MessengerInsightDashboardView } from "./MessengerInsightDashboardView";
 import { SchoolVitalsDashboardView } from "./SchoolVitalsDashboardView";
 import { SalesInsightDashboardView } from "./SalesInsightDashboardView";
 
@@ -247,6 +250,69 @@ export function InsightDashboardView({
   if (slug === "sales-insight") {
     return (
       <SalesInsightDashboardView
+        slug={slug}
+        title={title}
+        dashboard={dashboard}
+        loading={loading}
+        error={error}
+        range={range}
+        onRefresh={onRefresh}
+        showLastUpdated={showLastUpdated}
+        hiddenSlugs={hiddenSlugs}
+        preview={preview}
+        previewLayout={previewLayout}
+        savingPreview={savingPreview}
+        onSavePreview={onSavePreview}
+        onDiscardPreview={onDiscardPreview}
+      />
+    );
+  }
+
+  if (slug === "marketing-insight") {
+    return (
+      <MarketingInsightDashboardView
+        slug={slug}
+        title={title}
+        dashboard={dashboard}
+        loading={loading}
+        error={error}
+        range={range}
+        onRefresh={onRefresh}
+        showLastUpdated={showLastUpdated}
+        hiddenSlugs={hiddenSlugs}
+        preview={preview}
+        previewLayout={previewLayout}
+        savingPreview={savingPreview}
+        onSavePreview={onSavePreview}
+        onDiscardPreview={onDiscardPreview}
+      />
+    );
+  }
+
+  if (slug === "live-dashboard") {
+    return (
+      <LiveDashboardView
+        slug={slug}
+        title={title}
+        dashboard={dashboard}
+        loading={loading}
+        error={error}
+        range={range}
+        onRefresh={onRefresh}
+        showLastUpdated={showLastUpdated}
+        hiddenSlugs={hiddenSlugs}
+        preview={preview}
+        previewLayout={previewLayout}
+        savingPreview={savingPreview}
+        onSavePreview={onSavePreview}
+        onDiscardPreview={onDiscardPreview}
+      />
+    );
+  }
+
+  if (slug === "messenger-insight") {
+    return (
+      <MessengerInsightDashboardView
         slug={slug}
         title={title}
         dashboard={dashboard}

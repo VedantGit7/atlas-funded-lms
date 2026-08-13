@@ -1977,6 +1977,787 @@ export async function loadLiveDashboardSnapshot(tx: TenantTx): Promise<LiveDashb
   };
 }
 
+export type LiveDashboardNowSessionRow = {
+  id: string;
+  title: string;
+  status: string;
+  scheduledAt: string | null;
+  startedAt: string | null;
+  endedAt: string | null;
+  attendedCount: number;
+  registeredCount: number;
+  rosteredCount: number;
+  attendanceRate: number;
+  batchId: string | null;
+  batchKey: string | null;
+  batchName: string | null;
+};
+
+export type LiveDashboardNowSnapshot = {
+  attendanceRate30d: number;
+  liveSessions: LiveDashboardNowSessionRow[];
+  nextUp: LiveDashboardNowSessionRow[];
+  endedToday: LiveDashboardNowSessionRow[];
+  endedTodayTotal: number;
+  nextSession: {
+    id: string;
+    title: string;
+    scheduledAt: string | null;
+  } | null;
+};
+
+/** Point-in-time Now board for Insights → Live Dashboard → Now. */
+export async function loadLiveDashboardNowSnapshot(
+  tx: TenantTx,
+): Promise<LiveDashboardNowSnapshot> {
+  const [rateRows, liveRows, nextUpRows, endedRows, endedCountRows, nextSessionRows] =
+    await Promise.all([
+      tx.$queryRaw<
+        Array<{
+          attended_30d: bigint;
+          registered_30d: bigint;
+        }>
+      >`
+        select
+          (
+            select count(*)::bigint
+            from live_attendance la
+            join live_sessions ls on ls.id = la.live_session_id and ls.tenant_id = la.tenant_id
+            where la.status = 'attended'
+              and coalesce(ls.started_at, ls.scheduled_at, la.joined_at, la.created_at)
+                >= now() - interval '30 days'
+          ) as attended_30d,
+          (
+            select count(*)::bigint
+            from live_attendance la
+            join live_sessions ls on ls.id = la.live_session_id and ls.tenant_id = la.tenant_id
+            where la.status in ('registered', 'attended', 'absent')
+              and coalesce(ls.started_at, ls.scheduled_at, la.created_at)
+                >= now() - interval '30 days'
+          ) as registered_30d
+      `,
+      tx.$queryRaw<
+        Array<{
+          id: string;
+          title: string;
+          status: string;
+          scheduled_at: Date | null;
+          started_at: Date | null;
+          ended_at: Date | null;
+          attended_count: bigint;
+          registered_count: bigint;
+          rostered_count: bigint;
+          batch_id: string | null;
+          batch_key: string | null;
+          batch_name: string | null;
+        }>
+      >`
+        select
+          ls.id::text as id,
+          ls.title,
+          ls.status,
+          ls.scheduled_at,
+          ls.started_at,
+          ls.ended_at,
+          count(la.id) filter (where la.status = 'attended')::bigint as attended_count,
+          count(la.id) filter (
+            where la.status in ('registered', 'attended', 'absent')
+          )::bigint as registered_count,
+          coalesce(
+            (
+              select count(*)::bigint
+              from batch_memberships bm
+              where bm.batch_id = ls.batch_id
+                and bm.tenant_id = ls.tenant_id
+            ),
+            count(la.id) filter (
+              where la.status in ('registered', 'attended', 'absent')
+            )
+          )::bigint as rostered_count,
+          ls.batch_id::text as batch_id,
+          b.key as batch_key,
+          b.name as batch_name
+        from live_sessions ls
+        left join batches b on b.id = ls.batch_id and b.tenant_id = ls.tenant_id
+        left join live_attendance la
+          on la.live_session_id = ls.id and la.tenant_id = ls.tenant_id
+        where ls.status = 'live'
+        group by
+          ls.id, ls.title, ls.status, ls.scheduled_at, ls.started_at, ls.ended_at,
+          ls.batch_id, b.key, b.name
+        order by coalesce(ls.started_at, ls.scheduled_at, ls.created_at) asc nulls last
+        limit 12
+      `,
+      tx.$queryRaw<
+        Array<{
+          id: string;
+          title: string;
+          status: string;
+          scheduled_at: Date | null;
+          started_at: Date | null;
+          ended_at: Date | null;
+          attended_count: bigint;
+          registered_count: bigint;
+          rostered_count: bigint;
+          batch_id: string | null;
+          batch_key: string | null;
+          batch_name: string | null;
+        }>
+      >`
+        select
+          ls.id::text as id,
+          ls.title,
+          ls.status,
+          ls.scheduled_at,
+          ls.started_at,
+          ls.ended_at,
+          count(la.id) filter (where la.status = 'attended')::bigint as attended_count,
+          count(la.id) filter (
+            where la.status in ('registered', 'attended', 'absent')
+          )::bigint as registered_count,
+          coalesce(
+            (
+              select count(*)::bigint
+              from batch_memberships bm
+              where bm.batch_id = ls.batch_id
+                and bm.tenant_id = ls.tenant_id
+            ),
+            count(la.id) filter (
+              where la.status in ('registered', 'attended', 'absent')
+            )
+          )::bigint as rostered_count,
+          ls.batch_id::text as batch_id,
+          b.key as batch_key,
+          b.name as batch_name
+        from live_sessions ls
+        left join batches b on b.id = ls.batch_id and b.tenant_id = ls.tenant_id
+        left join live_attendance la
+          on la.live_session_id = ls.id and la.tenant_id = ls.tenant_id
+        where ls.status = 'scheduled'
+          and ls.scheduled_at is not null
+          and ls.scheduled_at >= now()
+          and ls.scheduled_at < now() + interval '24 hours'
+        group by
+          ls.id, ls.title, ls.status, ls.scheduled_at, ls.started_at, ls.ended_at,
+          ls.batch_id, b.key, b.name
+        order by ls.scheduled_at asc
+        limit 24
+      `,
+      tx.$queryRaw<
+        Array<{
+          id: string;
+          title: string;
+          status: string;
+          scheduled_at: Date | null;
+          started_at: Date | null;
+          ended_at: Date | null;
+          attended_count: bigint;
+          registered_count: bigint;
+          rostered_count: bigint;
+          batch_id: string | null;
+          batch_key: string | null;
+          batch_name: string | null;
+        }>
+      >`
+        select
+          ls.id::text as id,
+          ls.title,
+          ls.status,
+          ls.scheduled_at,
+          ls.started_at,
+          ls.ended_at,
+          count(la.id) filter (where la.status = 'attended')::bigint as attended_count,
+          count(la.id) filter (
+            where la.status in ('registered', 'attended', 'absent')
+          )::bigint as registered_count,
+          coalesce(
+            (
+              select count(*)::bigint
+              from batch_memberships bm
+              where bm.batch_id = ls.batch_id
+                and bm.tenant_id = ls.tenant_id
+            ),
+            count(la.id) filter (
+              where la.status in ('registered', 'attended', 'absent')
+            )
+          )::bigint as rostered_count,
+          ls.batch_id::text as batch_id,
+          b.key as batch_key,
+          b.name as batch_name
+        from live_sessions ls
+        left join batches b on b.id = ls.batch_id and b.tenant_id = ls.tenant_id
+        left join live_attendance la
+          on la.live_session_id = ls.id and la.tenant_id = ls.tenant_id
+        where ls.status in ('ended', 'completed')
+          and coalesce(ls.ended_at, ls.started_at, ls.scheduled_at)::date = (now() at time zone 'utc')::date
+        group by
+          ls.id, ls.title, ls.status, ls.scheduled_at, ls.started_at, ls.ended_at,
+          ls.batch_id, b.key, b.name
+        order by coalesce(ls.ended_at, ls.started_at, ls.scheduled_at) desc nulls last
+        limit 12
+      `,
+      tx.$queryRaw<Array<{ ended_today_total: bigint }>>`
+        select count(*)::bigint as ended_today_total
+        from live_sessions ls
+        where ls.status in ('ended', 'completed')
+          and coalesce(ls.ended_at, ls.started_at, ls.scheduled_at)::date = (now() at time zone 'utc')::date
+      `,
+      tx.$queryRaw<
+        Array<{
+          id: string;
+          title: string;
+          scheduled_at: Date | null;
+        }>
+      >`
+        select
+          ls.id::text as id,
+          ls.title,
+          ls.scheduled_at
+        from live_sessions ls
+        where ls.status = 'scheduled'
+          and ls.scheduled_at is not null
+          and ls.scheduled_at >= now()
+        order by ls.scheduled_at asc
+        limit 1
+      `,
+    ]);
+
+  function mapRow(row: {
+    id: string;
+    title: string;
+    status: string;
+    scheduled_at: Date | null;
+    started_at: Date | null;
+    ended_at: Date | null;
+    attended_count: bigint;
+    registered_count: bigint;
+    rostered_count: bigint;
+    batch_id: string | null;
+    batch_key: string | null;
+    batch_name: string | null;
+  }): LiveDashboardNowSessionRow {
+    const attended = asNumber(row.attended_count);
+    const registered = asNumber(row.registered_count);
+    return {
+      id: row.id,
+      title: row.title,
+      status: row.status,
+      scheduledAt: row.scheduled_at?.toISOString() ?? null,
+      startedAt: row.started_at?.toISOString() ?? null,
+      endedAt: row.ended_at?.toISOString() ?? null,
+      attendedCount: attended,
+      registeredCount: registered,
+      rosteredCount: asNumber(row.rostered_count),
+      attendanceRate: registered > 0 ? Math.round((attended / registered) * 100) : 0,
+      batchId: row.batch_id,
+      batchKey: row.batch_key,
+      batchName: row.batch_name,
+    };
+  }
+
+  const rate = rateRows[0];
+  const attended30d = asNumber(rate?.attended_30d);
+  const registered30d = asNumber(rate?.registered_30d);
+  const next = nextSessionRows[0] ?? null;
+
+  return {
+    attendanceRate30d: registered30d > 0 ? Math.round((attended30d / registered30d) * 100) : 0,
+    liveSessions: liveRows.map(mapRow),
+    nextUp: nextUpRows.map(mapRow),
+    endedToday: endedRows.map(mapRow),
+    endedTodayTotal: asNumber(endedCountRows[0]?.ended_today_total),
+    nextSession: next
+      ? {
+          id: next.id,
+          title: next.title,
+          scheduledAt: next.scheduled_at?.toISOString() ?? null,
+        }
+      : null,
+  };
+}
+
+export type LiveDashboardSessionsLedgerRow = {
+  id: string;
+  title: string;
+  status: string;
+  scheduledAt: string | null;
+  startedAt: string | null;
+  endedAt: string | null;
+  attendedCount: number;
+  registeredCount: number;
+  rosteredCount: number;
+  attendanceRate: number | null;
+  avgWatchMinutes: number | null;
+  durationMinutes: number | null;
+  batchId: string | null;
+  batchKey: string | null;
+  batchName: string | null;
+  courseId: string | null;
+  courseSlug: string | null;
+  courseTitle: string | null;
+};
+
+export type LiveDashboardSessionsSummary = {
+  sessionCount: number;
+  endedCount: number;
+  upcomingCount: number;
+  liveCount: number;
+  cancelledCount: number;
+  attendanceRate: number;
+  below50Count: number;
+  endedWithRosterCount: number;
+  avgWatchMinutes: number;
+  totalWatchHours: number;
+};
+
+export type LiveDashboardSessionsSnapshot = {
+  days: number;
+  summary: LiveDashboardSessionsSummary;
+  sessions: LiveDashboardSessionsLedgerRow[];
+  ratesForHistogram: number[];
+};
+
+/** Sessions ledger window for Insights → Live Dashboard → Sessions. */
+export async function loadLiveDashboardSessionsSnapshot(
+  tx: TenantTx,
+  days = 30,
+): Promise<LiveDashboardSessionsSnapshot> {
+  const safeDays = Math.max(1, Math.min(366, Math.floor(days)));
+
+  const [summaryRows, sessionRows] = await Promise.all([
+    tx.$queryRaw<
+      Array<{
+        session_count: bigint;
+        ended_count: bigint;
+        upcoming_count: bigint;
+        live_count: bigint;
+        cancelled_count: bigint;
+        total_attended: bigint;
+        total_registered: bigint;
+        below_50_count: bigint;
+        ended_with_roster_count: bigint;
+        avg_duration_seconds: number | null;
+        total_watch_seconds: bigint;
+      }>
+    >`
+      with windowed as (
+        select ls.*
+        from live_sessions ls
+        where coalesce(ls.started_at, ls.scheduled_at, ls.created_at)
+          >= now() - (${safeDays}::text || ' days')::interval
+      )
+      select
+        (select count(*)::bigint from windowed) as session_count,
+        (
+          select count(*)::bigint from windowed where status in ('ended', 'completed')
+        ) as ended_count,
+        (
+          select count(*)::bigint from windowed where status = 'scheduled'
+        ) as upcoming_count,
+        (
+          select count(*)::bigint from windowed where status = 'live'
+        ) as live_count,
+        (
+          select count(*)::bigint from windowed where status = 'cancelled'
+        ) as cancelled_count,
+        (
+          select count(*)::bigint
+          from live_attendance la
+          join windowed ls on ls.id = la.live_session_id and ls.tenant_id = la.tenant_id
+          where la.status = 'attended'
+        ) as total_attended,
+        (
+          select count(*)::bigint
+          from live_attendance la
+          join windowed ls on ls.id = la.live_session_id and ls.tenant_id = la.tenant_id
+          where la.status in ('registered', 'attended', 'absent')
+        ) as total_registered,
+        (
+          select count(*)::bigint
+          from windowed ls
+          where ls.status in ('ended', 'completed')
+            and (
+              select count(*)::float8
+              from live_attendance la
+              where la.live_session_id = ls.id
+                and la.tenant_id = ls.tenant_id
+                and la.status in ('registered', 'attended', 'absent')
+            ) > 0
+            and (
+              select count(*)::float8
+              from live_attendance la
+              where la.live_session_id = ls.id
+                and la.tenant_id = ls.tenant_id
+                and la.status = 'attended'
+            ) / nullif(
+              (
+                select count(*)::float8
+                from live_attendance la
+                where la.live_session_id = ls.id
+                  and la.tenant_id = ls.tenant_id
+                  and la.status in ('registered', 'attended', 'absent')
+              ),
+              0
+            ) < 0.5
+        ) as below_50_count,
+        (
+          select count(*)::bigint
+          from windowed ls
+          where ls.status in ('ended', 'completed')
+            and (
+              select count(*)
+              from live_attendance la
+              where la.live_session_id = ls.id
+                and la.tenant_id = ls.tenant_id
+                and la.status in ('registered', 'attended', 'absent')
+            ) > 0
+        ) as ended_with_roster_count,
+        (
+          select avg(la.duration_seconds)::float8
+          from live_attendance la
+          join windowed ls on ls.id = la.live_session_id and ls.tenant_id = la.tenant_id
+          where la.status = 'attended'
+            and la.duration_seconds is not null
+            and la.duration_seconds > 0
+        ) as avg_duration_seconds,
+        coalesce((
+          select sum(coalesce(la.duration_seconds, 0))::bigint
+          from live_attendance la
+          join windowed ls on ls.id = la.live_session_id and ls.tenant_id = la.tenant_id
+          where la.status = 'attended'
+        ), 0)::bigint as total_watch_seconds
+    `,
+    tx.$queryRaw<
+      Array<{
+        id: string;
+        title: string;
+        status: string;
+        scheduled_at: Date | null;
+        started_at: Date | null;
+        ended_at: Date | null;
+        attended_count: bigint;
+        registered_count: bigint;
+        rostered_count: bigint;
+        avg_duration_seconds: number | null;
+        batch_id: string | null;
+        batch_key: string | null;
+        batch_name: string | null;
+        course_id: string | null;
+        course_slug: string | null;
+        course_title: string | null;
+      }>
+    >`
+      select
+        ls.id::text as id,
+        ls.title,
+        ls.status,
+        ls.scheduled_at,
+        ls.started_at,
+        ls.ended_at,
+        count(la.id) filter (where la.status = 'attended')::bigint as attended_count,
+        count(la.id) filter (
+          where la.status in ('registered', 'attended', 'absent')
+        )::bigint as registered_count,
+        coalesce(
+          (
+            select count(*)::bigint
+            from batch_memberships bm
+            where bm.batch_id = ls.batch_id
+              and bm.tenant_id = ls.tenant_id
+          ),
+          count(la.id) filter (
+            where la.status in ('registered', 'attended', 'absent')
+          )
+        )::bigint as rostered_count,
+        avg(la.duration_seconds) filter (
+          where la.status = 'attended' and la.duration_seconds is not null
+        )::float8 as avg_duration_seconds,
+        ls.batch_id::text as batch_id,
+        b.key as batch_key,
+        b.name as batch_name,
+        ls.course_id::text as course_id,
+        c.slug as course_slug,
+        c.title as course_title
+      from live_sessions ls
+      left join batches b on b.id = ls.batch_id and b.tenant_id = ls.tenant_id
+      left join courses c on c.id = ls.course_id and c.tenant_id = ls.tenant_id and c.deleted_at is null
+      left join live_attendance la
+        on la.live_session_id = ls.id and la.tenant_id = ls.tenant_id
+      where coalesce(ls.started_at, ls.scheduled_at, ls.created_at)
+        >= now() - (${safeDays}::text || ' days')::interval
+      group by
+        ls.id, ls.title, ls.status, ls.scheduled_at, ls.started_at, ls.ended_at,
+        ls.batch_id, b.key, b.name, ls.course_id, c.slug, c.title
+      order by coalesce(ls.scheduled_at, ls.started_at, ls.created_at) desc nulls last
+      limit 500
+    `,
+  ]);
+
+  const summary = summaryRows[0];
+  const totalAttended = asNumber(summary?.total_attended);
+  const totalRegistered = asNumber(summary?.total_registered);
+
+  const sessions: LiveDashboardSessionsLedgerRow[] = sessionRows.map((row) => {
+    const attended = asNumber(row.attended_count);
+    const registered = asNumber(row.registered_count);
+    const rostered = Math.max(asNumber(row.rostered_count), registered);
+    const hasRoster = rostered > 0;
+    const rate = hasRoster ? Math.round((attended / rostered) * 100) : null;
+    const avgWatch =
+      row.avg_duration_seconds != null && row.avg_duration_seconds > 0
+        ? Math.round(row.avg_duration_seconds / 60)
+        : null;
+    let durationMinutes: number | null = null;
+    if (row.started_at && row.ended_at) {
+      const ms = row.ended_at.getTime() - row.started_at.getTime();
+      if (ms > 0) durationMinutes = Math.round(ms / 60000);
+    }
+
+    return {
+      id: row.id,
+      title: row.title,
+      status: row.status,
+      scheduledAt: row.scheduled_at?.toISOString() ?? null,
+      startedAt: row.started_at?.toISOString() ?? null,
+      endedAt: row.ended_at?.toISOString() ?? null,
+      attendedCount: attended,
+      registeredCount: registered,
+      rosteredCount: rostered,
+      attendanceRate: rate,
+      avgWatchMinutes: avgWatch,
+      durationMinutes,
+      batchId: row.batch_id,
+      batchKey: row.batch_key,
+      batchName: row.batch_name,
+      courseId: row.course_id,
+      courseSlug: row.course_slug,
+      courseTitle: row.course_title,
+    };
+  });
+
+  const ratesForHistogram = sessions
+    .filter(
+      (session) =>
+        (session.status === "ended" || session.status === "completed") &&
+        session.attendanceRate != null,
+    )
+    .map((session) => session.attendanceRate as number);
+
+  return {
+    days: safeDays,
+    summary: {
+      sessionCount: asNumber(summary?.session_count),
+      endedCount: asNumber(summary?.ended_count),
+      upcomingCount: asNumber(summary?.upcoming_count),
+      liveCount: asNumber(summary?.live_count),
+      cancelledCount: asNumber(summary?.cancelled_count),
+      attendanceRate: totalRegistered > 0 ? Math.round((totalAttended / totalRegistered) * 100) : 0,
+      below50Count: asNumber(summary?.below_50_count),
+      endedWithRosterCount: asNumber(summary?.ended_with_roster_count),
+      avgWatchMinutes: Math.round((summary?.avg_duration_seconds ?? 0) / 60),
+      totalWatchHours: Math.round((asNumber(summary?.total_watch_seconds) / 3600) * 10) / 10,
+    },
+    sessions,
+    ratesForHistogram,
+  };
+}
+
+export type LiveDashboardAttendanceDay = {
+  period: string;
+  attended: number;
+  registered: number;
+  sessionCount: number;
+  weekday: number;
+};
+
+export type LiveDashboardAttendanceSessionGap = {
+  id: string;
+  title: string;
+  attendedCount: number;
+  registeredCount: number;
+  rosteredCount: number;
+  batchId: string | null;
+};
+
+export type LiveDashboardAttendanceSnapshot = {
+  days: number;
+  daily: LiveDashboardAttendanceDay[];
+  topGapSessions: LiveDashboardAttendanceSessionGap[];
+  scatterSessions: Array<{
+    id: string;
+    title: string;
+    rosteredCount: number;
+    attendanceRate: number;
+    batchId: string | null;
+  }>;
+};
+
+/** Attendance overview window for Insights → Live Dashboard → Attendance. */
+export async function loadLiveDashboardAttendanceSnapshot(
+  tx: TenantTx,
+  days = 30,
+): Promise<LiveDashboardAttendanceSnapshot> {
+  const safeDays = Math.max(1, Math.min(90, Math.floor(days)));
+
+  const [dailyRows, gapRows, scatterRows] = await Promise.all([
+    tx.$queryRaw<
+      Array<{
+        period: string;
+        attended: number;
+        registered: number;
+        session_count: number;
+        weekday: number;
+      }>
+    >`
+      with days as (
+        select generate_series(
+          current_date - (${safeDays}::int - 1),
+          current_date,
+          interval '1 day'
+        )::date as day
+      )
+      select
+        to_char(d.day, 'YYYY-MM-DD') as period,
+        coalesce(count(la.id) filter (where la.status = 'attended'), 0)::int as attended,
+        coalesce(
+          count(la.id) filter (where la.status in ('registered', 'attended', 'absent')),
+          0
+        )::int as registered,
+        coalesce(count(distinct ls.id), 0)::int as session_count,
+        extract(isodow from d.day)::int as weekday
+      from days d
+      left join live_sessions ls
+        on coalesce(ls.started_at, ls.scheduled_at, ls.created_at)::date = d.day
+      left join live_attendance la
+        on la.live_session_id = ls.id and la.tenant_id = ls.tenant_id
+      group by d.day
+      order by d.day asc
+    `,
+    tx.$queryRaw<
+      Array<{
+        id: string;
+        title: string;
+        attended_count: bigint;
+        registered_count: bigint;
+        rostered_count: bigint;
+        batch_id: string | null;
+      }>
+    >`
+      select
+        ls.id::text as id,
+        ls.title,
+        count(la.id) filter (where la.status = 'attended')::bigint as attended_count,
+        count(la.id) filter (
+          where la.status in ('registered', 'attended', 'absent')
+        )::bigint as registered_count,
+        coalesce(
+          (
+            select count(*)::bigint
+            from batch_memberships bm
+            where bm.batch_id = ls.batch_id
+              and bm.tenant_id = ls.tenant_id
+          ),
+          count(la.id) filter (
+            where la.status in ('registered', 'attended', 'absent')
+          )
+        )::bigint as rostered_count,
+        ls.batch_id::text as batch_id
+      from live_sessions ls
+      left join live_attendance la
+        on la.live_session_id = ls.id and la.tenant_id = ls.tenant_id
+      where ls.status in ('ended', 'completed')
+        and coalesce(ls.started_at, ls.scheduled_at, ls.created_at)
+          >= now() - (${safeDays}::text || ' days')::interval
+      group by ls.id, ls.title, ls.batch_id
+      having count(la.id) filter (
+        where la.status in ('registered', 'attended', 'absent')
+      ) > 0
+      order by (
+        count(la.id) filter (
+          where la.status in ('registered', 'attended', 'absent')
+        ) - count(la.id) filter (where la.status = 'attended')
+      ) desc
+      limit 8
+    `,
+    tx.$queryRaw<
+      Array<{
+        id: string;
+        title: string;
+        rostered_count: bigint;
+        attended_count: bigint;
+        batch_id: string | null;
+      }>
+    >`
+      select
+        ls.id::text as id,
+        ls.title,
+        coalesce(
+          (
+            select count(*)::bigint
+            from batch_memberships bm
+            where bm.batch_id = ls.batch_id
+              and bm.tenant_id = ls.tenant_id
+          ),
+          count(la.id) filter (
+            where la.status in ('registered', 'attended', 'absent')
+          )
+        )::bigint as rostered_count,
+        count(la.id) filter (where la.status = 'attended')::bigint as attended_count,
+        ls.batch_id::text as batch_id
+      from live_sessions ls
+      left join live_attendance la
+        on la.live_session_id = ls.id and la.tenant_id = ls.tenant_id
+      where ls.status in ('ended', 'completed', 'live')
+        and coalesce(ls.started_at, ls.scheduled_at, ls.created_at)
+          >= now() - (${safeDays}::text || ' days')::interval
+      group by ls.id, ls.title, ls.batch_id
+      having coalesce(
+        (
+          select count(*)::bigint
+          from batch_memberships bm
+          where bm.batch_id = ls.batch_id
+            and bm.tenant_id = ls.tenant_id
+        ),
+        count(la.id) filter (
+          where la.status in ('registered', 'attended', 'absent')
+        )
+      ) > 0
+      order by coalesce(ls.started_at, ls.scheduled_at, ls.created_at) desc nulls last
+      limit 40
+    `,
+  ]);
+
+  return {
+    days: safeDays,
+    daily: dailyRows.map((row) => ({
+      period: row.period,
+      attended: row.attended,
+      registered: row.registered,
+      sessionCount: row.session_count,
+      weekday: row.weekday,
+    })),
+    topGapSessions: gapRows.map((row) => ({
+      id: row.id,
+      title: row.title,
+      attendedCount: asNumber(row.attended_count),
+      registeredCount: asNumber(row.registered_count),
+      rosteredCount: Math.max(asNumber(row.rostered_count), asNumber(row.registered_count)),
+      batchId: row.batch_id,
+    })),
+    scatterSessions: scatterRows.map((row) => {
+      const rostered = asNumber(row.rostered_count);
+      const attended = asNumber(row.attended_count);
+      return {
+        id: row.id,
+        title: row.title,
+        rosteredCount: rostered,
+        attendanceRate: rostered > 0 ? Math.round((attended / rostered) * 100) : 0,
+        batchId: row.batch_id,
+      };
+    }),
+  };
+}
+
 export type MarketingInsightSnapshot = {
   attributionTotal: number;
   attribution30d: number;
@@ -2375,6 +3156,509 @@ export async function loadMarketingInsightSnapshot(
   };
 }
 
+export type MarketingAttributionDetail = {
+  events: number;
+  events30d: number;
+  attributedRevenueCents: number;
+  sourceCount: number;
+  mediumCount: number;
+  campaignCount: number;
+  sources: Array<{ value: string; count: number; revenueCents: number }>;
+  mediums: Array<{ value: string; count: number; revenueCents: number }>;
+  campaigns: Array<{ value: string; count: number; revenueCents: number }>;
+  crossPairs: Array<{ source: string; medium: string; count: number }>;
+};
+
+export async function loadMarketingAttributionDetail(
+  tx: TenantTx,
+): Promise<MarketingAttributionDetail> {
+  const [kpiRows, sourceRows, mediumRows, campaignRows, crossRows] = await Promise.all([
+    tx.$queryRaw<
+      Array<{
+        attribution_total: bigint;
+        attribution_30d: bigint;
+        attribution_revenue_cents: bigint;
+        source_count: bigint;
+        medium_count: bigint;
+        campaign_count: bigint;
+      }>
+    >`
+      select
+        (select count(*)::bigint from sales_attribution_events) as attribution_total,
+        (
+          select count(*)::bigint from sales_attribution_events
+          where created_at >= now() - interval '30 days'
+        ) as attribution_30d,
+        coalesce((
+          select sum(coalesce(revenue_cents, 0))::bigint from sales_attribution_events
+        ), 0)::bigint as attribution_revenue_cents,
+        (
+          select count(distinct coalesce(nullif(utm_source, ''), 'direct'))::bigint
+          from sales_attribution_events
+        ) as source_count,
+        (
+          select count(distinct coalesce(nullif(utm_medium, ''), 'none'))::bigint
+          from sales_attribution_events
+        ) as medium_count,
+        (
+          select count(distinct coalesce(nullif(utm_campaign, ''), '(not set)'))::bigint
+          from sales_attribution_events
+        ) as campaign_count
+    `,
+    tx.$queryRaw<Array<{ value: string; count: bigint; revenue_cents: bigint }>>`
+      select
+        coalesce(nullif(utm_source, ''), 'direct') as value,
+        count(*)::bigint as count,
+        coalesce(sum(coalesce(revenue_cents, 0)), 0)::bigint as revenue_cents
+      from sales_attribution_events
+      group by 1
+      order by count desc, revenue_cents desc
+      limit 50
+    `,
+    tx.$queryRaw<Array<{ value: string; count: bigint; revenue_cents: bigint }>>`
+      select
+        coalesce(nullif(utm_medium, ''), 'none') as value,
+        count(*)::bigint as count,
+        coalesce(sum(coalesce(revenue_cents, 0)), 0)::bigint as revenue_cents
+      from sales_attribution_events
+      group by 1
+      order by count desc, revenue_cents desc
+      limit 50
+    `,
+    tx.$queryRaw<Array<{ value: string; count: bigint; revenue_cents: bigint }>>`
+      select
+        coalesce(nullif(utm_campaign, ''), '(not set)') as value,
+        count(*)::bigint as count,
+        coalesce(sum(coalesce(revenue_cents, 0)), 0)::bigint as revenue_cents
+      from sales_attribution_events
+      group by 1
+      order by count desc, revenue_cents desc
+      limit 50
+    `,
+    tx.$queryRaw<Array<{ source: string; medium: string; count: bigint }>>`
+      select
+        coalesce(nullif(utm_source, ''), 'direct') as source,
+        coalesce(nullif(utm_medium, ''), 'none') as medium,
+        count(*)::bigint as count
+      from sales_attribution_events
+      group by 1, 2
+      order by count desc
+      limit 36
+    `,
+  ]);
+
+  const kpi = kpiRows[0];
+  return {
+    events: asNumber(kpi?.attribution_total),
+    events30d: asNumber(kpi?.attribution_30d),
+    attributedRevenueCents: asNumber(kpi?.attribution_revenue_cents),
+    sourceCount: asNumber(kpi?.source_count),
+    mediumCount: asNumber(kpi?.medium_count),
+    campaignCount: asNumber(kpi?.campaign_count),
+    sources: sourceRows.map((row) => ({
+      value: row.value,
+      count: asNumber(row.count),
+      revenueCents: asNumber(row.revenue_cents),
+    })),
+    mediums: mediumRows.map((row) => ({
+      value: row.value,
+      count: asNumber(row.count),
+      revenueCents: asNumber(row.revenue_cents),
+    })),
+    campaigns: campaignRows.map((row) => ({
+      value: row.value,
+      count: asNumber(row.count),
+      revenueCents: asNumber(row.revenue_cents),
+    })),
+    crossPairs: crossRows.map((row) => ({
+      source: row.source,
+      medium: row.medium,
+      count: asNumber(row.count),
+    })),
+  };
+}
+
+export type MarketingCaptureDetail = {
+  formCount: number;
+  liveFormCount: number;
+  submissionCount: number;
+  submissions30d: number;
+  contactCount: number;
+  ctaCount: number;
+  liveCtaCount: number;
+  ctaViews: number;
+  ctaClicks: number;
+  forms: Array<{
+    id: string;
+    title: string;
+    status: string;
+    submissions: number;
+    submissions30d: number;
+    lastSubmissionAt: string | null;
+    href: string;
+  }>;
+  ctas: Array<{
+    id: string;
+    title: string;
+    ctaType: string;
+    status: string;
+    views: number;
+    clicks: number;
+    href: string;
+  }>;
+};
+
+export async function loadMarketingCaptureDetail(tx: TenantTx): Promise<MarketingCaptureDetail> {
+  const [kpiRows, formRows, ctaRows] = await Promise.all([
+    tx.$queryRaw<
+      Array<{
+        form_count: bigint;
+        live_form_count: bigint;
+        submission_count: bigint;
+        submissions_30d: bigint;
+        contact_count: bigint;
+        cta_count: bigint;
+        live_cta_count: bigint;
+        cta_views: bigint;
+        cta_clicks: bigint;
+      }>
+    >`
+      select
+        (select count(*)::bigint from marketing_forms) as form_count,
+        (
+          select count(*)::bigint from marketing_forms where status = 'LIVE'
+        ) as live_form_count,
+        (select count(*)::bigint from marketing_form_submissions) as submission_count,
+        (
+          select count(*)::bigint from marketing_form_submissions
+          where created_at >= now() - interval '30 days'
+        ) as submissions_30d,
+        (select count(*)::bigint from marketing_contacts) as contact_count,
+        (select count(*)::bigint from marketing_ctas) as cta_count,
+        (
+          select count(*)::bigint from marketing_ctas where status = 'LIVE'
+        ) as live_cta_count,
+        coalesce((select sum(view_count)::bigint from marketing_ctas), 0)::bigint as cta_views,
+        coalesce((select sum(click_count)::bigint from marketing_ctas), 0)::bigint as cta_clicks
+    `,
+    tx.$queryRaw<
+      Array<{
+        id: string;
+        title: string;
+        status: string;
+        submissions: bigint;
+        submissions_30d: bigint;
+        last_submission_at: Date | null;
+      }>
+    >`
+      select
+        f.id::text as id,
+        f.title,
+        f.status,
+        count(s.id)::bigint as submissions,
+        count(s.id) filter (
+          where s.created_at >= now() - interval '30 days'
+        )::bigint as submissions_30d,
+        max(s.created_at) as last_submission_at
+      from marketing_forms f
+      left join marketing_form_submissions s
+        on s.form_id = f.id and s.tenant_id = f.tenant_id
+      group by f.id, f.title, f.status
+      order by submissions desc, f.title asc
+      limit 24
+    `,
+    tx.$queryRaw<
+      Array<{
+        id: string;
+        title: string;
+        cta_type: string;
+        status: string;
+        views: number;
+        clicks: number;
+      }>
+    >`
+      select
+        id::text as id,
+        title,
+        cta_type,
+        status,
+        view_count as views,
+        click_count as clicks
+      from marketing_ctas
+      order by click_count desc, view_count desc, title asc
+      limit 24
+    `,
+  ]);
+
+  const kpi = kpiRows[0];
+
+  return {
+    formCount: asNumber(kpi?.form_count),
+    liveFormCount: asNumber(kpi?.live_form_count),
+    submissionCount: asNumber(kpi?.submission_count),
+    submissions30d: asNumber(kpi?.submissions_30d),
+    contactCount: asNumber(kpi?.contact_count),
+    ctaCount: asNumber(kpi?.cta_count),
+    liveCtaCount: asNumber(kpi?.live_cta_count),
+    ctaViews: asNumber(kpi?.cta_views),
+    ctaClicks: asNumber(kpi?.cta_clicks),
+    forms: formRows.map((row) => ({
+      id: row.id,
+      title: row.title,
+      status: row.status,
+      submissions: asNumber(row.submissions),
+      submissions30d: asNumber(row.submissions_30d),
+      lastSubmissionAt: row.last_submission_at?.toISOString() ?? null,
+      href: `/admin/marketing/forms/${row.id}`,
+    })),
+    ctas: ctaRows.map((row) => ({
+      id: row.id,
+      title: row.title,
+      ctaType: row.cta_type,
+      status: row.status,
+      views: row.views,
+      clicks: row.clicks,
+      href: `/admin/marketing/cta/${row.id}`,
+    })),
+  };
+}
+
+export type MarketingWorkflowsDetail = {
+  workflowCount: number;
+  publishedWorkflowCount: number;
+  runs30d: number;
+  runsCompleted30d: number;
+  runsFailed30d: number;
+  lastRunAt: string | null;
+  dailyVolume: Array<{ period: string; completed: number; failed: number; total: number }>;
+  byWorkflow: Array<{
+    id: string;
+    title: string;
+    status: string;
+    runs30d: number;
+    completed30d: number;
+    failed30d: number;
+    lastRunAt: string | null;
+    publishedAt: string | null;
+    href: string;
+  }>;
+  neverRun: Array<{ id: string; title: string; publishedAt: string | null; href: string }>;
+  triggers: Array<{ trigger: string; runs: number }>;
+  ledger: Array<{
+    id: string;
+    workflowId: string;
+    workflowTitle: string;
+    status: string;
+    triggerEventType: string;
+    createdAt: string;
+    errorMessage: string | null;
+    href: string;
+    workflowHref: string;
+  }>;
+};
+
+export async function loadMarketingWorkflowsDetail(
+  tx: TenantTx,
+): Promise<MarketingWorkflowsDetail> {
+  const [kpiRows, dailyRows, byWorkflowRows, neverRunRows, triggerRows, ledgerRows] =
+    await Promise.all([
+      tx.$queryRaw<
+        Array<{
+          workflow_count: bigint;
+          published_workflow_count: bigint;
+          runs_30d: bigint;
+          runs_completed_30d: bigint;
+          runs_failed_30d: bigint;
+          last_run_at: Date | null;
+        }>
+      >`
+      select
+        (select count(*)::bigint from marketing_workflows) as workflow_count,
+        (
+          select count(*)::bigint from marketing_workflows where status = 'PUBLISHED'
+        ) as published_workflow_count,
+        (
+          select count(*)::bigint from marketing_workflow_runs
+          where created_at >= now() - interval '30 days'
+        ) as runs_30d,
+        (
+          select count(*)::bigint from marketing_workflow_runs
+          where created_at >= now() - interval '30 days'
+            and status = 'COMPLETED'
+        ) as runs_completed_30d,
+        (
+          select count(*)::bigint from marketing_workflow_runs
+          where created_at >= now() - interval '30 days'
+            and status = 'FAILED'
+        ) as runs_failed_30d,
+        (
+          select max(created_at) from marketing_workflow_runs
+        ) as last_run_at
+    `,
+      tx.$queryRaw<Array<{ period: string; completed: number; failed: number; total: number }>>`
+      with days as (
+        select generate_series(
+          current_date - 29,
+          current_date,
+          interval '1 day'
+        )::date as day
+      )
+      select
+        to_char(d.day, 'YYYY-MM-DD') as period,
+        coalesce((
+          select count(*)::int from marketing_workflow_runs r
+          where r.created_at::date = d.day and r.status = 'COMPLETED'
+        ), 0) as completed,
+        coalesce((
+          select count(*)::int from marketing_workflow_runs r
+          where r.created_at::date = d.day and r.status = 'FAILED'
+        ), 0) as failed,
+        coalesce((
+          select count(*)::int from marketing_workflow_runs r
+          where r.created_at::date = d.day
+        ), 0) as total
+      from days d
+      order by d.day asc
+    `,
+      tx.$queryRaw<
+        Array<{
+          id: string;
+          title: string;
+          status: string;
+          runs_30d: bigint;
+          completed_30d: bigint;
+          failed_30d: bigint;
+          last_run_at: Date | null;
+          published_at: Date | null;
+        }>
+      >`
+      select
+        w.id::text as id,
+        w.title,
+        w.status,
+        count(r.id) filter (
+          where r.created_at >= now() - interval '30 days'
+        )::bigint as runs_30d,
+        count(r.id) filter (
+          where r.created_at >= now() - interval '30 days'
+            and r.status = 'COMPLETED'
+        )::bigint as completed_30d,
+        count(r.id) filter (
+          where r.created_at >= now() - interval '30 days'
+            and r.status = 'FAILED'
+        )::bigint as failed_30d,
+        max(r.created_at) as last_run_at,
+        w.published_at
+      from marketing_workflows w
+      left join marketing_workflow_runs r
+        on r.workflow_id = w.id and r.tenant_id = w.tenant_id
+      group by w.id, w.title, w.status, w.published_at
+      order by runs_30d desc, failed_30d desc, w.title asc
+      limit 24
+    `,
+      tx.$queryRaw<Array<{ id: string; title: string; published_at: Date | null }>>`
+      select
+        w.id::text as id,
+        w.title,
+        w.published_at
+      from marketing_workflows w
+      where w.status = 'PUBLISHED'
+        and not exists (
+          select 1 from marketing_workflow_runs r
+          where r.workflow_id = w.id
+            and r.tenant_id = w.tenant_id
+            and r.created_at >= now() - interval '30 days'
+        )
+      order by w.published_at desc nulls last, w.title asc
+      limit 12
+    `,
+      tx.$queryRaw<Array<{ trigger: string; runs: bigint }>>`
+      select
+        r.trigger_event_type as trigger,
+        count(*)::bigint as runs
+      from marketing_workflow_runs r
+      where r.created_at >= now() - interval '30 days'
+      group by r.trigger_event_type
+      order by runs desc, trigger asc
+      limit 16
+    `,
+      tx.$queryRaw<
+        Array<{
+          id: string;
+          workflow_id: string;
+          workflow_title: string;
+          status: string;
+          trigger_event_type: string;
+          created_at: Date;
+          error_message: string | null;
+        }>
+      >`
+      select
+        r.id::text as id,
+        r.workflow_id::text as workflow_id,
+        coalesce(w.title, 'Workflow') as workflow_title,
+        r.status,
+        r.trigger_event_type,
+        r.created_at,
+        r.error_message
+      from marketing_workflow_runs r
+      left join marketing_workflows w
+        on w.id = r.workflow_id and w.tenant_id = r.tenant_id
+      order by r.created_at desc
+      limit 48
+    `,
+    ]);
+
+  const kpi = kpiRows[0];
+
+  return {
+    workflowCount: asNumber(kpi?.workflow_count),
+    publishedWorkflowCount: asNumber(kpi?.published_workflow_count),
+    runs30d: asNumber(kpi?.runs_30d),
+    runsCompleted30d: asNumber(kpi?.runs_completed_30d),
+    runsFailed30d: asNumber(kpi?.runs_failed_30d),
+    lastRunAt: kpi?.last_run_at?.toISOString() ?? null,
+    dailyVolume: dailyRows.map((row) => ({
+      period: row.period,
+      completed: row.completed,
+      failed: row.failed,
+      total: row.total,
+    })),
+    byWorkflow: byWorkflowRows.map((row) => ({
+      id: row.id,
+      title: row.title,
+      status: row.status,
+      runs30d: asNumber(row.runs_30d),
+      completed30d: asNumber(row.completed_30d),
+      failed30d: asNumber(row.failed_30d),
+      lastRunAt: row.last_run_at?.toISOString() ?? null,
+      publishedAt: row.published_at?.toISOString() ?? null,
+      href: `/admin/marketing/workflows/${row.id}`,
+    })),
+    neverRun: neverRunRows.map((row) => ({
+      id: row.id,
+      title: row.title,
+      publishedAt: row.published_at?.toISOString() ?? null,
+      href: `/admin/marketing/workflows/${row.id}`,
+    })),
+    triggers: triggerRows.map((row) => ({
+      trigger: row.trigger,
+      runs: asNumber(row.runs),
+    })),
+    ledger: ledgerRows.map((row) => ({
+      id: row.id,
+      workflowId: row.workflow_id,
+      workflowTitle: row.workflow_title,
+      status: row.status,
+      triggerEventType: row.trigger_event_type,
+      createdAt: row.created_at.toISOString(),
+      errorMessage: row.error_message,
+      href: `/admin/marketing/workflows/${row.workflow_id}?runId=${row.id}`,
+      workflowHref: `/admin/marketing/workflows/${row.workflow_id}`,
+    })),
+  };
+}
+
 export type MessengerInsightSnapshot = {
   emailSentCount: number;
   emailScheduledCount: number;
@@ -2404,6 +3688,8 @@ export type MessengerInsightSnapshot = {
     emailRecipients: number;
     pushRecipients: number;
     whatsappRecipients: number;
+    whatsappDelivered: number;
+    whatsappFailed: number;
     inboxMessages: number;
   }>;
   recentEmailCampaigns: Array<{
@@ -2540,6 +3826,8 @@ export async function loadMessengerInsightSnapshot(
           email_recipients: number;
           push_recipients: number;
           whatsapp_recipients: number;
+          whatsapp_delivered: number;
+          whatsapp_failed: number;
           inbox_messages: number;
         }>
       >`
@@ -2570,6 +3858,18 @@ export async function loadMessengerInsightSnapshot(
           where wc.status = 'SENT'
             and coalesce(wc.sent_at, wc.created_at)::date = d.day
         ), 0) as whatsapp_recipients,
+        coalesce((
+          select sum(wc.delivered_count)::int
+          from whatsapp_campaigns wc
+          where wc.status = 'SENT'
+            and coalesce(wc.sent_at, wc.created_at)::date = d.day
+        ), 0) as whatsapp_delivered,
+        coalesce((
+          select sum(wc.failed_count)::int
+          from whatsapp_campaigns wc
+          where wc.status = 'SENT'
+            and coalesce(wc.sent_at, wc.created_at)::date = d.day
+        ), 0) as whatsapp_failed,
         coalesce((
           select count(*)::int from messenger_messages mm
           where mm.sent_at::date = d.day
@@ -2642,7 +3942,7 @@ export async function loadMessengerInsightSnapshot(
         sent_at
       from whatsapp_campaigns
       order by coalesce(sent_at, created_at) desc
-      limit 8
+      limit 12
     `,
       tx.$queryRaw<
         Array<{
@@ -2730,6 +4030,8 @@ export async function loadMessengerInsightSnapshot(
       emailRecipients: row.email_recipients,
       pushRecipients: row.push_recipients,
       whatsappRecipients: row.whatsapp_recipients,
+      whatsappDelivered: row.whatsapp_delivered,
+      whatsappFailed: row.whatsapp_failed,
       inboxMessages: row.inbox_messages,
     })),
     recentEmailCampaigns: emailRows.map((row) => ({
@@ -2763,6 +4065,255 @@ export async function loadMessengerInsightSnapshot(
       recipientCount: row.recipient_count,
       sentAt: row.sent_at?.toISOString() ?? null,
     })),
+  };
+}
+
+export type MessengerInboxResponseTimeBucketId = "0-1h" | "1-4h" | "4-24h" | "24h+";
+
+export type MessengerInboxInsightDetail = {
+  openConversations: Array<{
+    id: string;
+    learnerName: string;
+    lastMessagePreview: string;
+    messageCount: number;
+    lastMessageAt: string;
+    waitingOn: "us" | "learner";
+  }>;
+  responseTimes: {
+    samples: number;
+    medianFirstReplySeconds: number | null;
+    longestFirstReplySeconds: number | null;
+    longestWaitingSeconds: number | null;
+    buckets: Array<{
+      id: MessengerInboxResponseTimeBucketId;
+      label: string;
+      count: number;
+      sharePct: number | null;
+    }>;
+  };
+};
+
+function truncatePreview(body: string, max = 120): string {
+  const compact = body.replace(/\s+/g, " ").trim();
+  if (compact.length <= max) return compact;
+  return `${compact.slice(0, Math.max(0, max - 3)).trimEnd()}...`;
+}
+
+function medianSeconds(values: number[]): number | null {
+  if (values.length === 0) return null;
+  const sorted = [...values].sort((a, b) => a - b);
+  const mid = Math.floor(sorted.length / 2);
+  if (sorted.length % 2 === 0) {
+    const left = sorted[mid - 1];
+    const right = sorted[mid];
+    if (left === undefined || right === undefined) return null;
+    return Math.round((left + right) / 2);
+  }
+  const value = sorted[mid];
+  return value === undefined ? null : Math.round(value);
+}
+
+function bucketFirstReply(seconds: number): MessengerInboxResponseTimeBucketId {
+  if (seconds < 3600) return "0-1h";
+  if (seconds < 14400) return "1-4h";
+  if (seconds < 86400) return "4-24h";
+  return "24h+";
+}
+
+const INBOX_REPLY_BUCKETS: Array<{
+  id: MessengerInboxResponseTimeBucketId;
+  label: string;
+}> = [
+  { id: "0-1h", label: "0-1h" },
+  { id: "1-4h", label: "1-4h" },
+  { id: "4-24h", label: "4-24h" },
+  { id: "24h+", label: "24h+" },
+];
+
+/** Open conversations + first-reply timings for Messenger Insight → Inbox. */
+export async function loadMessengerInboxDetail(tx: TenantTx): Promise<MessengerInboxInsightDetail> {
+  const [openRows, replyRows] = await Promise.all([
+    tx.$queryRaw<
+      Array<{
+        id: string;
+        learner_name: string | null;
+        last_message_preview: string | null;
+        message_count: number;
+        last_message_at: Date | null;
+        waiting_on: "us" | "learner";
+      }>
+    >`
+      with open_convs as (
+        select mc.id
+        from messenger_conversations mc
+        where mc.status = 'open'
+      ),
+      last_msg as (
+        select distinct on (mm.conversation_id)
+          mm.conversation_id,
+          mm.body,
+          mm.sent_at,
+          mm.sender_membership_id
+        from messenger_messages mm
+        join open_convs oc on oc.id = mm.conversation_id
+        order by mm.conversation_id, mm.sent_at desc, mm.id desc
+      ),
+      msg_counts as (
+        select mm.conversation_id, count(*)::int as message_count
+        from messenger_messages mm
+        join open_convs oc on oc.id = mm.conversation_id
+        group by mm.conversation_id
+      ),
+      first_learner as (
+        select distinct on (mm.conversation_id)
+          mm.conversation_id,
+          mm.sender_membership_id
+        from messenger_messages mm
+        join open_convs oc on oc.id = mm.conversation_id
+        join user_roles ur
+          on ur.membership_id = mm.sender_membership_id and ur.tenant_id = mm.tenant_id
+        join roles r
+          on r.id = ur.role_id and r.tenant_id = ur.tenant_id and r.key = 'learner'
+        order by mm.conversation_id, mm.sent_at asc, mm.id asc
+      ),
+      last_sender_is_learner as (
+        select
+          lm.conversation_id,
+          exists(
+            select 1
+            from user_roles ur
+            join roles r
+              on r.id = ur.role_id and r.tenant_id = ur.tenant_id and r.key = 'learner'
+            where ur.membership_id = lm.sender_membership_id
+          ) as is_learner
+        from last_msg lm
+      )
+      select
+        oc.id::text as id,
+        coalesce(
+          fl_mp.display_name,
+          fl_ap.email,
+          fl_m.invited_email_normalized,
+          lm_mp.display_name,
+          lm_ap.email,
+          lm_m.invited_email_normalized,
+          'Learner'
+        ) as learner_name,
+        left(coalesce(lm.body, ''), 200) as last_message_preview,
+        coalesce(mc.message_count, 0)::int as message_count,
+        lm.sent_at as last_message_at,
+        case
+          when coalesce(lsl.is_learner, false) then 'us'
+          else 'learner'
+        end as waiting_on
+      from open_convs oc
+      left join last_msg lm on lm.conversation_id = oc.id
+      left join msg_counts mc on mc.conversation_id = oc.id
+      left join last_sender_is_learner lsl on lsl.conversation_id = oc.id
+      left join first_learner fl on fl.conversation_id = oc.id
+      left join memberships fl_m on fl_m.id = fl.sender_membership_id
+      left join member_profiles fl_mp
+        on fl_mp.membership_id = fl_m.id
+        and fl_mp.tenant_id = fl_m.tenant_id
+        and fl_mp.deleted_at is null
+      left join auth_principals fl_ap on fl_ap.id = fl_m.auth_principal_id
+      left join memberships lm_m on lm_m.id = lm.sender_membership_id
+      left join member_profiles lm_mp
+        on lm_mp.membership_id = lm_m.id
+        and lm_mp.tenant_id = lm_m.tenant_id
+        and lm_mp.deleted_at is null
+      left join auth_principals lm_ap on lm_ap.id = lm_m.auth_principal_id
+      order by lm.sent_at asc nulls last
+      limit 10
+    `,
+    tx.$queryRaw<Array<{ reply_seconds: number }>>`
+      with first_learner_msg as (
+        select distinct on (mm.conversation_id)
+          mm.conversation_id,
+          mm.sent_at as first_learner_at
+        from messenger_messages mm
+        join user_roles ur
+          on ur.membership_id = mm.sender_membership_id and ur.tenant_id = mm.tenant_id
+        join roles r
+          on r.id = ur.role_id and r.tenant_id = ur.tenant_id and r.key = 'learner'
+        order by mm.conversation_id, mm.sent_at asc, mm.id asc
+      ),
+      first_staff_reply as (
+        select
+          fl.conversation_id,
+          fl.first_learner_at,
+          min(mm.sent_at) as first_reply_at
+        from first_learner_msg fl
+        join messenger_messages mm
+          on mm.conversation_id = fl.conversation_id
+          and mm.sent_at > fl.first_learner_at
+        where not exists (
+          select 1
+          from user_roles ur
+          join roles r
+            on r.id = ur.role_id and r.tenant_id = ur.tenant_id and r.key = 'learner'
+          where ur.membership_id = mm.sender_membership_id
+        )
+        group by fl.conversation_id, fl.first_learner_at
+      )
+      select
+        greatest(
+          0,
+          floor(extract(epoch from (fsr.first_reply_at - fsr.first_learner_at)))
+        )::int as reply_seconds
+      from first_staff_reply fsr
+    `,
+  ]);
+
+  const nowMs = Date.now();
+  const openConversations = openRows.map((row) => ({
+    id: row.id,
+    learnerName: row.learner_name?.trim() || "Learner",
+    lastMessagePreview: truncatePreview(row.last_message_preview ?? ""),
+    messageCount: row.message_count,
+    lastMessageAt: row.last_message_at?.toISOString() ?? new Date(0).toISOString(),
+    waitingOn: row.waiting_on,
+  }));
+
+  const replySeconds = replyRows.map((row) => row.reply_seconds);
+  const samples = replySeconds.length;
+  const bucketCounts: Record<MessengerInboxResponseTimeBucketId, number> = {
+    "0-1h": 0,
+    "1-4h": 0,
+    "4-24h": 0,
+    "24h+": 0,
+  };
+  for (const value of replySeconds) {
+    bucketCounts[bucketFirstReply(value)] += 1;
+  }
+
+  let longestWaitingSeconds: number | null = null;
+  for (const row of openConversations) {
+    if (row.waitingOn !== "us") continue;
+    const age = Math.max(0, Math.floor((nowMs - Date.parse(row.lastMessageAt)) / 1000));
+    if (!Number.isFinite(age)) continue;
+    if (longestWaitingSeconds == null || age > longestWaitingSeconds) {
+      longestWaitingSeconds = age;
+    }
+  }
+
+  return {
+    openConversations,
+    responseTimes: {
+      samples,
+      medianFirstReplySeconds: medianSeconds(replySeconds),
+      longestFirstReplySeconds: samples === 0 ? null : Math.max(...replySeconds),
+      longestWaitingSeconds,
+      buckets: INBOX_REPLY_BUCKETS.map((bucket) => {
+        const count = bucketCounts[bucket.id];
+        return {
+          id: bucket.id,
+          label: bucket.label,
+          count,
+          sharePct: samples <= 0 ? null : Math.round((count / samples) * 1000) / 10,
+        };
+      }),
+    },
   };
 }
 

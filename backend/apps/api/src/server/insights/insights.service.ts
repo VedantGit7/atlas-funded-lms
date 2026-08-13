@@ -17,9 +17,21 @@ import type {
   InsightWidgetDetail,
   InsightEngagementFunnelBoard,
   InsightSalesPipelineBoard,
+  InsightMessengerChannelsBoard,
+  InsightMessengerWhatsappBoard,
+  InsightMessengerInboxBoard,
   InsightSalesAttributionBoard,
+  InsightMarketingAttributionBoard,
+  InsightMarketingCaptureBoard,
+  InsightMarketingWorkflowsBoard,
+  InsightAttributionBoard,
   InsightSalesOpportunityBoard,
   InsightContentHealthBoard,
+  InsightLiveNowBoard,
+  InsightLiveSessionsBoard,
+  InsightLiveSessionsQuery,
+  InsightLiveAttendanceBoard,
+  InsightLiveAttendanceQuery,
 } from "./insights.schemas";
 import type { NormalizedResult } from "../reports/reports.schemas";
 import {
@@ -30,12 +42,21 @@ import {
 import { buildInsightWidgetDetail } from "./insights-widget-detail";
 import { buildInsightEngagementFunnel } from "./insights-engagement-funnel";
 import { buildInsightSalesPipeline } from "./insights-sales-pipeline";
+import { buildInsightMessengerChannels } from "./insights-messenger-channels";
+import { buildInsightMessengerWhatsapp } from "./insights-messenger-whatsapp";
+import { buildInsightMessengerInbox } from "./insights-messenger-inbox";
 import {
   buildInsightSalesAttribution,
   SALES_ATTRIBUTION_EMPTY_CAPTION,
 } from "./insights-sales-attribution";
+import { buildInsightMarketingAttribution } from "./insights-marketing-attribution";
+import { buildInsightMarketingCapture } from "./insights-marketing-capture";
+import { buildInsightMarketingWorkflows } from "./insights-marketing-workflows";
 import { buildInsightSalesOpportunity } from "./insights-sales-opportunity";
 import { buildInsightContentHealth } from "./insights-content-health";
+import { buildInsightLiveNow } from "./insights-live-now";
+import { buildInsightLiveSessions } from "./insights-live-sessions";
+import { buildInsightLiveAttendance } from "./insights-live-attendance";
 import {
   applyInsightAlertMutation,
   findInsightAlertRule,
@@ -108,9 +129,16 @@ import {
   loadLearningRollupBundle,
   loadContentHealthDetail,
   loadLiveDashboardSnapshot,
+  loadLiveDashboardNowSnapshot,
+  loadLiveDashboardSessionsSnapshot,
+  loadLiveDashboardAttendanceSnapshot,
   loadMarketingInsightSnapshot,
+  loadMarketingAttributionDetail,
+  loadMarketingCaptureDetail,
+  loadMarketingWorkflowsDetail,
   loadMembershipDisplayName,
   loadMembershipEmail,
+  loadMessengerInboxDetail,
   loadMessengerInsightSnapshot,
   loadSalesAttributionSources,
   loadSalesInsightSnapshot,
@@ -1069,7 +1097,75 @@ function liveDashboardAlertMetrics(snapshot: LiveDashboardSnapshot): InsightAler
   };
 }
 
+function liveStatusOrder(status: string): number {
+  const normalized = status.toLowerCase();
+  if (normalized.includes("ended") || normalized.includes("completed")) return 0;
+  if (normalized.includes("live")) return 1;
+  if (normalized.includes("sched")) return 2;
+  if (normalized.includes("canc")) return 3;
+  return 9;
+}
+
+function liveStatusLabel(status: string): string {
+  const normalized = status.toLowerCase();
+  if (normalized.includes("ended") || normalized.includes("completed")) return "Ended";
+  if (normalized.includes("live")) return "Live";
+  if (normalized.includes("sched")) return "Scheduled";
+  if (normalized.includes("canc")) return "Cancelled";
+  return status;
+}
+
+function normalizeLiveStatusRows(
+  rows: Array<{ status: string; sessionCount: number; attendedCount: number }>,
+): Array<{ status: string; sessionCount: number; attendedCount: number }> {
+  const byLabel = new Map<
+    string,
+    { status: string; sessionCount: number; attendedCount: number }
+  >();
+  for (const row of rows) {
+    const label = liveStatusLabel(row.status);
+    const existing = byLabel.get(label);
+    if (existing) {
+      existing.sessionCount += row.sessionCount;
+      existing.attendedCount += row.attendedCount;
+    } else {
+      byLabel.set(label, {
+        status: label,
+        sessionCount: row.sessionCount,
+        attendedCount: row.attendedCount,
+      });
+    }
+  }
+  for (const label of ["Ended", "Live", "Scheduled", "Cancelled"] as const) {
+    if (!byLabel.has(label)) {
+      byLabel.set(label, { status: label, sessionCount: 0, attendedCount: 0 });
+    }
+  }
+  return [...byLabel.values()].sort(
+    (a, b) => liveStatusOrder(a.status) - liveStatusOrder(b.status),
+  );
+}
+
+function attendedByStatusFootnote(
+  rows: Array<{ status: string; sessionCount: number; attendedCount: number }>,
+): string | undefined {
+  const totalSessions = rows.reduce((sum, row) => sum + row.sessionCount, 0);
+  const totalAttended = rows.reduce((sum, row) => sum + row.attendedCount, 0);
+  if (totalSessions <= 0 || totalAttended <= 0) return undefined;
+  const ended = rows.find((row) => {
+    const normalized = row.status.toLowerCase();
+    return normalized.includes("ended") || normalized.includes("completed");
+  });
+  if (!ended || ended.sessionCount <= 0 || ended.attendedCount <= 0) return undefined;
+  const sessionShare = Math.round((ended.sessionCount / totalSessions) * 100);
+  const attendanceShare = Math.round((ended.attendedCount / totalAttended) * 100);
+  return `Ended sessions are ${sessionShare}% of all sessions but ${attendanceShare}% of all attendance.`;
+}
+
 function buildLiveDashboardWidgets(snapshot: LiveDashboardSnapshot): InsightWidget[] {
+  const statusRows = normalizeLiveStatusRows(snapshot.sessionsByStatus);
+  const attendanceFootnote = attendedByStatusFootnote(statusRows);
+
   return [
     kpiWidget("sessions", "Total sessions", snapshot.sessionCount),
     kpiWidget("live-now", "Live now", snapshot.liveNowCount),
@@ -1101,8 +1197,8 @@ function buildLiveDashboardWidgets(snapshot: LiveDashboardSnapshot): InsightWidg
           { key: "label", label: "Status", kind: "dimension" },
           { key: "value", label: "Sessions", kind: "measure" },
         ],
-        rows: snapshot.sessionsByStatus.map((row) => ({
-          label: row.status,
+        rows: statusRows.map((row) => ({
+          label: liveStatusLabel(row.status),
           value: row.sessionCount,
         })),
         dimensions: ["label"],
@@ -1114,13 +1210,14 @@ function buildLiveDashboardWidgets(snapshot: LiveDashboardSnapshot): InsightWidg
       title: "Attendance by session status",
       defaultViz: "bar",
       span: "half",
+      ...(attendanceFootnote ? { footnote: attendanceFootnote } : {}),
       data: {
         columns: [
           { key: "label", label: "Status", kind: "dimension" },
           { key: "value", label: "Attended", kind: "measure" },
         ],
-        rows: snapshot.sessionsByStatus.map((row) => ({
-          label: row.status,
+        rows: statusRows.map((row) => ({
+          label: liveStatusLabel(row.status),
           value: row.attendedCount,
         })),
         dimensions: ["label"],
@@ -1161,7 +1258,7 @@ function buildLiveDashboardWidgets(snapshot: LiveDashboardSnapshot): InsightWidg
         ],
         rows: snapshot.upcomingSessions.map((row) => ({
           title: row.title,
-          status: row.status,
+          status: liveStatusLabel(row.status),
           scheduled: row.scheduledAt ? row.scheduledAt.slice(0, 16).replace("T", " ") : null,
           registered: row.registeredCount,
         })),
@@ -1184,7 +1281,7 @@ function buildLiveDashboardWidgets(snapshot: LiveDashboardSnapshot): InsightWidg
         ],
         rows: snapshot.recentSessions.map((row) => ({
           title: row.title,
-          status: row.status,
+          status: liveStatusLabel(row.status),
           attended: row.attendedCount,
           registered: row.registeredCount,
           rate: row.attendanceRate,
@@ -1232,8 +1329,11 @@ function marketingInsightAlertMetrics(snapshot: MarketingInsightSnapshot): Insig
   };
 }
 
+const MARKETING_CTA_EMPTY_CAPTION = "No CTA views recorded";
+
 function buildMarketingInsightWidgets(snapshot: MarketingInsightSnapshot): InsightWidget[] {
   const clickRate = ctaClickRate(snapshot.ctaViews, snapshot.ctaClicks);
+  const ctaRateEmpty = snapshot.ctaViews <= 0;
 
   return [
     kpiWidget("attribution-events", "Attribution events", snapshot.attributionTotal),
@@ -1251,9 +1351,15 @@ function buildMarketingInsightWidgets(snapshot: MarketingInsightSnapshot): Insig
     kpiWidget("live-ctas", "Live CTAs", snapshot.liveCtaCount),
     kpiWidget("cta-views", "CTA views", snapshot.ctaViews),
     kpiWidget("cta-clicks", "CTA clicks", snapshot.ctaClicks),
-    kpiWidget("cta-click-rate", "CTA click rate %", clickRate),
-    kpiWidget("published-workflows", "Published workflows", snapshot.publishedWorkflowCount),
-    kpiWidget("workflow-runs-30d", "Workflow runs (30d)", snapshot.workflowRuns30d),
+    kpiWidget("cta-click-rate", "CTA click rate %", clickRate, {
+      footnote: ctaRateEmpty ? MARKETING_CTA_EMPTY_CAPTION : undefined,
+    }),
+    kpiWidget("published-workflows", "Published workflows", snapshot.publishedWorkflowCount, {
+      href: "/admin/insights/marketing-insight/workflows",
+    }),
+    kpiWidget("workflow-runs-30d", "Workflow runs (30d)", snapshot.workflowRuns30d, {
+      href: "/admin/insights/marketing-insight/workflows",
+    }),
     kpiWidget("coupon-redemptions", "Coupon redemptions", snapshot.couponRedemptions),
     kpiWidget("event-registrations", "Event registrations", snapshot.eventRegistrations),
     {
@@ -1261,6 +1367,7 @@ function buildMarketingInsightWidgets(snapshot: MarketingInsightSnapshot): Insig
       title: "Attribution by source",
       defaultViz: "bar",
       span: "half",
+      href: "/admin/insights/marketing-insight/attribution",
       data: {
         columns: [
           { key: "label", label: "Source", kind: "dimension" },
@@ -1279,6 +1386,7 @@ function buildMarketingInsightWidgets(snapshot: MarketingInsightSnapshot): Insig
       title: "Attribution by medium",
       defaultViz: "bar",
       span: "half",
+      href: "/admin/insights/marketing-insight/attribution",
       data: {
         columns: [
           { key: "label", label: "Medium", kind: "dimension" },
@@ -1355,6 +1463,7 @@ function buildMarketingInsightWidgets(snapshot: MarketingInsightSnapshot): Insig
       title: "Top forms by submissions",
       defaultViz: "table",
       span: "half",
+      href: "/admin/insights/marketing-insight/capture",
       data: {
         columns: [
           { key: "title", label: "Form", kind: "string" },
@@ -1374,6 +1483,7 @@ function buildMarketingInsightWidgets(snapshot: MarketingInsightSnapshot): Insig
       title: "Top CTAs by engagement",
       defaultViz: "table",
       span: "half",
+      href: "/admin/insights/marketing-insight/capture",
       data: {
         columns: [
           { key: "title", label: "CTA", kind: "string" },
@@ -1444,6 +1554,7 @@ function buildMarketingInsightWidgets(snapshot: MarketingInsightSnapshot): Insig
       title: "Recent workflow runs",
       defaultViz: "table",
       span: "full",
+      href: "/admin/insights/marketing-insight/workflows",
       data: {
         columns: [
           { key: "workflow", label: "Workflow", kind: "string" },
@@ -1477,6 +1588,7 @@ function messengerInsightAlertMetrics(snapshot: MessengerInsightSnapshot): Insig
 
 function buildMessengerInsightWidgets(snapshot: MessengerInsightSnapshot): InsightWidget[] {
   const waRate = whatsappDeliveryRate(snapshot.whatsappDelivered, snapshot.whatsappRecipients);
+  const waEmpty = snapshot.whatsappRecipients <= 0;
 
   return [
     kpiWidget("outbound-sends", "Outbound campaigns sent", snapshot.totalOutboundSends),
@@ -1488,31 +1600,57 @@ function buildMessengerInsightWidgets(snapshot: MessengerInsightSnapshot): Insig
     kpiWidget("push-reach", "Push recipients", snapshot.pushRecipients),
     kpiWidget("whatsapp-sent", "WhatsApp campaigns sent", snapshot.whatsappSentCount),
     kpiWidget("whatsapp-delivered", "WhatsApp delivered", snapshot.whatsappDelivered),
-    kpiWidget("whatsapp-failed", "WhatsApp failed", snapshot.whatsappFailed),
-    kpiWidget("whatsapp-delivery-rate", "WhatsApp delivery %", waRate),
+    kpiWidget("whatsapp-failed", "WhatsApp failed", snapshot.whatsappFailed, {
+      footnote: "Higher is worse",
+      href: "/admin/insights/messenger-insight/whatsapp",
+    }),
+    kpiWidget(
+      "whatsapp-delivery-rate",
+      "WhatsApp delivery %",
+      waRate,
+      waEmpty
+        ? {
+            footnote: "No WhatsApp sends recorded",
+            href: "/admin/insights/messenger-insight/whatsapp",
+          }
+        : { href: "/admin/insights/messenger-insight/whatsapp" },
+    ),
     kpiWidget("announcements", "Announcements sent", snapshot.announcementCount),
-    kpiWidget("inbox-messages", "Inbox messages", snapshot.inboxMessageCount),
-    kpiWidget("inbox-30d", "Inbox messages (30d)", snapshot.inboxMessages30d),
-    kpiWidget("open-conversations", "Open conversations", snapshot.openConversationCount),
+    kpiWidget("inbox-messages", "Inbox messages", snapshot.inboxMessageCount, {
+      href: "/admin/insights/messenger-insight/inbox",
+    }),
+    kpiWidget("inbox-30d", "Inbox messages (30d)", snapshot.inboxMessages30d, {
+      href: "/admin/insights/messenger-insight/inbox",
+    }),
+    kpiWidget("open-conversations", "Open conversations", snapshot.openConversationCount, {
+      href: "/admin/insights/messenger-insight/inbox",
+    }),
     kpiWidget(
       "scheduled-total",
       "Scheduled campaigns",
       snapshot.emailScheduledCount + snapshot.pushScheduledCount + snapshot.whatsappScheduledCount,
+      {
+        footnote: "Email, push, and WhatsApp combined",
+        href: null,
+      },
     ),
     {
       id: "channel-mix-sends",
       title: "Sends by channel",
       defaultViz: "bar",
       span: "half",
+      href: "/admin/insights/messenger-insight/channels",
       data: {
         columns: [
           { key: "label", label: "Channel", kind: "dimension" },
           { key: "value", label: "Sends", kind: "measure" },
         ],
-        rows: snapshot.channelMix.map((row) => ({
-          label: row.channel,
-          value: row.sends,
-        })),
+        rows: snapshot.channelMix
+          .filter((row) => row.channel !== "Inbox messages")
+          .map((row) => ({
+            label: row.channel,
+            value: row.sends,
+          })),
         dimensions: ["label"],
         measures: ["value"],
       },
@@ -1522,15 +1660,18 @@ function buildMessengerInsightWidgets(snapshot: MessengerInsightSnapshot): Insig
       title: "Reach by channel",
       defaultViz: "bar",
       span: "half",
+      href: "/admin/insights/messenger-insight/channels",
       data: {
         columns: [
           { key: "label", label: "Channel", kind: "dimension" },
           { key: "value", label: "Recipients", kind: "measure" },
         ],
-        rows: snapshot.channelMix.map((row) => ({
-          label: row.channel,
-          value: row.recipients,
-        })),
+        rows: snapshot.channelMix
+          .filter((row) => row.channel !== "Inbox messages")
+          .map((row) => ({
+            label: row.channel,
+            value: row.recipients,
+          })),
         dimensions: ["label"],
         measures: ["value"],
       },
@@ -1540,6 +1681,7 @@ function buildMessengerInsightWidgets(snapshot: MessengerInsightSnapshot): Insig
       title: "Daily messaging volume (30d)",
       defaultViz: "line",
       span: "full",
+      href: "/admin/insights/messenger-insight/channels",
       data: {
         columns: [
           { key: "period", label: "Period", kind: "date" },
@@ -1608,6 +1750,7 @@ function buildMessengerInsightWidgets(snapshot: MessengerInsightSnapshot): Insig
       title: "Recent WhatsApp campaigns",
       defaultViz: "table",
       span: "half",
+      href: "/admin/insights/messenger-insight/whatsapp",
       data: {
         columns: [
           { key: "title", label: "Campaign", kind: "string" },
@@ -2687,7 +2830,7 @@ export async function getInsightSalesAttribution(
     throw new AtlasHttpError({
       code: "PERMISSION_DENIED",
       status: 404,
-      message: "Attribution is only available on Sales Insight.",
+      message: "Sales attribution is only available on Sales Insight.",
     });
   }
   const [snapshot, sources] = await Promise.all([
@@ -2695,6 +2838,107 @@ export async function getInsightSalesAttribution(
     loadSalesAttributionSources(tx),
   ]);
   return buildInsightSalesAttribution(snapshot, sources);
+}
+
+export async function getInsightMarketingAttribution(
+  tx: TenantTx,
+  slug: string,
+): Promise<InsightMarketingAttributionBoard> {
+  await assertInsightSectionVisible(tx, slug);
+  if (slug !== "marketing-insight") {
+    throw new AtlasHttpError({
+      code: "PERMISSION_DENIED",
+      status: 404,
+      message: "Marketing attribution is only available on Marketing Insight.",
+    });
+  }
+  const [currency, detail] = await Promise.all([
+    loadInsightDisplayCurrency(tx),
+    loadMarketingAttributionDetail(tx),
+  ]);
+  return buildInsightMarketingAttribution(
+    {
+      currency,
+      events: detail.events,
+      events30d: detail.events30d,
+      attributedRevenueCents: detail.attributedRevenueCents,
+      sourceCount: detail.sourceCount,
+      mediumCount: detail.mediumCount,
+      campaignCount: detail.campaignCount,
+    },
+    detail.sources,
+    detail.mediums,
+    detail.campaigns,
+    detail.crossPairs,
+  );
+}
+
+export async function getInsightMarketingCapture(
+  tx: TenantTx,
+  slug: string,
+): Promise<InsightMarketingCaptureBoard> {
+  await assertInsightSectionVisible(tx, slug);
+  if (slug !== "marketing-insight") {
+    throw new AtlasHttpError({
+      code: "PERMISSION_DENIED",
+      status: 404,
+      message: "Marketing capture is only available on Marketing Insight.",
+    });
+  }
+  const detail = await loadMarketingCaptureDetail(tx);
+  return buildInsightMarketingCapture(
+    {
+      formCount: detail.formCount,
+      liveFormCount: detail.liveFormCount,
+      submissionCount: detail.submissionCount,
+      submissions30d: detail.submissions30d,
+      contactCount: detail.contactCount,
+      ctaCount: detail.ctaCount,
+      liveCtaCount: detail.liveCtaCount,
+      ctaViews: detail.ctaViews,
+      ctaClicks: detail.ctaClicks,
+    },
+    detail.forms,
+    detail.ctas,
+  );
+}
+
+export async function getInsightMarketingWorkflows(
+  tx: TenantTx,
+  slug: string,
+): Promise<InsightMarketingWorkflowsBoard> {
+  await assertInsightSectionVisible(tx, slug);
+  if (slug !== "marketing-insight") {
+    throw new AtlasHttpError({
+      code: "PERMISSION_DENIED",
+      status: 404,
+      message: "Marketing workflows is only available on Marketing Insight.",
+    });
+  }
+  const detail = await loadMarketingWorkflowsDetail(tx);
+  return buildInsightMarketingWorkflows({
+    workflowCount: detail.workflowCount,
+    publishedWorkflowCount: detail.publishedWorkflowCount,
+    runs30d: detail.runs30d,
+    runsCompleted30d: detail.runsCompleted30d,
+    runsFailed30d: detail.runsFailed30d,
+    lastRunAt: detail.lastRunAt,
+    dailyVolume: detail.dailyVolume,
+    byWorkflow: detail.byWorkflow,
+    neverRun: detail.neverRun,
+    triggers: detail.triggers,
+    ledger: detail.ledger,
+  });
+}
+
+export async function getInsightAttribution(
+  tx: TenantTx,
+  slug: string,
+): Promise<InsightAttributionBoard> {
+  if (slug === "marketing-insight") {
+    return getInsightMarketingAttribution(tx, slug);
+  }
+  return getInsightSalesAttribution(tx, slug);
 }
 
 export async function getInsightSalesPipeline(
@@ -2711,6 +2955,57 @@ export async function getInsightSalesPipeline(
   }
   const snapshot = await loadSalesInsightSnapshot(tx);
   return buildInsightSalesPipeline(snapshot);
+}
+
+export async function getInsightMessengerChannels(
+  tx: TenantTx,
+  slug: string,
+): Promise<InsightMessengerChannelsBoard> {
+  await assertInsightSectionVisible(tx, slug);
+  if (slug !== "messenger-insight") {
+    throw new AtlasHttpError({
+      code: "PERMISSION_DENIED",
+      status: 404,
+      message: "Messenger channels is only available on Messenger Insight.",
+    });
+  }
+  const snapshot = await loadMessengerInsightSnapshot(tx);
+  return buildInsightMessengerChannels(snapshot);
+}
+
+export async function getInsightMessengerWhatsapp(
+  tx: TenantTx,
+  slug: string,
+): Promise<InsightMessengerWhatsappBoard> {
+  await assertInsightSectionVisible(tx, slug);
+  if (slug !== "messenger-insight") {
+    throw new AtlasHttpError({
+      code: "PERMISSION_DENIED",
+      status: 404,
+      message: "Messenger WhatsApp is only available on Messenger Insight.",
+    });
+  }
+  const snapshot = await loadMessengerInsightSnapshot(tx);
+  return buildInsightMessengerWhatsapp(snapshot);
+}
+
+export async function getInsightMessengerInbox(
+  tx: TenantTx,
+  slug: string,
+): Promise<InsightMessengerInboxBoard> {
+  await assertInsightSectionVisible(tx, slug);
+  if (slug !== "messenger-insight") {
+    throw new AtlasHttpError({
+      code: "PERMISSION_DENIED",
+      status: 404,
+      message: "Messenger inbox is only available on Messenger Insight.",
+    });
+  }
+  const [snapshot, detail] = await Promise.all([
+    loadMessengerInsightSnapshot(tx),
+    loadMessengerInboxDetail(tx),
+  ]);
+  return buildInsightMessengerInbox(snapshot, detail);
 }
 
 export async function getInsightEngagementFunnel(
@@ -2751,4 +3046,51 @@ export async function getInsightContentHealth(
     loadLearningRollupBundle(tx, days),
   ]);
   return buildInsightContentHealth(snapshot, detail, rollups, range);
+}
+
+export async function getInsightLiveNow(tx: TenantTx, slug: string): Promise<InsightLiveNowBoard> {
+  await assertInsightSectionVisible(tx, slug);
+  if (slug !== "live-dashboard") {
+    throw new AtlasHttpError({
+      code: "PERMISSION_DENIED",
+      status: 404,
+      message: "Now board is only available on Live Dashboard.",
+    });
+  }
+  const snapshot = await loadLiveDashboardNowSnapshot(tx);
+  return buildInsightLiveNow(snapshot);
+}
+
+export async function getInsightLiveSessions(
+  tx: TenantTx,
+  slug: string,
+  query: InsightLiveSessionsQuery,
+): Promise<InsightLiveSessionsBoard> {
+  await assertInsightSectionVisible(tx, slug);
+  if (slug !== "live-dashboard") {
+    throw new AtlasHttpError({
+      code: "PERMISSION_DENIED",
+      status: 404,
+      message: "Sessions ledger is only available on Live Dashboard.",
+    });
+  }
+  const snapshot = await loadLiveDashboardSessionsSnapshot(tx, 30);
+  return buildInsightLiveSessions(snapshot, query);
+}
+
+export async function getInsightLiveAttendance(
+  tx: TenantTx,
+  slug: string,
+  query: InsightLiveAttendanceQuery,
+): Promise<InsightLiveAttendanceBoard> {
+  await assertInsightSectionVisible(tx, slug);
+  if (slug !== "live-dashboard") {
+    throw new AtlasHttpError({
+      code: "PERMISSION_DENIED",
+      status: 404,
+      message: "Attendance board is only available on Live Dashboard.",
+    });
+  }
+  const snapshot = await loadLiveDashboardAttendanceSnapshot(tx, 30);
+  return buildInsightLiveAttendance(snapshot, query);
 }

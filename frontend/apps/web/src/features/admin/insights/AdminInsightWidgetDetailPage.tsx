@@ -7,6 +7,9 @@ import {
   type InsightWidgetDetail,
 } from "./admin-insights-api";
 import { InsightWidgetDetailView } from "./InsightWidgetDetailView";
+import { LiveDashboardWidgetDetailView } from "./LiveDashboardWidgetDetailView";
+import { MarketingInsightWidgetDetailView } from "./MarketingInsightWidgetDetailView";
+import { MessengerInsightWidgetDetailView } from "./MessengerInsightWidgetDetailView";
 import { SalesInsightWidgetDetailView } from "./SalesInsightWidgetDetailView";
 import { SchoolVitalsWidgetDetailView } from "./SchoolVitalsWidgetDetailView";
 
@@ -72,6 +75,18 @@ export function AdminInsightWidgetDetailPage({
 
   if (slug === "sales-insight") {
     return <SalesInsightWidgetDetailView {...viewProps} />;
+  }
+
+  if (slug === "live-dashboard") {
+    return <LiveDashboardWidgetDetailView {...viewProps} />;
+  }
+
+  if (slug === "marketing-insight") {
+    return <MarketingInsightWidgetDetailView {...viewProps} />;
+  }
+
+  if (slug === "messenger-insight") {
+    return <MessengerInsightWidgetDetailView {...viewProps} />;
   }
 
   return <InsightWidgetDetailView {...viewProps} />;
