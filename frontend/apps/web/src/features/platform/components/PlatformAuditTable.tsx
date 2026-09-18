@@ -78,7 +78,7 @@ export function PlatformAuditTable() {
           <label className="block max-w-md text-sm">
             <span className="font-medium">Filter by action</span>
             <input
-              className="mt-1 w-full rounded border px-3 py-2 font-mono"
+              className="mt-1 w-full rounded border border-input bg-background text-foreground px-3 py-2 font-mono"
               value={actionFilter}
               onChange={(event) => {
                 setActionFilter(event.target.value);
@@ -89,7 +89,7 @@ export function PlatformAuditTable() {
           <label className="block max-w-md text-sm">
             <span className="font-medium">Filter by target type</span>
             <input
-              className="mt-1 w-full rounded border px-3 py-2 font-mono"
+              className="mt-1 w-full rounded border border-input bg-background text-foreground px-3 py-2 font-mono"
               value={targetTypeFilter}
               onChange={(event) => {
                 setTargetTypeFilter(event.target.value);
@@ -103,7 +103,7 @@ export function PlatformAuditTable() {
 
         <table className="w-full border-collapse text-sm">
           <thead>
-            <tr className="border-b text-left">
+            <tr className="border-b border-border text-left">
               <th className="py-2 pr-4">When</th>
               <th className="py-2 pr-4">Action</th>
               <th className="py-2 pr-4">Target</th>
@@ -114,7 +114,7 @@ export function PlatformAuditTable() {
             {entries.map((entry) => (
               <tr
                 key={entry.id}
-                className={`border-b ${isScopeTransition(entry) ? "bg-amber-50" : ""}`}
+                className={`border-b border-border ${isScopeTransition(entry) ? "bg-warning/10" : ""}`}
               >
                 <td className="py-2 pr-4">{new Date(entry.occurredAt).toLocaleString()}</td>
                 <td className="py-2 pr-4 font-mono text-xs">{entry.action}</td>
@@ -125,7 +125,7 @@ export function PlatformAuditTable() {
                 <td className="py-2">
                   <button
                     type="button"
-                    className="rounded border px-2 py-1"
+                    className="rounded border border-border px-2 py-1 hover:bg-muted"
                     onClick={() => {
                       setSelected(entry);
                     }}
@@ -141,7 +141,7 @@ export function PlatformAuditTable() {
         {hasMore ? (
           <button
             type="button"
-            className="rounded border px-3 py-2 text-sm"
+            className="rounded border border-border px-3 py-2 text-sm hover:bg-muted"
             disabled={loading || !nextCursor}
             onClick={() => {
               void loadAudit(nextCursor, true);
@@ -152,32 +152,35 @@ export function PlatformAuditTable() {
         ) : null}
 
         {selected ? (
-          <aside className="rounded border bg-white p-4 text-sm" aria-label="Audit entry details">
+          <aside
+            className="rounded border border-border bg-card p-4 text-sm text-card-foreground"
+            aria-label="Audit entry details"
+          >
             <h2 className="font-medium">Audit entry</h2>
             <dl className="mt-2 grid gap-2">
               <div>
-                <dt className="opacity-70">Action</dt>
+                <dt className="text-muted-foreground">Action</dt>
                 <dd className="font-mono text-xs">{selected.action}</dd>
               </div>
               <div>
-                <dt className="opacity-70">Reason</dt>
+                <dt className="text-muted-foreground">Reason</dt>
                 <dd>{selected.reason ?? "—"}</dd>
               </div>
               <div>
-                <dt className="opacity-70">Request ID</dt>
+                <dt className="text-muted-foreground">Request ID</dt>
                 <dd className="font-mono text-xs">{selected.requestId}</dd>
               </div>
               <div>
-                <dt className="opacity-70">Actor membership</dt>
+                <dt className="text-muted-foreground">Actor membership</dt>
                 <dd className="font-mono text-xs">{selected.actorMembershipId ?? "—"}</dd>
               </div>
               <div>
-                <dt className="opacity-70">Platform principal</dt>
+                <dt className="text-muted-foreground">Platform principal</dt>
                 <dd className="font-mono text-xs">{selected.platformPrincipalId ?? "—"}</dd>
               </div>
               {selected.metadata && Object.keys(selected.metadata).length > 0 ? (
                 <div>
-                  <dt className="opacity-70">Metadata</dt>
+                  <dt className="text-muted-foreground">Metadata</dt>
                   <dd>
                     <pre className="mt-1 overflow-x-auto rounded bg-muted p-2 text-xs">
                       {JSON.stringify(selected.metadata, null, 2)}

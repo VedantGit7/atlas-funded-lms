@@ -144,7 +144,7 @@ export function GlobalCatalogTabs() {
           <h1 className="text-2xl font-semibold">Global catalog</h1>
           <button
             type="button"
-            className="rounded bg-neutral-900 px-3 py-2 text-sm text-white"
+            className="rounded bg-primary px-3 py-2 text-sm text-primary-foreground hover:opacity-90"
             onClick={() => {
               setCreateOpen(true);
             }}
@@ -161,7 +161,9 @@ export function GlobalCatalogTabs() {
               role="tab"
               aria-selected={tab === value}
               className={`rounded border px-3 py-1 text-sm ${
-                tab === value ? "bg-neutral-900 text-white" : ""
+                tab === value
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border hover:bg-muted"
               }`}
               onClick={() => {
                 setTab(value);
@@ -173,7 +175,7 @@ export function GlobalCatalogTabs() {
         </div>
 
         {error ? (
-          <p role="alert" className="text-sm text-red-700">
+          <p role="alert" className="text-sm text-destructive">
             {error}
           </p>
         ) : null}
@@ -181,14 +183,14 @@ export function GlobalCatalogTabs() {
         {tab === "permissions" ? (
           <table className="w-full border-collapse text-sm">
             <thead>
-              <tr className="border-b text-left">
+              <tr className="border-b border-border text-left">
                 <th className="py-2 pr-4">Key</th>
                 <th className="py-2">Description</th>
               </tr>
             </thead>
             <tbody>
               {permissions.map((row) => (
-                <tr key={row.id} className="border-b">
+                <tr key={row.id} className="border-b border-border">
                   <td className="py-2 pr-4 font-mono">{row.key}</td>
                   <td className="py-2">{row.description ?? "—"}</td>
                 </tr>
@@ -200,7 +202,7 @@ export function GlobalCatalogTabs() {
         {tab === "item-types" ? (
           <table className="w-full border-collapse text-sm">
             <thead>
-              <tr className="border-b text-left">
+              <tr className="border-b border-border text-left">
                 <th className="py-2 pr-4">Key</th>
                 <th className="py-2 pr-4">Name</th>
                 <th className="py-2 pr-4">Renderer</th>
@@ -209,7 +211,7 @@ export function GlobalCatalogTabs() {
             </thead>
             <tbody>
               {itemTypes.map((row) => (
-                <tr key={row.id} className="border-b">
+                <tr key={row.id} className="border-b border-border">
                   <td className="py-2 pr-4 font-mono">{row.key}</td>
                   <td className="py-2 pr-4">{row.name}</td>
                   <td className="py-2 pr-4 font-mono">{row.rendererKey}</td>
@@ -223,7 +225,7 @@ export function GlobalCatalogTabs() {
         {tab === "extension-points" ? (
           <table className="w-full border-collapse text-sm">
             <thead>
-              <tr className="border-b text-left">
+              <tr className="border-b border-border text-left">
                 <th className="py-2 pr-4">Key</th>
                 <th className="py-2 pr-4">Point type</th>
                 <th className="py-2">Status</th>
@@ -231,7 +233,7 @@ export function GlobalCatalogTabs() {
             </thead>
             <tbody>
               {extensionPoints.map((row) => (
-                <tr key={row.id} className="border-b">
+                <tr key={row.id} className="border-b border-border">
                   <td className="py-2 pr-4 font-mono">{row.key}</td>
                   <td className="py-2 pr-4">{row.pointType}</td>
                   <td className="py-2">{row.status}</td>
@@ -243,14 +245,14 @@ export function GlobalCatalogTabs() {
       </section>
 
       {createOpen ? (
-        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 p-4">
-          <div className="w-full max-w-lg rounded-lg border bg-white p-4 shadow-lg">
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-background/80 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-lg rounded-lg border border-border bg-card p-4 text-card-foreground shadow-lg">
             <h2 className="text-lg font-semibold">Add catalog entry</h2>
             <div className="mt-4 space-y-3">
               <label className="block text-sm">
                 Key
                 <input
-                  className="mt-1 w-full rounded border px-3 py-2 font-mono"
+                  className="mt-1 w-full rounded border border-input bg-background text-foreground px-3 py-2 font-mono"
                   value={draft.key}
                   onChange={(event) => {
                     setDraft((current) => ({ ...current, key: event.target.value }));
@@ -261,7 +263,7 @@ export function GlobalCatalogTabs() {
                 <label className="block text-sm">
                   Description
                   <input
-                    className="mt-1 w-full rounded border px-3 py-2"
+                    className="mt-1 w-full rounded border border-input bg-background text-foreground px-3 py-2"
                     value={draft.description}
                     onChange={(event) => {
                       setDraft((current) => ({ ...current, description: event.target.value }));
@@ -274,7 +276,7 @@ export function GlobalCatalogTabs() {
                   <label className="block text-sm">
                     Name
                     <input
-                      className="mt-1 w-full rounded border px-3 py-2"
+                      className="mt-1 w-full rounded border border-input bg-background text-foreground px-3 py-2"
                       value={draft.name}
                       onChange={(event) => {
                         setDraft((current) => ({ ...current, name: event.target.value }));
@@ -284,7 +286,7 @@ export function GlobalCatalogTabs() {
                   <label className="block text-sm">
                     Renderer key
                     <input
-                      className="mt-1 w-full rounded border px-3 py-2 font-mono"
+                      className="mt-1 w-full rounded border border-input bg-background text-foreground px-3 py-2 font-mono"
                       value={draft.rendererKey}
                       onChange={(event) => {
                         setDraft((current) => ({ ...current, rendererKey: event.target.value }));
@@ -294,7 +296,7 @@ export function GlobalCatalogTabs() {
                   <label className="block text-sm">
                     Schema JSON
                     <textarea
-                      className="mt-1 w-full rounded border px-3 py-2 font-mono"
+                      className="mt-1 w-full rounded border border-input bg-background text-foreground px-3 py-2 font-mono"
                       rows={3}
                       value={draft.schemaJson}
                       onChange={(event) => {
@@ -309,7 +311,7 @@ export function GlobalCatalogTabs() {
                   <label className="block text-sm">
                     Point type
                     <input
-                      className="mt-1 w-full rounded border px-3 py-2"
+                      className="mt-1 w-full rounded border border-input bg-background text-foreground px-3 py-2"
                       value={draft.pointType}
                       onChange={(event) => {
                         setDraft((current) => ({ ...current, pointType: event.target.value }));
@@ -319,7 +321,7 @@ export function GlobalCatalogTabs() {
                   <label className="block text-sm">
                     Schema JSON
                     <textarea
-                      className="mt-1 w-full rounded border px-3 py-2 font-mono"
+                      className="mt-1 w-full rounded border border-input bg-background text-foreground px-3 py-2 font-mono"
                       rows={3}
                       value={draft.schemaJson}
                       onChange={(event) => {
@@ -333,7 +335,7 @@ export function GlobalCatalogTabs() {
             <div className="mt-4 flex justify-end gap-2">
               <button
                 type="button"
-                className="rounded border px-3 py-2 text-sm"
+                className="rounded border border-border px-3 py-2 text-sm hover:bg-muted"
                 onClick={() => {
                   setCreateOpen(false);
                 }}
@@ -342,7 +344,7 @@ export function GlobalCatalogTabs() {
               </button>
               <button
                 type="button"
-                className="rounded bg-neutral-900 px-3 py-2 text-sm text-white"
+                className="rounded bg-primary px-3 py-2 text-sm text-primary-foreground hover:opacity-90"
                 onClick={() => {
                   setActionReason("");
                   setReasonDialogOpen(true);

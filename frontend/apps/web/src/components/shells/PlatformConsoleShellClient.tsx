@@ -33,7 +33,7 @@ function PlatformReasonBanner() {
     <>
       <div
         role="status"
-        className="border-b border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-950"
+        className="border-b border-warning/30 bg-warning/10 px-4 py-2 text-sm text-foreground"
       >
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-2">
           <p>
@@ -44,7 +44,7 @@ function PlatformReasonBanner() {
           <div className="flex gap-2">
             <button
               type="button"
-              className="min-h-10 rounded border border-amber-300 px-2 py-1"
+              className="min-h-10 rounded border border-warning/40 px-2 py-1 hover:bg-warning/10"
               onClick={() => {
                 setDraftReason(reason ?? "");
                 setDialogOpen(true);
@@ -55,7 +55,7 @@ function PlatformReasonBanner() {
             {isValid ? (
               <button
                 type="button"
-                className="min-h-10 rounded border border-amber-300 px-2 py-1"
+                className="min-h-10 rounded border border-warning/40 px-2 py-1 hover:bg-warning/10"
                 onClick={clearReason}
               >
                 Clear reason
@@ -115,7 +115,10 @@ function PlatformConsoleShellInner({
       navigationItems={navigationItems}
       pathname={pathname}
       isActive={navIsActive}
-      accentColor="#171717"
+      // A theme token, not a hex: the active item pairs this background with
+      // text-primary-foreground, and a fixed near-black made that pair
+      // dark-on-dark -- unreadable -- in dark mode.
+      accentColor="var(--primary)"
       requestId={requestId}
       bottomNavLimit={3}
     >

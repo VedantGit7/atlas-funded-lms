@@ -142,11 +142,11 @@ export function PlatformTenantDetailClient({
       <section className="space-y-4">
         <div>
           <h1 className="text-2xl font-semibold">{tenant?.displayName ?? "Tenant detail"}</h1>
-          <p className="text-sm opacity-70">{tenant?.slug}</p>
+          <p className="text-sm text-muted-foreground">{tenant?.slug}</p>
         </div>
 
         {error ? (
-          <p role="alert" className="text-sm text-red-700">
+          <p role="alert" className="text-sm text-destructive">
             {error}
           </p>
         ) : null}
@@ -162,7 +162,9 @@ export function PlatformTenantDetailClient({
                 role="tab"
                 aria-selected={tab === value}
                 className={`rounded border px-3 py-1 text-sm ${
-                  tab === value ? "bg-neutral-900 text-white" : ""
+                  tab === value
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-border hover:bg-muted"
                 }`}
                 onClick={() => {
                   setTab(value);
@@ -178,15 +180,15 @@ export function PlatformTenantDetailClient({
         {tab === "overview" && tenant ? (
           <dl className="grid gap-3 text-sm md:grid-cols-2">
             <div>
-              <dt className="opacity-70">State</dt>
+              <dt className="text-muted-foreground">State</dt>
               <dd>{tenant.state}</dd>
             </div>
             <div>
-              <dt className="opacity-70">Provisioning</dt>
+              <dt className="text-muted-foreground">Provisioning</dt>
               <dd>{tenant.provisioning.latestStatus ?? "—"}</dd>
             </div>
             <div>
-              <dt className="opacity-70">Primary host</dt>
+              <dt className="text-muted-foreground">Primary host</dt>
               <dd>
                 {tenant.primaryDomain
                   ? `${tenant.primaryDomain.hostname} (${tenant.primaryDomain.status})`
@@ -194,11 +196,11 @@ export function PlatformTenantDetailClient({
               </dd>
             </div>
             <div>
-              <dt className="opacity-70">Locale</dt>
+              <dt className="text-muted-foreground">Locale</dt>
               <dd>{tenant.defaultLocale}</dd>
             </div>
             <div>
-              <dt className="opacity-70">Timezone</dt>
+              <dt className="text-muted-foreground">Timezone</dt>
               <dd>{tenant.defaultTimezone}</dd>
             </div>
           </dl>
@@ -210,7 +212,7 @@ export function PlatformTenantDetailClient({
             <div className="flex flex-wrap gap-2">
               <button
                 type="button"
-                className="rounded border px-3 py-2 text-sm disabled:opacity-50"
+                className="rounded border border-border px-3 py-2 text-sm hover:bg-muted disabled:opacity-50"
                 disabled={!canSuspend}
                 onClick={() => {
                   setPendingAction("suspend");
@@ -222,7 +224,7 @@ export function PlatformTenantDetailClient({
               </button>
               <button
                 type="button"
-                className="rounded border px-3 py-2 text-sm disabled:opacity-50"
+                className="rounded border border-border px-3 py-2 text-sm hover:bg-muted disabled:opacity-50"
                 disabled={!canResume}
                 onClick={() => {
                   setPendingAction("resume");
@@ -234,7 +236,7 @@ export function PlatformTenantDetailClient({
               </button>
               <button
                 type="button"
-                className="rounded border px-3 py-2 text-sm disabled:opacity-50"
+                className="rounded border border-border px-3 py-2 text-sm hover:bg-muted disabled:opacity-50"
                 disabled={!canArchive}
                 onClick={() => {
                   setPendingAction("archive");
@@ -251,7 +253,7 @@ export function PlatformTenantDetailClient({
         {tab === "provisioning" ? (
           <table className="w-full border-collapse text-sm">
             <thead>
-              <tr className="border-b text-left">
+              <tr className="border-b border-border text-left">
                 <th className="py-2 pr-4">Status</th>
                 <th className="py-2 pr-4">Step</th>
                 <th className="py-2 pr-4">Error</th>
@@ -260,7 +262,7 @@ export function PlatformTenantDetailClient({
             </thead>
             <tbody>
               {jobs.map((job) => (
-                <tr key={job.id} className="border-b">
+                <tr key={job.id} className="border-b border-border">
                   <td className="py-2 pr-4">{job.status}</td>
                   <td className="py-2 pr-4">{job.step ?? "—"}</td>
                   <td className="py-2 pr-4">{job.safeErrorMessage ?? "—"}</td>
@@ -276,7 +278,7 @@ export function PlatformTenantDetailClient({
             <PlatformEntitlementEditor entitlements={entitlements} onChange={setEntitlements} />
             <button
               type="button"
-              className="rounded bg-neutral-900 px-3 py-2 text-sm text-white"
+              className="rounded bg-primary px-3 py-2 text-sm text-primary-foreground hover:opacity-90"
               onClick={() => {
                 setDialogKind("entitlements");
                 setPendingAction(null);

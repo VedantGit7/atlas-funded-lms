@@ -67,14 +67,14 @@ export function ProvisionTenantWizard() {
     <PlatformReasonGate ready={isValid}>
       <section className="mx-auto max-w-2xl space-y-4">
         <h1 className="text-2xl font-semibold">Provision tenant</h1>
-        <p className="text-sm opacity-70">
+        <p className="text-sm text-muted-foreground">
           Creates a tenant through the approved provisioning saga.
         </p>
 
         <label className="block text-sm">
           Slug
           <input
-            className="mt-1 w-full rounded border px-3 py-2"
+            className="mt-1 w-full rounded border border-input bg-background text-foreground px-3 py-2"
             value={form.slug}
             onChange={(event) => {
               setForm((current) => ({ ...current, slug: event.target.value }));
@@ -84,7 +84,7 @@ export function ProvisionTenantWizard() {
         <label className="block text-sm">
           Display name
           <input
-            className="mt-1 w-full rounded border px-3 py-2"
+            className="mt-1 w-full rounded border border-input bg-background text-foreground px-3 py-2"
             value={form.displayName}
             onChange={(event) => {
               setForm((current) => ({ ...current, displayName: event.target.value }));
@@ -94,7 +94,7 @@ export function ProvisionTenantWizard() {
         <label className="block text-sm">
           Owner email
           <input
-            className="mt-1 w-full rounded border px-3 py-2"
+            className="mt-1 w-full rounded border border-input bg-background text-foreground px-3 py-2"
             type="email"
             value={form.ownerEmail}
             onChange={(event) => {
@@ -105,7 +105,7 @@ export function ProvisionTenantWizard() {
         <label className="block text-sm">
           Owner display name
           <input
-            className="mt-1 w-full rounded border px-3 py-2"
+            className="mt-1 w-full rounded border border-input bg-background text-foreground px-3 py-2"
             value={form.ownerDisplayName}
             onChange={(event) => {
               setForm((current) => ({ ...current, ownerDisplayName: event.target.value }));
@@ -115,7 +115,7 @@ export function ProvisionTenantWizard() {
         <label className="block text-sm">
           Seed profile
           <select
-            className="mt-1 w-full rounded border px-3 py-2"
+            className="mt-1 w-full rounded border border-input bg-background text-foreground px-3 py-2"
             value={form.seedProfile}
             onChange={(event) => {
               setForm((current) => ({
@@ -131,7 +131,7 @@ export function ProvisionTenantWizard() {
 
         <div className="space-y-2">
           <h2 className="text-lg font-medium">Initial entitlements</h2>
-          <p className="text-sm opacity-70">
+          <p className="text-sm text-muted-foreground">
             Optional capability grants applied during provisioning.
           </p>
           <PlatformEntitlementEditor
@@ -141,7 +141,7 @@ export function ProvisionTenantWizard() {
         </div>
 
         {error ? (
-          <p role="alert" className="text-sm text-red-700">
+          <p role="alert" className="text-sm text-destructive">
             {error}
           </p>
         ) : null}
@@ -149,7 +149,7 @@ export function ProvisionTenantWizard() {
         <div className="flex gap-2">
           <button
             type="button"
-            className="rounded bg-neutral-900 px-3 py-2 text-sm text-white disabled:opacity-50"
+            className="rounded bg-primary px-3 py-2 text-sm text-primary-foreground hover:opacity-90 disabled:opacity-50"
             disabled={busy}
             onClick={() => {
               if (!isValid) {
@@ -162,7 +162,10 @@ export function ProvisionTenantWizard() {
           >
             Provision tenant
           </button>
-          <Link href="/platform" className="rounded border px-3 py-2 text-sm">
+          <Link
+            href="/platform"
+            className="rounded border border-border px-3 py-2 text-sm hover:bg-muted"
+          >
             Cancel
           </Link>
         </div>

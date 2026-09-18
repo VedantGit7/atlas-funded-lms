@@ -139,13 +139,13 @@ export function GlobalFeatureFlagEditor() {
         <div className="flex items-center justify-between gap-3">
           <div>
             <h1 className="text-2xl font-semibold">Global feature flags</h1>
-            <p className="text-sm opacity-70">
+            <p className="text-sm text-muted-foreground">
               Manage the global flag catalogue and default values.
             </p>
           </div>
           <button
             type="button"
-            className="rounded bg-neutral-900 px-3 py-2 text-sm text-white"
+            className="rounded bg-primary px-3 py-2 text-sm text-primary-foreground hover:opacity-90"
             onClick={openCreateDialog}
           >
             Create flag
@@ -153,7 +153,7 @@ export function GlobalFeatureFlagEditor() {
         </div>
 
         {error ? (
-          <p role="alert" className="text-sm text-red-700">
+          <p role="alert" className="text-sm text-destructive">
             {error}
           </p>
         ) : null}
@@ -161,7 +161,7 @@ export function GlobalFeatureFlagEditor() {
         <table className="w-full border-collapse text-sm">
           <caption className="sr-only">Global feature flags</caption>
           <thead>
-            <tr className="border-b text-left">
+            <tr className="border-b border-border text-left">
               <th className="py-2 pr-4">Key</th>
               <th className="py-2 pr-4">Default</th>
               <th className="py-2 pr-4">Description</th>
@@ -171,7 +171,7 @@ export function GlobalFeatureFlagEditor() {
           </thead>
           <tbody>
             {flags.map((flag) => (
-              <tr key={flag.id} className="border-b">
+              <tr key={flag.id} className="border-b border-border">
                 <td className="py-2 pr-4 font-mono">{flag.key}</td>
                 <td className="py-2 pr-4">{formatDefaultValue(flag.defaultValue)}</td>
                 <td className="py-2 pr-4">{flag.description ?? "—"}</td>
@@ -179,7 +179,7 @@ export function GlobalFeatureFlagEditor() {
                 <td className="py-2">
                   <button
                     type="button"
-                    className="rounded border px-2 py-1 text-xs"
+                    className="rounded border border-border px-2 py-1 text-xs hover:bg-muted"
                     onClick={() => {
                       openUpdateDialog(flag);
                     }}
@@ -193,13 +193,13 @@ export function GlobalFeatureFlagEditor() {
         </table>
 
         {flags.length === 0 ? (
-          <p className="text-sm opacity-70">No global flags in catalogue.</p>
+          <p className="text-sm text-muted-foreground">No global flags in catalogue.</p>
         ) : null}
       </section>
 
       {formMode ? (
-        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 p-4">
-          <div className="w-full max-w-lg rounded-lg border bg-white p-4 shadow-lg">
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-background/80 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-lg rounded-lg border border-border bg-card p-4 text-card-foreground shadow-lg">
             <h2 className="text-lg font-semibold">
               {formMode === "create" ? "Create global feature flag" : "Update global feature flag"}
             </h2>
@@ -208,7 +208,7 @@ export function GlobalFeatureFlagEditor() {
                 <label className="block text-sm">
                   Key
                   <input
-                    className="mt-1 w-full rounded border px-3 py-2 font-mono"
+                    className="mt-1 w-full rounded border border-input bg-background text-foreground px-3 py-2 font-mono"
                     value={draft.key}
                     onChange={(event) => {
                       setDraft((current) => ({ ...current, key: event.target.value }));
@@ -221,7 +221,7 @@ export function GlobalFeatureFlagEditor() {
               <label className="block text-sm">
                 Rollout type
                 <select
-                  className="mt-1 w-full rounded border px-3 py-2"
+                  className="mt-1 w-full rounded border border-input bg-background text-foreground px-3 py-2"
                   value={draft.rolloutType}
                   onChange={(event) => {
                     setDraft((current) => ({
@@ -238,7 +238,7 @@ export function GlobalFeatureFlagEditor() {
                 Default value
                 {draft.rolloutType === "BOOLEAN" ? (
                   <select
-                    className="mt-1 w-full rounded border px-3 py-2"
+                    className="mt-1 w-full rounded border border-input bg-background text-foreground px-3 py-2"
                     value={draft.defaultValue}
                     onChange={(event) => {
                       setDraft((current) => ({ ...current, defaultValue: event.target.value }));
@@ -249,7 +249,7 @@ export function GlobalFeatureFlagEditor() {
                   </select>
                 ) : (
                   <textarea
-                    className="mt-1 w-full rounded border px-3 py-2 font-mono"
+                    className="mt-1 w-full rounded border border-input bg-background text-foreground px-3 py-2 font-mono"
                     rows={3}
                     value={draft.defaultValue}
                     onChange={(event) => {
@@ -261,7 +261,7 @@ export function GlobalFeatureFlagEditor() {
               <label className="block text-sm">
                 Description
                 <input
-                  className="mt-1 w-full rounded border px-3 py-2"
+                  className="mt-1 w-full rounded border border-input bg-background text-foreground px-3 py-2"
                   value={draft.description}
                   onChange={(event) => {
                     setDraft((current) => ({ ...current, description: event.target.value }));
@@ -272,14 +272,14 @@ export function GlobalFeatureFlagEditor() {
             <div className="mt-4 flex justify-end gap-2">
               <button
                 type="button"
-                className="rounded border px-3 py-2 text-sm"
+                className="rounded border border-border px-3 py-2 text-sm hover:bg-muted"
                 onClick={closeDialogs}
               >
                 Cancel
               </button>
               <button
                 type="button"
-                className="rounded bg-neutral-900 px-3 py-2 text-sm text-white disabled:opacity-50"
+                className="rounded bg-primary px-3 py-2 text-sm text-primary-foreground hover:opacity-90 disabled:opacity-50"
                 disabled={formMode === "create" && !draft.key.trim()}
                 onClick={() => {
                   setActionReason("");
