@@ -1,4 +1,5 @@
 import { createTransport, type Transporter } from "nodemailer";
+import { recordTenantUsage } from "@atlas/api/tenant-usage-meter";
 
 /**
  * Email delivery.
@@ -19,6 +20,14 @@ import { createTransport, type Transporter } from "nodemailer";
  */
 
 export type EmailSendInput = {
+  /**
+   * The tenant this email is sent on behalf of, or null for platform email that
+   * belongs to no tenant. Required rather than optional so that every sender has
+   * to decide: an optional field would default to "unattributed" at each call
+   * site nobody remembered, and the email bill would drift away from the tenants
+   * who caused it without any error (DoD item 8, cost attribution).
+   */
+  tenantId: string | null;
   to: string;
   subject: string;
   body: string;
@@ -125,6 +134,27 @@ export class SmtpEmailProvider implements EmailProvider {
   }
 }
 
+/**
+ * Counts each successfully sent email against its tenant. A decorator rather
+ * than a line in SmtpEmailProvider.send, so every provider the factory can
+ * return is metered the same way and a future vendor adapter cannot forget to.
+ * Failed sends are not counted: an SMTP rejection is not billed.
+ */
+class MeteredEmailProvider implements EmailProvider {
+  constructor(private readonly inner: EmailProvider) {}
+
+  isConfigured(): boolean {
+    return this.inner.isConfigured();
+  }
+
+  async send(input: EmailSendInput): Promise<void> {
+    await this.inner.send(input);
+    if (input.tenantId !== null) {
+      recordTenantUsage(input.tenantId, { emails: 1 });
+    }
+  }
+}
+
 let cachedProvider: EmailProvider | null = null;
 
 export function getEmailProvider(env: NodeJS.ProcessEnv = process.env): EmailProvider {
@@ -150,9 +180,9 @@ export function getEmailProvider(env: NodeJS.ProcessEnv = process.env): EmailPro
         "SMTP email provider is selected but SMTP_HOST / NOTIFICATION_EMAIL_FROM are not set.",
       );
     }
-    cachedProvider = provider;
+    cachedProvider = new MeteredEmailProvider(provider);
   } else if (mode === "mock") {
-    cachedProvider = new MockEmailProvider();
+    cachedProvider = new MeteredEmailProvider(new MockEmailProvider());
   } else {
     cachedProvider = new UnconfiguredEmailProvider();
   }

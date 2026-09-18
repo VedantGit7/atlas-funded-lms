@@ -1,5 +1,6 @@
 import { runOutboxSweep, type SweepResult } from "./outbox-sweep";
 import { createHealthState, startHealthServer } from "./worker-health";
+import { flushTenantUsageMeter } from "@atlas/api/tenant-usage-meter";
 
 /**
  * Outbox worker entrypoint.
@@ -176,6 +177,15 @@ export async function main(): Promise<number> {
       const backoff = Math.min(state.consecutiveFailedSweeps, 5) * idleIntervalMs;
       await sleep(idleIntervalMs + backoff, shutdown.signal);
     }
+  }
+
+  // The notification processors meter emails in memory; write what has not
+  // been flushed yet so a deploy does not drop the last minute of it. Still
+  // inside the shutdown deadline, which force-exits if the database is gone.
+  try {
+    await flushTenantUsageMeter();
+  } catch (error) {
+    log("error", "worker.usage_meter.flush_failed", { error: describeError(error) });
   }
 
   clearTimeout(shutdownDeadline);

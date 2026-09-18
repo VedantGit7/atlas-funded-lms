@@ -10,6 +10,7 @@ export type PlatformNavItem = {
   requiresAuditRead?: boolean;
   requiresSupportAccess?: boolean;
   requiresEventingReplay?: boolean;
+  requiresCostRead?: boolean;
   mobilePrimary?: boolean;
 };
 
@@ -59,6 +60,12 @@ export const PLATFORM_PRIMARY_NAV: readonly PlatformNavItem[] = [
     screenId: "P8",
     requiresEventingReplay: true,
   },
+  {
+    href: "/platform/costs",
+    label: "Costs",
+    screenId: "P9",
+    requiresCostRead: true,
+  },
 ] as const;
 
 import type { PlatformCapabilityProjection } from "./platform-capability-projection";
@@ -76,6 +83,7 @@ export function filterPlatformNavigation(
     if (item.requiresAuditRead && !capabilities.canAuditRead) return false;
     if (item.requiresSupportAccess && !capabilities.canSupportAccess) return false;
     if (item.requiresEventingReplay && !capabilities.canEventingReplay) return false;
+    if (item.requiresCostRead && !capabilities.canCostRead) return false;
     return true;
   });
 }

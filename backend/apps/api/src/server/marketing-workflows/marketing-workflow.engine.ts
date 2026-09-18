@@ -120,6 +120,7 @@ async function sendActionEmail(args: {
 
   if (provider.isConfigured()) {
     await provider.send({
+      tenantId: args.ctx.tenantId,
       to: email,
       subject: args.subject,
       body: args.bodyHtml,

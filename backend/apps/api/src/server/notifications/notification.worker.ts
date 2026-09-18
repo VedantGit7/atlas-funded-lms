@@ -454,6 +454,7 @@ export async function processNotificationQueuedEvent(
   const channel = await readTenantEmailChannel(tx, "transactionalEmail");
 
   await emailProvider.send({
+    tenantId: ctx.tenantId,
     to,
     subject: rendered.emailSubject ?? rendered.title,
     body: rendered.body,

@@ -2,6 +2,11 @@ import path from "node:path";
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
+  // The web app's tsconfig sets `jsx: "preserve"` because Next.js compiles JSX
+  // itself. Vite honours that and would hand untransformed JSX to Node the first
+  // time a test imports a component, so tests compile it here instead. Only
+  // matters for files that contain JSX; everything else is unaffected.
+  oxc: { jsx: { runtime: "automatic" } },
   test: {
     environment: "node",
     include: ["tests/**/*.test.ts", "tests/**/*.e2e.ts"],

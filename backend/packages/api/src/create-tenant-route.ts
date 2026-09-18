@@ -24,6 +24,7 @@ import { toSafeErrorEnvelope } from "./error-envelope";
 import { loadResourceRefOrDefault } from "./load-resource-ref";
 import type { RouteMetadata, TenantRouteContext } from "./route-metadata";
 import { noBodySchema } from "./schemas";
+import { recordTenantUsage } from "./tenant-usage-meter";
 
 type InferParams<TParams extends z.ZodType | undefined> = TParams extends z.ZodType
   ? z.infer<TParams> extends object
@@ -223,6 +224,13 @@ export function createTenantRoute<
   async function route(req: NextRequest, routeContext?: TenantRouteContextArg) {
     const requestId = getOrCreateRequestId(req.headers);
     const pathname = new URL(req.url).pathname;
+    // Cost attribution (DoD item 8). Set once the tenant is known, so a request
+    // that fails authentication before tenant resolution -- which cannot be
+    // attributed to anyone -- is not counted.
+    const startedAt = performance.now();
+    // A holder rather than a `let`: the tenant is assigned inside the lifecycle
+    // callback, which control-flow analysis cannot see from the `finally`.
+    const metered: { tenantId: string | null } = { tenantId: null };
 
     try {
       return await runRouteLifecycle(
@@ -308,6 +316,7 @@ export function createTenantRoute<
 
             return { tenant: resolvedTenant, principal: resolvedPrincipal };
           });
+          metered.tenantId = tenant.tenantId;
 
           // Cross-tenant CSRF guard. Runs after tenant resolution because it
           // needs the resolved host to compare against. See assert-same-origin.ts
@@ -400,6 +409,15 @@ export function createTenantRoute<
         NextResponse.json(safe.body, { status: safe.status }),
         requestId,
       );
+    } finally {
+      // Failed requests are counted too: a denied or invalid request still
+      // spent server time resolving the tenant and checking permissions.
+      if (metered.tenantId !== null) {
+        recordTenantUsage(metered.tenantId, {
+          requests: 1,
+          durationMs: performance.now() - startedAt,
+        });
+      }
     }
   }
 

@@ -50,7 +50,7 @@ export async function handleReportDeliveryOutboxEvent(event: {
           reportRunId: payload.reportRunId,
           sendEmail: emailProvider.isConfigured()
             ? async (input: { to: string; subject: string; body: string; requestId: string }) => {
-                await emailProvider.send(input);
+                await emailProvider.send({ ...input, tenantId: tenantId });
               }
             : null,
           resolveMembershipEmail: (membershipId: string) =>

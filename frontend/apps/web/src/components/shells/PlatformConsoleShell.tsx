@@ -3,7 +3,7 @@ import { PlatformConsoleShellGate } from "./PlatformConsoleShellGate";
 
 export const platformConsoleShellNavigationContract = {
   shell: "PlatformConsoleShell",
-  routes: "P1-P8",
+  routes: "P1-P9",
 };
 
 type PlatformConsoleShellProps = {

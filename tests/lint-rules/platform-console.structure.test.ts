@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 const webRoot = resolve(import.meta.dirname, "../../frontend/apps/web/src");
 
 describe("platform console e2e wiring", () => {
-  it("includes all P1-P8 page files", () => {
+  it("includes all P1-P9 page files", () => {
     const pages = [
       "app/platform/page.tsx",
       "app/platform/tenants/new/page.tsx",
@@ -15,6 +15,7 @@ describe("platform console e2e wiring", () => {
       "app/platform/audit/page.tsx",
       "app/platform/support/page.tsx",
       "app/platform/eventing/page.tsx",
+      "app/platform/costs/page.tsx",
     ];
 
     for (const page of pages) {

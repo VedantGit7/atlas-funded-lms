@@ -14,7 +14,10 @@ import { platformReasonSchema } from "../../../frontend/apps/web/src/features/pl
 const webRoot = resolve(import.meta.dirname, "../../../frontend/apps/web/src");
 
 describe("platform route registry", () => {
-  it("maps P1-P8 only", () => {
+  // P9 is per-tenant cost attribution (DoD item 8), added after the original
+  // P1-P8 console. The exact-list assertion stays: a new platform screen must
+  // still be added here on purpose, not appear by accident.
+  it("maps P1-P9 only", () => {
     expect(PLATFORM_ROUTE_REGISTRY.map((entry) => entry.screenId)).toEqual([
       "P1",
       "P2",
@@ -24,6 +27,7 @@ describe("platform route registry", () => {
       "P6",
       "P7",
       "P8",
+      "P9",
     ]);
   });
 

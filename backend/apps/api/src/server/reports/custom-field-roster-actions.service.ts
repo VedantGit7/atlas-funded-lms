@@ -159,6 +159,7 @@ async function sendCustomFieldAudienceMessage(
 
     try {
       await provider.send({
+        tenantId: ctx.tenantId,
         to: target.email,
         subject: args.subject,
         body: renderedBody,
@@ -308,6 +309,7 @@ export async function exportCustomFieldRoster(tx: TenantTx, ctx: ServiceCtx, raw
     const adminEmail = await notificationRepository.findMembershipEmail(tx, ctx.actorMembershipId);
     if (provider.isConfigured() && adminEmail) {
       await provider.send({
+        tenantId: ctx.tenantId,
         to: adminEmail,
         subject: "Your Custom Field learners export is ready",
         body: [

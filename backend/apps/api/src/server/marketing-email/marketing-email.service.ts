@@ -157,6 +157,7 @@ async function deliverCampaign(
 
     try {
       await provider.send({
+        tenantId: ctx.tenantId,
         to: target.email,
         subject: row.subject,
         body: renderedBody,
@@ -447,6 +448,7 @@ export async function sendMarketingEmail(
       learnerName: "there",
     });
     await provider.send({
+      tenantId: ctx.tenantId,
       to: testEmail,
       subject: `[TEST] ${existing.subject}`,
       body: renderedBody,

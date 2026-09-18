@@ -44,6 +44,7 @@ export async function exportPaymentRoster(tx: TenantTx, ctx: ServiceCtx, rawBody
     const adminEmail = await notificationRepository.findMembershipEmail(tx, ctx.actorMembershipId);
     if (provider.isConfigured() && adminEmail) {
       await provider.send({
+        tenantId: ctx.tenantId,
         to: adminEmail,
         subject: "Your payments report export is ready",
         body: [

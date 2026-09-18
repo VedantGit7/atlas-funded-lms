@@ -47,6 +47,7 @@ export async function sendEnrollmentRosterMessage(tx: TenantTx, ctx: ServiceCtx,
     const renderedBody = `Hi ${greeting},\n\n${body.message}`;
 
     await provider.send({
+      tenantId: ctx.tenantId,
       to: target.email,
       subject: body.subject,
       body: renderedBody,
@@ -106,6 +107,7 @@ export async function exportEnrollmentRoster(tx: TenantTx, ctx: ServiceCtx, rawB
     const adminEmail = await notificationRepository.findMembershipEmail(tx, ctx.actorMembershipId);
     if (provider.isConfigured() && adminEmail) {
       await provider.send({
+        tenantId: ctx.tenantId,
         to: adminEmail,
         subject: "Your enrollments report export is ready",
         body: [

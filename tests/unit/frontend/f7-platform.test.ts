@@ -6,13 +6,14 @@ const webRoot = resolve(import.meta.dirname, "../../../frontend/apps/web/src");
 const apiRoot = resolve(import.meta.dirname, "../../../backend/apps/api/src/app/api/v1");
 
 describe("F7 platform console", () => {
-  it("maps P1-P8 in platform route registry", () => {
+  it("maps P1-P9 in platform route registry", () => {
     const registry = readFileSync(
       resolve(webRoot, "features/platform/platform-route-registry.ts"),
       "utf8",
     );
     expect(registry).toContain('screenId: "P1"');
     expect(registry).toContain('screenId: "P8"');
+    expect(registry).toContain('screenId: "P9"');
   });
 
   it("global feature flag editor wires PUT /platform/feature-flags/:key", () => {

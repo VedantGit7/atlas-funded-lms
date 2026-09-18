@@ -34,6 +34,19 @@ export const USAGE_SNAPSHOT_KEYS = {
   testSubmits: "usage.test_submits",
 } as const;
 
+/**
+ * Rollup keys written by the in-process usage meter (DoD item 8, cost
+ * attribution). Kept out of USAGE_COUNTER_KEYS on purpose: that set is read with
+ * an `::int` cast for the tenant Usage Insights page, and a busy tenant's monthly
+ * request count or server milliseconds can exceed a 32-bit integer.
+ */
+export const METERED_USAGE_KEYS = {
+  apiRequests: "usage.api_requests",
+  emailsSent: "usage.emails_sent",
+} as const;
+
+export type MeteredUsageKey = (typeof METERED_USAGE_KEYS)[keyof typeof METERED_USAGE_KEYS];
+
 /** Rollup keys for event-driven monthly usage counters (Tier B). */
 export const USAGE_COUNTER_KEYS = {
   messageSends: "usage.message_sends",
@@ -218,6 +231,55 @@ export async function upsertUsageSnapshot(
     on conflict (tenant_id, rollup_key, subject_type, subject_id, period_start)
     do update set
       metrics_json = jsonb_build_object('value', ${value}::float8),
+      calculated_at = now()
+  `;
+}
+
+/**
+ * Adds a batch of metered usage to one tenant's monthly rollup.
+ *
+ * The period is passed in rather than taken from `now()`: the meter buckets by
+ * the month a request happened in, and a batch flushed a few seconds after
+ * midnight on the 1st belongs to the month that just ended.
+ *
+ * `bigint` arithmetic throughout, unlike incrementUsageCounter's `::int`, for the
+ * overflow reason given on METERED_USAGE_KEYS. One statement, so concurrent
+ * flushes from several instances serialise on the unique index instead of
+ * losing each other's increments.
+ */
+export async function addMeteredUsage(
+  tx: TenantTx,
+  args: { rollupKey: MeteredUsageKey; periodStart: Date; count: number; durationMs: number },
+): Promise<void> {
+  if (args.count <= 0 && args.durationMs <= 0) {
+    return;
+  }
+  const id = randomUUID();
+  const count = Math.max(0, Math.round(args.count));
+  const durationMs = Math.max(0, Math.round(args.durationMs));
+  await tx.$executeRaw`
+    insert into analytics_rollups (
+      id, tenant_id, rollup_key, subject_type, subject_id, period_start, period_end, metrics_json, calculated_at
+    )
+    values (
+      ${id}::uuid,
+      current_setting('app.tenant_id')::uuid,
+      ${args.rollupKey},
+      'tenant',
+      current_setting('app.tenant_id'),
+      ${args.periodStart}::timestamptz,
+      ${args.periodStart}::timestamptz + interval '1 month',
+      jsonb_build_object('count', ${count}::bigint, 'durationMs', ${durationMs}::bigint),
+      now()
+    )
+    on conflict (tenant_id, rollup_key, subject_type, subject_id, period_start)
+    do update set
+      metrics_json = jsonb_build_object(
+        'count',
+        coalesce((analytics_rollups.metrics_json->>'count')::bigint, 0) + ${count}::bigint,
+        'durationMs',
+        coalesce((analytics_rollups.metrics_json->>'durationMs')::bigint, 0) + ${durationMs}::bigint
+      ),
       calculated_at = now()
   `;
 }

@@ -35,6 +35,7 @@ export async function exportZoomInsightsRoster(tx: TenantTx, ctx: ServiceCtx, ra
     const adminEmail = await notificationRepository.findMembershipEmail(tx, ctx.actorMembershipId);
     if (provider.isConfigured() && adminEmail) {
       await provider.send({
+        tenantId: ctx.tenantId,
         to: adminEmail,
         subject: "Your Zoom Insights export is ready",
         body: [

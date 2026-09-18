@@ -113,6 +113,7 @@ export async function sendResourceUsageInactiveMessage(
       });
 
       await provider.send({
+        tenantId: ctx.tenantId,
         to: target.email,
         subject: body.subject,
         body: renderedBody,

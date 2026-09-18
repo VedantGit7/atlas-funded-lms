@@ -75,3 +75,17 @@ REVOKE INSERT, UPDATE, DELETE ON platform_operators FROM atlas_app, atlas_worker
 
 GRANT SELECT, INSERT, UPDATE ON platform_operators TO atlas_platform;
 REVOKE DELETE ON platform_operators FROM atlas_platform;
+
+-- DoD item 8 supplier cost tables (migration 106). Platform-global and
+-- commercially sensitive: the tenant roles get nothing, not even SELECT, and the
+-- rate history is append-only even for the platform role. Repeated here for the
+-- same reason as the blocks above -- the blanket GRANT at the top of this file
+-- runs after migrate deploy on a fresh provision.
+REVOKE ALL ON platform_cost_rates FROM atlas_app, atlas_worker;
+REVOKE ALL ON platform_fixed_costs FROM atlas_app, atlas_worker;
+
+GRANT SELECT, INSERT ON platform_cost_rates TO atlas_platform;
+REVOKE UPDATE, DELETE ON platform_cost_rates FROM atlas_platform;
+
+GRANT SELECT, INSERT, UPDATE ON platform_fixed_costs TO atlas_platform;
+REVOKE DELETE ON platform_fixed_costs FROM atlas_platform;
