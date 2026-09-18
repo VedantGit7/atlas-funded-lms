@@ -354,11 +354,9 @@ describeWithDb("per-tenant cost attribution", () => {
   });
 
   it("does not let the platform role rewrite rate history", async () => {
-    // Checked on a raw connection rather than through withPlatformScope. That
-    // wrapper writes its "failed" exit audit into the transaction the failing
-    // statement has already aborted, so what reaches the caller is `25P02
-    // current transaction is aborted` instead of the permission error -- the
-    // assertion would be testing the wrapper, not the grant.
+    // Checked on a raw connection so the assertion is about the grant alone.
+    // (withPlatformScope used to mask this error as 25P02; that is fixed and
+    // covered in platform-scope-failure-audit.test.ts.)
     for (const statement of [
       "UPDATE platform_cost_rates SET unit_cost_usd = 0",
       "DELETE FROM platform_cost_rates",
