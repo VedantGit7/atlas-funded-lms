@@ -144,9 +144,21 @@ describeWithPlatformDb("withPlatformScope database context", () => {
       },
     );
 
-    expect(auditRows.map((row) => row.action)).toEqual([
-      "platform.scope.enter",
-      "platform.scope.exit",
-    ]);
+    // Both rows are written inside one transaction, and `occurred_at` defaults
+    // to now() -- which in Postgres is transaction start time, so the two share
+    // a timestamp exactly. `orderBy: occurred_at` therefore has no tie-break and
+    // the row order is whatever the planner returns; this assertion passed by
+    // luck and failed roughly one run in six.
+    //
+    // What withPlatformScope actually guarantees, and what this test exists to
+    // protect, is that entering and leaving platform scope are both recorded.
+    // The ordering claim was never verifiable from this data, so it is asserted
+    // as a set rather than left as a coin flip. Making it verifiable would mean
+    // storing clock_timestamp() rather than now(), which is a schema change to
+    // the audit log and a decision of its own.
+    expect(new Set(auditRows.map((row) => row.action))).toEqual(
+      new Set(["platform.scope.enter", "platform.scope.exit"]),
+    );
+    expect(auditRows).toHaveLength(2);
   });
 });
