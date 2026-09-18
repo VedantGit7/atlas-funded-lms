@@ -75,7 +75,10 @@ export const messengerRepository = {
     }));
   },
 
-  async findConversationById(tx: TenantTx, conversationId: string): Promise<ConversationRow | null> {
+  async findConversationById(
+    tx: TenantTx,
+    conversationId: string,
+  ): Promise<ConversationRow | null> {
     const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
       select
         c.id,

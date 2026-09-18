@@ -8,11 +8,21 @@ import { putRouteMetadata } from "./route.metadata";
 type FeatureFlagListResponse = z.output<typeof FeatureFlagListResponseSchema>;
 type UpdateFeatureFlagRequest = z.output<typeof UpdateFeatureFlagRequestSchema>;
 
-export const PUT = createTenantRoute<UpdateFeatureFlagRequest, FeatureFlagListResponse>({
+// The params schema was passed at runtime but not as a type argument. Supplying
+// only two of the three generics makes TypeScript fall back to the default for
+// the third, so the handler saw `Record<string, never>` and `params["key"]` was
+// `undefined` at the type level — hence the `?? ""` that could never fire.
+const paramsSchema = z.object({ key: z.string().min(1).max(120) });
+
+export const PUT = createTenantRoute<
+  UpdateFeatureFlagRequest,
+  FeatureFlagListResponse,
+  typeof paramsSchema
+>({
   metadata: putRouteMetadata,
   body: UpdateFeatureFlagRequestSchema,
   output: FeatureFlagListResponseSchema,
-  params: z.object({ key: z.string().min(1).max(120) }),
+  params: paramsSchema,
   handler: async ({ tx, ctx, input, params }) =>
-    updateTenantFeatureFlagOverride(tx, ctx, params["key"] ?? "", input),
+    updateTenantFeatureFlagOverride(tx, ctx, params.key, input),
 });

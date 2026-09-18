@@ -23,9 +23,23 @@ const {
   findActiveEntitlementByKeyMock: vi.fn(),
 }));
 
-vi.mock("@atlas/domain-config", () => ({
-  findActiveEntitlementByKey: (...args: unknown[]) => findActiveEntitlementByKeyMock(...args),
-}));
+vi.mock("@atlas/domain-config", async () => {
+  // The gate now reads value_json on every call, so the parse is real here:
+  // mocking it would hide whether `{ enabled: false }` actually denies.
+  const { parseEntitlementValue } = (await vi.importActual(
+    "@atlas/domain-config/schemas/entitlement-value",
+  )) as {
+    parseEntitlementValue: (raw: unknown) => {
+      enabled: boolean;
+      limit: number | null;
+      period: string;
+    };
+  };
+  return {
+    parseEntitlementValue,
+    findActiveEntitlementByKey: (...args: unknown[]) => findActiveEntitlementByKeyMock(...args),
+  };
+});
 
 vi.mock("@atlas/domain-branding/repositories/domain.repository", () => ({
   listTenantDomains: (...args: unknown[]) => listTenantDomainsMock(...args),
@@ -86,7 +100,9 @@ describe("domain admin", () => {
     outboxPublishMock.mockResolvedValue({ id: "018f0000-0000-7000-8000-000000000099" });
     findActiveEntitlementByKeyMock.mockResolvedValue({
       key: "branding.custom_domain.enable",
-      enabled: true,
+      // The repository selects value_json AS value, and the gate parses it.
+      // The old stub carried a bare `enabled` that nothing ever read.
+      value: true,
     });
   });
 

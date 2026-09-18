@@ -13,12 +13,29 @@
   "include": ["src/**/*.ts", "src/**/*.tsx"],
   "exclude": ["node_modules", "dist", "build", ".next"],
   "references": [
-    { "path": "../api" },
-    { "path": "../authorization" },
-    { "path": "../db" },
-    { "path": "./config" },
-    { "path": "../events" },
-    { "path": "../membership" },
-    { "path": "../storage" }
+    {
+      "path": "../api"
+    },
+    {
+      "path": "../authorization"
+    },
+    {
+      "path": "../db"
+    },
+    {
+      "path": "../events"
+    },
+    {
+      "path": "../membership"
+    },
+    {
+      "path": "../security"
+    },
+    {
+      "path": "../storage"
+    },
+    {
+      "path": "./config"
+    }
   ]
 }

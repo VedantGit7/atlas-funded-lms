@@ -8,11 +8,17 @@ import { putRouteMetadata } from "./route.metadata";
 type FeatureFlagListResponse = z.output<typeof FeatureFlagListResponseSchema>;
 type UpdateFeatureFlagRequest = z.output<typeof UpdateFeatureFlagRequestSchema>;
 
-export const PUT = createTenantRoute<UpdateFeatureFlagRequest, FeatureFlagListResponse>({
+const paramsSchema = z.object({ key: z.string().min(1).max(120) });
+
+export const PUT = createTenantRoute<
+  UpdateFeatureFlagRequest,
+  FeatureFlagListResponse,
+  typeof paramsSchema
+>({
   metadata: putRouteMetadata,
   body: UpdateFeatureFlagRequestSchema,
   output: FeatureFlagListResponseSchema,
-  params: z.object({ key: z.string().min(1).max(120) }),
+  params: paramsSchema,
   handler: async ({ tx, ctx, input, params }) =>
-    updateTenantFeatureFlagOverride(tx, ctx, params["key"] ?? "", input),
+    updateTenantFeatureFlagOverride(tx, ctx, params.key, input),
 });

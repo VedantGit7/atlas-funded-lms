@@ -2,8 +2,7 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
-import Image from "next/image";
-import { FUNDED_BEYOND_LOGO_URL } from "@/lib/brand";
+import { TenantBrandMark } from "@/components/patterns/TenantBrandMark";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import { FbaDarkModeButton } from "@/components/theme/FbaDarkModeButton";
 import { useFbaTheme } from "@/components/theme/use-fba-theme";
@@ -20,6 +19,16 @@ const plusJakarta = Plus_Jakarta_Sans({
 export type VerifyEmailStatus = "success" | "sent" | "expired" | "invalid";
 
 type VerifyEmailScreenProps = {
+  /** The tenant's own logo; an initials mark is shown when they have none. */
+  logoUrl?: string | null;
+  /** Tenant public name — this screen used to hardcode "FundedBeyond Academy". */
+  tenantName?: string | null;
+  /**
+   * Support contact: the tenant's own address, or the platform address when
+   * they have not set one. Null hides the contact line entirely — better than
+   * pointing every academy's learners at another tenant's inbox.
+   */
+  supportEmail?: string | null;
   initialEmail: string;
   status: VerifyEmailStatus;
   /** Sanitized destination for the success auto-redirect. */
@@ -63,12 +72,66 @@ const COPY: Record<
 
 // Deterministic particle field (no Math.random) to keep SSR/CSR markup stable.
 const PARTICLES = [
-  { left: "16%", top: "24%", size: 6, dx: "10px", dy: "-44px", dur: "6.5s", delay: "0s", gold: true },
-  { left: "78%", top: "30%", size: 5, dx: "-12px", dy: "-38px", dur: "7.5s", delay: "0.8s", gold: false },
-  { left: "30%", top: "74%", size: 4, dx: "8px", dy: "-50px", dur: "8s", delay: "1.6s", gold: true },
-  { left: "68%", top: "70%", size: 6, dx: "-6px", dy: "-46px", dur: "6.8s", delay: "0.4s", gold: false },
-  { left: "50%", top: "18%", size: 4, dx: "0px", dy: "-40px", dur: "7.2s", delay: "1.1s", gold: true },
-  { left: "88%", top: "54%", size: 5, dx: "-14px", dy: "-34px", dur: "8.4s", delay: "2s", gold: false },
+  {
+    left: "16%",
+    top: "24%",
+    size: 6,
+    dx: "10px",
+    dy: "-44px",
+    dur: "6.5s",
+    delay: "0s",
+    gold: true,
+  },
+  {
+    left: "78%",
+    top: "30%",
+    size: 5,
+    dx: "-12px",
+    dy: "-38px",
+    dur: "7.5s",
+    delay: "0.8s",
+    gold: false,
+  },
+  {
+    left: "30%",
+    top: "74%",
+    size: 4,
+    dx: "8px",
+    dy: "-50px",
+    dur: "8s",
+    delay: "1.6s",
+    gold: true,
+  },
+  {
+    left: "68%",
+    top: "70%",
+    size: 6,
+    dx: "-6px",
+    dy: "-46px",
+    dur: "6.8s",
+    delay: "0.4s",
+    gold: false,
+  },
+  {
+    left: "50%",
+    top: "18%",
+    size: 4,
+    dx: "0px",
+    dy: "-40px",
+    dur: "7.2s",
+    delay: "1.1s",
+    gold: true,
+  },
+  {
+    left: "88%",
+    top: "54%",
+    size: 5,
+    dx: "-14px",
+    dy: "-34px",
+    dur: "8.4s",
+    delay: "2s",
+    gold: false,
+  },
 ] as const;
 
 const SPARKLES = [
@@ -286,8 +349,21 @@ function SecuredBadge() {
   );
 }
 
-export function VerifyEmailScreen({ initialEmail, status, next }: VerifyEmailScreenProps) {
+export function VerifyEmailScreen({
+  initialEmail,
+  status,
+  next,
+  logoUrl = null,
+  tenantName = null,
+  supportEmail = null,
+}: VerifyEmailScreenProps) {
   const { darkMode, toggleDark } = useFbaTheme();
+
+  // Neutral fallbacks: this screen serves every tenant, so a branded default
+  // showed tenant #1 to any academy that had not set a publicName.
+  const fullName = tenantName?.trim() ?? "Your academy";
+  const brandName = fullName.replace(/\s*Academy\s*$/i, "") || fullName;
+  const hasAcademySuffix = /academy/i.test(fullName);
 
   const copy = COPY[status];
   const isSuccess = status === "success";
@@ -318,7 +394,9 @@ export function VerifyEmailScreen({ initialEmail, status, next }: VerifyEmailScr
       }
       window.location.assign(redirectTarget);
     }, SUCCESS_REDIRECT_MS);
-    return () => window.clearTimeout(timer);
+    return () => {
+      window.clearTimeout(timer);
+    };
   }, [isSuccess, redirectTarget]);
 
   return (
@@ -330,7 +408,8 @@ export function VerifyEmailScreen({ initialEmail, status, next }: VerifyEmailScr
         aria-hidden
         className="pointer-events-none absolute -left-40 top-[-10%] h-[460px] w-[460px] rounded-full"
         style={{
-          background: "radial-gradient(circle, color-mix(in srgb, var(--fba-ind) 16%, transparent), transparent 70%)",
+          background:
+            "radial-gradient(circle, color-mix(in srgb, var(--fba-ind) 16%, transparent), transparent 70%)",
           filter: "blur(120px)",
         }}
       />
@@ -338,7 +417,8 @@ export function VerifyEmailScreen({ initialEmail, status, next }: VerifyEmailScr
         aria-hidden
         className="pointer-events-none absolute -right-40 bottom-[-10%] h-[460px] w-[460px] rounded-full"
         style={{
-          background: "radial-gradient(circle, color-mix(in srgb, var(--fba-gld) 12%, transparent), transparent 70%)",
+          background:
+            "radial-gradient(circle, color-mix(in srgb, var(--fba-gld) 12%, transparent), transparent 70%)",
           filter: "blur(120px)",
         }}
       />
@@ -348,19 +428,20 @@ export function VerifyEmailScreen({ initialEmail, status, next }: VerifyEmailScr
         <div className="mx-auto flex w-full max-w-[1100px] items-center justify-between px-5 sm:px-8">
           <Link
             href="/"
-            aria-label="FundedBeyond Academy home"
+            aria-label={`${fullName} home`}
             className="flex items-center gap-2.5 no-underline transition-opacity hover:opacity-90"
           >
-            <Image
-              src={FUNDED_BEYOND_LOGO_URL}
-              alt=""
-              width={32}
-              height={32}
+            <TenantBrandMark
+              logoUrl={logoUrl}
+              name={fullName}
+              size={32}
               className="h-8 w-8 shrink-0 rounded-full"
             />
             <span className="text-[14px] font-extrabold text-[var(--fba-tx)]">
-              FundedBeyond
-              <span className="font-medium text-[var(--fba-tx3)]"> Academy</span>
+              {brandName}
+              {hasAcademySuffix ? (
+                <span className="font-medium text-[var(--fba-tx3)]"> Academy</span>
+              ) : null}
             </span>
           </Link>
           <FbaDarkModeButton darkMode={darkMode} onToggle={toggleDark} />
@@ -412,7 +493,9 @@ export function VerifyEmailScreen({ initialEmail, status, next }: VerifyEmailScr
               <a
                 href={redirectTarget}
                 className="inline-flex w-full items-center justify-center gap-2 rounded-[10px] bg-[var(--fba-ind)] px-4 py-4 text-[15px] font-bold text-white no-underline transition-colors hover:bg-[var(--fba-ind-d)] active:scale-[0.98]"
-                style={{ boxShadow: "0 10px 40px color-mix(in srgb, var(--fba-ind) 35%, transparent)" }}
+                style={{
+                  boxShadow: "0 10px 40px color-mix(in srgb, var(--fba-ind) 35%, transparent)",
+                }}
               >
                 Go to dashboard now
                 <svg
@@ -442,11 +525,7 @@ export function VerifyEmailScreen({ initialEmail, status, next }: VerifyEmailScr
               </div>
             </div>
           ) : (
-            <ResendVerificationForm
-              initialEmail={initialEmail}
-              status={status}
-              isWarn={isWarn}
-            />
+            <ResendVerificationForm initialEmail={initialEmail} status={status} isWarn={isWarn} />
           )}
 
           <div className="flex flex-col items-center">
@@ -474,13 +553,18 @@ export function VerifyEmailScreen({ initialEmail, status, next }: VerifyEmailScr
                 <SecuredBadge />
                 {!isSuccess ? (
                   <p className="mt-6 max-w-[360px] text-[13px] leading-[1.6] text-[var(--fba-tx3)]">
-                    Didn&apos;t receive anything? Check your spam folder or{" "}
-                    <a
-                      href="mailto:support@fundedbeyond.com"
-                      className="font-semibold text-[var(--fba-ind)] underline decoration-[var(--fba-bdr2)] underline-offset-2 transition-colors hover:decoration-[var(--fba-ind)]"
-                    >
-                      contact support
-                    </a>
+                    Didn&apos;t receive anything? Check your spam folder
+                    {supportEmail ? (
+                      <>
+                        {" or "}
+                        <a
+                          href={`mailto:${supportEmail}`}
+                          className="font-semibold text-[var(--fba-ind)] underline decoration-[var(--fba-bdr2)] underline-offset-2 transition-colors hover:decoration-[var(--fba-ind)]"
+                        >
+                          contact support
+                        </a>
+                      </>
+                    ) : null}
                     .
                   </p>
                 ) : null}
@@ -493,9 +577,7 @@ export function VerifyEmailScreen({ initialEmail, status, next }: VerifyEmailScr
       {/* Footer */}
       <footer className="relative z-10 border-t border-[var(--fba-bdr)] py-8">
         <div className="mx-auto flex w-full max-w-[1100px] flex-col items-center gap-3 px-5 text-center sm:px-8">
-          <span className="text-[13px] font-extrabold text-[var(--fba-ind)]">
-            FundedBeyond Academy
-          </span>
+          <span className="text-[13px] font-extrabold text-[var(--fba-ind)]">{fullName}</span>
           <nav className="flex flex-wrap justify-center gap-5">
             <Link
               href="/terms"

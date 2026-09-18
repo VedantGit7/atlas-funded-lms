@@ -183,13 +183,7 @@ function hasValidTimestamp(iso: string | null | undefined): boolean {
  * been recorded active. Members who have not joined yet (invited) read "—" since
  * presence is not applicable to them.
  */
-function PresenceCell({
-  iso,
-  status,
-}: {
-  iso: string | null | undefined;
-  status: string;
-}) {
+function PresenceCell({ iso, status }: { iso: string | null | undefined; status: string }) {
   if (!hasValidTimestamp(iso)) {
     const text = status === "INVITED" ? "—" : "Never";
     return <span className="text-sm text-[var(--admin-on-surface-variant)]">{text}</span>;
@@ -204,7 +198,9 @@ function PresenceCell({
           aria-hidden="true"
         />
       )}
-      <span className="text-sm text-[var(--admin-on-surface-variant)]">{formatLastActive(iso)}</span>
+      <span className="text-sm text-[var(--admin-on-surface-variant)]">
+        {formatLastActive(iso)}
+      </span>
     </span>
   );
 }
@@ -329,10 +325,7 @@ export function MembersTable({
   function goNext() {
     if (!pageInfo.hasNextPage || !pageInfo.nextCursor) return;
     const next = pageInfo.nextCursor;
-    pageStartCursors.current = [
-      ...pageStartCursors.current.slice(0, pageIndex + 1),
-      next,
-    ];
+    pageStartCursors.current = [...pageStartCursors.current.slice(0, pageIndex + 1), next];
     setPageIndex((value) => value + 1);
     void loadPage(next);
   }
@@ -413,7 +406,11 @@ export function MembersTable({
     setBusyId(memberId);
     setErrorMessage(null);
     try {
-      await clientApi.post(`/api/v1/members/${memberId}/resend-invite`, null, "member-resend-invite");
+      await clientApi.post(
+        `/api/v1/members/${memberId}/resend-invite`,
+        null,
+        "member-resend-invite",
+      );
       await refreshCurrentPage();
     } catch (error) {
       setErrorMessage(formatClientError(error));
@@ -482,9 +479,7 @@ export function MembersTable({
       setEditRolesOpen(false);
       setEditRoleId("");
       if (failures > 0) {
-        setErrorMessage(
-          `Could not assign the role to ${String(failures)} member(s). ${lastError}`,
-        );
+        setErrorMessage(`Could not assign the role to ${String(failures)} member(s). ${lastError}`);
       }
       await refreshCurrentPage();
     } finally {
@@ -950,8 +945,9 @@ export function MembersTable({
 
           <div className="flex flex-col items-center justify-between gap-3 sm:flex-row">
             <p className="text-sm text-[var(--admin-on-surface-variant)]">
-              Showing <span className="font-medium text-[var(--admin-on-surface)]">{rangeStart}</span>
-              –<span className="font-medium text-[var(--admin-on-surface)]">{rangeEnd}</span> of{" "}
+              Showing{" "}
+              <span className="font-medium text-[var(--admin-on-surface)]">{rangeStart}</span>–
+              <span className="font-medium text-[var(--admin-on-surface)]">{rangeEnd}</span> of{" "}
               <span className="font-medium text-[var(--admin-on-surface)]">{totalCount}</span>
             </p>
             <div className="flex items-center gap-2">
@@ -994,7 +990,10 @@ export function MembersTable({
             className="relative w-full max-w-md overflow-hidden rounded-2xl border border-[var(--admin-border)] bg-[var(--admin-surface)] shadow-2xl"
           >
             <div className="border-b border-[var(--admin-border)] px-6 py-5">
-              <h2 id="edit-roles-title" className="text-lg font-bold text-[var(--admin-on-surface)]">
+              <h2
+                id="edit-roles-title"
+                className="text-lg font-bold text-[var(--admin-on-surface)]"
+              >
                 Assign role
               </h2>
               <p className="text-xs text-[var(--admin-on-surface-variant)]">

@@ -87,8 +87,7 @@ function EditablePermissionCard({
       </div>
       <div className="space-y-3">
         {permissions.map((permission) => {
-          const disabled =
-            permission.key.startsWith("platform.") || permission.key.includes("*");
+          const disabled = permission.key.startsWith("platform.") || permission.key.includes("*");
           const isChecked = selected.includes(permission.key);
 
           return (

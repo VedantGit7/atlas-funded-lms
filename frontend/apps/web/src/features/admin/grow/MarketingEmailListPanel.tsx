@@ -45,14 +45,7 @@ const MESSENGER_HREF = "/admin/marketing/messenger";
 const PAGE_SIZE = 10;
 
 type StatusTab = "ALL" | MarketingEmailStatus;
-type ColumnId =
-  | "title"
-  | "status"
-  | "audience"
-  | "created"
-  | "datetime"
-  | "recipients"
-  | "actions";
+type ColumnId = "title" | "status" | "audience" | "created" | "datetime" | "recipients" | "actions";
 
 const TABS: ReadonlyArray<{ id: StatusTab; label: string }> = [
   { id: "ALL", label: "All" },
@@ -664,9 +657,7 @@ export function MarketingEmailListPanel() {
                             </span>
                           ) : column.id === "recipients" ? (
                             <span className="block text-right font-mono text-xs tabular-nums text-[var(--admin-on-surface)]">
-                              {row.audienceType
-                                ? formatCompactCount(row.recipientCount)
-                                : "-"}
+                              {row.audienceType ? formatCompactCount(row.recipientCount) : "-"}
                             </span>
                           ) : (
                             <div
@@ -905,9 +896,7 @@ export function MarketingEmailListPanel() {
                     (1 -
                       Math.min(
                         1,
-                        stats.totalReach > 0
-                          ? stats.reach30d / Math.max(stats.totalReach, 1)
-                          : 0,
+                        stats.totalReach > 0 ? stats.reach30d / Math.max(stats.totalReach, 1) : 0,
                       ))
                   }`}
                   className="transition-[stroke-dashoffset] duration-500 motion-safe:duration-500"

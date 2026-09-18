@@ -35,7 +35,9 @@ export function HelpArticleToc({ sections }: HelpArticleTocProps) {
       observer.observe(element);
     }
 
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+    };
   }, [sections]);
 
   function scrollToSection(id: string) {
@@ -60,7 +62,9 @@ export function HelpArticleToc({ sections }: HelpArticleTocProps) {
             <button
               key={section.id}
               type="button"
-              onClick={() => scrollToSection(section.id)}
+              onClick={() => {
+                scrollToSection(section.id);
+              }}
               className={[
                 "block w-full border-l-2 py-1 pl-3 text-left text-sm motion-safe:transition-colors",
                 isActive
@@ -74,7 +78,9 @@ export function HelpArticleToc({ sections }: HelpArticleTocProps) {
         })}
         <button
           type="button"
-          onClick={() => scrollToSection("feedback")}
+          onClick={() => {
+            scrollToSection("feedback");
+          }}
           className={[
             "block w-full border-l-2 py-1 pl-3 text-left text-sm motion-safe:transition-colors",
             activeId === "feedback"

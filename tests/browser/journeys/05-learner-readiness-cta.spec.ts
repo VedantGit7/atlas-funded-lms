@@ -1,6 +1,6 @@
 import { test, expect } from "../fixtures/axe";
 import { loginWithCredentials } from "../helpers/auth";
-import { hasLearnerCredentials } from "../helpers/env";
+import { hasLearnerCredentials, requiredCredential } from "../helpers/env";
 
 test.describe("J05 learner readiness CTA", () => {
   test.beforeEach(() => {
@@ -10,8 +10,8 @@ test.describe("J05 learner readiness CTA", () => {
   test("readiness surface loads for authenticated learner", async ({ page }) => {
     await loginWithCredentials(
       page,
-      process.env["E2E_LEARNER_EMAIL"]!,
-      process.env["E2E_LEARNER_PASSWORD"]!,
+      requiredCredential("E2E_LEARNER_EMAIL"),
+      requiredCredential("E2E_LEARNER_PASSWORD"),
     );
     await page.goto("/readiness");
     await expect(page.getByRole("main")).toBeVisible();

@@ -50,7 +50,7 @@ export function DeleteModuleDialog({
     setBusy(true);
     setError(null);
     try {
-      await clientApi.delete(`/api/v1/modules/${moduleId}`, "module-delete");
+      await clientApi.delete(`/api/v1/modules/${moduleId ?? ""}`, "module-delete");
       onDeleted();
       onClose();
     } catch (deleteError) {
@@ -82,7 +82,10 @@ export function DeleteModuleDialog({
           <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--admin-danger)_14%,var(--admin-surface))]">
             <AlertTriangle className="h-8 w-8 text-[var(--admin-danger)]" aria-hidden="true" />
           </div>
-          <h2 id="delete-module-title" className="mb-2 text-lg font-semibold text-[var(--admin-on-surface)]">
+          <h2
+            id="delete-module-title"
+            className="mb-2 text-lg font-semibold text-[var(--admin-on-surface)]"
+          >
             Delete this module?
           </h2>
           <p className="text-sm leading-relaxed text-[var(--admin-on-surface-variant)]">

@@ -164,7 +164,7 @@ export async function hasLaterTransitionForTarget(args: {
   tx: Tx;
   targetType: string;
   targetId: string;
-  afterOccurredAt: Date;
+  pendingTransitionId: string;
 }): Promise<boolean> {
   const count = await countLaterTransitionsForTarget(args);
   return count > 0;
@@ -228,14 +228,26 @@ export async function countLaterTransitionsForTarget(args: {
   tx: Tx;
   targetType: string;
   targetId: string;
-  afterOccurredAt: Date;
+  pendingTransitionId: string;
 }): Promise<number> {
+  // The comparison timestamp is read back inside SQL rather than passed in from
+  // the caller. `occurred_at` is a timestamptz with microsecond precision, but a
+  // JavaScript Date only carries milliseconds — round-tripping the pending row's
+  // own timestamp truncated it, so `occurred_at > <truncated>` matched the
+  // pending row itself whenever its microsecond remainder was non-zero. That
+  // made every workflow action fail with a spurious "already acted on" conflict
+  // roughly 999 times in 1000, depending only on clock luck.
   const rows = await args.tx.$queryRaw<Array<{ count: bigint }>>`
     select count(*)::bigint as count
     from workflow_transitions
     where target_type = ${args.targetType}
       and target_id = ${args.targetId}::uuid
-      and occurred_at > ${args.afterOccurredAt}
+      and id <> ${args.pendingTransitionId}::uuid
+      and occurred_at > (
+        select occurred_at
+        from workflow_transitions
+        where id = ${args.pendingTransitionId}::uuid
+      )
   `;
 
   return Number(rows[0]?.count ?? 0n);
@@ -300,9 +312,7 @@ export async function findAssessmentForWorkflow(args: { tx: Tx; assessmentId: st
   title: string;
   status: string;
 } | null> {
-  const rows = await args.tx.$queryRaw<
-    Array<{ id: string; title: string; status: string }>
-  >`
+  const rows = await args.tx.$queryRaw<Array<{ id: string; title: string; status: string }>>`
     select id::text, title, status::text
     from assessments
     where id = ${args.assessmentId}::uuid

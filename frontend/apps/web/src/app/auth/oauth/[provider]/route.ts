@@ -11,10 +11,7 @@ const API_INTERNAL_URL = process.env["API_INTERNAL_URL"] ?? "http://127.0.0.1:30
 const VALID_PROVIDERS = new Set(["google", "apple"]);
 const OAUTH_COOKIE_MAX_AGE_SECONDS = 60 * 10;
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: Promise<{ provider: string }> },
-) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ provider: string }> }) {
   const { provider } = await params;
   const origin = resolveRequestOrigin(req);
   const loginUrl = `${origin}/login`;

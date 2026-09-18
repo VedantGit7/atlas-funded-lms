@@ -11,9 +11,12 @@ type SupabaseUserMetadata = Record<string, unknown> | null | undefined;
 
 type SupabasePasswordSignInResult = {
   data: {
-    user:
-      | { id: string; email: string; factors?: unknown; user_metadata?: SupabaseUserMetadata }
-      | null;
+    user: {
+      id: string;
+      email: string;
+      factors?: unknown;
+      user_metadata?: SupabaseUserMetadata;
+    } | null;
     session: { access_token: string; refresh_token: string; expires_in: number } | null;
   };
   error: { message: string } | null;

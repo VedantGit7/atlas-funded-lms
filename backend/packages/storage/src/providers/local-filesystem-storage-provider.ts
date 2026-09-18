@@ -15,7 +15,12 @@ type StoredObjectMeta = {
   checksumSha256?: string | null;
 };
 
-function signDownloadToken(secret: string, bucket: string, key: string, expiresAtMs: number): string {
+function signDownloadToken(
+  secret: string,
+  bucket: string,
+  key: string,
+  expiresAtMs: number,
+): string {
   return createHmac("sha256", secret)
     .update(`${bucket}\n${key}\n${String(expiresAtMs)}`)
     .digest("hex");
@@ -65,20 +70,23 @@ export class LocalFilesystemStorageProvider implements StorageProvider {
     await writeFile(metaFile, JSON.stringify(meta), "utf8");
   }
 
-  async createSignedUploadUrl(input: CreateSignedUploadUrlInput) {
+  // The local-filesystem provider computes these synchronously; the interface
+  // is async because the S3/R2 providers are. Promise.resolve keeps the shape
+  // without pretending there is something to await.
+  createSignedUploadUrl(input: CreateSignedUploadUrlInput) {
     const expiresAt = new Date(Date.now() + input.expiresInSeconds * 1000);
     const encodedKey = encodeURIComponent(input.key);
 
-    return {
+    return Promise.resolve({
       url: `http://localhost.local-storage/upload/${input.bucket}/${encodedKey}?expires=${String(expiresAt.getTime())}`,
       expiresAt,
       requiredHeaders: {
         "content-type": input.contentType,
       },
-    };
+    });
   }
 
-  async createSignedDownloadUrl(input: CreateSignedDownloadUrlInput) {
+  createSignedDownloadUrl(input: CreateSignedDownloadUrlInput) {
     const expiresAt = new Date(Date.now() + input.expiresInSeconds * 1000);
     const expiresAtMs = expiresAt.getTime();
     const token = signDownloadToken(this.signingSecret, input.bucket, input.key, expiresAtMs);
@@ -89,10 +97,10 @@ export class LocalFilesystemStorageProvider implements StorageProvider {
       token,
     });
 
-    return {
+    return Promise.resolve({
       url: `${this.publicOrigin}${this.downloadBasePath}?${params.toString()}`,
       expiresAt,
-    };
+    });
   }
 
   async headObject(input: { bucket: string; key: string }): Promise<ObjectMetadata | null> {
@@ -102,7 +110,7 @@ export class LocalFilesystemStorageProvider implements StorageProvider {
       const meta = await this.readMeta(input.bucket, input.key);
       return {
         contentType: meta?.contentType ?? "application/octet-stream",
-        sizeBytes: Number(fileStat.size),
+        sizeBytes: fileStat.size,
         checksumSha256: meta?.checksumSha256 ?? null,
       };
     } catch {

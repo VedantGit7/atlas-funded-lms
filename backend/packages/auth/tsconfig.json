@@ -12,5 +12,15 @@
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"],
   "exclude": ["node_modules", "dist", "build", ".next"],
-  "references": [{ "path": "../core" }, { "path": "../tenancy" }]
+  "references": [
+    {
+      "path": "../core"
+    },
+    {
+      "path": "../tenancy"
+    },
+    {
+      "path": "../observability"
+    }
+  ]
 }

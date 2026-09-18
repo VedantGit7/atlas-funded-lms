@@ -49,7 +49,9 @@ function ToggleSwitch(props: {
       aria-checked={props.checked}
       aria-label={props.ariaLabel}
       disabled={props.disabled}
-      onClick={() => props.onChange(!props.checked)}
+      onClick={() => {
+        props.onChange(!props.checked);
+      }}
       className={[
         "relative h-6 w-11 shrink-0 rounded-full transition-colors duration-200 disabled:opacity-50",
         props.checked ? "bg-[var(--admin-primary)]" : "bg-[var(--admin-outline)]",
@@ -98,7 +100,9 @@ export function ReferralAdminPanel() {
       setDebouncedQuery(query.trim());
       setPage(1);
     }, 250);
-    return () => window.clearTimeout(timer);
+    return () => {
+      window.clearTimeout(timer);
+    };
   }, [query]);
 
   const load = useCallback(async () => {
@@ -240,7 +244,9 @@ export function ReferralAdminPanel() {
               checked={draft.enabled}
               disabled={enableDisabled}
               ariaLabel="Enable referral program"
-              onChange={(next) => setDraft({ ...draft, enabled: next })}
+              onChange={(next) => {
+                setDraft({ ...draft, enabled: next });
+              }}
             />
           </div>
         </div>
@@ -261,12 +267,12 @@ export function ReferralAdminPanel() {
                     type="number"
                     min={0}
                     value={draft.referrerSignupCredits}
-                    onChange={(event) =>
+                    onChange={(event) => {
                       setDraft({
                         ...draft,
                         referrerSignupCredits: Math.max(0, Number(event.target.value) || 0),
-                      })
-                    }
+                      });
+                    }}
                     className={`${MESSENGER_WIZARD_FIELD_CLASS} h-11 pr-12`}
                   />
                   <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs font-semibold text-[var(--admin-on-surface-variant)]">
@@ -281,12 +287,12 @@ export function ReferralAdminPanel() {
                     type="number"
                     min={0}
                     value={draft.referrerPurchaseCredits}
-                    onChange={(event) =>
+                    onChange={(event) => {
                       setDraft({
                         ...draft,
                         referrerPurchaseCredits: Math.max(0, Number(event.target.value) || 0),
-                      })
-                    }
+                      });
+                    }}
                     className={`${MESSENGER_WIZARD_FIELD_CLASS} h-11 pr-12`}
                   />
                   <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs font-semibold text-[var(--admin-on-surface-variant)]">
@@ -312,12 +318,12 @@ export function ReferralAdminPanel() {
                     type="number"
                     min={0}
                     value={draft.refereeSignupCredits}
-                    onChange={(event) =>
+                    onChange={(event) => {
                       setDraft({
                         ...draft,
                         refereeSignupCredits: Math.max(0, Number(event.target.value) || 0),
-                      })
-                    }
+                      });
+                    }}
                     className={`${MESSENGER_WIZARD_FIELD_CLASS} h-11 pr-12`}
                   />
                   <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs font-semibold text-[var(--admin-on-surface-variant)]">
@@ -341,14 +347,12 @@ export function ReferralAdminPanel() {
                 min={1}
                 disabled={unlimited}
                 value={draft.maxReferrals ?? ""}
-                onChange={(event) =>
+                onChange={(event) => {
                   setDraft({
                     ...draft,
-                    maxReferrals: event.target.value.trim()
-                      ? Number(event.target.value)
-                      : null,
-                  })
-                }
+                    maxReferrals: event.target.value.trim() ? Number(event.target.value) : null,
+                  });
+                }}
                 className={`${MESSENGER_WIZARD_FIELD_CLASS} h-11 disabled:opacity-50`}
                 placeholder="50"
               />
@@ -357,12 +361,12 @@ export function ReferralAdminPanel() {
               <input
                 type="checkbox"
                 checked={unlimited}
-                onChange={(event) =>
+                onChange={(event) => {
                   setDraft({
                     ...draft,
-                    maxReferrals: event.target.checked ? null : draft.maxReferrals ?? 50,
-                  })
-                }
+                    maxReferrals: event.target.checked ? null : (draft.maxReferrals ?? 50),
+                  });
+                }}
                 className="rounded border-[var(--admin-outline)] text-[var(--admin-primary)] focus:ring-[var(--admin-primary)]"
               />
               Unlimited referrals
@@ -393,7 +397,9 @@ export function ReferralAdminPanel() {
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--admin-on-surface-variant)]" />
               <input
                 value={query}
-                onChange={(event) => setQuery(event.target.value)}
+                onChange={(event) => {
+                  setQuery(event.target.value);
+                }}
                 placeholder="Search name/code/email..."
                 className={`${MESSENGER_WIZARD_FIELD_CLASS} h-10 w-full pl-9 sm:w-64`}
               />
@@ -545,7 +551,9 @@ export function ReferralAdminPanel() {
             <button
               type="button"
               disabled={page <= 1}
-              onClick={() => setPage((current) => Math.max(1, current - 1))}
+              onClick={() => {
+                setPage((current) => Math.max(1, current - 1));
+              }}
               className="inline-flex items-center gap-1 rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 py-2 text-xs font-semibold transition-colors hover:bg-[var(--admin-surface-high)] disabled:opacity-40"
             >
               <ChevronLeft className="h-3.5 w-3.5" />
@@ -554,7 +562,9 @@ export function ReferralAdminPanel() {
             <button
               type="button"
               disabled={page >= pageCount}
-              onClick={() => setPage((current) => Math.min(pageCount, current + 1))}
+              onClick={() => {
+                setPage((current) => Math.min(pageCount, current + 1));
+              }}
               className="inline-flex items-center gap-1 rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 py-2 text-xs font-semibold transition-colors hover:bg-[var(--admin-surface-high)] disabled:opacity-40"
             >
               Next

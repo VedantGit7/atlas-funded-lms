@@ -11,7 +11,9 @@ html:has(.atlas-landing) {
   --atl-bdr2: #cfd6e2;
   --atl-tx: #0c1322;
   --atl-tx2: #4b566b;
-  --atl-tx3: #8a93a6;
+  /* H17: was 2.68:1 on --atl-bg2. The audit measured the FundedBeyond
+     landing only; the platform landing carried the identical defect. */
+  --atl-tx3: #616b80;
   --atl-acc: #2563eb;
   --atl-acc-d: #1d4ed8;
   --atl-acc-l: #eaf1ff;
@@ -21,7 +23,9 @@ html:has(.atlas-landing) {
   background: var(--atl-bg);
   color: var(--atl-tx);
   font-family: var(--font-plus-jakarta), "Plus Jakarta Sans", system-ui, sans-serif;
-  transition: background-color 0.3s ease, color 0.25s ease;
+  transition:
+    background-color 0.3s ease,
+    color 0.25s ease;
 }
 
 .atlas-landing.atl-dark {
@@ -32,7 +36,8 @@ html:has(.atlas-landing) {
   --atl-bdr2: #2e394d;
   --atl-tx: #eef2f8;
   --atl-tx2: #9aa6bb;
-  --atl-tx3: #5d6678;
+  /* Same token, dark palette -- 2.98:1 on --atl-surf. */
+  --atl-tx3: #7b8598;
   --atl-acc: #4f7cf0;
   --atl-acc-d: #3f6ae0;
   --atl-acc-l: #14203a;
@@ -43,8 +48,16 @@ html:has(.atlas-landing) {
 /* Subtle grid texture for the hero, accent-tinted and pointer-safe. */
 .atl-hero-grid {
   background-image:
-    linear-gradient(to right, color-mix(in srgb, var(--atl-acc) 8%, transparent) 1px, transparent 1px),
-    linear-gradient(to bottom, color-mix(in srgb, var(--atl-acc) 8%, transparent) 1px, transparent 1px);
+    linear-gradient(
+      to right,
+      color-mix(in srgb, var(--atl-acc) 8%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--atl-acc) 8%, transparent) 1px,
+      transparent 1px
+    );
   background-size: 56px 56px;
   -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 35%, transparent 75%);
   mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 35%, transparent 75%);

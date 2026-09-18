@@ -48,11 +48,7 @@ function mapRuleDto(row: AtRiskRuleRow) {
   };
 }
 
-export async function listAtRiskAlerts(
-  tx: TenantTx,
-  _ctx: AtRiskServiceCtx,
-  rawQuery: unknown,
-) {
+export async function listAtRiskAlerts(tx: TenantTx, _ctx: AtRiskServiceCtx, rawQuery: unknown) {
   const query = listAtRiskAlertsQuerySchema.parse(rawQuery);
   const rows = await atRiskRepository.listAlerts(tx, {
     status: query.status ?? null,
@@ -178,7 +174,9 @@ export async function evaluateAtRiskAlerts(tx: TenantTx, _ctx: AtRiskServiceCtx)
       continue;
     }
 
-    if (rule.rule_type === "low_activity_vs_cohort") {
+    // Last arm of an exhaustive chain: every other union member has
+    // already returned, so `rule.rule_type === "low_activity_vs_cohort"` is always true here.
+    {
       const lookbackDays = Number(rule.config_json["lookbackDays"] ?? 14);
       const cohortPercentile = Number(rule.config_json["cohortPercentile"] ?? 25);
       const memberships = await atRiskRepository.findLowActivityMemberships(

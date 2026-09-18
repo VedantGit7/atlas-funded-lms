@@ -113,7 +113,6 @@ function CtaLivePreview({
     >
       {imageUrl.trim() ? (
         <div className="aspect-[2/1] w-full overflow-hidden bg-[var(--admin-surface-high)]">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={imageUrl.trim()}
             alt=""
@@ -355,9 +354,7 @@ export function CtaBuilderPanel({ ctaId }: { ctaId: string }) {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await clientApi.get<{ data: CtaDto }>(
-        `/api/v1/marketing/ctas/${ctaId}`,
-      );
+      const response = await clientApi.get<{ data: CtaDto }>(`/api/v1/marketing/ctas/${ctaId}`);
       const data = response.data;
       setCta(data);
       setTitle(data.title);
@@ -459,8 +456,7 @@ export function CtaBuilderPanel({ ctaId }: { ctaId: string }) {
           backgroundColor,
           linkUrl: linkUrl.trim() || null,
           formId: cta.ctaType === "POPUP" ? formId || null : null,
-          linkedPopupCtaId:
-            cta.ctaType === "EMBEDDED_BUTTON" ? linkedPopupCtaId || null : null,
+          linkedPopupCtaId: cta.ctaType === "EMBEDDED_BUTTON" ? linkedPopupCtaId || null : null,
         },
         "cta-design",
         { successMessage: "Design saved." },
@@ -499,9 +495,7 @@ export function CtaBuilderPanel({ ctaId }: { ctaId: string }) {
       setCta(response.data);
       setTargeting(response.data.targeting);
     } catch (caught) {
-      toast.error(
-        caught instanceof ClientApiError ? caught.message : "Could not save targeting.",
-      );
+      toast.error(caught instanceof ClientApiError ? caught.message : "Could not save targeting.");
     } finally {
       setBusy(false);
     }
@@ -897,9 +891,10 @@ export function CtaBuilderPanel({ ctaId }: { ctaId: string }) {
                     <button
                       type="button"
                       className="mt-2 inline-flex items-center gap-2 rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 py-2 text-[12px] font-bold uppercase tracking-[0.04em] text-[var(--admin-on-surface)] transition-colors hover:bg-[var(--admin-surface-low)]"
-                      onClick={async () => {
-                        await navigator.clipboard.writeText(embedSnippet);
-                        toast.success("Embed code copied.");
+                      onClick={() => {
+                        void navigator.clipboard.writeText(embedSnippet).then(() => {
+                          toast.success("Embed code copied.");
+                        });
                       }}
                     >
                       <Copy className="h-4 w-4" aria-hidden="true" />
@@ -1128,9 +1123,8 @@ export function CtaBuilderPanel({ ctaId }: { ctaId: string }) {
               Delete CTA
             </h2>
             <p className="text-sm text-[var(--admin-on-surface-variant)]">
-              Type{" "}
-              <span className="font-semibold text-[var(--admin-on-surface)]">{cta.title}</span> to
-              confirm.
+              Type <span className="font-semibold text-[var(--admin-on-surface)]">{cta.title}</span>{" "}
+              to confirm.
             </p>
             <input
               value={deleteConfirm}

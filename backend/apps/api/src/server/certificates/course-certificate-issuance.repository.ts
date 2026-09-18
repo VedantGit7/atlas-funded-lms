@@ -19,9 +19,7 @@ export const courseCertificateIssuanceRepository = {
     tx: TenantTx,
     courseId: string,
   ): Promise<CourseCertificateContextRow | null> {
-    const rows = await tx.$queryRaw<
-      Array<{ id: string; status: string; metadata_json: unknown }>
-    >`
+    const rows = await tx.$queryRaw<Array<{ id: string; status: string; metadata_json: unknown }>>`
       select id::text, status::text, metadata_json
       from courses
       where id = ${courseId}::uuid

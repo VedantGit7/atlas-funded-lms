@@ -41,7 +41,8 @@ function backupStatusTone(status: string): "success" | "primary" | "danger" | "n
   const normalized = status.toUpperCase();
   if (normalized === "COMPLETED" || normalized === "SUCCEEDED") return "success";
   if (normalized === "FAILED") return "danger";
-  if (normalized === "RUNNING" || normalized === "QUEUED" || normalized === "IN_PROGRESS") return "primary";
+  if (normalized === "RUNNING" || normalized === "QUEUED" || normalized === "IN_PROGRESS")
+    return "primary";
   return "neutral";
 }
 
@@ -98,7 +99,7 @@ export function ManageCourseBackupPanel() {
       .then((response) => {
         if (!cancelled) setCourses(response.data.items);
       })
-      .catch((caught) => {
+      .catch((caught: unknown) => {
         if (!cancelled) {
           setError(formatError(caught));
           setCourses([]);
@@ -160,12 +161,9 @@ export function ManageCourseBackupPanel() {
     setSendingOtp(true);
     setError(null);
     try {
-      await clientApi.post(
-        "/api/v1/manage/course-backups/request-otp",
-        null,
-        "course-backup-otp",
-        { silent: true },
-      );
+      await clientApi.post("/api/v1/manage/course-backups/request-otp", null, "course-backup-otp", {
+        silent: true,
+      });
       toast.success("Verification code sent. Use code 000000 for demo.");
       setOtpSent(true);
     } catch (caught) {
@@ -255,7 +253,9 @@ export function ManageCourseBackupPanel() {
         <h2 className="text-sm font-semibold text-[var(--admin-on-surface)]">Create backup</h2>
 
         <label className="block text-sm">
-          <span className="mb-1 block font-medium text-[var(--admin-on-surface-variant)]">Course</span>
+          <span className="mb-1 block font-medium text-[var(--admin-on-surface-variant)]">
+            Course
+          </span>
           <Select
             value={courseId}
             onValueChange={(value) => {
@@ -273,10 +273,13 @@ export function ManageCourseBackupPanel() {
         {courseId ? (
           <div className="space-y-2">
             <p className="text-sm font-medium text-[var(--admin-on-surface-variant)]">
-              Sections {loadingModules ? "(loading…)" : `(optional, ${String(modules.length)} available)`}
+              Sections{" "}
+              {loadingModules ? "(loading…)" : `(optional, ${String(modules.length)} available)`}
             </p>
             {modules.length === 0 && !loadingModules ? (
-              <p className="text-sm text-[var(--admin-on-surface-variant)]">No sections found for this course.</p>
+              <p className="text-sm text-[var(--admin-on-surface-variant)]">
+                No sections found for this course.
+              </p>
             ) : (
               <ul className="max-h-40 space-y-1 overflow-y-auto rounded-lg border border-[var(--admin-border)] p-2">
                 {modules.map((module) => (
@@ -341,7 +344,9 @@ export function ManageCourseBackupPanel() {
             </div>
           )}
           {otpVerified ? (
-            <p className="text-sm text-[var(--admin-success)]">Verified — you can create the backup.</p>
+            <p className="text-sm text-[var(--admin-success)]">
+              Verified — you can create the backup.
+            </p>
           ) : null}
         </div>
 
@@ -378,7 +383,9 @@ export function ManageCourseBackupPanel() {
             Loading history…
           </div>
         ) : history.length === 0 ? (
-          <p className="px-4 py-10 text-sm text-[var(--admin-on-surface-variant)]">No backups yet.</p>
+          <p className="px-4 py-10 text-sm text-[var(--admin-on-surface-variant)]">
+            No backups yet.
+          </p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full border-collapse text-left text-sm">
@@ -392,7 +399,10 @@ export function ManageCourseBackupPanel() {
               </thead>
               <tbody>
                 {history.map((job) => (
-                  <tr key={job.id} className="border-b border-[var(--admin-border)] last:border-b-0">
+                  <tr
+                    key={job.id}
+                    className="border-b border-[var(--admin-border)] last:border-b-0"
+                  >
                     <td className={`${manageTableTdClassName} font-semibold`}>{job.courseTitle}</td>
                     <td className={manageTableTdClassName}>
                       <span className={manageStatusChipClassName(backupStatusTone(job.status))}>

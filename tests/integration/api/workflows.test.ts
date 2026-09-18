@@ -120,10 +120,26 @@ describeWithDb("workflow integration", () => {
       });
     });
 
+    // Replaying the *same* action on a stale transition is resolved
+    // idempotently by `resolveIdempotentWorkflowAction` — a retried approve of an
+    // already-published course returns the original transition rather than a
+    // conflict, which is what the route's idempotency contract promises. The
+    // conflict guard covers the different case: a second reviewer acting on a
+    // transition someone else has already decided.
+    const replayed = await withTenantTx(
+      authoringTenantTx(fixture, fixture.adminMembershipId),
+      async (tx) =>
+        actOnWorkflowTransition(tx, admin, submitted.data.workflowTransitionId, {
+          action: "approve",
+        }),
+    );
+    expect(replayed.data.targetStatus).toBe("PUBLISHED");
+
     await expect(
       withTenantTx(authoringTenantTx(fixture, fixture.adminMembershipId), async (tx) =>
         actOnWorkflowTransition(tx, admin, submitted.data.workflowTransitionId, {
-          action: "approve",
+          action: "return",
+          comment: "Changed my mind",
         }),
       ),
     ).rejects.toMatchObject({ status: 409 });
@@ -157,7 +173,13 @@ describeWithDb("workflow integration", () => {
         select event_type
         from outbox_events
         where tenant_id = ${fixture.tenantId}::uuid
-          and aggregate_id in (${fixture.draftCourseId}::uuid, ${submitted.data.workflowTransitionId}::uuid)
+          and (
+            aggregate_id = ${fixture.draftCourseId}
+            -- workflow.transitioned is keyed to the transition it creates, not
+            -- the pending one the caller acted on, so it is only reachable through
+            -- the target the payload names.
+            or payload_json->>'targetId' = ${fixture.draftCourseId}
+          )
       `;
       const eventTypes = outboxRows.map((row) => row.event_type);
       expect(eventTypes).toContain("course.submitted_for_review");

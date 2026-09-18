@@ -43,6 +43,7 @@ function estimateSizeLabel(rowCount: number | null, format: string): string | nu
 
 function datasetLabel(dataset: PaymentDataset): string {
   if (dataset === "gateways") return "Gateway transactions";
+  if (dataset === "orders") return "Orders";
   if (dataset === "instalments") return "Instalments";
   if (dataset === "invoices") return "Invoices";
   if (dataset === "refunds") return "Refunds";
@@ -62,13 +63,15 @@ function fileNameFor(dataset: PaymentDataset, createdAt: string, format: string)
   const slug =
     dataset === "gateways"
       ? "gateway-txns"
-      : dataset === "instalments"
-        ? "instalments"
-        : dataset === "invoices"
-          ? "invoices"
-          : dataset === "refunds"
-            ? "refunds"
-            : "transactions";
+      : dataset === "orders"
+        ? "orders"
+        : dataset === "instalments"
+          ? "instalments"
+          : dataset === "invoices"
+            ? "invoices"
+            : dataset === "refunds"
+              ? "refunds"
+              : "transactions";
   return `payments_${slug}_${stamp}.${format === "json" ? "json" : format}`;
 }
 
@@ -94,6 +97,12 @@ function scopeLabelFromParams(params: Record<string, unknown>): string {
   const status = params["status"];
   if (typeof status === "string" && status.trim()) {
     parts.push(status.trim());
+  }
+  // A settlement narrowing halves the row count, so a history entry that does
+  // not name it describes a file nobody can reproduce.
+  const settlement = params["settlement"];
+  if (settlement === "settled" || settlement === "unsettled") {
+    parts.push(settlement === "settled" ? "Settled only" : "Unsettled only");
   }
   const from = formatDateShort(
     typeof params["startDate"] === "string"
@@ -286,6 +295,7 @@ function buildRunParams(body: CreatePaymentExportBody): Record<string, unknown> 
   if (body.paidTo) params["endDate"] = body.paidTo;
   if (body.gatewayKey?.trim()) params["gatewayKey"] = body.gatewayKey.trim();
   if (body.status?.trim()) params["status"] = body.status.trim();
+  if (body.settlement) params["settlement"] = body.settlement;
   if (body.grouping !== "none") params["grouping"] = body.grouping;
   if (body.includeSubtotals) params["includeSubtotals"] = true;
   if (body.delivery !== "download") params["deliveryMode"] = body.delivery;
@@ -368,6 +378,16 @@ export async function createPaymentExport(
       code: "VALIDATION_ERROR",
       status: 400,
       message: "Select a gateway for gateway transaction exports.",
+    });
+  }
+
+  // Silently dropping a filter on a finance export is how a partial file gets
+  // reconciled as though it were complete, so an unusable one is refused.
+  if (body.settlement && body.dataset !== "orders") {
+    throw new AtlasHttpError({
+      code: "VALIDATION_ERROR",
+      status: 400,
+      message: "Settlement filtering applies to the orders dataset only.",
     });
   }
 

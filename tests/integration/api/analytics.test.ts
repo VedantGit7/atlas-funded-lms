@@ -116,7 +116,26 @@ describeWithDb("analytics API integration", () => {
       });
 
       expect(first.delivered).toBeGreaterThan(0);
-      expect(second.skipped).toBeGreaterThan(0);
+
+      // The second pass must not deliver again. `skipped` used to be the signal,
+      // but that counter only increments for events the poll hands back and the
+      // in-loop delivery check then rejects. Since pollOutboxEventsForProcessing
+      // started excluding already-delivered (event, destination) pairs in SQL —
+      // the fix for the outbox head-of-line block — a duplicate never reaches the
+      // loop, so it is now correctly counted as nothing at all.
+      expect(second.processed).toBe(0);
+      expect(second.delivered).toBe(0);
+      expect(second.failed).toBe(0);
+
+      const deliveries = await tx.$queryRaw<Array<{ count: number }>>`
+        select count(*)::int as count
+        from event_deliveries
+        where outbox_event_id = ${outboxEventId}::uuid
+          -- The worker's SUCCEEDED maps onto the shared DispatchStatus enum,
+          -- which spells a successful delivery SENT.
+          and status = 'SENT'
+      `;
+      expect(deliveries[0]?.count).toBe(1);
     });
   });
 

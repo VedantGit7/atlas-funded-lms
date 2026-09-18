@@ -18,8 +18,7 @@ export const billingRowClassName =
 
 export const billingRowTitleClassName = "text-sm font-semibold text-[var(--admin-on-surface)]";
 
-export const billingRowDescClassName =
-  "mt-0.5 text-sm text-[var(--admin-on-surface-variant)]";
+export const billingRowDescClassName = "mt-0.5 text-sm text-[var(--admin-on-surface-variant)]";
 
 export const billingActionButtonClassName =
   "inline-flex shrink-0 items-center justify-center rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-4 py-2 text-sm font-semibold text-[var(--admin-on-surface)] transition-colors hover:border-[var(--admin-primary)] hover:bg-[var(--admin-surface-high)] hover:text-[var(--admin-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--admin-bg)] disabled:cursor-not-allowed disabled:opacity-50";

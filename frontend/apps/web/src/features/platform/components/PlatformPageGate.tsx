@@ -19,11 +19,7 @@ export function PlatformPageGate({
   children,
 }: PlatformPageGateProps) {
   return (
-    <PageGate
-      state={state}
-      title={title}
-      {...(deniedMessage ? { deniedMessage } : {})}
-    >
+    <PageGate state={state} title={title} {...(deniedMessage ? { deniedMessage } : {})}>
       {children}
     </PageGate>
   );

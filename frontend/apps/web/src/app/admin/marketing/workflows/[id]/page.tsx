@@ -23,7 +23,9 @@ export default async function AdminWorkflowBuilderPage({ params }: PageProps) {
 
   return (
     <AdminPageGate screenId="T86" state="ready" title="Workflow">
-      <Suspense fallback={<p className="text-sm text-[var(--admin-on-surface-variant)]">Loading…</p>}>
+      <Suspense
+        fallback={<p className="text-sm text-[var(--admin-on-surface-variant)]">Loading…</p>}
+      >
         <WorkflowsBuilderPanel workflowId={id} />
       </Suspense>
     </AdminPageGate>

@@ -1,17 +1,23 @@
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 
+// `apps`, `packages` and `src` are pre-F-1 paths that no longer exist, so this
+// secret scanner was reading .github, scripts, infrastructure, monitoring and
+// tests but **none of the application source** — the largest body of code in
+// the repo and the likeliest place for a committed credential.
 const scanRoots = [
   ".github",
-  "apps",
-  "packages",
+  "backend",
+  "frontend",
   "scripts",
   "infrastructure",
   "monitoring",
   "runbooks",
-  "src",
   "tests",
 ];
+
+/** A guard that cannot find its input must fail, never pass quietly. */
+const MIN_EXPECTED_FILES = 500;
 
 const allowedFiles = new Set([".env.example"]);
 
@@ -39,6 +45,18 @@ const secretPatterns = [
   {
     name: "Long bearer token",
     pattern: /Bearer\s+[A-Za-z0-9._-]{40,}/,
+  },
+  // The repo integrates Stripe and Razorpay, and
+  // `backend/packages/tenant-config/src/validate.ts` already rejects `sk_live_`
+  // in tenant manifests — but the repo-wide scanner did not look for it, so a
+  // live payment key in application source would have passed.
+  {
+    name: "Stripe live secret key",
+    pattern: /\b[sr]k_live_[A-Za-z0-9]{16,}/,
+  },
+  {
+    name: "Razorpay live key secret",
+    pattern: /\brzp_live_[A-Za-z0-9]{10,}/,
   },
 ];
 
@@ -83,6 +101,13 @@ const files = scanRoots
 
     return /\.(ts|tsx|js|mjs|cjs|json|yaml|yml|md|env|txt|sh)$/.test(fileName);
   });
+
+if (files.length < MIN_EXPECTED_FILES) {
+  console.error(
+    `check-secrets: scanned only ${files.length} files (expected at least ${MIN_EXPECTED_FILES}); scan roots are stale.`,
+  );
+  process.exit(1);
+}
 
 const failures = [];
 

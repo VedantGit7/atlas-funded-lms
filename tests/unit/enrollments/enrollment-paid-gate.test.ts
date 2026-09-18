@@ -14,13 +14,16 @@ const { mockFindCourseAuthProjection, mockFindActiveEnrollment, mockInsertEnroll
 );
 
 // Keep the real readCoursePricing so the gate exercises actual projection logic.
-vi.mock("../../../backend/apps/api/src/server/courses/courses.repository", async (importOriginal) => {
-  const actual = await importOriginal<Record<string, unknown>>();
-  return {
-    ...actual,
-    findCourseAuthProjection: (...args: unknown[]) => mockFindCourseAuthProjection(...args),
-  };
-});
+vi.mock(
+  "../../../backend/apps/api/src/server/courses/courses.repository",
+  async (importOriginal) => {
+    const actual = await importOriginal<Record<string, unknown>>();
+    return {
+      ...actual,
+      findCourseAuthProjection: (...args: unknown[]) => mockFindCourseAuthProjection(...args),
+    };
+  },
+);
 
 vi.mock("../../../backend/apps/api/src/server/enrollments/enrollments.repository", () => ({
   findActiveEnrollment: (...args: unknown[]) => mockFindActiveEnrollment(...args),
@@ -93,9 +96,9 @@ describe("enrollCurrentMemberInCourse freemium gate", () => {
       code: "PAYMENT_REQUIRED",
       status: 402,
     });
-    await expect(
-      enrollCurrentMemberInCourse(tx, ctx, { courseId }),
-    ).rejects.toBeInstanceOf(AtlasHttpError);
+    await expect(enrollCurrentMemberInCourse(tx, ctx, { courseId })).rejects.toBeInstanceOf(
+      AtlasHttpError,
+    );
     expect(mockInsertEnrollment).not.toHaveBeenCalled();
   });
 

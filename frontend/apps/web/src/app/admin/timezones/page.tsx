@@ -9,7 +9,9 @@ type TenantTimezoneResponse = {
 
 export default async function AdminTimezonesPageRoute() {
   try {
-    const response = await serverApi.get<TenantTimezoneResponse>("/api/v1/tenant-settings/timezone");
+    const response = await serverApi.get<TenantTimezoneResponse>(
+      "/api/v1/tenant-settings/timezone",
+    );
     const initialTimezone = isValidTimezone(response.data.timezone)
       ? response.data.timezone
       : "UTC";

@@ -174,10 +174,7 @@ export const salesWalletRepository = {
     return rows[0] ?? null;
   },
 
-  async listWallets(
-    tx: TenantTx,
-    args: { q?: string; limit: number },
-  ): Promise<WalletRow[]> {
+  async listWallets(tx: TenantTx, args: { q?: string; limit: number }): Promise<WalletRow[]> {
     const q = args.q?.trim() ?? "";
     return tx.$queryRawUnsafe<WalletRow[]>(
       `
@@ -208,6 +205,11 @@ export const salesWalletRepository = {
     );
   },
 
+  /**
+   * Absolute balance write. Only safe when the caller has already established
+   * the exact target value under a lock — prefer spendCredits/creditCredits,
+   * which compute the new balance inside the UPDATE itself.
+   */
   async updateBalances(
     tx: TenantTx,
     args: {
@@ -225,6 +227,71 @@ export const salesWalletRepository = {
           updated_at = now()
       where id = ${args.walletId}::uuid
     `;
+  },
+
+  /**
+   * Atomically spend credits.
+   *
+   * The `balance_credits >= credits` predicate IS the guard: it is evaluated by
+   * Postgres against the current row, not against a value the caller read
+   * earlier. Returns null when the balance is insufficient (zero rows updated).
+   *
+   * Replaces a read-compute-absolute-write sequence that was demonstrated
+   * double-spending: five concurrent spends of 100 credits all succeeded against
+   * a 100-credit wallet because each read the same stale balance under READ
+   * COMMITTED. The post-balance is taken from RETURNING so the append-only
+   * ledger records the true value.
+   */
+  async spendCredits(
+    tx: TenantTx,
+    args: { walletId: string; credits: number },
+  ): Promise<{ balanceAfter: number } | null> {
+    const rows = await tx.$queryRaw<Array<{ balance_credits: number }>>`
+      update sales_wallets
+      set balance_credits = balance_credits - ${args.credits},
+          used_credits = used_credits + ${args.credits},
+          updated_at = now()
+      where id = ${args.walletId}::uuid
+        and balance_credits >= ${args.credits}
+      returning balance_credits
+    `;
+
+    const row = rows[0];
+    return row ? { balanceAfter: row.balance_credits } : null;
+  },
+
+  /**
+   * Lock a wallet row for the remainder of the transaction.
+   *
+   * Crediting needs the current balance to apply max_balance_credits, so it
+   * cannot be expressed as pure arithmetic the way spending can. Taking the row
+   * lock first makes the subsequent read-compute-write safe: concurrent
+   * transactions serialise on this lock instead of racing on a stale read.
+   */
+  async lockWalletForUpdate(
+    tx: TenantTx,
+    walletId: string,
+  ): Promise<{ balanceCredits: number; earnedCredits: number; usedCredits: number } | null> {
+    // Returns every column a subsequent absolute write touches. Mixing
+    // post-lock values with a pre-lock read would let a concurrent spend that
+    // committed in between have its used_credits increment silently clobbered.
+    const rows = await tx.$queryRaw<
+      Array<{ balance_credits: number; earned_credits: number; used_credits: number }>
+    >`
+      select balance_credits, earned_credits, used_credits
+      from sales_wallets
+      where id = ${walletId}::uuid
+      for update
+    `;
+
+    const row = rows[0];
+    return row
+      ? {
+          balanceCredits: row.balance_credits,
+          earnedCredits: row.earned_credits,
+          usedCredits: row.used_credits,
+        }
+      : null;
   },
 
   async insertTransaction(tx: TenantTx, args: WalletTxnInput): Promise<string> {

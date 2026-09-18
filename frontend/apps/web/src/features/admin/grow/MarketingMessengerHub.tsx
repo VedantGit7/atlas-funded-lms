@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ReactNode,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -294,7 +287,9 @@ function QuickActionsMenu() {
         className={`${manageSecondaryButtonClassName} rounded-xl border-[var(--admin-border)] text-[var(--admin-primary)]`}
         aria-expanded={open}
         aria-haspopup="menu"
-        onClick={() => setOpen((value) => !value)}
+        onClick={() => {
+          setOpen((value) => !value);
+        }}
       >
         <Zap className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
         Quick actions
@@ -311,7 +306,9 @@ function QuickActionsMenu() {
               role="menuitem"
               prefetch={false}
               className="flex items-center justify-between gap-2 px-3 py-2.5 text-sm text-[var(--admin-on-surface)] transition-colors hover:bg-[var(--admin-surface-high)] focus-visible:bg-[var(--admin-surface-high)] focus-visible:outline-none"
-              onClick={() => setOpen(false)}
+              onClick={() => {
+                setOpen(false);
+              }}
             >
               <span>{action.label}</span>
               <ArrowRight className="h-3.5 w-3.5 text-[var(--admin-on-surface-variant)]" />
@@ -333,16 +330,12 @@ export function MarketingMessengerHub() {
   const loadSummary = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await clientApi.get<HubResponse>(
-        "/api/v1/marketing/messenger-hub-summary",
-      );
+      const response = await clientApi.get<HubResponse>("/api/v1/marketing/messenger-hub-summary");
       setSummary(response.data);
     } catch (caught) {
       setSummary(emptySummary());
       toast.error(
-        caught instanceof ClientApiError
-          ? caught.message
-          : "Could not load messenger hub.",
+        caught instanceof ClientApiError ? caught.message : "Could not load messenger hub.",
       );
     } finally {
       setLoading(false);
@@ -362,7 +355,9 @@ export function MarketingMessengerHub() {
       }
     }
     window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+    };
   }, []);
 
   const data = summary ?? emptySummary();
@@ -380,8 +375,7 @@ export function MarketingMessengerHub() {
     });
   }, [data, filter, query]);
 
-  const showChannel = (id: ChannelCardId) =>
-    visibleChannels.some((channel) => channel.id === id);
+  const showChannel = (id: ChannelCardId) => visibleChannels.some((channel) => channel.id === id);
 
   return (
     <div className="mx-auto w-full max-w-[1440px] space-y-10 pb-10">
@@ -406,7 +400,9 @@ export function MarketingMessengerHub() {
                 <button
                   key={tab.id}
                   type="button"
-                  onClick={() => setFilter(tab.id)}
+                  onClick={() => {
+                    setFilter(tab.id);
+                  }}
                   className={`relative px-3 py-2 text-xs font-semibold tracking-wide transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)] ${
                     active
                       ? "text-[var(--admin-primary)]"
@@ -435,7 +431,9 @@ export function MarketingMessengerHub() {
             <input
               ref={searchRef}
               value={query}
-              onChange={(event) => setQuery(event.target.value)}
+              onChange={(event) => {
+                setQuery(event.target.value);
+              }}
               placeholder="Search channels…"
               className="ml-2 w-full border-none bg-transparent text-sm text-[var(--admin-on-surface)] outline-none placeholder:text-[color-mix(in_srgb,var(--admin-on-surface-variant)_55%,transparent)]"
             />
@@ -660,7 +658,11 @@ export function MarketingMessengerHub() {
               className="group relative col-span-12 flex flex-col overflow-hidden rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)] p-6 transition-[transform,border-color,box-shadow] duration-200 hover:-translate-y-1 hover:border-[var(--admin-primary)] hover:shadow-[0_12px_32px_color-mix(in_srgb,var(--admin-primary)_10%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)] motion-reduce:hover:translate-y-0 md:col-span-4"
             >
               <span className="pointer-events-none absolute -bottom-4 -right-4 rotate-12 text-[var(--admin-on-surface)] opacity-[0.06] transition-transform duration-500 group-hover:rotate-0 motion-reduce:transition-none">
-                <MessageCircle className="h-[7.5rem] w-[7.5rem]" strokeWidth={1} aria-hidden="true" />
+                <MessageCircle
+                  className="h-[7.5rem] w-[7.5rem]"
+                  strokeWidth={1}
+                  aria-hidden="true"
+                />
               </span>
               <div className="relative z-[1] flex items-start justify-between gap-3">
                 <IconTile accent="whatsapp">
@@ -763,7 +765,9 @@ export function MarketingMessengerHub() {
         <div className="col-span-12 lg:col-span-8">
           <div className="rounded-2xl border border-[var(--admin-border)] bg-[var(--admin-surface-low)] p-6 md:p-8">
             <div className="mb-6 flex items-center justify-between gap-3">
-              <h2 className="text-lg font-semibold text-[var(--admin-on-surface)]">Activity feed</h2>
+              <h2 className="text-lg font-semibold text-[var(--admin-on-surface)]">
+                Activity feed
+              </h2>
               <Link
                 href={AUDIT_HREF}
                 prefetch={false}

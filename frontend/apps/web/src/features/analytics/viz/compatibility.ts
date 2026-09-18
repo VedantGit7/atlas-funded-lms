@@ -3,7 +3,9 @@ import type { NormalizedResult, VizType } from "./types";
 function hasDimension(data: NormalizedResult): boolean {
   return (
     (data.dimensions?.length ?? 0) > 0 ||
-    data.columns.some((column) => column.kind === "dimension" || column.kind === "string" || column.kind === "date")
+    data.columns.some(
+      (column) => column.kind === "dimension" || column.kind === "string" || column.kind === "date",
+    )
   );
 }
 

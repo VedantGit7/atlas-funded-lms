@@ -1,13 +1,7 @@
 "use client";
 
 import { Fragment, useMemo, useState } from "react";
-import {
-  ChevronDown,
-  ChevronRight,
-  Pencil,
-  Search,
-  Trash2,
-} from "lucide-react";
+import { ChevronDown, ChevronRight, Pencil, Search, Trash2 } from "lucide-react";
 import type { z } from "zod";
 import {
   Button,
@@ -84,8 +78,7 @@ export function LocalesStringsTab({
     if (!query) return localeResources;
     return localeResources.filter(
       (resource) =>
-        resource.key.toLowerCase().includes(query) ||
-        resource.value.toLowerCase().includes(query),
+        resource.key.toLowerCase().includes(query) || resource.value.toLowerCase().includes(query),
     );
   }, [localeResources, searchQuery]);
 
@@ -166,9 +159,14 @@ export function LocalesStringsTab({
   }
 
   const localeListEntries = useMemo(() => {
-    const fromData = locales.map((locale) => ({ locale, count: resources.filter((r) => r.locale === locale).length }));
+    const fromData = locales.map((locale) => ({
+      locale,
+      count: resources.filter((r) => r.locale === locale).length,
+    }));
     if (!fromData.some((entry) => entry.locale === selectedLocale) && selectedLocale) {
-      return [...fromData, { locale: selectedLocale, count: 0 }].sort((a, b) => a.locale.localeCompare(b.locale));
+      return [...fromData, { locale: selectedLocale, count: 0 }].sort((a, b) =>
+        a.locale.localeCompare(b.locale),
+      );
     }
     return fromData;
   }, [locales, resources, selectedLocale]);
@@ -211,7 +209,9 @@ export function LocalesStringsTab({
                       }}
                     >
                       <span>{entry.locale}</span>
-                      <span className="text-xs text-[var(--admin-on-surface-variant)]">{entry.count}</span>
+                      <span className="text-xs text-[var(--admin-on-surface-variant)]">
+                        {entry.count}
+                      </span>
                     </button>
                   </li>
                 );
@@ -255,7 +255,9 @@ export function LocalesStringsTab({
               <input
                 type="search"
                 value={searchQuery}
-                onChange={(event) => setSearchQuery(event.target.value)}
+                onChange={(event) => {
+                  setSearchQuery(event.target.value);
+                }}
                 placeholder="Search keys or values…"
                 className={localesSearchInputClassName}
               />
@@ -268,7 +270,11 @@ export function LocalesStringsTab({
             <div
               role="alert"
               aria-live="polite"
-              className={messageTone === "success" ? localesAlertSuccessClassName : localesAlertErrorClassName}
+              className={
+                messageTone === "success"
+                  ? localesAlertSuccessClassName
+                  : localesAlertErrorClassName
+              }
             >
               {message}
               {requestId ? ` (Request ID: ${requestId})` : ""}
@@ -303,8 +309,12 @@ export function LocalesStringsTab({
                     <TableHeaderCell className={`${localesTableHeadClassName} w-8`} />
                     <TableHeaderCell className={localesTableHeadClassName}>Key</TableHeaderCell>
                     <TableHeaderCell className={localesTableHeadClassName}>Value</TableHeaderCell>
-                    <TableHeaderCell className={localesTableHeadClassName}>Last updated</TableHeaderCell>
-                    <TableHeaderCell className={`${localesTableHeadClassName} text-right`}>Actions</TableHeaderCell>
+                    <TableHeaderCell className={localesTableHeadClassName}>
+                      Last updated
+                    </TableHeaderCell>
+                    <TableHeaderCell className={`${localesTableHeadClassName} text-right`}>
+                      Actions
+                    </TableHeaderCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -312,12 +322,16 @@ export function LocalesStringsTab({
                     const expanded = expandedKey === resource.key;
                     return (
                       <Fragment key={resource.key}>
-                        <TableRow className={`${localesTableRowClassName} border-[var(--admin-border)] hover:bg-[var(--admin-surface-low)]`}>
+                        <TableRow
+                          className={`${localesTableRowClassName} border-[var(--admin-border)] hover:bg-[var(--admin-surface-low)]`}
+                        >
                           <TableCell className="w-8">
                             <button
                               type="button"
                               className="rounded p-1 text-[var(--admin-on-surface-variant)] hover:bg-[var(--admin-surface-high)]"
-                              onClick={() => setExpandedKey(expanded ? null : resource.key)}
+                              onClick={() => {
+                                setExpandedKey(expanded ? null : resource.key);
+                              }}
                               aria-expanded={expanded}
                               aria-label={expanded ? "Collapse row" : "Expand row"}
                             >
@@ -345,7 +359,9 @@ export function LocalesStringsTab({
                                 <button
                                   type="button"
                                   className="rounded p-1.5 text-[var(--admin-primary)] hover:bg-[var(--admin-surface-high)]"
-                                  onClick={() => beginEdit(resource)}
+                                  onClick={() => {
+                                    beginEdit(resource);
+                                  }}
                                   aria-label={`Edit ${resource.key}`}
                                 >
                                   <Pencil className="h-4 w-4" aria-hidden="true" />
@@ -354,7 +370,11 @@ export function LocalesStringsTab({
                               <button
                                 type="button"
                                 disabled={!canManage || deletingKey === resource.key}
-                                title={canManage ? `Delete ${resource.key}` : "Delete requires manage access"}
+                                title={
+                                  canManage
+                                    ? `Delete ${resource.key}`
+                                    : "Delete requires manage access"
+                                }
                                 aria-label={`Delete ${resource.key}`}
                                 className="rounded p-1.5 text-[var(--admin-danger)] hover:bg-[var(--admin-surface-high)] disabled:cursor-not-allowed disabled:opacity-40"
                                 onClick={() => void deleteResource(resource.key)}
@@ -366,7 +386,10 @@ export function LocalesStringsTab({
                         </TableRow>
                         {expanded ? (
                           <TableRow className="bg-[var(--admin-surface-low)]">
-                            <TableCell colSpan={5} className="text-sm text-[var(--admin-on-surface)]">
+                            <TableCell
+                              colSpan={5}
+                              className="text-sm text-[var(--admin-on-surface)]"
+                            >
                               {resource.value}
                             </TableCell>
                           </TableRow>
@@ -395,7 +418,9 @@ export function LocalesStringsTab({
                   <Input
                     id="locale-string-key"
                     value={draftKey}
-                    onChange={(event) => setDraftKey(event.target.value)}
+                    onChange={(event) => {
+                      setDraftKey(event.target.value);
+                    }}
                     className={fieldClassName}
                     placeholder="welcome.title"
                     disabled={saving}
@@ -411,7 +436,9 @@ export function LocalesStringsTab({
                   <textarea
                     id="locale-string-value"
                     value={draftValue}
-                    onChange={(event) => setDraftValue(event.target.value)}
+                    onChange={(event) => {
+                      setDraftValue(event.target.value);
+                    }}
                     className={localesTextareaClassName}
                     disabled={saving}
                   />

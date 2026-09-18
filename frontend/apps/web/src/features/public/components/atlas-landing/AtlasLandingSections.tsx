@@ -4,9 +4,27 @@ import Link from "next/link";
 
 export function ConsolePreviewCard() {
   const tenants = [
-    { name: "Meridian Trading School", domain: "learn.meridian.io", learners: "2,140", status: "Active", tone: "grn" as const },
-    { name: "Northbridge Institute", domain: "academy.northbridge.edu", learners: "5,028", status: "Active", tone: "grn" as const },
-    { name: "Atelier Skills Lab", domain: "atelier.atlas.dev", learners: "318", status: "Provisioning", tone: "amb" as const },
+    {
+      name: "Meridian Trading School",
+      domain: "learn.meridian.io",
+      learners: "2,140",
+      status: "Active",
+      tone: "grn" as const,
+    },
+    {
+      name: "Northbridge Institute",
+      domain: "academy.northbridge.edu",
+      learners: "5,028",
+      status: "Active",
+      tone: "grn" as const,
+    },
+    {
+      name: "Atelier Skills Lab",
+      domain: "atelier.atlas.dev",
+      learners: "318",
+      status: "Provisioning",
+      tone: "amb" as const,
+    },
   ];
 
   return (

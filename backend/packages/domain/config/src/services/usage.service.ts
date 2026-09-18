@@ -60,16 +60,23 @@ function currentMonthEntry(
  * remain zero until that instrumentation lands.
  */
 export async function getUsageSummary(tx: TenantTx): Promise<UsageSummaryResponse> {
-  const [metrics, subscriptionRows, mauMonthly, mauDaily, gaugeHistory, counterHistory, entitlements] =
-    await Promise.all([
-      getUsageTierAMetrics(tx),
-      listTenantSubscriptionRows(tx),
-      getMauMonthly(tx),
-      getMauDaily(tx),
-      getUsageGaugeHistory(tx),
-      getUsageCounterHistory(tx),
-      listActiveEntitlements(tx),
-    ]);
+  const [
+    metrics,
+    subscriptionRows,
+    mauMonthly,
+    mauDaily,
+    gaugeHistory,
+    counterHistory,
+    entitlements,
+  ] = await Promise.all([
+    getUsageTierAMetrics(tx),
+    listTenantSubscriptionRows(tx),
+    getMauMonthly(tx),
+    getMauDaily(tx),
+    getUsageGaugeHistory(tx),
+    getUsageCounterHistory(tx),
+    listActiveEntitlements(tx),
+  ]);
 
   const subscription = subscriptionRows[0] ?? null;
   const storageGb = roundGb(metrics.storageGb);
@@ -99,16 +106,19 @@ export async function getUsageSummary(tx: TenantTx): Promise<UsageSummaryRespons
   for (const row of gaugeHistory) {
     const entry = historyByPeriod.get(row.period) ?? emptyEntry(row.period);
     if (row.rollupKey === USAGE_SNAPSHOT_KEYS.storageGb) entry.storageGb = roundGb(row.value);
-    if (row.rollupKey === USAGE_SNAPSHOT_KEYS.totalLearners) entry.totalLearners = Math.round(row.value);
+    if (row.rollupKey === USAGE_SNAPSHOT_KEYS.totalLearners)
+      entry.totalLearners = Math.round(row.value);
     if (row.rollupKey === USAGE_SNAPSHOT_KEYS.products) entry.products = Math.round(row.value);
     if (row.rollupKey === USAGE_SNAPSHOT_KEYS.questions) entry.questions = Math.round(row.value);
-    if (row.rollupKey === USAGE_SNAPSHOT_KEYS.testSubmits) entry.testSubmits = Math.round(row.value);
+    if (row.rollupKey === USAGE_SNAPSHOT_KEYS.testSubmits)
+      entry.testSubmits = Math.round(row.value);
     historyByPeriod.set(row.period, entry);
   }
 
   for (const row of counterHistory) {
     const entry = historyByPeriod.get(row.period) ?? emptyEntry(row.period);
-    if (row.rollupKey === USAGE_COUNTER_KEYS.messageSends) entry.messageSends = Math.round(row.value);
+    if (row.rollupKey === USAGE_COUNTER_KEYS.messageSends)
+      entry.messageSends = Math.round(row.value);
     if (row.rollupKey === USAGE_COUNTER_KEYS.emailValidations) {
       entry.emailValidations = Math.round(row.value);
     }

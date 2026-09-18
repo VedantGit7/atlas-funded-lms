@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
-import { Mail, Plus, X } from "lucide-react";
+import { Mail, X } from "lucide-react";
 import type { MembersListResponse } from "@atlas/contracts/membership/schemas/admin-members";
 import type { RoleListResponse } from "@atlas/contracts/domain-access/schemas/access-admin";
 import { ClientApiError, clientApi } from "../../../lib/client-api";
@@ -85,9 +85,7 @@ export function AddNewMemberDialog({
 
         setRoleOptions(configs);
         setRoleToggles(
-          Object.fromEntries(
-            configs.map((config) => [config.key, config.key === defaultRoleKey]),
-          ),
+          Object.fromEntries(configs.map((config) => [config.key, config.key === defaultRoleKey])),
         );
       } catch {
         if (!cancelled) {

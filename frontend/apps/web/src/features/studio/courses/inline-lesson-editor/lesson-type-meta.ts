@@ -1,4 +1,4 @@
-import type { StudioLessonType, StudioLessonTypeCreate } from "@atlas/contracts/lessons/lesson-schemas";
+import type { StudioLessonTypeCreate } from "@atlas/contracts/lessons/lesson-schemas";
 import { LESSON_TYPE_OPTIONS } from "../lesson-type-options";
 
 export type InlineLessonEditorType = Extract<
@@ -73,7 +73,8 @@ export function uploadWorkspaceMeta(
   if (lessonType === "slides") {
     return {
       panelTitle: "Upload Slide lesson",
-      accept: ".ppt,.pptx,.pdf,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation",
+      accept:
+        ".ppt,.pptx,.pdf,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation",
       showCloudStorage: true,
       showEmbedVideo: true,
     };
@@ -82,7 +83,7 @@ export function uploadWorkspaceMeta(
 }
 
 export function normalizeLessonTypeForEditor(
-  lessonType: StudioLessonType | string | null | undefined,
+  lessonType: string | null | undefined,
 ): InlineLessonEditorType | "unsupported" {
   if (lessonType === "text") return "article";
   if (isInlineLessonEditorType(lessonType)) return lessonType;

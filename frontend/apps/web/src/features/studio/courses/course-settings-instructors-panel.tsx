@@ -32,11 +32,7 @@ type CourseSettingsInstructorsPanelProps = {
 function InstructorListAvatar({ member }: { member: InstructorMember }) {
   if (member.avatarUrl) {
     return (
-      <img
-        src={member.avatarUrl}
-        alt=""
-        className="h-10 w-10 shrink-0 rounded-full object-cover"
-      />
+      <img src={member.avatarUrl} alt="" className="h-10 w-10 shrink-0 rounded-full object-cover" />
     );
   }
 

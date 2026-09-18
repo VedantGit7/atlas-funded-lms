@@ -20,7 +20,11 @@ export const GET = createTenantRoute<Record<string, never>, TenantSeoResponse>({
   output: tenantSeoResponseSchema,
   handler: async ({ tx, ctx }) => {
     const seo = await readTenantSeoSettings(tx);
-    const metaImageUrl = await resolveBrandingAssetUrl(tx, { tenantId: ctx.tenantId }, seo.metaImageRefId);
+    const metaImageUrl = await resolveBrandingAssetUrl(
+      tx,
+      { tenantId: ctx.tenantId },
+      seo.metaImageRefId,
+    );
     return {
       data: {
         ...seo,
@@ -36,7 +40,11 @@ export const PUT = createTenantRoute<UpdateTenantSeoBody, TenantSeoResponse>({
   output: tenantSeoResponseSchema,
   handler: async ({ tx, ctx, input }) => {
     const seo = await updateTenantSeoSettings(tx, input);
-    const metaImageUrl = await resolveBrandingAssetUrl(tx, { tenantId: ctx.tenantId }, seo.metaImageRefId);
+    const metaImageUrl = await resolveBrandingAssetUrl(
+      tx,
+      { tenantId: ctx.tenantId },
+      seo.metaImageRefId,
+    );
     return {
       data: {
         ...seo,

@@ -82,13 +82,18 @@ export function CourseSettingsGeneralShell({
               <h1 className="text-2xl font-bold tracking-tight text-[var(--admin-on-surface)] md:text-[1.75rem]">
                 {section.title}
               </h1>
-              <p className={`${builderHelperClassName} mt-2 max-w-2xl text-sm leading-relaxed md:text-[0.9375rem]`}>
+              <p
+                className={`${builderHelperClassName} mt-2 max-w-2xl text-sm leading-relaxed md:text-[0.9375rem]`}
+              >
                 {section.description}
               </p>
             </header>
 
             <div className="mb-6 lg:hidden">
-              <label htmlFor="course-general-settings-section" className={builderFieldLabelClassName}>
+              <label
+                htmlFor="course-general-settings-section"
+                className={builderFieldLabelClassName}
+              >
                 Section
               </label>
               <select

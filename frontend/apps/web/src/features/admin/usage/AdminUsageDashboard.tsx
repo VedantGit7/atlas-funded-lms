@@ -2,14 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import {
-  ChevronLeft,
-  ChevronRight,
-  Info,
-  RotateCcw,
-  Trash2,
-  TrendingUp,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, Info, RotateCcw, Trash2, TrendingUp } from "lucide-react";
 import { Select } from "@atlas/design-system";
 import { billingBackLinkClassName } from "../billing/billing-admin-shared";
 import {
@@ -195,7 +188,9 @@ function StorageAlert({ summary }: { summary: UsageSummary }) {
         <Trash2 className="h-5 w-5" aria-hidden="true" />
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block text-sm font-semibold text-[var(--admin-on-surface)]">{heading}</span>
+        <span className="block text-sm font-semibold text-[var(--admin-on-surface)]">
+          {heading}
+        </span>
         <span className="block text-sm text-[var(--admin-on-surface-variant)]">{body}</span>
       </span>
       <ChevronRight
@@ -288,7 +283,9 @@ function ComparisonTiles({ comparison }: { comparison: UsageSummary["mau"]["comp
       <p className="flex items-center gap-1.5 text-sm text-[var(--admin-on-surface-variant)]">
         <TrendingUp className="h-4 w-4" aria-hidden="true" />
         Your MAU has grown{" "}
-        <span className="font-semibold text-[var(--admin-success)]">{formatGrowthLabel(current)}</span>{" "}
+        <span className="font-semibold text-[var(--admin-success)]">
+          {formatGrowthLabel(current)}
+        </span>{" "}
         over the last 9 months. Growth compares each period to your current balance.
       </p>
     </div>
@@ -457,7 +454,10 @@ function ContentStorageChart({ summary, now }: { summary: UsageSummary; now: Dat
     <section className={panelClassName} aria-labelledby="content-storage-heading">
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h2 id="content-storage-heading" className="text-base font-bold text-[var(--admin-on-surface)]">
+          <h2
+            id="content-storage-heading"
+            className="text-base font-bold text-[var(--admin-on-surface)]"
+          >
             Content Storage
           </h2>
           <p className="mt-1 text-sm">
@@ -594,7 +594,13 @@ function LineChart({
 
         {areaPath ? <path d={areaPath} fill={CHART_FILL} /> : null}
         {linePath ? (
-          <path d={linePath} fill="none" stroke={CHART_LINE} strokeWidth={2} strokeLinecap="round" />
+          <path
+            d={linePath}
+            fill="none"
+            stroke={CHART_LINE}
+            strokeWidth={2}
+            strokeLinecap="round"
+          />
         ) : null}
 
         {coords.map((point, index) =>

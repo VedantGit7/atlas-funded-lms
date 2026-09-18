@@ -26,7 +26,10 @@ export default async function ProfileSecurityPage({ searchParams }: ProfileSecur
         />
 
         {mfaSetupRequired && !me.data.identity.mfaEnabled ? (
-          <section role="status" className="mb-8 rounded-lg border border-[var(--acct-border)] bg-[var(--acct-surface-low)] p-4 text-sm">
+          <section
+            role="status"
+            className="mb-8 rounded-lg border border-[var(--acct-border)] bg-[var(--acct-surface-low)] p-4 text-sm"
+          >
             <p className="font-medium text-[var(--acct-on-surface)]">
               Set up multi-factor authentication to continue.
             </p>

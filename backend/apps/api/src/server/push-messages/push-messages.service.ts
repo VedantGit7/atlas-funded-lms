@@ -19,10 +19,7 @@ import {
   setPushMessageAudienceBodySchema,
   updatePushMessageTitleBodySchema,
 } from "./push-messages.schemas";
-import {
-  pushMessagesRepository,
-  type PushMessageRow,
-} from "./push-messages.repository";
+import { pushMessagesRepository, type PushMessageRow } from "./push-messages.repository";
 
 function notFound() {
   return new AtlasHttpError({
@@ -160,7 +157,7 @@ export async function listPushMessages(tx: TenantTx, ctx: ServiceCtx, rawQuery: 
   await processDueScheduledPushMessages(tx, ctx);
   const query = pushMessagesListQuerySchema.parse(rawQuery ?? {});
   const listArgs = {
-    ...(query.status ? { status: query.status } : {}),
+    status: query.status,
     ...(query.q ? { q: query.q } : {}),
     ...(query.createdOn ? { createdOn: query.createdOn } : {}),
     limit: query.limit,
@@ -209,9 +206,7 @@ export async function getPushMessagesSummary(tx: TenantTx, ctx: ServiceCtx) {
       ? summary.reach_30d > 0
         ? 100
         : null
-      : Math.round(
-          ((summary.reach_30d - summary.reach_prev_30d) / summary.reach_prev_30d) * 100,
-        );
+      : Math.round(((summary.reach_30d - summary.reach_prev_30d) / summary.reach_prev_30d) * 100);
 
   return pushMessagesSummaryResponseSchema.parse({
     data: {
@@ -298,11 +293,7 @@ export async function setPushMessageAudience(
   return pushMessageResponseSchema.parse({ data: toDto(row) });
 }
 
-export async function listPushMessageRecipients(
-  tx: TenantTx,
-  _ctx: ServiceCtx,
-  id: string,
-) {
+export async function listPushMessageRecipients(tx: TenantTx, _ctx: ServiceCtx, id: string) {
   const existing = await requireMessage(tx, id);
   if (!existing.audience_type) {
     return pushMessageRecipientsResponseSchema.parse({
@@ -361,12 +352,7 @@ export async function composePushMessage(
   return pushMessageResponseSchema.parse({ data: toDto(row) });
 }
 
-export async function sendPushMessage(
-  tx: TenantTx,
-  ctx: ServiceCtx,
-  id: string,
-  rawBody: unknown,
-) {
+export async function sendPushMessage(tx: TenantTx, ctx: ServiceCtx, id: string, rawBody: unknown) {
   await processDueScheduledPushMessages(tx, ctx);
   const body = sendPushMessageBodySchema.parse(rawBody);
   const existing = await requireMessage(tx, id);
@@ -381,7 +367,10 @@ export async function sendPushMessage(
   }
 
   if (body.mode === "schedule") {
-    const scheduledAt = new Date(body.scheduledAt!);
+    // Required in schedule mode by a schema refinement the emitted type does not
+    // express; asserting instead would build `new Date(undefined)` = Invalid Date.
+    if (!body.scheduledAt) throw validationError("A schedule time is required in schedule mode.");
+    const scheduledAt = new Date(body.scheduledAt);
     if (Number.isNaN(scheduledAt.getTime()) || scheduledAt.getTime() <= Date.now()) {
       throw validationError("Schedule time must be in the future.");
     }

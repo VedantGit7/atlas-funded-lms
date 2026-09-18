@@ -54,17 +54,16 @@ export function LearnerPromoSliderCarousel() {
     };
   }, []);
 
-  const safeItems = useMemo(
-    () => items.filter((item) => Boolean(item.imageUrl?.trim())),
-    [items],
-  );
+  const safeItems = useMemo(() => items.filter((item) => Boolean(item.imageUrl?.trim())), [items]);
 
   useEffect(() => {
     if (safeItems.length <= 1) return;
     const timer = window.setInterval(() => {
       setIndex((prev) => (prev + 1) % safeItems.length);
     }, 6000);
-    return () => window.clearInterval(timer);
+    return () => {
+      window.clearInterval(timer);
+    };
   }, [safeItems.length]);
 
   if (safeItems.length === 0) return null;
@@ -73,7 +72,6 @@ export function LearnerPromoSliderCarousel() {
   if (!current?.imageUrl) return null;
 
   const content = (
-    // eslint-disable-next-line @next/next/no-img-element
     <img
       src={current.imageUrl}
       alt={current.name}
@@ -105,9 +103,9 @@ export function LearnerPromoSliderCarousel() {
               type="button"
               aria-label="Previous slide"
               className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-black/40 p-1.5 text-white hover:bg-black/55"
-              onClick={() =>
-                setIndex((prev) => (prev - 1 + safeItems.length) % safeItems.length)
-              }
+              onClick={() => {
+                setIndex((prev) => (prev - 1 + safeItems.length) % safeItems.length);
+              }}
             >
               <ChevronLeft className="h-4 w-4" />
             </button>
@@ -115,7 +113,9 @@ export function LearnerPromoSliderCarousel() {
               type="button"
               aria-label="Next slide"
               className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-black/40 p-1.5 text-white hover:bg-black/55"
-              onClick={() => setIndex((prev) => (prev + 1) % safeItems.length)}
+              onClick={() => {
+                setIndex((prev) => (prev + 1) % safeItems.length);
+              }}
             >
               <ChevronRight className="h-4 w-4" />
             </button>
@@ -129,7 +129,9 @@ export function LearnerPromoSliderCarousel() {
                     "h-1.5 w-1.5 rounded-full",
                     i === index ? "bg-white" : "bg-white/50",
                   ].join(" ")}
-                  onClick={() => setIndex(i)}
+                  onClick={() => {
+                    setIndex(i);
+                  }}
                 />
               ))}
             </div>

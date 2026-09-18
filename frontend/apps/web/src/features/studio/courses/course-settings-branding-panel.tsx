@@ -67,9 +67,7 @@ export function CourseSettingsBrandingPanel({
 
   const savedForm = useMemo(() => courseBrandingFromDetail(course), [course]);
   const [form, setForm] = useState<CourseBrandingFormState>(savedForm);
-  const [coverPreview, setCoverPreview] = useState<string | null>(
-    course.coverKey?.trim() || null,
-  );
+  const [coverPreview, setCoverPreview] = useState<string | null>(course.coverKey?.trim() || null);
   const [videoPreview, setVideoPreview] = useState<string | null>(
     savedForm.promoVideoUrl.trim() || null,
   );

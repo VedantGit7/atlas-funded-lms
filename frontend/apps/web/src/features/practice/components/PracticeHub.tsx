@@ -47,11 +47,46 @@ const MODES: Array<{
   live: boolean;
   engine?: PracticeEngine;
 }> = [
-  { key: "swipe", label: "Swipe", tagline: "Flagship fast-review", Icon: Layers, live: true, engine: "swipe" },
-  { key: "flashcards", label: "Flashcards", tagline: "Classic flip-to-reveal", Icon: Copy, live: true, engine: "flashcards" },
-  { key: "learn", label: "Learn", tagline: "Adaptive quiz-style", Icon: BrainCircuit, live: true, engine: "learn" },
-  { key: "test", label: "Test", tagline: "Timed, graded test", Icon: Timer, live: true, engine: "test" },
-  { key: "match", label: "Match", tagline: "Pair them correctly", Icon: Puzzle, live: true, engine: "match" },
+  {
+    key: "swipe",
+    label: "Swipe",
+    tagline: "Flagship fast-review",
+    Icon: Layers,
+    live: true,
+    engine: "swipe",
+  },
+  {
+    key: "flashcards",
+    label: "Flashcards",
+    tagline: "Classic flip-to-reveal",
+    Icon: Copy,
+    live: true,
+    engine: "flashcards",
+  },
+  {
+    key: "learn",
+    label: "Learn",
+    tagline: "Adaptive quiz-style",
+    Icon: BrainCircuit,
+    live: true,
+    engine: "learn",
+  },
+  {
+    key: "test",
+    label: "Test",
+    tagline: "Timed, graded test",
+    Icon: Timer,
+    live: true,
+    engine: "test",
+  },
+  {
+    key: "match",
+    label: "Match",
+    tagline: "Pair them correctly",
+    Icon: Puzzle,
+    live: true,
+    engine: "match",
+  },
 ];
 
 function Ring({ percent }: { percent: number }) {
@@ -61,7 +96,14 @@ function Ring({ percent }: { percent: number }) {
   return (
     <div className="relative h-12 w-12 shrink-0">
       <svg className="h-full w-full -rotate-90" viewBox="0 0 48 48" aria-hidden="true">
-        <circle cx="24" cy="24" r={radius} fill="transparent" strokeWidth="4" style={{ stroke: "var(--muted)" }} />
+        <circle
+          cx="24"
+          cy="24"
+          r={radius}
+          fill="transparent"
+          strokeWidth="4"
+          style={{ stroke: "var(--muted)" }}
+        />
         <circle
           cx="24"
           cy="24"
@@ -69,10 +111,17 @@ function Ring({ percent }: { percent: number }) {
           fill="transparent"
           strokeWidth="4"
           strokeLinecap="round"
-          style={{ stroke: "var(--success)", strokeDasharray: circumference, strokeDashoffset: offset }}
+          style={{
+            stroke: "var(--success)",
+            strokeDasharray: circumference,
+            strokeDashoffset: offset,
+          }}
         />
       </svg>
-      <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold" style={{ color: "var(--success)" }}>
+      <span
+        className="absolute inset-0 flex items-center justify-center text-[10px] font-bold"
+        style={{ color: "var(--success)" }}
+      >
         {percent}%
       </span>
     </div>
@@ -102,30 +151,43 @@ function DeckCard({
         </button>
       ) : null}
       <button type="button" onClick={onOpen} className="flex flex-1 flex-col gap-6 text-left">
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0 space-y-1">
-          <h4 className="truncate text-lg font-bold text-primary">{deck.title}</h4>
-          <p className="text-xs text-muted-foreground">
-            {deck.itemCount} {deck.itemCount === 1 ? "item" : "items"}
-            {deck.category ? ` · ${deck.category}` : ""}
-          </p>
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0 space-y-1">
+            <h4 className="truncate text-lg font-bold text-primary">{deck.title}</h4>
+            <p className="text-xs text-muted-foreground">
+              {deck.itemCount} {deck.itemCount === 1 ? "item" : "items"}
+              {deck.category ? ` · ${deck.category}` : ""}
+            </p>
+          </div>
+          <Ring percent={deck.masteryPercent} />
         </div>
-        <Ring percent={deck.masteryPercent} />
-      </div>
-      <div className="mt-auto flex items-center justify-between">
-        <span
-          className="inline-flex items-center gap-1 rounded-full px-3 py-1 text-[10px] font-bold uppercase"
-          style={
-            clean
-              ? { background: "color-mix(in srgb, var(--success) 15%, transparent)", color: "var(--success)" }
-              : { background: "color-mix(in srgb, var(--destructive) 15%, transparent)", color: "var(--destructive)" }
-          }
-        >
-          {clean ? <CheckCircle2 className="h-3 w-3" aria-hidden="true" /> : <AlarmClock className="h-3 w-3" aria-hidden="true" />}
-          {clean ? "Clean" : `${String(deck.dueCount)} due`}
-        </span>
-        <ChevronRight className="h-5 w-5 text-muted-foreground transition-transform group-hover:translate-x-1" aria-hidden="true" />
-      </div>
+        <div className="mt-auto flex items-center justify-between">
+          <span
+            className="inline-flex items-center gap-1 rounded-full px-3 py-1 text-[10px] font-bold uppercase"
+            style={
+              clean
+                ? {
+                    background: "color-mix(in srgb, var(--success) 15%, transparent)",
+                    color: "var(--success)",
+                  }
+                : {
+                    background: "color-mix(in srgb, var(--destructive) 15%, transparent)",
+                    color: "var(--destructive)",
+                  }
+            }
+          >
+            {clean ? (
+              <CheckCircle2 className="h-3 w-3" aria-hidden="true" />
+            ) : (
+              <AlarmClock className="h-3 w-3" aria-hidden="true" />
+            )}
+            {clean ? "Clean" : `${String(deck.dueCount)} due`}
+          </span>
+          <ChevronRight
+            className="h-5 w-5 text-muted-foreground transition-transform group-hover:translate-x-1"
+            aria-hidden="true"
+          />
+        </div>
       </button>
     </div>
   );
@@ -142,9 +204,12 @@ export function PracticeHub({ due, starting, onStartDue, onStartDeck }: Practice
     <div className="mx-auto max-w-5xl space-y-12">
       {/* Header */}
       <header className="space-y-2">
-        <h1 className="text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">Practice</h1>
+        <h1 className="text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
+          Practice
+        </h1>
         <p className="max-w-xl text-sm text-muted-foreground">
-          Review what you&apos;ve learned, on your schedule. Keep your momentum high and your knowledge sharp.
+          Review what you&apos;ve learned, on your schedule. Keep your momentum high and your
+          knowledge sharp.
         </p>
       </header>
 
@@ -159,7 +224,9 @@ export function PracticeHub({ due, starting, onStartDue, onStartDeck }: Practice
       >
         <div className="relative z-10 flex flex-col items-center justify-between gap-8 text-center md:flex-row md:text-left">
           <div>
-            <div className="text-5xl font-extrabold tracking-tight text-primary sm:text-6xl">{dueTotal}</div>
+            <div className="text-5xl font-extrabold tracking-tight text-primary sm:text-6xl">
+              {dueTotal}
+            </div>
             <p className="mt-1 text-xl font-bold text-foreground">
               {dueTotal === 1 ? "card due for review" : "cards due for review"}
             </p>
@@ -179,14 +246,18 @@ export function PracticeHub({ due, starting, onStartDue, onStartDeck }: Practice
           >
             {starting ? <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" /> : null}
             {hasDue ? "Start due review" : "Nothing due"}
-            {!starting && hasDue ? <Zap className="h-5 w-5" fill="currentColor" aria-hidden="true" /> : null}
+            {!starting && hasDue ? (
+              <Zap className="h-5 w-5" fill="currentColor" aria-hidden="true" />
+            ) : null}
           </button>
         </div>
       </section>
 
       {/* Mode selector */}
       <section className="space-y-6">
-        <h3 className="text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">Select mode</h3>
+        <h3 className="text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">
+          Select mode
+        </h3>
         <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
           {MODES.map((mode) => {
             const disabled = !mode.live;
@@ -197,7 +268,9 @@ export function PracticeHub({ due, starting, onStartDue, onStartDeck }: Practice
                 </span>
                 <div>
                   <p className="font-bold text-primary">{mode.label}</p>
-                  <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">{mode.tagline}</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                    {mode.tagline}
+                  </p>
                 </div>
                 {!mode.live ? (
                   <span className="absolute right-2 top-2 rounded-full bg-muted px-2 py-0.5 text-[9px] font-bold uppercase text-muted-foreground">
@@ -221,7 +294,11 @@ export function PracticeHub({ due, starting, onStartDue, onStartDeck }: Practice
                 {content}
               </button>
             ) : (
-              <div key={mode.key} className={`${base} cursor-default opacity-70`} aria-disabled="true">
+              <div
+                key={mode.key}
+                className={`${base} cursor-default opacity-70`}
+                aria-disabled="true"
+              >
                 {content}
               </div>
             );
@@ -232,7 +309,9 @@ export function PracticeHub({ due, starting, onStartDue, onStartDeck }: Practice
       {/* Decks */}
       <section className="space-y-6">
         <div className="flex items-center justify-between">
-          <h3 className="text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">Your decks</h3>
+          <h3 className="text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">
+            Your decks
+          </h3>
         </div>
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {due.availableDecks.map((deck) => (

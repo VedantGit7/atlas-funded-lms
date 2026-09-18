@@ -2,7 +2,10 @@ export function formatRelativeTime(iso: string): string {
   const date = new Date(iso);
   const diffMinutes = Math.round((date.getTime() - Date.now()) / (1000 * 60));
   if (Math.abs(diffMinutes) < 60) {
-    return new Intl.RelativeTimeFormat(undefined, { numeric: "auto" }).format(diffMinutes, "minute");
+    return new Intl.RelativeTimeFormat(undefined, { numeric: "auto" }).format(
+      diffMinutes,
+      "minute",
+    );
   }
   const diffHours = Math.round((date.getTime() - Date.now()) / (1000 * 60 * 60));
   if (Math.abs(diffHours) < 48) {
@@ -16,7 +19,10 @@ export function truncateText(value: string, maxLength = 80): string {
   return `${value.slice(0, maxLength)}…`;
 }
 
-export function mergeLocaleOptions(existingLocales: string[], commonValues: readonly { value: string; label: string }[]) {
+export function mergeLocaleOptions(
+  existingLocales: string[],
+  commonValues: readonly { value: string; label: string }[],
+) {
   const seen = new Set<string>();
   const options: Array<{ value: string; label: string }> = [];
 

@@ -36,7 +36,8 @@ function parseSeoFromTags(tags?: Record<string, unknown>): CourseSeoSettings {
   const record = raw as Record<string, unknown>;
 
   return {
-    pageTitle: typeof record["pageTitle"] === "string" ? record["pageTitle"] : DEFAULT_SEO.pageTitle,
+    pageTitle:
+      typeof record["pageTitle"] === "string" ? record["pageTitle"] : DEFAULT_SEO.pageTitle,
     seoDescription:
       typeof record["seoDescription"] === "string"
         ? record["seoDescription"]

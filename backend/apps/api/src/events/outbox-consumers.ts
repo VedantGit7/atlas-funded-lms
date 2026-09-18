@@ -134,6 +134,10 @@ import {
   reportsOutboxHandlers,
 } from "@atlas/domain/reports/reports.worker";
 import {
+  MARKETING_WEBHOOK_DISPATCH_EVENT,
+  marketingWebhookOutboxHandlers,
+} from "../server/marketing-integrations/marketing-integrations.worker";
+import {
   REPORT_DELIVERY_WORKER_DESTINATION,
   REPORT_RUN_SUCCEEDED_EVENT,
   handleReportDeliveryOutboxEvent,
@@ -283,6 +287,11 @@ export function createMarketingWorkflowOutboxConsumers(): Record<string, OutboxH
   for (const eventType of MARKETING_WORKFLOW_SOURCE_EVENTS) {
     appendHandlers(map, eventType, marketingWorkflowOutboxHandlers);
   }
+
+  // Tenant webhook fan-out. Registered here rather than as an eleventh consumer
+  // group because this factory is already folded into the engagement consumers,
+  // which the competency processor runs.
+  appendHandlers(map, MARKETING_WEBHOOK_DISPATCH_EVENT, marketingWebhookOutboxHandlers);
 
   return map;
 }

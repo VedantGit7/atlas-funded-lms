@@ -137,7 +137,9 @@ export function MatchCard({ leftItems, rightItems, disabled, onSubmit }: MatchCa
           }}
           className="inline-flex min-w-[160px] items-center justify-center rounded-xl bg-primary px-6 py-3 text-sm font-bold text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50 motion-safe:active:scale-95"
         >
-          {complete ? "Check answers" : `${String(Object.keys(pairs).length)} / ${String(leftItems.length)} matched`}
+          {complete
+            ? "Check answers"
+            : `${String(Object.keys(pairs).length)} / ${String(leftItems.length)} matched`}
         </button>
       </div>
     </div>

@@ -1,8 +1,5 @@
 import { createTenantRoute, noBodySchema } from "@atlas/api";
-import {
-  FxRatesResponseSchema,
-  type FxRatesResponse,
-} from "@atlas/domain-config/schemas/fx";
+import { FxRatesResponseSchema, type FxRatesResponse } from "@atlas/domain-config/schemas/fx";
 import { getFxRates, refreshFxRates } from "@atlas/domain-config/services/fx.service";
 import { getRouteMetadata, postRouteMetadata } from "./route.metadata";
 

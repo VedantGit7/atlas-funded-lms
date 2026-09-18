@@ -5,13 +5,7 @@ import { AdminPageGate } from "../../../../../../../../../components/patterns/Ad
 import { AdminProgressLearnerDetailPage } from "../../../../../../../../../features/admin/reports/AdminProgressLearnerDetailPage";
 import { runTenantStateGate } from "../../../../../../../../../lib/server/tenant-state-gate";
 
-const PRODUCT_TYPES = new Set([
-  "course",
-  "test_series",
-  "bundle",
-  "subscription",
-  "mock_test",
-]);
+const PRODUCT_TYPES = new Set(["course", "test_series", "bundle", "subscription", "mock_test"]);
 
 export default async function AdminProgressLearnerDetailRoutePage({
   params,

@@ -48,11 +48,7 @@ function resolveWindow(query: ProgressScoreOverviewQuery): {
   return { windowFrom, windowTo, previousFrom, previousTo, windowLabel };
 }
 
-export async function getProgressScoreOverview(
-  tx: TenantTx,
-  _ctx: ServiceCtx,
-  rawQuery: unknown,
-) {
+export async function getProgressScoreOverview(tx: TenantTx, _ctx: ServiceCtx, rawQuery: unknown) {
   const query = progressScoreOverviewQuerySchema.parse(rawQuery);
   const { windowFrom, windowTo, previousFrom, previousTo, windowLabel } = resolveWindow(query);
 
@@ -65,9 +61,7 @@ export async function getProgressScoreOverview(
 
   const delta =
     signals.averageCompletionPct != null && signals.previousAverageCompletionPct != null
-      ? Math.round(
-          (signals.averageCompletionPct - signals.previousAverageCompletionPct) * 10,
-        ) / 10
+      ? Math.round((signals.averageCompletionPct - signals.previousAverageCompletionPct) * 10) / 10
       : null;
 
   const bandTotal =

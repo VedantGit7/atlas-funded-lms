@@ -4,6 +4,7 @@ Paste **Block 0 (Design System)** into Stitch first, then paste one screen promp
 Keep the same Stitch project so the design system carries across screens.
 
 Source of truth for existing behaviour:
+
 - `frontend/apps/web/src/features/admin/reports/AdminActiveDevicesRosterPage.tsx`
 - `frontend/apps/web/src/features/admin/reports/admin-active-devices-roster-api.ts`
 - `backend/packages/domain/src/reports/active-devices-roster.{service,repository}.ts`
@@ -406,14 +407,14 @@ action, and the failed-export detail popover showing the error reason and a Retr
 The prompts intentionally describe the full best-in-class version. Today the API only backs
 the roster list, per-learner devices, bulk delete, and force-sign-out. Not yet backed:
 
-| Prompt feature | Status |
-| --- | --- |
-| Roster list, learner devices, revoke, force sign-out | exists |
-| Email / platform filters, pagination | exists |
-| IP, platform, fingerprint, user agent, first/last seen fields | exists on `device_sessions` |
-| Geo resolution (city/country/ISP), maps | needs backend |
-| Device-limit policy, overrides, enforcement modes | partly in `/admin/security/device-monitor` — verify before building |
-| Alerts engine (impossible travel, concurrent sessions, shared fingerprint) | needs backend |
-| Fingerprint blocklist | needs backend |
-| Saved views, export history, scheduled exports | export pipeline exists under reports; scheduling needs backend |
-| Per-session request activity / heatstrip | needs an event source |
+| Prompt feature                                                             | Status                                                              |
+| -------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| Roster list, learner devices, revoke, force sign-out                       | exists                                                              |
+| Email / platform filters, pagination                                       | exists                                                              |
+| IP, platform, fingerprint, user agent, first/last seen fields              | exists on `device_sessions`                                         |
+| Geo resolution (city/country/ISP), maps                                    | needs backend                                                       |
+| Device-limit policy, overrides, enforcement modes                          | partly in `/admin/security/device-monitor` — verify before building |
+| Alerts engine (impossible travel, concurrent sessions, shared fingerprint) | needs backend                                                       |
+| Fingerprint blocklist                                                      | needs backend                                                       |
+| Saved views, export history, scheduled exports                             | export pipeline exists under reports; scheduling needs backend      |
+| Per-session request activity / heatstrip                                   | needs an event source                                               |

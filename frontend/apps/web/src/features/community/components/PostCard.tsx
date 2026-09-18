@@ -44,7 +44,12 @@ type PostCardProps = {
   initialComments?: CommentItem[];
 };
 
-export function PostCard({ post, viewer, defaultExpanded = false, initialComments }: PostCardProps) {
+export function PostCard({
+  post,
+  viewer,
+  defaultExpanded = false,
+  initialComments,
+}: PostCardProps) {
   const [expanded, setExpanded] = useState(defaultExpanded);
   const [comments, setComments] = useState<CommentItem[] | null>(initialComments ?? null);
   const [loading, setLoading] = useState(false);
@@ -109,11 +114,15 @@ export function PostCard({ post, viewer, defaultExpanded = false, initialComment
               <p className="text-[11px] text-muted-foreground">{relativeTime(post.createdAt)}</p>
             </div>
           </div>
-          {!isOwn ? <ReportContentDialog variant="button" targetType="post" targetId={post.id} /> : null}
+          {!isOwn ? (
+            <ReportContentDialog variant="button" targetType="post" targetId={post.id} />
+          ) : null}
         </div>
 
         {post.title ? (
-          <h3 className="mt-4 text-lg font-semibold tracking-tight text-foreground">{post.title}</h3>
+          <h3 className="mt-4 text-lg font-semibold tracking-tight text-foreground">
+            {post.title}
+          </h3>
         ) : null}
 
         <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-muted-foreground">

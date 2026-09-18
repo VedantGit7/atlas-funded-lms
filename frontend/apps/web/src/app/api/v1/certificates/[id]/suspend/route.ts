@@ -17,6 +17,5 @@ export const POST = createTenantRoute<
   params: certificateParamsSchema,
   body: certificateLifecycleActionBodySchema,
   output: certificateDetailResponseSchema,
-  handler: async ({ tx, ctx, params, input }) =>
-    suspendCertificate(tx, ctx, params["id"] ?? "", input),
+  handler: async ({ tx, ctx, params, input }) => suspendCertificate(tx, ctx, params.id, input),
 });

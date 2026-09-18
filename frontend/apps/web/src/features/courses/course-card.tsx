@@ -43,15 +43,26 @@ export type CourseCardData = {
 /** Maps a course's category/title to a recognizable icon + design token accent. */
 const CATEGORY_VISUALS: Array<{ match: RegExp; Icon: LucideIcon; tone: string }> = [
   { match: /personal|budget|saving|money|wealth/, Icon: Wallet, tone: "var(--success)" },
-  { match: /invest|market|trading|portfolio|stock|equit|macro/, Icon: TrendingUp, tone: "var(--primary)" },
+  {
+    match: /invest|market|trading|portfolio|stock|equit|macro/,
+    Icon: TrendingUp,
+    tone: "var(--primary)",
+  },
   { match: /bank/, Icon: Landmark, tone: "var(--accent)" },
   { match: /account|tax|audit|bookkeep/, Icon: Calculator, tone: "var(--warning)" },
   { match: /law|compliance|govern|ethic|regulat|legal/, Icon: Scale, tone: "var(--primary)" },
-  { match: /fintech|crypto|blockchain|tech|algo|\bai\b|data|python/, Icon: Rocket, tone: "var(--accent)" },
+  {
+    match: /fintech|crypto|blockchain|tech|algo|\bai\b|data|python/,
+    Icon: Rocket,
+    tone: "var(--accent)",
+  },
   { match: /risk|hedge|derivativ|volatil/, Icon: ShieldAlert, tone: "var(--warning)" },
 ];
 
-export function courseVisual(category: string | null, title: string): { Icon: LucideIcon; tone: string } {
+export function courseVisual(
+  category: string | null,
+  title: string,
+): { Icon: LucideIcon; tone: string } {
   const haystack = `${category ?? ""} ${title}`.toLowerCase();
   for (const v of CATEGORY_VISUALS) {
     if (v.match.test(haystack)) return { Icon: v.Icon, tone: v.tone };
@@ -88,7 +99,9 @@ export function CoverArt({
   return (
     <div
       className={`relative overflow-hidden ${className}`}
-      style={{ backgroundImage: `linear-gradient(135deg, color-mix(in srgb, ${tone} 26%, var(--card)), var(--card))` }}
+      style={{
+        backgroundImage: `linear-gradient(135deg, color-mix(in srgb, ${tone} 26%, var(--card)), var(--card))`,
+      }}
     >
       <div className="absolute inset-0 flex items-center justify-center">
         <Icon
@@ -170,7 +183,12 @@ export function CourseCard({ course, wishlisted, onToggleWishlist }: CourseCardP
     <article className="group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-all duration-300 motion-safe:hover:-translate-y-1 hover:shadow-lg">
       <Link href={`/courses/${course.id}`} className="flex flex-1 flex-col focus:outline-none">
         {/* Media (real cover image over token-gradient + category-icon fallback) */}
-        <CoverArt coverKey={course.coverKey} category={course.category} title={course.title} className="aspect-video w-full">
+        <CoverArt
+          coverKey={course.coverKey}
+          category={course.category}
+          title={course.title}
+          className="aspect-video w-full"
+        >
           {course.level ? (
             <span className="absolute left-3 top-3 rounded-full bg-card/90 px-3 py-1 text-xs font-bold text-primary backdrop-blur">
               {LEVEL_LABEL[course.level]}
@@ -211,12 +229,20 @@ export function CourseCard({ course, wishlisted, onToggleWishlist }: CourseCardP
           <div className="flex items-center gap-3 text-sm text-muted-foreground">
             {course.ratingAverage != null ? (
               <span className="flex items-center gap-1">
-                <Star className="h-3.5 w-3.5 text-[var(--warning)]" fill="currentColor" aria-hidden="true" />
+                <Star
+                  className="h-3.5 w-3.5 text-[var(--warning)]"
+                  fill="currentColor"
+                  aria-hidden="true"
+                />
                 <span className="font-bold text-foreground">{course.ratingAverage.toFixed(1)}</span>
-                {course.ratingCount > 0 ? <span>({course.ratingCount.toLocaleString()})</span> : null}
+                {course.ratingCount > 0 ? (
+                  <span>({course.ratingCount.toLocaleString()})</span>
+                ) : null}
               </span>
             ) : (
-              <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-bold text-primary">New</span>
+              <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-bold text-primary">
+                New
+              </span>
             )}
             {course.studentCount > 0 ? (
               <span className="flex items-center gap-1">
@@ -232,7 +258,9 @@ export function CourseCard({ course, wishlisted, onToggleWishlist }: CourseCardP
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-muted-foreground">
-                    {course.progressPct != null ? `${String(course.progressPct)}% complete` : "In progress"}
+                    {course.progressPct != null
+                      ? `${String(course.progressPct)}% complete`
+                      : "In progress"}
                   </span>
                   <span className="font-bold text-primary">Continue</span>
                 </div>
@@ -247,8 +275,11 @@ export function CourseCard({ course, wishlisted, onToggleWishlist }: CourseCardP
               <span className="text-lg font-extrabold text-[var(--success)]">Free</span>
             ) : (
               <div className="flex items-center gap-2">
-                <span className="text-lg font-extrabold text-primary">{formatMoney(course.priceCents, course.currency)}</span>
-                {course.compareAtPriceCents != null && course.compareAtPriceCents > course.priceCents ? (
+                <span className="text-lg font-extrabold text-primary">
+                  {formatMoney(course.priceCents, course.currency)}
+                </span>
+                {course.compareAtPriceCents != null &&
+                course.compareAtPriceCents > course.priceCents ? (
                   <span className="text-sm text-muted-foreground line-through">
                     {formatMoney(course.compareAtPriceCents, course.currency)}
                   </span>
@@ -256,7 +287,10 @@ export function CourseCard({ course, wishlisted, onToggleWishlist }: CourseCardP
                 {discountPct != null ? (
                   <span
                     className="ml-auto rounded-full px-2 py-0.5 text-[11px] font-bold"
-                    style={{ background: "color-mix(in srgb, var(--success) 16%, transparent)", color: "var(--success)" }}
+                    style={{
+                      background: "color-mix(in srgb, var(--success) 16%, transparent)",
+                      color: "var(--success)",
+                    }}
                   >
                     {discountPct}% off
                   </span>

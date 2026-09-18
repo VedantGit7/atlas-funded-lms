@@ -8,7 +8,11 @@
     "./cookie-store": "./src/cookie-store.ts",
     "./session": "./src/session.ts",
     "./public-auth.service": "./src/public-auth.service.ts",
-    "./schemas": "./src/schemas.ts"
+    "./schemas": "./src/schemas.ts",
+    "./platform-auth": "./src/platform-auth.ts",
+    "./supabase-server": "./src/supabase-server.ts",
+    "./platform-operators.repository": "./src/platform-operators.repository.ts",
+    "./mfa-enforcement": "./src/mfa-enforcement.ts"
   },
   "scripts": {
     "build": "echo \"No auth build configured yet.\"",
@@ -24,8 +28,9 @@
   "dependencies": {
     "@atlas/core": "workspace:*",
     "@supabase/supabase-js": "^2.108.2",
-    "next": "^16.2.9",
-    "zod": "^4.4.3"
+    "next": "^16.2.11",
+    "zod": "^4.4.3",
+    "@atlas/observability": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^24.0.0"

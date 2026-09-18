@@ -2,7 +2,9 @@
 
 import type { AdminReportSlug } from "../reports/admin-reports-catalog";
 
-export const REPORT_MANAGE_LINKS: Partial<Record<AdminReportSlug, { href: string; label: string }>> = {
+export const REPORT_MANAGE_LINKS: Partial<
+  Record<AdminReportSlug, { href: string; label: string }>
+> = {
   batches: { href: "/admin/batches", label: "Manage batches" },
   polls: { href: "/admin/polls", label: "Manage polls" },
   "live-class-attendance": { href: "/admin/live-sessions", label: "Manage live sessions" },

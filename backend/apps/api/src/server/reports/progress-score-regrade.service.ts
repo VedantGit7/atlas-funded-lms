@@ -66,7 +66,7 @@ async function loadScoringItems(tx: TenantTx, assessmentId: string): Promise<Sco
       assessmentItemId: row.assessment_item_id,
       itemId: row.item_id,
       itemTypeKey: row.item_type_key,
-      points: Number(row.points),
+      points: row.points,
       answerKeyJson: answerKeyJson ?? {},
       options: optionsByItem.get(row.item_id) ?? [],
     };
@@ -147,9 +147,7 @@ export async function regradeScoreAttempts(
       continue;
     }
 
-    const answers = await tx.$queryRaw<
-      Array<{ assessment_item_id: string; answer_json: unknown }>
-    >`
+    const answers = await tx.$queryRaw<Array<{ assessment_item_id: string; answer_json: unknown }>>`
       select assessment_item_id::text as assessment_item_id, answer_json
       from attempt_answers
       where attempt_id = ${attemptId}::uuid

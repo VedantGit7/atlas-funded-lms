@@ -5,7 +5,10 @@
   "exports": {
     ".": "./src/index.ts",
     "./services/audit-writer": "./src/services/audit-writer.ts",
-    "./services/audit-chain.service": "./src/services/audit-chain.service.ts"
+    "./services/audit-chain.service": "./src/services/audit-chain.service.ts",
+    "./repositories/audit.repository": "./src/repositories/audit.repository.ts",
+    "./services/audit-reader.service": "./src/services/audit-reader.service.ts",
+    "./transaction": "./src/transaction.ts"
   },
   "scripts": {
     "build": "echo \"No audit build configured yet.\"",

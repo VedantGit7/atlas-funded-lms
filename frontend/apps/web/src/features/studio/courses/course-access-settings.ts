@@ -88,9 +88,7 @@ function readDripLessonSchedules(value: unknown): DripLessonSchedule[] {
     .filter((item): item is DripLessonSchedule => item != null);
 }
 
-export function parseCourseAccessFromTags(
-  tags?: Record<string, unknown>,
-): CourseAccessSettings {
+export function parseCourseAccessFromTags(tags?: Record<string, unknown>): CourseAccessSettings {
   const raw = tags?.[ACCESS_SETTINGS_TAG_KEY];
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
     return DEFAULT_SETTINGS;
@@ -192,7 +190,7 @@ export function courseDripSettingsEqual(a: CourseDripSettings, b: CourseDripSett
     a.dripLessonSchedules.every(
       (schedule, index) =>
         schedule.lessonId === b.dripLessonSchedules[index]?.lessonId &&
-        schedule.releaseAfterDays === b.dripLessonSchedules[index]?.releaseAfterDays,
+        schedule.releaseAfterDays === b.dripLessonSchedules[index].releaseAfterDays,
     )
   );
 }

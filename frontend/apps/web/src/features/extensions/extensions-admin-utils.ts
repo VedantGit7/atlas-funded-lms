@@ -6,7 +6,10 @@ export function formatRelativeTime(iso: string): string {
   const date = new Date(iso);
   const diffMinutes = Math.round((date.getTime() - Date.now()) / (1000 * 60));
   if (Math.abs(diffMinutes) < 60) {
-    return new Intl.RelativeTimeFormat(undefined, { numeric: "auto" }).format(diffMinutes, "minute");
+    return new Intl.RelativeTimeFormat(undefined, { numeric: "auto" }).format(
+      diffMinutes,
+      "minute",
+    );
   }
   const diffHours = Math.round((date.getTime() - Date.now()) / (1000 * 60 * 60));
   if (Math.abs(diffHours) < 48) {
@@ -72,7 +75,9 @@ export function filterRegistrations(
   );
 }
 
-export function parseConfigJson(raw: string): { ok: true; value: Record<string, unknown> } | { ok: false; message: string } {
+export function parseConfigJson(
+  raw: string,
+): { ok: true; value: Record<string, unknown> } | { ok: false; message: string } {
   try {
     const parsed: unknown = JSON.parse(raw);
     if (parsed === null || typeof parsed !== "object" || Array.isArray(parsed)) {
@@ -86,7 +91,8 @@ export function parseConfigJson(raw: string): { ok: true; value: Record<string, 
 }
 
 export function defaultRegistrationDraft(extensionPoints: ExtensionPointDto[]) {
-  const defaultPoint = extensionPoints.find((point) => point.key === "item_type_renderer") ?? extensionPoints[0];
+  const defaultPoint =
+    extensionPoints.find((point) => point.key === "item_type_renderer") ?? extensionPoints[0];
   return {
     extensionPointKey: defaultPoint?.key ?? "item_type_renderer",
     registrationKey: "swipe-renderer",

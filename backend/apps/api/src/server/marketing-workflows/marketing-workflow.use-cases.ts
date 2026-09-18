@@ -33,10 +33,16 @@ export const MARKETING_WORKFLOW_USE_CASES: MarketingUseCase[] = [
     graph: {
       entryNodeId: "t1",
       nodes: {
-        t1: node("t1", "trigger", "On form submitted", {
-          triggerType: "form_submitted",
-          formLabel: "Lead form",
-        }, { next: "a1" }),
+        t1: node(
+          "t1",
+          "trigger",
+          "On form submitted",
+          {
+            triggerType: "form_submitted",
+            formLabel: "Lead form",
+          },
+          { next: "a1" },
+        ),
         a1: node("a1", "action", "Send free eBook", {
           actionType: "send_free_resource",
           channel: "email",
@@ -56,21 +62,33 @@ export const MARKETING_WORKFLOW_USE_CASES: MarketingUseCase[] = [
     graph: {
       entryNodeId: "t1",
       nodes: {
-        t1: node("t1", "trigger", "On form submitted", {
-          triggerType: "form_submitted",
-          formLabel: "Webinar form",
-        }, { next: "a1" }),
-        a1: node("a1", "action", "Register for marketing event", {
-          actionType: "register_marketing_event",
-          channel: "email",
-          eventId: null,
-          eventLabel: "Live webinar",
-          reminderHours: 24,
-          email: {
-            subject: "You're registered",
-            bodyHtml: "<p>You are registered for our live session.</p>",
+        t1: node(
+          "t1",
+          "trigger",
+          "On form submitted",
+          {
+            triggerType: "form_submitted",
+            formLabel: "Webinar form",
           },
-        }, { next: "a2" }),
+          { next: "a1" },
+        ),
+        a1: node(
+          "a1",
+          "action",
+          "Register for marketing event",
+          {
+            actionType: "register_marketing_event",
+            channel: "email",
+            eventId: null,
+            eventLabel: "Live webinar",
+            reminderHours: 24,
+            email: {
+              subject: "You're registered",
+              bodyHtml: "<p>You are registered for our live session.</p>",
+            },
+          },
+          { next: "a2" },
+        ),
         a2: node("a2", "action", "Send webinar invitation", {
           actionType: "send_webinar_invite",
           channel: "email",
@@ -86,24 +104,43 @@ export const MARKETING_WORKFLOW_USE_CASES: MarketingUseCase[] = [
   {
     key: "scholarship_test_coupon",
     title: "Increase revenue by conducting a scholarship test",
-    description: "On test evaluation, branch by score percentage and send coupons or encouragement.",
+    description:
+      "On test evaluation, branch by score percentage and send coupons or encouragement.",
     graph: {
       entryNodeId: "t1",
       nodes: {
-        t1: node("t1", "trigger", "On test evaluation", {
-          triggerType: "test_evaluation",
-          testLabel: "Scholarship test",
-        }, { next: "c1" }),
-        c1: node("c1", "condition", "Score >= 80%", {
-          conditionType: "test_percentage",
-          operator: "gte",
-          value: 80,
-        }, { onTrue: "a1", onFalse: "c2" }),
-        c2: node("c2", "condition", "Score >= 50%", {
-          conditionType: "test_percentage",
-          operator: "gte",
-          value: 50,
-        }, { onTrue: "a2", onFalse: "a3" }),
+        t1: node(
+          "t1",
+          "trigger",
+          "On test evaluation",
+          {
+            triggerType: "test_evaluation",
+            testLabel: "Scholarship test",
+          },
+          { next: "c1" },
+        ),
+        c1: node(
+          "c1",
+          "condition",
+          "Score >= 80%",
+          {
+            conditionType: "test_percentage",
+            operator: "gte",
+            value: 80,
+          },
+          { onTrue: "a1", onFalse: "c2" },
+        ),
+        c2: node(
+          "c2",
+          "condition",
+          "Score >= 50%",
+          {
+            conditionType: "test_percentage",
+            operator: "gte",
+            value: 50,
+          },
+          { onTrue: "a2", onFalse: "a3" },
+        ),
         a1: node("a1", "action", "Send 40% coupon", {
           actionType: "send_coupon",
           channel: "email",
@@ -140,15 +177,27 @@ export const MARKETING_WORKFLOW_USE_CASES: MarketingUseCase[] = [
     graph: {
       entryNodeId: "t1",
       nodes: {
-        t1: node("t1", "trigger", "On payment success", {
-          triggerType: "payment_success",
-          productLabel: "Purchased product",
-        }, { next: "d1" }),
-        d1: node("d1", "delay", "Wait before upsell", {
-          days: 1,
-          hours: 0,
-          minutes: 0,
-        }, { next: "a1" }),
+        t1: node(
+          "t1",
+          "trigger",
+          "On payment success",
+          {
+            triggerType: "payment_success",
+            productLabel: "Purchased product",
+          },
+          { next: "d1" },
+        ),
+        d1: node(
+          "d1",
+          "delay",
+          "Wait before upsell",
+          {
+            days: 1,
+            hours: 0,
+            minutes: 0,
+          },
+          { next: "a1" },
+        ),
         a1: node("a1", "action", "Send paid enrollment invitation", {
           actionType: "send_paid_enrollment_invite",
           channel: "email",
@@ -169,9 +218,15 @@ export const MARKETING_WORKFLOW_USE_CASES: MarketingUseCase[] = [
     graph: {
       entryNodeId: "t1",
       nodes: {
-        t1: node("t1", "trigger", "On learner signup", {
-          triggerType: "learner_signup",
-        }, { next: "a1" }),
+        t1: node(
+          "t1",
+          "trigger",
+          "On learner signup",
+          {
+            triggerType: "learner_signup",
+          },
+          { next: "a1" },
+        ),
         a1: node("a1", "action", "Send product link", {
           actionType: "send_message",
           channel: "email",
@@ -190,10 +245,16 @@ export const MARKETING_WORKFLOW_USE_CASES: MarketingUseCase[] = [
     graph: {
       entryNodeId: "t1",
       nodes: {
-        t1: node("t1", "trigger", "On form submitted", {
-          triggerType: "form_submitted",
-          formLabel: "PYQP form",
-        }, { next: "a1" }),
+        t1: node(
+          "t1",
+          "trigger",
+          "On form submitted",
+          {
+            triggerType: "form_submitted",
+            formLabel: "PYQP form",
+          },
+          { next: "a1" },
+        ),
         a1: node("a1", "action", "Send question papers", {
           actionType: "send_free_resource",
           channel: "email",
@@ -213,11 +274,17 @@ export const MARKETING_WORKFLOW_USE_CASES: MarketingUseCase[] = [
     graph: {
       entryNodeId: "t1",
       nodes: {
-        t1: node("t1", "trigger", "Access expires in 3 days", {
-          triggerType: "product_expiry_soon",
-          daysBeforeExpiry: 3,
-          productLabel: "Subscription product",
-        }, { next: "a1" }),
+        t1: node(
+          "t1",
+          "trigger",
+          "Access expires in 3 days",
+          {
+            triggerType: "product_expiry_soon",
+            daysBeforeExpiry: 3,
+            productLabel: "Subscription product",
+          },
+          { next: "a1" },
+        ),
         a1: node("a1", "action", "Send expiry reminder", {
           actionType: "send_message",
           channel: "email",

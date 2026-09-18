@@ -7,6 +7,7 @@ Block 0 is identical to the one in the Active Devices, Payments, Progress & Scor
 Polls files; reproduced here so this file stands alone.
 
 Source of truth:
+
 - `frontend/apps/web/src/features/admin/reports/AdminSalesMarketingRosterPage.tsx`
 - `frontend/apps/web/src/features/admin/reports/admin-sales-marketing-roster-api.ts`
 - `backend/packages/domain/src/reports/sales-marketing-roster.*`
@@ -636,26 +637,26 @@ schedule cards stack under the history table.
 
 Full best-in-class versions, as intended. What exists today vs. what needs building:
 
-| Prompt feature | Status |
-| --- | --- |
-| Sales by product: revenue, paid/trial learner counts, purchaser count | exists |
-| Purchaser list per product with name/email/date filters, sort, column picker | exists |
-| Coupon list: code, name, status, discount type and value, redemptions, total discount, total revenue | exists |
-| Coupon redemption list with learner, product, discount, final amount, applied-at | exists |
-| Referral & wallet list: referral code, successful referrals, credit earned, wallet balance | exists |
-| Affiliate products: enabled flag, order count, revenue, commission, published-at | exists |
-| Affiliates: tier, status, coupon code, revenue contribution, commission earned, unpaid, paid | exists |
-| Async CSV export; message matched purchasers; create group from purchasers | exists |
-| Overview channel attribution, revenue trend charts, "needs attention" | needs backend aggregates |
-| Conversion rate, average order, discounted-order share, first-time-buyer split | derivable in places, but not returned today |
-| Coupon usage caps and expiry dates | not in the report DTO — check the coupon domain before rendering caps |
-| Referred-learner drill (who a referrer brought in, per-referral status and credit) | needs backend |
-| Wallet adjustments | needs backend |
-| Affiliate detail: attributed orders, earnings over time, payout history | needs backend |
-| Record payout, approve/decline, suspend affiliate | needs backend — this module is read-only today |
-| Enable/disable an affiliate product, commission-rate overrides | needs backend |
-| Saved views, export history, scheduled exports | export runs exist; history UI and scheduling need backend |
-| Multi-currency subtotals / conversion | currency is stored per row; conversion rates need backend |
+| Prompt feature                                                                                       | Status                                                                |
+| ---------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| Sales by product: revenue, paid/trial learner counts, purchaser count                                | exists                                                                |
+| Purchaser list per product with name/email/date filters, sort, column picker                         | exists                                                                |
+| Coupon list: code, name, status, discount type and value, redemptions, total discount, total revenue | exists                                                                |
+| Coupon redemption list with learner, product, discount, final amount, applied-at                     | exists                                                                |
+| Referral & wallet list: referral code, successful referrals, credit earned, wallet balance           | exists                                                                |
+| Affiliate products: enabled flag, order count, revenue, commission, published-at                     | exists                                                                |
+| Affiliates: tier, status, coupon code, revenue contribution, commission earned, unpaid, paid         | exists                                                                |
+| Async CSV export; message matched purchasers; create group from purchasers                           | exists                                                                |
+| Overview channel attribution, revenue trend charts, "needs attention"                                | needs backend aggregates                                              |
+| Conversion rate, average order, discounted-order share, first-time-buyer split                       | derivable in places, but not returned today                           |
+| Coupon usage caps and expiry dates                                                                   | not in the report DTO — check the coupon domain before rendering caps |
+| Referred-learner drill (who a referrer brought in, per-referral status and credit)                   | needs backend                                                         |
+| Wallet adjustments                                                                                   | needs backend                                                         |
+| Affiliate detail: attributed orders, earnings over time, payout history                              | needs backend                                                         |
+| Record payout, approve/decline, suspend affiliate                                                    | needs backend — this module is read-only today                        |
+| Enable/disable an affiliate product, commission-rate overrides                                       | needs backend                                                         |
+| Saved views, export history, scheduled exports                                                       | export runs exist; history UI and scheduling need backend             |
+| Multi-currency subtotals / conversion                                                                | currency is stored per row; conversion rates need backend             |
 
 Two data-shape notes worth checking before build: `discount_type` and affiliate `tier` are both
 free-text `String` columns, not enums — so the UI must format on the value rather than assume a

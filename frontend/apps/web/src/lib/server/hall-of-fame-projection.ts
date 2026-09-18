@@ -1,5 +1,8 @@
 import type { z } from "zod";
-import type { postListResponseSchema, spaceListResponseSchema } from "@atlas/contracts/community/community.dto";
+import type {
+  postListResponseSchema,
+  spaceListResponseSchema,
+} from "@atlas/contracts/community/community.dto";
 import type {
   leaderboardDetailResponseSchema,
   leaderboardListResponseSchema,
@@ -23,7 +26,8 @@ export type HallOfFameProjection = {
 // Recognition spaces follow a naming convention (the admin config points at one
 // of these). Resolving server-side keeps client ids out of the request while
 // degrading to a clean empty state when no dedicated space exists.
-const RECOGNITION_SPACE_PATTERN = /(recognition|hall[-_ ]?of[-_ ]?fame|wall[-_ ]?of[-_ ]?fame|honou?rs?|fame)/i;
+const RECOGNITION_SPACE_PATTERN =
+  /(recognition|hall[-_ ]?of[-_ ]?fame|wall[-_ ]?of[-_ ]?fame|honou?rs?|fame)/i;
 
 function isMissingOrForbidden(error: unknown): boolean {
   return (
@@ -67,7 +71,8 @@ async function loadRecognitionFeed(): Promise<PostListResponse | null> {
   }
 
   const space = spaces.data.items.find(
-    (item) => RECOGNITION_SPACE_PATTERN.test(item.slug) || RECOGNITION_SPACE_PATTERN.test(item.name),
+    (item) =>
+      RECOGNITION_SPACE_PATTERN.test(item.slug) || RECOGNITION_SPACE_PATTERN.test(item.name),
   );
   if (!space) return null;
 

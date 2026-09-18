@@ -107,7 +107,7 @@ function summarizeGraph(graph: ReturnType<typeof parseGraph>) {
       ? formLabel ||
         testLabel ||
         productLabel ||
-        entry.title?.trim() ||
+        entry.title.trim() ||
         triggerTypeLabel(entry.config["triggerType"])
       : "No trigger";
 
@@ -146,7 +146,7 @@ export async function listMarketingWorkflows(tx: TenantTx, ctx: ServiceCtx, rawQ
   const query = marketingWorkflowsListQuerySchema.parse(rawQuery ?? {});
   const [rows, statusCounts, totalActiveRuns] = await Promise.all([
     marketingWorkflowRepository.list(tx, {
-      ...(query.status ? { status: query.status } : {}),
+      status: query.status,
       ...(query.q ? { q: query.q } : {}),
       limit: query.limit,
     }),
@@ -218,7 +218,7 @@ export async function updateMarketingWorkflowBasics(
   return marketingWorkflowResponseSchema.parse({ data: toDto(row) });
 }
 
-export async function listMarketingUseCases(_tx: TenantTx, _ctx: ServiceCtx) {
+export function listMarketingUseCases(_tx: TenantTx, _ctx: ServiceCtx) {
   return marketingUseCasesResponseSchema.parse({
     data: {
       items: MARKETING_WORKFLOW_USE_CASES.map((item) => ({
@@ -357,7 +357,7 @@ export async function listMarketingWorkflowRuns(tx: TenantTx, _ctx: ServiceCtx, 
           status: row.status,
           triggerEventType: row.trigger_event_type,
           currentNodeId: row.current_node_id,
-          currentNodeTitle: currentNode?.title?.trim() || row.current_node_id,
+          currentNodeTitle: currentNode?.title.trim() || row.current_node_id,
           waitUntil: row.wait_until?.toISOString() ?? null,
           errorMessage: row.error_message,
           createdAt: row.created_at.toISOString(),
@@ -384,7 +384,7 @@ export async function testFireMarketingWorkflow(
   const entry = graph.nodes[graph.entryNodeId];
   const triggerType =
     entry?.type === "trigger" && typeof entry.config["triggerType"] === "string"
-      ? String(entry.config["triggerType"])
+      ? entry.config["triggerType"]
       : "manual_test";
   const eventType =
     body.eventType ??

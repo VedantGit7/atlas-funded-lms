@@ -91,15 +91,18 @@ function titleCase(value: string | null | undefined): string {
 function learnerInitials(name: string | null, email: string | null): string {
   const source = (name?.trim() || email?.trim() || "?").split(/\s+/).filter(Boolean);
   if (source.length === 0) return "?";
-  if (source.length === 1) return source[0]!.slice(0, 2).toUpperCase();
-  return `${source[0]![0] ?? ""}${source[1]![0] ?? ""}`.toUpperCase();
+  if (source.length === 1) return (source[0] ?? "").slice(0, 2).toUpperCase();
+  return `${source[0]?.[0] ?? ""}${source[1]?.[0] ?? ""}`.toUpperCase();
 }
 
 function formatAbsolute(value: string | null): string {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  return date.toISOString().replace("T", " ").replace(/\.\d{3}Z$/, "Z");
+  return date
+    .toISOString()
+    .replace("T", " ")
+    .replace(/\.\d{3}Z$/, "Z");
 }
 
 function formatRelative(value: string | null): string {
@@ -161,7 +164,12 @@ function DeviceSparkline({ points }: { points: ActiveDevicesOverview["trend"] })
       role="img"
       aria-label="Active devices trend"
     >
-      <path d={path} stroke="var(--admin-primary)" strokeWidth="2" vectorEffect="non-scaling-stroke" />
+      <path
+        d={path}
+        stroke="var(--admin-primary)"
+        strokeWidth="2"
+        vectorEffect="non-scaling-stroke"
+      />
     </svg>
   );
 }
@@ -181,7 +189,11 @@ function EmptyIllustration() {
       <path d="M40 50 L50 50" strokeDasharray="2 2" />
       <circle cx="55" cy="55" r="15" className="stroke-[var(--admin-primary)]" strokeWidth="2" />
       <path d="M65 65 L75 75" className="stroke-[var(--admin-primary)]" strokeWidth="2" />
-      <path d="M50 50 L60 60 M60 50 L50 60" className="stroke-[var(--admin-primary)]" strokeWidth="1.5" />
+      <path
+        d="M50 50 L60 60 M60 50 L50 60"
+        className="stroke-[var(--admin-primary)]"
+        strokeWidth="1.5"
+      />
     </svg>
   );
 }
@@ -316,30 +328,39 @@ export function AdminActiveDevicesRosterPage() {
       chips.push({
         key: "platform",
         label: `Device type: ${titleCase(platform)}`,
-        clear: () => setPlatform(""),
+        clear: () => {
+          setPlatform("");
+        },
       });
     }
     if (lastSeenFilter) {
       const label =
-        LAST_SEEN_OPTIONS.find((option) => option.value === lastSeenFilter)?.label ?? lastSeenFilter;
+        LAST_SEEN_OPTIONS.find((option) => option.value === lastSeenFilter)?.label ??
+        lastSeenFilter;
       chips.push({
         key: "lastSeen",
         label: `Last seen: ${label}`,
-        clear: () => setLastSeenFilter(""),
+        clear: () => {
+          setLastSeenFilter("");
+        },
       });
     }
     if (statusFilter) {
       chips.push({
         key: "status",
         label: `Status: ${statusFilter === "over_limit" ? "Over limit" : "Active"}`,
-        clear: () => setStatusFilter(""),
+        clear: () => {
+          setStatusFilter("");
+        },
       });
     }
     if (search.trim()) {
       chips.push({
         key: "search",
         label: `Learner: ${search.trim()}`,
-        clear: () => setSearch(""),
+        clear: () => {
+          setSearch("");
+        },
       });
     }
     return chips;
@@ -691,7 +712,10 @@ export function AdminActiveDevicesRosterPage() {
                 {overLimitCount.toLocaleString()}
               </span>
             )}
-            <TriangleAlert className="mb-0.5 h-5 w-5 text-[var(--admin-warning)]" aria-hidden="true" />
+            <TriangleAlert
+              className="mb-0.5 h-5 w-5 text-[var(--admin-warning)]"
+              aria-hidden="true"
+            />
           </div>
         </div>
 
@@ -703,7 +727,10 @@ export function AdminActiveDevicesRosterPage() {
             <span className="font-mono text-3xl font-medium leading-none text-[var(--admin-on-surface)]">
               {(overview?.summary.flaggedSessions ?? 0).toLocaleString()}
             </span>
-            <AlertTriangle className="mb-0.5 h-5 w-5 text-[var(--admin-danger)]" aria-hidden="true" />
+            <AlertTriangle
+              className="mb-0.5 h-5 w-5 text-[var(--admin-danger)]"
+              aria-hidden="true"
+            />
           </div>
         </div>
       </div>
@@ -772,7 +799,9 @@ export function AdminActiveDevicesRosterPage() {
 
           {activeChips.length > 0 ? (
             <div className={`flex flex-wrap items-center gap-2 ${inlineExpandClassName}`}>
-              <span className="text-xs text-[var(--admin-on-surface-variant)]">Active filters:</span>
+              <span className="text-xs text-[var(--admin-on-surface-variant)]">
+                Active filters:
+              </span>
               {activeChips.map((chip) => (
                 <button
                   key={chip.key}
@@ -919,7 +948,9 @@ export function AdminActiveDevicesRosterPage() {
                             type="checkbox"
                             className="rounded border-[var(--admin-outline)] accent-[var(--admin-primary)]"
                             checked={selected}
-                            onChange={() => toggleLearner(learner.membershipId)}
+                            onChange={() => {
+                              toggleLearner(learner.membershipId);
+                            }}
                             aria-label={`Select ${learner.learnerName ?? learner.email ?? "learner"}`}
                           />
                         </td>
@@ -946,7 +977,11 @@ export function AdminActiveDevicesRosterPage() {
                         </td>
                         <td className="px-4 py-2">
                           <div className="flex items-center gap-1 font-mono">
-                            <span className={overLimit ? "font-semibold text-[var(--admin-warning)]" : ""}>
+                            <span
+                              className={
+                                overLimit ? "font-semibold text-[var(--admin-warning)]" : ""
+                              }
+                            >
                               {learner.deviceCount}
                             </span>
                             {learner.platforms.slice(0, 3).map((platformName) => {
@@ -998,11 +1033,11 @@ export function AdminActiveDevicesRosterPage() {
                             aria-expanded={menuOpen}
                             aria-controls={menuOpen ? menuId : undefined}
                             className="rounded p-0.5 text-[var(--admin-outline)] transition-colors hover:bg-[var(--admin-surface-high)] hover:text-[var(--admin-on-surface)]"
-                            onClick={() =>
+                            onClick={() => {
                               setMenuLearnerId((current) =>
                                 current === learner.membershipId ? null : learner.membershipId,
-                              )
-                            }
+                              );
+                            }}
                           >
                             <MoreVertical className="h-4 w-4" aria-hidden="true" />
                           </button>
@@ -1024,16 +1059,24 @@ export function AdminActiveDevicesRosterPage() {
                                   goToLearnerDetail(learner.membershipId);
                                 }}
                               >
-                                <Eye className="h-4 w-4 text-[var(--admin-outline)]" aria-hidden="true" />
+                                <Eye
+                                  className="h-4 w-4 text-[var(--admin-outline)]"
+                                  aria-hidden="true"
+                                />
                                 View session details
                               </button>
                               <Link
                                 href={`/admin/members/${learner.membershipId}`}
                                 role="menuitem"
                                 className={dropdownItemClassName}
-                                onClick={() => setMenuLearnerId(null)}
+                                onClick={() => {
+                                  setMenuLearnerId(null);
+                                }}
                               >
-                                <History className="h-4 w-4 text-[var(--admin-outline)]" aria-hidden="true" />
+                                <History
+                                  className="h-4 w-4 text-[var(--admin-outline)]"
+                                  aria-hidden="true"
+                                />
                                 Open member profile
                               </Link>
                               <div className="my-1 h-px w-full bg-[var(--admin-border)]" />
@@ -1091,7 +1134,9 @@ export function AdminActiveDevicesRosterPage() {
                 type="button"
                 className="rounded p-1 text-[var(--admin-outline)] hover:bg-[var(--admin-surface-high)] disabled:opacity-30"
                 disabled={busy || page <= 1}
-                onClick={() => setPage((current) => Math.max(1, current - 1))}
+                onClick={() => {
+                  setPage((current) => Math.max(1, current - 1));
+                }}
                 aria-label="Previous page"
               >
                 <ChevronLeft className="h-4 w-4" aria-hidden="true" />
@@ -1100,7 +1145,9 @@ export function AdminActiveDevicesRosterPage() {
                 type="button"
                 className="rounded p-1 text-[var(--admin-on-surface)] hover:bg-[var(--admin-surface-high)] disabled:opacity-30"
                 disabled={busy || page >= totalPages || totalPages === 0}
-                onClick={() => setPage((current) => current + 1)}
+                onClick={() => {
+                  setPage((current) => current + 1);
+                }}
                 aria-label="Next page"
               >
                 <ChevronRight className="h-4 w-4" aria-hidden="true" />
@@ -1123,13 +1170,19 @@ export function AdminActiveDevicesRosterPage() {
             >
               Force sign out
             </button>
-            <button type="button" className="text-[var(--admin-primary-container)] hover:underline" onClick={handleExportCsv}>
+            <button
+              type="button"
+              className="text-[var(--admin-primary-container)] hover:underline"
+              onClick={handleExportCsv}
+            >
               Export
             </button>
             <button
               type="button"
               className="text-[var(--admin-on-surface-variant)] hover:underline"
-              onClick={() => setSelectedLearnerIds(new Set())}
+              onClick={() => {
+                setSelectedLearnerIds(new Set());
+              }}
             >
               Clear
             </button>
@@ -1169,7 +1222,9 @@ export function AdminActiveDevicesRosterPage() {
                 type="button"
                 className={ghostButtonClassName}
                 disabled={busy || selectedDeviceIds.size === 0}
-                onClick={() => setConfirmDeleteOpen(true)}
+                onClick={() => {
+                  setConfirmDeleteOpen(true);
+                }}
               >
                 Delete selected
               </button>
@@ -1177,7 +1232,9 @@ export function AdminActiveDevicesRosterPage() {
                 type="button"
                 className={ghostButtonClassName}
                 disabled={busy}
-                onClick={() => setConfirmSignOutOpen(true)}
+                onClick={() => {
+                  setConfirmSignOutOpen(true);
+                }}
               >
                 Force sign out
               </button>
@@ -1212,9 +1269,7 @@ export function AdminActiveDevicesRosterPage() {
                       <th className="px-4 py-3">
                         <input
                           type="checkbox"
-                          checked={
-                            devices.length > 0 && selectedDeviceIds.size === devices.length
-                          }
+                          checked={devices.length > 0 && selectedDeviceIds.size === devices.length}
                           onChange={() => {
                             if (selectedDeviceIds.size === devices.length) {
                               setSelectedDeviceIds(new Set());
@@ -1252,11 +1307,11 @@ export function AdminActiveDevicesRosterPage() {
                             />
                           </td>
                           <td className="px-4 py-3 text-sm">{device.deviceLabel}</td>
-                          <td className="px-4 py-3">{device.osLabel ?? titleCase(device.platform)}</td>
-                          <td className="px-4 py-3">{formatRelative(device.lastSeenAt)}</td>
-                          <td className="px-4 py-3 font-mono text-xs">
-                            {device.ipAddress ?? "-"}
+                          <td className="px-4 py-3">
+                            {device.osLabel ?? titleCase(device.platform)}
                           </td>
+                          <td className="px-4 py-3">{formatRelative(device.lastSeenAt)}</td>
+                          <td className="px-4 py-3 font-mono text-xs">{device.ipAddress ?? "-"}</td>
                         </tr>
                       );
                     })}
@@ -1270,17 +1325,22 @@ export function AdminActiveDevicesRosterPage() {
 
       {confirmDeleteOpen ? (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-[var(--admin-scrim)] p-4">
-          <div className={`w-full max-w-md space-y-4 border border-[var(--admin-border)] bg-[var(--admin-surface)] p-5 shadow-xl ${inlineExpandClassName}`}>
+          <div
+            className={`w-full max-w-md space-y-4 border border-[var(--admin-border)] bg-[var(--admin-surface)] p-5 shadow-xl ${inlineExpandClassName}`}
+          >
             <h2 className="text-lg font-semibold text-[var(--admin-on-surface)]">Delete devices</h2>
             <p className="text-sm text-[var(--admin-on-surface-variant)]">
-              Delete {selectedDeviceIds.size} selected device session(s)? Learners may need to sign in again on those devices.
+              Delete {selectedDeviceIds.size} selected device session(s)? Learners may need to sign
+              in again on those devices.
             </p>
             <div className="flex justify-end gap-2">
               <button
                 type="button"
                 className={ghostButtonClassName}
                 disabled={busy}
-                onClick={() => setConfirmDeleteOpen(false)}
+                onClick={() => {
+                  setConfirmDeleteOpen(false);
+                }}
               >
                 Cancel
               </button>
@@ -1302,17 +1362,22 @@ export function AdminActiveDevicesRosterPage() {
 
       {confirmSignOutOpen && selectedLearner ? (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-[var(--admin-scrim)] p-4">
-          <div className={`w-full max-w-md space-y-4 border border-[var(--admin-border)] bg-[var(--admin-surface)] p-5 shadow-xl ${inlineExpandClassName}`}>
+          <div
+            className={`w-full max-w-md space-y-4 border border-[var(--admin-border)] bg-[var(--admin-surface)] p-5 shadow-xl ${inlineExpandClassName}`}
+          >
             <h2 className="text-lg font-semibold text-[var(--admin-on-surface)]">Force sign out</h2>
             <p className="text-sm text-[var(--admin-on-surface-variant)]">
-              Sign out {selectedLearner.learnerName ?? selectedLearner.email ?? "this learner"} from all devices?
+              Sign out {selectedLearner.learnerName ?? selectedLearner.email ?? "this learner"} from
+              all devices?
             </p>
             <div className="flex justify-end gap-2">
               <button
                 type="button"
                 className={ghostButtonClassName}
                 disabled={busy}
-                onClick={() => setConfirmSignOutOpen(false)}
+                onClick={() => {
+                  setConfirmSignOutOpen(false);
+                }}
               >
                 Cancel
               </button>

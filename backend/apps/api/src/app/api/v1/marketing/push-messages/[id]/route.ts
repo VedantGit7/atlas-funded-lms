@@ -14,7 +14,7 @@ import {
   updatePushMessageTitle,
 } from "../../../../../../server/push-messages/push-messages.service";
 
-const paramsSchema = zod.object({ id: zod.string().uuid() });
+const paramsSchema = zod.object({ id: zod.uuid() });
 
 export const GET = createTenantRoute<
   Record<string, never>,

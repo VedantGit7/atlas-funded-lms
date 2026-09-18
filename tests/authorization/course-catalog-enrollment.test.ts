@@ -8,7 +8,7 @@ function learnerTx() {
       .fn()
       .mockResolvedValueOnce([{ key: "course.read" }])
       .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([{ role_key: "learner" }]),
+      .mockResolvedValueOnce([{ role_key: "learner", bypasses_resource_predicates: false }]),
   };
 }
 

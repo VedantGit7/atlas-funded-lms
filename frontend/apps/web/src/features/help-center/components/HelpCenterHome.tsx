@@ -1,10 +1,6 @@
 import Link from "next/link";
-import { Calendar, ChevronRight, Clock, GraduationCap, Headphones } from "lucide-react";
-import {
-  HELP_CATEGORIES,
-  getPopularArticles,
-  getTipOfWeek,
-} from "../help-center-content";
+import { ChevronRight, GraduationCap, Headphones } from "lucide-react";
+import { HELP_CATEGORIES, getPopularArticles, getTipOfWeek } from "../help-center-content";
 import {
   helpCardClassName,
   helpCategoryIconClassName,
@@ -72,7 +68,10 @@ export function HelpCenterHome({ academyName }: HelpCenterHomeProps) {
           <div className="lg:col-span-7">
             <div className="mb-6 flex items-center justify-between gap-4">
               <h2 className="text-2xl font-semibold text-primary">Popular articles</h2>
-              <Link href="/help/category/getting-started" className="text-sm font-medium text-primary hover:underline">
+              <Link
+                href="/help/category/getting-started"
+                className="text-sm font-medium text-primary hover:underline"
+              >
                 View all
               </Link>
             </div>
@@ -127,8 +126,8 @@ export function HelpCenterHome({ academyName }: HelpCenterHomeProps) {
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-2xl font-semibold text-primary">Still need help?</h2>
           <p className="mt-3 text-sm leading-relaxed text-muted-foreground sm:text-base">
-            Review account and security settings, or browse troubleshooting articles for
-            sign-in and playback issues.
+            Review account and security settings, or browse troubleshooting articles for sign-in and
+            playback issues.
           </p>
           <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Link href="/settings" className={helpPrimaryButtonClassName}>

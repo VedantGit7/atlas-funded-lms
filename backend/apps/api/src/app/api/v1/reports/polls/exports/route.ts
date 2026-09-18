@@ -9,10 +9,7 @@ import {
   createPollsExportMetadata,
   getPollsExportsMetadata,
 } from "@atlas/domain/reports/polls-exports.route-metadata";
-import {
-  createPollExport,
-  getPollsExports,
-} from "@atlas/domain/reports/polls-exports.service";
+import { createPollExport, getPollsExports } from "@atlas/domain/reports/polls-exports.service";
 
 export const GET = createTenantRoute<
   Record<string, never>,

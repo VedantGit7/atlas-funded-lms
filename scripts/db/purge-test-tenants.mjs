@@ -253,9 +253,7 @@ async function main() {
   }
 
   if (report.perTable.length > 0) {
-    console.log(
-      `[purge-test-tenants] ${apply ? "deleted" : "would delete"} child rows by table:`,
-    );
+    console.log(`[purge-test-tenants] ${apply ? "deleted" : "would delete"} child rows by table:`);
     for (const entry of report.perTable.sort((a, b) => b.rows - a.rows)) {
       console.log(`  ${entry.table}: ${entry.rows}`);
     }

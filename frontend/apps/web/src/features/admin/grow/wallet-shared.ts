@@ -107,10 +107,12 @@ export function formatWalletDateTime(value: string | null | undefined): string {
 export function learnerInitials(name: string | null | undefined, email: string | null | undefined) {
   const source = (name?.trim() || email?.trim() || "?").split(/\s+/).filter(Boolean);
   if (source.length === 0) return "?";
-  if (source.length === 1) return source[0]!.slice(0, 2).toUpperCase();
-  return `${source[0]![0] ?? ""}${source[1]![0] ?? ""}`.toUpperCase();
+  if (source.length === 1) return (source[0] ?? "").slice(0, 2).toUpperCase();
+  return `${source[0]?.[0] ?? ""}${source[1]?.[0] ?? ""}`.toUpperCase();
 }
 
-export function learnerLabel(account: Pick<WalletAccount, "displayName" | "email" | "membershipId">) {
+export function learnerLabel(
+  account: Pick<WalletAccount, "displayName" | "email" | "membershipId">,
+) {
   return account.displayName?.trim() || account.email?.trim() || account.membershipId.slice(0, 8);
 }

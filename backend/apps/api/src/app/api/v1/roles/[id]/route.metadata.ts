@@ -32,6 +32,7 @@ export const deleteRouteMetadata = {
   permission: "role.delete",
   entitlement: null,
   audit: "required",
+  mfa: "required",
   rateLimit: "tenantMutation",
   idempotency: "required",
   resourceLoader: putRouteMetadata.resourceLoader,

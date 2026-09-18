@@ -37,10 +37,14 @@ export function LocalesReviewQueueTab({ canManage }: LocalesReviewQueueTabProps)
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await clientApi.get<{ data: ReviewQueueItem[] }>("/api/v1/locales/review-queue");
+      const response = await clientApi.get<{ data: ReviewQueueItem[] }>(
+        "/api/v1/locales/review-queue",
+      );
       setItems(response.data);
     } catch (caught) {
-      setMessage(caught instanceof ClientApiError ? caught.message : "Failed to load review queue.");
+      setMessage(
+        caught instanceof ClientApiError ? caught.message : "Failed to load review queue.",
+      );
       setMessageTone("error");
     } finally {
       setLoading(false);
@@ -62,7 +66,9 @@ export function LocalesReviewQueueTab({ canManage }: LocalesReviewQueueTabProps)
         { status },
         `locale-review-${actionKey}-${status}`,
       );
-      setItems((current) => current.filter((row) => !(row.locale === item.locale && row.key === item.key)));
+      setItems((current) =>
+        current.filter((row) => !(row.locale === item.locale && row.key === item.key)),
+      );
       setMessage(`String ${status}.`);
       setMessageTone("success");
     } catch (caught) {
@@ -87,7 +93,9 @@ export function LocalesReviewQueueTab({ canManage }: LocalesReviewQueueTabProps)
       {message ? (
         <div
           role="alert"
-          className={messageTone === "success" ? localesAlertSuccessClassName : localesAlertErrorClassName}
+          className={
+            messageTone === "success" ? localesAlertSuccessClassName : localesAlertErrorClassName
+          }
         >
           {message}
         </div>
@@ -109,7 +117,9 @@ export function LocalesReviewQueueTab({ canManage }: LocalesReviewQueueTabProps)
                 <th className={`${localesTableHeadClassName} px-4 py-2`}>Translation</th>
                 <th className={`${localesTableHeadClassName} px-4 py-2`}>Source</th>
                 <th className={`${localesTableHeadClassName} px-4 py-2`}>Updated</th>
-                {canManage ? <th className={`${localesTableHeadClassName} px-4 py-2 text-right`}>Actions</th> : null}
+                {canManage ? (
+                  <th className={`${localesTableHeadClassName} px-4 py-2 text-right`}>Actions</th>
+                ) : null}
               </tr>
             </thead>
             <tbody>
@@ -117,11 +127,15 @@ export function LocalesReviewQueueTab({ canManage }: LocalesReviewQueueTabProps)
                 const actionKey = `${item.locale}:${item.key}`;
                 return (
                   <tr key={actionKey} className={localesTableRowClassName}>
-                    <td className="px-4 py-3 font-mono text-[var(--admin-on-surface)]">{item.locale}</td>
+                    <td className="px-4 py-3 font-mono text-[var(--admin-on-surface)]">
+                      {item.locale}
+                    </td>
                     <td className="px-4 py-3">
                       <code className={localesMonoKeyClassName}>{item.key}</code>
                     </td>
-                    <td className="px-4 py-3 text-[var(--admin-on-surface)]">{truncateText(item.value)}</td>
+                    <td className="px-4 py-3 text-[var(--admin-on-surface)]">
+                      {truncateText(item.value)}
+                    </td>
                     <td className="px-4 py-3 text-[var(--admin-on-surface-variant)]">
                       {item.sourceValue ? truncateText(item.sourceValue) : "—"}
                     </td>

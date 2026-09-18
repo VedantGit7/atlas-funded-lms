@@ -1,5 +1,10 @@
 import type { TenantTx } from "@atlas/db";
-import { assertTenantKeyPrefix, buildTenantStorageKey, getStorageProvider, parseStorageEnv } from "@atlas/storage";
+import {
+  assertTenantKeyPrefix,
+  buildTenantStorageKey,
+  getStorageProvider,
+  parseStorageEnv,
+} from "@atlas/storage";
 import type { BiExportFormat } from "./bi-export.dto";
 import {
   biExportDetailResponseSchema,
@@ -139,11 +144,7 @@ async function resolveSignedDownload(
   };
 }
 
-export async function processBiExport(
-  tx: TenantTx,
-  ctx: ServiceCtx,
-  jobId: string,
-): Promise<void> {
+export async function processBiExport(tx: TenantTx, ctx: ServiceCtx, jobId: string): Promise<void> {
   const job = await biExportRepository.findById(tx, jobId);
   if (!job || job.status !== "QUEUED") {
     return;
@@ -163,10 +164,7 @@ export async function processBiExport(
       params,
     });
 
-    const content =
-      format === "jsonl"
-        ? renderBiExportJsonl(dataset)
-        : renderReportCsv(dataset);
+    const content = format === "jsonl" ? renderBiExportJsonl(dataset) : renderReportCsv(dataset);
 
     const stored = await storeBiExportArtifact(ctx, {
       jobId,
@@ -238,7 +236,10 @@ export async function listBiExportJobs(tx: TenantTx, ctx: ServiceCtx, rawQuery: 
     data: {
       items: await Promise.all(
         pageRows.map(async (job) =>
-          mapBiExportDto(job, job.status === "SUCCEEDED" ? await resolveSignedDownload(ctx, job) : null),
+          mapBiExportDto(
+            job,
+            job.status === "SUCCEEDED" ? await resolveSignedDownload(ctx, job) : null,
+          ),
         ),
       ),
       pageInfo: {

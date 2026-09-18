@@ -72,16 +72,23 @@ const tenantA = {
   tenantState: "ACTIVE" as const,
 };
 
+// FeatureFlagViewSchema requires canonicalKey and description. The route
+// validates its own output, so a fixture missing them fails validation and the
+// route answers 500 -- which reads as a broken route rather than a stale test.
 const effectiveFlagsPayload = {
   data: [
     {
       key: "community.enable",
+      canonicalKey: "community.enable",
+      description: "Community features",
       value: false,
       source: "GLOBAL_DEFAULT" as const,
       readOnly: true,
     },
     {
       key: "analytics.dashboard.view",
+      canonicalKey: "analytics.dashboard.view",
+      description: null,
       value: { enabled: true, tier: "advanced" },
       source: "TENANT_OVERRIDE" as const,
       readOnly: false,

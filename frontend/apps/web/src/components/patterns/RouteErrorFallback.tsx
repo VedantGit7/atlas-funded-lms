@@ -31,7 +31,9 @@ export function RouteErrorFallback({
     <main className="mx-auto max-w-lg p-6">
       <h1 className="text-xl font-semibold text-foreground">{title}</h1>
       <p className="mt-2 text-sm text-muted-foreground">{description}</p>
-      {requestId ? <p className="mt-4 text-xs text-muted-foreground">Request ID: {requestId}</p> : null}
+      {requestId ? (
+        <p className="mt-4 text-xs text-muted-foreground">Request ID: {requestId}</p>
+      ) : null}
       <Button type="button" variant="outline" className="mt-4" onClick={reset}>
         Try again
       </Button>

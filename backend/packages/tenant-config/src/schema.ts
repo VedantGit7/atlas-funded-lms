@@ -298,8 +298,6 @@ export const themeManifestSchema = z
         primary: hexColorSchema,
         accent: hexColorSchema.optional(),
         header: hexColorSchema.optional(),
-        background: hexColorSchema.optional(),
-        foreground: hexColorSchema.optional(),
         radius: z.enum(["none", "sm", "md", "lg", "xl"]).default("md"),
         modeDefault: z.enum(["system", "light", "dark"]).default("system"),
       })

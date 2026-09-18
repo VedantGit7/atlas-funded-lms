@@ -7,7 +7,11 @@ type PermissionBoundaryProps = Readonly<{
   fallback?: ReactNode;
 }>;
 
-export function PermissionBoundary({ allowed, children, fallback = null }: PermissionBoundaryProps) {
+export function PermissionBoundary({
+  allowed,
+  children,
+  fallback = null,
+}: PermissionBoundaryProps) {
   if (!allowed) {
     return <>{fallback}</>;
   }

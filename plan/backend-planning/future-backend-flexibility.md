@@ -21,15 +21,15 @@ related:
 
 These are the **only** things the frontend may depend on:
 
-| Contract element | Spec source | Notes |
-|------------------|-------------|-------|
-| Base path | `/api/v1/**` | Version in URL; v2 can run parallel later |
-| Request/response shapes | `@atlas/contracts` + [API Inventory v1](docs/locked/) | Zod schemas; optional OpenAPI export |
-| Error envelope | `{ error: { code, message, requestId } }` | Already used by `clientApi` / `serverApi` |
-| Auth session | Supabase cookies + host resolution | Swap auth provider only if cookie/JWT contract preserved |
-| Tenant context | **Host header** → tenant | Never `tenant_id` from client body |
-| Idempotency | `idempotency-key` on mutations | Preserved across backend rewrites |
-| Permissions/entitlements | Server-enforced; UI gets projection hints only | Frontend never encodes RBAC logic |
+| Contract element         | Spec source                                           | Notes                                                    |
+| ------------------------ | ----------------------------------------------------- | -------------------------------------------------------- |
+| Base path                | `/api/v1/**`                                          | Version in URL; v2 can run parallel later                |
+| Request/response shapes  | `@atlas/contracts` + [API Inventory v1](docs/locked/) | Zod schemas; optional OpenAPI export                     |
+| Error envelope           | `{ error: { code, message, requestId } }`             | Already used by `clientApi` / `serverApi`                |
+| Auth session             | Supabase cookies + host resolution                    | Swap auth provider only if cookie/JWT contract preserved |
+| Tenant context           | **Host header** → tenant                              | Never `tenant_id` from client body                       |
+| Idempotency              | `idempotency-key` on mutations                        | Preserved across backend rewrites                        |
+| Permissions/entitlements | Server-enforced; UI gets projection hints only        | Frontend never encodes RBAC logic                        |
 
 If a future backend honors the same contract, **the frontend keeps working without code changes**.
 
@@ -37,17 +37,17 @@ If a future backend honors the same contract, **the frontend keeps working witho
 
 ## 2. What can change later (without touching frontend)
 
-| Layer | Today | Future options (examples) |
-|-------|-------|---------------------------|
-| API runtime | Next.js route handlers (`backend/apps/api`) | Hono, Fastify, NestJS, Go, separate services per domain |
-| ORM | Prisma + PostgreSQL | Drizzle, Kysely, raw SQL, read replicas |
-| Monolith vs services | Modular monolith in `backend/packages/` | Split courses, auth, billing into separate deployables behind same gateway |
-| Database | Single Postgres (RLS) | Same DB with new access layer, or CQRS read models |
-| Auth provider | Supabase Auth | Auth0, Clerk, custom JWT — if session bridge unchanged |
-| Jobs/workers | Outbox + workers in backend | SQS, Temporal, separate worker fleet |
-| Search | Current search API | Elasticsearch, Typesense — same `GET /search` response shape |
-| File storage | R2 references | S3, GCS — same signed-URL contract |
-| Hosting | Vercel functions | Fly.io, AWS, K8s — frontend only needs stable `API_URL` |
+| Layer                | Today                                       | Future options (examples)                                                  |
+| -------------------- | ------------------------------------------- | -------------------------------------------------------------------------- |
+| API runtime          | Next.js route handlers (`backend/apps/api`) | Hono, Fastify, NestJS, Go, separate services per domain                    |
+| ORM                  | Prisma + PostgreSQL                         | Drizzle, Kysely, raw SQL, read replicas                                    |
+| Monolith vs services | Modular monolith in `backend/packages/`     | Split courses, auth, billing into separate deployables behind same gateway |
+| Database             | Single Postgres (RLS)                       | Same DB with new access layer, or CQRS read models                         |
+| Auth provider        | Supabase Auth                               | Auth0, Clerk, custom JWT — if session bridge unchanged                     |
+| Jobs/workers         | Outbox + workers in backend                 | SQS, Temporal, separate worker fleet                                       |
+| Search               | Current search API                          | Elasticsearch, Typesense — same `GET /search` response shape               |
+| File storage         | R2 references                               | S3, GCS — same signed-URL contract                                         |
+| Hosting              | Vercel functions                            | Fly.io, AWS, K8s — frontend only needs stable `API_URL`                    |
 
 ---
 
@@ -100,12 +100,12 @@ Mirror the payment/notification pattern for anything external:
 
 Documented in [complete-frontend-rebuild.md](../frontend-planning/complete-frontend-rebuild.md):
 
-| Do | Don't |
-|----|-------|
-| Call `API_URL + /api/v1/...` only | Import `@atlas/db`, domain services |
-| Use `@atlas/contracts` for forms and types | Assume Prisma field names or DB enums in UI |
-| Treat 401/403/ENTITLEMENT_REQUIRED uniformly | Encode permission matrices in client |
-| Use env `NEXT_PUBLIC_API_URL` / `API_INTERNAL_URL` | Hardcode backend host per environment |
+| Do                                                 | Don't                                       |
+| -------------------------------------------------- | ------------------------------------------- |
+| Call `API_URL + /api/v1/...` only                  | Import `@atlas/db`, domain services         |
+| Use `@atlas/contracts` for forms and types         | Assume Prisma field names or DB enums in UI |
+| Treat 401/403/ENTITLEMENT_REQUIRED uniformly       | Encode permission matrices in client        |
+| Use env `NEXT_PUBLIC_API_URL` / `API_INTERNAL_URL` | Hardcode backend host per environment       |
 
 **Result:** Point frontend at a new API deployment → change env vars only.
 
@@ -115,11 +115,11 @@ Documented in [complete-frontend-rebuild.md](../frontend-planning/complete-front
 
 Prevent silent backend breaks when you refactor later:
 
-| Test type | Tool | What it guards |
-|-----------|------|----------------|
-| **Schema tests** | Vitest + Zod | Every route response matches contract |
-| **API integration** | Existing `tests/api/*` | Handler + DB behavior |
-| **Consumer contract** | Optional: Pact or OpenAPI diff in CI | Frontend expectations vs backend spec |
+| Test type                    | Tool                                  | What it guards                             |
+| ---------------------------- | ------------------------------------- | ------------------------------------------ |
+| **Schema tests**             | Vitest + Zod                          | Every route response matches contract      |
+| **API integration**          | Existing `tests/api/*`                | Handler + DB behavior                      |
+| **Consumer contract**        | Optional: Pact or OpenAPI diff in CI  | Frontend expectations vs backend spec      |
 | **Breaking change detector** | `openapi-diff` or custom Zod snapshot | PR fails on removed fields / changed types |
 
 Store golden fixtures in `tests/fixtures/api/v1/`.
@@ -149,26 +149,26 @@ Store golden fixtures in `tests/fixtures/api/v1/`.
 
 These are **compatible** with this architecture if needed later:
 
-| Path | Frontend impact |
-|------|-----------------|
-| **API gateway** (Kong, Cloudflare) | None — same paths |
-| **GraphQL BFF** | New client layer; REST v1 still supported during transition |
-| **gRPC internal + REST edge** | None on frontend |
-| **Multi-region API** | DNS/routing only |
-| **Third-party LMS head** | New frontend; same API if white-label API product |
+| Path                               | Frontend impact                                             |
+| ---------------------------------- | ----------------------------------------------------------- |
+| **API gateway** (Kong, Cloudflare) | None — same paths                                           |
+| **GraphQL BFF**                    | New client layer; REST v1 still supported during transition |
+| **gRPC internal + REST edge**      | None on frontend                                            |
+| **Multi-region API**               | DNS/routing only                                            |
+| **Third-party LMS head**           | New frontend; same API if white-label API product           |
 
 ---
 
 ## 8. Phased roadmap alignment
 
-| When | Backend focus | Frontend impact |
-|------|---------------|-----------------|
-| **F-1** | Split API app; introduce `@atlas/contracts` | Env + HTTP only |
-| **F0–F8** | Keep current domain logic; stabilize contracts | Full rebuild against v1 |
-| **Post-F8 (your decision)** | Option A: **keep & harden** current backend | None |
-| | Option B: **refactor internals** (ORM, services) | Contract tests must stay green |
-| | Option C: **replace runtime** (non-Next API) | Reimplement v1 routes; frontend unchanged |
-| | Option D: **microservices** | Gateway exposes same v1; frontend unchanged |
+| When                        | Backend focus                                    | Frontend impact                             |
+| --------------------------- | ------------------------------------------------ | ------------------------------------------- |
+| **F-1**                     | Split API app; introduce `@atlas/contracts`      | Env + HTTP only                             |
+| **F0–F8**                   | Keep current domain logic; stabilize contracts   | Full rebuild against v1                     |
+| **Post-F8 (your decision)** | Option A: **keep & harden** current backend      | None                                        |
+|                             | Option B: **refactor internals** (ORM, services) | Contract tests must stay green              |
+|                             | Option C: **replace runtime** (non-Next API)     | Reimplement v1 routes; frontend unchanged   |
+|                             | Option D: **microservices**                      | Gateway exposes same v1; frontend unchanged |
 
 ---
 
@@ -188,11 +188,11 @@ Before you consider the frontend “done” and backend “optional to replace�
 
 ## 10. Decision log (fill when you choose)
 
-| Date | Decision | Notes |
-|------|----------|-------|
-| _TBD_ | Keep current backend stack | Prisma + Next API + Postgres |
-| _TBD_ | Refactor target | e.g. extract workers, add read models |
-| _TBD_ | Replace target | e.g. Go API, separate services |
+| Date  | Decision                   | Notes                                 |
+| ----- | -------------------------- | ------------------------------------- |
+| _TBD_ | Keep current backend stack | Prisma + Next API + Postgres          |
+| _TBD_ | Refactor target            | e.g. extract workers, add read models |
+| _TBD_ | Replace target             | e.g. Go API, separate services        |
 
 ---
 

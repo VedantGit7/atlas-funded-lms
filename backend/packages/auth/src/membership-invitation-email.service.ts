@@ -1,7 +1,13 @@
 import { AtlasHttpError } from "@atlas/core/http/errors";
-import { createSupabaseAdminServerClient, createSupabasePublicServerClient } from "./supabase-server";
+import {
+  createSupabaseAdminServerClient,
+  createSupabasePublicServerClient,
+} from "./supabase-server";
 
-function isExistingSupabaseUserError(error: { message: string; status?: number | undefined }): boolean {
+function isExistingSupabaseUserError(error: {
+  message: string;
+  status?: number | undefined;
+}): boolean {
   const message = error.message.toLowerCase();
   return (
     message.includes("already registered") ||

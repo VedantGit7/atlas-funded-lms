@@ -85,11 +85,7 @@ function formatMovedOn(iso: string): string {
   });
 }
 
-export function AdminTrashPanel({
-  initial,
-}: {
-  initial: ContentTrashListResponse["data"];
-}) {
+export function AdminTrashPanel({ initial }: { initial: ContentTrashListResponse["data"] }) {
   const [kind, setKind] = useState<ContentTrashKind>(initial.kind);
   const [itemsByKind, setItemsByKind] = useState<Record<ContentTrashKind, ContentTrashItem[]>>({
     courses: initial.kind === "courses" ? initial.items : [],
@@ -151,7 +147,9 @@ export function AdminTrashPanel({
         [item.kind]: prev[item.kind].filter((row) => row.id !== item.id),
       }));
     } catch {
-      setError(action === "restore" ? "Restore failed. Try again." : "Delete forever failed. Try again.");
+      setError(
+        action === "restore" ? "Restore failed. Try again." : "Delete forever failed. Try again.",
+      );
     } finally {
       setBusyId(null);
     }
@@ -173,7 +171,8 @@ export function AdminTrashPanel({
             Trash
           </h1>
           <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[var(--admin-on-surface-variant)]">
-            Items you move to Trash are stored here. You can restore them within {retentionDays} days.
+            Items you move to Trash are stored here. You can restore them within {retentionDays}{" "}
+            days.
           </p>
         </div>
         <Link
@@ -188,11 +187,7 @@ export function AdminTrashPanel({
 
       <div className="overflow-hidden rounded-2xl border border-[var(--admin-border)] bg-[var(--admin-surface)] shadow-sm">
         <div className="flex flex-col gap-3 border-b border-[var(--admin-border)] px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-          <div
-            role="tablist"
-            aria-label="Trash content types"
-            className="flex flex-wrap gap-1"
-          >
+          <div role="tablist" aria-label="Trash content types" className="flex flex-wrap gap-1">
             {TABS.map((tab) => {
               const active = kind === tab.kind;
               const Icon = tab.icon;
@@ -202,7 +197,9 @@ export function AdminTrashPanel({
                   type="button"
                   role="tab"
                   aria-selected={active}
-                  onClick={() => selectTab(tab.kind)}
+                  onClick={() => {
+                    selectTab(tab.kind);
+                  }}
                   className={[
                     "inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold uppercase tracking-[0.06em] transition-colors",
                     active
@@ -236,12 +233,18 @@ export function AdminTrashPanel({
 
         <div className="min-h-[360px] px-4 py-8 sm:px-6">
           {pending && !loaded[kind] ? (
-            <p className="py-16 text-center text-sm text-[var(--admin-on-surface-variant)]">Loading…</p>
+            <p className="py-16 text-center text-sm text-[var(--admin-on-surface-variant)]">
+              Loading…
+            </p>
           ) : items.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-10 text-center motion-safe:animate-[admin-dropdown-in_0.28s_cubic-bezier(0.16,1,0.3,1)]">
               <TrashEmptyIllustration />
-              <p className="mt-4 text-lg font-bold text-[var(--admin-on-surface)]">{emptyCopy.title}</p>
-              <p className="mt-2 max-w-md text-sm text-[var(--admin-on-surface-variant)]">{emptyCopy.body}</p>
+              <p className="mt-4 text-lg font-bold text-[var(--admin-on-surface)]">
+                {emptyCopy.title}
+              </p>
+              <p className="mt-2 max-w-md text-sm text-[var(--admin-on-surface-variant)]">
+                {emptyCopy.body}
+              </p>
             </div>
           ) : (
             <ul className="divide-y divide-[var(--admin-border)]">

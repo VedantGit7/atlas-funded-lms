@@ -1,9 +1,6 @@
 import Link from "next/link";
 import { Calendar, Clock, Headphones } from "lucide-react";
-import {
-  getHelpCategory,
-  getRelatedArticles,
-} from "../help-center-content";
+import { getHelpCategory, getRelatedArticles } from "../help-center-content";
 import { formatReadTime } from "../help-center-view";
 import type { HelpArticle } from "../help-center-types";
 import { HelpArticleContent, HelpBreadcrumbs } from "./HelpArticleContent";

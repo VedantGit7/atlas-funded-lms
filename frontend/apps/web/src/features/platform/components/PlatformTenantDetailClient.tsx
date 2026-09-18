@@ -48,9 +48,7 @@ export function PlatformTenantDetailClient({
   const [error, setError] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogKind, setDialogKind] = useState<"lifecycle" | "entitlements" | null>(null);
-  const [pendingAction, setPendingAction] = useState<"suspend" | "resume" | "archive" | null>(
-    null,
-  );
+  const [pendingAction, setPendingAction] = useState<"suspend" | "resume" | "archive" | null>(null);
   const [actionReason, setActionReason] = useState("");
 
   useEffect(() => {

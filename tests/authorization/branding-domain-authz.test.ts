@@ -7,9 +7,23 @@ const canMock = vi.fn();
 const findDomainByHostnameMock = vi.fn();
 const insertTenantDomainMock = vi.fn();
 
-vi.mock("@atlas/domain-config", () => ({
-  findActiveEntitlementByKey: (...args: unknown[]) => findActiveEntitlementByKeyMock(...args),
-}));
+vi.mock("@atlas/domain-config", async () => {
+  // The gate now reads value_json on every call, so the parse is real here:
+  // mocking it would hide whether `{ enabled: false }` actually denies.
+  const { parseEntitlementValue } = (await vi.importActual(
+    "@atlas/domain-config/schemas/entitlement-value",
+  )) as {
+    parseEntitlementValue: (raw: unknown) => {
+      enabled: boolean;
+      limit: number | null;
+      period: string;
+    };
+  };
+  return {
+    parseEntitlementValue,
+    findActiveEntitlementByKey: (...args: unknown[]) => findActiveEntitlementByKeyMock(...args),
+  };
+});
 
 vi.mock("@atlas/authorization", async (importOriginal) => {
   const actual = await importOriginal<Record<string, unknown>>();
@@ -41,7 +55,7 @@ import {
   putRouteMetadata as putBrandingRouteMetadata,
 } from "../../backend/apps/api/src/app/api/v1/branding/route.metadata";
 import { routeMetadata as publishBrandingRouteMetadata } from "../../backend/apps/api/src/app/api/v1/branding/publish/route.metadata";
-import { routeMetadata as putThemeRouteMetadata } from "../../backend/apps/api/src/app/api/v1/theme/route.metadata";
+import { putRouteMetadata as putThemeRouteMetadata } from "../../backend/apps/api/src/app/api/v1/theme/route.metadata";
 import {
   getRouteMetadata as getDomainsRouteMetadata,
   postRouteMetadata as postDomainsRouteMetadata,

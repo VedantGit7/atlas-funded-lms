@@ -27,10 +27,6 @@ function deny(
   };
 }
 
-function isAdminBypassRole(roleKeys: string[]): boolean {
-  return roleKeys.includes("owner") || roleKeys.includes("admin");
-}
-
 export async function can(args: {
   tx: Tx;
   actor: AuthorizationActor;
@@ -85,7 +81,11 @@ export async function can(args: {
     return deny(args.permission, "NO_ROLE_GRANT");
   }
 
-  const bypassedResourcePredicate = isAdminBypassRole(roleKeys);
+  // H11: read from the role record, never from its key. This was
+  // `roleKeys.includes("owner") || roleKeys.includes("admin")`, which made the
+  // bypass invisible in the data, unrevocable without a deploy, and inheritable
+  // by any custom role that happened to be named "admin".
+  const bypassedResourcePredicate = grant?.bypassesResourcePredicates ?? false;
   const requiredRelationshipKeys = requiredRelationships(args.permission);
   const ownsResource = actorOwnsResource({ actor: args.actor, resource: args.resource });
   const hasRelationship =

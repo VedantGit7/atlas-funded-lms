@@ -6,7 +6,8 @@ export const seoFieldBlockClassName = "space-y-2";
 
 export const seoFieldLabelClassName = "text-sm font-semibold text-[var(--admin-on-surface)]";
 
-export const seoFieldHelperClassName = "text-sm leading-relaxed text-[var(--admin-on-surface-variant)]";
+export const seoFieldHelperClassName =
+  "text-sm leading-relaxed text-[var(--admin-on-surface-variant)]";
 
 export const seoTextareaClassName =
   "min-h-[120px] w-full resize-y rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-4 py-3 text-sm text-[var(--admin-on-surface)] outline-none transition-all placeholder:text-[var(--admin-on-surface-variant)] focus:border-[var(--admin-primary)] focus:ring-2 focus:ring-[var(--admin-primary)]/30 disabled:cursor-not-allowed disabled:opacity-50";

@@ -5,10 +5,7 @@ import { Clock } from "lucide-react";
 import type { z } from "zod";
 import type { studioCourseListItemSchema } from "@atlas/contracts/courses/course-authoring-schemas";
 import { CourseFeaturesPopover } from "./course-features-popover";
-import {
-  courseAgeDays,
-  courseCardStatusLabel,
-} from "./courses-catalog-shared";
+import { courseAgeDays, courseCardStatusLabel } from "./courses-catalog-shared";
 import { StudioCoursePrice } from "./StudioCoursePrice";
 
 type CourseRow = z.infer<typeof studioCourseListItemSchema>;

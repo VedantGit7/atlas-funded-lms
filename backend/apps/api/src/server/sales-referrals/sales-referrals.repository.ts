@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { randomInt, randomUUID } from "node:crypto";
 import type { TenantTx } from "@atlas/db";
 
 export type ReferralConfigRow = {
@@ -42,13 +42,16 @@ export type ReferralStatsRow = {
 const CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
 export function normalizeReferralCode(raw: string): string {
-  return raw.trim().toUpperCase().replace(/[^A-Z0-9_-]/g, "");
+  return raw
+    .trim()
+    .toUpperCase()
+    .replace(/[^A-Z0-9_-]/g, "");
 }
 
 export function generateReferralCodeValue(): string {
   let out = "";
   for (let i = 0; i < 8; i += 1) {
-    out += CODE_ALPHABET[Math.floor(Math.random() * CODE_ALPHABET.length)]!;
+    out += CODE_ALPHABET.charAt(randomInt(CODE_ALPHABET.length));
   }
   return out;
 }
@@ -349,10 +352,7 @@ export const salesReferralsRepository = {
     );
     const row = rows[0];
     if (!row) return null;
-    await tx.$executeRawUnsafe(
-      `delete from sales_referral_pending where id = $1::uuid`,
-      row.id,
-    );
+    await tx.$executeRawUnsafe(`delete from sales_referral_pending where id = $1::uuid`, row.id);
     return row.code;
   },
 

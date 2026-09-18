@@ -114,7 +114,7 @@ export function EnrollStudentDialog({
     }
   }
 
-  async function handleSubmit(event: React.FormEvent) {
+  async function handleSubmit(event: React.SyntheticEvent) {
     event.preventDefault();
     if (!canSubmit || !membershipId) return;
     await enrollMember(membershipId);

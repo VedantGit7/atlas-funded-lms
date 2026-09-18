@@ -2,6 +2,11 @@
 
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
+import {
+  extractFrontendApiPatterns,
+  patternMatchesRoute,
+  routePathToPattern,
+} from "./lib/api-path-patterns.mjs";
 
 const repoRoot = process.cwd();
 const apiRoot = join(repoRoot, "backend/apps/api/src/app/api");
@@ -32,14 +37,6 @@ function routeFileToApiPath(file) {
   return `/api/${withoutRoute}`;
 }
 
-function routePathToPattern(apiPath) {
-  return apiPath
-    .replace(/^\/api\/v1\//, "")
-    .split("/")
-    .map((segment) => (segment.startsWith("[") && segment.endsWith("]") ? "*" : segment))
-    .join("/");
-}
-
 function collectFrontendSource(root) {
   const chunks = [];
   function walk(dir) {
@@ -58,56 +55,69 @@ function collectFrontendSource(root) {
   return chunks.join("\n");
 }
 
-function extractFrontendApiPatterns(source) {
-  const patterns = new Set();
-  const literalMatches = source.matchAll(/\/api\/v1\/[a-zA-Z0-9_./?=&:-]+/g);
-  for (const match of literalMatches) {
-    patterns.add(routePathToPattern(match[0].split("?")[0] ?? match[0]));
-  }
-
-  const templateMatches = source.matchAll(/`\/api\/v1\/[^`]+`/g);
-  for (const match of templateMatches) {
-    const normalized = match[0]
-      .slice(1, -1)
-      .split("?")[0]
-      .replace(/\$\{[^}]+\}/g, "*");
-    patterns.add(routePathToPattern(normalized));
-  }
-
-  return patterns;
-}
-
-function patternMatchesRoute(routePattern, frontendPatterns) {
-  if (frontendPatterns.has(routePattern)) {
-    return true;
-  }
-
-  const routeSegments = routePattern.split("/");
-  for (const frontendPattern of frontendPatterns) {
-    const frontendSegments = frontendPattern.split("/");
-    if (frontendSegments.length !== routeSegments.length) {
-      continue;
-    }
-    const matches = routeSegments.every(
-      (segment, index) =>
-        segment === "*" ||
-        frontendSegments[index] === "*" ||
-        segment === frontendSegments[index],
-    );
-    if (matches) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
 function isOpsOnly(apiPath, opsOnlyPrefixes) {
   return opsOnlyPrefixes.some((prefix) => apiPath === prefix || apiPath.startsWith(prefix));
 }
 
 const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
-const opsOnlyPrefixes = manifest.opsOnly ?? [];
+/**
+ * Every opsOnly entry must say why it is exempt.
+ *
+ * The list was bare strings. That is how a broken gate gets silenced quietly:
+ * this checker reported 17 fully-wired /api/v1/reports/* routes as unwired
+ * because of a parser bug, and the obvious "fix" would have been to paste them
+ * in here, permanently excusing routes that were never broken. Requiring a
+ * reason forces whoever adds an entry to state the mechanism, which is exactly
+ * the step at which "the parser is wrong" becomes obvious.
+ */
+const opsOnlyPrefixes = (manifest.opsOnly ?? []).map((entry) => {
+  if (typeof entry === "string") {
+    throw new Error(
+      `opsOnly entry "${entry}" must be { path, reason }: an exemption without a stated reason cannot be reviewed.`,
+    );
+  }
+  if (!entry?.path || !entry?.reason) {
+    throw new Error(`opsOnly entry is missing path or reason: ${JSON.stringify(entry)}`);
+  }
+  return entry.path;
+});
+/**
+ * Routes the app really does call, but by a URL the API hands back at runtime.
+ *
+ * Kept separate from opsOnly on purpose. "No UI exists" and "the UI follows a
+ * server-supplied link" are different facts, and collapsing them would hide a
+ * genuinely missing screen behind an exemption meant for webhooks. The course
+ * backup download is the worked example: ManageCourseBackupPanel fetches
+ * `job.downloadUrl`, so the path is data rather than source text and no static
+ * scan can see it.
+ */
+const runtimeLinkedPrefixes = (manifest.runtimeLinked ?? []).map((entry) => {
+  if (typeof entry === "string" || !entry?.path || !entry?.reason) {
+    throw new Error(`runtimeLinked entry must be { path, reason }: ${JSON.stringify(entry)}`);
+  }
+  return entry.path;
+});
+/**
+ * Routes with no product surface yet, each with a reason and an owner.
+ *
+ * Distinct from opsOnly (never called from the app by design) and from
+ * runtimeLinked (called through a server-supplied URL). These are backend
+ * capability that a deliberate product decision has not yet given a home.
+ *
+ * They are NOT silenced. Every run prints them, so the debt stays in front of
+ * whoever reads the gate instead of decaying into an allowlist nobody revisits
+ * -- which is how the release-evidence file in this repo came to assert a clean
+ * state that was sixty days stale.
+ */
+const pendingProductSurface = (manifest.pendingProductSurface ?? []).map((entry) => {
+  if (typeof entry === "string" || !entry?.path || !entry?.reason || !entry?.owner) {
+    throw new Error(
+      "pendingProductSurface entry must be { path, reason, owner }: " + JSON.stringify(entry),
+    );
+  }
+  return entry;
+});
+const pendingPaths = pendingProductSurface.map((entry) => entry.path);
 const uiWiredRequired = manifest.uiWiredRequired ?? [];
 
 const routeFiles = walkFiles(apiRoot);
@@ -134,17 +144,41 @@ const uncovered = apiPaths.filter((apiPath) => {
   if (isOpsOnly(apiPath, opsOnlyPrefixes)) {
     return false;
   }
+  if (isOpsOnly(apiPath, pendingPaths)) {
+    return false;
+  }
+  if (isOpsOnly(apiPath, runtimeLinkedPrefixes)) {
+    return false;
+  }
   return !frontendReferencesApi(apiPath);
 });
 
-const strict = process.env["STRICT_API_CLOSURE"] === "1";
+if (pendingProductSurface.length > 0) {
+  console.warn(
+    "API closure: " +
+      String(pendingProductSurface.length) +
+      " route(s) have no product surface yet:",
+  );
+  for (const entry of pendingProductSurface) {
+    console.warn("  - " + entry.path + " [" + entry.owner + "] " + entry.reason);
+  }
+}
+
+/**
+ * `--strict` exists so the local `ci` chain can enforce this without an inline
+ * env var. Nothing in this repo sets one in an npm script — every other case
+ * goes through `dotenv -e` — and `STRICT_API_CLOSURE=1 node ...` is not portable
+ * to a Windows shell. The env var stays supported because the GitHub job
+ * already sets it.
+ */
+const strict = process.env["STRICT_API_CLOSURE"] === "1" || process.argv.includes("--strict");
 if (strict) {
   for (const apiPath of uncovered) {
     failures.push(`API route not wired in frontend and not listed ops-only: ${apiPath}`);
   }
 } else if (uncovered.length > 0) {
   console.warn(
-    `API closure advisory: ${uncovered.length} routes not referenced in frontend (set STRICT_API_CLOSURE=1 to fail).`,
+    `API closure advisory: ${uncovered.length} routes not referenced in frontend (pass --strict, or set STRICT_API_CLOSURE=1, to fail).`,
   );
 }
 

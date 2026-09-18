@@ -12,7 +12,6 @@ import {
   ChevronLeft,
   ChevronRight,
   ClipboardCopy,
-  CloudOff,
   Columns3,
   Download,
   Filter,
@@ -48,13 +47,7 @@ import {
 } from "./admin-batches-roster-api";
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
 
-type DetailTab =
-  | "overview"
-  | "learners"
-  | "live_sessions"
-  | "exams"
-  | "content"
-  | "messages";
+type DetailTab = "overview" | "learners" | "live_sessions" | "exams" | "content" | "messages";
 
 type LearnerPanelTab = "live" | "exams" | "course";
 type CompletionOp = "gte" | "lte";
@@ -97,7 +90,7 @@ function Shimmer({ className }: { className?: string }) {
 
 function formatPct(value: number | null | undefined): string {
   if (value == null || Number.isNaN(value)) return "-";
-  return `${Number(value).toFixed(value % 1 === 0 ? 0 : 1)}%`;
+  return `${value.toFixed(value % 1 === 0 ? 0 : 1)}%`;
 }
 
 function formatDate(value: string | null | undefined): string {
@@ -216,7 +209,7 @@ function learnerInitials(name: string | null, email: string | null): string {
   const source = (name?.trim() || email?.trim() || "?").replace(/\s+/g, " ");
   const parts = source.split(" ").filter(Boolean);
   if (parts.length >= 2) {
-    return `${parts[0]![0] ?? ""}${parts[1]![0] ?? ""}`.toUpperCase();
+    return `${parts[0]?.[0] ?? ""}${parts[1]?.[0] ?? ""}`.toUpperCase();
   }
   return source.slice(0, 2).toUpperCase();
 }
@@ -325,12 +318,8 @@ function SummaryMetricCard({
   const className = [
     "rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] p-4 text-left",
     span2 ? "md:col-span-2" : "",
-    warning
-      ? "border-[color-mix(in_srgb,var(--admin-warning)_30%,var(--admin-border))]"
-      : "",
-    onClick
-      ? "transition-colors hover:bg-[var(--admin-surface-high)]"
-      : "",
+    warning ? "border-[color-mix(in_srgb,var(--admin-warning)_30%,var(--admin-border))]" : "",
+    onClick ? "transition-colors hover:bg-[var(--admin-surface-high)]" : "",
   ].join(" ");
 
   if (onClick) {
@@ -387,28 +376,6 @@ function DetailLoadingSkeleton() {
           <Shimmer className="h-40" />
         </div>
       </div>
-    </div>
-  );
-}
-
-function PlaceholderPanel({
-  title,
-  description,
-}: {
-  title: string;
-  description: string;
-}) {
-  return (
-    <div className="rounded-lg border border-dashed border-[var(--admin-border)] bg-[var(--admin-surface)] px-6 py-16 text-center">
-      <CloudOff
-        className="mx-auto mb-4 h-10 w-10 text-[var(--admin-outline)]"
-        aria-hidden="true"
-        strokeWidth={1.5}
-      />
-      <h3 className="text-base font-semibold text-[var(--admin-on-surface)]">{title}</h3>
-      <p className="mx-auto mt-2 max-w-md text-sm text-[var(--admin-on-surface-variant)]">
-        {description}
-      </p>
     </div>
   );
 }
@@ -492,9 +459,7 @@ export function AdminBatchDetailPage({ batchId }: { batchId: string }) {
       }
       const query = params.toString();
       router.replace(
-        query
-          ? `/admin/reports/batches/${batchId}?${query}`
-          : `/admin/reports/batches/${batchId}`,
+        query ? `/admin/reports/batches/${batchId}?${query}` : `/admin/reports/batches/${batchId}`,
       );
     },
     [batchId, router, searchParams],
@@ -527,9 +492,7 @@ export function AdminBatchDetailPage({ batchId }: { batchId: string }) {
       const trimmedName = learnerName.trim();
       const joinedFromIso = dateInputToStartIso(joinedFrom);
       const joinedToIso = dateInputToEndIso(joinedTo);
-      const parsedCompletion = completionValue.trim()
-        ? Number(completionValue.trim())
-        : undefined;
+      const parsedCompletion = completionValue.trim() ? Number(completionValue.trim()) : undefined;
       const completionFilter =
         parsedCompletion != null && !Number.isNaN(parsedCompletion)
           ? completionOp === "gte"
@@ -553,9 +516,7 @@ export function AdminBatchDetailPage({ batchId }: { batchId: string }) {
       setTotalCount(response.data.pageInfo.totalCount);
       setTotalPages(response.data.pageInfo.totalPages);
       setSelectedIds((current) =>
-        current.filter((id) =>
-          response.data.items.some((item) => item.membershipId === id),
-        ),
+        current.filter((id) => response.data.items.some((item) => item.membershipId === id)),
       );
     } catch (loadError) {
       setLearners([]);
@@ -618,7 +579,9 @@ export function AdminBatchDetailPage({ batchId }: { batchId: string }) {
       }
     }
     document.addEventListener("mousedown", onPointerDown);
-    return () => document.removeEventListener("mousedown", onPointerDown);
+    return () => {
+      document.removeEventListener("mousedown", onPointerDown);
+    };
   }, [columnsOpen]);
 
   useEffect(() => {
@@ -630,7 +593,7 @@ export function AdminBatchDetailPage({ batchId }: { batchId: string }) {
       .then((response) => {
         if (!cancelled) setLearnerDetail(response.data);
       })
-      .catch((loadError) => {
+      .catch((loadError: unknown) => {
         if (cancelled) return;
         setLearnerDetailError(
           loadError instanceof ClientApiError
@@ -650,11 +613,7 @@ export function AdminBatchDetailPage({ batchId }: { batchId: string }) {
 
   const hasLearnerFilters = useMemo(() => {
     return Boolean(
-      learnerName ||
-        joinedFrom ||
-        joinedTo ||
-        completionValue ||
-        healthFilter !== "any",
+      learnerName || joinedFrom || joinedTo || completionValue || healthFilter !== "any",
     );
   }, [completionValue, healthFilter, joinedFrom, joinedTo, learnerName]);
 
@@ -694,7 +653,9 @@ export function AdminBatchDetailPage({ batchId }: { batchId: string }) {
     try {
       await navigator.clipboard.writeText(detail.key);
       setCopiedKey(true);
-      window.setTimeout(() => setCopiedKey(false), 1500);
+      window.setTimeout(() => {
+        setCopiedKey(false);
+      }, 1500);
     } catch {
       setActionError("Couldn't copy batch key.");
     }
@@ -726,9 +687,7 @@ export function AdminBatchDetailPage({ batchId }: { batchId: string }) {
       const trimmedName = learnerName.trim();
       const joinedFromIso = dateInputToStartIso(joinedFrom);
       const joinedToIso = dateInputToEndIso(joinedTo);
-      const parsedCompletion = completionValue.trim()
-        ? Number(completionValue.trim())
-        : undefined;
+      const parsedCompletion = completionValue.trim() ? Number(completionValue.trim()) : undefined;
       await sendBatchMessage({
         batchId,
         subject: messageSubject.trim(),
@@ -984,7 +943,9 @@ export function AdminBatchDetailPage({ batchId }: { batchId: string }) {
                     <button
                       type="button"
                       className="text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-on-surface)]"
-                      onClick={() => setColumnsOpen(false)}
+                      onClick={() => {
+                        setColumnsOpen(false);
+                      }}
                       aria-label="Close columns"
                     >
                       <X className="h-4 w-4" aria-hidden="true" />
@@ -1005,7 +966,9 @@ export function AdminBatchDetailPage({ batchId }: { batchId: string }) {
                             type="checkbox"
                             className="h-4 w-4 accent-[var(--admin-primary)]"
                             checked
-                            onChange={() => toggleDraftColumn(key)}
+                            onChange={() => {
+                              toggleDraftColumn(key);
+                            }}
                             aria-label={`Toggle ${option.label}`}
                           />
                           <span className="min-w-0 flex-1 text-xs text-[var(--admin-on-surface)]">
@@ -1015,7 +978,9 @@ export function AdminBatchDetailPage({ batchId }: { batchId: string }) {
                             type="button"
                             className="rounded p-1 text-[var(--admin-on-surface-variant)] hover:bg-[var(--admin-surface-high)] disabled:opacity-30"
                             disabled={index === 0}
-                            onClick={() => moveDraftColumn(index, -1)}
+                            onClick={() => {
+                              moveDraftColumn(index, -1);
+                            }}
                             aria-label={`Move ${option.label} up`}
                           >
                             <ArrowUp className="h-3.5 w-3.5" aria-hidden="true" />
@@ -1024,7 +989,9 @@ export function AdminBatchDetailPage({ batchId }: { batchId: string }) {
                             type="button"
                             className="rounded p-1 text-[var(--admin-on-surface-variant)] hover:bg-[var(--admin-surface-high)] disabled:opacity-30"
                             disabled={index === draftColumns.length - 1}
-                            onClick={() => moveDraftColumn(index, 1)}
+                            onClick={() => {
+                              moveDraftColumn(index, 1);
+                            }}
                             aria-label={`Move ${option.label} down`}
                           >
                             <ArrowDown className="h-3.5 w-3.5" aria-hidden="true" />
@@ -1043,7 +1010,9 @@ export function AdminBatchDetailPage({ batchId }: { batchId: string }) {
                           type="checkbox"
                           className="h-4 w-4 accent-[var(--admin-primary)]"
                           checked={false}
-                          onChange={() => toggleDraftColumn(column.key)}
+                          onChange={() => {
+                            toggleDraftColumn(column.key);
+                          }}
                           aria-label={`Toggle ${column.label}`}
                         />
                         <span className="text-xs text-[var(--admin-on-surface-variant)]">
@@ -1056,7 +1025,9 @@ export function AdminBatchDetailPage({ batchId }: { batchId: string }) {
                     <button
                       type="button"
                       className="text-xs font-medium text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-on-surface)]"
-                      onClick={() => setDraftColumns(DEFAULT_COLUMNS)}
+                      onClick={() => {
+                        setDraftColumns(DEFAULT_COLUMNS);
+                      }}
                     >
                       Reset
                     </button>
@@ -1092,7 +1063,9 @@ export function AdminBatchDetailPage({ batchId }: { batchId: string }) {
           <button
             type="button"
             className={primaryButtonClassName}
-            onClick={() => openMessageModal()}
+            onClick={() => {
+              openMessageModal();
+            }}
           >
             <Mail className="h-4 w-4" aria-hidden="true" />
             Message Learners
@@ -1114,7 +1087,9 @@ export function AdminBatchDetailPage({ batchId }: { batchId: string }) {
                   ? "border-b-2 border-[var(--admin-primary)] text-[var(--admin-primary)]"
                   : "border-b-2 border-transparent text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-primary)]",
               ].join(" ")}
-              onClick={() => setTab(tab.key)}
+              onClick={() => {
+                setTab(tab.key);
+              }}
             >
               {tab.label}
             </button>
@@ -1160,7 +1135,9 @@ export function AdminBatchDetailPage({ batchId }: { batchId: string }) {
           <button
             type="button"
             className={ghostButtonClassName}
-            onClick={() => setActionError(null)}
+            onClick={() => {
+              setActionError(null);
+            }}
           >
             Dismiss
           </button>
@@ -1400,9 +1377,7 @@ export function AdminBatchDetailPage({ batchId }: { batchId: string }) {
                         </p>
                         <p className="mt-1 font-mono text-[11px] text-[var(--admin-on-surface-variant)]">
                           {formatDateTime(session.scheduledAt)}
-                          {session.durationMinutes != null
-                            ? ` · ${session.durationMinutes}m`
-                            : ""}
+                          {session.durationMinutes != null ? ` · ${session.durationMinutes}m` : ""}
                           {" · "}
                           {titleCase(session.status)}
                         </p>
@@ -1461,7 +1436,9 @@ export function AdminBatchDetailPage({ batchId }: { batchId: string }) {
                     className={`${fieldClassName} w-full pl-9`}
                     placeholder="Search learner name"
                     value={draftSearch}
-                    onChange={(event) => setDraftSearch(event.target.value)}
+                    onChange={(event) => {
+                      setDraftSearch(event.target.value);
+                    }}
                     onKeyDown={(event) => {
                       if (event.key === "Enter") applySearch();
                     }}
@@ -1667,7 +1644,9 @@ export function AdminBatchDetailPage({ batchId }: { batchId: string }) {
                   <button
                     type="button"
                     className={secondaryButtonClassName}
-                    onClick={() => openMessageModal(selectedIds)}
+                    onClick={() => {
+                      openMessageModal(selectedIds);
+                    }}
                   >
                     <Mail className="h-4 w-4" aria-hidden="true" />
                     Message
@@ -1684,7 +1663,9 @@ export function AdminBatchDetailPage({ batchId }: { batchId: string }) {
                   <button
                     type="button"
                     className={ghostButtonClassName}
-                    onClick={() => setSelectedIds([])}
+                    onClick={() => {
+                      setSelectedIds([]);
+                    }}
                   >
                     Clear
                   </button>
@@ -1717,9 +1698,7 @@ export function AdminBatchDetailPage({ batchId }: { batchId: string }) {
                           <input
                             type="checkbox"
                             className="h-4 w-4 accent-[var(--admin-primary)]"
-                            checked={
-                              learners.length > 0 && selectedIds.length === learners.length
-                            }
+                            checked={learners.length > 0 && selectedIds.length === learners.length}
                             onChange={toggleSelectAll}
                             aria-label="Select all learners on this page"
                           />
@@ -1739,9 +1718,7 @@ export function AdminBatchDetailPage({ batchId }: { batchId: string }) {
                         {columns.includes("content_completion_pct") ? (
                           <th className="px-3">Content</th>
                         ) : null}
-                        {columns.includes("joined_at") ? (
-                          <th className="px-3">Joined on</th>
-                        ) : null}
+                        {columns.includes("joined_at") ? <th className="px-3">Joined on</th> : null}
                         <th className="w-12 px-3">
                           <span className="sr-only">Actions</span>
                         </th>
@@ -1750,10 +1727,7 @@ export function AdminBatchDetailPage({ batchId }: { batchId: string }) {
                     <tbody>
                       {!learnersLoading && learners.length === 0 ? (
                         <tr>
-                          <td
-                            colSpan={Math.max(3, columns.length + 2)}
-                            className="p-0"
-                          >
+                          <td colSpan={Math.max(3, columns.length + 2)} className="p-0">
                             <div className="flex flex-col items-center justify-center px-6 py-16 text-center">
                               <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full border border-dashed border-[var(--admin-border)] bg-[var(--admin-surface-low)]">
                                 <Users
@@ -1782,10 +1756,7 @@ export function AdminBatchDetailPage({ batchId }: { batchId: string }) {
                                     Clear filters
                                   </button>
                                 ) : (
-                                  <Link
-                                    href="/admin/batches"
-                                    className={primaryButtonClassName}
-                                  >
+                                  <Link href="/admin/batches" className={primaryButtonClassName}>
                                     Batch Settings
                                   </Link>
                                 )}
@@ -1810,11 +1781,15 @@ export function AdminBatchDetailPage({ batchId }: { batchId: string }) {
                               style={{
                                 animationDelay: `${Math.min(index, 11) * 20}ms`,
                               }}
-                              onClick={() => openLearnerPanel(learner)}
+                              onClick={() => {
+                                openLearnerPanel(learner);
+                              }}
                             >
                               <td
                                 className="relative px-3"
-                                onClick={(event) => event.stopPropagation()}
+                                onClick={(event) => {
+                                  event.stopPropagation();
+                                }}
                               >
                                 <span
                                   className={`absolute bottom-0 left-0 top-0 w-1 ${healthRailClass(learner.health)}`}
@@ -1824,7 +1799,9 @@ export function AdminBatchDetailPage({ batchId }: { batchId: string }) {
                                   type="checkbox"
                                   className="h-4 w-4 accent-[var(--admin-primary)]"
                                   checked={selected}
-                                  onChange={() => toggleSelect(learner.membershipId)}
+                                  onChange={() => {
+                                    toggleSelect(learner.membershipId);
+                                  }}
                                   aria-label={`Select ${learner.learnerName ?? learner.email ?? "learner"}`}
                                 />
                               </td>
@@ -1900,19 +1877,21 @@ export function AdminBatchDetailPage({ batchId }: { batchId: string }) {
                               ) : null}
                               <td
                                 className="relative px-3"
-                                onClick={(event) => event.stopPropagation()}
+                                onClick={(event) => {
+                                  event.stopPropagation();
+                                }}
                               >
                                 <button
                                   type="button"
                                   className="rounded p-1 text-[var(--admin-on-surface-variant)] hover:bg-[var(--admin-surface-high)] hover:text-[var(--admin-on-surface)]"
                                   aria-label="Row actions"
-                                  onClick={() =>
+                                  onClick={() => {
                                     setRowMenuId((current) =>
                                       current === learner.membershipId
                                         ? null
                                         : learner.membershipId,
-                                    )
-                                  }
+                                    );
+                                  }}
                                 >
                                   <MoreVertical className="h-4 w-4" aria-hidden="true" />
                                 </button>
@@ -1921,14 +1900,18 @@ export function AdminBatchDetailPage({ batchId }: { batchId: string }) {
                                     <button
                                       type="button"
                                       className="block w-full px-3 py-2 text-left text-xs text-[var(--admin-on-surface)] hover:bg-[var(--admin-surface-high)]"
-                                      onClick={() => openLearnerPanel(learner)}
+                                      onClick={() => {
+                                        openLearnerPanel(learner);
+                                      }}
                                     >
                                       View learner report
                                     </button>
                                     <button
                                       type="button"
                                       className="block w-full px-3 py-2 text-left text-xs text-[var(--admin-on-surface)] hover:bg-[var(--admin-surface-high)]"
-                                      onClick={() => openMessageModal([learner.membershipId])}
+                                      onClick={() => {
+                                        openMessageModal([learner.membershipId]);
+                                      }}
                                     >
                                       Message learner
                                     </button>
@@ -1959,8 +1942,8 @@ export function AdminBatchDetailPage({ batchId }: { batchId: string }) {
                       Critical
                     </span>
                     {" · "}
-                    At risk: any metric below 40% or no activity in 14 days. Critical: two or
-                    more metrics below 40%.
+                    At risk: any metric below 40% or no activity in 14 days. Critical: two or more
+                    metrics below 40%.
                   </p>
                 </div>
                 {totalPages > 1 ? (
@@ -1969,7 +1952,9 @@ export function AdminBatchDetailPage({ batchId }: { batchId: string }) {
                       type="button"
                       className={ghostButtonClassName}
                       disabled={page <= 1 || learnersLoading}
-                      onClick={() => setPage((current) => Math.max(1, current - 1))}
+                      onClick={() => {
+                        setPage((current) => Math.max(1, current - 1));
+                      }}
                       aria-label="Previous page"
                     >
                       <ChevronLeft className="h-4 w-4" aria-hidden="true" />
@@ -1981,7 +1966,9 @@ export function AdminBatchDetailPage({ batchId }: { batchId: string }) {
                       type="button"
                       className={ghostButtonClassName}
                       disabled={page >= totalPages || learnersLoading}
-                      onClick={() => setPage((current) => current + 1)}
+                      onClick={() => {
+                        setPage((current) => current + 1);
+                      }}
                       aria-label="Next page"
                     >
                       <ChevronRight className="h-4 w-4" aria-hidden="true" />
@@ -2057,7 +2044,9 @@ export function AdminBatchDetailPage({ batchId }: { batchId: string }) {
                         ? "bg-[color-mix(in_srgb,var(--admin-primary)_12%,var(--admin-surface))] text-[var(--admin-primary)]"
                         : "text-[var(--admin-on-surface-variant)] hover:bg-[var(--admin-surface-high)]",
                     ].join(" ")}
-                    onClick={() => setLearnerPanelTab(key)}
+                    onClick={() => {
+                      setLearnerPanelTab(key);
+                    }}
                   >
                     {label}
                   </button>
@@ -2164,9 +2153,7 @@ export function AdminBatchDetailPage({ batchId }: { batchId: string }) {
 
       {activeTab === "exams" ? (
         <div className="rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] p-8 text-center">
-          <p className="text-sm text-[var(--admin-on-surface-variant)]">
-            Opening exams report…
-          </p>
+          <p className="text-sm text-[var(--admin-on-surface-variant)]">Opening exams report…</p>
           <Link
             href={`/admin/reports/batches/${batchId}/exams`}
             className="mt-3 inline-flex text-sm font-medium text-[var(--admin-primary)] hover:underline"
@@ -2192,9 +2179,7 @@ export function AdminBatchDetailPage({ batchId }: { batchId: string }) {
 
       {activeTab === "messages" ? (
         <div className="rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] p-8 text-center">
-          <p className="text-sm text-[var(--admin-on-surface-variant)]">
-            Opening messages…
-          </p>
+          <p className="text-sm text-[var(--admin-on-surface-variant)]">Opening messages…</p>
           <Link
             href={`/admin/reports/batches/${batchId}/messages`}
             className="mt-3 inline-flex text-sm font-medium text-[var(--admin-primary)] hover:underline"
@@ -2222,7 +2207,9 @@ export function AdminBatchDetailPage({ batchId }: { batchId: string }) {
               <button
                 type="button"
                 className="rounded p-1 text-[var(--admin-on-surface-variant)] hover:bg-[var(--admin-surface-high)]"
-                onClick={() => setMessageOpen(false)}
+                onClick={() => {
+                  setMessageOpen(false);
+                }}
                 aria-label="Close message dialog"
               >
                 <X className="h-4 w-4" aria-hidden="true" />
@@ -2239,7 +2226,9 @@ export function AdminBatchDetailPage({ batchId }: { batchId: string }) {
                 <input
                   className={fieldClassName}
                   value={messageSubject}
-                  onChange={(event) => setMessageSubject(event.target.value)}
+                  onChange={(event) => {
+                    setMessageSubject(event.target.value);
+                  }}
                   maxLength={200}
                 />
               </label>
@@ -2249,7 +2238,9 @@ export function AdminBatchDetailPage({ batchId }: { batchId: string }) {
                   className={`${fieldClassName} h-auto min-h-[120px] py-2`}
                   rows={5}
                   value={messageBody}
-                  onChange={(event) => setMessageBody(event.target.value)}
+                  onChange={(event) => {
+                    setMessageBody(event.target.value);
+                  }}
                   maxLength={10000}
                 />
               </label>
@@ -2258,7 +2249,9 @@ export function AdminBatchDetailPage({ batchId }: { batchId: string }) {
               <button
                 type="button"
                 className={ghostButtonClassName}
-                onClick={() => setMessageOpen(false)}
+                onClick={() => {
+                  setMessageOpen(false);
+                }}
               >
                 Cancel
               </button>

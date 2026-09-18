@@ -13,10 +13,7 @@ describe("upsertAuthPrincipal", () => {
     };
 
     const db = {
-      $queryRaw: vi
-        .fn()
-        .mockResolvedValueOnce([existingRow])
-        .mockResolvedValueOnce([]),
+      $queryRaw: vi.fn().mockResolvedValueOnce([existingRow]).mockResolvedValueOnce([]),
     };
 
     const principal = await upsertAuthPrincipal({

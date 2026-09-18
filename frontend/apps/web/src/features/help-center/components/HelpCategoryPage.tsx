@@ -1,9 +1,6 @@
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
-import {
-  getArticlesByCategory,
-  getHelpCategory,
-} from "../help-center-content";
+import { getArticlesByCategory, getHelpCategory } from "../help-center-content";
 import { helpListRowClassName } from "../help-center-styles";
 import { HelpSearchBar } from "./HelpSearchBar";
 
@@ -56,7 +53,10 @@ export function HelpCategoryPage({ categoryId, academyName }: HelpCategoryPagePr
                   </p>
                   <p className="mt-0.5 text-sm text-muted-foreground">{article.summary}</p>
                 </div>
-                <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+                <ChevronRight
+                  className="h-4 w-4 shrink-0 text-muted-foreground"
+                  aria-hidden="true"
+                />
               </Link>
             </li>
           ))}

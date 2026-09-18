@@ -39,7 +39,9 @@ export function ReadinessCtaCard({ prominence, ctaPolicy, disabled }: ReadinessC
     return (
       <section aria-label="Next step" className="rounded-2xl border border-border bg-card p-6">
         <h2 className="text-lg font-semibold text-foreground">Next step</h2>
-        <p className="mt-2 text-sm text-muted-foreground">Readiness policy is not configured yet.</p>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Readiness policy is not configured yet.
+        </p>
       </section>
     );
   }
@@ -106,7 +108,9 @@ export function ReadinessCtaCard({ prominence, ctaPolicy, disabled }: ReadinessC
           </h2>
           <p
             className={`mt-3 text-sm leading-relaxed ${
-              isBanner ? "text-[color-mix(in_srgb,var(--primary-foreground)_85%,transparent)]" : "text-muted-foreground"
+              isBanner
+                ? "text-[color-mix(in_srgb,var(--primary-foreground)_85%,transparent)]"
+                : "text-muted-foreground"
             }`}
           >
             {body}
@@ -145,7 +149,9 @@ export function ReadinessCtaCard({ prominence, ctaPolicy, disabled }: ReadinessC
       {error ? (
         <p
           className={`relative mt-4 flex items-start gap-2 text-sm ${
-            isBanner ? "text-[color-mix(in_srgb,var(--primary-foreground)_90%,transparent)]" : "text-[var(--destructive)]"
+            isBanner
+              ? "text-[color-mix(in_srgb,var(--primary-foreground)_90%,transparent)]"
+              : "text-[var(--destructive)]"
           }`}
           role="alert"
         >

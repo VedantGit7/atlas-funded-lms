@@ -23,9 +23,9 @@ export default async function ProfileDangerZonePage() {
         .get<{ data: { archivedAt: string | null } }>("/api/v1/me/archive")
         .catch(() => ({ data: { archivedAt: null } })),
       serverApi
-        .get<{ data: { profileVisibility: "PUBLIC" | "PRIVATE" } }>(
-          `/api/v1/members/${me.data.membership.id}/profile`,
-        )
+        .get<{
+          data: { profileVisibility: "PUBLIC" | "PRIVATE" };
+        }>(`/api/v1/members/${me.data.membership.id}/profile`)
         .catch(() => ({ data: { profileVisibility: "PUBLIC" as const } })),
     ]);
 
@@ -48,7 +48,10 @@ export default async function ProfileDangerZonePage() {
                   : "Your profile is private in community surfaces."}
               </p>
             </div>
-            <Link href="/profile/privacy" className="rounded-lg border border-[var(--acct-outline)] px-4 py-2 text-xs font-semibold text-[var(--acct-on-surface)] transition-colors hover:bg-[var(--acct-surface-low)]">
+            <Link
+              href="/profile/privacy"
+              className="rounded-lg border border-[var(--acct-outline)] px-4 py-2 text-xs font-semibold text-[var(--acct-on-surface)] transition-colors hover:bg-[var(--acct-surface-low)]"
+            >
               Change visibility
             </Link>
           </div>

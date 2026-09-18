@@ -64,7 +64,11 @@ export function VerificationSuccess({
   const greenGlow = "color-mix(in srgb, var(--fba-grn) 32%, transparent)";
 
   return (
-    <div role="status" aria-live="polite" className="fba-loader-reveal flex flex-col items-center text-center">
+    <div
+      role="status"
+      aria-live="polite"
+      className="fba-loader-reveal flex flex-col items-center text-center"
+    >
       <div className="relative mb-8 flex h-[120px] w-[120px] items-center justify-center">
         <span
           aria-hidden
@@ -87,7 +91,9 @@ export function VerificationSuccess({
       <h2 className="mb-2 text-[28px] font-extrabold leading-[1.2] tracking-[-0.01em] text-[var(--fba-tx)]">
         {title}
       </h2>
-      <p className="mb-8 max-w-[320px] text-[15px] leading-[1.6] text-[var(--fba-tx2)]">{message}</p>
+      <p className="mb-8 max-w-[320px] text-[15px] leading-[1.6] text-[var(--fba-tx2)]">
+        {message}
+      </p>
 
       <div className="mb-8 flex items-center gap-2" aria-hidden>
         {[0, 1, 2].map((index) => (

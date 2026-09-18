@@ -56,7 +56,9 @@ export function DeviceMonitorPanel({ initial }: { initial: Data }) {
       setRestrictParallel(response.data.restrictParallelLogins);
       setStatus("Device monitor settings saved.");
     } catch (caught) {
-      setError(caught instanceof ClientApiError ? caught.message : "Could not save. Please try again.");
+      setError(
+        caught instanceof ClientApiError ? caught.message : "Could not save. Please try again.",
+      );
     } finally {
       setSaving(false);
     }
@@ -89,7 +91,9 @@ export function DeviceMonitorPanel({ initial }: { initial: Data }) {
         />
 
         <div className="space-y-3">
-          <h2 className="text-base font-bold text-[var(--admin-on-surface)]">Device Registration Limit</h2>
+          <h2 className="text-base font-bold text-[var(--admin-on-surface)]">
+            Device Registration Limit
+          </h2>
           <SettingNumberField
             value={registrationLimit}
             onChange={setRegistrationLimit}
@@ -101,7 +105,9 @@ export function DeviceMonitorPanel({ initial }: { initial: Data }) {
           />
           <SettingsNote>
             <Info className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-            <span>Allows learners to register on a device. Maximum limit can be up to 10 devices.</span>
+            <span>
+              Allows learners to register on a device. Maximum limit can be up to 10 devices.
+            </span>
           </SettingsNote>
         </div>
 

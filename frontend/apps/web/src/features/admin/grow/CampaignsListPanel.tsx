@@ -36,6 +36,7 @@ import {
   type CampaignStatus,
   type MarketingCampaignDto,
 } from "./campaigns-shared";
+import { csvEscape } from "@/lib/export/csv";
 
 type StatusTab = "ALL" | CampaignStatus;
 
@@ -70,9 +71,7 @@ function enabledChannels(channels: CampaignChannels): CampaignChannel[] {
 function channelIcons(channels: CampaignChannels) {
   const enabled = enabledChannels(channels);
   if (enabled.length === 0) {
-    return (
-      <span className="text-[13px] text-[var(--admin-on-surface-variant)]">Not set</span>
-    );
+    return <span className="text-[13px] text-[var(--admin-on-surface-variant)]">Not set</span>;
   }
   return (
     <div className="flex flex-wrap items-center gap-2">
@@ -104,8 +103,7 @@ function channelIcons(channels: CampaignChannels) {
 }
 
 function StatusPill({ status }: { status: CampaignStatus }) {
-  const tone =
-    status === "SENT" ? "success" : status === "SCHEDULED" ? "warning" : "neutral";
+  const tone = status === "SENT" ? "success" : status === "SCHEDULED" ? "warning" : "neutral";
   return (
     <span
       className={[
@@ -166,7 +164,9 @@ function downloadCsv(rows: MarketingCampaignDto[]) {
         row.launchedAt ?? "",
         row.updatedAt,
       ];
-      return cells.map((cell) => `"${cell.replace(/"/g, '""')}"`).join(",");
+      // csvEscape also neutralises a leading =, +, -, @ so a learner-supplied
+      // value cannot execute as a formula in the admin's spreadsheet (M1).
+      return cells.map((cell) => csvEscape(cell)).join(",");
     }),
   ];
   const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8" });
@@ -234,9 +234,7 @@ export function CampaignsListPanel() {
         totalCount: 0,
         totalReach: 0,
       });
-      toast.error(
-        caught instanceof ClientApiError ? caught.message : "Could not load campaigns.",
-      );
+      toast.error(caught instanceof ClientApiError ? caught.message : "Could not load campaigns.");
     } finally {
       setLoading(false);
     }
@@ -274,8 +272,7 @@ export function CampaignsListPanel() {
   const rangeStart = filtered.length === 0 ? 0 : (safePage - 1) * pageSize + 1;
   const rangeEnd = Math.min(safePage * pageSize, filtered.length);
   const hasFilters = Boolean(debouncedQuery || tab !== "ALL");
-  const deleteMatches =
-    deleteRow != null && deleteConfirm.trim() === deleteRow.title.trim();
+  const deleteMatches = deleteRow != null && deleteConfirm.trim() === deleteRow.title.trim();
 
   const tabCount = (id: StatusTab): number => {
     if (id === "ALL") return summary.totalCount;
@@ -323,9 +320,7 @@ export function CampaignsListPanel() {
       setDeleteConfirm("");
       await load();
     } catch (caught) {
-      toast.error(
-        caught instanceof ClientApiError ? caught.message : "Could not delete campaign.",
-      );
+      toast.error(caught instanceof ClientApiError ? caught.message : "Could not delete campaign.");
     } finally {
       setDeleteBusy(false);
     }
@@ -339,17 +334,11 @@ export function CampaignsListPanel() {
   }
 
   const scheduledShare =
-    summary.totalCount === 0
-      ? 0
-      : Math.round((summary.scheduledCount / summary.totalCount) * 100);
+    summary.totalCount === 0 ? 0 : Math.round((summary.scheduledCount / summary.totalCount) * 100);
   const draftShare =
-    summary.totalCount === 0
-      ? 0
-      : Math.round((summary.draftCount / summary.totalCount) * 100);
+    summary.totalCount === 0 ? 0 : Math.round((summary.draftCount / summary.totalCount) * 100);
   const sentShare =
-    summary.totalCount === 0
-      ? 0
-      : Math.round((summary.sentCount / summary.totalCount) * 100);
+    summary.totalCount === 0 ? 0 : Math.round((summary.sentCount / summary.totalCount) * 100);
 
   return (
     <div className="relative space-y-6">
@@ -430,9 +419,7 @@ export function CampaignsListPanel() {
                   ].join(" ")}
                 >
                   {entry.label}
-                  <span className="ml-1.5 tabular-nums opacity-70">
-                    {tabCount(entry.id)}
-                  </span>
+                  <span className="ml-1.5 tabular-nums opacity-70">{tabCount(entry.id)}</span>
                 </button>
               );
             })}
@@ -574,9 +561,7 @@ export function CampaignsListPanel() {
                       </td>
                       <td className="px-6 py-4">
                         <span className="text-[13px] font-bold text-[var(--admin-on-surface)]">
-                          {row.recipientCount > 0
-                            ? formatCampaignCount(row.recipientCount)
-                            : "—"}
+                          {row.recipientCount > 0 ? formatCampaignCount(row.recipientCount) : "—"}
                         </span>
                       </td>
                       <td className="px-6 py-4">

@@ -13,11 +13,7 @@ type ServiceCtx = {
   requestId: string;
 };
 
-export async function exportZoomInsightsRoster(
-  tx: TenantTx,
-  ctx: ServiceCtx,
-  rawBody: unknown,
-) {
+export async function exportZoomInsightsRoster(tx: TenantTx, ctx: ServiceCtx, rawBody: unknown) {
   const body = exportZoomInsightsRosterBodySchema.parse(rawBody);
   const params: Record<string, unknown> = {};
   if (body.meetingId) params["meetingId"] = body.meetingId;
@@ -36,10 +32,7 @@ export async function exportZoomInsightsRoster(
   let emailed = false;
   if (body.emailDownloadLink) {
     const provider = getEmailProvider();
-    const adminEmail = await notificationRepository.findMembershipEmail(
-      tx,
-      ctx.actorMembershipId,
-    );
+    const adminEmail = await notificationRepository.findMembershipEmail(tx, ctx.actorMembershipId);
     if (provider.isConfigured() && adminEmail) {
       await provider.send({
         to: adminEmail,

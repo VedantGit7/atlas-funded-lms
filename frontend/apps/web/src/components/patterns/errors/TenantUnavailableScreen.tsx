@@ -74,8 +74,7 @@ const cardClass =
   "w-full max-w-[480px] rounded-xl border-[1.5px] border-[var(--fba-bdr)] bg-[var(--fba-surf)] p-8 text-center shadow-[0_4px_24px_color-mix(in_srgb,var(--fba-tx)_6%,transparent)]";
 
 function StatusIcon({ tone }: { tone: StatusCopy["iconTone"] }) {
-  const shellClass =
-    "mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full";
+  const shellClass = "mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full";
   const shellStyle =
     tone === "warn"
       ? { background: "var(--fba-gld-l)" }
@@ -93,21 +92,56 @@ function StatusIcon({ tone }: { tone: StatusCopy["iconTone"] }) {
   return (
     <div className={shellClass} style={shellStyle} aria-hidden>
       {tone === "warn" ? (
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={iconColor} strokeWidth="2.2" strokeLinecap="round">
+        <svg
+          width="28"
+          height="28"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke={iconColor}
+          strokeWidth="2.2"
+          strokeLinecap="round"
+        >
           <rect x="6" y="4" width="4" height="16" rx="1" fill={iconColor} stroke="none" />
           <rect x="14" y="4" width="4" height="16" rx="1" fill={iconColor} stroke="none" />
         </svg>
       ) : tone === "refresh" ? (
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={iconColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg
+          width="28"
+          height="28"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke={iconColor}
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
           <path d="M21 12a9 9 0 1 1-2.64-6.36" />
           <path d="M21 3v6h-6" />
         </svg>
       ) : tone === "brand" ? (
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={iconColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg
+          width="28"
+          height="28"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke={iconColor}
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
           <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
         </svg>
       ) : (
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={iconColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg
+          width="28"
+          height="28"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke={iconColor}
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
           <circle cx="12" cy="12" r="9" />
           <path d="M12 8v4M12 16h.01" />
         </svg>
@@ -159,7 +193,9 @@ export function TenantUnavailableScreen({
       window.location.assign(retryTarget);
     }, 1600);
 
-    return () => window.clearTimeout(timer);
+    return () => {
+      window.clearTimeout(timer);
+    };
   }, [isTransient, retryTarget]);
 
   return (
@@ -197,10 +233,7 @@ export function TenantUnavailableScreen({
       </header>
 
       <main className="relative z-10 flex flex-grow items-center justify-center px-4 py-8">
-        <section
-          aria-labelledby="tenant-unavailable-title"
-          className={`fba-ve-rise ${cardClass}`}
-        >
+        <section aria-labelledby="tenant-unavailable-title" className={`fba-ve-rise ${cardClass}`}>
           <StatusIcon tone={copy.iconTone} />
 
           <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--fba-tx2)]">
@@ -220,7 +253,9 @@ export function TenantUnavailableScreen({
             {isTransient ? (
               <button
                 type="button"
-                onClick={() => window.location.assign(retryTarget)}
+                onClick={() => {
+                  window.location.assign(retryTarget);
+                }}
                 className="inline-flex w-full items-center justify-center rounded-lg bg-[var(--fba-ind)] px-6 py-3.5 text-[15px] font-semibold text-white transition-all hover:bg-[var(--fba-ind-d)] active:scale-[0.98]"
               >
                 {autoRetryArmed ? "Retrying…" : "Try again"}

@@ -13,7 +13,7 @@ vi.mock("../../../backend/packages/auth/src/supabase-server", () => ({
 }));
 
 import { signupWithPassword } from "../../../backend/packages/auth/src/public-auth.service";
-import { AtlasHttpError } from "../../../backend/packages/core/src/http/errors";
+import type { AtlasHttpError } from "../../../backend/packages/core/src/http/errors";
 
 describe("signupWithPassword error mapping", () => {
   beforeEach(() => {
@@ -23,7 +23,11 @@ describe("signupWithPassword error mapping", () => {
   it("maps Supabase email rate limits to a user-friendly 429 error", async () => {
     mockSignUp.mockResolvedValue({
       data: { user: null, session: null },
-      error: { message: "email rate limit exceeded", status: 429, code: "over_email_send_rate_limit" },
+      error: {
+        message: "email rate limit exceeded",
+        status: 429,
+        code: "over_email_send_rate_limit",
+      },
     });
 
     await expect(

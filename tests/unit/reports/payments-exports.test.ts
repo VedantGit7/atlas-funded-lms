@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   PAYMENT_EXPORT_COLUMNS,
+  PAYMENT_EXPORT_DATASETS,
   createPaymentExportBodySchema,
   paymentExportsResponseSchema,
 } from "@atlas/domain/reports/payments-exports.dto";
@@ -78,6 +79,46 @@ describe("payments exports dto", () => {
     expect(body.format).toBe("xlsx");
     expect(body.scheduleEnabled).toBe(true);
     expect(body.recipients).toEqual(["finance@example.com"]);
+  });
+
+  it("offers orders as a dataset of its own", () => {
+    // Not a synonym for transactions: same table, different axis. See the
+    // comment on PAYMENT_EXPORT_DATASETS.
+    expect(PAYMENT_EXPORT_DATASETS).toContain("orders");
+    const body = createPaymentExportBodySchema.parse({
+      dataset: "orders",
+      columns: ["id", "external_id", "status", "amount_cents"],
+      format: "csv",
+      settlement: "unsettled",
+    });
+    expect(body.dataset).toBe("orders");
+    expect(body.settlement).toBe("unsettled");
+  });
+
+  it("exposes the external id as a selectable column", () => {
+    // It was queried by every payments dataset and selectable by none.
+    expect(PAYMENT_EXPORT_COLUMNS.some((column) => column.key === "external_id")).toBe(true);
+    expect(PAYMENT_EXPORT_COLUMNS.some((column) => column.key === "id")).toBe(true);
+  });
+
+  it("leaves the new identifier columns off by default", () => {
+    // Existing schedules keep producing the file they produced yesterday.
+    for (const key of ["id", "external_id"]) {
+      expect(PAYMENT_EXPORT_COLUMNS.find((column) => column.key === key)?.defaultSelected).toBe(
+        false,
+      );
+    }
+  });
+
+  it("rejects a settlement value outside the two it knows", () => {
+    expect(() =>
+      createPaymentExportBodySchema.parse({
+        dataset: "orders",
+        columns: ["status"],
+        format: "csv",
+        settlement: "partially",
+      }),
+    ).toThrow();
   });
 
   it("rejects empty columns", () => {

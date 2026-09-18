@@ -223,7 +223,9 @@ export function CommentTree({
                   {badge.label}
                 </span>
               ) : null}
-              <span className="text-[11px] text-muted-foreground">{relativeTime(node.createdAt)}</span>
+              <span className="text-[11px] text-muted-foreground">
+                {relativeTime(node.createdAt)}
+              </span>
             </div>
 
             {isEditing ? (
@@ -352,9 +354,7 @@ export function CommentTree({
       {tree.length > 0 ? (
         <ul className="space-y-5">{tree.map((node) => renderNode(node, 0))}</ul>
       ) : (
-        <p className="text-sm text-muted-foreground">
-          No comments yet. Be the first to weigh in.
-        </p>
+        <p className="text-sm text-muted-foreground">No comments yet. Be the first to weigh in.</p>
       )}
     </div>
   );

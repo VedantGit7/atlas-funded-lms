@@ -36,6 +36,7 @@ import {
   type CustomFieldDefinitionColumn,
   type CustomFieldRosterItem,
   type CustomFieldRosterSummary,
+  fetchCustomFieldReportDefinitions,
 } from "./admin-custom-field-roster-api";
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
 import { AdminCustomFieldLearnerDrawer } from "./AdminCustomFieldLearnerDrawer";
@@ -393,6 +394,28 @@ export function AdminCustomFieldRosterPage() {
 
   const [items, setItems] = useState<CustomFieldRosterItem[]>([]);
   const [fieldDefinitions, setFieldDefinitions] = useState<CustomFieldDefinitionColumn[]>([]);
+
+  // The full definition list, loaded once. Without it the column picker can only
+  // offer fields that happen to appear in the current page of roster rows.
+  useEffect(() => {
+    void (async () => {
+      try {
+        const response = await fetchCustomFieldReportDefinitions();
+        setFieldDefinitions((previous) => {
+          const byKey = new Map(previous.map((definition) => [definition.key, definition]));
+          for (const definition of response.data.items) {
+            if (!byKey.has(definition.key)) byKey.set(definition.key, definition);
+          }
+          return [...byKey.values()];
+        });
+      } catch {
+        // Non-fatal: the roster response still supplies the columns it knows
+        // about, so the picker degrades to its previous behaviour.
+      }
+    })();
+    // No cancellation flag: the merge is idempotent and keyed by field key, so a
+    // late resolve after unmount changes nothing.
+  }, []);
   const [summary, setSummary] = useState<CustomFieldRosterSummary | null>(null);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(25);
@@ -476,7 +499,12 @@ export function AdminCustomFieldRosterPage() {
         ...filterPayload,
       });
       setItems(response.data.items);
-      setFieldDefinitions(response.data.fieldDefinitions);
+      setFieldDefinitions((previous) => {
+        const byKey = new Map(previous.map((definition) => [definition.key, definition]));
+        for (const definition of response.data.fieldDefinitions)
+          byKey.set(definition.key, definition);
+        return [...byKey.values()];
+      });
       setSummary(response.data.summary);
       setTotalCount(response.data.pageInfo.totalCount);
       setTotalPages(response.data.pageInfo.totalPages);

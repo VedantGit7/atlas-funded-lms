@@ -2,10 +2,7 @@
 
 import { useId, useState, type ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
-import {
-  AccountDropdownField,
-  accountDropdownItemClassName,
-} from "./account-form-dropdown";
+import { AccountDropdownField, accountDropdownItemClassName } from "./account-form-dropdown";
 import { useAccountTheme } from "./account-theme-context";
 
 /** Bare on/off switch matching the settings theme tokens. */
@@ -42,7 +39,9 @@ export function SettingsSwitch({
           checked ? classes.toggleTrackOn : classes.toggleTrackOff
         }`}
       >
-        <span className={`${classes.toggleKnob} ${checked ? "translate-x-4" : "translate-x-0.5"}`} />
+        <span
+          className={`${classes.toggleKnob} ${checked ? "translate-x-4" : "translate-x-0.5"}`}
+        />
       </span>
     </label>
   );

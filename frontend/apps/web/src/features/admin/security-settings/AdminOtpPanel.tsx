@@ -41,7 +41,9 @@ export function AdminOtpPanel({ initial }: { initial: Data }) {
       setLimit(response.data.loginLimitPerMonth);
       setStatus("Admin OTP settings saved.");
     } catch (caught) {
-      setError(caught instanceof ClientApiError ? caught.message : "Could not save. Please try again.");
+      setError(
+        caught instanceof ClientApiError ? caught.message : "Could not save. Please try again.",
+      );
     } finally {
       setSaving(false);
     }
@@ -51,7 +53,9 @@ export function AdminOtpPanel({ initial }: { initial: Data }) {
     <SecuritySettingsShell>
       <header>
         <h1 className={generalSettingsPageTitleClassName}>Admin OTP</h1>
-        <p className={generalSettingsPageDescClassName}>Set admin login limit for OTP verification.</p>
+        <p className={generalSettingsPageDescClassName}>
+          Set admin login limit for OTP verification.
+        </p>
       </header>
 
       <div className="mt-8">

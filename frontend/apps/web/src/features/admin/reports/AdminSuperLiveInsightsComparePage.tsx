@@ -29,6 +29,7 @@ import {
   type SuperLiveInsightsSeriesKind,
 } from "./admin-super-live-insights-roster-api";
 import { SuperLiveInsightsModuleTabs } from "./SuperLiveInsightsModuleTabs";
+import { csvEscape } from "@/lib/export/csv";
 
 const secondaryButtonClassName =
   "inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-[var(--admin-outline)] bg-[var(--admin-surface)] px-4 text-[13px] font-semibold text-[var(--admin-on-surface)] transition-all hover:bg-[var(--admin-surface-high)] active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]/30 disabled:cursor-not-allowed disabled:opacity-50";
@@ -364,7 +365,9 @@ export function AdminSuperLiveInsightsComparePage() {
       ]);
     }
     const csv = [headers, ...rows]
-      .map((row) => row.map((cell) => `"${cell.replace(/"/g, '""')}"`).join(","))
+      // Labels come from tenant-authored content, so quote AND neutralise
+      // formula prefixes (M1).
+      .map((row) => row.map((cell) => csvEscape(cell)).join(","))
       .join("\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);

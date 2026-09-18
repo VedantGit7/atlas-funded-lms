@@ -31,9 +31,7 @@ export type CertificateIssueBody = z.output<typeof certificateIssueBodySchema>;
 export type CertificateBulkIssueBody = z.output<typeof certificateBulkIssueBodySchema>;
 export type CertificateBulkIssueResponse = z.output<typeof certificateBulkIssueResponseSchema>;
 export type CertificateAnalyticsResponse = z.output<typeof certificateAnalyticsResponseSchema>;
-export type CertificateLifecycleActionBody = z.output<
-  typeof certificateLifecycleActionBodySchema
->;
+export type CertificateLifecycleActionBody = z.output<typeof certificateLifecycleActionBodySchema>;
 export type CertificateRevokeBody = z.output<typeof certificateRevokeBodySchema>;
 export type CertificateTemplateListResponse = z.output<
   typeof certificateTemplateListResponseSchema

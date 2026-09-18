@@ -69,7 +69,7 @@ export function MoveLessonSectionDialog({
     setError(null);
     try {
       await clientApi.put(
-        `/api/v1/lessons/${lessonId}`,
+        `/api/v1/lessons/${lessonId ?? ""}`,
         { moduleId: targetModuleId },
         "lesson-move-section",
       );

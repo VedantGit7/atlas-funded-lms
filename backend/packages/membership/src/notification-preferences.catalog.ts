@@ -22,8 +22,7 @@ export const NOTIFICATION_PREFERENCE_CATEGORIES = [
   ...SECURITY_NOTIFICATION_CATEGORIES,
 ] as const;
 
-export type NotificationPreferenceCategory =
-  (typeof NOTIFICATION_PREFERENCE_CATEGORIES)[number];
+export type NotificationPreferenceCategory = (typeof NOTIFICATION_PREFERENCE_CATEGORIES)[number];
 
 export const notificationPreferenceCategorySchema = z.enum(NOTIFICATION_PREFERENCE_CATEGORIES);
 

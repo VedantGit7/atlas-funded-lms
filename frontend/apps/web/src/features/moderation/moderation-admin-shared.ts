@@ -59,8 +59,7 @@ export const moderationChipButtonClassName =
   "inline-flex items-center gap-1.5 rounded border border-[var(--admin-border)] bg-[var(--admin-surface)] px-2.5 py-1.5 text-[13px] font-medium text-[var(--admin-on-surface)] transition-colors hover:bg-[var(--admin-surface-high)]";
 
 const STATUS_BADGE: Record<string, string> = {
-  OPEN:
-    "border-[color-mix(in_srgb,var(--admin-outline)_45%,var(--admin-border))] bg-[color-mix(in_srgb,var(--admin-outline)_12%,var(--admin-surface))] text-[var(--admin-on-surface-variant)]",
+  OPEN: "border-[color-mix(in_srgb,var(--admin-outline)_45%,var(--admin-border))] bg-[color-mix(in_srgb,var(--admin-outline)_12%,var(--admin-surface))] text-[var(--admin-on-surface-variant)]",
   REVIEWING:
     "border-[color-mix(in_srgb,var(--admin-warning)_40%,var(--admin-border))] bg-[color-mix(in_srgb,var(--admin-warning)_14%,var(--admin-surface))] text-[var(--admin-warning)]",
   ACTIONED:

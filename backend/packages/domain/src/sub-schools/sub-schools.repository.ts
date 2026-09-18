@@ -114,8 +114,7 @@ export const subSchoolsRepository = {
 
     const nextDescription =
       args.description !== undefined ? args.description : existing.description;
-    const nextMobile =
-      args.mobileNumber !== undefined ? args.mobileNumber : existing.mobile_number;
+    const nextMobile = args.mobileNumber !== undefined ? args.mobileNumber : existing.mobile_number;
     const nextEmail = args.email !== undefined ? args.email : existing.email;
     const nextPasswordHash =
       args.passwordHash !== undefined ? args.passwordHash : existing.password_hash;
@@ -128,7 +127,7 @@ export const subSchoolsRepository = {
         mobile_number = ${nextMobile},
         email = ${nextEmail},
         password_hash = ${nextPasswordHash},
-        status = ${(args.status ?? existing.status)}::"EntityStatus",
+        status = ${args.status ?? existing.status}::"EntityStatus",
         updated_at = now()
       where id = ${subSchoolId}::uuid
       returning *

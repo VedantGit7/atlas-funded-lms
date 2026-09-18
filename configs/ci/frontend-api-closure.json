@@ -1,16 +1,92 @@
 {
+  "_comment": "opsOnly entries need a reason. An unexplained allowlist is how a broken gate gets silenced: the 17 /api/v1/reports/* routes reported here were fully wired, and an entry without justification would have excused them permanently.",
   "opsOnly": [
-    "/api/v1/health",
-    "/api/v1/search/reindex",
-    "/api/v1/internal/",
-    "/api/v1/platform/eventing/dead-letters",
-    "/api/v1/platform/shell",
-    "/api/v1/public/auth/",
-    "/api/v1/public/bootstrap",
-    "/api/v1/public/diagnostic/",
-    "/api/v1/public/invitations/",
-    "/api/v1/public/landing/",
-    "/api/v1/public/verify/"
+    {
+      "path": "/api/v1/health",
+      "reason": "Liveness probe called by infrastructure, not the app."
+    },
+    {
+      "path": "/api/v1/search/reindex",
+      "reason": "Operator-triggered reindex; also listed under uiWiredRequired for its admin control."
+    },
+    {
+      "path": "/api/v1/internal/",
+      "reason": "Internal service-to-service surface."
+    },
+    {
+      "path": "/api/v1/platform/eventing/dead-letters",
+      "reason": "Platform operator tooling outside the tenant app."
+    },
+    {
+      "path": "/api/v1/platform/shell",
+      "reason": "Platform operator shell, not tenant UI."
+    },
+    {
+      "path": "/api/v1/public/auth/",
+      "reason": "Auth plane posts forms directly rather than through the typed client."
+    },
+    {
+      "path": "/api/v1/public/bootstrap",
+      "reason": "Read server-side during render, before any client fetch exists."
+    },
+    {
+      "path": "/api/v1/public/diagnostic/",
+      "reason": "Public diagnostic runner posts directly from the unauthenticated shell."
+    },
+    {
+      "path": "/api/v1/public/invitations/",
+      "reason": "Invitation acceptance is reached by emailed link, not an in-app fetch."
+    },
+    {
+      "path": "/api/v1/public/landing/",
+      "reason": "Rendered server-side for the public landing page."
+    },
+    {
+      "path": "/api/v1/public/verify/",
+      "reason": "Credential verification opened directly by URL."
+    },
+    {
+      "path": "/api/v1/payments/webhooks/razorpay",
+      "reason": "Inbound webhook: Razorpay calls us. A frontend caller would be a bug."
+    },
+    {
+      "path": "/api/v1/payments/webhooks/stripe",
+      "reason": "Inbound webhook: Stripe calls us. A frontend caller would be a bug."
+    },
+    {
+      "path": "/api/v1/public/marketing/integrations/actions/",
+      "reason": "Invoked by external sites and marketing integrations, not by this app."
+    },
+    {
+      "path": "/api/v1/reports/internal/tick",
+      "reason": "Scheduler-triggered report tick."
+    },
+    {
+      "path": "/api/v1/iap/verify",
+      "reason": "Mobile in-app purchase receipt verification; there is no web purchase flow."
+    },
+    {
+      "path": "/api/v1/zoom/webhooks",
+      "reason": "Inbound webhook: Zoom calls us on meeting lifecycle events."
+    },
+    {
+      "path": "/api/v1/storage/local/download",
+      "reason": "Signed download URL opened directly by the browser on the local-fs dev provider; it is a navigation target, never fetched."
+    },
+    {
+      "path": "/api/v1/modules/[id]/scorm-content",
+      "reason": "SCORM package content served into a sandboxed iframe (audit C1). The browser loads it as a document; fetching it would defeat the opaque origin."
+    },
+    {
+      "path": "/api/v1/usage/snapshot",
+      "reason": "Scheduler-triggered metering snapshot, same shape as reports/internal/tick. Nothing in-app should trigger billing metering."
+    }
+  ],
+  "runtimeLinked": [
+    {
+      "path": "/api/v1/manage/course-backups/[id]/download",
+      "reason": "ManageCourseBackupPanel.downloadBackup fetches job.downloadUrl, which the list response supplies per backup. The UI exists; the path is data, so no static scan can see it."
+    }
   ],
   "uiWiredRequired": [
     "/api/v1/me",

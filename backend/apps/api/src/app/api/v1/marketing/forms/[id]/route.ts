@@ -14,7 +14,7 @@ import {
   updateMarketingFormBasics,
 } from "../../../../../../server/marketing-forms/marketing-forms.service";
 
-const paramsSchema = zod.object({ id: zod.string().uuid() });
+const paramsSchema = zod.object({ id: zod.uuid() });
 
 export const GET = createTenantRoute<
   undefined,

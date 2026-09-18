@@ -22,9 +22,7 @@ export default async function AdminPollsExportsRoutePage() {
     <AdminPageGate screenId="T50" state="ready" title="Poll exports">
       <Suspense
         fallback={
-          <p className="p-8 text-sm text-[var(--admin-on-surface-variant)]">
-            Loading exports…
-          </p>
+          <p className="p-8 text-sm text-[var(--admin-on-surface-variant)]">Loading exports…</p>
         }
       >
         <AdminPollsExportsPage />

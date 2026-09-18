@@ -18,8 +18,7 @@ export const builderSectionTitleClassName =
 
 export const builderSectionBodyClassName = "p-5";
 
-export const builderFieldLabelClassName =
-  "text-sm font-semibold text-[var(--admin-on-surface)]";
+export const builderFieldLabelClassName = "text-sm font-semibold text-[var(--admin-on-surface)]";
 
 export const builderHelperClassName = "text-xs text-[var(--admin-on-surface-variant)]";
 

@@ -78,11 +78,7 @@ export const ShapeElementModel = types.model("ShapeElement", {
 export const QrElementModel = types.model("QrElement", {
   ...baseElementProps,
   type: types.literal("qr"),
-  valueSource: types.enumeration("QrValueSource", [
-    "verification_url",
-    "credential_id",
-    "custom",
-  ]),
+  valueSource: types.enumeration("QrValueSource", ["verification_url", "credential_id", "custom"]),
   customValue: types.maybe(types.string),
 });
 
@@ -494,9 +490,7 @@ export const StudioStore = types
       },
 
       duplicateSelected(): void {
-        const selected = self.doc.elements.filter((el) =>
-          self.selectedElementIds.includes(el.id),
-        );
+        const selected = self.doc.elements.filter((el) => self.selectedElementIds.includes(el.id));
         if (selected.length === 0) return;
         pushHistory();
         const newIds: string[] = [];
@@ -812,10 +806,7 @@ export const StudioStore = types
       },
 
       /** Set the page background (solid color, image URL, or CSS gradient). */
-      setBackground(background: {
-        type: "color" | "image" | "gradient";
-        value: string;
-      }): void {
+      setBackground(background: { type: "color" | "image" | "gradient"; value: string }): void {
         pushHistory();
         self.doc.background.type = background.type;
         self.doc.background.value = background.value;

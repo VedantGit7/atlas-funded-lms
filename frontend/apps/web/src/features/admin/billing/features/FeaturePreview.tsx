@@ -119,11 +119,13 @@ const MOTIFS: Record<FeatureMotif, ReactNode> = {
         strokeLinecap="round"
         strokeDasharray="1 7"
       />
-      {([
-        [46, 88],
-        [104, 66],
-        [174, 44],
-      ] as const).map(([cx, cy], i) => (
+      {(
+        [
+          [46, 88],
+          [104, 66],
+          [174, 44],
+        ] as const
+      ).map(([cx, cy], i) => (
         <g key={i}>
           <circle cx={cx} cy={cy} r={9} fill={SURFACE} stroke={ACCENT} strokeWidth={2.5} />
           <circle cx={cx} cy={cy} r={3.5} fill={ACCENT} />
@@ -133,13 +135,15 @@ const MOTIFS: Record<FeatureMotif, ReactNode> = {
   ),
   chart: (
     <Frame>
-      {([
-        [50, 40],
-        [78, 58],
-        [106, 30],
-        [134, 48],
-        [162, 22],
-      ] as const).map(([x, h], i) => (
+      {(
+        [
+          [50, 40],
+          [78, 58],
+          [106, 30],
+          [134, 48],
+          [162, 22],
+        ] as const
+      ).map(([x, h], i) => (
         <rect
           key={i}
           x={x}
@@ -176,12 +180,29 @@ const MOTIFS: Record<FeatureMotif, ReactNode> = {
       <rect x={48} y={44} width={70} height={5} rx={2.5} fill={MUTED} />
       <rect x={48} y={53} width={44} height={5} rx={2.5} fill={MUTED} />
       <rect x={98} y={70} width={104} height={26} rx={10} fill={ACCENT} />
-      <rect x={110} y={80} width={66} height={5} rx={2.5} fill="var(--admin-on-primary)" opacity={0.8} />
+      <rect
+        x={110}
+        y={80}
+        width={66}
+        height={5}
+        rx={2.5}
+        fill="var(--admin-on-primary)"
+        opacity={0.8}
+      />
     </Frame>
   ),
   certificate: (
     <Frame>
-      <rect x={50} y={30} width={140} height={62} rx={6} fill={SURFACE} stroke={BORDER} strokeWidth={1.5} />
+      <rect
+        x={50}
+        y={30}
+        width={140}
+        height={62}
+        rx={6}
+        fill={SURFACE}
+        stroke={BORDER}
+        strokeWidth={1.5}
+      />
       <rect x={62} y={40} width={80} height={6} rx={3} fill={MUTED} />
       <rect x={62} y={52} width={116} height={5} rx={2.5} fill={MUTED} />
       <rect x={62} y={62} width={96} height={5} rx={2.5} fill={MUTED} />
@@ -198,13 +219,22 @@ const MOTIFS: Record<FeatureMotif, ReactNode> = {
   ),
   trophy: (
     <Frame>
-      {([
-        [72, 30, 2],
-        [110, 20, 1],
-        [148, 40, 3],
-      ] as const).map(([x, h, rank]) => (
+      {(
+        [
+          [72, 30, 2],
+          [110, 20, 1],
+          [148, 40, 3],
+        ] as const
+      ).map(([x, h, rank]) => (
         <g key={rank}>
-          <rect x={x} y={96 - h} width={30} height={h} rx={4} fill={rank === 1 ? ACCENT : ACCENT_SOFT} />
+          <rect
+            x={x}
+            y={96 - h}
+            width={30}
+            height={h}
+            rx={4}
+            fill={rank === 1 ? ACCENT : ACCENT_SOFT}
+          />
         </g>
       ))}
       <path
@@ -267,7 +297,12 @@ const MOTIFS: Record<FeatureMotif, ReactNode> = {
       <circle cx={120} cy={66} r={30} fill={ACCENT_SOFT} stroke={ACCENT} strokeWidth={2} />
       <ellipse cx={120} cy={66} rx={12} ry={30} fill="none" stroke={ACCENT} strokeWidth={1.5} />
       <line x1={90} y1={66} x2={150} y2={66} stroke={ACCENT} strokeWidth={1.5} />
-      <path d="M96 50 Q120 60 144 50 M96 82 Q120 72 144 82" fill="none" stroke={ACCENT} strokeWidth={1.5} />
+      <path
+        d="M96 50 Q120 60 144 50 M96 82 Q120 72 144 82"
+        fill="none"
+        stroke={ACCENT}
+        strokeWidth={1.5}
+      />
     </Frame>
   ),
   receipt: (
@@ -294,13 +329,28 @@ const MOTIFS: Record<FeatureMotif, ReactNode> = {
         strokeWidth={2}
         strokeLinejoin="round"
       />
-      <path d="M112 82 a8 8 0 0 0 16 0" fill="none" stroke={ACCENT} strokeWidth={2} strokeLinecap="round" />
+      <path
+        d="M112 82 a8 8 0 0 0 16 0"
+        fill="none"
+        stroke={ACCENT}
+        strokeWidth={2}
+        strokeLinecap="round"
+      />
       <circle cx={140} cy={40} r={8} fill={ACCENT} />
     </Frame>
   ),
   envelope: (
     <Frame>
-      <rect x={62} y={38} width={116} height={58} rx={8} fill={ACCENT_SOFT} stroke={ACCENT} strokeWidth={2} />
+      <rect
+        x={62}
+        y={38}
+        width={116}
+        height={58}
+        rx={8}
+        fill={ACCENT_SOFT}
+        stroke={ACCENT}
+        strokeWidth={2}
+      />
       <path
         d="M62 46 L120 78 L178 46"
         fill="none"
@@ -322,7 +372,16 @@ const MOTIFS: Record<FeatureMotif, ReactNode> = {
   ),
   search: (
     <Frame>
-      <rect x={40} y={40} width={160} height={20} rx={10} fill={SURFACE} stroke={BORDER} strokeWidth={1.5} />
+      <rect
+        x={40}
+        y={40}
+        width={160}
+        height={20}
+        rx={10}
+        fill={SURFACE}
+        stroke={BORDER}
+        strokeWidth={1.5}
+      />
       <circle cx={56} cy={50} r={5} fill="none" stroke={ACCENT} strokeWidth={2} />
       <line x1={60} y1={54} x2={64} y2={58} stroke={ACCENT} strokeWidth={2} strokeLinecap="round" />
       <rect x={72} y={47} width={70} height={6} rx={3} fill={MUTED} />
@@ -333,7 +392,15 @@ const MOTIFS: Record<FeatureMotif, ReactNode> = {
     <Frame>
       <rect x={54} y={40} width={132} height={52} rx={8} fill={ACCENT} />
       <rect x={54} y={52} width={132} height={10} fill="var(--admin-on-primary)" opacity={0.18} />
-      <rect x={64} y={74} width={40} height={6} rx={3} fill="var(--admin-on-primary)" opacity={0.7} />
+      <rect
+        x={64}
+        y={74}
+        width={40}
+        height={6}
+        rx={3}
+        fill="var(--admin-on-primary)"
+        opacity={0.7}
+      />
       <circle cx={168} cy={78} r={7} fill="var(--admin-on-primary)" opacity={0.85} />
       <circle cx={158} cy={78} r={7} fill="var(--admin-on-primary)" opacity={0.5} />
     </Frame>
@@ -347,7 +414,15 @@ const MOTIFS: Record<FeatureMotif, ReactNode> = {
         strokeWidth={2}
         strokeLinejoin="round"
       />
-      <line x1={120} y1={60} x2={120} y2={88} stroke={ACCENT} strokeWidth={2.4} strokeLinecap="round" />
+      <line
+        x1={120}
+        y1={60}
+        x2={120}
+        y2={88}
+        stroke={ACCENT}
+        strokeWidth={2.4}
+        strokeLinecap="round"
+      />
       <path
         d="M111 80 L120 89 L129 80"
         fill="none"

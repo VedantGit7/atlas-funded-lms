@@ -32,6 +32,14 @@ export const AuditListQuerySchema = z.object({
   cursor: z.string().optional(),
   action: z.string().max(160).optional(),
   targetType: z.string().max(120).optional(),
+  /**
+   * Narrow to one record's history.
+   *
+   * `targetType` alone answers "what happened to tags", which is not the
+   * question a detail screen asks. `target_id` is text rather than uuid in the
+   * table — some targets are not uuids — so this is a string.
+   */
+  targetId: z.string().max(200).optional(),
 });
 
 export const TenantAuditListQuerySchema = AuditListQuerySchema.strict();

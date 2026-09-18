@@ -13,5 +13,7 @@ const DEFAULT_CURRENCY = "USD";
 export function CoursePrice({ course }: { course: CoursePricing }) {
   if (course.accessTier !== "PAID") return <>Free</>;
   if (course.priceCents == null) return <>Paid</>;
-  return <Money amount={course.priceCents} currency={course.currency ?? DEFAULT_CURRENCY} minorUnits />;
+  return (
+    <Money amount={course.priceCents} currency={course.currency ?? DEFAULT_CURRENCY} minorUnits />
+  );
 }

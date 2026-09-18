@@ -32,15 +32,15 @@ type CourseOutlineProps = {
 export function CourseOutline({ courseId, modules, enrolled, tagId }: CourseOutlineProps) {
   const [moduleLessons, setModuleLessons] = useState<Record<string, LessonOutlineItem[]>>({});
   const [loading, setLoading] = useState(false);
-  
+
   useEffect(() => {
     if (!tagId || !enrolled) {
       setModuleLessons({});
       return;
     }
-    
+
     setLoading(true);
-    
+
     // Fetch lessons for all modules with tag filter
     void Promise.all(
       modules
@@ -67,9 +67,9 @@ export function CourseOutline({ courseId, modules, enrolled, tagId }: CourseOutl
         setLoading(false);
       });
   }, [tagId, enrolled, modules]);
-  
+
   const showLessons = tagId && enrolled;
-  
+
   if (modules.length === 0) {
     return <p role="status">This course does not have a published module outline yet.</p>;
   }
@@ -85,7 +85,9 @@ export function CourseOutline({ courseId, modules, enrolled, tagId }: CourseOutl
           <li key={module.id} className="rounded-lg border p-4">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0 flex-1">
-                <p className="text-xs uppercase tracking-wide opacity-60">Chapter {module.position}</p>
+                <p className="text-xs uppercase tracking-wide opacity-60">
+                  Chapter {module.position}
+                </p>
                 <h3 className="font-medium">{module.title}</h3>
                 {isScorm ? (
                   <p className="mt-1 text-sm opacity-70">
@@ -117,7 +119,7 @@ export function CourseOutline({ courseId, modules, enrolled, tagId }: CourseOutl
                 )
               ) : null}
             </div>
-            
+
             {hasLessons ? (
               <ol className="mt-3 space-y-1 border-t pt-3">
                 {lessons.map((lesson, index) => (

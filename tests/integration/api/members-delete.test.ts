@@ -99,8 +99,8 @@ describeWithDb("removeMember integration", () => {
         metadata: deleteRouteMetadata,
         params: { id: invitedMembershipId },
         input: {},
-        handler: async ({ tx: routeTx, ctx: routeCtx, params }) =>
-          removeMember(routeTx, routeCtx, params.id!),
+        handler: async ({ tx: routeTx, ctx: routeCtx }) =>
+          removeMember(routeTx, routeCtx, invitedMembershipId),
       });
 
       expect(result.data.status).toBe("REMOVED");

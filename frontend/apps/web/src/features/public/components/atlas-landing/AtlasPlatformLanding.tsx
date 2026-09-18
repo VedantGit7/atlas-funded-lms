@@ -41,15 +41,14 @@ export function AtlasPlatformLanding() {
   const { darkMode, toggleDark, mounted } = useAtlasTheme();
 
   return (
-    <div className={`atlas-landing ${plusJakarta.variable} ${mounted && darkMode ? "atl-dark" : ""}`}>
+    <div
+      className={`atlas-landing ${plusJakarta.variable} ${mounted && darkMode ? "atl-dark" : ""}`}
+    >
       <AtlasNav darkMode={darkMode} onToggleDark={toggleDark} />
 
       {/* Hero */}
       <div className="relative overflow-hidden px-7 max-[768px]:px-4">
-        <div
-          className="pointer-events-none absolute inset-0 atl-hero-grid"
-          aria-hidden
-        />
+        <div className="pointer-events-none absolute inset-0 atl-hero-grid" aria-hidden />
         <div className="relative mx-auto flex max-w-[1140px] items-center gap-[64px] pb-24 pt-20 max-[900px]:flex-col max-[900px]:gap-12 max-[768px]:pt-14">
           <div className="min-w-0 flex-1">
             <div className="mb-6 inline-flex items-center gap-2 rounded-[40px] border border-[var(--atl-bdr2)] bg-[var(--atl-surf)] px-3.5 py-[7px]">
@@ -89,9 +88,9 @@ export function AtlasPlatformLanding() {
         <div className="mx-auto flex max-w-[1140px] px-7 max-[768px]:grid max-[768px]:grid-cols-2 max-[768px]:px-4">
           {ATLAS_STATS.map((stat, i) => {
             const valueColor =
-              "accent" in stat && stat.accent
+              "accent" in stat
                 ? "text-[var(--atl-acc)]"
-                : "grn" in stat && stat.grn
+                : "grn" in stat
                   ? "text-[var(--atl-grn)]"
                   : "text-[var(--atl-tx)]";
             return (
@@ -317,7 +316,10 @@ export function AtlasPlatformLanding() {
       <AtlasFaq />
 
       {/* Final CTA */}
-      <div id="contact" className="bg-[var(--atl-acc)] px-7 py-[88px] text-center max-[768px]:px-4 max-[768px]:py-16">
+      <div
+        id="contact"
+        className="bg-[var(--atl-acc)] px-7 py-[88px] text-center max-[768px]:px-4 max-[768px]:py-16"
+      >
         <div className="mx-auto max-w-[620px]">
           <div className="mb-[18px] text-[11px] font-semibold uppercase tracking-[0.15em] text-white/45">
             Book a demo
@@ -348,7 +350,9 @@ export function AtlasPlatformLanding() {
             <div className="min-w-[220px] flex-[2]">
               <div className="mb-[18px] flex items-center gap-2.5">
                 <AtlasBrandMark />
-                <span className="text-[14px] font-extrabold leading-none text-white">Atlas LMS</span>
+                <span className="text-[14px] font-extrabold leading-none text-white">
+                  Atlas LMS
+                </span>
               </div>
               <p className="m-0 max-w-[280px] text-[13px] leading-[1.75] text-white/45">
                 The multi-tenant, white-label learning platform for academies and training teams.
@@ -401,7 +405,9 @@ export function AtlasPlatformLanding() {
             <div className="text-xs text-white/30">
               {"\u00A9"} 2026 Atlas LMS. All rights reserved.
             </div>
-            <div className="text-xs text-white/25">Built for multi-tenant, white-label delivery.</div>
+            <div className="text-xs text-white/25">
+              Built for multi-tenant, white-label delivery.
+            </div>
           </div>
         </div>
       </footer>

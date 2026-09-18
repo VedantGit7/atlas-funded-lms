@@ -8,7 +8,7 @@ describe("can relationship predicates", () => {
         .fn()
         .mockResolvedValueOnce([{ key: "assessment.grade" }])
         .mockResolvedValueOnce([])
-        .mockResolvedValueOnce([{ role_key: "instructor" }]),
+        .mockResolvedValueOnce([{ role_key: "instructor", bypasses_resource_predicates: false }]),
     };
 
     const decision = await can({
@@ -35,7 +35,7 @@ describe("can relationship predicates", () => {
         .fn()
         .mockResolvedValueOnce([{ key: "assessment.grade" }])
         .mockResolvedValueOnce([])
-        .mockResolvedValueOnce([{ role_key: "instructor" }]),
+        .mockResolvedValueOnce([{ role_key: "instructor", bypasses_resource_predicates: false }]),
     };
 
     const decision = await can({

@@ -7,7 +7,7 @@ function adminTx() {
       .fn()
       .mockResolvedValueOnce([{ key: "analytics.dashboard.view" }])
       .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([{ role_key: "admin" }]),
+      .mockResolvedValueOnce([{ role_key: "admin", bypasses_resource_predicates: true }]),
   };
 }
 
@@ -17,7 +17,7 @@ function instructorTx() {
       .fn()
       .mockResolvedValueOnce([{ key: "analytics.dashboard.view" }])
       .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([{ role_key: "instructor" }]),
+      .mockResolvedValueOnce([{ role_key: "instructor", bypasses_resource_predicates: false }]),
   };
 }
 
@@ -79,7 +79,7 @@ describe("analytics authorization", () => {
         .fn()
         .mockResolvedValueOnce([{ key: "analytics.funnel.view" }])
         .mockResolvedValueOnce([])
-        .mockResolvedValueOnce([{ role_key: "admin" }]),
+        .mockResolvedValueOnce([{ role_key: "admin", bypasses_resource_predicates: true }]),
     };
 
     const decision = await can({

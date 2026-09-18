@@ -1,10 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import {
-  createAppeal,
-  formatModerationError,
-} from "../../moderation/api";
+import { createAppeal, formatModerationError } from "../../moderation/api";
 
 type SubmitAppealDialogProps = {
   moderationCaseId: string;

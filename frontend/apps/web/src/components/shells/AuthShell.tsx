@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import type { PublicTenantBranding } from "@atlas/tenant-branding";
-import { FUNDED_BEYOND_LOGO_URL } from "@/lib/brand";
+import { resolveTenantLogoUrl } from "@/lib/brand";
+import { TenantBrandMark } from "@/components/patterns/TenantBrandMark";
 import { ShellSkipLink } from "./shared/ShellSkipLink";
 import { FbaDarkModeButton } from "@/components/theme/FbaDarkModeButton";
 import { useFbaTheme } from "@/components/theme/use-fba-theme";
@@ -32,8 +32,11 @@ const BRAND_HIGHLIGHTS = [
 export function AuthShell({ branding, requestId, children }: AuthShellProps) {
   const { darkMode, toggleDark } = useFbaTheme();
 
-  const fullName = branding.publicName ?? "FundedBeyond Academy";
-  const brandName = fullName.replace(/\s*Academy\s*$/i, "") || "FundedBeyond";
+  // Fallbacks must be neutral: this shell renders every tenant's auth screens,
+  // so a branded default showed tenant #1 to any academy that had not set a
+  // publicName yet.
+  const fullName = branding.publicName ?? "Your academy";
+  const brandName = fullName.replace(/\s*Academy\s*$/i, "") || fullName;
   const hasAcademySuffix = /academy/i.test(fullName);
 
   return (
@@ -48,8 +51,7 @@ export function AuthShell({ branding, requestId, children }: AuthShellProps) {
           className="pointer-events-none absolute inset-0 opacity-10"
           aria-hidden
           style={{
-            backgroundImage:
-              "radial-gradient(circle at 2px 2px, #ffffff 1px, transparent 0)",
+            backgroundImage: "radial-gradient(circle at 2px 2px, #ffffff 1px, transparent 0)",
             backgroundSize: "40px 40px",
           }}
         />
@@ -59,11 +61,10 @@ export function AuthShell({ branding, requestId, children }: AuthShellProps) {
           aria-label={`${fullName} home`}
           className="relative z-10 flex items-center gap-3 no-underline transition-opacity hover:opacity-90"
         >
-          <Image
-            src={FUNDED_BEYOND_LOGO_URL}
-            alt=""
-            width={40}
-            height={40}
+          <TenantBrandMark
+            logoUrl={resolveTenantLogoUrl(branding)}
+            name={fullName}
+            size={40}
             className="h-10 w-10 shrink-0 rounded-full"
           />
           <div className="leading-tight">
@@ -94,7 +95,7 @@ export function AuthShell({ branding, requestId, children }: AuthShellProps) {
         </div>
 
         <p className="relative z-10 text-[12px] uppercase leading-relaxed tracking-wider text-white/30">
-          Not financial advice. Trading carries significant risk. FundedBeyond is an educational
+          Not financial advice. Trading carries significant risk. {brandName} is an educational
           platform.
         </p>
       </aside>
@@ -112,11 +113,10 @@ export function AuthShell({ branding, requestId, children }: AuthShellProps) {
             aria-label={`${fullName} home`}
             className="mb-8 flex items-center gap-2.5 no-underline transition-opacity hover:opacity-90 md:hidden"
           >
-            <Image
-              src={FUNDED_BEYOND_LOGO_URL}
-              alt=""
-              width={32}
-              height={32}
+            <TenantBrandMark
+              logoUrl={resolveTenantLogoUrl(branding)}
+              name={fullName}
+              size={32}
               className="h-8 w-8 shrink-0 rounded-full"
             />
             <div className="text-[13px] font-extrabold text-[var(--fba-tx)]">

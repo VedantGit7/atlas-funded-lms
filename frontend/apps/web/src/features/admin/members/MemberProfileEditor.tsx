@@ -3,7 +3,12 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ClientApiError, clientApi } from "../../../lib/client-api";
-import { cardClassName, cardHeaderClassName, fieldClassName, labelClassName } from "./member-detail-shared";
+import {
+  cardClassName,
+  cardHeaderClassName,
+  fieldClassName,
+  labelClassName,
+} from "./member-detail-shared";
 
 type MemberProfileEditorProps = {
   membershipId: string;

@@ -31,9 +31,7 @@ type TagRowDb = {
 
 function mapTagRow(row: TagRowDb): TagRow {
   const visibility =
-    row.visibility === "PRIVATE" || row.visibility === "CLASSIFICATION"
-      ? row.visibility
-      : "PUBLIC";
+    row.visibility === "PRIVATE" || row.visibility === "CLASSIFICATION" ? row.visibility : "PUBLIC";
 
   return {
     id: row.id,
@@ -188,6 +186,60 @@ export async function tagSlugExists(args: {
   `;
 
   return rows.length > 0;
+}
+
+/**
+ * The live tag holding a slug, if any.
+ *
+ * `tagSlugExists` answers the same question with a boolean, which is not enough
+ * for the message: two different titles can derive the same slug, so telling an
+ * admin "that title is taken" when the clash is on the slug sends them looking
+ * for a tag that does not exist under that name. This returns the tag actually
+ * holding it so the error can name it.
+ */
+export async function findTagBySlug(args: {
+  tx: Tx;
+  tenantId: string;
+  slug: string;
+  excludeTagId?: string;
+}): Promise<TagRow | null> {
+  const rows = args.excludeTagId
+    ? await args.tx.$queryRaw<TagRowDb[]>`
+        select
+          id::text,
+          tenant_id::text,
+          title,
+          slug,
+          description,
+          visibility::text,
+          created_at,
+          updated_at
+        from tags
+        where tenant_id = ${args.tenantId}::uuid
+          and slug = ${args.slug}
+          and deleted_at is null
+          and id <> ${args.excludeTagId}::uuid
+        limit 1
+      `
+    : await args.tx.$queryRaw<TagRowDb[]>`
+        select
+          id::text,
+          tenant_id::text,
+          title,
+          slug,
+          description,
+          visibility::text,
+          created_at,
+          updated_at
+        from tags
+        where tenant_id = ${args.tenantId}::uuid
+          and slug = ${args.slug}
+          and deleted_at is null
+        limit 1
+      `;
+
+  const row = rows[0];
+  return row ? mapTagRow(row) : null;
 }
 
 export async function insertTag(args: {
@@ -593,4 +645,253 @@ export async function detachTagFromCourse(args: {
       and tenant_id = ${args.tenantId}::uuid
       and tag_id = ${args.tagId}::uuid
   `;
+}
+
+/**
+ * Attachment counts for a set of tags, in two statements regardless of size.
+ *
+ * `course_tags` and `lesson_tags` both carry `@@index([tenant_id, tag_id])`, so
+ * this is an index-only aggregate — the reverse lookup was never expensive, it
+ * simply had no caller. Deleted courses and lessons are excluded: counting a
+ * soft-deleted lesson would inflate the blast radius an admin is shown before a
+ * destructive action, which is worse than showing no number at all.
+ */
+export async function countTagUsage(args: {
+  tx: Tx;
+  tenantId: string;
+  tagIds: string[];
+}): Promise<Map<string, { courses: number; lessons: number }>> {
+  const usage = new Map<string, { courses: number; lessons: number }>();
+  if (args.tagIds.length === 0) return usage;
+
+  for (const tagId of args.tagIds) {
+    usage.set(tagId, { courses: 0, lessons: 0 });
+  }
+
+  const courseRows = await args.tx.$queryRaw<Array<{ tag_id: string; total: bigint }>>`
+    select ct.tag_id::text as tag_id, count(*)::bigint as total
+    from course_tags ct
+    inner join courses c
+      on c.id = ct.course_id
+     and c.tenant_id = ct.tenant_id
+    where ct.tenant_id = ${args.tenantId}::uuid
+      and ct.tag_id = any(${args.tagIds}::uuid[])
+      and c.deleted_at is null
+    group by ct.tag_id
+  `;
+
+  const lessonRows = await args.tx.$queryRaw<Array<{ tag_id: string; total: bigint }>>`
+    select lt.tag_id::text as tag_id, count(*)::bigint as total
+    from lesson_tags lt
+    inner join lessons l
+      on l.id = lt.lesson_id
+     and l.tenant_id = lt.tenant_id
+    where lt.tenant_id = ${args.tenantId}::uuid
+      and lt.tag_id = any(${args.tagIds}::uuid[])
+      and l.deleted_at is null
+    group by lt.tag_id
+  `;
+
+  for (const row of courseRows) {
+    const entry = usage.get(row.tag_id);
+    if (entry) entry.courses = Number(row.total);
+  }
+  for (const row of lessonRows) {
+    const entry = usage.get(row.tag_id);
+    if (entry) entry.lessons = Number(row.total);
+  }
+
+  return usage;
+}
+
+export type TagUsageCourse = { id: string; title: string; status: string };
+export type TagUsageLesson = {
+  id: string;
+  title: string;
+  courseId: string;
+  courseTitle: string;
+};
+
+/** The courses carrying a tag, alphabetical, capped by the caller. */
+export async function listCoursesWithTag(args: {
+  tx: Tx;
+  tenantId: string;
+  tagId: string;
+  limit: number;
+}): Promise<TagUsageCourse[]> {
+  return await args.tx.$queryRaw<TagUsageCourse[]>`
+    select c.id::text, c.title, c.status::text as status
+    from course_tags ct
+    inner join courses c
+      on c.id = ct.course_id
+     and c.tenant_id = ct.tenant_id
+    where ct.tenant_id = ${args.tenantId}::uuid
+      and ct.tag_id = ${args.tagId}::uuid
+      and c.deleted_at is null
+    order by c.title asc
+    limit ${args.limit}
+  `;
+}
+
+/**
+ * The lessons carrying a tag, each named with the course it sits in.
+ *
+ * A bare lesson title does not identify a lesson — "Introduction" exists in
+ * most courses — so the join up through `course_modules` to `courses` is what
+ * makes this list actionable rather than merely long.
+ */
+export async function listLessonsWithTag(args: {
+  tx: Tx;
+  tenantId: string;
+  tagId: string;
+  limit: number;
+}): Promise<TagUsageLesson[]> {
+  const rows = await args.tx.$queryRaw<
+    Array<{ id: string; title: string; course_id: string; course_title: string }>
+  >`
+    select
+      l.id::text,
+      l.title,
+      c.id::text as course_id,
+      c.title as course_title
+    from lesson_tags lt
+    inner join lessons l
+      on l.id = lt.lesson_id
+     and l.tenant_id = lt.tenant_id
+    inner join course_modules m
+      on m.id = l.module_id
+     and m.tenant_id = l.tenant_id
+    inner join courses c
+      on c.id = m.course_id
+     and c.tenant_id = m.tenant_id
+    where lt.tenant_id = ${args.tenantId}::uuid
+      and lt.tag_id = ${args.tagId}::uuid
+      and l.deleted_at is null
+      and m.deleted_at is null
+      and c.deleted_at is null
+    order by c.title asc, l.title asc
+    limit ${args.limit}
+  `;
+
+  return rows.map((row) => ({
+    id: row.id,
+    title: row.title,
+    courseId: row.course_id,
+    courseTitle: row.course_title,
+  }));
+}
+
+/** Which of these ids are live tags in this tenant. */
+export async function findExistingTagIds(args: {
+  tx: Tx;
+  tenantId: string;
+  tagIds: string[];
+}): Promise<string[]> {
+  if (args.tagIds.length === 0) return [];
+
+  const rows = await args.tx.$queryRaw<Array<{ id: string }>>`
+    select id::text
+    from tags
+    where tenant_id = ${args.tenantId}::uuid
+      and id = any(${args.tagIds}::uuid[])
+      and deleted_at is null
+  `;
+
+  return rows.map((row) => row.id);
+}
+
+/** Re-scope a set of tags in one statement. Returns the ids actually changed. */
+export async function setTagVisibilityMany(args: {
+  tx: Tx;
+  tenantId: string;
+  tagIds: string[];
+  visibility: TagVisibility;
+}): Promise<string[]> {
+  if (args.tagIds.length === 0) return [];
+
+  const rows = await args.tx.$queryRaw<Array<{ id: string }>>`
+    update tags
+    set visibility = ${args.visibility}::"LessonTagVisibility",
+        updated_at = now()
+    where tenant_id = ${args.tenantId}::uuid
+      and id = any(${args.tagIds}::uuid[])
+      and deleted_at is null
+    returning id::text
+  `;
+
+  return rows.map((row) => row.id);
+}
+
+/** Soft-delete a set of tags in one statement. Returns the ids actually deleted. */
+export async function softDeleteTagsMany(args: {
+  tx: Tx;
+  tenantId: string;
+  tagIds: string[];
+}): Promise<string[]> {
+  if (args.tagIds.length === 0) return [];
+
+  const rows = await args.tx.$queryRaw<Array<{ id: string }>>`
+    update tags
+    set deleted_at = now(), updated_at = now()
+    where tenant_id = ${args.tenantId}::uuid
+      and id = any(${args.tagIds}::uuid[])
+      and deleted_at is null
+    returning id::text
+  `;
+
+  return rows.map((row) => row.id);
+}
+
+/**
+ * Re-point every attachment of one tag onto another.
+ *
+ * Insert-then-delete rather than `update ... set tag_id`, because the unique
+ * constraint on `(tenant_id, course_id, tag_id)` makes a plain update fail the
+ * moment one course carries both tags — which on a merge of two near-duplicates
+ * is the common case, not the edge case. `on conflict do nothing` absorbs
+ * exactly those rows, and the gap between what was deleted and what was
+ * inserted is how many were already carrying the target.
+ */
+export async function repointTagAttachments(args: {
+  tx: Tx;
+  tenantId: string;
+  sourceTagId: string;
+  targetTagId: string;
+}): Promise<{ movedCourses: number; movedLessons: number; alreadyTagged: number }> {
+  const insertedCourses = await args.tx.$executeRaw`
+    insert into course_tags (id, tenant_id, course_id, tag_id, created_at)
+    select gen_random_uuid(), ct.tenant_id, ct.course_id, ${args.targetTagId}::uuid, now()
+    from course_tags ct
+    where ct.tenant_id = ${args.tenantId}::uuid
+      and ct.tag_id = ${args.sourceTagId}::uuid
+    on conflict (tenant_id, course_id, tag_id) do nothing
+  `;
+
+  const removedCourses = await args.tx.$executeRaw`
+    delete from course_tags
+    where tenant_id = ${args.tenantId}::uuid
+      and tag_id = ${args.sourceTagId}::uuid
+  `;
+
+  const insertedLessons = await args.tx.$executeRaw`
+    insert into lesson_tags (id, tenant_id, lesson_id, tag_id, created_at)
+    select gen_random_uuid(), lt.tenant_id, lt.lesson_id, ${args.targetTagId}::uuid, now()
+    from lesson_tags lt
+    where lt.tenant_id = ${args.tenantId}::uuid
+      and lt.tag_id = ${args.sourceTagId}::uuid
+    on conflict (tenant_id, lesson_id, tag_id) do nothing
+  `;
+
+  const removedLessons = await args.tx.$executeRaw`
+    delete from lesson_tags
+    where tenant_id = ${args.tenantId}::uuid
+      and tag_id = ${args.sourceTagId}::uuid
+  `;
+
+  const movedCourses = Number(insertedCourses);
+  const movedLessons = Number(insertedLessons);
+  const alreadyTagged =
+    Number(removedCourses) - movedCourses + (Number(removedLessons) - movedLessons);
+
+  return { movedCourses, movedLessons, alreadyTagged };
 }

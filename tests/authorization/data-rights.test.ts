@@ -7,7 +7,7 @@ function adminTx() {
       .fn()
       .mockResolvedValueOnce([{ key: "data.export.run" }])
       .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([{ role_key: "admin" }]),
+      .mockResolvedValueOnce([{ role_key: "admin", bypasses_resource_predicates: true }]),
   };
 }
 
@@ -17,7 +17,7 @@ function learnerTx() {
       .fn()
       .mockResolvedValueOnce([{ key: "data.deletion.request" }])
       .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([{ role_key: "learner" }]),
+      .mockResolvedValueOnce([{ role_key: "learner", bypasses_resource_predicates: false }]),
   };
 }
 
@@ -79,7 +79,7 @@ describe("data-rights authorization", () => {
         .fn()
         .mockResolvedValueOnce([{ key: "data.deletion.manage" }])
         .mockResolvedValueOnce([])
-        .mockResolvedValueOnce([{ role_key: "admin" }]),
+        .mockResolvedValueOnce([{ role_key: "admin", bypasses_resource_predicates: true }]),
     };
 
     const decision = await can({

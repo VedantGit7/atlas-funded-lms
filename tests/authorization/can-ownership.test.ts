@@ -8,7 +8,7 @@ describe("can ownership predicates", () => {
         .fn()
         .mockResolvedValueOnce([{ key: "profile.update" }])
         .mockResolvedValueOnce([])
-        .mockResolvedValueOnce([{ role_key: "learner" }]),
+        .mockResolvedValueOnce([{ role_key: "learner", bypasses_resource_predicates: false }]),
     };
 
     const decision = await can({
@@ -33,7 +33,7 @@ describe("can ownership predicates", () => {
         .fn()
         .mockResolvedValueOnce([{ key: "profile.update" }])
         .mockResolvedValueOnce([])
-        .mockResolvedValueOnce([{ role_key: "learner" }]),
+        .mockResolvedValueOnce([{ role_key: "learner", bypasses_resource_predicates: false }]),
     };
 
     const decision = await can({

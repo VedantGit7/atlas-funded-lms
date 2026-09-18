@@ -22,7 +22,7 @@ export const GET = createTenantRoute<
   metadata: getPostMetadata,
   params: postIdParamsSchema,
   output: postDetailResponseSchema,
-  handler: async ({ tx, ctx, params }) => getPostById(tx, ctx, params["id"] ?? ""),
+  handler: async ({ tx, ctx, params }) => getPostById(tx, ctx, params.id),
 });
 
 export const DELETE = createTenantRoute<
@@ -33,5 +33,5 @@ export const DELETE = createTenantRoute<
   metadata: deletePostMetadata,
   params: postIdParamsSchema,
   output: deletePostResponseSchema,
-  handler: async ({ tx, ctx, params }) => deletePost(tx, ctx, params["id"] ?? ""),
+  handler: async ({ tx, ctx, params }) => deletePost(tx, ctx, params.id),
 });

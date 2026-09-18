@@ -263,8 +263,7 @@ export async function getMemberStatsForTenant(args: {
     pendingInvites: Number(status?.pending_invites ?? 0n),
     suspendedMembers: Number(status?.suspended_members ?? 0n),
     activeNow: Number(status?.active_now ?? 0n),
-    courseCompletionRate:
-      totalEnrollments > 0 ? completedEnrollments / totalEnrollments : null,
+    courseCompletionRate: totalEnrollments > 0 ? completedEnrollments / totalEnrollments : null,
   };
 }
 

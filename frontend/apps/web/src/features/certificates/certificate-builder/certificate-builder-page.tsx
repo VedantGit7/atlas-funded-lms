@@ -13,6 +13,7 @@ import {
   saveTemplateDesign,
   slugifyTemplateKey,
 } from "./studio-template-api";
+import { cancellationFlag } from "@/lib/effect-cancellation";
 
 type CertificateBuilderPageProps = {
   publicName: string;
@@ -57,7 +58,7 @@ export function CertificateBuilderPage({ publicName }: CertificateBuilderPagePro
       return;
     }
 
-    let cancelled = false;
+    const effect = cancellationFlag();
     setReady(false);
     setLoadError(null);
     setView("studio");
@@ -65,10 +66,8 @@ export function CertificateBuilderPage({ publicName }: CertificateBuilderPagePro
     void (async () => {
       try {
         const template = await fetchTemplate(templateIdParam);
-        if (cancelled) return;
-        const doc = isDesignDocument(template.templateJson)
-          ? template.templateJson
-          : undefined;
+        if (effect.isCancelled()) return;
+        const doc = isDesignDocument(template.templateJson) ? template.templateJson : undefined;
         setSession({
           templateId: template.id,
           name: template.name,
@@ -81,15 +80,15 @@ export function CertificateBuilderPage({ publicName }: CertificateBuilderPagePro
           );
         }
       } catch (error) {
-        if (cancelled) return;
+        if (effect.isCancelled()) return;
         setLoadError(error instanceof Error ? error.message : "Failed to load template");
       } finally {
-        if (!cancelled) setReady(true);
+        if (!effect.isCancelled()) setReady(true);
       }
     })();
 
     return () => {
-      cancelled = true;
+      effect.cancel();
     };
   }, [templateIdParam]);
 
@@ -140,9 +139,7 @@ export function CertificateBuilderPage({ publicName }: CertificateBuilderPagePro
           templateId: result.data.id,
           name: result.data.name,
           updatedAt: result.data.updatedAt,
-          document: isDesignDocument(result.data.templateJson)
-            ? result.data.templateJson
-            : doc,
+          document: isDesignDocument(result.data.templateJson) ? result.data.templateJson : doc,
         });
         syncUrl(result.data.id);
         setStatusMessage("Saved");
@@ -170,9 +167,7 @@ export function CertificateBuilderPage({ publicName }: CertificateBuilderPagePro
             templateId: id,
             name: created.data.name,
             updatedAt: created.data.updatedAt,
-            document: isDesignDocument(created.data.templateJson)
-              ? created.data.templateJson
-              : doc,
+            document: isDesignDocument(created.data.templateJson) ? created.data.templateJson : doc,
           }));
           syncUrl(id);
         } else {

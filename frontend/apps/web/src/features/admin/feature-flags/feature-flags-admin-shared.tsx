@@ -24,12 +24,12 @@ export const infoBannerClassName =
 export const rowClassName =
   "flex flex-col gap-4 px-6 py-4 motion-safe:transition-colors motion-safe:duration-200 hover:bg-[var(--admin-surface-low)]/80 sm:flex-row sm:items-center sm:gap-6";
 
-export const flagKeyClassName =
-  "font-mono text-[13px] font-bold text-[var(--admin-primary)]";
+export const flagKeyClassName = "font-mono text-[13px] font-bold text-[var(--admin-primary)]";
 
 export const flagTitleClassName = "text-sm font-semibold text-[var(--admin-on-surface)]";
 
-export const flagDescriptionClassName = "text-xs leading-relaxed text-[var(--admin-on-surface-variant)]";
+export const flagDescriptionClassName =
+  "text-xs leading-relaxed text-[var(--admin-on-surface-variant)]";
 
 export const columnLabelClassName =
   "text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--admin-on-surface-variant)]";
@@ -40,11 +40,8 @@ export function enabledBadgeClassName(enabled: boolean): string {
     : "inline-flex rounded px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider bg-[var(--admin-surface-high)] text-[var(--admin-on-surface-variant)]";
 }
 
-export function sourceBadgeClassName(
-  source: "entitlement" | "platform" | "override",
-): string {
-  const base =
-    "inline-flex rounded px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider";
+export function sourceBadgeClassName(source: "entitlement" | "platform" | "override"): string {
+  const base = "inline-flex rounded px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider";
 
   if (source === "entitlement") {
     return `${base} bg-[color-mix(in_srgb,var(--admin-primary-container)_55%,var(--admin-surface))] text-[var(--admin-on-primary-container)]`;
@@ -71,9 +68,10 @@ export const paginationButtonClassName = (active: boolean) =>
       : "border-[var(--admin-border)] text-[var(--admin-on-surface-variant)] hover:bg-[var(--admin-surface-low)]",
   ].join(" ");
 
-export function resolveSourceBadge(
-  flag: { readOnly: boolean; source: "GLOBAL_DEFAULT" | "TENANT_OVERRIDE" },
-): { id: "entitlement" | "platform" | "override"; label: string } {
+export function resolveSourceBadge(flag: {
+  readOnly: boolean;
+  source: "GLOBAL_DEFAULT" | "TENANT_OVERRIDE";
+}): { id: "entitlement" | "platform" | "override"; label: string } {
   if (flag.readOnly) {
     return { id: "entitlement", label: "Entitlement" };
   }
@@ -86,7 +84,7 @@ export function resolveSourceBadge(
 export function isEffectiveValueEnabled(value: unknown): boolean {
   if (typeof value === "boolean") return value;
   if (value && typeof value === "object" && "enabled" in value) {
-    return Boolean((value as { enabled: unknown }).enabled);
+    return Boolean(value.enabled);
   }
   return false;
 }

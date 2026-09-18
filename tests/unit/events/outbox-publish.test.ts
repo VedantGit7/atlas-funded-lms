@@ -108,7 +108,10 @@ describe("outbox.publish", () => {
 
   it("does not run direct side effects", () => {
     const serviceSource = readFileSync(
-      resolve(import.meta.dirname, "../../../backend/packages/events/src/services/outbox.service.ts"),
+      resolve(
+        import.meta.dirname,
+        "../../../backend/packages/events/src/services/outbox.service.ts",
+      ),
       "utf8",
     );
 

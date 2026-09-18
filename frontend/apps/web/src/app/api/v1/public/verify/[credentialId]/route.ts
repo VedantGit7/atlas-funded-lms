@@ -25,7 +25,7 @@ const VERIFY_MAX_PER_WINDOW = 60;
 const verifyHits = new Map<string, number[]>();
 
 function enforceVerifyRateLimit(req: Request): void {
-  const key = hashClientIp(req) ?? "unknown";
+  const key = hashClientIp(req);
   const now = Date.now();
   const recent = (verifyHits.get(key) ?? []).filter((ts) => now - ts < VERIFY_WINDOW_MS);
   if (recent.length >= VERIFY_MAX_PER_WINDOW) {

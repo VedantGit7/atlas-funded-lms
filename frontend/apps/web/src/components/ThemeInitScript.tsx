@@ -56,7 +56,5 @@ function buildThemeInitScript(tenantModeDefault: "system" | "light" | "dark"): s
  * no DB round-trip.
  */
 export function ThemeInitScript({ tenantModeDefault }: ThemeInitScriptProps) {
-  return (
-    <script dangerouslySetInnerHTML={{ __html: buildThemeInitScript(tenantModeDefault) }} />
-  );
+  return <script dangerouslySetInnerHTML={{ __html: buildThemeInitScript(tenantModeDefault) }} />;
 }

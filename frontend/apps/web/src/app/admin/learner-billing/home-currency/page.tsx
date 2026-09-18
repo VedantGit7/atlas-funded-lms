@@ -2,6 +2,7 @@ import type { LearnerBillingConfigResponse } from "@atlas/domain-config/schemas/
 import { AdminPageGate } from "../../../../components/patterns/AdminPageGate";
 import { LearnerBillingSettingsShell } from "../../../../features/admin/learner-billing/LearnerBillingSettingsShell";
 import { HomeCurrencyPanel } from "../../../../features/admin/learner-billing/HomeCurrencyPanel";
+import { FxRatesPanel } from "../../../../features/admin/learner-billing/FxRatesPanel";
 import { ServerApiError, serverApi } from "../../../../lib/server-api";
 
 export default async function HomeCurrencyPageRoute() {
@@ -14,6 +15,9 @@ export default async function HomeCurrencyPageRoute() {
       <AdminPageGate screenId="T33" state="ready" title="Home Currency">
         <LearnerBillingSettingsShell>
           <HomeCurrencyPanel initialCurrency={config.data.homeCurrency} />
+          {/* The rates panel quotes against the home currency, so it needs
+              to know it — the stored table is USD-based regardless. */}
+          <FxRatesPanel homeCurrency={config.data.homeCurrency} />
         </LearnerBillingSettingsShell>
       </AdminPageGate>
     );

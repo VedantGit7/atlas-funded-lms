@@ -21,7 +21,7 @@ import { AdminDomainPageShell, adminDomainCardClassName } from "./admin-domain-s
 export function AdminLiveSessionsPanel() {
   const [sessions, setSessions] = useState<Array<LiveSession & { attendanceCount?: number }>>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<unknown>(null);
   const [title, setTitle] = useState("");
   const [scheduledAt, setScheduledAt] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -43,7 +43,7 @@ export function AdminLiveSessionsPanel() {
       );
       setSessions(withCounts);
     } catch (loadError) {
-      setError(loadError instanceof Error ? loadError.message : "Unable to load live sessions.");
+      setError(loadError);
     } finally {
       setLoading(false);
     }
@@ -53,7 +53,7 @@ export function AdminLiveSessionsPanel() {
     void load();
   }, [load]);
 
-  async function handleCreate(event: React.FormEvent) {
+  async function handleCreate(event: React.SyntheticEvent) {
     event.preventDefault();
     if (!title.trim()) return;
     setSubmitting(true);
@@ -67,7 +67,7 @@ export function AdminLiveSessionsPanel() {
       setScheduledAt("");
       await load();
     } catch (createError) {
-      setError(createError instanceof Error ? createError.message : "Unable to create session.");
+      setError(createError);
     } finally {
       setSubmitting(false);
     }
@@ -81,18 +81,34 @@ export function AdminLiveSessionsPanel() {
     >
       <div className={adminDomainCardClassName}>
         <h2 className="text-lg font-semibold text-[var(--admin-on-surface)]">Create session</h2>
-        <form className="mt-4 grid gap-3 sm:grid-cols-2" onSubmit={(event) => void handleCreate(event)}>
+        <form
+          className="mt-4 grid gap-3 sm:grid-cols-2"
+          onSubmit={(event) => void handleCreate(event)}
+        >
           <label className="block text-sm">
-            <span className="mb-1 block font-medium text-[var(--admin-on-surface-variant)]">Title</span>
-            <input className={fieldClassName} value={title} onChange={(e) => setTitle(e.target.value)} required />
+            <span className="mb-1 block font-medium text-[var(--admin-on-surface-variant)]">
+              Title
+            </span>
+            <input
+              className={fieldClassName}
+              value={title}
+              onChange={(e) => {
+                setTitle(e.target.value);
+              }}
+              required
+            />
           </label>
           <label className="block text-sm">
-            <span className="mb-1 block font-medium text-[var(--admin-on-surface-variant)]">Scheduled at</span>
+            <span className="mb-1 block font-medium text-[var(--admin-on-surface-variant)]">
+              Scheduled at
+            </span>
             <input
               type="datetime-local"
               className={fieldClassName}
               value={scheduledAt}
-              onChange={(e) => setScheduledAt(e.target.value)}
+              onChange={(e) => {
+                setScheduledAt(e.target.value);
+              }}
             />
           </label>
           <div className="sm:col-span-2">
@@ -106,14 +122,21 @@ export function AdminLiveSessionsPanel() {
       <section className={adminDomainCardClassName}>
         <div className="flex items-center justify-between gap-3">
           <h2 className="text-lg font-semibold text-[var(--admin-on-surface)]">Sessions</h2>
-          <button type="button" className={ghostButtonClassName} disabled={loading} onClick={() => void load()}>
+          <button
+            type="button"
+            className={ghostButtonClassName}
+            disabled={loading}
+            onClick={() => void load()}
+          >
             Refresh
           </button>
         </div>
         {loading ? (
           <p className="mt-3 text-sm text-[var(--admin-on-surface-variant)]">Loading…</p>
         ) : sessions.length === 0 ? (
-          <p className="mt-3 text-sm text-[var(--admin-on-surface-variant)]">No live sessions yet.</p>
+          <p className="mt-3 text-sm text-[var(--admin-on-surface-variant)]">
+            No live sessions yet.
+          </p>
         ) : (
           <div className={`${analyticsTableShellClassName} mt-4`}>
             <table className="min-w-full text-sm">

@@ -2,18 +2,11 @@ import { createUuidV7 } from "@atlas/core/id/uuid-v7";
 
 import type { AuthPrincipalBridge } from "./types";
 
-
-
 type QueryableDb = {
-
   $queryRaw<T = unknown>(query: TemplateStringsArray, ...values: unknown[]): Promise<T>;
-
 };
 
-
-
 type PrincipalRow = {
-
   id: string;
 
   email: string;
@@ -25,15 +18,10 @@ type PrincipalRow = {
   mfa_enabled: boolean;
 
   last_login_at: Date | null;
-
 };
 
-
-
 function mapPrincipalRow(row: PrincipalRow): AuthPrincipalBridge {
-
   return {
-
     id: row.id,
 
     email: row.email,
@@ -45,15 +33,10 @@ function mapPrincipalRow(row: PrincipalRow): AuthPrincipalBridge {
     mfaEnabled: row.mfa_enabled,
 
     lastLoginAt: row.last_login_at,
-
   };
-
 }
 
-
-
 export async function upsertAuthPrincipal(args: {
-
   db: QueryableDb;
 
   supabaseUserId: string;
@@ -63,9 +46,7 @@ export async function upsertAuthPrincipal(args: {
   mfaEnabled?: boolean;
 
   markLogin?: boolean;
-
 }): Promise<AuthPrincipalBridge> {
-
   const emailNormalized = args.email.trim().toLowerCase();
 
   const id = createUuidV7();
@@ -73,8 +54,6 @@ export async function upsertAuthPrincipal(args: {
   const mfaEnabled = args.mfaEnabled ?? false;
 
   const markLogin = args.markLogin ?? false;
-
-
 
   // Re-link an existing principal when the email already exists but Supabase
 
@@ -132,15 +111,9 @@ export async function upsertAuthPrincipal(args: {
 
   `;
 
-
-
   if (updatedRows[0]) {
-
     return mapPrincipalRow(updatedRows[0]);
-
   }
-
-
 
   const insertedRows = await args.db.$queryRaw<PrincipalRow[]>`
 
@@ -224,21 +197,11 @@ export async function upsertAuthPrincipal(args: {
 
   `;
 
-
-
   const row = insertedRows[0];
 
-
-
   if (!row) {
-
     throw new Error("Failed to upsert auth principal");
-
   }
 
-
-
   return mapPrincipalRow(row);
-
 }
-

@@ -1,12 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import {
-  ChevronLeft,
-  Layers,
-  Database,
-  FileText,
-} from "lucide-react";
+import { ChevronLeft, Layers, Database, FileText } from "lucide-react";
 import { generalSettingsBackLinkClassName } from "../general-settings/general-settings-shared";
 import type { SubSchoolRow } from "./SubSchoolsListPanel";
 import { subSchoolCopyFlowHref, type CopyProductKind } from "./copy-product-flows";
@@ -199,7 +194,9 @@ export function CopyProductPanel({ subSchool, history = [] }: CopyProductPanelPr
                       <td className="px-4 py-3 font-medium text-[var(--admin-on-surface)]">
                         {row.source}
                       </td>
-                      <td className="px-4 py-3 text-[var(--admin-on-surface-variant)]">{row.type}</td>
+                      <td className="px-4 py-3 text-[var(--admin-on-surface-variant)]">
+                        {row.type}
+                      </td>
                       <td className="px-4 py-3 text-[var(--admin-on-surface-variant)]">
                         {row.destination}
                       </td>

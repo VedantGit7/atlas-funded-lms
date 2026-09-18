@@ -4,7 +4,10 @@ import {
   localeQaChecksResponseSchema,
   runLocaleQaChecksResponseSchema,
 } from "../../../../../server/locales/locale.contract";
-import { getLocaleQaChecks, runLocaleQaChecksForTenant } from "../../../../../server/locales/locale.service";
+import {
+  getLocaleQaChecks,
+  runLocaleQaChecksForTenant,
+} from "../../../../../server/locales/locale.service";
 import {
   getLocaleQaChecksMetadata,
   runLocaleQaChecksMetadata,

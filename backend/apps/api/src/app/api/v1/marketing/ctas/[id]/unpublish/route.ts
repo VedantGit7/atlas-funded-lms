@@ -5,7 +5,7 @@ import { marketingCtaResponseSchema } from "../../../../../../../server/marketin
 import { mutateMarketingCtasMetadata } from "../../../../../../../server/marketing-cta/marketing-cta.route-metadata";
 import { unpublishMarketingCta } from "../../../../../../../server/marketing-cta/marketing-cta.service";
 
-const paramsSchema = zod.object({ id: zod.string().uuid() });
+const paramsSchema = zod.object({ id: zod.uuid() });
 
 export const POST = createTenantRoute<
   Record<string, never>,

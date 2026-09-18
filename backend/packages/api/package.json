@@ -22,7 +22,8 @@
     "@atlas/membership": "workspace:*",
     "@atlas/observability": "workspace:*",
     "@atlas/tenancy": "workspace:*",
-    "next": "^16.2.9",
+    "ioredis": "^5.9.0",
+    "next": "^16.2.11",
     "zod": "^4.4.3"
   },
   "devDependencies": {}

@@ -132,7 +132,6 @@ function TitleCell({ row }: { row: NewsfeedPostDto }) {
         aria-hidden="true"
       >
         {row.coverImageUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={row.coverImageUrl}
             alt=""
@@ -180,7 +179,9 @@ function ToggleSwitch(props: {
       aria-checked={props.checked}
       aria-label={props.ariaLabel}
       disabled={props.disabled}
-      onClick={() => props.onChange(!props.checked)}
+      onClick={() => {
+        props.onChange(!props.checked);
+      }}
       className={[
         "relative h-6 w-11 shrink-0 rounded-full transition-colors duration-200 disabled:opacity-50",
         props.checked ? "bg-[var(--admin-primary)]" : "bg-[var(--admin-outline)]",
@@ -261,9 +262,7 @@ export function NewsfeedListPanel() {
       setItems([]);
       setSummary(EMPTY_SUMMARY);
       toast.error(
-        caught instanceof ClientApiError
-          ? caught.message
-          : "Could not load newsfeed posts.",
+        caught instanceof ClientApiError ? caught.message : "Could not load newsfeed posts.",
       );
     } finally {
       setLoading(false);
@@ -304,9 +303,7 @@ export function NewsfeedListPanel() {
       setSettings(response.data);
     } catch (caught) {
       toast.error(
-        caught instanceof ClientApiError
-          ? caught.message
-          : "Could not update newsfeed settings.",
+        caught instanceof ClientApiError ? caught.message : "Could not update newsfeed settings.",
       );
     } finally {
       setSettingsBusy(false);
@@ -325,15 +322,12 @@ export function NewsfeedListPanel() {
         {},
         `marketing-newsfeed-${row.status === "LIVE" ? "unpublish" : "publish"}`,
         {
-          successMessage:
-            row.status === "LIVE" ? "Post unpublished." : "Post is live.",
+          successMessage: row.status === "LIVE" ? "Post unpublished." : "Post is live.",
         },
       );
       await load();
     } catch (caught) {
-      toast.error(
-        caught instanceof ClientApiError ? caught.message : "Could not update status.",
-      );
+      toast.error(caught instanceof ClientApiError ? caught.message : "Could not update status.");
     } finally {
       setActionBusy(null);
     }
@@ -357,9 +351,7 @@ export function NewsfeedListPanel() {
       setDeleteConfirm("");
       await load();
     } catch (caught) {
-      toast.error(
-        caught instanceof ClientApiError ? caught.message : "Could not delete post.",
-      );
+      toast.error(caught instanceof ClientApiError ? caught.message : "Could not delete post.");
     } finally {
       setDeleteBusy(false);
     }
@@ -429,9 +421,7 @@ export function NewsfeedListPanel() {
         </div>
         <div className="flex items-center gap-4 rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)] p-4">
           <div className="min-w-0">
-            <p className="text-sm font-semibold text-[var(--admin-on-surface)]">
-              Newsfeed enabled
-            </p>
+            <p className="text-sm font-semibold text-[var(--admin-on-surface)]">Newsfeed enabled</p>
             <p
               className={[
                 "text-xs",
@@ -440,9 +430,7 @@ export function NewsfeedListPanel() {
                   : "text-[var(--admin-danger)]",
               ].join(" ")}
             >
-              {settings?.enabled
-                ? "Visible on learner dashboards"
-                : "Hidden from all learners"}
+              {settings?.enabled ? "Visible on learner dashboards" : "Hidden from all learners"}
             </p>
           </div>
           <ToggleSwitch
@@ -548,7 +536,9 @@ export function NewsfeedListPanel() {
             />
             <input
               value={query}
-              onChange={(event) => setQuery(event.target.value)}
+              onChange={(event) => {
+                setQuery(event.target.value);
+              }}
               placeholder="Search posts..."
               className={`${MESSENGER_WIZARD_FIELD_CLASS} pl-9`}
               aria-label="Search newsfeed posts"
@@ -594,9 +584,7 @@ export function NewsfeedListPanel() {
               </tr>
             </thead>
             <tbody className="divide-y divide-[var(--admin-border)]">
-              {loading
-                ? [0, 1, 2].map((key) => <SkeletonRow key={key} />)
-                : null}
+              {loading ? [0, 1, 2].map((key) => <SkeletonRow key={key} />) : null}
               {!loading && pageItems.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="px-6 py-16 text-center">
@@ -605,8 +593,7 @@ export function NewsfeedListPanel() {
                       No newsfeed posts yet
                     </h2>
                     <p className="mx-auto mt-2 max-w-sm text-sm text-[var(--admin-on-surface-variant)]">
-                      Start sharing updates, tips, and promotional announcements with your
-                      learners.
+                      Start sharing updates, tips, and promotional announcements with your learners.
                     </p>
                     <Link
                       href={NEWSFEED_CREATE_HREF}
@@ -624,7 +611,9 @@ export function NewsfeedListPanel() {
                     <tr
                       key={row.id}
                       className="group cursor-pointer transition-colors hover:bg-[color-mix(in_srgb,var(--admin-surface-low)_40%,transparent)]"
-                      onClick={() => router.push(newsfeedHref(row.id))}
+                      onClick={() => {
+                        router.push(newsfeedHref(row.id));
+                      }}
                     >
                       <td className="px-6 py-4">
                         <TitleCell row={row} />
@@ -648,7 +637,9 @@ export function NewsfeedListPanel() {
                       </td>
                       <td
                         className="px-6 py-4 text-right"
-                        onClick={(event) => event.stopPropagation()}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                        }}
                       >
                         <DropdownMenu
                           label={`Actions for ${row.title}`}
@@ -668,9 +659,7 @@ export function NewsfeedListPanel() {
         <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[var(--admin-border)] bg-[color-mix(in_srgb,var(--admin-surface-low)_20%,var(--admin-surface))] px-6 py-4">
           <p className="text-sm text-[var(--admin-on-surface-variant)]">
             Showing {pageItems.length} of {items.length} posts
-            {summary.totalCount > items.length
-              ? ` (filtered from ${summary.totalCount})`
-              : ""}
+            {summary.totalCount > items.length ? ` (filtered from ${summary.totalCount})` : ""}
           </p>
           <div className="flex flex-wrap items-center gap-3">
             <AdminSelectDropdown
@@ -689,7 +678,9 @@ export function NewsfeedListPanel() {
                 type="button"
                 className="inline-flex items-center gap-1 rounded-lg border border-[var(--admin-border)] px-3 py-1 text-sm disabled:opacity-50"
                 disabled={page <= 1}
-                onClick={() => setPage((current) => Math.max(1, current - 1))}
+                onClick={() => {
+                  setPage((current) => Math.max(1, current - 1));
+                }}
               >
                 <ChevronLeft className="h-4 w-4" />
                 Previous
@@ -698,7 +689,9 @@ export function NewsfeedListPanel() {
                 type="button"
                 className="inline-flex items-center gap-1 rounded-lg border border-[var(--admin-border)] px-3 py-1 text-sm disabled:opacity-50"
                 disabled={page >= pageCount}
-                onClick={() => setPage((current) => Math.min(pageCount, current + 1))}
+                onClick={() => {
+                  setPage((current) => Math.min(pageCount, current + 1));
+                }}
               >
                 Next
                 <ChevronRight className="h-4 w-4" />
@@ -724,7 +717,9 @@ export function NewsfeedListPanel() {
             aria-modal="true"
             aria-labelledby="newsfeed-delete-title"
             className={`admin-theme w-full max-w-md space-y-4 bg-[var(--admin-surface)] p-5 shadow-xl ${dropdownPanelSurfaceClassName}`}
-            onClick={(event) => event.stopPropagation()}
+            onClick={(event) => {
+              event.stopPropagation();
+            }}
           >
             <h2
               id="newsfeed-delete-title"
@@ -741,7 +736,9 @@ export function NewsfeedListPanel() {
             </p>
             <input
               value={deleteConfirm}
-              onChange={(event) => setDeleteConfirm(event.target.value)}
+              onChange={(event) => {
+                setDeleteConfirm(event.target.value);
+              }}
               className={MESSENGER_WIZARD_FIELD_CLASS}
               aria-label="Confirm post title"
               disabled={deleteBusy}

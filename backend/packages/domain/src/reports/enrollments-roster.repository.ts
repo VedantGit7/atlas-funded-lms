@@ -1,5 +1,6 @@
 import type { TenantTx } from "@atlas/db";
 import type { EnrollmentRosterQuery } from "./enrollments-roster.dto";
+import { textColumn } from "./raw-column";
 
 export type EnrollmentRosterRow = {
   id: string;
@@ -25,14 +26,14 @@ export type EnrollmentRosterFilter = {
 
 function mapRow(row: Record<string, unknown>): EnrollmentRosterRow {
   return {
-    id: String(row["id"]),
-    course_id: String(row["course_id"]),
-    membership_id: String(row["membership_id"]),
+    id: textColumn(row["id"]),
+    course_id: textColumn(row["course_id"]),
+    membership_id: textColumn(row["membership_id"]),
     learner_name: typeof row["learner_name"] === "string" ? row["learner_name"] : null,
     email: typeof row["email"] === "string" ? row["email"] : null,
-    product_title: String(row["product_title"] ?? ""),
-    enrolled_type: String(row["enrolled_type"] ?? "free"),
-    status: String(row["status"]),
+    product_title: textColumn(row["product_title"], ""),
+    enrolled_type: textColumn(row["enrolled_type"], "free"),
+    status: textColumn(row["status"]),
     enrolled_at: row["enrolled_at"] as Date,
     expires_at: row["expires_at"] instanceof Date ? row["expires_at"] : null,
   };

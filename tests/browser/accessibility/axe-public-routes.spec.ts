@@ -7,7 +7,10 @@ test.describe("axe public learner routes", () => {
     await assertNoCriticalViolations();
   });
 
-  test("public landing has no serious axe violations", async ({ page, assertNoCriticalViolations }) => {
+  test("public landing has no serious axe violations", async ({
+    page,
+    assertNoCriticalViolations,
+  }) => {
     await page.goto("/p/home");
     await expect(page.getByRole("main")).toBeVisible();
     await assertNoCriticalViolations();

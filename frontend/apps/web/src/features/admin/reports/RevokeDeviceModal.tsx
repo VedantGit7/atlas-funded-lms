@@ -51,7 +51,10 @@ export function RevokeDeviceModal({
         className={`w-full max-w-[480px] border border-[var(--admin-border)] bg-[var(--admin-surface)] shadow-xl ${inlineExpandClassName}`}
       >
         <div className="flex items-start justify-between border-b border-[var(--admin-border)] px-6 py-4">
-          <h2 id="revoke-device-title" className="text-base font-semibold text-[var(--admin-on-surface)]">
+          <h2
+            id="revoke-device-title"
+            className="text-base font-semibold text-[var(--admin-on-surface)]"
+          >
             Revoke this device?
           </h2>
           <button
@@ -76,9 +79,13 @@ export function RevokeDeviceModal({
           </div>
 
           <div className="flex items-start gap-3 rounded border border-[color-mix(in_srgb,var(--admin-danger)_25%,var(--admin-border))] bg-[color-mix(in_srgb,var(--admin-danger)_10%,var(--admin-surface))] p-3">
-            <TriangleAlert className="mt-0.5 h-5 w-5 shrink-0 text-[var(--admin-danger)]" aria-hidden="true" />
+            <TriangleAlert
+              className="mt-0.5 h-5 w-5 shrink-0 text-[var(--admin-danger)]"
+              aria-hidden="true"
+            />
             <p className="text-sm text-[var(--admin-on-surface)]">
-              The learner will be signed out on this device immediately and will need to sign in again.
+              The learner will be signed out on this device immediately and will need to sign in
+              again.
             </p>
           </div>
 
@@ -132,7 +139,9 @@ export function RevokeDeviceModal({
                 className="h-4 w-4 rounded border-[var(--admin-outline)] accent-[var(--admin-primary)]"
                 checked={notifyLearner}
                 disabled={busy}
-                onChange={(event) => setNotifyLearner(event.target.checked)}
+                onChange={(event) => {
+                  setNotifyLearner(event.target.checked);
+                }}
               />
               <span className="text-sm text-[var(--admin-on-surface)]">
                 Notify the learner by email
@@ -157,7 +166,9 @@ export function RevokeDeviceModal({
             type="button"
             className="inline-flex h-10 min-w-[140px] items-center justify-center gap-2 rounded bg-[var(--admin-danger)] px-4 text-[12px] font-semibold uppercase tracking-[0.06em] text-[var(--admin-on-primary)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
             disabled={busy || !reason}
-            onClick={() => onConfirm({ reason, notifyLearner })}
+            onClick={() => {
+              onConfirm({ reason, notifyLearner });
+            }}
           >
             {busy ? (
               <>

@@ -5,7 +5,7 @@ import { getPollResultsMetadata } from "@atlas/domain/polls/polls.route-metadata
 import { getPollResults } from "@atlas/domain/polls/polls.service";
 import { z as zod } from "zod";
 
-const paramsSchema = zod.object({ id: zod.string().uuid() });
+const paramsSchema = zod.object({ id: zod.uuid() });
 
 export const GET = createTenantRoute<
   Record<string, never>,

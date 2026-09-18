@@ -61,7 +61,9 @@ export function AdminPaymentTransactionDrawer({ orderId, onClose }: Props) {
       if (event.key === "Escape") onClose();
     }
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+    };
   }, [orderId, refundOpen, onClose]);
 
   if (!orderId) return null;
@@ -194,7 +196,9 @@ export function AdminPaymentTransactionDrawer({ orderId, onClose }: Props) {
               type="button"
               disabled={busy || !detail.canRefund}
               className="inline-flex items-center gap-2 border border-[var(--admin-danger)] bg-[color-mix(in_srgb,var(--admin-danger)_12%,transparent)] px-4 py-2 font-mono text-xs text-[var(--admin-danger)] hover:bg-[color-mix(in_srgb,var(--admin-danger)_20%,transparent)] disabled:opacity-40"
-              onClick={() => setRefundOpen(true)}
+              onClick={() => {
+                setRefundOpen(true);
+              }}
             >
               <Undo2 className="h-4 w-4" /> Refund
             </button>
@@ -206,7 +210,9 @@ export function AdminPaymentTransactionDrawer({ orderId, onClose }: Props) {
         <AdminPaymentRefundModal
           open={refundOpen}
           detail={detail}
-          onClose={() => setRefundOpen(false)}
+          onClose={() => {
+            setRefundOpen(false);
+          }}
           onRefunded={() => void load(detail.id)}
         />
       ) : null}

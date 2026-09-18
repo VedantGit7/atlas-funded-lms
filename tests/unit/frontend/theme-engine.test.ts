@@ -7,6 +7,13 @@ import { validateThemeContrast } from "../../../frontend/packages/contracts/src/
 import { THEME_PRESETS } from "../../../frontend/packages/contracts/src/domain-branding/utils/theme-presets";
 import { mapTenantThemeToSemanticPayload } from "../../../frontend/packages/contracts/src/domain-branding/utils/theme-semantic-tokens";
 
+/** Indexing a readonly array yields `T | undefined`; assert the fixture exists once, loudly. */
+function requirePreset(index: number) {
+  const preset = THEME_PRESETS[index];
+  if (!preset) throw new Error(`THEME_PRESETS[${index}] is missing`);
+  return preset;
+}
+
 describe("resolveTenantLogoUrl", () => {
   it("prefers explicit logoUrl", () => {
     expect(
@@ -32,19 +39,24 @@ describe("resolveTenantLogoUrl", () => {
 
 describe("buildThemeCssVars", () => {
   it("maps semantic tenant colors to CSS variables", () => {
-    const semantic = mapTenantThemeToSemanticPayload(THEME_PRESETS[0]!.tokens);
-    expect(buildThemeCssVars(semantic)).toMatchObject({
+    const semantic = mapTenantThemeToSemanticPayload(requirePreset(0).tokens);
+    const vars = buildThemeCssVars(semantic);
+    expect(vars).toMatchObject({
       "--brand-primary": "#224466",
-      "--tenant-background": "#ffffff",
-      "--tenant-foreground": "#101010",
       "--radius": "0.5rem",
     });
+    // The tenant used to be able to paint the page canvas, which put its brand
+    // background behind fixed-light cards and rendered card text invisible.
+    // toMatchObject ignores keys it is not asked about, so absence needs its own
+    // assertion or this stops testing anything.
+    expect(vars).not.toHaveProperty("--tenant-background");
+    expect(vars).not.toHaveProperty("--tenant-foreground");
   });
 });
 
 describe("diffThemeTokens", () => {
   it("lists changed token keys against published baseline", () => {
-    const baseline = THEME_PRESETS[0]!.tokens;
+    const baseline = requirePreset(0).tokens;
     const draft = { ...baseline, primary: "#112233" };
     const diff = diffThemeTokens(baseline, draft);
     expect(diff).toEqual([
@@ -60,7 +72,7 @@ describe("diffThemeTokens", () => {
 describe("validateThemeContrast", () => {
   it("flags low-contrast primary buttons", () => {
     const issues = validateThemeContrast({
-      ...THEME_PRESETS[0]!.tokens,
+      ...requirePreset(0).tokens,
       primary: "#ffff00",
       background: "#ffffff",
       foreground: "#101010",

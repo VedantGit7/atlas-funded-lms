@@ -10,13 +10,9 @@ import {
 describe("polls exports dto", () => {
   it("marks email as sensitive on respondents columns", () => {
     expect(
-      POLL_RESPONDENTS_EXPORT_COLUMNS.some(
-        (column) => column.key === "email" && column.sensitive,
-      ),
+      POLL_RESPONDENTS_EXPORT_COLUMNS.some((column) => column.key === "email" && column.sensitive),
     ).toBe(true);
-    expect(
-      POLL_SUMMARY_EXPORT_COLUMNS.some((column) => column.key === "poll_title"),
-    ).toBe(true);
+    expect(POLL_SUMMARY_EXPORT_COLUMNS.some((column) => column.key === "poll_title")).toBe(true);
   });
 
   it("parses exports ledger response", () => {
@@ -72,12 +68,7 @@ describe("polls exports dto", () => {
         nonRespondentsColumns: [],
         capabilities: {
           formats: ["csv", "xlsx", "json"],
-          datasets: [
-            "poll_summary",
-            "option_tallies",
-            "respondents",
-            "non_respondents",
-          ],
+          datasets: ["poll_summary", "option_tallies", "respondents", "non_respondents"],
           canSchedule: true,
           canEmailDelivery: true,
           canWebhookDelivery: true,

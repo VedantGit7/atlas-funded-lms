@@ -8,7 +8,7 @@ import {
 import { mutatePushMessagesMetadata } from "../../../../../../../server/push-messages/push-messages.route-metadata";
 import { deletePushMessage } from "../../../../../../../server/push-messages/push-messages.service";
 
-const paramsSchema = zod.object({ id: zod.string().uuid() });
+const paramsSchema = zod.object({ id: zod.uuid() });
 
 export const POST = createTenantRoute<
   z.output<typeof deletePushMessageBodySchema>,

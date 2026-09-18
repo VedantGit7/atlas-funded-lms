@@ -29,7 +29,12 @@ describeWithDb("gamification integration", () => {
     const started = await withTenantTx(
       authoringTenantTx(fixture, fixture.learnerMembershipId),
       async (tx) =>
-        startPracticeSession(tx, ctx, { mode: "due", maxItems: 1 }, "gamification-practice"),
+        startPracticeSession(
+          tx,
+          ctx,
+          { mode: "due", engine: "swipe", maxItems: 1 },
+          "gamification-practice",
+        ),
     );
 
     const card = started.data.card;

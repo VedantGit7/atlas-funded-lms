@@ -57,8 +57,12 @@ export function LearnerEventsCountdown() {
 
   useEffect(() => {
     if (items.length === 0) return;
-    const timer = window.setInterval(() => setNow(Date.now()), 1000);
-    return () => window.clearInterval(timer);
+    const timer = window.setInterval(() => {
+      setNow(Date.now());
+    }, 1000);
+    return () => {
+      window.clearInterval(timer);
+    };
   }, [items.length]);
 
   const nextEvent = useMemo(() => {
@@ -73,7 +77,11 @@ export function LearnerEventsCountdown() {
 
   const { item, startMs } = nextEvent;
   const remaining = startMs - now;
-  const href = item.joinUrl || item.linkUrl || null;
+  // Falls back to the event’s own page rather than leaving the card unlinked.
+  // An event with no external joinUrl or linkUrl previously rendered as dead
+  // text, and /events/[id] — which carries the description, location and the
+  // registration form — had nothing pointing at it from anywhere in the app.
+  const href = item.joinUrl || item.linkUrl || `/events/${item.id}`;
 
   const body = (
     <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -102,13 +110,9 @@ export function LearnerEventsCountdown() {
       aria-label="Upcoming event"
       className="rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-5"
     >
-      {href ? (
-        <Link href={href} className="block transition-opacity hover:opacity-90">
-          {body}
-        </Link>
-      ) : (
-        body
-      )}
+      <Link href={href} className="block transition-opacity hover:opacity-90">
+        {body}
+      </Link>
     </section>
   );
 }

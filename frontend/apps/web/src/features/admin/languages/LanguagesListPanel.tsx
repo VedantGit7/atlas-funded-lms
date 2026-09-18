@@ -97,10 +97,16 @@ export function LanguagesListPanel({ initialLanguages }: { initialLanguages: Lan
     );
   }, [rows, query]);
 
-  const visibleColumns = useMemo(() => COLUMNS.filter((column) => !hidden.has(column.id)), [hidden]);
+  const visibleColumns = useMemo(
+    () => COLUMNS.filter((column) => !hidden.has(column.id)),
+    [hidden],
+  );
   const pageCount = Math.max(1, Math.ceil(filtered.length / rowsPerPage));
   const currentPage = Math.min(page, pageCount - 1);
-  const pageRows = filtered.slice(currentPage * rowsPerPage, currentPage * rowsPerPage + rowsPerPage);
+  const pageRows = filtered.slice(
+    currentPage * rowsPerPage,
+    currentPage * rowsPerPage + rowsPerPage,
+  );
 
   function toggleColumn(id: ColumnId) {
     setHidden((previous) => {
@@ -123,7 +129,11 @@ export function LanguagesListPanel({ initialLanguages }: { initialLanguages: Lan
       );
       router.refresh();
     } catch (caught) {
-      setError(caught instanceof ClientApiError ? caught.message : "Could not update the default language.");
+      setError(
+        caught instanceof ClientApiError
+          ? caught.message
+          : "Could not update the default language.",
+      );
     } finally {
       setBusyLocale(null);
     }
@@ -139,7 +149,9 @@ export function LanguagesListPanel({ initialLanguages }: { initialLanguages: Lan
       setConfirmRemove(null);
       router.refresh();
     } catch (caught) {
-      setError(caught instanceof ClientApiError ? caught.message : "Could not remove the language.");
+      setError(
+        caught instanceof ClientApiError ? caught.message : "Could not remove the language.",
+      );
     } finally {
       setBusyLocale(null);
     }
@@ -167,14 +179,20 @@ export function LanguagesListPanel({ initialLanguages }: { initialLanguages: Lan
       </header>
 
       {error ? (
-        <p role="alert" className="rounded-lg border border-[var(--admin-danger)]/30 bg-[var(--admin-danger)]/10 px-4 py-3 text-sm text-[var(--admin-danger)]">
+        <p
+          role="alert"
+          className="rounded-lg border border-[var(--admin-danger)]/30 bg-[var(--admin-danger)]/10 px-4 py-3 text-sm text-[var(--admin-danger)]"
+        >
           {error}
         </p>
       ) : null}
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative w-full sm:max-w-xs">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--admin-on-surface-variant)]" aria-hidden="true" />
+          <Search
+            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--admin-on-surface-variant)]"
+            aria-hidden="true"
+          />
           <input
             type="search"
             value={query}
@@ -199,7 +217,10 @@ export function LanguagesListPanel({ initialLanguages }: { initialLanguages: Lan
           >
             <Columns3 className="h-4 w-4" aria-hidden="true" />
             Columns
-            <ChevronDown className={`h-4 w-4 text-[var(--admin-on-surface-variant)] transition-transform duration-200 ${columnsOpen ? "rotate-180" : ""}`} aria-hidden="true" />
+            <ChevronDown
+              className={`h-4 w-4 text-[var(--admin-on-surface-variant)] transition-transform duration-200 ${columnsOpen ? "rotate-180" : ""}`}
+              aria-hidden="true"
+            />
           </button>
           {columnsOpen ? (
             <div
@@ -208,7 +229,10 @@ export function LanguagesListPanel({ initialLanguages }: { initialLanguages: Lan
               className={`absolute right-0 top-[calc(100%+6px)] z-20 w-52 bg-[var(--admin-surface)] p-1.5 shadow-lg ${dropdownPanelSurfaceClassName}`}
             >
               {COLUMNS.map((column) => (
-                <label key={column.id} className="flex cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-[var(--admin-on-surface)] transition-colors hover:bg-[var(--admin-surface-high)]">
+                <label
+                  key={column.id}
+                  className="flex cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-[var(--admin-on-surface)] transition-colors hover:bg-[var(--admin-surface-high)]"
+                >
                   <input
                     type="checkbox"
                     checked={!hidden.has(column.id)}
@@ -245,13 +269,31 @@ export function LanguagesListPanel({ initialLanguages }: { initialLanguages: Lan
               />
             </div>
             <div className="flex items-center gap-1">
-              <PagerButton label="First page" disabled={currentPage === 0} onClick={() => { setPage(0); }}>
+              <PagerButton
+                label="First page"
+                disabled={currentPage === 0}
+                onClick={() => {
+                  setPage(0);
+                }}
+              >
                 <ChevronsLeft className="h-4 w-4" aria-hidden="true" />
               </PagerButton>
-              <PagerButton label="Previous page" disabled={currentPage === 0} onClick={() => { setPage((value) => Math.max(0, value - 1)); }}>
+              <PagerButton
+                label="Previous page"
+                disabled={currentPage === 0}
+                onClick={() => {
+                  setPage((value) => Math.max(0, value - 1));
+                }}
+              >
                 <ChevronLeft className="h-4 w-4" aria-hidden="true" />
               </PagerButton>
-              <PagerButton label="Next page" disabled={currentPage >= pageCount - 1} onClick={() => { setPage((value) => Math.min(pageCount - 1, value + 1)); }}>
+              <PagerButton
+                label="Next page"
+                disabled={currentPage >= pageCount - 1}
+                onClick={() => {
+                  setPage((value) => Math.min(pageCount - 1, value + 1));
+                }}
+              >
                 <ChevronRight className="h-4 w-4" aria-hidden="true" />
               </PagerButton>
             </div>
@@ -262,7 +304,10 @@ export function LanguagesListPanel({ initialLanguages }: { initialLanguages: Lan
               <thead>
                 <tr className="border-b border-[var(--admin-border)]">
                   {visibleColumns.map((column) => (
-                    <th key={column.id} className="whitespace-nowrap px-4 py-3 text-xs font-semibold uppercase tracking-wide text-[var(--admin-on-surface-variant)]">
+                    <th
+                      key={column.id}
+                      className="whitespace-nowrap px-4 py-3 text-xs font-semibold uppercase tracking-wide text-[var(--admin-on-surface-variant)]"
+                    >
                       {column.label}
                     </th>
                   ))}
@@ -273,7 +318,10 @@ export function LanguagesListPanel({ initialLanguages }: { initialLanguages: Lan
               </thead>
               <tbody>
                 {pageRows.map((row) => (
-                  <tr key={row.locale} className="border-b border-[var(--admin-border)] last:border-b-0">
+                  <tr
+                    key={row.locale}
+                    className="border-b border-[var(--admin-border)] last:border-b-0"
+                  >
                     {visibleColumns.map((column) => (
                       <td key={column.id} className="px-4 py-4 align-middle">
                         {column.id === "language" ? (
@@ -282,14 +330,20 @@ export function LanguagesListPanel({ initialLanguages }: { initialLanguages: Lan
                               {row.locale.slice(0, 2)}
                             </span>
                             <div className="min-w-0">
-                              <p className="font-semibold text-[var(--admin-on-surface)]">{row.englishName}</p>
+                              <p className="font-semibold text-[var(--admin-on-surface)]">
+                                {row.englishName}
+                              </p>
                               {row.nativeName && row.nativeName !== row.englishName ? (
-                                <p className="text-xs text-[var(--admin-on-surface-variant)]">{row.nativeName}</p>
+                                <p className="text-xs text-[var(--admin-on-surface-variant)]">
+                                  {row.nativeName}
+                                </p>
                               ) : null}
                             </div>
                           </div>
                         ) : column.id === "direction" ? (
-                          <span className="text-[var(--admin-on-surface-variant)]">{row.isRtl ? "RTL" : "LTR"}</span>
+                          <span className="text-[var(--admin-on-surface-variant)]">
+                            {row.isRtl ? "RTL" : "LTR"}
+                          </span>
                         ) : column.id === "status" ? (
                           <div className="flex flex-wrap gap-1.5">
                             {row.isDefault ? (
@@ -310,7 +364,9 @@ export function LanguagesListPanel({ initialLanguages }: { initialLanguages: Lan
                             ) : null}
                           </div>
                         ) : (
-                          <span className="whitespace-nowrap text-[var(--admin-on-surface-variant)]">{formatUpdated(row.updatedAt)}</span>
+                          <span className="whitespace-nowrap text-[var(--admin-on-surface-variant)]">
+                            {formatUpdated(row.updatedAt)}
+                          </span>
                         )}
                       </td>
                     ))}
@@ -339,7 +395,9 @@ export function LanguagesListPanel({ initialLanguages }: { initialLanguages: Lan
                             setConfirmRemove(row);
                           }}
                           aria-label={`Remove ${row.englishName}`}
-                          title={row.isDefault ? "The default language cannot be removed" : undefined}
+                          title={
+                            row.isDefault ? "The default language cannot be removed" : undefined
+                          }
                           className="rounded-lg p-2 text-[var(--admin-on-surface-variant)] transition-colors hover:bg-[var(--admin-surface-high)] hover:text-[var(--admin-danger)] disabled:cursor-not-allowed disabled:opacity-40"
                         >
                           <Trash2 className="h-4 w-4" aria-hidden="true" />

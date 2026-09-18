@@ -134,9 +134,7 @@ describe("payments roster dto", () => {
       },
     });
     expect(detail.data.activity).toHaveLength(1);
-    expect(detail.data.instalments[0]?.paymentOrderId).toBe(
-      "44444444-4444-4444-8444-444444444444",
-    );
+    expect(detail.data.instalments[0]?.paymentOrderId).toBe("44444444-4444-4444-8444-444444444444");
 
     const cancelBody = cancelPaymentInstalmentPlanBodySchema.parse({
       reason: "learner_request",
@@ -328,9 +326,7 @@ describe("payments roster dto", () => {
     const voided = voidPaymentInvoiceBodySchema.parse({ reason: "duplicate" });
     expect(voided.reason).toBe("duplicate");
 
-    expect(() =>
-      voidPaymentInvoiceBodySchema.parse({ reason: "unknown" }),
-    ).toThrow();
+    expect(() => voidPaymentInvoiceBodySchema.parse({ reason: "unknown" })).toThrow();
   });
 
   it("accepts export body and rejects tenant fields", () => {
@@ -724,4 +720,3 @@ describe("payments roster dto", () => {
     expect(parsed.data.displayId).toBe("11111111");
   });
 });
-

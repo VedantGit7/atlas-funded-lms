@@ -67,7 +67,11 @@ export function CertificateDetailPanel({
             className="flex h-9 w-9 items-center justify-center rounded-full border-2"
             style={{ borderColor: "color-mix(in srgb, var(--admin-primary) 40%, transparent)" }}
           >
-            <Award className="h-4 w-4" style={{ color: "var(--admin-primary)" }} aria-hidden="true" />
+            <Award
+              className="h-4 w-4"
+              style={{ color: "var(--admin-primary)" }}
+              aria-hidden="true"
+            />
           </div>
           <p className="font-ceremonial text-sm font-semibold leading-tight">
             {certificate.templateName}
@@ -141,11 +145,7 @@ export function CertificateDetailPanel({
             <span className="truncate font-mono text-xs text-[var(--admin-on-surface)]">
               {certificate.credentialId}
             </span>
-            <button
-              type="button"
-              className={ghostButtonClassName}
-              onClick={copyCredentialId}
-            >
+            <button type="button" className={ghostButtonClassName} onClick={copyCredentialId}>
               <Copy className="h-3.5 w-3.5" aria-hidden="true" />
               {copied ? "Copied" : "Copy"}
             </button>

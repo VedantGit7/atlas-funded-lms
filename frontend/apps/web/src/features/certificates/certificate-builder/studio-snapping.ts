@@ -55,7 +55,10 @@ function bestSnap(
   for (const candidate of candidates) {
     for (const target of targets) {
       const delta = target - candidate;
-      if (Math.abs(delta) <= threshold && (best === null || Math.abs(delta) < Math.abs(best.delta))) {
+      if (
+        Math.abs(delta) <= threshold &&
+        (best === null || Math.abs(delta) < Math.abs(best.delta))
+      ) {
         best = { delta, target };
       }
     }

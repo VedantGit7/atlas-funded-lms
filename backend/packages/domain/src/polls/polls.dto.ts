@@ -76,6 +76,42 @@ export const pollDtoSchema = z
   })
   .strict();
 
+/**
+ * What a learner is allowed to see of a poll they are being asked to answer.
+ *
+ * Deliberately NOT pollDtoSchema. That carries `options[].isCorrect`, so
+ * serving it to a respondent would hand the answer key to anyone who could
+ * vote -- for a quizMode poll that is the whole point of the exercise. It also
+ * drops `resultVisibility`, `status` and `liveSessionId`, none of which a
+ * respondent needs in order to choose an option.
+ *
+ * The read permission is `enrollment.read`, matching the respond route: an
+ * enrolled learner may read the single poll they can already write to, but
+ * still cannot enumerate polls (that stays on `membership.read`).
+ */
+export const pollRespondentOptionDtoSchema = z
+  .object({
+    id: z.uuid(),
+    label: z.string(),
+    sortOrder: z.number().int(),
+  })
+  .strict();
+
+export const pollRespondentViewDtoSchema = z
+  .object({
+    id: z.uuid(),
+    title: z.string(),
+    description: z.string().nullable(),
+    allowMultipleAnswers: z.boolean(),
+    anonymousVote: z.boolean(),
+    closesAt: z.iso.datetime().nullable(),
+    options: z.array(pollRespondentOptionDtoSchema),
+  })
+  .strict();
+
+export const pollRespondentViewResponseSchema = z.object({
+  data: pollRespondentViewDtoSchema,
+});
 export const pollResponseSchema = z.object({ data: pollDtoSchema });
 export const pollListResponseSchema = z.object({
   data: z.object({ items: z.array(pollDtoSchema) }),

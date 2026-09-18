@@ -7,7 +7,7 @@ function learnerScoreReadTx() {
       .fn()
       .mockResolvedValueOnce([{ key: "competency.score.read" }])
       .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([{ role_key: "learner" }]),
+      .mockResolvedValueOnce([{ role_key: "learner", bypasses_resource_predicates: false }]),
   };
 }
 
@@ -17,7 +17,7 @@ function instructorScoreReadTx() {
       .fn()
       .mockResolvedValueOnce([{ key: "competency.score.read" }])
       .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([{ role_key: "instructor" }]),
+      .mockResolvedValueOnce([{ role_key: "instructor", bypasses_resource_predicates: false }]),
   };
 }
 
@@ -27,7 +27,7 @@ function adminSignalReadTx() {
       .fn()
       .mockResolvedValueOnce([{ key: "competency.signal.read" }])
       .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([{ role_key: "admin" }]),
+      .mockResolvedValueOnce([{ role_key: "admin", bypasses_resource_predicates: true }]),
   };
 }
 

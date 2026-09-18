@@ -60,8 +60,4 @@ export const deletionsOutlineButtonClassName =
 export const deletionsProcessButtonClassName =
   "inline-flex items-center rounded-lg border border-[var(--admin-danger)] px-3 py-1.5 text-xs font-semibold text-[var(--admin-danger)] transition-colors hover:bg-[color-mix(in_srgb,var(--admin-danger)_10%,var(--admin-surface))] motion-safe:active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50";
 
-export {
-  fieldClassName,
-  ghostButtonClassName,
-  primaryButtonClassName,
-};
+export { fieldClassName, ghostButtonClassName, primaryButtonClassName };

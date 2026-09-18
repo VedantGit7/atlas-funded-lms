@@ -1,10 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import { useCallback } from "react";
-import { FUNDED_BEYOND_LOGO_URL } from "@/lib/brand";
+import { TenantBrandMark } from "@/components/patterns/TenantBrandMark";
 import { FbaDarkModeButton } from "@/components/theme/FbaDarkModeButton";
 import { useFbaTheme } from "@/components/theme/use-fba-theme";
 import "@/components/theme/fba-theme.css";
@@ -21,14 +20,21 @@ const plusJakarta = Plus_Jakarta_Sans({
 type FbaLegalDocumentProps = {
   document: LegalDocument;
   publicName?: string;
+  /** The tenant's own logo; without one their initials mark is shown. */
+  logoUrl?: string | null;
 };
 
 export function FbaLegalDocument({
   document: legalDocument,
-  publicName = "FundedBeyond Academy",
+  // Neutral fallback: this shell renders every tenant's legal pages, so a
+  // "FundedBeyond Academy" default named tenant #1 in every academy's footer
+  // and copyright line.
+  publicName = "Academy",
+  logoUrl = null,
 }: FbaLegalDocumentProps) {
   const { darkMode, toggleDark } = useFbaTheme();
-  const brandShort = publicName.replace(/\s*Academy\s*$/i, "") || "FundedBeyond";
+  const brandShort = publicName.replace(/\s*Academy\s*$/i, "") || publicName;
+  const hasAcademySuffix = /academy/i.test(publicName);
 
   const handleTocClick = useCallback(
     (event: React.MouseEvent<HTMLAnchorElement>, targetId: string) => {
@@ -43,8 +49,7 @@ export function FbaLegalDocument({
   );
 
   const siblingHref = legalDocument.slug === "terms" ? "/privacy" : "/terms";
-  const siblingLabel =
-    legalDocument.slug === "terms" ? "Privacy Policy" : "Terms and Conditions";
+  const siblingLabel = legalDocument.slug === "terms" ? "Privacy Policy" : "Terms and Conditions";
 
   return (
     <div
@@ -53,21 +58,22 @@ export function FbaLegalDocument({
       <header className="sticky top-0 z-50 border-b border-[var(--fba-bdr)] bg-[var(--fba-nav-bg)] backdrop-blur-[8px]">
         <div className="mx-auto flex h-[62px] max-w-[1100px] items-center justify-between gap-4 px-7 max-[768px]:px-4">
           <Link href="/" className="flex shrink-0 items-center gap-2 no-underline">
-            <Image
-              src={FUNDED_BEYOND_LOGO_URL}
-              alt=""
-              width={30}
-              height={30}
+            <TenantBrandMark
+              logoUrl={logoUrl}
+              name={publicName}
+              size={30}
               className="h-[30px] w-[30px] shrink-0 rounded-full"
             />
             <div>
               <span className="text-[13px] font-extrabold leading-none text-[var(--fba-tx)]">
                 {brandShort}
               </span>
-              <span className="text-[13px] font-normal leading-none text-[var(--fba-tx3)]">
-                {" "}
-                Academy
-              </span>
+              {hasAcademySuffix ? (
+                <span className="text-[13px] font-normal leading-none text-[var(--fba-tx3)]">
+                  {" "}
+                  Academy
+                </span>
+              ) : null}
             </div>
           </Link>
           <div className="flex items-center gap-2.5">
@@ -111,7 +117,9 @@ export function FbaLegalDocument({
                 <a
                   key={section.id}
                   href={`#${section.id}`}
-                  onClick={(event) => handleTocClick(event, section.id)}
+                  onClick={(event) => {
+                    handleTocClick(event, section.id);
+                  }}
                   className="block rounded-[10px] border border-[var(--fba-bdr)] bg-[var(--fba-surf)] px-3 py-3 no-underline transition-colors hover:border-[var(--fba-bdr2)] hover:bg-[var(--fba-bg2)]"
                 >
                   <span className="mb-1 block text-[10px] font-bold uppercase tracking-[0.12em] text-[var(--fba-ind)]">

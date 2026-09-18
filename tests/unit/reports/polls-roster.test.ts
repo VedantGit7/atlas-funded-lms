@@ -484,8 +484,7 @@ describe("polls roster dto", () => {
 
   it("parses poll compare query from comma-separated ids", () => {
     const parsed = pollsCompareQuerySchema.parse({
-      pollIds:
-        "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa,bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+      pollIds: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa,bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
     });
     expect(parsed.pollIds).toHaveLength(2);
     expect(parsed.alignBy).toBe("label");

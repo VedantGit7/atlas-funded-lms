@@ -10,7 +10,10 @@ import {
   createMockTestMetadata,
   listMockTestsMetadata,
 } from "@atlas/domain/learner-products/learner-products.route-metadata";
-import { createMockTest, listMockTests } from "@atlas/domain/learner-products/learner-products.service";
+import {
+  createMockTest,
+  listMockTests,
+} from "@atlas/domain/learner-products/learner-products.service";
 
 export const GET = createTenantRoute<
   z.output<typeof learnerProductListQuerySchema>,

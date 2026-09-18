@@ -8,6 +8,7 @@ import {
   CERTIFICATE_STUDIO_NEW,
   certificateStudioEditPath,
 } from "../certificate-builder/studio-routes";
+import { approveTemplateDesign } from "../certificate-builder/studio-template-api";
 import { CertificateLivePreview } from "./CertificateLivePreview";
 import { TemplateConfirmDialog } from "./TemplateConfirmDialog";
 import {
@@ -95,6 +96,8 @@ export function CertificateTemplateManager({ initialTemplates }: CertificateTemp
   const [publishing, setPublishing] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [confirmPublishOpen, setConfirmPublishOpen] = useState(false);
+  const [approving, setApproving] = useState(false);
+  const [confirmApproveOpen, setConfirmApproveOpen] = useState(false);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
 
   const [message, setMessage] = useState<string | null>(null);
@@ -216,6 +219,29 @@ export function CertificateTemplateManager({ initialTemplates }: CertificateTemp
       setError(caught);
     } finally {
       setPublishing(false);
+    }
+  }
+
+  /**
+   * Approval is the review sign-off, distinct from publish.
+   *
+   * The backend has had this route since the workflow gate landed, but nothing
+   * called it: templates could only be published, so a workflow configured to
+   * require review had no way to record that review from the UI.
+   */
+  async function approveSelected() {
+    if (!selected) return;
+    setMessage(null);
+    setRequestId(null);
+    setApproving(true);
+    try {
+      await approveTemplateDesign(selected.id);
+      await refreshTemplates();
+      setConfirmApproveOpen(false);
+    } catch (caught) {
+      setError(caught);
+    } finally {
+      setApproving(false);
     }
   }
 
@@ -682,6 +708,16 @@ export function CertificateTemplateManager({ initialTemplates }: CertificateTemp
                     </button>
                     <button
                       type="button"
+                      className={outlineButtonClassName}
+                      disabled={!editable || approving}
+                      onClick={() => {
+                        setConfirmApproveOpen(true);
+                      }}
+                    >
+                      {approving ? "Approving…" : "Approve"}
+                    </button>
+                    <button
+                      type="button"
                       className={primaryButtonClassName}
                       disabled={!editable || publishing}
                       onClick={() => {
@@ -742,6 +778,18 @@ export function CertificateTemplateManager({ initialTemplates }: CertificateTemp
         onConfirm={() => void publishSelected()}
         onClose={() => {
           setConfirmPublishOpen(false);
+        }}
+      />
+
+      <TemplateConfirmDialog
+        open={confirmApproveOpen}
+        title="Approve this template?"
+        description="Records your review sign-off against the current draft. Approval satisfies a workflow gate that requires review; it does not publish the template on its own."
+        confirmLabel="Confirm approval"
+        busy={approving}
+        onConfirm={() => void approveSelected()}
+        onClose={() => {
+          setConfirmApproveOpen(false);
         }}
       />
 

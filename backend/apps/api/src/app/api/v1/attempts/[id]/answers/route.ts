@@ -1,10 +1,7 @@
 import type { z } from "zod";
 import { AtlasHttpError } from "@atlas/core/http/errors";
 import { createTenantRoute } from "@atlas/api";
-import {
-  AttemptParamsSchema,
-  SaveAnswerBodySchema,
-} from "@atlas/api-server/assessments/schemas";
+import { AttemptParamsSchema, SaveAnswerBodySchema } from "@atlas/api-server/assessments/schemas";
 import { saveAnswerResponseSchema } from "@atlas/api-server/assessments/assessment-response-schemas";
 import { saveAttemptAnswer } from "../../../../../../server/attempts/attempts.service";
 import { saveAnswerRouteMetadata } from "./route.metadata";

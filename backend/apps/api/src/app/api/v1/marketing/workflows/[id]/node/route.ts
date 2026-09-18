@@ -8,7 +8,7 @@ import {
 import { mutateMarketingWorkflowsMetadata } from "../../../../../../../server/marketing-workflows/marketing-workflow.route-metadata";
 import { updateMarketingWorkflowNode } from "../../../../../../../server/marketing-workflows/marketing-workflow.service";
 
-const paramsSchema = zod.object({ id: zod.string().uuid() });
+const paramsSchema = zod.object({ id: zod.uuid() });
 
 export const PATCH = createTenantRoute<
   z.output<typeof updateWorkflowNodeBodySchema>,

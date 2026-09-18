@@ -1,3 +1,9 @@
+// Poisons this module for any client bundle. Audit finding M9: nothing at the
+// language level stopped a server module being pulled into a client component,
+// so a leak of service code -- and whatever secrets or privileged queries it
+// closes over -- would only have shown up as a runtime surprise.
+import "server-only";
+
 /**
  * Course certificate eligibility — pure helpers for studioFeatures config
  * stored under courses.metadata_json.tags.
@@ -110,12 +116,11 @@ export function parseCourseCertificateSettings(
   const configuration = readConfiguration(features);
   const enabled =
     typeof features?.[ENABLED_TAG_KEY] === "boolean"
-      ? Boolean(features[ENABLED_TAG_KEY])
+      ? features[ENABLED_TAG_KEY]
       : DEFAULT_SETTINGS.enabled;
   const templateId =
-    typeof features?.[TEMPLATE_TAG_KEY] === "string" &&
-    (features[TEMPLATE_TAG_KEY] as string).length > 0
-      ? (features[TEMPLATE_TAG_KEY] as string)
+    typeof features?.[TEMPLATE_TAG_KEY] === "string" && features[TEMPLATE_TAG_KEY].length > 0
+      ? features[TEMPLATE_TAG_KEY]
       : DEFAULT_SETTINGS.templateId;
 
   return {
@@ -152,10 +157,7 @@ export function meetsCompletionCriteria(
   return completionPercent >= criteriaPercent;
 }
 
-export function meetsTestPassingMarks(
-  scorePercent: number | null,
-  passingMarks: number,
-): boolean {
+export function meetsTestPassingMarks(scorePercent: number | null, passingMarks: number): boolean {
   if (scorePercent == null) return false;
   return scorePercent >= passingMarks;
 }
@@ -171,9 +173,7 @@ export type EligibilityInput = {
   hasTemplate: boolean;
 };
 
-export type EligibilityResult =
-  | { eligible: true }
-  | { eligible: false; reason: string };
+export type EligibilityResult = { eligible: true } | { eligible: false; reason: string };
 
 export function evaluateCourseCertificateEligibility(input: EligibilityInput): EligibilityResult {
   if (!input.settings.enabled) {

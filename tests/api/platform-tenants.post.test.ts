@@ -21,6 +21,7 @@ const {
   insertProvisioningJobMock,
   insertFallbackTenantDomainMock,
   seedTenantSystemRolesFromCatalogueMock,
+  seedTenantWorkflowDefinitionsFromCatalogueMock,
   seedOwnerInvitationFromExistingHelperMock,
   grantPlatformTenantEntitlementsMock,
   updateTenantStateMock,
@@ -30,7 +31,15 @@ const {
   mockProvisionTenant: vi.fn(),
   mockWithGlobalDb: vi.fn((fn: (db: unknown) => unknown) => fn({ $queryRaw: vi.fn() })),
   mockWithPlatformScope: vi.fn((_ctx: unknown, _reason: string, fn: (tx: unknown) => unknown) =>
-    fn({ $queryRaw: vi.fn(), $executeRaw: vi.fn() }),
+    fn({
+      // A bare vi.fn() returns undefined, so any repository doing rows[0] throws.
+      // The route pipeline now claims an idempotency key through this tx (M10),
+      // which made that latent stub gap visible as a 500.
+      $queryRaw: vi.fn().mockResolvedValue([]),
+      $queryRawUnsafe: vi.fn().mockResolvedValue([]),
+      $executeRaw: vi.fn().mockResolvedValue(0),
+      $executeRawUnsafe: vi.fn().mockResolvedValue(0),
+    }),
   ),
   mockResolveTenant: vi.fn(),
   mockRequireActiveMembership: vi.fn(),
@@ -42,6 +51,7 @@ const {
   insertProvisioningJobMock: vi.fn(),
   insertFallbackTenantDomainMock: vi.fn(),
   seedTenantSystemRolesFromCatalogueMock: vi.fn(),
+  seedTenantWorkflowDefinitionsFromCatalogueMock: vi.fn(),
   seedOwnerInvitationFromExistingHelperMock: vi.fn(),
   grantPlatformTenantEntitlementsMock: vi.fn(),
   updateTenantStateMock: vi.fn(),
@@ -113,9 +123,15 @@ vi.mock("@atlas/domain-tenancy/services/platform-tenant-read.service", () => ({
   readPlatformTenantDetail: (...args: unknown[]) => readPlatformTenantDetailMock(...args),
 }));
 
+// A factory mock replaces the whole module, so an export added later is simply
+// absent and provisioning throws before it reaches anything under test. That
+// surfaced as a 500 from the route rather than a missing-export message,
+// because route.failure only logs the error text under NODE_ENV=development.
 vi.mock("@atlas/domain-tenancy/services/platform-tenant-provisioning.helpers", () => ({
   seedTenantSystemRolesFromCatalogue: (...args: unknown[]) =>
     seedTenantSystemRolesFromCatalogueMock(...args),
+  seedTenantWorkflowDefinitionsFromCatalogue: (...args: unknown[]) =>
+    seedTenantWorkflowDefinitionsFromCatalogueMock(...args),
   seedOwnerInvitationFromExistingHelper: (...args: unknown[]) =>
     seedOwnerInvitationFromExistingHelperMock(...args),
 }));
@@ -354,5 +370,41 @@ describe("POST /api/v1/platform/tenants", () => {
       expect.anything(),
       expect.objectContaining({ eventType: "tenant.state_changed" }),
     );
+  });
+});
+
+describe("cross-origin protection on the platform plane (H20)", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockRequirePlatformPrincipal.mockResolvedValue(platformPrincipal);
+    mockProvisionTenant.mockResolvedValue(tenantResponse);
+    findTenantBySlugMock.mockResolvedValue(null);
+  });
+
+  it("rejects a mutating request from another origin", async () => {
+    // Phase 2.5 named both route wrappers; only the tenant one had the check, so
+    // the platform console was the single surface without CSRF protection while
+    // also being the only one with cross-tenant reach.
+    const response = await POST(createRequest({ origin: "https://evil.example.com" }));
+
+    expect(response.status).toBe(403);
+    expect(mockProvisionTenant).not.toHaveBeenCalled();
+  });
+
+  it("rejects before authenticating, so it cannot be used as an oracle", async () => {
+    await POST(createRequest({ origin: "https://evil.example.com" }));
+    expect(mockRequirePlatformPrincipal).not.toHaveBeenCalled();
+  });
+
+  it("allows a same-origin request", async () => {
+    const response = await POST(createRequest({ origin: "https://platform.example.com" }));
+    expect(response.status).toBe(200);
+  });
+
+  it("allows a request with no Origin at all", async () => {
+    // Browsers always send Origin on non-GET, so an absent one is a non-browser
+    // client (mobile, scripts, server-to-server) and cannot be CSRF.
+    const response = await POST(createRequest());
+    expect(response.status).toBe(200);
   });
 });

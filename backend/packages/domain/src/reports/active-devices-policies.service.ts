@@ -89,7 +89,11 @@ export async function createDevicePolicyOverride(
   input: CreateDevicePolicyOverrideBody,
 ) {
   const body = createDevicePolicyOverrideBodySchema.parse(input);
-  const exists = await activeDevicesPoliciesRepository.scopeExists(tx, body.scopeType, body.scopeId);
+  const exists = await activeDevicesPoliciesRepository.scopeExists(
+    tx,
+    body.scopeType,
+    body.scopeId,
+  );
   if (!exists) {
     throw new AtlasHttpError({
       status: 404,
@@ -154,7 +158,11 @@ export async function updateDevicePolicyOverride(
   });
 }
 
-export async function deleteDevicePolicyOverride(tx: TenantTx, _ctx: ServiceCtx, overrideId: string) {
+export async function deleteDevicePolicyOverride(
+  tx: TenantTx,
+  _ctx: ServiceCtx,
+  overrideId: string,
+) {
   const deleted = await activeDevicesPoliciesRepository.deleteOverride(tx, overrideId);
   if (!deleted) {
     throw new AtlasHttpError({

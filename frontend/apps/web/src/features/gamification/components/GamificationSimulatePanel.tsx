@@ -50,7 +50,9 @@ type GamificationSimulatePanelProps = {
 export function GamificationSimulatePanel({ members, events }: GamificationSimulatePanelProps) {
   const [open, setOpen] = useState(false);
   const [membershipId, setMembershipId] = useState(members[0]?.id ?? "");
-  const [eventType, setEventType] = useState(events.find((e) => e.status === "active")?.eventType ?? "");
+  const [eventType, setEventType] = useState(
+    events.find((e) => e.status === "active")?.eventType ?? "",
+  );
   const [result, setResult] = useState<SimulateResult | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -111,7 +113,10 @@ export function GamificationSimulatePanel({ members, events }: GamificationSimul
             <div className={panelHeaderClassName}>
               <div>
                 <p className={panelEyebrowClassName}>Dry run</p>
-                <h2 id="simulate-panel-title" className="font-semibold text-[var(--admin-on-surface)]">
+                <h2
+                  id="simulate-panel-title"
+                  className="font-semibold text-[var(--admin-on-surface)]"
+                >
                   Simulate engine
                 </h2>
               </div>
@@ -129,8 +134,8 @@ export function GamificationSimulatePanel({ members, events }: GamificationSimul
 
             <div className={`${panelBodyClassName} space-y-4`}>
               <p className="text-xs text-[var(--admin-on-surface-variant)]">
-                Preview XP, streaks, badges, and quest progress for a member without writing to
-                the database.
+                Preview XP, streaks, badges, and quest progress for a member without writing to the
+                database.
               </p>
 
               {message ? (
@@ -214,7 +219,9 @@ export function GamificationSimulatePanel({ members, events }: GamificationSimul
                   </div>
 
                   <div>
-                    <h3 className="text-sm font-semibold text-[var(--admin-on-surface)]">Streaks</h3>
+                    <h3 className="text-sm font-semibold text-[var(--admin-on-surface)]">
+                      Streaks
+                    </h3>
                     {result.streaks.length === 0 ? (
                       <p className="mt-1 text-xs text-[var(--admin-on-surface-variant)]">
                         No streak changes.

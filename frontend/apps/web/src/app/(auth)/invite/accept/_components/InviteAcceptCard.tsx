@@ -20,12 +20,12 @@ const initialState: AcceptInvitationActionState = {
 const cardClass =
   "w-full rounded-[16px] border-[1.5px] border-[var(--fba-bdr)] bg-[var(--fba-surf)] p-7 shadow-[0_24px_60px_rgba(0,0,0,0.12)]";
 
-const headlineClass = "text-[24px] font-bold leading-[1.25] tracking-[-0.01em] text-[var(--fba-tx)]";
+const headlineClass =
+  "text-[24px] font-bold leading-[1.25] tracking-[-0.01em] text-[var(--fba-tx)]";
 
 const bodyClass = "text-[14px] leading-[1.6] text-[var(--fba-tx2)]";
 
-const labelClass =
-  "block text-[12px] font-bold uppercase tracking-[0.05em] text-[var(--fba-tx2)]";
+const labelClass = "block text-[12px] font-bold uppercase tracking-[0.05em] text-[var(--fba-tx2)]";
 
 const inputClass =
   "w-full rounded-[10px] border-[1.5px] border-[var(--fba-bdr)] bg-[var(--fba-bg2)] px-4 py-3 pr-12 text-[15px] text-[var(--fba-tx)] outline-none transition-all placeholder:text-[var(--fba-tx3)] focus:border-transparent focus:ring-2 focus:ring-[var(--fba-ind)]";
@@ -156,13 +156,7 @@ function StrengthMeter({ score }: { score: number }) {
   );
 }
 
-function CardShell({
-  labelledBy,
-  children,
-}: {
-  labelledBy: string;
-  children: ReactNode;
-}) {
+function CardShell({ labelledBy, children }: { labelledBy: string; children: ReactNode }) {
   return (
     <section aria-labelledby={labelledBy} className={cardClass}>
       {children}
@@ -183,8 +177,8 @@ function InvalidInviteCard({
         Invitation unavailable
       </h2>
       <p className={bodyClass}>
-        This invitation link is invalid or has expired. Ask your academy administrator to send a
-        new invitation, then open the link from the latest email.
+        This invitation link is invalid or has expired. Ask your academy administrator to send a new
+        invitation, then open the link from the latest email.
       </p>
       {signedInEmail ? (
         <div className="mt-5 space-y-3">
@@ -298,7 +292,9 @@ export function InviteAcceptCard({
             unique password.
           </p>
         ) : (
-          <p className={bodyClass}>Choose a strong, unique password to finish setting up your account.</p>
+          <p className={bodyClass}>
+            Choose a strong, unique password to finish setting up your account.
+          </p>
         )}
 
         {mismatch ? (
@@ -384,7 +380,7 @@ export function InviteAcceptCard({
     );
   }
 
-  if (!inviteValid && !inviteSession) {
+  if (!inviteValid) {
     return <InvalidInviteCard token={token} signedInEmail={signedInEmail} />;
   }
 
@@ -405,7 +401,8 @@ export function InviteAcceptCard({
           </p>
         ) : (
           <p className={bodyClass}>
-            Open the link in your invitation email to continue, or sign in to accept this invitation.
+            Open the link in your invitation email to continue, or sign in to accept this
+            invitation.
           </p>
         )}
         <div className="mt-6 flex flex-col gap-3">
@@ -440,8 +437,8 @@ export function InviteAcceptCard({
 
         {signedInEmail ? (
           <p className={`text-[13px] ${bodyClass}`}>
-            Signed in as{" "}
-            <span className="font-semibold text-[var(--fba-tx)]">{signedInEmail}</span>.
+            Signed in as <span className="font-semibold text-[var(--fba-tx)]">{signedInEmail}</span>
+            .
           </p>
         ) : null}
       </div>
@@ -452,20 +449,21 @@ export function InviteAcceptCard({
           className="mt-5 space-y-3 rounded-[10px] border-[1.5px] border-[var(--fba-red)]/30 bg-[var(--fba-red)]/5 p-4 text-[13px] text-[var(--fba-red)]"
         >
           <p>
-            You are signed in with a different email than the one that received this invitation. Sign
-            out, then open your invitation link again to accept as{" "}
+            You are signed in with a different email than the one that received this invitation.
+            Sign out, then open your invitation link again to accept as{" "}
             <span className="font-semibold">{invitedEmail ?? "the invited user"}</span>.
           </p>
           <InviteSignOutButton redirectTo={`/invite/accept?token=${encodeURIComponent(token)}`} />
         </div>
       ) : (
         <>
-          {!inviteSession ? (
-            <p className={`mt-4 rounded-[10px] border-[1.5px] border-[var(--fba-bdr)] bg-[var(--fba-bg2)] p-3 text-[13px] ${bodyClass}`}>
-              Open the invitation link from your email on this device to set your password. If you
-              already completed that step, click below to finish accepting.
-            </p>
-          ) : null}
+          {/* The invited-session path returned above, so this always renders. */}
+          <p
+            className={`mt-4 rounded-[10px] border-[1.5px] border-[var(--fba-bdr)] bg-[var(--fba-bg2)] p-3 text-[13px] ${bodyClass}`}
+          >
+            Open the invitation link from your email on this device to set your password. If you
+            already completed that step, click below to finish accepting.
+          </p>
 
           {acceptState.message ? (
             <p

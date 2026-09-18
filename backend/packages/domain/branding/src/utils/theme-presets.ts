@@ -14,21 +14,20 @@ export const THEME_PRESETS: readonly ThemePreset[] = [
       primary: "#224466",
       accent: "#8899aa",
       header: "#112233",
-      background: "#ffffff",
-      foreground: "#101010",
       radius: "md",
       modeDefault: "system",
     },
   },
   {
+    // The `key` is preserved because tenants may already have this preset
+    // selected; only the customer-visible label changes. A preset catalogue
+    // offered to every academy must not advertise one of them by name.
     key: "funded-beyond",
-    label: "FundedBeyond",
+    label: "Deep Blue",
     tokens: {
       primary: "#3D7BF0",
       accent: "#1B2A4A",
       header: "#1B2A4A",
-      background: "#ffffff",
-      foreground: "#0f172a",
       radius: "md",
       modeDefault: "system",
     },
@@ -40,8 +39,6 @@ export const THEME_PRESETS: readonly ThemePreset[] = [
       primary: "#334155",
       accent: "#64748b",
       header: "#1e293b",
-      background: "#ffffff",
-      foreground: "#0f172a",
       radius: "sm",
       modeDefault: "light",
     },
@@ -53,8 +50,6 @@ export const THEME_PRESETS: readonly ThemePreset[] = [
       primary: "#047857",
       accent: "#10b981",
       header: "#064e3b",
-      background: "#ffffff",
-      foreground: "#052e16",
       radius: "lg",
       modeDefault: "system",
     },

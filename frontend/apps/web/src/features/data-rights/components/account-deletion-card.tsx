@@ -54,7 +54,10 @@ export function AccountDeletionCard({
             Once you delete your account, there is no going back. Please be certain.
           </p>
           {pending ? (
-            <p role="status" className={`${classes.helper} mt-2 font-medium text-[var(--acct-danger)]`}>
+            <p
+              role="status"
+              className={`${classes.helper} mt-2 font-medium text-[var(--acct-danger)]`}
+            >
               A deletion request is pending review.
             </p>
           ) : null}
@@ -85,7 +88,9 @@ export function AccountDeletionCard({
       ) : null}
 
       {confirmOpen ? (
-        <div className={`fixed inset-0 z-50 flex items-center justify-center p-6 ${classes.modalScrim}`}>
+        <div
+          className={`fixed inset-0 z-50 flex items-center justify-center p-6 ${classes.modalScrim}`}
+        >
           <div
             className={classes.modalCard}
             role="dialog"
@@ -117,7 +122,8 @@ export function AccountDeletionCard({
                 </p>
               </div>
               <p className="mb-4 text-sm text-[var(--acct-on-surface)]">
-                This will permanently delete your account and remove all associations with your data.
+                This will permanently delete your account and remove all associations with your
+                data.
               </p>
               <div className="space-y-2">
                 <label className={classes.label} htmlFor="confirm-email">

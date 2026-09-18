@@ -85,7 +85,9 @@ export function TenantConfigEditor({
       return activeParseResult.value;
     }
     const parsed = parseJsonDraft(sectionDraft);
-    return parsed.ok && isPlainObject(parsed.value) ? parsed.value : pickConfigSection(configJson, activeTab);
+    return parsed.ok && isPlainObject(parsed.value)
+      ? parsed.value
+      : pickConfigSection(configJson, activeTab);
   }, [activeParseResult, activeTab, configJson, sectionDraft, sectionMode]);
 
   function resolveNextConfig(): Record<string, unknown> | null {
@@ -235,7 +237,10 @@ export function TenantConfigEditor({
 
       <section className={cardClassName}>
         <div className="flex items-center gap-1 overflow-x-auto border-b border-[var(--admin-border)] bg-[var(--admin-surface-low)]/40 px-4">
-          <nav className="flex min-w-0 flex-1 gap-1 overflow-x-auto py-1" aria-label="Configuration sections">
+          <nav
+            className="flex min-w-0 flex-1 gap-1 overflow-x-auto py-1"
+            aria-label="Configuration sections"
+          >
             {TENANT_CONFIG_SECTIONS.map((section) => (
               <button
                 key={section.key}
@@ -272,7 +277,10 @@ export function TenantConfigEditor({
                 </span>
               </div>
               <div className="flex gap-3 rounded-lg border border-[var(--admin-warning)]/40 bg-[var(--admin-warning)]/10 p-4">
-                <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-[var(--admin-warning)]" aria-hidden="true" />
+                <AlertTriangle
+                  className="mt-0.5 h-5 w-5 shrink-0 text-[var(--admin-warning)]"
+                  aria-hidden="true"
+                />
                 <p className="text-sm leading-relaxed text-[var(--admin-on-surface-variant)]">
                   You are editing the full configuration object. Changes here overwrite all section
                   settings at once. Validate carefully before saving.
@@ -315,7 +323,11 @@ export function TenantConfigEditor({
                         return;
                       }
                       const parsed = parseJsonDraft(sectionDraft);
-                      if (parsed.ok && isPlainObject(parsed.value) && canRenderAsForm(parsed.value)) {
+                      if (
+                        parsed.ok &&
+                        isPlainObject(parsed.value) &&
+                        canRenderAsForm(parsed.value)
+                      ) {
                         setSectionMode("form");
                         return;
                       }

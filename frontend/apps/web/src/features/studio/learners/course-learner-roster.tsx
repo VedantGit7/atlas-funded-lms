@@ -71,7 +71,7 @@ export function CourseLearnerRoster({ courseId, courseTitle }: CourseLearnerRost
 
   const cancelEnrollmentMutation = useMutation({
     mutationFn: (enrollmentId: string) => cancelEnrollment(enrollmentId),
-    onMutate: async (enrollmentId) => {
+    onMutate: (enrollmentId) => {
       const previous = rows;
       setRows((current) => current.filter((row) => row.enrollmentId !== enrollmentId));
       if (selectedRow?.enrollmentId === enrollmentId) {
@@ -88,13 +88,7 @@ export function CourseLearnerRoster({ courseId, courseTitle }: CourseLearnerRost
   });
 
   const issueCertificateMutation = useMutation({
-    mutationFn: ({
-      membershipId,
-      templateId,
-    }: {
-      membershipId: string;
-      templateId: string;
-    }) =>
+    mutationFn: ({ membershipId, templateId }: { membershipId: string; templateId: string }) =>
       issueCourseCertificate({
         courseId,
         recipientMembershipId: membershipId,
@@ -212,7 +206,10 @@ export function CourseLearnerRoster({ courseId, courseTitle }: CourseLearnerRost
       )}
 
       {selectedRow ? (
-        <section aria-labelledby="learner-drill-in-heading" className="space-y-6 rounded border p-4">
+        <section
+          aria-labelledby="learner-drill-in-heading"
+          className="space-y-6 rounded border p-4"
+        >
           <h2 id="learner-drill-in-heading" className="font-semibold">
             {selectedRow.displayName}
           </h2>
@@ -266,11 +263,9 @@ export function CourseLearnerRoster({ courseId, courseTitle }: CourseLearnerRost
                   </li>
                 ))}
               </ul>
-            ) : (
-              !attemptsLoading && !attemptsError ? (
-                <p className="mt-2 text-sm opacity-80">No assessment attempts for this learner.</p>
-              ) : null
-            )}
+            ) : !attemptsLoading && !attemptsError ? (
+              <p className="mt-2 text-sm opacity-80">No assessment attempts for this learner.</p>
+            ) : null}
           </div>
 
           <div className="space-y-2">

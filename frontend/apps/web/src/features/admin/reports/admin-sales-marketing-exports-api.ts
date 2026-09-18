@@ -9,7 +9,11 @@ export type SmExportDataset =
   | "coupons"
   | "referral-wallet"
   | "affiliate-products"
-  | "affiliates";
+  | "affiliates"
+  | "attribution";
+
+/** Only meaningful for the `attribution` dataset; the server rejects it elsewhere. */
+export type SmAttributionPresence = "any" | "attributed" | "none";
 export type SmExportDelivery = "download" | "email_me" | "recipients";
 export type SmExportCadence = "daily" | "weekly" | "monthly";
 export type SmExportGrouping = "none" | "product" | "month" | "currency";
@@ -86,6 +90,7 @@ export type CreateSalesMarketingExportBody = {
   learnerName?: string | undefined;
   email?: string | undefined;
   q?: string | undefined;
+  attribution?: SmAttributionPresence | undefined;
   grouping?: SmExportGrouping | undefined;
   includeSubtotals?: boolean | undefined;
   useCurrentFilters: boolean;

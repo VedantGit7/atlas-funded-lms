@@ -11,6 +11,53 @@ minimumReleaseAge: 1440
 minimumReleaseAgeExclude:
   - nanoid
 
+# Transitive advisories with no direct dependency to bump. Each key is scoped to
+# the vulnerable range so the override lifts only the affected copy and leaves
+# other consumers on the major they were resolved against.
+#
+# `extract-zip` is deliberately absent -- see the auditConfig note at the bottom.
+overrides:
+  # Three separate advisories, one per major line. The 1.x copy is not dev-only:
+  # it reaches production through exceljs -> archiver -> glob -> minimatch.
+  "brace-expansion@<1.1.16": "^1.1.16"
+  "brace-expansion@>=2.0.0 <2.1.2": "^2.1.2"
+  "brace-expansion@>=5.0.0 <5.0.7": "^5.0.7"
+  "@hono/node-server@<1.19.13": "^1.19.13"
+  "body-parser@<1.20.6": "^1.20.6"
+  "cookie@<0.7.0": "^0.7.0"
+  "deepmerge-ts@<8.0.0": "^8.0.0"
+  "dompurify@<3.4.13": "^3.4.13"
+  "fast-uri@>=3.0.0 <=3.1.3": "^3.1.4"
+  "hono@<4.12.34": "^4.12.34"
+  "ip-address@<=10.3.0": "^10.3.1"
+  "js-yaml@>=3.0.0 <3.15.0": "^3.15.0"
+  "nanoid@<3.3.16": "^3.3.16"
+  "postcss@<=8.5.17": "^8.5.18"
+  "shell-quote@<=1.8.4": "^1.8.5"
+  "tmp@<0.2.6": "^0.2.6"
+  # exceljs pulls uuid only for v4; the advisory is a bounds check in v3/v5/v6
+  # when an explicit `buf` is passed, so it was never reachable here. Bumped
+  # anyway because uuid still ships a CJS build and exceljs keeps working.
+  "uuid@<11.1.1": "^11.1.1"
+  "valibot@<1.4.2": "^1.4.2"
+
+# GHSA-jmr9-qjv8-65gv (extract-zip, symlink path traversal, high).
+#
+# This is NOT a judgement that the advisory is unimportant -- it is unfixable
+# today: 2.0.1 is the latest published release of extract-zip, so the "patched
+# >=2.0.2" version does not exist yet. The only path into the tree is
+#   @lhci/cli (devDependency) -> lighthouse -> puppeteer-core -> @puppeteer/browsers
+# so it never ships in the application runtime, and the archives it extracts are
+# Chrome builds fetched by Lighthouse rather than user-supplied uploads.
+#
+# Ignored here so `pnpm security:check` fails loudly on any NEW advisory instead
+# of being permanently red on one nobody can act on. Tracked as SEC-09 in
+# docs/release/security-exception-register.md -- revisit when extract-zip
+# publishes a fix or @lhci/cli moves off puppeteer.
+auditConfig:
+  ignoreGhsas:
+    - GHSA-jmr9-qjv8-65gv
+
 allowBuilds:
   "@prisma/client": true
   "@prisma/engines": true

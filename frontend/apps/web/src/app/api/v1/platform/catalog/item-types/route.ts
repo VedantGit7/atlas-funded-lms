@@ -32,7 +32,7 @@ export const POST = createPlatformRoute({
       },
       {
         ...body,
-        schemaJson: body.schemaJson ?? {},
+        schemaJson: body.schemaJson,
       },
     ),
 });

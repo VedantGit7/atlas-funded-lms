@@ -32,13 +32,13 @@ One dev server (:3000)
 
 ## 2. URLs you need day to day
 
-| Purpose | URL | Notes |
-|---------|-----|-------|
-| **FundedBeyond learner / default work** | `http://fundedbeyond.localhost.test:3000` | Primary dev tenant |
-| **Login** | `http://fundedbeyond.localhost.test:3000/login` | Same host, auth route |
-| **Tenant admin** | `http://fundedbeyond.localhost.test:3000/admin` | T1–T24 surfaces |
-| **Instructor / studio** | `http://fundedbeyond.localhost.test:3000/studio` | I1–I13 surfaces |
-| **Platform ops (rare)** | `http://platform.localhost:3000` | P1–P8; never tenant-branded |
+| Purpose                                 | URL                                              | Notes                       |
+| --------------------------------------- | ------------------------------------------------ | --------------------------- |
+| **FundedBeyond learner / default work** | `http://fundedbeyond.localhost.test:3000`        | Primary dev tenant          |
+| **Login**                               | `http://fundedbeyond.localhost.test:3000/login`  | Same host, auth route       |
+| **Tenant admin**                        | `http://fundedbeyond.localhost.test:3000/admin`  | T1–T24 surfaces             |
+| **Instructor / studio**                 | `http://fundedbeyond.localhost.test:3000/studio` | I1–I13 surfaces             |
+| **Platform ops (rare)**                 | `http://platform.localhost:3000`                 | P1–P8; never tenant-branded |
 
 Bookmark **one host** (`fundedbeyond.localhost.test:3000`) and navigate by path. You do not need a different server per route.
 
@@ -48,13 +48,13 @@ Bookmark **one host** (`fundedbeyond.localhost.test:3000`) and navigate by path.
 
 These exist for **CI, staging simulation, and multi-tenant smoke tests** — not daily development.
 
-| Host | Tenant | When to use |
-|------|--------|-------------|
-| `fundedbeyond-test.localhost.test` | FundedBeyond | Test env hostname in manifest |
-| `fundedbeyond.staging.localhost.test` | FundedBeyond | Staging env hostname in manifest |
-| `second-smoke.localhost.test` | Second Smoke Academy | Multi-tenant isolation / e2e |
-| `second-smoke-test.localhost.test` | Second Smoke Academy | Test env |
-| `second-smoke.staging.localhost.test` | Second Smoke Academy | Staging env |
+| Host                                  | Tenant               | When to use                      |
+| ------------------------------------- | -------------------- | -------------------------------- |
+| `fundedbeyond-test.localhost.test`    | FundedBeyond         | Test env hostname in manifest    |
+| `fundedbeyond.staging.localhost.test` | FundedBeyond         | Staging env hostname in manifest |
+| `second-smoke.localhost.test`         | Second Smoke Academy | Multi-tenant isolation / e2e     |
+| `second-smoke-test.localhost.test`    | Second Smoke Academy | Test env                         |
+| `second-smoke.staging.localhost.test` | Second Smoke Academy | Staging env                      |
 
 Source: [`configs/tenants/fundedbeyond/manifest.json`](../../configs/tenants/fundedbeyond/manifest.json), [`configs/tenants/second-smoke-academy/manifest.json`](../../configs/tenants/second-smoke-academy/manifest.json).
 
@@ -77,14 +77,14 @@ Platform shell is **never tenant-branded** (PRD constraint).
 
 Atlas uses the same pattern as major course / white-label LMS products:
 
-| Concept | Industry (e.g. Learnyst) | Atlas |
-|---------|---------------------------|-------|
-| Tenant identity | Hostname (`school.learnyst.com` or custom domain) | Hostname (`*.localhost.test` dev; custom domain prod) |
-| Learner entry | One branded URL per school | One host per tenant |
-| Creator / admin | `app.learnyst.com` (central) or same host `/admin` | Same tenant host: `/admin`, `/studio` |
-| Custom domain | DNS CNAME to platform | `tenant_domains` + admin domain UI (T9) |
-| Path-based tenancy (`/t/acme`) | Rare in white-label course SaaS | **Not used** — host-based only (PRD) |
-| Many URLs in dev | Hidden from customers | Visible because we seed multiple test tenants + env hostnames |
+| Concept                        | Industry (e.g. Learnyst)                           | Atlas                                                         |
+| ------------------------------ | -------------------------------------------------- | ------------------------------------------------------------- |
+| Tenant identity                | Hostname (`school.learnyst.com` or custom domain)  | Hostname (`*.localhost.test` dev; custom domain prod)         |
+| Learner entry                  | One branded URL per school                         | One host per tenant                                           |
+| Creator / admin                | `app.learnyst.com` (central) or same host `/admin` | Same tenant host: `/admin`, `/studio`                         |
+| Custom domain                  | DNS CNAME to platform                              | `tenant_domains` + admin domain UI (T9)                       |
+| Path-based tenancy (`/t/acme`) | Rare in white-label course SaaS                    | **Not used** — host-based only (PRD)                          |
+| Many URLs in dev               | Hidden from customers                              | Visible because we seed multiple test tenants + env hostnames |
 
 References:
 
@@ -105,8 +105,14 @@ References:
 
    ```text
    127.0.0.1 fundedbeyond.localhost.test
+   127.0.0.1 second-smoke.localhost.test
    127.0.0.1 platform.localhost
    ```
+
+   `second-smoke.localhost.test` is easy to leave out and the omission is
+   quiet: only the visual branding specs use it, so `pnpm test:browser` fails
+   two screenshots with `ERR_NAME_NOT_RESOLVED` while everything else passes.
+   CI adds all three in the `browser-smoke` job.
 
    Some environments resolve `*.localhost.test` without manual hosts; use hosts file if you get DNS errors.
 

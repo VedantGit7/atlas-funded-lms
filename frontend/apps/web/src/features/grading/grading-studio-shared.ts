@@ -6,11 +6,7 @@ const errorBadge =
 const warningBadge =
   "bg-[color-mix(in_srgb,var(--admin-warning)_16%,var(--admin-surface))] text-[var(--admin-warning)]";
 
-const successBadge =
-  "bg-[color-mix(in_srgb,var(--admin-success)_14%,var(--admin-surface))] text-[var(--admin-success)]";
-
-const neutralBadge =
-  "bg-[var(--admin-surface-high)] text-[var(--admin-on-surface-variant)]";
+const neutralBadge = "bg-[var(--admin-surface-high)] text-[var(--admin-on-surface-variant)]";
 
 export const GRADING_STATUS_CONFIG: Record<
   GradingQueueItem["status"],
@@ -49,7 +45,10 @@ export {
   sectionHeaderClassName,
 } from "../learning-paths/learning-path-studio-shared";
 
-export { primaryButtonClassName, outlineButtonClassName } from "../../app/admin/branding/_components/branding-admin-shared";
+export {
+  primaryButtonClassName,
+  outlineButtonClassName,
+} from "../../app/admin/branding/_components/branding-admin-shared";
 
 export const tableShellClassName =
   "overflow-hidden rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)] shadow-sm";
@@ -60,8 +59,7 @@ export const tableHeaderClassName =
 export const tableRowClassName =
   "group cursor-pointer border-b border-[var(--admin-border)] transition-colors last:border-b-0 hover:bg-[color-mix(in_srgb,var(--admin-primary)_6%,var(--admin-surface-low))] motion-safe:active:bg-[color-mix(in_srgb,var(--admin-primary)_10%,var(--admin-surface-low))]";
 
-export const tableRowUrgentClassName =
-  "border-l-[3px] border-l-[var(--admin-warning)]";
+export const tableRowUrgentClassName = "border-l-[3px] border-l-[var(--admin-warning)]";
 
 export const tableRowMutedClassName = "opacity-60";
 
@@ -82,8 +80,8 @@ export const panelHeaderEyebrowClassName =
 export function learnerInitials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
   if (parts.length === 0) return "?";
-  if (parts.length === 1) return parts[0]!.slice(0, 2).toUpperCase();
-  return `${parts[0]![0] ?? ""}${parts[1]![0] ?? ""}`.toUpperCase();
+  if (parts.length === 1) return (parts[0] ?? "").slice(0, 2).toUpperCase();
+  return `${parts[0]?.[0] ?? ""}${parts[1]?.[0] ?? ""}`.toUpperCase();
 }
 
 const AVATAR_SURFACES = [

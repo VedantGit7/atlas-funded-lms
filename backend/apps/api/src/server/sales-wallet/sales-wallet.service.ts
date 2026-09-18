@@ -190,11 +190,20 @@ export async function creditWallet(
   }
 
   const wallet = await salesWalletRepository.ensureWallet(tx, args.membershipId);
-  let nextBalance = wallet.balance_credits + args.credits;
+
+  // Lock the row before reading the balance. The cap calculation needs the
+  // current value, so this cannot be pure arithmetic; without the lock,
+  // concurrent credits each read the same balance and the last write wins.
+  const locked = await salesWalletRepository.lockWalletForUpdate(tx, wallet.id);
+  if (!locked) {
+    throw validationError("Wallet not found.");
+  }
+
+  let nextBalance = locked.balanceCredits + args.credits;
   let applied = args.credits;
   if (config.max_balance_credits != null && nextBalance > config.max_balance_credits) {
-    applied = Math.max(0, config.max_balance_credits - wallet.balance_credits);
-    nextBalance = wallet.balance_credits + applied;
+    applied = Math.max(0, config.max_balance_credits - locked.balanceCredits);
+    nextBalance = locked.balanceCredits + applied;
   }
   if (applied <= 0) {
     throw validationError("Wallet is already at the maximum credit balance.");
@@ -204,8 +213,10 @@ export async function creditWallet(
   await salesWalletRepository.updateBalances(tx, {
     walletId: wallet.id,
     balanceCredits: nextBalance,
-    earnedCredits: wallet.earned_credits + applied,
-    usedCredits: wallet.used_credits,
+    earnedCredits: locked.earnedCredits + applied,
+    // Must come from the locked read, not the earlier ensureWallet read: a spend
+    // committing in between would otherwise have its increment rolled back.
+    usedCredits: locked.usedCredits,
   });
   await salesWalletRepository.insertTransaction(tx, {
     walletId: wallet.id,
@@ -265,14 +276,21 @@ export async function spendWalletCredits(
   }
 
   const discountCents = creditsSpent * config.credit_value_cents;
-  const nextBalance = wallet.balance_credits - creditsSpent;
 
-  await salesWalletRepository.updateBalances(tx, {
+  // The balance read above only sizes the spend; it is NOT the authority. The
+  // atomic update below re-checks `balance_credits >= creditsSpent` against the
+  // live row and returns null if another transaction spent it first, so
+  // concurrent requests cannot each pass a stale check.
+  const spent = await salesWalletRepository.spendCredits(tx, {
     walletId: wallet.id,
-    balanceCredits: nextBalance,
-    earnedCredits: wallet.earned_credits,
-    usedCredits: wallet.used_credits + creditsSpent,
+    credits: creditsSpent,
   });
+
+  if (!spent) {
+    throw validationError("Wallet balance changed. Please retry.");
+  }
+
+  const nextBalance = spent.balanceAfter;
   await salesWalletRepository.insertTransaction(tx, {
     walletId: wallet.id,
     membershipId: args.membershipId,
@@ -344,16 +362,19 @@ export async function adjustWalletByAdmin(tx: TenantTx, ctx: ServiceCtx, rawBody
   } else {
     const config = (await salesWalletRepository.getConfig(tx)) ?? defaultConfig();
     const wallet = await salesWalletRepository.ensureWallet(tx, body.membershipId);
-    if (body.credits > wallet.balance_credits) {
+
+    // Atomic debit: the `balance_credits >= credits` predicate lives in the
+    // UPDATE, so a concurrent debit cannot slip past a stale balance read.
+    const debited = await salesWalletRepository.spendCredits(tx, {
+      walletId: wallet.id,
+      credits: body.credits,
+    });
+
+    if (!debited) {
       throw validationError("Cannot debit more credits than the available balance.");
     }
-    const nextBalance = wallet.balance_credits - body.credits;
-    await salesWalletRepository.updateBalances(tx, {
-      walletId: wallet.id,
-      balanceCredits: nextBalance,
-      earnedCredits: wallet.earned_credits,
-      usedCredits: wallet.used_credits + body.credits,
-    });
+
+    const nextBalance = debited.balanceAfter;
     await salesWalletRepository.insertTransaction(tx, {
       walletId: wallet.id,
       membershipId: body.membershipId,
@@ -368,10 +389,7 @@ export async function adjustWalletByAdmin(tx: TenantTx, ctx: ServiceCtx, rawBody
     });
   }
 
-  const updated = await salesWalletRepository.findWalletAccountByMembership(
-    tx,
-    body.membershipId,
-  );
+  const updated = await salesWalletRepository.findWalletAccountByMembership(tx, body.membershipId);
   if (!updated) throw validationError("Wallet not found after adjustment.");
   return adjustWalletResponseSchema.parse({
     data: toAccountDto(updated),

@@ -1,10 +1,32 @@
 /**
- * FundedBeyond brand assets.
+ * Tenant logo resolution.
  *
- * The LMS uses a single logo everywhere: the circular avatar-gradient mark
- * (gradient disc + white FB mark). It is self-contained, so the same asset
- * works on light and dark surfaces — no light/dark logo swapping.
+ * There is deliberately no platform logo constant here any more.
+ * `/brand/avatar-gradient.svg` is FundedBeyond's mark (gradient disc + white FB
+ * monogram), and exporting it as a shared default is what put tenant #1's
+ * monogram on every academy's admin, studio, auth, loading, verify-email and
+ * certificate-builder screens. `atlas/no-hardcoded-tenant-strings` could not
+ * catch it: the rule inspects string literals, and this was an identifier.
  *
- * Source: `fb logo kit/avatar-gradient.svg`, served from `public/brand/`.
+ * A tenant with no uploaded logo gets an initials mark derived from their own
+ * name — render `<TenantBrandMark />` rather than resolving a URL yourself.
  */
-export const FUNDED_BEYOND_LOGO_URL = "/brand/avatar-gradient.svg";
+
+type BrandingLogos = {
+  logoLightUrl?: string | null;
+  logoDarkUrl?: string | null;
+};
+
+/**
+ * The tenant's own logo for the requested variant, or `null` when they have not
+ * uploaded one. `null` means "render the initials mark", never "substitute
+ * another tenant's asset".
+ */
+export function resolveTenantLogoUrl(
+  branding: BrandingLogos | null | undefined,
+  variant: "light" | "dark" = "light",
+): string | null {
+  const preferred = variant === "dark" ? branding?.logoDarkUrl : branding?.logoLightUrl;
+  const other = variant === "dark" ? branding?.logoLightUrl : branding?.logoDarkUrl;
+  return preferred ?? other ?? null;
+}

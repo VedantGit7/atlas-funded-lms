@@ -16,7 +16,9 @@ export function HelpArticleTocMobile({ sections }: HelpArticleTocMobileProps) {
     <div className="mb-8 rounded-xl border border-border bg-card md:hidden">
       <button
         type="button"
-        onClick={() => setOpen((value) => !value)}
+        onClick={() => {
+          setOpen((value) => !value);
+        }}
         className="flex w-full items-center justify-between px-4 py-3 text-left text-sm font-medium text-foreground"
         aria-expanded={open}
       >

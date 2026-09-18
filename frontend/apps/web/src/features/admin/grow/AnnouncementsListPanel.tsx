@@ -19,10 +19,7 @@ import {
 import { ClientApiError, clientApi, toast } from "../../../lib/client-api";
 import { generalSettingsBackLinkClassName } from "../general-settings/general-settings-shared";
 import { dropdownPanelSurfaceClassName } from "../../studio/courses/admin-form-dropdown-shared";
-import {
-  managePageDescClassName,
-  managePageTitleClassName,
-} from "../manage/manage-ui-shared";
+import { managePageDescClassName, managePageTitleClassName } from "../manage/manage-ui-shared";
 import {
   ANNOUNCEMENTS_CREATE_HREF,
   announcementTypeLabel,
@@ -83,7 +80,6 @@ function AnnouncementThumb({ item }: { item: AnnouncementDto }) {
     return (
       <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface-high)]">
         {/* Announcement images are JPEG data URLs or external http(s) URLs */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={item.imageUrl} alt="" className="h-full w-full object-cover" />
       </div>
     );
@@ -99,11 +95,7 @@ function AnnouncementThumb({ item }: { item: AnnouncementDto }) {
       ].join(" ")}
       aria-hidden="true"
     >
-      {item.type === "BATCH" ? (
-        <Target className="h-7 w-7" />
-      ) : (
-        <Megaphone className="h-7 w-7" />
-      )}
+      {item.type === "BATCH" ? <Target className="h-7 w-7" /> : <Megaphone className="h-7 w-7" />}
     </div>
   );
 }
@@ -143,7 +135,9 @@ function MonthFilter({
         type="button"
         aria-haspopup="listbox"
         aria-expanded={open}
-        onClick={() => setOpen((current) => !current)}
+        onClick={() => {
+          setOpen((current) => !current);
+        }}
         className="inline-flex items-center gap-2 rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 py-2 text-[12px] font-bold text-[var(--admin-on-surface-variant)] transition-colors hover:bg-[var(--admin-surface-low)]"
       >
         <CalendarDays className="h-4 w-4" aria-hidden="true" />
@@ -222,8 +216,12 @@ export function AnnouncementsListPanel() {
   const monthOptions = useMemo(() => recentAnnouncementMonths(12), []);
 
   useEffect(() => {
-    const timer = window.setTimeout(() => setDebouncedQuery(query.trim()), 250);
-    return () => window.clearTimeout(timer);
+    const timer = window.setTimeout(() => {
+      setDebouncedQuery(query.trim());
+    }, 250);
+    return () => {
+      window.clearTimeout(timer);
+    };
   }, [query]);
 
   useEffect(() => {
@@ -257,9 +255,7 @@ export function AnnouncementsListPanel() {
     } catch (caught) {
       setItems([]);
       toast.error(
-        caught instanceof ClientApiError
-          ? caught.message
-          : "Could not load announcements.",
+        caught instanceof ClientApiError ? caught.message : "Could not load announcements.",
       );
     } finally {
       setLoading(false);
@@ -271,8 +267,7 @@ export function AnnouncementsListPanel() {
   }, [load]);
 
   const hasFilters = Boolean(query.trim() || createdMonth || tab !== "ALL");
-  const deleteMatches =
-    deleteRow != null && deleteConfirm.trim() === deleteRow.title.trim();
+  const deleteMatches = deleteRow != null && deleteConfirm.trim() === deleteRow.title.trim();
 
   async function onDelete() {
     if (!deleteRow || !deleteMatches) {
@@ -292,9 +287,7 @@ export function AnnouncementsListPanel() {
       await load();
     } catch (caught) {
       toast.error(
-        caught instanceof ClientApiError
-          ? caught.message
-          : "Could not delete announcement.",
+        caught instanceof ClientApiError ? caught.message : "Could not delete announcement.",
       );
     } finally {
       setDeleteBusy(false);
@@ -351,7 +344,9 @@ export function AnnouncementsListPanel() {
                   type="button"
                   role="tab"
                   aria-selected={active}
-                  onClick={() => setTab(entry.id)}
+                  onClick={() => {
+                    setTab(entry.id);
+                  }}
                   className={[
                     "rounded-md px-4 py-1.5 text-[12px] font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]",
                     active
@@ -378,16 +373,14 @@ export function AnnouncementsListPanel() {
                 id="announcements-search"
                 type="search"
                 value={query}
-                onChange={(event) => setQuery(event.target.value)}
+                onChange={(event) => {
+                  setQuery(event.target.value);
+                }}
                 placeholder="Search announcements…"
                 className="w-full rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] py-2 pl-10 pr-4 text-[13px] text-[var(--admin-on-surface)] outline-none transition-[border-color,box-shadow] placeholder:text-[var(--admin-on-surface-variant)]/60 focus:border-[var(--admin-primary)] focus:ring-2 focus:ring-[var(--admin-primary)]/20"
               />
             </div>
-            <MonthFilter
-              value={createdMonth}
-              options={monthOptions}
-              onChange={setCreatedMonth}
-            />
+            <MonthFilter value={createdMonth} options={monthOptions} onChange={setCreatedMonth} />
           </div>
         </div>
       </div>
@@ -436,9 +429,7 @@ export function AnnouncementsListPanel() {
             const menuOpen = menuId === row.id;
             return (
               <li key={row.id}>
-                <article
-                  className="group relative flex gap-4 rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)] p-4 transition-[border-color,box-shadow,transform] duration-200 hover:border-[color-mix(in_srgb,var(--admin-primary)_40%,var(--admin-border))] hover:shadow-md motion-safe:hover:-translate-y-0.5 sm:gap-5"
-                >
+                <article className="group relative flex gap-4 rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)] p-4 transition-[border-color,box-shadow,transform] duration-200 hover:border-[color-mix(in_srgb,var(--admin-primary)_40%,var(--admin-border))] hover:shadow-md motion-safe:hover:-translate-y-0.5 sm:gap-5">
                   <AnnouncementThumb item={row} />
 
                   <div className="min-w-0 flex-1">
@@ -489,9 +480,9 @@ export function AnnouncementsListPanel() {
                       aria-label={`Actions for ${row.title}`}
                       aria-haspopup="menu"
                       aria-expanded={menuOpen}
-                      onClick={() =>
-                        setMenuId((current) => (current === row.id ? null : row.id))
-                      }
+                      onClick={() => {
+                        setMenuId((current) => (current === row.id ? null : row.id));
+                      }}
                       className="rounded-lg p-1 text-[var(--admin-on-surface-variant)] transition-colors hover:bg-[var(--admin-surface-low)] hover:text-[var(--admin-on-surface)]"
                     >
                       <MoreVertical className="h-5 w-5" aria-hidden="true" />
@@ -548,7 +539,9 @@ export function AnnouncementsListPanel() {
             type="button"
             aria-label="Close preview"
             className="absolute inset-0 bg-[var(--admin-scrim)] backdrop-blur-[2px]"
-            onClick={() => setPreviewRow(null)}
+            onClick={() => {
+              setPreviewRow(null);
+            }}
           />
           <div
             role="dialog"
@@ -576,12 +569,7 @@ export function AnnouncementsListPanel() {
             <div className="space-y-4 p-5 sm:p-6">
               {previewRow.imageUrl ? (
                 <div className="aspect-[2/1] overflow-hidden rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface-low)]">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={previewRow.imageUrl}
-                    alt=""
-                    className="h-full w-full object-cover"
-                  />
+                  <img src={previewRow.imageUrl} alt="" className="h-full w-full object-cover" />
                 </div>
               ) : null}
               <p className="whitespace-pre-wrap text-sm leading-relaxed text-[var(--admin-on-surface-variant)]">
@@ -616,7 +604,9 @@ export function AnnouncementsListPanel() {
             <div className="flex justify-end border-t border-[var(--admin-border)] px-5 py-4 sm:px-6">
               <button
                 type="button"
-                onClick={() => setPreviewRow(null)}
+                onClick={() => {
+                  setPreviewRow(null);
+                }}
                 className="rounded-lg px-5 py-2 text-[12px] font-bold text-[var(--admin-on-surface-variant)] transition-colors hover:bg-[var(--admin-surface-high)]"
               >
                 Close
@@ -656,8 +646,8 @@ export function AnnouncementsListPanel() {
                 </h2>
               </div>
               <p className="text-sm text-[var(--admin-on-surface-variant)]">
-                This removes the announcement from admin history. Inbox items already delivered
-                to learners are not recalled.
+                This removes the announcement from admin history. Inbox items already delivered to
+                learners are not recalled.
               </p>
             </div>
             <div className="space-y-3 bg-[var(--admin-surface-low)] p-6">
@@ -674,7 +664,9 @@ export function AnnouncementsListPanel() {
                 id="delete-announcement-confirm"
                 type="text"
                 value={deleteConfirm}
-                onChange={(event) => setDeleteConfirm(event.target.value)}
+                onChange={(event) => {
+                  setDeleteConfirm(event.target.value);
+                }}
                 placeholder="Type title here…"
                 className="w-full rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 py-2.5 text-sm text-[var(--admin-on-surface)] outline-none transition-[border-color,box-shadow] focus:border-[var(--admin-danger)] focus:ring-2 focus:ring-[var(--admin-danger)]/20"
               />

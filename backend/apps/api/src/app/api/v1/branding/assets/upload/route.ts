@@ -27,12 +27,20 @@ export const POST = createTenantRoute<CreateBrandingAssetUploadBody, SignedUploa
   body: createBrandingAssetUploadBodySchema,
   output: SignedUploadResponseSchema,
   handler: async ({ tx, ctx, input }) =>
-    createBrandingAssetUpload(tx, { tenantId: ctx.tenantId }, {
-      purpose: input.purpose,
-      fileName: input.fileName,
-      contentType: input.contentType,
-      sizeBytes: input.sizeBytes,
-      checksumSha256: input.checksumSha256 ?? null,
-      visibility: "public-safe",
-    }),
+    createBrandingAssetUpload(
+      tx,
+      {
+        tenantId: ctx.tenantId,
+        actorMembershipId: ctx.actorMembershipId,
+        requestId: ctx.requestId,
+      },
+      {
+        purpose: input.purpose,
+        fileName: input.fileName,
+        contentType: input.contentType,
+        sizeBytes: input.sizeBytes,
+        checksumSha256: input.checksumSha256 ?? null,
+        visibility: "public-safe",
+      },
+    ),
 });

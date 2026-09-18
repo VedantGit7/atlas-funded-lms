@@ -52,7 +52,9 @@ export function ReadinessScoreSummary({ scores }: ReadinessScoreSummaryProps) {
                 variant="mini"
                 ariaLabel={`${score.dimensionName} score ${String(rounded)} of 100, band ${bandLabel}`}
               />
-              <h3 className="mt-4 text-base font-semibold text-foreground">{score.dimensionName}</h3>
+              <h3 className="mt-4 text-base font-semibold text-foreground">
+                {score.dimensionName}
+              </h3>
               <span
                 className={`mt-2 inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider ${tone.chipClassName}`}
               >

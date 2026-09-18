@@ -448,12 +448,10 @@ function ViewToggle({
 }) {
   return (
     <div className="flex items-center rounded-lg border border-border p-0.5">
-      {(
-        [
-          { value: "list" as const, Icon: List, label: "List view" },
-          { value: "grid" as const, Icon: LayoutGrid, label: "Grid view" },
-        ]
-      ).map((option) => {
+      {[
+        { value: "list" as const, Icon: List, label: "List view" },
+        { value: "grid" as const, Icon: LayoutGrid, label: "Grid view" },
+      ].map((option) => {
         const active = view === option.value;
         return (
           <button
@@ -522,7 +520,10 @@ function SortDropdown({
         <span className="hidden text-muted-foreground sm:inline">Sort:</span>
         {activeLabel}
         <ChevronDown
-          className={cn("h-4 w-4 text-muted-foreground transition-transform duration-200", open && "rotate-180")}
+          className={cn(
+            "h-4 w-4 text-muted-foreground transition-transform duration-200",
+            open && "rotate-180",
+          )}
           aria-hidden="true"
         />
       </button>

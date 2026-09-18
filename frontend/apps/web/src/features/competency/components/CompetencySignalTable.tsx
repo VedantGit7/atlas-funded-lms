@@ -64,7 +64,9 @@ export function CompetencySignalTable() {
       </div>
 
       {loading && signals.length === 0 ? (
-        <p className="p-5 text-sm text-[var(--admin-on-surface-variant)]">Loading competency signals…</p>
+        <p className="p-5 text-sm text-[var(--admin-on-surface-variant)]">
+          Loading competency signals…
+        </p>
       ) : null}
 
       {error ? (
@@ -75,7 +77,8 @@ export function CompetencySignalTable() {
 
       {!loading && !error && signals.length === 0 ? (
         <p className="p-5 text-sm text-[var(--admin-on-surface-variant)]">
-          No competency signals recorded yet. Signals appear when learners complete scored activities.
+          No competency signals recorded yet. Signals appear when learners complete scored
+          activities.
         </p>
       ) : null}
 
@@ -85,7 +88,9 @@ export function CompetencySignalTable() {
             <table className="w-full min-w-[40rem] border-collapse text-left text-sm">
               <caption className="sr-only">Recent competency signals</caption>
               <thead className="sticky top-0 z-10">
-                <tr className={`${tableHeadClassName} border-b border-[var(--admin-border)] shadow-sm`}>
+                <tr
+                  className={`${tableHeadClassName} border-b border-[var(--admin-border)] shadow-sm`}
+                >
                   <th scope="col" className="px-4 py-3 sm:px-5">
                     Timestamp
                   </th>

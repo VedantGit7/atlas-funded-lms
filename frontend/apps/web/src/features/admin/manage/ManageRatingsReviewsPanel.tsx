@@ -111,9 +111,7 @@ export function ManageRatingsReviewsPanel() {
         { status },
         `review-status-${item.id}`,
       );
-      setItems((previous) =>
-        previous.map((row) => (row.id === item.id ? response.data : row)),
-      );
+      setItems((previous) => previous.map((row) => (row.id === item.id ? response.data : row)));
     } catch (caught) {
       setError(formatError(caught));
     } finally {
@@ -214,7 +212,10 @@ export function ManageRatingsReviewsPanel() {
               </thead>
               <tbody>
                 {items.map((item) => (
-                  <tr key={item.id} className="border-b border-[var(--admin-border)] last:border-b-0">
+                  <tr
+                    key={item.id}
+                    className="border-b border-[var(--admin-border)] last:border-b-0"
+                  >
                     <td className={manageTableTdClassName}>
                       <span className="font-semibold">{item.courseTitle}</span>
                     </td>
@@ -333,7 +334,10 @@ export function ManageRatingsReviewsPanel() {
 
 function RatingStars({ rating }: { rating: number }) {
   return (
-    <span className="inline-flex items-center gap-0.5" aria-label={`${String(rating)} out of 5 stars`}>
+    <span
+      className="inline-flex items-center gap-0.5"
+      aria-label={`${String(rating)} out of 5 stars`}
+    >
       {[1, 2, 3, 4, 5].map((value) => (
         <Star
           key={value}
@@ -448,7 +452,7 @@ function ReviewFormDialog({
 
   if (!open) return null;
 
-  async function handleSubmit(event: React.FormEvent) {
+  async function handleSubmit(event: React.SyntheticEvent) {
     event.preventDefault();
     if (!courseId) {
       setLocalError("Select a course.");
@@ -547,7 +551,12 @@ function ReviewFormDialog({
           ) : null}
 
           <div className="flex justify-end gap-2 pt-2">
-            <button type="button" disabled={busy} onClick={onClose} className={manageSecondaryButtonClassName}>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={onClose}
+              className={manageSecondaryButtonClassName}
+            >
               Cancel
             </button>
             <button type="submit" disabled={busy} className={managePrimaryButtonClassName}>

@@ -10,10 +10,7 @@ import {
   listLessonComments,
 } from "../../../../../../server/lessons/lesson-discussion.service";
 import { uuidParamSchema } from "@atlas/membership/schemas/shared";
-import {
-  createLessonCommentMetadata,
-  listLessonCommentsMetadata,
-} from "./route.metadata";
+import { createLessonCommentMetadata, listLessonCommentsMetadata } from "./route.metadata";
 
 export const GET = createTenantRoute<
   Record<string, never>,

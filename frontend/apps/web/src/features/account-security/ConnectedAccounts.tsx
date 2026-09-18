@@ -147,7 +147,11 @@ export function SignOutOtherSessionsCard() {
     setBusy(true);
     setMessage(null);
     try {
-      await clientApi.post("/api/v1/me/security/sessions/revoke-others", {}, "revoke-other-sessions");
+      await clientApi.post(
+        "/api/v1/me/security/sessions/revoke-others",
+        {},
+        "revoke-other-sessions",
+      );
       setMessage("Signed out of all other devices.");
     } catch (error) {
       setMessage(formatError(error));

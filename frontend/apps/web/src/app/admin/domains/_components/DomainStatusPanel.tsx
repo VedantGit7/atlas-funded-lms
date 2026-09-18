@@ -104,7 +104,9 @@ export function DomainStatusPanel({ domains }: DomainStatusPanelProps) {
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--admin-surface-high)] text-[var(--admin-on-surface-variant)]">
             <Globe className="h-6 w-6" aria-hidden="true" />
           </div>
-          <p className="text-sm font-medium text-[var(--admin-on-surface)]">No domains configured</p>
+          <p className="text-sm font-medium text-[var(--admin-on-surface)]">
+            No domains configured
+          </p>
           <p className="max-w-sm text-sm text-[var(--admin-on-surface-variant)]">
             Add a custom domain to route learners to your branded hostname.
           </p>
@@ -251,7 +253,9 @@ function DomainRow({
             ].join(" ")}
           >
             <span
-              className={["h-1.5 w-1.5 rounded-full", domainStatusDotClassName(domain.status)].join(" ")}
+              className={["h-1.5 w-1.5 rounded-full", domainStatusDotClassName(domain.status)].join(
+                " ",
+              )}
               aria-hidden="true"
             />
             {formatDomainStatus(domain.status)}

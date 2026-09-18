@@ -42,7 +42,7 @@ function uniqueConflictMessage(error: unknown): "key" | "email" | "unknown" {
   if (!isUniqueViolation(error)) return "unknown";
   const constraint =
     typeof error === "object" && error !== null && "constraint" in error
-      ? String((error as { constraint?: string }).constraint ?? "")
+      ? ((error as { constraint?: string }).constraint ?? "")
       : "";
   if (constraint.includes("email")) return "email";
   if (constraint.includes("key")) return "key";

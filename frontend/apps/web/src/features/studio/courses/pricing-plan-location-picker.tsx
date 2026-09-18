@@ -34,9 +34,7 @@ export function PricingPlanLocationPicker({
 
   return (
     <PricingPlanSearchableDropdown
-      label={
-        <PricingPlanFieldLabel htmlFor={id}>Location</PricingPlanFieldLabel>
-      }
+      label={<PricingPlanFieldLabel htmlFor={id}>Location</PricingPlanFieldLabel>}
       labelId={id}
       value={resolvedValue}
       onChange={onChange}

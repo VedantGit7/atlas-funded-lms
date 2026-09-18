@@ -29,7 +29,9 @@ export function MasteryVelocityChart({ weeks, currentLevel }: MasteryVelocityCha
   const toY = (xp: number) => PAD_TOP + (1 - (maxXp > 0 ? xp / maxXp : 0)) * plotH;
 
   const linePath = weeks
-    .map((week, index) => `${index === 0 ? "M" : "L"} ${String(toX(index))} ${String(toY(week.xp))}`)
+    .map(
+      (week, index) => `${index === 0 ? "M" : "L"} ${String(toX(index))} ${String(toY(week.xp))}`,
+    )
     .join(" ");
   const baseline = toY(0);
   const areaPath = hasData

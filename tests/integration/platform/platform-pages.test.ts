@@ -74,10 +74,7 @@ describe("platform console integration wiring", () => {
   });
 
   it("exposes shared platform page access loader", () => {
-    const access = readFileSync(
-      resolve(webRoot, "lib/server/platform-page-access.ts"),
-      "utf8",
-    );
+    const access = readFileSync(resolve(webRoot, "lib/server/platform-page-access.ts"), "utf8");
     expect(access).toContain("loadPlatformPageAccess");
     expect(access).toContain("loadPlatformShellContext");
   });

@@ -7,14 +7,8 @@ import {
   productCopyJobListResponseSchema,
   productCopyJobResponseSchema,
 } from "./product-copy.dto";
-import {
-  productCopyDestinationRequired,
-  productCopySourceNotFound,
-} from "./product-copy.errors";
-import {
-  productCopyRepository,
-  type ProductCopyJobRow,
-} from "./product-copy.repository";
+import { productCopyDestinationRequired, productCopySourceNotFound } from "./product-copy.errors";
+import { productCopyRepository, type ProductCopyJobRow } from "./product-copy.repository";
 
 function parseSectionIds(value: unknown): string[] | null {
   if (!Array.isArray(value)) return null;
@@ -104,11 +98,7 @@ async function cloneCourseForSubSchool(
 
   await productCopyRepository.copyCourseTags(tx, source.id, courseId);
 
-  const modules = await productCopyRepository.listModulesForCourse(
-    tx,
-    source.id,
-    args.sectionIds,
-  );
+  const modules = await productCopyRepository.listModulesForCourse(tx, source.id, args.sectionIds);
 
   let position = 1;
   for (const module of modules) {
@@ -143,11 +133,7 @@ async function cloneCourseForSubSchool(
   return courseId;
 }
 
-export async function listProductCopyJobs(
-  tx: TenantTx,
-  _ctx: ServiceCtx,
-  subSchoolId: string,
-) {
+export async function listProductCopyJobs(tx: TenantTx, _ctx: ServiceCtx, subSchoolId: string) {
   const subSchool = await subSchoolsRepository.findSubSchoolById(tx, subSchoolId);
   if (!subSchool) throw subSchoolNotFound();
 
@@ -170,8 +156,7 @@ export async function createProductCopyJob(
   const subSchool = await subSchoolsRepository.findSubSchoolById(tx, subSchoolId);
   if (!subSchool) throw subSchoolNotFound();
 
-  const sectionIds =
-    body.sectionIds && body.sectionIds.length > 0 ? body.sectionIds : null;
+  const sectionIds = body.sectionIds && body.sectionIds.length > 0 ? body.sectionIds : null;
 
   const job = await productCopyRepository.insertJob(tx, {
     destinationSubSchoolId: subSchoolId,

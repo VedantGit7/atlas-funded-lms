@@ -5,7 +5,7 @@ import { resendInvite, resendInviteResponseSchema } from "@atlas/membership";
 import { postRouteMetadata } from "./route.metadata";
 import { sendMembershipInvitationEmail } from "../../../../../../server/notifications/membership-invitation.service";
 
-const memberParamsSchema = zod.object({ id: zod.string().uuid() });
+const memberParamsSchema = zod.object({ id: zod.uuid() });
 
 type ResendInviteResponse = z.output<typeof resendInviteResponseSchema>;
 

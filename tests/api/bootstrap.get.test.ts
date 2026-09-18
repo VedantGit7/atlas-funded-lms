@@ -13,21 +13,39 @@ const {
   mockLookupTenantFromHost,
   mockReadRuntimeBrandingProjection,
   mockResolveBrandingAssetUrl,
+  mockReadTenantEmailChannel,
+  mockGetLearnerBillingConfigRow,
+  mockGetCachedFxRates,
   mockWithGlobalDb,
   mockWithTenantTx,
 } = vi.hoisted(() => ({
   mockLookupTenantFromHost: vi.fn(),
   mockReadRuntimeBrandingProjection: vi.fn(),
   mockResolveBrandingAssetUrl: vi.fn(),
+  mockReadTenantEmailChannel: vi.fn(),
+  mockGetLearnerBillingConfigRow: vi.fn(),
+  mockGetCachedFxRates: vi.fn(),
   mockWithGlobalDb: vi.fn((fn: (db: unknown) => unknown) => fn({ $queryRaw: vi.fn() })),
   mockWithTenantTx: vi.fn((_ctx: unknown, fn: (tx: unknown) => unknown) =>
-    fn({ $queryRaw: vi.fn(), $executeRaw: vi.fn() }),
+    fn({
+      // A bare vi.fn() returns undefined, so any repository doing rows[0] throws.
+      // The route pipeline now claims an idempotency key through this tx (M10),
+      // which made that latent stub gap visible as a 500.
+      $queryRaw: vi.fn().mockResolvedValue([]),
+      $queryRawUnsafe: vi.fn().mockResolvedValue([]),
+      $executeRaw: vi.fn().mockResolvedValue(0),
+      $executeRawUnsafe: vi.fn().mockResolvedValue(0),
+    }),
   ),
 }));
 
-vi.mock("@atlas/tenancy", () => ({
-  lookupTenantFromHost: (...args: unknown[]) => mockLookupTenantFromHost(...args),
-}));
+vi.mock("@atlas/tenancy", async (importOriginal) => {
+  const actual = await importOriginal<Record<string, unknown>>();
+  return {
+    ...actual,
+    lookupTenantFromHost: (...args: unknown[]) => mockLookupTenantFromHost(...args),
+  };
+});
 
 vi.mock("@atlas/db/global-db", () => ({
   withGlobalDb: (fn: (db: unknown) => unknown) => mockWithGlobalDb(fn),
@@ -41,7 +59,8 @@ vi.mock("@atlas/domain-branding", async (importOriginal) => {
   const actual = await importOriginal<Record<string, unknown>>();
   return {
     ...actual,
-    readRuntimeBrandingProjection: (...args: unknown[]) => mockReadRuntimeBrandingProjection(...args),
+    readRuntimeBrandingProjection: (...args: unknown[]) =>
+      mockReadRuntimeBrandingProjection(...args),
   };
 });
 
@@ -52,6 +71,18 @@ vi.mock("@atlas/storage", async (importOriginal) => {
     resolveBrandingAssetUrl: (...args: unknown[]) => mockResolveBrandingAssetUrl(...args),
   };
 });
+
+vi.mock("../../backend/apps/api/src/server/tenant-settings/tenant-settings.service", () => ({
+  readTenantEmailChannel: (...args: unknown[]) => mockReadTenantEmailChannel(...args),
+}));
+
+vi.mock("@atlas/domain-config/repositories/learner-billing.repository", () => ({
+  getLearnerBillingConfigRow: (...args: unknown[]) => mockGetLearnerBillingConfigRow(...args),
+}));
+
+vi.mock("@atlas/domain-config/services/fx.service", () => ({
+  getCachedFxRates: (...args: unknown[]) => mockGetCachedFxRates(...args),
+}));
 
 import { GET } from "../../backend/apps/api/src/app/api/v1/public/bootstrap/route";
 
@@ -81,6 +112,13 @@ describe("GET /api/v1/public/bootstrap", () => {
       brandingVersion: 1,
       themeVersion: 1,
     });
+    mockReadTenantEmailChannel.mockResolvedValue({
+      fromEmail: "support@acme.example.com",
+      fromName: "Acme Support",
+      enabled: true,
+    });
+    mockGetLearnerBillingConfigRow.mockResolvedValue({ home_currency: "USD" });
+    mockGetCachedFxRates.mockResolvedValue({ data: { base: "USD", rates: { EUR: 0.9 } } });
     mockResolveBrandingAssetUrl.mockImplementation(
       async (_tx: unknown, _ctx: unknown, assetId: string | null) => {
         if (assetId === "018f0000-0000-7000-8000-000000000020") {

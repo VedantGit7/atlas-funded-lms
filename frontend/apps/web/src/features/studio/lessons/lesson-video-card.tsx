@@ -101,11 +101,7 @@ export function LessonVideoCard({
         </div>
 
         {embedReady ? (
-          <LessonVideoEmbed
-            provider={videoProvider}
-            url={trimmedVideoUrl}
-            title="Video preview"
-          />
+          <LessonVideoEmbed provider={videoProvider} url={trimmedVideoUrl} title="Video preview" />
         ) : (
           <div
             className={[

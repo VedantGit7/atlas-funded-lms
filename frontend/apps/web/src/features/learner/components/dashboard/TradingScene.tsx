@@ -102,7 +102,13 @@ function CandleBar({ c, x, min, max }: { c: Candle; x: number; min: number; max:
       </mesh>
       <mesh ref={body} position={[0, bodyMid, 0]} scale={[1, bodyH, 1]}>
         <boxGeometry args={[0.19, 1, 0.19]} />
-        <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.22} roughness={0.55} metalness={0.15} />
+        <meshStandardMaterial
+          color={color}
+          emissive={color}
+          emissiveIntensity={0.22}
+          roughness={0.55}
+          metalness={0.15}
+        />
       </mesh>
     </group>
   );
@@ -152,13 +158,21 @@ function CandleScene({ accent }: { accent: string }) {
 
   return (
     <group ref={group} rotation={[0.05, -0.1, 0]}>
-      <gridHelper args={[6.6, 9, GRID, GRID]} rotation={[Math.PI / 2, 0, 0]} position={[0, 0, -0.35]} />
+      <gridHelper
+        args={[6.6, 9, GRID, GRID]}
+        rotation={[Math.PI / 2, 0, 0]}
+        position={[0, 0, -0.35]}
+      />
       {candles.map((c, i) => (
         <CandleBar key={i} c={c} x={xFor(i)} min={min} max={max} />
       ))}
       <Line points={ma} color={accent} lineWidth={2} transparent opacity={0.9} />
       {last ? (
-        <Html position={[3.2, priceToY(last.close, min, max), 0]} distanceFactor={7} pointerEvents="none">
+        <Html
+          position={[3.2, priceToY(last.close, min, max), 0]}
+          distanceFactor={7}
+          pointerEvents="none"
+        >
           <div
             style={{
               whiteSpace: "nowrap",
@@ -181,7 +195,15 @@ function CandleScene({ accent }: { accent: string }) {
 
 /* ---------------------------- Scene 2: Currency ---------------------------- */
 
-function Coin({ position, color, symbol }: { position: [number, number, number]; color: string; symbol: string }) {
+function Coin({
+  position,
+  color,
+  symbol,
+}: {
+  position: [number, number, number];
+  color: string;
+  symbol: string;
+}) {
   return (
     <group position={position}>
       <mesh rotation={[Math.PI / 2, 0, 0]}>
@@ -233,10 +255,32 @@ function CurrencyScene({ accent, usdInr }: { accent: string; usdInr: number | nu
       </Float>
       <mesh rotation={[Math.PI / 2.1, 0, 0]}>
         <torusGeometry args={[2.2, 0.015, 16, 100]} />
-        <meshStandardMaterial color={accent} emissive={accent} emissiveIntensity={1.1} toneMapped={false} transparent opacity={0.6} />
+        <meshStandardMaterial
+          color={accent}
+          emissive={accent}
+          emissiveIntensity={1.1}
+          toneMapped={false}
+          transparent
+          opacity={0.6}
+        />
       </mesh>
       <Html center position={[0, -1.95, 0]} distanceFactor={8} pointerEvents="none">
-        <div style={{ display: "flex", alignItems: "center", gap: 6, whiteSpace: "nowrap", fontWeight: 700, fontVariantNumeric: "tabular-nums", color: "#eaf1ff", background: "rgba(8,12,24,0.65)", padding: "5px 14px", borderRadius: 6, fontSize: 20, border: "1px solid rgba(255,255,255,0.08)" }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            whiteSpace: "nowrap",
+            fontWeight: 700,
+            fontVariantNumeric: "tabular-nums",
+            color: "#eaf1ff",
+            background: "rgba(8,12,24,0.65)",
+            padding: "5px 14px",
+            borderRadius: 6,
+            fontSize: 20,
+            border: "1px solid rgba(255,255,255,0.08)",
+          }}
+        >
           <span style={{ opacity: 0.7, fontSize: 13 }}>USD/INR</span>
           <span style={{ color: up ? UP : DOWN }}>₹{value}</span>
         </div>
@@ -276,7 +320,11 @@ function LineScene({ accent }: { accent: string }) {
   });
   return (
     <group ref={group} rotation={[0.04, -0.05, 0]}>
-      <gridHelper args={[6.6, 9, GRID, GRID]} rotation={[Math.PI / 2, 0, 0]} position={[0, 0, -0.35]} />
+      <gridHelper
+        args={[6.6, 9, GRID, GRID]}
+        rotation={[Math.PI / 2, 0, 0]}
+        position={[0, 0, -0.35]}
+      />
       <mesh>
         <shapeGeometry args={[buildShape(fill)]} />
         <meshBasicMaterial color={accent} transparent opacity={0.14} />
@@ -284,10 +332,26 @@ function LineScene({ accent }: { accent: string }) {
       <Line points={points} color={accent} lineWidth={3} />
       <mesh ref={dot}>
         <sphereGeometry args={[0.1, 20, 20]} />
-        <meshStandardMaterial color="#ffffff" emissive={accent} emissiveIntensity={1.6} toneMapped={false} />
+        <meshStandardMaterial
+          color="#ffffff"
+          emissive={accent}
+          emissiveIntensity={1.6}
+          toneMapped={false}
+        />
       </mesh>
       <Html position={[tip[0] + 0.15, tip[1], 0]} distanceFactor={7} pointerEvents="none">
-        <div style={{ whiteSpace: "nowrap", fontWeight: 700, fontVariantNumeric: "tabular-nums", fontSize: 14, color: "#fff", background: accent, padding: "2px 8px", borderRadius: 4 }}>
+        <div
+          style={{
+            whiteSpace: "nowrap",
+            fontWeight: 700,
+            fontVariantNumeric: "tabular-nums",
+            fontSize: 14,
+            color: "#fff",
+            background: accent,
+            padding: "2px 8px",
+            borderRadius: 4,
+          }}
+        >
           +{(12 + tip[1] * 6).toFixed(1)}%
         </div>
       </Html>
@@ -359,8 +423,23 @@ function DepthScene({ accent }: { accent: string }) {
       </mesh>
       <Line points={bid} color={UP} lineWidth={2.5} />
       <Line points={ask} color={DOWN} lineWidth={2.5} />
-      <Line points={[[0, -1.7, 0], [0, 1.6, 0]]} color={accent} lineWidth={1} dashed dashScale={4} transparent opacity={0.5} />
-      <gridHelper args={[7, 8, GRID, GRID]} rotation={[Math.PI / 2, 0, 0]} position={[0, 0, -0.35]} />
+      <Line
+        points={[
+          [0, -1.7, 0],
+          [0, 1.6, 0],
+        ]}
+        color={accent}
+        lineWidth={1}
+        dashed
+        dashScale={4}
+        transparent
+        opacity={0.5}
+      />
+      <gridHelper
+        args={[7, 8, GRID, GRID]}
+        rotation={[Math.PI / 2, 0, 0]}
+        position={[0, 0, -0.35]}
+      />
     </group>
   );
 }
@@ -378,17 +457,31 @@ function GlobeScene({ accent }: { accent: string }) {
     const surface = (): Vector3 => {
       const theta = Math.random() * Math.PI * 2;
       const phi = Math.acos(2 * Math.random() - 1);
-      return new Vector3(R * Math.sin(phi) * Math.cos(theta), R * Math.cos(phi), R * Math.sin(phi) * Math.sin(theta));
+      return new Vector3(
+        R * Math.sin(phi) * Math.cos(theta),
+        R * Math.cos(phi),
+        R * Math.sin(phi) * Math.sin(theta),
+      );
     };
     return Array.from({ length: 8 }, () => {
       const a = surface();
       const b = surface();
-      const mid = a.clone().add(b).multiplyScalar(0.5).normalize().multiplyScalar(R * 1.5);
-      return new QuadraticBezierCurve3(a, mid, b).getPoints(30).map((v) => [v.x, v.y, v.z] as [number, number, number]);
+      const mid = a
+        .clone()
+        .add(b)
+        .multiplyScalar(0.5)
+        .normalize()
+        .multiplyScalar(R * 1.5);
+      return new QuadraticBezierCurve3(a, mid, b)
+        .getPoints(30)
+        .map((v) => [v.x, v.y, v.z] as [number, number, number]);
     });
   }, []);
   const nodes = useMemo(
-    () => arcs.flatMap((arc) => [arc[0], arc[arc.length - 1]]).filter(Boolean) as Array<[number, number, number]>,
+    () =>
+      arcs.flatMap((arc) => [arc[0], arc[arc.length - 1]]).filter(Boolean) as Array<
+        [number, number, number]
+      >,
     [arcs],
   );
   return (
@@ -399,15 +492,33 @@ function GlobeScene({ accent }: { accent: string }) {
       </mesh>
       <mesh>
         <sphereGeometry args={[R * 0.99, 48, 48]} />
-        <meshStandardMaterial color="#0a1224" metalness={0.4} roughness={0.6} transparent opacity={0.6} />
+        <meshStandardMaterial
+          color="#0a1224"
+          metalness={0.4}
+          roughness={0.6}
+          transparent
+          opacity={0.6}
+        />
       </mesh>
       {arcs.map((arc, i) => (
-        <Line key={i} points={arc} color={i % 2 ? UP : accent} lineWidth={2} transparent opacity={0.85} />
+        <Line
+          key={i}
+          points={arc}
+          color={i % 2 ? UP : accent}
+          lineWidth={2}
+          transparent
+          opacity={0.85}
+        />
       ))}
       {nodes.map((n, i) => (
         <mesh key={i} position={n}>
           <sphereGeometry args={[0.045, 12, 12]} />
-          <meshStandardMaterial color={accent} emissive={accent} emissiveIntensity={1.4} toneMapped={false} />
+          <meshStandardMaterial
+            color={accent}
+            emissive={accent}
+            emissiveIntensity={1.4}
+            toneMapped={false}
+          />
         </mesh>
       ))}
       <Sparkles count={26} scale={5.5} size={1.4} speed={0.25} color={accent} opacity={0.4} />
@@ -455,7 +566,14 @@ function PayoffScene({ accent }: { accent: string }) {
           <bufferAttribute attach="attributes-position" args={[geometry.positions, 3]} />
           <bufferAttribute attach="index" args={[geometry.indices, 1]} />
         </bufferGeometry>
-        <meshStandardMaterial color={accent} emissive={accent} emissiveIntensity={0.5} wireframe transparent opacity={0.85} />
+        <meshStandardMaterial
+          color={accent}
+          emissive={accent}
+          emissiveIntensity={0.5}
+          wireframe
+          transparent
+          opacity={0.85}
+        />
       </mesh>
       <Sparkles count={24} scale={5.5} size={1.6} speed={0.35} color={accent} opacity={0.4} />
     </group>
@@ -464,7 +582,15 @@ function PayoffScene({ accent }: { accent: string }) {
 
 /* ------------------------------- Composition ------------------------------- */
 
-function ActiveScene({ scene, accent, usdInr }: { scene: SceneKey; accent: string; usdInr: number | null }) {
+function ActiveScene({
+  scene,
+  accent,
+  usdInr,
+}: {
+  scene: SceneKey;
+  accent: string;
+  usdInr: number | null;
+}) {
   switch (scene) {
     case "candles":
       return <CandleScene accent={accent} />;
@@ -507,17 +633,37 @@ export default function TradingScene({
       </div>
       <div className="pointer-events-none absolute right-3 top-3 z-10 flex gap-1">
         {SCENES.map((key, i) => (
-          <span key={key} className={`h-1 rounded-full transition-all ${i === index ? "w-4 bg-white/80" : "w-1.5 bg-white/25"}`} />
+          <span
+            key={key}
+            className={`h-1 rounded-full transition-all ${i === index ? "w-4 bg-white/80" : "w-1.5 bg-white/25"}`}
+          />
         ))}
       </div>
-      <Canvas dpr={[1, 1.75]} camera={{ position: [0, 0, 6.2], fov: 42 }} gl={{ antialias: true, alpha: true }}>
+      <Canvas
+        dpr={[1, 1.75]}
+        camera={{ position: [0, 0, 6.2], fov: 42 }}
+        gl={{ antialias: true, alpha: true }}
+      >
         <ambientLight intensity={0.7} />
         <Environment resolution={128}>
           <Lightformer form="rect" intensity={2.5} position={[3, 4, 4]} scale={7} color={accent} />
-          <Lightformer form="rect" intensity={1.4} position={[-5, -1, 2]} scale={6} color="#ffffff" />
+          <Lightformer
+            form="rect"
+            intensity={1.4}
+            position={[-5, -1, 2]}
+            scale={6}
+            color="#ffffff"
+          />
         </Environment>
         <ActiveScene key={scene} scene={scene} accent={accent} usdInr={usdInr} />
-        <ContactShadows position={[0, -1.95, 0]} opacity={0.4} scale={13} blur={2.4} far={4.5} color="#000000" />
+        <ContactShadows
+          position={[0, -1.95, 0]}
+          opacity={0.4}
+          scale={13}
+          blur={2.4}
+          far={4.5}
+          color="#000000"
+        />
         <EffectComposer>
           <Bloom mipmapBlur intensity={0.65} luminanceThreshold={0.5} luminanceSmoothing={0.9} />
         </EffectComposer>

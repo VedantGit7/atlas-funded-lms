@@ -45,3 +45,33 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON
   extension_points,
   materialized_view_registry
 TO atlas_platform;
+
+-- Platform operator grants (H7). Migration 101 sets these, but this file is
+-- applied *after* `prisma migrate deploy` during db:provision and re-run by
+-- db:sql:apply, so the blanket GRANT above silently restored write access to
+-- the tenant application roles on every freshly provisioned database. Left as
+-- it was, atlas_app could INSERT its own row here and self-escalate to platform
+-- operator, which is the exact privilege boundary H7 exists to draw.
+--
+-- Grants are soft-revoked (revoked_at) rather than deleted, so nothing may
+-- DELETE from this table -- not even atlas_platform.
+-- proctoring_events is append-only evidence: migration 098 grants only
+-- SELECT and INSERT, but it never revoked the rest, so the blanket GRANT above
+-- handed every role UPDATE and DELETE on a freshly provisioned database and the
+-- tamper-evidence guarantee was lost. Same mechanism as platform_operators
+-- below: GRANT ... ON ALL TABLES only covers tables that exist when it runs, so
+-- a migration-created table is narrow on an incrementally-migrated database and
+-- wide on a fresh provision, where this file runs last.
+REVOKE UPDATE, DELETE ON proctoring_events FROM atlas_app, atlas_worker, atlas_platform;
+
+-- M11 metering counters are evidence of consumption; the tenant plane may
+-- record and read them but never erase them. Declared here as well as in
+-- migration 103 because the blanket GRANT above runs after migrate deploy on a
+-- fresh provision and would otherwise hand back DELETE.
+REVOKE DELETE ON entitlement_usage FROM atlas_app, atlas_worker;
+
+GRANT SELECT ON platform_operators TO atlas_app, atlas_worker;
+REVOKE INSERT, UPDATE, DELETE ON platform_operators FROM atlas_app, atlas_worker;
+
+GRANT SELECT, INSERT, UPDATE ON platform_operators TO atlas_platform;
+REVOKE DELETE ON platform_operators FROM atlas_platform;

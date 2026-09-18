@@ -51,7 +51,10 @@ function formatRelative(value: string): string {
 function formatUtc(value: string): string {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return date.toISOString().replace("T", " ").replace(/\.\d{3}Z$/, "Z");
+  return date
+    .toISOString()
+    .replace("T", " ")
+    .replace(/\.\d{3}Z$/, "Z");
 }
 
 function datasetChipClassName(dataset: ProgressScoreExportDataset): string {
@@ -85,7 +88,9 @@ function PolicyToggle({
       aria-checked={checked}
       aria-label={label}
       disabled={disabled}
-      onClick={() => onChange(!checked)}
+      onClick={() => {
+        onChange(!checked);
+      }}
       className={`relative h-5 w-9 shrink-0 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]/40 disabled:opacity-50 ${
         checked ? "bg-[var(--admin-primary)]" : "bg-[var(--admin-outline)]"
       }`}
@@ -330,7 +335,9 @@ export function AdminProgressScoreExportsPage() {
         }
       })();
     }, 2500);
-    return () => window.clearInterval(timer);
+    return () => {
+      window.clearInterval(timer);
+    };
   }, [buildingIds]);
 
   function openNewExport(schedulePreset: boolean) {
@@ -423,7 +430,11 @@ export function AdminProgressScoreExportsPage() {
         <p className="text-sm text-[var(--admin-danger)]" role="alert">
           {error ?? "Could not load exports."}
         </p>
-        <button type="button" onClick={() => void load()} className={`${primaryButtonClassName} h-10 gap-2`}>
+        <button
+          type="button"
+          onClick={() => void load()}
+          className={`${primaryButtonClassName} h-10 gap-2`}
+        >
           <RefreshCw className="h-4 w-4" aria-hidden="true" />
           Retry
         </button>
@@ -436,11 +447,17 @@ export function AdminProgressScoreExportsPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <nav className="mb-2 flex items-center gap-2 text-sm text-[var(--admin-on-surface-variant)]">
-            <Link href="/admin/reports/progress-score" className="hover:text-[var(--admin-primary)]">
+            <Link
+              href="/admin/reports/progress-score"
+              className="hover:text-[var(--admin-primary)]"
+            >
               Reports
             </Link>
             <span aria-hidden="true">/</span>
-            <Link href="/admin/reports/progress-score" className="hover:text-[var(--admin-primary)]">
+            <Link
+              href="/admin/reports/progress-score"
+              className="hover:text-[var(--admin-primary)]"
+            >
               Progress &amp; Score
             </Link>
             <span aria-hidden="true">/</span>
@@ -464,7 +481,9 @@ export function AdminProgressScoreExportsPage() {
           </button>
           <button
             type="button"
-            onClick={() => openNewExport(false)}
+            onClick={() => {
+              openNewExport(false);
+            }}
             className={`${primaryButtonClassName} h-10 gap-2`}
           >
             <Plus className="h-4 w-4" aria-hidden="true" />
@@ -487,7 +506,9 @@ export function AdminProgressScoreExportsPage() {
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
         <section className="flex flex-col overflow-hidden rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface)] lg:col-span-7">
           <div className="border-b border-[var(--admin-border)] bg-[var(--admin-surface-low)] p-4">
-            <h2 className="text-base font-semibold text-[var(--admin-on-surface)]">Export history</h2>
+            <h2 className="text-base font-semibold text-[var(--admin-on-surface)]">
+              Export history
+            </h2>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full border-collapse text-left">
@@ -605,7 +626,9 @@ export function AdminProgressScoreExportsPage() {
                               ) : failed ? (
                                 <button
                                   type="button"
-                                  onClick={() => setFailureItem(item)}
+                                  onClick={() => {
+                                    setFailureItem(item);
+                                  }}
                                   className="inline-flex h-6 items-center rounded-sm bg-[color-mix(in_srgb,var(--admin-danger)_12%,var(--admin-surface))] px-2 text-xs font-medium text-[var(--admin-danger)]"
                                 >
                                   Failed
@@ -654,7 +677,9 @@ export function AdminProgressScoreExportsPage() {
         </section>
 
         <section className="flex flex-col gap-4 lg:col-span-5">
-          <h2 className="text-base font-semibold text-[var(--admin-on-surface)]">Scheduled exports</h2>
+          <h2 className="text-base font-semibold text-[var(--admin-on-surface)]">
+            Scheduled exports
+          </h2>
           {payload.schedules.length === 0 ? (
             <p className="text-sm text-[var(--admin-on-surface-variant)]">
               No scheduled exports yet.
@@ -668,7 +693,10 @@ export function AdminProgressScoreExportsPage() {
               }`}
             >
               {schedule.isActive ? (
-                <div className="absolute top-0 bottom-0 left-0 w-1 bg-[var(--admin-primary)]" aria-hidden="true" />
+                <div
+                  className="absolute top-0 bottom-0 left-0 w-1 bg-[var(--admin-primary)]"
+                  aria-hidden="true"
+                />
               ) : null}
               <div className="mb-3 flex items-start justify-between gap-3 pl-2">
                 <div className="min-w-0">
@@ -734,7 +762,9 @@ export function AdminProgressScoreExportsPage() {
 
           <button
             type="button"
-            onClick={() => openNewExport(true)}
+            onClick={() => {
+              openNewExport(true);
+            }}
             className="flex min-h-[120px] flex-col items-center justify-center gap-2 rounded-sm border border-dashed border-[var(--admin-outline)] bg-[var(--admin-surface-low)] p-6 text-[var(--admin-on-surface-variant)] transition-colors hover:border-[var(--admin-primary)] hover:text-[var(--admin-primary)]"
           >
             <Plus className="h-5 w-5" aria-hidden="true" />
@@ -757,7 +787,9 @@ export function AdminProgressScoreExportsPage() {
         scoreColumns={payload.scoreColumns}
         capabilities={payload.capabilities}
         initialScheduleEnabled={modalSchedulePreset}
-        onClose={() => setModalOpen(false)}
+        onClose={() => {
+          setModalOpen(false);
+        }}
         onCreated={(run, schedule) => {
           statusRef.current.set(run.id, run.status);
           setPayload((current) =>
@@ -777,7 +809,9 @@ export function AdminProgressScoreExportsPage() {
         <FailureDrawer
           item={failureItem}
           busy={busyId === failureItem.id}
-          onClose={() => setFailureItem(null)}
+          onClose={() => {
+            setFailureItem(null);
+          }}
           onRetry={() => void onRetry(failureItem)}
         />
       ) : null}
@@ -798,7 +832,9 @@ export function AdminProgressScoreExportsPage() {
           <button
             type="button"
             aria-label="Dismiss"
-            onClick={() => setToastRun(null)}
+            onClick={() => {
+              setToastRun(null);
+            }}
             className="text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-on-surface)]"
           >
             <X className="h-4 w-4" aria-hidden="true" />

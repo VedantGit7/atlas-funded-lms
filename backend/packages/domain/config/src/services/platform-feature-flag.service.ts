@@ -26,9 +26,7 @@ function assertRolloutValueMatchesType(
 
   const inferred = inferRolloutType(value);
   if (inferred !== rolloutType) {
-    throw new Error(
-      `defaultValue must match rolloutType ${rolloutType} (received ${inferred})`,
-    );
+    throw new Error(`defaultValue must match rolloutType ${rolloutType} (received ${inferred})`);
   }
 }
 

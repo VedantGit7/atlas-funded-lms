@@ -38,6 +38,7 @@ import {
 } from "./custom-field-segments.errors";
 import { customFieldSegmentsRepository, type SegmentRow } from "./custom-field-segments.repository";
 import { customFieldRosterRepository } from "./custom-field-roster.repository";
+import { csvEscape } from "@atlas/core/csv/escape";
 const STALE_MS = 30 * 24 * 60 * 60 * 1000;
 
 function slugifyKey(value: string): string {
@@ -435,11 +436,6 @@ export async function createGroupFromCustomFieldSegment(
       memberCount,
     },
   });
-}
-
-function csvEscape(value: string): string {
-  if (/[",\n]/.test(value)) return `"${value.replaceAll('"', '""')}"`;
-  return value;
 }
 
 export async function exportCustomFieldSegmentsCsv(tx: TenantTx, ctx: ServiceCtx) {

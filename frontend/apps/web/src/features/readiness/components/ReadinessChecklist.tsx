@@ -52,7 +52,10 @@ export function ReadinessChecklist({ scores }: ReadinessChecklistProps) {
                 ? "No band assigned yet. Complete more activities to establish a baseline."
                 : "Below your target range. Focused practice will lift this dimension.";
             return (
-              <li key={`${score.scoringProfileId}:${score.dimensionId}`} className="flex items-start gap-4 px-6 py-4">
+              <li
+                key={`${score.scoringProfileId}:${score.dimensionId}`}
+                className="flex items-start gap-4 px-6 py-4"
+              >
                 <CircleDot
                   className="mt-0.5 h-5 w-5 shrink-0 text-[var(--warning)]"
                   strokeWidth={2}

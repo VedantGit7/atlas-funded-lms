@@ -36,7 +36,8 @@ const ITEMS: SeedItem[] = [
     stem: "A beta of 1.0 means the asset is uncorrelated with the market.",
     answerKey: {
       direction: "left",
-      explanation: "A beta of 1.0 means it moves with the market. Zero beta implies no correlation.",
+      explanation:
+        "A beta of 1.0 means it moves with the market. Zero beta implies no correlation.",
     },
   },
   {
@@ -60,7 +61,8 @@ const ITEMS: SeedItem[] = [
         market: "Sensitivity to market moves",
         riskadj: "Return per unit of risk",
       },
-      explanation: "Alpha is excess return, beta is market sensitivity, Sharpe is risk-adjusted return.",
+      explanation:
+        "Alpha is excess return, beta is market sensitivity, Sharpe is risk-adjusted return.",
     },
   },
   {
@@ -68,7 +70,8 @@ const ITEMS: SeedItem[] = [
     itemTypeKey: "mcq_single",
     stem: "What is the main purpose of diversification?",
     answerKey: {
-      explanation: "Diversification reduces unsystematic (asset-specific) risk. Market risk remains.",
+      explanation:
+        "Diversification reduces unsystematic (asset-specific) risk. Market risk remains.",
     },
     options: [
       { key: "a", label: "To reduce unsystematic risk", isCorrect: true },
@@ -105,7 +108,8 @@ const ITEMS: SeedItem[] = [
     stem: "Bond prices rise when interest rates rise.",
     answerKey: {
       value: false,
-      explanation: "Bond prices move inversely to rates: when rates rise, existing bonds fall in price.",
+      explanation:
+        "Bond prices move inversely to rates: when rates rise, existing bonds fall in price.",
     },
   },
 ];

@@ -2,12 +2,7 @@
 
 import Link from "next/link";
 
-export type ProgressScoreReportTab =
-  | "overview"
-  | "progress"
-  | "scores"
-  | "cohorts"
-  | "exports";
+export type ProgressScoreReportTab = "overview" | "progress" | "scores" | "cohorts" | "exports";
 
 const TABS: Array<{ key: ProgressScoreReportTab; label: string; href: string }> = [
   { key: "overview", label: "Overview", href: "/admin/reports/progress-score" },

@@ -16,7 +16,7 @@ import {
 } from "@atlas/domain/live/live.service";
 import { z as zod } from "zod";
 
-const paramsSchema = zod.object({ id: zod.string().uuid() });
+const paramsSchema = zod.object({ id: zod.uuid() });
 const deletedResponseSchema = zod.object({ data: zod.object({ deleted: zod.boolean() }) });
 
 export const GET = createTenantRoute<

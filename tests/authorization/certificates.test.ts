@@ -7,7 +7,7 @@ function adminTx() {
       .fn()
       .mockResolvedValueOnce([{ key: "certificate.issue" }])
       .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([{ role_key: "admin" }]),
+      .mockResolvedValueOnce([{ role_key: "admin", bypasses_resource_predicates: true }]),
   };
 }
 
@@ -17,7 +17,7 @@ function instructorWithoutRelationshipTx() {
       .fn()
       .mockResolvedValueOnce([{ key: "certificate.issue" }])
       .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([{ role_key: "instructor" }]),
+      .mockResolvedValueOnce([{ role_key: "instructor", bypasses_resource_predicates: false }]),
   };
 }
 
@@ -27,7 +27,7 @@ function learnerTx() {
       .fn()
       .mockResolvedValueOnce([{ key: "certificate.read" }])
       .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([{ role_key: "learner" }]),
+      .mockResolvedValueOnce([{ role_key: "learner", bypasses_resource_predicates: false }]),
   };
 }
 

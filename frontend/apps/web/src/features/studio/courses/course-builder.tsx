@@ -4,12 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import {
-  Archive,
-  ChevronRight,
-  MoreVertical,
-  Users,
-} from "lucide-react";
+import { Archive, ChevronRight, MoreVertical, Users } from "lucide-react";
 import type { z } from "zod";
 import { ClientApiError, clientApi } from "../../../lib/client-api";
 import type {
@@ -161,7 +156,7 @@ export function CourseBuilder({
               <button
                 type="button"
                 onClick={() => {
-                  void handleArchive();
+                  handleArchive();
                 }}
                 disabled={archiveMutation.isPending}
                 className={builderDangerOutlineClassName}
@@ -242,7 +237,7 @@ export function CourseBuilder({
             moduleCount={modules.length}
             canPublish={canPublish}
             onPublish={() => {
-              void handlePublish();
+              handlePublish();
             }}
             publishing={publishMutation.isPending}
             publishError={publishError}

@@ -310,7 +310,9 @@ export function CourseManagerView({ courses, canCreate }: CourseManagerViewProps
             strokeWidth={1.5}
             aria-hidden="true"
           />
-          <h2 className="mt-4 text-lg font-bold text-[var(--admin-on-surface)]">No courses found</h2>
+          <h2 className="mt-4 text-lg font-bold text-[var(--admin-on-surface)]">
+            No courses found
+          </h2>
           <p className="mt-2 text-sm text-[var(--admin-on-surface-variant)]">
             {courses.length === 0
               ? "Create your first course to start building curriculum."

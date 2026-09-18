@@ -24,7 +24,13 @@ type ProtectedRoleEditorProps = {
   };
 };
 
-function LockedControl({ children, onLockedInteraction }: { children: ReactNode; onLockedInteraction: () => void }) {
+function LockedControl({
+  children,
+  onLockedInteraction,
+}: {
+  children: ReactNode;
+  onLockedInteraction: () => void;
+}) {
   return (
     <div
       className="contents"

@@ -5,10 +5,7 @@ import {
   createReportScheduleResponseSchema,
   reportScheduleListResponseSchema,
 } from "@atlas/domain/reports/reports.dto";
-import {
-  createReportSchedule,
-  listReportSchedules,
-} from "@atlas/domain/reports/reports.service";
+import { createReportSchedule, listReportSchedules } from "@atlas/domain/reports/reports.service";
 import {
   createReportScheduleMetadata,
   listReportSchedulesMetadata,

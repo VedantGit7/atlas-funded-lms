@@ -61,7 +61,10 @@ export default defineConfig({
       },
       {
         find: "@atlas/authorization",
-        replacement: path.resolve(import.meta.dirname, "backend/packages/authorization/src/index.ts"),
+        replacement: path.resolve(
+          import.meta.dirname,
+          "backend/packages/authorization/src/index.ts",
+        ),
       },
       {
         find: /^@atlas\/api\/(.+)$/,
@@ -77,7 +80,10 @@ export default defineConfig({
       },
       {
         find: "@atlas/domain-config",
-        replacement: path.resolve(import.meta.dirname, "backend/packages/domain/config/src/index.ts"),
+        replacement: path.resolve(
+          import.meta.dirname,
+          "backend/packages/domain/config/src/index.ts",
+        ),
       },
       {
         find: /^@atlas\/domain-tenancy\/(.+)$/,
@@ -85,15 +91,24 @@ export default defineConfig({
       },
       {
         find: "@atlas/domain-tenancy",
-        replacement: path.resolve(import.meta.dirname, "backend/packages/domain/tenancy/src/index.ts"),
+        replacement: path.resolve(
+          import.meta.dirname,
+          "backend/packages/domain/tenancy/src/index.ts",
+        ),
       },
       {
         find: /^@atlas\/domain-branding\/(.+)$/,
-        replacement: path.resolve(import.meta.dirname, "backend/packages/domain/branding/src/$1.ts"),
+        replacement: path.resolve(
+          import.meta.dirname,
+          "backend/packages/domain/branding/src/$1.ts",
+        ),
       },
       {
         find: "@atlas/domain-branding",
-        replacement: path.resolve(import.meta.dirname, "backend/packages/domain/branding/src/index.ts"),
+        replacement: path.resolve(
+          import.meta.dirname,
+          "backend/packages/domain/branding/src/index.ts",
+        ),
       },
       {
         find: /^@atlas\/domain-access\/(.+)$/,
@@ -101,15 +116,24 @@ export default defineConfig({
       },
       {
         find: "@atlas/domain-access",
-        replacement: path.resolve(import.meta.dirname, "backend/packages/domain/access/src/index.ts"),
+        replacement: path.resolve(
+          import.meta.dirname,
+          "backend/packages/domain/access/src/index.ts",
+        ),
       },
       {
         find: /^@atlas\/domain-identity\/(.+)$/,
-        replacement: path.resolve(import.meta.dirname, "backend/packages/domain/identity/src/$1.ts"),
+        replacement: path.resolve(
+          import.meta.dirname,
+          "backend/packages/domain/identity/src/$1.ts",
+        ),
       },
       {
         find: "@atlas/domain-identity",
-        replacement: path.resolve(import.meta.dirname, "backend/packages/domain/identity/src/index.ts"),
+        replacement: path.resolve(
+          import.meta.dirname,
+          "backend/packages/domain/identity/src/index.ts",
+        ),
       },
       {
         find: /^@atlas\/domain\/(.+)$/,
@@ -153,7 +177,10 @@ export default defineConfig({
       },
       {
         find: "@atlas/observability",
-        replacement: path.resolve(import.meta.dirname, "backend/packages/observability/src/index.ts"),
+        replacement: path.resolve(
+          import.meta.dirname,
+          "backend/packages/observability/src/index.ts",
+        ),
       },
       {
         find: /^@atlas\/tenant-config\/(.+)$/,
@@ -161,15 +188,24 @@ export default defineConfig({
       },
       {
         find: "@atlas/tenant-config",
-        replacement: path.resolve(import.meta.dirname, "backend/packages/tenant-config/src/index.ts"),
+        replacement: path.resolve(
+          import.meta.dirname,
+          "backend/packages/tenant-config/src/index.ts",
+        ),
       },
       {
         find: /^@atlas\/release-readiness\/(.+)$/,
-        replacement: path.resolve(import.meta.dirname, "backend/packages/release-readiness/src/$1.ts"),
+        replacement: path.resolve(
+          import.meta.dirname,
+          "backend/packages/release-readiness/src/$1.ts",
+        ),
       },
       {
         find: "@atlas/release-readiness",
-        replacement: path.resolve(import.meta.dirname, "backend/packages/release-readiness/src/index.ts"),
+        replacement: path.resolve(
+          import.meta.dirname,
+          "backend/packages/release-readiness/src/index.ts",
+        ),
       },
       {
         find: "@atlas/security",

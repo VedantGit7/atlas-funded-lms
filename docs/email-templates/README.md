@@ -17,14 +17,14 @@ Design system (shared across all templates):
 Paste these into **Supabase Dashboard → Authentication → Emails → Templates**.
 They use Supabase Go-template variables (e.g. `{{ .ConfirmationURL }}`).
 
-| File | Supabase template | Suggested subject | Key variables |
-| --- | --- | --- | --- |
-| `confirm-signup.html` | Confirm signup | Confirm your email to activate your FundedBeyond Academy account | `{{ .ConfirmationURL }}`, `{{ .Data.display_name }}` |
-| `reset-password.html` | Reset password | Reset your FundedBeyond Academy password | `{{ .ConfirmationURL }}`, `{{ .Data.display_name }}` |
-| `magic-link.html` | Magic link | Your FundedBeyond Academy sign-in link | `{{ .ConfirmationURL }}`, `{{ .Data.display_name }}` |
-| `invite-user.html` | Invite user | You've been invited to FundedBeyond Academy | `{{ .ConfirmationURL }}` |
-| `change-email-address.html` | Change email address | Confirm your new email address | `{{ .ConfirmationURL }}`, `{{ .Email }}`, `{{ .NewEmail }}` |
-| `reauthentication.html` | Reauthentication | Your FundedBeyond Academy verification code | `{{ .Token }}` (6-digit OTP, no link) |
+| File                        | Supabase template    | Suggested subject                                                | Key variables                                               |
+| --------------------------- | -------------------- | ---------------------------------------------------------------- | ----------------------------------------------------------- |
+| `confirm-signup.html`       | Confirm signup       | Confirm your email to activate your FundedBeyond Academy account | `{{ .ConfirmationURL }}`, `{{ .Data.display_name }}`        |
+| `reset-password.html`       | Reset password       | Reset your FundedBeyond Academy password                         | `{{ .ConfirmationURL }}`, `{{ .Data.display_name }}`        |
+| `magic-link.html`           | Magic link           | Your FundedBeyond Academy sign-in link                           | `{{ .ConfirmationURL }}`, `{{ .Data.display_name }}`        |
+| `invite-user.html`          | Invite user          | You've been invited to FundedBeyond Academy                      | `{{ .ConfirmationURL }}`                                    |
+| `change-email-address.html` | Change email address | Confirm your new email address                                   | `{{ .ConfirmationURL }}`, `{{ .Email }}`, `{{ .NewEmail }}` |
+| `reauthentication.html`     | Reauthentication     | Your FundedBeyond Academy verification code                      | `{{ .Token }}` (6-digit OTP, no link)                       |
 
 ## Security notification templates (custom transactional)
 
@@ -33,15 +33,15 @@ code when a sensitive account change occurs. The `Secure my account` button link
 `{{ .SiteURL }}/reset-password`; swap `{{ .SiteURL }}` / `{{ .Email }}` for whatever your
 sender substitutes.
 
-| File | Suggested subject |
-| --- | --- |
-| `security-password-changed.html` | Your FundedBeyond Academy password was changed |
-| `security-email-changed.html` | Your FundedBeyond Academy email address was changed |
-| `security-phone-changed.html` | Your FundedBeyond Academy phone number was changed |
-| `security-signin-method-linked.html` | A new sign-in method was added to your account |
-| `security-signin-method-removed.html` | A sign-in method was removed from your account |
-| `security-mfa-method-added.html` | Two-factor authentication was added to your account |
-| `security-mfa-method-removed.html` | Two-factor authentication was removed from your account |
+| File                                  | Suggested subject                                       |
+| ------------------------------------- | ------------------------------------------------------- |
+| `security-password-changed.html`      | Your FundedBeyond Academy password was changed          |
+| `security-email-changed.html`         | Your FundedBeyond Academy email address was changed     |
+| `security-phone-changed.html`         | Your FundedBeyond Academy phone number was changed      |
+| `security-signin-method-linked.html`  | A new sign-in method was added to your account          |
+| `security-signin-method-removed.html` | A sign-in method was removed from your account          |
+| `security-mfa-method-added.html`      | Two-factor authentication was added to your account     |
+| `security-mfa-method-removed.html`    | Two-factor authentication was removed from your account |
 
 ## Supabase dashboard configuration
 
@@ -57,12 +57,12 @@ Also enable in Supabase Auth settings:
 
 ## Application wiring status
 
-| Template / feature | Wired in app code |
-| --- | --- |
-| Confirm signup, reset password, magic link | Supabase sends email; app handles redirect/session |
-| Security alert emails (`security-*.html`) | Dispatched via notification worker when account-security routes succeed |
-| User toggles for alerts | `PUT /api/v1/me/preferences` persists to `member_notification_preferences` |
-| Account security UI | `/settings` → Account security section |
+| Template / feature                         | Wired in app code                                                          |
+| ------------------------------------------ | -------------------------------------------------------------------------- |
+| Confirm signup, reset password, magic link | Supabase sends email; app handles redirect/session                         |
+| Security alert emails (`security-*.html`)  | Dispatched via notification worker when account-security routes succeed    |
+| User toggles for alerts                    | `PUT /api/v1/me/preferences` persists to `member_notification_preferences` |
+| Account security UI                        | `/settings` → Account security section                                     |
 
 ## Environment
 
@@ -78,4 +78,3 @@ Also enable in Supabase Auth settings:
   clients) hosted on a public HTTPS URL.
 - Preview rendering after any edit with a tool like [Litmus](https://litmus.com) or
   [Email on Acid](https://www.emailonacid.com) before shipping.
-

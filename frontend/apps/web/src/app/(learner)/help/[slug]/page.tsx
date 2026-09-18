@@ -2,7 +2,10 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { PageGate } from "../../../../components/patterns/PageGate";
 import { HelpArticlePage } from "../../../../features/help-center/components/HelpArticlePage";
-import { HELP_ARTICLES, getHelpArticle } from "../../../../features/help-center/help-center-content";
+import {
+  HELP_ARTICLES,
+  getHelpArticle,
+} from "../../../../features/help-center/help-center-content";
 
 type HelpArticleRouteProps = {
   params: Promise<{ slug: string }>;

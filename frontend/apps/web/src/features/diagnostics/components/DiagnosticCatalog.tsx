@@ -225,7 +225,10 @@ function IntroModal({
               </blockquote>
 
               <dl className="mt-6 space-y-3">
-                <IntroRow icon={Timer} label={`Duration: ${formatDuration(item.estimatedMinutes)}`} />
+                <IntroRow
+                  icon={Timer}
+                  label={`Duration: ${formatDuration(item.estimatedMinutes)}`}
+                />
                 <IntroRow icon={Brain} label="Focus: Your competency themes" />
                 <IntroRow
                   icon={BadgeCheck}

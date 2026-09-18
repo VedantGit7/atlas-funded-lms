@@ -23,10 +23,7 @@ import { DropdownMenu, type DropdownMenuItem } from "@atlas/design-system";
 import { ClientApiError, clientApi, toast } from "../../../lib/client-api";
 import { generalSettingsBackLinkClassName } from "../general-settings/general-settings-shared";
 import { dropdownPanelSurfaceClassName } from "../../studio/courses/admin-form-dropdown-shared";
-import {
-  managePageDescClassName,
-  managePageTitleClassName,
-} from "../manage/manage-ui-shared";
+import { managePageDescClassName, managePageTitleClassName } from "../manage/manage-ui-shared";
 import {
   formatWorkflowCount,
   formatWorkflowDate,
@@ -67,12 +64,7 @@ const EMPTY_SUMMARY: WorkflowListSummary = {
 };
 
 function StatusPill({ status }: { status: WorkflowStatus }) {
-  const tone =
-    status === "PUBLISHED"
-      ? "success"
-      : status === "DRAFT"
-        ? "neutral"
-        : "warning";
+  const tone = status === "PUBLISHED" ? "success" : status === "DRAFT" ? "neutral" : "warning";
   return (
     <span
       className={[
@@ -148,7 +140,9 @@ export function WorkflowsListPanel() {
       setDebouncedQuery(query.trim());
       setPage(1);
     }, 250);
-    return () => window.clearTimeout(timer);
+    return () => {
+      window.clearTimeout(timer);
+    };
   }, [query]);
 
   useEffect(() => {
@@ -166,13 +160,11 @@ export function WorkflowsListPanel() {
         `/api/v1/marketing/workflows?${params.toString()}`,
       );
       setItems(response.data.items);
-      setSummary(response.data.summary ?? EMPTY_SUMMARY);
+      setSummary(response.data.summary);
     } catch (caught) {
       setItems([]);
       setSummary(EMPTY_SUMMARY);
-      toast.error(
-        caught instanceof ClientApiError ? caught.message : "Could not load workflows.",
-      );
+      toast.error(caught instanceof ClientApiError ? caught.message : "Could not load workflows.");
     } finally {
       setLoading(false);
     }
@@ -192,8 +184,7 @@ export function WorkflowsListPanel() {
   const rangeStart = items.length === 0 ? 0 : (safePage - 1) * PAGE_SIZE + 1;
   const rangeEnd = Math.min(safePage * PAGE_SIZE, items.length);
   const hasFilters = Boolean(debouncedQuery || tab !== "ALL");
-  const deleteMatches =
-    deleteRow != null && deleteConfirm.trim() === deleteRow.title.trim();
+  const deleteMatches = deleteRow != null && deleteConfirm.trim() === deleteRow.title.trim();
 
   async function runAction(id: string, path: string, successMessage: string) {
     setActionBusy(id);
@@ -282,9 +273,7 @@ export function WorkflowsListPanel() {
       setDeleteConfirm("");
       await load();
     } catch (caught) {
-      toast.error(
-        caught instanceof ClientApiError ? caught.message : "Could not delete workflow.",
-      );
+      toast.error(caught instanceof ClientApiError ? caught.message : "Could not delete workflow.");
     } finally {
       setDeleteBusy(false);
     }
@@ -396,7 +385,9 @@ export function WorkflowsListPanel() {
                 type="button"
                 role="tab"
                 aria-selected={active}
-                onClick={() => setTab(entry.id)}
+                onClick={() => {
+                  setTab(entry.id);
+                }}
                 className={[
                   "relative px-3 py-2 text-[12px] font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]",
                   active
@@ -428,7 +419,9 @@ export function WorkflowsListPanel() {
             id="workflows-search"
             type="search"
             value={query}
-            onChange={(event) => setQuery(event.target.value)}
+            onChange={(event) => {
+              setQuery(event.target.value);
+            }}
             placeholder="Search workflows…"
             className="w-full rounded-lg border-none bg-[var(--admin-surface-low)] py-2 pl-10 pr-4 text-[13px] text-[var(--admin-on-surface)] outline-none ring-1 ring-[var(--admin-border)] transition-[box-shadow] placeholder:text-[var(--admin-on-surface-variant)]/60 focus:ring-2 focus:ring-[var(--admin-primary)]/20"
           />
@@ -538,7 +531,10 @@ export function WorkflowsListPanel() {
                     </td>
                     <td className="px-6 py-5">
                       <div className="flex items-center gap-2 text-sm text-[var(--admin-on-surface-variant)]">
-                        <Zap className="h-[18px] w-[18px] shrink-0 text-[var(--admin-primary)]" aria-hidden="true" />
+                        <Zap
+                          className="h-[18px] w-[18px] shrink-0 text-[var(--admin-primary)]"
+                          aria-hidden="true"
+                        />
                         <span className="truncate">{row.triggerLabel}</span>
                       </div>
                     </td>
@@ -586,7 +582,9 @@ export function WorkflowsListPanel() {
               <button
                 type="button"
                 disabled={safePage <= 1}
-                onClick={() => setPage((current) => Math.max(1, current - 1))}
+                onClick={() => {
+                  setPage((current) => Math.max(1, current - 1));
+                }}
                 className="rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] p-2 text-[var(--admin-on-surface-variant)] transition-colors hover:bg-[var(--admin-surface-high)] disabled:opacity-50"
                 aria-label="Previous page"
               >
@@ -598,7 +596,9 @@ export function WorkflowsListPanel() {
               <button
                 type="button"
                 disabled={safePage >= totalPages}
-                onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
+                onClick={() => {
+                  setPage((current) => Math.min(totalPages, current + 1));
+                }}
                 className="rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] p-2 text-[var(--admin-on-surface-variant)] transition-colors hover:bg-[var(--admin-surface-high)] disabled:opacity-50"
                 aria-label="Next page"
               >
@@ -667,13 +667,17 @@ export function WorkflowsListPanel() {
               </h2>
               <p className="text-sm text-[var(--admin-on-surface-variant)]">
                 Type{" "}
-                <span className="font-semibold text-[var(--admin-on-surface)]">{deleteRow.title}</span>{" "}
+                <span className="font-semibold text-[var(--admin-on-surface)]">
+                  {deleteRow.title}
+                </span>{" "}
                 to confirm. Active runs already in progress are not cancelled by this action.
               </p>
               <input
                 type="text"
                 value={deleteConfirm}
-                onChange={(event) => setDeleteConfirm(event.target.value)}
+                onChange={(event) => {
+                  setDeleteConfirm(event.target.value);
+                }}
                 placeholder="Workflow title"
                 className="w-full rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] px-3 py-2.5 text-sm outline-none focus:border-[var(--admin-danger)] focus:ring-2 focus:ring-[var(--admin-danger)]/20"
               />

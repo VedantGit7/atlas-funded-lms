@@ -45,6 +45,7 @@ import {
   insightTableHeadClassName,
   insightTableRowClassName,
 } from "./admin-insights-shared";
+import { csvEscape } from "@/lib/export/csv";
 
 type SalesInsightPipelineViewProps = {
   slug: string;
@@ -76,12 +77,6 @@ async function copyText(text: string): Promise<boolean> {
   } catch {
     return false;
   }
-}
-
-function csvEscape(value: string | number): string {
-  const raw = String(value);
-  if (/[",\n]/.test(raw)) return `"${raw.replace(/"/g, '""')}"`;
-  return raw;
 }
 
 function pipelineCsv(board: InsightSalesPipelineBoard): string {

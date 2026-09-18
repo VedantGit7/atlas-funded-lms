@@ -66,9 +66,7 @@ export function ManageAnswerReviewsPanel() {
       const response = await listGradingTasks({
         assignedTo: "all",
         limit: 50,
-        ...(statusFilter
-          ? { status: statusFilter as "PENDING" | "IN_PROGRESS" | "GRADED" }
-          : {}),
+        ...(statusFilter ? { status: statusFilter as "PENDING" | "IN_PROGRESS" | "GRADED" } : {}),
         ...(query.trim() ? { q: query.trim() } : {}),
       });
       setTasks(response.data);
@@ -102,7 +100,7 @@ export function ManageAnswerReviewsPanel() {
       .then((response) => {
         if (!cancelled) setTaskDetail(response.data);
       })
-      .catch((caught) => {
+      .catch((caught: unknown) => {
         if (!cancelled) {
           setError(formatGradingApiError(caught));
           setTaskDetail(null);
@@ -202,7 +200,9 @@ export function ManageAnswerReviewsPanel() {
                     key={task.id}
                     className="border-b border-[var(--admin-border)] last:border-b-0 transition-colors hover:bg-[var(--admin-surface-high)]"
                   >
-                    <td className={`${manageTableTdClassName} font-semibold`}>{task.assessmentTitle}</td>
+                    <td className={`${manageTableTdClassName} font-semibold`}>
+                      {task.assessmentTitle}
+                    </td>
                     <td className={manageTableTdClassName}>{task.learnerDisplayName}</td>
                     <td className={manageTableTdClassName}>
                       <span className="rounded-md bg-[var(--admin-surface-high)] px-2 py-0.5 text-xs font-medium text-[var(--admin-on-surface-variant)]">
@@ -210,7 +210,9 @@ export function ManageAnswerReviewsPanel() {
                       </span>
                     </td>
                     <td className={manageTableTdClassName}>{String(task.possiblePoints)}</td>
-                    <td className={manageTableTdClassName}>{formatSubmittedAt(task.submittedAt)}</td>
+                    <td className={manageTableTdClassName}>
+                      {formatSubmittedAt(task.submittedAt)}
+                    </td>
                     <td className={manageTableTdClassName}>
                       <span className={manageStatusChipClassName(taskStatusTone(task.status))}>
                         {task.status.replaceAll("_", " ")}
@@ -283,7 +285,7 @@ function EvaluateDrawer({
 
   const isGraded = task?.status === "GRADED";
 
-  async function handleSubmit(event: React.FormEvent) {
+  async function handleSubmit(event: React.SyntheticEvent) {
     event.preventDefault();
     if (!task || isGraded) return;
 
@@ -331,7 +333,10 @@ function EvaluateDrawer({
             <p className="text-xs font-semibold uppercase tracking-wide text-[var(--admin-on-surface-variant)]">
               Answer review
             </p>
-            <h2 id="evaluate-drawer-title" className="truncate text-lg font-bold text-[var(--admin-on-surface)]">
+            <h2
+              id="evaluate-drawer-title"
+              className="truncate text-lg font-bold text-[var(--admin-on-surface)]"
+            >
               {task?.assessment.title ?? "Evaluate submission"}
             </h2>
           </div>
@@ -352,11 +357,15 @@ function EvaluateDrawer({
               Loading submission…
             </div>
           ) : !task ? (
-            <p className="text-sm text-[var(--admin-on-surface-variant)]">Could not load task {taskId}.</p>
+            <p className="text-sm text-[var(--admin-on-surface-variant)]">
+              Could not load task {taskId}.
+            </p>
           ) : (
             <div className="space-y-4">
               <div className="rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface-high)] p-4">
-                <p className="text-sm font-semibold text-[var(--admin-on-surface)]">{task.learner.displayName}</p>
+                <p className="text-sm font-semibold text-[var(--admin-on-surface)]">
+                  {task.learner.displayName}
+                </p>
                 <p className="mt-1 text-xs text-[var(--admin-on-surface-variant)]">
                   {task.answers.length} answer{task.answers.length === 1 ? "" : "s"} · max{" "}
                   {String(task.possiblePoints)} pts
@@ -371,7 +380,9 @@ function EvaluateDrawer({
                   <p className="text-xs font-semibold uppercase tracking-wide text-[var(--admin-on-surface-variant)]">
                     Question {String(index + 1)}
                   </p>
-                  <p className="mt-1 text-sm font-medium text-[var(--admin-on-surface)]">{answer.prompt}</p>
+                  <p className="mt-1 text-sm font-medium text-[var(--admin-on-surface)]">
+                    {answer.prompt}
+                  </p>
                   <p className="mt-3 whitespace-pre-wrap text-sm text-[var(--admin-on-surface-variant)]">
                     {formatAnswer(answer.learnerAnswer)}
                   </p>
@@ -384,9 +395,14 @@ function EvaluateDrawer({
                 </p>
               ) : null}
 
-              <form className="space-y-4 border-t border-[var(--admin-border)] pt-4" onSubmit={(event) => void handleSubmit(event)}>
+              <form
+                className="space-y-4 border-t border-[var(--admin-border)] pt-4"
+                onSubmit={(event) => void handleSubmit(event)}
+              >
                 <label className="block text-sm">
-                  <span className="mb-1 block font-medium text-[var(--admin-on-surface-variant)]">Points</span>
+                  <span className="mb-1 block font-medium text-[var(--admin-on-surface-variant)]">
+                    Points
+                  </span>
                   <input
                     type="number"
                     min={0}
@@ -401,7 +417,9 @@ function EvaluateDrawer({
                   />
                 </label>
                 <label className="block text-sm">
-                  <span className="mb-1 block font-medium text-[var(--admin-on-surface-variant)]">Remarks</span>
+                  <span className="mb-1 block font-medium text-[var(--admin-on-surface-variant)]">
+                    Remarks
+                  </span>
                   <textarea
                     rows={5}
                     value={remarks}
@@ -414,9 +432,15 @@ function EvaluateDrawer({
                   />
                 </label>
                 {isGraded ? (
-                  <p className="text-sm text-[var(--admin-on-surface-variant)]">This task has already been graded.</p>
+                  <p className="text-sm text-[var(--admin-on-surface-variant)]">
+                    This task has already been graded.
+                  </p>
                 ) : (
-                  <button type="submit" disabled={submitting} className={`${managePrimaryButtonClassName} w-full`}>
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className={`${managePrimaryButtonClassName} w-full`}
+                  >
                     {submitting ? "Submitting…" : "Submit grade"}
                   </button>
                 )}
@@ -426,7 +450,11 @@ function EvaluateDrawer({
         </div>
 
         <footer className="border-t border-[var(--admin-border)] px-5 py-4">
-          <button type="button" onClick={onClose} className={`${manageSecondaryButtonClassName} w-full`}>
+          <button
+            type="button"
+            onClick={onClose}
+            className={`${manageSecondaryButtonClassName} w-full`}
+          >
             Close
           </button>
         </footer>
@@ -441,6 +469,12 @@ function formatAnswer(value: unknown): string {
   try {
     return JSON.stringify(value, null, 2);
   } catch {
-    return String(value);
+    // Unserialisable (circular, BigInt): describe it rather than rendering the
+    // literal text "[object Object]" to a reviewer.
+    if (typeof value === "string") return value;
+    if (typeof value === "number" || typeof value === "boolean" || typeof value === "bigint") {
+      return String(value);
+    }
+    return "[unrenderable answer]";
   }
 }

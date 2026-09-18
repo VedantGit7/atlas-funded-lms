@@ -21,7 +21,11 @@ export function LessonPreviewPanel({ lesson, content }: LessonPreviewPanelProps)
         ) : null}
       </header>
       {lesson.videoProvider && lesson.videoUrl ? (
-        <LessonVideoEmbed provider={lesson.videoProvider} url={lesson.videoUrl} title="Lesson preview" />
+        <LessonVideoEmbed
+          provider={lesson.videoProvider}
+          url={lesson.videoUrl}
+          title="Lesson preview"
+        />
       ) : null}
       <pre className="whitespace-pre-wrap rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface-low)] p-4 font-mono text-sm leading-relaxed text-[var(--admin-on-surface)]">
         {content || "No content yet."}

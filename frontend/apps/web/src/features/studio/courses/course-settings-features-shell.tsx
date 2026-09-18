@@ -32,7 +32,9 @@ export function CourseSettingsFeaturesShell({
         <aside className="hidden w-[15.5rem] shrink-0 flex-col border-r border-[var(--admin-border)] bg-[var(--admin-surface)] lg:flex">
           <div className="border-b border-[var(--admin-border)] px-5 py-4">
             <p className="text-sm font-bold text-[var(--admin-on-surface)]">Features</p>
-            <p className={`${builderHelperClassName} mt-1`}>Use course features to enhance your course</p>
+            <p className={`${builderHelperClassName} mt-1`}>
+              Use course features to enhance your course
+            </p>
           </div>
           <nav className="flex flex-col gap-0.5 p-3" aria-label="Course feature settings">
             {COURSE_FEATURES_SETTINGS_SECTIONS.map((item) => {
@@ -82,13 +84,18 @@ export function CourseSettingsFeaturesShell({
               <h1 className="text-2xl font-bold tracking-tight text-[var(--admin-on-surface)] md:text-[1.75rem]">
                 {section.title}
               </h1>
-              <p className={`${builderHelperClassName} mt-2 max-w-2xl text-sm leading-relaxed md:text-[0.9375rem]`}>
+              <p
+                className={`${builderHelperClassName} mt-2 max-w-2xl text-sm leading-relaxed md:text-[0.9375rem]`}
+              >
                 {section.description}
               </p>
             </header>
 
             <div className="mb-6 lg:hidden">
-              <label htmlFor="course-features-settings-section" className={builderFieldLabelClassName}>
+              <label
+                htmlFor="course-features-settings-section"
+                className={builderFieldLabelClassName}
+              >
                 Section
               </label>
               <select

@@ -71,3 +71,17 @@ BEGIN
   RETURN NEW;
 END;
 $$;
+
+-- Append-only guard used by trigger definitions in prisma/sql/triggers and, since
+-- migration 098, directly by Prisma migrations. It must therefore be defined during
+-- setup (before `prisma migrate deploy`) rather than only in sql/triggers, which
+-- cannot run until the tables it attaches to already exist. Definition is identical
+-- to the one in sql/triggers/006 and is CREATE OR REPLACE, so re-applying is a no-op.
+CREATE OR REPLACE FUNCTION app.reject_update_delete()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  RAISE EXCEPTION 'append-only table % cannot be updated or deleted', TG_TABLE_NAME;
+END;
+$$;

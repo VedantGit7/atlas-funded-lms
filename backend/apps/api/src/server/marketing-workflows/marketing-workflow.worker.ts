@@ -20,14 +20,15 @@ export async function handleMarketingWorkflowWorkerEvent(event: {
   payload: unknown;
   requestId: string;
 }): Promise<void> {
-  if (!event.tenantId) return;
+  const tenantId = event.tenantId;
+  if (!tenantId) return;
   const payload =
     event.payload && typeof event.payload === "object"
       ? (event.payload as Record<string, unknown>)
       : {};
   await withTenantTx(
     {
-      tenantId: event.tenantId,
+      tenantId,
       requestId: event.requestId,
       allowAnonymousTenantRead: true,
     },
@@ -35,7 +36,7 @@ export async function handleMarketingWorkflowWorkerEvent(event: {
       await handleMarketingWorkflowOutboxEvent(
         tx,
         {
-          tenantId: event.tenantId!,
+          tenantId,
           actorMembershipId: SYSTEM_ACTOR,
           requestId: event.requestId,
         },

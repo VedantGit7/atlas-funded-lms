@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./route-metadata": "./src/route-metadata.ts"
   },
   "scripts": {
     "build": "echo \"No authorization build configured yet.\"",

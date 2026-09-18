@@ -12,7 +12,9 @@ type ReadyAssetRow = {
   status: string;
 };
 
-export function buildPublicSafeAssetUrl(asset: Pick<ReadyAssetRow, "bucket" | "object_key">): string | null {
+export function buildPublicSafeAssetUrl(
+  asset: Pick<ReadyAssetRow, "bucket" | "object_key">,
+): string | null {
   const env = parseStorageEnv(process.env);
   if (!env.R2_PUBLIC_ENDPOINT) {
     return null;

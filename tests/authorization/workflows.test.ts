@@ -7,7 +7,12 @@ function workflowTransitionTx(roleKeys: string[]) {
       .fn()
       .mockResolvedValueOnce([{ key: "workflow.transition.act" }])
       .mockResolvedValueOnce([])
-      .mockResolvedValueOnce(roleKeys.map((role_key) => ({ role_key }))),
+      .mockResolvedValueOnce(
+        roleKeys.map((role_key) => ({
+          role_key,
+          bypasses_resource_predicates: role_key === "owner" || role_key === "admin",
+        })),
+      ),
   };
 }
 
@@ -97,7 +102,7 @@ describe("workflow authorization", () => {
           .fn()
           .mockResolvedValueOnce([{ key: "workflow.transition.act" }])
           .mockResolvedValueOnce([{ effect: "DENY" }])
-          .mockResolvedValueOnce([{ role_key: "admin" }]),
+          .mockResolvedValueOnce([{ role_key: "admin", bypasses_resource_predicates: true }]),
       },
       actor: { tenantId: "tenant-a", membershipId: "admin-a" },
       permission: "workflow.transition.act",

@@ -45,7 +45,7 @@ function formatError(error: unknown): string {
 
 function defaultOverride(): CourseXpRuleOverride {
   return {
-    eventType: GAMIFICATION_EVENT_TYPES[0]?.value ?? "lesson.completed",
+    eventType: GAMIFICATION_EVENT_TYPES[0].value,
     points: 10,
   };
 }
@@ -152,7 +152,9 @@ export function CourseSettingsGamificationPanel({
             <div className={SETTINGS_CARD_CLASSNAME}>
               <div className="mb-4 flex items-center justify-between gap-3">
                 <div>
-                  <p className="text-sm font-semibold text-[var(--admin-on-surface)]">XP overrides</p>
+                  <p className="text-sm font-semibold text-[var(--admin-on-surface)]">
+                    XP overrides
+                  </p>
                   <p className="mt-1 text-xs text-[var(--admin-on-surface-variant)]">
                     One override per event type. Assessment graded supports an optional pass
                     condition.
@@ -226,8 +228,7 @@ export function CourseSettingsGamificationPanel({
                             disabled={disabled}
                             onChange={(e) => {
                               updateOverride(index, {
-                                condition:
-                                  e.target.value === "pass" ? "pass" : undefined,
+                                condition: e.target.value === "pass" ? "pass" : undefined,
                               });
                             }}
                           >

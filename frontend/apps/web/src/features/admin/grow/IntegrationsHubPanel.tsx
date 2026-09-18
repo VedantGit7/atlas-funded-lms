@@ -78,8 +78,12 @@ const EMPTY_OVERVIEW: MarketingIntegrationOverviewDto = {
 
 function copyText(value: string, label: string) {
   void navigator.clipboard.writeText(value).then(
-    () => toast.success(`${label} copied.`),
-    () => toast.error(`Could not copy ${label.toLowerCase()}.`),
+    () => {
+      toast.success(`${label} copied.`);
+    },
+    () => {
+      toast.error(`Could not copy ${label.toLowerCase()}.`);
+    },
   );
 }
 
@@ -162,9 +166,7 @@ function ToggleSwitch(props: {
       }}
       className={[
         "relative h-5 w-9 shrink-0 rounded-full transition-colors duration-200 disabled:opacity-50",
-        props.checked
-          ? "bg-[var(--admin-primary)]"
-          : "bg-[var(--admin-outline)]",
+        props.checked ? "bg-[var(--admin-primary)]" : "bg-[var(--admin-outline)]",
       ].join(" ")}
     >
       <span
@@ -219,9 +221,7 @@ export function IntegrationsHubPanel() {
       setCredentials(credentialsRes.data);
     } catch (caught) {
       toast.error(
-        caught instanceof ClientApiError
-          ? caught.message
-          : "Could not load integrations.",
+        caught instanceof ClientApiError ? caught.message : "Could not load integrations.",
       );
     } finally {
       setLoading(false);
@@ -247,10 +247,7 @@ export function IntegrationsHubPanel() {
 
   const reservedWithoutHooks = useMemo(
     () =>
-      events.filter(
-        (event) =>
-          !isLiveIntegrationEvent(event.key) && event.webhooks.length === 0,
-      ),
+      events.filter((event) => !isLiveIntegrationEvent(event.key) && event.webhooks.length === 0),
     [events],
   );
 
@@ -258,9 +255,7 @@ export function IntegrationsHubPanel() {
     () =>
       events.map((event) => ({
         value: event.key,
-        label: isLiveIntegrationEvent(event.key)
-          ? event.label
-          : `${event.label} (reserved)`,
+        label: isLiveIntegrationEvent(event.key) ? event.label : `${event.label} (reserved)`,
       })),
     [events],
   );
@@ -281,9 +276,7 @@ export function IntegrationsHubPanel() {
       setSnippets(response.data);
       await loadAll();
     } catch (caught) {
-      toast.error(
-        caught instanceof ClientApiError ? caught.message : "Could not save snippets.",
-      );
+      toast.error(caught instanceof ClientApiError ? caught.message : "Could not save snippets.");
     } finally {
       setSavingSnippets(false);
     }
@@ -297,8 +290,7 @@ export function IntegrationsHubPanel() {
         {},
         "marketing-integrations-rotate-key",
         {
-          successMessage:
-            "API key generated. Copy it now; it will not be shown again.",
+          successMessage: "API key generated. Copy it now; it will not be shown again.",
         },
       );
       setFreshApiKey(response.data.apiKey);
@@ -317,9 +309,7 @@ export function IntegrationsHubPanel() {
         apiKeyCreatedAt: response.data.apiKeyCreatedAt,
       }));
     } catch (caught) {
-      toast.error(
-        caught instanceof ClientApiError ? caught.message : "Could not rotate API key.",
-      );
+      toast.error(caught instanceof ClientApiError ? caught.message : "Could not rotate API key.");
     } finally {
       setWebhookBusy(null);
     }
@@ -342,9 +332,7 @@ export function IntegrationsHubPanel() {
       setAddEndpointOpen(false);
       await loadAll();
     } catch (caught) {
-      toast.error(
-        caught instanceof ClientApiError ? caught.message : "Could not add webhook.",
-      );
+      toast.error(caught instanceof ClientApiError ? caught.message : "Could not add webhook.");
     } finally {
       setWebhookBusy(null);
     }
@@ -365,9 +353,7 @@ export function IntegrationsHubPanel() {
       }
       await loadAll();
     } catch (caught) {
-      toast.error(
-        caught instanceof ClientApiError ? caught.message : "Webhook test failed.",
-      );
+      toast.error(caught instanceof ClientApiError ? caught.message : "Webhook test failed.");
     } finally {
       setWebhookBusy(null);
     }
@@ -389,9 +375,7 @@ export function IntegrationsHubPanel() {
       }
       await loadAll();
     } catch (caught) {
-      toast.error(
-        caught instanceof ClientApiError ? caught.message : "Could not delete webhook.",
-      );
+      toast.error(caught instanceof ClientApiError ? caught.message : "Could not delete webhook.");
     } finally {
       setWebhookBusy(null);
     }
@@ -408,9 +392,7 @@ export function IntegrationsHubPanel() {
       );
       await loadAll();
     } catch (caught) {
-      toast.error(
-        caught instanceof ClientApiError ? caught.message : "Could not update webhook.",
-      );
+      toast.error(caught instanceof ClientApiError ? caught.message : "Could not update webhook.");
     } finally {
       setWebhookBusy(null);
     }
@@ -427,9 +409,7 @@ export function IntegrationsHubPanel() {
       setDeliveries(response.data.items);
     } catch (caught) {
       toast.error(
-        caught instanceof ClientApiError
-          ? caught.message
-          : "Could not load delivery log.",
+        caught instanceof ClientApiError ? caught.message : "Could not load delivery log.",
       );
     } finally {
       setDeliveriesLoading(false);
@@ -449,9 +429,7 @@ export function IntegrationsHubPanel() {
       : overview.snippetConfiguredCount > 0
         ? "Partial setup"
         : "Not set";
-  const apiKeyTone = overview.apiKeyConfigured
-    ? ("success" as const)
-    : ("neutral" as const);
+  const apiKeyTone = overview.apiKeyConfigured ? ("success" as const) : ("neutral" as const);
 
   const maskedKey = credentials?.apiKeyConfigured
     ? `${credentials.apiKeyPrefix ?? "atk_"}********************************`
@@ -504,7 +482,9 @@ export function IntegrationsHubPanel() {
             <button
               key={item.id}
               type="button"
-              onClick={() => setTab(item.id)}
+              onClick={() => {
+                setTab(item.id);
+              }}
               className={[
                 "px-5 py-3 text-xs font-semibold tracking-wide transition-colors motion-safe:duration-200",
                 active
@@ -620,22 +600,26 @@ export function IntegrationsHubPanel() {
                 Connect your automation stack
               </h2>
               <p className="mt-2 max-w-2xl text-[14px] text-[var(--admin-on-surface-variant)]">
-                Sign Up and Purchase events dispatch today. Other event types can be registered
-                now and will fire when those product hooks ship.
+                Sign Up and Purchase events dispatch today. Other event types can be registered now
+                and will fire when those product hooks ship.
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
               <button
                 type="button"
                 className="rounded-xl bg-[var(--admin-primary)] px-4 py-2 text-xs font-semibold text-[var(--admin-on-primary)] transition-colors hover:bg-[var(--admin-primary-strong)]"
-                onClick={() => setTab("webhooks")}
+                onClick={() => {
+                  setTab("webhooks");
+                }}
               >
                 Configure webhooks
               </button>
               <button
                 type="button"
                 className="rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 py-2 text-xs font-semibold text-[var(--admin-on-surface)] transition-colors hover:bg-[var(--admin-surface-high)]"
-                onClick={() => setTab("credentials")}
+                onClick={() => {
+                  setTab("credentials");
+                }}
               >
                 View credentials
               </button>
@@ -658,7 +642,9 @@ export function IntegrationsHubPanel() {
             <button
               type="button"
               className="inline-flex items-center gap-1 text-xs font-semibold text-[var(--admin-primary)] hover:underline"
-              onClick={() => setAddEndpointOpen(true)}
+              onClick={() => {
+                setAddEndpointOpen(true);
+              }}
             >
               <Plus className="h-4 w-4" />
               Add endpoint
@@ -676,7 +662,9 @@ export function IntegrationsHubPanel() {
               <button
                 type="button"
                 className="mt-4 inline-flex items-center gap-2 rounded-xl bg-[var(--admin-primary)] px-4 py-2 text-xs font-semibold text-[var(--admin-on-primary)]"
-                onClick={() => setAddEndpointOpen(true)}
+                onClick={() => {
+                  setAddEndpointOpen(true);
+                }}
               >
                 <Plus className="h-4 w-4" />
                 Add endpoint
@@ -695,7 +683,9 @@ export function IntegrationsHubPanel() {
                   >
                     <div
                       className="flex cursor-pointer items-center justify-between gap-4 p-4 transition-colors hover:bg-[var(--admin-surface-low)]"
-                      onClick={() => setExpandedId(open ? null : hook.id)}
+                      onClick={() => {
+                        setExpandedId(open ? null : hook.id);
+                      }}
                       onKeyDown={(keyboardEvent) => {
                         if (keyboardEvent.key === "Enter" || keyboardEvent.key === " ") {
                           keyboardEvent.preventDefault();
@@ -827,8 +817,8 @@ export function IntegrationsHubPanel() {
                 Caution: trusted HTML only
               </p>
               <p className="mt-1 text-[13px] text-[var(--admin-on-surface-variant)]">
-                Only paste snippets from sources you trust. Malicious code can expose learner
-                data or compromise your school site.
+                Only paste snippets from sources you trust. Malicious code can expose learner data
+                or compromise your school site.
               </p>
             </div>
           </div>
@@ -881,17 +871,16 @@ export function IntegrationsHubPanel() {
                 <CredentialField
                   label="School ID"
                   value={credentials?.schoolId ?? ""}
-                  onCopy={() =>
-                    credentials?.schoolId && copyText(credentials.schoolId, "School ID")
-                  }
+                  onCopy={() => {
+                    if (credentials?.schoolId) copyText(credentials.schoolId, "School ID");
+                  }}
                 />
                 <CredentialField
                   label="Tenant slug"
                   value={credentials?.tenantSlug ?? ""}
-                  onCopy={() =>
-                    credentials?.tenantSlug &&
-                    copyText(credentials.tenantSlug, "Tenant slug")
-                  }
+                  onCopy={() => {
+                    if (credentials?.tenantSlug) copyText(credentials.tenantSlug, "Tenant slug");
+                  }}
                 />
               </div>
               <p className="mt-5 text-[13px] text-[var(--admin-on-surface-variant)]">
@@ -936,7 +925,9 @@ export function IntegrationsHubPanel() {
                       <button
                         type="button"
                         className="rounded-xl border border-[var(--admin-border)] px-3 transition-colors hover:bg-[var(--admin-surface-high)]"
-                        onClick={() => setRevealKey((current) => !current)}
+                        onClick={() => {
+                          setRevealKey((current) => !current);
+                        }}
                         aria-label={revealKey ? "Hide API key" : "Reveal API key"}
                       >
                         {revealKey ? "Hide" : "Show"}
@@ -946,7 +937,9 @@ export function IntegrationsHubPanel() {
                       <button
                         type="button"
                         className="rounded-xl border border-[var(--admin-border)] px-3 transition-colors hover:bg-[var(--admin-surface-high)]"
-                        onClick={() => copyText(freshApiKey, "API key")}
+                        onClick={() => {
+                          copyText(freshApiKey, "API key");
+                        }}
                         aria-label="Copy API key"
                       >
                         <Copy className="h-4 w-4 text-[var(--admin-on-surface-variant)]" />
@@ -966,7 +959,9 @@ export function IntegrationsHubPanel() {
                     type="button"
                     className="inline-flex items-center gap-1 text-xs font-semibold text-[var(--admin-danger)] hover:underline disabled:opacity-50"
                     disabled={webhookBusy === "rotate"}
-                    onClick={() => setRotateOpen(true)}
+                    onClick={() => {
+                      setRotateOpen(true);
+                    }}
                   >
                     <RefreshCw className="h-3.5 w-3.5" />
                     {credentials?.apiKeyConfigured ? "Rotate secret key" : "Generate secret key"}
@@ -998,7 +993,9 @@ export function IntegrationsHubPanel() {
             aria-modal="true"
             aria-labelledby="integrations-add-endpoint-title"
             className={`admin-theme w-full max-w-lg space-y-4 bg-[var(--admin-surface)] p-6 shadow-xl ${dropdownPanelSurfaceClassName}`}
-            onClick={(event) => event.stopPropagation()}
+            onClick={(event) => {
+              event.stopPropagation();
+            }}
           >
             <h2
               id="integrations-add-endpoint-title"
@@ -1012,7 +1009,9 @@ export function IntegrationsHubPanel() {
               ariaLabel="Webhook event"
               value={selectedEvent}
               options={eventOptions}
-              onChange={(value) => setSelectedEvent(value as MarketingIntegrationEventKey)}
+              onChange={(value) => {
+                setSelectedEvent(value as MarketingIntegrationEventKey);
+              }}
             />
             <p className="text-[13px] text-[var(--admin-on-surface-variant)]">
               {INTEGRATION_EVENT_HINTS[selectedEvent]}
@@ -1024,7 +1023,9 @@ export function IntegrationsHubPanel() {
               <input
                 id="integrations-webhook-url"
                 value={newWebhookUrl}
-                onChange={(event) => setNewWebhookUrl(event.target.value)}
+                onChange={(event) => {
+                  setNewWebhookUrl(event.target.value);
+                }}
                 placeholder="https://hooks.example.com/catch/..."
                 className={`${MESSENGER_WIZARD_FIELD_CLASS} font-mono text-xs`}
               />
@@ -1034,7 +1035,9 @@ export function IntegrationsHubPanel() {
                 type="button"
                 className="rounded-xl px-4 py-2 text-sm font-semibold text-[var(--admin-on-surface-variant)] hover:bg-[var(--admin-surface-high)]"
                 disabled={webhookBusy === "add"}
-                onClick={() => setAddEndpointOpen(false)}
+                onClick={() => {
+                  setAddEndpointOpen(false);
+                }}
               >
                 Cancel
               </button>
@@ -1098,8 +1101,7 @@ export function IntegrationsHubPanel() {
               ) : null}
               {!deliveriesLoading && deliveries.length === 0 ? (
                 <p className="text-sm text-[var(--admin-on-surface-variant)]">
-                  No delivery attempts recorded yet. Run Test &amp; save to create the first
-                  entry.
+                  No delivery attempts recorded yet. Run Test &amp; save to create the first entry.
                 </p>
               ) : null}
               {deliveries.map((item) => (
@@ -1154,7 +1156,9 @@ export function IntegrationsHubPanel() {
             aria-modal="true"
             aria-labelledby="integrations-rotate-title"
             className={`admin-theme w-full max-w-md space-y-4 bg-[var(--admin-surface)] p-6 shadow-xl ${dropdownPanelSurfaceClassName}`}
-            onClick={(event) => event.stopPropagation()}
+            onClick={(event) => {
+              event.stopPropagation();
+            }}
           >
             <h2
               id="integrations-rotate-title"
@@ -1172,7 +1176,9 @@ export function IntegrationsHubPanel() {
                 type="button"
                 className="rounded-xl px-4 py-2 text-sm font-semibold text-[var(--admin-on-surface-variant)] hover:bg-[var(--admin-surface-high)]"
                 disabled={webhookBusy === "rotate"}
-                onClick={() => setRotateOpen(false)}
+                onClick={() => {
+                  setRotateOpen(false);
+                }}
               >
                 Cancel
               </button>
@@ -1210,7 +1216,9 @@ function SnippetEditor(props: {
       </p>
       <textarea
         value={props.value}
-        onChange={(event) => props.onChange(event.target.value)}
+        onChange={(event) => {
+          props.onChange(event.target.value);
+        }}
         rows={7}
         spellCheck={false}
         className="min-h-[120px] w-full resize-y rounded-lg border border-[var(--admin-border)] bg-[color-mix(in_srgb,var(--admin-on-surface)_88%,var(--admin-surface))] p-4 font-mono text-[12px] leading-relaxed text-[var(--admin-surface)] outline-none transition-[border-color,box-shadow] focus:border-[var(--admin-primary)] focus:ring-2 focus:ring-[var(--admin-primary)]/25"

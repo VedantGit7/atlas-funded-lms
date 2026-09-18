@@ -1,6 +1,9 @@
 import type { RouteMetadata } from "@atlas/api/route-metadata";
 import { loadCourseResourceRef } from "../../../../../../server/courses/load-course-resource-ref";
-import type { CourseReviewsQuery, SubmitReviewBody } from "../../../../../../server/reviews/schemas";
+import type {
+  CourseReviewsQuery,
+  SubmitReviewBody,
+} from "../../../../../../server/reviews/schemas";
 
 export const getReviewsRouteMetadata = {
   permission: "course_review.read",

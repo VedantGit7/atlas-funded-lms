@@ -8,7 +8,6 @@ import {
   FilePen,
   FileSearch,
   GraduationCap,
-  Plus,
   Settings,
   type LucideIcon,
 } from "lucide-react";
@@ -72,10 +71,7 @@ export function StudioDashboardView({
 }: StudioDashboardViewProps) {
   const inReviewTotal = reviewCount + pendingWorkflowCount;
   const totalCourses =
-    contentStatus.published +
-    contentStatus.draft +
-    contentStatus.review +
-    contentStatus.archived;
+    contentStatus.published + contentStatus.draft + contentStatus.review + contentStatus.archived;
   const publishRate =
     totalCourses > 0 ? Math.min(100, Math.round((publishedCount / totalCourses) * 100)) : 0;
 
@@ -332,7 +328,12 @@ export function StudioDashboardView({
 
 function ContentPipeline({ summary }: { summary: ContentStatusSummary }) {
   const segments = [
-    { key: "published", label: "Published", value: summary.published, color: "var(--admin-success)" },
+    {
+      key: "published",
+      label: "Published",
+      value: summary.published,
+      color: "var(--admin-success)",
+    },
     { key: "review", label: "In review", value: summary.review, color: "var(--admin-warning)" },
     { key: "draft", label: "Draft", value: summary.draft, color: "var(--admin-primary)" },
     { key: "archived", label: "Archived", value: summary.archived, color: "var(--admin-outline)" },
@@ -458,7 +459,9 @@ function QuickLink({
         </span>
         <span
           className={`block truncate text-xs ${
-            urgent ? "font-semibold text-[var(--admin-danger)]" : "text-[var(--admin-on-surface-variant)]"
+            urgent
+              ? "font-semibold text-[var(--admin-danger)]"
+              : "text-[var(--admin-on-surface-variant)]"
           }`}
         >
           {caption}

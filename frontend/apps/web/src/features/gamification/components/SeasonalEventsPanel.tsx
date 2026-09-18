@@ -481,31 +481,34 @@ export function SeasonalEventsPanel({
         </div>
       </section>
 
-      <GamificationAnimatedCollapsible open={Boolean(selectedId && editForm)} id="seasonal-edit-panel">
+      <GamificationAnimatedCollapsible
+        open={Boolean(selectedId && editForm)}
+        id="seasonal-edit-panel"
+      >
         {selectedId && editForm ? (
-        <section className={panelClassName}>
-          <div className={panelHeaderClassName}>
-            <div>
-              <p className={panelEyebrowClassName}>Edit</p>
-              <h2 className="font-semibold text-[var(--admin-on-surface)]">{editForm.name}</h2>
+          <section className={panelClassName}>
+            <div className={panelHeaderClassName}>
+              <div>
+                <p className={panelEyebrowClassName}>Edit</p>
+                <h2 className="font-semibold text-[var(--admin-on-surface)]">{editForm.name}</h2>
+              </div>
             </div>
-          </div>
-          <div className={panelBodyClassName}>
-            <SeasonalForm
-              mode="edit"
-              form={editForm}
-              setForm={(updater) => {
-                setEditForm((current) => (current ? updater(current) : current));
-              }}
-              quests={quests}
-              leaderboards={leaderboards}
-              busy={busy}
-              onSubmit={() => {
-                void saveEvent();
-              }}
-            />
-          </div>
-        </section>
+            <div className={panelBodyClassName}>
+              <SeasonalForm
+                mode="edit"
+                form={editForm}
+                setForm={(updater) => {
+                  setEditForm((current) => (current ? updater(current) : current));
+                }}
+                quests={quests}
+                leaderboards={leaderboards}
+                busy={busy}
+                onSubmit={() => {
+                  void saveEvent();
+                }}
+              />
+            </div>
+          </section>
         ) : null}
       </GamificationAnimatedCollapsible>
 

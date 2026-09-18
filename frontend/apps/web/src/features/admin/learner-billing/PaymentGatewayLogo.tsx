@@ -23,7 +23,10 @@ function accentFor(key: string): string {
 }
 
 function initialsOf(name: string): string {
-  const parts = name.replace(/[^A-Za-z0-9 ]/g, "").trim().split(/\s+/);
+  const parts = name
+    .replace(/[^A-Za-z0-9 ]/g, "")
+    .trim()
+    .split(/\s+/);
   if (parts.length >= 2 && parts[0] && parts[1]) {
     return `${parts[0][0] ?? ""}${parts[1][0] ?? ""}`.toUpperCase();
   }

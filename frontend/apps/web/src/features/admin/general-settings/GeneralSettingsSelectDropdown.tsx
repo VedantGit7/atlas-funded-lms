@@ -52,7 +52,11 @@ export function GeneralSettingsSelectDropdown({
         setOpen((current) => !current);
       }}
       triggerContent={
-        <span className={value ? "text-[var(--admin-on-surface)]" : "text-[var(--admin-on-surface-variant)]"}>
+        <span
+          className={
+            value ? "text-[var(--admin-on-surface)]" : "text-[var(--admin-on-surface-variant)]"
+          }
+        >
           {selectedLabel}
         </span>
       }

@@ -15,7 +15,8 @@ export type DailyCountRow = {
 export type ActivityRow = {
   id: string;
   channel: "push" | "email" | "announcements" | "whatsapp";
-  kind: "sent" | "scheduled" | "draft";
+  /** `lower(status)::text` from the source tables — narrowed by the service. */
+  kind: string;
   title: string;
   detail: string;
   at: Date;
@@ -94,9 +95,7 @@ export const messengerHubRepository = {
     );
   },
 
-  async announcementCounts(
-    tx: TenantTx,
-  ): Promise<{ sent_count: number; total_reach: number }> {
+  async announcementCounts(tx: TenantTx): Promise<{ sent_count: number; total_reach: number }> {
     const rows = await tx.$queryRaw<Array<{ sent_count: number; total_reach: number }>>`
       select
         count(*)::int as sent_count,

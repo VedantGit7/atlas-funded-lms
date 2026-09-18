@@ -372,11 +372,7 @@ export const pushMessagesRepository = {
     return rows.map((row) => row.id);
   },
 
-  async listBatchMembershipIds(
-    tx: TenantTx,
-    batchId: string,
-    limit = 2000,
-  ): Promise<string[]> {
+  async listBatchMembershipIds(tx: TenantTx, batchId: string, limit = 2000): Promise<string[]> {
     const rows = await tx.$queryRaw<Array<{ membership_id: string }>>`
       select bm.membership_id::text
       from batch_memberships bm

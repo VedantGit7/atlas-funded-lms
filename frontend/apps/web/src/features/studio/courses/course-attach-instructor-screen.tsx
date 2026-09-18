@@ -12,10 +12,7 @@ import {
   type InstructorMember,
 } from "./create-course-add-member-dialog";
 import { courseInstructorIdsFromDetail } from "./course-instructor-settings";
-import {
-  attachCourseInstructor,
-  formatCourseInstructorError,
-} from "./course-instructors-client";
+import { attachCourseInstructor, formatCourseInstructorError } from "./course-instructors-client";
 import { lessonInputClassName } from "../lessons/lesson-editor-shared";
 import {
   inlineLessonGhostButtonClassName,
@@ -150,7 +147,9 @@ export function CourseAttachInstructorScreen({
             Back
           </button>
 
-          <p className="text-sm font-semibold text-[var(--admin-primary-strong)]">Add Instructors</p>
+          <p className="text-sm font-semibold text-[var(--admin-primary-strong)]">
+            Add Instructors
+          </p>
           <header className="mb-6 mt-1">
             <h1 className="text-2xl font-bold text-[var(--admin-on-surface)] md:text-3xl">
               Add Instructors

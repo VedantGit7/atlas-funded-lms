@@ -48,8 +48,8 @@ export function SeasonalEventBanner({ event }: SeasonalEventBannerProps) {
             {event.name}
           </h2>
           <p className="mt-2 text-sm leading-relaxed text-[color-mix(in_srgb,var(--primary-foreground)_78%,transparent)]">
-            Every lesson, assessment, and practice session you complete earns {multiplierLabel} while
-            this event runs. Keep your streak alive to make the most of it.
+            Every lesson, assessment, and practice session you complete earns {multiplierLabel}{" "}
+            while this event runs. Keep your streak alive to make the most of it.
           </p>
         </div>
 

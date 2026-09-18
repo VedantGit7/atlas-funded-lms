@@ -22,9 +22,7 @@ export default async function AdminPollsLiveSessionsRoutePage() {
     <AdminPageGate screenId="T50" state="ready" title="Live sessions">
       <Suspense
         fallback={
-          <p className="text-sm text-[var(--admin-on-surface-variant)]">
-            Loading live sessions…
-          </p>
+          <p className="text-sm text-[var(--admin-on-surface-variant)]">Loading live sessions…</p>
         }
       >
         <AdminPollsLiveSessionsPage />

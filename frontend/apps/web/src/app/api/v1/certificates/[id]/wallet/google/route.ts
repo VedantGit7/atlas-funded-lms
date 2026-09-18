@@ -13,5 +13,5 @@ export const POST = createTenantRoute<
   metadata: certificateWalletPassMetadata,
   params: certificateParamsSchema,
   output: certificateWalletPassResponseSchema,
-  handler: async ({ tx, ctx, params }) => issueGoogleWalletPass(tx, ctx, params["id"] ?? ""),
+  handler: async ({ tx, ctx, params }) => issueGoogleWalletPass(tx, ctx, params.id),
 });

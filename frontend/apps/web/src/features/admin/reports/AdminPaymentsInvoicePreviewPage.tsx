@@ -19,15 +19,13 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ClientApiError } from "../../../lib/client-api";
-import {
-  fetchPaymentInvoiceDetail,
-  type PaymentInvoiceDetail,
-} from "./admin-payments-roster-api";
+import { fetchPaymentInvoiceDetail, type PaymentInvoiceDetail } from "./admin-payments-roster-api";
 import { AdminPaymentInvoiceVoidModal } from "./AdminPaymentInvoiceVoidModal";
 import { PaymentsReportTabs } from "./PaymentsReportTabs";
 
 type Props = {
-  invoiceId: string;
+  /** The order's id — invoices are keyed by order, not by invoice number. */
+  orderId: string;
 };
 
 function formatMoney(cents: number, currency: string): string {
@@ -100,7 +98,7 @@ function downloadHtmlFile(filename: string, content: string) {
   URL.revokeObjectURL(url);
 }
 
-export function AdminPaymentsInvoicePreviewPage({ invoiceId }: Props) {
+export function AdminPaymentsInvoicePreviewPage({ orderId }: Props) {
   const [detail, setDetail] = useState<PaymentInvoiceDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -114,7 +112,7 @@ export function AdminPaymentsInvoicePreviewPage({ invoiceId }: Props) {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetchPaymentInvoiceDetail(invoiceId);
+      const response = await fetchPaymentInvoiceDetail(orderId);
       setDetail(response.data);
     } catch (err) {
       setDetail(null);
@@ -128,7 +126,7 @@ export function AdminPaymentsInvoicePreviewPage({ invoiceId }: Props) {
     } finally {
       setLoading(false);
     }
-  }, [invoiceId]);
+  }, [orderId]);
 
   useEffect(() => {
     void load();
@@ -149,24 +147,37 @@ export function AdminPaymentsInvoicePreviewPage({ invoiceId }: Props) {
     const blob = new Blob([detail.content], { type: "text/html;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     window.open(url, "_blank", "noopener,noreferrer");
-    window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    window.setTimeout(() => {
+      URL.revokeObjectURL(url);
+    }, 60_000);
   }
 
   function handlePrint() {
     if (!paperRef.current) return;
-    const printWindow = window.open("", "_blank", "noopener,noreferrer");
-    if (!printWindow || !detail) return;
-    printWindow.document.write(detail.content);
-    printWindow.document.close();
-    printWindow.focus();
-    printWindow.print();
+    if (!detail) return;
+    // `document.write` is deprecated. Handing the browser a Blob URL renders the
+    // same standalone invoice document without it.
+    const blob = new Blob([detail.content], { type: "text/html" });
+    const blobUrl = URL.createObjectURL(blob);
+    const printWindow = window.open(blobUrl, "_blank", "noopener,noreferrer");
+    if (!printWindow) {
+      URL.revokeObjectURL(blobUrl);
+      return;
+    }
+    printWindow.addEventListener("load", () => {
+      printWindow.focus();
+      printWindow.print();
+      URL.revokeObjectURL(blobUrl);
+    });
   }
 
   async function handleCopyLink() {
-    const url = `${window.location.origin}/admin/reports/payments/invoices/${invoiceId}`;
+    const url = `${window.location.origin}/admin/reports/payments/invoices/${orderId}`;
     await navigator.clipboard.writeText(url);
     setCopiedLink(true);
-    window.setTimeout(() => setCopiedLink(false), 1600);
+    window.setTimeout(() => {
+      setCopiedLink(false);
+    }, 1600);
   }
 
   const isVoid = detail?.status === "void";
@@ -242,23 +253,31 @@ export function AdminPaymentsInvoicePreviewPage({ invoiceId }: Props) {
                   type="button"
                   className="border border-transparent bg-[var(--admin-surface-variant)] p-1 text-[var(--admin-on-surface-variant)] hover:border-[var(--admin-border)] hover:text-[var(--admin-primary)] disabled:opacity-40"
                   disabled={zoom <= 75}
-                  onClick={() => setZoom((value) => Math.max(75, value - 10))}
+                  onClick={() => {
+                    setZoom((value) => Math.max(75, value - 10));
+                  }}
                   aria-label="Zoom out"
                 >
                   <Minus className="h-4 w-4" aria-hidden="true" />
                 </button>
-                <span className="px-2 font-mono text-xs text-[var(--admin-on-surface)]">{zoom}%</span>
+                <span className="px-2 font-mono text-xs text-[var(--admin-on-surface)]">
+                  {zoom}%
+                </span>
                 <button
                   type="button"
                   className="border border-transparent bg-[var(--admin-surface-variant)] p-1 text-[var(--admin-on-surface-variant)] hover:border-[var(--admin-border)] hover:text-[var(--admin-primary)] disabled:opacity-40"
                   disabled={zoom >= 140}
-                  onClick={() => setZoom((value) => Math.min(140, value + 10))}
+                  onClick={() => {
+                    setZoom((value) => Math.min(140, value + 10));
+                  }}
                   aria-label="Zoom in"
                 >
                   <Plus className="h-4 w-4" aria-hidden="true" />
                 </button>
               </div>
-              <div className="font-mono text-xs text-[var(--admin-on-surface-variant)]">Page 1 / 1</div>
+              <div className="font-mono text-xs text-[var(--admin-on-surface-variant)]">
+                Page 1 / 1
+              </div>
               <button
                 type="button"
                 className="inline-flex items-center gap-2 border border-[var(--admin-border)] bg-[var(--admin-surface-variant)] px-3 py-1 font-mono text-xs text-[var(--admin-on-surface)] hover:border-[var(--admin-primary)] hover:text-[var(--admin-primary)]"
@@ -284,7 +303,9 @@ export function AdminPaymentsInvoicePreviewPage({ invoiceId }: Props) {
                   <div
                     className={[
                       "pointer-events-none absolute top-20 right-12 rotate-12 border-4 px-4 py-2 text-2xl font-bold tracking-widest uppercase opacity-80",
-                      isVoid ? "border-[#93000a] text-[#93000a]" : "border-[#008000] text-[#008000]",
+                      isVoid
+                        ? "border-[#93000a] text-[#93000a]"
+                        : "border-[#008000] text-[#008000]",
                     ].join(" ")}
                   >
                     {isVoid ? "VOID" : "PAID IN FULL"}
@@ -305,7 +326,9 @@ export function AdminPaymentsInvoicePreviewPage({ invoiceId }: Props) {
                       <div className="mb-2 text-2xl font-bold tracking-tight uppercase sm:text-3xl">
                         Tax Invoice
                       </div>
-                      <div className="font-mono text-base text-[#666666]">{detail.invoiceNumber}</div>
+                      <div className="font-mono text-base text-[#666666]">
+                        {detail.invoiceNumber}
+                      </div>
                       <div className="mt-1 text-sm text-[#666666]">
                         Issue Date: {formatDate(detail.issuedAt ?? detail.paidAt)}
                       </div>
@@ -317,9 +340,7 @@ export function AdminPaymentsInvoicePreviewPage({ invoiceId }: Props) {
                       <div className="mb-2 text-xs font-bold tracking-wider text-[#666666] uppercase">
                         Billed From
                       </div>
-                      <div className="text-base font-bold">
-                        {detail.businessName ?? "Academy"}
-                      </div>
+                      <div className="text-base font-bold">{detail.businessName ?? "Academy"}</div>
                       <div className="mt-1 text-sm leading-relaxed text-[#444444]">
                         Configured issuer for this academy.
                       </div>
@@ -475,12 +496,10 @@ export function AdminPaymentsInvoicePreviewPage({ invoiceId }: Props) {
                   type="button"
                   className="inline-flex items-center justify-center gap-2 border border-[var(--admin-border)] bg-[var(--admin-surface-variant)] py-2 px-3 font-mono text-xs text-[var(--admin-danger)] hover:border-[var(--admin-danger)] disabled:opacity-50"
                   disabled={!detail.canVoid || busy}
-                  onClick={() => setVoidOpen(true)}
-                  title={
-                    detail.canVoid
-                      ? "Void this invoice"
-                      : "Invoice is already voided"
-                  }
+                  onClick={() => {
+                    setVoidOpen(true);
+                  }}
+                  title={detail.canVoid ? "Void this invoice" : "Invoice is already voided"}
                 >
                   <Ban className="h-4 w-4" aria-hidden="true" />
                   Void Invoice
@@ -671,7 +690,9 @@ export function AdminPaymentsInvoicePreviewPage({ invoiceId }: Props) {
         <AdminPaymentInvoiceVoidModal
           open={voidOpen}
           detail={detail}
-          onClose={() => setVoidOpen(false)}
+          onClose={() => {
+            setVoidOpen(false);
+          }}
           onVoided={() => void load()}
         />
       ) : null}

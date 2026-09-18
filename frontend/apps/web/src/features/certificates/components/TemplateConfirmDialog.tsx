@@ -83,7 +83,12 @@ export function TemplateConfirmDialog({
           </p>
         </div>
         <div className="flex items-center justify-end gap-3 border-t border-[var(--admin-border)] px-6 py-4">
-          <button type="button" className={outlineButtonClassName} disabled={busy} onClick={onClose}>
+          <button
+            type="button"
+            className={outlineButtonClassName}
+            disabled={busy}
+            onClick={onClose}
+          >
             Cancel
           </button>
           <button

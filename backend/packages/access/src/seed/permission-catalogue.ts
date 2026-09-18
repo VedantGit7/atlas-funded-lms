@@ -156,7 +156,11 @@ export const PERMISSIONS: readonly PermissionDefinition[] = [
     resourceType: "enrollment",
   },
   { key: "course_review.read", description: "Read course reviews", resourceType: "course" },
-  { key: "course_review.create", description: "Write or update a course review", resourceType: "course" },
+  {
+    key: "course_review.create",
+    description: "Write or update a course review",
+    resourceType: "course",
+  },
   {
     // Self-scoped: only ever grants access to decks the learner owns. Managing
     // tenant/studio collections stays behind item_collection.manage.

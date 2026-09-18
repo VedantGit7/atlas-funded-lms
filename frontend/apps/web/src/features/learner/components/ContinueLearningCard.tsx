@@ -41,7 +41,10 @@ export function ContinueLearningCard({
           />
         </div>
       ) : null}
-      <Link href={href} className="mt-4 inline-flex rounded-md border px-4 py-2 text-sm font-medium">
+      <Link
+        href={href}
+        className="mt-4 inline-flex rounded-md border px-4 py-2 text-sm font-medium"
+      >
         Resume
       </Link>
     </section>

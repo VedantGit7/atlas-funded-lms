@@ -4,11 +4,10 @@ import { whatsappConnectionResponseSchema } from "../../../../../../../server/wh
 import { mutateWhatsappMetadata } from "../../../../../../../server/whatsapp/whatsapp.route-metadata";
 import { disconnectWhatsapp } from "../../../../../../../server/whatsapp/whatsapp.service";
 
-export const POST = createTenantRoute<
-  undefined,
-  z.output<typeof whatsappConnectionResponseSchema>
->({
-  metadata: mutateWhatsappMetadata,
-  output: whatsappConnectionResponseSchema,
-  handler: async ({ tx, ctx }) => disconnectWhatsapp(tx, ctx),
-});
+export const POST = createTenantRoute<undefined, z.output<typeof whatsappConnectionResponseSchema>>(
+  {
+    metadata: mutateWhatsappMetadata,
+    output: whatsappConnectionResponseSchema,
+    handler: async ({ tx, ctx }) => disconnectWhatsapp(tx, ctx),
+  },
+);

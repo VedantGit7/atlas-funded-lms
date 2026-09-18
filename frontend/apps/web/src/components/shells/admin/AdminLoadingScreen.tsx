@@ -50,7 +50,8 @@ export function AdminLoadingScreen({ label = "Loading" }: AdminLoadingScreenProp
             className="flex h-[52px] w-[52px] items-center justify-center rounded-[15px]"
             style={{
               backgroundColor: "var(--admin-primary)",
-              boxShadow: "0 12px 28px -6px color-mix(in srgb, var(--admin-primary) 30%, transparent)",
+              boxShadow:
+                "0 12px 28px -6px color-mix(in srgb, var(--admin-primary) 30%, transparent)",
             }}
           >
             <GraduationCap

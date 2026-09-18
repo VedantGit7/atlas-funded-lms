@@ -2,7 +2,24 @@ import ExcelJS from "exceljs";
 import type { ReportFormat } from "./reports.contract";
 import type { ReportDatasetResult, ServiceCtx } from "./reports.types";
 import { buildTenantStorageKey, getStorageProvider, parseStorageEnv } from "@atlas/storage";
+import { csvEscape } from "@atlas/core/csv/escape";
+import { textColumn } from "./raw-column";
 
+/**
+ * Normalise an arbitrary dataset cell to text, then hand it to the shared
+ * escaper.
+ *
+ * This function used to do its own quoting, which handled commas, quotes and
+ * newlines but left a leading `=`, `+`, `-`, `@`, tab or carriage return intact
+ * — audit finding M1. Report exports are built from learner-controlled data and
+ * opened by administrators, so `=cmd|/c calc` reached the admin's spreadsheet
+ * as a live formula. Quoting does not help: the spreadsheet strips the quotes
+ * before evaluating the cell.
+ *
+ * The `unknown` -> string narrowing stays here because report datasets carry
+ * Dates, objects and bigints that `csvEscape` does not accept; the escaping
+ * itself is now the one shared implementation.
+ */
 function escapeCsvValue(value: unknown): string {
   if (value == null) {
     return "";
@@ -15,13 +32,19 @@ function escapeCsvValue(value: unknown): string {
         ? value.toISOString()
         : typeof value === "object"
           ? JSON.stringify(value)
-          : String(value);
+          : // A symbol's default String() form is "Symbol(x)", which is noise in
+            // a CSV cell; its description is the only useful part.
+            typeof value === "symbol"
+            ? (value.description ?? "")
+            : // Everything left is a number, boolean or bigint. Narrowing to them
+              // explicitly is what lets String() be provably safe here — the
+              // parameter is `unknown`, so subtractive narrowing alone never gets
+              // there and the call read as a possible "[object Object]".
+              typeof value === "number" || typeof value === "boolean" || typeof value === "bigint"
+              ? String(value)
+              : "";
 
-  if (/[",\n\r]/.test(text)) {
-    return `"${text.replace(/"/g, '""')}"`;
-  }
-
-  return text;
+  return csvEscape(text);
 }
 
 function pdfEscape(text: string): string {
@@ -55,7 +78,7 @@ function buildMinimalPdf(lines: string[]): Uint8Array {
   pdf += `xref\n0 ${String(objects.length + 1)}\n`;
   pdf += "0000000000 65535 f \n";
   for (let index = 1; index < offsets.length; index += 1) {
-    pdf += `${String(offsets[index]).padStart(10, "0")} 00000 n \n`;
+    pdf += `${textColumn(offsets[index]).padStart(10, "0")} 00000 n \n`;
   }
   pdf += `trailer<< /Size ${String(objects.length + 1)} /Root 1 0 R >>\n`;
   pdf += `startxref\n${String(xrefOffset)}\n%%EOF`;
@@ -105,9 +128,9 @@ export function renderReportPdf(dataset: ReportDatasetResult, title: string): Ui
   const lines = [
     title,
     dataset.columns.join(" | "),
-    ...dataset.rows.slice(0, 50).map((row) =>
-      dataset.columns.map((column) => escapeCsvValue(row[column])).join(" | "),
-    ),
+    ...dataset.rows
+      .slice(0, 50)
+      .map((row) => dataset.columns.map((column) => escapeCsvValue(row[column])).join(" | ")),
   ];
 
   if (dataset.rows.length > 50) {

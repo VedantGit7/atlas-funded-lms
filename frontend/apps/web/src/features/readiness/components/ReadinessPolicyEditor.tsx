@@ -7,10 +7,7 @@ import { ClientApiError } from "../../../lib/client-api";
 import { readinessApiClient } from "@atlas/contracts-modules/readiness/readiness.api-client";
 import type { ReadinessPolicyDto } from "@atlas/contracts/readiness/readiness.types";
 import type { ScoringProfileDto } from "@atlas/contracts/competency/competency-config.types";
-import {
-  alertErrorClassName,
-  defaultLegalChecklist,
-} from "../readiness-admin-shared";
+import { alertErrorClassName, defaultLegalChecklist } from "../readiness-admin-shared";
 import { BandProminenceRulesPanel } from "./BandProminenceRulesPanel";
 import { CtaContentPanel } from "./CtaContentPanel";
 import { LegalDisclaimersPanel } from "./LegalDisclaimersPanel";
@@ -48,14 +45,12 @@ function buildDraft(
   scoringProfiles: ScoringProfileDto[],
 ) {
   const checklist =
-    initialPolicy?.legalCopy?.legalReviewChecklist.filter((item) => item.trim().length > 0) ??
-    [];
+    initialPolicy?.legalCopy?.legalReviewChecklist.filter((item) => item.trim().length > 0) ?? [];
 
   return {
     scoringProfileId:
       initialPolicy?.scoringProfileId ?? scoringProfiles[0]?.id ?? defaultDraft.scoringProfileId,
-    outboundTargetUrl:
-      initialPolicy?.ctaPolicy.outboundTargetUrl ?? defaultDraft.outboundTargetUrl,
+    outboundTargetUrl: initialPolicy?.ctaPolicy.outboundTargetUrl ?? defaultDraft.outboundTargetUrl,
     tokenTtlSeconds: initialPolicy?.ctaPolicy.tokenTtlSeconds ?? defaultDraft.tokenTtlSeconds,
     bandProminenceRules:
       initialPolicy?.ctaPolicy.bandProminenceRules ?? defaultDraft.bandProminenceRules,
@@ -69,10 +64,7 @@ function buildDraft(
   };
 }
 
-function draftsEqual(
-  a: ReturnType<typeof buildDraft>,
-  b: ReturnType<typeof buildDraft>,
-): boolean {
+function draftsEqual(a: ReturnType<typeof buildDraft>, b: ReturnType<typeof buildDraft>): boolean {
   return JSON.stringify(a) === JSON.stringify(b);
 }
 

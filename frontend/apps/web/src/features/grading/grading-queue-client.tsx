@@ -15,11 +15,7 @@ const STATUS_OPTIONS = [
   { value: "CANCELLED", label: "Cancelled" },
 ] as const;
 
-export function GradingQueueClient({
-  initialTasks = [],
-}: {
-  initialTasks?: GradingQueueItem[];
-}) {
+export function GradingQueueClient({ initialTasks = [] }: { initialTasks?: GradingQueueItem[] }) {
   const [tasks, setTasks] = useState<GradingQueueItem[]>(initialTasks);
   const [loading, setLoading] = useState(initialTasks.length === 0);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -91,7 +87,10 @@ export function GradingQueueClient({
               </select>
             </label>
             <label className="flex min-w-[12rem] items-center gap-2 px-3 py-2">
-              <Search className="h-4 w-4 shrink-0 text-[var(--admin-on-surface-variant)]" aria-hidden="true" />
+              <Search
+                className="h-4 w-4 shrink-0 text-[var(--admin-on-surface-variant)]"
+                aria-hidden="true"
+              />
               <span className="sr-only">Search assessments or learners</span>
               <input
                 type="search"

@@ -5,7 +5,7 @@ import { newsfeedPostResponseSchema } from "../../../../../../../server/marketin
 import { mutateMarketingNewsfeedMetadata } from "../../../../../../../server/marketing-newsfeed/marketing-newsfeed.route-metadata";
 import { unpublishMarketingNewsfeedPost } from "../../../../../../../server/marketing-newsfeed/marketing-newsfeed.service";
 
-const paramsSchema = zod.object({ id: zod.string().uuid() });
+const paramsSchema = zod.object({ id: zod.uuid() });
 
 export const POST = createTenantRoute<
   Record<string, never>,

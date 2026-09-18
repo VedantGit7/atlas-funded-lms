@@ -36,7 +36,9 @@ function ToggleSwitch(props: {
       aria-checked={props.checked}
       aria-label={props.ariaLabel}
       disabled={props.disabled}
-      onClick={() => props.onChange(!props.checked)}
+      onClick={() => {
+        props.onChange(!props.checked);
+      }}
       className={[
         "relative h-6 w-11 shrink-0 rounded-full transition-colors duration-200 disabled:opacity-50",
         props.checked ? "bg-[var(--admin-primary)]" : "bg-[var(--admin-outline)]",
@@ -71,7 +73,7 @@ export function CouponCreatePanel() {
       return;
     }
 
-    let discountValue = 0;
+    let discountValue: number;
     if (discountType === "PERCENT") {
       discountValue = Math.round(Number(percentValue));
       if (!Number.isFinite(discountValue) || discountValue < 1 || discountValue > 100) {
@@ -170,7 +172,9 @@ export function CouponCreatePanel() {
           <input
             id="coupon-create-name"
             value={name}
-            onChange={(event) => setName(event.target.value)}
+            onChange={(event) => {
+              setName(event.target.value);
+            }}
             className={`${MESSENGER_WIZARD_FIELD_CLASS} h-11`}
             placeholder="e.g. Holiday Season 2026"
             maxLength={200}
@@ -202,7 +206,9 @@ export function CouponCreatePanel() {
               <input
                 id="coupon-create-code"
                 value={code}
-                onChange={(event) => setCode(event.target.value.toUpperCase())}
+                onChange={(event) => {
+                  setCode(event.target.value.toUpperCase());
+                }}
                 className={`${MESSENGER_WIZARD_FIELD_CLASS} h-11 flex-1 font-mono uppercase`}
                 placeholder="SUMMER25"
                 maxLength={64}
@@ -211,7 +217,9 @@ export function CouponCreatePanel() {
               <button
                 type="button"
                 disabled={busy}
-                onClick={() => setCode(generateCouponCode())}
+                onClick={() => {
+                  setCode(generateCouponCode());
+                }}
                 className="inline-flex h-11 items-center gap-2 rounded-xl border border-[var(--admin-border)] px-4 text-sm font-semibold text-[var(--admin-on-surface)] transition-colors hover:bg-[var(--admin-surface-high)]"
               >
                 <Sparkles className="h-4 w-4" />
@@ -229,7 +237,9 @@ export function CouponCreatePanel() {
                 <input
                   id="coupon-create-prefix"
                   value={prefix}
-                  onChange={(event) => setPrefix(event.target.value.toUpperCase())}
+                  onChange={(event) => {
+                    setPrefix(event.target.value.toUpperCase());
+                  }}
                   className={`${MESSENGER_WIZARD_FIELD_CLASS} h-11 font-mono uppercase`}
                   placeholder="WINTER"
                   maxLength={24}
@@ -246,7 +256,9 @@ export function CouponCreatePanel() {
                   min={1}
                   max={100}
                   value={bulkCount}
-                  onChange={(event) => setBulkCount(Number(event.target.value) || 1)}
+                  onChange={(event) => {
+                    setBulkCount(Number(event.target.value) || 1);
+                  }}
                   className={`${MESSENGER_WIZARD_FIELD_CLASS} h-11`}
                   disabled={busy}
                 />
@@ -255,8 +267,8 @@ export function CouponCreatePanel() {
             <div className="flex items-start gap-2 rounded-lg bg-[color-mix(in_srgb,var(--admin-primary)_10%,var(--admin-surface))] p-3 text-[var(--admin-on-primary-container)]">
               <Info className="mt-0.5 h-4 w-4 shrink-0" />
               <p className="text-[13px]">
-                Generate up to 100 unique draft codes with this configuration. Open any code afterward
-                to refine scheduling, limits, and course scope.
+                Generate up to 100 unique draft codes with this configuration. Open any code
+                afterward to refine scheduling, limits, and course scope.
               </p>
             </div>
           </div>
@@ -271,7 +283,9 @@ export function CouponCreatePanel() {
               <button
                 type="button"
                 disabled={busy}
-                onClick={() => setDiscountType("PERCENT")}
+                onClick={() => {
+                  setDiscountType("PERCENT");
+                }}
                 className={[
                   "rounded-lg px-5 py-1.5 text-sm font-semibold transition-all",
                   discountType === "PERCENT"
@@ -284,7 +298,9 @@ export function CouponCreatePanel() {
               <button
                 type="button"
                 disabled={busy}
-                onClick={() => setDiscountType("FIXED")}
+                onClick={() => {
+                  setDiscountType("FIXED");
+                }}
                 className={[
                   "rounded-lg px-5 py-1.5 text-sm font-semibold transition-all",
                   discountType === "FIXED"

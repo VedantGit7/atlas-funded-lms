@@ -1,18 +1,19 @@
 import { randomUUID } from "node:crypto";
 import type { TenantTx } from "@atlas/db";
 import { DEFAULT_AT_RISK_RULES, type AtRiskAlertRow, type AtRiskRuleRow } from "./at-risk.types";
+import { textColumn } from "../reports/raw-column";
 
 function mapRuleRow(row: Record<string, unknown>): AtRiskRuleRow {
   return {
-    id: String(row["id"]),
-    key: String(row["key"]),
-    name: String(row["name"]),
-    rule_type: String(row["rule_type"]) as AtRiskRuleRow["rule_type"],
+    id: textColumn(row["id"]),
+    key: textColumn(row["key"]),
+    name: textColumn(row["name"]),
+    rule_type: textColumn(row["rule_type"]) as AtRiskRuleRow["rule_type"],
     config_json:
       row["config_json"] && typeof row["config_json"] === "object"
         ? (row["config_json"] as Record<string, unknown>)
         : {},
-    status: String(row["status"]),
+    status: textColumn(row["status"]),
     created_at: row["created_at"] as Date,
     updated_at: row["updated_at"] as Date,
   };
@@ -20,10 +21,10 @@ function mapRuleRow(row: Record<string, unknown>): AtRiskRuleRow {
 
 function mapAlertRow(row: Record<string, unknown>): AtRiskAlertRow {
   return {
-    id: String(row["id"]),
-    at_risk_rule_id: String(row["at_risk_rule_id"]),
-    membership_id: String(row["membership_id"]),
-    status: String(row["status"]),
+    id: textColumn(row["id"]),
+    at_risk_rule_id: textColumn(row["at_risk_rule_id"]),
+    membership_id: textColumn(row["membership_id"]),
+    status: textColumn(row["status"]),
     context_json:
       row["context_json"] && typeof row["context_json"] === "object"
         ? (row["context_json"] as Record<string, unknown>)
@@ -32,9 +33,9 @@ function mapAlertRow(row: Record<string, unknown>): AtRiskAlertRow {
     acknowledged_at: row["acknowledged_at"] == null ? null : (row["acknowledged_at"] as Date),
     created_at: row["created_at"] as Date,
     updated_at: row["updated_at"] as Date,
-    rule_key: String(row["rule_key"]),
-    rule_name: String(row["rule_name"]),
-    display_name: row["display_name"] == null ? null : String(row["display_name"]),
+    rule_key: textColumn(row["rule_key"]),
+    rule_name: textColumn(row["rule_name"]),
+    display_name: row["display_name"] == null ? null : textColumn(row["display_name"]),
   };
 }
 
@@ -269,7 +270,7 @@ export const atRiskRepository = {
     `;
 
     return rows.map((row) => ({
-      membership_id: String(row["membership_id"]),
+      membership_id: textColumn(row["membership_id"]),
       last_seen_at: row["last_seen_at"] == null ? null : (row["last_seen_at"] as Date),
     }));
   },
@@ -295,7 +296,7 @@ export const atRiskRepository = {
 
     return rows
       .map((row) => ({
-        membership_id: String(row["membership_id"]),
+        membership_id: textColumn(row["membership_id"]),
         score_pct: row["score_pct"] == null ? null : Number(row["score_pct"]),
       }))
       .filter((row) => row.score_pct != null && row.score_pct < gradeThreshold);
@@ -335,7 +336,7 @@ export const atRiskRepository = {
     `;
 
     return rows.map((row) => ({
-      membership_id: String(row["membership_id"]),
+      membership_id: textColumn(row["membership_id"]),
       activity_count: Number(row["activity_count"]),
     }));
   },

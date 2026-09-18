@@ -57,8 +57,8 @@ export function HallOfFameConfigPanel({ leaderboards }: HallOfFameConfigPanelPro
           ),
         ]);
         const config = {
-          recognitionSpaceSlug: configResponse.data.recognitionSpaceSlug ?? "",
-          leaderboardKey: configResponse.data.leaderboardKey ?? "",
+          recognitionSpaceSlug: configResponse.data.recognitionSpaceSlug,
+          leaderboardKey: configResponse.data.leaderboardKey,
         };
         setForm(config);
         setSavedForm(config);
@@ -99,8 +99,8 @@ export function HallOfFameConfigPanel({ leaderboards }: HallOfFameConfigPanelPro
         `hall-of-fame-config-${Date.now().toString()}`,
       );
       const config = {
-        recognitionSpaceSlug: response.data.recognitionSpaceSlug ?? "",
-        leaderboardKey: response.data.leaderboardKey ?? "",
+        recognitionSpaceSlug: response.data.recognitionSpaceSlug,
+        leaderboardKey: response.data.leaderboardKey,
       };
       setForm(config);
       setSavedForm(config);
@@ -136,8 +136,7 @@ export function HallOfFameConfigPanel({ leaderboards }: HallOfFameConfigPanelPro
       </div>
       <div className={`${panelBodyClassName} space-y-4`}>
         <p className="text-xs text-[var(--admin-on-surface-variant)]">
-          Connect a community recognition space and XP leaderboard to the learner Hall of Fame
-          page.
+          Connect a community recognition space and XP leaderboard to the learner Hall of Fame page.
         </p>
 
         {!loaded ? (

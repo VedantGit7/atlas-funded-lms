@@ -12,10 +12,7 @@ import {
   ratingsReviewsSettingsEqual,
   type CourseRatingsReviewsSettings,
 } from "./course-ratings-reviews-settings";
-import {
-  CourseSettingsCheckboxField,
-  CourseSettingsFormFooter,
-} from "./course-settings-shared";
+import { CourseSettingsCheckboxField, CourseSettingsFormFooter } from "./course-settings-shared";
 
 type CourseDetail = z.infer<typeof studioCourseDetailSchema>;
 

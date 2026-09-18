@@ -8,6 +8,8 @@ type DashboardLoadingSkeletonProps = Readonly<{
  * Dashboard / learner home route loading state. Delegates to the site-wide
  * branded loading screen for a consistent waiting experience.
  */
-export function DashboardLoadingSkeleton({ title = "Loading dashboard" }: DashboardLoadingSkeletonProps) {
+export function DashboardLoadingSkeleton({
+  title = "Loading dashboard",
+}: DashboardLoadingSkeletonProps) {
   return <BrandLoadingScreen label={title} />;
 }

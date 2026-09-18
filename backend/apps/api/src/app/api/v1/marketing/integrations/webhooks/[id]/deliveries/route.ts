@@ -5,7 +5,7 @@ import { marketingIntegrationDeliveriesListResponseSchema } from "../../../../..
 import { listMarketingIntegrationsMetadata } from "../../../../../../../../server/marketing-integrations/marketing-integrations.route-metadata";
 import { listMarketingIntegrationWebhookDeliveries } from "../../../../../../../../server/marketing-integrations/marketing-integrations.service";
 
-const paramsSchema = zod.object({ id: zod.string().uuid() });
+const paramsSchema = zod.object({ id: zod.uuid() });
 
 export const GET = createTenantRoute<
   undefined,

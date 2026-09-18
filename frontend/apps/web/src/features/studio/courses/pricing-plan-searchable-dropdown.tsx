@@ -2,10 +2,7 @@
 
 import { useMemo, useState, type ReactNode } from "react";
 import { Check } from "lucide-react";
-import {
-  DropdownField,
-  dropdownItemClassName,
-} from "./admin-form-dropdown-shared";
+import { DropdownField, dropdownItemClassName } from "./admin-form-dropdown-shared";
 import { fieldClassName } from "./create-course-dialog-shared";
 
 export type PricingPlanDropdownOption = {
@@ -126,9 +123,14 @@ export function PricingPlanSearchableDropdown({
               value === emptyValue ? "bg-[var(--admin-surface-high)] font-semibold" : "",
             ].join(" ")}
           >
-            <span className="min-w-0 flex-1 truncate text-[var(--admin-on-surface)]">{emptyLabel}</span>
+            <span className="min-w-0 flex-1 truncate text-[var(--admin-on-surface)]">
+              {emptyLabel}
+            </span>
             {value === emptyValue ? (
-              <Check className="h-4 w-4 shrink-0 text-[var(--admin-on-surface-variant)]" aria-hidden="true" />
+              <Check
+                className="h-4 w-4 shrink-0 text-[var(--admin-on-surface-variant)]"
+                aria-hidden="true"
+              />
             ) : (
               <span className="h-4 w-4 shrink-0" aria-hidden="true" />
             )}
@@ -136,7 +138,9 @@ export function PricingPlanSearchableDropdown({
         ) : null}
 
         {filteredOptions.length === 0 ? (
-          <p className="px-3 py-2 text-sm text-[var(--admin-on-surface-variant)]">No matches found.</p>
+          <p className="px-3 py-2 text-sm text-[var(--admin-on-surface-variant)]">
+            No matches found.
+          </p>
         ) : (
           filteredOptions.map((option) => {
             const active = option.value === value;

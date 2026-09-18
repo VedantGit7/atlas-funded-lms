@@ -110,12 +110,11 @@ export function parseCourseCertificateSettings(
   const configuration = readConfiguration(features);
   const enabled =
     typeof features?.[ENABLED_TAG_KEY] === "boolean"
-      ? Boolean(features[ENABLED_TAG_KEY])
+      ? features[ENABLED_TAG_KEY]
       : DEFAULT_SETTINGS.enabled;
   const templateId =
-    typeof features?.[TEMPLATE_TAG_KEY] === "string" &&
-    (features[TEMPLATE_TAG_KEY] as string).length > 0
-      ? (features[TEMPLATE_TAG_KEY] as string)
+    typeof features?.[TEMPLATE_TAG_KEY] === "string" && features[TEMPLATE_TAG_KEY].length > 0
+      ? features[TEMPLATE_TAG_KEY]
       : DEFAULT_SETTINGS.templateId;
 
   return {
@@ -152,10 +151,7 @@ export function meetsCompletionCriteria(
   return completionPercent >= criteriaPercent;
 }
 
-export function meetsTestPassingMarks(
-  scorePercent: number | null,
-  passingMarks: number,
-): boolean {
+export function meetsTestPassingMarks(scorePercent: number | null, passingMarks: number): boolean {
   if (scorePercent == null) return false;
   return scorePercent >= passingMarks;
 }
@@ -171,9 +167,7 @@ export type EligibilityInput = {
   hasTemplate: boolean;
 };
 
-export type EligibilityResult =
-  | { eligible: true }
-  | { eligible: false; reason: string };
+export type EligibilityResult = { eligible: true } | { eligible: false; reason: string };
 
 export function evaluateCourseCertificateEligibility(input: EligibilityInput): EligibilityResult {
   if (!input.settings.enabled) {

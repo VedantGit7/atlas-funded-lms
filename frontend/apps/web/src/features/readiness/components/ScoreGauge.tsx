@@ -23,8 +23,22 @@ type ScoreGaugeProps = {
 };
 
 const VARIANTS = {
-  hero: { size: 264, stroke: 14, sweep: 0.75, rotation: 135, numberClass: "text-6xl", captionClass: "text-xs" },
-  mini: { size: 92, stroke: 9, sweep: 1, rotation: -90, numberClass: "text-2xl", captionClass: "text-[10px]" },
+  hero: {
+    size: 264,
+    stroke: 14,
+    sweep: 0.75,
+    rotation: 135,
+    numberClass: "text-6xl",
+    captionClass: "text-xs",
+  },
+  mini: {
+    size: 92,
+    stroke: 9,
+    sweep: 1,
+    rotation: -90,
+    numberClass: "text-2xl",
+    captionClass: "text-[10px]",
+  },
 } as const;
 
 export function ScoreGauge({
@@ -101,11 +115,18 @@ export function ScoreGauge({
       </svg>
 
       <div className="absolute inset-0 flex flex-col items-center justify-center gap-0.5">
-        <span className={cn("font-semibold leading-none tracking-tight tabular-nums", cfg.numberClass)}>
+        <span
+          className={cn("font-semibold leading-none tracking-tight tabular-nums", cfg.numberClass)}
+        >
           <motion.span>{display}</motion.span>
         </span>
         {caption ? (
-          <span className={cn("font-medium uppercase tracking-wider text-muted-foreground", cfg.captionClass)}>
+          <span
+            className={cn(
+              "font-medium uppercase tracking-wider text-muted-foreground",
+              cfg.captionClass,
+            )}
+          >
             {caption}
           </span>
         ) : null}

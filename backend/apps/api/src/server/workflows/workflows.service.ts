@@ -573,7 +573,7 @@ export async function actOnWorkflowTransition(
     tx,
     targetType: pending.targetType,
     targetId: pending.targetId,
-    afterOccurredAt: pending.occurredAt,
+    pendingTransitionId: pending.id,
   });
 
   if (laterExists) {

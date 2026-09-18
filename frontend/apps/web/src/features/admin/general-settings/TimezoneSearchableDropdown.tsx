@@ -61,7 +61,11 @@ export function TimezoneSearchableDropdown({
         });
       }}
       triggerContent={
-        <span className={value ? "text-[var(--admin-on-surface)]" : "text-[var(--admin-on-surface-variant)]"}>
+        <span
+          className={
+            value ? "text-[var(--admin-on-surface)]" : "text-[var(--admin-on-surface-variant)]"
+          }
+        >
           {selectedLabel}
         </span>
       }
@@ -83,7 +87,9 @@ export function TimezoneSearchableDropdown({
 
       <div className="min-h-0 flex-1 overflow-y-auto p-1.5">
         {filteredOptions.length === 0 ? (
-          <p className="px-3 py-2 text-sm text-[var(--admin-on-surface-variant)]">No matches found.</p>
+          <p className="px-3 py-2 text-sm text-[var(--admin-on-surface-variant)]">
+            No matches found.
+          </p>
         ) : (
           filteredOptions.map((option) => {
             const active = option.value === value;

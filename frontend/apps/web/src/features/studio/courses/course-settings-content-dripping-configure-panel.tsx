@@ -9,16 +9,14 @@ import { ClientApiError, clientApi } from "../../../lib/client-api";
 import { inlineExpandClassName } from "./admin-form-dropdown-shared";
 import type { CourseDripSettings, DripLessonSchedule } from "./course-access-settings";
 import { courseDripSettingsEqual } from "./course-access-settings";
-import {
-  builderHelperClassName,
-  fieldClassName,
-} from "./course-builder-shared";
+import { builderHelperClassName, fieldClassName } from "./course-builder-shared";
 import {
   CourseSettingsFormFooter,
   CourseSettingsSectionBlock,
   courseSettingsCardClassName,
 } from "./course-settings-shared";
 import { inlineLessonGhostButtonClassName } from "./inline-lesson-editor/inline-lesson-editor-shared";
+import { cancellationFlag } from "@/lib/effect-cancellation";
 
 type StudioCourseModulesResponse = z.infer<typeof studioCourseModulesResponseSchema>;
 type StudioLessonOutlineItem = z.infer<typeof studioLessonOutlineItemSchema>;
@@ -85,7 +83,7 @@ export function CourseSettingsContentDrippingConfigurePanel({
   const isDirty = !courseDripSettingsEqual(form, savedForm);
 
   useEffect(() => {
-    let cancelled = false;
+    const effect = cancellationFlag();
 
     async function loadLessons() {
       setLoading(true);
@@ -95,7 +93,7 @@ export function CourseSettingsContentDrippingConfigurePanel({
         const response = await clientApi.get<StudioCourseModulesResponse>(
           `/api/v1/courses/${courseId}/modules?view=studio`,
         );
-        if (cancelled) return;
+        if (effect.isCancelled()) return;
 
         const rows: LessonDripRow[] = [];
         let lessonIndex = 0;
@@ -121,18 +119,18 @@ export function CourseSettingsContentDrippingConfigurePanel({
           }
         }
 
-        if (!cancelled) {
+        if (!effect.isCancelled()) {
           setLessons(rows);
         }
       } catch (caught) {
-        if (!cancelled) {
+        if (!effect.isCancelled()) {
           setLoadError(
             caught instanceof ClientApiError ? caught.message : "Unable to load course lessons.",
           );
           setLessons([]);
         }
       } finally {
-        if (!cancelled) {
+        if (!effect.isCancelled()) {
           setLoading(false);
         }
       }
@@ -141,7 +139,7 @@ export function CourseSettingsContentDrippingConfigurePanel({
     void loadLessons();
 
     return () => {
-      cancelled = true;
+      effect.cancel();
     };
   }, [courseId, form.dripIntervalDays]);
 
@@ -167,7 +165,11 @@ export function CourseSettingsContentDrippingConfigurePanel({
       ),
     );
     onChange({
-      dripLessonSchedules: upsertLessonSchedule(form.dripLessonSchedules, lessonId, releaseAfterDays),
+      dripLessonSchedules: upsertLessonSchedule(
+        form.dripLessonSchedules,
+        lessonId,
+        releaseAfterDays,
+      ),
     });
   }
 
@@ -187,7 +189,9 @@ export function CourseSettingsContentDrippingConfigurePanel({
         <h1 className="text-2xl font-bold tracking-tight text-[var(--admin-on-surface)] md:text-[1.75rem]">
           Configure content-dripping
         </h1>
-        <p className={`${builderHelperClassName} mt-2 max-w-2xl text-sm leading-relaxed md:text-[0.9375rem]`}>
+        <p
+          className={`${builderHelperClassName} mt-2 max-w-2xl text-sm leading-relaxed md:text-[0.9375rem]`}
+        >
           Set when each lesson becomes available after the release anchor date
         </p>
       </header>
@@ -215,11 +219,15 @@ export function CourseSettingsContentDrippingConfigurePanel({
         description="Configure the number of days after the release anchor when each lesson unlocks"
       >
         {loading ? (
-          <p className={`${builderHelperClassName} rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 py-8 text-center`}>
+          <p
+            className={`${builderHelperClassName} rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 py-8 text-center`}
+          >
             Loading lessons…
           </p>
         ) : lessons.length === 0 ? (
-          <p className={`${builderHelperClassName} rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 py-8 text-center`}>
+          <p
+            className={`${builderHelperClassName} rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 py-8 text-center`}
+          >
             Add lessons to this course to configure content dripping.
           </p>
         ) : (
@@ -233,13 +241,12 @@ export function CourseSettingsContentDrippingConfigurePanel({
                   <p className="truncate text-sm font-semibold text-[var(--admin-on-surface)]">
                     {lesson.title}
                   </p>
-                  <p className={`${builderHelperClassName} mt-0.5 truncate`}>{lesson.moduleTitle}</p>
+                  <p className={`${builderHelperClassName} mt-0.5 truncate`}>
+                    {lesson.moduleTitle}
+                  </p>
                 </div>
                 <div className="w-full sm:w-[11rem]">
-                  <label
-                    htmlFor={`drip-days-${lesson.lessonId}`}
-                    className="sr-only"
-                  >
+                  <label htmlFor={`drip-days-${lesson.lessonId}`} className="sr-only">
                     Release after days for {lesson.title}
                   </label>
                   <div className="flex overflow-hidden rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)] shadow-sm focus-within:border-[var(--admin-primary)] focus-within:ring-2 focus-within:ring-[var(--admin-primary)]/25">
@@ -271,8 +278,8 @@ export function CourseSettingsContentDrippingConfigurePanel({
           onSave={onSave}
           onCancel={onCancel}
           saving={saving}
-          saveDisabled={disabled || !isDirty}
-          cancelDisabled={disabled || !isDirty}
+          saveDisabled={!isDirty}
+          cancelDisabled={!isDirty}
         />
       ) : null}
     </div>

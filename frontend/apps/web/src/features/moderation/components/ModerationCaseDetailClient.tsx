@@ -30,7 +30,6 @@ import {
   monoClassName,
   outlineButtonClassName,
   panelClassName,
-  primaryButtonClassName,
   targetTypeMeta,
 } from "../moderation-admin-shared";
 import { ADMIN_MODERATION_CASES_PATH } from "../moderation-paths";
@@ -81,7 +80,8 @@ function buildTimeline(detail: ModerationCaseItem): TimelineEntry[] {
 }
 
 const TIMELINE_DOT: Record<TimelineEntry["tone"], string> = {
-  primary: "border-[color-mix(in_srgb,var(--admin-primary)_30%,var(--admin-surface))] bg-[var(--admin-primary)]",
+  primary:
+    "border-[color-mix(in_srgb,var(--admin-primary)_30%,var(--admin-surface))] bg-[var(--admin-primary)]",
   secondary:
     "border-[color-mix(in_srgb,var(--admin-primary)_25%,var(--admin-surface))] bg-[var(--admin-surface-high)]",
   warning:
@@ -139,7 +139,10 @@ export function ModerationCaseDetailClient({ caseId }: { caseId: string }) {
 
   if (loading) {
     return (
-      <p className="flex items-center gap-2 text-sm text-[var(--admin-on-surface-variant)]" aria-live="polite">
+      <p
+        className="flex items-center gap-2 text-sm text-[var(--admin-on-surface-variant)]"
+        aria-live="polite"
+      >
         <Loader2 className="h-4 w-4 motion-safe:animate-spin" aria-hidden="true" />
         Loading case detail…
       </p>
@@ -155,9 +158,7 @@ export function ModerationCaseDetailClient({ caseId }: { caseId: string }) {
   }
 
   if (!detail) {
-    return (
-      <p className="text-sm text-[var(--admin-on-surface-variant)]">Case not found.</p>
-    );
+    return <p className="text-sm text-[var(--admin-on-surface-variant)]">Case not found.</p>;
   }
 
   const target = targetTypeMeta(detail.targetType);
@@ -198,7 +199,10 @@ export function ModerationCaseDetailClient({ caseId }: { caseId: string }) {
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
         <div className="space-y-6 xl:col-span-8">
-          <section className={moderationEvidenceCardClassName} aria-labelledby="reported-evidence-heading">
+          <section
+            className={moderationEvidenceCardClassName}
+            aria-labelledby="reported-evidence-heading"
+          >
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-[var(--admin-border)] pb-3">
               <h2
                 id="reported-evidence-heading"
@@ -236,7 +240,9 @@ export function ModerationCaseDetailClient({ caseId }: { caseId: string }) {
                   <TargetIcon className="h-3.5 w-3.5" aria-hidden="true" />
                   {target.label}
                 </span>
-                <span className={`inline-flex items-center gap-1.5 rounded bg-[var(--admin-surface-high)] px-2 py-1 text-[12px] ${monoClassName}`}>
+                <span
+                  className={`inline-flex items-center gap-1.5 rounded bg-[var(--admin-surface-high)] px-2 py-1 text-[12px] ${monoClassName}`}
+                >
                   ID {detail.targetId.slice(0, 10)}
                 </span>
               </div>
@@ -269,7 +275,9 @@ export function ModerationCaseDetailClient({ caseId }: { caseId: string }) {
                 <p className={`${moderationPageTitleClassName} mt-1 text-lg`}>{detail.status}</p>
               </article>
               <article className="rounded-lg border border-[var(--admin-border)] bg-[var(--admin-bg)] p-4">
-                <p className="text-[13px] text-[var(--admin-on-surface-variant)]">Decisions logged</p>
+                <p className="text-[13px] text-[var(--admin-on-surface-variant)]">
+                  Decisions logged
+                </p>
                 <p className={`${moderationPageTitleClassName} mt-1 text-lg`}>
                   {detail.decisions?.length ?? 0}
                 </p>
@@ -304,10 +312,7 @@ export function ModerationCaseDetailClient({ caseId }: { caseId: string }) {
                 </p>
               ) : (
                 timeline.map((entry, index) => (
-                  <div
-                    key={entry.id}
-                    className="relative flex gap-3 pb-5 last:pb-0"
-                  >
+                  <div key={entry.id} className="relative flex gap-3 pb-5 last:pb-0">
                     {index < timeline.length - 1 ? (
                       <span
                         className="absolute left-[7px] top-5 bottom-0 w-0.5 bg-[var(--admin-border)]"

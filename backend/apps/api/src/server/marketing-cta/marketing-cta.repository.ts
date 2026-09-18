@@ -52,10 +52,7 @@ export function parseTargeting(raw: unknown): CtaTargeting {
 }
 
 export const marketingCtaRepository = {
-  async list(
-    tx: TenantTx,
-    args: { q?: string; status?: string; ctaType?: string; limit: number },
-  ) {
+  async list(tx: TenantTx, args: { q?: string; status?: string; ctaType?: string; limit: number }) {
     const q = args.q?.trim() ?? "";
     const status = args.status && args.status !== "ALL" ? args.status : null;
     const ctaType = args.ctaType && args.ctaType !== "ALL" ? args.ctaType : null;

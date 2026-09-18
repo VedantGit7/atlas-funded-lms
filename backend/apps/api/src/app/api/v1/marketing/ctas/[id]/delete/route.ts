@@ -8,7 +8,7 @@ import {
 import { mutateMarketingCtasMetadata } from "../../../../../../../server/marketing-cta/marketing-cta.route-metadata";
 import { deleteMarketingCta } from "../../../../../../../server/marketing-cta/marketing-cta.service";
 
-const paramsSchema = zod.object({ id: zod.string().uuid() });
+const paramsSchema = zod.object({ id: zod.uuid() });
 
 export const POST = createTenantRoute<
   z.output<typeof deleteMarketingCtaBodySchema>,

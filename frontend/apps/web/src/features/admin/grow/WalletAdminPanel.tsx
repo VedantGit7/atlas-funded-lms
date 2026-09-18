@@ -48,7 +48,9 @@ function ToggleSwitch(props: {
       aria-checked={props.checked}
       aria-label={props.ariaLabel}
       disabled={props.disabled}
-      onClick={() => props.onChange(!props.checked)}
+      onClick={() => {
+        props.onChange(!props.checked);
+      }}
       className={[
         "relative h-6 w-11 shrink-0 rounded-full transition-colors duration-200 disabled:opacity-50",
         props.checked ? "bg-[var(--admin-primary)]" : "bg-[var(--admin-outline)]",
@@ -83,8 +85,12 @@ export function WalletAdminPanel() {
   const [adjustOpen, setAdjustOpen] = useState(false);
 
   useEffect(() => {
-    const timer = window.setTimeout(() => setDebouncedQuery(query.trim()), 250);
-    return () => window.clearTimeout(timer);
+    const timer = window.setTimeout(() => {
+      setDebouncedQuery(query.trim());
+    }, 250);
+    return () => {
+      window.clearTimeout(timer);
+    };
   }, [query]);
 
   const load = useCallback(async () => {
@@ -126,9 +132,7 @@ export function WalletAdminPanel() {
       }>(`/api/v1/sales/wallet/accounts/${membershipId}?limit=50`);
       setTransactions(response.data.transactions);
       setAccounts((prev) =>
-        prev.map((row) =>
-          row.membershipId === membershipId ? response.data.account : row,
-        ),
+        prev.map((row) => (row.membershipId === membershipId ? response.data.account : row)),
       );
     } catch (caught) {
       setTransactions([]);
@@ -217,9 +221,7 @@ export function WalletAdminPanel() {
         { successMessage: "Wallet adjusted." },
       );
       setAccounts((prev) =>
-        prev.map((row) =>
-          row.membershipId === response.data.membershipId ? response.data : row,
-        ),
+        prev.map((row) => (row.membershipId === response.data.membershipId ? response.data : row)),
       );
       setAdjustDollars("");
       setAdjustNote("");
@@ -323,7 +325,9 @@ export function WalletAdminPanel() {
             <ToggleSwitch
               checked={draft.enabled}
               ariaLabel="Enable learner wallets"
-              onChange={(next) => setDraft({ ...draft, enabled: next })}
+              onChange={(next) => {
+                setDraft({ ...draft, enabled: next });
+              }}
             />
           </div>
 
@@ -334,12 +338,12 @@ export function WalletAdminPanel() {
                 type="number"
                 min={1}
                 value={draft.creditValueCents}
-                onChange={(event) =>
+                onChange={(event) => {
                   setDraft({
                     ...draft,
                     creditValueCents: Number(event.target.value) || 1,
-                  })
-                }
+                  });
+                }}
                 className={`${MESSENGER_WIZARD_FIELD_CLASS} h-11 pr-16`}
               />
               <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 font-mono text-xs text-[var(--admin-on-surface-variant)]">
@@ -365,7 +369,9 @@ export function WalletAdminPanel() {
                 { value: "GBP", label: "GBP - British Pound" },
                 { value: "INR", label: "INR - Indian Rupee" },
               ]}
-              onChange={(value) => setDraft({ ...draft, currency: value })}
+              onChange={(value) => {
+                setDraft({ ...draft, currency: value });
+              }}
             />
             <p className="mt-1 text-[11px] text-[var(--admin-on-surface-variant)]">
               Primary settlement currency.
@@ -378,14 +384,12 @@ export function WalletAdminPanel() {
               type="number"
               min={1}
               value={draft.maxBalanceCredits ?? ""}
-              onChange={(event) =>
+              onChange={(event) => {
                 setDraft({
                   ...draft,
-                  maxBalanceCredits: event.target.value.trim()
-                    ? Number(event.target.value)
-                    : null,
-                })
-              }
+                  maxBalanceCredits: event.target.value.trim() ? Number(event.target.value) : null,
+                });
+              }}
               className={`${MESSENGER_WIZARD_FIELD_CLASS} h-11`}
               placeholder="Unlimited"
             />
@@ -400,14 +404,12 @@ export function WalletAdminPanel() {
               type="number"
               min={1}
               value={draft.maxCreditsPerOrder ?? ""}
-              onChange={(event) =>
+              onChange={(event) => {
                 setDraft({
                   ...draft,
-                  maxCreditsPerOrder: event.target.value.trim()
-                    ? Number(event.target.value)
-                    : null,
-                })
-              }
+                  maxCreditsPerOrder: event.target.value.trim() ? Number(event.target.value) : null,
+                });
+              }}
               className={`${MESSENGER_WIZARD_FIELD_CLASS} h-11`}
               placeholder="Unlimited"
             />
@@ -443,7 +445,9 @@ export function WalletAdminPanel() {
                 <Search className="pointer-events-none absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[var(--admin-on-surface-variant)]" />
                 <input
                   value={query}
-                  onChange={(event) => setQuery(event.target.value)}
+                  onChange={(event) => {
+                    setQuery(event.target.value);
+                  }}
                   placeholder="Search by name or email..."
                   className={`${MESSENGER_WIZARD_FIELD_CLASS} h-8 w-56 py-1 pl-8 text-[12px]`}
                 />
@@ -475,7 +479,9 @@ export function WalletAdminPanel() {
                       return (
                         <tr
                           key={row.membershipId}
-                          onClick={() => setSelectedId(row.membershipId)}
+                          onClick={() => {
+                            setSelectedId(row.membershipId);
+                          }}
                           className={[
                             "cursor-pointer transition-colors",
                             active
@@ -506,18 +512,10 @@ export function WalletAdminPanel() {
                                 : "text-[var(--admin-on-surface)]",
                             ].join(" ")}
                           >
-                            {formatWalletCreditsAsMoney(
-                              row.balanceCredits,
-                              creditValue,
-                              currency,
-                            )}
+                            {formatWalletCreditsAsMoney(row.balanceCredits, creditValue, currency)}
                           </td>
                           <td className="px-6 py-4 text-right font-mono text-xs text-[var(--admin-success)]">
-                            {formatWalletCreditsAsMoney(
-                              row.earnedCredits,
-                              creditValue,
-                              currency,
-                            )}
+                            {formatWalletCreditsAsMoney(row.earnedCredits, creditValue, currency)}
                           </td>
                           <td className="px-6 py-4 text-right font-mono text-xs text-[var(--admin-warning)]">
                             {formatWalletCreditsAsMoney(row.usedCredits, creditValue, currency)}
@@ -552,7 +550,9 @@ export function WalletAdminPanel() {
                   </div>
                   <button
                     type="button"
-                    onClick={() => setAdjustOpen(true)}
+                    onClick={() => {
+                      setAdjustOpen(true);
+                    }}
                     className="rounded-lg p-2 text-[var(--admin-on-surface-variant)] hover:bg-[var(--admin-surface-high)]"
                     aria-label="Open adjustment"
                   >
@@ -565,11 +565,7 @@ export function WalletAdminPanel() {
                   </p>
                   <div className="flex flex-wrap items-baseline gap-2">
                     <span className="text-[32px] font-bold tracking-[-0.02em] text-[var(--admin-primary)]">
-                      {formatWalletCreditsAsMoney(
-                        selected.balanceCredits,
-                        creditValue,
-                        currency,
-                      )}
+                      {formatWalletCreditsAsMoney(selected.balanceCredits, creditValue, currency)}
                     </span>
                     <span className="text-sm text-[var(--admin-on-surface-variant)]">
                       {selected.balanceCredits.toLocaleString()} credits
@@ -581,11 +577,7 @@ export function WalletAdminPanel() {
                         Earned
                       </p>
                       <p className="text-sm font-bold text-[var(--admin-success)]">
-                        {formatWalletCreditsAsMoney(
-                          selected.earnedCredits,
-                          creditValue,
-                          currency,
-                        )}
+                        {formatWalletCreditsAsMoney(selected.earnedCredits, creditValue, currency)}
                       </p>
                     </div>
                     <div className="rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] px-3 py-2">
@@ -593,11 +585,7 @@ export function WalletAdminPanel() {
                         Used
                       </p>
                       <p className="text-sm font-bold text-[var(--admin-warning)]">
-                        {formatWalletCreditsAsMoney(
-                          selected.usedCredits,
-                          creditValue,
-                          currency,
-                        )}
+                        {formatWalletCreditsAsMoney(selected.usedCredits, creditValue, currency)}
                       </p>
                     </div>
                   </div>
@@ -717,7 +705,9 @@ export function WalletAdminPanel() {
               <div className="flex overflow-hidden rounded-lg border border-[var(--admin-border)]">
                 <button
                   type="button"
-                  onClick={() => setAdjustDirection("CREDIT")}
+                  onClick={() => {
+                    setAdjustDirection("CREDIT");
+                  }}
                   className={[
                     "flex-1 py-2 text-xs font-bold transition-colors",
                     adjustDirection === "CREDIT"
@@ -729,7 +719,9 @@ export function WalletAdminPanel() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setAdjustDirection("DEBIT")}
+                  onClick={() => {
+                    setAdjustDirection("DEBIT");
+                  }}
                   className={[
                     "flex-1 py-2 text-xs font-bold transition-colors",
                     adjustDirection === "DEBIT"
@@ -748,7 +740,9 @@ export function WalletAdminPanel() {
                 min={0.01}
                 step={0.01}
                 value={adjustDollars}
-                onChange={(event) => setAdjustDollars(event.target.value)}
+                onChange={(event) => {
+                  setAdjustDollars(event.target.value);
+                }}
                 placeholder="0.00"
                 className={`${MESSENGER_WIZARD_FIELD_CLASS} h-11 font-mono`}
               />
@@ -766,7 +760,9 @@ export function WalletAdminPanel() {
             </label>
             <textarea
               value={adjustNote}
-              onChange={(event) => setAdjustNote(event.target.value.slice(0, 500))}
+              onChange={(event) => {
+                setAdjustNote(event.target.value.slice(0, 500));
+              }}
               maxLength={500}
               placeholder="Required: Provide a detailed explanation for this manual balance change for auditing purposes..."
               className={`${MESSENGER_WIZARD_FIELD_CLASS} min-h-[120px] flex-1 resize-none`}
@@ -818,7 +814,9 @@ export function WalletAdminPanel() {
             <div className="flex overflow-hidden rounded-lg border border-[var(--admin-border)]">
               <button
                 type="button"
-                onClick={() => setAdjustDirection("CREDIT")}
+                onClick={() => {
+                  setAdjustDirection("CREDIT");
+                }}
                 className={[
                   "flex-1 py-2 text-xs font-bold",
                   adjustDirection === "CREDIT"
@@ -830,7 +828,9 @@ export function WalletAdminPanel() {
               </button>
               <button
                 type="button"
-                onClick={() => setAdjustDirection("DEBIT")}
+                onClick={() => {
+                  setAdjustDirection("DEBIT");
+                }}
                 className={[
                   "flex-1 py-2 text-xs font-bold",
                   adjustDirection === "DEBIT"
@@ -848,7 +848,9 @@ export function WalletAdminPanel() {
                 min={0.01}
                 step={0.01}
                 value={adjustDollars}
-                onChange={(event) => setAdjustDollars(event.target.value)}
+                onChange={(event) => {
+                  setAdjustDollars(event.target.value);
+                }}
                 className={`${MESSENGER_WIZARD_FIELD_CLASS} h-11 font-mono`}
                 placeholder="0.00"
               />
@@ -857,7 +859,9 @@ export function WalletAdminPanel() {
               <label className={MESSENGER_WIZARD_LABEL_CLASS}>Audit reason</label>
               <textarea
                 value={adjustNote}
-                onChange={(event) => setAdjustNote(event.target.value.slice(0, 500))}
+                onChange={(event) => {
+                  setAdjustNote(event.target.value.slice(0, 500));
+                }}
                 maxLength={500}
                 className={`${MESSENGER_WIZARD_FIELD_CLASS} min-h-[96px] resize-none`}
                 placeholder="Required for the ledger audit trail"
@@ -867,7 +871,9 @@ export function WalletAdminPanel() {
               <button
                 type="button"
                 className="rounded-lg border border-[var(--admin-border)] px-4 py-2 text-sm font-semibold text-[var(--admin-on-surface-variant)]"
-                onClick={() => setAdjustOpen(false)}
+                onClick={() => {
+                  setAdjustOpen(false);
+                }}
               >
                 Cancel
               </button>

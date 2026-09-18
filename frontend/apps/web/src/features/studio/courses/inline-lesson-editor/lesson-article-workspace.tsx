@@ -2,23 +2,10 @@
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-  Bold,
-  Code,
-  Heading1,
-  Image,
-  Italic,
-  Link,
-  List,
-  ListOrdered,
-  Strikethrough,
-  Table,
-  Underline,
-} from "lucide-react";
+import {} from "lucide-react";
 import { ClientApiError, clientApi } from "../../../../lib/client-api";
 import type { z } from "zod";
 import type { studioLessonDetailSchema } from "@atlas/contracts/lessons/lesson-schemas";
-import { lessonToolbarButtonClassName } from "../../lessons/lesson-editor-shared";
 import {
   inlineLessonPrimaryDarkButtonClassName,
   inlineLessonSecondaryButtonClassName,
@@ -68,13 +55,13 @@ export function LessonArticleWorkspace({ lesson, editable }: LessonArticleWorksp
       setSaving(false);
     }
   }
-  
+
   async function handlePublish() {
     if (!editable || saving) return;
-    
+
     // Save first
     await handleSave();
-    
+
     // Navigate to full lesson editor
     router.push(`/studio/courses/${lesson.courseId}/lessons/${lesson.id}`);
   }

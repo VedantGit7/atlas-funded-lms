@@ -45,8 +45,6 @@
     "tokens": {
       "primary": "#2D3748",
       "accent": "#48BB78",
-      "background": "#1A202C",
-      "foreground": "#EDF2F7",
       "radius": "lg",
       "modeDefault": "light"
     },
@@ -55,6 +53,7 @@
   "entitlements": [
     { "key": "branding.custom_domain.enable", "enabled": true },
     { "key": "community.enable", "enabled": true },
+    { "key": "community.private_spaces.enable", "enabled": true },
     { "key": "certification.enable", "enabled": true },
     { "key": "gamification.enable", "enabled": true },
     { "key": "analytics.dashboard.view", "enabled": true },

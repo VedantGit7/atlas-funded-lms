@@ -74,11 +74,7 @@ function HelpBlock({ block }: { block: HelpContentBlock }) {
   }
 }
 
-function HelpCallout({
-  block,
-}: {
-  block: Extract<HelpContentBlock, { type: "callout" }>;
-}) {
+function HelpCallout({ block }: { block: Extract<HelpContentBlock, { type: "callout" }> }) {
   const styles = {
     tip: {
       icon: Lightbulb,
@@ -88,8 +84,7 @@ function HelpCallout({
     },
     note: {
       icon: Info,
-      surface:
-        "border-[color-mix(in_srgb,var(--muted-foreground)_22%,transparent)] bg-muted",
+      surface: "border-[color-mix(in_srgb,var(--muted-foreground)_22%,transparent)] bg-muted",
       label: "Note",
     },
     warning: {
@@ -128,7 +123,10 @@ type HelpBreadcrumbsProps = {
 
 export function HelpBreadcrumbs({ categoryTitle, categoryId, articleTitle }: HelpBreadcrumbsProps) {
   return (
-    <nav aria-label="Breadcrumb" className="mb-6 flex flex-wrap items-center gap-1 text-sm text-muted-foreground">
+    <nav
+      aria-label="Breadcrumb"
+      className="mb-6 flex flex-wrap items-center gap-1 text-sm text-muted-foreground"
+    >
       <Link href="/help" className="text-primary hover:underline">
         Help Center
       </Link>

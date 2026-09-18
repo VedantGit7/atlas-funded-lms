@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { loadPublicBootstrap } from "@/lib/server/bootstrap";
+import { resolveTenantLogoUrl } from "@/lib/brand";
 import { VerifyEmailScreen, type VerifyEmailStatus } from "./_components/VerifyEmailScreen";
 
 export const metadata: Metadata = {
@@ -35,11 +37,22 @@ export default async function VerifyEmailPage({
   const normalizedStatus: VerifyEmailStatus =
     status === "success" || status === "expired" || status === "invalid" ? status : "sent";
 
+  const branding = await loadPublicBootstrap();
+
+  // Prefer the tenant's own support address. `PLATFORM_SUPPORT_EMAIL` is the
+  // operator-configured fallback; when neither is set the contact line is
+  // hidden rather than pointing learners at some other academy's inbox.
+  const platformSupportEmail = process.env["PLATFORM_SUPPORT_EMAIL"]?.trim();
+  const supportEmail = branding.supportEmail ?? (platformSupportEmail || null);
+
   return (
     <VerifyEmailScreen
       initialEmail={email}
       status={normalizedStatus}
       next={sanitizeNext(next)}
+      logoUrl={resolveTenantLogoUrl(branding)}
+      tenantName={branding.publicName}
+      supportEmail={supportEmail}
     />
   );
 }

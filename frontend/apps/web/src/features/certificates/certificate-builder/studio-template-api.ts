@@ -48,7 +48,9 @@ export async function deleteTemplateDesign(id: string): Promise<void> {
   );
 }
 
-export async function duplicateTemplateDesign(template: TemplateDto): Promise<TemplateDetailResponse> {
+export async function duplicateTemplateDesign(
+  template: TemplateDto,
+): Promise<TemplateDetailResponse> {
   const baseName = template.name.replace(/\s*\(copy\)\s*$/i, "").trim();
   const name = `${baseName} (copy)`;
   const templateJson = isDesignDocument(template.templateJson)
@@ -116,6 +118,21 @@ export async function publishTemplateDesign(
     `/api/v1/certificate-templates/${id}/publish`,
     body,
     "studio-template-publish",
+  );
+}
+
+/**
+ * Approval is the review step before publish, not a synonym for it: it accepts
+ * the same body but records sign-off rather than making the template live.
+ */
+export async function approveTemplateDesign(
+  id: string,
+  body: object = {},
+): Promise<TemplateDetailResponse> {
+  return clientApi.post<TemplateDetailResponse>(
+    `/api/v1/certificate-templates/${id}/approve`,
+    body,
+    "studio-template-approve",
   );
 }
 

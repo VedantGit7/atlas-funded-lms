@@ -64,7 +64,9 @@ export function ReviewQueue({
             className="mb-3 h-10 w-10 text-[var(--admin-on-surface-variant)] opacity-50"
             aria-hidden="true"
           />
-          <h2 className="text-base font-semibold text-[var(--admin-on-surface)]">No pending reviews</h2>
+          <h2 className="text-base font-semibold text-[var(--admin-on-surface)]">
+            No pending reviews
+          </h2>
           <p className="mt-2 max-w-xs text-sm text-[var(--admin-on-surface-variant)]">
             Items appear here when authors submit courses, assessments, or learning paths for
             publish approval.

@@ -15,5 +15,5 @@ export const GET = createTenantRoute<
   metadata: getExportMetadata,
   params: exportJobParamsSchema,
   output: exportJobDetailResponseSchema,
-  handler: async ({ tx, ctx, params }) => getExportJob(tx, ctx, params["id"] ?? ""),
+  handler: async ({ tx, ctx, params }) => getExportJob(tx, ctx, params.id),
 });

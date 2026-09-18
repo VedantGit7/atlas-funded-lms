@@ -52,8 +52,8 @@ function Shimmer({ className }: { className?: string }) {
 function learnerInitials(name: string, email: string | null): string {
   const source = (name.trim() || email?.trim() || "?").split(/\s+/).filter(Boolean);
   if (source.length === 0) return "?";
-  if (source.length === 1) return source[0]!.slice(0, 2).toUpperCase();
-  return `${source[0]![0] ?? ""}${source[1]![0] ?? ""}`.toUpperCase();
+  if (source.length === 1) return (source[0] ?? "").slice(0, 2).toUpperCase();
+  return `${source[0]?.[0] ?? ""}${source[1]?.[0] ?? ""}`.toUpperCase();
 }
 
 function formatRelative(value: string | null): string {
@@ -248,19 +248,10 @@ export function AdminProgressLearnerDetailPage({
     void load();
   }, [load]);
 
-  const weeks = useMemo(
-    () => (detail ? chunkWeeks(detail.activity.days) : []),
-    [detail],
-  );
-  const months = useMemo(
-    () => (detail ? monthLabels(detail.activity.days) : []),
-    [detail],
-  );
+  const weeks = useMemo(() => (detail ? chunkWeeks(detail.activity.days) : []), [detail]);
+  const months = useMemo(() => (detail ? monthLabels(detail.activity.days) : []), [detail]);
 
-  async function handleReset(payload: {
-    clearAssessmentAttempts: boolean;
-    reason: string;
-  }) {
+  async function handleReset(payload: { clearAssessmentAttempts: boolean; reason: string }) {
     setResetBusy(true);
     try {
       await resetProgressLearner(productType, productId, enrollmentId, payload);
@@ -350,7 +341,11 @@ export function AdminProgressLearnerDetailPage({
             <ArrowLeft className="h-4 w-4" aria-hidden="true" />
             All learners
           </Link>
-          <button type="button" className={`${primaryButtonClassName} h-9 gap-2`} onClick={() => void load()}>
+          <button
+            type="button"
+            className={`${primaryButtonClassName} h-9 gap-2`}
+            onClick={() => void load()}
+          >
             <RefreshCw className="h-4 w-4" aria-hidden="true" />
             Retry
           </button>
@@ -410,12 +405,7 @@ export function AdminProgressLearnerDetailPage({
           <div className="flex items-center gap-5">
             <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full border-2 border-[var(--admin-border)] bg-[var(--admin-surface-high)]">
               {detail.learner.avatarUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={detail.learner.avatarUrl}
-                  alt=""
-                  className="h-full w-full object-cover"
-                />
+                <img src={detail.learner.avatarUrl} alt="" className="h-full w-full object-cover" />
               ) : (
                 <span className="flex h-full w-full items-center justify-center font-mono text-sm font-semibold text-[var(--admin-on-surface)]">
                   {learnerInitials(detail.learner.displayName, detail.learner.email)}
@@ -464,7 +454,9 @@ export function AdminProgressLearnerDetailPage({
               <button
                 type="button"
                 className={`${ghostButtonClassName} h-9 gap-2 border border-[var(--admin-border)]`}
-                onClick={() => setMessageOpen(true)}
+                onClick={() => {
+                  setMessageOpen(true);
+                }}
               >
                 <Mail className="h-4 w-4" aria-hidden="true" />
                 Send message
@@ -486,7 +478,9 @@ export function AdminProgressLearnerDetailPage({
               <button
                 type="button"
                 className="inline-flex h-9 items-center gap-2 border-2 border-[var(--admin-warning)] bg-transparent px-4 font-mono text-xs font-bold text-[var(--admin-warning)] transition-colors hover:bg-[var(--admin-warning)] hover:text-[var(--admin-on-primary)]"
-                onClick={() => setResetOpen(true)}
+                onClick={() => {
+                  setResetOpen(true);
+                }}
               >
                 <RotateCcw className="h-4 w-4" aria-hidden="true" />
                 Reset progress
@@ -569,8 +563,9 @@ export function AdminProgressLearnerDetailPage({
                 Lesson checklist unavailable
               </p>
               <p className="mt-2 text-sm text-[var(--admin-on-surface-variant)]">
-                Curriculum drill-down is supported for courses. This {productTypeLabel(productType).toLowerCase()}{" "}
-                enrolment shows enrolment and assessment context only.
+                Curriculum drill-down is supported for courses. This{" "}
+                {productTypeLabel(productType).toLowerCase()} enrolment shows enrolment and
+                assessment context only.
               </p>
             </div>
           ) : detail.modules.length === 0 ? (
@@ -765,7 +760,10 @@ export function AdminProgressLearnerDetailPage({
                 </div>
                 {detail.activity.longestGapLabel ? (
                   <div className="mt-1 flex items-center gap-2 border border-[var(--admin-border)] bg-[var(--admin-surface-low)] p-3">
-                    <Info className="h-4 w-4 shrink-0 text-[var(--admin-warning)]" aria-hidden="true" />
+                    <Info
+                      className="h-4 w-4 shrink-0 text-[var(--admin-warning)]"
+                      aria-hidden="true"
+                    />
                     <span className="font-mono text-[11px] text-[var(--admin-on-surface-variant)]">
                       Longest gap:{" "}
                       <strong className="font-semibold text-[var(--admin-on-surface)]">
@@ -821,7 +819,9 @@ export function AdminProgressLearnerDetailPage({
                                 : "text-[var(--admin-on-surface-variant)]",
                           ].join(" ")}
                         >
-                          {assessment.scorePct == null ? "—" : `${Math.round(assessment.scorePct)}%`}
+                          {assessment.scorePct == null
+                            ? "—"
+                            : `${Math.round(assessment.scorePct)}%`}
                         </span>
                       </div>
                       <div className="mt-1 flex flex-wrap items-center gap-2">
@@ -962,7 +962,10 @@ export function AdminProgressLearnerDetailPage({
             className="w-full max-w-md border border-[var(--admin-border)] bg-[var(--admin-surface)] shadow-xl"
           >
             <div className="border-b border-[var(--admin-border)] px-5 py-4">
-              <h2 id="extend-access-title" className="text-lg font-semibold text-[var(--admin-on-surface)]">
+              <h2
+                id="extend-access-title"
+                className="text-lg font-semibold text-[var(--admin-on-surface)]"
+              >
                 Extend access
               </h2>
             </div>
@@ -974,7 +977,9 @@ export function AdminProgressLearnerDetailPage({
                 <input
                   type="date"
                   value={extendDate}
-                  onChange={(event) => setExtendDate(event.target.value)}
+                  onChange={(event) => {
+                    setExtendDate(event.target.value);
+                  }}
                   disabled={extendBusy}
                   className="h-10 border border-[var(--admin-border)] bg-[var(--admin-bg)] px-3 text-sm text-[var(--admin-on-surface)] focus:border-[var(--admin-primary)] focus:outline-none"
                 />
@@ -985,7 +990,9 @@ export function AdminProgressLearnerDetailPage({
                 type="button"
                 className={`${ghostButtonClassName} h-9`}
                 disabled={extendBusy}
-                onClick={() => setExtendOpen(false)}
+                onClick={() => {
+                  setExtendOpen(false);
+                }}
               >
                 Cancel
               </button>
@@ -1011,7 +1018,10 @@ export function AdminProgressLearnerDetailPage({
             className="w-full max-w-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] shadow-xl"
           >
             <div className="border-b border-[var(--admin-border)] px-5 py-4">
-              <h2 id="send-message-title" className="text-lg font-semibold text-[var(--admin-on-surface)]">
+              <h2
+                id="send-message-title"
+                className="text-lg font-semibold text-[var(--admin-on-surface)]"
+              >
                 Message {detail.learner.displayName}
               </h2>
             </div>
@@ -1022,7 +1032,9 @@ export function AdminProgressLearnerDetailPage({
                 </span>
                 <input
                   value={messageSubject}
-                  onChange={(event) => setMessageSubject(event.target.value)}
+                  onChange={(event) => {
+                    setMessageSubject(event.target.value);
+                  }}
                   disabled={messageBusy}
                   className="h-10 border border-[var(--admin-border)] bg-[var(--admin-bg)] px-3 text-sm text-[var(--admin-on-surface)] focus:border-[var(--admin-primary)] focus:outline-none"
                 />
@@ -1034,7 +1046,9 @@ export function AdminProgressLearnerDetailPage({
                 <textarea
                   rows={5}
                   value={messageBody}
-                  onChange={(event) => setMessageBody(event.target.value)}
+                  onChange={(event) => {
+                    setMessageBody(event.target.value);
+                  }}
                   disabled={messageBusy}
                   className="resize-none border border-[var(--admin-border)] bg-[var(--admin-bg)] p-3 text-sm text-[var(--admin-on-surface)] focus:border-[var(--admin-primary)] focus:outline-none"
                 />
@@ -1045,7 +1059,9 @@ export function AdminProgressLearnerDetailPage({
                 type="button"
                 className={`${ghostButtonClassName} h-9`}
                 disabled={messageBusy}
-                onClick={() => setMessageOpen(false)}
+                onClick={() => {
+                  setMessageOpen(false);
+                }}
               >
                 Cancel
               </button>

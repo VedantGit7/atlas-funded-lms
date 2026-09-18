@@ -20,7 +20,7 @@ export const GET = createTenantRoute<
   metadata: listSpacePostsMetadata,
   params: spaceIdParamsSchema,
   output: postListResponseSchema,
-  handler: async ({ tx, ctx, params }) => listPostsInSpace(tx, ctx, params["id"] ?? ""),
+  handler: async ({ tx, ctx, params }) => listPostsInSpace(tx, ctx, params.id),
 });
 
 export const POST = createTenantRoute<
@@ -32,5 +32,5 @@ export const POST = createTenantRoute<
   params: spaceIdParamsSchema,
   body: createPostBodySchema,
   output: postDetailResponseSchema,
-  handler: async ({ tx, ctx, params, input }) => createPost(tx, ctx, params["id"] ?? "", input),
+  handler: async ({ tx, ctx, params, input }) => createPost(tx, ctx, params.id, input),
 });

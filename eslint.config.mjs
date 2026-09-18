@@ -220,8 +220,21 @@ export default tseslint.config(
       "**/out/**",
       "**/pnpm-lock.yaml",
       "docs/locked/**",
+      // Vendored third-party material, not project source. `eslint .` was linting
+      // these starter templates and extracted page assets unintentionally, which
+      // added avoidable work to an already memory-bound type-aware lint.
+      ".agents/**",
+      ".claude/**",
+      "frontend/ui_reference/**",
       "frontend/apps/web/next-env.d.ts",
-      "prisma.config.ts",
+      // Untracked scratch scripts kept at the repo root by convention. They are
+      // never committed, so CI never sees them, but they broke `pnpm lint`
+      // locally for whoever happened to have one lying around.
+      "tmp-*",
+      // Matches both the historical root path and backend/prisma.config.ts after
+      // the F-1 split. It belongs to no tsconfig project, so type-aware linting
+      // cannot parse it.
+      "**/prisma.config.ts",
       "backend/packages/db/src/generated/**",
       "backend/packages/**/src/**/*.d.ts",
       "backend/packages/domain/config/src/schemas/**",
@@ -283,7 +296,14 @@ export default tseslint.config(
       ],
       "@typescript-eslint/no-floating-promises": "error",
       "@typescript-eslint/no-misused-promises": "error",
-      "@typescript-eslint/switch-exhaustiveness-check": "error",
+      // A switch with a catch-all `default` IS exhaustive. Without this option
+      // the rule also demands every union member be listed explicitly, which
+      // flagged ten switches that all already had a default — and would force
+      // dead `case` arms whose body duplicates the default.
+      "@typescript-eslint/switch-exhaustiveness-check": [
+        "error",
+        { considerDefaultExhaustiveForUnions: true },
+      ],
       // Numbers/booleans in template strings are intentional and safe in this codebase.
       "@typescript-eslint/restrict-template-expressions": [
         "error",
@@ -297,6 +317,46 @@ export default tseslint.config(
       ],
       "atlas/no-hardcoded-tenant-strings": "error",
       "atlas/require-route-metadata": "error",
+      // The codebase already signals "deliberately unused" with a leading
+      // underscore (`_ctx`, `_proof`), but strictTypeChecked enables
+      // no-unused-vars with default options, which does not honour it — so the
+      // convention read as a mistake in every file that used it. Handlers must
+      // still accept `ctx` to match their signature even when they ignore it.
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
+          destructuredArrayIgnorePattern: "^_",
+          ignoreRestSiblings: true,
+        },
+      ],
+    },
+  },
+
+  {
+    // Next types `headers`, `rewrites` and `redirects` as promise-returning, so
+    // these are declared `async` to match the framework's interface even though
+    // they only return a literal. Same interface-conformance case as the
+    // resource loaders below.
+    files: ["**/next.config.ts"],
+    rules: {
+      "@typescript-eslint/require-await": "off",
+    },
+  },
+
+  {
+    // `ResourceLoaderFn` is typed `(args) => Promise<ResourceRef>`, so a loader
+    // that resolves its ref from params alone still has to return a promise.
+    // Writing it `async` is the honest way to satisfy that contract, and
+    // require-await flags all 144 of them. Rewriting each to return
+    // `Promise.resolve(...)` would satisfy the linter by making the code worse,
+    // so the rule is switched off for this file class instead — narrowly, and
+    // only where the async signature is imposed by an interface.
+    files: ["**/*.route-metadata.ts", "**/route.metadata.ts"],
+    rules: {
+      "@typescript-eslint/require-await": "off",
     },
   },
 
@@ -374,6 +434,30 @@ export default tseslint.config(
               message: "Tenant/frontend modules must not import platform-only code.",
             },
           ],
+        },
+      ],
+    },
+  },
+
+  {
+    // Raw dangerouslySetInnerHTML is banned outside the two files that are
+    // allowed to use it. Audit finding H1: eight sites rendered author-supplied
+    // HTML with no sanitizer anywhere in the repository, two of them on public
+    // unauthenticated pages. Render through <SafeHtml /> instead.
+    files: ["frontend/apps/web/src/**/*.tsx"],
+    ignores: [
+      // The sanitizer itself.
+      "frontend/apps/web/src/components/SafeHtml.tsx",
+      // Emits a generated theme-init script, not author content.
+      "frontend/apps/web/src/components/ThemeInitScript.tsx",
+    ],
+    rules: {
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector: "JSXAttribute[name.name='dangerouslySetInnerHTML']",
+          message:
+            "Do not use dangerouslySetInnerHTML directly. Render author HTML through <SafeHtml /> (components/SafeHtml.tsx), which sanitises at render time.",
         },
       ],
     },
@@ -542,7 +626,10 @@ export default tseslint.config(
   },
 
   {
-    files: ["prisma/seeds/**/*.ts"],
+    // Seeds legitimately reference the "fundedbeyond" seed-group selector, which
+    // must match the configs/tenants/fundedbeyond manifest directory. Path moved
+    // under backend/ in the F-1 split, which silently disabled this exemption.
+    files: ["backend/prisma/seeds/**/*.ts"],
     rules: {
       "atlas/no-hardcoded-tenant-strings": "off",
     },
@@ -552,14 +639,17 @@ export default tseslint.config(
     files: [
       "configs/tenants/**",
       "scripts/tenants/**",
-      "packages/tenant-config/**",
-      "packages/release-readiness/**",
+      "backend/packages/tenant-config/**",
+      "backend/packages/release-readiness/**",
       "tests/unit/tenant-config/**",
       "tests/unit/release-readiness/**",
       "tests/integration/tenant-config/**",
       "tests/tenant-isolation/tenant-config.isolation.test.ts",
       "tests/e2e/tenant-config.e2e.ts",
       "tests/e2e/fundedbeyond-journey.e2e.ts",
+      // Renamed and relocated by 3.6: structure checks moved out of tests/e2e,
+      // where their name implied behaviour coverage they never provided.
+      "tests/lint-rules/fundedbeyond-journey.structure.test.ts",
       "tests/security/release-security-suite.test.ts",
     ],
     rules: {
@@ -568,7 +658,7 @@ export default tseslint.config(
   },
 
   {
-    files: ["packages/release-readiness/**/*.ts"],
+    files: ["backend/packages/release-readiness/**/*.ts"],
     ...tseslint.configs.disableTypeChecked,
     languageOptions: {
       parserOptions: {
@@ -581,7 +671,21 @@ export default tseslint.config(
   },
 
   {
-    files: ["scripts/**/*.ts", "tests/**/*.{ts,tsx}", "vitest.config.ts"],
+    files: [
+      "scripts/**/*.ts",
+      "tests/**/*.{ts,tsx}",
+      "vitest.config.ts",
+      // Tooling config, in no tsconfig project. Without this ESLint reported a
+      // parsing error ("not found by the project service") instead of linting it.
+      "playwright.config.ts",
+      // The web app keeps a second test tree outside the root `tests/` glob and
+      // outside any tsconfig project, so those files were reported as parsing
+      // errors rather than linted at all.
+      "frontend/apps/web/tests/**/*.{ts,tsx}",
+      // Shared Node-side config consumed by both Next apps' next.config.ts.
+      // Plain ESM, in no tsconfig project, so type-aware rules are disabled.
+      "configs/**/*.{mjs,cjs,js}",
+    ],
     ...tseslint.configs.disableTypeChecked,
     languageOptions: {
       parserOptions: {

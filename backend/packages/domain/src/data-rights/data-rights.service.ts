@@ -1,4 +1,4 @@
-import { enforceEntitlement } from "@atlas/authorization";
+import { consumeEntitlementUnits, enforceEntitlement } from "@atlas/authorization";
 import { auditWriter } from "@atlas/audit";
 import type { TenantTx } from "@atlas/db";
 import { outbox } from "@atlas/events";
@@ -80,16 +80,47 @@ function mapDeletionRequestDto(request: DeletionRequestRow) {
   });
 }
 
+const EXPORT_ENTITLEMENT_KEY = "data.export.enable";
+
+/**
+ * The capability gate: may this tenant use exports at all.
+ *
+ * Runs on the read paths too, so listing and fetching a job are gated the same
+ * way as creating one.
+ */
 async function ensureExportEntitlement(tx: TenantTx, ctx: ServiceCtx): Promise<void> {
   try {
     await enforceEntitlement(tx, {
       tenantId: ctx.tenantId,
-      key: "data.export.enable",
+      key: EXPORT_ENTITLEMENT_KEY,
       requestId: ctx.requestId,
     });
   } catch {
     throw exportEntitlementRequired();
   }
+}
+
+/**
+ * Charge one export against the tenant's plan (audit finding M11).
+ *
+ * Only requesting an export consumes anything — listing jobs and fetching one
+ * back are reads, and metering those would charge a tenant repeatedly for a
+ * single export they already paid for.
+ *
+ * Deliberately not routed through `ensureExportEntitlement`'s catch. That
+ * converts every failure into `exportEntitlementRequired()`, which would report
+ * an exhausted allowance as 403 "your plan does not include exports" when the
+ * truth is 402 "your plan includes exports and you have used them all" — a
+ * different problem with a different remedy. `EntitlementLimitExceededError`
+ * carries the used/limit/period figures, so it is left to propagate intact.
+ */
+async function consumeExportAllowance(tx: TenantTx, ctx: ServiceCtx): Promise<void> {
+  await consumeEntitlementUnits(tx, {
+    tenantId: ctx.tenantId,
+    key: EXPORT_ENTITLEMENT_KEY,
+    requestId: ctx.requestId,
+    units: 1,
+  });
 }
 
 async function resolveSignedDownload(
@@ -146,6 +177,9 @@ export async function listExportJobs(tx: TenantTx, ctx: ServiceCtx, rawQuery: un
 
 export async function createExportJob(tx: TenantTx, ctx: ServiceCtx) {
   await ensureExportEntitlement(tx, ctx);
+  // Charged before the job row is written: a request that cannot fit inside the
+  // plan should not leave a queued export behind it.
+  await consumeExportAllowance(tx, ctx);
 
   const scope = exportScopeSchema.parse({
     version: EXPORT_SCOPE_VERSION,
@@ -419,4 +453,9 @@ export async function loadDeletionRequestMembershipResourceRef(args: {
   });
 }
 
-export { mapExportJobBaseDto, mapDeletionRequestDto, ensureExportEntitlement };
+export {
+  mapExportJobBaseDto,
+  mapDeletionRequestDto,
+  ensureExportEntitlement,
+  consumeExportAllowance,
+};

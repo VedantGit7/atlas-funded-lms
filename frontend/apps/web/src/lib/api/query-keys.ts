@@ -32,7 +32,8 @@ export const queryKeys = {
   },
 
   community: {
-    spaces: (host?: string) => withQueryHost([...queryKeys.root, "community", "spaces"] as const, host),
+    spaces: (host?: string) =>
+      withQueryHost([...queryKeys.root, "community", "spaces"] as const, host),
     space: (spaceId: string, host?: string) =>
       withQueryHost([...queryKeys.root, "community", "spaces", spaceId] as const, host),
     post: (postId: string, host?: string) =>
@@ -40,18 +41,22 @@ export const queryKeys = {
   },
 
   admin: {
-    members: (host?: string) => withQueryHost([...queryKeys.root, "admin", "members"] as const, host),
+    members: (host?: string) =>
+      withQueryHost([...queryKeys.root, "admin", "members"] as const, host),
     roles: (host?: string) => withQueryHost([...queryKeys.root, "admin", "roles"] as const, host),
-    branding: (host?: string) => withQueryHost([...queryKeys.root, "admin", "branding"] as const, host),
+    branding: (host?: string) =>
+      withQueryHost([...queryKeys.root, "admin", "branding"] as const, host),
   },
 
   studio: {
-    courses: (host?: string) => withQueryHost([...queryKeys.root, "studio", "courses"] as const, host),
+    courses: (host?: string) =>
+      withQueryHost([...queryKeys.root, "studio", "courses"] as const, host),
     course: (courseId: string, host?: string) =>
       withQueryHost([...queryKeys.root, "studio", "courses", courseId] as const, host),
   },
 
   platform: {
-    shell: (host?: string) => withQueryHost([...queryKeys.root, "platform", "shell"] as const, host),
+    shell: (host?: string) =>
+      withQueryHost([...queryKeys.root, "platform", "shell"] as const, host),
   },
 } as const;

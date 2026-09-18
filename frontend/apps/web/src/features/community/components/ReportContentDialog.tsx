@@ -102,7 +102,7 @@ export function ReportContentDialog({
           role="dialog"
           aria-label="Report content"
         >
-            <label className="block space-y-1.5">
+          <label className="block space-y-1.5">
             <span className="text-xs font-semibold text-foreground">Reason</span>
             <select
               className="w-full rounded-lg border border-input bg-background px-2 py-1.5 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -139,7 +139,7 @@ export function ReportContentDialog({
               Cancel
             </button>
           </div>
-            {error ? <p className="text-xs text-destructive">{error}</p> : null}
+          {error ? <p className="text-xs text-destructive">{error}</p> : null}
         </div>
       ) : null}
       {message ? <p className="mt-1 text-[11px] text-muted-foreground">{message}</p> : null}

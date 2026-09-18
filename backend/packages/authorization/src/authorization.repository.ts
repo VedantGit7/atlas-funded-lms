@@ -29,8 +29,10 @@ export async function findRolePermissionGrant(args: {
   membershipId: string;
   permissionKey: string;
 }): Promise<RolePermissionGrant | null> {
-  const rows = await args.tx.$queryRaw<Array<{ role_key: string }>>`
-      select distinct r.key as role_key
+  const rows = await args.tx.$queryRaw<
+    Array<{ role_key: string; bypasses_resource_predicates: boolean }>
+  >`
+      select distinct r.key as role_key, r.bypasses_resource_predicates
       from user_roles ur
       join roles r
         on r.id = ur.role_id
@@ -51,6 +53,7 @@ export async function findRolePermissionGrant(args: {
   return {
     permissionKey: args.permissionKey,
     roleKeys: rows.map((row) => row.role_key),
+    bypassesResourcePredicates: rows.some((row) => row.bypasses_resource_predicates),
   };
 }
 

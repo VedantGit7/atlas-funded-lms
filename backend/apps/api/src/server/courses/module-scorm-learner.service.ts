@@ -109,11 +109,23 @@ export async function getModuleScormContentForLearner(
   const env = parseStorageEnv(process.env);
   const provider = getStorageProvider();
 
-  const key = buildScormContentStorageKey({
-    tenantId: ctx.tenantId,
-    moduleId,
-    relativePath,
-  });
+  // `relativePath` comes straight from a client query parameter. The key builder
+  // now rejects traversal instead of silently stripping it, so translate that
+  // into a 404 rather than letting a raw Error surface as a 500.
+  let key: string;
+  try {
+    key = buildScormContentStorageKey({
+      tenantId: ctx.tenantId,
+      moduleId,
+      relativePath,
+    });
+  } catch {
+    throw new AtlasHttpError({
+      code: "PERMISSION_DENIED",
+      status: 404,
+      message: "SCORM content file was not found.",
+    });
+  }
 
   const body = await provider.getObjectBody({
     bucket: env.R2_BUCKET_NAME,

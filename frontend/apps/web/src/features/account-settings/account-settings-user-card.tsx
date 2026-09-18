@@ -80,7 +80,9 @@ export async function AccountSettingsUserCard({
           </div>
         )}
         <div className="min-w-0 flex-1">
-          <p className="truncate text-xs font-medium text-[var(--acct-on-surface)]">{displayName}</p>
+          <p className="truncate text-xs font-medium text-[var(--acct-on-surface)]">
+            {displayName}
+          </p>
           <p className="truncate text-[11px] font-semibold text-[var(--acct-on-surface-variant)]">
             {roleLabel}
           </p>

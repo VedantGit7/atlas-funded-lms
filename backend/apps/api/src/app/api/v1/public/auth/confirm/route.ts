@@ -4,10 +4,7 @@ import { createPublicRouteHandler } from "@atlas/api";
 import { establishSessionFromTokenHash, setAuthCookies } from "@atlas/auth";
 import { withGlobalDb } from "@atlas/db/global-db";
 import { withTenantTx } from "@atlas/db/with-tenant-tx";
-import {
-  findMembershipByPrincipal,
-  ensureSelfServiceLearnerMembership,
-} from "@atlas/membership";
+import { findMembershipByPrincipal, ensureSelfServiceLearnerMembership } from "@atlas/membership";
 import {
   PublicAuthConfirmRequestSchema,
   rejectClientTenantId,

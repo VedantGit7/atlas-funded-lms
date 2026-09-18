@@ -36,21 +36,21 @@ export function LessonSectionQuizWorkspace({ lesson, editable }: LessonSectionQu
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   async function handleContinue() {
     if (!editable || busy) return;
-    
+
     const existingAssessmentId = getAssessmentId(lesson.content);
-    
+
     if (existingAssessmentId) {
       router.push(`/studio/assessments/${existingAssessmentId}`);
       return;
     }
-    
+
     // Create new assessment
     setBusy(true);
     setError(null);
-    
+
     try {
       const response = await clientApi.post<{ data: { id: string } }>(
         "/api/v1/assessments",
@@ -61,9 +61,9 @@ export function LessonSectionQuizWorkspace({ lesson, editable }: LessonSectionQu
         },
         "assessment-create",
       );
-      
+
       const assessmentId = response.data.id;
-      
+
       // Save assessmentId to lesson content
       await clientApi.put(
         `/api/v1/lessons/${lesson.id}`,
@@ -74,7 +74,7 @@ export function LessonSectionQuizWorkspace({ lesson, editable }: LessonSectionQu
         },
         "lesson-assessment-link",
       );
-      
+
       router.push(`/studio/assessments/${assessmentId}`);
     } catch (createError) {
       if (createError instanceof ClientApiError) {
@@ -85,7 +85,7 @@ export function LessonSectionQuizWorkspace({ lesson, editable }: LessonSectionQu
       setBusy(false);
     }
   }
-  
+
   return (
     <div className="space-y-4">
       {error ? (
@@ -93,13 +93,10 @@ export function LessonSectionQuizWorkspace({ lesson, editable }: LessonSectionQu
           {error}
         </div>
       ) : null}
-      
+
       <section className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-[var(--admin-border)] bg-[var(--admin-border)] md:grid-cols-5">
         {QUIZ_STATS.map((stat) => (
-          <div
-            key={stat.label}
-            className="bg-[var(--admin-surface)] px-4 py-3 text-center md:py-4"
-          >
+          <div key={stat.label} className="bg-[var(--admin-surface)] px-4 py-3 text-center md:py-4">
             <p className="text-lg font-semibold tabular-nums text-[var(--admin-on-surface)]">
               {stat.value}
             </p>

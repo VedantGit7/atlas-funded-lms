@@ -17,6 +17,5 @@ export const POST = createTenantRoute<
   params: certificateParamsSchema,
   body: certificateRevokeBodySchema,
   output: certificateDetailResponseSchema,
-  handler: async ({ tx, ctx, params, input }) =>
-    revokeCertificate(tx, ctx, params["id"] ?? "", input),
+  handler: async ({ tx, ctx, params, input }) => revokeCertificate(tx, ctx, params.id, input),
 });

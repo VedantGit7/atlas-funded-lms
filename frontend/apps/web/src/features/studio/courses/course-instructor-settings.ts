@@ -26,10 +26,7 @@ export function mergeCourseInstructorsIntoTags(
   return mergeCourseAccessIntoTags(nextTags, access);
 }
 
-export function buildCourseInstructorsUpdatePayload(
-  course: CourseDetail,
-  membershipIds: string[],
-) {
+export function buildCourseInstructorsUpdatePayload(course: CourseDetail, membershipIds: string[]) {
   return {
     tags: mergeCourseInstructorsIntoTags(course.tags, membershipIds),
   };

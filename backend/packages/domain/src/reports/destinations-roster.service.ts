@@ -1,6 +1,7 @@
 import { createHmac, randomBytes } from "node:crypto";
 import { auditWriter } from "@atlas/audit";
 import { AtlasHttpError } from "@atlas/core/http/errors";
+import { safeOutboundFetch } from "@atlas/security/safe-outbound-fetch";
 import type { TenantTx } from "@atlas/db";
 import { assertTenantKeyPrefix, getStorageProvider, parseStorageEnv } from "@atlas/storage";
 import type { ServiceCtx } from "./reports.types";
@@ -386,6 +387,12 @@ export async function deleteDestination(tx: TenantTx, ctx: ServiceCtx, destinati
   });
 }
 
+// outbox-exempt: an admin clicking "Test destination" is asking whether this
+// destination works right now, so the send has to happen inline and its result
+// reported back. Routing it through the outbox would answer a different
+// question — "was it queued" — which is exactly what the operator is trying to
+// look past. Ordinary report delivery does go through the outbox, via
+// `handleReportDeliveryOutboxEvent`.
 export async function testDestination(
   tx: TenantTx,
   ctx: ServiceCtx,
@@ -465,7 +472,8 @@ export async function testDestination(
         };
         const body = JSON.stringify(payload);
         const signature = createHmac("sha256", signingSecret).update(body).digest("hex");
-        const response = await fetch(url, {
+        // Tenant-configured destination URL: SSRF-guarded.
+        const response = await safeOutboundFetch(url, {
           method: "POST",
           headers: {
             "content-type": "application/json",

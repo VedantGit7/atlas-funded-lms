@@ -17,7 +17,6 @@ import {
 } from "lucide-react";
 import { Select } from "@atlas/design-system";
 import {
-  fieldClassName,
   ghostButtonClassName,
   primaryButtonClassName,
 } from "../../analytics/analytics-admin-shared";
@@ -194,7 +193,7 @@ function learnerInitials(learner: ProgressLearnerItem): string {
   const source = learner.learnerName?.trim() || learner.email?.trim() || "?";
   const parts = source.split(/\s+/).filter(Boolean);
   if (parts.length >= 2) {
-    return `${parts[0]![0] ?? ""}${parts[1]![0] ?? ""}`.toUpperCase();
+    return `${parts[0]?.[0] ?? ""}${parts[1]?.[0] ?? ""}`.toUpperCase();
   }
   return source.slice(0, 2).toUpperCase();
 }
@@ -349,10 +348,8 @@ function CurriculumStrip({
       {curriculum.steepestDropOff ? (
         <p className="mt-4 font-mono text-[12px] text-[var(--admin-on-surface-variant)]">
           Steepest drop-off:{" "}
-          <span className="text-[var(--admin-warning)]">
-            {curriculum.steepestDropOff.title}
-          </span>{" "}
-          ({formatPct(curriculum.steepestDropOff.completionPct)} completion, −
+          <span className="text-[var(--admin-warning)]">{curriculum.steepestDropOff.title}</span> (
+          {formatPct(curriculum.steepestDropOff.completionPct)} completion, −
           {formatPct(curriculum.steepestDropOff.dropPct)} vs prior lesson)
         </p>
       ) : (
@@ -457,7 +454,10 @@ export function AdminProgressLearnerRosterPage({
 
   const [product, setProduct] = useState<ProgressLearnerRosterProduct | null>(null);
   const [summary, setSummary] = useState<ProgressLearnerRosterSummary | null>(null);
-  const [curriculum, setCurriculum] = useState<ProgressCurriculumStrip>({ lessons: [], steepestDropOff: null });
+  const [curriculum, setCurriculum] = useState<ProgressCurriculumStrip>({
+    lessons: [],
+    steepestDropOff: null,
+  });
   const [learners, setLearners] = useState<ProgressLearnerItem[]>([]);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(25);
@@ -484,7 +484,9 @@ export function AdminProgressLearnerRosterPage({
       setDebouncedSearch(searchInput.trim());
       setPage(1);
     }, 300);
-    return () => window.clearTimeout(timer);
+    return () => {
+      window.clearTimeout(timer);
+    };
   }, [searchInput]);
 
   const load = useCallback(async () => {
@@ -548,10 +550,7 @@ export function AdminProgressLearnerRosterPage({
   const showingFrom = totalCount === 0 ? 0 : (page - 1) * pageSize + 1;
   const showingTo = Math.min(page * pageSize, totalCount);
 
-  const selectedMembershipIds = useMemo(
-    () => [...selectedIds],
-    [selectedIds],
-  );
+  const selectedMembershipIds = useMemo(() => [...selectedIds], [selectedIds]);
 
   const allOnPageSelected =
     learners.length > 0 && learners.every((learner) => selectedIds.has(learner.membershipId));
@@ -701,7 +700,10 @@ export function AdminProgressLearnerRosterPage({
         </div>
       ) : null}
 
-      <nav aria-label="Breadcrumb" className="font-mono text-[11px] uppercase tracking-[0.08em] text-[var(--admin-on-surface-variant)]">
+      <nav
+        aria-label="Breadcrumb"
+        className="font-mono text-[11px] uppercase tracking-[0.08em] text-[var(--admin-on-surface-variant)]"
+      >
         <ol className="flex flex-wrap items-center gap-1.5">
           <li>
             <Link href="/admin" className="hover:text-[var(--admin-primary)]">
@@ -716,13 +718,19 @@ export function AdminProgressLearnerRosterPage({
           </li>
           <li aria-hidden="true">/</li>
           <li>
-            <Link href="/admin/reports/progress-score" className="hover:text-[var(--admin-primary)]">
+            <Link
+              href="/admin/reports/progress-score"
+              className="hover:text-[var(--admin-primary)]"
+            >
               Progress &amp; Score
             </Link>
           </li>
           <li aria-hidden="true">/</li>
           <li>
-            <Link href="/admin/reports/progress-score/progress" className="hover:text-[var(--admin-primary)]">
+            <Link
+              href="/admin/reports/progress-score/progress"
+              className="hover:text-[var(--admin-primary)]"
+            >
               Progress
             </Link>
           </li>
@@ -775,7 +783,9 @@ export function AdminProgressLearnerRosterPage({
             className={`${ghostButtonClassName} inline-flex h-10 items-center justify-center gap-2 rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface)] leading-none`}
             aria-expanded={columnsOpen}
             aria-controls={columnsPanelId}
-            onClick={() => setColumnsOpen((open) => !open)}
+            onClick={() => {
+              setColumnsOpen((open) => !open);
+            }}
           >
             <Columns3 className="h-4 w-4 shrink-0" aria-hidden="true" />
             Columns
@@ -799,7 +809,9 @@ export function AdminProgressLearnerRosterPage({
           <button
             type="button"
             className={`${primaryButtonClassName} inline-flex h-10 items-center justify-center gap-2 rounded-sm leading-none`}
-            onClick={() => openCohortDrawer("group")}
+            onClick={() => {
+              openCohortDrawer("group");
+            }}
           >
             <Users className="h-4 w-4 shrink-0" aria-hidden="true" />
             Cohort actions
@@ -892,7 +904,9 @@ export function AdminProgressLearnerRosterPage({
             id={searchId}
             type="search"
             value={searchInput}
-            onChange={(event) => setSearchInput(event.target.value)}
+            onChange={(event) => {
+              setSearchInput(event.target.value);
+            }}
             placeholder="Search learner name…"
             className="h-9 w-full rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface)] pl-9 pr-3 text-xs font-medium text-[var(--admin-on-surface)] outline-none placeholder:text-[var(--admin-on-surface-variant)] focus:border-[var(--admin-primary)] focus:ring-2 focus:ring-[var(--admin-primary)]/30"
           />
@@ -939,21 +953,27 @@ export function AdminProgressLearnerRosterPage({
             <button
               type="button"
               className={ghostButtonClassName}
-              onClick={() => openCohortDrawer("group")}
+              onClick={() => {
+                openCohortDrawer("group");
+              }}
             >
               Create group
             </button>
             <button
               type="button"
               className={ghostButtonClassName}
-              onClick={() => openCohortDrawer("message")}
+              onClick={() => {
+                openCohortDrawer("message");
+              }}
             >
               Message learners
             </button>
             <button
               type="button"
               className={`${ghostButtonClassName} inline-flex items-center gap-1`}
-              onClick={() => setSelectedIds(new Set())}
+              onClick={() => {
+                setSelectedIds(new Set());
+              }}
             >
               <X className="h-4 w-4" aria-hidden="true" />
               Clear
@@ -1026,7 +1046,9 @@ export function AdminProgressLearnerRosterPage({
                             ? "border-l-2 border-l-[var(--admin-warning)]"
                             : "border-l-2 border-l-transparent",
                         ].join(" ")}
-                        onClick={() => navigateToLearnerDetail(learner.enrollmentId)}
+                        onClick={() => {
+                          navigateToLearnerDetail(learner.enrollmentId);
+                        }}
                         onKeyDown={(event) => {
                           if (event.key === "Enter" || event.key === " ") {
                             event.preventDefault();
@@ -1042,8 +1064,12 @@ export function AdminProgressLearnerRosterPage({
                             type="checkbox"
                             checked={selected}
                             aria-label={`Select ${learner.learnerName ?? learner.email ?? "learner"}`}
-                            onClick={(event) => event.stopPropagation()}
-                            onChange={() => toggleLearnerSelection(learner.membershipId)}
+                            onClick={(event) => {
+                              event.stopPropagation();
+                            }}
+                            onChange={() => {
+                              toggleLearnerSelection(learner.membershipId);
+                            }}
                           />
                         </td>
                         <td className="px-4 py-3">
@@ -1058,7 +1084,9 @@ export function AdminProgressLearnerRosterPage({
                               <Link
                                 href={memberHref}
                                 className="block truncate font-semibold text-[var(--admin-on-surface)] transition-colors group-hover:text-[var(--admin-primary)]"
-                                onClick={(event) => event.stopPropagation()}
+                                onClick={(event) => {
+                                  event.stopPropagation();
+                                }}
                               >
                                 {learner.learnerName ?? "Unnamed learner"}
                               </Link>
@@ -1120,7 +1148,9 @@ export function AdminProgressLearnerRosterPage({
                           <Link
                             href={memberHref}
                             className="inline-flex text-[var(--admin-on-surface-variant)] transition-colors hover:text-[var(--admin-primary)]"
-                            onClick={(event) => event.stopPropagation()}
+                            onClick={(event) => {
+                              event.stopPropagation();
+                            }}
                             aria-label={`Open member profile for ${learner.learnerName ?? learner.email ?? "learner"}`}
                           >
                             <ChevronRight className="h-4 w-4" aria-hidden="true" />
@@ -1157,7 +1187,9 @@ export function AdminProgressLearnerRosterPage({
                 type="button"
                 className="inline-flex h-8 w-8 items-center justify-center border border-[var(--admin-border)] transition-colors hover:bg-[var(--admin-surface-high)] hover:text-[var(--admin-on-surface)] disabled:cursor-not-allowed disabled:opacity-40"
                 disabled={page <= 1 || loading}
-                onClick={() => setPage((current) => Math.max(1, current - 1))}
+                onClick={() => {
+                  setPage((current) => Math.max(1, current - 1));
+                }}
                 aria-label="Previous page"
               >
                 <ChevronLeft className="h-4 w-4" aria-hidden="true" />
@@ -1169,7 +1201,9 @@ export function AdminProgressLearnerRosterPage({
                 type="button"
                 className="inline-flex h-8 w-8 items-center justify-center border border-[var(--admin-border)] transition-colors hover:bg-[var(--admin-surface-high)] hover:text-[var(--admin-on-surface)] disabled:cursor-not-allowed disabled:opacity-40"
                 disabled={page >= totalPages || loading}
-                onClick={() => setPage((current) => current + 1)}
+                onClick={() => {
+                  setPage((current) => current + 1);
+                }}
                 aria-label="Next page"
               >
                 <ChevronRight className="h-4 w-4" aria-hidden="true" />
@@ -1188,9 +1222,7 @@ export function AdminProgressLearnerRosterPage({
           productId,
           productTitle: product?.title ?? "Product",
           matchCount: selectedMembershipIds.length > 0 ? selectedMembershipIds.length : totalCount,
-          ...(selectedMembershipIds.length > 0
-            ? { membershipIds: selectedMembershipIds }
-            : {}),
+          ...(selectedMembershipIds.length > 0 ? { membershipIds: selectedMembershipIds } : {}),
           filterChips,
           suggestedGroupName: `${view !== "all" ? view.replace(/_/g, " ") : "Cohort"} — ${product?.title ?? "learners"}`,
           audienceFilters: {
@@ -1198,7 +1230,9 @@ export function AdminProgressLearnerRosterPage({
             ...(enrolledType ? { enrolledType } : {}),
           },
         }}
-        onClose={() => setDrawerOpen(false)}
+        onClose={() => {
+          setDrawerOpen(false);
+        }}
         onSuccess={() => void load()}
       />
     </div>

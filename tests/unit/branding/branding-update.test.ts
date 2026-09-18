@@ -130,7 +130,10 @@ describe("branding update", () => {
       "utf8",
     );
     const schemaSource = readFileSync(
-      resolve(import.meta.dirname, "../../../backend/packages/domain/branding/src/schemas/branding.ts"),
+      resolve(
+        import.meta.dirname,
+        "../../../backend/packages/domain/branding/src/schemas/branding.ts",
+      ),
       "utf8",
     );
 

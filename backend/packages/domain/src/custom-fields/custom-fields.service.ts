@@ -23,7 +23,11 @@ function toDefinitionDto(row: CustomFieldDefinitionRow) {
   };
 }
 
-export async function createCustomFieldDefinition(tx: TenantTx, _ctx: ServiceCtx, rawBody: unknown) {
+export async function createCustomFieldDefinition(
+  tx: TenantTx,
+  _ctx: ServiceCtx,
+  rawBody: unknown,
+) {
   const body = createCustomFieldDefinitionBodySchema.parse(rawBody);
   const row = await customFieldsRepository.insertDefinition(tx, {
     key: body.key,
@@ -58,7 +62,11 @@ export async function updateCustomFieldDefinition(
   return customFieldDefinitionResponseSchema.parse({ data: toDefinitionDto(row) });
 }
 
-export async function deleteCustomFieldDefinition(tx: TenantTx, _ctx: ServiceCtx, definitionId: string) {
+export async function deleteCustomFieldDefinition(
+  tx: TenantTx,
+  _ctx: ServiceCtx,
+  definitionId: string,
+) {
   const deleted = await customFieldsRepository.deleteDefinition(tx, definitionId);
   if (!deleted) throw customFieldDefinitionNotFound();
   return { data: { deleted: true } };

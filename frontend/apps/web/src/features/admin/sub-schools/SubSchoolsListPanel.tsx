@@ -19,7 +19,11 @@ import { ClientApiError, clientApi } from "../../../lib/client-api";
 import { ConfirmDialog } from "../../../components/patterns/ConfirmDialog";
 import { dropdownPanelSurfaceClassName } from "../../studio/courses/admin-form-dropdown-shared";
 import { SubSchoolsEmptyIllustration } from "./SubSchoolsEmptyIllustration";
-import { SUB_SCHOOLS_CREATE_HREF, SUB_SCHOOL_URL_SUFFIX, subSchoolDetailHref } from "./sub-schools-shared";
+import {
+  SUB_SCHOOLS_CREATE_HREF,
+  SUB_SCHOOL_URL_SUFFIX,
+  subSchoolDetailHref,
+} from "./sub-schools-shared";
 
 export type SubSchoolRow = {
   id: string;
@@ -107,10 +111,16 @@ export function SubSchoolsListPanel({ initialItems }: { initialItems: SubSchoolR
     );
   }, [items, query]);
 
-  const visibleColumns = useMemo(() => COLUMNS.filter((column) => !hidden.has(column.id)), [hidden]);
+  const visibleColumns = useMemo(
+    () => COLUMNS.filter((column) => !hidden.has(column.id)),
+    [hidden],
+  );
   const pageCount = Math.max(1, Math.ceil(filtered.length / rowsPerPage));
   const currentPage = Math.min(page, pageCount - 1);
-  const pageRows = filtered.slice(currentPage * rowsPerPage, currentPage * rowsPerPage + rowsPerPage);
+  const pageRows = filtered.slice(
+    currentPage * rowsPerPage,
+    currentPage * rowsPerPage + rowsPerPage,
+  );
   const hasQuery = query.trim().length > 0;
 
   function toggleColumn(id: ColumnId) {
@@ -126,14 +136,21 @@ export function SubSchoolsListPanel({ initialItems }: { initialItems: SubSchoolR
     setBusyId(row.id);
     setError(null);
     try {
-      await clientApi.delete(`/api/v1/sub-schools/${row.id}`, `sub-school-delete-${row.id}`, undefined, {
-        successMessage: `${row.name} removed.`,
-      });
+      await clientApi.delete(
+        `/api/v1/sub-schools/${row.id}`,
+        `sub-school-delete-${row.id}`,
+        undefined,
+        {
+          successMessage: `${row.name} removed.`,
+        },
+      );
       setConfirmRemove(null);
       setItems((previous) => previous.filter((item) => item.id !== row.id));
       router.refresh();
     } catch (caught) {
-      setError(caught instanceof ClientApiError ? caught.message : "Could not remove the sub-school.");
+      setError(
+        caught instanceof ClientApiError ? caught.message : "Could not remove the sub-school.",
+      );
     } finally {
       setBusyId(null);
     }
@@ -248,7 +265,9 @@ export function SubSchoolsListPanel({ initialItems }: { initialItems: SubSchoolR
             </p>
             <div className="flex flex-wrap items-center justify-end gap-4">
               <div className="flex items-center gap-2">
-                <span className="text-sm text-[var(--admin-on-surface-variant)]">Rows Per Page</span>
+                <span className="text-sm text-[var(--admin-on-surface-variant)]">
+                  Rows Per Page
+                </span>
                 <Select
                   value={String(rowsPerPage)}
                   onValueChange={(value) => {
@@ -311,7 +330,10 @@ export function SubSchoolsListPanel({ initialItems }: { initialItems: SubSchoolR
               </thead>
               <tbody>
                 {pageRows.map((row) => (
-                  <tr key={row.id} className="border-b border-[var(--admin-border)] last:border-b-0">
+                  <tr
+                    key={row.id}
+                    className="border-b border-[var(--admin-border)] last:border-b-0"
+                  >
                     {visibleColumns.map((column) => (
                       <td key={column.id} className="px-4 py-4 align-middle">
                         {column.id === "name" ? (
@@ -407,13 +429,7 @@ export function SubSchoolsListPanel({ initialItems }: { initialItems: SubSchoolR
   );
 }
 
-function EmptyState({
-  hasQuery,
-  onClearSearch,
-}: {
-  hasQuery: boolean;
-  onClearSearch: () => void;
-}) {
+function EmptyState({ hasQuery, onClearSearch }: { hasQuery: boolean; onClearSearch: () => void }) {
   return (
     <div className="flex flex-col items-center justify-center gap-5 py-20 text-center sm:py-28">
       <SubSchoolsEmptyIllustration />

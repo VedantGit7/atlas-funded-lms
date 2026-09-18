@@ -30,6 +30,7 @@ export type RoleMinAggregateOutputType = {
   key: string | null
   name: string | null
   is_system: boolean | null
+  bypasses_resource_predicates: boolean | null
   created_at: Date | null
   updated_at: Date | null
   deleted_at: Date | null
@@ -41,6 +42,7 @@ export type RoleMaxAggregateOutputType = {
   key: string | null
   name: string | null
   is_system: boolean | null
+  bypasses_resource_predicates: boolean | null
   created_at: Date | null
   updated_at: Date | null
   deleted_at: Date | null
@@ -52,6 +54,7 @@ export type RoleCountAggregateOutputType = {
   key: number
   name: number
   is_system: number
+  bypasses_resource_predicates: number
   created_at: number
   updated_at: number
   deleted_at: number
@@ -65,6 +68,7 @@ export type RoleMinAggregateInputType = {
   key?: true
   name?: true
   is_system?: true
+  bypasses_resource_predicates?: true
   created_at?: true
   updated_at?: true
   deleted_at?: true
@@ -76,6 +80,7 @@ export type RoleMaxAggregateInputType = {
   key?: true
   name?: true
   is_system?: true
+  bypasses_resource_predicates?: true
   created_at?: true
   updated_at?: true
   deleted_at?: true
@@ -87,6 +92,7 @@ export type RoleCountAggregateInputType = {
   key?: true
   name?: true
   is_system?: true
+  bypasses_resource_predicates?: true
   created_at?: true
   updated_at?: true
   deleted_at?: true
@@ -171,6 +177,7 @@ export type RoleGroupByOutputType = {
   key: string
   name: string
   is_system: boolean
+  bypasses_resource_predicates: boolean
   created_at: Date
   updated_at: Date
   deleted_at: Date | null
@@ -203,6 +210,7 @@ export type RoleWhereInput = {
   key?: Prisma.StringFilter<"Role"> | string
   name?: Prisma.StringFilter<"Role"> | string
   is_system?: Prisma.BoolFilter<"Role"> | boolean
+  bypasses_resource_predicates?: Prisma.BoolFilter<"Role"> | boolean
   created_at?: Prisma.DateTimeFilter<"Role"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"Role"> | Date | string
   deleted_at?: Prisma.DateTimeNullableFilter<"Role"> | Date | string | null
@@ -214,6 +222,7 @@ export type RoleOrderByWithRelationInput = {
   key?: Prisma.SortOrder
   name?: Prisma.SortOrder
   is_system?: Prisma.SortOrder
+  bypasses_resource_predicates?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   deleted_at?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -221,6 +230,7 @@ export type RoleOrderByWithRelationInput = {
 
 export type RoleWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  tenant_id_key?: Prisma.RoleTenant_idKeyCompoundUniqueInput
   AND?: Prisma.RoleWhereInput | Prisma.RoleWhereInput[]
   OR?: Prisma.RoleWhereInput[]
   NOT?: Prisma.RoleWhereInput | Prisma.RoleWhereInput[]
@@ -228,10 +238,11 @@ export type RoleWhereUniqueInput = Prisma.AtLeast<{
   key?: Prisma.StringFilter<"Role"> | string
   name?: Prisma.StringFilter<"Role"> | string
   is_system?: Prisma.BoolFilter<"Role"> | boolean
+  bypasses_resource_predicates?: Prisma.BoolFilter<"Role"> | boolean
   created_at?: Prisma.DateTimeFilter<"Role"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"Role"> | Date | string
   deleted_at?: Prisma.DateTimeNullableFilter<"Role"> | Date | string | null
-}, "id">
+}, "id" | "tenant_id_key">
 
 export type RoleOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -239,6 +250,7 @@ export type RoleOrderByWithAggregationInput = {
   key?: Prisma.SortOrder
   name?: Prisma.SortOrder
   is_system?: Prisma.SortOrder
+  bypasses_resource_predicates?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   deleted_at?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -256,6 +268,7 @@ export type RoleScalarWhereWithAggregatesInput = {
   key?: Prisma.StringWithAggregatesFilter<"Role"> | string
   name?: Prisma.StringWithAggregatesFilter<"Role"> | string
   is_system?: Prisma.BoolWithAggregatesFilter<"Role"> | boolean
+  bypasses_resource_predicates?: Prisma.BoolWithAggregatesFilter<"Role"> | boolean
   created_at?: Prisma.DateTimeWithAggregatesFilter<"Role"> | Date | string
   updated_at?: Prisma.DateTimeWithAggregatesFilter<"Role"> | Date | string
   deleted_at?: Prisma.DateTimeNullableWithAggregatesFilter<"Role"> | Date | string | null
@@ -267,6 +280,7 @@ export type RoleCreateInput = {
   key: string
   name: string
   is_system?: boolean
+  bypasses_resource_predicates?: boolean
   created_at?: Date | string
   updated_at?: Date | string
   deleted_at?: Date | string | null
@@ -278,6 +292,7 @@ export type RoleUncheckedCreateInput = {
   key: string
   name: string
   is_system?: boolean
+  bypasses_resource_predicates?: boolean
   created_at?: Date | string
   updated_at?: Date | string
   deleted_at?: Date | string | null
@@ -289,6 +304,7 @@ export type RoleUpdateInput = {
   key?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   is_system?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  bypasses_resource_predicates?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -300,6 +316,7 @@ export type RoleUncheckedUpdateInput = {
   key?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   is_system?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  bypasses_resource_predicates?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -311,6 +328,7 @@ export type RoleCreateManyInput = {
   key: string
   name: string
   is_system?: boolean
+  bypasses_resource_predicates?: boolean
   created_at?: Date | string
   updated_at?: Date | string
   deleted_at?: Date | string | null
@@ -322,6 +340,7 @@ export type RoleUpdateManyMutationInput = {
   key?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   is_system?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  bypasses_resource_predicates?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -333,9 +352,15 @@ export type RoleUncheckedUpdateManyInput = {
   key?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   is_system?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  bypasses_resource_predicates?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
+export type RoleTenant_idKeyCompoundUniqueInput = {
+  tenant_id: string
+  key: string
 }
 
 export type RoleCountOrderByAggregateInput = {
@@ -344,6 +369,7 @@ export type RoleCountOrderByAggregateInput = {
   key?: Prisma.SortOrder
   name?: Prisma.SortOrder
   is_system?: Prisma.SortOrder
+  bypasses_resource_predicates?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   deleted_at?: Prisma.SortOrder
@@ -355,6 +381,7 @@ export type RoleMaxOrderByAggregateInput = {
   key?: Prisma.SortOrder
   name?: Prisma.SortOrder
   is_system?: Prisma.SortOrder
+  bypasses_resource_predicates?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   deleted_at?: Prisma.SortOrder
@@ -366,6 +393,7 @@ export type RoleMinOrderByAggregateInput = {
   key?: Prisma.SortOrder
   name?: Prisma.SortOrder
   is_system?: Prisma.SortOrder
+  bypasses_resource_predicates?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   deleted_at?: Prisma.SortOrder
@@ -379,6 +407,7 @@ export type RoleSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   key?: boolean
   name?: boolean
   is_system?: boolean
+  bypasses_resource_predicates?: boolean
   created_at?: boolean
   updated_at?: boolean
   deleted_at?: boolean
@@ -390,6 +419,7 @@ export type RoleSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   key?: boolean
   name?: boolean
   is_system?: boolean
+  bypasses_resource_predicates?: boolean
   created_at?: boolean
   updated_at?: boolean
   deleted_at?: boolean
@@ -401,6 +431,7 @@ export type RoleSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   key?: boolean
   name?: boolean
   is_system?: boolean
+  bypasses_resource_predicates?: boolean
   created_at?: boolean
   updated_at?: boolean
   deleted_at?: boolean
@@ -412,12 +443,13 @@ export type RoleSelectScalar = {
   key?: boolean
   name?: boolean
   is_system?: boolean
+  bypasses_resource_predicates?: boolean
   created_at?: boolean
   updated_at?: boolean
   deleted_at?: boolean
 }
 
-export type RoleOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "key" | "name" | "is_system" | "created_at" | "updated_at" | "deleted_at", ExtArgs["result"]["role"]>
+export type RoleOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "key" | "name" | "is_system" | "bypasses_resource_predicates" | "created_at" | "updated_at" | "deleted_at", ExtArgs["result"]["role"]>
 
 export type $RolePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Role"
@@ -428,6 +460,11 @@ export type $RolePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     key: string
     name: string
     is_system: boolean
+    /**
+     * H11: can() skips ownership/relationship predicates for this role.
+     * Replaces matching the literal keys "owner"/"admin" in code.
+     */
+    bypasses_resource_predicates: boolean
     created_at: Date
     updated_at: Date
     deleted_at: Date | null
@@ -859,6 +896,7 @@ export interface RoleFieldRefs {
   readonly key: Prisma.FieldRef<"Role", 'String'>
   readonly name: Prisma.FieldRef<"Role", 'String'>
   readonly is_system: Prisma.FieldRef<"Role", 'Boolean'>
+  readonly bypasses_resource_predicates: Prisma.FieldRef<"Role", 'Boolean'>
   readonly created_at: Prisma.FieldRef<"Role", 'DateTime'>
   readonly updated_at: Prisma.FieldRef<"Role", 'DateTime'>
   readonly deleted_at: Prisma.FieldRef<"Role", 'DateTime'>

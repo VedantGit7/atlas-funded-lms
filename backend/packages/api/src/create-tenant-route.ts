@@ -1,7 +1,12 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { ZodError, type z } from "zod";
-import { can, enforceEntitlement, toAuthorizationError } from "@atlas/authorization";
+import {
+  can,
+  consumeEntitlementUnits,
+  enforceEntitlement,
+  toAuthorizationError,
+} from "@atlas/authorization";
 import type { ResourceRef } from "@atlas/authorization";
 import { AtlasHttpError } from "@atlas/core/http/errors";
 import { getOrCreateRequestId } from "@atlas/core/request/request-id";
@@ -12,6 +17,9 @@ import type { TenantTx } from "@atlas/db";
 import { withTenantTx } from "@atlas/db/with-tenant-tx";
 import { ensurePlatformSuperAdminTenantAccess, requireActiveMembership } from "@atlas/membership";
 import { resolveTenantFromRequest } from "@atlas/tenancy";
+import { assertSameOrigin } from "./assert-same-origin";
+import { fingerprintRequest, withIdempotency } from "./idempotency-registry";
+import { assertTenantMfa } from "@atlas/auth/mfa-enforcement";
 import { toSafeErrorEnvelope } from "./error-envelope";
 import { loadResourceRefOrDefault } from "./load-resource-ref";
 import type { RouteMetadata, TenantRouteContext } from "./route-metadata";
@@ -33,6 +41,14 @@ export async function runProtectedTenantRoutePipeline<TInput>(args: {
   metadata: RouteMetadata<TInput>;
   params: Record<string, string>;
   input: TInput;
+  /**
+   * Whether the caller's session has a verified second factor (H5).
+   *
+   * Threaded explicitly rather than added to `TenantRouteContext`, which is
+   * constructed in hundreds of places; an optional flag there would default to
+   * "no MFA" at every one of them and quietly deny.
+   */
+  mfaEnabled?: boolean;
 }): Promise<ResourceRef> {
   await enforceEntitlement(args.tx, {
     tenantId: args.ctx.tenantId,
@@ -66,6 +82,32 @@ export async function runProtectedTenantRoutePipeline<TInput>(args: {
     throw toAuthorizationError(decision);
   }
 
+  // After the permission decision on purpose: a caller who lacks the permission
+  // should learn "denied", not "you need MFA" — the latter tells them the
+  // action exists and that they would otherwise be allowed to perform it.
+  assertTenantMfa({
+    mfaEnabled: args.mfaEnabled ?? false,
+    required: args.metadata.mfa === "required",
+    permission: args.metadata.permission,
+  });
+
+  // Metering runs last, for the same reason MFA runs after the permission
+  // decision: a caller who is going to be denied must not consume a unit of the
+  // tenant's plan on the way out. Routes that declare no usage function are
+  // unaffected — the gate above is the whole of their entitlement handling.
+  if (args.metadata.entitlementUsage) {
+    await consumeEntitlementUnits(args.tx, {
+      tenantId: args.ctx.tenantId,
+      key: args.metadata.entitlement ?? null,
+      requestId: args.ctx.requestId,
+      units: args.metadata.entitlementUsage({
+        ctx: args.ctx,
+        params: args.params,
+        input: args.input,
+      }),
+    });
+  }
+
   return resource;
 }
 
@@ -87,6 +129,7 @@ export async function runProtectedTenantRouteHandler<
   metadata: RouteMetadata<TInput>;
   params: TParams;
   input: TInput;
+  mfaEnabled?: boolean;
   handler: ProtectedTenantRouteHandler<TInput, TOutput, TParams>;
 }): Promise<TOutput> {
   const resource = await runProtectedTenantRoutePipeline({
@@ -95,6 +138,7 @@ export async function runProtectedTenantRouteHandler<
     metadata: args.metadata,
     params: asParamRecord(args.params),
     input: args.input,
+    ...(args.mfaEnabled === undefined ? {} : { mfaEnabled: args.mfaEnabled }),
   });
 
   return args.handler({
@@ -187,16 +231,67 @@ export function createTenantRoute<
           route: pathname,
           routeGroup: inferRouteGroup(pathname),
           actorPlane: "tenant",
+          // Log the code this route will actually answer with, derived from the
+          // same envelope the catch below responds with, so the two cannot drift.
+          classifyError: (error) => toSafeErrorEnvelope(error, requestId).body.error.code,
         },
         async () => {
           if (config.metadata.idempotency === "required") {
             requireIdempotencyKey(req);
           }
 
-          return await withGlobalDb(async (db) => {
-            const tenant = await resolveTenantFromRequest({ req, db });
-            const supabaseUser = await requireSupabaseUser(req);
-            const principal = await upsertAuthPrincipal({
+          // ---------------------------------------------------------------
+          // Phase 1: no database connection held.
+          //
+          // requireSupabaseUser makes up to three Supabase HTTPS calls. It used
+          // to run inside withGlobalDb, pinning a pooled connection for the
+          // duration of that network I/O. Input parsing is pure CPU and likewise
+          // needs no connection.
+          //
+          // Note this moves authentication ahead of tenant resolution, so an
+          // unauthenticated request to an unknown host now fails 401 rather than
+          // tenant-unavailable. That ordering is preferable anyway: it does not
+          // disclose whether a tenant host exists to an anonymous caller.
+          // ---------------------------------------------------------------
+          const supabaseUser = await requireSupabaseUser(req);
+
+          let input: TInput;
+
+          if (config.readBody != null) {
+            rejectClientSuppliedQueryParams(req);
+            input = (await config.readBody(req)) as TInput;
+          } else if (config.body != null) {
+            rejectClientSuppliedQueryParams(req);
+            input = (await readBodyInput(req, config.body)) as TInput;
+          } else if (config.input != null) {
+            input = readGetInput(req, config.input) as TInput;
+          } else {
+            readGetInput(req, noBodySchema);
+            input = {} as TInput;
+          }
+
+          const params: InferParams<TParams> =
+            config.params != null
+              ? (config.params.parse(
+                  routeContext ? await routeContext.params : {},
+                ) as InferParams<TParams>)
+              : ({} as InferParams<TParams>);
+
+          const idempotencyKey = req.headers.get("idempotency-key")?.trim() ?? undefined;
+
+          // ---------------------------------------------------------------
+          // Phase 2: first connection, released before phase 3 begins.
+          //
+          // withTenantTx used to be nested INSIDE this block, so every request
+          // held two pool connections at once. With DATABASE_POOL_MAX = 20 that
+          // deadlocked at 20 concurrent requests: each held an outer connection
+          // while waiting for an inner one, none could release, and every
+          // request failed after the 10s connect timeout. Measured 0 successful
+          // requests at 20 concurrent; 364 rps at 80 concurrent once un-nested.
+          // ---------------------------------------------------------------
+          const { tenant, principal } = await withGlobalDb(async (db) => {
+            const resolvedTenant = await resolveTenantFromRequest({ req, db });
+            const resolvedPrincipal = await upsertAuthPrincipal({
               db,
               supabaseUserId: supabaseUser.supabaseUserId,
               email: supabaseUser.email,
@@ -204,51 +299,42 @@ export function createTenantRoute<
               markLogin: false,
             });
 
-            let input: TInput;
-
-            if (config.readBody != null) {
-              rejectClientSuppliedQueryParams(req);
-              input = (await config.readBody(req)) as TInput;
-            } else if (config.body != null) {
-              rejectClientSuppliedQueryParams(req);
-              input = (await readBodyInput(req, config.body)) as TInput;
-            } else if (config.input != null) {
-              input = readGetInput(req, config.input) as TInput;
-            } else {
-              readGetInput(req, noBodySchema);
-              input = {} as TInput;
-            }
-
-            const params: InferParams<TParams> =
-              config.params != null
-                ? (config.params.parse(
-                    routeContext ? await routeContext.params : {},
-                  ) as InferParams<TParams>)
-                : ({} as InferParams<TParams>);
-
-            const idempotencyKey = req.headers.get("idempotency-key")?.trim() ?? undefined;
-
             await ensurePlatformSuperAdminTenantAccess({
               db,
-              tenantId: tenant.tenantId,
+              tenantId: resolvedTenant.tenantId,
               requestId,
               email: supabaseUser.email,
             });
 
-            const result = await withTenantTx(
-              {
-                tenantId: tenant.tenantId,
-                requestId,
-                allowAnonymousTenantRead: true,
-              },
-              async (tx) => {
-                const membership = await requireActiveMembership({
-                  tx,
-                  tenantId: tenant.tenantId,
-                  authPrincipalId: principal.id,
-                });
+            return { tenant: resolvedTenant, principal: resolvedPrincipal };
+          });
 
-                return runProtectedTenantRouteHandler({
+          // Cross-tenant CSRF guard. Runs after tenant resolution because it
+          // needs the resolved host to compare against. See assert-same-origin.ts
+          // for why SameSite=Lax does not separate tenants on a shared base domain.
+          assertSameOrigin({
+            method: req.method,
+            origin: req.headers.get("origin"),
+            host: tenant.host,
+          });
+
+          // Phase 3: second connection, acquired only after the first is back
+          // in the pool.
+          const result = await withTenantTx(
+            {
+              tenantId: tenant.tenantId,
+              requestId,
+              allowAnonymousTenantRead: true,
+            },
+            async (tx) => {
+              const membership = await requireActiveMembership({
+                tx,
+                tenantId: tenant.tenantId,
+                authPrincipalId: principal.id,
+              });
+
+              const runHandler = () =>
+                runProtectedTenantRouteHandler({
                   tx,
                   ctx: {
                     tenantId: tenant.tenantId,
@@ -259,27 +345,53 @@ export function createTenantRoute<
                   metadata: config.metadata,
                   params,
                   input,
+                  mfaEnabled: supabaseUser.mfaEnabled,
                   handler: config.handler,
                 });
-              },
-            );
 
-            let body: TOutput;
-            try {
-              body = config.output.parse(result) as TOutput;
-            } catch (error) {
-              if (error instanceof ZodError) {
-                throw new AtlasHttpError({
-                  code: "INTERNAL_ERROR",
-                  status: 500,
-                  message: "Response validation failed",
-                  expose: false,
-                });
+              // M10. The claim is made in this transaction, so the record and
+              // the handler's writes commit together — a handler that throws
+              // leaves no claim, and the client's retry is a first attempt
+              // rather than a key that is permanently poisoned.
+              if (config.metadata.idempotency !== "required" || idempotencyKey === undefined) {
+                return runHandler();
               }
-              throw error;
+
+              return withIdempotency(
+                tx,
+                {
+                  tenantId: tenant.tenantId,
+                  idempotencyKey,
+                  scope: `${req.method} ${pathname}`,
+                  requestFingerprint: fingerprintRequest({
+                    method: req.method,
+                    path: pathname,
+                    body: input,
+                  }),
+                  actorMembershipId: membership.membershipId,
+                  requestId,
+                },
+                runHandler,
+              );
+            },
+          );
+
+          // Phase 4: no connection held while validating and serialising output.
+          let body: TOutput;
+          try {
+            body = config.output.parse(result) as TOutput;
+          } catch (error) {
+            if (error instanceof ZodError) {
+              throw new AtlasHttpError({
+                code: "INTERNAL_ERROR",
+                status: 500,
+                message: "Response validation failed",
+                expose: false,
+              });
             }
-            return attachRequestIdHeader(NextResponse.json(body), requestId);
-          });
+            throw error;
+          }
+          return attachRequestIdHeader(NextResponse.json(body), requestId);
         },
       );
     } catch (error) {

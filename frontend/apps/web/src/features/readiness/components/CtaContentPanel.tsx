@@ -28,7 +28,10 @@ export function CtaContentPanel({ ctaCopy, disabled, onChange }: CtaContentPanel
     >
       <div className={panelClassName}>
         <div className="border-b border-[var(--admin-border)] px-4 py-3 sm:px-5">
-          <h2 id="cta-content-heading" className="text-base font-semibold text-[var(--admin-on-surface)]">
+          <h2
+            id="cta-content-heading"
+            className="text-base font-semibold text-[var(--admin-on-surface)]"
+          >
             CTA Content Configuration
           </h2>
         </div>

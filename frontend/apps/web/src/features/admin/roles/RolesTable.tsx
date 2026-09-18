@@ -84,7 +84,10 @@ export function RolesTable({ roles }: RolesTableProps) {
   return (
     <div className="space-y-4">
       {errorMessage ? (
-        <p role="alert" className="rounded-lg border border-[var(--admin-danger)]/30 bg-[var(--admin-danger)]/10 px-4 py-3 text-sm text-[var(--admin-danger)]">
+        <p
+          role="alert"
+          className="rounded-lg border border-[var(--admin-danger)]/30 bg-[var(--admin-danger)]/10 px-4 py-3 text-sm text-[var(--admin-danger)]"
+        >
           {errorMessage}
         </p>
       ) : null}

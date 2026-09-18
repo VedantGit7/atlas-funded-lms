@@ -14,7 +14,10 @@ import {
   primaryButtonClassName,
   statusBannerClassName,
 } from "./create-course-dialog-shared";
-import { inferScormPackageContentType, uploadModuleScormPackage } from "./upload-module-scorm-package";
+import {
+  inferScormPackageContentType,
+  uploadModuleScormPackage,
+} from "./upload-module-scorm-package";
 
 type ModuleItem = z.infer<typeof studioModuleOutlineItemSchema>;
 
@@ -99,10 +102,9 @@ export function AddChapterDialog({ open, courseId, onClose, onCreated }: AddChap
     setScormFile(file);
   }
 
-  const canSubmit =
-    title.trim().length > 0 && (!scormEnabled || scormFile != null) && !busy;
+  const canSubmit = title.trim().length > 0 && (!scormEnabled || scormFile != null) && !busy;
 
-  async function handleSubmit(event: React.FormEvent) {
+  async function handleSubmit(event: React.SyntheticEvent) {
     event.preventDefault();
     if (!canSubmit) return;
 
@@ -228,12 +230,18 @@ export function AddChapterDialog({ open, courseId, onClose, onCreated }: AddChap
                 }}
                 className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-4 py-2.5 text-sm font-semibold text-[var(--admin-on-surface)] transition-colors hover:bg-[var(--admin-surface-high)] disabled:opacity-50"
               >
-                <Upload className="h-4 w-4 text-[var(--admin-on-surface-variant)]" aria-hidden="true" />
+                <Upload
+                  className="h-4 w-4 text-[var(--admin-on-surface-variant)]"
+                  aria-hidden="true"
+                />
                 Upload a ZIP file
               </button>
               {scormFile ? (
                 <p className="truncate text-sm text-[var(--admin-on-surface-variant)]">
-                  Selected: <span className="font-medium text-[var(--admin-on-surface)]">{scormFile.name}</span>
+                  Selected:{" "}
+                  <span className="font-medium text-[var(--admin-on-surface)]">
+                    {scormFile.name}
+                  </span>
                 </p>
               ) : null}
             </div>

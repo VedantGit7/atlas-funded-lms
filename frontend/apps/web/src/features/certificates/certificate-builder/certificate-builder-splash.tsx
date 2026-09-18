@@ -1,30 +1,40 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FUNDED_BEYOND_LOGO_URL } from "../../../lib/brand";
+import { tenantInitials } from "../../../components/patterns/TenantBrandMark";
 
 type CertificateBuilderSplashProps = {
   publicName: string;
   onFinished: () => void;
   minDurationMs?: number;
-  /** Override only for tests; production always uses avatar-gradient. */
-  logoUrl?: string;
+  /** The tenant's own logo; without one the splash shows their initials. */
+  logoUrl?: string | null;
 };
 
 /**
- * Dark boot splash: FundedBeyond avatar-gradient mark + soft glow.
+ * Dark boot splash: the tenant's mark (or their initials) plus a soft glow.
+ *
+ * The initials disc used to read a hardcoded "FB", so every academy booted the
+ * certificate builder under FundedBeyond's monogram.
  */
 export function CertificateBuilderSplash({
   publicName,
   onFinished,
   minDurationMs = 1600,
-  logoUrl = FUNDED_BEYOND_LOGO_URL,
+  logoUrl = null,
 }: CertificateBuilderSplashProps) {
   const [assetReady, setAssetReady] = useState(false);
-  const [logoFailed, setLogoFailed] = useState(false);
+  // No logo at all goes straight to the initials disc; the probe below only
+  // exists to catch a logo URL that fails to load (expired or moved asset).
+  const [logoFailed, setLogoFailed] = useState(logoUrl == null);
   const [exiting, setExiting] = useState(false);
 
   useEffect(() => {
+    if (logoUrl == null) {
+      setLogoFailed(true);
+      setAssetReady(true);
+      return;
+    }
     let cancelled = false;
     const probe = new window.Image();
     probe.decoding = "async";
@@ -58,11 +68,10 @@ export function CertificateBuilderSplash({
     if (!assetReady) return;
 
     const started = Date.now();
-    let exitTimer: number | undefined;
     let removeTimer: number | undefined;
 
     const wait = Math.max(0, minDurationMs - (Date.now() - started));
-    exitTimer = window.setTimeout(() => {
+    const exitTimer = window.setTimeout(() => {
       setExiting(true);
       removeTimer = window.setTimeout(() => {
         onFinished();
@@ -70,7 +79,9 @@ export function CertificateBuilderSplash({
     }, wait);
 
     return () => {
-      if (exitTimer != null) window.clearTimeout(exitTimer);
+      // removeTimer is assigned inside the first timeout, so it genuinely may
+      // still be undefined when cleanup runs.
+      window.clearTimeout(exitTimer);
       if (removeTimer != null) window.clearTimeout(removeTimer);
     };
   }, [assetReady, minDurationMs, onFinished]);
@@ -104,7 +115,10 @@ export function CertificateBuilderSplash({
         }}
       >
         <span className="cert-builder-boot-glow" aria-hidden="true" />
-        {!logoFailed ? (
+        {!logoFailed && logoUrl != null ? (
+          // Raw <img> on purpose: the probe above preloads this exact URL, and
+          // tenant logos are arbitrary remote (possibly signed) URLs that the
+          // image optimizer cannot be pointed at.
           <img
             className="cert-builder-boot-logo"
             src={logoUrl}
@@ -140,7 +154,7 @@ export function CertificateBuilderSplash({
               letterSpacing: "-0.02em",
             }}
           >
-            FB
+            {tenantInitials(publicName)}
           </span>
         )}
       </div>

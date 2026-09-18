@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import type { TenantTx } from "@atlas/db";
+import { textColumn } from "../reports/raw-column";
 
 export type CustomFieldDefinitionRow = {
   id: string;
@@ -48,11 +49,11 @@ export const customFieldsRepository = {
     const row = rows[0];
     if (!row) throw new Error("CUSTOM_FIELD_DEFINITION_INSERT_FAILED");
     return {
-      id: String(row["id"]),
-      key: String(row["key"]),
-      label: String(row["label"]),
-      field_type: String(row["field_type"]),
-      status: String(row["status"]),
+      id: textColumn(row["id"]),
+      key: textColumn(row["key"]),
+      label: textColumn(row["label"]),
+      field_type: textColumn(row["field_type"]),
+      status: textColumn(row["status"]),
       created_at: row["created_at"] as Date,
     };
   },
@@ -64,16 +65,19 @@ export const customFieldsRepository = {
       order by key asc
     `;
     return rows.map((row) => ({
-      id: String(row["id"]),
-      key: String(row["key"]),
-      label: String(row["label"]),
-      field_type: String(row["field_type"]),
-      status: String(row["status"]),
+      id: textColumn(row["id"]),
+      key: textColumn(row["key"]),
+      label: textColumn(row["label"]),
+      field_type: textColumn(row["field_type"]),
+      status: textColumn(row["status"]),
       created_at: row["created_at"] as Date,
     }));
   },
 
-  async findDefinitionById(tx: TenantTx, definitionId: string): Promise<CustomFieldDefinitionRow | null> {
+  async findDefinitionById(
+    tx: TenantTx,
+    definitionId: string,
+  ): Promise<CustomFieldDefinitionRow | null> {
     const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
       select id, key, label, field_type, status, created_at
       from custom_field_definitions where id = ${definitionId}::uuid limit 1
@@ -81,11 +85,11 @@ export const customFieldsRepository = {
     const row = rows[0];
     if (!row) return null;
     return {
-      id: String(row["id"]),
-      key: String(row["key"]),
-      label: String(row["label"]),
-      field_type: String(row["field_type"]),
-      status: String(row["status"]),
+      id: textColumn(row["id"]),
+      key: textColumn(row["key"]),
+      label: textColumn(row["label"]),
+      field_type: textColumn(row["field_type"]),
+      status: textColumn(row["status"]),
       created_at: row["created_at"] as Date,
     };
   },
@@ -102,7 +106,7 @@ export const customFieldsRepository = {
       update custom_field_definitions
       set
         label = ${args.label ?? existing.label},
-        status = ${(args.status ?? existing.status)}::"EntityStatus",
+        status = ${args.status ?? existing.status}::"EntityStatus",
         options_json = ${args.optionsJson !== undefined ? JSON.stringify(args.optionsJson) : null}::jsonb,
         updated_at = now()
       where id = ${definitionId}::uuid
@@ -111,11 +115,11 @@ export const customFieldsRepository = {
     const row = rows[0];
     if (!row) return null;
     return {
-      id: String(row["id"]),
-      key: String(row["key"]),
-      label: String(row["label"]),
-      field_type: String(row["field_type"]),
-      status: String(row["status"]),
+      id: textColumn(row["id"]),
+      key: textColumn(row["key"]),
+      label: textColumn(row["label"]),
+      field_type: textColumn(row["field_type"]),
+      status: textColumn(row["status"]),
       created_at: row["created_at"] as Date,
     };
   },
@@ -211,14 +215,14 @@ export const customFieldsRepository = {
     }
 
     return {
-      custom_field_definition_id: String(row["custom_field_definition_id"]),
-      membership_id: String(row["membership_id"]),
+      custom_field_definition_id: textColumn(row["custom_field_definition_id"]),
+      membership_id: textColumn(row["membership_id"]),
       value_json: row["value_json"],
       updated_at: row["updated_at"] as Date,
       updated_by_membership_id:
         row["updated_by_membership_id"] == null
           ? null
-          : String(row["updated_by_membership_id"]),
+          : textColumn(row["updated_by_membership_id"]),
     };
   },
 
@@ -273,7 +277,10 @@ export const customFieldsRepository = {
     return count > 0;
   },
 
-  async listValuesForDefinition(tx: TenantTx, definitionId: string): Promise<CustomFieldValueRow[]> {
+  async listValuesForDefinition(
+    tx: TenantTx,
+    definitionId: string,
+  ): Promise<CustomFieldValueRow[]> {
     const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
       select
         custom_field_definition_id,
@@ -286,14 +293,14 @@ export const customFieldsRepository = {
       order by updated_at desc
     `;
     return rows.map((row) => ({
-      custom_field_definition_id: String(row["custom_field_definition_id"]),
-      membership_id: String(row["membership_id"]),
+      custom_field_definition_id: textColumn(row["custom_field_definition_id"]),
+      membership_id: textColumn(row["membership_id"]),
       value_json: row["value_json"],
       updated_at: row["updated_at"] as Date,
       updated_by_membership_id:
         row["updated_by_membership_id"] == null
           ? null
-          : String(row["updated_by_membership_id"]),
+          : textColumn(row["updated_by_membership_id"]),
     }));
   },
 };

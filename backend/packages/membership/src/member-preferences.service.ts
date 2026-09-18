@@ -7,10 +7,7 @@ import {
   listMemberNotificationPreferenceOverrides,
   upsertMemberNotificationPreferences,
 } from "./member-notification-preferences.repository";
-import {
-  readMemberProfileMetadata,
-  writeMemberProfileMetadata,
-} from "./member-admin.repository";
+import { readMemberProfileMetadata, writeMemberProfileMetadata } from "./member-admin.repository";
 
 const channelPrefsSchema = z.object({
   email: z.boolean(),
@@ -92,9 +89,7 @@ const METADATA_PREFERENCES_KEY = "preferences";
 /** Reads a stored preference blob, applying defaults and dropping junk. */
 function coercePreferences(raw: unknown): StoredPreferences {
   const obj =
-    raw && typeof raw === "object" && !Array.isArray(raw)
-      ? (raw as Record<string, unknown>)
-      : {};
+    raw && typeof raw === "object" && !Array.isArray(raw) ? (raw as Record<string, unknown>) : {};
 
   const appearance = appearancePreferencesSchema.safeParse(obj["appearance"] ?? {});
   const learning = learningPreferencesSchema.safeParse(obj["learning"] ?? {});

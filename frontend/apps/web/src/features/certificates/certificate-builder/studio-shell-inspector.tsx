@@ -16,11 +16,7 @@ import {
   Database,
 } from "lucide-react";
 import type { DocumentUnit } from "./studio-units";
-import {
-  type AlignMode,
-  type ElementInstance,
-  type StudioStoreInstance,
-} from "./studio-store";
+import { type AlignMode, type ElementInstance, type StudioStoreInstance } from "./studio-store";
 
 const FONT_FAMILIES: { label: string; value: string }[] = [
   { label: "Plus Jakarta Sans", value: '"Plus Jakarta Sans", system-ui, sans-serif' },
@@ -166,9 +162,7 @@ export const PageSetupPanel = observer(function PageSetupPanel({
   const [bgMode, setBgMode] = useState<"color" | "image">(
     background.type === "image" ? "image" : "color",
   );
-  const [imageUrl, setImageUrl] = useState(
-    background.type === "image" ? background.value : "",
-  );
+  const [imageUrl, setImageUrl] = useState(background.type === "image" ? background.value : "");
 
   const applyImageUrl = (url: string) => {
     const trimmed = url.trim();
@@ -526,13 +520,9 @@ export const ElementInspector = observer(function ElementInspector({
                   });
                 }}
               >
-                {FONT_WEIGHTS.some((w) => String(w.value) === String(element.fontWeight))
-                  ? null
-                  : (
-                      <option value={String(element.fontWeight)}>
-                        {String(element.fontWeight)}
-                      </option>
-                    )}
+                {FONT_WEIGHTS.some((w) => String(w.value) === String(element.fontWeight)) ? null : (
+                  <option value={String(element.fontWeight)}>{String(element.fontWeight)}</option>
+                )}
                 {FONT_WEIGHTS.map((weight) => (
                   <option key={weight.value} value={String(weight.value)}>
                     {weight.label}

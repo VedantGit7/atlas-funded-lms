@@ -193,7 +193,14 @@ const SOCIAL_PROVIDERS = [
     id: "apple",
     label: "Apple",
     icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden focusable="false">
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        aria-hidden
+        focusable="false"
+      >
         <path d="M17.05 12.54c-.02-2.07 1.69-3.06 1.77-3.11-.96-1.41-2.46-1.6-2.99-1.62-1.27-.13-2.49.75-3.13.75-.65 0-1.64-.73-2.7-.71-1.39.02-2.67.81-3.38 2.05-1.44 2.5-.37 6.2 1.04 8.23.69.99 1.51 2.1 2.58 2.06 1.04-.04 1.43-.67 2.69-.67 1.25 0 1.6.67 2.7.65 1.11-.02 1.82-1.01 2.5-2.01.79-1.15 1.11-2.27 1.13-2.33-.02-.01-2.17-.83-2.19-3.31zM15.02 6.2c.57-.69.96-1.65.85-2.6-.82.03-1.82.55-2.41 1.23-.53.61-.99 1.58-.87 2.51.91.07 1.85-.46 2.43-1.14z" />
       </svg>
     ),
@@ -336,7 +343,7 @@ export function LoginForm() {
               <FormItem className="space-y-0">
                 <FormControl>
                   <OtpInput
-                    value={field.value ?? ""}
+                    value={field.value}
                     onChange={field.onChange}
                     length={6}
                     autoFocus
@@ -444,9 +451,7 @@ export function LoginForm() {
           })(event);
         }}
       >
-        {redirectTo ? (
-          <HiddenFormField control={loginForm.control} name="redirectTo" />
-        ) : null}
+        {redirectTo ? <HiddenFormField control={loginForm.control} name="redirectTo" /> : null}
 
         <FormField
           control={loginForm.control}
@@ -494,7 +499,9 @@ export function LoginForm() {
                 </FormControl>
                 <button
                   type="button"
-                  onClick={() => setShowPassword((prev) => !prev)}
+                  onClick={() => {
+                    setShowPassword((prev) => !prev);
+                  }}
                   aria-label={showPassword ? "Hide password" : "Show password"}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--fba-tx3)] transition-colors hover:text-[var(--fba-tx)]"
                 >
@@ -511,7 +518,9 @@ export function LoginForm() {
             type="checkbox"
             name="rememberMe"
             checked={rememberMe}
-            onChange={(event) => setRememberMe(event.target.checked)}
+            onChange={(event) => {
+              setRememberMe(event.target.checked);
+            }}
             className="h-[18px] w-[18px] rounded border-[1.5px] border-[var(--fba-bdr2)] accent-[var(--fba-ind)]"
           />
           <span className="text-[13px] font-medium text-[var(--fba-tx2)]">Remember me</span>
@@ -526,8 +535,7 @@ export function LoginForm() {
                 : "text-[13px] text-[var(--fba-red)]"
             }
           >
-            {loginState.message ||
-              "We couldn't sign you in with that provider. Please try again."}
+            {loginState.message || "We couldn't sign you in with that provider. Please try again."}
           </p>
         ) : null}
 

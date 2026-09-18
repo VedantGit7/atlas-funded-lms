@@ -124,11 +124,7 @@ export function CourseSettingsMediaUpload({
         >
           {previewUrl ? (
             previewKind === "video" && previewUrl.startsWith("blob:") ? (
-              <video
-                src={previewUrl}
-                controls
-                className="h-full w-full object-contain"
-              />
+              <video src={previewUrl} controls className="h-full w-full object-contain" />
             ) : previewKind === "image" ? (
               <img src={previewUrl} alt="" className="h-full w-full object-contain" />
             ) : (
@@ -141,9 +137,7 @@ export function CourseSettingsMediaUpload({
               <span className="flex h-14 w-14 items-center justify-center rounded-2xl border border-[var(--admin-border)] bg-[var(--admin-surface)] text-[var(--admin-on-surface-variant)] shadow-sm">
                 <EmptyIcon className="h-7 w-7" strokeWidth={1.5} aria-hidden="true" />
               </span>
-              <p className="text-sm text-[var(--admin-on-surface-variant)]">
-                No file selected
-              </p>
+              <p className="text-sm text-[var(--admin-on-surface-variant)]">No file selected</p>
             </div>
           )}
         </div>
@@ -180,7 +174,10 @@ export function CourseSettingsMediaUpload({
 
       {hint ? (
         <p className="inline-flex items-start gap-1.5 text-xs text-[var(--admin-on-surface-variant)]">
-          <span className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--admin-primary)]" aria-hidden="true" />
+          <span
+            className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--admin-primary)]"
+            aria-hidden="true"
+          />
           <span>{hint}</span>
         </p>
       ) : null}
@@ -361,7 +358,11 @@ export function CourseSettingsSlugUrlField({
           }}
         >
           {copied ? (
-            <Check className="h-4 w-4 text-[var(--admin-success)]" strokeWidth={2} aria-hidden="true" />
+            <Check
+              className="h-4 w-4 text-[var(--admin-success)]"
+              strokeWidth={2}
+              aria-hidden="true"
+            />
           ) : (
             <Copy className="h-4 w-4" strokeWidth={1.75} aria-hidden="true" />
           )}
@@ -509,12 +510,7 @@ export function CourseSettingsNavigationRow({
   if (href && !disabled) {
     if (openInNewTab) {
       return (
-        <a
-          href={href}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={className}
-        >
+        <a href={href} target="_blank" rel="noopener noreferrer" className={className}>
           {content}
         </a>
       );

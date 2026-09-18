@@ -48,13 +48,14 @@ import {
 } from "./push-message-shared";
 import { AdminSelectDropdown } from "../../readiness/components/AdminSelectDropdown";
 import {
-  PUSH_WIZARD_FIELD_CLASS,
-  PUSH_WIZARD_LABEL_CLASS,
+  MESSENGER_WIZARD_FIELD_CLASS,
+  MESSENGER_WIZARD_LABEL_CLASS,
   PUSH_WIZARD_STEPS,
-  PushWizardCard,
-  PushWizardFooter,
-  PushWizardStepper,
+  MessengerWizardCard,
+  MessengerWizardFooter,
+  MessengerWizardStepper,
 } from "./push-wizard-chrome";
+import { cancellationFlag } from "@/lib/effect-cancellation";
 
 type MessageResponse = { data: PushMessageDto };
 type RecipientsResponse = { data: { totalCount: number; items: PushRecipient[] } };
@@ -147,28 +148,28 @@ export function PushMessageWizardPanel({
 
   useEffect(() => {
     if (!messageId) return;
-    let cancelled = false;
+    const effect = cancellationFlag();
     setLoading(true);
     void (async () => {
       try {
         const response = await clientApi.get<MessageResponse>(
           `/api/v1/marketing/push-messages/${messageId}`,
         );
-        if (cancelled) return;
+        if (effect.isCancelled()) return;
         hydrateFromMessage(response.data);
       } catch (caught) {
-        if (!cancelled) {
+        if (!effect.isCancelled()) {
           toast.error(
             caught instanceof ClientApiError ? caught.message : "Could not load push message.",
           );
           router.replace(PUSH_LIST_HREF);
         }
       } finally {
-        if (!cancelled) setLoading(false);
+        if (!effect.isCancelled()) setLoading(false);
       }
     })();
     return () => {
-      cancelled = true;
+      effect.cancel();
     };
   }, [messageId, hydrateFromMessage, router]);
 
@@ -183,45 +184,45 @@ export function PushMessageWizardPanel({
   }, []);
 
   useEffect(() => {
-    let cancelled = false;
+    const effect = cancellationFlag();
     void clientApi
       .get<MeResponse>("/api/v1/me")
       .then((me) => {
-        if (cancelled) return;
+        if (effect.isCancelled()) return;
         const name = me.data.profile?.displayName?.trim() || me.data.identity.email || "Admin";
         setActorLabel(name);
-        setActorInitials(recipientInitials(me.data.profile?.displayName ?? null, me.data.identity.email));
+        setActorInitials(
+          recipientInitials(me.data.profile?.displayName ?? null, me.data.identity.email),
+        );
       })
       .catch(() => {
-        if (!cancelled) {
+        if (!effect.isCancelled()) {
           setActorLabel(null);
           setActorInitials("AD");
         }
       });
     return () => {
-      cancelled = true;
+      effect.cancel();
     };
   }, []);
 
   useEffect(() => {
     if (step !== "audience") return;
-    let cancelled = false;
+    const effect = cancellationFlag();
     setEstimateBusy(true);
     void clientApi
-      .get<EstimateResponse>(
-        `/api/v1/marketing/push-messages-audience-estimate?audienceType=ALL`,
-      )
+      .get<EstimateResponse>(`/api/v1/marketing/push-messages-audience-estimate?audienceType=ALL`)
       .then((response) => {
-        if (!cancelled) setAllLearnersEstimate(response.data.totalCount);
+        if (!effect.isCancelled()) setAllLearnersEstimate(response.data.totalCount);
       })
       .catch(() => {
-        if (!cancelled) setAllLearnersEstimate(null);
+        if (!effect.isCancelled()) setAllLearnersEstimate(null);
       })
       .finally(() => {
-        if (!cancelled) setEstimateBusy(false);
+        if (!effect.isCancelled()) setEstimateBusy(false);
       });
     return () => {
-      cancelled = true;
+      effect.cancel();
     };
   }, [step]);
 
@@ -230,23 +231,23 @@ export function PushMessageWizardPanel({
       setGroupEstimate(null);
       return;
     }
-    let cancelled = false;
+    const effect = cancellationFlag();
     setEstimateBusy(true);
     void clientApi
       .get<EstimateResponse>(
         `/api/v1/marketing/push-messages-audience-estimate?audienceType=GROUP&audienceBatchId=${encodeURIComponent(batchId)}`,
       )
       .then((response) => {
-        if (!cancelled) setGroupEstimate(response.data.totalCount);
+        if (!effect.isCancelled()) setGroupEstimate(response.data.totalCount);
       })
       .catch(() => {
-        if (!cancelled) setGroupEstimate(null);
+        if (!effect.isCancelled()) setGroupEstimate(null);
       })
       .finally(() => {
-        if (!cancelled) setEstimateBusy(false);
+        if (!effect.isCancelled()) setEstimateBusy(false);
       });
     return () => {
-      cancelled = true;
+      effect.cancel();
     };
   }, [step, audienceType, batchId]);
 
@@ -353,9 +354,7 @@ export function PushMessageWizardPanel({
       await loadRecipients(response.data.id);
       setStep("recipients");
     } catch (caught) {
-      toast.error(
-        caught instanceof ClientApiError ? caught.message : "Could not save recipients.",
-      );
+      toast.error(caught instanceof ClientApiError ? caught.message : "Could not save recipients.");
     } finally {
       setBusy(false);
     }
@@ -370,9 +369,7 @@ export function PushMessageWizardPanel({
       }
       setStep("compose");
     } catch (caught) {
-      toast.error(
-        caught instanceof ClientApiError ? caught.message : "Could not load recipients.",
-      );
+      toast.error(caught instanceof ClientApiError ? caught.message : "Could not load recipients.");
     } finally {
       setBusy(false);
     }
@@ -621,21 +618,23 @@ export function PushMessageWizardPanel({
       </header>
 
       {progressSteps.length > 0 ? (
-        <PushWizardStepper steps={progressSteps} current={step} />
+        <MessengerWizardStepper steps={progressSteps} current={step} />
       ) : null}
 
       {step === "title" ? (
         <div className="flex justify-center pt-2">
-          <PushWizardCard className="w-full max-w-2xl">
+          <MessengerWizardCard className="w-full max-w-2xl">
             <div className="border-b border-[var(--admin-border)] bg-[var(--admin-surface)] px-6 py-5">
-              <h2 className="text-lg font-bold text-[var(--admin-on-surface)]">Campaign identity</h2>
+              <h2 className="text-lg font-bold text-[var(--admin-on-surface)]">
+                Campaign identity
+              </h2>
               <p className="mt-1 text-sm text-[var(--admin-on-surface-variant)]">
                 Start with a clear internal name so your team can find this draft later.
               </p>
             </div>
             <div className="space-y-6 px-6 py-6">
               <label className="block">
-                <span className={PUSH_WIZARD_LABEL_CLASS}>Internal campaign name</span>
+                <span className={MESSENGER_WIZARD_LABEL_CLASS}>Internal campaign name</span>
                 <input
                   type="text"
                   value={title}
@@ -644,11 +643,14 @@ export function PushMessageWizardPanel({
                     setTitle(event.target.value);
                   }}
                   placeholder="e.g. Q3 reactivation - North America"
-                  className={PUSH_WIZARD_FIELD_CLASS}
+                  className={MESSENGER_WIZARD_FIELD_CLASS}
                 />
               </label>
               <div className="flex items-start gap-3 rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface-high)] p-3">
-                <Info className="mt-0.5 h-4 w-4 shrink-0 text-[var(--admin-primary)]" aria-hidden="true" />
+                <Info
+                  className="mt-0.5 h-4 w-4 shrink-0 text-[var(--admin-primary)]"
+                  aria-hidden="true"
+                />
                 <p className="text-[13px] leading-relaxed text-[var(--admin-on-surface-variant)]">
                   This name is for internal reference and will not be visible to learners.
                 </p>
@@ -696,7 +698,7 @@ export function PushMessageWizardPanel({
                 <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </button>
             </div>
-          </PushWizardCard>
+          </MessengerWizardCard>
         </div>
       ) : null}
 
@@ -766,7 +768,7 @@ export function PushMessageWizardPanel({
           </div>
 
           {audienceType === "GROUP" ? (
-            <PushWizardCard>
+            <MessengerWizardCard>
               <div className="space-y-3 px-6 py-5">
                 <AdminSelectDropdown
                   id="push-audience-batch"
@@ -791,18 +793,18 @@ export function PushMessageWizardPanel({
                   </p>
                 )}
               </div>
-            </PushWizardCard>
+            </MessengerWizardCard>
           ) : null}
 
           <div className="flex items-start gap-3 rounded-lg border border-[color-mix(in_srgb,var(--admin-warning)_35%,var(--admin-border))] bg-[color-mix(in_srgb,var(--admin-warning)_10%,var(--admin-surface))] p-4 text-[var(--admin-warning)]">
             <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0" aria-hidden="true" />
             <p className="text-sm leading-relaxed">
-              Audience selection locks permanently once saved. Confirm targeting before continuing to
-              content.
+              Audience selection locks permanently once saved. Confirm targeting before continuing
+              to content.
             </p>
           </div>
 
-          <PushWizardFooter
+          <MessengerWizardFooter
             left={
               <button
                 type="button"
@@ -895,7 +897,7 @@ export function PushMessageWizardPanel({
           </div>
 
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-            <PushWizardCard className="lg:col-span-8">
+            <MessengerWizardCard className="lg:col-span-8">
               <div className="flex items-center justify-between gap-3 border-b border-[var(--admin-border)] px-5 py-4">
                 <div>
                   <h3 className="text-lg font-bold text-[var(--admin-on-surface)]">
@@ -955,10 +957,10 @@ export function PushMessageWizardPanel({
                   </tbody>
                 </table>
               </div>
-            </PushWizardCard>
+            </MessengerWizardCard>
 
             <div className="space-y-4 lg:col-span-4">
-              <PushWizardCard>
+              <MessengerWizardCard>
                 <div className="space-y-3 px-5 py-5">
                   <h3 className="text-base font-bold text-[var(--admin-on-surface)]">
                     Delivery notes
@@ -980,7 +982,7 @@ export function PushMessageWizardPanel({
                     </li>
                   </ul>
                 </div>
-              </PushWizardCard>
+              </MessengerWizardCard>
               <div className="rounded-xl border border-[color-mix(in_srgb,var(--admin-primary)_18%,var(--admin-border))] bg-[color-mix(in_srgb,var(--admin-primary)_8%,var(--admin-surface))] p-5">
                 <div className="mb-2 flex items-center gap-2 text-[var(--admin-primary)]">
                   <Info className="h-4 w-4" aria-hidden="true" />
@@ -994,7 +996,7 @@ export function PushMessageWizardPanel({
             </div>
           </div>
 
-          <PushWizardFooter
+          <MessengerWizardFooter
             left={
               <button
                 type="button"
@@ -1028,11 +1030,13 @@ export function PushMessageWizardPanel({
       {step === "compose" && message ? (
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
           <div className="space-y-6 lg:col-span-7">
-            <PushWizardCard>
+            <MessengerWizardCard>
               <div className="space-y-5 px-6 py-6">
-                <h3 className="text-lg font-bold text-[var(--admin-on-surface)]">Message details</h3>
+                <h3 className="text-lg font-bold text-[var(--admin-on-surface)]">
+                  Message details
+                </h3>
                 <label className="block">
-                  <span className={PUSH_WIZARD_LABEL_CLASS}>Notification subject / title</span>
+                  <span className={MESSENGER_WIZARD_LABEL_CLASS}>Notification subject / title</span>
                   <input
                     type="text"
                     value={subject}
@@ -1040,13 +1044,13 @@ export function PushMessageWizardPanel({
                     onChange={(event) => {
                       setSubject(event.target.value);
                     }}
-                    className={PUSH_WIZARD_FIELD_CLASS}
+                    className={MESSENGER_WIZARD_FIELD_CLASS}
                     placeholder="New funding available!"
                   />
                 </label>
                 <label className="block">
                   <div className="mb-2 flex items-center justify-between gap-3">
-                    <span className={PUSH_WIZARD_LABEL_CLASS + " mb-0"}>Message body</span>
+                    <span className={MESSENGER_WIZARD_LABEL_CLASS + " mb-0"}>Message body</span>
                     <span className="text-[11px] font-bold text-[var(--admin-on-surface-variant)]">
                       {body.length} / 4000
                     </span>
@@ -1058,13 +1062,13 @@ export function PushMessageWizardPanel({
                     onChange={(event) => {
                       setBody(event.target.value);
                     }}
-                    className={PUSH_WIZARD_FIELD_CLASS}
+                    className={MESSENGER_WIZARD_FIELD_CLASS}
                     placeholder="A new round has been opened for your sector. Explore now."
                   />
                 </label>
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <label className="block">
-                    <span className={PUSH_WIZARD_LABEL_CLASS}>Deep link (optional)</span>
+                    <span className={MESSENGER_WIZARD_LABEL_CLASS}>Deep link (optional)</span>
                     <input
                       type="text"
                       value={deepLink}
@@ -1072,19 +1076,19 @@ export function PushMessageWizardPanel({
                       onChange={(event) => {
                         setDeepLink(event.target.value);
                       }}
-                      className={PUSH_WIZARD_FIELD_CLASS}
+                      className={MESSENGER_WIZARD_FIELD_CLASS}
                       placeholder="/courses or absolute URL"
                     />
                   </label>
                   <label className="block">
-                    <span className={PUSH_WIZARD_LABEL_CLASS}>Image URL (optional)</span>
+                    <span className={MESSENGER_WIZARD_LABEL_CLASS}>Image URL (optional)</span>
                     <input
                       type="url"
                       value={imageUrl}
                       onChange={(event) => {
                         setImageUrl(event.target.value);
                       }}
-                      className={PUSH_WIZARD_FIELD_CLASS}
+                      className={MESSENGER_WIZARD_FIELD_CLASS}
                       placeholder="https://cdn.example.com/promo.jpg"
                     />
                     <span className="mt-1.5 flex items-center gap-1 text-[11px] text-[var(--admin-warning)]">
@@ -1094,7 +1098,7 @@ export function PushMessageWizardPanel({
                   </label>
                 </div>
                 <fieldset>
-                  <legend className={PUSH_WIZARD_LABEL_CLASS}>Target channels</legend>
+                  <legend className={MESSENGER_WIZARD_LABEL_CLASS}>Target channels</legend>
                   <div className="flex flex-wrap gap-5">
                     {(
                       [
@@ -1121,9 +1125,9 @@ export function PushMessageWizardPanel({
                   </div>
                 </fieldset>
               </div>
-            </PushWizardCard>
+            </MessengerWizardCard>
 
-            <PushWizardFooter
+            <MessengerWizardFooter
               left={
                 <button
                   type="button"
@@ -1168,7 +1172,8 @@ export function PushMessageWizardPanel({
           <aside className="lg:col-span-5">
             <div className="sticky top-24 flex flex-col items-center">
               <p className="mb-5 text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--admin-on-surface-variant)]">
-                Live {previewDevice === "ios" ? "iOS" : previewDevice === "android" ? "Android" : "Web"}{" "}
+                Live{" "}
+                {previewDevice === "ios" ? "iOS" : previewDevice === "android" ? "Android" : "Web"}{" "}
                 preview
               </p>
               <div className="relative h-[560px] w-[280px] overflow-hidden rounded-[42px] border-[7px] border-[color-mix(in_srgb,var(--admin-on-surface)_88%,transparent)] bg-[var(--admin-on-surface)] p-2.5 shadow-2xl">
@@ -1211,7 +1216,6 @@ export function PushMessageWizardPanel({
                         {previewBody}
                       </p>
                       {imageUrl.trim() ? (
-                        // eslint-disable-next-line @next/next/no-img-element
                         <img
                           src={imageUrl.trim()}
                           alt=""
@@ -1263,7 +1267,7 @@ export function PushMessageWizardPanel({
         <div className="space-y-6 pb-4">
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
             <div className="space-y-6 lg:col-span-7">
-              <PushWizardCard>
+              <MessengerWizardCard>
                 <div className="space-y-4 px-6 py-6">
                   <h3 className="text-lg font-bold text-[var(--admin-on-surface)]">
                     Schedule delivery
@@ -1290,8 +1294,8 @@ export function PushMessageWizardPanel({
                         Send now
                       </span>
                       <p className="mt-1 text-[13px] text-[var(--admin-on-surface-variant)]">
-                        Process immediately after you confirm. Learners see the notification in their
-                        in-app inbox.
+                        Process immediately after you confirm. Learners see the notification in
+                        their in-app inbox.
                       </p>
                     </div>
                   </label>
@@ -1322,20 +1326,18 @@ export function PushMessageWizardPanel({
                       <div
                         className={[
                           "mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2",
-                          deliveryMode === "schedule"
-                            ? ""
-                            : "pointer-events-none opacity-50",
+                          deliveryMode === "schedule" ? "" : "pointer-events-none opacity-50",
                         ].join(" ")}
                       >
                         <label className="block">
-                          <span className={PUSH_WIZARD_LABEL_CLASS}>Date & time</span>
+                          <span className={MESSENGER_WIZARD_LABEL_CLASS}>Date & time</span>
                           <input
                             type="datetime-local"
                             value={scheduleLocal}
                             onChange={(event) => {
                               setScheduleLocal(event.target.value);
                             }}
-                            className={PUSH_WIZARD_FIELD_CLASS}
+                            className={MESSENGER_WIZARD_FIELD_CLASS}
                           />
                         </label>
                       </div>
@@ -1343,7 +1345,10 @@ export function PushMessageWizardPanel({
                   </label>
                   <div className="rounded-lg border-l-4 border-[var(--admin-primary)] bg-[var(--admin-surface-high)] p-4">
                     <div className="flex gap-3">
-                      <Info className="h-5 w-5 shrink-0 text-[var(--admin-primary)]" aria-hidden="true" />
+                      <Info
+                        className="h-5 w-5 shrink-0 text-[var(--admin-primary)]"
+                        aria-hidden="true"
+                      />
                       <div className="text-[13px] text-[var(--admin-on-surface-variant)]">
                         <p className="font-bold text-[var(--admin-on-surface)]">Delivery note</p>
                         <p className="mt-1">
@@ -1354,11 +1359,11 @@ export function PushMessageWizardPanel({
                     </div>
                   </div>
                 </div>
-              </PushWizardCard>
+              </MessengerWizardCard>
             </div>
 
             <div className="lg:col-span-5">
-              <PushWizardCard className="h-full">
+              <MessengerWizardCard className="h-full">
                 <div className="border-b border-[var(--admin-border)] px-6 py-5">
                   <h3 className="text-lg font-bold text-[var(--admin-on-surface)]">
                     Campaign review
@@ -1366,7 +1371,7 @@ export function PushMessageWizardPanel({
                 </div>
                 <div className="space-y-5 px-6 py-5">
                   <div>
-                    <span className={PUSH_WIZARD_LABEL_CLASS}>Target audience</span>
+                    <span className={MESSENGER_WIZARD_LABEL_CLASS}>Target audience</span>
                     <div className="flex items-center justify-between gap-3 rounded-lg bg-[var(--admin-surface-high)] p-3">
                       <div className="flex items-center gap-2">
                         <Users className="h-4 w-4 text-[var(--admin-primary)]" aria-hidden="true" />
@@ -1380,7 +1385,7 @@ export function PushMessageWizardPanel({
                     </div>
                   </div>
                   <div>
-                    <span className={PUSH_WIZARD_LABEL_CLASS}>Message content</span>
+                    <span className={MESSENGER_WIZARD_LABEL_CLASS}>Message content</span>
                     <div className="rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] p-4">
                       <p className="text-[11px] font-bold uppercase tracking-[0.06em] text-[var(--admin-on-surface-variant)]">
                         Subject
@@ -1394,7 +1399,7 @@ export function PushMessageWizardPanel({
                     </div>
                   </div>
                   <div>
-                    <span className={PUSH_WIZARD_LABEL_CLASS}>Active channels</span>
+                    <span className={MESSENGER_WIZARD_LABEL_CLASS}>Active channels</span>
                     <div className="flex flex-wrap gap-2">
                       {channelAndroid ? (
                         <span className="inline-flex items-center gap-1.5 rounded-full border border-[color-mix(in_srgb,var(--admin-success)_28%,var(--admin-border))] bg-[color-mix(in_srgb,var(--admin-success)_10%,var(--admin-surface))] px-3 py-1 text-[11px] font-bold text-[var(--admin-success)]">
@@ -1415,11 +1420,11 @@ export function PushMessageWizardPanel({
                   </div>
                 </div>
                 <div className="h-1 bg-gradient-to-r from-[var(--admin-primary)] to-[color-mix(in_srgb,var(--admin-primary)_20%,var(--admin-surface-high))]" />
-              </PushWizardCard>
+              </MessengerWizardCard>
             </div>
           </div>
 
-          <PushWizardFooter
+          <MessengerWizardFooter
             left={
               <button
                 type="button"
@@ -1482,11 +1487,11 @@ export function PushMessageWizardPanel({
 
       {step === "settings" && message ? (
         <section className="max-w-xl space-y-6">
-          <PushWizardCard>
+          <MessengerWizardCard>
             <div className="space-y-4 px-6 py-6">
               <h2 className="text-base font-bold text-[var(--admin-on-surface)]">Edit title</h2>
               <label className="block">
-                <span className={PUSH_WIZARD_LABEL_CLASS}>Title</span>
+                <span className={MESSENGER_WIZARD_LABEL_CLASS}>Title</span>
                 <input
                   type="text"
                   value={settingsTitle}
@@ -1494,7 +1499,7 @@ export function PushMessageWizardPanel({
                   onChange={(event) => {
                     setSettingsTitle(event.target.value);
                   }}
-                  className={PUSH_WIZARD_FIELD_CLASS}
+                  className={MESSENGER_WIZARD_FIELD_CLASS}
                 />
               </label>
               <button
@@ -1521,12 +1526,13 @@ export function PushMessageWizardPanel({
                 </button>
               ) : null}
             </div>
-          </PushWizardCard>
+          </MessengerWizardCard>
 
           <div className="space-y-4 rounded-xl border border-[color-mix(in_srgb,var(--admin-danger)_35%,var(--admin-border))] bg-[var(--admin-surface)] p-6 shadow-sm">
             <h2 className="text-base font-bold text-[var(--admin-danger)]">Delete push message</h2>
             <p className="text-sm text-[var(--admin-on-surface-variant)]">
-              Type <span className="font-semibold text-[var(--admin-on-surface)]">{message.title}</span>{" "}
+              Type{" "}
+              <span className="font-semibold text-[var(--admin-on-surface)]">{message.title}</span>{" "}
               to confirm.
             </p>
             <input
@@ -1535,7 +1541,7 @@ export function PushMessageWizardPanel({
               onChange={(event) => {
                 setDeleteConfirm(event.target.value);
               }}
-              className={PUSH_WIZARD_FIELD_CLASS}
+              className={MESSENGER_WIZARD_FIELD_CLASS}
               placeholder="Exact title"
             />
             <button

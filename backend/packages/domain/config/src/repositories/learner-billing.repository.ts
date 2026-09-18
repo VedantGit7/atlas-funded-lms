@@ -91,6 +91,36 @@ export async function upsertInvoice(
   `;
 }
 
+/**
+ * The highest sequence already printed on an invoice under this prefix.
+ *
+ * `payment_orders.invoice_number` carries only a plain index, no unique
+ * constraint, so winding the counter back below this hands a second order an
+ * invoice number a first order already has. Reads what was actually issued
+ * rather than trusting the stored counter, which an earlier wind-back may have
+ * already left behind the truth.
+ */
+export async function highestIssuedInvoiceSequence(
+  tx: TenantTx,
+  prefix: string,
+): Promise<number | null> {
+  // The allocator writes `${prefix}-${padded}`, so the tail starts one past the
+  // prefix and its hyphen. Both the needle and the offset are bound values —
+  // nothing is interpolated into the statement.
+  const needle = `${prefix}-`;
+  const tailStart = needle.length + 1;
+  const rows = await tx.$queryRaw<Array<{ highest: bigint | null }>>`
+    SELECT max(substr(invoice_number, ${tailStart})::bigint) AS highest
+    FROM payment_orders
+    WHERE tenant_id = app.current_tenant_id()
+      AND invoice_number IS NOT NULL
+      AND left(invoice_number, ${needle.length}) = ${needle}
+      AND substr(invoice_number, ${tailStart}) ~ '^[0-9]+$'
+  `;
+  const highest = rows[0]?.highest ?? null;
+  return highest === null ? null : Number(highest);
+}
+
 export async function upsertLearnerConfig(
   tx: TenantTx,
   args: {
@@ -152,10 +182,7 @@ const ROW_DEFAULT_DESCRIPTION =
   "In this location, any currency added is accessible to all learners in regions where a specific location has not been set.";
 
 /** Ensures the tenant has the default "Rest Of The World" location (idempotent). */
-export async function ensureRestOfWorldLocation(
-  tx: TenantTx,
-  currency: string,
-): Promise<void> {
+export async function ensureRestOfWorldLocation(tx: TenantTx, currency: string): Promise<void> {
   const existing = await tx.$queryRaw<Array<{ id: string }>>`
     SELECT id::text FROM learner_billing_locations WHERE country = 'ROW' LIMIT 1
   `;
@@ -176,6 +203,28 @@ export async function ensureRestOfWorldLocation(
       now()
     )
   `;
+}
+
+/**
+ * The location already covering a country, if any.
+ *
+ * There is no unique index on (tenant_id, country): `ensureRestOfWorldLocation`
+ * guards its own insert, but the add-location path did not, so the same country
+ * could be added twice with two different currencies and nothing said which one
+ * applied. The picker even offers "Rest of the World", so a second default
+ * region was reachable in two clicks.
+ */
+export async function findBillingLocationByCountry(
+  tx: TenantTx,
+  country: string,
+): Promise<BillingLocationRow | null> {
+  const rows = await tx.$queryRaw<BillingLocationRow[]>`
+    SELECT id::text, name, country, currency, description, status, is_default, updated_at
+    FROM learner_billing_locations
+    WHERE upper(country) = upper(${country})
+    LIMIT 1
+  `;
+  return rows[0] ?? null;
 }
 
 export async function insertBillingLocation(

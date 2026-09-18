@@ -24,7 +24,12 @@ describeWithDb("practice integration", () => {
     const first = await withTenantTx(
       authoringTenantTx(fixture, fixture.learnerMembershipId),
       async (tx) =>
-        startPracticeSession(tx, ctx, { mode: "due", maxItems: 2 }, "idem-practice-start"),
+        startPracticeSession(
+          tx,
+          ctx,
+          { mode: "due", engine: "swipe", maxItems: 2 },
+          "idem-practice-start",
+        ),
     );
 
     expect(first.data.session.totalItems).toBeGreaterThan(0);
@@ -34,7 +39,12 @@ describeWithDb("practice integration", () => {
     const replay = await withTenantTx(
       authoringTenantTx(fixture, fixture.learnerMembershipId),
       async (tx) =>
-        startPracticeSession(tx, ctx, { mode: "due", maxItems: 2 }, "idem-practice-start"),
+        startPracticeSession(
+          tx,
+          ctx,
+          { mode: "due", engine: "swipe", maxItems: 2 },
+          "idem-practice-start",
+        ),
     );
 
     expect(replay.data.session.id).toBe(first.data.session.id);
@@ -47,7 +57,12 @@ describeWithDb("practice integration", () => {
     const started = await withTenantTx(
       authoringTenantTx(fixture, fixture.learnerMembershipId),
       async (tx) =>
-        startPracticeSession(tx, ctx, { mode: "due", maxItems: 1 }, "idem-practice-one"),
+        startPracticeSession(
+          tx,
+          ctx,
+          { mode: "due", engine: "swipe", maxItems: 1 },
+          "idem-practice-one",
+        ),
     );
 
     const itemId = started.data.card?.itemId;
@@ -125,7 +140,12 @@ describeWithDb("practice integration", () => {
     const started = await withTenantTx(
       authoringTenantTx(fixture, fixture.learnerMembershipId),
       async (tx) =>
-        startPracticeSession(tx, ctx, { mode: "due", maxItems: 1 }, "idem-practice-dup"),
+        startPracticeSession(
+          tx,
+          ctx,
+          { mode: "due", engine: "swipe", maxItems: 1 },
+          "idem-practice-dup",
+        ),
     );
 
     const card = started.data.card;

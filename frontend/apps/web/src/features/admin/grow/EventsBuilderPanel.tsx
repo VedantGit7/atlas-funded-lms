@@ -24,7 +24,6 @@ import {
   MARKETING_HREF,
   REMINDER_OPTIONS,
   countdownParts,
-  eventHref,
   eventStatusLabel,
   formatEventCount,
   formatEventDateTime,
@@ -35,15 +34,11 @@ import {
   type MarketingEventRegistrationDto,
   type MarketingEventStatus,
 } from "./events-shared";
+import { csvEscape } from "@/lib/export/csv";
 
 type Tab = "details" | "registrations" | "publish";
 
 const REG_PAGE_SIZE = 10;
-
-function csvEscape(value: string): string {
-  if (/[",\n]/.test(value)) return `"${value.replaceAll('"', '""')}"`;
-  return value;
-}
 
 function statusTone(status: MarketingEventStatus): "success" | "warning" | "neutral" {
   if (status === "LIVE") return "success";
@@ -138,7 +133,6 @@ function EventPublicPreview({
           >
             {coverImageUrl.trim() ? (
               <div className="aspect-[21/9] w-full overflow-hidden bg-[var(--admin-surface-high)]">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={coverImageUrl.trim()}
                   alt=""
@@ -179,13 +173,13 @@ function EventPublicPreview({
                       key={part.label}
                       className="rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-2 py-3 text-center"
                     >
-                      <p
-                        className="text-lg font-bold tabular-nums"
-                        style={{ color: "CanvasText" }}
-                      >
+                      <p className="text-lg font-bold tabular-nums" style={{ color: "CanvasText" }}>
                         {String(part.value).padStart(2, "0")}
                       </p>
-                      <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "GrayText" }}>
+                      <p
+                        className="text-[10px] font-bold uppercase tracking-wider"
+                        style={{ color: "GrayText" }}
+                      >
                         {part.label}
                       </p>
                     </div>
@@ -216,7 +210,10 @@ function EventPublicPreview({
               </div>
 
               <div>
-                <h5 className="text-xs font-bold uppercase tracking-wider" style={{ color: "GrayText" }}>
+                <h5
+                  className="text-xs font-bold uppercase tracking-wider"
+                  style={{ color: "GrayText" }}
+                >
                   About
                 </h5>
                 <p className="mt-2 text-sm leading-5" style={{ color: "CanvasText" }}>
@@ -448,12 +445,7 @@ export function EventsBuilderPanel({ eventId }: { eventId: string }) {
     const lines = [
       headers.map(csvEscape).join(","),
       ...filteredRegistrations.map((row) =>
-        [
-          row.name ?? "",
-          row.email,
-          registrationSourceLabel(row.source),
-          row.createdAt,
-        ]
+        [row.name ?? "", row.email, registrationSourceLabel(row.source), row.createdAt]
           .map(csvEscape)
           .join(","),
       ),
@@ -762,7 +754,6 @@ export function EventsBuilderPanel({ eventId }: { eventId: string }) {
                 />
                 {coverImageUrl.trim() ? (
                   <div className="mt-3 overflow-hidden rounded-lg border border-[var(--admin-border)]">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={coverImageUrl.trim()}
                       alt="Cover preview"
@@ -932,8 +923,11 @@ export function EventsBuilderPanel({ eventId }: { eventId: string }) {
               Publication status
             </h2>
             <p className="mt-2 text-sm leading-6 text-[var(--admin-on-surface-variant)]">
-              Status: <strong className="text-[var(--admin-on-surface)]">{eventStatusLabel(event.status)}</strong>.
-              Live events appear on your public events API for upcoming listings and accept new
+              Status:{" "}
+              <strong className="text-[var(--admin-on-surface)]">
+                {eventStatusLabel(event.status)}
+              </strong>
+              . Live events appear on your public events API for upcoming listings and accept new
               registrations. Unpublish before editing details or deleting.
             </p>
           </div>

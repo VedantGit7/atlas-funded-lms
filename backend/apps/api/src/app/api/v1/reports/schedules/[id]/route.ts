@@ -6,10 +6,7 @@ import {
   updateReportScheduleBodySchema,
   updateReportScheduleResponseSchema,
 } from "@atlas/domain/reports/reports.dto";
-import {
-  deleteReportSchedule,
-  updateReportSchedule,
-} from "@atlas/domain/reports/reports.service";
+import { deleteReportSchedule, updateReportSchedule } from "@atlas/domain/reports/reports.service";
 import {
   deleteReportScheduleMetadata,
   updateReportScheduleMetadata,
@@ -24,8 +21,7 @@ export const PATCH = createTenantRoute<
   params: reportScheduleParamsSchema,
   input: updateReportScheduleBodySchema,
   output: updateReportScheduleResponseSchema,
-  handler: async ({ tx, ctx, params, input }) =>
-    updateReportSchedule(tx, ctx, params["id"] ?? "", input),
+  handler: async ({ tx, ctx, params, input }) => updateReportSchedule(tx, ctx, params.id, input),
 });
 
 export const DELETE = createTenantRoute<
@@ -36,5 +32,5 @@ export const DELETE = createTenantRoute<
   metadata: deleteReportScheduleMetadata,
   params: reportScheduleParamsSchema,
   output: deleteReportScheduleResponseSchema,
-  handler: async ({ tx, ctx, params }) => deleteReportSchedule(tx, ctx, params["id"] ?? ""),
+  handler: async ({ tx, ctx, params }) => deleteReportSchedule(tx, ctx, params.id),
 });

@@ -171,10 +171,7 @@ export function EventsCreatePanel() {
 
       <div className="grid gap-3 sm:grid-cols-3">
         <div className="rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)] p-4">
-          <ListChecks
-            className="mb-2 h-5 w-5 text-[var(--admin-primary)]"
-            aria-hidden="true"
-          />
+          <ListChecks className="mb-2 h-5 w-5 text-[var(--admin-primary)]" aria-hidden="true" />
           <p className="text-sm font-bold text-[var(--admin-on-surface)]">Setup details</p>
           <p className="mt-1 text-[12px] leading-5 text-[var(--admin-on-surface-variant)]">
             Add venue or online join info and a cover image on the Details tab.

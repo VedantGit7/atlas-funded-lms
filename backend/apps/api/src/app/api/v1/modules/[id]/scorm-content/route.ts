@@ -12,6 +12,7 @@ import { requireSupabaseUser, upsertAuthPrincipal } from "@atlas/auth";
 import { withGlobalDb } from "@atlas/db/global-db";
 import { withTenantTx } from "@atlas/db/with-tenant-tx";
 import { ensurePlatformSuperAdminTenantAccess, requireActiveMembership } from "@atlas/membership";
+import { scormContentSecurityHeaders } from "@atlas/storage/scorm-content-headers";
 import { resolveTenantFromRequest } from "@atlas/tenancy";
 import { getModuleScormContentForLearner } from "../../../../../../server/courses/module-scorm-learner.service";
 import { loadModuleLessonsResourceRef } from "../../../../../../server/courses/load-course-resource-ref";
@@ -111,6 +112,7 @@ export async function GET(req: NextRequest, context: { params: Promise<{ id: str
           headers: {
             "content-type": result.contentType,
             "cache-control": "private, max-age=60",
+            ...scormContentSecurityHeaders(),
           },
         }),
         requestId,

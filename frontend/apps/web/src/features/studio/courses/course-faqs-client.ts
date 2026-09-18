@@ -1,10 +1,7 @@
 import type { z } from "zod";
 import type { studioCourseDetailSchema } from "@atlas/contracts/courses/course-authoring-schemas";
 import { ClientApiError, clientApi, type ClientApiMutationOptions } from "../../../lib/client-api";
-import {
-  buildCourseFaqsUpdatePayload,
-  type CourseFaqItem,
-} from "./course-faq-settings";
+import { buildCourseFaqsUpdatePayload, type CourseFaqItem } from "./course-faq-settings";
 
 type CourseDetail = z.infer<typeof studioCourseDetailSchema>;
 

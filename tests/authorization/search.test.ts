@@ -7,7 +7,7 @@ function learnerTx() {
       .fn()
       .mockResolvedValueOnce([{ key: "search.query" }])
       .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([{ role_key: "learner" }]),
+      .mockResolvedValueOnce([{ role_key: "learner", bypasses_resource_predicates: false }]),
   };
 }
 
@@ -17,7 +17,7 @@ function adminTx() {
       .fn()
       .mockResolvedValueOnce([{ key: "search.reindex.manage" }])
       .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([{ role_key: "admin" }]),
+      .mockResolvedValueOnce([{ role_key: "admin", bypasses_resource_predicates: true }]),
   };
 }
 
@@ -60,7 +60,7 @@ describe("search authorization", () => {
         .fn()
         .mockResolvedValueOnce([])
         .mockResolvedValueOnce([])
-        .mockResolvedValueOnce([{ role_key: "learner" }]),
+        .mockResolvedValueOnce([{ role_key: "learner", bypasses_resource_predicates: false }]),
     };
 
     const decision = await can({

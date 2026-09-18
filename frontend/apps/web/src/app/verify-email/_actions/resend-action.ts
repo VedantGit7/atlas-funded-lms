@@ -4,10 +4,7 @@ import { z } from "zod";
 import { serverPublicApi } from "../../../lib/server/public-auth-fetch";
 import { resolveTenantEmailRedirect } from "../../../lib/server/tenant-email-redirect";
 
-const EmailSchema = z
-  .string()
-  .email()
-  .transform((value) => value.trim().toLowerCase());
+const EmailSchema = z.email().transform((value) => value.trim().toLowerCase());
 
 export type ResendActionState = {
   ok: boolean;

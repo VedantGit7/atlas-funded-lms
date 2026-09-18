@@ -81,10 +81,7 @@ export async function loadAdminShellContext(): Promise<AdminShellContext> {
     try {
       me = await serverApi.get("/api/v1/me");
     } catch (firstError) {
-      if (
-        !(firstError instanceof ServerApiError) ||
-        firstError.code !== "TENANT_NOT_FOUND"
-      ) {
+      if (!(firstError instanceof ServerApiError) || firstError.code !== "TENANT_NOT_FOUND") {
         throw firstError;
       }
       await new Promise((resolve) => setTimeout(resolve, 750));
@@ -101,7 +98,7 @@ export async function loadAdminShellContext(): Promise<AdminShellContext> {
       };
     }
 
-    const roleKeys = me.data.membership.roleKeys ?? [];
+    const roleKeys = me.data.membership.roleKeys;
     const isTenantAdmin = roleKeys.includes("owner") || roleKeys.includes("admin");
     if (!isTenantAdmin) {
       return {
@@ -200,8 +197,7 @@ export async function loadAdminShellContext(): Promise<AdminShellContext> {
         requestId,
         branding,
         reason: "forbidden",
-        message:
-          "Admin access is temporarily rate-limited. Wait a moment and refresh the page.",
+        message: "Admin access is temporarily rate-limited. Wait a moment and refresh the page.",
       };
     }
 

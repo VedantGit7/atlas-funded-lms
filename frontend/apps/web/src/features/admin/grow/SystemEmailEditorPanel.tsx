@@ -16,10 +16,7 @@ import {
   TriangleAlert,
 } from "lucide-react";
 import { ClientApiError, clientApi, toast } from "../../../lib/client-api";
-import {
-  MESSENGER_WIZARD_FIELD_CLASS,
-  MESSENGER_WIZARD_LABEL_CLASS,
-} from "./push-wizard-chrome";
+import { MESSENGER_WIZARD_FIELD_CLASS, MESSENGER_WIZARD_LABEL_CLASS } from "./push-wizard-chrome";
 import {
   SYSTEM_EMAIL_LIST_HREF,
   TRANSACTIONAL_EMAIL_SETTINGS_HREF,
@@ -97,7 +94,9 @@ function PreviewAccent({
       <div className="my-6 rounded-xl border border-[color-mix(in_srgb,var(--admin-danger)_28%,var(--admin-border))] bg-[color-mix(in_srgb,var(--admin-danger)_8%,var(--admin-surface))] p-5">
         <div className="mb-2 flex items-center gap-2 text-[var(--admin-danger)]">
           <TriangleAlert className="h-4 w-4" aria-hidden="true" />
-          <span className="text-[11px] font-bold uppercase tracking-[0.12em]">Revocation notice</span>
+          <span className="text-[11px] font-bold uppercase tracking-[0.12em]">
+            Revocation notice
+          </span>
         </div>
         <p className="text-sm text-[var(--admin-on-surface-variant)]">
           Revoked on {sampleVariables["revokedAt"] ?? "—"}. Review certificates in your account.
@@ -122,7 +121,9 @@ function PreviewAccent({
         <span className="inline-flex rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] px-5 py-2.5 text-sm font-bold text-[var(--admin-on-surface)]">
           Secure my account
         </span>
-        <p className="mt-3 text-[11px] text-[var(--admin-on-surface-variant)]">Opens {actionPath}</p>
+        <p className="mt-3 text-[11px] text-[var(--admin-on-surface-variant)]">
+          Opens {actionPath}
+        </p>
       </div>
     );
   }
@@ -164,9 +165,7 @@ export function SystemEmailEditorPanel({ emailKey }: SystemEmailEditorPanelProps
   }, [item, subject, body]);
 
   const previewRecipient =
-    sampleVariables["email"]?.trim() ||
-    testEmail.trim() ||
-    "learner@example.com";
+    sampleVariables["email"]?.trim() || testEmail.trim() || "learner@example.com";
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -182,7 +181,7 @@ export function SystemEmailEditorPanel({ emailKey }: SystemEmailEditorPanelProps
       setItem(detail.data);
       setSubject(detail.data.subject);
       setBody(detail.data.body);
-      setVariables(preview.data.variables ?? []);
+      setVariables(preview.data.variables);
       setActionPath(preview.data.defaultActionPath || detail.data.defaultActionPath);
     } catch (caught) {
       toast.error(
@@ -213,8 +212,8 @@ export function SystemEmailEditorPanel({ emailKey }: SystemEmailEditorPanelProps
       .get<TransactionalEmailResponse>("/api/v1/tenant-settings/transactional-email")
       .then((response) => {
         if (cancelled) return;
-        setFromName(response.data.fromName?.trim() || "");
-        setFromEmail(response.data.fromEmail?.trim() || "");
+        setFromName(response.data.fromName.trim() || "");
+        setFromEmail(response.data.fromEmail.trim() || "");
       })
       .catch(() => {
         /* preview falls back to generic sender label */
@@ -314,8 +313,8 @@ export function SystemEmailEditorPanel({ emailKey }: SystemEmailEditorPanelProps
       setBody((current) => `${current}${token}`);
       return;
     }
-    const start = field.selectionStart ?? body.length;
-    const end = field.selectionEnd ?? body.length;
+    const start = field.selectionStart;
+    const end = field.selectionEnd;
     const next = `${body.slice(0, start)}${token}${body.slice(end)}`;
     setBody(next);
     requestAnimationFrame(() => {
@@ -397,7 +396,9 @@ export function SystemEmailEditorPanel({ emailKey }: SystemEmailEditorPanelProps
 
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-3 rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-3 py-2 sm:px-4">
-            <span className="text-[12px] font-bold text-[var(--admin-on-surface-variant)]">Status</span>
+            <span className="text-[12px] font-bold text-[var(--admin-on-surface-variant)]">
+              Status
+            </span>
             <label className="inline-flex cursor-pointer items-center gap-2">
               <span className="relative inline-flex h-5 w-9 items-center">
                 <input
@@ -411,9 +412,7 @@ export function SystemEmailEditorPanel({ emailKey }: SystemEmailEditorPanelProps
                 <span
                   className={[
                     "absolute inset-0 rounded-full transition-colors",
-                    item.enabled
-                      ? "bg-[var(--admin-success)]"
-                      : "bg-[var(--admin-outline)]",
+                    item.enabled ? "bg-[var(--admin-success)]" : "bg-[var(--admin-outline)]",
                   ].join(" ")}
                   aria-hidden="true"
                 />
@@ -445,8 +444,8 @@ export function SystemEmailEditorPanel({ emailKey }: SystemEmailEditorPanelProps
           <div className="flex items-start gap-2 text-[var(--admin-warning)] sm:items-center">
             <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0 sm:mt-0" aria-hidden="true" />
             <p className="text-[12px] font-semibold leading-snug">
-              You are using a customized version of this email. System updates to the base
-              template will not be applied.
+              You are using a customized version of this email. System updates to the base template
+              will not be applied.
             </p>
           </div>
           <button
@@ -475,7 +474,9 @@ export function SystemEmailEditorPanel({ emailKey }: SystemEmailEditorPanelProps
                 type="text"
                 value={subject}
                 maxLength={200}
-                onChange={(event) => setSubject(event.target.value)}
+                onChange={(event) => {
+                  setSubject(event.target.value);
+                }}
                 className={MESSENGER_WIZARD_FIELD_CLASS}
                 placeholder="Enter email subject…"
               />
@@ -494,7 +495,9 @@ export function SystemEmailEditorPanel({ emailKey }: SystemEmailEditorPanelProps
                 value={body}
                 rows={14}
                 maxLength={4000}
-                onChange={(event) => setBody(event.target.value)}
+                onChange={(event) => {
+                  setBody(event.target.value);
+                }}
                 className={`${MESSENGER_WIZARD_FIELD_CLASS} min-h-[18rem] resize-y`}
                 placeholder="Write the email body…"
               />
@@ -522,7 +525,9 @@ export function SystemEmailEditorPanel({ emailKey }: SystemEmailEditorPanelProps
                           <div className="mb-1.5 flex items-start justify-between gap-2">
                             <button
                               type="button"
-                              onClick={() => insertToken(variable.key)}
+                              onClick={() => {
+                                insertToken(variable.key);
+                              }}
                               className="rounded bg-[color-mix(in_srgb,var(--admin-primary)_8%,var(--admin-surface))] px-2 py-0.5 font-mono text-[12px] font-bold text-[var(--admin-primary)] transition-colors hover:bg-[color-mix(in_srgb,var(--admin-primary)_14%,var(--admin-surface))]"
                               title="Insert into body"
                             >
@@ -535,7 +540,10 @@ export function SystemEmailEditorPanel({ emailKey }: SystemEmailEditorPanelProps
                               aria-label={copied ? `Copied ${token}` : `Copy ${token}`}
                             >
                               {copied ? (
-                                <Check className="h-4 w-4 text-[var(--admin-success)]" aria-hidden="true" />
+                                <Check
+                                  className="h-4 w-4 text-[var(--admin-success)]"
+                                  aria-hidden="true"
+                                />
                               ) : (
                                 <Copy className="h-4 w-4" aria-hidden="true" />
                               )}
@@ -574,7 +582,9 @@ export function SystemEmailEditorPanel({ emailKey }: SystemEmailEditorPanelProps
             <div className="flex items-center gap-1" role="group" aria-label="Preview width">
               <button
                 type="button"
-                onClick={() => setPreviewMode("desktop")}
+                onClick={() => {
+                  setPreviewMode("desktop");
+                }}
                 className={[
                   "rounded p-1.5 transition-colors",
                   previewMode === "desktop"
@@ -588,7 +598,9 @@ export function SystemEmailEditorPanel({ emailKey }: SystemEmailEditorPanelProps
               </button>
               <button
                 type="button"
-                onClick={() => setPreviewMode("mobile")}
+                onClick={() => {
+                  setPreviewMode("mobile");
+                }}
                 className={[
                   "rounded p-1.5 transition-colors",
                   previewMode === "mobile"
@@ -683,7 +695,9 @@ export function SystemEmailEditorPanel({ emailKey }: SystemEmailEditorPanelProps
             type="email"
             value={testEmail}
             disabled={busy}
-            onChange={(event) => setTestEmail(event.target.value)}
+            onChange={(event) => {
+              setTestEmail(event.target.value);
+            }}
             placeholder="test@example.com"
             className={`${MESSENGER_WIZARD_FIELD_CLASS} w-full sm:w-64`}
           />

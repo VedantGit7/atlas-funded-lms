@@ -139,10 +139,7 @@ export function typeSegmentButtonClassName(isSelected: boolean): string {
 export const secondaryButtonClassName =
   "inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] px-3 py-1.5 text-sm font-medium text-[var(--admin-on-surface-variant)] shadow-sm transition-[border-color,color,box-shadow] hover:border-[var(--admin-primary)] hover:text-[var(--admin-primary)] motion-safe:active:scale-[0.98]";
 
-export function formatGateLabel(
-  gateType: string,
-  config: Record<string, unknown>,
-): string {
+export function formatGateLabel(gateType: string, config: Record<string, unknown>): string {
   if (gateType === "competency_band" && typeof config["bandKey"] === "string") {
     return `${GATE_TYPE_CONFIG["competency_band"]?.label ?? "Competency"}: ${config["bandKey"]}`;
   }

@@ -18,11 +18,7 @@ type ServiceCtx = {
   requestId: string;
 };
 
-export async function sendEnrollmentRosterMessage(
-  tx: TenantTx,
-  ctx: ServiceCtx,
-  rawBody: unknown,
-) {
+export async function sendEnrollmentRosterMessage(tx: TenantTx, ctx: ServiceCtx, rawBody: unknown) {
   const body = sendEnrollmentMessageBodySchema.parse(rawBody);
   const membershipIds = await resolveEnrollmentMembershipIds(tx, body);
   const provider = getEmailProvider();
@@ -85,11 +81,7 @@ export async function sendEnrollmentRosterMessage(
   });
 }
 
-export async function exportEnrollmentRoster(
-  tx: TenantTx,
-  ctx: ServiceCtx,
-  rawBody: unknown,
-) {
+export async function exportEnrollmentRoster(tx: TenantTx, ctx: ServiceCtx, rawBody: unknown) {
   const body = exportEnrollmentRosterBodySchema.parse(rawBody);
 
   const params: Record<string, unknown> = {};

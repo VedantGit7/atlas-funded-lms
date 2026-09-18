@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
   const requestId = getOrCreateRequestId(req.headers);
 
   try {
-    enforcePublicRateLimit({
+    await enforcePublicRateLimit({
       req,
       bucket: routeMetadata.rateLimit,
       requestId,

@@ -13,7 +13,11 @@ import {
   loadInstructorMembers,
   type InstructorMember,
 } from "./create-course-add-member-dialog";
-import { dropdownLabelClassName, fieldClassName, RequiredMark } from "./create-course-dialog-shared";
+import {
+  dropdownLabelClassName,
+  fieldClassName,
+  RequiredMark,
+} from "./create-course-dialog-shared";
 
 type StudentMemberPickerProps = {
   value: string | null;

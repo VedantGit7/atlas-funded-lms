@@ -59,12 +59,12 @@ function Shimmer({ className }: { className?: string }) {
 
 function formatPct(value: number | null | undefined): string {
   if (value == null || Number.isNaN(value)) return "-";
-  return `${Number(value).toFixed(value % 1 === 0 ? 0 : 1)}%`;
+  return `${value.toFixed(value % 1 === 0 ? 0 : 1)}%`;
 }
 
 function formatSeconds(value: number | null | undefined): string {
   if (value == null || Number.isNaN(value)) return "-";
-  const rounded = Number(value);
+  const rounded = value;
   if (rounded % 1 === 0) return `${rounded}s`;
   return `${rounded.toFixed(1)}s`;
 }
@@ -100,7 +100,7 @@ function learnerInitials(name: string | null): string {
   const source = (name?.trim() || "?").replace(/\s+/g, " ");
   const parts = source.split(" ").filter(Boolean);
   if (parts.length >= 2) {
-    return `${parts[0]![0] ?? ""}${parts[1]![0] ?? ""}`.toUpperCase();
+    return `${parts[0]?.[0] ?? ""}${parts[1]?.[0] ?? ""}`.toUpperCase();
   }
   return source.slice(0, 2).toUpperCase();
 }
@@ -111,13 +111,7 @@ function barOpacity(index: number, total: number): number {
   return Math.max(0.25, 1 - index * step);
 }
 
-function VelocityChart({
-  points,
-  label,
-}: {
-  points: PollTimelinePoint[];
-  label: string;
-}) {
+function VelocityChart({ points, label }: { points: PollTimelinePoint[]; label: string }) {
   const width = 640;
   const height = 180;
   const pad = { top: 16, right: 12, bottom: 28, left: 36 };
@@ -134,13 +128,13 @@ function VelocityChart({
 
   let linePath = "";
   let areaPath = "";
-  if (coords.length > 0) {
+  const firstCoord = coords[0];
+  const lastCoord = coords.at(-1);
+  if (firstCoord && lastCoord) {
     linePath = coords
       .map((c, i) => `${i === 0 ? "M" : "L"}${c.x.toFixed(1)},${c.y.toFixed(1)}`)
       .join(" ");
-    const first = coords[0]!;
-    const last = coords[coords.length - 1]!;
-    areaPath = `${linePath} L${last.x.toFixed(1)},${(pad.top + plotH).toFixed(1)} L${first.x.toFixed(1)},${(pad.top + plotH).toFixed(1)} Z`;
+    areaPath = `${linePath} L${lastCoord.x.toFixed(1)},${(pad.top + plotH).toFixed(1)} L${firstCoord.x.toFixed(1)},${(pad.top + plotH).toFixed(1)} Z`;
   }
 
   const peak = coords.reduce<(typeof coords)[number] | null>((best, c) => {
@@ -177,10 +171,7 @@ function VelocityChart({
           );
         })}
         {areaPath ? (
-          <path
-            d={areaPath}
-            fill="color-mix(in srgb, var(--admin-primary) 18%, transparent)"
-          />
+          <path d={areaPath} fill="color-mix(in srgb, var(--admin-primary) 18%, transparent)" />
         ) : null}
         {linePath ? (
           <path
@@ -253,9 +244,7 @@ function OptionBars({
   );
 
   if (sorted.length === 0) {
-    return (
-      <p className="text-sm text-[var(--admin-on-surface-variant)]">No options configured.</p>
-    );
+    return <p className="text-sm text-[var(--admin-on-surface-variant)]">No options configured.</p>;
   }
 
   return (
@@ -340,9 +329,7 @@ function EventLog({ events, closed }: { events: PollTimelineEvent[]; closed: boo
         ].join(" ")}
       >
         {events.length === 0 ? (
-          <p className="px-2 py-2 text-xs text-[var(--admin-on-surface-variant)]">
-            No events yet.
-          </p>
+          <p className="px-2 py-2 text-xs text-[var(--admin-on-surface-variant)]">No events yet.</p>
         ) : (
           [...events].reverse().map((event, index) => (
             <div
@@ -476,9 +463,7 @@ export function AdminPollLiveMonitorPage({ pollId }: { pollId: string }) {
       else params.delete("present");
       const qs = params.toString();
       router.replace(
-        qs
-          ? `/admin/reports/polls/${pollId}/live?${qs}`
-          : `/admin/reports/polls/${pollId}/live`,
+        qs ? `/admin/reports/polls/${pollId}/live?${qs}` : `/admin/reports/polls/${pollId}/live`,
         { scroll: false },
       );
     },
@@ -532,7 +517,9 @@ export function AdminPollLiveMonitorPage({ pollId }: { pollId: string }) {
       if (document.visibilityState === "hidden") return;
       void load({ quiet: true });
     }, POLL_INTERVAL_MS);
-    return () => window.clearInterval(id);
+    return () => {
+      window.clearInterval(id);
+    };
   }, [data?.isOpen, load]);
 
   useEffect(() => {
@@ -547,7 +534,9 @@ export function AdminPollLiveMonitorPage({ pollId }: { pollId: string }) {
         setLocalRemaining(remaining);
       }
     }, 250);
-    return () => window.clearInterval(id);
+    return () => {
+      window.clearInterval(id);
+    };
   }, [data?.closesAt, data?.isOpen]);
 
   useEffect(() => {
@@ -556,7 +545,9 @@ export function AdminPollLiveMonitorPage({ pollId }: { pollId: string }) {
       if (event.key === "Escape") setPresent(false);
     };
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+    };
   }, [present, setPresent]);
 
   const showCorrect = Boolean(
@@ -680,7 +671,9 @@ export function AdminPollLiveMonitorPage({ pollId }: { pollId: string }) {
       <PresentModeView
         data={{ ...data, secondsRemaining: localRemaining }}
         showCorrect={showCorrect}
-        onExit={() => setPresent(false)}
+        onExit={() => {
+          setPresent(false);
+        }}
       />
     );
   }
@@ -706,10 +699,7 @@ export function AdminPollLiveMonitorPage({ pollId }: { pollId: string }) {
           Polls
         </Link>
         <ChevronRight className="h-3.5 w-3.5" aria-hidden="true" />
-        <Link
-          href={`/admin/reports/polls/${pollId}`}
-          className="hover:text-[var(--admin-primary)]"
-        >
+        <Link href={`/admin/reports/polls/${pollId}`} className="hover:text-[var(--admin-primary)]">
           {data.title}
         </Link>
         <ChevronRight className="h-3.5 w-3.5" aria-hidden="true" />
@@ -729,7 +719,9 @@ export function AdminPollLiveMonitorPage({ pollId }: { pollId: string }) {
           <button
             type="button"
             className="ml-auto text-xs font-medium text-[var(--admin-danger)]"
-            onClick={() => setError(null)}
+            onClick={() => {
+              setError(null);
+            }}
             aria-label="Dismiss"
           >
             <X className="h-4 w-4" />
@@ -760,7 +752,9 @@ export function AdminPollLiveMonitorPage({ pollId }: { pollId: string }) {
             {!isOpen && data.closedAt ? (
               <span className="text-xs text-[var(--admin-on-surface-variant)]">
                 Closed {formatClock(data.closedAt)}
-                {data.ranForSeconds != null ? ` · ran for ${formatSeconds(data.ranForSeconds)}` : ""}
+                {data.ranForSeconds != null
+                  ? ` · ran for ${formatSeconds(data.ranForSeconds)}`
+                  : ""}
               </span>
             ) : null}
             {data.anonymousVote ? (
@@ -811,7 +805,9 @@ export function AdminPollLiveMonitorPage({ pollId }: { pollId: string }) {
             <button
               type="button"
               className={secondaryButtonClassName}
-              onClick={() => setPresent(true)}
+              onClick={() => {
+                setPresent(true);
+              }}
             >
               <Maximize2 className="h-4 w-4" aria-hidden="true" />
               Present mode
@@ -848,10 +844,7 @@ export function AdminPollLiveMonitorPage({ pollId }: { pollId: string }) {
                   <Download className="h-4 w-4" aria-hidden="true" />
                   {busy ? "Exporting..." : "Export CSV"}
                 </button>
-                <Link
-                  href={`/admin/reports/polls/${pollId}`}
-                  className={primaryButtonClassName}
-                >
+                <Link href={`/admin/reports/polls/${pollId}`} className={primaryButtonClassName}>
                   Open full report
                 </Link>
               </>
@@ -879,8 +872,8 @@ export function AdminPollLiveMonitorPage({ pollId }: { pollId: string }) {
               </div>
               {data.recentResponseCount > 0 ? (
                 <div className="mt-1 flex items-center justify-end gap-1 text-xs text-[var(--admin-success)]">
-                  <TrendingUp className="h-3.5 w-3.5" aria-hidden="true" />
-                  +{data.recentResponseCount} in the last 10 seconds
+                  <TrendingUp className="h-3.5 w-3.5" aria-hidden="true" />+
+                  {data.recentResponseCount} in the last 10 seconds
                 </div>
               ) : (
                 <div className="mt-1 text-xs text-[var(--admin-on-surface-variant)]">
@@ -933,7 +926,9 @@ export function AdminPollLiveMonitorPage({ pollId }: { pollId: string }) {
                 <button
                   type="button"
                   className="inline-flex h-8 items-center rounded-lg border border-[var(--admin-outline)] bg-[var(--admin-surface-low)] px-3 text-xs font-medium text-[var(--admin-on-surface)] hover:bg-[var(--admin-surface-high)]"
-                  onClick={() => setRevealCorrect((value) => !value)}
+                  onClick={() => {
+                    setRevealCorrect((value) => !value);
+                  }}
                 >
                   {revealCorrect ? "Hide correct answer" : "Reveal correct answer"}
                 </button>
@@ -1010,11 +1005,7 @@ export function AdminPollLiveMonitorPage({ pollId }: { pollId: string }) {
                       : "text-[var(--admin-on-surface)]",
                   ].join(" ")}
                 >
-                  {data.quizMode
-                    ? showCorrect
-                      ? formatPct(data.correctPct)
-                      : "Hidden"
-                    : "-"}
+                  {data.quizMode ? (showCorrect ? formatPct(data.correctPct) : "Hidden") : "-"}
                 </span>
               </div>
               <div>
@@ -1095,9 +1086,7 @@ export function AdminPollLiveMonitorPage({ pollId }: { pollId: string }) {
         )}
       </div>
 
-      {isOpen && !data.anonymousVote ? (
-        <EventLog events={data.events} closed={false} />
-      ) : null}
+      {isOpen && !data.anonymousVote ? <EventLog events={data.events} closed={false} /> : null}
 
       {isOpen && data.anonymousVote ? (
         <p className="text-xs text-[var(--admin-on-surface-variant)]">

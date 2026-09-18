@@ -16,9 +16,7 @@ describe("readCoursePricing", () => {
   });
 
   it("reads PAID tier with normalized price and currency", () => {
-    expect(
-      readCoursePricing({ accessTier: "PAID", priceCents: 4999, currency: "usd" }),
-    ).toEqual({
+    expect(readCoursePricing({ accessTier: "PAID", priceCents: 4999, currency: "usd" })).toEqual({
       accessTier: "PAID",
       priceCents: 4999,
       currency: "USD",
@@ -26,17 +24,13 @@ describe("readCoursePricing", () => {
   });
 
   it("ignores invalid price and currency values", () => {
-    expect(
-      readCoursePricing({ accessTier: "PAID", priceCents: -10, currency: "US" }),
-    ).toEqual({
+    expect(readCoursePricing({ accessTier: "PAID", priceCents: -10, currency: "US" })).toEqual({
       accessTier: "PAID",
       priceCents: null,
       currency: null,
     });
 
-    expect(
-      readCoursePricing({ accessTier: "PAID", priceCents: "free", currency: 123 }),
-    ).toEqual({
+    expect(readCoursePricing({ accessTier: "PAID", priceCents: "free", currency: 123 })).toEqual({
       accessTier: "PAID",
       priceCents: null,
       currency: null,

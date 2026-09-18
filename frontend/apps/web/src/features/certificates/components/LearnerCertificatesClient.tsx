@@ -291,7 +291,8 @@ function EmptyState({
   }
 
   if (status !== "all" || hasItems) {
-    const label = status === "all" ? "credentials" : `${statusMeta(status).label.toLowerCase()} credentials`;
+    const label =
+      status === "all" ? "credentials" : `${statusMeta(status).label.toLowerCase()} credentials`;
     return (
       <div className="flex flex-col items-center justify-center gap-4 rounded-xl border border-dashed border-border bg-card px-6 py-16 text-center">
         <span className="flex h-14 w-14 items-center justify-center rounded-full bg-muted text-muted-foreground">

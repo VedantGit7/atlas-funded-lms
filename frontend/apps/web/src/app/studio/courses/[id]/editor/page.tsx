@@ -21,7 +21,5 @@ export default async function StudioCourseEditorPage({ params }: StudioCourseEdi
     serverApi.get<StudioCourseModulesResponse>(`/api/v1/courses/${id}/modules?view=studio`),
   ]);
 
-  return (
-    <CourseEditorLazy initialCourse={course.data} initialModules={modules.data.items} />
-  );
+  return <CourseEditorLazy initialCourse={course.data} initialModules={modules.data.items} />;
 }

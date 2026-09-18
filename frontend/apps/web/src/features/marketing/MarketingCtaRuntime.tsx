@@ -1,5 +1,6 @@
 "use client";
 
+import { SafeHtml } from "@/components/SafeHtml";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePathname } from "next/navigation";
 import type { PublicCtaDto } from "../admin/grow/cta-shared";
@@ -41,11 +42,7 @@ function pathMatches(pathname: string, rule: string): boolean {
   return pathname === normalized || pathname.includes(normalized);
 }
 
-function matchesTargeting(
-  cta: PublicCtaDto,
-  pathname: string,
-  isAuthenticated: boolean,
-): boolean {
+function matchesTargeting(cta: PublicCtaDto, pathname: string, isAuthenticated: boolean): boolean {
   const { targeting } = cta;
   if (targeting.audience === "ANONYMOUS" && isAuthenticated) return false;
   if (targeting.audience === "LEARNERS" && !isAuthenticated) return false;
@@ -83,11 +80,8 @@ async function postMetric(id: string, kind: "view" | "click") {
 function CtaBody({ html, className }: { html: string | null; className?: string }) {
   if (!html?.trim()) return null;
   return (
-    <div
-      className={className}
-      // Admin-authored CTA body (same pattern as marketing form thank-you HTML).
-      dangerouslySetInnerHTML={{ __html: html }}
-    />
+    // Admin-authored CTA body rendered on a PUBLIC unauthenticated page.
+    <SafeHtml html={html} className={className} />
   );
 }
 
@@ -176,7 +170,7 @@ export function MarketingCtaRuntime({ isAuthenticated = false }: MarketingCtaRun
   useEffect(() => {
     function onClick(event: MouseEvent) {
       const target = event.target as HTMLElement | null;
-      const button = target?.closest?.("[data-atlas-cta-button]") as HTMLElement | null;
+      const button = target?.closest("[data-atlas-cta-button]") as HTMLElement | null;
       if (!button) return;
       const id = button.getAttribute("data-atlas-cta-button");
       if (!id) return;
@@ -194,19 +188,19 @@ export function MarketingCtaRuntime({ isAuthenticated = false }: MarketingCtaRun
       }
     }
     document.addEventListener("click", onClick);
-    return () => document.removeEventListener("click", onClick);
+    return () => {
+      document.removeEventListener("click", onClick);
+    };
   }, [byId]);
 
-  async function onPrimaryAction(cta: PublicCtaDto) {
+  function onPrimaryAction(cta: PublicCtaDto) {
     void postMetric(cta.id, "click");
     if (cta.linkUrl) {
       window.location.assign(cta.linkUrl);
     }
   }
 
-  const sticky = items.find(
-    (cta) => cta.ctaType === "STICKY" && visibleAutoIds.includes(cta.id),
-  );
+  const sticky = items.find((cta) => cta.ctaType === "STICKY" && visibleAutoIds.includes(cta.id));
   const slideIns = items.filter(
     (cta) => cta.ctaType === "SLIDE_IN" && visibleAutoIds.includes(cta.id),
   );
@@ -231,7 +225,9 @@ export function MarketingCtaRuntime({ isAuthenticated = false }: MarketingCtaRun
                 backgroundColor: sticky.buttonColor,
                 color: sticky.buttonTextColor,
               }}
-              onClick={() => void onPrimaryAction(sticky)}
+              onClick={() => {
+                onPrimaryAction(sticky);
+              }}
             >
               {sticky.buttonText}
             </button>
@@ -246,7 +242,6 @@ export function MarketingCtaRuntime({ isAuthenticated = false }: MarketingCtaRun
           style={{ backgroundColor: cta.backgroundColor }}
         >
           {cta.imageUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
             <img src={cta.imageUrl} alt="" className="h-28 w-full object-cover" />
           ) : null}
           <div className="space-y-2 p-4">
@@ -257,7 +252,9 @@ export function MarketingCtaRuntime({ isAuthenticated = false }: MarketingCtaRun
                 type="button"
                 className="rounded-md px-3 py-1.5 text-sm font-medium"
                 style={{ backgroundColor: cta.buttonColor, color: cta.buttonTextColor }}
-                onClick={() => void onPrimaryAction(cta)}
+                onClick={() => {
+                  onPrimaryAction(cta);
+                }}
               >
                 {cta.buttonText}
               </button>
@@ -276,12 +273,13 @@ export function MarketingCtaRuntime({ isAuthenticated = false }: MarketingCtaRun
               type="button"
               aria-label="Close"
               className="absolute right-3 top-3 z-10 rounded-md px-2 py-1 text-sm text-neutral-500 hover:bg-neutral-100"
-              onClick={() => setActivePopupId(null)}
+              onClick={() => {
+                setActivePopupId(null);
+              }}
             >
               Close
             </button>
             {activePopup.imageUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
               <img src={activePopup.imageUrl} alt="" className="h-40 w-full object-cover" />
             ) : null}
             <div className="space-y-3 p-5 pt-10">
@@ -302,7 +300,9 @@ export function MarketingCtaRuntime({ isAuthenticated = false }: MarketingCtaRun
                     backgroundColor: activePopup.buttonColor,
                     color: activePopup.buttonTextColor,
                   }}
-                  onClick={() => void onPrimaryAction(activePopup)}
+                  onClick={() => {
+                    onPrimaryAction(activePopup);
+                  }}
                 >
                   {activePopup.buttonText}
                 </button>

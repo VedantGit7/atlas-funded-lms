@@ -302,7 +302,10 @@ function inferActionFromPrefix(prefix: string, method: MutationHttpMethod): Toas
 
 function normalizePrefix(prefix: string): string {
   const parts = prefix.split("-").filter(Boolean);
-  while (parts.length > 0 && (ACTION_SUFFIXES.has(parts[parts.length - 1]!) || isUuidSegment(parts[parts.length - 1]!))) {
+  for (;;) {
+    const last = parts.at(-1);
+    if (last === undefined) break;
+    if (!ACTION_SUFFIXES.has(last) && !isUuidSegment(last)) break;
     parts.pop();
   }
   return parts.join("-");
@@ -340,7 +343,8 @@ export function formatToastSuccessMessage(label: string, action: ToastAction): s
 
 function stripTrailingUuid(key: string): string {
   const parts = key.split("-");
-  if (parts.length > 1 && isUuidSegment(parts[parts.length - 1]!)) {
+  const last = parts.at(-1);
+  if (parts.length > 1 && last !== undefined && isUuidSegment(last)) {
     return parts.slice(0, -1).join("-");
   }
   return key;
@@ -364,7 +368,10 @@ export function resolveMutationSuccessToast(
 
   const exact = IDEMPOTENCY_TOASTS[key];
   if (exact) {
-    return formatToastSuccessMessage(exact.label, exact.action ?? inferActionFromPrefix(key, method));
+    return formatToastSuccessMessage(
+      exact.label,
+      exact.action ?? inferActionFromPrefix(key, method),
+    );
   }
 
   if (key.startsWith("workflow-definition-")) {

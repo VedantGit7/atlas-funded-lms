@@ -25,8 +25,6 @@ const validTokens = {
   primary: "#112233",
   accent: "#445566",
   header: "#778899",
-  background: "#ffffff",
-  foreground: "#000000",
   radius: "md" as const,
   modeDefault: "system" as const,
 };
@@ -108,8 +106,6 @@ describe("theme update", () => {
         primary: "#112233",
         accent: "#445566",
         header: "#778899",
-        background: "#ffffff",
-        foreground: "#000000",
       },
       radius: "md",
       modeDefault: "system",

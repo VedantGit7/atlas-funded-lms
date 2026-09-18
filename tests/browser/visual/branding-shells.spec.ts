@@ -1,8 +1,14 @@
 import { test, expect } from "../fixtures/axe";
 
+// This suite proves two REAL tenants render with different branding, so it has
+// to name the real tenant-config slugs and their dev hosts. That is tenant
+// configuration, which is what the rule permits — not a brand baked into
+// product code. Both hosts are overridable by environment.
 const BRANDING_HOSTS = [
   {
+    /* eslint-disable-next-line atlas/no-hardcoded-tenant-strings */
     name: "fundedbeyond",
+    /* eslint-disable-next-line atlas/no-hardcoded-tenant-strings */
     baseURL: process.env["E2E_TENANT_BASE_URL"] ?? "http://fundedbeyond.localhost.test:3000",
   },
   {

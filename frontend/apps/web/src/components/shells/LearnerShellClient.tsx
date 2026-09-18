@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
 import { useState, type ReactNode } from "react";
 import {
   Award,
@@ -30,10 +31,30 @@ import { TenantLogo } from "@atlas/design-system";
 import type { PublicTenantBranding } from "@atlas/tenant-branding";
 import type { LearnerNavItem } from "../../features/learner/learner-navigation";
 import { performAtlasLogout } from "../../lib/auth/perform-logout";
-import { DeviceSessionCapture } from "../observability/DeviceSessionCapture";
-import { LearnerConfirmDialog } from "./LearnerConfirmDialog";
+// H16. These three are not on the first-paint path -- one is a pure side
+// effect, one only appears after the learner asks to sign out, and one injects
+// marketing CTAs after hydration. Loading them with the shell put their whole
+// dependency graph in the learner entry chunk, which every learner route pays
+// for on first load. Deferring them costs nothing visible.
+const DeviceSessionCapture = dynamic(
+  () =>
+    import("../observability/DeviceSessionCapture").then((m) => ({
+      default: m.DeviceSessionCapture,
+    })),
+  { ssr: false },
+);
+const LearnerConfirmDialog = dynamic(
+  () => import("./LearnerConfirmDialog").then((m) => ({ default: m.LearnerConfirmDialog })),
+  { ssr: false },
+);
 import { ThemeModeToggle } from "../ThemeModeToggle";
-import { MarketingCtaRuntime } from "../../features/marketing/MarketingCtaRuntime";
+const MarketingCtaRuntime = dynamic(
+  () =>
+    import("../../features/marketing/MarketingCtaRuntime").then((m) => ({
+      default: m.MarketingCtaRuntime,
+    })),
+  { ssr: false },
+);
 import { LearnerNotificationPopover } from "../../features/notifications/components/LearnerNotificationPopover";
 import { ShellBottomNav } from "./shared/ShellBottomNav";
 import { ShellSkipLink } from "./shared/ShellSkipLink";
@@ -326,21 +347,23 @@ export function LearnerShellClient({
         mobileLimit={4}
       />
 
-      <LearnerConfirmDialog
-        open={confirmSignOut}
-        title="Sign out?"
-        description="You will be returned to the sign-in screen and need to sign in again to continue learning."
-        confirmLabel="Sign out"
-        busyLabel="Signing out…"
-        cancelLabel="Stay signed in"
-        icon={LogOut}
-        tone="danger"
-        busy={signingOut}
-        onConfirm={() => void handleSignOut()}
-        onCancel={() => {
-          if (!signingOut) setConfirmSignOut(false);
-        }}
-      />
+      {confirmSignOut ? (
+        <LearnerConfirmDialog
+          open={confirmSignOut}
+          title="Sign out?"
+          description="You will be returned to the sign-in screen and need to sign in again to continue learning."
+          confirmLabel="Sign out"
+          busyLabel="Signing out…"
+          cancelLabel="Stay signed in"
+          icon={LogOut}
+          tone="danger"
+          busy={signingOut}
+          onConfirm={() => void handleSignOut()}
+          onCancel={() => {
+            if (!signingOut) setConfirmSignOut(false);
+          }}
+        />
+      ) : null}
 
       <span className="sr-only">Request ID: {requestId}</span>
       <MarketingCtaRuntime isAuthenticated />

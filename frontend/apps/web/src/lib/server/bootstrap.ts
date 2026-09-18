@@ -1,23 +1,17 @@
 import { cache } from "react";
 import { serverApi } from "../server-api";
 import { ServerApiError } from "../api/errors";
-import { FUNDED_BEYOND_LOGO_URL } from "../brand";
 
 export type PublicBootstrapData = {
   tenantId: string | null;
   tenantSlug: string | null;
   tenantDomainId: string | null;
   tenantState: "ACTIVE" | "PROVISIONING" | "SUSPENDED" | "ARCHIVED" | "DELETED" | null;
-  tenantDomainStatus:
-    | "PENDING"
-    | "VERIFYING"
-    | "ACTIVE"
-    | "FAILED"
-    | "REMOVED"
-    | "ERROR"
-    | null;
+  tenantDomainStatus: "PENDING" | "VERIFYING" | "ACTIVE" | "FAILED" | "REMOVED" | "ERROR" | null;
   publicName: string | null;
   issuerName: string | null;
+  /** The tenant's own support contact, or null when they have not set one. */
+  supportEmail: string | null;
   logoLightUrl: string | null;
   logoDarkUrl: string | null;
   faviconUrl: string | null;
@@ -32,27 +26,23 @@ export type PublicBootstrapData = {
 type BootstrapResponse = { data: PublicBootstrapData };
 
 /**
- * FundedBeyond uses a single brand mark everywhere (avatar-gradient), so the
- * tenant-uploaded light/dark logos and favicon from the API are overridden here.
  * This is the one place logo URLs enter the app; all shells and layouts read
  * from this bootstrap.
+ *
+ * It used to overwrite `logoLightUrl`, `logoDarkUrl` and `faviconUrl` with
+ * FundedBeyond's mark on every response, discarding whatever the tenant had
+ * uploaded. That made the per-tenant logo resolution in the shells unreachable:
+ * branding always arrived already carrying tenant #1's asset. The override is
+ * gone — tenant assets now flow through, and a tenant without one gets an
+ * initials mark from `<TenantBrandMark />` rather than another tenant's logo.
  */
-function withFundedBeyondBranding(data: PublicBootstrapData): PublicBootstrapData {
-  return {
-    ...data,
-    logoLightUrl: FUNDED_BEYOND_LOGO_URL,
-    logoDarkUrl: FUNDED_BEYOND_LOGO_URL,
-    faviconUrl: FUNDED_BEYOND_LOGO_URL,
-  };
-}
-
 export const loadPublicBootstrap = cache(async (): Promise<PublicBootstrapData> => {
   const maxAttempts = 3;
 
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     try {
       const response = await serverApi.get<BootstrapResponse>("/api/v1/public/bootstrap");
-      return withFundedBeyondBranding(response.data);
+      return response.data;
     } catch (error) {
       const isTransient =
         error instanceof ServerApiError &&

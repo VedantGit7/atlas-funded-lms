@@ -86,6 +86,10 @@ describe("GET /api/v1/members", () => {
       data: {
         items: [],
         pageInfo: { nextCursor: null, hasNextPage: false },
+        // Required by membersListResponseSchema, which the route validates its
+        // output against — the missing field made the route 500 rather than
+        // fail an assertion, so a stale mock read as a broken endpoint.
+        totalCount: 0,
       },
     });
   });

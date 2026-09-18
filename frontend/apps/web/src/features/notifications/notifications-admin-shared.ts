@@ -24,8 +24,7 @@ export const notificationsFilterTabInactiveClassName =
 export const notificationsGroupHeadingClassName =
   "text-[12px] font-medium uppercase leading-4 tracking-[0.08em] text-[var(--admin-on-surface-variant)]";
 
-export const notificationsGroupDividerClassName =
-  "h-px flex-1 bg-[var(--admin-border)]";
+export const notificationsGroupDividerClassName = "h-px flex-1 bg-[var(--admin-border)]";
 
 export const notificationsCardClassName =
   "group relative flex cursor-pointer items-start gap-4 overflow-hidden rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface-variant)] p-4 motion-safe:transition-[background-color,box-shadow,border-color] hover:border-[color-mix(in_srgb,var(--admin-primary)_18%,var(--admin-border))] hover:bg-[var(--admin-surface-high)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]/30";

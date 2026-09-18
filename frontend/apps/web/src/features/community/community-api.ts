@@ -23,15 +23,11 @@ export async function addReaction(target: ReactionTarget): Promise<void> {
 }
 
 export async function removeReaction(target: ReactionTarget): Promise<void> {
-  await clientApi.delete(
-    "/api/v1/reactions",
-    "community-reaction-remove",
-    {
-      targetType: target.targetType,
-      targetId: target.targetId,
-      reactionKey: target.reactionKey ?? DEFAULT_REACTION_KEY,
-    },
-  );
+  await clientApi.delete("/api/v1/reactions", "community-reaction-remove", {
+    targetType: target.targetType,
+    targetId: target.targetId,
+    reactionKey: target.reactionKey ?? DEFAULT_REACTION_KEY,
+  });
 }
 
 export { ClientApiError };

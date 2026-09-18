@@ -8,6 +8,7 @@ import {
   runIntegrationPaidEnrollmentAction,
 } from "../../../../../../../../server/marketing-integrations/marketing-integrations.service";
 import { routeMetadata } from "./route.metadata";
+import { systemServiceCtx } from "@atlas/core/actor/system-actor";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -37,7 +38,11 @@ export const POST = createPublicRouteHandler(routeMetadata, async ({ req, reques
           await requireIntegrationApiKey(tx, readApiKey(req));
           return runIntegrationPaidEnrollmentAction(
             tx,
-            { tenantId: tenant.tenantId, actorMembershipId: tenant.tenantId, requestId },
+            systemServiceCtx({
+              tenantId: tenant.tenantId,
+              requestId,
+              source: "marketing.public_action",
+            }),
             body,
           );
         },

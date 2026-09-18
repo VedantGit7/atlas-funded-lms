@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { Loader2, RefreshCw } from "lucide-react";
 import { ClientApiError } from "../../../lib/client-api";
+import { PageGate } from "../../../components/patterns/PageGate";
+import { isAuthorizationDenied } from "../domain/admin-domain-shared";
 import {
   fetchConversationMessages,
   fetchConversations,
@@ -13,7 +15,6 @@ import {
 import {
   managePrimaryButtonClassName,
   manageSearchInputClassName,
-  manageSecondaryButtonClassName,
   manageStatusChipClassName,
   manageTableCardClassName,
   manageTableHeadClassName,
@@ -34,7 +35,7 @@ export function ManageLearnerSupportPanel() {
   const [loading, setLoading] = useState(true);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<unknown>(null);
 
   const loadConversations = useCallback(async () => {
     setLoading(true);
@@ -43,7 +44,7 @@ export function ManageLearnerSupportPanel() {
       const response = await fetchConversations();
       setConversations(response.data.items);
     } catch (caught) {
-      setError(formatError(caught));
+      setError(caught);
       setConversations([]);
     } finally {
       setLoading(false);
@@ -57,7 +58,7 @@ export function ManageLearnerSupportPanel() {
       const response = await fetchConversationMessages(conversationId);
       setMessages(response.data.items);
     } catch (caught) {
-      setError(formatError(caught));
+      setError(caught);
       setMessages([]);
     } finally {
       setLoadingMessages(false);
@@ -84,7 +85,7 @@ export function ManageLearnerSupportPanel() {
     return subject.includes(normalized) || id.includes(normalized);
   });
 
-  async function handleSend(event: React.FormEvent) {
+  async function handleSend(event: React.SyntheticEvent) {
     event.preventDefault();
     if (!selectedId || !messageBody.trim()) return;
     setSubmitting(true);
@@ -95,10 +96,17 @@ export function ManageLearnerSupportPanel() {
       await loadMessages(selectedId);
       await loadConversations();
     } catch (caught) {
-      setError(formatError(caught));
+      setError(caught);
     } finally {
       setSubmitting(false);
     }
+  }
+
+  // A 401/403 replaces the panel rather than annotating it, matching the
+  // server-rendered admin pages. Previously every failure, denial included,
+  // rendered as an inline banner above a fully interactive inbox.
+  if (isAuthorizationDenied(error)) {
+    return <PageGate state="denied" title="Messenger" />;
   }
 
   const selectedConversation = conversations.find((item) => item.id === selectedId) ?? null;
@@ -110,7 +118,7 @@ export function ManageLearnerSupportPanel() {
           role="alert"
           className="rounded-lg border border-[var(--admin-danger)]/30 bg-[var(--admin-danger)]/10 px-4 py-3 text-sm text-[var(--admin-danger)]"
         >
-          {error}
+          {formatError(error)}
         </p>
       ) : null}
 
@@ -126,7 +134,10 @@ export function ManageLearnerSupportPanel() {
               }}
               className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs font-semibold text-[var(--admin-on-surface-variant)] transition-colors hover:bg-[var(--admin-surface-high)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]"
             >
-              <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} aria-hidden="true" />
+              <RefreshCw
+                className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`}
+                aria-hidden="true"
+              />
               Refresh
             </button>
           </div>
@@ -152,7 +163,9 @@ export function ManageLearnerSupportPanel() {
               </div>
             ) : filteredConversations.length === 0 ? (
               <p className="px-2 py-6 text-sm text-[var(--admin-on-surface-variant)]">
-                {inboxQuery.trim() ? "No conversations match your search." : "No conversations yet."}
+                {inboxQuery.trim()
+                  ? "No conversations match your search."
+                  : "No conversations yet."}
               </p>
             ) : (
               <ul className="space-y-1">
@@ -176,7 +189,9 @@ export function ManageLearnerSupportPanel() {
                         </span>
                         <span className="mt-0.5 flex items-center gap-2 text-xs text-[var(--admin-on-surface-variant)]">
                           <span>{conversation.messageCount} messages</span>
-                          <span className={manageStatusChipClassName("neutral")}>{conversation.status}</span>
+                          <span className={manageStatusChipClassName("neutral")}>
+                            {conversation.status}
+                          </span>
                         </span>
                       </button>
                     </li>
@@ -212,7 +227,9 @@ export function ManageLearnerSupportPanel() {
             <>
               <div className="max-h-80 flex-1 overflow-y-auto">
                 {messages.length === 0 ? (
-                  <p className="px-4 py-8 text-sm text-[var(--admin-on-surface-variant)]">No messages yet.</p>
+                  <p className="px-4 py-8 text-sm text-[var(--admin-on-surface-variant)]">
+                    No messages yet.
+                  </p>
                 ) : (
                   <table className="w-full border-collapse text-sm">
                     <thead>
@@ -223,7 +240,10 @@ export function ManageLearnerSupportPanel() {
                     </thead>
                     <tbody>
                       {messages.map((message) => (
-                        <tr key={message.id} className="border-b border-[var(--admin-border)] last:border-b-0">
+                        <tr
+                          key={message.id}
+                          className="border-b border-[var(--admin-border)] last:border-b-0"
+                        >
                           <td className={`${manageTableTdClassName} whitespace-nowrap align-top`}>
                             {new Date(message.sentAt).toLocaleString()}
                           </td>
@@ -255,7 +275,11 @@ export function ManageLearnerSupportPanel() {
                     className="w-full rounded-lg border border-[var(--admin-outline)] bg-[var(--admin-surface)] px-3 py-2 text-sm text-[var(--admin-on-surface)] outline-none transition-[border-color,box-shadow] placeholder:text-[var(--admin-on-surface-variant)] focus:border-[var(--admin-primary)] focus:ring-2 focus:ring-[var(--admin-primary)]/30"
                   />
                 </label>
-                <button type="submit" disabled={submitting} className={managePrimaryButtonClassName}>
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className={managePrimaryButtonClassName}
+                >
                   {submitting ? "Sending…" : "Send message"}
                 </button>
               </form>

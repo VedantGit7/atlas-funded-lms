@@ -90,10 +90,7 @@ export type MarketingEmailCampaignsSummary = {
   campaignCount: number;
 };
 
-export function emailRecipientInitials(
-  displayName: string | null,
-  email: string | null,
-): string {
+export function emailRecipientInitials(displayName: string | null, email: string | null): string {
   const source = (displayName ?? email ?? "?").trim();
   if (!source) return "?";
   const parts = source.split(/\s+/).filter(Boolean);

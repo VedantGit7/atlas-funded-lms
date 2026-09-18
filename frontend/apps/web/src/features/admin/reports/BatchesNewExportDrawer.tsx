@@ -65,7 +65,9 @@ function PolicyToggle({
       aria-checked={checked}
       aria-label={label}
       disabled={disabled}
-      onClick={() => onChange(!checked)}
+      onClick={() => {
+        onChange(!checked);
+      }}
       className={`relative h-5 w-9 shrink-0 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]/40 disabled:opacity-50 ${
         checked ? "bg-[var(--admin-primary)]" : "bg-[var(--admin-outline)]"
       }`}
@@ -101,9 +103,7 @@ export function BatchesNewExportDrawer({
   const [batchQuery, setBatchQuery] = useState("");
   const [batchOptions, setBatchOptions] = useState<BatchListItem[]>([]);
   const [batchesLoading, setBatchesLoading] = useState(false);
-  const [selectedBatches, setSelectedBatches] = useState<
-    Array<{ id: string; name: string }>
-  >([]);
+  const [selectedBatches, setSelectedBatches] = useState<Array<{ id: string; name: string }>>([]);
   const [allActiveBatches, setAllActiveBatches] = useState(false);
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
@@ -131,7 +131,9 @@ export function BatchesNewExportDrawer({
       if (event.key === "Escape") onClose();
     };
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+    };
   }, [open, onClose]);
 
   useEffect(() => {
@@ -145,9 +147,7 @@ export function BatchesNewExportDrawer({
     setDateTo("");
     setSelected(
       new Set(
-        summaryColumns
-          .filter((column) => column.defaultSelected)
-          .map((column) => column.key),
+        summaryColumns.filter((column) => column.defaultSelected).map((column) => column.key),
       ),
     );
     setUseCurrentFilters(true);
@@ -361,7 +361,9 @@ export function BatchesNewExportDrawer({
                   <button
                     key={option.value}
                     type="button"
-                    onClick={() => setDataset(option.value)}
+                    onClick={() => {
+                      setDataset(option.value);
+                    }}
                     className={`rounded-sm border px-3 py-2 text-sm font-medium transition-colors ${
                       dataset === option.value
                         ? "border-[var(--admin-primary)] bg-[color-mix(in_srgb,var(--admin-primary)_12%,var(--admin-surface))] text-[var(--admin-primary)]"
@@ -409,7 +411,9 @@ export function BatchesNewExportDrawer({
                             type="button"
                             aria-label={`Remove ${batch.name}`}
                             className="text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-danger)]"
-                            onClick={() => removeBatch(batch.id)}
+                            onClick={() => {
+                              removeBatch(batch.id);
+                            }}
                           >
                             <X className="h-3.5 w-3.5" aria-hidden="true" />
                           </button>
@@ -423,7 +427,9 @@ export function BatchesNewExportDrawer({
                       />
                       <input
                         value={batchQuery}
-                        onChange={(event) => setBatchQuery(event.target.value)}
+                        onChange={(event) => {
+                          setBatchQuery(event.target.value);
+                        }}
                         placeholder="Search batches…"
                         className="h-9 w-full rounded-sm border-none bg-transparent pr-3 pl-8 text-sm text-[var(--admin-on-surface)] outline-none"
                       />
@@ -441,7 +447,9 @@ export function BatchesNewExportDrawer({
                               <button
                                 type="button"
                                 disabled={already}
-                                onClick={() => addBatch(batch)}
+                                onClick={() => {
+                                  addBatch(batch);
+                                }}
                                 className="flex w-full items-center justify-between rounded-sm px-2 py-2 text-left text-sm text-[var(--admin-on-surface)] hover:bg-[var(--admin-surface-high)] disabled:opacity-50"
                               >
                                 <span className="truncate">{batch.name}</span>
@@ -470,7 +478,9 @@ export function BatchesNewExportDrawer({
                   <input
                     type="date"
                     value={dateFrom}
-                    onChange={(event) => setDateFrom(event.target.value)}
+                    onChange={(event) => {
+                      setDateFrom(event.target.value);
+                    }}
                     className="h-10 rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-3 font-mono text-[13px] text-[var(--admin-on-surface)] outline-none focus:border-[var(--admin-primary)]"
                   />
                 </label>
@@ -481,7 +491,9 @@ export function BatchesNewExportDrawer({
                   <input
                     type="date"
                     value={dateTo}
-                    onChange={(event) => setDateTo(event.target.value)}
+                    onChange={(event) => {
+                      setDateTo(event.target.value);
+                    }}
                     className="h-10 rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-3 font-mono text-[13px] text-[var(--admin-on-surface)] outline-none focus:border-[var(--admin-primary)]"
                   />
                 </label>
@@ -496,7 +508,9 @@ export function BatchesNewExportDrawer({
               <button
                 type="button"
                 className="text-sm text-[var(--admin-primary)] hover:underline"
-                onClick={() => setSelected(new Set(columns.map((column) => column.key)))}
+                onClick={() => {
+                  setSelected(new Set(columns.map((column) => column.key)));
+                }}
               >
                 Select all
               </button>
@@ -512,15 +526,15 @@ export function BatchesNewExportDrawer({
                 <label
                   key={column.key}
                   className="group flex cursor-pointer items-start justify-between gap-3"
-                  title={
-                    column.key === "email" ? "Contains learner personal data" : undefined
-                  }
+                  title={column.key === "email" ? "Contains learner personal data" : undefined}
                 >
                   <span className="flex items-center gap-3">
                     <input
                       type="checkbox"
                       checked={selected.has(column.key)}
-                      onChange={() => toggleColumn(column.key)}
+                      onChange={() => {
+                        toggleColumn(column.key);
+                      }}
                       className="h-4 w-4 rounded-sm border-[var(--admin-outline)] text-[var(--admin-primary)] focus:ring-[var(--admin-primary)]"
                     />
                     <span className="text-sm text-[var(--admin-on-surface)] group-hover:text-[var(--admin-primary)]">
@@ -569,7 +583,9 @@ export function BatchesNewExportDrawer({
           </section>
 
           <section>
-            <h3 className="mb-4 text-base font-semibold text-[var(--admin-on-surface)]">Grouping</h3>
+            <h3 className="mb-4 text-base font-semibold text-[var(--admin-on-surface)]">
+              Grouping
+            </h3>
             <div className="space-y-3 rounded-sm border border-[var(--admin-border)] p-4">
               <label className="flex flex-col gap-2">
                 <span className="text-[12px] font-semibold tracking-[0.06em] text-[var(--admin-on-surface-variant)] uppercase">
@@ -593,7 +609,9 @@ export function BatchesNewExportDrawer({
                   type="checkbox"
                   checked={includeSubtotals}
                   disabled={grouping === "none"}
-                  onChange={(event) => setIncludeSubtotals(event.target.checked)}
+                  onChange={(event) => {
+                    setIncludeSubtotals(event.target.checked);
+                  }}
                   className="h-4 w-4 rounded-sm border-[var(--admin-outline)] text-[var(--admin-primary)] focus:ring-[var(--admin-primary)] disabled:cursor-not-allowed"
                 />
                 <span className="text-sm text-[var(--admin-on-surface)]">
@@ -610,7 +628,9 @@ export function BatchesNewExportDrawer({
                 <button
                   key={value}
                   type="button"
-                  onClick={() => setFormat(value)}
+                  onClick={() => {
+                    setFormat(value);
+                  }}
                   className={`rounded-sm px-5 py-2 text-[12px] font-semibold tracking-[0.06em] uppercase transition-all ${
                     format === value
                       ? "bg-[var(--admin-surface)] text-[var(--admin-primary)] shadow-sm"
@@ -624,7 +644,9 @@ export function BatchesNewExportDrawer({
           </section>
 
           <section>
-            <h3 className="mb-4 text-base font-semibold text-[var(--admin-on-surface)]">Delivery</h3>
+            <h3 className="mb-4 text-base font-semibold text-[var(--admin-on-surface)]">
+              Delivery
+            </h3>
             <div className="space-y-3">
               {(
                 [
@@ -638,7 +660,9 @@ export function BatchesNewExportDrawer({
                     type="radio"
                     name="batches-export-delivery"
                     checked={delivery === value}
-                    onChange={() => setDelivery(value)}
+                    onChange={() => {
+                      setDelivery(value);
+                    }}
                     className="h-4 w-4 border-[var(--admin-outline)] text-[var(--admin-primary)] focus:ring-[var(--admin-primary)]"
                   />
                   <span className="text-sm text-[var(--admin-on-surface)]">{label}</span>
@@ -660,9 +684,9 @@ export function BatchesNewExportDrawer({
                           <button
                             type="button"
                             className="ml-2 text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-danger)]"
-                            onClick={() =>
-                              setRecipients((current) => current.filter((item) => item !== email))
-                            }
+                            onClick={() => {
+                              setRecipients((current) => current.filter((item) => item !== email));
+                            }}
                           >
                             <X className="h-3.5 w-3.5" aria-hidden="true" />
                           </button>
@@ -670,7 +694,9 @@ export function BatchesNewExportDrawer({
                       ))}
                       <input
                         value={recipientInput}
-                        onChange={(event) => setRecipientInput(event.target.value)}
+                        onChange={(event) => {
+                          setRecipientInput(event.target.value);
+                        }}
                         onKeyDown={(event) => {
                           if (event.key === "Enter") {
                             event.preventDefault();
@@ -690,7 +716,9 @@ export function BatchesNewExportDrawer({
                       </label>
                       <input
                         value={webhookUrl}
-                        onChange={(event) => setWebhookUrl(event.target.value)}
+                        onChange={(event) => {
+                          setWebhookUrl(event.target.value);
+                        }}
                         placeholder="https://"
                         className="h-10 w-full rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-3 font-mono text-[13px] text-[var(--admin-on-surface)] outline-none focus:border-[var(--admin-primary)]"
                       />
@@ -724,7 +752,9 @@ export function BatchesNewExportDrawer({
                     </span>
                     <Select
                       value={cadence}
-                      onValueChange={(value) => setCadence(value as BatchExportCadence)}
+                      onValueChange={(value) => {
+                        setCadence(value as BatchExportCadence);
+                      }}
                       options={[
                         { value: "daily", label: "Daily" },
                         { value: "weekly", label: "Weekly" },
@@ -740,7 +770,9 @@ export function BatchesNewExportDrawer({
                     <input
                       type="time"
                       value={time}
-                      onChange={(event) => setTime(event.target.value)}
+                      onChange={(event) => {
+                        setTime(event.target.value);
+                      }}
                       className="h-10 rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-3 font-mono text-[13px] text-[var(--admin-on-surface)] outline-none focus:border-[var(--admin-primary)]"
                     />
                   </label>
@@ -767,7 +799,10 @@ export function BatchesNewExportDrawer({
           ) : null}
 
           <div className="flex items-start gap-2 rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-4 py-3 text-sm text-[var(--admin-on-surface-variant)]">
-            <Info className="mt-0.5 h-4 w-4 shrink-0 text-[var(--admin-primary)]" aria-hidden="true" />
+            <Info
+              className="mt-0.5 h-4 w-4 shrink-0 text-[var(--admin-primary)]"
+              aria-hidden="true"
+            />
             <span>{capabilities.note}</span>
           </div>
 

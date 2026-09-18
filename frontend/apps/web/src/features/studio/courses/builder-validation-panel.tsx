@@ -3,11 +3,7 @@
 import { Check, Info, Play, Rocket, ShieldCheck } from "lucide-react";
 import type { z } from "zod";
 import type { studioCourseDetailSchema } from "@atlas/contracts/courses/course-authoring-schemas";
-import {
-  builderHelperClassName,
-  primaryButtonClassName,
-  statusBannerClassName,
-} from "./course-builder-shared";
+import { builderHelperClassName, statusBannerClassName } from "./course-builder-shared";
 
 type CourseDetail = z.infer<typeof studioCourseDetailSchema>;
 
@@ -137,7 +133,10 @@ export function BuilderValidationPanel({
           <div className="mt-6 space-y-3">
             {ready ? (
               <div className="flex items-center gap-3 rounded-lg border border-[var(--admin-success)]/30 bg-[var(--admin-success)]/10 px-3 py-2.5">
-                <ShieldCheck className="h-5 w-5 shrink-0 text-[var(--admin-success)]" aria-hidden="true" />
+                <ShieldCheck
+                  className="h-5 w-5 shrink-0 text-[var(--admin-success)]"
+                  aria-hidden="true"
+                />
                 <span className="text-xs font-bold text-[var(--admin-success)]">
                   Ready to submit for review
                 </span>

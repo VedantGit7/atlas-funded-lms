@@ -13,11 +13,7 @@ type ServiceCtx = {
   requestId: string;
 };
 
-export async function exportResourceUsageRoster(
-  tx: TenantTx,
-  ctx: ServiceCtx,
-  rawBody: unknown,
-) {
+export async function exportResourceUsageRoster(tx: TenantTx, ctx: ServiceCtx, rawBody: unknown) {
   const body = exportResourceUsageRosterBodySchema.parse(rawBody);
   const params: Record<string, unknown> = {
     reportTab: body.reportTab,
@@ -35,10 +31,7 @@ export async function exportResourceUsageRoster(
   let emailed = false;
   if (body.emailDownloadLink) {
     const provider = getEmailProvider();
-    const adminEmail = await notificationRepository.findMembershipEmail(
-      tx,
-      ctx.actorMembershipId,
-    );
+    const adminEmail = await notificationRepository.findMembershipEmail(tx, ctx.actorMembershipId);
     if (provider.isConfigured() && adminEmail) {
       await provider.send({
         to: adminEmail,

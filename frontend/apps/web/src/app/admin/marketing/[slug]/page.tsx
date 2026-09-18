@@ -1,10 +1,7 @@
 import { notFound } from "next/navigation";
 import { AdminPageGate } from "../../../../components/patterns/AdminPageGate";
 import { AdminGrowSectionPage } from "../../../../features/admin/grow/AdminGrowSectionPage";
-import {
-  getAdminMarketingSection,
-  type AdminMarketingSlug,
-} from "../../../../features/admin/grow/admin-marketing-catalog";
+import { getAdminMarketingSection } from "../../../../features/admin/grow/admin-marketing-catalog";
 import { runTenantStateGate } from "../../../../lib/server/tenant-state-gate";
 
 type AdminMarketingSlugPageProps = {
@@ -32,7 +29,7 @@ export default async function AdminMarketingSlugPage({ params }: AdminMarketingS
 
   return (
     <AdminPageGate screenId="T68" state="ready" title={section.title}>
-      <AdminGrowSectionPage kind="marketing" slug={section.slug as AdminMarketingSlug} />
+      <AdminGrowSectionPage kind="marketing" slug={section.slug} />
     </AdminPageGate>
   );
 }

@@ -1,9 +1,6 @@
 import type { z } from "zod";
 import { createTenantRoute } from "@atlas/api";
-import {
-  connectZoomBodySchema,
-  connectZoomResponseSchema,
-} from "@atlas/domain/zoom/zoom.dto";
+import { connectZoomBodySchema, connectZoomResponseSchema } from "@atlas/domain/zoom/zoom.dto";
 import { connectZoomMetadata } from "@atlas/domain/zoom/zoom.route-metadata";
 import { connectZoom } from "@atlas/domain/zoom/zoom.service";
 

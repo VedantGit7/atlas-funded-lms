@@ -588,10 +588,7 @@ export const localeRepository = {
     return inserted;
   },
 
-  async getLatestQaCheckRun(
-    tx: TenantTx,
-    tenantId: string,
-  ): Promise<LocaleQaCheckRunRow | null> {
+  async getLatestQaCheckRun(tx: TenantTx, tenantId: string): Promise<LocaleQaCheckRunRow | null> {
     const rows = await tx.$queryRaw<LocaleQaCheckRunRow[]>`
       select
         id::text,

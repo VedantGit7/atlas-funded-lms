@@ -71,7 +71,8 @@ function buildServerParams(filters: CourseFilterValues): URLSearchParams {
 const chipBase =
   "flex items-center gap-2 whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition-colors";
 const chipActive = "bg-primary text-primary-foreground shadow-sm";
-const chipIdle = "border border-border text-muted-foreground hover:border-primary hover:text-primary";
+const chipIdle =
+  "border border-border text-muted-foreground hover:border-primary hover:text-primary";
 
 export function CourseCatalog({ initialItems, pageInfo, initialFilters }: CourseCatalogProps) {
   const router = useRouter();
@@ -123,7 +124,9 @@ export function CourseCatalog({ initialItems, pageInfo, initialFilters }: Course
   }
 
   function pushFilters(
-    patch: Partial<Record<"q" | "stage" | "dimension" | "persona" | "certificate" | "sort", string | undefined>>,
+    patch: Partial<
+      Record<"q" | "stage" | "dimension" | "persona" | "certificate" | "sort", string | undefined>
+    >,
   ) {
     const params = buildServerParams(initialFilters);
     for (const [key, value] of Object.entries(patch)) {
@@ -183,7 +186,11 @@ export function CourseCatalog({ initialItems, pageInfo, initialFilters }: Course
   }, [items, refine, category, level, price, duration]);
 
   const popular = useMemo(
-    () => [...items].filter((c) => c.studentCount > 0).sort((a, b) => b.studentCount - a.studentCount).slice(0, 6),
+    () =>
+      [...items]
+        .filter((c) => c.studentCount > 0)
+        .sort((a, b) => b.studentCount - a.studentCount)
+        .slice(0, 6),
     [items],
   );
 
@@ -207,7 +214,9 @@ export function CourseCatalog({ initialItems, pageInfo, initialFilters }: Course
           style={{ background: "color-mix(in srgb, var(--primary) 30%, transparent)" }}
         />
         <div className="relative mx-auto max-w-2xl">
-          <h1 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">Find your next course</h1>
+          <h1 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
+            Find your next course
+          </h1>
           <p className="mt-2 text-sm text-muted-foreground">
             Build real financial skills with courses from your academy.
           </p>
@@ -281,7 +290,9 @@ export function CourseCatalog({ initialItems, pageInfo, initialFilters }: Course
           <div className="mb-4 flex items-end justify-between gap-4">
             <div>
               <h2 className="text-xl font-bold tracking-tight text-foreground">Featured courses</h2>
-              <p className="mt-0.5 text-sm text-muted-foreground">Handpicked to help you level up faster.</p>
+              <p className="mt-0.5 text-sm text-muted-foreground">
+                Handpicked to help you level up faster.
+              </p>
             </div>
             <div className="hidden gap-2 sm:flex">
               <button
@@ -312,7 +323,11 @@ export function CourseCatalog({ initialItems, pageInfo, initialFilters }: Course
           >
             {featured.map((course) => (
               <div key={course.id} className="w-[340px] shrink-0 snap-start">
-                <CourseCard course={course} wishlisted={wishlist.has(course.id)} onToggleWishlist={toggleWishlist} />
+                <CourseCard
+                  course={course}
+                  wishlisted={wishlist.has(course.id)}
+                  onToggleWishlist={toggleWishlist}
+                />
               </div>
             ))}
           </div>
@@ -323,7 +338,10 @@ export function CourseCatalog({ initialItems, pageInfo, initialFilters }: Course
       <div className="sticky top-16 z-30 -mx-4 flex flex-wrap items-center justify-between gap-3 border-y border-border bg-background/85 px-4 py-3 backdrop-blur md:-mx-8 md:px-8">
         <div className="flex flex-wrap items-center gap-2">
           <div className="relative">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+            <Search
+              className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+              aria-hidden="true"
+            />
             <input
               type="search"
               value={refine}
@@ -337,13 +355,20 @@ export function CourseCatalog({ initialItems, pageInfo, initialFilters }: Course
           </div>
           <FacetGroup label="Level" options={LEVEL_FACETS} value={level} onChange={setLevel} />
           <FacetGroup label="Price" options={PRICE_FACETS} value={price} onChange={setPrice} />
-          <FacetGroup label="Duration" options={DURATION_FACETS} value={duration} onChange={setDuration} />
+          <FacetGroup
+            label="Duration"
+            options={DURATION_FACETS}
+            value={duration}
+            onChange={setDuration}
+          />
           <button
             type="button"
             role="switch"
             aria-checked={initialFilters.certificate === "true"}
             onClick={() => {
-              pushFilters({ certificate: initialFilters.certificate === "true" ? undefined : "true" });
+              pushFilters({
+                certificate: initialFilters.certificate === "true" ? undefined : "true",
+              });
             }}
             className="flex items-center gap-2 rounded-full border border-border py-1.5 pl-3 pr-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
           >
@@ -389,12 +414,19 @@ export function CourseCatalog({ initialItems, pageInfo, initialFilters }: Course
             <Search className="h-6 w-6" aria-hidden="true" />
           </span>
           <p className="mt-3 text-sm font-bold text-foreground">No courses match these filters</p>
-          <p className="mt-1 text-sm text-muted-foreground">Try clearing a filter or searching for something else.</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Try clearing a filter or searching for something else.
+          </p>
         </div>
       ) : (
         <section className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {visible.map((course) => (
-            <CourseCard key={course.id} course={course} wishlisted={wishlist.has(course.id)} onToggleWishlist={toggleWishlist} />
+            <CourseCard
+              key={course.id}
+              course={course}
+              wishlisted={wishlist.has(course.id)}
+              onToggleWishlist={toggleWishlist}
+            />
           ))}
         </section>
       )}
@@ -411,7 +443,9 @@ export function CourseCatalog({ initialItems, pageInfo, initialFilters }: Course
             {loadingMore ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : null}
             {loadingMore ? "Loading..." : "Load more"}
           </button>
-          <p className="text-sm text-muted-foreground">Showing {items.length.toLocaleString()} courses</p>
+          <p className="text-sm text-muted-foreground">
+            Showing {items.length.toLocaleString()} courses
+          </p>
         </div>
       ) : null}
 
@@ -426,7 +460,11 @@ export function CourseCatalog({ initialItems, pageInfo, initialFilters }: Course
           </div>
           <div className="-mx-1 flex gap-5 overflow-x-auto px-1 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {popular.map((course) => (
-              <Link key={course.id} href={`/courses/${course.id}`} className="group flex w-[280px] shrink-0 flex-col">
+              <Link
+                key={course.id}
+                href={`/courses/${course.id}`}
+                className="group flex w-[280px] shrink-0 flex-col"
+              >
                 <span className="mb-1 text-[11px] font-semibold text-muted-foreground">
                   {course.studentCount.toLocaleString()} learners enrolled
                 </span>
@@ -437,7 +475,9 @@ export function CourseCatalog({ initialItems, pageInfo, initialFilters }: Course
                   className="aspect-[4/3] rounded-2xl border border-border"
                   iconClassName="h-10 w-10"
                 />
-                <h3 className="mt-2 line-clamp-1 text-sm font-bold text-foreground">{course.title}</h3>
+                <h3 className="mt-2 line-clamp-1 text-sm font-bold text-foreground">
+                  {course.title}
+                </h3>
                 <span className="mt-1 inline-flex items-center gap-1 text-sm font-semibold text-primary transition-all group-hover:gap-2">
                   View course
                   <ArrowRight className="h-4 w-4" aria-hidden="true" />

@@ -3,25 +3,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  Inter,
-  Playfair_Display,
-  JetBrains_Mono,
-} from "next/font/google";
-import {
-  Search,
-  Plus,
-  User,
-  BookOpen,
-  Pencil,
-  Copy,
-  Trash2,
-  Menu,
-  X,
-  ChevronLeft,
-} from "lucide-react";
+import { Inter, Playfair_Display, JetBrains_Mono } from "next/font/google";
+import { Search, User, BookOpen, Pencil, Copy, Trash2, Menu, X, ChevronLeft } from "lucide-react";
 import type { CertificateDesignDocument } from "@atlas/contracts/certificates/certificate-design-document";
-import { FUNDED_BEYOND_LOGO_URL } from "../../../lib/brand";
+import { TenantBrandMark } from "../../../components/patterns/TenantBrandMark";
 import { ClientApiError } from "../../../lib/api/errors";
 import { clientApi } from "../../../lib/client-api";
 import {
@@ -95,9 +80,11 @@ type CertificateStudioHomeProps = {
 
 const GALLERY_CHIPS = GALLERY_CATEGORY_CHIPS;
 
+// No logo here: a shared default put tenant #1's monogram in every academy's
+// brand kit. `TenantBrandMark` renders the tenant's own initials instead.
 const DEFAULT_BRAND: BrandKitSummary = {
-  name: "FundedBeyond Brand Kit",
-  logoUrl: FUNDED_BEYOND_LOGO_URL,
+  name: "Default brand kit",
+  logoUrl: null,
   colors: [
     { name: "Teal", hex: "#10D9A3" },
     { name: "Blue", hex: "#2E6BFF" },
@@ -125,19 +112,22 @@ function pageLabelFromDoc(doc: CertificateDesignDocument | undefined): string {
   return `${width}x${height}${unit}`;
 }
 
-function inferPreviewKind(doc: CertificateDesignDocument | undefined): StarterTemplate["previewKind"] {
+function inferPreviewKind(
+  doc: CertificateDesignDocument | undefined,
+): StarterTemplate["previewKind"] {
   if (!doc) return "classic";
-  const bg = doc.background?.type === "color" ? doc.background.value?.toLowerCase() : "";
+  const bg = doc.background.type === "color" ? doc.background.value.toLowerCase() : "";
   if (bg === "#0f1419") return "branded";
   const texts = doc.elements
     .filter((e) => e.type === "text")
-    .map((e) => ("text" in e ? String(e.text).toLowerCase() : ""));
+    .map((e) => ("text" in e ? e.text.toLowerCase() : ""));
   if (texts.some((t) => t.includes("mastery"))) return "mastery";
   if (texts.some((t) => t.includes("legacy"))) return "legacy";
   if (texts.some((t) => t.includes("completion"))) return "completion";
   if (texts.some((t) => t.includes("participation"))) return "participation";
   if (texts.some((t) => t.includes("excellence"))) return "excellence";
-  if (texts.some((t) => t.includes("recognition") || t.includes("appreciation"))) return "recognition";
+  if (texts.some((t) => t.includes("recognition") || t.includes("appreciation")))
+    return "recognition";
   if (texts.some((t) => t.includes("assessment") || t.includes("skill check"))) return "assessment";
   if (texts.some((t) => t.includes("learning path") || t.includes("track"))) return "path";
   if (texts.some((t) => t.includes("achievement"))) return "achievement";
@@ -191,9 +181,13 @@ export function CertificateStudioHome({ publicName, onOpenStudio }: CertificateS
       const [templates, kitsRes] = await Promise.all([
         listTemplates(),
         clientApi
-          .get<{ data: Array<{ name: string; logoUrl: string | null; colors: Array<{ name: string; hex: string }> }> }>(
-            "/api/v1/certificate-brand-kits",
-          )
+          .get<{
+            data: Array<{
+              name: string;
+              logoUrl: string | null;
+              colors: Array<{ name: string; hex: string }>;
+            }>;
+          }>("/api/v1/certificate-brand-kits")
           .catch(() => null),
       ]);
 
@@ -214,21 +208,16 @@ export function CertificateStudioHome({ publicName, onOpenStudio }: CertificateS
         });
       setRecent(mapped);
 
-      const firstKit = kitsRes?.data?.[0];
+      const firstKit = kitsRes?.data[0];
       if (firstKit) {
         setBrandKit({
           name: firstKit.name || DEFAULT_BRAND.name,
-          logoUrl: firstKit.logoUrl || FUNDED_BEYOND_LOGO_URL,
-          colors:
-            firstKit.colors.length > 0
-              ? firstKit.colors.slice(0, 3)
-              : DEFAULT_BRAND.colors,
+          logoUrl: firstKit.logoUrl || null,
+          colors: firstKit.colors.length > 0 ? firstKit.colors.slice(0, 3) : DEFAULT_BRAND.colors,
         });
       }
     } catch (e) {
-      setError(
-        e instanceof ClientApiError ? e.message : "Failed to load studio designs.",
-      );
+      setError(e instanceof ClientApiError ? e.message : "Failed to load studio designs.");
     } finally {
       setLoading(false);
     }
@@ -324,10 +313,7 @@ export function CertificateStudioHome({ publicName, onOpenStudio }: CertificateS
   );
 
   return (
-    <div
-      className={`cert-home ${fontClass}`}
-      style={{ fontFamily: "var(--ch-font-sans)" }}
-    >
+    <div className={`cert-home ${fontClass}`} style={{ fontFamily: "var(--ch-font-sans)" }}>
       <header className="cert-home__topbar">
         <div className="cert-home__topbar-left">
           <button
@@ -335,7 +321,9 @@ export function CertificateStudioHome({ publicName, onOpenStudio }: CertificateS
             className="cert-home__menu-btn"
             aria-label={sidebarOpen ? "Close navigation" : "Open navigation"}
             aria-expanded={sidebarOpen}
-            onClick={() => setSidebarOpen((o) => !o)}
+            onClick={() => {
+              setSidebarOpen((o) => !o);
+            }}
           >
             {sidebarOpen ? <X size={18} strokeWidth={2} /> : <Menu size={18} strokeWidth={2} />}
           </button>
@@ -348,7 +336,9 @@ export function CertificateStudioHome({ publicName, onOpenStudio }: CertificateS
               type="search"
               placeholder="Search templates..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => {
+                setSearch(e.target.value);
+              }}
             />
           </label>
         </div>
@@ -374,7 +364,9 @@ export function CertificateStudioHome({ publicName, onOpenStudio }: CertificateS
       <div
         className="cert-home__backdrop"
         data-open={sidebarOpen ? "true" : "false"}
-        onClick={() => setSidebarOpen(false)}
+        onClick={() => {
+          setSidebarOpen(false);
+        }}
         aria-hidden
       />
 
@@ -399,7 +391,9 @@ export function CertificateStudioHome({ publicName, onOpenStudio }: CertificateS
                 href={item.href}
                 className="cert-home__nav-link"
                 data-active={active ? "true" : "false"}
-                onClick={() => setSidebarOpen(false)}
+                onClick={() => {
+                  setSidebarOpen(false);
+                }}
               >
                 <Icon size={20} strokeWidth={1.75} aria-hidden />
                 <span>{item.label}</span>
@@ -421,11 +415,7 @@ export function CertificateStudioHome({ publicName, onOpenStudio }: CertificateS
             ))}
           </div>
           <div className="cert-home__logo-well">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={brandKit.logoUrl ?? FUNDED_BEYOND_LOGO_URL}
-              alt={`${publicName} logo`}
-            />
+            <TenantBrandMark logoUrl={brandKit.logoUrl} name={publicName} size={64} />
           </div>
         </div>
       </aside>
@@ -449,7 +439,9 @@ export function CertificateStudioHome({ publicName, onOpenStudio }: CertificateS
                 key={starter.id}
                 type="button"
                 className="cert-home__paper-card"
-                onClick={() => openStarter(starter)}
+                onClick={() => {
+                  openStarter(starter);
+                }}
               >
                 <div className="cert-home__paper">
                   <StudioDocPreview document={starter.document} />
@@ -505,7 +497,9 @@ export function CertificateStudioHome({ publicName, onOpenStudio }: CertificateS
                         className="cert-home__icon-btn cert-home__icon-btn--primary"
                         aria-label={`Edit ${item.name}`}
                         disabled={busyId === item.id}
-                        onClick={() => openRecent(item)}
+                        onClick={() => {
+                          openRecent(item);
+                        }}
                       >
                         <Pencil size={18} strokeWidth={2} aria-hidden />
                       </button>
@@ -560,7 +554,9 @@ export function CertificateStudioHome({ publicName, onOpenStudio }: CertificateS
                   aria-selected={galleryFilter === chip.id}
                   className="cert-home__chip"
                   data-active={galleryFilter === chip.id ? "true" : "false"}
-                  onClick={() => setGalleryFilter(chip.id)}
+                  onClick={() => {
+                    setGalleryFilter(chip.id);
+                  }}
                 >
                   {chip.label}
                 </button>
@@ -574,7 +570,9 @@ export function CertificateStudioHome({ publicName, onOpenStudio }: CertificateS
                 type="button"
                 className="cert-home__paper-card"
                 data-gallery="true"
-                onClick={() => openStarter(starter)}
+                onClick={() => {
+                  openStarter(starter);
+                }}
               >
                 <div className="cert-home__paper">
                   <StudioDocPreview document={starter.document} />

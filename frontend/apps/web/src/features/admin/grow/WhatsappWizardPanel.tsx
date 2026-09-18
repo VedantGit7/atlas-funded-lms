@@ -25,6 +25,7 @@ import {
   type TemplateDto,
   type WizardStep,
 } from "./whatsapp-shared";
+import { cancellationFlag } from "@/lib/effect-cancellation";
 
 type CampaignResponse = { data: CampaignDto };
 type RecipientsResponse = {
@@ -72,54 +73,51 @@ export function WhatsappWizardPanel({ campaignId }: WhatsappWizardPanelProps) {
   const [deleteConfirm, setDeleteConfirm] = useState("");
   const [settingsTitle, setSettingsTitle] = useState("");
 
-  const hydrateFromCampaign = useCallback(
-    (next: CampaignDto, options?: { keepStep?: boolean }) => {
-      setCampaign(next);
-      setTitle(next.title);
-      setSettingsTitle(next.title);
-      if (next.audienceType) setAudienceType(next.audienceType);
-      if (next.audienceBatchId) setBatchId(next.audienceBatchId);
-      if (next.templateId) setSelectedTemplateId(next.templateId);
-      if (next.scheduledAt) {
-        const date = new Date(next.scheduledAt);
-        if (!Number.isNaN(date.getTime())) {
-          const pad = (n: number) => String(n).padStart(2, "0");
-          setScheduleLocal(
-            `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`,
-          );
-        }
+  const hydrateFromCampaign = useCallback((next: CampaignDto, options?: { keepStep?: boolean }) => {
+    setCampaign(next);
+    setTitle(next.title);
+    setSettingsTitle(next.title);
+    if (next.audienceType) setAudienceType(next.audienceType);
+    if (next.audienceBatchId) setBatchId(next.audienceBatchId);
+    if (next.templateId) setSelectedTemplateId(next.templateId);
+    if (next.scheduledAt) {
+      const date = new Date(next.scheduledAt);
+      if (!Number.isNaN(date.getTime())) {
+        const pad = (n: number) => String(n).padStart(2, "0");
+        setScheduleLocal(
+          `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`,
+        );
       }
-      if (!options?.keepStep) {
-        setStep(resolveWizardStep(next));
-      }
-    },
-    [],
-  );
+    }
+    if (!options?.keepStep) {
+      setStep(resolveWizardStep(next));
+    }
+  }, []);
 
   useEffect(() => {
     if (!campaignId) return;
-    let cancelled = false;
+    const effect = cancellationFlag();
     setLoading(true);
     void (async () => {
       try {
         const response = await clientApi.get<CampaignResponse>(
           `/api/v1/marketing/whatsapp/campaigns/${campaignId}`,
         );
-        if (cancelled) return;
+        if (effect.isCancelled()) return;
         hydrateFromCampaign(response.data);
       } catch (caught) {
-        if (!cancelled) {
+        if (!effect.isCancelled()) {
           toast.error(
             caught instanceof ClientApiError ? caught.message : "Could not load WhatsApp campaign.",
           );
           router.replace(WHATSAPP_LIST_HREF);
         }
       } finally {
-        if (!cancelled) setLoading(false);
+        if (!effect.isCancelled()) setLoading(false);
       }
     })();
     return () => {
-      cancelled = true;
+      effect.cancel();
     };
   }, [campaignId, hydrateFromCampaign, router]);
 
@@ -148,9 +146,7 @@ export function WhatsappWizardPanel({ campaignId }: WhatsappWizardPanelProps) {
   }
 
   async function loadTemplates() {
-    const response = await clientApi.get<TemplatesResponse>(
-      "/api/v1/marketing/whatsapp/templates",
-    );
+    const response = await clientApi.get<TemplatesResponse>("/api/v1/marketing/whatsapp/templates");
     setTemplates(response.data.items.filter((item) => item.status === "APPROVED"));
   }
 
@@ -209,9 +205,7 @@ export function WhatsappWizardPanel({ campaignId }: WhatsappWizardPanelProps) {
       await loadRecipients(response.data.id);
       setStep("recipients");
     } catch (caught) {
-      toast.error(
-        caught instanceof ClientApiError ? caught.message : "Could not save recipients.",
-      );
+      toast.error(caught instanceof ClientApiError ? caught.message : "Could not save recipients.");
     } finally {
       setBusy(false);
     }
@@ -227,9 +221,7 @@ export function WhatsappWizardPanel({ campaignId }: WhatsappWizardPanelProps) {
       await loadTemplates();
       setStep("template");
     } catch (caught) {
-      toast.error(
-        caught instanceof ClientApiError ? caught.message : "Could not load templates.",
-      );
+      toast.error(caught instanceof ClientApiError ? caught.message : "Could not load templates.");
     } finally {
       setBusy(false);
     }
@@ -252,9 +244,7 @@ export function WhatsappWizardPanel({ campaignId }: WhatsappWizardPanelProps) {
       hydrateFromCampaign(response.data);
       setStep("delivery");
     } catch (caught) {
-      toast.error(
-        caught instanceof ClientApiError ? caught.message : "Could not save template.",
-      );
+      toast.error(caught instanceof ClientApiError ? caught.message : "Could not save template.");
     } finally {
       setBusy(false);
     }
@@ -370,7 +360,11 @@ export function WhatsappWizardPanel({ campaignId }: WhatsappWizardPanelProps) {
   if (loading) {
     return (
       <div className="space-y-4">
-        <Link href={WHATSAPP_LIST_HREF} prefetch={false} className={generalSettingsBackLinkClassName}>
+        <Link
+          href={WHATSAPP_LIST_HREF}
+          prefetch={false}
+          className={generalSettingsBackLinkClassName}
+        >
           <ChevronLeft className="h-4 w-4" aria-hidden="true" />
           Back
         </Link>

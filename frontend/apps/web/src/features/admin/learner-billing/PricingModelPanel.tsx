@@ -63,11 +63,31 @@ const SETUP_STEP_DEFS: ReadonlyArray<{
   icon: LucideIcon;
   href: string;
 }> = [
-  { key: "home_currency", label: "Home Currency", icon: Coins, href: "/admin/learner-billing/home-currency" },
-  { key: "payment_gateway", label: "Payment Gateway", icon: Landmark, href: "/admin/learner-billing/payment-gateway" },
+  {
+    key: "home_currency",
+    label: "Home Currency",
+    icon: Coins,
+    href: "/admin/learner-billing/home-currency",
+  },
+  {
+    key: "payment_gateway",
+    label: "Payment Gateway",
+    icon: Landmark,
+    href: "/admin/learner-billing/payment-gateway",
+  },
   { key: "gst", label: "Tax / GST", icon: ReceiptText, href: "/admin/learner-billing/gst" },
-  { key: "invoice", label: "Invoice Configuration", icon: FileText, href: "/admin/learner-billing/invoice-config" },
-  { key: "locations", label: "Billing Locations", icon: MapPin, href: "/admin/learner-billing/locations" },
+  {
+    key: "invoice",
+    label: "Invoice Configuration",
+    icon: FileText,
+    href: "/admin/learner-billing/invoice-config",
+  },
+  {
+    key: "locations",
+    label: "Billing Locations",
+    icon: MapPin,
+    href: "/admin/learner-billing/locations",
+  },
 ];
 
 function labelFor(model: PricingModel | null): string | null {
@@ -254,7 +274,10 @@ export function PricingModelPanel({
           <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--admin-primary)_12%,var(--admin-surface))] text-[var(--admin-primary)]">
             <Check className="h-4 w-4" aria-hidden="true" />
           </span>
-          <h2 id="pricing-setup-heading" className="text-base font-bold text-[var(--admin-on-surface)]">
+          <h2
+            id="pricing-setup-heading"
+            className="text-base font-bold text-[var(--admin-on-surface)]"
+          >
             Complete your setup
           </h2>
         </div>
@@ -278,7 +301,9 @@ export function PricingModelPanel({
                     <StepIcon className="h-4 w-4" aria-hidden="true" />
                   </span>
                   <div>
-                    <p className="text-sm font-semibold text-[var(--admin-on-surface)]">{step.label}</p>
+                    <p className="text-sm font-semibold text-[var(--admin-on-surface)]">
+                      {step.label}
+                    </p>
                     <p className="flex items-center gap-1.5 text-[11px] text-[var(--admin-on-surface-variant)]">
                       <span
                         className={`h-1.5 w-1.5 rounded-full ${status.configured ? "bg-[var(--admin-success)]" : "bg-[var(--admin-warning)]"}`}
@@ -328,7 +353,10 @@ export function PricingModelPanel({
         >
           {saving ? (
             <>
-              <RefreshCw className="h-4 w-4 animate-spin motion-reduce:animate-none" aria-hidden="true" />
+              <RefreshCw
+                className="h-4 w-4 animate-spin motion-reduce:animate-none"
+                aria-hidden="true"
+              />
               Saving
             </>
           ) : (

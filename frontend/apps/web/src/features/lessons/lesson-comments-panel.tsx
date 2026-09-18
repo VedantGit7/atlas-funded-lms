@@ -32,7 +32,7 @@ export function LessonCommentsPanel({ lessonId }: LessonCommentsPanelProps) {
       .then((response) => {
         setComments(response.data.items);
       })
-      .catch((loadError) => {
+      .catch((loadError: unknown) => {
         setComments([]);
         if (loadError instanceof ClientApiError) {
           setError(loadError.message);
@@ -62,7 +62,9 @@ export function LessonCommentsPanel({ lessonId }: LessonCommentsPanelProps) {
       setComments((current) => [...current, response.data]);
       setDraft("");
     } catch (submitError) {
-      setError(submitError instanceof ClientApiError ? submitError.message : "Unable to post comment.");
+      setError(
+        submitError instanceof ClientApiError ? submitError.message : "Unable to post comment.",
+      );
     } finally {
       setSubmitting(false);
     }

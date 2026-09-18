@@ -7,7 +7,7 @@ function instructorTx() {
       .fn()
       .mockResolvedValueOnce([{ key: "assessment.create" }])
       .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([{ role_key: "instructor" }]),
+      .mockResolvedValueOnce([{ role_key: "instructor", bypasses_resource_predicates: false }]),
   };
 }
 
@@ -17,7 +17,7 @@ function learnerAssessmentReadTx() {
       .fn()
       .mockResolvedValueOnce([{ key: "assessment.read" }])
       .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([{ role_key: "learner" }]),
+      .mockResolvedValueOnce([{ role_key: "learner", bypasses_resource_predicates: false }]),
   };
 }
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { SafeHtml } from "@/components/SafeHtml";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -132,33 +133,32 @@ export function MarketingEmailWizardPanel({ campaignId }: MarketingEmailWizardPa
   const [deleteConfirm, setDeleteConfirm] = useState("");
   const [settingsTitle, setSettingsTitle] = useState("");
 
-  const hydrate = useCallback((next: MarketingEmailCampaignDto, options?: { keepStep?: boolean }) => {
-    setCampaign(next);
-    setTitle(next.title);
-    setSettingsTitle(next.title);
-    if (next.audienceType) setAudienceType(next.audienceType);
-    if (next.audienceBatchId) setBatchId(next.audienceBatchId);
-    setSubject(next.subject ?? "");
-    setBodyHtml(next.bodyHtml ?? "");
-    setTemplateKey(next.templateKey);
-    if (next.subject && next.bodyHtml) setPickingTemplate(false);
-    if (next.scheduledAt) {
-      const date = new Date(next.scheduledAt);
-      if (!Number.isNaN(date.getTime())) {
-        const pad = (n: number) => String(n).padStart(2, "0");
-        setScheduleLocal(
-          [
-            String(date.getFullYear()),
-            pad(date.getMonth() + 1),
-            pad(date.getDate()),
-          ].join("-") +
-            `T${pad(date.getHours())}:${pad(date.getMinutes())}`,
-        );
-        setDeliveryMode("schedule");
+  const hydrate = useCallback(
+    (next: MarketingEmailCampaignDto, options?: { keepStep?: boolean }) => {
+      setCampaign(next);
+      setTitle(next.title);
+      setSettingsTitle(next.title);
+      if (next.audienceType) setAudienceType(next.audienceType);
+      if (next.audienceBatchId) setBatchId(next.audienceBatchId);
+      setSubject(next.subject ?? "");
+      setBodyHtml(next.bodyHtml ?? "");
+      setTemplateKey(next.templateKey);
+      if (next.subject && next.bodyHtml) setPickingTemplate(false);
+      if (next.scheduledAt) {
+        const date = new Date(next.scheduledAt);
+        if (!Number.isNaN(date.getTime())) {
+          const pad = (n: number) => String(n).padStart(2, "0");
+          setScheduleLocal(
+            [String(date.getFullYear()), pad(date.getMonth() + 1), pad(date.getDate())].join("-") +
+              `T${pad(date.getHours())}:${pad(date.getMinutes())}`,
+          );
+          setDeliveryMode("schedule");
+        }
       }
-    }
-    if (!options?.keepStep) setStep(resolveEmailWizardStep(next));
-  }, []);
+      if (!options?.keepStep) setStep(resolveEmailWizardStep(next));
+    },
+    [],
+  );
 
   useEffect(() => {
     if (!campaignId) return;
@@ -233,9 +233,7 @@ export function MarketingEmailWizardPanel({ campaignId }: MarketingEmailWizardPa
     let cancelled: boolean = false;
     setEstimateBusy(true);
     void clientApi
-      .get<EstimateResponse>(
-        `/api/v1/marketing/email-campaigns-audience-estimate?audienceType=ALL`,
-      )
+      .get<EstimateResponse>(`/api/v1/marketing/email-campaigns-audience-estimate?audienceType=ALL`)
       .then((response) => {
         if (!cancelled) setAllLearnersEstimate(response.data.totalCount);
       })
@@ -387,9 +385,7 @@ export function MarketingEmailWizardPanel({ campaignId }: MarketingEmailWizardPa
       await loadRecipients(response.data.id);
       setStep("recipients");
     } catch (caught) {
-      toast.error(
-        caught instanceof ClientApiError ? caught.message : "Could not save recipients.",
-      );
+      toast.error(caught instanceof ClientApiError ? caught.message : "Could not save recipients.");
     } finally {
       setBusy(false);
     }
@@ -418,16 +414,12 @@ export function MarketingEmailWizardPanel({ campaignId }: MarketingEmailWizardPa
       );
       setSpamPreview(response.data);
       if (response.data.spamDetected) {
-        toast.error(
-          `Flagged words: ${response.data.spamWords.join(", ") || "spammy phrasing"}.`,
-        );
+        toast.error(`Flagged words: ${response.data.spamWords.join(", ") || "spammy phrasing"}.`);
       } else {
         toast.success("No high-risk spam phrases detected.");
       }
     } catch (caught) {
-      toast.error(
-        caught instanceof ClientApiError ? caught.message : "Could not run spam check.",
-      );
+      toast.error(caught instanceof ClientApiError ? caught.message : "Could not run spam check.");
     } finally {
       setSpamCheckBusy(false);
     }
@@ -655,7 +647,9 @@ export function MarketingEmailWizardPanel({ campaignId }: MarketingEmailWizardPa
         <div className="grid grid-cols-1 gap-6 pt-2 lg:grid-cols-12">
           <MessengerWizardCard className="lg:col-span-8">
             <div className="border-b border-[var(--admin-border)] bg-[var(--admin-surface)] px-6 py-5 sm:px-8">
-              <h2 className="text-lg font-bold text-[var(--admin-on-surface)]">Campaign identity</h2>
+              <h2 className="text-lg font-bold text-[var(--admin-on-surface)]">
+                Campaign identity
+              </h2>
               <p className="mt-1 text-sm text-[var(--admin-on-surface-variant)]">
                 Start by naming your campaign. This name helps you track and organize engagement
                 efforts.
@@ -675,7 +669,10 @@ export function MarketingEmailWizardPanel({ campaignId }: MarketingEmailWizardPa
                   className={MESSENGER_WIZARD_FIELD_CLASS}
                 />
                 <span className="mt-2 flex items-center gap-1.5 text-[13px] text-[var(--admin-on-surface-variant)]">
-                  <Info className="h-4 w-4 shrink-0 text-[var(--admin-primary)]" aria-hidden="true" />
+                  <Info
+                    className="h-4 w-4 shrink-0 text-[var(--admin-primary)]"
+                    aria-hidden="true"
+                  />
                   For your reference only - learners will not see this.
                 </span>
               </label>
@@ -977,10 +974,8 @@ export function MarketingEmailWizardPanel({ campaignId }: MarketingEmailWizardPa
                   </h3>
                   <p className="text-[13px] text-[var(--admin-on-surface-variant)]">
                     Showing first {recipients.length || 0}
-                    {recipientTotal > recipients.length
-                      ? ` of ${String(recipientTotal)}`
-                      : ""} matching
-                    records
+                    {recipientTotal > recipients.length ? ` of ${String(recipientTotal)}` : ""}{" "}
+                    matching records
                   </p>
                 </div>
               </div>
@@ -1107,7 +1102,9 @@ export function MarketingEmailWizardPanel({ campaignId }: MarketingEmailWizardPa
           {pickingTemplate ? (
             <div className="space-y-4">
               <div>
-                <h2 className="text-lg font-bold text-[var(--admin-on-surface)]">Choose a template</h2>
+                <h2 className="text-lg font-bold text-[var(--admin-on-surface)]">
+                  Choose a template
+                </h2>
                 <p className="mt-1 text-sm text-[var(--admin-on-surface-variant)]">
                   Start from a starter layout, then edit the subject and HTML body.
                 </p>
@@ -1358,14 +1355,14 @@ export function MarketingEmailWizardPanel({ campaignId }: MarketingEmailWizardPa
                         {subject.trim() || "Subject line"}
                       </p>
                       <p className="mt-0.5 truncate text-[12px] text-[var(--admin-on-surface-variant)]">
-                        To: locked audience · {formatCompactCount(campaign.recipientCount)} recipients
+                        To: locked audience · {formatCompactCount(campaign.recipientCount)}{" "}
+                        recipients
                       </p>
                     </div>
-                    <div
+                    <SafeHtml
+                      html={bodyHtml.trim()}
+                      fallback="<p>Email body preview appears here.</p>"
                       className="prose prose-sm max-w-none p-5 text-[var(--admin-on-surface)] dark:prose-invert"
-                      dangerouslySetInnerHTML={{
-                        __html: bodyHtml.trim() || "<p>Email body preview appears here.</p>",
-                      }}
                     />
                   </div>
                 </div>
@@ -1379,7 +1376,9 @@ export function MarketingEmailWizardPanel({ campaignId }: MarketingEmailWizardPa
         <div className="space-y-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <h2 className="text-xl font-bold text-[var(--admin-on-surface)]">Campaign delivery</h2>
+              <h2 className="text-xl font-bold text-[var(--admin-on-surface)]">
+                Campaign delivery
+              </h2>
               <p className="mt-1 text-sm text-[var(--admin-on-surface-variant)]">
                 Finalize the schedule and review your campaign before launch.
               </p>
@@ -1456,7 +1455,10 @@ export function MarketingEmailWizardPanel({ campaignId }: MarketingEmailWizardPa
                       ].join(" ")}
                     >
                       <span className="mb-2 flex items-center gap-2 font-bold text-[var(--admin-on-surface)]">
-                        <Layers className="h-4 w-4 text-[var(--admin-primary)]" aria-hidden="true" />
+                        <Layers
+                          className="h-4 w-4 text-[var(--admin-primary)]"
+                          aria-hidden="true"
+                        />
                         Schedule for later
                       </span>
                       <p className="text-[13px] text-[var(--admin-on-surface-variant)]">
@@ -1528,7 +1530,8 @@ export function MarketingEmailWizardPanel({ campaignId }: MarketingEmailWizardPa
                         className="mt-0.5 h-4 w-4 shrink-0 text-[var(--admin-success)]"
                         aria-hidden="true"
                       />
-                      Audience is locked at {formatCompactCount(campaign.recipientCount)} recipients.
+                      Audience is locked at {formatCompactCount(campaign.recipientCount)}{" "}
+                      recipients.
                     </li>
                     <li className="flex items-start gap-2">
                       <Info
@@ -1662,7 +1665,9 @@ export function MarketingEmailWizardPanel({ campaignId }: MarketingEmailWizardPa
               <h2 className="text-base font-bold text-[var(--admin-danger)]">Delete campaign</h2>
               <p className="text-sm text-[var(--admin-on-surface-variant)]">
                 Type{" "}
-                <span className="font-semibold text-[var(--admin-on-surface)]">{campaign.title}</span>{" "}
+                <span className="font-semibold text-[var(--admin-on-surface)]">
+                  {campaign.title}
+                </span>{" "}
                 to confirm. Deleted emails cannot be recovered.
               </p>
               <input

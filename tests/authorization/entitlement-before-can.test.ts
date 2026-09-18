@@ -4,9 +4,23 @@ import type { TenantTx } from "@atlas/db";
 const findActiveEntitlementByKeyMock = vi.fn();
 const canMock = vi.fn();
 
-vi.mock("@atlas/domain-config", () => ({
-  findActiveEntitlementByKey: (...args: unknown[]) => findActiveEntitlementByKeyMock(...args),
-}));
+vi.mock("@atlas/domain-config", async () => {
+  // The gate now reads value_json on every call, so the parse is real here:
+  // mocking it would hide whether `{ enabled: false }` actually denies.
+  const { parseEntitlementValue } = (await vi.importActual(
+    "@atlas/domain-config/schemas/entitlement-value",
+  )) as {
+    parseEntitlementValue: (raw: unknown) => {
+      enabled: boolean;
+      limit: number | null;
+      period: string;
+    };
+  };
+  return {
+    parseEntitlementValue,
+    findActiveEntitlementByKey: (...args: unknown[]) => findActiveEntitlementByKeyMock(...args),
+  };
+});
 
 vi.mock("@atlas/authorization", async (importOriginal) => {
   const actual = await importOriginal<Record<string, unknown>>();

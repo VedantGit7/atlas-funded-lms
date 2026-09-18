@@ -213,7 +213,11 @@ export function PhoneForm() {
     setBusy(true);
     setMessage(null);
     try {
-      await clientApi.post("/api/v1/me/security/phone/verify", { phone, token }, "change-phone-verify");
+      await clientApi.post(
+        "/api/v1/me/security/phone/verify",
+        { phone, token },
+        "change-phone-verify",
+      );
       setStep("start");
       setToken("");
       setMessage("Phone number updated.");

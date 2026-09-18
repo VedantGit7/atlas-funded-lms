@@ -1,7 +1,10 @@
 "use server";
 
 import { PublicLoginRequestSchema } from "@atlas/contracts/domain-identity/schemas/public-auth";
-import { resolvePostAuthRedirect, resolveSafeRedirectPath } from "../../../../lib/auth/safe-redirect";
+import {
+  resolvePostAuthRedirect,
+  resolveSafeRedirectPath,
+} from "../../../../lib/auth/safe-redirect";
 import { GENERIC_LOGIN_ERROR_MESSAGE } from "../../../../lib/auth-messages";
 import { readFormString } from "../../../../lib/server/form";
 import { serverPublicApi } from "../../../../lib/server/public-auth-fetch";

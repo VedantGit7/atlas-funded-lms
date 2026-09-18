@@ -11,7 +11,7 @@ function adminTx() {
       .fn()
       .mockResolvedValueOnce([{ key: "readiness_policy.manage" }])
       .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([{ role_key: "admin" }]),
+      .mockResolvedValueOnce([{ role_key: "admin", bypasses_resource_predicates: true }]),
   };
 }
 
@@ -21,7 +21,7 @@ function learnerReadTx() {
       .fn()
       .mockResolvedValueOnce([{ key: "readiness_policy.read" }])
       .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([{ role_key: "learner" }]),
+      .mockResolvedValueOnce([{ role_key: "learner", bypasses_resource_predicates: false }]),
   };
 }
 

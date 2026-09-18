@@ -18,7 +18,11 @@ export function defaultSampleValueForVariable(name: string): string {
   if (normalized.includes("email")) {
     return "member@example.com";
   }
-  if (normalized.includes("organization") || normalized.includes("academy") || normalized.includes("tenant")) {
+  if (
+    normalized.includes("organization") ||
+    normalized.includes("academy") ||
+    normalized.includes("tenant")
+  ) {
     return "Your organization";
   }
   return `Sample ${name.replace(/_/g, " ")}`;
@@ -30,7 +34,8 @@ export function buildVariableSampleMap(
 ): Record<string, string> {
   const samples: Record<string, string> = {};
   for (const variable of variables) {
-    samples[variable.name] = overrides[variable.name] ?? defaultSampleValueForVariable(variable.name);
+    samples[variable.name] =
+      overrides[variable.name] ?? defaultSampleValueForVariable(variable.name);
   }
   return samples;
 }
@@ -39,7 +44,10 @@ export function renderTemplatePreviewText(
   template: string,
   samples: Readonly<Record<string, string>>,
 ): string {
-  return template.replace(/\{\{(\w+)\}\}/g, (_match, name: string) => samples[name] ?? `{{${name}}}`);
+  return template.replace(
+    /\{\{(\w+)\}\}/g,
+    (_match, name: string) => samples[name] ?? `{{${name}}}`,
+  );
 }
 
 export function renderPreviewParagraphs(body: string): string[] {
@@ -50,11 +58,6 @@ export function renderPreviewParagraphs(body: string): string[] {
 }
 
 export function renderInlinePreviewHtml(text: string): string {
-  const escaped = text
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
-  return escaped
-    .replace(BOLD_PATTERN, "<strong>$1</strong>")
-    .replace(/\n/g, "<br />");
+  const escaped = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  return escaped.replace(BOLD_PATTERN, "<strong>$1</strong>").replace(/\n/g, "<br />");
 }

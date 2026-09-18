@@ -8,7 +8,7 @@ import { assignBatchMemberMetadata } from "@atlas/domain/batches/batches.route-m
 import { assignBatchMember } from "@atlas/domain/batches/batches.service";
 import { z as zod } from "zod";
 
-const paramsSchema = zod.object({ id: zod.string().uuid() });
+const paramsSchema = zod.object({ id: zod.uuid() });
 
 export const POST = createTenantRoute<
   z.output<typeof assignBatchMemberBodySchema>,

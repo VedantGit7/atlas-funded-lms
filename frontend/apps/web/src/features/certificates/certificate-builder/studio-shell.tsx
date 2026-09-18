@@ -135,9 +135,15 @@ function readAutosaveDraft(draftId: string): AutosaveDraft | null {
   try {
     const raw = window.localStorage.getItem(autosaveStorageKey(draftId));
     if (!raw) return null;
-    const parsed = JSON.parse(raw) as AutosaveDraft;
-    if (!parsed || typeof parsed.savedAt !== "number" || !parsed.doc) return null;
-    return parsed;
+    const parsed: unknown = JSON.parse(raw);
+    if (typeof parsed !== "object" || parsed === null) return null;
+    const candidate = parsed as Partial<AutosaveDraft>;
+    if (typeof candidate.savedAt !== "number" || !candidate.doc) return null;
+    return {
+      savedAt: candidate.savedAt,
+      name: typeof candidate.name === "string" ? candidate.name : "",
+      doc: candidate.doc,
+    };
   } catch {
     return null;
   }
@@ -232,7 +238,9 @@ export const CertificateStudioShell = observer(function CertificateStudioShell({
   }>({ open: false, loading: false, html: "", error: null });
 
   const homeStarters = useMemo(() => getHomeStarters(), []);
-  const templateList = showAllTemplates ? STARTER_TEMPLATES : homeStarters.slice(0, HOME_TEMPLATE_PREVIEW_COUNT);
+  const templateList = showAllTemplates
+    ? STARTER_TEMPLATES
+    : homeStarters.slice(0, HOME_TEMPLATE_PREVIEW_COUNT);
   const canViewAllTemplates = STARTER_TEMPLATES.length > HOME_TEMPLATE_PREVIEW_COUNT;
 
   const selectedKit = brandKits.find((kit) => kit.id === selectedKitId) ?? null;
@@ -252,7 +260,6 @@ export const CertificateStudioShell = observer(function CertificateStudioShell({
     if (!isNewer) return;
     store.loadDocument(draft.doc);
     if (draft.name) store.setTemplateName(draft.name);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -289,7 +296,6 @@ export const CertificateStudioShell = observer(function CertificateStudioShell({
       if (timer) clearTimeout(timer);
       dispose();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [draftId, saveStatusProp]);
 
   useEffect(() => {
@@ -535,19 +541,39 @@ export const CertificateStudioShell = observer(function CertificateStudioShell({
             <ul className="cert-studio__help-list">
               <li>
                 <span>Save</span>
-                <kbd>{typeof navigator !== "undefined" && navigator.platform.includes("Mac") ? "⌘" : "Ctrl"}+S</kbd>
+                <kbd>
+                  {typeof navigator !== "undefined" && navigator.platform.includes("Mac")
+                    ? "⌘"
+                    : "Ctrl"}
+                  +S
+                </kbd>
               </li>
               <li>
                 <span>Undo</span>
-                <kbd>{typeof navigator !== "undefined" && navigator.platform.includes("Mac") ? "⌘" : "Ctrl"}+Z</kbd>
+                <kbd>
+                  {typeof navigator !== "undefined" && navigator.platform.includes("Mac")
+                    ? "⌘"
+                    : "Ctrl"}
+                  +Z
+                </kbd>
               </li>
               <li>
                 <span>Redo</span>
-                <kbd>{typeof navigator !== "undefined" && navigator.platform.includes("Mac") ? "⌘" : "Ctrl"}+Shift+Z</kbd>
+                <kbd>
+                  {typeof navigator !== "undefined" && navigator.platform.includes("Mac")
+                    ? "⌘"
+                    : "Ctrl"}
+                  +Shift+Z
+                </kbd>
               </li>
               <li>
                 <span>Duplicate selection</span>
-                <kbd>{typeof navigator !== "undefined" && navigator.platform.includes("Mac") ? "⌘" : "Ctrl"}+D</kbd>
+                <kbd>
+                  {typeof navigator !== "undefined" && navigator.platform.includes("Mac")
+                    ? "⌘"
+                    : "Ctrl"}
+                  +D
+                </kbd>
               </li>
               <li>
                 <span>Delete selection</span>
@@ -611,7 +637,9 @@ export const CertificateStudioShell = observer(function CertificateStudioShell({
               ) : (
                 <CloudOff size={12} strokeWidth={2} aria-hidden="true" />
               )}
-              <span className="cert-studio__label-mono">{syncStatusLabel(effectiveSaveStatus)}</span>
+              <span className="cert-studio__label-mono">
+                {syncStatusLabel(effectiveSaveStatus)}
+              </span>
             </div>
           </div>
         </div>
@@ -729,13 +757,25 @@ export const CertificateStudioShell = observer(function CertificateStudioShell({
 
           <span className="cert-studio__divider-v" aria-hidden="true" />
 
-          <button type="button" className="cert-studio__btn cert-studio__btn--ghost" onClick={handlePreview}>
+          <button
+            type="button"
+            className="cert-studio__btn cert-studio__btn--ghost"
+            onClick={handlePreview}
+          >
             Preview
           </button>
-          <button type="button" className="cert-studio__btn cert-studio__btn--ghost" onClick={handleSave}>
+          <button
+            type="button"
+            className="cert-studio__btn cert-studio__btn--ghost"
+            onClick={handleSave}
+          >
             Save
           </button>
-          <button type="button" className="cert-studio__btn cert-studio__btn--primary" onClick={handlePublish}>
+          <button
+            type="button"
+            className="cert-studio__btn cert-studio__btn--primary"
+            onClick={handlePublish}
+          >
             Publish
           </button>
         </div>
@@ -796,7 +836,11 @@ export const CertificateStudioShell = observer(function CertificateStudioShell({
                       <Square size={18} strokeWidth={1.75} aria-hidden="true" />
                       Shape
                     </button>
-                    <button type="button" className="cert-studio__element-tile" onClick={handleAddImage}>
+                    <button
+                      type="button"
+                      className="cert-studio__element-tile"
+                      onClick={handleAddImage}
+                    >
                       <Image size={18} strokeWidth={1.75} aria-hidden="true" />
                       Image
                     </button>
@@ -861,11 +905,7 @@ export const CertificateStudioShell = observer(function CertificateStudioShell({
                   </div>
                 </section>
               </div>
-              <button
-                type="button"
-                className="cert-studio__add-asset"
-                onClick={handleAddImage}
-              >
+              <button type="button" className="cert-studio__add-asset" onClick={handleAddImage}>
                 <CirclePlus size={18} className="cert-studio__add-asset-icon" aria-hidden="true" />
                 Add asset
               </button>

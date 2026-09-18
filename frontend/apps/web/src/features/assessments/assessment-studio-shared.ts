@@ -1,11 +1,5 @@
 import type { LucideIcon } from "lucide-react";
-import {
-  Award,
-  ClipboardPen,
-  GraduationCap,
-  HelpCircle,
-  Stethoscope,
-} from "lucide-react";
+import { Award, ClipboardPen, GraduationCap, HelpCircle, Stethoscope } from "lucide-react";
 
 const successBadge =
   "bg-[color-mix(in_srgb,var(--admin-success)_14%,var(--admin-surface))] text-[var(--admin-success)]";
@@ -19,18 +13,20 @@ const primaryBadge =
 const primaryChipSelected =
   "border-[var(--admin-primary)] bg-[color-mix(in_srgb,var(--admin-primary-container)_55%,var(--admin-surface))] text-[var(--admin-primary)] shadow-[0_0_0_1px_color-mix(in_srgb,var(--admin-primary)_20%,transparent)]";
 
+const QUIZ_TYPE_CONFIG = {
+  label: "Quiz",
+  icon: HelpCircle,
+  className: primaryBadge,
+  chipSelected: primaryChipSelected,
+  iconSurface:
+    "bg-[color-mix(in_srgb,var(--admin-primary)_12%,var(--admin-surface))] text-[var(--admin-primary)]",
+};
+
 export const ASSESSMENT_TYPE_CONFIG: Record<
   string,
   { label: string; icon: LucideIcon; className: string; chipSelected: string; iconSurface: string }
 > = {
-  quiz: {
-    label: "Quiz",
-    icon: HelpCircle,
-    className: primaryBadge,
-    chipSelected: primaryChipSelected,
-    iconSurface:
-      "bg-[color-mix(in_srgb,var(--admin-primary)_12%,var(--admin-surface))] text-[var(--admin-primary)]",
-  },
+  quiz: QUIZ_TYPE_CONFIG,
   exam: {
     label: "Exam",
     icon: GraduationCap,
@@ -80,7 +76,7 @@ export const ASSESSMENT_TYPE_CONFIG: Record<
   },
 };
 
-export const DEFAULT_ASSESSMENT_TYPE = ASSESSMENT_TYPE_CONFIG["quiz"]!;
+export const DEFAULT_ASSESSMENT_TYPE = QUIZ_TYPE_CONFIG;
 
 export const ASSESSMENT_TYPE_OPTIONS = [
   { value: "quiz" as const, label: "Quiz" },
@@ -118,8 +114,7 @@ export {
   sectionHeaderClassName,
 } from "../learning-paths/learning-path-studio-shared";
 
-export const typeChipGroupClassName =
-  "flex flex-wrap gap-1.5";
+export const typeChipGroupClassName = "flex flex-wrap gap-1.5";
 
 export const typeChipButtonBase =
   "inline-flex items-center gap-1.5 rounded-full border border-[var(--admin-border)] px-3 py-2 text-xs font-semibold text-[var(--admin-on-surface-variant)] transition-[border-color,color,background-color,box-shadow] duration-200 motion-safe:active:scale-[0.98] hover:border-[color-mix(in_srgb,var(--admin-primary)_35%,var(--admin-border))] hover:text-[var(--admin-primary)] disabled:opacity-40";
@@ -134,8 +129,7 @@ export function typeChipButtonClassName(isSelected: boolean, chipSelected: strin
 export const listRowClassName =
   "group flex flex-col gap-3 border-b border-[var(--admin-border)] p-4 transition-colors last:border-b-0 hover:bg-[var(--admin-surface-low)] sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:p-5";
 
-export const listRowReviewAccentClassName =
-  "border-l-4 border-l-[var(--admin-warning)]";
+export const listRowReviewAccentClassName = "border-l-4 border-l-[var(--admin-warning)]";
 
 export const toggleTrackClassName =
   "relative inline-flex h-[18px] w-8 shrink-0 cursor-pointer items-center rounded-full bg-[var(--admin-surface-high)] transition-colors peer-checked:bg-[var(--admin-primary)] peer-disabled:cursor-not-allowed peer-disabled:opacity-40";

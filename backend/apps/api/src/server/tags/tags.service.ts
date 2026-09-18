@@ -6,20 +6,31 @@ import { courseNotFound } from "../courses/courses.errors";
 import { findLessonWithModuleAndCourse } from "../lessons/lessons.repository";
 import { lessonNotFound } from "../lessons/lessons.errors";
 import type {
+  BulkTagActionBody,
   CreateTagBody,
+  MergeTagsBody,
   ReplaceCourseTagsBody,
   ReplaceLessonTagsBody,
   TagListQuery,
   TagSummary,
   UpdateTagBody,
 } from "./tag-schemas";
-import { tagNotFound } from "./tags.errors";
+import { TAG_USAGE_SAMPLE_LIMIT } from "./tag-schemas";
+import { tagCannotMergeIntoItself, tagNotFound, tagSlugTaken } from "./tags.errors";
 import {
   attachTagToCourse,
   attachTagToLesson,
+  countTagUsage,
   detachTagFromCourse,
   detachTagFromLesson,
+  findExistingTagIds,
   findTagById,
+  findTagBySlug,
+  listCoursesWithTag,
+  listLessonsWithTag,
+  repointTagAttachments,
+  setTagVisibilityMany,
+  softDeleteTagsMany,
   fromApiTagVisibility,
   insertTag,
   listTags,
@@ -29,7 +40,6 @@ import {
   replaceLessonTags,
   slugifyTagTitle,
   softDeleteTag,
-  tagSlugExists,
   toApiTagVisibility,
   updateTagRecord,
   validateTagIdsExist,
@@ -96,9 +106,62 @@ export async function listTenantTags(tx: TenantTx, ctx: ServiceCtx, query?: TagL
     ...(query?.visibility ? { visibility: fromApiTagVisibility(query.visibility) } : {}),
   });
 
+  const summaries = items.map(mapTagSummary);
+
+  // Two extra aggregates for the whole page, not one per row: the admin screen
+  // renders every tag at once, so a per-tag count would be an N+1 over a list
+  // that is deliberately unpaginated.
+  if (query?.withUsage) {
+    const usage = await countTagUsage({
+      tx,
+      tenantId: ctx.tenantId,
+      tagIds: summaries.map((tag) => tag.id),
+    });
+
+    return {
+      data: {
+        items: summaries.map((tag) => ({
+          ...tag,
+          usage: usage.get(tag.id) ?? { courses: 0, lessons: 0 },
+        })),
+      },
+    };
+  }
+
   return {
     data: {
-      items: items.map(mapTagSummary),
+      items: summaries,
+    },
+  };
+}
+
+/**
+ * Where a tag is attached.
+ *
+ * The console used to state plainly that it could not answer this, which was
+ * true of the API and not of the database: both join tables are indexed on
+ * `(tenant_id, tag_id)`. The counts are exact; the two lists are samples, and
+ * `truncated` says which.
+ */
+export async function getTagUsage(tx: TenantTx, ctx: ServiceCtx, tagId: string) {
+  const tag = await findTagById({ tx, tenantId: ctx.tenantId, tagId });
+  if (!tag) throw tagNotFound();
+
+  const counts = await countTagUsage({ tx, tenantId: ctx.tenantId, tagIds: [tagId] });
+  const totals = counts.get(tagId) ?? { courses: 0, lessons: 0 };
+
+  const [courses, lessons] = await Promise.all([
+    listCoursesWithTag({ tx, tenantId: ctx.tenantId, tagId, limit: TAG_USAGE_SAMPLE_LIMIT }),
+    listLessonsWithTag({ tx, tenantId: ctx.tenantId, tagId, limit: TAG_USAGE_SAMPLE_LIMIT }),
+  ]);
+
+  return {
+    data: {
+      tagId,
+      counts: totals,
+      courses,
+      lessons,
+      truncated: courses.length < totals.courses || lessons.length < totals.lessons,
     },
   };
 }
@@ -115,12 +178,9 @@ export async function createTag(tx: TenantTx, ctx: ServiceCtx, input: CreateTagB
     });
   }
 
-  if (await tagSlugExists({ tx, tenantId: ctx.tenantId, slug })) {
-    throw new AtlasHttpError({
-      code: "VALIDATION_ERROR",
-      status: 409,
-      message: "A tag with this title already exists.",
-    });
+  const clash = await findTagBySlug({ tx, tenantId: ctx.tenantId, slug });
+  if (clash) {
+    throw tagSlugTaken(clash.title, clash.slug);
   }
 
   const created = await insertTag({
@@ -170,6 +230,23 @@ export async function updateTag(
 
   const title = input.title?.trim() ?? existing.title;
   const slug = input.title ? slugifyTagTitle(title) : existing.slug;
+
+  // Create checked this and rename did not, so renaming one tag onto another's
+  // slug reached the unique index on (tenant_id, slug) and came back as a raw
+  // 23505 — a 500 for what is an ordinary "that name is taken". Excluding this
+  // tag's own id is what stops it colliding with itself on every save.
+  if (slug !== existing.slug) {
+    const clash = await findTagBySlug({
+      tx,
+      tenantId: ctx.tenantId,
+      slug,
+      excludeTagId: tagId,
+    });
+    if (clash) {
+      throw tagSlugTaken(clash.title, clash.slug);
+    }
+  }
+
   const description =
     input.description !== undefined ? input.description.trim() || null : existing.description;
   const visibility = input.visibility
@@ -518,6 +595,145 @@ export async function detachTagFromCourseForStudio(
   return {
     data: {
       items: items.map(mapTagSummary),
+    },
+  };
+}
+
+/**
+ * Re-scope or remove a selection of tags in one transaction.
+ *
+ * Batched for the same reason the roster actions are: the screen acts on a
+ * selection, so twenty-five tags move together or not at all. Ids that no
+ * longer resolve come back as `missingIds` rather than failing the batch — a
+ * tag deleted by a colleague while the page sat open should not cost the
+ * operator the rest of their selection.
+ *
+ * Each changed tag gets the same audit action a single-tag edit would write, so
+ * an existing query for `tag.delete` does not quietly miss everything done in
+ * bulk; `metadata.bulk` is what distinguishes them.
+ */
+export async function bulkTagAction(tx: TenantTx, ctx: ServiceCtx, input: BulkTagActionBody) {
+  const requestedIds = [...new Set(input.tagIds)];
+  const existingIds = await findExistingTagIds({
+    tx,
+    tenantId: ctx.tenantId,
+    tagIds: requestedIds,
+  });
+
+  const updatedIds =
+    input.action === "delete"
+      ? await softDeleteTagsMany({ tx, tenantId: ctx.tenantId, tagIds: existingIds })
+      : await setTagVisibilityMany({
+          tx,
+          tenantId: ctx.tenantId,
+          tagIds: existingIds,
+          visibility: fromApiTagVisibility(input.visibility ?? "public"),
+        });
+
+  const changed = new Set(updatedIds);
+  const missingIds = requestedIds.filter((id) => !changed.has(id));
+
+  for (const tagId of updatedIds) {
+    await auditWriter.write(
+      tx,
+      {
+        tenantId: ctx.tenantId,
+        actorMembershipId: ctx.actorMembershipId,
+        platformPrincipalId: null,
+        requestId: ctx.requestId,
+      },
+      {
+        action: input.action === "delete" ? "tag.delete" : "tag.update",
+        target: { type: "tag", id: tagId },
+        before: null,
+        after:
+          input.action === "delete" ? null : { id: tagId, visibility: input.visibility ?? null },
+        reason: null,
+        metadata: { bulk: true },
+      },
+    );
+  }
+
+  return { data: { updatedIds, missingIds } };
+}
+
+/**
+ * Fold one tag into another, keeping every attachment.
+ *
+ * The list screen flags near-duplicates — "Beginner" beside "beginners" is the
+ * exact mess this module exists for — and flagging them with no way to resolve
+ * them is a dead end. Merging re-points the source's course and lesson
+ * attachments onto the target and then soft-deletes the source, so no course
+ * silently loses a tag in the process.
+ */
+export async function mergeTags(tx: TenantTx, ctx: ServiceCtx, input: MergeTagsBody) {
+  const target = await findTagById({ tx, tenantId: ctx.tenantId, tagId: input.targetTagId });
+  if (!target) throw tagNotFound();
+
+  const sourceIds = [...new Set(input.sourceTagIds)];
+  if (sourceIds.includes(target.id)) {
+    throw tagCannotMergeIntoItself();
+  }
+
+  // Resolve every source before moving anything. A merge that folded two tags
+  // and then discovered the third was already gone would leave the vocabulary
+  // in exactly the half-tidied state this screen exists to clear — and the
+  // transaction rolls back, so the operator sees one clean failure.
+  const sources = [];
+  for (const sourceTagId of sourceIds) {
+    const source = await findTagById({ tx, tenantId: ctx.tenantId, tagId: sourceTagId });
+    if (!source) throw tagNotFound();
+    sources.push(source);
+  }
+
+  const totals = { movedCourses: 0, movedLessons: 0, alreadyTagged: 0 };
+
+  for (const source of sources) {
+    const moved = await repointTagAttachments({
+      tx,
+      tenantId: ctx.tenantId,
+      sourceTagId: source.id,
+      targetTagId: target.id,
+    });
+
+    const deleted = await softDeleteTag({ tx, tenantId: ctx.tenantId, tagId: source.id });
+    if (!deleted) throw tagNotFound();
+
+    totals.movedCourses += moved.movedCourses;
+    totals.movedLessons += moved.movedLessons;
+    totals.alreadyTagged += moved.alreadyTagged;
+
+    // One entry per folded tag rather than one per merge: "which tags became
+    // this one" is the question the history has to answer, and a single
+    // aggregate entry cannot.
+    await auditWriter.write(
+      tx,
+      {
+        tenantId: ctx.tenantId,
+        actorMembershipId: ctx.actorMembershipId,
+        platformPrincipalId: null,
+        requestId: ctx.requestId,
+      },
+      {
+        action: "tag.merge",
+        target: { type: "tag", id: target.id },
+        before: { id: source.id, title: source.title, slug: source.slug },
+        after: { id: target.id, title: target.title, slug: target.slug },
+        reason: null,
+        metadata: {
+          movedCourses: moved.movedCourses,
+          movedLessons: moved.movedLessons,
+          alreadyTagged: moved.alreadyTagged,
+        },
+      },
+    );
+  }
+
+  return {
+    data: {
+      sourceTagIds: sources.map((source) => source.id),
+      targetTagId: target.id,
+      ...totals,
     },
   };
 }

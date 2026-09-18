@@ -1,5 +1,6 @@
 import type { TenantTx } from "@atlas/db";
 import type { ProgressProductType } from "./progress-score-roster.dto";
+import { textColumn } from "./raw-column";
 
 export type LearnerDetailHeaderRow = {
   enrollment_id: string;
@@ -67,15 +68,15 @@ function asNumber(value: unknown): number | null {
 
 function mapHeader(row: Record<string, unknown>): LearnerDetailHeaderRow {
   return {
-    enrollment_id: String(row["enrollment_id"]),
-    membership_id: String(row["membership_id"]),
-    product_id: String(row["product_id"]),
-    product_title: String(row["product_title"] ?? ""),
-    display_name: row["display_name"] == null ? null : String(row["display_name"]),
-    email: row["email"] == null ? null : String(row["email"]),
-    avatar_key: row["avatar_key"] == null ? null : String(row["avatar_key"]),
-    enrolled_type: String(row["enrolled_type"] ?? "free"),
-    status: String(row["status"] ?? "active"),
+    enrollment_id: textColumn(row["enrollment_id"]),
+    membership_id: textColumn(row["membership_id"]),
+    product_id: textColumn(row["product_id"]),
+    product_title: textColumn(row["product_title"], ""),
+    display_name: row["display_name"] == null ? null : textColumn(row["display_name"]),
+    email: row["email"] == null ? null : textColumn(row["email"]),
+    avatar_key: row["avatar_key"] == null ? null : textColumn(row["avatar_key"]),
+    enrolled_type: textColumn(row["enrolled_type"], "free"),
+    status: textColumn(row["status"], "active"),
     enrolled_at: row["enrolled_at"] instanceof Date ? row["enrolled_at"] : new Date(),
     expires_at: asDate(row["expires_at"]),
     completed_at: asDate(row["completed_at"]),
@@ -176,66 +177,36 @@ export const progressScoreLearnerDetailRepository = {
       return rows[0] ? mapHeader(rows[0]) : null;
     }
 
-    if (productType === "subscription") {
-      const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
-        select
-          e.id::text as enrollment_id,
-          e.membership_id::text as membership_id,
-          p.id::text as product_id,
-          p.title as product_title,
-          coalesce(mp.display_name, ap.email, m.invited_email_normalized) as display_name,
-          coalesce(ap.email, m.invited_email_normalized) as email,
-          mp.avatar_key,
-          e.enrolled_type,
-          e.status,
-          e.enrolled_at,
-          e.expires_at,
-          null::timestamptz as completed_at
-        from learner_subscription_enrollments e
-        join learner_subscription_plans p
-          on p.id = e.plan_id and p.tenant_id = e.tenant_id and p.deleted_at is null
-        join memberships m on m.id = e.membership_id and m.tenant_id = e.tenant_id
-        left join member_profiles mp
-          on mp.membership_id = m.id and mp.tenant_id = m.tenant_id and mp.deleted_at is null
-        left join auth_principals ap on ap.id = m.auth_principal_id
-        where e.tenant_id = current_setting('app.tenant_id', true)::uuid
-          and e.id = ${enrollmentId}::uuid
-          and e.plan_id = ${productId}::uuid
-        limit 1
-      `;
-      return rows[0] ? mapHeader(rows[0]) : null;
-    }
-
-    if (productType === "mock_test") {
-      const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
-        select
-          e.id::text as enrollment_id,
-          e.membership_id::text as membership_id,
-          mt.id::text as product_id,
-          mt.title as product_title,
-          coalesce(mp.display_name, ap.email, m.invited_email_normalized) as display_name,
-          coalesce(ap.email, m.invited_email_normalized) as email,
-          mp.avatar_key,
-          e.enrolled_type,
-          e.status,
-          e.enrolled_at,
-          e.expires_at,
-          null::timestamptz as completed_at
-        from mock_test_enrollments e
-        join mock_tests mt on mt.id = e.mock_test_id and mt.tenant_id = e.tenant_id and mt.deleted_at is null
-        join memberships m on m.id = e.membership_id and m.tenant_id = e.tenant_id
-        left join member_profiles mp
-          on mp.membership_id = m.id and mp.tenant_id = m.tenant_id and mp.deleted_at is null
-        left join auth_principals ap on ap.id = m.auth_principal_id
-        where e.tenant_id = current_setting('app.tenant_id', true)::uuid
-          and e.id = ${enrollmentId}::uuid
-          and e.mock_test_id = ${productId}::uuid
-        limit 1
-      `;
-      return rows[0] ? mapHeader(rows[0]) : null;
-    }
-
-    return null;
+    // `subscription` is the final member of ProgressProductType, so this is
+    // the exhaustive last arm. A `mock_test` branch used to follow it, but
+    // `mock_test` belongs to ScoreProductType and no caller could reach it.
+    const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
+      select
+        e.id::text as enrollment_id,
+        e.membership_id::text as membership_id,
+        p.id::text as product_id,
+        p.title as product_title,
+        coalesce(mp.display_name, ap.email, m.invited_email_normalized) as display_name,
+        coalesce(ap.email, m.invited_email_normalized) as email,
+        mp.avatar_key,
+        e.enrolled_type,
+        e.status,
+        e.enrolled_at,
+        e.expires_at,
+        null::timestamptz as completed_at
+      from learner_subscription_enrollments e
+      join learner_subscription_plans p
+        on p.id = e.plan_id and p.tenant_id = e.tenant_id and p.deleted_at is null
+      join memberships m on m.id = e.membership_id and m.tenant_id = e.tenant_id
+      left join member_profiles mp
+        on mp.membership_id = m.id and mp.tenant_id = m.tenant_id and mp.deleted_at is null
+      left join auth_principals ap on ap.id = m.auth_principal_id
+      where e.tenant_id = current_setting('app.tenant_id', true)::uuid
+        and e.id = ${enrollmentId}::uuid
+        and e.plan_id = ${productId}::uuid
+      limit 1
+    `;
+    return rows[0] ? mapHeader(rows[0]) : null;
   },
 
   async listCourseCurriculumProgress(
@@ -332,21 +303,21 @@ export const progressScoreLearnerDetailRepository = {
     `;
 
     return rows.map((row) => ({
-      lesson_id: String(row["lesson_id"]),
-      module_id: String(row["module_id"]),
-      module_title: String(row["module_title"] ?? ""),
+      lesson_id: textColumn(row["lesson_id"]),
+      module_id: textColumn(row["module_id"]),
+      module_title: textColumn(row["module_title"], ""),
       module_position: Number(row["module_position"] ?? 0),
-      lesson_title: String(row["lesson_title"] ?? ""),
+      lesson_title: textColumn(row["lesson_title"], ""),
       lesson_position: Number(row["lesson_position"] ?? 0),
-      lesson_type: (row["lesson_type"] as LearnerDetailLessonRow["lesson_type"]) ?? "other",
+      lesson_type: row["lesson_type"] as LearnerDetailLessonRow["lesson_type"],
       duration_seconds: asNumber(row["duration_seconds"]),
-      assessment_id: row["assessment_id"] == null ? null : String(row["assessment_id"]),
-      progress_status: row["progress_status"] == null ? null : String(row["progress_status"]),
+      assessment_id: row["assessment_id"] == null ? null : textColumn(row["assessment_id"]),
+      progress_status: row["progress_status"] == null ? null : textColumn(row["progress_status"]),
       progress_pct: asNumber(row["progress_pct"]),
       completed_at: asDate(row["completed_at"]),
       last_seen_at: asDate(row["last_seen_at"]),
       quiz_score_pct: asNumber(row["quiz_score_pct"]),
-      quiz_attempt_id: row["quiz_attempt_id"] == null ? null : String(row["quiz_attempt_id"]),
+      quiz_attempt_id: row["quiz_attempt_id"] == null ? null : textColumn(row["quiz_attempt_id"]),
     }));
   },
 
@@ -466,12 +437,12 @@ export const progressScoreLearnerDetailRepository = {
     `;
 
     return rows.map((row) => ({
-      assessment_id: String(row["assessment_id"]),
-      title: String(row["title"] ?? ""),
+      assessment_id: textColumn(row["assessment_id"]),
+      title: textColumn(row["title"], ""),
       score_pct: asNumber(row["score_pct"]),
-      result_status: (row["result_status"] as LearnerDetailAssessmentRow["result_status"]) ?? "pending",
+      result_status: row["result_status"] as LearnerDetailAssessmentRow["result_status"],
       attempt_number: asNumber(row["attempt_number"]),
-      attempt_id: row["attempt_id"] == null ? null : String(row["attempt_id"]),
+      attempt_id: row["attempt_id"] == null ? null : textColumn(row["attempt_id"]),
       submitted_at: asDate(row["submitted_at"]),
     }));
   },
@@ -502,7 +473,7 @@ export const progressScoreLearnerDetailRepository = {
     return {
       issued: true,
       issued_at: asDate(row["issued_at"]),
-      credential_id: row["credential_id"] == null ? null : String(row["credential_id"]),
+      credential_id: row["credential_id"] == null ? null : textColumn(row["credential_id"]),
     };
   },
 
@@ -624,30 +595,17 @@ export const progressScoreLearnerDetailRepository = {
       return rows[0]?.expires_at ?? null;
     }
 
-    if (productType === "subscription") {
-      const rows = await tx.$queryRaw<Array<{ expires_at: Date | null }>>`
-        update learner_subscription_enrollments
-        set expires_at = ${expiresAt}
-        where id = ${enrollmentId}::uuid
-          and plan_id = ${productId}::uuid
-          and tenant_id = current_setting('app.tenant_id', true)::uuid
-        returning expires_at
-      `;
-      return rows[0]?.expires_at ?? null;
-    }
-
-    if (productType === "mock_test") {
-      const rows = await tx.$queryRaw<Array<{ expires_at: Date | null }>>`
-        update mock_test_enrollments
-        set expires_at = ${expiresAt}
-        where id = ${enrollmentId}::uuid
-          and mock_test_id = ${productId}::uuid
-          and tenant_id = current_setting('app.tenant_id', true)::uuid
-        returning expires_at
-      `;
-      return rows[0]?.expires_at ?? null;
-    }
-
-    return null;
+    // `subscription` is the final member of ProgressProductType, so this is
+    // the exhaustive last arm. A `mock_test` branch used to follow it, but
+    // `mock_test` belongs to ScoreProductType and no caller could reach it.
+    const rows = await tx.$queryRaw<Array<{ expires_at: Date | null }>>`
+      update learner_subscription_enrollments
+      set expires_at = ${expiresAt}
+      where id = ${enrollmentId}::uuid
+        and plan_id = ${productId}::uuid
+        and tenant_id = current_setting('app.tenant_id', true)::uuid
+      returning expires_at
+    `;
+    return rows[0]?.expires_at ?? null;
   },
 };

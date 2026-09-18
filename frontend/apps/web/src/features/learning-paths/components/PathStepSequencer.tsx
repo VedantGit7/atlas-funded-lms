@@ -1,17 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import {
-  ChevronDown,
-  ChevronUp,
-  ListOrdered,
-  PlusCircle,
-  Save,
-  Trash2,
-} from "lucide-react";
-import {
-  primaryButtonClassName,
-} from "../../../app/admin/branding/_components/branding-admin-shared";
+import { ChevronDown, ChevronUp, ListOrdered, PlusCircle, Save, Trash2 } from "lucide-react";
+import { primaryButtonClassName } from "../../../app/admin/branding/_components/branding-admin-shared";
 import {
   resourcesForStepType,
   useLearningPathStepResources,
@@ -84,13 +75,15 @@ export function PathStepSequencer({
   const [newStepRefId, setNewStepRefId] = useState("");
   const [saving, setSaving] = useState(false);
 
-  const { courses, assessments, paths, loading: resourcesLoading, error: resourcesError } =
-    useLearningPathStepResources(pathId);
+  const {
+    courses,
+    assessments,
+    paths,
+    loading: resourcesLoading,
+    error: resourcesError,
+  } = useLearningPathStepResources(pathId);
 
-  const resources = useMemo(
-    () => ({ courses, assessments, paths }),
-    [courses, assessments, paths],
-  );
+  const resources = useMemo(() => ({ courses, assessments, paths }), [courses, assessments, paths]);
 
   useEffect(() => {
     setSteps(initialSteps);
@@ -177,10 +170,15 @@ export function PathStepSequencer({
           {steps.length === 0 ? (
             <div className="flex flex-col items-center gap-3 py-6 text-center">
               <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[var(--admin-surface-high)]">
-                <ListOrdered className="h-5 w-5 text-[var(--admin-on-surface-variant)]" aria-hidden="true" />
+                <ListOrdered
+                  className="h-5 w-5 text-[var(--admin-on-surface-variant)]"
+                  aria-hidden="true"
+                />
               </div>
               <div>
-                <p className="text-sm font-semibold text-[var(--admin-on-surface)]">No steps configured</p>
+                <p className="text-sm font-semibold text-[var(--admin-on-surface)]">
+                  No steps configured
+                </p>
                 <p className="mt-0.5 max-w-sm text-xs text-[var(--admin-on-surface-variant)]">
                   Add steps below to define the sequence learners follow on this path.
                 </p>
@@ -206,7 +204,9 @@ export function PathStepSequencer({
                         <div className="min-w-0 flex-1">
                           <div className="flex flex-wrap items-start justify-between gap-2">
                             <div className="min-w-0">
-                              <p className="text-sm font-semibold text-[var(--admin-on-surface)]">{step.title}</p>
+                              <p className="text-sm font-semibold text-[var(--admin-on-surface)]">
+                                {step.title}
+                              </p>
                               {linkedTitle ? (
                                 <p className="mt-0.5 text-xs text-[var(--admin-on-surface-variant)]">
                                   {linkedTitle}
@@ -297,7 +297,11 @@ export function PathStepSequencer({
 
                           <div>
                             <span className={labelClass}>Step type</span>
-                            <div className={stepTypeSegmentGroupClassName} role="group" aria-label="Step type">
+                            <div
+                              className={stepTypeSegmentGroupClassName}
+                              role="group"
+                              aria-label="Step type"
+                            >
                               {STEP_TYPE_OPTIONS.map((option) => {
                                 const isSelected = step.stepType === option.value;
                                 return (

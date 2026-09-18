@@ -63,7 +63,9 @@ export async function loadPersonalizedDashboardActions(
     }
   } else {
     try {
-      const enrollments = await serverApi.get<EnrollmentListResponse>("/api/v1/enrollments?limit=1");
+      const enrollments = await serverApi.get<EnrollmentListResponse>(
+        "/api/v1/enrollments?limit=1",
+      );
       const enrollment = enrollments.data.items[0];
       if (enrollment) {
         const course = await serverApi.get<CourseDetailResponse>(

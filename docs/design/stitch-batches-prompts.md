@@ -7,6 +7,7 @@ Block 0 is identical to the one in the Active Devices, Payments, and Progress & 
 reproduced here so this file stands alone.
 
 Source of truth:
+
 - `frontend/apps/web/src/features/admin/reports/AdminBatchesRosterPage.tsx`
 - `frontend/apps/web/src/features/admin/reports/admin-batches-roster-api.ts`
 - `backend/packages/domain/src/reports/batches-roster.*`
@@ -639,20 +640,20 @@ schedule cards stack under the history table.
 
 Full best-in-class versions, as intended. What exists today vs. what needs building:
 
-| Prompt feature | Status |
-| --- | --- |
-| Batch list with member count and the three averages, search, status filter | exists |
-| Batch detail with averages and active-learner count | exists |
-| Batch learner roster: last activity, attendance %, test %, completion % with fractions | exists |
-| Learner filters: name, joined from/to, min/max completion; sort; column picker | exists (min/max completion is in the API but not surfaced in the current UI) |
-| Learner detail: live attendance rows, exam attempts, per-course progress | exists |
-| Message matched learners, async CSV export | exists |
-| Health bands (at risk / critical), "ending soon", batch-level trend over the window | needs backend |
+| Prompt feature                                                                                       | Status                                                                                                 |
+| ---------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| Batch list with member count and the three averages, search, status filter                           | exists                                                                                                 |
+| Batch detail with averages and active-learner count                                                  | exists                                                                                                 |
+| Batch learner roster: last activity, attendance %, test %, completion % with fractions               | exists                                                                                                 |
+| Learner filters: name, joined from/to, min/max completion; sort; column picker                       | exists (min/max completion is in the API but not surfaced in the current UI)                           |
+| Learner detail: live attendance rows, exam attempts, per-course progress                             | exists                                                                                                 |
+| Message matched learners, async CSV export                                                           | exists                                                                                                 |
+| Health bands (at risk / critical), "ending soon", batch-level trend over the window                  | needs backend                                                                                          |
 | Attendance matrix, per-session detail, concurrency timeline, late joins, watch time, rejoins, device | session rows exist per learner; the session-level aggregate, concurrency, and device data need backend |
-| Mark as excused | needs backend |
-| Exams by-learner grid, pass rate, awaiting grading, score spread | attempt rows exist; aggregates and pass-mark joins need backend |
-| Content funnel per lesson, drop-off, pace vs. target, projected finish | per-course totals exist; lesson-level cohort aggregates need backend |
-| Message history, delivery/open/click counters, scheduled sends, automated nudges | send exists; everything after it needs backend |
-| Batch comparison (normalised by week, multi-batch trend and distribution) | needs backend |
-| Saved views, export history, scheduled exports | export runs exist; history UI and scheduling need backend |
-| Remove learner from batch | batch membership is managed in Admin → Batches; verify the endpoint before wiring |
+| Mark as excused                                                                                      | needs backend                                                                                          |
+| Exams by-learner grid, pass rate, awaiting grading, score spread                                     | attempt rows exist; aggregates and pass-mark joins need backend                                        |
+| Content funnel per lesson, drop-off, pace vs. target, projected finish                               | per-course totals exist; lesson-level cohort aggregates need backend                                   |
+| Message history, delivery/open/click counters, scheduled sends, automated nudges                     | send exists; everything after it needs backend                                                         |
+| Batch comparison (normalised by week, multi-batch trend and distribution)                            | needs backend                                                                                          |
+| Saved views, export history, scheduled exports                                                       | export runs exist; history UI and scheduling need backend                                              |
+| Remove learner from batch                                                                            | batch membership is managed in Admin → Batches; verify the endpoint before wiring                      |

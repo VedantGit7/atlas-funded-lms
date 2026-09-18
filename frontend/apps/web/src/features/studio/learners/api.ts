@@ -6,9 +6,15 @@ import type { enrollmentListResponseSchema } from "@atlas/contracts/enrollments/
 import type { enrollmentCancelResponseSchema } from "@atlas/contracts/enrollments/schemas";
 import type { courseProgressListResponseSchema } from "@atlas/contracts/courses/course-progress.schemas";
 import type { myCompetencyResponseSchema } from "@atlas/contracts/competency/competency-projection.schemas";
-import type { gradingListResponseSchema, gradingTaskDetailResponseSchema } from "@atlas/contracts/grading/grading-schemas";
+import type {
+  gradingListResponseSchema,
+  gradingTaskDetailResponseSchema,
+} from "@atlas/contracts/grading/grading-schemas";
 import type { attemptRunnerResponseSchema } from "@atlas/contracts/assessments/assessment-response-schemas";
-import type { certificateTemplateListResponseSchema, certificateDetailResponseSchema } from "@atlas/contracts/certificates/certificate.dto";
+import type {
+  certificateTemplateListResponseSchema,
+  certificateDetailResponseSchema,
+} from "@atlas/contracts/certificates/certificate.dto";
 
 type EnrollmentListResponse = z.infer<typeof enrollmentListResponseSchema>;
 type EnrollmentCancelResponse = z.infer<typeof enrollmentCancelResponseSchema>;
@@ -86,7 +92,9 @@ export async function fetchLearnerGradingTasks(
   return response.data;
 }
 
-export async function fetchAttemptDetail(attemptId: string): Promise<AttemptDetailResponse["data"]> {
+export async function fetchAttemptDetail(
+  attemptId: string,
+): Promise<AttemptDetailResponse["data"]> {
   const response = await clientApi.get<AttemptDetailResponse>(`/api/v1/attempts/${attemptId}`);
   return response.data;
 }
@@ -127,7 +135,10 @@ export async function fetchLearnerAttemptSummaries(
 }
 
 export async function cancelEnrollment(enrollmentId: string): Promise<EnrollmentCancelResponse> {
-  return clientApi.delete(`/api/v1/enrollments/${enrollmentId}`, `cancel-enrollment-${enrollmentId}`);
+  return clientApi.delete(
+    `/api/v1/enrollments/${enrollmentId}`,
+    `cancel-enrollment-${enrollmentId}`,
+  );
 }
 
 export async function fetchPublishedCertificateTemplates(): Promise<

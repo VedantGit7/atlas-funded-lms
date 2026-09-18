@@ -48,11 +48,7 @@ function monthLabel(monthKey: string): string {
   });
 }
 
-function EnrollmentChart({
-  points,
-}: {
-  points: OverviewData["monthlyEnrollments"];
-}) {
+function EnrollmentChart({ points }: { points: OverviewData["monthlyEnrollments"] }) {
   const width = 640;
   const height = 220;
   const padX = 28;
@@ -98,8 +94,20 @@ function EnrollmentChart({
           stroke="var(--admin-border)"
           strokeWidth="1"
         />
-        <path d={paidPath} fill="none" stroke="var(--admin-primary)" strokeWidth="2.5" strokeLinecap="round" />
-        <path d={freePath} fill="none" stroke="var(--admin-warning)" strokeWidth="2.5" strokeLinecap="round" />
+        <path
+          d={paidPath}
+          fill="none"
+          stroke="var(--admin-primary)"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+        />
+        <path
+          d={freePath}
+          fill="none"
+          stroke="var(--admin-warning)"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+        />
         {points.map((point, index) => {
           const x =
             padX +
@@ -123,15 +131,7 @@ function EnrollmentChart({
   );
 }
 
-function KpiTile({
-  label,
-  value,
-  href,
-}: {
-  label: string;
-  value: string;
-  href: string;
-}) {
+function KpiTile({ label, value, href }: { label: string; value: string; href: string }) {
   return (
     <Link
       href={href}
@@ -181,16 +181,23 @@ function TaskRow({
       </span>
       <span className="min-w-0 flex-1">
         <span className="flex items-center gap-2">
-          <span className="truncate text-sm font-semibold text-[var(--admin-on-surface)]">{label}</span>
+          <span className="truncate text-sm font-semibold text-[var(--admin-on-surface)]">
+            {label}
+          </span>
           {count > 0 ? (
             <span className="rounded-full bg-[var(--admin-warning)]/15 px-2 py-0.5 text-[10px] font-bold text-[var(--admin-warning)]">
               {count}
             </span>
           ) : null}
         </span>
-        <span className="block truncate text-xs text-[var(--admin-on-surface-variant)]">{caption}</span>
+        <span className="block truncate text-xs text-[var(--admin-on-surface-variant)]">
+          {caption}
+        </span>
       </span>
-      <ChevronRight className="h-4 w-4 shrink-0 text-[var(--admin-on-surface-variant)]" aria-hidden="true" />
+      <ChevronRight
+        className="h-4 w-4 shrink-0 text-[var(--admin-on-surface-variant)]"
+        aria-hidden="true"
+      />
     </Link>
   );
 }
@@ -210,11 +217,11 @@ export function AdminCommerceOverview({
     data.pendingTasks.deletionRequests +
     data.pendingTasks.courseReviews;
 
+  const firstEnrollmentMonth = data.monthlyEnrollments[0];
+  const lastEnrollmentMonth = data.monthlyEnrollments.at(-1);
   const rangeLabel =
-    data.monthlyEnrollments.length > 0
-      ? `${monthLabel(data.monthlyEnrollments[0]!.month)} – ${monthLabel(
-          data.monthlyEnrollments[data.monthlyEnrollments.length - 1]!.month,
-        )}`
+    firstEnrollmentMonth && lastEnrollmentMonth
+      ? `${monthLabel(firstEnrollmentMonth.month)} – ${monthLabel(lastEnrollmentMonth.month)}`
       : "Last 12 months";
 
   const secondaryStats =
@@ -315,7 +322,9 @@ export function AdminCommerceOverview({
                   type="button"
                   role="tab"
                   aria-selected={active}
-                  onClick={() => setTab(item.key)}
+                  onClick={() => {
+                    setTab(item.key);
+                  }}
                   className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold transition-colors ${
                     active
                       ? "bg-[var(--admin-primary)] text-[var(--admin-on-primary)]"
@@ -338,8 +347,12 @@ export function AdminCommerceOverview({
           <div className="rounded-2xl border border-[var(--admin-border)] bg-[var(--admin-surface)] p-5 shadow-sm">
             <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
               <div>
-                <h3 className="text-lg font-bold text-[var(--admin-on-surface)]">Monthly enrollments</h3>
-                <p className="text-sm text-[var(--admin-on-surface-variant)]">Total for {rangeLabel}</p>
+                <h3 className="text-lg font-bold text-[var(--admin-on-surface)]">
+                  Monthly enrollments
+                </h3>
+                <p className="text-sm text-[var(--admin-on-surface-variant)]">
+                  Total for {rangeLabel}
+                </p>
               </div>
               <span className="rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface-high)] px-3 py-1.5 text-xs font-semibold text-[var(--admin-on-surface-variant)]">
                 Last 12 months
@@ -393,14 +406,19 @@ export function AdminCommerceOverview({
                             : " · Free"}
                         </span>
                       </span>
-                      <BookOpen className="h-4 w-4 shrink-0 text-[var(--admin-on-surface-variant)]" aria-hidden="true" />
+                      <BookOpen
+                        className="h-4 w-4 shrink-0 text-[var(--admin-on-surface-variant)]"
+                        aria-hidden="true"
+                      />
                     </Link>
                   </li>
                 ))}
               </ul>
             ) : (
               <div className="px-2 py-10 text-center">
-                <p className="text-sm font-semibold text-[var(--admin-on-surface)]">No results found</p>
+                <p className="text-sm font-semibold text-[var(--admin-on-surface)]">
+                  No results found
+                </p>
                 <p className="mt-1 text-sm text-[var(--admin-on-surface-variant)]">
                   Publish courses and enroll learners to see rankings here.
                 </p>
@@ -412,7 +430,9 @@ export function AdminCommerceOverview({
         <aside className="space-y-5">
           <div className="rounded-2xl border border-[var(--admin-border)] bg-[var(--admin-surface)] p-5 shadow-sm">
             <div className="mb-4 flex items-center justify-between gap-2">
-              <h3 className="text-base font-bold text-[var(--admin-on-surface)]">Scheduled events</h3>
+              <h3 className="text-base font-bold text-[var(--admin-on-surface)]">
+                Scheduled events
+              </h3>
               <span className="rounded-full bg-[var(--admin-surface-high)] px-2.5 py-0.5 text-xs font-bold text-[var(--admin-on-surface-variant)]">
                 {data.scheduledEvents.length}
               </span>
@@ -424,7 +444,9 @@ export function AdminCommerceOverview({
                     key={event.id}
                     className="rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface-high)]/40 px-3 py-3"
                   >
-                    <p className="text-sm font-semibold text-[var(--admin-on-surface)]">{event.name}</p>
+                    <p className="text-sm font-semibold text-[var(--admin-on-surface)]">
+                      {event.name}
+                    </p>
                     <p className="mt-1 text-xs text-[var(--admin-on-surface-variant)]">
                       {new Date(event.startsAt).toLocaleDateString()} –{" "}
                       {new Date(event.endsAt).toLocaleDateString()}
@@ -435,8 +457,13 @@ export function AdminCommerceOverview({
               </ul>
             ) : (
               <div className="flex flex-col items-center gap-2 py-8 text-center">
-                <CalendarDays className="h-8 w-8 text-[var(--admin-on-surface-variant)]" aria-hidden="true" />
-                <p className="text-sm font-semibold text-[var(--admin-on-surface)]">No scheduled events</p>
+                <CalendarDays
+                  className="h-8 w-8 text-[var(--admin-on-surface-variant)]"
+                  aria-hidden="true"
+                />
+                <p className="text-sm font-semibold text-[var(--admin-on-surface)]">
+                  No scheduled events
+                </p>
                 <Link
                   href="/admin/gamification"
                   prefetch={false}

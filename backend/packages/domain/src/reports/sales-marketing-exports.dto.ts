@@ -8,7 +8,25 @@ export const SM_EXPORT_DATASETS = [
   "referral-wallet",
   "affiliate-products",
   "affiliates",
+  /**
+   * The raw attribution event log.
+   *
+   * Every other dataset here is a rollup — one row per coupon, per affiliate,
+   * per purchaser. This one is the event stream those rollups are computed
+   * from, which is the only export that can answer whether the tracking behind
+   * them was working: a campaign with no events attributed to it looks
+   * identical to a campaign nobody clicked.
+   */
+  "attribution",
 ] as const;
+
+/**
+ * Whether an exported event carried any campaign attribution.
+ *
+ * Only meaningful for the `attribution` dataset; the create route refuses it
+ * elsewhere rather than dropping it.
+ */
+export const SM_ATTRIBUTION_PRESENCE = ["any", "attributed", "none"] as const;
 
 export const SM_EXPORT_FORMATS = ["csv", "xlsx", "json"] as const;
 export const SM_EXPORT_DELIVERY = ["download", "email_me", "recipients"] as const;
@@ -88,6 +106,23 @@ export const SM_AFFILIATE_EXPORT_COLUMNS = [
   { key: "membership_id", label: "Membership ID", sensitive: false, defaultSelected: false },
 ] as const;
 
+export const SM_ATTRIBUTION_EXPORT_COLUMNS = [
+  { key: "occurred_at", label: "Occurred at", sensitive: false, defaultSelected: true },
+  { key: "event_type", label: "Event type", sensitive: false, defaultSelected: true },
+  { key: "utm_source", label: "UTM source", sensitive: false, defaultSelected: true },
+  { key: "utm_medium", label: "UTM medium", sensitive: false, defaultSelected: true },
+  { key: "utm_campaign", label: "UTM campaign", sensitive: false, defaultSelected: true },
+  { key: "utm_term", label: "UTM term", sensitive: false, defaultSelected: false },
+  { key: "utm_content", label: "UTM content", sensitive: false, defaultSelected: false },
+  { key: "attributed", label: "Attributed", sensitive: false, defaultSelected: true },
+  { key: "revenue_cents", label: "Revenue", sensitive: false, defaultSelected: true },
+  { key: "currency", label: "Currency", sensitive: false, defaultSelected: true },
+  { key: "learner_name", label: "Learner name", sensitive: false, defaultSelected: false },
+  { key: "email", label: "Email", sensitive: true, defaultSelected: false },
+  { key: "membership_id", label: "Membership ID", sensitive: false, defaultSelected: false },
+  { key: "event_id", label: "Event ID", sensitive: false, defaultSelected: false },
+] as const;
+
 export const smExportColumnKeySchema = z.string().min(1).max(64);
 
 export const smExportHistoryItemSchema = z
@@ -152,6 +187,7 @@ export const salesMarketingExportsResponseSchema = z.object({
       "referral-wallet": z.array(smExportColumnSchema),
       "affiliate-products": z.array(smExportColumnSchema),
       affiliates: z.array(smExportColumnSchema),
+      attribution: z.array(smExportColumnSchema),
     }),
     capabilities: z.object({
       formats: z.array(z.enum(SM_EXPORT_FORMATS)),
@@ -176,6 +212,7 @@ export const createSalesMarketingExportBodySchema = rejectClientTenantFields
     learnerName: z.string().trim().min(1).max(200).optional(),
     email: z.string().trim().min(1).max(320).optional(),
     q: z.string().trim().min(1).max(200).optional(),
+    attribution: z.enum(SM_ATTRIBUTION_PRESENCE).optional(),
     grouping: z.enum(SM_EXPORT_GROUPING).default("none"),
     includeSubtotals: z.boolean().default(false),
     useCurrentFilters: z.boolean().default(true),

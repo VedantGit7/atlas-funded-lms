@@ -5,7 +5,7 @@ import { respondPollMetadata } from "@atlas/domain/polls/polls.route-metadata";
 import { respondToPoll } from "@atlas/domain/polls/polls.service";
 import { z as zod } from "zod";
 
-const paramsSchema = zod.object({ id: zod.string().uuid() });
+const paramsSchema = zod.object({ id: zod.uuid() });
 
 export const POST = createTenantRoute<
   z.output<typeof respondPollBodySchema>,

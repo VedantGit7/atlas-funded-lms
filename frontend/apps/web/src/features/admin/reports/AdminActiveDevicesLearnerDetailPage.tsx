@@ -43,8 +43,8 @@ type AdminActiveDevicesLearnerDetailPageProps = {
 function learnerInitials(name: string | null, email: string | null): string {
   const source = (name?.trim() || email?.trim() || "?").split(/\s+/).filter(Boolean);
   if (source.length === 0) return "?";
-  if (source.length === 1) return source[0]!.slice(0, 2).toUpperCase();
-  return `${source[0]![0] ?? ""}${source[1]![0] ?? ""}`.toUpperCase();
+  if (source.length === 1) return (source[0] ?? "").slice(0, 2).toUpperCase();
+  return `${source[0]?.[0] ?? ""}${source[1]?.[0] ?? ""}`.toUpperCase();
 }
 
 function formatAbsolute(value: string | null): string {
@@ -75,7 +75,10 @@ function formatRelative(value: string | null): string {
 function formatUtcStamp(value: string): string {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return date.toISOString().replace("T", " ").replace(/\.\d{3}Z$/, " UTC");
+  return date
+    .toISOString()
+    .replace("T", " ")
+    .replace(/\.\d{3}Z$/, " UTC");
 }
 
 function statusChipClass(status: ActiveDevicesDetailDevice["status"]): string {
@@ -278,9 +281,7 @@ export function AdminActiveDevicesLearnerDetailPage({
       setSelectedIds(new Set());
     } catch (err) {
       const message =
-        err instanceof ClientApiError
-          ? err.message
-          : "Unable to load learner device detail.";
+        err instanceof ClientApiError ? err.message : "Unable to load learner device detail.";
       setError(message);
       setDetail(null);
     } finally {
@@ -371,7 +372,9 @@ export function AdminActiveDevicesLearnerDetailPage({
     try {
       await navigator.clipboard.writeText(value);
       setCopiedId(device.id);
-      window.setTimeout(() => setCopiedId(null), 1500);
+      window.setTimeout(() => {
+        setCopiedId(null);
+      }, 1500);
     } catch {
       setError("Unable to copy device ID.");
     }
@@ -416,7 +419,13 @@ export function AdminActiveDevicesLearnerDetailPage({
           className="flex items-center justify-between gap-3 border border-[color-mix(in_srgb,var(--admin-danger)_30%,var(--admin-border))] bg-[color-mix(in_srgb,var(--admin-danger)_8%,var(--admin-surface))] px-4 py-3 text-sm text-[var(--admin-danger)]"
         >
           <span>{error}</span>
-          <button type="button" className="underline" onClick={() => setError(null)}>
+          <button
+            type="button"
+            className="underline"
+            onClick={() => {
+              setError(null);
+            }}
+          >
             Dismiss
           </button>
         </div>
@@ -491,7 +500,9 @@ export function AdminActiveDevicesLearnerDetailPage({
               type="button"
               className="inline-flex h-8 items-center gap-1 rounded border border-[var(--admin-danger)] px-3 text-sm font-semibold uppercase tracking-[0.06em] text-[var(--admin-danger)] transition-colors hover:bg-[color-mix(in_srgb,var(--admin-danger)_10%,var(--admin-surface))]"
               disabled={busy}
-              onClick={() => setConfirmSignOutOpen(true)}
+              onClick={() => {
+                setConfirmSignOutOpen(true);
+              }}
             >
               <Ban className="h-3.5 w-3.5" aria-hidden="true" />
               Force sign out of all devices
@@ -577,7 +588,9 @@ export function AdminActiveDevicesLearnerDetailPage({
                   type="button"
                   className="text-sm font-semibold uppercase tracking-[0.06em] text-[var(--admin-on-surface-variant)] disabled:cursor-not-allowed disabled:opacity-50"
                   disabled={selectedIds.size === 0 || busy}
-                  onClick={() => setConfirmRevokeOpen(true)}
+                  onClick={() => {
+                    setConfirmRevokeOpen(true);
+                  }}
                 >
                   Revoke selected
                 </button>
@@ -599,7 +612,10 @@ export function AdminActiveDevicesLearnerDetailPage({
                   disabled={busy}
                   onClick={() => void load()}
                 >
-                  <RefreshCw className={`h-4 w-4 ${busy ? "animate-spin" : ""}`} aria-hidden="true" />
+                  <RefreshCw
+                    className={`h-4 w-4 ${busy ? "animate-spin" : ""}`}
+                    aria-hidden="true"
+                  />
                 </button>
               </div>
             </div>
@@ -607,7 +623,9 @@ export function AdminActiveDevicesLearnerDetailPage({
             {detail.devices.length === 0 ? (
               <div className="flex flex-col items-center gap-2 px-6 py-16 text-center">
                 <Shield className="h-8 w-8 text-[var(--admin-outline)]" aria-hidden="true" />
-                <p className="text-sm font-medium text-[var(--admin-on-surface)]">No active devices</p>
+                <p className="text-sm font-medium text-[var(--admin-on-surface)]">
+                  No active devices
+                </p>
                 <p className="max-w-sm text-sm text-[var(--admin-on-surface-variant)]">
                   This learner has no registered device sessions right now.
                 </p>
@@ -666,7 +684,9 @@ export function AdminActiveDevicesLearnerDetailPage({
                             type="checkbox"
                             className="h-4 w-4 rounded border-[var(--admin-border)] text-[var(--admin-primary)] focus:ring-[var(--admin-primary)]"
                             checked={selected}
-                            onChange={() => toggleDevice(device.id)}
+                            onChange={() => {
+                              toggleDevice(device.id);
+                            }}
                             aria-label={`Select ${device.deviceLabel}`}
                           />
                         </div>
@@ -674,7 +694,9 @@ export function AdminActiveDevicesLearnerDetailPage({
                           <button
                             type="button"
                             className="truncate text-left hover:text-[var(--admin-primary)] hover:underline"
-                            onClick={() => setDrawerDeviceId(device.id)}
+                            onClick={() => {
+                              setDrawerDeviceId(device.id);
+                            }}
                           >
                             {device.deviceLabel}
                           </button>
@@ -706,9 +728,11 @@ export function AdminActiveDevicesLearnerDetailPage({
                             aria-expanded={menuOpen}
                             aria-controls={menuOpen ? menuId : undefined}
                             className="flex h-6 w-6 items-center justify-center rounded text-[var(--admin-on-surface-variant)] hover:bg-[var(--admin-surface-high)] hover:text-[var(--admin-on-surface)]"
-                            onClick={() =>
-                              setMenuDeviceId((current) => (current === device.id ? null : device.id))
-                            }
+                            onClick={() => {
+                              setMenuDeviceId((current) =>
+                                current === device.id ? null : device.id,
+                              );
+                            }}
                           >
                             <MoreVertical className="h-[18px] w-[18px]" aria-hidden="true" />
                           </button>
@@ -738,7 +762,9 @@ export function AdminActiveDevicesLearnerDetailPage({
                                 href={`/admin/reports/active-devices/${membershipId}/${device.id}`}
                                 role="menuitem"
                                 className={dropdownItemClassName}
-                                onClick={() => setMenuDeviceId(null)}
+                                onClick={() => {
+                                  setMenuDeviceId(null);
+                                }}
                               >
                                 <ExternalLink className="h-4 w-4" aria-hidden="true" />
                                 Open full page
@@ -779,7 +805,9 @@ export function AdminActiveDevicesLearnerDetailPage({
 
         <div className="flex w-full flex-col gap-6 lg:w-[32%]">
           <section className="border border-[var(--admin-border)] bg-[var(--admin-surface)] p-4">
-            <h3 className="mb-4 text-base font-semibold text-[var(--admin-on-surface)]">Device limit</h3>
+            <h3 className="mb-4 text-base font-semibold text-[var(--admin-on-surface)]">
+              Device limit
+            </h3>
             <div className="mb-4 flex items-center justify-between border-b border-[var(--admin-border)] pb-4">
               <div>
                 <div className="mb-1 font-mono text-[11px] uppercase tracking-widest text-[var(--admin-on-surface-variant)]">
@@ -811,7 +839,9 @@ export function AdminActiveDevicesLearnerDetailPage({
           </section>
 
           <section className="border border-[var(--admin-border)] bg-[var(--admin-surface)] p-4">
-            <h3 className="mb-4 text-base font-semibold text-[var(--admin-on-surface)]">Risk signals</h3>
+            <h3 className="mb-4 text-base font-semibold text-[var(--admin-on-surface)]">
+              Risk signals
+            </h3>
             <div className="flex flex-col gap-3">
               {detail.riskSignals.map((signal, index) => {
                 const chip = riskChip(signal);
@@ -837,7 +867,9 @@ export function AdminActiveDevicesLearnerDetailPage({
 
           <section className="flex flex-1 flex-col border border-[var(--admin-border)] bg-[var(--admin-surface)] p-4">
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-base font-semibold text-[var(--admin-on-surface)]">Recent activity</h3>
+              <h3 className="text-base font-semibold text-[var(--admin-on-surface)]">
+                Recent activity
+              </h3>
               <Link
                 href="/admin/reports/active-devices"
                 className="text-xs font-semibold uppercase tracking-[0.06em] text-[var(--admin-primary)] hover:underline"
@@ -893,7 +925,10 @@ export function AdminActiveDevicesLearnerDetailPage({
             aria-labelledby="force-signout-title"
             className="w-full max-w-md border border-[var(--admin-border)] bg-[var(--admin-surface)] p-6 shadow-xl"
           >
-            <h2 id="force-signout-title" className="text-lg font-semibold text-[var(--admin-on-surface)]">
+            <h2
+              id="force-signout-title"
+              className="text-lg font-semibold text-[var(--admin-on-surface)]"
+            >
               Force sign out of all devices?
             </h2>
             <p className="mt-2 text-sm text-[var(--admin-on-surface-variant)]">
@@ -904,7 +939,9 @@ export function AdminActiveDevicesLearnerDetailPage({
                 type="button"
                 className={ghostButtonClassName}
                 disabled={busy}
-                onClick={() => setConfirmSignOutOpen(false)}
+                onClick={() => {
+                  setConfirmSignOutOpen(false);
+                }}
               >
                 Cancel
               </button>
@@ -929,7 +966,10 @@ export function AdminActiveDevicesLearnerDetailPage({
             aria-labelledby="revoke-selected-title"
             className="w-full max-w-md border border-[var(--admin-border)] bg-[var(--admin-surface)] p-6 shadow-xl"
           >
-            <h2 id="revoke-selected-title" className="text-lg font-semibold text-[var(--admin-on-surface)]">
+            <h2
+              id="revoke-selected-title"
+              className="text-lg font-semibold text-[var(--admin-on-surface)]"
+            >
               Revoke selected devices?
             </h2>
             <p className="mt-2 text-sm text-[var(--admin-on-surface-variant)]">
@@ -940,7 +980,9 @@ export function AdminActiveDevicesLearnerDetailPage({
                 type="button"
                 className={ghostButtonClassName}
                 disabled={busy}
-                onClick={() => setConfirmRevokeOpen(false)}
+                onClick={() => {
+                  setConfirmRevokeOpen(false);
+                }}
               >
                 Cancel
               </button>

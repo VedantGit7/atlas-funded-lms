@@ -5,6 +5,7 @@ import {
   seriesHalfDelta,
 } from "./insights-school-vitals";
 import type { LearningRollupBundle, SchoolVitalsRollupKey } from "./insights.repository";
+import { csvEscape } from "@atlas/core/csv/escape";
 
 export const ENGAGEMENT_FUNNEL_STAGES = [
   {
@@ -212,9 +213,4 @@ export function engagementFunnelToCsv(board: InsightEngagementFunnelBoard): stri
     );
   }
   return lines.join("\n");
-}
-
-function csvEscape(value: string): string {
-  if (/[",\n]/.test(value)) return `"${value.replace(/"/g, '""')}"`;
-  return value;
 }

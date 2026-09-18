@@ -3,9 +3,7 @@
 import Link from "next/link";
 import { useRef, useState } from "react";
 import { ChevronLeft, Loader2 } from "lucide-react";
-import {
-  generalSettingsBackLinkClassName,
-} from "../general-settings/general-settings-shared";
+import { generalSettingsBackLinkClassName } from "../general-settings/general-settings-shared";
 import {
   ghostButtonClassName,
   inferBrandingContentType,
@@ -156,7 +154,9 @@ export function AdminSeoPage({ initialSeo }: AdminSeoPageProps) {
       <div className="flex flex-col gap-4 border-b border-[var(--admin-border)] pb-6 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-2">
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-bold tracking-tight text-[var(--admin-on-surface)]">SEO</h1>
+            <h1 className="text-2xl font-bold tracking-tight text-[var(--admin-on-surface)]">
+              SEO
+            </h1>
             {isDirty ? <span className={seoDirtyBadgeClassName}>Not saved</span> : null}
           </div>
           <p className="max-w-2xl text-sm leading-relaxed text-[var(--admin-on-surface-variant)]">
@@ -225,7 +225,6 @@ export function AdminSeoPage({ initialSeo }: AdminSeoPageProps) {
           </p>
           {seo.metaImageUrl ? (
             <div className={seoImagePreviewClassName}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={seo.metaImageUrl}
                 alt="SEO meta preview"

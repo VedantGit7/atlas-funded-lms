@@ -14,6 +14,5 @@ export const POST = createTenantRoute<
   metadata: exportPaymentsRosterMetadata,
   body: exportPaymentRosterBodySchema,
   output: exportPaymentRosterResponseSchema,
-  handler: async ({ tx, ctx, input }) =>
-    exportPaymentRoster(tx, ctx, { ...input, tab: input.tab ?? "transactions" }),
+  handler: async ({ tx, ctx, input }) => exportPaymentRoster(tx, ctx, { ...input, tab: input.tab }),
 });

@@ -131,7 +131,8 @@ const CLASSES: Record<AccountThemeKind, AccountThemeClasses> = {
     toggleTrackOn: "bg-[var(--admin-primary)]",
     toggleTrackOff: "bg-[var(--admin-surface-high)]",
     ...LEGACY_EXTRA,
-    sectionLabel: "text-xs font-semibold uppercase tracking-wider text-[var(--admin-on-surface-variant)]",
+    sectionLabel:
+      "text-xs font-semibold uppercase tracking-wider text-[var(--admin-on-surface-variant)]",
     divider: "border-[var(--admin-border)]",
     panel: "rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)]",
     panelRow: "border-[var(--admin-border)] hover:bg-[var(--admin-surface-low)]",
@@ -142,7 +143,8 @@ const CLASSES: Record<AccountThemeKind, AccountThemeClasses> = {
   },
   studio: {
     card: "rounded-xl border border-[var(--studio-border)] bg-[var(--studio-surface)] p-5 shadow-sm",
-    dangerCard: "rounded-xl border border-[var(--studio-danger)]/30 bg-[var(--studio-danger)]/5 p-5",
+    dangerCard:
+      "rounded-xl border border-[var(--studio-danger)]/30 bg-[var(--studio-danger)]/5 p-5",
     field:
       "w-full rounded-lg border border-[var(--studio-border)] bg-[var(--studio-surface-low)] px-3 py-2.5 text-sm text-[var(--studio-on-surface)] outline-none transition-colors placeholder:text-[var(--studio-on-surface-variant)] focus:border-[var(--studio-primary)] focus:ring-2 focus:ring-[var(--studio-primary)]/20 disabled:cursor-not-allowed disabled:opacity-60",
     monoField:
@@ -174,7 +176,8 @@ const CLASSES: Record<AccountThemeKind, AccountThemeClasses> = {
     toggleTrackOn: "bg-[var(--studio-primary)]",
     toggleTrackOff: "bg-[var(--studio-surface-high)]",
     ...LEGACY_EXTRA,
-    sectionLabel: "text-xs font-semibold uppercase tracking-wider text-[var(--studio-on-surface-variant)]",
+    sectionLabel:
+      "text-xs font-semibold uppercase tracking-wider text-[var(--studio-on-surface-variant)]",
     divider: "border-[var(--studio-border)]",
     panel: "rounded-xl border border-[var(--studio-border)] bg-[var(--studio-surface)]",
     panelRow: "border-[var(--studio-border)] hover:bg-[var(--studio-surface-low)]",
@@ -204,9 +207,11 @@ const CLASSES: Record<AccountThemeKind, AccountThemeClasses> = {
     dangerOutlineButton:
       "inline-flex items-center justify-center gap-2 rounded-lg border border-destructive/30 px-4 py-2.5 text-sm font-semibold text-destructive transition-colors hover:bg-destructive/10 disabled:cursor-not-allowed disabled:opacity-50",
     ghostButton: "text-sm font-semibold text-foreground underline-offset-2 hover:underline",
-    errorBanner: "rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive",
+    errorBanner:
+      "rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive",
     infoBanner: "rounded-lg border border-border bg-muted px-4 py-3 text-sm text-muted-foreground",
-    tabActive: "border-b-2 border-foreground px-3 py-3 text-sm font-medium text-foreground transition-colors",
+    tabActive:
+      "border-b-2 border-foreground px-3 py-3 text-sm font-medium text-foreground transition-colors",
     tabInactive:
       "border-b-2 border-transparent px-3 py-3 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground",
     checkbox: "h-4 w-4 accent-foreground",
@@ -227,8 +232,7 @@ const CLASSES: Record<AccountThemeKind, AccountThemeClasses> = {
     sectionTitle: "text-lg font-semibold tracking-tight text-[var(--acct-on-surface)]",
     sectionDangerTitle: "text-lg font-semibold text-[var(--acct-danger)]",
     sectionDesc: "text-sm leading-relaxed text-[var(--acct-on-surface-variant)]",
-    sectionLabel:
-      "text-xs font-medium uppercase tracking-wider text-[var(--acct-outline)]",
+    sectionLabel: "text-xs font-medium uppercase tracking-wider text-[var(--acct-outline)]",
     divider: "border-[var(--acct-border)]",
     panel:
       "overflow-hidden rounded-xl border border-[var(--acct-border)] bg-[var(--acct-surface-lowest)] divide-y divide-[color-mix(in_srgb,var(--acct-border)_30%,transparent)]",

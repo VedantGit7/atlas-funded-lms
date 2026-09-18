@@ -220,9 +220,14 @@ export async function confirmModuleScormPackageUploadService(
   }
 
   const provider = getStorageProvider();
-  await confirmAssetUpload(tx, provider, { tenantId: ctx.tenantId }, {
-    assetReferenceId: input.assetReferenceId,
-  });
+  await confirmAssetUpload(
+    tx,
+    provider,
+    { tenantId: ctx.tenantId },
+    {
+      assetReferenceId: input.assetReferenceId,
+    },
+  );
 
   await updateModuleScormPackageReference({
     tx,

@@ -1,6 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type ReactNode,
+} from "react";
 import { createPortal } from "react-dom";
 import { ChevronDown } from "lucide-react";
 import { dropdownPanelEnterClassName } from "@atlas/design-system";
@@ -8,8 +15,7 @@ import { dropdownPanelEnterClassName } from "@atlas/design-system";
 export const dropdownTriggerClassName =
   "flex w-full items-center gap-2 rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-4 py-2.5 text-left text-sm text-[var(--admin-on-surface)] outline-none transition-[border-color,box-shadow,background-color] duration-200 hover:border-[var(--admin-outline)] focus:border-[var(--admin-primary)] focus:ring-2 focus:ring-[var(--admin-primary)]/30 disabled:cursor-not-allowed disabled:opacity-50";
 
-export const dropdownPanelSurfaceClassName =
-  `overflow-hidden rounded-xl border border-[var(--admin-border)] ${dropdownPanelEnterClassName}`;
+export const dropdownPanelSurfaceClassName = `overflow-hidden rounded-xl border border-[var(--admin-border)] ${dropdownPanelEnterClassName}`;
 
 /** @deprecated Prefer DropdownField portaled panel; kept for non-portaled menus. */
 export const dropdownPanelClassName = `absolute left-0 right-0 top-[calc(100%+6px)] z-20 bg-[var(--admin-surface)] shadow-lg ${dropdownPanelSurfaceClassName}`;
@@ -65,7 +71,10 @@ type DropdownFieldProps = {
   children: ReactNode;
 };
 
-function computePanelPosition(trigger: HTMLElement, portalZIndex: number): {
+function computePanelPosition(
+  trigger: HTMLElement,
+  portalZIndex: number,
+): {
   style: CSSProperties;
   position: PanelPosition;
 } {
@@ -88,9 +97,7 @@ function computePanelPosition(trigger: HTMLElement, portalZIndex: number): {
     left: rect.left,
     width: rect.width,
     maxHeight,
-    ...(openUpward
-      ? { bottom: window.innerHeight - rect.top + gap }
-      : { top: rect.bottom + gap }),
+    ...(openUpward ? { bottom: window.innerHeight - rect.top + gap } : { top: rect.bottom + gap }),
   };
 
   const style: CSSProperties = {

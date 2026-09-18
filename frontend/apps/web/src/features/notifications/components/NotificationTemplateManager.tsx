@@ -2,16 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import {
-  AlertTriangle,
-  Bell,
-  Eye,
-  Info,
-  Mail,
-  Plus,
-  Search,
-  Trash2,
-} from "lucide-react";
+import { AlertTriangle, Bell, Eye, Info, Mail, Plus, Search, Trash2 } from "lucide-react";
 import type { z } from "zod";
 import { AdminConfirmDialog } from "../../../components/shells/admin/AdminConfirmDialog";
 import { ClientApiError, clientApi } from "../../../lib/client-api";
@@ -57,6 +48,7 @@ import {
   templateVariablesTableClassName,
   templateWorkspaceClassName,
 } from "../notification-templates-admin-shared";
+import { SafeHtml } from "../../../components/SafeHtml";
 
 type TemplateDto = z.infer<typeof notificationTemplateDtoSchema>;
 type TemplateStatus = TemplateDto["status"];
@@ -134,7 +126,8 @@ export function NotificationTemplateManager({
     const query = searchQuery.trim().toLowerCase();
     if (!query) return templates;
     return templates.filter((template) => {
-      const haystack = `${template.key} ${template.channel} ${template.locale} ${templateStatusLabel(template.status)}`.toLowerCase();
+      const haystack =
+        `${template.key} ${template.channel} ${template.locale} ${templateStatusLabel(template.status)}`.toLowerCase();
       return haystack.includes(query);
     });
   }, [searchQuery, templates]);
@@ -488,7 +481,9 @@ export function NotificationTemplateManager({
                 </div>
               ) : filteredTemplates.length === 0 ? (
                 <div className="p-6 text-center text-sm text-[var(--admin-on-surface-variant)]">
-                  {searchQuery.trim() ? "No templates match your search." : "No templates yet. Create one to get started."}
+                  {searchQuery.trim()
+                    ? "No templates match your search."
+                    : "No templates yet. Create one to get started."}
                 </div>
               ) : (
                 <ul>
@@ -649,8 +644,12 @@ export function NotificationTemplateManager({
                     <table className={templateVariablesTableClassName}>
                       <thead className={templateVariablesHeadClassName}>
                         <tr>
-                          <th className="border-b border-[var(--admin-border)] px-3 py-2">Variable</th>
-                          <th className="border-b border-[var(--admin-border)] px-3 py-2">Sample value</th>
+                          <th className="border-b border-[var(--admin-border)] px-3 py-2">
+                            Variable
+                          </th>
+                          <th className="border-b border-[var(--admin-border)] px-3 py-2">
+                            Sample value
+                          </th>
                           <th className="border-b border-[var(--admin-border)] px-3 py-2" />
                         </tr>
                       </thead>
@@ -661,7 +660,8 @@ export function NotificationTemplateManager({
                               colSpan={3}
                               className="px-3 py-4 text-sm text-[var(--admin-on-surface-variant)]"
                             >
-                              No variables declared. Use Insert variable to add preview placeholders.
+                              No variables declared. Use Insert variable to add preview
+                              placeholders.
                             </td>
                           </tr>
                         ) : (
@@ -676,7 +676,9 @@ export function NotificationTemplateManager({
                               <td className="border-b border-[var(--admin-border)] px-3 py-2">
                                 <input
                                   className="w-full border-none bg-transparent p-0 text-sm text-[var(--admin-primary)] outline-none focus:ring-0"
-                                  value={variableSamples[variable.name] ?? sampleMap[variable.name] ?? ""}
+                                  value={
+                                    variableSamples[variable.name] ?? sampleMap[variable.name] ?? ""
+                                  }
                                   onChange={(event) => {
                                     setVariableSamples((current) => ({
                                       ...current,
@@ -708,7 +710,10 @@ export function NotificationTemplateManager({
 
               <div className={templatePreviewPaneClassName}>
                 <div className="mb-4 flex items-center gap-2">
-                  <Eye className="h-4 w-4 text-[var(--admin-on-surface-variant)]" aria-hidden="true" />
+                  <Eye
+                    className="h-4 w-4 text-[var(--admin-on-surface-variant)]"
+                    aria-hidden="true"
+                  />
                   <h4 className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--admin-on-surface-variant)]">
                     Live preview
                   </h4>
@@ -721,31 +726,46 @@ export function NotificationTemplateManager({
                         <span className="w-16 shrink-0 font-medium text-[var(--admin-on-surface-variant)]">
                           Subject
                         </span>
-                        <span className="font-semibold text-[var(--admin-on-surface)]">{previewSubject}</span>
+                        <span className="font-semibold text-[var(--admin-on-surface)]">
+                          {previewSubject}
+                        </span>
                       </div>
                     ) : (
                       <div className="flex gap-3">
                         <span className="w-16 shrink-0 font-medium text-[var(--admin-on-surface-variant)]">
                           Event
                         </span>
-                        <span className="font-semibold text-[var(--admin-on-surface)]">{editorTitle}</span>
+                        <span className="font-semibold text-[var(--admin-on-surface)]">
+                          {editorTitle}
+                        </span>
                       </div>
                     )}
                   </div>
                   <div className={templatePreviewBodyClassName}>
                     {previewParagraphs.length === 0 ? (
-                      <p className="text-[var(--admin-on-surface-variant)]">Start typing to see a preview.</p>
+                      <p className="text-[var(--admin-on-surface-variant)]">
+                        Start typing to see a preview.
+                      </p>
                     ) : (
                       previewParagraphs.map((paragraph, index) => (
-                        <p
-                          key={`preview-paragraph-${String(index)}`}
-                          dangerouslySetInnerHTML={{ __html: renderInlinePreviewHtml(paragraph) }}
-                        />
+                        <p key={`preview-paragraph-${String(index)}`}>
+                          {/* renderInlinePreviewHtml already escapes &<> before adding
+                              <strong>/<br>, so this is not exploitable today — but it
+                              bypassed the single sanctioned render path from 2.3, which
+                              is exactly how the next unescaped helper would slip in. */}
+                          <SafeHtml
+                            as="span"
+                            variant="inline"
+                            html={renderInlinePreviewHtml(paragraph)}
+                          />
+                        </p>
                       ))
                     )}
                     {draftDefaultActionPath ? (
                       <div className="pt-2">
-                        <span className={`${primaryButtonClassName} pointer-events-none inline-flex`}>
+                        <span
+                          className={`${primaryButtonClassName} pointer-events-none inline-flex`}
+                        >
                           View in app
                         </span>
                       </div>
@@ -757,11 +777,17 @@ export function NotificationTemplateManager({
                 </div>
 
                 <div className={templateInfoPanelClassName}>
-                  <Info className="mt-0.5 h-5 w-5 shrink-0 text-[var(--admin-primary)]" aria-hidden="true" />
+                  <Info
+                    className="mt-0.5 h-5 w-5 shrink-0 text-[var(--admin-primary)]"
+                    aria-hidden="true"
+                  />
                   <div>
-                    <p className="text-sm font-medium text-[var(--admin-on-surface)]">Dynamic rendering</p>
+                    <p className="text-sm font-medium text-[var(--admin-on-surface)]">
+                      Dynamic rendering
+                    </p>
                     <p className="mt-1 text-[13px] leading-5 text-[var(--admin-on-surface-variant)]">
-                      This preview reflects your current variables and template content. Unmapped variables stay as raw placeholders.
+                      This preview reflects your current variables and template content. Unmapped
+                      variables stay as raw placeholders.
                     </p>
                   </div>
                 </div>

@@ -6,13 +6,17 @@ const actorMembershipId = "018f0000-0000-7000-8000-000000000020";
 const courseId = "018f0000-0000-7000-8000-000000000030";
 const targetMembershipId = "018f0000-0000-7000-8000-000000000040";
 
-const { mockFindCourseAuthProjection, mockFindMembershipById, mockFindActiveEnrollment, mockInsertEnrollment } =
-  vi.hoisted(() => ({
-    mockFindCourseAuthProjection: vi.fn(),
-    mockFindMembershipById: vi.fn(),
-    mockFindActiveEnrollment: vi.fn(),
-    mockInsertEnrollment: vi.fn(),
-  }));
+const {
+  mockFindCourseAuthProjection,
+  mockFindMembershipById,
+  mockFindActiveEnrollment,
+  mockInsertEnrollment,
+} = vi.hoisted(() => ({
+  mockFindCourseAuthProjection: vi.fn(),
+  mockFindMembershipById: vi.fn(),
+  mockFindActiveEnrollment: vi.fn(),
+  mockInsertEnrollment: vi.fn(),
+}));
 
 vi.mock("../../../backend/apps/api/src/server/courses/courses.repository", () => ({
   findCourseAuthProjection: (...args: unknown[]) => mockFindCourseAuthProjection(...args),

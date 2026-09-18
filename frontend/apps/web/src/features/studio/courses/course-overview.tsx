@@ -11,10 +11,7 @@ import type {
 } from "@atlas/contracts/courses/course-authoring-schemas";
 import type { studioLessonOutlineItemSchema } from "@atlas/contracts/lessons/lesson-schemas";
 import { memberInitials } from "./admin-form-dropdown-shared";
-import {
-  loadInstructorMembers,
-  type InstructorMember,
-} from "./create-course-add-member-dialog";
+import { loadInstructorMembers, type InstructorMember } from "./create-course-add-member-dialog";
 import {
   courseDetailCardClassName,
   courseDetailMutedTextClassName,
@@ -47,15 +44,15 @@ function CreatorAvatar({
   size?: "sm" | "md" | "lg";
 }) {
   const sizeClass =
-    size === "lg" ? "h-12 w-12 text-base" : size === "sm" ? "h-6 w-6 text-[10px]" : "h-8 w-8 text-xs";
+    size === "lg"
+      ? "h-12 w-12 text-base"
+      : size === "sm"
+        ? "h-6 w-6 text-[10px]"
+        : "h-8 w-8 text-xs";
 
   if (avatarUrl) {
     return (
-      <img
-        src={avatarUrl}
-        alt=""
-        className={`${sizeClass} shrink-0 rounded-full object-cover`}
-      />
+      <img src={avatarUrl} alt="" className={`${sizeClass} shrink-0 rounded-full object-cover`} />
     );
   }
 
@@ -88,11 +85,16 @@ function CourseOverviewSidebar({
           <StudioCoursePrice course={course} />
         </p>
         <div className="mt-5 space-y-3">
-          <p className="text-sm font-semibold text-[var(--admin-on-surface)]">This course includes:</p>
+          <p className="text-sm font-semibold text-[var(--admin-on-surface)]">
+            This course includes:
+          </p>
           <ul className="space-y-2">
             {certificateEnabled ? (
               <li className="flex items-center gap-2 text-sm text-[var(--admin-on-surface-variant)]">
-                <Award className="h-4 w-4 shrink-0 text-[var(--admin-primary)]" aria-hidden="true" />
+                <Award
+                  className="h-4 w-4 shrink-0 text-[var(--admin-primary)]"
+                  aria-hidden="true"
+                />
                 Certificate of completion
               </li>
             ) : (

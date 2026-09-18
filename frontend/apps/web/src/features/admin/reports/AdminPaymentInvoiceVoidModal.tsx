@@ -4,10 +4,7 @@ import { AlertTriangle, Ban, Loader2, X } from "lucide-react";
 import { useEffect, useId, useState } from "react";
 import { Select } from "@atlas/design-system";
 import { ClientApiError } from "../../../lib/client-api";
-import {
-  voidPaymentInvoice,
-  type PaymentInvoiceDetail,
-} from "./admin-payments-roster-api";
+import { voidPaymentInvoice, type PaymentInvoiceDetail } from "./admin-payments-roster-api";
 
 type VoidReason = "issued_in_error" | "duplicate" | "amount_incorrect" | "order_refunded";
 
@@ -51,7 +48,9 @@ export function AdminPaymentInvoiceVoidModal({ open, detail, onClose, onVoided }
       if (event.key === "Escape" && !busy) onClose();
     }
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+    };
   }, [open, busy, onClose]);
 
   if (!open) return null;
@@ -92,7 +91,9 @@ export function AdminPaymentInvoiceVoidModal({ open, detail, onClose, onVoided }
         aria-modal="true"
         aria-labelledby={titleId}
         className="relative z-50 flex w-full max-w-lg flex-col border border-[var(--admin-border)] bg-[var(--admin-surface-high)] shadow-2xl"
-        onClick={(event) => event.stopPropagation()}
+        onClick={(event) => {
+          event.stopPropagation();
+        }}
       >
         <div className="flex items-center justify-between border-b border-[var(--admin-border)] bg-[var(--admin-surface)] px-6 py-4">
           <div className="flex items-center gap-2">
@@ -138,7 +139,9 @@ export function AdminPaymentInvoiceVoidModal({ open, detail, onClose, onVoided }
             </label>
             <Select
               value={reason}
-              onValueChange={(value) => setReason(value as VoidReason)}
+              onValueChange={(value) => {
+                setReason(value as VoidReason);
+              }}
               options={[
                 { value: "", label: "Select a reason..." },
                 ...REASONS.map((item) => ({ value: item.value, label: item.label })),

@@ -89,10 +89,16 @@ const COLUMNS: ColumnDef[] = [
   {
     id: "status",
     label: "Status",
-    render: (row) => <span className={statusPillClassName(row.status)}>{titleCase(row.status)}</span>,
+    render: (row) => (
+      <span className={statusPillClassName(row.status)}>{titleCase(row.status)}</span>
+    ),
   },
   { id: "durationType", label: "Duration Type", render: (row) => titleCase(row.durationType) },
-  { id: "nextBillingAt", label: "Next Billing Date", render: (row) => formatDate(row.nextBillingAt) },
+  {
+    id: "nextBillingAt",
+    label: "Next Billing Date",
+    render: (row) => formatDate(row.nextBillingAt),
+  },
   { id: "createdAt", label: "Created On", render: (row) => formatDate(row.createdAt) },
   { id: "updatedAt", label: "Updated On", render: (row) => formatDate(row.updatedAt) },
 ];
@@ -103,7 +109,8 @@ const ROWS_PER_PAGE_OPTIONS = [
   { value: "50", label: "50" },
 ];
 
-const cellClassName = "whitespace-nowrap px-4 py-3.5 text-sm text-[var(--admin-on-surface-variant)]";
+const cellClassName =
+  "whitespace-nowrap px-4 py-3.5 text-sm text-[var(--admin-on-surface-variant)]";
 const headCellClassName =
   "whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-[var(--admin-on-surface-variant)]";
 
@@ -125,7 +132,10 @@ export function AdminSubscriptionsPage({ subscriptions }: AdminSubscriptionsPage
     };
   }, [columnsOpen]);
 
-  const visibleColumns = useMemo(() => COLUMNS.filter((column) => !hidden.has(column.id)), [hidden]);
+  const visibleColumns = useMemo(
+    () => COLUMNS.filter((column) => !hidden.has(column.id)),
+    [hidden],
+  );
 
   const pageCount = Math.max(1, Math.ceil(subscriptions.length / rowsPerPage));
   const currentPage = Math.min(page, pageCount - 1);

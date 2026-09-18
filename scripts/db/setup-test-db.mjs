@@ -107,10 +107,13 @@ async function main() {
   // 3. Seed global catalogues (permissions, flags, entitlements, etc.) into the
   //    test database. Tenant data is intentionally left empty.
   console.log("[setup-test-db] seeding catalogues...");
-  execSync("pnpm exec dotenv -e .env.test -- tsx backend/prisma/seeds/index.ts catalogues --apply", {
-    cwd: repoRoot,
-    stdio: "inherit",
-  });
+  execSync(
+    "pnpm exec dotenv -e .env.test -- tsx backend/prisma/seeds/index.ts catalogues --apply",
+    {
+      cwd: repoRoot,
+      stdio: "inherit",
+    },
+  );
 
   console.log(`[setup-test-db] done. Test database "${testDb}" is ready.`);
 }

@@ -2,6 +2,7 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import type { z } from "zod";
 import { requirePlatformPrincipal } from "@atlas/auth/platform-auth";
+import { assertSameOrigin } from "./assert-same-origin";
 import { ATLAS_PLATFORM_REASON_HEADER } from "@atlas/core/http/headers";
 import { AtlasHttpError } from "@atlas/core/http/errors";
 import { getOrCreateRequestId } from "@atlas/core/request/request-id";
@@ -81,13 +82,13 @@ type PlatformRouteWithParams = (
 
 type PlatformRouteWithoutParams = (req: NextRequest) => Promise<NextResponse>;
 
-type InferParams<TParams extends z.ZodTypeAny | undefined> = TParams extends z.ZodTypeAny
+type InferParams<TParams extends z.ZodType | undefined> = TParams extends z.ZodType
   ? z.infer<TParams>
   : Record<string, never>;
 
 export function createPlatformRoute<
   TQuery = Record<string, never>,
-  TParams extends z.ZodTypeAny | undefined = undefined,
+  TParams extends z.ZodType | undefined = undefined,
   TBody = Record<string, never>,
   TOutput = unknown,
 >(config: {
@@ -98,11 +99,11 @@ export function createPlatformRoute<
   output: z.ZodType<TOutput>;
   handler: PlatformRouteHandler<
     TQuery,
-    TParams extends z.ZodTypeAny ? z.infer<TParams> : Record<string, never>,
+    TParams extends z.ZodType ? z.infer<TParams> : Record<string, never>,
     TBody,
     TOutput
   >;
-}): TParams extends z.ZodTypeAny ? PlatformRouteWithParams : PlatformRouteWithoutParams {
+}): TParams extends z.ZodType ? PlatformRouteWithParams : PlatformRouteWithoutParams {
   async function route(req: NextRequest, routeContext?: PlatformRouteContextArg) {
     const requestId = getOrCreateRequestId(req.headers);
     const pathname = new URL(req.url).pathname;
@@ -114,69 +115,94 @@ export function createPlatformRoute<
           route: pathname,
           routeGroup: inferRouteGroup(pathname),
           actorPlane: "platform",
+          // Log the code this route will actually answer with, derived from the
+          // same envelope the catch below responds with, so the two cannot drift.
+          classifyError: (error) => toSafeErrorEnvelope(error, requestId).body.error.code,
         },
         async () => {
           if (!config.metadata.permission.startsWith("platform.")) {
             throw new Error("Platform route must declare a platform.* permission");
           }
 
-          return await withGlobalDb(async (db) => {
-            const platformPrincipal = await requirePlatformPrincipal({
-              req,
-              db,
-              requiredPermission: config.metadata.permission,
-            });
-
-            const reason =
-              config.metadata.reasonRequired === true
-                ? readPlatformReason(req)
-                : (req.headers.get(ATLAS_PLATFORM_REASON_HEADER)?.trim() ?? "platform.route");
-
-            const idempotencyKey =
-              config.metadata.idempotency === "required"
-                ? readIdempotencyKey(req)
-                : (req.headers.get("idempotency-key")?.trim() ?? "");
-
-            const query = config.query != null ? readQueryInput(req, config.query) : ({} as TQuery);
-            const params: InferParams<TParams> =
-              config.params != null
-                ? (config.params.parse(
-                    routeContext ? await routeContext.params : {},
-                  ) as InferParams<TParams>)
-                : ({} as InferParams<TParams>);
-            const body =
-              config.body != null ? await readBodyInput(req, config.body) : ({} as TBody);
-
-            const ctx: PlatformRouteContext = {
-              platformPrincipalId: platformPrincipal.platformPrincipalId,
-              requestId,
-              reason,
-              idempotencyKey,
-            };
-
-            const result = await withPlatformScope(
-              {
-                principalId: platformPrincipal.platformPrincipalId,
-                requestId,
-                requiredPermission: config.metadata.permission as PlatformPermission,
-                platformPermissions:
-                  platformPrincipal.platformPermissions as readonly PlatformPermission[],
-                route: new URL(req.url).pathname,
-              },
-              reason,
-              async (tx) =>
-                config.handler({
-                  tx,
-                  ctx,
-                  query,
-                  params,
-                  body,
-                }),
-            );
-
-            const bodyOut = config.output.parse(result);
-            return attachRequestIdHeader(NextResponse.json(bodyOut), requestId);
+          // H20. Phase 2.5 named createTenantRoute *and* createPlatformRoute;
+          // only the tenant wrapper got the check, leaving the highest-privilege
+          // surface in the product as the one without CSRF protection.
+          //
+          // There is no tenant to resolve here, so the comparison is against the
+          // request's own Host. That is exactly the right pair for CSRF: in a
+          // browser-driven attack the browser sets Origin to the attacking page
+          // and Host to the target, so a mismatch is the attack and a match
+          // cannot be forged cross-origin.
+          assertSameOrigin({
+            method: req.method,
+            origin: req.headers.get("origin"),
+            host: req.headers.get("host") ?? "",
           });
+
+          // Same un-nesting as createTenantRoute: withPlatformScope used to run
+          // inside withGlobalDb, so each platform request held two pool
+          // connections at once and deadlocked the pool at DATABASE_POOL_MAX
+          // concurrent requests. Operator routes are exactly the ones that must
+          // keep working during an incident, so they get the same treatment.
+          const reason =
+            config.metadata.reasonRequired === true
+              ? readPlatformReason(req)
+              : (req.headers.get(ATLAS_PLATFORM_REASON_HEADER)?.trim() ?? "platform.route");
+
+          const idempotencyKey =
+            config.metadata.idempotency === "required"
+              ? readIdempotencyKey(req)
+              : (req.headers.get("idempotency-key")?.trim() ?? "");
+
+          const query = config.query != null ? readQueryInput(req, config.query) : ({} as TQuery);
+          const params: InferParams<TParams> =
+            config.params != null
+              ? (config.params.parse(
+                  routeContext ? await routeContext.params : {},
+                ) as InferParams<TParams>)
+              : ({} as InferParams<TParams>);
+          const body = config.body != null ? await readBodyInput(req, config.body) : ({} as TBody);
+
+          // First connection: principal resolution, released before the scope
+          // transaction opens.
+          const platformPrincipal = await withGlobalDb(
+            async (db) =>
+              await requirePlatformPrincipal({
+                req,
+                db,
+                requiredPermission: config.metadata.permission,
+              }),
+          );
+
+          const ctx: PlatformRouteContext = {
+            platformPrincipalId: platformPrincipal.platformPrincipalId,
+            requestId,
+            reason,
+            idempotencyKey,
+          };
+
+          const result = await withPlatformScope(
+            {
+              principalId: platformPrincipal.platformPrincipalId,
+              requestId,
+              requiredPermission: config.metadata.permission as PlatformPermission,
+              platformPermissions:
+                platformPrincipal.platformPermissions as readonly PlatformPermission[],
+              route: new URL(req.url).pathname,
+            },
+            reason,
+            async (tx) =>
+              config.handler({
+                tx,
+                ctx,
+                query,
+                params,
+                body,
+              }),
+          );
+
+          const bodyOut = config.output.parse(result);
+          return attachRequestIdHeader(NextResponse.json(bodyOut), requestId);
         },
       );
     } catch (error) {

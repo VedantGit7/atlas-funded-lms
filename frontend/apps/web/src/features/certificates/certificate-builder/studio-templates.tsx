@@ -11,16 +11,7 @@ import { useCallback, useEffect, useMemo, useState, type MouseEvent } from "reac
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Plus_Jakarta_Sans, Cormorant_Garamond, JetBrains_Mono } from "next/font/google";
-import {
-  Search,
-  User,
-  Menu,
-  X,
-  Plus,
-  Star,
-  ChevronDown,
-  LayoutTemplate,
-} from "lucide-react";
+import { Search, User, Menu, X, Plus, Star, ChevronDown, LayoutTemplate } from "lucide-react";
 import {
   GALLERY_CATEGORY_CHIPS,
   type GalleryCategory,
@@ -159,7 +150,9 @@ export function CertificateStudioTemplates({
         className="cert-tpl__menu-btn"
         aria-label={sidebarOpen ? "Close navigation" : "Open navigation"}
         aria-expanded={sidebarOpen}
-        onClick={() => setSidebarOpen((o) => !o)}
+        onClick={() => {
+          setSidebarOpen((o) => !o);
+        }}
       >
         {sidebarOpen ? <X size={18} strokeWidth={2} /> : <Menu size={18} strokeWidth={2} />}
       </button>
@@ -167,7 +160,9 @@ export function CertificateStudioTemplates({
       <div
         className="cert-tpl__backdrop"
         data-open={sidebarOpen ? "true" : "false"}
-        onClick={() => setSidebarOpen(false)}
+        onClick={() => {
+          setSidebarOpen(false);
+        }}
         aria-hidden
       />
 
@@ -187,7 +182,9 @@ export function CertificateStudioTemplates({
                 href={item.href}
                 className="cert-tpl__nav-link"
                 data-active={active ? "true" : "false"}
-                onClick={() => setSidebarOpen(false)}
+                onClick={() => {
+                  setSidebarOpen(false);
+                }}
               >
                 <Icon size={20} strokeWidth={1.75} aria-hidden />
                 <span>{item.label}</span>
@@ -222,7 +219,9 @@ export function CertificateStudioTemplates({
                 type="search"
                 placeholder="Search templates..."
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                }}
               />
             </label>
             <button type="button" className="cert-tpl__blank-btn" onClick={onBlank}>
@@ -241,7 +240,9 @@ export function CertificateStudioTemplates({
               aria-selected={filter === chip.id}
               className="cert-tpl__chip"
               data-active={filter === chip.id ? "true" : "false"}
-              onClick={() => setFilter(chip.id)}
+              onClick={() => {
+                setFilter(chip.id);
+              }}
             >
               {chip.label}
             </button>
@@ -266,7 +267,12 @@ export function CertificateStudioTemplates({
               const usageLabel = formatUsageLabel(usage[starter.id]);
               return (
                 <article key={starter.id} className="cert-tpl__card">
-                  <div className="cert-tpl__artifact" onClick={() => handleUse(starter)}>
+                  <div
+                    className="cert-tpl__artifact"
+                    onClick={() => {
+                      handleUse(starter);
+                    }}
+                  >
                     <div className="cert-tpl__preview">
                       <StudioDocPreview document={starter.document} />
                     </div>
@@ -276,7 +282,9 @@ export function CertificateStudioTemplates({
                       data-active={isFav ? "true" : "false"}
                       aria-label={isFav ? `Unfavorite ${starter.name}` : `Favorite ${starter.name}`}
                       aria-pressed={isFav}
-                      onClick={(e) => toggleFavorite(e, starter.id)}
+                      onClick={(e) => {
+                        toggleFavorite(e, starter.id);
+                      }}
                     >
                       <Star
                         size={18}
@@ -289,7 +297,9 @@ export function CertificateStudioTemplates({
                       <button
                         type="button"
                         className="cert-tpl__use-btn"
-                        onClick={() => handleUse(starter)}
+                        onClick={() => {
+                          handleUse(starter);
+                        }}
                       >
                         Use template
                       </button>
@@ -304,7 +314,9 @@ export function CertificateStudioTemplates({
                             all: "unset",
                             cursor: "pointer",
                           }}
-                          onClick={() => handleUse(starter)}
+                          onClick={() => {
+                            handleUse(starter);
+                          }}
                         >
                           {starter.name}
                         </button>
@@ -328,7 +340,9 @@ export function CertificateStudioTemplates({
             <button
               type="button"
               className="cert-tpl__load-more-btn"
-              onClick={() => setVisibleCount((n) => n + PAGE_SIZE)}
+              onClick={() => {
+                setVisibleCount((n) => n + PAGE_SIZE);
+              }}
             >
               Load more templates
               <ChevronDown size={18} strokeWidth={2} aria-hidden />

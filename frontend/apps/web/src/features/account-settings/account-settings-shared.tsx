@@ -48,7 +48,12 @@ export const SETTINGS_TABS: SettingsTab[] = [
     shortLabel: "Affiliate",
     icon: Handshake,
   },
-  { href: "/profile/notifications", label: "Notifications", shortLabel: "Notifications", icon: Bell },
+  {
+    href: "/profile/notifications",
+    label: "Notifications",
+    shortLabel: "Notifications",
+    icon: Bell,
+  },
   {
     href: "/profile/appearance",
     label: "Appearance & accessibility",
@@ -154,7 +159,9 @@ export function AccountSettingsSidebar({
 }) {
   return (
     <aside className="sticky top-0 hidden max-h-[calc(100vh-1px)] w-64 shrink-0 flex-col self-start border-r border-[var(--acct-border)] bg-[var(--acct-surface)] md:flex">
-      {header ? <div className="border-b border-[var(--acct-border)] px-4 py-4">{header}</div> : null}
+      {header ? (
+        <div className="border-b border-[var(--acct-border)] px-4 py-4">{header}</div>
+      ) : null}
 
       <nav
         aria-label="Account settings sections"

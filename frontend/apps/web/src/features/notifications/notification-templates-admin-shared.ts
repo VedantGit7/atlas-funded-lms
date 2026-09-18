@@ -18,8 +18,7 @@ export const templateListPanelClassName =
 export const templateListHeaderClassName =
   "flex items-start justify-between gap-3 border-b border-[var(--admin-border)] p-4 sm:p-5";
 
-export const templateListScrollClassName =
-  "custom-scrollbar flex-1 overflow-y-auto";
+export const templateListScrollClassName = "custom-scrollbar flex-1 overflow-y-auto";
 
 export const templateListItemClassName =
   "cursor-pointer border-b border-[var(--admin-border)] p-4 motion-safe:transition-colors hover:bg-[var(--admin-surface-high)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--admin-primary)]/30";
@@ -27,8 +26,7 @@ export const templateListItemClassName =
 export const templateListItemSelectedClassName =
   "border-l-4 border-l-[var(--admin-primary)] bg-[color-mix(in_srgb,var(--admin-primary)_6%,var(--admin-surface))]";
 
-export const templateEditorPanelClassName =
-  "flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden";
+export const templateEditorPanelClassName = "flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden";
 
 export const templateEditorHeaderClassName =
   "flex flex-wrap items-center justify-between gap-3 border-b border-[var(--admin-border)] px-4 py-4 sm:px-6";
@@ -72,11 +70,8 @@ export const templateVariablesHeadClassName =
 
 export const templateSearchFieldClassName = notificationsSearchFieldClassName;
 
-export function templateStatusBadgeClassName(
-  status: "ACTIVE" | "INACTIVE" | "ARCHIVED",
-): string {
-  const base =
-    "rounded px-1.5 py-0.5 text-[10px] font-bold uppercase leading-tight tracking-wide";
+export function templateStatusBadgeClassName(status: "ACTIVE" | "INACTIVE" | "ARCHIVED"): string {
+  const base = "rounded px-1.5 py-0.5 text-[10px] font-bold uppercase leading-tight tracking-wide";
   switch (status) {
     case "ACTIVE":
       return `${base} bg-[color-mix(in_srgb,var(--admin-success)_14%,transparent)] text-[var(--admin-success)]`;

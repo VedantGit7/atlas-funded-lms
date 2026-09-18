@@ -50,7 +50,7 @@ export function DomainDnsVerificationPanel({ domain }: DomainDnsVerificationPane
     }
   }
 
-  async function refreshStatus() {
+  function refreshStatus() {
     setRefreshing(true);
     router.refresh();
     setSecondsUntilRefresh(POLL_INTERVAL_SECONDS);
@@ -131,7 +131,7 @@ export function DomainDnsVerificationPanel({ domain }: DomainDnsVerificationPane
             type="button"
             disabled={refreshing}
             onClick={() => {
-              void refreshStatus();
+              refreshStatus();
             }}
             className={`${outlineButtonClassName} inline-flex items-center gap-2`}
           >

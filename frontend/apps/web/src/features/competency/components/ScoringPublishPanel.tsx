@@ -148,8 +148,7 @@ export function ScoringPublishPanel({
               </p>
               <ul className="space-y-2 text-sm text-[var(--admin-on-surface)]">
                 <li className="rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-3 py-2">
-                  Profile:{" "}
-                  <span className="font-semibold">{selectedProfile?.name ?? "—"}</span>
+                  Profile: <span className="font-semibold">{selectedProfile?.name ?? "—"}</span>
                 </li>
                 <li className="rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-3 py-2">
                   {dimensionCount} dimension{dimensionCount === 1 ? "" : "s"} · {bandCount} band
@@ -172,7 +171,10 @@ export function ScoringPublishPanel({
               </div>
             ) : null}
             <div className={alertInfoClassName}>
-              <Info className="mt-0.5 h-4 w-4 shrink-0 text-[var(--admin-primary)]" aria-hidden="true" />
+              <Info
+                className="mt-0.5 h-4 w-4 shrink-0 text-[var(--admin-primary)]"
+                aria-hidden="true"
+              />
               <span>Publishing applies to new competency evaluations using this profile.</span>
             </div>
           </div>

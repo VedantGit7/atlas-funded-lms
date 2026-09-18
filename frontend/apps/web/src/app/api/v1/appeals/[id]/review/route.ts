@@ -20,5 +20,5 @@ export const POST = createTenantRoute<
   params: appealIdParamsSchema,
   body: reviewAppealBodySchema,
   output: reviewAppealResponseSchema,
-  handler: async ({ tx, ctx, params, input }) => reviewAppeal(tx, ctx, params["id"] ?? "", input),
+  handler: async ({ tx, ctx, params, input }) => reviewAppeal(tx, ctx, params.id, input),
 });

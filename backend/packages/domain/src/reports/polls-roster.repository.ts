@@ -1,5 +1,10 @@
 import type { TenantTx } from "@atlas/db";
-import type { PollNonRespondentsQuery, PollRespondentsQuery, PollsListQuery } from "./polls-roster.dto";
+import type {
+  PollNonRespondentsQuery,
+  PollRespondentsQuery,
+  PollsListQuery,
+} from "./polls-roster.dto";
+import { textColumn } from "./raw-column";
 
 export type PollListRow = {
   id: string;
@@ -86,18 +91,17 @@ export type PollOptionSegmentRow = {
 
 function mapPollListRow(row: Record<string, unknown>): PollListRow {
   return {
-    id: String(row["id"]),
-    title: String(row["title"]),
+    id: textColumn(row["id"]),
+    title: textColumn(row["title"]),
     description: typeof row["description"] === "string" ? row["description"] : null,
-    poll_type: String(row["poll_type"] ?? "multiple_choice"),
-    status: String(row["status"]),
+    poll_type: textColumn(row["poll_type"], "multiple_choice"),
+    status: textColumn(row["status"]),
     quiz_mode: Boolean(row["quiz_mode"]),
     allow_multiple_answers: Boolean(row["allow_multiple_answers"]),
     anonymous_vote: Boolean(row["anonymous_vote"]),
-    result_visibility: String(row["result_visibility"] ?? "after_vote"),
-    layout: String(row["layout"] ?? "list"),
-    duration_seconds:
-      row["duration_seconds"] == null ? null : Number(row["duration_seconds"]),
+    result_visibility: textColumn(row["result_visibility"], "after_vote"),
+    layout: textColumn(row["layout"], "list"),
+    duration_seconds: row["duration_seconds"] == null ? null : Number(row["duration_seconds"]),
     live_session_id: typeof row["live_session_id"] === "string" ? row["live_session_id"] : null,
     live_session_title:
       typeof row["live_session_title"] === "string" ? row["live_session_title"] : null,
@@ -105,15 +109,14 @@ function mapPollListRow(row: Record<string, unknown>): PollListRow {
     is_open: Boolean(row["is_open"]),
     response_count: Number(row["response_count"] ?? 0),
     option_count: Number(row["option_count"] ?? 0),
-    participation_pct:
-      row["participation_pct"] == null ? null : Number(row["participation_pct"]),
+    participation_pct: row["participation_pct"] == null ? null : Number(row["participation_pct"]),
     created_at: row["created_at"] as Date,
   };
 }
 
 export const pollsRosterRepository = {
   async countPolls(tx: TenantTx, query: PollsListQuery): Promise<number> {
-    const view = query.view ?? "all";
+    const view = query.view;
     const rows = await tx.$queryRaw<Array<{ count: bigint }>>`
       select count(*)::bigint as count
       from polls p
@@ -163,7 +166,7 @@ export const pollsRosterRepository = {
 
   async listPolls(tx: TenantTx, query: PollsListQuery): Promise<PollListRow[]> {
     const skip = (query.page - 1) * query.limit;
-    const view = query.view ?? "all";
+    const view = query.view;
     const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
       select
         p.id::text as id,
@@ -381,9 +384,7 @@ export const pollsRosterRepository = {
       total_responses: Number(row["total_responses"] ?? 0),
       poll_count: Number(row["poll_count"] ?? 0),
       avg_participation_pct:
-        row["avg_participation_pct"] == null
-          ? null
-          : Number(row["avg_participation_pct"]),
+        row["avg_participation_pct"] == null ? null : Number(row["avg_participation_pct"]),
       quiz_poll_count: Number(row["quiz_poll_count"] ?? 0),
       avg_quiz_correct_pct:
         row["avg_quiz_correct_pct"] == null ? null : Number(row["avg_quiz_correct_pct"]),
@@ -476,8 +477,8 @@ export const pollsRosterRepository = {
       order by po.sort_order asc
     `;
     return rows.map((row) => ({
-      option_id: String(row["option_id"]),
-      label: String(row["label"]),
+      option_id: textColumn(row["option_id"]),
+      label: textColumn(row["label"]),
       sort_order: Number(row["sort_order"] ?? 0),
       is_correct: Boolean(row["is_correct"]),
       count: Number(row["count"] ?? 0),
@@ -552,13 +553,9 @@ export const pollsRosterRepository = {
       eligible_count: row["eligible_count"] == null ? null : Number(row["eligible_count"]),
       correct_count: Number(row["correct_count"] ?? 0),
       median_response_seconds:
-        row["median_response_seconds"] == null
-          ? null
-          : Number(row["median_response_seconds"]),
-      first_response_at:
-        row["first_response_at"] instanceof Date ? row["first_response_at"] : null,
-      last_response_at:
-        row["last_response_at"] instanceof Date ? row["last_response_at"] : null,
+        row["median_response_seconds"] == null ? null : Number(row["median_response_seconds"]),
+      first_response_at: row["first_response_at"] instanceof Date ? row["first_response_at"] : null,
+      last_response_at: row["last_response_at"] instanceof Date ? row["last_response_at"] : null,
       response_offsets,
     };
   },
@@ -607,7 +604,7 @@ export const pollsRosterRepository = {
     query: PollRespondentsQuery,
   ): Promise<PollRespondentRow[]> {
     const skip = (query.page - 1) * query.limit;
-    const isCorrect = query.isCorrect ?? "any";
+    const isCorrect = query.isCorrect;
     const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
       select
         pr.membership_id::text as membership_id,
@@ -664,14 +661,13 @@ export const pollsRosterRepository = {
     `;
 
     return rows.map((row) => ({
-      membership_id: String(row["membership_id"]),
+      membership_id: textColumn(row["membership_id"]),
       learner_name: typeof row["learner_name"] === "string" ? row["learner_name"] : null,
       email: typeof row["email"] === "string" ? row["email"] : null,
-      option_id: String(row["option_id"]),
-      option_label: String(row["option_label"]),
+      option_id: textColumn(row["option_id"]),
+      option_label: textColumn(row["option_label"]),
       is_correct: Boolean(row["is_correct"]),
-      response_seconds:
-        row["response_seconds"] == null ? null : Number(row["response_seconds"]),
+      response_seconds: row["response_seconds"] == null ? null : Number(row["response_seconds"]),
       responded_at: row["responded_at"] as Date,
     }));
   },
@@ -796,8 +792,8 @@ export const pollsRosterRepository = {
       limit 8
     `;
     return rows.map((row) => ({
-      key: String(row["key"]),
-      label: String(row["label"]),
+      key: textColumn(row["key"]),
+      label: textColumn(row["label"]),
       count: Number(row["count"] ?? 0),
     }));
   },
@@ -849,8 +845,7 @@ export const pollsRosterRepository = {
     const row = rows[0];
     if (!row) return null;
     return {
-      live_session_id:
-        typeof row["live_session_id"] === "string" ? row["live_session_id"] : null,
+      live_session_id: typeof row["live_session_id"] === "string" ? row["live_session_id"] : null,
       live_session_title:
         typeof row["live_session_title"] === "string" ? row["live_session_title"] : null,
       batch_id: typeof row["batch_id"] === "string" ? row["batch_id"] : null,
@@ -973,7 +968,7 @@ export const pollsRosterRepository = {
     source: "live_session" | "batch",
     query: PollNonRespondentsQuery,
   ): Promise<number> {
-    const presence = query.excludeAbsent ? "present" : (query.presence ?? "any");
+    const presence = query.excludeAbsent ? "present" : query.presence;
     const rows =
       source === "live_session"
         ? await tx.$queryRaw<Array<{ count: bigint }>>`
@@ -1071,7 +1066,7 @@ export const pollsRosterRepository = {
     }>
   > {
     const skip = (query.page - 1) * query.limit;
-    const presence = query.excludeAbsent ? "present" : (query.presence ?? "any");
+    const presence = query.excludeAbsent ? "present" : query.presence;
     const rows =
       source === "live_session"
         ? await tx.$queryRaw<Array<Record<string, unknown>>>`
@@ -1268,7 +1263,7 @@ export const pollsRosterRepository = {
           `;
 
     return rows.map((row) => ({
-      membership_id: String(row["membership_id"]),
+      membership_id: textColumn(row["membership_id"]),
       learner_name: typeof row["learner_name"] === "string" ? row["learner_name"] : null,
       email: typeof row["email"] === "string" ? row["email"] : null,
       batch_id: typeof row["batch_id"] === "string" ? row["batch_id"] : null,
@@ -1276,16 +1271,11 @@ export const pollsRosterRepository = {
       presence: row["presence"] === "present" ? ("present" as const) : ("absent" as const),
       watch_seconds: row["watch_seconds"] == null ? null : Number(row["watch_seconds"]),
       polls_answered: Number(row["polls_answered"] ?? 0),
-      last_response_at:
-        row["last_response_at"] instanceof Date ? row["last_response_at"] : null,
+      last_response_at: row["last_response_at"] instanceof Date ? row["last_response_at"] : null,
     }));
   },
 
-  async setPollClosesAt(
-    tx: TenantTx,
-    pollId: string,
-    closesAt: Date,
-  ): Promise<Date | null> {
+  async setPollClosesAt(tx: TenantTx, pollId: string, closesAt: Date): Promise<Date | null> {
     const rows = await tx.$queryRaw<Array<{ closes_at: Date }>>`
       update polls
       set closes_at = ${closesAt}::timestamptz, updated_at = now()
@@ -1327,10 +1317,10 @@ export const pollsRosterRepository = {
       limit ${limit}
     `;
     return rows.map((row) => ({
-      membership_id: String(row["membership_id"]),
+      membership_id: textColumn(row["membership_id"]),
       learner_name: typeof row["learner_name"] === "string" ? row["learner_name"] : null,
-      option_id: String(row["option_id"]),
-      option_label: String(row["option_label"]),
+      option_id: textColumn(row["option_id"]),
+      option_label: textColumn(row["option_label"]),
       responded_at: row["responded_at"] as Date,
     }));
   },
@@ -1411,9 +1401,9 @@ export const pollsRosterRepository = {
         ? row["recording_url"]
         : null;
     return {
-      id: String(row["id"]),
-      title: String(row["title"] ?? "Live session"),
-      status: String(row["status"] ?? "scheduled"),
+      id: textColumn(row["id"]),
+      title: textColumn(row["title"], "Live session"),
+      status: textColumn(row["status"], "scheduled"),
       scheduled_at: row["scheduled_at"] instanceof Date ? row["scheduled_at"] : null,
       started_at: row["started_at"] instanceof Date ? row["started_at"] : null,
       ended_at: row["ended_at"] instanceof Date ? row["ended_at"] : null,
@@ -1421,9 +1411,7 @@ export const pollsRosterRepository = {
       recording_url: recordingUrl,
       timezone_label: typeof row["timezone_label"] === "string" ? row["timezone_label"] : null,
       planned_duration_minutes:
-        row["planned_duration_minutes"] == null
-          ? null
-          : Number(row["planned_duration_minutes"]),
+        row["planned_duration_minutes"] == null ? null : Number(row["planned_duration_minutes"]),
       batch_id: typeof row["batch_id"] === "string" ? row["batch_id"] : null,
       batch_name: typeof row["batch_name"] === "string" ? row["batch_name"] : null,
       course_id: typeof row["course_id"] === "string" ? row["course_id"] : null,
@@ -1517,8 +1505,7 @@ export const pollsRosterRepository = {
       .map((row) => ({
         joined_at: row["joined_at"] as Date,
         left_at: row["left_at"] instanceof Date ? row["left_at"] : null,
-        duration_seconds:
-          row["duration_seconds"] == null ? null : Number(row["duration_seconds"]),
+        duration_seconds: row["duration_seconds"] == null ? null : Number(row["duration_seconds"]),
       }));
   },
 
@@ -1549,7 +1536,7 @@ export const pollsRosterRepository = {
       limit ${limit}
     `;
     return rows.map((row) => ({
-      membership_id: String(row["membership_id"]),
+      membership_id: textColumn(row["membership_id"]),
       learner_name: typeof row["learner_name"] === "string" ? row["learner_name"] : null,
       email: typeof row["email"] === "string" ? row["email"] : null,
     }));
@@ -1581,16 +1568,13 @@ export const pollsRosterRepository = {
         and p.anonymous_vote = false
     `;
     return rows.map((row) => ({
-      poll_id: String(row["poll_id"]),
-      membership_id: String(row["membership_id"]),
+      poll_id: textColumn(row["poll_id"]),
+      membership_id: textColumn(row["membership_id"]),
       is_correct: row["is_correct"] == null ? null : Boolean(row["is_correct"]),
     }));
   },
 
-  async countAnsweredEveryTrackedPoll(
-    tx: TenantTx,
-    liveSessionId: string,
-  ): Promise<number> {
+  async countAnsweredEveryTrackedPoll(tx: TenantTx, liveSessionId: string): Promise<number> {
     const rows = await tx.$queryRaw<Array<{ count: bigint }>>`
       with tracked_polls as (
         select p.id
@@ -1625,10 +1609,7 @@ export const pollsRosterRepository = {
     return Number(rows[0]?.count ?? 0);
   },
 
-  async countLiveSessionsWithPolls(
-    tx: TenantTx,
-    query: { q?: string },
-  ): Promise<number> {
+  async countLiveSessionsWithPolls(tx: TenantTx, query: { q?: string }): Promise<number> {
     const rows = await tx.$queryRaw<Array<{ count: bigint }>>`
       select count(*)::bigint as count
       from live_sessions ls
@@ -1748,9 +1729,9 @@ export const pollsRosterRepository = {
       offset ${offset}
     `;
     return rows.map((row) => ({
-      id: String(row["id"]),
-      title: String(row["title"] ?? "Live session"),
-      status: String(row["status"] ?? "scheduled"),
+      id: textColumn(row["id"]),
+      title: textColumn(row["title"], "Live session"),
+      status: textColumn(row["status"], "scheduled"),
       scheduled_at: row["scheduled_at"] instanceof Date ? row["scheduled_at"] : null,
       started_at: row["started_at"] instanceof Date ? row["started_at"] : null,
       ended_at: row["ended_at"] instanceof Date ? row["ended_at"] : null,

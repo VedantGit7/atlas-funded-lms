@@ -148,7 +148,7 @@ function learnerInitials(row: CustomFieldDetailLearner): string {
   const source = row.learnerName?.trim() || row.email?.trim() || "?";
   const parts = source.split(/\s+/).filter(Boolean);
   if (parts.length >= 2) {
-    return `${parts[0]![0] ?? ""}${parts[1]![0] ?? ""}`.toUpperCase();
+    return `${parts[0]?.[0] ?? ""}${parts[1]?.[0] ?? ""}`.toUpperCase();
   }
   return source.slice(0, 2).toUpperCase();
 }
@@ -205,7 +205,10 @@ function FieldValueCell({ value, fieldType }: { value: string | null; fieldType:
   }
 
   return (
-    <span className="max-w-[180px] truncate text-[13px] text-[var(--admin-on-surface)]" title={value}>
+    <span
+      className="max-w-[180px] truncate text-[13px] text-[var(--admin-on-surface)]"
+      title={value}
+    >
       {value}
     </span>
   );
@@ -219,7 +222,9 @@ function CopyKeyButton({ value }: { value: string }) {
     try {
       await navigator.clipboard.writeText(value);
       setCopied(true);
-      window.setTimeout(() => setCopied(false), 1200);
+      window.setTimeout(() => {
+        setCopied(false);
+      }, 1200);
     } catch {
       // ignore
     }
@@ -228,7 +233,7 @@ function CopyKeyButton({ value }: { value: string }) {
   return (
     <button
       type="button"
-      onClick={handleCopy}
+      onClick={(event) => void handleCopy(event)}
       className="inline-flex items-center text-[var(--admin-on-surface-variant)] transition-colors hover:text-[var(--admin-primary)]"
       aria-label={`Copy key ${value}`}
       title="Copy key"
@@ -333,7 +338,9 @@ function DistributionBar({
     <>
       <div className="flex items-baseline justify-between gap-3">
         <div className="min-w-0">
-          <span className="truncate text-sm font-medium text-[var(--admin-on-surface)]">{label}</span>
+          <span className="truncate text-sm font-medium text-[var(--admin-on-surface)]">
+            {label}
+          </span>
           {unused ? (
             <span className="ml-2 font-mono text-[10px] text-[var(--admin-on-surface-variant)]">
               Defined but unused
@@ -365,7 +372,9 @@ function DistributionBar({
         onClick={onClick}
         className={[
           "flex w-full flex-col gap-1.5 rounded-sm text-left transition-colors",
-          active ? "bg-[color-mix(in_srgb,var(--admin-primary)_6%,transparent)]" : "hover:bg-[var(--admin-surface-high)]",
+          active
+            ? "bg-[color-mix(in_srgb,var(--admin-primary)_6%,transparent)]"
+            : "hover:bg-[var(--admin-surface-high)]",
         ].join(" ")}
       >
         {content}
@@ -403,9 +412,9 @@ function SelectDistribution({
             sharePct={option.sharePct}
             leading={option.count === maxCount && option.count > 0}
             active={valueFilter === option.value}
-            onClick={() =>
-              onFilterValue(valueFilter === option.value ? null : option.value)
-            }
+            onClick={() => {
+              onFilterValue(valueFilter === option.value ? null : option.value);
+            }}
           />
         ))}
         {unused.map((option) => (
@@ -438,7 +447,9 @@ function SelectDistribution({
                 className="flex items-center justify-between gap-3 rounded-sm border border-[color-mix(in_srgb,var(--admin-warning)_25%,var(--admin-border))] bg-[color-mix(in_srgb,var(--admin-warning)_6%,var(--admin-surface))] px-3 py-2"
               >
                 <div className="min-w-0">
-                  <span className="truncate text-sm text-[var(--admin-on-surface)]">{orphan.value}</span>
+                  <span className="truncate text-sm text-[var(--admin-on-surface)]">
+                    {orphan.value}
+                  </span>
                   <span className="ml-2 inline-flex items-center rounded-sm border border-[var(--admin-warning)] px-1.5 py-0.5 font-mono text-[10px] font-semibold uppercase text-[var(--admin-warning)]">
                     Orphaned value
                   </span>
@@ -469,7 +480,12 @@ function CrossTabulationPanel({
   if (compareFields.length === 0) return null;
 
   const maxCell = crossTab
-    ? Math.max(1, ...crossTab.cells.flatMap((row) => row), ...crossTab.rowTotals, ...crossTab.columnTotals)
+    ? Math.max(
+        1,
+        ...crossTab.cells.flatMap((row) => row),
+        ...crossTab.rowTotals,
+        ...crossTab.columnTotals,
+      )
     : 1;
 
   return (
@@ -585,7 +601,9 @@ function NumberDistribution({ data }: { data: CustomFieldDetailNumber }) {
   const rangeMax = stats.max ?? data.buckets[data.buckets.length - 1]?.max ?? 1;
   const span = rangeMax - rangeMin || 1;
   const medianLeft =
-    stats.median == null ? null : Math.min(100, Math.max(0, ((stats.median - rangeMin) / span) * 100));
+    stats.median == null
+      ? null
+      : Math.min(100, Math.max(0, ((stats.median - rangeMin) / span) * 100));
 
   return (
     <section className="rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] p-4 md:p-6">
@@ -627,20 +645,34 @@ function NumberDistribution({ data }: { data: CustomFieldDetailNumber }) {
           </div>
           <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1 font-mono text-[11px] text-[var(--admin-on-surface-variant)]">
             <span>
-              min <strong className="font-medium text-[var(--admin-on-surface)]">{formatStatNumber(stats.min)}</strong>
+              min{" "}
+              <strong className="font-medium text-[var(--admin-on-surface)]">
+                {formatStatNumber(stats.min)}
+              </strong>
             </span>
             <span>
               median{" "}
-              <strong className="font-medium text-[var(--admin-on-surface)]">{formatStatNumber(stats.median)}</strong>
+              <strong className="font-medium text-[var(--admin-on-surface)]">
+                {formatStatNumber(stats.median)}
+              </strong>
             </span>
             <span>
-              mean <strong className="font-medium text-[var(--admin-on-surface)]">{formatStatNumber(stats.mean)}</strong>
+              mean{" "}
+              <strong className="font-medium text-[var(--admin-on-surface)]">
+                {formatStatNumber(stats.mean)}
+              </strong>
             </span>
             <span>
-              max <strong className="font-medium text-[var(--admin-on-surface)]">{formatStatNumber(stats.max)}</strong>
+              max{" "}
+              <strong className="font-medium text-[var(--admin-on-surface)]">
+                {formatStatNumber(stats.max)}
+              </strong>
             </span>
             <span>
-              σ <strong className="font-medium text-[var(--admin-on-surface)]">{formatStatNumber(stats.stdDev)}</strong>
+              σ{" "}
+              <strong className="font-medium text-[var(--admin-on-surface)]">
+                {formatStatNumber(stats.stdDev)}
+              </strong>
             </span>
           </div>
         </div>
@@ -700,11 +732,7 @@ function NumberDistribution({ data }: { data: CustomFieldDetailNumber }) {
   );
 }
 
-function BooleanSparkline({
-  points,
-}: {
-  points: CustomFieldDetailBoolean["trend"];
-}) {
+function BooleanSparkline({ points }: { points: CustomFieldDetailBoolean["trend"] }) {
   const width = 280;
   const height = 64;
   const values = points.map((point) => point.yesSharePct ?? 0);
@@ -809,7 +837,9 @@ function BooleanDistribution({ data }: { data: CustomFieldDetailBoolean }) {
         </h3>
         <BooleanSparkline points={data.trend} />
         {data.trendCaption ? (
-          <p className="mt-2 text-[12px] text-[var(--admin-on-surface-variant)]">{data.trendCaption}</p>
+          <p className="mt-2 text-[12px] text-[var(--admin-on-surface-variant)]">
+            {data.trendCaption}
+          </p>
         ) : null}
       </div>
     </section>
@@ -906,8 +936,12 @@ export function AdminCustomFieldDetailPage({ fieldKey }: { fieldKey: string }) {
   const [groupTitle, setGroupTitle] = useState("");
 
   useEffect(() => {
-    const timer = window.setTimeout(() => setDebouncedSearch(searchInput.trim()), 300);
-    return () => window.clearTimeout(timer);
+    const timer = window.setTimeout(() => {
+      setDebouncedSearch(searchInput.trim());
+    }, 300);
+    return () => {
+      window.clearTimeout(timer);
+    };
   }, [searchInput]);
 
   useEffect(() => {
@@ -954,15 +988,7 @@ export function AdminCustomFieldDetailPage({ fieldKey }: { fieldKey: string }) {
     } finally {
       setLoading(false);
     }
-  }, [
-    appliedMaxValue,
-    appliedMinValue,
-    compareWith,
-    debouncedSearch,
-    fieldKey,
-    page,
-    valueFilter,
-  ]);
+  }, [appliedMaxValue, appliedMinValue, compareWith, debouncedSearch, fieldKey, page, valueFilter]);
 
   useEffect(() => {
     void load();
@@ -974,10 +1000,7 @@ export function AdminCustomFieldDetailPage({ fieldKey }: { fieldKey: string }) {
   const summary = detail?.summary;
   const fieldType = field?.fieldType.toLowerCase() ?? "";
   const selectedCompare =
-    compareWith ||
-    detail?.crossTab?.otherField.key ||
-    detail?.compareFields[0]?.key ||
-    "";
+    compareWith || detail?.crossTab?.otherField.key || detail?.compareFields[0]?.key || "";
   const selectOptionValues = useMemo(() => {
     if (!detail?.select) return field?.options ?? [];
     const fromOptions = detail.select.options.map((option) => option.value);
@@ -1019,12 +1042,8 @@ export function AdminCustomFieldDetailPage({ fieldKey }: { fieldKey: string }) {
     const maxRaw = maxValueInput.trim();
     const minParsed = minRaw === "" ? undefined : Number(minRaw);
     const maxParsed = maxRaw === "" ? undefined : Number(maxRaw);
-    setAppliedMinValue(
-      minParsed != null && !Number.isNaN(minParsed) ? minParsed : undefined,
-    );
-    setAppliedMaxValue(
-      maxParsed != null && !Number.isNaN(maxParsed) ? maxParsed : undefined,
-    );
+    setAppliedMinValue(minParsed != null && !Number.isNaN(minParsed) ? minParsed : undefined);
+    setAppliedMaxValue(maxParsed != null && !Number.isNaN(maxParsed) ? maxParsed : undefined);
     setPage(1);
   }
 
@@ -1221,7 +1240,9 @@ export function AdminCustomFieldDetailPage({ fieldKey }: { fieldKey: string }) {
             type="button"
             className={ghostButtonClassName}
             disabled={busy || learners.length === 0}
-            onClick={() => handleClientCsvExport(false)}
+            onClick={() => {
+              handleClientCsvExport(false);
+            }}
           >
             <Download className="h-4 w-4" aria-hidden />
             Export CSV
@@ -1233,7 +1254,9 @@ export function AdminCustomFieldDetailPage({ fieldKey }: { fieldKey: string }) {
           <button
             type="button"
             className={primaryButtonClassName}
-            onClick={() => setActionsOpen((open) => !open)}
+            onClick={() => {
+              setActionsOpen((open) => !open);
+            }}
           >
             Cohort actions
           </button>
@@ -1271,22 +1294,23 @@ export function AdminCustomFieldDetailPage({ fieldKey }: { fieldKey: string }) {
               className={filterInputClassName}
               placeholder="Subject"
               value={messageSubject}
-              onChange={(event) => setMessageSubject(event.target.value)}
+              onChange={(event) => {
+                setMessageSubject(event.target.value);
+              }}
             />
             <textarea
               className={`${filterInputClassName} min-h-[80px] py-2`}
               placeholder="Message"
               value={messageBody}
-              onChange={(event) => setMessageBody(event.target.value)}
+              onChange={(event) => {
+                setMessageBody(event.target.value);
+              }}
             />
             <button
               type="button"
               className={primaryButtonClassName}
               disabled={
-                busy ||
-                audienceCount === 0 ||
-                !messageSubject.trim() ||
-                !messageBody.trim()
+                busy || audienceCount === 0 || !messageSubject.trim() || !messageBody.trim()
               }
               onClick={() => void handleSendMessage()}
             >
@@ -1312,7 +1336,9 @@ export function AdminCustomFieldDetailPage({ fieldKey }: { fieldKey: string }) {
               className={filterInputClassName}
               placeholder="Group title"
               value={groupTitle}
-              onChange={(event) => setGroupTitle(event.target.value)}
+              onChange={(event) => {
+                setGroupTitle(event.target.value);
+              }}
             />
             <div className="flex flex-wrap gap-2">
               <button
@@ -1383,7 +1409,9 @@ export function AdminCustomFieldDetailPage({ fieldKey }: { fieldKey: string }) {
           <button
             type="button"
             className="group text-left"
-            onClick={() => setValueFilter(valueFilter === "missing" ? "" : "missing")}
+            onClick={() => {
+              setValueFilter(valueFilter === "missing" ? "" : "missing");
+            }}
           >
             <span className="mb-1 block font-mono text-[10px] font-medium uppercase tracking-[0.08em] text-[var(--admin-warning)]">
               Missing
@@ -1421,7 +1449,9 @@ export function AdminCustomFieldDetailPage({ fieldKey }: { fieldKey: string }) {
             <SelectDistribution
               data={detail.select}
               valueFilter={valueFilter}
-              onFilterValue={(value) => setValueFilter(value ?? "")}
+              onFilterValue={(value) => {
+                setValueFilter(value ?? "");
+              }}
             />
           ) : null}
           {fieldType === "select" ? (
@@ -1460,7 +1490,9 @@ export function AdminCustomFieldDetailPage({ fieldKey }: { fieldKey: string }) {
                   className={`${filterInputClassName} pl-8`}
                   placeholder="Name or email"
                   value={searchInput}
-                  onChange={(event) => setSearchInput(event.target.value)}
+                  onChange={(event) => {
+                    setSearchInput(event.target.value);
+                  }}
                 />
               </div>
             </div>
@@ -1477,7 +1509,9 @@ export function AdminCustomFieldDetailPage({ fieldKey }: { fieldKey: string }) {
                         ? "border-[var(--admin-primary)] bg-[color-mix(in_srgb,var(--admin-primary)_10%,var(--admin-surface))] text-[var(--admin-primary)]"
                         : "border-[var(--admin-outline)] text-[var(--admin-on-surface-variant)] hover:border-[var(--admin-primary)]",
                     ].join(" ")}
-                    onClick={() => setValueFilter("")}
+                    onClick={() => {
+                      setValueFilter("");
+                    }}
                   >
                     All
                   </button>
@@ -1491,7 +1525,9 @@ export function AdminCustomFieldDetailPage({ fieldKey }: { fieldKey: string }) {
                           ? "border-[var(--admin-primary)] bg-[color-mix(in_srgb,var(--admin-primary)_10%,var(--admin-surface))] text-[var(--admin-primary)]"
                           : "border-[var(--admin-outline)] text-[var(--admin-on-surface-variant)] hover:border-[var(--admin-primary)]",
                       ].join(" ")}
-                      onClick={() => setValueFilter(valueFilter === value ? "" : value)}
+                      onClick={() => {
+                        setValueFilter(valueFilter === value ? "" : value);
+                      }}
                     >
                       {value}
                     </button>
@@ -1504,9 +1540,9 @@ export function AdminCustomFieldDetailPage({ fieldKey }: { fieldKey: string }) {
                         ? "border-[var(--admin-warning)] bg-[color-mix(in_srgb,var(--admin-warning)_10%,var(--admin-surface))] text-[var(--admin-warning)]"
                         : "border-[var(--admin-outline)] text-[var(--admin-on-surface-variant)] hover:border-[var(--admin-warning)]",
                     ].join(" ")}
-                    onClick={() =>
-                      setValueFilter(valueFilter === "missing" ? "" : "missing")
-                    }
+                    onClick={() => {
+                      setValueFilter(valueFilter === "missing" ? "" : "missing");
+                    }}
                   >
                     No value
                   </button>
@@ -1525,7 +1561,9 @@ export function AdminCustomFieldDetailPage({ fieldKey }: { fieldKey: string }) {
                     type="number"
                     className={`${filterInputClassName} w-28`}
                     value={minValueInput}
-                    onChange={(event) => setMinValueInput(event.target.value)}
+                    onChange={(event) => {
+                      setMinValueInput(event.target.value);
+                    }}
                   />
                 </div>
                 <div>
@@ -1537,7 +1575,9 @@ export function AdminCustomFieldDetailPage({ fieldKey }: { fieldKey: string }) {
                     type="number"
                     className={`${filterInputClassName} w-28`}
                     value={maxValueInput}
-                    onChange={(event) => setMaxValueInput(event.target.value)}
+                    onChange={(event) => {
+                      setMaxValueInput(event.target.value);
+                    }}
                   />
                 </div>
                 <button type="button" className={ghostButtonClassName} onClick={applyNumberRange}>
@@ -1565,7 +1605,9 @@ export function AdminCustomFieldDetailPage({ fieldKey }: { fieldKey: string }) {
                           ? "bg-[var(--admin-primary)] text-white"
                           : "bg-[var(--admin-surface)] text-[var(--admin-on-surface-variant)] hover:bg-[var(--admin-surface-high)]",
                       ].join(" ")}
-                      onClick={() => setValueFilter(option.key)}
+                      onClick={() => {
+                        setValueFilter(option.key);
+                      }}
                     >
                       {option.label}
                     </button>
@@ -1585,14 +1627,18 @@ export function AdminCustomFieldDetailPage({ fieldKey }: { fieldKey: string }) {
               <button
                 type="button"
                 className="text-[13px] text-[var(--admin-primary)] hover:underline"
-                onClick={() => setActionsOpen(true)}
+                onClick={() => {
+                  setActionsOpen(true);
+                }}
               >
                 Create group
               </button>
               <button
                 type="button"
                 className="text-[13px] text-[var(--admin-primary)] hover:underline"
-                onClick={() => setActionsOpen(true)}
+                onClick={() => {
+                  setActionsOpen(true);
+                }}
               >
                 Message learners
               </button>
@@ -1600,14 +1646,18 @@ export function AdminCustomFieldDetailPage({ fieldKey }: { fieldKey: string }) {
                 type="button"
                 className="text-[13px] text-[var(--admin-primary)] hover:underline"
                 disabled={selectedLearners.length === 0}
-                onClick={() => handleClientCsvExport(true)}
+                onClick={() => {
+                  handleClientCsvExport(true);
+                }}
               >
                 Export selection
               </button>
               <button
                 type="button"
                 className="text-[13px] text-[var(--admin-primary)] hover:underline"
-                onClick={() => setSelectedIds(new Set())}
+                onClick={() => {
+                  setSelectedIds(new Set());
+                }}
               >
                 Clear
               </button>
@@ -1705,7 +1755,9 @@ export function AdminCustomFieldDetailPage({ fieldKey }: { fieldKey: string }) {
                           type="checkbox"
                           className="h-3.5 w-3.5 cursor-pointer rounded-[3px] border-[var(--admin-outline)] text-[var(--admin-primary)] focus:ring-[var(--admin-primary)]"
                           checked={selected}
-                          onChange={() => toggleRowSelection(row.membershipId)}
+                          onChange={() => {
+                            toggleRowSelection(row.membershipId);
+                          }}
                           aria-label={`Select ${row.learnerName || row.email || "learner"}`}
                         />
                       </td>
@@ -1773,7 +1825,9 @@ export function AdminCustomFieldDetailPage({ fieldKey }: { fieldKey: string }) {
                 type="button"
                 className={ghostButtonClassName}
                 disabled={!pageInfo.hasPreviousPage || loading}
-                onClick={() => setPage((current) => Math.max(1, current - 1))}
+                onClick={() => {
+                  setPage((current) => Math.max(1, current - 1));
+                }}
               >
                 <ChevronLeft className="h-4 w-4" aria-hidden />
                 Prev
@@ -1782,7 +1836,9 @@ export function AdminCustomFieldDetailPage({ fieldKey }: { fieldKey: string }) {
                 type="button"
                 className={ghostButtonClassName}
                 disabled={!pageInfo.hasNextPage || loading}
-                onClick={() => setPage((current) => current + 1)}
+                onClick={() => {
+                  setPage((current) => current + 1);
+                }}
               >
                 Next
                 <ChevronRight className="h-4 w-4" aria-hidden />

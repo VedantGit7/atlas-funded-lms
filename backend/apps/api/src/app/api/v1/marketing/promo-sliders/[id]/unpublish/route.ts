@@ -5,7 +5,7 @@ import { promoSliderResponseSchema } from "../../../../../../../server/marketing
 import { mutatePromoSlidersMetadata } from "../../../../../../../server/marketing-promo-slider/marketing-promo-slider.route-metadata";
 import { unpublishPromoSlider } from "../../../../../../../server/marketing-promo-slider/marketing-promo-slider.service";
 
-const paramsSchema = zod.object({ id: zod.string().uuid() });
+const paramsSchema = zod.object({ id: zod.uuid() });
 
 export const POST = createTenantRoute<
   Record<string, never>,

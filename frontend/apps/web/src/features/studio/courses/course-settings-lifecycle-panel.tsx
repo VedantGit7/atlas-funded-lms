@@ -87,7 +87,9 @@ export function CourseSettingsLifecyclePanel({
       <div className={`${builderSectionClassName} overflow-hidden`}>
         <div className={builderSectionBodyClassName}>
           <div className="flex flex-wrap items-center gap-3">
-            <span className="text-sm font-semibold text-[var(--admin-on-surface)]">Current status</span>
+            <span className="text-sm font-semibold text-[var(--admin-on-surface)]">
+              Current status
+            </span>
             <CourseStatusBadge status={course.status} />
           </div>
 
@@ -142,8 +144,8 @@ export function CourseSettingsLifecyclePanel({
     <div className={`${builderSectionClassName} overflow-hidden`}>
       <div className={builderSectionBodyClassName}>
         <p className={`${builderHelperClassName} max-w-xl`}>
-          Archiving moves this course out of your active catalog. Learners will lose access until the
-          course is restored.
+          Archiving moves this course out of your active catalog. Learners will lose access until
+          the course is restored.
         </p>
 
         {archiveError ? (

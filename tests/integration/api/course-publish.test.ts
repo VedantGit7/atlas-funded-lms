@@ -33,7 +33,7 @@ describeWithDb("course publish integration", () => {
         select to_state
         from workflow_transitions
         where tenant_id = ${fixture.tenantId}::uuid
-          and target_id = ${fixture.draftCourseId}::uuid
+          and target_id = ${fixture.draftCourseId}
           and target_type = 'course'
         limit 1
       `;

@@ -104,7 +104,7 @@ export async function listMarketingForms(tx: TenantTx, _ctx: ServiceCtx, rawQuer
   const query = marketingFormsListQuerySchema.parse(rawQuery ?? {});
   const [rows, summary] = await Promise.all([
     marketingFormsRepository.list(tx, {
-      ...(query.status ? { status: query.status } : {}),
+      status: query.status,
       ...(query.q ? { q: query.q } : {}),
       limit: query.limit,
     }),
@@ -124,7 +124,7 @@ export async function getMarketingForm(tx: TenantTx, _ctx: ServiceCtx, id: strin
 
 export async function createMarketingForm(tx: TenantTx, ctx: ServiceCtx, rawBody: unknown) {
   const body = createMarketingFormBodySchema.parse(rawBody);
-  const kind = body.kind ?? "LEAD";
+  const kind = body.kind;
   const id = await marketingFormsRepository.insert(tx, {
     title: body.title,
     description: body.description ?? null,

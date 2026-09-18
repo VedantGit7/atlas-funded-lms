@@ -10,7 +10,13 @@ export function StudioDashboardCreateCourseButton() {
 
   return (
     <>
-      <button type="button" className={primaryButtonClassName} onClick={() => setOpen(true)}>
+      <button
+        type="button"
+        className={primaryButtonClassName}
+        onClick={() => {
+          setOpen(true);
+        }}
+      >
         <Plus className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
         New course
       </button>

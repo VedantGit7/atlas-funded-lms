@@ -32,11 +32,12 @@ export function BrandPreview({ branding, theme }: BrandPreviewProps) {
     }
   }, [theme.tokens.modeDefault]);
 
-  const bg = previewMode === "dark" ? "#1A1714" : semantic.color.background ?? "#FFFDF9";
-  const fg = previewMode === "dark" ? "#F0EEF8" : semantic.color.foreground ?? "#1A1714";
-  const headerBg =
-    previewMode === "dark" ? "#000000" : semantic.color.header ?? semantic.color.primary ?? "#1A1714";
-  const primary = semantic.color.primary ?? "#3730A3";
+  // The canvas is not tenant-configurable: a brand colour is not a content
+  // surface. The preview shows the neutral canvas the app actually renders.
+  const bg = previewMode === "dark" ? "#1A1714" : "#FFFDF9";
+  const fg = previewMode === "dark" ? "#F0EEF8" : "#1A1714";
+  const headerBg = previewMode === "dark" ? "#000000" : (semantic.color.header ?? "#1A1714");
+  const primary = semantic.color.primary;
   const radiusPx =
     theme.tokens.radius === "none"
       ? 0
@@ -67,8 +68,16 @@ export function BrandPreview({ branding, theme }: BrandPreviewProps) {
               value={previewMode}
               ariaLabel="Preview appearance"
               options={[
-                { id: "light", label: "", icon: <Sun className="h-3.5 w-3.5" aria-hidden="true" /> },
-                { id: "dark", label: "", icon: <Moon className="h-3.5 w-3.5" aria-hidden="true" /> },
+                {
+                  id: "light",
+                  label: "",
+                  icon: <Sun className="h-3.5 w-3.5" aria-hidden="true" />,
+                },
+                {
+                  id: "dark",
+                  label: "",
+                  icon: <Moon className="h-3.5 w-3.5" aria-hidden="true" />,
+                },
               ]}
               onChange={setPreviewMode}
             />

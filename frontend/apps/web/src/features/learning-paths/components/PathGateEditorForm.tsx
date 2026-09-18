@@ -17,10 +17,7 @@ type PathGateEditorFormProps = {
   onChange: (gates: PathGateDraft[]) => void;
 };
 
-function updateGateConfig(
-  gate: PathGateDraft,
-  patch: Record<string, unknown>,
-): PathGateDraft {
+function updateGateConfig(gate: PathGateDraft, patch: Record<string, unknown>): PathGateDraft {
   return {
     ...gate,
     config: { ...gate.config, ...patch },
@@ -67,7 +64,9 @@ function GateConfigFields({
     const daysRaw = gate.config["daysSinceEnroll"];
     const days = typeof daysRaw === "number" ? String(daysRaw) : "";
     const availableFrom =
-      typeof gate.config["availableFrom"] === "string" ? gate.config["availableFrom"].slice(0, 10) : "";
+      typeof gate.config["availableFrom"] === "string"
+        ? gate.config["availableFrom"].slice(0, 10)
+        : "";
 
     return (
       <div className="grid gap-3 sm:grid-cols-2">

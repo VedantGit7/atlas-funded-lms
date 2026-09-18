@@ -138,7 +138,9 @@ function CourseCertificateAddTestDialog({
         setOptions(quizzes);
       } catch (caught) {
         if (!cancelled) {
-          setError(caught instanceof ClientApiError ? caught.message : "Unable to load course tests.");
+          setError(
+            caught instanceof ClientApiError ? caught.message : "Unable to load course tests.",
+          );
           setOptions([]);
         }
       } finally {
@@ -165,7 +167,7 @@ function CourseCertificateAddTestDialog({
     parsedPassingMarks <= 100;
 
   function handleSave() {
-    if (!canSave || !selectedOption) return;
+    if (!canSave) return;
     onAdd({
       lessonId: selectedOption.lessonId,
       title: selectedOption.title,
@@ -201,7 +203,8 @@ function CourseCertificateAddTestDialog({
               Add Test Criteria
             </h2>
             <p className={`${builderHelperClassName} mt-1.5 leading-relaxed`}>
-              Add test and assign passing marks required for the test to issue certificates to learners
+              Add test and assign passing marks required for the test to issue certificates to
+              learners
             </p>
           </div>
           <button
@@ -249,7 +252,7 @@ function CourseCertificateAddTestDialog({
                   ? "Loading tests…"
                   : options.length === 0
                     ? "No section quizzes available"
-                    : selectedOption?.title ?? "Select Tests"}
+                    : (selectedOption?.title ?? "Select Tests")}
               </span>
             }
             panelAriaLabel="Certificate tests"
@@ -377,7 +380,9 @@ function CertificateAttemptRadioGroup({
                 <span className="h-2 w-2 rounded-full bg-[var(--admin-primary)]" />
               ) : null}
             </span>
-            <span className="text-sm font-semibold text-[var(--admin-on-surface)]">{option.label}</span>
+            <span className="text-sm font-semibold text-[var(--admin-on-surface)]">
+              {option.label}
+            </span>
             <input
               type="radio"
               name="certificate-attempt-mode"
@@ -431,7 +436,9 @@ export function CourseSettingsCertificatesConfigurePanel({
           <h1 className="text-2xl font-bold tracking-tight text-[var(--admin-on-surface)] md:text-[1.75rem]">
             Configure Certificates
           </h1>
-          <p className={`${builderHelperClassName} mt-2 max-w-2xl text-sm leading-relaxed md:text-[0.9375rem]`}>
+          <p
+            className={`${builderHelperClassName} mt-2 max-w-2xl text-sm leading-relaxed md:text-[0.9375rem]`}
+          >
             Configure certificate settings and add tests to issue certificates
           </p>
         </header>
@@ -567,8 +574,8 @@ export function CourseSettingsCertificatesConfigurePanel({
             onSave={onSave}
             onCancel={onCancel}
             saving={saving}
-            saveDisabled={disabled || !isDirty}
-            cancelDisabled={disabled || !isDirty}
+            saveDisabled={!isDirty}
+            cancelDisabled={!isDirty}
           />
         ) : null}
       </div>

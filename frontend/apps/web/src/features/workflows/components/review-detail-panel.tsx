@@ -29,8 +29,13 @@ export function ReviewDetailPanel({ item }: ReviewDetailPanelProps) {
         className="flex flex-1 flex-col items-center justify-center px-6 py-16 text-center"
         aria-label="Review detail"
       >
-        <Eye className="mb-3 h-10 w-10 text-[var(--admin-on-surface-variant)] opacity-50" aria-hidden="true" />
-        <h2 className="text-lg font-semibold text-[var(--admin-on-surface)]">Select a pending item</h2>
+        <Eye
+          className="mb-3 h-10 w-10 text-[var(--admin-on-surface-variant)] opacity-50"
+          aria-hidden="true"
+        />
+        <h2 className="text-lg font-semibold text-[var(--admin-on-surface)]">
+          Select a pending item
+        </h2>
         <p className="mt-2 max-w-md text-sm text-[var(--admin-on-surface-variant)]">
           Choose a submission from the queue to inspect its details, workflow history, and decision
           controls.

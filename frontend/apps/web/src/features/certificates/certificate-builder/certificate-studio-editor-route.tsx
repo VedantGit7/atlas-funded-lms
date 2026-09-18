@@ -13,6 +13,7 @@ import {
 } from "./studio-template-api";
 import { findStarterById } from "./starter-templates";
 import { CERTIFICATE_STUDIO_HOME, certificateStudioEditPath } from "./studio-routes";
+import { cancellationFlag } from "@/lib/effect-cancellation";
 
 type CertificateStudioEditorRouteProps = {
   publicName: string;
@@ -59,7 +60,7 @@ export function CertificateStudioEditorRoute({
   });
 
   useEffect(() => {
-    let cancelled = false;
+    const effect = cancellationFlag();
     setReady(false);
     setLoadError(null);
 
@@ -67,10 +68,8 @@ export function CertificateStudioEditorRoute({
       try {
         if (!isNew && templateIdProp) {
           const template = await fetchTemplate(templateIdProp);
-          if (cancelled) return;
-          const doc = isDesignDocument(template.templateJson)
-            ? template.templateJson
-            : undefined;
+          if (effect.isCancelled()) return;
+          const doc = isDesignDocument(template.templateJson) ? template.templateJson : undefined;
           setSession({
             templateId: template.id,
             name: template.name,
@@ -98,15 +97,15 @@ export function CertificateStudioEditorRoute({
           }
         }
       } catch (error) {
-        if (cancelled) return;
+        if (effect.isCancelled()) return;
         setLoadError(error instanceof Error ? error.message : "Failed to load template");
       } finally {
-        if (!cancelled) setReady(true);
+        if (!effect.isCancelled()) setReady(true);
       }
     })();
 
     return () => {
-      cancelled = true;
+      effect.cancel();
     };
   }, [isNew, templateIdProp, starterId, publicName]);
 
@@ -129,9 +128,7 @@ export function CertificateStudioEditorRoute({
           templateId: result.data.id,
           name: result.data.name,
           updatedAt: result.data.updatedAt,
-          document: isDesignDocument(result.data.templateJson)
-            ? result.data.templateJson
-            : doc,
+          document: isDesignDocument(result.data.templateJson) ? result.data.templateJson : doc,
         });
         // Promote /studio/new → /studio/{id} after first save.
         if (isNew || session.templateId !== result.data.id) {
@@ -164,9 +161,7 @@ export function CertificateStudioEditorRoute({
             templateId: id,
             name: created.data.name,
             updatedAt: created.data.updatedAt,
-            document: isDesignDocument(created.data.templateJson)
-              ? created.data.templateJson
-              : doc,
+            document: isDesignDocument(created.data.templateJson) ? created.data.templateJson : doc,
           });
           router.replace(certificateStudioEditPath(id));
         } else {
@@ -227,9 +222,7 @@ export function CertificateStudioEditorRoute({
         {!loadError && ready ? (
           <Suspense
             fallback={
-              <div className="cert-studio__canvas-loading cert-studio__muted">
-                Opening studio…
-              </div>
+              <div className="cert-studio__canvas-loading cert-studio__muted">Opening studio…</div>
             }
           >
             <CertificateStudioShell

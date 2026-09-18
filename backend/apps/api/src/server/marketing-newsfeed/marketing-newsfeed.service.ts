@@ -15,10 +15,7 @@ import {
   updateNewsfeedPostBodySchema,
   updateNewsfeedSettingsBodySchema,
 } from "./marketing-newsfeed.schemas";
-import {
-  marketingNewsfeedRepository,
-  type NewsfeedPostRow,
-} from "./marketing-newsfeed.repository";
+import { marketingNewsfeedRepository, type NewsfeedPostRow } from "./marketing-newsfeed.repository";
 
 function notFound(message = "Newsfeed post not found.") {
   return new AtlasHttpError({ code: "PERMISSION_DENIED", status: 404, message });
@@ -130,7 +127,7 @@ export async function getMarketingNewsfeedSettings(tx: TenantTx) {
   return newsfeedSettingsResponseSchema.parse({
     data: {
       enabled: settings?.enabled === true,
-      updatedAt: settings?.updated_at?.toISOString() ?? null,
+      updatedAt: settings?.updated_at.toISOString() ?? null,
     },
   });
 }
@@ -153,8 +150,8 @@ export async function listMarketingNewsfeedPosts(
   const query = newsfeedPostsListQuerySchema.parse(rawQuery ?? {});
   const [rows, summary] = await Promise.all([
     marketingNewsfeedRepository.list(tx, {
-      ...(query.status ? { status: query.status } : {}),
-      ...(query.postType ? { postType: query.postType } : {}),
+      status: query.status,
+      postType: query.postType,
       ...(query.q ? { q: query.q } : {}),
       ...(query.productId ? { productId: query.productId } : {}),
       limit: query.limit,
@@ -184,11 +181,7 @@ export async function getMarketingNewsfeedPost(tx: TenantTx, _ctx: ServiceCtx, i
   });
 }
 
-export async function createMarketingNewsfeedPost(
-  tx: TenantTx,
-  ctx: ServiceCtx,
-  rawBody: unknown,
-) {
+export async function createMarketingNewsfeedPost(tx: TenantTx, ctx: ServiceCtx, rawBody: unknown) {
   const body = createNewsfeedPostBodySchema.parse(rawBody);
   const slug = await uniqueSlug(tx, body.title);
   const id = await marketingNewsfeedRepository.insert(tx, {
@@ -229,10 +222,7 @@ export async function updateMarketingNewsfeedPost(
       ? existing.product_id
       : emptyToNull(typeof body.productId === "string" ? body.productId : null);
 
-  let productTitle: string | null =
-    body.productTitle === undefined
-      ? existing.product_title
-      : emptyToNull(body.productTitle);
+  let productTitle: string | null;
 
   if (productId) {
     const title = await marketingNewsfeedRepository.findProductTitle(tx, productId);
@@ -249,16 +239,13 @@ export async function updateMarketingNewsfeedPost(
     slug,
     bodyHtml: body.bodyHtml === undefined ? existing.body_html : emptyToNull(body.bodyHtml),
     coverImageUrl:
-      body.coverImageUrl === undefined
-        ? existing.cover_image_url
-        : emptyToNull(body.coverImageUrl),
+      body.coverImageUrl === undefined ? existing.cover_image_url : emptyToNull(body.coverImageUrl),
     seoTitle: body.seoTitle === undefined ? existing.seo_title : emptyToNull(body.seoTitle),
     seoDescription:
       body.seoDescription === undefined
         ? existing.seo_description
         : emptyToNull(body.seoDescription),
-    authorName:
-      body.authorName === undefined ? existing.author_name : emptyToNull(body.authorName),
+    authorName: body.authorName === undefined ? existing.author_name : emptyToNull(body.authorName),
     tagsJson: body.tags ?? parseStringList(existing.tags_json),
     categoriesJson: body.categories ?? parseStringList(existing.categories_json),
     pinned: body.pinned ?? existing.pinned,
@@ -271,11 +258,7 @@ export async function updateMarketingNewsfeedPost(
   });
 }
 
-export async function publishMarketingNewsfeedPost(
-  tx: TenantTx,
-  _ctx: ServiceCtx,
-  id: string,
-) {
+export async function publishMarketingNewsfeedPost(tx: TenantTx, _ctx: ServiceCtx, id: string) {
   const existing = await requirePost(tx, id);
   if (existing.post_type === "PROMO") {
     if (!existing.cover_image_url) {
@@ -294,11 +277,7 @@ export async function publishMarketingNewsfeedPost(
   });
 }
 
-export async function unpublishMarketingNewsfeedPost(
-  tx: TenantTx,
-  _ctx: ServiceCtx,
-  id: string,
-) {
+export async function unpublishMarketingNewsfeedPost(tx: TenantTx, _ctx: ServiceCtx, id: string) {
   await requirePost(tx, id);
   await marketingNewsfeedRepository.setStatus(tx, id, "UNPUBLISHED");
   return newsfeedPostResponseSchema.parse({
@@ -398,11 +377,7 @@ export async function getPublicNewsfeedPostBySlug(
   });
 }
 
-export async function savePublicNewsfeedPost(
-  tx: TenantTx,
-  ctx: ServiceCtx,
-  id: string,
-) {
+export async function savePublicNewsfeedPost(tx: TenantTx, ctx: ServiceCtx, id: string) {
   const enabled = await isEnabled(tx);
   if (!enabled) throw notFound("Newsfeed is not enabled.");
   const row = await requirePost(tx, id);
@@ -413,11 +388,7 @@ export async function savePublicNewsfeedPost(
   });
 }
 
-export async function unsavePublicNewsfeedPost(
-  tx: TenantTx,
-  ctx: ServiceCtx,
-  id: string,
-) {
+export async function unsavePublicNewsfeedPost(tx: TenantTx, ctx: ServiceCtx, id: string) {
   await marketingNewsfeedRepository.unsave(tx, id, ctx.actorMembershipId);
   return saveNewsfeedPostResponseSchema.parse({
     data: { postId: id, saved: false },

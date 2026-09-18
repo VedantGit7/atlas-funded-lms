@@ -1,0 +1,130 @@
+name: Drills
+
+# Phase 5 verification harnesses. They are deliberately NOT part of the per-push
+# CI: a load test on shared runners measures the runner, and a restore drill on
+# every commit is noise. But a harness nothing ever runs is a harness that rots —
+# this programme has already found six test suites and four CI guards in exactly
+# that state, so "we have a script" is not evidence of anything.
+#
+# Weekly, plus on demand. The point is that both keep working, and that the
+# restore procedure is exercised on a schedule rather than first attempted during
+# an incident.
+
+on:
+  schedule:
+    # Mondays 03:00 UTC, before the working week.
+    - cron: "0 3 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  CI_DATABASE_URL: postgresql://atlas:atlas_dev_password@localhost:5432/atlas_lms_ci
+
+jobs:
+  restore-drill:
+    name: restore-drill
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: atlas
+          POSTGRES_PASSWORD: atlas_dev_password
+          POSTGRES_DB: atlas_lms_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U atlas -d atlas_lms_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: ${{ env.CI_DATABASE_URL }}
+      PLATFORM_DATABASE_URL: ${{ env.CI_DATABASE_URL }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.13.1
+
+      - uses: pnpm/action-setup@v6
+
+      - run: pnpm install --frozen-lockfile
+      - name: Generate Prisma client
+        env:
+          DATABASE_URL: postgresql://generate:generate@127.0.0.1:5432/generate
+        run: pnpm db:generate:ci
+      - run: pnpm db:provision
+
+      # The drill dumps and restores through the container, so it needs the
+      # service container's name rather than the local default.
+      - name: Backup and restore drill
+        run: pnpm release:restore:drill
+        env:
+          RESTORE_DRILL_CONTAINER: ${{ job.services.postgres.id }}
+          RESTORE_DRILL_SOURCE_DB: atlas_lms_ci
+          RESTORE_DRILL_TARGET_DB: atlas_lms_ci_drill
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: restore-drill
+          path: restore-drill.json
+          if-no-files-found: warn
+
+  load-harness:
+    name: load-harness
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: atlas
+          POSTGRES_PASSWORD: atlas_dev_password
+          POSTGRES_DB: atlas_lms_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U atlas -d atlas_lms_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: ${{ env.CI_DATABASE_URL }}
+      PLATFORM_DATABASE_URL: ${{ env.CI_DATABASE_URL }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.13.1
+
+      - uses: pnpm/action-setup@v6
+
+      - run: pnpm install --frozen-lockfile
+      - name: Generate Prisma client
+        env:
+          DATABASE_URL: postgresql://generate:generate@127.0.0.1:5432/generate
+        run: pnpm db:generate:ci
+      - run: pnpm db:provision
+      - run: pnpm db:seed:tenants
+
+      # Short levels on purpose. Numbers from a shared runner describe the
+      # runner, not production — what this job proves is that the harness still
+      # runs and that the pipeline does not deadlock, which is the C6 regression
+      # it exists to catch.
+      - name: Exam-window load harness
+        run: pnpm exec dotenv -e /dev/null -- tsx --tsconfig backend/apps/api/tsconfig.json scripts/perf/exam-window-load.ts
+        env:
+          PERF_LEVELS: "1,20,40"
+          PERF_SECONDS: "4"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: perf-exam-window
+          path: perf-exam-window.json
+          if-no-files-found: warn

@@ -209,9 +209,15 @@ export function StudioLearningPathDetailClient({ path }: StudioLearningPathDetai
             className="w-full max-w-sm rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)] p-6 shadow-lg motion-safe:animate-[admin-dropdown-in_0.22s_cubic-bezier(0.16,1,0.3,1)]"
           >
             <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-50 dark:bg-red-950/40">
-              <AlertTriangle className="h-6 w-6 text-red-600 dark:text-red-400" aria-hidden="true" />
+              <AlertTriangle
+                className="h-6 w-6 text-red-600 dark:text-red-400"
+                aria-hidden="true"
+              />
             </div>
-            <h2 id="delete-path-title" className="mb-2 text-lg font-bold text-[var(--admin-on-surface)]">
+            <h2
+              id="delete-path-title"
+              className="mb-2 text-lg font-bold text-[var(--admin-on-surface)]"
+            >
               Delete this path?
             </h2>
             <p className="mb-6 text-sm text-[var(--admin-on-surface-variant)]">

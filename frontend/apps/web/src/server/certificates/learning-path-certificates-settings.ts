@@ -1,3 +1,9 @@
+// Poisons this module for any client bundle. Audit finding M9: nothing at the
+// language level stopped a server module being pulled into a client component,
+// so a leak of service code -- and whatever secrets or privileged queries it
+// closes over -- would only have shown up as a runtime surprise.
+import "server-only";
+
 /**
  * Learning-path certificate settings — minimal stub.
  *
@@ -64,18 +70,17 @@ export function parseLearningPathCertificateSettings(
 
   const enabled =
     typeof features[ENABLED_TAG_KEY] === "boolean"
-      ? Boolean(features[ENABLED_TAG_KEY])
+      ? features[ENABLED_TAG_KEY]
       : DEFAULT_SETTINGS.enabled;
 
   const templateId =
-    typeof features[TEMPLATE_TAG_KEY] === "string" &&
-    (features[TEMPLATE_TAG_KEY] as string).length > 0
-      ? (features[TEMPLATE_TAG_KEY] as string)
+    typeof features[TEMPLATE_TAG_KEY] === "string" && features[TEMPLATE_TAG_KEY].length > 0
+      ? features[TEMPLATE_TAG_KEY]
       : DEFAULT_SETTINGS.templateId;
 
   const requireAllSteps =
     config && typeof config["requireAllSteps"] === "boolean"
-      ? Boolean(config["requireAllSteps"])
+      ? config["requireAllSteps"]
       : DEFAULT_SETTINGS.requireAllSteps;
 
   const completionCriteriaPercent =
@@ -83,15 +88,15 @@ export function parseLearningPathCertificateSettings(
     typeof config["completionCriteriaPercent"] === "number" &&
     config["completionCriteriaPercent"] >= 0 &&
     config["completionCriteriaPercent"] <= 100
-      ? Math.floor(config["completionCriteriaPercent"] as number)
+      ? Math.floor(config["completionCriteriaPercent"])
       : DEFAULT_SETTINGS.completionCriteriaPercent;
 
   const validityDays =
     config &&
     typeof config["validityDays"] === "number" &&
     Number.isInteger(config["validityDays"]) &&
-    (config["validityDays"] as number) > 0
-      ? (config["validityDays"] as number)
+    config["validityDays"] > 0
+      ? config["validityDays"]
       : DEFAULT_SETTINGS.validityDays;
 
   return { enabled, templateId, requireAllSteps, completionCriteriaPercent, validityDays };

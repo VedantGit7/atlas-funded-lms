@@ -14,5 +14,5 @@ export const POST = createTenantRoute<
   metadata: mutateMarketingEmailMetadata,
   body: spamCheckBodySchema,
   output: spamCheckResponseSchema,
-  handler: async ({ tx, input }) => checkMarketingEmailSpam(tx, input),
+  handler: ({ tx, input }) => Promise.resolve(checkMarketingEmailSpam(tx, input)),
 });

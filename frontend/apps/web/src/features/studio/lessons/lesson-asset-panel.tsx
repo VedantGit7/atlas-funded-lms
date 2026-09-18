@@ -8,10 +8,7 @@ import {
   lessonCardTitleClassName,
   lessonInputClassName,
 } from "./lesson-editor-shared";
-import {
-  uploadLessonAssetFile,
-  attachLessonAssetReference,
-} from "../courses/upload-lesson-asset";
+import { uploadLessonAssetFile, attachLessonAssetReference } from "../courses/upload-lesson-asset";
 
 type LessonAsset = {
   id: string;
@@ -33,7 +30,9 @@ function formatError(error: unknown): string {
 
 function assetIcon(assetType: string) {
   if (assetType.includes("image")) {
-    return <FileImage className="h-[18px] w-[18px] text-[var(--admin-primary)]" aria-hidden="true" />;
+    return (
+      <FileImage className="h-[18px] w-[18px] text-[var(--admin-primary)]" aria-hidden="true" />
+    );
   }
   return <FileText className="h-[18px] w-[18px] text-[var(--admin-danger)]" aria-hidden="true" />;
 }
@@ -105,11 +104,7 @@ export function LessonAssetPanel({ lessonId, editable }: LessonAssetPanelProps) 
     setBusy(true);
     setError(null);
     try {
-      const assetReferenceId = await uploadLessonAssetFile(
-        lessonId,
-        file,
-        "lesson.attachment",
-      );
+      const assetReferenceId = await uploadLessonAssetFile(lessonId, file, "lesson.attachment");
       await attachLessonAssetReference(lessonId, assetReferenceId, file.type || "file");
       await refreshAssets();
     } catch (attachError) {

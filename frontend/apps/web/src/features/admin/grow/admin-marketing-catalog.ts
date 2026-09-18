@@ -39,8 +39,7 @@ export const ADMIN_MARKETING_SECTIONS = [
     slug: "promo-slider",
     label: "Promo Slider",
     title: "Promo Slider",
-    description:
-      "Learner-dashboard carousel banners with images, links, and scheduled visibility.",
+    description: "Learner-dashboard carousel banners with images, links, and scheduled visibility.",
     badge: "beta" as const,
   },
   {
@@ -53,8 +52,7 @@ export const ADMIN_MARKETING_SECTIONS = [
     slug: "integrations",
     label: "Integrations",
     title: "Integrations",
-    description:
-      "Webhooks, Zapier/Pabbly credentials, and site tracking snippets (GA, Ads, Meta).",
+    description: "Webhooks, Zapier/Pabbly credentials, and site tracking snippets (GA, Ads, Meta).",
   },
   {
     slug: "newsfeed",

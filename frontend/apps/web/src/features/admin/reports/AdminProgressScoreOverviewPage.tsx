@@ -64,7 +64,8 @@ function formatCount(value: number): string {
 
 function bandFill(key: ProgressScoreCompletionBand["key"]): string {
   if (key === "complete") return "var(--admin-success)";
-  if (key === "nearly_done") return "color-mix(in srgb, var(--admin-primary) 80%, var(--admin-success))";
+  if (key === "nearly_done")
+    return "color-mix(in srgb, var(--admin-primary) 80%, var(--admin-success))";
   if (key === "in_progress") return "var(--admin-primary)";
   if (key === "early") return "color-mix(in srgb, var(--admin-primary) 55%, var(--admin-outline))";
   return "var(--admin-outline)";
@@ -202,7 +203,9 @@ export function AdminProgressScoreOverviewPage() {
                 <Select
                   id="ps-overview-window"
                   value={windowKey}
-                  onValueChange={(value) => setWindowKey(value as ProgressScoreOverviewWindow)}
+                  onValueChange={(value) => {
+                    setWindowKey(value as ProgressScoreOverviewWindow);
+                  }}
                   options={WINDOW_OPTIONS}
                   className={selectTriggerClassName}
                 />
@@ -249,7 +252,9 @@ export function AdminProgressScoreOverviewPage() {
               </p>
               <button
                 type="button"
-                onClick={() => setWindowKey("90d")}
+                onClick={() => {
+                  setWindowKey("90d");
+                }}
                 className={`${primaryButtonClassName} relative mt-8 h-11 px-8`}
               >
                 Widen to last 90 days
@@ -306,7 +311,9 @@ export function AdminProgressScoreOverviewPage() {
 
                 <button
                   type="button"
-                  onClick={() => router.push("/admin/reports/progress-score/progress")}
+                  onClick={() => {
+                    router.push("/admin/reports/progress-score/progress");
+                  }}
                   className="group relative flex flex-col justify-between bg-[var(--admin-surface)] p-6 text-left transition-colors hover:bg-[color-mix(in_srgb,var(--admin-warning)_8%,var(--admin-surface))]"
                 >
                   <span className="pointer-events-none absolute inset-0 border-2 border-transparent transition-colors group-hover:border-[var(--admin-warning)]" />
@@ -340,7 +347,9 @@ export function AdminProgressScoreOverviewPage() {
 
                 <button
                   type="button"
-                  onClick={() => router.push("/admin/reports/progress-score/scores")}
+                  onClick={() => {
+                    router.push("/admin/reports/progress-score/scores");
+                  }}
                   className="flex flex-col justify-between bg-[var(--admin-surface)] p-6 text-left transition-colors hover:bg-[color-mix(in_srgb,var(--admin-warning)_8%,var(--admin-surface))]"
                 >
                   <p className="mb-4 flex items-center gap-2 font-mono text-[11px] font-medium tracking-[0.1em] text-[var(--admin-warning)] uppercase">

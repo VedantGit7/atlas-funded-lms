@@ -24,7 +24,14 @@ describeWithDb("practice authorization", () => {
     const started = await withTenantTx(
       authoringTenantTx(fixture, fixture.learnerMembershipId),
       async (tx) =>
-        startPracticeSession(tx, learner, { mode: "due", maxItems: 1 }, "auth-practice"),
+        startPracticeSession(
+          tx,
+          learner,
+          // `engine` became required and is written straight into the NOT NULL
+          // practice_sessions.session_type, so omitting it fails at the insert.
+          { mode: "due", engine: "swipe", maxItems: 1 },
+          "auth-practice",
+        ),
     );
 
     const card = started.data.card;

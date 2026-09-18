@@ -17,14 +17,7 @@ export function SubSchoolsEmptyIllustration() {
       </defs>
 
       {/* Ground shadow */}
-      <ellipse
-        cx="110"
-        cy="148"
-        rx="54"
-        ry="6"
-        fill="var(--admin-on-surface)"
-        opacity="0.06"
-      />
+      <ellipse cx="110" cy="148" rx="54" ry="6" fill="var(--admin-on-surface)" opacity="0.06" />
 
       {/* Post */}
       <rect
@@ -82,7 +75,15 @@ export function SubSchoolsEmptyIllustration() {
         strokeWidth="1.75"
         strokeOpacity="0.8"
       />
-      <circle cx="128" cy="54" r="7" fill="var(--admin-surface)" stroke="var(--admin-on-surface)" strokeWidth="1.5" strokeOpacity="0.8" />
+      <circle
+        cx="128"
+        cy="54"
+        r="7"
+        fill="var(--admin-surface)"
+        stroke="var(--admin-on-surface)"
+        strokeWidth="1.5"
+        strokeOpacity="0.8"
+      />
       <circle cx="130" cy="53" r="1.4" fill="var(--admin-on-surface)" />
       <path d="M134 55 l8 2 -8 2 z" fill="var(--admin-warning)" />
       <path
@@ -94,18 +95,30 @@ export function SubSchoolsEmptyIllustration() {
         strokeLinecap="round"
       />
       {/* Leaf in beak area accent */}
-      <path
-        d="M96 44 q8 -10 16 -2 q-10 4 -16 2 z"
-        fill="var(--admin-success)"
-        opacity="0.9"
-      />
+      <path d="M96 44 q8 -10 16 -2 q-10 4 -16 2 z" fill="var(--admin-success)" opacity="0.9" />
 
       {/* Birds peeking from mailbox */}
-      <circle cx="88" cy="102" r="9" fill="var(--admin-surface)" stroke="var(--admin-on-surface)" strokeWidth="1.5" strokeOpacity="0.75" />
+      <circle
+        cx="88"
+        cy="102"
+        r="9"
+        fill="var(--admin-surface)"
+        stroke="var(--admin-on-surface)"
+        strokeWidth="1.5"
+        strokeOpacity="0.75"
+      />
       <circle cx="91" cy="100" r="1.2" fill="var(--admin-on-surface)" />
       <path d="M96 102 l5 1.5 -5 1.5 z" fill="var(--admin-warning)" />
 
-      <circle cx="112" cy="106" r="8" fill="var(--admin-surface)" stroke="var(--admin-on-surface)" strokeWidth="1.5" strokeOpacity="0.75" />
+      <circle
+        cx="112"
+        cy="106"
+        r="8"
+        fill="var(--admin-surface)"
+        stroke="var(--admin-on-surface)"
+        strokeWidth="1.5"
+        strokeOpacity="0.75"
+      />
       <circle cx="115" cy="104" r="1.1" fill="var(--admin-on-surface)" />
       <path d="M119 106 l4.5 1.2 -4.5 1.2 z" fill="var(--admin-warning)" />
     </svg>

@@ -69,7 +69,10 @@ export function ConfirmDialog({
         <h2 id={titleId} className="text-lg font-bold text-[var(--admin-on-surface)]">
           {title}
         </h2>
-        <p id={descriptionId} className="mt-2 text-sm leading-relaxed text-[var(--admin-on-surface-variant)]">
+        <p
+          id={descriptionId}
+          className="mt-2 text-sm leading-relaxed text-[var(--admin-on-surface-variant)]"
+        >
           {description}
         </p>
         <div className="mt-6 flex justify-end gap-2">

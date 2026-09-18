@@ -8,7 +8,7 @@ import {
 import { mutateMarketingWorkflowsMetadata } from "../../../../../../../server/marketing-workflows/marketing-workflow.route-metadata";
 import { deleteMarketingWorkflow } from "../../../../../../../server/marketing-workflows/marketing-workflow.service";
 
-const paramsSchema = zod.object({ id: zod.string().uuid() });
+const paramsSchema = zod.object({ id: zod.uuid() });
 
 export const POST = createTenantRoute<
   z.output<typeof deleteMarketingWorkflowBodySchema>,

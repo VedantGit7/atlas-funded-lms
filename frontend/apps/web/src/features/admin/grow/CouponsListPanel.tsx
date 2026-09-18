@@ -116,7 +116,9 @@ export function CouponsListPanel() {
       setDebouncedQuery(query.trim());
       setPage(1);
     }, 250);
-    return () => window.clearTimeout(timer);
+    return () => {
+      window.clearTimeout(timer);
+    };
   }, [query]);
 
   const load = useCallback(async () => {
@@ -131,7 +133,7 @@ export function CouponsListPanel() {
         clientApi.get<PerformanceResponse>("/api/v1/sales/coupons/performance?limit=20"),
       ]);
       setItems(listResponse.data.items);
-      setSummary(listResponse.data.summary ?? EMPTY_COUPONS_SUMMARY);
+      setSummary(listResponse.data.summary);
       setPerformance(perfResponse.data.items);
     } catch (caught) {
       setItems([]);
@@ -370,7 +372,9 @@ export function CouponsListPanel() {
                 type="button"
                 role="tab"
                 aria-selected={active}
-                onClick={() => setTab(entry.id)}
+                onClick={() => {
+                  setTab(entry.id);
+                }}
                 className={[
                   "relative -mb-px pb-3 text-sm font-semibold transition-colors",
                   active
@@ -390,7 +394,9 @@ export function CouponsListPanel() {
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--admin-on-surface-variant)]" />
           <input
             value={query}
-            onChange={(event) => setQuery(event.target.value)}
+            onChange={(event) => {
+              setQuery(event.target.value);
+            }}
             placeholder="Search by code or name"
             className={`${MESSENGER_WIZARD_FIELD_CLASS} h-10 pl-10`}
           />
@@ -507,7 +513,9 @@ export function CouponsListPanel() {
               <button
                 type="button"
                 disabled={page <= 1}
-                onClick={() => setPage((current) => Math.max(1, current - 1))}
+                onClick={() => {
+                  setPage((current) => Math.max(1, current - 1));
+                }}
                 className="inline-flex items-center gap-1 rounded-lg border border-[var(--admin-border)] px-3 py-1 transition-colors hover:bg-[var(--admin-surface-high)] disabled:opacity-40"
               >
                 <ChevronLeft className="h-3.5 w-3.5" />
@@ -516,7 +524,9 @@ export function CouponsListPanel() {
               <button
                 type="button"
                 disabled={page >= pageCount}
-                onClick={() => setPage((current) => Math.min(pageCount, current + 1))}
+                onClick={() => {
+                  setPage((current) => Math.min(pageCount, current + 1));
+                }}
                 className="inline-flex items-center gap-1 rounded-lg border border-[var(--admin-border)] px-3 py-1 transition-colors hover:bg-[var(--admin-surface-high)] disabled:opacity-40"
               >
                 Next
@@ -594,7 +604,10 @@ export function CouponsListPanel() {
           aria-labelledby="delete-coupon-title"
         >
           <div className="w-full max-w-md space-y-4 rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)] p-5 shadow-lg">
-            <h2 id="delete-coupon-title" className="text-lg font-semibold text-[var(--admin-on-surface)]">
+            <h2
+              id="delete-coupon-title"
+              className="text-lg font-semibold text-[var(--admin-on-surface)]"
+            >
               Delete coupon
             </h2>
             <p className="text-sm text-[var(--admin-on-surface-variant)]">
@@ -604,7 +617,9 @@ export function CouponsListPanel() {
             </p>
             <input
               value={deleteConfirm}
-              onChange={(event) => setDeleteConfirm(event.target.value)}
+              onChange={(event) => {
+                setDeleteConfirm(event.target.value);
+              }}
               className={MESSENGER_WIZARD_FIELD_CLASS}
               placeholder="Coupon name"
             />
@@ -612,7 +627,9 @@ export function CouponsListPanel() {
               <button
                 type="button"
                 className="rounded-lg border border-[var(--admin-border)] px-4 py-2 text-sm font-semibold text-[var(--admin-on-surface-variant)] hover:bg-[var(--admin-surface-high)]"
-                onClick={() => setDeleteRow(null)}
+                onClick={() => {
+                  setDeleteRow(null);
+                }}
               >
                 Cancel
               </button>

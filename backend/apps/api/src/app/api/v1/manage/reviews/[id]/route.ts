@@ -12,7 +12,7 @@ import {
 } from "../../../../../../server/manage/manage-reviews.service";
 import { z as zod } from "zod";
 
-const paramsSchema = zod.object({ id: zod.string().uuid() });
+const paramsSchema = zod.object({ id: zod.uuid() });
 
 export const PATCH = createTenantRoute<
   z.output<typeof updateManageReviewBodySchema>,

@@ -8,7 +8,10 @@ import { ManageRatingsReviewsPanel } from "./ManageRatingsReviewsPanel";
 import { ManageAnswerReviewsPanel } from "./ManageAnswerReviewsPanel";
 import { ManageLearnerSupportPanel } from "./ManageLearnerSupportPanel";
 import { ManageArchiveLearnersPanel } from "./ManageArchiveLearnersPanel";
+import { AdminLearnerProductsPage } from "../learner-products/AdminLearnerProductsPage";
+import { AdminTagsPage } from "../tags/AdminTagsPage";
 import { ManageCourseBackupPanel } from "./ManageCourseBackupPanel";
+import { ManageSectionTabs } from "./ManageSectionTabs";
 import { managePageDescClassName, managePageTitleClassName } from "./manage-ui-shared";
 
 type AdminManageSectionPageProps = {
@@ -21,6 +24,8 @@ export function AdminManageSectionPage({ slug }: AdminManageSectionPageProps) {
 
   return (
     <div className="space-y-6">
+      <ManageSectionTabs active={slug} />
+
       <header>
         <h1 className={managePageTitleClassName}>{section.title}</h1>
         <p className={managePageDescClassName}>{section.description}</p>
@@ -47,6 +52,10 @@ function ManageSectionBody({ slug }: { slug: AdminManageSlug }) {
       return <ManageArchiveLearnersPanel />;
     case "course-backup":
       return <ManageCourseBackupPanel />;
+    case "learner-products":
+      return <AdminLearnerProductsPage />;
+    case "tags":
+      return <AdminTagsPage />;
     default:
       return null;
   }

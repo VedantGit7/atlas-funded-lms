@@ -38,7 +38,10 @@ function asUuid(value: unknown): string | null {
     : null;
 }
 
-function sourceKindFromCreatedFrom(createdFrom: string | null, source: string | null): "progress" | "scores" {
+function sourceKindFromCreatedFrom(
+  createdFrom: string | null,
+  source: string | null,
+): "progress" | "scores" {
   const hay = `${createdFrom ?? ""} ${source ?? ""}`.toLowerCase();
   if (hay.includes("scores")) return "scores";
   return "progress";

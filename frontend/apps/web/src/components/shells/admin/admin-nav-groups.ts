@@ -89,44 +89,42 @@ const GROUP_ORDER: ReadonlyArray<{ id: AdminNavGroupId; label: string }> = [
   { id: "more", label: "More" },
 ];
 
-const NAV_META: Record<
-  string,
-  { group: AdminNavGroupId; icon: LucideIcon; expandable?: boolean }
-> = {
-  "/admin": { group: "overview", icon: LayoutDashboard },
-  "/admin/members": { group: "people", icon: Users },
-  "/admin/roles": { group: "people", icon: ShieldCheck },
-  "/studio/courses": { group: "content", icon: GraduationCap },
-  "/admin/competency": { group: "content", icon: Target },
-  "/admin/certificates/templates": { group: "content", icon: FileBadge },
-  "/admin/certificates": { group: "content", icon: Award },
-  "/admin/readiness-policy": { group: "content", icon: ClipboardList },
-  "/admin/moderation/cases": { group: "community", icon: MessagesSquare },
-  "/admin/moderation/appeals": { group: "community", icon: Scale },
-  "/admin/review": { group: "community", icon: CheckSquare },
-  "/admin/gamification": { group: "community", icon: Trophy },
-  "/admin/marketing": { group: "grow", icon: Megaphone, expandable: true },
-  "/admin/sales": { group: "grow", icon: Tag, expandable: true },
-  [ADMIN_MANAGE_HREF]: { group: "operate", icon: Briefcase, expandable: true },
-  "/admin/sub-schools": { group: "operate", icon: BookOpen },
-  [ADMIN_REPORTS_HREF]: { group: "analyse", icon: AlignLeft, expandable: true },
-  [ADMIN_INSIGHTS_HREF]: { group: "analyse", icon: LineChart, expandable: true },
-  "/admin/config": { group: "configuration", icon: Settings },
-  "/admin/branding": { group: "configuration", icon: Palette },
-  "/admin/domains": { group: "configuration", icon: Globe },
-  "/admin/feature-flags": { group: "configuration", icon: Flag },
-  "/admin/entitlements": { group: "configuration", icon: KeyRound },
-  "/admin/notifications": { group: "configuration", icon: Bell },
-  "/admin/notifications/templates": { group: "configuration", icon: Bell },
-  "/admin/automation": { group: "configuration", icon: Zap },
-  "/admin/workflows": { group: "configuration", icon: GitBranch },
-  "/admin/locales": { group: "configuration", icon: Languages },
-  "/admin/extensions": { group: "configuration", icon: Puzzle },
-  "/admin/analytics": { group: "data", icon: BarChart3 },
-  "/admin/audit": { group: "data", icon: ScrollText },
-  "/admin/exports": { group: "data", icon: Download },
-  "/admin/deletion-requests": { group: "data", icon: Trash2 },
-};
+const NAV_META: Record<string, { group: AdminNavGroupId; icon: LucideIcon; expandable?: boolean }> =
+  {
+    "/admin": { group: "overview", icon: LayoutDashboard },
+    "/admin/members": { group: "people", icon: Users },
+    "/admin/roles": { group: "people", icon: ShieldCheck },
+    "/studio/courses": { group: "content", icon: GraduationCap },
+    "/admin/competency": { group: "content", icon: Target },
+    "/admin/certificates/templates": { group: "content", icon: FileBadge },
+    "/admin/certificates": { group: "content", icon: Award },
+    "/admin/readiness-policy": { group: "content", icon: ClipboardList },
+    "/admin/moderation/cases": { group: "community", icon: MessagesSquare },
+    "/admin/moderation/appeals": { group: "community", icon: Scale },
+    "/admin/review": { group: "community", icon: CheckSquare },
+    "/admin/gamification": { group: "community", icon: Trophy },
+    "/admin/marketing": { group: "grow", icon: Megaphone, expandable: true },
+    "/admin/sales": { group: "grow", icon: Tag, expandable: true },
+    [ADMIN_MANAGE_HREF]: { group: "operate", icon: Briefcase, expandable: true },
+    "/admin/sub-schools": { group: "operate", icon: BookOpen },
+    [ADMIN_REPORTS_HREF]: { group: "analyse", icon: AlignLeft, expandable: true },
+    [ADMIN_INSIGHTS_HREF]: { group: "analyse", icon: LineChart, expandable: true },
+    "/admin/config": { group: "configuration", icon: Settings },
+    "/admin/branding": { group: "configuration", icon: Palette },
+    "/admin/domains": { group: "configuration", icon: Globe },
+    "/admin/feature-flags": { group: "configuration", icon: Flag },
+    "/admin/entitlements": { group: "configuration", icon: KeyRound },
+    "/admin/notifications": { group: "configuration", icon: Bell },
+    "/admin/notifications/templates": { group: "configuration", icon: Bell },
+    "/admin/automation": { group: "configuration", icon: Zap },
+    "/admin/workflows": { group: "configuration", icon: GitBranch },
+    "/admin/locales": { group: "configuration", icon: Languages },
+    "/admin/extensions": { group: "configuration", icon: Puzzle },
+    "/admin/analytics": { group: "data", icon: BarChart3 },
+    "/admin/audit": { group: "data", icon: ScrollText },
+    "/admin/exports": { group: "data", icon: Download },
+    "/admin/deletion-requests": { group: "data", icon: Trash2 },
+  };
 
 export type AdminNavChildItem = {
   href: string;
@@ -166,7 +164,7 @@ const MANAGE_CHILDREN: AdminNavChildItem[] = ADMIN_MANAGE_SECTIONS.map((section)
 const MARKETING_CHILDREN: AdminNavChildItem[] = ADMIN_MARKETING_SECTIONS.map((section) => ({
   href: adminMarketingHref(section.slug),
   label: section.label,
-  ...("badge" in section && section.badge ? { badge: section.badge } : {}),
+  ...("badge" in section ? { badge: section.badge } : {}),
 }));
 
 const SALES_CHILDREN: AdminNavChildItem[] = ADMIN_SALES_SECTIONS.map((section) => ({

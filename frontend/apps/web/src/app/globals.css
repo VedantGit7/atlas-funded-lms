@@ -19,7 +19,9 @@
   --input: #e5e5e5;
   --ring: #224466;
   --muted: #f5f5f5;
-  --muted-foreground: #737373;
+  /* H17: 4.35:1 when muted text sits on --muted (#f5f5f5), which is the
+     common case for helper text inside muted panels. Just under AA. */
+  --muted-foreground: #6f6f6f;
   --destructive: #dc2626;
   --destructive-foreground: #ffffff;
   --success: #16a34a;
@@ -34,16 +36,25 @@
   --brand-primary: #224466;
   --brand-accent: #8899aa;
   --brand-header: #112233;
-  --tenant-background: #ffffff;
-  --tenant-foreground: #0a0a0a;
   --primary: var(--brand-primary);
   --primary-foreground: #ffffff;
   --accent: var(--brand-accent);
   --accent-foreground: var(--foreground);
   --radius: 0.5rem;
 
-  --background: var(--tenant-background);
-  --foreground: var(--tenant-foreground);
+  /* The tenant brand drives accents -- --primary, --accent, the sidebar and
+     button chrome -- but NOT the content canvas.
+
+     --background and --foreground used to follow tenant-supplied background and
+     foreground colours. FundedBeyond ships #0F172A, so the canvas became dark
+     navy while --card and --card-foreground stayed hardcoded white/near-black:
+     white cards floating on navy, and every `text-foreground` inside a card
+     rendering near-white on white.
+
+     A brand colour is not a substitute for a content surface, so the canvas is
+     neutral (the #ffffff / #0a0a0a declared above) and those two fields have
+     been removed from the branding form rather than left as config that quietly
+     does nothing. Tenants still get their brand everywhere it belongs. */
 
   /* Personal preference layer: never overrides brand/logo elements. */
   --user-accent: var(--brand-primary);
@@ -71,6 +82,34 @@
   --league-gold: #eab308;
   --league-silver: #c7ccd4;
   --league-bronze: #cf8b52;
+
+  /* The dark chassis redefined background and foreground but left --primary
+     pointing at the raw tenant brand colour. FundedBeyond ships #1B2A4A, so
+     `text-primary` rendered at 1.26:1 on the dark card -- present in the DOM and
+     invisible on screen. Any tenant with a dark brand had the same problem.
+     Lightening toward the page foreground keeps the tenant hue rather than
+     flattening it to grey, and every brand tested lands above 5.7:1.
+     --primary-foreground flips with it, which is the same treatment shadcn
+     applies in dark mode; all 50 bg-primary call sites already pair with
+     text-primary-foreground, so the button styling follows automatically. */
+  --primary: color-mix(in srgb, var(--brand-primary) 50%, #fafafa);
+  --primary-foreground: #0a0a0a;
+}
+
+/* A card paints itself with --card, so text inside it has to be measured
+   against the card, not against the page.
+
+   This rule predates the canvas fix above and is kept deliberately. --card and
+   --card-foreground are their own pair, and a page-level --foreground that ever
+   diverges from --card-foreground again would put unreadable text inside every
+   card -- present in the DOM, selectable, and invisible.
+
+   62 files use bg-card and exactly one pairs it with text-card-foreground, so
+   this re-points --foreground for the card subtree rather than asking every
+   call site to remember the pairing. Only the custom property is set, not
+   `color`: an explicit text-* utility on the card or its children still wins. */
+.bg-card {
+  --foreground: var(--card-foreground);
 }
 
 @theme inline {
@@ -464,7 +503,11 @@ body {
   --admin-surface-variant: #edecf6;
   --admin-border: #e3e2ef;
   --admin-outline: #cac8da;
-  --admin-primary: #6366f1;
+  /* Indigo 500 (#6366f1) carries white --admin-on-primary at 4.47:1, just
+     under AA. Darkened until it clears with margin (4.88) rather than nudged
+     until the checker stops complaining; still visibly distinct from
+     --admin-primary-strong, which paints the hover state. */
+  --admin-primary: #5b5ef0;
   --admin-primary-strong: #4f46e5;
   --admin-primary-container: #e0e7ff;
   --admin-on-primary: #ffffff;
@@ -511,7 +554,11 @@ body {
   --admin-surface-variant: #2a283e;
   --admin-border: #2a283e;
   --admin-outline: #464553;
-  --admin-primary: #6366f1;
+  /* Indigo 500 (#6366f1) carries white --admin-on-primary at 4.47:1, just
+     under AA. Darkened until it clears with margin (4.88) rather than nudged
+     until the checker stops complaining; still visibly distinct from
+     --admin-primary-strong, which paints the hover state. */
+  --admin-primary: #5b5ef0;
   --admin-primary-strong: #4f46e5;
   --admin-primary-container: #3730a3;
   --admin-on-primary: #ffffff;

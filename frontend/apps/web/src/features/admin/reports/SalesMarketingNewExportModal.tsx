@@ -17,6 +17,7 @@ import {
   type SmExportDelivery,
   type SmExportFormat,
   type SmExportGrouping,
+  type SmAttributionPresence,
   type SmExportHistoryItem,
   type SmExportScheduleItem,
 } from "./admin-sales-marketing-exports-api";
@@ -31,6 +32,13 @@ const DATASET_OPTIONS: Array<{ value: SmExportDataset; label: string }> = [
   { value: "referral-wallet", label: "Referral & wallet" },
   { value: "affiliate-products", label: "Affiliate products" },
   { value: "affiliates", label: "Affiliates" },
+  { value: "attribution", label: "Attribution events" },
+];
+
+const ATTRIBUTION_OPTIONS: Array<{ value: SmAttributionPresence; label: string }> = [
+  { value: "any", label: "Any attribution" },
+  { value: "attributed", label: "Has UTM" },
+  { value: "none", label: "No UTM at all" },
 ];
 
 const GROUPING_OPTIONS: Array<{ value: SmExportGrouping; label: string }> = [
@@ -58,7 +66,9 @@ function PolicyToggle({
       aria-checked={checked}
       aria-label={label}
       disabled={disabled}
-      onClick={() => onChange(!checked)}
+      onClick={() => {
+        onChange(!checked);
+      }}
       className={`relative h-5 w-9 shrink-0 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]/40 disabled:opacity-50 ${
         checked ? "bg-[var(--admin-primary)]" : "bg-[var(--admin-outline)]"
       }`}
@@ -92,6 +102,7 @@ export function SalesMarketingNewExportModal({
   const [dataset, setDataset] = useState<SmExportDataset>(defaultDataset);
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
+  const [attribution, setAttribution] = useState<SmAttributionPresence>("any");
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [useCurrentFilters, setUseCurrentFilters] = useState(true);
   const [grouping, setGrouping] = useState<SmExportGrouping>("none");
@@ -108,7 +119,7 @@ export function SalesMarketingNewExportModal({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const columns = useMemo(() => columnsByDataset[dataset] ?? [], [columnsByDataset, dataset]);
+  const columns = useMemo(() => columnsByDataset[dataset], [columnsByDataset, dataset]);
 
   const hasSensitiveSelected = useMemo(
     () => columns.some((column) => selected.has(column.key) && column.sensitive),
@@ -121,20 +132,20 @@ export function SalesMarketingNewExportModal({
       if (event.key === "Escape") onClose();
     };
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+    };
   }, [open, onClose]);
 
   useEffect(() => {
     if (!open) return;
     const nextDataset = capabilities.datasets[0] ?? "sales";
-    const nextColumns = columnsByDataset[nextDataset] ?? [];
+    const nextColumns = columnsByDataset[nextDataset];
     setDataset(nextDataset);
     setDateFrom("");
     setDateTo("");
     setSelected(
-      new Set(
-        nextColumns.filter((column) => column.defaultSelected).map((column) => column.key),
-      ),
+      new Set(nextColumns.filter((column) => column.defaultSelected).map((column) => column.key)),
     );
     setUseCurrentFilters(true);
     setGrouping("none");
@@ -168,6 +179,14 @@ export function SalesMarketingNewExportModal({
   }
 
   function filterSummary(): string {
+    // The attribution dataset is an event stream, not product revenue — a scope
+    // label reading "All products" would describe a file that has no product
+    // column in it.
+    if (dataset === "attribution") {
+      const presence =
+        attribution === "any" ? "All events" : attribution === "attributed" ? "With UTM" : "No UTM";
+      return `${presence} · ${activitySummary()}`;
+    }
     return `All products · ${activitySummary()}`;
   }
 
@@ -213,6 +232,12 @@ export function SalesMarketingNewExportModal({
       const toIso = dateInputToEndIso(dateTo);
       if (fromIso) body.purchasedFrom = fromIso;
       if (toIso) body.purchasedTo = toIso;
+      // Sent only where it is honoured. The server refuses it on the other
+      // datasets rather than dropping it, so sending it anywhere else would
+      // turn an ignored control into a failed export.
+      if (dataset === "attribution" && attribution !== "any") {
+        body.attribution = attribution;
+      }
       body.filterSummary = filterSummary();
 
       if (grouping !== "none") {
@@ -280,7 +305,9 @@ export function SalesMarketingNewExportModal({
                   <button
                     key={option.value}
                     type="button"
-                    onClick={() => setDataset(option.value)}
+                    onClick={() => {
+                      setDataset(option.value);
+                    }}
                     className={`rounded-sm border px-3 py-2 text-sm font-medium transition-colors ${
                       dataset === option.value
                         ? "border-[var(--admin-primary)] bg-[color-mix(in_srgb,var(--admin-primary)_12%,var(--admin-surface))] text-[var(--admin-primary)]"
@@ -297,9 +324,25 @@ export function SalesMarketingNewExportModal({
           <section>
             <h3 className="mb-4 text-base font-semibold text-[var(--admin-on-surface)]">Scope</h3>
             <div className="space-y-4">
-              <p className="text-sm text-[var(--admin-on-surface-variant)]">
-                Product: <span className="text-[var(--admin-on-surface)]">All products</span>
-              </p>
+              {dataset === "attribution" ? (
+                <label className="flex max-w-xs flex-col gap-2">
+                  <span className="text-[12px] font-semibold tracking-[0.06em] text-[var(--admin-on-surface-variant)] uppercase">
+                    Attribution
+                  </span>
+                  <Select
+                    value={attribution}
+                    onValueChange={(value) => {
+                      setAttribution(value as SmAttributionPresence);
+                    }}
+                    options={ATTRIBUTION_OPTIONS}
+                    className={selectTriggerClassName}
+                  />
+                </label>
+              ) : (
+                <p className="text-sm text-[var(--admin-on-surface-variant)]">
+                  Product: <span className="text-[var(--admin-on-surface)]">All products</span>
+                </p>
+              )}
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <label className="flex flex-col gap-2">
                   <span className="text-[12px] font-semibold tracking-[0.06em] text-[var(--admin-on-surface-variant)] uppercase">
@@ -308,7 +351,9 @@ export function SalesMarketingNewExportModal({
                   <input
                     type="date"
                     value={dateFrom}
-                    onChange={(event) => setDateFrom(event.target.value)}
+                    onChange={(event) => {
+                      setDateFrom(event.target.value);
+                    }}
                     className="h-10 rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-3 font-mono text-[13px] text-[var(--admin-on-surface)] outline-none focus:border-[var(--admin-primary)]"
                   />
                 </label>
@@ -319,7 +364,9 @@ export function SalesMarketingNewExportModal({
                   <input
                     type="date"
                     value={dateTo}
-                    onChange={(event) => setDateTo(event.target.value)}
+                    onChange={(event) => {
+                      setDateTo(event.target.value);
+                    }}
                     className="h-10 rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-3 font-mono text-[13px] text-[var(--admin-on-surface)] outline-none focus:border-[var(--admin-primary)]"
                   />
                 </label>
@@ -334,7 +381,9 @@ export function SalesMarketingNewExportModal({
               <button
                 type="button"
                 className="text-sm text-[var(--admin-primary)] hover:underline"
-                onClick={() => setSelected(new Set(columns.map((column) => column.key)))}
+                onClick={() => {
+                  setSelected(new Set(columns.map((column) => column.key)));
+                }}
               >
                 Select all
               </button>
@@ -356,7 +405,9 @@ export function SalesMarketingNewExportModal({
                     <input
                       type="checkbox"
                       checked={selected.has(column.key)}
-                      onChange={() => toggleColumn(column.key)}
+                      onChange={() => {
+                        toggleColumn(column.key);
+                      }}
                       className="h-4 w-4 rounded-sm border-[var(--admin-outline)] text-[var(--admin-primary)] focus:ring-[var(--admin-primary)]"
                     />
                     <span className="text-sm text-[var(--admin-on-surface)] group-hover:text-[var(--admin-primary)]">
@@ -406,7 +457,9 @@ export function SalesMarketingNewExportModal({
           </section>
 
           <section>
-            <h3 className="mb-4 text-base font-semibold text-[var(--admin-on-surface)]">Grouping</h3>
+            <h3 className="mb-4 text-base font-semibold text-[var(--admin-on-surface)]">
+              Grouping
+            </h3>
             <div className="space-y-3 rounded-sm border border-[var(--admin-border)] p-4">
               <label className="flex flex-col gap-2">
                 <span className="text-[12px] font-semibold tracking-[0.06em] text-[var(--admin-on-surface-variant)] uppercase">
@@ -430,7 +483,9 @@ export function SalesMarketingNewExportModal({
                   type="checkbox"
                   checked={includeSubtotals}
                   disabled={grouping === "none"}
-                  onChange={(event) => setIncludeSubtotals(event.target.checked)}
+                  onChange={(event) => {
+                    setIncludeSubtotals(event.target.checked);
+                  }}
                   className="h-4 w-4 rounded-sm border-[var(--admin-outline)] text-[var(--admin-primary)] focus:ring-[var(--admin-primary)] disabled:cursor-not-allowed"
                 />
                 <span className="text-sm text-[var(--admin-on-surface)]">
@@ -447,7 +502,9 @@ export function SalesMarketingNewExportModal({
                 <button
                   key={value}
                   type="button"
-                  onClick={() => setFormat(value)}
+                  onClick={() => {
+                    setFormat(value);
+                  }}
                   className={`rounded-sm px-5 py-2 text-[12px] font-semibold tracking-[0.06em] uppercase transition-all ${
                     format === value
                       ? "bg-[var(--admin-surface)] text-[var(--admin-primary)] shadow-sm"
@@ -461,7 +518,9 @@ export function SalesMarketingNewExportModal({
           </section>
 
           <section>
-            <h3 className="mb-4 text-base font-semibold text-[var(--admin-on-surface)]">Delivery</h3>
+            <h3 className="mb-4 text-base font-semibold text-[var(--admin-on-surface)]">
+              Delivery
+            </h3>
             <div className="space-y-3">
               {(
                 [
@@ -475,7 +534,9 @@ export function SalesMarketingNewExportModal({
                     type="radio"
                     name="sm-export-delivery"
                     checked={delivery === value}
-                    onChange={() => setDelivery(value)}
+                    onChange={() => {
+                      setDelivery(value);
+                    }}
                     disabled={value !== "download" && !capabilities.canEmailDelivery}
                     className="h-4 w-4 border-[var(--admin-outline)] text-[var(--admin-primary)] focus:ring-[var(--admin-primary)] disabled:opacity-50"
                   />
@@ -499,9 +560,9 @@ export function SalesMarketingNewExportModal({
                             type="button"
                             aria-label={`Remove ${email}`}
                             className="ml-2 text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-danger)]"
-                            onClick={() =>
-                              setRecipients((current) => current.filter((item) => item !== email))
-                            }
+                            onClick={() => {
+                              setRecipients((current) => current.filter((item) => item !== email));
+                            }}
                           >
                             <X className="h-3.5 w-3.5" aria-hidden="true" />
                           </button>
@@ -509,7 +570,9 @@ export function SalesMarketingNewExportModal({
                       ))}
                       <input
                         value={recipientInput}
-                        onChange={(event) => setRecipientInput(event.target.value)}
+                        onChange={(event) => {
+                          setRecipientInput(event.target.value);
+                        }}
                         onKeyDown={(event) => {
                           if (event.key === "Enter") {
                             event.preventDefault();
@@ -529,7 +592,9 @@ export function SalesMarketingNewExportModal({
                       </label>
                       <input
                         value={webhookUrl}
-                        onChange={(event) => setWebhookUrl(event.target.value)}
+                        onChange={(event) => {
+                          setWebhookUrl(event.target.value);
+                        }}
                         placeholder="https://"
                         className="h-10 w-full rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-3 font-mono text-[13px] text-[var(--admin-on-surface)] outline-none focus:border-[var(--admin-primary)]"
                       />
@@ -563,7 +628,9 @@ export function SalesMarketingNewExportModal({
                     </span>
                     <Select
                       value={cadence}
-                      onValueChange={(value) => setCadence(value as SmExportCadence)}
+                      onValueChange={(value) => {
+                        setCadence(value as SmExportCadence);
+                      }}
                       options={[
                         { value: "daily", label: "Daily" },
                         { value: "weekly", label: "Weekly" },
@@ -579,7 +646,9 @@ export function SalesMarketingNewExportModal({
                     <input
                       type="time"
                       value={time}
-                      onChange={(event) => setTime(event.target.value)}
+                      onChange={(event) => {
+                        setTime(event.target.value);
+                      }}
                       className="h-10 rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-3 font-mono text-[13px] text-[var(--admin-on-surface)] outline-none focus:border-[var(--admin-primary)]"
                     />
                   </label>
@@ -606,7 +675,10 @@ export function SalesMarketingNewExportModal({
           ) : null}
 
           <div className="flex items-start gap-2 rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-4 py-3 text-sm text-[var(--admin-on-surface-variant)]">
-            <Info className="mt-0.5 h-4 w-4 shrink-0 text-[var(--admin-primary)]" aria-hidden="true" />
+            <Info
+              className="mt-0.5 h-4 w-4 shrink-0 text-[var(--admin-primary)]"
+              aria-hidden="true"
+            />
             <span>{capabilities.note}</span>
           </div>
 

@@ -14,7 +14,7 @@ import { AdminDomainPageShell, adminDomainCardClassName } from "./admin-domain-s
 export function AdminDevicesPanel() {
   const [sessions, setSessions] = useState<DeviceSession[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<unknown>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -23,7 +23,7 @@ export function AdminDevicesPanel() {
       const response = await fetchDeviceSessions();
       setSessions(response.data.items);
     } catch (loadError) {
-      setError(loadError instanceof Error ? loadError.message : "Unable to load device sessions.");
+      setError(loadError);
     } finally {
       setLoading(false);
     }
@@ -42,14 +42,21 @@ export function AdminDevicesPanel() {
       <section className={adminDomainCardClassName}>
         <div className="flex items-center justify-between gap-3">
           <h2 className="text-lg font-semibold text-[var(--admin-on-surface)]">Sessions</h2>
-          <button type="button" className={ghostButtonClassName} disabled={loading} onClick={() => void load()}>
+          <button
+            type="button"
+            className={ghostButtonClassName}
+            disabled={loading}
+            onClick={() => void load()}
+          >
             Refresh
           </button>
         </div>
         {loading ? (
           <p className="mt-3 text-sm text-[var(--admin-on-surface-variant)]">Loading…</p>
         ) : sessions.length === 0 ? (
-          <p className="mt-3 text-sm text-[var(--admin-on-surface-variant)]">No device sessions recorded.</p>
+          <p className="mt-3 text-sm text-[var(--admin-on-surface-variant)]">
+            No device sessions recorded.
+          </p>
         ) : (
           <div className={`${analyticsTableShellClassName} mt-4`}>
             <table className="min-w-full text-sm">

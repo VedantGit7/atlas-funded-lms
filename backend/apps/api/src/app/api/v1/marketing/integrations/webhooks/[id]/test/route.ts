@@ -5,7 +5,7 @@ import { testMarketingIntegrationWebhookResponseSchema } from "../../../../../..
 import { mutateMarketingIntegrationsMetadata } from "../../../../../../../../server/marketing-integrations/marketing-integrations.route-metadata";
 import { testMarketingIntegrationWebhook } from "../../../../../../../../server/marketing-integrations/marketing-integrations.service";
 
-const paramsSchema = zod.object({ id: zod.string().uuid() });
+const paramsSchema = zod.object({ id: zod.uuid() });
 
 export const POST = createTenantRoute<
   undefined,

@@ -7,10 +7,7 @@ import {
 
 const API_INTERNAL_URL = process.env["API_INTERNAL_URL"] ?? "http://127.0.0.1:3001";
 
-export async function POST(
-  req: NextRequest,
-  context: { params: Promise<{ id: string }> },
-) {
+export async function POST(req: NextRequest, context: { params: Promise<{ id: string }> }) {
   const { id: lessonId } = await context.params;
   const assetReferenceId = req.headers.get("x-asset-reference-id")?.trim() ?? "";
 
@@ -45,15 +42,13 @@ export async function POST(
     req.headers.get("x-forwarded-host") ??
     req.headers.get("host") ??
     "";
-  const cookie =
-    req.headers.get(ATLAS_INTERNAL_COOKIE_HEADER) ?? req.headers.get("cookie") ?? "";
+  const cookie = req.headers.get(ATLAS_INTERNAL_COOKIE_HEADER) ?? req.headers.get("cookie") ?? "";
 
   const headers = new Headers({
     "content-type": req.headers.get("content-type") ?? "application/octet-stream",
     "x-asset-reference-id": assetReferenceId,
     "idempotency-key":
-      req.headers.get("idempotency-key")?.trim() ??
-      `lesson-asset-blob-proxy-${randomUUID()}`,
+      req.headers.get("idempotency-key")?.trim() ?? `lesson-asset-blob-proxy-${randomUUID()}`,
     "x-forwarded-host": forwardedHost,
   });
 

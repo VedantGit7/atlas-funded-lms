@@ -98,10 +98,7 @@ const MFA_ASSURED_HOME_PATHS = new Set(["/admin", "/studio", "/moderate"]);
  * invite security screen (auth layout) so we do not route new members through
  * learner/admin shells that can fail transiently right after sign-in.
  */
-export function resolvePostInviteRedirect(args: {
-  roleHome: string;
-  mfaEnabled: boolean;
-}): string {
+export function resolvePostInviteRedirect(args: { roleHome: string; mfaEnabled: boolean }): string {
   if (!args.mfaEnabled && MFA_ASSURED_HOME_PATHS.has(args.roleHome)) {
     return `/invite/security?next=${encodeURIComponent(args.roleHome)}`;
   }

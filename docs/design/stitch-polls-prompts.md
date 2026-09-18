@@ -7,6 +7,7 @@ Block 0 is identical to the one in the Active Devices, Payments, Progress & Scor
 files; reproduced here so this file stands alone.
 
 Source of truth:
+
 - `frontend/apps/web/src/features/admin/reports/AdminPollsRosterPage.tsx`
 - `frontend/apps/web/src/features/admin/reports/admin-polls-roster-api.ts`
 - `backend/packages/domain/src/polls/polls.dto.ts` (enums)
@@ -577,19 +578,19 @@ where schedule cards stack under the history table.
 
 Full best-in-class versions, as intended. What exists today vs. what needs building:
 
-| Prompt feature | Status |
-| --- | --- |
-| Poll list with type, status, quiz mode, multi-answer, anonymity, result visibility, layout, duration, live session link, response and option counts | exists |
-| Poll detail with total responses and per-option count/percent/correct flag | exists |
-| `respondentsHidden` anonymity enforcement | exists — the addendum's hard rule is already the server's behaviour |
-| Respondent list with learner, email, option, correct, responded-at; filters by name, option, date range; sort; column picker | exists |
-| Async CSV export | exists |
-| Participation denominators (eligible audience from a session roster or batch) | needs backend |
-| Non-respondent list and presence-at-poll-time | needs backend |
-| Response timing — time to answer, response curve, "first 20 seconds" | `responded_at` exists; poll-open timestamp and per-response latency need backend |
-| Live monitor (open poll, countdown, streaming tally, reveal-correct control, extend, close now) | needs backend and a realtime channel |
-| Session-level poll rollup, cross-poll participation grid | needs backend |
-| Poll comparison across sessions, option-label alignment | needs backend |
-| Message respondents / non-respondents | no poll-scoped messaging endpoint — the batches and progress reports have one to model it on |
-| Saved views, export history, scheduled exports | export runs exist; history UI and scheduling need backend |
-| Segment breakdowns on an option (by batch, first-time vs repeat) | needs backend |
+| Prompt feature                                                                                                                                      | Status                                                                                       |
+| --------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| Poll list with type, status, quiz mode, multi-answer, anonymity, result visibility, layout, duration, live session link, response and option counts | exists                                                                                       |
+| Poll detail with total responses and per-option count/percent/correct flag                                                                          | exists                                                                                       |
+| `respondentsHidden` anonymity enforcement                                                                                                           | exists — the addendum's hard rule is already the server's behaviour                          |
+| Respondent list with learner, email, option, correct, responded-at; filters by name, option, date range; sort; column picker                        | exists                                                                                       |
+| Async CSV export                                                                                                                                    | exists                                                                                       |
+| Participation denominators (eligible audience from a session roster or batch)                                                                       | needs backend                                                                                |
+| Non-respondent list and presence-at-poll-time                                                                                                       | needs backend                                                                                |
+| Response timing — time to answer, response curve, "first 20 seconds"                                                                                | `responded_at` exists; poll-open timestamp and per-response latency need backend             |
+| Live monitor (open poll, countdown, streaming tally, reveal-correct control, extend, close now)                                                     | needs backend and a realtime channel                                                         |
+| Session-level poll rollup, cross-poll participation grid                                                                                            | needs backend                                                                                |
+| Poll comparison across sessions, option-label alignment                                                                                             | needs backend                                                                                |
+| Message respondents / non-respondents                                                                                                               | no poll-scoped messaging endpoint — the batches and progress reports have one to model it on |
+| Saved views, export history, scheduled exports                                                                                                      | export runs exist; history UI and scheduling need backend                                    |
+| Segment breakdowns on an option (by batch, first-time vs repeat)                                                                                    | needs backend                                                                                |

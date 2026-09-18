@@ -82,11 +82,7 @@ export function InlineLessonSettingsPanel({
     setError(null);
     try {
       const payload = buildLessonSettingsPayload(lesson, form);
-      await clientApi.put(
-        `/api/v1/lessons/${lesson.id}`,
-        payload,
-        "lesson-settings-save",
-      );
+      await clientApi.put(`/api/v1/lessons/${lesson.id}`, payload, "lesson-settings-save");
       const response = await clientApi.get<{ data: StudioLessonDetail }>(
         `/api/v1/lessons/${lesson.id}?view=studio`,
       );

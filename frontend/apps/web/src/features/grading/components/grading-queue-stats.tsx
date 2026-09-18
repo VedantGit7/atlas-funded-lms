@@ -59,7 +59,11 @@ export function GradingQueueStats({ tasks }: GradingQueueStatsProps) {
             {String(stats.urgent)}
           </span>
           <span className="text-[11px] font-semibold text-[var(--admin-warning)]">
-            {stats.urgent > 0 ? "Over 24h old" : stats.total > 0 ? "Queue healthy" : "Nothing waiting"}
+            {stats.urgent > 0
+              ? "Over 24h old"
+              : stats.total > 0
+                ? "Queue healthy"
+                : "Nothing waiting"}
           </span>
         </div>
         <p className="mt-3 text-[11px] text-[var(--admin-on-surface-variant)]">
@@ -67,9 +71,7 @@ export function GradingQueueStats({ tasks }: GradingQueueStatsProps) {
         </p>
       </div>
 
-      <div
-        className={`${statCardClassName} border-l-4 border-l-[var(--admin-warning)]`}
-      >
+      <div className={`${statCardClassName} border-l-4 border-l-[var(--admin-warning)]`}>
         <span className={`${statLabelClassName} text-[var(--admin-warning)]`}>Total loaded</span>
         <div className="mt-2 flex items-end justify-between gap-3">
           <span className="text-2xl font-bold text-[var(--admin-on-surface)]">

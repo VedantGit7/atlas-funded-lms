@@ -1,8 +1,5 @@
 import type { TenantTx } from "@atlas/db";
-import {
-  computeDiscriminationStub,
-  computeDifficulty,
-} from "../analytics/analytics-psychometrics";
+import { computeDiscriminationStub, computeDifficulty } from "../analytics/analytics-psychometrics";
 import type { ScoreAttemptHistoryQuery } from "./progress-score-roster.dto";
 
 function stemText(stemJson: unknown): string {
@@ -159,8 +156,7 @@ export const progressScoreQuizDetailRepository = {
 
     return items.map((item) => {
       const answerCount = item.answer_count;
-      const correctRate =
-        answerCount > 0 ? (item.correct_count / answerCount) * 100 : null;
+      const correctRate = answerCount > 0 ? (item.correct_count / answerCount) * 100 : null;
       const difficulty = computeDifficulty(answerCount, item.correct_count);
       const discrimination = computeDiscriminationStub(answerCount, item.correct_count);
       const itemOptions = optionsByItem.get(item.item_id) ?? [];
@@ -183,11 +179,8 @@ export const progressScoreQuizDetailRepository = {
         itemTypeKey: item.item_type_key,
         correctRatePct: correctRate == null ? null : Math.round(correctRate * 10) / 10,
         avgTimeLabel:
-          item.avg_latency_ms == null
-            ? null
-            : formatDuration(item.avg_latency_ms / 1000),
-        discrimination:
-          discrimination == null ? null : Math.round(discrimination * 100) / 100,
+          item.avg_latency_ms == null ? null : formatDuration(item.avg_latency_ms / 1000),
+        discrimination: discrimination == null ? null : Math.round(discrimination * 100) / 100,
         mostWrongOption: wrong?.label ?? null,
         mostWrongSharePct: wrong?.sharePct ?? null,
         options: mappedOptions,
@@ -277,11 +270,7 @@ export const progressScoreQuizDetailRepository = {
     return Number(rows[0]?.count ?? 0);
   },
 
-  async listAttemptHistory(
-    tx: TenantTx,
-    assessmentId: string,
-    query: ScoreAttemptHistoryQuery,
-  ) {
+  async listAttemptHistory(tx: TenantTx, assessmentId: string, query: ScoreAttemptHistoryQuery) {
     const skip = (query.page - 1) * query.limit;
     const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
       with question_count as (
@@ -394,18 +383,15 @@ export const progressScoreQuizDetailRepository = {
       email: typeof row["email"] === "string" ? row["email"] : null,
       attemptNumber: Number(row["attempt_number"] ?? 1),
       scorePct: row["score_pct"] == null ? null : Number(row["score_pct"]),
-      resultStatus: String(row["result_status"]) as
-        | "pass"
-        | "fail"
-        | "pending"
-        | "in_progress",
+      resultStatus: String(row["result_status"]) as "pass" | "fail" | "pending" | "in_progress",
       answeredCount: Number(row["answered_count"] ?? 0),
       questionCount: row["question_count"] == null ? null : Number(row["question_count"]),
       startedAt: row["started_at"] instanceof Date ? row["started_at"].toISOString() : null,
-      submittedAt:
-        row["submitted_at"] instanceof Date ? row["submitted_at"].toISOString() : null,
+      submittedAt: row["submitted_at"] instanceof Date ? row["submitted_at"].toISOString() : null,
       durationSeconds:
-        row["duration_seconds"] == null ? null : Math.max(0, Math.round(Number(row["duration_seconds"]))),
+        row["duration_seconds"] == null
+          ? null
+          : Math.max(0, Math.round(Number(row["duration_seconds"]))),
       flags: parseFlags(row["metadata_json"]),
     }));
   },

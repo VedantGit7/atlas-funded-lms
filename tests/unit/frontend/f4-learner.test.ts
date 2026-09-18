@@ -10,17 +10,20 @@ describe("F4 learner wire gaps + lesson player", () => {
     expect(existsSync(resolve(webRoot, "features/community/components/ReactionToggle.tsx"))).toBe(
       true,
     );
-    expect(existsSync(resolve(webRoot, "features/community/components/ReportContentDialog.tsx"))).toBe(
-      true,
-    );
-    expect(existsSync(resolve(webRoot, "features/community/components/SubmitAppealDialog.tsx"))).toBe(
-      true,
-    );
+    expect(
+      existsSync(resolve(webRoot, "features/community/components/ReportContentDialog.tsx")),
+    ).toBe(true);
+    expect(
+      existsSync(resolve(webRoot, "features/community/components/SubmitAppealDialog.tsx")),
+    ).toBe(true);
 
     const moderationApi = readFileSync(resolve(webRoot, "features/moderation/api.ts"), "utf8");
     expect(moderationApi).toContain("export async function createAppeal");
 
-    const spaceFeed = readFileSync(resolve(webRoot, "features/community/components/SpaceFeed.tsx"), "utf8");
+    const spaceFeed = readFileSync(
+      resolve(webRoot, "features/community/components/SpaceFeed.tsx"),
+      "utf8",
+    );
     expect(spaceFeed).toContain("PostCard");
 
     const postCard = readFileSync(
@@ -46,20 +49,23 @@ describe("F4 learner wire gaps + lesson player", () => {
     expect(existsSync(resolve(webRoot, "features/lessons/lesson-autosave-indicator.tsx"))).toBe(
       true,
     );
-    expect(
-      existsSync(resolve(webRoot, "app/courses/[id]/lessons/[lessonId]/loading.tsx")),
-    ).toBe(true);
+    expect(existsSync(resolve(webRoot, "app/courses/[id]/lessons/[lessonId]/loading.tsx"))).toBe(
+      true,
+    );
 
-    const shell = readFileSync(resolve(webRoot, "features/lessons/lesson-player-shell.tsx"), "utf8");
+    const shell = readFileSync(
+      resolve(webRoot, "features/lessons/lesson-player-shell.tsx"),
+      "utf8",
+    );
     expect(shell).toContain("LessonProgressProvider");
     expect(shell).toContain("fixed inset-x-0 bottom-0");
     expect(shell).toContain("LessonAutosaveIndicator");
   });
 
   it("enriches continue-learning on the learner dashboard", () => {
-    expect(existsSync(resolve(webRoot, "features/learner/components/ContinueLearningCard.tsx"))).toBe(
-      true,
-    );
+    expect(
+      existsSync(resolve(webRoot, "features/learner/components/ContinueLearningCard.tsx")),
+    ).toBe(true);
 
     const dashboardView = readFileSync(
       resolve(webRoot, "features/learner/components/LearnerDashboardView.tsx"),
@@ -143,12 +149,12 @@ describe("F4 audit polish", () => {
     expect(dangerZonePage).toContain("/api/v1/me/deletion-request");
     expect(dangerZonePage).toContain("initialPending={deletionStatus.data.pending}");
 
-    expect(
-      existsSync(resolve(webRoot, "app/(learner)/community/spaces/[id]/loading.tsx")),
-    ).toBe(true);
-    expect(
-      existsSync(resolve(webRoot, "app/(learner)/community/posts/[id]/loading.tsx")),
-    ).toBe(true);
+    expect(existsSync(resolve(webRoot, "app/(learner)/community/spaces/[id]/loading.tsx"))).toBe(
+      true,
+    );
+    expect(existsSync(resolve(webRoot, "app/(learner)/community/posts/[id]/loading.tsx"))).toBe(
+      true,
+    );
   });
 
   it("optimizes lesson position saves and wires profile avatar plus leaderboard deep links", () => {
@@ -212,7 +218,10 @@ describe("F4 audit polish", () => {
 describe("F4 backend learner report permission", () => {
   it("grants community.report to learners and uses it for case creation", () => {
     const matrix = readFileSync(
-      resolve(import.meta.dirname, "../../../backend/packages/access/src/seed/role-permission-matrix.ts"),
+      resolve(
+        import.meta.dirname,
+        "../../../backend/packages/access/src/seed/role-permission-matrix.ts",
+      ),
       "utf8",
     );
     expect(matrix).toContain('"community.report"');

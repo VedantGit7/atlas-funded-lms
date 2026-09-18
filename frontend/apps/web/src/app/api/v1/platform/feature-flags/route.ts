@@ -32,7 +32,7 @@ export const POST = createPlatformRoute({
       },
       {
         ...body,
-        rolloutType: body.rolloutType ?? "BOOLEAN",
+        rolloutType: body.rolloutType,
       },
     ),
 });

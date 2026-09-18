@@ -81,10 +81,7 @@ export function DropdownMenu({
 
     function onPointerDown(event: MouseEvent) {
       const target = event.target as Node;
-      if (
-        !triggerRef.current?.contains(target) &&
-        !menuRef.current?.contains(target)
-      ) {
+      if (!triggerRef.current?.contains(target) && !menuRef.current?.contains(target)) {
         setOpen(false);
       }
     }

@@ -8,7 +8,7 @@ import {
 import { adminAffiliateWriteMetadata } from "../../../../../../../server/sales-affiliates/sales-affiliates.route-metadata";
 import { updateAffiliate } from "../../../../../../../server/sales-affiliates/sales-affiliates.service";
 
-const paramsSchema = zod.object({ id: zod.string().uuid() });
+const paramsSchema = zod.object({ id: zod.uuid() });
 
 export const PUT = createTenantRoute<
   z.output<typeof updateAffiliateBodySchema>,

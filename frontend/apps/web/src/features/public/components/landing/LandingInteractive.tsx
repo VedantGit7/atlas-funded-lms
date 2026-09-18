@@ -1,9 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { useCallback, useState } from "react";
-import { FUNDED_BEYOND_LOGO_URL } from "@/lib/brand";
+import { TenantBrandMark } from "@/components/patterns/TenantBrandMark";
 import { FAQ_DATA } from "./landing-data";
 import { captureLandingCtaClick } from "./landing-analytics";
 import { FbaDarkModeButton } from "@/components/theme/FbaDarkModeButton";
@@ -17,10 +16,7 @@ export function LandingFaq() {
   }, []);
 
   return (
-    <div
-      id="faq"
-      className="px-7 py-24 max-[768px]:px-4 max-[768px]:py-16"
-    >
+    <div id="faq" className="px-7 py-24 max-[768px]:px-4 max-[768px]:py-16">
       <div className="mx-auto max-w-[720px]">
         <div className="mb-[52px] text-center">
           <div className="mb-3.5 text-[11px] font-semibold uppercase tracking-[0.15em] text-[var(--fba-ind)]">
@@ -37,7 +33,9 @@ export function LandingFaq() {
               <div key={faq.q} className="border-b border-[var(--fba-bdr)] last:border-b-0">
                 <button
                   type="button"
-                  onClick={() => handleFaqClick(index)}
+                  onClick={() => {
+                    handleFaqClick(index);
+                  }}
                   className="flex w-full cursor-pointer items-center justify-between gap-4 bg-[var(--fba-surf)] px-[26px] py-[22px] text-left transition-colors hover:bg-[var(--fba-bg2)]"
                   aria-expanded={isOpen}
                 >
@@ -79,14 +77,29 @@ export function LandingNav({
   onToggleDark,
   publicName,
   authCta = null,
+  logoUrl = null,
 }: {
   darkMode: boolean;
   onToggleDark: () => void;
   publicName?: string | null;
   /** When present, replaces Sign In (resolved on the server from the session). */
   authCta?: { label: string; href: string } | null;
+  /** The tenant's own logo; without one their initials mark is shown. */
+  logoUrl?: string | null;
 }) {
-  const brandName = publicName?.replace(/\s*Academy\s*$/i, "") || "FundedBeyond";
+  // Neutral fallback: this nav renders every tenant's public landing, so a
+  // "FundedBeyond" default put tenant #1's name on every academy's home page.
+  //
+  // The " Academy" suffix below is split out only so it can be de-emphasised
+  // typographically for names that already end in it ("FundedBeyond" +
+  // "Academy"). It used to be appended unconditionally, which rendered
+  // "Academy Academy" for a tenant with no publicName, and would have made
+  // "Northwind Institute" read "Northwind Institute Academy".
+  const fullName = publicName?.trim() || "Academy";
+  const hasAcademySuffix = /\s*Academy\s*$/i.test(fullName);
+  const brandName = hasAcademySuffix
+    ? fullName.replace(/\s*Academy\s*$/i, "") || fullName
+    : fullName;
 
   const navLinks = [
     { id: "how", label: "How It Works" },
@@ -102,9 +115,7 @@ export function LandingNav({
       event.preventDefault();
       const navHeight = 62;
       const top = target.getBoundingClientRect().top + window.scrollY - navHeight;
-      const prefersReducedMotion = window.matchMedia(
-        "(prefers-reduced-motion: reduce)",
-      ).matches;
+      const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       window.scrollTo({ top, behavior: prefersReducedMotion ? "auto" : "smooth" });
     },
     [],
@@ -117,21 +128,22 @@ export function LandingNav({
     <div className="sticky top-0 z-[100] border-b border-[var(--fba-bdr)] bg-[var(--fba-nav-bg)] backdrop-blur-[8px]">
       <div className="mx-auto flex h-[62px] max-w-[1100px] items-center justify-between gap-6 px-7 max-[1024px]:px-4">
         <Link href="/" className="flex shrink-0 items-center gap-2 no-underline">
-          <Image
-            src={FUNDED_BEYOND_LOGO_URL}
-            alt=""
-            width={30}
-            height={30}
+          <TenantBrandMark
+            logoUrl={logoUrl}
+            name={fullName}
+            size={30}
             className="h-[30px] w-[30px] shrink-0 rounded-full"
           />
           <div>
             <span className="text-[13px] font-extrabold leading-none text-[var(--fba-tx)]">
               {brandName}
             </span>
-            <span className="text-[13px] font-normal leading-none text-[var(--fba-tx3)]">
-              {" "}
-              Academy
-            </span>
+            {hasAcademySuffix ? (
+              <span className="text-[13px] font-normal leading-none text-[var(--fba-tx3)]">
+                {" "}
+                Academy
+              </span>
+            ) : null}
           </div>
         </Link>
         <nav className="hidden items-center gap-7 lg:flex" aria-label="Landing sections">
@@ -139,7 +151,9 @@ export function LandingNav({
             <a
               key={link.id}
               href={`#${link.id}`}
-              onClick={(event) => handleNavClick(event, link.id)}
+              onClick={(event) => {
+                handleNavClick(event, link.id);
+              }}
               className="text-[13px] font-medium text-[var(--fba-tx2)] no-underline transition-colors hover:text-[var(--fba-tx)]"
             >
               {link.label}
@@ -156,7 +170,9 @@ export function LandingNav({
           </Link>
           <Link
             href="/diagnostic"
-            onClick={() => captureLandingCtaClick("nav_start_free")}
+            onClick={() => {
+              captureLandingCtaClick("nav_start_free");
+            }}
             className="rounded-lg bg-[var(--fba-ind)] px-5 py-[11px] text-xs font-bold text-white no-underline transition-colors hover:bg-[var(--fba-ind-d)]"
           >
             Start Free →

@@ -16,6 +16,6 @@ export const POST = createTenantRoute<
   params: spaceIdParamsSchema,
   output: joinSpaceResponseSchema,
   handler: async ({ tx, ctx, params }) => {
-    return joinSpace(tx, ctx, params["id"] ?? "");
+    return joinSpace(tx, ctx, params.id);
   },
 });

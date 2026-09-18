@@ -5,10 +5,7 @@ import { FolderOpen, Paperclip, Plus } from "lucide-react";
 import { ClientApiError, clientApi } from "../../../../lib/client-api";
 import { builderHelperClassName } from "../course-builder-shared";
 import { inlineLessonSecondaryButtonClassName } from "./inline-lesson-editor-shared";
-import {
-  uploadLessonAssetFile,
-  attachLessonAssetReference,
-} from "../upload-lesson-asset";
+import { uploadLessonAssetFile, attachLessonAssetReference } from "../upload-lesson-asset";
 
 type LessonAsset = {
   id: string;
@@ -77,11 +74,7 @@ export function LessonAttachmentsSidebar({ lessonId, editable }: LessonAttachmen
     setBusy(true);
     setError(null);
     try {
-      const assetReferenceId = await uploadLessonAssetFile(
-        lessonId,
-        file,
-        "lesson.attachment",
-      );
+      const assetReferenceId = await uploadLessonAssetFile(lessonId, file, "lesson.attachment");
       await attachLessonAssetReference(lessonId, assetReferenceId, file.type || "file");
       await refreshAssets();
     } catch (attachError) {
@@ -94,10 +87,10 @@ export function LessonAttachmentsSidebar({ lessonId, editable }: LessonAttachmen
   return (
     <aside className="flex min-h-[min(24rem,calc(100vh-14rem))] flex-col rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)]">
       <div className="border-b border-[var(--admin-border)] px-5 py-4">
-        <h2 className="text-sm font-semibold text-[var(--admin-on-surface-variant)]">Attachments</h2>
-        <p className={`${builderHelperClassName} mt-1`}>
-          Add attachments like docs, pdf or links
-        </p>
+        <h2 className="text-sm font-semibold text-[var(--admin-on-surface-variant)]">
+          Attachments
+        </h2>
+        <p className={`${builderHelperClassName} mt-1`}>Add attachments like docs, pdf or links</p>
       </div>
 
       <div className="flex flex-1 flex-col px-5 py-6">

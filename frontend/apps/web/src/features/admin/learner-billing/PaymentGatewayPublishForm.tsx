@@ -39,7 +39,9 @@ export function PaymentGatewayPublishForm({ gateway }: { gateway: PaymentGateway
         `/api/v1/learner-billing/payment-gateways/${gateway.id}/publish`,
         { published },
         "publish-payment-gateway",
-        { successMessage: published ? "Payment gateway published." : "Payment gateway unpublished." },
+        {
+          successMessage: published ? "Payment gateway published." : "Payment gateway unpublished.",
+        },
       );
       router.refresh();
     } catch (caught) {
@@ -138,7 +140,10 @@ export function PaymentGatewayPublishForm({ gateway }: { gateway: PaymentGateway
         >
           {saving ? (
             <>
-              <RefreshCw className="h-4 w-4 animate-spin motion-reduce:animate-none" aria-hidden="true" />
+              <RefreshCw
+                className="h-4 w-4 animate-spin motion-reduce:animate-none"
+                aria-hidden="true"
+              />
               Saving
             </>
           ) : (

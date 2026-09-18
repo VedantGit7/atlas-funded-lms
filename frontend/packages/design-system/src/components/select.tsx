@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  useCallback,
-  useEffect,
-  useId,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Check, ChevronDown } from "lucide-react";
 import { cn } from "../lib/cn";
@@ -248,7 +241,9 @@ export function Select({
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-controls={open ? listboxId : undefined}
-        aria-activedescendant={open && options[highlight] ? `${listboxId}-opt-${highlight}` : undefined}
+        aria-activedescendant={
+          open && options[highlight] ? `${listboxId}-opt-${highlight}` : undefined
+        }
         aria-label={ariaLabel}
         aria-labelledby={ariaLabelledby}
         disabled={disabled}
@@ -286,9 +281,7 @@ export function Select({
               style={{
                 top: position.placement === "bottom" ? position.top : undefined,
                 bottom:
-                  position.placement === "top"
-                    ? window.innerHeight - position.top
-                    : undefined,
+                  position.placement === "top" ? window.innerHeight - position.top : undefined,
                 left: position.left,
                 width: position.width,
                 maxHeight: MENU_MAX_HEIGHT,
@@ -330,7 +323,10 @@ export function Select({
                   >
                     <span className="min-w-0 flex-1 truncate">{option.label}</span>
                     {isSelected ? (
-                      <Check className="h-4 w-4 shrink-0 text-neutral-900 dark:text-neutral-100" aria-hidden="true" />
+                      <Check
+                        className="h-4 w-4 shrink-0 text-neutral-900 dark:text-neutral-100"
+                        aria-hidden="true"
+                      />
                     ) : null}
                   </button>
                 );

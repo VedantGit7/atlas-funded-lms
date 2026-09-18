@@ -1,10 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createPublicRouteHandler } from "@atlas/api";
-import {
-  applyAuthSessionToCookieStore,
-  readSessionPersistence,
-} from "@atlas/auth/cookie-store";
+import { applyAuthSessionToCookieStore, readSessionPersistence } from "@atlas/auth/cookie-store";
 import { refreshSessionFromRefreshToken } from "@atlas/auth";
 import { authRequired } from "@atlas/auth";
 import { extractRefreshToken } from "@atlas/auth/session";

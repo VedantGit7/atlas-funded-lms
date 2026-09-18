@@ -33,8 +33,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 function isCertificateBuilderRoute(pathname: string): boolean {
   return (
-    pathname === "/admin/certificate-builder" ||
-    pathname.startsWith("/admin/certificate-builder/")
+    pathname === "/admin/certificate-builder" || pathname.startsWith("/admin/certificate-builder/")
   );
 }
 

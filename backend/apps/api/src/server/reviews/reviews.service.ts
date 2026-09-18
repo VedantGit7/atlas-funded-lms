@@ -1,7 +1,10 @@
 import type { TenantTx } from "@atlas/db";
 import { courseNotFound } from "../courses/courses.errors";
 import { loadCourseResourceRef } from "../courses/load-course-resource-ref";
-import { findCourseAuthProjection, findEnrollmentForMembership } from "../courses/courses.repository";
+import {
+  findCourseAuthProjection,
+  findEnrollmentForMembership,
+} from "../courses/courses.repository";
 import {
   findMyCourseReview,
   getCourseReviewAggregate,

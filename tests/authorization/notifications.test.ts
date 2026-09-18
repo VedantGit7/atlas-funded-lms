@@ -7,7 +7,7 @@ function adminTx() {
       .fn()
       .mockResolvedValueOnce([{ key: "notification.template.manage" }])
       .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([{ role_key: "admin" }]),
+      .mockResolvedValueOnce([{ role_key: "admin", bypasses_resource_predicates: true }]),
   };
 }
 
@@ -17,7 +17,7 @@ function learnerTx() {
       .fn()
       .mockResolvedValueOnce([{ key: "notification.read.self" }])
       .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([{ role_key: "learner" }]),
+      .mockResolvedValueOnce([{ role_key: "learner", bypasses_resource_predicates: false }]),
   };
 }
 
@@ -80,7 +80,7 @@ describe("notification authorization", () => {
           .fn()
           .mockResolvedValueOnce([{ key: "notification.template.read" }])
           .mockResolvedValueOnce([{ permission_key: "notification.template.read", effect: "DENY" }])
-          .mockResolvedValueOnce([{ role_key: "admin" }]),
+          .mockResolvedValueOnce([{ role_key: "admin", bypasses_resource_predicates: true }]),
       },
       actor: { tenantId: "tenant-a", membershipId: "admin-a" },
       permission: "notification.template.read",

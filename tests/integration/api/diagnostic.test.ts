@@ -6,9 +6,9 @@ import { authoringTenantTx } from "../../fixtures/assessment-fixture";
 import {
   completePublicDiagnosticSession,
   startPublicDiagnosticSession,
-} from "../../backend/apps/api/src/server/diagnostics/diagnostic-public-session.service";
-import { mergeAnonymousDiagnosticSession } from "../../backend/apps/api/src/server/diagnostics/diagnostic-merge.service";
-import { handleCompetencyOutboxEvent } from "../../backend/apps/api/src/server/competency/competency.worker";
+} from "../../../backend/apps/api/src/server/diagnostics/diagnostic-public-session.service";
+import { mergeAnonymousDiagnosticSession } from "../../../backend/apps/api/src/server/diagnostics/diagnostic-merge.service";
+import { handleCompetencyOutboxEvent } from "../../../backend/apps/api/src/server/competency/competency.worker";
 
 const describeWithDb =
   process.env["DATABASE_URL"] && process.env["PLATFORM_DATABASE_URL"] ? describe : describe.skip;
@@ -205,7 +205,7 @@ describeWithDb("diagnostic integration", () => {
         tx.$queryRaw<Array<{ event_type: string }>>`
         select event_type
         from outbox_events
-        where aggregate_id = ${mergeResult.data.attemptId}::uuid
+        where aggregate_id = ${mergeResult.data.attemptId}
           and event_type = 'assessment.submitted'
       `,
     );
@@ -217,7 +217,7 @@ describeWithDb("diagnostic integration", () => {
         tx.$queryRaw<Array<{ action: string }>>`
         select action
         from audit_entries
-        where target_id = ${started.session.id}::uuid
+        where target_id = ${started.session.id}
           and action = 'diagnostic.anonymous_merged'
       `,
     );
@@ -229,7 +229,7 @@ describeWithDb("diagnostic integration", () => {
       >`
         select id::text, payload_json, metadata_json
         from outbox_events
-        where aggregate_id = ${mergeResult.data.attemptId}::uuid
+        where aggregate_id = ${mergeResult.data.attemptId}
           and event_type = 'assessment.submitted'
         limit 1
       `;

@@ -67,7 +67,9 @@ export function ProvisionTenantWizard() {
     <PlatformReasonGate ready={isValid}>
       <section className="mx-auto max-w-2xl space-y-4">
         <h1 className="text-2xl font-semibold">Provision tenant</h1>
-        <p className="text-sm opacity-70">Creates a tenant through the approved provisioning saga.</p>
+        <p className="text-sm opacity-70">
+          Creates a tenant through the approved provisioning saga.
+        </p>
 
         <label className="block text-sm">
           Slug
@@ -129,7 +131,9 @@ export function ProvisionTenantWizard() {
 
         <div className="space-y-2">
           <h2 className="text-lg font-medium">Initial entitlements</h2>
-          <p className="text-sm opacity-70">Optional capability grants applied during provisioning.</p>
+          <p className="text-sm opacity-70">
+            Optional capability grants applied during provisioning.
+          </p>
           <PlatformEntitlementEditor
             entitlements={initialEntitlements}
             onChange={setInitialEntitlements}

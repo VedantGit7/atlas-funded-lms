@@ -113,7 +113,10 @@ export function DeckEditorDialog({ deckId, deckTitle, onClose, onChanged }: Deck
   async function removeItem(itemId: string) {
     setBusyItemId(itemId);
     try {
-      await clientApi.delete(`/api/v1/me/decks/${deckId ?? ""}/items?itemId=${itemId}`, "deck-remove-item");
+      await clientApi.delete(
+        `/api/v1/me/decks/${deckId ?? ""}/items?itemId=${itemId}`,
+        "deck-remove-item",
+      );
       await loadDeckItems();
       onChanged();
     } catch {
@@ -178,7 +181,9 @@ export function DeckEditorDialog({ deckId, deckTitle, onClose, onChanged }: Deck
                       className="flex items-start gap-2 rounded-xl border border-border bg-background p-3"
                     >
                       <div className="min-w-0 flex-1">
-                        <p className="line-clamp-2 text-sm text-foreground">{item.stem || "Untitled card"}</p>
+                        <p className="line-clamp-2 text-sm text-foreground">
+                          {item.stem || "Untitled card"}
+                        </p>
                         <TypeChip itemTypeKey={item.itemTypeKey} />
                       </div>
                       <button
@@ -231,7 +236,9 @@ export function DeckEditorDialog({ deckId, deckTitle, onClose, onChanged }: Deck
                         className="flex items-start gap-2 rounded-xl border border-border bg-background p-3"
                       >
                         <div className="min-w-0 flex-1">
-                          <p className="line-clamp-2 text-sm text-foreground">{item.stem || "Untitled card"}</p>
+                          <p className="line-clamp-2 text-sm text-foreground">
+                            {item.stem || "Untitled card"}
+                          </p>
                           <TypeChip itemTypeKey={item.itemTypeKey} />
                         </div>
                         <button

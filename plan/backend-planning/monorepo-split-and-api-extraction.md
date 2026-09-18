@@ -35,12 +35,12 @@ atlas-funded-lms/
 
 ## What moves to `backend/`
 
-| Source (today) | Destination |
-|----------------|-------------|
-| `apps/web/src/app/api/v1/**` | `backend/apps/api/src/app/api/v1/**` |
-| `apps/web/src/server/**` | `backend/apps/api/src/server/**` |
-| `packages/*` (except design-system) | `backend/packages/*` |
-| `prisma/`, `prisma.config.ts` | `backend/prisma/`, `backend/prisma.config.ts` |
+| Source (today)                      | Destination                                   |
+| ----------------------------------- | --------------------------------------------- |
+| `apps/web/src/app/api/v1/**`        | `backend/apps/api/src/app/api/v1/**`          |
+| `apps/web/src/server/**`            | `backend/apps/api/src/server/**`              |
+| `packages/*` (except design-system) | `backend/packages/*`                          |
+| `prisma/`, `prisma.config.ts`       | `backend/prisma/`, `backend/prisma.config.ts` |
 
 ## New backend work
 
@@ -68,10 +68,10 @@ Move from `apps/web/src/lib/server/public-auth-orchestrator.ts` to `backend/apps
 
 ## Cross-app networking
 
-| Environment | Frontend | Backend |
-|-------------|----------|---------|
-| Local dev | `:3000` | `:3001` |
-| Wiring | `next.config.ts` rewrites `/api/v1/*` → backend | Standalone API app |
+| Environment | Frontend                                        | Backend            |
+| ----------- | ----------------------------------------------- | ------------------ |
+| Local dev   | `:3000`                                         | `:3001`            |
+| Wiring      | `next.config.ts` rewrites `/api/v1/*` → backend | Standalone API app |
 
 **Env vars**
 

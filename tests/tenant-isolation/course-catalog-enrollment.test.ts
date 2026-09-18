@@ -98,13 +98,27 @@ describeWithDb("course catalog enrollment tenant isolation", () => {
     );
 
     expect(result.data.items).toHaveLength(1);
-    expect(result.data.items[0]).toEqual({
+
+    // The guarantee is that the outline carries no lesson *content*, not that
+    // its shape never grows. `toEqual` locked the exact object, so adding the
+    // module-level render hints `contentKind` and `scormLaunchReady` — neither
+    // of which is lesson content — failed a test whose stated purpose they do
+    // not touch. Assert the summary fields, then assert the absence directly.
+    expect(result.data.items[0]).toMatchObject({
       id: fixture.moduleId,
       title: "Module 1",
       position: 1,
       lessonCount: 1,
     });
-    expect(JSON.stringify(result.data)).not.toContain("secret lesson body");
+
+    const serialized = JSON.stringify(result.data);
+    expect(serialized).not.toContain("secret lesson body");
+    // No content-bearing key may appear on an outline, whatever else is added.
+    for (const leak of ["body", "bodyHtml", "content", "html", "answer", "assetUrl", "videoUrl"]) {
+      expect(serialized, `outline must not expose ${leak}`).not.toMatch(
+        new RegExp(`"${leak}"\\s*:`, "i"),
+      );
+    }
   });
 
   it("duplicate enrollment is idempotent", async () => {

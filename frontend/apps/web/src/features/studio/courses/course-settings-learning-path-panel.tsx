@@ -9,7 +9,11 @@ import type {
   studioCourseListResponseSchema,
 } from "@atlas/contracts/courses/course-authoring-schemas";
 import { ClientApiError, clientApi } from "../../../lib/client-api";
-import { DropdownField, dropdownItemClassName, inlineExpandClassName } from "./admin-form-dropdown-shared";
+import {
+  DropdownField,
+  dropdownItemClassName,
+  inlineExpandClassName,
+} from "./admin-form-dropdown-shared";
 import type { CourseLearningPathSettings, LearningPathLockingMode } from "./course-access-settings";
 import {
   courseLearningPathSettingsEqual,
@@ -30,9 +34,7 @@ import {
 } from "./course-settings-shared";
 
 type CourseDetail = z.infer<typeof studioCourseDetailSchema>;
-type StudioCourseListItem = z.infer<
-  typeof studioCourseListResponseSchema
->["data"]["items"][number];
+type StudioCourseListItem = z.infer<typeof studioCourseListResponseSchema>["data"]["items"][number];
 
 type CourseSettingsLearningPathPanelProps = {
   course: CourseDetail;
@@ -78,7 +80,11 @@ function LearningPathLockingRadioGroup({
   onChange: (value: LearningPathLockingMode) => void;
 }) {
   return (
-    <div className={`space-y-3 ${inlineExpandClassName}`} role="radiogroup" aria-label="Locking mechanism">
+    <div
+      className={`space-y-3 ${inlineExpandClassName}`}
+      role="radiogroup"
+      aria-label="Locking mechanism"
+    >
       {LOCKING_MODE_OPTIONS.map((option) => {
         const selected = value === option.value;
         return (
@@ -367,15 +373,15 @@ export function CourseSettingsLearningPathPanel({
                 ))}
               </ul>
             ) : (
-              <p className={`${builderHelperClassName} rounded-lg border border-dashed border-[var(--admin-border)] px-4 py-3`}>
+              <p
+                className={`${builderHelperClassName} rounded-lg border border-dashed border-[var(--admin-border)] px-4 py-3`}
+              >
                 No prerequisite courses selected.
               </p>
             )}
 
             <DropdownField
-              label={
-                <span className={builderFieldLabelClassName}>Add prerequisite course</span>
-              }
+              label={<span className={builderFieldLabelClassName}>Add prerequisite course</span>}
               labelId="prerequisite-course-picker"
               open={prerequisiteDropdownOpen}
               disabled={disabled || coursesLoading || availableCourses.length === 0}

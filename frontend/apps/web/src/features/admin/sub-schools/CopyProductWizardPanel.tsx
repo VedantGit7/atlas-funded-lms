@@ -71,9 +71,7 @@ export function CopyProductWizardPanel({ subSchool, kind }: CopyProductWizardPan
         const response = await clientApi.get<StudioCourseListResponse>(
           "/api/v1/courses?view=studio&limit=100",
         );
-        setPrimaryItems(
-          response.data.items.map((item) => ({ id: item.id, label: item.title })),
-        );
+        setPrimaryItems(response.data.items.map((item) => ({ id: item.id, label: item.title })));
       } else {
         setPrimaryItems([]);
       }
@@ -100,9 +98,7 @@ export function CopyProductWizardPanel({ subSchool, kind }: CopyProductWizardPan
         const response = await clientApi.get<StudioModulesResponse>(
           `/api/v1/courses/${courseId}/modules?view=studio`,
         );
-        setSectionItems(
-          response.data.items.map((item) => ({ id: item.id, label: item.title })),
-        );
+        setSectionItems(response.data.items.map((item) => ({ id: item.id, label: item.title })));
       } catch {
         setSectionItems([]);
       } finally {
@@ -177,11 +173,12 @@ export function CopyProductWizardPanel({ subSchool, kind }: CopyProductWizardPan
   }
 
   const primaryDisplay = primary?.label ?? "";
+  const onlySection = sections.length === 1 ? sections[0] : undefined;
   const sectionsDisplay =
     sections.length === 0
       ? ""
-      : sections.length === 1
-        ? sections[0]!.label
+      : onlySection
+        ? onlySection.label
         : `${sections.length} sections selected`;
 
   return (

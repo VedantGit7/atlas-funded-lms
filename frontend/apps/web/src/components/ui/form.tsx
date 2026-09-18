@@ -109,14 +109,18 @@ function FormDescription({ className, ...props }: ComponentProps<"p">) {
 
 function FormMessage({ className, children, ...props }: ComponentProps<"p">) {
   const { error, formMessageId } = useFormField();
-  const body = error ? String(error.message ?? "") : children;
+  const body = error ? (error.message ?? "") : children;
 
   if (!body) {
     return null;
   }
 
   return (
-    <p id={formMessageId} className={cn("text-sm font-medium text-destructive", className)} {...props}>
+    <p
+      id={formMessageId}
+      className={cn("text-sm font-medium text-destructive", className)}
+      {...props}
+    >
       {body}
     </p>
   );

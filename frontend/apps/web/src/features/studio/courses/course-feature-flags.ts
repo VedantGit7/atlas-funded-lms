@@ -1,7 +1,10 @@
 import type { z } from "zod";
 import type { studioCourseListItemSchema } from "@atlas/contracts/courses/course-authoring-schemas";
 import { parseCourseAccessFromTags } from "./course-access-settings";
-import { courseLeaderboardFromTags, isCourseLeaderboardEnabled } from "./course-leaderboard-settings";
+import {
+  courseLeaderboardFromTags,
+  isCourseLeaderboardEnabled,
+} from "./course-leaderboard-settings";
 
 type CourseRow = z.infer<typeof studioCourseListItemSchema>;
 
@@ -39,7 +42,12 @@ export function deriveCourseFeatureFlags(course: CourseRow): CourseFeatureFlag[]
   const isPublished = course.status === "PUBLISHED";
 
   return [
-    feature("content-dripping", "Content Dripping", access.dripEnabled, readStudioFeature(tags, "contentDripping")),
+    feature(
+      "content-dripping",
+      "Content Dripping",
+      access.dripEnabled,
+      readStudioFeature(tags, "contentDripping"),
+    ),
     feature("discussion", "Discussion", true, readStudioFeature(tags, "discussion")),
     feature("notes", "Notes", true, readStudioFeature(tags, "notes")),
     feature("certificate", "Certificate", false, readStudioFeature(tags, "certificate")),
@@ -61,7 +69,12 @@ export function deriveCourseFeatureFlags(course: CourseRow): CourseFeatureFlag[]
       access.accessMode === "open",
       readStudioFeature(tags, "enrollOnSignup"),
     ),
-    feature("sell-independently", "Sell Independently", isPaid, readStudioFeature(tags, "sellIndependently")),
+    feature(
+      "sell-independently",
+      "Sell Independently",
+      isPaid,
+      readStudioFeature(tags, "sellIndependently"),
+    ),
     feature(
       "sell-only-mobile",
       "Sell Only on Mobile",

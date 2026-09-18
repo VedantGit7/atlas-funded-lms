@@ -3,14 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import {
-  ChevronLeft,
-  Download,
-  Info,
-  Save,
-  Tag,
-  Trash2,
-} from "lucide-react";
+import { ChevronLeft, Download, Info, Save, Tag, Trash2 } from "lucide-react";
 import { ClientApiError, clientApi, toast } from "../../../lib/client-api";
 import { generalSettingsBackLinkClassName } from "../general-settings/general-settings-shared";
 import { MESSENGER_WIZARD_FIELD_CLASS } from "./push-wizard-chrome";
@@ -31,6 +24,7 @@ import {
   type CouponFormValues,
   type CouponRedemptionDto,
 } from "./coupons-shared";
+import { csvEscape } from "@/lib/export/csv";
 
 type CourseOption = { id: string; title: string };
 
@@ -51,7 +45,9 @@ function ToggleSwitch(props: {
       aria-checked={props.checked}
       aria-label={props.ariaLabel}
       disabled={props.disabled}
-      onClick={() => props.onChange(!props.checked)}
+      onClick={() => {
+        props.onChange(!props.checked);
+      }}
       className={[
         "relative h-6 w-11 shrink-0 rounded-full transition-colors duration-200 disabled:opacity-50",
         props.checked ? "bg-[var(--admin-primary)]" : "bg-[var(--admin-outline)]",
@@ -71,8 +67,8 @@ function ToggleSwitch(props: {
 function learnerInitials(name: string) {
   const parts = name.trim().split(/\s+/).filter(Boolean);
   if (parts.length === 0) return "?";
-  if (parts.length === 1) return parts[0]!.slice(0, 2).toUpperCase();
-  return `${parts[0]![0] ?? ""}${parts[1]![0] ?? ""}`.toUpperCase();
+  if (parts.length === 1) return (parts[0] ?? "").slice(0, 2).toUpperCase();
+  return `${parts[0]?.[0] ?? ""}${parts[1]?.[0] ?? ""}`.toUpperCase();
 }
 
 export function CouponBuilderPanel({ couponId }: CouponBuilderPanelProps) {
@@ -94,9 +90,7 @@ export function CouponBuilderPanel({ couponId }: CouponBuilderPanelProps) {
     try {
       const [couponResponse, coursesResponse, redemptionsResponse] = await Promise.all([
         clientApi.get<{ data: CouponDto }>(`/api/v1/sales/coupons/${couponId}`),
-        clientApi.get<{ data: { items: CourseOption[] } }>(
-          "/api/v1/courses?view=studio&limit=100",
-        ),
+        clientApi.get<{ data: { items: CourseOption[] } }>("/api/v1/courses?view=studio&limit=100"),
         clientApi.get<{ data: { items: CouponRedemptionDto[]; totalCount: number } }>(
           `/api/v1/sales/coupons/${couponId}/redemptions?limit=20`,
         ),
@@ -205,9 +199,9 @@ export function CouponBuilderPanel({ couponId }: CouponBuilderPanelProps) {
       row.createdAt,
     ]);
     const csv = [header, ...rows]
-      .map((cols) =>
-        cols.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","),
-      )
+      // Redemption exports carry learner-supplied names; csvEscape neutralises
+      // formula prefixes as well as quoting (M1).
+      .map((cols) => cols.map((cell) => csvEscape(cell)).join(","))
       .join("\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
@@ -341,9 +335,9 @@ export function CouponBuilderPanel({ couponId }: CouponBuilderPanelProps) {
                 </label>
                 <input
                   value={values.code}
-                  onChange={(event) =>
-                    setValues({ ...values, code: event.target.value.toUpperCase() })
-                  }
+                  onChange={(event) => {
+                    setValues({ ...values, code: event.target.value.toUpperCase() });
+                  }}
                   className={`${MESSENGER_WIZARD_FIELD_CLASS} h-10 font-mono`}
                   maxLength={64}
                 />
@@ -354,7 +348,9 @@ export function CouponBuilderPanel({ couponId }: CouponBuilderPanelProps) {
                 </label>
                 <input
                   value={values.name}
-                  onChange={(event) => setValues({ ...values, name: event.target.value })}
+                  onChange={(event) => {
+                    setValues({ ...values, name: event.target.value });
+                  }}
                   className={`${MESSENGER_WIZARD_FIELD_CLASS} h-10`}
                   maxLength={200}
                 />
@@ -530,14 +526,18 @@ export function CouponBuilderPanel({ couponId }: CouponBuilderPanelProps) {
             </p>
             <input
               value={deleteConfirm}
-              onChange={(event) => setDeleteConfirm(event.target.value)}
+              onChange={(event) => {
+                setDeleteConfirm(event.target.value);
+              }}
               className={MESSENGER_WIZARD_FIELD_CLASS}
             />
             <div className="flex justify-end gap-2">
               <button
                 type="button"
                 className="rounded-lg border border-[var(--admin-border)] px-4 py-2 text-sm font-semibold text-[var(--admin-on-surface-variant)]"
-                onClick={() => setDeleteOpen(false)}
+                onClick={() => {
+                  setDeleteOpen(false);
+                }}
               >
                 Cancel
               </button>

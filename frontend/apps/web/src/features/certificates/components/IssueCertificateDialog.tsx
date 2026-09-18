@@ -129,7 +129,10 @@ export function IssueCertificateDialog({
         <div className="flex items-center justify-between border-b border-[var(--admin-border)] px-6 py-5">
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--admin-primary-container)]">
-              <Award className="h-4 w-4 text-[var(--admin-on-primary-container)]" aria-hidden="true" />
+              <Award
+                className="h-4 w-4 text-[var(--admin-on-primary-container)]"
+                aria-hidden="true"
+              />
             </div>
             <h2 id={titleId} className="text-lg font-bold text-[var(--admin-on-surface)]">
               Issue certificate
@@ -181,13 +184,20 @@ export function IssueCertificateDialog({
           {message ? (
             <div className={errorBannerClassName}>
               <p>{message}</p>
-              {requestId ? <p className="mt-1 text-xs opacity-70">Request ID: {requestId}</p> : null}
+              {requestId ? (
+                <p className="mt-1 text-xs opacity-70">Request ID: {requestId}</p>
+              ) : null}
             </div>
           ) : null}
         </div>
 
         <div className="flex items-center justify-end gap-3 border-t border-[var(--admin-border)] px-6 py-4">
-          <button type="button" className={outlineButtonClassName} disabled={busy} onClick={onClose}>
+          <button
+            type="button"
+            className={outlineButtonClassName}
+            disabled={busy}
+            onClick={onClose}
+          >
             Cancel
           </button>
           <button

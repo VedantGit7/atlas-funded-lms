@@ -5,10 +5,7 @@ import {
   applyAuthSessionToCookieStore,
   readSessionPersistenceFromStore,
 } from "@atlas/auth/cookie-store";
-import {
-  ATLAS_ACCESS_TOKEN_COOKIE,
-  ATLAS_REFRESH_TOKEN_COOKIE,
-} from "@atlas/auth/cookies";
+import { ATLAS_ACCESS_TOKEN_COOKIE, ATLAS_REFRESH_TOKEN_COOKIE } from "@atlas/auth/cookies";
 import { withGlobalDb } from "@atlas/db/global-db";
 import { withTenantTx } from "@atlas/db/with-tenant-tx";
 import {
@@ -29,7 +26,10 @@ import {
   type PublicAuthStatus,
 } from "@atlas/domain-identity";
 import { getOrCreateRequestId } from "@atlas/core/request/request-id";
-import { applyReferralForNewMembership, stashReferralCodeForSignup } from "../server/sales-referrals/sales-referrals.service";
+import {
+  applyReferralForNewMembership,
+  stashReferralCodeForSignup,
+} from "../server/sales-referrals/sales-referrals.service";
 import type { PublicAuthApiResponse } from "./public-auth-types";
 
 async function resolveActiveTenantFromRequest() {
@@ -126,8 +126,7 @@ async function setSessionCookies(session: {
   expiresIn: number;
   persistent?: boolean;
 }): Promise<void> {
-  const persistent =
-    session.persistent ?? (await readSessionPersistenceFromStore());
+  const persistent = session.persistent ?? (await readSessionPersistenceFromStore());
 
   await applyAuthSessionToCookieStore({
     accessToken: session.accessToken,
@@ -253,7 +252,8 @@ export async function orchestratePublicSignup(input: {
       throw new Error("tenant unavailable");
     }
 
-    if (parsed.referralCode) {
+    const referralCode = parsed.referralCode;
+    if (referralCode) {
       await withTenantTx(
         {
           tenantId: tenant.tenantId,
@@ -263,7 +263,7 @@ export async function orchestratePublicSignup(input: {
         async (tx) => {
           await stashReferralCodeForSignup(tx, {
             emailNormalized: parsed.email,
-            referralCode: parsed.referralCode!,
+            referralCode,
           });
         },
       );

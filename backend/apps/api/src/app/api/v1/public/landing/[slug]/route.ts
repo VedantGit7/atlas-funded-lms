@@ -34,9 +34,9 @@ export const GET = createPublicRouteHandler(routeMetadata, async ({ req, request
       async (tx) => getPublicLandingPage(tx, slug),
     );
 
-    return NextResponse.json(
-      PublicLandingResponseSchema.parse({ data: page }),
-      { status: 200, headers: { "cache-control": "public, max-age=60" } },
-    );
+    return NextResponse.json(PublicLandingResponseSchema.parse({ data: page }), {
+      status: 200,
+      headers: { "cache-control": "public, max-age=60" },
+    });
   });
 });

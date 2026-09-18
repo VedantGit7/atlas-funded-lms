@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import {
@@ -21,7 +20,8 @@ import type { AdminNavItem } from "../../../features/admin/admin-navigation";
 import { AdminNotificationPopover } from "../../../features/notifications/components/AdminNotificationPopover";
 import { performAtlasLogout } from "../../../lib/auth/perform-logout";
 import { DeviceSessionCapture } from "../../observability/DeviceSessionCapture";
-import { FUNDED_BEYOND_LOGO_URL } from "../../../lib/brand";
+import { resolveTenantLogoUrl } from "../../../lib/brand";
+import { TenantBrandMark } from "../../patterns/TenantBrandMark";
 import { ADMIN_DASHBOARD_HREF } from "../../../lib/branding/document-title";
 import { ThemeModeToggle } from "../../ThemeModeToggle";
 import { AccountMenu, type AccountMenuItem } from "../shared/AccountMenu";
@@ -74,13 +74,7 @@ function initialsOf(name: string | null): string {
   return parts.map((part) => part.charAt(0).toUpperCase()).join("") || "AD";
 }
 
-function SidebarFooter({
-  pathname,
-  onSignOut,
-}: {
-  pathname: string;
-  onSignOut: () => void;
-}) {
+function SidebarFooter({ pathname, onSignOut }: { pathname: string; onSignOut: () => void }) {
   const trashActive = pathname === "/admin/trash" || pathname.startsWith("/admin/trash/");
   const settingsActive = pathname === "/admin/settings" || pathname.startsWith("/admin/settings/");
 
@@ -206,7 +200,8 @@ function SidebarContent({
             const childActive = item.children?.some(
               (child) => pathname === child.href || pathname.startsWith(`${child.href}/`),
             );
-            const expanded = hasChildren && item.expandable ? Boolean(openSections[item.href]) : false;
+            const expanded =
+              hasChildren && item.expandable ? Boolean(openSections[item.href]) : false;
             const parentActive = active || Boolean(childActive);
 
             if (hasChildren && item.expandable) {
@@ -228,7 +223,11 @@ function SidebarContent({
                         : "border-l-4 border-transparent text-[var(--admin-on-surface-variant)] hover:bg-[var(--admin-surface-high)] hover:text-[var(--admin-on-surface)]",
                     ].join(" ")}
                   >
-                    <Icon className="h-[18px] w-[18px] shrink-0" strokeWidth={2} aria-hidden="true" />
+                    <Icon
+                      className="h-[18px] w-[18px] shrink-0"
+                      strokeWidth={2}
+                      aria-hidden="true"
+                    />
                     <span className="min-w-0 flex-1 truncate">{item.label}</span>
                     {expanded ? (
                       <AdminNavChevronDownIcon
@@ -363,11 +362,10 @@ export function AdminShell({
         className="flex items-center gap-3 rounded-lg outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)] focus-visible:ring-offset-2"
         aria-label={`${publicName} admin dashboard`}
       >
-        <Image
-          src={FUNDED_BEYOND_LOGO_URL}
-          alt=""
-          width={40}
-          height={40}
+        <TenantBrandMark
+          logoUrl={resolveTenantLogoUrl(branding)}
+          name={publicName}
+          size={40}
           className="h-10 w-10 shrink-0 rounded-full"
         />
         <div className="min-w-0">
@@ -383,7 +381,12 @@ export function AdminShell({
   );
 
   const sidebarFooter = (
-    <SidebarFooter pathname={pathname} onSignOut={() => { setConfirmSignOut(true); }} />
+    <SidebarFooter
+      pathname={pathname}
+      onSignOut={() => {
+        setConfirmSignOut(true);
+      }}
+    />
   );
 
   return (
@@ -399,7 +402,11 @@ export function AdminShell({
       {/* Desktop sidebar */}
       <aside className="fixed inset-y-0 left-0 z-40 hidden w-[280px] flex-col border-r border-[var(--admin-border)] bg-[var(--admin-surface)] py-6 lg:flex">
         {sidebarHeader}
-        <SidebarContent groups={groups} pathname={pathname} pendingReviewCount={pendingReviewCount} />
+        <SidebarContent
+          groups={groups}
+          pathname={pathname}
+          pendingReviewCount={pendingReviewCount}
+        />
         {sidebarFooter}
       </aside>
 
@@ -497,9 +504,7 @@ export function AdminShell({
               {mfaEnabled ? "MFA verified" : "Assurance pending"}
             </span>
 
-            <ThemeModeToggle
-              className="inline-flex h-9 w-9 items-center justify-center rounded-full text-[var(--admin-on-surface-variant)] transition-colors hover:text-[var(--admin-primary)]"
-            />
+            <ThemeModeToggle className="inline-flex h-9 w-9 items-center justify-center rounded-full text-[var(--admin-on-surface-variant)] transition-colors hover:text-[var(--admin-primary)]" />
 
             <AdminNotificationPopover />
 
@@ -514,7 +519,9 @@ export function AdminShell({
                     <p className="text-sm font-bold leading-tight text-[var(--admin-on-surface)]">
                       {displayName}
                     </p>
-                    <p className="text-[11px] text-[var(--admin-on-surface-variant)]">Administrator</p>
+                    <p className="text-[11px] text-[var(--admin-on-surface-variant)]">
+                      Administrator
+                    </p>
                   </div>
                   {member.avatarUrl ? (
                     <img

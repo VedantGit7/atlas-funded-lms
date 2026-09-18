@@ -13,11 +13,7 @@ import {
 } from "@atlas/membership/member-self-archive.service";
 import { manageLearnerArchiveResponseSchema } from "./manage-learners.schemas";
 
-export async function archiveManageLearner(
-  tx: TenantTx,
-  ctx: ServiceCtx,
-  membershipId: string,
-) {
+export async function archiveManageLearner(tx: TenantTx, ctx: ServiceCtx, membershipId: string) {
   const hasOwner = await membershipHasRoleKey({
     tx,
     tenantId: ctx.tenantId,
@@ -69,11 +65,7 @@ export async function archiveManageLearner(
   });
 }
 
-export async function unarchiveManageLearner(
-  tx: TenantTx,
-  ctx: ServiceCtx,
-  membershipId: string,
-) {
+export async function unarchiveManageLearner(tx: TenantTx, ctx: ServiceCtx, membershipId: string) {
   const hasOwner = await membershipHasRoleKey({
     tx,
     tenantId: ctx.tenantId,

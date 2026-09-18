@@ -19,7 +19,7 @@ function walkFiles(directory: string): string[] {
 function resolveImportPath(fromFile: string, importPath: string): string | null {
   if (importPath.startsWith("@atlas/domain/")) {
     const subpath = importPath.replace("@atlas/domain/", "");
-    return join(root, "packages/domain/src", `${subpath}.ts`);
+    return join(root, "backend/packages/domain/src", `${subpath}.ts`);
   }
 
   if (importPath.startsWith(".")) {
@@ -39,8 +39,12 @@ function collectImportedMetadataFiles(content: string, filePath: string): string
 
   return resolved.filter(
     (path) =>
+      // Both spellings exist in the tree: `route.metadata.ts` (co-located, dot)
+      // and `*.route-metadata.ts` (domain packages, hyphen). Matching only the
+      // hyphen form silently skipped re-export files such as
+      // `content-trash/purge/route.metadata.ts`, producing false positives.
       path.includes("route-metadata") ||
-      path.includes(".route-metadata") ||
+      path.includes("route.metadata") ||
       path.includes("packages/domain/src/"),
   );
 }

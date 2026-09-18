@@ -4,14 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import type { z } from "zod";
-import {
-  AlertCircle,
-  ArrowRight,
-  Award,
-  ClipboardList,
-  Filter,
-  Search,
-} from "lucide-react";
+import { AlertCircle, ArrowRight, Award, ClipboardList, Filter, Search } from "lucide-react";
 import { primaryButtonClassName } from "../../../app/admin/branding/_components/branding-admin-shared";
 import { ClientApiError, clientApi } from "../../../lib/client-api";
 import type { assessmentSummarySchema } from "../assessment-response-schemas";
@@ -24,7 +17,6 @@ import {
   badgeClassName,
   formatAssessmentDate,
   inputClass,
-  labelClass,
   listRowClassName,
   listRowReviewAccentClassName,
   panelClassName,
@@ -203,7 +195,10 @@ export function AssessmentManager({ assessments }: AssessmentManagerProps) {
         {filtered.length === 0 ? (
           <div className="flex flex-col items-center gap-3 px-6 py-12 text-center">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--admin-surface-high)]">
-              <ClipboardList className="h-5 w-5 text-[var(--admin-on-surface-variant)]" aria-hidden="true" />
+              <ClipboardList
+                className="h-5 w-5 text-[var(--admin-on-surface-variant)]"
+                aria-hidden="true"
+              />
             </div>
             <div>
               <p className="text-sm font-semibold text-[var(--admin-on-surface)]">
@@ -258,9 +253,15 @@ export function AssessmentManager({ assessments }: AssessmentManagerProps) {
                       </div>
                       <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--admin-on-surface-variant)]">
                         <span>{String(assessment.config.passMarkPercent)}% pass mark</span>
-                        <span className="h-1 w-1 rounded-full bg-[var(--admin-border)]" aria-hidden="true" />
+                        <span
+                          className="h-1 w-1 rounded-full bg-[var(--admin-border)]"
+                          aria-hidden="true"
+                        />
                         <span>{assessment.config.attemptsAllowed} attempts</span>
-                        <span className="h-1 w-1 rounded-full bg-[var(--admin-border)]" aria-hidden="true" />
+                        <span
+                          className="h-1 w-1 rounded-full bg-[var(--admin-border)]"
+                          aria-hidden="true"
+                        />
                         <span>Updated {formatAssessmentDate(assessment.updatedAt)}</span>
                       </div>
                     </div>

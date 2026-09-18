@@ -3,7 +3,12 @@ import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const guardScriptPath = resolve(fileURLToPath(import.meta.url));
-const roots = ["prisma", "scripts", "packages", "apps"];
+// Post F-1 these live under backend/ and frontend/. The pre-split spellings
+// resolved to nothing, walkFiles swallowed the ENOENT and returned [], and the
+// guard passed while inspecting none of the tenant-scoped code it exists to
+// police -- the identical failure its sibling check-sql-approved-paths.mjs
+// documents and had already been fixed for.
+const roots = ["backend/prisma", "backend/packages", "backend/apps", "frontend/apps", "scripts"];
 const failures = [];
 
 function walkFiles(directory) {

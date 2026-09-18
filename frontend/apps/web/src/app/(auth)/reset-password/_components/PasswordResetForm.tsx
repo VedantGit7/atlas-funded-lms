@@ -31,9 +31,6 @@ const fieldInputClass =
 const primaryButtonClass =
   "flex w-full items-center justify-center gap-2 rounded-[10px] bg-[var(--fba-ind)] px-4 py-4 text-[15px] font-bold text-white shadow-[0_10px_40px_rgba(0,0,0,0.07)] transition-colors hover:bg-[var(--fba-ind-d)] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60";
 
-const inlineLinkClass =
-  "text-[13px] font-semibold text-[var(--fba-ind)] transition-colors hover:underline";
-
 function EyeIcon({ open }: { open: boolean }) {
   return (
     <svg
@@ -228,9 +225,11 @@ export function PasswordResetForm() {
         <form
           aria-labelledby="complete-reset-title"
           className="space-y-4"
-          onSubmit={completeForm.handleSubmit((values) => {
-            completeAction(valuesToFormData(values));
-          })}
+          onSubmit={(event) => {
+            void completeForm.handleSubmit((values) => {
+              completeAction(valuesToFormData(values));
+            })(event);
+          }}
         >
           <HiddenFormField control={completeForm.control} name="accessToken" />
           <HiddenFormField control={completeForm.control} name="refreshToken" />
@@ -254,7 +253,9 @@ export function PasswordResetForm() {
                   </FormControl>
                   <button
                     type="button"
-                    onClick={() => setShowPassword((prev) => !prev)}
+                    onClick={() => {
+                      setShowPassword((prev) => !prev);
+                    }}
                     aria-label={showPassword ? "Hide password" : "Show password"}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--fba-tx3)] transition-colors hover:text-[var(--fba-tx)]"
                   >
@@ -317,9 +318,11 @@ export function PasswordResetForm() {
       <form
         aria-labelledby="request-reset-title"
         className="space-y-4"
-        onSubmit={requestForm.handleSubmit((values) => {
-          requestAction(valuesToFormData(values));
-        })}
+        onSubmit={(event) => {
+          void requestForm.handleSubmit((values) => {
+            requestAction(valuesToFormData(values));
+          })(event);
+        }}
       >
         <FormField
           control={requestForm.control}

@@ -24,7 +24,7 @@ describe("F8 component wiring", () => {
 
   it("ConfirmDialog supports focus trap and keyboard dismissal", () => {
     const source = readFileSync(resolve(webRoot, "components/patterns/ConfirmDialog.tsx"), "utf8");
-    expect(source).toContain("role=\"dialog\"");
+    expect(source).toContain('role="dialog"');
     expect(source).toMatch(/onKeyDown|Escape/);
   });
 
@@ -49,6 +49,12 @@ describe("F8 component wiring", () => {
 });
 
 describe("F8 tenant branding fixtures", () => {
+  // These names are the real tenant-config slugs under configs/tenants, which is
+  // exactly what "FundedBeyond must be tenant configuration only" permits — the
+  // test reads tenant config rather than baking the brand into product code. The
+  // last assertion is the white-label guarantee itself: a second tenant's
+  // manifest must contain no trace of tenant #1.
+  /* eslint-disable atlas/no-hardcoded-tenant-strings */
   it("loads FundedBeyond and second-smoke manifests for visual regression", () => {
     const fundedBeyond = loadTenantManifest("fundedbeyond", configsRoot);
     const secondSmoke = loadTenantManifest("second-smoke-academy", configsRoot);
@@ -56,4 +62,5 @@ describe("F8 tenant branding fixtures", () => {
     expect(secondSmoke.tenant.slug).toBe("second-smoke-academy");
     expect(JSON.stringify(secondSmoke).toLowerCase()).not.toContain("fundedbeyond");
   });
+  /* eslint-enable atlas/no-hardcoded-tenant-strings */
 });

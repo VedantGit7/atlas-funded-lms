@@ -8,7 +8,7 @@ import {
 import { mutateCouponsMetadata } from "../../../../../../../server/sales-coupons/sales-coupons.route-metadata";
 import { deleteCoupon } from "../../../../../../../server/sales-coupons/sales-coupons.service";
 
-const paramsSchema = zod.object({ id: zod.string().uuid() });
+const paramsSchema = zod.object({ id: zod.uuid() });
 
 export const POST = createTenantRoute<
   z.output<typeof deleteCouponBodySchema>,

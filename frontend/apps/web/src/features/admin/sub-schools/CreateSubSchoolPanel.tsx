@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, type FormEvent } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, Eye, EyeOff, Loader2 } from "lucide-react";
@@ -39,7 +39,8 @@ function validate(values: {
 }): FieldErrors {
   const errors: FieldErrors = {};
   if (!values.name.trim()) errors.name = "Sub-school name is required.";
-  else if (values.name.trim().length > NAME_MAX) errors.name = `Name must be ${NAME_MAX} characters or fewer.`;
+  else if (values.name.trim().length > NAME_MAX)
+    errors.name = `Name must be ${NAME_MAX} characters or fewer.`;
 
   if (!values.url.trim()) errors.url = "URL is required.";
   else if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(values.url)) {
@@ -81,7 +82,7 @@ export function CreateSubSchoolPanel() {
     return "Looks good.";
   }, [password]);
 
-  async function onSubmit(event: FormEvent) {
+  async function onSubmit(event: React.SyntheticEvent) {
     event.preventDefault();
     const nextUrl = urlTouched ? url : slugifySubSchoolUrl(name);
     const values = {
@@ -136,7 +137,9 @@ export function CreateSubSchoolPanel() {
         <h1 className="text-2xl font-bold tracking-tight text-[var(--admin-on-surface)] sm:text-3xl">
           Create Sub-School
         </h1>
-        <p className="text-sm text-[var(--admin-on-surface-variant)]">Start creating a new Sub-School</p>
+        <p className="text-sm text-[var(--admin-on-surface-variant)]">
+          Start creating a new Sub-School
+        </p>
       </header>
 
       <form
@@ -212,7 +215,10 @@ export function CreateSubSchoolPanel() {
                 {SUB_SCHOOL_URL_SUFFIX}
               </span>
             </div>
-            <p id="sub-school-url-help" className="mt-1.5 text-xs text-[var(--admin-on-surface-variant)]">
+            <p
+              id="sub-school-url-help"
+              className="mt-1.5 text-xs text-[var(--admin-on-surface-variant)]"
+            >
               Learners will open{" "}
               <span className="font-medium text-[var(--admin-on-surface)]">
                 {url || "your-slug"}

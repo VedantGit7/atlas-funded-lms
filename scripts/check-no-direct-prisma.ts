@@ -3,12 +3,15 @@ import { join, relative } from "node:path";
 
 const root = process.cwd();
 
+// Moved under backend/ in the F-1 monorepo split. With the old spellings the
+// allowlist matched nothing, so the guard flagged the very wrappers it exists
+// to protect.
 const allowedFiles = new Set([
-  "packages/db/src/client.ts",
-  "packages/db/src/platform-client.ts",
-  "packages/db/src/with-tenant-tx.ts",
-  "packages/db/src/with-platform-scope.ts",
-  "packages/db/src/index.ts",
+  "backend/packages/db/src/client.ts",
+  "backend/packages/db/src/platform-client.ts",
+  "backend/packages/db/src/with-tenant-tx.ts",
+  "backend/packages/db/src/with-platform-scope.ts",
+  "backend/packages/db/src/index.ts",
 ]);
 
 const ignoredFiles = new Set(["scripts/check-no-direct-prisma.ts"]);
@@ -36,7 +39,7 @@ function walk(dir: string): void {
     const stat = statSync(fullPath);
 
     if (stat.isDirectory()) {
-      if (relPath === "packages/db/src/generated") continue;
+      if (relPath === "backend/packages/db/src/generated") continue;
       walk(fullPath);
       continue;
     }
@@ -47,7 +50,12 @@ function walk(dir: string): void {
     if (relPath.endsWith(".d.ts")) continue;
     if (relPath.includes("/generated/prisma/")) continue;
 
-    const content = readFileSync(fullPath, "utf8");
+    const rawContent = readFileSync(fullPath, "utf8");
+
+    // `import type { … }` is erased at compile time and grants no runtime access
+    // to Prisma, so it is not "direct Prisma access". Strip those statements
+    // before testing; value imports below are still violations.
+    const content = rawContent.replace(/import\s+type\s+\{[^}]*\}\s+from\s+['"][^'"]+['"];?/g, "");
 
     const importsPrismaClient =
       content.includes("from '@prisma/client'") || content.includes('from "@prisma/client"');

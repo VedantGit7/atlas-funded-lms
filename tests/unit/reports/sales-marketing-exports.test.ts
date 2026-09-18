@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
+  SM_ATTRIBUTION_EXPORT_COLUMNS,
+  SM_EXPORT_DATASETS,
   SM_SALES_EXPORT_COLUMNS,
   createSalesMarketingExportBodySchema,
   salesMarketingExportsResponseSchema,
@@ -47,16 +49,11 @@ describe("sales-marketing exports dto", () => {
           "referral-wallet": [],
           "affiliate-products": [],
           affiliates: [],
+          attribution: [],
         },
         capabilities: {
           formats: ["csv", "xlsx", "json"],
-          datasets: [
-            "sales",
-            "coupons",
-            "referral-wallet",
-            "affiliate-products",
-            "affiliates",
-          ],
+          datasets: ["sales", "coupons", "referral-wallet", "affiliate-products", "affiliates"],
           canSchedule: true,
           canEmailDelivery: true,
           canWebhookDelivery: true,
@@ -87,5 +84,54 @@ describe("sales-marketing exports dto", () => {
     expect(body.format).toBe("xlsx");
     expect(body.scheduleEnabled).toBe(true);
     expect(body.recipients).toEqual(["finance@example.com"]);
+  });
+  it("offers attribution as a dataset of its own", () => {
+    // The event stream the other datasets are rolled up from.
+    expect(SM_EXPORT_DATASETS).toContain("attribution");
+    const body = createSalesMarketingExportBodySchema.parse({
+      dataset: "attribution",
+      columns: ["occurred_at", "event_type", "utm_source", "attributed"],
+      format: "csv",
+      attribution: "none",
+    });
+    expect(body.dataset).toBe("attribution");
+    expect(body.attribution).toBe("none");
+  });
+
+  it("carries all five UTM fields plus a computed attributed flag", () => {
+    const keys = SM_ATTRIBUTION_EXPORT_COLUMNS.map((column) => column.key);
+    for (const key of ["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content"]) {
+      expect(keys).toContain(key);
+    }
+    // Computed server side so a spreadsheet formula cannot drift from the
+    // console's own definition of attributed.
+    expect(keys).toContain("attributed");
+  });
+
+  it("treats the learner email as sensitive on attribution exports too", () => {
+    expect(
+      SM_ATTRIBUTION_EXPORT_COLUMNS.some((column) => column.key === "email" && column.sensitive),
+    ).toBe(true);
+  });
+
+  it("leaves the identifying columns off by default", () => {
+    // An attribution export is normally read in aggregate; the learner columns
+    // are opt-in rather than shipped to every recipient by default.
+    for (const key of ["email", "learner_name", "membership_id"]) {
+      expect(
+        SM_ATTRIBUTION_EXPORT_COLUMNS.find((column) => column.key === key)?.defaultSelected,
+      ).toBe(false);
+    }
+  });
+
+  it("rejects an attribution value outside the three it knows", () => {
+    expect(() =>
+      createSalesMarketingExportBodySchema.parse({
+        dataset: "attribution",
+        columns: ["event_type"],
+        format: "csv",
+        attribution: "partially",
+      }),
+    ).toThrow();
   });
 });

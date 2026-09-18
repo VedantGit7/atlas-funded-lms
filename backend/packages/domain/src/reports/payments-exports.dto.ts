@@ -4,11 +4,26 @@ import { REPORT_FORMATS } from "./reports.contract";
 
 export const PAYMENT_EXPORT_DATASETS = [
   "transactions",
+  /**
+   * The order ledger, which is not the same view of `payment_orders` as
+   * `transactions`.
+   *
+   * Transactions are ordered and date-filtered by settlement date, so an order
+   * that never settled sorts by the day it was created and reads as though it
+   * settled then. The orders view sorts and filters by creation date, exposes
+   * the external id a webhook matches on, and can be narrowed to settled or
+   * unsettled rows — the three things an operator reconciling stuck orders
+   * needs, and none of which the transactions view can express.
+   */
+  "orders",
   "invoices",
   "instalments",
   "refunds",
   "gateways",
 ] as const;
+
+/** Whether an order carries a settlement timestamp. Only meaningful for `orders`. */
+export const PAYMENT_EXPORT_SETTLEMENTS = ["settled", "unsettled"] as const;
 
 export const PAYMENT_EXPORT_FORMATS = ["csv", "xlsx", "json"] as const;
 export const PAYMENT_EXPORT_DELIVERY = ["download", "email_me", "recipients"] as const;
@@ -16,6 +31,13 @@ export const PAYMENT_EXPORT_CADENCE = ["daily", "weekly", "monthly"] as const;
 export const PAYMENT_EXPORT_GROUPING = ["none", "gateway", "product", "currency", "month"] as const;
 
 export const PAYMENT_EXPORT_COLUMNS = [
+  { key: "id", label: "Order ID", sensitive: false, defaultSelected: false },
+  /**
+   * Queried by every payments dataset and, until now, selectable by none of
+   * them — which made the shared export useless for the one job an external id
+   * exists for: matching a row against what the gateway thinks it settled.
+   */
+  { key: "external_id", label: "External ID", sensitive: false, defaultSelected: false },
   { key: "learner_name", label: "Learner name", sensitive: false, defaultSelected: true },
   { key: "email", label: "Email", sensitive: false, defaultSelected: true },
   { key: "product_title", label: "Product", sensitive: false, defaultSelected: true },
@@ -32,6 +54,8 @@ export const PAYMENT_EXPORT_COLUMNS = [
 ] as const;
 
 export const paymentExportColumnKeySchema = z.enum([
+  "id",
+  "external_id",
   "learner_name",
   "email",
   "product_title",
@@ -124,6 +148,7 @@ export const createPaymentExportBodySchema = rejectClientTenantFields
     paidTo: z.iso.datetime().optional(),
     gatewayKey: z.string().trim().min(1).max(64).optional(),
     status: z.string().trim().min(1).max(64).optional(),
+    settlement: z.enum(PAYMENT_EXPORT_SETTLEMENTS).optional(),
     useCurrentFilters: z.boolean().default(true),
     grouping: z.enum(PAYMENT_EXPORT_GROUPING).default("none"),
     includeSubtotals: z.boolean().default(false),

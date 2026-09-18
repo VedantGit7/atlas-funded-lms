@@ -11,7 +11,7 @@ export function DiagnosticMockCard() {
         </div>
         <div className="mb-2 flex items-baseline gap-1.5">
           <div className="text-[60px] font-extrabold leading-none text-[var(--fba-ind)]">47</div>
-          <div className="text-[22px] font-semibold leading-none text-[var(--fba-ind)] opacity-50">
+          <div className="text-[22px] font-semibold leading-none text-[var(--fba-ind)] opacity-75">
             /100
           </div>
         </div>
@@ -21,15 +21,38 @@ export function DiagnosticMockCard() {
         </div>
         <div className="flex flex-col gap-[18px]">
           {[
-            { label: "Risk Management", pct: 30, color: "var(--fba-red)" },
-            { label: "Trading Psychology", pct: 62, color: "#d97706" },
-            { label: "Technical Analysis", pct: 45, color: "#d97706" },
-            { label: "Evaluation Rules", pct: 71, color: "var(--fba-grn)" },
+            // `color` paints the bar, `textColor` prints the number. They were one
+            // value, so making the percentage legible would have repainted the bar
+            // as a side effect.
+            {
+              label: "Risk Management",
+              pct: 30,
+              color: "var(--fba-red)",
+              textColor: "var(--fba-red)",
+            },
+            {
+              label: "Trading Psychology",
+              pct: 62,
+              color: "#d97706",
+              textColor: "var(--fba-amb-tx)",
+            },
+            {
+              label: "Technical Analysis",
+              pct: 45,
+              color: "#d97706",
+              textColor: "var(--fba-amb-tx)",
+            },
+            {
+              label: "Evaluation Rules",
+              pct: 71,
+              color: "var(--fba-grn)",
+              textColor: "var(--fba-grn-tx)",
+            },
           ].map((row) => (
             <div key={row.label}>
               <div className="mb-[7px] flex justify-between">
                 <span className="text-xs font-medium text-[var(--fba-tx)]">{row.label}</span>
-                <span className="text-xs font-bold" style={{ color: row.color }}>
+                <span className="text-xs font-bold" style={{ color: row.textColor }}>
                   {row.pct}%
                 </span>
               </div>
@@ -69,7 +92,7 @@ export function ToolsMockCard() {
         <div className="mb-[22px]">
           <div className="mb-3.5 flex items-center justify-between">
             <div className="text-[13px] font-bold text-[var(--fba-tx)]">Daily Habit Tracker</div>
-            <div className="text-[11px] font-semibold text-[var(--fba-gld)]">7-day streak</div>
+            <div className="text-[11px] font-semibold text-[var(--fba-gld-tx)]">7-day streak</div>
           </div>
           <div className="flex gap-[5px]">
             {days.map((day, i) => {
@@ -136,7 +159,7 @@ export function ToolsMockCard() {
                 <span className="text-[11px] text-[var(--fba-tx2)]">{trade.pair}</span>
                 <span
                   className={`text-[11px] font-bold ${
-                    trade.positive ? "text-[var(--fba-grn)]" : "text-[var(--fba-red)]"
+                    trade.positive ? "text-[var(--fba-grn-tx)]" : "text-[var(--fba-red-tx)]"
                   }`}
                 >
                   {trade.pnl}
@@ -144,7 +167,9 @@ export function ToolsMockCard() {
               </div>
             ))}
             <div className="mt-0.5 flex items-center justify-between rounded-[7px] bg-[var(--fba-ind-l)] px-[11px] py-[9px]">
-              <span className="text-[11px] font-semibold text-[var(--fba-ind)]">Today&apos;s P&amp;L</span>
+              <span className="text-[11px] font-semibold text-[var(--fba-ind)]">
+                Today&apos;s P&amp;L
+              </span>
               <span className="text-xs font-extrabold text-[var(--fba-ind)]">+$148</span>
             </div>
           </div>
@@ -154,13 +179,7 @@ export function ToolsMockCard() {
   );
 }
 
-function FeatureBullet({
-  title,
-  body,
-}: {
-  title: string;
-  body: string;
-}) {
+function FeatureBullet({ title, body }: { title: string; body: string }) {
   return (
     <div className="flex items-start gap-[13px]">
       <div className="mt-px flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-full bg-[var(--fba-ind-l)]">
@@ -192,8 +211,8 @@ export function DiagnosticSection() {
           </h2>
           <p className="mb-[30px] text-[15px] leading-[1.75] text-[var(--fba-tx2)]">
             The Trader Readiness Diagnostic gives you a clear, scored breakdown of your evaluation
-            readiness across the four areas that actually determine whether you pass or fail a funded
-            challenge.
+            readiness across the four areas that actually determine whether you pass or fail a
+            funded challenge.
           </p>
           <div className="mb-9 flex flex-col gap-4">
             <FeatureBullet

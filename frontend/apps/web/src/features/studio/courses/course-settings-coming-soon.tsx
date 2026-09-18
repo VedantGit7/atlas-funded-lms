@@ -10,7 +10,9 @@ import {
 export function CourseSettingsComingSoon() {
   return (
     <div className={`${builderSectionClassName} overflow-hidden shadow-sm`}>
-      <div className={`${builderSectionBodyClassName} flex flex-col items-center py-16 text-center`}>
+      <div
+        className={`${builderSectionBodyClassName} flex flex-col items-center py-16 text-center`}
+      >
         <span className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-[var(--admin-border)] bg-[var(--admin-surface-low)] text-[var(--admin-primary)]">
           <Sparkles className="h-6 w-6" strokeWidth={1.75} aria-hidden="true" />
         </span>

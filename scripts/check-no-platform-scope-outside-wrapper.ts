@@ -3,9 +3,10 @@ import { join, relative } from "node:path";
 
 const root = process.cwd();
 
+// Moved under backend/ in the F-1 monorepo split (see check-no-direct-prisma.ts).
 const allowedFiles = new Set([
-  "packages/db/src/platform-client.ts",
-  "packages/db/src/with-platform-scope.ts",
+  "backend/packages/db/src/platform-client.ts",
+  "backend/packages/db/src/with-platform-scope.ts",
   "tests/db/with-platform-scope.test.ts",
   "tests/tenant-isolation/platform-leakage.test.ts",
 ]);
@@ -37,7 +38,7 @@ function walk(dir: string): void {
     const stat = statSync(fullPath);
 
     if (stat.isDirectory()) {
-      if (relPath === "packages/db/src/generated") continue;
+      if (relPath === "backend/packages/db/src/generated") continue;
       walk(fullPath);
       continue;
     }

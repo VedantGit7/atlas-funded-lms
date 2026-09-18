@@ -2,10 +2,7 @@
 
 import { useEffect, useId, useRef, useState, type MouseEvent } from "react";
 import { Code2, Cloud, Info } from "lucide-react";
-import {
-  LessonVideoEmbed,
-  canEmbedLessonVideo,
-} from "../../../lessons/lesson-video-embed";
+import { LessonVideoEmbed, canEmbedLessonVideo } from "../../../lessons/lesson-video-embed";
 import { inlineLessonSecondaryButtonClassName } from "./inline-lesson-editor-shared";
 import { uploadWorkspaceMeta, type InlineLessonEditorType } from "./lesson-type-meta";
 import { uploadLessonAssetFile } from "../upload-lesson-asset";
@@ -48,7 +45,9 @@ export function LessonUploadWorkspace({
   const trimmedVideoUrl = videoUrl?.trim() ?? "";
   const hasVideoEmbed =
     lessonType === "video" &&
-    Boolean(videoProvider && trimmedVideoUrl && canEmbedLessonVideo(videoProvider, trimmedVideoUrl));
+    Boolean(
+      videoProvider && trimmedVideoUrl && canEmbedLessonVideo(videoProvider, trimmedVideoUrl),
+    );
 
   function openFilePicker() {
     if (!editable || hasVideoEmbed) return;
@@ -67,23 +66,19 @@ export function LessonUploadWorkspace({
 
   async function handleFileSelected(file: File) {
     if (!editable || uploading) return;
-    
+
     // Video files are not allowed - must use embed
     if (lessonType === "video") {
       setError("Use Embed video for video lessons");
       return;
     }
-    
+
     setUploading(true);
     setError(null);
-    
+
     try {
-      const assetReferenceId = await uploadLessonAssetFile(
-        lessonId,
-        file,
-        "lesson.asset",
-      );
-      
+      const assetReferenceId = await uploadLessonAssetFile(lessonId, file, "lesson.asset");
+
       // Save primaryAssetReferenceId to content_json
       await clientApi.put(
         `/api/v1/lessons/${lessonId}`,
@@ -95,7 +90,7 @@ export function LessonUploadWorkspace({
         },
         "lesson-primary-asset-save",
       );
-      
+
       onFileUploaded?.();
     } catch (uploadError) {
       if (uploadError instanceof ClientApiError) {
@@ -153,7 +148,7 @@ export function LessonUploadWorkspace({
             event.preventDefault();
             setDragActive(false);
             if (!editable || hasVideoEmbed || uploading) return;
-            const file = event.dataTransfer.files?.[0];
+            const file = event.dataTransfer.files[0];
             if (file) void handleFileSelected(file);
           }}
         >
@@ -177,7 +172,9 @@ export function LessonUploadWorkspace({
               onClick={openFilePicker}
             >
               <p id={inputId} className="text-sm text-[var(--admin-on-surface-variant)]">
-                {uploading ? "Uploading..." : (
+                {uploading ? (
+                  "Uploading..."
+                ) : (
                   <>
                     Drop files here or{" "}
                     <span className="font-semibold text-[var(--admin-primary)]">browse files</span>

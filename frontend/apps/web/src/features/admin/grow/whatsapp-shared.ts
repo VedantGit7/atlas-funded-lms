@@ -85,13 +85,7 @@ export type InboxMessage = {
   createdAt: string;
 };
 
-export type WizardStep =
-  | "title"
-  | "audience"
-  | "recipients"
-  | "template"
-  | "delivery"
-  | "settings";
+export type WizardStep = "title" | "audience" | "recipients" | "template" | "delivery" | "settings";
 
 export const WHATSAPP_LIST_HREF = "/admin/marketing/messenger/whatsapp";
 export const WHATSAPP_CREATE_HREF = "/admin/marketing/messenger/whatsapp/create";

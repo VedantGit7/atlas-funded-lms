@@ -2,7 +2,7 @@
  * Certificate Studio — Design Read & Visual System
  *
  * Design read: Dense professional credential design studio for academy admins.
- * FundedBeyond brand. Cockpit-dense Canva/Polotno-class editor chrome; shell-free.
+ * Tenant brand. Cockpit-dense Canva/Polotno-class editor chrome; shell-free.
  * Dark tooling frames a light certificate paper stage. Matches Studio Home +
  * Canvas Editor mock: coral primary CTA, teal tertiary for selection/guides.
  *
@@ -14,7 +14,7 @@
 
 export const STUDIO_DESIGN_READ = {
   intent:
-    "Dense professional credential design studio for academy admins; FundedBeyond brand; cockpit-dense Canva/Polotno-class; shell-free; coral primary + teal tertiary",
+    "Dense professional credential design studio for academy admins; tenant brand; cockpit-dense Canva/Polotno-class; shell-free; coral primary + teal tertiary",
   density: 8,
   motion: 4,
   variance: 5,

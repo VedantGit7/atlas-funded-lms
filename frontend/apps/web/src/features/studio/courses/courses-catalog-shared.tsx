@@ -107,7 +107,9 @@ export function StatCard({
           <Icon className="h-[18px] w-[18px]" strokeWidth={2} aria-hidden="true" />
         </span>
       </div>
-      <p className="mt-4 text-3xl font-bold tracking-tight text-[var(--admin-on-surface)]">{value}</p>
+      <p className="mt-4 text-3xl font-bold tracking-tight text-[var(--admin-on-surface)]">
+        {value}
+      </p>
     </div>
   );
 }

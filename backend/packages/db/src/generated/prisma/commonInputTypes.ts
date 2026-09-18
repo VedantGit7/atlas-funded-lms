@@ -299,13 +299,6 @@ export type UuidNullableFilter<$PrismaModel = never> = {
   not?: Prisma.NestedUuidNullableFilter<$PrismaModel> | string | null
 }
 
-export type EnumMembershipStatusFilter<$PrismaModel = never> = {
-  equals?: $Enums.MembershipStatus | Prisma.EnumMembershipStatusFieldRefInput<$PrismaModel>
-  in?: $Enums.MembershipStatus[] | Prisma.ListEnumMembershipStatusFieldRefInput<$PrismaModel>
-  notIn?: $Enums.MembershipStatus[] | Prisma.ListEnumMembershipStatusFieldRefInput<$PrismaModel>
-  not?: Prisma.NestedEnumMembershipStatusFilter<$PrismaModel> | $Enums.MembershipStatus
-}
-
 export type UuidNullableWithAggregatesFilter<$PrismaModel = never> = {
   equals?: string | Prisma.StringFieldRefInput<$PrismaModel> | null
   in?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel> | null
@@ -319,6 +312,13 @@ export type UuidNullableWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
   _min?: Prisma.NestedStringNullableFilter<$PrismaModel>
   _max?: Prisma.NestedStringNullableFilter<$PrismaModel>
+}
+
+export type EnumMembershipStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.MembershipStatus | Prisma.EnumMembershipStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.MembershipStatus[] | Prisma.ListEnumMembershipStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.MembershipStatus[] | Prisma.ListEnumMembershipStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumMembershipStatusFilter<$PrismaModel> | $Enums.MembershipStatus
 }
 
 export type EnumMembershipStatusWithAggregatesFilter<$PrismaModel = never> = {
@@ -639,6 +639,23 @@ export type EnumAttemptStatusWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedEnumAttemptStatusFilter<$PrismaModel>
 }
 
+export type EnumSeverityFilter<$PrismaModel = never> = {
+  equals?: $Enums.Severity | Prisma.EnumSeverityFieldRefInput<$PrismaModel>
+  in?: $Enums.Severity[] | Prisma.ListEnumSeverityFieldRefInput<$PrismaModel>
+  notIn?: $Enums.Severity[] | Prisma.ListEnumSeverityFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumSeverityFilter<$PrismaModel> | $Enums.Severity
+}
+
+export type EnumSeverityWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.Severity | Prisma.EnumSeverityFieldRefInput<$PrismaModel>
+  in?: $Enums.Severity[] | Prisma.ListEnumSeverityFieldRefInput<$PrismaModel>
+  notIn?: $Enums.Severity[] | Prisma.ListEnumSeverityFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumSeverityWithAggregatesFilter<$PrismaModel> | $Enums.Severity
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumSeverityFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumSeverityFilter<$PrismaModel>
+}
+
 export type EnumVisibilityFilter<$PrismaModel = never> = {
   equals?: $Enums.Visibility | Prisma.EnumVisibilityFieldRefInput<$PrismaModel>
   in?: $Enums.Visibility[] | Prisma.ListEnumVisibilityFieldRefInput<$PrismaModel>
@@ -941,13 +958,6 @@ export type NestedUuidNullableFilter<$PrismaModel = never> = {
   not?: Prisma.NestedUuidNullableFilter<$PrismaModel> | string | null
 }
 
-export type NestedEnumMembershipStatusFilter<$PrismaModel = never> = {
-  equals?: $Enums.MembershipStatus | Prisma.EnumMembershipStatusFieldRefInput<$PrismaModel>
-  in?: $Enums.MembershipStatus[] | Prisma.ListEnumMembershipStatusFieldRefInput<$PrismaModel>
-  notIn?: $Enums.MembershipStatus[] | Prisma.ListEnumMembershipStatusFieldRefInput<$PrismaModel>
-  not?: Prisma.NestedEnumMembershipStatusFilter<$PrismaModel> | $Enums.MembershipStatus
-}
-
 export type NestedUuidNullableWithAggregatesFilter<$PrismaModel = never> = {
   equals?: string | Prisma.StringFieldRefInput<$PrismaModel> | null
   in?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel> | null
@@ -960,6 +970,13 @@ export type NestedUuidNullableWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
   _min?: Prisma.NestedStringNullableFilter<$PrismaModel>
   _max?: Prisma.NestedStringNullableFilter<$PrismaModel>
+}
+
+export type NestedEnumMembershipStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.MembershipStatus | Prisma.EnumMembershipStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.MembershipStatus[] | Prisma.ListEnumMembershipStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.MembershipStatus[] | Prisma.ListEnumMembershipStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumMembershipStatusFilter<$PrismaModel> | $Enums.MembershipStatus
 }
 
 export type NestedEnumMembershipStatusWithAggregatesFilter<$PrismaModel = never> = {
@@ -1251,6 +1268,23 @@ export type NestedEnumAttemptStatusWithAggregatesFilter<$PrismaModel = never> = 
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumAttemptStatusFilter<$PrismaModel>
   _max?: Prisma.NestedEnumAttemptStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumSeverityFilter<$PrismaModel = never> = {
+  equals?: $Enums.Severity | Prisma.EnumSeverityFieldRefInput<$PrismaModel>
+  in?: $Enums.Severity[] | Prisma.ListEnumSeverityFieldRefInput<$PrismaModel>
+  notIn?: $Enums.Severity[] | Prisma.ListEnumSeverityFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumSeverityFilter<$PrismaModel> | $Enums.Severity
+}
+
+export type NestedEnumSeverityWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.Severity | Prisma.EnumSeverityFieldRefInput<$PrismaModel>
+  in?: $Enums.Severity[] | Prisma.ListEnumSeverityFieldRefInput<$PrismaModel>
+  notIn?: $Enums.Severity[] | Prisma.ListEnumSeverityFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumSeverityWithAggregatesFilter<$PrismaModel> | $Enums.Severity
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumSeverityFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumSeverityFilter<$PrismaModel>
 }
 
 export type NestedEnumVisibilityFilter<$PrismaModel = never> = {

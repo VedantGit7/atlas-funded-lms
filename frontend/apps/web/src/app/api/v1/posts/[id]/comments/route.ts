@@ -23,7 +23,7 @@ export const GET = createTenantRoute<
   metadata: listPostCommentsMetadata,
   params: postIdParamsSchema,
   output: commentListResponseSchema,
-  handler: async ({ tx, ctx, params }) => listCommentsForPost(tx, ctx, params["id"] ?? ""),
+  handler: async ({ tx, ctx, params }) => listCommentsForPost(tx, ctx, params.id),
 });
 
 export const POST = createTenantRoute<
@@ -35,5 +35,5 @@ export const POST = createTenantRoute<
   params: postIdParamsSchema,
   body: createCommentBodySchema,
   output: commentDetailResponseSchema,
-  handler: async ({ tx, ctx, params, input }) => createComment(tx, ctx, params["id"] ?? "", input),
+  handler: async ({ tx, ctx, params, input }) => createComment(tx, ctx, params.id, input),
 });

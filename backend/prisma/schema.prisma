@@ -112,10 +112,10 @@ model Tenant {
   updated_at           DateTime    @updatedAt @db.Timestamptz(6)
   deleted_at           DateTime?   @db.Timestamptz(6)
 
-  domains         TenantDomain[]
-  memberships                      Membership[]
-  member_profiles                  MemberProfile[]
-  member_notification_preferences  MemberNotificationPreference[]
+  domains                         TenantDomain[]
+  memberships                     Membership[]
+  member_profiles                 MemberProfile[]
+  member_notification_preferences MemberNotificationPreference[]
 
   @@map("tenants")
 }
@@ -149,9 +149,38 @@ model AuthPrincipal {
   created_at       DateTime  @default(now()) @db.Timestamptz(6)
   updated_at       DateTime  @updatedAt @db.Timestamptz(6)
 
-  memberships Membership[]
+  memberships             Membership[]
+  platform_grants         PlatformOperator[] @relation("PlatformOperatorPrincipal")
+  platform_grants_made    PlatformOperator[] @relation("PlatformOperatorGrantedBy")
+  platform_grants_revoked PlatformOperator[] @relation("PlatformOperatorRevokedBy")
 
   @@map("auth_principals")
+}
+
+/// H7: platform (cross-tenant) role grants.
+///
+/// Replaces matching an email against PLATFORM_OPERATOR_ASSIGNMENTS, which
+/// required a deploy to change and recorded nothing about who granted access.
+/// Revocation is a soft revoke so grant history survives an audit question.
+model PlatformOperator {
+  id                      String    @id @default(uuid()) @db.Uuid
+  auth_principal_id       String    @db.Uuid
+  role_key                String
+  granted_at              DateTime  @default(now()) @db.Timestamptz(6)
+  granted_by_principal_id String?   @db.Uuid
+  grant_reason            String?
+  revoked_at              DateTime? @db.Timestamptz(6)
+  revoked_by_principal_id String?   @db.Uuid
+  revoke_reason           String?
+  created_at              DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at              DateTime  @updatedAt @db.Timestamptz(6)
+
+  principal  AuthPrincipal  @relation("PlatformOperatorPrincipal", fields: [auth_principal_id], references: [id], onDelete: Cascade)
+  granted_by AuthPrincipal? @relation("PlatformOperatorGrantedBy", fields: [granted_by_principal_id], references: [id])
+  revoked_by AuthPrincipal? @relation("PlatformOperatorRevokedBy", fields: [revoked_by_principal_id], references: [id])
+
+  @@index([role_key])
+  @@map("platform_operators")
 }
 
 model Membership {
@@ -171,10 +200,10 @@ model Membership {
   created_at               DateTime         @default(now()) @db.Timestamptz(6)
   updated_at               DateTime         @updatedAt @db.Timestamptz(6)
 
-  tenant                    Tenant                         @relation(fields: [tenant_id], references: [id], onDelete: Restrict)
-  auth_principal            AuthPrincipal?                 @relation(fields: [auth_principal_id], references: [id], onDelete: Restrict)
-  profile                   MemberProfile?
-  notification_preferences  MemberNotificationPreference[]
+  tenant                   Tenant                         @relation(fields: [tenant_id], references: [id], onDelete: Restrict)
+  auth_principal           AuthPrincipal?                 @relation(fields: [auth_principal_id], references: [id], onDelete: Restrict)
+  profile                  MemberProfile?
+  notification_preferences MemberNotificationPreference[]
 
   @@unique([tenant_id, auth_principal_id])
   @@index([tenant_id, status])
@@ -185,18 +214,18 @@ model Membership {
 }
 
 model MemberProfile {
-  id                  String             @id @db.Uuid
-  tenant_id           String             @db.Uuid
-  membership_id       String             @unique @db.Uuid
-  display_name        String?
-  avatar_key          String?
-  bio                 String?
-  timezone            String?
-  profile_visibility  ProfileVisibility  @default(PUBLIC)
-  metadata_json       Json?
-  created_at          DateTime           @default(now()) @db.Timestamptz(6)
-  updated_at          DateTime           @updatedAt @db.Timestamptz(6)
-  deleted_at          DateTime?          @db.Timestamptz(6)
+  id                 String            @id @db.Uuid
+  tenant_id          String            @db.Uuid
+  membership_id      String            @unique @db.Uuid
+  display_name       String?
+  avatar_key         String?
+  bio                String?
+  timezone           String?
+  profile_visibility ProfileVisibility @default(PUBLIC)
+  metadata_json      Json?
+  created_at         DateTime          @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime          @updatedAt @db.Timestamptz(6)
+  deleted_at         DateTime?         @db.Timestamptz(6)
 
   tenant     Tenant     @relation(fields: [tenant_id], references: [id], onDelete: Restrict)
   membership Membership @relation(fields: [membership_id], references: [id], onDelete: Restrict)
@@ -206,15 +235,15 @@ model MemberProfile {
 }
 
 model MemberNotificationPreference {
-  id              String   @id @db.Uuid
-  tenant_id       String   @db.Uuid
-  membership_id   String   @db.Uuid
-  category_key    String
-  enabled         Boolean  @default(true)
-  email_enabled   Boolean  @default(true)
-  in_app_enabled  Boolean  @default(true)
-  created_at      DateTime @default(now()) @db.Timestamptz(6)
-  updated_at      DateTime @updatedAt @db.Timestamptz(6)
+  id             String   @id @db.Uuid
+  tenant_id      String   @db.Uuid
+  membership_id  String   @db.Uuid
+  category_key   String
+  enabled        Boolean  @default(true)
+  email_enabled  Boolean  @default(true)
+  in_app_enabled Boolean  @default(true)
+  created_at     DateTime @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime @updatedAt @db.Timestamptz(6)
 
   tenant     Tenant     @relation(fields: [tenant_id], references: [id], onDelete: Restrict)
   membership Membership @relation(fields: [membership_id], references: [id], onDelete: Restrict)
@@ -244,16 +273,23 @@ model PermissionBundle {
 }
 
 model Role {
-  id         String    @id @db.Uuid
-  tenant_id  String    @db.Uuid
-  key        String
-  name       String
-  is_system  Boolean   @default(false)
-  created_at DateTime  @default(now()) @db.Timestamptz(6)
-  updated_at DateTime  @updatedAt @db.Timestamptz(6)
-  deleted_at DateTime? @db.Timestamptz(6)
+  id                           String    @id @db.Uuid
+  tenant_id                    String    @db.Uuid
+  key                          String
+  name                         String
+  is_system                    Boolean   @default(false)
+  /// H11: can() skips ownership/relationship predicates for this role.
+  /// Replaces matching the literal keys "owner"/"admin" in code.
+  bypasses_resource_predicates Boolean   @default(false)
+  created_at                   DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at                   DateTime  @updatedAt @db.Timestamptz(6)
+  deleted_at                   DateTime? @db.Timestamptz(6)
 
-  @@index([tenant_id, key])
+  /// Partial-unique in the database since migration 029
+  /// (roles_tenant_key_active_uq, WHERE deleted_at IS NULL). The model declared
+  /// @@index, which is why H11 read as "duplicate keys can race in" — the
+  /// constraint was there, the schema just did not say so.
+  @@unique([tenant_id, key])
   @@map("roles")
 }
 
@@ -400,20 +436,20 @@ model TenantActiveDay {
 }
 
 model LearnerBillingConfig {
-  tenant_id             String   @id @db.Uuid
-  pricing_model         String?
-  home_currency         String?
-  gst_enabled           Boolean  @default(false)
-  gst_number            String?
-  gst_percentage        Decimal? @db.Decimal(6, 3)
-  invoice_prefix        String?
-  invoice_next_number   Int?
-  invoice_business_name String?
-  request_billing_address  Boolean @default(false)
-  request_shipping_address Boolean @default(false)
-  request_gstin            Boolean @default(false)
-  request_mobile           Boolean @default(false)
-  updated_at            DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+  tenant_id                String   @id @db.Uuid
+  pricing_model            String?
+  home_currency            String?
+  gst_enabled              Boolean  @default(false)
+  gst_number               String?
+  gst_percentage           Decimal? @db.Decimal(6, 3)
+  invoice_prefix           String?
+  invoice_next_number      Int?
+  invoice_business_name    String?
+  request_billing_address  Boolean  @default(false)
+  request_shipping_address Boolean  @default(false)
+  request_gstin            Boolean  @default(false)
+  request_mobile           Boolean  @default(false)
+  updated_at               DateTime @default(now()) @updatedAt @db.Timestamptz(6)
 
   @@map("learner_billing_config")
 }
@@ -888,7 +924,7 @@ model TestSeriesItem {
   created_at     DateTime @default(now()) @db.Timestamptz(6)
   updated_at     DateTime @updatedAt @db.Timestamptz(6)
 
-  test_series TestSeries              @relation(fields: [test_series_id], references: [id], onDelete: Cascade)
+  test_series TestSeries               @relation(fields: [test_series_id], references: [id], onDelete: Cascade)
   progress    TestSeriesItemProgress[]
 
   @@unique([tenant_id, test_series_id, position])
@@ -1037,18 +1073,18 @@ model LearnerSubscriptionPlanItem {
 }
 
 model LearnerSubscriptionEnrollment {
-  id                  String    @id @db.Uuid
-  tenant_id           String    @db.Uuid
-  plan_id             String    @db.Uuid
-  membership_id       String    @db.Uuid
-  status              String    @default("active")
-  enrolled_type       String    @default("free")
-  enrolled_at         DateTime  @default(now()) @db.Timestamptz(6)
+  id                   String    @id @db.Uuid
+  tenant_id            String    @db.Uuid
+  plan_id              String    @db.Uuid
+  membership_id        String    @db.Uuid
+  status               String    @default("active")
+  enrolled_type        String    @default("free")
+  enrolled_at          DateTime  @default(now()) @db.Timestamptz(6)
   current_period_start DateTime? @db.Timestamptz(6)
   current_period_end   DateTime? @db.Timestamptz(6)
-  expires_at          DateTime? @db.Timestamptz(6)
-  cancelled_at        DateTime? @db.Timestamptz(6)
-  completed_at        DateTime? @db.Timestamptz(6)
+  expires_at           DateTime? @db.Timestamptz(6)
+  cancelled_at         DateTime? @db.Timestamptz(6)
+  completed_at         DateTime? @db.Timestamptz(6)
 
   plan LearnerSubscriptionPlan @relation(fields: [plan_id], references: [id], onDelete: Cascade)
 
@@ -1264,18 +1300,18 @@ model ItemDimensionWeight {
 }
 
 model ItemCollection {
-  id              String        @id @db.Uuid
-  tenant_id       String        @db.Uuid
-  slug            String
-  title           String
-  collection_type String
-  status          PublishStatus @default(DRAFT)
-  metadata_json   Json?
+  id                       String        @id @db.Uuid
+  tenant_id                String        @db.Uuid
+  slug                     String
+  title                    String
+  collection_type          String
+  status                   PublishStatus @default(DRAFT)
+  metadata_json            Json?
   /// Null for tenant/studio-authored collections; set for learner-owned decks.
-  created_by_membership_id String? @db.Uuid
-  created_at      DateTime      @default(now()) @db.Timestamptz(6)
-  updated_at      DateTime      @updatedAt @db.Timestamptz(6)
-  deleted_at      DateTime?     @db.Timestamptz(6)
+  created_by_membership_id String?       @db.Uuid
+  created_at               DateTime      @default(now()) @db.Timestamptz(6)
+  updated_at               DateTime      @updatedAt @db.Timestamptz(6)
+  deleted_at               DateTime?     @db.Timestamptz(6)
 
   @@index([tenant_id, slug])
   @@index([tenant_id, collection_type, status])
@@ -1807,19 +1843,19 @@ model CertificateRenderJob {
 }
 
 model CertificateWalletPass {
-  id              String   @id @db.Uuid
-  tenant_id       String   @db.Uuid
-  certificate_id  String   @db.Uuid
+  id              String    @id @db.Uuid
+  tenant_id       String    @db.Uuid
+  certificate_id  String    @db.Uuid
   platform        String
   pass_object_key String?
   external_id     String?
-  status          String   @default("active")
-  created_at      DateTime @default(now()) @db.Timestamptz(6)
-  updated_at      DateTime @updatedAt @db.Timestamptz(6)
+  status          String    @default("active")
+  created_at      DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime  @updatedAt @db.Timestamptz(6)
   revoked_at      DateTime? @db.Timestamptz(6)
 
-  @@index([tenant_id, certificate_id])
   @@unique([tenant_id, certificate_id, platform])
+  @@index([tenant_id, certificate_id])
   @@map("certificate_wallet_passes")
 }
 
@@ -2587,11 +2623,11 @@ model ReportDeliveryDestination {
 }
 
 model ReportExportSettings {
-  tenant_id                  String   @id @db.Uuid
-  settings_json              Json     @default("{}")
-  updated_by_membership_id   String?  @db.Uuid
-  created_at                 DateTime @default(now()) @db.Timestamptz(6)
-  updated_at                 DateTime @updatedAt @db.Timestamptz(6)
+  tenant_id                String   @id @db.Uuid
+  settings_json            Json     @default("{}")
+  updated_by_membership_id String?  @db.Uuid
+  created_at               DateTime @default(now()) @db.Timestamptz(6)
+  updated_at               DateTime @updatedAt @db.Timestamptz(6)
 
   @@map("report_export_settings")
 }
@@ -2634,22 +2670,22 @@ model AtRiskAlert {
 }
 
 model DeviceSecurityAlert {
-  id              String    @id @db.Uuid
-  tenant_id       String    @db.Uuid
-  membership_id   String    @db.Uuid
-  alert_key       String
-  alert_type      String
-  severity        String
-  status          String    @default("open")
-  title           String
-  evidence_json   Json?
-  session_ids     Json
-  detected_at     DateTime  @default(now()) @db.Timestamptz(6)
-  resolved_at     DateTime? @db.Timestamptz(6)
-  resolved_by     String?   @db.Uuid
-  notes_json      Json?
-  created_at      DateTime  @default(now()) @db.Timestamptz(6)
-  updated_at      DateTime  @updatedAt @db.Timestamptz(6)
+  id            String    @id @db.Uuid
+  tenant_id     String    @db.Uuid
+  membership_id String    @db.Uuid
+  alert_key     String
+  alert_type    String
+  severity      String
+  status        String    @default("open")
+  title         String
+  evidence_json Json?
+  session_ids   Json
+  detected_at   DateTime  @default(now()) @db.Timestamptz(6)
+  resolved_at   DateTime? @db.Timestamptz(6)
+  resolved_by   String?   @db.Uuid
+  notes_json    Json?
+  created_at    DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime  @updatedAt @db.Timestamptz(6)
 
   @@unique([tenant_id, alert_key])
   @@index([tenant_id, status, detected_at])
@@ -2901,6 +2937,21 @@ model SalesAttributionEvent {
   @@index([tenant_id, occurred_at])
   @@index([tenant_id, utm_source, utm_campaign])
   @@map("sales_attribution_events")
+}
+
+/// Per-tenant retention policy for the attribution event log.
+///
+/// `retention_days` NULL means keep everything, which is the default: this table
+/// has data in existing tenants, so a finite default would delete real history
+/// on deploy.
+model SalesAttributionRetentionSetting {
+  tenant_id                String   @id @db.Uuid
+  retention_days           Int?
+  updated_by_membership_id String?  @db.Uuid
+  created_at               DateTime @default(now()) @db.Timestamptz(6)
+  updated_at               DateTime @updatedAt @db.Timestamptz(6)
+
+  @@map("sales_attribution_retention_settings")
 }
 
 /// Discount coupons for course checkout (Learnyst-style Sales → Coupons).
@@ -3164,16 +3215,16 @@ model SalesAffiliateProduct {
 }
 
 model SalesAffiliateRequest {
-  id                       String    @id @db.Uuid
-  tenant_id                String    @db.Uuid
-  membership_id            String    @db.Uuid
+  id                        String    @id @db.Uuid
+  tenant_id                 String    @db.Uuid
+  membership_id             String    @db.Uuid
   /// PENDING | APPROVED | REJECTED
-  status                   String    @default("PENDING")
-  note                     String?
-  reviewed_by_membership_id String?  @db.Uuid
-  reviewed_at              DateTime? @db.Timestamptz(6)
-  created_at               DateTime  @default(now()) @db.Timestamptz(6)
-  updated_at               DateTime  @updatedAt @db.Timestamptz(6)
+  status                    String    @default("PENDING")
+  note                      String?
+  reviewed_by_membership_id String?   @db.Uuid
+  reviewed_at               DateTime? @db.Timestamptz(6)
+  created_at                DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at                DateTime  @updatedAt @db.Timestamptz(6)
 
   @@index([tenant_id, status, created_at])
   @@map("sales_affiliate_requests")
@@ -3204,17 +3255,17 @@ model SalesAffiliateCommission {
 }
 
 model SalesAffiliatePayout {
-  id                       String   @id @db.Uuid
-  tenant_id                String   @db.Uuid
-  affiliate_id             String   @db.Uuid
-  affiliate_membership_id  String   @db.Uuid
-  amount_cents             Int
-  currency                 String
-  status                   String   @default("PAID")
-  note                     String?
-  marked_by_membership_id  String?  @db.Uuid
-  paid_at                  DateTime @default(now()) @db.Timestamptz(6)
-  created_at               DateTime @default(now()) @db.Timestamptz(6)
+  id                      String   @id @db.Uuid
+  tenant_id               String   @db.Uuid
+  affiliate_id            String   @db.Uuid
+  affiliate_membership_id String   @db.Uuid
+  amount_cents            Int
+  currency                String
+  status                  String   @default("PAID")
+  note                    String?
+  marked_by_membership_id String?  @db.Uuid
+  paid_at                 DateTime @default(now()) @db.Timestamptz(6)
+  created_at              DateTime @default(now()) @db.Timestamptz(6)
 
   @@index([tenant_id, affiliate_id, paid_at])
   @@map("sales_affiliate_payouts")
@@ -3275,20 +3326,20 @@ model CustomFieldValueHistory {
 }
 
 model CustomFieldSegment {
-  id                         String    @id @db.Uuid
-  tenant_id                  String    @db.Uuid
-  name                       String
-  description                String?
-  visibility                 String    @default("shared")
-  refresh_mode               String    @default("live")
-  conditions_json            Json
-  matched_count              Int?
-  previous_matched_count     Int?
-  matched_count_at           DateTime? @db.Timestamptz(6)
-  snapshot_batch_id          String?   @db.Uuid
-  created_by_membership_id   String    @db.Uuid
-  created_at                 DateTime  @default(now()) @db.Timestamptz(6)
-  updated_at                 DateTime  @updatedAt @db.Timestamptz(6)
+  id                       String    @id @db.Uuid
+  tenant_id                String    @db.Uuid
+  name                     String
+  description              String?
+  visibility               String    @default("shared")
+  refresh_mode             String    @default("live")
+  conditions_json          Json
+  matched_count            Int?
+  previous_matched_count   Int?
+  matched_count_at         DateTime? @db.Timestamptz(6)
+  snapshot_batch_id        String?   @db.Uuid
+  created_by_membership_id String    @db.Uuid
+  created_at               DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at               DateTime  @updatedAt @db.Timestamptz(6)
 
   @@index([tenant_id])
   @@index([tenant_id, visibility])
@@ -3353,15 +3404,15 @@ model ZoomSyncRun {
 }
 
 model ZoomWebhookEvent {
-  id                 String    @id @db.Uuid
-  tenant_id          String    @db.Uuid
-  zoom_connection_id String?   @db.Uuid
+  id                 String   @id @db.Uuid
+  tenant_id          String   @db.Uuid
+  zoom_connection_id String?  @db.Uuid
   event_type         String
   topic              String?
-  status_code        Int       @default(200)
-  received_at        DateTime  @default(now()) @db.Timestamptz(6)
+  status_code        Int      @default(200)
+  received_at        DateTime @default(now()) @db.Timestamptz(6)
   payload_json       Json?
-  created_at         DateTime  @default(now()) @db.Timestamptz(6)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
 
   @@index([tenant_id, received_at])
   @@map("zoom_webhook_events")
@@ -3431,19 +3482,19 @@ model LiveSession {
 }
 
 model LiveAttendance {
-  id                           String    @id @db.Uuid
-  tenant_id                    String    @db.Uuid
-  live_session_id              String    @db.Uuid
-  membership_id                String    @db.Uuid
-  status                       String    @default("registered")
-  joined_at                    DateTime? @db.Timestamptz(6)
-  left_at                      DateTime? @db.Timestamptz(6)
-  duration_seconds             Int?
-  override_reason              String?
-  overridden_at                DateTime? @db.Timestamptz(6)
-  overridden_by_membership_id  String?   @db.Uuid
-  created_at                   DateTime  @default(now()) @db.Timestamptz(6)
-  updated_at                   DateTime  @updatedAt @db.Timestamptz(6)
+  id                          String    @id @db.Uuid
+  tenant_id                   String    @db.Uuid
+  live_session_id             String    @db.Uuid
+  membership_id               String    @db.Uuid
+  status                      String    @default("registered")
+  joined_at                   DateTime? @db.Timestamptz(6)
+  left_at                     DateTime? @db.Timestamptz(6)
+  duration_seconds            Int?
+  override_reason             String?
+  overridden_at               DateTime? @db.Timestamptz(6)
+  overridden_by_membership_id String?   @db.Uuid
+  created_at                  DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at                  DateTime  @updatedAt @db.Timestamptz(6)
 
   session LiveSession @relation(fields: [live_session_id], references: [id], onDelete: Cascade)
 
@@ -3570,25 +3621,25 @@ model CourseBackupJob {
 }
 
 model PushMessage {
-  id                         String    @id @db.Uuid
-  tenant_id                  String    @db.Uuid
-  title                      String
-  status                     String    @default("DRAFT")
-  audience_type              String?
-  audience_batch_id          String?   @db.Uuid
-  subject                    String?
-  body                       String?
-  deep_link                  String?
-  image_url                  String?
-  channel_android            Boolean   @default(true)
-  channel_ios                Boolean   @default(true)
-  channel_web                Boolean   @default(true)
-  recipient_count            Int       @default(0)
-  scheduled_at               DateTime? @db.Timestamptz(6)
-  sent_at                    DateTime? @db.Timestamptz(6)
-  created_by_membership_id   String    @db.Uuid
-  created_at                 DateTime  @default(now()) @db.Timestamptz(6)
-  updated_at                 DateTime  @updatedAt @db.Timestamptz(6)
+  id                       String    @id @db.Uuid
+  tenant_id                String    @db.Uuid
+  title                    String
+  status                   String    @default("DRAFT")
+  audience_type            String?
+  audience_batch_id        String?   @db.Uuid
+  subject                  String?
+  body                     String?
+  deep_link                String?
+  image_url                String?
+  channel_android          Boolean   @default(true)
+  channel_ios              Boolean   @default(true)
+  channel_web              Boolean   @default(true)
+  recipient_count          Int       @default(0)
+  scheduled_at             DateTime? @db.Timestamptz(6)
+  sent_at                  DateTime? @db.Timestamptz(6)
+  created_by_membership_id String    @db.Uuid
+  created_at               DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at               DateTime  @updatedAt @db.Timestamptz(6)
 
   @@index([tenant_id, status, created_at])
   @@index([tenant_id, scheduled_at])
@@ -3596,21 +3647,21 @@ model PushMessage {
 }
 
 model MarketingEmailCampaign {
-  id                         String    @id @db.Uuid
-  tenant_id                  String    @db.Uuid
-  title                      String
-  status                     String    @default("DRAFT")
-  audience_type              String?
-  audience_batch_id          String?   @db.Uuid
-  subject                    String?
-  body_html                  String?
-  template_key               String?
-  recipient_count            Int       @default(0)
-  scheduled_at               DateTime? @db.Timestamptz(6)
-  sent_at                    DateTime? @db.Timestamptz(6)
-  created_by_membership_id   String    @db.Uuid
-  created_at                 DateTime  @default(now()) @db.Timestamptz(6)
-  updated_at                 DateTime  @updatedAt @db.Timestamptz(6)
+  id                       String    @id @db.Uuid
+  tenant_id                String    @db.Uuid
+  title                    String
+  status                   String    @default("DRAFT")
+  audience_type            String?
+  audience_batch_id        String?   @db.Uuid
+  subject                  String?
+  body_html                String?
+  template_key             String?
+  recipient_count          Int       @default(0)
+  scheduled_at             DateTime? @db.Timestamptz(6)
+  sent_at                  DateTime? @db.Timestamptz(6)
+  created_by_membership_id String    @db.Uuid
+  created_at               DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at               DateTime  @updatedAt @db.Timestamptz(6)
 
   @@index([tenant_id, status, created_at])
   @@index([tenant_id, scheduled_at])
@@ -3619,21 +3670,21 @@ model MarketingEmailCampaign {
 
 /// Multi-channel campaign orchestration (Goal → Audience → Touchpoints → Launch).
 model MarketingCampaign {
-  id                         String    @id @db.Uuid
-  tenant_id                  String    @db.Uuid
-  title                      String
-  goal                       String?
-  status                     String    @default("DRAFT")
-  audience_type              String?
-  audience_batch_id          String?   @db.Uuid
-  recipient_count            Int       @default(0)
-  channels_json              Json      @default("{}")
-  touchpoints_json           Json      @default("[]")
-  launched_at                DateTime? @db.Timestamptz(6)
-  scheduled_at               DateTime? @db.Timestamptz(6)
-  created_by_membership_id   String    @db.Uuid
-  created_at                 DateTime  @default(now()) @db.Timestamptz(6)
-  updated_at                 DateTime  @updatedAt @db.Timestamptz(6)
+  id                       String    @id @db.Uuid
+  tenant_id                String    @db.Uuid
+  title                    String
+  goal                     String?
+  status                   String    @default("DRAFT")
+  audience_type            String?
+  audience_batch_id        String?   @db.Uuid
+  recipient_count          Int       @default(0)
+  channels_json            Json      @default("{}")
+  touchpoints_json         Json      @default("[]")
+  launched_at              DateTime? @db.Timestamptz(6)
+  scheduled_at             DateTime? @db.Timestamptz(6)
+  created_by_membership_id String    @db.Uuid
+  created_at               DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at               DateTime  @updatedAt @db.Timestamptz(6)
 
   @@index([tenant_id, status, created_at])
   @@index([tenant_id, updated_at])
@@ -3641,20 +3692,20 @@ model MarketingCampaign {
 }
 
 model Announcement {
-  id                         String    @id @db.Uuid
-  tenant_id                  String    @db.Uuid
-  title                      String
-  message                    String
-  type                       String
-  audience_batch_id          String?   @db.Uuid
-  deep_link                  String?
-  image_url                  String?
-  status                     String    @default("SENT")
-  recipient_count            Int       @default(0)
-  sent_at                    DateTime? @db.Timestamptz(6)
-  created_by_membership_id   String    @db.Uuid
-  created_at                 DateTime  @default(now()) @db.Timestamptz(6)
-  updated_at                 DateTime  @updatedAt @db.Timestamptz(6)
+  id                       String    @id @db.Uuid
+  tenant_id                String    @db.Uuid
+  title                    String
+  message                  String
+  type                     String
+  audience_batch_id        String?   @db.Uuid
+  deep_link                String?
+  image_url                String?
+  status                   String    @default("SENT")
+  recipient_count          Int       @default(0)
+  sent_at                  DateTime? @db.Timestamptz(6)
+  created_by_membership_id String    @db.Uuid
+  created_at               DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at               DateTime  @updatedAt @db.Timestamptz(6)
 
   @@index([tenant_id, type, created_at])
   @@index([tenant_id, created_at])
@@ -3683,23 +3734,23 @@ model WhatsappConnection {
 }
 
 model WhatsappTemplate {
-  id                 String   @id @db.Uuid
-  tenant_id          String   @db.Uuid
-  name               String
-  category           String
-  language           String   @default("en")
-  header_type        String   @default("NONE")
-  header_text        String?
-  header_image_url   String?
-  body               String
-  footer             String?
-  buttons_json       Json?
-  status             String   @default("DRAFT")
-  meta_template_id   String?
-  rejection_reason   String?
-  created_by_membership_id String @db.Uuid
-  created_at         DateTime @default(now()) @db.Timestamptz(6)
-  updated_at         DateTime @updatedAt @db.Timestamptz(6)
+  id                       String   @id @db.Uuid
+  tenant_id                String   @db.Uuid
+  name                     String
+  category                 String
+  language                 String   @default("en")
+  header_type              String   @default("NONE")
+  header_text              String?
+  header_image_url         String?
+  body                     String
+  footer                   String?
+  buttons_json             Json?
+  status                   String   @default("DRAFT")
+  meta_template_id         String?
+  rejection_reason         String?
+  created_by_membership_id String   @db.Uuid
+  created_at               DateTime @default(now()) @db.Timestamptz(6)
+  updated_at               DateTime @updatedAt @db.Timestamptz(6)
 
   @@unique([tenant_id, name])
   @@index([tenant_id, status, created_at])
@@ -3778,20 +3829,20 @@ model MarketingWorkflow {
 }
 
 model MarketingWorkflowRun {
-  id                 String    @id @db.Uuid
-  tenant_id          String    @db.Uuid
-  workflow_id        String    @db.Uuid
-  membership_id      String?   @db.Uuid
-  status             String    @default("RUNNING")
-  trigger_event_type String
-  trigger_payload_json Json    @default("{}")
-  current_node_id    String?
-  wait_until         DateTime? @db.Timestamptz(6)
-  idempotency_key    String
-  error_message      String?
-  created_at         DateTime  @default(now()) @db.Timestamptz(6)
-  updated_at         DateTime  @updatedAt @db.Timestamptz(6)
-  completed_at       DateTime? @db.Timestamptz(6)
+  id                   String    @id @db.Uuid
+  tenant_id            String    @db.Uuid
+  workflow_id          String    @db.Uuid
+  membership_id        String?   @db.Uuid
+  status               String    @default("RUNNING")
+  trigger_event_type   String
+  trigger_payload_json Json      @default("{}")
+  current_node_id      String?
+  wait_until           DateTime? @db.Timestamptz(6)
+  idempotency_key      String
+  error_message        String?
+  created_at           DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime  @updatedAt @db.Timestamptz(6)
+  completed_at         DateTime? @db.Timestamptz(6)
 
   @@unique([tenant_id, idempotency_key])
   @@index([tenant_id, workflow_id, created_at])
@@ -3859,13 +3910,13 @@ model MarketingContact {
 }
 
 model MarketingFormSubmission {
-  id          String   @id @db.Uuid
-  tenant_id   String   @db.Uuid
-  form_id     String   @db.Uuid
-  contact_id  String   @db.Uuid
-  answers_json Json    @default("{}")
-  source      String   @default("LINK")
-  created_at  DateTime @default(now()) @db.Timestamptz(6)
+  id           String   @id @db.Uuid
+  tenant_id    String   @db.Uuid
+  form_id      String   @db.Uuid
+  contact_id   String   @db.Uuid
+  answers_json Json     @default("{}")
+  source       String   @default("LINK")
+  created_at   DateTime @default(now()) @db.Timestamptz(6)
 
   @@index([tenant_id, form_id, created_at])
   @@index([tenant_id, contact_id, created_at])
@@ -3919,18 +3970,18 @@ model MarketingPromoSlider {
 }
 
 model MarketingPromoSlide {
-  id          String    @id @db.Uuid
-  tenant_id   String    @db.Uuid
-  slider_id   String    @db.Uuid
-  name        String
-  image_url   String?
-  image_fit   String    @default("COVER")
-  link_url    String?
-  starts_at   DateTime? @db.Timestamptz(6)
-  ends_at     DateTime? @db.Timestamptz(6)
-  sort_order  Int       @default(0)
-  created_at  DateTime  @default(now()) @db.Timestamptz(6)
-  updated_at  DateTime  @updatedAt @db.Timestamptz(6)
+  id         String    @id @db.Uuid
+  tenant_id  String    @db.Uuid
+  slider_id  String    @db.Uuid
+  name       String
+  image_url  String?
+  image_fit  String    @default("COVER")
+  link_url   String?
+  starts_at  DateTime? @db.Timestamptz(6)
+  ends_at    DateTime? @db.Timestamptz(6)
+  sort_order Int       @default(0)
+  created_at DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at DateTime  @updatedAt @db.Timestamptz(6)
 
   @@index([tenant_id, slider_id, sort_order])
   @@index([tenant_id, ends_at])
