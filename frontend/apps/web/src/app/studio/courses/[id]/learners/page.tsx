@@ -15,7 +15,9 @@ export default async function StudioCourseLearnersPage({ params }: StudioCourseL
   const { id } = await params;
 
   try {
-    const course = await serverApi.get<StudioCourseDetailResponse>(`/api/v1/courses/${id}?view=studio`);
+    const course = await serverApi.get<StudioCourseDetailResponse>(
+      `/api/v1/courses/${id}?view=studio`,
+    );
 
     return (
       <PageGate state="ready" title="Learner roster">

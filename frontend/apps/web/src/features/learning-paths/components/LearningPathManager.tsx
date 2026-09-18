@@ -169,10 +169,12 @@ export function LearningPathManager({ paths }: StudioLearningPathsPageProps) {
             <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--admin-primary-container)_55%,var(--admin-surface))]">
               <BookOpen className="h-7 w-7 text-[var(--admin-primary)]" aria-hidden="true" />
             </div>
-            <h3 className="text-lg font-semibold text-[var(--admin-on-surface)]">No learning paths yet</h3>
+            <h3 className="text-lg font-semibold text-[var(--admin-on-surface)]">
+              No learning paths yet
+            </h3>
             <p className="max-w-sm text-sm text-[var(--admin-on-surface-variant)]">
-              Create a structured sequence of courses, assessments, and milestones for your
-              learners using the form above.
+              Create a structured sequence of courses, assessments, and milestones for your learners
+              using the form above.
             </p>
           </div>
         ) : (
@@ -241,8 +243,7 @@ export function LearningPathManager({ paths }: StudioLearningPathsPageProps) {
             </ul>
             <div className="flex items-center justify-between border-t border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-4 py-3 md:px-6">
               <span className="text-[11px] font-medium text-[var(--admin-on-surface-variant)]">
-                Showing {paths.length} of {paths.length}{" "}
-                {paths.length === 1 ? "path" : "paths"}
+                Showing {paths.length} of {paths.length} {paths.length === 1 ? "path" : "paths"}
               </span>
             </div>
           </>
@@ -256,7 +257,9 @@ export function LearningPathManager({ paths }: StudioLearningPathsPageProps) {
               <Icon className="h-4 w-4 text-[var(--admin-primary)]" aria-hidden="true" />
             </div>
             <h4 className="text-sm font-bold text-[var(--admin-on-surface)]">{cardTitle}</h4>
-            <p className="mt-1 text-xs leading-relaxed text-[var(--admin-on-surface-variant)]">{description}</p>
+            <p className="mt-1 text-xs leading-relaxed text-[var(--admin-on-surface-variant)]">
+              {description}
+            </p>
           </div>
         ))}
       </div>

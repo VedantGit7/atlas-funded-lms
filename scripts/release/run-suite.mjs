@@ -1,8 +1,32 @@
 #!/usr/bin/env node
 
-import { spawnSync } from "node:child_process";
+import { execFileSync, spawnSync } from "node:child_process";
 import { writeFileSync } from "node:fs";
 import { join } from "node:path";
+
+/**
+ * Resolve the commit this evidence describes.
+ *
+ * This used to be `process.env.GIT_SHA ?? undefined`, and nothing sets GIT_SHA
+ * outside CI — so commitSha was always absent and validate-evidence took its
+ * “commit correspondence not checked” branch on every local run. The check
+ * existed and could never fire, which is the same defect as an unrun gate:
+ * a question nobody answered, reported as though it had been.
+ *
+ * Falling back to `git rev-parse HEAD` mirrors what the validator already does
+ * to find HEAD, so the two agree by construction.
+ */
+function resolveCommitSha() {
+  const fromEnv = process.env.GIT_SHA?.trim();
+  if (fromEnv) return fromEnv;
+  try {
+    return execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim();
+  } catch {
+    // Not a git checkout (a release tarball, say). Absent is honest here;
+    // the validator reports correspondence as unchecked rather than passing it.
+    return undefined;
+  }
+}
 
 function readArg(name) {
   const index = process.argv.indexOf(`--${name}`);
@@ -147,14 +171,33 @@ const launchCriticalP1Failures = gates.filter(
     ["release_health", "restore_validation", "worker_tests", "storage_tests"].includes(gate.id),
 );
 
+/**
+ * H18. A skipped P0 gate used to be treated as an absent problem rather than an
+ * unanswered question, so `--skip-db --skip-build --skip-e2e` -- which is how CI
+ * invoked this suite -- produced READY_FOR_STAGING with integration_tests,
+ * tenant_isolation_tests, rls_tests, e2e_tests, db_rls_check and build all
+ * unrun. The artifact vouched for guarantees nothing had checked.
+ *
+ * Manual gates are different: they are recorded as manual_required by design and
+ * tracked through manualGatesRequired, so they do not block staging here.
+ */
+const automatedP0Skips = gates.filter(
+  (gate) => gate.severity === "P0" && gate.status === "skipped",
+);
+
 let verdict = "NOT_READY";
-if (automatedP0Failures.length === 0 && launchCriticalP1Failures.length === 0) {
+if (
+  automatedP0Failures.length === 0 &&
+  automatedP0Skips.length === 0 &&
+  launchCriticalP1Failures.length === 0
+) {
   verdict = "READY_FOR_STAGING";
 }
 const releaseHealthPassed = gates.find((gate) => gate.id === "release_health")?.status === "passed";
 if (
   releaseHealthPassed &&
   automatedP0Failures.length === 0 &&
+  automatedP0Skips.length === 0 &&
   launchCriticalP1Failures.length === 0
 ) {
   verdict = "READY_FOR_PRODUCTION_REVIEW";
@@ -165,7 +208,7 @@ const evidence = {
   storyId: "ATL-STORY-045",
   generatedAt: new Date().toISOString(),
   branch: process.env.GIT_BRANCH ?? undefined,
-  commitSha: process.env.GIT_SHA ?? undefined,
+  commitSha: resolveCommitSha(),
   environment: process.env.RELEASE_ENV ?? process.env.APP_ENV ?? "local",
   verdict,
   productionApproved: false,

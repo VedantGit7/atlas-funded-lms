@@ -65,9 +65,14 @@ export function LearningPreferencesForm({ initial }: LearningPreferencesFormProp
     setMessage(null);
     setRequestId(null);
     try {
-      await clientApi.put("/api/v1/me/preferences", { learning: state }, "learning-preferences-update", {
-        silent: true,
-      });
+      await clientApi.put(
+        "/api/v1/me/preferences",
+        { learning: state },
+        "learning-preferences-update",
+        {
+          silent: true,
+        },
+      );
       setToastOpen(true);
     } catch (error) {
       const formatted = formatClientError(error);

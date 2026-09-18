@@ -54,6 +54,7 @@ const selectTriggerClassName =
 
 const DATASET_OPTIONS: Array<{ value: PaymentExportDataset; label: string }> = [
   { value: "transactions", label: "Transactions" },
+  { value: "orders", label: "Orders" },
   { value: "invoices", label: "Invoices" },
   { value: "instalments", label: "Instalments" },
   { value: "refunds", label: "Refunds" },
@@ -76,6 +77,12 @@ const STATUS_OPTIONS = [
   { value: "refunded", label: "Refunded" },
 ];
 
+const SETTLEMENT_OPTIONS = [
+  { value: "", label: "Settled and unsettled" },
+  { value: "settled", label: "Settled only" },
+  { value: "unsettled", label: "Unsettled only" },
+];
+
 const SENSITIVE_COLUMN_KEYS = new Set(["amount_cents", "tax_amount_cents", "coupon_amount_cents"]);
 
 function formatRelative(value: string): string {
@@ -93,7 +100,10 @@ function formatRelative(value: string): string {
 function formatUtc(value: string): string {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return date.toISOString().replace("T", " ").replace(/\.\d{3}Z$/, "Z");
+  return date
+    .toISOString()
+    .replace("T", " ")
+    .replace(/\.\d{3}Z$/, "Z");
 }
 
 function datasetChipClassName(dataset: PaymentExportDataset): string {
@@ -124,7 +134,9 @@ function PolicyToggle({
       aria-checked={checked}
       aria-label={label}
       disabled={disabled}
-      onClick={() => onChange(!checked)}
+      onClick={() => {
+        onChange(!checked);
+      }}
       className={`relative h-5 w-9 shrink-0 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]/40 disabled:opacity-50 ${
         checked ? "bg-[var(--admin-primary)]" : "bg-[var(--admin-outline)]"
       }`}
@@ -310,6 +322,7 @@ function NewExportModal({
   const [paidTo, setPaidTo] = useState("");
   const [gatewayKey, setGatewayKey] = useState("");
   const [status, setStatus] = useState("");
+  const [settlement, setSettlement] = useState("");
   const [useCurrentFilters, setUseCurrentFilters] = useState(true);
   const [grouping, setGrouping] = useState<PaymentExportGrouping>("none");
   const [includeSubtotals, setIncludeSubtotals] = useState(false);
@@ -327,7 +340,9 @@ function NewExportModal({
   useEffect(() => {
     if (!open) return;
     setDataset("transactions");
-    setSelected(new Set(columns.filter((column) => column.defaultSelected).map((column) => column.key)));
+    setSelected(
+      new Set(columns.filter((column) => column.defaultSelected).map((column) => column.key)),
+    );
     setFormat("csv");
     setPaidFrom("");
     setPaidTo("");
@@ -376,6 +391,9 @@ function NewExportModal({
       parts.push("All sources");
     }
     if (status.trim()) parts.push(status.trim());
+    if (dataset === "orders" && settlement) {
+      parts.push(settlement === "settled" ? "Settled only" : "Unsettled only");
+    }
     if (paidFrom && paidTo) parts.push(`${paidFrom} – ${paidTo}`);
     else if (paidFrom) parts.push(`From ${paidFrom}`);
     else if (paidTo) parts.push(`Until ${paidTo}`);
@@ -418,6 +436,12 @@ function NewExportModal({
         if (toIso) body.paidTo = toIso;
         if (dataset === "gateways" && gatewayKey.trim()) body.gatewayKey = gatewayKey.trim();
         if (status.trim()) body.status = status.trim();
+        // Sent only where it is honoured. The server refuses it on the other
+        // datasets rather than dropping it, so sending it anywhere else would
+        // turn an ignored control into a failed export.
+        if (dataset === "orders" && (settlement === "settled" || settlement === "unsettled")) {
+          body.settlement = settlement;
+        }
       }
 
       if (delivery === "recipients") {
@@ -451,7 +475,10 @@ function NewExportModal({
         className="flex max-h-[90vh] w-full max-w-[800px] flex-col rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface)]"
       >
         <header className="flex h-16 shrink-0 items-center justify-between border-b border-[var(--admin-border)] px-6">
-          <h2 id={titleId} className="text-2xl font-semibold tracking-tight text-[var(--admin-on-surface)]">
+          <h2
+            id={titleId}
+            className="text-2xl font-semibold tracking-tight text-[var(--admin-on-surface)]"
+          >
             New export
           </h2>
           <button
@@ -473,7 +500,9 @@ function NewExportModal({
                   <button
                     key={option.value}
                     type="button"
-                    onClick={() => setDataset(option.value)}
+                    onClick={() => {
+                      setDataset(option.value);
+                    }}
                     className={`rounded-sm border px-4 py-2 text-sm font-medium transition-colors ${
                       dataset === option.value
                         ? "border-[var(--admin-primary)] bg-[color-mix(in_srgb,var(--admin-primary)_12%,var(--admin-surface))] text-[var(--admin-primary)]"
@@ -493,7 +522,9 @@ function NewExportModal({
               <button
                 type="button"
                 className="text-sm text-[var(--admin-primary)] hover:underline"
-                onClick={() => setSelected(new Set(columns.map((column) => column.key)))}
+                onClick={() => {
+                  setSelected(new Set(columns.map((column) => column.key)));
+                }}
               >
                 Select all
               </button>
@@ -509,12 +540,17 @@ function NewExportModal({
             ) : null}
             <div className="grid grid-cols-1 gap-x-8 gap-y-3 rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface-low)] p-4 sm:grid-cols-2">
               {columns.map((column) => (
-                <label key={column.key} className="group flex cursor-pointer items-start justify-between gap-3">
+                <label
+                  key={column.key}
+                  className="group flex cursor-pointer items-start justify-between gap-3"
+                >
                   <span className="flex items-center gap-3">
                     <input
                       type="checkbox"
                       checked={selected.has(column.key)}
-                      onChange={() => toggleColumn(column.key)}
+                      onChange={() => {
+                        toggleColumn(column.key);
+                      }}
                       className="h-4 w-4 rounded-sm border-[var(--admin-outline)] text-[var(--admin-primary)] focus:ring-[var(--admin-primary)]"
                     />
                     <span className="text-sm text-[var(--admin-on-surface)] group-hover:text-[var(--admin-primary)]">
@@ -556,26 +592,43 @@ function NewExportModal({
               <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <label className="flex flex-col gap-2">
                   <span className="text-[12px] font-semibold tracking-[0.06em] text-[var(--admin-on-surface-variant)] uppercase">
-                    Paid from
+                    {dataset === "orders" ? "Created from" : "Paid from"}
                   </span>
                   <input
                     type="date"
                     value={paidFrom}
-                    onChange={(event) => setPaidFrom(event.target.value)}
+                    onChange={(event) => {
+                      setPaidFrom(event.target.value);
+                    }}
                     className="h-10 rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-3 font-mono text-[13px] text-[var(--admin-on-surface)] outline-none focus:border-[var(--admin-primary)]"
                   />
                 </label>
                 <label className="flex flex-col gap-2">
                   <span className="text-[12px] font-semibold tracking-[0.06em] text-[var(--admin-on-surface-variant)] uppercase">
-                    Paid to
+                    {dataset === "orders" ? "Created to" : "Paid to"}
                   </span>
                   <input
                     type="date"
                     value={paidTo}
-                    onChange={(event) => setPaidTo(event.target.value)}
+                    onChange={(event) => {
+                      setPaidTo(event.target.value);
+                    }}
                     className="h-10 rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-3 font-mono text-[13px] text-[var(--admin-on-surface)] outline-none focus:border-[var(--admin-primary)]"
                   />
                 </label>
+                {dataset === "orders" ? (
+                  <label className="flex flex-col gap-2 sm:col-span-2">
+                    <span className="text-[12px] font-semibold tracking-[0.06em] text-[var(--admin-on-surface-variant)] uppercase">
+                      Settlement (optional)
+                    </span>
+                    <Select
+                      value={settlement}
+                      onValueChange={setSettlement}
+                      options={SETTLEMENT_OPTIONS}
+                      className={selectTriggerClassName}
+                    />
+                  </label>
+                ) : null}
                 {dataset === "gateways" ? (
                   <label className="flex flex-col gap-2 sm:col-span-2">
                     <span className="text-[12px] font-semibold tracking-[0.06em] text-[var(--admin-on-surface-variant)] uppercase">
@@ -586,7 +639,10 @@ function NewExportModal({
                       onValueChange={setGatewayKey}
                       disabled={gatewaysLoading}
                       options={[
-                        { value: "", label: gatewaysLoading ? "Loading gateways…" : "Select gateway" },
+                        {
+                          value: "",
+                          label: gatewaysLoading ? "Loading gateways…" : "Select gateway",
+                        },
                         ...gateways.map((gateway) => ({
                           value: gateway.gatewayKey,
                           label: gateway.displayName,
@@ -612,7 +668,9 @@ function NewExportModal({
           </section>
 
           <section>
-            <h3 className="mb-4 text-base font-semibold text-[var(--admin-on-surface)]">Grouping</h3>
+            <h3 className="mb-4 text-base font-semibold text-[var(--admin-on-surface)]">
+              Grouping
+            </h3>
             <div className="space-y-3 rounded-sm border border-[var(--admin-border)] p-4">
               <label className="flex flex-col gap-2">
                 <span className="text-[12px] font-semibold tracking-[0.06em] text-[var(--admin-on-surface-variant)] uppercase">
@@ -620,7 +678,9 @@ function NewExportModal({
                 </span>
                 <Select
                   value={grouping}
-                  onValueChange={(value) => setGrouping(value as PaymentExportGrouping)}
+                  onValueChange={(value) => {
+                    setGrouping(value as PaymentExportGrouping);
+                  }}
                   options={GROUPING_OPTIONS}
                   className={selectTriggerClassName}
                 />
@@ -629,10 +689,14 @@ function NewExportModal({
                 <input
                   type="checkbox"
                   checked={includeSubtotals}
-                  onChange={(event) => setIncludeSubtotals(event.target.checked)}
+                  onChange={(event) => {
+                    setIncludeSubtotals(event.target.checked);
+                  }}
                   className="h-4 w-4 rounded-sm border-[var(--admin-outline)] text-[var(--admin-primary)] focus:ring-[var(--admin-primary)]"
                 />
-                <span className="text-sm text-[var(--admin-on-surface)]">Include per-group subtotals</span>
+                <span className="text-sm text-[var(--admin-on-surface)]">
+                  Include per-group subtotals
+                </span>
               </label>
             </div>
           </section>
@@ -644,7 +708,9 @@ function NewExportModal({
                 <button
                   key={value}
                   type="button"
-                  onClick={() => setFormat(value)}
+                  onClick={() => {
+                    setFormat(value);
+                  }}
                   className={`rounded-sm px-6 py-2 text-[12px] font-semibold tracking-[0.06em] uppercase transition-all ${
                     format === value
                       ? "bg-[var(--admin-surface)] text-[var(--admin-primary)] shadow-sm"
@@ -658,7 +724,9 @@ function NewExportModal({
           </section>
 
           <section>
-            <h3 className="mb-4 text-base font-semibold text-[var(--admin-on-surface)]">Delivery</h3>
+            <h3 className="mb-4 text-base font-semibold text-[var(--admin-on-surface)]">
+              Delivery
+            </h3>
             <div className="space-y-3">
               {(
                 [
@@ -672,7 +740,9 @@ function NewExportModal({
                     type="radio"
                     name="delivery"
                     checked={delivery === value}
-                    onChange={() => setDelivery(value)}
+                    onChange={() => {
+                      setDelivery(value);
+                    }}
                     className="h-4 w-4 border-[var(--admin-outline)] text-[var(--admin-primary)] focus:ring-[var(--admin-primary)]"
                   />
                   <span className="text-sm text-[var(--admin-on-surface)]">{label}</span>
@@ -694,9 +764,9 @@ function NewExportModal({
                           <button
                             type="button"
                             className="ml-2 text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-danger)]"
-                            onClick={() =>
-                              setRecipients((current) => current.filter((item) => item !== email))
-                            }
+                            onClick={() => {
+                              setRecipients((current) => current.filter((item) => item !== email));
+                            }}
                           >
                             <X className="h-3.5 w-3.5" aria-hidden="true" />
                           </button>
@@ -704,7 +774,9 @@ function NewExportModal({
                       ))}
                       <input
                         value={recipientInput}
-                        onChange={(event) => setRecipientInput(event.target.value)}
+                        onChange={(event) => {
+                          setRecipientInput(event.target.value);
+                        }}
                         onKeyDown={(event) => {
                           if (event.key === "Enter") {
                             event.preventDefault();
@@ -723,7 +795,9 @@ function NewExportModal({
                     </label>
                     <input
                       value={webhookUrl}
-                      onChange={(event) => setWebhookUrl(event.target.value)}
+                      onChange={(event) => {
+                        setWebhookUrl(event.target.value);
+                      }}
                       placeholder="https://"
                       className="h-10 w-full rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-3 font-mono text-[13px] text-[var(--admin-on-surface)] outline-none focus:border-[var(--admin-primary)]"
                     />
@@ -756,7 +830,9 @@ function NewExportModal({
                     </span>
                     <Select
                       value={cadence}
-                      onValueChange={(value) => setCadence(value as PaymentExportCadence)}
+                      onValueChange={(value) => {
+                        setCadence(value as PaymentExportCadence);
+                      }}
                       options={[
                         { value: "daily", label: "Daily" },
                         { value: "weekly", label: "Weekly" },
@@ -772,7 +848,9 @@ function NewExportModal({
                     <input
                       type="time"
                       value={time}
-                      onChange={(event) => setTime(event.target.value)}
+                      onChange={(event) => {
+                        setTime(event.target.value);
+                      }}
                       className="h-10 rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-3 font-mono text-[13px] text-[var(--admin-on-surface)] outline-none focus:border-[var(--admin-primary)]"
                     />
                   </label>
@@ -799,7 +877,10 @@ function NewExportModal({
           ) : null}
 
           <div className="flex items-start gap-2 rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-4 py-3 text-sm text-[var(--admin-on-surface-variant)]">
-            <Info className="mt-0.5 h-4 w-4 shrink-0 text-[var(--admin-primary)]" aria-hidden="true" />
+            <Info
+              className="mt-0.5 h-4 w-4 shrink-0 text-[var(--admin-primary)]"
+              aria-hidden="true"
+            />
             <span>{capabilities.note}</span>
           </div>
 
@@ -924,7 +1005,9 @@ export function AdminPaymentsExportsPage() {
         }
       })();
     }, 2000);
-    return () => window.clearInterval(timer);
+    return () => {
+      window.clearInterval(timer);
+    };
   }, [buildingIds]);
 
   function openNewExport(schedulePreset: boolean) {
@@ -1053,7 +1136,9 @@ export function AdminPaymentsExportsPage() {
           </button>
           <button
             type="button"
-            onClick={() => openNewExport(false)}
+            onClick={() => {
+              openNewExport(false);
+            }}
             className={`${primaryButtonClassName} h-10 gap-2`}
           >
             <Plus className="h-4 w-4" aria-hidden="true" />
@@ -1076,7 +1161,9 @@ export function AdminPaymentsExportsPage() {
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
         <section className="flex flex-col overflow-hidden rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface)] lg:col-span-8">
           <div className="border-b border-[var(--admin-border)] bg-[var(--admin-surface-low)] p-4">
-            <h2 className="text-base font-semibold text-[var(--admin-on-surface)]">Export history</h2>
+            <h2 className="text-base font-semibold text-[var(--admin-on-surface)]">
+              Export history
+            </h2>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full border-collapse text-left">
@@ -1194,7 +1281,9 @@ export function AdminPaymentsExportsPage() {
                               ) : failed ? (
                                 <button
                                   type="button"
-                                  onClick={() => setFailureItem(item)}
+                                  onClick={() => {
+                                    setFailureItem(item);
+                                  }}
                                   className="inline-flex h-6 items-center rounded-sm bg-[color-mix(in_srgb,var(--admin-danger)_12%,var(--admin-surface))] px-2 text-xs font-medium text-[var(--admin-danger)]"
                                 >
                                   Failed
@@ -1243,7 +1332,9 @@ export function AdminPaymentsExportsPage() {
         </section>
 
         <section className="flex flex-col gap-4 lg:col-span-4">
-          <h2 className="text-base font-semibold text-[var(--admin-on-surface)]">Scheduled exports</h2>
+          <h2 className="text-base font-semibold text-[var(--admin-on-surface)]">
+            Scheduled exports
+          </h2>
           {payload.schedules.map((schedule) => (
             <div
               key={schedule.id}
@@ -1252,7 +1343,10 @@ export function AdminPaymentsExportsPage() {
               }`}
             >
               {schedule.isActive ? (
-                <div className="absolute top-0 bottom-0 left-0 w-1 bg-[var(--admin-primary)]" aria-hidden="true" />
+                <div
+                  className="absolute top-0 bottom-0 left-0 w-1 bg-[var(--admin-primary)]"
+                  aria-hidden="true"
+                />
               ) : null}
               <div className="mb-3 flex items-start justify-between gap-3 pl-2">
                 <div className="min-w-0">
@@ -1330,7 +1424,9 @@ export function AdminPaymentsExportsPage() {
 
           <button
             type="button"
-            onClick={() => openNewExport(true)}
+            onClick={() => {
+              openNewExport(true);
+            }}
             className="flex min-h-[120px] flex-col items-center justify-center gap-2 rounded-sm border border-dashed border-[var(--admin-outline)] bg-[var(--admin-surface-low)] p-6 text-[var(--admin-on-surface-variant)] transition-colors hover:border-[var(--admin-primary)] hover:text-[var(--admin-primary)]"
           >
             <Plus className="h-5 w-5" aria-hidden="true" />
@@ -1346,7 +1442,9 @@ export function AdminPaymentsExportsPage() {
         gateways={gateways}
         gatewaysLoading={gatewaysLoading}
         initialScheduleEnabled={modalSchedulePreset}
-        onClose={() => setModalOpen(false)}
+        onClose={() => {
+          setModalOpen(false);
+        }}
         onCreated={(run, schedule) => {
           statusRef.current.set(run.id, run.status);
           setPayload((current) =>
@@ -1366,7 +1464,9 @@ export function AdminPaymentsExportsPage() {
         <FailureDrawer
           item={failureItem}
           busy={busyId === failureItem.id}
-          onClose={() => setFailureItem(null)}
+          onClose={() => {
+            setFailureItem(null);
+          }}
           onRetry={() => void onRetry(failureItem)}
         />
       ) : null}
@@ -1387,7 +1487,9 @@ export function AdminPaymentsExportsPage() {
           <button
             type="button"
             aria-label="Dismiss"
-            onClick={() => setToastRun(null)}
+            onClick={() => {
+              setToastRun(null);
+            }}
             className="text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-on-surface)]"
           >
             <X className="h-4 w-4" aria-hidden="true" />

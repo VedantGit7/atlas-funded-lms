@@ -85,8 +85,7 @@ export function ProgressStatCards({
         {levelProgress ? (
           <>
             <p className="text-3xl font-semibold leading-none tracking-tight text-primary tabular-nums">
-              Lv.{" "}
-              <CountUp value={levelProgress.levelNumber} />
+              Lv. <CountUp value={levelProgress.levelNumber} />
             </p>
             <div
               className="mt-4 h-3 w-full overflow-hidden rounded-full bg-muted"

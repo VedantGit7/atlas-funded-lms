@@ -7,7 +7,9 @@
     "./http/errors": "./src/http/errors.ts",
     "./http/headers": "./src/http/headers.ts",
     "./id/uuid-v7": "./src/id/uuid-v7.ts",
-    "./request/request-id": "./src/request/request-id.ts"
+    "./request/request-id": "./src/request/request-id.ts",
+    "./csv/escape": "./src/csv/escape.ts",
+    "./actor/system-actor": "./src/actor/system-actor.ts"
   },
   "dependencies": {
     "uuid": "^14.0.0"

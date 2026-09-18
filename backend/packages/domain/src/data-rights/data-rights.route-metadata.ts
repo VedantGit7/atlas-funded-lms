@@ -34,6 +34,10 @@ export const createExportMetadata = {
   permission: "data.export.run",
   entitlement: "data.export.enable",
   audit: "required",
+  // H5 applies to *initiating* an export — the action that assembles a subject
+  // access package. Listing job metadata is a read and stays reachable without
+  // a step-up, so an operator can see what is running.
+  mfa: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",
   resourceLoader: async ({ ctx }: { ctx: LoaderCtx }) => loadExportCatalogResourceRef({ ctx }),
@@ -79,6 +83,12 @@ export const listDeletionRequestsMetadata = {
 
 export const createDeletionRequestMetadata = {
   permission: "data.deletion.request",
+  // The handler already writes DATA_DELETION_REQUESTED_AUDIT; this said "none",
+  // so the declared contract and the behaviour disagreed. The declaration is what
+  // release evidence and the audit-obligation tooling read, and a subject-erasure
+  // request -- which may name another membership as its target -- is exactly the
+  // action whose trail must be discoverable from the contract, not only from the
+  // code.
   audit: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",
@@ -101,7 +111,7 @@ export const getMyDeletionRequestStatusMetadata = {
       tx,
       tenantId: ctx.tenantId,
       actorMembershipId: ctx.actorMembershipId,
-      input: (input ?? {}) as { targetMembershipId?: string },
+      input: input ?? {},
     }),
 } satisfies RouteMetadata;
 

@@ -10,8 +10,22 @@ export type AtlasErrorCode =
   | "INVALID_INVITATION"
   | "INVITATION_EMAIL_MISMATCH"
   | "PERMISSION_DENIED"
+  // 403, but distinct from PERMISSION_DENIED: the caller has the permission and
+  // is missing a second factor, so the client can offer enrolment instead of a
+  // dead-end "you do not have access". Same reasoning as RATE_LIMITED below
+  // (audit finding H5).
+  | "MFA_REQUIRED"
   | "PAYMENT_REQUIRED"
   | "VALIDATION_ERROR"
+  // 429. Distinct from INTERNAL_ERROR so clients can back off instead of
+  // treating a throttle as a server fault (audit finding L4).
+  | "RATE_LIMITED"
+  // 409. Distinct because the two idempotency conflicts need opposite client
+  // responses: an in-flight duplicate should be retried with the same key,
+  // while a key reused for a different request must never be retried at all.
+  // Collapsing both into VALIDATION_ERROR would leave the client guessing
+  // (audit finding M10).
+  | "IDEMPOTENCY_CONFLICT"
   | "INTERNAL_ERROR";
 
 export class AtlasHttpError extends Error {

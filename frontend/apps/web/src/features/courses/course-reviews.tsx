@@ -27,7 +27,11 @@ type SubmitResponse = { data: { id: string; created: boolean } };
 
 function formatDate(iso: string): string {
   try {
-    return new Date(iso).toLocaleDateString(undefined, { day: "2-digit", month: "short", year: "numeric" });
+    return new Date(iso).toLocaleDateString(undefined, {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
   } catch {
     return "";
   }
@@ -73,7 +77,12 @@ export function CourseReviews({ courseId, canReview }: { courseId: string; canRe
         setComment(res.data.myReview.comment ?? "");
       }
     } catch {
-      setState({ items: [], aggregate: { average: null, count: 0 }, myReview: null, pageInfo: { nextCursor: null, hasNextPage: false } });
+      setState({
+        items: [],
+        aggregate: { average: null, count: 0 },
+        myReview: null,
+        pageInfo: { nextCursor: null, hasNextPage: false },
+      });
     } finally {
       setLoading(false);
     }
@@ -141,7 +150,11 @@ export function CourseReviews({ courseId, canReview }: { courseId: string; canRe
               <p className="text-sm font-bold text-foreground">
                 {state?.myReview ? "Update your review" : "Write a review"}
               </p>
-              <div className="mt-3 flex items-center gap-1" role="radiogroup" aria-label="Your rating">
+              <div
+                className="mt-3 flex items-center gap-1"
+                role="radiogroup"
+                aria-label="Your rating"
+              >
                 {[1, 2, 3, 4, 5].map((n) => (
                   <button
                     key={n}
@@ -185,7 +198,9 @@ export function CourseReviews({ courseId, canReview }: { courseId: string; canRe
                   disabled={rating < 1 || submitting}
                   className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50 motion-safe:active:scale-95"
                 >
-                  {submitting ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : null}
+                  {submitting ? (
+                    <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                  ) : null}
                   {state?.myReview ? "Update review" : "Submit review"}
                 </button>
               </div>
@@ -210,17 +225,23 @@ export function CourseReviews({ courseId, canReview }: { courseId: string; canRe
                         <div className="flex items-center gap-2">
                           <span className="truncate text-sm font-bold text-foreground">{name}</span>
                           {review.mine ? (
-                            <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold text-primary">You</span>
+                            <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold text-primary">
+                              You
+                            </span>
                           ) : null}
                         </div>
                         <div className="flex items-center gap-2">
                           <Stars value={review.rating} />
-                          <span className="text-xs text-muted-foreground">{formatDate(review.createdAt)}</span>
+                          <span className="text-xs text-muted-foreground">
+                            {formatDate(review.createdAt)}
+                          </span>
                         </div>
                       </div>
                     </div>
                     {review.comment ? (
-                      <p className="mt-3 text-sm leading-relaxed text-foreground/90">{review.comment}</p>
+                      <p className="mt-3 text-sm leading-relaxed text-foreground/90">
+                        {review.comment}
+                      </p>
                     ) : null}
                   </li>
                 );

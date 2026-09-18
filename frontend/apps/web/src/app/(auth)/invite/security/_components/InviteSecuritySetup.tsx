@@ -6,7 +6,8 @@ import { resolveSafeRedirectPath } from "@/lib/auth/safe-redirect";
 const cardClass =
   "w-full rounded-[16px] border-[1.5px] border-[var(--fba-bdr)] bg-[var(--fba-surf)] p-7 shadow-[0_24px_60px_rgba(0,0,0,0.12)]";
 
-const headlineClass = "text-[24px] font-bold leading-[1.25] tracking-[-0.01em] text-[var(--fba-tx)]";
+const headlineClass =
+  "text-[24px] font-bold leading-[1.25] tracking-[-0.01em] text-[var(--fba-tx)]";
 
 const bodyClass = "text-[14px] leading-[1.6] text-[var(--fba-tx2)]";
 

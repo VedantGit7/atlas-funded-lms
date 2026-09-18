@@ -3,6 +3,7 @@ import { AtlasHttpError } from "@atlas/core/http/errors";
 import type { ServiceCtx } from "../shared/domain.types";
 import {
   SM_AFFILIATE_EXPORT_COLUMNS,
+  SM_ATTRIBUTION_EXPORT_COLUMNS,
   SM_AFFILIATE_PRODUCT_EXPORT_COLUMNS,
   SM_COUPON_EXPORT_COLUMNS,
   SM_EXPORT_DATASETS,
@@ -47,6 +48,7 @@ function estimateSizeLabel(rowCount: number | null, format: string): string | nu
 
 function datasetLabel(dataset: SmExportDataset): string {
   if (dataset === "coupons") return "Coupons";
+  if (dataset === "attribution") return "Attribution events";
   if (dataset === "referral-wallet") return "Referral & wallet";
   if (dataset === "affiliate-products") return "Affiliate products";
   if (dataset === "affiliates") return "Affiliates";
@@ -71,15 +73,17 @@ function fileNameFor(dataset: SmExportDataset, createdAt: string, format: string
   const date = new Date(createdAt);
   const stamp = Number.isNaN(date.getTime()) ? "export" : date.toISOString().slice(0, 10);
   const slug =
-    dataset === "coupons"
-      ? "coupons"
-      : dataset === "referral-wallet"
-        ? "referrals"
-        : dataset === "affiliate-products"
-          ? "affiliate-products"
-          : dataset === "affiliates"
-            ? "affiliates"
-            : "sales";
+    dataset === "attribution"
+      ? "attribution-events"
+      : dataset === "coupons"
+        ? "coupons"
+        : dataset === "referral-wallet"
+          ? "referrals"
+          : dataset === "affiliate-products"
+            ? "affiliate-products"
+            : dataset === "affiliates"
+              ? "affiliates"
+              : "sales";
   return `${slug}-${stamp}.${format === "json" ? "json" : format}`;
 }
 
@@ -106,6 +110,12 @@ function scopeLabelFromParams(params: Record<string, unknown>): string {
   }
   if (typeof params["couponId"] === "string" && params["couponId"].trim()) {
     parts.push("1 coupon");
+  }
+  // A presence narrowing changes the row count dramatically, so a history entry
+  // that does not name it describes a file nobody can reproduce.
+  const attribution = params["attribution"];
+  if (attribution === "attributed" || attribution === "none") {
+    parts.push(attribution === "attributed" ? "With UTM" : "No UTM");
   }
   const from = formatDateShort(
     typeof params["purchasedFrom"] === "string" ? params["purchasedFrom"] : undefined,
@@ -190,15 +200,17 @@ function requesterLabel(
 
 function allowedKeysFor(dataset: SmExportDataset): Set<string> {
   const catalog =
-    dataset === "coupons"
-      ? SM_COUPON_EXPORT_COLUMNS
-      : dataset === "referral-wallet"
-        ? SM_REFERRAL_EXPORT_COLUMNS
-        : dataset === "affiliate-products"
-          ? SM_AFFILIATE_PRODUCT_EXPORT_COLUMNS
-          : dataset === "affiliates"
-            ? SM_AFFILIATE_EXPORT_COLUMNS
-            : SM_SALES_EXPORT_COLUMNS;
+    dataset === "attribution"
+      ? SM_ATTRIBUTION_EXPORT_COLUMNS
+      : dataset === "coupons"
+        ? SM_COUPON_EXPORT_COLUMNS
+        : dataset === "referral-wallet"
+          ? SM_REFERRAL_EXPORT_COLUMNS
+          : dataset === "affiliate-products"
+            ? SM_AFFILIATE_PRODUCT_EXPORT_COLUMNS
+            : dataset === "affiliates"
+              ? SM_AFFILIATE_EXPORT_COLUMNS
+              : SM_SALES_EXPORT_COLUMNS;
   return new Set(catalog.map((column) => column.key));
 }
 
@@ -319,6 +331,7 @@ function buildRunParams(body: CreateSalesMarketingExportBody): Record<string, un
   if (body.learnerName?.trim()) params["learnerName"] = body.learnerName.trim();
   if (body.email?.trim()) params["email"] = body.email.trim();
   if (body.q?.trim()) params["q"] = body.q.trim();
+  if (body.attribution) params["attribution"] = body.attribution;
   if (body.filterSummary?.trim()) params["filterSummary"] = body.filterSummary.trim();
   if (body.delivery === "email_me") {
     params["emailDownloadLink"] = true;
@@ -391,6 +404,7 @@ export async function getSalesMarketingExports(tx: TenantTx, ctx: ServiceCtx) {
           ...column,
         })),
         affiliates: SM_AFFILIATE_EXPORT_COLUMNS.map((column) => ({ ...column })),
+        attribution: SM_ATTRIBUTION_EXPORT_COLUMNS.map((column) => ({ ...column })),
       },
       capabilities: {
         formats: ["csv", "xlsx", "json"],
@@ -417,6 +431,16 @@ export async function createSalesMarketingExport(
       code: "VALIDATION_ERROR",
       status: 400,
       message: "Add at least one recipient email for recipient delivery.",
+    });
+  }
+
+  // Silently dropping a filter produces a file that looks like the filtered
+  // one and is not, which is worse than refusing the request.
+  if (body.attribution && body.dataset !== "attribution") {
+    throw new AtlasHttpError({
+      code: "VALIDATION_ERROR",
+      status: 400,
+      message: "Attribution filtering applies to the attribution dataset only.",
     });
   }
 

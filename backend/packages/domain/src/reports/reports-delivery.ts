@@ -1,4 +1,5 @@
 import { createHmac } from "node:crypto";
+import { safeOutboundFetch } from "@atlas/security/safe-outbound-fetch";
 import type { TenantTx } from "@atlas/db";
 import { assertTenantKeyPrefix, getStorageProvider, parseStorageEnv } from "@atlas/storage";
 import { getReportRun, listReportSchedules } from "./reports.service";
@@ -282,7 +283,10 @@ export async function deliverSucceededReportRun(
       headers["x-atlas-signature-alg"] = "hmac-sha256";
     }
 
-    const response = await fetch(webhookUrl, {
+    // Tenant-configured destination URL: SSRF-guarded. Note the payload carries
+    // a signed report download URL, so an unguarded fetch could hand tenant data
+    // to an attacker-chosen endpoint.
+    const response = await safeOutboundFetch(webhookUrl, {
       method: "POST",
       headers,
       body,

@@ -9,7 +9,11 @@ import {
   dropdownItemClassName,
   slugifyCategoryLabel,
 } from "./admin-form-dropdown-shared";
-import { dropdownLabelClassName, fieldClassName, primaryButtonClassName } from "./create-course-dialog-shared";
+import {
+  dropdownLabelClassName,
+  fieldClassName,
+  primaryButtonClassName,
+} from "./create-course-dialog-shared";
 
 export type CategoryOption = {
   value: string;
@@ -104,100 +108,103 @@ export function CreateCourseCategoryPicker({
         });
       }}
       triggerContent={
-        <span className={selected ? "text-[var(--admin-on-surface)]" : "text-[var(--admin-on-surface-variant)]"}>
+        <span
+          className={
+            selected ? "text-[var(--admin-on-surface)]" : "text-[var(--admin-on-surface-variant)]"
+          }
+        >
           {selected?.label ?? "Select option"}
         </span>
       }
     >
-        {mode === "list" ? (
-          <>
-            <div className="min-h-0 flex-1 overflow-y-auto p-1.5">
-              {sortedCategories.map((option) => {
-                const active = option.value === value;
-                return (
-                  <button
-                    key={option.value}
-                    type="button"
-                    role="option"
-                    aria-selected={active}
-                    onClick={() => {
-                      handleSelect(option.value);
-                    }}
-                    className={[
-                      dropdownItemClassName,
-                      active ? "bg-[var(--admin-surface-high)] font-medium" : "",
-                    ].join(" ")}
-                  >
-                    <span className="min-w-0 flex-1 truncate">{option.label}</span>
-                    {active ? (
-                      <Check className="h-4 w-4 shrink-0 text-[var(--admin-on-surface-variant)]" aria-hidden="true" />
-                    ) : (
-                      <span className="h-4 w-4 shrink-0" aria-hidden="true" />
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-            <div className={dropdownFooterClassName}>
-              <button
-                type="button"
-                onClick={handleClear}
-                className={dropdownFooterButtonClassName}
-              >
-                Clear
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setMode("create");
-                  setNewCategoryName("");
-                }}
-                className={`${dropdownFooterButtonClassName} inline-flex items-center gap-1`}
-              >
-                <Plus className="h-4 w-4" aria-hidden="true" />
-                Create New
-              </button>
-            </div>
-          </>
-        ) : (
-          <div className="flex items-center gap-2 p-2">
+      {mode === "list" ? (
+        <>
+          <div className="min-h-0 flex-1 overflow-y-auto p-1.5">
+            {sortedCategories.map((option) => {
+              const active = option.value === value;
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  role="option"
+                  aria-selected={active}
+                  onClick={() => {
+                    handleSelect(option.value);
+                  }}
+                  className={[
+                    dropdownItemClassName,
+                    active ? "bg-[var(--admin-surface-high)] font-medium" : "",
+                  ].join(" ")}
+                >
+                  <span className="min-w-0 flex-1 truncate">{option.label}</span>
+                  {active ? (
+                    <Check
+                      className="h-4 w-4 shrink-0 text-[var(--admin-on-surface-variant)]"
+                      aria-hidden="true"
+                    />
+                  ) : (
+                    <span className="h-4 w-4 shrink-0" aria-hidden="true" />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+          <div className={dropdownFooterClassName}>
+            <button type="button" onClick={handleClear} className={dropdownFooterButtonClassName}>
+              Clear
+            </button>
             <button
               type="button"
-              aria-label="Back to category list"
               onClick={() => {
-                setMode("list");
+                setMode("create");
                 setNewCategoryName("");
               }}
-              className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-[var(--admin-on-surface-variant)] transition-colors hover:bg-[var(--admin-surface-high)] hover:text-[var(--admin-on-surface)]"
+              className={`${dropdownFooterButtonClassName} inline-flex items-center gap-1`}
             >
-              <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-            </button>
-            <input
-              type="text"
-              value={newCategoryName}
-              onChange={(event) => {
-                setNewCategoryName(event.target.value);
-              }}
-              onKeyDown={(event) => {
-                if (event.key === "Enter") {
-                  event.preventDefault();
-                  handleCreateCategory();
-                }
-              }}
-              placeholder="Enter…"
-              className={`${fieldClassName} min-w-0 flex-1 rounded-xl py-2`}
-              autoFocus
-            />
-            <button
-              type="button"
-              disabled={newCategoryName.trim().length === 0}
-              onClick={handleCreateCategory}
-              className={`${primaryButtonClassName} rounded-xl px-4 py-2`}
-            >
-              Create
+              <Plus className="h-4 w-4" aria-hidden="true" />
+              Create New
             </button>
           </div>
-        )}
+        </>
+      ) : (
+        <div className="flex items-center gap-2 p-2">
+          <button
+            type="button"
+            aria-label="Back to category list"
+            onClick={() => {
+              setMode("list");
+              setNewCategoryName("");
+            }}
+            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-[var(--admin-on-surface-variant)] transition-colors hover:bg-[var(--admin-surface-high)] hover:text-[var(--admin-on-surface)]"
+          >
+            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+          </button>
+          <input
+            type="text"
+            value={newCategoryName}
+            onChange={(event) => {
+              setNewCategoryName(event.target.value);
+            }}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                event.preventDefault();
+                handleCreateCategory();
+              }
+            }}
+            placeholder="Enter…"
+            className={`${fieldClassName} min-w-0 flex-1 rounded-xl py-2`}
+            autoFocus
+          />
+          <button
+            type="button"
+            disabled={newCategoryName.trim().length === 0}
+            onClick={handleCreateCategory}
+            className={`${primaryButtonClassName} rounded-xl px-4 py-2`}
+          >
+            Create
+          </button>
+        </div>
+      )}
     </DropdownField>
   );
 }

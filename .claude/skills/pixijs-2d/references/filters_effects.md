@@ -22,18 +22,15 @@ Comprehensive guide to using and creating visual effects with PixiJS filters and
 Filters are WebGL/WebGPU shader programs applied to display objects after rendering.
 
 ```javascript
-import { BlurFilter, Sprite } from 'pixi.js';
+import { BlurFilter, Sprite } from "pixi.js";
 
-const sprite = Sprite.from('image.png');
+const sprite = Sprite.from("image.png");
 
 // Single filter
 sprite.filters = [new BlurFilter()];
 
 // Multiple filters (applied in order)
-sprite.filters = [
-  new BlurFilter({ strength: 4 }),
-  new ColorMatrixFilter()
-];
+sprite.filters = [new BlurFilter({ strength: 4 }), new ColorMatrixFilter()];
 
 // Remove filters
 sprite.filters = null;
@@ -42,7 +39,7 @@ sprite.filters = null;
 ### Filter Area Optimization
 
 ```javascript
-import { Rectangle } from 'pixi.js';
+import { Rectangle } from "pixi.js";
 
 // Specify filter bounds for performance
 sprite.filterArea = new Rectangle(0, 0, sprite.width, sprite.height);
@@ -53,7 +50,7 @@ sprite.filterArea = new Rectangle(0, 0, sprite.width, sprite.height);
 ### Filter on Containers
 
 ```javascript
-import { Container } from 'pixi.js';
+import { Container } from "pixi.js";
 
 const container = new Container();
 container.addChild(sprite1, sprite2, sprite3);
@@ -71,23 +68,24 @@ container.filters = [new BlurFilter()];
 Gaussian blur effect for depth of field, motion blur, or soft focus.
 
 ```javascript
-import { BlurFilter } from 'pixi.js';
+import { BlurFilter } from "pixi.js";
 
 const blur = new BlurFilter({
-  strength: 8,      // Blur radius (default: 8)
-  quality: 4,       // Number of passes (1-5, default: 4)
-  kernelSize: 5     // Sample size: 5, 7, 9, 11, 13, 15 (default: 5)
+  strength: 8, // Blur radius (default: 8)
+  quality: 4, // Number of passes (1-5, default: 4)
+  kernelSize: 5, // Sample size: 5, 7, 9, 11, 13, 15 (default: 5)
 });
 
 sprite.filters = [blur];
 
 // Adjust blur dynamically
 app.ticker.add(() => {
-  blur.blur = 5 + Math.sin(Date.now() * 0.001) * 5;  // Pulsing blur
+  blur.blur = 5 + Math.sin(Date.now() * 0.001) * 5; // Pulsing blur
 });
 ```
 
 **Use Cases**:
+
 - Depth of field effects
 - Focus/unfocus transitions
 - Motion blur
@@ -102,12 +100,12 @@ app.ticker.add(() => {
 Transform colors using matrix multiplication. Includes preset effects.
 
 ```javascript
-import { ColorMatrixFilter } from 'pixi.js';
+import { ColorMatrixFilter } from "pixi.js";
 
 const colorMatrix = new ColorMatrixFilter();
 
 // Grayscale
-colorMatrix.greyscale(0.5);  // 0 = color, 1 = full grayscale
+colorMatrix.greyscale(0.5); // 0 = color, 1 = full grayscale
 
 // Sepia tone
 colorMatrix.sepia();
@@ -116,16 +114,16 @@ colorMatrix.sepia();
 colorMatrix.blackAndWhite();
 
 // Adjust contrast
-colorMatrix.contrast(1.5);  // >1 = more contrast
+colorMatrix.contrast(1.5); // >1 = more contrast
 
 // Adjust saturation
-colorMatrix.saturate(0.5);  // <1 = desaturate, >1 = supersaturate
+colorMatrix.saturate(0.5); // <1 = desaturate, >1 = supersaturate
 
 // Adjust brightness
-colorMatrix.brightness(1.2);  // >1 = brighter
+colorMatrix.brightness(1.2); // >1 = brighter
 
 // Hue rotation
-colorMatrix.hue(45);  // Rotate hue in degrees
+colorMatrix.hue(45); // Rotate hue in degrees
 
 // Negative (invert)
 colorMatrix.negative();
@@ -140,24 +138,43 @@ sprite.filters = [colorMatrix];
 ```
 
 **Chaining Effects**:
+
 ```javascript
 colorMatrix.greyscale(0.3).contrast(1.2).brightness(1.1);
 ```
 
 **Custom Color Matrix**:
+
 ```javascript
 // 5x4 color matrix [R, G, B, A, offset]
 const matrix = [
-  1, 0, 0, 0, 0,  // Red
-  0, 1, 0, 0, 0,  // Green
-  0, 0, 1, 0, 0,  // Blue
-  0, 0, 0, 1, 0   // Alpha
+  1,
+  0,
+  0,
+  0,
+  0, // Red
+  0,
+  1,
+  0,
+  0,
+  0, // Green
+  0,
+  0,
+  1,
+  0,
+  0, // Blue
+  0,
+  0,
+  0,
+  1,
+  0, // Alpha
 ];
 
 colorMatrix.matrix = matrix;
 ```
 
 **Use Cases**:
+
 - Photo filters (Instagram-style)
 - Color grading
 - Night vision effect
@@ -170,15 +187,15 @@ colorMatrix.matrix = matrix;
 Warp/distort pixels based on a displacement map texture.
 
 ```javascript
-import { DisplacementFilter, Sprite } from 'pixi.js';
+import { DisplacementFilter, Sprite } from "pixi.js";
 
 // Create displacement sprite (usually perlin noise or cloud texture)
-const displacementSprite = Sprite.from('displacement.jpg');
+const displacementSprite = Sprite.from("displacement.jpg");
 displacementSprite.texture.baseTexture.wrapMode = WRAP_MODES.REPEAT;
 
 const displacementFilter = new DisplacementFilter({
   sprite: displacementSprite,
-  scale: 50  // Displacement amount
+  scale: 50, // Displacement amount
 });
 
 sprite.filters = [displacementFilter];
@@ -192,10 +209,12 @@ app.ticker.add(() => {
 ```
 
 **Parameters**:
+
 - `sprite`: Displacement map (red channel = X offset, green channel = Y offset)
 - `scale`: Displacement intensity (default: 20)
 
 **Use Cases**:
+
 - Water ripple effects
 - Heat distortion
 - Portal effects
@@ -203,12 +222,13 @@ app.ticker.add(() => {
 - Flag waving
 
 **Creating Displacement Maps**:
+
 ```javascript
 // Generate noise texture
-const canvas = document.createElement('canvas');
+const canvas = document.createElement("canvas");
 canvas.width = 256;
 canvas.height = 256;
-const ctx = canvas.getContext('2d');
+const ctx = canvas.getContext("2d");
 
 // Draw perlin noise or clouds
 // ... (use simplex-noise library or draw manually)
@@ -224,12 +244,12 @@ const displacementSprite = new Sprite(displacementTexture);
 Flatten alpha across all children in a container.
 
 ```javascript
-import { AlphaFilter, Container } from 'pixi.js';
+import { AlphaFilter, Container } from "pixi.js";
 
 const container = new Container();
 container.addChild(sprite1, sprite2, sprite3);
 
-const alphaFilter = new AlphaFilter(0.5);  // 50% opacity
+const alphaFilter = new AlphaFilter(0.5); // 50% opacity
 container.filters = [alphaFilter];
 
 // Without filter: each sprite has individual alpha
@@ -237,6 +257,7 @@ container.filters = [alphaFilter];
 ```
 
 **Use Cases**:
+
 - Fade entire UI panel
 - Composite transparency
 - Layer blending
@@ -248,11 +269,11 @@ container.filters = [alphaFilter];
 Add random grain/noise for film grain or static effects.
 
 ```javascript
-import { NoiseFilter } from 'pixi.js';
+import { NoiseFilter } from "pixi.js";
 
 const noise = new NoiseFilter({
-  noise: 0.5,  // Amount (0-1, default: 0.5)
-  seed: Math.random()  // Random seed
+  noise: 0.5, // Amount (0-1, default: 0.5)
+  seed: Math.random(), // Random seed
 });
 
 sprite.filters = [noise];
@@ -264,6 +285,7 @@ app.ticker.add(() => {
 ```
 
 **Use Cases**:
+
 - Film grain
 - Old TV static
 - Analog distortion
@@ -276,13 +298,14 @@ app.ticker.add(() => {
 Fast approximate anti-aliasing for smooth edges.
 
 ```javascript
-import { FXAAFilter } from 'pixi.js';
+import { FXAAFilter } from "pixi.js";
 
 const fxaa = new FXAAFilter();
 sprite.filters = [fxaa];
 ```
 
 **Use Cases**:
+
 - Smooth jagged edges
 - Improve visual quality on low-res displays
 - Reduce aliasing artifacts
@@ -296,7 +319,7 @@ sprite.filters = [fxaa];
 Custom filters use GLSL shaders for GPU-accelerated effects.
 
 ```javascript
-import { Filter, GlProgram } from 'pixi.js';
+import { Filter, GlProgram } from "pixi.js";
 
 const vertex = `
   in vec2 aPosition;
@@ -343,9 +366,9 @@ const waveFilter = new Filter({
   glProgram: new GlProgram({ vertex, fragment }),
   resources: {
     timeUniforms: {
-      uTime: { value: 0.0, type: 'f32' }
-    }
-  }
+      uTime: { value: 0.0, type: "f32" },
+    },
+  },
 });
 
 sprite.filters = [waveFilter];
@@ -406,14 +429,14 @@ class PixelateFilter extends Filter {
     super({
       glProgram: new GlProgram({
         vertex: pixelateVertex,
-        fragment: pixelateFragment
+        fragment: pixelateFragment,
       }),
       resources: {
         pixelateUniforms: {
-          uSize: { value: new Float32Array([800, 600]), type: 'vec2<f32>' },
-          uPixelSize: { value: pixelSize, type: 'f32' }
-        }
-      }
+          uSize: { value: new Float32Array([800, 600]), type: "vec2<f32>" },
+          uPixelSize: { value: pixelSize, type: "f32" },
+        },
+      },
     });
   }
 
@@ -462,14 +485,14 @@ class ChromaticAberrationFilter extends Filter {
   constructor(amount = 0.005) {
     super({
       glProgram: new GlProgram({
-        vertex: defaultVertex,  // Use default vertex shader
-        fragment: chromaticFragment
+        vertex: defaultVertex, // Use default vertex shader
+        fragment: chromaticFragment,
       }),
       resources: {
         chromaticUniforms: {
-          uAmount: { value: amount, type: 'f32' }
-        }
-      }
+          uAmount: { value: amount, type: "f32" },
+        },
+      },
     });
   }
 
@@ -513,14 +536,14 @@ class VignetteFilter extends Filter {
     super({
       glProgram: new GlProgram({
         vertex: defaultVertex,
-        fragment: vignetteFragment
+        fragment: vignetteFragment,
       }),
       resources: {
         vignetteUniforms: {
-          uIntensity: { value: intensity, type: 'f32' },
-          uSoftness: { value: softness, type: 'f32' }
-        }
-      }
+          uIntensity: { value: intensity, type: "f32" },
+          uSoftness: { value: softness, type: "f32" },
+        },
+      },
     });
   }
 
@@ -549,6 +572,7 @@ class VignetteFilter extends Filter {
 ### GLSL Basics
 
 **Data Types**:
+
 ```glsl
 float x = 1.0;
 vec2 position = vec2(0.5, 0.5);
@@ -559,6 +583,7 @@ sampler2D texture;  // Texture sampler
 ```
 
 **Built-in Functions**:
+
 ```glsl
 // Math
 sin(x), cos(x), tan(x)
@@ -579,6 +604,7 @@ texture(sampler, uv)  // Sample texture at UV coordinates
 ```
 
 **Vertex Shader Template**:
+
 ```glsl
 in vec2 aPosition;
 out vec2 vTextureCoord;
@@ -594,6 +620,7 @@ void main() {
 ```
 
 **Fragment Shader Template**:
+
 ```glsl
 in vec2 vTextureCoord;
 uniform sampler2D uTexture;
@@ -619,12 +646,12 @@ const filter = new Filter({
   glProgram: new GlProgram({ vertex, fragment }),
   resources: {
     customUniforms: {
-      uTime: { value: 0.0, type: 'f32' },
-      uColor: { value: [1.0, 0.0, 0.0], type: 'vec3<f32>' },
-      uPosition: { value: new Float32Array([0.5, 0.5]), type: 'vec2<f32>' },
-      uTexture2: { value: secondTexture, type: 'sampler2D' }
-    }
-  }
+      uTime: { value: 0.0, type: "f32" },
+      uColor: { value: [1.0, 0.0, 0.0], type: "vec3<f32>" },
+      uPosition: { value: new Float32Array([0.5, 0.5]), type: "vec2<f32>" },
+      uTexture2: { value: secondTexture, type: "sampler2D" },
+    },
+  },
 });
 
 // Access uniforms
@@ -633,6 +660,7 @@ filter.resources.customUniforms.uniforms.uColor = [0.0, 1.0, 0.0];
 ```
 
 **In Shader**:
+
 ```glsl
 uniform float uTime;
 uniform vec3 uColor;
@@ -658,21 +686,21 @@ class MultiPassFilter extends Filter {
   constructor() {
     // First pass: Blur horizontal
     const pass1 = new Filter({
-      glProgram: new GlProgram({ vertex: defaultVertex, fragment: blurHorizontalFragment })
+      glProgram: new GlProgram({ vertex: defaultVertex, fragment: blurHorizontalFragment }),
     });
 
     // Second pass: Blur vertical
     const pass2 = new Filter({
-      glProgram: new GlProgram({ vertex: defaultVertex, fragment: blurVerticalFragment })
+      glProgram: new GlProgram({ vertex: defaultVertex, fragment: blurVerticalFragment }),
     });
 
     // Combine passes
     super({
       glProgram: new GlProgram({ vertex: defaultVertex, fragment: combineFragment }),
       resources: {
-        pass1Texture: { value: null, type: 'sampler2D' },
-        pass2Texture: { value: null, type: 'sampler2D' }
-      }
+        pass1Texture: { value: null, type: "sampler2D" },
+        pass2Texture: { value: null, type: "sampler2D" },
+      },
     });
   }
 }
@@ -687,10 +715,10 @@ class MultiPassFilter extends Filter {
 Blur + Additive Blend
 
 ```javascript
-import { BlurFilter, BLEND_MODES } from 'pixi.js';
+import { BlurFilter, BLEND_MODES } from "pixi.js";
 
 // Original sprite
-const sprite = Sprite.from('star.png');
+const sprite = Sprite.from("star.png");
 
 // Glow sprite (blurred copy)
 const glowSprite = new Sprite(sprite.texture);
@@ -699,7 +727,7 @@ glowSprite.blendMode = BLEND_MODES.ADD;
 glowSprite.alpha = 0.8;
 
 const container = new Container();
-container.addChild(glowSprite, sprite);  // Glow behind
+container.addChild(glowSprite, sprite); // Glow behind
 
 app.stage.addChild(container);
 ```
@@ -743,10 +771,10 @@ class OutlineFilter extends Filter {
       glProgram: new GlProgram({ vertex: defaultVertex, fragment: outlineFragment }),
       resources: {
         outlineUniforms: {
-          uThickness: { value: thickness, type: 'f32' },
-          uColor: { value: color, type: 'vec3<f32>' }
-        }
-      }
+          uThickness: { value: thickness, type: "f32" },
+          uColor: { value: color, type: "vec3<f32>" },
+        },
+      },
     });
   }
 }
@@ -798,7 +826,7 @@ const crtFragment = `
 sprite.filters = [
   new NoiseFilter({ noise: 0.2 }),
   new VignetteFilter(0.5, 0.3),
-  new ColorMatrixFilter().sepia()
+  new ColorMatrixFilter().sepia(),
 ];
 ```
 
@@ -833,7 +861,7 @@ sprite.filterArea = new Rectangle(0, 0, sprite.width, sprite.height);
 // Apply filter once, generate texture
 const filteredTexture = renderer.filters.generateFilteredTexture({
   texture: originalTexture,
-  filters: [blurFilter, colorMatrix]
+  filters: [blurFilter, colorMatrix],
 });
 
 const sprite = new Sprite(filteredTexture);
@@ -847,8 +875,8 @@ const sprite = new Sprite(filteredTexture);
 ```javascript
 const blur = new BlurFilter({
   strength: 8,
-  quality: 2,  // Lower = faster (1-5)
-  kernelSize: 5  // Smaller = faster
+  quality: 2, // Lower = faster (1-5)
+  kernelSize: 5, // Smaller = faster
 });
 ```
 
@@ -863,10 +891,10 @@ app.ticker.add(() => {
   const fps = Math.round(1000 / app.ticker.deltaMS);
 
   if (fps < 30 && filtersEnabled) {
-    sprite.filters = null;  // Disable filters
+    sprite.filters = null; // Disable filters
     filtersEnabled = false;
   } else if (fps > 55 && !filtersEnabled) {
-    sprite.filters = [blurFilter];  // Re-enable
+    sprite.filters = [blurFilter]; // Re-enable
     filtersEnabled = true;
   }
 });
@@ -877,25 +905,25 @@ app.ticker.add(() => {
 ## Filter Examples Library
 
 ### Glass/Frosted Effect
+
 ```javascript
-sprite.filters = [
-  new BlurFilter({ strength: 10 }),
-  new ColorMatrixFilter().brightness(1.2)
-];
+sprite.filters = [new BlurFilter({ strength: 10 }), new ColorMatrixFilter().brightness(1.2)];
 sprite.alpha = 0.8;
 ```
 
 ### Night Vision
+
 ```javascript
 const nightVision = new ColorMatrixFilter();
 nightVision.greyscale(1);
 nightVision.contrast(1.5);
 nightVision.brightness(1.5);
 sprite.filters = [nightVision];
-sprite.tint = 0x00ff00;  // Green tint
+sprite.tint = 0x00ff00; // Green tint
 ```
 
 ### X-Ray
+
 ```javascript
 const xray = new ColorMatrixFilter();
 xray.negative();
@@ -904,10 +932,11 @@ sprite.filters = [xray];
 ```
 
 ### Underwater
+
 ```javascript
 sprite.filters = [
   new DisplacementFilter({ sprite: waveSprite, scale: 20 }),
-  new ColorMatrixFilter().saturate(0.7)
+  new ColorMatrixFilter().saturate(0.7),
 ];
 sprite.tint = 0x88ccff;
 ```

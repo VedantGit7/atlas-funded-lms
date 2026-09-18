@@ -10,30 +10,30 @@ describe("resolveDocumentTitle", () => {
 
   it("formats tenant public name as Name LMS", () => {
     assert.equal(
-      resolveDocumentTitle({ tenantId: "t1", publicName: "FundedBeyond" }),
-      "FundedBeyond LMS",
+      resolveDocumentTitle({ tenantId: "t1", publicName: "Northwind" }),
+      "Northwind LMS",
     );
   });
 
   it("strips trailing Academy / LMS before appending LMS", () => {
     assert.equal(
-      resolveDocumentTitle({ tenantId: "t1", publicName: "FundedBeyond Academy" }),
-      "FundedBeyond LMS",
+      resolveDocumentTitle({ tenantId: "t1", publicName: "Northwind Academy" }),
+      "Northwind LMS",
     );
     assert.equal(
-      resolveDocumentTitle({ tenantId: "t1", publicName: "FundedBeyond LMS" }),
-      "FundedBeyond LMS",
+      resolveDocumentTitle({ tenantId: "t1", publicName: "Northwind LMS" }),
+      "Northwind LMS",
     );
   });
 
   it("falls back to issuerName then humanized slug", () => {
     assert.equal(
-      resolveDocumentTitle({ tenantId: "t1", issuerName: "Funded Beyond" }),
-      "Funded Beyond LMS",
+      resolveDocumentTitle({ tenantId: "t1", issuerName: "North Wind" }),
+      "North Wind LMS",
     );
     assert.equal(
-      resolveDocumentTitle({ tenantId: "t1", tenantSlug: "fundedbeyond" }),
-      "Fundedbeyond LMS",
+      resolveDocumentTitle({ tenantId: "t1", tenantSlug: "northwind" }),
+      "Northwind LMS",
     );
   });
 

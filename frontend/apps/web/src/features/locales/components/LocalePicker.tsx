@@ -24,7 +24,9 @@ export function LocalePicker({
   label = "Locale code",
 }: LocalePickerProps) {
   const [customMode, setCustomMode] = useState(
-    () => value.length > 0 && !mergeLocaleOptions(existingLocales, COMMON_BCP47_LOCALES).some((o) => o.value === value),
+    () =>
+      value.length > 0 &&
+      !mergeLocaleOptions(existingLocales, COMMON_BCP47_LOCALES).some((o) => o.value === value),
   );
   const [customValue, setCustomValue] = useState(customMode ? value : "");
 
@@ -34,7 +36,8 @@ export function LocalePicker({
   }, [existingLocales]);
 
   const selectValue =
-    customMode || !selectOptions.some((option) => option.value === value && option.value !== CUSTOM_OPTION_VALUE)
+    customMode ||
+    !selectOptions.some((option) => option.value === value && option.value !== CUSTOM_OPTION_VALUE)
       ? CUSTOM_OPTION_VALUE
       : value;
 

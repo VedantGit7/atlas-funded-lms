@@ -8,7 +8,7 @@ import {
 import { mutateWhatsappMetadata } from "../../../../../../../../server/whatsapp/whatsapp.route-metadata";
 import { setWhatsappCampaignAudience } from "../../../../../../../../server/whatsapp/whatsapp.service";
 
-const paramsSchema = zod.object({ id: zod.string().uuid() });
+const paramsSchema = zod.object({ id: zod.uuid() });
 
 export const POST = createTenantRoute<
   z.output<typeof setWhatsappCampaignAudienceBodySchema>,

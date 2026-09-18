@@ -23,17 +23,17 @@ Cursor does **not** show a native "pick a phase" dialog on **Build**. Use one of
 2. In the todo checklist, **check only** the todo(s) for the phase you want.
 3. Click **Build in New Agent** (not plain **Build**).
 
-| Phase | Master plan todos to select |
-|-------|-----------------------------|
+| Phase  | Master plan todos to select               |
+| ------ | ----------------------------------------- |
 | **F0** | `f0-stack-foundation`, `f0-perf-baseline` |
-| **F1** | `f1-theme` |
-| **F2** | `f2-shells` |
-| **F3** | `f3-public-auth` |
-| **F4** | `f4-learner` |
-| **F5** | `f5-studio-mod` (done) |
-| **F6** | `f6-admin` (done) |
-| **F7** | `f7-platform` (done) |
-| **F8** | `f8-hardening` (done) |
+| **F1** | `f1-theme`                                |
+| **F2** | `f2-shells`                               |
+| **F3** | `f3-public-auth`                          |
+| **F4** | `f4-learner`                              |
+| **F5** | `f5-studio-mod` (done)                    |
+| **F6** | `f6-admin` (done)                         |
+| **F7** | `f7-platform` (done)                      |
+| **F8** | `f8-hardening` (done)                     |
 
 Plain **Build** (no selection) loads the **full remaining plan** in the same chat — avoid unless you want one long session.
 
@@ -43,17 +43,17 @@ Plain **Build** (no selection) loads the **full remaining plan** in the same cha
 
 Open a single-phase plan and click **Build**:
 
-| File | Phase |
-|------|-------|
-| `f0-foundation.plan.md` | F0 — Foundation |
-| `f1-theme.plan.md` | F1 — Theme engine |
-| `f2-shells.plan.md` | F2 — Shells |
-| `f3-public-auth.plan.md` | F3 — Public + auth |
-| `f4-learner.plan.md` | F4 — Learner |
-| `f5-studio-mod.plan.md` | F5 — Studio + moderation (**done**) |
-| `f6-admin.plan.md` | F6 — Tenant admin (**done**) |
-| `f7-platform.plan.md` | F7 — Platform (**done**) |
-| `f8-hardening.plan.md` | F8 — Hardening (**done**) |
+| File                     | Phase                               |
+| ------------------------ | ----------------------------------- |
+| `f0-foundation.plan.md`  | F0 — Foundation                     |
+| `f1-theme.plan.md`       | F1 — Theme engine                   |
+| `f2-shells.plan.md`      | F2 — Shells                         |
+| `f3-public-auth.plan.md` | F3 — Public + auth                  |
+| `f4-learner.plan.md`     | F4 — Learner                        |
+| `f5-studio-mod.plan.md`  | F5 — Studio + moderation (**done**) |
+| `f6-admin.plan.md`       | F6 — Tenant admin (**done**)        |
+| `f7-platform.plan.md`    | F7 — Platform (**done**)            |
+| `f8-hardening.plan.md`   | F8 — Hardening (**done**)           |
 
 Each file links to the matching section in [complete-frontend-rebuild.md](complete-frontend-rebuild.md).
 
@@ -67,7 +67,7 @@ Attach:
 - `@plan/frontend-planning/complete-frontend-rebuild.md`
 - `@plan/frontend-planning/tech-stack.md` (F0+)
 
-Example: *"Implement Phase F0 only. Do not start F1+."*
+Example: _"Implement Phase F0 only. Do not start F1+."_
 
 ---
 

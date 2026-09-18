@@ -10,6 +10,7 @@ description: Blender to web export workflows for 3D models and animations. Use t
 Blender Web Pipeline skill provides workflows for exporting 3D models and animations from Blender to web-optimized formats (primarily glTF 2.0). It covers Python scripting for batch processing, optimization techniques for web performance, and integration with web 3D libraries like Three.js and Babylon.js.
 
 **When to use this skill:**
+
 - Exporting Blender models for web applications
 - Batch processing multiple 3D assets
 - Optimizing file sizes for web delivery
@@ -18,6 +19,7 @@ Blender Web Pipeline skill provides workflows for exporting 3D models and animat
 - Converting legacy formats to glTF
 
 **Key capabilities:**
+
 - glTF 2.0 export with optimization
 - Python (bpy) automation scripts
 - Texture baking and compression
@@ -30,6 +32,7 @@ Blender Web Pipeline skill provides workflows for exporting 3D models and animat
 ### glTF 2.0 Format
 
 **Why glTF for Web:**
+
 - Industry-standard 3D format for web
 - Efficient binary encoding (.glb)
 - PBR materials support
@@ -38,6 +41,7 @@ Blender Web Pipeline skill provides workflows for exporting 3D models and animat
 - Wide library support (Three.js, Babylon.js, etc.)
 
 **glTF vs GLB:**
+
 ```
 .gltf = JSON + external .bin + external textures
 .glb  = Single binary file (recommended for web)
@@ -69,6 +73,7 @@ bpy.ops.export_scene.gltf(
 ### Web Optimization Goals
 
 **Target Metrics:**
+
 - File size: <5 MB per model (ideal <1 MB)
 - Polygon count: <50k triangles for real-time
 - Texture resolution: 2048x2048 max (1024x1024 preferred)
@@ -363,19 +368,19 @@ echo "All files exported!"
 ### With Three.js
 
 ```javascript
-import * as THREE from 'three';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
+import * as THREE from "three";
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
 
 const loader = new GLTFLoader();
 
 // Setup Draco decoder for compressed models
 const dracoLoader = new DRACOLoader();
-dracoLoader.setDecoderPath('/draco/');
+dracoLoader.setDecoderPath("/draco/");
 loader.setDRACOLoader(dracoLoader);
 
 // Load Blender export
-loader.load('/models/exported.glb', (gltf) => {
+loader.load("/models/exported.glb", (gltf) => {
   scene.add(gltf.scene);
 
   // Play animations
@@ -390,32 +395,26 @@ loader.load('/models/exported.glb', (gltf) => {
 ### With React Three Fiber
 
 ```jsx
-import { useGLTF } from '@react-three/drei';
+import { useGLTF } from "@react-three/drei";
 
 function Model() {
-  const { scene } = useGLTF('/models/exported.glb');
+  const { scene } = useGLTF("/models/exported.glb");
   return <primitive object={scene} />;
 }
 
 // Preload for better performance
-useGLTF.preload('/models/exported.glb');
+useGLTF.preload("/models/exported.glb");
 ```
 
 ### With Babylon.js
 
 ```javascript
-import * as BABYLON from '@babylonjs/core';
-import '@babylonjs/loaders/glTF';
+import * as BABYLON from "@babylonjs/core";
+import "@babylonjs/loaders/glTF";
 
-BABYLON.SceneLoader.ImportMesh(
-  '',
-  '/models/',
-  'exported.glb',
-  scene,
-  (meshes) => {
-    console.log('Loaded meshes:', meshes);
-  }
-);
+BABYLON.SceneLoader.ImportMesh("", "/models/", "exported.glb", scene, (meshes) => {
+  console.log("Loaded meshes:", meshes);
+});
 ```
 
 ## Optimization Techniques
@@ -423,6 +422,7 @@ BABYLON.SceneLoader.ImportMesh(
 ### 1. Geometry Optimization
 
 **Decimate Modifier:**
+
 ```python
 # Reduce polygon count by 70%
 obj.modifiers.new(name='Decimate', type='DECIMATE')
@@ -430,6 +430,7 @@ obj.modifiers['Decimate'].ratio = 0.3
 ```
 
 **Merge by Distance:**
+
 ```python
 # Remove duplicate vertices
 bpy.ops.object.mode_set(mode='EDIT')
@@ -439,6 +440,7 @@ bpy.ops.object.mode_set(mode='OBJECT')
 ```
 
 **Triangulate Faces:**
+
 ```python
 # Ensure all faces are triangles (required for some engines)
 bpy.ops.object.mode_set(mode='EDIT')
@@ -450,6 +452,7 @@ bpy.ops.object.mode_set(mode='OBJECT')
 ### 2. Texture Optimization
 
 **Image Compression:**
+
 ```python
 # Save textures as JPEG (lossy but smaller)
 for img in bpy.data.images:
@@ -459,6 +462,7 @@ for img in bpy.data.images:
 ```
 
 **Texture Atlas:**
+
 ```python
 # Combine multiple textures into one atlas
 # Use Smart UV Project for automatic atlasing
@@ -471,6 +475,7 @@ bpy.ops.object.mode_set(mode='OBJECT')
 ### 3. Material Simplification
 
 **Convert to PBR:**
+
 ```python
 # Ensure materials use Principled BSDF (glTF standard)
 for mat in bpy.data.materials:
@@ -493,6 +498,7 @@ for mat in bpy.data.materials:
 **Problem:** Exported .glb files are 20+ MB
 
 **Solutions:**
+
 - Enable Draco compression (60-90% reduction)
 - Reduce texture resolution (2048 → 1024 or 512)
 - Use JPEG instead of PNG for textures
@@ -504,6 +510,7 @@ for mat in bpy.data.materials:
 **Problem:** Textures don't appear in web viewer
 
 **Solutions:**
+
 - Ensure all images are saved (not packed)
 - Use relative paths for textures
 - Export with "Export Images" enabled
@@ -514,6 +521,7 @@ for mat in bpy.data.materials:
 **Problem:** Animations don't export or play incorrectly
 
 **Solutions:**
+
 - Ensure animations are on timeline (not NLA strips)
 - Export with "Export Animations" enabled
 - Check animation actions are assigned to objects
@@ -524,6 +532,7 @@ for mat in bpy.data.materials:
 **Problem:** Materials render differently in web vs Blender
 
 **Solutions:**
+
 - Use Principled BSDF (maps to glTF PBR)
 - Avoid custom shader nodes (won't export)
 - Use supported texture types (Base Color, Metallic, Roughness, Normal, Emission)
@@ -534,6 +543,7 @@ for mat in bpy.data.materials:
 **Problem:** Export takes 10+ minutes
 
 **Solutions:**
+
 - Apply modifiers before export (don't export non-destructively)
 - Reduce geometry complexity
 - Remove unused data (orphan cleanup)
@@ -544,6 +554,7 @@ for mat in bpy.data.materials:
 **Problem:** Model lags in browser
 
 **Solutions:**
+
 - Generate LODs (Level of Detail)
 - Use instancing for repeated objects
 - Limit draw calls (merge objects, texture atlases)
@@ -592,16 +603,19 @@ bpy.ops.export_scene.gltf(
 This skill includes:
 
 ### scripts/
+
 - `batch_export.py` - Batch export .blend files to glTF
 - `optimize_model.py` - Optimize geometry and textures for web
 - `generate_lods.py` - Generate LOD copies automatically
 
 ### references/
+
 - `gltf_export_guide.md` - Complete glTF export reference
 - `bpy_api_reference.md` - Blender Python API quick reference
 - `optimization_strategies.md` - Detailed optimization techniques
 
 ### assets/
+
 - `export_template.blend` - Pre-configured export template
 - `shader_library/` - Web-optimized PBR shaders
 

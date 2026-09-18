@@ -5,6 +5,7 @@ Complete reference for automating Substance 3D Painter workflows with Python.
 ## API Overview
 
 The Substance 3D Painter Python API provides programmatic access to:
+
 - **Export System** - Texture export configuration and execution
 - **Project Management** - Open, save, close projects
 - **Texture Sets** - Access and modify texture sets
@@ -25,16 +26,20 @@ Texture export functionality.
 Exports project textures according to JSON configuration.
 
 **Parameters:**
+
 - `json_config` (dict) - Export configuration object
 
 **Returns:**
+
 - `ExportResult` with status, message, and list of exported files
 
 **Raises:**
+
 - `ProjectError` - No project is open
 - `ValueError` - Invalid configuration
 
 **Example:**
+
 ```python
 import substance_painter.export
 
@@ -64,12 +69,15 @@ if result.status == substance_painter.export.ExportStatus.Success:
 Lists textures that would be exported without actually exporting.
 
 **Parameters:**
+
 - `json_config` (dict) - Export configuration
 
 **Returns:**
+
 - Dictionary mapping (texture_set, stack) to list of file paths
 
 **Example:**
+
 ```python
 texture_list = substance_painter.export.list_project_textures(config)
 
@@ -84,6 +92,7 @@ for stack, files in texture_list.items():
 **ExportStatus (Enum)**
 
 Export operation status codes:
+
 - `Success` - Export completed successfully
 - `Error` - Export failed
 
@@ -92,6 +101,7 @@ Export operation status codes:
 Result object returned by `export_project_textures()`.
 
 **Attributes:**
+
 - `status` (ExportStatus) - Status code
 - `message` (str) - Human-readable status message
 - `textures` (Dict[Tuple[str, str], List[str]]) - Exported files grouped by stack
@@ -103,9 +113,11 @@ Result object returned by `export_project_textures()`.
 Triggered before export begins.
 
 **Attributes:**
+
 - `textures` (Dict[Tuple[str, str], List[str]]) - Files to be exported
 
 **Example:**
+
 ```python
 import substance_painter.event
 
@@ -123,6 +135,7 @@ substance_painter.event.DISPATCHER.connect(
 Triggered after export completes.
 
 **Attributes:**
+
 - `status` (ExportStatus) - Export status
 - `message` (str) - Status message
 - `textures` (Dict[Tuple[str, str], List[str]]) - Exported files
@@ -138,6 +151,7 @@ Project management operations.
 Check if a project is currently open.
 
 **Example:**
+
 ```python
 if substance_painter.project.is_open():
     print("Project is open")
@@ -150,9 +164,11 @@ if substance_painter.project.is_open():
 Open an existing Substance project (.spp).
 
 **Parameters:**
+
 - `file_path` (str) - Absolute path to .spp file
 
 **Example:**
+
 ```python
 substance_painter.project.open("C:/projects/MyProject.spp")
 ```
@@ -182,9 +198,11 @@ Close the current project.
 Get the current project's file path.
 
 **Returns:**
+
 - Absolute path to .spp file, or empty string if no project open
 
 **Example:**
+
 ```python
 project_path = substance_painter.project.file_path()
 export_path = project_path.replace('.spp', '_textures')
@@ -215,6 +233,7 @@ Triggered before project saves.
 Triggered after project saves.
 
 **Example: Auto-export on save**
+
 ```python
 import substance_painter.event
 import substance_painter.project
@@ -248,9 +267,11 @@ Access texture sets and UV tiles.
 Get all texture sets in the project.
 
 **Returns:**
+
 - List of TextureSet objects
 
 **Example:**
+
 ```python
 import substance_painter.textureset
 
@@ -267,9 +288,11 @@ for ts in substance_painter.textureset.all_texture_sets():
 Get all UV tiles in the project (for UDIM workflows).
 
 **Returns:**
+
 - List of UVTile objects
 
 **Example:**
+
 ```python
 for tile in substance_painter.textureset.all_uv_tiles():
     print(f"Tile ({tile.u}, {tile.v}): {tile.get_resolution()}")
@@ -282,9 +305,11 @@ for tile in substance_painter.textureset.all_uv_tiles():
 Set resolution for multiple UV tiles.
 
 **Parameters:**
+
 - `resolutions` (dict) - Mapping of UVTile to Resolution
 
 **Example:**
+
 ```python
 from substance_painter.textureset import Resolution
 
@@ -303,6 +328,7 @@ substance_painter.textureset.set_uvtiles_resolution({
 Represents a texture set (material slot).
 
 **Methods:**
+
 - `name() → str` - Get texture set name
 - `is_layered_material() → bool` - Check if uses layer stacks
 - `get_resolution() → Resolution` - Get texture resolution
@@ -313,6 +339,7 @@ Represents a texture set (material slot).
 Represents a layer stack in a texture set.
 
 **Methods:**
+
 - `material() → TextureSet` - Get parent texture set
 - `get_channel(channel_type: ChannelType) → Channel` - Get specific channel
 
@@ -321,11 +348,13 @@ Represents a layer stack in a texture set.
 Represents a texture channel (baseColor, normal, etc.).
 
 **Methods:**
+
 - `is_color() → bool` - Check if channel contains color data
 
 **ChannelType (Enum)**
 
 Available texture channels:
+
 - `BaseColor`
 - `Normal`
 - `Metallic`
@@ -340,10 +369,12 @@ Available texture channels:
 Texture resolution container.
 
 **Attributes:**
+
 - `width` (int) - Width in pixels
 - `height` (int) - Height in pixels
 
 **Constructor:**
+
 ```python
 from substance_painter.textureset import Resolution
 
@@ -355,10 +386,12 @@ res = Resolution(2048, 2048)  # 2K
 Represents a UV tile in UDIM workflow.
 
 **Attributes:**
+
 - `u` (int) - U coordinate (0-based)
 - `v` (int) - V coordinate (0-based)
 
 **Methods:**
+
 - `get_resolution() → Resolution` - Get tile resolution
 - `set_resolution(resolution: Resolution) → None` - Set tile resolution
 
@@ -373,6 +406,7 @@ Access and manage resources (materials, brushes, presets).
 Identifier for a resource.
 
 **Constructor:**
+
 ```python
 resource = substance_painter.resource.ResourceID(
     context="starter_assets",  # Library name
@@ -381,9 +415,11 @@ resource = substance_painter.resource.ResourceID(
 ```
 
 **Methods:**
+
 - `url() → str` - Get resource URL (e.g., "starter_assets://PBR Metallic Roughness")
 
 **Example: Use export preset**
+
 ```python
 export_preset = substance_painter.resource.ResourceID(
     context="starter_assets",
@@ -405,6 +441,7 @@ UI customization and menu integration.
 **ApplicationMenu**
 
 Available application menus:
+
 - `File`
 - `Edit`
 - `Mode`
@@ -421,10 +458,12 @@ Available application menus:
 Add menu item to application menu.
 
 **Parameters:**
+
 - `menu` (ApplicationMenu) - Target menu
 - `action` (QAction) - Qt action to add
 
 **Example:**
+
 ```python
 from PySide2 import QtWidgets
 import substance_painter.ui
@@ -449,6 +488,7 @@ Remove UI element (cleanup when plugin closes).
 Get main application window (for parenting dialogs).
 
 **Example: File dialog**
+
 ```python
 from PySide2 import QtWidgets
 
@@ -469,10 +509,12 @@ Event system for reacting to application events.
 Global event dispatcher object.
 
 **Methods:**
+
 - `connect(event_type, callback)` - Register event handler
 - `disconnect(event_type, callback)` - Unregister event handler
 
 **Example:**
+
 ```python
 import substance_painter.event
 
@@ -488,20 +530,24 @@ substance_painter.event.DISPATCHER.connect(
 #### Available Events
 
 **Project Events:**
+
 - `ProjectOpened`
 - `ProjectAboutToClose`
 - `ProjectAboutToSave`
 - `ProjectSaved`
 
 **Export Events:**
+
 - `ExportTexturesAboutToStart`
 - `ExportTexturesEnded`
 
 **Shader Events:**
+
 - `ShaderAdded`
 - `ShaderRemoved`
 
 **Texture Set Events:**
+
 - `TextureSetAdded`
 - `TextureSetRemoved`
 
@@ -584,12 +630,14 @@ Complete JSON schema for `export_project_textures()` config parameter.
 ### Filename Patterns
 
 Variables available in `fileName` patterns:
+
 - `$textureSet` - Texture set name
 - `$project` - Project name
 - `$mesh` - Mesh name
 - `$udim` - UDIM tile number (e.g., 1001)
 
 **Examples:**
+
 - `$textureSet_baseColor` → "MyAsset_baseColor.png"
 - `$project_$textureSet_color` → "MyProject_MyAsset_color.png"
 
@@ -731,6 +779,7 @@ config = {
 ### Creating a Plugin
 
 **Directory structure:**
+
 ```
 plugins/
 └── my_plugin/
@@ -739,6 +788,7 @@ plugins/
 ```
 
 **plugin.py:**
+
 ```python
 import substance_painter.ui
 from PySide2 import QtWidgets
@@ -787,18 +837,22 @@ if __name__ == "__main__":
 ### Common Issues
 
 **Import Error: No module named 'substance_painter'**
+
 - API only available when running inside Substance 3D Painter
 - Use File → Scripts → Run Script to execute Python code
 
 **ProjectError: No project is open**
+
 - Check `substance_painter.project.is_open()` before API calls
 
 **ValueError: Invalid export configuration**
+
 - Verify all required fields in export config
 - Check `exportPath` exists and is writable
 - Ensure `exportList` is not empty
 
 **ResourceID not found**
+
 - Verify `context` (library name) is correct
 - Check resource `name` matches exactly (case-sensitive)
 - Use Substance UI to find resource names
@@ -806,18 +860,21 @@ if __name__ == "__main__":
 ### Debugging Tips
 
 **Print configuration:**
+
 ```python
 import json
 print(json.dumps(config, indent=2))
 ```
 
 **List available texture sets:**
+
 ```python
 for ts in substance_painter.textureset.all_texture_sets():
     print(f"Texture Set: {ts.name()}")
 ```
 
 **Preview export list without exporting:**
+
 ```python
 preview = substance_painter.export.list_project_textures(config)
 for stack, files in preview.items():

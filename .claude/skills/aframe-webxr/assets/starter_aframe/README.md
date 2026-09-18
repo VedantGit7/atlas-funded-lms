@@ -60,16 +60,19 @@ starter_aframe/
 ### Interactive Objects
 
 **Box** (Blue)
+
 - Continuous rotation animation
 - Click to randomize color
 - Hover to scale
 
 **Sphere** (Red)
+
 - Bouncing position animation
 - Click to scale pulse
 - Hover effects
 
 **Cylinder** (Yellow)
+
 - Click to spin 360°
 - Hover color change
 
@@ -98,7 +101,8 @@ starter_aframe/
   radius="0.5"
   color="#00FF00"
   shadow="cast: true"
-  event-set__click="color: blue">
+  event-set__click="color: blue"
+>
 </a-sphere>
 ```
 
@@ -106,19 +110,17 @@ starter_aframe/
 
 ```html
 <!-- Rotation animation -->
-<a-box
-  animation="property: rotation; to: 0 360 0; loop: true; dur: 5000">
-</a-box>
+<a-box animation="property: rotation; to: 0 360 0; loop: true; dur: 5000"> </a-box>
 
 <!-- Position animation -->
-<a-sphere
-  animation="property: position; to: 0 3 -5; dir: alternate; loop: true; dur: 2000">
+<a-sphere animation="property: position; to: 0 3 -5; dir: alternate; loop: true; dur: 2000">
 </a-sphere>
 
 <!-- Multiple animations -->
 <a-cylinder
   animation__rotate="property: rotation; to: 0 360 0; loop: true; dur: 10000"
-  animation__scale="property: scale; to: 1.5 1.5 1.5; dir: alternate; loop: true; dur: 3000">
+  animation__scale="property: scale; to: 1.5 1.5 1.5; dir: alternate; loop: true; dur: 3000"
+>
 </a-cylinder>
 ```
 
@@ -126,7 +128,7 @@ starter_aframe/
 
 ```html
 <a-assets>
-  <img id="wood" src="textures/wood.jpg">
+  <img id="wood" src="textures/wood.jpg" />
 </a-assets>
 
 <a-box material="src: #wood" position="0 1 -3"></a-box>
@@ -150,24 +152,17 @@ Replace the camera with a VR rig:
 <!-- Remove simple camera, add VR rig -->
 <a-entity id="rig" position="0 0 0">
   <!-- Camera -->
-  <a-entity
-    id="camera"
-    camera
-    look-controls
-    position="0 1.6 0">
-  </a-entity>
+  <a-entity id="camera" camera look-controls position="0 1.6 0"> </a-entity>
 
   <!-- Left Hand Controller -->
-  <a-entity
-    hand-controls="hand: left"
-    laser-controls="hand: left">
-  </a-entity>
+  <a-entity hand-controls="hand: left" laser-controls="hand: left"> </a-entity>
 
   <!-- Right Hand Controller -->
   <a-entity
     hand-controls="hand: right"
     laser-controls="hand: right"
-    raycaster="objects: .interactive">
+    raycaster="objects: .interactive"
+  >
   </a-entity>
 </a-entity>
 ```
@@ -185,6 +180,7 @@ Replace the camera with a VR rig:
 ### A-Frame Inspector
 
 Press **Ctrl+Alt+I** to open the visual scene inspector:
+
 - View scene graph
 - Edit entity properties in real-time
 - Test materials and lighting
@@ -193,6 +189,7 @@ Press **Ctrl+Alt+I** to open the visual scene inspector:
 ### Console Logs
 
 The template includes console logs for:
+
 - Scene load events
 - Object interactions
 - VR mode changes
@@ -209,6 +206,7 @@ Open browser DevTools (F12) to view logs.
 ### Objects Not Clickable
 
 - **Solution**: Ensure cursor raycaster targets correct objects
+
 ```html
 <a-cursor raycaster="objects: .interactive"></a-cursor>
 ```
@@ -216,6 +214,7 @@ Open browser DevTools (F12) to view logs.
 ### Performance Issues
 
 - **Solution**: Reduce geometry complexity
+
 ```html
 <!-- Low poly (faster) -->
 <a-sphere segments-width="8" segments-height="6"></a-sphere>

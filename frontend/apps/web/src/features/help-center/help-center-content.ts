@@ -1,12 +1,4 @@
-import {
-  Award,
-  BookOpen,
-  Compass,
-  CreditCard,
-  Rocket,
-  User,
-  Wrench,
-} from "lucide-react";
+import { Award, BookOpen, Compass, CreditCard, Rocket, User, Wrench } from "lucide-react";
 import type { HelpArticle, HelpCategory, HelpTipOfWeek } from "./help-center-types";
 
 export const HELP_CATEGORIES: readonly HelpCategory[] = [
@@ -48,8 +40,7 @@ export const HELP_CATEGORIES: readonly HelpCategory[] = [
   {
     id: "account",
     title: "Account",
-    description:
-      "Profile, security, notifications, appearance, privacy, and data export.",
+    description: "Profile, security, notifications, appearance, privacy, and data export.",
     icon: User,
   },
   {
@@ -61,10 +52,10 @@ export const HELP_CATEGORIES: readonly HelpCategory[] = [
   },
 ] as const;
 
-export const HELP_TIPS: readonly HelpTipOfWeek[] = [
+export const HELP_TIPS: readonly [HelpTipOfWeek, ...HelpTipOfWeek[]] = [
   {
     label: "Tip of the week",
-    body: 'Use Practice mode from the sidebar to review flashcards and drills without affecting your course completion percentage.',
+    body: "Use Practice mode from the sidebar to review flashcards and drills without affecting your course completion percentage.",
   },
   {
     label: "Study smarter",
@@ -142,8 +133,7 @@ export const HELP_ARTICLES: readonly HelpArticle[] = [
     slug: "navigating-the-dashboard",
     categoryId: "getting-started",
     title: "Navigating the dashboard",
-    summary:
-      "How home, search, notifications, and the mobile drawer work across devices.",
+    summary: "How home, search, notifications, and the mobile drawer work across devices.",
     lastUpdated: "July 8, 2026",
     readMinutes: 3,
     popular: true,
@@ -273,8 +263,7 @@ export const HELP_ARTICLES: readonly HelpArticle[] = [
     slug: "tracking-lesson-progress",
     categoryId: "courses",
     title: "Tracking lesson progress",
-    summary:
-      "How completion is recorded for video lessons, readings, SCORM modules, and quizzes.",
+    summary: "How completion is recorded for video lessons, readings, SCORM modules, and quizzes.",
     lastUpdated: "July 11, 2026",
     readMinutes: 5,
     popular: true,
@@ -315,8 +304,7 @@ export const HELP_ARTICLES: readonly HelpArticle[] = [
     slug: "completing-assessments",
     categoryId: "courses",
     title: "Completing assessments",
-    summary:
-      "Starting attempts, submitting answers, viewing results, and retake policies.",
+    summary: "Starting attempts, submitting answers, viewing results, and retake policies.",
     lastUpdated: "July 9, 2026",
     readMinutes: 6,
     relatedSlugs: ["tracking-lesson-progress", "understanding-diagnostic-results"],
@@ -361,8 +349,7 @@ export const HELP_ARTICLES: readonly HelpArticle[] = [
     slug: "using-practice-mode",
     categoryId: "courses",
     title: "Using practice mode",
-    summary:
-      "Spaced repetition, drills, and swipe review without affecting formal course grades.",
+    summary: "Spaced repetition, drills, and swipe review without affecting formal course grades.",
     lastUpdated: "July 7, 2026",
     readMinutes: 3,
     relatedSlugs: ["tracking-lesson-progress", "understanding-your-roadmap"],
@@ -397,8 +384,7 @@ export const HELP_ARTICLES: readonly HelpArticle[] = [
     slug: "downloading-your-certificates",
     categoryId: "certificates",
     title: "Downloading your certificates",
-    summary:
-      "Access your credential wallet, export PDFs, and share verification links.",
+    summary: "Access your credential wallet, export PDFs, and share verification links.",
     lastUpdated: "July 14, 2026",
     readMinutes: 4,
     popular: true,
@@ -449,8 +435,7 @@ export const HELP_ARTICLES: readonly HelpArticle[] = [
     slug: "sharing-and-verifying-credentials",
     categoryId: "certificates",
     title: "Sharing and verifying credentials",
-    summary:
-      "Public verify URLs, LinkedIn sharing, and what third parties see.",
+    summary: "Public verify URLs, LinkedIn sharing, and what third parties see.",
     lastUpdated: "July 13, 2026",
     readMinutes: 3,
     relatedSlugs: ["downloading-your-certificates"],
@@ -485,15 +470,11 @@ export const HELP_ARTICLES: readonly HelpArticle[] = [
     slug: "taking-the-readiness-diagnostic",
     categoryId: "diagnostics",
     title: "Taking the readiness diagnostic",
-    summary:
-      "Start an assessment, save progress, and submit for competency scoring.",
+    summary: "Start an assessment, save progress, and submit for competency scoring.",
     lastUpdated: "July 15, 2026",
     readMinutes: 5,
     popular: true,
-    relatedSlugs: [
-      "understanding-diagnostic-results",
-      "retaking-diagnostics",
-    ],
+    relatedSlugs: ["understanding-diagnostic-results", "retaking-diagnostics"],
     sections: [
       {
         id: "overview",
@@ -540,15 +521,11 @@ export const HELP_ARTICLES: readonly HelpArticle[] = [
     slug: "understanding-diagnostic-results",
     categoryId: "diagnostics",
     title: "Understanding diagnostic results",
-    summary:
-      "Bands, dimension scores, momentum charts, and how results affect your roadmap.",
+    summary: "Bands, dimension scores, momentum charts, and how results affect your roadmap.",
     lastUpdated: "July 14, 2026",
     readMinutes: 6,
     popular: true,
-    relatedSlugs: [
-      "taking-the-readiness-diagnostic",
-      "understanding-your-roadmap",
-    ],
+    relatedSlugs: ["taking-the-readiness-diagnostic", "understanding-your-roadmap"],
     sections: [
       {
         id: "overview",
@@ -594,8 +571,7 @@ export const HELP_ARTICLES: readonly HelpArticle[] = [
     slug: "retaking-diagnostics",
     categoryId: "diagnostics",
     title: "Retaking diagnostics",
-    summary:
-      "Cooldowns, best-score vs latest-score, and when a retake is worthwhile.",
+    summary: "Cooldowns, best-score vs latest-score, and when a retake is worthwhile.",
     lastUpdated: "July 6, 2026",
     readMinutes: 3,
     relatedSlugs: ["taking-the-readiness-diagnostic", "using-practice-mode"],
@@ -631,8 +607,7 @@ export const HELP_ARTICLES: readonly HelpArticle[] = [
     slug: "managing-your-subscription",
     categoryId: "billing",
     title: "Managing your subscription",
-    summary:
-      "View plan status, update payment methods, and understand renewal timing.",
+    summary: "View plan status, update payment methods, and understand renewal timing.",
     lastUpdated: "July 12, 2026",
     readMinutes: 4,
     popular: true,
@@ -668,8 +643,7 @@ export const HELP_ARTICLES: readonly HelpArticle[] = [
     slug: "understanding-invoices-and-refunds",
     categoryId: "billing",
     title: "Understanding invoices and refunds",
-    summary:
-      "Receipts, tax details, refund eligibility, and how to request billing support.",
+    summary: "Receipts, tax details, refund eligibility, and how to request billing support.",
     lastUpdated: "July 10, 2026",
     readMinutes: 5,
     relatedSlugs: ["managing-your-subscription"],
@@ -705,8 +679,7 @@ export const HELP_ARTICLES: readonly HelpArticle[] = [
     slug: "updating-your-profile",
     categoryId: "account",
     title: "Updating your profile",
-    summary:
-      "Display name, avatar, locale, and fields visible to other learners.",
+    summary: "Display name, avatar, locale, and fields visible to other learners.",
     lastUpdated: "July 13, 2026",
     readMinutes: 3,
     popular: true,
@@ -738,8 +711,7 @@ export const HELP_ARTICLES: readonly HelpArticle[] = [
     slug: "changing-your-password",
     categoryId: "account",
     title: "Changing your password and MFA",
-    summary:
-      "Password updates, multi-factor authentication, and connected sign-in providers.",
+    summary: "Password updates, multi-factor authentication, and connected sign-in providers.",
     lastUpdated: "July 11, 2026",
     readMinutes: 4,
     relatedSlugs: ["resolving-sign-in-problems", "updating-your-profile"],
@@ -778,8 +750,7 @@ export const HELP_ARTICLES: readonly HelpArticle[] = [
     slug: "notification-preferences",
     categoryId: "account",
     title: "Notification preferences",
-    summary:
-      "Control email and in-app alerts for course, community, and system events.",
+    summary: "Control email and in-app alerts for course, community, and system events.",
     lastUpdated: "July 9, 2026",
     readMinutes: 3,
     relatedSlugs: ["updating-your-profile"],
@@ -805,8 +776,7 @@ export const HELP_ARTICLES: readonly HelpArticle[] = [
     slug: "privacy-and-data-export",
     categoryId: "account",
     title: "Privacy and data export",
-    summary:
-      "Analytics opt-out, profile visibility, downloading your data, and account deletion.",
+    summary: "Analytics opt-out, profile visibility, downloading your data, and account deletion.",
     lastUpdated: "July 8, 2026",
     readMinutes: 5,
     relatedSlugs: ["updating-your-profile"],
@@ -837,8 +807,7 @@ export const HELP_ARTICLES: readonly HelpArticle[] = [
     slug: "fixing-video-playback-issues",
     categoryId: "troubleshooting",
     title: "Fixing video playback issues",
-    summary:
-      "Buffering, DRM, browser extensions, and mobile playback tips.",
+    summary: "Buffering, DRM, browser extensions, and mobile playback tips.",
     lastUpdated: "July 14, 2026",
     readMinutes: 4,
     relatedSlugs: ["tracking-lesson-progress", "resolving-sign-in-problems"],
@@ -875,8 +844,7 @@ export const HELP_ARTICLES: readonly HelpArticle[] = [
     slug: "resolving-sign-in-problems",
     categoryId: "troubleshooting",
     title: "Resolving sign-in problems",
-    summary:
-      "Password reset, MFA lockouts, invited accounts, and suspended memberships.",
+    summary: "Password reset, MFA lockouts, invited accounts, and suspended memberships.",
     lastUpdated: "July 13, 2026",
     readMinutes: 4,
     popular: true,
@@ -913,8 +881,7 @@ export const HELP_ARTICLES: readonly HelpArticle[] = [
     slug: "when-pages-fail-to-load",
     categoryId: "troubleshooting",
     title: "When pages fail to load",
-    summary:
-      "Intermittent errors, request IDs, and what to do before opening a ticket.",
+    summary: "Intermittent errors, request IDs, and what to do before opening a ticket.",
     lastUpdated: "July 16, 2026",
     readMinutes: 3,
     popular: true,
@@ -960,8 +927,7 @@ export const HELP_ARTICLES: readonly HelpArticle[] = [
     slug: "achievements-and-leaderboards",
     categoryId: "courses",
     title: "Achievements and leaderboards",
-    summary:
-      "XP, badges, leagues, and how gamification interacts with your progress.",
+    summary: "XP, badges, leagues, and how gamification interacts with your progress.",
     lastUpdated: "July 7, 2026",
     readMinutes: 4,
     relatedSlugs: ["using-practice-mode", "understanding-your-roadmap"],
@@ -992,8 +958,7 @@ export const HELP_ARTICLES: readonly HelpArticle[] = [
     slug: "community-guidelines",
     categoryId: "courses",
     title: "Community spaces and posting",
-    summary:
-      "Join spaces, create posts, moderation, and reporting content.",
+    summary: "Join spaces, create posts, moderation, and reporting content.",
     lastUpdated: "July 6, 2026",
     readMinutes: 4,
     relatedSlugs: ["updating-your-profile", "privacy-and-data-export"],
@@ -1065,11 +1030,9 @@ export function getRelatedArticles(article: HelpArticle, limit = 3) {
 
 export function getTipOfWeek(referenceDate = new Date()): HelpTipOfWeek {
   const start = new Date(referenceDate.getFullYear(), 0, 1);
-  const dayOfYear = Math.floor(
-    (referenceDate.getTime() - start.getTime()) / (24 * 60 * 60 * 1000),
-  );
+  const dayOfYear = Math.floor((referenceDate.getTime() - start.getTime()) / (24 * 60 * 60 * 1000));
   const index = dayOfYear % HELP_TIPS.length;
-  return HELP_TIPS[index] ?? HELP_TIPS[0]!;
+  return HELP_TIPS[index] ?? HELP_TIPS[0];
 }
 
 export const HELP_SEARCH_SUGGESTIONS = [

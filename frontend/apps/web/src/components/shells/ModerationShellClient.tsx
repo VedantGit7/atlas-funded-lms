@@ -55,9 +55,7 @@ export function ModerationShellClient({
       headerLogo={
         <Link href="/moderate/cases" className="text-brand-primary">
           <TenantLogo
-            publicName={
-              branding.publicName ? `${branding.publicName} Moderation` : "Moderation"
-            }
+            publicName={branding.publicName ? `${branding.publicName} Moderation` : "Moderation"}
             logoLightUrl={branding.logoLightUrl}
             logoDarkUrl={branding.logoDarkUrl}
           />

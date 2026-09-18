@@ -12,11 +12,7 @@ import {
   manageSecondaryButtonClassName,
   manageStatusChipClassName,
 } from "../manage/manage-ui-shared";
-import {
-  WHATSAPP_LIST_HREF,
-  type TemplateDto,
-  type WhatsappHeaderType,
-} from "./whatsapp-shared";
+import { WHATSAPP_LIST_HREF, type TemplateDto, type WhatsappHeaderType } from "./whatsapp-shared";
 
 type TemplatesResponse = { data: { items: TemplateDto[] } };
 type TemplateResponse = { data: TemplateDto };
@@ -57,9 +53,7 @@ export function WhatsappTemplatesPanel() {
       setItems(response.data.items);
     } catch (caught) {
       setItems([]);
-      toast.error(
-        caught instanceof ClientApiError ? caught.message : "Could not load templates.",
-      );
+      toast.error(caught instanceof ClientApiError ? caught.message : "Could not load templates.");
     } finally {
       setLoading(false);
     }
@@ -129,9 +123,7 @@ export function WhatsappTemplatesPanel() {
       setShowCreate(false);
       await load();
     } catch (caught) {
-      toast.error(
-        caught instanceof ClientApiError ? caught.message : "Could not create template.",
-      );
+      toast.error(caught instanceof ClientApiError ? caught.message : "Could not create template.");
     } finally {
       setBusy(false);
     }
@@ -338,7 +330,10 @@ export function WhatsappTemplatesPanel() {
               </thead>
               <tbody>
                 {items.map((row) => (
-                  <tr key={row.id} className="border-b border-[var(--admin-border)] last:border-b-0">
+                  <tr
+                    key={row.id}
+                    className="border-b border-[var(--admin-border)] last:border-b-0"
+                  >
                     <td className="px-4 py-3 font-semibold text-[var(--admin-on-surface)]">
                       {row.name}
                     </td>

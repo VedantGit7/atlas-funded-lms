@@ -150,7 +150,9 @@ export function StudioTagListSection({
             >
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
-                  <p className="text-sm font-semibold text-[var(--admin-on-surface)]">{tag.title}</p>
+                  <p className="text-sm font-semibold text-[var(--admin-on-surface)]">
+                    {tag.title}
+                  </p>
                   <span className="rounded-full bg-[color-mix(in_srgb,var(--admin-primary)_10%,var(--admin-surface))] px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-[var(--admin-primary-strong)]">
                     {tagVisibilityLabel(tag.visibility)}
                   </span>

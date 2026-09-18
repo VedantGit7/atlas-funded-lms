@@ -67,6 +67,11 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - *generate-prisma-client
       - run: pnpm lint
+      # `pnpm lint` runs per-directory shards because a single `eslint .`
+      # OOM-aborted. Sharding trades a loud crash for a silent coverage hole, and
+      # this asserts the shards still cover every file ESLint would lint. It has
+      # existed since the sharding change and ran nowhere.
+      - run: pnpm lint:coverage
 
   format-check:
     name: format-check
@@ -138,6 +143,9 @@ jobs:
           --health-retries 10
     env:
       DATABASE_URL: ${{ env.CI_DATABASE_URL }}
+      # Suites gate on both URLs being present and skip silently when either is
+      # missing, so omitting this one turned with-platform-scope into a no-op.
+      PLATFORM_DATABASE_URL: ${{ env.CI_DATABASE_URL }}
     steps:
       - uses: actions/checkout@v4
 
@@ -149,10 +157,61 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
       - *generate-prisma-client
-      - run: pnpm exec vitest run tests/db
+      # The postgres service starts empty; without this the suite runs against
+      # a database with no schema.
+      - run: pnpm db:provision
+      # This job was named integration-tests and ran tests/db. All 65 files and
+      # 258 tests under tests/integration ran in no CI job at all.
+      - run: pnpm test:integration
+      - run: pnpm test:db
+      # tests/api and tests/ci -- 26 files, 127 tests -- were also unreferenced.
+      - run: pnpm test:routes
 
   authorization-tests:
     name: authorization-tests
+    runs-on: ubuntu-latest
+    needs: install
+    # tests/authorization/{diagnostic,practice}.test.ts gate on DATABASE_URL and
+    # PLATFORM_DATABASE_URL. Without a database they skipped, so this job was
+    # green while the foreign-session denial checks never executed -- one of
+    # them had in fact been failing.
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: atlas
+          POSTGRES_PASSWORD: atlas_dev_password
+          POSTGRES_DB: atlas_lms_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U atlas -d atlas_lms_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: ${{ env.CI_DATABASE_URL }}
+      PLATFORM_DATABASE_URL: ${{ env.CI_DATABASE_URL }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.13.1
+
+      - uses: pnpm/action-setup@v6
+
+      - run: pnpm install --frozen-lockfile
+      - *generate-prisma-client
+      - run: pnpm db:provision
+      - run: pnpm test:authorization
+
+  # tests/security, tests/events and tests/lint-rules need no database and ran
+  # in no CI job. tests/lint-rules is the 33 structural checks relocated in
+  # Phase 3 section 3.6 -- unwired, the relocation would have quietly dropped
+  # them from CI entirely.
+  static-suite-tests:
+    name: static-suite-tests
     runs-on: ubuntu-latest
     needs: install
     steps:
@@ -165,7 +224,10 @@ jobs:
       - uses: pnpm/action-setup@v6
 
       - run: pnpm install --frozen-lockfile
-      - run: pnpm test:authorization
+      - *generate-prisma-client
+      - run: pnpm test:security
+      - run: pnpm test:events
+      - run: pnpm test:structure
 
   tenant-isolation-tests:
     name: tenant-isolation-tests
@@ -199,12 +261,43 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
       - *generate-prisma-client
+      - run: pnpm db:provision
+
+      # non-superuser-rls-backstop and tenant-domains-host-resolution connect as
+      # the restricted login role and skip themselves without ATLAS_APP_LOGIN_URL,
+      # which was set in no job. Those two cover the C5 backstop and the
+      # tenant_domains host-resolution policy -- the two load-bearing RLS
+      # guarantees in this programme -- so both were unverified in CI.
+      - name: Set login role passwords
+        run: pnpm db:setup-login-roles
+        env:
+          ATLAS_APP_LOGIN_PASSWORD: ci_app_login
+          ATLAS_PLATFORM_LOGIN_PASSWORD: ci_platform_login
+
       - run: pnpm test:tenant-isolation
+        env:
+          ATLAS_APP_LOGIN_URL: postgresql://atlas_app_login:ci_app_login@localhost:5432/atlas_lms_ci?schema=public
 
   rls-tests:
     name: rls-tests
     runs-on: ubuntu-latest
     needs: install
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: atlas
+          POSTGRES_PASSWORD: atlas_dev_password
+          POSTGRES_DB: atlas_lms_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U atlas -d atlas_lms_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: ${{ env.CI_DATABASE_URL }}
     steps:
       - uses: actions/checkout@v4
 
@@ -215,7 +308,27 @@ jobs:
       - uses: pnpm/action-setup@v6
 
       - run: pnpm install --frozen-lockfile
-      - run: pnpm db:rls:check
+
+      # RLS lives in sql/rls, not in migrations, so the schema must be fully
+      # provisioned or the check inspects an empty database. check-rls-state.ts
+      # now refuses to pass below 200 tenant tables for exactly that reason.
+      - name: Provision database
+        run: pnpm db:provision
+
+      # Provisioning needs admin rights, but the RLS check must run as the role
+      # production uses. A superuser bypasses RLS entirely, so checking as one
+      # proves nothing — that is exactly how C5 went unnoticed.
+      - name: Set login role passwords
+        run: pnpm db:setup-login-roles
+        env:
+          ATLAS_APP_LOGIN_PASSWORD: ci_app_login
+          ATLAS_PLATFORM_LOGIN_PASSWORD: ci_platform_login
+
+      - name: Verify RLS as the non-superuser application role
+        run: pnpm db:rls:check:ci
+        env:
+          DATABASE_URL: postgresql://atlas_app_login:ci_app_login@localhost:5432/atlas_lms_ci?schema=public
+          REQUIRE_NON_SUPERUSER_DB: "1"
 
   migration-validation:
     name: migration-validation
@@ -331,6 +444,10 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
       - run: pnpm check:forbidden-scope
+      # Static SQL guards: no session-level tenant context, and SQL only in
+      # approved directories. Both are tenant-isolation controls and neither ran
+      # in this pipeline.
+      - run: pnpm db:sql:check
 
   zod-boundaries-check:
     name: zod-boundaries-check
@@ -396,6 +513,54 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm ci:tenant-resource-registry
 
+  audit-metadata-check:
+    name: audit-metadata-check
+    runs-on: ubuntu-latest
+    needs: install
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.13.1
+
+      - uses: pnpm/action-setup@v6
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm ci:audit-metadata
+
+  package-exports-check:
+    name: package-exports-check
+    runs-on: ubuntu-latest
+    needs: install
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.13.1
+
+      - uses: pnpm/action-setup@v6
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm check:package-exports
+
+  outbox-worker-check:
+    name: outbox-worker-check
+    runs-on: ubuntu-latest
+    needs: install
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.13.1
+
+      - uses: pnpm/action-setup@v6
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm check:outbox-worker
+
   security-check:
     name: security-check
     runs-on: ubuntu-latest
@@ -445,12 +610,36 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
       - *generate-prisma-client
+      - run: pnpm db:provision
       - run: pnpm test:e2e
 
   release-evidence-validation:
     name: release-evidence-validation
     runs-on: ubuntu-latest
     needs: install
+    # H18. This job ran the suite with --skip-db --skip-build --skip-e2e and then
+    # asserted only `test -f release-evidence.json`. Eight P0 gates -- integration,
+    # tenant isolation, RLS, e2e, tenant config, migration status, RLS policies
+    # and the production build -- were skipped, and the artifact still read
+    # READY_FOR_STAGING. Generating evidence about gates you did not run is worse
+    # than generating none, because the artifact is then cited as proof.
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: atlas
+          POSTGRES_PASSWORD: atlas_dev_password
+          POSTGRES_DB: atlas_lms_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U atlas -d atlas_lms_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: ${{ env.CI_DATABASE_URL }}
+      PLATFORM_DATABASE_URL: ${{ env.CI_DATABASE_URL }}
     steps:
       - uses: actions/checkout@v4
 
@@ -462,8 +651,24 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
       - *generate-prisma-client
-      - run: pnpm release:suite -- --skip-db --skip-build --skip-e2e
-      - run: test -f release-evidence.json
+      - run: pnpm db:provision
+
+      - name: Set login role passwords
+        run: pnpm db:setup-login-roles
+        env:
+          ATLAS_APP_LOGIN_PASSWORD: ci_app_login
+          ATLAS_PLATFORM_LOGIN_PASSWORD: ci_platform_login
+
+      - run: pnpm release:suite
+        env:
+          GIT_SHA: ${{ github.sha }}
+          GIT_BRANCH: ${{ github.ref_name }}
+          ATLAS_APP_LOGIN_URL: postgresql://atlas_app_login:ci_app_login@localhost:5432/atlas_lms_ci?schema=public
+
+      # Freshness, commit correspondence, and verdict-versus-gates consistency.
+      - run: pnpm release:evidence:validate
+        env:
+          GIT_SHA: ${{ github.sha }}
 
   observability-contract-check:
     name: observability-contract-check
@@ -585,6 +790,25 @@ jobs:
       PLATFORM_DATABASE_URL: ${{ env.CI_DATABASE_URL }}
       BROWSER_E2E: "1"
       CI: "true"
+      # Turns a missing credential into a failure instead of a skip. Ten of the
+      # eleven journeys need a session; without this they skip, Playwright
+      # reports the job green, and the absence of coverage is invisible.
+      E2E_REQUIRE_AUTH_JOURNEYS: "1"
+      # Every committed screenshot baseline is a -win32.png. This runner is
+      # Linux, so Playwright would find no baseline, write a new one and pass
+      # without comparing anything. Journeys and accessibility still run.
+      BROWSER_E2E_SKIP_VISUAL: "1"
+      E2E_TENANT_SLUG: fundedbeyond
+      # The auth stack is local (supabase/config.toml), so these are the Supabase
+      # CLI's well-known development keys rather than secrets. They are published
+      # constants, identical on every machine, and grant nothing outside this
+      # runner. Using a hosted project here would mean four secrets to maintain
+      # and a suite no fork could run.
+      E2E_SEED_PASSWORD: e2e-Journey-Password-1
+      SUPABASE_URL: http://127.0.0.1:54321
+      NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0
+      SUPABASE_SERVICE_ROLE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -594,8 +818,55 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - *generate-prisma-client
       - run: node scripts/db/ci-migrate-validate.mjs
+
+      # Tenants are resolved by hostname, and `.test` is a reserved TLD that no
+      # resolver answers for. Without these entries every page.goto fails with
+      # ERR_NAME_NOT_RESOLVED — which is what the suite has been doing here,
+      # since nothing ever added them and no job overrode the base URLs.
+      - name: Resolve tenant hosts
+        run: |
+          sudo tee -a /etc/hosts >/dev/null <<'HOSTS'
+          127.0.0.1 fundedbeyond.localhost.test
+          127.0.0.1 second-smoke.localhost.test
+          127.0.0.1 platform.localhost
+          HOSTS
+          getent hosts fundedbeyond.localhost.test
+
+      # The hosts above only resolve to a server; these make them resolve to a
+      # tenant. The visual and cross-tenant specs cover both academies, so both
+      # manifests are applied.
+      #
+      # `--apply` is not optional: the seed runner defaults to dry-run, and a
+      # dry-run seed step looks successful while inserting nothing — the browser
+      # suite would then fail on hosts that resolve to no tenant.
+      - run: pnpm db:seed:catalogues -- --apply
+      - run: pnpm tenant-config:apply -- --tenant fundedbeyond
+      - run: pnpm tenant-config:apply -- --tenant second-smoke-academy
+
+      # Login goes through Supabase `signInWithPassword`, so the journeys need a
+      # running auth stack. This starts GoTrue locally from supabase/config.toml
+      # -- no hosted project, no secrets, and a fork can run the same suite.
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - name: Start local Supabase auth stack
+        run: supabase start
+
+      # Creates the Supabase users the authenticated journeys log in as, and the
+      # membership plus role that authorizes them. Idempotent, so re-running the
+      # job is safe.
+      - name: Seed journey users
+        run: node scripts/e2e/seed-browser-users.mjs
+
       - run: pnpm exec playwright install --with-deps chromium
-      - run: pnpm exec playwright test tests/browser/journeys/01-public-diagnostic-signup.spec.ts tests/browser/accessibility
+      - name: Browser journeys and accessibility
+        run: pnpm exec playwright test
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
 
   build:
     name: build

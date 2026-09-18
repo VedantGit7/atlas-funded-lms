@@ -18,7 +18,9 @@ describe("practice engine selection", () => {
   });
 
   it("rejects an unknown engine", () => {
-    expect(() => StartPracticeSessionBodySchema.parse({ mode: "due", engine: "telepathy" })).toThrow();
+    expect(() =>
+      StartPracticeSessionBodySchema.parse({ mode: "due", engine: "telepathy" }),
+    ).toThrow();
   });
 });
 

@@ -139,7 +139,6 @@ describeWithDb("gamification advanced mechanics", () => {
   it("simulates events without writing anything", async () => {
     const fixture = await createGamificationFixture();
     const admin = adminCtx(fixture, "req_simulate");
-    const learner = learnerCtx(fixture, "req_simulate_learner");
 
     await withTenantTx(authoringTenantTx(fixture, fixture.adminMembershipId), async (tx) =>
       mutateBadges(tx, admin, {

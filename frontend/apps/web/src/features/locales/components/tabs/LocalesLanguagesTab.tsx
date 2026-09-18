@@ -44,7 +44,9 @@ export function LocalesLanguagesTab({ canManage }: LocalesLanguagesTabProps) {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await clientApi.get<{ data: LocaleMetadataDto[] }>("/api/v1/locales/metadata");
+      const response = await clientApi.get<{ data: LocaleMetadataDto[] }>(
+        "/api/v1/locales/metadata",
+      );
       setMetadata(response.data);
     } catch (caught) {
       setMessage(caught instanceof ClientApiError ? caught.message : "Failed to load metadata.");
@@ -110,7 +112,9 @@ export function LocalesLanguagesTab({ canManage }: LocalesLanguagesTabProps) {
       {message ? (
         <div
           role="alert"
-          className={messageTone === "success" ? localesAlertSuccessClassName : localesAlertErrorClassName}
+          className={
+            messageTone === "success" ? localesAlertSuccessClassName : localesAlertErrorClassName
+          }
         >
           {message}
         </div>
@@ -119,7 +123,9 @@ export function LocalesLanguagesTab({ canManage }: LocalesLanguagesTabProps) {
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
         <div className={localesTableShellClassName}>
           <div className="border-b border-[var(--admin-border)] px-4 py-3">
-            <h2 className="text-sm font-semibold text-[var(--admin-on-surface)]">Configured languages</h2>
+            <h2 className="text-sm font-semibold text-[var(--admin-on-surface)]">
+              Configured languages
+            </h2>
           </div>
           {metadata.length === 0 ? (
             <p className="p-4 text-sm text-[var(--admin-on-surface-variant)]">
@@ -139,12 +145,22 @@ export function LocalesLanguagesTab({ canManage }: LocalesLanguagesTabProps) {
                   <tr
                     key={entry.locale}
                     className={`${localesTableRowClassName} cursor-pointer`}
-                    onClick={() => setSelectedLocale(entry.locale)}
+                    onClick={() => {
+                      setSelectedLocale(entry.locale);
+                    }}
                   >
-                    <td className="px-4 py-3 font-mono text-[var(--admin-on-surface)]">{entry.locale}</td>
-                    <td className="px-4 py-3 text-[var(--admin-on-surface)]">{entry.nativeName ?? "—"}</td>
+                    <td className="px-4 py-3 font-mono text-[var(--admin-on-surface)]">
+                      {entry.locale}
+                    </td>
+                    <td className="px-4 py-3 text-[var(--admin-on-surface)]">
+                      {entry.nativeName ?? "—"}
+                    </td>
                     <td className="px-4 py-3 text-xs text-[var(--admin-on-surface-variant)]">
-                      {[entry.isDefault ? "default" : null, entry.isFallback ? "fallback" : null, entry.isRtl ? "rtl" : null]
+                      {[
+                        entry.isDefault ? "default" : null,
+                        entry.isFallback ? "fallback" : null,
+                        entry.isRtl ? "rtl" : null,
+                      ]
                         .filter(Boolean)
                         .join(", ") || "—"}
                     </td>
@@ -156,7 +172,9 @@ export function LocalesLanguagesTab({ canManage }: LocalesLanguagesTabProps) {
         </div>
 
         <section className="rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)] p-4 sm:p-5">
-          <h2 className="text-sm font-semibold text-[var(--admin-on-surface)]">Edit language metadata</h2>
+          <h2 className="text-sm font-semibold text-[var(--admin-on-surface)]">
+            Edit language metadata
+          </h2>
           {!canManage ? (
             <p className="mt-2 text-sm text-[var(--admin-on-surface-variant)]">Read-only access.</p>
           ) : null}
@@ -167,28 +185,54 @@ export function LocalesLanguagesTab({ canManage }: LocalesLanguagesTabProps) {
               existingLocales={existingLocales}
             />
             <div className="space-y-1.5">
-              <label htmlFor="locale-native-name" className="text-xs font-semibold uppercase tracking-wide text-[var(--admin-on-surface-variant)]">
+              <label
+                htmlFor="locale-native-name"
+                className="text-xs font-semibold uppercase tracking-wide text-[var(--admin-on-surface-variant)]"
+              >
                 Native name
               </label>
               <Input
                 id="locale-native-name"
                 value={nativeName}
-                onChange={(event) => setNativeName(event.target.value)}
+                onChange={(event) => {
+                  setNativeName(event.target.value);
+                }}
                 className={fieldClassName}
                 disabled={!canManage || saving}
               />
             </div>
             <div className="flex flex-wrap gap-4 text-sm text-[var(--admin-on-surface)]">
               <label className="flex items-center gap-2">
-                <input type="checkbox" checked={isRtl} onChange={(event) => setIsRtl(event.target.checked)} disabled={!canManage || saving} />
+                <input
+                  type="checkbox"
+                  checked={isRtl}
+                  onChange={(event) => {
+                    setIsRtl(event.target.checked);
+                  }}
+                  disabled={!canManage || saving}
+                />
                 RTL
               </label>
               <label className="flex items-center gap-2">
-                <input type="checkbox" checked={isDefault} onChange={(event) => setIsDefault(event.target.checked)} disabled={!canManage || saving} />
+                <input
+                  type="checkbox"
+                  checked={isDefault}
+                  onChange={(event) => {
+                    setIsDefault(event.target.checked);
+                  }}
+                  disabled={!canManage || saving}
+                />
                 Default
               </label>
               <label className="flex items-center gap-2">
-                <input type="checkbox" checked={isFallback} onChange={(event) => setIsFallback(event.target.checked)} disabled={!canManage || saving} />
+                <input
+                  type="checkbox"
+                  checked={isFallback}
+                  onChange={(event) => {
+                    setIsFallback(event.target.checked);
+                  }}
+                  disabled={!canManage || saving}
+                />
                 Fallback
               </label>
             </div>

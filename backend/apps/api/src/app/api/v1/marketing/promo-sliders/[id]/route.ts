@@ -14,7 +14,7 @@ import {
   updatePromoSliderBasics,
 } from "../../../../../../server/marketing-promo-slider/marketing-promo-slider.service";
 
-const paramsSchema = zod.object({ id: zod.string().uuid() });
+const paramsSchema = zod.object({ id: zod.uuid() });
 
 export const GET = createTenantRoute<
   undefined,

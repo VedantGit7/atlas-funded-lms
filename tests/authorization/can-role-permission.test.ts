@@ -8,7 +8,7 @@ describe("can role permission grants", () => {
         .fn()
         .mockResolvedValueOnce([{ key: "membership.read" }])
         .mockResolvedValueOnce([])
-        .mockResolvedValueOnce([{ role_key: "admin" }]),
+        .mockResolvedValueOnce([{ role_key: "admin", bypasses_resource_predicates: true }]),
     };
 
     const decision = await can({
@@ -36,7 +36,7 @@ describe("can role permission grants", () => {
         .fn()
         .mockResolvedValueOnce([{ key: "profile.update" }])
         .mockResolvedValueOnce([])
-        .mockResolvedValueOnce([{ role_key: "owner" }]),
+        .mockResolvedValueOnce([{ role_key: "owner", bypasses_resource_predicates: true }]),
     };
 
     const decision = await can({

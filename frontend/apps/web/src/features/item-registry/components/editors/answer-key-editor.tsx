@@ -10,10 +10,7 @@ import {
 import { ArrowDown, ArrowUp, Plus, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type { EditorOptionRow } from "../shared/item-options-builder";
-import {
-  answerKeyFromOptions,
-  ItemOptionsBuilder,
-} from "../shared/item-options-builder";
+import { answerKeyFromOptions, ItemOptionsBuilder } from "../shared/item-options-builder";
 import { AnswerKeyExplanationEditor } from "../shared/answer-key-explanation-editor";
 import {
   chipButtonClassName,
@@ -407,10 +404,26 @@ function OrderingKeyEditor({
               }}
               className={`${editorInputClassName} flex-1`}
             />
-              <button type="button" aria-label="Move up" disabled={index === 0} onClick={() => { move(index, -1); }} className="rounded p-1 hover:bg-[var(--admin-surface-high)] disabled:opacity-30">
+            <button
+              type="button"
+              aria-label="Move up"
+              disabled={index === 0}
+              onClick={() => {
+                move(index, -1);
+              }}
+              className="rounded p-1 hover:bg-[var(--admin-surface-high)] disabled:opacity-30"
+            >
               <ArrowUp className="h-4 w-4" aria-hidden="true" />
             </button>
-            <button type="button" aria-label="Move down" disabled={index === items.length - 1} onClick={() => { move(index, 1); }} className="rounded p-1 hover:bg-[var(--admin-surface-high)] disabled:opacity-30">
+            <button
+              type="button"
+              aria-label="Move down"
+              disabled={index === items.length - 1}
+              onClick={() => {
+                move(index, 1);
+              }}
+              className="rounded p-1 hover:bg-[var(--admin-surface-high)] disabled:opacity-30"
+            >
               <ArrowDown className="h-4 w-4" aria-hidden="true" />
             </button>
             <button
@@ -526,10 +539,14 @@ function MatchingKeyEditor({
 
   return (
     <div className={`${editorPanelClassName} space-y-4`}>
-      <p className={editorHintClassName}>Define prompts and matches, then pick the correct pairing for each prompt.</p>
+      <p className={editorHintClassName}>
+        Define prompts and matches, then pick the correct pairing for each prompt.
+      </p>
       <div className="grid gap-4 md:grid-cols-2">
         <div className="space-y-2">
-          <p className="text-xs font-semibold uppercase tracking-wide text-[var(--admin-on-surface-variant)]">Prompts</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-[var(--admin-on-surface-variant)]">
+            Prompts
+          </p>
           {leftItems.map((item) => (
             <div key={item.id} className="flex gap-2">
               <input
@@ -571,7 +588,9 @@ function MatchingKeyEditor({
           </button>
         </div>
         <div className="space-y-2">
-          <p className="text-xs font-semibold uppercase tracking-wide text-[var(--admin-on-surface-variant)]">Matches</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-[var(--admin-on-surface-variant)]">
+            Matches
+          </p>
           {rightItems.map((item) => (
             <div key={item.id} className="flex gap-2">
               <input
@@ -616,7 +635,9 @@ function MatchingKeyEditor({
       <div className="space-y-2">
         {leftItems.map((left) => (
           <label key={left.id} className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-3">
-            <span className="min-w-0 flex-1 text-sm font-medium text-[var(--admin-on-surface)]">{left.label || left.id}</span>
+            <span className="min-w-0 flex-1 text-sm font-medium text-[var(--admin-on-surface)]">
+              {left.label || left.id}
+            </span>
             <select
               value={localPairs[left.id] ?? ""}
               onChange={(event) => {

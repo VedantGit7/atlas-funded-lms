@@ -2,14 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  ExternalLink,
-  History,
-  Loader2,
-  RefreshCw,
-  Scale,
-  TriangleAlert,
-} from "lucide-react";
+import { ExternalLink, History, Loader2, RefreshCw, Scale, TriangleAlert } from "lucide-react";
 import { AdminConfirmDialog } from "../../../components/shells/admin/AdminConfirmDialog";
 import { formatRelativeUpdatedAt } from "../../../app/admin/branding/_components/branding-admin-shared";
 import {
@@ -257,7 +250,10 @@ export function AppealsReviewClient({ viewerMembershipId }: AppealsReviewClientP
       </header>
 
       {loading ? (
-        <p className="flex items-center gap-2 text-sm text-[var(--admin-on-surface-variant)]" aria-live="polite">
+        <p
+          className="flex items-center gap-2 text-sm text-[var(--admin-on-surface-variant)]"
+          aria-live="polite"
+        >
           <Loader2 className="h-4 w-4 motion-safe:animate-spin" aria-hidden="true" />
           Loading pending appeals…
         </p>

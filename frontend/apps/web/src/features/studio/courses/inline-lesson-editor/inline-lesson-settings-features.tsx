@@ -64,7 +64,10 @@ export function LessonSettingsFeaturesSection({
       </div>
       {form.features.showTranscript ? (
         <div>
-          <LessonSettingsFieldLabel label="Transcript" helper="Plain text shown to learners when transcript is enabled." />
+          <LessonSettingsFieldLabel
+            label="Transcript"
+            helper="Plain text shown to learners when transcript is enabled."
+          />
           <textarea
             className="min-h-[8rem] w-full resize-y rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-4 py-3 text-sm text-[var(--admin-on-surface)] outline-none placeholder:text-[var(--admin-on-surface-variant)] focus:border-[var(--admin-primary)] focus:ring-2 focus:ring-[var(--admin-primary)]/30"
             placeholder="Paste or type lesson transcript"

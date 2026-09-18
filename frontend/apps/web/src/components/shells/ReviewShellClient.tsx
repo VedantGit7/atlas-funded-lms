@@ -66,9 +66,7 @@ export function ReviewShellClient({
                 );
               })}
             </nav>
-            <ThemeModeToggle
-              className="inline-flex h-10 w-10 items-center justify-center rounded border border-border text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-            />
+            <ThemeModeToggle className="inline-flex h-10 w-10 items-center justify-center rounded border border-border text-muted-foreground transition-colors hover:bg-muted hover:text-foreground" />
             <button
               type="button"
               className="min-h-10 rounded border border-border px-3 py-1.5 text-sm md:hidden"

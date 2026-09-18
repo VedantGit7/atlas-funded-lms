@@ -40,7 +40,9 @@ export function LearnerEmailVerificationPanel({ initial }: { initial: Data }) {
       setDays(response.data.verificationDays);
       setStatus("Learner email verification settings saved.");
     } catch (caught) {
-      setError(caught instanceof ClientApiError ? caught.message : "Could not save. Please try again.");
+      setError(
+        caught instanceof ClientApiError ? caught.message : "Could not save. Please try again.",
+      );
     } finally {
       setSaving(false);
     }

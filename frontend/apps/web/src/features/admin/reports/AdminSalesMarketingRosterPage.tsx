@@ -11,6 +11,7 @@ import { AdminSalesMarketingOverviewPanel } from "./AdminSalesMarketingOverviewP
 import { AdminSalesByProductPanel } from "./AdminSalesByProductPanel";
 import {
   SalesMarketingReportTabs,
+  SALES_MARKETING_TAB_HREFS,
   type SalesMarketingReportTab,
 } from "./SalesMarketingReportTabs";
 
@@ -58,23 +59,7 @@ export function AdminSalesMarketingRosterPage() {
 
   function navigateTab(next: SalesMarketingReportTab) {
     setTab(next);
-    const href =
-      next === "overview"
-        ? "/admin/reports/sales-marketing"
-        : next === "sales"
-          ? "/admin/reports/sales-marketing/sales"
-          : next === "coupons"
-            ? "/admin/reports/sales-marketing/coupons"
-            : next === "referral-wallet"
-              ? "/admin/reports/sales-marketing/referral-wallet"
-              : next === "affiliate-products"
-                ? "/admin/reports/sales-marketing/affiliate-products"
-                : next === "affiliates"
-                  ? "/admin/reports/sales-marketing/affiliates"
-                  : next === "exports"
-                    ? "/admin/reports/sales-marketing/exports"
-                    : `/admin/reports/sales-marketing?tab=${next}`;
-    router.replace(href, { scroll: false });
+    router.replace(SALES_MARKETING_TAB_HREFS[next], { scroll: false });
   }
 
   const showSalesPanel = tab === "sales";
@@ -90,7 +75,9 @@ export function AdminSalesMarketingRosterPage() {
 
       {tab === "overview" ? (
         <AdminSalesMarketingOverviewPanel
-          onNavigateTab={(next) => navigateTab(next)}
+          onNavigateTab={(next) => {
+            navigateTab(next);
+          }}
         />
       ) : null}
 

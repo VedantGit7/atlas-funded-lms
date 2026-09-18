@@ -23,28 +23,28 @@ describe("resolveRequestHostFromHeaders", () => {
   it("uses x-forwarded-host for internal localhost requests", () => {
     const headers = new Headers({
       host: "127.0.0.1:3001",
-      "x-forwarded-host": "fundedbeyond.localhost.test:3000",
+      "x-forwarded-host": "acme-academy.localhost.test:3000",
     });
 
-    expect(resolveRequestHostFromHeaders(headers)).toBe("fundedbeyond.localhost.test");
+    expect(resolveRequestHostFromHeaders(headers)).toBe("acme-academy.localhost.test");
   });
 
   it("prefers the direct host for public tenant domains", () => {
     const headers = new Headers({
-      host: "fundedbeyond.localhost.test:3000",
+      host: "acme-academy.localhost.test:3000",
       "x-forwarded-host": "evil.example.com",
     });
 
-    expect(resolveRequestHostFromHeaders(headers)).toBe("fundedbeyond.localhost.test");
+    expect(resolveRequestHostFromHeaders(headers)).toBe("acme-academy.localhost.test");
   });
 
   it("prefers x-atlas-tenant-host when stamped by the frontend proxy", () => {
     const headers = new Headers({
       host: "127.0.0.1:3001",
       "x-forwarded-host": "evil.example.com",
-      "x-atlas-tenant-host": "fundedbeyond.localhost.test:3000",
+      "x-atlas-tenant-host": "acme-academy.localhost.test:3000",
     });
 
-    expect(resolveRequestHostFromHeaders(headers)).toBe("fundedbeyond.localhost.test");
+    expect(resolveRequestHostFromHeaders(headers)).toBe("acme-academy.localhost.test");
   });
 });

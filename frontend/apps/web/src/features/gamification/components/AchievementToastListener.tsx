@@ -16,9 +16,16 @@ function readBaseline(): AchievementBaseline | null {
   try {
     const raw = sessionStorage.getItem(BASELINE_STORAGE_KEY);
     if (!raw) return null;
-    const parsed = JSON.parse(raw) as AchievementBaseline;
-    if (!parsed || !Array.isArray(parsed.awardedBadgeKeys)) return null;
-    return parsed;
+    const parsed: unknown = JSON.parse(raw);
+    if (typeof parsed !== "object" || parsed === null) return null;
+    const candidate = parsed as Partial<AchievementBaseline>;
+    if (!Array.isArray(candidate.awardedBadgeKeys)) return null;
+    return {
+      levelKey: typeof candidate.levelKey === "string" ? candidate.levelKey : null,
+      awardedBadgeKeys: candidate.awardedBadgeKeys.filter(
+        (key): key is string => typeof key === "string",
+      ),
+    };
   } catch {
     return null;
   }

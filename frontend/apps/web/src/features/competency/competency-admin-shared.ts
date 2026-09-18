@@ -23,7 +23,8 @@ export const panelBodyClassName = "p-4 sm:p-5";
 export const panelEyebrowClassName =
   "text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--admin-on-surface-variant)]";
 
-export const monoClassName = "font-mono text-[12px] leading-4 text-[var(--admin-on-surface-variant)]";
+export const monoClassName =
+  "font-mono text-[12px] leading-4 text-[var(--admin-on-surface-variant)]";
 
 export const tableHeadClassName =
   "bg-[var(--admin-surface-low)] text-[11px] font-semibold uppercase tracking-[0.06em] text-[var(--admin-on-surface-variant)]";
@@ -65,7 +66,9 @@ export function dimensionIconForIndex(index: number): LucideIcon {
 
 export function formatProfileSubtitle(profile: ScoringProfileDto): string {
   const version =
-    profile.activeVersion != null ? `Version ${String(profile.activeVersion)}` : "Unpublished draft";
+    profile.activeVersion != null
+      ? `Version ${String(profile.activeVersion)}`
+      : "Unpublished draft";
   const updated = formatRelativeUpdatedAt(profile.updatedAt);
   return `${version} · Updated ${updated}`;
 }

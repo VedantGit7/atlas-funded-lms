@@ -107,6 +107,29 @@ export async function createBatch(body: { key: string; name: string }) {
   return clientApi.post<{ data: Batch }>("/api/v1/batches", body, `batch-${body.key}`);
 }
 
+export async function fetchBatch(batchId: string) {
+  return clientApi.get<{ data: Batch }>(`/api/v1/batches/${encodeURIComponent(batchId)}`);
+}
+
+/** Partial update: send only the fields that changed. */
+export async function updateBatch(
+  batchId: string,
+  body: { name?: string; status?: string; metadataJson?: Record<string, unknown> },
+) {
+  return clientApi.patch<{ data: Batch }>(
+    `/api/v1/batches/${encodeURIComponent(batchId)}`,
+    body,
+    `batch-update-${batchId}`,
+  );
+}
+
+export async function deleteBatch(batchId: string) {
+  return clientApi.delete<{ data: { deleted: boolean } }>(
+    `/api/v1/batches/${encodeURIComponent(batchId)}`,
+    `batch-delete-${batchId}`,
+  );
+}
+
 export async function assignBatchMember(batchId: string, membershipId: string) {
   return clientApi.post(
     `/api/v1/batches/${encodeURIComponent(batchId)}/members`,
@@ -139,6 +162,39 @@ export async function createPoll(body: {
 export async function fetchPollResults(pollId: string) {
   return clientApi.get<{ data: PollResults }>(
     `/api/v1/polls/${encodeURIComponent(pollId)}/results`,
+  );
+}
+
+export async function fetchPoll(pollId: string) {
+  return clientApi.get<{ data: Poll }>(`/api/v1/polls/${encodeURIComponent(pollId)}`);
+}
+
+/** Partial update. The route accepts every field as optional, so send only what changed. */
+export async function updatePoll(
+  pollId: string,
+  body: {
+    title?: string;
+    description?: string | null;
+    status?: string;
+    quizMode?: boolean;
+    allowMultipleAnswers?: boolean;
+    anonymousVote?: boolean;
+    resultVisibility?: "after_vote" | "after_poll_ends";
+    layout?: "list" | "grid" | "card";
+    durationSeconds?: number | null;
+  },
+) {
+  return clientApi.patch<{ data: Poll }>(
+    `/api/v1/polls/${encodeURIComponent(pollId)}`,
+    body,
+    `poll-update-${pollId}`,
+  );
+}
+
+export async function deletePoll(pollId: string) {
+  return clientApi.delete<{ data: { deleted: boolean } }>(
+    `/api/v1/polls/${encodeURIComponent(pollId)}`,
+    `poll-delete-${pollId}`,
   );
 }
 
@@ -175,6 +231,37 @@ export async function createCustomFieldDefinition(body: {
     "/api/v1/custom-fields/definitions",
     body,
     `custom-field-${body.key}`,
+  );
+}
+
+export type CustomFieldValue = {
+  definitionId: string;
+  membershipId: string;
+  valueJson: unknown;
+  updatedAt: string;
+};
+
+export async function fetchCustomFieldValues(definitionId: string) {
+  return clientApi.get<{ data: { items: CustomFieldValue[] } }>(
+    `/api/v1/custom-fields/definitions/${encodeURIComponent(definitionId)}/values`,
+  );
+}
+
+/**
+ * Sets one member's value for a definition.
+ *
+ * `valueJson` is deliberately `unknown`: the field type is configured per
+ * definition (text, number, boolean, select, date), so the caller decides the
+ * shape and the server validates it against the definition.
+ */
+export async function setCustomFieldValue(
+  definitionId: string,
+  body: { membershipId: string; valueJson: unknown },
+) {
+  return clientApi.post<{ data: CustomFieldValue }>(
+    `/api/v1/custom-fields/definitions/${encodeURIComponent(definitionId)}/values`,
+    body,
+    `custom-field-value-${definitionId}`,
   );
 }
 

@@ -7,5 +7,8 @@ export const routeMetadata = {
   audit: "required",
   rateLimit: "tenantMutation",
   idempotency: "required",
+  // A redemption is a consumable, so it meters. Unlimited until a plan
+  // sets a limit; the counter runs either way.
+  entitlementUsage: () => 1,
   resourceLoader: async ({ ctx }) => loadSelfGamificationResourceRef({ ctx }),
 } satisfies RouteMetadata;

@@ -24,6 +24,7 @@ beforeOnce → once → afterOnce
 ```
 
 **Timeline**:
+
 1. `beforeOnce` - Setup before first render
 2. `once` - Intro animation plays
 3. `afterOnce` - Cleanup after first render
@@ -38,6 +39,7 @@ beforeEnter → enter → afterEnter → after
 ```
 
 **Timeline**:
+
 1. `before` - Transition starts
 2. `beforeLeave` - Prepare to leave current page
 3. `leave` - Animate current page out
@@ -70,15 +72,16 @@ Run on **every** transition, registered via `barba.hooks`:
 
 ```javascript
 barba.hooks.before(() => {
-  console.log('Every transition');
+  console.log("Every transition");
 });
 
 barba.hooks.afterEnter(({ next }) => {
-  console.log('Entered:', next.namespace);
+  console.log("Entered:", next.namespace);
 });
 ```
 
 **Use for**:
+
 - Universal behavior (analytics, scroll reset)
 - Debug logging
 - Loading indicators
@@ -90,19 +93,22 @@ Run when a **specific transition** matches:
 
 ```javascript
 barba.init({
-  transitions: [{
-    name: 'fade',
-    leave({ current }) {
-      return gsap.to(current.container, { opacity: 0 });
+  transitions: [
+    {
+      name: "fade",
+      leave({ current }) {
+        return gsap.to(current.container, { opacity: 0 });
+      },
+      enter({ next }) {
+        return gsap.from(next.container, { opacity: 0 });
+      },
     },
-    enter({ next }) {
-      return gsap.from(next.container, { opacity: 0 });
-    }
-  }]
+  ],
 });
 ```
 
 **Use for**:
+
 - Transition-specific animations
 - Conditional behaviors based on navigation context
 
@@ -112,39 +118,42 @@ Run for **specific namespaces**:
 
 ```javascript
 barba.init({
-  views: [{
-    namespace: 'home',
-    afterEnter() {
-      console.log('Home page entered');
-      initHomeFeatures();
+  views: [
+    {
+      namespace: "home",
+      afterEnter() {
+        console.log("Home page entered");
+        initHomeFeatures();
+      },
+      beforeLeave() {
+        console.log("Leaving home page");
+        cleanupHomeFeatures();
+      },
     },
-    beforeLeave() {
-      console.log('Leaving home page');
-      cleanupHomeFeatures();
-    }
-  }]
+  ],
 });
 ```
 
 **Use for**:
+
 - Page-specific initialization
 - Feature cleanup before leaving page
 
 ### Hook Availability Matrix
 
-| Hook | Global | Transition | View |
-|------|--------|------------|------|
-| `beforeOnce` | ✅ | ✅ | ❌ |
-| `once` | ✅ | ✅ | ❌ |
-| `afterOnce` | ✅ | ✅ | ❌ |
-| `before` | ✅ | ✅ | ❌ |
-| `beforeLeave` | ✅ | ✅ | ✅ |
-| `leave` | ✅ | ✅ | ❌ |
-| `afterLeave` | ✅ | ✅ | ✅ |
-| `beforeEnter` | ✅ | ✅ | ✅ |
-| `enter` | ✅ | ✅ | ❌ |
-| `afterEnter` | ✅ | ✅ | ✅ |
-| `after` | ✅ | ✅ | ❌ |
+| Hook          | Global | Transition | View |
+| ------------- | ------ | ---------- | ---- |
+| `beforeOnce`  | ✅     | ✅         | ❌   |
+| `once`        | ✅     | ✅         | ❌   |
+| `afterOnce`   | ✅     | ✅         | ❌   |
+| `before`      | ✅     | ✅         | ❌   |
+| `beforeLeave` | ✅     | ✅         | ✅   |
+| `leave`       | ✅     | ✅         | ❌   |
+| `afterLeave`  | ✅     | ✅         | ✅   |
+| `beforeEnter` | ✅     | ✅         | ✅   |
+| `enter`       | ✅     | ✅         | ❌   |
+| `afterEnter`  | ✅     | ✅         | ✅   |
+| `after`       | ✅     | ✅         | ❌   |
 
 ---
 
@@ -217,6 +226,7 @@ async leave({ current }) {
 **Purpose**: Setup before the first page renders.
 
 **Common Use Cases**:
+
 - Show loading screen
 - Prepare intro animation
 - Initial app setup
@@ -248,6 +258,7 @@ barba.hooks.beforeOnce(() => {
 **Purpose**: Animate the first page view (intro animation).
 
 **Common Use Cases**:
+
 - Intro animations
 - Reveal content on first load
 - Splash screen effects
@@ -292,6 +303,7 @@ barba.hooks.beforeOnce(() => {
 **Purpose**: Cleanup or initialization after intro animation.
 
 **Common Use Cases**:
+
 - Hide loading screen
 - Initialize page features
 - Track page load
@@ -301,10 +313,10 @@ barba.hooks.beforeOnce(() => {
 ```javascript
 barba.hooks.afterOnce(() => {
   // Hide loader
-  document.querySelector('.loader').style.display = 'none';
+  document.querySelector(".loader").style.display = "none";
 
   // Track page load
-  gtag('event', 'page_load', { page: window.location.pathname });
+  gtag("event", "page_load", { page: window.location.pathname });
 });
 ```
 
@@ -319,6 +331,7 @@ barba.hooks.afterOnce(() => {
 **Purpose**: Setup before transition begins.
 
 **Common Use Cases**:
+
 - Show loading indicator
 - Prepare global state
 - Disable interactions during transition
@@ -328,13 +341,13 @@ barba.hooks.afterOnce(() => {
 ```javascript
 // Global loading indicator
 barba.hooks.before(() => {
-  document.body.classList.add('is-transitioning');
-  document.querySelector('.page-loader').classList.add('active');
+  document.body.classList.add("is-transitioning");
+  document.querySelector(".page-loader").classList.add("active");
 });
 
 // Disable scroll during transition
 barba.hooks.before(() => {
-  document.body.style.overflow = 'hidden';
+  document.body.style.overflow = "hidden";
 });
 ```
 
@@ -349,6 +362,7 @@ barba.hooks.before(() => {
 **Purpose**: Prepare current page before leave animation.
 
 **Common Use Cases**:
+
 - Reset scroll position
 - Prepare elements for leave animation
 - Save page state
@@ -394,6 +408,7 @@ barba.hooks.beforeLeave(() => {
 **Purpose**: Animate current page out.
 
 **Common Use Cases**:
+
 - Fade out animation
 - Slide out animation
 - Complex exit sequences
@@ -459,6 +474,7 @@ barba.hooks.beforeLeave(() => {
 **Purpose**: Cleanup after current page has animated out.
 
 **Common Use Cases**:
+
 - Remove event listeners
 - Clean up third-party widgets
 - Debug logging
@@ -468,26 +484,28 @@ barba.hooks.beforeLeave(() => {
 ```javascript
 // Global cleanup
 barba.hooks.afterLeave(({ current }) => {
-  console.log('Left page:', current.namespace);
+  console.log("Left page:", current.namespace);
 });
 
 // View-specific cleanup
 {
-  views: [{
-    namespace: 'video-gallery',
-    afterLeave({ current }) {
-      // Pause all videos
-      current.container.querySelectorAll('video').forEach(video => {
-        video.pause();
-        video.currentTime = 0;
-      });
+  views: [
+    {
+      namespace: "video-gallery",
+      afterLeave({ current }) {
+        // Pause all videos
+        current.container.querySelectorAll("video").forEach((video) => {
+          video.pause();
+          video.currentTime = 0;
+        });
 
-      // Remove event listeners
-      current.container.querySelectorAll('.video-play').forEach(btn => {
-        btn.removeEventListener('click', handleVideoPlay);
-      });
-    }
-  }]
+        // Remove event listeners
+        current.container.querySelectorAll(".video-play").forEach((btn) => {
+          btn.removeEventListener("click", handleVideoPlay);
+        });
+      },
+    },
+  ];
 }
 ```
 
@@ -502,6 +520,7 @@ barba.hooks.afterLeave(({ current }) => {
 **Purpose**: Prepare new page before enter animation.
 
 **Common Use Cases**:
+
 - Set initial animation states
 - Load images
 - Prepare page-specific features
@@ -550,6 +569,7 @@ barba.hooks.beforeEnter(({ next }) => {
 **Purpose**: Animate new page in.
 
 **Common Use Cases**:
+
 - Fade in animation
 - Slide in animation
 - Complex entrance sequences
@@ -618,6 +638,7 @@ barba.hooks.beforeEnter(({ next }) => {
 **Purpose**: Initialize features after new page has animated in.
 
 **Common Use Cases**:
+
 - Initialize page features
 - Track page views
 - Start auto-playing content
@@ -627,19 +648,19 @@ barba.hooks.beforeEnter(({ next }) => {
 ```javascript
 // Global analytics tracking
 barba.hooks.afterEnter(({ next }) => {
-  gtag('config', 'GA_MEASUREMENT_ID', {
+  gtag("config", "GA_MEASUREMENT_ID", {
     page_path: next.url.path,
-    page_title: document.title
+    page_title: document.title,
   });
 });
 
 // Re-initialize third-party scripts
 barba.hooks.afterEnter(() => {
-  if (typeof Prism !== 'undefined') {
+  if (typeof Prism !== "undefined") {
     Prism.highlightAll();
   }
 
-  if (typeof twttr !== 'undefined') {
+  if (typeof twttr !== "undefined") {
     twttr.widgets.load();
   }
 });
@@ -648,29 +669,29 @@ barba.hooks.afterEnter(() => {
 {
   views: [
     {
-      namespace: 'home',
+      namespace: "home",
       afterEnter() {
         initHomeSlider();
         initParallaxEffects();
-      }
+      },
     },
     {
-      namespace: 'product',
+      namespace: "product",
       afterEnter({ next }) {
-        const productId = next.url.path.split('/').pop();
+        const productId = next.url.path.split("/").pop();
         loadProductData(productId);
-      }
+      },
     },
     {
-      namespace: 'video',
+      namespace: "video",
       afterEnter({ next }) {
-        const video = next.container.querySelector('video');
+        const video = next.container.querySelector("video");
         if (video) {
           video.play();
         }
-      }
-    }
-  ]
+      },
+    },
+  ];
 }
 ```
 
@@ -685,6 +706,7 @@ barba.hooks.afterEnter(() => {
 **Purpose**: Final cleanup after transition.
 
 **Common Use Cases**:
+
 - Hide loading indicators
 - Re-enable interactions
 - Debug logging
@@ -694,13 +716,13 @@ barba.hooks.afterEnter(() => {
 ```javascript
 // Global loading indicator
 barba.hooks.after(() => {
-  document.body.classList.remove('is-transitioning');
-  document.querySelector('.page-loader').classList.remove('active');
+  document.body.classList.remove("is-transitioning");
+  document.querySelector(".page-loader").classList.remove("active");
 });
 
 // Re-enable scroll
 barba.hooks.after(() => {
-  document.body.style.overflow = '';
+  document.body.style.overflow = "";
 });
 
 // Debug transition
@@ -717,11 +739,11 @@ barba.hooks.after(({ current, next }) => {
 
 ```javascript
 barba.hooks.before(() => {
-  gsap.to('.loader', { opacity: 1, duration: 0.3 });
+  gsap.to(".loader", { opacity: 1, duration: 0.3 });
 });
 
 barba.hooks.after(() => {
-  gsap.to('.loader', { opacity: 0, duration: 0.3 });
+  gsap.to(".loader", { opacity: 0, duration: 0.3 });
 });
 ```
 
@@ -730,7 +752,7 @@ barba.hooks.after(() => {
 ```javascript
 barba.hooks.beforeLeave(() => {
   // Save current scroll position
-  sessionStorage.setItem('scrollPos', window.scrollY);
+  sessionStorage.setItem("scrollPos", window.scrollY);
 });
 
 barba.hooks.beforeEnter(({ next }) => {
@@ -748,16 +770,16 @@ barba.hooks.beforeEnter(({ next }) => {
 ```javascript
 barba.hooks.after(({ next }) => {
   // Google Analytics 4
-  gtag('config', 'GA_MEASUREMENT_ID', {
+  gtag("config", "GA_MEASUREMENT_ID", {
     page_path: next.url.path,
-    page_title: document.title
+    page_title: document.title,
   });
 
   // Or GTM data layer
   window.dataLayer = window.dataLayer || [];
   window.dataLayer.push({
-    event: 'pageview',
-    page: next.url.path
+    event: "pageview",
+    page: next.url.path,
   });
 });
 ```
@@ -767,21 +789,21 @@ barba.hooks.after(({ next }) => {
 ```javascript
 barba.hooks.afterEnter(() => {
   // Syntax highlighting
-  if (typeof Prism !== 'undefined') {
+  if (typeof Prism !== "undefined") {
     Prism.highlightAll();
   }
 
   // Social widgets
-  if (typeof twttr !== 'undefined') {
+  if (typeof twttr !== "undefined") {
     twttr.widgets.load();
   }
 
-  if (typeof FB !== 'undefined') {
+  if (typeof FB !== "undefined") {
     FB.XFBML.parse();
   }
 
   // Custom form library
-  if (typeof customForms !== 'undefined') {
+  if (typeof customForms !== "undefined") {
     customForms.init();
   }
 });
@@ -793,29 +815,29 @@ barba.hooks.afterEnter(() => {
 barba.init({
   views: [
     {
-      namespace: 'home',
+      namespace: "home",
       afterEnter() {
         initHomeSlider();
         initParallax();
       },
       beforeLeave() {
         destroyHomeSlider();
-      }
+      },
     },
     {
-      namespace: 'shop',
+      namespace: "shop",
       afterEnter() {
         initProductFilters();
         initAddToCart();
       },
       beforeLeave() {
         // Cleanup
-        document.querySelectorAll('.product-quick-view').forEach(el => {
+        document.querySelectorAll(".product-quick-view").forEach((el) => {
           el.remove();
         });
-      }
-    }
-  ]
+      },
+    },
+  ],
 });
 ```
 
@@ -826,36 +848,36 @@ barba.init({
   transitions: [
     // Slow fade for first visit
     {
-      name: 'first-visit',
+      name: "first-visit",
       once: async ({ next }) => {
         await gsap.from(next.container, {
           opacity: 0,
-          duration: 1.5
+          duration: 1.5,
         });
-      }
+      },
     },
     // Fast fade for same namespace
     {
-      name: 'same-page-type',
+      name: "same-page-type",
       custom: ({ current, next }) => current.namespace === next.namespace,
       leave: ({ current }) => {
         return gsap.to(current.container, { opacity: 0, duration: 0.2 });
       },
       enter: ({ next }) => {
         return gsap.from(next.container, { opacity: 0, duration: 0.2 });
-      }
+      },
     },
     // Slower transition for different page types
     {
-      name: 'different-page-type',
+      name: "different-page-type",
       leave: ({ current }) => {
         return gsap.to(current.container, { opacity: 0, duration: 0.5 });
       },
       enter: ({ next }) => {
         return gsap.from(next.container, { opacity: 0, duration: 0.5 });
-      }
-    }
-  ]
+      },
+    },
+  ],
 });
 ```
 
@@ -887,16 +909,18 @@ async leave({ current }) {
 ```javascript
 // ✅ Good - analytics tracking applies everywhere
 barba.hooks.after(({ next }) => {
-  gtag('config', 'GA_ID', { page_path: next.url.path });
+  gtag("config", "GA_ID", { page_path: next.url.path });
 });
 
 // ❌ Avoid - repeating in every transition
 {
-  transitions: [{
-    after({ next }) {
-      gtag('config', 'GA_ID', { page_path: next.url.path });
-    }
-  }]
+  transitions: [
+    {
+      after({ next }) {
+        gtag("config", "GA_ID", { page_path: next.url.path });
+      },
+    },
+  ];
 }
 ```
 
@@ -905,17 +929,19 @@ barba.hooks.after(({ next }) => {
 ```javascript
 // ✅ Good - isolated to home page
 {
-  views: [{
-    namespace: 'home',
-    afterEnter() {
-      initHomeSlider();
-    }
-  }]
+  views: [
+    {
+      namespace: "home",
+      afterEnter() {
+        initHomeSlider();
+      },
+    },
+  ];
 }
 
 // ❌ Avoid - checking namespace manually
 barba.hooks.afterEnter(({ next }) => {
-  if (next.namespace === 'home') {
+  if (next.namespace === "home") {
     initHomeSlider();
   }
 });
@@ -926,23 +952,27 @@ barba.hooks.afterEnter(({ next }) => {
 ```javascript
 // ✅ Good - cleanup before leaving
 {
-  views: [{
-    namespace: 'video',
-    beforeLeave({ current }) {
-      current.container.querySelectorAll('video').forEach(v => v.pause());
-    }
-  }]
+  views: [
+    {
+      namespace: "video",
+      beforeLeave({ current }) {
+        current.container.querySelectorAll("video").forEach((v) => v.pause());
+      },
+    },
+  ];
 }
 
 // ❌ Risky - container might already be removed
 {
-  views: [{
-    namespace: 'video',
-    afterLeave({ current }) {
-      // current.container might not be in DOM anymore
-      current.container.querySelectorAll('video').forEach(v => v.pause());
-    }
-  }]
+  views: [
+    {
+      namespace: "video",
+      afterLeave({ current }) {
+        // current.container might not be in DOM anymore
+        current.container.querySelectorAll("video").forEach((v) => v.pause());
+      },
+    },
+  ];
 }
 ```
 
@@ -974,20 +1004,32 @@ barba.hooks.afterEnter(({ next }) => {
 barba.init({
   // Global hooks - universal behavior
   hooks: {
-    after: () => { /* ... */ }
+    after: () => {
+      /* ... */
+    },
   },
 
   // Transitions - animation logic
-  transitions: [{
-    leave() { /* ... */ },
-    enter() { /* ... */ }
-  }],
+  transitions: [
+    {
+      leave() {
+        /* ... */
+      },
+      enter() {
+        /* ... */
+      },
+    },
+  ],
 
   // Views - page-specific logic
-  views: [{
-    namespace: 'home',
-    afterEnter() { /* ... */ }
-  }]
+  views: [
+    {
+      namespace: "home",
+      afterEnter() {
+        /* ... */
+      },
+    },
+  ],
 });
 ```
 
@@ -998,7 +1040,7 @@ barba.hooks.afterEnter(({ next }) => {
   try {
     initPageFeatures(next.container);
   } catch (error) {
-    console.error('Failed to initialize page features:', error);
+    console.error("Failed to initialize page features:", error);
     // Fallback or report error
   }
 });

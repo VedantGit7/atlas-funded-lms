@@ -1,15 +1,12 @@
 "use client";
 
-import {
-  CheckCircle2,
-  CircleDot,
-  Pencil,
-  RotateCcw,
-  Send,
-  XCircle,
-} from "lucide-react";
+import { CheckCircle2, CircleDot, Pencil, RotateCcw, Send, XCircle } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import { panelHeaderEyebrowClassName, formatLifecycleState, formatSubmittedAt } from "../review-studio-shared";
+import {
+  panelHeaderEyebrowClassName,
+  formatLifecycleState,
+  formatSubmittedAt,
+} from "../review-studio-shared";
 
 type WorkflowHistoryItem = {
   id: string;
@@ -95,7 +92,10 @@ export function WorkflowHistoryPanel({ items, loading = false }: WorkflowHistory
                     <span className="rounded bg-[var(--admin-surface-high)] px-1.5 py-0.5 text-[10px] font-medium text-[var(--admin-on-surface-variant)]">
                       {formatLifecycleState(item.fromState)}
                     </span>
-                    <CircleDot className="h-3 w-3 text-[var(--admin-on-surface-variant)]" aria-hidden="true" />
+                    <CircleDot
+                      className="h-3 w-3 text-[var(--admin-on-surface-variant)]"
+                      aria-hidden="true"
+                    />
                     <span
                       className={`rounded px-1.5 py-0.5 text-[10px] font-medium ${
                         isLatest

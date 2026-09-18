@@ -110,8 +110,28 @@ describe("acceptInvitation", () => {
         },
       }),
     ).rejects.toMatchObject({
-      code: "INVALID_INVITATION",
-      status: 404,
+      // Was INVALID_INVITATION/404. A dedicated INVITATION_EMAIL_MISMATCH/403
+      // was added deliberately — it is a declared member of AtlasErrorCode — so
+      // a user signed in with the wrong account gets an actionable message
+      // rather than "invitation not found". The unknown-token case above still
+      // returns the safe 404, which is where token non-disclosure matters.
+      code: "INVITATION_EMAIL_MISMATCH",
+      status: 403,
     });
+
+    // The non-leak property this test is named for, stated explicitly so a
+    // future copy change cannot put the invited address in front of whoever
+    // happens to hold the token.
+    const rejection = await acceptInvitation({
+      tx: { $queryRaw: vi.fn() },
+      tenantId: "tenant-id",
+      requestId: "req_00000000-0000-4000-8000-000000000000",
+      input: { token: "invite-token-abcdefghijklmnopqrstuvwxyz123456" },
+      principal: { id: "principal-id", emailNormalized: "other@example.com" },
+    }).catch((error: unknown) => error);
+
+    expect(String((rejection as { message?: string }).message)).not.toContain(
+      "invited@example.com",
+    );
   });
 });

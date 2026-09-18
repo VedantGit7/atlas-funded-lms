@@ -128,6 +128,17 @@ export const ModerationStatus = {
 export type ModerationStatus = (typeof ModerationStatus)[keyof typeof ModerationStatus]
 
 
+export const Severity = {
+  INFO: 'INFO',
+  LOW: 'LOW',
+  MEDIUM: 'MEDIUM',
+  HIGH: 'HIGH',
+  CRITICAL: 'CRITICAL'
+} as const
+
+export type Severity = (typeof Severity)[keyof typeof Severity]
+
+
 export const LessonTagVisibility = {
   PUBLIC: 'PUBLIC',
   PRIVATE: 'PRIVATE',

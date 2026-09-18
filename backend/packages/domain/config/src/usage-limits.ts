@@ -44,10 +44,7 @@ function planTierDefaults(planName: string | null): UsageLimits {
   return { storageGb: 10, mau: 100, bandwidthGb: 50, videoHours: 20 };
 }
 
-function readNumericEntitlement(
-  entitlements: ActiveEntitlementRow[],
-  key: string,
-): number | null {
+function readNumericEntitlement(entitlements: ActiveEntitlementRow[], key: string): number | null {
   const entry = entitlements.find((row) => row.key === key);
   if (!entry) {
     return null;
@@ -71,7 +68,8 @@ export function resolveUsageLimits(
 ): UsageLimits {
   const defaults = planTierDefaults(planName);
   return {
-    storageGb: readNumericEntitlement(entitlements, USAGE_LIMIT_KEYS.storageGb) ?? defaults.storageGb,
+    storageGb:
+      readNumericEntitlement(entitlements, USAGE_LIMIT_KEYS.storageGb) ?? defaults.storageGb,
     mau: readNumericEntitlement(entitlements, USAGE_LIMIT_KEYS.mau) ?? defaults.mau,
     bandwidthGb:
       readNumericEntitlement(entitlements, USAGE_LIMIT_KEYS.bandwidthGb) ?? defaults.bandwidthGb,

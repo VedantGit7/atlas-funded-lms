@@ -2,7 +2,9 @@ import type { z } from "zod";
 import type { learningPathDetailResponseSchema } from "@atlas/contracts/learning-paths/learning-path.schemas";
 import { createUuid } from "../../lib/create-uuid";
 
-export type PathStepDraft = z.infer<typeof learningPathDetailResponseSchema>["data"]["steps"][number];
+export type PathStepDraft = z.infer<
+  typeof learningPathDetailResponseSchema
+>["data"]["steps"][number];
 export type PathGateDraft = PathStepDraft["gates"][number];
 export type PathStepType = PathStepDraft["stepType"];
 export type PathGateType = PathGateDraft["gateType"];
@@ -56,7 +58,11 @@ export function normalizeStepPositions(steps: PathStepDraft[]): PathStepDraft[] 
   }));
 }
 
-export function moveStep(steps: PathStepDraft[], stepId: string, direction: "up" | "down"): PathStepDraft[] {
+export function moveStep(
+  steps: PathStepDraft[],
+  stepId: string,
+  direction: "up" | "down",
+): PathStepDraft[] {
   const index = steps.findIndex((step) => step.id === stepId);
   if (index < 0) return steps;
 

@@ -46,12 +46,12 @@ type EmailOverride = Awaited<ReturnType<typeof notificationRepository.findTempla
 function toDto(entry: SystemEmailCatalogEntry, override: EmailOverride) {
   const enabled = !(override?.status === "INACTIVE" || override?.status === "ARCHIVED");
   const subject = override?.subject?.trim() || entry.defaultSubject;
-  const body = override?.body?.trim() || entry.defaultBody;
+  const body = override?.body.trim() || entry.defaultBody;
   const isCustomized = Boolean(
     override &&
-      (override.subject?.trim() !== entry.defaultSubject ||
-        override.body.trim() !== entry.defaultBody ||
-        override.status !== "ACTIVE"),
+    (override.subject?.trim() !== entry.defaultSubject ||
+      override.body.trim() !== entry.defaultBody ||
+      override.status !== "ACTIVE"),
   );
 
   return {
@@ -67,7 +67,7 @@ function toDto(entry: SystemEmailCatalogEntry, override: EmailOverride) {
     defaultBody: entry.defaultBody,
     defaultActionPath: entry.defaultActionPath,
     templateId: override?.id ?? null,
-    updatedAt: override?.updated_at?.toISOString() ?? null,
+    updatedAt: override?.updated_at.toISOString() ?? null,
   };
 }
 
@@ -80,7 +80,7 @@ async function loadOverride(tx: TenantTx, tenantId: string, key: string) {
   });
 }
 
-async function requireEntry(key: string) {
+function requireEntry(key: string) {
   const parsed = notificationSourceEventKeySchema.safeParse(key);
   if (!parsed.success) throw notFound();
   const entry = getSystemEmailCatalogEntry(parsed.data);
@@ -130,7 +130,7 @@ export async function listSystemEmails(tx: TenantTx, ctx: ServiceCtx) {
 }
 
 export async function getSystemEmail(tx: TenantTx, ctx: ServiceCtx, key: string) {
-  const entry = await requireEntry(key);
+  const entry = requireEntry(key);
   const override = await loadOverride(tx, ctx.tenantId, entry.key);
   return systemEmailResponseSchema.parse({ data: toDto(entry, override) });
 }
@@ -142,7 +142,7 @@ export async function updateSystemEmail(
   rawBody: unknown,
 ) {
   const body = updateSystemEmailBodySchema.parse(rawBody);
-  const entry = await requireEntry(key);
+  const entry = requireEntry(key);
   const existing = await loadOverride(tx, ctx.tenantId, entry.key);
   const status =
     existing?.status === "INACTIVE" || existing?.status === "ARCHIVED" ? "INACTIVE" : "ACTIVE";
@@ -159,7 +159,7 @@ export async function updateSystemEmail(
 }
 
 export async function resetSystemEmail(tx: TenantTx, ctx: ServiceCtx, key: string) {
-  const entry = await requireEntry(key);
+  const entry = requireEntry(key);
   const existing = await loadOverride(tx, ctx.tenantId, entry.key);
   if (existing) {
     await notificationRepository.deleteTemplate(tx, existing.id);
@@ -174,7 +174,7 @@ export async function setSystemEmailEnabled(
   rawBody: unknown,
 ) {
   const body = setSystemEmailEnabledBodySchema.parse(rawBody);
-  const entry = await requireEntry(key);
+  const entry = requireEntry(key);
   const existing = await loadOverride(tx, ctx.tenantId, entry.key);
 
   if (body.enabled) {
@@ -200,7 +200,7 @@ export async function setSystemEmailEnabled(
   await upsertEmailTemplate(tx, ctx, {
     key: entry.key,
     subject: existing?.subject?.trim() || entry.defaultSubject,
-    body: existing?.body?.trim() || entry.defaultBody,
+    body: existing?.body.trim() || entry.defaultBody,
     status: "INACTIVE",
     existing,
   });
@@ -209,7 +209,7 @@ export async function setSystemEmailEnabled(
 }
 
 export async function previewSystemEmail(tx: TenantTx, ctx: ServiceCtx, key: string) {
-  const entry = await requireEntry(key);
+  const entry = requireEntry(key);
   const override = await loadOverride(tx, ctx.tenantId, entry.key);
   const dto = toDto(entry, override);
   const sampleVariables = sampleVariablesFromDefs(entry.variables);
@@ -231,8 +231,8 @@ export async function previewSystemEmail(tx: TenantTx, ctx: ServiceCtx, key: str
 async function resolveTransactionalSender(tx: TenantTx) {
   const channel = await readTenantEmailChannel(tx, "transactionalEmail");
   const provider = getEmailProvider();
-  const fromEmail = channel.fromEmail?.trim();
-  const fromName = channel.fromName?.trim();
+  const fromEmail = channel.fromEmail.trim();
+  const fromName = channel.fromName.trim();
   if ((!fromEmail || !fromName) && !provider.isConfigured()) {
     throw validationError(
       "Configure Transactional Email channel settings (From name and From email) before sending.",
@@ -252,7 +252,7 @@ export async function testSystemEmail(
   rawBody: unknown,
 ) {
   const body = testSystemEmailBodySchema.parse(rawBody);
-  const entry = await requireEntry(key);
+  const entry = requireEntry(key);
   const override = await loadOverride(tx, ctx.tenantId, entry.key);
   const dto = toDto(entry, override);
   if (!dto.enabled) {

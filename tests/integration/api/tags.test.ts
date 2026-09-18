@@ -21,11 +21,16 @@ describeWithDb("lesson tags integration", () => {
     const fixture = await createLessonEngineFixture();
 
     const result = await withTenantTx(lessonTenantTx(fixture), async (tx) =>
-      createTagAndAttachToLesson(tx, instructorCtx(fixture, "req_tag_create"), fixture.draftLessonId, {
-        title: "Foundations",
-        description: "Core concepts",
-        visibility: "public",
-      }),
+      createTagAndAttachToLesson(
+        tx,
+        instructorCtx(fixture, "req_tag_create"),
+        fixture.draftLessonId,
+        {
+          title: "Foundations",
+          description: "Core concepts",
+          visibility: "public",
+        },
+      ),
     );
 
     expect(result.tag.title).toBe("Foundations");

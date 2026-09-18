@@ -23,7 +23,7 @@ Comprehensive guide to optimizing PixiJS applications for maximum performance an
 ### Built-in Stats
 
 ```javascript
-import { Application } from 'pixi.js';
+import { Application } from "pixi.js";
 
 const app = new Application();
 await app.init({ width: 800, height: 600 });
@@ -32,10 +32,10 @@ await app.init({ width: 800, height: 600 });
 app.ticker.add(() => {
   const stats = app.renderer.stats;
 
-  console.log('FPS:', Math.round(1000 / app.ticker.deltaMS));
-  console.log('Draw calls:', stats.drawCalls);
-  console.log('Texture bind count:', stats.textureCount);
-  console.log('Shader bind count:', stats.shaderCount);
+  console.log("FPS:", Math.round(1000 / app.ticker.deltaMS));
+  console.log("Draw calls:", stats.drawCalls);
+  console.log("Texture bind count:", stats.textureCount);
+  console.log("Shader bind count:", stats.shaderCount);
 });
 ```
 
@@ -55,7 +55,7 @@ class PerformanceMonitor {
   }
 
   createDisplay() {
-    this.container = document.createElement('div');
+    this.container = document.createElement("div");
     this.container.style.cssText = `
       position: fixed;
       top: 10px;
@@ -75,7 +75,7 @@ class PerformanceMonitor {
     const now = performance.now();
 
     if (now - this.lastTime >= 1000) {
-      this.fps = Math.round(this.frameCount * 1000 / (now - this.lastTime));
+      this.fps = Math.round((this.frameCount * 1000) / (now - this.lastTime));
       this.frameCount = 0;
       this.lastTime = now;
 
@@ -87,7 +87,7 @@ class PerformanceMonitor {
   }
 
   render() {
-    const color = this.fps >= 55 ? '#0f0' : this.fps >= 30 ? '#ff0' : '#f00';
+    const color = this.fps >= 55 ? "#0f0" : this.fps >= 30 ? "#ff0" : "#f00";
     this.container.style.color = color;
 
     this.container.innerHTML = `
@@ -102,7 +102,7 @@ class PerformanceMonitor {
     let count = 0;
     const traverse = (container) => {
       if (container.children) {
-        container.children.forEach(child => {
+        container.children.forEach((child) => {
           count++;
           traverse(child);
         });
@@ -117,7 +117,7 @@ class PerformanceMonitor {
       const mb = (performance.memory.usedJSHeapSize / 1048576).toFixed(2);
       return `${mb} MB`;
     }
-    return 'N/A';
+    return "N/A";
   }
 }
 
@@ -136,7 +136,7 @@ const monitor = new PerformanceMonitor(app);
 **Solution**: Use ParticleContainer with static properties.
 
 ```javascript
-import { ParticleContainer, Particle, Texture } from 'pixi.js';
+import { ParticleContainer, Particle, Texture } from "pixi.js";
 
 // ❌ BAD: Regular container (slow)
 const container = new Container();
@@ -151,18 +151,18 @@ for (let i = 0; i < 10000; i++) {
 const particles = new ParticleContainer({
   maxSize: 10000,
   dynamicProperties: {
-    position: true,   // Only if you need to update positions
-    scale: false,     // Static scale
-    rotation: false,  // Static rotation
-    color: false      // Static color
-  }
+    position: true, // Only if you need to update positions
+    scale: false, // Static scale
+    rotation: false, // Static rotation
+    color: false, // Static color
+  },
 });
 
 for (let i = 0; i < 10000; i++) {
   const particle = new Particle({
     texture,
     x: Math.random() * 800,
-    y: Math.random() * 600
+    y: Math.random() * 600,
   });
   particles.addParticle(particle);
 }
@@ -211,13 +211,13 @@ app.stage.addChild(group1, group2);
 **Solution**: Enable viewport culling.
 
 ```javascript
-import { Application } from 'pixi.js';
+import { Application } from "pixi.js";
 
 const app = new Application();
 await app.init({
   width: 800,
   height: 600,
-  cullable: true  // Enable automatic culling
+  cullable: true, // Enable automatic culling
 });
 
 // Or per-object
@@ -227,24 +227,24 @@ sprite.cullable = true;
 app.ticker.add(() => {
   const bounds = app.screen;
 
-  sprites.forEach(sprite => {
+  sprites.forEach((sprite) => {
     const spriteBounds = sprite.getBounds();
 
     // Check if sprite is in viewport
-    sprite.renderable = (
+    sprite.renderable =
       spriteBounds.x < bounds.width &&
       spriteBounds.x + spriteBounds.width > 0 &&
       spriteBounds.y < bounds.height &&
-      spriteBounds.y + spriteBounds.height > 0
-    );
+      spriteBounds.y + spriteBounds.height > 0;
   });
 });
 ```
 
 **CullerPlugin**:
+
 ```javascript
 // Automatic viewport culling plugin
-import { CullerPlugin } from 'pixi.js';
+import { CullerPlugin } from "pixi.js";
 
 // Enabled by default in Application
 app.cullable = true;
@@ -261,17 +261,15 @@ app.cullable = true;
 **Solution**: Convert to texture using `cacheAsBitmap`.
 
 ```javascript
-import { Graphics } from 'pixi.js';
+import { Graphics } from "pixi.js";
 
 const complexShape = new Graphics();
 
 // Draw many shapes
 for (let i = 0; i < 100; i++) {
-  complexShape.circle(
-    Math.random() * 200,
-    Math.random() * 200,
-    Math.random() * 10
-  ).fill(Math.random() * 0xffffff);
+  complexShape
+    .circle(Math.random() * 200, Math.random() * 200, Math.random() * 10)
+    .fill(Math.random() * 0xffffff);
 }
 
 // ✅ Cache as bitmap for static graphics
@@ -282,6 +280,7 @@ complexShape.cacheAsBitmap = true;
 ```
 
 **When to Use**:
+
 - ✅ Static UI elements
 - ✅ Backgrounds
 - ✅ Complex shapes that don't change
@@ -305,7 +304,7 @@ await app.init({
   width: 800,
   height: 600,
   resolution,
-  autoDensity: true
+  autoDensity: true,
 });
 
 // Dynamic resolution scaling
@@ -333,27 +332,31 @@ app.ticker.add(adjustResolution);
 **Solution**: Explicitly destroy textures when done.
 
 ```javascript
-import { Texture } from 'pixi.js';
+import { Texture } from "pixi.js";
 
-const texture = Texture.from('image.png');
+const texture = Texture.from("image.png");
 const sprite = new Sprite(texture);
 
 // When done
 sprite.destroy({ texture: true, baseTexture: true });
 
 // Or destroy texture directly
-texture.destroy(true);  // true = also destroy baseTexture
+texture.destroy(true); // true = also destroy baseTexture
 ```
 
 **Batch Destruction with Delay**:
+
 ```javascript
 // Prevent frame drops by staggering destruction
 const textures = [tex1, tex2, tex3, tex4];
 
 textures.forEach((tex, index) => {
-  setTimeout(() => {
-    tex.destroy(true);
-  }, index * 50 + Math.random() * 50);
+  setTimeout(
+    () => {
+      tex.destroy(true);
+    },
+    index * 50 + Math.random() * 50,
+  );
 });
 ```
 
@@ -366,14 +369,14 @@ textures.forEach((tex, index) => {
 **Solution**: Pack images into sprite sheets.
 
 ```javascript
-import { Assets, Sprite } from 'pixi.js';
+import { Assets, Sprite } from "pixi.js";
 
 // Load sprite sheet
-await Assets.load('spritesheet.json');
+await Assets.load("spritesheet.json");
 
 // Access individual frames
-const texture1 = Texture.from('frame1.png');
-const texture2 = Texture.from('frame2.png');
+const texture1 = Texture.from("frame1.png");
+const texture2 = Texture.from("frame2.png");
 
 const sprite1 = new Sprite(texture1);
 const sprite2 = new Sprite(texture2);
@@ -383,6 +386,7 @@ app.stage.addChild(sprite1, sprite2);
 ```
 
 **Tools for Creating Sprite Sheets**:
+
 - TexturePacker: https://www.codeandweb.com/texturepacker
 - ShoeBox: https://renderhjs.net/shoebox/
 - Free Texture Packer: https://free-tex-packer.com/
@@ -397,10 +401,10 @@ app.stage.addChild(sprite1, sprite2);
 
 ```javascript
 // ❌ BAD: 4096x4096 texture (64MB RGBA)
-const hugeTexture = Texture.from('huge-image-4k.png');
+const hugeTexture = Texture.from("huge-image-4k.png");
 
 // ✅ GOOD: 1024x1024 texture (4MB RGBA)
-const optimizedTexture = Texture.from('optimized-image-1k.png');
+const optimizedTexture = Texture.from("optimized-image-1k.png");
 
 // Power-of-2 sizes for best performance
 // Good sizes: 256, 512, 1024, 2048
@@ -422,24 +426,17 @@ texture.baseTexture.scaleMode = SCALE_MODES.LINEAR;
 **Solution**: Load assets on-demand.
 
 ```javascript
-import { Assets } from 'pixi.js';
+import { Assets } from "pixi.js";
 
 // Preload critical assets
-const criticalAssets = await Assets.load([
-  'ui/background.png',
-  'ui/logo.png'
-]);
+const criticalAssets = await Assets.load(["ui/background.png", "ui/logo.png"]);
 
 // Background load game assets
-Assets.backgroundLoad([
-  'characters/hero.png',
-  'characters/enemy.png',
-  'levels/level1.jpg'
-]);
+Assets.backgroundLoad(["characters/hero.png", "characters/enemy.png", "levels/level1.jpg"]);
 
 // Check if asset is loaded
-if (Assets.cache.has('characters/hero.png')) {
-  const heroTexture = Assets.get('characters/hero.png');
+if (Assets.cache.has("characters/hero.png")) {
+  const heroTexture = Assets.get("characters/hero.png");
   const hero = new Sprite(heroTexture);
 }
 
@@ -457,13 +454,13 @@ async function showLevel(levelNumber) {
 ### 1. Disable Unnecessary Features
 
 ```javascript
-import { Container } from 'pixi.js';
+import { Container } from "pixi.js";
 
 const container = new Container();
 
 // ❌ Don't enable unless needed
-container.sortableChildren = false;  // Z-index sorting (expensive)
-container.interactiveChildren = false;  // Child interaction (expensive)
+container.sortableChildren = false; // Z-index sorting (expensive)
+container.interactiveChildren = false; // Child interaction (expensive)
 
 // ✅ Enable only when required
 if (needsSorting) {
@@ -523,7 +520,7 @@ class SpritePool {
   }
 
   reset() {
-    this.active.forEach(sprite => {
+    this.active.forEach((sprite) => {
       sprite.visible = false;
       this.available.push(sprite);
     });
@@ -584,22 +581,22 @@ sprite.y = parentY + childY;
 **Solution**: Use sparingly, optimize where possible.
 
 ```javascript
-import { BlurFilter } from 'pixi.js';
+import { BlurFilter } from "pixi.js";
 
 // ❌ BAD: Filter on every sprite
-sprites.forEach(sprite => {
+sprites.forEach((sprite) => {
   sprite.filters = [new BlurFilter()];
 });
 
 // ✅ GOOD: Filter on container
 const container = new Container();
-sprites.forEach(sprite => container.addChild(sprite));
+sprites.forEach((sprite) => container.addChild(sprite));
 container.filters = [new BlurFilter()];
 
 // ✅ BETTER: Bake filter into texture
 const filteredTexture = renderer.filters.generateFilteredTexture({
   texture: originalTexture,
-  filters: [new BlurFilter({ strength: 5 })]
+  filters: [new BlurFilter({ strength: 5 })],
 });
 
 const sprite = new Sprite(filteredTexture);
@@ -614,7 +611,7 @@ const sprite = new Sprite(filteredTexture);
 **Solution**: Manually specify `filterArea`.
 
 ```javascript
-import { BlurFilter, Rectangle } from 'pixi.js';
+import { BlurFilter, Rectangle } from "pixi.js";
 
 const sprite = new Sprite(texture);
 sprite.filters = [new BlurFilter()];
@@ -623,7 +620,7 @@ sprite.filters = [new BlurFilter()];
 sprite.filterArea = new Rectangle(0, 0, sprite.width, sprite.height);
 
 // Update if sprite resizes
-sprite.on('resize', () => {
+sprite.on("resize", () => {
   sprite.filterArea = new Rectangle(0, 0, sprite.width, sprite.height);
 });
 ```
@@ -642,7 +639,7 @@ sprite.filters = [new BlurFilter()];
 sprite.filters = null;
 
 // Toggle based on game state
-if (gameState === 'paused') {
+if (gameState === "paused") {
   sprite.filters = [new BlurFilter()];
 } else {
   sprite.filters = null;
@@ -660,23 +657,23 @@ if (gameState === 'paused') {
 **Solution**: Use BitmapText for frequently changing text.
 
 ```javascript
-import { Text, BitmapText } from 'pixi.js';
+import { Text, BitmapText } from "pixi.js";
 
 // ❌ BAD: Standard Text (expensive updates)
-const scoreText = new Text({ text: 'Score: 0' });
+const scoreText = new Text({ text: "Score: 0" });
 
 app.ticker.add(() => {
-  scoreText.text = `Score: ${++score}`;  // Re-renders texture every frame
+  scoreText.text = `Score: ${++score}`; // Re-renders texture every frame
 });
 
 // ✅ GOOD: BitmapText (much faster)
 const scoreBitmap = new BitmapText({
-  text: 'Score: 0',
-  style: { fontFamily: 'MyBitmapFont', fontSize: 24 }
+  text: "Score: 0",
+  style: { fontFamily: "MyBitmapFont", fontSize: 24 },
 });
 
 app.ticker.add(() => {
-  scoreBitmap.text = `Score: ${++score}`;  // Fast glyph updates
+  scoreBitmap.text = `Score: ${++score}`; // Fast glyph updates
 });
 ```
 
@@ -691,13 +688,13 @@ app.ticker.add(() => {
 **Solution**: Lower resolution for less critical text.
 
 ```javascript
-import { Text, TextStyle } from 'pixi.js';
+import { Text, TextStyle } from "pixi.js";
 
 const style = new TextStyle({ fontSize: 36 });
-const text = new Text({ text: 'Hello', style });
+const text = new Text({ text: "Hello", style });
 
 // Default resolution matches renderer (e.g., 2 on Retina)
-text.resolution = 1;  // Reduce to 1 for memory savings
+text.resolution = 1; // Reduce to 1 for memory savings
 
 // Still looks good, uses less memory
 ```
@@ -711,16 +708,16 @@ text.resolution = 1;  // Reduce to 1 for memory savings
 **Solution**: Apply filters at texture creation.
 
 ```javascript
-import { Text, TextStyle, BlurFilter } from 'pixi.js';
+import { Text, TextStyle, BlurFilter } from "pixi.js";
 
 const style = new TextStyle({
-  fontFamily: 'Arial',
+  fontFamily: "Arial",
   fontSize: 36,
-  fill: '#ffffff',
-  filters: [new BlurFilter()]  // Baked into texture at creation
+  fill: "#ffffff",
+  filters: [new BlurFilter()], // Baked into texture at creation
 });
 
-const text = new Text({ text: 'Glowing Text', style });
+const text = new Text({ text: "Glowing Text", style });
 
 // Filter applied once at creation, not every frame
 ```
@@ -732,23 +729,23 @@ const text = new Text({ text: 'Glowing Text', style });
 ### 1. Destroy Display Objects Properly
 
 ```javascript
-import { Sprite, Container } from 'pixi.js';
+import { Sprite, Container } from "pixi.js";
 
 const sprite = new Sprite(texture);
 const container = new Container();
 
 // ✅ GOOD: Destroy with options
 sprite.destroy({
-  children: true,      // Destroy children
-  texture: false,      // Keep texture (if used elsewhere)
-  baseTexture: false   // Keep baseTexture
+  children: true, // Destroy children
+  texture: false, // Keep texture (if used elsewhere)
+  baseTexture: false, // Keep baseTexture
 });
 
 // Destroy container and all children
 container.destroy({ children: true });
 
 // Destroy texture when completely done
-texture.destroy(true);  // true = also destroy baseTexture
+texture.destroy(true); // true = also destroy baseTexture
 ```
 
 ---
@@ -758,12 +755,12 @@ texture.destroy(true);  // true = also destroy baseTexture
 ```javascript
 const sprite = new Sprite(texture);
 
-sprite.on('pointerdown', onPointerDown);
-sprite.on('pointermove', onPointerMove);
+sprite.on("pointerdown", onPointerDown);
+sprite.on("pointermove", onPointerMove);
 
 // ✅ Remove listeners before destroying
-sprite.off('pointerdown', onPointerDown);
-sprite.off('pointermove', onPointerMove);
+sprite.off("pointerdown", onPointerDown);
+sprite.off("pointermove", onPointerMove);
 
 // Or remove all
 sprite.removeAllListeners();
@@ -800,8 +797,8 @@ const app = new Application();
 await app.init({
   width: 800,
   height: 600,
-  antialias: false,  // Faster on mobile
-  resolution: 1       // Lower resolution
+  antialias: false, // Faster on mobile
+  resolution: 1, // Lower resolution
 });
 ```
 
@@ -823,13 +820,13 @@ for (let i = 0; i < particleCount; i++) {
 ### 3. Limit Frame Rate on Battery
 
 ```javascript
-import { Ticker } from 'pixi.js';
+import { Ticker } from "pixi.js";
 
 function checkBattery() {
-  if ('getBattery' in navigator) {
-    navigator.getBattery().then(battery => {
+  if ("getBattery" in navigator) {
+    navigator.getBattery().then((battery) => {
       if (battery.charging === false && battery.level < 0.2) {
-        Ticker.shared.maxFPS = 30;  // Reduce to 30 FPS
+        Ticker.shared.maxFPS = 30; // Reduce to 30 FPS
       } else {
         Ticker.shared.maxFPS = 60;
       }
@@ -848,11 +845,11 @@ checkBattery();
 
 ```javascript
 // worker.js
-self.onmessage = function(e) {
+self.onmessage = function (e) {
   const { particles, delta } = e.data;
 
   // Update particle physics
-  particles.forEach(p => {
+  particles.forEach((p) => {
     p.vx += (Math.random() - 0.5) * 0.1;
     p.vy += 0.05;
     p.x += p.vx * delta;
@@ -863,9 +860,9 @@ self.onmessage = function(e) {
 };
 
 // main.js
-const worker = new Worker('worker.js');
+const worker = new Worker("worker.js");
 
-worker.onmessage = function(e) {
+worker.onmessage = function (e) {
   const updatedParticles = e.data;
 
   // Apply to PixiJS particles
@@ -876,11 +873,11 @@ worker.onmessage = function(e) {
 };
 
 app.ticker.add((ticker) => {
-  const particleData = particles.particleChildren.map(p => ({
+  const particleData = particles.particleChildren.map((p) => ({
     x: p.x,
     y: p.y,
     vx: p.vx || 0,
-    vy: p.vy || 0
+    vy: p.vy || 0,
   }));
 
   worker.postMessage({ particles: particleData, delta: ticker.deltaTime });
@@ -904,7 +901,7 @@ class SpatialHash {
 
   insert(sprite) {
     const cells = this.getCells(sprite);
-    cells.forEach(cell => {
+    cells.forEach((cell) => {
       const key = `${cell.x},${cell.y}`;
       if (!this.grid.has(key)) {
         this.grid.set(key, []);
@@ -935,11 +932,11 @@ class SpatialHash {
     const cells = this.getCells(sprite);
     const nearby = new Set();
 
-    cells.forEach(cell => {
+    cells.forEach((cell) => {
       const key = `${cell.x},${cell.y}`;
       const sprites = this.grid.get(key);
       if (sprites) {
-        sprites.forEach(s => {
+        sprites.forEach((s) => {
           if (s !== sprite) nearby.add(s);
         });
       }
@@ -956,12 +953,12 @@ app.ticker.add(() => {
   spatialHash.clear();
 
   // Insert all sprites
-  sprites.forEach(sprite => spatialHash.insert(sprite));
+  sprites.forEach((sprite) => spatialHash.insert(sprite));
 
   // Check collisions only with nearby sprites
-  sprites.forEach(sprite => {
+  sprites.forEach((sprite) => {
     const nearby = spatialHash.getNearby(sprite);
-    nearby.forEach(other => {
+    nearby.forEach((other) => {
       if (checkCollision(sprite, other)) {
         handleCollision(sprite, other);
       }
@@ -977,6 +974,7 @@ app.ticker.add(() => {
 ## Performance Checklist
 
 ✅ **Rendering**
+
 - [ ] Use ParticleContainer for 1,000+ sprites
 - [ ] Batch sprites by texture
 - [ ] Enable culling for off-screen objects
@@ -984,33 +982,39 @@ app.ticker.add(() => {
 - [ ] Minimize draw calls
 
 ✅ **Textures**
+
 - [ ] Destroy unused textures
 - [ ] Use sprite atlases
 - [ ] Optimize texture sizes (power-of-2)
 - [ ] Lazy load non-critical assets
 
 ✅ **Containers**
+
 - [ ] Disable sortableChildren unless needed
 - [ ] Use object pooling
 - [ ] Keep hierarchy shallow
 
 ✅ **Filters**
+
 - [ ] Limit filter usage (1-2 per scene)
 - [ ] Specify filterArea
 - [ ] Release filters when not needed
 - [ ] Bake filters into textures
 
 ✅ **Text**
+
 - [ ] Use BitmapText for dynamic text
 - [ ] Reduce text resolution
 - [ ] Bake filters into TextStyle
 
 ✅ **Memory**
+
 - [ ] Destroy objects properly
 - [ ] Clear event listeners
 - [ ] Monitor memory usage
 
 ✅ **Mobile**
+
 - [ ] Disable anti-aliasing
 - [ ] Reduce particle counts
 - [ ] Lower resolution
@@ -1024,26 +1028,26 @@ app.ticker.add(() => {
 
 ```javascript
 // Measure specific operations
-console.time('particleUpdate');
+console.time("particleUpdate");
 updateParticles();
-console.timeEnd('particleUpdate');
+console.timeEnd("particleUpdate");
 
 // Profile draw calls
-console.log('Draw calls:', app.renderer.stats.drawCalls.total);
+console.log("Draw calls:", app.renderer.stats.drawCalls.total);
 
 // Check texture count
-console.log('Textures bound:', app.renderer.stats.textureCount);
+console.log("Textures bound:", app.renderer.stats.textureCount);
 ```
 
 ### Common Issues
 
-| Symptom | Likely Cause | Solution |
-|---------|--------------|----------|
-| Low FPS | Too many draw calls | Batch sprites, use atlases |
-| Stuttering | GC pauses | Use object pooling |
-| High memory | Texture leaks | Destroy textures properly |
-| Slow filters | Too many filters | Limit usage, bake into textures |
-| Laggy text | Text updates | Use BitmapText |
+| Symptom      | Likely Cause        | Solution                        |
+| ------------ | ------------------- | ------------------------------- |
+| Low FPS      | Too many draw calls | Batch sprites, use atlases      |
+| Stuttering   | GC pauses           | Use object pooling              |
+| High memory  | Texture leaks       | Destroy textures properly       |
+| Slow filters | Too many filters    | Limit usage, bake into textures |
+| Laggy text   | Text updates        | Use BitmapText                  |
 
 ---
 

@@ -215,6 +215,9 @@ export type AuthPrincipalWhereInput = {
   created_at?: Prisma.DateTimeFilter<"AuthPrincipal"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"AuthPrincipal"> | Date | string
   memberships?: Prisma.MembershipListRelationFilter
+  platform_grants?: Prisma.PlatformOperatorListRelationFilter
+  platform_grants_made?: Prisma.PlatformOperatorListRelationFilter
+  platform_grants_revoked?: Prisma.PlatformOperatorListRelationFilter
 }
 
 export type AuthPrincipalOrderByWithRelationInput = {
@@ -228,6 +231,9 @@ export type AuthPrincipalOrderByWithRelationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   memberships?: Prisma.MembershipOrderByRelationAggregateInput
+  platform_grants?: Prisma.PlatformOperatorOrderByRelationAggregateInput
+  platform_grants_made?: Prisma.PlatformOperatorOrderByRelationAggregateInput
+  platform_grants_revoked?: Prisma.PlatformOperatorOrderByRelationAggregateInput
 }
 
 export type AuthPrincipalWhereUniqueInput = Prisma.AtLeast<{
@@ -244,6 +250,9 @@ export type AuthPrincipalWhereUniqueInput = Prisma.AtLeast<{
   created_at?: Prisma.DateTimeFilter<"AuthPrincipal"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"AuthPrincipal"> | Date | string
   memberships?: Prisma.MembershipListRelationFilter
+  platform_grants?: Prisma.PlatformOperatorListRelationFilter
+  platform_grants_made?: Prisma.PlatformOperatorListRelationFilter
+  platform_grants_revoked?: Prisma.PlatformOperatorListRelationFilter
 }, "id" | "supabase_user_id" | "email" | "email_normalized">
 
 export type AuthPrincipalOrderByWithAggregationInput = {
@@ -287,6 +296,9 @@ export type AuthPrincipalCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   memberships?: Prisma.MembershipCreateNestedManyWithoutAuth_principalInput
+  platform_grants?: Prisma.PlatformOperatorCreateNestedManyWithoutPrincipalInput
+  platform_grants_made?: Prisma.PlatformOperatorCreateNestedManyWithoutGranted_byInput
+  platform_grants_revoked?: Prisma.PlatformOperatorCreateNestedManyWithoutRevoked_byInput
 }
 
 export type AuthPrincipalUncheckedCreateInput = {
@@ -300,6 +312,9 @@ export type AuthPrincipalUncheckedCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   memberships?: Prisma.MembershipUncheckedCreateNestedManyWithoutAuth_principalInput
+  platform_grants?: Prisma.PlatformOperatorUncheckedCreateNestedManyWithoutPrincipalInput
+  platform_grants_made?: Prisma.PlatformOperatorUncheckedCreateNestedManyWithoutGranted_byInput
+  platform_grants_revoked?: Prisma.PlatformOperatorUncheckedCreateNestedManyWithoutRevoked_byInput
 }
 
 export type AuthPrincipalUpdateInput = {
@@ -313,6 +328,9 @@ export type AuthPrincipalUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   memberships?: Prisma.MembershipUpdateManyWithoutAuth_principalNestedInput
+  platform_grants?: Prisma.PlatformOperatorUpdateManyWithoutPrincipalNestedInput
+  platform_grants_made?: Prisma.PlatformOperatorUpdateManyWithoutGranted_byNestedInput
+  platform_grants_revoked?: Prisma.PlatformOperatorUpdateManyWithoutRevoked_byNestedInput
 }
 
 export type AuthPrincipalUncheckedUpdateInput = {
@@ -326,6 +344,9 @@ export type AuthPrincipalUncheckedUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   memberships?: Prisma.MembershipUncheckedUpdateManyWithoutAuth_principalNestedInput
+  platform_grants?: Prisma.PlatformOperatorUncheckedUpdateManyWithoutPrincipalNestedInput
+  platform_grants_made?: Prisma.PlatformOperatorUncheckedUpdateManyWithoutGranted_byNestedInput
+  platform_grants_revoked?: Prisma.PlatformOperatorUncheckedUpdateManyWithoutRevoked_byNestedInput
 }
 
 export type AuthPrincipalCreateManyInput = {
@@ -400,9 +421,60 @@ export type AuthPrincipalMinOrderByAggregateInput = {
   updated_at?: Prisma.SortOrder
 }
 
+export type AuthPrincipalScalarRelationFilter = {
+  is?: Prisma.AuthPrincipalWhereInput
+  isNot?: Prisma.AuthPrincipalWhereInput
+}
+
 export type AuthPrincipalNullableScalarRelationFilter = {
   is?: Prisma.AuthPrincipalWhereInput | null
   isNot?: Prisma.AuthPrincipalWhereInput | null
+}
+
+export type AuthPrincipalCreateNestedOneWithoutPlatform_grantsInput = {
+  create?: Prisma.XOR<Prisma.AuthPrincipalCreateWithoutPlatform_grantsInput, Prisma.AuthPrincipalUncheckedCreateWithoutPlatform_grantsInput>
+  connectOrCreate?: Prisma.AuthPrincipalCreateOrConnectWithoutPlatform_grantsInput
+  connect?: Prisma.AuthPrincipalWhereUniqueInput
+}
+
+export type AuthPrincipalCreateNestedOneWithoutPlatform_grants_madeInput = {
+  create?: Prisma.XOR<Prisma.AuthPrincipalCreateWithoutPlatform_grants_madeInput, Prisma.AuthPrincipalUncheckedCreateWithoutPlatform_grants_madeInput>
+  connectOrCreate?: Prisma.AuthPrincipalCreateOrConnectWithoutPlatform_grants_madeInput
+  connect?: Prisma.AuthPrincipalWhereUniqueInput
+}
+
+export type AuthPrincipalCreateNestedOneWithoutPlatform_grants_revokedInput = {
+  create?: Prisma.XOR<Prisma.AuthPrincipalCreateWithoutPlatform_grants_revokedInput, Prisma.AuthPrincipalUncheckedCreateWithoutPlatform_grants_revokedInput>
+  connectOrCreate?: Prisma.AuthPrincipalCreateOrConnectWithoutPlatform_grants_revokedInput
+  connect?: Prisma.AuthPrincipalWhereUniqueInput
+}
+
+export type AuthPrincipalUpdateOneRequiredWithoutPlatform_grantsNestedInput = {
+  create?: Prisma.XOR<Prisma.AuthPrincipalCreateWithoutPlatform_grantsInput, Prisma.AuthPrincipalUncheckedCreateWithoutPlatform_grantsInput>
+  connectOrCreate?: Prisma.AuthPrincipalCreateOrConnectWithoutPlatform_grantsInput
+  upsert?: Prisma.AuthPrincipalUpsertWithoutPlatform_grantsInput
+  connect?: Prisma.AuthPrincipalWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.AuthPrincipalUpdateToOneWithWhereWithoutPlatform_grantsInput, Prisma.AuthPrincipalUpdateWithoutPlatform_grantsInput>, Prisma.AuthPrincipalUncheckedUpdateWithoutPlatform_grantsInput>
+}
+
+export type AuthPrincipalUpdateOneWithoutPlatform_grants_madeNestedInput = {
+  create?: Prisma.XOR<Prisma.AuthPrincipalCreateWithoutPlatform_grants_madeInput, Prisma.AuthPrincipalUncheckedCreateWithoutPlatform_grants_madeInput>
+  connectOrCreate?: Prisma.AuthPrincipalCreateOrConnectWithoutPlatform_grants_madeInput
+  upsert?: Prisma.AuthPrincipalUpsertWithoutPlatform_grants_madeInput
+  disconnect?: Prisma.AuthPrincipalWhereInput | boolean
+  delete?: Prisma.AuthPrincipalWhereInput | boolean
+  connect?: Prisma.AuthPrincipalWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.AuthPrincipalUpdateToOneWithWhereWithoutPlatform_grants_madeInput, Prisma.AuthPrincipalUpdateWithoutPlatform_grants_madeInput>, Prisma.AuthPrincipalUncheckedUpdateWithoutPlatform_grants_madeInput>
+}
+
+export type AuthPrincipalUpdateOneWithoutPlatform_grants_revokedNestedInput = {
+  create?: Prisma.XOR<Prisma.AuthPrincipalCreateWithoutPlatform_grants_revokedInput, Prisma.AuthPrincipalUncheckedCreateWithoutPlatform_grants_revokedInput>
+  connectOrCreate?: Prisma.AuthPrincipalCreateOrConnectWithoutPlatform_grants_revokedInput
+  upsert?: Prisma.AuthPrincipalUpsertWithoutPlatform_grants_revokedInput
+  disconnect?: Prisma.AuthPrincipalWhereInput | boolean
+  delete?: Prisma.AuthPrincipalWhereInput | boolean
+  connect?: Prisma.AuthPrincipalWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.AuthPrincipalUpdateToOneWithWhereWithoutPlatform_grants_revokedInput, Prisma.AuthPrincipalUpdateWithoutPlatform_grants_revokedInput>, Prisma.AuthPrincipalUncheckedUpdateWithoutPlatform_grants_revokedInput>
 }
 
 export type AuthPrincipalCreateNestedOneWithoutMembershipsInput = {
@@ -421,6 +493,234 @@ export type AuthPrincipalUpdateOneWithoutMembershipsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.AuthPrincipalUpdateToOneWithWhereWithoutMembershipsInput, Prisma.AuthPrincipalUpdateWithoutMembershipsInput>, Prisma.AuthPrincipalUncheckedUpdateWithoutMembershipsInput>
 }
 
+export type AuthPrincipalCreateWithoutPlatform_grantsInput = {
+  id: string
+  supabase_user_id: string
+  email: string
+  email_normalized: string
+  global_status?: string
+  mfa_enabled?: boolean
+  last_login_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  memberships?: Prisma.MembershipCreateNestedManyWithoutAuth_principalInput
+  platform_grants_made?: Prisma.PlatformOperatorCreateNestedManyWithoutGranted_byInput
+  platform_grants_revoked?: Prisma.PlatformOperatorCreateNestedManyWithoutRevoked_byInput
+}
+
+export type AuthPrincipalUncheckedCreateWithoutPlatform_grantsInput = {
+  id: string
+  supabase_user_id: string
+  email: string
+  email_normalized: string
+  global_status?: string
+  mfa_enabled?: boolean
+  last_login_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  memberships?: Prisma.MembershipUncheckedCreateNestedManyWithoutAuth_principalInput
+  platform_grants_made?: Prisma.PlatformOperatorUncheckedCreateNestedManyWithoutGranted_byInput
+  platform_grants_revoked?: Prisma.PlatformOperatorUncheckedCreateNestedManyWithoutRevoked_byInput
+}
+
+export type AuthPrincipalCreateOrConnectWithoutPlatform_grantsInput = {
+  where: Prisma.AuthPrincipalWhereUniqueInput
+  create: Prisma.XOR<Prisma.AuthPrincipalCreateWithoutPlatform_grantsInput, Prisma.AuthPrincipalUncheckedCreateWithoutPlatform_grantsInput>
+}
+
+export type AuthPrincipalCreateWithoutPlatform_grants_madeInput = {
+  id: string
+  supabase_user_id: string
+  email: string
+  email_normalized: string
+  global_status?: string
+  mfa_enabled?: boolean
+  last_login_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  memberships?: Prisma.MembershipCreateNestedManyWithoutAuth_principalInput
+  platform_grants?: Prisma.PlatformOperatorCreateNestedManyWithoutPrincipalInput
+  platform_grants_revoked?: Prisma.PlatformOperatorCreateNestedManyWithoutRevoked_byInput
+}
+
+export type AuthPrincipalUncheckedCreateWithoutPlatform_grants_madeInput = {
+  id: string
+  supabase_user_id: string
+  email: string
+  email_normalized: string
+  global_status?: string
+  mfa_enabled?: boolean
+  last_login_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  memberships?: Prisma.MembershipUncheckedCreateNestedManyWithoutAuth_principalInput
+  platform_grants?: Prisma.PlatformOperatorUncheckedCreateNestedManyWithoutPrincipalInput
+  platform_grants_revoked?: Prisma.PlatformOperatorUncheckedCreateNestedManyWithoutRevoked_byInput
+}
+
+export type AuthPrincipalCreateOrConnectWithoutPlatform_grants_madeInput = {
+  where: Prisma.AuthPrincipalWhereUniqueInput
+  create: Prisma.XOR<Prisma.AuthPrincipalCreateWithoutPlatform_grants_madeInput, Prisma.AuthPrincipalUncheckedCreateWithoutPlatform_grants_madeInput>
+}
+
+export type AuthPrincipalCreateWithoutPlatform_grants_revokedInput = {
+  id: string
+  supabase_user_id: string
+  email: string
+  email_normalized: string
+  global_status?: string
+  mfa_enabled?: boolean
+  last_login_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  memberships?: Prisma.MembershipCreateNestedManyWithoutAuth_principalInput
+  platform_grants?: Prisma.PlatformOperatorCreateNestedManyWithoutPrincipalInput
+  platform_grants_made?: Prisma.PlatformOperatorCreateNestedManyWithoutGranted_byInput
+}
+
+export type AuthPrincipalUncheckedCreateWithoutPlatform_grants_revokedInput = {
+  id: string
+  supabase_user_id: string
+  email: string
+  email_normalized: string
+  global_status?: string
+  mfa_enabled?: boolean
+  last_login_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  memberships?: Prisma.MembershipUncheckedCreateNestedManyWithoutAuth_principalInput
+  platform_grants?: Prisma.PlatformOperatorUncheckedCreateNestedManyWithoutPrincipalInput
+  platform_grants_made?: Prisma.PlatformOperatorUncheckedCreateNestedManyWithoutGranted_byInput
+}
+
+export type AuthPrincipalCreateOrConnectWithoutPlatform_grants_revokedInput = {
+  where: Prisma.AuthPrincipalWhereUniqueInput
+  create: Prisma.XOR<Prisma.AuthPrincipalCreateWithoutPlatform_grants_revokedInput, Prisma.AuthPrincipalUncheckedCreateWithoutPlatform_grants_revokedInput>
+}
+
+export type AuthPrincipalUpsertWithoutPlatform_grantsInput = {
+  update: Prisma.XOR<Prisma.AuthPrincipalUpdateWithoutPlatform_grantsInput, Prisma.AuthPrincipalUncheckedUpdateWithoutPlatform_grantsInput>
+  create: Prisma.XOR<Prisma.AuthPrincipalCreateWithoutPlatform_grantsInput, Prisma.AuthPrincipalUncheckedCreateWithoutPlatform_grantsInput>
+  where?: Prisma.AuthPrincipalWhereInput
+}
+
+export type AuthPrincipalUpdateToOneWithWhereWithoutPlatform_grantsInput = {
+  where?: Prisma.AuthPrincipalWhereInput
+  data: Prisma.XOR<Prisma.AuthPrincipalUpdateWithoutPlatform_grantsInput, Prisma.AuthPrincipalUncheckedUpdateWithoutPlatform_grantsInput>
+}
+
+export type AuthPrincipalUpdateWithoutPlatform_grantsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  supabase_user_id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  email_normalized?: Prisma.StringFieldUpdateOperationsInput | string
+  global_status?: Prisma.StringFieldUpdateOperationsInput | string
+  mfa_enabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  last_login_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.MembershipUpdateManyWithoutAuth_principalNestedInput
+  platform_grants_made?: Prisma.PlatformOperatorUpdateManyWithoutGranted_byNestedInput
+  platform_grants_revoked?: Prisma.PlatformOperatorUpdateManyWithoutRevoked_byNestedInput
+}
+
+export type AuthPrincipalUncheckedUpdateWithoutPlatform_grantsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  supabase_user_id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  email_normalized?: Prisma.StringFieldUpdateOperationsInput | string
+  global_status?: Prisma.StringFieldUpdateOperationsInput | string
+  mfa_enabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  last_login_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.MembershipUncheckedUpdateManyWithoutAuth_principalNestedInput
+  platform_grants_made?: Prisma.PlatformOperatorUncheckedUpdateManyWithoutGranted_byNestedInput
+  platform_grants_revoked?: Prisma.PlatformOperatorUncheckedUpdateManyWithoutRevoked_byNestedInput
+}
+
+export type AuthPrincipalUpsertWithoutPlatform_grants_madeInput = {
+  update: Prisma.XOR<Prisma.AuthPrincipalUpdateWithoutPlatform_grants_madeInput, Prisma.AuthPrincipalUncheckedUpdateWithoutPlatform_grants_madeInput>
+  create: Prisma.XOR<Prisma.AuthPrincipalCreateWithoutPlatform_grants_madeInput, Prisma.AuthPrincipalUncheckedCreateWithoutPlatform_grants_madeInput>
+  where?: Prisma.AuthPrincipalWhereInput
+}
+
+export type AuthPrincipalUpdateToOneWithWhereWithoutPlatform_grants_madeInput = {
+  where?: Prisma.AuthPrincipalWhereInput
+  data: Prisma.XOR<Prisma.AuthPrincipalUpdateWithoutPlatform_grants_madeInput, Prisma.AuthPrincipalUncheckedUpdateWithoutPlatform_grants_madeInput>
+}
+
+export type AuthPrincipalUpdateWithoutPlatform_grants_madeInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  supabase_user_id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  email_normalized?: Prisma.StringFieldUpdateOperationsInput | string
+  global_status?: Prisma.StringFieldUpdateOperationsInput | string
+  mfa_enabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  last_login_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.MembershipUpdateManyWithoutAuth_principalNestedInput
+  platform_grants?: Prisma.PlatformOperatorUpdateManyWithoutPrincipalNestedInput
+  platform_grants_revoked?: Prisma.PlatformOperatorUpdateManyWithoutRevoked_byNestedInput
+}
+
+export type AuthPrincipalUncheckedUpdateWithoutPlatform_grants_madeInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  supabase_user_id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  email_normalized?: Prisma.StringFieldUpdateOperationsInput | string
+  global_status?: Prisma.StringFieldUpdateOperationsInput | string
+  mfa_enabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  last_login_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.MembershipUncheckedUpdateManyWithoutAuth_principalNestedInput
+  platform_grants?: Prisma.PlatformOperatorUncheckedUpdateManyWithoutPrincipalNestedInput
+  platform_grants_revoked?: Prisma.PlatformOperatorUncheckedUpdateManyWithoutRevoked_byNestedInput
+}
+
+export type AuthPrincipalUpsertWithoutPlatform_grants_revokedInput = {
+  update: Prisma.XOR<Prisma.AuthPrincipalUpdateWithoutPlatform_grants_revokedInput, Prisma.AuthPrincipalUncheckedUpdateWithoutPlatform_grants_revokedInput>
+  create: Prisma.XOR<Prisma.AuthPrincipalCreateWithoutPlatform_grants_revokedInput, Prisma.AuthPrincipalUncheckedCreateWithoutPlatform_grants_revokedInput>
+  where?: Prisma.AuthPrincipalWhereInput
+}
+
+export type AuthPrincipalUpdateToOneWithWhereWithoutPlatform_grants_revokedInput = {
+  where?: Prisma.AuthPrincipalWhereInput
+  data: Prisma.XOR<Prisma.AuthPrincipalUpdateWithoutPlatform_grants_revokedInput, Prisma.AuthPrincipalUncheckedUpdateWithoutPlatform_grants_revokedInput>
+}
+
+export type AuthPrincipalUpdateWithoutPlatform_grants_revokedInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  supabase_user_id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  email_normalized?: Prisma.StringFieldUpdateOperationsInput | string
+  global_status?: Prisma.StringFieldUpdateOperationsInput | string
+  mfa_enabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  last_login_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.MembershipUpdateManyWithoutAuth_principalNestedInput
+  platform_grants?: Prisma.PlatformOperatorUpdateManyWithoutPrincipalNestedInput
+  platform_grants_made?: Prisma.PlatformOperatorUpdateManyWithoutGranted_byNestedInput
+}
+
+export type AuthPrincipalUncheckedUpdateWithoutPlatform_grants_revokedInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  supabase_user_id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  email_normalized?: Prisma.StringFieldUpdateOperationsInput | string
+  global_status?: Prisma.StringFieldUpdateOperationsInput | string
+  mfa_enabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  last_login_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.MembershipUncheckedUpdateManyWithoutAuth_principalNestedInput
+  platform_grants?: Prisma.PlatformOperatorUncheckedUpdateManyWithoutPrincipalNestedInput
+  platform_grants_made?: Prisma.PlatformOperatorUncheckedUpdateManyWithoutGranted_byNestedInput
+}
+
 export type AuthPrincipalCreateWithoutMembershipsInput = {
   id: string
   supabase_user_id: string
@@ -431,6 +731,9 @@ export type AuthPrincipalCreateWithoutMembershipsInput = {
   last_login_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
+  platform_grants?: Prisma.PlatformOperatorCreateNestedManyWithoutPrincipalInput
+  platform_grants_made?: Prisma.PlatformOperatorCreateNestedManyWithoutGranted_byInput
+  platform_grants_revoked?: Prisma.PlatformOperatorCreateNestedManyWithoutRevoked_byInput
 }
 
 export type AuthPrincipalUncheckedCreateWithoutMembershipsInput = {
@@ -443,6 +746,9 @@ export type AuthPrincipalUncheckedCreateWithoutMembershipsInput = {
   last_login_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
+  platform_grants?: Prisma.PlatformOperatorUncheckedCreateNestedManyWithoutPrincipalInput
+  platform_grants_made?: Prisma.PlatformOperatorUncheckedCreateNestedManyWithoutGranted_byInput
+  platform_grants_revoked?: Prisma.PlatformOperatorUncheckedCreateNestedManyWithoutRevoked_byInput
 }
 
 export type AuthPrincipalCreateOrConnectWithoutMembershipsInput = {
@@ -471,6 +777,9 @@ export type AuthPrincipalUpdateWithoutMembershipsInput = {
   last_login_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  platform_grants?: Prisma.PlatformOperatorUpdateManyWithoutPrincipalNestedInput
+  platform_grants_made?: Prisma.PlatformOperatorUpdateManyWithoutGranted_byNestedInput
+  platform_grants_revoked?: Prisma.PlatformOperatorUpdateManyWithoutRevoked_byNestedInput
 }
 
 export type AuthPrincipalUncheckedUpdateWithoutMembershipsInput = {
@@ -483,6 +792,9 @@ export type AuthPrincipalUncheckedUpdateWithoutMembershipsInput = {
   last_login_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  platform_grants?: Prisma.PlatformOperatorUncheckedUpdateManyWithoutPrincipalNestedInput
+  platform_grants_made?: Prisma.PlatformOperatorUncheckedUpdateManyWithoutGranted_byNestedInput
+  platform_grants_revoked?: Prisma.PlatformOperatorUncheckedUpdateManyWithoutRevoked_byNestedInput
 }
 
 
@@ -492,10 +804,16 @@ export type AuthPrincipalUncheckedUpdateWithoutMembershipsInput = {
 
 export type AuthPrincipalCountOutputType = {
   memberships: number
+  platform_grants: number
+  platform_grants_made: number
+  platform_grants_revoked: number
 }
 
 export type AuthPrincipalCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   memberships?: boolean | AuthPrincipalCountOutputTypeCountMembershipsArgs
+  platform_grants?: boolean | AuthPrincipalCountOutputTypeCountPlatform_grantsArgs
+  platform_grants_made?: boolean | AuthPrincipalCountOutputTypeCountPlatform_grants_madeArgs
+  platform_grants_revoked?: boolean | AuthPrincipalCountOutputTypeCountPlatform_grants_revokedArgs
 }
 
 /**
@@ -515,6 +833,27 @@ export type AuthPrincipalCountOutputTypeCountMembershipsArgs<ExtArgs extends run
   where?: Prisma.MembershipWhereInput
 }
 
+/**
+ * AuthPrincipalCountOutputType without action
+ */
+export type AuthPrincipalCountOutputTypeCountPlatform_grantsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PlatformOperatorWhereInput
+}
+
+/**
+ * AuthPrincipalCountOutputType without action
+ */
+export type AuthPrincipalCountOutputTypeCountPlatform_grants_madeArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PlatformOperatorWhereInput
+}
+
+/**
+ * AuthPrincipalCountOutputType without action
+ */
+export type AuthPrincipalCountOutputTypeCountPlatform_grants_revokedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PlatformOperatorWhereInput
+}
+
 
 export type AuthPrincipalSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -527,6 +866,9 @@ export type AuthPrincipalSelect<ExtArgs extends runtime.Types.Extensions.Interna
   created_at?: boolean
   updated_at?: boolean
   memberships?: boolean | Prisma.AuthPrincipal$membershipsArgs<ExtArgs>
+  platform_grants?: boolean | Prisma.AuthPrincipal$platform_grantsArgs<ExtArgs>
+  platform_grants_made?: boolean | Prisma.AuthPrincipal$platform_grants_madeArgs<ExtArgs>
+  platform_grants_revoked?: boolean | Prisma.AuthPrincipal$platform_grants_revokedArgs<ExtArgs>
   _count?: boolean | Prisma.AuthPrincipalCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["authPrincipal"]>
 
@@ -569,6 +911,9 @@ export type AuthPrincipalSelectScalar = {
 export type AuthPrincipalOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "supabase_user_id" | "email" | "email_normalized" | "global_status" | "mfa_enabled" | "last_login_at" | "created_at" | "updated_at", ExtArgs["result"]["authPrincipal"]>
 export type AuthPrincipalInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   memberships?: boolean | Prisma.AuthPrincipal$membershipsArgs<ExtArgs>
+  platform_grants?: boolean | Prisma.AuthPrincipal$platform_grantsArgs<ExtArgs>
+  platform_grants_made?: boolean | Prisma.AuthPrincipal$platform_grants_madeArgs<ExtArgs>
+  platform_grants_revoked?: boolean | Prisma.AuthPrincipal$platform_grants_revokedArgs<ExtArgs>
   _count?: boolean | Prisma.AuthPrincipalCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type AuthPrincipalIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -578,6 +923,9 @@ export type $AuthPrincipalPayload<ExtArgs extends runtime.Types.Extensions.Inter
   name: "AuthPrincipal"
   objects: {
     memberships: Prisma.$MembershipPayload<ExtArgs>[]
+    platform_grants: Prisma.$PlatformOperatorPayload<ExtArgs>[]
+    platform_grants_made: Prisma.$PlatformOperatorPayload<ExtArgs>[]
+    platform_grants_revoked: Prisma.$PlatformOperatorPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -984,6 +1332,9 @@ readonly fields: AuthPrincipalFieldRefs;
 export interface Prisma__AuthPrincipalClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   memberships<T extends Prisma.AuthPrincipal$membershipsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AuthPrincipal$membershipsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MembershipPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  platform_grants<T extends Prisma.AuthPrincipal$platform_grantsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AuthPrincipal$platform_grantsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PlatformOperatorPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  platform_grants_made<T extends Prisma.AuthPrincipal$platform_grants_madeArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AuthPrincipal$platform_grants_madeArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PlatformOperatorPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  platform_grants_revoked<T extends Prisma.AuthPrincipal$platform_grants_revokedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AuthPrincipal$platform_grants_revokedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PlatformOperatorPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1436,6 +1787,78 @@ export type AuthPrincipal$membershipsArgs<ExtArgs extends runtime.Types.Extensio
   take?: number
   skip?: number
   distinct?: Prisma.MembershipScalarFieldEnum | Prisma.MembershipScalarFieldEnum[]
+}
+
+/**
+ * AuthPrincipal.platform_grants
+ */
+export type AuthPrincipal$platform_grantsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PlatformOperator
+   */
+  select?: Prisma.PlatformOperatorSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PlatformOperator
+   */
+  omit?: Prisma.PlatformOperatorOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PlatformOperatorInclude<ExtArgs> | null
+  where?: Prisma.PlatformOperatorWhereInput
+  orderBy?: Prisma.PlatformOperatorOrderByWithRelationInput | Prisma.PlatformOperatorOrderByWithRelationInput[]
+  cursor?: Prisma.PlatformOperatorWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PlatformOperatorScalarFieldEnum | Prisma.PlatformOperatorScalarFieldEnum[]
+}
+
+/**
+ * AuthPrincipal.platform_grants_made
+ */
+export type AuthPrincipal$platform_grants_madeArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PlatformOperator
+   */
+  select?: Prisma.PlatformOperatorSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PlatformOperator
+   */
+  omit?: Prisma.PlatformOperatorOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PlatformOperatorInclude<ExtArgs> | null
+  where?: Prisma.PlatformOperatorWhereInput
+  orderBy?: Prisma.PlatformOperatorOrderByWithRelationInput | Prisma.PlatformOperatorOrderByWithRelationInput[]
+  cursor?: Prisma.PlatformOperatorWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PlatformOperatorScalarFieldEnum | Prisma.PlatformOperatorScalarFieldEnum[]
+}
+
+/**
+ * AuthPrincipal.platform_grants_revoked
+ */
+export type AuthPrincipal$platform_grants_revokedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PlatformOperator
+   */
+  select?: Prisma.PlatformOperatorSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PlatformOperator
+   */
+  omit?: Prisma.PlatformOperatorOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PlatformOperatorInclude<ExtArgs> | null
+  where?: Prisma.PlatformOperatorWhereInput
+  orderBy?: Prisma.PlatformOperatorOrderByWithRelationInput | Prisma.PlatformOperatorOrderByWithRelationInput[]
+  cursor?: Prisma.PlatformOperatorWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PlatformOperatorScalarFieldEnum | Prisma.PlatformOperatorScalarFieldEnum[]
 }
 
 /**

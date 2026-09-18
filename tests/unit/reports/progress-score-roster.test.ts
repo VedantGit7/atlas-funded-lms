@@ -30,8 +30,6 @@ import {
   sendProgressMessageBodySchema,
   scoreProductTypeParamsSchema,
   scoreProductsQuerySchema,
-  scoreProductItemSchema,
-  scoreProductsListResponseSchema,
   scoreQuizzesQuerySchema,
   scoreQuizItemSchema,
   scoreQuizzesListResponseSchema,

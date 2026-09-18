@@ -32,7 +32,9 @@ const DEFAULT_SETTINGS: CourseCertificatesSettings = {
   attemptMode: null,
 };
 
-function readStudioFeatures(tags: Record<string, unknown> | undefined): Record<string, unknown> | null {
+function readStudioFeatures(
+  tags: Record<string, unknown> | undefined,
+): Record<string, unknown> | null {
   const features = tags?.[FEATURES_TAG_KEY];
   if (!features || typeof features !== "object" || Array.isArray(features)) {
     return null;
@@ -154,8 +156,8 @@ export function certificatesSettingsEqual(
     a.certificateTests.every(
       (test, index) =>
         test.lessonId === b.certificateTests[index]?.lessonId &&
-        test.title === b.certificateTests[index]?.title &&
-        test.passingMarks === b.certificateTests[index]?.passingMarks,
+        test.title === b.certificateTests[index].title &&
+        test.passingMarks === b.certificateTests[index].passingMarks,
     )
   );
 }

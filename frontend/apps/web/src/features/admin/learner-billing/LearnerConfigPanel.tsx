@@ -145,7 +145,10 @@ export function LearnerConfigPanel({ initial }: { initial: LearnerCheckoutConfig
         >
           {saving ? (
             <>
-              <RefreshCw className="h-4 w-4 animate-spin motion-reduce:animate-none" aria-hidden="true" />
+              <RefreshCw
+                className="h-4 w-4 animate-spin motion-reduce:animate-none"
+                aria-hidden="true"
+              />
               Saving
             </>
           ) : (

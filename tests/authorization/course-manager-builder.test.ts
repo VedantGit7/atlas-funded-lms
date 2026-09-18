@@ -11,7 +11,7 @@ function instructorTx() {
       .fn()
       .mockResolvedValueOnce([{ key: "course.create" }])
       .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([{ role_key: "instructor" }]),
+      .mockResolvedValueOnce([{ role_key: "instructor", bypasses_resource_predicates: false }]),
   };
 }
 

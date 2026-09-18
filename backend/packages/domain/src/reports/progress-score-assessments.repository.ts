@@ -4,6 +4,7 @@ import type {
   ScoreProductType,
   ScoreQuizzesQuery,
 } from "./progress-score-roster.dto";
+import { textColumn } from "./raw-column";
 
 export type ScoreAssessmentRow = {
   assessment_id: string;
@@ -55,11 +56,11 @@ function mapAssessmentRow(row: Record<string, unknown>): ScoreAssessmentRow {
     return Number.isFinite(n) ? n : null;
   };
   return {
-    assessment_id: String(row["assessment_id"]),
-    title: String(row["title"] ?? ""),
-    assessment_type: String(row["assessment_type"] ?? ""),
-    lesson_id: row["lesson_id"] == null ? null : String(row["lesson_id"]),
-    lesson_title: row["lesson_title"] == null ? null : String(row["lesson_title"]),
+    assessment_id: textColumn(row["assessment_id"]),
+    title: textColumn(row["title"], ""),
+    assessment_type: textColumn(row["assessment_type"], ""),
+    lesson_id: row["lesson_id"] == null ? null : textColumn(row["lesson_id"]),
+    lesson_title: row["lesson_title"] == null ? null : textColumn(row["lesson_title"]),
     question_count: num("question_count"),
     pass_mark_pct: num("pass_mark_pct"),
     attempt_count: Number(row["attempt_count"] ?? 0),
@@ -71,7 +72,7 @@ function mapAssessmentRow(row: Record<string, unknown>): ScoreAssessmentRow {
       row["last_attempt_at"] instanceof Date
         ? row["last_attempt_at"]
         : row["last_attempt_at"]
-          ? new Date(String(row["last_attempt_at"]))
+          ? new Date(textColumn(row["last_attempt_at"]))
           : null,
     spread_min: num("spread_min"),
     spread_q1: num("spread_q1"),
@@ -114,7 +115,9 @@ export const progressScoreAssessmentsRepository = {
       `;
       return rows[0] ?? null;
     }
-    if (productType === "mock_test") {
+    // Last arm of an exhaustive chain: every other union member has
+    // already returned, so `productType === "mock_test"` is always true here.
+    {
       const rows = await tx.$queryRaw<ScoreAssessmentProductMeta[]>`
         select id::text as product_id, title, slug, status::text as status
         from mock_tests
@@ -220,15 +223,11 @@ export const progressScoreAssessmentsRepository = {
         assessment_count: Number(row["assessment_count"] ?? 0),
         learners_attempted: Number(row["learners_attempted"] ?? 0),
         attempt_count: Number(row["attempt_count"] ?? 0),
-        avg_score_pct:
-          row["avg_score_pct"] == null ? null : Number(row["avg_score_pct"]),
-        pass_rate_pct:
-          row["pass_rate_pct"] == null ? null : Number(row["pass_rate_pct"]),
+        avg_score_pct: row["avg_score_pct"] == null ? null : Number(row["avg_score_pct"]),
+        pass_rate_pct: row["pass_rate_pct"] == null ? null : Number(row["pass_rate_pct"]),
         ungraded_count: Number(row["ungraded_count"] ?? 0),
         median_duration_seconds:
-          row["median_duration_seconds"] == null
-            ? null
-            : Number(row["median_duration_seconds"]),
+          row["median_duration_seconds"] == null ? null : Number(row["median_duration_seconds"]),
       };
     }
 
@@ -316,9 +315,7 @@ export const progressScoreAssessmentsRepository = {
       pass_rate_pct: row["pass_rate_pct"] == null ? null : Number(row["pass_rate_pct"]),
       ungraded_count: Number(row["ungraded_count"] ?? 0),
       median_duration_seconds:
-        row["median_duration_seconds"] == null
-          ? null
-          : Number(row["median_duration_seconds"]),
+        row["median_duration_seconds"] == null ? null : Number(row["median_duration_seconds"]),
     };
   },
 
@@ -367,7 +364,9 @@ export const progressScoreAssessmentsRepository = {
       `;
       return rows.map((r) => r.id);
     }
-    if (productType === "bundle") {
+    // Last arm of an exhaustive chain: every other union member has
+    // already returned, so `productType === "bundle"` is always true here.
+    {
       const rows = await tx.$queryRaw<Array<{ id: string }>>`
         select distinct a.id::text as id
         from bundle_items bi

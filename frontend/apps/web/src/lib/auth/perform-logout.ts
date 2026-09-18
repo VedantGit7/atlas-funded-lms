@@ -14,9 +14,7 @@ type PerformLogoutOptions = {
  * server uses for `/api/v1/me`, then best-effort clears the Supabase browser
  * session and client caches.
  */
-export async function performAtlasLogout(
-  options: PerformLogoutOptions = {},
-): Promise<string> {
+export async function performAtlasLogout(options: PerformLogoutOptions = {}): Promise<string> {
   const redirectTo = options.redirectTo ?? "/login";
 
   await clearAtlasAuthSession();

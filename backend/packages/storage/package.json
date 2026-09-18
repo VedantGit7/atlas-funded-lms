@@ -7,7 +7,12 @@
   "types": "./src/index.ts",
   "exports": {
     ".": "./src/index.ts",
-    "./*": "./src/*"
+    "./*": [
+      "./src/*.ts",
+      "./src/*.tsx",
+      "./src/*/index.ts",
+      "./src/*"
+    ]
   },
   "scripts": {
     "build": "echo \"No storage build configured yet.\"",
@@ -24,7 +29,7 @@
     "@atlas/db": "workspace:*",
     "@aws-sdk/client-s3": "^3.888.0",
     "@aws-sdk/s3-request-presigner": "^3.888.0",
-    "adm-zip": "^0.5.16",
+    "adm-zip": "^0.6.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {

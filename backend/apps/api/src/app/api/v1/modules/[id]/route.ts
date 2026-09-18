@@ -17,7 +17,7 @@ type StudioModuleResponse = z.output<typeof studioModuleResponseSchema>;
 
 const deleteModuleResponseSchema = zod.object({
   data: zod.object({
-    id: zod.string().uuid(),
+    id: zod.uuid(),
     deleted: zod.literal(true),
   }),
 });

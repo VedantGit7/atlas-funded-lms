@@ -84,7 +84,10 @@ export function CurrencySelectModal({
       >
         <div className="flex items-start justify-between gap-4 px-6 pt-6">
           <div>
-            <h2 id="currency-modal-title" className="text-lg font-bold text-[var(--admin-on-surface)]">
+            <h2
+              id="currency-modal-title"
+              className="text-lg font-bold text-[var(--admin-on-surface)]"
+            >
               Select currency
             </h2>
             <p className="mt-1 text-sm text-[var(--admin-on-surface-variant)]">
@@ -187,7 +190,10 @@ export function CurrencySelectModal({
           >
             {busy ? (
               <>
-                <RefreshCw className="h-4 w-4 animate-spin motion-reduce:animate-none" aria-hidden="true" />
+                <RefreshCw
+                  className="h-4 w-4 animate-spin motion-reduce:animate-none"
+                  aria-hidden="true"
+                />
                 Saving
               </>
             ) : (

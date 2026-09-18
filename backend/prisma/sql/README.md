@@ -16,12 +16,23 @@ Raw SQL is required for PostgreSQL features Prisma cannot safely express, includ
 
 ## Folder structure
 
-- `setup/` — schemas, extensions, helper functions, database role setup
-- `rls/` — row-level security policies and tenant isolation policies
-- `triggers/` — append-only and audit-related triggers
-- `indexes/` — partial indexes and non-Prisma-safe indexes
-- `grants/` — database grants/revokes
-- `partitions/` — partition parent/child setup
+Applied in this order by `pnpm db:provision` (see `scripts/db/provision-database.mjs`):
+
+1. `setup/` — schemas, extensions, and base helper functions. Runs **before** Prisma
+   migrations, because migrations depend on helpers defined here.
+2. _(Prisma migrations run here)_
+3. `functions/` — functions that query product tables, so they must be created after
+   migrations (e.g. `app.verify_audit_chain`).
+4. `rls/` — row-level security policies and tenant isolation policies
+5. `triggers/` — append-only and audit-related triggers
+6. `indexes/` — partial indexes and non-Prisma-safe indexes
+7. `grants/` — database grants/revokes
+8. `partitions/` — partition parent/child setup
+
+Every folder above must appear in **both** `scripts/db/apply-sql-directory.mjs` and
+`scripts/db/check-sql-approved-paths.mjs`. `functions/` was previously absent from both,
+so `app.verify_audit_chain` was never deployed despite being called by
+`backend/packages/audit/src/services/audit-chain.service.ts`.
 
 ## Rules
 

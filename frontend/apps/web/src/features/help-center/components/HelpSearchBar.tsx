@@ -18,14 +18,15 @@ export function HelpSearchBar({ autoFocus = false }: HelpSearchBarProps) {
   const [debouncedQuery, setDebouncedQuery] = useState("");
 
   useEffect(() => {
-    const timer = window.setTimeout(() => setDebouncedQuery(query), 200);
-    return () => window.clearTimeout(timer);
+    const timer = window.setTimeout(() => {
+      setDebouncedQuery(query);
+    }, 200);
+    return () => {
+      window.clearTimeout(timer);
+    };
   }, [query]);
 
-  const results = useMemo(
-    () => searchHelpArticles(debouncedQuery, 8),
-    [debouncedQuery],
-  );
+  const results = useMemo(() => searchHelpArticles(debouncedQuery, 8), [debouncedQuery]);
 
   const showResults = debouncedQuery.trim().length > 0;
 
@@ -42,7 +43,9 @@ export function HelpSearchBar({ autoFocus = false }: HelpSearchBarProps) {
           <input
             type="search"
             value={query}
-            onChange={(event) => setQuery(event.target.value)}
+            onChange={(event) => {
+              setQuery(event.target.value);
+            }}
             autoFocus={autoFocus}
             placeholder="Search articles, diagnostics, billing, and more…"
             aria-controls={showResults ? listId : undefined}
@@ -59,7 +62,9 @@ export function HelpSearchBar({ autoFocus = false }: HelpSearchBarProps) {
             <button
               key={label}
               type="button"
-              onClick={() => applySuggestion(label)}
+              onClick={() => {
+                applySuggestion(label);
+              }}
               className={`${helpChipClassName} whitespace-nowrap`}
             >
               {label}
@@ -79,9 +84,7 @@ export function HelpSearchBar({ autoFocus = false }: HelpSearchBarProps) {
               No articles match your search. Try different keywords or browse categories below.
             </li>
           ) : (
-            results.map((result) => (
-              <HelpSearchResultRow key={result.slug} result={result} />
-            ))
+            results.map((result) => <HelpSearchResultRow key={result.slug} result={result} />)
           )}
         </ul>
       ) : null}

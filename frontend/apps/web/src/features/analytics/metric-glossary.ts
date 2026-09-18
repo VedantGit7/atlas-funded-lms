@@ -55,7 +55,8 @@ export const METRIC_GLOSSARY: Record<string, MetricGlossaryEntry> = {
   },
   quality_flag: {
     label: "Quality flag",
-    description: "Heuristic item quality rating based on sample size, difficulty, and discrimination.",
+    description:
+      "Heuristic item quality rating based on sample size, difficulty, and discrimination.",
   },
 };
 

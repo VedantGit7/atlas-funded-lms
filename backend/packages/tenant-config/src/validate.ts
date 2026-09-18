@@ -74,12 +74,29 @@ export function validateBandsNonOverlapping(
   return issues;
 }
 
+/**
+ * Legal documents (`tenantConfigJson.legal`) are free-form prose, not
+ * configuration. `FORBIDDEN_MANIFEST_TERMS` exists to stop a manifest
+ * *declaring* prop-trading capability the LMS does not have — but a Terms
+ * document legitimately has to name those things in order to disclaim them
+ * ("the Academy does not operate trading accounts"), and a Privacy Policy has
+ * to describe payment processing to disclose its sub-processors. Scanning
+ * prose for capability keywords flags exactly the sentences that make the
+ * boundary explicit.
+ *
+ * Secret detection still applies here — that is about leaked credentials, not
+ * vocabulary, and legal text has no business containing one.
+ */
+function isLegalProsePath(path: string): boolean {
+  return path === "tenantConfigJson.legal" || path.startsWith("tenantConfigJson.legal.");
+}
+
 export function scanManifestForSecrets(manifest: TenantManifest): ValidationIssue[] {
   const issues: ValidationIssue[] = [];
   const strings = collectJsonStrings(manifest);
 
   for (const { path, value } of strings) {
-    for (const term of FORBIDDEN_MANIFEST_TERMS) {
+    for (const term of isLegalProsePath(path) ? [] : FORBIDDEN_MANIFEST_TERMS) {
       if (value.toLowerCase().includes(term.toLowerCase())) {
         issues.push({
           path,

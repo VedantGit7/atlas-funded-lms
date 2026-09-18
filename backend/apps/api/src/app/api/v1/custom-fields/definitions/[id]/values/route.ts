@@ -15,7 +15,7 @@ import {
 } from "@atlas/domain/custom-fields/custom-fields.service";
 import { z as zod } from "zod";
 
-const paramsSchema = zod.object({ id: zod.string().uuid() });
+const paramsSchema = zod.object({ id: zod.uuid() });
 
 export const GET = createTenantRoute<
   Record<string, never>,

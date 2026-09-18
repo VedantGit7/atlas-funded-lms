@@ -98,7 +98,9 @@ export function LocalesQaChecksTab({ canManage }: LocalesQaChecksTabProps) {
     <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-4 sm:p-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-sm font-semibold text-[var(--admin-on-surface)]">Automated QA checks</h2>
+          <h2 className="text-sm font-semibold text-[var(--admin-on-surface)]">
+            Automated QA checks
+          </h2>
           <p className="mt-1 text-xs text-[var(--admin-on-surface-variant)]">
             {run
               ? `Last run ${formatRelativeTime(run.completedAt)} — ${run.issueCount} issue(s)`
@@ -119,7 +121,9 @@ export function LocalesQaChecksTab({ canManage }: LocalesQaChecksTabProps) {
       {message ? (
         <div
           role="alert"
-          className={messageTone === "success" ? localesAlertSuccessClassName : localesAlertErrorClassName}
+          className={
+            messageTone === "success" ? localesAlertSuccessClassName : localesAlertErrorClassName
+          }
         >
           {message}
         </div>
@@ -145,12 +149,18 @@ export function LocalesQaChecksTab({ canManage }: LocalesQaChecksTabProps) {
             <tbody>
               {issues.map((issue) => (
                 <tr key={issue.id} className={localesTableRowClassName}>
-                  <td className="px-4 py-3 capitalize text-[var(--admin-on-surface)]">{issue.severity}</td>
-                  <td className="px-4 py-3 font-mono text-[var(--admin-on-surface)]">{issue.locale}</td>
+                  <td className="px-4 py-3 capitalize text-[var(--admin-on-surface)]">
+                    {issue.severity}
+                  </td>
+                  <td className="px-4 py-3 font-mono text-[var(--admin-on-surface)]">
+                    {issue.locale}
+                  </td>
                   <td className="px-4 py-3">
                     <code className={localesMonoKeyClassName}>{issue.key}</code>
                   </td>
-                  <td className="px-4 py-3 text-[var(--admin-on-surface-variant)]">{issue.message}</td>
+                  <td className="px-4 py-3 text-[var(--admin-on-surface-variant)]">
+                    {issue.message}
+                  </td>
                 </tr>
               ))}
             </tbody>

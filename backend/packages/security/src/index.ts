@@ -14,3 +14,10 @@ export {
   type DiagnosticSessionProof,
   type StoredSessionProofJson,
 } from "./diagnostic-session-cookie";
+
+export {
+  assertOutboundUrlAllowed,
+  BlockedOutboundRequestError,
+  isBlockedAddress,
+  safeOutboundFetch,
+} from "./safe-outbound-fetch";

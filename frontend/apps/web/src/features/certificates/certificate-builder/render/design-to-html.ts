@@ -23,9 +23,7 @@ export type DesignToHtmlOptions = {
 };
 
 /** Build sample merge data from document variable definitions. */
-export function sampleDataFromVariables(
-  doc: CertificateDesignDocument,
-): Record<string, string> {
+export function sampleDataFromVariables(doc: CertificateDesignDocument): Record<string, string> {
   const data: Record<string, string> = {};
   for (const variable of doc.variables ?? []) {
     data[variable.key] = variable.sampleValue ?? variable.label;
@@ -61,16 +59,13 @@ function resolveTextContent(
   }
 
   return element.text.replace(/\{\{\s*([a-zA-Z0-9_.-]+)\s*\}\}/g, (_match, key: string) => {
-    if (data[key] != null) return data[key]!;
+    if (data[key] != null) return data[key];
     const sample = doc.variables?.find((v) => v.key === key)?.sampleValue;
     return sample ?? "";
   });
 }
 
-function evaluateRule(
-  rule: CertificateDesignRule,
-  data: Record<string, string>,
-): boolean {
+function evaluateRule(rule: CertificateDesignRule, data: Record<string, string>): boolean {
   const raw = data[rule.when.variableKey] ?? "";
   const expected = rule.when.value;
 
@@ -124,9 +119,7 @@ function qrPayload(
   switch (element.valueSource) {
     case "verification_url":
       return (
-        options?.verificationUrl ??
-        data["verification_url"] ??
-        "https://verify.example.com/preview"
+        options?.verificationUrl ?? data["verification_url"] ?? "https://verify.example.com/preview"
       );
     case "credential_id":
       return data["credential_id"] ?? "CRED-PREVIEW-0001";
@@ -149,16 +142,14 @@ function backgroundCss(doc: CertificateDesignDocument): string {
   return `background:${escapeHtml(bg.value)};`;
 }
 
-function elementBaseStyle(
-  element: CertificateDesignElement,
-  unit: DocumentUnit,
-): string {
+function elementBaseStyle(element: CertificateDesignElement, unit: DocumentUnit): string {
   const left = toPx(element.x, unit);
   const top = toPx(element.y, unit);
   const width = toPx(element.width, unit);
   const height = toPx(element.height, unit);
   const rotation = element.rotation ?? 0;
-  const transform = rotation !== 0 ? `transform:rotate(${rotation}deg);transform-origin:top left;` : "";
+  const transform =
+    rotation !== 0 ? `transform:rotate(${rotation}deg);transform-origin:top left;` : "";
   return [
     "position:absolute",
     `left:${left}px`,
@@ -182,8 +173,7 @@ function renderTextElement(
 ): string {
   const content = escapeHtml(resolveTextContent(element, data, doc));
   const lineHeight = element.lineHeight ?? 1.2;
-  const letterSpacing =
-    element.letterSpacing != null ? `${element.letterSpacing}px` : "normal";
+  const letterSpacing = element.letterSpacing != null ? `${element.letterSpacing}px` : "normal";
   const fontWeight =
     typeof element.fontWeight === "number"
       ? String(element.fontWeight)
@@ -226,11 +216,7 @@ function renderShapeElement(
   if (element.shape === "line") {
     const stroke = escapeHtml(element.stroke ?? "#1a1f26");
     const sw = element.strokeWidth ?? 2;
-    const style = [
-      base,
-      "display:flex",
-      "align-items:center",
-    ].join(";");
+    const style = [base, "display:flex", "align-items:center"].join(";");
     return `<div data-element-id="${escapeHtml(element.id)}" data-type="shape" style="${style}"><div style="width:100%;height:0;border-top:${sw}px solid ${stroke};"></div></div>`;
   }
   const radius = element.cornerRadius ?? 0;
@@ -248,20 +234,13 @@ function renderImageElement(
   data: Record<string, string>,
   unit: DocumentUnit,
 ): string {
-  const src =
-    (element.variableKey ? data[element.variableKey] : undefined) ?? element.src;
+  const src = (element.variableKey ? data[element.variableKey] : undefined) ?? element.src;
   const opacity = element.opacity ?? 1;
-  const style = [
-    elementBaseStyle(element, unit),
-    `opacity:${opacity}`,
-  ].join(";");
+  const style = [elementBaseStyle(element, unit), `opacity:${opacity}`].join(";");
   return `<img data-element-id="${escapeHtml(element.id)}" data-type="image" src="${escapeHtml(src)}" alt="" style="${style};object-fit:contain;display:block;" />`;
 }
 
-function renderQrPlaceholder(
-  element: CertificateQrElement,
-  unit: DocumentUnit,
-): string {
+function renderQrPlaceholder(element: CertificateQrElement, unit: DocumentUnit): string {
   const style = [
     elementBaseStyle(element, unit),
     "background:#fff",
@@ -282,10 +261,7 @@ function renderQrWithDataUrl(
   dataUrl: string,
   unit: DocumentUnit,
 ): string {
-  const style = [
-    elementBaseStyle(element, unit),
-    "background:#fff",
-  ].join(";");
+  const style = [elementBaseStyle(element, unit), "background:#fff"].join(";");
   return `<img data-element-id="${escapeHtml(element.id)}" data-type="qr" src="${escapeHtml(dataUrl)}" alt="QR" style="${style};object-fit:contain;display:block;" />`;
 }
 
@@ -294,17 +270,17 @@ function renderSignatureElement(
   data: Record<string, string>,
   unit: DocumentUnit,
 ): string {
-  const label =
-    (element.labelVariableKey ? data[element.labelVariableKey] : undefined) ?? "";
-  const title =
-    (element.titleVariableKey ? data[element.titleVariableKey] : undefined) ?? "";
+  const label = (element.labelVariableKey ? data[element.labelVariableKey] : undefined) ?? "";
+  const title = (element.titleVariableKey ? data[element.titleVariableKey] : undefined) ?? "";
   const style = elementBaseStyle(element, unit);
   const img = element.imageSrc
     ? `<img src="${escapeHtml(element.imageSrc)}" alt="" style="max-width:100%;max-height:70%;object-fit:contain;display:block;margin:0 auto;" />`
     : "";
   const meta = [
     label ? `<div style="font-size:12px;text-align:center;">${escapeHtml(label)}</div>` : "",
-    title ? `<div style="font-size:11px;text-align:center;opacity:0.7;">${escapeHtml(title)}</div>` : "",
+    title
+      ? `<div style="font-size:11px;text-align:center;opacity:0.7;">${escapeHtml(title)}</div>`
+      : "",
   ].join("");
   return `<div data-element-id="${escapeHtml(element.id)}" data-type="signature" style="${style};display:flex;flex-direction:column;justify-content:flex-end;border-bottom:1.5px solid #1a1f26;">${img}${meta}</div>`;
 }
@@ -337,9 +313,7 @@ function renderElements(
       case "qr": {
         const url = qrDataUrls?.get(element.id);
         parts.push(
-          url
-            ? renderQrWithDataUrl(element, url, unit)
-            : renderQrPlaceholder(element, unit),
+          url ? renderQrWithDataUrl(element, url, unit) : renderQrPlaceholder(element, unit),
         );
         break;
       }
@@ -386,8 +360,7 @@ function wrapDocumentHtml(
       ? `<div data-watermark="preview" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:9999;overflow:hidden;"><span style="font-family:system-ui,sans-serif;font-size:${Math.round(Math.min(width, height) * 0.12)}px;font-weight:800;letter-spacing:0.12em;color:rgba(0,0,0,0.08);transform:rotate(-28deg);user-select:none;">PREVIEW</span></div>`
       : "";
 
-  const overlays =
-    options?.showBleedSafe === true ? bleedSafeOverlays(doc, width, height) : "";
+  const overlays = options?.showBleedSafe === true ? bleedSafeOverlays(doc, width, height) : "";
 
   return `<!DOCTYPE html>
 <html lang="${escapeHtml(doc.locale ?? "en")}">

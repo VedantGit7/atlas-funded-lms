@@ -6,14 +6,15 @@
 const FAVORITES_KEY = "certificate-studio:template-favorites";
 const USAGE_KEY = "certificate-studio:template-usage";
 
-function readJson<T>(key: string, fallback: T): T {
-  if (typeof window === "undefined") return fallback;
+/** localStorage is untrusted input, so callers must narrow the result. */
+function readJson(key: string): unknown {
+  if (typeof window === "undefined") return undefined;
   try {
     const raw = window.localStorage.getItem(key);
-    if (!raw) return fallback;
-    return JSON.parse(raw) as T;
+    if (!raw) return undefined;
+    return JSON.parse(raw) as unknown;
   } catch {
-    return fallback;
+    return undefined;
   }
 }
 
@@ -27,8 +28,8 @@ function writeJson(key: string, value: unknown): void {
 }
 
 export function loadTemplateFavorites(): string[] {
-  const list = readJson<string[]>(FAVORITES_KEY, []);
-  return Array.isArray(list) ? list.filter((id) => typeof id === "string") : [];
+  const list = readJson(FAVORITES_KEY);
+  return Array.isArray(list) ? list.filter((id): id is string => typeof id === "string") : [];
 }
 
 export function saveTemplateFavorites(ids: string[]): void {
@@ -36,9 +37,13 @@ export function saveTemplateFavorites(ids: string[]): void {
 }
 
 export function loadTemplateUsage(): Record<string, number> {
-  const map = readJson<Record<string, number>>(USAGE_KEY, {});
-  if (!map || typeof map !== "object") return {};
-  return map;
+  const map = readJson(USAGE_KEY);
+  if (typeof map !== "object" || map === null || Array.isArray(map)) return {};
+  // Drop corrupt entries: `bumpTemplateUsage` does arithmetic on these values,
+  // and a non-number would silently produce NaN.
+  return Object.fromEntries(
+    Object.entries(map).filter((entry): entry is [string, number] => typeof entry[1] === "number"),
+  );
 }
 
 export function bumpTemplateUsage(id: string): Record<string, number> {

@@ -53,7 +53,15 @@ const {
   mockCreateTenantDomain: vi.fn(),
   mockWithGlobalDb: vi.fn((fn: (db: unknown) => unknown) => fn({ $queryRaw: vi.fn() })),
   mockWithTenantTx: vi.fn((_ctx: unknown, fn: (tx: unknown) => unknown) =>
-    fn({ $queryRaw: vi.fn(), $executeRaw: vi.fn() }),
+    fn({
+      // A bare vi.fn() returns undefined, so any repository doing rows[0] throws.
+      // The route pipeline now claims an idempotency key through this tx (M10),
+      // which made that latent stub gap visible as a 500.
+      $queryRaw: vi.fn().mockResolvedValue([]),
+      $queryRawUnsafe: vi.fn().mockResolvedValue([]),
+      $executeRaw: vi.fn().mockResolvedValue(0),
+      $executeRawUnsafe: vi.fn().mockResolvedValue(0),
+    }),
   ),
   findDomainByHostnameMock: vi.fn(),
   insertTenantDomainMock: vi.fn(),
@@ -105,9 +113,23 @@ vi.mock("@atlas/authorization", async (importOriginal) => {
   };
 });
 
-vi.mock("@atlas/domain-config", () => ({
-  findActiveEntitlementByKey: (...args: unknown[]) => findActiveEntitlementByKeyMock(...args),
-}));
+vi.mock("@atlas/domain-config", async () => {
+  // The gate now reads value_json on every call, so the parse is real here:
+  // mocking it would hide whether `{ enabled: false }` actually denies.
+  const { parseEntitlementValue } = (await vi.importActual(
+    "@atlas/domain-config/schemas/entitlement-value",
+  )) as {
+    parseEntitlementValue: (raw: unknown) => {
+      enabled: boolean;
+      limit: number | null;
+      period: string;
+    };
+  };
+  return {
+    parseEntitlementValue,
+    findActiveEntitlementByKey: (...args: unknown[]) => findActiveEntitlementByKeyMock(...args),
+  };
+});
 
 vi.mock("@atlas/domain-branding/repositories/domain.repository", () => ({
   findDomainByHostname: (...args: unknown[]) => findDomainByHostnameMock(...args),
@@ -211,7 +233,9 @@ describe("POST /api/v1/domains", () => {
     findDomainByHostnameMock.mockResolvedValue(null);
     findActiveEntitlementByKeyMock.mockResolvedValue({
       key: "branding.custom_domain.enable",
-      enabled: true,
+      // The repository selects value_json AS value, and the gate parses it.
+      // The old stub carried a bare `enabled` that nothing ever read.
+      value: true,
     });
     insertTenantDomainMock.mockResolvedValue({
       id: domainId,

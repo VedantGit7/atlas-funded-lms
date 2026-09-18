@@ -5,7 +5,10 @@ import { useRouter } from "next/navigation";
 import { useMemo, useRef, useState } from "react";
 import { Camera, Info, Pencil } from "lucide-react";
 import { ClientApiError, clientApi } from "../../../lib/client-api";
-import { SettingsSelectField, type SettingsSelectOption } from "../../account-settings/account-settings-fields";
+import {
+  SettingsSelectField,
+  type SettingsSelectOption,
+} from "../../account-settings/account-settings-fields";
 import { AccountSettingsToast } from "../../account-settings/account-settings-toast";
 import { useAccountTheme } from "../../account-settings/account-theme-context";
 import { COMMON_BCP47_LOCALES } from "../../locales/locales-common-locales";
@@ -23,7 +26,12 @@ type ProfileFormProps = {
 type SignedUploadResponse = {
   data: {
     asset: { id: string; bucket: string; key: string };
-    upload: { method: "PUT"; url: string; expiresAt: string; requiredHeaders: Record<string, string> };
+    upload: {
+      method: "PUT";
+      url: string;
+      expiresAt: string;
+      requiredHeaders: Record<string, string>;
+    };
   };
 };
 
@@ -103,7 +111,16 @@ export function ProfileForm({
       bio !== (initialBio ?? "") ||
       timezone !== (initialTimezone ?? "") ||
       locale !== (initialLocale ?? ""),
-    [bio, displayName, initialBio, initialDisplayName, initialLocale, initialTimezone, locale, timezone],
+    [
+      bio,
+      displayName,
+      initialBio,
+      initialDisplayName,
+      initialLocale,
+      initialTimezone,
+      locale,
+      timezone,
+    ],
   );
 
   async function saveProfile() {
@@ -125,9 +142,14 @@ export function ProfileForm({
 
       if (locale !== (initialLocale ?? "")) {
         requests.push(
-          clientApi.put("/api/v1/me/preferences", { locale: locale || null }, "profile-locale-update", {
-            silent: true,
-          }),
+          clientApi.put(
+            "/api/v1/me/preferences",
+            { locale: locale || null },
+            "profile-locale-update",
+            {
+              silent: true,
+            },
+          ),
         );
       }
 
@@ -361,7 +383,9 @@ export function ProfileForm({
             </div>
           </div>
 
-          <div className={`mt-8 flex items-center justify-end gap-4 border-t pt-6 ${classes.divider}`}>
+          <div
+            className={`mt-8 flex items-center justify-end gap-4 border-t pt-6 ${classes.divider}`}
+          >
             <button
               type="button"
               className="text-xs font-medium text-[var(--acct-on-surface-variant)] transition-colors hover:text-[var(--acct-on-surface)] disabled:opacity-40"

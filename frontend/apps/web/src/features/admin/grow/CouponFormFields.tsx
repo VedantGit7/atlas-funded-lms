@@ -6,7 +6,6 @@ import { MESSENGER_WIZARD_FIELD_CLASS, MESSENGER_WIZARD_LABEL_CLASS } from "./pu
 import {
   centsToDollarInput,
   dollarInputToCents,
-  type CouponDeviceType,
   type CouponDiscountType,
   type CouponFormValues,
 } from "./coupons-shared";
@@ -140,9 +139,9 @@ export function CouponFormFields({
               min={0.01}
               step={0.01}
               value={centsToDollarInput(values.maxDiscountCents)}
-              onChange={(event) =>
-                patch({ maxDiscountCents: dollarInputToCents(event.target.value) })
-              }
+              onChange={(event) => {
+                patch({ maxDiscountCents: dollarInputToCents(event.target.value) });
+              }}
               className={`${MESSENGER_WIZARD_FIELD_CLASS} h-10 pl-8`}
               placeholder="Optional"
             />
@@ -162,7 +161,9 @@ export function CouponFormFields({
             { value: "GBP", label: "GBP - British Pound" },
             { value: "INR", label: "INR - Indian Rupee" },
           ]}
-          onChange={(value) => patch({ currency: value })}
+          onChange={(value) => {
+            patch({ currency: value });
+          }}
         />
       </div>
     </div>
@@ -181,9 +182,9 @@ export function CouponFormFields({
             min={0}
             step={0.01}
             value={centsToDollarInput(values.minPurchaseCents)}
-            onChange={(event) =>
-              patch({ minPurchaseCents: dollarInputToCents(event.target.value) })
-            }
+            onChange={(event) => {
+              patch({ minPurchaseCents: dollarInputToCents(event.target.value) });
+            }}
             className={`${MESSENGER_WIZARD_FIELD_CLASS} h-10 pl-8`}
             placeholder="0.00"
           />
@@ -196,13 +197,11 @@ export function CouponFormFields({
           min={1}
           disabled={unlimitedUsage}
           value={values.totalUsageLimit ?? ""}
-          onChange={(event) =>
+          onChange={(event) => {
             patch({
-              totalUsageLimit: event.target.value.trim()
-                ? Number(event.target.value)
-                : null,
-            })
-          }
+              totalUsageLimit: event.target.value.trim() ? Number(event.target.value) : null,
+            });
+          }}
           className={`${MESSENGER_WIZARD_FIELD_CLASS} h-10 disabled:opacity-50`}
           placeholder="Unlimited"
         />
@@ -213,7 +212,9 @@ export function CouponFormFields({
           type="number"
           min={1}
           value={values.perLearnerLimit}
-          onChange={(event) => patch({ perLearnerLimit: Number(event.target.value) || 1 })}
+          onChange={(event) => {
+            patch({ perLearnerLimit: Number(event.target.value) || 1 });
+          }}
           className={`${MESSENGER_WIZARD_FIELD_CLASS} h-10`}
         />
       </div>
@@ -227,7 +228,9 @@ export function CouponFormFields({
         <input
           type="datetime-local"
           value={values.startsAt}
-          onChange={(event) => patch({ startsAt: event.target.value })}
+          onChange={(event) => {
+            patch({ startsAt: event.target.value });
+          }}
           className={`${MESSENGER_WIZARD_FIELD_CLASS} h-10`}
         />
       </div>
@@ -236,7 +239,9 @@ export function CouponFormFields({
         <input
           type="datetime-local"
           value={values.endsAt}
-          onChange={(event) => patch({ endsAt: event.target.value })}
+          onChange={(event) => {
+            patch({ endsAt: event.target.value });
+          }}
           className={`${MESSENGER_WIZARD_FIELD_CLASS} h-10`}
           disabled={noExpiry}
         />
@@ -256,7 +261,9 @@ export function CouponFormFields({
         <div className="flex rounded-lg bg-[var(--admin-surface-high)] p-1">
           <button
             type="button"
-            onClick={() => patch({ visibility: "PUBLIC" })}
+            onClick={() => {
+              patch({ visibility: "PUBLIC" });
+            }}
             className={[
               "rounded-md px-3 py-1 text-xs font-bold transition-all",
               values.visibility === "PUBLIC"
@@ -268,7 +275,9 @@ export function CouponFormFields({
           </button>
           <button
             type="button"
-            onClick={() => patch({ visibility: "PRIVATE" })}
+            onClick={() => {
+              patch({ visibility: "PRIVATE" });
+            }}
             className={[
               "rounded-md px-3 py-1 text-xs font-bold transition-all",
               values.visibility === "PRIVATE"
@@ -296,7 +305,9 @@ export function CouponFormFields({
               <button
                 key={entry.id}
                 type="button"
-                onClick={() => patch({ deviceType: entry.id as CouponDeviceType })}
+                onClick={() => {
+                  patch({ deviceType: entry.id });
+                }}
                 className={[
                   "rounded-lg border p-2 text-center text-[10px] font-bold uppercase transition-all",
                   active
@@ -323,12 +334,12 @@ export function CouponFormFields({
             <input
               type="checkbox"
               checked={values.appliesToAllCourses}
-              onChange={(event) =>
+              onChange={(event) => {
                 patch({
                   appliesToAllCourses: event.target.checked,
                   courseIds: event.target.checked ? [] : values.courseIds,
-                })
-              }
+                });
+              }}
               className="rounded border-[var(--admin-outline)] text-[var(--admin-primary)] focus:ring-[var(--admin-primary)]"
             />
             All courses
@@ -353,7 +364,9 @@ export function CouponFormFields({
                     <input
                       type="checkbox"
                       checked={values.courseIds.includes(course.id)}
-                      onChange={() => toggleCourse(course.id)}
+                      onChange={() => {
+                        toggleCourse(course.id);
+                      }}
                       className="rounded border-[var(--admin-outline)] text-[var(--admin-primary)] focus:ring-[var(--admin-primary)]"
                     />
                     {course.title}
@@ -382,11 +395,13 @@ export function CouponFormFields({
                 <input
                   type="checkbox"
                   checked={unlimitedUsage}
-                  onChange={(event) =>
+                  onChange={(event) => {
                     patch({
-                      totalUsageLimit: event.target.checked ? null : values.totalUsageLimit ?? 100,
-                    })
-                  }
+                      totalUsageLimit: event.target.checked
+                        ? null
+                        : (values.totalUsageLimit ?? 100),
+                    });
+                  }}
                   className="rounded border-[var(--admin-outline)] text-[var(--admin-primary)] focus:ring-[var(--admin-primary)]"
                 />
               </label>
@@ -435,7 +450,9 @@ export function CouponFormFields({
             <label className={MESSENGER_WIZARD_LABEL_CLASS}>Coupon code</label>
             <input
               value={values.code}
-              onChange={(event) => patch({ code: event.target.value.toUpperCase() })}
+              onChange={(event) => {
+                patch({ code: event.target.value.toUpperCase() });
+              }}
               className={`${MESSENGER_WIZARD_FIELD_CLASS} font-mono`}
               maxLength={64}
               placeholder="SAVE20"
@@ -445,7 +462,9 @@ export function CouponFormFields({
             <label className={MESSENGER_WIZARD_LABEL_CLASS}>Name</label>
             <input
               value={values.name}
-              onChange={(event) => patch({ name: event.target.value })}
+              onChange={(event) => {
+                patch({ name: event.target.value });
+              }}
               className={MESSENGER_WIZARD_FIELD_CLASS}
               maxLength={200}
               placeholder="Spring sale 20%"

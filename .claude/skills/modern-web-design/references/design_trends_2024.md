@@ -11,6 +11,7 @@ This document catalogs the dominant web design trends, aesthetic movements, and 
 **Definition**: Minimalist foundations enhanced with bold typography, intentional color, and confident white space.
 
 **Key Characteristics**:
+
 - Ultra-large typography (80px-200px+ headlines)
 - Limited color palettes (2-4 colors max)
 - Generous white space (breathing room)
@@ -19,12 +20,14 @@ This document catalogs the dominant web design trends, aesthetic movements, and 
 - Sans-serif dominance (Inter, Space Grotesk, Sora)
 
 **Examples**:
+
 - Apple product pages
 - Linear.app
 - Stripe documentation
 - Vercel website
 
 **Implementation Tips**:
+
 ```css
 /* Fluid typography for bold headlines */
 h1 {
@@ -51,35 +54,39 @@ section {
 **Patterns**:
 
 **a) Variable Font Animations**:
+
 - Weight transitions (100 → 900)
 - Width morphing (condensed → expanded)
 - Slant/italic transformations
 - Multiple axes animating simultaneously
 
 **Implementation**:
+
 ```css
 @font-face {
-  font-family: 'Inter';
-  src: url('Inter-Variable.woff2') format('woff2-variations');
+  font-family: "Inter";
+  src: url("Inter-Variable.woff2") format("woff2-variations");
   font-weight: 100 900;
 }
 
 h1 {
-  font-variation-settings: 'wght' 300;
+  font-variation-settings: "wght" 300;
   transition: font-variation-settings 0.3s;
 }
 
 h1:hover {
-  font-variation-settings: 'wght' 900;
+  font-variation-settings: "wght" 900;
 }
 ```
 
 **b) Text Split & Stagger**:
+
 - Reveal by character, word, or line
 - Staggered entrance animations
 - 3D text transformations
 
 **c) Scroll-Linked Text**:
+
 - Text color change on scroll
 - Weight increase/decrease
 - Size transformations
@@ -94,6 +101,7 @@ h1:hover {
 **Evolution**: Refined frosted-glass aesthetic with better accessibility and performance.
 
 **Modern Approach** (2024):
+
 ```css
 .glass-card {
   /* More subtle, accessible backgrounds */
@@ -121,11 +129,13 @@ h1:hover {
 ```
 
 **Accessibility Considerations**:
+
 - Ensure text has 4.5:1+ contrast on glass backgrounds
 - Test with screen readers (ensure content is readable)
 - Provide high-contrast mode alternative
 
 **Performance**:
+
 - `backdrop-filter` can be expensive on mobile
 - Use sparingly (2-3 glass elements max per viewport)
 - Consider `will-change: backdrop-filter` during animations only
@@ -137,11 +147,13 @@ h1:hover {
 **Definition**: Complex, multi-color gradients with organic blob shapes.
 
 **Tools**:
+
 - CSS: `background: radial-gradient()` layering
 - SVG: Gradient mesh filters
 - Canvas/WebGL: Shader-based gradients (Vanta.js)
 
 **Modern Gradient System**:
+
 ```css
 :root {
   /* Define gradient stops */
@@ -161,12 +173,18 @@ h1:hover {
 }
 
 @keyframes gradient-shift {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
 }
 ```
 
 **Animated Gradients** (WebGL approach with Vanta.js):
+
 - WAVES effect with custom colors
 - CELLS effect for organic feel
 - FOG for atmospheric backgrounds
@@ -180,14 +198,14 @@ h1:hover {
 **Status**: Declining but still used for specific contexts (iOS apps, dashboards).
 
 **Modern Implementation** (Improved contrast):
+
 ```css
 .neomorphic-card {
   background: #e0e5ec;
   box-shadow:
     /* Light shadow */
     8px 8px 16px rgba(163, 177, 198, 0.6),
-    /* Dark shadow */
-    -8px -8px 16px rgba(255, 255, 255, 0.8);
+    /* Dark shadow */ -8px -8px 16px rgba(255, 255, 255, 0.8);
 
   border-radius: 16px;
   padding: 2rem;
@@ -213,6 +231,7 @@ h1:hover {
 **Trend**: Many sites now default to dark mode with light mode as alternative.
 
 **Best Practices** (2024):
+
 ```css
 /* Use system preference as default */
 :root {
@@ -248,6 +267,7 @@ h1:hover {
 ```
 
 **Color Adjustments for Dark Mode**:
+
 - Reduce saturation by 10-20%
 - Lower brightness for vibrant colors
 - Use warmer blacks (#0a0a0a, not pure #000)
@@ -260,6 +280,7 @@ h1:hover {
 **Definition**: Breaking the grid for visual interest and hierarchy.
 
 **Patterns**:
+
 - Split-screen layouts (60/40, 70/30)
 - Overlapping elements with z-index
 - Diagonal sections
@@ -267,6 +288,7 @@ h1:hover {
 - Broken grid systems
 
 **CSS Grid Implementation**:
+
 ```css
 .asymmetric-grid {
   display: grid;
@@ -290,6 +312,7 @@ h1:hover {
 ```
 
 **Examples**:
+
 - Awwwards winners (70%+ use asymmetry)
 - Design agency portfolios
 - Product launch pages
@@ -305,35 +328,40 @@ h1:hover {
 **Categories & Examples**:
 
 **a) Button Interactions**:
+
 - Hover lift (transform: translateY(-2px))
 - Press down (scale: 0.98)
 - Ripple effect on click
 - Color shift transitions
 
 **b) Form Feedback**:
+
 - Input focus animations (border glow)
 - Success/error state transitions
 - Character count with progress ring
 - Password strength indicator
 
 **c) Loading States**:
+
 - Skeleton screens (better than spinners)
 - Progress indicators
 - Optimistic UI updates
 - Staggered content reveals
 
 **d) Navigation**:
+
 - Hamburger to X transitions
 - Dropdown reveals with stagger
 - Active state indicators
 - Scroll progress bars
 
 **Implementation** (Framer Motion):
+
 ```jsx
 const buttonVariants = {
   idle: { scale: 1, y: 0 },
   hover: { scale: 1.05, y: -2 },
-  tap: { scale: 0.98, y: 0 }
+  tap: { scale: 0.98, y: 0 },
 };
 
 <motion.button
@@ -344,7 +372,7 @@ const buttonVariants = {
   transition={{ type: "spring", stiffness: 400, damping: 17 }}
 >
   Click me
-</motion.button>
+</motion.button>;
 ```
 
 **Related Skills**: `motion-framer`, `react-spring-physics`, `animejs`
@@ -358,6 +386,7 @@ const buttonVariants = {
 **Techniques**:
 
 **a) Pinned Sections with Scrubbing**:
+
 ```javascript
 // Pin section while content scrubs through
 gsap.to(".content", {
@@ -366,29 +395,33 @@ gsap.to(".content", {
     start: "top top",
     end: "+=3000", // 3000px of scroll
     scrub: 1,
-    pin: true
+    pin: true,
   },
   opacity: 1,
-  scale: 1.2
+  scale: 1.2,
 });
 ```
 
 **b) Horizontal Scroll Galleries**:
+
 - Card-based portfolios
 - Timeline experiences
 - Product showcases
 
 **c) Parallax Layers**:
+
 - Foreground, midground, background at different speeds
 - 3D depth illusion
 - Hero section parallax
 
 **d) Progress Indicators**:
+
 - Reading progress bars
 - Section progress dots
 - Animated SVG paths
 
 **Examples**:
+
 - Apple product pages (iPhone, MacBook)
 - Stripe's annual reports
 - Web agency showcases
@@ -404,11 +437,12 @@ gsap.to(".content", {
 **Patterns**:
 
 **a) Dot Follower**:
+
 ```javascript
 const cursor = { x: 0, y: 0 };
 const follower = { x: 0, y: 0 };
 
-document.addEventListener('mousemove', (e) => {
+document.addEventListener("mousemove", (e) => {
   cursor.x = e.clientX;
   cursor.y = e.clientY;
 });
@@ -424,12 +458,14 @@ function updateCursor() {
 ```
 
 **b) Contextual Cursors**:
+
 - "View" on images
 - "Drag" on sliders
 - "Play" on videos
 - Magnetic attraction to buttons
 
 **c) Blend Mode Cursors**:
+
 ```css
 .cursor {
   mix-blend-mode: difference;
@@ -438,6 +474,7 @@ function updateCursor() {
 ```
 
 **Accessibility**:
+
 - Hide on touch devices
 - Respect `prefers-reduced-motion`
 - Don't hide native cursor completely (layer on top)
@@ -449,16 +486,18 @@ function updateCursor() {
 **Status**: Increasingly mainstream with improved performance and tooling.
 
 **Use Cases**:
+
 - Hero backgrounds (Vanta.js waves, particles)
 - Product viewers (rotate, zoom, configure)
 - Data visualization (3D charts, globes)
 - Immersive experiences (games, virtual tours)
 
 **Performance-First Approach**:
+
 ```javascript
 // Lazy load 3D content
 const observer = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
+  entries.forEach((entry) => {
     if (entry.isIntersecting) {
       // Load 3D scene
       loadThreeJSScene();
@@ -467,15 +506,17 @@ const observer = new IntersectionObserver((entries) => {
   });
 });
 
-observer.observe(document.querySelector('.3d-container'));
+observer.observe(document.querySelector(".3d-container"));
 ```
 
 **Lightweight 3D Options**:
+
 - Vanta.js for backgrounds (uses Three.js)
 - Zdog for flat-style 3D illustrations
 - Spline for designer-friendly 3D
 
 **Full 3D Engines**:
+
 - Three.js for custom scenes
 - React Three Fiber for React apps
 - Babylon.js for physics and VR
@@ -489,12 +530,14 @@ observer.observe(document.querySelector('.3d-container'));
 **Emerging Trend**: Voice commands and conversational interfaces.
 
 **Patterns**:
+
 - Voice search integration
 - Chatbot interfaces (natural language)
 - Voice-controlled navigation
 - Audio feedback for interactions
 
 **Implementation Considerations**:
+
 - Web Speech API for voice input
 - Text-to-speech for feedback
 - Fallback to text input
@@ -509,23 +552,27 @@ observer.observe(document.querySelector('.3d-container'));
 **Core Web Vitals as Design Constraints**:
 
 **LCP (Largest Contentful Paint) < 2.5s**:
+
 - Optimize hero images (WebP/AVIF)
 - Inline critical CSS
 - Preload key resources
 - Avoid layout shifts
 
 **FID (First Input Delay) < 100ms**:
+
 - Defer non-critical JavaScript
 - Split code bundles
 - Use passive event listeners
 - Minimize main thread work
 
 **CLS (Cumulative Layout Shift) < 0.1**:
+
 - Reserve space for images (aspect-ratio)
 - Avoid inserting content above existing content
 - Use CSS transforms, not position changes
 
 **Design Implications**:
+
 - Avoid web fonts that cause FOIT/FOUT
 - Use system fonts for body text
 - Lazy load below-fold content
@@ -538,12 +585,14 @@ observer.observe(document.querySelector('.3d-container'));
 **Approach**: Design and build in reusable components.
 
 **Tools**:
+
 - Figma with variants and auto-layout
 - Storybook for component documentation
 - Design tokens (JSON format)
 - Automated design-to-code (Figma plugins)
 
 **Component Architecture**:
+
 ```
 Design System/
 ├── Foundations/
@@ -571,24 +620,28 @@ Design System/
 **Applications**:
 
 **a) Content Generation**:
+
 - AI-written copy (with human editing)
 - Image generation (Midjourney, DALL-E)
 - Icon generation
 - Design variations
 
 **b) Personalization**:
+
 - Dynamic layouts based on user behavior
 - A/B testing with AI optimization
 - Adaptive color schemes
 - Content recommendations
 
 **c) Accessibility**:
+
 - AI-generated alt text
 - Automatic color contrast adjustments
 - Smart keyboard navigation
 - Content simplification
 
 **Implementation**:
+
 - Edge functions for fast personalization
 - Client-side ML models (TensorFlow.js)
 - Privacy-preserving personalization
@@ -600,6 +653,7 @@ Design System/
 **Status**: Mainstream adoption, especially for mobile-first products.
 
 **Key Features**:
+
 - Offline functionality
 - Install to home screen
 - Push notifications
@@ -607,6 +661,7 @@ Design System/
 - Native-like performance
 
 **Design Considerations**:
+
 - Mobile-first responsive design
 - Touch-friendly interactions (44px+ targets)
 - Offline-first content strategy
@@ -622,24 +677,29 @@ Design System/
 **Trending Color Schemes**:
 
 **a) High Contrast Duotone**:
+
 - Black + bright accent (electric blue, hot pink, lime green)
 - Minimal, punchy, attention-grabbing
 
 **b) Muted Earth Tones**:
+
 - Terracotta, sage green, warm beige
 - Natural, calming, sustainable aesthetic
 
 **c) Neon Gradients**:
+
 - Bright, saturated gradient meshes
 - Cyberpunk aesthetic
 - Gaming and tech brands
 
 **d) Monochromatic + Accent**:
+
 - Single hue with varying lightness
 - One bold accent color
 - Sophisticated, cohesive
 
 **Color Space Evolution**:
+
 ```css
 /* OKLCH for perceptual uniformity */
 :root {
@@ -662,6 +722,7 @@ Design System/
 **Adoption**: Major sites now using variable fonts by default.
 
 **Popular Variable Fonts**:
+
 - Inter (UI text)
 - Space Grotesk (headlines)
 - Recursive (code & UI)
@@ -669,22 +730,24 @@ Design System/
 - Outfit (geometric sans)
 
 **Advantages**:
+
 - Single file, multiple weights/styles
 - Animation possibilities
 - Fine-grained control (weight: 347)
 - Smaller file size than multiple weights
 
 **Implementation**:
+
 ```css
 @font-face {
-  font-family: 'Inter';
-  src: url('Inter-Variable.woff2') format('woff2-variations');
+  font-family: "Inter";
+  src: url("Inter-Variable.woff2") format("woff2-variations");
   font-weight: 100 900;
   font-display: swap;
 }
 
 h1 {
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-weight: 750; /* Any value 100-900 */
 }
 ```
@@ -696,6 +759,7 @@ h1 {
 **Trend**: Headlines at 100px-300px for desktop.
 
 **Fluid Typography System**:
+
 ```css
 :root {
   --font-size-base: clamp(1rem, 0.9rem + 0.5vw, 1.25rem);
@@ -713,6 +777,7 @@ h1 {
 ```
 
 **Design Considerations**:
+
 - Tight line-height (0.9-1.0)
 - Negative letter-spacing (-0.02 to -0.04em)
 - Strong font weight (700-900)
@@ -727,6 +792,7 @@ h1 {
 **Definition**: Intentionally breaking traditional grid systems for visual interest.
 
 **Techniques**:
+
 - Overlapping elements
 - Off-grid positioning
 - Diagonal layouts
@@ -734,6 +800,7 @@ h1 {
 - Z-axis layering
 
 **CSS Grid + Subgrid**:
+
 ```css
 .parent-grid {
   display: grid;
@@ -756,18 +823,21 @@ h1 {
 **Trend**: Entire site on one scrollable page.
 
 **Patterns**:
+
 - Section-based navigation (anchor links)
 - Full-screen sections
 - Scroll-driven reveals
 - Smooth scrolling between sections
 
 **Benefits**:
+
 - Cohesive narrative flow
 - No page load transitions
 - Mobile-friendly (swipe to scroll)
 - Performance (single bundle)
 
 **Challenges**:
+
 - SEO (use meaningful sections with h2-h6)
 - Deep linking (use hash routing)
 - Back button behavior
@@ -780,17 +850,20 @@ h1 {
 ### 22. AI-Generated Visuals
 
 **Tools**:
+
 - Midjourney for illustrations
 - DALL-E 3 for specific images
 - Stable Diffusion for customization
 
 **Use Cases**:
+
 - Hero backgrounds
 - Blog post headers
 - Icon generation
 - Abstract patterns
 
 **Ethical Considerations**:
+
 - Disclose AI-generated content
 - Review for bias and appropriateness
 - Ensure licensing rights
@@ -801,6 +874,7 @@ h1 {
 ### 23. Web3 Design Patterns
 
 **Characteristics**:
+
 - Wallet connection UIs
 - NFT galleries
 - Token-gated content
@@ -808,6 +882,7 @@ h1 {
 - Decentralized identity
 
 **Design Challenges**:
+
 - Explaining complex concepts simply
 - Transaction loading states (slow blockchains)
 - Error handling (failed transactions)
@@ -820,6 +895,7 @@ h1 {
 **Future Trend**: Preparing for AR/VR mainstream adoption.
 
 **Patterns**:
+
 - Depth-based layering
 - 3D navigation
 - Gesture controls
@@ -851,22 +927,26 @@ h1 {
 ## Resources & Inspiration
 
 **Award Sites**:
+
 - Awwwards.com (daily winners)
 - CSS Design Awards
 - The FWA
 
 **Trend Reports**:
+
 - Webflow's Annual Design Report
 - Dribbble Year in Review
 - Behance Featured Projects
 
 **Design Systems**:
+
 - Material Design 3 (Google)
 - Fluent 2 (Microsoft)
 - Polaris (Shopify)
 - Carbon (IBM)
 
 **Tools**:
+
 - Figma (design)
 - Webflow (visual development)
 - Framer (design + code)
@@ -888,6 +968,7 @@ h1 {
 8. **Biometric Interfaces**: Face/voice recognition for auth and personalization
 
 **Technology Shifts**:
+
 - WebGPU mainstream adoption (faster 3D)
 - Container queries (component-based responsive design)
 - View Transitions API (smooth SPA transitions)
@@ -895,5 +976,5 @@ h1 {
 
 ---
 
-*Last updated: 2024*
-*Review quarterly for updates*
+_Last updated: 2024_
+_Review quarterly for updates_

@@ -1,4 +1,5 @@
 import { AtlasHttpError } from "@atlas/core/http/errors";
+import { safeOutboundFetch } from "@atlas/security/safe-outbound-fetch";
 import type { TenantTx } from "@atlas/db";
 import type { ServiceCtx } from "@atlas/domain/shared/domain.types";
 import { ensureSelfServiceLearnerMembership, findMembershipByPrincipal } from "@atlas/membership";
@@ -78,9 +79,13 @@ async function deliverWebhook(args: {
   timeoutMs?: number;
 }): Promise<{ ok: boolean; statusCode: number | null; message: string }> {
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), args.timeoutMs ?? 8000);
+  const timer = setTimeout(() => {
+    controller.abort();
+  }, args.timeoutMs ?? 8000);
   try {
-    const response = await fetch(args.url, {
+    // Tenant-configured URL: SSRF-guarded. This is the "test webhook" path, the
+    // most directly attacker-driven of the four surfaces.
+    const response = await safeOutboundFetch(args.url, {
       method: "POST",
       headers: {
         "content-type": "application/json",
@@ -99,18 +104,14 @@ async function deliverWebhook(args: {
       : `Remote responded with status ${response.status}.`;
     return { ok: response.ok, statusCode: response.status, message };
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Webhook delivery failed.";
+    const message = error instanceof Error ? error.message : "Webhook delivery failed.";
     return { ok: false, statusCode: null, message };
   } finally {
     clearTimeout(timer);
   }
 }
 
-export async function getMarketingIntegrationSnippets(
-  tx: TenantTx,
-  _ctx: ServiceCtx,
-) {
+export async function getMarketingIntegrationSnippets(tx: TenantTx, _ctx: ServiceCtx) {
   const settings = await marketingIntegrationsRepository.getSettings(tx);
   return marketingIntegrationSnippetsResponseSchema.parse({
     data: toSnippetsDto(settings),
@@ -153,10 +154,7 @@ export async function updateMarketingIntegrationSnippets(
   });
 }
 
-export async function listMarketingIntegrationWebhooks(
-  tx: TenantTx,
-  _ctx: ServiceCtx,
-) {
+export async function listMarketingIntegrationWebhooks(tx: TenantTx, _ctx: ServiceCtx) {
   const rows = await marketingIntegrationsRepository.listWebhooks(tx);
   const byEvent = new Map<MarketingIntegrationEventKey, ReturnType<typeof toWebhookDto>[]>();
   for (const key of MARKETING_INTEGRATION_EVENT_KEYS) {
@@ -195,10 +193,7 @@ export async function createMarketingIntegrationWebhook(
     if (!row) throw notFound();
     return marketingIntegrationWebhookResponseSchema.parse({ data: toWebhookDto(row) });
   } catch (error) {
-    if (
-      error instanceof Error &&
-      /unique|duplicate/i.test(error.message)
-    ) {
+    if (error instanceof Error && /unique|duplicate/i.test(error.message)) {
       throw validationError("This webhook URL is already registered for that event.");
     }
     throw error;
@@ -233,11 +228,7 @@ export async function deleteMarketingIntegrationWebhook(
   });
 }
 
-export async function testMarketingIntegrationWebhook(
-  tx: TenantTx,
-  ctx: ServiceCtx,
-  id: string,
-) {
+export async function testMarketingIntegrationWebhook(tx: TenantTx, ctx: ServiceCtx, id: string) {
   const row = await marketingIntegrationsRepository.findWebhookById(tx, id);
   if (!row) throw notFound("Webhook not found.");
 
@@ -348,10 +339,7 @@ export async function getMarketingIntegrationOverview(tx: TenantTx, _ctx: Servic
   });
 }
 
-export async function getMarketingIntegrationCredentials(
-  tx: TenantTx,
-  ctx: ServiceCtx,
-) {
+export async function getMarketingIntegrationCredentials(tx: TenantTx, ctx: ServiceCtx) {
   const settings = await marketingIntegrationsRepository.ensureSettings(tx);
   const tenantRows = await tx.$queryRawUnsafe<Array<{ slug: string }>>(
     `select slug from tenants where id = $1::uuid limit 1`,
@@ -368,10 +356,7 @@ export async function getMarketingIntegrationCredentials(
   });
 }
 
-export async function rotateMarketingIntegrationApiKey(
-  tx: TenantTx,
-  ctx: ServiceCtx,
-) {
+export async function rotateMarketingIntegrationApiKey(tx: TenantTx, ctx: ServiceCtx) {
   const { settings, apiKey } = await marketingIntegrationsRepository.rotateApiKey(tx);
   if (!settings?.api_key_prefix || !settings.api_key_created_at) {
     throw validationError("Could not rotate integration API key.");
@@ -402,10 +387,7 @@ export async function getPublicMarketingIntegrationSnippets(tx: TenantTx) {
   });
 }
 
-export async function requireIntegrationApiKey(
-  tx: TenantTx,
-  apiKey: string | null | undefined,
-) {
+export async function requireIntegrationApiKey(tx: TenantTx, apiKey: string | null | undefined) {
   if (!apiKey?.trim()) throw authRequired();
   const settings = await marketingIntegrationsRepository.findSettingsByApiKeyHash(
     tx,
@@ -415,11 +397,7 @@ export async function requireIntegrationApiKey(
   return settings;
 }
 
-export async function runIntegrationSignUpAction(
-  tx: TenantTx,
-  ctx: ServiceCtx,
-  body: unknown,
-) {
+export async function runIntegrationSignUpAction(tx: TenantTx, ctx: ServiceCtx, body: unknown) {
   const input = integrationSignUpBodySchema.parse(body);
   const email = input.email.trim().toLowerCase();
 

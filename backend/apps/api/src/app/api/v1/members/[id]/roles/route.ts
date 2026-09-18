@@ -5,13 +5,13 @@ import { assignRoleToMember } from "@atlas/domain-access";
 import { z as zod } from "zod";
 import { postRouteMetadata } from "./route.metadata";
 
-const memberParamsSchema = zod.object({ id: zod.string().uuid() });
+const memberParamsSchema = zod.object({ id: zod.uuid() });
 
 const assignRoleResponseSchema = zod.object({
   data: zod.object({
-    membershipId: zod.string().uuid(),
+    membershipId: zod.uuid(),
     role: zod.object({
-      id: zod.string().uuid(),
+      id: zod.uuid(),
       key: zod.string(),
       name: zod.string(),
       isSystem: zod.boolean(),

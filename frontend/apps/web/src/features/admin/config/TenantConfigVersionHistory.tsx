@@ -17,7 +17,8 @@ type TenantConfigVersionHistoryProps = {
 const UNKNOWN_PUBLISHER = "Unknown";
 
 export function TenantConfigVersionHistory({ versions }: TenantConfigVersionHistoryProps) {
-  const latestVersion = versions.find((version) => version.isCurrent)?.version ?? versions[0]?.version;
+  const latestVersion =
+    versions.find((version) => version.isCurrent)?.version ?? versions[0]?.version;
 
   return (
     <section className="space-y-4" aria-label="Configuration version history">

@@ -1,21 +1,11 @@
-export type LegalContentBlock =
-  | { type: "p"; text: string }
-  | { type: "h3"; text: string }
-  | { type: "ul"; items: string[] }
-  | { type: "ol"; items: string[] }
-  | { type: "table"; headers: string[]; rows: string[][] };
-
-export type LegalSection = {
-  id: string;
-  sectionNumber: string;
-  title: string;
-  blocks: LegalContentBlock[];
-};
-
-export type LegalDocument = {
-  slug: "terms" | "privacy";
-  title: string;
-  subtitle: string;
-  lastUpdated: string;
-  sections: LegalSection[];
-};
+/**
+ * Legal document shapes now live in the shared contract, because the documents
+ * themselves are tenant configuration rather than app source. Re-exported here
+ * so the existing imports in this folder keep working.
+ */
+export type {
+  LegalContentBlock,
+  LegalDocument,
+  LegalDocumentSlug,
+  LegalSection,
+} from "@atlas/contracts/domain-branding/schemas/public-legal";

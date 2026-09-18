@@ -45,7 +45,10 @@ export function BandProminenceRulesPanel({
     <section className={panelClassName} aria-labelledby="band-prominence-heading">
       <div className={`${panelHeaderClassName} items-start`}>
         <div className="min-w-0 flex-1 pr-2">
-          <h2 id="band-prominence-heading" className="text-base font-semibold text-[var(--admin-on-surface)]">
+          <h2
+            id="band-prominence-heading"
+            className="text-base font-semibold text-[var(--admin-on-surface)]"
+          >
             Band Prominence Rules
           </h2>
           <p className="mt-1 text-[13px] leading-relaxed text-[var(--admin-on-surface-variant)]">

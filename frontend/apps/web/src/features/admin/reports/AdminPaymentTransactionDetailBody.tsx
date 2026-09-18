@@ -335,8 +335,7 @@ export function AdminPaymentTransactionDetailBody({
               {detail.risk ? (
                 <>
                   <p className="mb-4 text-sm text-[var(--admin-on-surface-variant)]">
-                    {detail.risk.summary ??
-                      "Risk metadata was recorded with this payment order."}
+                    {detail.risk.summary ?? "Risk metadata was recorded with this payment order."}
                   </p>
                   <div className="inline-flex items-center gap-2 border border-[var(--admin-border)] bg-[var(--admin-bg)] px-3 py-1 font-mono text-xs text-[var(--admin-primary)]">
                     <span>Score:</span>
@@ -391,7 +390,9 @@ export function AdminPaymentTransactionDetailBody({
                   <span
                     className={[
                       "font-mono text-[10px] font-bold uppercase tracking-wider",
-                      done ? "text-[var(--admin-primary)]" : "text-[var(--admin-on-surface-variant)]",
+                      done
+                        ? "text-[var(--admin-primary)]"
+                        : "text-[var(--admin-on-surface-variant)]",
                     ].join(" ")}
                   >
                     {step.label}
@@ -421,9 +422,7 @@ export function AdminPaymentTransactionDetailBody({
             <span className="font-mono text-xs">{detail.learner.email ?? "—"}</span>
           </Field>
           <Field label="Membership ID">
-            <span className="font-mono text-xs">
-              {detail.learner.membershipId ?? "—"}
-            </span>
+            <span className="font-mono text-xs">{detail.learner.membershipId ?? "—"}</span>
           </Field>
           {detail.learner.membershipId ? (
             <Link
@@ -468,7 +467,9 @@ export function AdminPaymentTransactionDetailBody({
               </div>
               <div>
                 <div className="font-bold">
-                  {detail.gateway.last4 ? `•••• ${detail.gateway.last4}` : detail.gateway.methodLabel}
+                  {detail.gateway.last4
+                    ? `•••• ${detail.gateway.last4}`
+                    : detail.gateway.methodLabel}
                 </div>
               </div>
             </div>
@@ -483,7 +484,7 @@ export function AdminPaymentTransactionDetailBody({
                 ))}
               </span>
             ) : (
-              detail.billing.name ?? "—"
+              (detail.billing.name ?? "—")
             )}
           </Field>
           <Field label="GSTIN / Tax ID">{detail.billing.taxId ?? "—"}</Field>
@@ -507,7 +508,10 @@ export function AdminPaymentTransactionDetailBody({
             </Field>
           ) : null}
           <Field label="Network ref">
-            <span className="block truncate font-mono text-xs" title={detail.gateway.networkRef ?? ""}>
+            <span
+              className="block truncate font-mono text-xs"
+              title={detail.gateway.networkRef ?? ""}
+            >
               {detail.gateway.networkRef ?? "—"}
             </span>
           </Field>
@@ -538,9 +542,12 @@ export function AdminPaymentTransactionDetailBody({
               <button
                 type="button"
                 className="inline-flex items-center gap-1 font-mono text-xs text-[var(--admin-primary)] hover:underline"
-                onClick={() => setMetaOpen((v) => !v)}
+                onClick={() => {
+                  setMetaOpen((v) => !v);
+                }}
               >
-                View raw JSON <ChevronDown className={`h-3.5 w-3.5 ${metaOpen ? "rotate-180" : ""}`} />
+                View raw JSON{" "}
+                <ChevronDown className={`h-3.5 w-3.5 ${metaOpen ? "rotate-180" : ""}`} />
               </button>
             ) : null}
           </div>
@@ -597,7 +604,9 @@ export function AdminPaymentTransactionDetailBody({
             <button
               type="button"
               className="mb-4 flex cursor-pointer items-center justify-between border-b border-[color-mix(in_srgb,var(--admin-border)_50%,transparent)] pb-2"
-              onClick={() => setMetaOpen((v) => !v)}
+              onClick={() => {
+                setMetaOpen((v) => !v);
+              }}
             >
               <h3 className="flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-widest text-[var(--admin-on-surface-variant)]">
                 <RefreshCw className="h-4 w-4" /> Order metadata
@@ -616,7 +625,9 @@ export function AdminPaymentTransactionDetailBody({
               <button
                 type="button"
                 className="py-4 text-center font-mono text-xs text-[var(--admin-on-surface-variant)] transition-colors hover:text-[var(--admin-primary)]"
-                onClick={() => setMetaOpen(true)}
+                onClick={() => {
+                  setMetaOpen(true);
+                }}
               >
                 {metaJson ? "Click to view raw payload" : "No metadata stored on this order"}
               </button>

@@ -19,7 +19,8 @@ function mapRow(row: Record<string, unknown>): DeviceSessionRow {
     id: String(row["id"]),
     tenant_id: String(row["tenant_id"]),
     membership_id: String(row["membership_id"]),
-    device_fingerprint: typeof row["device_fingerprint"] === "string" ? row["device_fingerprint"] : null,
+    device_fingerprint:
+      typeof row["device_fingerprint"] === "string" ? row["device_fingerprint"] : null,
     user_agent: typeof row["user_agent"] === "string" ? row["user_agent"] : null,
     ip_address: typeof row["ip_address"] === "string" ? row["ip_address"] : null,
     platform: typeof row["platform"] === "string" ? row["platform"] : null,
@@ -169,7 +170,7 @@ export const devicesRepository = {
       delete from device_sessions
       where id = any(${sessionIds}::uuid[])
     `;
-    return Number(count);
+    return count;
   },
 
   async deleteSessionsForMembership(tx: TenantTx, membershipId: string): Promise<number> {
@@ -177,6 +178,6 @@ export const devicesRepository = {
       delete from device_sessions
       where membership_id = ${membershipId}::uuid
     `;
-    return Number(count);
+    return count;
   },
 };

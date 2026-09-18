@@ -156,7 +156,11 @@ function severityClass(severity: string): string {
 
 function ReviewSkeleton() {
   return (
-    <div className="grid grid-cols-1 gap-6 lg:grid-cols-12" aria-busy="true" aria-label="Loading attempt review">
+    <div
+      className="grid grid-cols-1 gap-6 lg:grid-cols-12"
+      aria-busy="true"
+      aria-label="Loading attempt review"
+    >
       <div className="flex flex-col gap-8 lg:col-span-8">
         <div className="space-y-3">
           <Shimmer className="h-3 w-48" />
@@ -172,7 +176,10 @@ function ReviewSkeleton() {
           ))}
         </div>
         {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className="rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface)] p-6">
+          <div
+            key={i}
+            className="rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface)] p-6"
+          >
             <Shimmer className="mb-4 h-5 w-2/3" />
             <Shimmer className="mb-2 h-10 w-full" />
             <Shimmer className="h-10 w-full" />
@@ -232,7 +239,9 @@ function VoidModal({
         aria-modal="true"
         aria-labelledby={titleId}
         className="relative flex w-full max-w-[540px] flex-col gap-6 rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)] p-8"
-        onClick={(event) => event.stopPropagation()}
+        onClick={(event) => {
+          event.stopPropagation();
+        }}
       >
         <button
           type="button"
@@ -258,8 +267,8 @@ function VoidModal({
           <strong className="text-[var(--admin-on-surface)]">
             {attemptLabel} ({formatPct(scorePct)})
           </strong>{" "}
-          for {learnerName}. This attempt will be excluded from all performance reports and
-          rosters but will be retained in the audit log.
+          for {learnerName}. This attempt will be excluded from all performance reports and rosters
+          but will be retained in the audit log.
         </p>
         <div className="flex flex-col gap-2">
           <label
@@ -275,7 +284,9 @@ function VoidModal({
             className="resize-none rounded-sm border border-[var(--admin-on-surface)] bg-[var(--admin-surface-low)] p-4 text-sm text-[var(--admin-on-surface)] outline-none focus:border-[var(--admin-warning)] focus:ring-1 focus:ring-[var(--admin-warning)]"
             placeholder="Provide a required explanation for the audit log…"
             value={reason}
-            onChange={(event) => setReason(event.target.value)}
+            onChange={(event) => {
+              setReason(event.target.value);
+            }}
           />
         </div>
         <div className="flex justify-end gap-3 border-t border-[var(--admin-border)] pt-4">
@@ -291,7 +302,9 @@ function VoidModal({
             type="button"
             className="inline-flex items-center gap-2 rounded-sm bg-[var(--admin-warning)] px-6 py-2.5 font-mono text-[12px] font-bold uppercase tracking-[0.08em] text-[var(--admin-on-primary)] hover:brightness-110 disabled:opacity-50"
             disabled={busy || !reason.trim()}
-            onClick={() => onConfirm(reason.trim())}
+            onClick={() => {
+              onConfirm(reason.trim());
+            }}
           >
             Void Attempt
           </button>
@@ -333,8 +346,7 @@ export function AdminScoreAttemptReviewPage({
       for (const question of response.data.questions) {
         if (question.isManual) {
           nextDrafts[question.assessmentItemId] = {
-            pointsAwarded:
-              question.pointsAwarded == null ? "" : String(question.pointsAwarded),
+            pointsAwarded: question.pointsAwarded == null ? "" : String(question.pointsAwarded),
             feedback: question.feedback ?? "",
           };
         }
@@ -360,8 +372,7 @@ export function AdminScoreAttemptReviewPage({
 
   const dirtyItems = useMemo(() => {
     if (!data) return [];
-    const items: Array<{ assessmentItemId: string; pointsAwarded: number; feedback?: string }> =
-      [];
+    const items: Array<{ assessmentItemId: string; pointsAwarded: number; feedback?: string }> = [];
     for (const question of data.questions) {
       if (!question.isManual) continue;
       const draft = drafts[question.assessmentItemId];
@@ -370,8 +381,7 @@ export function AdminScoreAttemptReviewPage({
       if (!Number.isFinite(points)) continue;
       const feedbackChanged = (draft.feedback || "") !== (question.feedback ?? "");
       const pointsChanged =
-        question.pointsAwarded == null ||
-        Math.abs(question.pointsAwarded - points) > 0.001;
+        question.pointsAwarded == null || Math.abs(question.pointsAwarded - points) > 0.001;
       if (pointsChanged || feedbackChanged) {
         items.push({
           assessmentItemId: question.assessmentItemId,
@@ -405,7 +415,7 @@ export function AdminScoreAttemptReviewPage({
       ? previewScore >= data.assessment.passMarkPercent
         ? "pass"
         : "fail"
-      : data?.attempt.resultStatus ?? "pending";
+      : (data?.attempt.resultStatus ?? "pending");
 
   async function handleSave() {
     if (dirtyItems.length === 0) return;
@@ -556,11 +566,17 @@ export function AdminScoreAttemptReviewPage({
             className="flex items-center gap-2 overflow-x-auto whitespace-nowrap font-mono text-[11px] uppercase tracking-[0.1em] text-[var(--admin-on-surface-variant)]"
             aria-label="Breadcrumb"
           >
-            <Link href="/admin/reports/progress-score/scores" className="hover:text-[var(--admin-primary)]">
+            <Link
+              href="/admin/reports/progress-score/scores"
+              className="hover:text-[var(--admin-primary)]"
+            >
               Scores
             </Link>
             <ChevronRight className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-            <Link href={rosterHref} className="max-w-[160px] truncate hover:text-[var(--admin-primary)]">
+            <Link
+              href={rosterHref}
+              className="max-w-[160px] truncate hover:text-[var(--admin-primary)]"
+            >
               {data.assessment.title}
             </Link>
             <ChevronRight className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
@@ -733,9 +749,8 @@ export function AdminScoreAttemptReviewPage({
                   Attempts
                 </span>
                 <p className="text-[var(--admin-on-surface)]">
-                  Attempt{" "}
-                  <span className="font-mono font-bold">{data.attempt.attemptNumber}</span> of{" "}
-                  {data.attempt.ofAllowed} allowed
+                  Attempt <span className="font-mono font-bold">{data.attempt.attemptNumber}</span>{" "}
+                  of {data.attempt.ofAllowed} allowed
                 </p>
               </div>
             </div>
@@ -813,15 +828,15 @@ export function AdminScoreAttemptReviewPage({
                               step={0.5}
                               className="w-20 rounded-sm border border-[var(--admin-primary)] bg-[var(--admin-surface-low)] px-3 py-2 text-center font-mono text-[13px] text-[var(--admin-primary)] outline-none"
                               value={draft?.pointsAwarded ?? ""}
-                              onChange={(event) =>
+                              onChange={(event) => {
                                 setDrafts((prev) => ({
                                   ...prev,
                                   [question.assessmentItemId]: {
                                     pointsAwarded: event.target.value,
                                     feedback: prev[question.assessmentItemId]?.feedback ?? "",
                                   },
-                                }))
-                              }
+                                }));
+                              }}
                             />
                             <span className="font-mono text-[12px] text-[var(--admin-on-surface-variant)]">
                               / {question.pointsMax} pts
@@ -835,15 +850,16 @@ export function AdminScoreAttemptReviewPage({
                             className="mb-2 w-full resize-none rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface-low)] p-2 text-sm outline-none focus:border-[var(--admin-primary)]"
                             placeholder="Optional feedback…"
                             value={draft?.feedback ?? ""}
-                            onChange={(event) =>
+                            onChange={(event) => {
                               setDrafts((prev) => ({
                                 ...prev,
                                 [question.assessmentItemId]: {
-                                  pointsAwarded: prev[question.assessmentItemId]?.pointsAwarded ?? "",
+                                  pointsAwarded:
+                                    prev[question.assessmentItemId]?.pointsAwarded ?? "",
                                   feedback: event.target.value,
                                 },
-                              }))
-                            }
+                              }));
+                            }}
                           />
                         </div>
                       </div>
@@ -861,9 +877,7 @@ export function AdminScoreAttemptReviewPage({
                                   ? "border-l-4 border-l-[color:var(--admin-outline)]"
                                   : "",
                                 correctRail ? "border-l-4 border-l-[var(--admin-primary)]" : "",
-                                learnerRail && !correctRail
-                                  ? "!border-l-[color:#6366f1]"
-                                  : "",
+                                learnerRail && !correctRail ? "!border-l-[color:#6366f1]" : "",
                               ].join(" ")}
                               style={
                                 learnerRail && !correctRail
@@ -988,7 +1002,8 @@ export function AdminScoreAttemptReviewPage({
                         </div>
                       </div>
                     );
-                    if (item.isCurrent || !item.attemptId) return <div key={item.attemptId ?? item.attemptNumber}>{row}</div>;
+                    if (item.isCurrent || !item.attemptId)
+                      return <div key={item.attemptId ?? item.attemptNumber}>{row}</div>;
                     return (
                       <Link
                         key={item.attemptId}
@@ -1063,7 +1078,9 @@ export function AdminScoreAttemptReviewPage({
                   <button
                     type="button"
                     className={`${ghostButtonClassName} inline-flex w-full items-center justify-center gap-2`}
-                    onClick={() => setMessageOpen((o) => !o)}
+                    onClick={() => {
+                      setMessageOpen((o) => !o);
+                    }}
                   >
                     <Mail className="h-4 w-4" aria-hidden="true" />
                     Message Learner
@@ -1074,14 +1091,18 @@ export function AdminScoreAttemptReviewPage({
                         className="h-9 rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-3 text-xs"
                         placeholder="Subject"
                         value={messageSubject}
-                        onChange={(event) => setMessageSubject(event.target.value)}
+                        onChange={(event) => {
+                          setMessageSubject(event.target.value);
+                        }}
                       />
                       <textarea
                         className="rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-3 py-2 text-xs"
                         rows={3}
                         placeholder="Message"
                         value={messageBody}
-                        onChange={(event) => setMessageBody(event.target.value)}
+                        onChange={(event) => {
+                          setMessageBody(event.target.value);
+                        }}
                       />
                       <button
                         type="button"
@@ -1098,7 +1119,9 @@ export function AdminScoreAttemptReviewPage({
                     type="button"
                     className="inline-flex w-full items-center justify-center gap-2 rounded-sm border border-[var(--admin-danger)] bg-[color-mix(in_srgb,var(--admin-danger)_12%,transparent)] py-2.5 font-mono text-[12px] text-[var(--admin-danger)] transition-colors hover:bg-[var(--admin-danger)] hover:text-[var(--admin-on-primary)] disabled:opacity-40"
                     disabled={busy || data.attempt.status === "VOIDED"}
-                    onClick={() => setVoidOpen(true)}
+                    onClick={() => {
+                      setVoidOpen(true);
+                    }}
                   >
                     Void Attempt
                   </button>
@@ -1173,7 +1196,9 @@ export function AdminScoreAttemptReviewPage({
             attemptLabel={`Attempt ${data.attempt.attemptNumber}`}
             scorePct={data.attempt.scorePct}
             busy={busy}
-            onClose={() => setVoidOpen(false)}
+            onClose={() => {
+              setVoidOpen(false);
+            }}
             onConfirm={(reason) => void handleVoid(reason)}
           />
         </>

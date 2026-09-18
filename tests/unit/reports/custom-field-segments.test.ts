@@ -201,10 +201,11 @@ describe("custom field segments conditions", () => {
     const completeness = assessConditionsCompleteness(tree, fieldTypes);
     expect(completeness.complete).toBe(true);
     const predicate = buildConditionsPredicate(tree, fieldTypes);
-    expect(predicate).not.toBeNull();
-    expect(predicate!.sql).toContain("exists");
-    expect(predicate!.params).toContain("ACTIVE");
-    expect(predicate!.params).toContain("certified");
+    if (predicate === null)
+      throw new Error("expected buildConditionsPredicate to return a predicate");
+    expect(predicate.sql).toContain("exists");
+    expect(predicate.params).toContain("ACTIVE");
+    expect(predicate.params).toContain("certified");
     expect(countConditions(tree)).toEqual({ conditionCount: 2, groupCount: 1 });
   });
 

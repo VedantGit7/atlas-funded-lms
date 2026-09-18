@@ -3,10 +3,7 @@ import type { studioCourseDetailSchema } from "@atlas/contracts/courses/course-a
 import type { MemberDetailResponse } from "@atlas/contracts/membership/schemas/admin-members";
 import { ClientApiError, clientApi, type ClientApiMutationOptions } from "../../../lib/client-api";
 import { buildCourseInstructorsUpdatePayload } from "./course-instructor-settings";
-import {
-  loadInstructorMembers,
-  type InstructorMember,
-} from "./create-course-add-member-dialog";
+import { loadInstructorMembers, type InstructorMember } from "./create-course-add-member-dialog";
 
 type CourseDetail = z.infer<typeof studioCourseDetailSchema>;
 

@@ -14,6 +14,5 @@ export const GET = createTenantRoute<
   metadata: listMarketingCampaignsMetadata,
   input: marketingCampaignAudienceEstimateQuerySchema,
   output: marketingCampaignAudienceEstimateResponseSchema,
-  handler: async ({ tx, ctx, input }) =>
-    estimateMarketingCampaignAudience(tx, ctx, input),
+  handler: async ({ tx, ctx, input }) => estimateMarketingCampaignAudience(tx, ctx, input),
 });

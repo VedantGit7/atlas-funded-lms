@@ -74,11 +74,7 @@ export function DiagnosticIdentityGate({
     }
   }, [open]);
 
-  async function submitSignup(values: {
-    email: string;
-    password: string;
-    displayName: string;
-  }) {
+  async function submitSignup(values: { email: string; password: string; displayName: string }) {
     setStatus("loading");
     setMessage(null);
 
@@ -165,9 +161,11 @@ export function DiagnosticIdentityGate({
           <Form {...signupForm}>
             <form
               className="space-y-4"
-              onSubmit={signupForm.handleSubmit((values) => {
-                void submitSignup(values);
-              })}
+              onSubmit={(event) => {
+                void signupForm.handleSubmit((values) => {
+                  void submitSignup(values);
+                })(event);
+              }}
             >
               <FormField
                 control={signupForm.control}
@@ -190,7 +188,13 @@ export function DiagnosticIdentityGate({
                   <FormItem>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input {...field} required type="email" autoComplete="email" className="w-full" />
+                      <Input
+                        {...field}
+                        required
+                        type="email"
+                        autoComplete="email"
+                        className="w-full"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -244,9 +248,11 @@ export function DiagnosticIdentityGate({
           <Form {...loginForm}>
             <form
               className="space-y-4"
-              onSubmit={loginForm.handleSubmit((values) => {
-                void submitLogin(values);
-              })}
+              onSubmit={(event) => {
+                void loginForm.handleSubmit((values) => {
+                  void submitLogin(values);
+                })(event);
+              }}
             >
               <FormField
                 control={loginForm.control}
@@ -255,7 +261,13 @@ export function DiagnosticIdentityGate({
                   <FormItem>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input {...field} required type="email" autoComplete="email" className="w-full" />
+                      <Input
+                        {...field}
+                        required
+                        type="email"
+                        autoComplete="email"
+                        className="w-full"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

@@ -85,7 +85,7 @@ export const batchesRepository = {
       update batches
       set
         name = ${args.name ?? existing.name},
-        status = ${(args.status ?? existing.status)}::"EntityStatus",
+        status = ${args.status ?? existing.status}::"EntityStatus",
         metadata_json = ${args.metadataJson !== undefined ? JSON.stringify(args.metadataJson) : existing.metadata_json}::jsonb,
         updated_at = now()
       where id = ${batchId}::uuid

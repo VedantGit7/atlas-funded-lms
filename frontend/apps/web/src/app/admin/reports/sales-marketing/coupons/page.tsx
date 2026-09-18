@@ -21,9 +21,7 @@ export default async function AdminSalesMarketingCouponsRoutePage() {
   return (
     <AdminPageGate screenId="T50" state="ready" title="Coupons">
       <Suspense
-        fallback={
-          <p className="text-sm text-[var(--admin-on-surface-variant)]">Loading…</p>
-        }
+        fallback={<p className="text-sm text-[var(--admin-on-surface-variant)]">Loading…</p>}
       >
         <AdminSalesMarketingRosterPage />
       </Suspense>

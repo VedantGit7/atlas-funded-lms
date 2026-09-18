@@ -7,6 +7,7 @@ Block 0 is identical to the one in the Active Devices, Payments, Progress & Scor
 Polls, and Sales & Marketing files; reproduced here so this file stands alone.
 
 Source of truth:
+
 - `frontend/apps/web/src/features/admin/reports/AdminCustomFieldRosterPage.tsx`
 - `frontend/apps/web/src/features/admin/reports/admin-custom-field-roster-api.ts`
 - `backend/packages/domain/src/custom-fields/custom-fields.dto.ts` (field types)
@@ -600,20 +601,20 @@ schedule cards stack under the history table.
 
 Full best-in-class versions, as intended. What exists today vs. what needs building:
 
-| Prompt feature | Status |
-| --- | --- |
-| Learner roster with the seven known columns plus dynamic custom-field values | exists |
-| `fieldDefinitions` returned alongside the roster (id, key, label, fieldType) | exists |
-| Filters: search, email, status, signed-up range, min/max total spent; sort; column picker | exists |
-| Async CSV export; message matched learners; create group from matched learners | exists |
-| Field-type-aware condition builder (operators per type, typed value controls) | filters today are generic field/value pairs — typed operators need backend query support |
-| Field catalogue: coverage, distinct values, most common value, last updated | needs backend aggregates |
-| Field detail: value distribution, orphaned values, cross-tabulation, number histograms, boolean trend | needs backend |
-| Per-learner value view, edit, and value history | `setCustomFieldValue` exists in the custom-fields domain; history/audit does not |
-| Segments: save, live match counts, refresh modes, overlap, segment-vs-tenant profile | needs backend |
-| Group and message history, delivery/open/click counters, scheduled sends | create-group and send exist; everything after them needs backend |
-| Merge tags with per-tag fallbacks for missing values | needs backend |
-| Saved views, export history, scheduled exports, empty-value handling on export | export runs exist; the rest needs backend |
+| Prompt feature                                                                                        | Status                                                                                   |
+| ----------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Learner roster with the seven known columns plus dynamic custom-field values                          | exists                                                                                   |
+| `fieldDefinitions` returned alongside the roster (id, key, label, fieldType)                          | exists                                                                                   |
+| Filters: search, email, status, signed-up range, min/max total spent; sort; column picker             | exists                                                                                   |
+| Async CSV export; message matched learners; create group from matched learners                        | exists                                                                                   |
+| Field-type-aware condition builder (operators per type, typed value controls)                         | filters today are generic field/value pairs — typed operators need backend query support |
+| Field catalogue: coverage, distinct values, most common value, last updated                           | needs backend aggregates                                                                 |
+| Field detail: value distribution, orphaned values, cross-tabulation, number histograms, boolean trend | needs backend                                                                            |
+| Per-learner value view, edit, and value history                                                       | `setCustomFieldValue` exists in the custom-fields domain; history/audit does not         |
+| Segments: save, live match counts, refresh modes, overlap, segment-vs-tenant profile                  | needs backend                                                                            |
+| Group and message history, delivery/open/click counters, scheduled sends                              | create-group and send exist; everything after them needs backend                         |
+| Merge tags with per-tag fallbacks for missing values                                                  | needs backend                                                                            |
+| Saved views, export history, scheduled exports, empty-value handling on export                        | export runs exist; the rest needs backend                                                |
 
 One data-shape note: `fieldType` is a strict five-value enum in the custom-fields domain
 (`text`, `number`, `boolean`, `select`, `date`) but is widened to a plain string in the report

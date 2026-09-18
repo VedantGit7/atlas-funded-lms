@@ -8,7 +8,7 @@ import {
 import { mutateMarketingNewsfeedMetadata } from "../../../../../../../server/marketing-newsfeed/marketing-newsfeed.route-metadata";
 import { deleteMarketingNewsfeedPost } from "../../../../../../../server/marketing-newsfeed/marketing-newsfeed.service";
 
-const paramsSchema = zod.object({ id: zod.string().uuid() });
+const paramsSchema = zod.object({ id: zod.uuid() });
 
 export const POST = createTenantRoute<
   z.output<typeof deleteNewsfeedPostBodySchema>,

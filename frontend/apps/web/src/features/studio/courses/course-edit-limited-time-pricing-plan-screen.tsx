@@ -62,7 +62,8 @@ const ACCESS_TYPE_OPTIONS = [
   {
     value: "PRIVATE" as const,
     title: "Private",
-    description: "Make it a private type to allow access to only the invited students with whom you share.",
+    description:
+      "Make it a private type to allow access to only the invited students with whom you share.",
   },
 ];
 
@@ -115,10 +116,10 @@ function patchDateTime(
   current: string | null,
   patch: { date?: string; time?: string },
 ): string | null {
-  const { date, time } = splitPricingPlanDateTime(current);
+  const { date } = splitPricingPlanDateTime(current);
   const nextDate = patch.date ?? date;
   if (!nextDate) return null;
-  return combinePricingPlanDateTime(nextDate, patch.time ?? time ?? "00:00");
+  return combinePricingPlanDateTime(nextDate, patch.time ?? "00:00");
 }
 
 export function CourseEditLimitedTimePricingPlanScreen({

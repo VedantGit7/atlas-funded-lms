@@ -35,9 +35,7 @@ export async function applyAnalyticsProjectionMutations(
       attemptsDelta: mutation.attemptsDelta,
       correctDelta: mutation.correctDelta,
       latencyMs: mutation.latencyMs,
-      ...(mutation.selectedOptionId != null
-        ? { selectedOptionId: mutation.selectedOptionId }
-        : {}),
+      ...(mutation.selectedOptionId != null ? { selectedOptionId: mutation.selectedOptionId } : {}),
     });
   }
 }

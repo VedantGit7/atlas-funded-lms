@@ -1,13 +1,19 @@
 import { loadPublicBootstrap } from "../../../lib/server/bootstrap";
 
+/**
+ * The academy name shown in the certificate studio.
+ *
+ * The fallback used to be the literal "FundedBeyond", so any tenant whose
+ * bootstrap call failed saw tenant #1's brand on their own certificate studio.
+ * A neutral placeholder is the only safe default on a white-label platform.
+ */
+const FALLBACK_PUBLIC_NAME = "Your academy";
+
 export async function loadCertificateStudioPublicName(): Promise<string> {
-  let publicName = "FundedBeyond";
   try {
     const bootstrap = await loadPublicBootstrap();
-    publicName =
-      bootstrap.publicName?.trim() || bootstrap.issuerName?.trim() || publicName;
+    return bootstrap.publicName?.trim() || bootstrap.issuerName?.trim() || FALLBACK_PUBLIC_NAME;
   } catch {
-    // Keep FundedBeyond fallback.
+    return FALLBACK_PUBLIC_NAME;
   }
-  return publicName;
 }

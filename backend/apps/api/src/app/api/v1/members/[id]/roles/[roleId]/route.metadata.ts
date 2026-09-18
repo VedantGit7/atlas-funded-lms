@@ -6,6 +6,7 @@ export const routeMetadata = {
   permission: "role.revoke",
   entitlement: null,
   audit: "required",
+  mfa: "required",
   rateLimit: "tenantMutation",
   idempotency: "required",
   resourceLoader: async ({ tx, ctx, params }) => {

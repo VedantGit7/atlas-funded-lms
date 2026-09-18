@@ -9,40 +9,30 @@ export type SalesMarketingReportTab =
   | "referral-wallet"
   | "affiliate-products"
   | "affiliates"
+  | "attribution"
   | "exports";
 
-const TABS: Array<{ key: SalesMarketingReportTab; label: string; href: string }> = [
-  { key: "overview", label: "Overview", href: "/admin/reports/sales-marketing" },
-  {
-    key: "sales",
-    label: "Sales",
-    href: "/admin/reports/sales-marketing/sales",
-  },
-  {
-    key: "coupons",
-    label: "Coupons",
-    href: "/admin/reports/sales-marketing/coupons",
-  },
-  {
-    key: "referral-wallet",
-    label: "Referral & wallet",
-    href: "/admin/reports/sales-marketing/referral-wallet",
-  },
-  {
-    key: "affiliate-products",
-    label: "Affiliate products",
-    href: "/admin/reports/sales-marketing/affiliate-products",
-  },
-  {
-    key: "affiliates",
-    label: "Affiliates",
-    href: "/admin/reports/sales-marketing/affiliates",
-  },
-  {
-    key: "exports",
-    label: "Exports",
-    href: "/admin/reports/sales-marketing/exports",
-  },
+/** Single source of truth for tab routing; exhaustive over the tab union. */
+export const SALES_MARKETING_TAB_HREFS: Record<SalesMarketingReportTab, string> = {
+  overview: "/admin/reports/sales-marketing",
+  sales: "/admin/reports/sales-marketing/sales",
+  coupons: "/admin/reports/sales-marketing/coupons",
+  "referral-wallet": "/admin/reports/sales-marketing/referral-wallet",
+  "affiliate-products": "/admin/reports/sales-marketing/affiliate-products",
+  affiliates: "/admin/reports/sales-marketing/affiliates",
+  attribution: "/admin/reports/sales-marketing/attribution",
+  exports: "/admin/reports/sales-marketing/exports",
+};
+
+const TABS: Array<{ key: SalesMarketingReportTab; label: string }> = [
+  { key: "overview", label: "Overview" },
+  { key: "sales", label: "Sales" },
+  { key: "coupons", label: "Coupons" },
+  { key: "referral-wallet", label: "Referral & wallet" },
+  { key: "affiliate-products", label: "Affiliate products" },
+  { key: "affiliates", label: "Affiliates" },
+  { key: "attribution", label: "Attribution" },
+  { key: "exports", label: "Exports" },
 ];
 
 type Props = {
@@ -68,7 +58,9 @@ export function SalesMarketingReportTabs({ active, onChange }: Props) {
               key={tab.key}
               type="button"
               className={className}
-              onClick={() => onChange(tab.key)}
+              onClick={() => {
+                onChange(tab.key);
+              }}
             >
               {tab.label}
             </button>
@@ -76,7 +68,7 @@ export function SalesMarketingReportTabs({ active, onChange }: Props) {
         }
 
         return (
-          <Link key={tab.key} href={tab.href} className={className}>
+          <Link key={tab.key} href={SALES_MARKETING_TAB_HREFS[tab.key]} className={className}>
             {tab.label}
           </Link>
         );

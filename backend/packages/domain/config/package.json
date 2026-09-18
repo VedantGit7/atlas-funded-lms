@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@atlas/audit": "workspace:*",
+    "@atlas/core": "workspace:*",
     "@atlas/db": "workspace:*",
     "@atlas/events": "workspace:*",
     "zod": "^4.4.3"

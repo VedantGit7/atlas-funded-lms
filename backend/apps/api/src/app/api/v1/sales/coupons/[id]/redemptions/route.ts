@@ -8,7 +8,7 @@ import {
 import { listCouponsMetadata } from "../../../../../../../server/sales-coupons/sales-coupons.route-metadata";
 import { listCouponRedemptions } from "../../../../../../../server/sales-coupons/sales-coupons.service";
 
-const paramsSchema = zod.object({ id: zod.string().uuid() });
+const paramsSchema = zod.object({ id: zod.uuid() });
 
 export const GET = createTenantRoute<
   z.output<typeof couponRedemptionsQuerySchema>,
@@ -20,5 +20,5 @@ export const GET = createTenantRoute<
   input: couponRedemptionsQuerySchema,
   output: couponRedemptionsListResponseSchema,
   handler: async ({ tx, ctx, params, input }) =>
-    listCouponRedemptions(tx, ctx, params["id"]!, input),
+    listCouponRedemptions(tx, ctx, params["id"], input),
 });

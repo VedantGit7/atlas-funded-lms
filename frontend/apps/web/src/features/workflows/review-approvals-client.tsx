@@ -2,7 +2,12 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { AlertCircle, Info } from "lucide-react";
-import { formatWorkflowApiError, getWorkflowHistory, listWorkflows, type WorkflowQueueItem } from "./api";
+import {
+  formatWorkflowApiError,
+  getWorkflowHistory,
+  listWorkflows,
+  type WorkflowQueueItem,
+} from "./api";
 import { ReviewDetailPanel } from "./components/review-detail-panel";
 import { ReviewQueue } from "./components/review-queue";
 import { WorkflowDecisionControls } from "./components/workflow-decision-controls";
@@ -33,34 +38,37 @@ export function ReviewApprovalsClient({ initialItems = [] }: ReviewApprovalsClie
   const [historyError, setHistoryError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
-  const refresh = useCallback(async (options?: { showLoading?: boolean }) => {
-    const showLoading = options?.showLoading ?? true;
-    if (showLoading) {
-      setLoading(true);
-    }
-    setError(null);
-    try {
-      const response = await listWorkflows({
-        status: "pending",
-        ...(targetFilter === "all" ? {} : { targetType: targetFilter }),
-      });
-      setItems(response.data);
-      setSelectedId((current) => {
-        if (current && response.data.some((item) => item.id === current)) {
-          return current;
-        }
-        return response.data[0]?.id ?? null;
-      });
-    } catch (err) {
-      setError(formatWorkflowApiError(err));
-      setItems([]);
-      setSelectedId(null);
-    } finally {
+  const refresh = useCallback(
+    async (options?: { showLoading?: boolean }) => {
+      const showLoading = options?.showLoading ?? true;
       if (showLoading) {
-        setLoading(false);
+        setLoading(true);
       }
-    }
-  }, [targetFilter]);
+      setError(null);
+      try {
+        const response = await listWorkflows({
+          status: "pending",
+          ...(targetFilter === "all" ? {} : { targetType: targetFilter }),
+        });
+        setItems(response.data);
+        setSelectedId((current) => {
+          if (current && response.data.some((item) => item.id === current)) {
+            return current;
+          }
+          return response.data[0]?.id ?? null;
+        });
+      } catch (err) {
+        setError(formatWorkflowApiError(err));
+        setItems([]);
+        setSelectedId(null);
+      } finally {
+        if (showLoading) {
+          setLoading(false);
+        }
+      }
+    },
+    [targetFilter],
+  );
 
   useEffect(() => {
     void refresh({ showLoading: true });
@@ -85,7 +93,7 @@ export function ReviewApprovalsClient({ initialItems = [] }: ReviewApprovalsClie
           setHistoryItems(response.data.items);
         }
       })
-      .catch((err) => {
+      .catch((err: unknown) => {
         if (!cancelled) {
           setHistoryError(formatWorkflowApiError(err));
           setHistoryItems([]);
@@ -128,7 +136,10 @@ export function ReviewApprovalsClient({ initialItems = [] }: ReviewApprovalsClie
           role="status"
           className="mb-4 flex items-start gap-2 rounded-lg border border-[color-mix(in_srgb,var(--admin-primary)_25%,var(--admin-border))] bg-[color-mix(in_srgb,var(--admin-primary)_8%,var(--admin-surface))] px-4 py-3 text-sm text-[var(--admin-on-surface)]"
         >
-          <Info className="mt-0.5 h-4 w-4 shrink-0 text-[var(--admin-primary)]" aria-hidden="true" />
+          <Info
+            className="mt-0.5 h-4 w-4 shrink-0 text-[var(--admin-primary)]"
+            aria-hidden="true"
+          />
           <span>{notice}</span>
         </div>
       ) : null}
@@ -174,7 +185,9 @@ export function ReviewApprovalsClient({ initialItems = [] }: ReviewApprovalsClie
                   Failed to load workflow history. {historyError}
                 </p>
               ) : null}
-              {selected ? <WorkflowHistoryPanel items={historyItems} loading={historyLoading} /> : null}
+              {selected ? (
+                <WorkflowHistoryPanel items={historyItems} loading={historyLoading} />
+              ) : null}
             </div>
             <WorkflowDecisionControls
               item={selected}

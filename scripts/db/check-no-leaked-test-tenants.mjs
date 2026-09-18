@@ -35,13 +35,8 @@ try {
     process.exit(0);
   }
 
-  console.error(
-    `[check-no-leaked-test-tenants] FAILED: ${total} leaked test tenant(s) found.`,
-  );
-  console.error(
-    "  sample slugs:",
-    result.rows.map((row) => row.slug).join(", "),
-  );
+  console.error(`[check-no-leaked-test-tenants] FAILED: ${total} leaked test tenant(s) found.`);
+  console.error("  sample slugs:", result.rows.map((row) => row.slug).join(", "));
   console.error(
     "  Test fixtures must clean up after themselves. Run `pnpm db:cleanup-test-tenants -- --apply` " +
       "to purge, and ensure the vitest global teardown is active.",

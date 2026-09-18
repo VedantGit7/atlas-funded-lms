@@ -34,7 +34,7 @@ npm install aframe-extras
 ```
 
 ```javascript
-import 'aframe-extras';
+import "aframe-extras";
 ```
 
 ### Local Download
@@ -56,17 +56,20 @@ Generate procedural 3D environments with presets.
 **GitHub**: https://github.com/supermedium/aframe-environment-component
 
 **Installation**:
+
 ```html
 <script src="https://cdn.jsdelivr.net/npm/aframe-environment-component@1.3.3/dist/aframe-environment-component.min.js"></script>
 ```
 
 **Usage**:
+
 ```html
 <!-- Preset environment -->
 <a-entity environment="preset: forest"></a-entity>
 
 <!-- Custom environment -->
-<a-entity environment="
+<a-entity
+  environment="
   preset: default;
   seed: 42;
   skyType: gradient;
@@ -83,10 +86,12 @@ Generate procedural 3D environments with presets.
   dressingColor: #228B22;
   dressingScale: 5;
   grid: none
-"></a-entity>
+"
+></a-entity>
 ```
 
 **Presets**:
+
 - `default`, `contact`, `egypt`, `checkerboard`, `forest`, `goaland`, `yavapai`, `goldmine`, `threetowers`, `poison`, `arches`, `tron`, `japan`, `dream`, `volcano`, `starry`, `osiris`
 
 **Properties**:
@@ -107,11 +112,13 @@ GPU particle systems for effects.
 **GitHub**: https://github.com/IdeaSpaceVR/aframe-particle-system-component
 
 **Installation**:
+
 ```html
 <script src="https://cdn.jsdelivr.net/gh/IdeaSpaceVR/aframe-particle-system-component@1.2.x/dist/aframe-particle-system-component.min.js"></script>
 ```
 
 **Usage**:
+
 ```html
 <!-- Preset particles -->
 <a-entity particle-system="preset: default"></a-entity>
@@ -120,7 +127,8 @@ GPU particle systems for effects.
 <a-entity particle-system="preset: rain"></a-entity>
 
 <!-- Custom particles -->
-<a-entity particle-system="
+<a-entity
+  particle-system="
   preset: default;
   particleCount: 2000;
   color: #FF0000, #FFFF00;
@@ -131,7 +139,8 @@ GPU particle systems for effects.
   maxAge: 2;
   blending: additive;
   texture: https://cdn.aframe.io/examples/particle/images/star.png
-"></a-entity>
+"
+></a-entity>
 ```
 
 **Presets**: `default`, `dust`, `snow`, `rain`
@@ -143,22 +152,27 @@ Post-processing effects (bloom, film grain, etc.).
 **GitHub**: https://github.com/wizgrav/aframe-effects
 
 **Installation**:
+
 ```html
 <script src="https://cdn.jsdelivr.net/npm/aframe-effects@2.0.3/dist/aframe-effects.min.js"></script>
 ```
 
 **Usage**:
+
 ```html
-<a-scene effects="
+<a-scene
+  effects="
   bloom: 1.5;
   fxaa: true;
   filmgrain: 0.35
-">
+"
+>
   <!-- Scene content -->
 </a-scene>
 ```
 
 **Effects**:
+
 - `bloom`: Bloom intensity (0-5)
 - `fxaa`: Anti-aliasing (boolean)
 - `filmgrain`: Film grain amount (0-1)
@@ -175,54 +189,44 @@ Physics simulation using Ammo.js (Bullet physics).
 **GitHub**: https://github.com/c-frame/aframe-physics-system
 
 **Installation**:
+
 ```html
 <script src="https://cdn.jsdelivr.net/npm/aframe-physics-system@4.2.2/dist/aframe-physics-system.min.js"></script>
 ```
 
 **Usage**:
+
 ```html
 <a-scene physics="debug: false; gravity: -9.8">
   <!-- Static ground -->
-  <a-plane
-    static-body
-    position="0 0 0"
-    rotation="-90 0 0"
-    width="10"
-    height="10">
-  </a-plane>
+  <a-plane static-body position="0 0 0" rotation="-90 0 0" width="10" height="10"> </a-plane>
 
   <!-- Dynamic box -->
-  <a-box
-    dynamic-body
-    position="0 5 0"
-    width="1"
-    height="1"
-    depth="1">
-  </a-box>
+  <a-box dynamic-body position="0 5 0" width="1" height="1" depth="1"> </a-box>
 
   <!-- Kinematic sphere (non-reactive but affects others) -->
-  <a-sphere
-    kinematic-body
-    position="2 3 0"
-    radius="0.5">
-  </a-sphere>
+  <a-sphere kinematic-body position="2 3 0" radius="0.5"> </a-sphere>
 </a-scene>
 ```
 
 **Components**:
+
 - `static-body`: Immovable objects (walls, ground)
 - `dynamic-body`: Movable objects affected by forces
 - `kinematic-body`: Movable by code, affects dynamic bodies
 
 **Properties**:
+
 ```html
-<a-box dynamic-body="
+<a-box
+  dynamic-body="
   mass: 5;
   linearDamping: 0.01;
   angularDamping: 0.01;
   shape: box;
   sphereRadius: 1
-"></a-box>
+"
+></a-box>
 ```
 
 ### aframe-physics-extras
@@ -232,6 +236,7 @@ Physics helpers and constraints.
 **GitHub**: https://github.com/c-frame/aframe-physics-system
 
 **Usage**:
+
 ```html
 <!-- Constraint between two bodies -->
 <a-entity
@@ -239,7 +244,8 @@ Physics helpers and constraints.
     target: #bodyA;
     type: lock;
     collideConnected: false
-  ">
+  "
+>
 </a-entity>
 
 <!-- Spring -->
@@ -249,7 +255,8 @@ Physics helpers and constraints.
     restLength: 2;
     stiffness: 50;
     damping: 1
-  ">
+  "
+>
 </a-entity>
 ```
 
@@ -264,6 +271,7 @@ Includes movement, controls, and model utilities.
 **GitHub**: https://github.com/c-frame/aframe-extras
 
 **Installation**:
+
 ```html
 <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.5.0/dist/aframe-extras.min.js"></script>
 ```
@@ -271,18 +279,23 @@ Includes movement, controls, and model utilities.
 **Components Included**:
 
 **movement-controls** (FPS-style movement):
+
 ```html
-<a-entity movement-controls="
+<a-entity
+  movement-controls="
   speed: 0.3;
   fly: false;
   constrainToNavMesh: true;
   camera: #camera
-" position="0 0 0">
+"
+  position="0 0 0"
+>
   <a-entity id="camera" camera position="0 1.6 0"></a-entity>
 </a-entity>
 ```
 
 **checkpoint-controls** (Teleport between waypoints):
+
 ```html
 <!-- Player -->
 <a-entity checkpoint-controls="mode: teleport"></a-entity>
@@ -293,11 +306,9 @@ Includes movement, controls, and model utilities.
 ```
 
 **Animation Mixer** (GLTF animations):
+
 ```html
-<a-entity
-  gltf-model="#character"
-  animation-mixer="clip: walk; loop: repeat">
-</a-entity>
+<a-entity gltf-model="#character" animation-mixer="clip: walk; loop: repeat"> </a-entity>
 ```
 
 ### aframe-blink-controls
@@ -307,11 +318,13 @@ Teleportation locomotion for VR.
 **GitHub**: https://github.com/jure/aframe-blink-controls
 
 **Installation**:
+
 ```html
 <script src="https://cdn.jsdelivr.net/npm/aframe-blink-controls/dist/aframe-blink-controls.min.js"></script>
 ```
 
 **Usage**:
+
 ```html
 <a-entity
   hand-controls="hand: left"
@@ -319,7 +332,8 @@ Teleportation locomotion for VR.
     cameraRig: #rig;
     teleportOrigin: #camera;
     collisionEntities: .ground
-  ">
+  "
+>
 </a-entity>
 
 <a-entity id="rig" position="0 0 0">
@@ -363,10 +377,12 @@ Load OBJ + MTL models.
 Included in aframe-extras:
 
 **animation-mixer**: Play GLTF animations
+
 ```html
 <a-entity
   gltf-model="#character"
-  animation-mixer="clip: walk; loop: repeat; clampWhenFinished: true">
+  animation-mixer="clip: walk; loop: repeat; clampWhenFinished: true"
+>
 </a-entity>
 ```
 
@@ -377,11 +393,13 @@ Realistic sky with sun position.
 **GitHub**: https://github.com/c-frame/aframe-simple-sun-sky
 
 **Installation**:
+
 ```html
 <script src="https://cdn.jsdelivr.net/npm/aframe-simple-sun-sky@^1.2.2/simple-sun-sky.js"></script>
 ```
 
 **Usage**:
+
 ```html
 <a-simple-sun-sky sun-position="1 0.4 0"></a-simple-sun-sky>
 
@@ -392,7 +410,8 @@ Realistic sky with sun position.
   turbidity="10"
   luminance="1"
   mie-coefficient="0.005"
-  mie-directional-g="0.8">
+  mie-directional-g="0.8"
+>
 </a-simple-sun-sky>
 ```
 
@@ -407,15 +426,19 @@ Display HTML content on meshes.
 **GitHub**: https://github.com/mayognaise/aframe-html-shader
 
 **Installation**:
+
 ```html
 <script src="https://cdn.jsdelivr.net/npm/aframe-html-shader@0.2.0/dist/aframe-html-shader.min.js"></script>
 ```
 
 **Usage**:
+
 ```html
-<a-entity geometry="primitive: plane; width: 2; height: 1"
-          material="shader: html; target: #html-content; ratio: width"
-          position="0 1.5 -3">
+<a-entity
+  geometry="primitive: plane; width: 2; height: 1"
+  material="shader: html; target: #html-content; ratio: width"
+  position="0 1.5 -3"
+>
 </a-entity>
 
 <div id="html-content" style="width: 400px; height: 200px; background: white;">
@@ -431,11 +454,13 @@ VR GUI components (buttons, sliders, panels).
 **GitHub**: https://github.com/rdub80/aframe-gui
 
 **Installation**:
+
 ```html
 <script src="https://cdn.jsdelivr.net/npm/aframe-gui/dist/aframe-gui.min.js"></script>
 ```
 
 **Usage**:
+
 ```html
 <!-- Button -->
 <a-gui-button
@@ -443,24 +468,15 @@ VR GUI components (buttons, sliders, panels).
   height="0.75"
   value="Click Me"
   onclick="alert('Clicked!')"
-  position="0 1.5 -3">
+  position="0 1.5 -3"
+>
 </a-gui-button>
 
 <!-- Slider -->
-<a-gui-slider
-  width="2.5"
-  height="0.75"
-  percent="0.5"
-  position="0 2.5 -3">
-</a-gui-slider>
+<a-gui-slider width="2.5" height="0.75" percent="0.5" position="0 2.5 -3"> </a-gui-slider>
 
 <!-- Toggle -->
-<a-gui-toggle
-  width="2.5"
-  height="0.75"
-  value="Sound: On"
-  position="0 3.5 -3">
-</a-gui-toggle>
+<a-gui-toggle width="2.5" height="0.75" value="Sound: On" position="0 3.5 -3"> </a-gui-toggle>
 ```
 
 ### aframe-troika-text
@@ -470,14 +486,17 @@ High-quality text rendering.
 **GitHub**: https://github.com/lojjic/aframe-troika-text
 
 **Installation**:
+
 ```html
 <script src="https://cdn.jsdelivr.net/npm/troika-three-text@0.46.4/dist/troika-three-text.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/aframe-troika-text@1.0.0/dist/aframe-troika-text.min.js"></script>
 ```
 
 **Usage**:
+
 ```html
-<a-entity troika-text="
+<a-entity
+  troika-text="
   value: High Quality Text;
   align: center;
   anchor: center;
@@ -487,7 +506,9 @@ High-quality text rendering.
   maxWidth: 3;
   outlineWidth: 0.01;
   outlineColor: #000
-" position="0 2 -3">
+"
+  position="0 2 -3"
+>
 </a-entity>
 ```
 
@@ -502,14 +523,17 @@ Shader Particle Engine for advanced particle effects.
 **GitHub**: https://github.com/harlyq/aframe-spe-particles-component
 
 **Installation**:
+
 ```html
 <script src="https://cdn.jsdelivr.net/npm/aframe-spe-particles-component/dist/aframe-spe-particles-component.min.js"></script>
 ```
 
 **Usage**:
+
 ```html
 <!-- Fire effect -->
-<a-entity spe-particles="
+<a-entity
+  spe-particles="
   texture: https://cdn.rawgit.com/IdeaSpaceVR/aframe-particle-system-component/master/dist/images/star.png;
   color: #ff0000, #ffff00;
   particleCount: 1000;
@@ -520,7 +544,9 @@ Shader Particle Engine for advanced particle effects.
   size: 1, 0;
   opacity: 1, 0;
   blending: additive
-" position="0 0 -5">
+"
+  position="0 0 -5"
+>
 </a-entity>
 ```
 
@@ -535,11 +561,13 @@ Stereo/spatial audio controls.
 **GitHub**: https://github.com/oscarmarinmiro/aframe-stereo-component
 
 **Installation**:
+
 ```html
 <script src="https://cdn.jsdelivr.net/npm/aframe-stereo-component/dist/aframe-stereo-component.min.js"></script>
 ```
 
 **Usage**:
+
 ```html
 <a-assets>
   <audio id="ambience" src="forest.mp3" stereo></audio>
@@ -553,6 +581,7 @@ Stereo/spatial audio controls.
 Video playback controls for 360° and flat videos.
 
 **Usage**:
+
 ```html
 <a-assets>
   <video id="video360" src="360video.mp4" preload="auto"></video>
@@ -573,11 +602,13 @@ Video playback controls for 360° and flat videos.
 Set component properties on events.
 
 **Usage**:
+
 ```html
 <a-box
   event-set__mouseenter="scale: 1.2 1.2 1.2; material.color: yellow"
   event-set__mouseleave="scale: 1 1 1; material.color: blue"
-  event-set__click="rotation: 0 360 0">
+  event-set__click="rotation: 0 360 0"
+>
 </a-box>
 ```
 
@@ -588,26 +619,19 @@ Advanced hand interaction (grab, stretch, hover).
 **GitHub**: https://github.com/c-frame/aframe-super-hands-component
 
 **Installation**:
+
 ```html
 <script src="https://cdn.jsdelivr.net/npm/super-hands/dist/super-hands.min.js"></script>
 ```
 
 **Usage**:
+
 ```html
 <!-- Hands with super-hands -->
-<a-entity
-  hand-controls="hand: left"
-  super-hands>
-</a-entity>
+<a-entity hand-controls="hand: left" super-hands> </a-entity>
 
 <!-- Interactive object -->
-<a-box
-  hoverable
-  grabbable
-  stretchable
-  draggable
-  position="0 1.5 -3">
-</a-box>
+<a-box hoverable grabbable stretchable draggable position="0 1.5 -3"> </a-box>
 ```
 
 ### aframe-input-mapping-component
@@ -617,11 +641,13 @@ Map VR controller buttons to actions.
 **GitHub**: https://github.com/c-frame/aframe-input-mapping-component
 
 **Installation**:
+
 ```html
 <script src="https://cdn.jsdelivr.net/npm/aframe-input-mapping-component/dist/aframe-input-mapping-component.min.js"></script>
 ```
 
 **Usage**:
+
 ```html
 <a-entity
   hand-controls="hand: right"
@@ -633,7 +659,8 @@ Map VR controller buttons to actions.
       'gripdown': 'grab',
       'abuttondown': 'jump'
     }
-  ">
+  "
+>
 </a-entity>
 ```
 
@@ -648,33 +675,32 @@ Multiplayer WebRTC networking.
 **GitHub**: https://github.com/networked-aframe/networked-aframe
 
 **Installation**:
+
 ```html
 <script src="https://cdn.jsdelivr.net/npm/networked-aframe@^0.11.0/dist/networked-aframe.min.js"></script>
 ```
 
 **Usage**:
+
 ```html
-<a-scene networked-scene="
+<a-scene
+  networked-scene="
   room: myRoom;
   adapter: wseasyrtc;
   audio: true
-">
+"
+>
   <!-- Networked entity (synced across clients) -->
-  <a-entity
-    networked="template: #avatar-template; attachTemplateToLocal: false"
-    position="0 0 0">
+  <a-entity networked="template: #avatar-template; attachTemplateToLocal: false" position="0 0 0">
   </a-entity>
 </a-scene>
 
 <script>
-// Template for networked entities
-NAF.schemas.add({
-  template: '#avatar-template',
-  components: [
-    'position',
-    'rotation'
-  ]
-});
+  // Template for networked entities
+  NAF.schemas.add({
+    template: "#avatar-template",
+    components: ["position", "rotation"],
+  });
 </script>
 ```
 
@@ -687,6 +713,7 @@ NAF.schemas.add({
 Make entity face another entity or position.
 
 **Usage**:
+
 ```html
 <!-- Look at camera -->
 <a-text value="Look at me!" look-at="#camera"></a-text>
@@ -705,18 +732,22 @@ Orbit camera around scene.
 **GitHub**: https://github.com/tizzle/aframe-orbit-controls-component
 
 **Installation**:
+
 ```html
 <script src="https://cdn.jsdelivr.net/npm/aframe-orbit-controls@1.3.2/dist/aframe-orbit-controls.min.js"></script>
 ```
 
 **Usage**:
+
 ```html
-<a-camera orbit-controls="
+<a-camera
+  orbit-controls="
   target: 0 1.5 -3;
   minDistance: 2;
   maxDistance: 100;
   initialPosition: 0 2 5
-">
+"
+>
 </a-camera>
 ```
 
@@ -727,11 +758,13 @@ Animate entities along a path.
 **GitHub**: https://github.com/protyze/aframe-alongpath-component
 
 **Installation**:
+
 ```html
 <script src="https://cdn.jsdelivr.net/npm/aframe-alongpath-component/dist/aframe-alongpath-component.min.js"></script>
 ```
 
 **Usage**:
+
 ```html
 <a-curve id="track">
   <a-curve-point position="0 0 0"></a-curve-point>
@@ -739,11 +772,13 @@ Animate entities along a path.
   <a-curve-point position="10 0 0"></a-curve-point>
 </a-curve>
 
-<a-entity alongpath="
+<a-entity
+  alongpath="
   path: #track;
   dur: 10000;
   loop: true
-">
+"
+>
   <a-box></a-box>
 </a-entity>
 ```
@@ -755,11 +790,13 @@ Drag entities with mouse/gaze.
 **GitHub**: https://github.com/jesstelford/aframe-click-drag-component
 
 **Installation**:
+
 ```html
 <script src="https://cdn.jsdelivr.net/npm/aframe-click-drag-component/dist/aframe-click-drag-component.min.js"></script>
 ```
 
 **Usage**:
+
 ```html
 <a-camera>
   <a-cursor click-drag></a-cursor>
@@ -773,6 +810,7 @@ Drag entities with mouse/gaze.
 Teleportation for VR.
 
 **Usage**:
+
 ```html
 <a-entity
   hand-controls="hand: left"
@@ -781,7 +819,8 @@ Teleportation for VR.
     teleportOrigin: #camera;
     type: parabolic;
     collisionEntities: [mixin='navmesh']
-  ">
+  "
+>
 </a-entity>
 ```
 
@@ -794,6 +833,7 @@ Browse thousands of community components:
 **A-Frame Registry**: https://aframe.io/registry/
 
 Search components by category:
+
 - Animation
 - Audio
 - Camera
@@ -817,31 +857,32 @@ Search components by category:
 Template for creating reusable components:
 
 ```javascript
-AFRAME.registerComponent('my-custom-component', {
+AFRAME.registerComponent("my-custom-component", {
   schema: {
-    speed: {type: 'number', default: 1},
-    enabled: {type: 'boolean', default: true}
+    speed: { type: "number", default: 1 },
+    enabled: { type: "boolean", default: true },
   },
 
-  init: function() {
+  init: function () {
     // Setup
   },
 
-  update: function(oldData) {
+  update: function (oldData) {
     // When properties change
   },
 
-  tick: function(time, timeDelta) {
+  tick: function (time, timeDelta) {
     // Every frame
   },
 
-  remove: function() {
+  remove: function () {
     // Cleanup
-  }
+  },
 });
 ```
 
 **Share your component**:
+
 1. Publish to npm
 2. Submit to A-Frame Registry
 3. Add GitHub topic: `aframe-component`

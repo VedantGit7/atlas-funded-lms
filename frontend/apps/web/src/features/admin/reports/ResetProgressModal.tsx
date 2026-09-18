@@ -38,7 +38,9 @@ export function ResetProgressModal({
       if (event.key === "Escape" && !busy) onClose();
     }
     window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+    };
   }, [busy, onClose, open]);
 
   if (!open) return null;
@@ -78,8 +80,8 @@ export function ResetProgressModal({
               aria-hidden="true"
             />
             <p className="m-0 text-sm leading-relaxed text-[var(--admin-on-surface)]">
-              All lesson completions, watch positions, and time-on-content for this enrolment will be
-              cleared. Assessment attempts are kept unless you opt in below.
+              All lesson completions, watch positions, and time-on-content for this enrolment will
+              be cleared. Assessment attempts are kept unless you opt in below.
             </p>
           </div>
 
@@ -91,7 +93,9 @@ export function ResetProgressModal({
                   className="peer absolute inset-0 cursor-pointer opacity-0"
                   checked={clearAttempts}
                   disabled={busy}
-                  onChange={(event) => setClearAttempts(event.target.checked)}
+                  onChange={(event) => {
+                    setClearAttempts(event.target.checked);
+                  }}
                   aria-label="Also clear assessment attempts"
                 />
                 <span
@@ -120,7 +124,9 @@ export function ResetProgressModal({
                 rows={4}
                 disabled={busy}
                 value={reason}
-                onChange={(event) => setReason(event.target.value)}
+                onChange={(event) => {
+                  setReason(event.target.value);
+                }}
                 placeholder="Enter administrative reason for this action…"
                 className="w-full resize-none border border-[var(--admin-on-surface)] bg-[var(--admin-bg)] p-4 text-sm text-[var(--admin-on-surface)] placeholder:text-[var(--admin-outline)] transition-colors focus:border-[var(--admin-warning)] focus:ring-1 focus:ring-[var(--admin-warning)] focus:outline-none disabled:opacity-60"
               />
@@ -141,12 +147,12 @@ export function ResetProgressModal({
             type="button"
             disabled={!canSubmit}
             className="inline-flex h-10 items-center gap-2 bg-[var(--admin-warning)] px-8 font-mono text-xs font-bold tracking-[0.08em] text-[var(--admin-on-primary)] uppercase transition-[filter] hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-warning)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--admin-surface)] disabled:cursor-not-allowed disabled:opacity-50"
-            onClick={() =>
+            onClick={() => {
               onConfirm({
                 clearAssessmentAttempts: clearAttempts,
                 reason: reason.trim(),
-              })
-            }
+              });
+            }}
           >
             {busy ? (
               <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />

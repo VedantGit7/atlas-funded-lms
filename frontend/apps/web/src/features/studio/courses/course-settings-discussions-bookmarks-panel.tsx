@@ -12,10 +12,7 @@ import {
   mergeCourseDiscussionsBookmarksIntoTags,
   type CourseDiscussionsBookmarksSettings,
 } from "./course-discussions-bookmarks-settings";
-import {
-  CourseSettingsCheckboxField,
-  CourseSettingsFormFooter,
-} from "./course-settings-shared";
+import { CourseSettingsCheckboxField, CourseSettingsFormFooter } from "./course-settings-shared";
 
 type CourseDetail = z.infer<typeof studioCourseDetailSchema>;
 

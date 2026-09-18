@@ -94,7 +94,11 @@ function CoursePublishVisibilityRadioGroup({
   onChange: (value: PublishVisibility) => void;
 }) {
   return (
-    <div className={`space-y-3 ${inlineExpandClassName}`} role="radiogroup" aria-label="Course visibility">
+    <div
+      className={`space-y-3 ${inlineExpandClassName}`}
+      role="radiogroup"
+      aria-label="Course visibility"
+    >
       {VISIBILITY_OPTIONS.map((option) => {
         const selected = value === option.value;
         const isCurrentState = savedValue === option.value;

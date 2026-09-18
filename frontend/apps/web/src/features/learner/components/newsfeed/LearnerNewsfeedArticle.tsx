@@ -1,5 +1,6 @@
 "use client";
 
+import { SafeHtml } from "@/components/SafeHtml";
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { ClientApiError, clientApi, toast } from "../../../../lib/client-api";
@@ -145,9 +146,10 @@ export function LearnerNewsfeedArticle({ slug }: { slug: string }) {
           </div>
         ) : null}
       </header>
-      <div
+      <SafeHtml
+        html={post.bodyHtml}
+        fallback="<p></p>"
         className="prose prose-neutral max-w-none dark:prose-invert"
-        dangerouslySetInnerHTML={{ __html: post.bodyHtml || "<p></p>" }}
       />
     </article>
   );

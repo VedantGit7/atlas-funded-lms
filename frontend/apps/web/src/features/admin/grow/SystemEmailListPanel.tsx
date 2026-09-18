@@ -15,10 +15,7 @@ import {
 } from "lucide-react";
 import { ClientApiError, clientApi, toast } from "../../../lib/client-api";
 import { generalSettingsBackLinkClassName } from "../general-settings/general-settings-shared";
-import {
-  managePageDescClassName,
-  managePageTitleClassName,
-} from "../manage/manage-ui-shared";
+import { managePageDescClassName, managePageTitleClassName } from "../manage/manage-ui-shared";
 import {
   TRANSACTIONAL_EMAIL_SETTINGS_HREF,
   formatSystemEmailCategory,
@@ -55,18 +52,14 @@ function StatusCell({ enabled }: { enabled: boolean }) {
       <span
         className={[
           "h-2.5 w-2.5 rounded-full",
-          enabled
-            ? "bg-[var(--admin-success)]"
-            : "bg-[var(--admin-on-surface-variant)]/45",
+          enabled ? "bg-[var(--admin-success)]" : "bg-[var(--admin-on-surface-variant)]/45",
         ].join(" ")}
         aria-hidden="true"
       />
       <span
         className={[
           "text-[12px] font-bold uppercase tracking-[0.04em]",
-          enabled
-            ? "text-[var(--admin-success)]"
-            : "text-[var(--admin-on-surface-variant)]",
+          enabled ? "text-[var(--admin-success)]" : "text-[var(--admin-on-surface-variant)]",
         ].join(" ")}
       >
         {enabled ? "Enabled" : "Disabled"}
@@ -150,14 +143,8 @@ export function SystemEmailListPanel() {
     });
   }, [items, debouncedQuery, category]);
 
-  const enabledCount = useMemo(
-    () => items.filter((item) => item.enabled).length,
-    [items],
-  );
-  const customizedCount = useMemo(
-    () => items.filter((item) => item.isCustomized).length,
-    [items],
-  );
+  const enabledCount = useMemo(() => items.filter((item) => item.enabled).length, [items]);
+  const customizedCount = useMemo(() => items.filter((item) => item.isCustomized).length, [items]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const safePage = Math.min(page, totalPages);

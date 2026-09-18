@@ -41,6 +41,19 @@ export const ADMIN_MANAGE_SECTIONS = [
     title: "Course Backup",
     description: "Generate downloadable backups of course sections and lessons.",
   },
+  {
+    slug: "learner-products",
+    label: "Learner Products",
+    title: "Learner Products",
+    description:
+      "Mock tests, test series, bundles and subscription plans, and who is enrolled in them.",
+  },
+  {
+    slug: "tags",
+    label: "Tags",
+    title: "Tags",
+    description: "Rename, re-scope or remove the tags used across courses and lessons.",
+  },
 ] as const;
 
 export type AdminManageSlug = (typeof ADMIN_MANAGE_SECTIONS)[number]["slug"];

@@ -38,7 +38,10 @@ function memberEmail(member: MemberRow): string | null {
   return member.invitedEmail ?? member.accountEmail ?? null;
 }
 
-function statusTone(status: string, archivedAt: string | null | undefined): "success" | "danger" | "neutral" {
+function statusTone(
+  status: string,
+  archivedAt: string | null | undefined,
+): "success" | "danger" | "neutral" {
   if (archivedAt) return "neutral";
   if (status === "ACTIVE") return "success";
   if (status === "SUSPENDED") return "danger";
@@ -65,7 +68,9 @@ export function ManageArchiveLearnersPanel() {
     try {
       const params = new URLSearchParams({ limit: "100" });
       if (query.trim()) params.set("search", query.trim());
-      const response = await clientApi.get<MembersListResponse>(`/api/v1/members?${params.toString()}`);
+      const response = await clientApi.get<MembersListResponse>(
+        `/api/v1/members?${params.toString()}`,
+      );
       setItems(response.data.items);
     } catch (caught) {
       setError(formatError(caught));
@@ -112,13 +117,21 @@ export function ManageArchiveLearnersPanel() {
           } catch (caught) {
             if (caught instanceof ClientApiError && caught.status === 404) {
               setArchiveApiAvailable(false);
-              await clientApi.post(`/api/v1/members/${action.member.id}/suspend`, null, "member-suspend");
+              await clientApi.post(
+                `/api/v1/members/${action.member.id}/suspend`,
+                null,
+                "member-suspend",
+              );
             } else {
               throw caught;
             }
           }
         } else {
-          await clientApi.post(`/api/v1/members/${action.member.id}/suspend`, null, "member-suspend");
+          await clientApi.post(
+            `/api/v1/members/${action.member.id}/suspend`,
+            null,
+            "member-suspend",
+          );
         }
       } else {
         try {
@@ -182,7 +195,9 @@ export function ManageArchiveLearnersPanel() {
         <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-[var(--admin-border)] bg-[var(--admin-surface-low)] py-16 text-center">
           <p className="text-lg font-semibold text-[var(--admin-on-surface)]">No learners found</p>
           <p className="max-w-sm text-sm text-[var(--admin-on-surface-variant)]">
-            {query.trim() ? "Try a different name or email." : "Members will appear here once they join."}
+            {query.trim()
+              ? "Try a different name or email."
+              : "Members will appear here once they join."}
           </p>
         </div>
       ) : (
@@ -204,11 +219,20 @@ export function ManageArchiveLearnersPanel() {
               </thead>
               <tbody>
                 {filtered.map((member) => (
-                  <tr key={member.id} className="border-b border-[var(--admin-border)] last:border-b-0">
-                    <td className={`${manageTableTdClassName} font-semibold`}>{memberLabel(member)}</td>
+                  <tr
+                    key={member.id}
+                    className="border-b border-[var(--admin-border)] last:border-b-0"
+                  >
+                    <td className={`${manageTableTdClassName} font-semibold`}>
+                      {memberLabel(member)}
+                    </td>
                     <td className={manageTableTdClassName}>{memberEmail(member) ?? "—"}</td>
                     <td className={manageTableTdClassName}>
-                      <span className={manageStatusChipClassName(statusTone(member.status, member.archivedAt))}>
+                      <span
+                        className={manageStatusChipClassName(
+                          statusTone(member.status, member.archivedAt),
+                        )}
+                      >
                         {statusLabel(member)}
                       </span>
                     </td>

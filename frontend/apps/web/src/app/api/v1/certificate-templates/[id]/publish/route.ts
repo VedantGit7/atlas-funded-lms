@@ -18,5 +18,5 @@ export const POST = createTenantRoute<
   body: publishCertificateTemplateBodySchema,
   output: certificateTemplateDetailResponseSchema,
   handler: async ({ tx, ctx, params, input }) =>
-    publishCertificateTemplate(tx, ctx, params["id"] ?? "", input),
+    publishCertificateTemplate(tx, ctx, params.id, input),
 });

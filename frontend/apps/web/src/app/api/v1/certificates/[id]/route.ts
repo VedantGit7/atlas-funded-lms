@@ -13,5 +13,5 @@ export const GET = createTenantRoute<
   metadata: getCertificateMetadata,
   params: certificateParamsSchema,
   output: certificateDetailResponseSchema,
-  handler: async ({ tx, ctx, params }) => getCertificate(tx, ctx, params["id"] ?? ""),
+  handler: async ({ tx, ctx, params }) => getCertificate(tx, ctx, params.id),
 });

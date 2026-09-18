@@ -23,12 +23,16 @@ function toIso(value: Date | null | undefined): string | null {
   return value.toISOString();
 }
 
-function mapPaymentStatus(
-  enrolledType: string,
-): "paid" | "comped" | "trial" | "unknown" {
+function mapPaymentStatus(enrolledType: string): "paid" | "comped" | "trial" | "unknown" {
   const key = enrolledType.trim().toLowerCase();
   if (key === "paid" || key === "purchase" || key === "direct_purchase") return "paid";
-  if (key === "comped" || key === "comp" || key === "complimentary" || key === "free" || key === "gift")
+  if (
+    key === "comped" ||
+    key === "comp" ||
+    key === "complimentary" ||
+    key === "free" ||
+    key === "gift"
+  )
     return "comped";
   if (key === "trial") return "trial";
   return "unknown";
@@ -62,10 +66,7 @@ function formatDurationLabel(seconds: number | null): string | null {
   return `${secs}s`;
 }
 
-function formatWatchProgress(
-  progressPct: number,
-  durationSeconds: number | null,
-): string | null {
+function formatWatchProgress(progressPct: number, durationSeconds: number | null): string | null {
   if (durationSeconds == null || durationSeconds <= 0) return null;
   const watched = Math.round((Math.min(100, Math.max(0, progressPct)) / 100) * durationSeconds);
   const watchedLabel = formatDurationLabel(watched);
@@ -74,9 +75,7 @@ function formatWatchProgress(
   return `${watchedLabel} / ${totalLabel}`;
 }
 
-function lessonStatus(
-  row: LearnerDetailLessonRow,
-): "completed" | "in_progress" | "not_started" {
+function lessonStatus(row: LearnerDetailLessonRow): "completed" | "in_progress" | "not_started" {
   if (row.progress_status === "completed" || (row.progress_pct ?? 0) >= 100) {
     return "completed";
   }
@@ -96,8 +95,7 @@ function computeOutOfOrderFlags(lessons: LearnerDetailLessonRow[]): Set<string> 
   for (const item of ordered) {
     if (lessonStatus(item.lesson) !== "completed") continue;
     const earlierIncomplete = ordered.some(
-      (other) =>
-        other.globalIndex < item.globalIndex && lessonStatus(other.lesson) !== "completed",
+      (other) => other.globalIndex < item.globalIndex && lessonStatus(other.lesson) !== "completed",
     );
     if (earlierIncomplete) {
       outOfOrder.add(item.lesson.lesson_id);
@@ -131,15 +129,22 @@ function computeLongestGap(days: LearnerDetailActivityDayRow[]): {
   let longestEndIndex = -1;
 
   for (let i = 1; i < activeIndexes.length; i += 1) {
-    const gap = activeIndexes[i]! - activeIndexes[i - 1]! - 1;
+    // Indexing inside the loop bound cannot miss, but the type says otherwise;
+    // reading once and guarding is cheaper than three assertions.
+    const current = activeIndexes[i];
+    const previous = activeIndexes[i - 1];
+    if (current === undefined || previous === undefined) continue;
+
+    const gap = current - previous - 1;
     if (gap > longest) {
       longest = gap;
-      longestEndIndex = activeIndexes[i]!;
+      longestEndIndex = current;
     }
   }
 
   // Trailing inactivity after last activity until today
-  const trailing = days.length - 1 - activeIndexes[activeIndexes.length - 1]!;
+  const lastActiveIndex = activeIndexes[activeIndexes.length - 1];
+  const trailing = lastActiveIndex === undefined ? 0 : days.length - 1 - lastActiveIndex;
   if (trailing > longest) {
     longest = trailing;
     longestEndIndex = days.length - 1;
@@ -207,8 +212,7 @@ export async function getProgressLearnerDetail(
   const outOfOrderIds = computeOutOfOrderFlags(lessons);
   const completedLessons = lessons.filter((lesson) => lessonStatus(lesson) === "completed").length;
   const totalLessons = lessons.length;
-  const completionPct =
-    totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
+  const completionPct = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
 
   const lastActiveAt = lessons.reduce<Date | null>((latest, lesson) => {
     const candidate = lesson.last_seen_at ?? lesson.completed_at;
@@ -247,8 +251,8 @@ export async function getProgressLearnerDetail(
     const progressPct = Math.min(100, Math.max(0, lesson.progress_pct ?? 0));
     const durationLabel =
       status === "in_progress"
-        ? formatWatchProgress(progressPct, lesson.duration_seconds) ??
-          formatDurationLabel(lesson.duration_seconds)
+        ? (formatWatchProgress(progressPct, lesson.duration_seconds) ??
+          formatDurationLabel(lesson.duration_seconds))
         : formatDurationLabel(lesson.duration_seconds);
 
     const mapped: MappedLesson = {
@@ -263,9 +267,7 @@ export async function getProgressLearnerDetail(
       lastSeenAt: toIso(lesson.last_seen_at),
       outOfOrder: outOfOrderIds.has(lesson.lesson_id),
       quizScorePct:
-        lesson.quiz_score_pct == null
-          ? null
-          : Math.round(Number(lesson.quiz_score_pct) * 10) / 10,
+        lesson.quiz_score_pct == null ? null : Math.round(lesson.quiz_score_pct * 10) / 10,
       quizAttemptId: lesson.quiz_attempt_id,
     };
 
@@ -295,11 +297,7 @@ export async function getProgressLearnerDetail(
 
   const [activityDays, assessments, certificate] = await Promise.all([
     curriculumAvailable
-      ? progressScoreLearnerDetailRepository.listActivityDays(
-          tx,
-          productId,
-          header.membership_id,
-        )
+      ? progressScoreLearnerDetailRepository.listActivityDays(tx, productId, header.membership_id)
       : Promise.resolve([] as LearnerDetailActivityDayRow[]),
     curriculumAvailable
       ? progressScoreLearnerDetailRepository.listCourseAssessmentsForLearner(
@@ -363,8 +361,7 @@ export async function getProgressLearnerDetail(
       assessments: assessments.map((row) => ({
         assessmentId: row.assessment_id,
         title: row.title,
-        scorePct:
-          row.score_pct == null ? null : Math.round(Number(row.score_pct) * 10) / 10,
+        scorePct: row.score_pct == null ? null : Math.round(row.score_pct * 10) / 10,
         resultStatus: row.result_status,
         attemptNumber: row.attempt_number,
         attemptId: row.attempt_id,

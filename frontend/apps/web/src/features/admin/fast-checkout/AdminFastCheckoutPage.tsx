@@ -36,7 +36,9 @@ export function AdminFastCheckoutPage({ initialEnabled }: { initialEnabled: bool
       router.refresh();
     } catch (caught) {
       setError(
-        caught instanceof ClientApiError ? caught.message : "Could not save your changes. Please try again.",
+        caught instanceof ClientApiError
+          ? caught.message
+          : "Could not save your changes. Please try again.",
       );
     } finally {
       setSaving(false);
@@ -67,13 +69,19 @@ export function AdminFastCheckoutPage({ initialEnabled }: { initialEnabled: bool
         </header>
 
         {status ? (
-          <p role="status" className={`${bannerClassName} border-[var(--admin-success)]/30 bg-[var(--admin-success)]/10 text-[var(--admin-success)]`}>
+          <p
+            role="status"
+            className={`${bannerClassName} border-[var(--admin-success)]/30 bg-[var(--admin-success)]/10 text-[var(--admin-success)]`}
+          >
             {status}
           </p>
         ) : null}
 
         {error ? (
-          <p role="alert" className={`${bannerClassName} border-[var(--admin-danger)]/30 bg-[var(--admin-danger)]/10 text-[var(--admin-danger)]`}>
+          <p
+            role="alert"
+            className={`${bannerClassName} border-[var(--admin-danger)]/30 bg-[var(--admin-danger)]/10 text-[var(--admin-danger)]`}
+          >
             {error}
           </p>
         ) : null}
@@ -107,7 +115,9 @@ export function AdminFastCheckoutPage({ initialEnabled }: { initialEnabled: bool
             {enabled ? <Check className="h-3.5 w-3.5" strokeWidth={3} aria-hidden="true" /> : null}
           </span>
           <span className="min-w-0">
-            <span className="block text-sm font-semibold text-[var(--admin-on-surface)]">Fast Checkout</span>
+            <span className="block text-sm font-semibold text-[var(--admin-on-surface)]">
+              Fast Checkout
+            </span>
             <span className="mt-1 block text-sm leading-relaxed text-[var(--admin-on-surface-variant)]">
               Enable to allow learners to buy your products with a quick and easy checkout process.
             </span>

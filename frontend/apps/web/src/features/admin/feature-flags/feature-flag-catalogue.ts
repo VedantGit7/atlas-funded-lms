@@ -80,7 +80,7 @@ export function formatEffectiveFeatureFlagValue(value: unknown): string {
   }
 
   if (value && typeof value === "object" && "enabled" in value) {
-    const enabled = Boolean((value as { enabled: unknown }).enabled);
+    const enabled = Boolean(value.enabled);
     return enabled ? "Enabled" : "Disabled";
   }
 

@@ -6,17 +6,13 @@ import { loadPersonalizedDashboardActions } from "../../../frontend/apps/web/src
 
 describe("F8 query keys", () => {
   it("scopes tenant keys under atlas root with host", () => {
-    expect(queryKeys.me("tenant.test")).toEqual([
-      "atlas",
-      "me",
-      { host: "tenant.test" },
-    ]);
+    expect(queryKeys.me("tenant.test")).toEqual(["atlas", "me", { host: "tenant.test" }]);
     expect(queryKeys.courses.detail("course-1", "tenant.test")[2]).toBe("course-1");
   });
 
   it("keeps platform keys distinct from learner keys", () => {
     const platform = queryKeys.platform.shell("platform.localhost");
-    const learner = queryKeys.me("fundedbeyond.localhost.test");
+    const learner = queryKeys.me("acme-academy.localhost.test");
     expect(platform).not.toEqual(learner);
     expect(withQueryHost(["atlas", "platform"], "platform.localhost")[1]).toBe("platform");
   });

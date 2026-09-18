@@ -213,7 +213,12 @@ function QuickLink({
 
 function ContentPipeline({ summary }: { summary: ContentStatusSummary }) {
   const segments = [
-    { key: "published", label: "Published", value: summary.published, color: "var(--admin-success)" },
+    {
+      key: "published",
+      label: "Published",
+      value: summary.published,
+      color: "var(--admin-success)",
+    },
     { key: "review", label: "In review", value: summary.review, color: "var(--admin-warning)" },
     { key: "draft", label: "Draft", value: summary.draft, color: "var(--admin-primary)" },
     { key: "archived", label: "Archived", value: summary.archived, color: "var(--admin-outline)" },
@@ -223,7 +228,9 @@ function ContentPipeline({ summary }: { summary: ContentStatusSummary }) {
   return (
     <div className="mt-2">
       <div className="mb-3 flex items-center justify-between">
-        <p className="text-sm font-semibold text-[var(--admin-on-surface-variant)]">Content pipeline</p>
+        <p className="text-sm font-semibold text-[var(--admin-on-surface-variant)]">
+          Content pipeline
+        </p>
         <p className="text-xs text-[var(--admin-on-surface-variant)]">{total} course(s)</p>
       </div>
       {total > 0 ? (
@@ -246,7 +253,10 @@ function ContentPipeline({ summary }: { summary: ContentStatusSummary }) {
       )}
       <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2">
         {segments.map((segment) => (
-          <span key={segment.key} className="flex items-center gap-2 text-xs text-[var(--admin-on-surface-variant)]">
+          <span
+            key={segment.key}
+            className="flex items-center gap-2 text-xs text-[var(--admin-on-surface-variant)]"
+          >
             <span className="h-2 w-2 rounded-full" style={{ backgroundColor: segment.color }} />
             {segment.label}
             <span className="font-semibold text-[var(--admin-on-surface)]">{segment.value}</span>
@@ -260,7 +270,6 @@ function ContentPipeline({ summary }: { summary: ContentStatusSummary }) {
 export default async function AdminDashboardPage() {
   let memberCount = 0;
   let activeLearnerCount = 0;
-  let membersOk = false;
   let roleCount = 0;
   let auditAvailable = false;
   let recentAudit: AuditListResponse["data"] = [];
@@ -323,7 +332,7 @@ export default async function AdminDashboardPage() {
 
     memberCount = activation.memberCount;
     activeLearnerCount = activation.activeLearnerCount;
-    membersOk = activation.ok;
+    const membersOk = activation.ok;
 
     roleCount = roles ? roles.data.items.length : 0;
     auditAvailable = audit != null;
@@ -494,7 +503,9 @@ export default async function AdminDashboardPage() {
         </section>
 
         <section aria-label="Setup and configuration" className="space-y-4">
-          <h2 className="text-lg font-bold text-[var(--admin-on-surface)]">Setup and configuration</h2>
+          <h2 className="text-lg font-bold text-[var(--admin-on-surface)]">
+            Setup and configuration
+          </h2>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <QuickLink
               icon={ShieldCheck}
@@ -560,7 +571,9 @@ export default async function AdminDashboardPage() {
           <div className="flex items-center justify-between gap-4 border-b border-[var(--admin-border)] bg-[var(--admin-surface-high)]/40 px-6 py-5">
             <div>
               <h2 className="text-lg font-bold text-[var(--admin-on-surface)]">Recent activity</h2>
-              <p className="text-sm text-[var(--admin-on-surface-variant)]">Latest tenant audit trail</p>
+              <p className="text-sm text-[var(--admin-on-surface-variant)]">
+                Latest tenant audit trail
+              </p>
             </div>
             <Link
               href="/admin/audit"
@@ -593,7 +606,10 @@ export default async function AdminDashboardPage() {
                 </thead>
                 <tbody className="divide-y divide-[var(--admin-border)]">
                   {recentAudit.map((entry) => (
-                    <tr key={entry.id} className="transition-colors hover:bg-[var(--admin-surface-high)]/40">
+                    <tr
+                      key={entry.id}
+                      className="transition-colors hover:bg-[var(--admin-surface-high)]/40"
+                    >
                       <td className="px-6 py-4 text-sm text-[var(--admin-on-surface-variant)]">
                         {new Date(entry.occurredAt).toLocaleString()}
                       </td>
@@ -628,7 +644,9 @@ export default async function AdminDashboardPage() {
             </div>
           ) : (
             <div className="px-6 py-12 text-center">
-              <p className="text-sm font-semibold text-[var(--admin-on-surface)]">No recent activity</p>
+              <p className="text-sm font-semibold text-[var(--admin-on-surface)]">
+                No recent activity
+              </p>
               <p className="mt-1 text-sm text-[var(--admin-on-surface-variant)]">
                 {auditAvailable
                   ? "Audit events will appear here as administrators take action."

@@ -124,10 +124,7 @@ export function BadgeGrid({ badges }: BadgeGridProps) {
             const progress = drivingProgress(badge);
 
             return (
-              <li
-                key={badge.id}
-                className={`${cardBase} border-dashed border-border bg-muted/30`}
-              >
+              <li key={badge.id} className={`${cardBase} border-dashed border-border bg-muted/30`}>
                 <span className="relative flex h-16 w-16 items-center justify-center rounded-full bg-muted text-muted-foreground opacity-70">
                   <Icon className="h-8 w-8" strokeWidth={1.75} aria-hidden="true" />
                   <span className="absolute -bottom-0.5 -right-0.5 flex h-5 w-5 items-center justify-center rounded-full border border-border bg-card text-muted-foreground">

@@ -89,6 +89,27 @@ export function TenantLogo({
           alt={publicName}
           width={width}
           height={height}
+          /*
+           * Branding assets bypass the Next image optimizer deliberately.
+           *
+           * The optimizer validates src against `images.remotePatterns`, and an
+           * unlisted host does not degrade to a broken image -- it throws during
+           * render and takes the whole page with it. That is what happened here:
+           * a tenant logo served from the local storage provider at
+           * http://localhost:3000/... crashed the public landing so hard that
+           * <main> never rendered.
+           *
+           * Allowlisting the host is the usual answer and is wrong here. This
+           * URL is operator-supplied tenant configuration, so the allowlist
+           * would need every current and future asset host, and widening it to
+           * a wildcard would turn /_next/image into a server-side fetch of
+           * attacker-influenced URLs -- reintroducing the SSRF class closed in
+           * H3, on a route with no outbound guard.
+           *
+           * A logo is a small, already-sized asset; optimising it buys little
+           * and costs a page-level crash risk tied to tenant configuration.
+           */
+          unoptimized
           className={cn("h-8 w-auto object-contain", imageClassName)}
           {...imageProps}
         />

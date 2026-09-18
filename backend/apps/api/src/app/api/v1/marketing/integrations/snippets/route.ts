@@ -29,6 +29,5 @@ export const PUT = createTenantRoute<
   metadata: mutateMarketingIntegrationsMetadata,
   body: updateMarketingIntegrationSnippetsBodySchema,
   output: marketingIntegrationSnippetsResponseSchema,
-  handler: async ({ tx, ctx, input }) =>
-    updateMarketingIntegrationSnippets(tx, ctx, input),
+  handler: async ({ tx, ctx, input }) => updateMarketingIntegrationSnippets(tx, ctx, input),
 });

@@ -1,3 +1,4 @@
+import { csvEscape } from "@/lib/export/csv";
 import type { InsightDashboardRange } from "./admin-insights-api";
 
 let insightNumberLocale = "en-US";
@@ -67,11 +68,12 @@ export function widgetToCsv(
   return lines.join("\n");
 }
 
-export function csvEscape(value: string | number | null | undefined): string {
-  const raw = value == null ? "" : String(value);
-  if (/[",\n]/.test(raw)) return `"${raw.replace(/"/g, '""')}"`;
-  return raw;
-}
+/**
+ * Re-exported so the six insight views importing it from here keep working,
+ * while the implementation is the single formula-guarding one. The version that
+ * lived here quoted correctly but neutralised no formula prefix (M1).
+ */
+export { csvEscape };
 
 export function formatDurationHms(totalSeconds: number | null): string {
   if (totalSeconds == null || !Number.isFinite(totalSeconds)) return "";

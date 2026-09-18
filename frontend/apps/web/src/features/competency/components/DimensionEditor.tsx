@@ -129,7 +129,9 @@ export function DimensionEditor({ dimensions, canManage, onChanged }: DimensionE
       ) : null}
 
       {showCreate && canManage ? (
-        <div className={`${panelBodyClassName} border-b border-[var(--admin-border)] bg-[var(--admin-surface-low)]/50 space-y-3`}>
+        <div
+          className={`${panelBodyClassName} border-b border-[var(--admin-border)] bg-[var(--admin-surface-low)]/50 space-y-3`}
+        >
           <div className="grid gap-3 md:grid-cols-3">
             <label className="space-y-1">
               <span className={labelClassName}>Key</span>
@@ -222,7 +224,9 @@ export function DimensionEditor({ dimensions, canManage, onChanged }: DimensionE
                       <MoreVertical className="h-4 w-4" aria-hidden="true" />
                     </button>
                     {menuOpenId === dimension.id ? (
-                      <div className={`absolute right-0 top-full z-10 mt-1 min-w-[8rem] bg-[var(--admin-surface)] py-1 shadow-lg ${dropdownPanelSurfaceClassName}`}>
+                      <div
+                        className={`absolute right-0 top-full z-10 mt-1 min-w-[8rem] bg-[var(--admin-surface)] py-1 shadow-lg ${dropdownPanelSurfaceClassName}`}
+                      >
                         <button
                           type="button"
                           className="block w-full px-3 py-2 text-left text-sm hover:bg-[var(--admin-surface-high)]"
@@ -274,7 +278,10 @@ export function DimensionEditor({ dimensions, canManage, onChanged }: DimensionE
       />
 
       {editTarget ? (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" role="presentation">
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+          role="presentation"
+        >
           <button
             type="button"
             aria-label="Close edit dialog"
@@ -289,7 +296,10 @@ export function DimensionEditor({ dimensions, canManage, onChanged }: DimensionE
             aria-labelledby="edit-dimension-title"
             className="relative w-full max-w-md rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)] p-5 shadow-2xl"
           >
-            <h3 id="edit-dimension-title" className="text-lg font-bold text-[var(--admin-on-surface)]">
+            <h3
+              id="edit-dimension-title"
+              className="text-lg font-bold text-[var(--admin-on-surface)]"
+            >
               Edit dimension
             </h3>
             <div className="mt-4 space-y-3">

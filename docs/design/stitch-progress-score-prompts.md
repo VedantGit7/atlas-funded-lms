@@ -8,6 +8,7 @@ and [stitch-payments-prompts.md](./stitch-payments-prompts.md); reproduced here 
 stands alone.
 
 Source of truth:
+
 - `frontend/apps/web/src/features/admin/reports/AdminProgressScoreRosterPage.tsx`
 - `frontend/apps/web/src/features/admin/reports/admin-progress-score-roster-api.ts`
 - `backend/apps/api/src/app/api/v1/reports/progress-score/*`
@@ -646,20 +647,20 @@ schedule cards stack under the history table.
 
 Full best-in-class versions, as intended. What exists today vs. what needs building:
 
-| Prompt feature | Status |
-| --- | --- |
-| Progress product list per product type (course / test series / bundle / subscription) | exists |
-| Progress learner roster with completion %, completed/total, enrolment type, status, dates | exists |
-| Progress filters: enrolled from/to, name, enrolment type; sort; column picker | exists |
-| Score product list, assessment list per product, learner score roster | exists |
+| Prompt feature                                                                            | Status                                                                  |
+| ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| Progress product list per product type (course / test series / bundle / subscription)     | exists                                                                  |
+| Progress learner roster with completion %, completed/total, enrolment type, status, dates | exists                                                                  |
+| Progress filters: enrolled from/to, name, enrolment type; sort; column picker             | exists                                                                  |
+| Score product list, assessment list per product, learner score roster                     | exists                                                                  |
 | Score filters: submitted from/to, name, result status, min/max score; sort; column picker | exists (min/max score is in the API but not surfaced in the current UI) |
-| Pass mark per assessment | exists (`passMarkPercent`) |
-| Create group from filters, message matched learners, async CSV export | exists |
-| Overview aggregates, completion distribution, score histogram, "needs attention" lists | needs backend |
-| Per-product curriculum drop-off strip, stalled/last-activity signals | needs backend (lesson-level completion exists; the aggregate does not) |
-| Individual learner progress detail — lesson checklist, watch position, time on content | needs backend |
-| Attempt review, question-by-question, manual grading, regrade, void, extra attempt | needs backend |
-| Item analysis (correct rate, discrimination, distractor shares) | needs backend |
-| Integrity flags (tab switches, over-time submissions) | needs backend |
-| Live/auto-refreshing groups, message history and delivery counters | groups and sends exist; history, open rates, and live sync need backend |
-| Saved views, export history, scheduled exports | export runs exist; history UI and scheduling need backend |
+| Pass mark per assessment                                                                  | exists (`passMarkPercent`)                                              |
+| Create group from filters, message matched learners, async CSV export                     | exists                                                                  |
+| Overview aggregates, completion distribution, score histogram, "needs attention" lists    | needs backend                                                           |
+| Per-product curriculum drop-off strip, stalled/last-activity signals                      | needs backend (lesson-level completion exists; the aggregate does not)  |
+| Individual learner progress detail — lesson checklist, watch position, time on content    | needs backend                                                           |
+| Attempt review, question-by-question, manual grading, regrade, void, extra attempt        | needs backend                                                           |
+| Item analysis (correct rate, discrimination, distractor shares)                           | needs backend                                                           |
+| Integrity flags (tab switches, over-time submissions)                                     | needs backend                                                           |
+| Live/auto-refreshing groups, message history and delivery counters                        | groups and sends exist; history, open rates, and live sync need backend |
+| Saved views, export history, scheduled exports                                            | export runs exist; history UI and scheduling need backend               |

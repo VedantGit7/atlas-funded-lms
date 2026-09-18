@@ -240,8 +240,8 @@ function SummaryBand({
           {formatCount(summary.fieldsDefined)}
         </span>
         <span className="mt-2 font-mono text-[11px] text-[var(--admin-on-surface-variant)]">
-          {formatCount(summary.activeFieldCount)} active ·{" "}
-          {formatCount(summary.archivedFieldCount)} archived
+          {formatCount(summary.activeFieldCount)} active · {formatCount(summary.archivedFieldCount)}{" "}
+          archived
         </span>
       </div>
 
@@ -378,7 +378,9 @@ function CopyKeyButton({ value }: { value: string }) {
     try {
       await navigator.clipboard.writeText(value);
       setCopied(true);
-      window.setTimeout(() => setCopied(false), 1200);
+      window.setTimeout(() => {
+        setCopied(false);
+      }, 1200);
     } catch {
       // ignore
     }
@@ -387,7 +389,7 @@ function CopyKeyButton({ value }: { value: string }) {
   return (
     <button
       type="button"
-      onClick={handleCopy}
+      onClick={(event) => void handleCopy(event)}
       className="inline-flex items-center text-[var(--admin-on-surface-variant)] transition-colors hover:text-[var(--admin-primary)]"
       aria-label={`Copy key ${value}`}
       title="Copy key"
@@ -454,8 +456,12 @@ export function AdminCustomFieldCataloguePage() {
   const [sortBy, setSortBy] = useState("coverage_asc");
 
   useEffect(() => {
-    const timer = window.setTimeout(() => setDebouncedSearch(searchInput.trim()), 300);
-    return () => window.clearTimeout(timer);
+    const timer = window.setTimeout(() => {
+      setDebouncedSearch(searchInput.trim());
+    }, 300);
+    return () => {
+      window.clearTimeout(timer);
+    };
   }, [searchInput]);
 
   const load = useCallback(async () => {
@@ -552,7 +558,9 @@ export function AdminCustomFieldCataloguePage() {
             type="button"
             className={ghostButtonClassName}
             disabled={items.length === 0}
-            onClick={() => downloadCatalogueCsv(items)}
+            onClick={() => {
+              downloadCatalogueCsv(items);
+            }}
           >
             <Download className="h-4 w-4" aria-hidden />
             Export CSV
@@ -577,8 +585,12 @@ export function AdminCustomFieldCataloguePage() {
       {summary && !noFieldsDefined ? (
         <SummaryBand
           summary={summary}
-          onBelow40Click={() => setCoverage("below_40")}
-          onNeverUsedClick={() => setCoverage("never_used")}
+          onBelow40Click={() => {
+            setCoverage("below_40");
+          }}
+          onNeverUsedClick={() => {
+            setCoverage("never_used");
+          }}
         />
       ) : null}
 
@@ -616,7 +628,9 @@ export function AdminCustomFieldCataloguePage() {
                     className={`${filterInputClassName} pl-8`}
                     placeholder="Search field label or key"
                     value={searchInput}
-                    onChange={(event) => setSearchInput(event.target.value)}
+                    onChange={(event) => {
+                      setSearchInput(event.target.value);
+                    }}
                   />
                 </div>
               </div>
@@ -738,7 +752,9 @@ export function AdminCustomFieldCataloguePage() {
                           key={item.id}
                           className={[
                             "group relative h-11 transition-colors hover:bg-[var(--admin-surface-high)]",
-                            archived ? "bg-[color-mix(in_srgb,var(--admin-surface-low)_50%,transparent)] opacity-75" : "",
+                            archived
+                              ? "bg-[color-mix(in_srgb,var(--admin-surface-low)_50%,transparent)] opacity-75"
+                              : "",
                           ].join(" ")}
                         >
                           {low && !archived ? (

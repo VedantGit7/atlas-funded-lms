@@ -17,10 +17,7 @@ const MIN_DISCRIMINATION_SAMPLE = 10;
 const QUALITY_MIN_ATTEMPTS = 50;
 const BAD_MAX_ATTEMPTS = 20;
 
-export function computeDifficulty(
-  attemptsCount: number,
-  correctCount: number,
-): number | null {
+export function computeDifficulty(attemptsCount: number, correctCount: number): number | null {
   if (attemptsCount <= 0) {
     return null;
   }
@@ -73,10 +70,7 @@ export function computePsychometricQualityFlag(args: {
     return "bad";
   }
 
-  if (
-    difficulty != null &&
-    (difficulty < 0.2 || difficulty > 0.9)
-  ) {
+  if (difficulty != null && (difficulty < 0.2 || difficulty > 0.9)) {
     return "bad";
   }
 

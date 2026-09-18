@@ -58,7 +58,10 @@ const SPAM_WORDS = [
   "lottery",
 ] as const;
 
-export function detectMarketingEmailSpam(subject: string, bodyHtml: string): {
+export function detectMarketingEmailSpam(
+  subject: string,
+  bodyHtml: string,
+): {
   spamDetected: boolean;
   spamWords: string[];
 } {

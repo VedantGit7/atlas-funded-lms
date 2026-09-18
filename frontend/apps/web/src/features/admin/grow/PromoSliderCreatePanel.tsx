@@ -121,15 +121,24 @@ export function PromoSliderCreatePanel() {
           </div>
           <ul className="space-y-2 text-[13px] leading-5 text-[var(--admin-on-surface-variant)]">
             <li className="flex items-start gap-2">
-              <CircleCheck className="mt-0.5 h-4 w-4 shrink-0 text-[var(--admin-primary)]" aria-hidden="true" />
+              <CircleCheck
+                className="mt-0.5 h-4 w-4 shrink-0 text-[var(--admin-primary)]"
+                aria-hidden="true"
+              />
               Upload image URLs for each slide (up to 20)
             </li>
             <li className="flex items-start gap-2">
-              <CircleCheck className="mt-0.5 h-4 w-4 shrink-0 text-[var(--admin-primary)]" aria-hidden="true" />
+              <CircleCheck
+                className="mt-0.5 h-4 w-4 shrink-0 text-[var(--admin-primary)]"
+                aria-hidden="true"
+              />
               Set action links and optional start/end schedules per slide
             </li>
             <li className="flex items-start gap-2">
-              <CircleCheck className="mt-0.5 h-4 w-4 shrink-0 text-[var(--admin-primary)]" aria-hidden="true" />
+              <CircleCheck
+                className="mt-0.5 h-4 w-4 shrink-0 text-[var(--admin-primary)]"
+                aria-hidden="true"
+              />
               Publish when ready to show on the learner dashboard
             </li>
           </ul>

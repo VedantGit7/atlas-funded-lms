@@ -19,10 +19,7 @@ import type { z } from "zod";
 import type { TenantBrandingViewSchema } from "@atlas/domain-branding/schemas/branding";
 import type { TenantThemeViewSchema } from "@atlas/domain-branding/schemas/theme";
 import type { UpdateTenantThemeRequest } from "@atlas/domain-branding/schemas/theme";
-import {
-  diffThemeTokens,
-  formatThemeTokenLabel,
-} from "@atlas/domain-branding/utils/theme-diff";
+import { diffThemeTokens, formatThemeTokenLabel } from "@atlas/domain-branding/utils/theme-diff";
 import { ClientApiError, clientApi } from "../../../../lib/client-api";
 import { ConfirmDialog } from "../../../../components/patterns/ConfirmDialog";
 import { BrandPreview } from "./BrandPreview";
@@ -131,17 +128,19 @@ export function BrandingEditor({
 
   const pendingCount = brandingDirtyItems.length + themeDiff.length;
   const lastSavedAt =
-    new Date(branding.updatedAt) > new Date(theme.updatedAt)
-      ? branding.updatedAt
-      : theme.updatedAt;
+    new Date(branding.updatedAt) > new Date(theme.updatedAt) ? branding.updatedAt : theme.updatedAt;
 
   const previewBranding: BrandingView = {
     ...branding,
     publicName: publicName.trim() || branding.publicName,
     issuerName: issuerName.trim() || branding.issuerName,
     publicLandingCopy: headline.trim() ? { headline: headline.trim() } : branding.publicLandingCopy,
-    logoLight: logoLightRef ? { storageRefId: logoLightRef, altText: publicName.trim() || null } : null,
-    logoDark: logoDarkRef ? { storageRefId: logoDarkRef, altText: publicName.trim() || null } : null,
+    logoLight: logoLightRef
+      ? { storageRefId: logoLightRef, altText: publicName.trim() || null }
+      : null,
+    logoDark: logoDarkRef
+      ? { storageRefId: logoDarkRef, altText: publicName.trim() || null }
+      : null,
     favicon: faviconRef ? { storageRefId: faviconRef, altText: publicName.trim() || null } : null,
   };
 
@@ -520,16 +519,24 @@ export function BrandingEditor({
                 <ul className="space-y-2 text-sm text-[var(--admin-on-surface-variant)]">
                   {brandingDirtyItems.map((item) => (
                     <li key={item} className="flex items-start gap-2">
-                      <Edit3 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--admin-primary)]" aria-hidden="true" />
+                      <Edit3
+                        className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--admin-primary)]"
+                        aria-hidden="true"
+                      />
                       {item}
                     </li>
                   ))}
                   {themeDiff.map((entry) => (
                     <li key={entry.key} className="flex items-start gap-2">
-                      <Type className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--admin-primary)]" aria-hidden="true" />
+                      <Type
+                        className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--admin-primary)]"
+                        aria-hidden="true"
+                      />
                       <span>
                         {formatThemeTokenLabel(entry.key)}:{" "}
-                        <code className="line-through opacity-60">{entry.before ?? EMPTY_TOKEN_VALUE}</code>
+                        <code className="line-through opacity-60">
+                          {entry.before ?? EMPTY_TOKEN_VALUE}
+                        </code>
                         {" → "}
                         <code className="font-semibold text-[var(--admin-on-surface)]">
                           {entry.after ?? EMPTY_TOKEN_VALUE}
@@ -559,7 +566,9 @@ export function BrandingEditor({
               <Rocket className="h-5 w-5" aria-hidden="true" />
             </div>
             <div>
-              <p className="text-sm font-bold text-[var(--admin-on-surface)]">Ready to push live?</p>
+              <p className="text-sm font-bold text-[var(--admin-on-surface)]">
+                Ready to push live?
+              </p>
               <p className="text-xs text-[var(--admin-on-surface-variant)]">
                 {pendingCount > 0
                   ? `Review ${String(pendingCount)} pending change${pendingCount === 1 ? "" : "s"} before publishing.`
@@ -644,11 +653,17 @@ function LogoAssetRow({
           ].join(" ")}
         >
           {busy ? (
-            <Loader2 className="h-5 w-5 animate-spin text-[var(--admin-primary)]" aria-hidden="true" />
+            <Loader2
+              className="h-5 w-5 animate-spin text-[var(--admin-primary)]"
+              aria-hidden="true"
+            />
           ) : configured && monogram ? (
             <span className="text-lg font-bold text-[var(--admin-primary)]">{monogram}</span>
           ) : (
-            <ImageIcon className="h-5 w-5 text-[var(--admin-on-surface-variant)] opacity-40" aria-hidden="true" />
+            <ImageIcon
+              className="h-5 w-5 text-[var(--admin-on-surface-variant)] opacity-40"
+              aria-hidden="true"
+            />
           )}
         </div>
         <div className="min-w-0">

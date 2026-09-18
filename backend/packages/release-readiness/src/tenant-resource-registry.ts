@@ -73,7 +73,11 @@ const DOMAIN_ISOLATION_TEST_MAP: Record<string, string> = {
   branding: "branding-domain.isolation.test.ts",
   tenancy: "branding-domain.isolation.test.ts",
   "permission-overrides": "admin-member-role-management.test.ts",
-  admin: "admin-shell.test.ts",
+  // Was admin-shell.test.ts, which read component source and asserted
+  // aria-labels — it could not have detected a cross-tenant read on
+  // admin/overview. Repointed at real isolation coverage when 3.6 moved the
+  // structural checks out and the gap became visible.
+  admin: "admin-overview.isolation.test.ts",
   "learner-billing": "tenant-config.isolation.test.ts",
   decks: "practice.test.ts",
   reports: "analytics.test.ts",

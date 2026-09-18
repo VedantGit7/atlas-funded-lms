@@ -29,6 +29,7 @@ import {
   type PollNonRespondentItem,
   type PollNonRespondentsSummary,
 } from "./admin-polls-roster-api";
+import { csvEscape } from "@/lib/export/csv";
 
 function defined<T>(value: T, message = "Expected value to be defined"): NonNullable<T> {
   if (value == null) {
@@ -111,10 +112,9 @@ function learnerInitials(name: string | null, email: string | null): string {
 }
 
 function escapeCsvCell(value: string): string {
-  if (/[",\n\r]/.test(value)) {
-    return `"${value.replace(/"/g, '""')}"`;
-  }
-  return value;
+  // Non-respondent exports are lists of learner names; csvEscape adds the
+  // formula-prefix guard this was missing (M1).
+  return csvEscape(value);
 }
 
 function buildCsv(rows: PollNonRespondentItem[]): string {

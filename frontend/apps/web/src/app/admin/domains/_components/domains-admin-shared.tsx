@@ -1,8 +1,5 @@
 import type { z } from "zod";
-import type {
-  DomainStatusSchema,
-  DomainTypeSchema,
-} from "@atlas/domain-branding/schemas/domains";
+import type { DomainStatusSchema, DomainTypeSchema } from "@atlas/domain-branding/schemas/domains";
 
 type DomainStatus = z.infer<typeof DomainStatusSchema>;
 type DomainType = z.infer<typeof DomainTypeSchema>;

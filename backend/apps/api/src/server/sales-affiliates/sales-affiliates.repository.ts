@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { randomInt, randomUUID } from "node:crypto";
 import type { TenantTx } from "@atlas/db";
 
 export type AffiliateConfigRow = {
@@ -106,13 +106,16 @@ export type AffiliatePayoutListRow = AffiliatePayoutRow & {
 const CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
 export function normalizeAffiliateCode(raw: string): string {
-  return raw.trim().toUpperCase().replace(/[^A-Z0-9_-]/g, "");
+  return raw
+    .trim()
+    .toUpperCase()
+    .replace(/[^A-Z0-9_-]/g, "");
 }
 
 export function generateAffiliateCouponCode(): string {
   let out = "";
   for (let i = 0; i < 8; i += 1) {
-    out += CODE_ALPHABET[Math.floor(Math.random() * CODE_ALPHABET.length)]!;
+    out += CODE_ALPHABET.charAt(randomInt(CODE_ALPHABET.length));
   }
   return out;
 }
@@ -196,7 +199,10 @@ export const salesAffiliatesRepository = {
     );
   },
 
-  async findAffiliateByMembership(tx: TenantTx, membershipId: string): Promise<AffiliateRow | null> {
+  async findAffiliateByMembership(
+    tx: TenantTx,
+    membershipId: string,
+  ): Promise<AffiliateRow | null> {
     const rows = await tx.$queryRawUnsafe<AffiliateRow[]>(
       `
       select id::text, membership_id::text, tier, status, coupon_code,
@@ -570,7 +576,10 @@ export const salesAffiliatesRepository = {
     return rows[0] ?? null;
   },
 
-  async findPendingRequest(tx: TenantTx, membershipId: string): Promise<AffiliateRequestRow | null> {
+  async findPendingRequest(
+    tx: TenantTx,
+    membershipId: string,
+  ): Promise<AffiliateRequestRow | null> {
     const rows = await tx.$queryRawUnsafe<AffiliateRequestRow[]>(
       `
       select id::text, membership_id::text, status, note,

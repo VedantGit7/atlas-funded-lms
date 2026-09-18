@@ -104,7 +104,7 @@ function Shimmer({ className }: { className?: string }) {
 
 function formatPct(v: number | null | undefined) {
   if (v == null || Number.isNaN(v)) return "-";
-  return `${Number(v).toFixed(v % 1 === 0 ? 0 : 1)}%`;
+  return `${v.toFixed(v % 1 === 0 ? 0 : 1)}%`;
 }
 
 function formatDateTime(v: string | null | undefined) {
@@ -133,17 +133,17 @@ function formatMinutes(v: number | null | undefined) {
 }
 
 function formatWatchPair(actual: number | null | undefined, planned: number | null | undefined) {
-  if (actual == null && planned == null) return "-";
   if (actual != null && planned != null) return `${Math.round(actual)}m of ${Math.round(planned)}m`;
   if (actual != null) return `${Math.round(actual)}m`;
-  return `of ${Math.round(planned!)}m`;
+  if (planned != null) return `of ${Math.round(planned)}m`;
+  return "-";
 }
 
 function learnerInitials(name: string | null, email: string | null) {
   const source = (name?.trim() || email?.trim() || "?").replace(/\s+/g, " ");
   const parts = source.split(" ").filter(Boolean);
   if (parts.length >= 2) {
-    return `${parts[0]![0] ?? ""}${parts[1]![0] ?? ""}`.toUpperCase();
+    return `${parts[0]?.[0] ?? ""}${parts[1]?.[0] ?? ""}`.toUpperCase();
   }
   return source.slice(0, 2).toUpperCase();
 }
@@ -229,12 +229,15 @@ function barTone(v: number | null | undefined, pass = 50) {
   return "bg-[var(--admin-danger)]";
 }
 
-function MiniBar({ value, warningBelow50 }: { value: number | null | undefined; warningBelow50?: boolean }) {
+function MiniBar({
+  value,
+  warningBelow50,
+}: {
+  value: number | null | undefined;
+  warningBelow50?: boolean;
+}) {
   if (value == null) return null;
-  const tone =
-    warningBelow50 && value < 50
-      ? "bg-[var(--admin-warning)]"
-      : barTone(value);
+  const tone = warningBelow50 && value < 50 ? "bg-[var(--admin-warning)]" : barTone(value);
   return (
     <div className="mt-1 h-[3px] w-full max-w-[72px] overflow-hidden rounded-full bg-[var(--admin-surface-high)]">
       <div
@@ -247,10 +250,20 @@ function MiniBar({ value, warningBelow50 }: { value: number | null | undefined; 
 
 function DeviceIcon({ label }: { label: string }) {
   const lower = label.toLowerCase();
-  if (lower.includes("phone") || lower.includes("ios") || lower.includes("android") || lower.includes("mobile")) {
+  if (
+    lower.includes("phone") ||
+    lower.includes("ios") ||
+    lower.includes("android") ||
+    lower.includes("mobile")
+  ) {
     return <Smartphone className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />;
   }
-  if (lower.includes("laptop") || lower.includes("mac") || lower.includes("desktop") || lower.includes("windows")) {
+  if (
+    lower.includes("laptop") ||
+    lower.includes("mac") ||
+    lower.includes("desktop") ||
+    lower.includes("windows")
+  ) {
     return <Laptop className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />;
   }
   return <Monitor className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />;
@@ -329,19 +342,24 @@ function AttendanceTimelineChart({
   const yAt = (concurrent: number) => padT + plotH - (concurrent / maxY) * plotH;
 
   const linePath = points
-    .map((p, i) => `${i === 0 ? "M" : "L"} ${xAt(p.offsetMinutes).toFixed(1)} ${yAt(p.concurrent).toFixed(1)}`)
+    .map(
+      (p, i) =>
+        `${i === 0 ? "M" : "L"} ${xAt(p.offsetMinutes).toFixed(1)} ${yAt(p.concurrent).toFixed(1)}`,
+    )
     .join(" ");
 
+  const firstPoint = points[0];
+  const lastPoint = points.at(-1);
   const areaPath =
-    points.length > 0
-      ? `${linePath} L ${xAt(points[points.length - 1]!.offsetMinutes).toFixed(1)} ${(padT + plotH).toFixed(1)} L ${xAt(points[0]!.offsetMinutes).toFixed(1)} ${(padT + plotH).toFixed(1)} Z`
+    firstPoint && lastPoint
+      ? `${linePath} L ${xAt(lastPoint.offsetMinutes).toFixed(1)} ${(padT + plotH).toFixed(1)} L ${xAt(firstPoint.offsetMinutes).toFixed(1)} ${(padT + plotH).toFixed(1)} Z`
       : "";
 
   const tickCount = Math.min(6, Math.max(2, Math.ceil(maxX / 10)));
-  const xTicks = Array.from({ length: tickCount + 1 }, (_, i) => Math.round((maxX * i) / tickCount));
-  const yTicks = [0, Math.round(maxY / 2), maxY].filter(
-    (v, i, arr) => arr.indexOf(v) === i,
+  const xTicks = Array.from({ length: tickCount + 1 }, (_, i) =>
+    Math.round((maxX * i) / tickCount),
   );
+  const yTicks = [0, Math.round(maxY / 2), maxY].filter((v, i, arr) => arr.indexOf(v) === i);
 
   return (
     <svg
@@ -443,7 +461,10 @@ function PageSkeleton() {
       <Shimmer className="h-52 w-full rounded-lg" />
       <div className="rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)]">
         {Array.from({ length: 8 }).map((_, i) => (
-          <div key={i} className="flex items-center gap-3 border-b border-[var(--admin-border)] px-4 py-3 last:border-0">
+          <div
+            key={i}
+            className="flex items-center gap-3 border-b border-[var(--admin-border)] px-4 py-3 last:border-0"
+          >
             <Shimmer className="h-4 w-4" />
             <Shimmer className="h-8 w-8 rounded-full" />
             <Shimmer className="h-4 w-40" />
@@ -494,7 +515,7 @@ function MessageDrawer({
       (focusables[0] ?? panel).focus();
     }
     return () => {
-      previouslyFocused.current?.focus?.();
+      previouslyFocused.current?.focus();
     };
   }, [open]);
 
@@ -508,9 +529,9 @@ function MessageDrawer({
       }
       if (event.key !== "Tab" || !panelRef.current) return;
       const focusables = getFocusable(panelRef.current);
-      if (focusables.length === 0) return;
-      const first = focusables[0]!;
-      const last = focusables[focusables.length - 1]!;
+      const first = focusables[0];
+      const last = focusables.at(-1);
+      if (!first || !last) return;
       if (event.shiftKey && document.activeElement === first) {
         event.preventDefault();
         last.focus();
@@ -520,7 +541,9 @@ function MessageDrawer({
       }
     }
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+    };
   }, [open, busy, onClose]);
 
   function insertTag(tag: string) {
@@ -529,8 +552,8 @@ function MessageDrawer({
       onBodyChange(`${body}${tag}`);
       return;
     }
-    const start = el.selectionStart ?? body.length;
-    const end = el.selectionEnd ?? body.length;
+    const start = el.selectionStart;
+    const end = el.selectionEnd;
     const next = `${body.slice(0, start)}${tag}${body.slice(end)}`;
     onBodyChange(next);
     requestAnimationFrame(() => {
@@ -590,7 +613,9 @@ function MessageDrawer({
             <input
               className={fieldClassName}
               value={subject}
-              onChange={(e) => onSubjectChange(e.target.value)}
+              onChange={(e) => {
+                onSubjectChange(e.target.value);
+              }}
               maxLength={200}
             />
           </label>
@@ -603,7 +628,9 @@ function MessageDrawer({
                   key={item.tag}
                   type="button"
                   className="inline-flex h-7 items-center rounded-md border border-[var(--admin-outline)] bg-[var(--admin-surface-low)] px-2.5 font-mono text-[11px] text-[var(--admin-on-surface)] hover:bg-[var(--admin-surface-high)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]/30"
-                  onClick={() => insertTag(item.tag)}
+                  onClick={() => {
+                    insertTag(item.tag);
+                  }}
                 >
                   {item.label}
                 </button>
@@ -618,7 +645,9 @@ function MessageDrawer({
               className={`${fieldClassName} h-auto min-h-[180px] py-2`}
               rows={8}
               value={body}
-              onChange={(e) => onBodyChange(e.target.value)}
+              onChange={(e) => {
+                onBodyChange(e.target.value);
+              }}
               maxLength={10000}
             />
           </label>
@@ -633,7 +662,9 @@ function MessageDrawer({
                 className="h-4 w-4 accent-[var(--admin-primary)]"
               />
               Email
-              <span className="text-xs text-[var(--admin-on-surface-variant)]">(queued via batch message)</span>
+              <span className="text-xs text-[var(--admin-on-surface-variant)]">
+                (queued via batch message)
+              </span>
             </label>
           </fieldset>
         </div>
@@ -709,7 +740,9 @@ export function AdminBatchSessionAttendancePage({
     [basePath, router, searchParams],
   );
 
-  useEffect(() => setDraftQ(q), [q]);
+  useEffect(() => {
+    setDraftQ(q);
+  }, [q]);
 
   useEffect(() => {
     const t = window.setTimeout(() => {
@@ -717,7 +750,9 @@ export function AdminBatchSessionAttendancePage({
       if (next === q) return;
       replaceParams({ q: next || null, page: "1" });
     }, 300);
-    return () => window.clearTimeout(t);
+    return () => {
+      window.clearTimeout(t);
+    };
   }, [draftQ, q, replaceParams]);
 
   useEffect(() => {
@@ -775,11 +810,7 @@ export function AdminBatchSessionAttendancePage({
 
   const cancelled = detail ? statusKind(detail.session.status) === "cancelled" : false;
   const upcoming = detail ? statusKind(detail.session.status) === "upcoming" : false;
-  const showTimeline =
-    !!detail &&
-    !cancelled &&
-    !upcoming &&
-    detail.timeline.points.length > 0;
+  const showTimeline = !!detail && !cancelled && !upcoming && detail.timeline.points.length > 0;
 
   const rangeStart = totalCount === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
   const rangeEnd = Math.min(page * PAGE_SIZE, totalCount);
@@ -820,7 +851,8 @@ export function AdminBatchSessionAttendancePage({
         emailDownloadLink: true,
       });
       const completed = await pollReportRunUntilComplete(response.data.runId);
-      if (completed.status === "failed") throw new Error(completed.errorMessage ?? "Export failed.");
+      if (completed.status === "failed")
+        throw new Error(completed.errorMessage ?? "Export failed.");
       if (completed.status === "completed") await downloadReportExport(completed.id, "csv");
     } catch (e) {
       setActionError(errMsg(e, "Unable to export report."));
@@ -943,8 +975,7 @@ export function AdminBatchSessionAttendancePage({
 
   const session = detail.session;
   const summary = detail.summary;
-  const durationMinutes =
-    session.actualDurationMinutes ?? session.plannedDurationMinutes ?? null;
+  const durationMinutes = session.actualDurationMinutes ?? session.plannedDurationMinutes ?? null;
 
   return (
     <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-6 pb-16">
@@ -996,14 +1027,8 @@ export function AdminBatchSessionAttendancePage({
           </div>
           <p className="mt-1 text-sm text-[var(--admin-on-surface-variant)]">
             Scheduled {formatDateTime(session.scheduledAt)}
-            {durationMinutes != null ? (
-              <>
-                {" "}
-                · {durationMinutes}m
-              </>
-            ) : null}
-            {" "}
-            · Hosted by {session.hostLabel ?? "-"}
+            {durationMinutes != null ? <> · {durationMinutes}m</> : null} · Hosted by{" "}
+            {session.hostLabel ?? "-"}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -1051,7 +1076,13 @@ export function AdminBatchSessionAttendancePage({
             />
             <p className="text-sm text-[var(--admin-danger)]">{actionError}</p>
           </div>
-          <button type="button" className={ghostButtonClassName} onClick={() => setActionError(null)}>
+          <button
+            type="button"
+            className={ghostButtonClassName}
+            onClick={() => {
+              setActionError(null);
+            }}
+          >
             Dismiss
           </button>
         </div>
@@ -1099,9 +1130,7 @@ export function AdminBatchSessionAttendancePage({
             </div>
           ) : null}
           <p className="mt-2 font-mono text-xs text-[var(--admin-on-surface-variant)]">
-            {cancelled
-              ? "-"
-              : `${summary.attendedCount} of ${summary.rosterCount} learners`}
+            {cancelled ? "-" : `${summary.attendedCount} of ${summary.rosterCount} learners`}
           </p>
         </div>
         <div className="flex flex-col justify-between bg-[var(--admin-surface)] p-5">
@@ -1151,7 +1180,7 @@ export function AdminBatchSessionAttendancePage({
             Peak concurrent
           </p>
           <p className="font-mono text-2xl font-medium leading-none text-[var(--admin-on-surface)]">
-            {cancelled ? "-" : summary.peakConcurrent ?? "-"}
+            {cancelled ? "-" : (summary.peakConcurrent ?? "-")}
           </p>
           <p className="mt-2 font-mono text-xs text-[var(--admin-on-surface-variant)]">
             {cancelled
@@ -1227,7 +1256,9 @@ export function AdminBatchSessionAttendancePage({
                 <button
                   type="button"
                   className={ghostButtonClassName}
-                  onClick={() => setSelectedIds([])}
+                  onClick={() => {
+                    setSelectedIds([]);
+                  }}
                 >
                   Clear
                 </button>
@@ -1251,18 +1282,23 @@ export function AdminBatchSessionAttendancePage({
                     className={`${fieldClassName} pl-9`}
                     placeholder="Search name or email"
                     value={draftQ}
-                    onChange={(e) => setDraftQ(e.target.value)}
+                    onChange={(e) => {
+                      setDraftQ(e.target.value);
+                    }}
                   />
                 </div>
                 <div className="inline-flex items-center gap-2">
-                  <Filter className="h-3.5 w-3.5 text-[var(--admin-on-surface-variant)]" aria-hidden="true" />
+                  <Filter
+                    className="h-3.5 w-3.5 text-[var(--admin-on-surface-variant)]"
+                    aria-hidden="true"
+                  />
                   <Select
                     className={selectClassName}
                     ariaLabel="Filter by attendance"
                     value={kind}
-                    onValueChange={(value) =>
-                      replaceParams({ kind: value === "any" ? null : value, page: "1" })
-                    }
+                    onValueChange={(value) => {
+                      replaceParams({ kind: value === "any" ? null : value, page: "1" });
+                    }}
                     options={KIND_OPTIONS}
                   />
                 </div>
@@ -1270,20 +1306,20 @@ export function AdminBatchSessionAttendancePage({
                   className={selectClassName}
                   ariaLabel="Sort by"
                   value={sortBy}
-                  onValueChange={(value) =>
+                  onValueChange={(value) => {
                     replaceParams({
                       sortBy: value === "status" ? null : value,
                       page: "1",
-                    })
-                  }
+                    });
+                  }}
                   options={SORT_OPTIONS}
                 />
                 <button
                   type="button"
                   className={ghostButtonClassName}
-                  onClick={() =>
-                    replaceParams({ sortDir: sortDir === "asc" ? "desc" : "asc", page: "1" })
-                  }
+                  onClick={() => {
+                    replaceParams({ sortDir: sortDir === "asc" ? "desc" : "asc", page: "1" });
+                  }}
                 >
                   {sortDir === "asc" ? "Asc" : "Desc"}
                 </button>
@@ -1309,7 +1345,9 @@ export function AdminBatchSessionAttendancePage({
               </div>
             ) : items.length === 0 ? (
               <div className="px-6 py-14 text-center">
-                <p className="text-sm font-medium text-[var(--admin-on-surface)]">No learners match</p>
+                <p className="text-sm font-medium text-[var(--admin-on-surface)]">
+                  No learners match
+                </p>
                 <p className="mt-1 text-sm text-[var(--admin-on-surface-variant)]">
                   Try clearing search or changing the attendance filter.
                 </p>
@@ -1360,7 +1398,9 @@ export function AdminBatchSessionAttendancePage({
                               type="checkbox"
                               className="ml-2 h-4 w-4 accent-[var(--admin-primary)]"
                               checked={selectedIds.includes(row.membershipId)}
-                              onChange={() => toggleRow(row.membershipId)}
+                              onChange={() => {
+                                toggleRow(row.membershipId);
+                              }}
                               aria-label={`Select ${name}`}
                             />
                           </td>
@@ -1429,11 +1469,11 @@ export function AdminBatchSessionAttendancePage({
                               className="rounded p-1.5 text-[var(--admin-on-surface-variant)] hover:bg-[var(--admin-surface-high)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]/30"
                               aria-label={`Actions for ${name}`}
                               aria-expanded={rowMenuId === row.membershipId}
-                              onClick={() =>
+                              onClick={() => {
                                 setRowMenuId((c) =>
                                   c === row.membershipId ? null : row.membershipId,
-                                )
-                              }
+                                );
+                              }}
                               onKeyDown={onRowMenuKey}
                             >
                               <MoreVertical className="h-4 w-4" aria-hidden="true" />
@@ -1443,7 +1483,9 @@ export function AdminBatchSessionAttendancePage({
                                 <Link
                                   href={`/admin/reports/batches/${batchId}/learners/${row.membershipId}`}
                                   className="block px-3 py-2 text-left text-xs text-[var(--admin-on-surface)] hover:bg-[var(--admin-surface-high)]"
-                                  onClick={() => setRowMenuId(null)}
+                                  onClick={() => {
+                                    setRowMenuId(null);
+                                  }}
                                 >
                                   View learner report
                                 </Link>
@@ -1483,7 +1525,9 @@ export function AdminBatchSessionAttendancePage({
                     type="button"
                     className={secondaryButtonClassName}
                     disabled={page <= 1}
-                    onClick={() => replaceParams({ page: String(page - 1) })}
+                    onClick={() => {
+                      replaceParams({ page: String(page - 1) });
+                    }}
                   >
                     Previous
                   </button>
@@ -1491,7 +1535,9 @@ export function AdminBatchSessionAttendancePage({
                     type="button"
                     className={secondaryButtonClassName}
                     disabled={page >= totalPages}
-                    onClick={() => replaceParams({ page: String(page + 1) })}
+                    onClick={() => {
+                      replaceParams({ page: String(page + 1) });
+                    }}
                   >
                     Next
                   </button>

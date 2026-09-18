@@ -5,7 +5,7 @@ import { manageCourseBackupDownloadResponseSchema } from "@atlas/api-server/mana
 import { listManageCourseBackupsMetadata } from "@atlas/api-server/manage/manage-course-backups.route-metadata";
 import { downloadManageCourseBackup } from "@atlas/api-server/manage/manage-course-backups.service";
 
-const paramsSchema = zod.object({ id: zod.string().uuid() });
+const paramsSchema = zod.object({ id: zod.uuid() });
 
 export const GET = createTenantRoute<
   Record<string, never>,

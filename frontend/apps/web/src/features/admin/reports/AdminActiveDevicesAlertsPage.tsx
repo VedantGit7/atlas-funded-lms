@@ -68,7 +68,10 @@ function formatRelative(value: string | null): string {
 function formatUtc(value: string): string {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return date.toISOString().replace("T", " ").replace(/\.\d{3}Z$/, " UTC");
+  return date
+    .toISOString()
+    .replace("T", " ")
+    .replace(/\.\d{3}Z$/, " UTC");
 }
 
 function severityMeta(severity: DeviceAlertListItem["severity"]) {
@@ -98,7 +101,6 @@ function typeLabel(type: DeviceAlertType): string {
   if (type === "device_limit_exceeded") return "Device limit exceeded";
   return "Shared fingerprint";
 }
-
 
 export function AdminActiveDevicesAlertsPage() {
   const menuBaseId = useId();
@@ -160,7 +162,7 @@ export function AdminActiveDevicesAlertsPage() {
       .then((response) => {
         if (!cancelled) setDetail(response.data);
       })
-      .catch((err) => {
+      .catch((err: unknown) => {
         if (!cancelled) {
           setError(err instanceof ClientApiError ? err.message : "Unable to load alert detail.");
           setDrawerAlertId(null);
@@ -281,7 +283,10 @@ export function AdminActiveDevicesAlertsPage() {
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <Link href="/admin/reports/active-devices/policies" className={`${ghostButtonClassName} h-10 gap-2`}>
+            <Link
+              href="/admin/reports/active-devices/policies"
+              className={`${ghostButtonClassName} h-10 gap-2`}
+            >
               <Filter className="h-4 w-4" aria-hidden="true" />
               Alert rules
             </Link>
@@ -300,7 +305,10 @@ export function AdminActiveDevicesAlertsPage() {
               aria-label="Refresh"
               onClick={() => void load()}
             >
-              <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} aria-hidden="true" />
+              <RefreshCw
+                className={`h-4 w-4 ${loading ? "animate-spin" : ""}`}
+                aria-hidden="true"
+              />
             </button>
           </div>
         </div>
@@ -313,7 +321,13 @@ export function AdminActiveDevicesAlertsPage() {
           className="mt-4 flex items-center justify-between gap-3 border border-[color-mix(in_srgb,var(--admin-danger)_30%,var(--admin-border))] bg-[color-mix(in_srgb,var(--admin-danger)_8%,var(--admin-surface))] px-4 py-3 text-sm text-[var(--admin-danger)]"
         >
           <span>{error}</span>
-          <button type="button" className="underline" onClick={() => setError(null)}>
+          <button
+            type="button"
+            className="underline"
+            onClick={() => {
+              setError(null);
+            }}
+          >
             Dismiss
           </button>
         </div>
@@ -333,43 +347,48 @@ export function AdminActiveDevicesAlertsPage() {
                     label: "All open",
                     count: summary?.openTotal ?? 0,
                     active: openFilterActive,
-                    onClick: () => setTriageFilter({ kind: "status", status: "open" }),
+                    onClick: () => {
+                      setTriageFilter({ kind: "status", status: "open" });
+                    },
                   },
                   {
                     key: "concurrent_sessions",
                     label: "Concurrent sessions",
                     count: summary?.byType.concurrent_sessions ?? 0,
                     active: triage.kind === "type" && triage.type === "concurrent_sessions",
-                    onClick: () =>
+                    onClick: () => {
                       setTriageFilter({
                         kind: "type",
                         type: "concurrent_sessions",
                         status: "open",
-                      }),
+                      });
+                    },
                   },
                   {
                     key: "device_limit_exceeded",
                     label: "Device limit exceeded",
                     count: summary?.byType.device_limit_exceeded ?? 0,
                     active: triage.kind === "type" && triage.type === "device_limit_exceeded",
-                    onClick: () =>
+                    onClick: () => {
                       setTriageFilter({
                         kind: "type",
                         type: "device_limit_exceeded",
                         status: "open",
-                      }),
+                      });
+                    },
                   },
                   {
                     key: "shared_fingerprint",
                     label: "Shared fingerprint",
                     count: summary?.byType.shared_fingerprint ?? 0,
                     active: triage.kind === "type" && triage.type === "shared_fingerprint",
-                    onClick: () =>
+                    onClick: () => {
                       setTriageFilter({
                         kind: "type",
                         type: "shared_fingerprint",
                         status: "open",
-                      }),
+                      });
+                    },
                   },
                 ] as const
               ).map((item) => (
@@ -421,7 +440,9 @@ export function AdminActiveDevicesAlertsPage() {
               <li>
                 <button
                   type="button"
-                  onClick={() => setTriageFilter({ kind: "status", status: "resolved" })}
+                  onClick={() => {
+                    setTriageFilter({ kind: "status", status: "resolved" });
+                  }}
                   className={`flex w-full items-center justify-between rounded-r px-3 py-2 text-left text-sm transition-colors ${
                     resolvedActive
                       ? "border-l-4 border-[var(--admin-primary)] bg-[var(--admin-surface-high)] font-semibold text-[var(--admin-on-surface)]"
@@ -437,7 +458,9 @@ export function AdminActiveDevicesAlertsPage() {
               <li>
                 <button
                   type="button"
-                  onClick={() => setTriageFilter({ kind: "status", status: "dismissed" })}
+                  onClick={() => {
+                    setTriageFilter({ kind: "status", status: "dismissed" });
+                  }}
                   className={`flex w-full items-center justify-between rounded-r px-3 py-2 text-left text-sm transition-colors ${
                     dismissedActive
                       ? "border-l-4 border-[var(--admin-primary)] bg-[var(--admin-surface-high)] font-semibold text-[var(--admin-on-surface)]"
@@ -462,7 +485,10 @@ export function AdminActiveDevicesAlertsPage() {
                   key={index}
                   className="h-[72px] border border-[var(--admin-border)] bg-[var(--admin-surface)]"
                 >
-                  <div className="h-full w-full bg-[var(--admin-surface-variant)]" aria-hidden="true" />
+                  <div
+                    className="h-full w-full bg-[var(--admin-surface-variant)]"
+                    aria-hidden="true"
+                  />
                 </div>
               ))}
             </div>
@@ -483,7 +509,9 @@ export function AdminActiveDevicesAlertsPage() {
                 <button
                   type="button"
                   className={`${primaryButtonClassName} inline-flex h-10 items-center gap-2`}
-                  onClick={() => setTriageFilter({ kind: "status", status: "open" })}
+                  onClick={() => {
+                    setTriageFilter({ kind: "status", status: "open" });
+                  }}
                 >
                   Go to open alerts
                   <ArrowRight className="h-4 w-4" aria-hidden="true" />
@@ -502,20 +530,27 @@ export function AdminActiveDevicesAlertsPage() {
                     key={alert.id}
                     className="group relative flex min-h-[72px] items-center overflow-hidden border border-[var(--admin-border)] bg-[var(--admin-surface)] py-3 pr-4 transition-colors hover:border-[var(--admin-outline)]"
                   >
-                    <div className={`absolute bottom-0 left-0 top-0 w-1 ${meta.rail}`} aria-hidden="true" />
+                    <div
+                      className={`absolute bottom-0 left-0 top-0 w-1 ${meta.rail}`}
+                      aria-hidden="true"
+                    />
                     <div className="flex h-full items-center px-4 pr-3">
                       <input
                         type="checkbox"
                         className="h-4 w-4 rounded border-[var(--admin-outline)] accent-[var(--admin-primary)]"
                         checked={selected}
-                        onChange={() => toggleSelected(alert.id)}
+                        onChange={() => {
+                          toggleSelected(alert.id);
+                        }}
                         aria-label={`Select alert ${alert.title}`}
                       />
                     </div>
                     <button
                       type="button"
                       className="flex min-w-0 flex-1 flex-col justify-center pr-4 text-left"
-                      onClick={() => setDrawerAlertId(alert.id)}
+                      onClick={() => {
+                        setDrawerAlertId(alert.id);
+                      }}
                     >
                       <div className="mb-1 flex flex-wrap items-center gap-2">
                         <span
@@ -536,7 +571,9 @@ export function AdminActiveDevicesAlertsPage() {
                             {alert.email}
                           </span>
                         ) : null}
-                        <span className="text-xs text-[var(--admin-outline)]">{typeLabel(alert.alertType)}</span>
+                        <span className="text-xs text-[var(--admin-outline)]">
+                          {typeLabel(alert.alertType)}
+                        </span>
                       </div>
                     </button>
                     <div className="hidden min-w-[200px] shrink-0 flex-col gap-1 pr-6 lg:flex">
@@ -571,9 +608,9 @@ export function AdminActiveDevicesAlertsPage() {
                           aria-expanded={menuOpen}
                           aria-controls={menuOpen ? menuId : undefined}
                           className="p-1 text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-on-surface)]"
-                          onClick={() =>
-                            setMenuAlertId((current) => (current === alert.id ? null : alert.id))
-                          }
+                          onClick={() => {
+                            setMenuAlertId((current) => (current === alert.id ? null : alert.id));
+                          }}
                         >
                           <MoreVertical className="h-5 w-5" aria-hidden="true" />
                         </button>
@@ -603,7 +640,9 @@ export function AdminActiveDevicesAlertsPage() {
                               href={`/admin/reports/active-devices/${alert.membershipId}`}
                               role="menuitem"
                               className={dropdownItemClassName}
-                              onClick={() => setMenuAlertId(null)}
+                              onClick={() => {
+                                setMenuAlertId(null);
+                              }}
                             >
                               <Laptop className="h-4 w-4" aria-hidden="true" />
                               Learner devices
@@ -656,7 +695,9 @@ export function AdminActiveDevicesAlertsPage() {
                       type="button"
                       className={ghostButtonClassName}
                       disabled={page <= 1}
-                      onClick={() => setPage((current) => Math.max(1, current - 1))}
+                      onClick={() => {
+                        setPage((current) => Math.max(1, current - 1));
+                      }}
                     >
                       <ChevronLeft className="h-4 w-4" aria-hidden="true" />
                     </button>
@@ -667,7 +708,9 @@ export function AdminActiveDevicesAlertsPage() {
                       type="button"
                       className={ghostButtonClassName}
                       disabled={page >= totalPages}
-                      onClick={() => setPage((current) => current + 1)}
+                      onClick={() => {
+                        setPage((current) => current + 1);
+                      }}
                     >
                       <ChevronRight className="h-4 w-4" aria-hidden="true" />
                     </button>
@@ -685,7 +728,9 @@ export function AdminActiveDevicesAlertsPage() {
             type="button"
             className="absolute inset-0 cursor-default"
             aria-label="Close alert drawer overlay"
-            onClick={() => setDrawerAlertId(null)}
+            onClick={() => {
+              setDrawerAlertId(null);
+            }}
           />
           <aside
             className={`relative z-10 flex h-full w-full max-w-[560px] flex-col border-l border-[var(--admin-border)] bg-[var(--admin-surface)] shadow-xl ${inlineExpandClassName}`}
@@ -731,7 +776,9 @@ export function AdminActiveDevicesAlertsPage() {
                     type="button"
                     className="rounded p-1 text-[var(--admin-on-surface-variant)] hover:bg-[var(--admin-surface-high)]"
                     aria-label="Close"
-                    onClick={() => setDrawerAlertId(null)}
+                    onClick={() => {
+                      setDrawerAlertId(null);
+                    }}
                   >
                     <X className="h-5 w-5" aria-hidden="true" />
                   </button>
@@ -829,11 +876,11 @@ export function AdminActiveDevicesAlertsPage() {
                         ))}
                       </div>
                     )}
-                    {!detail.capabilities.geoAvailable ? (
-                      <p className="mt-3 text-xs text-[var(--admin-on-surface-variant)]">
-                        Geographic trajectory is unavailable without IP geolocation.
-                      </p>
-                    ) : null}
+                    {/* `geoAvailable` is typed as the literal `false` until IP
+                        geolocation ships, so this notice always renders. */}
+                    <p className="mt-3 text-xs text-[var(--admin-on-surface-variant)]">
+                      Geographic trajectory is unavailable without IP geolocation.
+                    </p>
                   </section>
 
                   <section>
@@ -851,7 +898,9 @@ export function AdminActiveDevicesAlertsPage() {
                     </h3>
                     <div className="mb-4 space-y-3">
                       {detail.notes.length === 0 ? (
-                        <p className="text-sm text-[var(--admin-on-surface-variant)]">No notes yet.</p>
+                        <p className="text-sm text-[var(--admin-on-surface-variant)]">
+                          No notes yet.
+                        </p>
                       ) : (
                         detail.notes.map((note) => (
                           <div
@@ -866,7 +915,9 @@ export function AdminActiveDevicesAlertsPage() {
                                 {formatUtc(note.createdAt)}
                               </span>
                             </div>
-                            <p className="text-sm text-[var(--admin-on-surface-variant)]">{note.body}</p>
+                            <p className="text-sm text-[var(--admin-on-surface-variant)]">
+                              {note.body}
+                            </p>
                           </div>
                         ))
                       )}
@@ -876,7 +927,9 @@ export function AdminActiveDevicesAlertsPage() {
                         className="h-24 w-full resize-none rounded border border-[var(--admin-border)] bg-[var(--admin-surface)] p-3 text-sm text-[var(--admin-on-surface)] outline-none placeholder:text-[var(--admin-outline)] focus:border-[var(--admin-primary)] focus:ring-1 focus:ring-[var(--admin-primary)]"
                         placeholder="Add internal note..."
                         value={noteDraft}
-                        onChange={(event) => setNoteDraft(event.target.value)}
+                        onChange={(event) => {
+                          setNoteDraft(event.target.value);
+                        }}
                       />
                       <button
                         type="button"

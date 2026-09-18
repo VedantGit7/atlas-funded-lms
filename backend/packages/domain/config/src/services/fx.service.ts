@@ -8,8 +8,7 @@ import { listFxRateRows, upsertFxRates } from "../repositories/fx.repository";
 export const FX_BASE_CURRENCY = "USD";
 
 /** Frankfurter (ECB data, free, no API key). Overridable for tests / self-host. */
-const FX_PROVIDER_URL =
-  process.env["FX_PROVIDER_URL"] ?? "https://api.frankfurter.app/latest";
+const FX_PROVIDER_URL = process.env["FX_PROVIDER_URL"] ?? "https://api.frankfurter.app/latest";
 
 const FETCH_TIMEOUT_MS = 5000;
 
@@ -53,8 +52,9 @@ export async function refreshFxRatesForActiveTenants(
   requestId: string,
 ): Promise<{ tenants: number; asOf: string }> {
   const { asOf, rates } = await fetchLiveRates();
-  const tenants = await withGlobalDb((db) =>
-    db.$queryRaw<{ id: string }[]>`
+  const tenants = await withGlobalDb(
+    (db) =>
+      db.$queryRaw<{ id: string }[]>`
       SELECT id FROM tenants WHERE state = 'ACTIVE' AND deleted_at IS NULL
     `,
   );

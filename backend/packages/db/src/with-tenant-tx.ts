@@ -53,24 +53,24 @@ export async function withTenantTx<T>(
   const txOptions = interactiveTxOptions(resolveInteractiveTimeoutMs(statementTimeoutMs));
 
   return await prisma.$transaction(async (tx) => {
+    // SET LOCAL ROLE cannot be parameterised or combined into a SELECT, so it
+    // stays its own statement.
     await tx.$executeRawUnsafe("SET LOCAL ROLE atlas_app");
 
+    // The four GUCs are set in ONE round trip rather than four. Latency per
+    // request converts directly into how long the pooled connection is held,
+    // which converts directly into concurrent capacity — so against a remote
+    // database this removes three round trips from every tenant request.
+    //
+    // statement_timeout is a transaction-local per-statement guard in
+    // milliseconds, independent of the Prisma interactive transaction
+    // wall-clock in `txOptions.timeout`.
     await tx.$executeRaw`
-      SELECT set_config('app.tenant_id', ${ctx.tenantId}, true)
-    `;
-
-    await tx.$executeRaw`
-      SELECT set_config('app.actor_membership_id', ${ctx.actorMembershipId ?? ""}, true)
-    `;
-
-    await tx.$executeRaw`
-      SELECT set_config('app.request_id', ${ctx.requestId}, true)
-    `;
-
-    // Transaction-local per-statement guard (milliseconds). Independent of the
-    // Prisma interactive transaction wall-clock in `txOptions.timeout`.
-    await tx.$executeRaw`
-      SELECT set_config('statement_timeout', ${String(statementTimeoutMs)}, true)
+      SELECT
+        set_config('app.tenant_id', ${ctx.tenantId}, true),
+        set_config('app.actor_membership_id', ${ctx.actorMembershipId ?? ""}, true),
+        set_config('app.request_id', ${ctx.requestId}, true),
+        set_config('statement_timeout', ${String(statementTimeoutMs)}, true)
     `;
 
     return fn(tx);

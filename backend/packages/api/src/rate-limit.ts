@@ -1,12 +1,12 @@
 import type { RateLimitBucket } from "@atlas/authorization/route-metadata";
 import { AtlasHttpError } from "@atlas/core/http/errors";
-
-type RateLimitEntry = {
-  count: number;
-  resetAt: number;
-};
-
-const buckets = new Map<string, RateLimitEntry>();
+import { resolveClientIp } from "./client-ip";
+import {
+  MemoryRateLimitStore,
+  resolveRateLimitStore,
+  setRateLimitStore,
+  type RateLimitStore,
+} from "./rate-limit-store";
 
 const BUCKET_LIMITS: Record<RateLimitBucket, { max: number; windowMs: number }> = {
   publicRead: { max: 120, windowMs: 60_000 },
@@ -17,41 +17,62 @@ const BUCKET_LIMITS: Record<RateLimitBucket, { max: number; windowMs: number }> 
   authenticatedTenantWrite: { max: 60, windowMs: 60_000 },
 };
 
-function getClientKey(req: Request): string {
-  const forwarded = req.headers.get("x-forwarded-for");
-  if (forwarded) {
-    return forwarded.split(",")[0]?.trim() ?? "unknown";
-  }
+/**
+ * Per-process backstop used only when the shared store is unreachable. Losing
+ * Redis must not take the platform down (a limiter is a mitigation, not a
+ * primary control), but it must also not remove throttling entirely — so the
+ * request is still counted locally.
+ */
+const degradedStore = new MemoryRateLimitStore();
+let lastDegradedLogAt = 0;
 
-  return req.headers.get("x-real-ip") ?? "unknown";
+function logStoreFailure(error: unknown, requestId: string): void {
+  const now = Date.now();
+  // Redis outages produce one failure per request; log at most once every 30s.
+  if (now - lastDegradedLogAt < 30_000) return;
+  lastDegradedLogAt = now;
+
+  console.error("[rate-limit] shared store unavailable, degraded to per-process counters", {
+    requestId,
+    error: error instanceof Error ? error.message : String(error),
+  });
 }
 
-export function enforcePublicRateLimit(args: {
+function tooManyRequests(resetAt: number): AtlasHttpError {
+  const retryAfterSeconds = Math.max(1, Math.ceil((resetAt - Date.now()) / 1000));
+  const error = new AtlasHttpError({
+    // Audit finding L4: this used to report INTERNAL_ERROR, telling clients the
+    // server had broken when in fact they should back off and retry.
+    code: "RATE_LIMITED",
+    status: 429,
+    message: `Too many requests. Please try again in ${retryAfterSeconds}s.`,
+  });
+  return error;
+}
+
+export async function enforcePublicRateLimit(args: {
   req: Request;
   bucket: RateLimitBucket;
   requestId: string;
-}): void {
+}): Promise<void> {
   const config = BUCKET_LIMITS[args.bucket];
-  const key = `${args.bucket}:${getClientKey(args.req)}`;
-  const now = Date.now();
-  const current = buckets.get(key);
+  const key = `${args.bucket}:${resolveClientIp(args.req)}`;
 
-  if (!current || current.resetAt <= now) {
-    buckets.set(key, { count: 1, resetAt: now + config.windowMs });
-    return;
+  let hit;
+  try {
+    hit = await resolveRateLimitStore().hit(key, config.windowMs);
+  } catch (error) {
+    logStoreFailure(error, args.requestId);
+    hit = await degradedStore.hit(key, config.windowMs);
   }
 
-  if (current.count >= config.max) {
-    throw new AtlasHttpError({
-      code: "INTERNAL_ERROR",
-      status: 429,
-      message: "Too many requests. Please try again later.",
-    });
+  if (hit.count > config.max) {
+    throw tooManyRequests(hit.resetAt);
   }
-
-  current.count += 1;
 }
 
-export function resetRateLimitsForTests(): void {
-  buckets.clear();
+export async function resetRateLimitsForTests(store?: RateLimitStore | null): Promise<void> {
+  if (store !== undefined) setRateLimitStore(store);
+  await resolveRateLimitStore().reset();
+  await degradedStore.reset();
 }

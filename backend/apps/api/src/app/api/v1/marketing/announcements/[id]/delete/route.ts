@@ -8,7 +8,7 @@ import {
 import { mutateAnnouncementsMetadata } from "../../../../../../../server/announcements/announcements.route-metadata";
 import { deleteAnnouncement } from "../../../../../../../server/announcements/announcements.service";
 
-const paramsSchema = zod.object({ id: zod.string().uuid() });
+const paramsSchema = zod.object({ id: zod.uuid() });
 
 export const POST = createTenantRoute<
   z.output<typeof deleteAnnouncementBodySchema>,

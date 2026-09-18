@@ -2,9 +2,23 @@ import { describe, expect, it, vi } from "vitest";
 import { can, createTenantResourceRef, enforceEntitlement } from "@atlas/authorization";
 import { EntitlementRequiredError } from "@atlas/authorization";
 
-vi.mock("@atlas/domain-config", () => ({
-  findActiveEntitlementByKey: vi.fn(),
-}));
+vi.mock("@atlas/domain-config", async () => {
+  // The gate now reads value_json on every call, so the parse is real here:
+  // mocking it would hide whether `{ enabled: false }` actually denies.
+  const { parseEntitlementValue } = (await vi.importActual(
+    "@atlas/domain-config/schemas/entitlement-value",
+  )) as {
+    parseEntitlementValue: (raw: unknown) => {
+      enabled: boolean;
+      limit: number | null;
+      period: string;
+    };
+  };
+  return {
+    parseEntitlementValue,
+    findActiveEntitlementByKey: vi.fn(),
+  };
+});
 
 import { findActiveEntitlementByKey } from "@atlas/domain-config";
 
@@ -16,7 +30,7 @@ function moderatorTx() {
       .fn()
       .mockResolvedValueOnce([{ key: "community.moderate" }])
       .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([{ role_key: "moderator" }]),
+      .mockResolvedValueOnce([{ role_key: "moderator", bypasses_resource_predicates: false }]),
   };
 }
 
@@ -45,7 +59,7 @@ describe("moderation authorization", () => {
         .fn()
         .mockResolvedValueOnce([{ key: "community.moderate" }])
         .mockResolvedValueOnce([])
-        .mockResolvedValueOnce([{ role_key: "admin" }]),
+        .mockResolvedValueOnce([{ role_key: "admin", bypasses_resource_predicates: true }]),
     };
 
     const decision = await can({
@@ -70,7 +84,7 @@ describe("moderation authorization", () => {
         .fn()
         .mockResolvedValueOnce([{ key: "post.delete" }])
         .mockResolvedValueOnce([])
-        .mockResolvedValueOnce([{ role_key: "moderator" }]),
+        .mockResolvedValueOnce([{ role_key: "moderator", bypasses_resource_predicates: false }]),
     };
 
     const decision = await can({
@@ -96,7 +110,7 @@ describe("moderation authorization", () => {
         .fn()
         .mockResolvedValueOnce([{ key: "comment.update" }])
         .mockResolvedValueOnce([])
-        .mockResolvedValueOnce([{ role_key: "moderator" }]),
+        .mockResolvedValueOnce([{ role_key: "moderator", bypasses_resource_predicates: false }]),
     };
 
     const decision = await can({
@@ -123,7 +137,7 @@ describe("moderation authorization", () => {
         .fn()
         .mockResolvedValueOnce([{ key: "appeal.create" }])
         .mockResolvedValueOnce([])
-        .mockResolvedValueOnce([{ role_key: "learner" }]),
+        .mockResolvedValueOnce([{ role_key: "learner", bypasses_resource_predicates: false }]),
     };
 
     const allowed = await can({

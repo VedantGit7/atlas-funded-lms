@@ -276,7 +276,9 @@ export function AppearanceForm({ initial }: AppearanceFormProps) {
             />
           </div>
 
-          <div className={`mt-6 flex items-center justify-end gap-4 border-t pt-6 ${classes.divider}`}>
+          <div
+            className={`mt-6 flex items-center justify-end gap-4 border-t pt-6 ${classes.divider}`}
+          >
             <button
               type="submit"
               className={isDirty && !busy ? classes.primaryButton : classes.primaryButtonMuted}

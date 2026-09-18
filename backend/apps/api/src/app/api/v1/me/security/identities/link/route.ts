@@ -1,10 +1,7 @@
 import type { z } from "zod";
 import { createTenantRoute } from "@atlas/api";
 import { startLinkIdentity } from "@atlas/auth";
-import {
-  LinkIdentityRequestSchema,
-  LinkIdentityResponseSchema,
-} from "@atlas/domain-identity";
+import { LinkIdentityRequestSchema, LinkIdentityResponseSchema } from "@atlas/domain-identity";
 import { securityMutationMetadata } from "../../route.metadata";
 
 type LinkIdentityBody = z.output<typeof LinkIdentityRequestSchema>;

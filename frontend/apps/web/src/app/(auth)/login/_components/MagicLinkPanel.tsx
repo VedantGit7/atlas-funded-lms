@@ -15,7 +15,7 @@ export function MagicLinkPanel() {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
-  async function sendLink(event: React.FormEvent) {
+  async function sendLink(event: React.SyntheticEvent) {
     event.preventDefault();
     setBusy(true);
     setMessage(null);
@@ -42,7 +42,13 @@ export function MagicLinkPanel() {
   if (!open) {
     return (
       <div className="mt-4">
-        <button type="button" className={secondaryButtonClass} onClick={() => setOpen(true)}>
+        <button
+          type="button"
+          className={secondaryButtonClass}
+          onClick={() => {
+            setOpen(true);
+          }}
+        >
           Email me a sign-in link
         </button>
         {message ? <p className="mt-3 text-[13px] text-[var(--fba-tx2)]">{message}</p> : null}
@@ -62,10 +68,18 @@ export function MagicLinkPanel() {
         placeholder="name@company.com"
         className={fieldInputClass}
         value={email}
-        onChange={(e) => setEmail(e.target.value)}
+        onChange={(e) => {
+          setEmail(e.target.value);
+        }}
       />
       <div className="grid grid-cols-2 gap-3">
-        <button type="button" className={secondaryButtonClass} onClick={() => setOpen(false)}>
+        <button
+          type="button"
+          className={secondaryButtonClass}
+          onClick={() => {
+            setOpen(false);
+          }}
+        >
           Cancel
         </button>
         <button

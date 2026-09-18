@@ -39,10 +39,10 @@ describe("queryStaleTimes", () => {
 
 describe("withQueryHost", () => {
   it("appends explicit host scope", () => {
-    expect(withQueryHost(["atlas", "me"] as const, "fundedbeyond.localhost.test:3000")).toEqual([
+    expect(withQueryHost(["atlas", "me"] as const, "acme-academy.localhost.test:3000")).toEqual([
       "atlas",
       "me",
-      { host: "fundedbeyond.localhost.test:3000" },
+      { host: "acme-academy.localhost.test:3000" },
     ]);
   });
 

@@ -15,7 +15,10 @@ function Thumbnail({ resource, className }: { resource: ResourceItem; className?
   const { Icon } = meta;
   return (
     <div
-      className={cn("relative flex items-center justify-center overflow-hidden bg-muted", className)}
+      className={cn(
+        "relative flex items-center justify-center overflow-hidden bg-muted",
+        className,
+      )}
       style={{
         backgroundImage: `linear-gradient(135deg, color-mix(in srgb, ${meta.tone} 20%, var(--card)), var(--card))`,
       }}

@@ -31,7 +31,7 @@ Complete reference for Vanilla-Tilt.js - smooth 3D tilt effect for any DOM eleme
 <div class="tilt-card" data-tilt></div>
 
 <script>
-VanillaTilt.init(document.querySelector(".tilt-card"));
+  VanillaTilt.init(document.querySelector(".tilt-card"));
 </script>
 ```
 
@@ -44,7 +44,7 @@ npm install vanilla-tilt
 ```
 
 ```javascript
-import VanillaTilt from 'vanilla-tilt';
+import VanillaTilt from "vanilla-tilt";
 
 VanillaTilt.init(document.querySelector(".tilt-card"));
 ```
@@ -65,12 +65,12 @@ VanillaTilt.init(document.querySelector(".tilt-card"));
 <div class="tilt-card"></div>
 
 <script>
-VanillaTilt.init(document.querySelector(".tilt-card"), {
-  max: 25,
-  speed: 400,
-  glare: true,
-  "max-glare": 0.5
-});
+  VanillaTilt.init(document.querySelector(".tilt-card"), {
+    max: 25,
+    speed: 400,
+    glare: true,
+    "max-glare": 0.5,
+  });
 </script>
 ```
 
@@ -89,38 +89,38 @@ VanillaTilt.init(document.querySelectorAll(".tilt-card"));
 ```javascript
 VanillaTilt.init(element, {
   // Rotation
-  reverse: false,               // Reverse tilt direction
-  max: 15,                      // Max tilt angle (degrees)
-  startX: 0,                    // Starting tilt on X axis (degrees)
-  startY: 0,                    // Starting tilt on Y axis (degrees)
-  perspective: 1000,            // Transform perspective (px)
+  reverse: false, // Reverse tilt direction
+  max: 15, // Max tilt angle (degrees)
+  startX: 0, // Starting tilt on X axis (degrees)
+  startY: 0, // Starting tilt on Y axis (degrees)
+  perspective: 1000, // Transform perspective (px)
 
   // Scale
-  scale: 1.0,                   // Scale on hover (2 = 200%)
+  scale: 1.0, // Scale on hover (2 = 200%)
 
   // Speed & Easing
-  speed: 300,                   // Transition speed (ms)
-  transition: true,             // Enable/disable transition
-  easing: "cubic-bezier(.03,.98,.52,.99)",  // CSS easing
+  speed: 300, // Transition speed (ms)
+  transition: true, // Enable/disable transition
+  easing: "cubic-bezier(.03,.98,.52,.99)", // CSS easing
 
   // Axis Control
-  axis: null,                   // Restrict axis ("x" or "y")
-  reset: true,                  // Reset on mouseout
-  "reset-to-start": true,       // Reset to startX/startY values
+  axis: null, // Restrict axis ("x" or "y")
+  reset: true, // Reset on mouseout
+  "reset-to-start": true, // Reset to startX/startY values
 
   // Glare Effect
-  glare: false,                 // Enable glare effect
-  "max-glare": 1,               // Max glare opacity (0-1)
-  "glare-prerender": false,     // Pre-render glare element
+  glare: false, // Enable glare effect
+  "max-glare": 1, // Max glare opacity (0-1)
+  "glare-prerender": false, // Pre-render glare element
 
   // Mouse/Touch
-  "mouse-event-element": null,  // Element for mouse detection
+  "mouse-event-element": null, // Element for mouse detection
   "full-page-listening": false, // Listen to mouse on entire page
-  gyroscope: true,              // Enable gyroscope (mobile)
-  gyroscopeMinAngleX: -45,      // Min gyro angle X
-  gyroscopeMaxAngleX: 45,       // Max gyro angle X
-  gyroscopeMinAngleY: -45,      // Min gyro angle Y
-  gyroscopeMaxAngleY: 45        // Max gyro angle Y
+  gyroscope: true, // Enable gyroscope (mobile)
+  gyroscopeMinAngleX: -45, // Min gyro angle X
+  gyroscopeMaxAngleX: 45, // Max gyro angle X
+  gyroscopeMinAngleY: -45, // Min gyro angle Y
+  gyroscopeMaxAngleY: 45, // Max gyro angle Y
 });
 ```
 
@@ -155,7 +155,7 @@ Reverse the tilt direction.
 
 ```javascript
 VanillaTilt.init(element, {
-  reverse: true  // Tilts opposite to mouse movement
+  reverse: true, // Tilts opposite to mouse movement
 });
 ```
 
@@ -169,8 +169,8 @@ Initial tilt angle (degrees).
 
 ```javascript
 VanillaTilt.init(element, {
-  startX: 10,    // Start tilted 10° on X axis
-  startY: -5     // Start tilted -5° on Y axis
+  startX: 10, // Start tilted 10° on X axis
+  startY: -5, // Start tilted -5° on Y axis
 });
 ```
 
@@ -237,22 +237,22 @@ CSS easing function for transitions.
 ```javascript
 // Linear
 VanillaTilt.init(element, {
-  easing: "linear"
+  easing: "linear",
 });
 
 // Ease out (recommended)
 VanillaTilt.init(element, {
-  easing: "cubic-bezier(.03,.98,.52,.99)"
+  easing: "cubic-bezier(.03,.98,.52,.99)",
 });
 
 // Bounce
 VanillaTilt.init(element, {
-  easing: "cubic-bezier(.68,-0.55,.265,1.55)"
+  easing: "cubic-bezier(.68,-0.55,.265,1.55)",
 });
 
 // Elastic
 VanillaTilt.init(element, {
-  easing: "cubic-bezier(.6,.04,.98,.335)"
+  easing: "cubic-bezier(.6,.04,.98,.335)",
 });
 ```
 
@@ -310,7 +310,7 @@ Reset to startX/startY values instead of 0.
 VanillaTilt.init(element, {
   startX: 10,
   startY: -5,
-  "reset-to-start": true  // Resets to (10, -5) not (0, 0)
+  "reset-to-start": true, // Resets to (10, -5) not (0, 0)
 });
 ```
 
@@ -325,7 +325,7 @@ Enable glossy glare overlay.
 ```javascript
 VanillaTilt.init(element, {
   glare: true,
-  "max-glare": 0.5  // 50% max opacity
+  "max-glare": 0.5, // 50% max opacity
 });
 ```
 
@@ -341,13 +341,13 @@ Maximum glare opacity (0 to 1).
 // Subtle glare
 VanillaTilt.init(element, {
   glare: true,
-  "max-glare": 0.2
+  "max-glare": 0.2,
 });
 
 // Strong glare
 VanillaTilt.init(element, {
   glare: true,
-  "max-glare": 0.8
+  "max-glare": 0.8,
 });
 ```
 
@@ -369,7 +369,7 @@ Pre-render glare element in HTML (performance optimization).
 ```javascript
 VanillaTilt.init(element, {
   glare: true,
-  "glare-prerender": true
+  "glare-prerender": true,
 });
 ```
 
@@ -383,7 +383,7 @@ Use different element for mouse tracking.
 
 ```javascript
 VanillaTilt.init(element, {
-  "mouse-event-element": document.querySelector(".parent")
+  "mouse-event-element": document.querySelector(".parent"),
 });
 ```
 
@@ -397,7 +397,7 @@ Track mouse position across entire page.
 
 ```javascript
 VanillaTilt.init(element, {
-  "full-page-listening": true
+  "full-page-listening": true,
 });
 ```
 
@@ -417,7 +417,7 @@ VanillaTilt.init(element, {
   gyroscopeMinAngleX: -45,
   gyroscopeMaxAngleX: 45,
   gyroscopeMinAngleY: -45,
-  gyroscopeMaxAngleY: 45
+  gyroscopeMaxAngleY: 45,
 });
 ```
 
@@ -471,6 +471,7 @@ console.log(values);
 ```
 
 **Return values**:
+
 - `tiltX`: Current X-axis tilt (degrees)
 - `tiltY`: Current Y-axis tilt (degrees)
 - `percentageX`: Mouse X position as percentage (0-100)
@@ -486,7 +487,7 @@ Update options after initialization.
 ```javascript
 element.vanillaTilt.setOptions({
   max: 35,
-  speed: 600
+  speed: 600,
 });
 ```
 
@@ -546,11 +547,11 @@ Tilting card grid with glare.
 ```html
 <div class="card-grid">
   <div class="tilt-card" data-tilt>
-    <img src="image1.jpg" alt="Card 1">
+    <img src="image1.jpg" alt="Card 1" />
     <h3>Card Title</h3>
   </div>
   <div class="tilt-card" data-tilt>
-    <img src="image2.jpg" alt="Card 2">
+    <img src="image2.jpg" alt="Card 2" />
     <h3>Card Title</h3>
   </div>
   <!-- More cards... -->
@@ -569,7 +570,7 @@ Tilting card grid with glare.
   background: white;
   border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
   transform-style: preserve-3d;
 }
 
@@ -591,7 +592,7 @@ VanillaTilt.init(document.querySelectorAll(".tilt-card"), {
   speed: 400,
   glare: true,
   "max-glare": 0.3,
-  scale: 1.05
+  scale: 1.05,
 });
 ```
 
@@ -649,7 +650,7 @@ Multiple layered elements with different tilt depths.
 VanillaTilt.init(document.querySelector(".parallax-container"), {
   max: 25,
   speed: 400,
-  perspective: 1000
+  perspective: 1000,
 });
 ```
 
@@ -711,7 +712,7 @@ Reveal content on tilt hover.
 VanillaTilt.init(document.querySelector(".reveal-card"), {
   max: 25,
   speed: 400,
-  glare: true
+  glare: true,
 });
 ```
 
@@ -737,7 +738,7 @@ Elevated button with shadow that follows tilt.
   border-radius: 50px;
   cursor: pointer;
   transform-style: preserve-3d;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
   transition: box-shadow 0.3s;
 }
 
@@ -747,7 +748,7 @@ Elevated button with shadow that follows tilt.
 }
 
 .tilt-button:hover {
-  box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
 }
 ```
 
@@ -757,7 +758,7 @@ VanillaTilt.init(document.querySelector(".tilt-button"), {
   speed: 300,
   scale: 1.1,
   glare: true,
-  "max-glare": 0.5
+  "max-glare": 0.5,
 });
 ```
 
@@ -770,7 +771,7 @@ E-commerce product card with layered depth.
 ```html
 <div class="product-card" data-tilt>
   <div class="product-badge">NEW</div>
-  <img src="product.jpg" alt="Product" class="product-image">
+  <img src="product.jpg" alt="Product" class="product-image" />
   <div class="product-info">
     <h3 class="product-title">Product Name</h3>
     <p class="product-price">$99.99</p>
@@ -786,7 +787,7 @@ E-commerce product card with layered depth.
   border-radius: 15px;
   overflow: hidden;
   transform-style: preserve-3d;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
 }
 
 .product-badge {
@@ -831,7 +832,7 @@ VanillaTilt.init(document.querySelector(".product-card"), {
   speed: 400,
   glare: true,
   "max-glare": 0.2,
-  scale: 1.03
+  scale: 1.03,
 });
 ```
 
@@ -855,8 +856,7 @@ element.addEventListener("tiltChange", (e) => {
   element.style.background = `hsl(${hue}, 70%, 50%)`;
 
   // Update text based on angle
-  element.querySelector(".angle-display").textContent =
-    `Angle: ${angle.toFixed(1)}°`;
+  element.querySelector(".angle-display").textContent = `Angle: ${angle.toFixed(1)}°`;
 });
 ```
 
@@ -872,14 +872,14 @@ const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 if (!isMobile) {
   VanillaTilt.init(document.querySelectorAll(".tilt-card"), {
     max: 25,
-    speed: 400
+    speed: 400,
   });
 } else {
   // Enable gyroscope on mobile
   VanillaTilt.init(document.querySelectorAll(".tilt-card"), {
     max: 15,
     speed: 600,
-    gyroscope: true
+    gyroscope: true,
   });
 }
 ```
@@ -896,7 +896,7 @@ const cards = document.querySelectorAll(".sync-card");
 // Initialize all cards
 VanillaTilt.init(cards, {
   max: 20,
-  speed: 400
+  speed: 400,
 });
 
 // Sync tilt values
@@ -906,8 +906,7 @@ cards[0].addEventListener("tiltChange", (e) => {
   // Apply same tilt to other cards
   cards.forEach((card, index) => {
     if (index > 0) {
-      card.style.transform =
-        `perspective(1000px) rotateY(${tiltX}deg) rotateX(${-tiltY}deg)`;
+      card.style.transform = `perspective(1000px) rotateY(${tiltX}deg) rotateX(${-tiltY}deg)`;
     }
   });
 });
@@ -940,7 +939,7 @@ Change glare color dynamically.
 ```javascript
 VanillaTilt.init(element, {
   glare: true,
-  "max-glare": 0.5
+  "max-glare": 0.5,
 });
 
 element.addEventListener("tiltChange", (e) => {
@@ -948,9 +947,8 @@ element.addEventListener("tiltChange", (e) => {
   const { percentageX } = e.detail;
 
   // Color shifts from blue to purple
-  const hue = 200 + (percentageX * 0.8);
-  glareEl.style.background =
-    `linear-gradient(0deg, transparent, hsl(${hue}, 70%, 50%))`;
+  const hue = 200 + percentageX * 0.8;
+  glareEl.style.background = `linear-gradient(0deg, transparent, hsl(${hue}, 70%, 50%))`;
 });
 ```
 
@@ -961,8 +959,8 @@ element.addEventListener("tiltChange", (e) => {
 ### React
 
 ```jsx
-import React, { useEffect, useRef } from 'react';
-import VanillaTilt from 'vanilla-tilt';
+import React, { useEffect, useRef } from "react";
+import VanillaTilt from "vanilla-tilt";
 
 function TiltCard({ children, options }) {
   const tiltRef = useRef(null);
@@ -985,7 +983,7 @@ function TiltCard({ children, options }) {
 // Usage
 <TiltCard options={{ max: 25, speed: 400, glare: true }}>
   <h2>Card Content</h2>
-</TiltCard>
+</TiltCard>;
 ```
 
 ---
@@ -1000,14 +998,14 @@ function TiltCard({ children, options }) {
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
-import VanillaTilt from 'vanilla-tilt';
+import { ref, onMounted, onUnmounted } from "vue";
+import VanillaTilt from "vanilla-tilt";
 
 const props = defineProps({
   options: {
     type: Object,
-    default: () => ({ max: 25, speed: 400 })
-  }
+    default: () => ({ max: 25, speed: 400 }),
+  },
 });
 
 const tiltRef = ref(null);
@@ -1027,16 +1025,16 @@ onUnmounted(() => {
 ### Angular
 
 ```typescript
-import { Component, ElementRef, Input, OnInit, OnDestroy } from '@angular/core';
-import VanillaTilt from 'vanilla-tilt';
+import { Component, ElementRef, Input, OnInit, OnDestroy } from "@angular/core";
+import VanillaTilt from "vanilla-tilt";
 
 @Component({
-  selector: 'app-tilt-card',
+  selector: "app-tilt-card",
   template: `
     <div class="tilt-card">
       <ng-content></ng-content>
     </div>
-  `
+  `,
 })
 export class TiltCardComponent implements OnInit, OnDestroy {
   @Input() options: any = { max: 25, speed: 400 };
@@ -1044,11 +1042,11 @@ export class TiltCardComponent implements OnInit, OnDestroy {
   constructor(private el: ElementRef) {}
 
   ngOnInit() {
-    VanillaTilt.init(this.el.nativeElement.querySelector('.tilt-card'), this.options);
+    VanillaTilt.init(this.el.nativeElement.querySelector(".tilt-card"), this.options);
   }
 
   ngOnDestroy() {
-    this.el.nativeElement.querySelector('.tilt-card').vanillaTilt.destroy();
+    this.el.nativeElement.querySelector(".tilt-card").vanillaTilt.destroy();
   }
 }
 ```
@@ -1102,7 +1100,7 @@ if (!isMobile) {
 
 ```css
 .tilt-card {
-  transform: translateZ(0);  /* Force GPU layer */
+  transform: translateZ(0); /* Force GPU layer */
 }
 ```
 
@@ -1110,7 +1108,7 @@ if (!isMobile) {
 
 ```javascript
 let observer = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
+  entries.forEach((entry) => {
     if (entry.isIntersecting) {
       VanillaTilt.init(entry.target);
     } else {
@@ -1121,7 +1119,7 @@ let observer = new IntersectionObserver((entries) => {
   });
 });
 
-document.querySelectorAll('.tilt-card').forEach(el => {
+document.querySelectorAll(".tilt-card").forEach((el) => {
   observer.observe(el);
 });
 ```
@@ -1144,7 +1142,7 @@ const hasGoodGPU = navigator.hardwareConcurrency > 4;
 VanillaTilt.init(element, {
   max: 25,
   glare: hasGoodGPU,
-  "max-glare": hasGoodGPU ? 0.5 : 0
+  "max-glare": hasGoodGPU ? 0.5 : 0,
 });
 ```
 
@@ -1155,13 +1153,14 @@ VanillaTilt.init(element, {
 ### Tilt Not Working
 
 **Check**:
+
 1. Element exists when initializing
 2. Element has dimensions (width/height > 0)
 3. No CSS conflicts with `transform`
 
 ```javascript
 // Wait for DOM
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener("DOMContentLoaded", () => {
   VanillaTilt.init(document.querySelector(".tilt-card"));
 });
 ```
@@ -1174,7 +1173,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 ```css
 .tilt-card {
-  overflow: hidden;  /* Required for glare */
+  overflow: hidden; /* Required for glare */
   border-radius: 10px;
 }
 ```

@@ -27,29 +27,29 @@ The root display object that manages the scene and rendering.
 
 ```javascript
 let illo = new Zdog.Illustration({
-  element: '.zdog-canvas',  // CSS selector or DOM element
-  zoom: 4,                  // Scale multiplier
-  dragRotate: false,        // Enable drag-to-rotate
-  resize: false,            // Auto-resize to element
-  centered: true,           // Center origin
-  onDragStart: function() {},
-  onDragMove: function() {},
-  onDragEnd: function() {},
-  onResize: function(width, height) {}
+  element: ".zdog-canvas", // CSS selector or DOM element
+  zoom: 4, // Scale multiplier
+  dragRotate: false, // Enable drag-to-rotate
+  resize: false, // Auto-resize to element
+  centered: true, // Center origin
+  onDragStart: function () {},
+  onDragMove: function () {},
+  onDragEnd: function () {},
+  onResize: function (width, height) {},
 });
 ```
 
 #### Properties
 
-| Property | Type | Default | Description |
-|----------|------|---------|-------------|
-| `element` | String\|Element | Required | Canvas or SVG element |
-| `zoom` | Number | 1 | Scale multiplier |
-| `dragRotate` | Boolean\|Zdog.Anchor | false | Enable drag rotation |
-| `resize` | Boolean | false | Auto-resize to fit element |
-| `centered` | Boolean | true | Center scene at origin |
-| `rotate` | Zdog.Vector | {x:0,y:0,z:0} | Rotation in radians |
-| `translate` | Zdog.Vector | {x:0,y:0,z:0} | Position offset |
+| Property     | Type                 | Default       | Description                |
+| ------------ | -------------------- | ------------- | -------------------------- |
+| `element`    | String\|Element      | Required      | Canvas or SVG element      |
+| `zoom`       | Number               | 1             | Scale multiplier           |
+| `dragRotate` | Boolean\|Zdog.Anchor | false         | Enable drag rotation       |
+| `resize`     | Boolean              | false         | Auto-resize to fit element |
+| `centered`   | Boolean              | true          | Center scene at origin     |
+| `rotate`     | Zdog.Vector          | {x:0,y:0,z:0} | Rotation in radians        |
+| `translate`  | Zdog.Vector          | {x:0,y:0,z:0} | Position offset            |
 
 #### Methods
 
@@ -72,18 +72,18 @@ let group = new Zdog.Anchor({
   addTo: illo,
   translate: { x: 0, y: 0, z: 0 },
   rotate: { x: 0, y: 0, z: 0 },
-  scale: 1
+  scale: 1,
 });
 ```
 
 #### Properties
 
-| Property | Type | Default | Description |
-|----------|------|---------|-------------|
-| `addTo` | Zdog.Anchor | null | Parent object |
-| `translate` | Object | {x:0,y:0,z:0} | Position |
-| `rotate` | Object | {x:0,y:0,z:0} | Rotation (radians) |
-| `scale` | Number\|Object | 1 | Uniform or {x,y,z} scale |
+| Property    | Type           | Default       | Description              |
+| ----------- | -------------- | ------------- | ------------------------ |
+| `addTo`     | Zdog.Anchor    | null          | Parent object            |
+| `translate` | Object         | {x:0,y:0,z:0} | Position                 |
+| `rotate`    | Object         | {x:0,y:0,z:0} | Rotation (radians)       |
+| `scale`     | Number\|Object | 1             | Uniform or {x,y,z} scale |
 
 #### Methods
 
@@ -102,7 +102,7 @@ let copy = group.copy();
 
 // Copy with options
 let copy = group.copyGraph({
-  translate: { x: 10 }
+  translate: { x: 10 },
 });
 ```
 
@@ -117,23 +117,23 @@ let shape = new Zdog.Shape({
   addTo: group,
   stroke: 1,
   fill: false,
-  color: '#333',
+  color: "#333",
   visible: true,
-  backface: true
+  backface: true,
 });
 ```
 
 #### Common Shape Properties
 
-| Property | Type | Default | Description |
-|----------|------|---------|-------------|
-| `stroke` | Number | 1 | Line thickness |
-| `fill` | Boolean | false | Fill shape interior |
-| `color` | String | '#333' | CSS color value |
-| `visible` | Boolean | true | Render visibility |
-| `backface` | Boolean\|String | true | Show back face / color |
-| `front` | Object | {z:0} | Front face offset |
-| `closed` | Boolean | true | Close path |
+| Property   | Type            | Default | Description            |
+| ---------- | --------------- | ------- | ---------------------- |
+| `stroke`   | Number          | 1       | Line thickness         |
+| `fill`     | Boolean         | false   | Fill shape interior    |
+| `color`    | String          | '#333'  | CSS color value        |
+| `visible`  | Boolean         | true    | Render visibility      |
+| `backface` | Boolean\|String | true    | Show back face / color |
+| `front`    | Object          | {z:0}   | Front face offset      |
+| `closed`   | Boolean         | true    | Close path             |
 
 ---
 
@@ -146,25 +146,25 @@ Circle or ellipse shape.
 ```javascript
 new Zdog.Ellipse({
   addTo: illo,
-  diameter: 80,        // Circle
+  diameter: 80, // Circle
   // OR
-  width: 80,           // Ellipse width
-  height: 40,          // Ellipse height
-  quarters: 4,         // Number of curve segments
+  width: 80, // Ellipse width
+  height: 40, // Ellipse height
+  quarters: 4, // Number of curve segments
   stroke: 20,
-  color: '#636',
-  fill: true
+  color: "#636",
+  fill: true,
 });
 ```
 
 #### Properties
 
-| Property | Type | Default | Description |
-|----------|------|---------|-------------|
-| `diameter` | Number | 1 | Circle diameter |
-| `width` | Number | diameter | Ellipse width |
-| `height` | Number | diameter | Ellipse height |
-| `quarters` | Number | 4 | Bezier curve segments (4 = smooth) |
+| Property   | Type   | Default  | Description                        |
+| ---------- | ------ | -------- | ---------------------------------- |
+| `diameter` | Number | 1        | Circle diameter                    |
+| `width`    | Number | diameter | Ellipse width                      |
+| `height`   | Number | diameter | Ellipse height                     |
+| `quarters` | Number | 4        | Bezier curve segments (4 = smooth) |
 
 ---
 
@@ -178,17 +178,17 @@ new Zdog.Rect({
   width: 80,
   height: 60,
   stroke: 2,
-  color: '#E62',
-  fill: true
+  color: "#E62",
+  fill: true,
 });
 ```
 
 #### Properties
 
-| Property | Type | Default | Description |
-|----------|------|---------|-------------|
-| `width` | Number | 1 | Rectangle width |
-| `height` | Number | 1 | Rectangle height |
+| Property | Type   | Default | Description      |
+| -------- | ------ | ------- | ---------------- |
+| `width`  | Number | 1       | Rectangle width  |
+| `height` | Number | 1       | Rectangle height |
 
 ---
 
@@ -203,18 +203,18 @@ new Zdog.RoundedRect({
   height: 60,
   cornerRadius: 10,
   stroke: 2,
-  color: '#E62',
-  fill: true
+  color: "#E62",
+  fill: true,
 });
 ```
 
 #### Properties
 
-| Property | Type | Default | Description |
-|----------|------|---------|-------------|
-| `width` | Number | 1 | Rectangle width |
-| `height` | Number | 1 | Rectangle height |
-| `cornerRadius` | Number | 0 | Corner curve radius |
+| Property       | Type   | Default | Description         |
+| -------------- | ------ | ------- | ------------------- |
+| `width`        | Number | 1       | Rectangle width     |
+| `height`       | Number | 1       | Rectangle height    |
+| `cornerRadius` | Number | 0       | Corner curve radius |
 
 ---
 
@@ -229,30 +229,30 @@ new Zdog.Polygon({
   sides: 3,
   radius: 40,
   stroke: 2,
-  color: '#EA0',
-  fill: true
+  color: "#EA0",
+  fill: true,
 });
 
 // Pentagon
 new Zdog.Polygon({
   sides: 5,
-  radius: 40
+  radius: 40,
 });
 
 // Star (using path hack)
 new Zdog.Polygon({
   sides: 5,
   radius: 40,
-  rotate: { z: -Math.PI/2 }
+  rotate: { z: -Math.PI / 2 },
 });
 ```
 
 #### Properties
 
-| Property | Type | Default | Description |
-|----------|------|---------|-------------|
-| `sides` | Number | 3 | Number of sides |
-| `radius` | Number | 1 | Distance from center |
+| Property | Type   | Default | Description          |
+| -------- | ------ | ------- | -------------------- |
+| `sides`  | Number | 3       | Number of sides      |
+| `radius` | Number | 1       | Distance from center |
 
 ---
 
@@ -264,11 +264,11 @@ Straight line segment.
 new Zdog.Shape({
   addTo: illo,
   path: [
-    { x: -40, y: 0, z: 0 },  // Start point
-    { x: 40, y: 0, z: 0 }    // End point
+    { x: -40, y: 0, z: 0 }, // Start point
+    { x: 40, y: 0, z: 0 }, // End point
   ],
   stroke: 4,
-  color: '#636'
+  color: "#636",
 });
 ```
 
@@ -282,17 +282,17 @@ Bezier curve path.
 new Zdog.Shape({
   addTo: illo,
   path: [
-    { x: -40, y: 0 },           // Start
+    { x: -40, y: 0 }, // Start
     {
       bezier: [
-        { x: -20, y: -40 },     // Control point 1
-        { x: 20, y: -40 },      // Control point 2
-        { x: 40, y: 0 }         // End point
-      ]
-    }
+        { x: -20, y: -40 }, // Control point 1
+        { x: 20, y: -40 }, // Control point 2
+        { x: 40, y: 0 }, // End point
+      ],
+    },
   ],
   stroke: 4,
-  color: '#E62'
+  color: "#E62",
 });
 ```
 
@@ -307,7 +307,7 @@ new Zdog.Hemisphere({
   addTo: illo,
   diameter: 80,
   stroke: 5,
-  color: '#EA0',
+  color: "#EA0",
   fill: true,
   // Render semi-circles
 });
@@ -315,9 +315,9 @@ new Zdog.Hemisphere({
 
 #### Properties
 
-| Property | Type | Default | Description |
-|----------|------|---------|-------------|
-| `diameter` | Number | 1 | Sphere diameter |
+| Property   | Type   | Default | Description     |
+| ---------- | ------ | ------- | --------------- |
+| `diameter` | Number | 1       | Sphere diameter |
 
 ---
 
@@ -331,20 +331,20 @@ new Zdog.Cylinder({
   diameter: 80,
   length: 120,
   stroke: 5,
-  color: '#636',
+  color: "#636",
   fill: true,
-  frontFace: '#EA0',   // Front cap color
-  backface: '#E62'     // Back cap color
+  frontFace: "#EA0", // Front cap color
+  backface: "#E62", // Back cap color
 });
 ```
 
 #### Properties
 
-| Property | Type | Default | Description |
-|----------|------|---------|-------------|
-| `diameter` | Number | 1 | Cylinder diameter |
-| `length` | Number | 1 | Cylinder length (depth) |
-| `frontFace` | String\|Boolean | true | Front cap color |
+| Property    | Type            | Default | Description             |
+| ----------- | --------------- | ------- | ----------------------- |
+| `diameter`  | Number          | 1       | Cylinder diameter       |
+| `length`    | Number          | 1       | Cylinder length (depth) |
+| `frontFace` | String\|Boolean | true    | Front cap color         |
 
 ---
 
@@ -358,18 +358,18 @@ new Zdog.Cone({
   diameter: 80,
   length: 120,
   stroke: 5,
-  color: '#636',
+  color: "#636",
   fill: true,
-  backface: '#E62'
+  backface: "#E62",
 });
 ```
 
 #### Properties
 
-| Property | Type | Default | Description |
-|----------|------|---------|-------------|
-| `diameter` | Number | 1 | Base diameter |
-| `length` | Number | 1 | Cone height |
+| Property   | Type   | Default | Description   |
+| ---------- | ------ | ------- | ------------- |
+| `diameter` | Number | 1       | Base diameter |
+| `length`   | Number | 1       | Cone height   |
 
 ---
 
@@ -384,30 +384,30 @@ new Zdog.Box({
   height: 100,
   depth: 60,
   stroke: 2,
-  color: '#C25',
+  color: "#C25",
   fill: true,
-  frontFace: '#EA0',
-  rearFace: '#E62',
-  leftFace: '#636',
-  rightFace: '#C25',
-  topFace: '#EA0',
-  bottomFace: '#E62'
+  frontFace: "#EA0",
+  rearFace: "#E62",
+  leftFace: "#636",
+  rightFace: "#C25",
+  topFace: "#EA0",
+  bottomFace: "#E62",
 });
 ```
 
 #### Properties
 
-| Property | Type | Default | Description |
-|----------|------|---------|-------------|
-| `width` | Number | 1 | Box width (x-axis) |
-| `height` | Number | 1 | Box height (y-axis) |
-| `depth` | Number | 1 | Box depth (z-axis) |
-| `frontFace` | String\|Boolean | true | Front face color |
-| `rearFace` | String\|Boolean | true | Rear face color |
-| `leftFace` | String\|Boolean | true | Left face color |
-| `rightFace` | String\|Boolean | true | Right face color |
-| `topFace` | String\|Boolean | true | Top face color |
-| `bottomFace` | String\|Boolean | true | Bottom face color |
+| Property     | Type            | Default | Description         |
+| ------------ | --------------- | ------- | ------------------- |
+| `width`      | Number          | 1       | Box width (x-axis)  |
+| `height`     | Number          | 1       | Box height (y-axis) |
+| `depth`      | Number          | 1       | Box depth (z-axis)  |
+| `frontFace`  | String\|Boolean | true    | Front face color    |
+| `rearFace`   | String\|Boolean | true    | Rear face color     |
+| `leftFace`   | String\|Boolean | true    | Left face color     |
+| `rightFace`  | String\|Boolean | true    | Right face color    |
+| `topFace`    | String\|Boolean | true    | Top face color      |
+| `bottomFace` | String\|Boolean | true    | Bottom face color   |
 
 ---
 
@@ -433,15 +433,16 @@ Rotation in radians around each axis.
 
 ```javascript
 shape.rotate = { x: 0, y: 0, z: 0 };
-shape.rotate.y = Math.PI / 4;  // 45 degrees
-shape.rotate.z += 0.03;        // Incremental
+shape.rotate.y = Math.PI / 4; // 45 degrees
+shape.rotate.z += 0.03; // Incremental
 ```
 
 **Helper**: Convert degrees to radians
+
 ```javascript
 const TAU = Math.PI * 2;
 let degrees = 90;
-let radians = degrees / 360 * TAU;
+let radians = (degrees / 360) * TAU;
 ```
 
 #### scale
@@ -465,9 +466,9 @@ shape.scale = { x: 1, y: 2, z: 1 };
 CSS color string.
 
 ```javascript
-shape.color = '#E62';
-shape.color = 'rgb(255, 100, 50)';
-shape.color = 'hsl(200, 100%, 50%)';
+shape.color = "#E62";
+shape.color = "rgb(255, 100, 50)";
+shape.color = "hsl(200, 100%, 50%)";
 ```
 
 #### stroke
@@ -491,7 +492,7 @@ shape.fill = true;
 Control rendering visibility.
 
 ```javascript
-shape.visible = false;  // Hidden but still in scene
+shape.visible = false; // Hidden but still in scene
 ```
 
 #### backface
@@ -506,7 +507,7 @@ shape.backface = true;
 shape.backface = false;
 
 // Different back face color
-shape.backface = '#EA0';
+shape.backface = "#EA0";
 ```
 
 ---
@@ -571,12 +572,12 @@ Create a duplicate of a shape.
 let original = new Zdog.Ellipse({
   addTo: illo,
   diameter: 40,
-  color: '#636'
+  color: "#636",
 });
 
 let duplicate = original.copy({
   translate: { x: 50 },
-  color: '#E62'
+  color: "#E62",
 });
 ```
 
@@ -589,7 +590,7 @@ let group = new Zdog.Anchor({ addTo: illo });
 // ... add children ...
 
 let groupCopy = group.copyGraph({
-  translate: { x: 100 }
+  translate: { x: 100 },
 });
 ```
 
@@ -601,14 +602,14 @@ let groupCopy = group.copyGraph({
 
 ```javascript
 let illo = new Zdog.Illustration({
-  element: '.zdog-canvas'
+  element: ".zdog-canvas",
 });
 
 let shape = new Zdog.Ellipse({
   addTo: illo,
   diameter: 80,
   stroke: 20,
-  color: '#636'
+  color: "#636",
 });
 
 function animate() {
@@ -703,26 +704,26 @@ Zdog doesn't support direct color interpolation. Use external libraries or manua
 ```javascript
 // Manual RGB interpolation
 function lerpColor(color1, color2, t) {
-  let r1 = parseInt(color1.substr(1,2), 16);
-  let g1 = parseInt(color1.substr(3,2), 16);
-  let b1 = parseInt(color1.substr(5,2), 16);
+  let r1 = parseInt(color1.substr(1, 2), 16);
+  let g1 = parseInt(color1.substr(3, 2), 16);
+  let b1 = parseInt(color1.substr(5, 2), 16);
 
-  let r2 = parseInt(color2.substr(1,2), 16);
-  let g2 = parseInt(color2.substr(3,2), 16);
-  let b2 = parseInt(color2.substr(5,2), 16);
+  let r2 = parseInt(color2.substr(1, 2), 16);
+  let g2 = parseInt(color2.substr(3, 2), 16);
+  let b2 = parseInt(color2.substr(5, 2), 16);
 
   let r = Math.round(r1 + (r2 - r1) * t);
   let g = Math.round(g1 + (g2 - g1) * t);
   let b = Math.round(b1 + (b2 - b1) * t);
 
-  return `#${r.toString(16).padStart(2,'0')}${g.toString(16).padStart(2,'0')}${b.toString(16).padStart(2,'0')}`;
+  return `#${r.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
 }
 
 let time = 0;
 function animate() {
   time += 0.05;
-  let t = (Math.sin(time) + 1) / 2;  // 0 to 1
-  shape.color = lerpColor('#636', '#E62', t);
+  let t = (Math.sin(time) + 1) / 2; // 0 to 1
+  shape.color = lerpColor("#636", "#E62", t);
 
   illo.updateRenderGraph();
   requestAnimationFrame(animate);
@@ -738,12 +739,10 @@ Use easing functions for smooth animations.
 ```javascript
 // Easing functions
 const easing = {
-  linear: t => t,
-  easeInOut: t => t < 0.5
-    ? 2 * t * t
-    : -1 + (4 - 2 * t) * t,
-  easeOut: t => t * (2 - t),
-  easeIn: t => t * t
+  linear: (t) => t,
+  easeInOut: (t) => (t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t),
+  easeOut: (t) => t * (2 - t),
+  easeIn: (t) => t * t,
 };
 
 // Animate with easing
@@ -768,14 +767,14 @@ function animate() {
 let isDragging = false;
 
 let illo = new Zdog.Illustration({
-  element: '.zdog-canvas',
+  element: ".zdog-canvas",
   dragRotate: true,
-  onDragStart: function() {
+  onDragStart: function () {
     isDragging = true;
   },
-  onDragEnd: function() {
+  onDragEnd: function () {
     isDragging = false;
-  }
+  },
 });
 
 // Auto-rotate when not dragging
@@ -800,15 +799,15 @@ Create complex shapes using path arrays.
 new Zdog.Shape({
   addTo: illo,
   path: [
-    { x: 0, y: -40 },           // Start point
-    { x: 40, y: 0 },            // Line to
-    { x: 0, y: 40 },            // Line to
-    { x: -40, y: 0 },           // Line to
+    { x: 0, y: -40 }, // Start point
+    { x: 40, y: 0 }, // Line to
+    { x: 0, y: 40 }, // Line to
+    { x: -40, y: 0 }, // Line to
   ],
   closed: true,
   stroke: 4,
-  color: '#636',
-  fill: true
+  color: "#636",
+  fill: true,
 });
 ```
 
@@ -823,23 +822,23 @@ new Zdog.Shape({
     { x: -60, y: 0 },
     {
       bezier: [
-        { x: -30, y: -60 },    // Control 1
-        { x: 30, y: -60 },     // Control 2
-        { x: 60, y: 0 }        // End point
-      ]
+        { x: -30, y: -60 }, // Control 1
+        { x: 30, y: -60 }, // Control 2
+        { x: 60, y: 0 }, // End point
+      ],
     },
     {
       bezier: [
         { x: 30, y: 60 },
         { x: -30, y: 60 },
-        { x: -60, y: 0 }
-      ]
-    }
+        { x: -60, y: 0 },
+      ],
+    },
   ],
   closed: true,
   stroke: 4,
-  color: '#E62',
-  fill: true
+  color: "#E62",
+  fill: true,
 });
 ```
 
@@ -854,13 +853,13 @@ new Zdog.Shape({
     { x: -40, y: 0 },
     {
       arc: [
-        { x: 0, y: -40 },      // Corner
-        { x: 40, y: 0 }        // End
-      ]
-    }
+        { x: 0, y: -40 }, // Corner
+        { x: 40, y: 0 }, // End
+      ],
+    },
   ],
   stroke: 4,
-  color: '#636'
+  color: "#636",
 });
 ```
 
@@ -874,7 +873,7 @@ Build complex 3D objects using groups.
 // Robot example
 let robot = new Zdog.Anchor({
   addTo: illo,
-  translate: { y: -40 }
+  translate: { y: -40 },
 });
 
 // Head
@@ -884,9 +883,9 @@ new Zdog.Box({
   height: 40,
   depth: 40,
   stroke: 2,
-  color: '#636',
-  topFace: '#EA0',
-  bottomFace: '#E62'
+  color: "#636",
+  topFace: "#EA0",
+  bottomFace: "#E62",
 });
 
 // Body
@@ -897,11 +896,11 @@ new Zdog.Box({
   height: 60,
   depth: 40,
   stroke: 2,
-  color: '#636'
+  color: "#636",
 });
 
 // Arms (group for symmetry)
-[-1, 1].forEach(xSide => {
+[-1, 1].forEach((xSide) => {
   new Zdog.Box({
     addTo: robot,
     translate: { x: xSide * 40, y: 50 },
@@ -909,12 +908,12 @@ new Zdog.Box({
     height: 60,
     depth: 20,
     stroke: 2,
-    color: '#C25'
+    color: "#C25",
   });
 });
 
 // Legs
-[-1, 1].forEach(xSide => {
+[-1, 1].forEach((xSide) => {
   new Zdog.Box({
     addTo: robot,
     translate: { x: xSide * 15, y: 100 },
@@ -922,7 +921,7 @@ new Zdog.Box({
     height: 60,
     depth: 20,
     stroke: 2,
-    color: '#C25'
+    color: "#C25",
   });
 });
 
@@ -946,8 +945,8 @@ Efficiently create multiple copies.
 let sphere = new Zdog.Hemisphere({
   diameter: 20,
   stroke: 2,
-  color: '#636',
-  fill: true
+  color: "#636",
+  fill: true,
 });
 
 // Instance grid
@@ -956,7 +955,7 @@ for (let x = -100; x <= 100; x += 40) {
     sphere.copy({
       addTo: illo,
       translate: { x, y },
-      color: `hsl(${(x+100)/2}, 70%, 50%)`
+      color: `hsl(${(x + 100) / 2}, 70%, 50%)`,
     });
   }
 }
@@ -970,21 +969,21 @@ Make Zdog canvas responsive to container.
 
 ```javascript
 let illo = new Zdog.Illustration({
-  element: '.zdog-canvas',
+  element: ".zdog-canvas",
   resize: true,
-  onResize: function(width, height) {
+  onResize: function (width, height) {
     // Adjust zoom based on size
     this.zoom = Math.min(width, height) / 200;
-  }
+  },
 });
 
 // Manual resize handling
 function handleResize() {
-  let container = document.querySelector('.zdog-container');
+  let container = document.querySelector(".zdog-container");
   illo.setSize(container.offsetWidth, container.offsetHeight);
 }
 
-window.addEventListener('resize', handleResize);
+window.addEventListener("resize", handleResize);
 handleResize();
 ```
 
@@ -997,7 +996,7 @@ handleResize();
 ```javascript
 let needsUpdate = false;
 
-element.addEventListener('mousemove', () => {
+element.addEventListener("mousemove", () => {
   needsUpdate = true;
 });
 
@@ -1014,7 +1013,7 @@ function animate() {
 
 ```javascript
 // Hide off-screen objects
-shapes.forEach(shape => {
+shapes.forEach((shape) => {
   shape.visible = isInView(shape);
 });
 ```
@@ -1025,15 +1024,16 @@ shapes.forEach(shape => {
 let lastUpdate = 0;
 
 let illo = new Zdog.Illustration({
-  element: '.zdog-canvas',
+  element: ".zdog-canvas",
   dragRotate: true,
-  onDragMove: function() {
+  onDragMove: function () {
     const now = Date.now();
-    if (now - lastUpdate > 16) {  // ~60fps
+    if (now - lastUpdate > 16) {
+      // ~60fps
       this.updateRenderGraph();
       lastUpdate = now;
     }
-  }
+  },
 });
 ```
 
@@ -1042,24 +1042,26 @@ let illo = new Zdog.Illustration({
 ### SVG vs Canvas
 
 **Canvas** (default):
+
 - Better performance
 - Smaller file size
 - Rasterized output
 
 ```javascript
 let illo = new Zdog.Illustration({
-  element: 'canvas'  // Canvas element
+  element: "canvas", // Canvas element
 });
 ```
 
 **SVG**:
+
 - Vector output (scalable)
 - Accessible/indexable
 - Slower performance
 
 ```javascript
 let illo = new Zdog.Illustration({
-  element: 'svg'  // SVG element
+  element: "svg", // SVG element
 });
 ```
 
@@ -1092,9 +1094,9 @@ Rotations apply in ZYX order (z-axis first, then y, then x).
 
 ```javascript
 shape.rotate = {
-  x: Math.PI / 4,   // Pitch (applied last)
-  y: Math.PI / 6,   // Yaw (applied second)
-  z: Math.PI / 8    // Roll (applied first)
+  x: Math.PI / 4, // Pitch (applied last)
+  y: Math.PI / 6, // Yaw (applied second)
+  z: Math.PI / 8, // Roll (applied first)
 };
 ```
 
@@ -1107,9 +1109,9 @@ shape.rotate = {
 Zdog doesn't have built-in click detection. Use canvas coordinates.
 
 ```javascript
-let canvas = document.querySelector('canvas');
+let canvas = document.querySelector("canvas");
 
-canvas.addEventListener('click', (event) => {
+canvas.addEventListener("click", (event) => {
   let rect = canvas.getBoundingClientRect();
   let x = event.clientX - rect.left;
   let y = event.clientY - rect.top;
@@ -1118,13 +1120,10 @@ canvas.addEventListener('click', (event) => {
   let shapeX = shape.translate.x * illo.zoom + canvas.width / 2;
   let shapeY = shape.translate.y * illo.zoom + canvas.height / 2;
 
-  let distance = Math.sqrt(
-    Math.pow(x - shapeX, 2) +
-    Math.pow(y - shapeY, 2)
-  );
+  let distance = Math.sqrt(Math.pow(x - shapeX, 2) + Math.pow(y - shapeY, 2));
 
   if (distance < 50) {
-    console.log('Shape clicked!');
+    console.log("Shape clicked!");
   }
 });
 ```
@@ -1141,14 +1140,14 @@ let frames = [];
 // Create frames
 for (let i = 0; i < 10; i++) {
   let illo = new Zdog.Illustration({
-    element: '.canvas',
-    zoom: 4
+    element: ".canvas",
+    zoom: 4,
   });
 
   let shape = new Zdog.Ellipse({
     addTo: illo,
     diameter: 20,
-    rotate: { y: i * Math.PI / 10 }
+    rotate: { y: (i * Math.PI) / 10 },
   });
 
   illo.updateRenderGraph();
@@ -1179,17 +1178,17 @@ for (let i = 0; i < 50; i++) {
       addTo: illo,
       diameter: 4,
       stroke: 2,
-      color: '#636'
+      color: "#636",
     }),
     velocity: {
       x: (Math.random() - 0.5) * 4,
-      y: (Math.random() - 0.5) * 4
-    }
+      y: (Math.random() - 0.5) * 4,
+    },
   });
 }
 
 function animate() {
-  particles.forEach(p => {
+  particles.forEach((p) => {
     p.shape.translate.x += p.velocity.x;
     p.shape.translate.y += p.velocity.y;
 
@@ -1214,18 +1213,18 @@ function animate() {
 Zdog includes TypeScript definitions.
 
 ```typescript
-import Zdog from 'zdog';
+import Zdog from "zdog";
 
 const illo: Zdog.Illustration = new Zdog.Illustration({
-  element: '.zdog-canvas',
-  zoom: 4
+  element: ".zdog-canvas",
+  zoom: 4,
 });
 
 const shape: Zdog.Ellipse = new Zdog.Ellipse({
   addTo: illo,
   diameter: 80,
   stroke: 20,
-  color: '#636'
+  color: "#636",
 });
 ```
 

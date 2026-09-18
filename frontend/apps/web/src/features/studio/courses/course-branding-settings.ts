@@ -35,7 +35,9 @@ function parseBrandingFromTags(tags?: Record<string, unknown>): CourseBrandingSe
 
   return {
     promoVideoUrl:
-      typeof record["promoVideoUrl"] === "string" ? record["promoVideoUrl"] : DEFAULT_BRANDING.promoVideoUrl,
+      typeof record["promoVideoUrl"] === "string"
+        ? record["promoVideoUrl"]
+        : DEFAULT_BRANDING.promoVideoUrl,
   };
 }
 

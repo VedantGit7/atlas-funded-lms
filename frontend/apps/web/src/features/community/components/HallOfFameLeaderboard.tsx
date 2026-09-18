@@ -115,11 +115,7 @@ export function HallOfFameLeaderboard({
           }
         />
         {categories.length >= 2 ? (
-          <div
-            role="tablist"
-            aria-label="Leaderboard categories"
-            className="flex flex-wrap gap-2"
-          >
+          <div role="tablist" aria-label="Leaderboard categories" className="flex flex-wrap gap-2">
             {categories.map((board) => {
               const active = board.id === activeId;
               return (
@@ -198,9 +194,7 @@ function LeaderboardBody({ detail }: { detail: HallOfFameLeaderboardDetail }) {
               <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
                 Your standing
               </p>
-              <p className="text-sm font-semibold text-foreground">
-                Rank #{detail.callerRank}
-              </p>
+              <p className="text-sm font-semibold text-foreground">Rank #{detail.callerRank}</p>
             </div>
           </div>
           {detail.callerMetricValue != null ? (
@@ -286,11 +280,7 @@ function PodiumColumn({ entry }: { entry: HallOfFameEntry }) {
             )}
             style={meta.discStyle}
           >
-            <Icon
-              className={isGold ? "h-9 w-9" : "h-8 w-8"}
-              strokeWidth={2}
-              aria-hidden="true"
-            />
+            <Icon className={isGold ? "h-9 w-9" : "h-8 w-8"} strokeWidth={2} aria-hidden="true" />
           </span>
           <span
             className="absolute -bottom-1 -right-1 flex h-8 w-8 items-center justify-center rounded-full border-2 border-card text-xs font-bold text-primary-foreground tabular-nums"
@@ -300,12 +290,7 @@ function PodiumColumn({ entry }: { entry: HallOfFameEntry }) {
           </span>
         </div>
 
-        <p
-          className={cn(
-            "mt-4 font-semibold text-foreground",
-            isGold ? "text-lg" : "text-base",
-          )}
-        >
+        <p className={cn("mt-4 font-semibold text-foreground", isGold ? "text-lg" : "text-base")}>
           {entryDisplayName(entry)}
         </p>
         <p className="text-sm font-semibold tabular-nums text-foreground">

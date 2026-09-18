@@ -4,11 +4,8 @@ import { marketingUseCasesResponseSchema } from "../../../../../../server/market
 import { listMarketingWorkflowsMetadata } from "../../../../../../server/marketing-workflows/marketing-workflow.route-metadata";
 import { listMarketingUseCases } from "../../../../../../server/marketing-workflows/marketing-workflow.service";
 
-export const GET = createTenantRoute<
-  undefined,
-  z.output<typeof marketingUseCasesResponseSchema>
->({
+export const GET = createTenantRoute<undefined, z.output<typeof marketingUseCasesResponseSchema>>({
   metadata: listMarketingWorkflowsMetadata,
   output: marketingUseCasesResponseSchema,
-  handler: async ({ tx, ctx }) => listMarketingUseCases(tx, ctx),
+  handler: ({ tx, ctx }) => Promise.resolve(listMarketingUseCases(tx, ctx)),
 });

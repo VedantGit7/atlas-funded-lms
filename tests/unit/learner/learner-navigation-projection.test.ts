@@ -29,9 +29,8 @@ describe("loadLearnerNavigationProjection", () => {
       data: [{ key: "community.enable", enabled: true }],
     });
 
-    const { loadLearnerNavigationProjection } = await import(
-      "../../../frontend/apps/web/src/lib/server/learner-navigation-projection"
-    );
+    const { loadLearnerNavigationProjection } =
+      await import("../../../frontend/apps/web/src/lib/server/learner-navigation-projection");
 
     const projection = await loadLearnerNavigationProjection();
 
@@ -51,9 +50,8 @@ describe("loadLearnerNavigationProjection", () => {
       }),
     );
 
-    const { loadLearnerNavigationProjection } = await import(
-      "../../../frontend/apps/web/src/lib/server/learner-navigation-projection"
-    );
+    const { loadLearnerNavigationProjection } =
+      await import("../../../frontend/apps/web/src/lib/server/learner-navigation-projection");
 
     const projection = await loadLearnerNavigationProjection();
 
@@ -67,9 +65,8 @@ describe("loadLearnerNavigationProjection", () => {
   it("falls back to core navigation when entitlements are unavailable", async () => {
     mockGet.mockRejectedValue(new Error("network failure"));
 
-    const { loadLearnerNavigationProjection } = await import(
-      "../../../frontend/apps/web/src/lib/server/learner-navigation-projection"
-    );
+    const { loadLearnerNavigationProjection } =
+      await import("../../../frontend/apps/web/src/lib/server/learner-navigation-projection");
 
     const projection = await loadLearnerNavigationProjection();
 

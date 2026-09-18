@@ -1,4 +1,4 @@
-export { EntitlementRequiredError } from "@atlas/authorization";
+export { EntitlementLimitExceededError, EntitlementRequiredError } from "@atlas/authorization";
 export const STORAGE_ERROR_CODES = {
   ASSET_REFERENCE_NOT_FOUND: "ASSET_REFERENCE_NOT_FOUND",
   ASSET_OBJECT_NOT_FOUND: "ASSET_OBJECT_NOT_FOUND",

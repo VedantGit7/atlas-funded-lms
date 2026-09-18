@@ -1,4 +1,4 @@
-import { NOTIFICATION_SOURCE_EVENT_KEYS } from "../notifications/notification.events";
+import type { NOTIFICATION_SOURCE_EVENT_KEYS } from "../notifications/notification.events";
 import { getBuiltInSecurityTemplate } from "../notifications/security-notification.templates";
 import type { SecurityNotificationEventKey } from "../notifications/security-notification.events";
 
@@ -148,10 +148,7 @@ export function getSystemEmailCatalogEntry(key: string): SystemEmailCatalogEntry
   return SYSTEM_EMAIL_CATALOG.find((entry) => entry.key === key) ?? null;
 }
 
-export function renderSystemEmailText(
-  template: string,
-  variables: Record<string, string>,
-): string {
+export function renderSystemEmailText(template: string, variables: Record<string, string>): string {
   return template.replace(/\{\{\s*([a-zA-Z][a-zA-Z0-9_]*)\s*\}\}/g, (_match, name: string) => {
     return variables[name] ?? "";
   });

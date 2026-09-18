@@ -32,8 +32,12 @@ export function ResendVerificationForm({
     if (cooldown <= 0) {
       return;
     }
-    const timer = window.setTimeout(() => setCooldown((current) => current - 1), 1000);
-    return () => window.clearTimeout(timer);
+    const timer = window.setTimeout(() => {
+      setCooldown((current) => current - 1);
+    }, 1000);
+    return () => {
+      window.clearTimeout(timer);
+    };
   }, [cooldown]);
 
   useEffect(() => {
@@ -71,7 +75,9 @@ export function ResendVerificationForm({
               autoComplete="email"
               placeholder="name@company.com"
               value={email}
-              onChange={(event) => setEmail(event.target.value)}
+              onChange={(event) => {
+                setEmail(event.target.value);
+              }}
               className="w-full rounded-[10px] border-[1.5px] border-[var(--fba-bdr)] bg-[var(--fba-surf)] px-4 py-3 text-[15px] text-[var(--fba-tx)] outline-none transition-colors placeholder:text-[var(--fba-tx3)] focus:border-[var(--fba-ind)]"
             />
           </div>

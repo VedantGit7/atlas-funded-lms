@@ -157,12 +157,16 @@ export function PrivacyDataForm({
             >
               <Globe
                 className={`mt-0.5 h-5 w-5 shrink-0 ${
-                  visibility === "PUBLIC" ? "text-[var(--acct-primary)]" : "text-[var(--acct-on-surface-variant)]"
+                  visibility === "PUBLIC"
+                    ? "text-[var(--acct-primary)]"
+                    : "text-[var(--acct-on-surface-variant)]"
                 }`}
                 aria-hidden="true"
               />
               <span>
-                <span className="block text-sm font-semibold text-[var(--acct-on-surface)]">Public</span>
+                <span className="block text-sm font-semibold text-[var(--acct-on-surface)]">
+                  Public
+                </span>
                 <span className="mt-0.5 block text-xs text-[var(--acct-on-surface-variant)]">
                   Your name, avatar, and bio are shown to other members.
                 </span>
@@ -183,12 +187,16 @@ export function PrivacyDataForm({
             >
               <Lock
                 className={`mt-0.5 h-5 w-5 shrink-0 ${
-                  visibility === "PRIVATE" ? "text-[var(--acct-primary)]" : "text-[var(--acct-on-surface-variant)]"
+                  visibility === "PRIVATE"
+                    ? "text-[var(--acct-primary)]"
+                    : "text-[var(--acct-on-surface-variant)]"
                 }`}
                 aria-hidden="true"
               />
               <span>
-                <span className="block text-sm font-semibold text-[var(--acct-on-surface)]">Private</span>
+                <span className="block text-sm font-semibold text-[var(--acct-on-surface)]">
+                  Private
+                </span>
                 <span className="mt-0.5 block text-xs text-[var(--acct-on-surface-variant)]">
                   You appear as an anonymous member across community surfaces.
                 </span>
@@ -232,7 +240,9 @@ export function PrivacyDataForm({
             />
           </div>
 
-          <div className={`mt-6 flex items-center justify-end gap-4 border-t pt-6 ${classes.divider}`}>
+          <div
+            className={`mt-6 flex items-center justify-end gap-4 border-t pt-6 ${classes.divider}`}
+          >
             <button
               type="submit"
               className={isDirty && !busy ? classes.primaryButton : classes.primaryButtonMuted}

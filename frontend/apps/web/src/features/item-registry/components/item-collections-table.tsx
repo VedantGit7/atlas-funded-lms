@@ -28,7 +28,6 @@ import {
   panelClassName,
   panelScrollClassName,
   sectionHeaderClassName,
-  secondaryButtonClassName,
 } from "../../learning-paths/learning-path-studio-shared";
 import {
   formatItemRegistryApiError,
@@ -100,7 +99,10 @@ const collectionRowClassName = (isSelected: boolean) =>
   ].join(" ");
 
 function itemTypeBadgeClassName(itemTypeKey: string): string {
-  return ITEM_TYPE_BADGE[itemTypeKey] ?? "bg-[var(--admin-surface-high)] text-[var(--admin-on-surface-variant)]";
+  return (
+    ITEM_TYPE_BADGE[itemTypeKey] ??
+    "bg-[var(--admin-surface-high)] text-[var(--admin-on-surface-variant)]"
+  );
 }
 
 function formatItemTypeLabel(itemTypeKey: string): string {
@@ -119,7 +121,10 @@ type ItemCollectionsTableProps = {
   items: ItemDto[];
 };
 
-export function ItemCollectionsTable({ collections: initialCollections, items }: ItemCollectionsTableProps) {
+export function ItemCollectionsTable({
+  collections: initialCollections,
+  items,
+}: ItemCollectionsTableProps) {
   const [collections, setCollections] = useState(initialCollections);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
@@ -335,10 +340,15 @@ export function ItemCollectionsTable({ collections: initialCollections, items }:
               {collections.length === 0 ? (
                 <div className="flex flex-col items-center gap-3 px-2 py-6 text-center">
                   <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[var(--admin-surface-high)]">
-                    <FolderOpen className="h-5 w-5 text-[var(--admin-on-surface-variant)]" aria-hidden="true" />
+                    <FolderOpen
+                      className="h-5 w-5 text-[var(--admin-on-surface-variant)]"
+                      aria-hidden="true"
+                    />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-[var(--admin-on-surface)]">No collections yet</p>
+                    <p className="text-sm font-semibold text-[var(--admin-on-surface)]">
+                      No collections yet
+                    </p>
                     <p className="mt-0.5 text-xs text-[var(--admin-on-surface-variant)]">
                       Create your first collection below
                     </p>
@@ -427,7 +437,11 @@ export function ItemCollectionsTable({ collections: initialCollections, items }:
                   </div>
                   <div>
                     <span className={labelClass}>Type</span>
-                    <div className={typeSegmentGroupClassName} role="group" aria-label="Collection type">
+                    <div
+                      className={typeSegmentGroupClassName}
+                      role="group"
+                      aria-label="Collection type"
+                    >
                       {(["deck", "quiz_bank", "practice_set"] as const).map((type) => {
                         const cfg = COLLECTION_TYPE_CONFIG[type];
                         const Icon = cfg.icon;
@@ -469,12 +483,16 @@ export function ItemCollectionsTable({ collections: initialCollections, items }:
         <div className={`${collectionsPanelClassName} min-w-0`}>
           {!selectedCollectionId ? (
             collections.length === 0 ? (
-              <div className={`${panelScrollClassName} flex flex-col items-center justify-center gap-5 p-6 text-center`}>
+              <div
+                className={`${panelScrollClassName} flex flex-col items-center justify-center gap-5 p-6 text-center`}
+              >
                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[color-mix(in_srgb,color-mix(in_srgb,var(--admin-primary-container)_55%,var(--admin-surface))_70%,var(--admin-surface))]">
                   <Layers className="h-6 w-6 text-[var(--admin-primary)]" aria-hidden="true" />
                 </div>
                 <div className="max-w-sm space-y-1.5">
-                  <p className="text-base font-bold text-[var(--admin-on-surface)]">Build your first collection</p>
+                  <p className="text-base font-bold text-[var(--admin-on-surface)]">
+                    Build your first collection
+                  </p>
                   <p className="text-sm text-[var(--admin-on-surface-variant)]">
                     Group reusable items into decks, quiz banks, or practice sets — then wire them
                     into assessments.
@@ -486,7 +504,10 @@ export function ItemCollectionsTable({ collections: initialCollections, items }:
                     { step: "2", text: "Add items from your item bank" },
                     { step: "3", text: "Use the collection in quizzes and courses" },
                   ].map(({ step, text }) => (
-                    <li key={step} className="flex items-start gap-3 rounded-lg border border-[var(--admin-border)] bg-[color-mix(in_srgb,var(--admin-surface-low)_90%,var(--admin-surface))] px-3 py-2.5">
+                    <li
+                      key={step}
+                      className="flex items-start gap-3 rounded-lg border border-[var(--admin-border)] bg-[color-mix(in_srgb,var(--admin-surface-low)_90%,var(--admin-surface))] px-3 py-2.5"
+                    >
                       <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--admin-primary-container)_55%,var(--admin-surface))] text-xs font-bold text-[var(--admin-primary)]">
                         {step}
                       </span>
@@ -496,11 +517,18 @@ export function ItemCollectionsTable({ collections: initialCollections, items }:
                 </ol>
               </div>
             ) : (
-              <div className={`${panelScrollClassName} flex flex-col items-center justify-center gap-3 p-8 text-center`}>
+              <div
+                className={`${panelScrollClassName} flex flex-col items-center justify-center gap-3 p-8 text-center`}
+              >
                 <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[var(--admin-surface-high)]">
-                  <LayoutPanelLeft className="h-5 w-5 text-[var(--admin-on-surface-variant)]" aria-hidden="true" />
+                  <LayoutPanelLeft
+                    className="h-5 w-5 text-[var(--admin-on-surface-variant)]"
+                    aria-hidden="true"
+                  />
                 </div>
-                <p className="text-base font-semibold text-[var(--admin-on-surface)]">Select a collection</p>
+                <p className="text-base font-semibold text-[var(--admin-on-surface)]">
+                  Select a collection
+                </p>
                 <p className="max-w-xs text-sm text-[var(--admin-on-surface-variant)]">
                   Choose a collection on the left to view and manage its items.
                 </p>
@@ -585,7 +613,10 @@ export function ItemCollectionsTable({ collections: initialCollections, items }:
                     ) : collectionItems.length === 0 ? (
                       <div className="flex flex-col items-center gap-3 px-4 py-10 text-center">
                         <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[var(--admin-surface-high)]">
-                          <Inbox className="h-5 w-5 text-[var(--admin-on-surface-variant)]" aria-hidden="true" />
+                          <Inbox
+                            className="h-5 w-5 text-[var(--admin-on-surface-variant)]"
+                            aria-hidden="true"
+                          />
                         </div>
                         <div>
                           <p className="text-sm font-semibold text-[var(--admin-on-surface)]">
@@ -614,55 +645,57 @@ export function ItemCollectionsTable({ collections: initialCollections, items }:
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-[var(--admin-border)]">
-                          {collectionItems.map((entry) => {
-                            const itemData = items.find((it) => it.id === entry.itemId);
-                            const stemValue = itemData
-                              ? (itemData.contentJson as { stem?: unknown }).stem
-                              : null;
-                            const stem =
-                              typeof stemValue === "string"
-                                ? stemValue
-                                : entry.itemId.slice(0, 8);
-                            const typeKey = itemData?.itemTypeKey ?? "";
-                            return (
-                              <tr
-                                key={entry.id}
-                                className="group transition-colors hover:bg-[var(--admin-surface-low)]"
-                              >
-                                <td className="px-4 py-3 font-mono text-xs text-[var(--admin-on-surface-variant)]">
-                                  {String(entry.position).padStart(2, "0")}
-                                </td>
-                                <td className="max-w-0 px-3 py-3">
-                                  <p className="truncate text-[var(--admin-on-surface)]">{stem}</p>
-                                </td>
-                                <td className="px-3 py-3">
-                                  {itemData ? (
-                                    <span
-                                      className={`${badgeClassName} ${itemTypeBadgeClassName(typeKey)}`}
+                            {collectionItems.map((entry) => {
+                              const itemData = items.find((it) => it.id === entry.itemId);
+                              const stemValue = itemData
+                                ? (itemData.contentJson as { stem?: unknown }).stem
+                                : null;
+                              const stem =
+                                typeof stemValue === "string"
+                                  ? stemValue
+                                  : entry.itemId.slice(0, 8);
+                              const typeKey = itemData?.itemTypeKey ?? "";
+                              return (
+                                <tr
+                                  key={entry.id}
+                                  className="group transition-colors hover:bg-[var(--admin-surface-low)]"
+                                >
+                                  <td className="px-4 py-3 font-mono text-xs text-[var(--admin-on-surface-variant)]">
+                                    {String(entry.position).padStart(2, "0")}
+                                  </td>
+                                  <td className="max-w-0 px-3 py-3">
+                                    <p className="truncate text-[var(--admin-on-surface)]">
+                                      {stem}
+                                    </p>
+                                  </td>
+                                  <td className="px-3 py-3">
+                                    {itemData ? (
+                                      <span
+                                        className={`${badgeClassName} ${itemTypeBadgeClassName(typeKey)}`}
+                                      >
+                                        {formatItemTypeLabel(typeKey)}
+                                      </span>
+                                    ) : null}
+                                  </td>
+                                  <td className="px-3 py-3 text-right">
+                                    <button
+                                      type="button"
+                                      aria-label="Remove item from collection"
+                                      disabled={removeItemMutation.isPending}
+                                      onClick={() => {
+                                        removeItemMutation.mutate({
+                                          collectionId: selectedCollectionId,
+                                          itemId: entry.itemId,
+                                        });
+                                      }}
+                                      className="rounded p-1 text-[var(--admin-on-surface-variant)] opacity-70 transition-[opacity,background-color,color] hover:bg-red-50 hover:text-red-600 group-hover:opacity-100 disabled:opacity-40 dark:hover:bg-red-950/40 dark:hover:text-red-400"
                                     >
-                                      {formatItemTypeLabel(typeKey)}
-                                    </span>
-                                  ) : null}
-                                </td>
-                                <td className="px-3 py-3 text-right">
-                                  <button
-                                    type="button"
-                                    aria-label="Remove item from collection"
-                                    disabled={removeItemMutation.isPending}
-                                    onClick={() => {
-                                      removeItemMutation.mutate({
-                                        collectionId: selectedCollectionId,
-                                        itemId: entry.itemId,
-                                      });
-                                    }}
-                                    className="rounded p-1 text-[var(--admin-on-surface-variant)] opacity-70 transition-[opacity,background-color,color] hover:bg-red-50 hover:text-red-600 group-hover:opacity-100 disabled:opacity-40 dark:hover:bg-red-950/40 dark:hover:text-red-400"
-                                  >
-                                    <X className="h-4 w-4" aria-hidden="true" />
-                                  </button>
-                                </td>
-                              </tr>
-                            );
-                          })}
+                                      <X className="h-4 w-4" aria-hidden="true" />
+                                    </button>
+                                  </td>
+                                </tr>
+                              );
+                            })}
                           </tbody>
                         </table>
                       </div>
@@ -675,62 +708,67 @@ export function ItemCollectionsTable({ collections: initialCollections, items }:
                         Add item
                       </p>
                       <div className="flex flex-wrap items-end gap-3">
-                      <div className="min-w-[180px] flex-1">
-                        <label className={labelClass} htmlFor="collection-add-item">
-                          Item
-                        </label>
-                        <select
-                          id="collection-add-item"
-                          value={selectedItemId}
-                          onChange={(e) => {
-                            setSelectedItemId(e.target.value);
+                        <div className="min-w-[180px] flex-1">
+                          <label className={labelClass} htmlFor="collection-add-item">
+                            Item
+                          </label>
+                          <select
+                            id="collection-add-item"
+                            value={selectedItemId}
+                            onChange={(e) => {
+                              setSelectedItemId(e.target.value);
+                            }}
+                            className={inputClass}
+                            disabled={items.length === 0}
+                          >
+                            {items.length === 0 ? (
+                              <option value="">No items in bank — create items first</option>
+                            ) : (
+                              items.map((item) => {
+                                const s = (item.contentJson as { stem?: unknown }).stem;
+                                const label =
+                                  typeof s === "string" && s ? s.slice(0, 50) : item.id.slice(0, 8);
+                                return (
+                                  <option key={item.id} value={item.id}>
+                                    {label}
+                                  </option>
+                                );
+                              })
+                            )}
+                          </select>
+                        </div>
+                        <div className="w-20">
+                          <label className={labelClass} htmlFor="collection-add-position">
+                            Position
+                          </label>
+                          <input
+                            id="collection-add-position"
+                            type="number"
+                            min={1}
+                            value={position}
+                            onChange={(e) => {
+                              setPosition(Number(e.target.value));
+                            }}
+                            className={inputClass}
+                          />
+                        </div>
+                        <button
+                          type="button"
+                          disabled={
+                            pending ||
+                            !selectedCollectionId ||
+                            !selectedItemId ||
+                            items.length === 0
+                          }
+                          onClick={() => {
+                            void onAddItem();
                           }}
-                          className={inputClass}
-                          disabled={items.length === 0}
+                          className={primaryButtonClassName}
                         >
-                          {items.length === 0 ? (
-                            <option value="">No items in bank — create items first</option>
-                          ) : (
-                            items.map((item) => {
-                              const s = (item.contentJson as { stem?: unknown }).stem;
-                              const label =
-                                typeof s === "string" && s ? s.slice(0, 50) : item.id.slice(0, 8);
-                              return (
-                                <option key={item.id} value={item.id}>
-                                  {label}
-                                </option>
-                              );
-                            })
-                          )}
-                        </select>
+                          <PlusCircle className="h-4 w-4" aria-hidden="true" />
+                          Add
+                        </button>
                       </div>
-                      <div className="w-20">
-                        <label className={labelClass} htmlFor="collection-add-position">
-                          Position
-                        </label>
-                        <input
-                          id="collection-add-position"
-                          type="number"
-                          min={1}
-                          value={position}
-                          onChange={(e) => {
-                            setPosition(Number(e.target.value));
-                          }}
-                          className={inputClass}
-                        />
-                      </div>
-                      <button
-                        type="button"
-                        disabled={pending || !selectedCollectionId || !selectedItemId || items.length === 0}
-                        onClick={() => {
-                          void onAddItem();
-                        }}
-                        className={primaryButtonClassName}
-                      >
-                        <PlusCircle className="h-4 w-4" aria-hidden="true" />
-                        Add
-                      </button>
-                    </div>
                     </div>
                   </div>
                 </div>
@@ -749,7 +787,10 @@ export function ItemCollectionsTable({ collections: initialCollections, items }:
             className="w-full max-w-md rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)] p-6 shadow-lg motion-safe:animate-[admin-dropdown-in_0.22s_cubic-bezier(0.16,1,0.3,1)]"
           >
             <div className="mb-5 flex items-center justify-between">
-              <h2 id="edit-collection-title" className="text-lg font-bold text-[var(--admin-on-surface)]">
+              <h2
+                id="edit-collection-title"
+                className="text-lg font-bold text-[var(--admin-on-surface)]"
+              >
                 Edit collection
               </h2>
               <button
@@ -792,7 +833,11 @@ export function ItemCollectionsTable({ collections: initialCollections, items }:
               </div>
               <div>
                 <span className={labelClass}>Type</span>
-                <div className={typeSegmentGroupClassName} role="group" aria-label="Collection type">
+                <div
+                  className={typeSegmentGroupClassName}
+                  role="group"
+                  aria-label="Collection type"
+                >
                   {(["deck", "quiz_bank", "practice_set"] as const).map((type) => {
                     const cfg = COLLECTION_TYPE_CONFIG[type];
                     const Icon = cfg.icon;
@@ -851,7 +896,10 @@ export function ItemCollectionsTable({ collections: initialCollections, items }:
             <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-50 dark:bg-red-950/40">
               <AlertCircle className="h-6 w-6 text-red-600 dark:text-red-400" aria-hidden="true" />
             </div>
-            <h2 id="delete-collection-title" className="mb-2 text-lg font-bold text-[var(--admin-on-surface)]">
+            <h2
+              id="delete-collection-title"
+              className="mb-2 text-lg font-bold text-[var(--admin-on-surface)]"
+            >
               Delete this collection?
             </h2>
             <p className="mb-6 text-sm text-[var(--admin-on-surface-variant)]">

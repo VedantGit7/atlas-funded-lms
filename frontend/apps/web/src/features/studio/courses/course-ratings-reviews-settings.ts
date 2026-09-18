@@ -36,7 +36,9 @@ export function mergeCourseRatingsReviewsIntoTags(
   settings: CourseRatingsReviewsSettings,
 ): Record<string, unknown> {
   const existingFeatures =
-    tags?.[FEATURES_TAG_KEY] && typeof tags[FEATURES_TAG_KEY] === "object" && !Array.isArray(tags[FEATURES_TAG_KEY])
+    tags?.[FEATURES_TAG_KEY] &&
+    typeof tags[FEATURES_TAG_KEY] === "object" &&
+    !Array.isArray(tags[FEATURES_TAG_KEY])
       ? (tags[FEATURES_TAG_KEY] as Record<string, unknown>)
       : {};
 

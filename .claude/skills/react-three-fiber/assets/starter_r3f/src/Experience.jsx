@@ -1,8 +1,8 @@
-import { Canvas } from '@react-three/fiber'
-import { OrbitControls, Environment, ContactShadows } from '@react-three/drei'
-import { Suspense } from 'react'
-import Box from './components/Box'
-import Sphere from './components/Sphere'
+import { Canvas } from "@react-three/fiber";
+import { OrbitControls, Environment, ContactShadows } from "@react-three/drei";
+import { Suspense } from "react";
+import Box from "./components/Box";
+import Sphere from "./components/Sphere";
 
 function Scene() {
   return (
@@ -28,18 +28,12 @@ function Scene() {
 
       {/* Environment */}
       <Environment preset="sunset" />
-      <ContactShadows
-        position={[0, 0, 0]}
-        opacity={0.5}
-        scale={10}
-        blur={1}
-        far={10}
-      />
+      <ContactShadows position={[0, 0, 0]} opacity={0.5} scale={10} blur={1} far={10} />
 
       {/* Camera Controls */}
       <OrbitControls makeDefault />
     </>
-  )
+  );
 }
 
 export default function Experience() {
@@ -47,11 +41,11 @@ export default function Experience() {
     <Canvas
       shadows
       camera={{ position: [5, 5, 5], fov: 50 }}
-      style={{ width: '100%', height: '100%' }}
+      style={{ width: "100%", height: "100%" }}
     >
       <Suspense fallback={null}>
         <Scene />
       </Suspense>
     </Canvas>
-  )
+  );
 }

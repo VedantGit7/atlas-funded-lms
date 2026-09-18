@@ -22,11 +22,7 @@ type ServiceCtx = {
   requestId: string;
 };
 
-export async function sendSalesMarketingMessage(
-  tx: TenantTx,
-  ctx: ServiceCtx,
-  rawBody: unknown,
-) {
+export async function sendSalesMarketingMessage(tx: TenantTx, ctx: ServiceCtx, rawBody: unknown) {
   const body = sendSalesMessageBodySchema.parse(rawBody);
   const membershipIds = await resolveSalesPurchaserMembershipIds(tx, {
     ...(body.courseId ? { courseId: body.courseId } : {}),
@@ -50,10 +46,7 @@ export async function sendSalesMarketingMessage(
     );
   }
 
-  const targets = await marketingEmailRepository.listRecipientDeliveryTargets(
-    tx,
-    membershipIds,
-  );
+  const targets = await marketingEmailRepository.listRecipientDeliveryTargets(tx, membershipIds);
   let deliveredCount = 0;
   let skippedCount = membershipIds.length - targets.length;
 
@@ -103,11 +96,7 @@ export async function sendSalesMarketingMessage(
   });
 }
 
-export async function createSalesMarketingGroup(
-  tx: TenantTx,
-  ctx: ServiceCtx,
-  rawBody: unknown,
-) {
+export async function createSalesMarketingGroup(tx: TenantTx, ctx: ServiceCtx, rawBody: unknown) {
   const body = createSalesGroupBodySchema.parse(rawBody);
   return createSalesPurchaserGroup(tx, ctx, {
     ...(body.courseId ? { courseId: body.courseId } : {}),
@@ -127,11 +116,7 @@ export async function createSalesMarketingGroup(
   });
 }
 
-export async function exportSalesMarketingRoster(
-  tx: TenantTx,
-  ctx: ServiceCtx,
-  rawBody: unknown,
-) {
+export async function exportSalesMarketingRoster(tx: TenantTx, ctx: ServiceCtx, rawBody: unknown) {
   const body = exportSalesMarketingBodySchema.parse(rawBody);
   const params: Record<string, unknown> = { section: body.section };
   if (body.courseId) params["courseId"] = body.courseId;

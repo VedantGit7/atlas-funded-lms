@@ -67,12 +67,14 @@ starter_r3f/
 ### Components
 
 **Box.jsx** - Interactive component with:
+
 - Click to toggle rotation animation
 - Hover for color change
 - Scale animation on click
 - Cast shadows
 
 **Sphere.jsx** - Animated component with:
+
 - Floating sine wave animation
 - Continuous rotation
 - Metallic material
@@ -105,50 +107,51 @@ starter_r3f/
 
 ```jsx
 // src/components/MyComponent.jsx
-import { useRef } from 'react'
-import { useFrame } from '@react-three/fiber'
+import { useRef } from "react";
+import { useFrame } from "@react-three/fiber";
 
 export default function MyComponent() {
-  const meshRef = useRef()
+  const meshRef = useRef();
 
   useFrame((state, delta) => {
-    meshRef.current.rotation.y += delta
-  })
+    meshRef.current.rotation.y += delta;
+  });
 
   return (
     <mesh ref={meshRef}>
       <boxGeometry />
       <meshStandardMaterial color="orange" />
     </mesh>
-  )
+  );
 }
 ```
 
 Then import in Experience.jsx:
+
 ```jsx
-import MyComponent from './components/MyComponent'
+import MyComponent from "./components/MyComponent";
 
 // In Scene component:
-<MyComponent />
+<MyComponent />;
 ```
 
 ### Add Leva Controls
 
 ```jsx
-import { useControls } from 'leva'
+import { useControls } from "leva";
 
 export default function Box() {
   const { color, scale } = useControls({
-    color: '#ff6b6b',
-    scale: { value: 1, min: 0.5, max: 2, step: 0.1 }
-  })
+    color: "#ff6b6b",
+    scale: { value: 1, min: 0.5, max: 2, step: 0.1 },
+  });
 
   return (
     <mesh scale={scale}>
       <boxGeometry />
       <meshStandardMaterial color={color} />
     </mesh>
-  )
+  );
 }
 ```
 
@@ -157,15 +160,15 @@ export default function Box() {
 ### Load GLTF Models
 
 ```jsx
-import { useGLTF } from '@react-three/drei'
+import { useGLTF } from "@react-three/drei";
 
 function Model() {
-  const { scene } = useGLTF('/models/mymodel.glb')
-  return <primitive object={scene} />
+  const { scene } = useGLTF("/models/mymodel.glb");
+  return <primitive object={scene} />;
 }
 
 // Preload
-useGLTF.preload('/models/mymodel.glb')
+useGLTF.preload("/models/mymodel.glb");
 ```
 
 ### Add Post-Processing
@@ -175,14 +178,14 @@ npm install @react-three/postprocessing
 ```
 
 ```jsx
-import { EffectComposer, Bloom } from '@react-three/postprocessing'
+import { EffectComposer, Bloom } from "@react-three/postprocessing";
 
 <Canvas>
   <Scene />
   <EffectComposer>
     <Bloom intensity={0.5} />
   </EffectComposer>
-</Canvas>
+</Canvas>;
 ```
 
 ### Optimize Performance

@@ -71,10 +71,12 @@ export function StreaksRulesPanel({ rules, events, onSaved }: StreaksRulesPanelP
         `gamification-rules-streaks-${Date.now().toString()}`,
       );
       onSaved(response.data);
-      setStreaks(response.data.streaks.map((streak) => ({
-        ...streak,
-        cadence: streak.cadence ?? "daily",
-      })));
+      setStreaks(
+        response.data.streaks.map((streak) => ({
+          ...streak,
+          cadence: streak.cadence ?? "daily",
+        })),
+      );
       setFreezeInventory(response.data.defaultFreezeInventory);
       setBonuses(response.data.streakBonuses);
       setMessage("Streak rules saved.");

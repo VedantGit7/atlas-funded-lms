@@ -157,13 +157,20 @@ export function RevokeCertificateDialog({
           {message ? (
             <div className={errorBannerClassName}>
               <p>{message}</p>
-              {requestId ? <p className="mt-1 text-xs opacity-70">Request ID: {requestId}</p> : null}
+              {requestId ? (
+                <p className="mt-1 text-xs opacity-70">Request ID: {requestId}</p>
+              ) : null}
             </div>
           ) : null}
         </div>
 
         <div className="flex items-center justify-end gap-3 border-t border-[var(--admin-border)] px-6 py-4">
-          <button type="button" className={outlineButtonClassName} disabled={busy} onClick={onClose}>
+          <button
+            type="button"
+            className={outlineButtonClassName}
+            disabled={busy}
+            onClick={onClose}
+          >
             Cancel
           </button>
           <button

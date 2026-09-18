@@ -4,7 +4,12 @@
   "private": true,
   "exports": {
     ".": "./src/index.ts",
-    "./*": "./src/*"
+    "./*": [
+      "./src/*.ts",
+      "./src/*.tsx",
+      "./src/*/index.ts",
+      "./src/*"
+    ]
   },
   "scripts": {
     "build": "echo \"No domain build configured yet.\"",
@@ -26,6 +31,7 @@
     "@atlas/domain-config": "workspace:*",
     "@atlas/events": "workspace:*",
     "@atlas/membership": "workspace:*",
+    "@atlas/security": "workspace:*",
     "@atlas/storage": "workspace:*",
     "cron-parser": "^5.8.1",
     "exceljs": "^4.4.0",

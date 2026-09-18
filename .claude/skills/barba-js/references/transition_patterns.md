@@ -204,6 +204,7 @@ Slide direction based on browser history:
 ```
 
 **CSS Required** (for sync mode):
+
 ```css
 [data-barba="wrapper"] {
   position: relative;
@@ -292,6 +293,7 @@ Slide direction based on browser history:
 ```
 
 **CSS Required**:
+
 ```css
 [data-barba="wrapper"] {
   perspective: 1000px;
@@ -338,11 +340,13 @@ Animated overlay curtain:
 ```
 
 **HTML Required**:
+
 ```html
 <div class="transition-curtain"></div>
 ```
 
 **CSS Required**:
+
 ```css
 .transition-curtain {
   position: fixed;
@@ -398,11 +402,13 @@ Diagonal wipe transition:
 ```
 
 **HTML Required**:
+
 ```html
 <div class="transition-wipe"></div>
 ```
 
 **CSS Required**:
+
 ```css
 .transition-wipe {
   position: fixed;
@@ -465,6 +471,7 @@ Elements animate out/in individually:
 ```
 
 **HTML Classes Required**:
+
 ```html
 <div data-barba="container">
   <h1 class="stagger-item">Title</h1>
@@ -485,67 +492,67 @@ barba.init({
   transitions: [
     // From home: fade
     {
-      name: 'from-home',
-      from: { namespace: 'home' },
+      name: "from-home",
+      from: { namespace: "home" },
 
       async leave({ current }) {
         await gsap.to(current.container, {
           opacity: 0,
-          duration: 0.5
+          duration: 0.5,
         });
       },
 
       async enter({ next }) {
         await gsap.from(next.container, {
           opacity: 0,
-          duration: 0.5
+          duration: 0.5,
         });
-      }
+      },
     },
 
     // To/from product: slide
     {
-      name: 'product-transition',
-      from: { namespace: 'product' },
-      to: { namespace: 'product' },
+      name: "product-transition",
+      from: { namespace: "product" },
+      to: { namespace: "product" },
       sync: true,
 
       leave({ current }) {
         return gsap.to(current.container, {
-          x: '-100%',
-          duration: 0.6
+          x: "-100%",
+          duration: 0.6,
         });
       },
 
       enter({ next }) {
-        gsap.set(next.container, { x: '100%' });
+        gsap.set(next.container, { x: "100%" });
         return gsap.to(next.container, {
-          x: '0%',
-          duration: 0.6
+          x: "0%",
+          duration: 0.6,
         });
-      }
+      },
     },
 
     // Default: crossfade
     {
-      name: 'default',
+      name: "default",
       sync: true,
 
       leave({ current }) {
         return gsap.to(current.container, {
           opacity: 0,
-          duration: 0.4
+          duration: 0.4,
         });
       },
 
       enter({ next }) {
         return gsap.from(next.container, {
           opacity: 0,
-          duration: 0.4
+          duration: 0.4,
         });
-      }
-    }
-  ]
+      },
+    },
+  ],
 });
 ```
 
@@ -589,53 +596,54 @@ barba.init({
   transitions: [
     // Product to product: fast slide
     {
-      name: 'product-to-product',
-      from: { namespace: 'product' },
-      to: { namespace: 'product' },
+      name: "product-to-product",
+      from: { namespace: "product" },
+      to: { namespace: "product" },
       sync: true,
 
       leave({ current }) {
         return gsap.to(current.container, {
-          x: '-50%',
+          x: "-50%",
           opacity: 0,
           duration: 0.4,
-          ease: 'power2.inOut'
+          ease: "power2.inOut",
         });
       },
 
       enter({ next }) {
-        gsap.set(next.container, { x: '50%', opacity: 0 });
+        gsap.set(next.container, { x: "50%", opacity: 0 });
 
         return gsap.to(next.container, {
-          x: '0%',
+          x: "0%",
           opacity: 1,
           duration: 0.4,
-          ease: 'power2.inOut'
+          ease: "power2.inOut",
         });
-      }
+      },
     },
 
     // Default: elegant fade
     {
-      name: 'default',
+      name: "default",
 
       async leave({ current }) {
         await gsap.to(current.container, {
           opacity: 0,
           y: -30,
           duration: 0.6,
-          ease: 'power2.in'
+          ease: "power2.in",
         });
       },
 
       async enter({ next }) {
-        await gsap.fromTo(next.container,
+        await gsap.fromTo(
+          next.container,
           { opacity: 0, y: 30 },
-          { opacity: 1, y: 0, duration: 0.7, ease: 'power2.out' }
+          { opacity: 1, y: 0, duration: 0.7, ease: "power2.out" },
         );
-      }
-    }
-  ]
+      },
+    },
+  ],
 });
 ```
 
@@ -643,50 +651,54 @@ barba.init({
 
 ```javascript
 barba.init({
-  transitions: [{
-    name: 'portfolio',
+  transitions: [
+    {
+      name: "portfolio",
 
-    async leave({ current }) {
-      const loader = document.querySelector('.page-loader');
+      async leave({ current }) {
+        const loader = document.querySelector(".page-loader");
 
-      // Fade out content
-      await gsap.to(current.container, {
-        opacity: 0,
-        duration: 0.4
-      });
+        // Fade out content
+        await gsap.to(current.container, {
+          opacity: 0,
+          duration: 0.4,
+        });
 
-      // Show loader
-      gsap.to(loader, {
-        opacity: 1,
-        duration: 0.3
-      });
+        // Show loader
+        gsap.to(loader, {
+          opacity: 1,
+          duration: 0.3,
+        });
+      },
+
+      async enter({ next }) {
+        const loader = document.querySelector(".page-loader");
+
+        // Hide loader
+        await gsap.to(loader, {
+          opacity: 0,
+          duration: 0.3,
+        });
+
+        // Fade in content
+        await gsap.from(next.container, {
+          opacity: 0,
+          duration: 0.5,
+        });
+      },
     },
-
-    async enter({ next }) {
-      const loader = document.querySelector('.page-loader');
-
-      // Hide loader
-      await gsap.to(loader, {
-        opacity: 0,
-        duration: 0.3
-      });
-
-      // Fade in content
-      await gsap.from(next.container, {
-        opacity: 0,
-        duration: 0.5
-      });
-    }
-  }]
+  ],
 });
 ```
 
 **HTML**:
+
 ```html
 <div class="page-loader">Loading...</div>
 ```
 
 **CSS**:
+
 ```css
 .page-loader {
   position: fixed;
@@ -704,60 +716,69 @@ barba.init({
 
 ```javascript
 barba.init({
-  transitions: [{
-    name: 'blog',
+  transitions: [
+    {
+      name: "blog",
 
-    async leave({ current }) {
-      const tl = gsap.timeline();
+      async leave({ current }) {
+        const tl = gsap.timeline();
 
-      tl.to(current.container.querySelector('.post-header'), {
-        y: -50,
-        opacity: 0,
-        duration: 0.4
-      })
-      .to(current.container.querySelectorAll('.post-content > *'), {
-        y: -30,
-        opacity: 0,
-        duration: 0.3,
-        stagger: 0.03
-      }, '-=0.3')
-      .to(current.container, {
-        opacity: 0,
-        duration: 0.2
-      });
+        tl.to(current.container.querySelector(".post-header"), {
+          y: -50,
+          opacity: 0,
+          duration: 0.4,
+        })
+          .to(
+            current.container.querySelectorAll(".post-content > *"),
+            {
+              y: -30,
+              opacity: 0,
+              duration: 0.3,
+              stagger: 0.03,
+            },
+            "-=0.3",
+          )
+          .to(current.container, {
+            opacity: 0,
+            duration: 0.2,
+          });
 
-      await tl.play();
+        await tl.play();
+      },
+
+      async enter({ next }) {
+        const tl = gsap.timeline();
+
+        gsap.set(next.container.querySelector(".post-header"), {
+          y: 50,
+          opacity: 0,
+        });
+        gsap.set(next.container.querySelectorAll(".post-content > *"), {
+          y: 30,
+          opacity: 0,
+        });
+
+        tl.to(next.container.querySelector(".post-header"), {
+          y: 0,
+          opacity: 1,
+          duration: 0.6,
+          ease: "power3.out",
+        }).to(
+          next.container.querySelectorAll(".post-content > *"),
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.5,
+            stagger: 0.05,
+            ease: "power2.out",
+          },
+          "-=0.4",
+        );
+
+        await tl.play();
+      },
     },
-
-    async enter({ next }) {
-      const tl = gsap.timeline();
-
-      gsap.set(next.container.querySelector('.post-header'), {
-        y: 50,
-        opacity: 0
-      });
-      gsap.set(next.container.querySelectorAll('.post-content > *'), {
-        y: 30,
-        opacity: 0
-      });
-
-      tl.to(next.container.querySelector('.post-header'), {
-        y: 0,
-        opacity: 1,
-        duration: 0.6,
-        ease: 'power3.out'
-      })
-      .to(next.container.querySelectorAll('.post-content > *'), {
-        y: 0,
-        opacity: 1,
-        duration: 0.5,
-        stagger: 0.05,
-        ease: 'power2.out'
-      }, '-=0.4');
-
-      await tl.play();
-    }
-  }]
+  ],
 });
 ```
 
@@ -765,59 +786,85 @@ barba.init({
 
 ```javascript
 barba.init({
-  transitions: [{
-    name: 'parallax',
-    sync: true,
+  transitions: [
+    {
+      name: "parallax",
+      sync: true,
 
-    async leave({ current }) {
-      const tl = gsap.timeline();
+      async leave({ current }) {
+        const tl = gsap.timeline();
 
-      // Parallax effect - different speeds
-      tl.to(current.container.querySelector('.layer-bg'), {
-        y: -50,
-        opacity: 0,
-        duration: 0.8
-      }, 0)
-      .to(current.container.querySelector('.layer-mid'), {
-        y: -100,
-        opacity: 0,
-        duration: 0.8
-      }, 0)
-      .to(current.container.querySelector('.layer-front'), {
-        y: -150,
-        opacity: 0,
-        duration: 0.8
-      }, 0);
+        // Parallax effect - different speeds
+        tl.to(
+          current.container.querySelector(".layer-bg"),
+          {
+            y: -50,
+            opacity: 0,
+            duration: 0.8,
+          },
+          0,
+        )
+          .to(
+            current.container.querySelector(".layer-mid"),
+            {
+              y: -100,
+              opacity: 0,
+              duration: 0.8,
+            },
+            0,
+          )
+          .to(
+            current.container.querySelector(".layer-front"),
+            {
+              y: -150,
+              opacity: 0,
+              duration: 0.8,
+            },
+            0,
+          );
 
-      await tl.play();
+        await tl.play();
+      },
+
+      async enter({ next }) {
+        const tl = gsap.timeline();
+
+        gsap.set(next.container.querySelectorAll('[class^="layer-"]'), {
+          opacity: 0,
+        });
+
+        tl.from(
+          next.container.querySelector(".layer-bg"),
+          {
+            y: 50,
+            opacity: 0,
+            duration: 0.8,
+          },
+          0,
+        )
+          .from(
+            next.container.querySelector(".layer-mid"),
+            {
+              y: 100,
+              opacity: 0,
+              duration: 0.8,
+            },
+            0,
+          )
+          .from(
+            next.container.querySelector(".layer-front"),
+            {
+              y: 150,
+              opacity: 0,
+              duration: 0.8,
+            },
+            0,
+          );
+
+        await tl.play();
+      },
     },
-
-    async enter({ next }) {
-      const tl = gsap.timeline();
-
-      gsap.set(next.container.querySelectorAll('[class^="layer-"]'), {
-        opacity: 0
-      });
-
-      tl.from(next.container.querySelector('.layer-bg'), {
-        y: 50,
-        opacity: 0,
-        duration: 0.8
-      }, 0)
-      .from(next.container.querySelector('.layer-mid'), {
-        y: 100,
-        opacity: 0,
-        duration: 0.8
-      }, 0)
-      .from(next.container.querySelector('.layer-front'), {
-        y: 150,
-        opacity: 0,
-        duration: 0.8
-      }, 0);
-
-      await tl.play();
-    }
-  }]
+  ],
 });
 ```
 
@@ -827,27 +874,29 @@ Fast, subtle transitions for app-like feel:
 
 ```javascript
 barba.init({
-  transitions: [{
-    name: 'dashboard',
+  transitions: [
+    {
+      name: "dashboard",
 
-    async leave({ current }) {
-      await gsap.to(current.container, {
-        opacity: 0,
-        duration: 0.2,
-        ease: 'power1.inOut'
-      });
+      async leave({ current }) {
+        await gsap.to(current.container, {
+          opacity: 0,
+          duration: 0.2,
+          ease: "power1.inOut",
+        });
+      },
+
+      async enter({ next }) {
+        gsap.set(next.container, { opacity: 0 });
+
+        await gsap.to(next.container, {
+          opacity: 1,
+          duration: 0.2,
+          ease: "power1.inOut",
+        });
+      },
     },
-
-    async enter({ next }) {
-      gsap.set(next.container, { opacity: 0 });
-
-      await gsap.to(next.container, {
-        opacity: 1,
-        duration: 0.2,
-        ease: 'power1.inOut'
-      });
-    }
-  }]
+  ],
 });
 ```
 
@@ -858,75 +907,76 @@ barba.init({
 Full implementation with multiple transitions:
 
 ```javascript
-import barba from '@barba/core';
-import gsap from 'gsap';
+import barba from "@barba/core";
+import gsap from "gsap";
 
 barba.init({
   transitions: [
     // Initial page load
     {
-      name: 'initial-load',
+      name: "initial-load",
       once: async ({ next }) => {
-        const loader = document.querySelector('.page-loader');
+        const loader = document.querySelector(".page-loader");
 
         await gsap.to(loader, {
           opacity: 0,
           duration: 0.5,
-          delay: 0.5
+          delay: 0.5,
         });
 
-        gsap.set(loader, { display: 'none' });
+        gsap.set(loader, { display: "none" });
 
         await gsap.from(next.container, {
           opacity: 0,
           y: 50,
           duration: 0.8,
-          ease: 'power2.out'
+          ease: "power2.out",
         });
-      }
+      },
     },
 
     // Same namespace: fast transition
     {
-      name: 'same-namespace',
+      name: "same-namespace",
       custom: ({ current, next }) => current.namespace === next.namespace,
 
       async leave({ current }) {
         await gsap.to(current.container, {
           opacity: 0,
-          duration: 0.3
+          duration: 0.3,
         });
       },
 
       async enter({ next }) {
         await gsap.from(next.container, {
           opacity: 0,
-          duration: 0.3
+          duration: 0.3,
         });
-      }
+      },
     },
 
     // Default: elegant fade
     {
-      name: 'default',
+      name: "default",
 
       async leave({ current }) {
         await gsap.to(current.container, {
           opacity: 0,
           y: -30,
           duration: 0.5,
-          ease: 'power2.in'
+          ease: "power2.in",
         });
       },
 
       async enter({ next }) {
-        await gsap.fromTo(next.container,
+        await gsap.fromTo(
+          next.container,
           { opacity: 0, y: 30 },
-          { opacity: 1, y: 0, duration: 0.6, ease: 'power2.out' }
+          { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" },
         );
-      }
-    }
-  ]
+      },
+    },
+  ],
 });
 
 // Global hooks
@@ -936,14 +986,14 @@ barba.hooks.beforeEnter(() => {
 
 barba.hooks.after(({ next }) => {
   // Analytics
-  if (typeof gtag !== 'undefined') {
-    gtag('config', 'GA_MEASUREMENT_ID', {
-      page_path: next.url.path
+  if (typeof gtag !== "undefined") {
+    gtag("config", "GA_MEASUREMENT_ID", {
+      page_path: next.url.path,
     });
   }
 
   // Re-initialize scripts
-  if (typeof Prism !== 'undefined') {
+  if (typeof Prism !== "undefined") {
     Prism.highlightAll();
   }
 });

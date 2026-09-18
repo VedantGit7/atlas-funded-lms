@@ -7,7 +7,7 @@ function instructorTx() {
       .fn()
       .mockResolvedValueOnce([{ key: "enrollment.read" }])
       .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([{ role_key: "instructor" }]),
+      .mockResolvedValueOnce([{ role_key: "instructor", bypasses_resource_predicates: false }]),
   };
 }
 
@@ -55,7 +55,7 @@ describe("studio roster authorization", () => {
         .fn()
         .mockResolvedValueOnce([{ key: "progress.read" }])
         .mockResolvedValueOnce([])
-        .mockResolvedValueOnce([{ role_key: "instructor" }]),
+        .mockResolvedValueOnce([{ role_key: "instructor", bypasses_resource_predicates: false }]),
     };
 
     const decision = await can({

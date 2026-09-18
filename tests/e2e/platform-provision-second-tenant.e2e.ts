@@ -70,7 +70,9 @@ describeWithE2E("platform provision second tenant smoke", () => {
     expect(provisioned.data.primaryDomain).toMatchObject({
       hostname,
       status: "ACTIVE",
-      type: "atlas_subdomain",
+      // Migration 033 (normalize_tenant_domain_type_values) uppercased these;
+      // the assertion kept the pre-normalisation spelling.
+      type: "ATLAS_SUBDOMAIN",
     });
     expect(provisioned.data.provisioning.latestStatus).toBe("SUCCEEDED");
 

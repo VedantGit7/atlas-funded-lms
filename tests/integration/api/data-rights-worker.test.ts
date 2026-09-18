@@ -157,7 +157,24 @@ describeWithDb("data-rights worker", () => {
       });
 
       expect(first.delivered).toBeGreaterThan(0);
-      expect(second.skipped).toBeGreaterThan(0);
+
+      // See the analytics duplicate-delivery test: the poll now filters
+      // already-delivered pairs in SQL, so a replay is invisible to the loop
+      // rather than counted as `skipped`. The delivery row is the durable
+      // guarantee, so assert on that instead of a worker counter.
+      expect(second.processed).toBe(0);
+      expect(second.delivered).toBe(0);
+      expect(second.failed).toBe(0);
+
+      const deliveries = await tx.$queryRaw<Array<{ count: number }>>`
+        select count(*)::int as count
+        from event_deliveries
+        where outbox_event_id = ${outboxEventId}::uuid
+          -- The worker's SUCCEEDED maps onto the shared DispatchStatus enum,
+          -- which spells a successful delivery SENT.
+          and status = 'SENT'
+      `;
+      expect(deliveries[0]?.count).toBe(1);
     });
 
     const job = await withTenantTx(

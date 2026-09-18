@@ -27,7 +27,10 @@ process.env.DATABASE_URL = [
   "?schema=public",
 ].join("");
 
-execSync("pnpm exec prisma migrate deploy", {
+// Provision rather than bare `migrate deploy`: migrations depend on helper
+// functions created by sql/setup (migration 098 calls app.reject_update_delete),
+// so `migrate deploy` alone fails on a clean database.
+execSync("node scripts/db/provision-database.mjs", {
   cwd: repoRoot,
   stdio: "inherit",
   env: process.env,

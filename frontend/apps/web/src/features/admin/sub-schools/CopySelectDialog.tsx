@@ -63,9 +63,7 @@ export function CopySelectDialog({
   function toggle(id: string) {
     setDraftIds((previous) => {
       if (multi) {
-        return previous.includes(id)
-          ? previous.filter((value) => value !== id)
-          : [...previous, id];
+        return previous.includes(id) ? previous.filter((value) => value !== id) : [...previous, id];
       }
       return previous.includes(id) ? [] : [id];
     });

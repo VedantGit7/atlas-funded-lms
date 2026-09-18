@@ -12,20 +12,20 @@
 
 ## Gap inventory (what this plan closes)
 
-| Gap | Resolution |
-|-----|------------|
-| Upload drop zone / Cloud Storage | Signed upload + attach primary lesson asset (audio/pdf/slides; video stays embed-only per policy) |
-| Attachments sidebar file upload | Same upload helper → `POST /lessons/:id/assets` with `storageReferenceId` |
-| Thumbnail upload | `lesson.thumbnail` purpose upload → save `thumbnailAssetReferenceId` in settings |
-| Rich description toolbar | Markdown insertion toolbar (Bold/Italic/Link/List) on textarea — no new editor dependency |
-| Display in syllabus | SQL filter on studio + published lesson lists |
-| Feature toggles (comments/downloads/transcript) | Expose on learner detail; gate UI |
-| Course `?tagId=` filter | Read search param; filter module lesson lists |
-| Live lesson Configure | Persist `live` config in `content_json`; configure form |
-| Section quiz Continue | Link/create `assessmentId` in `content_json`; open studio assessment builder |
-| Preview button | Reuse `LessonPreviewPanel` in inline modal |
-| Article Publish | Navigate to full lesson editor review tab OR trigger course publish workflow entry — use “open full editor” link (minimal) |
-| Local storage | `.storage/` directory at repo root, gitignored |
+| Gap                                             | Resolution                                                                                                                 |
+| ----------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| Upload drop zone / Cloud Storage                | Signed upload + attach primary lesson asset (audio/pdf/slides; video stays embed-only per policy)                          |
+| Attachments sidebar file upload                 | Same upload helper → `POST /lessons/:id/assets` with `storageReferenceId`                                                  |
+| Thumbnail upload                                | `lesson.thumbnail` purpose upload → save `thumbnailAssetReferenceId` in settings                                           |
+| Rich description toolbar                        | Markdown insertion toolbar (Bold/Italic/Link/List) on textarea — no new editor dependency                                  |
+| Display in syllabus                             | SQL filter on studio + published lesson lists                                                                              |
+| Feature toggles (comments/downloads/transcript) | Expose on learner detail; gate UI                                                                                          |
+| Course `?tagId=` filter                         | Read search param; filter module lesson lists                                                                              |
+| Live lesson Configure                           | Persist `live` config in `content_json`; configure form                                                                    |
+| Section quiz Continue                           | Link/create `assessmentId` in `content_json`; open studio assessment builder                                               |
+| Preview button                                  | Reuse `LessonPreviewPanel` in inline modal                                                                                 |
+| Article Publish                                 | Navigate to full lesson editor review tab OR trigger course publish workflow entry — use “open full editor” link (minimal) |
+| Local storage                                   | `.storage/` directory at repo root, gitignored                                                                             |
 
 ---
 
@@ -65,6 +65,7 @@ tests/unit/storage/local-filesystem-storage-provider.test.ts
 ### Task 1: Add `local-fs` storage provider
 
 **Files:**
+
 - Create: `backend/packages/storage/src/providers/local-filesystem-storage-provider.ts`
 - Modify: `backend/packages/storage/src/providers/storage-provider-factory.ts`
 - Modify: `backend/packages/storage/src/schemas/storage-env.ts`
@@ -138,6 +139,7 @@ STORAGE_LOCAL_ROOT=.storage
 ### Task 2: Backend upload / blob / confirm routes
 
 **Files:**
+
 - Create: `backend/apps/api/src/server/lessons/lesson-asset-upload.service.ts`
 - Create: `backend/apps/api/src/app/api/v1/lessons/[id]/assets/upload/route.ts`
 - Create: `backend/apps/api/src/app/api/v1/lessons/[id]/assets/blob/route.ts`
@@ -148,21 +150,27 @@ STORAGE_LOCAL_ROOT=.storage
 - [ ] **Step 1: Schemas**
 
 ```ts
-export const lessonAssetUploadBodySchema = z.object({
-  purpose: z.enum(["lesson.asset", "lesson.attachment", "lesson.thumbnail"]),
-  fileName: z.string().min(1).max(240),
-  contentType: z.string().min(1).max(180),
-  sizeBytes: z.number().int().min(1),
-}).strict();
+export const lessonAssetUploadBodySchema = z
+  .object({
+    purpose: z.enum(["lesson.asset", "lesson.attachment", "lesson.thumbnail"]),
+    fileName: z.string().min(1).max(240),
+    contentType: z.string().min(1).max(180),
+    sizeBytes: z.number().int().min(1),
+  })
+  .strict();
 
-export const lessonAssetBlobBodySchema = z.object({
-  assetReferenceId: z.string().uuid(),
-  contentBase64: z.string().min(1),
-}).strict();
+export const lessonAssetBlobBodySchema = z
+  .object({
+    assetReferenceId: z.string().uuid(),
+    contentBase64: z.string().min(1),
+  })
+  .strict();
 
-export const lessonAssetConfirmBodySchema = z.object({
-  assetReferenceId: z.string().uuid(),
-}).strict();
+export const lessonAssetConfirmBodySchema = z
+  .object({
+    assetReferenceId: z.string().uuid(),
+  })
+  .strict();
 ```
 
 - [ ] **Step 2: Service methods**
@@ -177,7 +185,7 @@ Reuse `createLessonAssetUpload` from `@atlas/storage/lesson-asset.service` with 
 
 `POST /api/v1/lessons/:id/assets/upload` → signed upload response  
 `POST /api/v1/lessons/:id/assets/blob` → local-fs blob ingest  
-`POST /api/v1/lessons/:id/assets/confirm` → mark READY  
+`POST /api/v1/lessons/:id/assets/confirm` → mark READY
 
 All require studio lesson ownership + course DRAFT (same guard as `attachLessonAsset`).
 
@@ -190,6 +198,7 @@ Upload small PDF via upload → blob → confirm → attach → list assets → 
 ### Task 3: Shared frontend upload helper
 
 **Files:**
+
 - Create: `frontend/apps/web/src/features/studio/courses/upload-lesson-asset.ts`
 
 - [ ] **Implement `uploadLessonAssetFile(lessonId, file, purpose)`**
@@ -213,6 +222,7 @@ Copy structure from `upload-module-scorm-package.ts`:
 ### Task 4: Attachments sidebar real file upload
 
 **Files:**
+
 - Modify: `frontend/apps/web/src/features/studio/courses/inline-lesson-editor/lesson-attachments-sidebar.tsx`
 - Modify: `frontend/apps/web/src/features/studio/lessons/lesson-asset-panel.tsx` (full editor parity)
 
@@ -230,6 +240,7 @@ await attachLessonAssetReference(lessonId, assetReferenceId, file.type || "file"
 ### Task 5: Upload workspace (audio / pdf / slides)
 
 **Files:**
+
 - Modify: `lesson-upload-workspace.tsx`
 - Modify: `inline-lesson-editor.tsx`
 
@@ -253,6 +264,7 @@ content: {
 ### Task 6: Thumbnail upload in settings branding
 
 **Files:**
+
 - Modify: `inline-lesson-settings-branding.tsx`
 - Modify: `lesson-settings-metadata.ts`
 
@@ -262,6 +274,7 @@ content: {
 - [ ] Preview via `GET /api/v1/lessons/:id/assets?view=studio` signed URL for that ref, or dedicated `thumbnailUrl` projected from backend on lesson detail.
 
 **Backend projection (Task 6b):**
+
 - Modify `getLessonForEditor` / `getLessonForPlayer` to resolve `thumbnailAssetReferenceId` → short-lived `thumbnailUrl` using `createLessonAssetDownload`.
 
 ---
@@ -271,6 +284,7 @@ content: {
 ### Task 7: Typed `content_json` helpers
 
 **Files:**
+
 - Create: `backend/apps/api/src/server/lessons/lesson-content-metadata.ts`
 - Modify: `frontend/packages/contracts/src/lessons/lesson-schemas.ts`
 - Modify: `lesson-settings-metadata.ts`
@@ -316,6 +330,7 @@ displayInSyllabus: z.boolean().optional(),
 ### Task 8: Display in syllabus filter
 
 **Files:**
+
 - Modify: `backend/apps/api/src/server/lessons/lessons.repository.ts` (`listLessonsForModuleBuilder`, `listPublishedLessonsForModule`, `listPublishedLessonNavigation`)
 
 - [ ] Add SQL predicate:
@@ -335,6 +350,7 @@ and coalesce((l.content_json->>'displayInSyllabus')::boolean, true) = true
 ### Task 9: Downloads gate
 
 **Files:**
+
 - Modify: `lesson-player-shell.tsx`
 - Modify: `lesson-asset-list.tsx`
 
@@ -346,6 +362,7 @@ and coalesce((l.content_json->>'displayInSyllabus')::boolean, true) = true
 ### Task 10: Transcript panel
 
 **Files:**
+
 - Create: `frontend/apps/web/src/features/lessons/lesson-transcript-panel.tsx`
 - Modify: `inline-lesson-settings-features.tsx` or branding — add optional transcript textarea / VTT upload
 - Modify: `lesson-settings-metadata.ts`
@@ -358,6 +375,7 @@ and coalesce((l.content_json->>'displayInSyllabus')::boolean, true) = true
 ### Task 11: Comments via discussion post bridge
 
 **Files:**
+
 - Create: `backend/apps/api/src/server/lessons/lesson-discussion.service.ts`
 - Create: `frontend/apps/web/src/features/lessons/lesson-comments-panel.tsx`
 - Modify: `lessons.service.ts` (ensure discussion post on save when `allowComments` flipped on)
@@ -380,6 +398,7 @@ and coalesce((l.content_json->>'displayInSyllabus')::boolean, true) = true
 ### Task 12: `?tagId=` on course detail
 
 **Files:**
+
 - Modify: `frontend/apps/web/src/app/courses/[id]/page.tsx`
 - Modify: `frontend/apps/web/src/features/courses/course-detail.tsx`
 - Create: `frontend/apps/web/src/features/courses/course-lessons-by-tag.tsx` (or extend `course-outline.tsx`)
@@ -396,6 +415,7 @@ and coalesce((l.content_json->>'displayInSyllabus')::boolean, true) = true
 ### Task 13: Live workspace form + persistence
 
 **Files:**
+
 - Modify: `lesson-live-workspace.tsx`
 - Modify: `inline-lesson-editor.tsx`
 
@@ -411,6 +431,7 @@ and coalesce((l.content_json->>'displayInSyllabus')::boolean, true) = true
 ### Task 14: Link assessment to section quiz lesson
 
 **Files:**
+
 - Modify: `lesson-section-quiz-workspace.tsx`
 - Create: `backend/apps/api/src/server/lessons/lesson-quiz.service.ts` (optional thin service)
 - Modify: `lessons.service.ts`
@@ -430,6 +451,7 @@ and coalesce((l.content_json->>'displayInSyllabus')::boolean, true) = true
 ### Task 15: Inline preview modal
 
 **Files:**
+
 - Modify: `inline-lesson-editor-header.tsx`
 - Modify: `inline-lesson-editor.tsx`
 - Reuse: `lesson-preview-panel.tsx`
@@ -441,6 +463,7 @@ and coalesce((l.content_json->>'displayInSyllabus')::boolean, true) = true
 ### Task 16: Article Publish button
 
 **Files:**
+
 - Modify: `lesson-article-workspace.tsx`
 
 - [ ] Wire Publish → `router.push(/studio/courses/${courseId}/lessons/${lessonId})` (full lesson editor) **after** save, OR open course review workflow if that exists.
@@ -451,6 +474,7 @@ and coalesce((l.content_json->>'displayInSyllabus')::boolean, true) = true
 ### Task 17: Markdown toolbar (settings + article)
 
 **Files:**
+
 - Create: `frontend/apps/web/src/features/studio/courses/inline-lesson-editor/markdown-toolbar.tsx`
 - Modify: `inline-lesson-settings-branding.tsx`, `lesson-article-workspace.tsx`
 
@@ -528,19 +552,19 @@ cd backend && npx prisma migrate deploy
 
 ## Self-review (spec coverage)
 
-| Requirement | Task |
-|-------------|------|
-| Local project folder storage | Task 1 |
-| Upload drop zone | Task 5 |
-| Attachments | Task 4 |
-| Thumbnail | Task 6 |
-| Rich toolbar | Task 17 |
-| displayInSyllabus | Task 8 |
-| Feature toggles | Tasks 7, 9–11 |
-| tagId course filter | Task 12 |
-| Live configure | Task 13 |
-| Section quiz | Task 14 |
-| Preview | Task 15 |
-| Article publish | Task 16 |
+| Requirement                  | Task          |
+| ---------------------------- | ------------- |
+| Local project folder storage | Task 1        |
+| Upload drop zone             | Task 5        |
+| Attachments                  | Task 4        |
+| Thumbnail                    | Task 6        |
+| Rich toolbar                 | Task 17       |
+| displayInSyllabus            | Task 8        |
+| Feature toggles              | Tasks 7, 9–11 |
+| tagId course filter          | Task 12       |
+| Live configure               | Task 13       |
+| Section quiz                 | Task 14       |
+| Preview                      | Task 15       |
+| Article publish              | Task 16       |
 
 All gaps mapped. No placeholders remain.

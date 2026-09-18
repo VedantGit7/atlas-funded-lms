@@ -18,8 +18,8 @@ Complete reference for AOS (Animate On Scroll) configuration, methods, and data 
 ### Basic Initialization
 
 ```javascript
-import AOS from 'aos';
-import 'aos/dist/aos.css';
+import AOS from "aos";
+import "aos/dist/aos.css";
 
 AOS.init();
 ```
@@ -30,9 +30,9 @@ AOS.init();
 AOS.init({
   // Global settings
   duration: 800,
-  easing: 'ease-in-out',
+  easing: "ease-in-out",
   once: true,
-  offset: 120
+  offset: 120,
 });
 ```
 
@@ -80,7 +80,7 @@ AOS.init({ delay: 100 });
 - **See**: [Easing Functions](#easing-functions) for all available values
 
 ```javascript
-AOS.init({ easing: 'ease-in-out' });
+AOS.init({ easing: "ease-in-out" });
 ```
 
 ```html
@@ -111,7 +111,7 @@ AOS.init({ offset: 200 });
 - **See**: [Anchor Placement Values](#anchor-placement-values) for all options
 
 ```javascript
-AOS.init({ anchorPlacement: 'center-center' });
+AOS.init({ anchorPlacement: "center-center" });
 ```
 
 ```html
@@ -170,13 +170,13 @@ AOS.init({ mirror: true });
 
 ```javascript
 // Disable on mobile
-AOS.init({ disable: 'mobile' });
+AOS.init({ disable: "mobile" });
 
 // Disable with function
 AOS.init({
-  disable: function() {
+  disable: function () {
     return window.innerWidth < 768;
-  }
+  },
 });
 ```
 
@@ -190,7 +190,7 @@ AOS.init({
 - **Description**: Name of the event dispatched on the document, that AOS should initialize on
 
 ```javascript
-AOS.init({ startEvent: 'load' });
+AOS.init({ startEvent: "load" });
 ```
 
 #### `throttleDelay`
@@ -318,11 +318,12 @@ Initialize AOS with optional configuration.
 ```javascript
 AOS.init({
   duration: 800,
-  once: true
+  once: true,
 });
 ```
 
 **Parameters:**
+
 - `options` (Object): Configuration object
 
 **Returns:** `void`
@@ -333,8 +334,8 @@ Recalculate all offsets and positions of elements. Should be called after dynami
 
 ```javascript
 // After adding new elements
-const newElement = document.createElement('div');
-newElement.setAttribute('data-aos', 'fade-in');
+const newElement = document.createElement("div");
+newElement.setAttribute("data-aos", "fade-in");
 container.appendChild(newElement);
 
 AOS.refresh(); // Recalculate positions
@@ -362,8 +363,8 @@ AOS dispatches custom events on animated elements:
 Fired when element enters the viewport and animation starts.
 
 ```javascript
-document.addEventListener('aos:in', ({ detail }) => {
-  console.log('Animated element:', detail);
+document.addEventListener("aos:in", ({ detail }) => {
+  console.log("Animated element:", detail);
 });
 ```
 
@@ -372,20 +373,21 @@ document.addEventListener('aos:in', ({ detail }) => {
 Fired when element leaves the viewport (when `mirror: true`).
 
 ```javascript
-document.addEventListener('aos:out', ({ detail }) => {
-  console.log('Animation reversed:', detail);
+document.addEventListener("aos:out", ({ detail }) => {
+  console.log("Animation reversed:", detail);
 });
 ```
 
 ### Event Details
 
 Event detail object contains:
+
 - Element reference
 - Animation name
 - Configuration
 
 ```javascript
-document.addEventListener('aos:in', ({ detail }) => {
+document.addEventListener("aos:in", ({ detail }) => {
   console.log(detail); // HTMLElement with AOS attributes
 });
 ```
@@ -435,7 +437,7 @@ Available easing values for `easing` option:
 ### Usage Example
 
 ```javascript
-AOS.init({ easing: 'ease-out-cubic' });
+AOS.init({ easing: "ease-out-cubic" });
 ```
 
 ```html
@@ -462,17 +464,17 @@ Format: `{element-position}-{viewport-position}`
 
 ### All Combinations
 
-| Value | Description |
-|-------|-------------|
-| `top-bottom` | Element's top edge hits viewport's bottom edge |
-| `top-center` | Element's top edge hits viewport's center |
-| `top-top` | Element's top edge hits viewport's top edge |
-| `center-bottom` | Element's center hits viewport's bottom edge |
-| `center-center` | Element's center hits viewport's center |
-| `center-top` | Element's center hits viewport's top edge |
+| Value           | Description                                       |
+| --------------- | ------------------------------------------------- |
+| `top-bottom`    | Element's top edge hits viewport's bottom edge    |
+| `top-center`    | Element's top edge hits viewport's center         |
+| `top-top`       | Element's top edge hits viewport's top edge       |
+| `center-bottom` | Element's center hits viewport's bottom edge      |
+| `center-center` | Element's center hits viewport's center           |
+| `center-top`    | Element's center hits viewport's top edge         |
 | `bottom-bottom` | Element's bottom edge hits viewport's bottom edge |
-| `bottom-center` | Element's bottom edge hits viewport's center |
-| `bottom-top` | Element's bottom edge hits viewport's top edge |
+| `bottom-center` | Element's bottom edge hits viewport's center      |
+| `bottom-top`    | Element's bottom edge hits viewport's top edge    |
 
 ### Visual Examples
 
@@ -509,14 +511,10 @@ bottom-top:
 
 ```html
 <!-- Trigger early (when bottom of element reaches top of viewport) -->
-<div data-aos="fade-up" data-aos-anchor-placement="bottom-top">
-  Content
-</div>
+<div data-aos="fade-up" data-aos-anchor-placement="bottom-top">Content</div>
 
 <!-- Trigger when centered -->
-<div data-aos="fade-up" data-aos-anchor-placement="center-center">
-  Content
-</div>
+<div data-aos="fade-up" data-aos-anchor-placement="center-center">Content</div>
 ```
 
 ## Disable Options
@@ -527,7 +525,7 @@ The `disable` option controls when AOS is disabled.
 
 ```javascript
 AOS.init({ disable: false }); // Always enabled
-AOS.init({ disable: true });  // Always disabled
+AOS.init({ disable: true }); // Always disabled
 ```
 
 ### String Values
@@ -537,7 +535,7 @@ AOS.init({ disable: true });  // Always disabled
 Disables on mobile devices (phones and tablets).
 
 ```javascript
-AOS.init({ disable: 'mobile' });
+AOS.init({ disable: "mobile" });
 ```
 
 Matches: `window.innerWidth < 768 || navigator.userAgent.match(/Mobile|Tablet/)`
@@ -547,7 +545,7 @@ Matches: `window.innerWidth < 768 || navigator.userAgent.match(/Mobile|Tablet/)`
 Disables only on phones.
 
 ```javascript
-AOS.init({ disable: 'phone' });
+AOS.init({ disable: "phone" });
 ```
 
 Matches: `window.innerWidth < 480`
@@ -557,7 +555,7 @@ Matches: `window.innerWidth < 480`
 Disables only on tablets.
 
 ```javascript
-AOS.init({ disable: 'tablet' });
+AOS.init({ disable: "tablet" });
 ```
 
 Matches: `window.innerWidth < 1024 && window.innerWidth >= 768`
@@ -568,72 +566,72 @@ Custom function for fine-grained control.
 
 ```javascript
 AOS.init({
-  disable: function() {
+  disable: function () {
     // Disable on small screens
     return window.innerWidth < 768;
-  }
+  },
 });
 ```
 
 ```javascript
 AOS.init({
-  disable: function() {
+  disable: function () {
     // Disable in IE
     return /MSIE|Trident/.test(navigator.userAgent);
-  }
+  },
 });
 ```
 
 ```javascript
 AOS.init({
-  disable: function() {
+  disable: function () {
     // Disable based on user preference
-    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  }
+    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  },
 });
 ```
 
 ## Complete Example
 
 ```javascript
-import AOS from 'aos';
-import 'aos/dist/aos.css';
+import AOS from "aos";
+import "aos/dist/aos.css";
 
 // Initialize with full configuration
 AOS.init({
   // Animation settings
   duration: 800,
   delay: 0,
-  easing: 'ease-out-cubic',
+  easing: "ease-out-cubic",
 
   // Trigger settings
   offset: 120,
-  anchorPlacement: 'top-bottom',
+  anchorPlacement: "top-bottom",
 
   // Behavior
   once: true,
   mirror: false,
 
   // Device settings
-  disable: 'mobile',
+  disable: "mobile",
 
   // Performance
-  startEvent: 'DOMContentLoaded',
+  startEvent: "DOMContentLoaded",
   throttleDelay: 99,
   debounceDelay: 50,
-  disableMutationObserver: false
+  disableMutationObserver: false,
 });
 
 // Listen to events
-document.addEventListener('aos:in', ({ detail }) => {
-  console.log('Element animated in:', detail);
+document.addEventListener("aos:in", ({ detail }) => {
+  console.log("Element animated in:", detail);
 });
 
 // Refresh after dynamic changes
 function addNewElement() {
-  const el = document.createElement('div');
-  el.setAttribute('data-aos', 'fade-up');
-  el.textContent = 'New content';
+  const el = document.createElement("div");
+  el.setAttribute("data-aos", "fade-up");
+  el.textContent = "New content";
   document.body.appendChild(el);
 
   // Refresh AOS to detect new element
@@ -653,6 +651,7 @@ AOS works in all modern browsers:
 - Chrome for Android (latest)
 
 **Note**: IE11 support requires polyfills for:
+
 - `Array.prototype.forEach`
 - `Element.prototype.classList`
 - `Object.assign`
@@ -662,21 +661,24 @@ AOS works in all modern browsers:
 ### Best Practices
 
 1. **Use `once: true` for better performance**
+
    ```javascript
    AOS.init({ once: true });
    ```
 
 2. **Increase throttle/debounce delays on slower devices**
+
    ```javascript
    AOS.init({
      throttleDelay: 120,
-     debounceDelay: 80
+     debounceDelay: 80,
    });
    ```
 
 3. **Disable on mobile if not needed**
+
    ```javascript
-   AOS.init({ disable: 'mobile' });
+   AOS.init({ disable: "mobile" });
    ```
 
 4. **Use simpler animations**
@@ -693,9 +695,9 @@ Respect user preferences for reduced motion:
 
 ```javascript
 AOS.init({
-  disable: function() {
-    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  }
+  disable: function () {
+    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  },
 });
 ```
 

@@ -1,7 +1,10 @@
 "use server";
 
 import { PublicMfaVerifyRequestSchema } from "@atlas/contracts/domain-identity/schemas/public-auth";
-import { resolvePostAuthRedirect, resolveSafeRedirectPath } from "../../../../lib/auth/safe-redirect";
+import {
+  resolvePostAuthRedirect,
+  resolveSafeRedirectPath,
+} from "../../../../lib/auth/safe-redirect";
 import { readFormString } from "../../../../lib/server/form";
 import { serverPublicApi } from "../../../../lib/server/public-auth-fetch";
 

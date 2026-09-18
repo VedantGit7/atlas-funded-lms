@@ -116,7 +116,9 @@ export function StudioAttachTagScreen({
 
           <p className="text-sm font-semibold text-[var(--admin-primary-strong)]">Add Tag</p>
           <header className="mb-6 mt-1">
-            <h1 className="text-2xl font-bold text-[var(--admin-on-surface)] md:text-3xl">Add Tag</h1>
+            <h1 className="text-2xl font-bold text-[var(--admin-on-surface)] md:text-3xl">
+              Add Tag
+            </h1>
             <p className={`${builderHelperClassName} mt-2`}>
               Choose an existing tag from your catalog or create a new one.
             </p>

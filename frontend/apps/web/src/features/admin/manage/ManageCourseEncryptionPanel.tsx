@@ -68,7 +68,9 @@ export function ManageCourseEncryptionPanel() {
     setLoading(true);
     setError(null);
     try {
-      const response = await clientApi.get<CoursesListResponse>("/api/v1/courses?view=studio&limit=100");
+      const response = await clientApi.get<CoursesListResponse>(
+        "/api/v1/courses?view=studio&limit=100",
+      );
       setCourses(response.data.items);
     } catch (caught) {
       setError(formatError(caught));
@@ -165,13 +167,20 @@ export function ManageCourseEncryptionPanel() {
                 {courses.map((course) => {
                   const encrypted = isEncrypted(course.tags);
                   return (
-                    <tr key={course.id} className="border-b border-[var(--admin-border)] last:border-b-0">
+                    <tr
+                      key={course.id}
+                      className="border-b border-[var(--admin-border)] last:border-b-0"
+                    >
                       <td className={`${manageTableTdClassName} font-semibold`}>{course.title}</td>
                       <td className={manageTableTdClassName}>
-                        <span className={manageStatusChipClassName("neutral")}>{course.status}</span>
+                        <span className={manageStatusChipClassName("neutral")}>
+                          {course.status}
+                        </span>
                       </td>
                       <td className={manageTableTdClassName}>
-                        <span className={manageStatusChipClassName(encrypted ? "success" : "neutral")}>
+                        <span
+                          className={manageStatusChipClassName(encrypted ? "success" : "neutral")}
+                        >
                           {encrypted ? "Encrypted" : "Not encrypted"}
                         </span>
                       </td>

@@ -136,7 +136,7 @@ function stringList(value: unknown): string[] | null {
 
 function daysValue(value: unknown): number | null {
   if (value && typeof value === "object" && !Array.isArray(value) && "days" in value) {
-    return numberValue((value as { days: unknown }).days);
+    return numberValue(value.days);
   }
   return numberValue(value);
 }
@@ -185,12 +185,7 @@ export function isConditionComplete(
   if (!allowed.includes(condition.operator)) return false;
 
   const op = condition.operator;
-  if (
-    op === "is_empty" ||
-    op === "is_not_empty" ||
-    op === "is_true" ||
-    op === "is_false"
-  ) {
+  if (op === "is_empty" || op === "is_not_empty" || op === "is_true" || op === "is_false") {
     return true;
   }
   if (op === "between") {
@@ -231,10 +226,7 @@ export function assessConditionsCompleteness(
   };
 }
 
-function buildCustomFieldExists(
-  fieldKeyParam: string,
-  extraPredicate: string,
-): string {
+function buildCustomFieldExists(fieldKeyParam: string, extraPredicate: string): string {
   return `exists (
     select 1
     from custom_field_values cfv
@@ -565,7 +557,7 @@ function buildConditionSql(
 
 function joinPredicates(parts: string[], combinator: "and" | "or"): string {
   if (parts.length === 0) return "false";
-  if (parts.length === 1) return parts[0]!;
+  if (parts.length === 1) return parts[0] ?? "false";
   return `(${parts.join(` ${combinator} `)})`;
 }
 
@@ -688,6 +680,9 @@ export function formatConditionValue(condition: SegmentCondition): string {
     return days == null ? "" : `${days} days`;
   }
   if (condition.value == null) return "";
+  // An object here would render as "[object Object]" in the segment summary
+  // shown to admins; JSON is at least inspectable.
+  if (typeof condition.value === "object") return JSON.stringify(condition.value);
   return String(condition.value);
 }
 

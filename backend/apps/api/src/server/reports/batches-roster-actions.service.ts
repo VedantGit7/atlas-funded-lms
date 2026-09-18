@@ -7,9 +7,7 @@ import {
   sendBatchMessageResponseSchema,
 } from "@atlas/domain/reports/batches-roster.dto";
 import { batchRosterMessageFailed } from "@atlas/domain/reports/batches-roster.errors";
-import {
-  batchesRosterRepository,
-} from "@atlas/domain/reports/batches-roster.repository";
+import { batchesRosterRepository } from "@atlas/domain/reports/batches-roster.repository";
 import { resolveBatchMembershipIds } from "@atlas/domain/reports/batches-roster.service";
 import { createReportRun } from "@atlas/domain/reports/reports.service";
 import { marketingEmailRepository } from "../marketing-email/marketing-email.repository";
@@ -35,14 +33,10 @@ async function resolveActorLabel(tx: TenantTx, membershipId: string): Promise<st
   return rows[0]?.label ?? null;
 }
 
-export async function sendBatchRosterMessage(
-  tx: TenantTx,
-  ctx: ServiceCtx,
-  rawBody: unknown,
-) {
+export async function sendBatchRosterMessage(tx: TenantTx, ctx: ServiceCtx, rawBody: unknown) {
   const body = sendBatchMessageBodySchema.parse(rawBody);
   const sendGroupId = randomUUID();
-  const channels = body.channels ?? ["email"];
+  const channels = body.channels;
   const wantsEmail = channels.includes("email");
   const wantsInApp = channels.includes("in_app");
   const scheduleAt = body.scheduleAt ? new Date(body.scheduleAt) : null;
@@ -59,12 +53,11 @@ export async function sendBatchRosterMessage(
   });
 
   if (body.excludeMessagedWithinDays && body.excludeMessagedWithinDays > 0) {
-    const recentlyMessaged =
-      await batchesRosterRepository.listRecentlyMessagedMembershipIds(
-        tx,
-        body.batchId,
-        body.excludeMessagedWithinDays,
-      );
+    const recentlyMessaged = await batchesRosterRepository.listRecentlyMessagedMembershipIds(
+      tx,
+      body.batchId,
+      body.excludeMessagedWithinDays,
+    );
     const exclude = new Set(recentlyMessaged);
     membershipIds = membershipIds.filter((id) => !exclude.has(id));
   }
@@ -76,9 +69,7 @@ export async function sendBatchRosterMessage(
   const sentByLabel = await resolveActorLabel(tx, ctx.actorMembershipId);
   const audienceLabel =
     body.audienceLabel?.trim() ||
-    (body.membershipIds?.length
-      ? `${membershipIds.length} learners`
-      : "Whole batch");
+    (body.membershipIds?.length ? `${membershipIds.length} learners` : "Whole batch");
 
   const basePayload = {
     batchId: body.batchId,
@@ -103,10 +94,7 @@ export async function sendBatchRosterMessage(
       );
     }
 
-    const targets = await marketingEmailRepository.listRecipientDeliveryTargets(
-      tx,
-      membershipIds,
-    );
+    const targets = await marketingEmailRepository.listRecipientDeliveryTargets(tx, membershipIds);
     skippedCount += membershipIds.length - targets.length;
 
     for (const target of targets) {

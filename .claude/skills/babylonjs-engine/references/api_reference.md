@@ -36,21 +36,23 @@ new Engine(
 ```
 
 **Parameters:**
+
 - `canvasOrContext`: HTML canvas element or WebGL context
 - `antialias`: Enable anti-aliasing (default: false)
 - `options`: Engine configuration options
 - `adaptToDeviceRatio`: Adapt to device pixel ratio (default: false)
 
 **EngineOptions:**
+
 ```typescript
 interface EngineOptions {
-  preserveDrawingBuffer?: boolean;     // Keep buffer for screenshots
-  stencil?: boolean;                   // Enable stencil buffer
-  disableWebGL2Support?: boolean;      // Force WebGL 1
-  powerPreference?: string;            // "high-performance" | "low-power"
+  preserveDrawingBuffer?: boolean; // Keep buffer for screenshots
+  stencil?: boolean; // Enable stencil buffer
+  disableWebGL2Support?: boolean; // Force WebGL 1
+  powerPreference?: string; // "high-performance" | "low-power"
   failIfMajorPerformanceCaveat?: boolean;
-  deterministicLockstep?: boolean;     // Fixed timestep
-  lockstepMaxSteps?: number;           // Max steps per frame
+  deterministicLockstep?: boolean; // Fixed timestep
+  lockstepMaxSteps?: number; // Max steps per frame
 }
 ```
 
@@ -68,6 +70,7 @@ engine.doNotHandleContextLost: boolean          // Disable context lost recovery
 #### Methods
 
 **Rendering**
+
 ```typescript
 engine.runRenderLoop(renderFunction: () => void): void
 engine.stopRenderLoop(renderFunction?: () => void): void
@@ -78,6 +81,7 @@ engine.setSize(width: number, height: number, forceSetSize?: boolean): void
 ```
 
 **Frame Info**
+
 ```typescript
 engine.getFps(): number
 engine.getDeltaTime(): number                   // Milliseconds since last frame
@@ -85,6 +89,7 @@ engine.getTimeStep(): number                    // Time step in ms
 ```
 
 **State Management**
+
 ```typescript
 engine.wipeCaches(bruteForce?: boolean): void
 engine.dispose(): void
@@ -92,6 +97,7 @@ engine.clear(color: Color4, backBuffer: boolean, depth: boolean, stencil?: boole
 ```
 
 **Screenshots**
+
 ```typescript
 engine.createScreenshot(
   camera: Camera,
@@ -130,18 +136,20 @@ new Scene(
 ```
 
 **SceneOptions:**
+
 ```typescript
 interface SceneOptions {
-  useGeometryUniqueIdsMap?: boolean;      // Faster geometry operations
-  useMaterialMeshMap?: boolean;           // Faster material operations
-  useClonedMeshMap?: boolean;             // Faster clone operations
-  virtual?: boolean;                      // Don't render automatically
+  useGeometryUniqueIdsMap?: boolean; // Faster geometry operations
+  useMaterialMeshMap?: boolean; // Faster material operations
+  useClonedMeshMap?: boolean; // Faster clone operations
+  virtual?: boolean; // Don't render automatically
 }
 ```
 
 #### Properties
 
 **Core**
+
 ```typescript
 scene.activeCamera: Camera | null               // Current rendering camera
 scene.activeCameras: Camera[]                   // For multi-viewport
@@ -154,6 +162,7 @@ scene.transformNodes: TransformNode[]           // Transform-only nodes
 ```
 
 **Rendering**
+
 ```typescript
 scene.autoClear: boolean                        // Auto-clear buffers
 scene.autoClearDepthAndStencil: boolean         // Auto-clear depth/stencil
@@ -168,6 +177,7 @@ scene.fogColor: Color3                          // Fog color
 ```
 
 **Optimization**
+
 ```typescript
 scene.blockMaterialDirtyMechanism: boolean      // Prevent material updates
 scene.useDelayedTextureLoading: boolean         // Lazy texture loading
@@ -177,6 +187,7 @@ scene.skipFrustumClipping: boolean              // Disable frustum culling
 ```
 
 **Animation**
+
 ```typescript
 scene.animationsEnabled: boolean                // Enable animations
 scene.useConstantAnimationDeltaTime: boolean    // Fixed timestep
@@ -186,6 +197,7 @@ scene.constantlyUpdateMeshUnderPointer: boolean // Continuous picking
 #### Methods
 
 **Rendering**
+
 ```typescript
 scene.render(updateCameras?: boolean, ignoreAnimations?: boolean): void
 scene.enableDepthRenderer(camera?: Camera, useFloat?: boolean): DepthRenderer
@@ -193,6 +205,7 @@ scene.enableGeometryBufferRenderer(ratio?: number): GeometryBufferRenderer
 ```
 
 **Mesh Management**
+
 ```typescript
 scene.getMeshByName(name: string): AbstractMesh | null
 scene.getMeshById(id: string): AbstractMesh | null
@@ -201,6 +214,7 @@ scene.removeMesh(mesh: AbstractMesh): number
 ```
 
 **Camera Management**
+
 ```typescript
 scene.getCameraByName(name: string): Camera | null
 scene.getCameraById(id: string): Camera | null
@@ -208,6 +222,7 @@ scene.removeCamera(camera: Camera): number
 ```
 
 **Light Management**
+
 ```typescript
 scene.getLightByName(name: string): Light | null
 scene.getLightById(id: string): Light | null
@@ -215,6 +230,7 @@ scene.removeLight(light: Light): number
 ```
 
 **Material Management**
+
 ```typescript
 scene.getMaterialByName(name: string): Material | null
 scene.getMaterialById(id: string): Material | null
@@ -222,6 +238,7 @@ scene.removeMaterial(material: Material): number
 ```
 
 **Animation**
+
 ```typescript
 scene.beginAnimation(
   target: any,
@@ -241,6 +258,7 @@ scene.getAnimatableByTarget(target: any): Animatable | null
 ```
 
 **Picking**
+
 ```typescript
 scene.pick(
   x: number,
@@ -265,6 +283,7 @@ scene.multiPick(
 ```
 
 **Environment**
+
 ```typescript
 scene.createDefaultEnvironment(options?: IEnvironmentHelperOptions): EnvironmentHelper | null
 scene.createDefaultCameraOrLight(
@@ -282,6 +301,7 @@ scene.createDefaultSkybox(
 ```
 
 **Optimization**
+
 ```typescript
 scene.createOrUpdateSelectionOctree(
   maxCapacity?: number,
@@ -293,6 +313,7 @@ scene.unfreezeActiveMeshes(): Scene
 ```
 
 **Cleanup**
+
 ```typescript
 scene.dispose(): void
 scene.disposeSounds(): void
@@ -350,6 +371,7 @@ new FreeCamera(
 ```
 
 **Properties:**
+
 ```typescript
 camera.ellipsoid: Vector3                       // Collision ellipsoid
 camera.checkCollisions: boolean                 // Enable collisions
@@ -363,6 +385,7 @@ camera.keysDownward: number[]                   // Key codes for down (fly mode)
 ```
 
 **Methods:**
+
 ```typescript
 camera.attachControl(noPreventDefault?: boolean): void
 camera.detachControl(): void
@@ -385,6 +408,7 @@ new ArcRotateCamera(
 ```
 
 **Properties:**
+
 ```typescript
 camera.alpha: number                            // Horizontal angle
 camera.beta: number                             // Vertical angle
@@ -407,6 +431,7 @@ camera.panningSensibility: number               // Pan sensitivity
 ```
 
 **Methods:**
+
 ```typescript
 camera.setPosition(position: Vector3): void
 camera.setTarget(target: Vector3): void
@@ -441,6 +466,7 @@ new FollowCamera(
 ```
 
 **Properties:**
+
 ```typescript
 camera.lockedTarget: AbstractMesh               // Mesh to follow
 camera.radius: number                           // Distance from target
@@ -482,6 +508,7 @@ new HemisphericLight(
 ```
 
 **Properties:**
+
 ```typescript
 light.groundColor: Color3                       // Color from below
 light.direction: Vector3                        // Light direction
@@ -500,6 +527,7 @@ new DirectionalLight(
 ```
 
 **Properties:**
+
 ```typescript
 light.direction: Vector3                        // Light direction
 light.position: Vector3                         // For shadow calculation
@@ -526,6 +554,7 @@ new PointLight(
 ```
 
 **Properties:**
+
 ```typescript
 light.position: Vector3                         // Light position
 light.shadowMinZ: number                        // Shadow near plane
@@ -548,6 +577,7 @@ new SpotLight(
 ```
 
 **Properties:**
+
 ```typescript
 light.position: Vector3                         // Light position
 light.direction: Vector3                        // Light direction
@@ -581,6 +611,7 @@ new Mesh(
 #### Properties
 
 **Transform**
+
 ```typescript
 mesh.position: Vector3                          // World position
 mesh.rotation: Vector3                          // Euler rotation
@@ -591,6 +622,7 @@ mesh.billboardMode: number                      // Mesh.BILLBOARDMODE_*
 ```
 
 **Visibility**
+
 ```typescript
 mesh.isVisible: boolean                         // Render visibility
 mesh.visibility: number                         // Transparency (0-1)
@@ -601,6 +633,7 @@ mesh.showBoundingBox: boolean                   // Debug bounds
 ```
 
 **Rendering**
+
 ```typescript
 mesh.material: Material | null                  // Applied material
 mesh.receiveShadows: boolean                    // Receive shadows
@@ -613,6 +646,7 @@ mesh.isOcclusionQueryInProgress: boolean        // Query in progress
 ```
 
 **Collisions**
+
 ```typescript
 mesh.checkCollisions: boolean                   // Enable collision detection
 mesh.ellipsoid: Vector3                         // Collision shape
@@ -620,6 +654,7 @@ mesh.ellipsoidOffset: Vector3                   // Collision offset
 ```
 
 **LOD**
+
 ```typescript
 mesh.useLODScreenCoverage: boolean              // Use screen coverage for LOD
 ```
@@ -627,6 +662,7 @@ mesh.useLODScreenCoverage: boolean              // Use screen coverage for LOD
 #### Methods
 
 **Transform**
+
 ```typescript
 mesh.setAbsolutePosition(absolutePosition: Vector3): Mesh
 mesh.getAbsolutePosition(): Vector3
@@ -640,6 +676,7 @@ mesh.rotateAround(point: Vector3, axis: Vector3, amount: number): Mesh
 ```
 
 **Geometry**
+
 ```typescript
 mesh.getBoundingInfo(): BoundingInfo
 mesh.refreshBoundingInfo(applySkeleton?: boolean): Mesh
@@ -651,12 +688,14 @@ mesh.getTotalIndices(): number
 ```
 
 **Cloning**
+
 ```typescript
 mesh.clone(name: string, newParent?: Node | null, doNotCloneChildren?: boolean): Mesh
 mesh.createInstance(name: string): InstancedMesh
 ```
 
 **LOD**
+
 ```typescript
 mesh.addLODLevel(distanceOrScreenCoverage: number, mesh: Mesh | null): Mesh
 mesh.removeLODLevel(mesh: Mesh): Mesh
@@ -664,6 +703,7 @@ mesh.getLODLevelAtDistance(distance: number): Mesh | null
 ```
 
 **Optimization**
+
 ```typescript
 mesh.convertToFlatShadedMesh(): Mesh
 mesh.convertToUnIndexedMesh(): Mesh
@@ -675,6 +715,7 @@ mesh.unfreezeWorldMatrix(): Mesh
 ```
 
 **Disposal**
+
 ```typescript
 mesh.dispose(doNotRecurse?: boolean, disposeMaterialAndTextures?: boolean): void
 ```
@@ -828,6 +869,7 @@ new StandardMaterial(
 #### Properties
 
 **Colors**
+
 ```typescript
 material.diffuseColor: Color3                   // Main color
 material.specularColor: Color3                  // Highlight color
@@ -837,6 +879,7 @@ material.specularPower: number                  // Shininess (1-128)
 ```
 
 **Textures**
+
 ```typescript
 material.diffuseTexture: BaseTexture | null     // Albedo map
 material.ambientTexture: BaseTexture | null     // Ambient occlusion
@@ -850,6 +893,7 @@ material.refractionTexture: BaseTexture | null  // Refraction map
 ```
 
 **Rendering**
+
 ```typescript
 material.alpha: number                          // Opacity (0-1)
 material.backFaceCulling: boolean               // Cull back faces
@@ -863,6 +907,7 @@ material.fillMode: number                       // Material.FILLMODE_*
 ```
 
 **Lighting**
+
 ```typescript
 material.useEmissiveAsIllumination: boolean     // Emissive as light
 material.linkEmissiveWithDiffuse: boolean       // Tie colors
@@ -878,6 +923,7 @@ material.useGlossinessFromSpecularMapAlpha: boolean  // Glossiness source
 ```
 
 **Fresnel**
+
 ```typescript
 material.diffuseFresnelParameters: FresnelParameters | null
 material.opacityFresnelParameters: FresnelParameters | null
@@ -913,6 +959,7 @@ new PBRMaterial(
 #### Properties
 
 **Metallic-Roughness Workflow**
+
 ```typescript
 material.metallic: number | null                // Metalness (0-1)
 material.roughness: number | null               // Roughness (0-1)
@@ -926,6 +973,7 @@ material.albedoTexture: BaseTexture | null      // Same as baseTexture
 ```
 
 **Specular-Glossiness Workflow**
+
 ```typescript
 material.reflectivityColor: Color3              // Specular color
 material.reflectivityTexture: BaseTexture | null  // Specular map
@@ -935,6 +983,7 @@ material.useMicroSurfaceFromReflectivityMapAlpha: boolean
 ```
 
 **Other Maps**
+
 ```typescript
 material.bumpTexture: BaseTexture | null        // Normal map
 material.ambientTexture: BaseTexture | null     // Ambient occlusion
@@ -947,6 +996,7 @@ material.opacityTexture: BaseTexture | null     // Opacity map
 ```
 
 **Environment**
+
 ```typescript
 material.environmentTexture: BaseTexture | null  // IBL/reflection
 material.environmentIntensity: number           // Environment strength
@@ -955,6 +1005,7 @@ material.useSpecularOverAlpha: boolean          // Spec over alpha
 ```
 
 **Rendering**
+
 ```typescript
 material.alpha: number                          // Opacity (0-1)
 material.transparencyMode: number | null        // PBRMaterial.PBRMATERIAL_*
@@ -968,6 +1019,7 @@ material.unlit: boolean                         // Same as above
 ```
 
 **Advanced**
+
 ```typescript
 material.usePhysicalLightFalloff: boolean       // Inverse square falloff
 material.useRadianceOcclusion: boolean          // Radiance AO
@@ -1080,6 +1132,7 @@ new RenderTargetTexture(
 ```
 
 **Properties:**
+
 ```typescript
 renderTarget.renderList: AbstractMesh[] | null  // Meshes to render
 renderTarget.activeCamera: Camera | null        // Render camera
@@ -1124,34 +1177,37 @@ new PhysicsAggregate(
 ```
 
 **PhysicsShapeType:**
+
 ```typescript
-BABYLON.PhysicsShapeType.SPHERE
-BABYLON.PhysicsShapeType.BOX
-BABYLON.PhysicsShapeType.CAPSULE
-BABYLON.PhysicsShapeType.CYLINDER
-BABYLON.PhysicsShapeType.CONVEX_HULL
-BABYLON.PhysicsShapeType.MESH
-BABYLON.PhysicsShapeType.HEIGHTFIELD
-BABYLON.PhysicsShapeType.CONTAINER
+BABYLON.PhysicsShapeType.SPHERE;
+BABYLON.PhysicsShapeType.BOX;
+BABYLON.PhysicsShapeType.CAPSULE;
+BABYLON.PhysicsShapeType.CYLINDER;
+BABYLON.PhysicsShapeType.CONVEX_HULL;
+BABYLON.PhysicsShapeType.MESH;
+BABYLON.PhysicsShapeType.HEIGHTFIELD;
+BABYLON.PhysicsShapeType.CONTAINER;
 ```
 
 **PhysicsAggregateParameters:**
+
 ```typescript
 interface PhysicsAggregateParameters {
-  mass?: number;                                // 0 = static
-  restitution?: number;                         // Bounciness (0-1)
-  friction?: number;                            // Surface friction
-  startAsleep?: boolean;                        // Start inactive
-  ignoreChildren?: boolean;                     // Ignore child meshes
+  mass?: number; // 0 = static
+  restitution?: number; // Bounciness (0-1)
+  friction?: number; // Surface friction
+  startAsleep?: boolean; // Start inactive
+  ignoreChildren?: boolean; // Ignore child meshes
   disableBidirectionalTransformation?: boolean;
-  pressure?: number;                            // For soft bodies
-  stiffness?: number;                           // For soft bodies
+  pressure?: number; // For soft bodies
+  stiffness?: number; // For soft bodies
   velocityIterations?: number;
   positionIterations?: number;
 }
 ```
 
 **Properties:**
+
 ```typescript
 aggregate.body: PhysicsBody                     // Physics body
 aggregate.shape: PhysicsShape                   // Collision shape
@@ -1159,6 +1215,7 @@ aggregate.transformNode: TransformNode          // Associated node
 ```
 
 **Methods:**
+
 ```typescript
 aggregate.dispose(): void
 ```
@@ -1221,23 +1278,25 @@ new Animation(
 ```
 
 **Data Types:**
+
 ```typescript
-Animation.ANIMATIONTYPE_FLOAT
-Animation.ANIMATIONTYPE_VECTOR2
-Animation.ANIMATIONTYPE_VECTOR3
-Animation.ANIMATIONTYPE_QUATERNION
-Animation.ANIMATIONTYPE_MATRIX
-Animation.ANIMATIONTYPE_COLOR3
-Animation.ANIMATIONTYPE_COLOR4
-Animation.ANIMATIONTYPE_SIZE
+Animation.ANIMATIONTYPE_FLOAT;
+Animation.ANIMATIONTYPE_VECTOR2;
+Animation.ANIMATIONTYPE_VECTOR3;
+Animation.ANIMATIONTYPE_QUATERNION;
+Animation.ANIMATIONTYPE_MATRIX;
+Animation.ANIMATIONTYPE_COLOR3;
+Animation.ANIMATIONTYPE_COLOR4;
+Animation.ANIMATIONTYPE_SIZE;
 ```
 
 **Loop Modes:**
+
 ```typescript
-Animation.ANIMATIONLOOPMODE_RELATIVE  // Continue from current
-Animation.ANIMATIONLOOPMODE_CYCLE     // Loop
-Animation.ANIMATIONLOOPMODE_CONSTANT  // Stop at end
-Animation.ANIMATIONLOOPMODE_YOYO      // Ping-pong
+Animation.ANIMATIONLOOPMODE_RELATIVE; // Continue from current
+Animation.ANIMATIONLOOPMODE_CYCLE; // Loop
+Animation.ANIMATIONLOOPMODE_CONSTANT; // Stop at end
+Animation.ANIMATIONLOOPMODE_YOYO; // Ping-pong
 ```
 
 #### Methods
@@ -1295,10 +1354,10 @@ animationGroup.speedRatio = 2.0;  // 2x speed
 
 ```typescript
 // Fullscreen UI
-const advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI('UI', true, scene);
+const advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI", true, scene);
 
 // Mesh UI
-const plane = BABYLON.MeshBuilder.CreatePlane('plane', {size: 2}, scene);
+const plane = BABYLON.MeshBuilder.CreatePlane("plane", { size: 2 }, scene);
 const advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateForMesh(plane, 1024, 1024);
 
 // Add controls
@@ -1309,29 +1368,29 @@ advancedTexture.addControl(control);
 
 ```typescript
 // Button
-const button = BABYLON.GUI.Button.CreateSimpleButton('button', 'Click Me');
-button.width = '150px';
-button.height = '40px';
-button.color = 'white';
-button.background = 'green';
-button.onPointerUpObservable.add(() => console.log('Clicked'));
+const button = BABYLON.GUI.Button.CreateSimpleButton("button", "Click Me");
+button.width = "150px";
+button.height = "40px";
+button.color = "white";
+button.background = "green";
+button.onPointerUpObservable.add(() => console.log("Clicked"));
 
 // TextBlock
 const text = new BABYLON.GUI.TextBlock();
-text.text = 'Hello';
-text.color = 'white';
+text.text = "Hello";
+text.color = "white";
 text.fontSize = 24;
 
 // Rectangle
 const rect = new BABYLON.GUI.Rectangle();
-rect.width = '400px';
-rect.height = '200px';
-rect.background = 'red';
+rect.width = "400px";
+rect.height = "200px";
+rect.background = "red";
 
 // Image
-const image = new BABYLON.GUI.Image('image', 'url');
-image.width = '100px';
-image.height = '100px';
+const image = new BABYLON.GUI.Image("image", "url");
+image.width = "100px";
+image.height = "100px";
 
 // Slider
 const slider = new BABYLON.GUI.Slider();
@@ -1351,10 +1410,10 @@ All-in-one post-processing.
 
 ```typescript
 const pipeline = new BABYLON.DefaultRenderingPipeline(
-  'pipeline',
-  true,      // HDR
+  "pipeline",
+  true, // HDR
   scene,
-  [camera]   // cameras
+  [camera], // cameras
 );
 
 // FXAA
@@ -1398,49 +1457,49 @@ pipeline.sharpen.edgeAmount = 0.3;
 
 ```typescript
 // Wrap modes
-Texture.CLAMP_ADDRESSMODE
-Texture.WRAP_ADDRESSMODE
-Texture.MIRROR_ADDRESSMODE
+Texture.CLAMP_ADDRESSMODE;
+Texture.WRAP_ADDRESSMODE;
+Texture.MIRROR_ADDRESSMODE;
 
 // Sampling modes
-Texture.NEAREST_SAMPLINGMODE
-Texture.BILINEAR_SAMPLINGMODE
-Texture.TRILINEAR_SAMPLINGMODE
+Texture.NEAREST_SAMPLINGMODE;
+Texture.BILINEAR_SAMPLINGMODE;
+Texture.TRILINEAR_SAMPLINGMODE;
 
 // Coordinate modes
-Texture.EXPLICIT_MODE
-Texture.SPHERICAL_MODE
-Texture.PLANAR_MODE
-Texture.CUBIC_MODE
-Texture.PROJECTION_MODE
-Texture.SKYBOX_MODE
-Texture.INVCUBIC_MODE
-Texture.EQUIRECTANGULAR_MODE
-Texture.FIXED_EQUIRECTANGULAR_MODE
+Texture.EXPLICIT_MODE;
+Texture.SPHERICAL_MODE;
+Texture.PLANAR_MODE;
+Texture.CUBIC_MODE;
+Texture.PROJECTION_MODE;
+Texture.SKYBOX_MODE;
+Texture.INVCUBIC_MODE;
+Texture.EQUIRECTANGULAR_MODE;
+Texture.FIXED_EQUIRECTANGULAR_MODE;
 ```
 
 ### Material Constants
 
 ```typescript
 // Side orientation
-Material.ClockWiseSideOrientation
-Material.CounterClockWiseSideOrientation
+Material.ClockWiseSideOrientation;
+Material.CounterClockWiseSideOrientation;
 
 // Fill modes
-Material.PointFillMode
-Material.WireFrameFillMode
-Material.TriangleFillMode
+Material.PointFillMode;
+Material.WireFrameFillMode;
+Material.TriangleFillMode;
 
 // Alpha modes
-Material.ALPHA_DISABLE
-Material.ALPHA_ADD
-Material.ALPHA_COMBINE
-Material.ALPHA_SUBTRACT
-Material.ALPHA_MULTIPLY
-Material.ALPHA_MAXIMIZED
-Material.ALPHA_ONEONE
-Material.ALPHA_PREMULTIPLIED
-Material.ALPHA_INTERPOLATE
+Material.ALPHA_DISABLE;
+Material.ALPHA_ADD;
+Material.ALPHA_COMBINE;
+Material.ALPHA_SUBTRACT;
+Material.ALPHA_MULTIPLY;
+Material.ALPHA_MAXIMIZED;
+Material.ALPHA_ONEONE;
+Material.ALPHA_PREMULTIPLIED;
+Material.ALPHA_INTERPOLATE;
 ```
 
 ---

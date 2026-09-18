@@ -85,7 +85,11 @@ export function VerificationFailed({ message, onRetry }: VerificationFailedProps
   const redGlow = "color-mix(in srgb, var(--fba-red) 30%, transparent)";
 
   return (
-    <div role="alert" aria-live="assertive" className="fba-loader-reveal flex flex-col items-center text-center">
+    <div
+      role="alert"
+      aria-live="assertive"
+      className="fba-loader-reveal flex flex-col items-center text-center"
+    >
       <div className="relative mb-8 flex h-[120px] w-[120px] items-center justify-center">
         <span
           aria-hidden
@@ -131,10 +135,12 @@ export function VerificationFailed({ message, onRetry }: VerificationFailedProps
           <HelpIcon />
         </div>
         <div>
-          <h3 className="mb-1 text-[14px] font-bold text-[var(--fba-tx)]">Lost access to your device?</h3>
+          <h3 className="mb-1 text-[14px] font-bold text-[var(--fba-tx)]">
+            Lost access to your device?
+          </h3>
           <p className="text-[13px] leading-[1.6] text-[var(--fba-tx2)]">
-            If you can no longer use your authenticator app, contact our support team to recover your
-            account.
+            If you can no longer use your authenticator app, contact our support team to recover
+            your account.
           </p>
         </div>
       </div>

@@ -305,10 +305,7 @@ export function AuditLogViewer({
       </div>
 
       {selected ? (
-        <aside
-          aria-label="Audit entry details"
-          className={`${pendingPanelClassName} space-y-5`}
-        >
+        <aside aria-label="Audit entry details" className={`${pendingPanelClassName} space-y-5`}>
           <div className="flex items-start justify-between gap-4">
             <div>
               <div className="flex items-center gap-2">

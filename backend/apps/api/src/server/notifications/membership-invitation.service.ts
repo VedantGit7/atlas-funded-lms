@@ -32,7 +32,8 @@ async function resolveRequestOrigin(): Promise<string | null> {
     return null;
   }
 
-  const proto = headerList.get("x-forwarded-proto")?.trim() || (isLocalHost(rawHost) ? "http" : "https");
+  const proto =
+    headerList.get("x-forwarded-proto")?.trim() || (isLocalHost(rawHost) ? "http" : "https");
 
   return `${proto}://${rawHost}`;
 }

@@ -5,7 +5,7 @@ import { announcementResponseSchema } from "../../../../../../server/announcemen
 import { listAnnouncementsMetadata } from "../../../../../../server/announcements/announcements.route-metadata";
 import { getAnnouncement } from "../../../../../../server/announcements/announcements.service";
 
-const paramsSchema = zod.object({ id: zod.string().uuid() });
+const paramsSchema = zod.object({ id: zod.uuid() });
 
 export const GET = createTenantRoute<
   undefined,

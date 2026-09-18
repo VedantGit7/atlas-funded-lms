@@ -28,8 +28,7 @@ type StatusConfig = {
 const STATUS_CONFIG: Record<StatusKey, StatusConfig> = {
   DRAFT: {
     label: "Draft",
-    className:
-      "bg-[var(--admin-surface-high)] text-[var(--admin-on-surface-variant)]",
+    className: "bg-[var(--admin-surface-high)] text-[var(--admin-on-surface-variant)]",
     dotClassName: "bg-[var(--admin-outline)]",
   },
   ACTIVE: {
@@ -86,19 +85,16 @@ function StatusBadge({ status }: { status: string }) {
 
   return (
     <span className={`${badgeClassName} ${cfg.className}`}>
-      <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${cfg.dotClassName}`} aria-hidden="true" />
+      <span
+        className={`h-1.5 w-1.5 shrink-0 rounded-full ${cfg.dotClassName}`}
+        aria-hidden="true"
+      />
       {cfg.label}
     </span>
   );
 }
 
-function ItemRow({
-  item,
-  typeNameByKey,
-}: {
-  item: ItemDto;
-  typeNameByKey: Map<string, string>;
-}) {
+function ItemRow({ item, typeNameByKey }: { item: ItemDto; typeNameByKey: Map<string, string> }) {
   const stem = extractStem(item);
   const typeName = typeNameByKey.get(item.itemTypeKey) ?? item.itemTypeKey;
   const typeVisual = getItemTypeVisual(item.itemTypeKey);
@@ -187,8 +183,8 @@ export function ItemBankEmptyState() {
       </div>
       <h2 className="text-lg font-semibold text-[var(--admin-on-surface)]">No items yet</h2>
       <p className="max-w-sm text-sm text-[var(--admin-on-surface-variant)]">
-        Create your first item using a registered item type. Items can be reused across
-        assessments and practice sets.
+        Create your first item using a registered item type. Items can be reused across assessments
+        and practice sets.
       </p>
       <Link href="/studio/items/new" className={`${primaryButtonClassName} mt-2`}>
         <PlusCircle className="h-4 w-4" aria-hidden="true" />
@@ -203,10 +199,7 @@ export function ItemBankTable({ items, itemTypes }: ItemBankTableProps) {
   const [typeFilter, setTypeFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
 
-  const typeNameByKey = useMemo(
-    () => new Map(itemTypes.map((t) => [t.key, t.name])),
-    [itemTypes],
-  );
+  const typeNameByKey = useMemo(() => new Map(itemTypes.map((t) => [t.key, t.name])), [itemTypes]);
 
   const filtered = useMemo(() => {
     return items.filter((item) => {
@@ -313,8 +306,7 @@ export function ItemBankTable({ items, itemTypes }: ItemBankTableProps) {
             </ul>
             <div className="flex items-center justify-between border-t border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-4 py-3 md:px-6">
               <span className="text-[11px] font-medium text-[var(--admin-on-surface-variant)]">
-                Showing {filtered.length} of {items.length}{" "}
-                {items.length === 1 ? "item" : "items"}
+                Showing {filtered.length} of {items.length} {items.length === 1 ? "item" : "items"}
               </span>
             </div>
           </>

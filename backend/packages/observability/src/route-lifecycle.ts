@@ -11,7 +11,40 @@ export type RouteLifecycleContext = {
   tenantSafeId?: string;
   actorSafeId?: string;
   actorPlane?: "tenant" | "platform" | "public";
+  /**
+   * Maps a thrown error to the error code the route will actually respond with.
+   *
+   * The lifecycle logs the failure and rethrows; the response envelope is built
+   * one level up, in the route factory's catch. Without this hook the logger has
+   * to guess, and its guess drifted: a Zod validation failure carries no `.code`
+   * property, so every malformed request across the API was logged as
+   * `INTERNAL_ERROR` while correctly answering `400 VALIDATION_ERROR`. Callers
+   * pass the same envelope function they answer with, so the log line and the
+   * response cannot disagree.
+   */
+  classifyError?: (error: unknown) => string;
 };
+
+/**
+ * Last-resort classification for callers that pass no `classifyError`.
+ *
+ * Deliberately mirrors `toSafeErrorEnvelope` in `@atlas/core`: a coded error
+ * reports its code, a Zod failure is a client validation error, and anything
+ * else is a genuine fault. `PlatformScopeError` is absent on purpose — the
+ * envelope has no case for it either, so it really does answer 500, and naming
+ * it here would trade one inaccurate log for another.
+ */
+export function classifyRouteErrorCode(error: unknown): string {
+  if (error instanceof Error && "code" in error && typeof error.code === "string") {
+    return error.code;
+  }
+
+  if (error instanceof Error && error.name === "ZodError") {
+    return "VALIDATION_ERROR";
+  }
+
+  return "INTERNAL_ERROR";
+}
 
 export function inferRouteGroup(pathname: string): string {
   if (pathname.startsWith("/api/v1/platform")) {
@@ -85,10 +118,9 @@ export async function runRouteLifecycle<T>(
 
     return result;
   } catch (error) {
-    const errorCode =
-      error instanceof Error && "code" in error && typeof error.code === "string"
-        ? error.code
-        : "INTERNAL_ERROR";
+    const errorCode = context.classifyError
+      ? context.classifyError(error)
+      : classifyRouteErrorCode(error);
 
     structuredLogger.error({
       message: "route.failure",

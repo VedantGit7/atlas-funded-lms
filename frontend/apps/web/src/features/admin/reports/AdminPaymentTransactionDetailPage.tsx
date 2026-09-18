@@ -80,7 +80,9 @@ export function AdminPaymentTransactionDetailPage({ orderId }: Props) {
     if (!detail) return;
     await navigator.clipboard.writeText(detail.id);
     setCopied(true);
-    window.setTimeout(() => setCopied(false), 1500);
+    window.setTimeout(() => {
+      setCopied(false);
+    }, 1500);
   }
 
   return (
@@ -103,9 +105,7 @@ export function AdminPaymentTransactionDetailPage({ orderId }: Props) {
           </Link>
           <span>/</span>
           <span className="text-[var(--admin-on-surface)]">{detail?.displayId ?? "…"}</span>
-          {copied ? (
-            <span className="text-[var(--admin-success)]">Copied order UUID</span>
-          ) : null}
+          {copied ? <span className="text-[var(--admin-success)]">Copied order UUID</span> : null}
         </div>
         <PaymentsReportTabs active="transactions" />
       </div>
@@ -141,7 +141,9 @@ export function AdminPaymentTransactionDetailPage({ orderId }: Props) {
             <button
               type="button"
               className="border border-[var(--admin-border)] px-4 py-2 font-mono text-xs font-bold uppercase tracking-wider"
-              onClick={() => router.push("/admin/reports/payments/transactions")}
+              onClick={() => {
+                router.push("/admin/reports/payments/transactions");
+              }}
             >
               Back to ledger
             </button>
@@ -161,12 +163,16 @@ export function AdminPaymentTransactionDetailPage({ orderId }: Props) {
             busy={busy}
             onCopyId={() => void handleCopyId()}
             onDownloadInvoice={() => void handleDownloadInvoice()}
-            onRefund={() => setRefundOpen(true)}
+            onRefund={() => {
+              setRefundOpen(true);
+            }}
           />
           <AdminPaymentRefundModal
             open={refundOpen}
             detail={detail}
-            onClose={() => setRefundOpen(false)}
+            onClose={() => {
+              setRefundOpen(false);
+            }}
             onRefunded={() => void load()}
           />
         </>

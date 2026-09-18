@@ -30,6 +30,5 @@ export const POST = createTenantRoute<
   metadata: mutateMarketingIntegrationsMetadata,
   body: createMarketingIntegrationWebhookBodySchema,
   output: marketingIntegrationWebhookResponseSchema,
-  handler: async ({ tx, ctx, input }) =>
-    createMarketingIntegrationWebhook(tx, ctx, input),
+  handler: async ({ tx, ctx, input }) => createMarketingIntegrationWebhook(tx, ctx, input),
 });

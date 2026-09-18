@@ -21,7 +21,7 @@ export const PUT = createTenantRoute<
   params: commentIdParamsSchema,
   body: updateCommentBodySchema,
   output: commentDetailResponseSchema,
-  handler: async ({ tx, ctx, params, input }) => updateComment(tx, ctx, params["id"] ?? "", input),
+  handler: async ({ tx, ctx, params, input }) => updateComment(tx, ctx, params.id, input),
 });
 
 export const DELETE = createTenantRoute<
@@ -32,5 +32,5 @@ export const DELETE = createTenantRoute<
   metadata: deleteCommentMetadata,
   params: commentIdParamsSchema,
   output: deleteCommentResponseSchema,
-  handler: async ({ tx, ctx, params }) => deleteComment(tx, ctx, params["id"] ?? ""),
+  handler: async ({ tx, ctx, params }) => deleteComment(tx, ctx, params.id),
 });

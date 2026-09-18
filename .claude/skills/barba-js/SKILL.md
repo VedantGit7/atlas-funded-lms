@@ -12,6 +12,7 @@ Modern page transition library for creating fluid, smooth transitions between we
 Barba.js is a lightweight (7kb minified and compressed) JavaScript library that intercepts navigation between pages, fetches new content via AJAX, and smoothly transitions between old and new containers. It reduces page load delays and HTTP requests while maintaining the benefits of traditional multi-page architecture.
 
 **Core Features**:
+
 - Smooth page transitions without full reloads
 - Lifecycle hooks for precise control over transition phases
 - View-based logic for page-specific behaviors
@@ -27,6 +28,7 @@ Barba.js is a lightweight (7kb minified and compressed) JavaScript library that 
 Barba.js uses a specific DOM structure to manage transitions:
 
 **HTML Structure**:
+
 ```html
 <body data-barba="wrapper">
   <!-- Static elements (header, nav) stay outside container -->
@@ -71,6 +73,7 @@ Barba.js uses a specific DOM structure to manage transitions:
 Barba.js follows a precise lifecycle for each navigation:
 
 **Default Async Flow**:
+
 1. User clicks link
 2. Barba intercepts navigation
 3. Prefetch next page (via AJAX)
@@ -83,6 +86,7 @@ Barba.js follows a precise lifecycle for each navigation:
 10. Update browser history
 
 **Sync Flow** (with `sync: true`):
+
 1. User clicks link
 2. Barba intercepts navigation
 3. Prefetch next page
@@ -96,6 +100,7 @@ Barba.js follows a precise lifecycle for each navigation:
 Barba provides 11 lifecycle hooks for controlling transitions:
 
 **Hook Execution Order**:
+
 ```
 Initial page load:
   beforeOnce → once → afterOnce
@@ -106,11 +111,13 @@ Every navigation:
 ```
 
 **Hook Types**:
+
 - **Global hooks**: Run on every transition (`barba.hooks.before()`)
 - **Transition hooks**: Defined within specific transition objects
 - **View hooks**: Defined within view objects for page-specific logic
 
 **Common Hook Use Cases**:
+
 - `beforeLeave` - Reset scroll position, prepare animations
 - `leave` - Animate current page out
 - `afterLeave` - Clean up old page
@@ -124,25 +131,28 @@ Views are page-specific logic containers that run based on namespace:
 
 ```javascript
 barba.init({
-  views: [{
-    namespace: 'home',
-    beforeEnter() {
-      // Home-specific setup
-      console.log('Entering home page');
+  views: [
+    {
+      namespace: "home",
+      beforeEnter() {
+        // Home-specific setup
+        console.log("Entering home page");
+      },
+      afterEnter() {
+        // Initialize home page features
+        initHomeSlider();
+      },
     },
-    afterEnter() {
-      // Initialize home page features
-      initHomeSlider();
-    }
-  }, {
-    namespace: 'product',
-    beforeEnter() {
-      console.log('Entering product page');
+    {
+      namespace: "product",
+      beforeEnter() {
+        console.log("Entering product page");
+      },
+      afterEnter() {
+        initProductGallery();
+      },
     },
-    afterEnter() {
-      initProductGallery();
-    }
-  }]
+  ],
 });
 ```
 
@@ -151,6 +161,7 @@ barba.init({
 ### 1. Basic Setup
 
 **Installation**:
+
 ```bash
 npm install --save-dev @barba/core
 # or
@@ -158,27 +169,30 @@ yarn add @barba/core --dev
 ```
 
 **Minimal Configuration**:
+
 ```javascript
-import barba from '@barba/core';
+import barba from "@barba/core";
 
 barba.init({
-  transitions: [{
-    name: 'default',
-    leave({ current }) {
-      // Fade out current page
-      return gsap.to(current.container, {
-        opacity: 0,
-        duration: 0.5
-      });
+  transitions: [
+    {
+      name: "default",
+      leave({ current }) {
+        // Fade out current page
+        return gsap.to(current.container, {
+          opacity: 0,
+          duration: 0.5,
+        });
+      },
+      enter({ next }) {
+        // Fade in new page
+        return gsap.from(next.container, {
+          opacity: 0,
+          duration: 0.5,
+        });
+      },
     },
-    enter({ next }) {
-      // Fade in new page
-      return gsap.from(next.container, {
-        opacity: 0,
-        duration: 0.5
-      });
-    }
-  }]
+  ],
 });
 ```
 
@@ -187,31 +201,33 @@ barba.init({
 Classic fade-out, fade-in transition:
 
 ```javascript
-import barba from '@barba/core';
-import gsap from 'gsap';
+import barba from "@barba/core";
+import gsap from "gsap";
 
 barba.init({
-  transitions: [{
-    name: 'fade',
-    async leave({ current }) {
-      await gsap.to(current.container, {
-        opacity: 0,
-        duration: 0.5,
-        ease: 'power2.inOut'
-      });
-    },
-    async enter({ next }) {
-      // Start invisible
-      gsap.set(next.container, { opacity: 0 });
+  transitions: [
+    {
+      name: "fade",
+      async leave({ current }) {
+        await gsap.to(current.container, {
+          opacity: 0,
+          duration: 0.5,
+          ease: "power2.inOut",
+        });
+      },
+      async enter({ next }) {
+        // Start invisible
+        gsap.set(next.container, { opacity: 0 });
 
-      // Fade in
-      await gsap.to(next.container, {
-        opacity: 1,
-        duration: 0.5,
-        ease: 'power2.inOut'
-      });
-    }
-  }]
+        // Fade in
+        await gsap.to(next.container, {
+          opacity: 1,
+          duration: 0.5,
+          ease: "power2.inOut",
+        });
+      },
+    },
+  ],
 });
 ```
 
@@ -221,24 +237,26 @@ Simultaneous fade between pages:
 
 ```javascript
 barba.init({
-  transitions: [{
-    name: 'crossfade',
-    sync: true, // Enable sync mode
-    leave({ current }) {
-      return gsap.to(current.container, {
-        opacity: 0,
-        duration: 0.8,
-        ease: 'power2.inOut'
-      });
+  transitions: [
+    {
+      name: "crossfade",
+      sync: true, // Enable sync mode
+      leave({ current }) {
+        return gsap.to(current.container, {
+          opacity: 0,
+          duration: 0.8,
+          ease: "power2.inOut",
+        });
+      },
+      enter({ next }) {
+        return gsap.from(next.container, {
+          opacity: 0,
+          duration: 0.8,
+          ease: "power2.inOut",
+        });
+      },
     },
-    enter({ next }) {
-      return gsap.from(next.container, {
-        opacity: 0,
-        duration: 0.8,
-        ease: 'power2.inOut'
-      });
-    }
-  }]
+  ],
 });
 ```
 
@@ -248,28 +266,30 @@ Slide old page out, new page in with overlap:
 
 ```javascript
 barba.init({
-  transitions: [{
-    name: 'slide',
-    sync: true,
-    leave({ current }) {
-      return gsap.to(current.container, {
-        x: '-100%',
-        duration: 0.7,
-        ease: 'power3.inOut'
-      });
-    },
-    enter({ next }) {
-      // Start off-screen right
-      gsap.set(next.container, { x: '100%' });
+  transitions: [
+    {
+      name: "slide",
+      sync: true,
+      leave({ current }) {
+        return gsap.to(current.container, {
+          x: "-100%",
+          duration: 0.7,
+          ease: "power3.inOut",
+        });
+      },
+      enter({ next }) {
+        // Start off-screen right
+        gsap.set(next.container, { x: "100%" });
 
-      // Slide in from right
-      return gsap.to(next.container, {
-        x: '0%',
-        duration: 0.7,
-        ease: 'power3.inOut'
-      });
-    }
-  }]
+        // Slide in from right
+        return gsap.to(next.container, {
+          x: "0%",
+          duration: 0.7,
+          ease: "power3.inOut",
+        });
+      },
+    },
+  ],
 });
 ```
 
@@ -282,57 +302,57 @@ barba.init({
   transitions: [
     // Home to any page: fade
     {
-      name: 'from-home-fade',
-      from: { namespace: 'home' },
+      name: "from-home-fade",
+      from: { namespace: "home" },
       leave({ current }) {
         return gsap.to(current.container, {
           opacity: 0,
-          duration: 0.5
+          duration: 0.5,
         });
       },
       enter({ next }) {
         return gsap.from(next.container, {
           opacity: 0,
-          duration: 0.5
+          duration: 0.5,
         });
-      }
+      },
     },
     // Product to product: slide left
     {
-      name: 'product-to-product',
-      from: { namespace: 'product' },
-      to: { namespace: 'product' },
+      name: "product-to-product",
+      from: { namespace: "product" },
+      to: { namespace: "product" },
       leave({ current }) {
         return gsap.to(current.container, {
-          x: '-100%',
-          duration: 0.6
+          x: "-100%",
+          duration: 0.6,
         });
       },
       enter({ next }) {
-        gsap.set(next.container, { x: '100%' });
+        gsap.set(next.container, { x: "100%" });
         return gsap.to(next.container, {
-          x: '0%',
-          duration: 0.6
+          x: "0%",
+          duration: 0.6,
         });
-      }
+      },
     },
     // Default fallback
     {
-      name: 'default',
+      name: "default",
       leave({ current }) {
         return gsap.to(current.container, {
           opacity: 0,
-          duration: 0.3
+          duration: 0.3,
         });
       },
       enter({ next }) {
         return gsap.from(next.container, {
           opacity: 0,
-          duration: 0.3
+          duration: 0.3,
         });
-      }
-    }
-  ]
+      },
+    },
+  ],
 });
 ```
 
@@ -341,48 +361,52 @@ barba.init({
 Use `@barba/router` for route-specific transitions:
 
 **Installation**:
+
 ```bash
 npm install --save-dev @barba/router
 ```
 
 **Usage**:
+
 ```javascript
-import barba from '@barba/core';
-import barbaPrefetch from '@barba/prefetch';
-import barbaRouter from '@barba/router';
+import barba from "@barba/core";
+import barbaPrefetch from "@barba/prefetch";
+import barbaRouter from "@barba/router";
 
 // Define routes
 barbaRouter.init({
   routes: [
-    { path: '/', name: 'home' },
-    { path: '/about', name: 'about' },
-    { path: '/products/:id', name: 'product' }, // Dynamic segment
-    { path: '/blog/:category/:slug', name: 'blog-post' }
-  ]
+    { path: "/", name: "home" },
+    { path: "/about", name: "about" },
+    { path: "/products/:id", name: "product" }, // Dynamic segment
+    { path: "/blog/:category/:slug", name: "blog-post" },
+  ],
 });
 
 barba.use(barbaRouter);
 barba.use(barbaPrefetch); // Optional: prefetch on hover
 
 barba.init({
-  transitions: [{
-    name: 'product-transition',
-    to: { route: 'product' }, // Trigger on route name
-    leave({ current }) {
-      return gsap.to(current.container, {
-        scale: 0.95,
-        opacity: 0,
-        duration: 0.5
-      });
+  transitions: [
+    {
+      name: "product-transition",
+      to: { route: "product" }, // Trigger on route name
+      leave({ current }) {
+        return gsap.to(current.container, {
+          scale: 0.95,
+          opacity: 0,
+          duration: 0.5,
+        });
+      },
+      enter({ next }) {
+        return gsap.from(next.container, {
+          scale: 1.05,
+          opacity: 0,
+          duration: 0.5,
+        });
+      },
     },
-    enter({ next }) {
-      return gsap.from(next.container, {
-        scale: 1.05,
-        opacity: 0,
-        duration: 0.5
-      });
-    }
-  }]
+  ],
 });
 ```
 
@@ -392,32 +416,34 @@ Show loading state during page fetch:
 
 ```javascript
 barba.init({
-  transitions: [{
-    async leave({ current }) {
-      // Show loader
-      const loader = document.querySelector('.loader');
-      gsap.set(loader, { display: 'flex', opacity: 0 });
-      gsap.to(loader, { opacity: 1, duration: 0.3 });
+  transitions: [
+    {
+      async leave({ current }) {
+        // Show loader
+        const loader = document.querySelector(".loader");
+        gsap.set(loader, { display: "flex", opacity: 0 });
+        gsap.to(loader, { opacity: 1, duration: 0.3 });
 
-      // Fade out page
-      await gsap.to(current.container, {
-        opacity: 0,
-        duration: 0.5
-      });
+        // Fade out page
+        await gsap.to(current.container, {
+          opacity: 0,
+          duration: 0.5,
+        });
+      },
+      async enter({ next }) {
+        // Hide loader
+        const loader = document.querySelector(".loader");
+        await gsap.to(loader, { opacity: 0, duration: 0.3 });
+        gsap.set(loader, { display: "none" });
+
+        // Fade in page
+        await gsap.from(next.container, {
+          opacity: 0,
+          duration: 0.5,
+        });
+      },
     },
-    async enter({ next }) {
-      // Hide loader
-      const loader = document.querySelector('.loader');
-      await gsap.to(loader, { opacity: 0, duration: 0.3 });
-      gsap.set(loader, { display: 'none' });
-
-      // Fade in page
-      await gsap.from(next.container, {
-        opacity: 0,
-        duration: 0.5
-      });
-    }
-  }]
+  ],
 });
 ```
 
@@ -428,60 +454,71 @@ barba.init({
 Barba.js works seamlessly with GSAP for animations:
 
 **Timeline-Based Transitions**:
+
 ```javascript
-import barba from '@barba/core';
-import gsap from 'gsap';
+import barba from "@barba/core";
+import gsap from "gsap";
 
 barba.init({
-  transitions: [{
-    async leave({ current }) {
-      const tl = gsap.timeline();
+  transitions: [
+    {
+      async leave({ current }) {
+        const tl = gsap.timeline();
 
-      tl.to(current.container.querySelector('h1'), {
-        y: -50,
-        opacity: 0,
-        duration: 0.3
-      })
-      .to(current.container.querySelector('.content'), {
-        y: -30,
-        opacity: 0,
-        duration: 0.3
-      }, '-=0.2')
-      .to(current.container, {
-        opacity: 0,
-        duration: 0.2
-      });
+        tl.to(current.container.querySelector("h1"), {
+          y: -50,
+          opacity: 0,
+          duration: 0.3,
+        })
+          .to(
+            current.container.querySelector(".content"),
+            {
+              y: -30,
+              opacity: 0,
+              duration: 0.3,
+            },
+            "-=0.2",
+          )
+          .to(current.container, {
+            opacity: 0,
+            duration: 0.2,
+          });
 
-      await tl.play();
+        await tl.play();
+      },
+      async enter({ next }) {
+        const tl = gsap.timeline();
+
+        // Set initial states
+        gsap.set(next.container, { opacity: 0 });
+        gsap.set(next.container.querySelector("h1"), { y: 50, opacity: 0 });
+        gsap.set(next.container.querySelector(".content"), { y: 30, opacity: 0 });
+
+        tl.to(next.container, {
+          opacity: 1,
+          duration: 0.2,
+        })
+          .to(next.container.querySelector("h1"), {
+            y: 0,
+            opacity: 1,
+            duration: 0.5,
+            ease: "power3.out",
+          })
+          .to(
+            next.container.querySelector(".content"),
+            {
+              y: 0,
+              opacity: 1,
+              duration: 0.5,
+              ease: "power3.out",
+            },
+            "-=0.3",
+          );
+
+        await tl.play();
+      },
     },
-    async enter({ next }) {
-      const tl = gsap.timeline();
-
-      // Set initial states
-      gsap.set(next.container, { opacity: 0 });
-      gsap.set(next.container.querySelector('h1'), { y: 50, opacity: 0 });
-      gsap.set(next.container.querySelector('.content'), { y: 30, opacity: 0 });
-
-      tl.to(next.container, {
-        opacity: 1,
-        duration: 0.2
-      })
-      .to(next.container.querySelector('h1'), {
-        y: 0,
-        opacity: 1,
-        duration: 0.5,
-        ease: 'power3.out'
-      })
-      .to(next.container.querySelector('.content'), {
-        y: 0,
-        opacity: 1,
-        duration: 0.5,
-        ease: 'power3.out'
-      }, '-=0.3');
-
-      await tl.play();
-    }
-  }]
+  ],
 });
 ```
 
@@ -495,7 +532,7 @@ Initialize libraries or scripts per page:
 barba.init({
   views: [
     {
-      namespace: 'home',
+      namespace: "home",
       afterEnter() {
         // Initialize home page features
         initHomepageSlider();
@@ -504,19 +541,19 @@ barba.init({
       beforeLeave() {
         // Clean up
         destroyHomepageSlider();
-      }
+      },
     },
     {
-      namespace: 'gallery',
+      namespace: "gallery",
       afterEnter() {
         initLightbox();
         initMasonry();
       },
       beforeLeave() {
         destroyLightbox();
-      }
-    }
-  ]
+      },
+    },
+  ],
 });
 ```
 
@@ -527,17 +564,17 @@ Track page views on navigation:
 ```javascript
 barba.hooks.after(() => {
   // Google Analytics
-  if (typeof gtag !== 'undefined') {
-    gtag('config', 'GA_MEASUREMENT_ID', {
-      page_path: window.location.pathname
+  if (typeof gtag !== "undefined") {
+    gtag("config", "GA_MEASUREMENT_ID", {
+      page_path: window.location.pathname,
     });
   }
 
   // Or use data layer
   window.dataLayer = window.dataLayer || [];
   window.dataLayer.push({
-    event: 'pageview',
-    page: window.location.pathname
+    event: "pageview",
+    page: window.location.pathname,
   });
 });
 ```
@@ -549,16 +586,16 @@ Re-run scripts after page transitions:
 ```javascript
 barba.hooks.after(() => {
   // Re-initialize third-party widgets
-  if (typeof twttr !== 'undefined') {
+  if (typeof twttr !== "undefined") {
     twttr.widgets.load(); // Twitter widgets
   }
 
-  if (typeof FB !== 'undefined') {
+  if (typeof FB !== "undefined") {
     FB.XFBML.parse(); // Facebook widgets
   }
 
   // Re-run syntax highlighting
-  if (typeof Prism !== 'undefined') {
+  if (typeof Prism !== "undefined") {
     Prism.highlightAll();
   }
 });
@@ -575,8 +612,8 @@ npm install --save-dev @barba/prefetch
 ```
 
 ```javascript
-import barba from '@barba/core';
-import barbaPrefetch from '@barba/prefetch';
+import barba from "@barba/core";
+import barbaPrefetch from "@barba/prefetch";
 
 barba.use(barbaPrefetch);
 
@@ -584,8 +621,8 @@ barba.init({
   // Prefetch fires on link hover by default
   prefetch: {
     root: null, // Observe all links
-    timeout: 3000 // Cache timeout in ms
-  }
+    timeout: 3000, // Cache timeout in ms
+  },
 });
 ```
 
@@ -611,14 +648,14 @@ gsap.to(element, {
   opacity: 0,
   x: -100,
   scale: 0.9,
-  rotation: 45
+  rotation: 45,
 });
 
 // ❌ Avoid - causes reflow/repaint
 gsap.to(element, {
-  width: '50%',
-  height: '300px',
-  top: '100px'
+  width: "50%",
+  height: "300px",
+  top: "100px",
 });
 ```
 
@@ -628,18 +665,20 @@ Remove listeners in `beforeLeave` or view hooks:
 
 ```javascript
 barba.init({
-  views: [{
-    namespace: 'home',
-    afterEnter() {
-      // Add listeners
-      this.clickHandler = () => console.log('clicked');
-      document.querySelector('.btn').addEventListener('click', this.clickHandler);
+  views: [
+    {
+      namespace: "home",
+      afterEnter() {
+        // Add listeners
+        this.clickHandler = () => console.log("clicked");
+        document.querySelector(".btn").addEventListener("click", this.clickHandler);
+      },
+      beforeLeave() {
+        // Remove listeners
+        document.querySelector(".btn").removeEventListener("click", this.clickHandler);
+      },
     },
-    beforeLeave() {
-      // Remove listeners
-      document.querySelector('.btn').removeEventListener('click', this.clickHandler);
-    }
-  }]
+  ],
 });
 ```
 
@@ -649,22 +688,24 @@ Defer image loading until after transition:
 
 ```javascript
 barba.init({
-  transitions: [{
-    async enter({ next }) {
-      // Complete transition first
-      await gsap.from(next.container, {
-        opacity: 0,
-        duration: 0.5
-      });
+  transitions: [
+    {
+      async enter({ next }) {
+        // Complete transition first
+        await gsap.from(next.container, {
+          opacity: 0,
+          duration: 0.5,
+        });
 
-      // Then load images
-      const images = next.container.querySelectorAll('img[data-src]');
-      images.forEach(img => {
-        img.src = img.dataset.src;
-        img.removeAttribute('data-src');
-      });
-    }
-  }]
+        // Then load images
+        const images = next.container.querySelectorAll("img[data-src]");
+        images.forEach((img) => {
+          img.src = img.dataset.src;
+          img.removeAttribute("data-src");
+        });
+      },
+    },
+  ],
 });
 ```
 
@@ -703,11 +744,11 @@ async leave({ current }) {
 barba.init({
   prevent: ({ href }) => {
     // Allow external links
-    if (href.indexOf('http') > -1 && href.indexOf(window.location.host) === -1) {
+    if (href.indexOf("http") > -1 && href.indexOf(window.location.host) === -1) {
       return true;
     }
     return false;
-  }
+  },
 });
 ```
 
@@ -751,8 +792,8 @@ npm install --save-dev @barba/head
 ```
 
 ```javascript
-import barba from '@barba/core';
-import barbaHead from '@barba/head';
+import barba from "@barba/core";
+import barbaHead from "@barba/head";
 
 barba.use(barbaHead);
 
@@ -766,16 +807,16 @@ Or manually:
 ```javascript
 barba.hooks.after(({ next }) => {
   // Update title
-  document.title = next.html.querySelector('title').textContent;
+  document.title = next.html.querySelector("title").textContent;
 
   // Update meta tags
-  const newMeta = next.html.querySelectorAll('meta');
-  newMeta.forEach(meta => {
-    const name = meta.getAttribute('name') || meta.getAttribute('property');
+  const newMeta = next.html.querySelectorAll("meta");
+  newMeta.forEach((meta) => {
+    const name = meta.getAttribute("name") || meta.getAttribute("property");
     if (name) {
       const existing = document.querySelector(`meta[name="${name}"], meta[property="${name}"]`);
       if (existing) {
-        existing.setAttribute('content', meta.getAttribute('content'));
+        existing.setAttribute("content", meta.getAttribute("content"));
       }
     }
   });
@@ -829,17 +870,19 @@ Or manage in JavaScript:
 
 ```javascript
 barba.init({
-  transitions: [{
-    sync: true,
-    beforeLeave({ current }) {
-      gsap.set(current.container, {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        width: '100%'
-      });
-    }
-  }]
+  transitions: [
+    {
+      sync: true,
+      beforeLeave({ current }) {
+        gsap.set(current.container, {
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100%",
+        });
+      },
+    },
+  ],
 });
 ```
 
@@ -848,19 +891,25 @@ barba.init({
 This skill includes:
 
 ### scripts/
+
 Executable utilities for common Barba.js tasks:
+
 - `transition_generator.py` - Generate transition boilerplate code
 - `project_setup.py` - Initialize Barba.js project structure
 
 ### references/
+
 Detailed documentation:
+
 - `api_reference.md` - Complete Barba.js API (hooks, transitions, views, router)
 - `hooks_guide.md` - All 11 hooks with execution order and use cases
 - `gsap_integration.md` - GSAP animation patterns for Barba transitions
 - `transition_patterns.md` - Common transition implementations
 
 ### assets/
+
 Templates and starter projects:
+
 - `starter_barba/` - Complete Barba.js + GSAP starter template
 - `examples/` - Real-world transition implementations
 

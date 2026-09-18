@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useMemo,
-  useState,
-  type ReactNode,
-} from "react";
+import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
 import { ClientApiError, clientApi } from "../../lib/client-api";
 import { captureProductEvent } from "../../observability/capture-product-event";
 
@@ -124,7 +117,9 @@ export function LessonProgressProvider({
     } catch (completeError) {
       setProgress(previous);
       setCompleteError(
-        completeError instanceof ClientApiError ? completeError.message : "Failed to save progress.",
+        completeError instanceof ClientApiError
+          ? completeError.message
+          : "Failed to save progress.",
       );
       setAutosave("error");
     } finally {
@@ -145,9 +140,7 @@ export function LessonProgressProvider({
     [autosave, completeBusy, completeError, lessonId, markComplete, progress, updatePosition],
   );
 
-  return (
-    <LessonProgressContext.Provider value={value}>{children}</LessonProgressContext.Provider>
-  );
+  return <LessonProgressContext.Provider value={value}>{children}</LessonProgressContext.Provider>;
 }
 
 export function useLessonProgress(): LessonProgressContextValue {

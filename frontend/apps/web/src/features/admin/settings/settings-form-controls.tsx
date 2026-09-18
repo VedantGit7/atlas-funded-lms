@@ -105,7 +105,9 @@ export function SettingToggleCard({
     <div className="flex items-start justify-between gap-4 rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)] p-5 shadow-sm">
       <div className="min-w-0">
         <p className="text-sm font-semibold text-[var(--admin-on-surface)]">{title}</p>
-        <p className="mt-1 text-sm leading-relaxed text-[var(--admin-on-surface-variant)]">{description}</p>
+        <p className="mt-1 text-sm leading-relaxed text-[var(--admin-on-surface-variant)]">
+          {description}
+        </p>
       </div>
       <button
         type="button"
@@ -216,7 +218,9 @@ export function SettingTextField({
           className={[
             inputClassName,
             suffix ? "pr-28" : "",
-            error ? "border-[var(--admin-danger)] focus:border-[var(--admin-danger)] focus:ring-[var(--admin-danger)]/30" : "",
+            error
+              ? "border-[var(--admin-danger)] focus:border-[var(--admin-danger)] focus:ring-[var(--admin-danger)]/30"
+              : "",
           ].join(" ")}
         />
         {suffix ? (

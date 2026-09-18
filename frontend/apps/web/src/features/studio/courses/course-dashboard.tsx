@@ -14,10 +14,7 @@ import {
   type CourseLearnerRow,
 } from "../learners/api";
 import { useCourseDetailActions } from "./course-detail-context";
-import {
-  courseDetailCardClassName,
-  courseDetailMutedTextClassName,
-} from "./course-detail-shared";
+import { courseDetailCardClassName, courseDetailMutedTextClassName } from "./course-detail-shared";
 
 type CourseDetail = z.infer<typeof studioCourseDetailSchema>;
 type ModuleItem = z.infer<typeof studioModuleOutlineItemSchema>;
@@ -35,19 +32,15 @@ type DashboardMetrics = {
   learners: CourseLearnerRow[];
 };
 
-function DashboardMetricCard({
-  label,
-  value,
-}: {
-  label: string;
-  value: React.ReactNode;
-}) {
+function DashboardMetricCard({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div
       className={`${courseDetailCardClassName} flex min-h-[7.5rem] flex-col justify-between p-5 shadow-sm`}
     >
       <p className="text-sm font-medium text-[var(--admin-on-surface-variant)]">{label}</p>
-      <div className="text-3xl font-bold tracking-tight text-[var(--admin-on-surface)]">{value}</div>
+      <div className="text-3xl font-bold tracking-tight text-[var(--admin-on-surface)]">
+        {value}
+      </div>
     </div>
   );
 }
@@ -92,7 +85,10 @@ function DashboardLearnerTable({ learners }: { learners: CourseLearnerRow[] }) {
           </thead>
           <tbody className="divide-y divide-[var(--admin-border)]">
             {learners.map((row) => (
-              <tr key={row.enrollmentId} className="transition-colors hover:bg-[var(--admin-surface-high)]">
+              <tr
+                key={row.enrollmentId}
+                className="transition-colors hover:bg-[var(--admin-surface-high)]"
+              >
                 <td className="px-5 py-3 font-medium text-[var(--admin-on-surface)]">
                   {row.displayName}
                 </td>
@@ -139,9 +135,7 @@ export function CourseDashboard({ course, modules }: CourseDashboardProps) {
   const { dashboardRefreshToken } = useCourseDetailActions();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [metrics, setMetrics] = useState<DashboardMetrics>(() =>
-    computeMetrics([], lessonCount),
-  );
+  const [metrics, setMetrics] = useState<DashboardMetrics>(() => computeMetrics([], lessonCount));
 
   useEffect(() => {
     let cancelled = false;
@@ -176,10 +170,7 @@ export function CourseDashboard({ course, modules }: CourseDashboardProps) {
   return (
     <div className="mx-auto w-full max-w-6xl space-y-8 px-4 py-8 md:px-8">
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <DashboardMetricCard
-          label="Enrolled"
-          value={loading ? "—" : metrics.enrolledCount}
-        />
+        <DashboardMetricCard label="Enrolled" value={loading ? "—" : metrics.enrolledCount} />
         <DashboardMetricCard
           label="Average Completion Rate"
           value={loading ? "—" : `${metrics.averageCompletionRate}%`}

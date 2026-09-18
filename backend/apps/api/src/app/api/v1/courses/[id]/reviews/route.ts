@@ -1,6 +1,9 @@
 import type { z } from "zod";
 import { createTenantRoute } from "@atlas/api";
-import { getCourseReviews, submitCourseReview } from "../../../../../../server/reviews/reviews.service";
+import {
+  getCourseReviews,
+  submitCourseReview,
+} from "../../../../../../server/reviews/reviews.service";
 import {
   courseReviewIdParamsSchema,
   courseReviewsQuerySchema,

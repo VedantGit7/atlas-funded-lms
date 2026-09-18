@@ -1,0 +1,13 @@
+{
+  "_comment": "Pages that are legitimately reached by URL rather than by an in-app link. Every entry needs a reason: an unexplained entry here is indistinguishable from a screen nobody can find, which is the exact defect this gate exists to catch.",
+  "directEntryPoints": [
+    {
+      "path": "/",
+      "reason": "Site root. Reached by opening the domain, so no in-app link precedes it."
+    },
+    {
+      "path": "/swipe",
+      "reason": "Deliberate legacy redirect to /practice, kept so existing bookmarks and external links continue to resolve. Nothing should link to it — that is the point."
+    }
+  ]
+}

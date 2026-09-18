@@ -7,7 +7,12 @@ export default async function PlatformTenantsPage() {
 
   if (access.kind === "denied") {
     return (
-      <PlatformPageGate screenId="P1" state="denied" title="Tenants" deniedMessage={access.message} />
+      <PlatformPageGate
+        screenId="P1"
+        state="denied"
+        title="Tenants"
+        deniedMessage={access.message}
+      />
     );
   }
 

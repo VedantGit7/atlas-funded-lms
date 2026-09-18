@@ -68,7 +68,8 @@ function gateReason(gate: ProgressGate, enrolledAt: string | null): string {
     case "competency_band": {
       const band = configString(gate.config, "bandKey", "minBandKey");
       const composite = configString(gate.config, "compositeKey", "dimensionKey");
-      if (band && composite) return `Reach the ${humanize(band)} band in ${humanize(composite)} to unlock.`;
+      if (band && composite)
+        return `Reach the ${humanize(band)} band in ${humanize(composite)} to unlock.`;
       if (band) return `Reach the ${humanize(band)} competency band to unlock.`;
       return "Reach the required competency band to unlock.";
     }
@@ -77,13 +78,17 @@ function gateReason(gate: ProgressGate, enrolledAt: string | null): string {
       if (availableFrom && !Number.isNaN(Date.parse(availableFrom))) {
         const date = new Date(availableFrom);
         const daysLeft = Math.ceil((date.getTime() - Date.now()) / 86_400_000);
-        return daysLeft > 0 ? `Unlocks in ${String(daysLeft)} day${daysLeft === 1 ? "" : "s"}.` : "Now available.";
+        return daysLeft > 0
+          ? `Unlocks in ${String(daysLeft)} day${daysLeft === 1 ? "" : "s"}.`
+          : "Now available.";
       }
       const days = gate.config["daysSinceEnroll"];
       if (typeof days === "number" && enrolledAt) {
         const unlockAt = new Date(new Date(enrolledAt).getTime() + days * 86_400_000);
         const daysLeft = Math.ceil((unlockAt.getTime() - Date.now()) / 86_400_000);
-        return daysLeft > 0 ? `Unlocks in ${String(daysLeft)} day${daysLeft === 1 ? "" : "s"}.` : "Now available.";
+        return daysLeft > 0
+          ? `Unlocks in ${String(daysLeft)} day${daysLeft === 1 ? "" : "s"}.`
+          : "Now available.";
       }
       return "Unlocks on a schedule set by your academy.";
     }
@@ -121,7 +126,9 @@ export function RoadmapJourney({
   const [enrolling, setEnrolling] = useState(false);
 
   const percent = totalStepCount > 0 ? Math.round((completedStepCount / totalStepCount) * 100) : 0;
-  const nextStep = nextAction.stepId ? steps.find((s) => s.stepId === nextAction.stepId) ?? null : null;
+  const nextStep = nextAction.stepId
+    ? (steps.find((s) => s.stepId === nextAction.stepId) ?? null)
+    : null;
   const nextHref = nextStep?.href ?? detailHref;
   const isComplete = nextAction.type === "complete";
   const isWaiting = nextAction.type === "wait_for_gate";
@@ -159,7 +166,11 @@ export function RoadmapJourney({
             <span
               className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-full text-primary-foreground shadow-lg ${isComplete ? "bg-[var(--success)]" : "bg-primary"}`}
             >
-              {isComplete ? <Trophy className="h-7 w-7" aria-hidden="true" /> : <Play className="h-8 w-8" fill="currentColor" aria-hidden="true" />}
+              {isComplete ? (
+                <Trophy className="h-7 w-7" aria-hidden="true" />
+              ) : (
+                <Play className="h-8 w-8" fill="currentColor" aria-hidden="true" />
+              )}
             </span>
             <div>
               <p className="text-xs font-bold uppercase tracking-[0.15em] text-primary/70">
@@ -184,7 +195,9 @@ export function RoadmapJourney({
                 : isWaiting
                   ? nextAction.label
                   : "Start lesson"}
-            {!enrolling && !isWaiting ? <ArrowRight className="h-4 w-4" aria-hidden="true" /> : null}
+            {!enrolling && !isWaiting ? (
+              <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            ) : null}
           </button>
         </div>
       </section>
@@ -208,8 +221,14 @@ export function RoadmapJourney({
       {/* Winding path */}
       <ol className="relative mx-auto flex max-w-xl flex-col items-center py-4">
         {/* Spine */}
-        <div className="pointer-events-none absolute bottom-0 top-0 left-1/2 flex w-1 -translate-x-1/2 flex-col" aria-hidden="true">
-          <div className="w-full rounded-full bg-primary" style={{ height: `${String(percent)}%` }} />
+        <div
+          className="pointer-events-none absolute bottom-0 top-0 left-1/2 flex w-1 -translate-x-1/2 flex-col"
+          aria-hidden="true"
+        >
+          <div
+            className="w-full rounded-full bg-primary"
+            style={{ height: `${String(percent)}%` }}
+          />
           <div className="w-0 flex-1 self-center border-l-[3px] border-dashed border-border" />
         </div>
 
@@ -319,7 +338,9 @@ export function RoadmapJourney({
                         Prerequisite required
                       </span>
                     </div>
-                    <p className="text-xs font-medium leading-relaxed text-muted-foreground">{reason}</p>
+                    <p className="text-xs font-medium leading-relaxed text-muted-foreground">
+                      {reason}
+                    </p>
                   </div>
                 </div>
               ) : (

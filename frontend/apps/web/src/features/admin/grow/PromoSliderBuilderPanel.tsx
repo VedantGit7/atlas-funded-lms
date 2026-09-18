@@ -98,7 +98,7 @@ function fromLocalInput(value: string): string | null {
 }
 
 function mapSlides(slides: PromoSlideDto[]): EditableSlide[] {
-  return slides.map((slide, index) => ({
+  return slides.map((slide, _index) => ({
     id: slide.id,
     name: slide.name,
     imageUrl: slide.imageUrl ?? "",
@@ -106,7 +106,7 @@ function mapSlides(slides: PromoSlideDto[]): EditableSlide[] {
     linkUrl: slide.linkUrl ?? "",
     startsAt: toLocalInput(slide.startsAt),
     endsAt: toLocalInput(slide.endsAt),
-    sortOrder: slide.sortOrder ?? index,
+    sortOrder: slide.sortOrder,
     scheduleEnabled: slideHasSchedule(slide),
   }));
 }
@@ -188,7 +188,6 @@ function CarouselPreview({
             <div className="relative">
               <div className="relative aspect-[21/9] overflow-hidden rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)]">
                 {current?.imageUrl.trim() ? (
-                  // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={current.imageUrl.trim()}
                     alt={current.name}
@@ -335,9 +334,7 @@ export function PromoSliderBuilderPanel({ sliderId }: { sliderId: string }) {
   }, [selectedIndex, slides.length]);
 
   function updateSlide(index: number, patch: Partial<EditableSlide>) {
-    setSlides((prev) =>
-      prev.map((slide, i) => (i === index ? { ...slide, ...patch } : slide)),
-    );
+    setSlides((prev) => prev.map((slide, i) => (i === index ? { ...slide, ...patch } : slide)));
   }
 
   function moveSlide(fromIndex: number, toIndex: number) {
@@ -348,7 +345,9 @@ export function PromoSliderBuilderPanel({ sliderId }: { sliderId: string }) {
 
   function removeSlide(index: number) {
     setSlides((prev) => {
-      const next = prev.filter((_, i) => i !== index).map((slide, i) => ({ ...slide, sortOrder: i }));
+      const next = prev
+        .filter((_, i) => i !== index)
+        .map((slide, i) => ({ ...slide, sortOrder: i }));
       return next;
     });
     setSelectedIndex((current) => Math.max(0, current >= index ? current - 1 : current));
@@ -482,7 +481,9 @@ export function PromoSliderBuilderPanel({ sliderId }: { sliderId: string }) {
   }
 
   if (loading) {
-    return <p className="text-sm text-[var(--admin-on-surface-variant)]">Loading promo slider...</p>;
+    return (
+      <p className="text-sm text-[var(--admin-on-surface-variant)]">Loading promo slider...</p>
+    );
   }
   if (!slider) {
     return <p className="text-sm text-[var(--admin-danger)]">Promo slider not found.</p>;
@@ -885,7 +886,10 @@ export function PromoSliderBuilderPanel({ sliderId }: { sliderId: string }) {
                   {selectedSlide.scheduleEnabled ? (
                     <div className="grid gap-3 sm:grid-cols-2">
                       <div>
-                        <label htmlFor="promo-slide-starts" className={MESSENGER_WIZARD_LABEL_CLASS}>
+                        <label
+                          htmlFor="promo-slide-starts"
+                          className={MESSENGER_WIZARD_LABEL_CLASS}
+                        >
                           Starts at
                         </label>
                         <input
@@ -955,14 +959,13 @@ export function PromoSliderBuilderPanel({ sliderId }: { sliderId: string }) {
         <div className="max-w-xl space-y-4 rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)] p-5">
           <p className="text-sm text-[var(--admin-on-surface-variant)]">
             Status:{" "}
-            <strong className="text-[var(--admin-on-surface)]">{promoStatusLabel(slider.status)}</strong>
+            <strong className="text-[var(--admin-on-surface)]">
+              {promoStatusLabel(slider.status)}
+            </strong>
             . At least one slide with an image is required to go Live. Expired slides are hidden
             automatically.
             {slider.publishedAt ? (
-              <>
-                {" "}
-                Last published {formatPromoDateTime(slider.publishedAt)}.
-              </>
+              <> Last published {formatPromoDateTime(slider.publishedAt)}.</>
             ) : null}
           </p>
           <div className="flex flex-wrap gap-2">
@@ -1032,8 +1035,8 @@ export function PromoSliderBuilderPanel({ sliderId }: { sliderId: string }) {
             </h2>
             <p className="text-sm text-[var(--admin-on-surface-variant)]">
               Type{" "}
-              <span className="font-semibold text-[var(--admin-on-surface)]">{slider.title}</span> to
-              confirm.
+              <span className="font-semibold text-[var(--admin-on-surface)]">{slider.title}</span>{" "}
+              to confirm.
             </p>
             <input
               value={deleteConfirm}

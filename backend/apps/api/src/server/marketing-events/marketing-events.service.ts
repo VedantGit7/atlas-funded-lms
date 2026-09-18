@@ -15,10 +15,7 @@ import {
   registerPublicMarketingEventResponseSchema,
   updateMarketingEventBodySchema,
 } from "./marketing-events.schemas";
-import {
-  marketingEventsRepository,
-  type MarketingEventRow,
-} from "./marketing-events.repository";
+import { marketingEventsRepository, type MarketingEventRow } from "./marketing-events.repository";
 
 function notFound(message = "Event not found.") {
   return new AtlasHttpError({ code: "PERMISSION_DENIED", status: 404, message });
@@ -104,7 +101,7 @@ export async function listMarketingEvents(tx: TenantTx, _ctx: ServiceCtx, rawQue
   const query = marketingEventsListQuerySchema.parse(rawQuery ?? {});
   const [rows, summary] = await Promise.all([
     marketingEventsRepository.list(tx, {
-      ...(query.status ? { status: query.status } : {}),
+      status: query.status,
       ...(query.q ? { q: query.q } : {}),
       limit: query.limit,
     }),
@@ -180,10 +177,9 @@ export async function updateMarketingEvent(
 }
 
 export async function publishMarketingEvent(tx: TenantTx, _ctx: ServiceCtx, id: string) {
+  // `starts_at` is NOT NULL and required by both the create and update
+  // paths, so there is no missing-start-date state to guard against here.
   const existing = await requireEvent(tx, id);
-  if (!existing.starts_at) {
-    throw validationError("Set a start date before publishing.");
-  }
   await marketingEventsRepository.setStatus(tx, existing.id, "LIVE");
   return marketingEventResponseSchema.parse({
     data: toDto(await requireEvent(tx, id)),
@@ -216,11 +212,7 @@ export async function deleteMarketingEvent(
   return deleteMarketingEventResponseSchema.parse({ data: { id, deleted: true as const } });
 }
 
-export async function listMarketingEventRegistrations(
-  tx: TenantTx,
-  _ctx: ServiceCtx,
-  id: string,
-) {
+export async function listMarketingEventRegistrations(tx: TenantTx, _ctx: ServiceCtx, id: string) {
   await requireEvent(tx, id);
   const rows = await marketingEventsRepository.listRegistrations(tx, id);
   return marketingEventRegistrationsListResponseSchema.parse({
@@ -252,11 +244,7 @@ export async function getPublicMarketingEvent(tx: TenantTx, id: string) {
   return publicMarketingEventResponseSchema.parse({ data: toPublicDto(row) });
 }
 
-export async function registerPublicMarketingEvent(
-  tx: TenantTx,
-  id: string,
-  rawBody: unknown,
-) {
+export async function registerPublicMarketingEvent(tx: TenantTx, id: string, rawBody: unknown) {
   const body = registerPublicMarketingEventBodySchema.parse(rawBody);
   const event = await requireEvent(tx, id);
   if (event.status !== "LIVE") throw notFound("Event is not open for registration.");
@@ -267,7 +255,7 @@ export async function registerPublicMarketingEvent(
     eventId: id,
     email: body.email,
     name: emptyToNull(body.name),
-    source: body.source ?? "LINK",
+    source: body.source,
   });
   return registerPublicMarketingEventResponseSchema.parse({
     data: {

@@ -127,7 +127,7 @@ export function LearnerNewsfeedFeed() {
                   : `/newsfeed/${activePromo.slug}`
               }
               prefetch={false}
-              className="block overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--card)]"
+              className="block overflow-hidden rounded-xl border border-[var(--border)] bg-card"
             >
               {activePromo.coverImageUrl ? (
                 <img
@@ -267,7 +267,7 @@ export function LearnerNewsfeedFeed() {
                 key={article.id}
                 href={`/newsfeed/${article.slug}`}
                 prefetch={false}
-                className="overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--card)] transition-colors hover:border-[var(--foreground)]/30"
+                className="overflow-hidden rounded-xl border border-[var(--border)] bg-card transition-colors hover:border-[var(--foreground)]/30"
               >
                 {article.coverImageUrl ? (
                   <img src={article.coverImageUrl} alt="" className="h-40 w-full object-cover" />

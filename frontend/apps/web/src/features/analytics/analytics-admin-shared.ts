@@ -30,11 +30,9 @@ export const analyticsMainClassName =
 export const analyticsTopBarClassName =
   "sticky top-0 z-10 flex flex-wrap items-center justify-between gap-4 border-b border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 py-4 sm:px-6";
 
-export const analyticsContentClassName =
-  "flex-1 overflow-y-auto p-4 sm:p-6";
+export const analyticsContentClassName = "flex-1 overflow-y-auto p-4 sm:p-6";
 
-export const analyticsTabNavClassName =
-  "flex border-b border-[var(--admin-border)]";
+export const analyticsTabNavClassName = "flex border-b border-[var(--admin-border)]";
 
 export const analyticsTabButtonClassName =
   "flex items-center gap-2 px-5 py-3 text-sm font-medium text-[var(--admin-on-surface-variant)] transition-colors hover:text-[var(--admin-primary)]";

@@ -1,16 +1,18 @@
 import type { TenantTx } from "@atlas/db";
 import { batchesRepository } from "../batches/batches.repository";
 import type { ServiceCtx } from "../shared/domain.types";
+import type {
+  customFieldDetailBooleanSchema,
+  customFieldDetailCrossTabSchema,
+  customFieldDetailNumberSchema,
+  customFieldDetailSelectSchema,
+  customFieldDetailTextSchema,
+} from "./custom-field-roster.dto";
 import {
   createCustomFieldGroupResponseSchema,
   customFieldCatalogueResponseSchema,
   customFieldDefinitionsReportResponseSchema,
-  customFieldDetailBooleanSchema,
-  customFieldDetailCrossTabSchema,
-  customFieldDetailNumberSchema,
   customFieldDetailResponseSchema,
-  customFieldDetailSelectSchema,
-  customFieldDetailTextSchema,
   customFieldLearnerDetailResponseSchema,
   customFieldRosterListResponseSchema,
   updateCustomFieldLearnerValuesResponseSchema,
@@ -128,9 +130,7 @@ export async function listCustomFieldCatalogue(
 
   const mapped = rows.map((row) => {
     const coveragePct =
-      row.learner_count === 0
-        ? null
-        : (row.filled_count / row.learner_count) * 100;
+      row.learner_count === 0 ? null : (row.filled_count / row.learner_count) * 100;
     const options = parseOptionsJson(row.options_json);
     const mostCommonValue = formatCustomValue(row.most_common_value_json);
     const mostCommonSharePct =
@@ -140,12 +140,15 @@ export async function listCustomFieldCatalogue(
 
     const isSelect = row.field_type === "select";
     const optionsUsedCount =
-      isSelect && options.length > 0
-        ? Math.min(row.distinct_value_count, options.length)
-        : null;
+      isSelect && options.length > 0 ? Math.min(row.distinct_value_count, options.length) : null;
     const unusedOptions =
-      isSelect && options.length > 0 && optionsUsedCount != null && optionsUsedCount < options.length
-        ? [`${options.length - optionsUsedCount} option${options.length - optionsUsedCount === 1 ? "" : "s"} unused`]
+      isSelect &&
+      options.length > 0 &&
+      optionsUsedCount != null &&
+      optionsUsedCount < options.length
+        ? [
+            `${options.length - optionsUsedCount} option${options.length - optionsUsedCount === 1 ? "" : "s"} unused`,
+          ]
         : [];
 
     return {
@@ -199,23 +202,19 @@ export async function listCustomFieldCatalogue(
   if (query.fieldType) {
     filtered = filtered.filter((item) => item.fieldType === query.fieldType);
   }
-  if (query.status && query.status !== "ALL") {
+  if (query.status !== "ALL") {
     filtered = filtered.filter((item) => item.status === query.status);
   }
   if (query.coverage === "below_40") {
     filtered = filtered.filter(
-      (item) =>
-        item.coveragePct != null && item.coveragePct < 40 && item.filledCount > 0,
+      (item) => item.coveragePct != null && item.coveragePct < 40 && item.filledCount > 0,
     );
   } else if (query.coverage === "40_80") {
     filtered = filtered.filter(
-      (item) =>
-        item.coveragePct != null && item.coveragePct >= 40 && item.coveragePct <= 80,
+      (item) => item.coveragePct != null && item.coveragePct >= 40 && item.coveragePct <= 80,
     );
   } else if (query.coverage === "above_80") {
-    filtered = filtered.filter(
-      (item) => item.coveragePct != null && item.coveragePct > 80,
-    );
+    filtered = filtered.filter((item) => item.coveragePct != null && item.coveragePct > 80);
   } else if (query.coverage === "never_used") {
     filtered = filtered.filter((item) => item.filledCount === 0);
   }
@@ -259,12 +258,8 @@ export async function listCustomFieldRoster(
     ...(query.status ? { status: query.status } : {}),
     ...(query.signedUpFrom ? { signedUpFrom: query.signedUpFrom } : {}),
     ...(query.signedUpTo ? { signedUpTo: query.signedUpTo } : {}),
-    ...(query.minTotalSpentCents != null
-      ? { minTotalSpentCents: query.minTotalSpentCents }
-      : {}),
-    ...(query.maxTotalSpentCents != null
-      ? { maxTotalSpentCents: query.maxTotalSpentCents }
-      : {}),
+    ...(query.minTotalSpentCents != null ? { minTotalSpentCents: query.minTotalSpentCents } : {}),
+    ...(query.maxTotalSpentCents != null ? { maxTotalSpentCents: query.maxTotalSpentCents } : {}),
   });
   const [totalCount, rows, definitions, summaryRow] = await Promise.all([
     customFieldRosterRepository.countLearners(tx, filter),
@@ -376,14 +371,10 @@ export async function createCustomFieldLearnerGroup(
   if (input.email) criteriaParts.push(`Email: ${input.email}`);
   if (input.status) criteriaParts.push(`Status: ${input.status}`);
   if (input.signedUpFrom || input.signedUpTo) {
-    criteriaParts.push(
-      `Signed up ${input.signedUpFrom ?? "…"} → ${input.signedUpTo ?? "…"}`,
-    );
+    criteriaParts.push(`Signed up ${input.signedUpFrom ?? "…"} → ${input.signedUpTo ?? "…"}`);
   }
   if (input.minTotalSpentCents != null || input.maxTotalSpentCents != null) {
-    criteriaParts.push(
-      `Spend ${input.minTotalSpentCents ?? 0}–${input.maxTotalSpentCents ?? "∞"}`,
-    );
+    criteriaParts.push(`Spend ${input.minTotalSpentCents ?? 0}–${input.maxTotalSpentCents ?? "∞"}`);
   }
 
   const batch = await batchesRepository.insertBatch(tx, {
@@ -490,8 +481,7 @@ function buildStrongestAssociation(
     for (let c = 0; c < columnValues.length; c += 1) {
       const count = cells[r]?.[c] ?? 0;
       if (count === 0) continue;
-      const expected =
-        ((rowTotals[r] ?? 0) * (colTotals[c] ?? 0)) / grandTotal;
+      const expected = ((rowTotals[r] ?? 0) * (colTotals[c] ?? 0)) / grandTotal;
       const lift = expected > 0 ? count / expected : count;
       if (!best || lift > best.lift || (lift === best.lift && count > best.count)) {
         best = {
@@ -523,8 +513,7 @@ export async function getCustomFieldDetail(
   const filledCount = summaryRow.filled_count;
   const learnerCount = summaryRow.learner_count;
   const missingCount = Math.max(0, learnerCount - filledCount);
-  const coveragePct =
-    learnerCount === 0 ? null : roundPct((filledCount / learnerCount) * 100);
+  const coveragePct = learnerCount === 0 ? null : roundPct((filledCount / learnerCount) * 100);
   const mostCommonValue = formatCustomValue(summaryRow.most_common_value_json);
   const mostCommonSharePct =
     filledCount > 0 && summaryRow.most_common_count > 0
@@ -563,10 +552,7 @@ export async function getCustomFieldDetail(
       unusedDefinedCount: optionRows.filter((row) => row.unused).length,
     };
   } else if (definition.field_type === "number") {
-    const numericRows = await customFieldRosterRepository.listNumericFieldValues(
-      tx,
-      definition.id,
-    );
+    const numericRows = await customFieldRosterRepository.listNumericFieldValues(tx, definition.id);
     const values = numericRows.map((row) => row.num_value).sort((a, b) => a - b);
     const sum = values.reduce((acc, value) => acc + value, 0);
     const mean = values.length > 0 ? sum / values.length : null;
@@ -574,9 +560,7 @@ export async function getCustomFieldDetail(
     const stdDev = mean == null ? null : stdDevOf(values, mean);
     const withScores = numericRows.map((row) => {
       const zScore =
-        mean == null || stdDev == null || stdDev === 0
-          ? null
-          : (row.num_value - mean) / stdDev;
+        mean == null || stdDev == null || stdDev === 0 ? null : (row.num_value - mean) / stdDev;
       return { ...row, zScore };
     });
     const sortedAsc = [...withScores].sort((a, b) => a.num_value - b.num_value);
@@ -619,10 +603,7 @@ export async function getCustomFieldDetail(
     const resolvedNo = valueCounts
       .filter((row) => isNo(row.value_text))
       .reduce((sum, row) => sum + row.count, 0);
-    const trendRows = await customFieldRosterRepository.listBooleanWeeklyTrend(
-      tx,
-      definition.id,
-    );
+    const trendRows = await customFieldRosterRepository.listBooleanWeeklyTrend(tx, definition.id);
     const trend = trendRows.map((row) => {
       const total = row.yes_count + row.no_count;
       return {
@@ -633,9 +614,8 @@ export async function getCustomFieldDetail(
       };
     });
     const firstShare = trend.find((point) => point.yesSharePct != null)?.yesSharePct ?? null;
-    const lastShare = [...trend]
-      .reverse()
-      .find((point) => point.yesSharePct != null)?.yesSharePct ?? null;
+    const lastShare =
+      [...trend].reverse().find((point) => point.yesSharePct != null)?.yesSharePct ?? null;
     let trendCaption: string | null = null;
     if (firstShare != null && lastShare != null) {
       const delta = Math.round((lastShare - firstShare) * 10) / 10;
@@ -664,10 +644,7 @@ export async function getCustomFieldDetail(
   }
 
   if (definition.field_type === "select") {
-    const compareKey =
-      query.compareWith ??
-      compareCandidates[0]?.key ??
-      null;
+    const compareKey = query.compareWith ?? compareCandidates[0]?.key ?? null;
     if (compareKey) {
       const other = await customFieldRosterRepository.getFieldDefinitionByKey(tx, compareKey);
       if (other && other.field_type === "select") {
@@ -678,9 +655,7 @@ export async function getCustomFieldDetail(
           other.id,
         );
         const rowValues =
-          options.length > 0
-            ? options
-            : [...new Set(pairs.map((pair) => pair.row_value))].sort();
+          options.length > 0 ? options : [...new Set(pairs.map((pair) => pair.row_value))].sort();
         const columnValues =
           otherOptions.length > 0
             ? otherOptions
@@ -689,9 +664,7 @@ export async function getCustomFieldDetail(
           pairs.map((pair) => [`${pair.row_value}||${pair.col_value}`, pair.count]),
         );
         const cells = rowValues.map((rowValue) =>
-          columnValues.map(
-            (colValue) => countMap.get(`${rowValue}||${colValue}`) ?? 0,
-          ),
+          columnValues.map((colValue) => countMap.get(`${rowValue}||${colValue}`) ?? 0),
         );
         const rowTotals = cells.map((row) => row.reduce((a, b) => a + b, 0));
         const columnTotals = columnValues.map((_, colIndex) =>
@@ -832,12 +805,8 @@ export async function getCustomFieldLearnerDetail(
   const learner = await customFieldRosterRepository.findLearnerSummary(tx, membershipId);
   if (!learner) throw customFieldLearnerNotFound();
 
-  let fieldRows: Awaited<
-    ReturnType<typeof customFieldRosterRepository.listLearnerFieldValues>
-  > = [];
-  let historyRows: Awaited<
-    ReturnType<typeof customFieldRosterRepository.listLearnerFieldHistory>
-  > = [];
+  let fieldRows: Awaited<ReturnType<typeof customFieldRosterRepository.listLearnerFieldValues>>;
+  let historyRows: Awaited<ReturnType<typeof customFieldRosterRepository.listLearnerFieldHistory>>;
 
   try {
     fieldRows = await customFieldRosterRepository.listLearnerFieldValues(tx, membershipId);
@@ -846,11 +815,7 @@ export async function getCustomFieldLearnerDetail(
   }
 
   try {
-    historyRows = await customFieldRosterRepository.listLearnerFieldHistory(
-      tx,
-      membershipId,
-      50,
-    );
+    historyRows = await customFieldRosterRepository.listLearnerFieldHistory(tx, membershipId, 50);
   } catch {
     historyRows = [];
   }
@@ -880,8 +845,7 @@ export async function getCustomFieldLearnerDetail(
   const fieldCount = fields.length;
   const filledCount = fields.filter((field) => field.filled).length;
   const missingCount = Math.max(0, fieldCount - filledCount);
-  const completenessPct =
-    fieldCount === 0 ? null : roundPct((filledCount / fieldCount) * 100);
+  const completenessPct = fieldCount === 0 ? null : roundPct((filledCount / fieldCount) * 100);
 
   return customFieldLearnerDetailResponseSchema.parse({
     data: {

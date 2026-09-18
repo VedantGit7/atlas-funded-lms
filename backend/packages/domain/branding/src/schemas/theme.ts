@@ -7,8 +7,6 @@ export const TenantThemeTokensSchema = z
     primary: HexColorSchema,
     accent: HexColorSchema.optional(),
     header: HexColorSchema.optional(),
-    background: HexColorSchema.optional(),
-    foreground: HexColorSchema.optional(),
     radius: z.enum(["none", "sm", "md", "lg", "xl"]).default("md"),
     modeDefault: z.enum(["system", "light", "dark"]).default("system"),
   })

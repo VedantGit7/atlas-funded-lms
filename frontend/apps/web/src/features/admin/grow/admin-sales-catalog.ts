@@ -21,8 +21,7 @@ export const ADMIN_SALES_SECTIONS = [
     slug: "affiliates",
     label: "Affiliates",
     title: "Affiliates",
-    description:
-      "Let partners promote courses, earn commissions on sales, and receive payouts.",
+    description: "Let partners promote courses, earn commissions on sales, and receive payouts.",
   },
 ] as const;
 

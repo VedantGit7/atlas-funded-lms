@@ -107,7 +107,10 @@ export function NotificationPreferencesForm({ initial }: NotificationPreferences
   const [requestId, setRequestId] = useState<string | null>(null);
   const [toastOpen, setToastOpen] = useState(false);
 
-  const isDirty = useMemo(() => JSON.stringify(prefs) !== JSON.stringify(baseline), [baseline, prefs]);
+  const isDirty = useMemo(
+    () => JSON.stringify(prefs) !== JSON.stringify(baseline),
+    [baseline, prefs],
+  );
 
   async function save() {
     setBusy(true);
@@ -146,7 +149,9 @@ export function NotificationPreferencesForm({ initial }: NotificationPreferences
       >
         <div className={`grid grid-cols-12 mb-4 px-4 ${classes.stickyHeader}`}>
           <div className="col-span-6 md:col-span-8">
-            <span className={`${classes.helper} uppercase tracking-widest`}>Notification event</span>
+            <span className={`${classes.helper} uppercase tracking-widest`}>
+              Notification event
+            </span>
           </div>
           <div className="col-span-3 text-center md:col-span-2">
             <span className={`${classes.helper} uppercase tracking-widest`}>Email</span>

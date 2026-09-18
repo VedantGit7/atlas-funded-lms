@@ -79,7 +79,7 @@ export async function listMfaFactors() {
     mapAuthError();
   }
 
-  const factors = [...(data.totp ?? []), ...(data.phone ?? [])].map((factor) => ({
+  const factors = [...data.totp, ...data.phone].map((factor) => ({
     id: factor.id,
     factorType: factor.factor_type,
     status: factor.status,
@@ -96,7 +96,7 @@ export async function enrollMfaTotp() {
     friendlyName: "Authenticator app",
   });
 
-  if (error || !data) {
+  if (error) {
     mapAuthError();
   }
 
@@ -161,14 +161,17 @@ export async function listLinkedIdentities() {
   const identities = (user.identities ?? []).map((identity) => ({
     id: identity.id,
     provider: identity.provider,
-    email: identity.identity_data?.["email"] as string | undefined ?? null,
+    email: (identity.identity_data?.["email"] as string | undefined) ?? null,
     createdAt: identity.created_at ?? null,
   }));
 
   return { identities };
 }
 
-export async function startLinkIdentity(args: { provider: "google" | "apple"; redirectTo: string }) {
+export async function startLinkIdentity(args: {
+  provider: "google" | "apple";
+  redirectTo: string;
+}) {
   const { supabase } = await requireSupabaseUserClient();
 
   const { data, error } = await supabase.auth.linkIdentity({

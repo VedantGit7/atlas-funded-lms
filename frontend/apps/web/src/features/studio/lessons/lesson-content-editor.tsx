@@ -71,12 +71,18 @@ export function LessonContentEditor({
   return (
     <section className="flex min-h-[32rem] flex-1 flex-col overflow-hidden rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)]">
       <header className="flex h-14 items-center justify-between border-b border-[var(--admin-border)] bg-[var(--admin-surface)] px-4">
-        <div className={lessonSegmentedControlClassName} role="tablist" aria-label="Lesson content mode">
+        <div
+          className={lessonSegmentedControlClassName}
+          role="tablist"
+          aria-label="Lesson content mode"
+        >
           <button
             type="button"
             role="tab"
             aria-selected={tab === "editor"}
-            className={tab === "editor" ? lessonSegmentActiveClassName : lessonSegmentInactiveClassName}
+            className={
+              tab === "editor" ? lessonSegmentActiveClassName : lessonSegmentInactiveClassName
+            }
             onClick={() => {
               setTab("editor");
             }}
@@ -87,7 +93,9 @@ export function LessonContentEditor({
             type="button"
             role="tab"
             aria-selected={tab === "preview"}
-            className={tab === "preview" ? lessonSegmentActiveClassName : lessonSegmentInactiveClassName}
+            className={
+              tab === "preview" ? lessonSegmentActiveClassName : lessonSegmentInactiveClassName
+            }
             onClick={() => {
               setTab("preview");
             }}
@@ -116,44 +124,104 @@ export function LessonContentEditor({
               editable ? "" : "cursor-not-allowed opacity-40",
             ].join(" ")}
           >
-            <button type="button" disabled={!editable} className={lessonToolbarButtonClassName} aria-label="Bold">
+            <button
+              type="button"
+              disabled={!editable}
+              className={lessonToolbarButtonClassName}
+              aria-label="Bold"
+            >
               <Bold className="h-4 w-4" />
             </button>
-            <button type="button" disabled={!editable} className={lessonToolbarButtonClassName} aria-label="Italic">
+            <button
+              type="button"
+              disabled={!editable}
+              className={lessonToolbarButtonClassName}
+              aria-label="Italic"
+            >
               <Italic className="h-4 w-4" />
             </button>
-            <button type="button" disabled={!editable} className={lessonToolbarButtonClassName} aria-label="Underline">
+            <button
+              type="button"
+              disabled={!editable}
+              className={lessonToolbarButtonClassName}
+              aria-label="Underline"
+            >
               <Underline className="h-4 w-4" />
             </button>
             <span className="mx-1 h-6 w-px bg-[var(--admin-border)]" aria-hidden="true" />
-            <button type="button" disabled={!editable} className={lessonToolbarButtonClassName} aria-label="Heading 1">
+            <button
+              type="button"
+              disabled={!editable}
+              className={lessonToolbarButtonClassName}
+              aria-label="Heading 1"
+            >
               <Heading1 className="h-4 w-4" />
             </button>
-            <button type="button" disabled={!editable} className={lessonToolbarButtonClassName} aria-label="Heading 2">
+            <button
+              type="button"
+              disabled={!editable}
+              className={lessonToolbarButtonClassName}
+              aria-label="Heading 2"
+            >
               <Heading2 className="h-4 w-4" />
             </button>
-            <button type="button" disabled={!editable} className={lessonToolbarButtonClassName} aria-label="Heading 3">
+            <button
+              type="button"
+              disabled={!editable}
+              className={lessonToolbarButtonClassName}
+              aria-label="Heading 3"
+            >
               <Heading3 className="h-4 w-4" />
             </button>
             <span className="mx-1 h-6 w-px bg-[var(--admin-border)]" aria-hidden="true" />
-            <button type="button" disabled={!editable} className={lessonToolbarButtonClassName} aria-label="Bulleted list">
+            <button
+              type="button"
+              disabled={!editable}
+              className={lessonToolbarButtonClassName}
+              aria-label="Bulleted list"
+            >
               <List className="h-4 w-4" />
             </button>
-            <button type="button" disabled={!editable} className={lessonToolbarButtonClassName} aria-label="Numbered list">
+            <button
+              type="button"
+              disabled={!editable}
+              className={lessonToolbarButtonClassName}
+              aria-label="Numbered list"
+            >
               <ListOrdered className="h-4 w-4" />
             </button>
             <span className="mx-1 h-6 w-px bg-[var(--admin-border)]" aria-hidden="true" />
-            <button type="button" disabled={!editable} className={lessonToolbarButtonClassName} aria-label="Insert link">
+            <button
+              type="button"
+              disabled={!editable}
+              className={lessonToolbarButtonClassName}
+              aria-label="Insert link"
+            >
               <Link className="h-4 w-4" />
             </button>
-            <button type="button" disabled={!editable} className={lessonToolbarButtonClassName} aria-label="Insert image">
+            <button
+              type="button"
+              disabled={!editable}
+              className={lessonToolbarButtonClassName}
+              aria-label="Insert image"
+            >
               <Image className="h-4 w-4" />
             </button>
-            <button type="button" disabled={!editable} className={lessonToolbarButtonClassName} aria-label="Insert code">
+            <button
+              type="button"
+              disabled={!editable}
+              className={lessonToolbarButtonClassName}
+              aria-label="Insert code"
+            >
               <Code className="h-4 w-4" />
             </button>
             <div className="ml-auto">
-              <button type="button" disabled={!editable} className={lessonToolbarButtonClassName} aria-label="Fullscreen">
+              <button
+                type="button"
+                disabled={!editable}
+                className={lessonToolbarButtonClassName}
+                aria-label="Fullscreen"
+              >
                 <Maximize2 className="h-4 w-4" />
               </button>
             </div>

@@ -1,14 +1,6 @@
 "use client";
 
-import {
-  useEffect,
-  useId,
-  useMemo,
-  useRef,
-  useState,
-  type DragEvent,
-  type FormEvent,
-} from "react";
+import { useEffect, useId, useMemo, useRef, useState, type DragEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -29,13 +21,8 @@ import { fetchBatches, type Batch } from "../domain/admin-domain-api";
 import { generalSettingsBackLinkClassName } from "../general-settings/general-settings-shared";
 import { AdminSelectDropdown } from "../../readiness/components/AdminSelectDropdown";
 import { inlineExpandClassName } from "../../studio/courses/admin-form-dropdown-shared";
-import {
-  managePageTitleClassName,
-} from "../manage/manage-ui-shared";
-import {
-  MESSENGER_WIZARD_FIELD_CLASS,
-  MESSENGER_WIZARD_LABEL_CLASS,
-} from "./push-wizard-chrome";
+import { managePageTitleClassName } from "../manage/manage-ui-shared";
+import { MESSENGER_WIZARD_FIELD_CLASS, MESSENGER_WIZARD_LABEL_CLASS } from "./push-wizard-chrome";
 import {
   ANNOUNCEMENT_IMAGE_MAX_BYTES,
   ANNOUNCEMENT_IMAGE_MAX_HEIGHT,
@@ -61,8 +48,7 @@ type CreateResponse = { data: AnnouncementDto };
 
 function clearFieldError(previous: FieldErrors, key: keyof FieldErrors): FieldErrors {
   if (!(key in previous)) return previous;
-  const next = { ...previous };
-  delete next[key];
+  const { [key]: _removed, ...next } = previous;
   return next;
 }
 
@@ -126,8 +112,12 @@ export function AnnouncementsCreatePanel() {
 
   useEffect(() => {
     void fetchBatches()
-      .then((response) => setBatches(response.data.items))
-      .catch(() => setBatches([]));
+      .then((response) => {
+        setBatches(response.data.items);
+      })
+      .catch(() => {
+        setBatches([]);
+      });
   }, []);
 
   useEffect(() => {
@@ -153,9 +143,7 @@ export function AnnouncementsCreatePanel() {
 
   async function validateImage(file: File): Promise<string | null> {
     const isJpeg =
-      file.type === "image/jpeg" ||
-      file.type === "image/jpg" ||
-      /\.jpe?g$/i.test(file.name);
+      file.type === "image/jpeg" || file.type === "image/jpg" || /\.jpe?g$/i.test(file.name);
     if (!isJpeg) return "Image must be JPEG (.jpg or .jpeg).";
     if (file.size > ANNOUNCEMENT_IMAGE_MAX_BYTES) {
       return `File too large (${formatBytes(file.size)}). Max ${formatBytes(ANNOUNCEMENT_IMAGE_MAX_BYTES)}.`;
@@ -209,7 +197,7 @@ export function AnnouncementsCreatePanel() {
     event.stopPropagation();
     setDragActive(false);
     if (busy) return;
-    const file = event.dataTransfer.files?.[0] ?? null;
+    const file = event.dataTransfer.files[0] ?? null;
     void onPickImage(file);
   }
 
@@ -254,7 +242,7 @@ export function AnnouncementsCreatePanel() {
     };
   }
 
-  async function onSubmit(event: FormEvent<HTMLFormElement>) {
+  async function onSubmit(event: React.SyntheticEvent<HTMLFormElement>) {
     event.preventDefault();
     const nextErrors = validate();
     setErrors(nextErrors);
@@ -303,9 +291,7 @@ export function AnnouncementsCreatePanel() {
       toast.success("Test announcement sent to your in-app inbox.");
     } catch (caught) {
       toast.error(
-        caught instanceof ClientApiError
-          ? caught.message
-          : "Could not send test announcement.",
+        caught instanceof ClientApiError ? caught.message : "Could not send test announcement.",
       );
     } finally {
       setTestBusy(false);
@@ -322,7 +308,11 @@ export function AnnouncementsCreatePanel() {
         aria-hidden="true"
       />
 
-      <Link href={ANNOUNCEMENTS_LIST_HREF} prefetch={false} className={generalSettingsBackLinkClassName}>
+      <Link
+        href={ANNOUNCEMENTS_LIST_HREF}
+        prefetch={false}
+        className={generalSettingsBackLinkClassName}
+      >
         <ChevronLeft className="h-4 w-4" aria-hidden="true" />
         Back to Announcements
       </Link>
@@ -452,7 +442,6 @@ export function AnnouncementsCreatePanel() {
                 >
                   {imagePreview ? (
                     <div className="flex flex-col items-center gap-3">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={imagePreview}
                         alt="Announcement banner preview"
@@ -580,7 +569,11 @@ export function AnnouncementsCreatePanel() {
                 <p className="block text-[12px] font-bold tracking-[0.02em] text-[var(--admin-on-surface)]">
                   Target audience
                 </p>
-                <div className="flex flex-wrap gap-6" role="radiogroup" aria-label="Target audience">
+                <div
+                  className="flex flex-wrap gap-6"
+                  role="radiogroup"
+                  aria-label="Target audience"
+                >
                   <label className="group inline-flex cursor-pointer items-center gap-2">
                     <input
                       type="radio"
@@ -604,7 +597,9 @@ export function AnnouncementsCreatePanel() {
                       name="announcement-audience"
                       checked={audienceMode === "batch"}
                       disabled={locked}
-                      onChange={() => setAudienceMode("batch")}
+                      onChange={() => {
+                        setAudienceMode("batch");
+                      }}
                       className="h-4 w-4 accent-[var(--admin-primary)]"
                     />
                     <span className="text-sm text-[var(--admin-on-surface)] transition-colors group-hover:text-[var(--admin-primary)]">
@@ -667,7 +662,9 @@ export function AnnouncementsCreatePanel() {
               <div className="flex flex-1 items-center justify-center bg-[var(--admin-surface-low)] p-6">
                 <div className="relative flex h-[520px] w-full max-w-[300px] flex-col overflow-hidden rounded-[2.5rem] border-[8px] border-[var(--admin-on-surface-variant)] bg-[var(--admin-surface)] shadow-2xl">
                   <div className="flex h-7 items-center justify-between px-5 pt-2">
-                    <span className="text-[10px] font-bold text-[var(--admin-on-surface)]">9:41</span>
+                    <span className="text-[10px] font-bold text-[var(--admin-on-surface)]">
+                      9:41
+                    </span>
                     <div className="flex items-center gap-1 text-[var(--admin-on-surface)]">
                       <Signal className="h-2.5 w-2.5" aria-hidden="true" />
                       <Wifi className="h-2.5 w-2.5" aria-hidden="true" />
@@ -689,12 +686,7 @@ export function AnnouncementsCreatePanel() {
                     <div className="relative mt-8 overflow-hidden rounded-2xl border border-[color-mix(in_srgb,var(--admin-primary)_22%,var(--admin-border))] bg-[var(--admin-surface)] shadow-xl motion-safe:animate-[admin-dropdown-in_0.35s_cubic-bezier(0.16,1,0.3,1)]">
                       <div className="relative h-28 w-full overflow-hidden bg-[var(--admin-surface-high)]">
                         {imagePreview ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={imagePreview}
-                            alt=""
-                            className="h-full w-full object-cover"
-                          />
+                          <img src={imagePreview} alt="" className="h-full w-full object-cover" />
                         ) : (
                           <div className="flex h-full items-center justify-center text-[var(--admin-outline)]">
                             <Megaphone className="h-8 w-8" aria-hidden="true" />
@@ -754,7 +746,9 @@ export function AnnouncementsCreatePanel() {
             <button
               type="button"
               disabled={locked}
-              onClick={() => router.push(ANNOUNCEMENTS_LIST_HREF)}
+              onClick={() => {
+                router.push(ANNOUNCEMENTS_LIST_HREF);
+              }}
               className="rounded-xl border border-[var(--admin-border)] px-6 py-2.5 text-[12px] font-bold text-[var(--admin-on-surface)] transition-colors hover:bg-[var(--admin-surface-low)] disabled:opacity-50"
             >
               Cancel

@@ -13,13 +13,14 @@ describe("seed skeleton", () => {
       "05-extension-points",
       "06-workflows",
       "07-demo-tenants",
+      "08-practice-content",
     ]);
   });
 
   it("runs all seeds in dry-run mode without inserting rows", async () => {
     const results = await runSeeds("all", "dry-run");
 
-    expect(results).toHaveLength(8);
+    expect(results).toHaveLength(seedModules.length);
 
     for (const result of results) {
       expect(result.planned).toBe(0);

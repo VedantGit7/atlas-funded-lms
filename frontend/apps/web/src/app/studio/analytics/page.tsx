@@ -50,7 +50,9 @@ export default async function StudioAnalyticsPage() {
       serverApi.get<StudioCoursesResponse>("/api/v1/courses?view=studio&limit=50").catch(() => ({
         data: { items: [] as CourseOption[] },
       })),
-      serverApi.get<AssessmentListResponse>("/api/v1/assessments?limit=50").catch(() => EMPTY_ASSESSMENTS),
+      serverApi
+        .get<AssessmentListResponse>("/api/v1/assessments?limit=50")
+        .catch(() => EMPTY_ASSESSMENTS),
     ]);
 
     return (

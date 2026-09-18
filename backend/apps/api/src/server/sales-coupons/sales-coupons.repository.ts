@@ -366,6 +366,62 @@ export const salesCouponsRepository = {
     );
   },
 
+  /**
+   * Lock a coupon row and return its live limits plus current redemption counts.
+   *
+   * Coupon limits were previously enforced by a check-then-act in application
+   * code: count redemptions, compare to the limit, insert later. Five concurrent
+   * redemptions of a `total_usage_limit = 1` coupon were demonstrated all
+   * succeeding, because each counted before any had inserted.
+   *
+   * Taking the coupon row lock serialises redemptions of the same coupon, so the
+   * counts returned here are authoritative for the caller's transaction.
+   *
+   * A unique index is deliberately NOT used for the per-learner limit:
+   * `per_learner_limit` is an integer that may exceed 1, which a unique
+   * constraint cannot express.
+   */
+  async lockCouponForRedemption(
+    tx: TenantTx,
+    args: { couponId: string; membershipId: string },
+  ): Promise<{
+    totalUsageLimit: number | null;
+    perLearnerLimit: number;
+    totalRedemptions: number;
+    memberRedemptions: number;
+  } | null> {
+    const locked = await tx.$queryRaw<
+      Array<{ total_usage_limit: number | null; per_learner_limit: number }>
+    >`
+      select total_usage_limit, per_learner_limit
+      from sales_coupons
+      where id = ${args.couponId}::uuid
+      for update
+    `;
+
+    const coupon = locked[0];
+    if (!coupon) {
+      return null;
+    }
+
+    // Counted after the lock is held, so no concurrent redemption can be in
+    // flight for this coupon.
+    const counts = await tx.$queryRaw<Array<{ total: number; mine: number }>>`
+      select
+        count(*)::int as total,
+        count(*) filter (where membership_id = ${args.membershipId}::uuid)::int as mine
+      from sales_coupon_redemptions
+      where coupon_id = ${args.couponId}::uuid
+    `;
+
+    return {
+      totalUsageLimit: coupon.total_usage_limit,
+      perLearnerLimit: coupon.per_learner_limit,
+      totalRedemptions: counts[0]?.total ?? 0,
+      memberRedemptions: counts[0]?.mine ?? 0,
+    };
+  },
+
   async insertRedemption(tx: TenantTx, args: RedemptionInsertInput): Promise<string> {
     const id = randomUUID();
     await tx.$executeRawUnsafe(
@@ -419,10 +475,7 @@ export const salesCouponsRepository = {
     );
   },
 
-  async listRedemptions(
-    tx: TenantTx,
-    args: { couponId: string; limit: number },
-  ) {
+  async listRedemptions(tx: TenantTx, args: { couponId: string; limit: number }) {
     return tx.$queryRawUnsafe<
       Array<{
         id: string;

@@ -34,7 +34,10 @@ export function ModerationQueueMetrics({
   const max = Math.max(openCount, reviewingCount, actionedCount, visibleCount, 1);
 
   return (
-    <section aria-label="Queue summary" className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <section
+      aria-label="Queue summary"
+      className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4"
+    >
       <article className={moderationMetricCardClassName}>
         <p className={moderationMetricLabelClassName}>Open cases</p>
         <p className={`${moderationPageTitleClassName} mt-1 text-[var(--admin-on-surface)]`}>

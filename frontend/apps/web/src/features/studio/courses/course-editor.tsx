@@ -7,10 +7,7 @@ import type {
   studioModuleOutlineItemSchema,
 } from "@atlas/contracts/courses/course-authoring-schemas";
 import { CourseChaptersSidebar } from "./course-chapters-sidebar";
-import {
-  CourseEditorWorkspace,
-  type CourseEditorWorkspaceState,
-} from "./course-editor-workspace";
+import { CourseEditorWorkspace, type CourseEditorWorkspaceState } from "./course-editor-workspace";
 
 type CourseDetail = z.infer<typeof studioCourseDetailSchema>;
 type ModuleItem = z.infer<typeof studioModuleOutlineItemSchema>;
@@ -43,12 +40,15 @@ export function CourseEditor({ initialCourse, initialModules }: CourseEditorProp
     setWorkspace({ mode: "edit-lesson", lessonId, moduleId });
   }, []);
 
-  const handleLessonDeleted = useCallback((moduleId: string, lessonId: string) => {
-    setLessonsRefreshModuleId(moduleId);
-    if (workspace.mode === "edit-lesson" && workspace.lessonId === lessonId) {
-      setWorkspace({ mode: "empty" });
-    }
-  }, [workspace]);
+  const handleLessonDeleted = useCallback(
+    (moduleId: string, lessonId: string) => {
+      setLessonsRefreshModuleId(moduleId);
+      if (workspace.mode === "edit-lesson" && workspace.lessonId === lessonId) {
+        setWorkspace({ mode: "empty" });
+      }
+    },
+    [workspace],
+  );
 
   const selectedLessonId = workspace.mode === "edit-lesson" ? workspace.lessonId : null;
   const addingLessonModuleId = workspace.mode === "add-lesson" ? workspace.moduleId : null;

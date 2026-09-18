@@ -139,7 +139,7 @@ export default function HeroSection() {
 Implement scroll-triggered text reveals with BlurText:
 
 ```jsx
-import BlurText from './components/BlurText'
+import BlurText from "./components/BlurText";
 
 export default function MarketingSection() {
   return (
@@ -161,12 +161,12 @@ export default function MarketingSection() {
         direction="bottom"
         threshold={0.3}
         stepDuration={0.4}
-        animationFrom={{ filter: 'blur(20px)', opacity: 0, y: 50 }}
-        animationTo={{ filter: 'blur(0px)', opacity: 1, y: 0 }}
+        animationFrom={{ filter: "blur(20px)", opacity: 0, y: 50 }}
+        animationTo={{ filter: "blur(0px)", opacity: 1, y: 0 }}
         className="text-2xl text-gray-600 text-center"
       />
     </section>
-  )
+  );
 }
 ```
 
@@ -214,35 +214,35 @@ export default function CTASection() {
 Implement macOS-style dock with magnification effects:
 
 ```jsx
-import Dock from './components/Dock'
-import { VscHome, VscArchive, VscAccount, VscSettingsGear } from 'react-icons/vsc'
-import { useNavigate } from 'react-router-dom'
+import Dock from "./components/Dock";
+import { VscHome, VscArchive, VscAccount, VscSettingsGear } from "react-icons/vsc";
+import { useNavigate } from "react-router-dom";
 
 export default function AppNavigation() {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const dockItems = [
     {
       icon: <VscHome size={24} />,
-      label: 'Dashboard',
-      onClick: () => navigate('/dashboard')
+      label: "Dashboard",
+      onClick: () => navigate("/dashboard"),
     },
     {
       icon: <VscArchive size={24} />,
-      label: 'Projects',
-      onClick: () => navigate('/projects')
+      label: "Projects",
+      onClick: () => navigate("/projects"),
     },
     {
       icon: <VscAccount size={24} />,
-      label: 'Profile',
-      onClick: () => navigate('/profile')
+      label: "Profile",
+      onClick: () => navigate("/profile"),
     },
     {
       icon: <VscSettingsGear size={24} />,
-      label: 'Settings',
-      onClick: () => navigate('/settings')
-    }
-  ]
+      label: "Settings",
+      onClick: () => navigate("/settings"),
+    },
+  ];
 
   return (
     <div className="fixed bottom-4 left-1/2 -translate-x-1/2">
@@ -255,7 +255,7 @@ export default function AppNavigation() {
         baseItemSize={55}
       />
     </div>
-  )
+  );
 }
 ```
 
@@ -264,7 +264,7 @@ export default function AppNavigation() {
 Display animated numbers for dashboards and landing pages:
 
 ```jsx
-import CountUp from './components/CountUp'
+import CountUp from "./components/CountUp";
 
 export default function Statistics() {
   return (
@@ -305,7 +305,7 @@ export default function Statistics() {
         <p className="text-xl text-gray-600 mt-2">Happy Customers</p>
       </div>
     </div>
-  )
+  );
 }
 ```
 
@@ -449,11 +449,11 @@ import { BorderBeam } from "@/components/ui/border-beam"
 **Utility Function Required** (`lib/utils.ts`):
 
 ```typescript
-import clsx, { ClassValue } from "clsx"
-import { twMerge } from "tailwind-merge"
+import clsx, { ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
 }
 ```
 
@@ -462,8 +462,8 @@ export function cn(...inputs: ClassValue[]) {
 Both libraries leverage Framer Motion for animations:
 
 ```jsx
-import { motion } from "framer-motion"
-import { Magnet } from './components/Magnet'
+import { motion } from "framer-motion";
+import { Magnet } from "./components/Magnet";
 
 // Combine React Bits Magnet with Framer Motion gestures
 export default function InteractiveCard() {
@@ -478,7 +478,7 @@ export default function InteractiveCard() {
         <p>Combines magnetic pull with scale animation</p>
       </motion.div>
     </Magnet>
-  )
+  );
 }
 ```
 
@@ -487,34 +487,37 @@ export default function InteractiveCard() {
 Combine animated components with routing:
 
 ```jsx
-import { AnimatePresence, motion } from "framer-motion"
-import { useLocation, Routes, Route } from "react-router-dom"
-import { Dock } from './components/Dock'
+import { AnimatePresence, motion } from "framer-motion";
+import { useLocation, Routes, Route } from "react-router-dom";
+import { Dock } from "./components/Dock";
 
 export default function App() {
-  const location = useLocation()
+  const location = useLocation();
 
   return (
     <>
       {/* Animated Page Transitions */}
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
-          <Route path="/" element={
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-            >
-              <HomePage />
-            </motion.div>
-          } />
+          <Route
+            path="/"
+            element={
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+              >
+                <HomePage />
+              </motion.div>
+            }
+          />
         </Routes>
       </AnimatePresence>
 
       {/* Persistent Dock Navigation */}
       <Dock items={navItems} />
     </>
-  )
+  );
 }
 ```
 
@@ -524,14 +527,14 @@ Leverage strengths of both libraries in a single project:
 
 ```jsx
 // Magic UI: Patterns and structural components
-import { GridPattern } from "@/components/ui/grid-pattern"
-import { BorderBeam } from "@/components/ui/border-beam"
-import { Marquee } from "@/components/ui/marquee"
+import { GridPattern } from "@/components/ui/grid-pattern";
+import { BorderBeam } from "@/components/ui/border-beam";
+import { Marquee } from "@/components/ui/marquee";
 
 // React Bits: Interactive elements and effects
-import BlurText from './components/BlurText'
-import CountUp from './components/CountUp'
-import Particles from './components/Particles'
+import BlurText from "./components/BlurText";
+import CountUp from "./components/CountUp";
+import Particles from "./components/Particles";
 
 export default function LandingPage() {
   return (
@@ -540,13 +543,14 @@ export default function LandingPage() {
       <section className="relative h-screen">
         <Particles particleCount={150} />
         <GridPattern
-          squares={[[4,4], [8,2], [12,6]]}
+          squares={[
+            [4, 4],
+            [8, 2],
+            [12, 6],
+          ]}
           className="opacity-30"
         />
-        <BlurText
-          text="Next-Generation Platform"
-          className="text-7xl font-bold"
-        />
+        <BlurText text="Next-Generation Platform" className="text-7xl font-bold" />
       </section>
 
       {/* Stats with React Bits CountUp */}
@@ -556,12 +560,10 @@ export default function LandingPage() {
 
       {/* Testimonials with Magic UI Marquee */}
       <section>
-        <Marquee>
-          {/* Testimonial cards */}
-        </Marquee>
+        <Marquee>{/* Testimonial cards */}</Marquee>
       </section>
     </main>
-  )
+  );
 }
 ```
 
@@ -590,9 +592,7 @@ const isMobile = window.innerWidth < 768
 3. **Lazy Load Components**: Use React.lazy for heavy components
 
 ```typescript
-const AnimatedGridPattern = React.lazy(() =>
-  import("@/components/ui/animated-grid-pattern")
-)
+const AnimatedGridPattern = React.lazy(() => import("@/components/ui/animated-grid-pattern"));
 ```
 
 ### React Bits Performance Tips
@@ -632,12 +632,12 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
 
 ```jsx
 useEffect(() => {
-  if ('requestIdleCallback' in window) {
+  if ("requestIdleCallback" in window) {
     requestIdleCallback(() => {
       // Initialize expensive animations
-    })
+    });
   }
-}, [])
+}, []);
 ```
 
 ## Common Pitfalls
@@ -660,11 +660,11 @@ npm install ogl
 
 ```typescript
 // lib/utils.ts
-import clsx, { ClassValue } from "clsx"
-import { twMerge } from "tailwind-merge"
+import clsx, { ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
 }
 ```
 
@@ -684,22 +684,37 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 @keyframes ripple {
-  0%, 100% { transform: translate(-50%, -50%) scale(1); }
-  50% { transform: translate(-50%, -50%) scale(0.9); }
+  0%,
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(0.9);
+  }
 }
 
 @keyframes shimmer-slide {
-  to { transform: translate(calc(100cqw - 100%), 0); }
+  to {
+    transform: translate(calc(100cqw - 100%), 0);
+  }
 }
 
 @keyframes marquee {
-  from { transform: translateX(0); }
-  to { transform: translateX(calc(-100% - var(--gap))); }
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(calc(-100% - var(--gap)));
+  }
 }
 
 @keyframes marquee-vertical {
-  from { transform: translateY(0); }
-  to { transform: translateY(calc(-100% - var(--gap))); }
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(calc(-100% - var(--gap)));
+  }
 }
 ```
 
@@ -765,13 +780,13 @@ export default function OptimizedPage() {
 ```typescript
 // Magic UI pattern
 interface CustomComponentProps extends React.ComponentPropsWithoutRef<"div"> {
-  customProp?: string
-  className?: string
+  customProp?: string;
+  className?: string;
 }
 
 // React Bits pattern
 interface CustomProps extends React.HTMLAttributes<HTMLDivElement> {
-  customProp?: string
+  customProp?: string;
 }
 ```
 
@@ -792,27 +807,31 @@ module.exports = {
     extend: {},
   },
   plugins: [],
-}
+};
 ```
 
 ## Resources
 
 ### Official Documentation
+
 - **Magic UI**: https://magicui.design
 - **React Bits**: https://reactbits.dev
 - **shadcn/ui**: https://ui.shadcn.com
 - **Framer Motion**: https://motion.dev
 
 ### Key Scripts
+
 - `scripts/component_importer.py` - Import and customize components from both libraries
 - `scripts/props_generator.py` - Generate component prop configurations
 
 ### References
+
 - `references/magic_ui_components.md` - Complete Magic UI component catalog with usage examples
 - `references/react_bits_components.md` - React Bits component library reference
 - `references/customization_guide.md` - Prop-based customization patterns for both libraries
 
 ### Starter Assets
+
 - `assets/component_showcase/` - Interactive demo of all components
 - `assets/examples/` - Landing page sections, dashboard widgets, micro-interactions
 

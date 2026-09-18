@@ -6,10 +6,7 @@
 import type { TenantTx } from "@atlas/db";
 import { certificateDesignDocumentSchema } from "./certificate-design-document";
 import type { ServiceCtx } from "./certificate.types";
-import {
-  designDocumentToHtmlAsync,
-  sampleDataFromVariables,
-} from "./certificate-design-to-html";
+import { designDocumentToHtmlAsync, sampleDataFromVariables } from "./certificate-design-to-html";
 
 export type CertificateRenderPreviewInput = {
   templateJson: unknown;

@@ -128,7 +128,11 @@ export function PaymentGatewayAddModal({
           </div>
         </div>
 
-        <div role="listbox" aria-label="Payment gateways" className="mt-3 flex-1 space-y-1.5 overflow-y-auto px-6 pb-2">
+        <div
+          role="listbox"
+          aria-label="Payment gateways"
+          className="mt-3 flex-1 space-y-1.5 overflow-y-auto px-6 pb-2"
+        >
           {filtered.length === 0 ? (
             <p className="py-10 text-center text-sm text-[var(--admin-on-surface-variant)]">
               No payment gateways match your search.
@@ -196,7 +200,10 @@ export function PaymentGatewayAddModal({
           >
             {busy ? (
               <>
-                <RefreshCw className="h-4 w-4 animate-spin motion-reduce:animate-none" aria-hidden="true" />
+                <RefreshCw
+                  className="h-4 w-4 animate-spin motion-reduce:animate-none"
+                  aria-hidden="true"
+                />
                 Adding
               </>
             ) : (

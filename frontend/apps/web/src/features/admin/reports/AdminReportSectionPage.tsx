@@ -65,7 +65,7 @@ export function AdminReportSectionPage({ slug, title }: AdminReportSectionPagePr
   const [loadingPreview, setLoadingPreview] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [scheduleName, setScheduleName] = useState("");
-  const [scheduleCadence, setScheduleCadence] = useState<string>(SCHEDULE_CADENCE_OPTIONS[1]?.value ?? "0 8 * * *");
+  const [scheduleCadence, setScheduleCadence] = useState<string>(SCHEDULE_CADENCE_OPTIONS[1].value);
   const [scheduleFormats, setScheduleFormats] = useState<Array<"csv" | "xlsx" | "pdf">>(["csv"]);
   const [creatingSchedule, setCreatingSchedule] = useState(false);
 
@@ -156,7 +156,7 @@ export function AdminReportSectionPage({ slug, title }: AdminReportSectionPagePr
     }
   }
 
-  async function handleCreateSchedule(event: React.FormEvent) {
+  async function handleCreateSchedule(event: React.SyntheticEvent) {
     event.preventDefault();
     if (!selectedDefinition) return;
 
@@ -174,7 +174,9 @@ export function AdminReportSectionPage({ slug, title }: AdminReportSectionPagePr
       const schedulesResponse = await fetchReportSchedules(slug);
       setSchedules(schedulesResponse.data.schedules);
     } catch (scheduleError) {
-      setError(scheduleError instanceof Error ? scheduleError.message : "Unable to create schedule.");
+      setError(
+        scheduleError instanceof Error ? scheduleError.message : "Unable to create schedule.",
+      );
     } finally {
       setCreatingSchedule(false);
     }
@@ -248,12 +250,16 @@ export function AdminReportSectionPage({ slug, title }: AdminReportSectionPagePr
       <div className={generalSettingsFormCardClassName}>
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <label className="block min-w-[240px] flex-1 text-sm">
-            <span className="mb-1 block font-medium text-[var(--admin-on-surface-variant)]">Report</span>
+            <span className="mb-1 block font-medium text-[var(--admin-on-surface-variant)]">
+              Report
+            </span>
             <select
               className={fieldClassName}
               disabled={loadingDefinitions || definitions.length === 0}
               value={selectedDefinitionId}
-              onChange={(event) => setSelectedDefinitionId(event.target.value)}
+              onChange={(event) => {
+                setSelectedDefinitionId(event.target.value);
+              }}
             >
               {definitions.map((definition) => (
                 <option key={definition.key} value={definition.key}>
@@ -283,7 +289,9 @@ export function AdminReportSectionPage({ slug, title }: AdminReportSectionPagePr
         </div>
 
         {selectedDefinition ? (
-          <p className="mt-3 text-sm text-[var(--admin-on-surface-variant)]">{selectedDefinition.description}</p>
+          <p className="mt-3 text-sm text-[var(--admin-on-surface-variant)]">
+            {selectedDefinition.description}
+          </p>
         ) : null}
 
         {paramFilters ? <div className="mt-6">{paramFilters}</div> : null}
@@ -327,27 +335,44 @@ export function AdminReportSectionPage({ slug, title }: AdminReportSectionPagePr
         </div>
       ) : null}
 
-      <section className={generalSettingsFormCardClassName} aria-labelledby="report-schedules-heading">
-        <h2 id="report-schedules-heading" className="text-lg font-semibold text-[var(--admin-on-surface)]">
+      <section
+        className={generalSettingsFormCardClassName}
+        aria-labelledby="report-schedules-heading"
+      >
+        <h2
+          id="report-schedules-heading"
+          className="text-lg font-semibold text-[var(--admin-on-surface)]"
+        >
           Schedules
         </h2>
 
-        <form className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4" onSubmit={(event) => void handleCreateSchedule(event)}>
+        <form
+          className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4"
+          onSubmit={(event) => void handleCreateSchedule(event)}
+        >
           <label className="block text-sm sm:col-span-2">
-            <span className="mb-1 block font-medium text-[var(--admin-on-surface-variant)]">Name</span>
+            <span className="mb-1 block font-medium text-[var(--admin-on-surface-variant)]">
+              Name
+            </span>
             <input
               className={fieldClassName}
               value={scheduleName}
-              onChange={(event) => setScheduleName(event.target.value)}
+              onChange={(event) => {
+                setScheduleName(event.target.value);
+              }}
               placeholder={selectedDefinition?.name ?? "Schedule name"}
             />
           </label>
           <label className="block text-sm">
-            <span className="mb-1 block font-medium text-[var(--admin-on-surface-variant)]">Cadence</span>
+            <span className="mb-1 block font-medium text-[var(--admin-on-surface-variant)]">
+              Cadence
+            </span>
             <select
               className={fieldClassName}
               value={scheduleCadence}
-              onChange={(event) => setScheduleCadence(event.target.value)}
+              onChange={(event) => {
+                setScheduleCadence(event.target.value);
+              }}
             >
               {SCHEDULE_CADENCE_OPTIONS.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -357,14 +382,18 @@ export function AdminReportSectionPage({ slug, title }: AdminReportSectionPagePr
             </select>
           </label>
           <div className="block text-sm">
-            <span className="mb-1 block font-medium text-[var(--admin-on-surface-variant)]">Formats</span>
+            <span className="mb-1 block font-medium text-[var(--admin-on-surface-variant)]">
+              Formats
+            </span>
             <div className="flex flex-wrap gap-2 pt-1">
               {(["csv", "xlsx", "pdf"] as const).map((format) => (
                 <label key={format} className="inline-flex items-center gap-1.5 text-sm">
                   <input
                     type="checkbox"
                     checked={scheduleFormats.includes(format)}
-                    onChange={() => toggleScheduleFormat(format)}
+                    onChange={() => {
+                      toggleScheduleFormat(format);
+                    }}
                   />
                   {format.toUpperCase()}
                 </label>
@@ -383,7 +412,9 @@ export function AdminReportSectionPage({ slug, title }: AdminReportSectionPagePr
         </form>
 
         {schedules.length === 0 ? (
-          <p className="mt-3 text-sm text-[var(--admin-on-surface-variant)]">No schedules configured yet.</p>
+          <p className="mt-3 text-sm text-[var(--admin-on-surface-variant)]">
+            No schedules configured yet.
+          </p>
         ) : (
           <div className={`${analyticsTableShellClassName} mt-4`}>
             <table className="min-w-full text-sm">
@@ -410,8 +441,14 @@ export function AdminReportSectionPage({ slug, title }: AdminReportSectionPagePr
         )}
       </section>
 
-      <section className={generalSettingsFormCardClassName} aria-labelledby="report-history-heading">
-        <h2 id="report-history-heading" className="text-lg font-semibold text-[var(--admin-on-surface)]">
+      <section
+        className={generalSettingsFormCardClassName}
+        aria-labelledby="report-history-heading"
+      >
+        <h2
+          id="report-history-heading"
+          className="text-lg font-semibold text-[var(--admin-on-surface)]"
+        >
           Run history
         </h2>
         {history.length === 0 ? (

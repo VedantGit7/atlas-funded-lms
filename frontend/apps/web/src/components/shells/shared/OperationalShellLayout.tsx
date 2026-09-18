@@ -75,9 +75,7 @@ export function OperationalShellLayout({
               </button>
             ) : null}
             {headerActions}
-            <ThemeModeToggle
-              className="inline-flex h-9 w-9 items-center justify-center rounded border border-border text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-            />
+            <ThemeModeToggle className="inline-flex h-9 w-9 items-center justify-center rounded border border-border text-muted-foreground transition-colors hover:bg-muted hover:text-foreground" />
           </div>
         </div>
       </header>

@@ -135,10 +135,7 @@ describe("F7 platform console", () => {
   });
 
   it("exposes PUT platform feature-flags route on API app", () => {
-    const route = readFileSync(
-      resolve(apiRoot, "platform/feature-flags/[key]/route.ts"),
-      "utf8",
-    );
+    const route = readFileSync(resolve(apiRoot, "platform/feature-flags/[key]/route.ts"), "utf8");
     expect(route).toContain("updatePlatformFeatureFlag");
     expect(route).toContain("export async function PUT");
   });

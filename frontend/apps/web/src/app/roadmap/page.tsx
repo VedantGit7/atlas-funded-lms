@@ -28,7 +28,8 @@ export default async function RoadmapPage() {
             </span>
             <h1 className="mt-3 text-lg font-bold text-foreground">No roadmap yet</h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              Your academy has not published a learning roadmap. Browse the catalog to start learning in the meantime.
+              Your academy has not published a learning roadmap. Browse the catalog to start
+              learning in the meantime.
             </p>
             <Link
               href="/courses"
@@ -50,7 +51,9 @@ export default async function RoadmapPage() {
         <div className="mx-auto max-w-3xl space-y-8 pb-16">
           <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <h1 className="text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">{roadmap.title}</h1>
+              <h1 className="text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
+                {roadmap.title}
+              </h1>
               <p className="mt-1 max-w-xl text-sm text-muted-foreground">
                 {roadmap.description ??
                   "A step-by-step path to mastery. Every node brings you closer to professional proficiency."}

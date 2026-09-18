@@ -56,7 +56,8 @@ const VISIBILITY_OPTIONS = [
   {
     value: "PRIVATE" as const,
     title: "Private",
-    description: "Make it a private type to allow access to only the invited students with whom you share.",
+    description:
+      "Make it a private type to allow access to only the invited students with whom you share.",
   },
 ];
 

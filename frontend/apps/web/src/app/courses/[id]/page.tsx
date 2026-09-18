@@ -1,6 +1,8 @@
 import type { z } from "zod";
 import { PageGate } from "../../../components/patterns/PageGate";
 import { CourseDetail } from "../../../features/courses/course-detail";
+import { CourseCouponChecker } from "../../../features/courses/CourseCouponChecker";
+import { CourseStorePricing } from "../../../features/courses/CourseStorePricing";
 import { ServerApiError, serverApi } from "../../../lib/server-api";
 import type {
   courseDetailResponseSchema,
@@ -32,6 +34,8 @@ export default async function CourseDetailPage({ params, searchParams }: CourseD
           modules={modules.data.items}
           {...(tagId ? { tagId } : {})}
         />
+        <CourseCouponChecker courseId={id} />
+        <CourseStorePricing courseId={id} />
       </PageGate>
     );
   } catch (error) {

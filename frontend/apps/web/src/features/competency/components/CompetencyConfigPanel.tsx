@@ -87,10 +87,7 @@ export function CompetencyConfigPanel({
 
   return (
     <div className="admin-theme mx-auto max-w-[1200px] space-y-6 text-[var(--admin-on-surface)]">
-      <CompetencyPageHeader
-        selectedProfile={selectedProfile}
-        dimensionCount={dimensions.length}
-      />
+      <CompetencyPageHeader selectedProfile={selectedProfile} dimensionCount={dimensions.length} />
 
       <div className="grid grid-cols-12 items-start gap-6">
         <div className="col-span-12 space-y-6 lg:col-span-5">

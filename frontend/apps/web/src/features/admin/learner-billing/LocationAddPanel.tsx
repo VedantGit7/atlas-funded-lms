@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ChevronRight, RefreshCw } from "lucide-react";
+import { AlertTriangle, ChevronRight, RefreshCw } from "lucide-react";
 import type { BillingLocationView } from "@atlas/domain-config/schemas/learner-billing";
 import { ClientApiError, clientApi } from "../../../lib/client-api";
 import { CurrencyDropdown } from "./CurrencyDropdown";
@@ -13,7 +13,12 @@ import { locationTitle } from "./location-options";
 const DESCRIPTION_LIMIT = 150;
 const LOCATIONS_HREF = "/admin/learner-billing/locations";
 
-export function LocationAddPanel() {
+export function LocationAddPanel({
+  existingLocations = [],
+}: {
+  /** Regions that already have a location, so a dead end is visible up front. */
+  existingLocations?: Array<{ locationKey: string; title: string; currency: string }>;
+}) {
   const router = useRouter();
   const [locationKey, setLocationKey] = useState<string | null>(null);
   const [currency, setCurrency] = useState("USD");
@@ -21,7 +26,16 @@ export function LocationAddPanel() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const valid = locationKey != null && currency.length === 3;
+  // The server rejects a duplicate region; saying so before the round trip
+  // stops someone filling in a description for a location that cannot be saved.
+  const clash =
+    locationKey === null
+      ? null
+      : (existingLocations.find(
+          (location) => location.locationKey.toUpperCase() === locationKey.toUpperCase(),
+        ) ?? null);
+
+  const valid = locationKey != null && currency.length === 3 && clash === null;
 
   async function onAdd() {
     if (!valid) return;
@@ -62,7 +76,10 @@ export function LocationAddPanel() {
         >
           Locations
         </Link>
-        <ChevronRight className="h-3.5 w-3.5 text-[var(--admin-on-surface-variant)]" aria-hidden="true" />
+        <ChevronRight
+          className="h-3.5 w-3.5 text-[var(--admin-on-surface-variant)]"
+          aria-hidden="true"
+        />
         <span className="font-semibold text-[var(--admin-primary)]">Add New Location</span>
       </nav>
 
@@ -76,12 +93,33 @@ export function LocationAddPanel() {
       </header>
 
       <div className="max-w-xl space-y-5 rounded-2xl border border-[var(--admin-border)] bg-[var(--admin-surface)] p-6 shadow-sm">
-        <LocationDropdown id="location-select" value={locationKey} onChange={setLocationKey} />
+        <div className="space-y-2">
+          <LocationDropdown id="location-select" value={locationKey} onChange={setLocationKey} />
+          {clash === null ? null : (
+            <p
+              role="alert"
+              className="flex items-start gap-2 rounded-lg border border-[color-mix(in_srgb,var(--admin-warning)_35%,var(--admin-border))] bg-[color-mix(in_srgb,var(--admin-warning)_8%,var(--admin-surface))] px-3 py-2 text-xs text-[var(--admin-on-surface-variant)]"
+            >
+              <AlertTriangle
+                className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--admin-warning)]"
+                aria-hidden="true"
+              />
+              <span>
+                {clash.title} already has a location charging in{" "}
+                <span className="font-data">{clash.currency}</span>. A region can only have one, so
+                pick another region or change the existing one.
+              </span>
+            </p>
+          )}
+        </div>
         <CurrencyDropdown id="location-currency" value={currency} onChange={setCurrency} />
 
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <label htmlFor="location-description" className="text-sm font-bold text-[var(--admin-on-surface)]">
+            <label
+              htmlFor="location-description"
+              className="text-sm font-bold text-[var(--admin-on-surface)]"
+            >
               Description
             </label>
             <span className="text-[11px] text-[var(--admin-on-surface-variant)]">
@@ -97,7 +135,7 @@ export function LocationAddPanel() {
               setDescription(event.target.value);
             }}
             placeholder="Place your text"
-            className="w-full resize-y rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-4 py-2.5 text-sm text-[var(--admin-on-surface)] outline-none transition-colors placeholder:text-[var(--admin-on-surface-variant)] focus:border-[var(--admin-primary)] focus:ring-2 focus:ring-[var(--admin-primary)]/30"
+            className="w-full resize-y rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-4 py-2.5 text-sm text-[var(--admin-on-surface)] outline-none transition-colors placeholder:text-[var(--admin-on-surface-variant)] focus:border-[var(--admin-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--admin-primary)_30%,transparent)]"
           />
         </div>
       </div>
@@ -118,7 +156,7 @@ export function LocationAddPanel() {
           >
             {saving ? (
               <>
-                <RefreshCw className="h-4 w-4 animate-spin motion-reduce:animate-none" aria-hidden="true" />
+                <RefreshCw className="h-4 w-4 motion-safe:animate-spin" aria-hidden="true" />
                 Adding
               </>
             ) : (

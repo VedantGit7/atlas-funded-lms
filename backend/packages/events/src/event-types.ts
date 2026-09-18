@@ -56,6 +56,7 @@ export const APPROVED_EVENT_TYPES = new Set<string>([
   "security.mfa_enabled",
   "security.mfa_disabled",
   "marketing.form_submitted",
+  "marketing.webhook_dispatch_requested",
 ]);
 
 export function assertApprovedEventType(eventType: string): void {

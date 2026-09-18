@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { ClientApiError, clientApi, toast } from "../../../lib/client-api";
+import { cancellationFlag } from "@/lib/effect-cancellation";
 
 type MyReferral = {
   enabled: boolean;
@@ -23,7 +24,7 @@ export function LearnerReferralPanel() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    let cancelled = false;
+    const effect = cancellationFlag();
     void (async () => {
       setLoading(true);
       try {
@@ -31,20 +32,20 @@ export function LearnerReferralPanel() {
           "/api/v1/me/referral",
           "my-referral",
         );
-        if (!cancelled) {
+        if (!effect.isCancelled()) {
           setReferral(response.data);
           setError(null);
         }
       } catch (caught) {
-        if (!cancelled) {
+        if (!effect.isCancelled()) {
           setError(caught instanceof ClientApiError ? caught.message : "Could not load referrals.");
         }
       } finally {
-        if (!cancelled) setLoading(false);
+        if (!effect.isCancelled()) setLoading(false);
       }
     })();
     return () => {
-      cancelled = true;
+      effect.cancel();
     };
   }, []);
 
@@ -135,7 +136,7 @@ export function LearnerReferralPanel() {
               </button>
               <a
                 className="rounded-md border px-3 py-2 text-sm font-medium"
-                href={`https://wa.me/?text=${encodeURIComponent(`Join with my referral code ${referral.code}: ${shareUrl}`)}`}
+                href={`https://wa.me/?text=${encodeURIComponent(`Join with my referral code ${referral.code ?? ""}: ${shareUrl}`)}`}
                 target="_blank"
                 rel="noreferrer"
               >
@@ -143,7 +144,7 @@ export function LearnerReferralPanel() {
               </a>
               <a
                 className="rounded-md border px-3 py-2 text-sm font-medium"
-                href={`https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(`Join with my referral code ${referral.code}`)}`}
+                href={`https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(`Join with my referral code ${referral.code ?? ""}`)}`}
                 target="_blank"
                 rel="noreferrer"
               >

@@ -75,7 +75,9 @@ export function mergeCourseLeaderboardIntoTags(
   settings: CourseLeaderboardSettings,
 ): Record<string, unknown> {
   const existingFeatures =
-    tags?.[FEATURES_TAG_KEY] && typeof tags[FEATURES_TAG_KEY] === "object" && !Array.isArray(tags[FEATURES_TAG_KEY])
+    tags?.[FEATURES_TAG_KEY] &&
+    typeof tags[FEATURES_TAG_KEY] === "object" &&
+    !Array.isArray(tags[FEATURES_TAG_KEY])
       ? (tags[FEATURES_TAG_KEY] as Record<string, unknown>)
       : {};
 
@@ -96,7 +98,6 @@ export function leaderboardSettingsEqual(
   b: CourseLeaderboardSettings,
 ): boolean {
   return (
-    a.quizLeaderboard === b.quizLeaderboard &&
-    a.assignmentLeaderboard === b.assignmentLeaderboard
+    a.quizLeaderboard === b.quizLeaderboard && a.assignmentLeaderboard === b.assignmentLeaderboard
   );
 }

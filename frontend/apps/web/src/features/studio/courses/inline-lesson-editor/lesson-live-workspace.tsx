@@ -31,10 +31,10 @@ function readLiveConfig(content: unknown): LiveConfig {
       instructions: "",
     };
   }
-  
+
   const contentObj = content as Record<string, unknown>;
   const live = contentObj["live"];
-  
+
   if (!live || typeof live !== "object" || Array.isArray(live)) {
     return {
       meetingUrl: "",
@@ -43,9 +43,9 @@ function readLiveConfig(content: unknown): LiveConfig {
       instructions: "",
     };
   }
-  
+
   const liveObj = live as Record<string, unknown>;
-  
+
   return {
     meetingUrl: typeof liveObj["meetingUrl"] === "string" ? liveObj["meetingUrl"] : "",
     scheduledAt: typeof liveObj["scheduledAt"] === "string" ? liveObj["scheduledAt"] : "",
@@ -62,28 +62,28 @@ export function LessonLiveWorkspace({ lesson, editable, onSaved }: LessonLiveWor
   const scheduledAtId = useId();
   const providerId = useId();
   const instructionsId = useId();
-  
+
   const [config, setConfig] = useState<LiveConfig>(() => readLiveConfig(lesson.content));
   const [showForm, setShowForm] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   useEffect(() => {
     setConfig(readLiveConfig(lesson.content));
     setShowForm(Boolean(readLiveConfig(lesson.content).meetingUrl));
   }, [lesson.content]);
-  
+
   async function handleSave() {
     if (!editable || saving) return;
-    
+
     if (!config.meetingUrl.trim()) {
       setError("Meeting URL is required");
       return;
     }
-    
+
     setSaving(true);
     setError(null);
-    
+
     try {
       await clientApi.put(
         `/api/v1/lessons/${lesson.id}`,
@@ -99,7 +99,7 @@ export function LessonLiveWorkspace({ lesson, editable, onSaved }: LessonLiveWor
         },
         "lesson-live-config-save",
       );
-      
+
       onSaved?.();
       setShowForm(false);
     } catch (saveError) {
@@ -112,12 +112,14 @@ export function LessonLiveWorkspace({ lesson, editable, onSaved }: LessonLiveWor
       setSaving(false);
     }
   }
-  
+
   if (showForm) {
     return (
       <section className="flex min-h-[min(28rem,calc(100vh-14rem))] flex-col rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)]">
         <header className="border-b border-[var(--admin-border)] px-5 py-4">
-          <h2 className="text-sm font-semibold text-[var(--admin-on-surface)]">Configure live class</h2>
+          <h2 className="text-sm font-semibold text-[var(--admin-on-surface)]">
+            Configure live class
+          </h2>
         </header>
 
         {error ? (
@@ -128,7 +130,10 @@ export function LessonLiveWorkspace({ lesson, editable, onSaved }: LessonLiveWor
 
         <div className="flex flex-1 flex-col gap-6 p-5">
           <div>
-            <label htmlFor={meetingUrlId} className="mb-2 block text-sm font-medium text-[var(--admin-on-surface)]">
+            <label
+              htmlFor={meetingUrlId}
+              className="mb-2 block text-sm font-medium text-[var(--admin-on-surface)]"
+            >
               Meeting URL <span className="text-[var(--admin-danger)]">*</span>
             </label>
             <div className="relative">
@@ -152,7 +157,10 @@ export function LessonLiveWorkspace({ lesson, editable, onSaved }: LessonLiveWor
           </div>
 
           <div>
-            <label htmlFor={scheduledAtId} className="mb-2 block text-sm font-medium text-[var(--admin-on-surface)]">
+            <label
+              htmlFor={scheduledAtId}
+              className="mb-2 block text-sm font-medium text-[var(--admin-on-surface)]"
+            >
               Scheduled date and time
             </label>
             <div className="relative">
@@ -174,7 +182,10 @@ export function LessonLiveWorkspace({ lesson, editable, onSaved }: LessonLiveWor
           </div>
 
           <div>
-            <label htmlFor={providerId} className="mb-2 block text-sm font-medium text-[var(--admin-on-surface)]">
+            <label
+              htmlFor={providerId}
+              className="mb-2 block text-sm font-medium text-[var(--admin-on-surface)]"
+            >
               Platform
             </label>
             <select
@@ -196,7 +207,10 @@ export function LessonLiveWorkspace({ lesson, editable, onSaved }: LessonLiveWor
           </div>
 
           <div>
-            <label htmlFor={instructionsId} className="mb-2 block text-sm font-medium text-[var(--admin-on-surface)]">
+            <label
+              htmlFor={instructionsId}
+              className="mb-2 block text-sm font-medium text-[var(--admin-on-surface)]"
+            >
               Instructions for learners
             </label>
             <textarea
@@ -243,13 +257,18 @@ export function LessonLiveWorkspace({ lesson, editable, onSaved }: LessonLiveWor
   return (
     <section className="flex min-h-[min(28rem,calc(100vh-14rem))] flex-col rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)]">
       <header className="border-b border-[var(--admin-border)] px-5 py-4">
-        <h2 className="text-sm font-semibold text-[var(--admin-on-surface)]">Configure live class</h2>
+        <h2 className="text-sm font-semibold text-[var(--admin-on-surface)]">
+          Configure live class
+        </h2>
       </header>
 
       <div className="flex flex-1 flex-col p-5">
         <div className="flex flex-1 flex-col items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--admin-primary)_6%,var(--admin-surface-low))] px-6 py-12 text-center">
           <div className="mb-5 inline-flex items-center gap-2 rounded-md bg-[var(--admin-danger)] px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-[var(--admin-on-primary)]">
-            <span className="h-2 w-2 rounded-full bg-[var(--admin-on-primary)]" aria-hidden="true" />
+            <span
+              className="h-2 w-2 rounded-full bg-[var(--admin-on-primary)]"
+              aria-hidden="true"
+            />
             Live
           </div>
           <h3 className="text-lg font-semibold text-[var(--admin-on-surface)]">

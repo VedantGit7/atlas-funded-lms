@@ -56,7 +56,9 @@ function mapItemStatisticRow(row: Record<string, unknown>): ItemStatisticRow {
   };
 }
 
-function parseDistractorCounts(metricsJson: Record<string, unknown> | null): Record<string, number> {
+function parseDistractorCounts(
+  metricsJson: Record<string, unknown> | null,
+): Record<string, number> {
   const raw = metricsJson?.["distractorCounts"];
   if (!raw || typeof raw !== "object") {
     return {};
@@ -401,7 +403,9 @@ export const analyticsRepository = {
     tx: TenantTx,
     itemIds: string[],
     rollingCutoff: Date | null,
-  ): Promise<Map<string, { meanCorrectLatencyMs: number | null; meanIncorrectLatencyMs: number | null }>> {
+  ): Promise<
+    Map<string, { meanCorrectLatencyMs: number | null; meanIncorrectLatencyMs: number | null }>
+  > {
     if (itemIds.length === 0) {
       return new Map();
     }
@@ -433,13 +437,18 @@ export const analyticsRepository = {
       group by ai.item_id
     `;
 
-    const map = new Map<string, { meanCorrectLatencyMs: number | null; meanIncorrectLatencyMs: number | null }>();
+    const map = new Map<
+      string,
+      { meanCorrectLatencyMs: number | null; meanIncorrectLatencyMs: number | null }
+    >();
     for (const row of rows) {
       map.set(String(row["item_id"]), {
         meanCorrectLatencyMs:
           row["mean_correct_latency_ms"] == null ? null : Number(row["mean_correct_latency_ms"]),
         meanIncorrectLatencyMs:
-          row["mean_incorrect_latency_ms"] == null ? null : Number(row["mean_incorrect_latency_ms"]),
+          row["mean_incorrect_latency_ms"] == null
+            ? null
+            : Number(row["mean_incorrect_latency_ms"]),
       });
     }
     return map;

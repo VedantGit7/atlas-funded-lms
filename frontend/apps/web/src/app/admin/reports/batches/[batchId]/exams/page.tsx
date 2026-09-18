@@ -26,9 +26,7 @@ export default async function AdminBatchExamsRoutePage({ params }: PageProps) {
   return (
     <AdminPageGate screenId="T50" state="ready" title="Exams">
       <Suspense
-        fallback={
-          <p className="text-sm text-[var(--admin-on-surface-variant)]">Loading exams…</p>
-        }
+        fallback={<p className="text-sm text-[var(--admin-on-surface-variant)]">Loading exams…</p>}
       >
         <AdminBatchExamsPage batchId={batchId} />
       </Suspense>

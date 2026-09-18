@@ -2,7 +2,7 @@
 /**
  * Sync Zod schema / DTO / type files into @atlas/contracts (no Prisma / DB).
  */
-import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -87,14 +87,30 @@ function copyTree(sourceRoot, targetSubdir, mode = "contract") {
 
 let copied = 0;
 copied += copyTree(join(repoRoot, "backend/apps/api/src/server"), "");
-copied += copyTree(join(repoRoot, "backend/packages/domain/branding/src/schemas"), "domain-branding/schemas", "all");
+copied += copyTree(
+  join(repoRoot, "backend/packages/domain/branding/src/schemas"),
+  "domain-branding/schemas",
+  "all",
+);
 copied += copyFileToTarget(
   join(repoRoot, "backend/packages/domain/branding/src/utils/public-landing-projection.ts"),
   "domain-branding/utils/public-landing-projection.ts",
 );
-copied += copyTree(join(repoRoot, "backend/packages/domain/identity/src/schemas"), "domain-identity/schemas", "all");
-copied += copyTree(join(repoRoot, "backend/packages/domain/config/src/schemas"), "domain-config/schemas", "all");
-copied += copyTree(join(repoRoot, "backend/packages/domain/access/src/schemas"), "domain-access/schemas", "all");
+copied += copyTree(
+  join(repoRoot, "backend/packages/domain/identity/src/schemas"),
+  "domain-identity/schemas",
+  "all",
+);
+copied += copyTree(
+  join(repoRoot, "backend/packages/domain/config/src/schemas"),
+  "domain-config/schemas",
+  "all",
+);
+copied += copyTree(
+  join(repoRoot, "backend/packages/domain/access/src/schemas"),
+  "domain-access/schemas",
+  "all",
+);
 copied += copyFileToTarget(
   join(repoRoot, "backend/packages/membership/src/schemas.ts"),
   "membership/schemas.ts",

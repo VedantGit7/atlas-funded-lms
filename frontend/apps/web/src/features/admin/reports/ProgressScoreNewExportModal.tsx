@@ -28,7 +28,6 @@ import {
   fetchProgressProducts,
   fetchScoreProducts,
   fetchScoreQuizzes,
-  type ProgressProductType,
   type ScoreProductType,
 } from "./admin-progress-score-roster-api";
 
@@ -75,7 +74,9 @@ function PolicyToggle({
       aria-checked={checked}
       aria-label={label}
       disabled={disabled}
-      onClick={() => onChange(!checked)}
+      onClick={() => {
+        onChange(!checked);
+      }}
       className={`relative h-5 w-9 shrink-0 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]/40 disabled:opacity-50 ${
         checked ? "bg-[var(--admin-primary)]" : "bg-[var(--admin-outline)]"
       }`}
@@ -151,7 +152,9 @@ export function ProgressScoreNewExportModal({
       if (event.key === "Escape") onClose();
     };
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+    };
   }, [open, onClose]);
 
   useEffect(() => {
@@ -162,7 +165,9 @@ export function ProgressScoreNewExportModal({
     setProductId("");
     setAssessmentId("");
     setSelected(
-      new Set(progressColumns.filter((column) => column.defaultSelected).map((column) => column.key)),
+      new Set(
+        progressColumns.filter((column) => column.defaultSelected).map((column) => column.key),
+      ),
     );
     setFormat("csv");
     setDateFrom("");
@@ -197,7 +202,7 @@ export function ProgressScoreNewExportModal({
           const response = await fetchScoreProducts(scoreProductType, { page: 1, limit: 100 });
           setProducts(response.data.items.map((item) => ({ id: item.id, title: item.title })));
         } else {
-          const response = await fetchProgressProducts(productType as ProgressProductType, {
+          const response = await fetchProgressProducts(productType, {
             page: 1,
             limit: 100,
           });
@@ -223,7 +228,9 @@ export function ProgressScoreNewExportModal({
           page: 1,
           limit: 100,
         });
-        setQuizzes(response.data.items.map((item) => ({ id: item.assessmentId, title: item.title })));
+        setQuizzes(
+          response.data.items.map((item) => ({ id: item.assessmentId, title: item.title })),
+        );
       } catch {
         setQuizzes([]);
       } finally {
@@ -299,7 +306,7 @@ export function ProgressScoreNewExportModal({
       };
 
       if (productId) {
-        body.productType = effectiveProductType as ProgressScoreExportProductType;
+        body.productType = effectiveProductType;
         body.productId = productId;
         if (effectiveProductType === "course") body.courseId = productId;
       }
@@ -348,7 +355,10 @@ export function ProgressScoreNewExportModal({
         className="flex max-h-[90vh] w-full max-w-[800px] flex-col rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface)]"
       >
         <header className="flex h-16 shrink-0 items-center justify-between border-b border-[var(--admin-border)] px-6">
-          <h2 id={titleId} className="text-2xl font-semibold tracking-tight text-[var(--admin-on-surface)]">
+          <h2
+            id={titleId}
+            className="text-2xl font-semibold tracking-tight text-[var(--admin-on-surface)]"
+          >
             New export
           </h2>
           <button
@@ -370,7 +380,9 @@ export function ProgressScoreNewExportModal({
                   <button
                     key={option.value}
                     type="button"
-                    onClick={() => setDataset(option.value)}
+                    onClick={() => {
+                      setDataset(option.value);
+                    }}
                     className={`rounded-sm border px-4 py-2 text-sm font-medium transition-colors ${
                       dataset === option.value
                         ? "border-[var(--admin-primary)] bg-[color-mix(in_srgb,var(--admin-primary)_12%,var(--admin-surface))] text-[var(--admin-primary)]"
@@ -399,9 +411,7 @@ export function ProgressScoreNewExportModal({
                     setProductId("");
                     setAssessmentId("");
                   }}
-                  options={[
-                    ...productTypeOptions,
-                  ]}
+                  options={[...productTypeOptions]}
                   className={selectTriggerClassName}
                 />
               </label>
@@ -457,7 +467,9 @@ export function ProgressScoreNewExportModal({
               <button
                 type="button"
                 className="text-sm text-[var(--admin-primary)] hover:underline"
-                onClick={() => setSelected(new Set(columns.map((column) => column.key)))}
+                onClick={() => {
+                  setSelected(new Set(columns.map((column) => column.key)));
+                }}
               >
                 Select all
               </button>
@@ -473,12 +485,17 @@ export function ProgressScoreNewExportModal({
             ) : null}
             <div className="grid grid-cols-1 gap-x-8 gap-y-3 rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface-low)] p-4 sm:grid-cols-2">
               {columns.map((column) => (
-                <label key={column.key} className="group flex cursor-pointer items-start justify-between gap-3">
+                <label
+                  key={column.key}
+                  className="group flex cursor-pointer items-start justify-between gap-3"
+                >
                   <span className="flex items-center gap-3">
                     <input
                       type="checkbox"
                       checked={selected.has(column.key)}
-                      onChange={() => toggleColumn(column.key)}
+                      onChange={() => {
+                        toggleColumn(column.key);
+                      }}
                       className="h-4 w-4 rounded-sm border-[var(--admin-outline)] text-[var(--admin-primary)] focus:ring-[var(--admin-primary)]"
                     />
                     <span className="text-sm text-[var(--admin-on-surface)] group-hover:text-[var(--admin-primary)]">
@@ -529,7 +546,9 @@ export function ProgressScoreNewExportModal({
                   <input
                     type="date"
                     value={dateFrom}
-                    onChange={(event) => setDateFrom(event.target.value)}
+                    onChange={(event) => {
+                      setDateFrom(event.target.value);
+                    }}
                     className="h-10 rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-3 font-mono text-[13px] text-[var(--admin-on-surface)] outline-none focus:border-[var(--admin-primary)]"
                   />
                 </label>
@@ -540,7 +559,9 @@ export function ProgressScoreNewExportModal({
                   <input
                     type="date"
                     value={dateTo}
-                    onChange={(event) => setDateTo(event.target.value)}
+                    onChange={(event) => {
+                      setDateTo(event.target.value);
+                    }}
                     className="h-10 rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-3 font-mono text-[13px] text-[var(--admin-on-surface)] outline-none focus:border-[var(--admin-primary)]"
                   />
                 </label>
@@ -555,7 +576,9 @@ export function ProgressScoreNewExportModal({
                 <button
                   key={value}
                   type="button"
-                  onClick={() => setFormat(value)}
+                  onClick={() => {
+                    setFormat(value);
+                  }}
                   className={`rounded-sm px-6 py-2 text-[12px] font-semibold tracking-[0.06em] uppercase transition-all ${
                     format === value
                       ? "bg-[var(--admin-surface)] text-[var(--admin-primary)] shadow-sm"
@@ -569,7 +592,9 @@ export function ProgressScoreNewExportModal({
           </section>
 
           <section>
-            <h3 className="mb-4 text-base font-semibold text-[var(--admin-on-surface)]">Delivery</h3>
+            <h3 className="mb-4 text-base font-semibold text-[var(--admin-on-surface)]">
+              Delivery
+            </h3>
             <div className="space-y-3">
               {(
                 [
@@ -583,7 +608,9 @@ export function ProgressScoreNewExportModal({
                     type="radio"
                     name="progress-score-delivery"
                     checked={delivery === value}
-                    onChange={() => setDelivery(value)}
+                    onChange={() => {
+                      setDelivery(value);
+                    }}
                     className="h-4 w-4 border-[var(--admin-outline)] text-[var(--admin-primary)] focus:ring-[var(--admin-primary)]"
                   />
                   <span className="text-sm text-[var(--admin-on-surface)]">{label}</span>
@@ -605,9 +632,9 @@ export function ProgressScoreNewExportModal({
                           <button
                             type="button"
                             className="ml-2 text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-danger)]"
-                            onClick={() =>
-                              setRecipients((current) => current.filter((item) => item !== email))
-                            }
+                            onClick={() => {
+                              setRecipients((current) => current.filter((item) => item !== email));
+                            }}
                           >
                             <X className="h-3.5 w-3.5" aria-hidden="true" />
                           </button>
@@ -615,7 +642,9 @@ export function ProgressScoreNewExportModal({
                       ))}
                       <input
                         value={recipientInput}
-                        onChange={(event) => setRecipientInput(event.target.value)}
+                        onChange={(event) => {
+                          setRecipientInput(event.target.value);
+                        }}
                         onKeyDown={(event) => {
                           if (event.key === "Enter") {
                             event.preventDefault();
@@ -634,7 +663,9 @@ export function ProgressScoreNewExportModal({
                     </label>
                     <input
                       value={webhookUrl}
-                      onChange={(event) => setWebhookUrl(event.target.value)}
+                      onChange={(event) => {
+                        setWebhookUrl(event.target.value);
+                      }}
                       placeholder="https://"
                       className="h-10 w-full rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-3 font-mono text-[13px] text-[var(--admin-on-surface)] outline-none focus:border-[var(--admin-primary)]"
                     />
@@ -667,7 +698,9 @@ export function ProgressScoreNewExportModal({
                     </span>
                     <Select
                       value={cadence}
-                      onValueChange={(value) => setCadence(value as ProgressScoreExportCadence)}
+                      onValueChange={(value) => {
+                        setCadence(value as ProgressScoreExportCadence);
+                      }}
                       options={[
                         { value: "daily", label: "Daily" },
                         { value: "weekly", label: "Weekly" },
@@ -683,7 +716,9 @@ export function ProgressScoreNewExportModal({
                     <input
                       type="time"
                       value={time}
-                      onChange={(event) => setTime(event.target.value)}
+                      onChange={(event) => {
+                        setTime(event.target.value);
+                      }}
                       className="h-10 rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-3 font-mono text-[13px] text-[var(--admin-on-surface)] outline-none focus:border-[var(--admin-primary)]"
                     />
                   </label>
@@ -710,7 +745,10 @@ export function ProgressScoreNewExportModal({
           ) : null}
 
           <div className="flex items-start gap-2 rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-4 py-3 text-sm text-[var(--admin-on-surface-variant)]">
-            <Info className="mt-0.5 h-4 w-4 shrink-0 text-[var(--admin-primary)]" aria-hidden="true" />
+            <Info
+              className="mt-0.5 h-4 w-4 shrink-0 text-[var(--admin-primary)]"
+              aria-hidden="true"
+            />
             <span>{capabilities.note}</span>
           </div>
 

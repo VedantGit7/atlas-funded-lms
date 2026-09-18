@@ -14,7 +14,7 @@ import {
   updateMarketingEvent,
 } from "../../../../../../server/marketing-events/marketing-events.service";
 
-const paramsSchema = zod.object({ id: zod.string().uuid() });
+const paramsSchema = zod.object({ id: zod.uuid() });
 
 export const GET = createTenantRoute<
   undefined,

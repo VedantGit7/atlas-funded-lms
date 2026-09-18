@@ -221,7 +221,7 @@ export function LearnerNotificationPopover({
           aria-modal="false"
           className={cn(
             dropdownPanelEnterEndClassName,
-            "absolute right-0 top-[calc(100%+10px)] z-50 flex w-[min(100vw-2rem,22rem)] flex-col overflow-hidden rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] shadow-[0_18px_45px_color-mix(in_srgb,var(--foreground)_14%,transparent)]",
+            "absolute right-0 top-[calc(100%+10px)] z-50 flex w-[min(100vw-2rem,22rem)] flex-col overflow-hidden rounded-[var(--radius)] border border-[var(--border)] bg-card shadow-[0_18px_45px_color-mix(in_srgb,var(--foreground)_14%,transparent)]",
           )}
         >
           <div className="flex items-center justify-between gap-2 border-b border-[var(--border)] px-4 py-3">
@@ -238,7 +238,7 @@ export function LearnerNotificationPopover({
               onClick={() => {
                 setOpen(false);
               }}
-              className="inline-flex min-h-8 items-center gap-1 rounded px-2 py-1 text-[11px] font-medium text-[var(--brand-primary)] transition-colors hover:bg-[var(--muted)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)]"
+              className="inline-flex min-h-8 items-center gap-1 rounded px-2 py-1 text-[11px] font-medium text-[var(--primary)] transition-colors hover:bg-[var(--muted)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)]"
             >
               <Settings className="h-3.5 w-3.5" aria-hidden="true" strokeWidth={1.75} />
               Settings
@@ -264,7 +264,7 @@ export function LearnerNotificationPopover({
               </p>
             ) : items.length === 0 ? (
               <div className="flex flex-col items-center gap-2 px-4 py-10 text-center">
-                <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[var(--muted)] text-[var(--brand-primary)]">
+                <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[var(--muted)] text-[var(--primary)]">
                   <Bell className="h-5 w-5" aria-hidden="true" strokeWidth={1.75} />
                 </div>
                 <p className="text-sm font-medium text-[var(--foreground)]">All caught up</p>
@@ -300,7 +300,7 @@ export function LearnerNotificationPopover({
                               ? "bg-[color-mix(in_srgb,var(--destructive)_14%,var(--muted))] text-[var(--destructive)]"
                               : visual.priority === "warning"
                                 ? "bg-[color-mix(in_srgb,var(--warning)_14%,var(--muted))] text-[var(--warning)]"
-                                : "bg-[var(--muted)] text-[var(--brand-primary)]",
+                                : "bg-[var(--muted)] text-[var(--primary)]",
                           )}
                         >
                           <Icon
@@ -356,7 +356,7 @@ export function LearnerNotificationPopover({
                   onClick={() => {
                     void loadMore();
                   }}
-                  className="flex min-h-10 w-full items-center justify-center gap-2 rounded-[var(--radius)] px-3 py-2 text-xs font-medium text-[var(--brand-primary)] transition-colors hover:bg-[var(--muted)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)] disabled:opacity-60"
+                  className="flex min-h-10 w-full items-center justify-center gap-2 rounded-[var(--radius)] px-3 py-2 text-xs font-medium text-[var(--primary)] transition-colors hover:bg-[var(--muted)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)] disabled:opacity-60"
                 >
                   {loadingMore ? (
                     <>

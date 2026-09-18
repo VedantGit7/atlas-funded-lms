@@ -212,9 +212,7 @@ export function formatEntitlementExpiry(
   };
 }
 
-export function groupResolvedEntitlements(
-  entitlements: ResolvedEntitlement[],
-): Array<{
+export function groupResolvedEntitlements(entitlements: ResolvedEntitlement[]): Array<{
   id: string;
   label: string;
   entries: ResolvedEntitlement[];

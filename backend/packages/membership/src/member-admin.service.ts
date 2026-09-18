@@ -509,7 +509,9 @@ export async function updateMemberProfile(
     ...(input.bio !== undefined ? { bio: input.bio } : {}),
     ...(input.avatarUrl !== undefined ? { avatarUrl: input.avatarUrl } : {}),
     ...(input.timezone !== undefined ? { timezone: input.timezone } : {}),
-    ...(input.profileVisibility !== undefined ? { profileVisibility: input.profileVisibility } : {}),
+    ...(input.profileVisibility !== undefined
+      ? { profileVisibility: input.profileVisibility }
+      : {}),
   });
 
   await auditWriter.write(

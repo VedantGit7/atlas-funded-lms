@@ -97,8 +97,7 @@ function ctaTypeIcon(type: CtaType) {
 }
 
 function StatusPill({ status }: { status: CtaStatus }) {
-  const tone =
-    status === "LIVE" ? "success" : status === "UNPUBLISHED" ? "warning" : "neutral";
+  const tone = status === "LIVE" ? "success" : status === "UNPUBLISHED" ? "warning" : "neutral";
   const dotClass =
     tone === "success"
       ? "bg-[var(--admin-success)]"
@@ -232,8 +231,7 @@ export function CtaListPanel() {
   const rangeStart = items.length === 0 ? 0 : (safePage - 1) * pageSize + 1;
   const rangeEnd = Math.min(safePage * pageSize, items.length);
   const hasFilters = Boolean(debouncedQuery || tab !== "ALL" || typeFilter !== "ALL");
-  const deleteMatches =
-    deleteRow != null && deleteConfirm.trim() === deleteRow.title.trim();
+  const deleteMatches = deleteRow != null && deleteConfirm.trim() === deleteRow.title.trim();
 
   const tabCount = (id: StatusTab): number => {
     if (id === "ALL") return summary.totalCount;
@@ -245,12 +243,9 @@ export function CtaListPanel() {
   async function runAction(id: string, path: string, successMessage: string) {
     setActionBusy(id);
     try {
-      await clientApi.post<CtaResponse>(
-        `/api/v1/marketing/ctas/${id}/${path}`,
-        {},
-        `cta-${path}`,
-        { successMessage },
-      );
+      await clientApi.post<CtaResponse>(`/api/v1/marketing/ctas/${id}/${path}`, {}, `cta-${path}`, {
+        successMessage,
+      });
       await load();
     } catch (caught) {
       toast.error(caught instanceof ClientApiError ? caught.message : "Action failed.");
@@ -719,7 +714,9 @@ export function CtaListPanel() {
             </h2>
             <p className="text-sm text-[var(--admin-on-surface-variant)]">
               Unpublish first if Live. Type{" "}
-              <span className="font-semibold text-[var(--admin-on-surface)]">{deleteRow.title}</span>{" "}
+              <span className="font-semibold text-[var(--admin-on-surface)]">
+                {deleteRow.title}
+              </span>{" "}
               to confirm.
             </p>
             <input

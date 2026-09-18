@@ -90,7 +90,11 @@ export function AtlasThemeToggle({
       aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
       className="flex h-[38px] w-[38px] shrink-0 cursor-pointer items-center justify-center rounded-lg border-[1.5px] border-[var(--atl-bdr2)] bg-[var(--atl-surf)] text-[var(--atl-tx2)] transition-colors hover:border-[var(--atl-tx3)] hover:bg-[var(--atl-bg2)] hover:text-[var(--atl-tx)]"
     >
-      {darkMode ? <SunIcon className="h-[18px] w-[18px]" /> : <MoonIcon className="h-[18px] w-[18px]" />}
+      {darkMode ? (
+        <SunIcon className="h-[18px] w-[18px]" />
+      ) : (
+        <MoonIcon className="h-[18px] w-[18px]" />
+      )}
     </button>
   );
 }
@@ -136,7 +140,9 @@ export function AtlasNav({
             <a
               key={link.id}
               href={`#${link.id}`}
-              onClick={(event) => handleNavClick(event, link.id)}
+              onClick={(event) => {
+                handleNavClick(event, link.id);
+              }}
               className="text-[13px] font-medium text-[var(--atl-tx2)] no-underline transition-colors hover:text-[var(--atl-tx)]"
             >
               {link.label}
@@ -185,7 +191,9 @@ export function AtlasFaq() {
               <div key={faq.q} className="border-b border-[var(--atl-bdr)] last:border-b-0">
                 <button
                   type="button"
-                  onClick={() => handleFaqClick(index)}
+                  onClick={() => {
+                    handleFaqClick(index);
+                  }}
                   className="flex w-full cursor-pointer items-center justify-between gap-4 bg-[var(--atl-surf)] px-[26px] py-[22px] text-left transition-colors hover:bg-[var(--atl-bg2)]"
                   aria-expanded={isOpen}
                 >

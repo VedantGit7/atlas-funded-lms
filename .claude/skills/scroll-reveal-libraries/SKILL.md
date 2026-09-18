@@ -10,6 +10,7 @@ description: Simple scroll-triggered reveal animations using AOS (Animate On Scr
 This skill covers AOS (Animate On Scroll), a lightweight CSS-driven library for scroll-triggered animations. AOS excels at simple fade, slide, and zoom effects activated when elements enter the viewport.
 
 **Key Features**:
+
 - **Minimal Setup**: Single JavaScript file + CSS
 - **Data Attribute API**: Configure animations in HTML
 - **Performance**: CSS-driven, GPU-accelerated animations
@@ -17,12 +18,14 @@ This skill covers AOS (Animate On Scroll), a lightweight CSS-driven library for 
 - **Framework Agnostic**: Works with vanilla JS, React, Vue, etc.
 
 **When to Use**:
+
 - Marketing/landing pages with simple scroll effects
 - Content-heavy sites (blogs, documentation)
 - Quick prototypes requiring scroll animations
 - Projects where GSAP/Framer Motion complexity isn't needed
 
 **When NOT to Use**:
+
 - Complex animation timelines or orchestration → Use GSAP ScrollTrigger
 - Physics-based animations → Use React Spring or Framer Motion
 - Precise scroll-synced animations → Use GSAP ScrollTrigger
@@ -33,6 +36,7 @@ This skill covers AOS (Animate On Scroll), a lightweight CSS-driven library for 
 ### Installation
 
 **CDN (Quickest)**:
+
 ```html
 <head>
   <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
@@ -48,6 +52,7 @@ This skill covers AOS (Animate On Scroll), a lightweight CSS-driven library for 
 ```
 
 **NPM/Yarn (Recommended)**:
+
 ```bash
 npm install aos@next
 # or
@@ -55,8 +60,8 @@ yarn add aos@next
 ```
 
 ```javascript
-import AOS from 'aos';
-import 'aos/dist/aos.css';
+import AOS from "aos";
+import "aos/dist/aos.css";
 
 AOS.init();
 ```
@@ -82,28 +87,30 @@ Apply animations using the `data-aos` attribute:
 ### Configuration Options
 
 **Global Configuration**:
+
 ```javascript
 AOS.init({
   // Animation settings
-  duration: 800,  // Animation duration (ms): 0-3000
-  delay: 0,       // Delay before animation (ms): 0-3000
-  offset: 120,    // Offset from trigger point (px)
-  easing: 'ease', // Easing function
-  once: false,    // Animate only once (true) or every time (false)
-  mirror: false,  // Animate out when scrolling past
+  duration: 800, // Animation duration (ms): 0-3000
+  delay: 0, // Delay before animation (ms): 0-3000
+  offset: 120, // Offset from trigger point (px)
+  easing: "ease", // Easing function
+  once: false, // Animate only once (true) or every time (false)
+  mirror: false, // Animate out when scrolling past
 
   // Placement
-  anchorPlacement: 'top-bottom', // Which position triggers animation
+  anchorPlacement: "top-bottom", // Which position triggers animation
 
   // Performance
-  disable: false,                // Disable on mobile/tablet
-  startEvent: 'DOMContentLoaded', // Initialization event
-  debounceDelay: 50,             // Window resize debounce
-  throttleDelay: 99              // Scroll throttle
+  disable: false, // Disable on mobile/tablet
+  startEvent: "DOMContentLoaded", // Initialization event
+  debounceDelay: 50, // Window resize debounce
+  throttleDelay: 99, // Scroll throttle
 });
 ```
 
 **Per-Element Overrides**:
+
 ```html
 <div
   data-aos="fade-up"
@@ -126,30 +133,15 @@ AOS.init({
 ```html
 <section class="hero">
   <!-- Staggered heading words -->
-  <h1
-    data-aos="fade-down"
-    data-aos-duration="800"
-  >
-    Welcome to the Future
-  </h1>
+  <h1 data-aos="fade-down" data-aos-duration="800">Welcome to the Future</h1>
 
   <!-- Delayed subheading -->
-  <p
-    data-aos="fade-up"
-    data-aos-delay="200"
-    data-aos-duration="600"
-  >
+  <p data-aos="fade-up" data-aos-delay="200" data-aos-duration="600">
     Transform your ideas into reality
   </p>
 
   <!-- CTA button -->
-  <button
-    data-aos="zoom-in"
-    data-aos-delay="400"
-    data-aos-duration="500"
-  >
-    Get Started
-  </button>
+  <button data-aos="zoom-in" data-aos-delay="400" data-aos-duration="500">Get Started</button>
 </section>
 ```
 
@@ -158,32 +150,17 @@ AOS.init({
 ```html
 <div class="features-grid">
   <!-- Stagger cards with increasing delays -->
-  <div
-    class="feature-card"
-    data-aos="fade-up"
-    data-aos-duration="600"
-    data-aos-delay="0"
-  >
+  <div class="feature-card" data-aos="fade-up" data-aos-duration="600" data-aos-delay="0">
     <h3>Feature 1</h3>
     <p>Description...</p>
   </div>
 
-  <div
-    class="feature-card"
-    data-aos="fade-up"
-    data-aos-duration="600"
-    data-aos-delay="100"
-  >
+  <div class="feature-card" data-aos="fade-up" data-aos-duration="600" data-aos-delay="100">
     <h3>Feature 2</h3>
     <p>Description...</p>
   </div>
 
-  <div
-    class="feature-card"
-    data-aos="fade-up"
-    data-aos-duration="600"
-    data-aos-delay="200"
-  >
+  <div class="feature-card" data-aos="fade-up" data-aos-duration="600" data-aos-delay="200">
     <h3>Feature 3</h3>
     <p>Description...</p>
   </div>
@@ -195,33 +172,17 @@ AOS.init({
 ```html
 <!-- Content from left -->
 <div class="section">
-  <div
-    class="content"
-    data-aos="slide-right"
-    data-aos-duration="800"
-  >
+  <div class="content" data-aos="slide-right" data-aos-duration="800">
     <h2>Section Title</h2>
     <p>Content slides in from left...</p>
   </div>
-  <img
-    src="image1.jpg"
-    data-aos="fade-left"
-    data-aos-delay="200"
-  />
+  <img src="image1.jpg" data-aos="fade-left" data-aos-delay="200" />
 </div>
 
 <!-- Content from right -->
 <div class="section reverse">
-  <img
-    src="image2.jpg"
-    data-aos="fade-right"
-  />
-  <div
-    class="content"
-    data-aos="slide-left"
-    data-aos-duration="800"
-    data-aos-delay="200"
-  >
+  <img src="image2.jpg" data-aos="fade-right" />
+  <div class="content" data-aos="slide-left" data-aos-duration="800" data-aos-delay="200">
     <h2>Section Title</h2>
     <p>Content slides in from right...</p>
   </div>
@@ -232,21 +193,12 @@ AOS.init({
 
 ```html
 <div class="testimonials">
-  <div
-    class="testimonial"
-    data-aos="zoom-in"
-    data-aos-duration="500"
-  >
+  <div class="testimonial" data-aos="zoom-in" data-aos-duration="500">
     <blockquote>"Amazing product!"</blockquote>
     <cite>- John Doe</cite>
   </div>
 
-  <div
-    class="testimonial"
-    data-aos="zoom-in"
-    data-aos-duration="500"
-    data-aos-delay="100"
-  >
+  <div class="testimonial" data-aos="zoom-in" data-aos-duration="500" data-aos-delay="100">
     <blockquote>"Exceeded expectations"</blockquote>
     <cite>- Jane Smith</cite>
   </div>
@@ -265,13 +217,7 @@ Trigger animations based on a different element's scroll position:
   </div>
 </div>
 
-<aside
-  class="sidebar"
-  data-aos="fade-left"
-  data-aos-anchor="#trigger-point"
->
-  Sidebar content
-</aside>
+<aside class="sidebar" data-aos="fade-left" data-aos-anchor="#trigger-point">Sidebar content</aside>
 ```
 
 ### 6. Sequential Animation Chain
@@ -279,47 +225,17 @@ Trigger animations based on a different element's scroll position:
 ```html
 <div class="animation-sequence">
   <!-- Step 1: Heading -->
-  <h2
-    data-aos="fade-down"
-    data-aos-duration="600"
-    data-aos-delay="0"
-  >
-    Our Process
-  </h2>
+  <h2 data-aos="fade-down" data-aos-duration="600" data-aos-delay="0">Our Process</h2>
 
   <!-- Step 2: Description -->
-  <p
-    data-aos="fade-up"
-    data-aos-duration="600"
-    data-aos-delay="200"
-  >
-    Follow these simple steps
-  </p>
+  <p data-aos="fade-up" data-aos-duration="600" data-aos-delay="200">Follow these simple steps</p>
 
   <!-- Step 3-5: Process cards -->
-  <div
-    class="process-step"
-    data-aos="flip-left"
-    data-aos-delay="400"
-  >
-    Step 1
-  </div>
+  <div class="process-step" data-aos="flip-left" data-aos-delay="400">Step 1</div>
 
-  <div
-    class="process-step"
-    data-aos="flip-left"
-    data-aos-delay="600"
-  >
-    Step 2
-  </div>
+  <div class="process-step" data-aos="flip-left" data-aos-delay="600">Step 2</div>
 
-  <div
-    class="process-step"
-    data-aos="flip-left"
-    data-aos-delay="800"
-  >
-    Step 3
-  </div>
+  <div class="process-step" data-aos="flip-left" data-aos-delay="800">Step 3</div>
 </div>
 ```
 
@@ -327,23 +243,9 @@ Trigger animations based on a different element's scroll position:
 
 ```html
 <div class="gallery">
-  <img
-    src="photo1.jpg"
-    data-aos="zoom-in-up"
-    data-aos-duration="800"
-  />
-  <img
-    src="photo2.jpg"
-    data-aos="zoom-in-up"
-    data-aos-duration="800"
-    data-aos-delay="100"
-  />
-  <img
-    src="photo3.jpg"
-    data-aos="zoom-in-up"
-    data-aos-duration="800"
-    data-aos-delay="200"
-  />
+  <img src="photo1.jpg" data-aos="zoom-in-up" data-aos-duration="800" />
+  <img src="photo2.jpg" data-aos="zoom-in-up" data-aos-duration="800" data-aos-delay="100" />
+  <img src="photo3.jpg" data-aos="zoom-in-up" data-aos-duration="800" data-aos-delay="200" />
 </div>
 ```
 
@@ -352,17 +254,18 @@ Trigger animations based on a different element's scroll position:
 ### React Integration
 
 **Basic Setup**:
+
 ```jsx
-import { useEffect } from 'react';
-import AOS from 'aos';
-import 'aos/dist/aos.css';
+import { useEffect } from "react";
+import AOS from "aos";
+import "aos/dist/aos.css";
 
 function App() {
   useEffect(() => {
     AOS.init({
       duration: 800,
       once: true,
-      offset: 100
+      offset: 100,
     });
   }, []);
 
@@ -376,10 +279,11 @@ function App() {
 ```
 
 **Refreshing on Route Changes**:
+
 ```jsx
-import { useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
-import AOS from 'aos';
+import { useEffect } from "react";
+import { useLocation } from "react-router-dom";
+import AOS from "aos";
 
 function App() {
   const location = useLocation();
@@ -398,9 +302,10 @@ function App() {
 ```
 
 **Dynamic Content Updates**:
+
 ```jsx
-import { useState, useEffect } from 'react';
-import AOS from 'aos';
+import { useState, useEffect } from "react";
+import AOS from "aos";
 
 function DynamicList() {
   const [items, setItems] = useState([]);
@@ -410,7 +315,7 @@ function DynamicList() {
   }, []);
 
   const addItem = () => {
-    setItems([...items, { id: Date.now(), text: 'New Item' }]);
+    setItems([...items, { id: Date.now(), text: "New Item" }]);
 
     // Refresh AOS to detect new elements
     setTimeout(() => AOS.refresh(), 50);
@@ -432,17 +337,14 @@ function DynamicList() {
 ```
 
 **Component Wrapper Pattern**:
+
 ```jsx
-import AOS from 'aos';
-import 'aos/dist/aos.css';
+import AOS from "aos";
+import "aos/dist/aos.css";
 
 function AnimatedSection({ children, animation = "fade-up", delay = 0, ...props }) {
   return (
-    <div
-      data-aos={animation}
-      data-aos-delay={delay}
-      {...props}
-    >
+    <div data-aos={animation} data-aos-delay={delay} {...props}>
       {children}
     </div>
   );
@@ -451,7 +353,7 @@ function AnimatedSection({ children, animation = "fade-up", delay = 0, ...props 
 // Usage
 <AnimatedSection animation="slide-right" delay={200}>
   <h2>Animated Content</h2>
-</AnimatedSection>
+</AnimatedSection>;
 ```
 
 ### Vue.js Integration
@@ -472,8 +374,8 @@ function AnimatedSection({ children, animation = "fade-up", delay = 0, ...props 
 </template>
 
 <script>
-import AOS from 'aos';
-import 'aos/dist/aos.css';
+import AOS from "aos";
+import "aos/dist/aos.css";
 
 export default {
   mounted() {
@@ -487,9 +389,11 @@ export default {
   },
   data() {
     return {
-      items: [/*...*/]
+      items: [
+        /*...*/
+      ],
     };
-  }
+  },
 };
 </script>
 ```
@@ -498,15 +402,15 @@ export default {
 
 ```jsx
 // pages/_app.js
-import { useEffect } from 'react';
-import AOS from 'aos';
-import 'aos/dist/aos.css';
+import { useEffect } from "react";
+import AOS from "aos";
+import "aos/dist/aos.css";
 
 function MyApp({ Component, pageProps }) {
   useEffect(() => {
     AOS.init({
       duration: 800,
-      once: true
+      once: true,
     });
   }, []);
 
@@ -534,11 +438,11 @@ export default function Home() {
 
 ```javascript
 AOS.init({
-  disable: 'mobile', // Disable on mobile
+  disable: "mobile", // Disable on mobile
   // Or use function for custom logic
-  disable: function() {
+  disable: function () {
     return window.innerWidth < 768;
-  }
+  },
 });
 ```
 
@@ -547,7 +451,7 @@ AOS.init({
 ```javascript
 AOS.init({
   once: true, // Animate only once (better performance)
-  mirror: false // Don't animate out
+  mirror: false, // Don't animate out
 });
 ```
 
@@ -555,8 +459,8 @@ AOS.init({
 
 ```javascript
 AOS.init({
-  throttleDelay: 99,  // Scroll event throttle (default)
-  debounceDelay: 50   // Resize event debounce (default)
+  throttleDelay: 99, // Scroll event throttle (default)
+  debounceDelay: 50, // Resize event debounce (default)
 });
 ```
 
@@ -564,7 +468,7 @@ AOS.init({
 
 ```javascript
 AOS.init({
-  disableMutationObserver: true // Disable for fully static content
+  disableMutationObserver: true, // Disable for fully static content
 });
 ```
 
@@ -581,7 +485,7 @@ AOS.init({
 ### 6. Use RequestIdleCallback for Initialization
 
 ```javascript
-if ('requestIdleCallback' in window) {
+if ("requestIdleCallback" in window) {
   requestIdleCallback(() => {
     AOS.init({ duration: 800 });
   });
@@ -600,8 +504,8 @@ if ('requestIdleCallback' in window) {
 
 ```javascript
 // After adding elements to DOM
-const newElement = document.createElement('div');
-newElement.setAttribute('data-aos', 'fade-in');
+const newElement = document.createElement("div");
+newElement.setAttribute("data-aos", "fade-in");
 container.appendChild(newElement);
 
 // Refresh AOS
@@ -636,7 +540,7 @@ useEffect(() => {
 ```javascript
 AOS.init({
   once: true, // Animate only once
-  disable: window.innerWidth < 768 // Disable on mobile
+  disable: window.innerWidth < 768, // Disable on mobile
 });
 ```
 
@@ -682,21 +586,20 @@ data-aos-anchor-placement="bottom-top"
 **Solution**: Add custom CSS for extended durations:
 
 ```css
-body[data-aos-duration='4000'] [data-aos],
-[data-aos][data-aos][data-aos-duration='4000'] {
+body[data-aos-duration="4000"] [data-aos],
+[data-aos][data-aos][data-aos-duration="4000"] {
   transition-duration: 4000ms;
 }
 ```
 
 ```html
-<div data-aos="fade-in" data-aos-duration="4000">
-  Long animation
-</div>
+<div data-aos="fade-in" data-aos-duration="4000">Long animation</div>
 ```
 
 ## Built-in Animations
 
 ### Fade Animations
+
 - `fade-in` - Simple fade in
 - `fade-up` - Fade in from bottom
 - `fade-down` - Fade in from top
@@ -708,12 +611,14 @@ body[data-aos-duration='4000'] [data-aos],
 - `fade-down-left` - Diagonal fade
 
 ### Slide Animations
+
 - `slide-up` - Slide from bottom
 - `slide-down` - Slide from top
 - `slide-left` - Slide from right
 - `slide-right` - Slide from left
 
 ### Zoom Animations
+
 - `zoom-in` - Zoom in
 - `zoom-in-up` - Zoom in from bottom
 - `zoom-in-down` - Zoom in from top
@@ -726,6 +631,7 @@ body[data-aos-duration='4000'] [data-aos],
 - `zoom-out-right` - Zoom out to right
 
 ### Flip Animations
+
 - `flip-up` - Flip from bottom
 - `flip-down` - Flip from top
 - `flip-left` - Flip from right
@@ -749,7 +655,11 @@ Create custom animations with CSS:
 }
 
 @keyframes bounce {
-  0%, 20%, 50%, 80%, 100% {
+  0%,
+  20%,
+  50%,
+  80%,
+  100% {
     transform: translateY(0);
   }
   40% {
@@ -762,32 +672,32 @@ Create custom animations with CSS:
 ```
 
 ```html
-<div data-aos="custom-slide-bounce">
-  Custom animation
-</div>
+<div data-aos="custom-slide-bounce">Custom animation</div>
 ```
 
 ## Comparison with Alternatives
 
 ### AOS vs GSAP ScrollTrigger
 
-| Feature | AOS | GSAP ScrollTrigger |
-|---------|-----|-------------------|
-| **Complexity** | Simple, data-attribute based | Advanced, JavaScript API |
-| **Use Case** | Simple reveals | Complex timelines |
-| **File Size** | ~13KB | ~27KB (GSAP) + ScrollTrigger |
-| **Performance** | CSS-driven | JavaScript-driven |
-| **Learning Curve** | Minutes | Hours |
-| **Customization** | Limited | Extensive |
-| **Best For** | Marketing pages | Interactive experiences |
+| Feature            | AOS                          | GSAP ScrollTrigger           |
+| ------------------ | ---------------------------- | ---------------------------- |
+| **Complexity**     | Simple, data-attribute based | Advanced, JavaScript API     |
+| **Use Case**       | Simple reveals               | Complex timelines            |
+| **File Size**      | ~13KB                        | ~27KB (GSAP) + ScrollTrigger |
+| **Performance**    | CSS-driven                   | JavaScript-driven            |
+| **Learning Curve** | Minutes                      | Hours                        |
+| **Customization**  | Limited                      | Extensive                    |
+| **Best For**       | Marketing pages              | Interactive experiences      |
 
 **Use AOS when**:
+
 - Simple fade/slide/zoom effects
 - Quick implementation needed
 - Minimal JavaScript preferred
 - Basic scroll reveals sufficient
 
 **Use GSAP ScrollTrigger when**:
+
 - Complex animation sequences
 - Precise scroll-synced animations
 - Timeline orchestration needed
@@ -796,19 +706,23 @@ Create custom animations with CSS:
 ## Resources
 
 ### Official Documentation
+
 - **AOS**: https://michalsnik.github.io/aos/
 - **GitHub**: https://github.com/michalsnik/aos
 
 ### Key Scripts
+
 - `scripts/aos_generator.py` - Generate AOS HTML boilerplate
 - `scripts/config_builder.py` - Build AOS configuration
 
 ### References
+
 - `references/aos_api.md` - Complete AOS API reference
 - `references/animation_catalog.md` - All built-in animations with demos
 - `references/integration_patterns.md` - Framework integration guides
 
 ### Starter Assets
+
 - `assets/starter_aos/` - Complete AOS starter template
 - `assets/examples/` - Production-ready patterns
 

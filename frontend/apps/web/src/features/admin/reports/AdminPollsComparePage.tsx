@@ -2,14 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import {
-  useCallback,
-  useEffect,
-  useId,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import {
   AlertTriangle,
   ArrowLeft,
@@ -37,6 +30,7 @@ import {
   type PollListItem,
   type PollsCompareData,
 } from "./admin-polls-roster-api";
+import { csvEscape } from "@/lib/export/csv";
 
 const MAX_SLOTS = 4;
 const SAVE_KEY = "atlas.admin.polls.compare.saved";
@@ -123,19 +117,13 @@ function formatShortDate(iso: string | null): string {
   });
 }
 
-function deltaTone(
-  delta: number | null,
-  higherIsBetter: boolean,
-): "up" | "down" | "neutral" {
+function deltaTone(delta: number | null, higherIsBetter: boolean): "up" | "down" | "neutral" {
   if (delta == null || Math.abs(delta) < 0.05) return "neutral";
   const improved = higherIsBetter ? delta > 0 : delta < 0;
   return improved ? "up" : "down";
 }
 
-function formatDelta(
-  delta: number | null,
-  format: MetricDef["format"] | "pts",
-): string | null {
+function formatDelta(delta: number | null, format: MetricDef["format"] | "pts"): string | null {
   if (delta == null || Math.abs(delta) < 0.05) return null;
   const sign = delta > 0 ? "+" : "−";
   const abs = Math.abs(delta);
@@ -146,11 +134,6 @@ function formatDelta(
   return `${sign}${Math.round(abs).toLocaleString()}`;
 }
 
-function csvEscape(value: string): string {
-  if (/[",\n]/.test(value)) return `"${value.replace(/"/g, '""')}"`;
-  return value;
-}
-
 function downloadCsv(data: PollsCompareData) {
   const headers = ["Metric", ...data.polls.map((poll) => poll.shortName)];
   const lines = [headers.map(csvEscape).join(",")];
@@ -158,9 +141,7 @@ function downloadCsv(data: PollsCompareData) {
     lines.push(
       [
         metric.label,
-        ...data.polls.map((poll) =>
-          formatMetric(metricValue(poll, metric.key), metric.format),
-        ),
+        ...data.polls.map((poll) => formatMetric(metricValue(poll, metric.key), metric.format)),
       ]
         .map(csvEscape)
         .join(","),
@@ -171,12 +152,7 @@ function downloadCsv(data: PollsCompareData) {
     lines.push(["Option", ...data.polls.map((poll) => poll.shortName)].map(csvEscape).join(","));
     for (const row of data.optionRows) {
       lines.push(
-        [
-          row.label,
-          ...row.cells.map((cell) =>
-            cell.percent == null ? "—" : `${cell.percent}%`,
-          ),
-        ]
+        [row.label, ...row.cells.map((cell) => (cell.percent == null ? "—" : `${cell.percent}%`))]
           .map(csvEscape)
           .join(","),
       );
@@ -268,9 +244,7 @@ function TrendStrip({
 }) {
   const chronological = useMemo(
     () =>
-      [...polls].sort(
-        (a, b) => new Date(a.openedAt).getTime() - new Date(b.openedAt).getTime(),
-      ),
+      [...polls].sort((a, b) => new Date(a.openedAt).getTime() - new Date(b.openedAt).getTime()),
     [polls],
   );
 
@@ -320,8 +294,7 @@ function TrendStrip({
           Trend summary
         </h3>
         <p className="text-sm text-[var(--admin-on-surface-variant)]">
-          {insight ??
-            "Option shares across the selected polls in chronological order."}
+          {insight ?? "Option shares across the selected polls in chronological order."}
         </p>
         <ul className="mt-3 flex flex-wrap gap-2">
           {series.map((line) => (
@@ -348,10 +321,7 @@ export function AdminPollsComparePage() {
   const pickerId = useId();
   const pickerRef = useRef<HTMLDivElement>(null);
 
-  const selectedIds = useMemo(
-    () => parseIdsParam(searchParams.get("pollIds")),
-    [searchParams],
-  );
+  const selectedIds = useMemo(() => parseIdsParam(searchParams.get("pollIds")), [searchParams]);
   const alignBy = (searchParams.get("alignBy") as PollCompareAlignBy | null) ?? "label";
 
   const [data, setData] = useState<PollsCompareData | null>(null);
@@ -374,40 +344,31 @@ export function AdminPollsComparePage() {
       if (nextAlign !== "label") qs.set("alignBy", nextAlign);
       const query = qs.toString();
       router.replace(
-        query
-          ? `/admin/reports/polls/compare?${query}`
-          : "/admin/reports/polls/compare",
+        query ? `/admin/reports/polls/compare?${query}` : "/admin/reports/polls/compare",
       );
     },
     [alignBy, router],
   );
 
-  const loadCompare = useCallback(
-    async (ids: string[], nextAlign: PollCompareAlignBy) => {
-      if (ids.length < 2) {
-        setData(null);
-        setLoading(false);
-        setError(null);
-        return;
-      }
-      setLoading(true);
+  const loadCompare = useCallback(async (ids: string[], nextAlign: PollCompareAlignBy) => {
+    if (ids.length < 2) {
+      setData(null);
+      setLoading(false);
       setError(null);
-      try {
-        const response = await fetchPollsCompare(ids, nextAlign);
-        setData(response.data);
-      } catch (err) {
-        setData(null);
-        setError(
-          err instanceof ClientApiError
-            ? err.message
-            : "Could not load poll comparison.",
-        );
-      } finally {
-        setLoading(false);
-      }
-    },
-    [],
-  );
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetchPollsCompare(ids, nextAlign);
+      setData(response.data);
+    } catch (err) {
+      setData(null);
+      setError(err instanceof ClientApiError ? err.message : "Could not load poll comparison.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     void loadCompare(selectedIds, alignBy === "order" ? "order" : "label");
@@ -421,7 +382,9 @@ export function AdminPollsComparePage() {
       }
     };
     document.addEventListener("mousedown", onDoc);
-    return () => document.removeEventListener("mousedown", onDoc);
+    return () => {
+      document.removeEventListener("mousedown", onDoc);
+    };
   }, [pickerOpen]);
 
   const searchPicker = useCallback(async (q: string) => {
@@ -451,11 +414,15 @@ export function AdminPollsComparePage() {
     const handle = window.setTimeout(() => {
       void searchPicker(pickerQuery);
     }, 200);
-    return () => window.clearTimeout(handle);
+    return () => {
+      window.clearTimeout(handle);
+    };
   }, [pickerOpen, pickerQuery, searchPicker]);
 
   useEffect(() => {
-    const missing = selectedIds.filter((id) => !slotMeta[id] && !data?.polls.some((p) => p.id === id));
+    const missing = selectedIds.filter(
+      (id) => !slotMeta[id] && !data?.polls.some((p) => p.id === id),
+    );
     if (missing.length === 0) return;
     void (async () => {
       try {
@@ -495,7 +462,9 @@ export function AdminPollsComparePage() {
         JSON.stringify({ pollIds: selectedIds, alignBy, savedAt: new Date().toISOString() }),
       );
       setSaveMessage("Comparison saved in this browser.");
-      window.setTimeout(() => setSaveMessage(null), 2500);
+      window.setTimeout(() => {
+        setSaveMessage(null);
+      }, 2500);
     } catch {
       setSaveMessage("Could not save comparison locally.");
     }
@@ -516,7 +485,9 @@ export function AdminPollsComparePage() {
       }
       syncUrl(ids, parsed.alignBy === "order" ? "order" : "label");
       setSaveMessage("Restored saved comparison.");
-      window.setTimeout(() => setSaveMessage(null), 2500);
+      window.setTimeout(() => {
+        setSaveMessage(null);
+      }, 2500);
     } catch {
       setSaveMessage("Could not restore saved comparison.");
     }
@@ -595,8 +566,7 @@ export function AdminPollsComparePage() {
             Compare polls
           </h1>
           <p className="mt-1 max-w-2xl text-sm text-[var(--admin-on-surface-variant)]">
-            Put two to four polls side by side — useful when the same question runs across
-            sessions.
+            Put two to four polls side by side — useful when the same question runs across sessions.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -604,7 +574,9 @@ export function AdminPollsComparePage() {
             type="button"
             className={secondaryButtonClassName}
             disabled={!data || data.polls.length < 2}
-            onClick={() => data && downloadCsv(data)}
+            onClick={() => {
+              if (data) downloadCsv(data);
+            }}
           >
             <Download className="h-4 w-4" aria-hidden="true" />
             Export comparison
@@ -643,9 +615,9 @@ export function AdminPollsComparePage() {
               id={`${pickerId}-align`}
               ariaLabelledby={`${pickerId}-align-label`}
               value={alignBy === "order" ? "order" : "label"}
-              onValueChange={(value) =>
-                syncUrl(selectedIds, value === "order" ? "order" : "label")
-              }
+              onValueChange={(value) => {
+                syncUrl(selectedIds, value === "order" ? "order" : "label");
+              }}
               options={[
                 { value: "label", label: "Option label" },
                 { value: "order", label: "Option order" },
@@ -703,7 +675,9 @@ export function AdminPollsComparePage() {
                   type="button"
                   className="text-[var(--admin-outline)] transition-colors hover:text-[var(--admin-danger)]"
                   aria-label={`Remove ${poll.title}`}
-                  onClick={() => removePoll(poll.id)}
+                  onClick={() => {
+                    removePoll(poll.id);
+                  }}
                 >
                   <X className="h-4 w-4" aria-hidden="true" />
                 </button>
@@ -750,7 +724,9 @@ export function AdminPollsComparePage() {
                       type="button"
                       className="text-[var(--admin-outline)] hover:text-[var(--admin-danger)]"
                       aria-label="Remove poll"
-                      onClick={() => removePoll(id)}
+                      onClick={() => {
+                        removePoll(id);
+                      }}
                     >
                       <X className="h-4 w-4" aria-hidden="true" />
                     </button>
@@ -766,7 +742,9 @@ export function AdminPollsComparePage() {
             <button
               type="button"
               className="flex min-h-[140px] w-full flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-[var(--admin-outline)] bg-[var(--admin-surface)] p-3 text-sm font-semibold text-[var(--admin-on-surface-variant)] transition-colors hover:bg-[var(--admin-surface-high)] hover:text-[var(--admin-primary)]"
-              onClick={() => setPickerOpen(true)}
+              onClick={() => {
+                setPickerOpen(true);
+              }}
             >
               <Plus className="h-5 w-5" aria-hidden="true" />
               Add poll
@@ -778,7 +756,9 @@ export function AdminPollsComparePage() {
               type="button"
               id={pickerId}
               className="flex min-h-[140px] w-full flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-[var(--admin-outline)] bg-[var(--admin-surface)] p-3 text-sm font-semibold text-[var(--admin-on-surface-variant)] transition-colors hover:bg-[var(--admin-surface-high)] hover:text-[var(--admin-primary)]"
-              onClick={() => setPickerOpen((open) => !open)}
+              onClick={() => {
+                setPickerOpen((open) => !open);
+              }}
               aria-expanded={pickerOpen}
               aria-haspopup="listbox"
             >
@@ -794,17 +774,15 @@ export function AdminPollsComparePage() {
               <Search className="h-4 w-4 text-[var(--admin-outline)]" aria-hidden="true" />
               <input
                 value={pickerQuery}
-                onChange={(event) => setPickerQuery(event.target.value)}
+                onChange={(event) => {
+                  setPickerQuery(event.target.value);
+                }}
                 placeholder="Search polls…"
                 className="h-8 w-full bg-transparent text-sm text-[var(--admin-on-surface)] outline-none placeholder:text-[var(--admin-outline)]"
                 autoFocus
               />
             </div>
-            <div
-              className="max-h-64 overflow-y-auto p-2"
-              role="listbox"
-              aria-labelledby={pickerId}
-            >
+            <div className="max-h-64 overflow-y-auto p-2" role="listbox" aria-labelledby={pickerId}>
               {pickerLoading ? (
                 <p className="px-2 py-3 text-xs text-[var(--admin-on-surface-variant)]">
                   Searching…
@@ -827,7 +805,9 @@ export function AdminPollsComparePage() {
                         type="button"
                         role="option"
                         className="flex w-full flex-col gap-0.5 rounded px-2 py-2 text-left transition-colors hover:bg-[var(--admin-surface-high)]"
-                        onClick={() => addPoll(item.id)}
+                        onClick={() => {
+                          addPoll(item.id);
+                        }}
                       >
                         <span className="line-clamp-1 text-sm font-medium text-[var(--admin-on-surface)]">
                           {item.title}
@@ -888,9 +868,8 @@ export function AdminPollsComparePage() {
                 aria-hidden="true"
               />
               <p className="text-sm text-[var(--admin-on-surface)]">
-                <strong className="font-semibold">Mismatched datasets:</strong> These polls do
-                not share the same options — only participation and response counts can be
-                compared.
+                <strong className="font-semibold">Mismatched datasets:</strong> These polls do not
+                share the same options — only participation and response counts can be compared.
               </p>
             </div>
           ) : null}
@@ -997,9 +976,7 @@ export function AdminPollsComparePage() {
               <div className="overflow-hidden rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)]">
                 <div className="border-b border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-5 py-4">
                   <h2 className="text-base font-semibold text-[var(--admin-on-surface)]">
-                    {data.optionsAligned
-                      ? "Engagement metrics"
-                      : "High-level metric comparison"}
+                    {data.optionsAligned ? "Engagement metrics" : "High-level metric comparison"}
                   </h2>
                 </div>
                 <div className="overflow-x-auto">
@@ -1034,8 +1011,7 @@ export function AdminPollsComparePage() {
                         const values = data.polls.map((poll) => metricValue(poll, metric.key));
                         const baseline = values[0] ?? null;
                         const hideCorrect =
-                          metric.key === "correctPct" &&
-                          data.polls.every((poll) => !poll.quizMode);
+                          metric.key === "correctPct" && data.polls.every((poll) => !poll.quizMode);
                         if (hideCorrect) {
                           return (
                             <tr
@@ -1082,9 +1058,7 @@ export function AdminPollsComparePage() {
                                     : null
                                   : null;
                               const barPct =
-                                value != null && maxAbs > 0
-                                  ? (Math.abs(value) / maxAbs) * 100
-                                  : 0;
+                                value != null && maxAbs > 0 ? (Math.abs(value) / maxAbs) * 100 : 0;
                               const tone = deltaTone(delta, metric.higherIsBetter);
                               return (
                                 <td key={poll.id} className="px-4 py-3 text-right align-middle">
@@ -1126,7 +1100,7 @@ export function AdminPollsComparePage() {
                                 {(() => {
                                   const delta =
                                     values[1] != null && baseline != null
-                                      ? values[1]! - baseline
+                                      ? values[1] - baseline
                                       : null;
                                   const tone = deltaTone(delta, metric.higherIsBetter);
                                   return (

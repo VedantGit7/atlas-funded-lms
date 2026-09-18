@@ -22,10 +22,7 @@ import { LessonSectionQuizWorkspace } from "./lesson-section-quiz-workspace";
 import { LessonUploadWorkspace } from "./lesson-upload-workspace";
 import { InlineLessonSettingsPanel } from "./inline-lesson-settings-panel";
 import { LessonPreviewPanel } from "../../lessons/lesson-preview-panel";
-import {
-  normalizeLessonTypeForEditor,
-  type InlineLessonEditorType,
-} from "./lesson-type-meta";
+import { normalizeLessonTypeForEditor, type InlineLessonEditorType } from "./lesson-type-meta";
 
 type StudioLessonDetail = z.infer<typeof studioLessonDetailSchema>;
 
@@ -43,7 +40,12 @@ function formatError(error: unknown): string {
 function isUploadType(
   lessonType: InlineLessonEditorType | "unsupported",
 ): lessonType is Extract<InlineLessonEditorType, "video" | "audio" | "pdf" | "slides"> {
-  return lessonType === "video" || lessonType === "audio" || lessonType === "pdf" || lessonType === "slides";
+  return (
+    lessonType === "video" ||
+    lessonType === "audio" ||
+    lessonType === "pdf" ||
+    lessonType === "slides"
+  );
 }
 
 export function InlineLessonEditor({ courseId, lessonId, onDeleted }: InlineLessonEditorProps) {
@@ -179,7 +181,9 @@ export function InlineLessonEditor({ courseId, lessonId, onDeleted }: InlineLess
         >
           <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)] p-6 shadow-xl">
             <div className="mb-4 flex items-center justify-between gap-3">
-              <h2 className="text-lg font-semibold text-[var(--admin-on-surface)]">Lesson preview</h2>
+              <h2 className="text-lg font-semibold text-[var(--admin-on-surface)]">
+                Lesson preview
+              </h2>
               <button
                 type="button"
                 className={inlineLessonGhostButtonClassName}
@@ -209,122 +213,122 @@ export function InlineLessonEditor({ courseId, lessonId, onDeleted }: InlineLess
         />
       ) : (
         <>
-      {error ? (
-        <p
-          role="alert"
-          className="border-b border-[var(--admin-danger)]/25 bg-[color-mix(in_srgb,var(--admin-danger)_8%,var(--admin-surface))] px-4 py-2.5 text-sm text-[var(--admin-danger)] md:px-6"
-        >
-          {error}
-        </p>
-      ) : null}
+          {error ? (
+            <p
+              role="alert"
+              className="border-b border-[var(--admin-danger)]/25 bg-[color-mix(in_srgb,var(--admin-danger)_8%,var(--admin-surface))] px-4 py-2.5 text-sm text-[var(--admin-danger)] md:px-6"
+            >
+              {error}
+            </p>
+          ) : null}
 
-      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto p-4 md:p-6">
-        <div
-          className={[
-            "mx-auto grid w-full max-w-6xl flex-1 gap-4",
-            showAttachments ? "lg:grid-cols-[minmax(0,1fr)_280px]" : "",
-          ].join(" ")}
-        >
-          <div className="min-w-0">
-            {isUploadType(editorType) ? (
-              <>
-                <LessonUploadWorkspace
-                  lessonType={editorType}
-                  lessonId={lesson.id}
-                  lessonTitle={lesson.title}
-                  videoProvider={lesson.videoProvider ?? null}
-                  videoUrl={lesson.videoUrl ?? null}
-                  editable={editable}
-                  onEmbedVideo={() => {
-                    setError(null);
-                    setShowEmbed(true);
-                  }}
-                  onFileUploaded={() => {
-                    void loadLesson();
-                  }}
-                />
-                {showEmbed ? (
-                  <div className="mt-4 rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)] p-4 motion-safe:animate-[admin-dropdown-in_0.18s_cubic-bezier(0.16,1,0.3,1)]">
-                    <label className="mb-2 block text-sm font-medium text-[var(--admin-on-surface)]">
-                      Embed video URL
-                    </label>
-                    <input
-                      className="w-full rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-4 py-2.5 text-sm text-[var(--admin-on-surface)] outline-none focus:border-[var(--admin-primary)] focus:ring-2 focus:ring-[var(--admin-primary)]/30"
-                      placeholder="https://www.youtube.com/watch?v=…"
-                      value={embedUrl}
-                      onChange={(event) => {
-                        setEmbedUrl(event.target.value);
+          <div className="flex min-h-0 flex-1 flex-col overflow-y-auto p-4 md:p-6">
+            <div
+              className={[
+                "mx-auto grid w-full max-w-6xl flex-1 gap-4",
+                showAttachments ? "lg:grid-cols-[minmax(0,1fr)_280px]" : "",
+              ].join(" ")}
+            >
+              <div className="min-w-0">
+                {isUploadType(editorType) ? (
+                  <>
+                    <LessonUploadWorkspace
+                      lessonType={editorType}
+                      lessonId={lesson.id}
+                      lessonTitle={lesson.title}
+                      videoProvider={lesson.videoProvider ?? null}
+                      videoUrl={lesson.videoUrl ?? null}
+                      editable={editable}
+                      onEmbedVideo={() => {
                         setError(null);
+                        setShowEmbed(true);
+                      }}
+                      onFileUploaded={() => {
+                        void loadLesson();
                       }}
                     />
-                    {embedDraftReady && embedDraftProvider ? (
-                      <div className="mt-4">
-                        <p className="mb-2 text-xs font-medium text-[var(--admin-on-surface-variant)]">
-                          Preview
-                        </p>
-                        <LessonVideoEmbed
-                          provider={embedDraftProvider}
-                          url={embedUrl.trim()}
-                          title={lesson.title}
+                    {showEmbed ? (
+                      <div className="mt-4 rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)] p-4 motion-safe:animate-[admin-dropdown-in_0.18s_cubic-bezier(0.16,1,0.3,1)]">
+                        <label className="mb-2 block text-sm font-medium text-[var(--admin-on-surface)]">
+                          Embed video URL
+                        </label>
+                        <input
+                          className="w-full rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-4 py-2.5 text-sm text-[var(--admin-on-surface)] outline-none focus:border-[var(--admin-primary)] focus:ring-2 focus:ring-[var(--admin-primary)]/30"
+                          placeholder="https://www.youtube.com/watch?v=…"
+                          value={embedUrl}
+                          onChange={(event) => {
+                            setEmbedUrl(event.target.value);
+                            setError(null);
+                          }}
                         />
+                        {embedDraftReady && embedDraftProvider ? (
+                          <div className="mt-4">
+                            <p className="mb-2 text-xs font-medium text-[var(--admin-on-surface-variant)]">
+                              Preview
+                            </p>
+                            <LessonVideoEmbed
+                              provider={embedDraftProvider}
+                              url={embedUrl.trim()}
+                              title={lesson.title}
+                            />
+                          </div>
+                        ) : null}
+                        <div className="mt-3 flex gap-2">
+                          <button
+                            type="button"
+                            className={inlineLessonPrimaryDarkButtonClassName}
+                            onClick={() => {
+                              void saveEmbedUrl();
+                            }}
+                          >
+                            Save embed
+                          </button>
+                          <button
+                            type="button"
+                            className={inlineLessonGhostButtonClassName}
+                            onClick={() => {
+                              setShowEmbed(false);
+                            }}
+                          >
+                            Cancel
+                          </button>
+                        </div>
                       </div>
                     ) : null}
-                    <div className="mt-3 flex gap-2">
-                      <button
-                        type="button"
-                        className={inlineLessonPrimaryDarkButtonClassName}
-                        onClick={() => {
-                          void saveEmbedUrl();
-                        }}
-                      >
-                        Save embed
-                      </button>
-                      <button
-                        type="button"
-                        className={inlineLessonGhostButtonClassName}
-                        onClick={() => {
-                          setShowEmbed(false);
-                        }}
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
+                  </>
                 ) : null}
-              </>
-            ) : null}
 
-            {editorType === "live" ? (
-              <LessonLiveWorkspace
-                lesson={lesson}
-                editable={editable}
-                onSaved={() => {
-                  void loadLesson();
-                }}
-              />
-            ) : null}
-            {editorType === "article" ? (
-              <LessonArticleWorkspace lesson={lesson} editable={editable} />
-            ) : null}
-            {editorType === "section_quiz" ? (
-              <LessonSectionQuizWorkspace lesson={lesson} editable={editable} />
-            ) : null}
+                {editorType === "live" ? (
+                  <LessonLiveWorkspace
+                    lesson={lesson}
+                    editable={editable}
+                    onSaved={() => {
+                      void loadLesson();
+                    }}
+                  />
+                ) : null}
+                {editorType === "article" ? (
+                  <LessonArticleWorkspace lesson={lesson} editable={editable} />
+                ) : null}
+                {editorType === "section_quiz" ? (
+                  <LessonSectionQuizWorkspace lesson={lesson} editable={editable} />
+                ) : null}
 
-            {editorType === "unsupported" ? (
-              <section className="rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)] p-8 text-center">
-                <p className="text-sm text-[var(--admin-on-surface-variant)]">
-                  This lesson type does not have an inline editor yet. Open the full lesson editor
-                  to continue.
-                </p>
-              </section>
-            ) : null}
+                {editorType === "unsupported" ? (
+                  <section className="rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)] p-8 text-center">
+                    <p className="text-sm text-[var(--admin-on-surface-variant)]">
+                      This lesson type does not have an inline editor yet. Open the full lesson
+                      editor to continue.
+                    </p>
+                  </section>
+                ) : null}
+              </div>
+
+              {showAttachments ? (
+                <LessonAttachmentsSidebar lessonId={lesson.id} editable={editable} />
+              ) : null}
+            </div>
           </div>
-
-          {showAttachments ? (
-            <LessonAttachmentsSidebar lessonId={lesson.id} editable={editable} />
-          ) : null}
-        </div>
-      </div>
         </>
       )}
     </div>

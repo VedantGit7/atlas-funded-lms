@@ -1,8 +1,4 @@
-export type CampaignGoal =
-  | "REACTIVATION"
-  | "CONVERSION"
-  | "ONBOARDING"
-  | "RETENTION";
+export type CampaignGoal = "REACTIVATION" | "CONVERSION" | "ONBOARDING" | "RETENTION";
 
 export type CampaignStatus = "DRAFT" | "SCHEDULED" | "SENT";
 export type CampaignAudienceType = "ALL" | "GROUP";
@@ -109,8 +105,7 @@ export const GOAL_OPTIONS: ReadonlyArray<{
   {
     id: "REACTIVATION",
     label: "Re-activation",
-    description:
-      "Re-engage dormant learners who have not logged in recently.",
+    description: "Re-engage dormant learners who have not logged in recently.",
   },
   {
     id: "CONVERSION",

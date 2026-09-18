@@ -679,32 +679,35 @@ export function QuestsAdminPanel({
         </div>
       </section>
 
-      <GamificationAnimatedCollapsible open={Boolean(selectedQuestId && editForm)} id="quest-edit-panel">
+      <GamificationAnimatedCollapsible
+        open={Boolean(selectedQuestId && editForm)}
+        id="quest-edit-panel"
+      >
         {selectedQuestId && editForm ? (
-        <section className={panelClassName}>
-          <div className={panelHeaderClassName}>
-            <div>
-              <p className={panelEyebrowClassName}>Edit</p>
-              <h2 className="font-semibold text-[var(--admin-on-surface)]">{editForm.name}</h2>
+          <section className={panelClassName}>
+            <div className={panelHeaderClassName}>
+              <div>
+                <p className={panelEyebrowClassName}>Edit</p>
+                <h2 className="font-semibold text-[var(--admin-on-surface)]">{editForm.name}</h2>
+              </div>
             </div>
-          </div>
-          <div className={panelBodyClassName}>
-            <QuestForm
-              mode="edit"
-              form={editForm}
-              setForm={(updater) => {
-                setEditForm((current) => (current ? updater(current) : current));
-              }}
-              badges={badges}
-              courses={courses}
-              events={events}
-              busy={busy}
-              onSubmit={() => {
-                void saveQuest();
-              }}
-            />
-          </div>
-        </section>
+            <div className={panelBodyClassName}>
+              <QuestForm
+                mode="edit"
+                form={editForm}
+                setForm={(updater) => {
+                  setEditForm((current) => (current ? updater(current) : current));
+                }}
+                badges={badges}
+                courses={courses}
+                events={events}
+                busy={busy}
+                onSubmit={() => {
+                  void saveQuest();
+                }}
+              />
+            </div>
+          </section>
         ) : null}
       </GamificationAnimatedCollapsible>
 

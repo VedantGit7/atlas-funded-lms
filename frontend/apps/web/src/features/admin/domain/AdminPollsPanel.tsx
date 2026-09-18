@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { Trash2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { AdminConfirmDialog } from "../../../components/shells/admin/AdminConfirmDialog";
 import {
   analyticsTableHeadClassName,
   analyticsTableRowClassName,
@@ -12,8 +14,11 @@ import {
 } from "../../analytics/analytics-admin-shared";
 import {
   createPoll,
+  deletePoll,
+  fetchPoll,
   fetchPollResults,
   fetchPolls,
+  updatePoll,
   type Poll,
   type PollResults,
 } from "./admin-domain-api";
@@ -25,10 +30,16 @@ export function AdminPollsPanel() {
   const [selectedPollId, setSelectedPollId] = useState("");
   const [loading, setLoading] = useState(true);
   const [loadingResults, setLoadingResults] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<unknown>(null);
   const [title, setTitle] = useState("");
   const [optionsText, setOptionsText] = useState("Option A\nOption B");
   const [submitting, setSubmitting] = useState(false);
+  const [editingPollId, setEditingPollId] = useState("");
+  const [editTitle, setEditTitle] = useState("");
+  const [editStatus, setEditStatus] = useState("ACTIVE");
+  const [savingEdit, setSavingEdit] = useState(false);
+  const [deletingPollId, setDeletingPollId] = useState("");
+  const [pendingDelete, setPendingDelete] = useState<{ id: string; title: string } | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -37,7 +48,7 @@ export function AdminPollsPanel() {
       const response = await fetchPolls();
       setPolls(response.data.items);
     } catch (loadError) {
-      setError(loadError instanceof Error ? loadError.message : "Unable to load polls.");
+      setError(loadError);
     } finally {
       setLoading(false);
     }
@@ -47,7 +58,7 @@ export function AdminPollsPanel() {
     void load();
   }, [load]);
 
-  async function handleCreate(event: React.FormEvent) {
+  async function handleCreate(event: React.SyntheticEvent) {
     event.preventDefault();
     const options = optionsText
       .split("\n")
@@ -66,9 +77,63 @@ export function AdminPollsPanel() {
       setOptionsText("Option A\nOption B");
       await load();
     } catch (createError) {
-      setError(createError instanceof Error ? createError.message : "Unable to create poll.");
+      setError(createError);
     } finally {
       setSubmitting(false);
+    }
+  }
+
+  /**
+   * Re-reads the poll before editing rather than trusting the list row.
+   *
+   * The list is a snapshot from whenever it last loaded; another admin may have
+   * changed the poll since. Editing from a stale row would silently overwrite
+   * their change with whatever the row happened to hold.
+   */
+  async function handleStartEdit(pollId: string) {
+    setError(null);
+    try {
+      const response = await fetchPoll(pollId);
+      setEditingPollId(pollId);
+      setEditTitle(response.data.title);
+      setEditStatus(response.data.status);
+    } catch (editError) {
+      setError(editError);
+    }
+  }
+
+  async function handleSaveEdit(event: React.SyntheticEvent) {
+    event.preventDefault();
+    if (!editingPollId || !editTitle.trim()) return;
+
+    setSavingEdit(true);
+    setError(null);
+    try {
+      await updatePoll(editingPollId, { title: editTitle.trim(), status: editStatus });
+      setEditingPollId("");
+      await load();
+    } catch (saveError) {
+      setError(saveError);
+    } finally {
+      setSavingEdit(false);
+    }
+  }
+
+  async function handleDelete(pollId: string) {
+    setDeletingPollId(pollId);
+    setError(null);
+    try {
+      await deletePoll(pollId);
+      if (selectedPollId === pollId) {
+        setSelectedPollId("");
+        setResults(null);
+      }
+      if (editingPollId === pollId) setEditingPollId("");
+      await load();
+    } catch (deleteError) {
+      setError(deleteError);
+    } finally {
+      setDeletingPollId("");
     }
   }
 
@@ -81,7 +146,7 @@ export function AdminPollsPanel() {
       setResults(response.data);
     } catch (resultsError) {
       setResults(null);
-      setError(resultsError instanceof Error ? resultsError.message : "Unable to load results.");
+      setError(resultsError);
     } finally {
       setLoadingResults(false);
     }
@@ -97,8 +162,17 @@ export function AdminPollsPanel() {
         <h2 className="text-lg font-semibold text-[var(--admin-on-surface)]">Create poll</h2>
         <form className="mt-4 space-y-3" onSubmit={(event) => void handleCreate(event)}>
           <label className="block text-sm">
-            <span className="mb-1 block font-medium text-[var(--admin-on-surface-variant)]">Title</span>
-            <input className={fieldClassName} value={title} onChange={(e) => setTitle(e.target.value)} required />
+            <span className="mb-1 block font-medium text-[var(--admin-on-surface-variant)]">
+              Title
+            </span>
+            <input
+              className={fieldClassName}
+              value={title}
+              onChange={(e) => {
+                setTitle(e.target.value);
+              }}
+              required
+            />
           </label>
           <label className="block text-sm">
             <span className="mb-1 block font-medium text-[var(--admin-on-surface-variant)]">
@@ -107,7 +181,9 @@ export function AdminPollsPanel() {
             <textarea
               className={`${fieldClassName} min-h-[96px]`}
               value={optionsText}
-              onChange={(e) => setOptionsText(e.target.value)}
+              onChange={(e) => {
+                setOptionsText(e.target.value);
+              }}
               required
             />
           </label>
@@ -120,7 +196,12 @@ export function AdminPollsPanel() {
       <section className={adminDomainCardClassName}>
         <div className="flex items-center justify-between gap-3">
           <h2 className="text-lg font-semibold text-[var(--admin-on-surface)]">Polls</h2>
-          <button type="button" className={ghostButtonClassName} disabled={loading} onClick={() => void load()}>
+          <button
+            type="button"
+            className={ghostButtonClassName}
+            disabled={loading}
+            onClick={() => void load()}
+          >
             Refresh
           </button>
         </div>
@@ -146,13 +227,38 @@ export function AdminPollsPanel() {
                     <td className="px-4 py-3">{poll.options.length}</td>
                     <td className="px-4 py-3 capitalize">{poll.status.toLowerCase()}</td>
                     <td className="px-4 py-3">
-                      <button
-                        type="button"
-                        className={ghostButtonClassName}
-                        onClick={() => void handleViewResults(poll.id)}
-                      >
-                        View results
-                      </button>
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          type="button"
+                          className={ghostButtonClassName}
+                          onClick={() => void handleViewResults(poll.id)}
+                        >
+                          View results
+                        </button>
+                        <Link
+                          href={`/polls/${poll.id}`}
+                          className={ghostButtonClassName}
+                          title="Open the poll exactly as an enrolled learner sees it"
+                        >
+                          Learner view
+                        </Link>
+                        <button
+                          type="button"
+                          className={ghostButtonClassName}
+                          onClick={() => void handleStartEdit(poll.id)}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          type="button"
+                          className={ghostButtonClassName}
+                          onClick={() => {
+                            setPendingDelete({ id: poll.id, title: poll.title });
+                          }}
+                        >
+                          Delete
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -161,6 +267,57 @@ export function AdminPollsPanel() {
           </div>
         )}
       </section>
+
+      {editingPollId ? (
+        <section className={adminDomainCardClassName}>
+          <h2 className="text-lg font-semibold text-[var(--admin-on-surface)]">Edit poll</h2>
+          <form className="mt-4 space-y-3" onSubmit={(event) => void handleSaveEdit(event)}>
+            <label className="block text-sm">
+              <span className="mb-1 block font-medium text-[var(--admin-on-surface-variant)]">
+                Title
+              </span>
+              <input
+                className={fieldClassName}
+                value={editTitle}
+                onChange={(e) => {
+                  setEditTitle(e.target.value);
+                }}
+                required
+              />
+            </label>
+            <label className="block text-sm">
+              <span className="mb-1 block font-medium text-[var(--admin-on-surface-variant)]">
+                Status
+              </span>
+              <select
+                className={fieldClassName}
+                value={editStatus}
+                onChange={(e) => {
+                  setEditStatus(e.target.value);
+                }}
+              >
+                <option value="DRAFT">Draft</option>
+                <option value="ACTIVE">Active</option>
+                <option value="ARCHIVED">Archived</option>
+              </select>
+            </label>
+            <div className="flex flex-wrap gap-2">
+              <button type="submit" className={primaryButtonClassName} disabled={savingEdit}>
+                {savingEdit ? "Saving…" : "Save changes"}
+              </button>
+              <button
+                type="button"
+                className={ghostButtonClassName}
+                onClick={() => {
+                  setEditingPollId("");
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        </section>
+      ) : null}
 
       {selectedPollId ? (
         <section className={adminDomainCardClassName}>
@@ -192,10 +349,35 @@ export function AdminPollsPanel() {
       ) : null}
 
       <p className="text-sm text-[var(--admin-on-surface-variant)]">
-        <Link href="/admin/reports/polls" className="font-semibold text-[var(--admin-primary)] hover:underline">
+        <Link
+          href="/admin/reports/polls"
+          className="font-semibold text-[var(--admin-primary)] hover:underline"
+        >
           View polls report
         </Link>
       </p>
+
+      <AdminConfirmDialog
+        open={pendingDelete != null}
+        title="Delete poll?"
+        description={`Delete "${pendingDelete?.title ?? "this poll"}"? Responses collected so far are removed with it.`}
+        confirmLabel="Delete poll"
+        busyLabel="Deleting…"
+        cancelLabel="Keep poll"
+        icon={Trash2}
+        tone="danger"
+        busy={deletingPollId !== ""}
+        onConfirm={() => {
+          if (pendingDelete) {
+            const { id } = pendingDelete;
+            setPendingDelete(null);
+            void handleDelete(id);
+          }
+        }}
+        onCancel={() => {
+          setPendingDelete(null);
+        }}
+      />
     </AdminDomainPageShell>
   );
 }

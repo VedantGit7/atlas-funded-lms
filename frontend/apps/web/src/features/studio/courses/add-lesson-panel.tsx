@@ -4,10 +4,7 @@ import { useId, useRef, useState } from "react";
 import type { StudioLessonTypeCreate } from "@atlas/contracts/lessons/lesson-schemas";
 import { ClientApiError, clientApi } from "../../../lib/client-api";
 import { inlineExpandClassName } from "./admin-form-dropdown-shared";
-import {
-  builderHelperClassName,
-  primaryButtonClassName,
-} from "./course-builder-shared";
+import { builderHelperClassName, primaryButtonClassName } from "./course-builder-shared";
 import { dialogLabelClassName, fieldClassName } from "./create-course-dialog-shared";
 import { LESSON_TITLE_MAX_LENGTH, LESSON_TYPE_OPTIONS } from "./lesson-type-options";
 
@@ -39,7 +36,7 @@ export function AddLessonPanel({
   const canContinue = title.trim().length > 0 && lessonType !== null && !busy;
 
   async function handleContinue() {
-    if (!canContinue || !lessonType) return;
+    if (!canContinue) return;
     setBusy(true);
     setError(null);
     try {

@@ -49,7 +49,10 @@ export default async function StudioLearningPathDetailPage({
               <span
                 className={`${badgeClassName} ${STATUS_CONFIG[detail.data.status] ?? "bg-[var(--admin-surface-high)] text-[var(--admin-on-surface-variant)]"}`}
               >
-                <span className="h-1.5 w-1.5 rounded-full bg-current opacity-70" aria-hidden="true" />
+                <span
+                  className="h-1.5 w-1.5 rounded-full bg-current opacity-70"
+                  aria-hidden="true"
+                />
                 {STATUS_LABELS[detail.data.status] ?? detail.data.status}
               </span>
             </div>

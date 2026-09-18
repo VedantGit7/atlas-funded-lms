@@ -118,7 +118,9 @@ export function ScoringProfileEditor({
       ) : null}
 
       {showCreate && canCreate ? (
-        <div className={`${panelBodyClassName} border-b border-[var(--admin-border)] bg-[var(--admin-surface-low)]/50`}>
+        <div
+          className={`${panelBodyClassName} border-b border-[var(--admin-border)] bg-[var(--admin-surface-low)]/50`}
+        >
           <div className="grid gap-3 sm:grid-cols-2">
             <label className="space-y-1">
               <span className={labelClassName}>Key</span>
@@ -214,7 +216,10 @@ export function ScoringProfileEditor({
                     </button>
                   ) : null}
                   {selected ? (
-                    <CheckCircle2 className="h-5 w-5 text-[var(--admin-primary)]" aria-hidden="true" />
+                    <CheckCircle2
+                      className="h-5 w-5 text-[var(--admin-primary)]"
+                      aria-hidden="true"
+                    />
                   ) : (
                     <Circle className="h-5 w-5 text-[var(--admin-border)]" aria-hidden="true" />
                   )}
@@ -244,7 +249,10 @@ export function ScoringProfileEditor({
             aria-labelledby="rename-profile-title"
             className="relative w-full max-w-md rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)] p-5 shadow-2xl"
           >
-            <h3 id="rename-profile-title" className="text-lg font-bold text-[var(--admin-on-surface)]">
+            <h3
+              id="rename-profile-title"
+              className="text-lg font-bold text-[var(--admin-on-surface)]"
+            >
               Rename profile
             </h3>
             <label className="mt-4 block space-y-1">

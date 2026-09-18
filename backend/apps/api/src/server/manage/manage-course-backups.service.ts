@@ -84,7 +84,7 @@ export async function listManageCourseBackups(tx: TenantTx, _ctx: ServiceCtx) {
   });
 }
 
-export async function requestManageCourseBackupOtp(_tx: TenantTx, _ctx: ServiceCtx) {
+export function requestManageCourseBackupOtp(_tx: TenantTx, _ctx: ServiceCtx) {
   return requestCourseBackupOtpResponseSchema.parse({
     data: {
       sent: true,
@@ -93,11 +93,7 @@ export async function requestManageCourseBackupOtp(_tx: TenantTx, _ctx: ServiceC
   });
 }
 
-export async function createManageCourseBackup(
-  tx: TenantTx,
-  ctx: ServiceCtx,
-  rawBody: unknown,
-) {
+export async function createManageCourseBackup(tx: TenantTx, ctx: ServiceCtx, rawBody: unknown) {
   const body = createManageCourseBackupBodySchema.parse(rawBody);
   if (body.otpCode !== COURSE_BACKUP_DEMO_OTP) {
     throw invalidOtp();
@@ -153,11 +149,7 @@ export async function createManageCourseBackup(
   return manageCourseBackupResponseSchema.parse({ data: toDto(row) });
 }
 
-export async function downloadManageCourseBackup(
-  tx: TenantTx,
-  _ctx: ServiceCtx,
-  jobId: string,
-) {
+export async function downloadManageCourseBackup(tx: TenantTx, _ctx: ServiceCtx, jobId: string) {
   const row = await manageCourseBackupsRepository.findById(tx, jobId);
   if (!row) throw backupNotFound();
   if (row.status !== "SUCCEEDED") {

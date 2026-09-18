@@ -43,16 +43,10 @@ function formatError(error: unknown): string {
 }
 
 function formsEqual(a: CourseSeoFormState, b: CourseSeoFormState): boolean {
-  return (
-    a.slug === b.slug && a.pageTitle === b.pageTitle && a.seoDescription === b.seoDescription
-  );
+  return a.slug === b.slug && a.pageTitle === b.pageTitle && a.seoDescription === b.seoDescription;
 }
 
-export function CourseSettingsSeoPanel({
-  course,
-  editable,
-  onSaved,
-}: CourseSettingsSeoPanelProps) {
+export function CourseSettingsSeoPanel({ course, editable, onSaved }: CourseSettingsSeoPanelProps) {
   const slugId = useId();
   const pageTitleId = useId();
   const seoDescriptionId = useId();

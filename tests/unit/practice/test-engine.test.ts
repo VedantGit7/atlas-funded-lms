@@ -17,7 +17,9 @@ const now = new Date("2026-07-15T10:00:00.000Z");
 
 describe("test engine wiring", () => {
   it("is accepted on session start", () => {
-    expect(StartPracticeSessionBodySchema.parse({ mode: "due", engine: "test" }).engine).toBe("test");
+    expect(StartPracticeSessionBodySchema.parse({ mode: "due", engine: "test" }).engine).toBe(
+      "test",
+    );
   });
 
   it("draws from the same choice pool as learn", () => {
@@ -144,8 +146,12 @@ describe("parsePracticeSessionSummary round-trips timed tests", () => {
   it("keeps every engine it stored", () => {
     for (const engine of ["swipe", "flashcards", "match", "learn", "test"] as const) {
       expect(
-        parsePracticeSessionSummary({ mode: "due", engine, selectedItemIds: [], answeredItemIds: [] })
-          .engine,
+        parsePracticeSessionSummary({
+          mode: "due",
+          engine,
+          selectedItemIds: [],
+          answeredItemIds: [],
+        }).engine,
       ).toBe(engine);
     }
   });
@@ -168,8 +174,12 @@ describe("parsePracticeSessionSummary round-trips timed tests", () => {
       parsePracticeSessionSummary({ mode: "due", selectedItemIds: [], answeredItemIds: [] }).engine,
     ).toBe("swipe");
     expect(
-      parsePracticeSessionSummary({ mode: "due", engine: "telepathy", selectedItemIds: [], answeredItemIds: [] })
-        .engine,
+      parsePracticeSessionSummary({
+        mode: "due",
+        engine: "telepathy",
+        selectedItemIds: [],
+        answeredItemIds: [],
+      }).engine,
     ).toBe("swipe");
   });
 });

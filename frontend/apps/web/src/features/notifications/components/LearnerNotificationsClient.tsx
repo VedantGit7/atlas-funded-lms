@@ -294,7 +294,7 @@ export function LearnerNotificationsClient({
               </p>
               <button
                 type="button"
-                className="text-xs font-medium text-[var(--brand-primary)] underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)]"
+                className="text-xs font-medium text-[var(--primary)] underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)]"
                 onClick={() => {
                   setQuery("");
                 }}
@@ -327,7 +327,7 @@ export function LearnerNotificationsClient({
             {errorKind === "mark-read" || errorKind === "load-more" ? (
               <button
                 type="button"
-                className="text-xs font-medium text-[var(--brand-primary)] underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)]"
+                className="text-xs font-medium text-[var(--primary)] underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)]"
                 onClick={dismissError}
               >
                 Dismiss
@@ -336,7 +336,7 @@ export function LearnerNotificationsClient({
             {errorKind === "load-more" ? (
               <button
                 type="button"
-                className="text-xs font-medium text-[var(--brand-primary)] underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)]"
+                className="text-xs font-medium text-[var(--primary)] underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)]"
                 onClick={() => void loadMore()}
               >
                 Try again
@@ -348,7 +348,7 @@ export function LearnerNotificationsClient({
 
       {isEmptyInbox ? (
         <div className={learnerNotificationsEmptyShellClassName}>
-          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--muted)] text-[var(--brand-primary)]">
+          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--muted)] text-[var(--primary)]">
             <Bell className="h-5 w-5" aria-hidden="true" strokeWidth={1.75} />
           </div>
           <h2 className="text-base font-semibold text-[var(--foreground)]">No notifications yet</h2>
@@ -361,7 +361,7 @@ export function LearnerNotificationsClient({
         </div>
       ) : visibleItems.length === 0 ? (
         <div className={learnerNotificationsEmptyShellClassName}>
-          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--muted)] text-[var(--brand-primary)]">
+          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--muted)] text-[var(--primary)]">
             {trimmedQuery ? (
               <Search className="h-5 w-5" aria-hidden="true" strokeWidth={1.75} />
             ) : (

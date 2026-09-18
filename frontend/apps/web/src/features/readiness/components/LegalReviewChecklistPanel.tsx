@@ -39,7 +39,10 @@ export function LegalReviewChecklistPanel({
             <ClipboardCheck className="h-5 w-5" aria-hidden="true" />
           </div>
           <div className="min-w-0">
-            <h2 id="legal-review-heading" className="text-base font-semibold text-[var(--admin-on-surface)]">
+            <h2
+              id="legal-review-heading"
+              className="text-base font-semibold text-[var(--admin-on-surface)]"
+            >
               Legal Review Checklist
             </h2>
             <p className="mt-1 text-[13px] leading-relaxed text-[var(--admin-on-surface-variant)]">
@@ -98,7 +101,10 @@ export function LegalReviewChecklistPanel({
                   }}
                 >
                   {isChecked ? (
-                    <Check className="h-3.5 w-3.5 text-[var(--admin-on-primary)]" aria-hidden="true" />
+                    <Check
+                      className="h-3.5 w-3.5 text-[var(--admin-on-primary)]"
+                      aria-hidden="true"
+                    />
                   ) : null}
                 </button>
 

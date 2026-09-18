@@ -3,7 +3,11 @@ import { DeviceMonitorPanel } from "../../../../features/admin/security-settings
 import { ServerApiError, serverApi } from "../../../../lib/server-api";
 
 type Response = {
-  data: { restrictionsEnabled: boolean; registrationLimit: number; restrictParallelLogins: boolean };
+  data: {
+    restrictionsEnabled: boolean;
+    registrationLimit: number;
+    restrictParallelLogins: boolean;
+  };
 };
 
 export default async function DeviceMonitorPageRoute() {

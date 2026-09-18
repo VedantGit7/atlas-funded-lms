@@ -5,7 +5,7 @@ import { marketingCampaignAnalyticsResponseSchema } from "../../../../../../../s
 import { listMarketingCampaignsMetadata } from "../../../../../../../server/marketing-campaigns/marketing-campaigns.route-metadata";
 import { getMarketingCampaignAnalytics } from "../../../../../../../server/marketing-campaigns/marketing-campaigns.service";
 
-const paramsSchema = zod.object({ id: zod.string().uuid() });
+const paramsSchema = zod.object({ id: zod.uuid() });
 
 export const GET = createTenantRoute<
   Record<string, never>,

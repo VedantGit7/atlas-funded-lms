@@ -51,7 +51,9 @@ function readMatchingLists(answerKey: Record<string, unknown> | undefined): {
   rightItems: LabeledId[];
 } {
   const pairs =
-    answerKey?.["pairs"] && typeof answerKey["pairs"] === "object" && !Array.isArray(answerKey["pairs"])
+    answerKey?.["pairs"] &&
+    typeof answerKey["pairs"] === "object" &&
+    !Array.isArray(answerKey["pairs"])
       ? (answerKey["pairs"] as Record<string, string>)
       : {};
 
@@ -175,8 +177,16 @@ function renderInteraction(args: {
   answerKey: Record<string, unknown>;
   mode: "preview" | "attempt";
 }) {
-  const { itemTypeKey, state, updateState, previewOptions, typeVisual, choiceClass, disabled, answerKey } =
-    args;
+  const {
+    itemTypeKey,
+    state,
+    updateState,
+    previewOptions,
+    typeVisual,
+    choiceClass,
+    disabled,
+    answerKey,
+  } = args;
 
   if (itemTypeKey === "true_false" && state.type === "true_false") {
     return (
@@ -262,7 +272,9 @@ function renderInteraction(args: {
     return (
       <OrderingResponseEditor
         items={readOrderingItems(answerKey)}
-        order={state.order.length > 0 ? state.order : readOrderingItems(answerKey).map((item) => item.id)}
+        order={
+          state.order.length > 0 ? state.order : readOrderingItems(answerKey).map((item) => item.id)
+        }
         disabled={disabled}
         onChange={(order) => {
           updateState({ type: "ordering", order });
@@ -289,7 +301,10 @@ function renderInteraction(args: {
   if (itemTypeKey === "file_upload" && state.type === "file_upload") {
     return (
       <div className="rounded-xl border border-dashed border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-4 py-8 text-center motion-safe:transition-colors motion-safe:duration-200 hover:border-[color-mix(in_srgb,var(--admin-primary)_35%,var(--admin-border))]">
-        <Upload className="mx-auto h-8 w-8 text-[var(--admin-on-surface-variant)]" aria-hidden="true" />
+        <Upload
+          className="mx-auto h-8 w-8 text-[var(--admin-on-surface-variant)]"
+          aria-hidden="true"
+        />
         <p className="mt-2 text-sm font-medium text-[var(--admin-on-surface)]">Drop a file here</p>
         <p className="mt-1 text-xs text-[var(--admin-on-surface-variant)]">
           Or enter a file name for preview simulation.
@@ -318,7 +333,10 @@ function renderInteraction(args: {
     const isLong = itemTypeKey === "long_answer";
     return (
       <div className="space-y-2">
-        <label className="text-sm font-medium text-[var(--admin-on-surface)]" htmlFor="item-response-text">
+        <label
+          className="text-sm font-medium text-[var(--admin-on-surface)]"
+          htmlFor="item-response-text"
+        >
           Your response
         </label>
         {isLong ? (
@@ -343,7 +361,9 @@ function renderInteraction(args: {
               updateState({ ...state, value: event.target.value });
             }}
             className={editorInputClassName}
-            placeholder={itemTypeKey === "fill_blank" ? "Type the missing word..." : "Type your answer..."}
+            placeholder={
+              itemTypeKey === "fill_blank" ? "Type the missing word..." : "Type your answer..."
+            }
           />
         )}
       </div>
@@ -385,7 +405,9 @@ function OrderingResponseEditor({
 
   return (
     <div className="space-y-2">
-      <p className="text-xs text-[var(--admin-on-surface-variant)]">Drag steps into the correct order.</p>
+      <p className="text-xs text-[var(--admin-on-surface-variant)]">
+        Drag steps into the correct order.
+      </p>
       <ul className="space-y-2">
         {displayOrder.map((id, index) => {
           const item = items.find((entry) => entry.id === id);
@@ -398,15 +420,27 @@ function OrderingResponseEditor({
               <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--admin-surface-high)] text-xs font-bold text-[var(--admin-on-surface-variant)]">
                 {index + 1}
               </span>
-              <span className="flex-1 text-sm font-medium text-[var(--admin-on-surface)]">{item.label}</span>
-              <button type="button" disabled={disabled || index === 0} aria-label="Move up" onClick={() => { move(index, -1); }} className="rounded p-1 hover:bg-[var(--admin-surface-high)] disabled:opacity-30">
+              <span className="flex-1 text-sm font-medium text-[var(--admin-on-surface)]">
+                {item.label}
+              </span>
+              <button
+                type="button"
+                disabled={disabled || index === 0}
+                aria-label="Move up"
+                onClick={() => {
+                  move(index, -1);
+                }}
+                className="rounded p-1 hover:bg-[var(--admin-surface-high)] disabled:opacity-30"
+              >
                 <ArrowUp className="h-4 w-4" aria-hidden="true" />
               </button>
               <button
                 type="button"
                 disabled={disabled || index === displayOrder.length - 1}
                 aria-label="Move down"
-                onClick={() => { move(index, 1); }}
+                onClick={() => {
+                  move(index, 1);
+                }}
                 className="rounded p-1 hover:bg-[var(--admin-surface-high)] disabled:opacity-30"
               >
                 <ArrowDown className="h-4 w-4" aria-hidden="true" />
@@ -435,7 +469,10 @@ function MatchingResponseEditor({
   return (
     <div className="space-y-3">
       {leftItems.map((left) => (
-        <label key={left.id} className="flex flex-col gap-2 rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)] p-3 sm:flex-row sm:items-center sm:justify-between">
+        <label
+          key={left.id}
+          className="flex flex-col gap-2 rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)] p-3 sm:flex-row sm:items-center sm:justify-between"
+        >
           <span className="text-sm font-semibold text-[var(--admin-on-surface)]">{left.label}</span>
           <select
             disabled={disabled}

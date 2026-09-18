@@ -70,9 +70,7 @@ export function ReactionToggle({
           type="button"
           className={cn(
             "inline-flex items-center gap-1 text-xs font-medium transition-colors",
-            reacted
-              ? "text-primary"
-              : "text-muted-foreground hover:text-foreground",
+            reacted ? "text-primary" : "text-muted-foreground hover:text-foreground",
           )}
           aria-pressed={reacted}
           aria-label={pressedLabel}

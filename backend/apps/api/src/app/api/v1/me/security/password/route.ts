@@ -10,7 +10,10 @@ import { securityMutationMetadata } from "../route.metadata";
 
 type ChangePasswordBody = z.output<typeof ChangePasswordRequestSchema>;
 
-export const POST = createTenantRoute<ChangePasswordBody, z.output<typeof AccountSecurityOkResponseSchema>>({
+export const POST = createTenantRoute<
+  ChangePasswordBody,
+  z.output<typeof AccountSecurityOkResponseSchema>
+>({
   metadata: securityMutationMetadata,
   body: ChangePasswordRequestSchema,
   output: AccountSecurityOkResponseSchema,

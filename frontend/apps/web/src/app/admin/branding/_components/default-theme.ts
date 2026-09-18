@@ -10,8 +10,6 @@ export function createDefaultAdminTheme(tenantId: string, updatedAt: string): Th
       primary: "#224466",
       accent: "#8899aa",
       header: "#112233",
-      background: "#ffffff",
-      foreground: "#101010",
       radius: "md",
       modeDefault: "system",
     },

@@ -4,13 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import {
-  ChevronRight,
-  Filter,
-  Loader2,
-  MoreVertical,
-  RefreshCw,
-} from "lucide-react";
+import { ChevronRight, Filter, Loader2, MoreVertical, RefreshCw } from "lucide-react";
 import { AdminSelectDropdown } from "../../readiness/components/AdminSelectDropdown";
 import { dropdownPanelSurfaceClassName } from "../../studio/courses/admin-form-dropdown-shared";
 import {
@@ -193,7 +187,10 @@ export function ModerationQueueClient() {
       </div>
 
       {loading ? (
-        <p className="flex items-center gap-2 text-sm text-[var(--admin-on-surface-variant)]" aria-live="polite">
+        <p
+          className="flex items-center gap-2 text-sm text-[var(--admin-on-surface-variant)]"
+          aria-live="polite"
+        >
           <Loader2 className="h-4 w-4 motion-safe:animate-spin" aria-hidden="true" />
           Loading moderation queue…
         </p>
@@ -342,7 +339,10 @@ export function ModerationQueueClient() {
                         {target.label} · {formatModerationReason(item.reasonKey)}
                       </p>
                     </div>
-                    <ChevronRight className="h-4 w-4 shrink-0 text-[var(--admin-outline)]" aria-hidden="true" />
+                    <ChevronRight
+                      className="h-4 w-4 shrink-0 text-[var(--admin-outline)]"
+                      aria-hidden="true"
+                    />
                   </div>
                   <div className="mt-3 flex flex-wrap gap-2">
                     <Link

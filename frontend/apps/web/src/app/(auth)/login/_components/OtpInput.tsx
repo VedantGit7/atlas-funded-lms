@@ -65,11 +65,7 @@ export function OtpInput({
   };
 
   return (
-    <div
-      role="group"
-      aria-label={ariaLabel}
-      className="flex justify-between gap-2 sm:gap-3"
-    >
+    <div role="group" aria-label={ariaLabel} className="flex justify-between gap-2 sm:gap-3">
       {digits.map((digit, index) => (
         <input
           // Fixed-length positional inputs; index key is correct and stable here.
@@ -87,10 +83,16 @@ export function OtpInput({
           autoFocus={autoFocus && index === 0}
           aria-invalid={invalid || undefined}
           aria-label={`Digit ${index + 1}`}
-          onChange={(event) => handleChange(index, event.target.value)}
-          onKeyDown={(event) => handleKeyDown(index, event)}
+          onChange={(event) => {
+            handleChange(index, event.target.value);
+          }}
+          onKeyDown={(event) => {
+            handleKeyDown(index, event);
+          }}
           onPaste={handlePaste}
-          onFocus={(event) => event.target.select()}
+          onFocus={(event) => {
+            event.target.select();
+          }}
           className="h-14 w-full rounded-[10px] border-[1.5px] border-[var(--fba-bdr)] bg-[var(--fba-surf)] text-center text-[22px] font-bold text-[var(--fba-tx)] outline-none transition-colors focus:border-[var(--fba-ind)] aria-[invalid=true]:border-[var(--fba-red)] disabled:opacity-60"
         />
       ))}

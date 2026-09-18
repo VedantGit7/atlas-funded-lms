@@ -8,8 +8,7 @@ export const fieldClassName =
 export const selectClassName =
   "w-full rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-4 py-3 text-sm text-[var(--admin-on-surface)] outline-none transition-colors focus:border-[var(--admin-primary)] focus:ring-2 focus:ring-[var(--admin-primary)]/30";
 
-export const labelClassName =
-  "text-[13px] font-medium text-[var(--admin-on-surface-variant)]";
+export const labelClassName = "text-[13px] font-medium text-[var(--admin-on-surface-variant)]";
 
 export const cardClassName =
   "overflow-hidden rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)] shadow-sm motion-safe:transition-[box-shadow,border-color] motion-safe:duration-300 hover:shadow-md";
@@ -19,7 +18,8 @@ export const cardHeaderClassName =
 
 export const sectionTitleClassName = "text-lg font-semibold text-[var(--admin-on-surface)]";
 
-export const sectionDescClassName = "mt-1 text-sm leading-relaxed text-[var(--admin-on-surface-variant)]";
+export const sectionDescClassName =
+  "mt-1 text-sm leading-relaxed text-[var(--admin-on-surface-variant)]";
 
 export const outlineButtonClassName =
   "shrink-0 rounded-lg border border-[var(--admin-primary)] px-4 py-2 text-sm font-semibold text-[var(--admin-primary)] transition-colors hover:bg-[var(--admin-primary-container)]/30 disabled:cursor-not-allowed disabled:opacity-50";
@@ -82,15 +82,16 @@ export function inferBrandingContentType(file: File): string | null {
   return BRANDING_MIME_BY_EXTENSION[extension] ?? null;
 }
 
-export function radiusFromPx(px: number): "none" | "sm" | "md" | "lg" | "xl" {
-  const entries = Object.entries(RADIUS_PX) as Array<["none" | "sm" | "md" | "lg" | "xl", number]>;
-  let closest = entries[0]!;
-  for (const entry of entries) {
-    if (Math.abs(entry[1] - px) < Math.abs(closest[1] - px)) {
-      closest = entry;
+const RADIUS_KEYS = ["none", "sm", "md", "lg", "xl"] as const;
+
+export function radiusFromPx(px: number): (typeof RADIUS_KEYS)[number] {
+  let closest: (typeof RADIUS_KEYS)[number] = "none";
+  for (const key of RADIUS_KEYS) {
+    if (Math.abs(RADIUS_PX[key] - px) < Math.abs(RADIUS_PX[closest] - px)) {
+      closest = key;
     }
   }
-  return closest[0];
+  return closest;
 }
 
 export function BrandingAnimatedCollapsible({

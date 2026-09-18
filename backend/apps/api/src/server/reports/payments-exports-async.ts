@@ -45,7 +45,7 @@ export function schedulePaymentExportProcessing(args: {
         requestId: `${args.requestId}:delivery`,
         limit: 10,
       });
-    })().catch((error) => {
+    })().catch((error: unknown) => {
       console.error("[payments-exports] async generate/delivery failed", {
         reportRunId: args.reportRunId,
         requestId: args.requestId,

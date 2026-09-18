@@ -55,7 +55,7 @@ type ChangePreview = {
   fieldType: string;
   before: string | null;
   after: string | null;
-  valueJson: unknown | null;
+  valueJson: unknown;
 };
 
 function Shimmer({ className }: { className?: string }) {
@@ -163,7 +163,7 @@ function learnerInitials(name: string | null, email: string | null): string {
   const source = name?.trim() || email?.trim() || "?";
   const parts = source.split(/\s+/).filter(Boolean);
   if (parts.length >= 2) {
-    return `${parts[0]![0] ?? ""}${parts[1]![0] ?? ""}`.toUpperCase();
+    return `${parts[0]?.[0] ?? ""}${parts[1]?.[0] ?? ""}`.toUpperCase();
   }
   return source.slice(0, 2).toUpperCase();
 }
@@ -186,16 +186,32 @@ function unwrapValueJson(valueJson: unknown): unknown {
   return valueJson;
 }
 
+/**
+ * Custom-field values are `unknown` (free-form jsonb). A plain `String()` on an
+ * object or array yields "[object Object]", which would be shown in an editable
+ * input and then saved back over the real value.
+ */
+function stringifyFieldValue(value: unknown): string {
+  if (value === null || value === undefined) return "";
+  if (typeof value === "string") return value;
+  if (typeof value === "number" || typeof value === "boolean" || typeof value === "bigint") {
+    return String(value);
+  }
+  if (typeof value === "symbol") return value.description ?? "";
+  if (typeof value === "function") return "";
+  return JSON.stringify(value);
+}
+
 function valueJsonToDraft(valueJson: unknown, fieldType: string): string {
   const raw = unwrapValueJson(valueJson);
   if (raw == null) return "";
   const type = fieldType.toLowerCase();
   if (type === "boolean" || type === "bool" || type === "boo") {
     if (typeof raw === "boolean") return raw ? "true" : "false";
-    return isTruthyBoolean(String(raw)) ? "true" : "false";
+    return isTruthyBoolean(stringifyFieldValue(raw)) ? "true" : "false";
   }
   if (type === "date" || type === "dat") {
-    const text = String(raw);
+    const text = stringifyFieldValue(raw);
     if (/^\d{4}-\d{2}-\d{2}/.test(text)) return text.slice(0, 10);
     const date = new Date(text);
     if (!Number.isNaN(date.getTime())) return date.toISOString().slice(0, 10);
@@ -210,7 +226,7 @@ function valueJsonToDraft(valueJson: unknown, fieldType: string): string {
   }
 }
 
-function draftToValueJson(draft: string, fieldType: string): unknown | null {
+function draftToValueJson(draft: string, fieldType: string): unknown {
   const trimmed = draft.trim();
   if (!trimmed) return null;
   const type = fieldType.toLowerCase();
@@ -282,7 +298,10 @@ function FieldValueDisplay({ value, fieldType }: { value: string | null; fieldTy
   }
 
   return (
-    <span className="max-w-[280px] truncate text-[13px] text-[var(--admin-on-surface)]" title={value}>
+    <span
+      className="max-w-[280px] truncate text-[13px] text-[var(--admin-on-surface)]"
+      title={value}
+    >
       {value}
     </span>
   );
@@ -368,7 +387,9 @@ function HistoryPanel({
       <button
         type="button"
         className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition-colors hover:bg-[var(--admin-surface-high)]"
-        onClick={() => setOpen((current) => !current)}
+        onClick={() => {
+          setOpen((current) => !current);
+        }}
         aria-expanded={open}
       >
         <span className="font-mono text-[11px] font-medium uppercase tracking-[0.1em] text-[var(--admin-on-surface-variant)]">
@@ -389,10 +410,7 @@ function HistoryPanel({
           ) : (
             <ul className="flex flex-col gap-3">
               {history.map((item) => (
-                <li
-                  key={item.id}
-                  className="relative border-l-2 border-[var(--admin-border)] pl-3"
-                >
+                <li key={item.id} className="relative border-l-2 border-[var(--admin-border)] pl-3">
                   <div className="font-mono text-[11px] tabular-nums text-[var(--admin-on-surface-variant)]">
                     <span title={formatDateTime(item.changedAt)}>
                       {formatRelativeDate(item.changedAt)}
@@ -447,7 +465,9 @@ function ConfirmUpdatesModal({
       if (event.key === "Escape" && !busy) onCancel();
     }
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+    };
   }, [open, busy, onCancel]);
 
   if (!open) return null;
@@ -499,12 +519,7 @@ function ConfirmUpdatesModal({
           </ul>
         </div>
         <div className="flex items-center justify-end gap-2 border-t border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-5 py-3">
-          <button
-            type="button"
-            className={ghostButtonClassName}
-            disabled={busy}
-            onClick={onCancel}
-          >
+          <button type="button" className={ghostButtonClassName} disabled={busy} onClick={onCancel}>
             Cancel
           </button>
           <button
@@ -567,13 +582,17 @@ function MessagePanel({
           className={filterInputClassName}
           placeholder="Subject"
           value={subject}
-          onChange={(event) => onSubjectChange(event.target.value)}
+          onChange={(event) => {
+            onSubjectChange(event.target.value);
+          }}
         />
         <textarea
           className={`${filterInputClassName} min-h-[88px] py-2`}
           placeholder="Message"
           value={body}
-          onChange={(event) => onBodyChange(event.target.value)}
+          onChange={(event) => {
+            onBodyChange(event.target.value);
+          }}
         />
         <div className="flex flex-wrap gap-2">
           <button
@@ -632,7 +651,9 @@ function FieldEditControl({
                     ? "bg-[var(--admin-primary)] text-white"
                     : "bg-[var(--admin-surface)] text-[var(--admin-on-surface-variant)] hover:bg-[var(--admin-surface-high)]",
                 ].join(" ")}
-                onClick={() => onChange(option.key)}
+                onClick={() => {
+                  onChange(option.key);
+                }}
               >
                 {option.label}
               </button>
@@ -643,7 +664,9 @@ function FieldEditControl({
             id={inputId}
             className={filterInputClassName}
             value={draft}
-            onChange={(event) => onChange(event.target.value)}
+            onChange={(event) => {
+              onChange(event.target.value);
+            }}
           >
             <option value="">Select…</option>
             {field.options.map((option) => (
@@ -661,7 +684,9 @@ function FieldEditControl({
             type="number"
             className={filterInputClassName}
             value={draft}
-            onChange={(event) => onChange(event.target.value)}
+            onChange={(event) => {
+              onChange(event.target.value);
+            }}
           />
         ) : type === "date" || type === "dat" ? (
           <input
@@ -669,7 +694,9 @@ function FieldEditControl({
             type="date"
             className={filterInputClassName}
             value={draft}
-            onChange={(event) => onChange(event.target.value)}
+            onChange={(event) => {
+              onChange(event.target.value);
+            }}
           />
         ) : (
           <input
@@ -677,7 +704,9 @@ function FieldEditControl({
             type="text"
             className={filterInputClassName}
             value={draft}
-            onChange={(event) => onChange(event.target.value)}
+            onChange={(event) => {
+              onChange(event.target.value);
+            }}
           />
         )}
       </div>
@@ -753,7 +782,9 @@ export function AdminCustomFieldLearnerValuesView({
       onClose?.();
     }
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+    };
   }, [variant, onClose, confirmOpen, mode, baseline]);
 
   const changes = useMemo((): ChangePreview[] => {
@@ -852,17 +883,16 @@ export function AdminCustomFieldLearnerValuesView({
   const headerActions =
     mode === "view" && learner ? (
       <div className="flex shrink-0 flex-wrap gap-2">
-        <Link
-          href={`/admin/members/${learner.membershipId}`}
-          className={ghostButtonClassName}
-        >
+        <Link href={`/admin/members/${learner.membershipId}`} className={ghostButtonClassName}>
           <ExternalLink className="h-4 w-4" aria-hidden />
           Open member profile
         </Link>
         <button
           type="button"
           className={ghostButtonClassName}
-          onClick={() => setMessageOpen((open) => !open)}
+          onClick={() => {
+            setMessageOpen((open) => !open);
+          }}
         >
           <Mail className="h-4 w-4" aria-hidden />
           Message learner
@@ -870,7 +900,7 @@ export function AdminCustomFieldLearnerValuesView({
         <button
           type="button"
           className={primaryButtonClassName}
-          disabled={detail?.zeroFieldsDefined}
+          disabled={detail.zeroFieldsDefined}
           onClick={enterEdit}
         >
           <Pencil className="h-4 w-4" aria-hidden />
@@ -905,7 +935,9 @@ export function AdminCustomFieldLearnerValuesView({
             type="button"
             className={primaryButtonClassName}
             disabled={busy || changes.length === 0}
-            onClick={() => setConfirmOpen(true)}
+            onClick={() => {
+              setConfirmOpen(true);
+            }}
           >
             Save changes
           </button>
@@ -1059,14 +1091,19 @@ export function AdminCustomFieldLearnerValuesView({
           body={messageBody}
           onSubjectChange={setMessageSubject}
           onBodyChange={setMessageBody}
-          onClose={() => setMessageOpen(false)}
+          onClose={() => {
+            setMessageOpen(false);
+          }}
           onSend={() => void handleSendMessage()}
         />
 
         {detail.zeroFieldsDefined ? (
           <div className="flex min-h-[240px] flex-col items-center justify-center rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] p-10 text-center">
             <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-full border border-[var(--admin-border)] bg-[var(--admin-surface-low)]">
-              <FileText className="h-8 w-8 text-[var(--admin-on-surface-variant)]" strokeWidth={1.5} />
+              <FileText
+                className="h-8 w-8 text-[var(--admin-on-surface-variant)]"
+                strokeWidth={1.5}
+              />
             </div>
             <h2 className="mb-2 text-base font-semibold text-[var(--admin-on-surface)]">
               Your tenant has not defined any custom fields
@@ -1282,18 +1319,18 @@ export function AdminCustomFieldLearnerValuesView({
                             <FieldEditControl
                               field={field}
                               draft={draft}
-                              onChange={(value) =>
+                              onChange={(value) => {
                                 setDrafts((current) => ({
                                   ...current,
                                   [field.definitionId]: value,
-                                }))
-                              }
-                              onClear={() =>
+                                }));
+                              }}
+                              onClear={() => {
                                 setDrafts((current) => ({
                                   ...current,
                                   [field.definitionId]: "",
-                                }))
-                              }
+                                }));
+                              }}
                             />
                             {changed ? (
                               <p className="mt-1.5 text-[11px] text-[var(--admin-warning)]">
@@ -1370,7 +1407,7 @@ export function AdminCustomFieldLearnerValuesView({
 
           {mode === "edit" ? (
             editFooter
-          ) : learner && !detail?.zeroFieldsDefined ? (
+          ) : learner && !detail.zeroFieldsDefined ? (
             <footer className="relative z-20 flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-[var(--admin-outline)] bg-[var(--admin-bg)] px-4 py-4 sm:px-6">
               <div className="flex flex-wrap gap-2">
                 <Link
@@ -1382,7 +1419,9 @@ export function AdminCustomFieldLearnerValuesView({
                 <button
                   type="button"
                   className={ghostButtonClassName}
-                  onClick={() => setMessageOpen((open) => !open)}
+                  onClick={() => {
+                    setMessageOpen((open) => !open);
+                  }}
                 >
                   Message
                 </button>
@@ -1410,7 +1449,9 @@ export function AdminCustomFieldLearnerValuesView({
           learnerName={displayName}
           changes={changes}
           busy={busy}
-          onCancel={() => setConfirmOpen(false)}
+          onCancel={() => {
+            setConfirmOpen(false);
+          }}
           onConfirm={() => void handleConfirmSave()}
         />
       </div>
@@ -1425,7 +1466,9 @@ export function AdminCustomFieldLearnerValuesView({
         learnerName={displayName}
         changes={changes}
         busy={busy}
-        onCancel={() => setConfirmOpen(false)}
+        onCancel={() => {
+          setConfirmOpen(false);
+        }}
         onConfirm={() => void handleConfirmSave()}
       />
     </>

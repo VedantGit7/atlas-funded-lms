@@ -13,10 +13,7 @@ import {
   deleteAnnouncementResponseSchema,
   testAnnouncementResponseSchema,
 } from "./announcements.schemas";
-import {
-  announcementsRepository,
-  type AnnouncementRow,
-} from "./announcements.repository";
+import { announcementsRepository, type AnnouncementRow } from "./announcements.repository";
 
 function notFound() {
   return new AtlasHttpError({
@@ -123,7 +120,7 @@ async function deliverAnnouncement(
 export async function listAnnouncements(tx: TenantTx, _ctx: ServiceCtx, rawQuery: unknown) {
   const query = announcementsListQuerySchema.parse(rawQuery ?? {});
   const rows = await announcementsRepository.list(tx, {
-    ...(query.type ? { type: query.type } : {}),
+    type: query.type,
     ...(query.q ? { q: query.q } : {}),
     ...(query.createdOn ? { createdOn: query.createdOn } : {}),
     ...(query.createdMonth ? { createdMonth: query.createdMonth } : {}),
@@ -139,11 +136,7 @@ export async function getAnnouncement(tx: TenantTx, _ctx: ServiceCtx, id: string
   return announcementResponseSchema.parse({ data: toDto(row) });
 }
 
-export async function createAndSendAnnouncement(
-  tx: TenantTx,
-  ctx: ServiceCtx,
-  rawBody: unknown,
-) {
+export async function createAndSendAnnouncement(tx: TenantTx, ctx: ServiceCtx, rawBody: unknown) {
   const body = createAnnouncementBodySchema.parse(rawBody);
   const batchId = body.batchId?.trim() || null;
   const type = batchId ? "BATCH" : "GENERAL";
@@ -202,11 +195,7 @@ export async function deleteAnnouncement(
  * Delivers the draft announcement to the acting admin only.
  * Does not create a catalog announcement or fan out to learners.
  */
-export async function testAnnouncementToSelf(
-  tx: TenantTx,
-  ctx: ServiceCtx,
-  rawBody: unknown,
-) {
+export async function testAnnouncementToSelf(tx: TenantTx, ctx: ServiceCtx, rawBody: unknown) {
   const body = createAnnouncementBodySchema.parse(rawBody);
 
   await deliverAnnouncement(tx, ctx, {

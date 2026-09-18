@@ -36,7 +36,9 @@ export function CertificateShareDialog({ share, onClose }: CertificateShareDialo
   }, [open, onClose]);
 
   return (
-    <AnimatePresence>{share ? <SharePanel share={share} onClose={onClose} /> : null}</AnimatePresence>
+    <AnimatePresence>
+      {share ? <SharePanel share={share} onClose={onClose} /> : null}
+    </AnimatePresence>
   );
 }
 
@@ -150,8 +152,7 @@ function SharePanel({ share, onClose }: { share: ShareCertificate; onClose: () =
                   rel="noreferrer"
                   className="inline-flex items-center justify-center gap-1.5 rounded-md border border-border px-2 py-2 text-xs font-semibold text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
-                  <Send className="h-4 w-4" strokeWidth={1.75} aria-hidden="true" />
-                  X
+                  <Send className="h-4 w-4" strokeWidth={1.75} aria-hidden="true" />X
                 </a>
                 <a
                   href={targets.email}

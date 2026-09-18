@@ -24,14 +24,17 @@ describeWithDb("security notification worker", () => {
           tx,
           tenantId: fixture.tenantId,
           membershipId: fixture.learnerMembershipId,
-          preferences: { "security.password_changed": false },
+          // The value is a per-channel record, not a boolean. Passing `false`
+          // read as `undefined` for both channels, which defaults to enabled — so
+          // the member was never opted out and this test asserted nothing.
+          preferences: { "security.password_changed": { email: false, inApp: false } },
         });
 
         await publishSecurityEvent(tx, learner, {
           eventType: "security.password_changed",
           membershipId: fixture.learnerMembershipId,
           email: "learner@example.com",
-          siteUrl: "https://fundedbeyond.com",
+          siteUrl: "https://acme-academy.example.com",
         });
       },
     );

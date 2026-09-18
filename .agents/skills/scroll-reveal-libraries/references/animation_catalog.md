@@ -367,7 +367,11 @@ Create custom animations using CSS:
 ```css
 /* Define animation */
 @keyframes custom-bounce {
-  0%, 20%, 50%, 80%, 100% {
+  0%,
+  20%,
+  50%,
+  80%,
+  100% {
     transform: translateY(0);
   }
   40% {
@@ -431,10 +435,18 @@ Create custom animations using CSS:
 }
 
 @keyframes bounce-effect {
-  0% { transform: translateX(-100px); }
-  60% { transform: translateX(10px); }
-  80% { transform: translateX(-5px); }
-  100% { transform: translateX(0); }
+  0% {
+    transform: translateX(-100px);
+  }
+  60% {
+    transform: translateX(10px);
+  }
+  80% {
+    transform: translateX(-5px);
+  }
+  100% {
+    transform: translateX(0);
+  }
 }
 ```
 
@@ -504,7 +516,7 @@ Create custom animations using CSS:
 
 ```javascript
 AOS.init({
-  disable: 'mobile' // or window.innerWidth < 768
+  disable: "mobile", // or window.innerWidth < 768
 });
 ```
 
@@ -512,49 +524,53 @@ AOS.init({
 
 ### By Content Type
 
-| Content Type | Recommended Animation | Alternative |
-|--------------|----------------------|-------------|
-| Hero Heading | `fade-down` | `zoom-in-down` |
-| Hero Subtext | `fade-up` | `slide-up` |
-| CTA Button | `zoom-in` | `fade-up` |
-| Feature Cards | `fade-up` (staggered) | `zoom-in-up` |
-| Image Gallery | `zoom-in-up` | `fade-in` |
-| Testimonials | `zoom-in` | `fade-in` |
-| Statistics | `zoom-in` | `fade-up` |
-| Timeline Items | `slide-right` / `slide-left` | `fade-right` / `fade-left` |
-| Modal Overlay | `zoom-in` | `fade-in` |
-| Notifications | `slide-down` | `fade-down` |
-| Product Cards | `zoom-in-up` | `fade-up` |
-| Text Blocks | `fade-right` / `fade-left` | `slide-right` / `slide-left` |
-| Icons | `zoom-in` | `fade-in` |
-| Navigation | `fade-down` | `slide-down` |
+| Content Type   | Recommended Animation        | Alternative                  |
+| -------------- | ---------------------------- | ---------------------------- |
+| Hero Heading   | `fade-down`                  | `zoom-in-down`               |
+| Hero Subtext   | `fade-up`                    | `slide-up`                   |
+| CTA Button     | `zoom-in`                    | `fade-up`                    |
+| Feature Cards  | `fade-up` (staggered)        | `zoom-in-up`                 |
+| Image Gallery  | `zoom-in-up`                 | `fade-in`                    |
+| Testimonials   | `zoom-in`                    | `fade-in`                    |
+| Statistics     | `zoom-in`                    | `fade-up`                    |
+| Timeline Items | `slide-right` / `slide-left` | `fade-right` / `fade-left`   |
+| Modal Overlay  | `zoom-in`                    | `fade-in`                    |
+| Notifications  | `slide-down`                 | `fade-down`                  |
+| Product Cards  | `zoom-in-up`                 | `fade-up`                    |
+| Text Blocks    | `fade-right` / `fade-left`   | `slide-right` / `slide-left` |
+| Icons          | `zoom-in`                    | `fade-in`                    |
+| Navigation     | `fade-down`                  | `slide-down`                 |
 
 ### By User Experience Goal
 
-| Goal | Animation | Example |
-|------|-----------|---------|
-| **Subtle** | `fade-in`, `fade-up` | About text, descriptions |
-| **Attention-grabbing** | `zoom-in`, `zoom-out` | CTA buttons, special offers |
-| **Directional flow** | `slide-*`, `fade-*` with direction | Reading flow, timelines |
-| **Playful** | `flip-*`, diagonal fades | Portfolio items, creative sections |
-| **Professional** | `fade-up`, `fade-in` | Corporate sites, documentation |
+| Goal                   | Animation                          | Example                            |
+| ---------------------- | ---------------------------------- | ---------------------------------- |
+| **Subtle**             | `fade-in`, `fade-up`               | About text, descriptions           |
+| **Attention-grabbing** | `zoom-in`, `zoom-out`              | CTA buttons, special offers        |
+| **Directional flow**   | `slide-*`, `fade-*` with direction | Reading flow, timelines            |
+| **Playful**            | `flip-*`, diagonal fades           | Portfolio items, creative sections |
+| **Professional**       | `fade-up`, `fade-in`               | Corporate sites, documentation     |
 
 ## Quick Reference
 
 ### Fade Animations (9)
+
 - `fade-in`
 - `fade-up`, `fade-down`, `fade-left`, `fade-right`
 - `fade-up-right`, `fade-up-left`, `fade-down-right`, `fade-down-left`
 
 ### Slide Animations (4)
+
 - `slide-up`, `slide-down`, `slide-left`, `slide-right`
 
 ### Zoom Animations (11)
+
 - `zoom-in`, `zoom-out`
 - `zoom-in-up`, `zoom-in-down`, `zoom-in-left`, `zoom-in-right`
 - `zoom-out-up`, `zoom-out-down`, `zoom-out-left`, `zoom-out-right`
 
 ### Flip Animations (4)
+
 - `flip-up`, `flip-down`, `flip-left`, `flip-right`
 
 **Total**: 28 built-in animations
@@ -572,8 +588,8 @@ AOS.init({
 ```javascript
 // Respect reduced motion preference
 AOS.init({
-  disable: function() {
-    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  }
+  disable: function () {
+    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  },
 });
 ```

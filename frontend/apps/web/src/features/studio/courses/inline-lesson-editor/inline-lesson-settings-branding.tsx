@@ -1,15 +1,5 @@
 import { useEffect, useId, useRef, useState } from "react";
-import {
-  AlignLeft,
-  Bold,
-  Code,
-  Image as ImageIcon,
-  Italic,
-  Link,
-  Strikethrough,
-  Table,
-  Underline,
-} from "lucide-react";
+import { Image as ImageIcon } from "lucide-react";
 import { LESSON_TITLE_MAX_LENGTH } from "../lesson-type-options";
 import {
   LESSON_SHORT_DESCRIPTION_MAX_LENGTH,
@@ -22,7 +12,6 @@ import {
   LessonSettingsTextInput,
   LessonSettingsTextarea,
 } from "./inline-lesson-settings-shared";
-import { lessonToolbarButtonClassName } from "../../lessons/lesson-editor-shared";
 import {
   inlineLessonPrimaryDarkButtonClassName,
   inlineLessonSecondaryButtonClassName,
@@ -61,23 +50,23 @@ export function LessonSettingsBrandingSection({
 
   function handleThumbnailChange(file: File | null) {
     if (!file) return;
-    
+
     // Create preview
     const objectUrl = URL.createObjectURL(file);
     setThumbnailPreview(objectUrl);
-    
+
     // Upload file
     setUploading(true);
     setUploadError(null);
-    
+
     uploadLessonAssetFile(lessonId, file, "lesson.thumbnail")
       .then((assetReferenceId) => {
-        onChange({ 
+        onChange({
           thumbnailUrl: objectUrl,
           thumbnailAssetReferenceId: assetReferenceId,
         });
       })
-      .catch((error) => {
+      .catch((error: unknown) => {
         if (error instanceof ClientApiError) {
           setUploadError(error.message);
         } else {

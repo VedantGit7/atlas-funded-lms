@@ -139,10 +139,7 @@ function isPlanType(value: unknown): value is CoursePricingPlanType {
 
 function isPlanStatus(value: unknown): value is CoursePricingPlanStatus {
   return (
-    value === "DRAFT" ||
-    value === "PUBLISHED" ||
-    value === "UNPUBLISHED" ||
-    value === "ARCHIVED"
+    value === "DRAFT" || value === "PUBLISHED" || value === "UNPUBLISHED" || value === "ARCHIVED"
   );
 }
 
@@ -333,7 +330,9 @@ function parsePricingPlanItems(raw: unknown): CoursePricingPlanItem[] {
       typeof record["shortDescription"] === "string" ? record["shortDescription"].trim() : "";
     const longDescription =
       typeof record["longDescription"] === "string" ? record["longDescription"].trim() : "";
-    const validityMode = isValidityMode(record["validityMode"]) ? record["validityMode"] : "VALIDITY";
+    const validityMode = isValidityMode(record["validityMode"])
+      ? record["validityMode"]
+      : "VALIDITY";
     const rawExpiryDate =
       typeof record["expiryDate"] === "string" ? record["expiryDate"].trim() : "";
     const expiryDate = rawExpiryDate && isPricingPlanIsoDate(rawExpiryDate) ? rawExpiryDate : null;
@@ -344,11 +343,13 @@ function parsePricingPlanItems(raw: unknown): CoursePricingPlanItem[] {
     const allowReEnroll = record["allowReEnroll"] === true;
     const audienceType = isAudienceType(record["audienceType"]) ? record["audienceType"] : "NORMAL";
     const discountPriceCents =
-      typeof record["discountPriceCents"] === "number" && Number.isFinite(record["discountPriceCents"])
+      typeof record["discountPriceCents"] === "number" &&
+      Number.isFinite(record["discountPriceCents"])
         ? Math.max(0, Math.round(record["discountPriceCents"]))
         : null;
     const trialDurationDays =
-      typeof record["trialDurationDays"] === "number" && Number.isFinite(record["trialDurationDays"])
+      typeof record["trialDurationDays"] === "number" &&
+      Number.isFinite(record["trialDurationDays"])
         ? Math.max(0, Math.round(record["trialDurationDays"]))
         : 0;
     const allowCouponCode = record["allowCouponCode"] === true;
@@ -360,7 +361,8 @@ function parsePricingPlanItems(raw: unknown): CoursePricingPlanItem[] {
     const rawOfferStartAt =
       typeof record["offerStartAt"] === "string" ? record["offerStartAt"].trim() : "";
     const offerStartAt = rawOfferStartAt.length > 0 ? rawOfferStartAt : null;
-    const rawOfferEndAt = typeof record["offerEndAt"] === "string" ? record["offerEndAt"].trim() : "";
+    const rawOfferEndAt =
+      typeof record["offerEndAt"] === "string" ? record["offerEndAt"].trim() : "";
     const offerEndAt = rawOfferEndAt.length > 0 ? rawOfferEndAt : null;
 
     if (!id || !title) continue;
@@ -554,10 +556,9 @@ export function createPricingPlanDraftFromKind(
     title: option?.title ?? "",
     planKind: kind,
     type: isFree ? "FREE" : "PAID",
-    priceCents: isFree ? 0 : course.priceCents ?? 0,
+    priceCents: isFree ? 0 : (course.priceCents ?? 0),
     currency: course.currency ?? "USD",
-    validityDays:
-      kind === "FREE" || kind === "ONE_TIME" || kind === "LIMITED_TIME" ? 365 : 31,
+    validityDays: kind === "FREE" || kind === "ONE_TIME" || kind === "LIMITED_TIME" ? 365 : 31,
     location: PRICING_PLAN_DEFAULT_LOCATION,
     isDefault: existingPlans.length === 0,
     oneToOneTemplate: null,

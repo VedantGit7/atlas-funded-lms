@@ -1,19 +1,11 @@
 import type { LucideIcon } from "lucide-react";
-import {
-  BadgeCheck,
-  GraduationCap,
-  MessageSquare,
-  Shield,
-  Star,
-  User,
-} from "lucide-react";
+import { BadgeCheck, GraduationCap, MessageSquare, Shield, Star, User } from "lucide-react";
 import { PERMISSIONS } from "@atlas/access/seed/permission-catalogue";
 
 export const fieldClassName =
   "w-full rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-4 py-2.5 text-sm text-[var(--admin-on-surface)] outline-none transition-all placeholder:text-[var(--admin-on-surface-variant)] focus:border-[var(--admin-primary)] focus:ring-2 focus:ring-[var(--admin-primary)]/30";
 
-export const labelClassName =
-  "text-[13px] font-medium text-[var(--admin-on-surface-variant)]";
+export const labelClassName = "text-[13px] font-medium text-[var(--admin-on-surface-variant)]";
 
 export const cardClassName =
   "overflow-hidden rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)] shadow-sm";

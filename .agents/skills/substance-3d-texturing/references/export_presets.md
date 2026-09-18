@@ -20,15 +20,17 @@ Substance 3D Painter ships with presets for major engines and renderers.
 **Use for:** glTF, Three.js, Babylon.js, generic PBR engines
 
 **Output textures:**
+
 - `$textureSet_baseColor.png` - Base color (RGB)
 - `$textureSet_normal.png` - Normal map (RGB, OpenGL format)
 - `$textureSet_metallicRoughness.png` - Packed texture:
   - Red: Unused
   - Green: Roughness
   - Blue: Metallic
-- `$textureSet_emissive.png` - Emissive (RGB) *if present*
+- `$textureSet_emissive.png` - Emissive (RGB) _if present_
 
 **Usage:**
+
 ```python
 preset = substance_painter.resource.ResourceID(
     context="starter_assets",
@@ -37,6 +39,7 @@ preset = substance_painter.resource.ResourceID(
 ```
 
 **Best for:**
+
 - Web applications (Three.js, Babylon.js)
 - glTF/GLB export
 - Generic PBR workflows
@@ -50,6 +53,7 @@ preset = substance_painter.resource.ResourceID(
 **Use for:** Unity High Definition Render Pipeline
 
 **Output textures:**
+
 - `$textureSet_BaseMap.png` - Base color + alpha
 - `$textureSet_Normal.png` - Normal map (DirectX format)
 - `$textureSet_MaskMap.png` - Packed texture:
@@ -59,6 +63,7 @@ preset = substance_painter.resource.ResourceID(
   - Alpha: Smoothness (1 - roughness)
 
 **Differences from standard PBR:**
+
 - DirectX normal format (Y-flipped)
 - Smoothness instead of roughness (inverted)
 - Different channel packing
@@ -72,6 +77,7 @@ preset = substance_painter.resource.ResourceID(
 **Use for:** Unity Universal Render Pipeline
 
 **Output textures:**
+
 - `$textureSet_BaseMap.png` - Base color + alpha
 - `$textureSet_Normal.png` - Normal map
 - `$textureSet_MetallicSmoothness.png` - Packed:
@@ -87,6 +93,7 @@ preset = substance_painter.resource.ResourceID(
 **Use for:** Unreal Engine 4 and 5
 
 **Output textures:**
+
 - `$textureSet_BaseColor.png` - Base color
 - `$textureSet_Normal.png` - Normal map (DirectX)
 - `$textureSet_OcclusionRoughnessMetallic.png` - Packed:
@@ -106,6 +113,7 @@ preset = substance_painter.resource.ResourceID(
 **Use for:** Arnold renderer (Maya, Cinema 4D, Houdini)
 
 **Output textures:**
+
 - `$textureSet_baseColor.exr` - Base color (EXR 32-bit)
 - `$textureSet_normal.exr` - Normal map
 - `$textureSet_specularRoughness.exr` - Roughness
@@ -122,6 +130,7 @@ preset = substance_painter.resource.ResourceID(
 **Use for:** V-Ray renderer
 
 **Output textures:**
+
 - Separate files for each channel
 - High bit-depth support (16/32-bit)
 
@@ -174,6 +183,7 @@ Optimized presets for web and real-time rendering.
 ```
 
 **Matches glTF 2.0 specification:**
+
 - BaseColor in sRGB color space
 - MetallicRoughness: Green = Roughness, Blue = Metallic
 - Normal in OpenGL format (Y+)
@@ -234,19 +244,21 @@ Optimized presets for web and real-time rendering.
 ```
 
 **Features:**
+
 - JPEG for baseColor (70-80% quality, 10× smaller)
 - PNG for data textures (lossless required)
 - Separate metalness and roughness for flexibility
 - Separate AO map
 
 **Three.js usage:**
+
 ```javascript
 const material = new THREE.MeshStandardMaterial({
-  map: new THREE.TextureLoader().load('Asset_color.jpg'),
-  normalMap: new THREE.TextureLoader().load('Asset_normal.png'),
-  aoMap: new THREE.TextureLoader().load('Asset_ao.png'),
-  metalnessMap: new THREE.TextureLoader().load('Asset_metalness.png'),
-  roughnessMap: new THREE.TextureLoader().load('Asset_roughness.png'),
+  map: new THREE.TextureLoader().load("Asset_color.jpg"),
+  normalMap: new THREE.TextureLoader().load("Asset_normal.png"),
+  aoMap: new THREE.TextureLoader().load("Asset_ao.png"),
+  metalnessMap: new THREE.TextureLoader().load("Asset_metalness.png"),
+  roughnessMap: new THREE.TextureLoader().load("Asset_roughness.png"),
 });
 ```
 
@@ -293,6 +305,7 @@ const material = new THREE.MeshStandardMaterial({
 ```
 
 **Babylon.js usage:**
+
 ```javascript
 const pbr = new BABYLON.PBRMaterial("pbr", scene);
 pbr.albedoTexture = new BABYLON.Texture("Asset_albedo.png", scene);
@@ -345,6 +358,7 @@ pbr.useMetallnessFromMetallicTextureBlue = true;
 ```
 
 **Optimizations:**
+
 - 512×512 maximum resolution
 - JPEG for color (lossy but small)
 - RG normal map only (reconstruct Z in shader)
@@ -394,6 +408,7 @@ orm_preset = {
 
 **Reduces texture count:** 6 textures → 3 textures
 **Shader setup (Three.js):**
+
 ```javascript
 material.aoMap = ormTexture;
 material.roughnessMap = ormTexture;
@@ -475,6 +490,7 @@ material.metalnessMap = ormTexture;
 ### Standard PBR Packing
 
 **glTF 2.0 / Khronos Standard:**
+
 - BaseColor: RGB (sRGB)
 - Normal: RGB (OpenGL, linear)
 - MetallicRoughness:
@@ -483,6 +499,7 @@ material.metalnessMap = ormTexture;
   - B: Metallic (linear)
 
 **Advantages:**
+
 - Industry standard
 - Maximum compatibility
 - glTF compliance
@@ -492,6 +509,7 @@ material.metalnessMap = ormTexture;
 ### Unreal Engine Packing
 
 **Unreal's ORM format:**
+
 - BaseColor: RGB
 - Normal: RGB (DirectX)
 - ORM:
@@ -500,6 +518,7 @@ material.metalnessMap = ormTexture;
   - B: Metallic
 
 **Advantages:**
+
 - Includes AO without extra texture
 - Widely used format
 - Efficient for complex materials
@@ -509,16 +528,19 @@ material.metalnessMap = ormTexture;
 ### Mobile Optimized Packing
 
 **Aggressive compression:**
+
 - BaseColor: JPEG (lossy)
 - Normal: RG only (reconstruct Z)
 - ORM: RGB (AO + Roughness + Metallic)
 
 **Advantages:**
+
 - Smallest file size
 - Reduced texture memory
 - Faster loading on mobile
 
 **Disadvantages:**
+
 - Lossy baseColor (visual artifacts)
 - RG normal requires shader modification
 
@@ -527,6 +549,7 @@ material.metalnessMap = ormTexture;
 ### High Quality / Archival
 
 **Separate channels, high bit depth:**
+
 - BaseColor: PNG-16 or EXR-32
 - Normal: PNG-16
 - Metallic: PNG-16 (separate)
@@ -535,11 +558,13 @@ material.metalnessMap = ormTexture;
 - Height: PNG-16 (separate)
 
 **Advantages:**
+
 - Maximum quality
 - Per-channel editability
 - HDR support (EXR)
 
 **Disadvantages:**
+
 - Large file sizes
 - More texture slots
 - Overkill for real-time
@@ -548,33 +573,33 @@ material.metalnessMap = ormTexture;
 
 ### By Platform
 
-| Platform | Recommended Preset | Resolution | Format |
-|----------|-------------------|------------|---------|
-| **Desktop Web** | glTF_Standard / Web_ORM | 1024-2048 | PNG |
-| **Mobile Web** | Mobile_WebGL | 512-1024 | JPEG+PNG |
-| **Unity HDRP** | Unity HDRP (Lit) | 2048-4096 | PNG |
-| **Unreal Engine** | Unreal Engine (Packed) | 2048-4096 | PNG |
-| **glTF Export** | PBR Metallic Roughness | 1024-2048 | PNG |
-| **Three.js** | ThreeJS_Standard | 1024-2048 | JPEG+PNG |
-| **Babylon.js** | BabylonJS_PBR | 1024-2048 | PNG |
+| Platform          | Recommended Preset      | Resolution | Format   |
+| ----------------- | ----------------------- | ---------- | -------- |
+| **Desktop Web**   | glTF_Standard / Web_ORM | 1024-2048  | PNG      |
+| **Mobile Web**    | Mobile_WebGL            | 512-1024   | JPEG+PNG |
+| **Unity HDRP**    | Unity HDRP (Lit)        | 2048-4096  | PNG      |
+| **Unreal Engine** | Unreal Engine (Packed)  | 2048-4096  | PNG      |
+| **glTF Export**   | PBR Metallic Roughness  | 1024-2048  | PNG      |
+| **Three.js**      | ThreeJS_Standard        | 1024-2048  | JPEG+PNG |
+| **Babylon.js**    | BabylonJS_PBR           | 1024-2048  | PNG      |
 
 ### By Use Case
 
-| Use Case | Preset | Notes |
-|----------|--------|-------|
-| **Quick web export** | PBR Metallic Roughness | Built-in, universal |
-| **Smallest file size** | Mobile_WebGL | JPEG color, ORM packing |
-| **Maximum compatibility** | glTF_Standard | Strict glTF 2.0 spec |
-| **Maximum quality** | High Quality / Archival | 16/32-bit, separate channels |
-| **Production pipeline** | Web_ORM | Efficient, industry standard |
+| Use Case                  | Preset                  | Notes                        |
+| ------------------------- | ----------------------- | ---------------------------- |
+| **Quick web export**      | PBR Metallic Roughness  | Built-in, universal          |
+| **Smallest file size**    | Mobile_WebGL            | JPEG color, ORM packing      |
+| **Maximum compatibility** | glTF_Standard           | Strict glTF 2.0 spec         |
+| **Maximum quality**       | High Quality / Archival | 16/32-bit, separate channels |
+| **Production pipeline**   | Web_ORM                 | Efficient, industry standard |
 
 ### By Texture Count
 
-| Texture Count | Packing Strategy | Maps |
-|---------------|------------------|------|
-| **3 textures** | ORM packed | BaseColor, Normal, ORM |
-| **4 textures** | glTF standard | BaseColor, Normal, MetallicRoughness, Emissive |
-| **5+ textures** | Separate channels | Color, Normal, Metallic, Roughness, AO |
+| Texture Count   | Packing Strategy  | Maps                                           |
+| --------------- | ----------------- | ---------------------------------------------- |
+| **3 textures**  | ORM packed        | BaseColor, Normal, ORM                         |
+| **4 textures**  | glTF standard     | BaseColor, Normal, MetallicRoughness, Emissive |
+| **5+ textures** | Separate channels | Color, Normal, Metallic, Roughness, AO         |
 
 ## Best Practices
 
@@ -603,22 +628,27 @@ material.metalnessMap = ormTexture;
 ## Troubleshooting
 
 **Textures look washed out:**
+
 - BaseColor in wrong color space (should be sRGB)
 - Check engine texture settings
 
 **Metallic looks rough / rough looks metallic:**
+
 - Channels swapped (check Green/Blue order)
 - Verify MetallicRoughness packing: G=Roughness, B=Metallic
 
 **Normal map inverted:**
+
 - DirectX vs. OpenGL format
 - Flip green channel in export or engine
 
 **Seams at UV borders:**
+
 - Use `"paddingAlgorithm": "infinite"` in export parameters
 - Increase dilation distance
 
 **File sizes too large:**
+
 - Use JPEG for baseColor
 - Reduce resolution (sizeLog2)
 - Pack channels (ORM)

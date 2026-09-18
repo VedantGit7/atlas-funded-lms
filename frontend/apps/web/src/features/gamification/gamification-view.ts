@@ -107,10 +107,8 @@ export type QuestStatusMeta = {
 
 const QUEST_DONE_CHIP =
   "bg-[color-mix(in_srgb,var(--success)_16%,transparent)] text-[color-mix(in_srgb,var(--success)_74%,var(--foreground))] ring-1 ring-inset ring-[color-mix(in_srgb,var(--success)_32%,transparent)]";
-const QUEST_ACTIVE_CHIP =
-  "bg-primary/10 text-primary ring-1 ring-inset ring-primary/25";
-const QUEST_IDLE_CHIP =
-  "bg-muted text-muted-foreground ring-1 ring-inset ring-border";
+const QUEST_ACTIVE_CHIP = "bg-primary/10 text-primary ring-1 ring-inset ring-primary/25";
+const QUEST_IDLE_CHIP = "bg-muted text-muted-foreground ring-1 ring-inset ring-border";
 
 /** Status label + tinted pill for a learner quest. */
 export function questStatusMeta(status: QuestStatus): QuestStatusMeta {
@@ -125,9 +123,7 @@ export function questStatusMeta(status: QuestStatus): QuestStatusMeta {
 }
 
 /** Aggregates per-step progress into one 0-100 completion percentage. */
-export function questOverallPercent(
-  steps: Array<{ progress: number; target: number }>,
-): number {
+export function questOverallPercent(steps: Array<{ progress: number; target: number }>): number {
   const totals = steps.reduce(
     (acc, step) => {
       const target = Math.max(0, step.target);

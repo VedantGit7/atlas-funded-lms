@@ -2,15 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import {
-  useCallback,
-  useEffect,
-  useId,
-  useMemo,
-  useRef,
-  useState,
-  type ReactNode,
-} from "react";
+import { useCallback, useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   ArrowDown,
   ArrowLeft,
@@ -37,6 +29,7 @@ import {
   type BatchesCompareNormalize,
   type BatchListItem,
 } from "./admin-batches-roster-api";
+import { csvEscape } from "@/lib/export/csv";
 
 const MAX_SLOTS = 4;
 const SAVE_KEY = "atlas.admin.batches.compare.saved";
@@ -57,7 +50,13 @@ type MetricDef = {
 };
 
 const METRICS: MetricDef[] = [
-  { key: "learners", label: "Learners", format: "int", higherIsBetter: true, section: "enrollment" },
+  {
+    key: "learners",
+    label: "Learners",
+    format: "int",
+    higherIsBetter: true,
+    section: "enrollment",
+  },
   {
     key: "contentCompletionPct",
     label: "Content completion",
@@ -160,10 +159,7 @@ function parseIdsParam(raw: string | null): string[] {
   return ids;
 }
 
-function formatMetricValue(
-  value: number | null | undefined,
-  format: MetricDef["format"],
-): string {
+function formatMetricValue(value: number | null | undefined, format: MetricDef["format"]): string {
   if (value == null || Number.isNaN(value)) return "-";
   if (format === "pct") return `${Math.round(value * 10) / 10}%`;
   if (format === "minutes") return `${Math.round(value)}m`;
@@ -180,10 +176,7 @@ function formatDateRange(startsAt: string | null, endsAt: string | null): string
   return "Dates unset";
 }
 
-function bestIndexForMetric(
-  items: BatchCompareItem[],
-  metric: MetricDef,
-): number | null {
+function bestIndexForMetric(items: BatchCompareItem[], metric: MetricDef): number | null {
   let bestIdx: number | null = null;
   let bestVal: number | null = null;
   items.forEach((item, index) => {
@@ -221,20 +214,13 @@ function deltaVsBaseline(
   return { label, tone: improved ? "up" : "down" };
 }
 
-function csvEscape(value: string): string {
-  if (/[",\n]/.test(value)) return `"${value.replace(/"/g, '""')}"`;
-  return value;
-}
-
 function downloadCsv(items: BatchCompareItem[]) {
   const headers = ["Metric", ...items.map((item) => item.name)];
   const lines = [headers.map(csvEscape).join(",")];
   for (const metric of METRICS) {
     const row = [
       metric.label,
-      ...items.map((item) =>
-        formatMetricValue(item.metrics[metric.key], metric.format),
-      ),
+      ...items.map((item) => formatMetricValue(item.metrics[metric.key], metric.format)),
     ];
     lines.push(row.map(csvEscape).join(","));
   }
@@ -324,8 +310,7 @@ function CompletionTrendChart({ items }: { items: BatchCompareItem[] }) {
           );
         })}
         {markers.map((idx) => {
-          const x =
-            pad.left + (maxWeeks <= 1 ? 0 : (idx / (maxWeeks - 1)) * innerW);
+          const x = pad.left + (maxWeeks <= 1 ? 0 : (idx / (maxWeeks - 1)) * innerW);
           const label = firstLabels[idx]?.weekLabel ?? `Wk ${idx + 1}`;
           return (
             <g key={idx}>
@@ -352,8 +337,7 @@ function CompletionTrendChart({ items }: { items: BatchCompareItem[] }) {
         {items.map((item, batchIndex) => {
           if (item.currentWeekIndex == null || !item.isRunning) return null;
           const idx = Math.min(item.currentWeekIndex, Math.max(0, maxWeeks - 1));
-          const x =
-            pad.left + (maxWeeks <= 1 ? 0 : (idx / (maxWeeks - 1)) * innerW);
+          const x = pad.left + (maxWeeks <= 1 ? 0 : (idx / (maxWeeks - 1)) * innerW);
           return (
             <line
               key={`now-${item.id}`}
@@ -397,9 +381,7 @@ function CompletionTrendChart({ items }: { items: BatchCompareItem[] }) {
               className="h-2 w-2 rounded-full bg-[var(--admin-primary)]"
               style={{ opacity: SWATCH_OPACITIES[index] }}
             />
-            <span className="text-[11px] text-[var(--admin-on-surface-variant)]">
-              {item.name}
-            </span>
+            <span className="text-[11px] text-[var(--admin-on-surface-variant)]">{item.name}</span>
           </div>
         ))}
       </div>
@@ -412,16 +394,10 @@ function SpreadBars({ items }: { items: BatchCompareItem[] }) {
     <div className="space-y-4">
       {items.map((item) => {
         const spread = item.completionSpread;
-        const total =
-          spread.band0to25 +
-          spread.band26to50 +
-          spread.band51to75 +
-          spread.band76to100;
+        const total = spread.band0to25 + spread.band26to50 + spread.band51to75 + spread.band76to100;
         return (
           <div key={item.id}>
-            <div className="mb-1 text-xs text-[var(--admin-on-surface-variant)]">
-              {item.name}
-            </div>
+            <div className="mb-1 text-xs text-[var(--admin-on-surface-variant)]">{item.name}</div>
             <div className="flex h-6 overflow-hidden rounded">
               {SPREAD_BANDS.map((band) => {
                 const count = spread[band.key];
@@ -450,7 +426,7 @@ function SpreadBars({ items }: { items: BatchCompareItem[] }) {
       <div className="flex justify-between border-t border-[var(--admin-border)] pt-2">
         {SPREAD_BANDS.map((band) => (
           <div key={band.key} className="flex items-center gap-1">
-            <span className={`h-2 w-2 rounded-sm ${band.tone.split(" ")[0]}`} />
+            <span className={`h-2 w-2 rounded-sm ${band.tone.split(" ")[0] ?? ""}`} />
             <span className="font-mono text-[11px] text-[var(--admin-on-surface-variant)]">
               {band.label}
             </span>
@@ -486,9 +462,7 @@ function MetricCell({
       ].join(" ")}
     >
       <div className="flex items-center gap-2">
-        <span className="font-mono text-sm tabular-nums">
-          {formatMetricValue(value, format)}
-        </span>
+        <span className="font-mono text-sm tabular-nums">{formatMetricValue(value, format)}</span>
         {delta ? (
           <span
             className={[
@@ -549,14 +523,10 @@ export function AdminBatchesComparePage() {
   const pickerId = useId();
   const pickerRef = useRef<HTMLDivElement | null>(null);
 
-  const idsFromUrl = useMemo(
-    () => parseIdsParam(searchParams.get("ids")),
-    [searchParams],
-  );
+  const idsFromUrl = useMemo(() => parseIdsParam(searchParams.get("ids")), [searchParams]);
 
   const [selectedIds, setSelectedIds] = useState<string[]>(idsFromUrl);
-  const [normalize, setNormalize] =
-    useState<BatchesCompareNormalize>("week_of_batch");
+  const [normalize, setNormalize] = useState<BatchesCompareNormalize>("week_of_batch");
   const [items, setItems] = useState<BatchCompareItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -576,40 +546,31 @@ export function AdminBatchesComparePage() {
       if (ids.length > 0) params.set("ids", ids.join(","));
       const qs = params.toString();
       router.replace(
-        qs
-          ? `/admin/reports/batches/compare?${qs}`
-          : "/admin/reports/batches/compare",
+        qs ? `/admin/reports/batches/compare?${qs}` : "/admin/reports/batches/compare",
       );
     },
     [router],
   );
 
-  const loadCompare = useCallback(
-    async (ids: string[], mode: BatchesCompareNormalize) => {
-      if (ids.length < 2) {
-        setItems([]);
-        setLoading(false);
-        setError(null);
-        return;
-      }
-      setLoading(true);
+  const loadCompare = useCallback(async (ids: string[], mode: BatchesCompareNormalize) => {
+    if (ids.length < 2) {
+      setItems([]);
+      setLoading(false);
       setError(null);
-      try {
-        const response = await fetchBatchesCompare(ids, mode);
-        setItems(response.data.items);
-      } catch (err) {
-        setItems([]);
-        setError(
-          err instanceof ClientApiError
-            ? err.message
-            : "Could not load batch comparison.",
-        );
-      } finally {
-        setLoading(false);
-      }
-    },
-    [],
-  );
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetchBatchesCompare(ids, mode);
+      setItems(response.data.items);
+    } catch (err) {
+      setItems([]);
+      setError(err instanceof ClientApiError ? err.message : "Could not load batch comparison.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     void loadCompare(selectedIds, normalize);
@@ -623,7 +584,9 @@ export function AdminBatchesComparePage() {
       }
     };
     document.addEventListener("mousedown", onDoc);
-    return () => document.removeEventListener("mousedown", onDoc);
+    return () => {
+      document.removeEventListener("mousedown", onDoc);
+    };
   }, [pickerOpen]);
 
   const searchPicker = useCallback(async (q: string) => {
@@ -651,7 +614,9 @@ export function AdminBatchesComparePage() {
     const handle = window.setTimeout(() => {
       void searchPicker(pickerQuery);
     }, 200);
-    return () => window.clearTimeout(handle);
+    return () => {
+      window.clearTimeout(handle);
+    };
   }, [pickerOpen, pickerQuery, searchPicker]);
 
   const addBatch = (id: string) => {
@@ -680,7 +645,9 @@ export function AdminBatchesComparePage() {
         }),
       );
       setSaveMessage("Comparison saved on this device.");
-      window.setTimeout(() => setSaveMessage(null), 2500);
+      window.setTimeout(() => {
+        setSaveMessage(null);
+      }, 2500);
     } catch {
       setSaveMessage("Could not save comparison.");
     }
@@ -704,10 +671,7 @@ export function AdminBatchesComparePage() {
         setSaveMessage("Saved comparison needs at least two batches.");
         return;
       }
-      if (
-        parsed.normalize === "absolute_dates" ||
-        parsed.normalize === "week_of_batch"
-      ) {
+      if (parsed.normalize === "absolute_dates" || parsed.normalize === "week_of_batch") {
         setNormalize(parsed.normalize);
       }
       setSelectedIds(ids);
@@ -758,9 +722,7 @@ export function AdminBatchesComparePage() {
                 index >= 2 ? "opacity-50" : "",
               ].join(" ")}
             >
-              <span className="text-xs text-[var(--admin-outline)]">
-                Slot {index + 1}
-              </span>
+              <span className="text-xs text-[var(--admin-outline)]">Slot {index + 1}</span>
             </div>
           ))}
         </div>
@@ -776,13 +738,15 @@ export function AdminBatchesComparePage() {
             Pick at least two batches to compare
           </h3>
           <p className="mb-6 max-w-sm text-sm text-[var(--admin-on-surface-variant)]">
-            Select batches from the directory to populate the comparison matrix and
-            identify performance trends.
+            Select batches from the directory to populate the comparison matrix and identify
+            performance trends.
           </p>
           <button
             type="button"
             className={primaryButtonClassName}
-            onClick={() => setPickerOpen(true)}
+            onClick={() => {
+              setPickerOpen(true);
+            }}
           >
             <Plus className="h-4 w-4" aria-hidden="true" />
             Select batches
@@ -873,8 +837,7 @@ export function AdminBatchesComparePage() {
                         items.some(
                           (item) =>
                             item.metrics.learners > 0 &&
-                            item.metrics.atRiskLearners / item.metrics.learners >=
-                              0.15,
+                            item.metrics.atRiskLearners / item.metrics.learners >= 0.15,
                         );
 
                       return (
@@ -908,9 +871,7 @@ export function AdminBatchesComparePage() {
                                   )
                                 : null;
                             const barPct =
-                              value != null && maxAbs > 0
-                                ? (Math.abs(value) / maxAbs) * 100
-                                : 0;
+                              value != null && maxAbs > 0 ? (Math.abs(value) / maxAbs) * 100 : 0;
                             return (
                               <td key={item.id} className="p-0 align-middle">
                                 <MetricCell
@@ -946,10 +907,7 @@ export function AdminBatchesComparePage() {
                   </p>
                   <ul className="space-y-2">
                     {items.map((item, index) => (
-                      <li
-                        key={item.id}
-                        className="flex items-center justify-between gap-2 text-sm"
-                      >
+                      <li key={item.id} className="flex items-center justify-between gap-2 text-sm">
                         <span className="truncate text-[var(--admin-on-surface-variant)]">
                           {item.name}
                         </span>
@@ -1017,16 +975,14 @@ export function AdminBatchesComparePage() {
             type="button"
             className={secondaryButtonClassName}
             disabled={!canCompare || items.length === 0}
-            onClick={() => downloadCsv(items)}
+            onClick={() => {
+              downloadCsv(items);
+            }}
           >
             <Download className="h-4 w-4" aria-hidden="true" />
             Export comparison
           </button>
-          <button
-            type="button"
-            className={secondaryButtonClassName}
-            onClick={handleRestoreSaved}
-          >
+          <button type="button" className={secondaryButtonClassName} onClick={handleRestoreSaved}>
             Restore saved
           </button>
           <button
@@ -1068,7 +1024,9 @@ export function AdminBatchesComparePage() {
                   type="button"
                   className="text-[var(--admin-outline)] transition-colors hover:text-[var(--admin-danger)]"
                   aria-label={`Remove ${item.name}`}
-                  onClick={() => removeBatch(item.id)}
+                  onClick={() => {
+                    removeBatch(item.id);
+                  }}
                 >
                   <X className="h-4 w-4" aria-hidden="true" />
                 </button>
@@ -1100,7 +1058,9 @@ export function AdminBatchesComparePage() {
                   <button
                     type="button"
                     className="text-[var(--admin-outline)] hover:text-[var(--admin-danger)]"
-                    onClick={() => removeBatch(id)}
+                    onClick={() => {
+                      removeBatch(id);
+                    }}
                     aria-label="Remove batch"
                   >
                     <X className="h-4 w-4" />
@@ -1114,7 +1074,9 @@ export function AdminBatchesComparePage() {
               key={`empty-${index}`}
               type="button"
               className="flex min-w-[180px] flex-1 items-center justify-center gap-2 rounded border-2 border-dashed border-[var(--admin-outline)] p-3 text-sm font-medium text-[var(--admin-on-surface-variant)] transition-colors hover:bg-[var(--admin-surface)] hover:text-[var(--admin-primary)]"
-              onClick={() => setPickerOpen(true)}
+              onClick={() => {
+                setPickerOpen(true);
+              }}
             >
               <Plus className="h-4 w-4" aria-hidden="true" />
               Add batch
@@ -1132,9 +1094,9 @@ export function AdminBatchesComparePage() {
           <Select
             id={`${pickerId}-normalize`}
             value={normalize}
-            onValueChange={(value) =>
-              setNormalize(value as BatchesCompareNormalize)
-            }
+            onValueChange={(value) => {
+              setNormalize(value as BatchesCompareNormalize);
+            }}
             options={[
               { value: "week_of_batch", label: "Week of batch" },
               { value: "absolute_dates", label: "Absolute dates" },
@@ -1153,7 +1115,9 @@ export function AdminBatchesComparePage() {
                 <input
                   autoFocus
                   value={pickerQuery}
-                  onChange={(event) => setPickerQuery(event.target.value)}
+                  onChange={(event) => {
+                    setPickerQuery(event.target.value);
+                  }}
                   placeholder="Search batches…"
                   className="h-9 w-full rounded border border-[var(--admin-border)] bg-[var(--admin-bg)] pl-9 pr-3 text-sm text-[var(--admin-on-surface)] placeholder:text-[var(--admin-on-surface-variant)] focus-visible:border-[var(--admin-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]/30"
                 />
@@ -1171,15 +1135,16 @@ export function AdminBatchesComparePage() {
                 ) : null}
                 {pickerOptions.map((batch) => {
                   const disabled =
-                    selectedIds.includes(batch.id) ||
-                    selectedIds.length >= MAX_SLOTS;
+                    selectedIds.includes(batch.id) || selectedIds.length >= MAX_SLOTS;
                   return (
                     <li key={batch.id}>
                       <button
                         type="button"
                         disabled={disabled}
                         className="flex w-full items-center justify-between gap-2 rounded px-2 py-2 text-left text-sm transition-colors hover:bg-[var(--admin-surface-high)] disabled:cursor-not-allowed disabled:opacity-40"
-                        onClick={() => addBatch(batch.id)}
+                        onClick={() => {
+                          addBatch(batch.id);
+                        }}
                       >
                         <span className="min-w-0">
                           <span className="block truncate font-medium text-[var(--admin-on-surface)]">
@@ -1190,9 +1155,7 @@ export function AdminBatchesComparePage() {
                           </span>
                         </span>
                         {selectedIds.includes(batch.id) ? (
-                          <span className="text-[11px] text-[var(--admin-primary)]">
-                            Added
-                          </span>
+                          <span className="text-[11px] text-[var(--admin-primary)]">Added</span>
                         ) : null}
                       </button>
                     </li>
@@ -1202,7 +1165,9 @@ export function AdminBatchesComparePage() {
               <button
                 type="button"
                 className={`${ghostButtonClassName} mt-2 w-full`}
-                onClick={() => setPickerOpen(false)}
+                onClick={() => {
+                  setPickerOpen(false);
+                }}
               >
                 Close
               </button>

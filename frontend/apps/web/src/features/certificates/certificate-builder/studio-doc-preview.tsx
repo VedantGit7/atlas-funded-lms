@@ -16,10 +16,7 @@ import type {
 } from "@atlas/contracts/certificates/certificate-design-document";
 import { pagePixelSize, toPx, type DocumentUnit } from "./studio-units";
 
-function resolveText(
-  element: CertificateTextElement,
-  doc: CertificateDesignDocument,
-): string {
+function resolveText(element: CertificateTextElement, doc: CertificateDesignDocument): string {
   const sampleFor = (key: string): string | undefined =>
     doc.variables?.find((v) => v.key === key)?.sampleValue;
 
@@ -192,9 +189,7 @@ export function StudioDocPreview({
   const bg = doc.background;
   const gradientId = "cert-preview-grad";
   const gradientColors =
-    bg.type === "gradient"
-      ? (bg.value.match(/#[0-9a-fA-F]{3,8}|rgba?\([^)]*\)/g) ?? [])
-      : [];
+    bg.type === "gradient" ? (bg.value.match(/#[0-9a-fA-F]{3,8}|rgba?\([^)]*\)/g) ?? []) : [];
 
   return (
     <svg

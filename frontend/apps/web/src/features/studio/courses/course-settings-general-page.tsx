@@ -70,11 +70,7 @@ export function CourseSettingsGeneralPage({
             onSaved={onCourseChange}
           />
         ) : section.id === "seo" ? (
-          <CourseSettingsSeoPanel
-            course={course}
-            editable={editable}
-            onSaved={onCourseChange}
-          />
+          <CourseSettingsSeoPanel course={course} editable={editable} onSaved={onCourseChange} />
         ) : (
           <CourseSettingsComingSoon />
         )}

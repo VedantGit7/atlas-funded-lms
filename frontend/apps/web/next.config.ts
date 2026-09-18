@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 import bundleAnalyzer from "@next/bundle-analyzer";
+import { securityHeadersRule } from "../../../configs/security-headers.mjs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { withSentryConfig } from "@sentry/nextjs";
@@ -22,6 +23,18 @@ const nextConfig: NextConfig = {
     serverActions: {
       bodySizeLimit: "110mb",
     },
+    // H16. 556 files import from the lucide-react barrel, which pulled the whole
+    // icon set into a chunk loaded by 325 routes. Rewriting the barrel to deep
+    // imports is the single largest lever on learner first-load weight.
+    optimizePackageImports: ["lucide-react"],
+  },
+  // H2. configs/security-headers.mjs describes itself as shared by both Next
+  // apps and was wired into the API only -- so the app that actually serves HTML
+  // to browsers sent no CSP, no X-Frame-Options and no HSTS. Clickjacking of
+  // /admin and /studio, and the second line of defence against both stored-XSS
+  // vectors, depended on this being here rather than on the JSON API.
+  headers() {
+    return Promise.resolve([securityHeadersRule]);
   },
   // Local dev uses tenant/platform hostnames (see plan/frontend-planning/local-dev-urls.md)
   // instead of bare "localhost", so Next's dev-resource origin check needs these allowed

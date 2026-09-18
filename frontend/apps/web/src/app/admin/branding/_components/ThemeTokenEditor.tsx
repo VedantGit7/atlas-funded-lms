@@ -39,11 +39,15 @@ const TOKEN_ROWS: Array<{
   { key: "primary", label: "Primary brand", colorKey: "primary" },
   { key: "accent", label: "Accent", colorKey: "accent" },
   { key: "header", label: "Header / navigation", colorKey: "header" },
-  { key: "background", label: "Background", colorKey: "background" },
-  { key: "foreground", label: "Foreground text", colorKey: "foreground" },
 ];
 
-export function ThemeTokenEditor({ theme, tokens, onTokensChange, onSave, busy }: ThemeTokenEditorProps) {
+export function ThemeTokenEditor({
+  theme,
+  tokens,
+  onTokensChange,
+  onSave,
+  busy,
+}: ThemeTokenEditorProps) {
   const contrastIssues = useMemo(() => validateThemeContrast(tokens), [tokens]);
   const activePresetKey =
     THEME_PRESETS.find((preset) => JSON.stringify(preset.tokens) === JSON.stringify(tokens))?.key ??
@@ -83,7 +87,7 @@ export function ThemeTokenEditor({ theme, tokens, onTokensChange, onSave, busy }
       <div className="space-y-0.5 px-4 py-4 sm:px-6">
         {TOKEN_ROWS.map((row) => {
           const colorKey = row.colorKey ?? row.key;
-          const value = (tokens[colorKey] as string | undefined) ?? "#000000";
+          const value = tokens[colorKey] ?? "#000000";
           return (
             <TokenSwatchRow
               key={row.key}
@@ -100,9 +104,14 @@ export function ThemeTokenEditor({ theme, tokens, onTokensChange, onSave, busy }
       <BrandingAnimatedCollapsible open={contrastIssues.length > 0} id="theme-contrast-warning">
         {contrastIssues.length > 0 ? (
           <div className="mx-4 mb-4 flex gap-3 rounded-lg border border-[var(--admin-warning)]/40 bg-[var(--admin-warning)]/10 p-4 sm:mx-6">
-            <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-[var(--admin-warning)]" aria-hidden="true" />
+            <AlertTriangle
+              className="mt-0.5 h-5 w-5 shrink-0 text-[var(--admin-warning)]"
+              aria-hidden="true"
+            />
             <div>
-              <p className="text-sm font-semibold text-[var(--admin-warning)]">Accessibility warning</p>
+              <p className="text-sm font-semibold text-[var(--admin-warning)]">
+                Accessibility warning
+              </p>
               <ul className="mt-1 space-y-1 text-sm text-[var(--admin-on-surface-variant)]">
                 {contrastIssues.map((issue) => (
                   <li key={issue.pair}>

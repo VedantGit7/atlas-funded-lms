@@ -14,7 +14,7 @@ import {
   updateMarketingWorkflowBasics,
 } from "../../../../../../server/marketing-workflows/marketing-workflow.service";
 
-const paramsSchema = zod.object({ id: zod.string().uuid() });
+const paramsSchema = zod.object({ id: zod.uuid() });
 
 export const GET = createTenantRoute<
   undefined,

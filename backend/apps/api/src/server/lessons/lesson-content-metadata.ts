@@ -1,6 +1,6 @@
 /**
  * Lesson content_json metadata type definitions and helpers
- * 
+ *
  * The content_json field stores structured metadata that extends the core lesson model.
  * These helpers ensure safe parsing and merging without wiping unrelated keys.
  */

@@ -1,5 +1,6 @@
 "use client";
 
+import { SafeHtml } from "@/components/SafeHtml";
 import { useEffect, useState, type SyntheticEvent } from "react";
 import { toast } from "@/lib/client-api";
 import type { FormField, FormKind } from "@/features/admin/grow/forms-shared";
@@ -113,7 +114,7 @@ export function PublicMarketingFormClient({
       <div className="mx-auto max-w-lg space-y-4 p-8">
         <h1 className="text-2xl font-semibold">{form.title}</h1>
         {done.thankYouHtml ? (
-          <div dangerouslySetInnerHTML={{ __html: done.thankYouHtml }} />
+          <SafeHtml html={done.thankYouHtml} variant="inline" />
         ) : (
           <p className="text-neutral-700">Thanks — your response was submitted.</p>
         )}

@@ -26,6 +26,7 @@ export const routeMetadata = {
   permission: "membership.suspend",
   entitlement: null,
   audit: "required",
+  mfa: "required",
   rateLimit: "tenantMutation",
   idempotency: "required",
   resourceLoader: memberResourceLoader,

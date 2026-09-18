@@ -1,7 +1,5 @@
 import type { RouteMetadata } from "@atlas/api/route-metadata";
-import {
-  loadNotificationTemplateCatalogResourceRef,
-} from "../notifications/notification.resource-loader";
+import { loadNotificationTemplateCatalogResourceRef } from "../notifications/notification.resource-loader";
 
 export const listSystemEmailsMetadata = {
   permission: "notification.template.read",

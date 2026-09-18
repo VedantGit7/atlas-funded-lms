@@ -1,5 +1,11 @@
+import { safeOutboundFetch } from "@atlas/security/safe-outbound-fetch";
+import { publishOutboxEvent } from "@atlas/events";
 import type { TenantTx } from "@atlas/db";
 import type { ServiceCtx } from "@atlas/domain/shared/domain.types";
+import {
+  MARKETING_WEBHOOK_DISPATCH_EVENT,
+  marketingWebhookDispatchPayloadSchema,
+} from "./marketing-integrations.events";
 import type { MarketingIntegrationEventKey } from "./marketing-integrations.schemas";
 import { marketingIntegrationsRepository } from "./marketing-integrations.repository";
 
@@ -20,9 +26,13 @@ async function deliverWebhook(args: {
     data: args.payload,
   });
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), args.timeoutMs ?? 8000);
+  const timer = setTimeout(() => {
+    controller.abort();
+  }, args.timeoutMs ?? 8000);
   try {
-    const response = await fetch(args.url, {
+    // Tenant-configured URL: SSRF-guarded (protocol allowlist, resolved-address
+    // check, no redirect following).
+    const response = await safeOutboundFetch(args.url, {
       method: "POST",
       headers: {
         "content-type": "application/json",
@@ -37,8 +47,7 @@ async function deliverWebhook(args: {
       : `Remote responded with status ${response.status}.`;
     return { ok: response.ok, statusCode: response.status, message, requestBody };
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Webhook delivery failed.";
+    const message = error instanceof Error ? error.message : "Webhook delivery failed.";
     return { ok: false, statusCode: null, message, requestBody };
   } finally {
     clearTimeout(timer);
@@ -46,19 +55,62 @@ async function deliverWebhook(args: {
 }
 
 /**
- * Fan-out enabled webhook URLs for an event. Delivery failures are recorded but
- * do not throw - callers must not fail because a remote URL is down.
+ * Queue webhook fan-out for an event.
+ *
+ * This is the request-path entry point and it performs **no network I/O**. It
+ * used to loop over every enabled webhook and await an 8 s-timeout HTTP call
+ * for each, sequentially, inside the caller's tenant transaction — on public
+ * signup and on enrollment. Five slow or dead tenant-configured URLs pinned a
+ * pooled connection for up to 40 s on an unauthenticated request: the same
+ * shape as C6, which Phase 1 measured at 0 rps and a 10 s stall.
+ *
+ * Delivery now happens in `deliverMarketingIntegrationWebhooks` under the
+ * outbox worker, which also gives it retries. Callers never depended on
+ * delivery having completed — the old function was documented as never
+ * throwing — so this is not an observable change for them.
  */
 export async function dispatchMarketingIntegrationWebhooks(
+  tx: TenantTx,
+  ctx: ServiceCtx,
+  eventKey: MarketingIntegrationEventKey,
+  payload: Record<string, unknown>,
+): Promise<void> {
+  // Skip the enqueue entirely when the tenant has no webhook for this event,
+  // so the outbox does not accumulate events with nothing to deliver.
+  const webhooks = await marketingIntegrationsRepository.listEnabledWebhooksForEvent(tx, eventKey);
+  if (webhooks.length === 0) return;
+
+  await publishOutboxEvent(tx, {
+    ctx: {
+      tenantId: ctx.tenantId,
+      actorMembershipId: ctx.actorMembershipId,
+      requestId: ctx.requestId,
+    },
+    eventType: MARKETING_WEBHOOK_DISPATCH_EVENT,
+    aggregateType: "marketing_integration_event",
+    aggregateId: ctx.tenantId,
+    payload: marketingWebhookDispatchPayloadSchema.parse({
+      eventKey,
+      data: payload,
+      schemaVersion: 1,
+    }),
+    idempotencyKey: `${ctx.requestId}:marketing-webhook:${eventKey}`,
+  });
+}
+
+/**
+ * Perform the fan-out. Runs under the outbox worker, never in a request.
+ *
+ * Delivery failures are recorded but do not throw: one dead remote URL must not
+ * fail the whole batch or block the other webhooks for that event.
+ */
+export async function deliverMarketingIntegrationWebhooks(
   tx: TenantTx,
   ctx: Pick<ServiceCtx, "tenantId">,
   eventKey: MarketingIntegrationEventKey,
   payload: Record<string, unknown>,
 ): Promise<void> {
-  const webhooks = await marketingIntegrationsRepository.listEnabledWebhooksForEvent(
-    tx,
-    eventKey,
-  );
+  const webhooks = await marketingIntegrationsRepository.listEnabledWebhooksForEvent(tx, eventKey);
   if (webhooks.length === 0) return;
 
   for (const webhook of webhooks) {

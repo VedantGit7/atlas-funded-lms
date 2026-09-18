@@ -99,10 +99,7 @@ function LoadingSkeleton() {
         </div>
       </div>
       {[0, 1, 2].map((row) => (
-        <div
-          key={row}
-          className="h-11 border-b border-[var(--admin-border)] px-6 last:border-b-0"
-        >
+        <div key={row} className="h-11 border-b border-[var(--admin-border)] px-6 last:border-b-0">
           <div className="grid h-full grid-cols-12 items-center gap-4">
             <Shimmer className="col-span-5 h-4" />
             <Shimmer className="col-span-3 h-4" />
@@ -234,7 +231,9 @@ export function AdminCustomFieldSegmentsPage() {
       }
     }
     document.addEventListener("mousedown", onDocClick);
-    return () => document.removeEventListener("mousedown", onDocClick);
+    return () => {
+      document.removeEventListener("mousedown", onDocClick);
+    };
   }, []);
 
   const largestMatch = useMemo(() => {
@@ -307,8 +306,7 @@ export function AdminCustomFieldSegmentsPage() {
             Segments
           </h1>
           <p className="mt-1 max-w-2xl text-sm text-[var(--admin-on-surface-variant)]">
-            Saved conditions over your custom fields — reusable for grouping, messaging, and
-            export.
+            Saved conditions over your custom fields — reusable for grouping, messaging, and export.
           </p>
         </div>
         <div className="flex flex-wrap gap-3">
@@ -413,7 +411,10 @@ export function AdminCustomFieldSegmentsPage() {
 
       {!loading && items.length === 0 && !error ? (
         <div className="flex h-[400px] flex-col items-center justify-center rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] p-8 text-center">
-          <Filter className="mb-4 h-12 w-12 text-[var(--admin-on-surface-variant)]" strokeWidth={1.25} />
+          <Filter
+            className="mb-4 h-12 w-12 text-[var(--admin-on-surface-variant)]"
+            strokeWidth={1.25}
+          />
           <h3 className="mb-2 text-base font-semibold text-[var(--admin-on-surface)]">
             No segments yet
           </h3>
@@ -562,9 +563,9 @@ export function AdminCustomFieldSegmentsPage() {
                           type="button"
                           className="rounded-sm p-1.5 text-[var(--admin-on-surface-variant)] hover:bg-[var(--admin-surface-high)] hover:text-[var(--admin-on-surface)]"
                           aria-label={`Actions for ${item.name}`}
-                          onClick={() =>
-                            setMenuOpenId((current) => (current === item.id ? null : item.id))
-                          }
+                          onClick={() => {
+                            setMenuOpenId((current) => (current === item.id ? null : item.id));
+                          }}
                         >
                           <MoreHorizontal className="h-4 w-4" />
                         </button>
@@ -576,14 +577,18 @@ export function AdminCustomFieldSegmentsPage() {
                             <Link
                               href={`/admin/reports/custom-field/segments/${item.id}`}
                               className="block px-3 py-2 text-sm text-[var(--admin-on-surface)] hover:bg-[var(--admin-surface-low)]"
-                              onClick={() => setMenuOpenId(null)}
+                              onClick={() => {
+                                setMenuOpenId(null);
+                              }}
                             >
                               Open segment
                             </Link>
                             <Link
                               href={`/admin/reports/custom-field/segments/${item.id}/edit`}
                               className="block px-3 py-2 text-sm text-[var(--admin-on-surface)] hover:bg-[var(--admin-surface-low)]"
-                              onClick={() => setMenuOpenId(null)}
+                              onClick={() => {
+                                setMenuOpenId(null);
+                              }}
                             >
                               Edit conditions
                             </Link>
@@ -645,7 +650,9 @@ export function AdminCustomFieldSegmentsPage() {
         <DeleteModal
           segment={deleteTarget}
           busy={deleting}
-          onCancel={() => setDeleteTarget(null)}
+          onCancel={() => {
+            setDeleteTarget(null);
+          }}
           onConfirm={() => void confirmDelete()}
         />
       ) : null}

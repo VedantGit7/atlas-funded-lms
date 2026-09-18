@@ -200,11 +200,7 @@ export function CreateCourseDialog({ onClose }: CreateCourseDialogProps) {
                 <div className="flex items-start gap-3">
                   <div className="flex h-24 min-w-0 flex-1 items-center justify-center overflow-hidden rounded-lg border border-dashed border-[var(--admin-border)] bg-[var(--admin-surface-low)]">
                     {thumbnailPreview ? (
-                      <img
-                        src={thumbnailPreview}
-                        alt=""
-                        className="h-full w-full object-cover"
-                      />
+                      <img src={thumbnailPreview} alt="" className="h-full w-full object-cover" />
                     ) : (
                       <ImageIcon
                         className="h-8 w-8 text-[var(--admin-on-surface-variant)]/60"

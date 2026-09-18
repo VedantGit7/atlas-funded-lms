@@ -33,12 +33,7 @@ function formatMoney(cents: number, currency: string): string {
   })} ${currency}`;
 }
 
-export function AdminPaymentInstalmentCancelModal({
-  open,
-  plan,
-  onClose,
-  onCancelled,
-}: Props) {
+export function AdminPaymentInstalmentCancelModal({ open, plan, onClose, onCancelled }: Props) {
   const titleId = useId();
   const [accessOption, setAccessOption] = useState<"keep" | "revoke">("keep");
   const [reason, setReason] = useState<PaymentInstalmentCancelReason | "">("");
@@ -59,7 +54,9 @@ export function AdminPaymentInstalmentCancelModal({
       if (event.key === "Escape" && !busy) onClose();
     }
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+    };
   }, [open, busy, onClose]);
 
   if (!open) return null;
@@ -98,7 +95,9 @@ export function AdminPaymentInstalmentCancelModal({
         aria-modal="true"
         aria-labelledby={titleId}
         className="relative z-50 flex w-full max-w-lg flex-col border border-[var(--admin-border)] bg-[var(--admin-surface-high)] shadow-2xl"
-        onClick={(event) => event.stopPropagation()}
+        onClick={(event) => {
+          event.stopPropagation();
+        }}
       >
         <div className="flex items-center justify-between border-b border-[var(--admin-border)] bg-[var(--admin-surface)] px-6 py-4">
           <h2 id={titleId} className="text-lg font-semibold text-[var(--admin-on-surface)]">
@@ -117,7 +116,9 @@ export function AdminPaymentInstalmentCancelModal({
 
         <div className="flex flex-col gap-6 p-6">
           <div className="flex items-center justify-between border border-[var(--admin-border)] bg-[var(--admin-surface)] p-4">
-            <span className="text-sm text-[var(--admin-on-surface-variant)]">Remaining balance</span>
+            <span className="text-sm text-[var(--admin-on-surface-variant)]">
+              Remaining balance
+            </span>
             <span className="font-mono text-sm text-[var(--admin-danger)]">
               {formatMoney(plan.remainingAmountCents, plan.currency)}
             </span>
@@ -129,11 +130,15 @@ export function AdminPaymentInstalmentCancelModal({
                 type="radio"
                 name="access"
                 checked={accessOption === "keep"}
-                onChange={() => setAccessOption("keep")}
+                onChange={() => {
+                  setAccessOption("keep");
+                }}
                 className="mt-1 accent-[var(--admin-primary)]"
               />
               <span>
-                <span className="block text-sm text-[var(--admin-on-surface)]">Keep course access</span>
+                <span className="block text-sm text-[var(--admin-on-surface)]">
+                  Keep course access
+                </span>
                 <span className="mt-1 block text-xs text-[var(--admin-on-surface-variant)]">
                   Access is left unchanged on cancel.
                 </span>
@@ -144,7 +149,9 @@ export function AdminPaymentInstalmentCancelModal({
                 type="radio"
                 name="access"
                 checked={accessOption === "revoke"}
-                onChange={() => setAccessOption("revoke")}
+                onChange={() => {
+                  setAccessOption("revoke");
+                }}
                 className="mt-1 accent-[var(--admin-primary)]"
               />
               <span>
@@ -165,7 +172,9 @@ export function AdminPaymentInstalmentCancelModal({
             </label>
             <Select
               value={reason}
-              onValueChange={(value) => setReason(value as PaymentInstalmentCancelReason)}
+              onValueChange={(value) => {
+                setReason(value as PaymentInstalmentCancelReason);
+              }}
               options={[{ value: "", label: "Select a reason..." }, ...REASONS]}
               ariaLabel="Cancellation reason"
               className="h-10 w-full"

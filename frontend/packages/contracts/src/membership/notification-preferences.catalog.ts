@@ -20,8 +20,7 @@ export const NOTIFICATION_PREFERENCE_CATEGORIES = [
   ...SECURITY_NOTIFICATION_CATEGORIES,
 ] as const;
 
-export type NotificationPreferenceCategory =
-  (typeof NOTIFICATION_PREFERENCE_CATEGORIES)[number];
+export type NotificationPreferenceCategory = (typeof NOTIFICATION_PREFERENCE_CATEGORIES)[number];
 
 export const NOTIFICATION_CATEGORY_LABELS: Record<NotificationPreferenceCategory, string> = {
   "certificate.issued": "A certificate is issued to me",

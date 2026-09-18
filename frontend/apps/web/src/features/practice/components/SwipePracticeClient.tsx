@@ -297,7 +297,9 @@ export function SwipePracticeClient({ initialDue }: SwipePracticeClientProps) {
       <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
         <div
           className="h-full rounded-full bg-primary transition-[width] duration-500"
-          style={{ width: `${String(session.totalItems > 0 ? Math.round((session.answeredCount / session.totalItems) * 100) : 0)}%` }}
+          style={{
+            width: `${String(session.totalItems > 0 ? Math.round((session.answeredCount / session.totalItems) * 100) : 0)}%`,
+          }}
         />
       </div>
 
@@ -308,7 +310,9 @@ export function SwipePracticeClient({ initialDue }: SwipePracticeClientProps) {
         <p className="text-xl font-semibold text-foreground">{readStem(card)}</p>
         {isFlashcard && revealed ? (
           <div className="w-full border-t border-border pt-4" data-testid="flashcard-back">
-            <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Answer</p>
+            <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+              Answer
+            </p>
             <p className="mt-1 text-base leading-relaxed text-foreground/90">
               {card.explanation ?? "No explanation was added for this card."}
             </p>
@@ -355,7 +359,10 @@ export function SwipePracticeClient({ initialDue }: SwipePracticeClientProps) {
         >
           <p className="font-bold text-foreground">{feedback.feedbackLabel}</p>
           {feedback.explanation ? (
-            <p className="mx-auto mt-1 max-w-prose text-sm leading-relaxed text-foreground/90" data-testid="feedback-explanation">
+            <p
+              className="mx-auto mt-1 max-w-prose text-sm leading-relaxed text-foreground/90"
+              data-testid="feedback-explanation"
+            >
               {feedback.explanation}
             </p>
           ) : (

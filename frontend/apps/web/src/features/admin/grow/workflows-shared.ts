@@ -152,10 +152,7 @@ export function orderedGraphNodes(graph: WorkflowGraph): WorkflowNode[] {
   return result;
 }
 
-export function readConfigString(
-  config: Record<string, unknown>,
-  key: string,
-): string {
+export function readConfigString(config: Record<string, unknown>, key: string): string {
   const value = config[key];
   return typeof value === "string" ? value : "";
 }

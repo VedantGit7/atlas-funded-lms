@@ -190,7 +190,9 @@ export function ManageDiscussionsPanel() {
         </div>
       ) : filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-[var(--admin-border)] bg-[var(--admin-surface-low)] py-16 text-center">
-          <p className="text-lg font-semibold text-[var(--admin-on-surface)]">No open discussion cases</p>
+          <p className="text-lg font-semibold text-[var(--admin-on-surface)]">
+            No open discussion cases
+          </p>
           <p className="max-w-sm text-sm text-[var(--admin-on-surface-variant)]">
             {query.trim()
               ? "No cases match your search."
@@ -217,18 +219,25 @@ export function ManageDiscussionsPanel() {
               </thead>
               <tbody>
                 {filtered.map((item) => (
-                  <tr key={item.id} className="border-b border-[var(--admin-border)] last:border-b-0">
+                  <tr
+                    key={item.id}
+                    className="border-b border-[var(--admin-border)] last:border-b-0"
+                  >
                     <td className={manageTableTdClassName}>
                       <span className="font-semibold capitalize">{item.targetType}</span>
                       {item.reasonKey ? (
-                        <p className="mt-0.5 text-xs text-[var(--admin-on-surface-variant)]">{item.reasonKey}</p>
+                        <p className="mt-0.5 text-xs text-[var(--admin-on-surface-variant)]">
+                          {item.reasonKey}
+                        </p>
                       ) : null}
                     </td>
                     <td className={`${manageTableTdClassName} max-w-xs truncate`}>
                       {item.target?.previewText ?? item.target?.title ?? "—"}
                     </td>
                     <td className={manageTableTdClassName}>
-                      <span className={manageStatusChipClassName(statusTone(item.status))}>{item.status}</span>
+                      <span className={manageStatusChipClassName(statusTone(item.status))}>
+                        {item.status}
+                      </span>
                     </td>
                     <td className={manageTableTdClassName}>{formatDate(item.createdAt)}</td>
                     <td className={manageTableTdClassName}>
@@ -237,14 +246,22 @@ export function ManageDiscussionsPanel() {
                           label="Action"
                           disabled={busyId === item.id}
                           onClick={() => {
-                            setPendingDecision({ caseItem: item, decisionKey: "actioned", deleteContent: false });
+                            setPendingDecision({
+                              caseItem: item,
+                              decisionKey: "actioned",
+                              deleteContent: false,
+                            });
                           }}
                         />
                         <CaseActionButton
                           label="Delete content"
                           disabled={busyId === item.id}
                           onClick={() => {
-                            setPendingDecision({ caseItem: item, decisionKey: "actioned", deleteContent: true });
+                            setPendingDecision({
+                              caseItem: item,
+                              decisionKey: "actioned",
+                              deleteContent: true,
+                            });
                           }}
                         />
                         <CaseActionButton
@@ -312,7 +329,8 @@ function CaseActionButton({
 
 function decisionTitle(decision: PendingDecision | null): string {
   if (!decision) return "";
-  if (decision.decisionKey === "actioned" && decision.deleteContent) return "Delete reported content?";
+  if (decision.decisionKey === "actioned" && decision.deleteContent)
+    return "Delete reported content?";
   if (decision.decisionKey === "actioned") return "Mark case as actioned?";
   if (decision.decisionKey === "rejected") return "Reject this case?";
   return "Close this case?";

@@ -91,8 +91,8 @@ function toPartnerDto(row: AffiliateListRow) {
     payoutBankAccount: row.payout_bank_account,
     payoutIfsc: row.payout_ifsc,
     payoutAccountName: row.payout_account_name,
-    unpaidCents: Number(row.unpaid_cents),
-    paidCents: Number(row.paid_cents),
+    unpaidCents: row.unpaid_cents,
+    paidCents: row.paid_cents,
     createdAt: row.created_at.toISOString(),
     updatedAt: row.updated_at.toISOString(),
   };
@@ -148,9 +148,9 @@ function toCommissionDto(row: AffiliateCommissionRow) {
     paymentOrderId: row.payment_order_id,
     couponCodeSnapshot: row.coupon_code_snapshot,
     tierSnapshot: row.tier_snapshot,
-    orderAmountCents: Number(row.order_amount_cents),
-    discountCents: Number(row.discount_cents),
-    commissionCents: Number(row.commission_cents),
+    orderAmountCents: row.order_amount_cents,
+    discountCents: row.discount_cents,
+    commissionCents: row.commission_cents,
     currency: row.currency,
     status: row.status as "UNPAID" | "PAID",
     createdAt: row.created_at.toISOString(),
@@ -201,13 +201,13 @@ export async function getAffiliateSummary(tx: TenantTx, _ctx: ServiceCtx) {
   const row = await salesAffiliatesRepository.getSummary(tx);
   return affiliateSummaryResponseSchema.parse({
     data: {
-      activePartners: Number(row.active_partners),
-      totalPartners: Number(row.total_partners),
-      pendingRequests: Number(row.pending_requests),
-      unpaidCents: Number(row.unpaid_cents),
-      paidCents: Number(row.paid_cents),
-      partnersWithUnpaid: Number(row.partners_with_unpaid),
-      enabledProducts: Number(row.enabled_products),
+      activePartners: row.active_partners,
+      totalPartners: row.total_partners,
+      pendingRequests: row.pending_requests,
+      unpaidCents: row.unpaid_cents,
+      paidCents: row.paid_cents,
+      partnersWithUnpaid: row.partners_with_unpaid,
+      enabledProducts: row.enabled_products,
     },
   });
 }
@@ -278,10 +278,7 @@ export async function listAffiliates(tx: TenantTx, _ctx: ServiceCtx, rawQuery: u
 
 export async function createAffiliate(tx: TenantTx, ctx: ServiceCtx, rawBody: unknown) {
   const body = createAffiliateBodySchema.parse(rawBody);
-  const existing = await salesAffiliatesRepository.findAffiliateByMembership(
-    tx,
-    body.membershipId,
-  );
+  const existing = await salesAffiliatesRepository.findAffiliateByMembership(tx, body.membershipId);
   if (existing) throw validationError("This member is already an affiliate.");
 
   const pending = await salesAffiliatesRepository.findPendingRequest(tx, body.membershipId);
@@ -333,13 +330,9 @@ export async function updateAffiliate(
     ...(body.tier !== undefined ? { tier: body.tier } : {}),
     ...(body.status !== undefined ? { status: body.status } : {}),
     ...(body.payoutUpi !== undefined ? { payoutUpi: body.payoutUpi } : {}),
-    ...(body.payoutBankAccount !== undefined
-      ? { payoutBankAccount: body.payoutBankAccount }
-      : {}),
+    ...(body.payoutBankAccount !== undefined ? { payoutBankAccount: body.payoutBankAccount } : {}),
     ...(body.payoutIfsc !== undefined ? { payoutIfsc: body.payoutIfsc } : {}),
-    ...(body.payoutAccountName !== undefined
-      ? { payoutAccountName: body.payoutAccountName }
-      : {}),
+    ...(body.payoutAccountName !== undefined ? { payoutAccountName: body.payoutAccountName } : {}),
   };
 
   if (body.couponCode !== undefined) {
@@ -359,11 +352,7 @@ export async function updateAffiliate(
   });
 }
 
-export async function listAffiliateCommissions(
-  tx: TenantTx,
-  _ctx: ServiceCtx,
-  rawQuery: unknown,
-) {
+export async function listAffiliateCommissions(tx: TenantTx, _ctx: ServiceCtx, rawQuery: unknown) {
   const query = affiliateCommissionsListQuerySchema.parse(rawQuery ?? {});
   const status = query.status === "ALL" ? undefined : query.status;
   const rows = await salesAffiliatesRepository.listCommissions(tx, {
@@ -645,10 +634,7 @@ export async function resolveAffiliateForCheckout(
   const affiliate = await salesAffiliatesRepository.findAffiliateByCode(tx, code);
   if (!affiliate || affiliate.status !== "ACTIVE") return null;
 
-  if (
-    args.buyerMembershipId &&
-    affiliate.membership_id === args.buyerMembershipId
-  ) {
+  if (args.buyerMembershipId && affiliate.membership_id === args.buyerMembershipId) {
     throw validationError("You cannot use your own affiliate code.");
   }
 

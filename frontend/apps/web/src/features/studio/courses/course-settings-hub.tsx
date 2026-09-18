@@ -61,7 +61,9 @@ export function CourseSettingsHub({ courseId }: CourseSettingsHubProps) {
               >
                 {group.title}
               </h2>
-              <p className="mt-1 text-sm text-[var(--admin-on-surface-variant)]">{group.subtitle}</p>
+              <p className="mt-1 text-sm text-[var(--admin-on-surface-variant)]">
+                {group.subtitle}
+              </p>
             </div>
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               {group.cards.map((card) => (

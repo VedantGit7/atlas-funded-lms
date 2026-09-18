@@ -58,7 +58,8 @@ const ITEM_TYPE_SCHEMAS: Record<
   },
   matching: {
     fields: ["stem"],
-    answerKeyShape: "{ pairs: Record<string, string>, leftItems?: Record<string, string>, rightItems?: Record<string, string> }",
+    answerKeyShape:
+      "{ pairs: Record<string, string>, leftItems?: Record<string, string>, rightItems?: Record<string, string> }",
     responseShape: "{ pairs: Record<string, string> }",
     requiresOptions: false,
     gradingMode: "auto",

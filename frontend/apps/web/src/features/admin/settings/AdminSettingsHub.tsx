@@ -17,13 +17,7 @@ function normalizeQuery(value: string): string {
 
 function itemMatchesQuery(item: AdminSettingsItem, query: string): boolean {
   if (!query) return true;
-  const haystack = [
-    item.title,
-    item.description,
-    ...(item.keywords ?? []),
-  ]
-    .join(" ")
-    .toLowerCase();
+  const haystack = [item.title, item.description, ...(item.keywords ?? [])].join(" ").toLowerCase();
   return haystack.includes(query);
 }
 
@@ -66,7 +60,9 @@ function SettingsSectionBlock({
         >
           {section.title}
         </h2>
-        <p className="mt-0.5 text-sm text-[var(--admin-on-surface-variant)]">{section.description}</p>
+        <p className="mt-0.5 text-sm text-[var(--admin-on-surface-variant)]">
+          {section.description}
+        </p>
       </div>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {visibleItems.map((item) => (
@@ -111,7 +107,9 @@ export function AdminSettingsHub({ sections, academyName }: AdminSettingsHubProp
   return (
     <div className="mx-auto max-w-7xl space-y-10 pb-12">
       <header className="space-y-1">
-        <h1 className="text-2xl font-bold tracking-tight text-[var(--admin-on-surface)]">Settings</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-[var(--admin-on-surface)]">
+          Settings
+        </h1>
         <p className="text-sm text-[var(--admin-on-surface-variant)]">
           Manage {academyName} settings and preferences.
         </p>
@@ -143,7 +141,9 @@ export function AdminSettingsHub({ sections, academyName }: AdminSettingsHubProp
           role="status"
           className="rounded-xl border border-dashed border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-6 py-12 text-center"
         >
-          <p className="text-sm font-medium text-[var(--admin-on-surface)]">No settings match your search.</p>
+          <p className="text-sm font-medium text-[var(--admin-on-surface)]">
+            No settings match your search.
+          </p>
           <p className="mt-1 text-sm text-[var(--admin-on-surface-variant)]">
             Try a different keyword or clear the search field.
           </p>

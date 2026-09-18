@@ -1,14 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import { ArrowLeft, Bell, LogOut, Menu, Search, ShieldCheck, X } from "lucide-react";
 import type { PublicTenantBranding } from "@atlas/tenant-branding";
 import type { StudioNavItem } from "../../../features/studio/studio-navigation";
 import { performAtlasLogout } from "../../../lib/auth/perform-logout";
-import { FUNDED_BEYOND_LOGO_URL } from "../../../lib/brand";
+import { resolveTenantLogoUrl } from "../../../lib/brand";
+import { TenantBrandMark } from "../../patterns/TenantBrandMark";
 import { ADMIN_DASHBOARD_HREF } from "../../../lib/branding/document-title";
 import { ThemeModeToggle } from "../../ThemeModeToggle";
 import { AdminConfirmDialog } from "../admin/AdminConfirmDialog";
@@ -173,11 +173,10 @@ export function StudioShell({
         className="flex items-center gap-3 rounded-lg outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)] focus-visible:ring-offset-2"
         aria-label={`${publicName} admin dashboard`}
       >
-        <Image
-          src={FUNDED_BEYOND_LOGO_URL}
-          alt=""
-          width={40}
-          height={40}
+        <TenantBrandMark
+          logoUrl={resolveTenantLogoUrl(branding)}
+          name={publicName}
+          size={40}
           className="h-10 w-10 shrink-0 rounded-full"
         />
         <div className="min-w-0">
@@ -192,7 +191,13 @@ export function StudioShell({
     </div>
   );
 
-  const sidebarFooter = <SidebarFooter onSignOut={() => { setConfirmSignOut(true); }} />;
+  const sidebarFooter = (
+    <SidebarFooter
+      onSignOut={() => {
+        setConfirmSignOut(true);
+      }}
+    />
+  );
 
   return (
     <div className="admin-theme flex min-h-screen bg-[var(--admin-bg)] text-[var(--admin-on-surface)]">
@@ -296,9 +301,7 @@ export function StudioShell({
               {mfaEnabled ? "MFA verified" : "Assurance pending"}
             </span>
 
-            <ThemeModeToggle
-              className="inline-flex h-9 w-9 items-center justify-center rounded-full text-[var(--admin-on-surface-variant)] transition-colors hover:text-[var(--admin-primary)]"
-            />
+            <ThemeModeToggle className="inline-flex h-9 w-9 items-center justify-center rounded-full text-[var(--admin-on-surface-variant)] transition-colors hover:text-[var(--admin-primary)]" />
 
             <Link
               href="/studio/review"

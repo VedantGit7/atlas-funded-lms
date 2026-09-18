@@ -17,7 +17,11 @@ export const GET = createTenantRoute<Record<string, never>, AboutSchoolResponse>
   output: AboutSchoolResponseSchema,
   handler: async ({ tx, ctx }) => {
     const data = await getAboutSchoolData(tx);
-    const schoolImageUrl = await resolveBrandingAssetUrl(tx, { tenantId: ctx.tenantId }, data.imageRefId);
+    const schoolImageUrl = await resolveBrandingAssetUrl(
+      tx,
+      { tenantId: ctx.tenantId },
+      data.imageRefId,
+    );
     return { data: { ...data, schoolImageUrl } };
   },
 });
@@ -28,7 +32,11 @@ export const PUT = createTenantRoute<UpdateAboutSchoolRequest, AboutSchoolRespon
   output: AboutSchoolResponseSchema,
   handler: async ({ tx, ctx, input }) => {
     const data = await updateAboutSchool(tx, input);
-    const schoolImageUrl = await resolveBrandingAssetUrl(tx, { tenantId: ctx.tenantId }, data.imageRefId);
+    const schoolImageUrl = await resolveBrandingAssetUrl(
+      tx,
+      { tenantId: ctx.tenantId },
+      data.imageRefId,
+    );
     return { data: { ...data, schoolImageUrl } };
   },
 });

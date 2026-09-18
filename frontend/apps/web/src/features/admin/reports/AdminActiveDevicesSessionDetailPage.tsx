@@ -44,7 +44,10 @@ function formatUtc(value: string | null): string {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  return date.toISOString().replace("T", " ").replace(/\.\d{3}Z$/, "Z");
+  return date
+    .toISOString()
+    .replace("T", " ")
+    .replace(/\.\d{3}Z$/, "Z");
 }
 
 function formatRelative(value: string | null): string {
@@ -89,7 +92,8 @@ function statusChip(status: ActiveDevicesSessionDetail["device"]["status"]) {
 }
 
 function heatClass(level: ActiveDevicesSessionDetail["heatstrip"][number]["level"]): string {
-  if (level === "current") return "bg-[var(--admin-primary)] border-b-2 border-[var(--admin-danger)]";
+  if (level === "current")
+    return "bg-[var(--admin-primary)] border-b-2 border-[var(--admin-danger)]";
   if (level === "high") return "bg-[color-mix(in_srgb,var(--admin-primary)_90%,transparent)]";
   if (level === "mid") return "bg-[color-mix(in_srgb,var(--admin-primary)_55%,transparent)]";
   if (level === "low") return "bg-[color-mix(in_srgb,var(--admin-primary)_25%,transparent)]";
@@ -97,7 +101,12 @@ function heatClass(level: ActiveDevicesSessionDetail["heatstrip"][number]["level
 }
 
 function SkeletonBlock({ className }: { className?: string }) {
-  return <div className={`rounded bg-[var(--admin-surface-variant)] ${className ?? ""}`} aria-hidden="true" />;
+  return (
+    <div
+      className={`rounded bg-[var(--admin-surface-variant)] ${className ?? ""}`}
+      aria-hidden="true"
+    />
+  );
 }
 
 function SessionLoadingSkeleton({ asDrawer }: { asDrawer?: boolean }) {
@@ -146,9 +155,7 @@ export function AdminActiveDevicesSessionDetailPage({
     } catch (err) {
       setDetail(null);
       setError(
-        err instanceof ClientApiError
-          ? err.message
-          : "Unable to load device session detail.",
+        err instanceof ClientApiError ? err.message : "Unable to load device session detail.",
       );
     } finally {
       setLoading(false);
@@ -159,16 +166,15 @@ export function AdminActiveDevicesSessionDetailPage({
     void load();
   }, [load]);
 
-  const learnerLabel = useMemo(
-    () => detail?.learnerName ?? detail?.email ?? "Learner",
-    [detail],
-  );
+  const learnerLabel = useMemo(() => detail?.learnerName ?? detail?.email ?? "Learner", [detail]);
 
   async function copyText(value: string, kind: "id" | "hash") {
     try {
       await navigator.clipboard.writeText(value);
       setCopied(kind);
-      window.setTimeout(() => setCopied(null), 1500);
+      window.setTimeout(() => {
+        setCopied(null);
+      }, 1500);
     } catch {
       setError("Unable to copy to clipboard.");
     }
@@ -230,7 +236,10 @@ export function AdminActiveDevicesSessionDetailPage({
           <button type="button" className={primaryButtonClassName} onClick={() => void load()}>
             Retry
           </button>
-          <Link href={`/admin/reports/active-devices/${membershipId}`} className={ghostButtonClassName}>
+          <Link
+            href={`/admin/reports/active-devices/${membershipId}`}
+            className={ghostButtonClassName}
+          >
             Back to learner
           </Link>
         </div>
@@ -239,7 +248,9 @@ export function AdminActiveDevicesSessionDetailPage({
     if (!asDrawer) return errorBody;
     return (
       <div className="fixed inset-0 z-50 flex justify-end bg-[var(--admin-scrim)]">
-        <aside className={`flex h-full w-full max-w-[560px] flex-col border-l border-[var(--admin-border)] bg-[var(--admin-surface)] p-6 shadow-xl ${inlineExpandClassName}`}>
+        <aside
+          className={`flex h-full w-full max-w-[560px] flex-col border-l border-[var(--admin-border)] bg-[var(--admin-surface)] p-6 shadow-xl ${inlineExpandClassName}`}
+        >
           {errorBody}
         </aside>
       </div>
@@ -249,8 +260,7 @@ export function AdminActiveDevicesSessionDetailPage({
   if (!detail) return null;
 
   const chip = statusChip(detail.device.status);
-  const fingerprintValue =
-    detail.device.deviceFingerprint ?? detail.device.id;
+  const fingerprintValue = detail.device.deviceFingerprint ?? detail.device.id;
   const shortSessionId = detail.device.id.replace(/-/g, "").slice(0, 8);
 
   const headerActions = (
@@ -271,7 +281,9 @@ export function AdminActiveDevicesSessionDetailPage({
         type="button"
         className="inline-flex h-10 items-center gap-2 rounded bg-[var(--admin-danger)] px-4 text-sm font-semibold text-[var(--admin-on-primary)] transition-opacity hover:opacity-90 disabled:opacity-50"
         disabled={busy || !detail.capabilities.canRevoke}
-        onClick={() => setRevokeOpen(true)}
+        onClick={() => {
+          setRevokeOpen(true);
+        }}
       >
         Revoke device
       </button>
@@ -281,7 +293,10 @@ export function AdminActiveDevicesSessionDetailPage({
   const forensicOverview = (
     <section className="border border-[var(--admin-border)] bg-[var(--admin-surface)]">
       <div className="flex items-center gap-2 border-b border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-6 py-3">
-        <Terminal className="h-[18px] w-[18px] text-[var(--admin-on-surface-variant)]" aria-hidden="true" />
+        <Terminal
+          className="h-[18px] w-[18px] text-[var(--admin-on-surface-variant)]"
+          aria-hidden="true"
+        />
         <h2 className="text-base font-semibold text-[var(--admin-on-surface)]">Session overview</h2>
       </div>
       <div className="grid grid-cols-1 gap-x-8 gap-y-6 p-6 sm:grid-cols-2">
@@ -343,39 +358,53 @@ export function AdminActiveDevicesSessionDetailPage({
           </div>
           <div className="flex flex-col gap-2">
             <div className="flex items-baseline justify-between border-b border-dashed border-[var(--admin-border)] pb-1">
-              <span className="font-mono text-[11px] text-[var(--admin-on-surface-variant)]">Public IP</span>
+              <span className="font-mono text-[11px] text-[var(--admin-on-surface-variant)]">
+                Public IP
+              </span>
               <span className="font-mono text-[13px] text-[var(--admin-primary)]">
                 {detail.network.ipAddress ?? "-"}
               </span>
             </div>
             <div className="flex items-baseline justify-between">
-              <span className="font-mono text-[11px] text-[var(--admin-on-surface-variant)]">Geo / ISP</span>
-              <span className="font-mono text-[13px] text-[var(--admin-on-surface-variant)]">Not available</span>
+              <span className="font-mono text-[11px] text-[var(--admin-on-surface-variant)]">
+                Geo / ISP
+              </span>
+              <span className="font-mono text-[13px] text-[var(--admin-on-surface-variant)]">
+                Not available
+              </span>
             </div>
           </div>
         </div>
       </div>
       <div className="flex flex-col">
         <div className="flex items-center justify-between border-b border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-4 py-3">
-          <h3 className="text-base font-semibold text-[var(--admin-on-surface)]">Client signature</h3>
+          <h3 className="text-base font-semibold text-[var(--admin-on-surface)]">
+            Client signature
+          </h3>
           <Cpu className="h-4 w-4 text-[var(--admin-on-surface-variant)]" aria-hidden="true" />
         </div>
         <div className="flex flex-col gap-4 p-4">
           <div className="flex flex-col gap-2">
             <div className="flex items-baseline justify-between border-b border-dashed border-[var(--admin-border)] pb-1">
-              <span className="font-mono text-[11px] text-[var(--admin-on-surface-variant)]">Operating system</span>
+              <span className="font-mono text-[11px] text-[var(--admin-on-surface-variant)]">
+                Operating system
+              </span>
               <span className="font-mono text-[13px] text-[var(--admin-on-surface)]">
                 {detail.client.osLabel ?? "-"}
               </span>
             </div>
             <div className="flex items-baseline justify-between border-b border-dashed border-[var(--admin-border)] pb-1">
-              <span className="font-mono text-[11px] text-[var(--admin-on-surface-variant)]">Browser</span>
+              <span className="font-mono text-[11px] text-[var(--admin-on-surface-variant)]">
+                Browser
+              </span>
               <span className="font-mono text-[13px] text-[var(--admin-on-surface)]">
                 {detail.client.browserLabel ?? "-"}
               </span>
             </div>
             <div className="flex items-baseline justify-between border-b border-dashed border-[var(--admin-border)] pb-1">
-              <span className="font-mono text-[11px] text-[var(--admin-on-surface-variant)]">Platform</span>
+              <span className="font-mono text-[11px] text-[var(--admin-on-surface-variant)]">
+                Platform
+              </span>
               <span className="font-mono text-[13px] text-[var(--admin-on-surface)]">
                 {detail.client.platform ?? "-"}
               </span>
@@ -395,7 +424,10 @@ export function AdminActiveDevicesSessionDetailPage({
     <section className="border border-[var(--admin-border)] bg-[var(--admin-surface)]">
       <div className="flex items-center justify-between border-b border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-6 py-3">
         <h2 className="flex items-center gap-2 text-base font-semibold text-[var(--admin-on-surface)]">
-          <Fingerprint className="h-[18px] w-[18px] text-[var(--admin-on-surface-variant)]" aria-hidden="true" />
+          <Fingerprint
+            className="h-[18px] w-[18px] text-[var(--admin-on-surface-variant)]"
+            aria-hidden="true"
+          />
           Device fingerprint
         </h2>
         <button
@@ -429,7 +461,10 @@ export function AdminActiveDevicesSessionDetailPage({
     <section className="flex min-h-[420px] flex-col border border-[var(--admin-border)] bg-[var(--admin-surface)]">
       <div className="flex shrink-0 items-center justify-between border-b border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-4 py-3">
         <h2 className="flex items-center gap-2 text-base font-semibold text-[var(--admin-on-surface)]">
-          <History className="h-[18px] w-[18px] text-[var(--admin-on-surface-variant)]" aria-hidden="true" />
+          <History
+            className="h-[18px] w-[18px] text-[var(--admin-on-surface-variant)]"
+            aria-hidden="true"
+          />
           Activity telemetry
         </h2>
         <span className="rounded bg-[color-mix(in_srgb,var(--admin-primary)_12%,var(--admin-surface))] px-2 py-0.5 font-mono text-[11px] text-[var(--admin-primary)]">
@@ -454,11 +489,11 @@ export function AdminActiveDevicesSessionDetailPage({
             />
           ))}
         </div>
-        {!detail.capabilities.requestTelemetrySupported ? (
-          <p className="font-mono text-[11px] text-[var(--admin-on-surface-variant)]">
-            Per-request telemetry is not captured. Bars show session presence, not HTTP volume.
-          </p>
-        ) : null}
+        {/* `requestTelemetrySupported` is typed as the literal `false` until
+            per-request telemetry ships, so this notice always renders. */}
+        <p className="font-mono text-[11px] text-[var(--admin-on-surface-variant)]">
+          Per-request telemetry is not captured. Bars show session presence, not HTTP volume.
+        </p>
       </div>
       <div className="flex-1 overflow-auto">
         <table className="w-full border-collapse text-left">
@@ -488,10 +523,15 @@ export function AdminActiveDevicesSessionDetailPage({
                 <td className="px-4 text-[11px] text-[var(--admin-on-surface-variant)]">
                   {formatTimeOnly(event.at)}
                 </td>
-                <td className="max-w-[180px] truncate px-4 text-[var(--admin-on-surface)]" title={event.detail ?? event.label}>
+                <td
+                  className="max-w-[180px] truncate px-4 text-[var(--admin-on-surface)]"
+                  title={event.detail ?? event.label}
+                >
                   {event.label}
                   {event.detail ? (
-                    <span className="ml-1 text-[var(--admin-on-surface-variant)]">{event.detail}</span>
+                    <span className="ml-1 text-[var(--admin-on-surface-variant)]">
+                      {event.detail}
+                    </span>
                   ) : null}
                 </td>
                 <td
@@ -547,14 +587,22 @@ export function AdminActiveDevicesSessionDetailPage({
             <header className="flex items-start justify-between gap-3 border-b border-[var(--admin-border)] px-6 py-4">
               <div className="flex items-start gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded bg-[var(--admin-surface-high)]">
-                  <Laptop className="h-5 w-5 text-[var(--admin-on-surface-variant)]" aria-hidden="true" />
+                  <Laptop
+                    className="h-5 w-5 text-[var(--admin-on-surface-variant)]"
+                    aria-hidden="true"
+                  />
                 </div>
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
-                    <h2 id="session-drawer-title" className="text-base font-semibold text-[var(--admin-on-surface)]">
+                    <h2
+                      id="session-drawer-title"
+                      className="text-base font-semibold text-[var(--admin-on-surface)]"
+                    >
                       {detail.device.deviceLabel}
                     </h2>
-                    <span className={`inline-flex h-6 items-center rounded px-2 font-mono text-[11px] ${chip.className}`}>
+                    <span
+                      className={`inline-flex h-6 items-center rounded px-2 font-mono text-[11px] ${chip.className}`}
+                    >
                       {chip.label}
                     </span>
                   </div>
@@ -571,7 +619,9 @@ export function AdminActiveDevicesSessionDetailPage({
                       <Copy className="h-3.5 w-3.5" aria-hidden="true" />
                     </button>
                     {copied === "id" ? (
-                      <span className="font-mono text-[11px] text-[var(--admin-primary)]">Copied</span>
+                      <span className="font-mono text-[11px] text-[var(--admin-primary)]">
+                        Copied
+                      </span>
                     ) : null}
                   </div>
                 </div>
@@ -588,7 +638,10 @@ export function AdminActiveDevicesSessionDetailPage({
 
             <main className="flex-1 space-y-8 overflow-y-auto px-6 py-6">
               {error ? (
-                <div role="alert" className="border border-[var(--admin-danger)] px-3 py-2 text-sm text-[var(--admin-danger)]">
+                <div
+                  role="alert"
+                  className="border border-[var(--admin-danger)] px-3 py-2 text-sm text-[var(--admin-danger)]"
+                >
                   {error}
                 </div>
               ) : null}
@@ -606,7 +659,9 @@ export function AdminActiveDevicesSessionDetailPage({
                   ].map(([label, value]) => (
                     <div key={label} className="flex flex-col gap-1">
                       <span className="text-[12px] text-[var(--admin-outline)]">{label}</span>
-                      <span className="font-mono text-[13px] text-[var(--admin-on-surface)]">{value}</span>
+                      <span className="font-mono text-[13px] text-[var(--admin-on-surface)]">
+                        {value}
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -622,7 +677,9 @@ export function AdminActiveDevicesSessionDetailPage({
                   ].map(([label, value]) => (
                     <div key={label} className="flex flex-col gap-1">
                       <span className="text-[12px] text-[var(--admin-outline)]">{label}</span>
-                      <span className="font-mono text-[13px] text-[var(--admin-on-surface)]">{value}</span>
+                      <span className="font-mono text-[13px] text-[var(--admin-on-surface)]">
+                        {value}
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -632,7 +689,9 @@ export function AdminActiveDevicesSessionDetailPage({
                 <h3 className="mb-4 text-[12px] font-semibold uppercase tracking-wider text-[var(--admin-on-surface-variant)]">
                   Network context
                 </h3>
-                <p className="mb-3 text-sm text-[var(--admin-on-surface-variant)]">{detail.network.note}</p>
+                <p className="mb-3 text-sm text-[var(--admin-on-surface-variant)]">
+                  {detail.network.note}
+                </p>
                 <div className="flex items-center justify-between border-b border-[var(--admin-border)] py-2">
                   <span className="text-[12px] text-[var(--admin-outline)]">IP address</span>
                   <span className="font-mono text-[13px] text-[var(--admin-on-surface)]">
@@ -701,12 +760,17 @@ export function AdminActiveDevicesSessionDetailPage({
                       }`}
                     >
                       {event.result === "flagged" ? (
-                        <span className="absolute bottom-0 left-0 top-0 w-1 bg-[var(--admin-danger)]" aria-hidden="true" />
+                        <span
+                          className="absolute bottom-0 left-0 top-0 w-1 bg-[var(--admin-danger)]"
+                          aria-hidden="true"
+                        />
                       ) : null}
                       <div className="font-mono text-[11px] text-[var(--admin-on-surface-variant)]">
                         {formatTimeOnly(event.at)}
                       </div>
-                      <div className="truncate text-[13px] text-[var(--admin-on-surface)]">{event.label}</div>
+                      <div className="truncate text-[13px] text-[var(--admin-on-surface)]">
+                        {event.label}
+                      </div>
                       <div className="text-right">
                         <span
                           className={`inline-block rounded px-2 py-0.5 font-mono text-[11px] ${
@@ -734,7 +798,11 @@ export function AdminActiveDevicesSessionDetailPage({
                     Open full page
                     <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
                   </Link>
-                  <button type="button" className={`${ghostButtonClassName} h-10 gap-2`} onClick={exportJson}>
+                  <button
+                    type="button"
+                    className={`${ghostButtonClassName} h-10 gap-2`}
+                    onClick={exportJson}
+                  >
                     <Download className="h-4 w-4" aria-hidden="true" />
                     JSON
                   </button>
@@ -743,7 +811,9 @@ export function AdminActiveDevicesSessionDetailPage({
                   type="button"
                   className="inline-flex h-10 items-center rounded bg-[color-mix(in_srgb,var(--admin-danger)_14%,var(--admin-surface))] px-4 text-sm font-semibold text-[var(--admin-danger)] hover:bg-[var(--admin-danger)] hover:text-[var(--admin-on-primary)]"
                   disabled={busy}
-                  onClick={() => setRevokeOpen(true)}
+                  onClick={() => {
+                    setRevokeOpen(true);
+                  }}
                 >
                   Revoke device
                 </button>
@@ -767,7 +837,13 @@ export function AdminActiveDevicesSessionDetailPage({
           className="flex items-center justify-between gap-3 border border-[color-mix(in_srgb,var(--admin-danger)_30%,var(--admin-border))] bg-[color-mix(in_srgb,var(--admin-danger)_8%,var(--admin-surface))] px-4 py-3 text-sm text-[var(--admin-danger)]"
         >
           <span>{error}</span>
-          <button type="button" className="underline" onClick={() => setError(null)}>
+          <button
+            type="button"
+            className="underline"
+            onClick={() => {
+              setError(null);
+            }}
+          >
             Dismiss
           </button>
         </div>
@@ -783,7 +859,10 @@ export function AdminActiveDevicesSessionDetailPage({
               Reports
             </Link>
             <ChevronRight className="h-4 w-4" aria-hidden="true" />
-            <Link href="/admin/reports/active-devices" className="hover:text-[var(--admin-primary)]">
+            <Link
+              href="/admin/reports/active-devices"
+              className="hover:text-[var(--admin-primary)]"
+            >
               Active Devices
             </Link>
             <ChevronRight className="h-4 w-4" aria-hidden="true" />
@@ -798,7 +877,9 @@ export function AdminActiveDevicesSessionDetailPage({
           </nav>
           <h1 className="flex flex-wrap items-center gap-3 text-2xl font-semibold tracking-[-0.02em] text-[var(--admin-on-surface)]">
             Session:{" "}
-            <span className="font-mono tracking-tight text-[var(--admin-primary)]">{shortSessionId}</span>
+            <span className="font-mono tracking-tight text-[var(--admin-primary)]">
+              {shortSessionId}
+            </span>
             <span
               className={`inline-flex items-center rounded px-2 py-0.5 font-mono text-[11px] uppercase tracking-wider ${chip.className}`}
             >

@@ -29,8 +29,8 @@ function validationError(message: string) {
 }
 
 function toDto(row: MarketingCtaRow) {
-  const views = Number(row.view_count ?? 0);
-  const clicks = Number(row.click_count ?? 0);
+  const views = row.view_count;
+  const clicks = row.click_count;
   return {
     id: row.id,
     title: row.title,
@@ -100,8 +100,8 @@ export async function listMarketingCtas(tx: TenantTx, _ctx: ServiceCtx, rawQuery
   const query = marketingCtasListQuerySchema.parse(rawQuery ?? {});
   const [rows, summary] = await Promise.all([
     marketingCtaRepository.list(tx, {
-      ...(query.status ? { status: query.status } : {}),
-      ...(query.ctaType ? { ctaType: query.ctaType } : {}),
+      status: query.status,
+      ctaType: query.ctaType,
       ...(query.q ? { q: query.q } : {}),
       limit: query.limit,
     }),
@@ -231,16 +231,17 @@ export async function publishMarketingCta(tx: TenantTx, _ctx: ServiceCtx, id: st
   if (targeting.includeUrls.length === 0) {
     throw validationError("Add at least one targeting URL (or *) before publishing.");
   }
-  if (existing.cta_type === "EMBEDDED_BUTTON" && !existing.linked_popup_cta_id && !existing.link_url) {
+  if (
+    existing.cta_type === "EMBEDDED_BUTTON" &&
+    !existing.linked_popup_cta_id &&
+    !existing.link_url
+  ) {
     throw validationError("Embedded button needs a linked pop-up CTA or link URL.");
   }
   if (existing.cta_type === "POPUP" && !existing.form_id && !existing.link_url) {
     throw validationError("Pop-up needs a connected Live form or a link URL before publishing.");
   }
-  if (
-    (existing.cta_type === "STICKY" || existing.cta_type === "SLIDE_IN") &&
-    !existing.link_url
-  ) {
+  if ((existing.cta_type === "STICKY" || existing.cta_type === "SLIDE_IN") && !existing.link_url) {
     throw validationError("Add a link URL before publishing this CTA.");
   }
   await marketingCtaRepository.setStatus(tx, id, "LIVE");
@@ -253,7 +254,12 @@ export async function unpublishMarketingCta(tx: TenantTx, _ctx: ServiceCtx, id: 
   return marketingCtaResponseSchema.parse({ data: toDto(await requireCta(tx, id)) });
 }
 
-export async function deleteMarketingCta(tx: TenantTx, _ctx: ServiceCtx, id: string, rawBody: unknown) {
+export async function deleteMarketingCta(
+  tx: TenantTx,
+  _ctx: ServiceCtx,
+  id: string,
+  rawBody: unknown,
+) {
   const body = deleteMarketingCtaBodySchema.parse(rawBody);
   const existing = await requireCta(tx, id);
   if (existing.status === "LIVE") {

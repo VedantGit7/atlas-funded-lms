@@ -91,7 +91,10 @@ function inferCatalogVisibility(
   accessMode: CourseAccessMode,
 ): CourseCatalogVisibility {
   const publicCourse = readStudioFeature(course.tags, "publicCourse");
-  if (publicCourse === true || (publicCourse == null && accessMode === "open" && course.status === "PUBLISHED")) {
+  if (
+    publicCourse === true ||
+    (publicCourse == null && accessMode === "open" && course.status === "PUBLISHED")
+  ) {
     return "PUBLIC";
   }
   return DEFAULT_SETTINGS.catalogVisibility;
@@ -110,11 +113,11 @@ export function coursePermissionsFromDetail(course: CourseDetail): CoursePermiss
     sellIndependently:
       stored.sellIndependently ??
       readStudioFeature(course.tags, "sellIndependently") ??
-      (course.accessTier === "PAID"),
+      course.accessTier === "PAID",
     enrollOnSignup:
       stored.enrollOnSignup ??
       readStudioFeature(course.tags, "enrollOnSignup") ??
-      (access.accessMode === "open"),
+      access.accessMode === "open",
     catalogVisibility:
       stored.catalogVisibility ?? inferCatalogVisibility(course, access.accessMode),
     accessMode: access.accessMode,
@@ -152,7 +155,9 @@ export function mergeCoursePermissionsIntoTags(
   };
 
   const existingFeatures =
-    tags?.[FEATURES_TAG_KEY] && typeof tags[FEATURES_TAG_KEY] === "object" && !Array.isArray(tags[FEATURES_TAG_KEY])
+    tags?.[FEATURES_TAG_KEY] &&
+    typeof tags[FEATURES_TAG_KEY] === "object" &&
+    !Array.isArray(tags[FEATURES_TAG_KEY])
       ? (tags[FEATURES_TAG_KEY] as Record<string, unknown>)
       : {};
 

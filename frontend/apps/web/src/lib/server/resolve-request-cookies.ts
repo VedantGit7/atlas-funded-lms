@@ -1,9 +1,6 @@
 import { cache } from "react";
 import { cookies, headers } from "next/headers";
-import {
-  ATLAS_ACCESS_TOKEN_COOKIE,
-  ATLAS_REFRESH_TOKEN_COOKIE,
-} from "../auth-cookies";
+import { ATLAS_ACCESS_TOKEN_COOKIE, ATLAS_REFRESH_TOKEN_COOKIE } from "../auth-cookies";
 import { ATLAS_INTERNAL_COOKIE_HEADER } from "../http-headers";
 import { buildCookieHeaderFromPairs } from "./apply-set-cookie-headers";
 import { isAccessTokenExpired, refreshSessionCookieHeader } from "./session-refresh";

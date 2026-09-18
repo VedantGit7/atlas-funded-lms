@@ -9,15 +9,27 @@ const tenantA = {
   tenantDomainStatus: "ACTIVE" as const,
 };
 
-const { mockResolveTenantFromRequest, mockGetPublicLandingPage, mockWithGlobalDb, mockWithTenantTx } =
-  vi.hoisted(() => ({
-    mockResolveTenantFromRequest: vi.fn(),
-    mockGetPublicLandingPage: vi.fn(),
-    mockWithGlobalDb: vi.fn((fn: (db: unknown) => unknown) => fn({ $queryRaw: vi.fn() })),
-    mockWithTenantTx: vi.fn((_ctx: unknown, fn: (tx: unknown) => unknown) =>
-      fn({ $queryRaw: vi.fn(), $executeRaw: vi.fn() }),
-    ),
-  }));
+const {
+  mockResolveTenantFromRequest,
+  mockGetPublicLandingPage,
+  mockWithGlobalDb,
+  mockWithTenantTx,
+} = vi.hoisted(() => ({
+  mockResolveTenantFromRequest: vi.fn(),
+  mockGetPublicLandingPage: vi.fn(),
+  mockWithGlobalDb: vi.fn((fn: (db: unknown) => unknown) => fn({ $queryRaw: vi.fn() })),
+  mockWithTenantTx: vi.fn((_ctx: unknown, fn: (tx: unknown) => unknown) =>
+    fn({
+      // A bare vi.fn() returns undefined, so any repository doing rows[0] throws.
+      // The route pipeline now claims an idempotency key through this tx (M10),
+      // which made that latent stub gap visible as a 500.
+      $queryRaw: vi.fn().mockResolvedValue([]),
+      $queryRawUnsafe: vi.fn().mockResolvedValue([]),
+      $executeRaw: vi.fn().mockResolvedValue(0),
+      $executeRawUnsafe: vi.fn().mockResolvedValue(0),
+    }),
+  ),
+}));
 
 vi.mock("@atlas/tenancy", () => ({
   resolveTenantFromRequest: (...args: unknown[]) => mockResolveTenantFromRequest(...args),

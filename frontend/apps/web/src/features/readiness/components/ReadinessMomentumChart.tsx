@@ -41,7 +41,8 @@ export function ReadinessMomentumChart({ points }: ReadinessMomentumChartProps) 
   const last = values[values.length - 1] ?? 0;
   const delta = Number((last - first).toFixed(1));
   const deltaTrend = delta > 0 ? "up" : delta < 0 ? "down" : "flat";
-  const DeltaIcon = deltaTrend === "up" ? ArrowUpRight : deltaTrend === "down" ? ArrowDownRight : Minus;
+  const DeltaIcon =
+    deltaTrend === "up" ? ArrowUpRight : deltaTrend === "down" ? ArrowDownRight : Minus;
   const deltaColor =
     deltaTrend === "up"
       ? "text-[var(--success)]"
@@ -128,7 +129,11 @@ export function ReadinessMomentumChart({ points }: ReadinessMomentumChartProps) 
                   initial={{ opacity: reduce ? 1 : 0, scale: reduce ? 1 : 0 }}
                   whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: true, amount: 0.4 }}
-                  transition={{ duration: reduce ? 0 : 0.3, delay: reduce ? 0 : 0.6 + index * 0.08, ease: EASE }}
+                  transition={{
+                    duration: reduce ? 0 : 0.3,
+                    delay: reduce ? 0 : 0.6 + index * 0.08,
+                    ease: EASE,
+                  }}
                 />
               ))}
             </svg>

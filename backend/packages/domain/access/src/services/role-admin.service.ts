@@ -74,11 +74,7 @@ export async function listRoles(
   };
 }
 
-export async function getRoleById(
-  tx: TenantTx,
-  ctx: { tenantId: string },
-  roleId: string,
-) {
+export async function getRoleById(tx: TenantTx, ctx: { tenantId: string }, roleId: string) {
   const role = await requireRoleById({
     tx,
     tenantId: ctx.tenantId,

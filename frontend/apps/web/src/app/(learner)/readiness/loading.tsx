@@ -40,7 +40,10 @@ export default function ReadinessLoading() {
 
       <div className="grid gap-6 lg:grid-cols-2">
         {[0, 1].map((index) => (
-          <div key={index} className="h-64 rounded-2xl border border-border bg-card motion-safe:animate-pulse" />
+          <div
+            key={index}
+            className="h-64 rounded-2xl border border-border bg-card motion-safe:animate-pulse"
+          />
         ))}
       </div>
     </div>

@@ -43,6 +43,7 @@ export async function seedTenantSystemRoles(args: { tx: Db; tenantId: string }):
         set
           name = ${role.name},
           is_system = true,
+          bypasses_resource_predicates = ${role.bypassesResourcePredicates},
           updated_at = now()
         from locked
         where r.tenant_id = ${args.tenantId}::uuid
@@ -56,6 +57,7 @@ export async function seedTenantSystemRoles(args: { tx: Db; tenantId: string }):
         key,
         name,
         is_system,
+        bypasses_resource_predicates,
         created_at,
         updated_at
       )
@@ -65,12 +67,14 @@ export async function seedTenantSystemRoles(args: { tx: Db; tenantId: string }):
         ${role.key},
         ${role.name},
         true,
+        ${role.bypassesResourcePredicates},
         now(),
         now()
       where not exists (select 1 from updated)
       on conflict (id) do update set
         name = excluded.name,
         is_system = true,
+        bypasses_resource_predicates = excluded.bypasses_resource_predicates,
         updated_at = now(),
         deleted_at = null
     `;

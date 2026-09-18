@@ -14,10 +14,7 @@ type HubSummary = z.infer<typeof messengerHubSummaryDtoSchema>;
 const LOCALE = "en";
 const CHANNEL = "email";
 
-function activityHref(
-  channel: HubSummary["activity"][number]["channel"],
-  id: string,
-): string {
+function activityHref(channel: HubSummary["activity"][number]["channel"], id: string): string {
   switch (channel) {
     case "email":
       return `/admin/marketing/messenger/email/${id}`;
@@ -77,8 +74,7 @@ export async function getMessengerHubSummary(tx: TenantTx, ctx: ServiceCtx) {
   ]);
 
   const lastDeliveryStatus = webhookSummary.last_delivery_status;
-  const lastDeliveryOk =
-    lastDeliveryStatus == null ? null : lastDeliveryStatus.startsWith("ok");
+  const lastDeliveryOk = lastDeliveryStatus == null ? null : lastDeliveryStatus.startsWith("ok");
 
   const summary: HubSummary = {
     email: {

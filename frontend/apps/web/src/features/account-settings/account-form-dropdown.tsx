@@ -1,6 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type ReactNode,
+} from "react";
 import { createPortal } from "react-dom";
 import { ChevronDown } from "lucide-react";
 import { dropdownPanelEnterClassName } from "@atlas/design-system";
@@ -8,8 +15,7 @@ import { dropdownPanelEnterClassName } from "@atlas/design-system";
 export const accountDropdownTriggerClassName =
   "flex w-full items-center gap-2 rounded-lg border border-[var(--acct-border)] bg-[var(--acct-surface)] px-3 py-2 text-left text-sm text-[var(--acct-on-surface)] outline-none transition-all duration-200 hover:border-[var(--acct-outline)] focus:border-[var(--acct-primary-container)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--acct-primary-container)_20%,transparent)] disabled:cursor-not-allowed disabled:opacity-50";
 
-export const accountDropdownPanelSurfaceClassName =
-  `account-settings-theme account-dropdown-panel overflow-hidden rounded-lg border border-[var(--acct-border)] ${dropdownPanelEnterClassName}`;
+export const accountDropdownPanelSurfaceClassName = `account-settings-theme account-dropdown-panel overflow-hidden rounded-lg border border-[var(--acct-border)] ${dropdownPanelEnterClassName}`;
 
 export const accountDropdownItemClassName =
   "account-dropdown-item flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm transition-colors duration-150";
@@ -48,9 +54,7 @@ function computePanelPosition(trigger: HTMLElement, portalZIndex: number): CSSPr
     width: rect.width,
     maxHeight,
     zIndex: portalZIndex,
-    ...(openUpward
-      ? { bottom: window.innerHeight - rect.top + gap }
-      : { top: rect.bottom + gap }),
+    ...(openUpward ? { bottom: window.innerHeight - rect.top + gap } : { top: rect.bottom + gap }),
   };
 }
 

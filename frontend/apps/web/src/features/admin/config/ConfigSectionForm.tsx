@@ -28,7 +28,9 @@ export function ConfigSectionForm({ value, onChange, depth = 0 }: ConfigSectionF
   }
 
   return (
-    <div className={depth > 0 ? "space-y-4 border-l-2 border-[var(--admin-border)] pl-4" : "space-y-4"}>
+    <div
+      className={depth > 0 ? "space-y-4 border-l-2 border-[var(--admin-border)] pl-4" : "space-y-4"}
+    >
       {entries.map(([key, fieldValue]) => (
         <ConfigField
           key={key}
@@ -158,7 +160,9 @@ function ConfigField({
           }}
           className={`${fieldClassName} font-mono text-xs`}
         />
-        <p className="mt-1 text-xs text-[var(--admin-on-surface-variant)]">Comma-separated numbers</p>
+        <p className="mt-1 text-xs text-[var(--admin-on-surface-variant)]">
+          Comma-separated numbers
+        </p>
       </FieldShell>
     );
   }
@@ -166,7 +170,9 @@ function ConfigField({
   if (isPlainObject(value) && depth < 1) {
     return (
       <fieldset className="space-y-3 rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface-low)]/30 p-4">
-        <legend className="px-1 text-sm font-semibold text-[var(--admin-on-surface)]">{label}</legend>
+        <legend className="px-1 text-sm font-semibold text-[var(--admin-on-surface)]">
+          {label}
+        </legend>
         <ConfigSectionForm
           value={value}
           depth={depth + 1}

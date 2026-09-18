@@ -79,11 +79,7 @@ function toPurchaserFilter(
   return filter;
 }
 
-export async function listSalesProducts(
-  tx: TenantTx,
-  _ctx: ServiceCtx,
-  query: SalesProductsQuery,
-) {
+export async function listSalesProducts(tx: TenantTx, _ctx: ServiceCtx, query: SalesProductsQuery) {
   const filter = {
     q: query.q,
     paidFrom: query.paidFrom,
@@ -123,10 +119,7 @@ export async function listSalesProducts(
   ]);
 
   const currency =
-    query.currency?.toUpperCase() ??
-    summary.currencies[0] ??
-    rows[0]?.currency ??
-    "INR";
+    query.currency?.toUpperCase() ?? summary.currencies[0] ?? rows[0]?.currency ?? "INR";
 
   const totalRevenue = summary.total_revenue_cents;
   const changePercent = (current: number, previous: number): number | null => {
@@ -150,9 +143,7 @@ export async function listSalesProducts(
         purchaserCount: row.purchaser_count,
         avgUnitPriceCents: row.avg_unit_price_cents,
         revenueSharePercent:
-          totalRevenue <= 0
-            ? 0
-            : Math.round((row.revenue_cents / totalRevenue) * 1000) / 10,
+          totalRevenue <= 0 ? 0 : Math.round((row.revenue_cents / totalRevenue) * 1000) / 10,
       })),
       pageInfo: pageInfo(totalCount, query.page, query.limit),
       summary: {
@@ -357,11 +348,7 @@ export async function createSalesPurchaserGroup(
   });
 }
 
-export async function listSalesCoupons(
-  tx: TenantTx,
-  _ctx: ServiceCtx,
-  query: CouponsListQuery,
-) {
+export async function listSalesCoupons(tx: TenantTx, _ctx: ServiceCtx, query: CouponsListQuery) {
   const [totalCount, rows, summary] = await Promise.all([
     salesMarketingRosterRepository.countCoupons(tx, query),
     salesMarketingRosterRepository.listCoupons(tx, query),
@@ -443,9 +430,7 @@ export async function listCouponRedemptions(
   const redemptions = coupon.redemption_count;
   const avgOrderCents = redemptions === 0 ? 0 : Math.round(revenue / redemptions);
   const firstTimeBuyerPercent =
-    redemptions === 0
-      ? 0
-      : Math.round((firstTimeBuyerCount / redemptions) * 1000) / 10;
+    redemptions === 0 ? 0 : Math.round((firstTimeBuyerCount / redemptions) * 1000) / 10;
   const returningBuyerCount = Math.max(0, redemptions - firstTimeBuyerCount);
   const capReached =
     coupon.total_usage_limit != null && coupon.redemption_count >= coupon.total_usage_limit;
@@ -703,11 +688,7 @@ export async function listAffiliateProductsRoster(
   });
 }
 
-export async function listAffiliatesRoster(
-  tx: TenantTx,
-  _ctx: ServiceCtx,
-  query: AffiliatesQuery,
-) {
+export async function listAffiliatesRoster(tx: TenantTx, _ctx: ServiceCtx, query: AffiliatesQuery) {
   const windowTo = query.activityTo ? new Date(query.activityTo) : new Date();
   const windowFrom = query.activityFrom
     ? new Date(query.activityFrom)
@@ -776,11 +757,7 @@ export async function getAffiliateDetail(
       query.ordersLimit,
     ),
     salesMarketingRosterRepository.countAffiliateAttributedOrders(tx, affiliateId),
-    salesMarketingRosterRepository.listAffiliatePayoutHistory(
-      tx,
-      affiliateId,
-      query.payoutsLimit,
-    ),
+    salesMarketingRosterRepository.listAffiliatePayoutHistory(tx, affiliateId, query.payoutsLimit),
     salesMarketingRosterRepository.listAffiliateEarningsTrend(tx, affiliateId),
   ]);
 
@@ -847,11 +824,7 @@ function resolveSalesMarketingOverviewWindow(query: SalesMarketingOverviewQuery)
     Math.round((windowTo.getTime() - windowFrom.getTime()) / (24 * 60 * 60 * 1000)) + 1,
   );
   const windowLabel =
-    query.paidFrom || query.paidTo
-      ? days <= 40
-        ? `${days} days`
-        : "Selected range"
-      : "37 days";
+    query.paidFrom || query.paidTo ? (days <= 40 ? `${days} days` : "Selected range") : "37 days";
 
   const filter: SalesMarketingOverviewFilter = {
     paidFrom: windowFrom.toISOString(),
@@ -862,7 +835,10 @@ function resolveSalesMarketingOverviewWindow(query: SalesMarketingOverviewQuery)
   return { windowFrom, windowTo, windowLabel, filter };
 }
 
-function previousSalesMarketingWindow(windowFrom: Date, windowTo: Date): {
+function previousSalesMarketingWindow(
+  windowFrom: Date,
+  windowTo: Date,
+): {
   from: Date;
   to: Date;
 } {
@@ -877,8 +853,7 @@ function attributionPercent(part: number, total: number): number {
   return Math.round((part / total) * 1000) / 10;
 }
 
-const UUID_RE =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 function asUuidOrNull(value: string | null): string | null {
   if (!value) return null;
@@ -918,10 +893,7 @@ export async function getSalesMarketingOverview(
     salesMarketingRosterRepository.getOverviewAttention(tx),
   ]);
 
-  const currency =
-    filter.currency ??
-    summary.currencies[0] ??
-    "INR";
+  const currency = filter.currency ?? summary.currencies[0] ?? "INR";
 
   const changePercent =
     previousRevenue === 0

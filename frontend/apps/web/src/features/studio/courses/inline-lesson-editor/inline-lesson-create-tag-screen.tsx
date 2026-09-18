@@ -11,11 +11,7 @@ import {
   LESSON_TAG_TITLE_MAX_LENGTH,
   type LessonTagVisibility,
 } from "./lesson-settings-metadata";
-import {
-  createEntityTag,
-  formatTagError,
-  type StudioTagScope,
-} from "./studio-tags-client";
+import { createEntityTag, formatTagError, type StudioTagScope } from "./studio-tags-client";
 import {
   inlineLessonGhostButtonClassName,
   inlineLessonPrimaryDarkButtonClassName,

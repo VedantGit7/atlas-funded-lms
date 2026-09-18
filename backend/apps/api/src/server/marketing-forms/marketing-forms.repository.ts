@@ -282,7 +282,7 @@ export const marketingFormsRepository = {
   async deleteById(tx: TenantTx, id: string) {
     await tx.$executeRaw`delete from marketing_form_submissions where form_id = ${id}::uuid`;
     const result = await tx.$executeRaw`delete from marketing_forms where id = ${id}::uuid`;
-    return Number(result) > 0;
+    return result > 0;
   },
 
   async listSubmissions(tx: TenantTx, formId: string, limit = 100) {

@@ -61,10 +61,7 @@ function messageSourceKind(source: string | null, segmentId: string | null): "se
   return "ad_hoc";
 }
 
-function campaignStatus(
-  delivered: number,
-  failed: number,
-): "sent" | "partially_failed" | "failed" {
+function campaignStatus(delivered: number, failed: number): "sent" | "partially_failed" | "failed" {
   if (failed > 0 && delivered > 0) return "partially_failed";
   if (failed > 0 && delivered === 0) return "failed";
   return "sent";
@@ -92,14 +89,12 @@ export async function listCustomFieldCohortGroups(
     const sourceKind = sourceKindFromMeta(source);
     const segmentName = asString(meta["segmentName"]);
     const syncRaw = asString(meta["syncType"]);
-    let syncType: "static" | "live" = "static";
-    if (syncRaw === "live" || syncRaw === "static") {
-      syncType = syncRaw;
-    } else if (sourceKind === "segment") {
-      syncType = "live";
-    } else {
-      syncType = "static";
-    }
+    const syncType: "static" | "live" =
+      syncRaw === "live" || syncRaw === "static"
+        ? syncRaw
+        : sourceKind === "segment"
+          ? "live"
+          : "static";
 
     return {
       batchId: row.id,

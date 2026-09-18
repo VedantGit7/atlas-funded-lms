@@ -8,7 +8,7 @@ import {
 import { mutateMarketingCampaignsMetadata } from "../../../../../../../server/marketing-campaigns/marketing-campaigns.route-metadata";
 import { setMarketingCampaignAudience } from "../../../../../../../server/marketing-campaigns/marketing-campaigns.service";
 
-const paramsSchema = zod.object({ id: zod.string().uuid() });
+const paramsSchema = zod.object({ id: zod.uuid() });
 
 export const POST = createTenantRoute<
   z.output<typeof setMarketingCampaignAudienceBodySchema>,

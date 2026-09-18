@@ -9,8 +9,10 @@ import {
   ChevronsLeft,
   Columns3,
   HelpCircle,
+  Info,
   Plus,
   Search,
+  Star,
 } from "lucide-react";
 import { Select } from "@atlas/design-system";
 import type { BillingLocationView } from "@atlas/domain-config/schemas/learner-billing";
@@ -59,15 +61,29 @@ export function LocationsListPanel({
   const filtered = useMemo(() => {
     const normalized = query.trim().toLowerCase();
     if (!normalized) return initialLocations;
+    // Searching only the title meant typing a currency — a column right there
+    // on screen — returned nothing.
     return initialLocations.filter((location) =>
-      location.title.toLowerCase().includes(normalized),
+      [
+        location.title,
+        location.locationKey,
+        location.currency,
+        currencyName(location.currency) ?? "",
+        location.description ?? "",
+      ].some((field) => field.toLowerCase().includes(normalized)),
     );
   }, [initialLocations, query]);
 
-  const visibleColumns = useMemo(() => COLUMNS.filter((column) => !hidden.has(column.id)), [hidden]);
+  const visibleColumns = useMemo(
+    () => COLUMNS.filter((column) => !hidden.has(column.id)),
+    [hidden],
+  );
   const pageCount = Math.max(1, Math.ceil(filtered.length / rowsPerPage));
   const currentPage = Math.min(page, pageCount - 1);
-  const pageRows = filtered.slice(currentPage * rowsPerPage, currentPage * rowsPerPage + rowsPerPage);
+  const pageRows = filtered.slice(
+    currentPage * rowsPerPage,
+    currentPage * rowsPerPage + rowsPerPage,
+  );
 
   function toggleColumn(id: ColumnId) {
     setHidden((previous) => {
@@ -118,11 +134,19 @@ export function LocationsListPanel({
               setQuery(event.target.value);
               setPage(0);
             }}
-            placeholder="Search by location title"
-            aria-label="Search by location title"
-            className="w-full rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] py-2 pl-9 pr-3 text-sm text-[var(--admin-on-surface)] outline-none transition-colors placeholder:text-[var(--admin-on-surface-variant)] focus:border-[var(--admin-primary)] focus:ring-2 focus:ring-[var(--admin-primary)]/30"
+            placeholder="Search location, currency or code"
+            aria-label="Search location, currency or code"
+            className="w-full rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] py-2 pl-9 pr-3 text-sm text-[var(--admin-on-surface)] outline-none transition-colors placeholder:text-[var(--admin-on-surface-variant)] focus:border-[var(--admin-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--admin-primary)_30%,transparent)]"
           />
         </div>
+        <p
+          aria-live="polite"
+          className="text-sm text-[var(--admin-on-surface-variant)] sm:ml-auto sm:mr-2"
+        >
+          {query.trim() === ""
+            ? `${initialLocations.length} ${initialLocations.length === 1 ? "location" : "locations"}`
+            : `${filtered.length} of ${initialLocations.length} matching`}
+        </p>
         <div ref={columnsRef} className="relative">
           <button
             type="button"
@@ -232,17 +256,37 @@ export function LocationsListPanel({
               {pageRows.length === 0 ? (
                 <tr>
                   <td colSpan={visibleColumns.length} className="px-4 py-16 text-center">
+                    {/* Two different situations that used to share one message:
+                        an empty list needs "add one", a filtered list needs
+                        "clear the search". */}
                     <p className="text-sm font-medium text-[var(--admin-on-surface)]">
-                      No locations found
+                      {query.trim() === "" ? "No locations yet" : "No locations match that search"}
                     </p>
                     <p className="mt-1 text-sm text-[var(--admin-on-surface-variant)]">
-                      Add a location to charge learners in a specific currency by region.
+                      {query.trim() === ""
+                        ? "Add a location to charge learners in a specific currency by region."
+                        : `Nothing matches “${query.trim()}”.`}
                     </p>
+                    {query.trim() === "" ? null : (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setQuery("");
+                          setPage(0);
+                        }}
+                        className="mt-3 rounded-lg border border-[var(--admin-border)] px-3 py-1.5 text-sm font-semibold text-[var(--admin-on-surface)] transition-colors hover:bg-[var(--admin-surface-high)]"
+                      >
+                        Clear search
+                      </button>
+                    )}
                   </td>
                 </tr>
               ) : (
                 pageRows.map((location) => (
-                  <tr key={location.id} className="border-b border-[var(--admin-border)] last:border-b-0">
+                  <tr
+                    key={location.id}
+                    className="border-b border-[var(--admin-border)] last:border-b-0"
+                  >
                     {visibleColumns.map((column) => (
                       <td key={column.id} className="px-4 py-4 align-top">
                         {column.id === "title" ? (
@@ -250,8 +294,24 @@ export function LocationsListPanel({
                             <span className="flex h-10 w-14 shrink-0 items-center justify-center rounded-md bg-[color-mix(in_srgb,var(--admin-primary)_10%,var(--admin-surface))] text-xl">
                               {flagFor(location.locationKey)}
                             </span>
-                            <span className="font-semibold text-[var(--admin-on-surface)]">
-                              {location.title}
+                            <span className="min-w-0">
+                              <span className="block font-semibold text-[var(--admin-on-surface)]">
+                                {location.title}
+                              </span>
+                              {location.isDefault ? (
+                                <span className="mt-0.5 inline-flex items-center gap-1 text-xs font-medium text-[var(--admin-on-surface-variant)]">
+                                  {/* This row catches every region without a
+                                      location of its own, which is the one
+                                      thing that made it different and the one
+                                      thing the table never said. */}
+                                  <Star className="h-3 w-3" aria-hidden="true" />
+                                  Fallback for unlisted regions
+                                </span>
+                              ) : (
+                                <span className="font-data mt-0.5 block text-xs text-[var(--admin-on-surface-variant)]">
+                                  {location.locationKey}
+                                </span>
+                              )}
                             </span>
                           </div>
                         ) : column.id === "currency" ? (
@@ -284,6 +344,20 @@ export function LocationsListPanel({
             </tbody>
           </table>
         </div>
+      </div>
+      <div className="flex items-start gap-3 rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface-high)] p-4">
+        <Info
+          className="mt-0.5 h-4 w-4 shrink-0 text-[var(--admin-on-surface-variant)]"
+          aria-hidden="true"
+        />
+        <p className="text-sm leading-relaxed text-[var(--admin-on-surface-variant)]">
+          {/* Course pricing plans store the location as free text and match on
+              this title, so the name is load-bearing — worth saying, since
+              nothing else on the screen hints at it. */}
+          A course pricing plan picks its location by name, so renaming one here does not follow
+          through to plans already using the old name. Each region can have one location; the
+          fallback row covers everywhere else.
+        </p>
       </div>
     </div>
   );

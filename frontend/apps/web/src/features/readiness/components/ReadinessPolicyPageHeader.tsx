@@ -28,7 +28,7 @@ export function ReadinessPolicyPageHeader({
           Readiness Policy
         </h1>
         <span className={isActive ? publishedLiveBadgeClassName : statusDraftBadgeClassName}>
-          {isActive ? "Status: Active" : policy?.status ?? "Draft"}
+          {isActive ? "Status: Active" : (policy?.status ?? "Draft")}
         </span>
       </div>
       <div className="flex flex-col gap-1 text-sm text-[var(--admin-on-surface-variant)] lg:items-end">
@@ -40,7 +40,10 @@ export function ReadinessPolicyPageHeader({
         ) : null}
         {scoringProfile ? (
           <p className="text-[13px]">
-            Linked profile: <span className="font-medium text-[var(--admin-on-surface)]">{scoringProfile.name}</span>
+            Linked profile:{" "}
+            <span className="font-medium text-[var(--admin-on-surface)]">
+              {scoringProfile.name}
+            </span>
           </p>
         ) : null}
       </div>

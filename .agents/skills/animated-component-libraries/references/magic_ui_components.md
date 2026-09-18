@@ -22,6 +22,7 @@ npx shadcn@latest add https://magicui.design/r/[component-name]
 Static SVG grid pattern for backgrounds.
 
 **Props**:
+
 - `width` (number): Grid cell width, default 40
 - `height` (number): Grid cell height, default 40
 - `x` (number): X offset, default -1
@@ -31,6 +32,7 @@ Static SVG grid pattern for backgrounds.
 - `className` (string): Additional CSS classes
 
 **Usage**:
+
 ```typescript
 <GridPattern
   squares={[[4, 4], [5, 1], [8, 2]]}
@@ -43,6 +45,7 @@ Static SVG grid pattern for backgrounds.
 Animated version with dynamic square animations.
 
 **Props**:
+
 - All GridPattern props
 - `numSquares` (number): Number of animated squares, default 50
 - `maxOpacity` (number): Maximum opacity, default 0.5
@@ -50,6 +53,7 @@ Animated version with dynamic square animations.
 - `repeatDelay` (number): Delay between repeats, default 0.5
 
 **Usage**:
+
 ```typescript
 <AnimatedGridPattern
   numSquares={50}
@@ -65,6 +69,7 @@ Animated version with dynamic square animations.
 Grid pattern with interactive squares.
 
 **Props**:
+
 - `width` (number): Cell width, default 40
 - `height` (number): Cell height, default 40
 - `squares` ([horizontal, vertical]): Grid dimensions, default [24, 24]
@@ -72,6 +77,7 @@ Grid pattern with interactive squares.
 - `className` (string): Container class
 
 **Usage**:
+
 ```typescript
 <InteractiveGridPattern
   squares={[24, 24]}
@@ -84,12 +90,14 @@ Grid pattern with interactive squares.
 Diagonal striped background pattern.
 
 **Props**:
+
 - `direction` ("left" | "right"): Stripe direction, default "left"
 - `width` (number): Pattern width, default 10
 - `height` (number): Pattern height, default 10
 - `className` (string): Additional CSS classes
 
 **Usage**:
+
 ```typescript
 <StripedPattern
   direction="left"
@@ -104,6 +112,7 @@ Diagonal striped background pattern.
 Button with animated shimmer effect.
 
 **Props**:
+
 - `shimmerColor` (string): Shimmer color, default "#ffffff"
 - `shimmerSize` (string): Shimmer size, default "0.05em"
 - `shimmerDuration` (string): Animation duration, default "3s"
@@ -114,6 +123,7 @@ Button with animated shimmer effect.
 - All standard button props
 
 **Usage**:
+
 ```typescript
 <ShimmerButton
   shimmerColor="#ffffff"
@@ -130,11 +140,13 @@ Button with animated shimmer effect.
 Animated gradient border effect for containers.
 
 **Props**:
+
 - `duration` (number): Animation duration in seconds, default 15
 - `size` (number): Beam width in pixels, default 200
 - `className` (string): Additional CSS classes
 
 **Usage**:
+
 ```typescript
 <Card className="relative overflow-hidden">
   <CardContent>Your content</CardContent>
@@ -149,6 +161,7 @@ Animated gradient border effect for containers.
 Text arranged in a circular path with rotation.
 
 **Props**:
+
 - `children` (string): Text content (use • for separators)
 - `radius` (number): Circle radius, default 5
 - `duration` (number): Rotation duration in seconds, default 10
@@ -156,6 +169,7 @@ Text arranged in a circular path with rotation.
 - `className` (string): Additional CSS classes
 
 **Usage**:
+
 ```typescript
 <SpinningText
   reverse={false}
@@ -174,6 +188,7 @@ Text arranged in a circular path with rotation.
 Infinite scrolling content container.
 
 **Props**:
+
 - `className` (string): Additional CSS classes
 - `reverse` (boolean): Reverse scroll direction, default false
 - `pauseOnHover` (boolean): Pause on mouse hover, default false
@@ -182,6 +197,7 @@ Infinite scrolling content container.
 - `children` (ReactNode): Content to scroll
 
 **Usage**:
+
 ```typescript
 // Horizontal marquee
 <Marquee pauseOnHover className="[--duration:40s]">
@@ -205,10 +221,12 @@ Infinite scrolling content container.
 Responsive grid layout for product features.
 
 **Props**:
+
 - `children` (ReactNode): BentoCard components
 - `className` (string): Grid customization classes
 
 **BentoCard Props**:
+
 - `name` (string): Card title
 - `className` (string): Card size/position classes
 - `background` (ReactNode): Background component/image
@@ -218,6 +236,7 @@ Responsive grid layout for product features.
 - `cta` (string): Call-to-action text
 
 **Usage**:
+
 ```typescript
 <BentoGrid className="grid-cols-3 gap-4">
   <BentoCard
@@ -239,10 +258,12 @@ Responsive grid layout for product features.
 Interactive 3D globe visualization.
 
 **Props**:
+
 - `className` (string): Additional CSS classes
 - Additional THREE.js globe configuration props
 
 **Usage**:
+
 ```typescript
 <div className="relative flex size-full max-w-lg items-center justify-center">
   <span className="text-8xl font-semibold">Globe</span>
@@ -265,7 +286,8 @@ Add these to `app/globals.css` for manual installations:
 }
 
 @keyframes ripple {
-  0%, 100% {
+  0%,
+  100% {
     transform: translate(-50%, -50%) scale(1);
   }
   50% {
@@ -283,10 +305,12 @@ Add these to `app/globals.css` for manual installations:
   0% {
     transform: translateZ(0) rotate(0);
   }
-  15%, 35% {
+  15%,
+  35% {
     transform: translateZ(0) rotate(90deg);
   }
-  65%, 85% {
+  65%,
+  85% {
     transform: translateZ(0) rotate(270deg);
   }
   100% {
@@ -328,17 +352,18 @@ All Magic UI components require the `cn()` utility function:
 
 ```typescript
 // lib/utils.ts
-import clsx, { ClassValue } from "clsx"
-import { twMerge } from "tailwind-merge"
+import clsx, { ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
 }
 ```
 
 ## Common Component Combinations
 
 ### Hero Section with Pattern
+
 ```typescript
 <div className="relative flex h-screen items-center justify-center">
   <AnimatedGridPattern
@@ -350,6 +375,7 @@ export function cn(...inputs: ClassValue[]) {
 ```
 
 ### CTA Card with Border Beam
+
 ```typescript
 <Card className="relative overflow-hidden">
   <CardHeader>
@@ -364,6 +390,7 @@ export function cn(...inputs: ClassValue[]) {
 ```
 
 ### Testimonial Carousel
+
 ```typescript
 <Marquee pauseOnHover className="py-4">
   {testimonials.map((t) => (
@@ -385,15 +412,12 @@ Ensure Tailwind can find Magic UI components:
 ```javascript
 // tailwind.config.js
 module.exports = {
-  content: [
-    "./src/**/*.{js,jsx,ts,tsx}",
-    "./components/**/*.{js,jsx,ts,tsx}",
-  ],
+  content: ["./src/**/*.{js,jsx,ts,tsx}", "./components/**/*.{js,jsx,ts,tsx}"],
   theme: {
     extend: {},
   },
   plugins: [],
-}
+};
 ```
 
 ## Performance Tips
@@ -410,7 +434,7 @@ All Magic UI components are fully typed. Extend props interface when customizing
 
 ```typescript
 interface CustomGridPatternProps extends React.ComponentPropsWithoutRef<"svg"> {
-  customProp?: string
+  customProp?: string;
 }
 ```
 

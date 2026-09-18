@@ -7,9 +7,9 @@ import {
 
 describe("active devices exports dto", () => {
   it("exposes default column catalog", () => {
-    expect(DEVICE_EXPORT_COLUMNS.some((column) => column.key === "ip_address" && column.sensitive)).toBe(
-      true,
-    );
+    expect(
+      DEVICE_EXPORT_COLUMNS.some((column) => column.key === "ip_address" && column.sensitive),
+    ).toBe(true);
     expect(DEVICE_EXPORT_COLUMNS.some((column) => column.key === "learner_name")).toBe(true);
   });
 

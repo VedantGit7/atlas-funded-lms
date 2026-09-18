@@ -84,7 +84,7 @@ export function AdminNotificationPopover() {
     }
 
     void refreshBadge();
-    const interval = window.setInterval(refreshBadge, 60_000);
+    const interval = window.setInterval(() => void refreshBadge(), 60_000);
     return () => {
       cancelled = true;
       window.clearInterval(interval);

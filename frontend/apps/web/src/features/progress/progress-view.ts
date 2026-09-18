@@ -119,11 +119,7 @@ export function buildActivityHeatmap(days: ActivityDay[], rangeEnd: string): Hea
 }
 
 /** Sums the trailing `weekCount` weeks of daily XP for the momentum chart. */
-export function buildWeeklyXp(
-  days: ActivityDay[],
-  rangeEnd: string,
-  weekCount = 8,
-): WeekBucket[] {
+export function buildWeeklyXp(days: ActivityDay[], rangeEnd: string, weekCount = 8): WeekBucket[] {
   const { weeks } = buildActivityHeatmap(days, rangeEnd);
   const trailing = weeks.slice(-weekCount);
   return trailing.map((week) => {

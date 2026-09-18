@@ -31,7 +31,7 @@ export function isLearnerNavActive(pathname: string, href: string): boolean {
 
 export function mobilePrimaryItems<T extends ShellNavItem>(items: readonly T[], limit = 4): T[] {
   const primary = items.filter((item) => item.mobilePrimary);
-  return (primary.length > 0 ? primary : items.slice(0, limit)) as T[];
+  return primary.length > 0 ? primary : items.slice(0, limit);
 }
 
 export function bottomNavGridClass(count: number): string {

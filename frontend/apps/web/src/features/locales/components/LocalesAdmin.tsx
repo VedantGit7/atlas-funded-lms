@@ -26,16 +26,11 @@ import { LocalesLanguagesTab } from "./tabs/LocalesLanguagesTab";
 import { LocalesReviewQueueTab } from "./tabs/LocalesReviewQueueTab";
 import { LocalesQaChecksTab } from "./tabs/LocalesQaChecksTab";
 import { LocalesImportExportTab } from "./tabs/LocalesImportExportTab";
+import { cancellationFlag } from "@/lib/effect-cancellation";
 
 type LocaleResourceDto = z.infer<typeof localeResourceDtoSchema>;
 
-export type LocalesTabId =
-  | "overview"
-  | "languages"
-  | "strings"
-  | "review"
-  | "qa"
-  | "import-export";
+export type LocalesTabId = "overview" | "languages" | "strings" | "review" | "qa" | "import-export";
 
 type LocalesAdminProps = {
   initialResources?: LocaleResourceDto[];
@@ -76,12 +71,12 @@ export function LocalesAdmin({
 
   useEffect(() => {
     if (initialResources !== undefined) return;
-    let cancelled = false;
+    const effect = cancellationFlag();
     void (async () => {
       try {
         await refreshResources();
       } catch (error) {
-        if (cancelled) return;
+        if (effect.isCancelled()) return;
         if (error instanceof ClientApiError && (error.status === 401 || error.status === 403)) {
           setAuthDenied(true);
           return;
@@ -93,11 +88,11 @@ export function LocalesAdmin({
         }
         setLoadError("Failed to load locale resources.");
       } finally {
-        if (!cancelled) setLoading(false);
+        if (!effect.isCancelled()) setLoading(false);
       }
     })();
     return () => {
-      cancelled = true;
+      effect.cancel();
     };
   }, [initialResources, refreshResources]);
 
@@ -138,7 +133,9 @@ export function LocalesAdmin({
               aria-label={tab.label}
               aria-current={isActive ? "page" : undefined}
               className={`${localesRailButtonClassName} ${isActive ? localesRailButtonActiveClassName : ""}`}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => {
+                setActiveTab(tab.id);
+              }}
             >
               <Icon className="h-5 w-5" aria-hidden="true" />
             </button>

@@ -13,8 +13,6 @@ export function buildThemeCssVars(semantic: TenantThemeSemanticPayload): Record<
     "--brand-primary": semantic.color.primary,
     ...(semantic.color.accent ? { "--brand-accent": semantic.color.accent } : {}),
     ...(semantic.color.header ? { "--brand-header": semantic.color.header } : {}),
-    ...(semantic.color.background ? { "--tenant-background": semantic.color.background } : {}),
-    ...(semantic.color.foreground ? { "--tenant-foreground": semantic.color.foreground } : {}),
     "--radius": RADIUS_REM[semantic.radius],
   };
 }

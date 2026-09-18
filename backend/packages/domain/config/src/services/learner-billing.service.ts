@@ -1,8 +1,11 @@
+import { AtlasHttpError } from "@atlas/core/http/errors";
 import type { TenantTx } from "@atlas/db";
 import {
   countBillingLocations,
   ensureRestOfWorldLocation,
+  findBillingLocationByCountry,
   getLearnerBillingConfigRow,
+  highestIssuedInvoiceSequence,
   insertBillingLocation,
   listBillingLocationRows,
   upsertGst,
@@ -15,6 +18,7 @@ import {
 } from "../repositories/learner-billing.repository";
 import {
   PricingModelSchema,
+  formatInvoiceNumber,
   type BillingLocationListResponse,
   type BillingLocationView,
   type LearnerBillingConfigResponse,
@@ -86,7 +90,9 @@ export async function updateLearnerBillingGst(
 ): Promise<LearnerBillingConfigResponse> {
   await upsertGst(tx, {
     enabled: input.enabled,
-    number: input.number,
+    // An emptied field is an absent GSTIN, not a stored empty string — the
+    // config read maps null to "not set" and "" would read as set-but-blank.
+    number: input.number === null || input.number === "" ? null : input.number,
     percentage: input.percentage,
   });
   return readLearnerBillingConfig(tx);
@@ -96,6 +102,20 @@ export async function updateLearnerBillingInvoice(
   tx: TenantTx,
   input: UpdateInvoiceRequest,
 ): Promise<LearnerBillingConfigResponse> {
+  // Winding the counter back below what has already been printed would give a
+  // second order an invoice number a first order already carries — and nothing
+  // in the database prevents that, since invoice_number is only indexed, not
+  // unique. Two orders sharing a number is an accounting problem that cannot be
+  // undone once both invoices are out.
+  const highest = await highestIssuedInvoiceSequence(tx, input.prefix);
+  if (highest !== null && input.nextNumber <= highest) {
+    throw new AtlasHttpError({
+      code: "VALIDATION_ERROR",
+      status: 400,
+      message: `Invoice ${formatInvoiceNumber(input.prefix, highest)} has already been issued. The next number must be at least ${highest + 1}.`,
+    });
+  }
+
   await upsertInvoice(tx, {
     prefix: input.prefix,
     nextNumber: input.nextNumber,
@@ -130,9 +150,7 @@ function toLocationView(row: BillingLocationRow): BillingLocationView {
   };
 }
 
-export async function listBillingLocations(
-  tx: TenantTx,
-): Promise<BillingLocationListResponse> {
+export async function listBillingLocations(tx: TenantTx): Promise<BillingLocationListResponse> {
   // Guarantee the default "Rest Of The World" location exists, seeded with the
   // tenant's home currency (falls back to USD before a home currency is set).
   if ((await countBillingLocations(tx)) === 0) {
@@ -147,6 +165,18 @@ export async function addBillingLocation(
   tx: TenantTx,
   input: { locationKey: string; title: string; currency: string; description: string | null },
 ): Promise<{ data: BillingLocationView }> {
+  // One location per country. A second row for the same country is not a
+  // richer configuration, it is an ambiguity: two currencies would both claim
+  // the same region and nothing decides between them.
+  const existing = await findBillingLocationByCountry(tx, input.locationKey);
+  if (existing !== null) {
+    throw new AtlasHttpError({
+      code: "VALIDATION_ERROR",
+      status: 409,
+      message: `${existing.name} already has a location, charging in ${existing.currency}. Remove it before adding another for the same region.`,
+    });
+  }
+
   const row = await insertBillingLocation(tx, input);
   return { data: toLocationView(row) };
 }

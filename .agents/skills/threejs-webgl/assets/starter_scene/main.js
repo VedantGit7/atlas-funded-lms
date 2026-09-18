@@ -1,17 +1,12 @@
-import * as THREE from 'three';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
 // Scene, Camera, Renderer
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x1a1a2e);
 scene.fog = new THREE.Fog(0x1a1a2e, 10, 50);
 
-const camera = new THREE.PerspectiveCamera(
-  75,
-  window.innerWidth / window.innerHeight,
-  0.1,
-  1000
-);
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 camera.position.set(5, 3, 8);
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -60,7 +55,7 @@ const floorGeometry = new THREE.PlaneGeometry(20, 20);
 const floorMaterial = new THREE.MeshStandardMaterial({
   color: 0x2a2a4a,
   roughness: 0.8,
-  metalness: 0.2
+  metalness: 0.2,
 });
 const floor = new THREE.Mesh(floorGeometry, floorMaterial);
 floor.rotation.x = -Math.PI / 2;
@@ -81,7 +76,7 @@ const cubeGeometry = new THREE.BoxGeometry(1, 1, 1);
 const cubeMaterial = new THREE.MeshStandardMaterial({
   color: 0xff6b6b,
   roughness: 0.3,
-  metalness: 0.7
+  metalness: 0.7,
 });
 const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
 cube.position.set(-2, 1, 0);
@@ -94,7 +89,7 @@ const sphereGeometry = new THREE.SphereGeometry(0.7, 32, 32);
 const sphereMaterial = new THREE.MeshStandardMaterial({
   color: 0x4ecdc4,
   roughness: 0.2,
-  metalness: 0.8
+  metalness: 0.8,
 });
 const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
 sphere.position.set(0, 1.2, 0);
@@ -107,7 +102,7 @@ const torusGeometry = new THREE.TorusGeometry(0.6, 0.25, 16, 32);
 const torusMaterial = new THREE.MeshStandardMaterial({
   color: 0xffe66d,
   roughness: 0.4,
-  metalness: 0.6
+  metalness: 0.6,
 });
 const torus = new THREE.Mesh(torusGeometry, torusMaterial);
 torus.position.set(2, 1, 0);
@@ -145,12 +140,12 @@ function animate() {
 }
 
 // Handle Resize
-window.addEventListener('resize', () => {
+window.addEventListener("resize", () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
 // Hide loading screen and start animation
-document.getElementById('loading').classList.add('hidden');
+document.getElementById("loading").classList.add("hidden");
 animate();

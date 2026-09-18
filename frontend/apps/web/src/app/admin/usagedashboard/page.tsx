@@ -25,7 +25,11 @@ const EMPTY_SUMMARY: UsageSummary = {
     videoTranscodingHours: 0,
     questions: 0,
   },
-  mau: { monthly: [], daily: [], comparison: { current: 0, m1: null, m3: null, m6: null, m9: null } },
+  mau: {
+    monthly: [],
+    daily: [],
+    comparison: { current: 0, m1: null, m3: null, m6: null, m9: null },
+  },
   history: [],
 };
 

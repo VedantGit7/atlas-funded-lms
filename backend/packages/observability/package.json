@@ -23,7 +23,7 @@
   },
   "dependencies": {
     "@atlas/core": "workspace:*",
-    "@sentry/nextjs": "^9.47.0",
+    "@sentry/nextjs": "^10.59.0",
     "posthog-node": "^5.0.0",
     "zod": "^4.4.3"
   },

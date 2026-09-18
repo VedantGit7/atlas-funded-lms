@@ -8,7 +8,7 @@ function adminTx() {
       .fn()
       .mockResolvedValueOnce([{ key: "competency.dimension.manage" }])
       .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([{ role_key: "admin" }]),
+      .mockResolvedValueOnce([{ role_key: "admin", bypasses_resource_predicates: true }]),
   };
 }
 
@@ -18,7 +18,7 @@ function instructorReadTx() {
       .fn()
       .mockResolvedValueOnce([{ key: "competency.dimension.read" }])
       .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([{ role_key: "instructor" }]),
+      .mockResolvedValueOnce([{ role_key: "instructor", bypasses_resource_predicates: false }]),
   };
 }
 

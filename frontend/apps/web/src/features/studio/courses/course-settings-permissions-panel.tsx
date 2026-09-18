@@ -100,7 +100,9 @@ function PermissionsCheckbox({
       <span className="min-w-0 flex-1">
         <span className="block text-sm font-semibold text-[var(--admin-on-surface)]">{label}</span>
         {description ? (
-          <span className={`${builderHelperClassName} mt-1 block leading-relaxed`}>{description}</span>
+          <span className={`${builderHelperClassName} mt-1 block leading-relaxed`}>
+            {description}
+          </span>
         ) : null}
       </span>
       <input

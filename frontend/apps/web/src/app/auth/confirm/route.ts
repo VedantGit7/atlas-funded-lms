@@ -50,8 +50,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     return toVerifyEmail("expired");
   }
 
-  const authenticated =
-    result.status === "AUTHENTICATED" || result.status === "INVITED_MEMBERSHIP";
+  const authenticated = result.status === "AUTHENTICATED" || result.status === "INVITED_MEMBERSHIP";
 
   let destination: URL;
   if (authenticated) {

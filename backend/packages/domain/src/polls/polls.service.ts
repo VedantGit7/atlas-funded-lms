@@ -3,18 +3,14 @@ import type { ServiceCtx } from "../shared/domain.types";
 import {
   createPollBodySchema,
   pollListResponseSchema,
+  pollRespondentViewResponseSchema,
   pollResponseSchema,
   pollResultsResponseSchema,
   respondPollBodySchema,
   respondPollResponseSchema,
   updatePollBodySchema,
 } from "./polls.dto";
-import {
-  enrollmentRequired,
-  pollClosed,
-  pollNotFound,
-  pollOptionNotFound,
-} from "./polls.errors";
+import { enrollmentRequired, pollClosed, pollNotFound, pollOptionNotFound } from "./polls.errors";
 import { pollsRepository, type PollOptionRow, type PollRow } from "./polls.repository";
 
 function toPollDto(poll: PollRow, options: PollOptionRow[]) {
@@ -88,6 +84,41 @@ export async function getPoll(tx: TenantTx, _ctx: ServiceCtx, pollId: string) {
   return pollResponseSchema.parse({ data: toPollDto(poll, options) });
 }
 
+/**
+ * Read a poll as a respondent.
+ *
+ * Mirrors the guards in `respondToPoll` rather than those in `getPoll`: a
+ * learner may only see a poll they could actually answer, so an archived,
+ * inactive or closed poll is a 404-equivalent here even though an admin can
+ * still read it. Returns the learner-safe projection, which omits isCorrect.
+ */
+export async function getPollForRespondent(tx: TenantTx, ctx: ServiceCtx, pollId: string) {
+  const poll = await pollsRepository.findPollById(tx, pollId);
+  if (!poll) throw pollNotFound();
+  if (poll.status !== "ACTIVE") throw pollClosed();
+  if (poll.closes_at && poll.closes_at.getTime() < Date.now()) throw pollClosed();
+
+  const enrolled = await pollsRepository.hasActiveEnrollment(tx, ctx.actorMembershipId);
+  if (!enrolled) throw enrollmentRequired();
+
+  const options = await pollsRepository.listOptionsForPoll(tx, pollId);
+  return pollRespondentViewResponseSchema.parse({
+    data: {
+      id: poll.id,
+      title: poll.title,
+      description: poll.description,
+      allowMultipleAnswers: poll.allow_multiple_answers,
+      anonymousVote: poll.anonymous_vote,
+      closesAt: poll.closes_at?.toISOString() ?? null,
+      options: options.map((option) => ({
+        id: option.id,
+        label: option.label,
+        sortOrder: option.sort_order,
+      })),
+    },
+  });
+}
+
 export async function updatePoll(tx: TenantTx, _ctx: ServiceCtx, pollId: string, rawBody: unknown) {
   const body = updatePollBodySchema.parse(rawBody);
   const poll = await pollsRepository.updatePoll(tx, pollId, {
@@ -99,9 +130,7 @@ export async function updatePoll(tx: TenantTx, _ctx: ServiceCtx, pollId: string,
       ? { allowMultipleAnswers: body.allowMultipleAnswers }
       : {}),
     ...(body.anonymousVote !== undefined ? { anonymousVote: body.anonymousVote } : {}),
-    ...(body.resultVisibility !== undefined
-      ? { resultVisibility: body.resultVisibility }
-      : {}),
+    ...(body.resultVisibility !== undefined ? { resultVisibility: body.resultVisibility } : {}),
     ...(body.layout !== undefined ? { layout: body.layout } : {}),
     ...(body.durationSeconds !== undefined ? { durationSeconds: body.durationSeconds } : {}),
     ...(body.liveSessionId !== undefined ? { liveSessionId: body.liveSessionId } : {}),
@@ -169,10 +198,7 @@ export async function getPollResults(tx: TenantTx, _ctx: ServiceCtx, pollId: str
         label: option.label,
         count: option.count,
         isCorrect: option.isCorrect,
-        percent:
-          totalResponses > 0
-            ? Math.round((option.count / totalResponses) * 1000) / 10
-            : 0,
+        percent: totalResponses > 0 ? Math.round((option.count / totalResponses) * 1000) / 10 : 0,
       })),
     },
   });

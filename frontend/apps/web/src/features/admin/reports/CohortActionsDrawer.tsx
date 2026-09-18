@@ -110,7 +110,7 @@ export function CohortActionsDrawer({
       if (!product) return null;
       return {
         sourceKind: "progress",
-        productType: productType as ProgressProductType,
+        productType: productType,
         productId,
         productTitle: product.title,
         matchCount: standaloneCount ?? 0,
@@ -166,7 +166,9 @@ export function CohortActionsDrawer({
       if (event.key === "Escape") onClose();
     };
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+    };
   }, [open, onClose]);
 
   useEffect(() => {
@@ -186,7 +188,7 @@ export function CohortActionsDrawer({
     void (async () => {
       try {
         if (standaloneKind === "progress") {
-          const res = await fetchProgressProducts(productType as ProgressProductType, {
+          const res = await fetchProgressProducts(productType, {
             page: 1,
             limit: 50,
           });
@@ -229,7 +231,7 @@ export function CohortActionsDrawer({
       void (async () => {
         try {
           const { fetchProgressLearners } = await import("./admin-progress-score-roster-api");
-          const res = await fetchProgressLearners(productType as ProgressProductType, productId, {
+          const res = await fetchProgressLearners(productType, productId, {
             page: 1,
             limit: 1,
           });
@@ -568,7 +570,9 @@ export function CohortActionsDrawer({
                     id="cohort-quiz"
                     className={fieldClassName}
                     value={assessmentId}
-                    onChange={(e) => setAssessmentId(e.target.value)}
+                    onChange={(e) => {
+                      setAssessmentId(e.target.value);
+                    }}
                     disabled={!productId}
                   >
                     <option value="">Select assessment…</option>
@@ -593,7 +597,9 @@ export function CohortActionsDrawer({
                   id="group-name"
                   className={fieldClassName}
                   value={groupName}
-                  onChange={(e) => setGroupName(e.target.value)}
+                  onChange={(e) => {
+                    setGroupName(e.target.value);
+                  }}
                 />
               </div>
               <div className="flex flex-col gap-2">
@@ -606,7 +612,9 @@ export function CohortActionsDrawer({
                   rows={3}
                   placeholder="Briefly describe the purpose of this group…"
                   value={description}
-                  onChange={(e) => setDescription(e.target.value)}
+                  onChange={(e) => {
+                    setDescription(e.target.value);
+                  }}
                 />
               </div>
               <div className="rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface-high)] p-5">
@@ -614,7 +622,13 @@ export function CohortActionsDrawer({
                   Group Membership Type
                 </h3>
                 <label className="flex cursor-pointer items-start gap-4">
-                  <input type="radio" name="sync" className="mt-1 accent-[var(--admin-primary)]" checked readOnly />
+                  <input
+                    type="radio"
+                    name="sync"
+                    className="mt-1 accent-[var(--admin-primary)]"
+                    checked
+                    readOnly
+                  />
                   <span>
                     <span className="block font-mono text-sm text-[var(--admin-on-surface)]">
                       Static snapshot
@@ -644,7 +658,9 @@ export function CohortActionsDrawer({
                   id="batch-select"
                   className={fieldClassName}
                   value={alsoAddToBatchId}
-                  onChange={(e) => setAlsoAddToBatchId(e.target.value)}
+                  onChange={(e) => {
+                    setAlsoAddToBatchId(e.target.value);
+                  }}
                 >
                   <option value="">Select a batch (Optional)…</option>
                   {batches.map((b) => (
@@ -669,7 +685,9 @@ export function CohortActionsDrawer({
                     type="checkbox"
                     className="accent-[var(--admin-primary)]"
                     checked={excludeRecent}
-                    onChange={(e) => setExcludeRecent(e.target.checked)}
+                    onChange={(e) => {
+                      setExcludeRecent(e.target.checked);
+                    }}
                   />
                   <span className="text-sm text-[var(--admin-on-surface-variant)]">
                     Exclude messaged in last 7 days
@@ -678,7 +696,12 @@ export function CohortActionsDrawer({
               </div>
               <div className="flex gap-6">
                 <label className="flex items-center gap-2">
-                  <input type="checkbox" checked readOnly className="accent-[var(--admin-primary)]" />
+                  <input
+                    type="checkbox"
+                    checked
+                    readOnly
+                    className="accent-[var(--admin-primary)]"
+                  />
                   <span className="font-mono text-sm text-[var(--admin-on-surface)]">Email</span>
                 </label>
                 <label className="flex cursor-not-allowed items-center gap-2 opacity-50">
@@ -697,7 +720,9 @@ export function CohortActionsDrawer({
                   className={fieldClassName}
                   placeholder="Need help getting unstuck?"
                   value={subject}
-                  onChange={(e) => setSubject(e.target.value)}
+                  onChange={(e) => {
+                    setSubject(e.target.value);
+                  }}
                 />
               </div>
               <div className="flex flex-col gap-2">
@@ -709,7 +734,9 @@ export function CohortActionsDrawer({
                         key={tag.key}
                         type="button"
                         className="rounded-sm px-2 py-1 font-mono text-[11px] text-[var(--admin-on-surface-variant)] hover:bg-[var(--admin-surface)] hover:text-[var(--admin-on-surface)]"
-                        onClick={() => insertTag(tag.key)}
+                        onClick={() => {
+                          insertTag(tag.key);
+                        }}
                       >
                         {tag.label}
                       </button>
@@ -721,7 +748,9 @@ export function CohortActionsDrawer({
                     placeholder="Type your message here…"
                     rows={6}
                     value={message}
-                    onChange={(e) => setMessage(e.target.value)}
+                    onChange={(e) => {
+                      setMessage(e.target.value);
+                    }}
                   />
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -758,7 +787,9 @@ export function CohortActionsDrawer({
             <button
               type="button"
               className={`${ghostButtonClassName} underline`}
-              onClick={() => setConfirming(false)}
+              onClick={() => {
+                setConfirming(false);
+              }}
               disabled={busy}
             >
               Back

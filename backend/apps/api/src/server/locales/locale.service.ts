@@ -49,7 +49,12 @@ function mapQaIssueDto(row: LocaleQaIssueRow) {
   };
 }
 
-function mapQaRunDto(row: { id: string; issue_count: number; started_at: Date; completed_at: Date }) {
+function mapQaRunDto(row: {
+  id: string;
+  issue_count: number;
+  started_at: Date;
+  completed_at: Date;
+}) {
   return {
     id: row.id,
     issueCount: row.issue_count,
@@ -92,9 +97,7 @@ function buildResourceMap(rows: LocaleResourceRow[]): Map<string, string> {
   return new Map(rows.map((row) => [row.key, row.value]));
 }
 
-function buildLocaleResourceMaps(
-  rows: LocaleResourceRow[],
-): Map<string, Map<string, string>> {
+function buildLocaleResourceMaps(rows: LocaleResourceRow[]): Map<string, Map<string, string>> {
   const byLocale = new Map<string, Map<string, string>>();
   for (const row of rows) {
     const localeMap = byLocale.get(row.locale) ?? new Map<string, string>();
@@ -234,9 +237,7 @@ export async function getLocaleCoverage(tx: TenantTx, ctx: ServiceCtx) {
       .filter((key) => !localeValues.has(key));
     const translatedCount = canonicalKeys.length - missingKeys.length;
     const coveragePercent =
-      canonicalKeys.length === 0
-        ? 100
-        : Math.round((translatedCount / canonicalKeys.length) * 100);
+      canonicalKeys.length === 0 ? 100 : Math.round((translatedCount / canonicalKeys.length) * 100);
 
     return {
       locale,

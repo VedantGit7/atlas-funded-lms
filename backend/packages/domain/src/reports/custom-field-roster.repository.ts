@@ -1,5 +1,6 @@
 import type { TenantTx } from "@atlas/db";
 import type { CustomFieldRosterQuery } from "./custom-field-roster.dto";
+import { textColumn } from "./raw-column";
 
 export type CustomFieldDefRow = {
   id: string;
@@ -46,10 +47,10 @@ export const customFieldRosterRepository = {
       order by key asc
     `;
     return rows.map((row) => ({
-      id: String(row["id"]),
-      key: String(row["key"]),
-      label: String(row["label"]),
-      field_type: String(row["field_type"]),
+      id: textColumn(row["id"]),
+      key: textColumn(row["key"]),
+      label: textColumn(row["label"]),
+      field_type: textColumn(row["field_type"]),
     }));
   },
 
@@ -192,13 +193,13 @@ export const customFieldRosterRepository = {
     `;
 
     return rows.map((row) => ({
-      membership_id: String(row["membership_id"]),
+      membership_id: textColumn(row["membership_id"]),
       learner_name: typeof row["learner_name"] === "string" ? row["learner_name"] : null,
       email: typeof row["email"] === "string" ? row["email"] : null,
-      status: String(row["status"]),
+      status: textColumn(row["status"]),
       enrollment_count: Number(row["enrollment_count"] ?? 0),
       total_spent_cents: Number(row["total_spent_cents"] ?? 0),
-      currency: String(row["currency"] ?? "INR"),
+      currency: textColumn(row["currency"], "INR"),
       last_active_at: row["last_active_at"] instanceof Date ? row["last_active_at"] : null,
       signed_up_at: row["signed_up_at"] instanceof Date ? row["signed_up_at"] : null,
     }));
@@ -273,8 +274,8 @@ export const customFieldRosterRepository = {
       membershipIds,
     );
     return rows.map((row) => ({
-      membership_id: String(row["membership_id"]),
-      field_key: String(row["field_key"]),
+      membership_id: textColumn(row["membership_id"]),
+      field_key: textColumn(row["field_key"]),
       value_json: row["value_json"],
     }));
   },
@@ -433,8 +434,7 @@ export const customFieldRosterRepository = {
       active_learner_count: Number(row?.active_learner_count ?? 0),
       inactive_learner_count: Number(row?.inactive_learner_count ?? 0),
       custom_field_count: Number(row?.custom_field_count ?? 0),
-      average_coverage_pct:
-        row?.average_coverage_pct == null ? null : Number(row.average_coverage_pct),
+      average_coverage_pct: row?.average_coverage_pct == null ? null : row.average_coverage_pct,
       learners_with_all_fields_filled: Number(row?.learners_with_all_fields_filled ?? 0),
       fields_below_40_coverage: Number(row?.fields_below_40_coverage ?? 0),
     };
@@ -539,13 +539,16 @@ export const customFieldRosterRepository = {
     `;
 
     return rows.map((row) => ({
-      id: String(row["id"]),
-      key: String(row["key"]),
-      label: String(row["label"]),
-      field_type: String(row["field_type"]),
-      status: String(row["status"]),
+      id: textColumn(row["id"]),
+      key: textColumn(row["key"]),
+      label: textColumn(row["label"]),
+      field_type: textColumn(row["field_type"]),
+      status: textColumn(row["status"]),
       options_json: row["options_json"],
-      created_at: row["created_at"] instanceof Date ? row["created_at"] : new Date(String(row["created_at"])),
+      created_at:
+        row["created_at"] instanceof Date
+          ? row["created_at"]
+          : new Date(textColumn(row["created_at"])),
       learner_count: Number(row["learner_count"] ?? 0),
       filled_count: Number(row["filled_count"] ?? 0),
       distinct_value_count: Number(row["distinct_value_count"] ?? 0),
@@ -553,7 +556,7 @@ export const customFieldRosterRepository = {
         row["last_updated_at"] instanceof Date
           ? row["last_updated_at"]
           : row["last_updated_at"]
-            ? new Date(String(row["last_updated_at"]))
+            ? new Date(textColumn(row["last_updated_at"]))
             : null,
       most_common_value_json: row["most_common_value_json"] ?? null,
       most_common_count: Number(row["most_common_count"] ?? 0),
@@ -589,16 +592,16 @@ export const customFieldRosterRepository = {
     const row = rows[0];
     if (!row) return null;
     return {
-      id: String(row["id"]),
-      key: String(row["key"]),
-      label: String(row["label"]),
-      field_type: String(row["field_type"]),
-      status: String(row["status"]),
+      id: textColumn(row["id"]),
+      key: textColumn(row["key"]),
+      label: textColumn(row["label"]),
+      field_type: textColumn(row["field_type"]),
+      status: textColumn(row["status"]),
       options_json: row["options_json"],
       created_at:
         row["created_at"] instanceof Date
           ? row["created_at"]
-          : new Date(String(row["created_at"])),
+          : new Date(textColumn(row["created_at"])),
     };
   },
 
@@ -657,7 +660,7 @@ export const customFieldRosterRepository = {
         row?.["last_updated_at"] instanceof Date
           ? row["last_updated_at"]
           : row?.["last_updated_at"]
-            ? new Date(String(row["last_updated_at"]))
+            ? new Date(textColumn(row["last_updated_at"]))
             : null,
       most_common_value_json: row?.["most_common_value_json"] ?? null,
       most_common_count: Number(row?.["most_common_count"] ?? 0),
@@ -697,7 +700,7 @@ export const customFieldRosterRepository = {
       order by count desc, value_text asc
     `;
     return rows.map((row) => ({
-      value_text: String(row["value_text"] ?? ""),
+      value_text: textColumn(row["value_text"], ""),
       count: Number(row["count"] ?? 0),
     }));
   },
@@ -750,9 +753,9 @@ export const customFieldRosterRepository = {
       where n.num_value is not null
     `;
     return rows.map((row) => ({
-      membership_id: String(row["membership_id"]),
-      learner_name: row["learner_name"] == null ? null : String(row["learner_name"]),
-      email: row["email"] == null ? null : String(row["email"]),
+      membership_id: textColumn(row["membership_id"]),
+      learner_name: row["learner_name"] == null ? null : textColumn(row["learner_name"]),
+      email: row["email"] == null ? null : textColumn(row["email"]),
       num_value: Number(row["num_value"]),
     }));
   },
@@ -810,7 +813,7 @@ export const customFieldRosterRepository = {
       week_start:
         row["week_start"] instanceof Date
           ? row["week_start"]
-          : new Date(String(row["week_start"])),
+          : new Date(textColumn(row["week_start"])),
       yes_count: Number(row["yes_count"] ?? 0),
       no_count: Number(row["no_count"] ?? 0),
     }));
@@ -872,8 +875,8 @@ export const customFieldRosterRepository = {
       group by a.value_text, b.value_text
     `;
     return rows.map((row) => ({
-      row_value: String(row["row_value"] ?? ""),
-      col_value: String(row["col_value"] ?? ""),
+      row_value: textColumn(row["row_value"], ""),
+      col_value: textColumn(row["col_value"], ""),
       count: Number(row["count"] ?? 0),
     }));
   },
@@ -1069,26 +1072,26 @@ export const customFieldRosterRepository = {
     `;
 
     return rows.map((row) => ({
-      membership_id: String(row["membership_id"]),
-      learner_name: row["learner_name"] == null ? null : String(row["learner_name"]),
-      email: row["email"] == null ? null : String(row["email"]),
-      status: String(row["status"] ?? ""),
+      membership_id: textColumn(row["membership_id"]),
+      learner_name: row["learner_name"] == null ? null : textColumn(row["learner_name"]),
+      email: row["email"] == null ? null : textColumn(row["email"]),
+      status: textColumn(row["status"], ""),
       enrollment_count: Number(row["enrollment_count"] ?? 0),
       total_spent_cents: Number(row["total_spent_cents"] ?? 0),
-      currency: String(row["currency"] ?? "INR"),
+      currency: textColumn(row["currency"], "INR"),
       last_active_at:
         row["last_active_at"] instanceof Date
           ? row["last_active_at"]
           : row["last_active_at"]
-            ? new Date(String(row["last_active_at"]))
+            ? new Date(textColumn(row["last_active_at"]))
             : null,
       signed_up_at:
         row["signed_up_at"] instanceof Date
           ? row["signed_up_at"]
           : row["signed_up_at"]
-            ? new Date(String(row["signed_up_at"]))
+            ? new Date(textColumn(row["signed_up_at"]))
             : null,
-      field_value: row["field_value"] == null ? null : String(row["field_value"]),
+      field_value: row["field_value"] == null ? null : textColumn(row["field_value"]),
     }));
   },
 
@@ -1141,25 +1144,25 @@ export const customFieldRosterRepository = {
     const row = rows[0];
     if (!row) return null;
     return {
-      membership_id: String(row["membership_id"]),
-      learner_name: row["learner_name"] == null ? null : String(row["learner_name"]),
-      email: row["email"] == null ? null : String(row["email"]),
-      status: String(row["status"] ?? ""),
-      avatar_url: row["avatar_url"] == null ? null : String(row["avatar_url"]),
+      membership_id: textColumn(row["membership_id"]),
+      learner_name: row["learner_name"] == null ? null : textColumn(row["learner_name"]),
+      email: row["email"] == null ? null : textColumn(row["email"]),
+      status: textColumn(row["status"], ""),
+      avatar_url: row["avatar_url"] == null ? null : textColumn(row["avatar_url"]),
       enrollment_count: Number(row["enrollment_count"] ?? 0),
       total_spent_cents: Number(row["total_spent_cents"] ?? 0),
-      currency: String(row["currency"] ?? "INR"),
+      currency: textColumn(row["currency"], "INR"),
       last_active_at:
         row["last_active_at"] instanceof Date
           ? row["last_active_at"]
           : row["last_active_at"]
-            ? new Date(String(row["last_active_at"]))
+            ? new Date(textColumn(row["last_active_at"]))
             : null,
       signed_up_at:
         row["signed_up_at"] instanceof Date
           ? row["signed_up_at"]
           : row["signed_up_at"]
-            ? new Date(String(row["signed_up_at"]))
+            ? new Date(textColumn(row["signed_up_at"]))
             : null,
     };
   },
@@ -1175,7 +1178,7 @@ export const customFieldRosterRepository = {
       field_type: string;
       status: string;
       options_json: unknown;
-      value_json: unknown | null;
+      value_json: unknown;
       updated_at: Date | null;
       updated_by_membership_id: string | null;
       updated_by_name: string | null;
@@ -1208,25 +1211,24 @@ export const customFieldRosterRepository = {
       order by d.created_at asc, d.key asc
     `;
     return rows.map((row) => ({
-      definition_id: String(row["definition_id"]),
-      key: String(row["key"]),
-      label: String(row["label"]),
-      field_type: String(row["field_type"]),
-      status: String(row["status"]),
+      definition_id: textColumn(row["definition_id"]),
+      key: textColumn(row["key"]),
+      label: textColumn(row["label"]),
+      field_type: textColumn(row["field_type"]),
+      status: textColumn(row["status"]),
       options_json: row["options_json"],
       value_json: row["value_json"] ?? null,
       updated_at:
         row["updated_at"] instanceof Date
           ? row["updated_at"]
           : row["updated_at"]
-            ? new Date(String(row["updated_at"]))
+            ? new Date(textColumn(row["updated_at"]))
             : null,
       updated_by_membership_id:
         row["updated_by_membership_id"] == null
           ? null
-          : String(row["updated_by_membership_id"]),
-      updated_by_name:
-        row["updated_by_name"] == null ? null : String(row["updated_by_name"]),
+          : textColumn(row["updated_by_membership_id"]),
+      updated_by_name: row["updated_by_name"] == null ? null : textColumn(row["updated_by_name"]),
     }));
   },
 
@@ -1241,8 +1243,8 @@ export const customFieldRosterRepository = {
       field_key: string;
       field_label: string;
       field_type: string;
-      old_value_json: unknown | null;
-      new_value_json: unknown | null;
+      old_value_json: unknown;
+      new_value_json: unknown;
       changed_at: Date;
       changed_by_name: string | null;
     }>
@@ -1272,19 +1274,18 @@ export const customFieldRosterRepository = {
       limit ${limit}
     `;
     return rows.map((row) => ({
-      id: String(row["id"]),
-      definition_id: String(row["definition_id"]),
-      field_key: String(row["field_key"]),
-      field_label: String(row["field_label"]),
-      field_type: String(row["field_type"]),
+      id: textColumn(row["id"]),
+      definition_id: textColumn(row["definition_id"]),
+      field_key: textColumn(row["field_key"]),
+      field_label: textColumn(row["field_label"]),
+      field_type: textColumn(row["field_type"]),
       old_value_json: row["old_value_json"] ?? null,
       new_value_json: row["new_value_json"] ?? null,
       changed_at:
         row["changed_at"] instanceof Date
           ? row["changed_at"]
-          : new Date(String(row["changed_at"])),
-      changed_by_name:
-        row["changed_by_name"] == null ? null : String(row["changed_by_name"]),
+          : new Date(textColumn(row["changed_at"])),
+      changed_by_name: row["changed_by_name"] == null ? null : textColumn(row["changed_by_name"]),
     }));
   },
 };

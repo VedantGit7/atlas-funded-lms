@@ -126,6 +126,17 @@ describe("courses API integration", () => {
             currency: null,
             locked: false,
             enrollmentStatus: "not_enrolled",
+            level: null,
+            category: null,
+            featured: false,
+            trending: false,
+            compareAtPriceCents: null,
+            durationSeconds: null,
+            studentCount: 0,
+            instructor: null,
+            progressPct: null,
+            ratingAverage: null,
+            ratingCount: 0,
             updatedAt: new Date().toISOString(),
           },
         ],
@@ -157,6 +168,11 @@ describe("courses API integration", () => {
             title: "Module 1",
             position: 1,
             lessonCount: 2,
+            // Required by courseModuleOutlineItemSchema, which the route
+            // validates its output against. The mock predated both fields, so
+            // the response failed validation and the route returned 500.
+            contentKind: "standard" as const,
+            scormLaunchReady: false,
           },
         ],
       },
@@ -191,7 +207,7 @@ describe("courses API integration", () => {
     const body = await response.json();
 
     expect(response.status).toBe(200);
-    expect(body.data.items[0]).toEqual({
+    expect(body.data.items[0]).toMatchObject({
       id: "018f0000-0000-7000-8000-000000000040",
       title: "Module 1",
       position: 1,

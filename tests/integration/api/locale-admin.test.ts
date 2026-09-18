@@ -65,14 +65,18 @@ describeWithDb("locale admin integration", () => {
       expect(overview.data.defaultLocale).toBe("en");
 
       const metadata = await listLocaleMetadata(tx, admin);
-      expect(metadata.data.some((entry) => entry.locale === "fr" && entry.nativeName === "Français")).toBe(
-        true,
-      );
+      expect(
+        metadata.data.some((entry) => entry.locale === "fr" && entry.nativeName === "Français"),
+      ).toBe(true);
 
       const queue = await listLocaleReviewQueue(tx, admin);
-      expect(queue.data.some((entry) => entry.locale === "fr" && entry.key === "welcome.title")).toBe(true);
+      expect(
+        queue.data.some((entry) => entry.locale === "fr" && entry.key === "welcome.title"),
+      ).toBe(true);
 
-      const reviewed = await updateLocaleReview(tx, admin, "fr", "welcome.title", { status: "approved" });
+      const reviewed = await updateLocaleReview(tx, admin, "fr", "welcome.title", {
+        status: "approved",
+      });
       expect(reviewed.data.reviewStatus).toBe("approved");
 
       const qa = await runLocaleQaChecksForTenant(tx, admin);

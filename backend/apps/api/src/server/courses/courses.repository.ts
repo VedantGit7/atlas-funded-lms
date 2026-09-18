@@ -67,7 +67,9 @@ export type CourseCatalogMeta = {
 export function readCourseCatalogMeta(metadata: Record<string, unknown> | null): CourseCatalogMeta {
   const rawLevel = typeof metadata?.["level"] === "string" ? metadata["level"].toLowerCase() : null;
   const level: CourseLevel | null =
-    rawLevel === "beginner" || rawLevel === "intermediate" || rawLevel === "advanced" ? rawLevel : null;
+    rawLevel === "beginner" || rawLevel === "intermediate" || rawLevel === "advanced"
+      ? rawLevel
+      : null;
 
   const category =
     typeof metadata?.["category"] === "string"
@@ -527,9 +529,7 @@ export async function listPublishedCoursesPaginated(args: {
     const meta = learnerMetadataProjection(row.metadata_json);
     const pricing = readCoursePricing(row.metadata_json);
     const catalog = readCourseCatalogMeta(row.metadata_json);
-    const enrollmentStatus = row.enrollment_id
-      ? ("enrolled" as const)
-      : ("not_enrolled" as const);
+    const enrollmentStatus = row.enrollment_id ? ("enrolled" as const) : ("not_enrolled" as const);
     const durationSeconds = row.duration_seconds != null ? Number(row.duration_seconds) : null;
     const instructor =
       row.instructor_name != null || row.instructor_avatar_key != null
@@ -555,7 +555,8 @@ export async function listPublishedCoursesPaginated(args: {
       durationSeconds: durationSeconds != null && durationSeconds > 0 ? durationSeconds : null,
       studentCount: Number(row.student_count),
       instructor,
-      progressPct: enrollmentStatus === "enrolled" && row.progress_pct != null ? row.progress_pct : null,
+      progressPct:
+        enrollmentStatus === "enrolled" && row.progress_pct != null ? row.progress_pct : null,
       ratingAverage: row.rating_average,
       ratingCount: Number(row.rating_count),
       enrollmentStatus,

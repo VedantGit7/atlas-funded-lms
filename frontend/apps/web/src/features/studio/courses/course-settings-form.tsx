@@ -47,17 +47,17 @@ export function CourseSettingsForm({
   section,
 }: CourseSettingsFormProps) {
   const initialAccess = parseCourseAccessFromTags(course.tags);
-  const [title, setTitle] = useState(course.title);
-  const [description, setDescription] = useState(course.description ?? "");
+  const [title] = useState(course.title);
+  const [description] = useState(course.description ?? "");
   const [accessTier, setAccessTier] = useState<"FREE" | "PAID">(course.accessTier);
   const [priceAmount, setPriceAmount] = useState(
     course.priceCents != null ? (course.priceCents / 100).toString() : "",
   );
   const [currency, setCurrency] = useState(course.currency ?? "USD");
-  const [accessMode, setAccessMode] = useState<CourseAccessMode>(initialAccess.accessMode);
+  const [accessMode] = useState<CourseAccessMode>(initialAccess.accessMode);
   const [dripEnabled, setDripEnabled] = useState(initialAccess.dripEnabled);
   const [dripIntervalDays, setDripIntervalDays] = useState(initialAccess.dripIntervalDays);
-  const [sequentialLearning, setSequentialLearning] = useState(initialAccess.sequentialLearning);
+  const [sequentialLearning] = useState(initialAccess.sequentialLearning);
   const [prerequisiteCourseIds, setPrerequisiteCourseIds] = useState(
     initialAccess.prerequisiteCourseIds.join(", "),
   );
@@ -124,11 +124,13 @@ export function CourseSettingsForm({
       className="flex flex-col gap-6"
       onSubmit={(event) => {
         event.preventDefault();
-        void handleSubmit();
+        handleSubmit();
       }}
     >
       {!editable ? (
-        <p className={`${statusBannerClassName} border-[var(--admin-warning)]/30 bg-[var(--admin-warning)]/10 text-[var(--admin-warning)]`}>
+        <p
+          className={`${statusBannerClassName} border-[var(--admin-warning)]/30 bg-[var(--admin-warning)]/10 text-[var(--admin-warning)]`}
+        >
           This course is locked while in review or published.
         </p>
       ) : null}
@@ -274,7 +276,11 @@ export function CourseSettingsForm({
 
       {editable ? (
         <div className="flex justify-end">
-          <button type="submit" disabled={saveMutation.isPending} className={primaryButtonClassName}>
+          <button
+            type="submit"
+            disabled={saveMutation.isPending}
+            className={primaryButtonClassName}
+          >
             {saveMutation.isPending ? "Saving…" : "Save settings"}
           </button>
         </div>

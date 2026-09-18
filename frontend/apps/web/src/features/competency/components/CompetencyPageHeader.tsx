@@ -8,7 +8,10 @@ type CompetencyPageHeaderProps = {
   dimensionCount: number;
 };
 
-export function CompetencyPageHeader({ selectedProfile, dimensionCount }: CompetencyPageHeaderProps) {
+export function CompetencyPageHeader({
+  selectedProfile,
+  dimensionCount,
+}: CompetencyPageHeaderProps) {
   const isPublished = selectedProfile?.activeVersion != null;
 
   return (

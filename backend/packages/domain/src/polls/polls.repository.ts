@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import type { TenantTx } from "@atlas/db";
+import { textColumn } from "../reports/raw-column";
 
 export type PollRow = {
   id: string;
@@ -28,18 +29,17 @@ export type PollOptionRow = {
 
 function mapPollRow(row: Record<string, unknown>): PollRow {
   return {
-    id: String(row["id"]),
-    title: String(row["title"]),
+    id: textColumn(row["id"]),
+    title: textColumn(row["title"]),
     description: typeof row["description"] === "string" ? row["description"] : null,
-    poll_type: String(row["poll_type"] ?? "multiple_choice"),
-    status: String(row["status"]),
+    poll_type: textColumn(row["poll_type"], "multiple_choice"),
+    status: textColumn(row["status"]),
     quiz_mode: Boolean(row["quiz_mode"]),
     allow_multiple_answers: Boolean(row["allow_multiple_answers"]),
     anonymous_vote: Boolean(row["anonymous_vote"]),
-    result_visibility: String(row["result_visibility"] ?? "after_vote"),
-    layout: String(row["layout"] ?? "list"),
-    duration_seconds:
-      row["duration_seconds"] == null ? null : Number(row["duration_seconds"]),
+    result_visibility: textColumn(row["result_visibility"], "after_vote"),
+    layout: textColumn(row["layout"], "list"),
+    duration_seconds: row["duration_seconds"] == null ? null : Number(row["duration_seconds"]),
     live_session_id: typeof row["live_session_id"] === "string" ? row["live_session_id"] : null,
     closes_at: row["closes_at"] instanceof Date ? row["closes_at"] : null,
     created_at: row["created_at"] as Date,
@@ -119,9 +119,9 @@ export const pollsRepository = {
       const row = optionRows[0];
       if (row) {
         options.push({
-          id: String(row["id"]),
-          poll_id: String(row["poll_id"]),
-          label: String(row["label"]),
+          id: textColumn(row["id"]),
+          poll_id: textColumn(row["poll_id"]),
+          label: textColumn(row["label"]),
           sort_order: Number(row["sort_order"]),
           is_correct: Boolean(row["is_correct"]),
         });
@@ -163,9 +163,9 @@ export const pollsRepository = {
       order by sort_order asc
     `;
     return rows.map((row) => ({
-      id: String(row["id"]),
-      poll_id: String(row["poll_id"]),
-      label: String(row["label"]),
+      id: textColumn(row["id"]),
+      poll_id: textColumn(row["poll_id"]),
+      label: textColumn(row["label"]),
       sort_order: Number(row["sort_order"]),
       is_correct: Boolean(row["is_correct"]),
     }));
@@ -195,10 +195,8 @@ export const pollsRepository = {
       update polls
       set
         title = ${args.title ?? existing.title},
-        description = ${
-          args.description !== undefined ? args.description : existing.description
-        },
-        status = ${(args.status ?? existing.status)}::"EntityStatus",
+        description = ${args.description !== undefined ? args.description : existing.description},
+        status = ${args.status ?? existing.status}::"EntityStatus",
         quiz_mode = ${args.quizMode ?? existing.quiz_mode},
         allow_multiple_answers = ${args.allowMultipleAnswers ?? existing.allow_multiple_answers},
         anonymous_vote = ${args.anonymousVote ?? existing.anonymous_vote},
@@ -265,7 +263,7 @@ export const pollsRepository = {
       optionId: row.option_id,
       label: row.label,
       count: Number(row.count),
-      isCorrect: Boolean(row.is_correct),
+      isCorrect: row.is_correct,
     }));
   },
 

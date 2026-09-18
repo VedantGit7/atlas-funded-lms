@@ -131,7 +131,6 @@ function TitleCell({ row }: { row: MarketingEventDto }) {
         aria-hidden="true"
       >
         {row.coverImageUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={row.coverImageUrl}
             alt=""
@@ -237,8 +236,7 @@ export function EventsListPanel() {
   const rangeStart = items.length === 0 ? 0 : (safePage - 1) * pageSize + 1;
   const rangeEnd = Math.min(safePage * pageSize, items.length);
   const hasFilters = Boolean(debouncedQuery || tab !== "ALL");
-  const deleteMatches =
-    deleteRow != null && deleteConfirm.trim() === deleteRow.title.trim();
+  const deleteMatches = deleteRow != null && deleteConfirm.trim() === deleteRow.title.trim();
 
   const tabCount = (id: StatusTab): number => {
     if (id === "ALL") return summary.totalCount;
@@ -669,8 +667,7 @@ export function EventsListPanel() {
             {formatEventCount(summary.totalCount)}
           </p>
           <p className="mt-3 text-[12px] text-[var(--admin-on-surface-variant)]">
-            {formatEventCount(summary.liveCount)} live, {formatEventCount(summary.draftCount)}{" "}
-            draft
+            {formatEventCount(summary.liveCount)} live, {formatEventCount(summary.draftCount)} draft
           </p>
         </div>
       </div>
@@ -703,7 +700,9 @@ export function EventsListPanel() {
             </h2>
             <p className="text-sm text-[var(--admin-on-surface-variant)]">
               Unpublish first if Live. Type{" "}
-              <span className="font-semibold text-[var(--admin-on-surface)]">{deleteRow.title}</span>{" "}
+              <span className="font-semibold text-[var(--admin-on-surface)]">
+                {deleteRow.title}
+              </span>{" "}
               to confirm.
             </p>
             <input

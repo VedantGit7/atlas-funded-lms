@@ -1,16 +1,16 @@
 import type { z } from "zod";
 import { createTenantRoute } from "@atlas/api";
 import { verifyMfaEnrollment } from "@atlas/auth";
-import {
-  AccountSecurityOkResponseSchema,
-  MfaVerifyRequestSchema,
-} from "@atlas/domain-identity";
+import { AccountSecurityOkResponseSchema, MfaVerifyRequestSchema } from "@atlas/domain-identity";
 import { emitSecurityNotification } from "../../../../../../../lib/account-security-orchestrator";
 import { securityMutationMetadata } from "../../route.metadata";
 
 type MfaVerifyBody = z.output<typeof MfaVerifyRequestSchema>;
 
-export const POST = createTenantRoute<MfaVerifyBody, z.output<typeof AccountSecurityOkResponseSchema>>({
+export const POST = createTenantRoute<
+  MfaVerifyBody,
+  z.output<typeof AccountSecurityOkResponseSchema>
+>({
   metadata: securityMutationMetadata,
   body: MfaVerifyRequestSchema,
   output: AccountSecurityOkResponseSchema,

@@ -104,10 +104,16 @@ const tenantAEntitlements = {
   ],
 };
 
+// `canonicalKey` and `description` are required by
+// FeatureFlagViewSchema, which the route validates its output against. The
+// mock predates both fields, so the response failed validation and the route
+// returned 500 — a stale fixture, not a defect: the real service supplies them.
 const tenantAFeatureFlags = {
   data: [
     {
       key: "community.enable",
+      canonicalKey: "community.enable",
+      description: null,
       value: { tenantSlug: "tenant-a" },
       source: "TENANT_OVERRIDE" as const,
       readOnly: false,

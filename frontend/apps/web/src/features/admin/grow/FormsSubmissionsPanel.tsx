@@ -15,13 +15,9 @@ import {
   type FormDto,
   type FormSubmissionDto,
 } from "./forms-shared";
+import { csvEscape } from "@/lib/export/csv";
 
 const PAGE_SIZE = 10;
-
-function csvEscape(value: string): string {
-  if (/[",\n]/.test(value)) return `"${value.replaceAll('"', '""')}"`;
-  return value;
-}
 
 export function FormsSubmissionsPanel({ formId }: { formId: string }) {
   const [form, setForm] = useState<FormDto | null>(null);

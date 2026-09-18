@@ -4,10 +4,7 @@ import { createPublicRouteHandler } from "@atlas/api";
 import { publicSignupInputSchema, setAuthCookies, signupWithPassword } from "@atlas/auth";
 import { withGlobalDb } from "@atlas/db/global-db";
 import { withTenantTx } from "@atlas/db/with-tenant-tx";
-import {
-  findMembershipByPrincipal,
-  ensureSelfServiceLearnerMembership,
-} from "@atlas/membership";
+import { findMembershipByPrincipal, ensureSelfServiceLearnerMembership } from "@atlas/membership";
 import {
   PublicSignupRequestSchema,
   rejectClientTenantId,
@@ -30,7 +27,8 @@ export const POST = createPublicRouteHandler(routeMetadata, async ({ req, reques
 
     // Validate + stash referral before creating the auth principal so a bad
     // code cannot leave an orphaned signup behind.
-    if (input.referralCode) {
+    const referralCode = input.referralCode;
+    if (referralCode) {
       await withTenantTx(
         {
           tenantId: tenant.tenantId,
@@ -40,7 +38,7 @@ export const POST = createPublicRouteHandler(routeMetadata, async ({ req, reques
         async (tx) => {
           await stashReferralCodeForSignup(tx, {
             emailNormalized: input.email,
-            referralCode: input.referralCode!,
+            referralCode,
           });
         },
       );
@@ -87,7 +85,7 @@ export const POST = createPublicRouteHandler(routeMetadata, async ({ req, reques
         // there is no session and provisioning happens on first login instead.
         if (
           result.status === "signed_in" &&
-          !(result.identity?.mfaEnabled ?? false) &&
+          !result.identity.mfaEnabled &&
           principalId &&
           !membership
         ) {
@@ -118,11 +116,11 @@ export const POST = createPublicRouteHandler(routeMetadata, async ({ req, reques
           try {
             await dispatchMarketingIntegrationWebhooks(
               tx,
-              { tenantId: tenant.tenantId },
+              { tenantId: tenant.tenantId, actorMembershipId: membership.id, requestId },
               "sign_up",
               {
                 email: input.email,
-                name: input.displayName ?? null,
+                name: input.displayName,
                 membershipId: membership.id,
                 source: "public_signup",
               },

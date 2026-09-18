@@ -31,9 +31,7 @@ export default async function AdminCouponRedemptionsRoutePage({
   return (
     <AdminPageGate screenId="T50" state="ready" title="Coupon redemptions">
       <Suspense
-        fallback={
-          <p className="text-sm text-[var(--admin-on-surface-variant)]">Loading…</p>
-        }
+        fallback={<p className="text-sm text-[var(--admin-on-surface-variant)]">Loading…</p>}
       >
         <AdminCouponRedemptionsPanel couponId={couponId} />
       </Suspense>

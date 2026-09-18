@@ -220,7 +220,9 @@ export function WhatsappListPanel() {
       setConnection(response.data);
       toast.success("WhatsApp connected (mock).");
     } catch (caught) {
-      toast.error(caught instanceof ClientApiError ? caught.message : "Could not connect WhatsApp.");
+      toast.error(
+        caught instanceof ClientApiError ? caught.message : "Could not connect WhatsApp.",
+      );
     } finally {
       setConnectBusy(false);
     }
@@ -253,7 +255,9 @@ export function WhatsappListPanel() {
       setConnection(response.data);
       toast.success("WhatsApp connected via Meta.");
     } catch (caught) {
-      toast.error(caught instanceof ClientApiError ? caught.message : "Could not connect WhatsApp.");
+      toast.error(
+        caught instanceof ClientApiError ? caught.message : "Could not connect WhatsApp.",
+      );
     } finally {
       setConnectBusy(false);
     }
@@ -307,9 +311,7 @@ export function WhatsappListPanel() {
       setDeleteRow(null);
       await loadCampaigns();
     } catch (caught) {
-      toast.error(
-        caught instanceof ClientApiError ? caught.message : "Could not delete campaign.",
-      );
+      toast.error(caught instanceof ClientApiError ? caught.message : "Could not delete campaign.");
     } finally {
       setDeleteBusy(false);
     }
@@ -532,7 +534,11 @@ export function WhatsappListPanel() {
         </div>
 
         <div className="flex shrink-0 flex-wrap items-center gap-2">
-          <Link href={WHATSAPP_CREATE_HREF} prefetch={false} className={managePrimaryButtonClassName}>
+          <Link
+            href={WHATSAPP_CREATE_HREF}
+            prefetch={false}
+            className={managePrimaryButtonClassName}
+          >
             <Plus className="h-4 w-4" aria-hidden="true" />
             Create Message
           </Link>
@@ -811,7 +817,10 @@ export function WhatsappListPanel() {
               </thead>
               <tbody>
                 {items.map((row) => (
-                  <tr key={row.id} className="border-b border-[var(--admin-border)] last:border-b-0">
+                  <tr
+                    key={row.id}
+                    className="border-b border-[var(--admin-border)] last:border-b-0"
+                  >
                     {visibleColumns.map((column) => (
                       <td key={column.id} className="px-4 py-3 text-[var(--admin-on-surface)]">
                         {column.id === "title" ? (
@@ -827,11 +836,14 @@ export function WhatsappListPanel() {
                             {row.status}
                           </span>
                         ) : column.id === "audience" ? (
-                          row.audienceLabel ?? "—"
+                          (row.audienceLabel ?? "—")
                         ) : column.id === "created" ? (
                           formatWhatsappDateTime(row.createdAt)
                         ) : (
-                          <div ref={menuId === row.id ? menuRef : undefined} className="relative flex justify-end">
+                          <div
+                            ref={menuId === row.id ? menuRef : undefined}
+                            className="relative flex justify-end"
+                          >
                             <button
                               type="button"
                               aria-label={`Actions for ${row.title}`}
@@ -910,7 +922,9 @@ export function WhatsappListPanel() {
             <h2 className="text-lg font-bold text-[var(--admin-danger)]">Delete campaign</h2>
             <p className="text-sm text-[var(--admin-on-surface-variant)]">
               Type{" "}
-              <span className="font-semibold text-[var(--admin-on-surface)]">{deleteRow.title}</span>{" "}
+              <span className="font-semibold text-[var(--admin-on-surface)]">
+                {deleteRow.title}
+              </span>{" "}
               to confirm.
             </p>
             <input

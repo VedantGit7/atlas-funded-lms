@@ -913,6 +913,22 @@ async function queryPayments(tx: TenantTx, params: DatasetParams): Promise<Repor
   const endDate = asString(params["endDate"]) ?? asString(params["paidTo"]);
   const invoicesOnly = reportTab === "invoices";
   const refundsOnly = reportTab === "refunds";
+  /**
+   * The order ledger's view of the same table.
+   *
+   * Transactions sort and date-filter by `coalesce(paid_at, created_at)`, which
+   * is the right axis for money that moved. An order that never settled has no
+   * `paid_at`, so on that axis it silently sorts as though it settled on the day
+   * it was raised — precisely the row an operator is hunting for. This view uses
+   * `created_at` throughout instead, and can be narrowed by whether the order
+   * settled at all.
+   */
+  const ordersView = reportTab === "orders";
+  const settlementRaw = asString(params["settlement"]);
+  const settlement =
+    ordersView && (settlementRaw === "settled" || settlementRaw === "unsettled")
+      ? settlementRaw
+      : null;
 
   const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
     select
@@ -991,14 +1007,34 @@ async function queryPayments(tx: TenantTx, params: DatasetParams): Promise<Repor
         or lower(coalesce(po.billing_name, '')) like '%' || lower(${searchQ}) || '%'
       )
       and (
+        ${settlement}::text is null
+        or (${settlement} = 'settled' and po.paid_at is not null)
+        or (${settlement} = 'unsettled' and po.paid_at is null)
+      )
+      and (
         ${startDate}::timestamptz is null
-        or coalesce(po.paid_at, po.created_at) >= ${startDate}::timestamptz
+        or (
+          case
+            when ${ordersView}::boolean then po.created_at
+            else coalesce(po.paid_at, po.created_at)
+          end
+        ) >= ${startDate}::timestamptz
       )
       and (
         ${endDate}::timestamptz is null
-        or coalesce(po.paid_at, po.created_at) <= ${endDate}::timestamptz
+        or (
+          case
+            when ${ordersView}::boolean then po.created_at
+            else coalesce(po.paid_at, po.created_at)
+          end
+        ) <= ${endDate}::timestamptz
       )
-    order by coalesce(po.paid_at, po.created_at) desc
+    order by
+      case
+        when ${ordersView}::boolean then po.created_at
+        else coalesce(po.paid_at, po.created_at)
+      end desc,
+      po.id desc
     limit ${REPORT_ROW_CAP}
   `;
 
@@ -1200,6 +1236,113 @@ async function querySalesMarketing(
   const couponId = asString(params["couponId"]);
   const learnerName = asString(params["learnerName"]);
   const email = asString(params["email"]);
+
+  if (section === "attribution") {
+    /**
+     * The raw attribution event stream.
+     *
+     * The date bounds are the same `purchasedFrom` / `purchasedTo` params the
+     * other sections use, applied to `occurred_at` — an event is not a purchase
+     * and has no purchase date, and adding a parallel pair of parameters would
+     * mean two ways to say the same thing.
+     *
+     * `attributed` is computed here rather than left to the reader: whether a
+     * row counts as attributed depends on all five UTM fields, and a
+     * spreadsheet formula reconstructing that from five columns is a formula
+     * that will eventually disagree with the console.
+     */
+    const from = asString(params["purchasedFrom"]);
+    const to = asString(params["purchasedTo"]);
+    const presence = asString(params["attribution"]);
+    const searchQ = asString(params["q"]);
+    const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
+      select
+        e.id::text as event_id,
+        e.membership_id::text as membership_id,
+        coalesce(mp.display_name, ap.email, m.invited_email_normalized) as learner_name,
+        coalesce(ap.email, m.invited_email_normalized) as email,
+        e.event_type,
+        e.utm_source,
+        e.utm_medium,
+        e.utm_campaign,
+        e.utm_term,
+        e.utm_content,
+        case
+          when e.utm_source is null and e.utm_medium is null and e.utm_campaign is null
+            and e.utm_term is null and e.utm_content is null
+          then 'no'
+          else 'yes'
+        end as attributed,
+        e.revenue_cents,
+        e.currency,
+        e.occurred_at
+      from sales_attribution_events e
+      left join memberships m on m.id = e.membership_id and m.tenant_id = e.tenant_id
+      left join member_profiles mp
+        on mp.membership_id = m.id and mp.tenant_id = m.tenant_id and mp.deleted_at is null
+      left join auth_principals ap on ap.id = m.auth_principal_id
+      where e.tenant_id = current_setting('app.tenant_id', true)::uuid
+        and (${from}::timestamptz is null or e.occurred_at >= ${from}::timestamptz)
+        and (${to}::timestamptz is null or e.occurred_at <= ${to}::timestamptz)
+        and (
+          ${presence}::text is null
+          or ${presence} = 'any'
+          or (
+            ${presence} = 'none'
+            and e.utm_source is null and e.utm_medium is null and e.utm_campaign is null
+            and e.utm_term is null and e.utm_content is null
+          )
+          or (
+            ${presence} = 'attributed'
+            and (
+              e.utm_source is not null or e.utm_medium is not null or e.utm_campaign is not null
+              or e.utm_term is not null or e.utm_content is not null
+            )
+          )
+        )
+        and (
+          ${searchQ}::text is null
+          or e.event_type ilike '%' || ${searchQ} || '%'
+          or e.utm_source ilike '%' || ${searchQ} || '%'
+          or e.utm_medium ilike '%' || ${searchQ} || '%'
+          or e.utm_campaign ilike '%' || ${searchQ} || '%'
+        )
+        and (
+          ${learnerName}::text is null
+          or lower(coalesce(mp.display_name, ap.email, m.invited_email_normalized, ''))
+            like '%' || lower(${learnerName}) || '%'
+        )
+        and (
+          ${email}::text is null
+          or lower(coalesce(ap.email, m.invited_email_normalized, ''))
+            like '%' || lower(${email}) || '%'
+        )
+      order by e.occurred_at desc, e.id desc
+      limit ${REPORT_ROW_CAP}
+    `;
+    const allColumns = [
+      "occurred_at",
+      "event_type",
+      "utm_source",
+      "utm_medium",
+      "utm_campaign",
+      "utm_term",
+      "utm_content",
+      "attributed",
+      "revenue_cents",
+      "currency",
+      "learner_name",
+      "email",
+      "membership_id",
+      "event_id",
+    ];
+    const requested = Array.isArray(params["columns"])
+      ? params["columns"].filter((value): value is string => typeof value === "string")
+      : [];
+    const columns =
+      requested.length > 0 ? allColumns.filter((column) => requested.includes(column)) : allColumns;
+    return mapRows(rows, columns.length > 0 ? columns : allColumns);
+  }
 
   if (section === "coupons") {
     const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`

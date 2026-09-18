@@ -1,17 +1,21 @@
 import { readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 
+// Paths moved under backend/ in the F-1 monorepo split. The pre-split spellings
+// below scanned directories that no longer exist, so this guard passed while
+// inspecting no SQL at all.
 const approvedSqlDirectories = [
-  "prisma/migrations/",
-  "prisma/sql/setup/",
-  "prisma/sql/rls/",
-  "prisma/sql/triggers/",
-  "prisma/sql/indexes/",
-  "prisma/sql/grants/",
-  "prisma/sql/partitions/",
+  "backend/prisma/migrations/",
+  "backend/prisma/sql/setup/",
+  "backend/prisma/sql/functions/",
+  "backend/prisma/sql/rls/",
+  "backend/prisma/sql/triggers/",
+  "backend/prisma/sql/indexes/",
+  "backend/prisma/sql/grants/",
+  "backend/prisma/sql/partitions/",
 ];
 
-const roots = ["prisma", "scripts", "packages", "apps"];
+const roots = ["backend", "frontend", "scripts", "tests"];
 const failures = [];
 
 function walkFiles(directory) {

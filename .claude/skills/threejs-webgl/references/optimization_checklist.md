@@ -5,12 +5,14 @@
 ### ✅ Geometry Optimization
 
 - [ ] **Reuse geometries** across multiple meshes
+
   ```javascript
   const sharedGeometry = new THREE.BoxGeometry(1, 1, 1);
   // Use for all boxes instead of creating new geometry each time
   ```
 
 - [ ] **Use InstancedMesh** for repeated objects (>50 identical objects)
+
   ```javascript
   const mesh = new THREE.InstancedMesh(geometry, material, 1000);
   ```
@@ -139,7 +141,7 @@
 
 - [ ] **Merge static geometries**:
   ```javascript
-  import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
+  import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
   const merged = mergeGeometries([geo1, geo2, geo3]);
   ```
 - [ ] **Use texture atlases** to combine multiple textures
@@ -168,7 +170,7 @@
   ```javascript
   const renderTarget = new THREE.WebGLRenderTarget(
     window.innerWidth * 0.5,
-    window.innerHeight * 0.5
+    window.innerHeight * 0.5,
   );
   ```
 
@@ -177,12 +179,13 @@
 ### ⚙️ Memory Management
 
 - [ ] **Dispose all resources** when removing from scene:
+
   ```javascript
   function disposeObject(obj) {
     if (obj.geometry) obj.geometry.dispose();
     if (obj.material) {
       if (Array.isArray(obj.material)) {
-        obj.material.forEach(m => m.dispose());
+        obj.material.forEach((m) => m.dispose());
       } else {
         obj.material.dispose();
       }
@@ -194,6 +197,7 @@
   ```
 
 - [ ] **Clear render targets** when done:
+
   ```javascript
   renderTarget.dispose();
   ```
@@ -207,6 +211,7 @@
 ### ⚙️ Matrix Optimization
 
 - [ ] **Disable auto-update** for static objects:
+
   ```javascript
   mesh.matrixAutoUpdate = false;
   mesh.updateMatrix();
@@ -220,6 +225,7 @@
 ### ⚙️ Custom Shaders
 
 - [ ] **Use low precision** where possible:
+
   ```glsl
   precision mediump float; // Instead of highp
   ```
@@ -241,9 +247,10 @@
 ### ⚙️ Model Optimization
 
 - [ ] **Use glTF with Draco compression**:
+
   ```javascript
   const dracoLoader = new DRACOLoader();
-  dracoLoader.setDecoderPath('/draco/');
+  dracoLoader.setDecoderPath("/draco/");
   gltfLoader.setDRACOLoader(dracoLoader);
   ```
 
@@ -262,6 +269,7 @@
 ### 📱 Mobile Best Practices
 
 - [ ] **Lower pixel ratio**:
+
   ```javascript
   renderer.setPixelRatio(1);
   ```
@@ -276,7 +284,7 @@
 - [ ] **Implement aggressive LOD**
 - [ ] **Pause rendering** when tab is hidden:
   ```javascript
-  document.addEventListener('visibilitychange', () => {
+  document.addEventListener("visibilitychange", () => {
     if (document.hidden) {
       // Stop animation loop
     } else {
@@ -290,18 +298,20 @@
 ### 🔍 Performance Monitoring
 
 - [ ] **Use Stats.js**:
+
   ```javascript
-  import Stats from 'three/examples/jsm/libs/stats.module.js';
+  import Stats from "three/examples/jsm/libs/stats.module.js";
   const stats = new Stats();
   document.body.appendChild(stats.dom);
   ```
 
 - [ ] **Monitor renderer info**:
+
   ```javascript
-  console.log('Geometries:', renderer.info.memory.geometries);
-  console.log('Textures:', renderer.info.memory.textures);
-  console.log('Draw Calls:', renderer.info.render.calls);
-  console.log('Triangles:', renderer.info.render.triangles);
+  console.log("Geometries:", renderer.info.memory.geometries);
+  console.log("Textures:", renderer.info.memory.textures);
+  console.log("Draw Calls:", renderer.info.render.calls);
+  console.log("Triangles:", renderer.info.render.triangles);
   ```
 
 - [ ] **Use browser DevTools**:
@@ -326,6 +336,7 @@
 ## Performance Targets
 
 ### 🎯 Desktop
+
 - **60 FPS** (16.67ms per frame)
 - **Draw calls**: <100
 - **Triangles**: <1M visible
@@ -333,6 +344,7 @@
 - **Pixel ratio**: 1-2
 
 ### 🎯 Mobile
+
 - **30-60 FPS** (16.67-33ms per frame)
 - **Draw calls**: <50
 - **Triangles**: <100K visible

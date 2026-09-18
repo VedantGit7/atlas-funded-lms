@@ -72,7 +72,9 @@ export function EmailChannelPanel({
       setTouched(false);
       setStatus("Email settings saved.");
     } catch (caught) {
-      setError(caught instanceof ClientApiError ? caught.message : "Could not save. Please try again.");
+      setError(
+        caught instanceof ClientApiError ? caught.message : "Could not save. Please try again.",
+      );
     } finally {
       setSaving(false);
     }

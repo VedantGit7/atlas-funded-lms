@@ -3,6 +3,20 @@ export {
   listActiveEntitlements,
   type ActiveEntitlementRow,
 } from "./repositories/entitlement.repository";
+
+export {
+  consumeEntitlementUsage,
+  readEntitlementUsage,
+  type ConsumeResult,
+  type UsageSnapshot,
+} from "./repositories/entitlement-usage.repository";
+
+export {
+  parseEntitlementValue,
+  entitlementValueSchema,
+  usagePeriodSchema,
+  type EntitlementValue,
+} from "./schemas/entitlement-value";
 export {
   listTenantFeatureFlags,
   updateTenantFeatureFlagOverride,

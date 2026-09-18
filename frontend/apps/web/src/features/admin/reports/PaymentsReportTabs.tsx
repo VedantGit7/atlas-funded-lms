@@ -5,6 +5,7 @@ import Link from "next/link";
 export type PaymentsReportTab =
   | "overview"
   | "transactions"
+  | "orders"
   | "instalment"
   | "gateways"
   | "invoices"
@@ -17,6 +18,11 @@ const TABS: Array<{ key: PaymentsReportTab; label: string; href: string }> = [
     key: "transactions",
     label: "Transactions",
     href: "/admin/reports/payments/transactions",
+  },
+  {
+    key: "orders",
+    label: "Orders",
+    href: "/admin/reports/payments/orders",
   },
   {
     key: "instalment",

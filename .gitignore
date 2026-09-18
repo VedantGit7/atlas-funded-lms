@@ -28,9 +28,26 @@ Thumbs.db
 .storage/
 coverage/
 .test-results/
+test-results/
 playwright-report/
 lhci-reports/
 release-evidence.json
-packages/**/src/**/*.d.ts
-packages/**/tsconfig.tsbuildinfo
-packages/db/src/generated/
+
+# Paths below moved under backend/ in the F-1 monorepo split. The old spellings
+# silently stopped matching, which is why the generated Prisma client became
+# tracked and now produces ~30k-line diffs on every regenerate.
+backend/packages/**/src/**/*.d.ts
+backend/packages/**/tsconfig.tsbuildinfo
+backend/packages/db/src/generated/
+# Untracked scratch scripts kept at the repo root (see eslint.config.mjs ignores).
+tmp-*
+
+# Phase 5 measurement artifacts. Point-in-time runs, regenerated on demand;
+# committing them would create the same staleness problem as release-evidence.json (H18).
+perf-exam-window.json
+restore-drill.json
+
+# Supabase CLI local state (the auth stack for the browser journeys).
+# config.toml is committed; the runtime state is not.
+supabase/.temp/
+supabase/.branches/

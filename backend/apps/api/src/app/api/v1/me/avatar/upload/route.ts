@@ -25,11 +25,15 @@ export const POST = createTenantRoute<CreateAvatarUploadBody, SignedUploadRespon
   body: createAvatarUploadBodySchema,
   output: SignedUploadResponseSchema,
   handler: async ({ tx, ctx, input }) =>
-    createMemberAvatarUpload(tx, { tenantId: ctx.tenantId }, {
-      membershipId: ctx.actorMembershipId,
-      fileName: input.fileName,
-      contentType: input.contentType,
-      sizeBytes: input.sizeBytes,
-      checksumSha256: input.checksumSha256 ?? null,
-    }),
+    createMemberAvatarUpload(
+      tx,
+      { tenantId: ctx.tenantId },
+      {
+        membershipId: ctx.actorMembershipId,
+        fileName: input.fileName,
+        contentType: input.contentType,
+        sizeBytes: input.sizeBytes,
+        checksumSha256: input.checksumSha256 ?? null,
+      },
+    ),
 });

@@ -65,7 +65,7 @@ function Shimmer({ className }: { className?: string }) {
 
 function formatPct(value: number | null | undefined): string {
   if (value == null || Number.isNaN(value)) return "-";
-  return `${Number(value).toFixed(value % 1 === 0 ? 0 : 1)}%`;
+  return `${value.toFixed(value % 1 === 0 ? 0 : 1)}%`;
 }
 
 function formatDate(value: string | null | undefined): string {
@@ -110,7 +110,7 @@ function formatDuration(seconds: number | null, plannedMinutes: number | null): 
   const mins = seconds != null ? Math.round(seconds / 60) : null;
   if (mins != null && plannedMinutes != null) return `${mins}m of ${plannedMinutes}m`;
   if (mins != null) return `${mins}m`;
-  return `of ${plannedMinutes}m`;
+  return `of ${plannedMinutes ?? ""}m`;
 }
 
 function titleCase(value: string): string {
@@ -121,7 +121,7 @@ function learnerInitials(name: string | null, email: string | null): string {
   const source = (name?.trim() || email?.trim() || "?").replace(/\s+/g, " ");
   const parts = source.split(" ").filter(Boolean);
   if (parts.length >= 2) {
-    return `${parts[0]![0] ?? ""}${parts[1]![0] ?? ""}`.toUpperCase();
+    return `${parts[0]?.[0] ?? ""}${parts[1]?.[0] ?? ""}`.toUpperCase();
   }
   return source.slice(0, 2).toUpperCase();
 }
@@ -206,7 +206,9 @@ function outcomePillClass(outcome: BatchLearnerDetail["exams"][number]["outcome"
   return "border-[var(--admin-border)] bg-[var(--admin-surface-high)] text-[var(--admin-on-surface-variant)]";
 }
 
-function courseStatusLabel(status: BatchLearnerDetail["courseProgress"][number]["statusLabel"]): string {
+function courseStatusLabel(
+  status: BatchLearnerDetail["courseProgress"][number]["statusLabel"],
+): string {
   if (status === "completed") return "Completed";
   if (status === "in_progress") return "In progress";
   if (status === "behind") return "Behind";
@@ -457,7 +459,9 @@ export function AdminBatchLearnerDetailPage({
     try {
       await navigator.clipboard.writeText(membershipId);
       setCopiedId(true);
-      window.setTimeout(() => setCopiedId(false), 1500);
+      window.setTimeout(() => {
+        setCopiedId(false);
+      }, 1500);
     } catch {
       setActionError("Couldn't copy membership id.");
     }
@@ -631,10 +635,7 @@ export function AdminBatchLearnerDetailPage({
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <Link
-            href={`/admin/members/${membershipId}`}
-            className={secondaryButtonClassName}
-          >
+          <Link href={`/admin/members/${membershipId}`} className={secondaryButtonClassName}>
             <User className="h-4 w-4" aria-hidden="true" />
             Open member profile
           </Link>
@@ -660,7 +661,9 @@ export function AdminBatchLearnerDetailPage({
                 : "",
             ].join(" ")}
             aria-pressed={showCohortTicks}
-            onClick={() => setShowCohortTicks((current) => !current)}
+            onClick={() => {
+              setShowCohortTicks((current) => !current);
+            }}
           >
             Compare with cohort
           </button>
@@ -807,7 +810,9 @@ export function AdminBatchLearnerDetailPage({
                     ? "border-b-2 border-[var(--admin-primary)] text-[var(--admin-primary)]"
                     : "text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-on-surface)]",
                 ].join(" ")}
-                onClick={() => setTab(tab.key)}
+                onClick={() => {
+                  setTab(tab.key);
+                }}
               >
                 {tab.label}
               </button>
@@ -839,8 +844,8 @@ export function AdminBatchLearnerDetailPage({
                     </div>
                     <p className="mt-2 font-mono text-[11px] text-[var(--admin-on-surface-variant)]">
                       {detail.summary.liveAttendedCount} attended ·{" "}
-                      {detail.summary.livePartialCount} partial ·{" "}
-                      {detail.summary.liveAbsentCount} absent
+                      {detail.summary.livePartialCount} partial · {detail.summary.liveAbsentCount}{" "}
+                      absent
                     </p>
                   </div>
                   <div className="overflow-x-auto">
@@ -1271,7 +1276,10 @@ export function AdminBatchLearnerDetailPage({
                     aria-label="Copy membership id"
                   >
                     {copiedId ? (
-                      <Check className="h-3.5 w-3.5 text-[var(--admin-success)]" aria-hidden="true" />
+                      <Check
+                        className="h-3.5 w-3.5 text-[var(--admin-success)]"
+                        aria-hidden="true"
+                      />
                     ) : (
                       <ClipboardCopy className="h-3.5 w-3.5" aria-hidden="true" />
                     )}
@@ -1337,7 +1345,9 @@ export function AdminBatchLearnerDetailPage({
               <button
                 type="button"
                 className="rounded p-1 text-[var(--admin-on-surface-variant)] hover:bg-[var(--admin-surface-high)]"
-                onClick={() => setMessageOpen(false)}
+                onClick={() => {
+                  setMessageOpen(false);
+                }}
                 aria-label="Close message dialog"
               >
                 <X className="h-4 w-4" aria-hidden="true" />
@@ -1352,7 +1362,9 @@ export function AdminBatchLearnerDetailPage({
                 <input
                   className={fieldClassName}
                   value={messageSubject}
-                  onChange={(event) => setMessageSubject(event.target.value)}
+                  onChange={(event) => {
+                    setMessageSubject(event.target.value);
+                  }}
                   maxLength={200}
                 />
               </label>
@@ -1362,7 +1374,9 @@ export function AdminBatchLearnerDetailPage({
                   className={`${fieldClassName} h-auto min-h-[120px] py-2`}
                   rows={5}
                   value={messageBody}
-                  onChange={(event) => setMessageBody(event.target.value)}
+                  onChange={(event) => {
+                    setMessageBody(event.target.value);
+                  }}
                   maxLength={10000}
                 />
               </label>
@@ -1371,7 +1385,9 @@ export function AdminBatchLearnerDetailPage({
               <button
                 type="button"
                 className={ghostButtonClassName}
-                onClick={() => setMessageOpen(false)}
+                onClick={() => {
+                  setMessageOpen(false);
+                }}
               >
                 Cancel
               </button>
@@ -1406,7 +1422,9 @@ export function AdminBatchLearnerDetailPage({
               <button
                 type="button"
                 className="rounded p-1 text-[var(--admin-on-surface-variant)] hover:bg-[var(--admin-surface-high)]"
-                onClick={() => setRemoveOpen(false)}
+                onClick={() => {
+                  setRemoveOpen(false);
+                }}
                 aria-label="Close remove dialog"
               >
                 <X className="h-4 w-4" aria-hidden="true" />
@@ -1421,7 +1439,9 @@ export function AdminBatchLearnerDetailPage({
                 <Select
                   className={selectClassName}
                   value={removeReason}
-                  onValueChange={(value) => setRemoveReason(value as RemoveReason)}
+                  onValueChange={(value) => {
+                    setRemoveReason(value as RemoveReason);
+                  }}
                   options={[
                     { value: "transferred", label: "Transferred" },
                     { value: "withdrawn", label: "Withdrawn" },
@@ -1437,7 +1457,9 @@ export function AdminBatchLearnerDetailPage({
                     className={`${fieldClassName} h-auto min-h-[80px] py-2`}
                     rows={3}
                     value={removeNotes}
-                    onChange={(event) => setRemoveNotes(event.target.value)}
+                    onChange={(event) => {
+                      setRemoveNotes(event.target.value);
+                    }}
                     maxLength={2000}
                     placeholder="Describe the reason"
                   />
@@ -1448,16 +1470,16 @@ export function AdminBatchLearnerDetailPage({
               <button
                 type="button"
                 className={ghostButtonClassName}
-                onClick={() => setRemoveOpen(false)}
+                onClick={() => {
+                  setRemoveOpen(false);
+                }}
               >
                 Cancel
               </button>
               <button
                 type="button"
                 className="inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-[var(--admin-danger)] px-4 text-sm font-medium text-white transition-all hover:opacity-90 active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-danger)]/30 disabled:cursor-not-allowed disabled:opacity-50"
-                disabled={
-                  removeBusy || (removeReason === "other" && !removeNotes.trim())
-                }
+                disabled={removeBusy || (removeReason === "other" && !removeNotes.trim())}
                 onClick={() => void handleRemove()}
               >
                 {removeBusy ? "Removing…" : "Remove"}

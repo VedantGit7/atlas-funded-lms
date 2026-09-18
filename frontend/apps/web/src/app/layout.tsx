@@ -76,19 +76,35 @@ export default async function RootLayout({ children }: RootLayoutProps) {
 
   let displayCurrency: string | null = null;
   let fxRates: Record<string, number> | null = null;
+  // Route-level `loading.tsx` files are Suspense fallbacks: they must render
+  // immediately and cannot await branding, and making them async would suspend
+  // the fallback itself. Publishing the tenant's mark as a CSS custom property
+  // here lets `BrandLoadingScreen` show it with no data fetch of its own —
+  // which is why the FundedBeyond loading screen was blank.
+  const brandingStyle: Record<string, string> = {};
   try {
     const bootstrap = await loadPublicBootstrap();
     displayCurrency = bootstrap.homeCurrency;
     fxRates = bootstrap.fxRates;
+
+    const logoUrl = bootstrap.logoLightUrl ?? bootstrap.logoDarkUrl;
+    if (logoUrl) {
+      // CSS url() token: the value is a tenant-controlled URL, so quote it and
+      // reject the characters that could break out of the declaration.
+      if (!/["'()\\\s]/.test(logoUrl)) {
+        brandingStyle["--tenant-logo-url"] = `url("${logoUrl}")`;
+      }
+    }
   } catch {
-    // No resolvable tenant: currency conversion falls back to native amounts.
+    // No resolvable tenant: currency conversion falls back to native amounts,
+    // and the loading screen falls back to its unbranded spinner.
   }
 
   return (
     <html
       lang="en"
       className={appearance.className}
-      style={appearance.style}
+      style={{ ...appearance.style, ...brandingStyle }}
       suppressHydrationWarning
     >
       <head>

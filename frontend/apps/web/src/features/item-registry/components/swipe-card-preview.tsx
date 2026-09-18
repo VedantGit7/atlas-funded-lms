@@ -36,13 +36,7 @@ function usePrefersReducedMotion() {
   return reduce;
 }
 
-function StackCard({
-  depth,
-  isPromoting,
-}: {
-  depth: 1 | 2;
-  isPromoting: boolean;
-}) {
+function StackCard({ depth, isPromoting }: { depth: 1 | 2; isPromoting: boolean }) {
   const scale = depth === 2 ? 0.88 : 0.94;
   const offsetY = depth === 2 ? 18 : 10;
   const opacity = depth === 2 ? 0.45 : 0.68;
@@ -154,10 +148,13 @@ export function SwipeCardPreview({
       setExitSide(direction === 1 ? "right" : "left");
       setOffsetX(direction * (reduceMotion ? 280 : 520));
 
-      exitTimerRef.current = window.setTimeout(() => {
-        onSwipe(action);
-        resetCard();
-      }, reduceMotion ? 180 : FLY_OFF_MS);
+      exitTimerRef.current = window.setTimeout(
+        () => {
+          onSwipe(action);
+          resetCard();
+        },
+        reduceMotion ? 180 : FLY_OFF_MS,
+      );
     },
     [isInteractive, onSwipe, reduceMotion, resetCard],
   );
@@ -261,94 +258,97 @@ export function SwipeCardPreview({
                 transition: cardTransition,
               }}
             >
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-0 bg-[linear-gradient(160deg,color-mix(in_srgb,var(--admin-surface)_92%,var(--admin-primary)_8%)_0%,var(--admin-surface)_45%,color-mix(in_srgb,var(--admin-surface-low)_88%,var(--admin-lesson-live)_12%)_100%)]"
-            />
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-[linear-gradient(180deg,color-mix(in_srgb,var(--admin-on-surface)_5%,transparent),transparent)]"
-            />
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 bg-[linear-gradient(160deg,color-mix(in_srgb,var(--admin-surface)_92%,var(--admin-primary)_8%)_0%,var(--admin-surface)_45%,color-mix(in_srgb,var(--admin-surface-low)_88%,var(--admin-lesson-live)_12%)_100%)]"
+              />
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-[linear-gradient(180deg,color-mix(in_srgb,var(--admin-on-surface)_5%,transparent),transparent)]"
+              />
 
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-0 transition-opacity duration-150"
-              style={{
-                opacity: knownOpacity * 0.55,
-                background:
-                  "radial-gradient(circle at 85% 22%, color-mix(in srgb, var(--admin-success) 28%, transparent), transparent 52%)",
-              }}
-            />
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-0 transition-opacity duration-150"
-              style={{
-                opacity: unknownOpacity * 0.55,
-                background:
-                  "radial-gradient(circle at 15% 22%, color-mix(in srgb, var(--admin-danger) 28%, transparent), transparent 52%)",
-              }}
-            />
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 transition-opacity duration-150"
+                style={{
+                  opacity: knownOpacity * 0.55,
+                  background:
+                    "radial-gradient(circle at 85% 22%, color-mix(in srgb, var(--admin-success) 28%, transparent), transparent 52%)",
+                }}
+              />
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 transition-opacity duration-150"
+                style={{
+                  opacity: unknownOpacity * 0.55,
+                  background:
+                    "radial-gradient(circle at 15% 22%, color-mix(in srgb, var(--admin-danger) 28%, transparent), transparent 52%)",
+                }}
+              />
 
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute left-5 top-7 origin-center rounded-md border-[3px] border-[var(--admin-danger)] px-3 py-1 text-[1.65rem] font-black uppercase leading-none tracking-[0.14em] text-[var(--admin-danger)] transition-[opacity,transform] duration-150"
-              style={{
-                opacity: unknownOpacity,
-                transform: `rotate(-16deg) scale(${String(unknownScale)})`,
-              }}
-            >
-              Unknown
-            </div>
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute right-5 top-7 origin-center rounded-md border-[3px] border-[var(--admin-success)] px-3 py-1 text-[1.65rem] font-black uppercase leading-none tracking-[0.14em] text-[var(--admin-success)] transition-[opacity,transform] duration-150"
-              style={{
-                opacity: knownOpacity,
-                transform: `rotate(16deg) scale(${String(knownScale)})`,
-              }}
-            >
-              Known
-            </div>
-
-            <div className="relative z-10 flex flex-1 flex-col px-6 pb-5 pt-6">
-              <div className="flex items-center justify-between gap-2">
-                <span className="inline-flex items-center rounded-full border border-[color-mix(in_srgb,var(--admin-lesson-live)_35%,var(--admin-border))] bg-[color-mix(in_srgb,var(--admin-lesson-live)_10%,var(--admin-surface))] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--admin-lesson-live)]">
-                  Flashcard
-                </span>
-                <span className="text-[10px] font-medium text-[var(--admin-on-surface-variant)]">
-                  {isDragging ? "Release to decide" : "Drag horizontally"}
-                </span>
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute left-5 top-7 origin-center rounded-md border-[3px] border-[var(--admin-danger)] px-3 py-1 text-[1.65rem] font-black uppercase leading-none tracking-[0.14em] text-[var(--admin-danger)] transition-[opacity,transform] duration-150"
+                style={{
+                  opacity: unknownOpacity,
+                  transform: `rotate(-16deg) scale(${String(unknownScale)})`,
+                }}
+              >
+                Unknown
+              </div>
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute right-5 top-7 origin-center rounded-md border-[3px] border-[var(--admin-success)] px-3 py-1 text-[1.65rem] font-black uppercase leading-none tracking-[0.14em] text-[var(--admin-success)] transition-[opacity,transform] duration-150"
+                style={{
+                  opacity: knownOpacity,
+                  transform: `rotate(16deg) scale(${String(knownScale)})`,
+                }}
+              >
+                Known
               </div>
 
-              <div className="flex flex-1 items-center justify-center py-4">
-                <p className="text-center text-[1.35rem] font-semibold leading-snug tracking-tight text-[var(--admin-on-surface)]">
-                  {stem}
-                </p>
-              </div>
+              <div className="relative z-10 flex flex-1 flex-col px-6 pb-5 pt-6">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="inline-flex items-center rounded-full border border-[color-mix(in_srgb,var(--admin-lesson-live)_35%,var(--admin-border))] bg-[color-mix(in_srgb,var(--admin-lesson-live)_10%,var(--admin-surface))] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--admin-lesson-live)]">
+                    Flashcard
+                  </span>
+                  <span className="text-[10px] font-medium text-[var(--admin-on-surface-variant)]">
+                    {isDragging ? "Release to decide" : "Drag horizontally"}
+                  </span>
+                </div>
 
-              <div className="flex items-center justify-center gap-5 pt-1">
-                <span
-                  className={`text-[11px] font-bold uppercase tracking-wide transition-opacity duration-150 ${
-                    unknownOpacity > 0.35
-                      ? "text-[var(--admin-danger)] opacity-100"
-                      : "text-[var(--admin-on-surface-variant)] opacity-50"
-                  }`}
-                >
-                  ← Don&apos;t know
-                </span>
-                <span className="h-1 w-1 rounded-full bg-[var(--admin-border)]" aria-hidden="true" />
-                <span
-                  className={`text-[11px] font-bold uppercase tracking-wide transition-opacity duration-150 ${
-                    knownOpacity > 0.35
-                      ? "text-[var(--admin-success)] opacity-100"
-                      : "text-[var(--admin-on-surface-variant)] opacity-50"
-                  }`}
-                >
-                  Know it →
-                </span>
+                <div className="flex flex-1 items-center justify-center py-4">
+                  <p className="text-center text-[1.35rem] font-semibold leading-snug tracking-tight text-[var(--admin-on-surface)]">
+                    {stem}
+                  </p>
+                </div>
+
+                <div className="flex items-center justify-center gap-5 pt-1">
+                  <span
+                    className={`text-[11px] font-bold uppercase tracking-wide transition-opacity duration-150 ${
+                      unknownOpacity > 0.35
+                        ? "text-[var(--admin-danger)] opacity-100"
+                        : "text-[var(--admin-on-surface-variant)] opacity-50"
+                    }`}
+                  >
+                    ← Don&apos;t know
+                  </span>
+                  <span
+                    className="h-1 w-1 rounded-full bg-[var(--admin-border)]"
+                    aria-hidden="true"
+                  />
+                  <span
+                    className={`text-[11px] font-bold uppercase tracking-wide transition-opacity duration-150 ${
+                      knownOpacity > 0.35
+                        ? "text-[var(--admin-success)] opacity-100"
+                        : "text-[var(--admin-on-surface-variant)] opacity-50"
+                    }`}
+                  >
+                    Know it →
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
           </div>
         </div>
       </div>
@@ -362,9 +362,7 @@ export function SwipeCardPreview({
             flyOff("unknown", -1);
           }}
           className={`group relative inline-flex h-[3.75rem] w-[3.75rem] items-center justify-center rounded-full border-2 border-[color-mix(in_srgb,var(--admin-danger)_45%,var(--admin-border))] bg-[color-mix(in_srgb,var(--admin-danger)_10%,var(--admin-surface))] text-[var(--admin-danger)] shadow-[0_10px_28px_color-mix(in_srgb,var(--admin-danger)_18%,transparent)] transition-[transform,box-shadow,background-color] duration-200 hover:bg-[color-mix(in_srgb,var(--admin-danger)_16%,var(--admin-surface))] hover:shadow-[0_14px_32px_color-mix(in_srgb,var(--admin-danger)_24%,transparent)] disabled:cursor-not-allowed disabled:opacity-45 motion-safe:hover:scale-105 motion-safe:active:scale-95 ${
-            actionPulse === "unknown"
-              ? "motion-safe:animate-[swipe-action-pop_0.35s_ease-out]"
-              : ""
+            actionPulse === "unknown" ? "motion-safe:animate-[swipe-action-pop_0.35s_ease-out]" : ""
           }`}
         >
           <span
@@ -382,9 +380,7 @@ export function SwipeCardPreview({
             flyOff("known", 1);
           }}
           className={`group relative inline-flex h-[3.75rem] w-[3.75rem] items-center justify-center rounded-full border-2 border-[color-mix(in_srgb,var(--admin-success)_45%,var(--admin-border))] bg-[color-mix(in_srgb,var(--admin-success)_10%,var(--admin-surface))] text-[var(--admin-success)] shadow-[0_10px_28px_color-mix(in_srgb,var(--admin-success)_18%,transparent)] transition-[transform,box-shadow,background-color] duration-200 hover:bg-[color-mix(in_srgb,var(--admin-success)_16%,var(--admin-surface))] hover:shadow-[0_14px_32px_color-mix(in_srgb,var(--admin-success)_24%,transparent)] disabled:cursor-not-allowed disabled:opacity-45 motion-safe:hover:scale-105 motion-safe:active:scale-95 ${
-            actionPulse === "known"
-              ? "motion-safe:animate-[swipe-action-pop_0.35s_ease-out]"
-              : ""
+            actionPulse === "known" ? "motion-safe:animate-[swipe-action-pop_0.35s_ease-out]" : ""
           }`}
         >
           <span

@@ -10,6 +10,7 @@ description: Browser-based 3D design tool with visual editor, animation, and web
 Spline is a browser-based 3D design and animation platform that enables creators to build interactive 3D experiences without requiring code or specialized software knowledge. It provides a collaborative visual editor for designing, animating, and exporting 3D scenes across multiple platforms.
 
 **Key Features**:
+
 - Visual 3D modeling with parametric shapes, extrusion, and boolean operations
 - State-based animation system with timeline controls
 - Interactive event system (mouse, keyboard, collision, scroll)
@@ -19,6 +20,7 @@ Spline is a browser-based 3D design and animation platform that enables creators
 - Built-in physics and particle systems
 
 **When to Use This Skill**:
+
 - Creating 3D web experiences without writing Three.js code
 - Designing interactive product showcases or configurators
 - Prototyping 3D UI/UX concepts visually
@@ -27,6 +29,7 @@ Spline is a browser-based 3D design and animation platform that enables creators
 - Exporting scenes for React or vanilla JS integration
 
 **Alternatives**:
+
 - **Three.js** (threejs-webgl): For developers who prefer code-first approach and need maximum control
 - **Babylon.js** (babylonjs-engine): For game-focused projects with built-in physics
 - **React Three Fiber** (react-three-fiber): For React developers who want to build 3D with JSX
@@ -36,6 +39,7 @@ Spline is a browser-based 3D design and animation platform that enables creators
 ### 1. Scene Structure
 
 Spline organizes projects into scenes containing:
+
 - **Objects**: 3D models, shapes, text, images
 - **Lights**: Directional, point, spot lights
 - **Cameras**: Orbital, perspective, orthographic
@@ -45,6 +49,7 @@ Spline organizes projects into scenes containing:
 ### 2. Components System
 
 Reusable elements that can be:
+
 - Created from any object or group
 - Instantiated multiple times
 - Updated across all instances
@@ -53,6 +58,7 @@ Reusable elements that can be:
 ### 3. State-Based Animation
 
 Animations are defined as transitions between states:
+
 - **Default State**: Initial appearance
 - **Additional States**: Target appearances
 - **Events**: Triggers that cause state transitions
@@ -61,6 +67,7 @@ Animations are defined as transitions between states:
 ### 4. Interactivity Model
 
 Event-driven system with:
+
 - **Events**: User actions or scene triggers
 - **Conditions**: Logic gates (if/else)
 - **Actions**: State changes, audio, scene switches
@@ -69,6 +76,7 @@ Event-driven system with:
 ### 5. Export Options
 
 Multiple deployment methods:
+
 - **Public URL**: Direct shareable link
 - **Code Export**: React component or vanilla JS
 - **Spline Viewer**: Embedded iframe
@@ -88,11 +96,11 @@ npm install @splinetool/react-spline @splinetool/runtime
 ```
 
 ```jsx
-import Spline from '@splinetool/react-spline';
+import Spline from "@splinetool/react-spline";
 
 export default function Hero() {
   return (
-    <div style={{ width: '100%', height: '600px' }}>
+    <div style={{ width: "100%", height: "600px" }}>
       <Spline scene="https://prod.spline.design/YOUR-SCENE-ID/scene.splinecode" />
     </div>
   );
@@ -100,6 +108,7 @@ export default function Hero() {
 ```
 
 **Key Points**:
+
 - Scene URL comes from Spline export dialog
 - Component fills parent container
 - Automatically handles loading and rendering
@@ -111,24 +120,24 @@ export default function Hero() {
 **Implementation**:
 
 ```jsx
-import Spline from '@splinetool/react-spline';
+import Spline from "@splinetool/react-spline";
 
 export default function InteractiveScene() {
   function onSplineMouseDown(e) {
     // Check if clicked object is the button
-    if (e.target.name === 'Button') {
-      console.log('Button clicked!');
+    if (e.target.name === "Button") {
+      console.log("Button clicked!");
 
       // Get object properties
-      console.log('Position:', e.target.position);
-      console.log('Rotation:', e.target.rotation);
-      console.log('Scale:', e.target.scale);
+      console.log("Position:", e.target.position);
+      console.log("Rotation:", e.target.rotation);
+      console.log("Scale:", e.target.scale);
     }
   }
 
   function onSplineMouseHover(e) {
-    if (e.target.name === 'Button') {
-      console.log('Hovering over button');
+    if (e.target.name === "Button") {
+      console.log("Hovering over button");
     }
   }
 
@@ -143,6 +152,7 @@ export default function InteractiveScene() {
 ```
 
 **Available Event Handlers**:
+
 - `onSplineMouseDown` - Mouse press on object
 - `onSplineMouseUp` - Mouse release
 - `onSplineMouseHover` - Mouse over object
@@ -160,8 +170,8 @@ export default function InteractiveScene() {
 **Implementation**:
 
 ```jsx
-import { useRef } from 'react';
-import Spline from '@splinetool/react-spline';
+import { useRef } from "react";
+import Spline from "@splinetool/react-spline";
 
 export default function ProductViewer() {
   const cube = useRef();
@@ -172,7 +182,7 @@ export default function ProductViewer() {
     splineApp.current = spline;
 
     // Find object by name
-    const obj = spline.findObjectByName('Product');
+    const obj = spline.findObjectByName("Product");
     // Or by ID
     // const obj = spline.findObjectById('8E8C2DDD-18B6-4C54-861D-7ED2519DE20E');
 
@@ -202,11 +212,8 @@ export default function ProductViewer() {
 
   return (
     <div>
-      <Spline
-        scene="https://prod.spline.design/YOUR-SCENE-ID/scene.splinecode"
-        onLoad={onLoad}
-      />
-      <div style={{ position: 'absolute', top: 20, left: 20 }}>
+      <Spline scene="https://prod.spline.design/YOUR-SCENE-ID/scene.splinecode" onLoad={onLoad} />
+      <div style={{ position: "absolute", top: 20, left: 20 }}>
         <button onClick={rotateProduct}>Rotate</button>
         <button onClick={changeColor}>Change Color</button>
         <button onClick={moveProduct}>Move</button>
@@ -217,6 +224,7 @@ export default function ProductViewer() {
 ```
 
 **Object Properties You Can Modify**:
+
 - `position` - { x, y, z }
 - `rotation` - { x, y, z } (radians)
 - `scale` - { x, y, z }
@@ -230,8 +238,8 @@ export default function ProductViewer() {
 **Implementation**:
 
 ```jsx
-import { useRef } from 'react';
-import Spline from '@splinetool/react-spline';
+import { useRef } from "react";
+import Spline from "@splinetool/react-spline";
 
 export default function AnimatedCard() {
   const splineApp = useRef();
@@ -242,25 +250,22 @@ export default function AnimatedCard() {
 
   function triggerHoverAnimation() {
     // Emit mouseHover event on 'Card' object
-    splineApp.current.emitEvent('mouseHover', 'Card');
+    splineApp.current.emitEvent("mouseHover", "Card");
   }
 
   function triggerClickAnimation() {
     // Emit mouseDown event on 'Button' object
-    splineApp.current.emitEvent('mouseDown', 'Button');
+    splineApp.current.emitEvent("mouseDown", "Button");
   }
 
   function reverseAnimation() {
     // Play animation in reverse
-    splineApp.current.emitEventReverse('mouseHover', 'Card');
+    splineApp.current.emitEventReverse("mouseHover", "Card");
   }
 
   return (
     <div>
-      <Spline
-        scene="https://prod.spline.design/YOUR-SCENE-ID/scene.splinecode"
-        onLoad={onLoad}
-      />
+      <Spline scene="https://prod.spline.design/YOUR-SCENE-ID/scene.splinecode" onLoad={onLoad} />
       <button onClick={triggerHoverAnimation}>Hover Effect</button>
       <button onClick={triggerClickAnimation}>Click Effect</button>
       <button onClick={reverseAnimation}>Reverse</button>
@@ -270,6 +275,7 @@ export default function AnimatedCard() {
 ```
 
 **Available Event Types**:
+
 - `mouseDown` - Mouse press
 - `mouseHover` - Hover effect
 - `mouseUp` - Mouse release
@@ -287,12 +293,12 @@ export default function AnimatedCard() {
 
 ```jsx
 // app/page.js (Next.js 13+ App Router)
-import Spline from '@splinetool/react-spline/next';
+import Spline from "@splinetool/react-spline/next";
 
 export default function Home() {
   return (
     <main>
-      <div style={{ width: '100vw', height: '100vh' }}>
+      <div style={{ width: "100vw", height: "100vh" }}>
         <Spline scene="https://prod.spline.design/YOUR-SCENE-ID/scene.splinecode" />
       </div>
     </main>
@@ -301,6 +307,7 @@ export default function Home() {
 ```
 
 **Benefits**:
+
 - Placeholder image shown during SSR
 - Faster perceived load times
 - Better SEO with fallback content
@@ -312,10 +319,10 @@ export default function Home() {
 **Implementation**:
 
 ```jsx
-import React, { Suspense } from 'react';
+import React, { Suspense } from "react";
 
 // Dynamically import Spline
-const Spline = React.lazy(() => import('@splinetool/react-spline'));
+const Spline = React.lazy(() => import("@splinetool/react-spline"));
 
 export default function LazyScene() {
   return (
@@ -323,7 +330,7 @@ export default function LazyScene() {
       <h1>My Page Content</h1>
 
       <Suspense fallback={<div>Loading 3D scene...</div>}>
-        <div style={{ width: '100%', height: '500px' }}>
+        <div style={{ width: "100%", height: "500px" }}>
           <Spline scene="https://prod.spline.design/YOUR-SCENE-ID/scene.splinecode" />
         </div>
       </Suspense>
@@ -335,6 +342,7 @@ export default function LazyScene() {
 ```
 
 **Benefits**:
+
 - Reduces initial bundle size
 - Improves page load performance
 - Shows custom loading UI
@@ -346,8 +354,8 @@ export default function LazyScene() {
 **Implementation**:
 
 ```jsx
-import Spline from '@splinetool/react-spline';
-import { useState, useEffect } from 'react';
+import Spline from "@splinetool/react-spline";
+import { useState, useEffect } from "react";
 
 export default function ResponsiveScene() {
   const [isMobile, setIsMobile] = useState(false);
@@ -358,15 +366,17 @@ export default function ResponsiveScene() {
     };
 
     checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
   return (
-    <div style={{
-      width: '100%',
-      height: isMobile ? '400px' : '600px'
-    }}>
+    <div
+      style={{
+        width: "100%",
+        height: isMobile ? "400px" : "600px",
+      }}
+    >
       <Spline
         scene={
           isMobile
@@ -382,8 +392,8 @@ export default function ResponsiveScene() {
 **Alternative Approach** (Single Scene):
 
 ```jsx
-import Spline from '@splinetool/react-spline';
-import { useRef, useEffect } from 'react';
+import Spline from "@splinetool/react-spline";
+import { useRef, useEffect } from "react";
 
 export default function ResponsiveScene() {
   const splineApp = useRef();
@@ -396,7 +406,7 @@ export default function ResponsiveScene() {
   function adjustForScreenSize() {
     if (!splineApp.current) return;
 
-    const camera = splineApp.current.findObjectByName('Camera');
+    const camera = splineApp.current.findObjectByName("Camera");
     const isMobile = window.innerWidth < 768;
 
     if (isMobile) {
@@ -408,15 +418,12 @@ export default function ResponsiveScene() {
   }
 
   useEffect(() => {
-    window.addEventListener('resize', adjustForScreenSize);
-    return () => window.removeEventListener('resize', adjustForScreenSize);
+    window.addEventListener("resize", adjustForScreenSize);
+    return () => window.removeEventListener("resize", adjustForScreenSize);
   }, []);
 
   return (
-    <Spline
-      scene="https://prod.spline.design/YOUR-SCENE-ID/scene.splinecode"
-      onLoad={onLoad}
-    />
+    <Spline scene="https://prod.spline.design/YOUR-SCENE-ID/scene.splinecode" onLoad={onLoad} />
   );
 }
 ```
@@ -432,10 +439,10 @@ For advanced use cases, combine Spline-designed assets with Three.js code:
 3. **Enhance with code**: Add custom shaders, physics, or effects
 
 ```javascript
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 
 const loader = new GLTFLoader();
-loader.load('spline-model.glb', (gltf) => {
+loader.load("spline-model.glb", (gltf) => {
   scene.add(gltf.scene);
   // Add custom behaviors
 });
@@ -446,10 +453,10 @@ loader.load('spline-model.glb', (gltf) => {
 Trigger Spline animations on scroll:
 
 ```jsx
-import { useEffect, useRef } from 'react';
-import Spline from '@splinetool/react-spline';
-import gsap from 'gsap';
-import ScrollTrigger from 'gsap/ScrollTrigger';
+import { useEffect, useRef } from "react";
+import Spline from "@splinetool/react-spline";
+import gsap from "gsap";
+import ScrollTrigger from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -460,20 +467,17 @@ export default function ScrollAnimated() {
     splineApp.current = app;
 
     ScrollTrigger.create({
-      trigger: '.scene-container',
-      start: 'top center',
+      trigger: ".scene-container",
+      start: "top center",
       onEnter: () => {
-        app.emitEvent('mouseHover', 'Product');
-      }
+        app.emitEvent("mouseHover", "Product");
+      },
     });
   }
 
   return (
     <div className="scene-container">
-      <Spline
-        scene="https://prod.spline.design/YOUR-SCENE-ID/scene.splinecode"
-        onLoad={onLoad}
-      />
+      <Spline scene="https://prod.spline.design/YOUR-SCENE-ID/scene.splinecode" onLoad={onLoad} />
     </div>
   );
 }
@@ -484,8 +488,8 @@ export default function ScrollAnimated() {
 Animate container while Spline handles 3D:
 
 ```jsx
-import { motion } from 'framer-motion';
-import Spline from '@splinetool/react-spline';
+import { motion } from "framer-motion";
+import Spline from "@splinetool/react-spline";
 
 export default function AnimatedContainer() {
   return (
@@ -493,7 +497,7 @@ export default function AnimatedContainer() {
       initial={{ opacity: 0, y: 50 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.8 }}
-      style={{ width: '100%', height: '600px' }}
+      style={{ width: "100%", height: "600px" }}
     >
       <Spline scene="https://prod.spline.design/YOUR-SCENE-ID/scene.splinecode" />
     </motion.div>
@@ -517,6 +521,7 @@ Render only when scene changes, not every frame:
 ### 2. Optimize Scene in Spline Editor
 
 **In Spline**:
+
 - Reduce polygon count (use decimation)
 - Compress textures (lower resolution, use JPG over PNG)
 - Limit lights (2-3 lights maximum)
@@ -530,21 +535,19 @@ Use React.lazy() as shown in Pattern 6
 ### 4. Preload Critical Scenes
 
 ```jsx
-import { useEffect } from 'react';
-import Spline from '@splinetool/react-spline';
+import { useEffect } from "react";
+import Spline from "@splinetool/react-spline";
 
 export default function PreloadedScene() {
   useEffect(() => {
     // Preload scene assets
-    const link = document.createElement('link');
-    link.rel = 'prefetch';
-    link.href = 'https://prod.spline.design/YOUR-SCENE-ID/scene.splinecode';
+    const link = document.createElement("link");
+    link.rel = "prefetch";
+    link.href = "https://prod.spline.design/YOUR-SCENE-ID/scene.splinecode";
     document.head.appendChild(link);
   }, []);
 
-  return (
-    <Spline scene="https://prod.spline.design/YOUR-SCENE-ID/scene.splinecode" />
-  );
+  return <Spline scene="https://prod.spline.design/YOUR-SCENE-ID/scene.splinecode" />;
 }
 ```
 
@@ -559,8 +562,8 @@ export default function PreloadedScene() {
 <Spline
   scene={isMobile ? mobileSceneUrl : desktopSceneUrl}
   style={{
-    width: '100%',
-    height: isMobile ? '300px' : '600px'
+    width: "100%",
+    height: isMobile ? "300px" : "600px",
   }}
 />
 ```
@@ -572,6 +575,7 @@ export default function PreloadedScene() {
 **Problem**: Spline component renders but scene doesn't appear
 
 **Solutions**:
+
 ```jsx
 // ❌ Wrong: Invalid scene URL
 <Spline scene="my-scene.splinecode" />
@@ -588,6 +592,7 @@ function onLoad(app) {
 ```
 
 **Also Check**:
+
 - Scene is published in Spline editor
 - Network tab shows successful file downloads
 - No CORS errors in console
@@ -597,19 +602,20 @@ function onLoad(app) {
 **Problem**: Object refs become undefined after component updates
 
 **Solution**:
+
 ```jsx
 // ❌ Wrong: Storing objects without proper refs
 let myObject;
 
 function onLoad(spline) {
-  myObject = spline.findObjectByName('Cube'); // Lost on re-render
+  myObject = spline.findObjectByName("Cube"); // Lost on re-render
 }
 
 // ✅ Correct: Use React refs
 const myObject = useRef();
 
 function onLoad(spline) {
-  myObject.current = spline.findObjectByName('Cube');
+  myObject.current = spline.findObjectByName("Cube");
 }
 ```
 
@@ -618,6 +624,7 @@ function onLoad(spline) {
 **Problem**: Scene runs slowly on mobile devices
 
 **Solutions**:
+
 ```jsx
 // Create mobile-optimized version in Spline editor
 // - Fewer polygons (< 50k triangles)
@@ -628,10 +635,10 @@ function onLoad(spline) {
 // Load appropriate version
 const isMobile = window.innerWidth < 768;
 const sceneUrl = isMobile
-  ? 'https://prod.spline.design/MOBILE-SCENE/scene.splinecode'
-  : 'https://prod.spline.design/DESKTOP-SCENE/scene.splinecode';
+  ? "https://prod.spline.design/MOBILE-SCENE/scene.splinecode"
+  : "https://prod.spline.design/DESKTOP-SCENE/scene.splinecode";
 
-<Spline scene={sceneUrl} renderOnDemand={true} />
+<Spline scene={sceneUrl} renderOnDemand={true} />;
 ```
 
 ### Pitfall 4: Events Not Firing
@@ -639,6 +646,7 @@ const sceneUrl = isMobile
 **Problem**: Click or hover events don't trigger
 
 **Solutions**:
+
 ```jsx
 // ❌ Wrong: Using wrong event name
 <Spline onMouseDown={handler} /> // Not a Spline prop
@@ -657,10 +665,11 @@ const sceneUrl = isMobile
 **Problem**: `emitEvent()` doesn't trigger animation
 
 **Solutions**:
+
 ```jsx
 // ❌ Wrong: Calling before scene loads
 function triggerAnimation() {
-  splineApp.current.emitEvent('mouseHover', 'Button'); // Error if not loaded
+  splineApp.current.emitEvent("mouseHover", "Button"); // Error if not loaded
 }
 
 // ✅ Correct: Ensure scene is loaded
@@ -673,7 +682,7 @@ function onLoad(app) {
 
 function triggerAnimation() {
   if (isLoaded && splineApp.current) {
-    splineApp.current.emitEvent('mouseHover', 'Button');
+    splineApp.current.emitEvent("mouseHover", "Button");
   }
 }
 
@@ -688,39 +697,41 @@ function triggerAnimation() {
 **Problem**: Mismatch between server and client render
 
 **Solution**:
+
 ```jsx
 // ❌ Wrong: Using standard import in Next.js
-import Spline from '@splinetool/react-spline';
+import Spline from "@splinetool/react-spline";
 
 // ✅ Correct: Use Next.js-specific import
-import Spline from '@splinetool/react-spline/next';
+import Spline from "@splinetool/react-spline/next";
 
 // Or use dynamic import with ssr: false
-import dynamic from 'next/dynamic';
+import dynamic from "next/dynamic";
 
-const Spline = dynamic(
-  () => import('@splinetool/react-spline'),
-  { ssr: false }
-);
+const Spline = dynamic(() => import("@splinetool/react-spline"), { ssr: false });
 ```
 
 ## Resources
 
 ### Official Documentation
+
 - **Spline Docs**: https://docs.spline.design
 - **React Spline GitHub**: https://github.com/splinetool/react-spline
 - **Spline Community**: https://spline.community
 
 ### Spline Editor
+
 - **Web App**: https://app.spline.design
 - **Desktop App**: Available for macOS, Windows, Linux
 
 ### Learning Resources
+
 - **Tutorials**: https://spline.design/tutorials
 - **YouTube Channel**: Official Spline tutorials
 - **Examples Gallery**: https://spline.design/community
 
 ### Export Formats
+
 - React component (via `@splinetool/react-spline`)
 - Vanilla JavaScript (Web Code API)
 - GLTF/GLB (for Three.js, Babylon.js)
@@ -740,10 +751,12 @@ const Spline = dynamic(
 ## Scripts
 
 This skill includes utility scripts:
+
 - `project_generator.py` - Generate Spline + React starter projects
 - `component_builder.py` - Build Spline component wrappers with events
 
 Run scripts from the skill directory:
+
 ```bash
 ./scripts/project_generator.py
 ./scripts/component_builder.py
@@ -752,5 +765,6 @@ Run scripts from the skill directory:
 ## Assets
 
 Starter templates and examples:
+
 - `starter_spline/` - Complete React + Spline template
 - `examples/` - Real-world integration patterns

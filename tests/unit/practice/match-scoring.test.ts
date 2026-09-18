@@ -58,7 +58,11 @@ describe("scoreMatchResponse", () => {
 
   it("rejects a partial submission", () => {
     expect(
-      scoreMatchResponse({ itemTypeKey: "matching", answerKeyJson: answerKey, pairs: { l1: "r1" } }),
+      scoreMatchResponse({
+        itemTypeKey: "matching",
+        answerKeyJson: answerKey,
+        pairs: { l1: "r1" },
+      }),
     ).toBe(false);
   });
 
@@ -79,7 +83,9 @@ describe("scoreMatchResponse", () => {
   });
 
   it("is not correct when the answer key has no pairs", () => {
-    expect(scoreMatchResponse({ itemTypeKey: "matching", answerKeyJson: {}, pairs: {} })).toBe(false);
+    expect(scoreMatchResponse({ itemTypeKey: "matching", answerKeyJson: {}, pairs: {} })).toBe(
+      false,
+    );
   });
 });
 

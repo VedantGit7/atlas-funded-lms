@@ -8,10 +8,7 @@ type ServiceCtx = {
   requestId: string;
 };
 
-export async function resolveTenantPublicSiteUrl(
-  tx: TenantTx,
-  tenantId: string,
-): Promise<string> {
+export async function resolveTenantPublicSiteUrl(tx: TenantTx, tenantId: string): Promise<string> {
   const rows = await tx.$queryRaw<Array<{ hostname: string }>>`
     select hostname
     from tenant_domains
@@ -22,11 +19,24 @@ export async function resolveTenantPublicSiteUrl(
   `;
 
   const hostname = rows[0]?.hostname;
-  if (!hostname) {
-    return process.env["PUBLIC_SITE_URL"] ?? "https://fundedbeyond.com";
+  if (hostname) {
+    return `https://${hostname}`;
   }
 
-  return `https://${hostname}`;
+  // This URL becomes the "Secure my account" link in a security email. Falling
+  // back to a hardcoded brand meant a tenant with no primary domain sent its
+  // learners to a DIFFERENT company's site to secure their account — indistinguishable
+  // from a phishing link. PUBLIC_SITE_URL is the platform's configured default;
+  // if that is unset there is no safe URL to emit, so fail rather than guess.
+  const configuredDefault = process.env["PUBLIC_SITE_URL"]?.trim();
+  if (!configuredDefault) {
+    throw new Error(
+      `No primary domain for tenant ${tenantId} and PUBLIC_SITE_URL is unset. ` +
+        "Refusing to build a security email link against an unknown origin.",
+    );
+  }
+
+  return configuredDefault;
 }
 
 export async function emitSecurityNotification(

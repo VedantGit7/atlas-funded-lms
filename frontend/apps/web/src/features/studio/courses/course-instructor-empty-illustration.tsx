@@ -58,7 +58,14 @@ function CourseInstructorEmptyIllustration() {
       />
       <rect x="204" y="58" width="6" height="10" fill="var(--admin-primary)" fillOpacity="0.35" />
       <rect x="214" y="52" width="6" height="16" fill="var(--admin-primary)" fillOpacity="0.5" />
-      <rect x="224" y="48" width="6" height="20" fill="var(--admin-primary-strong)" fillOpacity="0.45" />
+      <rect
+        x="224"
+        y="48"
+        width="6"
+        height="20"
+        fill="var(--admin-primary-strong)"
+        fillOpacity="0.45"
+      />
       <line
         x1="148"
         y1="106"

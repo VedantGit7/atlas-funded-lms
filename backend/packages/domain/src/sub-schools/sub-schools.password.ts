@@ -12,10 +12,7 @@ export async function hashSubSchoolPassword(password: string): Promise<string> {
   return `scrypt$${salt.toString("hex")}$${derived.toString("hex")}`;
 }
 
-export async function verifySubSchoolPassword(
-  password: string,
-  stored: string,
-): Promise<boolean> {
+export async function verifySubSchoolPassword(password: string, stored: string): Promise<boolean> {
   const [scheme, saltHex, hashHex] = stored.split("$");
   if (scheme !== "scrypt" || !saltHex || !hashHex) return false;
   const salt = Buffer.from(saltHex, "hex");

@@ -7,6 +7,7 @@ Block 0 is identical to the one in [stitch-active-devices-prompts.md](./stitch-a
 and is reproduced here so this file stands alone.
 
 Source of truth:
+
 - `frontend/apps/web/src/features/admin/reports/AdminPaymentsRosterPage.tsx`
 - `frontend/apps/web/src/features/admin/reports/admin-payments-roster-api.ts`
 - `backend/packages/domain/src/payments/*`
@@ -677,18 +678,18 @@ the schedule cards stack under the history table.
 
 Full best-in-class versions, as intended. What exists today vs. what needs building:
 
-| Prompt feature | Status |
-| --- | --- |
-| Transactions list, column picker, sort, date/name/type/gateway/status filters | exists |
-| Invoices list, per-order invoice download (HTML) | exists |
-| Instalment plans list, plan detail schedule, create plan, record next payment | exists |
-| Gateways list with transaction count and paid volume, per-gateway transactions | exists |
-| CSV export for all four datasets, async run polling | exists |
-| Overview revenue charts, per-gateway share, top products, "needs attention" | needs backend aggregates |
-| Transaction detail page — gateway payload, fees, event timeline, receipts | partly (`metadata_json`, `external_id`); timeline needs an event source |
-| Refunds, disputes, chargebacks | **no refund domain at all** — needs backend |
-| Invoice PDF, resend, void, shareable link, delivery history | only HTML download exists |
-| Payouts, settlement reconciliation, webhook log | needs backend |
-| Saved views, export history, scheduled exports | export runs exist; history UI and scheduling need backend |
-| Instalment reminders, auto-revoke on overdue, edit schedule, cancel plan | needs backend |
-| Multi-currency subtotals / conversion | `currency` is stored per order; conversion rates need backend |
+| Prompt feature                                                                 | Status                                                                  |
+| ------------------------------------------------------------------------------ | ----------------------------------------------------------------------- |
+| Transactions list, column picker, sort, date/name/type/gateway/status filters  | exists                                                                  |
+| Invoices list, per-order invoice download (HTML)                               | exists                                                                  |
+| Instalment plans list, plan detail schedule, create plan, record next payment  | exists                                                                  |
+| Gateways list with transaction count and paid volume, per-gateway transactions | exists                                                                  |
+| CSV export for all four datasets, async run polling                            | exists                                                                  |
+| Overview revenue charts, per-gateway share, top products, "needs attention"    | needs backend aggregates                                                |
+| Transaction detail page — gateway payload, fees, event timeline, receipts      | partly (`metadata_json`, `external_id`); timeline needs an event source |
+| Refunds, disputes, chargebacks                                                 | **no refund domain at all** — needs backend                             |
+| Invoice PDF, resend, void, shareable link, delivery history                    | only HTML download exists                                               |
+| Payouts, settlement reconciliation, webhook log                                | needs backend                                                           |
+| Saved views, export history, scheduled exports                                 | export runs exist; history UI and scheduling need backend               |
+| Instalment reminders, auto-revoke on overdue, edit schedule, cancel plan       | needs backend                                                           |
+| Multi-currency subtotals / conversion                                          | `currency` is stored per order; conversion rates need backend           |

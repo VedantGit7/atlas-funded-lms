@@ -65,7 +65,9 @@ async function readInvitePreview(
   }
 }
 
-export async function loadInviteAcceptContext(token: string | undefined): Promise<InviteAcceptContext> {
+export async function loadInviteAcceptContext(
+  token: string | undefined,
+): Promise<InviteAcceptContext> {
   if (!token) {
     return {
       isAuthenticated: false,

@@ -10,5 +10,5 @@ export const POST = createTenantRoute<
 >({
   metadata: mutateManageCourseBackupsMetadata,
   output: requestCourseBackupOtpResponseSchema,
-  handler: async ({ tx, ctx }) => requestManageCourseBackupOtp(tx, ctx),
+  handler: ({ tx, ctx }) => Promise.resolve(requestManageCourseBackupOtp(tx, ctx)),
 });

@@ -15,10 +15,7 @@ import {
 } from "lucide-react";
 import { ClientApiError, clientApi, toast } from "../../../lib/client-api";
 import { generalSettingsBackLinkClassName } from "../general-settings/general-settings-shared";
-import {
-  managePageDescClassName,
-  managePageTitleClassName,
-} from "../manage/manage-ui-shared";
+import { managePageDescClassName, managePageTitleClassName } from "../manage/manage-ui-shared";
 import {
   CAMPAIGNS_HREF,
   MARKETING_HREF,
@@ -31,6 +28,7 @@ import {
   type CampaignAnalyticsDto,
   type CampaignChannel,
 } from "./campaigns-shared";
+import { csvEscape } from "@/lib/export/csv";
 
 type AnalyticsResponse = { data: CampaignAnalyticsDto };
 
@@ -42,8 +40,7 @@ function channelIcon(channel: CampaignChannel) {
 }
 
 function StatusPill({ status }: { status: CampaignAnalyticsDto["status"] }) {
-  const tone =
-    status === "SENT" ? "success" : status === "SCHEDULED" ? "warning" : "neutral";
+  const tone = status === "SENT" ? "success" : status === "SCHEDULED" ? "warning" : "neutral";
   return (
     <span
       className={[
@@ -86,7 +83,9 @@ function downloadChannelCsv(analytics: CampaignAnalyticsDto) {
         row.sentAt ?? "",
         row.href,
       ];
-      return cells.map((cell) => `"${cell.replace(/"/g, '""')}"`).join(",");
+      // csvEscape also neutralises a leading =, +, -, @ so a learner-supplied
+      // value cannot execute as a formula in the admin's spreadsheet (M1).
+      return cells.map((cell) => csvEscape(cell)).join(",");
     }),
   ];
   const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8" });
@@ -193,9 +192,7 @@ export function CampaignAnalyticsPanel({ campaignId }: CampaignAnalyticsPanelPro
           </div>
           <p className={`${managePageDescClassName} mt-1 max-w-2xl`}>
             Goal: {campaignGoalLabel(analytics.goal)}
-            {analytics.launchedAt
-              ? ` · Launched ${formatCampaignDate(analytics.launchedAt)}`
-              : ""}
+            {analytics.launchedAt ? ` · Launched ${formatCampaignDate(analytics.launchedAt)}` : ""}
             {analytics.audienceLabel ? ` · ${analytics.audienceLabel}` : ""}
           </p>
         </div>
@@ -310,7 +307,10 @@ export function CampaignAnalyticsPanel({ campaignId }: CampaignAnalyticsPanelPro
                 analytics.channels.map((row, index) => {
                   const Icon = channelIcon(row.channel);
                   return (
-                    <tr key={`${row.channel}-${String(index)}`} className="hover:bg-[var(--admin-surface-low)]">
+                    <tr
+                      key={`${row.channel}-${String(index)}`}
+                      className="hover:bg-[var(--admin-surface-low)]"
+                    >
                       <td className="px-6 py-4">
                         <p className="text-[14px] font-bold text-[var(--admin-on-surface)]">
                           {row.title}
@@ -338,7 +338,11 @@ export function CampaignAnalyticsPanel({ campaignId }: CampaignAnalyticsPanelPro
                       </td>
                       <td className="px-6 py-4">
                         <span className="text-[13px] text-[var(--admin-on-surface-variant)]">
-                          {row.sentAt ? formatCampaignDate(row.sentAt) : row.scheduledAt ? `Scheduled ${formatCampaignDate(row.scheduledAt)}` : "—"}
+                          {row.sentAt
+                            ? formatCampaignDate(row.sentAt)
+                            : row.scheduledAt
+                              ? `Scheduled ${formatCampaignDate(row.scheduledAt)}`
+                              : "—"}
                         </span>
                       </td>
                       <td className="px-6 py-4 text-right">

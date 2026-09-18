@@ -67,9 +67,7 @@ export function AdminSelectDropdown({
         setOpen((current) => !current);
       }}
       triggerContent={
-        <span className="text-[var(--admin-on-surface)]">
-          {selected?.label ?? "Select…"}
-        </span>
+        <span className="text-[var(--admin-on-surface)]">{selected?.label ?? "Select…"}</span>
       }
       panelAriaLabel={ariaLabel}
       portalZIndex={120}

@@ -11,8 +11,15 @@
   --fba-bdr: #e8e3d8;
   --fba-bdr2: #d0ccc0;
   --fba-tx: #1a1714;
-  --fba-tx2: #706860;
-  --fba-tx3: #a09888;
+  /* H17. The muted tier measured 2.36:1 on --fba-bg2 and accounted for the
+     large majority of 186 serious axe violations across login and the public
+     landing -- the two highest-traffic unauthenticated pages in the product.
+     Every value below now clears WCAG AA 4.5:1 against bg, bg2 and surf alike.
+     The secondary tier moved with it: pulling tx3 alone up to 4.5 would have
+     landed it on top of tx2 at 4.52 and erased the muted tier as a visual
+     distinction, so the ramp is re-spaced at roughly 14.7 / 7.1 / 4.6. */
+  --fba-tx2: #514b46;
+  --fba-tx3: #6f6758;
   --fba-ind: #3730a3;
   --fba-ind-d: #2e2789;
   --fba-ind-l: #eef2ff;
@@ -21,6 +28,31 @@
   --fba-gld-b: #fde68a;
   --fba-grn: #16a34a;
   --fba-red: #dc2626;
+
+  /* H17. The brand accents are legible as fills but not as text: --fba-gld
+     measures 1.89:1 on --fba-bg2 and --fba-grn 2.72:1, so both fail AA badly
+     wherever they carry words rather than paint a surface.
+
+     Darkening the brand values themselves was the wrong fix -- --fba-gld is the
+     FundedBeyond gold and appears on badges and rules where it is doing its job.
+     These are text-only variants, dark enough to clear 4.5:1 on bg, bg2 and
+     surf alike, and they are the tokens to reach for when the colour is
+     spelling something. */
+  --fba-gld-tx: #7c6525;
+  --fba-grn-tx: #107837;
+  /* Error red clears AA on white (4.83) but not on --fba-bg2 (3.99), which is
+     where the trade rows sit. */
+  --fba-red-tx: #ca2121;
+  /* The warning amber was a hardcoded #d97706 in the landing markup: 3.19:1. */
+  --fba-amb-tx: #b06105;
+
+  /* Oversized step numerals. These are large bold text, so the threshold is
+     3:1 rather than 4.5:1 -- but the pale tints they used measured 1.25 and
+     1.12, failing even that. They stay decorative-looking and are now
+     perceivable; --fba-gld-b at 1.25 was effectively invisible to anyone with
+     reduced contrast sensitivity, which is the population the rule exists for. */
+  --fba-gld-num: #ae8c03;
+  --fba-ind-num: #8783c8;
   --fba-nav-bg: rgba(255, 253, 249, 0.97);
   --fba-footer-bg: #1a1714;
 
@@ -41,8 +73,10 @@
   --fba-bdr: #2a2840;
   --fba-bdr2: #343254;
   --fba-tx: #f0eef8;
-  --fba-tx2: #9896b0;
-  --fba-tx3: #5e5c78;
+  /* The audit measured the light palette only, but dark failed just as badly --
+     tx3 was 2.58:1 on --fba-surf. Same ramp, same thresholds. */
+  --fba-tx2: #a8a7bc;
+  --fba-tx3: #8785a1;
   --fba-ind: #6366f1;
   --fba-ind-d: #5558e8;
   --fba-ind-l: #1e1d3a;

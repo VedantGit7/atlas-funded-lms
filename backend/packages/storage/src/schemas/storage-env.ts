@@ -19,8 +19,25 @@ export const StorageEnvSchema = z.object({
 
 export type StorageEnv = z.infer<typeof StorageEnvSchema>;
 
+/** Environments where a development storage provider must never be used. */
+const PRODUCTION_LIKE_ENVS = new Set(["production", "staging"]);
+
 export function parseStorageEnv(env: NodeJS.ProcessEnv): StorageEnv {
   const parsed = StorageEnvSchema.parse(env);
+
+  // Fail closed in production-like environments.
+  //
+  // STORAGE_PROVIDER defaults to "local-fs", so a deploy that simply forgot to
+  // set it wrote course content, branding assets and certificates to the
+  // container filesystem — silently, with no error at boot. On ephemeral
+  // container storage that means every upload disappears on the next redeploy.
+  const appEnv = env["APP_ENV"] ?? "";
+  if (PRODUCTION_LIKE_ENVS.has(appEnv) && parsed.STORAGE_PROVIDER !== "r2") {
+    throw new Error(
+      `STORAGE_PROVIDER must be "r2" when APP_ENV=${appEnv} (got "${parsed.STORAGE_PROVIDER}"). ` +
+        "A local provider in a production-like environment loses uploads on redeploy.",
+    );
+  }
 
   if (parsed.STORAGE_PROVIDER === "r2") {
     const missing = [

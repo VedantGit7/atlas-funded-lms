@@ -30,9 +30,12 @@ Micro-interactions are small, purposeful animations that provide feedback, guide
 **Effect**: Button lifts up slightly on hover, creating depth.
 
 **Implementation** (CSS):
+
 ```css
 .button-lift {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .button-lift:hover {
@@ -47,6 +50,7 @@ Micro-interactions are small, purposeful animations that provide feedback, guide
 ```
 
 **Framer Motion**:
+
 ```jsx
 <motion.button
   whileHover={{ y: -2, boxShadow: "0 4px 12px rgba(0,0,0,0.15)" }}
@@ -66,10 +70,11 @@ Micro-interactions are small, purposeful animations that provide feedback, guide
 **Effect**: Material Design-style ripple on click.
 
 **Implementation** (JavaScript):
+
 ```javascript
 function createRipple(event) {
   const button = event.currentTarget;
-  const ripple = document.createElement('span');
+  const ripple = document.createElement("span");
   const rect = button.getBoundingClientRect();
   const size = Math.max(rect.width, rect.height);
   const x = event.clientX - rect.left - size / 2;
@@ -78,19 +83,20 @@ function createRipple(event) {
   ripple.style.width = ripple.style.height = `${size}px`;
   ripple.style.left = `${x}px`;
   ripple.style.top = `${y}px`;
-  ripple.classList.add('ripple');
+  ripple.classList.add("ripple");
 
   button.appendChild(ripple);
 
   setTimeout(() => ripple.remove(), 600);
 }
 
-document.querySelectorAll('.button-ripple').forEach(button => {
-  button.addEventListener('click', createRipple);
+document.querySelectorAll(".button-ripple").forEach((button) => {
+  button.addEventListener("click", createRipple);
 });
 ```
 
 **CSS**:
+
 ```css
 .button-ripple {
   position: relative;
@@ -122,11 +128,12 @@ document.querySelectorAll('.button-ripple').forEach(button => {
 **Effect**: Button magnetically attracts cursor on proximity.
 
 **Implementation** (GSAP):
+
 ```javascript
-const button = document.querySelector('.magnetic-button');
+const button = document.querySelector(".magnetic-button");
 const magneticStrength = 0.3;
 
-button.addEventListener('mousemove', (e) => {
+button.addEventListener("mousemove", (e) => {
   const rect = button.getBoundingClientRect();
   const centerX = rect.left + rect.width / 2;
   const centerY = rect.top + rect.height / 2;
@@ -137,16 +144,16 @@ button.addEventListener('mousemove', (e) => {
     x: distanceX,
     y: distanceY,
     duration: 0.3,
-    ease: "power2.out"
+    ease: "power2.out",
   });
 });
 
-button.addEventListener('mouseleave', () => {
+button.addEventListener("mouseleave", () => {
   gsap.to(button, {
     x: 0,
     y: 0,
     duration: 0.5,
-    ease: "elastic.out(1, 0.3)"
+    ease: "elastic.out(1, 0.3)",
   });
 });
 ```
@@ -160,6 +167,7 @@ button.addEventListener('mouseleave', () => {
 **Effect**: Button morphs into loading spinner.
 
 **Framer Motion**:
+
 ```jsx
 function LoadingButton() {
   const [isLoading, setIsLoading] = useState(false);
@@ -169,12 +177,12 @@ function LoadingButton() {
       onClick={() => setIsLoading(true)}
       animate={isLoading ? "loading" : "idle"}
       disabled={isLoading}
-      style={{ position: 'relative', overflow: 'hidden' }}
+      style={{ position: "relative", overflow: "hidden" }}
     >
       <motion.span
         variants={{
           idle: { opacity: 1 },
-          loading: { opacity: 0 }
+          loading: { opacity: 0 },
         }}
       >
         Submit
@@ -184,9 +192,9 @@ function LoadingButton() {
         className="spinner"
         variants={{
           idle: { opacity: 0, scale: 0 },
-          loading: { opacity: 1, scale: 1 }
+          loading: { opacity: 1, scale: 1 },
         }}
-        style={{ position: 'absolute', inset: 0 }}
+        style={{ position: "absolute", inset: 0 }}
       >
         <Spinner />
       </motion.div>
@@ -206,6 +214,7 @@ function LoadingButton() {
 **Effect**: Label floats up when input is focused or filled.
 
 **Implementation**:
+
 ```css
 .input-wrapper {
   position: relative;
@@ -246,14 +255,10 @@ function LoadingButton() {
 ```
 
 **HTML**:
+
 ```html
 <div class="input-wrapper">
-  <input
-    class="input-field"
-    type="text"
-    placeholder=" "
-    required
-  />
+  <input class="input-field" type="text" placeholder=" " required />
   <label class="input-label">Email address</label>
 </div>
 ```
@@ -265,9 +270,10 @@ function LoadingButton() {
 **Effect**: Instant feedback on validation state.
 
 **React + Framer Motion**:
+
 ```jsx
 function ValidatedInput({ label, validator }) {
-  const [value, setValue] = useState('');
+  const [value, setValue] = useState("");
   const [isValid, setIsValid] = useState(null);
 
   const handleChange = (e) => {
@@ -282,8 +288,7 @@ function ValidatedInput({ label, validator }) {
         value={value}
         onChange={handleChange}
         animate={{
-          borderColor: isValid === null ? '#ccc' :
-                      isValid ? '#10b981' : '#ef4444'
+          borderColor: isValid === null ? "#ccc" : isValid ? "#10b981" : "#ef4444",
         }}
         transition={{ duration: 0.2 }}
       />
@@ -325,14 +330,15 @@ function ValidatedInput({ label, validator }) {
 **Effect**: Visual indicator of password strength.
 
 **Implementation**:
+
 ```jsx
 function PasswordStrengthIndicator({ password }) {
   const strength = calculateStrength(password);
 
   const variants = {
-    weak: { width: '33%', backgroundColor: '#ef4444' },
-    medium: { width: '66%', backgroundColor: '#f59e0b' },
-    strong: { width: '100%', backgroundColor: '#10b981' }
+    weak: { width: "33%", backgroundColor: "#ef4444" },
+    medium: { width: "66%", backgroundColor: "#f59e0b" },
+    strong: { width: "100%", backgroundColor: "#10b981" },
   };
 
   return (
@@ -351,9 +357,9 @@ function PasswordStrengthIndicator({ password }) {
 }
 
 function calculateStrength(password) {
-  if (password.length < 6) return 'weak';
-  if (password.length < 10) return 'medium';
-  return 'strong';
+  if (password.length < 6) return "weak";
+  if (password.length < 10) return "medium";
+  return "strong";
 }
 ```
 
@@ -364,44 +370,30 @@ function calculateStrength(password) {
 **Effect**: Shows remaining characters with visual indicator.
 
 **Implementation**:
+
 ```jsx
 function TextareaWithCount({ maxLength = 280 }) {
-  const [text, setText] = useState('');
+  const [text, setText] = useState("");
   const remaining = maxLength - text.length;
   const percentage = (text.length / maxLength) * 100;
 
   return (
     <div>
-      <textarea
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-        maxLength={maxLength}
-      />
+      <textarea value={text} onChange={(e) => setText(e.target.value)} maxLength={maxLength} />
 
       <div className="count-indicator">
-        <motion.svg
-          width="40"
-          height="40"
-          style={{ transform: 'rotate(-90deg)' }}
-        >
-          <circle
-            cx="20"
-            cy="20"
-            r="16"
-            stroke="#e5e7eb"
-            strokeWidth="3"
-            fill="none"
-          />
+        <motion.svg width="40" height="40" style={{ transform: "rotate(-90deg)" }}>
+          <circle cx="20" cy="20" r="16" stroke="#e5e7eb" strokeWidth="3" fill="none" />
           <motion.circle
             cx="20"
             cy="20"
             r="16"
-            stroke={remaining < 20 ? '#ef4444' : '#3b82f6'}
+            stroke={remaining < 20 ? "#ef4444" : "#3b82f6"}
             strokeWidth="3"
             fill="none"
             strokeDasharray={`${2 * Math.PI * 16}`}
             animate={{
-              strokeDashoffset: (1 - percentage / 100) * (2 * Math.PI * 16)
+              strokeDashoffset: (1 - percentage / 100) * (2 * Math.PI * 16),
             }}
           />
         </motion.svg>
@@ -421,22 +413,22 @@ function TextareaWithCount({ maxLength = 280 }) {
 **Effect**: Content placeholder that mimics layout.
 
 **Implementation**:
+
 ```css
 .skeleton {
-  background: linear-gradient(
-    90deg,
-    #f0f0f0 25%,
-    #e0e0e0 50%,
-    #f0f0f0 75%
-  );
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
   background-size: 200% 100%;
   animation: skeleton-loading 1.5s ease-in-out infinite;
   border-radius: 4px;
 }
 
 @keyframes skeleton-loading {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 .skeleton-text {
@@ -457,6 +449,7 @@ function TextareaWithCount({ maxLength = 280 }) {
 ```
 
 **React Component**:
+
 ```jsx
 function SkeletonCard() {
   return (
@@ -464,7 +457,7 @@ function SkeletonCard() {
       <div className="skeleton skeleton-image" />
       <div className="skeleton skeleton-title" />
       <div className="skeleton skeleton-text" />
-      <div className="skeleton skeleton-text" style={{ width: '80%' }} />
+      <div className="skeleton skeleton-text" style={{ width: "80%" }} />
     </div>
   );
 }
@@ -477,6 +470,7 @@ function SkeletonCard() {
 **Effect**: Linear progress indicator.
 
 **Framer Motion**:
+
 ```jsx
 function ProgressBar({ progress }) {
   return (
@@ -493,6 +487,7 @@ function ProgressBar({ progress }) {
 ```
 
 **CSS**:
+
 ```css
 .progress-container {
   width: 100%;
@@ -516,6 +511,7 @@ function ProgressBar({ progress }) {
 **Effect**: Rotating loading indicator.
 
 **CSS**:
+
 ```css
 .spinner {
   width: 40px;
@@ -527,11 +523,14 @@ function ProgressBar({ progress }) {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 ```
 
 **Framer Motion (Advanced)**:
+
 ```jsx
 function Spinner() {
   return (
@@ -547,7 +546,7 @@ function Spinner() {
         transition={{
           duration: 1,
           repeat: Infinity,
-          ease: "linear"
+          ease: "linear",
         }}
       />
     </motion.div>
@@ -564,6 +563,7 @@ function Spinner() {
 **Effect**: Hamburger transforms into X on click.
 
 **CSS**:
+
 ```css
 .hamburger {
   width: 30px;
@@ -582,9 +582,16 @@ function Spinner() {
   transition: all 0.3s ease;
 }
 
-.hamburger span:nth-child(1) { top: 0; }
-.hamburger span:nth-child(2) { top: 50%; transform: translateY(-50%); }
-.hamburger span:nth-child(3) { bottom: 0; }
+.hamburger span:nth-child(1) {
+  top: 0;
+}
+.hamburger span:nth-child(2) {
+  top: 50%;
+  transform: translateY(-50%);
+}
+.hamburger span:nth-child(3) {
+  bottom: 0;
+}
 
 .hamburger.active span:nth-child(1) {
   top: 50%;
@@ -608,23 +615,24 @@ function Spinner() {
 **Effect**: Dropdown slides down with stagger.
 
 **Framer Motion**:
+
 ```jsx
 const menuVariants = {
   closed: {
     opacity: 0,
     y: -20,
-    transition: { staggerChildren: 0.05, staggerDirection: -1 }
+    transition: { staggerChildren: 0.05, staggerDirection: -1 },
   },
   open: {
     opacity: 1,
     y: 0,
-    transition: { staggerChildren: 0.07, delayChildren: 0.1 }
-  }
+    transition: { staggerChildren: 0.07, delayChildren: 0.1 },
+  },
 };
 
 const itemVariants = {
   closed: { opacity: 0, x: -20 },
-  open: { opacity: 1, x: 0 }
+  open: { opacity: 1, x: 0 },
 };
 
 function DropdownMenu({ isOpen }) {
@@ -657,6 +665,7 @@ function DropdownMenu({ isOpen }) {
 **Effect**: Animated underline follows active link.
 
 **Framer Motion**:
+
 ```jsx
 function TabNavigation() {
   const [activeTab, setActiveTab] = useState(0);
@@ -667,7 +676,7 @@ function TabNavigation() {
         <button
           key={tab}
           onClick={() => setActiveTab(index)}
-          className={activeTab === index ? 'active' : ''}
+          className={activeTab === index ? "active" : ""}
         >
           {tab}
           {activeTab === index && (
@@ -685,6 +694,7 @@ function TabNavigation() {
 ```
 
 **CSS**:
+
 ```css
 .tabs {
   display: flex;
@@ -719,6 +729,7 @@ function TabNavigation() {
 **Effect**: Image scales up slightly on hover.
 
 **CSS**:
+
 ```css
 .image-container {
   overflow: hidden;
@@ -743,20 +754,22 @@ function TabNavigation() {
 **Effect**: Card tilts based on mouse position.
 
 **Vanilla-Tilt**:
+
 ```javascript
 VanillaTilt.init(document.querySelectorAll(".tilt-card"), {
   max: 15,
   speed: 400,
   glare: true,
-  "max-glare": 0.3
+  "max-glare": 0.3,
 });
 ```
 
 **Manual Implementation**:
-```javascript
-const card = document.querySelector('.tilt-card');
 
-card.addEventListener('mousemove', (e) => {
+```javascript
+const card = document.querySelector(".tilt-card");
+
+card.addEventListener("mousemove", (e) => {
   const rect = card.getBoundingClientRect();
   const x = e.clientX - rect.left;
   const y = e.clientY - rect.top;
@@ -770,8 +783,8 @@ card.addEventListener('mousemove', (e) => {
   card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
 });
 
-card.addEventListener('mouseleave', () => {
-  card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0)';
+card.addEventListener("mouseleave", () => {
+  card.style.transform = "perspective(1000px) rotateX(0) rotateY(0)";
 });
 ```
 
@@ -782,6 +795,7 @@ card.addEventListener('mouseleave', () => {
 **Effect**: Content reveals on hover with slide/fade.
 
 **CSS**:
+
 ```css
 .card {
   position: relative;
@@ -815,6 +829,7 @@ card.addEventListener('mouseleave', () => {
 **Effect**: Smooth toggle with spring animation.
 
 **Framer Motion**:
+
 ```jsx
 function ToggleSwitch({ enabled, setEnabled }) {
   return (
@@ -822,13 +837,13 @@ function ToggleSwitch({ enabled, setEnabled }) {
       className="switch"
       data-enabled={enabled}
       onClick={() => setEnabled(!enabled)}
-      animate={{ backgroundColor: enabled ? '#3b82f6' : '#d1d5db' }}
+      animate={{ backgroundColor: enabled ? "#3b82f6" : "#d1d5db" }}
     >
       <motion.div
         className="switch-handle"
         layout
         transition={{ type: "spring", stiffness: 500, damping: 30 }}
-        style={{ justifyContent: enabled ? 'flex-end' : 'flex-start' }}
+        style={{ justifyContent: enabled ? "flex-end" : "flex-start" }}
       />
     </motion.div>
   );
@@ -836,6 +851,7 @@ function ToggleSwitch({ enabled, setEnabled }) {
 ```
 
 **CSS**:
+
 ```css
 .switch {
   width: 50px;
@@ -865,6 +881,7 @@ function ToggleSwitch({ enabled, setEnabled }) {
 **Effect**: Card expands to full screen on click.
 
 **Framer Motion with `layout`**:
+
 ```jsx
 function ExpandableCard() {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -872,7 +889,7 @@ function ExpandableCard() {
   return (
     <motion.div
       layout
-      className={isExpanded ? 'card-expanded' : 'card'}
+      className={isExpanded ? "card-expanded" : "card"}
       onClick={() => setIsExpanded(!isExpanded)}
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
     >
@@ -880,11 +897,7 @@ function ExpandableCard() {
       <motion.p layout="position">Content</motion.p>
 
       {isExpanded && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-        >
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
           Additional content...
         </motion.div>
       )}
@@ -902,6 +915,7 @@ function ExpandableCard() {
 **Effect**: Elements fade in as they enter viewport.
 
 **Framer Motion + `useInView`**:
+
 ```jsx
 function FadeInSection({ children }) {
   const ref = useRef(null);
@@ -927,6 +941,7 @@ function FadeInSection({ children }) {
 **Effect**: Shows reading progress.
 
 **Implementation**:
+
 ```jsx
 function ScrollProgress() {
   const [scrollProgress, setScrollProgress] = useState(0);
@@ -938,14 +953,14 @@ function ScrollProgress() {
       setScrollProgress(progress);
     };
 
-    window.addEventListener('scroll', updateProgress);
-    return () => window.removeEventListener('scroll', updateProgress);
+    window.addEventListener("scroll", updateProgress);
+    return () => window.removeEventListener("scroll", updateProgress);
   }, []);
 
   return (
     <motion.div
       className="progress-bar"
-      style={{ scaleX: scrollProgress / 100, transformOrigin: 'left' }}
+      style={{ scaleX: scrollProgress / 100, transformOrigin: "left" }}
     />
   );
 }
@@ -960,6 +975,7 @@ function ScrollProgress() {
 **Effect**: Modal fades in and scales up.
 
 **Framer Motion**:
+
 ```jsx
 function Modal({ isOpen, onClose, children }) {
   return (
@@ -1001,6 +1017,7 @@ function Modal({ isOpen, onClose, children }) {
 **Effect**: Toast slides in from top/bottom with auto-dismiss.
 
 **Framer Motion**:
+
 ```jsx
 function Toast({ message, type, onDismiss }) {
   useEffect(() => {
@@ -1052,4 +1069,4 @@ For all micro-interactions:
 
 ---
 
-*This catalog is a living document. Patterns are updated based on modern web standards and user research.*
+_This catalog is a living document. Patterns are updated based on modern web standards and user research._

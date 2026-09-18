@@ -295,7 +295,9 @@ export function AdminProgressProductPicker({
       setDebouncedQ(searchInput.trim());
       setPage(1);
     }, 300);
-    return () => window.clearTimeout(timer);
+    return () => {
+      window.clearTimeout(timer);
+    };
   }, [searchInput]);
 
   const load = useCallback(async () => {
@@ -303,7 +305,7 @@ export function AdminProgressProductPicker({
     setError(null);
     const [sortByRaw, sortDirRaw] = sortKey.split(":");
     const sortBy = (sortByRaw ?? "enrolled_count") as ProgressProductSortBy;
-    const sortDir = (sortDirRaw === "asc" ? "asc" : "desc") as "asc" | "desc";
+    const sortDir = sortDirRaw === "asc" ? "asc" : "desc";
     try {
       const response = await fetchProgressProducts(productType, {
         q: debouncedQ || undefined,
@@ -477,7 +479,9 @@ export function AdminProgressProductPicker({
               id={searchId}
               type="search"
               value={searchInput}
-              onChange={(event) => setSearchInput(event.target.value)}
+              onChange={(event) => {
+                setSearchInput(event.target.value);
+              }}
               placeholder="Search product title…"
               className="h-9 w-full rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface)] pl-9 pr-3 text-xs font-medium text-[var(--admin-on-surface)] outline-none placeholder:text-[var(--admin-on-surface-variant)] focus:border-[var(--admin-primary)] focus:ring-2 focus:ring-[var(--admin-primary)]/30"
             />
@@ -574,7 +578,9 @@ export function AdminProgressProductPicker({
                     <tr
                       key={product.id}
                       className="group cursor-pointer transition-colors hover:bg-[color-mix(in_srgb,var(--admin-primary)_6%,var(--admin-surface))]"
-                      onClick={() => onSelectProduct(product)}
+                      onClick={() => {
+                        onSelectProduct(product);
+                      }}
                       onKeyDown={(event) => {
                         if (event.key === "Enter" || event.key === " ") {
                           event.preventDefault();
@@ -669,7 +675,9 @@ export function AdminProgressProductPicker({
                   type="button"
                   className="inline-flex h-8 w-8 items-center justify-center border border-[var(--admin-border)] transition-colors hover:bg-[var(--admin-surface-high)] hover:text-[var(--admin-on-surface)] disabled:cursor-not-allowed disabled:opacity-40"
                   disabled={!pageInfo.hasPreviousPage || loading}
-                  onClick={() => setPage((current) => Math.max(1, current - 1))}
+                  onClick={() => {
+                    setPage((current) => Math.max(1, current - 1));
+                  }}
                   aria-label="Previous page"
                 >
                   <ChevronLeft className="h-4 w-4" aria-hidden="true" />
@@ -688,7 +696,9 @@ export function AdminProgressProductPicker({
                             ? "border-[var(--admin-primary)] bg-[var(--admin-surface-high)] text-[var(--admin-primary)]"
                             : "border-[var(--admin-border)] hover:bg-[var(--admin-surface-high)] hover:text-[var(--admin-on-surface)]",
                         ].join(" ")}
-                        onClick={() => setPage(pageNumber)}
+                        onClick={() => {
+                          setPage(pageNumber);
+                        }}
                         aria-current={pageNumber === page ? "page" : undefined}
                       >
                         {pageNumber}
@@ -700,7 +710,9 @@ export function AdminProgressProductPicker({
                   type="button"
                   className="inline-flex h-8 w-8 items-center justify-center border border-[var(--admin-border)] transition-colors hover:bg-[var(--admin-surface-high)] hover:text-[var(--admin-on-surface)] disabled:cursor-not-allowed disabled:opacity-40"
                   disabled={!pageInfo.hasNextPage || loading}
-                  onClick={() => setPage((current) => current + 1)}
+                  onClick={() => {
+                    setPage((current) => current + 1);
+                  }}
                   aria-label="Next page"
                 >
                   <ChevronRight className="h-4 w-4" aria-hidden="true" />

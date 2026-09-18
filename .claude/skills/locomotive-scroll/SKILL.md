@@ -10,6 +10,7 @@ Comprehensive guide for implementing smooth scrolling, parallax effects, and scr
 ## Overview
 
 Locomotive Scroll is a JavaScript library that provides:
+
 - **Smooth scrolling**: Hardware-accelerated smooth scroll with customizable easing
 - **Parallax effects**: Element-level speed control for depth
 - **Viewport detection**: Track when elements enter/exit viewport
@@ -18,6 +19,7 @@ Locomotive Scroll is a JavaScript library that provides:
 - **Horizontal scrolling**: Support for horizontal scroll layouts
 
 **When to use Locomotive Scroll:**
+
 - Building immersive landing pages with parallax
 - Creating smooth, Apple-style scroll experiences
 - Implementing scroll-triggered animations
@@ -25,6 +27,7 @@ Locomotive Scroll is a JavaScript library that provides:
 - Adding depth and motion to long-form content
 
 **Trade-offs:**
+
 - Scroll-hijacking can impact accessibility (provide disable option)
 - Performance overhead on low-end devices (detect and disable)
 - Mobile touch scrolling feels different (test extensively)
@@ -55,33 +58,22 @@ Every Locomotive Scroll implementation requires specific data attributes:
 ```html
 <!-- Scroll container (required) -->
 <div data-scroll-container>
-
   <!-- Scroll sections (optional, improves performance) -->
   <div data-scroll-section>
-
     <!-- Tracked elements -->
     <h1 data-scroll>Basic detection</h1>
 
     <!-- Parallax element -->
-    <div data-scroll data-scroll-speed="2">
-      Moves faster than scroll
-    </div>
+    <div data-scroll data-scroll-speed="2">Moves faster than scroll</div>
 
     <!-- Sticky element -->
-    <div data-scroll data-scroll-sticky>
-      Sticks within section
-    </div>
+    <div data-scroll data-scroll-sticky>Sticks within section</div>
 
     <!-- Element with ID for tracking -->
-    <div data-scroll data-scroll-id="hero">
-      Accessible via JavaScript
-    </div>
+    <div data-scroll data-scroll-id="hero">Accessible via JavaScript</div>
 
     <!-- Call event trigger -->
-    <div data-scroll data-scroll-call="fadeIn">
-      Triggers custom event
-    </div>
-
+    <div data-scroll data-scroll-call="fadeIn">Triggers custom event</div>
   </div>
 </div>
 ```
@@ -90,41 +82,41 @@ Every Locomotive Scroll implementation requires specific data attributes:
 
 ```javascript
 const scroll = new LocomotiveScroll({
-  el: document.querySelector('[data-scroll-container]'),
+  el: document.querySelector("[data-scroll-container]"),
   smooth: true,
-  lerp: 0.1,        // Smoothness (0-1, lower = smoother)
-  multiplier: 1,    // Speed multiplier
-  class: 'is-inview', // Class added to visible elements
-  repeat: false,    // Repeat in-view detection
-  offset: [0, 0]    // Global trigger offset [bottom, top]
+  lerp: 0.1, // Smoothness (0-1, lower = smoother)
+  multiplier: 1, // Speed multiplier
+  class: "is-inview", // Class added to visible elements
+  repeat: false, // Repeat in-view detection
+  offset: [0, 0], // Global trigger offset [bottom, top]
 });
 ```
 
 ### 3. Data Attributes
 
-| Attribute | Purpose | Example |
-|-----------|---------|---------|
-| `data-scroll` | Enable detection | `data-scroll` |
-| `data-scroll-speed` | Parallax speed | `data-scroll-speed="2"` |
-| `data-scroll-direction` | Parallax axis | `data-scroll-direction="horizontal"` |
-| `data-scroll-sticky` | Sticky positioning | `data-scroll-sticky` |
-| `data-scroll-target` | Sticky boundary | `data-scroll-target="#section"` |
-| `data-scroll-offset` | Trigger offset | `data-scroll-offset="20%"` |
-| `data-scroll-repeat` | Repeat detection | `data-scroll-repeat` |
-| `data-scroll-call` | Event trigger | `data-scroll-call="myFunction"` |
-| `data-scroll-id` | Unique identifier | `data-scroll-id="hero"` |
-| `data-scroll-class` | Custom class | `data-scroll-class="is-visible"` |
+| Attribute               | Purpose            | Example                              |
+| ----------------------- | ------------------ | ------------------------------------ |
+| `data-scroll`           | Enable detection   | `data-scroll`                        |
+| `data-scroll-speed`     | Parallax speed     | `data-scroll-speed="2"`              |
+| `data-scroll-direction` | Parallax axis      | `data-scroll-direction="horizontal"` |
+| `data-scroll-sticky`    | Sticky positioning | `data-scroll-sticky`                 |
+| `data-scroll-target`    | Sticky boundary    | `data-scroll-target="#section"`      |
+| `data-scroll-offset`    | Trigger offset     | `data-scroll-offset="20%"`           |
+| `data-scroll-repeat`    | Repeat detection   | `data-scroll-repeat`                 |
+| `data-scroll-call`      | Event trigger      | `data-scroll-call="myFunction"`      |
+| `data-scroll-id`        | Unique identifier  | `data-scroll-id="hero"`              |
+| `data-scroll-class`     | Custom class       | `data-scroll-class="is-visible"`     |
 
 ## Common Patterns
 
 ### 1. Basic Smooth Scrolling
 
 ```javascript
-import LocomotiveScroll from 'locomotive-scroll';
+import LocomotiveScroll from "locomotive-scroll";
 
 const scroll = new LocomotiveScroll({
-  el: document.querySelector('[data-scroll-container]'),
-  smooth: true
+  el: document.querySelector("[data-scroll-container]"),
+  smooth: true,
 });
 ```
 
@@ -140,44 +132,36 @@ const scroll = new LocomotiveScroll({
 
 ```html
 <!-- Slow parallax -->
-<div data-scroll data-scroll-speed="0.5">
-  Moves slower than scroll (background effect)
-</div>
+<div data-scroll data-scroll-speed="0.5">Moves slower than scroll (background effect)</div>
 
 <!-- Fast parallax -->
-<div data-scroll data-scroll-speed="3">
-  Moves faster than scroll (foreground effect)
-</div>
+<div data-scroll data-scroll-speed="3">Moves faster than scroll (foreground effect)</div>
 
 <!-- Reverse parallax -->
-<div data-scroll data-scroll-speed="-2">
-  Moves in opposite direction
-</div>
+<div data-scroll data-scroll-speed="-2">Moves in opposite direction</div>
 
 <!-- Horizontal parallax -->
-<div data-scroll data-scroll-speed="2" data-scroll-direction="horizontal">
-  Moves horizontally
-</div>
+<div data-scroll data-scroll-speed="2" data-scroll-direction="horizontal">Moves horizontally</div>
 ```
 
 ### 3. Viewport Detection and Callbacks
 
 ```javascript
 // Track scroll progress
-scroll.on('scroll', (args) => {
+scroll.on("scroll", (args) => {
   console.log(args.scroll.y); // Current scroll position
-  console.log(args.speed);    // Scroll speed
+  console.log(args.speed); // Scroll speed
   console.log(args.direction); // Scroll direction
 
   // Access specific element progress
-  if (args.currentElements['hero']) {
-    const progress = args.currentElements['hero'].progress;
+  if (args.currentElements["hero"]) {
+    const progress = args.currentElements["hero"].progress;
     console.log(`Hero progress: ${progress}`); // 0 to 1
   }
 });
 
 // Call events
-scroll.on('call', (value, way, obj) => {
+scroll.on("call", (value, way, obj) => {
   console.log(`Event triggered: ${value}`);
   // value = data-scroll-call attribute value
   // way = 'enter' or 'exit'
@@ -195,9 +179,7 @@ scroll.on('call', (value, way, obj) => {
 ```html
 <!-- Stick within parent section -->
 <div data-scroll-section>
-  <div data-scroll data-scroll-sticky>
-    I stick while section is in view
-  </div>
+  <div data-scroll data-scroll-sticky>I stick while section is in view</div>
 </div>
 
 <!-- Stick with specific target -->
@@ -212,21 +194,21 @@ scroll.on('call', (value, way, obj) => {
 
 ```javascript
 // Scroll to element
-scroll.scrollTo('#target-section');
+scroll.scrollTo("#target-section");
 
 // Scroll to top
-scroll.scrollTo('top');
+scroll.scrollTo("top");
 
 // Scroll to bottom
-scroll.scrollTo('bottom');
+scroll.scrollTo("bottom");
 
 // Scroll with options
-scroll.scrollTo('#target', {
-  offset: -100,      // Offset in pixels
-  duration: 1000,    // Duration in ms
+scroll.scrollTo("#target", {
+  offset: -100, // Offset in pixels
+  duration: 1000, // Duration in ms
   easing: [0.25, 0.0, 0.35, 1.0], // Cubic bezier
   disableLerp: true, // Disable smooth lerp
-  callback: () => console.log('Scrolled!')
+  callback: () => console.log("Scrolled!"),
 });
 
 // Scroll to pixel value
@@ -237,9 +219,9 @@ scroll.scrollTo(500);
 
 ```javascript
 const scroll = new LocomotiveScroll({
-  el: document.querySelector('[data-scroll-container]'),
+  el: document.querySelector("[data-scroll-container]"),
   smooth: true,
-  direction: 'horizontal'
+  direction: "horizontal",
 });
 ```
 
@@ -257,20 +239,20 @@ const scroll = new LocomotiveScroll({
 
 ```javascript
 const scroll = new LocomotiveScroll({
-  el: document.querySelector('[data-scroll-container]'),
+  el: document.querySelector("[data-scroll-container]"),
   smooth: true,
 
   // Tablet settings
   tablet: {
     smooth: true,
-    breakpoint: 1024
+    breakpoint: 1024,
   },
 
   // Smartphone settings
   smartphone: {
     smooth: false, // Disable on mobile for performance
-    breakpoint: 768
-  }
+    breakpoint: 768,
+  },
 });
 ```
 
@@ -279,21 +261,21 @@ const scroll = new LocomotiveScroll({
 Locomotive Scroll and GSAP ScrollTrigger work together for advanced animations:
 
 ```javascript
-import LocomotiveScroll from 'locomotive-scroll';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import LocomotiveScroll from "locomotive-scroll";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
 const locoScroll = new LocomotiveScroll({
-  el: document.querySelector('[data-scroll-container]'),
-  smooth: true
+  el: document.querySelector("[data-scroll-container]"),
+  smooth: true,
 });
 
 // Sync Locomotive Scroll with ScrollTrigger
-locoScroll.on('scroll', ScrollTrigger.update);
+locoScroll.on("scroll", ScrollTrigger.update);
 
-ScrollTrigger.scrollerProxy('[data-scroll-container]', {
+ScrollTrigger.scrollerProxy("[data-scroll-container]", {
   scrollTop(value) {
     return arguments.length
       ? locoScroll.scrollTo(value, 0, 0)
@@ -304,29 +286,29 @@ ScrollTrigger.scrollerProxy('[data-scroll-container]', {
       top: 0,
       left: 0,
       width: window.innerWidth,
-      height: window.innerHeight
+      height: window.innerHeight,
     };
   },
-  pinType: document.querySelector('[data-scroll-container]').style.transform
-    ? 'transform'
-    : 'fixed'
+  pinType: document.querySelector("[data-scroll-container]").style.transform
+    ? "transform"
+    : "fixed",
 });
 
 // GSAP animation with ScrollTrigger
-gsap.to('.fade-in', {
+gsap.to(".fade-in", {
   scrollTrigger: {
-    trigger: '.fade-in',
-    scroller: '[data-scroll-container]',
-    start: 'top bottom',
-    end: 'top center',
-    scrub: true
+    trigger: ".fade-in",
+    scroller: "[data-scroll-container]",
+    start: "top bottom",
+    end: "top center",
+    scrub: true,
   },
   opacity: 1,
-  y: 0
+  y: 0,
 });
 
 // Update ScrollTrigger when Locomotive updates
-ScrollTrigger.addEventListener('refresh', () => locoScroll.update());
+ScrollTrigger.addEventListener("refresh", () => locoScroll.update());
 ScrollTrigger.refresh();
 ```
 
@@ -336,25 +318,26 @@ ScrollTrigger.refresh();
 const scroll = new LocomotiveScroll();
 
 // Lifecycle
-scroll.init();     // Reinitialize
-scroll.update();   // Refresh element positions
-scroll.destroy();  // Clean up
-scroll.start();    // Resume scrolling
-scroll.stop();     // Pause scrolling
+scroll.init(); // Reinitialize
+scroll.update(); // Refresh element positions
+scroll.destroy(); // Clean up
+scroll.start(); // Resume scrolling
+scroll.stop(); // Pause scrolling
 
 // Navigation
 scroll.scrollTo(target, options);
 scroll.setScroll(x, y);
 
 // Events
-scroll.on('scroll', callback);
-scroll.on('call', callback);
-scroll.off('scroll', callback);
+scroll.on("scroll", callback);
+scroll.on("call", callback);
+scroll.off("scroll", callback);
 ```
 
 ## Performance Optimization
 
 1. **Use `data-scroll-section`** to segment long pages:
+
 ```html
 <div data-scroll-container>
   <div data-scroll-section>Section 1</div>
@@ -366,18 +349,23 @@ scroll.off('scroll', callback);
 2. **Limit parallax elements** - Too many can impact performance
 
 3. **Disable on mobile** if performance is poor:
+
 ```javascript
-smartphone: { smooth: false }
+smartphone: {
+  smooth: false;
+}
 ```
 
 4. **Update on resize**:
+
 ```javascript
-window.addEventListener('resize', () => {
+window.addEventListener("resize", () => {
   scroll.update();
 });
 ```
 
 5. **Destroy when not needed**:
+
 ```javascript
 scroll.destroy();
 ```
@@ -389,6 +377,7 @@ scroll.destroy();
 **Problem**: `position: fixed` elements break with smooth scroll
 
 **Solution**: Use `data-scroll-sticky` instead or add fixed elements outside container:
+
 ```html
 <!-- Fixed nav outside container -->
 <nav style="position: fixed;">Navigation</nav>
@@ -403,13 +392,14 @@ scroll.destroy();
 **Problem**: All images load at once
 
 **Solution**: Integrate with lazy loading:
+
 ```html
-<img data-scroll data-src="image.jpg" class="lazy">
+<img data-scroll data-src="image.jpg" class="lazy" />
 ```
 
 ```javascript
-scroll.on('call', (func) => {
-  if (func === 'lazyLoad') {
+scroll.on("call", (func) => {
+  if (func === "lazyLoad") {
     // Trigger lazy load
   }
 });
@@ -420,6 +410,7 @@ scroll.on('call', (func) => {
 **Problem**: Dynamic content doesn't update scroll positions
 
 **Solution**: Call `update()` after DOM changes:
+
 ```javascript
 // After adding content
 addDynamicContent();
@@ -431,11 +422,12 @@ scroll.update();
 **Problem**: Screen readers and keyboard navigation broken
 
 **Solution**: Provide disable option:
+
 ```javascript
-const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 const scroll = new LocomotiveScroll({
-  smooth: !prefersReducedMotion
+  smooth: !prefersReducedMotion,
 });
 ```
 
@@ -444,6 +436,7 @@ const scroll = new LocomotiveScroll({
 **Problem**: Scroll instance not cleaned up on route changes (SPAs)
 
 **Solution**: Always destroy on unmount:
+
 ```javascript
 // React example
 useEffect(() => {
@@ -458,6 +451,7 @@ useEffect(() => {
 **Problem**: Parallax elements overlap incorrectly
 
 **Solution**: Set explicit z-index on parallax layers:
+
 ```css
 [data-scroll-speed] {
   position: relative;

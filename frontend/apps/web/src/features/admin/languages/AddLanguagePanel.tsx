@@ -22,10 +22,7 @@ export function AddLanguagePanel({ supported }: { supported: LanguageRow[] }) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const supportedCodes = useMemo(
-    () => new Set(supported.map((row) => row.locale)),
-    [supported],
-  );
+  const supportedCodes = useMemo(() => new Set(supported.map((row) => row.locale)), [supported]);
 
   const available = useMemo(
     () => getAllLanguages().filter((language) => !supportedCodes.has(language.code)),
@@ -35,7 +32,11 @@ export function AddLanguagePanel({ supported }: { supported: LanguageRow[] }) {
   const supportedList = useMemo(
     () =>
       supported
-        .map((row) => ({ code: row.locale, name: languageName(row.locale), isDefault: row.isDefault }))
+        .map((row) => ({
+          code: row.locale,
+          name: languageName(row.locale),
+          isDefault: row.isDefault,
+        }))
         .sort((a, b) => Number(b.isDefault) - Number(a.isDefault) || a.name.localeCompare(b.name)),
     [supported],
   );
@@ -55,7 +56,9 @@ export function AddLanguagePanel({ supported }: { supported: LanguageRow[] }) {
       router.refresh();
     } catch (caught) {
       setError(
-        caught instanceof ClientApiError ? caught.message : "Could not add the language. Please try again.",
+        caught instanceof ClientApiError
+          ? caught.message
+          : "Could not add the language. Please try again.",
       );
     } finally {
       setSaving(false);
@@ -64,11 +67,20 @@ export function AddLanguagePanel({ supported }: { supported: LanguageRow[] }) {
 
   return (
     <div className="mx-auto max-w-3xl space-y-8 pb-16">
-      <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide">
-        <Link href={LANGUAGES_HREF} prefetch={false} className="text-[var(--admin-primary)] transition-colors hover:opacity-80">
+      <nav
+        aria-label="Breadcrumb"
+        className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide"
+      >
+        <Link
+          href={LANGUAGES_HREF}
+          prefetch={false}
+          className="text-[var(--admin-primary)] transition-colors hover:opacity-80"
+        >
           Languages
         </Link>
-        <span className="text-[var(--admin-on-surface-variant)]" aria-hidden="true">/</span>
+        <span className="text-[var(--admin-on-surface-variant)]" aria-hidden="true">
+          /
+        </span>
         <span className="text-[var(--admin-on-surface-variant)]">Add Language</span>
       </nav>
 
@@ -76,14 +88,18 @@ export function AddLanguagePanel({ supported }: { supported: LanguageRow[] }) {
         <h1 className="text-2xl font-bold tracking-tight text-[var(--admin-on-surface)] sm:text-3xl">
           Add Language
         </h1>
-        <p className="text-sm text-[var(--admin-on-surface-variant)]">Add language for translation</p>
+        <p className="text-sm text-[var(--admin-on-surface-variant)]">
+          Add language for translation
+        </p>
       </header>
 
       <section className="space-y-3">
         <h2 className="text-lg font-bold text-[var(--admin-on-surface)]">Supported Languages</h2>
         <ul className="divide-y divide-[var(--admin-border)] border-b border-[var(--admin-border)]">
           {supportedList.length === 0 ? (
-            <li className="py-3 text-sm text-[var(--admin-on-surface-variant)]">No languages added yet.</li>
+            <li className="py-3 text-sm text-[var(--admin-on-surface-variant)]">
+              No languages added yet.
+            </li>
           ) : (
             supportedList.map((language) => (
               <li key={language.code} className="flex items-center justify-between gap-3 py-3">
@@ -184,7 +200,10 @@ function LanguageSelect({
     >
       <div className="shrink-0 border-b border-[var(--admin-border)] p-2">
         <div className="relative">
-          <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--admin-on-surface-variant)]" aria-hidden="true" />
+          <Search
+            className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--admin-on-surface-variant)]"
+            aria-hidden="true"
+          />
           <input
             ref={searchRef}
             type="search"
@@ -225,7 +244,10 @@ function LanguageSelect({
                 <span className="min-w-0 truncate">
                   {language.name}
                   {language.nativeName && language.nativeName !== language.name ? (
-                    <span className="text-[var(--admin-on-surface-variant)]"> · {language.nativeName}</span>
+                    <span className="text-[var(--admin-on-surface-variant)]">
+                      {" "}
+                      · {language.nativeName}
+                    </span>
                   ) : null}
                 </span>
                 {active ? <Check className="h-4 w-4 shrink-0" aria-hidden="true" /> : null}

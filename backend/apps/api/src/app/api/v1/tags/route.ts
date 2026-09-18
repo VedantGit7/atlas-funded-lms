@@ -1,4 +1,4 @@
-import { z } from "zod";
+import type { z } from "zod";
 import { createTenantRoute } from "@atlas/api";
 import { createTag, listTenantTags } from "../../../../server/tags/tags.service";
 import {

@@ -38,15 +38,15 @@ Edit `main.js` to change effect colors:
 // Vanta.js waves color
 let vantaEffect = VANTA.WAVES({
   el: "#vanta-bg",
-  color: 0x23153c,  // Change this hex number
-  waveHeight: 15.00,
-  waveSpeed: 0.75
+  color: 0x23153c, // Change this hex number
+  waveHeight: 15.0,
+  waveSpeed: 0.75,
 });
 
 // Zdog colors
 const heroCube = new Zdog.Box({
-  frontFace: '#667eea',  // Change face colors
-  rearFace: '#764ba2'
+  frontFace: "#667eea", // Change face colors
+  rearFace: "#764ba2",
 });
 ```
 
@@ -56,13 +56,13 @@ Replace WAVES with any other Vanta effect:
 
 ```javascript
 // Change from WAVES to BIRDS
-<script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.birds.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.birds.min.js"></script>;
 
 let vantaEffect = VANTA.BIRDS({
   el: "#vanta-bg",
   backgroundColor: 0x23153c,
   color1: 0xff0090,
-  quantity: 5
+  quantity: 5,
 });
 ```
 
@@ -97,12 +97,13 @@ let vantaEffect = VANTA.WAVES({
   mouseControls: true,
   touchControls: true,
   color: 0x23153c,
-  waveHeight: 15.00,
-  zoom: 0.65
+  waveHeight: 15.0,
+  zoom: 0.65,
 });
 ```
 
 **Customization Options**:
+
 - `color`: Wave color (hex number)
 - `waveHeight`: Wave amplitude (0-30)
 - `waveSpeed`: Animation speed (0-2)
@@ -139,15 +140,15 @@ let vantaEffect = VANTA.WAVES({
 
 ```javascript
 const newIllo = new Zdog.Illustration({
-  element: '.your-canvas-class',
-  zoom: 2
+  element: ".your-canvas-class",
+  zoom: 2,
 });
 
 new Zdog.Ellipse({
   addTo: newIllo,
   diameter: 40,
   stroke: 5,
-  color: '#667eea'
+  color: "#667eea",
 });
 
 function animate() {
@@ -164,6 +165,7 @@ animate();
 
 **Applied to**: `.tilt-card` elements
 **Features**:
+
 - 15° max tilt
 - Glare effect at 30% opacity
 - 3% scale on hover
@@ -173,12 +175,12 @@ animate();
 
 ```javascript
 VanillaTilt.init(document.querySelectorAll(".tilt-card"), {
-  max: 15,            // Max tilt angle
-  speed: 400,         // Transition speed (ms)
-  glare: true,        // Enable glare
-  "max-glare": 0.3,   // Max glare opacity
-  scale: 1.03,        // Scale multiplier
-  perspective: 1000   // CSS perspective
+  max: 15, // Max tilt angle
+  speed: 400, // Transition speed (ms)
+  glare: true, // Enable glare
+  "max-glare": 0.3, // Max glare opacity
+  scale: 1.03, // Scale multiplier
+  perspective: 1000, // CSS perspective
 });
 ```
 
@@ -228,15 +230,17 @@ Edit `index.html` card sections:
 ### Add New Zdog Icon
 
 1. Add canvas to HTML:
+
 ```html
 <canvas class="zdog-icon-4" width="120" height="120"></canvas>
 ```
 
 2. Create illustration in `main.js`:
+
 ```javascript
 const icon4 = new Zdog.Illustration({
-  element: '.zdog-icon-4',
-  zoom: 2
+  element: ".zdog-icon-4",
+  zoom: 2,
 });
 
 new Zdog.Polygon({
@@ -244,8 +248,8 @@ new Zdog.Polygon({
   sides: 6,
   radius: 20,
   stroke: 3,
-  color: '#667eea',
-  fill: true
+  color: "#667eea",
+  fill: true,
 });
 
 function animateIcon4() {
@@ -263,12 +267,12 @@ Instead of global init, initialize individually:
 ```javascript
 VanillaTilt.init(document.querySelector(".card-1"), {
   max: 25,
-  glare: true
+  glare: true,
 });
 
 VanillaTilt.init(document.querySelector(".card-2"), {
   max: 10,
-  glare: false
+  glare: false,
 });
 ```
 
@@ -281,9 +285,10 @@ VanillaTilt.init(document.querySelector(".card-2"), {
 **Automatic optimizations included**:
 
 1. **Tilt disabled on mobile** (< 768px width)
+
 ```javascript
 if (window.innerWidth < 768) {
-  document.querySelectorAll('.tilt-card').forEach(card => {
+  document.querySelectorAll(".tilt-card").forEach((card) => {
     if (card.vanillaTilt) {
       card.vanillaTilt.destroy();
     }
@@ -292,11 +297,13 @@ if (window.innerWidth < 768) {
 ```
 
 2. **Vanta mobile scale**
+
 ```javascript
-scaleMobile: 1.00  // Adjust to 0.5 for better performance
+scaleMobile: 1.0; // Adjust to 0.5 for better performance
 ```
 
 3. **Responsive CSS**
+
 ```css
 @media (max-width: 768px) {
   .hero h1 {
@@ -312,9 +319,9 @@ scaleMobile: 1.00  // Adjust to 0.5 for better performance
 ```javascript
 VANTA.WAVES({
   el: "#vanta-bg",
-  points: 5,           // Lower = faster (default: 10)
-  maxDistance: 15,     // Lower = faster (default: 20)
-  waveHeight: 10       // Lower = faster (default: 15)
+  points: 5, // Lower = faster (default: 10)
+  maxDistance: 15, // Lower = faster (default: 20)
+  waveHeight: 10, // Lower = faster (default: 15)
 });
 ```
 
@@ -325,12 +332,12 @@ VANTA.WAVES({
 let isVisible = true;
 
 let observer = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
+  entries.forEach((entry) => {
     isVisible = entry.isIntersecting;
   });
 });
 
-observer.observe(document.querySelector('.hero-zdog'));
+observer.observe(document.querySelector(".hero-zdog"));
 
 function animate() {
   if (isVisible) {
@@ -344,7 +351,7 @@ function animate() {
 **3. Pause Vanta when not visible**
 
 ```javascript
-document.addEventListener('visibilitychange', () => {
+document.addEventListener("visibilitychange", () => {
   if (document.hidden) {
     if (vantaEffect) vantaEffect.destroy();
   } else {
@@ -358,7 +365,7 @@ document.addEventListener('visibilitychange', () => {
 ## Browser Support
 
 | Browser | Vanta.js | Zdog | Vanilla-Tilt |
-|---------|----------|------|--------------|
+| ------- | -------- | ---- | ------------ |
 | Chrome  | ✅       | ✅   | ✅           |
 | Firefox | ✅       | ✅   | ✅           |
 | Safari  | ✅       | ✅   | ✅           |
@@ -366,6 +373,7 @@ document.addEventListener('visibilitychange', () => {
 | IE11    | ❌       | ✅   | ✅           |
 
 **Notes**:
+
 - Vanta.js requires WebGL support
 - All effects gracefully degrade if unavailable
 - Mobile gyroscope requires HTTPS
@@ -379,13 +387,14 @@ document.addEventListener('visibilitychange', () => {
 **Problem**: Background stays gradient, no animation
 
 **Solutions**:
+
 1. Check browser console for errors
 2. Ensure Three.js loads before Vanta
 3. Verify WebGL is enabled:
    ```javascript
-   const canvas = document.createElement('canvas');
-   const gl = canvas.getContext('webgl');
-   console.log('WebGL:', gl ? 'Enabled' : 'Disabled');
+   const canvas = document.createElement("canvas");
+   const gl = canvas.getContext("webgl");
+   console.log("WebGL:", gl ? "Enabled" : "Disabled");
    ```
 
 ### Tilt Not Working
@@ -393,6 +402,7 @@ document.addEventListener('visibilitychange', () => {
 **Problem**: Cards don't tilt on hover
 
 **Solutions**:
+
 1. Ensure `data-tilt` attribute exists
 2. Check if Vanilla-Tilt script loaded
 3. Verify card has dimensions:
@@ -408,11 +418,12 @@ document.addEventListener('visibilitychange', () => {
 **Problem**: Canvas shows nothing
 
 **Solutions**:
+
 1. Verify canvas dimensions are set
 2. Check if illustration is updating:
    ```javascript
-   console.log('Illustration:', illo);
-   illo.updateRenderGraph();  // Force render
+   console.log("Illustration:", illo);
+   illo.updateRenderGraph(); // Force render
    ```
 3. Ensure shapes have `stroke` or `fill`
 
@@ -432,12 +443,14 @@ All dependencies load from CDN (no build step required):
 ### Hosting
 
 **Static Hosting** (recommended):
+
 - Netlify: Drag & drop folder
 - Vercel: `vercel deploy`
 - GitHub Pages: Push to `gh-pages` branch
 - Cloudflare Pages: Connect repository
 
 **Example Netlify Deploy**:
+
 ```bash
 # Install Netlify CLI
 npm install -g netlify-cli
@@ -455,10 +468,10 @@ npm install three vanta zdog vanilla-tilt
 ```
 
 ```javascript
-import * as THREE from 'three';
-import WAVES from 'vanta/dist/vanta.waves.min.js';
-import Zdog from 'zdog';
-import VanillaTilt from 'vanilla-tilt';
+import * as THREE from "three";
+import WAVES from "vanta/dist/vanta.waves.min.js";
+import Zdog from "zdog";
+import VanillaTilt from "vanilla-tilt";
 
 // Use as before
 ```
@@ -470,18 +483,18 @@ import VanillaTilt from 'vanilla-tilt';
 ### Dynamic Effect Switching
 
 ```javascript
-let effects = ['WAVES', 'BIRDS', 'NET'];
+let effects = ["WAVES", "BIRDS", "NET"];
 let currentEffect = 0;
 
-document.getElementById('switchEffect').addEventListener('click', () => {
+document.getElementById("switchEffect").addEventListener("click", () => {
   vantaEffect.destroy();
 
   currentEffect = (currentEffect + 1) % effects.length;
   const effect = effects[currentEffect];
 
-  if (effect === 'WAVES') {
+  if (effect === "WAVES") {
     vantaEffect = VANTA.WAVES({ el: "#vanta-bg" });
-  } else if (effect === 'BIRDS') {
+  } else if (effect === "BIRDS") {
     vantaEffect = VANTA.BIRDS({ el: "#vanta-bg" });
   } else {
     vantaEffect = VANTA.NET({ el: "#vanta-bg" });
@@ -515,7 +528,7 @@ animateAll();
 ### Scroll-Based Effects
 
 ```javascript
-window.addEventListener('scroll', () => {
+window.addEventListener("scroll", () => {
   const scrollPercent = window.scrollY / (document.body.scrollHeight - window.innerHeight);
 
   // Rotate demo model based on scroll
@@ -524,7 +537,7 @@ window.addEventListener('scroll', () => {
 
   // Change Vanta color
   const hue = Math.floor(scrollPercent * 360);
-  const color = parseInt(`0x${hue.toString(16).padStart(6, '0')}`);
+  const color = parseInt(`0x${hue.toString(16).padStart(6, "0")}`);
   vantaEffect.setOptions({ color });
 });
 ```
@@ -534,11 +547,13 @@ window.addEventListener('scroll', () => {
 ## Resources
 
 ### Documentation
+
 - **Vanta.js**: https://www.vantajs.com
 - **Zdog**: https://zzz.dog
 - **Vanilla-Tilt**: https://github.com/micku7zu/vanilla-tilt.js
 
 ### Inspiration
+
 - **Vanta Gallery**: https://www.vantajs.com/?effect=waves
 - **Zdog Examples**: https://codepen.io/desandro/
 - **Tilt Patterns**: https://micku7zu.github.io/vanilla-tilt.js/
@@ -550,6 +565,7 @@ window.addEventListener('scroll', () => {
 This template is MIT licensed - free for personal and commercial use.
 
 **Dependencies**:
+
 - Three.js: MIT
 - Vanta.js: MIT
 - Zdog: MIT
@@ -560,6 +576,7 @@ This template is MIT licensed - free for personal and commercial use.
 ## Support
 
 For issues or questions:
+
 1. Check browser console for errors
 2. Review the [Common Issues](#common-issues) section
 3. Consult official library documentation

@@ -22,22 +22,25 @@ describe("locale QA engine", () => {
         ["welcome.body", "Body copy"],
       ]),
       localeValuesByLocale: new Map([
-        ["en", new Map([
-          ["welcome.title", "Hello {name}"],
-          ["welcome.body", "Body copy"],
-        ])],
-        ["fr", new Map([
-          ["welcome.title", "Bonjour"],
-        ])],
+        [
+          "en",
+          new Map([
+            ["welcome.title", "Hello {name}"],
+            ["welcome.body", "Body copy"],
+          ]),
+        ],
+        ["fr", new Map([["welcome.title", "Bonjour"]])],
       ]),
       targetLocales: ["en", "fr"],
     });
 
-    expect(issues.some((issue) => issue.issue_type === "missing_key" && issue.key === "welcome.body")).toBe(
-      true,
-    );
     expect(
-      issues.some((issue) => issue.issue_type === "placeholder_mismatch" && issue.key === "welcome.title"),
+      issues.some((issue) => issue.issue_type === "missing_key" && issue.key === "welcome.body"),
+    ).toBe(true);
+    expect(
+      issues.some(
+        (issue) => issue.issue_type === "placeholder_mismatch" && issue.key === "welcome.title",
+      ),
     ).toBe(true);
   });
 });

@@ -13,7 +13,7 @@ import {
 import { listMessages, sendMessage } from "@atlas/domain/messenger/messenger.service";
 import { z as zod } from "zod";
 
-const paramsSchema = zod.object({ id: zod.string().uuid() });
+const paramsSchema = zod.object({ id: zod.uuid() });
 
 export const GET = createTenantRoute<
   z.output<typeof listMessagesQuerySchema>,

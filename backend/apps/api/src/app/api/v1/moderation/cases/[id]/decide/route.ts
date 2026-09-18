@@ -20,6 +20,5 @@ export const POST = createTenantRoute<
   params: moderationCaseIdParamsSchema,
   body: decideModerationCaseBodySchema,
   output: decideModerationCaseResponseSchema,
-  handler: async ({ tx, ctx, params, input }) =>
-    decideModerationCase(tx, ctx, params["id"] ?? "", input),
+  handler: async ({ tx, ctx, params, input }) => decideModerationCase(tx, ctx, params.id, input),
 });

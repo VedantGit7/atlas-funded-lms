@@ -91,7 +91,10 @@ export function CreateDeckDialog({ open, onCancel, onCreated }: CreateDeckDialog
           Give it a name. Only you can see and practise your own decks.
         </p>
 
-        <label htmlFor={inputId} className="mt-4 block text-xs font-bold uppercase tracking-wide text-muted-foreground">
+        <label
+          htmlFor={inputId}
+          className="mt-4 block text-xs font-bold uppercase tracking-wide text-muted-foreground"
+        >
           Deck name
         </label>
         <input

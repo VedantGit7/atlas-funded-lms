@@ -46,10 +46,7 @@ export function LegalContentRenderer({ blocks }: { blocks: LegalContentBlock[] }
                   <thead>
                     <tr className="border-b border-[var(--fba-bdr)] bg-[var(--fba-bg2)]">
                       {block.headers.map((header) => (
-                        <th
-                          key={header}
-                          className="px-4 py-3 font-semibold text-[var(--fba-tx)]"
-                        >
+                        <th key={header} className="px-4 py-3 font-semibold text-[var(--fba-tx)]">
                           {header}
                         </th>
                       ))}

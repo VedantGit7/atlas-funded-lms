@@ -55,9 +55,7 @@ export function NewsfeedCreatePanel() {
       );
       router.push(newsfeedHref(response.data.id));
     } catch (caught) {
-      toast.error(
-        caught instanceof ClientApiError ? caught.message : "Could not create post.",
-      );
+      toast.error(caught instanceof ClientApiError ? caught.message : "Could not create post.");
     } finally {
       setBusy(false);
     }
@@ -88,7 +86,9 @@ export function NewsfeedCreatePanel() {
             <input
               id="newsfeed-create-title"
               value={title}
-              onChange={(event) => setTitle(event.target.value)}
+              onChange={(event) => {
+                setTitle(event.target.value);
+              }}
               className={`${MESSENGER_WIZARD_FIELD_CLASS} h-12`}
               placeholder="Enter a title for your post..."
               maxLength={200}
@@ -106,7 +106,9 @@ export function NewsfeedCreatePanel() {
                   <button
                     key={entry.id}
                     type="button"
-                    onClick={() => setPostType(entry.id)}
+                    onClick={() => {
+                      setPostType(entry.id);
+                    }}
                     className={[
                       "flex h-full flex-col items-start rounded-xl border p-6 text-left transition-all motion-safe:hover:-translate-y-0.5",
                       active

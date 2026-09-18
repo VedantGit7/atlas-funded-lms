@@ -45,7 +45,12 @@ export async function getBatch(tx: TenantTx, _ctx: ServiceCtx, batchId: string) 
   return batchResponseSchema.parse({ data: toDto(row) });
 }
 
-export async function updateBatch(tx: TenantTx, _ctx: ServiceCtx, batchId: string, rawBody: unknown) {
+export async function updateBatch(
+  tx: TenantTx,
+  _ctx: ServiceCtx,
+  batchId: string,
+  rawBody: unknown,
+) {
   const body = updateBatchBodySchema.parse(rawBody);
   const row = await batchesRepository.updateBatch(tx, batchId, {
     ...(body.name !== undefined ? { name: body.name } : {}),

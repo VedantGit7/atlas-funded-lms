@@ -195,7 +195,8 @@ export function InviteMemberDialog({ availableRoles = [] }: InviteMemberDialogPr
 
                 <div>
                   <label htmlFor="invite-display-name" className={labelClassName}>
-                    Display name <span className="font-normal lowercase tracking-normal">(optional)</span>
+                    Display name{" "}
+                    <span className="font-normal lowercase tracking-normal">(optional)</span>
                   </label>
                   <div className="relative">
                     <UserPlus

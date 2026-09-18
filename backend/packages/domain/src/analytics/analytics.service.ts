@@ -18,6 +18,7 @@ import {
   computeDifficulty,
   computeDiscriminationFromLatency,
   computeDiscriminationStub,
+  type DistractorRate,
   type ItemPsychometrics,
 } from "./analytics-psychometrics";
 
@@ -234,8 +235,12 @@ async function enrichItemPsychometrics(
     args.rollingCutoff,
   );
   const distractorByItem = args.rollingCutoff
-    ? await analyticsRepository.getItemDistractorRatesFromAnswers(tx, args.itemIds, args.rollingCutoff)
-    : new Map();
+    ? await analyticsRepository.getItemDistractorRatesFromAnswers(
+        tx,
+        args.itemIds,
+        args.rollingCutoff,
+      )
+    : new Map<string, DistractorRate[]>();
 
   const result = new Map<string, ItemPsychometrics>();
 
@@ -245,16 +250,13 @@ async function enrichItemPsychometrics(
     const storedMetrics = row.metrics_json;
     const latency = latencyByItem.get(row.item_id);
 
-    let discrimination: number | null = null;
-    if (attemptsCount >= 10 && latency) {
-      discrimination =
-        computeDiscriminationFromLatency({
-          meanCorrectLatencyMs: latency.meanCorrectLatencyMs,
-          meanIncorrectLatencyMs: latency.meanIncorrectLatencyMs,
-        }) ?? computeDiscriminationStub(attemptsCount, correctCount);
-    } else {
-      discrimination = computeDiscriminationStub(attemptsCount, correctCount);
-    }
+    const discrimination: number | null =
+      attemptsCount >= 10 && latency
+        ? (computeDiscriminationFromLatency({
+            meanCorrectLatencyMs: latency.meanCorrectLatencyMs,
+            meanIncorrectLatencyMs: latency.meanIncorrectLatencyMs,
+          }) ?? computeDiscriminationStub(attemptsCount, correctCount))
+        : computeDiscriminationStub(attemptsCount, correctCount);
 
     const rollingDistractors = distractorByItem.get(row.item_id) ?? null;
     const storedDistractors = Array.isArray(storedMetrics?.["distractorRates"])
@@ -315,9 +317,8 @@ export async function queryItemStatistics(
     await import("./analytics.dto");
   const query = analyticsItemStatisticsQuerySchema.parse(rawQuery);
 
-  const { itemStatisticWindowCutoff, isRollingItemStatisticWindow } = await import(
-    "./analytics-window"
-  );
+  const { itemStatisticWindowCutoff, isRollingItemStatisticWindow } =
+    await import("./analytics-window");
 
   const itemIds = await deps.resolveAssessmentItemIds(tx, query.assessmentId);
   const rollingCutoff = isRollingItemStatisticWindow(query.windowKey)

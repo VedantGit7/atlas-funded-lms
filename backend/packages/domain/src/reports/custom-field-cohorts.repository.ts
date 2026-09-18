@@ -164,10 +164,7 @@ export const customFieldCohortsRepository = {
     `;
   },
 
-  async findFailedMembershipIdsForCampaign(
-    tx: TenantTx,
-    campaignId: string,
-  ): Promise<string[]> {
+  async findFailedMembershipIdsForCampaign(tx: TenantTx, campaignId: string): Promise<string[]> {
     const rows = await tx.$queryRaw<Array<{ membership_id: string }>>`
       select d.membership_id::text as membership_id
       from notification_dispatches d

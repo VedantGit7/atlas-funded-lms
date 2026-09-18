@@ -89,7 +89,9 @@ export function PaymentGatewayListPanel({
           <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--admin-surface-high)] text-[var(--admin-on-surface-variant)]">
             <CreditCard className="h-6 w-6" aria-hidden="true" />
           </span>
-          <p className="text-sm font-semibold text-[var(--admin-on-surface)]">No payment gateways yet</p>
+          <p className="text-sm font-semibold text-[var(--admin-on-surface)]">
+            No payment gateways yet
+          </p>
           <p className="max-w-sm text-sm text-[var(--admin-on-surface-variant)]">
             Add a payment gateway to start collecting payments from your learners.
           </p>
@@ -113,10 +115,16 @@ export function PaymentGatewayListPanel({
             </thead>
             <tbody>
               {gateways.map((gateway) => (
-                <tr key={gateway.id} className="border-b border-[var(--admin-border)] last:border-b-0">
+                <tr
+                  key={gateway.id}
+                  className="border-b border-[var(--admin-border)] last:border-b-0"
+                >
                   <td className="px-4 py-3.5">
                     <div className="flex items-center gap-3">
-                      <PaymentGatewayLogo gatewayKey={gateway.gatewayKey} name={gateway.displayName} />
+                      <PaymentGatewayLogo
+                        gatewayKey={gateway.gatewayKey}
+                        name={gateway.displayName}
+                      />
                       <span className="font-semibold text-[var(--admin-on-surface)]">
                         {gateway.displayName}
                       </span>

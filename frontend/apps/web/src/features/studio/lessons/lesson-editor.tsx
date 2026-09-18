@@ -91,9 +91,7 @@ export function LessonEditor({ courseId, courseTitle, initialLesson }: LessonEdi
           title: title.trim(),
           ...(description.trim() ? { description: description.trim() } : {}),
           ...(content.trim() ? { content } : {}),
-          ...(videoProvider && trimmedVideoUrl
-            ? { videoProvider, videoUrl: trimmedVideoUrl }
-            : {}),
+          ...(videoProvider && trimmedVideoUrl ? { videoProvider, videoUrl: trimmedVideoUrl } : {}),
           ...(durationSeconds != null ? { durationSeconds } : {}),
         },
         "lesson-save",
@@ -122,7 +120,10 @@ export function LessonEditor({ courseId, courseTitle, initialLesson }: LessonEdi
                 Studio
               </Link>
               <ChevronRight className="h-3.5 w-3.5" aria-hidden="true" />
-              <Link href="/studio/courses" className="transition-colors hover:text-[var(--admin-primary)]">
+              <Link
+                href="/studio/courses"
+                className="transition-colors hover:text-[var(--admin-primary)]"
+              >
                 Courses
               </Link>
               <ChevronRight className="h-3.5 w-3.5" aria-hidden="true" />

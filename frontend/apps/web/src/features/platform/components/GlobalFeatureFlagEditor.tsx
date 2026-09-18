@@ -139,7 +139,9 @@ export function GlobalFeatureFlagEditor() {
         <div className="flex items-center justify-between gap-3">
           <div>
             <h1 className="text-2xl font-semibold">Global feature flags</h1>
-            <p className="text-sm opacity-70">Manage the global flag catalogue and default values.</p>
+            <p className="text-sm opacity-70">
+              Manage the global flag catalogue and default values.
+            </p>
           </div>
           <button
             type="button"
@@ -190,7 +192,9 @@ export function GlobalFeatureFlagEditor() {
           </tbody>
         </table>
 
-        {flags.length === 0 ? <p className="text-sm opacity-70">No global flags in catalogue.</p> : null}
+        {flags.length === 0 ? (
+          <p className="text-sm opacity-70">No global flags in catalogue.</p>
+        ) : null}
       </section>
 
       {formMode ? (
@@ -266,7 +270,11 @@ export function GlobalFeatureFlagEditor() {
               </label>
             </div>
             <div className="mt-4 flex justify-end gap-2">
-              <button type="button" className="rounded border px-3 py-2 text-sm" onClick={closeDialogs}>
+              <button
+                type="button"
+                className="rounded border px-3 py-2 text-sm"
+                onClick={closeDialogs}
+              >
                 Cancel
               </button>
               <button

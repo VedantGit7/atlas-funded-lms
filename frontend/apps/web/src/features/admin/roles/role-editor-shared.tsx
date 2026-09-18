@@ -196,11 +196,7 @@ export function GeneralDetailsCard({ children }: { children: ReactNode }) {
   );
 }
 
-export function PermissionCatalogueHeader({
-  trailing,
-}: {
-  trailing?: ReactNode;
-}) {
+export function PermissionCatalogueHeader({ trailing }: { trailing?: ReactNode }) {
   return (
     <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
       <h3 className="text-lg font-bold text-[var(--admin-on-surface)]">Permission Catalogue</h3>

@@ -23,6 +23,7 @@ npm install animejs
 ### Official Examples
 
 The Anime.js team maintains excellent examples at:
+
 - **Documentation**: https://animejs.com/documentation/
 - **CodePen Examples**: https://codepen.io/collection/DxpqGJ/
 - **Official Repository**: https://github.com/juliangarnier/anime
@@ -30,27 +31,32 @@ The Anime.js team maintains excellent examples at:
 ### Recommended Examples by Category
 
 **Basic Animations:**
+
 - Simple animation: https://codepen.io/juliangarnier/pen/KRwwOL
 - Property parameters: https://codepen.io/juliangarnier/pen/LpWPgj
 - Function-based values: https://codepen.io/juliangarnier/pen/gmOwJX
 
 **Stagger Animations:**
+
 - Basic stagger: https://codepen.io/juliangarnier/pen/PboRJN
 - Stagger from center: https://codepen.io/juliangarnier/pen/WNNwQa
 - Grid stagger: https://codepen.io/juliangarnier/pen/JXaKpP
 - Stagger easing: https://codepen.io/juliangarnier/pen/QMMmQK
 
 **Timeline Animations:**
+
 - Basic timeline: https://codepen.io/juliangarnier/pen/grVWYq
 - Timeline offsets: https://codepen.io/juliangarnier/pen/xLOXJX
 - Timeline controls: https://codepen.io/juliangarnier/pen/oWjmWd
 
 **SVG Animations:**
+
 - Line drawing: https://codepen.io/juliangarnier/pen/XdqyNw
 - Path morphing: https://codepen.io/juliangarnier/pen/mWEOmL
 - Motion path: https://codepen.io/juliangarnier/pen/NqYKQL
 
 **Advanced Patterns:**
+
 - Keyframes: https://codepen.io/juliangarnier/pen/QMMmQK
 - Scroll-driven: https://codepen.io/juliangarnier/pen/ZqyEJw
 - Custom easing: https://codepen.io/juliangarnier/pen/YBBRvG
@@ -60,6 +66,7 @@ The Anime.js team maintains excellent examples at:
 Minimal Anime.js setup:
 
 ### package.json
+
 ```json
 {
   "name": "animejs-starter",
@@ -81,104 +88,113 @@ Minimal Anime.js setup:
 ```
 
 ### index.html
+
 ```html
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Anime.js Starter</title>
-  <link rel="stylesheet" href="/style.css">
-</head>
-<body>
-  <div class="container">
-    <h1>Anime.js Animation Demo</h1>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Anime.js Starter</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>Anime.js Animation Demo</h1>
 
-    <div class="example basic-animation">
-      <h2>Basic Animation</h2>
-      <div class="box box1"></div>
-      <button id="basic-btn">Play</button>
-    </div>
-
-    <div class="example stagger-animation">
-      <h2>Stagger Animation</h2>
-      <div class="stagger-grid">
-        <div class="stagger-item"></div>
-        <div class="stagger-item"></div>
-        <div class="stagger-item"></div>
-        <div class="stagger-item"></div>
-        <div class="stagger-item"></div>
-        <div class="stagger-item"></div>
+      <div class="example basic-animation">
+        <h2>Basic Animation</h2>
+        <div class="box box1"></div>
+        <button id="basic-btn">Play</button>
       </div>
-      <button id="stagger-btn">Play</button>
-    </div>
 
-    <div class="example timeline-animation">
-      <h2>Timeline Animation</h2>
-      <div class="timeline-elements">
-        <div class="timeline-box box1"></div>
-        <div class="timeline-box box2"></div>
-        <div class="timeline-box box3"></div>
+      <div class="example stagger-animation">
+        <h2>Stagger Animation</h2>
+        <div class="stagger-grid">
+          <div class="stagger-item"></div>
+          <div class="stagger-item"></div>
+          <div class="stagger-item"></div>
+          <div class="stagger-item"></div>
+          <div class="stagger-item"></div>
+          <div class="stagger-item"></div>
+        </div>
+        <button id="stagger-btn">Play</button>
       </div>
-      <button id="timeline-btn">Play</button>
-    </div>
-  </div>
 
-  <script type="module" src="/main.js"></script>
-</body>
+      <div class="example timeline-animation">
+        <h2>Timeline Animation</h2>
+        <div class="timeline-elements">
+          <div class="timeline-box box1"></div>
+          <div class="timeline-box box2"></div>
+          <div class="timeline-box box3"></div>
+        </div>
+        <button id="timeline-btn">Play</button>
+      </div>
+    </div>
+
+    <script type="module" src="/main.js"></script>
+  </body>
 </html>
 ```
 
 ### main.js
+
 ```javascript
-import anime from 'animejs/lib/anime.es.js'
+import anime from "animejs/lib/anime.es.js";
 
 // Basic Animation
-document.getElementById('basic-btn').addEventListener('click', () => {
+document.getElementById("basic-btn").addEventListener("click", () => {
   anime({
-    targets: '.box1',
+    targets: ".box1",
     translateX: 250,
-    rotate: '1turn',
+    rotate: "1turn",
     scale: [0.75, 1],
     duration: 800,
-    easing: 'easeInOutQuad'
-  })
-})
+    easing: "easeInOutQuad",
+  });
+});
 
 // Stagger Animation
-document.getElementById('stagger-btn').addEventListener('click', () => {
+document.getElementById("stagger-btn").addEventListener("click", () => {
   anime({
-    targets: '.stagger-item',
+    targets: ".stagger-item",
     scale: [0, 1],
     delay: anime.stagger(100),
-    easing: 'easeOutElastic(1, .8)',
-    duration: 600
-  })
-})
+    easing: "easeOutElastic(1, .8)",
+    duration: 600,
+  });
+});
 
 // Timeline Animation
-document.getElementById('timeline-btn').addEventListener('click', () => {
+document.getElementById("timeline-btn").addEventListener("click", () => {
   const tl = anime.timeline({
-    easing: 'easeOutExpo',
-    duration: 750
-  })
+    easing: "easeOutExpo",
+    duration: 750,
+  });
 
   tl.add({
-    targets: '.timeline-box.box1',
-    translateX: 250
+    targets: ".timeline-box.box1",
+    translateX: 250,
   })
-  .add({
-    targets: '.timeline-box.box2',
-    translateX: 250
-  }, '-=500')
-  .add({
-    targets: '.timeline-box.box3',
-    translateX: 250
-  }, '-=500')
-})
+    .add(
+      {
+        targets: ".timeline-box.box2",
+        translateX: 250,
+      },
+      "-=500",
+    )
+    .add(
+      {
+        targets: ".timeline-box.box3",
+        translateX: 250,
+      },
+      "-=500",
+    );
+});
 ```
 
 ### style.css
+
 ```css
 * {
   box-sizing: border-box;
@@ -187,7 +203,7 @@ document.getElementById('timeline-btn').addEventListener('click', () => {
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, sans-serif;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   min-height: 100vh;
@@ -251,9 +267,15 @@ h2 {
   height: 60px;
 }
 
-.timeline-box.box1 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-.timeline-box.box2 { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
-.timeline-box.box3 { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+.timeline-box.box1 {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+.timeline-box.box2 {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+.timeline-box.box3 {
+  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+}
 
 button {
   background: white;
@@ -282,64 +304,70 @@ button:active {
 
 ```javascript
 anime({
-  targets: '.list-item',
+  targets: ".list-item",
   translateY: [30, 0],
   opacity: [0, 1],
   delay: anime.stagger(80),
-  easing: 'easeOutQuad',
-  duration: 600
-})
+  easing: "easeOutQuad",
+  duration: 600,
+});
 ```
 
 ### Pattern 2: Grid Expand from Center
 
 ```javascript
 anime({
-  targets: '.grid-square',
+  targets: ".grid-square",
   scale: [0, 1],
   delay: anime.stagger(30, {
     grid: [10, 10],
-    from: 'center'
+    from: "center",
   }),
-  easing: 'easeOutElastic(1, .8)',
-  duration: 600
-})
+  easing: "easeOutElastic(1, .8)",
+  duration: 600,
+});
 ```
 
 ### Pattern 3: SVG Line Drawing
 
 ```javascript
 anime({
-  targets: 'path',
+  targets: "path",
   strokeDashoffset: [anime.setDashoffset, 0],
-  easing: 'easeInOutQuad',
+  easing: "easeInOutQuad",
   duration: 2000,
-  delay: (el, i) => i * 250
-})
+  delay: (el, i) => i * 250,
+});
 ```
 
 ### Pattern 4: Timeline Sequence
 
 ```javascript
 const tl = anime.timeline({
-  easing: 'easeOutExpo',
-  duration: 750
-})
+  easing: "easeOutExpo",
+  duration: 750,
+});
 
 tl.add({
-  targets: '.title',
+  targets: ".title",
   translateY: [-50, 0],
-  opacity: [0, 1]
+  opacity: [0, 1],
 })
-.add({
-  targets: '.subtitle',
-  translateY: [-30, 0],
-  opacity: [0, 1]
-}, '-=500')
-.add({
-  targets: '.button',
-  scale: [0, 1]
-}, '-=300')
+  .add(
+    {
+      targets: ".subtitle",
+      translateY: [-30, 0],
+      opacity: [0, 1],
+    },
+    "-=500",
+  )
+  .add(
+    {
+      targets: ".button",
+      scale: [0, 1],
+    },
+    "-=300",
+  );
 ```
 
 ## Framework Integration
@@ -347,24 +375,24 @@ tl.add({
 ### With React
 
 ```jsx
-import { useEffect, useRef } from 'react'
-import anime from 'animejs/lib/anime.es.js'
+import { useEffect, useRef } from "react";
+import anime from "animejs/lib/anime.es.js";
 
 function AnimatedComponent() {
-  const ref = useRef(null)
+  const ref = useRef(null);
 
   useEffect(() => {
     const animation = anime({
       targets: ref.current,
       translateX: 250,
       duration: 800,
-      easing: 'easeInOutQuad'
-    })
+      easing: "easeInOutQuad",
+    });
 
-    return () => animation.pause()
-  }, [])
+    return () => animation.pause();
+  }, []);
 
-  return <div ref={ref}>Animated</div>
+  return <div ref={ref}>Animated</div>;
 }
 ```
 
@@ -376,10 +404,10 @@ export default {
     anime({
       targets: this.$el,
       translateX: 250,
-      duration: 800
-    })
-  }
-}
+      duration: 800,
+    });
+  },
+};
 ```
 
 ## TypeScript Support
@@ -410,6 +438,7 @@ npm install --save-dev @types/animejs
 ---
 
 For more patterns and reference documentation, see:
+
 - `api_reference.md` - Complete Anime.js API
 - `stagger_guide.md` - Stagger utilities deep dive
 - `timeline_guide.md` - Timeline sequencing guide

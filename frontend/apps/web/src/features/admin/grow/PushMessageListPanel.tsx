@@ -46,14 +46,7 @@ const MESSENGER_HREF = "/admin/marketing/messenger";
 const PAGE_SIZE = 10;
 
 type StatusTab = "ALL" | PushMessageStatus;
-type ColumnId =
-  | "title"
-  | "status"
-  | "channels"
-  | "created"
-  | "scheduled"
-  | "reach"
-  | "actions";
+type ColumnId = "title" | "status" | "channels" | "created" | "scheduled" | "reach" | "actions";
 
 const TABS: ReadonlyArray<{ id: StatusTab; label: string }> = [
   { id: "ALL", label: "All" },
@@ -388,7 +381,9 @@ export function PushMessageListPanel() {
                 type="button"
                 role="tab"
                 aria-selected={active}
-                onClick={() => setTab(entry.id)}
+                onClick={() => {
+                  setTab(entry.id);
+                }}
                 className={`rounded-md px-4 py-1.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)] ${
                   active
                     ? "bg-[var(--admin-surface)] text-[var(--admin-primary)] shadow-sm"
@@ -410,7 +405,9 @@ export function PushMessageListPanel() {
             <input
               type="search"
               value={query}
-              onChange={(event) => setQuery(event.target.value)}
+              onChange={(event) => {
+                setQuery(event.target.value);
+              }}
               placeholder="Search by title..."
               aria-label="Search by title"
               className="w-full rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] py-2 pl-10 pr-4 text-sm text-[var(--admin-on-surface)] outline-none transition-[border-color,box-shadow] placeholder:text-[var(--admin-on-surface-variant)] focus:border-[var(--admin-primary)] focus:ring-2 focus:ring-[var(--admin-primary)]/20"
@@ -451,7 +448,9 @@ export function PushMessageListPanel() {
                   <input
                     type="date"
                     value={createdOn}
-                    onChange={(event) => setCreatedOn(event.target.value)}
+                    onChange={(event) => {
+                      setCreatedOn(event.target.value);
+                    }}
                     className="w-full rounded-lg border border-[var(--admin-outline)] bg-[var(--admin-surface)] px-3 py-2 text-sm text-[var(--admin-on-surface)] outline-none focus:border-[var(--admin-primary)] focus:ring-2 focus:ring-[var(--admin-primary)]/30"
                   />
                 </label>
@@ -459,7 +458,9 @@ export function PushMessageListPanel() {
                   <button
                     type="button"
                     className="text-sm font-semibold text-[var(--admin-primary)] hover:underline"
-                    onClick={() => setCreatedOn("")}
+                    onClick={() => {
+                      setCreatedOn("");
+                    }}
                   >
                     Clear date
                   </button>
@@ -504,7 +505,9 @@ export function PushMessageListPanel() {
                       type="checkbox"
                       checked={!hidden.has(column.id)}
                       disabled={column.id === "title"}
-                      onChange={() => toggleColumn(column.id)}
+                      onChange={() => {
+                        toggleColumn(column.id);
+                      }}
                       className="h-4 w-4 accent-[var(--admin-primary)]"
                     />
                     {column.label}
@@ -527,7 +530,9 @@ export function PushMessageListPanel() {
         </div>
       ) : items.length === 0 ? (
         <div className="flex flex-col items-center justify-center gap-4 rounded-xl border border-dashed border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 py-16 text-center">
-          <p className="text-lg font-semibold text-[var(--admin-on-surface)]">No push messages found</p>
+          <p className="text-lg font-semibold text-[var(--admin-on-surface)]">
+            No push messages found
+          </p>
           <p className="max-w-md text-sm text-[var(--admin-on-surface-variant)]">
             {query.trim() || createdOn || tab !== "ALL"
               ? "Try another search term or clear filters."
@@ -605,11 +610,7 @@ export function PushMessageListPanel() {
                               Icon={TabletSmartphone}
                               enabled={row.channels.android}
                             />
-                            <ChannelIcon
-                              label="iOS"
-                              Icon={Smartphone}
-                              enabled={row.channels.ios}
-                            />
+                            <ChannelIcon label="iOS" Icon={Smartphone} enabled={row.channels.ios} />
                             <ChannelIcon label="Web" Icon={Globe} enabled={row.channels.web} />
                           </div>
                         ) : column.id === "created" ? (
@@ -654,9 +655,9 @@ export function PushMessageListPanel() {
                               aria-haspopup="menu"
                               aria-expanded={menuId === row.id}
                               className="rounded p-1.5 text-[var(--admin-on-surface-variant)] transition-colors hover:bg-[var(--admin-surface-high)] hover:text-[var(--admin-on-surface)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]"
-                              onClick={() =>
-                                setMenuId((current) => (current === row.id ? null : row.id))
-                              }
+                              onClick={() => {
+                                setMenuId((current) => (current === row.id ? null : row.id));
+                              }}
                             >
                               <MoreHorizontal className="h-5 w-5" aria-hidden="true" />
                             </button>
@@ -684,7 +685,9 @@ export function PushMessageListPanel() {
                                   type="button"
                                   role="menuitem"
                                   className="flex w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-[var(--admin-surface-high)]"
-                                  onClick={() => openSettings(row)}
+                                  onClick={() => {
+                                    openSettings(row);
+                                  }}
                                 >
                                   Settings
                                 </button>
@@ -714,7 +717,9 @@ export function PushMessageListPanel() {
                 type="button"
                 aria-label="Previous page"
                 disabled={page <= 1}
-                onClick={() => setPage((current) => Math.max(1, current - 1))}
+                onClick={() => {
+                  setPage((current) => Math.max(1, current - 1));
+                }}
                 className="rounded p-1 text-[var(--admin-on-surface-variant)] transition-colors hover:bg-[var(--admin-surface-low)] disabled:cursor-not-allowed disabled:text-[var(--admin-outline)]"
               >
                 <ChevronLeft className="h-5 w-5" aria-hidden="true" />
@@ -733,7 +738,9 @@ export function PushMessageListPanel() {
                       type="button"
                       aria-label={`Page ${pageNumber}`}
                       aria-current={page === pageNumber ? "page" : undefined}
-                      onClick={() => setPage(pageNumber)}
+                      onClick={() => {
+                        setPage(pageNumber);
+                      }}
                       className={`h-8 w-8 rounded text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)] ${
                         page === pageNumber
                           ? "bg-[var(--admin-primary)] text-[var(--admin-on-primary)]"
@@ -749,7 +756,9 @@ export function PushMessageListPanel() {
                 type="button"
                 aria-label="Next page"
                 disabled={page >= pageCount}
-                onClick={() => setPage((current) => Math.min(pageCount, current + 1))}
+                onClick={() => {
+                  setPage((current) => Math.min(pageCount, current + 1));
+                }}
                 className="rounded p-1 text-[var(--admin-on-surface-variant)] transition-colors hover:bg-[var(--admin-surface-low)] disabled:cursor-not-allowed disabled:text-[var(--admin-outline)]"
               >
                 <ChevronRight className="h-5 w-5" aria-hidden="true" />
@@ -884,7 +893,9 @@ export function PushMessageListPanel() {
                 value={settingsTitle}
                 maxLength={200}
                 disabled={settingsBusy}
-                onChange={(event) => setSettingsTitle(event.target.value)}
+                onChange={(event) => {
+                  setSettingsTitle(event.target.value);
+                }}
                 className="w-full rounded-lg border border-[var(--admin-outline)] bg-[var(--admin-surface)] px-3 py-2.5 text-[var(--admin-on-surface)] outline-none focus:border-[var(--admin-primary)] focus:ring-2 focus:ring-[var(--admin-primary)]/30"
               />
             </label>
@@ -912,7 +923,9 @@ export function PushMessageListPanel() {
                 type="text"
                 value={deleteConfirm}
                 disabled={settingsBusy}
-                onChange={(event) => setDeleteConfirm(event.target.value)}
+                onChange={(event) => {
+                  setDeleteConfirm(event.target.value);
+                }}
                 className="mt-2 w-full rounded-lg border border-[var(--admin-outline)] bg-[var(--admin-surface)] px-3 py-2.5 text-[var(--admin-on-surface)] outline-none focus:border-[var(--admin-primary)] focus:ring-2 focus:ring-[var(--admin-primary)]/30"
                 placeholder="Exact title"
               />
@@ -930,7 +943,9 @@ export function PushMessageListPanel() {
                 type="button"
                 disabled={settingsBusy}
                 className={`${manageSecondaryButtonClassName} mt-2 w-full`}
-                onClick={() => setSettingsRow(null)}
+                onClick={() => {
+                  setSettingsRow(null);
+                }}
               >
                 Cancel
               </button>

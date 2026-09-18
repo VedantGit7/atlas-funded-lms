@@ -7,8 +7,6 @@ export type TenantThemeSemanticPayload = {
     primary: string;
     accent?: string;
     header?: string;
-    background?: string;
-    foreground?: string;
   };
   radius: "none" | "sm" | "md" | "lg" | "xl";
   modeDefault: "system" | "light" | "dark";
@@ -22,8 +20,6 @@ export function mapTenantThemeToSemanticPayload(
       primary: tokens.primary,
       ...(tokens.accent != null ? { accent: tokens.accent } : {}),
       ...(tokens.header != null ? { header: tokens.header } : {}),
-      ...(tokens.background != null ? { background: tokens.background } : {}),
-      ...(tokens.foreground != null ? { foreground: tokens.foreground } : {}),
     },
     radius: tokens.radius,
     modeDefault: tokens.modeDefault,

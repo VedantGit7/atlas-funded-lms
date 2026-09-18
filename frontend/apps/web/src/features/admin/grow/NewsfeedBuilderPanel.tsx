@@ -1,5 +1,6 @@
 "use client";
 
+import { SafeHtml } from "@/components/SafeHtml";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -112,9 +113,7 @@ export function NewsfeedBuilderPanel({ postId }: { postId: string }) {
       setPinned(data.pinned);
       setProductId(data.productId ?? "");
     } catch (caught) {
-      toast.error(
-        caught instanceof ClientApiError ? caught.message : "Could not load post.",
-      );
+      toast.error(caught instanceof ClientApiError ? caught.message : "Could not load post.");
       setPost(null);
     } finally {
       setLoading(false);
@@ -150,8 +149,7 @@ export function NewsfeedBuilderPanel({ postId }: { postId: string }) {
 
   const seoTitleLen = seoTitle.trim().length;
   const seoDescLen = seoDescription.trim().length;
-  const previewHost =
-    typeof window !== "undefined" ? window.location.host : "your-school.example";
+  const previewHost = typeof window !== "undefined" ? window.location.host : "your-school.example";
 
   async function saveDetails() {
     if (!title.trim()) {
@@ -321,7 +319,9 @@ export function NewsfeedBuilderPanel({ postId }: { postId: string }) {
           <button
             type="button"
             className="inline-flex items-center gap-2 rounded-xl border border-[var(--admin-border)] px-4 py-2 text-xs font-semibold text-[var(--admin-primary)] transition-colors hover:bg-[var(--admin-surface-high)]"
-            onClick={() => setPreviewOpen(true)}
+            onClick={() => {
+              setPreviewOpen(true);
+            }}
           >
             <Eye className="h-4 w-4" />
             Preview
@@ -349,7 +349,9 @@ export function NewsfeedBuilderPanel({ postId }: { postId: string }) {
               type="button"
               role="tab"
               aria-selected={active}
-              onClick={() => setTab(entry.id)}
+              onClick={() => {
+                setTab(entry.id);
+              }}
               className={[
                 "relative -mb-px inline-flex items-center gap-2 pb-3 text-xs font-semibold tracking-wide transition-colors",
                 active
@@ -375,7 +377,9 @@ export function NewsfeedBuilderPanel({ postId }: { postId: string }) {
                 <label className={MESSENGER_WIZARD_LABEL_CLASS}>Post title</label>
                 <input
                   value={title}
-                  onChange={(event) => setTitle(event.target.value)}
+                  onChange={(event) => {
+                    setTitle(event.target.value);
+                  }}
                   className={`${MESSENGER_WIZARD_FIELD_CLASS} border-none bg-transparent px-0 text-[18px] font-bold shadow-none focus:ring-0`}
                   disabled={live}
                   maxLength={200}
@@ -387,14 +391,15 @@ export function NewsfeedBuilderPanel({ postId }: { postId: string }) {
                 </label>
                 <input
                   value={coverImageUrl}
-                  onChange={(event) => setCoverImageUrl(event.target.value)}
+                  onChange={(event) => {
+                    setCoverImageUrl(event.target.value);
+                  }}
                   className={MESSENGER_WIZARD_FIELD_CLASS}
                   disabled={live}
                   placeholder="https://"
                 />
                 <div className="relative mt-3 flex h-48 items-center justify-center overflow-hidden rounded-xl border border-dashed border-[var(--admin-outline)] bg-[var(--admin-surface-low)]">
                   {coverImageUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
                     <img src={coverImageUrl} alt="" className="h-full w-full object-cover" />
                   ) : (
                     <p className="text-sm text-[var(--admin-on-surface-variant)]">
@@ -411,7 +416,9 @@ export function NewsfeedBuilderPanel({ postId }: { postId: string }) {
                   <label className={MESSENGER_WIZARD_LABEL_CLASS}>Body (HTML)</label>
                   <textarea
                     value={bodyHtml}
-                    onChange={(event) => setBodyHtml(event.target.value)}
+                    onChange={(event) => {
+                      setBodyHtml(event.target.value);
+                    }}
                     className={`${MESSENGER_WIZARD_FIELD_CLASS} min-h-[320px] font-mono text-xs leading-relaxed`}
                     disabled={live}
                     placeholder="<p>Write your update...</p>"
@@ -491,7 +498,9 @@ export function NewsfeedBuilderPanel({ postId }: { postId: string }) {
               <button
                 type="button"
                 className="mt-4 w-full rounded-xl bg-[var(--admin-surface)] py-2.5 text-sm font-bold text-[var(--admin-primary)]"
-                onClick={() => setPreviewOpen(true)}
+                onClick={() => {
+                  setPreviewOpen(true);
+                }}
               >
                 Open preview
               </button>
@@ -516,7 +525,9 @@ export function NewsfeedBuilderPanel({ postId }: { postId: string }) {
                     </span>
                     <input
                       value={slug}
-                      onChange={(event) => setSlug(event.target.value)}
+                      onChange={(event) => {
+                        setSlug(event.target.value);
+                      }}
                       className={`${MESSENGER_WIZARD_FIELD_CLASS} rounded-l-none`}
                       disabled={live}
                     />
@@ -526,7 +537,9 @@ export function NewsfeedBuilderPanel({ postId }: { postId: string }) {
                   <label className={MESSENGER_WIZARD_LABEL_CLASS}>SEO title</label>
                   <input
                     value={seoTitle}
-                    onChange={(event) => setSeoTitle(event.target.value)}
+                    onChange={(event) => {
+                      setSeoTitle(event.target.value);
+                    }}
                     className={MESSENGER_WIZARD_FIELD_CLASS}
                     disabled={live}
                     maxLength={200}
@@ -539,7 +552,9 @@ export function NewsfeedBuilderPanel({ postId }: { postId: string }) {
                   <label className={MESSENGER_WIZARD_LABEL_CLASS}>Meta description</label>
                   <textarea
                     value={seoDescription}
-                    onChange={(event) => setSeoDescription(event.target.value)}
+                    onChange={(event) => {
+                      setSeoDescription(event.target.value);
+                    }}
                     className={`${MESSENGER_WIZARD_FIELD_CLASS} min-h-24`}
                     disabled={live}
                     maxLength={500}
@@ -581,7 +596,9 @@ export function NewsfeedBuilderPanel({ postId }: { postId: string }) {
                   <label className={MESSENGER_WIZARD_LABEL_CLASS}>Author</label>
                   <input
                     value={authorName}
-                    onChange={(event) => setAuthorName(event.target.value)}
+                    onChange={(event) => {
+                      setAuthorName(event.target.value);
+                    }}
                     className={MESSENGER_WIZARD_FIELD_CLASS}
                     disabled={live}
                     maxLength={120}
@@ -593,7 +610,9 @@ export function NewsfeedBuilderPanel({ postId }: { postId: string }) {
                   </label>
                   <input
                     value={categories}
-                    onChange={(event) => setCategories(event.target.value)}
+                    onChange={(event) => {
+                      setCategories(event.target.value);
+                    }}
                     className={MESSENGER_WIZARD_FIELD_CLASS}
                     disabled={live}
                     placeholder="updates, launches"
@@ -603,7 +622,9 @@ export function NewsfeedBuilderPanel({ postId }: { postId: string }) {
                   <label className={MESSENGER_WIZARD_LABEL_CLASS}>Tags (comma-separated)</label>
                   <input
                     value={tags}
-                    onChange={(event) => setTags(event.target.value)}
+                    onChange={(event) => {
+                      setTags(event.target.value);
+                    }}
                     className={MESSENGER_WIZARD_FIELD_CLASS}
                     disabled={live}
                     placeholder="announcements, exams"
@@ -621,7 +642,9 @@ export function NewsfeedBuilderPanel({ postId }: { postId: string }) {
                   <input
                     type="checkbox"
                     checked={pinned}
-                    onChange={(event) => setPinned(event.target.checked)}
+                    onChange={(event) => {
+                      setPinned(event.target.checked);
+                    }}
                     disabled={live}
                     className="mt-1"
                   />
@@ -762,8 +785,8 @@ export function NewsfeedBuilderPanel({ postId }: { postId: string }) {
             <section className="rounded-xl border border-[color-mix(in_srgb,var(--admin-danger)_20%,var(--admin-border))] bg-[color-mix(in_srgb,var(--admin-danger)_6%,var(--admin-surface))] p-6">
               <h3 className="text-[18px] font-semibold text-[var(--admin-danger)]">Danger zone</h3>
               <p className="mt-2 text-sm text-[var(--admin-on-surface-variant)]">
-                Deleting permanently removes this post and its saves. Unpublish first if the post
-                is live.
+                Deleting permanently removes this post and its saves. Unpublish first if the post is
+                live.
               </p>
               <button
                 type="button"
@@ -786,14 +809,18 @@ export function NewsfeedBuilderPanel({ postId }: { postId: string }) {
         <div
           className="fixed inset-0 z-[70] flex items-center justify-center bg-[color-mix(in_srgb,var(--admin-on-surface)_35%,transparent)] p-4"
           role="presentation"
-          onClick={() => setPreviewOpen(false)}
+          onClick={() => {
+            setPreviewOpen(false);
+          }}
         >
           <div
             role="dialog"
             aria-modal="true"
             aria-labelledby="newsfeed-preview-title"
             className={`admin-theme max-h-[90vh] w-full max-w-2xl overflow-y-auto bg-[var(--admin-surface)] p-5 shadow-xl ${dropdownPanelSurfaceClassName}`}
-            onClick={(event) => event.stopPropagation()}
+            onClick={(event) => {
+              event.stopPropagation();
+            }}
           >
             <div className="mb-4 flex items-start justify-between gap-3">
               <h2
@@ -806,13 +833,14 @@ export function NewsfeedBuilderPanel({ postId }: { postId: string }) {
                 type="button"
                 className="rounded-full p-2 hover:bg-[var(--admin-surface-high)]"
                 aria-label="Close preview"
-                onClick={() => setPreviewOpen(false)}
+                onClick={() => {
+                  setPreviewOpen(false);
+                }}
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
             {coverImageUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={coverImageUrl}
                 alt=""
@@ -823,18 +851,17 @@ export function NewsfeedBuilderPanel({ postId }: { postId: string }) {
               {title || post.title}
             </h3>
             {authorName ? (
-              <p className="mt-1 text-sm text-[var(--admin-on-surface-variant)]">
-                By {authorName}
-              </p>
+              <p className="mt-1 text-sm text-[var(--admin-on-surface-variant)]">By {authorName}</p>
             ) : null}
             {isPromo ? (
               <p className="mt-4 text-sm text-[var(--admin-on-surface)]">
                 Opens product: {post.productTitle || "Select a product"}
               </p>
             ) : (
-              <div
+              <SafeHtml
+                html={bodyHtml}
+                fallback="<p>(empty)</p>"
                 className="prose prose-sm mt-4 max-w-none text-[var(--admin-on-surface)]"
-                dangerouslySetInnerHTML={{ __html: bodyHtml || "<p>(empty)</p>" }}
               />
             )}
           </div>
@@ -854,7 +881,9 @@ export function NewsfeedBuilderPanel({ postId }: { postId: string }) {
             aria-modal="true"
             aria-labelledby="newsfeed-builder-delete-title"
             className={`admin-theme w-full max-w-md space-y-4 bg-[var(--admin-surface)] p-5 shadow-xl ${dropdownPanelSurfaceClassName}`}
-            onClick={(event) => event.stopPropagation()}
+            onClick={(event) => {
+              event.stopPropagation();
+            }}
           >
             <h2
               id="newsfeed-builder-delete-title"
@@ -869,7 +898,9 @@ export function NewsfeedBuilderPanel({ postId }: { postId: string }) {
             </p>
             <input
               value={deleteConfirm}
-              onChange={(event) => setDeleteConfirm(event.target.value)}
+              onChange={(event) => {
+                setDeleteConfirm(event.target.value);
+              }}
               className={MESSENGER_WIZARD_FIELD_CLASS}
               disabled={busy}
             />
@@ -878,7 +909,9 @@ export function NewsfeedBuilderPanel({ postId }: { postId: string }) {
                 type="button"
                 className="rounded-xl border border-[var(--admin-border)] px-4 py-2 text-sm font-semibold"
                 disabled={busy}
-                onClick={() => setDeleteOpen(false)}
+                onClick={() => {
+                  setDeleteOpen(false);
+                }}
               >
                 Cancel
               </button>

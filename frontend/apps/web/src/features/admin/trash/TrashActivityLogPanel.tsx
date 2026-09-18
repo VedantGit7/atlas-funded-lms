@@ -2,13 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState, useTransition } from "react";
-import {
-  ArrowLeft,
-  CalendarClock,
-  Columns3,
-  Search,
-  SlidersHorizontal,
-} from "lucide-react";
+import { ArrowLeft, CalendarClock, Columns3, Search, SlidersHorizontal } from "lucide-react";
 
 import type {
   ContentTrashActivityItem,
@@ -31,11 +25,7 @@ function ActivityEmptyIllustration() {
         className="fill-[var(--admin-surface)] stroke-[var(--admin-outline)]"
         strokeWidth="2"
       />
-      <path
-        d="M78 98h84"
-        className="stroke-[var(--admin-border)]"
-        strokeWidth="2"
-      />
+      <path d="M78 98h84" className="stroke-[var(--admin-border)]" strokeWidth="2" />
       <path
         d="M95 98c0 18 12 30 25 30s25-12 25-30"
         className="fill-[var(--admin-surface-high)] stroke-[var(--admin-outline)]"
@@ -50,7 +40,13 @@ function ActivityEmptyIllustration() {
         fill="none"
         strokeLinecap="round"
       />
-      <circle cx="120" cy="62" r="10" className="fill-[var(--admin-surface)] stroke-[var(--admin-outline)]" strokeWidth="2" />
+      <circle
+        cx="120"
+        cy="62"
+        r="10"
+        className="fill-[var(--admin-surface)] stroke-[var(--admin-outline)]"
+        strokeWidth="2"
+      />
       <path
         d="M162 88l8-4v20l-8 4V88Z"
         className="fill-[var(--admin-success)]/40 stroke-[var(--admin-success)]"
@@ -151,7 +147,9 @@ export function TrashActivityLogPanel({
             <input
               type="search"
               value={query}
-              onChange={(event) => setQuery(event.target.value)}
+              onChange={(event) => {
+                setQuery(event.target.value);
+              }}
               placeholder="Search by Admin"
               aria-label="Search by admin"
               className="w-full rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface-low)] py-2.5 pl-10 pr-3 text-sm text-[var(--admin-on-surface)] outline-none transition-colors placeholder:text-[var(--admin-on-surface-variant)] focus:border-[var(--admin-primary)]"
@@ -185,7 +183,9 @@ export function TrashActivityLogPanel({
 
         <div className="min-h-[380px] px-4 py-10 sm:px-6">
           {pending ? (
-            <p className="py-16 text-center text-sm text-[var(--admin-on-surface-variant)]">Searching…</p>
+            <p className="py-16 text-center text-sm text-[var(--admin-on-surface-variant)]">
+              Searching…
+            </p>
           ) : visibleItems.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-8 text-center motion-safe:animate-[admin-dropdown-in_0.28s_cubic-bezier(0.16,1,0.3,1)]">
               <ActivityEmptyIllustration />
@@ -196,7 +196,10 @@ export function TrashActivityLogPanel({
           ) : (
             <ul className="divide-y divide-[var(--admin-border)]">
               {visibleItems.map((item) => (
-                <li key={item.id} className="flex flex-col gap-1 py-4 sm:flex-row sm:items-center sm:justify-between">
+                <li
+                  key={item.id}
+                  className="flex flex-col gap-1 py-4 sm:flex-row sm:items-center sm:justify-between"
+                >
                   <div className="min-w-0">
                     <p className="text-sm font-semibold text-[var(--admin-on-surface)]">
                       {item.actionLabel}

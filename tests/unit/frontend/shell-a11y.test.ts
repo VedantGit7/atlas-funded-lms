@@ -14,19 +14,11 @@ const TENANT_SHELLS = [
   "ReviewShellClient.tsx",
 ] as const;
 
-const OPERATIONAL_SHELLS = new Set([
-  "ModerationShellClient.tsx",
-]);
+const OPERATIONAL_SHELLS = new Set(["ModerationShellClient.tsx"]);
 
-const ADMIN_STYLE_SHELLS = new Set([
-  "StudioShellClient.tsx",
-  "TenantAdminShellClient.tsx",
-]);
+const ADMIN_STYLE_SHELLS = new Set(["StudioShellClient.tsx", "TenantAdminShellClient.tsx"]);
 
-const layoutSource = readFileSync(
-  resolve(webRoot, "shared/OperationalShellLayout.tsx"),
-  "utf8",
-);
+const layoutSource = readFileSync(resolve(webRoot, "shared/OperationalShellLayout.tsx"), "utf8");
 
 function shellProvidesA11yLandmarks(fileName: string): boolean {
   const source = readFileSync(resolve(webRoot, fileName), "utf8");
@@ -39,8 +31,10 @@ function shellProvidesA11yLandmarks(fileName: string): boolean {
         ? readFileSync(resolve(webRoot, "studio/StudioShell.tsx"), "utf8")
         : readFileSync(resolve(webRoot, "admin/AdminShell.tsx"), "utf8");
     return (
-      source.includes("StudioShell") || source.includes("AdminShell")
-    ) && (shellFile.includes("Skip to content") && (shellFile.includes('id="studio-main"') || shellFile.includes('id="admin-main"')));
+      (source.includes("StudioShell") || source.includes("AdminShell")) &&
+      shellFile.includes("Skip to content") &&
+      (shellFile.includes('id="studio-main"') || shellFile.includes('id="admin-main"'))
+    );
   }
   return source.includes("ShellSkipLink") && source.includes('id="main-content"');
 }
@@ -97,18 +91,19 @@ describe("F2 shell accessibility landmarks", () => {
 
 describe("F2 shell responsive patterns", () => {
   it("operational shells use shared layout with drawer and sidebar", () => {
-    for (const fileName of [
-      "ModerationShellClient.tsx",
-      "PlatformConsoleShellClient.tsx",
-    ]) {
+    for (const fileName of ["ModerationShellClient.tsx", "PlatformConsoleShellClient.tsx"]) {
       const source = readFileSync(resolve(webRoot, fileName), "utf8");
       expect(source).toContain("OperationalShellLayout");
     }
   });
 
   it("admin-style shells use dedicated layout components", () => {
-    expect(readFileSync(resolve(webRoot, "StudioShellClient.tsx"), "utf8")).toContain("StudioShell");
-    expect(readFileSync(resolve(webRoot, "TenantAdminShellClient.tsx"), "utf8")).toContain("AdminShell");
+    expect(readFileSync(resolve(webRoot, "StudioShellClient.tsx"), "utf8")).toContain(
+      "StudioShell",
+    );
+    expect(readFileSync(resolve(webRoot, "TenantAdminShellClient.tsx"), "utf8")).toContain(
+      "AdminShell",
+    );
   });
 
   it("review shell has mobile navigation drawer", () => {
@@ -122,8 +117,8 @@ describe("F2 shell responsive patterns", () => {
     const bottomSource = readFileSync(resolve(webRoot, "shared/ShellBottomNav.tsx"), "utf8");
     expect(layoutSource).toContain("ariaLabel={sidebarAriaLabel}");
     expect(layoutSource).toContain("ariaLabel={bottomNavAriaLabel}");
-    expect(sidebarSource).toContain('aria-label={ariaLabel}');
-    expect(bottomSource).toContain('aria-label={ariaLabel}');
+    expect(sidebarSource).toContain("aria-label={ariaLabel}");
+    expect(bottomSource).toContain("aria-label={ariaLabel}");
     expect(layoutSource).toContain('id="main-content"');
     expect(layoutSource).toContain("ShellSkipLink");
   });
@@ -131,7 +126,10 @@ describe("F2 shell responsive patterns", () => {
   it("review shell gate loads pending workflow count", () => {
     expect(existsSync(resolve(webRoot, "ReviewShellGate.tsx"))).toBe(true);
     const contextSource = readFileSync(
-      resolve(import.meta.dirname, "../../../frontend/apps/web/src/lib/server/review-shell-context.ts"),
+      resolve(
+        import.meta.dirname,
+        "../../../frontend/apps/web/src/lib/server/review-shell-context.ts",
+      ),
       "utf8",
     );
     expect(contextSource).toContain("/api/v1/workflows?status=pending");

@@ -20,7 +20,10 @@ export function TableBody({ className, ...props }: HTMLAttributes<HTMLTableSecti
 export function TableRow({ className, ...props }: HTMLAttributes<HTMLTableRowElement>) {
   return (
     <tr
-      className={cn("border-b border-neutral-200 transition-colors hover:bg-neutral-50 dark:border-neutral-800 dark:hover:bg-neutral-900", className)}
+      className={cn(
+        "border-b border-neutral-200 transition-colors hover:bg-neutral-50 dark:border-neutral-800 dark:hover:bg-neutral-900",
+        className,
+      )}
       {...props}
     />
   );
@@ -29,7 +32,10 @@ export function TableRow({ className, ...props }: HTMLAttributes<HTMLTableRowEle
 export function TableHeaderCell({ className, ...props }: ThHTMLAttributes<HTMLTableCellElement>) {
   return (
     <th
-      className={cn("h-10 px-3 text-left align-middle text-xs font-medium text-neutral-500", className)}
+      className={cn(
+        "h-10 px-3 text-left align-middle text-xs font-medium text-neutral-500",
+        className,
+      )}
       {...props}
     />
   );

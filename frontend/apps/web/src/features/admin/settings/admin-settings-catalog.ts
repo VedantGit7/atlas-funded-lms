@@ -465,6 +465,8 @@ export function filterAdminSettingsSections(
     .filter((section) => section.items.length > 0);
 }
 
-export function flattenAdminSettingsItems(sections: readonly AdminSettingsSection[]): AdminSettingsItem[] {
+export function flattenAdminSettingsItems(
+  sections: readonly AdminSettingsSection[],
+): AdminSettingsItem[] {
   return sections.flatMap((section) => section.items);
 }

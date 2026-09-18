@@ -20,6 +20,7 @@ Complete guide to using GSAP (Green Sock Animation Platform) with Barba.js for s
 **GSAP** handles the actual animations.
 
 This combination provides:
+
 - **Performance**: GSAP uses GPU acceleration and optimized rendering
 - **Control**: Precise timing with timelines, stagger, and easing
 - **Simplicity**: GSAP returns promises that Barba can await
@@ -42,11 +43,11 @@ npm install --save-dev gsap/ScrollTrigger
 ### Basic Import
 
 ```javascript
-import barba from '@barba/core';
-import gsap from 'gsap';
+import barba from "@barba/core";
+import gsap from "gsap";
 
 // Optional GSAP plugins
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 gsap.registerPlugin(ScrollTrigger);
 ```
 
@@ -58,33 +59,36 @@ gsap.registerPlugin(ScrollTrigger);
 
 ```javascript
 barba.init({
-  transitions: [{
-    name: 'fade',
+  transitions: [
+    {
+      name: "fade",
 
-    async leave({ current }) {
-      await gsap.to(current.container, {
-        opacity: 0,
-        duration: 0.5,
-        ease: 'power2.inOut'
-      });
+      async leave({ current }) {
+        await gsap.to(current.container, {
+          opacity: 0,
+          duration: 0.5,
+          ease: "power2.inOut",
+        });
+      },
+
+      async enter({ next }) {
+        // Set initial state
+        gsap.set(next.container, { opacity: 0 });
+
+        // Animate in
+        await gsap.to(next.container, {
+          opacity: 1,
+          duration: 0.5,
+          ease: "power2.inOut",
+        });
+      },
     },
-
-    async enter({ next }) {
-      // Set initial state
-      gsap.set(next.container, { opacity: 0 });
-
-      // Animate in
-      await gsap.to(next.container, {
-        opacity: 1,
-        duration: 0.5,
-        ease: 'power2.inOut'
-      });
-    }
-  }]
+  ],
 });
 ```
 
 **Key Points**:
+
 - GSAP's `to()` returns a promise
 - Use `await` to make Barba wait for animation completion
 - `gsap.set()` sets initial state without animation
@@ -119,6 +123,7 @@ barba.init({
 ```
 
 **Key Points**:
+
 - `sync: true` enables crossfade/overlap effect
 - Use `return` instead of `await` (same result)
 - GPU-accelerated properties (`x`, `y`, `opacity`, `scale`)
@@ -158,6 +163,7 @@ barba.init({
 ```
 
 **Key Points**:
+
 - `fromTo()` sets initial state and animates to final state
 - Different easings for enter/exit (asymmetric feel)
 
@@ -221,6 +227,7 @@ GSAP Timelines provide precise control over complex sequences.
 ```
 
 **Timeline Position Parameter**:
+
 - `'-=0.2'` - Start 0.2s before previous animation ends (overlap)
 - `'+=0.2'` - Start 0.2s after previous animation ends (delay)
 - `'<'` - Start at beginning of previous animation
@@ -267,6 +274,7 @@ GSAP Timelines provide precise control over complex sequences.
 ```
 
 **Stagger Options**:
+
 ```javascript
 stagger: {
   amount: 0.5,      // Total duration for all staggers
@@ -411,11 +419,13 @@ stagger: {
 ```
 
 **HTML for Curtain**:
+
 ```html
 <div class="transition-curtain"></div>
 ```
 
 **CSS for Curtain**:
+
 ```css
 .transition-curtain {
   position: fixed;
@@ -554,15 +564,15 @@ gsap.to(element, {
   y: 50,
   opacity: 0.5,
   scale: 1.2,
-  rotation: 45
+  rotation: 45,
 });
 
 // ❌ Avoid - causes reflow/repaint
 gsap.to(element, {
-  left: '100px',
-  top: '50px',
-  width: '200px',
-  height: '300px'
+  left: "100px",
+  top: "50px",
+  width: "200px",
+  height: "300px",
 });
 ```
 
@@ -580,8 +590,8 @@ gsap.to(element, {
 ```javascript
 barba.hooks.after(() => {
   // Remove will-change after transition
-  document.querySelectorAll('[data-barba="container"]').forEach(el => {
-    el.style.willChange = 'auto';
+  document.querySelectorAll('[data-barba="container"]').forEach((el) => {
+    el.style.willChange = "auto";
   });
 });
 ```
@@ -633,7 +643,7 @@ barba.hooks.after(() => {
 gsap.to(element, {
   x: 100,
   force3D: true, // Force GPU acceleration
-  duration: 0.5
+  duration: 0.5,
 });
 ```
 
@@ -677,6 +687,7 @@ beforeEnter({ next }) {
 ```
 
 Or in CSS:
+
 ```css
 [data-barba="container"] {
   opacity: 0;
@@ -703,6 +714,7 @@ Or in CSS:
 ```
 
 Or in JavaScript:
+
 ```javascript
 {
   sync: true,
@@ -723,33 +735,35 @@ Or in JavaScript:
 **Solution**: Kill ScrollTriggers in `beforeLeave`:
 
 ```javascript
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 barba.hooks.beforeLeave(() => {
   // Kill all ScrollTrigger instances
-  ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+  ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
 });
 
 // Or use scoped instances
 barba.init({
-  views: [{
-    namespace: 'home',
-    afterEnter() {
-      // Create ScrollTriggers
-      this.scrollTriggers = [];
+  views: [
+    {
+      namespace: "home",
+      afterEnter() {
+        // Create ScrollTriggers
+        this.scrollTriggers = [];
 
-      this.scrollTriggers.push(
-        ScrollTrigger.create({
-          trigger: '.section',
-          // ...
-        })
-      );
+        this.scrollTriggers.push(
+          ScrollTrigger.create({
+            trigger: ".section",
+            // ...
+          }),
+        );
+      },
+      beforeLeave() {
+        // Kill scoped ScrollTriggers
+        this.scrollTriggers.forEach((trigger) => trigger.kill());
+      },
     },
-    beforeLeave() {
-      // Kill scoped ScrollTriggers
-      this.scrollTriggers.forEach(trigger => trigger.kill());
-    }
-  }]
+  ],
 });
 ```
 
@@ -763,7 +777,7 @@ barba.init({
 barba.hooks.beforeLeave(({ current }) => {
   // Kill all tweens on current page
   gsap.killTweensOf(current.container);
-  gsap.killTweensOf(current.container.querySelectorAll('*'));
+  gsap.killTweensOf(current.container.querySelectorAll("*"));
 });
 ```
 
@@ -797,24 +811,25 @@ Common GSAP easings for transitions:
 
 ```javascript
 // Smooth and natural
-ease: 'power2.inOut'
+ease: "power2.inOut";
 
 // Gentle acceleration
-ease: 'power1.out'
+ease: "power1.out";
 
 // Strong deceleration
-ease: 'power3.out'
+ease: "power3.out";
 
 // Bounce effect
-ease: 'back.out(1.7)'
+ease: "back.out(1.7)";
 
 // Elastic effect
-ease: 'elastic.out(1, 0.3)'
+ease: "elastic.out(1, 0.3)";
 
 // Custom bezier
-ease: 'cubic-bezier(0.4, 0, 0.2, 1)'
+ease: "cubic-bezier(0.4, 0, 0.2, 1)";
 ```
 
 **Recommended for Barba transitions**:
+
 - Leave: `'power2.in'` or `'power2.inOut'`
 - Enter: `'power2.out'` or `'power3.out'`

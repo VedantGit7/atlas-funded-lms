@@ -2,10 +2,11 @@ import { NextResponse } from "next/server";
 import { createPublicRouteHandler } from "@atlas/api";
 import { withGlobalDb } from "@atlas/db/global-db";
 import { withTenantTx } from "@atlas/db/with-tenant-tx";
-import { zoomWebhookBodySchema, zoomWebhookResponseSchema } from "@atlas/domain/zoom/zoom.dto";
+import { zoomWebhookResponseSchema } from "@atlas/domain/zoom/zoom.dto";
 import { zoomWebhookMetadata } from "@atlas/domain/zoom/zoom.route-metadata";
 import { handleZoomWebhook } from "@atlas/domain/zoom/zoom.service";
 import { resolveTenantFromRequest } from "@atlas/tenancy";
+import { systemServiceCtx } from "@atlas/core/actor/system-actor";
 
 export const POST = createPublicRouteHandler(zoomWebhookMetadata, async ({ req, requestId }) => {
   return withGlobalDb(async (db) => {
@@ -21,7 +22,7 @@ export const POST = createPublicRouteHandler(zoomWebhookMetadata, async ({ req, 
       async (tx) =>
         handleZoomWebhook(
           tx,
-          { tenantId: tenant.tenantId, actorMembershipId: tenant.tenantId, requestId },
+          systemServiceCtx({ tenantId: tenant.tenantId, requestId, source: "zoom.webhook" }),
           rawBody,
         ),
     );

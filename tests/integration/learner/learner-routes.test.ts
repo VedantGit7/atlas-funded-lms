@@ -36,11 +36,36 @@ const pageByScreen: Record<LearnerScreenId, string> = {
   L25: "app/settings/page.tsx",
 };
 
+/**
+ * Registry `pathPattern` -> App Router page module.
+ *
+ * "/admin/members/:id" becomes "app/admin/members/[id]/page.tsx".
+ */
+const ROUTE_GROUPS = ["", "(learner)", "(auth)", "(legal)", "(moderation)", "(public)"] as const;
+
+function pagePathCandidates(pathPattern: string): string[] {
+  const segments = pathPattern
+    .split("/")
+    .filter(Boolean)
+    .map((segment) => (segment.startsWith(":") ? `[${segment.slice(1)}]` : segment));
+
+  // A route group is part of the file path but not the URL, so the pattern
+  // alone cannot say which one a page lives in.
+  return ROUTE_GROUPS.map((group) =>
+    ["app", ...(group ? [group] : []), ...segments, "page.tsx"].join("/"),
+  );
+}
+
 describe("learner route integration wiring", () => {
   it("maps every approved screenId to a page module", () => {
     for (const route of LEARNER_ROUTE_REGISTRY) {
-      const pagePath = pageByScreen[route.screenId];
-      expect(existsSync(resolve(webRoot, pagePath))).toBe(true);
+      // Fall back to deriving the page from the registry's own `pathPattern`.
+      // Requiring the hand-maintained map to list every screen meant each new
+      // screen failed here until a second copy of the registry was updated.
+      const mapped = pageByScreen[route.screenId];
+      const candidates = mapped ? [mapped] : pagePathCandidates(route.pathPattern);
+      const pagePath = candidates.find((candidate) => existsSync(resolve(webRoot, candidate)));
+      expect(existsSync(resolve(webRoot, pagePath)), `${route.screenId} -> ${pagePath}`).toBe(true);
     }
   });
 
@@ -68,7 +93,13 @@ describe("learner route integration wiring", () => {
   });
 
   it("settings reuses Story 037 deletion component", () => {
-    const source = readFileSync(resolve(webRoot, "app/settings/page.tsx"), "utf8");
+    // /settings is a redirect to /profile now; the deletion entry lives on the
+    // danger-zone page. Reading the redirect stub found nothing and reported
+    // account deletion as missing when it had only moved.
+    const legacy = readFileSync(resolve(webRoot, "app/settings/page.tsx"), "utf8");
+    expect(legacy).toContain("redirect");
+
+    const source = readFileSync(resolve(webRoot, "app/profile/danger-zone/page.tsx"), "utf8");
     expect(source).toContain("AccountDeletionCard");
   });
 });

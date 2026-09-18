@@ -120,7 +120,10 @@ export function SubscriptionPanel({ entitlements, issuerName }: SubscriptionPane
       ) : null}
 
       <div className="flex items-start gap-4 rounded-xl border border-[var(--acct-border)] bg-[var(--acct-surface-low)] p-4">
-        <Building2 className="mt-0.5 h-5 w-5 shrink-0 text-[var(--acct-primary)]" aria-hidden="true" />
+        <Building2
+          className="mt-0.5 h-5 w-5 shrink-0 text-[var(--acct-primary)]"
+          aria-hidden="true"
+        />
         <div>
           <p className="flex items-center gap-1.5 text-sm font-semibold text-[var(--acct-on-surface)]">
             Managed by your academy

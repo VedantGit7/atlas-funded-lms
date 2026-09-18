@@ -1,6 +1,15 @@
 "use client";
 
-import { Award, CheckCircle2, ClipboardCheck, GraduationCap, Plus, Route, Sparkles, Users } from "lucide-react";
+import {
+  Award,
+  CheckCircle2,
+  ClipboardCheck,
+  GraduationCap,
+  Plus,
+  Route,
+  Sparkles,
+  Users,
+} from "lucide-react";
 import type { StarterTemplate } from "./starter-templates";
 
 export function StudioPaperPreview({ kind }: { kind: StarterTemplate["previewKind"] }) {
@@ -76,7 +85,7 @@ export function StudioPaperPreview({ kind }: { kind: StarterTemplate["previewKin
             className="cert-home__preview-display"
             style={{ fontSize: 10, letterSpacing: "0.12em" }}
           >
-            FundedBeyond
+            Your academy
           </div>
         </div>
       );

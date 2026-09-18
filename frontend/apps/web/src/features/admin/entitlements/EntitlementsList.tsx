@@ -11,7 +11,6 @@ import {
 } from "lucide-react";
 import type { EntitlementView } from "@atlas/domain-config/schemas/entitlements";
 import {
-  ENTITLEMENT_GROUPS,
   formatEntitlementExpiry,
   groupResolvedEntitlements,
   mergeEntitlementsWithCatalogue,
@@ -92,7 +91,10 @@ export function EntitlementsList({ entitlements }: EntitlementsListProps) {
           return (
             <article key={group.id} className={cardClassName}>
               <div className={groupHeaderClassName}>
-                <Icon className="h-5 w-5 text-[var(--admin-on-surface-variant)]" aria-hidden="true" />
+                <Icon
+                  className="h-5 w-5 text-[var(--admin-on-surface-variant)]"
+                  aria-hidden="true"
+                />
                 <h2 className={groupTitleClassName}>{group.label}</h2>
               </div>
               <div className="divide-y divide-[var(--admin-border)]/60">
@@ -130,7 +132,10 @@ function EntitlementRow({ entry }: { entry: ResolvedEntitlement }) {
           </div>
         </div>
         <div className={`${inactiveBannerClassName} mt-3`}>
-          <Info className="mt-0.5 h-5 w-5 shrink-0 text-[var(--admin-warning)]" aria-hidden="true" />
+          <Info
+            className="mt-0.5 h-5 w-5 shrink-0 text-[var(--admin-warning)]"
+            aria-hidden="true"
+          />
           <p>{entry.guidance}</p>
         </div>
       </div>

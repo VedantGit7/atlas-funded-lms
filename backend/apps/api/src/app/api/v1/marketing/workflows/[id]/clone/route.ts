@@ -5,7 +5,7 @@ import { marketingWorkflowResponseSchema } from "../../../../../../../server/mar
 import { mutateMarketingWorkflowsMetadata } from "../../../../../../../server/marketing-workflows/marketing-workflow.route-metadata";
 import { cloneMarketingWorkflow } from "../../../../../../../server/marketing-workflows/marketing-workflow.service";
 
-const paramsSchema = zod.object({ id: zod.string().uuid() });
+const paramsSchema = zod.object({ id: zod.uuid() });
 
 export const POST = createTenantRoute<
   Record<string, never>,

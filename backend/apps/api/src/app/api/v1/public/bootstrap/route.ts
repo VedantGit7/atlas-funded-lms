@@ -4,6 +4,7 @@ import { lookupTenantFromHost, resolveRequestHostFromHeaders } from "@atlas/tena
 import { withGlobalDb } from "@atlas/db/global-db";
 import { withTenantTx } from "@atlas/db/with-tenant-tx";
 import { readRuntimeBrandingProjection } from "@atlas/domain-branding";
+import { readTenantEmailChannel } from "../../../../../server/tenant-settings/tenant-settings.service";
 import { buildThemeCssVars, mapTenantThemeToSemanticPayload } from "@atlas/domain-branding";
 import { resolveBrandingAssetUrl } from "@atlas/storage";
 import { getLearnerBillingConfigRow } from "@atlas/domain-config/repositories/learner-billing.repository";
@@ -23,6 +24,12 @@ const bootstrapResponseSchema = z.object({
       .nullable(),
     publicName: z.string().nullable(),
     issuerName: z.string().nullable(),
+    /**
+     * The tenant's own support contact, so public screens (verify-email,
+     * password reset) can offer a route to help without falling back to
+     * another tenant's address. Already a public-facing contact by nature.
+     */
+    supportEmail: z.email().nullable(),
     logoLightUrl: z.url().nullable(),
     logoDarkUrl: z.url().nullable(),
     faviconUrl: z.url().nullable(),
@@ -54,6 +61,7 @@ export const GET = createPublicRouteHandler(routeMetadata, async ({ req, request
           tenantDomainStatus: null,
           publicName: null,
           issuerName: null,
+          supportEmail: null,
           logoLightUrl: null,
           logoDarkUrl: null,
           faviconUrl: null,
@@ -69,34 +77,52 @@ export const GET = createPublicRouteHandler(routeMetadata, async ({ req, request
     );
   }
 
-  const { branding, logoLightUrl, logoDarkUrl, faviconUrl, homeCurrency, fxBase, fxRates } =
-    await withTenantTx(
-      {
-        tenantId: tenant.tenantId,
-        requestId,
-        allowAnonymousTenantRead: true,
-      },
-      async (tx) => {
-        const projection = await readRuntimeBrandingProjection(tx);
-        const [lightUrl, darkUrl, iconUrl, billingConfig, fx] = await Promise.all([
-          resolveBrandingAssetUrl(tx, { tenantId: tenant.tenantId }, projection.logoLightRefId),
-          resolveBrandingAssetUrl(tx, { tenantId: tenant.tenantId }, projection.logoDarkRefId),
-          resolveBrandingAssetUrl(tx, { tenantId: tenant.tenantId }, projection.faviconRefId),
-          getLearnerBillingConfigRow(tx),
-          getCachedFxRates(tx),
-        ]);
+  const {
+    branding,
+    supportEmail,
+    logoLightUrl,
+    logoDarkUrl,
+    faviconUrl,
+    homeCurrency,
+    fxBase,
+    fxRates,
+  } = await withTenantTx(
+    {
+      tenantId: tenant.tenantId,
+      requestId,
+      allowAnonymousTenantRead: true,
+    },
+    async (tx) => {
+      const projection = await readRuntimeBrandingProjection(tx);
+      const [lightUrl, darkUrl, iconUrl, billingConfig, fx, support] = await Promise.all([
+        resolveBrandingAssetUrl(tx, { tenantId: tenant.tenantId }, projection.logoLightRefId),
+        resolveBrandingAssetUrl(tx, { tenantId: tenant.tenantId }, projection.logoDarkRefId),
+        resolveBrandingAssetUrl(tx, { tenantId: tenant.tenantId }, projection.faviconRefId),
+        getLearnerBillingConfigRow(tx),
+        getCachedFxRates(tx),
+        readTenantEmailChannel(tx, "supportEmail"),
+      ]);
 
-        return {
-          branding: projection,
-          logoLightUrl: lightUrl,
-          logoDarkUrl: darkUrl,
-          faviconUrl: iconUrl,
-          homeCurrency: billingConfig?.home_currency ?? null,
-          fxBase: fx.data.base,
-          fxRates: Object.keys(fx.data.rates).length > 0 ? fx.data.rates : null,
-        };
-      },
-    );
+      return {
+        branding: projection,
+        // An unconfigured channel reads as an empty string; publish null so
+        // callers fall through to the platform address instead of `mailto:`.
+        //
+        // Validated here rather than only at the response boundary: this route
+        // backs every page in the app, and the response schema requires a valid
+        // address, so a single malformed value in operator-supplied tenant
+        // config would otherwise 500 the entire tenant instead of degrading to
+        // "no support address".
+        supportEmail: z.email().safeParse(support.fromEmail.trim()).data ?? null,
+        logoLightUrl: lightUrl,
+        logoDarkUrl: darkUrl,
+        faviconUrl: iconUrl,
+        homeCurrency: billingConfig?.home_currency ?? null,
+        fxBase: fx.data.base,
+        fxRates: Object.keys(fx.data.rates).length > 0 ? fx.data.rates : null,
+      };
+    },
+  );
 
   const parsedTheme = TenantThemeTokensSchema.safeParse(branding.themeTokens);
   const semantic = parsedTheme.success ? mapTenantThemeToSemanticPayload(parsedTheme.data) : null;
@@ -112,6 +138,7 @@ export const GET = createPublicRouteHandler(routeMetadata, async ({ req, request
       tenantDomainStatus: tenant.tenantDomainStatus,
       publicName: branding.publicName,
       issuerName: branding.issuerName,
+      supportEmail,
       logoLightUrl,
       logoDarkUrl,
       faviconUrl,

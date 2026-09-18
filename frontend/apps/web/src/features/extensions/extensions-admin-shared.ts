@@ -25,11 +25,9 @@ export const extensionsMainClassName =
 export const extensionsTopBarClassName =
   "flex flex-wrap items-center justify-between gap-4 border-b border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 py-4 sm:px-6";
 
-export const extensionsContentClassName =
-  "flex-1 overflow-y-auto p-4 sm:p-6";
+export const extensionsContentClassName = "flex-1 overflow-y-auto p-4 sm:p-6";
 
-export const extensionsGridClassName =
-  "grid grid-cols-1 gap-6 xl:grid-cols-12";
+export const extensionsGridClassName = "grid grid-cols-1 gap-6 xl:grid-cols-12";
 
 export const extensionsPrimaryColumnClassName = "flex flex-col gap-6 xl:col-span-8";
 
@@ -69,8 +67,7 @@ export const extensionsJsonEditorErrorClassName =
 export const extensionsJsonTextareaClassName =
   "min-h-[12rem] w-full resize-y border-none bg-transparent p-4 font-mono text-[12px] leading-5 text-[var(--admin-on-surface)] outline-none";
 
-export const extensionsStatusToggleGroupClassName =
-  "grid grid-cols-2 gap-2";
+export const extensionsStatusToggleGroupClassName = "grid grid-cols-2 gap-2";
 
 export const extensionsStatusToggleActiveClassName =
   "flex items-center justify-center gap-2 rounded-lg border border-[var(--admin-primary)] bg-[color-mix(in_srgb,var(--admin-primary)_10%,var(--admin-surface))] px-3 py-2.5 text-sm font-semibold text-[var(--admin-primary)] motion-safe:transition-colors";

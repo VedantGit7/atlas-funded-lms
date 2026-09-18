@@ -80,7 +80,8 @@ export function AboutSchoolWizard({ initial }: { initial: AboutSchoolView }) {
   const [touched, setTouched] = useState(false);
 
   const nameError = touched && schoolName.trim().length === 0 ? "School name is required." : null;
-  const titleError = touched && browserTitle.trim().length === 0 ? "Browser title is required." : null;
+  const titleError =
+    touched && browserTitle.trim().length === 0 ? "Browser title is required." : null;
   const basicValid = schoolName.trim().length > 0 && browserTitle.trim().length > 0;
 
   function buildPayload() {
@@ -144,9 +145,7 @@ export function AboutSchoolWizard({ initial }: { initial: AboutSchoolView }) {
       router.refresh();
     } catch (caught) {
       setError(
-        caught instanceof ClientApiError
-          ? caught.message
-          : "Could not publish. Please try again.",
+        caught instanceof ClientApiError ? caught.message : "Could not publish. Please try again.",
       );
     } finally {
       setBusy(null);
@@ -163,7 +162,10 @@ export function AboutSchoolWizard({ initial }: { initial: AboutSchoolView }) {
         return;
       }
       const upload = await clientApi.post<{
-        data: { asset: { id: string }; upload: { url: string; requiredHeaders: Record<string, string> } };
+        data: {
+          asset: { id: string };
+          upload: { url: string; requiredHeaders: Record<string, string> };
+        };
       }>(
         "/api/v1/branding/assets/upload",
         { purpose: "branding.og-image", fileName: file.name, contentType, sizeBytes: file.size },
@@ -177,9 +179,7 @@ export function AboutSchoolWizard({ initial }: { initial: AboutSchoolView }) {
       setImageRefId(upload.data.asset.id);
       setImageUrl(URL.createObjectURL(file));
     } catch (caught) {
-      setError(
-        caught instanceof ClientApiError ? caught.message : "Could not upload the image.",
-      );
+      setError(caught instanceof ClientApiError ? caught.message : "Could not upload the image.");
     } finally {
       setBusy(null);
     }
@@ -187,7 +187,10 @@ export function AboutSchoolWizard({ initial }: { initial: AboutSchoolView }) {
 
   return (
     <div className="mx-auto max-w-3xl pb-28">
-      <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide">
+      <nav
+        aria-label="Breadcrumb"
+        className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide"
+      >
         <Link
           href="/admin/branding"
           prefetch={false}
@@ -195,7 +198,9 @@ export function AboutSchoolWizard({ initial }: { initial: AboutSchoolView }) {
         >
           Branding
         </Link>
-        <span className="text-[var(--admin-on-surface-variant)]" aria-hidden="true">/</span>
+        <span className="text-[var(--admin-on-surface-variant)]" aria-hidden="true">
+          /
+        </span>
         <span className="text-[var(--admin-on-surface-variant)]">About School</span>
       </nav>
 
@@ -208,9 +213,13 @@ export function AboutSchoolWizard({ initial }: { initial: AboutSchoolView }) {
         </p>
       </header>
 
-      <Stepper step={step} basicSaved={basicSaved} onSelect={(next) => {
-        if (next === 1) setStep(1);
-      }} />
+      <Stepper
+        step={step}
+        basicSaved={basicSaved}
+        onSelect={(next) => {
+          if (next === 1) setStep(1);
+        }}
+      />
 
       <BrandingAnimatedCollapsible open={Boolean(status)} id="about-school-status">
         {status ? (
@@ -223,7 +232,11 @@ export function AboutSchoolWizard({ initial }: { initial: AboutSchoolView }) {
         ) : null}
       </BrandingAnimatedCollapsible>
 
-      <BrandingAnimatedCollapsible open={Boolean(error)} id="about-school-error" noTopMargin={!status}>
+      <BrandingAnimatedCollapsible
+        open={Boolean(error)}
+        id="about-school-error"
+        noTopMargin={!status}
+      >
         {error ? (
           <p
             role="alert"
@@ -261,7 +274,10 @@ export function AboutSchoolWizard({ initial }: { initial: AboutSchoolView }) {
             />
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <label htmlFor="about-text" className="text-sm font-bold text-[var(--admin-on-surface)]">
+                <label
+                  htmlFor="about-text"
+                  className="text-sm font-bold text-[var(--admin-on-surface)]"
+                >
                   About School
                 </label>
                 <span className="text-xs tabular-nums text-[var(--admin-on-surface-variant)]">
@@ -284,7 +300,9 @@ export function AboutSchoolWizard({ initial }: { initial: AboutSchoolView }) {
             <div className="space-y-2">
               <div>
                 <p className="text-sm font-bold text-[var(--admin-on-surface)]">School Image</p>
-                <p className="text-xs text-[var(--admin-on-surface-variant)]">Add image for your school page</p>
+                <p className="text-xs text-[var(--admin-on-surface-variant)]">
+                  Add image for your school page
+                </p>
               </div>
               <ImageUploader
                 imageUrl={imageUrl}
@@ -315,12 +333,20 @@ export function AboutSchoolWizard({ initial }: { initial: AboutSchoolView }) {
           <div className="grid grid-cols-1 gap-x-6 gap-y-5 motion-safe:animate-[admin-slide-up_0.3s_cubic-bezier(0.16,1,0.3,1)] sm:grid-cols-2">
             {SOCIALS.map((item) => (
               <div key={item.key} className="space-y-2">
-                <label htmlFor={`social-${item.key}`} className="text-sm font-bold text-[var(--admin-on-surface)]">
+                <label
+                  htmlFor={`social-${item.key}`}
+                  className="text-sm font-bold text-[var(--admin-on-surface)]"
+                >
                   {item.label}
                 </label>
                 <div className="flex items-stretch gap-2">
                   <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-[var(--admin-border)] bg-[var(--admin-certificate-paper)]">
-                    <img src={item.icon} alt="" aria-hidden="true" className="h-5 w-5 object-contain" />
+                    <img
+                      src={item.icon}
+                      alt=""
+                      aria-hidden="true"
+                      className="h-5 w-5 object-contain"
+                    />
                   </span>
                   <input
                     id={`social-${item.key}`}
@@ -361,7 +387,9 @@ export function AboutSchoolWizard({ initial }: { initial: AboutSchoolView }) {
               onClick={() => void onSaveAndNext()}
               className="inline-flex items-center gap-2 rounded-lg bg-[var(--admin-primary)] px-5 py-2.5 text-sm font-semibold text-[var(--admin-on-primary)] shadow-md transition-all hover:opacity-90 motion-safe:active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-[var(--admin-surface-high)] disabled:text-[var(--admin-on-surface-variant)] disabled:opacity-100 disabled:shadow-none"
             >
-              {busy === "save" ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : null}
+              {busy === "save" ? (
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+              ) : null}
               Save &amp; next
             </button>
             <button
@@ -370,7 +398,9 @@ export function AboutSchoolWizard({ initial }: { initial: AboutSchoolView }) {
               onClick={() => void onPublish()}
               className="inline-flex items-center gap-2 rounded-lg bg-[var(--admin-on-surface)] px-5 py-2.5 text-sm font-semibold text-[var(--admin-surface)] shadow-md transition-all hover:opacity-90 motion-safe:active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-[var(--admin-surface-high)] disabled:text-[var(--admin-on-surface-variant)] disabled:opacity-100 disabled:shadow-none"
             >
-              {busy === "publish" ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : null}
+              {busy === "publish" ? (
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+              ) : null}
               Publish
             </button>
           </div>
@@ -423,7 +453,9 @@ function Stepper({
             <span
               className={[
                 "text-lg font-bold",
-                active || complete ? "text-[var(--admin-on-surface)]" : "text-[var(--admin-on-surface-variant)]",
+                active || complete
+                  ? "text-[var(--admin-on-surface)]"
+                  : "text-[var(--admin-on-surface-variant)]",
               ].join(" ")}
             >
               {item.label}
@@ -502,11 +534,17 @@ function ImageUploader({
     <div className="w-full max-w-sm overflow-hidden rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface-low)]">
       <div className="flex aspect-[500/280] items-center justify-center overflow-hidden bg-[var(--admin-surface-high)]">
         {busy ? (
-          <Loader2 className="h-6 w-6 animate-spin text-[var(--admin-primary)]" aria-hidden="true" />
+          <Loader2
+            className="h-6 w-6 animate-spin text-[var(--admin-primary)]"
+            aria-hidden="true"
+          />
         ) : imageUrl ? (
           <img src={imageUrl} alt="School image preview" className="h-full w-full object-cover" />
         ) : (
-          <ImageIcon className="h-8 w-8 text-[var(--admin-on-surface-variant)] opacity-40" aria-hidden="true" />
+          <ImageIcon
+            className="h-8 w-8 text-[var(--admin-on-surface-variant)] opacity-40"
+            aria-hidden="true"
+          />
         )}
       </div>
       <div className="flex items-center justify-center gap-3 border-t border-[var(--admin-border)] p-3">

@@ -7,10 +7,7 @@ import {
 } from "../utils/public-landing-projection";
 import { readRuntimeBrandingProjection } from "./runtime-branding.service";
 
-export async function getPublicLandingPage(
-  tx: TenantTx,
-  slug: string,
-): Promise<PublicLandingPage> {
+export async function getPublicLandingPage(tx: TenantTx, slug: string): Promise<PublicLandingPage> {
   const branding = await readRuntimeBrandingProjection(tx);
   const copy = resolvePublicLandingCopy(branding.publicLandingCopy, slug);
 

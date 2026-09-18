@@ -10,5 +10,5 @@ export const GET = createTenantRoute<
 >({
   metadata: listMarketingEmailMetadata,
   output: marketingEmailTemplatesResponseSchema,
-  handler: async () => listMarketingEmailTemplates(),
+  handler: () => Promise.resolve(listMarketingEmailTemplates()),
 });

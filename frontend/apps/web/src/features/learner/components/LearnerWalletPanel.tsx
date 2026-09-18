@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { ClientApiError, clientApi } from "../../../lib/client-api";
 import { formatMoney } from "../../admin/grow/coupons-shared";
+import { cancellationFlag } from "@/lib/effect-cancellation";
 
 type WalletTransaction = {
   id: string;
@@ -33,25 +34,25 @@ export function LearnerWalletPanel() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    let cancelled = false;
+    const effect = cancellationFlag();
     void (async () => {
       setLoading(true);
       try {
         const response = await clientApi.get<{ data: MyWallet }>("/api/v1/me/wallet", "my-wallet");
-        if (!cancelled) {
+        if (!effect.isCancelled()) {
           setWallet(response.data);
           setError(null);
         }
       } catch (caught) {
-        if (!cancelled) {
+        if (!effect.isCancelled()) {
           setError(caught instanceof ClientApiError ? caught.message : "Could not load wallet.");
         }
       } finally {
-        if (!cancelled) setLoading(false);
+        if (!effect.isCancelled()) setLoading(false);
       }
     })();
     return () => {
-      cancelled = true;
+      effect.cancel();
     };
   }, []);
 

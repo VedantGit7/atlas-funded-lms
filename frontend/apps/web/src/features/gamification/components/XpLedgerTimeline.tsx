@@ -101,7 +101,10 @@ export function XpLedgerTimeline({ initialItems, initialCursor }: XpLedgerTimeli
       )}
 
       {error ? (
-        <p className="mt-3 text-sm text-[color-mix(in_srgb,var(--destructive)_74%,var(--foreground))]" role="alert">
+        <p
+          className="mt-3 text-sm text-[color-mix(in_srgb,var(--destructive)_74%,var(--foreground))]"
+          role="alert"
+        >
           {error}
         </p>
       ) : null}

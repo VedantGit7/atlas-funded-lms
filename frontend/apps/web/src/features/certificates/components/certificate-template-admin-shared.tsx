@@ -24,7 +24,8 @@ export const cardClassName =
 
 export const sectionTitleClassName = "text-lg font-semibold text-[var(--admin-on-surface)]";
 
-export const sectionDescClassName = "mt-1 text-sm leading-relaxed text-[var(--admin-on-surface-variant)]";
+export const sectionDescClassName =
+  "mt-1 text-sm leading-relaxed text-[var(--admin-on-surface-variant)]";
 
 export const primaryButtonClassName =
   "inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-lg bg-[var(--admin-primary)] px-4 py-2.5 text-sm font-semibold text-[var(--admin-on-primary)] shadow-md transition-all hover:opacity-90 motion-safe:active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50";
@@ -121,10 +122,7 @@ export function CertificateStatusPill({ status }: { status: CertificateStatus })
 
 /** Deterministic 1-2 letter initials for a recipient label, for the avatar chip. */
 export function avatarInitials(label: string): string {
-  const parts = label
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean);
+  const parts = label.trim().split(/\s+/).filter(Boolean);
   const first = parts[0];
   if (!first) return "?";
   if (parts.length === 1) return first.slice(0, 2).toUpperCase();

@@ -114,7 +114,10 @@
   background: transparent;
   color: var(--studio-on-surface);
   cursor: pointer;
-  transition: background 150ms ease, color 150ms ease, opacity 150ms ease;
+  transition:
+    background 150ms ease,
+    color 150ms ease,
+    opacity 150ms ease;
 }
 
 .cert-studio__icon-hit:hover:not(:disabled) {
@@ -223,7 +226,9 @@
   font-family: var(--studio-font-mono);
   font-size: 11px;
   cursor: pointer;
-  transition: background 150ms ease, color 150ms ease;
+  transition:
+    background 150ms ease,
+    color 150ms ease;
 }
 
 .cert-studio__zoom-trigger:hover {
@@ -389,7 +394,10 @@
   letter-spacing: 0.14em;
   text-transform: uppercase;
   cursor: pointer;
-  transition: opacity 150ms ease, color 150ms ease, border-color 150ms ease;
+  transition:
+    opacity 150ms ease,
+    color 150ms ease,
+    border-color 150ms ease;
 }
 
 .cert-studio__tab:hover {
@@ -489,7 +497,10 @@
   font-family: var(--studio-font-ui);
   font-size: 10px;
   cursor: pointer;
-  transition: background 150ms ease, color 150ms ease, transform 120ms ease;
+  transition:
+    background 150ms ease,
+    color 150ms ease,
+    transform 120ms ease;
 }
 
 .cert-studio__element-tile:hover {
@@ -1052,7 +1063,8 @@
 select.cert-studio__input {
   appearance: none;
   cursor: pointer;
-  background-image: linear-gradient(45deg, transparent 50%, var(--studio-on-secondary) 50%),
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--studio-on-secondary) 50%),
     linear-gradient(135deg, var(--studio-on-secondary) 50%, transparent 50%);
   background-position:
     calc(100% - 14px) 16px,
@@ -1083,7 +1095,9 @@ select.cert-studio__input {
   background: var(--studio-panel-elevated);
   color: #e1bfb8;
   cursor: pointer;
-  transition: background 150ms ease, color 150ms ease;
+  transition:
+    background 150ms ease,
+    color 150ms ease;
 }
 
 .cert-studio__inspector-footer button:hover:not(:disabled) {

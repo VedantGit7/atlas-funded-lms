@@ -6,6 +6,7 @@ import type {
   PaymentOverviewGrain,
   PaymentTransactionsQuery,
 } from "./payments-roster.dto";
+import { textColumn } from "./raw-column";
 
 export type PaymentTransactionRow = {
   id: string;
@@ -212,7 +213,7 @@ function asJsonObject(value: unknown): Record<string, unknown> | null {
 function mapTransaction(row: Record<string, unknown>): PaymentTransactionRow {
   const createdAt = asDate(row["created_at"]) ?? new Date(0);
   return {
-    id: String(row["id"]),
+    id: textColumn(row["id"]),
     membership_id: asUuidOrNull(row["membership_id"]),
     learner_name: typeof row["learner_name"] === "string" ? row["learner_name"] : null,
     email: typeof row["email"] === "string" ? row["email"] : null,
@@ -222,8 +223,8 @@ function mapTransaction(row: Record<string, unknown>): PaymentTransactionRow {
     coupon_amount_cents: asIntOrNull(row["coupon_amount_cents"]),
     amount_cents: asIntOrNull(row["amount_cents"]) ?? 0,
     tax_amount_cents: asIntOrNull(row["tax_amount_cents"]),
-    currency: String(row["currency"] ?? "USD"),
-    status: String(row["status"] ?? "pending"),
+    currency: textColumn(row["currency"], "USD"),
+    status: textColumn(row["status"], "pending"),
     invoice_number: typeof row["invoice_number"] === "string" ? row["invoice_number"] : null,
     external_id: typeof row["external_id"] === "string" ? row["external_id"] : null,
     paid_at: asDate(row["paid_at"]),
@@ -236,17 +237,15 @@ function mapInvoice(row: Record<string, unknown>): PaymentInvoiceRow {
   const billingStored =
     typeof row["billing_name_stored"] === "string" ? row["billing_name_stored"] : null;
   const billingName =
-    typeof row["billing_name"] === "string"
-      ? row["billing_name"]
-      : (billingStored ?? learnerName);
+    typeof row["billing_name"] === "string" ? row["billing_name"] : (billingStored ?? learnerName);
   const differsRaw = row["billing_name_differs"];
   const billingNameDiffers =
     typeof differsRaw === "boolean"
       ? differsRaw
       : Boolean(
           billingStored &&
-            learnerName &&
-            billingStored.trim().toLowerCase() !== learnerName.trim().toLowerCase(),
+          learnerName &&
+          billingStored.trim().toLowerCase() !== learnerName.trim().toLowerCase(),
         );
   const metadata =
     row["metadata_json"] && typeof row["metadata_json"] === "object"
@@ -256,14 +255,14 @@ function mapInvoice(row: Record<string, unknown>): PaymentInvoiceRow {
     metadata && metadata["invoiceVoid"] && typeof metadata["invoiceVoid"] === "object"
       ? (metadata["invoiceVoid"] as Record<string, unknown>)
       : null;
-  const voidedAtRaw = typeof invoiceVoid?.["voidedAt"] === "string" ? invoiceVoid["voidedAt"] : null;
+  const voidedAtRaw =
+    typeof invoiceVoid?.["voidedAt"] === "string" ? invoiceVoid["voidedAt"] : null;
   const voidedAt = voidedAtRaw ? asDate(voidedAtRaw) : null;
-  const voidReason =
-    typeof invoiceVoid?.["reason"] === "string" ? invoiceVoid["reason"] : null;
+  const voidReason = typeof invoiceVoid?.["reason"] === "string" ? invoiceVoid["reason"] : null;
   return {
-    id: String(row["id"]),
+    id: textColumn(row["id"]),
     membership_id: asUuidOrNull(row["membership_id"]),
-    invoice_number: String(row["invoice_number"]),
+    invoice_number: textColumn(row["invoice_number"]),
     learner_name: learnerName,
     email: typeof row["email"] === "string" ? row["email"] : null,
     billing_name: billingName,
@@ -272,9 +271,9 @@ function mapInvoice(row: Record<string, unknown>): PaymentInvoiceRow {
     amount_cents: asIntOrNull(row["amount_cents"]) ?? 0,
     tax_amount_cents: asIntOrNull(row["tax_amount_cents"]),
     coupon_amount_cents: asIntOrNull(row["coupon_amount_cents"]),
-    currency: String(row["currency"] ?? "USD"),
+    currency: textColumn(row["currency"], "USD"),
     gateway_key: typeof row["gateway_key"] === "string" ? row["gateway_key"] : null,
-    order_status: String(row["order_status"] ?? row["status"] ?? "paid"),
+    order_status: textColumn(row["order_status"] ?? row["status"], "paid"),
     paid_at: asDate(row["paid_at"]),
     created_at: asDate(row["created_at"]) ?? new Date(0),
     voided_at: voidedAt,
@@ -285,19 +284,19 @@ function mapInvoice(row: Record<string, unknown>): PaymentInvoiceRow {
 
 function mapPlan(row: Record<string, unknown>): PaymentInstalmentPlanRow {
   return {
-    id: String(row["id"]),
-    membership_id: String(row["membership_id"]),
+    id: textColumn(row["id"]),
+    membership_id: textColumn(row["membership_id"]),
     learner_name: typeof row["learner_name"] === "string" ? row["learner_name"] : null,
     email: typeof row["email"] === "string" ? row["email"] : null,
-    product_title: String(row["product_title"]),
-    product_type: String(row["product_type"] ?? "course"),
+    product_title: textColumn(row["product_title"]),
+    product_type: textColumn(row["product_type"], "course"),
     pricing_plan_label:
       typeof row["pricing_plan_label"] === "string" ? row["pricing_plan_label"] : null,
     total_amount_cents: Number(row["total_amount_cents"]),
     remaining_amount_cents: Number(row["remaining_amount_cents"]),
-    currency: String(row["currency"]),
-    status: String(row["status"]),
-    created_at: (asDate(row["created_at"]) ?? new Date(0)) as Date,
+    currency: textColumn(row["currency"]),
+    status: textColumn(row["status"]),
+    created_at: asDate(row["created_at"]) ?? new Date(0),
     next_due_at: asDate(row["next_due_at"]),
     instalment_count: asIntOrNull(row["instalment_count"]) ?? 0,
     paid_count: asIntOrNull(row["paid_count"]) ?? 0,
@@ -320,7 +319,8 @@ export const paymentsRosterRepository = {
     `;
     const row = rows[0];
     if (row?.next_number != null) {
-      const prefix = (row.prefix?.trim() || "INV").replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 16) || "INV";
+      const prefix =
+        (row.prefix?.trim() || "INV").replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 16) || "INV";
       return `${prefix}-${String(row.next_number).padStart(5, "0")}`;
     }
     return `INV-${randomUUID().slice(0, 8).toUpperCase()}`;
@@ -408,10 +408,7 @@ export const paymentsRosterRepository = {
     return Number(rows[0]?.count ?? 0);
   },
 
-  async sumTransactionAmounts(
-    tx: TenantTx,
-    filter: PaymentTransactionsFilter,
-  ): Promise<number> {
+  async sumTransactionAmounts(tx: TenantTx, filter: PaymentTransactionsFilter): Promise<number> {
     const dateField = filter.dateField ?? "paid_at";
     const rows = await tx.$queryRaw<Array<{ total: bigint }>>`
       select coalesce(sum(po.amount_cents), 0)::bigint as total
@@ -464,7 +461,7 @@ export const paymentsRosterRepository = {
     query: PaymentTransactionsQuery,
   ): Promise<PaymentTransactionRow[]> {
     const skip = (query.page - 1) * query.limit;
-    const dateField = query.dateField ?? "paid_at";
+    const dateField = query.dateField;
     const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
       select
         po.id::text as id,
@@ -669,11 +666,11 @@ export const paymentsRosterRepository = {
     `;
     const row = rows[0];
     return {
-      refundable_count: Number(row?.refundable_count ?? 0),
-      partial_count: Number(row?.partial_count ?? 0),
-      refunded_count: Number(row?.refunded_count ?? 0),
-      refundable_amount_cents: Number(row?.refundable_amount_cents ?? 0),
-      refunded_amount_cents: Number(row?.refunded_amount_cents ?? 0),
+      refundable_count: row?.refundable_count ?? 0,
+      partial_count: row?.partial_count ?? 0,
+      refunded_count: row?.refunded_count ?? 0,
+      refundable_amount_cents: row?.refundable_amount_cents ?? 0,
+      refunded_amount_cents: row?.refunded_amount_cents ?? 0,
       currency: row?.currency ?? null,
     };
   },
@@ -1043,11 +1040,11 @@ export const paymentsRosterRepository = {
     `;
     const row = rows[0];
     return {
-      transaction_count: Number(row?.transaction_count ?? 0),
-      paid_transaction_count: Number(row?.paid_transaction_count ?? 0),
-      failed_count: Number(row?.failed_count ?? 0),
-      refunded_count: Number(row?.refunded_count ?? 0),
-      paid_amount_cents: Number(row?.paid_amount_cents ?? 0),
+      transaction_count: row?.transaction_count ?? 0,
+      paid_transaction_count: row?.paid_transaction_count ?? 0,
+      failed_count: row?.failed_count ?? 0,
+      refunded_count: row?.refunded_count ?? 0,
+      paid_amount_cents: row?.paid_amount_cents ?? 0,
       currency: row?.currency ?? null,
     };
   },
@@ -1649,10 +1646,7 @@ export const paymentsRosterRepository = {
     };
   },
 
-  async findInstalmentPlan(
-    tx: TenantTx,
-    planId: string,
-  ): Promise<PaymentInstalmentPlanRow | null> {
+  async findInstalmentPlan(tx: TenantTx, planId: string): Promise<PaymentInstalmentPlanRow | null> {
     const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
       select
         p.id::text as id,
@@ -1715,12 +1709,12 @@ export const paymentsRosterRepository = {
       order by sequence_no asc
     `;
     return rows.map((row) => ({
-      id: String(row["id"]),
+      id: textColumn(row["id"]),
       sequence_no: Number(row["sequence_no"]),
       amount_cents: Number(row["amount_cents"]),
       due_at: row["due_at"] as Date,
       paid_at: row["paid_at"] instanceof Date ? row["paid_at"] : null,
-      status: String(row["status"]),
+      status: textColumn(row["status"]),
       payment_order_id:
         typeof row["payment_order_id"] === "string" ? row["payment_order_id"] : null,
     }));
@@ -1811,12 +1805,12 @@ export const paymentsRosterRepository = {
     const row = rows[0];
     if (!row) return null;
     return {
-      id: String(row["id"]),
+      id: textColumn(row["id"]),
       sequence_no: Number(row["sequence_no"]),
       amount_cents: Number(row["amount_cents"]),
       due_at: row["due_at"] as Date,
       paid_at: row["paid_at"] instanceof Date ? row["paid_at"] : null,
-      status: String(row["status"]),
+      status: textColumn(row["status"]),
       payment_order_id:
         typeof row["payment_order_id"] === "string" ? row["payment_order_id"] : null,
     };
@@ -1969,10 +1963,7 @@ export const paymentsRosterRepository = {
     };
   },
 
-  async getOverviewCollectedInWindow(
-    tx: TenantTx,
-    filter: PaymentOverviewFilter,
-  ): Promise<number> {
+  async getOverviewCollectedInWindow(tx: TenantTx, filter: PaymentOverviewFilter): Promise<number> {
     const rows = await tx.$queryRaw<Array<{ collected_cents: bigint }>>`
       select coalesce(sum(po.amount_cents), 0)::bigint as collected_cents
       from payment_orders po
@@ -1992,9 +1983,7 @@ export const paymentsRosterRepository = {
     tx: TenantTx,
     currency?: string,
   ): Promise<{ remaining_cents: number; plan_count: number }> {
-    const rows = await tx.$queryRaw<
-      Array<{ remaining_cents: bigint; plan_count: bigint }>
-    >`
+    const rows = await tx.$queryRaw<Array<{ remaining_cents: bigint; plan_count: bigint }>>`
       select
         coalesce(sum(p.remaining_amount_cents), 0)::bigint as remaining_cents,
         count(*)::bigint as plan_count
@@ -2306,7 +2295,7 @@ export const paymentsRosterRepository = {
     const row = rows[0];
     if (!row) return null;
     return {
-      id: String(row["id"]),
+      id: textColumn(row["id"]),
       membership_id: typeof row["membership_id"] === "string" ? row["membership_id"] : null,
       learner_name: typeof row["learner_name"] === "string" ? row["learner_name"] : null,
       email: typeof row["email"] === "string" ? row["email"] : null,
@@ -2317,8 +2306,8 @@ export const paymentsRosterRepository = {
         row["coupon_amount_cents"] == null ? null : Number(row["coupon_amount_cents"]),
       amount_cents: Number(row["amount_cents"]),
       tax_amount_cents: row["tax_amount_cents"] == null ? null : Number(row["tax_amount_cents"]),
-      currency: String(row["currency"]),
-      status: String(row["status"]),
+      currency: textColumn(row["currency"]),
+      status: textColumn(row["status"]),
       invoice_number: typeof row["invoice_number"] === "string" ? row["invoice_number"] : null,
       external_id: typeof row["external_id"] === "string" ? row["external_id"] : null,
       billing_name: typeof row["billing_name"] === "string" ? row["billing_name"] : null,

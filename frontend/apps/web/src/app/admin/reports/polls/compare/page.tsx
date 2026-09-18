@@ -22,9 +22,7 @@ export default async function AdminPollsCompareRoutePage() {
     <AdminPageGate screenId="T50" state="ready" title="Compare polls">
       <Suspense
         fallback={
-          <p className="p-8 text-sm text-[var(--admin-on-surface-variant)]">
-            Loading comparison…
-          </p>
+          <p className="p-8 text-sm text-[var(--admin-on-surface-variant)]">Loading comparison…</p>
         }
       >
         <AdminPollsComparePage />

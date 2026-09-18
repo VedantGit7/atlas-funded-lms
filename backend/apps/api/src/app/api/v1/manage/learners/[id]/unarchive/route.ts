@@ -5,7 +5,7 @@ import { manageLearnerArchiveResponseSchema } from "@atlas/api-server/manage/man
 import { manageLearnerArchiveMetadata } from "@atlas/api-server/manage/manage-learners.route-metadata";
 import { unarchiveManageLearner } from "@atlas/api-server/manage/manage-learners.service";
 
-const paramsSchema = zod.object({ id: zod.string().uuid() });
+const paramsSchema = zod.object({ id: zod.uuid() });
 
 export const POST = createTenantRoute<
   Record<string, never>,

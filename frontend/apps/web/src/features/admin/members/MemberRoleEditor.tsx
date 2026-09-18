@@ -4,12 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Plus, X } from "lucide-react";
 import { ClientApiError, clientApi } from "../../../lib/client-api";
-import {
-  cardClassName,
-  cardHeaderClassName,
-  roleIcon,
-  roleSummary,
-} from "./member-detail-shared";
+import { cardClassName, cardHeaderClassName, roleIcon, roleSummary } from "./member-detail-shared";
 
 type RoleOption = {
   id: string;

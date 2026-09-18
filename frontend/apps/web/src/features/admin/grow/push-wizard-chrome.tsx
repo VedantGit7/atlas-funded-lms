@@ -10,11 +10,6 @@ export const MESSENGER_WIZARD_FIELD_CLASS =
 export const MESSENGER_WIZARD_LABEL_CLASS =
   "mb-2 block text-sm font-medium text-[var(--admin-on-surface)]";
 
-/** @deprecated Prefer MESSENGER_WIZARD_FIELD_CLASS */
-export const PUSH_WIZARD_FIELD_CLASS = MESSENGER_WIZARD_FIELD_CLASS;
-/** @deprecated Prefer MESSENGER_WIZARD_LABEL_CLASS */
-export const PUSH_WIZARD_LABEL_CLASS = MESSENGER_WIZARD_LABEL_CLASS;
-
 export type MessengerWizardStepDef = { id: string; label: string };
 
 export const PUSH_WIZARD_STEPS: ReadonlyArray<MessengerWizardStepDef> = [
@@ -83,9 +78,7 @@ export function MessengerWizardStepper({ steps, current }: MessengerWizardSteppe
                 <div
                   className={[
                     "mx-2 hidden h-0.5 flex-1 rounded-full sm:block",
-                    index < currentIndex
-                      ? "bg-[var(--admin-primary)]"
-                      : "bg-[var(--admin-border)]",
+                    index < currentIndex ? "bg-[var(--admin-primary)]" : "bg-[var(--admin-border)]",
                   ].join(" ")}
                   aria-hidden="true"
                 />
@@ -97,9 +90,6 @@ export function MessengerWizardStepper({ steps, current }: MessengerWizardSteppe
     </nav>
   );
 }
-
-/** @deprecated Prefer MessengerWizardStepper */
-export const PushWizardStepper = MessengerWizardStepper;
 
 type MessengerWizardFooterProps = {
   left?: ReactNode;
@@ -114,9 +104,6 @@ export function MessengerWizardFooter({ left, right }: MessengerWizardFooterProp
     </div>
   );
 }
-
-/** @deprecated Prefer MessengerWizardFooter */
-export const PushWizardFooter = MessengerWizardFooter;
 
 export function MessengerWizardCard({
   children,
@@ -136,6 +123,3 @@ export function MessengerWizardCard({
     </section>
   );
 }
-
-/** @deprecated Prefer MessengerWizardCard */
-export const PushWizardCard = MessengerWizardCard;

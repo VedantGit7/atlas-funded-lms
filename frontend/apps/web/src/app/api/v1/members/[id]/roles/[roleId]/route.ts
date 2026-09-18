@@ -7,8 +7,8 @@ import { routeMetadata } from "./route.metadata";
 
 const revokeRoleResponseSchema = zod.object({
   data: zod.object({
-    membershipId: zod.string().uuid(),
-    roleId: zod.string().uuid(),
+    membershipId: zod.uuid(),
+    roleId: zod.uuid(),
     revoked: zod.literal(true),
   }),
 });

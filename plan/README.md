@@ -22,17 +22,19 @@ plan/
 
 ## Active plans
 
-| Plan                                                                                              | Folder            | Status            |
-| ------------------------------------------------------------------------------------------------- | ----------------- | ----------------- |
-| [Complete frontend plan](frontend-planning/complete-frontend-rebuild.md)                          | frontend-planning | draft             |
-| [Frontend tech stack](frontend-planning/tech-stack.md)                                            | frontend-planning | draft             |
-| [Frontend performance strategy](frontend-planning/performance.md)                                 | frontend-planning | draft             |
-| [Local dev URLs & multi-tenant hosts](frontend-planning/local-dev-urls.md)                        | frontend-planning | draft             |
-| [Cursor Build workflow](frontend-planning/cursor-build-workflow.md)                               | frontend-planning | approved          |
-| [Monorepo split & API extraction](backend-planning/monorepo-split-and-api-extraction.md)          | backend-planning  | draft             |
-| [Future backend flexibility](backend-planning/future-backend-flexibility.md)                      | backend-planning  | draft             |
-| [Open signup, freemium courses & payments](backend-planning/open-signup-freemium-and-payments.md) | backend-planning  | done (phases 1–3) |
-| [Zod 4 migration (post-F8)](frontend-planning/zod-4-migration.md)                                 | frontend-planning | done              |
+| Plan                                                                                                  | Folder            | Status            |
+| ----------------------------------------------------------------------------------------------------- | ----------------- | ----------------- |
+| [Complete frontend plan](frontend-planning/complete-frontend-rebuild.md)                              | frontend-planning | draft             |
+| [Frontend tech stack](frontend-planning/tech-stack.md)                                                | frontend-planning | draft             |
+| [Frontend performance strategy](frontend-planning/performance.md)                                     | frontend-planning | draft             |
+| [Local dev URLs & multi-tenant hosts](frontend-planning/local-dev-urls.md)                            | frontend-planning | draft             |
+| [Cursor Build workflow](frontend-planning/cursor-build-workflow.md)                                   | frontend-planning | approved          |
+| [Monorepo split & API extraction](backend-planning/monorepo-split-and-api-extraction.md)              | backend-planning  | draft             |
+| [Future backend flexibility](backend-planning/future-backend-flexibility.md)                          | backend-planning  | draft             |
+| [Open signup, freemium courses & payments](backend-planning/open-signup-freemium-and-payments.md)     | backend-planning  | done (phases 1–3) |
+| [Zod 4 migration (post-F8)](frontend-planning/zod-4-migration.md)                                     | frontend-planning | done              |
+| [Production deployment, scale & platform margin](backend-planning/production-deployment-and-scale.md) | backend-planning  | draft             |
+| [Security hardening & remediation](backend-planning/security-hardening-and-remediation.md)            | backend-planning  | draft             |
 
 ## Sprint order (current roadmap)
 
@@ -40,7 +42,9 @@ plan/
 2. **Frontend F0–F8** — [complete frontend rebuild](frontend-planning/complete-frontend-rebuild.md) — **F0–F8 done**
 3. **Post-F8** — [Zod 4 monorepo migration](frontend-planning/zod-4-migration.md) ([§15](frontend-planning/complete-frontend-rebuild.md#15-post-f8--zod-4-migration-monorepo) of master plan) — **done**
 4. **P0/P1 completion program** — finish remaining product gaps (open-signup phase 3 live PaymentProvider gateway, plus other P0/P1 backlog)
-5. **Post-frontend (optional)** — [future backend flexibility](backend-planning/future-backend-flexibility.md) — keep, refactor, or replace backend without rewriting UI
+5. **Security hardening** — [hardening & remediation](backend-planning/security-hardening-and-remediation.md) — 53 audit findings in 5 phases; Phase 0 (restore CI gates) blocks everything else
+6. **Production readiness** — [deployment, scale & platform margin](backend-planning/production-deployment-and-scale.md) — capacity, rate-limit and worker blockers, then entitlement metering and deployment
+7. **Post-frontend (optional)** — [future backend flexibility](backend-planning/future-backend-flexibility.md) — keep, refactor, or replace backend without rewriting UI
 
 ### Frontend phase status
 

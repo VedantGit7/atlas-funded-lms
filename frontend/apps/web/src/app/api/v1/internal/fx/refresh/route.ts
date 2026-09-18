@@ -17,10 +17,7 @@ export const dynamic = "force-dynamic";
 async function handle(req: NextRequest): Promise<NextResponse> {
   const secret = process.env["CRON_SECRET"];
   if (!secret) {
-    return NextResponse.json(
-      { error: { code: "CRON_NOT_CONFIGURED" } },
-      { status: 503 },
-    );
+    return NextResponse.json({ error: { code: "CRON_NOT_CONFIGURED" } }, { status: 503 });
   }
   if (req.headers.get("authorization") !== `Bearer ${secret}`) {
     return NextResponse.json({ error: { code: "UNAUTHORIZED" } }, { status: 401 });

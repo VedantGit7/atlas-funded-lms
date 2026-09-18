@@ -10,26 +10,55 @@ type CompetencyResp = {
     composites?: Array<{ compositeKey: string; score: number; bandKey: string }>;
   };
 };
-type GamificationResp = { data: { xpTotal: number; levelKey: string | null; badgeCount: number; weeklyXp: number } };
+type GamificationResp = {
+  data: { xpTotal: number; levelKey: string | null; badgeCount: number; weeklyXp: number };
+};
 type ConfigResp = { data: { levelThresholds?: Array<{ levelKey: string; minXp: number }> } };
-type StreaksResp = { data: { items?: Array<{ streakKey: string; currentCount: number; availableFreezes: number }> } };
-type EnrollmentsResp = { data: { items: Array<{ id: string; courseId: string; displayName: string | null; status: string }> } };
+type StreaksResp = {
+  data: { items?: Array<{ streakKey: string; currentCount: number; availableFreezes: number }> };
+};
+type EnrollmentsResp = {
+  data: {
+    items: Array<{ id: string; courseId: string; displayName: string | null; status: string }>;
+  };
+};
 type CertsResp = {
   data: {
-    items: Array<{ id: string; templateName: string; credentialId: string; status: string; issuedAt: string; verificationUrl: string }>;
+    items: Array<{
+      id: string;
+      templateName: string;
+      credentialId: string;
+      status: string;
+      issuedAt: string;
+      verificationUrl: string;
+    }>;
   };
 };
 type QuestsResp = {
-  data: { items: Array<{ id: string; name?: string; title?: string; status?: string; rewards?: { xp?: number } }> };
+  data: {
+    items: Array<{
+      id: string;
+      name?: string;
+      title?: string;
+      status?: string;
+      rewards?: { xp?: number };
+    }>;
+  };
 };
-type PathsResp = { data: { items: Array<{ id: string; title?: string; name?: string; slug?: string }> } };
+type PathsResp = {
+  data: { items: Array<{ id: string; title?: string; name?: string; slug?: string }> };
+};
 /** Matches notificationInboxListResponseSchema — inbox list is `data: Item[]`, not `{ items }`. */
 type NotificationsResp = {
   data?: Array<{ id: string; title: string; body: string; createdAt: string }>;
 };
 type PolicyResp = { data: { legalCopy?: { disclaimer?: string | null } | null } };
-type BadgesResp = { data: { items: Array<{ id: string; name: string; iconKey: string | null; awarded: boolean }> } };
-type HistoryResp = { data: { items?: Array<{ id: string; occurredAt: string; scores?: Array<{ score: number }> }> } };
+type BadgesResp = {
+  data: { items: Array<{ id: string; name: string; iconKey: string | null; awarded: boolean }> };
+};
+type HistoryResp = {
+  data: { items?: Array<{ id: string; occurredAt: string; scores?: Array<{ score: number }> }> };
+};
 
 function fulfilled<T>(result: PromiseSettledResult<T>): T | null {
   return result.status === "fulfilled" ? result.value : null;
@@ -55,7 +84,9 @@ function parseLevelKey(levelKey: string | null): number | null {
   return match ? Number(match[1]) : null;
 }
 
-export async function loadLearnerDashboardData(displayName: string | null): Promise<LearnerDashboardData> {
+export async function loadLearnerDashboardData(
+  displayName: string | null,
+): Promise<LearnerDashboardData> {
   const [
     competency,
     gamification,
@@ -112,7 +143,11 @@ export async function loadLearnerDashboardData(displayName: string | null): Prom
 
   // Mastery rings from dimension scores.
   const mastery = (comp?.data.scores ?? [])
-    .map((s) => ({ key: s.dimensionKey, label: humanize(s.dimensionKey), score: toPercent(s.score) }))
+    .map((s) => ({
+      key: s.dimensionKey,
+      label: humanize(s.dimensionKey),
+      score: toPercent(s.score),
+    }))
     .filter((m): m is { key: string; label: string; score: number } => m.score != null)
     .slice(0, 6);
 
@@ -149,7 +184,12 @@ export async function loadLearnerDashboardData(displayName: string | null): Prom
 
   const courses = (enr?.data.items ?? [])
     .filter((e) => e.status === "active")
-    .map((e) => ({ id: e.id, courseId: e.courseId, title: e.displayName ?? "Untitled course", status: e.status }))
+    .map((e) => ({
+      id: e.id,
+      courseId: e.courseId,
+      title: e.displayName ?? "Untitled course",
+      status: e.status,
+    }))
     .slice(0, 6);
 
   const queue = (qst?.data.items ?? [])
@@ -173,7 +213,9 @@ export async function loadLearnerDashboardData(displayName: string | null): Prom
   }));
 
   const latest = notif?.data?.[0] ?? null;
-  const announcement = latest?.title ? { id: latest.id, title: latest.title, at: latest.createdAt } : null;
+  const announcement = latest?.title
+    ? { id: latest.id, title: latest.title, at: latest.createdAt }
+    : null;
 
   return {
     displayName,

@@ -27,9 +27,7 @@ export default async function AdminPollNonRespondentsRoutePage({ params }: PageP
     <AdminPageGate screenId="T50" state="ready" title="Non-respondents">
       <Suspense
         fallback={
-          <p className="text-sm text-[var(--admin-on-surface-variant)]">
-            Loading non-respondents…
-          </p>
+          <p className="text-sm text-[var(--admin-on-surface-variant)]">Loading non-respondents…</p>
         }
       >
         <AdminPollNonRespondentsPage pollId={pollId} />

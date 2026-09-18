@@ -121,8 +121,7 @@ export function CourseSettingsPricingPlansPanel({
   const columnsMenuRef = useRef<HTMLDivElement>(null);
   const [statusTab, setStatusTab] = useState<PricingPlanStatusTab>("ALL");
   const [search, setSearch] = useState("");
-  const [rowsPerPage, setRowsPerPage] =
-    useState<(typeof ROWS_PER_PAGE_OPTIONS)[number]>(30);
+  const [rowsPerPage, setRowsPerPage] = useState<(typeof ROWS_PER_PAGE_OPTIONS)[number]>(30);
   const [page, setPage] = useState(1);
   const [columnsOpen, setColumnsOpen] = useState(false);
   const [visibleColumns, setVisibleColumns] =
@@ -136,10 +135,7 @@ export function CourseSettingsPricingPlansPanel({
     [course, refreshToken],
   );
 
-  const plans = useMemo(
-    () => coursePricingPlansFromDetail(course),
-    [course, refreshToken],
-  );
+  const plans = useMemo(() => coursePricingPlansFromDetail(course), [course, refreshToken]);
 
   const filteredPlans = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -215,9 +211,7 @@ export function CourseSettingsPricingPlansPanel({
         return (
           <span className="inline-flex items-center gap-2">
             <span>{plan.location}</span>
-            {plan.isDefault ? (
-              <span className={adminBadgeSuccessClassName}>Default</span>
-            ) : null}
+            {plan.isDefault ? <span className={adminBadgeSuccessClassName}>Default</span> : null}
           </span>
         );
       case "oneToOneTemplate":
@@ -360,7 +354,9 @@ export function CourseSettingsPricingPlansPanel({
               value={rowsPerPage}
               className="rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] px-2.5 py-1.5 text-sm text-[var(--admin-on-surface)] outline-none focus:border-[var(--admin-primary)] focus:ring-2 focus:ring-[var(--admin-primary)]/30"
               onChange={(event) => {
-                setRowsPerPage(Number(event.target.value) as (typeof ROWS_PER_PAGE_OPTIONS)[number]);
+                setRowsPerPage(
+                  Number(event.target.value) as (typeof ROWS_PER_PAGE_OPTIONS)[number],
+                );
               }}
             >
               {ROWS_PER_PAGE_OPTIONS.map((option) => (
@@ -465,9 +461,7 @@ export function CourseSettingsPricingPlansPanel({
                         type="button"
                         className="rounded-lg p-1.5 text-[var(--admin-on-surface-variant)] transition-colors hover:bg-[color-mix(in_srgb,var(--admin-danger)_10%,var(--admin-surface))] hover:text-[var(--admin-danger)] disabled:cursor-not-allowed disabled:opacity-40"
                         disabled={
-                          disabled ||
-                          deletingPlanId === plan.id ||
-                          !storedPlanIds.has(plan.id)
+                          disabled || deletingPlanId === plan.id || !storedPlanIds.has(plan.id)
                         }
                         aria-label={`Delete ${plan.title}`}
                         onClick={(event) => {
@@ -492,7 +486,9 @@ export function CourseSettingsPricingPlansPanel({
         description={
           pendingDeletePlan ? (
             <>
-              <span className="font-medium text-[var(--admin-on-surface)]">{pendingDeletePlan.title}</span>{" "}
+              <span className="font-medium text-[var(--admin-on-surface)]">
+                {pendingDeletePlan.title}
+              </span>{" "}
               will be removed from your course. This action cannot be undone.
             </>
           ) : (

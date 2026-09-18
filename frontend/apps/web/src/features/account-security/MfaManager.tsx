@@ -1,5 +1,6 @@
 "use client";
 
+import { SafeHtml } from "@/components/SafeHtml";
 import { useCallback, useEffect, useState } from "react";
 import { Smartphone } from "lucide-react";
 import { ClientApiError, clientApi } from "../../lib/client-api";
@@ -36,9 +37,10 @@ function MfaQrCode({ qrCode }: { qrCode: string }) {
 
   if (value.startsWith("<svg") || value.startsWith("<?xml")) {
     return (
-      <div
+      <SafeHtml
+        html={value}
+        variant="svg"
         className={`flex justify-center overflow-hidden rounded-lg border border-[var(--acct-border)] bg-[var(--acct-surface)] p-4 [&>svg]:h-44 [&>svg]:w-44 [&>svg]:max-w-full ${classes.field}`}
-        dangerouslySetInnerHTML={{ __html: value }}
       />
     );
   }

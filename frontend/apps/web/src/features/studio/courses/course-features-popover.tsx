@@ -66,7 +66,10 @@ export function CourseFeaturesPopover({ course }: CourseFeaturesPopoverProps) {
         >
           <ul className="space-y-2.5">
             {features.map((item) => (
-              <li key={item.id} className="flex items-center gap-2.5 text-sm text-[var(--admin-on-surface-variant)]">
+              <li
+                key={item.id}
+                className="flex items-center gap-2.5 text-sm text-[var(--admin-on-surface-variant)]"
+              >
                 {item.enabled ? (
                   <Check
                     className="h-4 w-4 shrink-0 text-[var(--admin-success)]"
@@ -80,7 +83,9 @@ export function CourseFeaturesPopover({ course }: CourseFeaturesPopoverProps) {
                     aria-hidden="true"
                   />
                 )}
-                <span className={item.enabled ? "text-[var(--admin-on-surface)]" : ""}>{item.label}</span>
+                <span className={item.enabled ? "text-[var(--admin-on-surface)]" : ""}>
+                  {item.label}
+                </span>
               </li>
             ))}
           </ul>

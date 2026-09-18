@@ -127,7 +127,13 @@ export function ItemOptionsBuilder({
                     : "border-[var(--admin-border)] bg-[var(--admin-surface)] text-[var(--admin-on-surface-variant)] hover:border-[color-mix(in_srgb,var(--admin-success)_35%,var(--admin-border))]"
                 }`}
               >
-                {mode === "single" ? (option.isCorrect ? "Correct" : "Set correct") : option.isCorrect ? "Correct ✓" : "Mark correct"}
+                {mode === "single"
+                  ? option.isCorrect
+                    ? "Correct"
+                    : "Set correct"
+                  : option.isCorrect
+                    ? "Correct ✓"
+                    : "Mark correct"}
               </button>
             </div>
             <button

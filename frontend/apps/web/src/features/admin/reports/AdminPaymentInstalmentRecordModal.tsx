@@ -86,7 +86,9 @@ export function AdminPaymentInstalmentRecordModal({
       if (event.key === "Escape" && !busy) onClose();
     }
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+    };
   }, [open, busy, onClose]);
 
   const amountLabel = useMemo(
@@ -136,7 +138,9 @@ export function AdminPaymentInstalmentRecordModal({
         aria-modal="true"
         aria-labelledby={titleId}
         className="relative z-50 flex w-full max-w-lg flex-col border border-[var(--admin-border)] bg-[var(--admin-surface-high)] shadow-2xl"
-        onClick={(event) => event.stopPropagation()}
+        onClick={(event) => {
+          event.stopPropagation();
+        }}
       >
         <div className="flex items-center justify-between border-b border-[var(--admin-border)] bg-[var(--admin-surface)] px-6 py-4">
           <h2 id={titleId} className="text-lg font-semibold text-[var(--admin-on-surface)]">
@@ -176,7 +180,9 @@ export function AdminPaymentInstalmentRecordModal({
               </label>
               <Select
                 value={method}
-                onValueChange={(value) => setMethod(value as PaymentMethod)}
+                onValueChange={(value) => {
+                  setMethod(value as PaymentMethod);
+                }}
                 options={METHOD_OPTIONS}
                 ariaLabel="Payment method"
                 className="h-10 w-full"
@@ -203,7 +209,9 @@ export function AdminPaymentInstalmentRecordModal({
                 className="h-10 w-full border border-transparent border-b-[var(--admin-border)] bg-[var(--admin-surface)] px-3 font-mono text-xs outline-none focus:border-[var(--admin-primary)]"
                 placeholder="TXN-XXXX"
                 value={reference}
-                onChange={(event) => setReference(event.target.value)}
+                onChange={(event) => {
+                  setReference(event.target.value);
+                }}
               />
             </div>
             <div>
@@ -214,7 +222,9 @@ export function AdminPaymentInstalmentRecordModal({
                 type="date"
                 className="h-10 w-full border border-transparent border-b-[var(--admin-border)] bg-[var(--admin-surface)] px-3 font-mono text-xs outline-none focus:border-[var(--admin-primary)]"
                 value={paidOn}
-                onChange={(event) => setPaidOn(event.target.value)}
+                onChange={(event) => {
+                  setPaidOn(event.target.value);
+                }}
               />
             </div>
           </div>
@@ -223,7 +233,9 @@ export function AdminPaymentInstalmentRecordModal({
             <input
               type="checkbox"
               checked={sendReceipt}
-              onChange={(event) => setSendReceipt(event.target.checked)}
+              onChange={(event) => {
+                setSendReceipt(event.target.checked);
+              }}
               className="mt-0.5 h-4 w-4 accent-[var(--admin-primary)]"
             />
             <span className="text-sm text-[var(--admin-on-surface)]">

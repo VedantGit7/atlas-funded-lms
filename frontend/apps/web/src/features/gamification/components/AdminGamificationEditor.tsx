@@ -652,59 +652,59 @@ export function AdminGamificationEditor({
 
         <GamificationAnimatedCollapsible open={Boolean(selectedBadge)} id="badge-edit-panel">
           {selectedBadge ? (
-          <section className={panelClassName}>
-            <div className={panelHeaderClassName}>
-              <div>
-                <p className={panelEyebrowClassName}>Edit</p>
-                <h2 className="font-semibold text-[var(--admin-on-surface)]">
-                  {selectedBadge.name}
-                </h2>
+            <section className={panelClassName}>
+              <div className={panelHeaderClassName}>
+                <div>
+                  <p className={panelEyebrowClassName}>Edit</p>
+                  <h2 className="font-semibold text-[var(--admin-on-surface)]">
+                    {selectedBadge.name}
+                  </h2>
+                </div>
               </div>
-            </div>
-            <div className={`${panelBodyClassName} space-y-4`}>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <label className="block">
-                  <span className={labelClassName}>Display name</span>
-                  <input
-                    className={`${fieldClassName} mt-1.5`}
-                    value={editBadgeName}
-                    onChange={(e) => {
-                      setEditBadgeName(e.target.value);
+              <div className={`${panelBodyClassName} space-y-4`}>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <label className="block">
+                    <span className={labelClassName}>Display name</span>
+                    <input
+                      className={`${fieldClassName} mt-1.5`}
+                      value={editBadgeName}
+                      onChange={(e) => {
+                        setEditBadgeName(e.target.value);
+                      }}
+                    />
+                  </label>
+                  <GamificationSelectField
+                    label="Status"
+                    value={editBadgeStatus}
+                    onChange={(value) => {
+                      setEditBadgeStatus(value as BadgeDefinition["status"]);
                     }}
+                    options={[
+                      { value: "ACTIVE", label: "ACTIVE" },
+                      { value: "INACTIVE", label: "INACTIVE" },
+                      { value: "ARCHIVED", label: "ARCHIVED" },
+                    ]}
                   />
-                </label>
-                <GamificationSelectField
-                  label="Status"
-                  value={editBadgeStatus}
-                  onChange={(value) => {
-                    setEditBadgeStatus(value as BadgeDefinition["status"]);
-                  }}
-                  options={[
-                    { value: "ACTIVE", label: "ACTIVE" },
-                    { value: "INACTIVE", label: "INACTIVE" },
-                    { value: "ARCHIVED", label: "ARCHIVED" },
-                  ]}
+                </div>
+                <BadgeCriteriaEditor
+                  idPrefix="badge-edit"
+                  criteria={editBadgeCriteria}
+                  onChange={setEditBadgeCriteria}
+                  iconKey={editBadgeIconKey}
+                  onIconChange={setEditBadgeIconKey}
                 />
+                <button
+                  type="button"
+                  className={outlineButtonClassName}
+                  disabled={busy || !editBadgeName.trim()}
+                  onClick={() => {
+                    void saveBadge();
+                  }}
+                >
+                  Save badge
+                </button>
               </div>
-              <BadgeCriteriaEditor
-                idPrefix="badge-edit"
-                criteria={editBadgeCriteria}
-                onChange={setEditBadgeCriteria}
-                iconKey={editBadgeIconKey}
-                onIconChange={setEditBadgeIconKey}
-              />
-              <button
-                type="button"
-                className={outlineButtonClassName}
-                disabled={busy || !editBadgeName.trim()}
-                onClick={() => {
-                  void saveBadge();
-                }}
-              >
-                Save badge
-              </button>
-            </div>
-          </section>
+            </section>
           ) : null}
         </GamificationAnimatedCollapsible>
       </div>
@@ -761,13 +761,13 @@ export function AdminGamificationEditor({
                 id="leaderboard-edit-panel"
               >
                 {selectedLeaderboard ? (
-                <LeaderboardConfigForm
-                  key={selectedLeaderboard.id}
-                  mode="edit"
-                  definition={selectedLeaderboard}
-                  courses={courses}
-                  onSaved={upsertLeaderboard}
-                />
+                  <LeaderboardConfigForm
+                    key={selectedLeaderboard.id}
+                    mode="edit"
+                    definition={selectedLeaderboard}
+                    courses={courses}
+                    onSaved={upsertLeaderboard}
+                  />
                 ) : null}
               </GamificationAnimatedCollapsible>
             </div>
@@ -889,9 +889,7 @@ export function AdminGamificationEditor({
             <button
               type="button"
               className={primaryButtonClassName}
-              disabled={
-                busy || !bulkBadgeId || bulkMembers.length === 0 || !bulkReason.trim()
-              }
+              disabled={busy || !bulkBadgeId || bulkMembers.length === 0 || !bulkReason.trim()}
               onClick={() => {
                 setConfirmBulkAwardOpen(true);
               }}

@@ -1,10 +1,12 @@
 import type { NextRequest } from "next/server";
-import {
-  ATLAS_ACCESS_TOKEN_COOKIE,
-  ATLAS_REFRESH_TOKEN_COOKIE,
-} from "../auth-cookies";
+import { ATLAS_ACCESS_TOKEN_COOKIE, ATLAS_REFRESH_TOKEN_COOKIE } from "../auth-cookies";
 import { ATLAS_INTERNAL_TENANT_HOST_HEADER } from "../http-headers";
-import { appendSetCookieHeaders, buildCookieHeaderFromPairs, mergeCookieHeaderString, mergeRequestCookieHeader } from "./apply-set-cookie-headers";
+import {
+  appendSetCookieHeaders,
+  buildCookieHeaderFromPairs,
+  mergeCookieHeaderString,
+  mergeRequestCookieHeader,
+} from "./apply-set-cookie-headers";
 
 const API_INTERNAL_URL = process.env["API_INTERNAL_URL"] ?? "http://127.0.0.1:3001";
 
@@ -31,7 +33,9 @@ function decodeJwtPayload(token: string): Record<string, unknown> | null {
   try {
     const json = decodeBase64Url(payloadSegment);
     const parsed: unknown = JSON.parse(json);
-    return typeof parsed === "object" && parsed !== null ? (parsed as Record<string, unknown>) : null;
+    return typeof parsed === "object" && parsed !== null
+      ? (parsed as Record<string, unknown>)
+      : null;
   } catch {
     return null;
   }
@@ -58,7 +62,9 @@ function buildCookieHeader(req: NextRequest): string {
 }
 
 function readCookieValue(cookieHeader: string, name: string): string | null {
-  const match = cookieHeader.match(new RegExp(`(?:^|; )${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}=([^;]*)`));
+  const match = cookieHeader.match(
+    new RegExp(`(?:^|; )${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}=([^;]*)`),
+  );
   return match?.[1] ?? null;
 }
 
@@ -109,9 +115,7 @@ export async function refreshSessionCookieHeader(
  * Attempts to mint a fresh access token from the refresh-token cookie before
  * protected-route middleware sends the user to /login.
  */
-export async function tryRefreshSessionForMiddleware(
-  req: NextRequest,
-): Promise<Response | null> {
+export async function tryRefreshSessionForMiddleware(req: NextRequest): Promise<Response | null> {
   const refreshToken = req.cookies.get(ATLAS_REFRESH_TOKEN_COOKIE)?.value;
   const accessToken = req.cookies.get(ATLAS_ACCESS_TOKEN_COOKIE)?.value;
 
@@ -153,10 +157,7 @@ export async function tryRefreshSessionForMiddleware(
   return response;
 }
 
-export function forwardRefreshedSessionCookies(
-  target: Headers,
-  refreshResponse: Response,
-): void {
+export function forwardRefreshedSessionCookies(target: Headers, refreshResponse: Response): void {
   appendSetCookieHeaders(target, refreshResponse);
 }
 

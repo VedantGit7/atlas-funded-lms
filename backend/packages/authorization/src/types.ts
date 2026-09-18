@@ -27,6 +27,14 @@ export type ResourceRef = {
 export type RolePermissionGrant = {
   permissionKey: string;
   roleKeys: string[];
+  /**
+   * H11: at least one granting role carries `bypasses_resource_predicates`.
+   *
+   * Read from the role record rather than inferred from `roleKeys`, so the
+   * bypass is data a reviewer can see and an operator can revoke, and a custom
+   * role named "admin" no longer inherits it by name.
+   */
+  bypassesResourcePredicates: boolean;
 };
 
 export type PermissionOverrideEffect = "ALLOW" | "DENY";

@@ -51,15 +51,14 @@ export function HelpArticleFeedback({ articleSlug }: HelpArticleFeedbackProps) {
   }
 
   return (
-    <section
-      id="feedback"
-      className="rounded-xl border border-border bg-card p-8 text-center"
-    >
+    <section id="feedback" className="rounded-xl border border-border bg-card p-8 text-center">
       <h3 className="text-lg font-semibold text-primary">Was this article helpful?</h3>
       <div className="mt-6 flex flex-wrap justify-center gap-4">
         <button
           type="button"
-          onClick={() => submit("positive")}
+          onClick={() => {
+            submit("positive");
+          }}
           className={`${helpOutlineButtonClassName} px-6 py-3`}
         >
           <ThumbsUp className="h-4 w-4" aria-hidden="true" />
@@ -67,7 +66,9 @@ export function HelpArticleFeedback({ articleSlug }: HelpArticleFeedbackProps) {
         </button>
         <button
           type="button"
-          onClick={() => submit("negative")}
+          onClick={() => {
+            submit("negative");
+          }}
           className={`${helpOutlineButtonClassName} px-6 py-3`}
         >
           <ThumbsDown className="h-4 w-4" aria-hidden="true" />

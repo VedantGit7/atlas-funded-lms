@@ -20,6 +20,7 @@ Understanding and tuning spring animations for natural, physically accurate moti
 Unlike duration-based animations (e.g., "move from A to B in 300ms"), spring animations simulate physical motion based on forces:
 
 **Hooke's Law:**
+
 ```
 F = -k * x
 
@@ -30,6 +31,7 @@ x = Displacement from rest position
 ```
 
 **Damping Force:**
+
 ```
 F_damping = -c * v
 
@@ -49,20 +51,24 @@ v = Velocity
 **What it does:** Determines object's weight/inertia.
 
 **Effect:**
+
 - **Higher mass** (e.g., 5): Heavier, slower to accelerate/decelerate
 - **Lower mass** (e.g., 0.5): Lighter, more responsive
 
 **When to increase:**
+
 - Large UI elements (modals, panels)
 - Dramatic, weighty animations
 - Slow, deliberate movements
 
 **When to decrease:**
+
 - Small UI elements (tooltips, badges)
 - Quick, snappy interactions
 - Lightweight, responsive feel
 
 **Example:**
+
 ```jsx
 // Heavy modal
 { mass: 5, tension: 170, friction: 26 }
@@ -78,20 +84,24 @@ v = Velocity
 **What it does:** Spring's resistance to stretching (spring strength).
 
 **Effect:**
+
 - **Higher tension** (e.g., 300): Faster, stiffer spring
 - **Lower tension** (e.g., 100): Slower, softer spring
 
 **When to increase:**
+
 - Quick, responsive interactions
 - Snappy button feedback
 - Alert animations
 
 **When to decrease:**
+
 - Gentle, smooth transitions
 - Organic, flowing motion
 - Relaxed page transitions
 
 **Example:**
+
 ```jsx
 // Snappy button press
 { tension: 300, friction: 20 }
@@ -107,20 +117,24 @@ v = Velocity
 **What it does:** Opposing force that slows motion.
 
 **Effect:**
+
 - **Higher friction** (e.g., 40): Less overshoot, faster settling
-- **Lower friction** (e.g**, 10): More bounce, oscillation
+- **Lower friction** (e.g\*\*, 10): More bounce, oscillation
 
 **When to increase:**
+
 - Minimal overshoot desired
 - Professional, controlled feel
 - Quick settle time
 
 **When to decrease:**
+
 - Playful, bouncy animations
 - Noticeable spring effect
 - Dramatic overshoot
 
 **Example:**
+
 ```jsx
 // Minimal bounce (controlled)
 { tension: 170, friction: 40 }
@@ -136,17 +150,19 @@ v = Velocity
 ### Step-by-Step Tuning Process
 
 **1. Start with a preset:**
+
 ```jsx
-import { config } from '@react-spring/web'
+import { config } from "@react-spring/web";
 
 // Try these first:
-config.default  // Balanced
-config.gentle   // Smooth, slow
-config.wobbly   // Bouncy
-config.stiff    // Fast, minimal bounce
+config.default; // Balanced
+config.gentle; // Smooth, slow
+config.wobbly; // Bouncy
+config.stiff; // Fast, minimal bounce
 ```
 
 **2. Adjust tension for speed:**
+
 ```jsx
 // Too slow? Increase tension
 { tension: 250, friction: 26 }
@@ -156,6 +172,7 @@ config.stiff    // Fast, minimal bounce
 ```
 
 **3. Adjust friction for bounce:**
+
 ```jsx
 // Too bouncy? Increase friction
 { tension: 170, friction: 35 }
@@ -165,6 +182,7 @@ config.stiff    // Fast, minimal bounce
 ```
 
 **4. Adjust mass for weight:**
+
 ```jsx
 // Feels too light? Increase mass
 { mass: 3, tension: 170, friction: 26 }
@@ -180,23 +198,23 @@ config.stiff    // Fast, minimal bounce
 React Spring provides an interactive tuning tool:
 
 ```jsx
-import { useSpring, animated } from '@react-spring/web'
-import { useControls } from 'leva'
+import { useSpring, animated } from "@react-spring/web";
+import { useControls } from "leva";
 
 function Tuner() {
   const config = useControls({
     mass: { value: 1, min: 0.1, max: 10 },
     tension: { value: 170, min: 1, max: 500 },
-    friction: { value: 26, min: 1, max: 100 }
-  })
+    friction: { value: 26, min: 1, max: 100 },
+  });
 
   const springs = useSpring({
     from: { x: 0 },
     to: { x: 100 },
-    config
-  })
+    config,
+  });
 
-  return <animated.div style={springs} />
+  return <animated.div style={springs} />;
 }
 ```
 
@@ -209,36 +227,42 @@ Install leva: `npm install leva`
 ### By Use Case
 
 **Button Interactions (Quick, Responsive):**
+
 ```jsx
 { mass: 1, tension: 300, friction: 20 }
 // Fast response, minimal bounce
 ```
 
 **Modal Animations (Dramatic, Smooth):**
+
 ```jsx
 { mass: 2, tension: 150, friction: 30 }
 // Weighty, controlled entrance
 ```
 
 **Page Transitions (Smooth, Professional):**
+
 ```jsx
 { mass: 1, tension: 120, friction: 14 }
 // Gentle, flowing motion
 ```
 
 **Notifications/Toasts (Bouncy, Attention-Grabbing):**
+
 ```jsx
 { mass: 1, tension: 180, friction: 12 }
 // Noticeable bounce, playful
 ```
 
 **Drag-and-Drop (Natural Physics):**
+
 ```jsx
 { mass: 1, tension: 200, friction: 25 }
 // Balanced, realistic feel
 ```
 
 **Loading Indicators (Continuous, Smooth):**
+
 ```jsx
 { mass: 1, tension: 100, friction: 30 }
 // Slow, controlled oscillation
@@ -249,31 +273,37 @@ Install leva: `npm install leva`
 ### By Animation Feel
 
 **Snappy:**
+
 ```jsx
 { mass: 0.8, tension: 300, friction: 20 }
 ```
 
 **Bouncy:**
+
 ```jsx
 { mass: 1, tension: 180, friction: 12 }
 ```
 
 **Smooth/Gentle:**
+
 ```jsx
 { mass: 1, tension: 120, friction: 14 }
 ```
 
 **Stiff/Controlled:**
+
 ```jsx
 { mass: 1, tension: 210, friction: 20 }
 ```
 
 **Slow/Lazy:**
+
 ```jsx
 { mass: 1, tension: 280, friction: 60 }
 ```
 
 **Heavy/Dramatic:**
+
 ```jsx
 { mass: 5, tension: 170, friction: 26 }
 ```
@@ -287,15 +317,18 @@ Install leva: `npm install leva`
 Set starting velocity for momentum-based animations:
 
 ```jsx
-const [springs, api] = useSpring(() => ({
-  x: 0,
-  config: { tension: 200, friction: 20 }
-}), [])
+const [springs, api] = useSpring(
+  () => ({
+    x: 0,
+    config: { tension: 200, friction: 20 },
+  }),
+  [],
+);
 
 api.start({
   x: 100,
-  velocity: 500 // px/second
-})
+  velocity: 500, // px/second
+});
 ```
 
 ### Preserving Velocity (Interruptions)
@@ -307,12 +340,13 @@ const handleInterrupt = () => {
   api.start({
     x: newTarget,
     velocity: springs.x.getVelocity(), // Current velocity
-    config: { tension: 300, friction: 25 }
-  })
-}
+    config: { tension: 300, friction: 25 },
+  });
+};
 ```
 
 **Why this matters:**
+
 - Natural feel when user changes direction mid-animation
 - Smooth transitions between gesture states
 - Realistic physics simulation
@@ -322,22 +356,22 @@ const handleInterrupt = () => {
 ### Calculating Velocity from Gestures
 
 ```jsx
-import { useDrag } from '@use-gesture/react'
-import { useSpring, animated } from '@react-spring/web'
+import { useDrag } from "@use-gesture/react";
+import { useSpring, animated } from "@react-spring/web";
 
 function DraggableElement() {
-  const [{ x }, api] = useSpring(() => ({ x: 0 }))
+  const [{ x }, api] = useSpring(() => ({ x: 0 }));
 
   const bind = useDrag(({ down, movement: [mx], velocity: [vx] }) => {
     api.start({
       x: down ? mx : 0,
       velocity: vx * 1000, // Convert to px/second
       immediate: down,
-      config: { tension: 200, friction: 30 }
-    })
-  })
+      config: { tension: 200, friction: 30 },
+    });
+  });
 
-  return <animated.div {...bind()} style={{ x }} />
+  return <animated.div {...bind()} style={{ x }} />;
 }
 ```
 
@@ -355,11 +389,11 @@ const springs = useSpring({
   scale: 1.5,
   opacity: 1,
   config: {
-    x: { tension: 300, friction: 20 },      // Fast horizontal
-    scale: { mass: 4, friction: 10 },       // Heavy scaling
-    opacity: { tension: 120, friction: 14 }  // Gentle fade
-  }
-})
+    x: { tension: 300, friction: 20 }, // Fast horizontal
+    scale: { mass: 4, friction: 10 }, // Heavy scaling
+    opacity: { tension: 120, friction: 14 }, // Gentle fade
+  },
+});
 ```
 
 ### Config as Function
@@ -372,15 +406,15 @@ const springs = useSpring({
   y: 200,
   scale: 1.5,
   config: (key) => {
-    if (key === 'scale') {
-      return { mass: 4, friction: 10 }
+    if (key === "scale") {
+      return { mass: 4, friction: 10 };
     }
-    if (key === 'x') {
-      return { tension: 300, friction: 20 }
+    if (key === "x") {
+      return { tension: 300, friction: 20 };
     }
-    return config.default
-  }
-})
+    return config.default;
+  },
+});
 ```
 
 ### Spring with Clamp
@@ -393,9 +427,9 @@ const springs = useSpring({
   config: {
     tension: 300,
     friction: 20,
-    clamp: true // No overshoot
-  }
-})
+    clamp: true, // No overshoot
+  },
+});
 ```
 
 ---
@@ -408,10 +442,10 @@ Force a specific duration (not physically accurate):
 const springs = useSpring({
   x: 100,
   config: {
-    duration: 500,  // Override physics
-    easing: t => t  // Linear easing
-  }
-})
+    duration: 500, // Override physics
+    easing: (t) => t, // Linear easing
+  },
+});
 ```
 
 **Note:** When using `duration`, the animation is no longer physics-based. It becomes a traditional tween.
@@ -428,18 +462,20 @@ const springs = useSpring({
   config: {
     tension: 170,
     friction: 26,
-    precision: 0.01 // Stop when within 0.01 of target (default: 0.0001)
-  }
-})
+    precision: 0.01, // Stop when within 0.01 of target (default: 0.0001)
+  },
+});
 ```
 
 **Higher precision (0.1):**
+
 - Fewer updates
 - Earlier completion
 - Better performance
 - Slight imprecision
 
 **Lower precision (0.0001):**
+
 - More updates
 - Exact final value
 - Slower performance
@@ -452,6 +488,7 @@ const springs = useSpring({
 ### Animation Too Fast
 
 **Solutions:**
+
 1. Decrease `tension` (e.g., 170 → 120)
 2. Increase `mass` (e.g., 1 → 2)
 3. Increase `friction` (e.g., 26 → 40)
@@ -459,6 +496,7 @@ const springs = useSpring({
 ### Animation Too Slow
 
 **Solutions:**
+
 1. Increase `tension` (e.g., 170 → 250)
 2. Decrease `mass` (e.g., 1 → 0.7)
 3. Decrease `friction` (e.g., 26 → 15)
@@ -466,6 +504,7 @@ const springs = useSpring({
 ### Too Much Bounce/Overshoot
 
 **Solutions:**
+
 1. Increase `friction` (e.g., 26 → 40)
 2. Enable `clamp: true`
 3. Use `config.stiff` preset
@@ -473,6 +512,7 @@ const springs = useSpring({
 ### Not Enough Bounce
 
 **Solutions:**
+
 1. Decrease `friction` (e.g., 26 → 12)
 2. Use `config.wobbly` preset
 3. Increase `tension` slightly (e.g., 170 → 180)
@@ -480,6 +520,7 @@ const springs = useSpring({
 ### Animation Never Completes
 
 **Solutions:**
+
 1. Increase `precision` (e.g., 0.0001 → 0.01)
 2. Check for conflicting animations
 3. Ensure `restSpeed` is not set too low
@@ -502,6 +543,7 @@ m = mass
 ```
 
 **Damping Ratio:**
+
 ```
 ζ = c / (2 * sqrt(k * m))
 
@@ -511,6 +553,7 @@ m = mass
 ```
 
 **Example:**
+
 ```jsx
 // Calculate critically damped friction
 const mass = 1
@@ -543,11 +586,13 @@ transition: all 300ms ease-in-out;
 ```
 
 **Pros:**
+
 - Predictable timing
 - Easier to sync with other events
 - Consistent across devices
 
 **Cons:**
+
 - Feels artificial when interrupted
 - Loses momentum on direction change
 - Not physically accurate
@@ -561,12 +606,14 @@ transition: all 300ms ease-in-out;
 ```
 
 **Pros:**
+
 - Natural, organic feel
 - Interruptible without jarring
 - Preserves momentum
 - Realistic physics
 
 **Cons:**
+
 - Variable duration (depends on distance, velocity)
 - Harder to sync precisely
 - Requires tuning for desired feel

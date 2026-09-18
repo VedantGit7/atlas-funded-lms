@@ -8,7 +8,7 @@ function adminTx() {
       .fn()
       .mockResolvedValueOnce([{ key: "badge.manage" }])
       .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([{ role_key: "admin" }]),
+      .mockResolvedValueOnce([{ role_key: "admin", bypasses_resource_predicates: true }]),
   };
 }
 
@@ -18,7 +18,7 @@ function learnerTx() {
       .fn()
       .mockResolvedValueOnce([{ key: "gamification.profile.read" }])
       .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([{ role_key: "learner" }]),
+      .mockResolvedValueOnce([{ role_key: "learner", bypasses_resource_predicates: false }]),
   };
 }
 

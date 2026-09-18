@@ -3,13 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import {
-  ChevronRight,
-  MousePointerClick,
-  PanelBottom,
-  PanelTop,
-  Square,
-} from "lucide-react";
+import { ChevronRight, MousePointerClick, PanelBottom, PanelTop, Square } from "lucide-react";
 import { ClientApiError, clientApi, toast } from "../../../lib/client-api";
 import { MESSENGER_WIZARD_FIELD_CLASS, MESSENGER_WIZARD_LABEL_CLASS } from "./push-wizard-chrome";
 import {
@@ -187,7 +181,8 @@ export function CtaCreatePanel() {
         </div>
         <div>
           <label htmlFor="cta-create-description" className={MESSENGER_WIZARD_LABEL_CLASS}>
-            Description <span className="font-normal text-[var(--admin-on-surface-variant)]">(optional)</span>
+            Description{" "}
+            <span className="font-normal text-[var(--admin-on-surface-variant)]">(optional)</span>
           </label>
           <textarea
             id="cta-create-description"

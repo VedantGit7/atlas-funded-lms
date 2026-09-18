@@ -7,9 +7,7 @@ import { cookies } from "next/headers";
  */
 export async function applySetCookieHeaders(response: Response): Promise<void> {
   const setCookies =
-    typeof response.headers.getSetCookie === "function"
-      ? response.headers.getSetCookie()
-      : [];
+    typeof response.headers.getSetCookie === "function" ? response.headers.getSetCookie() : [];
 
   if (setCookies.length === 0) {
     return;
@@ -48,9 +46,7 @@ export async function applySetCookieHeaders(response: Response): Promise<void> {
 }
 
 export function readSetCookieHeaders(response: Response): string[] {
-  return typeof response.headers.getSetCookie === "function"
-    ? response.headers.getSetCookie()
-    : [];
+  return typeof response.headers.getSetCookie === "function" ? response.headers.getSetCookie() : [];
 }
 
 export function parseSetCookieHeader(header: string): { name: string; value: string } | null {
@@ -78,10 +74,7 @@ export function buildCookieHeaderFromPairs(
   return cookies.map((cookie) => `${cookie.name}=${cookie.value}`).join("; ");
 }
 
-export function mergeCookieHeaderString(
-  cookieHeader: string,
-  refreshResponse: Response,
-): string {
+export function mergeCookieHeaderString(cookieHeader: string, refreshResponse: Response): string {
   const cookieMap = new Map<string, string>();
 
   for (const segment of cookieHeader.split(";")) {

@@ -35,6 +35,20 @@ export const updatePollMetadata = createPollMetadata;
 export const deletePollMetadata = createPollMetadata;
 export const getPollResultsMetadata = listPollsMetadata;
 
+/**
+ * Respondent-scoped read. Same permission as responding, because the learner
+ * who may answer a poll must be able to see it; enumerating polls stays on
+ * `membership.read` via listPollsMetadata.
+ */
+export const getPollRespondentViewMetadata = {
+  permission: "enrollment.read",
+  entitlement: null,
+  audit: "none",
+  rateLimit: "authenticatedTenantRead",
+  idempotency: "none",
+  resourceLoader: async ({ ctx }: { ctx: LoaderCtx }) => loadTenantConfigRef({ ctx }),
+} satisfies RouteMetadata;
+
 export const respondPollMetadata = {
   permission: "enrollment.read",
   audit: "none",

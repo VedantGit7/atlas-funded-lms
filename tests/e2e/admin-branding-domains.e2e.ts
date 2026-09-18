@@ -47,8 +47,6 @@ const draftThemeTokens = {
   primary: "#224466",
   accent: "#8899aa",
   header: "#112233",
-  background: "#ffffff",
-  foreground: "#101010",
   radius: "md" as const,
   modeDefault: "system" as const,
 };

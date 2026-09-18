@@ -1,7 +1,10 @@
-import Image from "next/image";
-import { FUNDED_BEYOND_LOGO_URL } from "@/lib/brand";
+import { TenantBrandMark } from "./TenantBrandMark";
 
 type BrandLoadingScreenProps = {
+  /** The tenant's own logo, when branding supplies one. */
+  logoUrl?: string | null;
+  /** Tenant public name — shown as the wordmark and used for the initials mark. */
+  tenantName?: string | null;
   /** Accessible status text announced to screen readers. */
   label?: string;
 };
@@ -18,7 +21,23 @@ type BrandLoadingScreenProps = {
  * Motion (spinner, bouncing dots, entrance reveal) is CSS-only — keyframes live
  * in globals.css and are disabled automatically by `prefers-reduced-motion`.
  */
-export function BrandLoadingScreen({ label = "Loading" }: BrandLoadingScreenProps) {
+export function BrandLoadingScreen({
+  label = "Loading",
+  logoUrl = null,
+  tenantName = null,
+}: BrandLoadingScreenProps) {
+  // The wordmark used to read "FundedBeyond Academy" for every tenant. With no
+  // tenant name available this shows nothing rather than someone else's brand.
+  const wordmark = tenantName?.trim() ?? "";
+  const leadWord = wordmark.replace(/\s*Academy\s*$/i, "") || wordmark;
+  const hasAcademySuffix = /academy/i.test(wordmark);
+
+  // This component is usually a route-level `loading.tsx`, i.e. a Suspense
+  // fallback: it has to render immediately and cannot await branding, and an
+  // async fallback would suspend itself. The root layout therefore publishes
+  // the tenant's mark and name as CSS custom properties on <html>, which cost
+  // nothing to read here. Props still win when a caller has the data already.
+  const usesCssBranding = logoUrl == null && wordmark === "";
   const brand = "var(--fba-ind, var(--primary))";
   const surface = "var(--fba-bg, var(--background))";
   const textPrimary = "var(--fba-tx, var(--foreground))";
@@ -59,30 +78,54 @@ export function BrandLoadingScreen({ label = "Loading" }: BrandLoadingScreenProp
             className="fba-loader-spin absolute inset-0 rounded-full border-[3px] border-transparent"
             style={{ borderTopColor: brand }}
           />
-          <span
-            aria-hidden
-            className="flex h-[52px] w-[52px] items-center justify-center rounded-full"
-            style={{ boxShadow: `0 12px 28px -6px ${glowBadge}` }}
-          >
-            <Image
-              src={FUNDED_BEYOND_LOGO_URL}
-              alt=""
-              width={52}
-              height={52}
-              className="h-[52px] w-[52px] rounded-full"
+          {usesCssBranding ? (
+            // `--tenant-logo-url` is set by the root layout only when the tenant
+            // has a logo, so an unbranded tenant falls back to `none` and this
+            // renders as an empty disc behind the spinner rather than a broken
+            // image or someone else's mark.
+            <span
+              aria-hidden
+              className="flex h-[52px] w-[52px] items-center justify-center rounded-full"
+              style={{
+                boxShadow: `0 12px 28px -6px ${glowBadge}`,
+                // Inline rather than a Tailwind arbitrary value: this has to
+                // work regardless of whether the utility survived the content
+                // scan, and the fallback keeps an unbranded tenant blank.
+                backgroundImage: "var(--tenant-logo-url, none)",
+                backgroundSize: "contain",
+                backgroundPosition: "center",
+                backgroundRepeat: "no-repeat",
+              }}
             />
-          </span>
+          ) : (
+            <span
+              aria-hidden
+              className="flex h-[52px] w-[52px] items-center justify-center rounded-full"
+              style={{ boxShadow: `0 12px 28px -6px ${glowBadge}` }}
+            >
+              <TenantBrandMark
+                logoUrl={logoUrl}
+                name={wordmark}
+                size={52}
+                className="h-[52px] w-[52px] rounded-full"
+              />
+            </span>
+          )}
         </div>
 
         <div className="flex flex-col items-center gap-6">
-          <p className="flex items-center gap-1.5 text-[15px] tracking-tight">
-            <span className="font-extrabold" style={{ color: textPrimary }}>
-              FundedBeyond
-            </span>
-            <span className="font-medium" style={{ color: textMuted }}>
-              Academy
-            </span>
-          </p>
+          {wordmark ? (
+            <p className="flex items-center gap-1.5 text-[15px] tracking-tight">
+              <span className="font-extrabold" style={{ color: textPrimary }}>
+                {leadWord}
+              </span>
+              {hasAcademySuffix ? (
+                <span className="font-medium" style={{ color: textMuted }}>
+                  Academy
+                </span>
+              ) : null}
+            </p>
+          ) : null}
           <div className="flex items-center gap-2" aria-hidden>
             {[0, 1, 2].map((index) => (
               <span

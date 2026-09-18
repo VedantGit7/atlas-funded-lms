@@ -174,23 +174,17 @@ export function AdminPaymentsInstalmentPlanDetailPage({ planId }: Props) {
     [instalments],
   );
 
-  const collectedCents = plan
-    ? Math.max(0, plan.totalAmountCents - plan.remainingAmountCents)
-    : 0;
+  const collectedCents = plan ? Math.max(0, plan.totalAmountCents - plan.remainingAmountCents) : 0;
   const progressPct =
     plan && plan.totalAmountCents > 0
       ? Math.min(100, Math.round((collectedCents / plan.totalAmountCents) * 100))
       : 0;
 
   const daysOverdue = plan?.overdueCount
-    ? overdueDays(
-        instalments.find((item) => isOverdueRow(item))?.dueAt ?? plan.nextDueAt,
-      )
+    ? overdueDays(instalments.find((item) => isOverdueRow(item))?.dueAt ?? plan.nextDueAt)
     : null;
 
-  const canMutate = plan
-    ? plan.status !== "cancelled" && plan.status !== "completed"
-    : false;
+  const canMutate = plan ? plan.status !== "cancelled" && plan.status !== "completed" : false;
 
   function openRecord(item?: PaymentInstalmentScheduleItem | null) {
     const target = item ?? nextPayable;
@@ -204,7 +198,9 @@ export function AdminPaymentsInstalmentPlanDetailPage({ planId }: Props) {
     try {
       await navigator.clipboard.writeText(plan.membershipId);
       setCopied(true);
-      window.setTimeout(() => setCopied(false), 1600);
+      window.setTimeout(() => {
+        setCopied(false);
+      }, 1600);
     } catch {
       setCopied(false);
     }
@@ -254,7 +250,10 @@ export function AdminPaymentsInstalmentPlanDetailPage({ planId }: Props) {
                   Admin
                 </Link>
                 <ChevronRight className="h-3.5 w-3.5" aria-hidden="true" />
-                <Link href="/admin/reports/enrollments" className="hover:text-[var(--admin-primary)]">
+                <Link
+                  href="/admin/reports/enrollments"
+                  className="hover:text-[var(--admin-primary)]"
+                >
                   Reports
                 </Link>
                 <ChevronRight className="h-3.5 w-3.5" aria-hidden="true" />
@@ -269,9 +268,7 @@ export function AdminPaymentsInstalmentPlanDetailPage({ planId }: Props) {
                   Instalments
                 </Link>
                 <ChevronRight className="h-3.5 w-3.5" aria-hidden="true" />
-                <span className="text-[var(--admin-on-surface)]">
-                  Plan {shortPlanId(plan.id)}
-                </span>
+                <span className="text-[var(--admin-on-surface)]">Plan {shortPlanId(plan.id)}</span>
               </nav>
 
               <h1 className="mb-2 text-2xl font-bold tracking-tight text-[var(--admin-on-surface)] md:text-3xl">
@@ -281,10 +278,7 @@ export function AdminPaymentsInstalmentPlanDetailPage({ planId }: Props) {
                 <span>{plan.learnerName ?? "Learner"}</span>
                 <span>·</span>
                 {plan.email ? (
-                  <a
-                    href={`mailto:${plan.email}`}
-                    className="hover:text-[var(--admin-primary)]"
-                  >
+                  <a href={`mailto:${plan.email}`} className="hover:text-[var(--admin-primary)]">
                     {plan.email}
                   </a>
                 ) : (
@@ -331,7 +325,9 @@ export function AdminPaymentsInstalmentPlanDetailPage({ planId }: Props) {
                 type="button"
                 disabled={!canMutate}
                 className="inline-flex items-center gap-2 border border-[var(--admin-danger)] px-3 py-1.5 font-mono text-xs text-[var(--admin-danger)] hover:bg-[color-mix(in_srgb,var(--admin-danger)_10%,transparent)] disabled:opacity-40"
-                onClick={() => setCancelOpen(true)}
+                onClick={() => {
+                  setCancelOpen(true);
+                }}
               >
                 <Ban className="h-4 w-4" aria-hidden="true" />
                 Cancel plan
@@ -340,7 +336,9 @@ export function AdminPaymentsInstalmentPlanDetailPage({ planId }: Props) {
                 type="button"
                 disabled={!canMutate || !nextPayable}
                 className="inline-flex items-center gap-2 rounded bg-[var(--admin-primary)] px-4 py-1.5 font-mono text-xs font-bold uppercase tracking-wide text-[var(--admin-on-primary)] disabled:opacity-40"
-                onClick={() => openRecord()}
+                onClick={() => {
+                  openRecord();
+                }}
               >
                 <Wallet className="h-4 w-4" aria-hidden="true" />
                 Record next payment
@@ -441,9 +439,7 @@ export function AdminPaymentsInstalmentPlanDetailPage({ planId }: Props) {
                           overdue && item.status !== "paid" ? "overdue" : item.status,
                         );
                         const dueHint =
-                          item.status === "paid"
-                            ? null
-                            : relativeDueLabel(item.dueAt);
+                          item.status === "paid" ? null : relativeDueLabel(item.dueAt);
                         return (
                           <tr
                             key={item.id}
@@ -469,7 +465,9 @@ export function AdminPaymentsInstalmentPlanDetailPage({ planId }: Props) {
                             <td
                               className={[
                                 "p-3 font-mono text-xs",
-                                overdue ? "text-[var(--admin-danger)]" : "text-[var(--admin-on-surface)]",
+                                overdue
+                                  ? "text-[var(--admin-danger)]"
+                                  : "text-[var(--admin-on-surface)]",
                               ].join(" ")}
                             >
                               {formatMoney(item.amountCents, plan.currency)}
@@ -527,7 +525,9 @@ export function AdminPaymentsInstalmentPlanDetailPage({ planId }: Props) {
                                 <button
                                   type="button"
                                   className="border border-[var(--admin-primary)] px-2 py-1 font-mono text-[10px] font-bold uppercase tracking-wider text-[var(--admin-primary)] hover:bg-[color-mix(in_srgb,var(--admin-primary)_10%,transparent)]"
-                                  onClick={() => openRecord(item)}
+                                  onClick={() => {
+                                    openRecord(item);
+                                  }}
                                 >
                                   Record
                                 </button>
@@ -543,7 +543,10 @@ export function AdminPaymentsInstalmentPlanDetailPage({ planId }: Props) {
                         >
                           Total
                         </td>
-                        <td colSpan={5} className="p-3 font-mono text-xs text-[var(--admin-on-surface)]">
+                        <td
+                          colSpan={5}
+                          className="p-3 font-mono text-xs text-[var(--admin-on-surface)]"
+                        >
                           {formatMoney(plan.totalAmountCents, plan.currency)}
                         </td>
                       </tr>
@@ -554,7 +557,10 @@ export function AdminPaymentsInstalmentPlanDetailPage({ planId }: Props) {
                         >
                           Collected
                         </td>
-                        <td colSpan={5} className="p-3 font-mono text-xs text-[var(--admin-primary)]">
+                        <td
+                          colSpan={5}
+                          className="p-3 font-mono text-xs text-[var(--admin-primary)]"
+                        >
                           {formatMoney(collectedCents, plan.currency)}
                         </td>
                       </tr>
@@ -565,7 +571,10 @@ export function AdminPaymentsInstalmentPlanDetailPage({ planId }: Props) {
                         >
                           Remaining
                         </td>
-                        <td colSpan={5} className="p-3 font-mono text-xs text-[var(--admin-danger)]">
+                        <td
+                          colSpan={5}
+                          className="p-3 font-mono text-xs text-[var(--admin-danger)]"
+                        >
                           {formatMoney(plan.remainingAmountCents, plan.currency)}
                         </td>
                       </tr>
@@ -717,14 +726,18 @@ export function AdminPaymentsInstalmentPlanDetailPage({ planId }: Props) {
               open={recordOpen}
               plan={plan}
               instalment={recordTarget}
-              onClose={() => setRecordOpen(false)}
+              onClose={() => {
+                setRecordOpen(false);
+              }}
               onRecorded={() => void load()}
             />
           ) : null}
           <AdminPaymentInstalmentCancelModal
             open={cancelOpen}
             plan={plan}
-            onClose={() => setCancelOpen(false)}
+            onClose={() => {
+              setCancelOpen(false);
+            }}
             onCancelled={() => void load()}
           />
         </>

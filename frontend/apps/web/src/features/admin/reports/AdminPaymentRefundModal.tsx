@@ -8,6 +8,12 @@ import {
   type PaymentTransactionDetail,
 } from "./admin-payments-roster-api";
 import { formatAmount, formatMoney } from "./payment-transaction-ui";
+import {
+  isRefundAmountValid,
+  isRefundNoteValid,
+  parseRefundAmountCents,
+  revokeAccessBlockedReason,
+} from "./payment-refund-rules";
 
 type RefundReason = "duplicate" | "fraudulent" | "customer_requested" | "other";
 
@@ -35,6 +41,14 @@ export function AdminPaymentRefundModal({ open, detail, onClose, onRefunded }: P
   const [notifyLearner, setNotifyLearner] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  /**
+   * The server's word on whether money actually moved.
+   *
+   * Held rather than discarded on success: it usually says the gateway reverse
+   * still has to be done by hand, which is the most consequential thing an
+   * operator can be told here. Closing on a toast threw it away.
+   */
+  const [outcome, setOutcome] = useState<{ gatewayNote: string; amountCents: number } | null>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -46,43 +60,69 @@ export function AdminPaymentRefundModal({ open, detail, onClose, onRefunded }: P
     setNotifyLearner(true);
     setBusy(false);
     setError(null);
+    setOutcome(null);
   }, [open, detail.refundableAmountCents, detail.id]);
 
   useEffect(() => {
     if (!open) return;
     function onKey(event: KeyboardEvent) {
-      if (event.key === "Escape" && !busy) onClose();
+      // Dismissing an outcome any other way would skip the caller's reload and
+      // leave a refunded payment looking unrefunded.
+      if (event.key === "Escape" && !busy) {
+        if (outcome) {
+          onRefunded();
+        }
+        onClose();
+      }
     }
     window.addEventListener("keydown", onKey);
     return () => {
       window.removeEventListener("keydown", onKey);
     };
-  }, [open, busy, onClose]);
+  }, [open, busy, onClose, onRefunded, outcome]);
 
   if (!open) return null;
 
   const refundableCents = detail.refundableAmountCents;
-  const parsedPartialCents = Math.round(Number(amountInput.replace(/,/g, "")) * 100);
-  const amountCents = mode === "full" ? refundableCents : parsedPartialCents;
-  const amountValid =
-    Number.isFinite(amountCents) && amountCents > 0 && amountCents <= refundableCents;
-  const canSubmit = !busy && note.trim().length > 0 && amountValid;
+  const amountCents = mode === "full" ? refundableCents : parseRefundAmountCents(amountInput);
+  const amountValid = isRefundAmountValid(amountCents, refundableCents);
+  const canSubmit = !busy && isRefundNoteValid(note) && amountValid;
+
+  const revokeBlockedReason = revokeAccessBlockedReason(detail);
+  const canRevokeAccess = revokeBlockedReason === null;
+
+  /**
+   * Closing the outcome is what notifies the caller.
+   *
+   * `onRefunded` triggers a reload and, on the refunds ledger, unmounts this
+   * modal — so calling it at submit time would erase the gateway note before it
+   * could be read.
+   */
+  function dismissOutcome() {
+    onRefunded();
+    onClose();
+  }
 
   async function submit() {
     if (!canSubmit) return;
     setBusy(true);
     setError(null);
     try {
-      await refundPaymentTransaction(detail.id, {
+      const response = await refundPaymentTransaction(detail.id, {
         mode,
         ...(mode === "partial" ? { amountCents } : {}),
         reason,
         note: note.trim(),
-        revokeAccess,
+        // Never send a revoke the server would silently skip.
+        revokeAccess: canRevokeAccess && revokeAccess,
         notifyLearner,
       });
-      onRefunded();
-      onClose();
+      // `onRefunded` unmounts this modal at one call site, so the outcome is
+      // shown first and the caller is told once the operator dismisses it.
+      setOutcome({
+        gatewayNote: response.data.gatewayNote,
+        amountCents: response.data.refund.amountCents,
+      });
     } catch (err) {
       const message =
         err instanceof ClientApiError
@@ -104,7 +144,11 @@ export function AdminPaymentRefundModal({ open, detail, onClose, onRefunded }: P
         aria-label="Close refund dialog"
         disabled={busy}
         onClick={() => {
-          if (!busy) onClose();
+          if (busy) return;
+          if (outcome) {
+            onRefunded();
+          }
+          onClose();
         }}
       />
       <div
@@ -144,10 +188,12 @@ export function AdminPaymentRefundModal({ open, detail, onClose, onRefunded }: P
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h2 id={titleId} className="text-xl font-semibold text-[var(--admin-on-surface)]">
-                  {busy ? "Processing refund" : "Approve refund"}
+                  {outcome ? "Refund recorded" : busy ? "Processing refund" : "Approve refund"}
                 </h2>
                 <p className="mt-1 text-sm text-[var(--admin-on-surface-variant)]">
-                  Review the details before confirming. This updates the LMS ledger.
+                  {outcome
+                    ? "The ledger has been updated. Read the note below before closing."
+                    : "Review the details before confirming. This updates the LMS ledger."}
                 </p>
               </div>
               <button
@@ -155,7 +201,13 @@ export function AdminPaymentRefundModal({ open, detail, onClose, onRefunded }: P
                 aria-label="Close"
                 disabled={busy}
                 className="shrink-0 text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-on-surface)] disabled:opacity-40"
-                onClick={onClose}
+                onClick={() => {
+                  if (outcome) {
+                    dismissOutcome();
+                    return;
+                  }
+                  onClose();
+                }}
               >
                 <X className="h-5 w-5" />
               </button>
@@ -163,205 +215,240 @@ export function AdminPaymentRefundModal({ open, detail, onClose, onRefunded }: P
           </div>
         </div>
 
-        <div className="space-y-6 bg-[color-mix(in_srgb,var(--admin-bg)_50%,transparent)] p-6">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1">
-              <span className="block font-mono text-[11px] font-bold uppercase tracking-wider text-[var(--admin-on-surface-variant)]">
-                Amount
-              </span>
-              <span className="font-mono text-xs text-[var(--admin-on-surface)]">
-                {formatMoney(amountValid ? amountCents : refundableCents, detail.currency)}
-              </span>
-            </div>
-            <div className="space-y-1">
-              <span className="block font-mono text-[11px] font-bold uppercase tracking-wider text-[var(--admin-on-surface-variant)]">
-                Learner
-              </span>
-              <span className="truncate font-mono text-xs text-[var(--admin-on-surface)]">
-                {detail.learner.name ?? detail.learner.email ?? "—"}
-              </span>
-            </div>
-            <div className="col-span-2 space-y-1">
-              <span className="block font-mono text-[11px] font-bold uppercase tracking-wider text-[var(--admin-on-surface-variant)]">
-                Gateway
-              </span>
-              <span className="font-mono text-xs text-[var(--admin-on-surface)]">
-                {detail.gatewayKey ?? detail.gateway.provider ?? "—"}
-              </span>
-            </div>
-          </div>
-
-          <div className="flex border border-[var(--admin-border)] bg-[var(--admin-bg)] p-1">
-            {(["full", "partial"] as const).map((value) => (
-              <button
-                key={value}
-                type="button"
-                disabled={busy}
-                className={[
-                  "flex-1 py-2 font-mono text-[11px] font-bold uppercase tracking-wider transition-colors",
-                  mode === value
-                    ? "border border-[var(--admin-primary)] bg-[var(--admin-surface-variant)] text-[var(--admin-primary)]"
-                    : "text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-on-surface)]",
-                ].join(" ")}
-                onClick={() => {
-                  setMode(value);
-                  if (value === "full") {
-                    setAmountInput(formatAmount(refundableCents));
-                  }
-                }}
-              >
-                {value}
-              </button>
-            ))}
-          </div>
-
-          <div>
-            <label
-              htmlFor="refund-amount"
-              className="mb-2 block font-mono text-[11px] font-bold uppercase tracking-wider text-[var(--admin-on-surface-variant)]"
-            >
-              Amount ({detail.currency.toUpperCase()})
-            </label>
-            <div className="relative">
-              <input
-                id="refund-amount"
-                type="text"
-                inputMode="decimal"
-                disabled={busy || mode === "full"}
-                value={amountInput}
-                onChange={(event) => {
-                  setAmountInput(event.target.value);
-                }}
-                className="w-full border-0 border-b border-[var(--admin-border)] bg-[var(--admin-bg)] px-4 py-3 font-mono text-sm text-[var(--admin-on-surface)] outline-none focus:border-[var(--admin-primary)] disabled:opacity-60"
-              />
-              {mode === "full" ? (
-                <span className="pointer-events-none absolute inset-y-0 right-4 flex items-center font-mono text-xs text-[var(--admin-on-surface-variant)]">
-                  Capped
-                </span>
-              ) : null}
-            </div>
-          </div>
-
-          <div>
-            <label
-              htmlFor="refund-reason"
-              className="mb-2 block font-mono text-[11px] font-bold uppercase tracking-wider text-[var(--admin-on-surface-variant)]"
-            >
-              Reason
-            </label>
-            <select
-              id="refund-reason"
-              disabled={busy}
-              value={reason}
-              onChange={(event) => {
-                setReason(event.target.value as RefundReason);
-              }}
-              className="w-full appearance-none border-0 border-b border-[var(--admin-border)] bg-[var(--admin-bg)] px-4 py-3 text-sm text-[var(--admin-on-surface)] outline-none focus:border-[var(--admin-primary)] disabled:opacity-60"
-            >
-              {REASONS.map((item) => (
-                <option key={item.value} value={item.value}>
-                  {item.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label
-              htmlFor="refund-note"
-              className="mb-2 block font-mono text-[11px] font-bold uppercase tracking-wider text-[var(--admin-on-surface-variant)]"
-            >
-              Note <span className="text-[var(--admin-danger)]">*</span>
-            </label>
-            <textarea
-              id="refund-note"
-              rows={3}
-              disabled={busy}
-              value={note}
-              onChange={(event) => {
-                setNote(event.target.value);
-              }}
-              placeholder="Required explanation for the refund…"
-              className="w-full resize-none border-0 border-b border-[var(--admin-border)] bg-[var(--admin-bg)] px-4 py-3 text-sm text-[var(--admin-on-surface)] outline-none placeholder:text-[color-mix(in_srgb,var(--admin-on-surface-variant)_50%,transparent)] focus:border-[var(--admin-primary)] disabled:opacity-60"
-            />
-          </div>
-
-          <div className="flex flex-col gap-3">
-            <CheckboxRow
-              checked={revokeAccess}
-              disabled={busy || !detail.product.courseId}
-              label="Revoke course access"
-              hint={detail.product.courseId ? undefined : "No linked course ID on this order"}
-              onChange={setRevokeAccess}
-            />
-            <CheckboxRow
-              checked={notifyLearner}
-              disabled={busy}
-              label="Notify the learner by email"
-              hint="Queued as a ledger flag until outbound mail is wired"
-              onChange={setNotifyLearner}
-            />
-          </div>
-
-          <div className="flex items-start gap-3 border border-[color-mix(in_srgb,var(--admin-danger)_25%,transparent)] bg-[color-mix(in_srgb,var(--admin-danger)_10%,transparent)] p-4">
-            <Info
-              className="mt-0.5 h-5 w-5 shrink-0 text-[var(--admin-danger)]"
-              aria-hidden="true"
-            />
-            <p className="text-sm text-[var(--admin-danger)]">
-              Recording a refund on the ledger is permanent for audit. Reverse the charge in your
-              payment gateway separately if required — automated gateway refunds are not wired yet.
-            </p>
-          </div>
-
-          {busy ? (
-            <div className="flex items-start gap-2 border-l-2 border-[var(--admin-primary)] bg-[var(--admin-surface-high)] p-4">
-              <Loader2 className="mt-0.5 h-4 w-4 animate-spin text-[var(--admin-primary)]" />
-              <div>
-                <p className="text-sm text-[var(--admin-on-surface)]">
-                  Recording refund on the ledger…
-                </p>
-                <p className="mt-1 font-mono text-xs text-[var(--admin-on-surface-variant)]">
-                  Do not close this window.
-                </p>
+        {outcome ? (
+          <>
+            <div className="space-y-4 bg-[color-mix(in_srgb,var(--admin-bg)_50%,transparent)] p-6">
+              <div className="flex items-start gap-3 border border-[color-mix(in_srgb,var(--admin-success)_30%,transparent)] bg-[color-mix(in_srgb,var(--admin-success)_10%,transparent)] p-4">
+                <Check
+                  className="mt-0.5 h-5 w-5 shrink-0 text-[var(--admin-success)]"
+                  aria-hidden="true"
+                />
+                <div>
+                  <p className="text-sm font-semibold text-[var(--admin-on-surface)]">
+                    {formatMoney(outcome.amountCents, detail.currency)} refunded on the ledger
+                  </p>
+                  <p className="mt-1 text-sm text-[var(--admin-on-surface-variant)]">
+                    {/* Verbatim from the server — it states whether the gateway
+                        reverse still has to be done by hand. */}
+                    {outcome.gatewayNote}
+                  </p>
+                </div>
               </div>
             </div>
-          ) : null}
-        </div>
+            <div className="flex justify-end border-t border-[var(--admin-border)] bg-[var(--admin-surface-low)] p-6">
+              <button
+                type="button"
+                className="border border-[var(--admin-border)] px-6 py-2 font-mono text-[11px] font-bold uppercase tracking-wider text-[var(--admin-on-surface)] hover:bg-[var(--admin-surface-variant)]"
+                onClick={dismissOutcome}
+              >
+                Done
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="space-y-6 bg-[color-mix(in_srgb,var(--admin-bg)_50%,transparent)] p-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <span className="block font-mono text-[11px] font-bold uppercase tracking-wider text-[var(--admin-on-surface-variant)]">
+                    Amount
+                  </span>
+                  <span className="font-mono text-xs text-[var(--admin-on-surface)]">
+                    {formatMoney(amountValid ? amountCents : refundableCents, detail.currency)}
+                  </span>
+                </div>
+                <div className="space-y-1">
+                  <span className="block font-mono text-[11px] font-bold uppercase tracking-wider text-[var(--admin-on-surface-variant)]">
+                    Learner
+                  </span>
+                  <span className="truncate font-mono text-xs text-[var(--admin-on-surface)]">
+                    {detail.learner.name ?? detail.learner.email ?? "—"}
+                  </span>
+                </div>
+                <div className="col-span-2 space-y-1">
+                  <span className="block font-mono text-[11px] font-bold uppercase tracking-wider text-[var(--admin-on-surface-variant)]">
+                    Gateway
+                  </span>
+                  <span className="font-mono text-xs text-[var(--admin-on-surface)]">
+                    {detail.gatewayKey ?? detail.gateway.provider ?? "—"}
+                  </span>
+                </div>
+              </div>
 
-        <div className="flex justify-end gap-4 border-t border-[var(--admin-border)] bg-[var(--admin-surface-low)] p-6">
-          <button
-            type="button"
-            disabled={busy}
-            className="border border-[var(--admin-border)] px-6 py-2 font-mono text-[11px] font-bold uppercase tracking-wider text-[var(--admin-on-surface-variant)] hover:bg-[var(--admin-surface-variant)] hover:text-[var(--admin-on-surface)] disabled:opacity-40"
-            onClick={onClose}
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            disabled={!canSubmit}
-            className="flex items-center gap-2 border border-[var(--admin-danger)] bg-[var(--admin-danger)] px-6 py-2 font-mono text-[11px] font-bold uppercase tracking-wider text-[var(--admin-on-primary)] shadow-[0_0_15px_color-mix(in_srgb,var(--admin-danger)_30%,transparent)] hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
-            onClick={() => void submit()}
-          >
-            {busy ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Processing…
-              </>
-            ) : error ? (
-              <>
-                <RefreshCw className="h-4 w-4" />
-                Retry refund
-              </>
-            ) : (
-              `Approve refund — ${formatMoney(
-                amountValid ? amountCents : refundableCents,
-                detail.currency,
-              )}`
-            )}
-          </button>
-        </div>
+              <div className="flex border border-[var(--admin-border)] bg-[var(--admin-bg)] p-1">
+                {(["full", "partial"] as const).map((value) => (
+                  <button
+                    key={value}
+                    type="button"
+                    disabled={busy}
+                    className={[
+                      "flex-1 py-2 font-mono text-[11px] font-bold uppercase tracking-wider transition-colors",
+                      mode === value
+                        ? "border border-[var(--admin-primary)] bg-[var(--admin-surface-variant)] text-[var(--admin-primary)]"
+                        : "text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-on-surface)]",
+                    ].join(" ")}
+                    onClick={() => {
+                      setMode(value);
+                      if (value === "full") {
+                        setAmountInput(formatAmount(refundableCents));
+                      }
+                    }}
+                  >
+                    {value}
+                  </button>
+                ))}
+              </div>
+
+              <div>
+                <label
+                  htmlFor="refund-amount"
+                  className="mb-2 block font-mono text-[11px] font-bold uppercase tracking-wider text-[var(--admin-on-surface-variant)]"
+                >
+                  Amount ({detail.currency.toUpperCase()})
+                </label>
+                <div className="relative">
+                  <input
+                    id="refund-amount"
+                    type="text"
+                    inputMode="decimal"
+                    disabled={busy || mode === "full"}
+                    value={amountInput}
+                    onChange={(event) => {
+                      setAmountInput(event.target.value);
+                    }}
+                    className="w-full border-0 border-b border-[var(--admin-border)] bg-[var(--admin-bg)] px-4 py-3 font-mono text-sm text-[var(--admin-on-surface)] outline-none focus:border-[var(--admin-primary)] disabled:opacity-60"
+                  />
+                  {mode === "full" ? (
+                    <span className="pointer-events-none absolute inset-y-0 right-4 flex items-center font-mono text-xs text-[var(--admin-on-surface-variant)]">
+                      Capped
+                    </span>
+                  ) : null}
+                </div>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="refund-reason"
+                  className="mb-2 block font-mono text-[11px] font-bold uppercase tracking-wider text-[var(--admin-on-surface-variant)]"
+                >
+                  Reason
+                </label>
+                <select
+                  id="refund-reason"
+                  disabled={busy}
+                  value={reason}
+                  onChange={(event) => {
+                    setReason(event.target.value as RefundReason);
+                  }}
+                  className="w-full appearance-none border-0 border-b border-[var(--admin-border)] bg-[var(--admin-bg)] px-4 py-3 text-sm text-[var(--admin-on-surface)] outline-none focus:border-[var(--admin-primary)] disabled:opacity-60"
+                >
+                  {REASONS.map((item) => (
+                    <option key={item.value} value={item.value}>
+                      {item.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="refund-note"
+                  className="mb-2 block font-mono text-[11px] font-bold uppercase tracking-wider text-[var(--admin-on-surface-variant)]"
+                >
+                  Note <span className="text-[var(--admin-danger)]">*</span>
+                </label>
+                <textarea
+                  id="refund-note"
+                  rows={3}
+                  disabled={busy}
+                  value={note}
+                  onChange={(event) => {
+                    setNote(event.target.value);
+                  }}
+                  placeholder="Required explanation for the refund…"
+                  className="w-full resize-none border-0 border-b border-[var(--admin-border)] bg-[var(--admin-bg)] px-4 py-3 text-sm text-[var(--admin-on-surface)] outline-none placeholder:text-[color-mix(in_srgb,var(--admin-on-surface-variant)_50%,transparent)] focus:border-[var(--admin-primary)] disabled:opacity-60"
+                />
+              </div>
+
+              <div className="flex flex-col gap-3">
+                <CheckboxRow
+                  checked={canRevokeAccess && revokeAccess}
+                  disabled={busy || !canRevokeAccess}
+                  label="Revoke course access"
+                  hint={revokeBlockedReason ?? undefined}
+                  onChange={setRevokeAccess}
+                />
+                <CheckboxRow
+                  checked={notifyLearner}
+                  disabled={busy}
+                  label="Notify the learner by email"
+                  hint="Queued as a ledger flag until outbound mail is wired"
+                  onChange={setNotifyLearner}
+                />
+              </div>
+
+              <div className="flex items-start gap-3 border border-[color-mix(in_srgb,var(--admin-danger)_25%,transparent)] bg-[color-mix(in_srgb,var(--admin-danger)_10%,transparent)] p-4">
+                <Info
+                  className="mt-0.5 h-5 w-5 shrink-0 text-[var(--admin-danger)]"
+                  aria-hidden="true"
+                />
+                <p className="text-sm text-[var(--admin-danger)]">
+                  Recording a refund on the ledger is permanent for audit. Reverse the charge in
+                  your payment gateway separately if required — automated gateway refunds are not
+                  wired yet.
+                </p>
+              </div>
+
+              {busy ? (
+                <div className="flex items-start gap-2 border-l-2 border-[var(--admin-primary)] bg-[var(--admin-surface-high)] p-4">
+                  <Loader2 className="mt-0.5 h-4 w-4 animate-spin text-[var(--admin-primary)]" />
+                  <div>
+                    <p className="text-sm text-[var(--admin-on-surface)]">
+                      Recording refund on the ledger…
+                    </p>
+                    <p className="mt-1 font-mono text-xs text-[var(--admin-on-surface-variant)]">
+                      Do not close this window.
+                    </p>
+                  </div>
+                </div>
+              ) : null}
+            </div>
+
+            <div className="flex justify-end gap-4 border-t border-[var(--admin-border)] bg-[var(--admin-surface-low)] p-6">
+              <button
+                type="button"
+                disabled={busy}
+                className="border border-[var(--admin-border)] px-6 py-2 font-mono text-[11px] font-bold uppercase tracking-wider text-[var(--admin-on-surface-variant)] hover:bg-[var(--admin-surface-variant)] hover:text-[var(--admin-on-surface)] disabled:opacity-40"
+                onClick={onClose}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={!canSubmit}
+                className="flex items-center gap-2 border border-[var(--admin-danger)] bg-[var(--admin-danger)] px-6 py-2 font-mono text-[11px] font-bold uppercase tracking-wider text-[var(--admin-on-primary)] shadow-[0_0_15px_color-mix(in_srgb,var(--admin-danger)_30%,transparent)] hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+                onClick={() => void submit()}
+              >
+                {busy ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Processing…
+                  </>
+                ) : error ? (
+                  <>
+                    <RefreshCw className="h-4 w-4" />
+                    Retry refund
+                  </>
+                ) : (
+                  `Approve refund — ${formatMoney(
+                    amountValid ? amountCents : refundableCents,
+                    detail.currency,
+                  )}`
+                )}
+              </button>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

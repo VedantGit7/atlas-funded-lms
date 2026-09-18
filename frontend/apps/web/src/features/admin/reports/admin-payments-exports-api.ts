@@ -6,6 +6,7 @@ import { downloadReportExport } from "./admin-reports-api";
 export type PaymentExportFormat = "csv" | "xlsx" | "json";
 export type PaymentExportDataset =
   | "transactions"
+  | "orders"
   | "invoices"
   | "instalments"
   | "refunds"
@@ -13,6 +14,8 @@ export type PaymentExportDataset =
 export type PaymentExportDelivery = "download" | "email_me" | "recipients";
 export type PaymentExportCadence = "daily" | "weekly" | "monthly";
 export type PaymentExportGrouping = "none" | "gateway" | "product" | "currency" | "month";
+/** Only meaningful for the `orders` dataset; the server rejects it elsewhere. */
+export type PaymentExportSettlement = "settled" | "unsettled";
 export type PaymentExportStatus = "QUEUED" | "RUNNING" | "SUCCEEDED" | "FAILED" | "CANCELLED";
 
 export type PaymentExportColumn = {
@@ -83,6 +86,7 @@ export type CreatePaymentExportBody = {
   paidTo?: string | undefined;
   gatewayKey?: string | undefined;
   status?: string | undefined;
+  settlement?: PaymentExportSettlement | undefined;
   useCurrentFilters: boolean;
   grouping: PaymentExportGrouping;
   includeSubtotals: boolean;

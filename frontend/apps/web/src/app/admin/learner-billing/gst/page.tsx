@@ -13,7 +13,8 @@ export default async function GstPageRoute() {
     return (
       <AdminPageGate screenId="T35" state="ready" title="Goods & Service Tax (GST)">
         <LearnerBillingSettingsShell>
-          <GstPanel initial={config.data.gst} />
+          {/* The worked example prices in the tenant's own currency. */}
+          <GstPanel initial={config.data.gst} homeCurrency={config.data.homeCurrency} />
         </LearnerBillingSettingsShell>
       </AdminPageGate>
     );

@@ -27,8 +27,13 @@ type GradingQueueTableProps = {
 function StatusBadge({ status }: { status: GradingQueueItem["status"] }) {
   const config = GRADING_STATUS_CONFIG[status];
   return (
-    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-bold ${config.className}`}>
-      <span className={`mr-1.5 inline-block h-1.5 w-1.5 rounded-full ${config.dotClassName}`} aria-hidden="true" />
+    <span
+      className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-bold ${config.className}`}
+    >
+      <span
+        className={`mr-1.5 inline-block h-1.5 w-1.5 rounded-full ${config.dotClassName}`}
+        aria-hidden="true"
+      />
       {config.label}
     </span>
   );
@@ -43,8 +48,13 @@ export function GradingQueueTable({ tasks }: GradingQueueTableProps) {
         className="flex flex-col items-center justify-center rounded-xl border border-dashed border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-6 py-14 text-center"
         aria-label="Grading queue"
       >
-        <ClipboardList className="mb-3 h-10 w-10 text-[var(--admin-on-surface-variant)] opacity-50" aria-hidden="true" />
-        <h2 className="text-lg font-semibold text-[var(--admin-on-surface)]">No grading tasks yet</h2>
+        <ClipboardList
+          className="mb-3 h-10 w-10 text-[var(--admin-on-surface-variant)] opacity-50"
+          aria-hidden="true"
+        />
+        <h2 className="text-lg font-semibold text-[var(--admin-on-surface)]">
+          No grading tasks yet
+        </h2>
         <p className="mt-2 max-w-lg text-sm text-[var(--admin-on-surface-variant)]">
           Tasks appear here when a learner submits an assessment you authored that includes items
           requiring manual review (short answer, long answer, file upload, assignment, or other
@@ -131,13 +141,19 @@ export function GradingQueueTable({ tasks }: GradingQueueTableProps) {
                       >
                         {learnerInitials(task.learnerDisplayName)}
                       </span>
-                      <span className="text-[var(--admin-on-surface)]">{task.learnerDisplayName}</span>
+                      <span className="text-[var(--admin-on-surface)]">
+                        {task.learnerDisplayName}
+                      </span>
                     </div>
                   </td>
                   <td className="hidden px-4 py-4 md:table-cell">
-                    <span className={itemTypeChipClassName}>{task.itemType.replaceAll("_", " ")}</span>
+                    <span className={itemTypeChipClassName}>
+                      {task.itemType.replaceAll("_", " ")}
+                    </span>
                   </td>
-                  <td className={`px-4 py-4 text-right ${monoValueClassName}`}>{task.possiblePoints}</td>
+                  <td className={`px-4 py-4 text-right ${monoValueClassName}`}>
+                    {task.possiblePoints}
+                  </td>
                   <td className="hidden px-4 py-4 text-[var(--admin-on-surface-variant)] sm:table-cell">
                     {formatRelativeSubmittedAt(task.submittedAt)}
                   </td>

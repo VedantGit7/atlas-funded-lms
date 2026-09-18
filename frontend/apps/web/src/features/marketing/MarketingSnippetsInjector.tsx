@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { cancellationFlag } from "@/lib/effect-cancellation";
 
 type PublicSnippets = {
   siteBodyHtml: string | null;
@@ -25,7 +26,7 @@ function injectHtml(html: string, marker: string) {
     for (const attr of Array.from(oldScript.attributes)) {
       script.setAttribute(attr.name, attr.value);
     }
-    script.text = oldScript.textContent ?? "";
+    script.text = oldScript.textContent;
     oldScript.replaceWith(script);
   }
 
@@ -44,7 +45,7 @@ export function MarketingSnippetsInjector() {
     if (loaded.current) return;
     loaded.current = true;
 
-    let cancelled = false;
+    const effect = cancellationFlag();
 
     async function load() {
       try {
@@ -52,10 +53,10 @@ export function MarketingSnippetsInjector() {
           method: "GET",
           credentials: "include",
         });
-        if (!response.ok || cancelled) return;
+        if (!response.ok || effect.isCancelled()) return;
         const json = (await response.json()) as { data?: PublicSnippets };
         const data = json.data;
-        if (!data || cancelled) return;
+        if (!data || effect.isCancelled()) return;
 
         if (data.siteBodyHtml?.trim()) {
           injectHtml(data.siteBodyHtml, "atlas-marketing-snippet-site-body");
@@ -72,9 +73,7 @@ export function MarketingSnippetsInjector() {
 
         const path = window.location.pathname;
         const onSignup =
-          path.includes("/signup") ||
-          path.includes("/register") ||
-          path.includes("/sign-up");
+          path.includes("/signup") || path.includes("/register") || path.includes("/sign-up");
         if (onSignup && data.signupTrackingHtml?.trim()) {
           injectHtml(data.signupTrackingHtml, "atlas-marketing-snippet-signup");
         }
@@ -87,7 +86,7 @@ export function MarketingSnippetsInjector() {
 
     void load();
     return () => {
-      cancelled = true;
+      effect.cancel();
     };
   }, []);
 

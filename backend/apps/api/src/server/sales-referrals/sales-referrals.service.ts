@@ -119,9 +119,9 @@ export async function listReferralStats(tx: TenantTx, _ctx: ServiceCtx, rawQuery
         displayName: row.display_name,
         email: row.email,
         code: row.code,
-        successfulReferrals: Number(row.successful_referrals),
-        signupCreditsEarned: Number(row.signup_credits_earned),
-        purchaseCreditsEarned: Number(row.purchase_credits_earned),
+        successfulReferrals: row.successful_referrals,
+        signupCreditsEarned: row.signup_credits_earned,
+        purchaseCreditsEarned: row.purchase_credits_earned,
         createdAt: row.created_at.toISOString(),
       })),
     },
@@ -151,10 +151,7 @@ export async function getMyReferral(tx: TenantTx, ctx: ServiceCtx) {
     });
   }
 
-  const codeRow = await salesReferralsRepository.ensureCodeForMembership(
-    tx,
-    ctx.actorMembershipId,
-  );
+  const codeRow = await salesReferralsRepository.ensureCodeForMembership(tx, ctx.actorMembershipId);
   const successfulReferrals = await salesReferralsRepository.countSuccessfulReferrals(
     tx,
     ctx.actorMembershipId,
@@ -164,9 +161,7 @@ export async function getMyReferral(tx: TenantTx, ctx: ServiceCtx) {
     ctx.actorMembershipId,
   );
   const remainingReferrals =
-    config.max_referrals == null
-      ? null
-      : Math.max(0, config.max_referrals - successfulReferrals);
+    config.max_referrals == null ? null : Math.max(0, config.max_referrals - successfulReferrals);
 
   return myReferralResponseSchema.parse({
     data: {
@@ -253,7 +248,10 @@ export async function applyReferralForNewMembership(
       ? normalizeReferralCode(args.referralCode)
       : null;
   if (!code) {
-    code = await salesReferralsRepository.takePending(tx, args.emailNormalized.trim().toLowerCase());
+    code = await salesReferralsRepository.takePending(
+      tx,
+      args.emailNormalized.trim().toLowerCase(),
+    );
   } else {
     // Consume any pending row so it cannot be reused.
     await salesReferralsRepository.takePending(tx, args.emailNormalized.trim().toLowerCase());
@@ -288,28 +286,32 @@ export async function applyReferralForNewMembership(
     signupCreditedAt: null,
   });
 
-  const referrerApplied = await softCreditWallet(tx, {
+  // Both credits are applied for their side effect. The return values used to
+  // feed a branch that decided whether to mark the signup credited; that branch
+  // is gone (see below), but the wallet writes must still happen.
+  await softCreditWallet(tx, {
     membershipId: codeRow.membership_id,
     credits: config.referrer_signup_credits,
     reason: "REFERRAL_SIGNUP",
     note: `referral_signup:referrer:${attributionId}`,
   });
-  const refereeApplied = await softCreditWallet(tx, {
+  await softCreditWallet(tx, {
     membershipId: args.refereeMembershipId,
     credits: config.referee_signup_credits,
     reason: "REFERRAL_SIGNUP",
     note: `referral_signup:referee:${attributionId}`,
   });
 
-  if (referrerApplied > 0 || refereeApplied > 0 || config.referrer_signup_credits === 0) {
-    await salesReferralsRepository.markSignupCredited(tx, attributionId);
-  } else if (config.referee_signup_credits === 0 && config.referrer_signup_credits === 0) {
-    await salesReferralsRepository.markSignupCredited(tx, attributionId);
-  } else {
-    // Credits configured but wallet soft-failed (e.g. max balance). Still mark
-    // the referral successful so max_referrals counts the invite.
-    await salesReferralsRepository.markSignupCredited(tx, attributionId);
-  }
+  // The signup is marked credited unconditionally. This used to be an
+  // if / else-if / else chain whose three branches all made this same call with
+  // the same arguments — and whose `else if` was unreachable anyway, because
+  // `config.referrer_signup_credits === 0` already satisfies the first branch.
+  //
+  // The behaviour is deliberate, not an oversight: even when credits are
+  // configured and the wallet soft-fails (e.g. the balance cap is hit), the
+  // referral still counts so `max_referrals` cannot be farmed by forcing
+  // failures.
+  await salesReferralsRepository.markSignupCredited(tx, attributionId);
 
   return { applied: true };
 }

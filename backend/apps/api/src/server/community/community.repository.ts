@@ -786,7 +786,9 @@ export const communityRepository = {
       .filter((target) => target.targetType === "comment")
       .map((target) => target.targetId);
 
-    const rows = await tx.$queryRaw<Array<{ target_type: string; target_id: string; reaction_key: string }>>`
+    const rows = await tx.$queryRaw<
+      Array<{ target_type: string; target_id: string; reaction_key: string }>
+    >`
       select target_type, target_id::text, reaction_key
       from reactions
       where membership_id = ${args.membershipId}::uuid

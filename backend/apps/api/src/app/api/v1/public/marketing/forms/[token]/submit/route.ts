@@ -28,12 +28,7 @@ export const POST = createPublicRouteHandler(routeMetadata, async ({ req, reques
         allowAnonymousTenantRead: true,
       },
       async (tx) =>
-        submitPublicMarketingForm(
-          tx,
-          { tenantId: tenant.tenantId, requestId },
-          token,
-          body,
-        ),
+        submitPublicMarketingForm(tx, { tenantId: tenant.tenantId, requestId }, token, body),
     );
     return NextResponse.json(result, { status: 200 });
   });

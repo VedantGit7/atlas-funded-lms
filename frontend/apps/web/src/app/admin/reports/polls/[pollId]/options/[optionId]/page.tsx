@@ -27,9 +27,7 @@ export default async function AdminPollOptionReportRoutePage({ params }: PagePro
     <AdminPageGate screenId="T50" state="ready" title="Option report">
       <Suspense
         fallback={
-          <p className="text-sm text-[var(--admin-on-surface-variant)]">
-            Loading option report…
-          </p>
+          <p className="text-sm text-[var(--admin-on-surface-variant)]">Loading option report…</p>
         }
       >
         <AdminPollOptionDetailPage pollId={pollId} optionId={optionId} />

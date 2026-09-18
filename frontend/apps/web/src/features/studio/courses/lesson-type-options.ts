@@ -27,7 +27,12 @@ export const LESSON_TYPE_OPTIONS: LessonTypeOption[] = [
   { id: "live", label: "Live", icon: MonitorPlay, accentToken: "--admin-lesson-live" },
   { id: "article", label: "Article", icon: BookOpen, accentToken: "--admin-lesson-article" },
   { id: "scorm", label: "Scorm/Tincan", icon: Package, accentToken: "--admin-lesson-scorm" },
-  { id: "section_quiz", label: "Section Quiz", icon: HelpCircle, accentToken: "--admin-lesson-quiz" },
+  {
+    id: "section_quiz",
+    label: "Section Quiz",
+    icon: HelpCircle,
+    accentToken: "--admin-lesson-quiz",
+  },
   {
     id: "assignment",
     label: "Assignment",

@@ -12,7 +12,7 @@ export const FAQ_DATA = [
     a: "The free tools (trade journal, risk calculator, habit tracker) build consistent daily habits. The paid courses provide structured video lessons, strategy frameworks, and the deeper knowledge that turns good habits into a real, testable edge.",
   },
   {
-    q: "Will FundedBeyond guarantee I pass a funded evaluation?",
+    q: "Will this academy guarantee I pass a funded evaluation?",
     a: "No academy can guarantee your results. Challenges depend on your live execution and discipline. What we guarantee is that you'll understand the rules, have built the right habits, and have a tested strategy before you attempt one.",
   },
   {

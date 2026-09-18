@@ -104,7 +104,7 @@ export async function listPromoSliders(tx: TenantTx, _ctx: ServiceCtx, rawQuery:
   const query = promoSlidersListQuerySchema.parse(rawQuery ?? {});
   const [rows, summary] = await Promise.all([
     marketingPromoSliderRepository.list(tx, {
-      ...(query.status ? { status: query.status } : {}),
+      status: query.status,
       ...(query.q ? { q: query.q } : {}),
       limit: query.limit,
     }),
@@ -183,7 +183,7 @@ export async function replacePromoSlides(
   const existing = await requireSlider(tx, id);
   assertEditable(existing);
 
-  const slides: SlideInput[] = body.slides.map((slide, index) => {
+  const slides: SlideInput[] = body.slides.map((slide, _index) => {
     const startsAt = parseOptionalDate(slide.startsAt);
     const endsAt = parseOptionalDate(slide.endsAt);
     if (startsAt && endsAt && endsAt <= startsAt) {
@@ -193,11 +193,11 @@ export async function replacePromoSlides(
       ...(slide.id ? { id: slide.id } : {}),
       name: slide.name,
       imageUrl: emptyToNull(slide.imageUrl),
-      imageFit: slide.imageFit ?? "COVER",
+      imageFit: slide.imageFit,
       linkUrl: emptyToNull(slide.linkUrl),
       startsAt,
       endsAt,
-      sortOrder: slide.sortOrder ?? index,
+      sortOrder: slide.sortOrder,
     };
   });
 

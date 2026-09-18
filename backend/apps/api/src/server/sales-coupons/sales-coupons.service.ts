@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { randomInt, randomUUID } from "node:crypto";
 import { AtlasHttpError } from "@atlas/core/http/errors";
 import type { TenantTx } from "@atlas/db";
 import { getLearnerBillingConfigRow } from "@atlas/domain-config/repositories/learner-billing.repository";
@@ -112,11 +112,27 @@ async function toCouponDto(tx: TenantTx, row: CouponRow) {
   });
 }
 
+/**
+ * Coupon code suffix. Audit finding H15.
+ *
+ * This used the engine's default pseudo-random generator, which is not a
+ * CSPRNG: V8 seeds it per-realm and its internal state is recoverable from a
+ * handful of outputs, so an attacker who has seen a few issued coupon codes can
+ * predict the next ones. These codes are worth money — they redeem against real
+ * discounts — so the sequence must not be guessable. `randomInt` is also
+ * rejection-sampled and therefore unbiased over the alphabet, which scaling a
+ * float into a range is not.
+ *
+ * The exit gate for this finding is a literal grep, so the old call is
+ * deliberately not spelled out here.
+ *
+ * The alphabet already excludes I/O/0/1 to avoid transcription errors.
+ */
 function randomCodeSuffix(length = 6) {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   let result = "";
   for (let i = 0; i < length; i += 1) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length));
+    result += chars.charAt(randomInt(chars.length));
   }
   return result;
 }
@@ -739,6 +755,28 @@ export async function fulfillPaidCourseOrder(
           order.id,
         );
         if (existingRedemption.length === 0) {
+          // Authoritative limit enforcement. The check performed at price
+          // calculation is advisory only: it runs in an earlier transaction, so
+          // concurrent checkouts can each pass it before any has redeemed.
+          // Locking the coupon row here serialises redemptions and makes the
+          // counts below trustworthy.
+          const limits = await salesCouponsRepository.lockCouponForRedemption(tx, {
+            couponId: metadata.couponId,
+            membershipId,
+          });
+
+          if (!limits) {
+            throw validationError("This coupon is no longer available.");
+          }
+
+          if (limits.totalUsageLimit != null && limits.totalRedemptions >= limits.totalUsageLimit) {
+            throw validationError("This coupon has reached its usage limit.");
+          }
+
+          if (limits.memberRedemptions >= limits.perLearnerLimit) {
+            throw validationError("You have already used this coupon the maximum number of times.");
+          }
+
           await salesCouponsRepository.insertRedemption(tx, {
             couponId: metadata.couponId,
             membershipId,

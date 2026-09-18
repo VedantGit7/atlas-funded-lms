@@ -3,7 +3,11 @@
 import { useState } from "react";
 import { Search, X } from "lucide-react";
 import { clientApi } from "../../../lib/client-api";
-import { fieldClassName, labelClassName, dropdownPanelSurfaceClassName } from "../gamification-admin-shared";
+import {
+  fieldClassName,
+  labelClassName,
+  dropdownPanelSurfaceClassName,
+} from "../gamification-admin-shared";
 
 export type MemberOption = { id: string; label: string };
 
@@ -133,7 +137,9 @@ export function MemberMultiSearchSelect({
           </ul>
         </fieldset>
       ) : query.trim() ? (
-        <p className="text-xs text-[var(--admin-on-surface-variant)]">No matching active members.</p>
+        <p className="text-xs text-[var(--admin-on-surface-variant)]">
+          No matching active members.
+        </p>
       ) : null}
     </div>
   );

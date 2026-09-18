@@ -94,7 +94,9 @@ export function CompetencyMatrixChart({ scores, snapshots }: CompetencyMatrixCha
                     style={{ backgroundColor: entry.color }}
                     aria-hidden="true"
                   />
-                  <span className="text-[11px] font-medium text-muted-foreground">{entry.name}</span>
+                  <span className="text-[11px] font-medium text-muted-foreground">
+                    {entry.name}
+                  </span>
                 </li>
               ))}
           </ul>

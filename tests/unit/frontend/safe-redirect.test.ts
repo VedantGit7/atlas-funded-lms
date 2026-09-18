@@ -6,9 +6,7 @@ import {
 
 describe("resolveSafeRedirectPath", () => {
   it("allows relative in-app paths", () => {
-    expect(resolveSafeRedirectPath("/invite/accept?token=abc")).toBe(
-      "/invite/accept?token=abc",
-    );
+    expect(resolveSafeRedirectPath("/invite/accept?token=abc")).toBe("/invite/accept?token=abc");
     expect(resolveSafeRedirectPath("/")).toBe("/");
   });
 
@@ -21,9 +19,7 @@ describe("resolveSafeRedirectPath", () => {
 
 describe("resolvePostAuthRedirect", () => {
   it("prefers client redirect over API redirect", () => {
-    expect(resolvePostAuthRedirect("/invite/accept?token=a", "/")).toBe(
-      "/invite/accept?token=a",
-    );
+    expect(resolvePostAuthRedirect("/invite/accept?token=a", "/")).toBe("/invite/accept?token=a");
   });
 
   it("falls back to API then default", () => {

@@ -1,3 +1,9 @@
+// Poisons this module for any client bundle. Audit finding M9: nothing at the
+// language level stopped a server module being pulled into a client component,
+// so a leak of service code -- and whatever secrets or privileged queries it
+// closes over -- would only have shown up as a runtime surprise.
+import "server-only";
+
 import { randomUUID } from "node:crypto";
 import { decodeListCursor, encodeListCursor } from "@atlas/membership/schemas/shared";
 import type { LearningPathListQuery, UpdateLearningPathBody } from "./learning-path.schemas";
@@ -489,42 +495,50 @@ export async function insertPathEnrollment(args: {
 }) {
   const id = randomUUID();
 
-  try {
-    await args.tx.$executeRaw`
-      insert into path_enrollments (
-        id,
-        tenant_id,
-        path_id,
-        membership_id,
-        status,
-        enrolled_at
-      )
-      values (
-        ${id}::uuid,
-        ${args.tenantId}::uuid,
-        ${args.pathId}::uuid,
-        ${args.membershipId}::uuid,
-        'active',
-        now()
-      )
-    `;
+  // A duplicate enrolment is resolved by the conflict clause rather than by
+  // catching the unique violation. Postgres aborts the whole transaction on a
+  // constraint error, so the previous catch-then-select could never run: the
+  // follow-up query failed with 25P02 and the caller saw an opaque Prisma error
+  // instead of the existing enrolment.
+  const inserted = await args.tx.$queryRaw<Array<{ id: string; enrolled_at: Date }>>`
+    insert into path_enrollments (
+      id,
+      tenant_id,
+      path_id,
+      membership_id,
+      status,
+      enrolled_at
+    )
+    values (
+      ${id}::uuid,
+      ${args.tenantId}::uuid,
+      ${args.pathId}::uuid,
+      ${args.membershipId}::uuid,
+      'active',
+      now()
+    )
+    on conflict do nothing
+    returning id::text, enrolled_at
+  `;
 
-    return { id, enrolledAt: new Date(), created: true as const };
-  } catch {
-    const existing = await findPathEnrollment({
-      tx: args.tx,
-      pathId: args.pathId,
-      membershipId: args.membershipId,
-    });
-
-    if (!existing) throw new Error("Failed to enroll in path");
-
-    return {
-      id: existing.id,
-      enrolledAt: existing.enrolled_at,
-      created: false as const,
-    };
+  const row = inserted[0];
+  if (row) {
+    return { id: row.id, enrolledAt: row.enrolled_at, created: true as const };
   }
+
+  const existing = await findPathEnrollment({
+    tx: args.tx,
+    pathId: args.pathId,
+    membershipId: args.membershipId,
+  });
+
+  if (!existing) throw new Error("Failed to enroll in path");
+
+  return {
+    id: existing.id,
+    enrolledAt: existing.enrolled_at,
+    created: false as const,
+  };
 }
 
 export async function listPathStepProgress(args: {

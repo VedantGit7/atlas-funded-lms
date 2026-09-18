@@ -14,7 +14,11 @@ import {
   loadInstructorMembers,
   type InstructorMember,
 } from "./create-course-add-member-dialog";
-import { dropdownLabelClassName, fieldClassName, RequiredMark } from "./create-course-dialog-shared";
+import {
+  dropdownLabelClassName,
+  fieldClassName,
+  RequiredMark,
+} from "./create-course-dialog-shared";
 
 type CreateCourseInstructorsPickerProps = {
   value: string[];
@@ -109,9 +113,7 @@ export function CreateCourseInstructorsPicker({
       }
       return [member, ...current];
     });
-    onChange(
-      value.includes(member.membershipId) ? value : [...value, member.membershipId],
-    );
+    onChange(value.includes(member.membershipId) ? value : [...value, member.membershipId]);
     closeDropdown();
   }
 
@@ -148,92 +150,92 @@ export function CreateCourseInstructorsPicker({
           </span>
         }
       >
-          <div className="shrink-0 border-b border-[var(--admin-border)] p-2">
-            <input
-              type="search"
-              value={search}
-              onChange={(event) => {
-                setSearch(event.target.value);
-              }}
-              placeholder="Select instructors"
-              className={`${fieldClassName} rounded-xl py-2 text-sm`}
-              autoFocus
-            />
-          </div>
+        <div className="shrink-0 border-b border-[var(--admin-border)] p-2">
+          <input
+            type="search"
+            value={search}
+            onChange={(event) => {
+              setSearch(event.target.value);
+            }}
+            placeholder="Select instructors"
+            className={`${fieldClassName} rounded-xl py-2 text-sm`}
+            autoFocus
+          />
+        </div>
 
-          <div className="min-h-0 flex-1 overflow-y-auto p-1.5">
-            {filteredMembers.length === 0 ? (
-              <p className="px-3 py-4 text-center text-sm text-[var(--admin-on-surface-variant)]">
-                No instructors match your search.
-              </p>
-            ) : (
-              filteredMembers.map((member) => {
-                const checked = value.includes(member.membershipId);
-                return (
-                  <button
-                    key={member.membershipId}
-                    type="button"
-                    role="option"
-                    aria-selected={checked}
-                    onClick={() => {
-                      toggleMember(member.membershipId);
-                    }}
-                    className={[
-                      dropdownItemClassName,
-                      "gap-3",
-                      checked ? "bg-[var(--admin-surface-high)]" : "",
-                    ].join(" ")}
-                  >
-                    <input
-                      type="checkbox"
-                      readOnly
-                      checked={checked}
-                      tabIndex={-1}
-                      className="h-4 w-4 rounded border-[var(--admin-border)] text-[var(--admin-primary)]"
-                      aria-hidden="true"
+        <div className="min-h-0 flex-1 overflow-y-auto p-1.5">
+          {filteredMembers.length === 0 ? (
+            <p className="px-3 py-4 text-center text-sm text-[var(--admin-on-surface-variant)]">
+              No instructors match your search.
+            </p>
+          ) : (
+            filteredMembers.map((member) => {
+              const checked = value.includes(member.membershipId);
+              return (
+                <button
+                  key={member.membershipId}
+                  type="button"
+                  role="option"
+                  aria-selected={checked}
+                  onClick={() => {
+                    toggleMember(member.membershipId);
+                  }}
+                  className={[
+                    dropdownItemClassName,
+                    "gap-3",
+                    checked ? "bg-[var(--admin-surface-high)]" : "",
+                  ].join(" ")}
+                >
+                  <input
+                    type="checkbox"
+                    readOnly
+                    checked={checked}
+                    tabIndex={-1}
+                    className="h-4 w-4 rounded border-[var(--admin-border)] text-[var(--admin-primary)]"
+                    aria-hidden="true"
+                  />
+                  {member.avatarUrl ? (
+                    <img
+                      src={member.avatarUrl}
+                      alt=""
+                      className="h-9 w-9 shrink-0 rounded-full object-cover"
                     />
-                    {member.avatarUrl ? (
-                      <img
-                        src={member.avatarUrl}
-                        alt=""
-                        className="h-9 w-9 shrink-0 rounded-full object-cover"
-                      />
-                    ) : (
-                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--admin-primary-container)] text-xs font-bold text-[var(--admin-on-primary-container)]">
-                        {memberInitials(member.displayName, member.email)}
-                      </span>
-                    )}
-                    <span className="min-w-0 flex-1 text-left">
-                      <span className="block truncate font-semibold text-[var(--admin-on-surface)]">
-                        {member.displayName}
-                      </span>
-                      {member.email ? (
-                        <span className="block truncate text-xs text-[var(--admin-on-surface-variant)]">
-                          {member.email}
-                        </span>
-                      ) : null}
+                  ) : (
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--admin-primary-container)] text-xs font-bold text-[var(--admin-on-primary-container)]">
+                      {memberInitials(member.displayName, member.email)}
                     </span>
-                  </button>
-                );
-              })
-            )}
-          </div>
+                  )}
+                  <span className="min-w-0 flex-1 text-left">
+                    <span className="block truncate font-semibold text-[var(--admin-on-surface)]">
+                      {member.displayName}
+                    </span>
+                    {member.email ? (
+                      <span className="block truncate text-xs text-[var(--admin-on-surface-variant)]">
+                        {member.email}
+                      </span>
+                    ) : null}
+                  </span>
+                </button>
+              );
+            })
+          )}
+        </div>
 
-          <div className={dropdownFooterClassName}>
-            <button type="button" onClick={handleClear} className={dropdownFooterButtonClassName}>
-              Clear
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setAddMemberOpen(true);
-              }}
-              className={`${dropdownFooterButtonClassName} inline-flex items-center gap-1`}
-            >
-              <Plus className="h-4 w-4" aria-hidden="true" />
-              Create New
-            </button>
-          </div>
+        <div className={dropdownFooterClassName}>
+          <button type="button" onClick={handleClear} className={dropdownFooterButtonClassName}>
+            Clear
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setAddMemberOpen(true);
+            }}
+            className={`${dropdownFooterButtonClassName} inline-flex items-center gap-1`}
+          >
+            <Plus className="h-4 w-4" aria-hidden="true" />
+            Create New
+          </button>
+        </div>
       </DropdownField>
 
       <AddNewMemberDialog

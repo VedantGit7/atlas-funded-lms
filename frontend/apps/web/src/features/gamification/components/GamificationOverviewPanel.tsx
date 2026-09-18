@@ -1,7 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Coins, ExternalLink, Flame, Medal, ShoppingBag, Star, Trophy, Zap } from "lucide-react";
+import {
+  ArrowRight,
+  Coins,
+  ExternalLink,
+  Flame,
+  Medal,
+  ShoppingBag,
+  Star,
+  Trophy,
+  Zap,
+} from "lucide-react";
 import {
   gamificationDomainCardClassName,
   gamificationDiagramPanelClassName,
@@ -16,6 +26,7 @@ import {
 import { FlowConnector } from "./GamificationTabRail";
 import { GamificationSimulatePanel } from "./GamificationSimulatePanel";
 import { HallOfFameConfigPanel } from "./HallOfFameConfigPanel";
+import { GamificationExportButton } from "./GamificationExportButton";
 
 type DomainSummary = {
   badges: Array<{ status: string }>;
@@ -391,6 +402,7 @@ export function GamificationOverviewPanel({
             >
               Configure XP rules
             </button>
+            <GamificationExportButton />
           </div>
         </article>
       </section>

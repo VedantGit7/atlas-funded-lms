@@ -176,12 +176,7 @@ export async function ensurePlatformSuperAdminTenantAccess(args: {
         await seedTenantRolePermissions({ tx, tenantId: args.tenantId });
       }
 
-      const membershipId = await ensureActiveMembership(
-        tx,
-        args.tenantId,
-        principalId,
-        args.email,
-      );
+      const membershipId = await ensureActiveMembership(tx, args.tenantId, principalId, args.email);
 
       await assignSystemRoleToMembership({
         tx,

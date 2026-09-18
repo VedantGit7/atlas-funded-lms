@@ -5,11 +5,7 @@ import type { EntitlementView } from "@atlas/domain-config/schemas/entitlements"
 import { mergeEntitlementsWithCatalogue } from "../../entitlements/entitlement-catalogue";
 import { billingBackLinkClassName } from "../billing-admin-shared";
 import { FeaturePreview } from "./FeaturePreview";
-import {
-  FEATURE_CATALOGUE,
-  FEATURE_GROUPS,
-  type FeatureEntry,
-} from "./feature-catalogue";
+import { FEATURE_CATALOGUE, FEATURE_GROUPS, type FeatureEntry } from "./feature-catalogue";
 
 type AdminFeaturesPageProps = {
   entitlements: EntitlementView[];
@@ -50,7 +46,10 @@ export function AdminFeaturesPage({ entitlements }: AdminFeaturesPageProps) {
         </div>
         <div className="flex shrink-0 gap-3">
           <SummaryStat value={FEATURE_CATALOGUE.length} label="Features" />
-          <SummaryStat value={`${String(activeAddons)}/${String(addonCount)}`} label="Add-ons active" />
+          <SummaryStat
+            value={`${String(activeAddons)}/${String(addonCount)}`}
+            label="Add-ons active"
+          />
         </div>
       </header>
 
@@ -60,7 +59,11 @@ export function AdminFeaturesPage({ entitlements }: AdminFeaturesPageProps) {
         const GroupIcon = group.icon;
 
         return (
-          <section key={group.id} aria-labelledby={`feature-group-${group.id}`} className="space-y-4">
+          <section
+            key={group.id}
+            aria-labelledby={`feature-group-${group.id}`}
+            className="space-y-4"
+          >
             <div className="flex items-center gap-3">
               <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--admin-primary)_12%,var(--admin-surface))] text-[var(--admin-primary)]">
                 <GroupIcon className="h-5 w-5" aria-hidden="true" />
@@ -72,7 +75,9 @@ export function AdminFeaturesPage({ entitlements }: AdminFeaturesPageProps) {
                 >
                   {group.label}
                 </h2>
-                <p className="text-sm text-[var(--admin-on-surface-variant)]">{group.description}</p>
+                <p className="text-sm text-[var(--admin-on-surface-variant)]">
+                  {group.description}
+                </p>
               </div>
             </div>
 

@@ -120,7 +120,9 @@ function PolicyToggle({
       aria-checked={checked}
       aria-label={label}
       disabled={disabled}
-      onClick={() => onChange(!checked)}
+      onClick={() => {
+        onChange(!checked);
+      }}
       className={`relative h-5 w-9 shrink-0 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]/40 disabled:cursor-not-allowed disabled:opacity-50 ${
         checked ? "bg-[var(--admin-primary)]" : "bg-[var(--admin-outline)]"
       }`}
@@ -155,7 +157,9 @@ function NumberStepper({
         type="button"
         aria-label={`Decrease ${ariaLabel}`}
         disabled={disabled || value <= min}
-        onClick={() => onChange(Math.max(min, value - 1))}
+        onClick={() => {
+          onChange(Math.max(min, value - 1));
+        }}
         className="flex w-10 items-center justify-center text-[var(--admin-on-surface-variant)] transition-colors hover:bg-[var(--admin-surface-low)] hover:text-[var(--admin-primary)] disabled:opacity-40"
       >
         <Minus className="h-4 w-4" aria-hidden="true" />
@@ -178,7 +182,9 @@ function NumberStepper({
         type="button"
         aria-label={`Increase ${ariaLabel}`}
         disabled={disabled || value >= max}
-        onClick={() => onChange(Math.min(max, value + 1))}
+        onClick={() => {
+          onChange(Math.min(max, value + 1));
+        }}
         className="flex w-10 items-center justify-center text-[var(--admin-on-surface-variant)] transition-colors hover:bg-[var(--admin-surface-low)] hover:text-[var(--admin-primary)] disabled:opacity-40"
       >
         <Plus className="h-4 w-4" aria-hidden="true" />
@@ -321,9 +327,7 @@ function AddOverrideModal({
     setSaving(true);
     setError(null);
     try {
-      const expiresAt = expiryDate
-        ? new Date(`${expiryDate}T23:59:59.000Z`).toISOString()
-        : null;
+      const expiresAt = expiryDate ? new Date(`${expiryDate}T23:59:59.000Z`).toISOString() : null;
       const response = await createDevicePolicyOverride({
         scopeType,
         scopeId: selected.id,
@@ -334,9 +338,7 @@ function AddOverrideModal({
       onCreated(response.data);
       onClose();
     } catch (caught) {
-      setError(
-        caught instanceof ClientApiError ? caught.message : "Could not create override.",
-      );
+      setError(caught instanceof ClientApiError ? caught.message : "Could not create override.");
     } finally {
       setSaving(false);
     }
@@ -414,7 +416,9 @@ function AddOverrideModal({
                   setQuery(event.target.value);
                   setMenuOpen(true);
                 }}
-                onFocus={() => setMenuOpen(true)}
+                onFocus={() => {
+                  setMenuOpen(true);
+                }}
                 placeholder={placeholder}
                 className="h-10 w-full border border-[var(--admin-outline)] bg-[var(--admin-surface)] pr-10 pl-10 text-sm text-[var(--admin-on-surface)] outline-none transition-colors placeholder:text-[var(--admin-on-surface-variant)] focus:border-[var(--admin-primary)]"
               />
@@ -486,7 +490,9 @@ function AddOverrideModal({
               </label>
               <Select
                 value={onLimitReached}
-                onValueChange={(value) => setOnLimitReached(value as DevicePolicyOverrideOnLimit)}
+                onValueChange={(value) => {
+                  setOnLimitReached(value as DevicePolicyOverrideOnLimit);
+                }}
                 options={OVERRIDE_ON_LIMIT_OPTIONS.map((option) => ({
                   value: option.value,
                   label: option.label,
@@ -507,7 +513,9 @@ function AddOverrideModal({
             <input
               type="date"
               value={expiryDate}
-              onChange={(event) => setExpiryDate(event.target.value)}
+              onChange={(event) => {
+                setExpiryDate(event.target.value);
+              }}
               disabled={saving}
               className="h-10 w-full max-w-[50%] border border-[var(--admin-outline)] bg-[var(--admin-surface)] px-3 font-mono text-[13px] text-[var(--admin-on-surface)] outline-none focus:border-[var(--admin-primary)]"
             />
@@ -610,7 +618,9 @@ function AddBlockModal({
             </label>
             <input
               value={fingerprint}
-              onChange={(event) => setFingerprint(event.target.value)}
+              onChange={(event) => {
+                setFingerprint(event.target.value);
+              }}
               className="h-10 border border-[var(--admin-outline)] bg-[var(--admin-surface)] px-3 font-mono text-[13px] text-[var(--admin-on-surface)] outline-none focus:border-[var(--admin-primary)]"
               placeholder="Paste device fingerprint"
             />
@@ -621,7 +631,9 @@ function AddBlockModal({
             </label>
             <input
               value={reason}
-              onChange={(event) => setReason(event.target.value)}
+              onChange={(event) => {
+                setReason(event.target.value);
+              }}
               className="h-10 border border-[var(--admin-outline)] bg-[var(--admin-surface)] px-3 text-sm text-[var(--admin-on-surface)] outline-none focus:border-[var(--admin-primary)]"
             />
           </div>
@@ -704,11 +716,14 @@ export function AdminActiveDevicesPoliciesPage() {
   useEffect(() => {
     function onBeforeUnload(event: BeforeUnloadEvent) {
       if (!dirty || allowLeaveRef.current) return;
+      // `preventDefault()` alone triggers the browser's leave prompt in every
+      // currently supported browser; `returnValue` is deprecated.
       event.preventDefault();
-      event.returnValue = "";
     }
     window.addEventListener("beforeunload", onBeforeUnload);
-    return () => window.removeEventListener("beforeunload", onBeforeUnload);
+    return () => {
+      window.removeEventListener("beforeunload", onBeforeUnload);
+    };
   }, [dirty]);
 
   function requestNavigate(href: string) {
@@ -747,9 +762,7 @@ export function AdminActiveDevicesPoliciesPage() {
       await deleteDevicePolicyOverride(id);
       setOverrides((current) => current.filter((item) => item.id !== id));
     } catch (caught) {
-      setError(
-        caught instanceof ClientApiError ? caught.message : "Could not delete override.",
-      );
+      setError(caught instanceof ClientApiError ? caught.message : "Could not delete override.");
     }
   }
 
@@ -768,7 +781,9 @@ export function AdminActiveDevicesPoliciesPage() {
     try {
       await navigator.clipboard.writeText(item.fingerprint);
       setCopiedId(item.id);
-      window.setTimeout(() => setCopiedId(null), 1500);
+      window.setTimeout(() => {
+        setCopiedId(null);
+      }, 1500);
     } catch {
       setError("Could not copy fingerprint.");
     }
@@ -778,8 +793,7 @@ export function AdminActiveDevicesPoliciesPage() {
     const q = blockFilter.trim().toLowerCase();
     if (!q) return blocked;
     return blocked.filter(
-      (item) =>
-        item.fingerprint.toLowerCase().includes(q) || item.reason.toLowerCase().includes(q),
+      (item) => item.fingerprint.toLowerCase().includes(q) || item.reason.toLowerCase().includes(q),
     );
   }, [blocked, blockFilter]);
 
@@ -805,7 +819,10 @@ export function AdminActiveDevicesPoliciesPage() {
               Admin
             </Link>
             <span aria-hidden="true">/</span>
-            <Link href="/admin/reports/active-devices" className="hover:text-[var(--admin-primary)]">
+            <Link
+              href="/admin/reports/active-devices"
+              className="hover:text-[var(--admin-primary)]"
+            >
               Active Devices
             </Link>
             <span aria-hidden="true">/</span>
@@ -855,7 +872,10 @@ export function AdminActiveDevicesPoliciesPage() {
 
       {capabilitiesNote ? (
         <div className="flex items-start gap-2 rounded border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-4 py-3 text-sm text-[var(--admin-on-surface-variant)]">
-          <Info className="mt-0.5 h-4 w-4 shrink-0 text-[var(--admin-primary)]" aria-hidden="true" />
+          <Info
+            className="mt-0.5 h-4 w-4 shrink-0 text-[var(--admin-primary)]"
+            aria-hidden="true"
+          />
           <span>{capabilitiesNote}</span>
         </div>
       ) : null}
@@ -863,7 +883,9 @@ export function AdminActiveDevicesPoliciesPage() {
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
         <section className="flex flex-col border border-[var(--admin-border)] bg-[var(--admin-surface)] xl:col-span-8">
           <div className="border-b border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-6 py-4">
-            <h2 className="text-base font-semibold text-[var(--admin-on-surface)]">Tenant default</h2>
+            <h2 className="text-base font-semibold text-[var(--admin-on-surface)]">
+              Tenant default
+            </h2>
           </div>
           <div className="grid grid-cols-1 gap-x-8 gap-y-6 p-6 md:grid-cols-2">
             <div className="flex flex-col gap-1.5">
@@ -872,9 +894,9 @@ export function AdminActiveDevicesPoliciesPage() {
               </label>
               <NumberStepper
                 value={draft.devicesAllowed}
-                onChange={(devicesAllowed) =>
-                  setDraft((current) => (current ? { ...current, devicesAllowed } : current))
-                }
+                onChange={(devicesAllowed) => {
+                  setDraft((current) => (current ? { ...current, devicesAllowed } : current));
+                }}
                 min={1}
                 max={10}
                 disabled={saving || !draft.restrictionsEnabled}
@@ -890,8 +912,12 @@ export function AdminActiveDevicesPoliciesPage() {
                 Idle session expiry
               </label>
               <Select
-                value={draft.idleSessionExpiryDays == null ? "never" : String(draft.idleSessionExpiryDays)}
-                onValueChange={(value) =>
+                value={
+                  draft.idleSessionExpiryDays == null
+                    ? "never"
+                    : String(draft.idleSessionExpiryDays)
+                }
+                onValueChange={(value) => {
                   setDraft((current) =>
                     current
                       ? {
@@ -900,8 +926,8 @@ export function AdminActiveDevicesPoliciesPage() {
                             value === "never" ? null : (Number(value) as 7 | 14 | 30 | 90),
                         }
                       : current,
-                  )
-                }
+                  );
+                }}
                 options={IDLE_OPTIONS.map((option) => ({
                   value: option.value,
                   label: option.label,
@@ -929,11 +955,11 @@ export function AdminActiveDevicesPoliciesPage() {
                       role="radio"
                       aria-checked={selected}
                       disabled={saving}
-                      onClick={() =>
+                      onClick={() => {
                         setDraft((current) =>
                           current ? { ...current, onLimitReached: option.value } : current,
-                        )
-                      }
+                        );
+                      }}
                       className={`flex-1 px-4 py-2 text-sm transition-colors ${
                         selected
                           ? "bg-[var(--admin-surface-high)] font-semibold text-[var(--admin-on-surface)]"
@@ -965,9 +991,11 @@ export function AdminActiveDevicesPoliciesPage() {
                   label="Enable device restrictions"
                   checked={draft.restrictionsEnabled}
                   disabled={saving}
-                  onChange={(restrictionsEnabled) =>
-                    setDraft((current) => (current ? { ...current, restrictionsEnabled } : current))
-                  }
+                  onChange={(restrictionsEnabled) => {
+                    setDraft((current) =>
+                      current ? { ...current, restrictionsEnabled } : current,
+                    );
+                  }}
                 />
               </div>
 
@@ -988,11 +1016,11 @@ export function AdminActiveDevicesPoliciesPage() {
                   label="Restrict parallel logins"
                   checked={draft.restrictParallelLogins}
                   disabled={saving || !draft.restrictionsEnabled}
-                  onChange={(restrictParallelLogins) =>
+                  onChange={(restrictParallelLogins) => {
                     setDraft((current) =>
                       current ? { ...current, restrictParallelLogins } : current,
-                    )
-                  }
+                    );
+                  }}
                 />
               </div>
 
@@ -1013,11 +1041,11 @@ export function AdminActiveDevicesPoliciesPage() {
                   label="Require re-verification on a new device"
                   checked={draft.requireReverificationOnNewDevice}
                   disabled={saving}
-                  onChange={(requireReverificationOnNewDevice) =>
+                  onChange={(requireReverificationOnNewDevice) => {
                     setDraft((current) =>
                       current ? { ...current, requireReverificationOnNewDevice } : current,
-                    )
-                  }
+                    );
+                  }}
                 />
               </div>
 
@@ -1035,11 +1063,11 @@ export function AdminActiveDevicesPoliciesPage() {
                   label="Notify the learner on new device sign-in"
                   checked={draft.notifyLearnerOnNewDevice}
                   disabled={saving}
-                  onChange={(notifyLearnerOnNewDevice) =>
+                  onChange={(notifyLearnerOnNewDevice) => {
                     setDraft((current) =>
                       current ? { ...current, notifyLearnerOnNewDevice } : current,
-                    )
-                  }
+                    );
+                  }}
                 />
               </div>
 
@@ -1052,7 +1080,9 @@ export function AdminActiveDevicesPoliciesPage() {
                     Alert admins when a fingerprint appears on multiple accounts
                   </label>
                   <div className="mt-1 flex items-center gap-2">
-                    <span className="text-sm text-[var(--admin-on-surface-variant)]">Threshold:</span>
+                    <span className="text-sm text-[var(--admin-on-surface-variant)]">
+                      Threshold:
+                    </span>
                     <input
                       type="number"
                       min={2}
@@ -1084,11 +1114,11 @@ export function AdminActiveDevicesPoliciesPage() {
                   label="Alert admins when a fingerprint appears on multiple accounts"
                   checked={draft.sharedFingerprintAlertEnabled}
                   disabled={saving}
-                  onChange={(sharedFingerprintAlertEnabled) =>
+                  onChange={(sharedFingerprintAlertEnabled) => {
                     setDraft((current) =>
                       current ? { ...current, sharedFingerprintAlertEnabled } : current,
-                    )
-                  }
+                    );
+                  }}
                 />
               </div>
             </div>
@@ -1105,14 +1135,18 @@ export function AdminActiveDevicesPoliciesPage() {
               <button
                 type="button"
                 aria-label="Filter blocked fingerprints"
-                onClick={() => setShowBlockFilter((value) => !value)}
+                onClick={() => {
+                  setShowBlockFilter((value) => !value);
+                }}
                 className="p-1 text-[var(--admin-primary)] transition-colors hover:opacity-80"
               >
                 <Filter className="h-5 w-5" aria-hidden="true" />
               </button>
               <button
                 type="button"
-                onClick={() => setBlockModalOpen(true)}
+                onClick={() => {
+                  setBlockModalOpen(true);
+                }}
                 className="p-1 text-[var(--admin-primary)] transition-colors hover:opacity-80"
                 aria-label="Add block"
               >
@@ -1125,7 +1159,9 @@ export function AdminActiveDevicesPoliciesPage() {
             <div className="border-b border-[var(--admin-border)] px-4 py-2">
               <input
                 value={blockFilter}
-                onChange={(event) => setBlockFilter(event.target.value)}
+                onChange={(event) => {
+                  setBlockFilter(event.target.value);
+                }}
                 placeholder="Filter by fingerprint or reason"
                 className="h-9 w-full border border-[var(--admin-border)] bg-[var(--admin-surface)] px-3 text-sm text-[var(--admin-on-surface)] outline-none focus:border-[var(--admin-primary)]"
               />
@@ -1137,7 +1173,10 @@ export function AdminActiveDevicesPoliciesPage() {
               <div className="relative mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--admin-surface-high)]">
                 <Fingerprint className="h-9 w-9 text-[var(--admin-outline)]" aria-hidden="true" />
                 <div className="absolute -right-1 -bottom-1 flex h-6 w-6 items-center justify-center rounded-full border-2 border-[var(--admin-surface)] bg-[var(--admin-surface-high)]">
-                  <Ban className="h-3.5 w-3.5 text-[var(--admin-on-surface-variant)]" aria-hidden="true" />
+                  <Ban
+                    className="h-3.5 w-3.5 text-[var(--admin-on-surface-variant)]"
+                    aria-hidden="true"
+                  />
                 </div>
               </div>
               <h3 className="mb-2 text-center text-base font-semibold text-[var(--admin-on-surface)]">
@@ -1149,7 +1188,9 @@ export function AdminActiveDevicesPoliciesPage() {
               </p>
               <button
                 type="button"
-                onClick={() => setBlockModalOpen(true)}
+                onClick={() => {
+                  setBlockModalOpen(true);
+                }}
                 className={`${primaryButtonClassName} h-10 gap-2`}
               >
                 <Plus className="h-4 w-4" aria-hidden="true" />
@@ -1232,7 +1273,9 @@ export function AdminActiveDevicesPoliciesPage() {
             </div>
             <button
               type="button"
-              onClick={() => setOverrideModalOpen(true)}
+              onClick={() => {
+                setOverrideModalOpen(true);
+              }}
               className={`${ghostButtonClassName} h-9 gap-2`}
             >
               <Plus className="h-[18px] w-[18px]" aria-hidden="true" />
@@ -1291,7 +1334,11 @@ export function AdminActiveDevicesPoliciesPage() {
                           <span
                             className={`inline-flex items-center rounded px-2 py-0.5 text-xs font-semibold capitalize ${scopeBadgeClass(item.scopeType)}`}
                           >
-                            {item.scopeType === "learner" ? "Learner" : item.scopeType === "batch" ? "Batch" : "Role"}
+                            {item.scopeType === "learner"
+                              ? "Learner"
+                              : item.scopeType === "batch"
+                                ? "Batch"
+                                : "Role"}
                           </span>
                           <span className="truncate text-sm font-semibold text-[var(--admin-on-surface)]">
                             {item.scopeLabel}
@@ -1357,7 +1404,9 @@ export function AdminActiveDevicesPoliciesPage() {
 
       <AddOverrideModal
         open={overrideModalOpen}
-        onClose={() => setOverrideModalOpen(false)}
+        onClose={() => {
+          setOverrideModalOpen(false);
+        }}
         onCreated={(item) => {
           setOverrides((current) => {
             const without = current.filter(
@@ -1369,7 +1418,9 @@ export function AdminActiveDevicesPoliciesPage() {
       />
       <AddBlockModal
         open={blockModalOpen}
-        onClose={() => setBlockModalOpen(false)}
+        onClose={() => {
+          setBlockModalOpen(false);
+        }}
         onCreated={(item) => {
           setBlocked((current) => {
             const without = current.filter((row) => row.fingerprint !== item.fingerprint);

@@ -25,7 +25,14 @@ export async function processOutboxBatch(
     maxRetries: number;
   },
 ): Promise<{ processed: number; delivered: number; failed: number; skipped: number }> {
-  const events = await pollOutboxEventsForProcessing(tx, args.limit);
+  // Only claim events this group actually subscribes to and has not yet
+  // delivered — see pollOutboxEventsForProcessing for why the unfiltered poll
+  // made the outbox head-of-line block forever.
+  const subscriptions = Object.entries(args.handlers).flatMap(([eventType, handlers]) =>
+    handlers.map((handler) => ({ eventType, destinationKey: handler.destinationKey })),
+  );
+
+  const events = await pollOutboxEventsForProcessing(tx, args.limit, subscriptions);
 
   let delivered = 0;
   let failed = 0;

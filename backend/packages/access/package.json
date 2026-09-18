@@ -3,7 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./seed/permission-catalogue": "./src/seed/permission-catalogue.ts",
+    "./seed/tenant-system-roles": "./src/seed/tenant-system-roles.ts"
   },
   "scripts": {
     "build": "echo \"No access build configured yet.\"",

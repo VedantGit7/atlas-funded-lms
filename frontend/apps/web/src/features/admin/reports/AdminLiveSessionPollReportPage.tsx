@@ -45,7 +45,7 @@ function Shimmer({ className }: { className?: string }) {
 
 function formatPct(value: number | null | undefined): string {
   if (value == null || Number.isNaN(value)) return "-";
-  return `${Number(value).toFixed(value % 1 === 0 ? 0 : 1)}%`;
+  return `${value.toFixed(value % 1 === 0 ? 0 : 1)}%`;
 }
 
 function formatDuration(seconds: number | null | undefined): string {
@@ -57,10 +57,7 @@ function formatDuration(seconds: number | null | undefined): string {
   return rem > 0 ? `${hours}h ${rem}m` : `${hours}h`;
 }
 
-function formatSessionWhen(
-  iso: string | null,
-  timezoneLabel: string | null,
-): string {
+function formatSessionWhen(iso: string | null, timezoneLabel: string | null): string {
   if (!iso) return "-";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "-";
@@ -95,7 +92,7 @@ function learnerInitials(name: string | null, email: string | null): string {
   const source = (name?.trim() || email?.trim() || "?").replace(/\s+/g, " ");
   const parts = source.split(" ").filter(Boolean);
   if (parts.length >= 2) {
-    return `${parts[0]![0] ?? ""}${parts[1]![0] ?? ""}`.toUpperCase();
+    return `${parts[0]?.[0] ?? ""}${parts[1]?.[0] ?? ""}`.toUpperCase();
   }
   return source.slice(0, 2).toUpperCase();
 }
@@ -165,9 +162,7 @@ function SessionTimeline({
   return (
     <section className="rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] p-5">
       <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-        <h2 className="text-base font-semibold text-[var(--admin-on-surface)]">
-          Session timeline
-        </h2>
+        <h2 className="text-base font-semibold text-[var(--admin-on-surface)]">Session timeline</h2>
         {data.timeline.insight ? (
           <p className="max-w-xl text-xs text-[var(--admin-on-surface-variant)]">
             {data.timeline.insight}
@@ -199,7 +194,9 @@ function SessionTimeline({
               key={band.pollId}
               type="button"
               title={band.title}
-              onClick={() => onSelectPoll(band.pollId)}
+              onClick={() => {
+                onSelectPoll(band.pollId);
+              }}
               className="absolute inset-y-0 border-x border-[color-mix(in_srgb,var(--admin-primary)_25%,transparent)] bg-[color-mix(in_srgb,var(--admin-primary)_12%,transparent)] pt-1 transition-colors hover:bg-[color-mix(in_srgb,var(--admin-primary)_22%,transparent)]"
               style={{ left: `${left}%`, width: `${width}%` }}
             >
@@ -219,13 +216,7 @@ function SessionTimeline({
   );
 }
 
-function PollBlockMenu({
-  pollId,
-  anonymous,
-}: {
-  pollId: string;
-  anonymous: boolean;
-}) {
+function PollBlockMenu({ pollId, anonymous }: { pollId: string; anonymous: boolean }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement | null>(null);
 
@@ -235,7 +226,9 @@ function PollBlockMenu({
       if (!ref.current?.contains(event.target as Node)) setOpen(false);
     };
     document.addEventListener("mousedown", onDoc);
-    return () => document.removeEventListener("mousedown", onDoc);
+    return () => {
+      document.removeEventListener("mousedown", onDoc);
+    };
   }, [open]);
 
   return (
@@ -245,7 +238,9 @@ function PollBlockMenu({
         className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-[var(--admin-on-surface-variant)] hover:bg-[var(--admin-surface-high)] hover:text-[var(--admin-on-surface)]"
         aria-expanded={open}
         aria-label="Poll actions"
-        onClick={() => setOpen((value) => !value)}
+        onClick={() => {
+          setOpen((value) => !value);
+        }}
       >
         <MoreVertical className="h-4 w-4" aria-hidden="true" />
       </button>
@@ -254,7 +249,9 @@ function PollBlockMenu({
           <Link
             href={`/admin/reports/polls/${pollId}`}
             className="block px-3 py-2 text-sm text-[var(--admin-on-surface)] hover:bg-[var(--admin-surface-high)]"
-            onClick={() => setOpen(false)}
+            onClick={() => {
+              setOpen(false);
+            }}
           >
             Open report
           </Link>
@@ -263,14 +260,18 @@ function PollBlockMenu({
               <Link
                 href={`/admin/reports/polls/${pollId}`}
                 className="block px-3 py-2 text-sm text-[var(--admin-on-surface)] hover:bg-[var(--admin-surface-high)]"
-                onClick={() => setOpen(false)}
+                onClick={() => {
+                  setOpen(false);
+                }}
               >
                 View respondents
               </Link>
               <Link
                 href={`/admin/reports/polls/${pollId}/non-respondents`}
                 className="block px-3 py-2 text-sm text-[var(--admin-on-surface)] hover:bg-[var(--admin-surface-high)]"
-                onClick={() => setOpen(false)}
+                onClick={() => {
+                  setOpen(false);
+                }}
               >
                 View non-respondents
               </Link>
@@ -279,7 +280,9 @@ function PollBlockMenu({
           <Link
             href={`/admin/reports/polls/${pollId}/live`}
             className="block px-3 py-2 text-sm text-[var(--admin-on-surface)] hover:bg-[var(--admin-surface-high)]"
-            onClick={() => setOpen(false)}
+            onClick={() => {
+              setOpen(false);
+            }}
           >
             Open monitor
           </Link>
@@ -322,11 +325,7 @@ function LoadingSkeleton() {
   );
 }
 
-export function AdminLiveSessionPollReportPage({
-  liveSessionId,
-}: {
-  liveSessionId: string;
-}) {
+export function AdminLiveSessionPollReportPage({ liveSessionId }: { liveSessionId: string }) {
   const [data, setData] = useState<LiveSessionPollReport | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -363,12 +362,13 @@ export function AdminLiveSessionPollReportPage({
   };
 
   const handleExport = async () => {
-    if (!data?.polls.length) return;
+    // Export the least-answered / first poll as a starting CSV; full session
+    // export is not wired yet.
+    const pollId = data?.summary.leastAnswered?.pollId ?? data?.polls[0]?.pollId;
+    if (pollId === undefined) return;
     setBusy(true);
     setError(null);
     try {
-      // Export the least-answered / first poll as a starting CSV; full session export is not wired yet.
-      const pollId = data.summary.leastAnswered?.pollId ?? data.polls[0]!.pollId;
       const queued = await exportPollReport({ pollId, emailDownloadLink: false });
       const completed = await pollReportRunUntilComplete(queued.data.runId);
       if (completed.status === "failed") {
@@ -407,11 +407,7 @@ export function AdminLiveSessionPollReportPage({
               <AlertTriangle className="h-5 w-5 shrink-0" aria-hidden="true" />
               <p className="text-base font-semibold">Couldn't load session analytics.</p>
             </div>
-            <button
-              type="button"
-              className={secondaryButtonClassName}
-              onClick={() => void load()}
-            >
+            <button type="button" className={secondaryButtonClassName} onClick={() => void load()}>
               Retry
             </button>
           </div>
@@ -510,9 +506,7 @@ export function AdminLiveSessionPollReportPage({
           Live sessions
         </Link>
         <ChevronRight className="h-3.5 w-3.5" aria-hidden="true" />
-        <span className="font-medium text-[var(--admin-on-surface)]">
-          {data.session.title}
-        </span>
+        <span className="font-medium text-[var(--admin-on-surface)]">{data.session.title}</span>
       </nav>
 
       {error ? (
@@ -570,11 +564,11 @@ export function AdminLiveSessionPollReportPage({
           <button
             type="button"
             className={primaryButtonClassName}
-            onClick={() =>
+            onClick={() => {
               setMessageHint(
                 "Messaging low-engagement attendees is not available yet from this report.",
-              )
-            }
+              );
+            }}
           >
             <Mail className="h-4 w-4" aria-hidden="true" />
             Message low-engagement attendees
@@ -1013,8 +1007,7 @@ export function AdminLiveSessionPollReportPage({
             </table>
             {data.matrix.truncated ? (
               <p className="border-t border-[var(--admin-border)] px-4 py-2 text-xs text-[var(--admin-on-surface-variant)]">
-                Showing the first 300 attendees. Export individual poll reports for the full
-                roster.
+                Showing the first 300 attendees. Export individual poll reports for the full roster.
               </p>
             ) : null}
           </div>

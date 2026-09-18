@@ -60,6 +60,7 @@ export function DeadLetterEventTable() {
     if (!reason || !selectedId) return;
 
     setError(null);
+    setMessage(null);
     try {
       await platformApi.post(
         `/api/v1/internal/outbox/dead-letter/${selectedId}/replay`,
@@ -68,10 +69,17 @@ export function DeadLetterEventTable() {
         "platform-dead-letter-replay",
       );
       await loadRows();
+      // `message` was rendered as a role="status" banner but setMessage was never
+      // called, so a successful replay gave the operator no confirmation at all —
+      // indistinguishable from nothing having happened. The F7 test asserted only
+      // that the identifier `setMessage` appeared in the file, so it passed
+      // throughout.
+      setMessage(`Replay requested for dead letter ${selectedId}.`);
       setDialogOpen(false);
       setSelectedId(null);
       setActionReason("");
     } catch (err) {
+      setMessage(null);
       setError(err instanceof Error ? err.message : "Replay failed.");
     }
   }

@@ -35,16 +35,8 @@ import {
   STUDIO_RULER_PX,
   type DocumentUnit,
 } from "./studio-units";
-import {
-  collectSnapTargets,
-  computeSnappedPosition,
-  type SnapGuide,
-} from "./studio-snapping";
-import type {
-  ElementInstance,
-  ImageElementInstance,
-  StudioStoreInstance,
-} from "./studio-store";
+import { collectSnapTargets, computeSnappedPosition, type SnapGuide } from "./studio-snapping";
+import type { ElementInstance, ImageElementInstance, StudioStoreInstance } from "./studio-store";
 
 const MIN_ELEMENT_PX = 6;
 /** Snap threshold in screen pixels (converted to paper px by zoom). */
@@ -88,7 +80,9 @@ const ElementImageNode = observer(function ElementImageNode({
     }
     const img = new window.Image();
     img.crossOrigin = "anonymous";
-    const handleLoad = () => { setImage(img); };
+    const handleLoad = () => {
+      setImage(img);
+    };
     img.addEventListener("load", handleLoad);
     img.src = element.src;
     return () => {
@@ -284,17 +278,23 @@ const ElementNode = observer(function ElementNode({
 
   return (
     <Group
-      ref={(node) => { registerNode(element.id, node); }}
+      ref={(node) => {
+        registerNode(element.id, node);
+      }}
       x={toPx(element.x, unit)}
       y={toPx(element.y, unit)}
       rotation={element.rotation ?? 0}
       draggable={draggable}
       onMouseDown={handleSelect}
       onTap={handleSelect}
-      onDragStart={() => { store.beginInteraction(); }}
+      onDragStart={() => {
+        store.beginInteraction();
+      }}
       onDragMove={handleDragMove}
       onDragEnd={handleDragEnd}
-      onTransformStart={() => { store.beginInteraction(); }}
+      onTransformStart={() => {
+        store.beginInteraction();
+      }}
       onTransformEnd={handleTransformEnd}
     >
       <ElementChildren element={element} store={store} unit={unit} />
@@ -337,7 +337,9 @@ const PaperBackground = observer(function PaperBackground({
     }
     const img = new window.Image();
     img.crossOrigin = "anonymous";
-    const handleLoad = () => { setImage(img); };
+    const handleLoad = () => {
+      setImage(img);
+    };
     img.addEventListener("load", handleLoad);
     img.src = src;
     return () => {
@@ -622,7 +624,9 @@ export const CertificateStudioCanvas = observer(function CertificateStudioCanvas
     };
 
     window.addEventListener("keydown", handleKeyDown);
-    return () => { window.removeEventListener("keydown", handleKeyDown); };
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
   }, [store, unit]);
 
   const handleStagePointerDown = (event: KonvaEventObject<MouseEvent | TouchEvent>) => {
@@ -693,108 +697,108 @@ export const CertificateStudioCanvas = observer(function CertificateStudioCanvas
           onMouseDown={handleStagePointerDown}
           onTouchStart={handleStagePointerDown}
         >
-        <Layer x={originX} y={originY} scaleX={zoom} scaleY={zoom}>
-          <PaperBackground
-            background={doc.background}
-            width={paper.width}
-            height={paper.height}
-          />
-          {store.showGrid ? (
-            <Shape
-              listening={false}
-              sceneFunc={(context: Konva.Context) => {
-                const c = context._context;
-                c.beginPath();
-                for (let gx = gridStepPx; gx < paper.width; gx += gridStepPx) {
-                  c.moveTo(gx, 0);
-                  c.lineTo(gx, paper.height);
+          <Layer x={originX} y={originY} scaleX={zoom} scaleY={zoom}>
+            <PaperBackground
+              background={doc.background}
+              width={paper.width}
+              height={paper.height}
+            />
+            {store.showGrid ? (
+              <Shape
+                listening={false}
+                sceneFunc={(context: Konva.Context) => {
+                  const c = context._context;
+                  c.beginPath();
+                  for (let gx = gridStepPx; gx < paper.width; gx += gridStepPx) {
+                    c.moveTo(gx, 0);
+                    c.lineTo(gx, paper.height);
+                  }
+                  for (let gy = gridStepPx; gy < paper.height; gy += gridStepPx) {
+                    c.moveTo(0, gy);
+                    c.lineTo(paper.width, gy);
+                  }
+                  c.strokeStyle = "rgba(26, 31, 38, 0.08)";
+                  c.lineWidth = hairWidth;
+                  c.stroke();
+                }}
+              />
+            ) : null}
+            {store.orderedElements.map((element) => (
+              <ElementNode
+                key={element.id}
+                element={element}
+                store={store}
+                unit={unit}
+                registerNode={registerNode}
+                onSnapDragMove={handleSnapDragMove}
+                onSnapDragEnd={handleSnapDragEnd}
+              />
+            ))}
+            {store.showGuides && bleedPx > 0 ? (
+              <Rect
+                x={-bleedPx}
+                y={-bleedPx}
+                width={paper.width + bleedPx * 2}
+                height={paper.height + bleedPx * 2}
+                stroke="rgba(239, 68, 68, 0.6)"
+                strokeWidth={hairWidth}
+                dash={dashPattern}
+                listening={false}
+              />
+            ) : null}
+            {store.showGuides && safePx > 0 ? (
+              <Rect
+                x={safePx}
+                y={safePx}
+                width={paper.width - safePx * 2}
+                height={paper.height - safePx * 2}
+                stroke="rgba(16, 217, 163, 0.55)"
+                strokeWidth={hairWidth}
+                dash={dashPattern}
+                listening={false}
+              />
+            ) : null}
+            {snapGuides.map((guide) => (
+              <Line
+                key={`${guide.orientation}-${String(guide.position)}`}
+                points={
+                  guide.orientation === "vertical"
+                    ? [guide.position, 0, guide.position, paper.height]
+                    : [0, guide.position, paper.width, guide.position]
                 }
-                for (let gy = gridStepPx; gy < paper.height; gy += gridStepPx) {
-                  c.moveTo(0, gy);
-                  c.lineTo(paper.width, gy);
+                stroke="#2E6BFF"
+                strokeWidth={hairWidth}
+                dash={dashPattern}
+                listening={false}
+              />
+            ))}
+            <Transformer
+              ref={transformerRef}
+              rotateEnabled
+              ignoreStroke
+              padding={2}
+              anchorSize={8}
+              anchorStroke="#070b10"
+              anchorFill="#10d9a3"
+              anchorCornerRadius={1}
+              borderStroke="#10d9a3"
+              borderStrokeWidth={1.5}
+              boundBoxFunc={(oldBox, newBox) => {
+                if (newBox.width < MIN_ELEMENT_PX || newBox.height < MIN_ELEMENT_PX) {
+                  return oldBox;
                 }
-                c.strokeStyle = "rgba(26, 31, 38, 0.08)";
-                c.lineWidth = hairWidth;
-                c.stroke();
+                return newBox;
               }}
             />
-          ) : null}
-          {store.orderedElements.map((element) => (
-            <ElementNode
-              key={element.id}
-              element={element}
-              store={store}
-              unit={unit}
-              registerNode={registerNode}
-              onSnapDragMove={handleSnapDragMove}
-              onSnapDragEnd={handleSnapDragEnd}
-            />
-          ))}
-          {store.showGuides && bleedPx > 0 ? (
-            <Rect
-              x={-bleedPx}
-              y={-bleedPx}
-              width={paper.width + bleedPx * 2}
-              height={paper.height + bleedPx * 2}
-              stroke="rgba(239, 68, 68, 0.6)"
-              strokeWidth={hairWidth}
-              dash={dashPattern}
-              listening={false}
-            />
-          ) : null}
-          {store.showGuides && safePx > 0 ? (
-            <Rect
-              x={safePx}
-              y={safePx}
-              width={paper.width - safePx * 2}
-              height={paper.height - safePx * 2}
-              stroke="rgba(16, 217, 163, 0.55)"
-              strokeWidth={hairWidth}
-              dash={dashPattern}
-              listening={false}
-            />
-          ) : null}
-          {snapGuides.map((guide) => (
-            <Line
-              key={`${guide.orientation}-${String(guide.position)}`}
-              points={
-                guide.orientation === "vertical"
-                  ? [guide.position, 0, guide.position, paper.height]
-                  : [0, guide.position, paper.width, guide.position]
-              }
-              stroke="#2E6BFF"
-              strokeWidth={hairWidth}
-              dash={dashPattern}
-              listening={false}
-            />
-          ))}
-          <Transformer
-            ref={transformerRef}
-            rotateEnabled
-            ignoreStroke
-            padding={2}
-            anchorSize={8}
-            anchorStroke="#070b10"
-            anchorFill="#10d9a3"
-            anchorCornerRadius={1}
-            borderStroke="#10d9a3"
-            borderStrokeWidth={1.5}
-            boundBoxFunc={(oldBox, newBox) => {
-              if (newBox.width < MIN_ELEMENT_PX || newBox.height < MIN_ELEMENT_PX) {
-                return oldBox;
-              }
-              return newBox;
-            }}
+          </Layer>
+          <StudioRulers
+            zoom={zoom}
+            originX={originX}
+            originY={originY}
+            stageWidth={stageWidth}
+            stageHeight={stageHeight}
           />
-        </Layer>
-        <StudioRulers
-          zoom={zoom}
-          originX={originX}
-          originY={originY}
-          stageWidth={stageWidth}
-          stageHeight={stageHeight}
-        />
-      </Stage>
+        </Stage>
       </div>
     </div>
   );

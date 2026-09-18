@@ -11,7 +11,7 @@ function learnerTx() {
       .fn()
       .mockResolvedValueOnce([{ key: "course.read" }])
       .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([{ role_key: "learner" }]),
+      .mockResolvedValueOnce([{ role_key: "learner", bypasses_resource_predicates: false }]),
   };
 }
 
@@ -21,7 +21,7 @@ function learnerProgressTx() {
       .fn()
       .mockResolvedValueOnce([{ key: "progress.read" }])
       .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([{ role_key: "learner" }]),
+      .mockResolvedValueOnce([{ role_key: "learner", bypasses_resource_predicates: false }]),
   };
 }
 
@@ -31,7 +31,7 @@ function instructorWithoutUpdateTx() {
       .fn()
       .mockResolvedValueOnce([{ key: "course.update" }])
       .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([{ role_key: "instructor" }]),
+      .mockResolvedValueOnce([{ role_key: "instructor", bypasses_resource_predicates: false }]),
   };
 }
 

@@ -38,9 +38,7 @@ export function formatSystemEmailDate(value: string | null | undefined): string 
   });
 }
 
-export function formatSystemEmailCategory(
-  category: SystemEmailDto["category"],
-): string {
+export function formatSystemEmailCategory(category: SystemEmailDto["category"]): string {
   return category === "certificates" ? "Certificates" : "Security";
 }
 

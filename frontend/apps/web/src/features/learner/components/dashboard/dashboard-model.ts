@@ -51,7 +51,12 @@ export function computeLevel(
   const level = index + 1;
 
   if (!next) {
-    return { level, xpIntoLevel: xpTotal - current.minXp, xpForNextLevel: null, progressPercent: 100 };
+    return {
+      level,
+      xpIntoLevel: xpTotal - current.minXp,
+      xpForNextLevel: null,
+      progressPercent: 100,
+    };
   }
 
   const span = next.minXp - current.minXp;

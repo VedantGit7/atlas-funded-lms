@@ -31,19 +31,11 @@ function formatError(error: unknown): string {
   return "Request failed.";
 }
 
-function CourseDetailShellInner({
-  course,
-  canPublish,
-  children,
-}: CourseDetailShellProps) {
+function CourseDetailShellInner({ course, canPublish, children }: CourseDetailShellProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const {
-    enrollDialogOpen,
-    openEnrollDialog,
-    closeEnrollDialog,
-    bumpDashboardRefresh,
-  } = useCourseDetailActions();
+  const { enrollDialogOpen, openEnrollDialog, closeEnrollDialog, bumpDashboardRefresh } =
+    useCourseDetailActions();
   const [currentCourse, setCurrentCourse] = useState(course);
   const [publishError, setPublishError] = useState<string | null>(null);
   const activeTab = resolveActiveCourseTab(pathname, currentCourse.id);
@@ -85,7 +77,9 @@ function CourseDetailShellInner({
             <span aria-hidden="true" className="mx-2 text-[var(--admin-outline)]">
               /
             </span>
-            <span className="font-medium text-[var(--admin-on-surface)]">{currentCourse.title}</span>
+            <span className="font-medium text-[var(--admin-on-surface)]">
+              {currentCourse.title}
+            </span>
           </nav>
 
           <div className="flex items-center gap-2">

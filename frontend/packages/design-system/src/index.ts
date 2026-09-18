@@ -21,7 +21,12 @@ export { Select, type SelectProps, type SelectOption } from "./components/select
 export { EmptyState, type EmptyStateProps } from "./components/empty-state";
 export { PageSkeleton, type PageSkeletonProps } from "./components/page-skeleton";
 export { Skeleton } from "./components/skeleton";
-export { TenantLogo, BrandingMark, resolveTenantLogoUrl, type TenantLogoProps } from "./components/tenant-logo";
+export {
+  TenantLogo,
+  BrandingMark,
+  resolveTenantLogoUrl,
+  type TenantLogoProps,
+} from "./components/tenant-logo";
 export { cn } from "./lib/cn";
 export {
   dropdownPanelEnterBottomClassName,

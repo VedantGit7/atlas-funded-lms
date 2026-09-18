@@ -5,6 +5,7 @@ Comprehensive strategies for optimizing Lottie animation performance in producti
 ## Performance Metrics
 
 **Target Performance:**
+
 - **Desktop:** 60 FPS minimum
 - **Mobile:** 30-60 FPS
 - **File Size:** <100 KB ideal, <200 KB acceptable
@@ -23,6 +24,7 @@ Comprehensive strategies for optimizing Lottie animation performance in producti
 ```
 
 **Benefits:**
+
 - ZIP compression (up to 90% reduction)
 - Multiple animations in one file
 - Theme support
@@ -31,6 +33,7 @@ Comprehensive strategies for optimizing Lottie animation performance in producti
 ### 2. Optimize JSON
 
 **Before Export (After Effects):**
+
 ```
 - Simplify paths (reduce anchor points)
 - Merge shapes when possible
@@ -40,6 +43,7 @@ Comprehensive strategies for optimizing Lottie animation performance in producti
 ```
 
 **After Export:**
+
 ```bash
 # Use Lottie optimizer
 https://lottiefiles.com/tools/lottie-editor
@@ -51,9 +55,9 @@ gzip animation.json  # 60-80% reduction
 ### 3. Lazy Loading
 
 ```jsx
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense } from "react";
 
-const LottieAnimation = lazy(() => import('./LottieAnimation'));
+const LottieAnimation = lazy(() => import("./LottieAnimation"));
 
 function App() {
   return (
@@ -79,7 +83,7 @@ const LazyLottie = ({ src }) => {
           observer.disconnect();
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.1 },
     );
 
     if (ref.current) {
@@ -102,56 +106,60 @@ const LazyLottie = ({ src }) => {
 ### 1. Renderer Selection
 
 **SVG Renderer:**
+
 ```javascript
 // Best quality, slower performance
 // Use for: Simple icons, small animations, few instances
 lottie.loadAnimation({
-  renderer: 'svg',  // Vector-based, scalable
+  renderer: "svg", // Vector-based, scalable
   container: element,
-  path: 'animation.json'
+  path: "animation.json",
 });
 ```
 
 **Canvas Renderer:**
+
 ```javascript
 // Better performance, rasterized
 // Use for: Complex animations, many instances, mobile
 new DotLottie({
-  canvas: canvasElement,  // ✅ Recommended for complex animations
-  src: 'animation.lottie'
+  canvas: canvasElement, // ✅ Recommended for complex animations
+  src: "animation.lottie",
 });
 ```
 
 **Performance Comparison:**
 
-| Renderer | Quality | Performance | Use Case |
-|----------|---------|-------------|----------|
-| SVG      | Excellent | Good (simple animations) | Icons, logos, simple UI |
-| Canvas   | Good | Excellent | Complex animations, mobile |
-| HTML     | Poor | Poor | Legacy support only |
+| Renderer | Quality   | Performance              | Use Case                   |
+| -------- | --------- | ------------------------ | -------------------------- |
+| SVG      | Excellent | Good (simple animations) | Icons, logos, simple UI    |
+| Canvas   | Good      | Excellent                | Complex animations, mobile |
+| HTML     | Poor      | Poor                     | Legacy support only        |
 
 ### 2. Web Workers (Best Performance)
 
 ```javascript
-import { DotLottieWorker } from '@lottiefiles/dotlottie-web';
+import { DotLottieWorker } from "@lottiefiles/dotlottie-web";
 
 // Offload rendering to separate thread
 new DotLottieWorker({
-  canvas: document.getElementById('canvas'),
-  src: 'heavy-animation.lottie',
+  canvas: document.getElementById("canvas"),
+  src: "heavy-animation.lottie",
   autoplay: true,
   loop: true,
-  workerId: 'worker-1'
+  workerId: "worker-1",
 });
 ```
 
 **Benefits:**
+
 - No main thread blocking
 - Smooth scroll performance
 - Multiple animations without lag
 - Better mobile performance
 
 **When to use:**
+
 - Animation >100 KB
 - Multiple simultaneous animations
 - Scroll-driven animations
@@ -166,12 +174,12 @@ const isLowEnd = navigator.deviceMemory < 4; // GB
 
 new DotLottie({
   canvas: canvas,
-  src: 'animation.lottie',
+  src: "animation.lottie",
   renderConfig: {
-    devicePixelRatio: (isMobile || isLowEnd) ? 1 : window.devicePixelRatio
+    devicePixelRatio: isMobile || isLowEnd ? 1 : window.devicePixelRatio,
     // 1 = standard definition (faster)
     // 2 = retina (slower, better quality)
-  }
+  },
 });
 ```
 
@@ -185,12 +193,12 @@ const getAnimationSrc = () => {
   const isSlowDevice = navigator.hardwareConcurrency < 4;
 
   if (isMobile || isSlowDevice) {
-    return 'animation-low.lottie';  // Simplified version
+    return "animation-low.lottie"; // Simplified version
   }
-  return 'animation-high.lottie';    // Full quality
+  return "animation-high.lottie"; // Full quality
 };
 
-<DotLottieReact src={getAnimationSrc()} />
+<DotLottieReact src={getAnimationSrc()} />;
 ```
 
 **Frame Rate Reduction:**
@@ -201,7 +209,7 @@ const targetFPS = isMobile ? 30 : 60;
 
 new DotLottie({
   canvas: canvas,
-  src: 'animation.lottie',
+  src: "animation.lottie",
   speed: 1,
   // Implemented via requestAnimationFrame throttling
 });
@@ -232,13 +240,13 @@ const AnimationComponent = () => {
 useEffect(() => {
   if (!dotLottie) return;
 
-  const handleComplete = () => console.log('Done');
+  const handleComplete = () => console.log("Done");
 
-  dotLottie.addEventListener('complete', handleComplete);
+  dotLottie.addEventListener("complete", handleComplete);
 
   // CRITICAL: Remove listeners
   return () => {
-    dotLottie.removeEventListener('complete', handleComplete);
+    dotLottie.removeEventListener("complete", handleComplete);
   };
 }, [dotLottie]);
 ```
@@ -254,7 +262,7 @@ class LottiePool {
   }
 
   acquire(src) {
-    let instance = this.pool.find(i => i.src === src && !this.active.has(i));
+    let instance = this.pool.find((i) => i.src === src && !this.active.has(i));
 
     if (!instance) {
       instance = new DotLottie({ canvas: createCanvas(), src });
@@ -271,7 +279,7 @@ class LottiePool {
   }
 
   cleanup() {
-    this.pool.forEach(i => i.destroy());
+    this.pool.forEach((i) => i.destroy());
     this.pool = [];
     this.active.clear();
   }
@@ -284,14 +292,11 @@ class LottiePool {
 
 ```jsx
 // Host on CDN for better caching
-<DotLottieReact
-  src="https://cdn.example.com/animations/hero.lottie"
-  loop
-  autoplay
-/>
+<DotLottieReact src="https://cdn.example.com/animations/hero.lottie" loop autoplay />
 ```
 
 **Benefits:**
+
 - Edge caching (faster loads)
 - Reduced server load
 - Better global performance
@@ -300,7 +305,7 @@ class LottiePool {
 
 ```html
 <!-- Preload animation for faster display -->
-<link rel="preload" href="/animations/hero.lottie" as="fetch" crossorigin>
+<link rel="preload" href="/animations/hero.lottie" as="fetch" crossorigin />
 ```
 
 ```javascript
@@ -312,31 +317,28 @@ const preloadAnimation = async (src) => {
 };
 
 // Use preloaded blob
-const blobUrl = await preloadAnimation('/animation.lottie');
-<DotLottieReact src={blobUrl} />
+const blobUrl = await preloadAnimation("/animation.lottie");
+<DotLottieReact src={blobUrl} />;
 ```
 
 ### 3. Service Worker Caching
 
 ```javascript
 // service-worker.js
-self.addEventListener('install', (event) => {
+self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open('lottie-v1').then((cache) => {
-      return cache.addAll([
-        '/animations/hero.lottie',
-        '/animations/loading.lottie'
-      ]);
-    })
+    caches.open("lottie-v1").then((cache) => {
+      return cache.addAll(["/animations/hero.lottie", "/animations/loading.lottie"]);
+    }),
   );
 });
 
-self.addEventListener('fetch', (event) => {
-  if (event.request.url.endsWith('.lottie')) {
+self.addEventListener("fetch", (event) => {
+  if (event.request.url.endsWith(".lottie")) {
     event.respondWith(
       caches.match(event.request).then((response) => {
         return response || fetch(event.request);
-      })
+      }),
     );
   }
 });
@@ -350,11 +352,11 @@ self.addEventListener('fetch', (event) => {
 const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
 <DotLottieReact
-  src={isMobile ? 'animation-mobile.lottie' : 'animation-desktop.lottie'}
+  src={isMobile ? "animation-mobile.lottie" : "animation-desktop.lottie"}
   renderConfig={{
-    devicePixelRatio: isMobile ? 1 : window.devicePixelRatio
+    devicePixelRatio: isMobile ? 1 : window.devicePixelRatio,
   }}
-/>
+/>;
 ```
 
 ### 2. Pause on Offscreen
@@ -371,7 +373,7 @@ useEffect(() => {
     }
   });
 
-  observer.observe(document.getElementById('lottie-container'));
+  observer.observe(document.getElementById("lottie-container"));
 
   return () => observer.disconnect();
 }, [dotLottie]);
@@ -386,7 +388,7 @@ navigator.getBattery?.().then((battery) => {
     dotLottie.setSpeed(0.5); // Slower = less CPU
   }
 
-  battery.addEventListener('levelchange', () => {
+  battery.addEventListener("levelchange", () => {
     if (battery.level < 0.2) {
       dotLottie.stop();
     }
@@ -466,6 +468,7 @@ dotLottie.addEventListener('load', () => {
 **Symptoms:** Dropped frames, jerky playback
 
 **Solutions:**
+
 ```
 1. Switch to Canvas renderer
 2. Use DotLottieWorker for web worker rendering
@@ -479,6 +482,7 @@ dotLottie.addEventListener('load', () => {
 **Symptoms:** Long initial render time
 
 **Solutions:**
+
 ```
 1. Use lazy loading with IntersectionObserver
 2. Preload critical animations only
@@ -492,6 +496,7 @@ dotLottie.addEventListener('load', () => {
 **Symptoms:** Memory usage increases over time
 
 **Solutions:**
+
 ```
 1. Call destroy() on unmount
 2. Remove all event listeners
@@ -505,6 +510,7 @@ dotLottie.addEventListener('load', () => {
 **Symptoms:** Slow on phones, smooth on desktop
 
 **Solutions:**
+
 ```
 1. Create mobile-optimized version (simpler)
 2. Use Canvas renderer (not SVG)
@@ -517,6 +523,7 @@ dotLottie.addEventListener('load', () => {
 ## Best Practices Summary
 
 **File Size:**
+
 - ✅ Use dotLottie format (.lottie)
 - ✅ Compress JSON
 - ✅ Keep under 100 KB
@@ -524,6 +531,7 @@ dotLottie.addEventListener('load', () => {
 - ✅ Simplify paths
 
 **Runtime:**
+
 - ✅ Use Canvas renderer for complex animations
 - ✅ Use Web Workers (DotLottieWorker)
 - ✅ Destroy instances on unmount
@@ -531,12 +539,14 @@ dotLottie.addEventListener('load', () => {
 - ✅ Lazy load animations
 
 **Mobile:**
+
 - ✅ Create mobile-optimized versions
 - ✅ Set devicePixelRatio to 1
 - ✅ Pause when offscreen
 - ✅ Reduce quality on low-end devices
 
 **Monitoring:**
+
 - ✅ Track FPS (target 60 on desktop, 30 on mobile)
 - ✅ Monitor memory usage
 - ✅ Measure load times

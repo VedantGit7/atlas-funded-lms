@@ -69,7 +69,12 @@ export default async function HomePage({
         logoLightUrl={branding.logoLightUrl}
         logoDarkUrl={branding.logoDarkUrl}
       >
-        <PublicLandingView landing={landing.data} requestId={requestId} authCta={authCta} />
+        <PublicLandingView
+          landing={landing.data}
+          requestId={requestId}
+          authCta={authCta}
+          logoUrl={branding.logoLightUrl ?? branding.logoDarkUrl ?? null}
+        />
       </PublicSiteShell>
     );
   }

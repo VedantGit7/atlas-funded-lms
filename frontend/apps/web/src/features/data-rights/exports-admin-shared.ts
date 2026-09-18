@@ -48,8 +48,4 @@ export const exportsPollingDotClassName =
 
 export const exportsErrorCodeClassName = `${monoClassName} rounded bg-[color-mix(in_srgb,var(--admin-danger)_10%,var(--admin-surface))] px-2 py-0.5 text-[11px] text-[var(--admin-danger)]`;
 
-export {
-  fieldClassName,
-  ghostButtonClassName,
-  primaryButtonClassName,
-};
+export { fieldClassName, ghostButtonClassName, primaryButtonClassName };

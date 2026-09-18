@@ -61,8 +61,32 @@ describe("processOutboxBatch", () => {
       maxRetries: 3,
     });
 
-    expect(pollOutboxEventsForProcessingMock).toHaveBeenCalledWith(tx, 25);
+    expect(pollOutboxEventsForProcessingMock).toHaveBeenCalledWith(tx, 25, []);
     expect(result).toEqual({ processed: 0, delivered: 0, failed: 0, skipped: 0 });
+  });
+
+  it("passes this group's subscriptions to the poll so it only claims its own undelivered work", async () => {
+    // Without this the poll returned the oldest rows regardless of handler or
+    // delivery state, so the outbox head-of-line blocked forever.
+    pollOutboxEventsForProcessingMock.mockResolvedValue([]);
+
+    await processOutboxBatch(tx, {
+      limit: 25,
+      handlers: {
+        "course.published": [
+          { destinationKey: "search.index", handle: vi.fn() },
+          { destinationKey: "analytics.rollup", handle: vi.fn() },
+        ],
+        "user.registered": [{ destinationKey: "search.index", handle: vi.fn() }],
+      },
+      maxRetries: 3,
+    });
+
+    expect(pollOutboxEventsForProcessingMock).toHaveBeenCalledWith(tx, 25, [
+      { eventType: "course.published", destinationKey: "search.index" },
+      { eventType: "course.published", destinationKey: "analytics.rollup" },
+      { eventType: "user.registered", destinationKey: "search.index" },
+    ]);
   });
 
   it("inserts a succeeded event_deliveries row when the handler succeeds", async () => {
@@ -162,7 +186,10 @@ describe("processOutboxBatch", () => {
 
   it("does not update or delete outbox events in the worker service", () => {
     const workerSource = readFileSync(
-      resolve(import.meta.dirname, "../../backend/packages/events/src/services/outbox-worker.service.ts"),
+      resolve(
+        import.meta.dirname,
+        "../../backend/packages/events/src/services/outbox-worker.service.ts",
+      ),
       "utf8",
     );
 

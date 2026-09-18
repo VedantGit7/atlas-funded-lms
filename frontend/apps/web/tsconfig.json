@@ -8,9 +8,7 @@
         "name": "next"
       }
     ],
-    "types": [
-      "node"
-    ],
+    "types": ["node"],
     "baseUrl": "../../..",
     "paths": {
       "@/*": ["frontend/apps/web/src/*"],
@@ -88,10 +86,5 @@
     "src/**/*.tsx",
     ".next/types/**/*.ts"
   ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "build",
-    ".next"
-  ]
+  "exclude": ["node_modules", "dist", "build", ".next"]
 }

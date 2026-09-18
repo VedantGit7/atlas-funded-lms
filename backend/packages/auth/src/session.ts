@@ -5,11 +5,11 @@ import {
   getBearerToken,
   readCookieFromRequest,
 } from "./cookie-names";
+import { applyAuthSessionToCookieStore, readSessionPersistence } from "./cookie-store";
 import {
-  applyAuthSessionToCookieStore,
-  readSessionPersistence,
-} from "./cookie-store";
-import { createSupabaseAdminServerClient, createSupabasePublicServerClient } from "./supabase-server";
+  createSupabaseAdminServerClient,
+  createSupabasePublicServerClient,
+} from "./supabase-server";
 import { authRequired } from "./auth-errors";
 import { refreshSessionFromRefreshToken } from "./public-auth.service";
 
@@ -56,12 +56,21 @@ async function resolveMfaEnabledForSession(args: {
   }
 
   const { data, error } = await supabase.auth.mfa.listFactors();
-  if (error || !data) {
+  if (error) {
     return false;
   }
 
-  const factors = [...(data.totp ?? []), ...(data.phone ?? [])];
-  return factors.some((factor) => factor.status === "verified");
+  // `listFactors()` types `data.totp` and `data.phone` as `Factor<K, "verified">[]`
+  // — the SDK returns only verified factors there, and keeps unverified ones in
+  // `data.all`. The old `.some((f) => f.status === "verified")` was therefore
+  // comparing "verified" to "verified" and could never be false for a non-empty
+  // list. It was redundant, not wrong: presence in these arrays IS verification.
+  //
+  // Audit finding H5 assumed the opposite — that the predicate might fail to
+  // discriminate verified from pending factors, making MFA enforcement unsafe to
+  // build on. It does not; see the Phase 2 note in the remediation plan.
+  const verifiedFactors = [...data.totp, ...data.phone];
+  return verifiedFactors.length > 0;
 }
 
 async function resolveUserFromAccessToken(accessToken: string, refreshToken: string | null) {

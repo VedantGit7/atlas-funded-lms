@@ -1,8 +1,5 @@
-import {
-  getHelpArticle,
-  HELP_ARTICLES,
-  HELP_CATEGORIES,
-} from "./help-center-content";
+import type { getHelpArticle } from "./help-center-content";
+import { HELP_ARTICLES, HELP_CATEGORIES } from "./help-center-content";
 import type { HelpSearchResult } from "./help-center-types";
 
 function normalizeQuery(query: string): string {
@@ -23,7 +20,10 @@ export function searchHelpArticles(query: string, limit = 12): HelpSearchResult[
 
   const scored = HELP_ARTICLES.map((article) => {
     const haystack = `${article.title} ${article.summary} ${article.sections
-      .map((section) => `${section.title} ${section.blocks.map((block) => ("text" in block ? block.text : "")).join(" ")}`)
+      .map(
+        (section) =>
+          `${section.title} ${section.blocks.map((block) => ("text" in block ? block.text : "")).join(" ")}`,
+      )
       .join(" ")}`.toLowerCase();
 
     let score = 0;

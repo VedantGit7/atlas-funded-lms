@@ -11,6 +11,7 @@
 **Tech Stack:** Next.js App Router, `createTenantRoute` API layer, raw SQL repository (`gamification.repository.ts`), Prisma migrations, Zod contracts in `@atlas/contracts`, outbox worker, PostHog analytics (Phase 6).
 
 **References:**
+
 - PRD: `docs/locked/FundedBeyond-Academy-Master-PRD-v1.0.md` (Module 25 Gamification, Vol 09)
 - Current admin: `/admin/gamification` (Overview, Badges, Leaderboards, Manual awards enabled; 5 tabs disabled)
 - Engine defaults: `backend/apps/api/src/server/gamification/gamification-defaults.ts`
@@ -21,13 +22,13 @@
 
 ### Implemented today
 
-| Area | Status |
-|------|--------|
-| DB models | `gamification_profiles`, `point_ledger`, `badges`, `badge_awards`, `streak_states`, `streak_freezes`, `leaderboard_definitions`, `leaderboard_snapshots` |
-| Engine | XP accrual, levels, streaks, freeze, auto badge eval, manual awards, leaderboard snapshots |
-| Source events | `lesson.completed`, `path.step_completed`, `assessment.submitted`, `assessment.graded`, `practice.session_completed` |
-| Admin tabs (partial) | Badges, Leaderboards, Manual awards — simplified forms, hardcoded create payloads |
-| Learner surfaces | `/achievements`, `/leaderboards`, progress summary, home streak/XP cards |
+| Area                 | Status                                                                                                                                                   |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| DB models            | `gamification_profiles`, `point_ledger`, `badges`, `badge_awards`, `streak_states`, `streak_freezes`, `leaderboard_definitions`, `leaderboard_snapshots` |
+| Engine               | XP accrual, levels, streaks, freeze, auto badge eval, manual awards, leaderboard snapshots                                                               |
+| Source events        | `lesson.completed`, `path.step_completed`, `assessment.submitted`, `assessment.graded`, `practice.session_completed`                                     |
+| Admin tabs (partial) | Badges, Leaderboards, Manual awards — simplified forms, hardcoded create payloads                                                                        |
+| Learner surfaces     | `/achievements`, `/leaderboards`, progress summary, home streak/XP cards                                                                                 |
 
 ### Known engine bugs (P0)
 
@@ -39,13 +40,13 @@
 
 ### Admin tabs — UI-only / not implemented
 
-| Tab | Status |
-|-----|--------|
-| Points & XP | Disabled — no rules admin |
-| Streaks | Disabled — no streak config admin |
-| Quests | Disabled — no backend |
-| Rewards shop | Disabled — no backend |
-| Seasonal events | Disabled — no backend |
+| Tab             | Status                            |
+| --------------- | --------------------------------- |
+| Points & XP     | Disabled — no rules admin         |
+| Streaks         | Disabled — no streak config admin |
+| Quests          | Disabled — no backend             |
+| Rewards shop    | Disabled — no backend             |
+| Seasonal events | Disabled — no backend             |
 
 ---
 
@@ -55,33 +56,33 @@ Mechanics to cover so nothing is left out of product scope.
 
 ### Core (all major LMS platforms)
 
-| Mechanic | Atlas today | Target admin tab |
-|----------|-------------|------------------|
-| Points / XP | Engine only | Points & XP |
-| Levels | Engine only | Points & XP |
-| Badges / achievements | Partial CRUD | Badges |
-| Leaderboards | Partial + bugs | Leaderboards |
-| Streaks + freeze | Engine only | Streaks |
-| Manual awards | Working | Manual awards |
-| Progress toward goals | Not in learner UI | — (learner) |
-| XP / activity history | DB only | — (learner) |
-| Level-up / badge notifications | Outbox partial | — (automation + learner) |
+| Mechanic                       | Atlas today       | Target admin tab         |
+| ------------------------------ | ----------------- | ------------------------ |
+| Points / XP                    | Engine only       | Points & XP              |
+| Levels                         | Engine only       | Points & XP              |
+| Badges / achievements          | Partial CRUD      | Badges                   |
+| Leaderboards                   | Partial + bugs    | Leaderboards             |
+| Streaks + freeze               | Engine only       | Streaks                  |
+| Manual awards                  | Working           | Manual awards            |
+| Progress toward goals          | Not in learner UI | — (learner)              |
+| XP / activity history          | DB only           | — (learner)              |
+| Level-up / badge notifications | Outbox partial    | — (automation + learner) |
 
 ### Advanced (Docebo, Studeia, TalentLMS, FundedBeyond PRD)
 
-| Mechanic | Atlas today | Target |
-|----------|-------------|--------|
-| Quests / missions | None | Quests tab |
-| Challenges / contests | PRD community challenges | Seasonal tab |
-| Rewards shop | None | Rewards shop tab |
-| Virtual currency | None | Rewards shop tab |
-| Seasonal events / multipliers | None | Seasonal tab |
-| Leagues / tiers | None | Phase 6 |
-| Team / group streaks | PRD study groups | Streaks Phase 2b |
-| Course-level XP overrides | None | Points & XP Phase 2b |
-| Hall of Fame integration | Community config | Overview + Phase 6 |
-| Compound badge criteria (AND/OR) | Single criterion | Badges Phase 6 |
-| Gamification analytics | Removed mockup | Overview Phase 6 |
+| Mechanic                         | Atlas today              | Target               |
+| -------------------------------- | ------------------------ | -------------------- |
+| Quests / missions                | None                     | Quests tab           |
+| Challenges / contests            | PRD community challenges | Seasonal tab         |
+| Rewards shop                     | None                     | Rewards shop tab     |
+| Virtual currency                 | None                     | Rewards shop tab     |
+| Seasonal events / multipliers    | None                     | Seasonal tab         |
+| Leagues / tiers                  | None                     | Phase 6              |
+| Team / group streaks             | PRD study groups         | Streaks Phase 2b     |
+| Course-level XP overrides        | None                     | Points & XP Phase 2b |
+| Hall of Fame integration         | Community config         | Overview + Phase 6   |
+| Compound badge criteria (AND/OR) | Single criterion         | Badges Phase 6       |
+| Gamification analytics           | Removed mockup           | Overview Phase 6     |
 
 ### Explicit backlog (documented, not blocking v1)
 
@@ -224,6 +225,7 @@ configs/tenants/*/manifest.json                       # align badges/streaks Pha
 ### Task 0.1: Fix weekly/monthly leaderboard aggregation
 
 **Files:**
+
 - Modify: `backend/apps/api/src/server/gamification/gamification.repository.ts`
 - Modify: `backend/apps/api/src/server/gamification/gamification.service.ts`
 - Test: `tests/integration/api/gamification-leaderboards.test.ts`
@@ -236,6 +238,7 @@ configs/tenants/*/manifest.json                       # align badges/streaks Pha
 ### Task 0.2: Course-scoped leaderboard ranking
 
 **Files:**
+
 - Modify: `gamification.repository.ts`, `gamification.service.ts`
 - Modify: `AdminGamificationEditor.tsx` (minimal — full form in Phase 1)
 
@@ -245,6 +248,7 @@ configs/tenants/*/manifest.json                       # align badges/streaks Pha
 ### Task 0.3: Align tenant manifest with engine
 
 **Files:**
+
 - Modify: `backend/apps/api/src/server/gamification/gamification-defaults.ts`
 - Modify: `configs/tenants/fundedbeyond/manifest.json` (or equivalent)
 - Modify: `scripts/tenants/apply-adapter.ts` if leaderboard seeding needed
@@ -257,6 +261,7 @@ configs/tenants/*/manifest.json                       # align badges/streaks Pha
 ### Task 0.4: Wire `leaderboardsPublic`
 
 **Files:**
+
 - Modify: learner route guard or page loader for `/leaderboards`
 - Modify: `gamification-config.service.ts` to expose flag
 
@@ -267,6 +272,7 @@ configs/tenants/*/manifest.json                       # align badges/streaks Pha
 ### Task 0.5: Harden `event_count` badge criteria
 
 **Files:**
+
 - Modify: `gamification.repository.ts`, `gamification.schemas.ts`
 - Modify: point ledger write path to store structured `metadata_json.eventType`
 
@@ -276,6 +282,7 @@ configs/tenants/*/manifest.json                       # align badges/streaks Pha
 ### Task 0.6: Emit `level_up` outbox event
 
 **Files:**
+
 - Modify: `gamification.service.ts`, `gamification-event.schemas.ts`
 - Modify: `automation.registry.ts`
 
@@ -293,6 +300,7 @@ Written 2026-07-06 while closing Phase 0.
 **Streak keys available by default** (`gamification-defaults.ts`): `daily_learning` (any learning activity), `practice_daily` (practice sessions). Tenants may override `streaks` via `tenantConfigJson.gamification.streaks` — overrides REPLACE the default list, so include defaults you want to keep. All streaks are daily-cadence; weekly-cadence streaks (e.g. `practice_weekly`) are NOT supported by the engine yet — planned with the Phase 2 Streaks admin.
 
 **Manifest badge rules:**
+
 - `criteria.streakKey` must reference a streak key resolvable from defaults + tenant config, or the badge can never be earned. `practice_daily` badges are now satisfiable; `practice_weekly` badges must stay `INACTIVE` until weekly cadence ships (Phase 2).
 - `criteria.eventType` (for `event_count`) must be one of the consumed source events above. `diagnostic.completed` is not emitted by the diagnostics domain yet; the `first-diagnostic-complete` badge stays `INACTIVE` until that event ships (tracked as a Phase 2+ follow-up).
 
@@ -313,6 +321,7 @@ Written 2026-07-06 while closing Phase 0.
 ### Task 1A: Badge criteria + icon editor
 
 **Files:**
+
 - Create: `components/BadgeCriteriaEditor.tsx`
 - Modify: `AdminGamificationEditor.tsx`, `gamification-admin-shared.ts`
 - Modify: `frontend/packages/contracts/src/gamification/` schemas if needed
@@ -327,6 +336,7 @@ Written 2026-07-06 while closing Phase 0.
 ### Task 1B: Leaderboard full config
 
 **Files:**
+
 - Create: `components/LeaderboardConfigForm.tsx`
 - Modify: `AdminGamificationEditor.tsx`
 
@@ -338,6 +348,7 @@ Written 2026-07-06 while closing Phase 0.
 ### Task 1C: Manual awards — history + revoke
 
 **Files:**
+
 - Modify: `backend/apps/api/src/app/api/v1/badges/route.ts`
 - Create: `GET /api/v1/badges/awards` (or query param on GET badges)
 - Modify: `AdminGamificationEditor.tsx` awards section
@@ -350,6 +361,7 @@ Written 2026-07-06 while closing Phase 0.
 ### Task 1D: Overview live metrics
 
 **Files:**
+
 - Create: `GET /api/v1/gamification/metrics`
 - Modify: `GamificationOverviewPanel.tsx`
 
@@ -371,6 +383,7 @@ Written 2026-07-06 while closing Phase 0.
 ### Task 2A: Gamification rules API
 
 **Files:**
+
 - Create: `backend/apps/api/src/app/api/v1/gamification/rules/route.ts`
 - Create: `backend/apps/api/src/app/api/v1/gamification/events/route.ts`
 - Modify: `gamification-config.service.ts` — add write path with validation
@@ -382,6 +395,7 @@ Written 2026-07-06 while closing Phase 0.
 ### Task 2B: Points & XP admin tab
 
 **Files:**
+
 - Create: `components/PointsXpRulesPanel.tsx`
 - Modify: `gamification-admin-shared.ts` — `points` tab `enabled: true`
 
@@ -395,6 +409,7 @@ Written 2026-07-06 while closing Phase 0.
 ### Task 2C: Streaks admin tab
 
 **Files:**
+
 - Create: `components/StreaksRulesPanel.tsx`
 - Modify: `gamification-admin-shared.ts` — `streaks` tab `enabled: true`
 
@@ -406,6 +421,7 @@ Written 2026-07-06 while closing Phase 0.
 ### Task 2D: Learner XP ledger
 
 **Files:**
+
 - Create: `backend/apps/api/src/app/api/v1/me/gamification/ledger/route.ts`
 - Modify: `/achievements` page
 
@@ -476,14 +492,14 @@ model QuestProgress {
 
 ### Task 3B: Quest criteria types (v1)
 
-| Type | Example |
-|------|---------|
-| `complete_lessons` | Complete N lessons in course X |
-| `earn_xp` | Earn N XP within window |
-| `maintain_streak` | N-day streak on key |
-| `earn_badge` | Earn badge by key |
-| `complete_assessment` | Pass with min score |
-| `event_count` | Generic event counter |
+| Type                  | Example                        |
+| --------------------- | ------------------------------ |
+| `complete_lessons`    | Complete N lessons in course X |
+| `earn_xp`             | Earn N XP within window        |
+| `maintain_streak`     | N-day streak on key            |
+| `earn_badge`          | Earn badge by key              |
+| `complete_assessment` | Pass with min score            |
+| `event_count`         | Generic event counter          |
 
 - [x] Quest evaluator in worker after each source event (single_step/time_bound = parallel steps; chain = strict order)
 - [x] Emit `quest.completed` outbox event (approved event type + automation trigger)
@@ -496,6 +512,7 @@ model QuestProgress {
 ### Task 3D: Admin Quests tab
 
 **Files:**
+
 - Create: `components/QuestsAdminPanel.tsx`
 - Modify: `gamification-admin-shared.ts` — `quests` tab `enabled: true`
 
@@ -593,16 +610,17 @@ model RewardRedemption {
 
 ### Task 4C: Reward types (v1)
 
-| Type | Fulfillment | Status |
-|------|-------------|--------|
-| `CONTENT_UNLOCK` | Grants course enrollment (payload `courseId`) | ✅ auto |
-| `DISCOUNT_CODE` | Returns attached promo code (payload `code`) | ✅ auto |
-| `CERTIFICATE` | `pending_fulfillment` → admin fulfills from redemption log (auto issuance deferred) | ✅ manual |
-| `CUSTOM` | `pending_fulfillment` → admin fulfills from redemption log | ✅ manual |
+| Type             | Fulfillment                                                                         | Status    |
+| ---------------- | ----------------------------------------------------------------------------------- | --------- |
+| `CONTENT_UNLOCK` | Grants course enrollment (payload `courseId`)                                       | ✅ auto   |
+| `DISCOUNT_CODE`  | Returns attached promo code (payload `code`)                                        | ✅ auto   |
+| `CERTIFICATE`    | `pending_fulfillment` → admin fulfills from redemption log (auto issuance deferred) | ✅ manual |
+| `CUSTOM`         | `pending_fulfillment` → admin fulfills from redemption log                          | ✅ manual |
 
 ### Task 4D: Admin Rewards shop tab
 
 **Files:**
+
 - Create: `components/RewardsShopPanel.tsx`
 - Modify: `gamification-admin-shared.ts` — `shop` tab `enabled: true`
 
@@ -666,6 +684,7 @@ model SeasonalEvent {
 ### Task 5D: Admin Seasonal tab
 
 **Files:**
+
 - Create: `components/SeasonalEventsPanel.tsx`
 - Modify: `gamification-admin-shared.ts` — `seasonal` tab `enabled: true`
 
@@ -751,51 +770,51 @@ model SeasonalEvent {
 
 ### Existing (extend)
 
-| Method | Path | Notes |
-|--------|------|-------|
-| GET | `/me/gamification` | Profile summary |
-| GET | `/me/streaks` | Streak list + freezes |
-| POST | `/me/streaks/[key]/freeze` | Consume freeze |
-| GET/POST/PUT | `/badges` | Create, update, manual award |
-| GET/POST/PUT | `/leaderboards` | CRUD |
-| GET | `/leaderboards/[id]` | Detail + snapshot |
+| Method       | Path                       | Notes                        |
+| ------------ | -------------------------- | ---------------------------- |
+| GET          | `/me/gamification`         | Profile summary              |
+| GET          | `/me/streaks`              | Streak list + freezes        |
+| POST         | `/me/streaks/[key]/freeze` | Consume freeze               |
+| GET/POST/PUT | `/badges`                  | Create, update, manual award |
+| GET/POST/PUT | `/leaderboards`            | CRUD                         |
+| GET          | `/leaderboards/[id]`       | Detail + snapshot            |
 
 ### New
 
-| Method | Path | Phase |
-|--------|------|-------|
-| GET | `/gamification/rules` | 2 |
-| PUT | `/gamification/rules` | 2 |
-| GET | `/gamification/events` | 2 |
-| GET | `/gamification/metrics` | 1 |
-| GET | `/badges/awards` | 1 |
-| POST | `/badges` `revoke_award` | 1 |
-| GET | `/me/gamification/ledger` | 2 |
-| GET/POST/PUT | `/quests` | 3 |
-| GET | `/me/quests` | 3 |
-| GET/POST/PUT | `/rewards` | 4 |
-| GET | `/me/rewards` | 4 |
-| POST | `/me/rewards/redeem` | 4 |
-| GET/POST/PUT | `/seasonal-events` | 5 |
-| GET | `/me/seasonal-events/active` | 5 |
-| GET | `/me/badges/progress` | 6 |
-| POST | `/gamification/simulate` | 6 |
+| Method       | Path                         | Phase |
+| ------------ | ---------------------------- | ----- |
+| GET          | `/gamification/rules`        | 2     |
+| PUT          | `/gamification/rules`        | 2     |
+| GET          | `/gamification/events`       | 2     |
+| GET          | `/gamification/metrics`      | 1     |
+| GET          | `/badges/awards`             | 1     |
+| POST         | `/badges` `revoke_award`     | 1     |
+| GET          | `/me/gamification/ledger`    | 2     |
+| GET/POST/PUT | `/quests`                    | 3     |
+| GET          | `/me/quests`                 | 3     |
+| GET/POST/PUT | `/rewards`                   | 4     |
+| GET          | `/me/rewards`                | 4     |
+| POST         | `/me/rewards/redeem`         | 4     |
+| GET/POST/PUT | `/seasonal-events`           | 5     |
+| GET          | `/me/seasonal-events/active` | 5     |
+| GET          | `/me/badges/progress`        | 6     |
+| POST         | `/gamification/simulate`     | 6     |
 
 ---
 
 ## Admin tab completion checklist
 
-| Tab | Phase | Done when |
-|-----|-------|-----------|
-| Overview | 1D | Live metrics, navigation, accurate diagram |
-| Badges | 1A | Full CRUD + criteria + icons |
-| Leaderboards | 1B | Full config + preview + correct windows |
-| Manual awards | 1C | Award + history + revoke |
-| Points & XP | 2 | Rules + levels editable |
-| Streaks | 2 | Streak defs + freezes + bonuses |
-| Quests | 3 | CRUD + step builder + analytics |
-| Rewards shop | 4 | Currency + catalog + redemptions |
-| Seasonal events | 5 | Events + multipliers + linking |
+| Tab             | Phase | Done when                                  |
+| --------------- | ----- | ------------------------------------------ |
+| Overview        | 1D    | Live metrics, navigation, accurate diagram |
+| Badges          | 1A    | Full CRUD + criteria + icons               |
+| Leaderboards    | 1B    | Full config + preview + correct windows    |
+| Manual awards   | 1C    | Award + history + revoke                   |
+| Points & XP     | 2     | Rules + levels editable                    |
+| Streaks         | 2     | Streak defs + freezes + bonuses            |
+| Quests          | 3     | CRUD + step builder + analytics            |
+| Rewards shop    | 4     | Currency + catalog + redemptions           |
+| Seasonal events | 5     | Events + multipliers + linking             |
 
 Update `GAMIFICATION_TABS` in `gamification-admin-shared.ts` — set `enabled: true` as each phase ships.
 
@@ -803,13 +822,13 @@ Update `GAMIFICATION_TABS` in `gamification-admin-shared.ts` — set `enabled: t
 
 ## Testing & rollout
 
-| Layer | Coverage |
-|-------|----------|
-| Unit | Level calc, period keys, quest eval, seasonal multiplier, currency debit |
-| Integration | Event → XP → streak → badge → quest → leaderboard pipeline |
-| Auth | Tenant isolation, permission gates per endpoint |
-| E2E | Admin create badge → learner earns → leaderboard updates → shop redeem |
-| Migration | Backfill quest progress if needed |
+| Layer       | Coverage                                                                 |
+| ----------- | ------------------------------------------------------------------------ |
+| Unit        | Level calc, period keys, quest eval, seasonal multiplier, currency debit |
+| Integration | Event → XP → streak → badge → quest → leaderboard pipeline               |
+| Auth        | Tenant isolation, permission gates per endpoint                          |
+| E2E         | Admin create badge → learner earns → leaderboard updates → shop redeem   |
+| Migration   | Backfill quest progress if needed                                        |
 
 **Rollout order:** Phase 0 → 1 → 2 (internal QA) → 3–5 (beta tenant) → 6.
 
@@ -819,16 +838,16 @@ Update `GAMIFICATION_TABS` in `gamification-admin-shared.ts` — set `enabled: t
 
 ## Effort estimate
 
-| Phase | Focus | Est. effort |
-|-------|-------|-------------|
-| 0 | Engine fixes | 3–5 days |
-| 1 | Complete current tabs | 5–7 days |
-| 2 | Points & Streaks admin | 5–7 days |
-| 3 | Quests | 8–10 days |
-| 4 | Rewards shop | 8–10 days |
-| 5 | Seasonal events | 5–7 days |
-| 6 | Advanced + polish | 8–12 days |
-| **Total** | | **~8–12 weeks** (1–2 engineers) |
+| Phase     | Focus                  | Est. effort                     |
+| --------- | ---------------------- | ------------------------------- |
+| 0         | Engine fixes           | 3–5 days                        |
+| 1         | Complete current tabs  | 5–7 days                        |
+| 2         | Points & Streaks admin | 5–7 days                        |
+| 3         | Quests                 | 8–10 days                       |
+| 4         | Rewards shop           | 8–10 days                       |
+| 5         | Seasonal events        | 5–7 days                        |
+| 6         | Advanced + polish      | 8–12 days                       |
+| **Total** |                        | **~8–12 weeks** (1–2 engineers) |
 
 ---
 
@@ -846,16 +865,16 @@ When implementation is approved, begin with:
 
 ## Permissions (existing)
 
-| Permission | Roles |
-|------------|-------|
-| `gamification.profile.read` | owner, admin, instructor, learner |
-| `badge.read` | owner, admin, instructor, moderator, learner |
-| `badge.manage` | owner, admin |
-| `leaderboard.read` | owner, admin, instructor, moderator, learner |
-| `leaderboard.manage` | owner, admin |
+| Permission                  | Roles                                        |
+| --------------------------- | -------------------------------------------- |
+| `gamification.profile.read` | owner, admin, instructor, learner            |
+| `badge.read`                | owner, admin, instructor, moderator, learner |
+| `badge.manage`              | owner, admin                                 |
+| `leaderboard.read`          | owner, admin, instructor, moderator, learner |
+| `leaderboard.manage`        | owner, admin                                 |
 
 Consider adding `gamification.rules.manage` in Phase 2 if rules editing should differ from badge management.
 
 ---
 
-*Last updated: 2026-07-07 (implementation complete). Created from admin gamification audit + industry research (TalentLMS, Docebo, Studeia, Growth Engineering, Capermint gamification mechanics taxonomy).*
+_Last updated: 2026-07-07 (implementation complete). Created from admin gamification audit + industry research (TalentLMS, Docebo, Studeia, Growth Engineering, Capermint gamification mechanics taxonomy)._

@@ -96,7 +96,9 @@ export function LocalesOverviewTab({ canManage }: LocalesOverviewTabProps) {
             <p className="text-xs font-semibold uppercase tracking-wide text-[var(--admin-on-surface-variant)]">
               {card.label}
             </p>
-            <p className="mt-2 text-2xl font-semibold text-[var(--admin-on-surface)]">{card.value}</p>
+            <p className="mt-2 text-2xl font-semibold text-[var(--admin-on-surface)]">
+              {card.value}
+            </p>
           </div>
         ))}
       </div>
@@ -106,7 +108,9 @@ export function LocalesOverviewTab({ canManage }: LocalesOverviewTabProps) {
         <dl className="mt-3 grid gap-3 text-sm sm:grid-cols-2">
           <div>
             <dt className="text-[var(--admin-on-surface-variant)]">Default locale</dt>
-            <dd className="font-mono text-[var(--admin-on-surface)]">{overview?.defaultLocale ?? "—"}</dd>
+            <dd className="font-mono text-[var(--admin-on-surface)]">
+              {overview?.defaultLocale ?? "—"}
+            </dd>
           </div>
           <div>
             <dt className="text-[var(--admin-on-surface-variant)]">Fallback locale</dt>
@@ -132,7 +136,9 @@ export function LocalesOverviewTab({ canManage }: LocalesOverviewTabProps) {
 
       <div className={localesTableShellClassName}>
         <div className="border-b border-[var(--admin-border)] px-4 py-3">
-          <h2 className="text-sm font-semibold text-[var(--admin-on-surface)]">Coverage by locale</h2>
+          <h2 className="text-sm font-semibold text-[var(--admin-on-surface)]">
+            Coverage by locale
+          </h2>
           <p className="mt-1 text-xs text-[var(--admin-on-surface-variant)]">
             Completion is measured against the canonical key registry, not raw key counts.
           </p>
@@ -153,7 +159,9 @@ export function LocalesOverviewTab({ canManage }: LocalesOverviewTabProps) {
             <tbody>
               {coverage.map((entry) => (
                 <tr key={entry.locale} className={localesTableRowClassName}>
-                  <td className="px-4 py-3 font-mono text-[var(--admin-on-surface)]">{entry.locale}</td>
+                  <td className="px-4 py-3 font-mono text-[var(--admin-on-surface)]">
+                    {entry.locale}
+                  </td>
                   <td className="px-4 py-3 text-[var(--admin-on-surface)]">
                     {entry.coveragePercent}% ({entry.translatedCount}/{entry.totalCanonicalKeys})
                   </td>

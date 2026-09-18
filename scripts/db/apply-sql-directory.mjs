@@ -4,12 +4,14 @@ import { Client } from "pg";
 
 const allowedDirectories = new Set([
   "prisma/sql/setup",
+  "prisma/sql/functions",
   "prisma/sql/rls",
   "prisma/sql/triggers",
   "prisma/sql/indexes",
   "prisma/sql/grants",
   "prisma/sql/partitions",
   "backend/prisma/sql/setup",
+  "backend/prisma/sql/functions",
   "backend/prisma/sql/rls",
   "backend/prisma/sql/triggers",
   "backend/prisma/sql/indexes",

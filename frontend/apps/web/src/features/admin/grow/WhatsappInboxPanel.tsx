@@ -71,9 +71,7 @@ export function WhatsappInboxPanel() {
     } catch (caught) {
       setMessages([]);
       setSelectedConversation(null);
-      toast.error(
-        caught instanceof ClientApiError ? caught.message : "Could not load messages.",
-      );
+      toast.error(caught instanceof ClientApiError ? caught.message : "Could not load messages.");
     } finally {
       setLoadingMessages(false);
     }
@@ -173,7 +171,9 @@ export function WhatsappInboxPanel() {
           {loadingList ? (
             <p className="p-4 text-sm text-[var(--admin-on-surface-variant)]">Loading…</p>
           ) : conversations.length === 0 ? (
-            <p className="p-4 text-sm text-[var(--admin-on-surface-variant)]">No conversations yet.</p>
+            <p className="p-4 text-sm text-[var(--admin-on-surface-variant)]">
+              No conversations yet.
+            </p>
           ) : (
             <ul className="max-h-[32rem] overflow-y-auto">
               {conversations.map((conversation) => {

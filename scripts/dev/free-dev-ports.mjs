@@ -3,7 +3,7 @@ import { execSync } from "node:child_process";
 const DEV_PORTS = [3000, 3001];
 
 function freePortOnWindows(port) {
-  let output = "";
+  let output;
   try {
     output = execSync(`netstat -ano | findstr ":${port}"`, {
       encoding: "utf8",

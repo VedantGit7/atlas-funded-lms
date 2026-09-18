@@ -1,7 +1,11 @@
 "use client";
 
 import { Upload } from "lucide-react";
-import { ghostButtonClassName, primaryButtonClassName, stickyFooterClassName } from "../readiness-admin-shared";
+import {
+  ghostButtonClassName,
+  primaryButtonClassName,
+  stickyFooterClassName,
+} from "../readiness-admin-shared";
 
 type ReadinessPolicyFooterProps = {
   resolvedCount: number;

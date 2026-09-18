@@ -131,6 +131,7 @@ export async function listTenantAuditEntries(
     FROM audit_entries
     WHERE (${query.action ?? null}::text IS NULL OR action = ${query.action ?? null})
       AND (${query.targetType ?? null}::text IS NULL OR target_type = ${query.targetType ?? null})
+      AND (${query.targetId ?? null}::text IS NULL OR target_id = ${query.targetId ?? null})
       AND (
         ${cursor?.occurredAt ?? null}::timestamptz IS NULL
         OR occurred_at < ${cursor?.occurredAt ?? null}::timestamptz
@@ -167,6 +168,7 @@ export async function listPlatformAuditEntries(
     WHERE tenant_id IS NULL
       AND (${query.action ?? null}::text IS NULL OR action = ${query.action ?? null})
       AND (${query.targetType ?? null}::text IS NULL OR target_type = ${query.targetType ?? null})
+      AND (${query.targetId ?? null}::text IS NULL OR target_id = ${query.targetId ?? null})
       AND (
         ${cursor?.occurredAt ?? null}::timestamptz IS NULL
         OR occurred_at < ${cursor?.occurredAt ?? null}::timestamptz

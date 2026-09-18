@@ -40,7 +40,12 @@ describeWithDb("practice tenant isolation", () => {
         startPracticeSession(
           tx,
           learnerCtx(fixture, "iso_start"),
-          { mode: "collection", collectionId: fixture.publishedCollectionId, maxItems: 1 },
+          {
+            mode: "collection",
+            engine: "swipe",
+            collectionId: fixture.publishedCollectionId,
+            maxItems: 1,
+          },
           "iso-start",
         ),
       ),
@@ -52,7 +57,7 @@ describeWithDb("practice tenant isolation", () => {
         startPracticeSession(
           tx,
           learnerCtx(fixture, "iso_started"),
-          { mode: "due", maxItems: 1 },
+          { mode: "due", engine: "swipe", maxItems: 1 },
           "iso-started",
         ),
     );
@@ -87,7 +92,7 @@ describeWithDb("practice tenant isolation", () => {
       await startPracticeSession(
         tx,
         learnerCtx(fixture, "rls_start"),
-        { mode: "due", maxItems: 1 },
+        { mode: "due", engine: "swipe", maxItems: 1 },
         "rls-start",
       );
     });

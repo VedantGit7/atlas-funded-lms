@@ -10,7 +10,9 @@ export const LearningPathBuilderLazy = dynamic(
   {
     loading: () => (
       <div className="flex h-full min-h-[12rem] items-center justify-center">
-        <p className="text-sm text-[var(--admin-on-surface-variant)]">Loading learning path builder…</p>
+        <p className="text-sm text-[var(--admin-on-surface-variant)]">
+          Loading learning path builder…
+        </p>
       </div>
     ),
   },

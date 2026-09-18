@@ -490,7 +490,9 @@ export const practiceRepository = {
   async listItemOptions(
     tx: TenantTx,
     itemIds: string[],
-  ): Promise<Map<string, Array<{ id: string; label: string; isCorrect: boolean | null; position: number }>>> {
+  ): Promise<
+    Map<string, Array<{ id: string; label: string; isCorrect: boolean | null; position: number }>>
+  > {
     const map = new Map<
       string,
       Array<{ id: string; label: string; isCorrect: boolean | null; position: number }>

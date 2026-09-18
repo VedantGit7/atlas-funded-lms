@@ -139,19 +139,14 @@ export async function publishEnrollmentCreatedEvent(args: {
       where m.id = ${args.membershipId}::uuid
       limit 1
     `;
-    await dispatchMarketingIntegrationWebhooks(
-      args.tx as TenantTx,
-      { tenantId: args.ctx.tenantId },
-      "purchase",
-      {
-        email: memberRows[0]?.email ?? null,
-        name: memberRows[0]?.display_name ?? null,
-        membershipId: args.membershipId,
-        courseId: args.courseId,
-        enrollmentId: args.enrollmentId,
-        source: "enrollment",
-      },
-    );
+    await dispatchMarketingIntegrationWebhooks(args.tx as TenantTx, args.ctx, "purchase", {
+      email: memberRows[0]?.email ?? null,
+      name: memberRows[0]?.display_name ?? null,
+      membershipId: args.membershipId,
+      courseId: args.courseId,
+      enrollmentId: args.enrollmentId,
+      source: "enrollment",
+    });
   } catch {
     // Webhook fan-out must never block enrollment.
   }
@@ -245,10 +240,7 @@ export async function listEnrollmentsForCourse(args: {
   };
 }
 
-export async function findEnrollmentById(args: {
-  tx: Tx;
-  enrollmentId: string;
-}): Promise<{
+export async function findEnrollmentById(args: { tx: Tx; enrollmentId: string }): Promise<{
   id: string;
   courseId: string;
   membershipId: string;
@@ -287,10 +279,7 @@ export async function findEnrollmentById(args: {
   };
 }
 
-export async function cancelEnrollment(args: {
-  tx: Tx;
-  enrollmentId: string;
-}): Promise<boolean> {
+export async function cancelEnrollment(args: { tx: Tx; enrollmentId: string }): Promise<boolean> {
   const result = await args.tx.$executeRaw`
     update enrollments
     set status = 'cancelled'

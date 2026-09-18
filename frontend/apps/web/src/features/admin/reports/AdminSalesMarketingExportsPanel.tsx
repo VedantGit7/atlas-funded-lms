@@ -47,23 +47,25 @@ function formatRelative(value: string): string {
   return `${Math.floor(hours / 24)}d ago`;
 }
 
+const DATASET_CHIP_CLASS_NAMES: Record<SmExportDataset, string> = {
+  sales:
+    "bg-[color-mix(in_srgb,var(--admin-primary)_14%,var(--admin-surface))] text-[var(--admin-primary)]",
+  coupons:
+    "bg-[color-mix(in_srgb,var(--admin-success)_14%,var(--admin-surface))] text-[var(--admin-success)]",
+  "referral-wallet":
+    "bg-[color-mix(in_srgb,var(--admin-warning)_14%,var(--admin-surface))] text-[var(--admin-warning)]",
+  "affiliate-products":
+    "bg-[color-mix(in_srgb,var(--admin-primary)_10%,var(--admin-surface-high))] text-[var(--admin-on-surface)]",
+  affiliates:
+    "bg-[color-mix(in_srgb,var(--admin-success)_10%,var(--admin-surface-high))] text-[var(--admin-on-surface)]",
+  // The event stream rather than a rollup, so it reads as its own thing in the
+  // history list.
+  attribution:
+    "bg-[color-mix(in_srgb,var(--admin-on-surface-variant)_14%,var(--admin-surface))] text-[var(--admin-on-surface-variant)]",
+};
+
 function datasetChipClassName(dataset: SmExportDataset): string {
-  if (dataset === "sales") {
-    return "bg-[color-mix(in_srgb,var(--admin-primary)_14%,var(--admin-surface))] text-[var(--admin-primary)]";
-  }
-  if (dataset === "coupons") {
-    return "bg-[color-mix(in_srgb,var(--admin-success)_14%,var(--admin-surface))] text-[var(--admin-success)]";
-  }
-  if (dataset === "referral-wallet") {
-    return "bg-[color-mix(in_srgb,var(--admin-warning)_14%,var(--admin-surface))] text-[var(--admin-warning)]";
-  }
-  if (dataset === "affiliate-products") {
-    return "bg-[color-mix(in_srgb,var(--admin-primary)_10%,var(--admin-surface-high))] text-[var(--admin-on-surface)]";
-  }
-  if (dataset === "affiliates") {
-    return "bg-[color-mix(in_srgb,var(--admin-success)_10%,var(--admin-surface-high))] text-[var(--admin-on-surface)]";
-  }
-  return "bg-[var(--admin-surface-high)] text-[var(--admin-on-surface-variant)]";
+  return DATASET_CHIP_CLASS_NAMES[dataset];
 }
 
 function healthRailClassName(item: SmExportHistoryItem): string | null {
@@ -94,7 +96,9 @@ function PolicyToggle({
       aria-checked={checked}
       aria-label={label}
       disabled={disabled}
-      onClick={() => onChange(!checked)}
+      onClick={() => {
+        onChange(!checked);
+      }}
       className={`relative h-5 w-9 shrink-0 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]/40 disabled:opacity-50 ${
         checked ? "bg-[var(--admin-primary)]" : "bg-[var(--admin-outline)]"
       }`}
@@ -346,7 +350,9 @@ export function AdminSalesMarketingExportsPanel() {
         }
       })();
     }, 2500);
-    return () => window.clearInterval(timer);
+    return () => {
+      window.clearInterval(timer);
+    };
   }, [buildingIds]);
 
   const filteredHistory = useMemo(() => {
@@ -485,7 +491,9 @@ export function AdminSalesMarketingExportsPanel() {
           </button>
           <button
             type="button"
-            onClick={() => openNewExport(false)}
+            onClick={() => {
+              openNewExport(false);
+            }}
             className={`${primaryButtonClassName} h-10 gap-2`}
           >
             <Plus className="h-4 w-4" aria-hidden="true" />
@@ -518,7 +526,9 @@ export function AdminSalesMarketingExportsPanel() {
         <input
           type="search"
           value={searchQuery}
-          onChange={(event) => setSearchQuery(event.target.value)}
+          onChange={(event) => {
+            setSearchQuery(event.target.value);
+          }}
           placeholder="Search exports by file, dataset, or scope…"
           aria-label="Search export history"
           className="h-10 w-full rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface-low)] pr-3 pl-9 text-sm text-[var(--admin-on-surface)] outline-none focus:border-[var(--admin-primary)]"
@@ -528,7 +538,9 @@ export function AdminSalesMarketingExportsPanel() {
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
         <section className="flex flex-col overflow-hidden rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface)] lg:col-span-8">
           <div className="border-b border-[var(--admin-border)] bg-[var(--admin-surface-low)] p-4">
-            <h3 className="text-base font-semibold text-[var(--admin-on-surface)]">Export history</h3>
+            <h3 className="text-base font-semibold text-[var(--admin-on-surface)]">
+              Export history
+            </h3>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full border-collapse text-left">
@@ -659,7 +671,9 @@ export function AdminSalesMarketingExportsPanel() {
                               ) : failed ? (
                                 <button
                                   type="button"
-                                  onClick={() => setFailureItem(item)}
+                                  onClick={() => {
+                                    setFailureItem(item);
+                                  }}
                                   className="inline-flex h-6 items-center rounded-sm bg-[color-mix(in_srgb,var(--admin-danger)_12%,var(--admin-surface))] px-2 text-xs font-medium text-[var(--admin-danger)]"
                                 >
                                   Failed
@@ -798,7 +812,9 @@ export function AdminSalesMarketingExportsPanel() {
 
           <button
             type="button"
-            onClick={() => openNewExport(true)}
+            onClick={() => {
+              openNewExport(true);
+            }}
             className="flex min-h-[120px] flex-col items-center justify-center gap-2 rounded-sm border border-dashed border-[var(--admin-outline)] bg-[var(--admin-surface-low)] p-6 text-[var(--admin-on-surface-variant)] transition-colors hover:border-[var(--admin-primary)] hover:text-[var(--admin-primary)]"
           >
             <Plus className="h-5 w-5" aria-hidden="true" />
@@ -817,7 +833,9 @@ export function AdminSalesMarketingExportsPanel() {
         columnsByDataset={payload.columnsByDataset}
         capabilities={payload.capabilities}
         initialScheduleEnabled={modalSchedulePreset}
-        onClose={() => setModalOpen(false)}
+        onClose={() => {
+          setModalOpen(false);
+        }}
         onCreated={(run, schedule) => {
           statusRef.current.set(run.id, run.status);
           setPayload((current) =>
@@ -837,7 +855,9 @@ export function AdminSalesMarketingExportsPanel() {
         <FailureDrawer
           item={failureItem}
           busy={busyId === failureItem.id}
-          onClose={() => setFailureItem(null)}
+          onClose={() => {
+            setFailureItem(null);
+          }}
           onRetry={() => void onRetry(failureItem)}
         />
       ) : null}
@@ -858,7 +878,9 @@ export function AdminSalesMarketingExportsPanel() {
           <button
             type="button"
             aria-label="Dismiss"
-            onClick={() => setToastRun(null)}
+            onClick={() => {
+              setToastRun(null);
+            }}
             className="text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-on-surface)]"
           >
             <X className="h-4 w-4" aria-hidden="true" />

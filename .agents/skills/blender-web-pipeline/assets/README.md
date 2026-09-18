@@ -5,14 +5,18 @@ Template files and resources for Blender to web workflows.
 ## Included Assets
 
 ### export_template.blend
+
 Pre-configured Blender template with:
+
 - Optimized export settings
 - PBR material setup
 - LOD examples
 - Proper UV unwrapping
 
 ### shader_library/
+
 Collection of web-optimized PBR shaders:
+
 - Basic PBR material
 - Emissive material
 - Transparent material

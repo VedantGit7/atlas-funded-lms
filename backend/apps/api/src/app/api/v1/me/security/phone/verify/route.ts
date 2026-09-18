@@ -1,16 +1,16 @@
 import type { z } from "zod";
 import { createTenantRoute } from "@atlas/api";
 import { verifyPhoneChange } from "@atlas/auth";
-import {
-  AccountSecurityOkResponseSchema,
-  VerifyPhoneRequestSchema,
-} from "@atlas/domain-identity";
+import { AccountSecurityOkResponseSchema, VerifyPhoneRequestSchema } from "@atlas/domain-identity";
 import { emitSecurityNotification } from "../../../../../../../lib/account-security-orchestrator";
 import { securityMutationMetadata } from "../../route.metadata";
 
 type VerifyPhoneBody = z.output<typeof VerifyPhoneRequestSchema>;
 
-export const POST = createTenantRoute<VerifyPhoneBody, z.output<typeof AccountSecurityOkResponseSchema>>({
+export const POST = createTenantRoute<
+  VerifyPhoneBody,
+  z.output<typeof AccountSecurityOkResponseSchema>
+>({
   metadata: securityMutationMetadata,
   body: VerifyPhoneRequestSchema,
   output: AccountSecurityOkResponseSchema,

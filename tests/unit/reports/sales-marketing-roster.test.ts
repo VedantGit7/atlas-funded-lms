@@ -210,7 +210,14 @@ describe("sales marketing roster dto", () => {
           hasNextPage: true,
           hasPreviousPage: false,
         },
-        columns: ["learner_name", "email", "product_title", "discount_cents", "final_amount_cents", "applied_at"],
+        columns: [
+          "learner_name",
+          "email",
+          "product_title",
+          "discount_cents",
+          "final_amount_cents",
+          "applied_at",
+        ],
       },
     });
     expect(response.data.summary.firstTimeBuyerPercent).toBe(72.6);
@@ -250,7 +257,14 @@ describe("sales marketing roster dto", () => {
           hasNextPage: false,
           hasPreviousPage: false,
         },
-        columns: ["learner_name", "referral_code", "successful_referrals", "credit_earned", "wallet_balance", "signed_up_at"],
+        columns: [
+          "learner_name",
+          "referral_code",
+          "successful_referrals",
+          "credit_earned",
+          "wallet_balance",
+          "signed_up_at",
+        ],
         summary: {
           successfulReferrals: 418,
           previousSuccessfulReferrals: 373,

@@ -26,9 +26,12 @@ export function createPublicRouteHandler(
           route: pathname,
           routeGroup: inferRouteGroup(pathname),
           actorPlane: "public",
+          // Log the code this route will actually answer with, derived from the
+          // same envelope the catch below responds with, so the two cannot drift.
+          classifyError: (error) => toSafeErrorEnvelope(error, requestId).body.error.code,
         },
         async () => {
-          enforcePublicRateLimit({
+          await enforcePublicRateLimit({
             req,
             bucket: metadata.rateLimit,
             requestId,

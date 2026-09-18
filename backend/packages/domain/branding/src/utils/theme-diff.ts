@@ -10,8 +10,6 @@ const TOKEN_LABELS: Record<keyof UpdateTenantThemeRequest["tokens"], string> = {
   primary: "Primary",
   accent: "Accent",
   header: "Header",
-  background: "Background",
-  foreground: "Foreground",
   radius: "Corner radius",
   modeDefault: "Default appearance",
 };
@@ -29,8 +27,8 @@ export function diffThemeTokens(
     .filter((key) => baseline[key] !== draft[key])
     .map((key) => ({
       key,
-      before: baseline[key] != null ? String(baseline[key]) : undefined,
-      after: draft[key] != null ? String(draft[key]) : undefined,
+      before: baseline[key] != null ? baseline[key] : undefined,
+      after: draft[key] != null ? draft[key] : undefined,
     }));
 }
 

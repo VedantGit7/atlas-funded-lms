@@ -127,6 +127,22 @@ export async function fetchCustomFieldRoster(filters: {
   );
 }
 
+/**
+ * Every custom-field definition available to the report, independent of the
+ * roster query.
+ *
+ * The column picker used to be populated from whatever `fieldDefinitions` the
+ * roster response happened to carry, which makes the list of *available*
+ * columns depend on the current filter and page — a field with no matching rows
+ * on this page simply could not be chosen. This endpoint exists precisely to
+ * decouple the two and had no caller.
+ */
+export async function fetchCustomFieldReportDefinitions() {
+  return clientApi.get<{ data: { items: CustomFieldDefinitionColumn[] } }>(
+    "/api/v1/reports/custom-field/definitions",
+  );
+}
+
 export async function exportCustomFieldReport(body: Record<string, unknown>) {
   return clientApi.post<{ data: { runId: string; status: string; emailed: boolean } }>(
     "/api/v1/reports/custom-field/export",

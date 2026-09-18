@@ -59,15 +59,12 @@ function resolveOverviewWindow(query: EnrollmentOverviewQuery): {
   defaultFrom.setUTCHours(0, 0, 0, 0);
 
   if (query.enrolledFrom || query.enrolledTo) {
-    const windowFrom = query.enrolledFrom
-      ? new Date(query.enrolledFrom)
-      : defaultFrom;
+    const windowFrom = query.enrolledFrom ? new Date(query.enrolledFrom) : defaultFrom;
     const windowTo = query.enrolledTo ? new Date(query.enrolledTo) : now;
-    const days =
-      Math.max(
-        1,
-        Math.round((windowTo.getTime() - windowFrom.getTime()) / (24 * 60 * 60 * 1000)) + 1,
-      );
+    const days = Math.max(
+      1,
+      Math.round((windowTo.getTime() - windowFrom.getTime()) / (24 * 60 * 60 * 1000)) + 1,
+    );
     return {
       windowFrom,
       windowTo,
@@ -169,9 +166,7 @@ export async function getEnrollmentOverview(
       ? summary.totalCount > 0
         ? 100
         : null
-      : Math.round(
-          ((summary.totalCount - previousPeriodCount) / previousPeriodCount) * 1000,
-        ) / 10;
+      : Math.round(((summary.totalCount - previousPeriodCount) / previousPeriodCount) * 1000) / 10;
 
   return enrollmentOverviewResponseSchema.parse({
     data: {

@@ -54,9 +54,7 @@ function formatError(error: unknown): string {
 export function FeatureFlagsAdmin({ flags }: FeatureFlagsAdminProps) {
   const router = useRouter();
   const [busyKey, setBusyKey] = useState<string | null>(null);
-  const [message, setMessage] = useState<{ tone: "error" | "success"; text: string } | null>(
-    null,
-  );
+  const [message, setMessage] = useState<{ tone: "error" | "success"; text: string } | null>(null);
   const [filter, setFilter] = useState("");
   const [page, setPage] = useState(1);
   const [pendingOverride, setPendingOverride] = useState<PendingOverride | null>(null);
@@ -68,10 +66,7 @@ export function FeatureFlagsAdmin({ flags }: FeatureFlagsAdminProps) {
 
   const totalPages = Math.max(1, Math.ceil(filteredFlags.length / PAGE_SIZE));
   const currentPage = Math.min(page, totalPages);
-  const pageFlags = filteredFlags.slice(
-    (currentPage - 1) * PAGE_SIZE,
-    currentPage * PAGE_SIZE,
-  );
+  const pageFlags = filteredFlags.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
   const rangeStart = filteredFlags.length === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1;
   const rangeEnd = Math.min(currentPage * PAGE_SIZE, filteredFlags.length);
 
@@ -151,7 +146,9 @@ export function FeatureFlagsAdmin({ flags }: FeatureFlagsAdminProps) {
 
       <div className={cardClassName}>
         <div className={cardHeaderClassName}>
-          <h2 className="text-[15px] font-semibold text-[var(--admin-on-surface)]">Feature flags</h2>
+          <h2 className="text-[15px] font-semibold text-[var(--admin-on-surface)]">
+            Feature flags
+          </h2>
           <div className="relative w-full max-w-xs">
             <Search
               className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--admin-on-surface-variant)]"
@@ -291,7 +288,8 @@ function FeatureFlagRow({
       </div>
 
       <div className="w-full sm:w-28">
-        {booleanValue || (flag.value && typeof flag.value === "object" && "enabled" in flag.value) ? (
+        {booleanValue ||
+        (flag.value && typeof flag.value === "object" && "enabled" in flag.value) ? (
           <span className={enabledBadgeClassName(enabled)}>{enabled ? "Enabled" : "Disabled"}</span>
         ) : (
           <span className="inline-flex rounded bg-[var(--admin-surface-high)] px-1.5 py-0.5 font-mono text-xs text-[var(--admin-on-surface)]">

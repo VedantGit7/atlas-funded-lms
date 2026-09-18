@@ -1,4 +1,5 @@
 import type { TenantTx } from "@atlas/db";
+import { parseEntitlementValue } from "../schemas/entitlement-value";
 
 export type ActiveEntitlementRow = {
   key: string;
@@ -7,8 +8,14 @@ export type ActiveEntitlementRow = {
   expires_at: Date | null;
 };
 
+/**
+ * M11. The old test was `value !== false && value !== null`, which treated any
+ * object as enabled — including `{ "enabled": false }`, the exact shape a
+ * quantitative entitlement uses to express "switched off". Parsing the value
+ * properly is what makes the two forms safe to mix.
+ */
 function isEntitlementEnabled(value: unknown): boolean {
-  return value !== false && value !== null;
+  return parseEntitlementValue(value).enabled;
 }
 
 export async function findActiveEntitlementByKey(

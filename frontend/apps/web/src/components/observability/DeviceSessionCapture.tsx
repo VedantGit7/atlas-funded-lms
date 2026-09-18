@@ -3,9 +3,24 @@
 import { useEffect, useRef } from "react";
 import { clientApi } from "../../lib/client-api";
 
+/**
+ * The DOM lib types `crypto` and `crypto.subtle` as always present, but a
+ * browser on an insecure origin (plain HTTP beyond localhost) exposes neither.
+ * That is exactly when the non-crypto fallback exists to serve, so the lookup
+ * goes through `unknown` rather than trusting the lib type.
+ */
+function readSubtleCrypto(): SubtleCrypto | undefined {
+  const candidate: unknown = globalThis.crypto;
+  if (candidate === null || typeof candidate !== "object") return undefined;
+  const subtle = (candidate as { subtle?: SubtleCrypto }).subtle;
+  return typeof subtle === "object" ? subtle : undefined;
+}
+
 async function hashDeviceFingerprint(input: string): Promise<string> {
-  if (typeof crypto !== "undefined" && crypto.subtle) {
-    const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(input));
+  const subtle = readSubtleCrypto();
+
+  if (subtle) {
+    const digest = await subtle.digest("SHA-256", new TextEncoder().encode(input));
     return Array.from(new Uint8Array(digest))
       .map((byte) => byte.toString(16).padStart(2, "0"))
       .join("")

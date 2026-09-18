@@ -98,8 +98,8 @@ async function resolveRecipientIds(
 
 async function requireSenderChannel(tx: TenantTx) {
   const channel = await readTenantEmailChannel(tx, "marketingEmail");
-  const fromEmail = channel.fromEmail?.trim();
-  const fromName = channel.fromName?.trim();
+  const fromEmail = channel.fromEmail.trim();
+  const fromName = channel.fromName.trim();
   const provider = getEmailProvider();
   if ((!fromEmail || !fromName) && !provider.isConfigured()) {
     throw validationError(
@@ -227,7 +227,7 @@ export async function listMarketingEmailCampaigns(
   await processDueScheduledMarketingEmails(tx, ctx);
   const query = marketingEmailCampaignsListQuerySchema.parse(rawQuery ?? {});
   const listArgs = {
-    ...(query.status ? { status: query.status } : {}),
+    status: query.status,
     ...(query.q ? { q: query.q } : {}),
     ...(query.createdOn ? { createdOn: query.createdOn } : {}),
     limit: query.limit,
@@ -250,9 +250,7 @@ export async function getMarketingEmailCampaignsSummary(tx: TenantTx, ctx: Servi
       ? summary.reach_30d > 0
         ? 100
         : null
-      : Math.round(
-          ((summary.reach_30d - summary.reach_prev_30d) / summary.reach_prev_30d) * 100,
-        );
+      : Math.round(((summary.reach_30d - summary.reach_prev_30d) / summary.reach_prev_30d) * 100);
 
   return marketingEmailCampaignsSummaryResponseSchema.parse({
     data: {
@@ -338,11 +336,7 @@ export async function setMarketingEmailAudience(
   return marketingEmailCampaignResponseSchema.parse({ data: toDto(row) });
 }
 
-export async function listMarketingEmailRecipients(
-  tx: TenantTx,
-  _ctx: ServiceCtx,
-  id: string,
-) {
+export async function listMarketingEmailRecipients(tx: TenantTx, _ctx: ServiceCtx, id: string) {
   const existing = await requireCampaign(tx, id);
   if (!existing.audience_type) {
     return marketingEmailRecipientsResponseSchema.parse({
@@ -394,13 +388,13 @@ export async function composeMarketingEmail(
   return marketingEmailCampaignResponseSchema.parse({ data: toDto(row) });
 }
 
-export async function listMarketingEmailTemplates() {
+export function listMarketingEmailTemplates() {
   return marketingEmailTemplatesResponseSchema.parse({
     data: { items: MARKETING_EMAIL_TEMPLATES.map((t) => ({ ...t })) },
   });
 }
 
-export async function checkMarketingEmailSpam(_tx: TenantTx, rawBody: unknown) {
+export function checkMarketingEmailSpam(_tx: TenantTx, rawBody: unknown) {
   const body = spamCheckBodySchema.parse(rawBody);
   const result = detectMarketingEmailSpam(body.subject, body.bodyHtml);
   return spamCheckResponseSchema.parse({ data: result });
@@ -447,7 +441,8 @@ export async function sendMarketingEmail(
       );
     }
     const channel = await requireSenderChannel(tx);
-    const testEmail = body.testEmail!;
+    const testEmail = body.testEmail;
+    if (!testEmail) throw validationError("A test email address is required in test mode.");
     const renderedBody = renderMarketingEmailBody(existing.body_html, {
       learnerName: "there",
     });
@@ -472,7 +467,8 @@ export async function sendMarketingEmail(
   }
 
   if (body.mode === "schedule") {
-    const scheduledAt = new Date(body.scheduledAt!);
+    if (!body.scheduledAt) throw validationError("A schedule time is required in schedule mode.");
+    const scheduledAt = new Date(body.scheduledAt);
     if (Number.isNaN(scheduledAt.getTime()) || scheduledAt.getTime() <= Date.now()) {
       throw validationError("Schedule time must be in the future.");
     }

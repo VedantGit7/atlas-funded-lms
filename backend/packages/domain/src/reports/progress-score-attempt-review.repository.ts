@@ -241,7 +241,7 @@ export const progressScoreAttemptReviewRepository = {
         points: number;
         stem_json: unknown;
         item_type_key: string;
-        answer_json: unknown | null;
+        answer_json: unknown;
         is_correct: boolean | null;
         points_awarded: number | null;
         has_answer: boolean;
@@ -321,9 +321,7 @@ export const progressScoreAttemptReviewRepository = {
     return items.map((item) => {
       const itemOptions = optionsByItem.get(item.item_id) ?? [];
       const selectedIds = item.has_answer ? readSelectedOptionIds(item.answer_json) : [];
-      const correctIds = itemOptions
-        .filter((o) => o.is_correct === true)
-        .map((o) => o.option_id);
+      const correctIds = itemOptions.filter((o) => o.is_correct === true).map((o) => o.option_id);
       const isManual = MANUAL_TYPES.has(item.item_type_key);
       let outcome: "correct" | "incorrect" | "unanswered" | "needs_grading";
       if (!item.has_answer) {
@@ -346,14 +344,12 @@ export const progressScoreAttemptReviewRepository = {
         position: item.position,
         stem: stemText(item.stem_json),
         itemTypeKey: item.item_type_key,
-        pointsMax: Number(item.points),
-        pointsAwarded: item.points_awarded == null ? null : Number(item.points_awarded),
+        pointsMax: item.points,
+        pointsAwarded: item.points_awarded == null ? null : item.points_awarded,
         outcome,
         durationSeconds: item.has_answer ? readDurationSeconds(item.answer_json) : null,
         cohortCorrectRatePct:
-          item.cohort_correct_rate == null
-            ? null
-            : Math.round(item.cohort_correct_rate * 10) / 10,
+          item.cohort_correct_rate == null ? null : Math.round(item.cohort_correct_rate * 10) / 10,
         options: itemOptions.map((o) => ({
           optionId: o.option_id,
           label: optionLabel(o.option_json),

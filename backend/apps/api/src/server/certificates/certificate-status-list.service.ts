@@ -39,7 +39,7 @@ function setBit(buffer: Uint8Array, index: number, value: boolean): void {
   if (byteIndex >= buffer.length) {
     throw new Error(`Status list index ${index} exceeds capacity.`);
   }
-  const bitMask = 0x80 >> index % 8;
+  const bitMask = 0x80 >> (index % 8);
   if (value) {
     buffer[byteIndex] = (buffer[byteIndex] ?? 0) | bitMask;
   } else {
@@ -49,7 +49,7 @@ function setBit(buffer: Uint8Array, index: number, value: boolean): void {
 
 export function readBit(buffer: Uint8Array, index: number): boolean {
   const byteIndex = Math.floor(index / 8);
-  const bitMask = 0x80 >> index % 8;
+  const bitMask = 0x80 >> (index % 8);
   return ((buffer[byteIndex] ?? 0) & bitMask) !== 0;
 }
 
@@ -103,9 +103,7 @@ export async function getEncodedStatusListCredential(args: {
   }
 
   return {
-    "@context": [
-      "https://www.w3.org/ns/credentials/v2",
-    ],
+    "@context": ["https://www.w3.org/ns/credentials/v2"],
     id: args.publicUrl,
     type: ["VerifiableCredential", "BitstringStatusListCredential"],
     validFrom: list.updated_at.toISOString(),

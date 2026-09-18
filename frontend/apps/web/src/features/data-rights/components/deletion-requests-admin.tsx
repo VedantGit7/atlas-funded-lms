@@ -141,7 +141,9 @@ function FileRequestDialog({
       if (event.key === "Escape" && !busy) onClose();
     }
     document.addEventListener("keydown", onKeyDown);
-    return () => document.removeEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+    };
   }, [open, busy, onClose]);
 
   if (!open) return null;
@@ -180,7 +182,8 @@ function FileRequestDialog({
 
         <div className="space-y-4">
           <div className="rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-3 py-2 text-sm text-[var(--admin-on-surface-variant)]">
-            Target type: <span className="font-semibold text-[var(--admin-on-surface)]">Membership</span>
+            Target type:{" "}
+            <span className="font-semibold text-[var(--admin-on-surface)]">Membership</span>
           </div>
 
           {canFileForOthers ? (
@@ -272,7 +275,9 @@ function ProcessDialog({
       if (event.key === "Escape" && !busy) onClose();
     }
     document.addEventListener("keydown", onKeyDown);
-    return () => document.removeEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+    };
   }, [open, busy, onClose]);
 
   if (!open || !request) return null;
@@ -367,7 +372,9 @@ function DetailsDialog({ request, onClose }: DetailsDialogProps) {
       if (event.key === "Escape") onClose();
     }
     document.addEventListener("keydown", onKeyDown);
-    return () => document.removeEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+    };
   }, [request, onClose]);
 
   if (!request) return null;
@@ -405,7 +412,9 @@ function DetailsDialog({ request, onClose }: DetailsDialogProps) {
           </div>
           <div className="flex justify-between gap-4">
             <dt className="text-[var(--admin-on-surface-variant)]">Requested</dt>
-            <dd className="text-[var(--admin-on-surface)]">{new Date(request.createdAt).toLocaleString()}</dd>
+            <dd className="text-[var(--admin-on-surface)]">
+              {new Date(request.createdAt).toLocaleString()}
+            </dd>
           </div>
           {request.completedAt ? (
             <div className="flex justify-between gap-4">
@@ -457,7 +466,10 @@ export function DeletionRequestsAdmin({
     () => filterDeletionRequests(requests, searchQuery),
     [requests, searchQuery],
   );
-  const pageRequests = useMemo(() => paginateRequests(filteredRequests, page), [filteredRequests, page]);
+  const pageRequests = useMemo(
+    () => paginateRequests(filteredRequests, page),
+    [filteredRequests, page],
+  );
   const pageCount = totalDeletionPages(filteredRequests.length);
   const active = hasActiveDeletions(requests);
 
@@ -472,7 +484,9 @@ export function DeletionRequestsAdmin({
     const timer = window.setInterval(() => {
       void refreshRequests().catch(() => undefined);
     }, 4000);
-    return () => window.clearInterval(timer);
+    return () => {
+      window.clearInterval(timer);
+    };
   }, [active, refreshRequests]);
 
   useEffect(() => {
@@ -481,9 +495,11 @@ export function DeletionRequestsAdmin({
     let index = 0;
     const timer = window.setInterval(() => {
       index = (index + 1) % dots.length;
-      setPollingLabel(`Checking for updates${dots[index]}`);
+      setPollingLabel(`Checking for updates${dots[index] ?? ""}`);
     }, 900);
-    return () => window.clearInterval(timer);
+    return () => {
+      window.clearInterval(timer);
+    };
   }, [active]);
 
   useEffect(() => {
@@ -586,7 +602,10 @@ export function DeletionRequestsAdmin({
             </p>
           ) : null}
 
-          <section className={deletionsTableShellClassName} aria-labelledby="deletion-requests-heading">
+          <section
+            className={deletionsTableShellClassName}
+            aria-labelledby="deletion-requests-heading"
+          >
             <h2 id="deletion-requests-heading" className="sr-only">
               Deletion requests
             </h2>
@@ -654,16 +673,24 @@ export function DeletionRequestsAdmin({
                   <Table className="min-w-[960px] border-collapse">
                     <TableHead>
                       <TableRow className="border-b border-[var(--admin-border)] hover:bg-transparent">
-                        <TableHeaderCell className={`px-4 py-3 sm:px-5 ${deletionsTableHeadClassName}`}>
+                        <TableHeaderCell
+                          className={`px-4 py-3 sm:px-5 ${deletionsTableHeadClassName}`}
+                        >
                           Status
                         </TableHeaderCell>
-                        <TableHeaderCell className={`px-4 py-3 sm:px-5 ${deletionsTableHeadClassName}`}>
+                        <TableHeaderCell
+                          className={`px-4 py-3 sm:px-5 ${deletionsTableHeadClassName}`}
+                        >
                           Target
                         </TableHeaderCell>
-                        <TableHeaderCell className={`px-4 py-3 sm:px-5 ${deletionsTableHeadClassName}`}>
+                        <TableHeaderCell
+                          className={`px-4 py-3 sm:px-5 ${deletionsTableHeadClassName}`}
+                        >
                           Requested by
                         </TableHeaderCell>
-                        <TableHeaderCell className={`px-4 py-3 sm:px-5 ${deletionsTableHeadClassName}`}>
+                        <TableHeaderCell
+                          className={`px-4 py-3 sm:px-5 ${deletionsTableHeadClassName}`}
+                        >
                           Reason
                         </TableHeaderCell>
                         <TableHeaderCell
@@ -671,7 +698,9 @@ export function DeletionRequestsAdmin({
                         >
                           Requested
                         </TableHeaderCell>
-                        <TableHeaderCell className={`px-4 py-3 sm:px-5 ${deletionsTableHeadClassName}`}>
+                        <TableHeaderCell
+                          className={`px-4 py-3 sm:px-5 ${deletionsTableHeadClassName}`}
+                        >
                           Grace period
                         </TableHeaderCell>
                         <TableHeaderCell
@@ -684,7 +713,10 @@ export function DeletionRequestsAdmin({
                     <TableBody>
                       {refreshing
                         ? Array.from({ length: 3 }).map((_, index) => (
-                            <TableRow key={`skeleton-${index}`} className={deletionsTableRowClassName}>
+                            <TableRow
+                              key={`skeleton-${index}`}
+                              className={deletionsTableRowClassName}
+                            >
                               {Array.from({ length: 7 }).map((__, cellIndex) => (
                                 <TableCell key={cellIndex} className="px-4 py-4 sm:px-5">
                                   <Skeleton className="h-4 w-full max-w-[8rem] bg-[var(--admin-surface-high)]" />
@@ -698,7 +730,11 @@ export function DeletionRequestsAdmin({
                             return (
                               <TableRow
                                 key={request.id}
-                                className={muted ? deletionsTableRowMutedClassName : deletionsTableRowClassName}
+                                className={
+                                  muted
+                                    ? deletionsTableRowMutedClassName
+                                    : deletionsTableRowClassName
+                                }
                               >
                                 <TableCell className="px-4 py-4 sm:px-5">
                                   <DeletionStatusBadge status={request.status} />
@@ -708,7 +744,9 @@ export function DeletionRequestsAdmin({
                                     <span className="text-sm font-semibold text-[var(--admin-on-surface)]">
                                       {formatTargetType(request.targetType)}
                                     </span>
-                                    <span className={deletionsTargetIdClassName}>{formatShortId(request.targetId)}</span>
+                                    <span className={deletionsTargetIdClassName}>
+                                      {formatShortId(request.targetId)}
+                                    </span>
                                   </div>
                                 </TableCell>
                                 <TableCell className="px-4 py-4 text-sm text-[var(--admin-on-surface)] sm:px-5">
@@ -723,11 +761,15 @@ export function DeletionRequestsAdmin({
                                       {request.reason}
                                     </span>
                                   ) : (
-                                    <span className="text-sm text-[var(--admin-on-surface-variant)]">—</span>
+                                    <span className="text-sm text-[var(--admin-on-surface-variant)]">
+                                      —
+                                    </span>
                                   )}
                                 </TableCell>
                                 <TableCell className="px-4 py-4 text-center text-sm text-[var(--admin-on-surface-variant)] sm:px-5">
-                                  <time dateTime={request.createdAt}>{formatRelativeTime(request.createdAt)}</time>
+                                  <time dateTime={request.createdAt}>
+                                    {formatRelativeTime(request.createdAt)}
+                                  </time>
                                 </TableCell>
                                 <TableCell className="px-4 py-4 sm:px-5">
                                   {grace.startsWith("Executes") ? (
@@ -736,7 +778,9 @@ export function DeletionRequestsAdmin({
                                       {grace}
                                     </span>
                                   ) : (
-                                    <span className="text-sm text-[var(--admin-on-surface-variant)]">{grace}</span>
+                                    <span className="text-sm text-[var(--admin-on-surface-variant)]">
+                                      {grace}
+                                    </span>
                                   )}
                                 </TableCell>
                                 <TableCell className="px-4 py-4 text-right sm:px-5">
@@ -769,7 +813,9 @@ export function DeletionRequestsAdmin({
                                         Details
                                       </button>
                                     ) : (
-                                      <span className="text-xs text-[var(--admin-on-surface-variant)]">No action</span>
+                                      <span className="text-xs text-[var(--admin-on-surface-variant)]">
+                                        No action
+                                      </span>
                                     )}
                                   </div>
                                 </TableCell>
@@ -842,30 +888,37 @@ export function DeletionRequestsAdmin({
             <article className={deletionsInfoCardClassName}>
               <div className="mb-2 flex items-center gap-2 text-[var(--admin-danger)]">
                 <Trash2 className="h-5 w-5" aria-hidden="true" />
-                <h3 className="text-base font-semibold text-[var(--admin-on-surface)]">Irreversible</h3>
+                <h3 className="text-base font-semibold text-[var(--admin-on-surface)]">
+                  Irreversible
+                </h3>
               </div>
               <p className="text-sm text-[var(--admin-on-surface-variant)]">
-                Processing a queued request permanently removes membership-linked learner data. This cannot be
-                undone.
+                Processing a queued request permanently removes membership-linked learner data. This
+                cannot be undone.
               </p>
             </article>
             <article className={deletionsInfoCardClassName}>
               <div className="mb-2 flex items-center gap-2 text-[var(--admin-primary)]">
                 <ShieldAlert className="h-5 w-5" aria-hidden="true" />
-                <h3 className="text-base font-semibold text-[var(--admin-on-surface)]">Permissions</h3>
+                <h3 className="text-base font-semibold text-[var(--admin-on-surface)]">
+                  Permissions
+                </h3>
               </div>
               <p className="text-sm text-[var(--admin-on-surface-variant)]">
-                Filing requires <code className="text-xs">data.deletion.request</code>. Processing requires{" "}
-                <code className="text-xs">data.deletion.manage</code>.
+                Filing requires <code className="text-xs">data.deletion.request</code>. Processing
+                requires <code className="text-xs">data.deletion.manage</code>.
               </p>
             </article>
             <article className={deletionsInfoCardClassName}>
               <div className="mb-2 flex items-center gap-2 text-[var(--admin-success)]">
                 <CheckCircle2 className="h-5 w-5" aria-hidden="true" />
-                <h3 className="text-base font-semibold text-[var(--admin-on-surface)]">Audit trail</h3>
+                <h3 className="text-base font-semibold text-[var(--admin-on-surface)]">
+                  Audit trail
+                </h3>
               </div>
               <p className="text-sm text-[var(--admin-on-surface-variant)]">
-                Every filed and processed request is recorded in the tenant audit log for compliance review.
+                Every filed and processed request is recorded in the tenant audit log for compliance
+                review.
               </p>
             </article>
           </div>

@@ -37,10 +37,7 @@ function formatError(error: unknown): string {
   return "Module action failed.";
 }
 
-function initialExpandedIds(
-  modules: ModuleItem[],
-  selectedModuleId: string | null,
-): Set<string> {
+function initialExpandedIds(modules: ModuleItem[], selectedModuleId: string | null): Set<string> {
   const ids = new Set<string>();
   const selected = selectedModuleId ?? modules[0]?.id;
   if (selected) ids.add(selected);
@@ -160,8 +157,7 @@ export function CourseModuleTree({
       return next;
     });
     setLessonsByModule((current) => {
-      const next = { ...current };
-      delete next[moduleId];
+      const { [moduleId]: _removed, ...next } = current;
       return next;
     });
     void refreshModules();
@@ -301,7 +297,9 @@ export function CourseModuleTree({
 
                     <button
                       type="button"
-                      aria-label={isExpanded ? `Collapse ${module.title}` : `Expand ${module.title}`}
+                      aria-label={
+                        isExpanded ? `Collapse ${module.title}` : `Expand ${module.title}`
+                      }
                       aria-expanded={isExpanded}
                       className="mt-0.5 shrink-0 rounded p-0.5 text-[var(--admin-on-surface-variant)] transition-colors hover:bg-[var(--admin-surface-high)] hover:text-[var(--admin-on-surface)]"
                       onClick={() => {
@@ -334,8 +332,7 @@ export function CourseModuleTree({
                           </span>
                           {!isExpanded ? (
                             <span className={builderHelperClassName}>
-                              {module.lessonCount}{" "}
-                              {module.lessonCount === 1 ? "lesson" : "lessons"}
+                              {module.lessonCount} {module.lessonCount === 1 ? "lesson" : "lessons"}
                             </span>
                           ) : null}
                         </button>

@@ -177,7 +177,9 @@ DECLARE
     'live_attendance',
     'messenger_conversations',
     'messenger_messages',
-    'bi_export_jobs'
+    'bi_export_jobs',
+    'idempotency_records',
+    'entitlement_usage'
   ];
 BEGIN
   FOREACH target_table IN ARRAY tenant_tables
@@ -225,3 +227,34 @@ BEGIN
     );
   END LOOP;
 END $$;
+
+-- ---------------------------------------------------------------------------
+-- tenant_domains: host resolution before a tenant context exists
+-- ---------------------------------------------------------------------------
+--
+-- `withGlobalDb` runs `SET LOCAL ROLE atlas_app` and resolves a hostname to a
+-- tenant *before* `app.tenant_id` is set, so the generic
+-- `tenant_domains_tenant_isolation` policy above matches nothing and lookup
+-- returns zero rows. A permissive `USING (deleted_at IS NULL)` policy existed
+-- in the dev and test databases to work around that, but it was never defined
+-- in this repository — `db:provision` did not create it, so the live databases
+-- had drifted from source, and nothing here recorded why.
+--
+-- Worse, PostgreSQL ORs permissive policies together. That policy therefore
+-- read as `(deleted_at IS NULL) OR (tenant_id = app.current_tenant_id())`,
+-- making the isolation policy unreachable: with a tenant context set, the
+-- application role could still read *every* tenant's hostnames. Verified as
+-- `atlas_app` with `app.tenant_id` set to one tenant — 2 domains across 2
+-- distinct tenants were visible.
+--
+-- Adding `app.current_tenant_id() IS NULL` scopes the exemption to exactly the
+-- pre-context case it exists for. `current_tenant_id()` returns NULL when the
+-- setting is unset or empty, so host resolution keeps working while any
+-- tenant-scoped request falls through to the isolation policy alone.
+DROP POLICY IF EXISTS tenant_domains_host_resolution ON tenant_domains;
+
+CREATE POLICY tenant_domains_host_resolution
+  ON tenant_domains
+  FOR SELECT
+  TO atlas_app, atlas_worker
+  USING (deleted_at IS NULL AND app.current_tenant_id() IS NULL);

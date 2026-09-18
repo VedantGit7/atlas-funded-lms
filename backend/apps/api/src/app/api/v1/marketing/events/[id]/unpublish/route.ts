@@ -5,7 +5,7 @@ import { marketingEventResponseSchema } from "../../../../../../../server/market
 import { mutateMarketingEventsMetadata } from "../../../../../../../server/marketing-events/marketing-events.route-metadata";
 import { unpublishMarketingEvent } from "../../../../../../../server/marketing-events/marketing-events.service";
 
-const paramsSchema = zod.object({ id: zod.string().uuid() });
+const paramsSchema = zod.object({ id: zod.uuid() });
 
 export const POST = createTenantRoute<
   Record<string, never>,

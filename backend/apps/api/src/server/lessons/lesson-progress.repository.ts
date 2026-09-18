@@ -147,9 +147,7 @@ export async function markEnrollmentCompletedIfAllLessonsDone(args: {
   membershipId: string;
   enrollmentId: string;
 }): Promise<boolean> {
-  const rows = await args.tx.$queryRaw<
-    Array<{ published_total: bigint; completed_total: bigint }>
-  >`
+  const rows = await args.tx.$queryRaw<Array<{ published_total: bigint; completed_total: bigint }>>`
     select
       (
         select count(*)::bigint

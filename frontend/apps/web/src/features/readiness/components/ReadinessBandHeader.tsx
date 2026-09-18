@@ -21,7 +21,9 @@ export function ReadinessBandHeader({ composite, legalCopy }: ReadinessBandHeade
         <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-muted text-muted-foreground">
           <Gauge className="h-7 w-7" strokeWidth={1.75} aria-hidden="true" />
         </span>
-        <h2 className="mt-5 text-xl font-semibold text-foreground">Your readiness band is on the way</h2>
+        <h2 className="mt-5 text-xl font-semibold text-foreground">
+          Your readiness band is on the way
+        </h2>
         <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-muted-foreground">
           Complete lessons, practice, and assessments to generate a composite readiness score. Your
           band updates automatically as new signals arrive.

@@ -18,6 +18,7 @@ export const listPaymentsRosterMetadata = {
 export const mutatePaymentsRosterMetadata = {
   permission: "reports.run",
   audit: "required",
+  mfa: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",
   resourceLoader: async ({ ctx }: { ctx: LoaderCtx }) =>

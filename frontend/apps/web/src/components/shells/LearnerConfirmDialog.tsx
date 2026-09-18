@@ -27,10 +27,9 @@ const TONE_BADGE: Record<ConfirmTone, string> = {
 };
 
 const TONE_CONFIRM_BTN: Record<ConfirmTone, string> = {
-  primary:
-    "bg-primary text-primary-foreground hover:opacity-90 focus-visible:ring-primary/50",
+  primary: "bg-primary text-primary-foreground hover:opacity-90 focus-visible:ring-primary/50",
   danger:
-    "bg-[var(--destructive)] text-white hover:opacity-90 focus-visible:ring-[var(--destructive)]/50",
+    "bg-[var(--destructive)] text-[var(--destructive-foreground)] hover:opacity-90 focus-visible:ring-[var(--destructive)]/50",
 };
 
 /**
@@ -117,7 +116,9 @@ export function LearnerConfirmDialog({
         </button>
 
         {Icon ? (
-          <span className={`mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full ${TONE_BADGE[tone]}`}>
+          <span
+            className={`mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full ${TONE_BADGE[tone]}`}
+          >
             <Icon className="h-6 w-6" strokeWidth={2} aria-hidden="true" />
           </span>
         ) : null}

@@ -15,8 +15,7 @@ export const automationWorkspaceClassName =
 export const automationListPanelClassName =
   "flex min-h-[280px] w-full flex-col border-b border-[var(--admin-border)] lg:min-h-0 lg:w-[min(100%,400px)] lg:max-w-[400px] lg:shrink-0 lg:border-b-0 lg:border-r";
 
-export const automationListHeaderClassName =
-  "flex items-center justify-between gap-3 p-4 sm:p-5";
+export const automationListHeaderClassName = "flex items-center justify-between gap-3 p-4 sm:p-5";
 
 export const automationListScrollClassName = "flex-1 overflow-y-auto px-4 pb-5 sm:px-5";
 
@@ -72,9 +71,7 @@ export const automationSearchFieldClassName = notificationsSearchFieldClassName;
 export const automationJsonPreviewClassName =
   "overflow-x-auto rounded-lg bg-[var(--admin-surface-high)] p-4 font-mono text-[12px] leading-5 text-[var(--admin-on-surface)]";
 
-export function automationStatusBadgeClassName(
-  status: "ACTIVE" | "INACTIVE" | "ARCHIVED",
-): string {
+export function automationStatusBadgeClassName(status: "ACTIVE" | "INACTIVE" | "ARCHIVED"): string {
   const base =
     "rounded-full px-2 py-0.5 text-[10px] font-bold uppercase leading-tight tracking-wide";
   switch (status) {

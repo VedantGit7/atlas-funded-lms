@@ -24,14 +24,17 @@ const {
   mockList: vi.fn(),
 }));
 
-vi.mock("../../../backend/apps/api/src/server/courses/courses.repository", async (importOriginal) => {
-  const actual = await importOriginal<Record<string, unknown>>();
-  return {
-    ...actual,
-    findCourseAuthProjection: (...args: unknown[]) => mockFindCourseAuthProjection(...args),
-    findEnrollmentForMembership: (...args: unknown[]) => mockFindEnrollment(...args),
-  };
-});
+vi.mock(
+  "../../../backend/apps/api/src/server/courses/courses.repository",
+  async (importOriginal) => {
+    const actual = await importOriginal<Record<string, unknown>>();
+    return {
+      ...actual,
+      findCourseAuthProjection: (...args: unknown[]) => mockFindCourseAuthProjection(...args),
+      findEnrollmentForMembership: (...args: unknown[]) => mockFindEnrollment(...args),
+    };
+  },
+);
 
 vi.mock("../../../backend/apps/api/src/server/reviews/reviews.repository", () => ({
   upsertCourseReview: (...args: unknown[]) => mockUpsert(...args),
@@ -79,7 +82,10 @@ describe("submitCourseReview", () => {
   });
 
   it("stores a review for an enrolled learner and emits an event on creation", async () => {
-    const result = await submitCourseReview(tx, ctx, courseId, { rating: 5, comment: "Great course" });
+    const result = await submitCourseReview(tx, ctx, courseId, {
+      rating: 5,
+      comment: "Great course",
+    });
 
     expect(result.data.rating).toBe(5);
     expect(result.data.comment).toBe("Great course");

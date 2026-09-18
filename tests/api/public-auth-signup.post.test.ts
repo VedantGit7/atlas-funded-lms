@@ -32,7 +32,16 @@ const {
       fn({ $queryRaw: mockGlobalQueryRaw }),
     ),
     mockWithTenantTx: vi.fn((_ctx: unknown, fn: (tx: unknown) => unknown) =>
-      fn({ $queryRaw: vi.fn() }),
+      // The signup/login routes now apply a referral for a newly provisioned
+      // membership, and that repository reads through the Unsafe variants. A tx
+      // stub without them throws "tx.$queryRawUnsafe is not a function", which
+      // the route reports as a bare 500.
+      fn({
+        $queryRaw: vi.fn().mockResolvedValue([]),
+        $queryRawUnsafe: vi.fn().mockResolvedValue([]),
+        $executeRaw: vi.fn().mockResolvedValue(0),
+        $executeRawUnsafe: vi.fn().mockResolvedValue(0),
+      }),
     ),
     mockRejectClientTenantId: vi.fn(),
     mockFindMembership: vi.fn(),

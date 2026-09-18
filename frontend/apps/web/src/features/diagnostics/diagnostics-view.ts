@@ -25,13 +25,23 @@ import {
   toGaugePercent,
   type ReadinessTone,
 } from "../readiness/readiness-view";
-import type { DiagnosticCatalogItem, DiagnosticCatalogStatus } from "@atlas/contracts-modules/diagnostics/diagnostic.types";
+import type {
+  DiagnosticCatalogItem,
+  DiagnosticCatalogStatus,
+} from "@atlas/contracts-modules/diagnostics/diagnostic.types";
 
 export { formatBandLabel, readinessTone, toGaugePercent };
 export type { ReadinessTone };
 
 /** Icons cycled across catalog cards, keyed by position for stable rendering. */
-const CATALOG_ICONS: LucideIcon[] = [TrendingUp, LineChart, ShieldCheck, Target, BarChart3, Compass];
+const CATALOG_ICONS: LucideIcon[] = [
+  TrendingUp,
+  LineChart,
+  ShieldCheck,
+  Target,
+  BarChart3,
+  Compass,
+];
 
 export function catalogIcon(index: number): LucideIcon {
   return CATALOG_ICONS[index % CATALOG_ICONS.length] ?? Compass;

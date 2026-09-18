@@ -39,10 +39,7 @@ export async function exportSuperLiveInsightsRoster(
   let emailed = false;
   if (body.emailDownloadLink) {
     const provider = getEmailProvider();
-    const adminEmail = await notificationRepository.findMembershipEmail(
-      tx,
-      ctx.actorMembershipId,
-    );
+    const adminEmail = await notificationRepository.findMembershipEmail(tx, ctx.actorMembershipId);
     if (provider.isConfigured() && adminEmail) {
       await provider.send({
         to: adminEmail,

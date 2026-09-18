@@ -17,6 +17,5 @@ export const POST = createTenantRoute<
   params: deletionRequestParamsSchema,
   body: processDeletionRequestBodySchema,
   output: processDeletionRequestResponseSchema,
-  handler: async ({ tx, ctx, params, input }) =>
-    processDeletionRequest(tx, ctx, params["id"] ?? "", input),
+  handler: async ({ tx, ctx, params, input }) => processDeletionRequest(tx, ctx, params.id, input),
 });

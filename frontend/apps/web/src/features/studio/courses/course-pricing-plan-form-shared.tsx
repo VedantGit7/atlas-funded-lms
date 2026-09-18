@@ -2,11 +2,12 @@
 
 import { ChevronLeft, CircleHelp, Calendar } from "lucide-react";
 import { useRef, type ReactNode } from "react";
-import { builderHelperClassName, builderTextareaClassName, fieldClassName } from "./course-builder-shared";
 import {
-  courseSettingsCounterTone,
-  CourseSettingsFormFooter,
-} from "./course-settings-shared";
+  builderHelperClassName,
+  builderTextareaClassName,
+  fieldClassName,
+} from "./course-builder-shared";
+import { courseSettingsCounterTone, CourseSettingsFormFooter } from "./course-settings-shared";
 import { inlineExpandClassName } from "./admin-form-dropdown-shared";
 import { formatPricingPlanExpiryDate } from "./course-pricing-plan-settings";
 import { inlineLessonGhostButtonClassName } from "./inline-lesson-editor/inline-lesson-editor-shared";
@@ -44,7 +45,9 @@ export function PricingPlanFormShell({
   children,
 }: PricingPlanFormShellProps) {
   return (
-    <div className={`admin-theme flex min-h-0 flex-1 flex-col overflow-hidden ${inlineExpandClassName}`}>
+    <div
+      className={`admin-theme flex min-h-0 flex-1 flex-col overflow-hidden ${inlineExpandClassName}`}
+    >
       <div className="flex min-h-0 flex-1 flex-col overflow-y-auto bg-[var(--admin-surface-low)]">
         <div className="mx-auto flex min-h-0 w-full max-w-3xl flex-1 flex-col px-4 py-6 md:px-8 md:py-8">
           <button
@@ -70,7 +73,9 @@ export function PricingPlanFormShell({
                 </button>
               </li>
               <li aria-hidden="true">/</li>
-              <li className="font-semibold text-[var(--admin-on-surface)]">{breadcrumbCurrentLabel}</li>
+              <li className="font-semibold text-[var(--admin-on-surface)]">
+                {breadcrumbCurrentLabel}
+              </li>
             </ol>
           </nav>
 
@@ -129,7 +134,10 @@ export function PricingPlanFieldLabel({
 }: PricingPlanFieldLabelProps) {
   return (
     <div className="flex items-start justify-between gap-3">
-      <label htmlFor={htmlFor} className="inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--admin-on-surface)]">
+      <label
+        htmlFor={htmlFor}
+        className="inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--admin-on-surface)]"
+      >
         <span>
           {children}
           {required ? <span className="text-[var(--admin-danger)]">*</span> : null}
@@ -256,7 +264,9 @@ export function PricingPlanInlineRadioGroup<T extends string>({
           <span
             className={[
               "relative inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 transition-colors",
-              value === option.value ? "border-[var(--admin-primary)]" : "border-[var(--admin-outline)]",
+              value === option.value
+                ? "border-[var(--admin-primary)]"
+                : "border-[var(--admin-outline)]",
             ].join(" ")}
           >
             {value === option.value ? (
@@ -366,9 +376,7 @@ export function PricingPlanSelect({
         onChange(event.target.value);
       }}
     >
-      {placeholder ? (
-        <option value="">{placeholder}</option>
-      ) : null}
+      {placeholder ? <option value="">{placeholder}</option> : null}
       {options.map((option) => (
         <option key={option.value} value={option.value}>
           {option.label}
@@ -457,8 +465,7 @@ export function PricingPlanMoneyInput({
   disabled?: boolean;
   placeholder?: string;
 }) {
-  const displayValue =
-    valueCents != null && valueCents > 0 ? (valueCents / 100).toString() : "";
+  const displayValue = valueCents != null && valueCents > 0 ? (valueCents / 100).toString() : "";
 
   return (
     <input
@@ -532,7 +539,9 @@ export function PricingPlanExpiryInput({
           disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer",
         ].join(" ")}
       >
-        <span className="truncate text-[var(--admin-on-surface)]">{formatPricingPlanExpiryDate(value)}</span>
+        <span className="truncate text-[var(--admin-on-surface)]">
+          {formatPricingPlanExpiryDate(value)}
+        </span>
       </button>
       <Calendar
         className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--admin-on-surface-variant)]"
@@ -640,7 +649,11 @@ export function PricingPlanSectionTitle({
         {required ? <span className="text-[var(--admin-danger)]">*</span> : null}
       </p>
       {tooltip ? (
-        <span title={tooltip} className="text-[var(--admin-on-surface-variant)]" aria-label={tooltip}>
+        <span
+          title={tooltip}
+          className="text-[var(--admin-on-surface-variant)]"
+          aria-label={tooltip}
+        >
           <CircleHelp className="h-4 w-4" strokeWidth={1.75} aria-hidden="true" />
         </span>
       ) : null}

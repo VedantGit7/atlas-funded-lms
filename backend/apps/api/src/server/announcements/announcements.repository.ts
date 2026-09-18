@@ -39,10 +39,7 @@ export const announcementsRepository = {
           const [yearRaw, monthRaw] = createdMonth.split("-");
           const year = Number(yearRaw);
           const month = Number(monthRaw);
-          const next =
-            month === 12
-              ? { year: year + 1, month: 1 }
-              : { year, month: month + 1 };
+          const next = month === 12 ? { year: year + 1, month: 1 } : { year, month: month + 1 };
           return `${String(next.year).padStart(4, "0")}-${String(next.month).padStart(2, "0")}-01`;
         })()
       : null;
@@ -188,11 +185,7 @@ export const announcementsRepository = {
     return rows.map((row) => row.id);
   },
 
-  async listBatchMembershipIds(
-    tx: TenantTx,
-    batchId: string,
-    limit = 2000,
-  ): Promise<string[]> {
+  async listBatchMembershipIds(tx: TenantTx, batchId: string, limit = 2000): Promise<string[]> {
     const rows = await tx.$queryRaw<Array<{ membership_id: string }>>`
       select bm.membership_id::text
       from batch_memberships bm

@@ -16,14 +16,10 @@ type StudioCourseOverviewPageProps = {
 export default async function StudioCourseOverviewPage({ params }: StudioCourseOverviewPageProps) {
   const { id } = await params;
 
-  try {
-    const [course, modules] = await Promise.all([
-      serverApi.get<StudioCourseDetailResponse>(`/api/v1/courses/${id}?view=studio`),
-      serverApi.get<StudioCourseModulesResponse>(`/api/v1/courses/${id}/modules?view=studio`),
-    ]);
+  const [course, modules] = await Promise.all([
+    serverApi.get<StudioCourseDetailResponse>(`/api/v1/courses/${id}?view=studio`),
+    serverApi.get<StudioCourseModulesResponse>(`/api/v1/courses/${id}/modules?view=studio`),
+  ]);
 
-    return <CourseOverview course={course.data} modules={modules.data.items} courseId={id} />;
-  } catch (error) {
-    throw error;
-  }
+  return <CourseOverview course={course.data} modules={modules.data.items} courseId={id} />;
 }

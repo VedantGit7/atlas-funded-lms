@@ -10,13 +10,9 @@ import {
 describe("batches exports dto", () => {
   it("exposes summary and learner column catalogs with email PII", () => {
     expect(
-      BATCH_LEARNERS_EXPORT_COLUMNS.some(
-        (column) => column.key === "email" && column.sensitive,
-      ),
+      BATCH_LEARNERS_EXPORT_COLUMNS.some((column) => column.key === "email" && column.sensitive),
     ).toBe(true);
-    expect(
-      BATCH_SUMMARY_EXPORT_COLUMNS.some((column) => column.key === "batch_name"),
-    ).toBe(true);
+    expect(BATCH_SUMMARY_EXPORT_COLUMNS.some((column) => column.key === "batch_name")).toBe(true);
   });
 
   it("parses exports ledger response", () => {
@@ -67,13 +63,7 @@ describe("batches exports dto", () => {
         learnerColumns: BATCH_LEARNERS_EXPORT_COLUMNS.map((column) => ({ ...column })),
         capabilities: {
           formats: ["csv", "xlsx", "json"],
-          datasets: [
-            "batch_summary",
-            "batch_learners",
-            "live_attendance",
-            "exams",
-            "content",
-          ],
+          datasets: ["batch_summary", "batch_learners", "live_attendance", "exams", "content"],
           canSchedule: true,
           canEmailDelivery: true,
           canWebhookDelivery: true,

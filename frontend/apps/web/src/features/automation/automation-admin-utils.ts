@@ -112,8 +112,7 @@ export function validateAutomationDraft(draft: AutomationDraft): AutomationDraft
   try {
     parseAutomationAction(buildAutomationActionJson(draft));
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Invalid action configuration.";
+    const message = error instanceof Error ? error.message : "Invalid action configuration.";
     if (draft.actionType === "certificate.issue" && message.toLowerCase().includes("uuid")) {
       return {
         ok: false,
@@ -170,7 +169,10 @@ export function formatRelativeTime(iso: string): string {
   const date = new Date(iso);
   const diffMinutes = Math.round((date.getTime() - Date.now()) / (1000 * 60));
   if (Math.abs(diffMinutes) < 60) {
-    return new Intl.RelativeTimeFormat(undefined, { numeric: "auto" }).format(diffMinutes, "minute");
+    return new Intl.RelativeTimeFormat(undefined, { numeric: "auto" }).format(
+      diffMinutes,
+      "minute",
+    );
   }
   const diffHours = Math.round((date.getTime() - Date.now()) / (1000 * 60 * 60));
   if (Math.abs(diffHours) < 24) {

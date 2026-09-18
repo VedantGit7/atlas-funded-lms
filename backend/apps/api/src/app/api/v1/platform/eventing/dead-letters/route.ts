@@ -17,6 +17,6 @@ export const GET = createPlatformRoute({
   }),
   handler: async ({ tx, query }) => {
     const { limit, cursor } = query;
-    return readPlatformDeadLetterList(tx, { limit: limit ?? 25, cursor });
+    return readPlatformDeadLetterList(tx, { limit: limit, cursor });
   },
 });

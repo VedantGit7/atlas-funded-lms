@@ -78,14 +78,12 @@ export const POST = createPublicRouteHandler(routeMetadata, async ({ req, reques
     // Grant the global platform super admin tenant-admin access on tenant
     // sign-in (no-op for everyone else) so the role-based redirect resolves to
     // /admin. MFA accounts complete this in the verify-mfa orchestrator instead.
-    if (result.status === "signed_in") {
-      await ensurePlatformSuperAdminTenantAccess({
-        db,
-        tenantId: tenant.tenantId,
-        requestId,
-        email: input.email,
-      });
-    }
+    await ensurePlatformSuperAdminTenantAccess({
+      db,
+      tenantId: tenant.tenantId,
+      requestId,
+      email: input.email,
+    });
 
     const body = await withTenantTx(
       {
@@ -114,12 +112,9 @@ export const POST = createPublicRouteHandler(routeMetadata, async ({ req, reques
         // time with no membership becomes an ACTIVE learner. Gated on a fully
         // authenticated (non-MFA-pending) session so we never provision before
         // a required MFA challenge is satisfied.
-        if (
-          result.status === "signed_in" &&
-          !result.identity.mfaEnabled &&
-          principalId &&
-          !membership
-        ) {
+        // `loginWithPassword` resolves only on a completed password sign-in
+        // and throws otherwise, so its status is always "signed_in" here.
+        if (!result.identity.mfaEnabled && principalId && !membership) {
           const provisioned = await ensureSelfServiceLearnerMembership({
             tx,
             tenantId: tenant.tenantId,

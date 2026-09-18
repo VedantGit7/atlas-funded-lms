@@ -18,7 +18,11 @@ export const toast = {
     silent?: boolean;
   }) {
     if (args.silent) return;
-    const message = resolveMutationSuccessToast(args.idempotencyKeyPrefix, args.method, args.message);
+    const message = resolveMutationSuccessToast(
+      args.idempotencyKeyPrefix,
+      args.method,
+      args.message,
+    );
     if (message) {
       pushToast(message, "success");
     }

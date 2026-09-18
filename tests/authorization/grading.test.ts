@@ -7,7 +7,12 @@ function gradingTx(roleKeys: string[]) {
       .fn()
       .mockResolvedValueOnce([{ key: "assessment.grade" }])
       .mockResolvedValueOnce([])
-      .mockResolvedValueOnce(roleKeys.map((role_key) => ({ role_key }))),
+      .mockResolvedValueOnce(
+        roleKeys.map((role_key) => ({
+          role_key,
+          bypasses_resource_predicates: role_key === "owner" || role_key === "admin",
+        })),
+      ),
   };
 }
 
@@ -111,7 +116,7 @@ describe("grading authorization", () => {
           .fn()
           .mockResolvedValueOnce([{ key: "assessment.grade" }])
           .mockResolvedValueOnce([{ effect: "DENY" }])
-          .mockResolvedValueOnce([{ role_key: "instructor" }]),
+          .mockResolvedValueOnce([{ role_key: "instructor", bypasses_resource_predicates: false }]),
       },
       actor: { tenantId: "tenant-a", membershipId: "grader-a" },
       permission: "assessment.grade",

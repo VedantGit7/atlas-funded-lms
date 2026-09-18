@@ -11,8 +11,10 @@ export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 
 const variantClasses: Record<ButtonVariant, string> = {
   default: "bg-[var(--brand-primary,#224466)] text-white hover:opacity-90",
-  secondary: "bg-neutral-100 text-neutral-900 hover:bg-neutral-200 dark:bg-neutral-800 dark:text-neutral-100",
-  outline: "border border-neutral-300 bg-transparent hover:bg-neutral-50 dark:border-neutral-700 dark:hover:bg-neutral-900",
+  secondary:
+    "bg-neutral-100 text-neutral-900 hover:bg-neutral-200 dark:bg-neutral-800 dark:text-neutral-100",
+  outline:
+    "border border-neutral-300 bg-transparent hover:bg-neutral-50 dark:border-neutral-700 dark:hover:bg-neutral-900",
   ghost: "bg-transparent hover:bg-neutral-100 dark:hover:bg-neutral-800",
   destructive: "bg-red-600 text-white hover:bg-red-700",
 };

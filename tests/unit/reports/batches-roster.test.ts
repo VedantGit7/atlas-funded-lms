@@ -199,8 +199,7 @@ describe("batches roster dto", () => {
 
   it("parses compare query with comma-separated batch ids", () => {
     const parsed = batchesCompareQuerySchema.parse({
-      batchIds:
-        "11111111-1111-4111-8111-111111111111,22222222-2222-4222-8222-222222222222",
+      batchIds: "11111111-1111-4111-8111-111111111111,22222222-2222-4222-8222-222222222222",
     });
     expect(parsed.batchIds).toHaveLength(2);
     expect(parsed.normalize).toBe("week_of_batch");

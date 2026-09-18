@@ -17,15 +17,15 @@ depends-on:
 
 ## 1. Why the current frontend is slow (diagnosis)
 
-| Issue | What happens today | Fix in rebuild |
-|-------|-------------------|----------------|
+| Issue                     | What happens today                                                                         | Fix in rebuild                                                                                                       |
+| ------------------------- | ------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------- |
 | **Self-HTTP round-trips** | RSC `serverApi` fetches same-origin `/api/v1` inside one Next app (extra hop + JSON parse) | After F-1 split: direct internal URL + connection reuse; parallel fetches; consider batch endpoints for L1 dashboard |
-| **No client cache** | No React Query — client islands refetch on every mount/navigation | TanStack Query with tuned `staleTime` / `gcTime`; prefetch on hover for nav targets |
-| **Request waterfalls** | Sequential `await` in server loaders | `Promise.all` for independent resources; Suspense boundaries per widget |
-| **Heavy initial bundles** | Monolithic client JS; builders/charts may pull into learner routes | Route-group code splitting; `next/dynamic` for studio/admin only |
-| **Minimal loading UX** | Only 9 `loading.tsx` files; blank waits feel slower than skeletons | Skeleton per route group; stream shell chrome first |
-| **No bundle budgets** | No CI gate on JS size | Enforce max kB per route group in CI |
-| **Next 15 dev/build** | Older toolchain | **Next 16.2.9** + Turbopack default for faster dev and optimized prod builds |
+| **No client cache**       | No React Query — client islands refetch on every mount/navigation                          | TanStack Query with tuned `staleTime` / `gcTime`; prefetch on hover for nav targets                                  |
+| **Request waterfalls**    | Sequential `await` in server loaders                                                       | `Promise.all` for independent resources; Suspense boundaries per widget                                              |
+| **Heavy initial bundles** | Monolithic client JS; builders/charts may pull into learner routes                         | Route-group code splitting; `next/dynamic` for studio/admin only                                                     |
+| **Minimal loading UX**    | Only 9 `loading.tsx` files; blank waits feel slower than skeletons                         | Skeleton per route group; stream shell chrome first                                                                  |
+| **No bundle budgets**     | No CI gate on JS size                                                                      | Enforce max kB per route group in CI                                                                                 |
+| **Next 15 dev/build**     | Older toolchain                                                                            | **Next 16.2.9** + Turbopack default for faster dev and optimized prod builds                                         |
 
 ---
 
@@ -35,21 +35,21 @@ Aligned with [Frontend Architecture §26](docs/locked/ATLAS-LMS-Frontend-Archite
 
 ### Core Web Vitals (learner routes, p75 mobile)
 
-| Metric | Target | Priority routes |
-|--------|--------|-----------------|
-| **LCP** | < 2.5s | `/`, `/courses`, `/courses/[id]` |
+| Metric  | Target  | Priority routes                         |
+| ------- | ------- | --------------------------------------- |
+| **LCP** | < 2.5s  | `/`, `/courses`, `/courses/[id]`        |
 | **INP** | < 200ms | Lesson player, assessment runner, swipe |
-| **CLS** | < 0.1 | All learner shells |
+| **CLS** | < 0.1   | All learner shells                      |
 
 ### Custom budgets
 
-| Measure | Target |
-|---------|--------|
-| Learner route initial JS (gzip) | < 150 kB per route group entry |
-| L1 dashboard TTFB (RSC) | < 600 ms p95 (staging) |
-| Client navigation (cached) | < 100 ms perceived (skeleton → content) |
-| API parallelization | L1 loader: max 1 waterfall depth |
-| Time to interactive (lesson page) | < 3s on Fast 3G throttled |
+| Measure                           | Target                                  |
+| --------------------------------- | --------------------------------------- |
+| Learner route initial JS (gzip)   | < 150 kB per route group entry          |
+| L1 dashboard TTFB (RSC)           | < 600 ms p95 (staging)                  |
+| Client navigation (cached)        | < 100 ms perceived (skeleton → content) |
+| API parallelization               | L1 loader: max 1 waterfall depth        |
+| Time to interactive (lesson page) | < 3s on Fast 3G throttled               |
 
 ### Regression gate
 
@@ -76,13 +76,13 @@ const [me, competency, streaks] = await Promise.all([
 
 ### 3.2 React Query (client islands)
 
-| Surface | `staleTime` | Notes |
-|---------|-------------|-------|
-| Catalog lists | 60s | Invalidate on enroll |
-| `/me` shell context | 30s | Background refetch on focus |
-| Notifications count | 15s | Poll or refetch on route enter |
-| Assessment runner | 0 | Autosave is mutation-driven, not cache |
-| Admin tables | 0–30s | URL-driven filters; paginate server-side |
+| Surface             | `staleTime` | Notes                                    |
+| ------------------- | ----------- | ---------------------------------------- |
+| Catalog lists       | 60s         | Invalidate on enroll                     |
+| `/me` shell context | 30s         | Background refetch on focus              |
+| Notifications count | 15s         | Poll or refetch on route enter           |
+| Assessment runner   | 0           | Autosave is mutation-driven, not cache   |
+| Admin tables        | 0–30s       | URL-driven filters; paginate server-side |
 
 - Prefetch course detail on catalog row hover/focus
 - `placeholderData` / `keepPreviousData` for pagination — no full-table flash
@@ -109,12 +109,12 @@ const [me, competency, streaks] = await Promise.all([
 
 ### 3.5 Caching layers
 
-| Layer | Policy |
-|-------|--------|
+| Layer                       | Policy                                            |
+| --------------------------- | ------------------------------------------------- |
 | Public bootstrap / branding | Tag cache by host; invalidate on branding publish |
-| Protected member data | `cache: 'no-store'` default |
-| React Query | Tenant-scoped query keys include host |
-| CDN | Static assets immutable; HTML dynamic |
+| Protected member data       | `cache: 'no-store'` default                       |
+| React Query                 | Tenant-scoped query keys include host             |
+| CDN                         | Static assets immutable; HTML dynamic             |
 
 ### 3.6 Monorepo split performance win
 
@@ -135,27 +135,27 @@ Separating `frontend/apps/web` from `backend/apps/api`:
 
 ## 4. Per-surface performance profile
 
-| Surface | Density | Speed priority |
-|---------|---------|----------------|
-| **Learner** | Clean, low JS | **Highest** — mobile-first, minimal client islands |
-| **Public** | Marketing | **High** — PPR/ISR for landing where safe |
-| **Auth** | Simple forms | High — tiny bundle |
-| **Studio** | Rich editors | Medium — lazy-load builders acceptable |
-| **Admin** | Data-dense tables | Medium — virtualized tables for 100+ rows |
-| **Platform** | Cross-tenant ops | Medium — separate bundle, never in learner |
+| Surface      | Density           | Speed priority                                     |
+| ------------ | ----------------- | -------------------------------------------------- |
+| **Learner**  | Clean, low JS     | **Highest** — mobile-first, minimal client islands |
+| **Public**   | Marketing         | **High** — PPR/ISR for landing where safe          |
+| **Auth**     | Simple forms      | High — tiny bundle                                 |
+| **Studio**   | Rich editors      | Medium — lazy-load builders acceptable             |
+| **Admin**    | Data-dense tables | Medium — virtualized tables for 100+ rows          |
+| **Platform** | Cross-tenant ops  | Medium — separate bundle, never in learner         |
 
 ---
 
 ## 5. Phase integration (not only F8)
 
-| Phase | Performance work |
-|-------|------------------|
-| **F0** | Bundle analyzer setup; query-key factory; parallel loader pattern; skeleton components |
-| **F1** | Bootstrap endpoint single call for theme (no multi round-trip layout) |
-| **F2** | Shell streaming; prefetch nav routes; learner bundle budget |
+| Phase     | Performance work                                                                                                                                                                                                                           |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **F0**    | Bundle analyzer setup; query-key factory; parallel loader pattern; skeleton components                                                                                                                                                     |
+| **F1**    | Bootstrap endpoint single call for theme (no multi round-trip layout)                                                                                                                                                                      |
+| **F2**    | Shell streaming; prefetch nav routes; learner bundle budget                                                                                                                                                                                |
 | **F3–F4** | Lesson player lazy video embed; assessment runner code-split; swipe lightweight — **F4 shipped**; L1 waterfall / Suspense islands → F8 ([F4 backlog](complete-frontend-rebuild.md#101-phase-f4--completion--remaining-backlog) F4-R08–R10) |
-| **F5–F6** | Lazy builders/charts (F5 done); virtualized DataTables (F6) |
-| **F8** | Lighthouse CI, CWV regression gates, load test L1/dashboard |
+| **F5–F6** | Lazy builders/charts (F5 done); virtualized DataTables (F6)                                                                                                                                                                                |
+| **F8**    | Lighthouse CI, CWV regression gates, load test L1/dashboard                                                                                                                                                                                |
 
 ---
 

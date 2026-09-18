@@ -7,9 +7,9 @@
  *   () => loadLearnerNavigationProjection(),
  * ]);
  */
-export async function parallelLoad<T extends readonly unknown[]>(
-  loaders: { [K in keyof T]: () => Promise<T[K]> },
-): Promise<T> {
+export async function parallelLoad<T extends readonly unknown[]>(loaders: {
+  [K in keyof T]: () => Promise<T[K]>;
+}): Promise<T> {
   const results = await Promise.all(
     (loaders as ReadonlyArray<() => Promise<unknown>>).map((loader) => loader()),
   );

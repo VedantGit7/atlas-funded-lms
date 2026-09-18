@@ -39,17 +39,20 @@ export function lessonSettingsFromDetail(lesson: StudioLessonDetail): LessonSett
   const richFromBody = typeof content["body"] === "string" ? content["body"] : "";
   const richFromContent = typeof lesson.content === "string" ? lesson.content : "";
   const thumbnailUrl = typeof content["thumbnailUrl"] === "string" ? content["thumbnailUrl"] : "";
-  const thumbnailAssetReferenceId = 
-    typeof content["thumbnailAssetReferenceId"] === "string" 
-      ? content["thumbnailAssetReferenceId"] 
+  const thumbnailAssetReferenceId =
+    typeof content["thumbnailAssetReferenceId"] === "string"
+      ? content["thumbnailAssetReferenceId"]
       : undefined;
   const displayInSyllabus =
     typeof content["displayInSyllabus"] === "boolean" ? content["displayInSyllabus"] : true;
   const featuresRecord =
-    content["features"] && typeof content["features"] === "object" && !Array.isArray(content["features"])
+    content["features"] &&
+    typeof content["features"] === "object" &&
+    !Array.isArray(content["features"])
       ? (content["features"] as Record<string, unknown>)
       : {};
-  const transcriptText = typeof content["transcriptText"] === "string" ? content["transcriptText"] : "";
+  const transcriptText =
+    typeof content["transcriptText"] === "string" ? content["transcriptText"] : "";
 
   return {
     title: lesson.title,

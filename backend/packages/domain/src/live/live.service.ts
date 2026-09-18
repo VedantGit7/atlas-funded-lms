@@ -77,7 +77,9 @@ export async function updateLiveSession(
     ...(body.startedAt !== undefined
       ? { startedAt: body.startedAt ? new Date(body.startedAt) : null }
       : {}),
-    ...(body.endedAt !== undefined ? { endedAt: body.endedAt ? new Date(body.endedAt) : null } : {}),
+    ...(body.endedAt !== undefined
+      ? { endedAt: body.endedAt ? new Date(body.endedAt) : null }
+      : {}),
     ...(body.metadataJson !== undefined ? { metadataJson: body.metadataJson } : {}),
   });
   if (!row) throw liveSessionNotFound();

@@ -8,6 +8,7 @@ import { resolvePaymentProvider } from "@atlas/domain/payments/payment-provider.
 import { paymentsRepository } from "@atlas/domain/payments/payments.repository";
 import { resolveTenantFromRequest } from "@atlas/tenancy";
 import { fulfillPaidCourseOrderByExternalId } from "../../../../../../server/sales-coupons/sales-coupons.service";
+import { systemServiceCtx } from "@atlas/core/actor/system-actor";
 
 export const POST = createPublicRouteHandler(stripeWebhookMetadata, async ({ req, requestId }) => {
   return withGlobalDb(async (db) => {
@@ -66,12 +67,11 @@ export const POST = createPublicRouteHandler(stripeWebhookMetadata, async ({ req
 
         const fulfilled = await fulfillPaidCourseOrderByExternalId(
           tx,
-          {
+          systemServiceCtx({
             tenantId: tenant.tenantId,
-            // Webhooks are system actors; use tenant id as a stable stand-in for audit ctx.
-            actorMembershipId: tenant.tenantId,
             requestId,
-          },
+            source: "payments.stripe.webhook",
+          }),
           {
             externalId: parsed.externalId,
             paymentOrderId: parsed.paymentOrderId,

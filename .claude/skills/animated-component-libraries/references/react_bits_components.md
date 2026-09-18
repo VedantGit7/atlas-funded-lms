@@ -7,6 +7,7 @@ Complete reference for React Bits - 90+ animated React components with minimal d
 React Bits uses a copy-paste installation model. Visit [reactbits.dev](https://reactbits.dev), browse components, and copy the code directly into your project.
 
 **Common Dependencies**:
+
 ```bash
 npm install framer-motion  # For animation-heavy components
 npm install ogl           # For WebGL components (Particles, Plasma, Aurora)
@@ -20,6 +21,7 @@ npm install react-icons   # For icon components (Dock)
 Text reveal animation with blur effect, triggered by viewport intersection.
 
 **Props**:
+
 - `text` (string, required): Text to animate
 - `delay` (number): Delay between characters/words in ms, default 50
 - `animateBy` ("characters" | "words"): Animation unit, default "words"
@@ -34,6 +36,7 @@ Text reveal animation with blur effect, triggered by viewport intersection.
 - `className` (string): Additional CSS classes
 
 **Usage**:
+
 ```jsx
 // Basic word-by-word reveal
 <BlurText
@@ -63,6 +66,7 @@ Text reveal animation with blur effect, triggered by viewport intersection.
 Arranges text in a circular path with optional rotation.
 
 **Props**:
+
 - `text` (string, required): Text to display
 - `radius` (number): Circle radius in pixels, default 100
 - `fontSize` (number): Font size in pixels, default 16
@@ -72,6 +76,7 @@ Arranges text in a circular path with optional rotation.
 - `className` (string): Additional CSS classes
 
 **Usage**:
+
 ```jsx
 // Static circular text
 <CircularText
@@ -103,6 +108,7 @@ Arranges text in a circular path with optional rotation.
 Animates numbers from start to end value with formatting options.
 
 **Props**:
+
 - `start` (number): Starting number, default 0
 - `end` (number, required): Ending number
 - `duration` (number): Animation duration in seconds, default 2
@@ -115,6 +121,7 @@ Animates numbers from start to end value with formatting options.
 - `className` (string): Additional CSS classes
 
 **Usage**:
+
 ```jsx
 // Revenue counter
 <CountUp
@@ -155,6 +162,7 @@ Similar to CircularText but from React Bits (verify exact component name in libr
 Creates magnetic pull effect on child elements when cursor is nearby.
 
 **Props**:
+
 - `magnitude` (number): Pull strength, default 0.3
 - `maxDistance` (number): Max distance for effect in pixels, default 150
 - `damping` (number): Spring damping, default 25
@@ -163,6 +171,7 @@ Creates magnetic pull effect on child elements when cursor is nearby.
 - `children` (ReactNode, required): Element to apply effect to
 
 **Usage**:
+
 ```jsx
 // Magnetic button
 <Magnet>
@@ -189,6 +198,7 @@ Creates magnetic pull effect on child elements when cursor is nearby.
 macOS-style dock with magnification effect.
 
 **Props**:
+
 - `items` (array, required): Array of dock items
   - Each item: `{ icon: ReactNode, label: string, onClick: function, className?: string }`
 - `spring` (object): Spring physics `{ mass, stiffness, damping }`, default `{ mass: 0.1, stiffness: 150, damping: 12 }`
@@ -200,6 +210,7 @@ macOS-style dock with magnification effect.
 - `className` (string): Additional CSS classes
 
 **Usage**:
+
 ```jsx
 import Dock from './components/Dock'
 import { VscHome, VscArchive, VscAccount } from 'react-icons/vsc'
@@ -236,6 +247,7 @@ const dockItems = [
 Multi-step form/wizard component with navigation.
 
 **Props**:
+
 - `initialStep` (number): Starting step (1-indexed), default 1
 - `onStepChange` (function): Callback when step changes `(step: number) => void`
 - `onFinalStepCompleted` (function): Callback when final step is completed
@@ -252,9 +264,11 @@ Multi-step form/wizard component with navigation.
 - `children` (Step components, required): Step content
 
 **Step Component Props**:
+
 - `children` (ReactNode, required): Step content
 
 **Usage**:
+
 ```jsx
 import Stepper, { Step } from './components/Stepper'
 
@@ -304,6 +318,7 @@ Button component with special visual effects (verify exact implementation in lib
 List container with staggered entrance animations for children.
 
 **Props**:
+
 - `stagger` (number): Delay between items in seconds, default 0.1
 - `duration` (number): Animation duration per item in seconds, default 0.5
 - `initial` (object): Initial animation state, default `{ opacity: 0, y: 20 }`
@@ -313,6 +328,7 @@ List container with staggered entrance animations for children.
 - `children` (ReactNode, required): List items
 
 **Usage**:
+
 ```jsx
 // Basic animated list
 <AnimatedList className="space-y-4">
@@ -345,6 +361,7 @@ List container with staggered entrance animations for children.
 WebGL-powered 3D particle system.
 
 **Props**:
+
 - `particleCount` (number): Number of particles, default 200
 - `particleColors` (string[]): Particle colors array, default `['#ffffff']`
 - `particleSpread` (number): Spread factor, default 10
@@ -359,6 +376,7 @@ WebGL-powered 3D particle system.
 - `className` (string): Container CSS classes
 
 **Usage**:
+
 ```jsx
 // Basic particle background
 <section style={{ position: 'relative', height: '100vh' }}>
@@ -388,6 +406,7 @@ WebGL-powered 3D particle system.
 Organic plasma effect using WebGL.
 
 **Props**:
+
 - `color1` (string): First color, default varies
 - `color2` (string): Second color, default varies
 - `color3` (string): Third color, default varies
@@ -396,6 +415,7 @@ Organic plasma effect using WebGL.
 - `className` (string): Additional CSS classes
 
 **Usage**:
+
 ```jsx
 // Default plasma
 <div className="relative min-h-screen">
@@ -419,12 +439,14 @@ Organic plasma effect using WebGL.
 Dynamic gradient aurora effect.
 
 **Props**:
+
 - `colors` (string[]): Color array, default varies
 - `speed` (number): Animation speed, default 1
 - `blur` (number): Blur amount in pixels, default 50
 - `className` (string): Additional CSS classes
 
 **Usage**:
+
 ```jsx
 // Basic aurora
 <div style={{ position: 'relative', minHeight: '100vh' }}>
@@ -445,6 +467,7 @@ Dynamic gradient aurora effect.
 Custom cursor with blob trail effect.
 
 **Props**:
+
 - `blobType` ("circle" | "square"): Blob shape, default "circle"
 - `fillColor` (string): Blob color, default "#5227FF"
 - `trailCount` (number): Number of trail blobs, default 3
@@ -452,13 +475,9 @@ Custom cursor with blob trail effect.
 - Additional customization props
 
 **Usage**:
+
 ```jsx
-<BlobCursor
-  blobType="circle"
-  fillColor="#5227FF"
-  trailCount={3}
-  sizes={[60, 125, 75]}
-/>
+<BlobCursor blobType="circle" fillColor="#5227FF" trailCount={3} sizes={[60, 125, 75]} />
 ```
 
 ## Performance Optimization
@@ -466,6 +485,7 @@ Custom cursor with blob trail effect.
 ### WebGL Components (Particles, Plasma, Aurora)
 
 1. **Reduce Particle Count on Low-End Devices**:
+
 ```jsx
 const particleCount = navigator.hardwareConcurrency > 4 ? 300 : 150
 
@@ -473,21 +493,22 @@ const particleCount = navigator.hardwareConcurrency > 4 ? 300 : 150
 ```
 
 2. **Conditional Loading**:
+
 ```jsx
-const [enableWebGL, setEnableWebGL] = useState(false)
+const [enableWebGL, setEnableWebGL] = useState(false);
 
 useEffect(() => {
-  const isHighEnd = !navigator.userAgent.includes('Mobile') &&
-                   navigator.hardwareConcurrency > 4
-  setEnableWebGL(isHighEnd)
-}, [])
+  const isHighEnd = !navigator.userAgent.includes("Mobile") && navigator.hardwareConcurrency > 4;
+  setEnableWebGL(isHighEnd);
+}, []);
 
-return enableWebGL ? <Particles /> : <div className="gradient-bg" />
+return enableWebGL ? <Particles /> : <div className="gradient-bg" />;
 ```
 
 ### Text Animations
 
 1. **Respect Reduced Motion**:
+
 ```jsx
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
@@ -499,26 +520,24 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
 ```
 
 2. **Use RequestIdleCallback**:
+
 ```jsx
 useEffect(() => {
-  if ('requestIdleCallback' in window) {
+  if ("requestIdleCallback" in window) {
     requestIdleCallback(() => {
       // Initialize non-critical animations
-    })
+    });
   }
-}, [])
+}, []);
 ```
 
 ## Common Component Combinations
 
 ### Hero with Particles + Text Animation
+
 ```jsx
-<section style={{ position: 'relative', height: '100vh' }}>
-  <Particles
-    particleCount={200}
-    particleColors={['#4ECDC4']}
-    className="absolute inset-0"
-  />
+<section style={{ position: "relative", height: "100vh" }}>
+  <Particles particleCount={200} particleColors={["#4ECDC4"]} className="absolute inset-0" />
   <div className="relative z-10 flex items-center justify-center h-full">
     <BlurText
       text="Welcome to the Future"
@@ -531,6 +550,7 @@ useEffect(() => {
 ```
 
 ### Dashboard Stats
+
 ```jsx
 <div className="grid grid-cols-3 gap-8">
   <div className="text-center">
@@ -549,11 +569,9 @@ useEffect(() => {
 ```
 
 ### Onboarding Flow
+
 ```jsx
-<Stepper
-  initialStep={1}
-  onFinalStepCompleted={() => navigate('/dashboard')}
->
+<Stepper initialStep={1} onFinalStepCompleted={() => navigate("/dashboard")}>
   <Step>
     <BlurText text="Welcome!" className="text-4xl font-bold mb-4" />
     <p>Let's get started</p>
@@ -582,6 +600,6 @@ React Bits components include TypeScript definitions. Extend interfaces as neede
 
 ```typescript
 interface CustomBlurTextProps extends React.HTMLAttributes<HTMLDivElement> {
-  customProp?: string
+  customProp?: string;
 }
 ```

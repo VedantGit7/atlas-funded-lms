@@ -60,10 +60,7 @@ export class PaymentGatewayNotFoundError extends Error {
   }
 }
 
-export async function getPaymentGateway(
-  tx: TenantTx,
-  id: string,
-): Promise<PaymentGatewayResponse> {
+export async function getPaymentGateway(tx: TenantTx, id: string): Promise<PaymentGatewayResponse> {
   const row = await findPaymentGatewayById(tx, id);
   if (!row) {
     throw new PaymentGatewayNotFoundError();
@@ -87,8 +84,7 @@ export async function configurePaymentGateway(
     : null;
 
   const hasSecret = secret !== null || existing.has_secret;
-  const isConfigured =
-    input.userId.length > 0 && input.publishableKey.length > 0 && hasSecret;
+  const isConfigured = input.userId.length > 0 && input.publishableKey.length > 0 && hasSecret;
 
   await updatePaymentGatewayConfig(tx, {
     id,

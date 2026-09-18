@@ -37,6 +37,7 @@ import {
 import type { ServiceCtx } from "./notification.types";
 import { resolveSystemEmailForSend } from "../system-email/system-email.service";
 import { readTenantEmailChannel } from "../tenant-settings/tenant-settings.service";
+import { readTenantBranding } from "@atlas/domain-branding/services/branding-read.service";
 import type { NotificationTemplateRow } from "./notification.types";
 import { localeRepository } from "../locales/locale.repository";
 
@@ -149,10 +150,17 @@ async function processSecurityNotificationSourceEvent(
   });
 
   if (!emailOptedOut && systemEmail?.enabled !== false) {
+    // Security emails are sent on behalf of the tenant, so they must carry the
+    // tenant's own name. Every tenant's security email previously said
+    // "FundedBeyond Academy" because the brand was baked into the template.
+    const branding = await readTenantBranding(tx);
+
     const emailHtml = buildSecurityEmailHtml({
       eventType: event.eventType,
       email,
       siteUrl: siteUrl ?? "https://example.com",
+      // publicName is the outward-facing name; displayName is the internal one.
+      academyName: branding.data.publicName ?? branding.data.displayName,
       title: rendered.title,
       body: rendered.body,
       emailSubject: rendered.emailSubject,

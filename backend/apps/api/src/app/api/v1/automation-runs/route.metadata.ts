@@ -3,6 +3,7 @@ import { loadAutomationRuleCatalogResourceRef } from "../../../../server/automat
 
 export const routeMetadata = {
   permission: "automation.rule.read",
+  entitlement: null,
   audit: "none",
   rateLimit: "authenticatedTenantRead",
   idempotency: "none",

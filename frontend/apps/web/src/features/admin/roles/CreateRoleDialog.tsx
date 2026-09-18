@@ -40,7 +40,14 @@ function slugifyRoleName(name: string): string {
 }
 
 function parsePermissions(value: string): string[] {
-  return [...new Set(value.split(",").map((entry) => entry.trim()).filter(Boolean))];
+  return [
+    ...new Set(
+      value
+        .split(",")
+        .map((entry) => entry.trim())
+        .filter(Boolean),
+    ),
+  ];
 }
 
 function permissionsToString(permissions: string[]): string {
@@ -205,8 +212,7 @@ export function CreateRoleDialog() {
   const trimmedName = name.trim();
   const keyIsValid = trimmedKey.length >= 2 && ROLE_KEY_PATTERN.test(trimmedKey);
   const keyHasError = trimmedKey.length > 0 && !keyIsValid;
-  const canSubmit =
-    keyIsValid && trimmedName.length > 0 && selectedPermissions.length > 0 && !busy;
+  const canSubmit = keyIsValid && trimmedName.length > 0 && selectedPermissions.length > 0 && !busy;
 
   function resetForm() {
     setKey("");

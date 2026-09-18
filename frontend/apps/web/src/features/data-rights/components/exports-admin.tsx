@@ -138,7 +138,7 @@ export function ExportsAdmin({ initialJobs, canRunExport }: ExportsAdminProps) {
     let index = 0;
     const timer = window.setInterval(() => {
       index = (index + 1) % dots.length;
-      setPollingLabel(`Checking for updates${dots[index]}`);
+      setPollingLabel(`Checking for updates${dots[index] ?? ""}`);
     }, 900);
     return () => {
       window.clearInterval(timer);
@@ -209,7 +209,8 @@ export function ExportsAdmin({ initialJobs, canRunExport }: ExportsAdminProps) {
                 Data Exports
               </h1>
               <p className="mt-1 text-sm text-[var(--admin-on-surface-variant)]">
-                Export tenant-safe learning data for compliance review, backup, or external analysis.
+                Export tenant-safe learning data for compliance review, backup, or external
+                analysis.
               </p>
             </div>
             {canRunExport ? (
@@ -279,19 +280,29 @@ export function ExportsAdmin({ initialJobs, canRunExport }: ExportsAdminProps) {
                   <Table className="min-w-[760px] border-collapse">
                     <TableHead>
                       <TableRow className="border-b border-[var(--admin-border)] hover:bg-transparent">
-                        <TableHeaderCell className={`px-4 py-3 sm:px-5 ${exportsTableHeadClassName}`}>
+                        <TableHeaderCell
+                          className={`px-4 py-3 sm:px-5 ${exportsTableHeadClassName}`}
+                        >
                           Status
                         </TableHeaderCell>
-                        <TableHeaderCell className={`px-4 py-3 sm:px-5 ${exportsTableHeadClassName}`}>
+                        <TableHeaderCell
+                          className={`px-4 py-3 sm:px-5 ${exportsTableHeadClassName}`}
+                        >
                           Requested
                         </TableHeaderCell>
-                        <TableHeaderCell className={`px-4 py-3 sm:px-5 ${exportsTableHeadClassName}`}>
+                        <TableHeaderCell
+                          className={`px-4 py-3 sm:px-5 ${exportsTableHeadClassName}`}
+                        >
                           Requested by
                         </TableHeaderCell>
-                        <TableHeaderCell className={`px-4 py-3 sm:px-5 ${exportsTableHeadClassName}`}>
+                        <TableHeaderCell
+                          className={`px-4 py-3 sm:px-5 ${exportsTableHeadClassName}`}
+                        >
                           Expires
                         </TableHeaderCell>
-                        <TableHeaderCell className={`px-4 py-3 sm:px-5 ${exportsTableHeadClassName}`}>
+                        <TableHeaderCell
+                          className={`px-4 py-3 sm:px-5 ${exportsTableHeadClassName}`}
+                        >
                           Error
                         </TableHeaderCell>
                         <TableHeaderCell
@@ -304,7 +315,10 @@ export function ExportsAdmin({ initialJobs, canRunExport }: ExportsAdminProps) {
                     <TableBody>
                       {refreshing
                         ? Array.from({ length: 3 }).map((_, index) => (
-                            <TableRow key={`skeleton-${index}`} className={exportsTableRowClassName}>
+                            <TableRow
+                              key={`skeleton-${index}`}
+                              className={exportsTableRowClassName}
+                            >
                               {Array.from({ length: 6 }).map((__, cellIndex) => (
                                 <TableCell key={cellIndex} className="px-4 py-4 sm:px-5">
                                   <Skeleton className="h-4 w-full max-w-[8rem] bg-[var(--admin-surface-high)]" />
@@ -315,17 +329,22 @@ export function ExportsAdmin({ initialJobs, canRunExport }: ExportsAdminProps) {
                         : pageJobs.map((job) => {
                             const displayStatus = resolveExportDisplayStatus(job);
                             const downloadable = canDownloadExport(displayStatus);
-                            const muted = displayStatus === "EXPIRED" || displayStatus === "CANCELLED";
+                            const muted =
+                              displayStatus === "EXPIRED" || displayStatus === "CANCELLED";
                             return (
                               <TableRow
                                 key={job.id}
-                                className={muted ? exportsTableRowMutedClassName : exportsTableRowClassName}
+                                className={
+                                  muted ? exportsTableRowMutedClassName : exportsTableRowClassName
+                                }
                               >
                                 <TableCell className="px-4 py-4 sm:px-5">
                                   <ExportStatusBadge status={displayStatus} />
                                 </TableCell>
                                 <TableCell className="px-4 py-4 text-sm text-[var(--admin-on-surface)] sm:px-5">
-                                  <time dateTime={job.createdAt}>{formatRelativeTime(job.createdAt)}</time>
+                                  <time dateTime={job.createdAt}>
+                                    {formatRelativeTime(job.createdAt)}
+                                  </time>
                                 </TableCell>
                                 <TableCell className="px-4 py-4 text-sm text-[var(--admin-on-surface)] sm:px-5">
                                   {formatRequestedBy(job.requestedByMembershipId)}
@@ -335,9 +354,13 @@ export function ExportsAdmin({ initialJobs, canRunExport }: ExportsAdminProps) {
                                 </TableCell>
                                 <TableCell className="px-4 py-4 sm:px-5">
                                   {job.errorCode ? (
-                                    <code className={exportsErrorCodeClassName}>{job.errorCode}</code>
+                                    <code className={exportsErrorCodeClassName}>
+                                      {job.errorCode}
+                                    </code>
                                   ) : (
-                                    <span className="text-sm text-[var(--admin-on-surface-variant)]">—</span>
+                                    <span className="text-sm text-[var(--admin-on-surface-variant)]">
+                                      —
+                                    </span>
                                   )}
                                 </TableCell>
                                 <TableCell className="px-4 py-4 text-right sm:px-5">
@@ -429,31 +452,38 @@ export function ExportsAdmin({ initialJobs, canRunExport }: ExportsAdminProps) {
             <article className={exportsInfoCardClassName}>
               <div className="mb-2 flex items-center gap-2 text-[var(--admin-primary)]">
                 <CloudDownload className="h-5 w-5" aria-hidden="true" />
-                <h3 className="text-base font-semibold text-[var(--admin-on-surface)]">Retention</h3>
+                <h3 className="text-base font-semibold text-[var(--admin-on-surface)]">
+                  Retention
+                </h3>
               </div>
               <p className="text-sm text-[var(--admin-on-surface-variant)]">
-                Completed exports show an expiry timestamp. Download signed URLs before that time — files
-                are not kept indefinitely.
+                Completed exports show an expiry timestamp. Download signed URLs before that time —
+                files are not kept indefinitely.
               </p>
             </article>
             <article className={exportsInfoCardClassName}>
               <div className="mb-2 flex items-center gap-2 text-[var(--admin-success)]">
                 <Shield className="h-5 w-5" aria-hidden="true" />
-                <h3 className="text-base font-semibold text-[var(--admin-on-surface)]">Access control</h3>
+                <h3 className="text-base font-semibold text-[var(--admin-on-surface)]">
+                  Access control
+                </h3>
               </div>
               <p className="text-sm text-[var(--admin-on-surface-variant)]">
-                Export jobs require the <code className="text-xs">data.export.enable</code> entitlement and
-                appropriate admin permissions. Downloads use short-lived signed URLs.
+                Export jobs require the <code className="text-xs">data.export.enable</code>{" "}
+                entitlement and appropriate admin permissions. Downloads use short-lived signed
+                URLs.
               </p>
             </article>
             <article className={exportsInfoCardClassName}>
               <div className="mb-2 flex items-center gap-2 text-[var(--admin-on-surface-variant)]">
                 <Workflow className="h-5 w-5" aria-hidden="true" />
-                <h3 className="text-base font-semibold text-[var(--admin-on-surface)]">Background jobs</h3>
+                <h3 className="text-base font-semibold text-[var(--admin-on-surface)]">
+                  Background jobs
+                </h3>
               </div>
               <p className="text-sm text-[var(--admin-on-surface-variant)]">
-                Exports run asynchronously. Queued and running jobs refresh automatically every few seconds
-                until they complete.
+                Exports run asynchronously. Queued and running jobs refresh automatically every few
+                seconds until they complete.
               </p>
             </article>
           </div>

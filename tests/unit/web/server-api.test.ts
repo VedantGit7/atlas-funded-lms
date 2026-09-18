@@ -174,7 +174,8 @@ describe("serverApi", () => {
       ),
     );
 
-    const { serverApi, ServerApiError } = await import("../../../frontend/apps/web/src/lib/server-api");
+    const { serverApi, ServerApiError } =
+      await import("../../../frontend/apps/web/src/lib/server-api");
 
     await expect(serverApi.get("/api/v1/branding")).rejects.toBeInstanceOf(ServerApiError);
   });

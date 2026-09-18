@@ -102,7 +102,6 @@ function TitleCell({ row }: { row: PromoSliderListItem }) {
         aria-hidden="true"
       >
         {row.thumbnailUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={row.thumbnailUrl}
             alt=""
@@ -203,8 +202,7 @@ export function PromoSliderListPanel() {
   const rangeStart = items.length === 0 ? 0 : (safePage - 1) * pageSize + 1;
   const rangeEnd = Math.min(safePage * pageSize, items.length);
   const hasFilters = Boolean(debouncedQuery || tab !== "ALL");
-  const deleteMatches =
-    deleteRow != null && deleteConfirm.trim() === deleteRow.title.trim();
+  const deleteMatches = deleteRow != null && deleteConfirm.trim() === deleteRow.title.trim();
 
   const tabCount = (id: StatusTab): number => {
     if (id === "ALL") return summary.totalCount;
@@ -652,7 +650,9 @@ export function PromoSliderListPanel() {
             </h2>
             <p className="text-sm text-[var(--admin-on-surface-variant)]">
               Unpublish first if Live. Type{" "}
-              <span className="font-semibold text-[var(--admin-on-surface)]">{deleteRow.title}</span>{" "}
+              <span className="font-semibold text-[var(--admin-on-surface)]">
+                {deleteRow.title}
+              </span>{" "}
               to confirm.
             </p>
             <input

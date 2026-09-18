@@ -41,8 +41,13 @@ export async function DashboardPersonalizedIsland({ paths }: DashboardPersonaliz
         ) : (
           <section className="rounded-2xl border border-border bg-card p-5 shadow-sm">
             <h2 className="text-sm font-bold text-foreground">Continue learning</h2>
-            <p className="mt-1 text-sm text-muted-foreground">Browse the catalog to start a course.</p>
-            <Link href="/courses" className="mt-3 inline-block text-sm font-semibold text-primary hover:underline">
+            <p className="mt-1 text-sm text-muted-foreground">
+              Browse the catalog to start a course.
+            </p>
+            <Link
+              href="/courses"
+              className="mt-3 inline-block text-sm font-semibold text-primary hover:underline"
+            >
               Open catalog
             </Link>
           </section>
@@ -51,7 +56,10 @@ export async function DashboardPersonalizedIsland({ paths }: DashboardPersonaliz
         <section className="rounded-2xl border border-border bg-card p-5 shadow-sm">
           <h2 className="text-sm font-bold text-foreground">Recommended practice</h2>
           <p className="mt-1 text-sm text-muted-foreground">Review the cards that are due today.</p>
-          <Link href="/practice" className="mt-3 inline-block text-sm font-semibold text-primary hover:underline">
+          <Link
+            href="/practice"
+            className="mt-3 inline-block text-sm font-semibold text-primary hover:underline"
+          >
             Open practice
           </Link>
         </section>

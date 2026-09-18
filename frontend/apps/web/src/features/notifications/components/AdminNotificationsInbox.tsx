@@ -6,6 +6,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Archive, Bell, CheckCheck, ChevronDown, Search, Settings2 } from "lucide-react";
 import type { z } from "zod";
 import { ClientApiError, clientApi } from "../../../lib/client-api";
+import { PageGate } from "../../../components/patterns/PageGate";
 import type { notificationInboxItemSchema } from "@atlas/contracts/notifications/notification.dto";
 import {
   filterNotifications,
@@ -122,9 +123,18 @@ export function AdminNotificationsInbox({
   const [markingAllRead, setMarkingAllRead] = useState(false);
   const [archivingId, setArchivingId] = useState<string | null>(null);
   const [focusedId, setFocusedId] = useState<string | null>(null);
+  const [denied, setDenied] = useState(false);
 
   function setError(caught: unknown) {
     if (caught instanceof ClientApiError) {
+      // A 401/403 is not an ordinary error message. The page comment used to
+      // claim this component handled denial; it caught ClientApiError but never
+      // branched on the status, so a denied inbox rendered as an empty list with
+      // a message above it.
+      if (caught.status === 401 || caught.status === 403) {
+        setDenied(true);
+        return;
+      }
       setMessage(caught.message);
       setRequestId(caught.requestId);
       return;
@@ -326,6 +336,10 @@ export function AdminNotificationsInbox({
     } finally {
       setMarkingAllRead(false);
     }
+  }
+
+  if (denied) {
+    return <PageGate state="denied" title="Notifications" />;
   }
 
   return (

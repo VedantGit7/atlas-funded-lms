@@ -237,10 +237,7 @@ export const marketingIntegrationsRepository = {
     return id;
   },
 
-  async updateWebhook(
-    tx: TenantTx,
-    args: { id: string; url?: string; enabled?: boolean },
-  ) {
+  async updateWebhook(tx: TenantTx, args: { id: string; url?: string; enabled?: boolean }) {
     const existing = await this.findWebhookById(tx, args.id);
     if (!existing) return null;
     await tx.$executeRaw`
@@ -263,7 +260,7 @@ export const marketingIntegrationsRepository = {
       delete from marketing_integration_webhooks
       where id = ${id}::uuid
     `;
-    return Number(result) > 0;
+    return result > 0;
   },
 
   async markWebhookDelivery(

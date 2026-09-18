@@ -47,7 +47,9 @@ export function SubSchoolDetailPanel({ subSchool }: SubSchoolDetailPanelProps) {
             {subSchool.name}
           </h1>
           {subSchool.email ? (
-            <p className="truncate text-sm text-[var(--admin-on-surface-variant)]">{subSchool.email}</p>
+            <p className="truncate text-sm text-[var(--admin-on-surface-variant)]">
+              {subSchool.email}
+            </p>
           ) : null}
         </div>
         <a

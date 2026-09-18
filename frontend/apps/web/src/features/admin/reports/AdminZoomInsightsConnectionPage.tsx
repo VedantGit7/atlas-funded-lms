@@ -36,6 +36,7 @@ import {
   type ZoomWebhookEvent,
 } from "./admin-zoom-insights-roster-api";
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
+import { ZoomMeetingsPanel } from "./ZoomMeetingsPanel";
 
 type ModuleTab = "meetings" | "participants" | "unmatched" | "connection" | "exports";
 
@@ -1489,6 +1490,10 @@ export function AdminZoomInsightsConnectionPage() {
                 </div>
               </section>
             </div>
+          </div>
+
+          <div className="mt-6">
+            <ZoomMeetingsPanel />
           </div>
         </>
       ) : null}

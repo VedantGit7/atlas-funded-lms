@@ -161,7 +161,9 @@ export function AdminBillingPage({ summary }: AdminBillingPageProps) {
       </Link>
 
       <header className="space-y-1">
-        <h1 className="text-2xl font-bold tracking-tight text-[var(--admin-on-surface)]">Billing</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-[var(--admin-on-surface)]">
+          Billing
+        </h1>
         <p className="text-sm text-[var(--admin-on-surface-variant)]">
           Check your current billing cycle, manage your plan.
         </p>

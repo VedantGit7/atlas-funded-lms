@@ -47,6 +47,7 @@ import {
   type LiveLearnersMatrix,
   type LiveLearnersMatrixCell,
 } from "./admin-live-class-attendance-roster-api";
+import { csvEscape } from "@/lib/export/csv";
 
 type ModuleTab = "sessions" | "learners" | "series" | "exports";
 type DatePreset = "7d" | "30d" | "90d" | "custom";
@@ -509,10 +510,9 @@ function exportLearnersCsv(
     }),
   );
 
-  const escape = (value: string) => {
-    if (/[",\n]/.test(value)) return `"${value.replace(/"/g, '""')}"`;
-    return value;
-  };
+  // Attendance rows include learner display names, so this needs the formula
+  // guard in csvEscape and not just quoting (M1).
+  const escape = (value: string) => csvEscape(value);
 
   const csv = [headers, ...rows].map((row) => row.map(escape).join(",")).join("\n");
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
