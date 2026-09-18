@@ -13,9 +13,19 @@ const webSrcDir = path.dirname(fileURLToPath(import.meta.url));
 
 const apiInternalUrl = process.env["API_INTERNAL_URL"] ?? "http://127.0.0.1:3001";
 
+const repoRoot = path.join(webSrcDir, "..", "..", "..");
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  // F7: emit .next/standalone so a deployment carries only the traced files
+  // rather than the whole workspace plus node_modules.
+  output: "standalone",
+  // Tracing defaults to the app directory, which in this monorepo would exclude
+  // every @atlas/* workspace package the app imports -- the standalone bundle
+  // would build and then fail at runtime on a missing module. The root has to
+  // be the repository so the tracer can follow those links.
+  outputFileTracingRoot: repoRoot,
   transpilePackages: ["@atlas/design-system"],
   experimental: {
     // API requests are rewritten to the backend; raise proxy buffers for uploads.

@@ -14,7 +14,7 @@ function isLocalHost(host: string): boolean {
 
 /**
  * Resolve the origin the admin is actually inviting from (tenant host + port),
- * not a DB/config default. The web middleware forwards the browser host on
+ * not a DB/config default. The web proxy forwards the browser host on
  * `x-atlas-tenant-host` (and `x-forwarded-host`), so invites sent from
  * `fundedbeyond.localhost.test:3000` redirect back to that exact host. This is
  * what keeps the Supabase `redirect_to` inside the tenant's allow-listed URLs.

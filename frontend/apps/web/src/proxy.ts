@@ -11,7 +11,7 @@ import {
   forwardRefreshedSessionCookies,
   hasValidAccessToken,
   mergeRequestCookieHeader,
-  tryRefreshSessionForMiddleware,
+  tryRefreshSessionForProxy,
 } from "./lib/server/session-refresh";
 
 const PROTECTED_ROUTE_PREFIXES = [
@@ -60,11 +60,11 @@ function buildForwardedRequestHeaders(req: NextRequest, cookieHeader: string): H
   return requestHeaders;
 }
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   if (isProtectedRoute(pathname) && !hasValidAccessToken(req)) {
-    const refreshResponse = await tryRefreshSessionForMiddleware(req);
+    const refreshResponse = await tryRefreshSessionForProxy(req);
 
     if (!refreshResponse) {
       const loginUrl = req.nextUrl.clone();
@@ -89,7 +89,7 @@ export async function middleware(req: NextRequest) {
     return res;
   }
 
-  const refreshResponse = await tryRefreshSessionForMiddleware(req);
+  const refreshResponse = await tryRefreshSessionForProxy(req);
   const cookieHeader = refreshResponse
     ? mergeRequestCookieHeader(req, refreshResponse)
     : req.cookies

@@ -7,7 +7,7 @@ import {
 } from "@atlas/core/http/headers";
 import { createRequestId, stripClientSuppliedRequestIds } from "@atlas/core/request/request-id";
 
-export function middleware(req: NextRequest) {
+export function proxy(req: NextRequest) {
   const requestHeaders = new Headers(req.headers);
 
   // Never trust client-supplied tenant context headers.
@@ -34,7 +34,7 @@ export function middleware(req: NextRequest) {
 export const config = {
   matcher: [
     /*
-     * Keep static assets out of middleware.
+     * Keep static assets out of the proxy.
      * Tenant resolution itself happens in server route wrappers/loaders.
      */
     "/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml).*)",

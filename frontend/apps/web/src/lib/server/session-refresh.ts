@@ -115,7 +115,7 @@ export async function refreshSessionCookieHeader(
  * Attempts to mint a fresh access token from the refresh-token cookie before
  * protected-route middleware sends the user to /login.
  */
-export async function tryRefreshSessionForMiddleware(req: NextRequest): Promise<Response | null> {
+export async function tryRefreshSessionForProxy(req: NextRequest): Promise<Response | null> {
   const refreshToken = req.cookies.get(ATLAS_REFRESH_TOKEN_COOKIE)?.value;
   const accessToken = req.cookies.get(ATLAS_ACCESS_TOKEN_COOKIE)?.value;
 
