@@ -3,18 +3,20 @@
 ## Core Classes
 
 ### Scene
+
 ```javascript
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x000000);
 scene.fog = new THREE.Fog(0xffffff, 10, 100);
 scene.add(object);
 scene.remove(object);
-scene.getObjectByName('name');
+scene.getObjectByName("name");
 ```
 
 ### Camera
 
 #### PerspectiveCamera
+
 ```javascript
 new THREE.PerspectiveCamera(fov, aspect, near, far);
 camera.position.set(x, y, z);
@@ -23,11 +25,13 @@ camera.updateProjectionMatrix(); // Call after changing properties
 ```
 
 **Common FOVs:**
+
 - 45° - Natural perspective
 - 50° - Default for many apps
 - 75° - Wide, immersive feel
 
 #### OrthographicCamera
+
 ```javascript
 new THREE.OrthographicCamera(left, right, top, bottom, near, far);
 // Useful for 2D/isometric views
@@ -36,11 +40,12 @@ new THREE.OrthographicCamera(left, right, top, bottom, near, far);
 ### Renderer
 
 #### WebGLRenderer
+
 ```javascript
 const renderer = new THREE.WebGLRenderer({
   antialias: true,
   alpha: true,
-  powerPreference: "high-performance"
+  powerPreference: "high-performance",
 });
 renderer.setSize(width, height);
 renderer.setPixelRatio(window.devicePixelRatio);
@@ -52,6 +57,7 @@ renderer.toneMappingExposure = 1.0;
 ```
 
 #### WebGPURenderer
+
 ```javascript
 const renderer = new THREE.WebGPURenderer({ antialias: true });
 renderer.setAnimationLoop(animate);
@@ -60,6 +66,7 @@ renderer.setAnimationLoop(animate);
 ## Geometry
 
 ### Built-in Geometries
+
 ```javascript
 new THREE.BoxGeometry(width, height, depth);
 new THREE.SphereGeometry(radius, widthSegments, heightSegments);
@@ -69,6 +76,7 @@ new THREE.TorusGeometry(radius, tube, radialSegments, tubularSegments);
 ```
 
 ### BufferGeometry (Custom)
+
 ```javascript
 const geometry = new THREE.BufferGeometry();
 const vertices = new Float32Array([...]);
@@ -78,6 +86,7 @@ geometry.computeBoundingSphere();
 ```
 
 ### Geometry Operations
+
 ```javascript
 geometry.dispose(); // Free memory
 geometry.center(); // Center geometry at origin
@@ -89,6 +98,7 @@ geometry.translate(x, y, z);
 ## Materials
 
 ### Common Properties
+
 ```javascript
 {
   color: 0xff0000,
@@ -102,30 +112,34 @@ geometry.translate(x, y, z);
 ```
 
 ### Material Types
+
 ```javascript
 new THREE.MeshBasicMaterial({}); // Unlit
 new THREE.MeshLambertMaterial({}); // Simple diffuse
 new THREE.MeshPhongMaterial({ shininess: 30 }); // Specular
 new THREE.MeshStandardMaterial({ roughness: 0.5, metalness: 0.5 }); // PBR
-new THREE.MeshPhysicalMaterial({ // Advanced PBR
+new THREE.MeshPhysicalMaterial({
+  // Advanced PBR
   roughness: 0.0,
   metalness: 0.0,
   clearcoat: 1.0,
   clearcoatRoughness: 0.1,
   transmission: 1.0,
-  ior: 1.5
+  ior: 1.5,
 });
 ```
 
 ## Lights
 
 ### AmbientLight
+
 ```javascript
 new THREE.AmbientLight(0xffffff, 0.5);
 // Illuminates all objects equally
 ```
 
 ### DirectionalLight
+
 ```javascript
 const light = new THREE.DirectionalLight(0xffffff, 1);
 light.position.set(5, 10, 7.5);
@@ -134,6 +148,7 @@ light.castShadow = true;
 ```
 
 ### PointLight
+
 ```javascript
 const light = new THREE.PointLight(0xffffff, 1, distance, decay);
 light.castShadow = true;
@@ -141,6 +156,7 @@ light.castShadow = true;
 ```
 
 ### SpotLight
+
 ```javascript
 const light = new THREE.SpotLight(0xffffff, 1, distance, angle, penumbra, decay);
 light.target.position.set(x, y, z);
@@ -148,12 +164,14 @@ light.castShadow = true;
 ```
 
 ### HemisphereLight
+
 ```javascript
 new THREE.HemisphereLight(skyColor, groundColor, intensity);
 // Sky and ground hemisphere lighting
 ```
 
 ### Light Properties
+
 ```javascript
 light.intensity = 1.0;
 light.color.set(0xff0000);
@@ -164,9 +182,10 @@ light.visible = false;
 ## Textures
 
 ### TextureLoader
+
 ```javascript
 const loader = new THREE.TextureLoader();
-const texture = loader.load('texture.jpg', onLoad, onProgress, onError);
+const texture = loader.load("texture.jpg", onLoad, onProgress, onError);
 
 texture.colorSpace = THREE.SRGBColorSpace;
 texture.wrapS = THREE.RepeatWrapping;
@@ -180,6 +199,7 @@ texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
 ```
 
 ### Texture Types
+
 ```javascript
 material.map = diffuseTexture;
 material.normalMap = normalTexture;
@@ -195,6 +215,7 @@ material.alphaMap = alphaTexture;
 ## Mesh
 
 ### Creation
+
 ```javascript
 const mesh = new THREE.Mesh(geometry, material);
 mesh.position.set(x, y, z);
@@ -203,10 +224,11 @@ mesh.scale.set(x, y, z);
 mesh.castShadow = true;
 mesh.receiveShadow = true;
 mesh.visible = true;
-mesh.name = 'my-mesh';
+mesh.name = "my-mesh";
 ```
 
 ### Transformations
+
 ```javascript
 mesh.translateX(distance);
 mesh.translateY(distance);
@@ -218,6 +240,7 @@ mesh.lookAt(targetVector);
 ```
 
 ### Matrix Operations
+
 ```javascript
 mesh.updateMatrix();
 mesh.updateMatrixWorld(force);
@@ -225,6 +248,7 @@ mesh.applyMatrix4(matrix);
 ```
 
 ## Groups
+
 ```javascript
 const group = new THREE.Group();
 group.add(mesh1, mesh2, mesh3);
@@ -235,6 +259,7 @@ scene.add(group);
 ## Animation
 
 ### AnimationMixer
+
 ```javascript
 const mixer = new THREE.AnimationMixer(model);
 const action = mixer.clipAction(gltf.animations[0]);
@@ -246,6 +271,7 @@ mixer.update(delta);
 ```
 
 ### AnimationAction Methods
+
 ```javascript
 action.play();
 action.stop();
@@ -262,33 +288,42 @@ action.crossFadeTo(otherAction, duration);
 ## Loaders
 
 ### GLTFLoader
+
 ```javascript
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 const loader = new GLTFLoader();
-loader.load('model.glb', (gltf) => {
-  scene.add(gltf.scene);
-}, onProgress, onError);
+loader.load(
+  "model.glb",
+  (gltf) => {
+    scene.add(gltf.scene);
+  },
+  onProgress,
+  onError,
+);
 ```
 
 ### DRACOLoader
+
 ```javascript
-import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
+import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
 const dracoLoader = new DRACOLoader();
-dracoLoader.setDecoderPath('/draco/');
+dracoLoader.setDecoderPath("/draco/");
 gltfLoader.setDRACOLoader(dracoLoader);
 ```
 
 ### OBJLoader, FBXLoader
+
 ```javascript
-import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
-import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
+import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
+import { FBXLoader } from "three/addons/loaders/FBXLoader.js";
 ```
 
 ## Controls
 
 ### OrbitControls
+
 ```javascript
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.05;
@@ -300,13 +335,15 @@ controls.update(); // Call in animation loop if damping enabled
 ```
 
 ### MapControls, TrackballControls, FlyControls
+
 ```javascript
-import { MapControls } from 'three/addons/controls/MapControls.js';
-import { TrackballControls } from 'three/addons/controls/TrackballControls.js';
-import { FlyControls } from 'three/addons/controls/FlyControls.js';
+import { MapControls } from "three/addons/controls/MapControls.js";
+import { TrackballControls } from "three/addons/controls/TrackballControls.js";
+import { FlyControls } from "three/addons/controls/FlyControls.js";
 ```
 
 ## Raycaster
+
 ```javascript
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
@@ -330,6 +367,7 @@ if (intersects.length > 0) {
 ## Math Utilities
 
 ### Vector3
+
 ```javascript
 const v = new THREE.Vector3(x, y, z);
 v.set(x, y, z);
@@ -346,6 +384,7 @@ v.dot(otherVector);
 ```
 
 ### Quaternion
+
 ```javascript
 const q = new THREE.Quaternion();
 q.setFromEuler(euler);
@@ -354,6 +393,7 @@ mesh.quaternion.copy(q);
 ```
 
 ### Clock
+
 ```javascript
 const clock = new THREE.Clock();
 const delta = clock.getDelta(); // Time since last call
@@ -365,9 +405,10 @@ clock.stop();
 ## Post-Processing
 
 ### EffectComposer
+
 ```javascript
-import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
-import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
 
 const composer = new EffectComposer(renderer);
 composer.addPass(new RenderPass(scene, camera));
@@ -375,11 +416,12 @@ composer.render();
 ```
 
 ### Common Passes
+
 ```javascript
-import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
-import { SSAOPass } from 'three/addons/postprocessing/SSAOPass.js';
-import { SMAAPass } from 'three/addons/postprocessing/SMAAPass.js';
-import { OutlinePass } from 'three/addons/postprocessing/OutlinePass.js';
+import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
+import { SSAOPass } from "three/addons/postprocessing/SSAOPass.js";
+import { SMAAPass } from "three/addons/postprocessing/SMAAPass.js";
+import { OutlinePass } from "three/addons/postprocessing/OutlinePass.js";
 ```
 
 ## Helpers
@@ -396,23 +438,27 @@ new THREE.BoxHelper(object, color);
 ## Constants
 
 ### Side
+
 - `THREE.FrontSide` (default)
 - `THREE.BackSide`
 - `THREE.DoubleSide`
 
 ### Blending Modes
+
 - `THREE.NormalBlending` (default)
 - `THREE.AdditiveBlending`
 - `THREE.SubtractiveBlending`
 - `THREE.MultiplyBlending`
 
 ### Shadow Map Types
+
 - `THREE.BasicShadowMap`
 - `THREE.PCFShadowMap`
 - `THREE.PCFSoftShadowMap`
 - `THREE.VSMShadowMap`
 
 ### Tone Mapping
+
 - `THREE.NoToneMapping`
 - `THREE.LinearToneMapping`
 - `THREE.ReinhardToneMapping`
@@ -420,6 +466,7 @@ new THREE.BoxHelper(object, color);
 - `THREE.ACESFilmicToneMapping`
 
 ### Color Spaces
+
 - `THREE.SRGBColorSpace`
 - `THREE.LinearSRGBColorSpace`
 

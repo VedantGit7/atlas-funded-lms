@@ -16,15 +16,15 @@ Need lighting?
 
 ## Material Comparison Table
 
-| Material | Lighting | PBR | Performance | Use Case |
-|----------|----------|-----|-------------|----------|
-| MeshBasicMaterial | ✗ | ✗ | Excellent | UI, debugging, unlit scenes |
-| MeshLambertMaterial | ✓ | ✗ | Very Good | Mobile, simple diffuse |
-| MeshPhongMaterial | ✓ | ✗ | Good | Legacy, specular highlights |
-| MeshStandardMaterial | ✓ | ✓ | Moderate | Most realistic scenes |
-| MeshPhysicalMaterial | ✓ | ✓✓ | Lower | Advanced materials (glass, car paint) |
-| MeshToonMaterial | ✓ | ✗ | Very Good | Cel-shaded / cartoon style |
-| ShaderMaterial | Custom | Custom | Varies | Complete custom control |
+| Material             | Lighting | PBR    | Performance | Use Case                              |
+| -------------------- | -------- | ------ | ----------- | ------------------------------------- |
+| MeshBasicMaterial    | ✗        | ✗      | Excellent   | UI, debugging, unlit scenes           |
+| MeshLambertMaterial  | ✓        | ✗      | Very Good   | Mobile, simple diffuse                |
+| MeshPhongMaterial    | ✓        | ✗      | Good        | Legacy, specular highlights           |
+| MeshStandardMaterial | ✓        | ✓      | Moderate    | Most realistic scenes                 |
+| MeshPhysicalMaterial | ✓        | ✓✓     | Lower       | Advanced materials (glass, car paint) |
+| MeshToonMaterial     | ✓        | ✗      | Very Good   | Cel-shaded / cartoon style            |
+| ShaderMaterial       | Custom   | Custom | Varies      | Complete custom control               |
 
 ## MeshBasicMaterial
 
@@ -42,11 +42,12 @@ const material = new THREE.MeshBasicMaterial({
   envMap: environmentMap,
   combine: THREE.MultiplyOperation, // For envMap
   reflectivity: 1.0,
-  refractionRatio: 0.98
+  refractionRatio: 0.98,
 });
 ```
 
 **Key Features:**
+
 - No lighting calculations (fastest)
 - Flat, unshaded appearance
 - Always visible regardless of lights
@@ -68,11 +69,12 @@ const material = new THREE.MeshLambertMaterial({
   lightMap: lightMapTexture,
   lightMapIntensity: 1.0,
   aoMap: aoTexture,
-  aoMapIntensity: 1.0
+  aoMapIntensity: 1.0,
 });
 ```
 
 **Key Features:**
+
 - Simple diffuse (matte) lighting
 - No specular highlights
 - Cheaper than Phong/Standard
@@ -96,11 +98,12 @@ const material = new THREE.MeshPhongMaterial({
   normalScale: new THREE.Vector2(1, 1),
   bumpMap: bumpTexture,
   bumpScale: 1.0,
-  specularMap: specTexture
+  specularMap: specTexture,
 });
 ```
 
 **Key Features:**
+
 - Diffuse + specular highlights
 - Adjustable shininess
 - Per-pixel lighting
@@ -135,17 +138,19 @@ const material = new THREE.MeshStandardMaterial({
   displacementScale: 1.0,
   displacementBias: 0.0,
   alphaMap: alphaTexture,
-  flatShading: false
+  flatShading: false,
 });
 ```
 
 **Key Features:**
+
 - Physically Based Rendering (PBR)
 - Energy-conserving reflections
 - Works with HDR environment maps
 - Industry-standard workflow (glTF)
 
 **Roughness Guide:**
+
 - 0.0 - Perfect mirror (chrome, polished metal)
 - 0.2 - Very glossy (wet surfaces, varnished wood)
 - 0.5 - Moderate (painted metal, plastic)
@@ -153,6 +158,7 @@ const material = new THREE.MeshStandardMaterial({
 - 1.0 - Completely diffuse (clay, concrete)
 
 **Metalness Guide:**
+
 - 0.0 - Non-metal (wood, plastic, skin, fabric)
 - 1.0 - Metal (gold, silver, copper, iron)
 - Avoid values between 0-1 (physically incorrect)
@@ -186,13 +192,14 @@ const material = new THREE.MeshPhysicalMaterial({
 
   iridescence: 1.0, // Soap bubble, oil slick effect
   iridescenceIOR: 1.3,
-  iridescenceThicknessRange: [100, 400]
+  iridescenceThicknessRange: [100, 400],
 });
 ```
 
 **Use Cases:**
 
 ### Glass
+
 ```javascript
 {
   roughness: 0.0,
@@ -204,6 +211,7 @@ const material = new THREE.MeshPhysicalMaterial({
 ```
 
 ### Car Paint
+
 ```javascript
 {
   roughness: 0.4,
@@ -215,6 +223,7 @@ const material = new THREE.MeshPhysicalMaterial({
 ```
 
 ### Fabric (Velvet, Satin)
+
 ```javascript
 {
   roughness: 0.8,
@@ -226,6 +235,7 @@ const material = new THREE.MeshPhysicalMaterial({
 ```
 
 ### Soap Bubble
+
 ```javascript
 {
   roughness: 0.0,
@@ -248,11 +258,12 @@ const material = new THREE.MeshToonMaterial({
   color: 0xff0000,
   map: texture,
   gradientMap: gradientTexture, // Controls toon shading steps
-  emissive: 0x000000
+  emissive: 0x000000,
 });
 ```
 
 **Key Features:**
+
 - Discrete shading levels (cel-shaded)
 - Stylized, non-realistic look
 - Good performance
@@ -301,7 +312,7 @@ const material = new THREE.MeshToonMaterial({
 ### Texture Properties
 
 ```javascript
-const texture = loader.load('texture.jpg');
+const texture = loader.load("texture.jpg");
 
 // Color space (IMPORTANT!)
 texture.colorSpace = THREE.SRGBColorSpace; // For diffuse/color maps
@@ -328,24 +339,26 @@ texture.generateMipmaps = true;
 
 ### Texture Types & Color Spaces
 
-| Texture Type | Color Space | Purpose |
-|--------------|-------------|---------|
-| map (diffuse) | SRGB | Base color |
-| normalMap | Linear | Surface detail |
-| roughnessMap | Linear | Surface roughness |
-| metalnessMap | Linear | Metallic areas |
-| aoMap | Linear | Ambient occlusion |
-| emissiveMap | SRGB | Glow |
-| bumpMap | Linear | Height data |
-| displacementMap | Linear | Vertex displacement |
-| alphaMap | Linear | Transparency mask |
+| Texture Type    | Color Space | Purpose             |
+| --------------- | ----------- | ------------------- |
+| map (diffuse)   | SRGB        | Base color          |
+| normalMap       | Linear      | Surface detail      |
+| roughnessMap    | Linear      | Surface roughness   |
+| metalnessMap    | Linear      | Metallic areas      |
+| aoMap           | Linear      | Ambient occlusion   |
+| emissiveMap     | SRGB        | Glow                |
+| bumpMap         | Linear      | Height data         |
+| displacementMap | Linear      | Vertex displacement |
+| alphaMap        | Linear      | Transparency mask   |
 
 ## Material Optimization Tips
 
 ### 1. Texture Atlas
+
 Combine multiple textures into one to reduce draw calls.
 
 ### 2. Share Materials
+
 ```javascript
 // Good: Share material across meshes
 const sharedMaterial = new THREE.MeshStandardMaterial({...});
@@ -357,17 +370,20 @@ const mesh1 = new THREE.Mesh(geo1, new THREE.MeshStandardMaterial({...}));
 ```
 
 ### 3. Texture Size
+
 - Use power-of-two dimensions (512, 1024, 2048)
 - Compress textures (JPEG for photos, PNG for alpha)
 - Consider KTX2/Basis Universal for web
 
 ### 4. Disable Unnecessary Features
+
 ```javascript
 material.needsUpdate = false; // After initial setup
 renderer.shadowMap.autoUpdate = false; // If shadows don't change
 ```
 
 ### 5. Use InstancedMesh with Materials
+
 For identical objects with the same material.
 
 ## Custom Shaders (ShaderMaterial)
@@ -379,7 +395,7 @@ const material = new THREE.ShaderMaterial({
   uniforms: {
     uTime: { value: 0.0 },
     uColor: { value: new THREE.Color(0xff0000) },
-    uTexture: { value: texture }
+    uTexture: { value: texture },
   },
   vertexShader: `
     uniform float uTime;
@@ -408,7 +424,7 @@ const material = new THREE.ShaderMaterial({
     }
   `,
   transparent: false,
-  side: THREE.DoubleSide
+  side: THREE.DoubleSide,
 });
 
 // Update uniforms in animation loop
@@ -432,16 +448,19 @@ if (material.roughnessMap) material.roughnessMap.dispose();
 ## Troubleshooting
 
 ### Material Appears Black
+
 - No lights in scene (for Lambert/Phong/Standard)
 - Normals inverted
 - Material side setting incorrect
 
 ### Material Too Shiny
+
 - Reduce roughness (Standard/Physical)
 - Reduce shininess (Phong)
 - Check roughnessMap is loaded
 
 ### Material Not Transparent
+
 ```javascript
 material.transparent = true;
 material.opacity = 0.5;
@@ -449,12 +468,15 @@ material.depthWrite = false; // For glass-like materials
 ```
 
 ### Texture Not Showing
+
 - Check texture.colorSpace (SRGB for diffuse)
 - Ensure geometry has UV coordinates
 - Verify texture loaded successfully
 
 ### Z-Fighting / Flickering
+
 - Adjust material.polygonOffset
+
 ```javascript
 material.polygonOffset = true;
 material.polygonOffsetFactor = -1;

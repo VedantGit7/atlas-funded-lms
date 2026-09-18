@@ -75,8 +75,8 @@ In `main.js` line 10:
 
 ```javascript
 await app.init({
-    backgroundColor: 0x1a1a2e,  // Change this hex color
-    // ...
+  backgroundColor: 0x1a1a2e, // Change this hex color
+  // ...
 });
 ```
 
@@ -86,11 +86,11 @@ In `main.js` lines 35-40, edit the color palette:
 
 ```javascript
 const textures = [
-    createSpriteTexture(0xe74c3c),  // Red
-    createSpriteTexture(0x3498db),  // Blue
-    createSpriteTexture(0x2ecc71),  // Green
-    createSpriteTexture(0xf39c12),  // Orange
-    createSpriteTexture(0x9b59b6)   // Purple
+  createSpriteTexture(0xe74c3c), // Red
+  createSpriteTexture(0x3498db), // Blue
+  createSpriteTexture(0x2ecc71), // Green
+  createSpriteTexture(0xf39c12), // Orange
+  createSpriteTexture(0x9b59b6), // Purple
 ];
 ```
 
@@ -99,7 +99,7 @@ const textures = [
 In `main.js` line 31, change the circle radius:
 
 ```javascript
-graphics.circle(25, 25, 25).fill(color);  // Last parameter is radius
+graphics.circle(25, 25, 25).fill(color); // Last parameter is radius
 ```
 
 ### Change Initial Sprite Count
@@ -107,7 +107,7 @@ graphics.circle(25, 25, 25).fill(color);  // Last parameter is radius
 In `main.js` line 140:
 
 ```javascript
-addSprites(50);  // Change from 50 to your desired count
+addSprites(50); // Change from 50 to your desired count
 ```
 
 ### Modify Physics Behavior
@@ -115,8 +115,8 @@ addSprites(50);  // Change from 50 to your desired count
 In `main.js` lines 57-58, adjust velocity ranges:
 
 ```javascript
-sprite.vx = (Math.random() - 0.5) * 2;  // Horizontal speed
-sprite.vy = (Math.random() - 0.5) * 2;  // Vertical speed
+sprite.vx = (Math.random() - 0.5) * 2; // Horizontal speed
+sprite.vy = (Math.random() - 0.5) * 2; // Vertical speed
 ```
 
 ### Disable Rotation
@@ -135,7 +135,7 @@ Replace the procedural graphics with image textures:
 
 ```javascript
 // Load texture from image
-const texture = await PIXI.Assets.load('path/to/sprite.png');
+const texture = await PIXI.Assets.load("path/to/sprite.png");
 
 // Create sprite
 const sprite = new PIXI.Sprite(texture);
@@ -146,7 +146,7 @@ const sprite = new PIXI.Sprite(texture);
 Apply blur, glow, or other effects:
 
 ```javascript
-import { BlurFilter } from 'pixi.js';
+import { BlurFilter } from "pixi.js";
 
 const blurFilter = new BlurFilter();
 blurFilter.strength = 8;
@@ -160,37 +160,37 @@ For better performance with many sprites:
 
 ```javascript
 class SpritePool {
-    constructor(texture, size = 100) {
-        this.available = [];
-        this.active = [];
+  constructor(texture, size = 100) {
+    this.available = [];
+    this.active = [];
 
-        for (let i = 0; i < size; i++) {
-            const sprite = new PIXI.Sprite(texture);
-            sprite.visible = false;
-            this.available.push(sprite);
-        }
+    for (let i = 0; i < size; i++) {
+      const sprite = new PIXI.Sprite(texture);
+      sprite.visible = false;
+      this.available.push(sprite);
+    }
+  }
+
+  spawn(x, y) {
+    let sprite = this.available.pop();
+    if (!sprite) {
+      sprite = new PIXI.Sprite(this.texture);
     }
 
-    spawn(x, y) {
-        let sprite = this.available.pop();
-        if (!sprite) {
-            sprite = new PIXI.Sprite(this.texture);
-        }
+    sprite.position.set(x, y);
+    sprite.visible = true;
+    this.active.push(sprite);
+    return sprite;
+  }
 
-        sprite.position.set(x, y);
-        sprite.visible = true;
-        this.active.push(sprite);
-        return sprite;
+  despawn(sprite) {
+    sprite.visible = false;
+    const index = this.active.indexOf(sprite);
+    if (index > -1) {
+      this.active.splice(index, 1);
+      this.available.push(sprite);
     }
-
-    despawn(sprite) {
-        sprite.visible = false;
-        const index = this.active.indexOf(sprite);
-        if (index > -1) {
-            this.active.splice(index, 1);
-            this.available.push(sprite);
-        }
-    }
+  }
 }
 
 const pool = new SpritePool(texture);
@@ -204,17 +204,17 @@ Use ParticleContainer for thousands of sprites:
 
 ```javascript
 const particles = new PIXI.ParticleContainer(10000, {
-    position: true,
-    rotation: true,
-    scale: true,
-    tint: true
+  position: true,
+  rotation: true,
+  scale: true,
+  tint: true,
 });
 
 for (let i = 0; i < 10000; i++) {
-    const particle = new PIXI.Sprite(texture);
-    particle.x = Math.random() * app.screen.width;
-    particle.y = Math.random() * app.screen.height;
-    particles.addChild(particle);
+  const particle = new PIXI.Sprite(texture);
+  particle.x = Math.random() * app.screen.width;
+  particle.y = Math.random() * app.screen.height;
+  particles.addChild(particle);
 }
 
 app.stage.addChild(particles);
@@ -225,7 +225,7 @@ app.stage.addChild(particles);
 Create custom visual effects with GLSL:
 
 ```javascript
-import { Filter, GlProgram } from 'pixi.js';
+import { Filter, GlProgram } from "pixi.js";
 
 const fragment = `
     in vec2 vTextureCoord;
@@ -240,17 +240,17 @@ const fragment = `
 `;
 
 const waveFilter = new Filter({
-    glProgram: new GlProgram({ fragment }),
-    resources: {
-        waveUniforms: {
-            uTime: { value: 0, type: 'f32' }
-        }
-    }
+  glProgram: new GlProgram({ fragment }),
+  resources: {
+    waveUniforms: {
+      uTime: { value: 0, type: "f32" },
+    },
+  },
 });
 
 // Update in ticker
 app.ticker.add(() => {
-    waveFilter.resources.waveUniforms.uniforms.uTime += 0.1;
+  waveFilter.resources.waveUniforms.uniforms.uTime += 0.1;
 });
 
 sprite.filters = [waveFilter];
@@ -267,12 +267,12 @@ sprite.filters = [waveFilter];
 
 ```javascript
 await app.init({
-    antialias: true,
-    resolution: 2,  // Higher resolution
-    // ...
+  antialias: true,
+  resolution: 2, // Higher resolution
+  // ...
 });
 
-addSprites(500);  // More sprites
+addSprites(500); // More sprites
 ```
 
 ### For Mobile (Low-End)
@@ -284,12 +284,12 @@ addSprites(500);  // More sprites
 
 ```javascript
 await app.init({
-    antialias: false,
-    resolution: 1,
-    // ...
+  antialias: false,
+  resolution: 1,
+  // ...
 });
 
-addSprites(50);  // Fewer sprites
+addSprites(50); // Fewer sprites
 ```
 
 ### General Optimization
@@ -306,6 +306,7 @@ addSprites(50);  // Fewer sprites
 ### Issue: Black screen or no rendering
 
 **Solution**: Check browser console for errors. Ensure:
+
 - PixiJS CDN is loading correctly
 - No JavaScript errors in console
 - Browser supports WebGL (check `https://get.webgl.org/`)
@@ -316,11 +317,11 @@ addSprites(50);  // Fewer sprites
 
 ```javascript
 await app.init({
-    antialias: false,
-    resolution: 1
+  antialias: false,
+  resolution: 1,
 });
 
-addSprites(25);  // Fewer sprites
+addSprites(25); // Fewer sprites
 ```
 
 ### Issue: Sprites disappearing at edges
@@ -333,11 +334,11 @@ addSprites(25);  // Fewer sprites
 
 ```javascript
 function clearSprites() {
-    sprites.forEach(sprite => {
-        sprite.destroy({ texture: false });  // Keep texture
-    });
-    sprites.length = 0;
-    spriteContainer.removeChildren();
+  sprites.forEach((sprite) => {
+    sprite.destroy({ texture: false }); // Keep texture
+  });
+  sprites.length = 0;
+  spriteContainer.removeChildren();
 }
 ```
 
@@ -370,35 +371,39 @@ Requires WebGL support. Check compatibility at [caniuse.com/webgl](https://caniu
 ### Example Extensions
 
 **Collision Detection**:
+
 ```javascript
 function checkCollision(sprite1, sprite2) {
-    const bounds1 = sprite1.getBounds();
-    const bounds2 = sprite2.getBounds();
+  const bounds1 = sprite1.getBounds();
+  const bounds2 = sprite2.getBounds();
 
-    return bounds1.x < bounds2.x + bounds2.width &&
-           bounds1.x + bounds1.width > bounds2.x &&
-           bounds1.y < bounds2.y + bounds2.height &&
-           bounds1.y + bounds1.height > bounds2.y;
+  return (
+    bounds1.x < bounds2.x + bounds2.width &&
+    bounds1.x + bounds1.width > bounds2.x &&
+    bounds1.y < bounds2.y + bounds2.height &&
+    bounds1.y + bounds1.height > bounds2.y
+  );
 }
 
 app.ticker.add(() => {
-    for (let i = 0; i < sprites.length; i++) {
-        for (let j = i + 1; j < sprites.length; j++) {
-            if (checkCollision(sprites[i], sprites[j])) {
-                // Handle collision
-            }
-        }
+  for (let i = 0; i < sprites.length; i++) {
+    for (let j = i + 1; j < sprites.length; j++) {
+      if (checkCollision(sprites[i], sprites[j])) {
+        // Handle collision
+      }
     }
+  }
 });
 ```
 
 **Sprite Sheet Animation**:
+
 ```javascript
 // Load sprite sheet
-const sheet = await PIXI.Assets.load('spritesheet.json');
+const sheet = await PIXI.Assets.load("spritesheet.json");
 
 // Create animated sprite
-const animatedSprite = new PIXI.AnimatedSprite(sheet.animations['run']);
+const animatedSprite = new PIXI.AnimatedSprite(sheet.animations["run"]);
 animatedSprite.animationSpeed = 0.1;
 animatedSprite.play();
 
@@ -406,17 +411,18 @@ app.stage.addChild(animatedSprite);
 ```
 
 **React Integration**:
+
 ```javascript
-import { Stage, Container, Sprite } from '@pixi/react';
+import { Stage, Container, Sprite } from "@pixi/react";
 
 function App() {
-    return (
-        <Stage width={800} height={600}>
-            <Container>
-                <Sprite texture={texture} x={100} y={100} />
-            </Container>
-        </Stage>
-    );
+  return (
+    <Stage width={800} height={600}>
+      <Container>
+        <Sprite texture={texture} x={100} y={100} />
+      </Container>
+    </Stage>
+  );
 }
 ```
 
@@ -425,18 +431,21 @@ function App() {
 ### Static Hosting
 
 **Vercel**:
+
 ```bash
 npm install -g vercel
 vercel --prod
 ```
 
 **Netlify**:
+
 ```bash
 npm install -g netlify-cli
 netlify deploy --prod --dir .
 ```
 
 **GitHub Pages**:
+
 ```bash
 git init
 git add .
@@ -451,23 +460,26 @@ git push -u origin main
 ### CDN Considerations
 
 The template uses PixiJS from CDN:
+
 ```html
 <script src="https://pixijs.download/release/pixi.js"></script>
 ```
 
 For production, consider:
+
 1. **Self-hosting** for better caching and control
 2. **npm installation** for bundled builds
 3. **Specific version** to avoid breaking changes
 
 **npm approach**:
+
 ```bash
 npm install pixi.js
 ```
 
 ```javascript
 // main.js
-import * as PIXI from 'pixi.js';
+import * as PIXI from "pixi.js";
 
 // Use bundler like Vite or Webpack
 ```
@@ -481,6 +493,7 @@ PixiJS is MIT licensed. See [PixiJS GitHub](https://github.com/pixijs/pixijs) fo
 ## Support
 
 For PixiJS questions:
+
 - [PixiJS Discord](https://discord.gg/CPTjeb28nH)
 - [PixiJS GitHub Discussions](https://github.com/pixijs/pixijs/discussions)
 - [Stack Overflow](https://stackoverflow.com/questions/tagged/pixi.js)

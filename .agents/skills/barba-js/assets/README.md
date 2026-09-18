@@ -142,19 +142,21 @@ Add Barba attributes to your HTML:
 Create JavaScript file:
 
 ```javascript
-import barba from '@barba/core';
-import gsap from 'gsap';
+import barba from "@barba/core";
+import gsap from "gsap";
 
 barba.init({
-  transitions: [{
-    name: 'fade',
-    async leave({ current }) {
-      await gsap.to(current.container, { opacity: 0 });
+  transitions: [
+    {
+      name: "fade",
+      async leave({ current }) {
+        await gsap.to(current.container, { opacity: 0 });
+      },
+      async enter({ next }) {
+        await gsap.from(next.container, { opacity: 0 });
+      },
     },
-    async enter({ next }) {
-      await gsap.from(next.container, { opacity: 0 });
-    }
-  }]
+  ],
 });
 ```
 

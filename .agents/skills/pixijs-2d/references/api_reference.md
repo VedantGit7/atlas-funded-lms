@@ -28,7 +28,7 @@ Core application class that manages the renderer, stage, and update loop.
 ### Constructor
 
 ```typescript
-new Application()
+new Application();
 ```
 
 ### Methods
@@ -46,12 +46,13 @@ await app.init({
   antialias: true,
   resolution: window.devicePixelRatio || 1,
   autoDensity: true,
-  powerPreference: 'high-performance',
-  hello: true  // Show PixiJS banner in console
+  powerPreference: "high-performance",
+  hello: true, // Show PixiJS banner in console
 });
 ```
 
 **Options**:
+
 - `width: number` - Canvas width (default: 800)
 - `height: number` - Canvas height (default: 600)
 - `backgroundColor: number` - Background color (default: 0x000000)
@@ -71,6 +72,7 @@ app.destroy(true, { children: true, texture: true });
 ```
 
 **Parameters**:
+
 - `removeView: boolean` - Remove canvas from DOM (default: false)
 - `stageOptions: object` - Options for stage destruction
   - `children: boolean` - Destroy all children
@@ -82,7 +84,7 @@ app.destroy(true, { children: true, texture: true });
 Resize canvas to fill window.
 
 ```typescript
-window.addEventListener('resize', () => {
+window.addEventListener("resize", () => {
   app.resizeCanvas();
 });
 ```
@@ -109,16 +111,17 @@ app.ticker.add((ticker) => {
 
 app.ticker.stop();
 app.ticker.start();
-app.ticker.speed = 0.5;  // Half speed
+app.ticker.speed = 0.5; // Half speed
 
 // Resize Plugin
-app.resizeTo = window;  // Auto-resize to window
+app.resizeTo = window; // Auto-resize to window
 
 // Culler Plugin - automatic viewport culling
 app.cullable = true;
 ```
 
 **API References**:
+
 - TickerPlugin: https://pixijs.download/release/docs/app.TickerPlugin.html
 - ResizePlugin: https://pixijs.download/release/docs/app.ResizePlugin.html
 - CullerPlugin: https://pixijs.download/release/docs/app.CullerPlugin.html
@@ -170,27 +173,27 @@ sprite.cacheAsBitmap: boolean     // Convert to texture for performance
 
 ```typescript
 // Anchor
-sprite.anchor.set(x, y)
-sprite.anchor.set(0.5)  // Center (shorthand)
+sprite.anchor.set(x, y);
+sprite.anchor.set(0.5); // Center (shorthand)
 
 // Position
-sprite.position.set(x, y)
-sprite.setTransform(x, y, scaleX, scaleY, rotation, skewX, skewY, pivotX, pivotY)
+sprite.position.set(x, y);
+sprite.setTransform(x, y, scaleX, scaleY, rotation, skewX, skewY, pivotX, pivotY);
 
 // Bounds
-sprite.getBounds()
-sprite.getLocalBounds()
+sprite.getBounds();
+sprite.getLocalBounds();
 
 // Destroy
-sprite.destroy({ children: true, texture: false, baseTexture: false })
+sprite.destroy({ children: true, texture: false, baseTexture: false });
 ```
 
 ### Example
 
 ```typescript
-import { Sprite, Texture } from 'pixi.js';
+import { Sprite, Texture } from "pixi.js";
 
-const texture = Texture.from('bunny.png');
+const texture = Texture.from("bunny.png");
 const sprite = new Sprite(texture);
 
 sprite.anchor.set(0.5);
@@ -238,22 +241,22 @@ texture.clone()                 // Create copy
 ### Example
 
 ```typescript
-import { Texture, Assets } from 'pixi.js';
+import { Texture, Assets } from "pixi.js";
 
 // Load texture
-const texture = await Assets.load('image.png');
+const texture = await Assets.load("image.png");
 
 // From URL
-const tex = Texture.from('https://example.com/image.png');
+const tex = Texture.from("https://example.com/image.png");
 
 // From canvas
-const canvas = document.createElement('canvas');
-const ctx = canvas.getContext('2d');
+const canvas = document.createElement("canvas");
+const ctx = canvas.getContext("2d");
 // ... draw on canvas
 const canvasTex = Texture.from(canvas);
 
 // Destroy
-texture.destroy(true);  // Also destroy baseTexture
+texture.destroy(true); // Also destroy baseTexture
 ```
 
 **API Reference**: https://pixijs.download/release/docs/rendering.Texture.html
@@ -321,10 +324,7 @@ graphics.stroke({ width, color, alpha, alignment, cap, join })
 ### Holes
 
 ```typescript
-graphics.rect(0, 0, 100, 100).fill('red')
-  .beginHole()
-  .circle(50, 50, 20)
-  .endHole();
+graphics.rect(0, 0, 100, 100).fill("red").beginHole().circle(50, 50, 20).endHole();
 ```
 
 ### SVG Support
@@ -336,14 +336,14 @@ graphics.svg('<svg><path d="M 100 350 q 150 -300 300 0" /></svg>');
 ### Other Methods
 
 ```typescript
-graphics.clear()                    // Remove all shapes
-graphics.clone()                    // Create copy
-graphics.destroy(options)           // Destroy and release memory
+graphics.clear(); // Remove all shapes
+graphics.clone(); // Create copy
+graphics.destroy(options); // Destroy and release memory
 
 // Context sharing
-const context = new GraphicsContext().circle(50, 50, 30).fill('red');
+const context = new GraphicsContext().circle(50, 50, 30).fill("red");
 const g1 = new Graphics(context);
-const g2 = new Graphics(context);  // Shares same geometry
+const g2 = new Graphics(context); // Shares same geometry
 ```
 
 ### Properties
@@ -358,7 +358,7 @@ graphics.lineStyle: StrokeStyle     // Current line style
 ### Example
 
 ```typescript
-import { Graphics } from 'pixi.js';
+import { Graphics } from "pixi.js";
 
 const graphics = new Graphics();
 
@@ -366,9 +366,7 @@ const graphics = new Graphics();
 graphics.rect(50, 50, 200, 100).fill({ color: 0x3399ff, alpha: 0.8 });
 
 // Circle with stroke
-graphics.circle(400, 300, 80)
-  .fill('yellow')
-  .stroke({ width: 4, color: 'orange' });
+graphics.circle(400, 300, 80).fill("yellow").stroke({ width: 4, color: "orange" });
 
 // Star
 graphics.star(600, 300, 5, 50).fill(0xffdf00);
@@ -377,18 +375,16 @@ graphics.star(600, 300, 5, 50).fill(0xffdf00);
 graphics
   .moveTo(100, 400)
   .bezierCurveTo(150, 300, 250, 300, 300, 400)
-  .stroke({ width: 3, color: 'white' });
+  .stroke({ width: 3, color: "white" });
 
 // Hole
-graphics.rect(450, 400, 150, 100).fill('red')
-  .beginHole()
-  .circle(525, 450, 30)
-  .endHole();
+graphics.rect(450, 400, 150, 100).fill("red").beginHole().circle(525, 450, 30).endHole();
 
 app.stage.addChild(graphics);
 ```
 
 **API References**:
+
 - Graphics: https://pixijs.download/release/docs/scene.Graphics.html
 - GraphicsContext: https://pixijs.download/release/docs/scene.GraphicsContext.html
 - FillStyle: https://pixijs.download/release/docs/scene.FillStyle.html
@@ -403,7 +399,7 @@ Display object that can contain children (like a group).
 ### Constructor
 
 ```typescript
-new Container()
+new Container();
 ```
 
 ### Children Management
@@ -444,7 +440,7 @@ for (const child of container.children) {
   // Process child
 }
 
-container.children.forEach(child => {
+container.children.forEach((child) => {
   // Process child
 });
 ```
@@ -452,14 +448,14 @@ container.children.forEach(child => {
 ### Example
 
 ```typescript
-import { Container, Sprite } from 'pixi.js';
+import { Container, Sprite } from "pixi.js";
 
 const container = new Container();
 container.position.set(100, 100);
 
 // Add children
-const sprite1 = Sprite.from('image1.png');
-const sprite2 = Sprite.from('image2.png');
+const sprite1 = Sprite.from("image1.png");
+const sprite2 = Sprite.from("image2.png");
 sprite2.x = 50;
 
 container.addChild(sprite1, sprite2);
@@ -467,7 +463,7 @@ container.addChild(sprite1, sprite2);
 // Z-index sorting
 container.sortableChildren = true;
 sprite1.zIndex = 2;
-sprite2.zIndex = 1;  // Renders behind sprite1
+sprite2.zIndex = 1; // Renders behind sprite1
 
 app.stage.addChild(container);
 ```
@@ -485,6 +481,7 @@ new ParticleContainer(options?: ParticleContainerOptions)
 ```
 
 **Options**:
+
 ```typescript
 {
   maxSize: number,          // Max particles (default: 1500)
@@ -525,45 +522,45 @@ interface IParticle {
   anchorX: number;
   anchorY: number;
   rotation: number;
-  color: number;    // Tint
+  color: number; // Tint
   texture: Texture;
 }
 
 // Create particle
 const particle = new Particle({
-  texture: Texture.from('spark.png'),
+  texture: Texture.from("spark.png"),
   x: 100,
   y: 200,
   scaleX: 0.5,
   scaleY: 0.5,
   rotation: 0,
   tint: 0xffffff,
-  alpha: 1.0
+  alpha: 1.0,
 });
 ```
 
 ### Example
 
 ```typescript
-import { ParticleContainer, Particle, Texture } from 'pixi.js';
+import { ParticleContainer, Particle, Texture } from "pixi.js";
 
-const texture = Texture.from('particle.png');
+const texture = Texture.from("particle.png");
 
 const particles = new ParticleContainer({
   maxSize: 10000,
   dynamicProperties: {
-    position: true,   // Update positions
-    scale: true,      // Update scale
-    rotation: false,  // Static rotation
-    color: false      // Static color
-  }
+    position: true, // Update positions
+    scale: true, // Update scale
+    rotation: false, // Static rotation
+    color: false, // Static color
+  },
 });
 
 for (let i = 0; i < 10000; i++) {
   const particle = new Particle({
     texture,
     x: Math.random() * 800,
-    y: Math.random() * 600
+    y: Math.random() * 600,
   });
 
   particles.addParticle(particle);
@@ -573,8 +570,8 @@ app.stage.addChild(particles);
 
 // Update loop
 app.ticker.add(() => {
-  particles.particleChildren.forEach(p => {
-    p.y += 1;  // Move down
+  particles.particleChildren.forEach((p) => {
+    p.y += 1; // Move down
     if (p.y > 600) p.y = 0;
   });
 });
@@ -591,12 +588,12 @@ WebGL shader-based effects applied to display objects.
 #### BlurFilter
 
 ```typescript
-import { BlurFilter } from 'pixi.js';
+import { BlurFilter } from "pixi.js";
 
 const blur = new BlurFilter({
-  strength: 8,      // Blur amount (default: 8)
-  quality: 4,       // Iterations (default: 4)
-  kernelSize: 5     // Sample size: 5, 7, 9, 11, 13, 15
+  strength: 8, // Blur amount (default: 8)
+  quality: 4, // Iterations (default: 4)
+  kernelSize: 5, // Sample size: 5, 7, 9, 11, 13, 15
 });
 
 sprite.filters = [blur];
@@ -605,18 +602,18 @@ sprite.filters = [blur];
 #### ColorMatrixFilter
 
 ```typescript
-import { ColorMatrixFilter } from 'pixi.js';
+import { ColorMatrixFilter } from "pixi.js";
 
 const colorMatrix = new ColorMatrixFilter();
 
 // Presets
-colorMatrix.greyscale(0.5);     // 0-1
+colorMatrix.greyscale(0.5); // 0-1
 colorMatrix.sepia();
 colorMatrix.blackAndWhite();
-colorMatrix.contrast(1.5);      // >1 increases
-colorMatrix.saturate(2);        // -1 to 1
-colorMatrix.brightness(1.2);    // >1 brightens
-colorMatrix.hue(45);            // Rotate hue (degrees)
+colorMatrix.contrast(1.5); // >1 increases
+colorMatrix.saturate(2); // -1 to 1
+colorMatrix.brightness(1.2); // >1 brightens
+colorMatrix.hue(45); // Rotate hue (degrees)
 colorMatrix.negative();
 colorMatrix.kodachrome();
 colorMatrix.technicolor();
@@ -629,12 +626,12 @@ sprite.filters = [colorMatrix];
 #### DisplacementFilter
 
 ```typescript
-import { DisplacementFilter, Sprite } from 'pixi.js';
+import { DisplacementFilter, Sprite } from "pixi.js";
 
-const displacementSprite = Sprite.from('displacement.jpg');
+const displacementSprite = Sprite.from("displacement.jpg");
 const displacementFilter = new DisplacementFilter({
   sprite: displacementSprite,
-  scale: 50  // Displacement amount
+  scale: 50, // Displacement amount
 });
 
 sprite.filters = [displacementFilter];
@@ -648,20 +645,20 @@ app.ticker.add(() => {
 #### AlphaFilter
 
 ```typescript
-import { AlphaFilter } from 'pixi.js';
+import { AlphaFilter } from "pixi.js";
 
-const alphaFilter = new AlphaFilter(0.5);  // 0-1
-container.filters = [alphaFilter];  // Flattens alpha across children
+const alphaFilter = new AlphaFilter(0.5); // 0-1
+container.filters = [alphaFilter]; // Flattens alpha across children
 ```
 
 #### NoiseFilter
 
 ```typescript
-import { NoiseFilter } from 'pixi.js';
+import { NoiseFilter } from "pixi.js";
 
 const noise = new NoiseFilter({
-  noise: 0.5,  // Amount (0-1)
-  seed: Math.random()
+  noise: 0.5, // Amount (0-1)
+  seed: Math.random(),
 });
 
 sprite.filters = [noise];
@@ -670,28 +667,28 @@ sprite.filters = [noise];
 #### FXAAFilter
 
 ```typescript
-import { FXAAFilter } from 'pixi.js';
+import { FXAAFilter } from "pixi.js";
 
 const fxaa = new FXAAFilter();
-sprite.filters = [fxaa];  // Anti-aliasing
+sprite.filters = [fxaa]; // Anti-aliasing
 ```
 
 ### Custom Filters
 
 ```typescript
-import { Filter, GlProgram } from 'pixi.js';
+import { Filter, GlProgram } from "pixi.js";
 
-const vertex = `...`;  // Vertex shader
-const fragment = `...`;  // Fragment shader
+const vertex = `...`; // Vertex shader
+const fragment = `...`; // Fragment shader
 
 const customFilter = new Filter({
   glProgram: new GlProgram({ vertex, fragment }),
   resources: {
     customUniforms: {
-      uTime: { value: 0.0, type: 'f32' },
-      uColor: { value: [1.0, 0.0, 0.0], type: 'vec3<f32>' }
-    }
-  }
+      uTime: { value: 0.0, type: "f32" },
+      uColor: { value: [1.0, 0.0, 0.0], type: "vec3<f32>" },
+    },
+  },
 });
 
 sprite.filters = [customFilter];
@@ -714,11 +711,12 @@ sprite.filters = null;
 // Generate filtered texture (apply once)
 const filteredTexture = renderer.filters.generateFilteredTexture({
   texture: originalTexture,
-  filters: [blurFilter]
+  filters: [blurFilter],
 });
 ```
 
 **API References**:
+
 - BlurFilter: @pixi/filter-blur
 - ColorMatrixFilter: @pixi/filter-color-matrix
 - DisplacementFilter: @pixi/filter-displacement
@@ -737,41 +735,41 @@ Render styled text as a texture.
 Standard text rendering:
 
 ```typescript
-import { Text, TextStyle } from 'pixi.js';
+import { Text, TextStyle } from "pixi.js";
 
 const style = new TextStyle({
-  fontFamily: 'Arial',
+  fontFamily: "Arial",
   fontSize: 36,
-  fontStyle: 'italic',
-  fontWeight: 'bold',
-  fill: '#ffffff',
-  stroke: { color: '#000000', width: 4 },
+  fontStyle: "italic",
+  fontWeight: "bold",
+  fill: "#ffffff",
+  stroke: { color: "#000000", width: 4 },
   dropShadow: {
     alpha: 0.5,
     angle: Math.PI / 6,
     blur: 4,
-    color: '#000000',
-    distance: 6
+    color: "#000000",
+    distance: 6,
   },
   wordWrap: true,
   wordWrapWidth: 400,
-  align: 'center',
-  filters: [new BlurFilter()]  // Bake filter into texture
+  align: "center",
+  filters: [new BlurFilter()], // Bake filter into texture
 });
 
 const text = new Text({
-  text: 'Hello PixiJS!',
-  style
+  text: "Hello PixiJS!",
+  style,
 });
 
 text.position.set(100, 100);
 app.stage.addChild(text);
 
 // Update text
-text.text = 'New text';
+text.text = "New text";
 
 // Adjust resolution
-text.resolution = 2;  // Higher = sharper but more memory
+text.resolution = 2; // Higher = sharper but more memory
 ```
 
 ### BitmapText
@@ -779,16 +777,16 @@ text.resolution = 2;  // Higher = sharper but more memory
 High-performance text for dynamic content:
 
 ```typescript
-import { BitmapText } from 'pixi.js';
+import { BitmapText } from "pixi.js";
 
 // Requires bitmap font asset
 const bitmapText = new BitmapText({
-  text: 'Score: 0',
+  text: "Score: 0",
   style: {
-    fontFamily: 'MyBitmapFont',
+    fontFamily: "MyBitmapFont",
     fontSize: 24,
-    tint: 0xff0000
-  }
+    tint: 0xff0000,
+  },
 });
 
 app.stage.addChild(bitmapText);
@@ -806,27 +804,27 @@ interface TextStyleOptions {
   // Font
   fontFamily: string | string[];
   fontSize: number | string;
-  fontStyle: 'normal' | 'italic' | 'oblique';
-  fontWeight: 'normal' | 'bold' | '100-900';
+  fontStyle: "normal" | "italic" | "oblique";
+  fontWeight: "normal" | "bold" | "100-900";
 
   // Fill
-  fill: number | string | string[] | number[];  // Gradient support
+  fill: number | string | string[] | number[]; // Gradient support
   fillGradientStops: number[];
 
   // Stroke
-  stroke: { color: number | string, width: number, alpha?: number };
+  stroke: { color: number | string; width: number; alpha?: number };
 
   // Shadow
   dropShadow: {
-    alpha: number,
-    angle: number,
-    blur: number,
-    color: number | string,
-    distance: number
+    alpha: number;
+    angle: number;
+    blur: number;
+    color: number | string;
+    distance: number;
   };
 
   // Layout
-  align: 'left' | 'center' | 'right' | 'justify';
+  align: "left" | "center" | "right" | "justify";
   wordWrap: boolean;
   wordWrapWidth: number;
   breakWords: boolean;
@@ -837,7 +835,7 @@ interface TextStyleOptions {
   // Other
   padding: number;
   trim: boolean;
-  whiteSpace: 'normal' | 'pre' | 'pre-line';
+  whiteSpace: "normal" | "pre" | "pre-line";
 }
 ```
 
@@ -850,44 +848,40 @@ Asset loading and management system.
 ### Loading Assets
 
 ```typescript
-import { Assets } from 'pixi.js';
+import { Assets } from "pixi.js";
 
 // Load single asset
-const texture = await Assets.load('image.png');
-const spritesheet = await Assets.load('spritesheet.json');
+const texture = await Assets.load("image.png");
+const spritesheet = await Assets.load("spritesheet.json");
 
 // Load multiple assets
-const assets = await Assets.load([
-  'image1.png',
-  'image2.png',
-  'sound.mp3'
-]);
+const assets = await Assets.load(["image1.png", "image2.png", "sound.mp3"]);
 
 // Load with aliases
-await Assets.add({ alias: 'hero', src: 'hero.png' });
-const heroTexture = await Assets.load('hero');
+await Assets.add({ alias: "hero", src: "hero.png" });
+const heroTexture = await Assets.load("hero");
 
 // Load bundle
-Assets.addBundle('game', {
-  player: 'player.png',
-  enemy: 'enemy.png',
-  background: 'bg.jpg'
+Assets.addBundle("game", {
+  player: "player.png",
+  enemy: "enemy.png",
+  background: "bg.jpg",
 });
-const bundle = await Assets.loadBundle('game');
+const bundle = await Assets.loadBundle("game");
 
 // Access loaded assets
-const playerTexture = Assets.get('player');
+const playerTexture = Assets.get("player");
 ```
 
 ### Progress Tracking
 
 ```typescript
-Assets.load('large-file.png', (progress) => {
+Assets.load("large-file.png", (progress) => {
   console.log(`Loading: ${Math.round(progress * 100)}%`);
 });
 
 // Or with promises
-const promise = Assets.load(['file1.png', 'file2.png']);
+const promise = Assets.load(["file1.png", "file2.png"]);
 promise.progress = (progress) => {
   console.log(`Progress: ${progress * 100}%`);
 };
@@ -898,11 +892,11 @@ await promise;
 
 ```typescript
 // Load in background (non-blocking)
-Assets.backgroundLoad(['asset1.png', 'asset2.png']);
+Assets.backgroundLoad(["asset1.png", "asset2.png"]);
 
 // Check if loaded
-if (Assets.cache.has('asset1.png')) {
-  const texture = Assets.get('asset1.png');
+if (Assets.cache.has("asset1.png")) {
+  const texture = Assets.get("asset1.png");
 }
 ```
 
@@ -910,10 +904,10 @@ if (Assets.cache.has('asset1.png')) {
 
 ```typescript
 // Unload single asset
-await Assets.unload('image.png');
+await Assets.unload("image.png");
 
 // Unload bundle
-await Assets.unloadBundle('game');
+await Assets.unloadBundle("game");
 
 // Clear cache
 Assets.reset();
@@ -951,7 +945,7 @@ renderer.clear();
 // Generate texture from display object
 const texture = renderer.generateTexture(displayObject, {
   resolution: 1,
-  frame: new Rectangle(0, 0, 100, 100)
+  frame: new Rectangle(0, 0, 100, 100),
 });
 
 // Destroy
@@ -1022,56 +1016,56 @@ Interactive event system.
 ### Event Modes
 
 ```typescript
-sprite.eventMode = 'static';   // Enable interaction
-sprite.eventMode = 'dynamic';  // Enable + propagate to children
-sprite.eventMode = 'passive';  // Receive events but don't block
-sprite.eventMode = 'none';     // No interaction (default)
+sprite.eventMode = "static"; // Enable interaction
+sprite.eventMode = "dynamic"; // Enable + propagate to children
+sprite.eventMode = "passive"; // Receive events but don't block
+sprite.eventMode = "none"; // No interaction (default)
 ```
 
 ### Mouse Events
 
 ```typescript
-sprite.on('pointerdown', (event) => {
-  console.log('Clicked at:', event.global.x, event.global.y);
+sprite.on("pointerdown", (event) => {
+  console.log("Clicked at:", event.global.x, event.global.y);
 });
 
-sprite.on('pointerup', handler);
-sprite.on('pointermove', handler);
-sprite.on('pointerover', handler);   // Mouse enter
-sprite.on('pointerout', handler);    // Mouse leave
-sprite.on('pointerupoutside', handler);  // Released outside
+sprite.on("pointerup", handler);
+sprite.on("pointermove", handler);
+sprite.on("pointerover", handler); // Mouse enter
+sprite.on("pointerout", handler); // Mouse leave
+sprite.on("pointerupoutside", handler); // Released outside
 
 // Once
-sprite.once('pointerdown', handler);
+sprite.once("pointerdown", handler);
 
 // Remove
-sprite.off('pointerdown', handler);
+sprite.off("pointerdown", handler);
 sprite.removeAllListeners();
 ```
 
 ### Touch Events
 
 ```typescript
-sprite.on('touchstart', handler);
-sprite.on('touchend', handler);
-sprite.on('touchmove', handler);
-sprite.on('tap', handler);
+sprite.on("touchstart", handler);
+sprite.on("touchend", handler);
+sprite.on("touchmove", handler);
+sprite.on("tap", handler);
 ```
 
 ### Event Object
 
 ```typescript
 interface FederatedPointerEvent {
-  global: Point;         // Global coordinates
-  client: Point;         // Client coordinates
-  screen: Point;         // Screen coordinates
-  movement: Point;       // Delta movement
-  page: Point;           // Page coordinates
-  button: number;        // Mouse button (0=left, 1=middle, 2=right)
-  buttons: number;       // Bitmask of pressed buttons
+  global: Point; // Global coordinates
+  client: Point; // Client coordinates
+  screen: Point; // Screen coordinates
+  movement: Point; // Delta movement
+  page: Point; // Page coordinates
+  button: number; // Mouse button (0=left, 1=middle, 2=right)
+  buttons: number; // Bitmask of pressed buttons
   target: DisplayObject; // Event target
   currentTarget: DisplayObject;
-  type: string;          // Event type
+  type: string; // Event type
   preventDefault(): void;
   stopPropagation(): void;
 }
@@ -1080,15 +1074,15 @@ interface FederatedPointerEvent {
 ### Custom Cursor
 
 ```typescript
-sprite.cursor = 'pointer';
-sprite.cursor = 'grab';
-sprite.cursor = 'help';
+sprite.cursor = "pointer";
+sprite.cursor = "grab";
+sprite.cursor = "help";
 ```
 
 ### Hit Area
 
 ```typescript
-import { Rectangle, Circle, Polygon } from 'pixi.js';
+import { Rectangle, Circle, Polygon } from "pixi.js";
 
 // Rectangle hit area
 sprite.hitArea = new Rectangle(0, 0, 100, 100);
@@ -1097,7 +1091,7 @@ sprite.hitArea = new Rectangle(0, 0, 100, 100);
 sprite.hitArea = new Circle(50, 50, 30);
 
 // Polygon hit area
-sprite.hitArea = new Polygon([0,0, 100,0, 100,100, 0,100]);
+sprite.hitArea = new Polygon([0, 0, 100, 0, 100, 100, 0, 100]);
 ```
 
 ---
@@ -1133,7 +1127,7 @@ point.equals(otherPoint);
 ```typescript
 const observable = new ObservablePoint(callback, scope);
 observable.set(x, y);
-observable.x = 100;  // Triggers callback
+observable.x = 100; // Triggers callback
 ```
 
 ---
@@ -1153,7 +1147,7 @@ displayObject.cacheAsBitmap = false;
 ### Ticker
 
 ```typescript
-import { Ticker } from 'pixi.js';
+import { Ticker } from "pixi.js";
 
 const ticker = Ticker.shared;
 
@@ -1162,9 +1156,9 @@ ticker.add((delta) => {
   // delta = time since last frame
 });
 
-ticker.speed = 0.5;  // Half speed
-ticker.maxFPS = 30;  // Cap at 30 FPS
-ticker.minFPS = 10;  // Min for deltaTime calculation
+ticker.speed = 0.5; // Half speed
+ticker.maxFPS = 30; // Cap at 30 FPS
+ticker.minFPS = 10; // Min for deltaTime calculation
 
 ticker.stop();
 ticker.start();
@@ -1177,7 +1171,7 @@ ticker.start();
 ### Blend Modes
 
 ```typescript
-import { BLEND_MODES } from 'pixi.js';
+import { BLEND_MODES } from "pixi.js";
 
 sprite.blendMode = BLEND_MODES.NORMAL;
 sprite.blendMode = BLEND_MODES.ADD;
@@ -1201,10 +1195,10 @@ sprite.blendMode = BLEND_MODES.LUMINOSITY;
 ### Scale Modes
 
 ```typescript
-import { SCALE_MODES } from 'pixi.js';
+import { SCALE_MODES } from "pixi.js";
 
-texture.baseTexture.scaleMode = SCALE_MODES.LINEAR;   // Smooth (default)
-texture.baseTexture.scaleMode = SCALE_MODES.NEAREST;  // Pixelated
+texture.baseTexture.scaleMode = SCALE_MODES.LINEAR; // Smooth (default)
+texture.baseTexture.scaleMode = SCALE_MODES.NEAREST; // Pixelated
 ```
 
 ---
@@ -1214,7 +1208,7 @@ texture.baseTexture.scaleMode = SCALE_MODES.NEAREST;  // Pixelated
 PixiJS is written in TypeScript and provides full type definitions.
 
 ```typescript
-import { Application, Sprite, Texture, Container } from 'pixi.js';
+import { Application, Sprite, Texture, Container } from "pixi.js";
 
 const app: Application = new Application();
 const sprite: Sprite = new Sprite(Texture.WHITE);

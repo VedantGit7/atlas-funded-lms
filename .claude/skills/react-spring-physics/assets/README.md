@@ -26,6 +26,7 @@ npm install @use-gesture/react
 ### Official Examples
 
 The React Spring team maintains excellent examples at:
+
 - **Documentation**: https://react-spring.dev
 - **Examples**: https://react-spring.dev/examples
 - **CodeSandbox**: https://codesandbox.io/examples/package/@react-spring/web
@@ -33,25 +34,30 @@ The React Spring team maintains excellent examples at:
 ### Recommended Examples by Category
 
 **Basic Animations:**
+
 - Spring basics: https://codesandbox.io/s/react-spring-spring-vqqd5
 - Trails: https://codesandbox.io/s/react-spring-trail-q0zq5
 - Transitions: https://codesandbox.io/s/react-spring-transition-njgm6
 
 **Gesture Integration:**
+
 - Draggable cards: https://codesandbox.io/s/react-spring-draggable-list-xhqod
 - Viewpager: https://codesandbox.io/s/react-spring-viewpager-8tsle
 - Gesture examples: https://use-gesture.netlify.app/docs/examples/
 
 **Scroll Animations:**
+
 - Scroll progress: https://codesandbox.io/s/react-spring-scroll-progress-8nqwt
 - Parallax: https://codesandbox.io/s/react-spring-parallax-sticky-xhdn7
 - useScroll hook: https://react-spring.dev/docs/components/use-scroll
 
 **3D Integration (React Three Fiber):**
+
 - Spring animations in 3D: https://codesandbox.io/s/react-spring-3d-ijdj2
 - Interactive 3D: https://docs.pmnd.rs/react-three-fiber/tutorials/v8-migration-guide#spring
 
 **Advanced Patterns:**
+
 - Chained animations: https://codesandbox.io/s/react-spring-chain-dxqgq
 - Auto-height accordion: https://codesandbox.io/s/react-spring-auto-height-accordion-r4qku
 - Masonry grid: https://codesandbox.io/s/react-spring-masonry-5bw7y
@@ -61,6 +67,7 @@ The React Spring team maintains excellent examples at:
 Minimal React Spring setup:
 
 ### package.json
+
 ```json
 {
   "name": "react-spring-starter",
@@ -88,67 +95,70 @@ Minimal React Spring setup:
 ```
 
 ### src/App.jsx
+
 ```jsx
-import { useSpring, animated, config } from '@react-spring/web'
-import './App.css'
+import { useSpring, animated, config } from "@react-spring/web";
+import "./App.css";
 
 function App() {
-  const [springs, api] = useSpring(() => ({
-    from: { y: -50, opacity: 0 }
-  }), [])
+  const [springs, api] = useSpring(
+    () => ({
+      from: { y: -50, opacity: 0 },
+    }),
+    [],
+  );
 
   const handleClick = () => {
     api.start({
       from: { y: -50, opacity: 0 },
       to: { y: 0, opacity: 1 },
-      config: config.wobbly
-    })
-  }
+      config: config.wobbly,
+    });
+  };
 
   return (
     <div className="app">
-      <animated.h1 style={springs}>
-        React Spring Physics
-      </animated.h1>
+      <animated.h1 style={springs}>React Spring Physics</animated.h1>
 
-      <button onClick={handleClick}>
-        Animate
-      </button>
+      <button onClick={handleClick}>Animate</button>
 
       <div className="examples">
         <ExampleClick />
         <ExampleTrail />
       </div>
     </div>
-  )
+  );
 }
 
 function ExampleClick() {
-  const [springs, api] = useSpring(() => ({
-    scale: 1,
-    config: { tension: 300, friction: 10 }
-  }), [])
+  const [springs, api] = useSpring(
+    () => ({
+      scale: 1,
+      config: { tension: 300, friction: 10 },
+    }),
+    [],
+  );
 
   return (
     <animated.div
       className="box"
       onClick={() => api.start({ scale: 1.2 })}
       style={{
-        transform: springs.scale.to(s => `scale(${s})`)
+        transform: springs.scale.to((s) => `scale(${s})`),
       }}
     >
       Click Me
     </animated.div>
-  )
+  );
 }
 
 function ExampleTrail() {
-  const items = ['React', 'Spring', 'Physics']
+  const items = ["React", "Spring", "Physics"];
   const trails = useTrail(items.length, {
     from: { opacity: 0, x: -20 },
     to: { opacity: 1, x: 0 },
-    config: config.gentle
-  })
+    config: config.gentle,
+  });
 
   return (
     <div className="trail">
@@ -158,13 +168,14 @@ function ExampleTrail() {
         </animated.div>
       ))}
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
 ```
 
 ### src/App.css
+
 ```css
 .app {
   text-align: center;
@@ -209,69 +220,60 @@ export default App
 ### Pattern 1: Scroll-Triggered Animation
 
 ```jsx
-import { useInView, animated } from '@react-spring/web'
+import { useInView, animated } from "@react-spring/web";
 
 function ScrollReveal({ children }) {
   const [ref, springs] = useInView(
     () => ({
       from: { opacity: 0, y: 50 },
-      to: { opacity: 1, y: 0 }
+      to: { opacity: 1, y: 0 },
     }),
-    { rootMargin: '-20% 0%' }
-  )
+    { rootMargin: "-20% 0%" },
+  );
 
   return (
     <animated.div ref={ref} style={springs}>
       {children}
     </animated.div>
-  )
+  );
 }
 ```
 
 ### Pattern 2: List Transitions
 
 ```jsx
-import { useTransition, animated } from '@react-spring/web'
+import { useTransition, animated } from "@react-spring/web";
 
 function AnimatedList({ items }) {
   const transitions = useTransition(items, {
-    keys: item => item.id,
-    from: { opacity: 0, transform: 'translateX(-20px)' },
-    enter: { opacity: 1, transform: 'translateX(0px)' },
-    leave: { opacity: 0, transform: 'translateX(20px)' }
-  })
+    keys: (item) => item.id,
+    from: { opacity: 0, transform: "translateX(-20px)" },
+    enter: { opacity: 1, transform: "translateX(0px)" },
+    leave: { opacity: 0, transform: "translateX(20px)" },
+  });
 
-  return transitions((style, item) => (
-    <animated.div style={style}>
-      {item.text}
-    </animated.div>
-  ))
+  return transitions((style, item) => <animated.div style={style}>{item.text}</animated.div>);
 }
 ```
 
 ### Pattern 3: Gesture-Driven Drag
 
 ```jsx
-import { useSpring, animated } from '@react-spring/web'
-import { useDrag } from '@use-gesture/react'
+import { useSpring, animated } from "@react-spring/web";
+import { useDrag } from "@use-gesture/react";
 
 function DraggableCard() {
-  const [{ x, y }, api] = useSpring(() => ({ x: 0, y: 0 }))
+  const [{ x, y }, api] = useSpring(() => ({ x: 0, y: 0 }));
 
   const bind = useDrag(({ down, movement: [mx, my] }) => {
     api.start({
       x: down ? mx : 0,
       y: down ? my : 0,
-      immediate: down
-    })
-  })
+      immediate: down,
+    });
+  });
 
-  return (
-    <animated.div
-      {...bind()}
-      style={{ x, y, touchAction: 'none' }}
-    />
-  )
+  return <animated.div {...bind()} style={{ x, y, touchAction: "none" }} />;
 }
 ```
 
@@ -290,15 +292,15 @@ React Spring is fully typed - no additional @types package needed.
 For testing with React Spring, disable animations:
 
 ```jsx
-import { Globals } from '@react-spring/web'
+import { Globals } from "@react-spring/web";
 
 beforeAll(() => {
-  Globals.assign({ skipAnimation: true })
-})
+  Globals.assign({ skipAnimation: true });
+});
 
 afterAll(() => {
-  Globals.assign({ skipAnimation: false })
-})
+  Globals.assign({ skipAnimation: false });
+});
 ```
 
 ## Additional Resources
@@ -322,6 +324,7 @@ afterAll(() => {
 ---
 
 For more examples and patterns, refer to the skill's references:
+
 - `react_spring_api.md` - Complete API documentation
 - `popmotion_api.md` - Low-level physics utilities
 - `physics_guide.md` - Spring tuning deep dive

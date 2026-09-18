@@ -34,6 +34,7 @@ const app = new pc.Application(canvas, options);
 ```
 
 **Parameters**:
+
 - `canvas` (HTMLCanvasElement): Canvas element for rendering
 - `options` (Object): Configuration options
   - `keyboard` (pc.Keyboard): Keyboard device
@@ -44,53 +45,60 @@ const app = new pc.Application(canvas, options);
 
 #### Properties
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `root` | pc.Entity | Root entity of scene hierarchy |
-| `scene` | pc.Scene | Scene settings |
-| `assets` | pc.AssetRegistry | Asset management |
-| `graphicsDevice` | pc.GraphicsDevice | Rendering device |
-| `systems` | pc.ComponentSystemRegistry | Component systems |
-| `keyboard` | pc.Keyboard | Keyboard input |
-| `mouse` | pc.Mouse | Mouse input |
-| `touch` | pc.TouchDevice | Touch input |
-| `gamepads` | pc.GamePads | Gamepad input |
-| `timeScale` | Number | Global time scale (default: 1) |
+| Property         | Type                       | Description                    |
+| ---------------- | -------------------------- | ------------------------------ |
+| `root`           | pc.Entity                  | Root entity of scene hierarchy |
+| `scene`          | pc.Scene                   | Scene settings                 |
+| `assets`         | pc.AssetRegistry           | Asset management               |
+| `graphicsDevice` | pc.GraphicsDevice          | Rendering device               |
+| `systems`        | pc.ComponentSystemRegistry | Component systems              |
+| `keyboard`       | pc.Keyboard                | Keyboard input                 |
+| `mouse`          | pc.Mouse                   | Mouse input                    |
+| `touch`          | pc.TouchDevice             | Touch input                    |
+| `gamepads`       | pc.GamePads                | Gamepad input                  |
+| `timeScale`      | Number                     | Global time scale (default: 1) |
 
 #### Methods
 
 **setCanvasFillMode(mode)**
+
 ```javascript
 app.setCanvasFillMode(pc.FILLMODE_FILL_WINDOW);
 ```
 
 Modes:
+
 - `pc.FILLMODE_NONE`: No auto-resize
 - `pc.FILLMODE_FILL_WINDOW`: Fill entire window
 - `pc.FILLMODE_KEEP_ASPECT`: Maintain aspect ratio
 
 **setCanvasResolution(mode)**
+
 ```javascript
 app.setCanvasResolution(pc.RESOLUTION_AUTO);
 ```
 
 Modes:
+
 - `pc.RESOLUTION_AUTO`: Match window device pixel ratio
 - `pc.RESOLUTION_FIXED`: Use canvas width/height
 
 **resizeCanvas()**
+
 ```javascript
 app.resizeCanvas();
 // Manually trigger resize
 ```
 
 **start()**
+
 ```javascript
 app.start();
 // Start the application update loop
 ```
 
 **destroy()**
+
 ```javascript
 app.destroy();
 // Clean up application resources
@@ -99,28 +107,28 @@ app.destroy();
 #### Events
 
 ```javascript
-app.on('update', (dt) => {
+app.on("update", (dt) => {
   // Called every frame
   // dt = delta time in seconds
 });
 
-app.on('postUpdate', (dt) => {
+app.on("postUpdate", (dt) => {
   // Called after update
 });
 
-app.on('prerender', () => {
+app.on("prerender", () => {
   // Before rendering
 });
 
-app.on('postrender', () => {
+app.on("postrender", () => {
   // After rendering
 });
 
-app.on('start', () => {
+app.on("start", () => {
   // Application started
 });
 
-app.on('destroy', () => {
+app.on("destroy", () => {
   // Application destroyed
 });
 ```
@@ -141,15 +149,16 @@ const entity = new pc.Entity(name);
 
 #### Properties
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `name` | String | Entity name |
-| `enabled` | Boolean | Render and update enabled |
-| `children` | Array | Child entities |
-| `parent` | pc.Entity | Parent entity |
-| `tags` | pc.Tags | Tag list for searching |
+| Property   | Type      | Description               |
+| ---------- | --------- | ------------------------- |
+| `name`     | String    | Entity name               |
+| `enabled`  | Boolean   | Render and update enabled |
+| `children` | Array     | Child entities            |
+| `parent`   | pc.Entity | Parent entity             |
+| `tags`     | pc.Tags   | Tag list for searching    |
 
 **Component Accessors**:
+
 - `entity.model` - Model component
 - `entity.camera` - Camera component
 - `entity.light` - Light component
@@ -162,27 +171,29 @@ const entity = new pc.Entity(name);
 #### Transform Methods
 
 **Position**:
+
 ```javascript
 entity.setPosition(x, y, z);
 entity.setPosition(new pc.Vec3(x, y, z));
 entity.setLocalPosition(x, y, z);
 
-const pos = entity.getPosition();  // World position
-const localPos = entity.getLocalPosition();  // Local position
+const pos = entity.getPosition(); // World position
+const localPos = entity.getLocalPosition(); // Local position
 
-entity.translate(x, y, z);  // Move relative
-entity.translateLocal(x, y, z);  // Move in local space
+entity.translate(x, y, z); // Move relative
+entity.translateLocal(x, y, z); // Move in local space
 ```
 
 **Rotation**:
+
 ```javascript
-entity.setEulerAngles(x, y, z);  // Degrees
+entity.setEulerAngles(x, y, z); // Degrees
 entity.setLocalEulerAngles(x, y, z);
 
 const angles = entity.getEulerAngles();
 const localAngles = entity.getLocalEulerAngles();
 
-entity.rotate(x, y, z);  // Rotate relative (degrees)
+entity.rotate(x, y, z); // Rotate relative (degrees)
 entity.rotateLocal(x, y, z);
 
 // Quaternion rotation
@@ -190,11 +201,12 @@ entity.setRotation(quat);
 const quat = entity.getRotation();
 
 // Look at target
-entity.lookAt(target);  // target is Vec3 or Entity
+entity.lookAt(target); // target is Vec3 or Entity
 entity.lookAt(x, y, z);
 ```
 
 **Scale**:
+
 ```javascript
 entity.setLocalScale(x, y, z);
 entity.setLocalScale(new pc.Vec3(x, y, z));
@@ -203,8 +215,9 @@ const scale = entity.getLocalScale();
 ```
 
 **Forward/Right/Up Vectors**:
+
 ```javascript
-const forward = entity.forward;  // pc.Vec3
+const forward = entity.forward; // pc.Vec3
 const right = entity.right;
 const up = entity.up;
 ```
@@ -212,62 +225,72 @@ const up = entity.up;
 #### Hierarchy Methods
 
 **addChild(entity)**
+
 ```javascript
 parent.addChild(child);
 ```
 
 **removeChild(entity)**
+
 ```javascript
 parent.removeChild(child);
 ```
 
 **insertChild(entity, index)**
+
 ```javascript
-parent.insertChild(child, 0);  // Insert at start
+parent.insertChild(child, 0); // Insert at start
 ```
 
 **reparent(parent)**
+
 ```javascript
 entity.reparent(newParent);
 ```
 
 **find()**
+
 ```javascript
 // Find by name
-const child = entity.find(name => name === 'PlayerModel');
+const child = entity.find((name) => name === "PlayerModel");
 
 // Find all
 const allChildren = entity.find(() => true);
 ```
 
 **findByName(name)**
+
 ```javascript
-const player = app.root.findByName('Player');
+const player = app.root.findByName("Player");
 ```
 
 **findByTag(tag)**
+
 ```javascript
-const enemies = app.root.findByTag('enemy');
+const enemies = app.root.findByTag("enemy");
 // Returns array of entities
 ```
 
 #### Component Methods
 
 **addComponent(type, data)**
+
 ```javascript
-entity.addComponent('model', {
-  type: 'box'
+entity.addComponent("model", {
+  type: "box",
 });
 ```
 
 **removeComponent(type)**
+
 ```javascript
-entity.removeComponent('model');
+entity.removeComponent("model");
 ```
 
 **hasComponent(type)**
+
 ```javascript
-if (entity.hasComponent('rigidbody')) {
+if (entity.hasComponent("rigidbody")) {
   // Has physics
 }
 ```
@@ -275,21 +298,24 @@ if (entity.hasComponent('rigidbody')) {
 #### Entity Methods
 
 **clone()**
+
 ```javascript
 const clone = entity.clone();
 app.root.addChild(clone);
 ```
 
 **destroy()**
+
 ```javascript
 entity.destroy();
 // Removes from parent and cleans up
 ```
 
 **enable()**/**disable()**
+
 ```javascript
-entity.enabled = false;  // Disable
-entity.enabled = true;   // Enable
+entity.enabled = false; // Disable
+entity.enabled = true; // Enable
 ```
 
 ---
@@ -301,24 +327,26 @@ entity.enabled = true;   // Enable
 Renders 3D meshes.
 
 ```javascript
-entity.addComponent('model', {
-  type: 'box',               // Primitive type
-  asset: assetId,            // Model asset
+entity.addComponent("model", {
+  type: "box", // Primitive type
+  asset: assetId, // Model asset
   castShadows: true,
   receiveShadows: true,
   castShadowsLightmap: false,
   lightmapped: false,
   isStatic: false,
-  layers: [pc.LAYERID_WORLD]
+  layers: [pc.LAYERID_WORLD],
 });
 ```
 
 **Primitive Types**:
+
 - `'box'`, `'capsule'`, `'cone'`, `'cylinder'`, `'plane'`, `'sphere'`
 
 **Properties**:
+
 ```javascript
-entity.model.meshInstances;  // Array of MeshInstance
+entity.model.meshInstances; // Array of MeshInstance
 entity.model.material = material;
 entity.model.asset = assetId;
 ```
@@ -330,25 +358,27 @@ entity.model.asset = assetId;
 Renders the scene from a viewpoint.
 
 ```javascript
-entity.addComponent('camera', {
+entity.addComponent("camera", {
   clearColor: new pc.Color(0, 0, 0, 1),
   fov: 45,
-  aspectRatio: 16/9,  // Auto-calculated if null
+  aspectRatio: 16 / 9, // Auto-calculated if null
   nearClip: 0.1,
   farClip: 1000,
   projection: pc.PROJECTION_PERSPECTIVE,
   priority: 0,
   frustumCulling: true,
-  rect: new pc.Vec4(0, 0, 1, 1),  // Viewport
-  layers: [pc.LAYERID_WORLD, pc.LAYERID_UI]
+  rect: new pc.Vec4(0, 0, 1, 1), // Viewport
+  layers: [pc.LAYERID_WORLD, pc.LAYERID_UI],
 });
 ```
 
 **Projection Types**:
+
 - `pc.PROJECTION_PERSPECTIVE`
 - `pc.PROJECTION_ORTHOGRAPHIC`
 
 **Methods**:
+
 ```javascript
 // Screen to world conversion
 const worldPos = camera.camera.screenToWorld(screenX, screenY, depth);
@@ -367,7 +397,7 @@ const ray = camera.camera.screenToWorld(screenX, screenY, camera.camera.nearClip
 Illuminates the scene.
 
 ```javascript
-entity.addComponent('light', {
+entity.addComponent("light", {
   type: pc.LIGHTTYPE_DIRECTIONAL,
   color: new pc.Color(1, 1, 1),
   intensity: 1,
@@ -376,23 +406,26 @@ entity.addComponent('light', {
   shadowResolution: 2048,
   shadowBias: 0.05,
   normalOffsetBias: 0.05,
-  range: 10,              // Point/Spot only
-  innerConeAngle: 40,     // Spot only
-  outerConeAngle: 45,     // Spot only
+  range: 10, // Point/Spot only
+  innerConeAngle: 40, // Spot only
+  outerConeAngle: 45, // Spot only
   falloffMode: pc.LIGHTFALLOFF_INVERSESQUARED,
-  layers: [pc.LAYERID_WORLD]
+  layers: [pc.LAYERID_WORLD],
 });
 ```
 
 **Light Types**:
+
 - `pc.LIGHTTYPE_DIRECTIONAL`: Sun-like, parallel rays
 - `pc.LIGHTTYPE_POINT`: Omnidirectional, like a bulb
 - `pc.LIGHTTYPE_SPOT`: Cone-shaped, like a flashlight
 
 **Shadow Types**:
+
 ```javascript
 entity.light.shadowType = pc.SHADOW_PCF3;
 ```
+
 - `pc.SHADOW_PCF3`: 3x3 PCF (good quality)
 - `pc.SHADOW_PCF5`: 5x5 PCF (better quality, slower)
 - `pc.SHADOW_VSM8`: Variance shadow maps (softer)
@@ -404,7 +437,7 @@ entity.light.shadowType = pc.SHADOW_PCF3;
 Adds physics simulation.
 
 ```javascript
-entity.addComponent('rigidbody', {
+entity.addComponent("rigidbody", {
   type: pc.BODYTYPE_DYNAMIC,
   mass: 1,
   linearDamping: 0,
@@ -414,16 +447,18 @@ entity.addComponent('rigidbody', {
   friction: 0.5,
   restitution: 0,
   group: pc.BODYGROUP_DYNAMIC,
-  mask: pc.BODYMASK_ALL
+  mask: pc.BODYMASK_ALL,
 });
 ```
 
 **Body Types**:
+
 - `pc.BODYTYPE_STATIC`: Immovable (terrain, buildings)
 - `pc.BODYTYPE_DYNAMIC`: Affected by forces
 - `pc.BODYTYPE_KINEMATIC`: Moved by script, not physics
 
 **Methods**:
+
 ```javascript
 // Apply force
 entity.rigidbody.applyForce(x, y, z);
@@ -458,18 +493,19 @@ entity.rigidbody.teleport(position, rotation);
 Defines physics collision shape.
 
 ```javascript
-entity.addComponent('collision', {
-  type: 'box',
+entity.addComponent("collision", {
+  type: "box",
   halfExtents: new pc.Vec3(0.5, 0.5, 0.5),
-  radius: 0.5,           // Sphere/Capsule
-  axis: pc.AXIS_Y,       // Capsule/Cylinder
-  height: 2,             // Capsule/Cylinder
-  asset: assetId,        // Mesh collision
-  renderAsset: assetId   // Mesh collision (render)
+  radius: 0.5, // Sphere/Capsule
+  axis: pc.AXIS_Y, // Capsule/Cylinder
+  height: 2, // Capsule/Cylinder
+  asset: assetId, // Mesh collision
+  renderAsset: assetId, // Mesh collision (render)
 });
 ```
 
 **Collision Types**:
+
 - `'box'`: Box shape
 - `'sphere'`: Sphere shape
 - `'capsule'`: Capsule shape
@@ -479,17 +515,18 @@ entity.addComponent('collision', {
 - `'compound'`: Multiple shapes
 
 **Events**:
+
 ```javascript
-entity.collision.on('collisionstart', (result) => {
-  console.log('Collision with:', result.other.name);
-  console.log('Contact point:', result.contacts[0].point);
+entity.collision.on("collisionstart", (result) => {
+  console.log("Collision with:", result.other.name);
+  console.log("Contact point:", result.contacts[0].point);
 });
 
-entity.collision.on('collisionend', (other) => {
-  console.log('Collision ended with:', other.name);
+entity.collision.on("collisionend", (other) => {
+  console.log("Collision ended with:", other.name);
 });
 
-entity.collision.on('contact', (result) => {
+entity.collision.on("contact", (result) => {
   // Contact maintained
 });
 ```
@@ -501,50 +538,52 @@ entity.collision.on('contact', (result) => {
 Runs custom JavaScript code.
 
 ```javascript
-entity.addComponent('script');
-entity.script.create('scriptName', {
+entity.addComponent("script");
+entity.script.create("scriptName", {
   attributes: {
     speed: 10,
-    target: targetEntity
-  }
+    target: targetEntity,
+  },
 });
 ```
 
 **Script Definition**:
+
 ```javascript
-const MyScript = pc.createScript('myScript');
+const MyScript = pc.createScript("myScript");
 
-MyScript.attributes.add('speed', {
-  type: 'number',
+MyScript.attributes.add("speed", {
+  type: "number",
   default: 10,
-  title: 'Movement Speed',
-  description: 'Units per second'
+  title: "Movement Speed",
+  description: "Units per second",
 });
 
-MyScript.attributes.add('target', {
-  type: 'entity',
-  title: 'Target Entity'
+MyScript.attributes.add("target", {
+  type: "entity",
+  title: "Target Entity",
 });
 
-MyScript.prototype.initialize = function() {
+MyScript.prototype.initialize = function () {
   // Called once
 };
 
-MyScript.prototype.update = function(dt) {
+MyScript.prototype.update = function (dt) {
   // Called every frame
   this.entity.translate(0, 0, this.speed * dt);
 };
 
-MyScript.prototype.postUpdate = function(dt) {
+MyScript.prototype.postUpdate = function (dt) {
   // After all updates
 };
 
-MyScript.prototype.destroy = function() {
+MyScript.prototype.destroy = function () {
   // Cleanup
 };
 ```
 
 **Attribute Types**:
+
 - `'boolean'`, `'number'`, `'string'`
 - `'entity'`, `'asset'`, `'rgb'`, `'rgba'`
 - `'vec2'`, `'vec3'`, `'vec4'`
@@ -558,25 +597,26 @@ MyScript.prototype.destroy = function() {
 Plays skeletal animations.
 
 ```javascript
-entity.addComponent('animation', {
+entity.addComponent("animation", {
   assets: [animAsset],
   speed: 1.0,
   loop: true,
-  activate: true
+  activate: true,
 });
 ```
 
 **Methods**:
+
 ```javascript
 // Play animation
-entity.animation.play('Run', 0.2);  // 0.2s blend time
+entity.animation.play("Run", 0.2); // 0.2s blend time
 
 // Get current animations
 const anims = entity.animation.animations;
 
 // Animation events
-entity.animation.on('animationend', (name) => {
-  console.log('Animation ended:', name);
+entity.animation.on("animationend", (name) => {
+  console.log("Animation ended:", name);
 });
 ```
 
@@ -587,31 +627,32 @@ entity.animation.on('animationend', (name) => {
 3D positional audio.
 
 ```javascript
-entity.addComponent('sound', {
+entity.addComponent("sound", {
   positional: true,
   refDistance: 1,
   maxDistance: 10000,
   rollOffFactor: 1,
   distanceModel: pc.DISTANCE_LINEAR,
   slots: {
-    'music': {
+    music: {
       asset: musicAsset,
       autoPlay: true,
       loop: true,
       volume: 0.5,
-      pitch: 1.0
-    }
-  }
+      pitch: 1.0,
+    },
+  },
 });
 ```
 
 **Methods**:
-```javascript
-entity.sound.play('slotName');
-entity.sound.pause('slotName');
-entity.sound.stop('slotName');
 
-entity.sound.volume = 0.8;  // Global volume
+```javascript
+entity.sound.play("slotName");
+entity.sound.pause("slotName");
+entity.sound.stop("slotName");
+
+entity.sound.volume = 0.8; // Global volume
 ```
 
 ---
@@ -623,49 +664,54 @@ entity.sound.volume = 0.8;  // Global volume
 Manages loading and caching of assets.
 
 **add(asset)**
+
 ```javascript
-const asset = new pc.Asset('name', 'texture', { url: '/texture.jpg' });
+const asset = new pc.Asset("name", "texture", { url: "/texture.jpg" });
 app.assets.add(asset);
 ```
 
 **load(asset)**
+
 ```javascript
 app.assets.load(asset);
 ```
 
 **remove(asset)**
+
 ```javascript
 app.assets.remove(asset);
 ```
 
 **find()**
+
 ```javascript
 // Find by name
-const asset = app.assets.find('PlayerModel');
+const asset = app.assets.find("PlayerModel");
 
 // Find by type
-const textures = app.assets.findAll('texture');
+const textures = app.assets.findAll("texture");
 
 // Find by tag
-const tagged = app.assets.findByTag('environment');
+const tagged = app.assets.findByTag("environment");
 ```
 
 **Events**:
+
 ```javascript
 asset.ready((loadedAsset) => {
   // Asset loaded
-  console.log('Loaded:', loadedAsset.resource);
+  console.log("Loaded:", loadedAsset.resource);
 });
 
-asset.on('load', (asset) => {
+asset.on("load", (asset) => {
   // Asset loaded
 });
 
-asset.on('error', (err) => {
+asset.on("error", (err) => {
   // Loading failed
 });
 
-asset.on('remove', () => {
+asset.on("remove", () => {
   // Asset removed from registry
 });
 ```
@@ -675,16 +721,18 @@ asset.on('remove', () => {
 ### Asset Types
 
 **Texture**:
+
 ```javascript
-const texture = new pc.Asset('diffuse', 'texture', {
-  url: '/textures/diffuse.jpg'
+const texture = new pc.Asset("diffuse", "texture", {
+  url: "/textures/diffuse.jpg",
 });
 ```
 
 **Model (Container)**:
+
 ```javascript
-const model = new pc.Asset('character', 'container', {
-  url: '/models/character.glb'
+const model = new pc.Asset("character", "container", {
+  url: "/models/character.glb",
 });
 
 model.ready((asset) => {
@@ -694,21 +742,24 @@ model.ready((asset) => {
 ```
 
 **Material**:
+
 ```javascript
-const material = new pc.Asset('custom', 'material');
+const material = new pc.Asset("custom", "material");
 ```
 
 **Audio**:
+
 ```javascript
-const audio = new pc.Asset('music', 'audio', {
-  url: '/audio/music.mp3'
+const audio = new pc.Asset("music", "audio", {
+  url: "/audio/music.mp3",
 });
 ```
 
 **Script**:
+
 ```javascript
-const script = new pc.Asset('playerController', 'script', {
-  url: '/scripts/player-controller.js'
+const script = new pc.Asset("playerController", "script", {
+  url: "/scripts/player-controller.js",
 });
 ```
 
@@ -724,7 +775,7 @@ PBR material for rendering.
 const material = new pc.StandardMaterial();
 
 // Diffuse (albedo)
-material.diffuse = new pc.Color(1, 0, 0);  // Red
+material.diffuse = new pc.Color(1, 0, 0); // Red
 material.diffuseMap = texture;
 
 // Metalness
@@ -757,6 +808,7 @@ material.update();
 ```
 
 **Blend Types**:
+
 - `pc.BLEND_NONE`: Opaque
 - `pc.BLEND_NORMAL`: Alpha blending
 - `pc.BLEND_ADDITIVE`: Additive blending
@@ -778,22 +830,25 @@ const texture = new pc.Texture(app.graphicsDevice, {
   addressU: pc.ADDRESS_REPEAT,
   addressV: pc.ADDRESS_REPEAT,
   mipmaps: true,
-  anisotropy: 16
+  anisotropy: 16,
 });
 ```
 
 **Pixel Formats**:
+
 - `pc.PIXELFORMAT_RGBA8`: Standard 8-bit RGBA
 - `pc.PIXELFORMAT_RGB8`: 8-bit RGB
 - `pc.PIXELFORMAT_DXT5`: GPU-compressed
 - `pc.PIXELFORMAT_ETC2_RGBA`: Mobile compression
 
 **Filters**:
+
 - `pc.FILTER_NEAREST`: Pixelated
 - `pc.FILTER_LINEAR`: Smooth
 - `pc.FILTER_LINEAR_MIPMAP_LINEAR`: Trilinear (best quality)
 
 **Address Modes**:
+
 - `pc.ADDRESS_REPEAT`: Tile texture
 - `pc.ADDRESS_CLAMP`: Clamp to edge
 - `pc.ADDRESS_MIRRORED_REPEAT`: Mirror tiling
@@ -826,15 +881,16 @@ if (keyboard.wasReleased(pc.KEY_SHIFT)) {
 
 // Events
 keyboard.on(pc.EVENT_KEYDOWN, (event) => {
-  console.log('Key down:', event.key);
+  console.log("Key down:", event.key);
 });
 
 keyboard.on(pc.EVENT_KEYUP, (event) => {
-  console.log('Key up:', event.key);
+  console.log("Key up:", event.key);
 });
 ```
 
 **Key Constants**:
+
 - `pc.KEY_W`, `pc.KEY_A`, `pc.KEY_S`, `pc.KEY_D`
 - `pc.KEY_SPACE`, `pc.KEY_SHIFT`, `pc.KEY_CONTROL`
 - `pc.KEY_ENTER`, `pc.KEY_ESCAPE`
@@ -854,16 +910,16 @@ const mouse = new pc.Mouse(canvas);
 // Events
 mouse.on(pc.EVENT_MOUSEDOWN, (event) => {
   if (event.button === pc.MOUSEBUTTON_LEFT) {
-    console.log('Left click at:', event.x, event.y);
+    console.log("Left click at:", event.x, event.y);
   }
 });
 
 mouse.on(pc.EVENT_MOUSEUP, (event) => {
-  console.log('Mouse up');
+  console.log("Mouse up");
 });
 
 mouse.on(pc.EVENT_MOUSEMOVE, (event) => {
-  const dx = event.dx;  // Delta movement
+  const dx = event.dx; // Delta movement
   const dy = event.dy;
 
   camera.rotate(-dy * 0.2, -dx * 0.2, 0);
@@ -875,13 +931,15 @@ mouse.on(pc.EVENT_MOUSEWHEEL, (event) => {
 ```
 
 **Mouse Buttons**:
+
 - `pc.MOUSEBUTTON_LEFT`: Left button
 - `pc.MOUSEBUTTON_MIDDLE`: Middle button
 - `pc.MOUSEBUTTON_RIGHT`: Right button
 
 **Properties**:
+
 ```javascript
-mouse.isPressed(pc.MOUSEBUTTON_LEFT);  // Check if button pressed
+mouse.isPressed(pc.MOUSEBUTTON_LEFT); // Check if button pressed
 ```
 
 ---
@@ -920,22 +978,22 @@ Cast rays to detect collisions.
 
 ```javascript
 // Raycast from camera through mouse
-const camera = app.root.findByName('Camera');
+const camera = app.root.findByName("Camera");
 const from = camera.camera.screenToWorld(mouseX, mouseY, camera.camera.nearClip);
 const to = camera.camera.screenToWorld(mouseX, mouseY, camera.camera.farClip);
 
 const result = app.systems.rigidbody.raycastFirst(from, to);
 
 if (result) {
-  console.log('Hit entity:', result.entity.name);
-  console.log('Hit point:', result.point);
-  console.log('Hit normal:', result.normal);
+  console.log("Hit entity:", result.entity.name);
+  console.log("Hit point:", result.point);
+  console.log("Hit normal:", result.normal);
 }
 
 // Raycast all
 const results = app.systems.rigidbody.raycastAll(from, to);
-results.forEach(result => {
-  console.log('Hit:', result.entity.name);
+results.forEach((result) => {
+  console.log("Hit:", result.entity.name);
 });
 ```
 
@@ -948,10 +1006,10 @@ results.forEach(result => {
 3D positional audio.
 
 ```javascript
-entity.addComponent('sound');
+entity.addComponent("sound");
 
 // Add sound slot
-entity.sound.addSlot('footstep', {
+entity.sound.addSlot("footstep", {
   asset: footstepAsset,
   autoPlay: false,
   loop: false,
@@ -959,20 +1017,20 @@ entity.sound.addSlot('footstep', {
   pitch: 1.0,
   positional: true,
   refDistance: 1,
-  maxDistance: 20
+  maxDistance: 20,
 });
 
 // Play sound
-entity.sound.play('footstep');
+entity.sound.play("footstep");
 
 // Stop sound
-entity.sound.stop('footstep');
+entity.sound.stop("footstep");
 
 // Pause sound
-entity.sound.pause('footstep');
+entity.sound.pause("footstep");
 
 // Resume
-entity.sound.resume('footstep');
+entity.sound.resume("footstep");
 ```
 
 ---
@@ -1004,10 +1062,10 @@ v.lerp(a, b, t);
 RGBA color.
 
 ```javascript
-const color = new pc.Color(r, g, b, a);  // 0-1 range
+const color = new pc.Color(r, g, b, a); // 0-1 range
 
 // Conversion
-const hex = color.toString();  // "#RRGGBB"
+const hex = color.toString(); // "#RRGGBB"
 ```
 
 ### pc.Quat
@@ -1017,7 +1075,7 @@ Quaternion rotation.
 ```javascript
 const quat = new pc.Quat();
 quat.setFromEulerAngles(x, y, z);
-quat.slerp(a, b, t);  // Spherical interpolation
+quat.slerp(a, b, t); // Spherical interpolation
 ```
 
 ---
@@ -1025,29 +1083,35 @@ quat.slerp(a, b, t);  // Spherical interpolation
 ## Constants Reference
 
 **Fill Modes**:
+
 - `pc.FILLMODE_NONE`
 - `pc.FILLMODE_FILL_WINDOW`
 - `pc.FILLMODE_KEEP_ASPECT`
 
 **Resolution Modes**:
+
 - `pc.RESOLUTION_AUTO`
 - `pc.RESOLUTION_FIXED`
 
 **Projection Types**:
+
 - `pc.PROJECTION_PERSPECTIVE`
 - `pc.PROJECTION_ORTHOGRAPHIC`
 
 **Light Types**:
+
 - `pc.LIGHTTYPE_DIRECTIONAL`
 - `pc.LIGHTTYPE_POINT`
 - `pc.LIGHTTYPE_SPOT`
 
 **Body Types**:
+
 - `pc.BODYTYPE_STATIC`
 - `pc.BODYTYPE_DYNAMIC`
 - `pc.BODYTYPE_KINEMATIC`
 
 **Blend Types**:
+
 - `pc.BLEND_NONE`
 - `pc.BLEND_NORMAL`
 - `pc.BLEND_ADDITIVE`

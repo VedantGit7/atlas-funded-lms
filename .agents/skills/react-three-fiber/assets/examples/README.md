@@ -22,23 +22,23 @@ A comprehensive collection of production-ready R3F component patterns and exampl
 ### Basic Model Loader
 
 ```jsx
-import { useGLTF } from '@react-three/drei'
-import { Suspense } from 'react'
+import { useGLTF } from "@react-three/drei";
+import { Suspense } from "react";
 
 function Model({ url, ...props }) {
-  const { scene } = useGLTF(url)
-  return <primitive object={scene} {...props} />
+  const { scene } = useGLTF(url);
+  return <primitive object={scene} {...props} />;
 }
 
 // Preload for faster initial load
-useGLTF.preload('/models/scene.glb')
+useGLTF.preload("/models/scene.glb");
 
 export default function Scene() {
   return (
     <Suspense fallback={<Loader />}>
       <Model url="/models/scene.glb" position={[0, 0, 0]} scale={0.5} />
     </Suspense>
-  )
+  );
 }
 
 function Loader() {
@@ -47,59 +47,59 @@ function Loader() {
       <boxGeometry args={[1, 1, 1]} />
       <meshBasicMaterial wireframe color="white" />
     </mesh>
-  )
+  );
 }
 ```
 
 ### Model with Animations
 
 ```jsx
-import { useGLTF, useAnimations } from '@react-three/drei'
-import { useEffect, useRef } from 'react'
+import { useGLTF, useAnimations } from "@react-three/drei";
+import { useEffect, useRef } from "react";
 
 function AnimatedModel({ url }) {
-  const group = useRef()
-  const { scene, animations } = useGLTF(url)
-  const { actions, names } = useAnimations(animations, group)
+  const group = useRef();
+  const { scene, animations } = useGLTF(url);
+  const { actions, names } = useAnimations(animations, group);
 
   useEffect(() => {
     // Play first animation
-    actions[names[0]]?.play()
-  }, [actions, names])
+    actions[names[0]]?.play();
+  }, [actions, names]);
 
-  return <primitive ref={group} object={scene} />
+  return <primitive ref={group} object={scene} />;
 }
 
-useGLTF.preload('/models/animated.glb')
+useGLTF.preload("/models/animated.glb");
 ```
 
 ### Model with Material Override
 
 ```jsx
-import { useGLTF } from '@react-three/drei'
-import { useEffect } from 'react'
-import * as THREE from 'three'
+import { useGLTF } from "@react-three/drei";
+import { useEffect } from "react";
+import * as THREE from "three";
 
 function ModelWithCustomMaterial({ url }) {
-  const { scene } = useGLTF(url)
+  const { scene } = useGLTF(url);
 
   useEffect(() => {
     const customMaterial = new THREE.MeshStandardMaterial({
-      color: '#ff6b6b',
+      color: "#ff6b6b",
       metalness: 0.8,
       roughness: 0.2,
-    })
+    });
 
     scene.traverse((child) => {
       if (child.isMesh) {
-        child.material = customMaterial
-        child.castShadow = true
-        child.receiveShadow = true
+        child.material = customMaterial;
+        child.castShadow = true;
+        child.receiveShadow = true;
       }
-    })
-  }, [scene])
+    });
+  }, [scene]);
 
-  return <primitive object={scene} />
+  return <primitive object={scene} />;
 }
 ```
 
@@ -108,28 +108,28 @@ function ModelWithCustomMaterial({ url }) {
 ## 2. Interactive Product Viewer
 
 ```jsx
-import { useRef, useState } from 'react'
-import { Canvas, useFrame } from '@react-three/fiber'
-import { OrbitControls, Environment, useGLTF, Center, Bounds } from '@react-three/drei'
-import { useControls } from 'leva'
+import { useRef, useState } from "react";
+import { Canvas, useFrame } from "@react-three/fiber";
+import { OrbitControls, Environment, useGLTF, Center, Bounds } from "@react-three/drei";
+import { useControls } from "leva";
 
 function Product({ url }) {
-  const { scene } = useGLTF(url)
-  const meshRef = useRef()
-  const [hovered, setHovered] = useState(false)
+  const { scene } = useGLTF(url);
+  const meshRef = useRef();
+  const [hovered, setHovered] = useState(false);
 
   // Material controls
   const { metalness, roughness, color } = useControls({
     metalness: { value: 0.9, min: 0, max: 1, step: 0.01 },
     roughness: { value: 0.1, min: 0, max: 1, step: 0.01 },
-    color: '#ffffff',
-  })
+    color: "#ffffff",
+  });
 
   useFrame((state) => {
     if (hovered) {
-      meshRef.current.rotation.y += 0.01
+      meshRef.current.rotation.y += 0.01;
     }
-  })
+  });
 
   return (
     <Center>
@@ -139,18 +139,18 @@ function Product({ url }) {
         onPointerOver={() => setHovered(true)}
         onPointerOut={() => setHovered(false)}
         onClick={(e) => {
-          e.stopPropagation()
-          console.log('Product clicked:', e.object.name)
+          e.stopPropagation();
+          console.log("Product clicked:", e.object.name);
         }}
       />
     </Center>
-  )
+  );
 }
 
 export default function ProductViewer() {
   return (
     <Canvas camera={{ position: [0, 0, 5], fov: 45 }}>
-      <color attach="background" args={['#f0f0f0']} />
+      <color attach="background" args={["#f0f0f0"]} />
 
       <ambientLight intensity={0.5} />
       <directionalLight position={[5, 5, 5]} intensity={1} />
@@ -170,7 +170,7 @@ export default function ProductViewer() {
         maxPolarAngle={Math.PI / 2}
       />
     </Canvas>
-  )
+  );
 }
 ```
 
@@ -181,27 +181,27 @@ export default function ProductViewer() {
 ### Using Drei ScrollControls
 
 ```jsx
-import { Canvas } from '@react-three/fiber'
-import { ScrollControls, Scroll, useScroll } from '@react-three/drei'
-import { useFrame } from '@react-three/fiber'
-import { useRef } from 'react'
+import { Canvas } from "@react-three/fiber";
+import { ScrollControls, Scroll, useScroll } from "@react-three/drei";
+import { useFrame } from "@react-three/fiber";
+import { useRef } from "react";
 
 function ScrollScene() {
-  const meshRef = useRef()
-  const scroll = useScroll()
+  const meshRef = useRef();
+  const scroll = useScroll();
 
   useFrame(() => {
     // scroll.offset: 0 to 1
-    meshRef.current.position.y = scroll.offset * -10
-    meshRef.current.rotation.y = scroll.offset * Math.PI * 2
-  })
+    meshRef.current.position.y = scroll.offset * -10;
+    meshRef.current.rotation.y = scroll.offset * Math.PI * 2;
+  });
 
   return (
     <mesh ref={meshRef}>
       <boxGeometry />
       <meshStandardMaterial color="orange" />
     </mesh>
-  )
+  );
 }
 
 export default function ScrollAnimation() {
@@ -217,68 +217,68 @@ export default function ScrollAnimation() {
 
         {/* HTML content that scrolls */}
         <Scroll html>
-          <div style={{ height: '100vh' }}>
+          <div style={{ height: "100vh" }}>
             <h1>Page 1</h1>
           </div>
-          <div style={{ height: '100vh' }}>
+          <div style={{ height: "100vh" }}>
             <h1>Page 2</h1>
           </div>
-          <div style={{ height: '100vh' }}>
+          <div style={{ height: "100vh" }}>
             <h1>Page 3</h1>
           </div>
         </Scroll>
       </ScrollControls>
     </Canvas>
-  )
+  );
 }
 ```
 
 ### Syncing with GSAP ScrollTrigger
 
 ```jsx
-import { useRef, useEffect } from 'react'
-import { useFrame, useThree } from '@react-three/fiber'
-import gsap from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { useRef, useEffect } from "react";
+import { useFrame, useThree } from "@react-three/fiber";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-gsap.registerPlugin(ScrollTrigger)
+gsap.registerPlugin(ScrollTrigger);
 
 function ScrollSyncedBox() {
-  const meshRef = useRef()
-  const { viewport } = useThree()
+  const meshRef = useRef();
+  const { viewport } = useThree();
 
   useEffect(() => {
     const ctx = gsap.context(() => {
       gsap.to(meshRef.current.position, {
         x: 5,
         scrollTrigger: {
-          trigger: '.section-2',
-          start: 'top center',
-          end: 'bottom center',
+          trigger: ".section-2",
+          start: "top center",
+          end: "bottom center",
           scrub: true,
         },
-      })
+      });
 
       gsap.to(meshRef.current.rotation, {
         y: Math.PI * 2,
         scrollTrigger: {
-          trigger: '.section-2',
-          start: 'top center',
-          end: 'bottom center',
+          trigger: ".section-2",
+          start: "top center",
+          end: "bottom center",
           scrub: true,
         },
-      })
-    })
+      });
+    });
 
-    return () => ctx.revert()
-  }, [])
+    return () => ctx.revert();
+  }, []);
 
   return (
     <mesh ref={meshRef}>
       <boxGeometry />
       <meshStandardMaterial color="orange" />
     </mesh>
-  )
+  );
 }
 ```
 
@@ -289,57 +289,57 @@ function ScrollSyncedBox() {
 ### Instanced Particles
 
 ```jsx
-import { useRef, useMemo } from 'react'
-import { useFrame } from '@react-three/fiber'
-import * as THREE from 'three'
+import { useRef, useMemo } from "react";
+import { useFrame } from "@react-three/fiber";
+import * as THREE from "three";
 
 export default function Particles({ count = 5000 }) {
-  const meshRef = useRef()
+  const meshRef = useRef();
 
   const particles = useMemo(() => {
-    const temp = []
+    const temp = [];
     for (let i = 0; i < count; i++) {
-      const t = Math.random() * 100
-      const factor = 20 + Math.random() * 100
-      const speed = 0.01 + Math.random() / 200
-      const x = Math.random() * 40 - 20
-      const y = Math.random() * 40 - 20
-      const z = Math.random() * 40 - 20
-      temp.push({ t, factor, speed, x, y, z })
+      const t = Math.random() * 100;
+      const factor = 20 + Math.random() * 100;
+      const speed = 0.01 + Math.random() / 200;
+      const x = Math.random() * 40 - 20;
+      const y = Math.random() * 40 - 20;
+      const z = Math.random() * 40 - 20;
+      temp.push({ t, factor, speed, x, y, z });
     }
-    return temp
-  }, [count])
+    return temp;
+  }, [count]);
 
-  const dummy = useMemo(() => new THREE.Object3D(), [])
+  const dummy = useMemo(() => new THREE.Object3D(), []);
 
   useFrame(() => {
     particles.forEach((particle, i) => {
-      let { t, factor, speed, x, y, z } = particle
-      t = particle.t += speed / 2
-      const a = Math.cos(t) + Math.sin(t * 1) / 10
-      const b = Math.sin(t) + Math.cos(t * 2) / 10
-      const s = Math.cos(t)
+      let { t, factor, speed, x, y, z } = particle;
+      t = particle.t += speed / 2;
+      const a = Math.cos(t) + Math.sin(t * 1) / 10;
+      const b = Math.sin(t) + Math.cos(t * 2) / 10;
+      const s = Math.cos(t);
 
       dummy.position.set(
         x + Math.cos((t / 10) * factor) + (Math.sin(t * 1) * factor) / 10,
         y + Math.sin((t / 10) * factor) + (Math.cos(t * 2) * factor) / 10,
-        z + Math.cos((t / 10) * factor) + (Math.sin(t * 3) * factor) / 10
-      )
-      dummy.scale.set(s, s, s)
-      dummy.rotation.set(s * 5, s * 5, s * 5)
-      dummy.updateMatrix()
+        z + Math.cos((t / 10) * factor) + (Math.sin(t * 3) * factor) / 10,
+      );
+      dummy.scale.set(s, s, s);
+      dummy.rotation.set(s * 5, s * 5, s * 5);
+      dummy.updateMatrix();
 
-      meshRef.current.setMatrixAt(i, dummy.matrix)
-    })
-    meshRef.current.instanceMatrix.needsUpdate = true
-  })
+      meshRef.current.setMatrixAt(i, dummy.matrix);
+    });
+    meshRef.current.instanceMatrix.needsUpdate = true;
+  });
 
   return (
     <instancedMesh ref={meshRef} args={[null, null, count]}>
       <dodecahedronGeometry args={[0.1, 0]} />
       <meshPhongMaterial color="#ff4040" />
     </instancedMesh>
-  )
+  );
 }
 ```
 
@@ -350,16 +350,16 @@ export default function Particles({ count = 5000 }) {
 ### Using Drei Text
 
 ```jsx
-import { Text } from '@react-three/drei'
-import { useRef } from 'react'
-import { useFrame } from '@react-three/fiber'
+import { Text } from "@react-three/drei";
+import { useRef } from "react";
+import { useFrame } from "@react-three/fiber";
 
 export default function Text3D() {
-  const textRef = useRef()
+  const textRef = useRef();
 
   useFrame((state) => {
-    textRef.current.position.y = Math.sin(state.clock.elapsedTime) * 0.5
-  })
+    textRef.current.position.y = Math.sin(state.clock.elapsedTime) * 0.5;
+  });
 
   return (
     <Text
@@ -372,16 +372,16 @@ export default function Text3D() {
     >
       Hello R3F!
     </Text>
-  )
+  );
 }
 ```
 
 ### Text with Gradient Material
 
 ```jsx
-import { Text, shaderMaterial } from '@react-three/drei'
-import { extend } from '@react-three/fiber'
-import * as THREE from 'three'
+import { Text, shaderMaterial } from "@react-three/drei";
+import { extend } from "@react-three/fiber";
+import * as THREE from "three";
 
 const GradientMaterial = shaderMaterial(
   { uTime: 0 },
@@ -403,24 +403,24 @@ const GradientMaterial = shaderMaterial(
       vec3 color = mix(colorA, colorB, vUv.y);
       gl_FragColor = vec4(color, 1.0);
     }
-  `
-)
+  `,
+);
 
-extend({ GradientMaterial })
+extend({ GradientMaterial });
 
 export default function GradientText() {
-  const materialRef = useRef()
+  const materialRef = useRef();
 
   useFrame((state) => {
-    materialRef.current.uTime = state.clock.elapsedTime
-  })
+    materialRef.current.uTime = state.clock.elapsedTime;
+  });
 
   return (
     <Text fontSize={1} anchorX="center" anchorY="middle">
       Gradient Text
       <gradientMaterial ref={materialRef} />
     </Text>
-  )
+  );
 }
 ```
 
@@ -433,8 +433,8 @@ npm install @react-three/postprocessing
 ```
 
 ```jsx
-import { Canvas } from '@react-three/fiber'
-import { EffectComposer, Bloom, DepthOfField, Vignette } from '@react-three/postprocessing'
+import { Canvas } from "@react-three/fiber";
+import { EffectComposer, Bloom, DepthOfField, Vignette } from "@react-three/postprocessing";
 
 export default function PostProcessingScene() {
   return (
@@ -448,23 +448,12 @@ export default function PostProcessingScene() {
       </mesh>
 
       <EffectComposer>
-        <Bloom
-          intensity={1.5}
-          luminanceThreshold={0}
-          luminanceSmoothing={0.9}
-        />
-        <DepthOfField
-          focusDistance={0}
-          focalLength={0.02}
-          bokehScale={2}
-        />
-        <Vignette
-          offset={0.5}
-          darkness={0.5}
-        />
+        <Bloom intensity={1.5} luminanceThreshold={0} luminanceSmoothing={0.9} />
+        <DepthOfField focusDistance={0} focalLength={0.02} bokehScale={2} />
+        <Vignette offset={0.5} darkness={0.5} />
       </EffectComposer>
     </Canvas>
-  )
+  );
 }
 ```
 
@@ -477,8 +466,8 @@ npm install @react-three/rapier
 ```
 
 ```jsx
-import { Canvas } from '@react-three/fiber'
-import { Physics, RigidBody, CuboidCollider } from '@react-three/rapier'
+import { Canvas } from "@react-three/fiber";
+import { Physics, RigidBody, CuboidCollider } from "@react-three/rapier";
 
 function Box({ position }) {
   return (
@@ -488,7 +477,7 @@ function Box({ position }) {
         <meshStandardMaterial color="orange" />
       </mesh>
     </RigidBody>
-  )
+  );
 }
 
 function Floor() {
@@ -500,7 +489,7 @@ function Floor() {
         <meshStandardMaterial color="#808080" />
       </mesh>
     </RigidBody>
-  )
+  );
 }
 
 export default function PhysicsScene() {
@@ -516,7 +505,7 @@ export default function PhysicsScene() {
         <Floor />
       </Physics>
     </Canvas>
-  )
+  );
 }
 ```
 
@@ -527,40 +516,40 @@ export default function PhysicsScene() {
 ### Smooth Camera Movement
 
 ```jsx
-import { useRef } from 'react'
-import { useFrame, useThree } from '@react-three/fiber'
-import * as THREE from 'three'
+import { useRef } from "react";
+import { useFrame, useThree } from "@react-three/fiber";
+import * as THREE from "three";
 
 export default function CameraRig({ children }) {
-  const ref = useRef()
-  const { camera, pointer } = useThree()
+  const ref = useRef();
+  const { camera, pointer } = useThree();
 
   useFrame((state, delta) => {
     // Smooth camera follow mouse
-    const targetX = pointer.x * 2
-    const targetY = pointer.y * 2
+    const targetX = pointer.x * 2;
+    const targetY = pointer.y * 2;
 
-    camera.position.x += (targetX - camera.position.x) * delta * 2
-    camera.position.y += (targetY - camera.position.y) * delta * 2
+    camera.position.x += (targetX - camera.position.x) * delta * 2;
+    camera.position.y += (targetY - camera.position.y) * delta * 2;
 
-    camera.lookAt(0, 0, 0)
-  })
+    camera.lookAt(0, 0, 0);
+  });
 
-  return <group ref={ref}>{children}</group>
+  return <group ref={ref}>{children}</group>;
 }
 ```
 
 ### Camera Path Animation
 
 ```jsx
-import { useEffect, useRef } from 'react'
-import { useThree } from '@react-three/fiber'
-import * as THREE from 'three'
-import gsap from 'gsap'
+import { useEffect, useRef } from "react";
+import { useThree } from "@react-three/fiber";
+import * as THREE from "three";
+import gsap from "gsap";
 
 export default function CameraPath() {
-  const { camera } = useThree()
-  const pathRef = useRef()
+  const { camera } = useThree();
+  const pathRef = useRef();
 
   useEffect(() => {
     // Define camera path points
@@ -571,26 +560,29 @@ export default function CameraPath() {
       new THREE.Vector3(-5, 2, -5),
       new THREE.Vector3(-5, 2, 5),
       new THREE.Vector3(0, 0, 5),
-    ]
+    ];
 
-    const curve = new THREE.CatmullRomCurve3(points)
-    pathRef.current = curve
+    const curve = new THREE.CatmullRomCurve3(points);
+    pathRef.current = curve;
 
     // Animate camera along path
-    gsap.to({ progress: 0 }, {
-      progress: 1,
-      duration: 10,
-      repeat: -1,
-      ease: 'none',
-      onUpdate: function() {
-        const point = curve.getPointAt(this.targets()[0].progress)
-        camera.position.copy(point)
-        camera.lookAt(0, 0, 0)
-      }
-    })
-  }, [camera])
+    gsap.to(
+      { progress: 0 },
+      {
+        progress: 1,
+        duration: 10,
+        repeat: -1,
+        ease: "none",
+        onUpdate: function () {
+          const point = curve.getPointAt(this.targets()[0].progress);
+          camera.position.copy(point);
+          camera.lookAt(0, 0, 0);
+        },
+      },
+    );
+  }, [camera]);
 
-  return null
+  return null;
 }
 ```
 
@@ -599,43 +591,43 @@ export default function CameraPath() {
 ## 9. LOD (Level of Detail)
 
 ```jsx
-import { useMemo } from 'react'
-import { useThree } from '@react-three/fiber'
-import * as THREE from 'three'
+import { useMemo } from "react";
+import { useThree } from "@react-three/fiber";
+import * as THREE from "three";
 
 export default function LODMesh({ position }) {
-  const { camera } = useThree()
+  const { camera } = useThree();
 
   const lod = useMemo(() => {
-    const lodObject = new THREE.LOD()
+    const lodObject = new THREE.LOD();
 
     // High detail (close)
-    const geometryHigh = new THREE.IcosahedronGeometry(1, 3)
-    const materialHigh = new THREE.MeshStandardMaterial({ color: 'orange' })
-    const meshHigh = new THREE.Mesh(geometryHigh, materialHigh)
-    lodObject.addLevel(meshHigh, 0)
+    const geometryHigh = new THREE.IcosahedronGeometry(1, 3);
+    const materialHigh = new THREE.MeshStandardMaterial({ color: "orange" });
+    const meshHigh = new THREE.Mesh(geometryHigh, materialHigh);
+    lodObject.addLevel(meshHigh, 0);
 
     // Medium detail
-    const geometryMid = new THREE.IcosahedronGeometry(1, 1)
-    const materialMid = new THREE.MeshStandardMaterial({ color: 'orange' })
-    const meshMid = new THREE.Mesh(geometryMid, materialMid)
-    lodObject.addLevel(meshMid, 10)
+    const geometryMid = new THREE.IcosahedronGeometry(1, 1);
+    const materialMid = new THREE.MeshStandardMaterial({ color: "orange" });
+    const meshMid = new THREE.Mesh(geometryMid, materialMid);
+    lodObject.addLevel(meshMid, 10);
 
     // Low detail (far)
-    const geometryLow = new THREE.IcosahedronGeometry(1, 0)
-    const materialLow = new THREE.MeshStandardMaterial({ color: 'orange' })
-    const meshLow = new THREE.Mesh(geometryLow, materialLow)
-    lodObject.addLevel(meshLow, 20)
+    const geometryLow = new THREE.IcosahedronGeometry(1, 0);
+    const materialLow = new THREE.MeshStandardMaterial({ color: "orange" });
+    const meshLow = new THREE.Mesh(geometryLow, materialLow);
+    lodObject.addLevel(meshLow, 20);
 
-    lodObject.position.set(...position)
-    return lodObject
-  }, [position])
+    lodObject.position.set(...position);
+    return lodObject;
+  }, [position]);
 
   useFrame(() => {
-    lod.update(camera)
-  })
+    lod.update(camera);
+  });
 
-  return <primitive object={lod} />
+  return <primitive object={lod} />;
 }
 ```
 
@@ -644,26 +636,18 @@ export default function LODMesh({ position }) {
 ## 10. Performance Monitoring
 
 ```jsx
-import { Canvas } from '@react-three/fiber'
-import {
-  PerformanceMonitor,
-  AdaptiveDpr,
-  AdaptiveEvents,
-  Stats
-} from '@react-three/drei'
-import { useState } from 'react'
+import { Canvas } from "@react-three/fiber";
+import { PerformanceMonitor, AdaptiveDpr, AdaptiveEvents, Stats } from "@react-three/drei";
+import { useState } from "react";
 
 export default function AdaptiveScene() {
-  const [dpr, setDpr] = useState(1.5)
+  const [dpr, setDpr] = useState(1.5);
 
   return (
     <>
       <Stats />
       <Canvas dpr={dpr}>
-        <PerformanceMonitor
-          onIncline={() => setDpr(2)}
-          onDecline={() => setDpr(1)}
-        >
+        <PerformanceMonitor onIncline={() => setDpr(2)} onDecline={() => setDpr(1)}>
           <AdaptiveDpr pixelated />
           <AdaptiveEvents />
 
@@ -676,7 +660,7 @@ export default function AdaptiveScene() {
         </PerformanceMonitor>
       </Canvas>
     </>
-  )
+  );
 }
 ```
 

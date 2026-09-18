@@ -63,7 +63,7 @@ Real-world patterns and examples combining Vanta.js, Zdog, and Vanilla-Tilt for 
 .logo-zdog {
   display: block;
   margin: 0 auto 2rem;
-  filter: drop-shadow(0 10px 30px rgba(0,0,0,0.3));
+  filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.3));
 }
 
 .cta-button {
@@ -88,14 +88,14 @@ VANTA.NET({
   color: 0x3fafff,
   backgroundColor: 0x23153c,
   points: 10,
-  maxDistance: 20
+  maxDistance: 20,
 });
 
 // Zdog logo
 const logoIllo = new Zdog.Illustration({
-  element: '.logo-zdog',
+  element: ".logo-zdog",
   zoom: 3,
-  dragRotate: false
+  dragRotate: false,
 });
 
 // Create your brand icon here
@@ -104,12 +104,12 @@ const logo = new Zdog.Shape({
   path: [
     { x: -30, y: -30 },
     { x: 30, y: -30 },
-    { x: 0, y: 30 }
+    { x: 0, y: 30 },
   ],
   closed: true,
   stroke: 8,
-  color: '#fff',
-  fill: true
+  color: "#fff",
+  fill: true,
 });
 
 function animate() {
@@ -124,7 +124,7 @@ VanillaTilt.init(document.querySelector(".cta-button"), {
   max: 15,
   glare: true,
   "max-glare": 0.5,
-  scale: 1.1
+  scale: 1.1,
 });
 ```
 
@@ -156,13 +156,13 @@ VANTA.CLOUDS({
   el: "#vanta-bg",
   skyColor: 0x68b8d7,
   cloudColor: 0xadc1de,
-  speed: 0.5
+  speed: 0.5,
 });
 
 // Animated scroll indicator
 const scrollIllo = new Zdog.Illustration({
-  element: '.scroll-zdog',
-  zoom: 2
+  element: ".scroll-zdog",
+  zoom: 2,
 });
 
 // Mouse with scrolling animation
@@ -172,7 +172,7 @@ const mouse = new Zdog.RoundedRect({
   height: 30,
   cornerRadius: 10,
   stroke: 2,
-  color: '#fff'
+  color: "#fff",
 });
 
 const wheel = new Zdog.Ellipse({
@@ -180,8 +180,8 @@ const wheel = new Zdog.Ellipse({
   diameter: 4,
   translate: { y: -8 },
   stroke: 2,
-  color: '#fff',
-  fill: true
+  color: "#fff",
+  fill: true,
 });
 
 let wheelY = -8;
@@ -229,21 +229,21 @@ VanillaTilt.init(document.querySelectorAll(".pricing-card"), {
   speed: 400,
   glare: true,
   "max-glare": 0.2,
-  scale: 1.02
+  scale: 1.02,
 });
 
 // Create unique Zdog icon for each plan
 const starterIcon = new Zdog.Illustration({
-  element: document.querySelectorAll('.plan-icon')[0],
-  zoom: 2
+  element: document.querySelectorAll(".plan-icon")[0],
+  zoom: 2,
 });
 
 new Zdog.Ellipse({
   addTo: starterIcon,
   diameter: 30,
   stroke: 5,
-  color: '#4CAF50',
-  fill: true
+  color: "#4CAF50",
+  fill: true,
 });
 
 // Animate
@@ -301,7 +301,7 @@ animate();
 <div class="product-gallery">
   <div class="product-card tilt-card" data-tilt>
     <div class="product-badge">NEW</div>
-    <img src="product1.jpg" alt="Product" class="product-image">
+    <img src="product1.jpg" alt="Product" class="product-image" />
     <canvas class="product-icon" width="80" height="80"></canvas>
     <h3>Product Name</h3>
     <p class="product-price">$99.99</p>
@@ -316,14 +316,14 @@ VanillaTilt.init(document.querySelectorAll(".product-card"), {
   speed: 400,
   glare: true,
   "max-glare": 0.3,
-  scale: 1.05
+  scale: 1.05,
 });
 
 // Add floating Zdog indicator on each card
-document.querySelectorAll('.product-icon').forEach((canvas, i) => {
+document.querySelectorAll(".product-icon").forEach((canvas, i) => {
   const illo = new Zdog.Illustration({
     element: canvas,
-    zoom: 1.5
+    zoom: 1.5,
   });
 
   // Star rating indicator
@@ -334,8 +334,8 @@ document.querySelectorAll('.product-icon').forEach((canvas, i) => {
       radius: 6,
       translate: { x: (j - 2) * 14 },
       stroke: 2,
-      color: '#FFD700',
-      fill: true
+      color: "#FFD700",
+      fill: true,
     });
   }
 
@@ -372,37 +372,40 @@ document.querySelectorAll('.product-icon').forEach((canvas, i) => {
 
 ```javascript
 // Initialize Vanta for each project card
-document.querySelectorAll('.project-card').forEach((card, index) => {
-  const vantaEl = card.querySelector('.project-vanta');
+document.querySelectorAll(".project-card").forEach((card, index) => {
+  const vantaEl = card.querySelector(".project-vanta");
   const effect = vantaEl.dataset.effect;
 
   const effects = {
-    waves: () => VANTA.WAVES({
-      el: vantaEl,
-      color: 0x23153c,
-      waveHeight: 10,
-      zoom: 0.75
-    }),
-    cells: () => VANTA.CELLS({
-      el: vantaEl,
-      color1: 0x18b0c6,
-      size: 1.5
-    }),
-    net: () => VANTA.NET({
-      el: vantaEl,
-      color: 0x3fafff,
-      points: 8
-    })
+    waves: () =>
+      VANTA.WAVES({
+        el: vantaEl,
+        color: 0x23153c,
+        waveHeight: 10,
+        zoom: 0.75,
+      }),
+    cells: () =>
+      VANTA.CELLS({
+        el: vantaEl,
+        color1: 0x18b0c6,
+        size: 1.5,
+      }),
+    net: () =>
+      VANTA.NET({
+        el: vantaEl,
+        color: 0x3fafff,
+        points: 8,
+      }),
   };
 
   effects[effect]();
 
   // Tilt only the content overlay
-  VanillaTilt.init(card.querySelector('.project-content'), {
+  VanillaTilt.init(card.querySelector(".project-content"), {
     max: 8,
     scale: 1.02,
     glare: true,
-    "max-glare": 0.2
+    "max-glare": 0.2,
   });
 });
 ```
@@ -474,14 +477,14 @@ document.querySelectorAll('.project-card').forEach((card, index) => {
 VANTA.TOPOLOGY({
   el: "#vanta-bg",
   color: 0x667eea,
-  backgroundColor: 0xf8f9fa
+  backgroundColor: 0xf8f9fa,
 });
 
 // Zdog bar chart
 const chartIllo = new Zdog.Illustration({
-  element: '.stat-chart',
+  element: ".stat-chart",
   zoom: 2,
-  dragRotate: true
+  dragRotate: true,
 });
 
 const data = [10, 25, 15, 30, 20, 35, 28];
@@ -496,13 +499,13 @@ data.forEach((value, i) => {
     depth: barWidth,
     translate: {
       x: (i - 3) * spacing,
-      y: value / 2
+      y: value / 2,
     },
     stroke: 1,
     color: `hsl(${220 + i * 10}, 70%, 60%)`,
     fill: true,
-    topFace: '#667eea',
-    bottomFace: '#764ba2'
+    topFace: "#667eea",
+    bottomFace: "#764ba2",
   });
 });
 
@@ -517,7 +520,7 @@ animate();
 VanillaTilt.init(document.querySelectorAll(".stat-card"), {
   max: 5,
   glare: false,
-  scale: 1.01
+  scale: 1.01,
 });
 ```
 
@@ -562,11 +565,11 @@ VANTA.DOTS({
   color: 0xff3f81,
   backgroundColor: 0xffffff,
   size: 2,
-  spacing: 30
+  spacing: 30,
 });
 
 // Staggered tilt initialization
-document.querySelectorAll('.feature-item').forEach((item, index) => {
+document.querySelectorAll(".feature-item").forEach((item, index) => {
   const delay = parseInt(item.dataset.delay) || 0;
 
   setTimeout(() => {
@@ -574,27 +577,27 @@ document.querySelectorAll('.feature-item').forEach((item, index) => {
       max: 12,
       speed: 400,
       glare: true,
-      "max-glare": 0.2
+      "max-glare": 0.2,
     });
 
     // Fade in animation
-    item.style.opacity = '1';
-    item.style.transform = 'translateY(0)';
+    item.style.opacity = "1";
+    item.style.transform = "translateY(0)";
   }, delay);
 
   // Initial state
-  item.style.opacity = '0';
-  item.style.transform = 'translateY(20px)';
-  item.style.transition = 'opacity 0.6s, transform 0.6s';
+  item.style.opacity = "0";
+  item.style.transform = "translateY(20px)";
+  item.style.transition = "opacity 0.6s, transform 0.6s";
 });
 
 // Create unique Zdog icons
-const icons = document.querySelectorAll('.feature-icon');
+const icons = document.querySelectorAll(".feature-icon");
 
 // Lightning icon
 const lightning = new Zdog.Illustration({
   element: icons[0],
-  zoom: 2
+  zoom: 2,
 });
 
 new Zdog.Shape({
@@ -603,12 +606,12 @@ new Zdog.Shape({
     { x: 0, y: -30 },
     { x: 10, y: 0 },
     { x: -5, y: 0 },
-    { x: 0, y: 30 }
+    { x: 0, y: 30 },
   ],
   closed: true,
   stroke: 3,
-  color: '#FFD700',
-  fill: true
+  color: "#FFD700",
+  fill: true,
 });
 
 function animateLightning() {
@@ -652,14 +655,14 @@ animateLightning();
 ```javascript
 // Zdog 3D product model
 const productIllo = new Zdog.Illustration({
-  element: '.product-3d',
+  element: ".product-3d",
   zoom: 3,
-  dragRotate: true
+  dragRotate: true,
 });
 
 // Example: Watch model
 const watch = new Zdog.Anchor({
-  addTo: productIllo
+  addTo: productIllo,
 });
 
 // Watch body
@@ -668,8 +671,8 @@ new Zdog.Cylinder({
   diameter: 30,
   length: 10,
   stroke: 2,
-  color: '#333',
-  fill: true
+  color: "#333",
+  fill: true,
 });
 
 // Watch face
@@ -678,8 +681,8 @@ new Zdog.Ellipse({
   diameter: 28,
   translate: { z: 6 },
   stroke: 1,
-  color: '#fff',
-  fill: true
+  color: "#fff",
+  fill: true,
 });
 
 // Watch hands
@@ -688,7 +691,7 @@ new Zdog.Shape({
   path: [{ y: 0 }, { y: -10 }],
   translate: { z: 7 },
   stroke: 2,
-  color: '#333'
+  color: "#333",
 });
 
 let rotationSpeed = 0;
@@ -701,32 +704,32 @@ function animate() {
 animate();
 
 // Control buttons
-document.getElementById('rotate-left').addEventListener('click', () => {
+document.getElementById("rotate-left").addEventListener("click", () => {
   rotationSpeed = -0.05;
-  setTimeout(() => rotationSpeed = 0, 500);
+  setTimeout(() => (rotationSpeed = 0), 500);
 });
 
-document.getElementById('rotate-right').addEventListener('click', () => {
+document.getElementById("rotate-right").addEventListener("click", () => {
   rotationSpeed = 0.05;
-  setTimeout(() => rotationSpeed = 0, 500);
+  setTimeout(() => (rotationSpeed = 0), 500);
 });
 
 let currentZoom = 3;
-document.getElementById('zoom-in').addEventListener('click', () => {
+document.getElementById("zoom-in").addEventListener("click", () => {
   currentZoom += 0.5;
   productIllo.zoom = currentZoom;
 });
 
-document.getElementById('zoom-out').addEventListener('click', () => {
+document.getElementById("zoom-out").addEventListener("click", () => {
   currentZoom = Math.max(1, currentZoom - 0.5);
   productIllo.zoom = currentZoom;
 });
 
 // Tilt info card
-VanillaTilt.init(document.querySelector('.product-info'), {
+VanillaTilt.init(document.querySelector(".product-info"), {
   max: 8,
   glare: true,
-  "max-glare": 0.2
+  "max-glare": 0.2,
 });
 ```
 
@@ -772,25 +775,25 @@ VanillaTilt.init(document.querySelector('.product-info'), {
 VANTA.RINGS({
   el: "#vanta-bg",
   backgroundColor: 0xf8f9fa,
-  color: 0x667eea
+  color: 0x667eea,
 });
 
 // Tilt plan columns
-VanillaTilt.init(document.querySelectorAll('.plan-column'), {
+VanillaTilt.init(document.querySelectorAll(".plan-column"), {
   max: 5,
   glare: true,
   "max-glare": 0.1,
   scale: 1.02,
-  axis: 'y'  // Only tilt vertically
+  axis: "y", // Only tilt vertically
 });
 
 // Zdog icons for each plan
-const plans = document.querySelectorAll('.plan-icon');
+const plans = document.querySelectorAll(".plan-icon");
 
 // Starter: Single star
 const starter = new Zdog.Illustration({
   element: plans[0],
-  zoom: 1.5
+  zoom: 1.5,
 });
 
 new Zdog.Polygon({
@@ -798,43 +801,43 @@ new Zdog.Polygon({
   sides: 5,
   radius: 15,
   stroke: 2,
-  color: '#4CAF50',
-  fill: true
+  color: "#4CAF50",
+  fill: true,
 });
 
 // Pro: Two stars
 const pro = new Zdog.Illustration({
   element: plans[1],
-  zoom: 1.5
+  zoom: 1.5,
 });
 
-[-8, 8].forEach(x => {
+[-8, 8].forEach((x) => {
   new Zdog.Polygon({
     addTo: pro,
     sides: 5,
     radius: 12,
     translate: { x },
     stroke: 2,
-    color: '#2196F3',
-    fill: true
+    color: "#2196F3",
+    fill: true,
   });
 });
 
 // Enterprise: Three stars
 const enterprise = new Zdog.Illustration({
   element: plans[2],
-  zoom: 1.5
+  zoom: 1.5,
 });
 
-[-12, 0, 12].forEach(x => {
+[-12, 0, 12].forEach((x) => {
   new Zdog.Polygon({
     addTo: enterprise,
     sides: 5,
     radius: 10,
     translate: { x },
     stroke: 2,
-    color: '#9C27B0',
-    fill: true
+    color: "#9C27B0",
+    fill: true,
   });
 });
 
@@ -863,30 +866,33 @@ animate();
 
 ```javascript
 // Lazy load Vanta when section is visible
-const vantaSections = document.querySelectorAll('[data-vanta]');
+const vantaSections = document.querySelectorAll("[data-vanta]");
 
-const observer = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      const section = entry.target;
-      const effect = section.dataset.vanta;
+const observer = new IntersectionObserver(
+  (entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        const section = entry.target;
+        const effect = section.dataset.vanta;
 
-      // Load effect
-      if (effect === 'waves') {
-        VANTA.WAVES({
-          el: section,
-          color: 0x23153c,
-          waveHeight: 15
-        });
+        // Load effect
+        if (effect === "waves") {
+          VANTA.WAVES({
+            el: section,
+            color: 0x23153c,
+            waveHeight: 15,
+          });
+        }
+
+        // Stop observing
+        observer.unobserve(section);
       }
+    });
+  },
+  { threshold: 0.1 },
+);
 
-      // Stop observing
-      observer.unobserve(section);
-    }
-  });
-}, { threshold: 0.1 });
-
-vantaSections.forEach(section => observer.observe(section));
+vantaSections.forEach((section) => observer.observe(section));
 ```
 
 ---
@@ -903,32 +909,33 @@ if (!isMobile && !isLowEnd) {
     el: "#vanta-bg",
     color: 0x23153c,
     waveHeight: 20,
-    waveSpeed: 1.0
+    waveSpeed: 1.0,
   });
 
   VanillaTilt.init(document.querySelectorAll(".tilt-card"), {
     max: 25,
     glare: true,
-    "max-glare": 0.5
+    "max-glare": 0.5,
   });
 } else if (isMobile && !isLowEnd) {
   // Mobile-optimized
-  VANTA.DOTS({  // Lighter effect
+  VANTA.DOTS({
+    // Lighter effect
     el: "#vanta-bg",
     size: 2,
-    spacing: 40
+    spacing: 40,
   });
 
   // No tilt on mobile, use gyro instead
   VanillaTilt.init(document.querySelectorAll(".tilt-card"), {
     max: 10,
     gyroscope: true,
-    glare: false
+    glare: false,
   });
 } else {
   // Low-end devices: static gradient
-  document.getElementById('vanta-bg').style.background =
-    'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+  document.getElementById("vanta-bg").style.background =
+    "linear-gradient(135deg, #667eea 0%, #764ba2 100%)";
 
   // No tilt effects
 }
@@ -943,14 +950,14 @@ if (!isMobile && !isLowEnd) {
 let zdogQueue = [];
 
 function animateZdog() {
-  if ('requestIdleCallback' in window) {
+  if ("requestIdleCallback" in window) {
     requestIdleCallback(() => {
-      zdogQueue.forEach(illo => illo.updateRenderGraph());
+      zdogQueue.forEach((illo) => illo.updateRenderGraph());
       requestAnimationFrame(animateZdog);
     });
   } else {
     // Fallback
-    zdogQueue.forEach(illo => illo.updateRenderGraph());
+    zdogQueue.forEach((illo) => illo.updateRenderGraph());
     requestAnimationFrame(animateZdog);
   }
 }
@@ -972,7 +979,7 @@ function initVanta() {
   vantaEffect = VANTA.WAVES({ el: "#vanta-bg" });
 }
 
-window.addEventListener('resize', () => {
+window.addEventListener("resize", () => {
   clearTimeout(resizeTimer);
 
   resizeTimer = setTimeout(() => {
@@ -999,64 +1006,64 @@ Combining all three libraries for a production landing page:
 ```html
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Production Landing Page</title>
-  <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-  <!-- Hero with Vanta -->
-  <section class="hero" id="hero">
-    <div id="vanta-bg"></div>
-    <div class="hero-content">
-      <canvas class="logo-zdog" width="200" height="200"></canvas>
-      <h1>Your Amazing Product</h1>
-      <p>The tagline that converts</p>
-      <button class="cta-btn tilt-btn" data-tilt>Get Started Free</button>
-    </div>
-  </section>
-
-  <!-- Features with Tilt Cards -->
-  <section class="features">
-    <h2>Features</h2>
-    <div class="feature-grid">
-      <div class="feature-card tilt-card" data-tilt>
-        <canvas class="feature-icon" width="100" height="100"></canvas>
-        <h3>Fast</h3>
-        <p>Lightning-fast performance</p>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Production Landing Page</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <!-- Hero with Vanta -->
+    <section class="hero" id="hero">
+      <div id="vanta-bg"></div>
+      <div class="hero-content">
+        <canvas class="logo-zdog" width="200" height="200"></canvas>
+        <h1>Your Amazing Product</h1>
+        <p>The tagline that converts</p>
+        <button class="cta-btn tilt-btn" data-tilt>Get Started Free</button>
       </div>
+    </section>
 
-      <div class="feature-card tilt-card" data-tilt>
-        <canvas class="feature-icon" width="100" height="100"></canvas>
-        <h3>Secure</h3>
-        <p>Bank-level security</p>
+    <!-- Features with Tilt Cards -->
+    <section class="features">
+      <h2>Features</h2>
+      <div class="feature-grid">
+        <div class="feature-card tilt-card" data-tilt>
+          <canvas class="feature-icon" width="100" height="100"></canvas>
+          <h3>Fast</h3>
+          <p>Lightning-fast performance</p>
+        </div>
+
+        <div class="feature-card tilt-card" data-tilt>
+          <canvas class="feature-icon" width="100" height="100"></canvas>
+          <h3>Secure</h3>
+          <p>Bank-level security</p>
+        </div>
+
+        <div class="feature-card tilt-card" data-tilt>
+          <canvas class="feature-icon" width="100" height="100"></canvas>
+          <h3>Scalable</h3>
+          <p>Grows with you</p>
+        </div>
       </div>
+    </section>
 
-      <div class="feature-card tilt-card" data-tilt>
-        <canvas class="feature-icon" width="100" height="100"></canvas>
-        <h3>Scalable</h3>
-        <p>Grows with you</p>
+    <!-- Pricing with Zdog + Tilt -->
+    <section class="pricing" data-vanta="topology">
+      <h2>Pricing</h2>
+      <div class="pricing-grid">
+        <!-- Pricing cards here -->
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- Pricing with Zdog + Tilt -->
-  <section class="pricing" data-vanta="topology">
-    <h2>Pricing</h2>
-    <div class="pricing-grid">
-      <!-- Pricing cards here -->
-    </div>
-  </section>
-
-  <!-- Scripts -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.waves.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.topology.min.js"></script>
-  <script src="https://unpkg.com/zdog@1/dist/zdog.dist.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.1/vanilla-tilt.min.js"></script>
-  <script src="app.js"></script>
-</body>
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.waves.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.topology.min.js"></script>
+    <script src="https://unpkg.com/zdog@1/dist/zdog.dist.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.1/vanilla-tilt.min.js"></script>
+    <script src="app.js"></script>
+  </body>
 </html>
 ```
 
@@ -1068,18 +1075,18 @@ const performanceLevel = (() => {
   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
   const cores = navigator.hardwareConcurrency || 2;
 
-  if (isMobile && cores <= 4) return 'low';
-  if (isMobile || cores <= 4) return 'medium';
-  return 'high';
+  if (isMobile && cores <= 4) return "low";
+  if (isMobile || cores <= 4) return "medium";
+  return "high";
 })();
 
-console.log('Performance level:', performanceLevel);
+console.log("Performance level:", performanceLevel);
 
 // Conditional initialization
-if (performanceLevel === 'high') {
+if (performanceLevel === "high") {
   // Full effects
   initFullEffects();
-} else if (performanceLevel === 'medium') {
+} else if (performanceLevel === "medium") {
   initMediumEffects();
 } else {
   initLowEffects();
@@ -1091,16 +1098,16 @@ function initFullEffects() {
     el: "#vanta-bg",
     color: 0x23153c,
     waveHeight: 20,
-    waveSpeed: 1.0
+    waveSpeed: 1.0,
   });
 
   // Pricing Vanta (lazy load)
   const pricingObserver = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
+    entries.forEach((entry) => {
       if (entry.isIntersecting) {
         VANTA.TOPOLOGY({
           el: entry.target,
-          color: 0x667eea
+          color: 0x667eea,
         });
         pricingObserver.unobserve(entry.target);
       }
@@ -1116,14 +1123,14 @@ function initFullEffects() {
     max: 15,
     glare: true,
     "max-glare": 0.3,
-    scale: 1.05
+    scale: 1.05,
   });
 
   VanillaTilt.init(document.querySelector(".cta-btn"), {
     max: 20,
     glare: true,
     "max-glare": 0.5,
-    scale: 1.1
+    scale: 1.1,
   });
 }
 
@@ -1132,7 +1139,7 @@ function initMediumEffects() {
   VANTA.DOTS({
     el: "#vanta-bg",
     size: 2,
-    spacing: 40
+    spacing: 40,
   });
 
   // Zdog without heavy animations
@@ -1142,17 +1149,17 @@ function initMediumEffects() {
   VanillaTilt.init(document.querySelectorAll(".tilt-card"), {
     max: 10,
     glare: false,
-    scale: 1.02
+    scale: 1.02,
   });
 }
 
 function initLowEffects() {
   // Static gradient
-  document.getElementById('vanta-bg').style.background =
-    'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+  document.getElementById("vanta-bg").style.background =
+    "linear-gradient(135deg, #667eea 0%, #764ba2 100%)";
 
   // Static Zdog icons
-  initZdogIcons(false);  // No animation
+  initZdogIcons(false); // No animation
 
   // No tilt effects
 }
@@ -1160,8 +1167,8 @@ function initLowEffects() {
 function initZdogIcons(animate = true) {
   // Logo
   const logoIllo = new Zdog.Illustration({
-    element: '.logo-zdog',
-    zoom: 3
+    element: ".logo-zdog",
+    zoom: 3,
   });
 
   const logo = new Zdog.Box({
@@ -1170,8 +1177,8 @@ function initZdogIcons(animate = true) {
     height: 30,
     depth: 30,
     stroke: 2,
-    color: '#fff',
-    fill: true
+    color: "#fff",
+    fill: true,
   });
 
   if (animate) {
@@ -1186,12 +1193,12 @@ function initZdogIcons(animate = true) {
   }
 
   // Feature icons
-  const featureIcons = document.querySelectorAll('.feature-icon');
+  const featureIcons = document.querySelectorAll(".feature-icon");
 
   featureIcons.forEach((canvas, i) => {
     const illo = new Zdog.Illustration({
       element: canvas,
-      zoom: 2
+      zoom: 2,
     });
 
     // Different icon for each feature
@@ -1203,12 +1210,12 @@ function initZdogIcons(animate = true) {
           { x: 0, y: -20 },
           { x: 8, y: 0 },
           { x: -4, y: 0 },
-          { x: 0, y: 20 }
+          { x: 0, y: 20 },
         ],
         closed: true,
         stroke: 3,
-        color: '#FFD700',
-        fill: true
+        color: "#FFD700",
+        fill: true,
       });
     } else if (i === 1) {
       // Shield
@@ -1220,12 +1227,12 @@ function initZdogIcons(animate = true) {
           { x: 15, y: 10 },
           { x: 0, y: 20 },
           { x: -15, y: 10 },
-          { x: -15, y: -10 }
+          { x: -15, y: -10 },
         ],
         closed: true,
         stroke: 3,
-        color: '#4CAF50',
-        fill: true
+        color: "#4CAF50",
+        fill: true,
       });
     } else {
       // Graph
@@ -1236,8 +1243,8 @@ function initZdogIcons(animate = true) {
           height: h,
           translate: { x: (j - 1.5) * 8, y: h / 2 - 10 },
           stroke: 2,
-          color: '#2196F3',
-          fill: true
+          color: "#2196F3",
+          fill: true,
         });
       });
     }
@@ -1256,8 +1263,8 @@ function initZdogIcons(animate = true) {
 }
 
 // Cleanup
-window.addEventListener('beforeunload', () => {
-  document.querySelectorAll('.tilt-card').forEach(card => {
+window.addEventListener("beforeunload", () => {
+  document.querySelectorAll(".tilt-card").forEach((card) => {
     if (card.vanillaTilt) card.vanillaTilt.destroy();
   });
 });

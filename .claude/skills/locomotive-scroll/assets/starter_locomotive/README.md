@@ -58,28 +58,23 @@ Every Locomotive Scroll project requires specific data attributes:
 ```html
 <!-- Main scroll container (required) -->
 <div data-scroll-container>
-
   <!-- Section wrapper (optional, improves performance) -->
   <div data-scroll-section>
-
     <!-- Tracked element -->
-    <h1 data-scroll data-scroll-speed="2">
-      Smooth Parallax
-    </h1>
-
+    <h1 data-scroll data-scroll-speed="2">Smooth Parallax</h1>
   </div>
 </div>
 ```
 
 ### Key Data Attributes
 
-| Attribute | Purpose | Example |
-|-----------|---------|---------|
-| `data-scroll` | Enable detection | `data-scroll` |
-| `data-scroll-speed` | Parallax speed | `data-scroll-speed="2"` |
-| `data-scroll-sticky` | Sticky positioning | `data-scroll-sticky` |
-| `data-scroll-call` | Event trigger | `data-scroll-call="fadeIn"` |
-| `data-scroll-id` | Unique identifier | `data-scroll-id="hero"` |
+| Attribute            | Purpose            | Example                     |
+| -------------------- | ------------------ | --------------------------- |
+| `data-scroll`        | Enable detection   | `data-scroll`               |
+| `data-scroll-speed`  | Parallax speed     | `data-scroll-speed="2"`     |
+| `data-scroll-sticky` | Sticky positioning | `data-scroll-sticky`        |
+| `data-scroll-call`   | Event trigger      | `data-scroll-call="fadeIn"` |
+| `data-scroll-id`     | Unique identifier  | `data-scroll-id="hero"`     |
 
 ### Initialization Options
 
@@ -87,21 +82,21 @@ The template uses these configuration options:
 
 ```javascript
 const scroll = new LocomotiveScroll({
-  el: document.querySelector('[data-scroll-container]'),
-  smooth: true,         // Enable smooth scrolling
-  lerp: 0.1,            // Smoothness (0-1, lower = smoother)
-  multiplier: 1,        // Speed multiplier
-  class: 'is-inview',   // Class added to visible elements
-  repeat: true,         // Repeat in-view detection
-  offset: ['10%', 0],   // Global offset [bottom, top]
-  getSpeed: true,       // Track scroll speed
-  getDirection: true,   // Track scroll direction
+  el: document.querySelector("[data-scroll-container]"),
+  smooth: true, // Enable smooth scrolling
+  lerp: 0.1, // Smoothness (0-1, lower = smoother)
+  multiplier: 1, // Speed multiplier
+  class: "is-inview", // Class added to visible elements
+  repeat: true, // Repeat in-view detection
+  offset: ["10%", 0], // Global offset [bottom, top]
+  getSpeed: true, // Track scroll speed
+  getDirection: true, // Track scroll direction
 
   // Mobile settings
   smartphone: {
     smooth: true,
-    breakpoint: 768
-  }
+    breakpoint: 768,
+  },
 });
 ```
 
@@ -111,42 +106,32 @@ const scroll = new LocomotiveScroll({
 
 ```html
 <!-- Slow parallax (background) -->
-<div data-scroll data-scroll-speed="0.5">
-  Background Layer
-</div>
+<div data-scroll data-scroll-speed="0.5">Background Layer</div>
 
 <!-- Fast parallax (foreground) -->
-<div data-scroll data-scroll-speed="3">
-  Foreground Layer
-</div>
+<div data-scroll data-scroll-speed="3">Foreground Layer</div>
 
 <!-- Reverse parallax -->
-<div data-scroll data-scroll-speed="-2">
-  Reverse Layer
-</div>
+<div data-scroll data-scroll-speed="-2">Reverse Layer</div>
 ```
 
 ### 2. Sticky Element
 
 ```html
 <div data-scroll-section>
-  <div data-scroll data-scroll-sticky>
-    I stick while section is in view
-  </div>
+  <div data-scroll data-scroll-sticky>I stick while section is in view</div>
 </div>
 ```
 
 ### 3. Scroll Call Events
 
 ```html
-<div data-scroll data-scroll-call="fadeIn">
-  Triggers callback when visible
-</div>
+<div data-scroll data-scroll-call="fadeIn">Triggers callback when visible</div>
 ```
 
 ```javascript
-scroll.on('call', (func, way) => {
-  if (func === 'fadeIn' && way === 'enter') {
+scroll.on("call", (func, way) => {
+  if (func === "fadeIn" && way === "enter") {
     // Element entered viewport
   }
 });
@@ -155,15 +140,13 @@ scroll.on('call', (func, way) => {
 ### 4. Progress Tracking
 
 ```html
-<h1 data-scroll data-scroll-id="hero-title">
-  Hero Title
-</h1>
+<h1 data-scroll data-scroll-id="hero-title">Hero Title</h1>
 ```
 
 ```javascript
-scroll.on('scroll', (args) => {
-  if (args.currentElements['hero-title']) {
-    const progress = args.currentElements['hero-title'].progress;
+scroll.on("scroll", (args) => {
+  if (args.currentElements["hero-title"]) {
+    const progress = args.currentElements["hero-title"].progress;
     // progress ranges from 0 to 1
   }
 });
@@ -173,16 +156,16 @@ scroll.on('scroll', (args) => {
 
 ```javascript
 // Scroll to top
-scroll.scrollTo('top');
+scroll.scrollTo("top");
 
 // Scroll to element
-scroll.scrollTo('#section');
+scroll.scrollTo("#section");
 
 // Scroll with options
-scroll.scrollTo('#section', {
+scroll.scrollTo("#section", {
   offset: -100,
   duration: 1000,
-  callback: () => console.log('Done!')
+  callback: () => console.log("Done!"),
 });
 ```
 
@@ -205,7 +188,7 @@ Segment long pages into sections for better performance:
 The template includes resize handling:
 
 ```javascript
-window.addEventListener('resize', () => {
+window.addEventListener("resize", () => {
   clearTimeout(resizeTimer);
   resizeTimer = setTimeout(() => scroll.update(), 250);
 });
@@ -216,7 +199,7 @@ window.addEventListener('resize', () => {
 Always destroy the scroll instance:
 
 ```javascript
-window.addEventListener('beforeunload', () => {
+window.addEventListener("beforeunload", () => {
   scroll.destroy();
 });
 ```
@@ -237,6 +220,7 @@ tablet: {
 ```
 
 For best mobile performance, consider:
+
 - Disabling smooth scroll on smartphones: `smooth: false`
 - Reducing parallax speeds
 - Limiting number of tracked elements
@@ -244,12 +228,14 @@ For best mobile performance, consider:
 ## Accessibility
 
 The template includes:
+
 - Semantic HTML structure
 - Proper heading hierarchy
 - Color contrast compliance
 - Keyboard navigation support
 
 Consider adding:
+
 - `prefers-reduced-motion` detection
 - Skip to content link
 - ARIA labels where appropriate
@@ -290,10 +276,10 @@ scroll.update();
 Provide option to disable smooth scroll:
 
 ```javascript
-const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 const scroll = new LocomotiveScroll({
-  smooth: !prefersReducedMotion
+  smooth: !prefersReducedMotion,
 });
 ```
 

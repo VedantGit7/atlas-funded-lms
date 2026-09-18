@@ -10,6 +10,7 @@ description: Comprehensive skill for Adobe Substance 3D Painter texturing and ma
 Master PBR (Physically Based Rendering) texture creation and export workflows for web and real-time engines. This skill covers Substance 3D Painter workflows from material creation through web-optimized texture export, with Python automation for batch processing and integration with WebGL/WebGPU engines.
 
 **Key capabilities:**
+
 - PBR material authoring (metallic/roughness workflow)
 - Web-optimized texture export (glTF, Three.js, Babylon.js)
 - Python API automation for batch export
@@ -22,12 +23,14 @@ Master PBR (Physically Based Rendering) texture creation and export workflows fo
 Substance 3D Painter uses the **metallic/roughness** PBR workflow with these core channels:
 
 **Base Texture Maps:**
+
 - `baseColor` (Albedo) - RGB diffuse color, no lighting information
 - `normal` - RGB normal map (tangent space)
 - `metallic` - Grayscale metalness (0 = dielectric, 1 = metal)
 - `roughness` - Grayscale surface roughness (0 = smooth/glossy, 1 = rough/matte)
 
 **Additional Maps:**
+
 - `ambientOcclusion` (AO) - Grayscale cavity/occlusion
 - `height` - Grayscale displacement/height
 - `emissive` - RGB self-illumination
@@ -36,6 +39,7 @@ Substance 3D Painter uses the **metallic/roughness** PBR workflow with these cor
 ### Export Presets
 
 Substance 3D Painter includes built-in export presets for common engines:
+
 - **PBR Metallic Roughness** - Standard glTF/WebGL format
 - **Unity HDRP/URP** - Unity pipelines
 - **Unreal Engine** - UE4/UE5 format
@@ -46,6 +50,7 @@ For web engines, **PBR Metallic Roughness** is the universal standard.
 ### Texture Resolution
 
 Common resolutions for web (powers of 2):
+
 - 512×512 - Low detail props, mobile
 - 1024×1024 - Standard props, characters
 - 2048×2048 - Hero assets, close-ups
@@ -60,6 +65,7 @@ Common resolutions for web (powers of 2):
 Manual export workflow for single texture set:
 
 **Steps:**
+
 1. **File → Export Textures**
 2. **Select preset:** "PBR Metallic Roughness"
 3. **Configure export:**
@@ -70,6 +76,7 @@ Manual export workflow for single texture set:
 4. **Export**
 
 **Result files:**
+
 ```
 MyAsset_baseColor.png
 MyAsset_normal.png
@@ -78,17 +85,18 @@ MyAsset_emissive.png           // Optional
 ```
 
 **Three.js usage:**
+
 ```javascript
-import * as THREE from 'three';
+import * as THREE from "three";
 
 const textureLoader = new THREE.TextureLoader();
 
 const material = new THREE.MeshStandardMaterial({
-  map: textureLoader.load('MyAsset_baseColor.png'),
-  normalMap: textureLoader.load('MyAsset_normal.png'),
-  metalnessMap: textureLoader.load('MyAsset_metallicRoughness.png'),
-  roughnessMap: textureLoader.load('MyAsset_metallicRoughness.png'),
-  aoMap: textureLoader.load('MyAsset_ambientOcclusion.png'),
+  map: textureLoader.load("MyAsset_baseColor.png"),
+  normalMap: textureLoader.load("MyAsset_normal.png"),
+  metalnessMap: textureLoader.load("MyAsset_metallicRoughness.png"),
+  roughnessMap: textureLoader.load("MyAsset_metallicRoughness.png"),
+  aoMap: textureLoader.load("MyAsset_ambientOcclusion.png"),
 });
 ```
 
@@ -318,14 +326,14 @@ substance_painter.event.DISPATCHER.connect(
 Use exported textures in R3F:
 
 ```jsx
-import { useTexture } from '@react-three/drei';
+import { useTexture } from "@react-three/drei";
 
 function TexturedMesh() {
   const [baseColor, normal, metallicRoughness, ao] = useTexture([
-    '/textures/Asset_baseColor.png',
-    '/textures/Asset_normal.png',
-    '/textures/Asset_metallicRoughness.png',
-    '/textures/Asset_ambientOcclusion.png',
+    "/textures/Asset_baseColor.png",
+    "/textures/Asset_normal.png",
+    "/textures/Asset_metallicRoughness.png",
+    "/textures/Asset_ambientOcclusion.png",
   ]);
 
   return (
@@ -348,7 +356,7 @@ See **react-three-fiber** skill for advanced R3F material workflows.
 ### Babylon.js PBR Materials
 
 ```javascript
-import { PBRMaterial, Texture } from '@babylonjs/core';
+import { PBRMaterial, Texture } from "@babylonjs/core";
 
 const pbr = new PBRMaterial("pbr", scene);
 pbr.albedoTexture = new Texture("/textures/Asset_baseColor.png", scene);
@@ -382,6 +390,7 @@ See **blender-web-pipeline** skill for complete 3D asset pipeline.
 **Mobile WebGL:** ~30-50MB total texture memory
 
 **Budget per asset:**
+
 - Background/props: 512×512 (1MB per texture × 4 maps = 4MB)
 - Standard assets: 1024×1024 (4MB per texture × 4 maps = 16MB)
 - Hero assets: 2048×2048 (16MB per texture × 4 maps = 64MB)
@@ -398,11 +407,13 @@ See **blender-web-pipeline** skill for complete 3D asset pipeline.
 Pack grayscale maps into RGB channels to reduce texture count:
 
 **Packed ORM (Occlusion-Roughness-Metallic):**
+
 - Red: Ambient Occlusion
 - Green: Roughness
 - Blue: Metallic
 
 Export in Substance:
+
 ```python
 orm_map = {
     "fileName": "$textureSet_ORM",
@@ -446,6 +457,7 @@ baseColorTexture.colorSpace = THREE.SRGBColorSpace;
 **Problem:** Normal maps show inverted or incorrect shading.
 
 **Solution:**
+
 - Verify tangent space normal format (DirectX vs. OpenGL Y-flip)
 - Substance uses OpenGL (Y+), same as glTF standard
 - If using DirectX engine, flip green channel in export
@@ -455,6 +467,7 @@ baseColorTexture.colorSpace = THREE.SRGBColorSpace;
 **Problem:** Metallic/roughness texture has swapped channels.
 
 **Solution:** Default Substance export:
+
 - Blue channel = Metallic
 - Green channel = Roughness
 - Matches glTF 2.0 specification
@@ -464,6 +477,7 @@ baseColorTexture.colorSpace = THREE.SRGBColorSpace;
 **Problem:** Black or colored lines appear at UV seams.
 
 **Solution:** Set padding algorithm to **"infinite"** in export settings:
+
 ```python
 "paddingAlgorithm": "infinite"
 ```
@@ -473,6 +487,7 @@ baseColorTexture.colorSpace = THREE.SRGBColorSpace;
 **Problem:** 4K textures cause long load times and memory issues on web.
 
 **Solution:**
+
 - Default to 1024×1024 for web
 - Use 2048×2048 only for hero assets viewed close-up
 - Implement LOD system with multiple resolution sets
@@ -482,6 +497,7 @@ baseColorTexture.colorSpace = THREE.SRGBColorSpace;
 **Problem:** AO map exported but not visible in engine.
 
 **Solution:**
+
 - Three.js: Requires second UV channel (`geometry.attributes.uv2`)
 - Babylon.js: Set `material.useAmbientOcclusionFromMetallicTextureRed = true`
 - Alternative: Bake AO into baseColor in Substance

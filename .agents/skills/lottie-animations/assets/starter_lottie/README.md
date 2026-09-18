@@ -52,14 +52,9 @@ starter_lottie/
 ### Basic Animation
 
 ```jsx
-import { DotLottieReact } from '@lottiefiles/dotlottie-react';
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 
-<DotLottieReact
-  src="/animations/example.lottie"
-  loop
-  autoplay
-  style={{ height: 400 }}
-/>
+<DotLottieReact src="/animations/example.lottie" loop autoplay style={{ height: 400 }} />;
 ```
 
 ### Interactive Animation
@@ -82,6 +77,7 @@ const [dotLottie, setDotLottie] = useState(null);
 ### vite.config.js
 
 Optimized for production builds with:
+
 - Code splitting
 - Asset optimization
 - Gzip compression support
@@ -89,6 +85,7 @@ Optimized for production builds with:
 ### package.json
 
 Includes essential dependencies:
+
 - `@lottiefiles/dotlottie-react`
 - `react` and `react-dom`
 - Development tools
@@ -102,6 +99,7 @@ npm run build
 ```
 
 Output in `dist/` folder ready for deployment to:
+
 - Vercel
 - Netlify
 - AWS S3 + CloudFront

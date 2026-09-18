@@ -10,6 +10,7 @@ description: Build declarative 3D scenes with React Three Fiber (R3F) - a React 
 React Three Fiber (R3F) is a React renderer for Three.js that brings declarative, component-based 3D development to React applications. Instead of imperatively creating and managing Three.js objects, you build 3D scenes using JSX components that map directly to Three.js objects.
 
 **When to Use This Skill**:
+
 - Building 3D experiences within React applications
 - Creating interactive product configurators or showcases
 - Developing 3D portfolios, galleries, or storytelling experiences
@@ -19,6 +20,7 @@ React Three Fiber (R3F) is a React renderer for Three.js that brings declarative
 - When working with React frameworks (Next.js, Gatsby, Remix)
 
 **Key Benefits**:
+
 - **Declarative**: Write 3D scenes like React components
 - **React Integration**: Full access to hooks, context, state management
 - **Reusability**: Create and share 3D component libraries
@@ -35,22 +37,19 @@ React Three Fiber (R3F) is a React renderer for Three.js that brings declarative
 The `<Canvas>` component sets up a Three.js scene, camera, renderer, and render loop.
 
 ```jsx
-import { Canvas } from '@react-three/fiber'
+import { Canvas } from "@react-three/fiber";
 
 function App() {
   return (
-    <Canvas
-      camera={{ position: [0, 0, 5], fov: 75 }}
-      gl={{ antialias: true }}
-      dpr={[1, 2]}
-    >
+    <Canvas camera={{ position: [0, 0, 5], fov: 75 }} gl={{ antialias: true }} dpr={[1, 2]}>
       {/* 3D content goes here */}
     </Canvas>
-  )
+  );
 }
 ```
 
 **Canvas Props**:
+
 - `camera` - Camera configuration (position, fov, near, far)
 - `gl` - WebGL renderer settings
 - `dpr` - Device pixel ratio (default: [1, 2])
@@ -72,6 +71,7 @@ Three.js objects are created using JSX with kebab-case props:
 ```
 
 **Prop Mapping**:
+
 - `position` → `object.position.set(x, y, z)`
 - `rotation` → `object.rotation.set(x, y, z)`
 - `scale` → `object.scale.set(x, y, z)`
@@ -79,6 +79,7 @@ Three.js objects are created using JSX with kebab-case props:
 - `attach` → Attach to parent property (e.g., `attach="material"`)
 
 **Shorthand Notation**:
+
 ```jsx
 // Full notation
 <mesh position={[1, 2, 3]} />
@@ -92,32 +93,33 @@ Three.js objects are created using JSX with kebab-case props:
 Execute code on every frame (animation loop):
 
 ```jsx
-import { useFrame } from '@react-three/fiber'
-import { useRef } from 'react'
+import { useFrame } from "@react-three/fiber";
+import { useRef } from "react";
 
 function RotatingBox() {
-  const meshRef = useRef()
+  const meshRef = useRef();
 
   useFrame((state, delta) => {
     // Rotate mesh on every frame
-    meshRef.current.rotation.x += delta
-    meshRef.current.rotation.y += delta * 0.5
+    meshRef.current.rotation.x += delta;
+    meshRef.current.rotation.y += delta * 0.5;
 
     // Access scene state
-    const time = state.clock.elapsedTime
-    meshRef.current.position.y = Math.sin(time) * 2
-  })
+    const time = state.clock.elapsedTime;
+    meshRef.current.position.y = Math.sin(time) * 2;
+  });
 
   return (
     <mesh ref={meshRef}>
       <boxGeometry />
       <meshStandardMaterial color="orange" />
     </mesh>
-  )
+  );
 }
 ```
 
 **useFrame Parameters**:
+
 - `state` - Scene state (camera, scene, gl, clock, etc.)
 - `delta` - Time since last frame (for frame-rate independence)
 - `xrFrame` - XR frame data (for VR/AR)
@@ -129,23 +131,24 @@ function RotatingBox() {
 Access scene state and methods:
 
 ```jsx
-import { useThree } from '@react-three/fiber'
+import { useThree } from "@react-three/fiber";
 
 function CameraInfo() {
-  const { camera, gl, scene, size, viewport } = useThree()
+  const { camera, gl, scene, size, viewport } = useThree();
 
   // Selective subscription (only re-render on size change)
-  const size = useThree((state) => state.size)
+  const size = useThree((state) => state.size);
 
   // Get state non-reactively
-  const get = useThree((state) => state.get)
-  const freshState = get() // Latest state without triggering re-render
+  const get = useThree((state) => state.get);
+  const freshState = get(); // Latest state without triggering re-render
 
-  return null
+  return null;
 }
 ```
 
 **Available State**:
+
 - `camera` - Default camera
 - `scene` - Three.js scene
 - `gl` - WebGL renderer
@@ -161,24 +164,24 @@ function CameraInfo() {
 Load assets with automatic caching and Suspense integration:
 
 ```jsx
-import { Suspense } from 'react'
-import { useLoader } from '@react-three/fiber'
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
-import { TextureLoader } from 'three'
+import { Suspense } from "react";
+import { useLoader } from "@react-three/fiber";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+import { TextureLoader } from "three";
 
 function Model() {
-  const gltf = useLoader(GLTFLoader, '/model.glb')
-  return <primitive object={gltf.scene} />
+  const gltf = useLoader(GLTFLoader, "/model.glb");
+  return <primitive object={gltf.scene} />;
 }
 
 function TexturedMesh() {
-  const texture = useLoader(TextureLoader, '/texture.jpg')
+  const texture = useLoader(TextureLoader, "/texture.jpg");
   return (
     <mesh>
       <boxGeometry />
       <meshStandardMaterial map={texture} />
     </mesh>
-  )
+  );
 }
 
 function App() {
@@ -189,34 +192,37 @@ function App() {
         <TexturedMesh />
       </Suspense>
     </Canvas>
-  )
+  );
 }
 ```
 
 **Loading Multiple Assets**:
+
 ```jsx
 const [texture1, texture2, texture3] = useLoader(TextureLoader, [
-  '/tex1.jpg',
-  '/tex2.jpg',
-  '/tex3.jpg'
-])
+  "/tex1.jpg",
+  "/tex2.jpg",
+  "/tex3.jpg",
+]);
 ```
 
 **Loader Extensions**:
-```jsx
-import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader'
 
-useLoader(GLTFLoader, '/model.glb', (loader) => {
-  const dracoLoader = new DRACOLoader()
-  dracoLoader.setDecoderPath('/draco/')
-  loader.setDRACOLoader(dracoLoader)
-})
+```jsx
+import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader";
+
+useLoader(GLTFLoader, "/model.glb", (loader) => {
+  const dracoLoader = new DRACOLoader();
+  dracoLoader.setDecoderPath("/draco/");
+  loader.setDRACOLoader(dracoLoader);
+});
 ```
 
 **Pre-loading**:
+
 ```jsx
 // Pre-load assets before component mounts
-useLoader.preload(GLTFLoader, '/model.glb')
+useLoader.preload(GLTFLoader, "/model.glb");
 ```
 
 ---
@@ -226,7 +232,7 @@ useLoader.preload(GLTFLoader, '/model.glb')
 ### Pattern 1: Basic Scene Setup
 
 ```jsx
-import { Canvas } from '@react-three/fiber'
+import { Canvas } from "@react-three/fiber";
 
 function Scene() {
   return (
@@ -241,7 +247,7 @@ function Scene() {
         <meshStandardMaterial color="hotpink" />
       </mesh>
     </>
-  )
+  );
 }
 
 function App() {
@@ -249,18 +255,18 @@ function App() {
     <Canvas camera={{ position: [0, 0, 5], fov: 75 }}>
       <Scene />
     </Canvas>
-  )
+  );
 }
 ```
 
 ### Pattern 2: Interactive Objects (Click, Hover)
 
 ```jsx
-import { useState } from 'react'
+import { useState } from "react";
 
 function InteractiveBox() {
-  const [hovered, setHovered] = useState(false)
-  const [active, setActive] = useState(false)
+  const [hovered, setHovered] = useState(false);
+  const [active, setActive] = useState(false);
 
   return (
     <mesh
@@ -270,56 +276,50 @@ function InteractiveBox() {
       onPointerOut={() => setHovered(false)}
     >
       <boxGeometry />
-      <meshStandardMaterial color={hovered ? 'hotpink' : 'orange'} />
+      <meshStandardMaterial color={hovered ? "hotpink" : "orange"} />
     </mesh>
-  )
+  );
 }
 ```
 
 ### Pattern 3: Animated Component with useFrame
 
 ```jsx
-import { useRef } from 'react'
-import { useFrame } from '@react-three/fiber'
+import { useRef } from "react";
+import { useFrame } from "@react-three/fiber";
 
 function AnimatedSphere() {
-  const meshRef = useRef()
+  const meshRef = useRef();
 
   useFrame((state, delta) => {
     // Rotate
-    meshRef.current.rotation.y += delta
+    meshRef.current.rotation.y += delta;
 
     // Oscillate position
-    const time = state.clock.elapsedTime
-    meshRef.current.position.y = Math.sin(time) * 2
-  })
+    const time = state.clock.elapsedTime;
+    meshRef.current.position.y = Math.sin(time) * 2;
+  });
 
   return (
     <mesh ref={meshRef}>
       <sphereGeometry args={[1, 32, 32]} />
       <meshStandardMaterial color="cyan" />
     </mesh>
-  )
+  );
 }
 ```
 
 ### Pattern 4: Loading GLTF Models
 
 ```jsx
-import { Suspense } from 'react'
-import { useLoader } from '@react-three/fiber'
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
+import { Suspense } from "react";
+import { useLoader } from "@react-three/fiber";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 
 function Model({ url }) {
-  const gltf = useLoader(GLTFLoader, url)
+  const gltf = useLoader(GLTFLoader, url);
 
-  return (
-    <primitive
-      object={gltf.scene}
-      scale={0.5}
-      position={[0, 0, 0]}
-    />
-  )
+  return <primitive object={gltf.scene} scale={0.5} position={[0, 0, 0]} />;
 }
 
 function App() {
@@ -329,7 +329,7 @@ function App() {
         <Model url="/model.glb" />
       </Suspense>
     </Canvas>
-  )
+  );
 }
 
 function LoadingPlaceholder() {
@@ -338,7 +338,7 @@ function LoadingPlaceholder() {
       <boxGeometry />
       <meshBasicMaterial wireframe />
     </mesh>
-  )
+  );
 }
 ```
 
@@ -364,70 +364,65 @@ function Lighting() {
       <pointLight position={[-5, 5, -5]} intensity={0.5} color="blue" />
 
       {/* Spot light for focused illumination */}
-      <spotLight
-        position={[10, 10, 10]}
-        angle={0.3}
-        penumbra={1}
-        intensity={1}
-      />
+      <spotLight position={[10, 10, 10]} angle={0.3} penumbra={1} intensity={1} />
     </>
-  )
+  );
 }
 ```
 
 ### Pattern 6: Instancing (Many Objects)
 
 ```jsx
-import { useMemo, useRef } from 'react'
-import * as THREE from 'three'
-import { useFrame } from '@react-three/fiber'
+import { useMemo, useRef } from "react";
+import * as THREE from "three";
+import { useFrame } from "@react-three/fiber";
 
 function Particles({ count = 1000 }) {
-  const meshRef = useRef()
+  const meshRef = useRef();
 
   // Generate random positions
   const particles = useMemo(() => {
-    const temp = []
+    const temp = [];
     for (let i = 0; i < count; i++) {
-      const t = Math.random() * 100
-      const factor = 20 + Math.random() * 100
-      const speed = 0.01 + Math.random() / 200
-      const x = Math.random() * 2 - 1
-      const y = Math.random() * 2 - 1
-      const z = Math.random() * 2 - 1
-      temp.push({ t, factor, speed, x, y, z, mx: 0, my: 0 })
+      const t = Math.random() * 100;
+      const factor = 20 + Math.random() * 100;
+      const speed = 0.01 + Math.random() / 200;
+      const x = Math.random() * 2 - 1;
+      const y = Math.random() * 2 - 1;
+      const z = Math.random() * 2 - 1;
+      temp.push({ t, factor, speed, x, y, z, mx: 0, my: 0 });
     }
-    return temp
-  }, [count])
+    return temp;
+  }, [count]);
 
-  const dummy = useMemo(() => new THREE.Object3D(), [])
+  const dummy = useMemo(() => new THREE.Object3D(), []);
 
   useFrame(() => {
     particles.forEach((particle, i) => {
-      let { t, factor, speed, x, y, z } = particle
-      t = particle.t += speed / 2
-      const a = Math.cos(t) + Math.sin(t * 1) / 10
-      const b = Math.sin(t) + Math.cos(t * 2) / 10
-      const s = Math.cos(t)
+      let { t, factor, speed, x, y, z } = particle;
+      t = particle.t += speed / 2;
+      const a = Math.cos(t) + Math.sin(t * 1) / 10;
+      const b = Math.sin(t) + Math.cos(t * 2) / 10;
+      const s = Math.cos(t);
 
       dummy.position.set(
         x + Math.cos((t / 10) * factor) + (Math.sin(t * 1) * factor) / 10,
         y + Math.sin((t / 10) * factor) + (Math.cos(t * 2) * factor) / 10,
-        z + Math.cos((t / 10) * factor) + (Math.sin(t * 3) * factor) / 10
-      )
-      dummy.scale.set(s, s, s)
-      dummy.updateMatrix()
-      meshRef.current.setMatrixAt(i, dummy.matrix)
-    })
-    meshRef.current.instanceMatrix.needsUpdate = true
-  })
+        z + Math.cos((t / 10) * factor) + (Math.sin(t * 3) * factor) / 10,
+      );
+      dummy.scale.set(s, s, s);
+      dummy.updateMatrix();
+      meshRef.current.setMatrixAt(i, dummy.matrix);
+    });
+    meshRef.current.instanceMatrix.needsUpdate = true;
+  });
 
   return (
     <instancedMesh ref={meshRef} args={[null, null, count]}>
       <sphereGeometry args={[0.05, 8, 8]} />
       <meshBasicMaterial color="white" />
     </instancedMesh>
-  )
+  );
 }
 ```
 
@@ -464,7 +459,7 @@ function Robot() {
         </mesh>
       </group>
     </group>
-  )
+  );
 }
 ```
 
@@ -477,24 +472,18 @@ function Robot() {
 ### OrbitControls
 
 ```jsx
-import { OrbitControls } from '@react-three/drei'
+import { OrbitControls } from "@react-three/drei";
 
 <Canvas>
-  <OrbitControls
-    makeDefault
-    enableDamping
-    dampingFactor={0.05}
-    minDistance={3}
-    maxDistance={20}
-  />
+  <OrbitControls makeDefault enableDamping dampingFactor={0.05} minDistance={3} maxDistance={20} />
   <Box />
-</Canvas>
+</Canvas>;
 ```
 
 ### Environment & Lighting
 
 ```jsx
-import { Environment, ContactShadows } from '@react-three/drei'
+import { Environment, ContactShadows } from "@react-three/drei";
 
 <Canvas>
   {/* HDRI environment map */}
@@ -504,16 +493,10 @@ import { Environment, ContactShadows } from '@react-three/drei'
   <Environment files="/hdri.hdr" />
 
   {/* Soft contact shadows */}
-  <ContactShadows
-    opacity={0.5}
-    scale={10}
-    blur={1}
-    far={10}
-    resolution={256}
-  />
+  <ContactShadows opacity={0.5} scale={10} blur={1} far={10} resolution={256} />
 
   <Model />
-</Canvas>
+</Canvas>;
 ```
 
 ### Text
@@ -546,16 +529,16 @@ import { Text, Text3D } from '@react-three/drei'
 ### useGLTF Hook (Drei)
 
 ```jsx
-import { useGLTF } from '@react-three/drei'
+import { useGLTF } from "@react-three/drei";
 
 function Model() {
-  const { scene, materials, nodes } = useGLTF('/model.glb')
+  const { scene, materials, nodes } = useGLTF("/model.glb");
 
-  return <primitive object={scene} />
+  return <primitive object={scene} />;
 }
 
 // Pre-load
-useGLTF.preload('/model.glb')
+useGLTF.preload("/model.glb");
 ```
 
 ### Center & Bounds
@@ -577,40 +560,34 @@ import { Center, Bounds, useBounds } from '@react-three/drei'
 ### HTML Overlay
 
 ```jsx
-import { Html } from '@react-three/drei'
+import { Html } from "@react-three/drei";
 
 <mesh>
   <boxGeometry />
   <meshStandardMaterial />
 
-  <Html
-    position={[0, 1, 0]}
-    center
-    distanceFactor={10}
-  >
-    <div className="annotation">
-      This is a box
-    </div>
+  <Html position={[0, 1, 0]} center distanceFactor={10}>
+    <div className="annotation">This is a box</div>
   </Html>
-</mesh>
+</mesh>;
 ```
 
 ### Scroll Controls
 
 ```jsx
-import { ScrollControls, Scroll, useScroll } from '@react-three/drei'
-import { useFrame } from '@react-three/fiber'
+import { ScrollControls, Scroll, useScroll } from "@react-three/drei";
+import { useFrame } from "@react-three/fiber";
 
 function AnimatedScene() {
-  const scroll = useScroll()
-  const meshRef = useRef()
+  const scroll = useScroll();
+  const meshRef = useRef();
 
   useFrame(() => {
-    const offset = scroll.offset // 0-1 normalized scroll position
-    meshRef.current.position.y = offset * 10
-  })
+    const offset = scroll.offset; // 0-1 normalized scroll position
+    meshRef.current.position.y = offset * 10;
+  });
 
-  return <mesh ref={meshRef}>...</mesh>
+  return <mesh ref={meshRef}>...</mesh>;
 }
 
 <Canvas>
@@ -621,12 +598,12 @@ function AnimatedScene() {
 
     {/* HTML overlay */}
     <Scroll html>
-      <div style={{ height: '100vh' }}>
+      <div style={{ height: "100vh" }}>
         <h1>Scrollable content</h1>
       </div>
     </Scroll>
   </ScrollControls>
-</Canvas>
+</Canvas>;
 ```
 
 ---
@@ -636,79 +613,78 @@ function AnimatedScene() {
 ### With GSAP
 
 ```jsx
-import { useRef, useEffect } from 'react'
-import { useFrame } from '@react-three/fiber'
-import gsap from 'gsap'
+import { useRef, useEffect } from "react";
+import { useFrame } from "@react-three/fiber";
+import gsap from "gsap";
 
 function AnimatedBox() {
-  const meshRef = useRef()
+  const meshRef = useRef();
 
   useEffect(() => {
     // GSAP timeline animation
-    const tl = gsap.timeline({ repeat: -1, yoyo: true })
+    const tl = gsap.timeline({ repeat: -1, yoyo: true });
 
     tl.to(meshRef.current.position, {
       y: 2,
       duration: 1,
-      ease: 'power2.inOut'
-    })
-    .to(meshRef.current.rotation, {
-      y: Math.PI * 2,
-      duration: 2,
-      ease: 'none'
-    }, 0)
+      ease: "power2.inOut",
+    }).to(
+      meshRef.current.rotation,
+      {
+        y: Math.PI * 2,
+        duration: 2,
+        ease: "none",
+      },
+      0,
+    );
 
-    return () => tl.kill()
-  }, [])
+    return () => tl.kill();
+  }, []);
 
   return (
     <mesh ref={meshRef}>
       <boxGeometry />
       <meshStandardMaterial color="orange" />
     </mesh>
-  )
+  );
 }
 ```
 
 ### With Framer Motion
 
 ```jsx
-import { motion } from 'framer-motion-3d'
+import { motion } from "framer-motion-3d";
 
 function AnimatedSphere() {
   return (
-    <motion.mesh
-      initial={{ scale: 0 }}
-      animate={{ scale: 1 }}
-      transition={{ duration: 1 }}
-    >
+    <motion.mesh initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ duration: 1 }}>
       <sphereGeometry />
       <meshStandardMaterial color="hotpink" />
     </motion.mesh>
-  )
+  );
 }
 ```
 
 ### With Zustand (State Management)
 
 ```jsx
-import create from 'zustand'
+import create from "zustand";
 
 const useStore = create((set) => ({
-  color: 'orange',
-  setColor: (color) => set({ color })
-}))
+  color: "orange",
+  setColor: (color) => set({ color }),
+}));
 
 function Box() {
-  const color = useStore((state) => state.color)
-  const setColor = useStore((state) => state.setColor)
+  const color = useStore((state) => state.color);
+  const setColor = useStore((state) => state.setColor);
 
   return (
-    <mesh onClick={() => setColor('hotpink')}>
+    <mesh onClick={() => setColor("hotpink")}>
       <boxGeometry />
       <meshStandardMaterial color={color} />
     </mesh>
-  )
+  );
 }
 ```
 
@@ -719,20 +695,18 @@ function Box() {
 ### 1. On-Demand Rendering
 
 ```jsx
-<Canvas frameloop="demand">
-  {/* Only renders when needed */}
-</Canvas>
+<Canvas frameloop="demand">{/* Only renders when needed */}</Canvas>;
 
 // Manually trigger render
 function MyComponent() {
-  const invalidate = useThree((state) => state.invalidate)
+  const invalidate = useThree((state) => state.invalidate);
 
   return (
     <mesh onClick={() => invalidate()}>
       <boxGeometry />
       <meshStandardMaterial />
     </mesh>
-  )
+  );
 }
 ```
 
@@ -742,30 +716,26 @@ Use `<instancedMesh>` for rendering many identical objects:
 
 ```jsx
 function Particles({ count = 10000 }) {
-  const meshRef = useRef()
+  const meshRef = useRef();
 
   useEffect(() => {
-    const temp = new THREE.Object3D()
+    const temp = new THREE.Object3D();
 
     for (let i = 0; i < count; i++) {
-      temp.position.set(
-        Math.random() * 10 - 5,
-        Math.random() * 10 - 5,
-        Math.random() * 10 - 5
-      )
-      temp.updateMatrix()
-      meshRef.current.setMatrixAt(i, temp.matrix)
+      temp.position.set(Math.random() * 10 - 5, Math.random() * 10 - 5, Math.random() * 10 - 5);
+      temp.updateMatrix();
+      meshRef.current.setMatrixAt(i, temp.matrix);
     }
 
-    meshRef.current.instanceMatrix.needsUpdate = true
-  }, [count])
+    meshRef.current.instanceMatrix.needsUpdate = true;
+  }, [count]);
 
   return (
     <instancedMesh ref={meshRef} args={[null, null, count]}>
       <sphereGeometry args={[0.1, 8, 8]} />
       <meshBasicMaterial color="white" />
     </instancedMesh>
-  )
+  );
 }
 ```
 
@@ -784,7 +754,7 @@ Objects outside the camera view are automatically culled.
 ### 4. LOD (Level of Detail)
 
 ```jsx
-import { Detailed } from '@react-three/drei'
+import { Detailed } from "@react-three/drei";
 
 <Detailed distances={[0, 10, 20]}>
   {/* High detail - close to camera */}
@@ -795,13 +765,13 @@ import { Detailed } from '@react-three/drei'
 
   {/* Low detail - far from camera */}
   <mesh geometry={lowPolyGeometry} />
-</Detailed>
+</Detailed>;
 ```
 
 ### 5. Adaptive Performance
 
 ```jsx
-import { AdaptiveDpr, AdaptiveEvents, PerformanceMonitor } from '@react-three/drei'
+import { AdaptiveDpr, AdaptiveEvents, PerformanceMonitor } from "@react-three/drei";
 
 <Canvas>
   {/* Reduce DPR when performance drops */}
@@ -812,12 +782,12 @@ import { AdaptiveDpr, AdaptiveEvents, PerformanceMonitor } from '@react-three/dr
 
   {/* Monitor and respond to performance */}
   <PerformanceMonitor
-    onIncline={() => console.log('Performance improved')}
-    onDecline={() => console.log('Performance degraded')}
+    onIncline={() => console.log("Performance improved")}
+    onDecline={() => console.log("Performance degraded")}
   >
     <Scene />
   </PerformanceMonitor>
-</Canvas>
+</Canvas>;
 ```
 
 ### 6. Selective Re-renders
@@ -826,13 +796,13 @@ Use `useThree` selectors to avoid unnecessary re-renders:
 
 ```jsx
 // ❌ Re-renders on any state change
-const state = useThree()
+const state = useThree();
 
 // ✅ Only re-renders when size changes
-const size = useThree((state) => state.size)
+const size = useThree((state) => state.size);
 
 // ✅ Only re-renders when camera changes
-const camera = useThree((state) => state.camera)
+const camera = useThree((state) => state.camera);
 ```
 
 ---
@@ -843,20 +813,20 @@ const camera = useThree((state) => state.camera)
 
 ```jsx
 // ❌ BAD: Triggers React re-renders every frame
-const [x, setX] = useState(0)
-useFrame(() => setX((x) => x + 0.1))
-return <mesh position-x={x} />
+const [x, setX] = useState(0);
+useFrame(() => setX((x) => x + 0.1));
+return <mesh position-x={x} />;
 ```
 
 ✅ **Solution**: Mutate refs directly
 
 ```jsx
 // ✅ GOOD: Direct mutation, no re-renders
-const meshRef = useRef()
+const meshRef = useRef();
 useFrame((state, delta) => {
-  meshRef.current.position.x += delta
-})
-return <mesh ref={meshRef} />
+  meshRef.current.position.x += delta;
+});
+return <mesh ref={meshRef} />;
 ```
 
 ### ❌ Pitfall 2: Creating Objects in Render
@@ -882,11 +852,11 @@ const position = useMemo(() => new THREE.Vector3(1, 2, 3), [])
 ```jsx
 // ❌ BAD: Loads texture every render
 function Component() {
-  const [texture, setTexture] = useState()
+  const [texture, setTexture] = useState();
   useEffect(() => {
-    new TextureLoader().load('/texture.jpg', setTexture)
-  }, [])
-  return texture ? <meshBasicMaterial map={texture} /> : null
+    new TextureLoader().load("/texture.jpg", setTexture);
+  }, []);
+  return texture ? <meshBasicMaterial map={texture} /> : null;
 }
 ```
 
@@ -895,8 +865,8 @@ function Component() {
 ```jsx
 // ✅ GOOD: Cached and reused
 function Component() {
-  const texture = useLoader(TextureLoader, '/texture.jpg')
-  return <meshBasicMaterial map={texture} />
+  const texture = useLoader(TextureLoader, "/texture.jpg");
+  return <meshBasicMaterial map={texture} />;
 }
 ```
 
@@ -904,9 +874,15 @@ function Component() {
 
 ```jsx
 // ❌ BAD: Unmounts and remounts (expensive)
-{stage === 1 && <Stage1 />}
-{stage === 2 && <Stage2 />}
-{stage === 3 && <Stage3 />}
+{
+  stage === 1 && <Stage1 />;
+}
+{
+  stage === 2 && <Stage2 />;
+}
+{
+  stage === 3 && <Stage3 />;
+}
 ```
 
 ✅ **Solution**: Use visibility prop
@@ -927,8 +903,8 @@ function Stage1({ visible, ...props }) {
 ```jsx
 // ❌ BAD: Crashes - useThree must be inside Canvas
 function App() {
-  const { size } = useThree()
-  return <Canvas>...</Canvas>
+  const { size } = useThree();
+  return <Canvas>...</Canvas>;
 }
 ```
 
@@ -937,8 +913,8 @@ function App() {
 ```jsx
 // ✅ GOOD: useThree inside Canvas child
 function CameraInfo() {
-  const { size } = useThree()
-  return null
+  const { size } = useThree();
+  return null;
 }
 
 function App() {
@@ -946,7 +922,7 @@ function App() {
     <Canvas>
       <CameraInfo />
     </Canvas>
-  )
+  );
 }
 ```
 
@@ -954,7 +930,7 @@ function App() {
 
 ```jsx
 // ❌ BAD: Memory leak - textures not disposed
-const texture = useLoader(TextureLoader, '/texture.jpg')
+const texture = useLoader(TextureLoader, "/texture.jpg");
 ```
 
 ✅ **Solution**: R3F handles disposal automatically, but be careful with manual Three.js objects
@@ -962,14 +938,14 @@ const texture = useLoader(TextureLoader, '/texture.jpg')
 ```jsx
 // ✅ GOOD: Manual cleanup when needed
 useEffect(() => {
-  const geometry = new THREE.SphereGeometry(1)
-  const material = new THREE.MeshBasicMaterial()
+  const geometry = new THREE.SphereGeometry(1);
+  const material = new THREE.MeshBasicMaterial();
 
   return () => {
-    geometry.dispose()
-    material.dispose()
-  }
-}, [])
+    geometry.dispose();
+    material.dispose();
+  };
+}, []);
 ```
 
 ---
@@ -987,7 +963,7 @@ function Lights() {
       <ambientLight intensity={0.5} />
       <spotLight position={[10, 10, 10]} angle={0.15} />
     </>
-  )
+  );
 }
 
 function Scene() {
@@ -998,12 +974,12 @@ function Scene() {
       <Ground />
       <Effects />
     </>
-  )
+  );
 }
 
 <Canvas>
   <Scene />
-</Canvas>
+</Canvas>;
 ```
 
 ### 2. Suspend Heavy Assets
@@ -1059,19 +1035,23 @@ Monitor re-renders and optimize components causing performance issues.
 ## Resources
 
 ### References
+
 - `references/api_reference.md` - Complete R3F & Drei API documentation
 - `references/hooks_guide.md` - Detailed hooks usage and patterns
 - `references/drei_helpers.md` - Comprehensive Drei library guide
 
 ### Scripts
+
 - `scripts/component_generator.py` - Generate R3F component boilerplate
 - `scripts/scene_setup.py` - Initialize R3F scene with common patterns
 
 ### Assets
+
 - `assets/starter_r3f/` - Complete R3F + Vite starter template
 - `assets/examples/` - Real-world R3F component examples
 
 ### External Resources
+
 - [Official Docs](https://docs.pmnd.rs/react-three-fiber)
 - [Drei Docs](https://github.com/pmndrs/drei)
 - [Three.js Docs](https://threejs.org/docs/)

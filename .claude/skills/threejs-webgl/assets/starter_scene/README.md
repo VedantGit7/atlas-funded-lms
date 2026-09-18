@@ -64,10 +64,10 @@ scene.add(myMesh);
 ### Load 3D Models
 
 ```javascript
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 
 const loader = new GLTFLoader();
-loader.load('model.glb', (gltf) => {
+loader.load("model.glb", (gltf) => {
   scene.add(gltf.scene);
 });
 ```
@@ -88,6 +88,7 @@ material.roughness = 1.0; // More matte = faster
 ## Built-in Demo
 
 The starter scene includes:
+
 - **Red Cube**: Rotating on multiple axes
 - **Cyan Sphere**: Bobbing up and down
 - **Yellow Torus**: Rotating ring

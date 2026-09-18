@@ -29,40 +29,41 @@ Complete reference for Barba.js core API, plugins, and configuration options.
 Initialize Barba with configuration options.
 
 **Syntax**:
+
 ```javascript
 barba.init({
   debug: false,
-  logLevel: 'off',
+  logLevel: "off",
   timeout: 2000,
   cacheIgnore: false,
   preventRunning: true,
   prevent: null,
   requestError: null,
   schema: {
-    prefix: 'data-barba',
-    wrapper: 'wrapper',
-    container: 'container',
-    namespace: 'namespace'
+    prefix: "data-barba",
+    wrapper: "wrapper",
+    container: "container",
+    namespace: "namespace",
   },
   transitions: [],
-  views: []
+  views: [],
 });
 ```
 
 **Parameters**:
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `debug` | `boolean` | `false` | Enable debug mode (logs to console) |
-| `logLevel` | `string` | `'off'` | Logging level: `'off'`, `'error'`, `'warning'`, `'info'`, `'debug'` |
-| `timeout` | `number` | `2000` | Request timeout in milliseconds |
-| `cacheIgnore` | `boolean\|string\|function` | `false` | Disable cache, specific query string, or custom function |
-| `preventRunning` | `boolean` | `true` | Prevent transitions if one is already running |
-| `prevent` | `function` | `null` | Custom function to prevent Barba on specific links |
-| `requestError` | `function` | `null` | Custom request error handler |
-| `schema` | `object` | See above | Custom data attribute names |
-| `transitions` | `array` | `[]` | Array of transition objects |
-| `views` | `array` | `[]` | Array of view objects |
+| Parameter        | Type                        | Default   | Description                                                         |
+| ---------------- | --------------------------- | --------- | ------------------------------------------------------------------- |
+| `debug`          | `boolean`                   | `false`   | Enable debug mode (logs to console)                                 |
+| `logLevel`       | `string`                    | `'off'`   | Logging level: `'off'`, `'error'`, `'warning'`, `'info'`, `'debug'` |
+| `timeout`        | `number`                    | `2000`    | Request timeout in milliseconds                                     |
+| `cacheIgnore`    | `boolean\|string\|function` | `false`   | Disable cache, specific query string, or custom function            |
+| `preventRunning` | `boolean`                   | `true`    | Prevent transitions if one is already running                       |
+| `prevent`        | `function`                  | `null`    | Custom function to prevent Barba on specific links                  |
+| `requestError`   | `function`                  | `null`    | Custom request error handler                                        |
+| `schema`         | `object`                    | See above | Custom data attribute names                                         |
+| `transitions`    | `array`                     | `[]`      | Array of transition objects                                         |
+| `views`          | `array`                     | `[]`      | Array of view objects                                               |
 
 **Examples**:
 
@@ -76,24 +77,24 @@ barba.init({
   timeout: 5000,
   prevent: ({ el, href }) => {
     // Prevent external links
-    return href.indexOf('http') > -1 && href.indexOf(window.location.host) === -1;
+    return href.indexOf("http") > -1 && href.indexOf(window.location.host) === -1;
   },
   requestError: (trigger, action, url, response) => {
     // Redirect to 404 page
-    if (action === 'click' && response.status === 404) {
-      barba.go('/404');
+    if (action === "click" && response.status === 404) {
+      barba.go("/404");
     }
-  }
+  },
 });
 
 // Custom schema (use different data attributes)
 barba.init({
   schema: {
-    prefix: 'data-custom',
-    wrapper: 'page-wrapper',
-    container: 'page-container',
-    namespace: 'page-type'
-  }
+    prefix: "data-custom",
+    wrapper: "page-wrapper",
+    container: "page-container",
+    namespace: "page-type",
+  },
 });
 ```
 
@@ -102,35 +103,36 @@ barba.init({
 Programmatically navigate to a URL.
 
 **Syntax**:
+
 ```javascript
 barba.go(href, trigger, event);
 ```
 
 **Parameters**:
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `href` | `string` | - | Target URL (relative or absolute) |
+| Parameter | Type     | Default   | Description                                    |
+| --------- | -------- | --------- | ---------------------------------------------- |
+| `href`    | `string` | -         | Target URL (relative or absolute)              |
 | `trigger` | `string` | `'barba'` | Trigger identifier (appears in `data.trigger`) |
-| `event` | `object` | `null` | Event object (appears in `data.event`) |
+| `event`   | `object` | `null`    | Event object (appears in `data.event`)         |
 
 **Examples**:
 
 ```javascript
 // Navigate to URL
-barba.go('/about');
+barba.go("/about");
 
 // Navigate with custom trigger
-barba.go('/contact', 'custom-button');
+barba.go("/contact", "custom-button");
 
 // Navigate with event data
-barba.go('/products/123', 'product-link', { productId: 123 });
+barba.go("/products/123", "product-link", { productId: 123 });
 
 // Conditional navigation
 if (userLoggedIn) {
-  barba.go('/dashboard');
+  barba.go("/dashboard");
 } else {
-  barba.go('/login');
+  barba.go("/login");
 }
 ```
 
@@ -143,17 +145,39 @@ Global hooks object for registering lifecycle hooks.
 All hooks receive a `data` object as parameter:
 
 ```javascript
-barba.hooks.beforeOnce(data => { /* ... */ });
-barba.hooks.once(data => { /* ... */ });
-barba.hooks.afterOnce(data => { /* ... */ });
-barba.hooks.before(data => { /* ... */ });
-barba.hooks.beforeLeave(data => { /* ... */ });
-barba.hooks.leave(data => { /* ... */ });
-barba.hooks.afterLeave(data => { /* ... */ });
-barba.hooks.beforeEnter(data => { /* ... */ });
-barba.hooks.enter(data => { /* ... */ });
-barba.hooks.afterEnter(data => { /* ... */ });
-barba.hooks.after(data => { /* ... */ });
+barba.hooks.beforeOnce((data) => {
+  /* ... */
+});
+barba.hooks.once((data) => {
+  /* ... */
+});
+barba.hooks.afterOnce((data) => {
+  /* ... */
+});
+barba.hooks.before((data) => {
+  /* ... */
+});
+barba.hooks.beforeLeave((data) => {
+  /* ... */
+});
+barba.hooks.leave((data) => {
+  /* ... */
+});
+barba.hooks.afterLeave((data) => {
+  /* ... */
+});
+barba.hooks.beforeEnter((data) => {
+  /* ... */
+});
+barba.hooks.enter((data) => {
+  /* ... */
+});
+barba.hooks.afterEnter((data) => {
+  /* ... */
+});
+barba.hooks.after((data) => {
+  /* ... */
+});
 ```
 
 **Examples**:
@@ -166,23 +190,23 @@ barba.hooks.beforeEnter(() => {
 
 // Track page views
 barba.hooks.after(({ next }) => {
-  gtag('config', 'GA_MEASUREMENT_ID', {
-    page_path: next.url.path
+  gtag("config", "GA_MEASUREMENT_ID", {
+    page_path: next.url.path,
   });
 });
 
 // Show/hide loading indicator
 barba.hooks.before(() => {
-  document.querySelector('.loader').classList.add('active');
+  document.querySelector(".loader").classList.add("active");
 });
 
 barba.hooks.after(() => {
-  document.querySelector('.loader').classList.remove('active');
+  document.querySelector(".loader").classList.remove("active");
 });
 
 // Re-initialize scripts
 barba.hooks.afterEnter(() => {
-  if (typeof Prism !== 'undefined') {
+  if (typeof Prism !== "undefined") {
     Prism.highlightAll();
   }
 });
@@ -194,19 +218,19 @@ Access browser history and navigation state.
 
 **Properties**:
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `previous` | `object` | Previous page data |
-| `current` | `object` | Current page data |
-| `size` | `number` | Number of items in history |
+| Property    | Type     | Description                                            |
+| ----------- | -------- | ------------------------------------------------------ |
+| `previous`  | `object` | Previous page data                                     |
+| `current`   | `object` | Current page data                                      |
+| `size`      | `number` | Number of items in history                             |
 | `direction` | `string` | Navigation direction: `'forward'`, `'back'`, or `null` |
 
 **Methods**:
 
-| Method | Description |
-|--------|-------------|
-| `add(url, trigger)` | Add entry to history |
-| `cancel()` | Cancel current transition |
+| Method              | Description               |
+| ------------------- | ------------------------- |
+| `add(url, trigger)` | Add entry to history      |
+| `cancel()`          | Cancel current transition |
 
 **Examples**:
 
@@ -215,12 +239,12 @@ Access browser history and navigation state.
 barba.hooks.before(({ current, next }) => {
   const direction = barba.history.direction;
 
-  if (direction === 'back') {
-    console.log('User went back');
-  } else if (direction === 'forward') {
-    console.log('User went forward');
+  if (direction === "back") {
+    console.log("User went back");
+  } else if (direction === "forward") {
+    console.log("User went forward");
   } else {
-    console.log('Normal navigation');
+    console.log("Normal navigation");
   }
 });
 
@@ -240,28 +264,28 @@ URL manipulation utilities.
 
 **Methods**:
 
-| Method | Parameters | Returns | Description |
-|--------|------------|---------|-------------|
-| `getAbsoluteHref(href)` | `string` | `string` | Convert relative URL to absolute |
-| `getHref(url)` | `string` | `string` | Get clean href (without hash) |
-| `getOrigin(url)` | `string` | `string` | Get origin from URL |
-| `getPath(url)` | `string` | `string` | Get path from URL |
-| `getPathname(url)` | `string` | `string` | Get pathname from URL |
-| `getPort(url)` | `string` | `string` | Get port from URL |
+| Method                  | Parameters | Returns  | Description                      |
+| ----------------------- | ---------- | -------- | -------------------------------- |
+| `getAbsoluteHref(href)` | `string`   | `string` | Convert relative URL to absolute |
+| `getHref(url)`          | `string`   | `string` | Get clean href (without hash)    |
+| `getOrigin(url)`        | `string`   | `string` | Get origin from URL              |
+| `getPath(url)`          | `string`   | `string` | Get path from URL                |
+| `getPathname(url)`      | `string`   | `string` | Get pathname from URL            |
+| `getPort(url)`          | `string`   | `string` | Get port from URL                |
 
 **Examples**:
 
 ```javascript
 // Get absolute URL
-const absolute = barba.url.getAbsoluteHref('/about');
+const absolute = barba.url.getAbsoluteHref("/about");
 // Returns: "https://example.com/about"
 
 // Get path without query/hash
-const path = barba.url.getPath('/products?id=123#details');
+const path = barba.url.getPath("/products?id=123#details");
 // Returns: "/products"
 
 // Get pathname
-const pathname = barba.url.getPathname('https://example.com/blog/post-1');
+const pathname = barba.url.getPathname("https://example.com/blog/post-1");
 // Returns: "/blog/post-1"
 ```
 
@@ -270,31 +294,32 @@ const pathname = barba.url.getPathname('https://example.com/blog/post-1');
 Register Barba plugins.
 
 **Syntax**:
+
 ```javascript
 barba.use(plugin, options);
 ```
 
 **Parameters**:
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `plugin` | `object` | Plugin object with `install()` method |
-| `options` | `object` | Plugin-specific options |
+| Parameter | Type     | Description                           |
+| --------- | -------- | ------------------------------------- |
+| `plugin`  | `object` | Plugin object with `install()` method |
+| `options` | `object` | Plugin-specific options               |
 
 **Examples**:
 
 ```javascript
-import barba from '@barba/core';
-import barbaRouter from '@barba/router';
-import barbaPrefetch from '@barba/prefetch';
-import barbaHead from '@barba/head';
+import barba from "@barba/core";
+import barbaRouter from "@barba/router";
+import barbaPrefetch from "@barba/prefetch";
+import barbaHead from "@barba/head";
 
 // Register router
 barba.use(barbaRouter, {
   routes: [
-    { path: '/', name: 'home' },
-    { path: '/about', name: 'about' }
-  ]
+    { path: "/", name: "home" },
+    { path: "/about", name: "about" },
+  ],
 });
 
 // Register prefetch
@@ -329,12 +354,12 @@ Transition objects define how pages animate during navigation.
 
 **Properties**:
 
-| Property | Type | Default | Description |
-|----------|------|---------|-------------|
-| `name` | `string` | - | Unique transition identifier |
-| `from` | `object` | - | Rules for leaving page |
-| `to` | `object` | - | Rules for entering page |
-| `sync` | `boolean` | `false` | Sync mode (play leave/enter simultaneously) |
+| Property | Type      | Default | Description                                 |
+| -------- | --------- | ------- | ------------------------------------------- |
+| `name`   | `string`  | -       | Unique transition identifier                |
+| `from`   | `object`  | -       | Rules for leaving page                      |
+| `to`     | `object`  | -       | Rules for entering page                     |
+| `sync`   | `boolean` | `false` | Sync mode (play leave/enter simultaneously) |
 
 **Rules**:
 
@@ -342,17 +367,26 @@ Rules determine when a transition applies:
 
 ```javascript
 // Namespace rule
-{ namespace: 'home' }
-{ namespace: ['home', 'about'] }
+{
+  namespace: "home";
+}
+{
+  namespace: ["home", "about"];
+}
 
 // Route rule (requires @barba/router)
-{ route: 'product' }
+{
+  route: "product";
+}
 
 // Custom rule
-{ custom: ({ current, next }) => current.namespace === next.namespace }
+{
+  custom: ({ current, next }) => current.namespace === next.namespace;
+}
 ```
 
 **Rule Priority** (highest to lowest):
+
 1. `custom`
 2. `route` (requires @barba/router)
 3. `namespace`
@@ -364,40 +398,40 @@ barba.init({
   transitions: [
     // Only from home
     {
-      name: 'from-home',
-      from: { namespace: 'home' }
+      name: "from-home",
+      from: { namespace: "home" },
     },
 
     // Only to about
     {
-      name: 'to-about',
-      to: { namespace: 'about' }
+      name: "to-about",
+      to: { namespace: "about" },
     },
 
     // From home to about
     {
-      name: 'home-to-about',
-      from: { namespace: 'home' },
-      to: { namespace: 'about' }
+      name: "home-to-about",
+      from: { namespace: "home" },
+      to: { namespace: "about" },
     },
 
     // Multiple namespaces
     {
-      name: 'from-pages',
-      from: { namespace: ['about', 'contact', 'services'] }
+      name: "from-pages",
+      from: { namespace: ["about", "contact", "services"] },
     },
 
     // Custom rule
     {
-      name: 'same-namespace',
-      custom: ({ current, next }) => current.namespace === next.namespace
+      name: "same-namespace",
+      custom: ({ current, next }) => current.namespace === next.namespace,
     },
 
     // Always matches (fallback)
     {
-      name: 'default'
-    }
-  ]
+      name: "default",
+    },
+  ],
 });
 ```
 
@@ -449,8 +483,8 @@ View objects provide page-specific logic based on namespace.
 
 **Properties**:
 
-| Property | Type | Description |
-|----------|------|-------------|
+| Property    | Type     | Description                                       |
+| ----------- | -------- | ------------------------------------------------- |
 | `namespace` | `string` | Target namespace (matches `data-barba-namespace`) |
 
 **Examples**:
@@ -459,9 +493,9 @@ View objects provide page-specific logic based on namespace.
 barba.init({
   views: [
     {
-      namespace: 'home',
+      namespace: "home",
       beforeEnter() {
-        console.log('About to enter home page');
+        console.log("About to enter home page");
       },
       afterEnter() {
         // Initialize home-specific features
@@ -471,18 +505,18 @@ barba.init({
       beforeLeave() {
         // Clean up
         destroyHomeSlider();
-      }
+      },
     },
     {
-      namespace: 'product',
+      namespace: "product",
       afterEnter({ next }) {
         // Get product ID from URL
-        const productId = next.url.path.split('/').pop();
+        const productId = next.url.path.split("/").pop();
         loadProduct(productId);
-      }
+      },
     },
     {
-      namespace: 'gallery',
+      namespace: "gallery",
       afterEnter() {
         initMasonry();
         initLightbox();
@@ -490,9 +524,9 @@ barba.init({
       beforeLeave() {
         destroyMasonry();
         destroyLightbox();
-      }
-    }
-  ]
+      },
+    },
+  ],
 });
 ```
 
@@ -505,11 +539,13 @@ Complete reference for all 11 Barba.js hooks.
 ### Hook Execution Order
 
 **Initial page load**:
+
 ```
 beforeOnce → once → afterOnce
 ```
 
 **Every navigation**:
+
 ```
 before → beforeLeave → leave → afterLeave →
 beforeEnter → enter → afterEnter → after
@@ -520,27 +556,39 @@ beforeEnter → enter → afterEnter → after
 Hooks can be defined in three places:
 
 1. **Global hooks**: Run on every transition
+
    ```javascript
-   barba.hooks.before(() => { /* ... */ });
+   barba.hooks.before(() => {
+     /* ... */
+   });
    ```
 
 2. **Transition hooks**: Run when that transition matches
+
    ```javascript
    barba.init({
-     transitions: [{
-       name: 'fade',
-       leave() { /* ... */ }
-     }]
+     transitions: [
+       {
+         name: "fade",
+         leave() {
+           /* ... */
+         },
+       },
+     ],
    });
    ```
 
 3. **View hooks**: Run for specific namespaces
    ```javascript
    barba.init({
-     views: [{
-       namespace: 'home',
-       afterEnter() { /* ... */ }
-     }]
+     views: [
+       {
+         namespace: "home",
+         afterEnter() {
+           /* ... */
+         },
+       },
+     ],
    });
    ```
 
@@ -826,16 +874,16 @@ All hooks receive a `data` object with information about current and next pages.
 
 Information about the page being left.
 
-| Property | Type | Description |
-|----------|------|-------------|
+| Property    | Type          | Description                                     |
+| ----------- | ------------- | ----------------------------------------------- |
 | `container` | `HTMLElement` | Current page's `data-barba="container"` element |
-| `html` | `string` | Full HTML of current page |
-| `namespace` | `string` | Current page namespace |
-| `url` | `object` | URL information |
-| `url.href` | `string` | Full URL |
-| `url.path` | `string` | Path without query/hash |
-| `url.port` | `string` | Port number |
-| `url.query` | `object` | Query parameters as key-value pairs |
+| `html`      | `string`      | Full HTML of current page                       |
+| `namespace` | `string`      | Current page namespace                          |
+| `url`       | `object`      | URL information                                 |
+| `url.href`  | `string`      | Full URL                                        |
+| `url.path`  | `string`      | Path without query/hash                         |
+| `url.port`  | `string`      | Port number                                     |
+| `url.query` | `object`      | Query parameters as key-value pairs             |
 
 ### next
 
@@ -847,12 +895,12 @@ Same structure as `current`.
 
 Source of the navigation.
 
-| Value | Type | Description |
-|-------|------|-------------|
-| Link element | `HTMLElement` | User clicked a link |
-| `'barba'` | `string` | Programmatic navigation via `barba.go()` |
-| `'back'` | `string` | Browser back button |
-| `'forward'` | `string` | Browser forward button |
+| Value        | Type          | Description                              |
+| ------------ | ------------- | ---------------------------------------- |
+| Link element | `HTMLElement` | User clicked a link                      |
+| `'barba'`    | `string`      | Programmatic navigation via `barba.go()` |
+| `'back'`     | `string`      | Browser back button                      |
+| `'forward'`  | `string`      | Browser forward button                   |
 
 ### event
 
@@ -862,22 +910,22 @@ The triggering event object (if navigation was from user interaction).
 
 ```javascript
 barba.hooks.before(({ current, next, trigger, event }) => {
-  console.log('Leaving:', current.namespace);
-  console.log('Entering:', next.namespace);
-  console.log('Current URL:', current.url.href);
-  console.log('Next URL:', next.url.href);
-  console.log('Trigger:', trigger);
+  console.log("Leaving:", current.namespace);
+  console.log("Entering:", next.namespace);
+  console.log("Current URL:", current.url.href);
+  console.log("Next URL:", next.url.href);
+  console.log("Trigger:", trigger);
 
   // Check trigger type
-  if (trigger === 'back') {
-    console.log('User went back');
+  if (trigger === "back") {
+    console.log("User went back");
   } else if (trigger instanceof HTMLElement) {
-    console.log('User clicked:', trigger.href);
+    console.log("User clicked:", trigger.href);
   }
 
   // Access query parameters
   if (next.url.query.id) {
-    console.log('Product ID:', next.url.query.id);
+    console.log("Product ID:", next.url.query.id);
   }
 });
 ```
@@ -891,6 +939,7 @@ barba.hooks.before(({ current, next, trigger, event }) => {
 Add route-based transition rules using path patterns.
 
 **Installation**:
+
 ```bash
 npm install --save-dev @barba/router
 ```
@@ -898,16 +947,16 @@ npm install --save-dev @barba/router
 **API**:
 
 ```javascript
-import barbaRouter from '@barba/router';
+import barbaRouter from "@barba/router";
 
 barbaRouter.init({
   routes: [
-    { path: '/', name: 'home' },
-    { path: '/about', name: 'about' },
-    { path: '/products/:id', name: 'product' },
-    { path: '/blog/:category/:slug', name: 'blog-post' },
-    { path: '/:lang(en|fr)/:page', name: 'localized-page' }
-  ]
+    { path: "/", name: "home" },
+    { path: "/about", name: "about" },
+    { path: "/products/:id", name: "product" },
+    { path: "/blog/:category/:slug", name: "blog-post" },
+    { path: "/:lang(en|fr)/:page", name: "localized-page" },
+  ],
 });
 
 barba.use(barbaRouter);
@@ -915,35 +964,37 @@ barba.use(barbaRouter);
 
 **Route Properties**:
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `path` | `string` | URL pattern (supports path-to-regexp syntax) |
-| `name` | `string` | Route name (used in transition rules) |
+| Property | Type     | Description                                  |
+| -------- | -------- | -------------------------------------------- |
+| `path`   | `string` | URL pattern (supports path-to-regexp syntax) |
+| `name`   | `string` | Route name (used in transition rules)        |
 
 **Path Patterns**:
 
 ```javascript
-'/products/:id'              // Dynamic segment
-'/blog/:category/:slug'      // Multiple segments
-'/:lang(en|fr)/:page'        // Alternatives
-'/files/:path*'              // Wildcard (0 or more)
-'/files/:path+'              // Wildcard (1 or more)
-'/products/:id?'             // Optional segment
+"/products/:id"; // Dynamic segment
+"/blog/:category/:slug"; // Multiple segments
+"/:lang(en|fr)/:page"; // Alternatives
+"/files/:path*"; // Wildcard (0 or more)
+"/files/:path+"; // Wildcard (1 or more)
+"/products/:id?"; // Optional segment
 ```
 
 **Usage in Transitions**:
 
 ```javascript
 barba.init({
-  transitions: [{
-    name: 'product-transition',
-    to: { route: 'product' },  // Matches route name
-    enter({ next }) {
-      // Get route params from URL
-      const productId = next.url.path.split('/').pop();
-      console.log('Loading product:', productId);
-    }
-  }]
+  transitions: [
+    {
+      name: "product-transition",
+      to: { route: "product" }, // Matches route name
+      enter({ next }) {
+        // Get route params from URL
+        const productId = next.url.path.split("/").pop();
+        console.log("Loading product:", productId);
+      },
+    },
+  ],
 });
 ```
 
@@ -956,6 +1007,7 @@ barba.init({
 Prefetch pages on link hover for faster navigation.
 
 **Installation**:
+
 ```bash
 npm install --save-dev @barba/prefetch
 ```
@@ -963,15 +1015,15 @@ npm install --save-dev @barba/prefetch
 **API**:
 
 ```javascript
-import barbaPrefetch from '@barba/prefetch';
+import barbaPrefetch from "@barba/prefetch";
 
 barba.use(barbaPrefetch);
 
 barba.init({
   prefetch: {
-    root: null,        // Element to observe (null = document)
-    timeout: 3000      // Cache timeout in ms
-  }
+    root: null, // Element to observe (null = document)
+    timeout: 3000, // Cache timeout in ms
+  },
 });
 ```
 
@@ -986,10 +1038,10 @@ barba.init({
 
 ```javascript
 // Prefetch specific URL
-barba.prefetch('/about');
+barba.prefetch("/about");
 
 // Prefetch multiple URLs
-['/about', '/contact', '/services'].forEach(url => {
+["/about", "/contact", "/services"].forEach((url) => {
   barba.prefetch(url);
 });
 ```
@@ -1003,6 +1055,7 @@ barba.prefetch('/about');
 CSS-based transitions without writing JavaScript.
 
 **Installation**:
+
 ```bash
 npm install --save-dev @barba/css
 ```
@@ -1010,7 +1063,7 @@ npm install --save-dev @barba/css
 **Usage**:
 
 ```javascript
-import barbaCSS from '@barba/css';
+import barbaCSS from "@barba/css";
 
 barba.use(barbaCSS);
 barba.init();
@@ -1020,15 +1073,15 @@ barba.init();
 
 Barba adds classes during transitions:
 
-| Class | When | Description |
-|-------|------|-------------|
-| `.barba-once` | Initial load | Applied to wrapper during `once` hook |
-| `.barba-leave` | Leave phase | Applied to current container |
-| `.barba-leave-active` | Leave active | Added when animation starts |
-| `.barba-leave-to` | Leave end | Added when animation should end |
-| `.barba-enter` | Enter phase | Applied to next container |
-| `.barba-enter-active` | Enter active | Added when animation starts |
-| `.barba-enter-to` | Enter end | Added when animation should end |
+| Class                 | When         | Description                           |
+| --------------------- | ------------ | ------------------------------------- |
+| `.barba-once`         | Initial load | Applied to wrapper during `once` hook |
+| `.barba-leave`        | Leave phase  | Applied to current container          |
+| `.barba-leave-active` | Leave active | Added when animation starts           |
+| `.barba-leave-to`     | Leave end    | Added when animation should end       |
+| `.barba-enter`        | Enter phase  | Applied to next container             |
+| `.barba-enter-active` | Enter active | Added when animation starts           |
+| `.barba-enter-to`     | Enter end    | Added when animation should end       |
 
 **Example CSS**:
 
@@ -1037,7 +1090,9 @@ Barba adds classes during transitions:
 .barba-once [data-barba="container"] {
   opacity: 0;
   transform: translateY(50px);
-  transition: opacity 0.5s, transform 0.5s;
+  transition:
+    opacity 0.5s,
+    transform 0.5s;
 }
 
 .barba-once.barba-once-active [data-barba="container"] {
@@ -1075,6 +1130,7 @@ Barba adds classes during transitions:
 Automatically update `<head>` tags (title, meta) on navigation.
 
 **Installation**:
+
 ```bash
 npm install --save-dev @barba/head
 ```
@@ -1082,7 +1138,7 @@ npm install --save-dev @barba/head
 **Usage**:
 
 ```javascript
-import barbaHead from '@barba/head';
+import barbaHead from "@barba/head";
 
 barba.use(barbaHead);
 barba.init();
@@ -1091,6 +1147,7 @@ barba.init();
 **What It Updates**:
 
 The plugin updates these `<head>` tags automatically:
+
 - `<title>`
 - `<meta>` (name, property, http-equiv)
 - `<link>` (canonical, alternate)

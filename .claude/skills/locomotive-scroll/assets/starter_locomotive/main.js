@@ -9,36 +9,36 @@
  * - Programmatic scrolling
  */
 
-import LocomotiveScroll from 'https://cdn.skypack.dev/locomotive-scroll@4';
+import LocomotiveScroll from "https://cdn.skypack.dev/locomotive-scroll@4";
 
 // Initialize Locomotive Scroll
 const scroll = new LocomotiveScroll({
-  el: document.querySelector('[data-scroll-container]'),
+  el: document.querySelector("[data-scroll-container]"),
   smooth: true,
-  lerp: 0.1,          // Smoothness (0-1, lower = smoother)
-  multiplier: 1,      // Speed multiplier
-  class: 'is-inview', // Class added to visible elements
-  repeat: true,       // Repeat in-view detection
-  offset: ['10%', 0], // Global offset [bottom, top]
-  getSpeed: true,     // Track scroll speed
+  lerp: 0.1, // Smoothness (0-1, lower = smoother)
+  multiplier: 1, // Speed multiplier
+  class: "is-inview", // Class added to visible elements
+  repeat: true, // Repeat in-view detection
+  offset: ["10%", 0], // Global offset [bottom, top]
+  getSpeed: true, // Track scroll speed
   getDirection: true, // Track scroll direction
 
   // Tablet settings
   tablet: {
     smooth: true,
-    breakpoint: 1024
+    breakpoint: 1024,
   },
 
   // Smartphone settings
   smartphone: {
     smooth: true,
-    breakpoint: 768
-  }
+    breakpoint: 768,
+  },
 });
 
 // Update on window resize
 let resizeTimer;
-window.addEventListener('resize', () => {
+window.addEventListener("resize", () => {
   clearTimeout(resizeTimer);
   resizeTimer = setTimeout(() => {
     scroll.update();
@@ -46,7 +46,7 @@ window.addEventListener('resize', () => {
 });
 
 // Scroll event - Fires on every scroll update
-scroll.on('scroll', (args) => {
+scroll.on("scroll", (args) => {
   // Current scroll position
   const scrollY = args.scroll.y;
 
@@ -58,47 +58,47 @@ scroll.on('scroll', (args) => {
   // console.log('Scroll Y:', scrollY, 'Speed:', speed, 'Direction:', direction);
 
   // Track specific element progress
-  if (args.currentElements['hero-title']) {
-    const progress = args.currentElements['hero-title'].progress;
+  if (args.currentElements["hero-title"]) {
+    const progress = args.currentElements["hero-title"].progress;
     // Use progress (0 to 1) for custom animations
     // console.log('Hero title progress:', progress);
   }
 
   // Track special card
-  if (args.currentElements['special-card']) {
-    const el = args.currentElements['special-card'];
+  if (args.currentElements["special-card"]) {
+    const el = args.currentElements["special-card"];
     // console.log('Special card in view:', el.inView);
   }
 });
 
 // Call event - Fires when elements with data-scroll-call enter/exit viewport
-scroll.on('call', (func, way, obj) => {
+scroll.on("call", (func, way, obj) => {
   console.log(`Call event: ${func} - ${way}`);
 
   // Handle specific callbacks
-  if (func === 'fadeIn') {
-    if (way === 'enter') {
-      console.log('Element entered viewport:', obj.el);
-      obj.el.style.opacity = '1';
-    } else if (way === 'exit') {
-      console.log('Element exited viewport:', obj.el);
+  if (func === "fadeIn") {
+    if (way === "enter") {
+      console.log("Element entered viewport:", obj.el);
+      obj.el.style.opacity = "1";
+    } else if (way === "exit") {
+      console.log("Element exited viewport:", obj.el);
     }
   }
 });
 
 // Smooth scroll to section on nav click
-document.querySelectorAll('.nav-links a').forEach(link => {
-  link.addEventListener('click', (e) => {
+document.querySelectorAll(".nav-links a").forEach((link) => {
+  link.addEventListener("click", (e) => {
     e.preventDefault();
-    const target = link.getAttribute('href');
+    const target = link.getAttribute("href");
 
-    if (target === '#hero') {
-      scroll.scrollTo('top');
+    if (target === "#hero") {
+      scroll.scrollTo("top");
     } else {
       scroll.scrollTo(target, {
-        offset: -80,      // Offset for fixed nav
-        duration: 1000,   // Duration in ms
-        easing: [0.25, 0.0, 0.35, 1.0] // Cubic bezier
+        offset: -80, // Offset for fixed nav
+        duration: 1000, // Duration in ms
+        easing: [0.25, 0.0, 0.35, 1.0], // Cubic bezier
       });
     }
   });
@@ -134,13 +134,13 @@ scroll.setScroll(0, 500); // x, y
 */
 
 // Cleanup on page unload
-window.addEventListener('beforeunload', () => {
+window.addEventListener("beforeunload", () => {
   scroll.destroy();
 });
 
 // Log initialization
-console.log('Locomotive Scroll initialized');
-console.log('Scroll instance:', scroll);
+console.log("Locomotive Scroll initialized");
+console.log("Scroll instance:", scroll);
 
 // Export for debugging
 window.locomotiveScroll = scroll;

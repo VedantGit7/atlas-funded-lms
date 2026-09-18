@@ -18,6 +18,7 @@ The easiest way to get started is using the `project_generator.py` script:
 ```
 
 This automatically generates a complete project with:
+
 - package.json with all dependencies
 - Vite or Next.js configuration
 - React components with Spline integration
@@ -72,10 +73,10 @@ Use `component_builder.py` to generate reusable Spline components:
 ### With GSAP ScrollTrigger
 
 ```jsx
-import { useRef, useEffect } from 'react';
-import Spline from '@splinetool/react-spline';
-import gsap from 'gsap';
-import ScrollTrigger from 'gsap/ScrollTrigger';
+import { useRef, useEffect } from "react";
+import Spline from "@splinetool/react-spline";
+import gsap from "gsap";
+import ScrollTrigger from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -86,18 +87,15 @@ export default function ScrollSpline() {
     splineApp.current = app;
 
     ScrollTrigger.create({
-      trigger: '.scene',
-      start: 'top center',
-      onEnter: () => app.emitEvent('mouseHover', 'Product')
+      trigger: ".scene",
+      start: "top center",
+      onEnter: () => app.emitEvent("mouseHover", "Product"),
     });
   }
 
   return (
     <div className="scene">
-      <Spline
-        scene="https://prod.spline.design/YOUR-SCENE-ID/scene.splinecode"
-        onLoad={onLoad}
-      />
+      <Spline scene="https://prod.spline.design/YOUR-SCENE-ID/scene.splinecode" onLoad={onLoad} />
     </div>
   );
 }
@@ -106,8 +104,8 @@ export default function ScrollSpline() {
 ### With Framer Motion
 
 ```jsx
-import { motion } from 'framer-motion';
-import Spline from '@splinetool/react-spline';
+import { motion } from "framer-motion";
+import Spline from "@splinetool/react-spline";
 
 export default function AnimatedSpline() {
   return (
@@ -115,7 +113,7 @@ export default function AnimatedSpline() {
       initial={{ opacity: 0, scale: 0.8 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.8 }}
-      style={{ width: '100%', height: '600px' }}
+      style={{ width: "100%", height: "600px" }}
     >
       <Spline scene="https://prod.spline.design/YOUR-SCENE-ID/scene.splinecode" />
     </motion.div>
@@ -126,17 +124,17 @@ export default function AnimatedSpline() {
 ### Product Configurator
 
 ```jsx
-import { useRef, useState } from 'react';
-import Spline from '@splinetool/react-spline';
+import { useRef, useState } from "react";
+import Spline from "@splinetool/react-spline";
 
 export default function ProductConfigurator() {
   const product = useRef();
   const splineApp = useRef();
-  const [color, setColor] = useState('#ff6b6b');
+  const [color, setColor] = useState("#ff6b6b");
 
   function onLoad(spline) {
     splineApp.current = spline;
-    product.current = spline.findObjectByName('Product');
+    product.current = spline.findObjectByName("Product");
   }
 
   function changeColor(newColor) {
@@ -154,15 +152,12 @@ export default function ProductConfigurator() {
 
   return (
     <div>
-      <Spline
-        scene="https://prod.spline.design/YOUR-SCENE-ID/scene.splinecode"
-        onLoad={onLoad}
-      />
+      <Spline scene="https://prod.spline.design/YOUR-SCENE-ID/scene.splinecode" onLoad={onLoad} />
 
       <div className="controls">
-        <button onClick={() => changeColor('#ff6b6b')}>Red</button>
-        <button onClick={() => changeColor('#4ecdc4')}>Cyan</button>
-        <button onClick={() => changeColor('#ffe66d')}>Yellow</button>
+        <button onClick={() => changeColor("#ff6b6b")}>Red</button>
+        <button onClick={() => changeColor("#4ecdc4")}>Cyan</button>
+        <button onClick={() => changeColor("#ffe66d")}>Yellow</button>
         <button onClick={rotate}>Rotate</button>
       </div>
     </div>
@@ -173,26 +168,26 @@ export default function ProductConfigurator() {
 ### Multi-Scene Viewer
 
 ```jsx
-import { useState } from 'react';
-import Spline from '@splinetool/react-spline';
+import { useState } from "react";
+import Spline from "@splinetool/react-spline";
 
 const scenes = {
-  scene1: 'https://prod.spline.design/SCENE-1/scene.splinecode',
-  scene2: 'https://prod.spline.design/SCENE-2/scene.splinecode',
-  scene3: 'https://prod.spline.design/SCENE-3/scene.splinecode'
+  scene1: "https://prod.spline.design/SCENE-1/scene.splinecode",
+  scene2: "https://prod.spline.design/SCENE-2/scene.splinecode",
+  scene3: "https://prod.spline.design/SCENE-3/scene.splinecode",
 };
 
 export default function SceneSwitcher() {
-  const [currentScene, setCurrentScene] = useState('scene1');
+  const [currentScene, setCurrentScene] = useState("scene1");
 
   return (
     <div>
       <Spline scene={scenes[currentScene]} />
 
       <div className="tabs">
-        <button onClick={() => setCurrentScene('scene1')}>Scene 1</button>
-        <button onClick={() => setCurrentScene('scene2')}>Scene 2</button>
-        <button onClick={() => setCurrentScene('scene3')}>Scene 3</button>
+        <button onClick={() => setCurrentScene("scene1")}>Scene 1</button>
+        <button onClick={() => setCurrentScene("scene2")}>Scene 2</button>
+        <button onClick={() => setCurrentScene("scene3")}>Scene 3</button>
       </div>
     </div>
   );
@@ -212,8 +207,8 @@ export default function SceneSwitcher() {
 ### Marketing Hero Section
 
 ```jsx
-import Spline from '@splinetool/react-spline';
-import './Hero.css';
+import Spline from "@splinetool/react-spline";
+import "./Hero.css";
 
 export default function Hero() {
   return (
@@ -235,22 +230,22 @@ export default function Hero() {
 ### Interactive Portfolio
 
 ```jsx
-import { useRef } from 'react';
-import Spline from '@splinetool/react-spline';
+import { useRef } from "react";
+import Spline from "@splinetool/react-spline";
 
 export default function Portfolio() {
   const splineApp = useRef();
 
   function showProject(projectName) {
-    splineApp.current?.emitEvent('mouseHover', projectName);
+    splineApp.current?.emitEvent("mouseHover", projectName);
   }
 
   return (
     <div className="portfolio">
       <nav>
-        <button onClick={() => showProject('Project1')}>Project 1</button>
-        <button onClick={() => showProject('Project2')}>Project 2</button>
-        <button onClick={() => showProject('Project3')}>Project 3</button>
+        <button onClick={() => showProject("Project1")}>Project 1</button>
+        <button onClick={() => showProject("Project2")}>Project 2</button>
+        <button onClick={() => showProject("Project3")}>Project 3</button>
       </nav>
 
       <Spline
@@ -265,13 +260,15 @@ export default function Portfolio() {
 ## Performance Tips
 
 1. **Use On-Demand Rendering** (enabled by default):
+
    ```jsx
    <Spline scene={sceneUrl} renderOnDemand={true} />
    ```
 
 2. **Lazy Load Heavy Scenes**:
+
    ```jsx
-   const Spline = React.lazy(() => import('@splinetool/react-spline'));
+   const Spline = React.lazy(() => import("@splinetool/react-spline"));
    ```
 
 3. **Optimize in Spline Editor**:
@@ -288,17 +285,20 @@ export default function Portfolio() {
 ## Troubleshooting
 
 ### Scene Not Loading
+
 - Verify scene URL is complete and correct
 - Check scene is published in Spline editor
 - Look for CORS errors in browser console
 - Ensure both `@splinetool/react-spline` and `@splinetool/runtime` are installed
 
 ### Events Not Working
+
 - Use `onSplineMouseDown` not `onMouseDown`
 - Verify objects have events configured in Spline editor
 - Check object names match exactly (case-sensitive)
 
 ### Performance Issues
+
 - Enable renderOnDemand
 - Create mobile-specific scenes with lower detail
 - Use lazy loading for heavy scenes

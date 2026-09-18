@@ -22,20 +22,18 @@ Comprehensive collection of production-ready Babylon.js patterns and implementat
 ### GLTF Model Viewer with Progress
 
 ```javascript
-import { SceneLoader } from '@babylonjs/core/Loading/sceneLoader.js';
-import { Texture } from '@babylonjs/core/Materials/Textures/texture.js';
-import { PBRMaterial } from '@babylonjs/core/Materials/PBR/pbrMaterial.js';
-import '@babylonjs/loaders/glTF';
+import { SceneLoader } from "@babylonjs/core/Loading/sceneLoader.js";
+import { Texture } from "@babylonjs/core/Materials/Textures/texture.js";
+import { PBRMaterial } from "@babylonjs/core/Materials/PBR/pbrMaterial.js";
+import "@babylonjs/loaders/glTF";
 
 async function createModelViewer(scene, modelUrl, fileName) {
   // Show loading progress
-  let loadingScreen = document.getElementById('loading');
+  let loadingScreen = document.getElementById("loading");
 
   BABYLON.SceneLoader.OnPluginActivatedObservable.addOnce((loader) => {
     loader.onProgress = (event) => {
-      const progress = event.lengthComputable
-        ? (event.loaded / event.total) * 100
-        : 0;
+      const progress = event.lengthComputable ? (event.loaded / event.total) * 100 : 0;
 
       if (loadingScreen) {
         loadingScreen.textContent = `Loading: ${progress.toFixed(0)}%`;
@@ -44,15 +42,10 @@ async function createModelViewer(scene, modelUrl, fileName) {
   });
 
   // Load model
-  const result = await SceneLoader.ImportMeshAsync(
-    null,
-    modelUrl,
-    fileName,
-    scene
-  );
+  const result = await SceneLoader.ImportMeshAsync(null, modelUrl, fileName, scene);
 
   if (loadingScreen) {
-    loadingScreen.style.display = 'none';
+    loadingScreen.style.display = "none";
   }
 
   // Center model
@@ -60,7 +53,7 @@ async function createModelViewer(scene, modelUrl, fileName) {
   const boundingBox = meshes[0].getHierarchyBoundingVectors();
   const center = BABYLON.Vector3.Center(boundingBox.min, boundingBox.max);
 
-  meshes.forEach(mesh => {
+  meshes.forEach((mesh) => {
     mesh.position.subtractInPlace(center);
   });
 
@@ -73,19 +66,19 @@ async function createModelViewer(scene, modelUrl, fileName) {
 
   // Setup environment
   const envTexture = BABYLON.CubeTexture.CreateFromPrefilteredData(
-    'https://assets.babylonjs.com/environments/environmentSpecular.env',
-    scene
+    "https://assets.babylonjs.com/environments/environmentSpecular.env",
+    scene,
   );
   scene.environmentTexture = envTexture;
 
   // Apply PBR to all meshes
-  meshes.forEach(mesh => {
+  meshes.forEach((mesh) => {
     if (mesh.material && mesh.material.albedoTexture) {
       // Already has material, enhance it
       mesh.material.environmentIntensity = 1.0;
     } else if (!mesh.material) {
       // No material, create default
-      const pbr = new PBRMaterial('defaultPBR', scene);
+      const pbr = new PBRMaterial("defaultPBR", scene);
       pbr.metallic = 0.0;
       pbr.roughness = 0.5;
       pbr.baseColor = new BABYLON.Color3(0.8, 0.8, 0.8);
@@ -102,18 +95,18 @@ async function createModelViewer(scene, modelUrl, fileName) {
 ```javascript
 async function createLODMesh(scene, highResUrl, medResUrl, lowResUrl) {
   // Load all LOD levels
-  const highRes = await SceneLoader.ImportMeshAsync(null, '', highResUrl, scene);
-  const medRes = await SceneLoader.ImportMeshAsync(null, '', medResUrl, scene);
-  const lowRes = await SceneLoader.ImportMeshAsync(null, '', lowResUrl, scene);
+  const highRes = await SceneLoader.ImportMeshAsync(null, "", highResUrl, scene);
+  const medRes = await SceneLoader.ImportMeshAsync(null, "", medResUrl, scene);
+  const lowRes = await SceneLoader.ImportMeshAsync(null, "", lowResUrl, scene);
 
   const mainMesh = highRes.meshes[0];
   const medMesh = medRes.meshes[0];
   const lowMesh = lowRes.meshes[0];
 
   // Add LOD levels
-  mainMesh.addLODLevel(15, medMesh);   // Switch at 15 units
-  mainMesh.addLODLevel(30, lowMesh);   // Switch at 30 units
-  mainMesh.addLODLevel(50, null);      // Don't render beyond 50 units
+  mainMesh.addLODLevel(15, medMesh); // Switch at 15 units
+  mainMesh.addLODLevel(30, lowMesh); // Switch at 30 units
+  mainMesh.addLODLevel(50, null); // Don't render beyond 50 units
 
   return mainMesh;
 }
@@ -127,10 +120,10 @@ async function simplifyMesh(mesh, quality = 0.5) {
     [
       { quality: quality, distance: 10 },
       { quality: quality * 0.5, distance: 25 },
-      { quality: quality * 0.25, distance: 50 }
+      { quality: quality * 0.25, distance: 50 },
     ],
-    true,  // parallelProcessing
-    BABYLON.SimplificationType.QUADRATIC
+    true, // parallelProcessing
+    BABYLON.SimplificationType.QUADRATIC,
   );
 
   return simplified;
@@ -146,15 +139,10 @@ async function batchLoadModels(scene, models) {
   const loadedMeshes = [];
 
   models.forEach((model, index) => {
-    const task = assetsManager.addMeshTask(
-      `model${index}`,
-      '',
-      model.path,
-      model.filename
-    );
+    const task = assetsManager.addMeshTask(`model${index}`, "", model.path, model.filename);
 
     task.onSuccess = (task) => {
-      task.loadedMeshes.forEach(mesh => {
+      task.loadedMeshes.forEach((mesh) => {
         mesh.position = model.position || BABYLON.Vector3.Zero();
         mesh.scaling = model.scale || new BABYLON.Vector3(1, 1, 1);
       });
@@ -178,9 +166,14 @@ async function batchLoadModels(scene, models) {
 
 // Usage
 const models = [
-  { path: '/models/', filename: 'car.glb', position: new BABYLON.Vector3(0, 0, 0) },
-  { path: '/models/', filename: 'tree.glb', position: new BABYLON.Vector3(5, 0, 0), scale: new BABYLON.Vector3(2, 2, 2) },
-  { path: '/models/', filename: 'building.glb', position: new BABYLON.Vector3(-5, 0, 0) }
+  { path: "/models/", filename: "car.glb", position: new BABYLON.Vector3(0, 0, 0) },
+  {
+    path: "/models/",
+    filename: "tree.glb",
+    position: new BABYLON.Vector3(5, 0, 0),
+    scale: new BABYLON.Vector3(2, 2, 2),
+  },
+  { path: "/models/", filename: "building.glb", position: new BABYLON.Vector3(-5, 0, 0) },
 ];
 
 const meshes = await batchLoadModels(scene, models);
@@ -194,28 +187,28 @@ const meshes = await batchLoadModels(scene, models);
 
 ```javascript
 function createAdvancedPBRMaterial(scene) {
-  const pbr = new BABYLON.PBRMaterial('advancedPBR', scene);
+  const pbr = new BABYLON.PBRMaterial("advancedPBR", scene);
 
   // Base color
-  pbr.albedoTexture = new BABYLON.Texture('textures/albedo.png', scene);
+  pbr.albedoTexture = new BABYLON.Texture("textures/albedo.png", scene);
 
   // Metallic and roughness (combined in one texture)
-  pbr.metallicTexture = new BABYLON.Texture('textures/metallic_roughness.png', scene);
+  pbr.metallicTexture = new BABYLON.Texture("textures/metallic_roughness.png", scene);
   pbr.useRoughnessFromMetallicTextureAlpha = false;
   pbr.useMetallnessFromMetallicTextureBlue = true;
 
   // Normal map
-  pbr.bumpTexture = new BABYLON.Texture('textures/normal.png', scene);
+  pbr.bumpTexture = new BABYLON.Texture("textures/normal.png", scene);
   pbr.invertNormalMapX = false;
   pbr.invertNormalMapY = false;
 
   // Ambient occlusion
-  pbr.ambientTexture = new BABYLON.Texture('textures/ao.png', scene);
+  pbr.ambientTexture = new BABYLON.Texture("textures/ao.png", scene);
   pbr.useAmbientOcclusionFromMetallicTextureRed = true;
   pbr.ambientTextureStrength = 1.0;
 
   // Emissive
-  pbr.emissiveTexture = new BABYLON.Texture('textures/emissive.png', scene);
+  pbr.emissiveTexture = new BABYLON.Texture("textures/emissive.png", scene);
   pbr.emissiveColor = new BABYLON.Color3(1, 1, 1);
   pbr.emissiveIntensity = 1.0;
 
@@ -237,7 +230,7 @@ function createAdvancedPBRMaterial(scene) {
 
 ```javascript
 function createGlassMaterial(scene) {
-  const glass = new BABYLON.PBRMaterial('glass', scene);
+  const glass = new BABYLON.PBRMaterial("glass", scene);
 
   glass.metallic = 0.0;
   glass.roughness = 0.0;
@@ -263,12 +256,12 @@ function createGlassMaterial(scene) {
 ### Water Material
 
 ```javascript
-import { WaterMaterial } from '@babylonjs/materials/water/waterMaterial.js';
+import { WaterMaterial } from "@babylonjs/materials/water/waterMaterial.js";
 
 function createWaterMaterial(scene) {
-  const water = new WaterMaterial('water', scene, new BABYLON.Vector2(512, 512));
+  const water = new WaterMaterial("water", scene, new BABYLON.Vector2(512, 512));
 
-  water.bumpTexture = new BABYLON.Texture('textures/waterbump.png', scene);
+  water.bumpTexture = new BABYLON.Texture("textures/waterbump.png", scene);
   water.windForce = -5;
   water.waveHeight = 0.3;
   water.bumpHeight = 0.1;
@@ -293,29 +286,26 @@ function createWaterMaterial(scene) {
 ```javascript
 async function createNodeMaterial(scene) {
   // Load from snippet
-  const nodeMaterial = await BABYLON.NodeMaterial.ParseFromSnippetAsync(
-    '#SNIPPET_ID',
-    scene
-  );
+  const nodeMaterial = await BABYLON.NodeMaterial.ParseFromSnippetAsync("#SNIPPET_ID", scene);
 
   // Or create programmatically
-  const nodeMaterial2 = new BABYLON.NodeMaterial('node', scene);
+  const nodeMaterial2 = new BABYLON.NodeMaterial("node", scene);
 
   // Input blocks
-  const position = new BABYLON.InputBlock('position');
-  position.setAsAttribute('position');
+  const position = new BABYLON.InputBlock("position");
+  position.setAsAttribute("position");
 
-  const worldPos = new BABYLON.TransformBlock('worldPos');
-  const worldViewProjection = new BABYLON.InputBlock('worldViewProjection');
+  const worldPos = new BABYLON.TransformBlock("worldPos");
+  const worldViewProjection = new BABYLON.InputBlock("worldViewProjection");
   worldViewProjection.setAsSystemValue(BABYLON.NodeMaterialSystemValues.WorldViewProjection);
 
-  const worldPosMult = new BABYLON.MultiplyBlock('worldPosMult');
+  const worldPosMult = new BABYLON.MultiplyBlock("worldPosMult");
   worldPosMult.left.connectTo(worldViewProjection.output);
   worldPosMult.right.connectTo(worldPos.output);
 
   // Fragment output
-  const fragmentOutput = new BABYLON.FragmentOutputBlock('fragmentOutput');
-  const color = new BABYLON.ColorBlock('color');
+  const fragmentOutput = new BABYLON.FragmentOutputBlock("fragmentOutput");
+  const color = new BABYLON.ColorBlock("color");
   color.value = new BABYLON.Color3(1, 0, 0);
 
   fragmentOutput.rgb.connectTo(color.output);
@@ -359,7 +349,7 @@ class MaterialSwitcher {
 const materials = [
   createPBRMaterial(scene),
   createGlassMaterial(scene),
-  createMetallicMaterial(scene)
+  createMetallicMaterial(scene),
 ];
 
 const switcher = new MaterialSwitcher(mesh, materials);
@@ -396,9 +386,9 @@ async function createRagdoll(scene, mesh) {
         `bone_${index}`,
         {
           radius: 0.05,
-          height: 0.3
+          height: 0.3,
         },
-        scene
+        scene,
       );
 
       capsule.position = boneMatrix.position.clone();
@@ -409,7 +399,7 @@ async function createRagdoll(scene, mesh) {
         capsule,
         BABYLON.PhysicsShapeType.CAPSULE,
         { mass: 0.5, friction: 0.5 },
-        scene
+        scene,
       );
 
       bonePhysics.push({ bone, capsule, aggregate });
@@ -428,13 +418,10 @@ async function createRagdoll(scene, mesh) {
         pivotA: new BABYLON.Vector3(0, 0.15, 0),
         pivotB: new BABYLON.Vector3(0, -0.15, 0),
         axisA: new BABYLON.Vector3(1, 0, 0),
-        axisB: new BABYLON.Vector3(1, 0, 0)
+        axisB: new BABYLON.Vector3(1, 0, 0),
       },
-      [
-        { body: current.aggregate.body },
-        { body: next.aggregate.body }
-      ],
-      scene
+      [{ body: current.aggregate.body }, { body: next.aggregate.body }],
+      scene,
     );
   }
 
@@ -447,9 +434,9 @@ async function createRagdoll(scene, mesh) {
 ```javascript
 function createCloth(scene, width = 10, height = 10, segments = 20) {
   const cloth = BABYLON.MeshBuilder.CreateGround(
-    'cloth',
+    "cloth",
     { width, height, subdivisions: segments },
-    scene
+    scene,
   );
 
   // Make updatable
@@ -464,7 +451,7 @@ function createCloth(scene, width = 10, height = 10, segments = 20) {
     particles.push({
       position: new BABYLON.Vector3(positions[i], positions[i + 1], positions[i + 2]),
       previous: new BABYLON.Vector3(positions[i], positions[i + 1], positions[i + 2]),
-      pinned: positions[i + 1] >= height / 2 - 0.1 // Pin top row
+      pinned: positions[i + 1] >= height / 2 - 0.1, // Pin top row
     });
   }
 
@@ -475,7 +462,7 @@ function createCloth(scene, width = 10, height = 10, segments = 20) {
 
   scene.onBeforeRenderObservable.add(() => {
     // Verlet integration
-    particles.forEach(particle => {
+    particles.forEach((particle) => {
       if (particle.pinned) return;
 
       const velocity = particle.position.subtract(particle.previous);
@@ -497,7 +484,7 @@ function createCloth(scene, width = 10, height = 10, segments = 20) {
         const distance = diff.length();
         const restDistance = width / segments;
 
-        const correction = diff.scale((distance - restDistance) / distance * 0.5);
+        const correction = diff.scale(((distance - restDistance) / distance) * 0.5);
 
         if (!p1.pinned) p1.position.subtractInPlace(correction);
         if (!p2.pinned) p2.position.addInPlace(correction);
@@ -506,7 +493,7 @@ function createCloth(scene, width = 10, height = 10, segments = 20) {
 
     // Update mesh
     const newPositions = [];
-    particles.forEach(p => {
+    particles.forEach((p) => {
       newPositions.push(p.position.x, p.position.y, p.position.z);
     });
 
@@ -527,9 +514,9 @@ class Vehicle {
 
     // Create chassis
     this.chassis = BABYLON.MeshBuilder.CreateBox(
-      'chassis',
+      "chassis",
       { width: 2, height: 0.5, depth: 4 },
-      scene
+      scene,
     );
     this.chassis.position = position;
 
@@ -537,7 +524,7 @@ class Vehicle {
       this.chassis,
       BABYLON.PhysicsShapeType.BOX,
       { mass: 1000, friction: 0.5 },
-      scene
+      scene,
     );
 
     this.body = chassisAggregate.body;
@@ -545,17 +532,17 @@ class Vehicle {
     // Create wheels
     this.wheels = [];
     const wheelPositions = [
-      new BABYLON.Vector3(-0.8, -0.5, 1.5),   // Front left
-      new BABYLON.Vector3(0.8, -0.5, 1.5),    // Front right
-      new BABYLON.Vector3(-0.8, -0.5, -1.5),  // Rear left
-      new BABYLON.Vector3(0.8, -0.5, -1.5)    // Rear right
+      new BABYLON.Vector3(-0.8, -0.5, 1.5), // Front left
+      new BABYLON.Vector3(0.8, -0.5, 1.5), // Front right
+      new BABYLON.Vector3(-0.8, -0.5, -1.5), // Rear left
+      new BABYLON.Vector3(0.8, -0.5, -1.5), // Rear right
     ];
 
     wheelPositions.forEach((pos, index) => {
       const wheel = BABYLON.MeshBuilder.CreateCylinder(
         `wheel${index}`,
         { diameter: 0.8, height: 0.3, tessellation: 16 },
-        scene
+        scene,
       );
       wheel.rotation.z = Math.PI / 2;
       wheel.parent = this.chassis;
@@ -577,28 +564,28 @@ class Vehicle {
   setupControls() {
     const keys = {};
 
-    window.addEventListener('keydown', (e) => {
+    window.addEventListener("keydown", (e) => {
       keys[e.code] = true;
     });
 
-    window.addEventListener('keyup', (e) => {
+    window.addEventListener("keyup", (e) => {
       keys[e.code] = false;
     });
 
     this.scene.onBeforeRenderObservable.add(() => {
       // Throttle
-      if (keys['KeyW']) {
+      if (keys["KeyW"]) {
         this.throttle = Math.min(this.throttle + 0.1, 1);
-      } else if (keys['KeyS']) {
+      } else if (keys["KeyS"]) {
         this.throttle = Math.max(this.throttle - 0.1, -0.5);
       } else {
         this.throttle *= 0.95; // Decay
       }
 
       // Steering
-      if (keys['KeyA']) {
+      if (keys["KeyA"]) {
         this.steering = Math.max(this.steering - 0.1, -1);
-      } else if (keys['KeyD']) {
+      } else if (keys["KeyD"]) {
         this.steering = Math.min(this.steering + 0.1, 1);
       } else {
         this.steering *= 0.9; // Center
@@ -608,10 +595,7 @@ class Vehicle {
       const forward = this.chassis.forward;
       const force = forward.scale(this.throttle * this.acceleration * 1000);
 
-      this.body.applyForce(
-        force,
-        this.chassis.position
-      );
+      this.body.applyForce(force, this.chassis.position);
 
       // Apply turning torque
       const torque = new BABYLON.Vector3(0, this.steering * this.turnSpeed * 100, 0);
@@ -642,11 +626,11 @@ const vehicle = new Vehicle(scene, new BABYLON.Vector3(0, 5, 0));
 
 ```javascript
 function createFireEffect(scene, position) {
-  const fire = new BABYLON.ParticleSystem('fire', 2000, scene);
+  const fire = new BABYLON.ParticleSystem("fire", 2000, scene);
 
   fire.particleTexture = new BABYLON.Texture(
-    'https://assets.babylonjs.com/textures/flare.png',
-    scene
+    "https://assets.babylonjs.com/textures/flare.png",
+    scene,
   );
 
   fire.emitter = position;
@@ -698,11 +682,11 @@ function createFireEffect(scene, position) {
 
 ```javascript
 function createSmokeEffect(scene, position) {
-  const smoke = new BABYLON.ParticleSystem('smoke', 1000, scene);
+  const smoke = new BABYLON.ParticleSystem("smoke", 1000, scene);
 
   smoke.particleTexture = new BABYLON.Texture(
-    'https://assets.babylonjs.com/textures/cloud.png',
-    scene
+    "https://assets.babylonjs.com/textures/cloud.png",
+    scene,
   );
 
   smoke.emitter = position;
@@ -753,11 +737,11 @@ function createSmokeEffect(scene, position) {
 
 ```javascript
 function createGPUParticles(scene, position) {
-  const gpu = new BABYLON.GPUParticleSystem('gpu', { capacity: 50000 }, scene);
+  const gpu = new BABYLON.GPUParticleSystem("gpu", { capacity: 50000 }, scene);
 
   gpu.particleTexture = new BABYLON.Texture(
-    'https://assets.babylonjs.com/textures/flare.png',
-    scene
+    "https://assets.babylonjs.com/textures/flare.png",
+    scene,
   );
 
   gpu.emitter = position;
@@ -808,10 +792,10 @@ function createGPUParticles(scene, position) {
 ```javascript
 function createCinematicPipeline(scene, camera) {
   const pipeline = new BABYLON.DefaultRenderingPipeline(
-    'cinematic',
+    "cinematic",
     true, // HDR
     scene,
-    [camera]
+    [camera],
   );
 
   // Enable features
@@ -869,14 +853,14 @@ function createCinematicPipeline(scene, camera) {
 
 ```javascript
 function createOutlineEffect(scene, meshes) {
-  const highlightLayer = new BABYLON.HighlightLayer('highlight', scene);
+  const highlightLayer = new BABYLON.HighlightLayer("highlight", scene);
 
-  meshes.forEach(mesh => {
+  meshes.forEach((mesh) => {
     highlightLayer.addMesh(mesh, BABYLON.Color3.Green());
   });
 
   // Glow layer for emissive
-  const glowLayer = new BABYLON.GlowLayer('glow', scene);
+  const glowLayer = new BABYLON.GlowLayer("glow", scene);
   glowLayer.intensity = 0.5;
 
   return { highlightLayer, glowLayer };
@@ -888,16 +872,16 @@ function createOutlineEffect(scene, meshes) {
 ```javascript
 function createCustomPostProcess(camera) {
   const postProcess = new BABYLON.PostProcess(
-    'customPP',
-    './shaders/custom', // Path to shader files
-    ['time'], // Uniforms
-    ['textureSampler'], // Samplers
+    "customPP",
+    "./shaders/custom", // Path to shader files
+    ["time"], // Uniforms
+    ["textureSampler"], // Samplers
     1.0, // Sampling ratio
-    camera
+    camera,
   );
 
   postProcess.onApply = (effect) => {
-    effect.setFloat('time', performance.now() / 1000);
+    effect.setFloat("time", performance.now() / 1000);
   };
 
   return postProcess;
@@ -923,64 +907,60 @@ function createCustomPostProcess(camera) {
 ### 3D Menu System
 
 ```javascript
-import { AdvancedDynamicTexture } from '@babylonjs/gui/2D/advancedDynamicTexture.js';
-import { StackPanel } from '@babylonjs/gui/2D/controls/stackPanel.js';
-import { Button } from '@babylonjs/gui/2D/controls/button.js';
-import { TextBlock } from '@babylonjs/gui/2D/controls/textBlock.js';
+import { AdvancedDynamicTexture } from "@babylonjs/gui/2D/advancedDynamicTexture.js";
+import { StackPanel } from "@babylonjs/gui/2D/controls/stackPanel.js";
+import { Button } from "@babylonjs/gui/2D/controls/button.js";
+import { TextBlock } from "@babylonjs/gui/2D/controls/textBlock.js";
 
 function create3DMenu(scene) {
   // Create plane for menu
-  const plane = BABYLON.MeshBuilder.CreatePlane('menuPlane', { size: 4 }, scene);
+  const plane = BABYLON.MeshBuilder.CreatePlane("menuPlane", { size: 4 }, scene);
   plane.position = new BABYLON.Vector3(0, 2, 0);
 
   // Create texture for plane
-  const advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateForMesh(
-    plane,
-    1024,
-    1024
-  );
+  const advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateForMesh(plane, 1024, 1024);
 
   // Create panel
   const panel = new BABYLON.GUI.StackPanel();
-  panel.width = '600px';
+  panel.width = "600px";
   panel.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
   panel.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_CENTER;
   advancedTexture.addControl(panel);
 
   // Title
   const title = new BABYLON.GUI.TextBlock();
-  title.text = 'Main Menu';
-  title.height = '80px';
-  title.color = 'white';
+  title.text = "Main Menu";
+  title.height = "80px";
+  title.color = "white";
   title.fontSize = 48;
-  title.fontWeight = 'bold';
+  title.fontWeight = "bold";
   panel.addControl(title);
 
   // Buttons
   const buttonData = [
-    { text: 'Start Game', action: () => console.log('Start') },
-    { text: 'Options', action: () => console.log('Options') },
-    { text: 'Exit', action: () => console.log('Exit') }
+    { text: "Start Game", action: () => console.log("Start") },
+    { text: "Options", action: () => console.log("Options") },
+    { text: "Exit", action: () => console.log("Exit") },
   ];
 
-  buttonData.forEach(data => {
-    const button = BABYLON.GUI.Button.CreateSimpleButton('button', data.text);
-    button.width = '400px';
-    button.height = '60px';
-    button.color = 'white';
-    button.background = '#4fc3f7';
+  buttonData.forEach((data) => {
+    const button = BABYLON.GUI.Button.CreateSimpleButton("button", data.text);
+    button.width = "400px";
+    button.height = "60px";
+    button.color = "white";
+    button.background = "#4fc3f7";
     button.cornerRadius = 8;
     button.thickness = 0;
     button.fontSize = 24;
-    button.paddingTop = '10px';
-    button.paddingBottom = '10px';
+    button.paddingTop = "10px";
+    button.paddingBottom = "10px";
 
     button.onPointerEnterObservable.add(() => {
-      button.background = '#29b6f6';
+      button.background = "#29b6f6";
     });
 
     button.onPointerOutObservable.add(() => {
-      button.background = '#4fc3f7';
+      button.background = "#4fc3f7";
     });
 
     button.onPointerUpObservable.add(data.action);
@@ -996,27 +976,27 @@ function create3DMenu(scene) {
 
 ```javascript
 function createHUD(scene, engine) {
-  const advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI('HUD');
+  const advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("HUD");
 
   // FPS counter
   const fpsText = new BABYLON.GUI.TextBlock();
-  fpsText.text = 'FPS: 60';
-  fpsText.color = 'white';
+  fpsText.text = "FPS: 60";
+  fpsText.color = "white";
   fpsText.fontSize = 18;
   fpsText.textHorizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
   fpsText.textVerticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
-  fpsText.paddingTop = '10px';
-  fpsText.paddingRight = '10px';
+  fpsText.paddingTop = "10px";
+  fpsText.paddingRight = "10px";
   advancedTexture.addControl(fpsText);
 
   // Health bar
   const healthContainer = new BABYLON.GUI.Rectangle();
-  healthContainer.width = '200px';
-  healthContainer.height = '30px';
+  healthContainer.width = "200px";
+  healthContainer.height = "30px";
   healthContainer.cornerRadius = 4;
-  healthContainer.color = 'white';
+  healthContainer.color = "white";
   healthContainer.thickness = 2;
-  healthContainer.background = 'rgba(0, 0, 0, 0.5)';
+  healthContainer.background = "rgba(0, 0, 0, 0.5)";
   healthContainer.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
   healthContainer.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
   healthContainer.left = 10;
@@ -1024,9 +1004,9 @@ function createHUD(scene, engine) {
   advancedTexture.addControl(healthContainer);
 
   const healthBar = new BABYLON.GUI.Rectangle();
-  healthBar.width = '100%';
-  healthBar.height = '100%';
-  healthBar.background = '#4caf50';
+  healthBar.width = "100%";
+  healthBar.height = "100%";
+  healthBar.background = "#4caf50";
   healthBar.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
   healthContainer.addControl(healthBar);
 
@@ -1050,13 +1030,13 @@ async function createVRScene(scene) {
   // Create environment
   const env = scene.createDefaultEnvironment({
     createGround: true,
-    createSkybox: true
+    createSkybox: true,
   });
 
   // Enable WebXR
   const xrHelper = await scene.createDefaultXRExperienceAsync({
     floorMeshes: [env.ground],
-    disableTeleportation: false
+    disableTeleportation: false,
   });
 
   // Controller input
@@ -1064,19 +1044,19 @@ async function createVRScene(scene) {
     controller.onMotionControllerInitObservable.add((motionController) => {
       // Get components
       const trigger = motionController.getMainComponent();
-      const squeeze = motionController.getComponent('squeeze');
-      const thumbstick = motionController.getComponent('thumbstick');
+      const squeeze = motionController.getComponent("squeeze");
+      const thumbstick = motionController.getComponent("thumbstick");
 
       // Trigger press
       trigger.onButtonStateChangedObservable.add((component) => {
         if (component.pressed) {
-          console.log('Trigger pressed');
+          console.log("Trigger pressed");
           // Perform raycast
           const ray = controller.getWorldPointerRayToRef(new BABYLON.Ray());
           const hit = scene.pickWithRay(ray);
 
           if (hit.pickedMesh) {
-            console.log('Hit:', hit.pickedMesh.name);
+            console.log("Hit:", hit.pickedMesh.name);
           }
         }
       });
@@ -1085,7 +1065,7 @@ async function createVRScene(scene) {
       if (squeeze) {
         squeeze.onButtonStateChangedObservable.add((component) => {
           if (component.pressed) {
-            console.log('Grip pressed');
+            console.log("Grip pressed");
           }
         });
       }
@@ -1093,7 +1073,7 @@ async function createVRScene(scene) {
       // Thumbstick
       if (thumbstick) {
         thumbstick.onAxisValueChangedObservable.add((axes) => {
-          console.log('Thumbstick:', axes.x, axes.y);
+          console.log("Thumbstick:", axes.x, axes.y);
         });
       }
     });
@@ -1111,12 +1091,12 @@ function setupVRTeleportation(xrHelper, validTargets) {
 
   // Custom teleportation behavior
   xrHelper.teleportation.onTargetMeshSelectedObservable.add((mesh) => {
-    console.log('Teleporting to:', mesh.name);
+    console.log("Teleporting to:", mesh.name);
   });
 
   // Change teleportation arc color
-  xrHelper.teleportation.defaultTargetMeshOptions.teleportationFillColor = '#4fc3f7';
-  xrHelper.teleportation.defaultTargetMeshOptions.teleportationBorderColor = '#29b6f6';
+  xrHelper.teleportation.defaultTargetMeshOptions.teleportationFillColor = "#4fc3f7";
+  xrHelper.teleportation.defaultTargetMeshOptions.teleportationBorderColor = "#29b6f6";
 }
 ```
 
@@ -1131,7 +1111,7 @@ function optimizeWithOctree(scene) {
   const octree = scene.createOrUpdateSelectionOctree(32, 2);
 
   // Enable octree for all meshes
-  scene.meshes.forEach(mesh => {
+  scene.meshes.forEach((mesh) => {
     mesh.alwaysSelectAsActiveMesh = false;
   });
 
@@ -1147,11 +1127,7 @@ function createInstancedMeshes(scene, template, count) {
 
   for (let i = 0; i < count; i++) {
     const instance = template.createInstance(`instance${i}`);
-    instance.position = new BABYLON.Vector3(
-      Math.random() * 50 - 25,
-      0,
-      Math.random() * 50 - 25
-    );
+    instance.position = new BABYLON.Vector3(Math.random() * 50 - 25, 0, Math.random() * 50 - 25);
     instance.rotation.y = Math.random() * Math.PI * 2;
 
     instances.push(instance);
@@ -1168,11 +1144,7 @@ function createThinInstances(mesh, count) {
   const matrices = [];
 
   for (let i = 0; i < count; i++) {
-    const matrix = BABYLON.Matrix.Translation(
-      Math.random() * 50 - 25,
-      0,
-      Math.random() * 50 - 25
-    );
+    const matrix = BABYLON.Matrix.Translation(Math.random() * 50 - 25, 0, Math.random() * 50 - 25);
 
     matrices.push(matrix);
   }
@@ -1183,7 +1155,7 @@ function createThinInstances(mesh, count) {
     matrix.copyToArray(buffer, index * 16);
   });
 
-  mesh.thinInstanceSetBuffer('matrix', buffer, 16);
+  mesh.thinInstanceSetBuffer("matrix", buffer, 16);
 }
 ```
 

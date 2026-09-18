@@ -42,6 +42,7 @@ Complete guide for exporting Lottie animations from After Effects using the Body
 ### Recommended Settings for Web
 
 **Essential:**
+
 - ✅ **Glyphs** - Convert text to shapes (reduces file size)
 - ✅ **Hidden** - Skip hidden layers
 - ✅ **Skip images that aren't used**
@@ -49,6 +50,7 @@ Complete guide for exporting Lottie animations from After Effects using the Body
 - ⬜ **Export Mode: Demo** (uncheck for production)
 
 **Advanced:**
+
 - **Export Format:** JSON or dotLottie (.lottie)
 - **dotLottie:** Recommended for production (90% smaller)
 - **Segments:** Export specific frame ranges
@@ -66,6 +68,7 @@ Complete guide for exporting Lottie animations from After Effects using the Body
 ```
 
 **Expected File Sizes:**
+
 - Simple icon animation: 5-20 KB
 - Complex character animation: 50-150 KB
 - Heavy illustration animation: 150-500 KB
@@ -76,6 +79,7 @@ Complete guide for exporting Lottie animations from After Effects using the Body
 ### ✅ Fully Supported
 
 **Shapes:**
+
 - Shape layers (rect, ellipse, polygon, star)
 - Paths and bezier curves
 - Stroke and fill
@@ -84,38 +88,45 @@ Complete guide for exporting Lottie animations from After Effects using the Body
 - Repeaters
 
 **Transforms:**
+
 - Position, scale, rotation, opacity
 - Anchor points
 - Parenting
 
 **Effects:**
+
 - Stroke (via shape layers)
 - Fill (via shape layers)
 - Trim paths
 - Merge paths
 
 **Masks:**
+
 - Shape masks
 - Alpha mattes
 - Luma mattes (partial)
 
 **Text:**
+
 - As glyphs (converted to shapes)
 - Character animation (requires glyphs)
 
 ### ⚠️ Partial Support
 
 **Expressions:**
+
 - Simple expressions work
 - Complex expressions may fail
 - Test thoroughly after export
 
 **Blending Modes:**
+
 - Limited support
 - Normal, Add, Multiply work best
 - Others may render incorrectly
 
 **Track Mattes:**
+
 - Alpha mattes: Good support
 - Luma mattes: Limited support
 - Inverted mattes: May fail
@@ -123,17 +134,20 @@ Complete guide for exporting Lottie animations from After Effects using the Body
 ### ❌ Not Supported
 
 **Layer Effects:**
+
 - Drop Shadow → Use shape layer shadow
 - Glow → Use shape layer glow
 - Bevel & Emboss → Pre-render as image
 - All built-in effects → Convert to shapes
 
 **3D Layers:**
+
 - 3D transforms
 - Cameras (except 2D camera moves)
 - Lights
 
 **Advanced:**
+
 - Adjustment layers
 - Time remapping
 - Frame blending
@@ -145,12 +159,14 @@ Complete guide for exporting Lottie animations from After Effects using the Body
 ### 1. Composition Setup
 
 **Before Animating:**
+
 - Work at 1920x1080 or smaller
 - Use round numbers for dimensions
 - 30 fps or 60 fps (avoid 23.976, 29.97)
 - Keep composition under 5 seconds when possible
 
 **Comp Settings:**
+
 ```
 Width: 1920px (or target size)
 Height: 1080px
@@ -161,6 +177,7 @@ Duration: 2-5 seconds
 ### 2. Shape Layer Optimization
 
 **DO:**
+
 ```
 ✅ Use Shape Layers (not vector layers from AI)
 ✅ Combine shapes with Merge Paths
@@ -170,6 +187,7 @@ Duration: 2-5 seconds
 ```
 
 **DON'T:**
+
 ```
 ❌ Import AI files directly (convert to shapes)
 ❌ Use too many shapes (>50 layers = slow)
@@ -180,12 +198,14 @@ Duration: 2-5 seconds
 ### 3. Image Optimization
 
 **Embedded Images:**
+
 - Resize to actual displayed size
 - Use JPG for photos (not PNG)
 - Compress before import (TinyPNG)
 - Avoid embedding if possible
 
 **Alternative:**
+
 - Use shape layers instead
 - Pre-render complex elements
 - Load images separately in code
@@ -193,6 +213,7 @@ Duration: 2-5 seconds
 ### 4. Text Optimization
 
 **Recommended Approach:**
+
 ```
 1. Create text layer
 2. Enable "Glyphs" in Bodymovin settings
@@ -200,6 +221,7 @@ Duration: 2-5 seconds
 ```
 
 **Manual Alternative:**
+
 ```
 1. Select text layer
 2. Right-click → Create Shapes from Text
@@ -208,6 +230,7 @@ Duration: 2-5 seconds
 ```
 
 **Benefits:**
+
 - No font loading required
 - Smaller file size
 - Guaranteed consistent rendering
@@ -215,6 +238,7 @@ Duration: 2-5 seconds
 ### 5. Animation Optimization
 
 **Keyframe Reduction:**
+
 ```javascript
 // After Effects: Select keyframes
 // Right-click → Keyframe Assistant → Reduce Keys
@@ -222,6 +246,7 @@ Duration: 2-5 seconds
 ```
 
 **Simplify Paths:**
+
 ```javascript
 // Illustrator/After Effects
 // Object → Path → Simplify
@@ -229,6 +254,7 @@ Duration: 2-5 seconds
 ```
 
 **Limit Properties:**
+
 ```
 Only animate:
   Position, Scale, Rotation, Opacity
@@ -244,12 +270,14 @@ Avoid animating:
 ### Issue 1: Huge File Size (>500 KB)
 
 **Causes:**
+
 - Embedded images
 - Too many keyframes
 - Complex paths
 - Text not converted to glyphs
 
 **Solutions:**
+
 ```
 1. Enable "Glyphs" setting
 2. Enable "Skip images that aren't used"
@@ -262,11 +290,13 @@ Avoid animating:
 ### Issue 2: Animation Doesn't Match Preview
 
 **Causes:**
+
 - Unsupported features used
 - Expression errors
 - Blending mode issues
 
 **Solutions:**
+
 ```
 1. Check Bodymovin console for warnings
 2. Replace unsupported features
@@ -278,11 +308,13 @@ Avoid animating:
 ### Issue 3: Text Rendering Incorrectly
 
 **Causes:**
+
 - Font not supported
 - Glyphs not enabled
 - Special characters
 
 **Solutions:**
+
 ```
 1. Enable "Glyphs" in Bodymovin settings
 2. OR manually: Create Shapes from Text
@@ -293,11 +325,13 @@ Avoid animating:
 ### Issue 4: Colors Look Different
 
 **Causes:**
+
 - Color space mismatch
 - Blending mode issues
 - Opacity calculation differences
 
 **Solutions:**
+
 ```
 1. Work in sRGB color space
 2. Use Normal blending mode

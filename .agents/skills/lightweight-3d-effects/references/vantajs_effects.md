@@ -34,16 +34,16 @@ Complete reference for Vanta.js - animated WebGL backgrounds powered by Three.js
 <div id="vanta-bg"></div>
 
 <script>
-VANTA.WAVES({
-  el: "#vanta-bg",
-  mouseControls: true,
-  touchControls: true,
-  gyroControls: false,
-  minHeight: 200.00,
-  minWidth: 200.00,
-  scale: 1.00,
-  scaleMobile: 1.00
-});
+  VANTA.WAVES({
+    el: "#vanta-bg",
+    mouseControls: true,
+    touchControls: true,
+    gyroControls: false,
+    minHeight: 200.0,
+    minWidth: 200.0,
+    scale: 1.0,
+    scaleMobile: 1.0,
+  });
 </script>
 ```
 
@@ -54,12 +54,12 @@ npm install vanta
 ```
 
 ```javascript
-import * as THREE from 'three';
-import WAVES from 'vanta/dist/vanta.waves.min.js';
+import * as THREE from "three";
+import WAVES from "vanta/dist/vanta.waves.min.js";
 
 const vantaEffect = WAVES({
   el: "#vanta-bg",
-  THREE: THREE
+  THREE: THREE,
 });
 ```
 
@@ -79,27 +79,27 @@ VANTA.WAVES({
   mouseControls: true,
   touchControls: true,
   gyroControls: false,
-  minHeight: 200.00,
-  minWidth: 200.00,
-  scale: 1.00,
-  scaleMobile: 1.00,
-  color: 0x23153c,         // Hex number
-  shininess: 30.00,
-  waveHeight: 15.00,
+  minHeight: 200.0,
+  minWidth: 200.0,
+  scale: 1.0,
+  scaleMobile: 1.0,
+  color: 0x23153c, // Hex number
+  shininess: 30.0,
+  waveHeight: 15.0,
   waveSpeed: 0.75,
-  zoom: 0.65
+  zoom: 0.65,
 });
 ```
 
 **Options**:
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `color` | Number | 0x23153c | Wave color (hex number) |
-| `shininess` | Number | 30 | Surface reflectivity (0-100) |
-| `waveHeight` | Number | 15 | Wave amplitude |
-| `waveSpeed` | Number | 0.75 | Animation speed (0-2) |
-| `zoom` | Number | 0.65 | Camera zoom level |
+| Option       | Type   | Default  | Description                  |
+| ------------ | ------ | -------- | ---------------------------- |
+| `color`      | Number | 0x23153c | Wave color (hex number)      |
+| `shininess`  | Number | 30       | Surface reflectivity (0-100) |
+| `waveHeight` | Number | 15       | Wave amplitude               |
+| `waveSpeed`  | Number | 0.75     | Animation speed (0-2)        |
+| `zoom`       | Number | 0.65     | Camera zoom level            |
 
 ---
 
@@ -115,29 +115,29 @@ VANTA.CLOUDS({
   mouseControls: true,
   touchControls: true,
   gyroControls: false,
-  minHeight: 200.00,
-  minWidth: 200.00,
+  minHeight: 200.0,
+  minWidth: 200.0,
   skyColor: 0x68b8d7,
   cloudColor: 0xadc1de,
   cloudShadowColor: 0x183550,
   sunColor: 0xff9919,
   sunGlareColor: 0xff6633,
   sunlightColor: 0xff9933,
-  speed: 1.00
+  speed: 1.0,
 });
 ```
 
 **Options**:
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `skyColor` | Number | 0x68b8d7 | Sky background color |
-| `cloudColor` | Number | 0xadc1de | Cloud base color |
-| `cloudShadowColor` | Number | 0x183550 | Cloud shadow color |
-| `sunColor` | Number | 0xff9919 | Sun body color |
-| `sunGlareColor` | Number | 0xff6633 | Sun glare color |
-| `sunlightColor` | Number | 0xff9933 | Sunlight color |
-| `speed` | Number | 1.00 | Cloud movement speed |
+| Option             | Type   | Default  | Description          |
+| ------------------ | ------ | -------- | -------------------- |
+| `skyColor`         | Number | 0x68b8d7 | Sky background color |
+| `cloudColor`       | Number | 0xadc1de | Cloud base color     |
+| `cloudShadowColor` | Number | 0x183550 | Cloud shadow color   |
+| `sunColor`         | Number | 0xff9919 | Sun body color       |
+| `sunGlareColor`    | Number | 0xff6633 | Sun glare color      |
+| `sunlightColor`    | Number | 0xff9933 | Sunlight color       |
+| `speed`            | Number | 1.00     | Cloud movement speed |
 
 ---
 
@@ -153,39 +153,39 @@ VANTA.BIRDS({
   mouseControls: true,
   touchControls: true,
   gyroControls: false,
-  minHeight: 200.00,
-  minWidth: 200.00,
-  scale: 1.00,
-  scaleMobile: 1.00,
+  minHeight: 200.0,
+  minWidth: 200.0,
+  scale: 1.0,
+  scaleMobile: 1.0,
   backgroundColor: 0x23153c,
   color1: 0xff0090,
   color2: 0xff6633,
-  colorMode: "lerp",       // "lerp" or "lerpGradient"
-  birdSize: 1.00,
-  wingSpan: 20.00,
-  speedLimit: 5.00,
-  separation: 20.00,
-  alignment: 20.00,
-  cohesion: 20.00,
-  quantity: 3.00
+  colorMode: "lerp", // "lerp" or "lerpGradient"
+  birdSize: 1.0,
+  wingSpan: 20.0,
+  speedLimit: 5.0,
+  separation: 20.0,
+  alignment: 20.0,
+  cohesion: 20.0,
+  quantity: 3.0,
 });
 ```
 
 **Options**:
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `backgroundColor` | Number | 0x23153c | Scene background |
-| `color1` | Number | 0xff0090 | Primary bird color |
-| `color2` | Number | 0xff6633 | Secondary bird color |
-| `colorMode` | String | "lerp" | Color blending mode |
-| `birdSize` | Number | 1.00 | Bird scale multiplier |
-| `wingSpan` | Number | 20 | Wing spread distance |
-| `speedLimit` | Number | 5 | Maximum flight speed |
-| `separation` | Number | 20 | Avoid crowding force |
-| `alignment` | Number | 20 | Align with neighbors |
-| `cohesion` | Number | 20 | Move toward center |
-| `quantity` | Number | 3 | Number of birds |
+| Option            | Type   | Default  | Description           |
+| ----------------- | ------ | -------- | --------------------- |
+| `backgroundColor` | Number | 0x23153c | Scene background      |
+| `color1`          | Number | 0xff0090 | Primary bird color    |
+| `color2`          | Number | 0xff6633 | Secondary bird color  |
+| `colorMode`       | String | "lerp"   | Color blending mode   |
+| `birdSize`        | Number | 1.00     | Bird scale multiplier |
+| `wingSpan`        | Number | 20       | Wing spread distance  |
+| `speedLimit`      | Number | 5        | Maximum flight speed  |
+| `separation`      | Number | 20       | Avoid crowding force  |
+| `alignment`       | Number | 20       | Align with neighbors  |
+| `cohesion`        | Number | 20       | Move toward center    |
+| `quantity`        | Number | 3        | Number of birds       |
 
 ---
 
@@ -201,29 +201,29 @@ VANTA.NET({
   mouseControls: true,
   touchControls: true,
   gyroControls: false,
-  minHeight: 200.00,
-  minWidth: 200.00,
-  scale: 1.00,
-  scaleMobile: 1.00,
+  minHeight: 200.0,
+  minWidth: 200.0,
+  scale: 1.0,
+  scaleMobile: 1.0,
   color: 0x3fafff,
   backgroundColor: 0x23153c,
-  points: 10.00,
-  maxDistance: 20.00,
-  spacing: 15.00,
-  showDots: true
+  points: 10.0,
+  maxDistance: 20.0,
+  spacing: 15.0,
+  showDots: true,
 });
 ```
 
 **Options**:
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `color` | Number | 0x3fafff | Line/point color |
-| `backgroundColor` | Number | 0x23153c | Background color |
-| `points` | Number | 10 | Number of points |
-| `maxDistance` | Number | 20 | Max connection distance |
-| `spacing` | Number | 15 | Point spacing |
-| `showDots` | Boolean | true | Display dots |
+| Option            | Type    | Default  | Description             |
+| ----------------- | ------- | -------- | ----------------------- |
+| `color`           | Number  | 0x3fafff | Line/point color        |
+| `backgroundColor` | Number  | 0x23153c | Background color        |
+| `points`          | Number  | 10       | Number of points        |
+| `maxDistance`     | Number  | 20       | Max connection distance |
+| `spacing`         | Number  | 15       | Point spacing           |
+| `showDots`        | Boolean | true     | Display dots            |
 
 ---
 
@@ -239,24 +239,24 @@ VANTA.CELLS({
   mouseControls: true,
   touchControls: true,
   gyroControls: false,
-  minHeight: 200.00,
-  minWidth: 200.00,
-  scale: 1.00,
+  minHeight: 200.0,
+  minWidth: 200.0,
+  scale: 1.0,
   color1: 0x18b0c6,
   color2: 0xff6633,
-  size: 1.50,
-  speed: 1.00
+  size: 1.5,
+  speed: 1.0,
 });
 ```
 
 **Options**:
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `color1` | Number | 0x18b0c6 | Primary cell color |
-| `color2` | Number | 0xff6633 | Secondary cell color |
-| `size` | Number | 1.50 | Cell size multiplier |
-| `speed` | Number | 1.00 | Growth animation speed |
+| Option   | Type   | Default  | Description            |
+| -------- | ------ | -------- | ---------------------- |
+| `color1` | Number | 0x18b0c6 | Primary cell color     |
+| `color2` | Number | 0xff6633 | Secondary cell color   |
+| `size`   | Number | 1.50     | Cell size multiplier   |
+| `speed`  | Number | 1.00     | Growth animation speed |
 
 ---
 
@@ -272,29 +272,29 @@ VANTA.FOG({
   mouseControls: true,
   touchControls: true,
   gyroControls: false,
-  minHeight: 200.00,
-  minWidth: 200.00,
+  minHeight: 200.0,
+  minWidth: 200.0,
   highlightColor: 0xff3f81,
   midtoneColor: 0xff1f51,
   lowlightColor: 0x2d1b46,
   baseColor: 0xffebff,
-  blurFactor: 0.60,
-  speed: 1.00,
-  zoom: 1.00
+  blurFactor: 0.6,
+  speed: 1.0,
+  zoom: 1.0,
 });
 ```
 
 **Options**:
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `highlightColor` | Number | 0xff3f81 | Bright fog color |
-| `midtoneColor` | Number | 0xff1f51 | Mid fog color |
-| `lowlightColor` | Number | 0x2d1b46 | Dark fog color |
-| `baseColor` | Number | 0xffebff | Base background |
-| `blurFactor` | Number | 0.60 | Blur intensity (0-1) |
-| `speed` | Number | 1.00 | Movement speed |
-| `zoom` | Number | 1.00 | Camera zoom |
+| Option           | Type   | Default  | Description          |
+| ---------------- | ------ | -------- | -------------------- |
+| `highlightColor` | Number | 0xff3f81 | Bright fog color     |
+| `midtoneColor`   | Number | 0xff1f51 | Mid fog color        |
+| `lowlightColor`  | Number | 0x2d1b46 | Dark fog color       |
+| `baseColor`      | Number | 0xffebff | Base background      |
+| `blurFactor`     | Number | 0.60     | Blur intensity (0-1) |
+| `speed`          | Number | 1.00     | Movement speed       |
+| `zoom`           | Number | 1.00     | Camera zoom          |
 
 ---
 
@@ -310,25 +310,25 @@ VANTA.GLOBE({
   mouseControls: true,
   touchControls: true,
   gyroControls: false,
-  minHeight: 200.00,
-  minWidth: 200.00,
-  scale: 1.00,
-  scaleMobile: 1.00,
+  minHeight: 200.0,
+  minWidth: 200.0,
+  scale: 1.0,
+  scaleMobile: 1.0,
   color: 0x3fafff,
   color2: 0xff6633,
-  size: 1.50,
-  backgroundColor: 0x23153c
+  size: 1.5,
+  backgroundColor: 0x23153c,
 });
 ```
 
 **Options**:
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `color` | Number | 0x3fafff | Primary globe color |
-| `color2` | Number | 0xff6633 | Secondary color |
-| `size` | Number | 1.50 | Globe size |
-| `backgroundColor` | Number | 0x23153c | Background color |
+| Option            | Type   | Default  | Description         |
+| ----------------- | ------ | -------- | ------------------- |
+| `color`           | Number | 0x3fafff | Primary globe color |
+| `color2`          | Number | 0xff6633 | Secondary color     |
+| `size`            | Number | 1.50     | Globe size          |
+| `backgroundColor` | Number | 0x23153c | Background color    |
 
 ---
 
@@ -344,21 +344,21 @@ VANTA.RINGS({
   mouseControls: true,
   touchControls: true,
   gyroControls: false,
-  minHeight: 200.00,
-  minWidth: 200.00,
-  scale: 1.00,
-  scaleMobile: 1.00,
+  minHeight: 200.0,
+  minWidth: 200.0,
+  scale: 1.0,
+  scaleMobile: 1.0,
   backgroundColor: 0x23153c,
-  color: 0xff3f81
+  color: 0xff3f81,
 });
 ```
 
 **Options**:
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
+| Option            | Type   | Default  | Description      |
+| ----------------- | ------ | -------- | ---------------- |
 | `backgroundColor` | Number | 0x23153c | Background color |
-| `color` | Number | 0xff3f81 | Ring color |
+| `color`           | Number | 0xff3f81 | Ring color       |
 
 ---
 
@@ -374,23 +374,23 @@ VANTA.HALO({
   mouseControls: true,
   touchControls: true,
   gyroControls: false,
-  minHeight: 200.00,
-  minWidth: 200.00,
+  minHeight: 200.0,
+  minWidth: 200.0,
   backgroundColor: 0x111122,
-  size: 1.50,
-  xOffset: 0.20,
-  yOffset: 0.10
+  size: 1.5,
+  xOffset: 0.2,
+  yOffset: 0.1,
 });
 ```
 
 **Options**:
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `backgroundColor` | Number | 0x111122 | Background color |
-| `size` | Number | 1.50 | Halo size |
-| `xOffset` | Number | 0.20 | Horizontal position |
-| `yOffset` | Number | 0.10 | Vertical position |
+| Option            | Type   | Default  | Description         |
+| ----------------- | ------ | -------- | ------------------- |
+| `backgroundColor` | Number | 0x111122 | Background color    |
+| `size`            | Number | 1.50     | Halo size           |
+| `xOffset`         | Number | 0.20     | Horizontal position |
+| `yOffset`         | Number | 0.10     | Vertical position   |
 
 ---
 
@@ -406,25 +406,25 @@ VANTA.TRUNK({
   mouseControls: true,
   touchControls: true,
   gyroControls: false,
-  minHeight: 200.00,
-  minWidth: 200.00,
-  scale: 1.00,
-  scaleMobile: 1.00,
+  minHeight: 200.0,
+  minWidth: 200.0,
+  scale: 1.0,
+  scaleMobile: 1.0,
   backgroundColor: 0x23153c,
   color: 0xff3f81,
-  spacing: 2.00,
-  chaos: 4.00
+  spacing: 2.0,
+  chaos: 4.0,
 });
 ```
 
 **Options**:
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `backgroundColor` | Number | 0x23153c | Background color |
-| `color` | Number | 0xff3f81 | Trunk color |
-| `spacing` | Number | 2.00 | Branch spacing |
-| `chaos` | Number | 4.00 | Randomness factor |
+| Option            | Type   | Default  | Description       |
+| ----------------- | ------ | -------- | ----------------- |
+| `backgroundColor` | Number | 0x23153c | Background color  |
+| `color`           | Number | 0xff3f81 | Trunk color       |
+| `spacing`         | Number | 2.00     | Branch spacing    |
+| `chaos`           | Number | 4.00     | Randomness factor |
 
 ---
 
@@ -440,20 +440,20 @@ VANTA.TOPOLOGY({
   mouseControls: true,
   touchControls: true,
   gyroControls: false,
-  minHeight: 200.00,
-  minWidth: 200.00,
-  scale: 1.00,
-  scaleMobile: 1.00,
+  minHeight: 200.0,
+  minWidth: 200.0,
+  scale: 1.0,
+  scaleMobile: 1.0,
   color: 0xff3f81,
-  backgroundColor: 0x23153c
+  backgroundColor: 0x23153c,
 });
 ```
 
 **Options**:
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `color` | Number | 0xff3f81 | Mesh line color |
+| Option            | Type   | Default  | Description      |
+| ----------------- | ------ | -------- | ---------------- |
+| `color`           | Number | 0xff3f81 | Mesh line color  |
 | `backgroundColor` | Number | 0x23153c | Background color |
 
 ---
@@ -470,27 +470,27 @@ VANTA.DOTS({
   mouseControls: true,
   touchControls: true,
   gyroControls: false,
-  minHeight: 200.00,
-  minWidth: 200.00,
-  scale: 1.00,
-  scaleMobile: 1.00,
+  minHeight: 200.0,
+  minWidth: 200.0,
+  scale: 1.0,
+  scaleMobile: 1.0,
   color: 0xff3f81,
   color2: 0xffffff,
   backgroundColor: 0x23153c,
-  size: 3.00,
-  spacing: 35.00
+  size: 3.0,
+  spacing: 35.0,
 });
 ```
 
 **Options**:
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `color` | Number | 0xff3f81 | Primary dot color |
-| `color2` | Number | 0xffffff | Secondary dot color |
-| `backgroundColor` | Number | 0x23153c | Background color |
-| `size` | Number | 3.00 | Dot size |
-| `spacing` | Number | 35.00 | Dot spacing |
+| Option            | Type   | Default  | Description         |
+| ----------------- | ------ | -------- | ------------------- |
+| `color`           | Number | 0xff3f81 | Primary dot color   |
+| `color2`          | Number | 0xffffff | Secondary dot color |
+| `backgroundColor` | Number | 0x23153c | Background color    |
+| `size`            | Number | 3.00     | Dot size            |
+| `spacing`         | Number | 35.00    | Dot spacing         |
 
 ---
 
@@ -506,13 +506,13 @@ VANTA.CLOUDS2({
   mouseControls: true,
   touchControls: true,
   gyroControls: false,
-  minHeight: 200.00,
-  minWidth: 200.00,
+  minHeight: 200.0,
+  minWidth: 200.0,
   backgroundColor: 0x23153c,
   skyColor: 0x3f7fb7,
   cloudColor: 0x28496e,
   lightColor: 0xff8800,
-  speed: 1.00
+  speed: 1.0,
 });
 ```
 
@@ -535,9 +535,9 @@ VANTA.RIPPLE({
   mouseControls: true,
   touchControls: true,
   gyroControls: false,
-  minHeight: 200.00,
-  minWidth: 200.00,
-  color: 0x3f7fb7
+  minHeight: 200.0,
+  minWidth: 200.0,
+  color: 0x3f7fb7,
 });
 ```
 
@@ -568,14 +568,15 @@ These options work with most/all Vanta effects.
 
 ```javascript
 // ✅ Correct
-color: 0xff3f81
+color: 0xff3f81;
 
 // ❌ Incorrect
-color: "#ff3f81"
-color: "0xff3f81"
+color: "#ff3f81";
+color: "0xff3f81";
 ```
 
 **Conversion**:
+
 ```javascript
 // String to number
 let colorString = "#ff3f81";
@@ -583,7 +584,7 @@ let colorNumber = parseInt(colorString.replace("#", "0x"));
 
 // Number to string
 let colorNumber = 0xff3f81;
-let colorString = "#" + colorNumber.toString(16).padStart(6, '0');
+let colorString = "#" + colorNumber.toString(16).padStart(6, "0");
 ```
 
 ---
@@ -614,13 +615,13 @@ Update effect options dynamically.
 ```javascript
 let vantaEffect = VANTA.WAVES({
   el: "#vanta-bg",
-  color: 0x23153c
+  color: 0x23153c,
 });
 
 // Update color
 vantaEffect.setOptions({
   color: 0xff3f81,
-  waveHeight: 20
+  waveHeight: 20,
 });
 ```
 
@@ -631,7 +632,7 @@ vantaEffect.setOptions({
 Manually trigger a resize recalculation.
 
 ```javascript
-window.addEventListener('resize', () => {
+window.addEventListener("resize", () => {
   vantaEffect.resize();
 });
 ```
@@ -645,9 +646,9 @@ window.addEventListener('resize', () => {
 ### React
 
 ```jsx
-import React, { useState, useEffect, useRef } from 'react';
-import * as THREE from 'three';
-import WAVES from 'vanta/dist/vanta.waves.min.js';
+import React, { useState, useEffect, useRef } from "react";
+import * as THREE from "three";
+import WAVES from "vanta/dist/vanta.waves.min.js";
 
 function VantaBackground() {
   const [vantaEffect, setVantaEffect] = useState(null);
@@ -665,8 +666,8 @@ function VantaBackground() {
           color: 0x23153c,
           shininess: 30,
           waveHeight: 15,
-          zoom: 0.65
-        })
+          zoom: 0.65,
+        }),
       );
     }
 
@@ -676,7 +677,7 @@ function VantaBackground() {
   }, [vantaEffect]);
 
   return (
-    <div ref={vantaRef} style={{ width: '100%', height: '100vh' }}>
+    <div ref={vantaRef} style={{ width: "100%", height: "100vh" }}>
       <h1>Content over Vanta</h1>
     </div>
   );
@@ -697,9 +698,9 @@ export default VantaBackground;
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
-import * as THREE from 'three';
-import WAVES from 'vanta/dist/vanta.waves.min.js';
+import { ref, onMounted, onUnmounted } from "vue";
+import * as THREE from "three";
+import WAVES from "vanta/dist/vanta.waves.min.js";
 
 const vantaRef = ref(null);
 let vantaEffect = null;
@@ -710,7 +711,7 @@ onMounted(() => {
     THREE: THREE,
     mouseControls: true,
     touchControls: true,
-    color: 0x23153c
+    color: 0x23153c,
   });
 });
 
@@ -732,26 +733,28 @@ onUnmounted(() => {
 ### Angular
 
 ```typescript
-import { Component, OnInit, OnDestroy, ElementRef, ViewChild } from '@angular/core';
-import * as THREE from 'three';
-import WAVES from 'vanta/dist/vanta.waves.min.js';
+import { Component, OnInit, OnDestroy, ElementRef, ViewChild } from "@angular/core";
+import * as THREE from "three";
+import WAVES from "vanta/dist/vanta.waves.min.js";
 
 @Component({
-  selector: 'app-vanta-bg',
+  selector: "app-vanta-bg",
   template: `
     <div #vantaRef class="vanta-container">
       <ng-content></ng-content>
     </div>
   `,
-  styles: [`
-    .vanta-container {
-      width: 100%;
-      height: 100vh;
-    }
-  `]
+  styles: [
+    `
+      .vanta-container {
+        width: 100%;
+        height: 100vh;
+      }
+    `,
+  ],
 })
 export class VantaBgComponent implements OnInit, OnDestroy {
-  @ViewChild('vantaRef') vantaRef!: ElementRef;
+  @ViewChild("vantaRef") vantaRef!: ElementRef;
   vantaEffect: any;
 
   ngOnInit() {
@@ -760,7 +763,7 @@ export class VantaBgComponent implements OnInit, OnDestroy {
       THREE: THREE,
       mouseControls: true,
       touchControls: true,
-      color: 0x23153c
+      color: 0x23153c,
     });
   }
 
@@ -821,9 +824,9 @@ export class VantaBgComponent implements OnInit, OnDestroy {
 ```javascript
 VANTA.WAVES({
   el: "#vanta-bg",
-  mouseControls: false,    // Disable if not needed
+  mouseControls: false, // Disable if not needed
   touchControls: false,
-  gyroControls: false
+  gyroControls: false,
 });
 ```
 
@@ -834,9 +837,9 @@ const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
 VANTA.WAVES({
   el: "#vanta-bg",
-  scaleMobile: 0.5,        // Smaller scale
+  scaleMobile: 0.5, // Smaller scale
   waveHeight: isMobile ? 10 : 15,
-  points: isMobile ? 5 : 10
+  points: isMobile ? 5 : 10,
 });
 ```
 
@@ -862,7 +865,7 @@ observer.observe(document.querySelector("#vanta-bg"));
 VANTA.WAVES({
   el: "#vanta-bg",
   minHeight: 200,
-  minWidth: 200
+  minWidth: 200,
   // Effect pauses below these dimensions
 });
 ```
@@ -873,7 +876,7 @@ VANTA.WAVES({
 const isLowEnd = navigator.hardwareConcurrency <= 4;
 
 const effect = isLowEnd
-  ? VANTA.DOTS  // Simpler effect
+  ? VANTA.DOTS // Simpler effect
   : VANTA.WAVES; // Complex effect
 
 effect({ el: "#vanta-bg" });
@@ -884,22 +887,15 @@ effect({ el: "#vanta-bg" });
 ### Effect Performance Ranking
 
 **Most performant** (lightest):
+
 1. DOTS
 2. NET
 3. RINGS
 4. TOPOLOGY
 
-**Moderate**:
-5. WAVES
-6. CELLS
-7. FOG
-8. HALO
+**Moderate**: 5. WAVES 6. CELLS 7. FOG 8. HALO
 
-**Intensive** (heaviest):
-9. BIRDS
-10. CLOUDS
-11. GLOBE
-12. TRUNK
+**Intensive** (heaviest): 9. BIRDS 10. CLOUDS 11. GLOBE 12. TRUNK
 
 ---
 
@@ -913,7 +909,7 @@ const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 if (!isMobile) {
   VANTA.WAVES({ el: "#vanta-bg" });
 } else {
-  document.querySelector("#vanta-bg").style.background = '#23153c';
+  document.querySelector("#vanta-bg").style.background = "#23153c";
 }
 ```
 
@@ -921,7 +917,7 @@ if (!isMobile) {
 
 ```css
 .vanta-container {
-  background: url('fallback-image.jpg') center/cover;
+  background: url("fallback-image.jpg") center/cover;
 }
 
 .vanta-container.has-vanta {
@@ -931,7 +927,7 @@ if (!isMobile) {
 
 ```javascript
 VANTA.WAVES({ el: "#vanta-bg" });
-document.querySelector("#vanta-bg").classList.add('has-vanta');
+document.querySelector("#vanta-bg").classList.add("has-vanta");
 ```
 
 ---
@@ -999,7 +995,7 @@ vantaEffect.setOptions({ color: 0xff3f81 });
 **Solution**: Call resize() or enable auto-resize.
 
 ```javascript
-window.addEventListener('resize', () => {
+window.addEventListener("resize", () => {
   vantaEffect.resize();
 });
 ```

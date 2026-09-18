@@ -78,6 +78,7 @@ bpy.ops.export_scene.gltf(
 ## Recommended Presets
 
 ### Minimal (Smallest File)
+
 ```python
 export_format='GLB',
 export_apply=True,
@@ -91,6 +92,7 @@ export_lights=False
 ```
 
 ### Standard (Balanced)
+
 ```python
 export_format='GLB',
 export_apply=True,
@@ -102,6 +104,7 @@ export_animations=True
 ```
 
 ### High Quality (Larger Files)
+
 ```python
 export_format='GLB',
 export_apply=True,

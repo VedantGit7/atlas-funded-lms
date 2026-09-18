@@ -11,6 +11,7 @@ This directory contains design system templates, starter files, and reusable ass
 **Location**: Would be in `tokens/` subdirectory
 
 **What's included**:
+
 - CSS custom properties (variables) for:
   - Colors (OKLCH color space, AAA compliant)
   - Typography scales (fluid sizing with clamp())
@@ -20,11 +21,12 @@ This directory contains design system templates, starter files, and reusable ass
   - Animation timing (duration & easing)
 
 **Usage**:
+
 ```css
 /* Import design tokens */
-@import url('tokens/colors.css');
-@import url('tokens/typography.css');
-@import url('tokens/spacing.css');
+@import url("tokens/colors.css");
+@import url("tokens/typography.css");
+@import url("tokens/spacing.css");
 
 /* Use in your styles */
 .button {
@@ -40,6 +42,7 @@ This directory contains design system templates, starter files, and reusable ass
 **Location**: Would be in `components/` subdirectory
 
 **What's included**:
+
 - Button variants (primary, secondary, ghost, danger)
 - Form components (inputs, textareas, select, checkbox, radio)
 - Card layouts
@@ -49,6 +52,7 @@ This directory contains design system templates, starter files, and reusable ass
 - Loading states (spinners, skeletons, progress bars)
 
 **Features**:
+
 - Fully accessible (WCAG AAA where possible)
 - Keyboard navigable
 - Screen reader friendly
@@ -60,6 +64,7 @@ This directory contains design system templates, starter files, and reusable ass
 **Location**: Would be in `layouts/` subdirectory
 
 **What's included**:
+
 - Landing page template
 - Portfolio/Agency template
 - Blog/Article template
@@ -67,6 +72,7 @@ This directory contains design system templates, starter files, and reusable ass
 - E-commerce template
 
 **Features**:
+
 - Modern CSS Grid & Flexbox
 - Responsive breakpoints
 - Print stylesheets
@@ -77,6 +83,7 @@ This directory contains design system templates, starter files, and reusable ass
 **Location**: Would be in `animations/` subdirectory
 
 **What's included**:
+
 - CSS keyframe animations
 - Transition presets
 - Easing functions
@@ -84,6 +91,7 @@ This directory contains design system templates, starter files, and reusable ass
 - Framer Motion variants
 
 **Categories**:
+
 - Fade (in/out, up/down/left/right)
 - Slide (all directions)
 - Scale (grow/shrink)
@@ -97,11 +105,13 @@ This directory contains design system templates, starter files, and reusable ass
 **Location**: Would be in `icons/` subdirectory
 
 **What's included**:
+
 - SVG icon set (inline-ready)
 - Icon sprite sheet
 - Icon font (optional)
 
 **Features**:
+
 - Accessibility ready (proper aria-hidden/labels)
 - Consistent sizing
 - Color customizable via CSS
@@ -111,6 +121,7 @@ This directory contains design system templates, starter files, and reusable ass
 **Location**: Would be in `utilities/` subdirectory
 
 **What's included**:
+
 - Display utilities (flex, grid, block, inline, none)
 - Spacing utilities (margin, padding)
 - Typography utilities (size, weight, align)
@@ -119,10 +130,9 @@ This directory contains design system templates, starter files, and reusable ass
 - Accessibility utilities (sr-only, focus-visible)
 
 **Example**:
+
 ```html
-<div class="flex items-center gap-md p-lg bg-primary text-white rounded-lg">
-  Content
-</div>
+<div class="flex items-center gap-md p-lg bg-primary text-white rounded-lg">Content</div>
 ```
 
 ### 7. Reset & Base Styles
@@ -130,6 +140,7 @@ This directory contains design system templates, starter files, and reusable ass
 **Location**: Would be in `base/` subdirectory
 
 **What's included**:
+
 - Modern CSS reset (based on modern-normalize)
 - Base typography styles
 - Accessible focus styles
@@ -157,13 +168,13 @@ cp assets/components/button.css src/components/
 Import the complete design system:
 
 ```html
-<link rel="stylesheet" href="assets/design-system.css">
+<link rel="stylesheet" href="assets/design-system.css" />
 ```
 
 Or in your CSS:
 
 ```css
-@import url('../assets/design-system.css');
+@import url("../assets/design-system.css");
 ```
 
 ### Option 3: Use as Reference
@@ -182,7 +193,7 @@ Modify color tokens to match your brand:
 :root {
   /* Update these values */
   --color-primary: oklch(50% 0.2 250); /* Your brand blue */
-  --color-accent: oklch(65% 0.25 30);  /* Your accent color */
+  --color-accent: oklch(65% 0.25 30); /* Your accent color */
 
   /* System will generate variants automatically */
   --color-primary-hover: oklch(45% 0.2 250);
@@ -218,11 +229,11 @@ Customize spacing scale:
   --space-unit: 0.5rem;
 
   /* Scale multiples */
-  --space-xs: calc(var(--space-unit) * 1);  /* 8px */
-  --space-sm: calc(var(--space-unit) * 2);  /* 16px */
-  --space-md: calc(var(--space-unit) * 4);  /* 32px */
-  --space-lg: calc(var(--space-unit) * 6);  /* 48px */
-  --space-xl: calc(var(--space-unit) * 8);  /* 64px */
+  --space-xs: calc(var(--space-unit) * 1); /* 8px */
+  --space-sm: calc(var(--space-unit) * 2); /* 16px */
+  --space-md: calc(var(--space-unit) * 4); /* 32px */
+  --space-lg: calc(var(--space-unit) * 6); /* 48px */
+  --space-xl: calc(var(--space-unit) * 8); /* 64px */
 }
 ```
 
@@ -265,6 +276,7 @@ All components are designed mobile-first with progressive enhancement for larger
 ### 4. Design Token Driven
 
 Everything is configurable via design tokens:
+
 - Easy rebranding
 - Consistent visual language
 - Dark mode support built-in
@@ -310,16 +322,19 @@ assets/
 ## Browser Support
 
 **Modern Browsers** (recommended):
+
 - Chrome/Edge 90+
 - Firefox 88+
 - Safari 14+
 
 **Fallbacks provided for**:
+
 - CSS Grid → Flexbox
 - CSS custom properties → Fallback values
 - Modern CSS functions → Static values
 
 **Progressive Enhancement**:
+
 ```css
 /* Fallback */
 .container {
@@ -351,6 +366,7 @@ When adding new assets:
 ## Related Skills
 
 For implementation guidance, reference:
+
 - `gsap-scrolltrigger` - Animation patterns
 - `motion-framer` - React component animations
 - `animated-component-libraries` - Pre-built components
@@ -364,4 +380,4 @@ All assets follow the Apache 2.0 license (same as the skill).
 
 ---
 
-*Last updated: 2024*
+_Last updated: 2024_

@@ -21,6 +21,7 @@ Complete guide for working with the PlayCanvas Editor and integrating with the e
 ### PlayCanvas Editor (Online)
 
 **Pros**:
+
 - Visual scene editing
 - Real-time collaboration
 - Built-in asset pipeline
@@ -29,6 +30,7 @@ Complete guide for working with the PlayCanvas Editor and integrating with the e
 - No build step required
 
 **Cons**:
+
 - Requires online access
 - Less control over build process
 - Tied to PlayCanvas platform
@@ -40,6 +42,7 @@ Complete guide for working with the PlayCanvas Editor and integrating with the e
 ### Engine-Only (Code-First)
 
 **Pros**:
+
 - Full control over code
 - Works offline
 - Custom build pipeline
@@ -47,6 +50,7 @@ Complete guide for working with the PlayCanvas Editor and integrating with the e
 - No platform lock-in
 
 **Cons**:
+
 - Manual scene setup
 - No visual editor
 - Manual asset loading
@@ -97,6 +101,7 @@ Complete guide for working with the PlayCanvas Editor and integrating with the e
 ### Project Structure
 
 **Editor Project**:
+
 ```
 MyProject/
 ├── assets/
@@ -111,6 +116,7 @@ MyProject/
 ```
 
 **Exported Project**:
+
 ```
 build/
 ├── index.html
@@ -130,20 +136,24 @@ build/
 ### Uploading Assets
 
 **3D Models**:
+
 - Supported: `.glb`, `.gltf`, `.fbx`, `.obj`
 - Drag & drop into Assets panel
 - Auto-generates material instances
 
 **Textures**:
+
 - Supported: `.jpg`, `.png`, `.dds`, `.ktx2`, `.basis`
 - Automatically creates texture asset
 - Compression options available
 
 **Audio**:
+
 - Supported: `.mp3`, `.ogg`, `.wav`
 - 3D positional or 2D audio
 
 **Scripts**:
+
 - Create new script in Assets panel
 - Opens code editor
 - Hot-reload on save
@@ -153,6 +163,7 @@ build/
 ### Asset Import Settings
 
 **Model Import**:
+
 ```javascript
 // In Editor:
 // 1. Select model asset
@@ -164,6 +175,7 @@ build/
 ```
 
 **Texture Import**:
+
 ```javascript
 // Compression settings:
 // - None (original)
@@ -179,6 +191,7 @@ build/
 ### Creating Materials
 
 **In Editor**:
+
 1. Assets Panel → Right-click → New Material
 2. Select material
 3. Inspector shows material properties:
@@ -190,6 +203,7 @@ build/
    - Ambient occlusion
 
 **Material Graph** (Advanced):
+
 - Visual node-based material editor
 - Custom shader creation
 - Real-time preview
@@ -201,6 +215,7 @@ build/
 ### Scene Hierarchy
 
 **Creating Entities**:
+
 ```
 Right-click in Hierarchy → Add Entity
 Options:
@@ -212,10 +227,12 @@ Options:
 ```
 
 **Organizing**:
+
 - Drag entities to reparent
 - Multi-select with Ctrl/Cmd
 - Group related entities
 - Use naming conventions:
+
   ```
   Player
   ├── Model
@@ -233,17 +250,20 @@ Options:
 ### Components in Editor
 
 **Adding Components**:
+
 1. Select entity
 2. Inspector → Add Component
 3. Configure properties
 
 **Component Settings**:
+
 - Editable in Inspector
 - Color pickers for colors
 - Asset pickers for references
 - Vector editors for positions
 
 **Example - Camera Component**:
+
 ```
 Camera Component
 ├── Clear Color: [Color Picker]
@@ -259,20 +279,24 @@ Camera Component
 ### Tags and Layers
 
 **Tags**:
+
 - Add tags to entities for searching
 - Use in scripts: `app.root.findByTag('enemy')`
 
 **In Editor**:
+
 1. Select entity
 2. Inspector → Tags
 3. Add/remove tags
 
 **Layers**:
+
 - Control rendering order
 - Separate UI from world
 - Custom post-processing per layer
 
 **Default Layers**:
+
 - World (3D objects)
 - UI (2D interface)
 - Skybox
@@ -285,44 +309,46 @@ Camera Component
 ### Creating Scripts in Editor
 
 **New Script**:
+
 1. Assets Panel → New Script
 2. Name your script (e.g., `playerController`)
 3. Opens code editor
 
 **Script Template**:
+
 ```javascript
-var PlayerController = pc.createScript('playerController');
+var PlayerController = pc.createScript("playerController");
 
 // Attributes (editable in Editor)
-PlayerController.attributes.add('speed', {
-    type: 'number',
-    default: 10,
-    title: 'Movement Speed'
+PlayerController.attributes.add("speed", {
+  type: "number",
+  default: 10,
+  title: "Movement Speed",
 });
 
-PlayerController.attributes.add('jumpForce', {
-    type: 'number',
-    default: 5
+PlayerController.attributes.add("jumpForce", {
+  type: "number",
+  default: 5,
 });
 
 // Initialize
-PlayerController.prototype.initialize = function() {
-    this.velocity = new pc.Vec3();
+PlayerController.prototype.initialize = function () {
+  this.velocity = new pc.Vec3();
 };
 
 // Update every frame
-PlayerController.prototype.update = function(dt) {
-    var forward = this.entity.forward;
-    var right = this.entity.right;
+PlayerController.prototype.update = function (dt) {
+  var forward = this.entity.forward;
+  var right = this.entity.right;
 
-    // Movement
-    if (this.app.keyboard.isPressed(pc.KEY_W)) {
-        this.entity.translate(forward.mulScalar(this.speed * dt));
-    }
+  // Movement
+  if (this.app.keyboard.isPressed(pc.KEY_W)) {
+    this.entity.translate(forward.mulScalar(this.speed * dt));
+  }
 
-    if (this.app.keyboard.isPressed(pc.KEY_SPACE)) {
-        this.entity.rigidbody.applyImpulse(0, this.jumpForce, 0);
-    }
+  if (this.app.keyboard.isPressed(pc.KEY_SPACE)) {
+    this.entity.rigidbody.applyImpulse(0, this.jumpForce, 0);
+  }
 };
 ```
 
@@ -331,12 +357,14 @@ PlayerController.prototype.update = function(dt) {
 ### Attaching Scripts
 
 **In Editor**:
+
 1. Select entity
 2. Add Component → Script
 3. Add Script → Select your script
 4. Configure attributes in Inspector
 
 **Script Attributes in Inspector**:
+
 ```
 Script Component
 └── playerController
@@ -350,16 +378,17 @@ Script Component
 ### Script Communication
 
 **Between Scripts**:
+
 ```javascript
 // In one script
 this.entity.script.otherScript.doSomething();
 
 // Fire events
-this.app.fire('player:died', playerEntity);
+this.app.fire("player:died", playerEntity);
 
 // Listen to events
-this.app.on('enemy:spawned', function(enemy) {
-    console.log('Enemy spawned:', enemy.name);
+this.app.on("enemy:spawned", function (enemy) {
+  console.log("Enemy spawned:", enemy.name);
 });
 ```
 
@@ -368,13 +397,15 @@ this.app.on('enemy:spawned', function(enemy) {
 ### Debugging Scripts
 
 **Console Logging**:
+
 ```javascript
-console.log('Player position:', this.entity.getPosition());
-console.warn('Low health!');
-console.error('Failed to load asset');
+console.log("Player position:", this.entity.getPosition());
+console.warn("Low health!");
+console.error("Failed to load asset");
 ```
 
 **Launch Tab**:
+
 - Editor → Launch → Opens game in new tab
 - F12 for DevTools
 - Console shows logs
@@ -387,6 +418,7 @@ console.error('Failed to load asset');
 ### Publishing from Editor
 
 **Steps**:
+
 1. **Build**
    - Settings → Publishing
    - Configure build settings
@@ -398,6 +430,7 @@ console.error('Failed to load asset');
    - Upload to web server
 
 **Build Settings**:
+
 ```javascript
 {
   "name": "My Game",
@@ -418,12 +451,14 @@ console.error('Failed to load asset');
 ### Hosting Options
 
 **PlayCanvas Hosting**:
+
 - Click "Publish to PlayCanvas"
 - Get shareable URL
 - Free with watermark
 - Premium for custom domain
 
 **Self-Hosting**:
+
 1. Download build
 2. Upload to:
    - **Netlify**: Drag & drop
@@ -433,6 +468,7 @@ console.error('Failed to load asset');
    - **Any web server**: Just upload files
 
 **CORS Considerations**:
+
 ```javascript
 // If loading assets from different domain
 // Server must send CORS headers:
@@ -468,20 +504,22 @@ Access-Control-Allow-Origin: *
 ### Exporting Editor Scenes
 
 **Option 1: REST API**
+
 ```javascript
 // Download scene JSON via PlayCanvas API
-fetch('https://playcanvas.com/api/projects/{id}/scenes/{sceneId}', {
+fetch("https://playcanvas.com/api/projects/{id}/scenes/{sceneId}", {
   headers: {
-    'Authorization': 'Bearer YOUR_TOKEN'
-  }
+    Authorization: "Bearer YOUR_TOKEN",
+  },
 })
-.then(res => res.json())
-.then(sceneData => {
-  console.log('Scene data:', sceneData);
-});
+  .then((res) => res.json())
+  .then((sceneData) => {
+    console.log("Scene data:", sceneData);
+  });
 ```
 
 **Option 2: Download Build**
+
 - Editor → Settings → Publishing → Download
 - Extract ZIP
 - Use `config.json` and scene files in engine code
@@ -491,28 +529,28 @@ fetch('https://playcanvas.com/api/projects/{id}/scenes/{sceneId}', {
 ### Loading Editor Scenes in Code
 
 ```javascript
-import * as pc from 'playcanvas';
+import * as pc from "playcanvas";
 
 const app = new pc.Application(canvas);
 
 // Load scene from Editor export
-fetch('config.json')
-  .then(res => res.json())
-  .then(config => {
+fetch("config.json")
+  .then((res) => res.json())
+  .then((config) => {
     // Load scene hierarchy
     const sceneUrl = config.scenes[0].url;
 
     app.scenes.loadSceneHierarchy(sceneUrl, (err, parent) => {
       if (err) {
-        console.error('Failed to load scene:', err);
+        console.error("Failed to load scene:", err);
         return;
       }
 
-      console.log('Scene loaded');
+      console.log("Scene loaded");
 
       // Find entities
-      const player = app.root.findByName('Player');
-      const camera = app.root.findByName('Camera');
+      const player = app.root.findByName("Player");
+      const camera = app.root.findByName("Camera");
 
       // Start application
       app.start();
@@ -520,7 +558,7 @@ fetch('config.json')
 
     // Load scene settings
     app.scenes.loadSceneSettings(config.scenes[0].url, (err) => {
-      if (err) console.error('Failed to load settings:', err);
+      if (err) console.error("Failed to load settings:", err);
     });
   });
 ```
@@ -546,24 +584,25 @@ fetch('config.json')
    - Extend with JavaScript
 
 **Example**:
+
 ```javascript
 // Load Editor scene
-app.scenes.loadSceneHierarchy('scene.json', (err, root) => {
+app.scenes.loadSceneHierarchy("scene.json", (err, root) => {
   if (err) return;
 
   // Find Editor entities
-  const player = root.findByName('Player');
-  const enemies = root.findByTag('enemy');
+  const player = root.findByName("Player");
+  const enemies = root.findByTag("enemy");
 
   // Add code-based logic
-  const gameManager = new pc.Entity('GameManager');
-  gameManager.addComponent('script');
-  gameManager.script.create('gameManager');
+  const gameManager = new pc.Entity("GameManager");
+  gameManager.addComponent("script");
+  gameManager.script.create("gameManager");
   app.root.addChild(gameManager);
 
   // Start game
   app.start();
-  app.fire('game:start');
+  app.fire("game:start");
 });
 ```
 
@@ -572,28 +611,30 @@ app.scenes.loadSceneHierarchy('scene.json', (err, root) => {
 ### Accessing Editor Attributes in Code
 
 **In Editor Script**:
-```javascript
-var MyScript = pc.createScript('myScript');
 
-MyScript.attributes.add('target', {
-  type: 'entity',
-  title: 'Target Entity'
+```javascript
+var MyScript = pc.createScript("myScript");
+
+MyScript.attributes.add("target", {
+  type: "entity",
+  title: "Target Entity",
 });
 
-MyScript.attributes.add('speed', {
-  type: 'number',
-  default: 10
+MyScript.attributes.add("speed", {
+  type: "number",
+  default: 10,
 });
 ```
 
 **Accessing from Other Scripts**:
+
 ```javascript
 // Get script instance
 const myScript = entity.script.myScript;
 
 // Read attributes
-console.log('Target:', myScript.target);
-console.log('Speed:', myScript.speed);
+console.log("Target:", myScript.target);
+console.log("Speed:", myScript.speed);
 
 // Modify at runtime
 myScript.speed = 20;
@@ -606,12 +647,14 @@ myScript.speed = 20;
 ### Editor Projects
 
 **Built-in Version Control**:
+
 - Editor → Version Control
 - Checkpoint system
 - Branch management
 - Conflict resolution
 
 **Checkpoints**:
+
 - Create checkpoint before major changes
 - Name checkpoints descriptively
 - Restore previous versions
@@ -621,6 +664,7 @@ myScript.speed = 20;
 ### Engine-Only Projects
 
 **Git Workflow**:
+
 ```bash
 git init
 git add .
@@ -634,6 +678,7 @@ build/
 ```
 
 **Structure**:
+
 ```
 project/
 ├── src/
@@ -654,12 +699,14 @@ project/
 ### Editor Collaboration
 
 **Real-time Editing**:
+
 - Multiple users in same project
 - See others' cursors
 - Live updates
 - Chat built-in
 
 **Permissions**:
+
 - Owner (full access)
 - Admin (edit + manage)
 - Write (edit only)
@@ -696,15 +743,18 @@ project/
 ### Launch & Debug
 
 **Launch Tab**:
+
 - Editor → Launch
 - Opens game in new tab with DevTools
 
 **Debug Options**:
+
 - **Profiler**: Performance metrics
 - **Inspector**: Scene graph at runtime
 - **Console**: Logs and errors
 
 **Profiler**:
+
 ```
 Launch → Profiler
 Shows:
@@ -720,20 +770,21 @@ Shows:
 ### Editor Console
 
 **Accessing Engine in Console**:
+
 ```javascript
 // In Launch tab console:
-pc.app              // Application instance
-pc.app.root         // Root entity
-pc.app.systems      // Component systems
+pc.app; // Application instance
+pc.app.root; // Root entity
+pc.app.systems; // Component systems
 
 // Find entities
-pc.app.root.findByName('Player')
-pc.app.root.findByTag('enemy')
+pc.app.root.findByName("Player");
+pc.app.root.findByTag("enemy");
 
 // Inspect entities
-const player = pc.app.root.findByName('Player');
-console.log('Position:', player.getPosition());
-console.log('Components:', player.c);  // All components
+const player = pc.app.root.findByName("Player");
+console.log("Position:", player.getPosition());
+console.log("Components:", player.c); // All components
 ```
 
 ---
@@ -743,12 +794,14 @@ console.log('Components:', player.c);  // All components
 ### Performance
 
 **In Editor**:
+
 - Use LOD for complex models
 - Enable frustum culling
 - Batch static objects
 - Compress textures
 
 **Scene Organization**:
+
 - Group related entities
 - Disable entities instead of destroying
 - Use object pooling for bullets/particles
@@ -758,6 +811,7 @@ console.log('Components:', player.c);  // All components
 ### Asset Management
 
 **Naming Conventions**:
+
 ```
 Models:       char_player.glb
 Textures:     char_player_diffuse.png
@@ -767,6 +821,7 @@ Scenes:       level_01.json
 ```
 
 **Folder Structure**:
+
 ```
 assets/
 ├── characters/
@@ -786,6 +841,7 @@ assets/
 ### Editor Shortcuts
 
 **Navigation**:
+
 - `F`: Frame selected entity
 - `W/A/S/D`: Move viewport
 - `Q/E`: Up/down
@@ -794,6 +850,7 @@ assets/
 - `Scroll`: Zoom
 
 **Editing**:
+
 - `Ctrl/Cmd + D`: Duplicate entity
 - `Delete`: Delete entity
 - `Ctrl/Cmd + Z`: Undo
@@ -801,6 +858,7 @@ assets/
 - `Ctrl/Cmd + G`: Group entities
 
 **Tools**:
+
 - `1`: Select mode
 - `2`: Translate mode
 - `3`: Rotate mode
@@ -823,6 +881,7 @@ assets/
 ## Quick Reference
 
 ### Editor Workflow
+
 ```
 1. Create project
 2. Import assets
@@ -835,6 +894,7 @@ assets/
 ```
 
 ### Script Workflow
+
 ```
 1. Assets → New Script
 2. Write code in editor
@@ -846,6 +906,7 @@ assets/
 ```
 
 ### Publishing Workflow
+
 ```
 1. Settings → Publishing
 2. Configure build settings

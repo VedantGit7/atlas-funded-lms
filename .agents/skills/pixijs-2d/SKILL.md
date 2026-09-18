@@ -12,6 +12,7 @@ Fast, lightweight 2D rendering engine for creating interactive graphics, particl
 ## When to Use This Skill
 
 Trigger this skill when you encounter:
+
 - "Create 2D particle effects" or "animated particles"
 - "2D sprite animation" or "sprite sheet handling"
 - "Interactive canvas graphics" or "2D game"
@@ -34,7 +35,7 @@ Trigger this skill when you encounter:
 The entry point for PixiJS applications:
 
 ```javascript
-import { Application } from 'pixi.js';
+import { Application } from "pixi.js";
 
 const app = new Application();
 
@@ -42,14 +43,15 @@ await app.init({
   width: 800,
   height: 600,
   backgroundColor: 0x1099bb,
-  antialias: true,  // Smooth edges
-  resolution: window.devicePixelRatio || 1
+  antialias: true, // Smooth edges
+  resolution: window.devicePixelRatio || 1,
 });
 
 document.body.appendChild(app.canvas);
 ```
 
 **Key Properties**:
+
 - `app.stage`: Root container for all display objects
 - `app.renderer`: WebGL/WebGPU renderer instance
 - `app.ticker`: Update loop for animations
@@ -62,26 +64,27 @@ document.body.appendChild(app.canvas);
 Core visual elements loaded from images:
 
 ```javascript
-import { Assets, Sprite } from 'pixi.js';
+import { Assets, Sprite } from "pixi.js";
 
 // Load texture
-const texture = await Assets.load('path/to/image.png');
+const texture = await Assets.load("path/to/image.png");
 
 // Create sprite
 const sprite = new Sprite(texture);
-sprite.anchor.set(0.5);  // Center pivot
+sprite.anchor.set(0.5); // Center pivot
 sprite.position.set(400, 300);
-sprite.scale.set(2);  // 2x scale
-sprite.rotation = Math.PI / 4;  // 45 degrees
-sprite.alpha = 0.8;  // 80% opacity
-sprite.tint = 0xff0000;  // Red tint
+sprite.scale.set(2); // 2x scale
+sprite.rotation = Math.PI / 4; // 45 degrees
+sprite.alpha = 0.8; // 80% opacity
+sprite.tint = 0xff0000; // Red tint
 
 app.stage.addChild(sprite);
 ```
 
 **Quick Creation**:
+
 ```javascript
-const sprite = Sprite.from('path/to/image.png');
+const sprite = Sprite.from("path/to/image.png");
 ```
 
 ---
@@ -91,15 +94,15 @@ const sprite = Sprite.from('path/to/image.png');
 Draw vector shapes programmatically:
 
 ```javascript
-import { Graphics } from 'pixi.js';
+import { Graphics } from "pixi.js";
 
 const graphics = new Graphics();
 
 // Rectangle
-graphics.rect(50, 50, 100, 100).fill('blue');
+graphics.rect(50, 50, 100, 100).fill("blue");
 
 // Circle with stroke
-graphics.circle(200, 100, 50).fill('red').stroke({ width: 2, color: 'white' });
+graphics.circle(200, 100, 50).fill("red").stroke({ width: 2, color: "white" });
 
 // Complex path
 graphics
@@ -113,6 +116,7 @@ app.stage.addChild(graphics);
 ```
 
 **SVG Support**:
+
 ```javascript
 graphics.svg('<svg><path d="M 100 350 q 150 -300 300 0" /></svg>');
 ```
@@ -124,17 +128,17 @@ graphics.svg('<svg><path d="M 100 350 q 150 -300 300 0" /></svg>');
 Optimized container for rendering thousands of sprites:
 
 ```javascript
-import { ParticleContainer, Particle, Texture } from 'pixi.js';
+import { ParticleContainer, Particle, Texture } from "pixi.js";
 
-const texture = Texture.from('particle.png');
+const texture = Texture.from("particle.png");
 
 const container = new ParticleContainer({
   dynamicProperties: {
-    position: true,   // Allow position updates
-    scale: false,     // Static scale
-    rotation: false,  // Static rotation
-    color: false      // Static color
-  }
+    position: true, // Allow position updates
+    scale: false, // Static scale
+    rotation: false, // Static rotation
+    color: false, // Static color
+  },
 });
 
 // Add 10,000 particles
@@ -142,7 +146,7 @@ for (let i = 0; i < 10000; i++) {
   const particle = new Particle({
     texture,
     x: Math.random() * 800,
-    y: Math.random() * 600
+    y: Math.random() * 600,
   });
 
   container.addParticle(particle);
@@ -160,7 +164,7 @@ app.stage.addChild(container);
 Apply per-pixel effects using WebGL shaders:
 
 ```javascript
-import { BlurFilter, DisplacementFilter, ColorMatrixFilter } from 'pixi.js';
+import { BlurFilter, DisplacementFilter, ColorMatrixFilter } from "pixi.js";
 
 // Blur
 const blurFilter = new BlurFilter({ strength: 8, quality: 4 });
@@ -169,7 +173,7 @@ sprite.filters = [blurFilter];
 // Multiple filters
 sprite.filters = [
   new BlurFilter({ strength: 4 }),
-  new ColorMatrixFilter()  // Color transforms
+  new ColorMatrixFilter(), // Color transforms
 ];
 
 // Custom filter area for performance
@@ -177,6 +181,7 @@ sprite.filterArea = new Rectangle(0, 0, 200, 100);
 ```
 
 **Available Filters**:
+
 - `BlurFilter`: Gaussian blur
 - `ColorMatrixFilter`: Color transformations (sepia, grayscale, etc.)
 - `DisplacementFilter`: Warp/distort pixels
@@ -191,24 +196,24 @@ sprite.filterArea = new Rectangle(0, 0, 200, 100);
 Display text with styling:
 
 ```javascript
-import { Text, BitmapText, TextStyle } from 'pixi.js';
+import { Text, BitmapText, TextStyle } from "pixi.js";
 
 // Standard Text
 const style = new TextStyle({
-  fontFamily: 'Arial',
+  fontFamily: "Arial",
   fontSize: 36,
-  fill: '#ffffff',
-  stroke: { color: '#000000', width: 4 },
-  filters: [new BlurFilter()]  // Bake filter into texture
+  fill: "#ffffff",
+  stroke: { color: "#000000", width: 4 },
+  filters: [new BlurFilter()], // Bake filter into texture
 });
 
-const text = new Text({ text: 'Hello PixiJS!', style });
+const text = new Text({ text: "Hello PixiJS!", style });
 text.position.set(100, 100);
 
 // BitmapText (faster for dynamic text)
 const bitmapText = new BitmapText({
-  text: 'Score: 0',
-  style: { fontFamily: 'MyBitmapFont', fontSize: 24 }
+  text: "Score: 0",
+  style: { fontFamily: "MyBitmapFont", fontSize: 24 },
 });
 ```
 
@@ -221,35 +226,35 @@ const bitmapText = new BitmapText({
 ### Pattern 1: Basic Interactive Sprite
 
 ```javascript
-import { Application, Assets, Sprite } from 'pixi.js';
+import { Application, Assets, Sprite } from "pixi.js";
 
 const app = new Application();
 await app.init({ width: 800, height: 600 });
 document.body.appendChild(app.canvas);
 
-const texture = await Assets.load('bunny.png');
+const texture = await Assets.load("bunny.png");
 const bunny = new Sprite(texture);
 
 bunny.anchor.set(0.5);
 bunny.position.set(400, 300);
-bunny.eventMode = 'static';  // Enable interactivity
-bunny.cursor = 'pointer';
+bunny.eventMode = "static"; // Enable interactivity
+bunny.cursor = "pointer";
 
 // Events
-bunny.on('pointerdown', () => {
+bunny.on("pointerdown", () => {
   bunny.scale.set(1.2);
 });
 
-bunny.on('pointerup', () => {
+bunny.on("pointerup", () => {
   bunny.scale.set(1.0);
 });
 
-bunny.on('pointerover', () => {
-  bunny.tint = 0xff0000;  // Red on hover
+bunny.on("pointerover", () => {
+  bunny.tint = 0xff0000; // Red on hover
 });
 
-bunny.on('pointerout', () => {
-  bunny.tint = 0xffffff;  // Reset
+bunny.on("pointerout", () => {
+  bunny.tint = 0xffffff; // Reset
 });
 
 app.stage.addChild(bunny);
@@ -265,7 +270,7 @@ app.ticker.add((ticker) => {
 ### Pattern 2: Drawing with Graphics
 
 ```javascript
-import { Graphics, Application } from 'pixi.js';
+import { Graphics, Application } from "pixi.js";
 
 const app = new Application();
 await app.init({ width: 800, height: 600 });
@@ -276,13 +281,11 @@ const graphics = new Graphics();
 // Rectangle with gradient
 graphics.rect(50, 50, 200, 100).fill({
   color: 0x3399ff,
-  alpha: 0.8
+  alpha: 0.8,
 });
 
 // Circle with stroke
-graphics.circle(400, 300, 80)
-  .fill('yellow')
-  .stroke({ width: 4, color: 'orange' });
+graphics.circle(400, 300, 80).fill("yellow").stroke({ width: 4, color: "orange" });
 
 // Star shape
 graphics.star(600, 300, 5, 50, 0).fill({ color: 0xffdf00, alpha: 0.9 });
@@ -291,14 +294,10 @@ graphics.star(600, 300, 5, 50, 0).fill({ color: 0xffdf00, alpha: 0.9 });
 graphics
   .moveTo(100, 400)
   .bezierCurveTo(150, 300, 250, 300, 300, 400)
-  .stroke({ width: 3, color: 'white' });
+  .stroke({ width: 3, color: "white" });
 
 // Holes
-graphics
-  .rect(450, 400, 150, 100).fill('red')
-  .beginHole()
-  .circle(525, 450, 30)
-  .endHole();
+graphics.rect(450, 400, 150, 100).fill("red").beginHole().circle(525, 450, 30).endHole();
 
 app.stage.addChild(graphics);
 
@@ -310,7 +309,7 @@ app.ticker.add(() => {
   const x = 400 + Math.cos(time) * 100;
   const y = 300 + Math.sin(time) * 100;
 
-  graphics.circle(x, y, 20).fill('cyan');
+  graphics.circle(x, y, 20).fill("cyan");
 });
 ```
 
@@ -319,21 +318,21 @@ app.ticker.add(() => {
 ### Pattern 3: Particle System with ParticleContainer
 
 ```javascript
-import { Application, ParticleContainer, Particle, Texture } from 'pixi.js';
+import { Application, ParticleContainer, Particle, Texture } from "pixi.js";
 
 const app = new Application();
 await app.init({ width: 800, height: 600, backgroundColor: 0x000000 });
 document.body.appendChild(app.canvas);
 
-const texture = Texture.from('spark.png');
+const texture = Texture.from("spark.png");
 
 const particles = new ParticleContainer({
   dynamicProperties: {
-    position: true,  // Update positions every frame
-    scale: true,     // Fade out by scaling
-    rotation: true,  // Rotate particles
-    color: false     // Static color
-  }
+    position: true, // Update positions every frame
+    scale: true, // Fade out by scaling
+    rotation: true, // Rotate particles
+    color: false, // Static color
+  },
 });
 
 const particleData = [];
@@ -345,7 +344,7 @@ for (let i = 0; i < 5000; i++) {
     x: 400,
     y: 300,
     scaleX: 0.5,
-    scaleY: 0.5
+    scaleY: 0.5,
   });
 
   particles.addParticle(particle);
@@ -353,8 +352,8 @@ for (let i = 0; i < 5000; i++) {
   particleData.push({
     particle,
     vx: (Math.random() - 0.5) * 5,
-    vy: (Math.random() - 0.5) * 5 - 2,  // Slight upward bias
-    life: 1.0
+    vy: (Math.random() - 0.5) * 5 - 2, // Slight upward bias
+    life: 1.0,
   });
 }
 
@@ -362,11 +361,11 @@ app.stage.addChild(particles);
 
 // Update loop
 app.ticker.add((ticker) => {
-  particleData.forEach(data => {
+  particleData.forEach((data) => {
     // Physics
     data.particle.x += data.vx * ticker.deltaTime;
     data.particle.y += data.vy * ticker.deltaTime;
-    data.vy += 0.1 * ticker.deltaTime;  // Gravity
+    data.vy += 0.1 * ticker.deltaTime; // Gravity
 
     // Fade out
     data.life -= 0.01 * ticker.deltaTime;
@@ -390,13 +389,13 @@ app.ticker.add((ticker) => {
 ### Pattern 4: Applying Filters
 
 ```javascript
-import { Application, Sprite, Assets, BlurFilter, DisplacementFilter } from 'pixi.js';
+import { Application, Sprite, Assets, BlurFilter, DisplacementFilter } from "pixi.js";
 
 const app = new Application();
 await app.init({ width: 800, height: 600 });
 document.body.appendChild(app.canvas);
 
-const texture = await Assets.load('photo.jpg');
+const texture = await Assets.load("photo.jpg");
 const photo = new Sprite(texture);
 photo.position.set(100, 100);
 
@@ -404,11 +403,11 @@ photo.position.set(100, 100);
 const blurFilter = new BlurFilter({ strength: 5, quality: 4 });
 
 // Displacement filter (wavy effect)
-const displacementTexture = await Assets.load('displacement.jpg');
+const displacementTexture = await Assets.load("displacement.jpg");
 const displacementSprite = Sprite.from(displacementTexture);
 const displacementFilter = new DisplacementFilter({
   sprite: displacementSprite,
-  scale: 50
+  scale: 50,
 });
 
 // Apply multiple filters
@@ -431,7 +430,7 @@ app.ticker.add((ticker) => {
 ### Pattern 5: Custom Filter with Shaders
 
 ```javascript
-import { Filter, GlProgram } from 'pixi.js';
+import { Filter, GlProgram } from "pixi.js";
 
 const vertex = `
   in vec2 aPosition;
@@ -478,9 +477,9 @@ const customFilter = new Filter({
   glProgram: new GlProgram({ fragment, vertex }),
   resources: {
     timeUniforms: {
-      uTime: { value: 0.0, type: 'f32' }
-    }
-  }
+      uTime: { value: 0.0, type: "f32" },
+    },
+  },
 });
 
 sprite.filters = [customFilter];
@@ -496,14 +495,14 @@ app.ticker.add((ticker) => {
 ### Pattern 6: Sprite Sheet Animation
 
 ```javascript
-import { Application, Assets, AnimatedSprite } from 'pixi.js';
+import { Application, Assets, AnimatedSprite } from "pixi.js";
 
 const app = new Application();
 await app.init({ width: 800, height: 600 });
 document.body.appendChild(app.canvas);
 
 // Load sprite sheet
-await Assets.load('spritesheet.json');
+await Assets.load("spritesheet.json");
 
 // Create animation from frames
 const frames = [];
@@ -514,7 +513,7 @@ for (let i = 0; i < 10; i++) {
 const animation = new AnimatedSprite(frames);
 animation.anchor.set(0.5);
 animation.position.set(400, 300);
-animation.animationSpeed = 0.16;  // ~10 FPS
+animation.animationSpeed = 0.16; // ~10 FPS
 animation.play();
 
 app.stage.addChild(animation);
@@ -523,7 +522,7 @@ app.stage.addChild(animation);
 animation.stop();
 animation.gotoAndPlay(0);
 animation.onComplete = () => {
-  console.log('Animation completed!');
+  console.log("Animation completed!");
 };
 ```
 
@@ -576,7 +575,7 @@ class SpritePool {
   }
 
   reset() {
-    this.active.forEach(sprite => {
+    this.active.forEach((sprite) => {
       sprite.visible = false;
       this.available.push(sprite);
     });
@@ -585,7 +584,7 @@ class SpritePool {
 }
 
 // Usage
-const bulletTexture = Texture.from('bullet.png');
+const bulletTexture = Texture.from("bullet.png");
 const bulletPool = new SpritePool(bulletTexture, 50);
 
 // Spawn bullet
@@ -605,8 +604,8 @@ setTimeout(() => {
 ### React Integration
 
 ```jsx
-import { useEffect, useRef } from 'react';
-import { Application } from 'pixi.js';
+import { useEffect, useRef } from "react";
+import { Application } from "pixi.js";
 
 function PixiCanvas() {
   const canvasRef = useRef(null);
@@ -619,7 +618,7 @@ function PixiCanvas() {
       await app.init({
         width: 800,
         height: 600,
-        backgroundColor: 0x1099bb
+        backgroundColor: 0x1099bb,
       });
 
       canvasRef.current.appendChild(app.canvas);
@@ -647,8 +646,8 @@ function PixiCanvas() {
 ### Three.js Overlay (2D UI on 3D)
 
 ```javascript
-import * as THREE from 'three';
-import { Application, Sprite, Text } from 'pixi.js';
+import * as THREE from "three";
+import { Application, Sprite, Text } from "pixi.js";
 
 // Three.js scene
 const scene = new THREE.Scene();
@@ -661,17 +660,17 @@ const pixiApp = new Application();
 await pixiApp.init({
   width: window.innerWidth,
   height: window.innerHeight,
-  backgroundAlpha: 0  // Transparent background
+  backgroundAlpha: 0, // Transparent background
 });
 
-pixiApp.canvas.style.position = 'absolute';
-pixiApp.canvas.style.top = '0';
-pixiApp.canvas.style.left = '0';
-pixiApp.canvas.style.pointerEvents = 'none';  // Click through
+pixiApp.canvas.style.position = "absolute";
+pixiApp.canvas.style.top = "0";
+pixiApp.canvas.style.left = "0";
+pixiApp.canvas.style.pointerEvents = "none"; // Click through
 document.body.appendChild(pixiApp.canvas);
 
 // Add UI elements
-const scoreText = new Text({ text: 'Score: 0', style: { fontSize: 24, fill: 'white' } });
+const scoreText = new Text({ text: "Score: 0", style: { fontSize: 24, fill: "white" } });
 scoreText.position.set(20, 20);
 pixiApp.stage.addChild(scoreText);
 
@@ -679,8 +678,8 @@ pixiApp.stage.addChild(scoreText);
 function animate() {
   requestAnimationFrame(animate);
 
-  renderer.render(scene, camera);  // 3D scene
-  pixiApp.renderer.render(pixiApp.stage);  // 2D overlay
+  renderer.render(scene, camera); // 3D scene
+  pixiApp.renderer.render(pixiApp.stage); // 2D overlay
 }
 
 animate();
@@ -701,7 +700,7 @@ for (let i = 0; i < 10000; i++) {
 
 // DO: ParticleContainer (10x faster)
 const particles = new ParticleContainer({
-  dynamicProperties: { position: true }
+  dynamicProperties: { position: true },
 });
 for (let i = 0; i < 10000; i++) {
   particles.addParticle(new Particle({ texture }));
@@ -721,7 +720,7 @@ sprite.filters = null;
 
 // Bake filters into Text at creation
 const style = new TextStyle({
-  filters: [new BlurFilter()]  // Applied once at texture creation
+  filters: [new BlurFilter()], // Applied once at texture creation
 });
 ```
 
@@ -744,10 +743,10 @@ textures.forEach((tex, i) => {
 ### 4. Enable Culling for Off-Screen Objects
 
 ```javascript
-sprite.cullable = true;  // Skip rendering if outside viewport
+sprite.cullable = true; // Skip rendering if outside viewport
 
 // Use CullerPlugin
-import { CullerPlugin } from 'pixi.js';
+import { CullerPlugin } from "pixi.js";
 ```
 
 ---
@@ -759,7 +758,7 @@ import { CullerPlugin } from 'pixi.js';
 const complexShape = new Graphics();
 // ... draw many shapes
 
-complexShape.cacheAsBitmap = true;  // Renders to texture once
+complexShape.cacheAsBitmap = true; // Renders to texture once
 ```
 
 ---
@@ -769,9 +768,9 @@ complexShape.cacheAsBitmap = true;  // Renders to texture once
 ```javascript
 const app = new Application();
 await app.init({
-  antialias: false,  // Disable on mobile for performance
-  resolution: 1,     // Lower resolution on low-end devices
-  autoDensity: true
+  antialias: false, // Disable on mobile for performance
+  resolution: 1, // Lower resolution on low-end devices
+  autoDensity: true,
 });
 ```
 
@@ -783,7 +782,7 @@ await app.init({
 // DON'T: Standard Text (expensive updates)
 const text = new Text({ text: `Score: ${score}` });
 app.ticker.add(() => {
-  text.text = `Score: ${++score}`;  // Re-renders texture each frame
+  text.text = `Score: ${++score}`; // Re-renders texture each frame
 });
 
 // DO: BitmapText (much faster)
@@ -802,6 +801,7 @@ app.ticker.add(() => {
 **Problem**: Memory leaks from unreleased GPU resources.
 
 **Solution**:
+
 ```javascript
 // Always destroy sprites and textures
 sprite.destroy({ children: true, texture: true, baseTexture: true });
@@ -820,14 +820,15 @@ graphics.destroy();
 **Problem**: Changing `scale` when `dynamicProperties.scale = false` has no effect.
 
 **Solution**:
+
 ```javascript
 const container = new ParticleContainer({
   dynamicProperties: {
     position: true,
-    scale: true,  // Enable if you need to update
+    scale: true, // Enable if you need to update
     rotation: true,
-    color: true
-  }
+    color: true,
+  },
 });
 
 // If properties are static but you change them, call update:
@@ -841,9 +842,10 @@ container.update();
 **Problem**: Filters are expensive; too many cause performance issues.
 
 **Solution**:
+
 ```javascript
 // Limit filter usage
-sprite.filters = [blurFilter];  // 1-2 filters max
+sprite.filters = [blurFilter]; // 1-2 filters max
 
 // Use filterArea to constrain processing
 sprite.filterArea = new Rectangle(0, 0, sprite.width, sprite.height);
@@ -851,7 +853,7 @@ sprite.filterArea = new Rectangle(0, 0, sprite.width, sprite.height);
 // Bake filters into textures when possible
 const filteredTexture = renderer.filters.generateFilteredTexture({
   texture,
-  filters: [blurFilter]
+  filters: [blurFilter],
 });
 ```
 
@@ -862,12 +864,13 @@ const filteredTexture = renderer.filters.generateFilteredTexture({
 **Problem**: Updating Text re-generates texture every time.
 
 **Solution**:
+
 ```javascript
 // Use BitmapText for frequently changing text
-const bitmapText = new BitmapText({ text: 'Score: 0' });
+const bitmapText = new BitmapText({ text: "Score: 0" });
 
 // Reduce resolution for less memory
-text.resolution = 1;  // Lower than device pixel ratio
+text.resolution = 1; // Lower than device pixel ratio
 ```
 
 ---
@@ -877,11 +880,12 @@ text.resolution = 1;  // Lower than device pixel ratio
 **Problem**: Calling `clear()` removes all geometry but doesn't automatically redraw.
 
 **Solution**:
+
 ```javascript
-graphics.clear();  // Remove all shapes
+graphics.clear(); // Remove all shapes
 
 // Redraw new shapes
-graphics.rect(0, 0, 100, 100).fill('blue');
+graphics.rect(0, 0, 100, 100).fill("blue");
 ```
 
 ---
@@ -891,12 +895,13 @@ graphics.rect(0, 0, 100, 100).fill('blue');
 **Problem**: Creating sprites from URLs causes async issues.
 
 **Solution**:
+
 ```javascript
 // DON'T:
-const sprite = Sprite.from('image.png');  // May load asynchronously
+const sprite = Sprite.from("image.png"); // May load asynchronously
 
 // DO:
-const texture = await Assets.load('image.png');
+const texture = await Assets.load("image.png");
 const sprite = new Sprite(texture);
 ```
 
@@ -908,7 +913,7 @@ const sprite = new Sprite(texture);
 - **API Documentation**: https://pixijs.download/release/docs/
 - **Examples**: https://pixijs.io/examples/
 - **GitHub**: https://github.com/pixijs/pixijs
-- **Filters Library**: @pixi/filter-* packages
+- **Filters Library**: @pixi/filter-\* packages
 - **Community**: https://github.com/pixijs/pixijs/discussions
 
 ---

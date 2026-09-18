@@ -19,23 +19,21 @@ Production-ready code examples for AOS (Animate On Scroll) integration across di
 ```html
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AOS Minimal Example</title>
-  <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
-</head>
-<body>
-  <h1 data-aos="fade-down">Hello World</h1>
-  <p data-aos="fade-up" data-aos-delay="200">
-    This content fades in with a delay.
-  </p>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AOS Minimal Example</title>
+    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+  </head>
+  <body>
+    <h1 data-aos="fade-down">Hello World</h1>
+    <p data-aos="fade-up" data-aos-delay="200">This content fades in with a delay.</p>
 
-  <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
-  <script>
-    AOS.init({ duration: 800, once: true });
-  </script>
-</body>
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+    <script>
+      AOS.init({ duration: 800, once: true });
+    </script>
+  </body>
 </html>
 ```
 
@@ -47,13 +45,13 @@ npm install aos@next
 
 ```javascript
 // main.js
-import AOS from 'aos';
-import 'aos/dist/aos.css';
+import AOS from "aos";
+import "aos/dist/aos.css";
 
 AOS.init({
   duration: 800,
   once: true,
-  offset: 100
+  offset: 100,
 });
 ```
 
@@ -68,9 +66,9 @@ AOS.init({
 
 ```jsx
 // App.jsx
-import { useEffect } from 'react';
-import AOS from 'aos';
-import 'aos/dist/aos.css';
+import { useEffect } from "react";
+import AOS from "aos";
+import "aos/dist/aos.css";
 
 function App() {
   useEffect(() => {
@@ -78,7 +76,7 @@ function App() {
       duration: 800,
       once: true,
       offset: 100,
-      easing: 'ease-out-cubic'
+      easing: "ease-out-cubic",
     });
   }, []);
 
@@ -99,12 +97,12 @@ export default App;
 
 ```jsx
 // App.jsx
-import { useEffect } from 'react';
-import { useLocation, Routes, Route } from 'react-router-dom';
-import AOS from 'aos';
-import 'aos/dist/aos.css';
-import Home from './pages/Home';
-import About from './pages/About';
+import { useEffect } from "react";
+import { useLocation, Routes, Route } from "react-router-dom";
+import AOS from "aos";
+import "aos/dist/aos.css";
+import Home from "./pages/Home";
+import About from "./pages/About";
 
 function App() {
   const location = useLocation();
@@ -114,7 +112,7 @@ function App() {
     AOS.init({
       duration: 800,
       once: true,
-      offset: 100
+      offset: 100,
     });
   }, []);
 
@@ -138,16 +136,16 @@ export default App;
 
 ```jsx
 // components/AnimatedSection.jsx
-import React from 'react';
+import React from "react";
 
 const AnimatedSection = ({
   children,
-  animation = 'fade-up',
+  animation = "fade-up",
   delay = 0,
   duration = 800,
   offset = 100,
   once = true,
-  className = '',
+  className = "",
   ...props
 }) => {
   return (
@@ -172,7 +170,7 @@ Usage:
 
 ```jsx
 // pages/Home.jsx
-import AnimatedSection from '../components/AnimatedSection';
+import AnimatedSection from "../components/AnimatedSection";
 
 function Home() {
   return (
@@ -197,8 +195,8 @@ function Home() {
 
 ```jsx
 // components/DynamicList.jsx
-import { useState, useEffect } from 'react';
-import AOS from 'aos';
+import { useState, useEffect } from "react";
+import AOS from "aos";
 
 function DynamicList() {
   const [items, setItems] = useState([]);
@@ -210,7 +208,7 @@ function DynamicList() {
   const addItem = () => {
     const newItem = {
       id: Date.now(),
-      text: `Item ${items.length + 1}`
+      text: `Item ${items.length + 1}`,
     };
 
     setItems([...items, newItem]);
@@ -220,7 +218,7 @@ function DynamicList() {
   };
 
   const removeItem = (id) => {
-    setItems(items.filter(item => item.id !== id));
+    setItems(items.filter((item) => item.id !== id));
     setTimeout(() => AOS.refresh(), 50);
   };
 
@@ -230,11 +228,7 @@ function DynamicList() {
 
       <div className="list">
         {items.map((item, index) => (
-          <div
-            key={item.id}
-            data-aos="fade-in"
-            data-aos-delay={index * 50}
-          >
+          <div key={item.id} data-aos="fade-in" data-aos-delay={index * 50}>
             {item.text}
             <button onClick={() => removeItem(item.id)}>Remove</button>
           </div>
@@ -249,14 +243,14 @@ export default DynamicList;
 
 ## Next.js Integration
 
-### Next.js App Router (_app.js)
+### Next.js App Router (\_app.js)
 
 ```jsx
 // pages/_app.js
-import { useEffect } from 'react';
-import AOS from 'aos';
-import 'aos/dist/aos.css';
-import '../styles/globals.css';
+import { useEffect } from "react";
+import AOS from "aos";
+import "aos/dist/aos.css";
+import "../styles/globals.css";
 
 function MyApp({ Component, pageProps }) {
   useEffect(() => {
@@ -264,7 +258,7 @@ function MyApp({ Component, pageProps }) {
       duration: 800,
       once: true,
       offset: 100,
-      easing: 'ease-out-cubic'
+      easing: "ease-out-cubic",
     });
   }, []);
 
@@ -306,9 +300,9 @@ export default function Home() {
 }
 
 const features = [
-  { id: 1, title: 'Fast', description: 'Lightning fast performance' },
-  { id: 2, title: 'Secure', description: 'Enterprise-grade security' },
-  { id: 3, title: 'Scalable', description: 'Grows with your needs' }
+  { id: 1, title: "Fast", description: "Lightning fast performance" },
+  { id: 2, title: "Secure", description: "Enterprise-grade security" },
+  { id: 3, title: "Scalable", description: "Grows with your needs" },
 ];
 ```
 
@@ -316,16 +310,16 @@ const features = [
 
 ```tsx
 // pages/_app.tsx
-import { useEffect } from 'react';
-import type { AppProps } from 'next/app';
-import AOS from 'aos';
-import 'aos/dist/aos.css';
+import { useEffect } from "react";
+import type { AppProps } from "next/app";
+import AOS from "aos";
+import "aos/dist/aos.css";
 
 function MyApp({ Component, pageProps }: AppProps) {
   useEffect(() => {
     AOS.init({
       duration: 800,
-      once: true
+      once: true,
     });
   }, []);
 
@@ -345,11 +339,7 @@ interface AnimatedCardProps {
 
 const AnimatedCard = ({ title, description, delay = 0 }: AnimatedCardProps) => {
   return (
-    <div
-      data-aos="fade-up"
-      data-aos-delay={delay}
-      className="card"
-    >
+    <div data-aos="fade-up" data-aos-delay={delay} className="card">
       <h3>{title}</h3>
       <p>{description}</p>
     </div>
@@ -381,20 +371,20 @@ export default AnimatedCard;
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
-import AOS from 'aos';
-import 'aos/dist/aos.css';
+import { onMounted, ref } from "vue";
+import AOS from "aos";
+import "aos/dist/aos.css";
 
 const items = ref([
-  { id: 1, text: 'Item 1' },
-  { id: 2, text: 'Item 2' },
-  { id: 3, text: 'Item 3' }
+  { id: 1, text: "Item 1" },
+  { id: 2, text: "Item 2" },
+  { id: 3, text: "Item 3" },
 ]);
 
 onMounted(() => {
   AOS.init({
     duration: 800,
-    once: true
+    once: true,
   });
 });
 </script>
@@ -421,9 +411,9 @@ onMounted(() => {
 </template>
 
 <script setup>
-import { ref, nextTick, onMounted } from 'vue';
-import AOS from 'aos';
-import 'aos/dist/aos.css';
+import { ref, nextTick, onMounted } from "vue";
+import AOS from "aos";
+import "aos/dist/aos.css";
 
 const items = ref([]);
 
@@ -434,7 +424,7 @@ onMounted(() => {
 const addItem = async () => {
   items.value.push({
     id: Date.now(),
-    text: `Item ${items.value.length + 1}`
+    text: `Item ${items.value.length + 1}`,
   });
 
   // Wait for DOM update, then refresh AOS
@@ -456,15 +446,15 @@ const addItem = async () => {
 </template>
 
 <script>
-import AOS from 'aos';
-import 'aos/dist/aos.css';
+import AOS from "aos";
+import "aos/dist/aos.css";
 
 export default {
-  name: 'App',
+  name: "App",
   mounted() {
     AOS.init({
       duration: 800,
-      once: true
+      once: true,
     });
   },
   updated() {
@@ -472,7 +462,7 @@ export default {
     this.$nextTick(() => {
       AOS.refresh();
     });
-  }
+  },
 };
 </script>
 ```
@@ -484,122 +474,130 @@ export default {
 ```html
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AOS Landing Page</title>
-  <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AOS Landing Page</title>
+    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
 
-    /* Hero */
-    .hero {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 2rem;
-    }
+      /* Hero */
+      .hero {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+      }
 
-    .hero h1 { font-size: 3rem; margin-bottom: 1rem; }
-    .hero p { font-size: 1.25rem; margin-bottom: 2rem; }
-    .hero button {
-      padding: 1rem 2.5rem;
-      font-size: 1.1rem;
-      background: white;
-      color: #667eea;
-      border: none;
-      border-radius: 50px;
-      cursor: pointer;
-    }
+      .hero h1 {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+      }
+      .hero p {
+        font-size: 1.25rem;
+        margin-bottom: 2rem;
+      }
+      .hero button {
+        padding: 1rem 2.5rem;
+        font-size: 1.1rem;
+        background: white;
+        color: #667eea;
+        border: none;
+        border-radius: 50px;
+        cursor: pointer;
+      }
 
-    /* Features */
-    .features {
-      padding: 5rem 2rem;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
+      /* Features */
+      .features {
+        padding: 5rem 2rem;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
 
-    .features h2 {
-      text-align: center;
-      font-size: 2.5rem;
-      margin-bottom: 3rem;
-    }
+      .features h2 {
+        text-align: center;
+        font-size: 2.5rem;
+        margin-bottom: 3rem;
+      }
 
-    .feature-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 2rem;
-    }
+      .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 2rem;
+      }
 
-    .feature-card {
-      background: white;
-      padding: 2rem;
-      border-radius: 12px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      text-align: center;
-    }
+      .feature-card {
+        background: white;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        text-align: center;
+      }
 
-    .feature-icon {
-      font-size: 3rem;
-      margin-bottom: 1rem;
-    }
-  </style>
-</head>
-<body>
-  <!-- Hero Section -->
-  <section class="hero">
-    <div>
-      <h1 data-aos="fade-down" data-aos-duration="800">
-        Build Something Amazing
-      </h1>
-      <p data-aos="fade-up" data-aos-delay="200" data-aos-duration="600">
-        The most powerful platform for creating extraordinary experiences
-      </p>
-      <button data-aos="zoom-in" data-aos-delay="400" data-aos-duration="500">
-        Get Started
-      </button>
-    </div>
-  </section>
-
-  <!-- Features Section -->
-  <section class="features">
-    <h2 data-aos="fade-down">Why Choose Us</h2>
-
-    <div class="feature-grid">
-      <div class="feature-card" data-aos="fade-up" data-aos-delay="0">
-        <div class="feature-icon">🚀</div>
-        <h3>Lightning Fast</h3>
-        <p>Optimized for speed and performance</p>
+      .feature-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Hero Section -->
+    <section class="hero">
+      <div>
+        <h1 data-aos="fade-down" data-aos-duration="800">Build Something Amazing</h1>
+        <p data-aos="fade-up" data-aos-delay="200" data-aos-duration="600">
+          The most powerful platform for creating extraordinary experiences
+        </p>
+        <button data-aos="zoom-in" data-aos-delay="400" data-aos-duration="500">Get Started</button>
       </div>
+    </section>
 
-      <div class="feature-card" data-aos="fade-up" data-aos-delay="100">
-        <div class="feature-icon">🎨</div>
-        <h3>Beautiful UI</h3>
-        <p>Stunning designs that users love</p>
+    <!-- Features Section -->
+    <section class="features">
+      <h2 data-aos="fade-down">Why Choose Us</h2>
+
+      <div class="feature-grid">
+        <div class="feature-card" data-aos="fade-up" data-aos-delay="0">
+          <div class="feature-icon">🚀</div>
+          <h3>Lightning Fast</h3>
+          <p>Optimized for speed and performance</p>
+        </div>
+
+        <div class="feature-card" data-aos="fade-up" data-aos-delay="100">
+          <div class="feature-icon">🎨</div>
+          <h3>Beautiful UI</h3>
+          <p>Stunning designs that users love</p>
+        </div>
+
+        <div class="feature-card" data-aos="fade-up" data-aos-delay="200">
+          <div class="feature-icon">🔒</div>
+          <h3>Secure</h3>
+          <p>Enterprise-grade security built-in</p>
+        </div>
       </div>
+    </section>
 
-      <div class="feature-card" data-aos="fade-up" data-aos-delay="200">
-        <div class="feature-icon">🔒</div>
-        <h3>Secure</h3>
-        <p>Enterprise-grade security built-in</p>
-      </div>
-    </div>
-  </section>
-
-  <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
-  <script>
-    AOS.init({
-      duration: 800,
-      once: true,
-      offset: 100
-    });
-  </script>
-</body>
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+    <script>
+      AOS.init({
+        duration: 800,
+        once: true,
+        offset: 100,
+      });
+    </script>
+  </body>
 </html>
 ```
 
@@ -643,14 +641,14 @@ function ProductGrid({ products }) {
       <p>Description of the feature...</p>
     </div>
     <div class="image-col" data-aos="fade-left" data-aos-delay="200">
-      <img src="feature1.jpg" alt="Feature 1">
+      <img src="feature1.jpg" alt="Feature 1" />
     </div>
   </section>
 
   <!-- Section 2: Image on left -->
   <section class="content-row reverse">
     <div class="image-col" data-aos="fade-right">
-      <img src="feature2.jpg" alt="Feature 2">
+      <img src="feature2.jpg" alt="Feature 2" />
     </div>
     <div class="text-col" data-aos="slide-left" data-aos-duration="800" data-aos-delay="200">
       <h2>Feature Two</h2>
@@ -668,24 +666,23 @@ function ProductGrid({ products }) {
 // Best performance configuration
 AOS.init({
   // Animation settings
-  duration: 400,  // Shorter = smoother
-  easing: 'ease',  // Simple easing
+  duration: 400, // Shorter = smoother
+  easing: "ease", // Simple easing
 
   // Behavior
-  once: true,  // Animate only once (better performance)
-  mirror: false,  // Don't animate out
+  once: true, // Animate only once (better performance)
+  mirror: false, // Don't animate out
 
   // Device settings
-  disable: function() {
+  disable: function () {
     // Disable on mobile or reduced motion preference
-    return window.innerWidth < 768 ||
-           window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    return window.innerWidth < 768 || window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   },
 
   // Performance tuning
-  throttleDelay: 120,  // Increase for slower devices
+  throttleDelay: 120, // Increase for slower devices
   debounceDelay: 80,
-  disableMutationObserver: true  // For fully static content
+  disableMutationObserver: true, // For fully static content
 });
 ```
 
@@ -703,9 +700,7 @@ function BlogPost({ post }) {
       </p>
 
       {/* Don't animate body text - better for readability */}
-      <div className="content">
-        {post.content}
-      </div>
+      <div className="content">{post.content}</div>
 
       {/* Animate CTA */}
       <button data-aos="fade-up" className="cta">
@@ -723,9 +718,9 @@ function BlogPost({ post }) {
 ```javascript
 // Respect user's motion preferences
 AOS.init({
-  disable: function() {
-    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  }
+  disable: function () {
+    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  },
 });
 ```
 
@@ -733,21 +728,21 @@ AOS.init({
 
 ```jsx
 // React: Disable animations based on user preference
-import { useEffect, useState } from 'react';
-import AOS from 'aos';
-import 'aos/dist/aos.css';
+import { useEffect, useState } from "react";
+import AOS from "aos";
+import "aos/dist/aos.css";
 
 function App() {
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
   useEffect(() => {
-    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
     setPrefersReducedMotion(mediaQuery.matches);
 
     const handleChange = () => setPrefersReducedMotion(mediaQuery.matches);
-    mediaQuery.addEventListener('change', handleChange);
+    mediaQuery.addEventListener("change", handleChange);
 
-    return () => mediaQuery.removeEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener("change", handleChange);
   }, []);
 
   useEffect(() => {
@@ -758,9 +753,7 @@ function App() {
 
   return (
     <div>
-      <h1 data-aos={prefersReducedMotion ? undefined : "fade-down"}>
-        Accessible Heading
-      </h1>
+      <h1 data-aos={prefersReducedMotion ? undefined : "fade-down"}>Accessible Heading</h1>
     </div>
   );
 }
@@ -770,23 +763,13 @@ function App() {
 
 ```html
 <!-- Use aria-live for important content -->
-<div
-  data-aos="fade-up"
-  aria-live="polite"
-  aria-atomic="true"
->
+<div data-aos="fade-up" aria-live="polite" aria-atomic="true">
   <h2>Important Update</h2>
   <p>This content will be announced to screen readers</p>
 </div>
 
 <!-- Mark decorative animations -->
-<div
-  data-aos="zoom-in"
-  aria-hidden="true"
-  role="presentation"
->
-  Decorative element
-</div>
+<div data-aos="zoom-in" aria-hidden="true" role="presentation">Decorative element</div>
 ```
 
 ## Best Practices Summary

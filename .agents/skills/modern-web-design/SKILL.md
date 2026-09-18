@@ -18,12 +18,14 @@ This meta-skill synthesizes knowledge from all animation, interaction, and 3D sk
 **Philosophy**: Design decisions should prioritize Core Web Vitals and user experience on all devices.
 
 **Key Metrics**:
+
 - Largest Contentful Paint (LCP): < 2.5s
 - First Input Delay (FID): < 100ms
 - Cumulative Layout Shift (CLS): < 0.1
 - Interaction to Next Paint (INP): < 200ms
 
 **Implementation Guidelines**:
+
 - Defer non-critical animations until after page load
 - Use CSS transforms/opacity for animations (GPU-accelerated)
 - Implement lazy loading for images, videos, and 3D content
@@ -34,6 +36,7 @@ This meta-skill synthesizes knowledge from all animation, interaction, and 3D sk
 ### 2. Bold Minimalism
 
 **Characteristics**:
+
 - Large, impactful typography (clamp() for fluid sizing)
 - Ample white space (negative space as design element)
 - Limited color palettes (3-5 primary colors)
@@ -41,6 +44,7 @@ This meta-skill synthesizes knowledge from all animation, interaction, and 3D sk
 - Geometric shapes and clean lines
 
 **Typography Scale** (Modern fluid system):
+
 ```css
 /* Fluid typography using clamp() */
 --font-size-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
@@ -53,10 +57,11 @@ This meta-skill synthesizes knowledge from all animation, interaction, and 3D sk
 ```
 
 **Color System** (Accessibility-first):
+
 ```css
 /* WCAG AAA compliant color system */
 --color-primary: oklch(50% 0.2 250); /* Blue */
---color-accent: oklch(65% 0.25 30);  /* Coral */
+--color-accent: oklch(65% 0.25 30); /* Coral */
 --color-neutral-50: oklch(98% 0 0);
 --color-neutral-900: oklch(20% 0 0);
 /* Contrast ratio: minimum 7:1 for text */
@@ -71,24 +76,28 @@ This meta-skill synthesizes knowledge from all animation, interaction, and 3D sk
 **Categories**:
 
 **a) Hover States** (Desktop):
+
 - Scale transformations (1.05-1.1x)
 - Color transitions (200-300ms)
 - Shadow depth changes
 - Cursor transformations
 
 **b) Loading States**:
+
 - Skeleton screens (better than spinners)
 - Progressive image loading (blur-up technique)
 - Optimistic UI updates
 - Staggered content reveals
 
 **c) Interactive Feedback**:
+
 - Button press states (scale down 0.95x)
 - Toggle switches with spring physics
 - Form field validation (immediate, kind feedback)
 - Success/error states with motion
 
 **Implementation Example** (Framer Motion):
+
 ```jsx
 // Button with micro-interaction
 <motion.button
@@ -109,23 +118,27 @@ This meta-skill synthesizes knowledge from all animation, interaction, and 3D sk
 **Patterns**:
 
 **a) Scroll-Triggered Reveals**:
+
 - Fade-in on scroll entry (with offset)
 - Slide-in from sides with stagger
 - Scale + opacity transitions
 - Clip-path reveals
 
 **b) Scroll-Linked Animations**:
+
 - Parallax layers (different scroll speeds)
 - Horizontal scrolling sections
 - Pinned sections with scrubbing animations
 - 3D object rotation tied to scroll
 
 **c) Progress Indicators**:
+
 - Reading progress bars
 - Step-by-step visual guides
 - Animated SVG paths following scroll
 
 **Implementation Example** (GSAP ScrollTrigger):
+
 ```javascript
 // Scroll-linked 3D rotation
 gsap.to(".cube", {
@@ -136,7 +149,7 @@ gsap.to(".cube", {
     scrub: 1, // Smooth scrubbing
   },
   rotationY: 360,
-  ease: "none"
+  ease: "none",
 });
 ```
 
@@ -149,31 +162,37 @@ gsap.to(".cube", {
 **Patterns**:
 
 **a) Custom Cursor Shapes**:
+
 - Circle/dot followers (delayed with easing)
 - Text-based cursors ("View", "Drag", "Click")
 - Blend modes for visual interest
 - Scale/morph on hover
 
 **b) Contextual Transformations**:
+
 - Expand on links/buttons
 - Magnetic attraction to interactive elements
 - Color inversion over images
 - Custom icons for actions (play, zoom, expand)
 
 **c) Performance Considerations**:
+
 - Use CSS transforms only (no top/left)
 - RequestAnimationFrame for JS cursors
 - Disable on mobile/touch devices
 - Respect `prefers-reduced-motion`
 
 **Implementation Example**:
+
 ```javascript
 // Simple smooth cursor follower
-const cursor = document.querySelector('.cursor');
-let mouseX = 0, mouseY = 0;
-let cursorX = 0, cursorY = 0;
+const cursor = document.querySelector(".cursor");
+let mouseX = 0,
+  mouseY = 0;
+let cursorX = 0,
+  cursorY = 0;
 
-document.addEventListener('mousemove', (e) => {
+document.addEventListener("mousemove", (e) => {
   mouseX = e.clientX;
   mouseY = e.clientY;
 });
@@ -194,12 +213,14 @@ updateCursor();
 ### 6. Glassmorphism & Depth
 
 **Characteristics**:
+
 - Frosted glass effect (backdrop-filter)
 - Layered UI with depth hierarchy
 - Subtle shadows and borders
 - Translucent backgrounds
 
 **Modern Glassmorphism** (2024):
+
 ```css
 .glass-card {
   background: rgba(255, 255, 255, 0.1);
@@ -211,12 +232,13 @@ updateCursor();
 ```
 
 **Depth System** (Layering):
+
 ```css
 /* Elevation scale */
---elevation-1: 0 1px 3px rgba(0,0,0,0.12);
---elevation-2: 0 4px 8px rgba(0,0,0,0.15);
---elevation-3: 0 8px 16px rgba(0,0,0,0.18);
---elevation-4: 0 16px 32px rgba(0,0,0,0.2);
+--elevation-1: 0 1px 3px rgba(0, 0, 0, 0.12);
+--elevation-2: 0 4px 8px rgba(0, 0, 0, 0.15);
+--elevation-3: 0 8px 16px rgba(0, 0, 0, 0.18);
+--elevation-4: 0 16px 32px rgba(0, 0, 0, 0.2);
 ```
 
 **Related Skills**: `animated-component-libraries` for glassmorphic components
@@ -226,24 +248,28 @@ updateCursor();
 **Patterns**:
 
 **a) Adaptive Content**:
+
 - Dynamic layout based on user behavior
 - Personalized content recommendations
 - Adaptive color schemes (system preference + user history)
 - Smart defaults based on context
 
 **b) Intelligent Interactions**:
+
 - Predictive search with instant results
 - Smart form completion
 - Context-aware suggestions
 - Progressive disclosure based on usage
 
 **c) Performance + Privacy**:
+
 - Client-side personalization (localStorage, IndexedDB)
 - Edge computing for fast personalization
 - Privacy-preserving analytics
 - Transparent data usage
 
 **Implementation Considerations**:
+
 - Fallback to default experience
 - No layout shift from personalization
 - Respect "Do Not Track"
@@ -256,6 +282,7 @@ updateCursor();
 **Use Case**: Landing pages, product launches, portfolio sites
 
 **Characteristics**:
+
 - Full viewport height
 - Subtle 3D background or animated gradient
 - Large headline with fluid typography
@@ -265,6 +292,7 @@ updateCursor();
 **Implementation** (Combined approach):
 
 **HTML Structure**:
+
 ```html
 <section class="hero">
   <div id="bg-canvas"></div>
@@ -280,6 +308,7 @@ updateCursor();
 ```
 
 **Technologies**:
+
 - Background: Vanta.js WAVES effect (`lightweight-3d-effects`)
 - Text animation: GSAP SplitText with stagger (`gsap-scrolltrigger`)
 - Button: Framer Motion hover states (`motion-framer`)
@@ -292,6 +321,7 @@ updateCursor();
 **Use Case**: Portfolio work, product showcases, case studies
 
 **Implementation** (GSAP ScrollTrigger):
+
 ```javascript
 gsap.to(".gallery__track", {
   x: () => -(document.querySelector(".gallery__track").scrollWidth - window.innerWidth),
@@ -300,12 +330,13 @@ gsap.to(".gallery__track", {
     trigger: ".gallery",
     pin: true,
     scrub: 1,
-    end: () => "+=" + document.querySelector(".gallery__track").scrollWidth
-  }
+    end: () => "+=" + document.querySelector(".gallery__track").scrollWidth,
+  },
 });
 ```
 
 **Enhancements**:
+
 - Lazy load images as they scroll into view
 - Parallax within cards
 - Scale transformation on active card
@@ -318,9 +349,10 @@ gsap.to(".gallery__track", {
 **Use Case**: E-commerce, product marketing, showcases
 
 **Implementation** (React Three Fiber):
+
 ```jsx
-import { Canvas } from '@react-three/fiber'
-import { OrbitControls, useGLTF } from '@react-three/drei'
+import { Canvas } from "@react-three/fiber";
+import { OrbitControls, useGLTF } from "@react-three/drei";
 
 function ProductViewer() {
   return (
@@ -328,17 +360,14 @@ function ProductViewer() {
       <ambientLight intensity={0.5} />
       <spotLight position={[10, 10, 10]} angle={0.15} />
       <Product />
-      <OrbitControls
-        enableZoom={false}
-        autoRotate
-        autoRotateSpeed={2}
-      />
+      <OrbitControls enableZoom={false} autoRotate autoRotateSpeed={2} />
     </Canvas>
-  )
+  );
 }
 ```
 
 **Enhancements**:
+
 - Material variants (color picker)
 - Hotspots with annotations
 - AR mode on mobile
@@ -351,12 +380,14 @@ function ProductViewer() {
 **Use Case**: Dashboards, analytics, infographics
 
 **Patterns**:
+
 - Count-up animations on scroll into view
 - Animated chart reveals (progress bars, pie charts)
 - Staggered grid animations
 - Particle backgrounds representing data
 
 **Implementation** (Framer Motion + IntersectionObserver):
+
 ```jsx
 function AnimatedStat({ end, label }) {
   const [count, setCount] = useState(0);
@@ -404,27 +435,31 @@ function AnimatedStat({ end, label }) {
 **Use Case**: Multi-page apps, portfolio sites, storytelling experiences
 
 **Implementation** (Barba.js + GSAP):
+
 ```javascript
 barba.init({
-  transitions: [{
-    name: 'slide',
-    leave(data) {
-      return gsap.to(data.current.container, {
-        xPercent: -100,
-        duration: 0.5
-      });
+  transitions: [
+    {
+      name: "slide",
+      leave(data) {
+        return gsap.to(data.current.container, {
+          xPercent: -100,
+          duration: 0.5,
+        });
+      },
+      enter(data) {
+        return gsap.from(data.next.container, {
+          xPercent: 100,
+          duration: 0.5,
+        });
+      },
     },
-    enter(data) {
-      return gsap.from(data.next.container, {
-        xPercent: 100,
-        duration: 0.5
-      });
-    }
-  }]
+  ],
 });
 ```
 
 **Modern Alternatives**:
+
 - View Transitions API (Chrome 111+, progressive enhancement)
 - Framer Motion's AnimatePresence for React SPAs
 - Shared element transitions
@@ -436,30 +471,32 @@ barba.init({
 **Use Case**: Creative agencies, portfolios, interactive experiences
 
 **Patterns**:
+
 - Text cursor that follows with delay
 - Magnetic buttons (cursor attracted to elements)
 - Blend mode cursor (inverts colors)
 - Cursor that reveals content
 
 **Implementation** (Vanilla JS + GSAP):
-```javascript
-const links = document.querySelectorAll('a');
-const cursor = document.querySelector('.cursor');
 
-links.forEach(link => {
-  link.addEventListener('mouseenter', () => {
+```javascript
+const links = document.querySelectorAll("a");
+const cursor = document.querySelector(".cursor");
+
+links.forEach((link) => {
+  link.addEventListener("mouseenter", () => {
     gsap.to(cursor, {
       scale: 2,
       duration: 0.3,
-      ease: "power2.out"
+      ease: "power2.out",
     });
   });
 
-  link.addEventListener('mouseleave', () => {
+  link.addEventListener("mouseleave", () => {
     gsap.to(cursor, {
       scale: 1,
       duration: 0.3,
-      ease: "power2.out"
+      ease: "power2.out",
     });
   });
 });
@@ -472,20 +509,21 @@ links.forEach(link => {
 **Use Case**: Feature sections, testimonials, team grids
 
 **Implementation** (Framer Motion variants):
+
 ```jsx
 const container = {
   hidden: { opacity: 0 },
   show: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.1
-    }
-  }
+      staggerChildren: 0.1,
+    },
+  },
 };
 
 const item = {
   hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0 }
+  show: { opacity: 1, y: 0 },
 };
 
 function FeatureGrid() {
@@ -514,30 +552,35 @@ function FeatureGrid() {
 ### Animation Skills Integration
 
 **GSAP ScrollTrigger** (`gsap-scrolltrigger`):
+
 - Use for scroll-driven storytelling
 - Pin sections for multi-step reveals
 - Scrub animations tied to scroll position
 - Batch animations for performance
 
 **Framer Motion** (`motion-framer`):
+
 - React component animations
 - Page transitions with AnimatePresence
 - Gesture-based interactions (drag, hover, tap)
 - Layout animations (shared element transitions)
 
 **React Spring** (`react-spring-physics`):
+
 - Physics-based animations (more natural feel)
 - Interactive springs (drag, pull)
 - Trail animations (sequential reveals)
 - Use for UI feedback that feels "real"
 
 **Anime.js** (`animejs`):
+
 - SVG path animations (line drawing)
 - SVG morphing transitions
 - Stagger grid animations
 - Timeline-based sequences
 
 **Lottie** (`lottie-animations`):
+
 - Complex designer-created animations
 - Icon animations and micro-interactions
 - Loading states
@@ -546,24 +589,28 @@ function FeatureGrid() {
 ### 3D Skills Integration
 
 **Three.js** (`threejs-webgl`):
+
 - Custom 3D scenes and experiences
 - Shader effects and post-processing
 - WebGL-based particle systems
 - Advanced lighting and materials
 
 **React Three Fiber** (`react-three-fiber`):
+
 - 3D in React applications
 - Product viewers and configurators
 - Interactive 3D UI components
 - Scroll-driven 3D animations
 
 **Babylon.js** (`babylonjs-engine`):
+
 - Physics-based 3D experiences
 - VR/XR applications
 - Game-like interactions
 - PBR materials for realism
 
 **Lightweight 3D** (`lightweight-3d-effects`):
+
 - Background effects (Vanta.js)
 - Subtle 3D illustrations (Zdog)
 - Tilt effects (Vanilla-Tilt)
@@ -572,12 +619,14 @@ function FeatureGrid() {
 ### Component Libraries
 
 **Animated Components** (`animated-component-libraries`):
+
 - Magic UI components (backgrounds, text effects)
 - Pre-built interactive components
 - Design system foundations
 - Rapid prototyping
 
 **Scroll Reveals** (`scroll-reveal-libraries`):
+
 - Simple fade/slide on scroll
 - AOS library integration
 - Lightweight alternative to ScrollTrigger
@@ -588,6 +637,7 @@ function FeatureGrid() {
 ### 1. Motion & Animation
 
 **Respect User Preferences**:
+
 ```css
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -602,8 +652,9 @@ function FeatureGrid() {
 ```
 
 **JavaScript Detection**:
+
 ```javascript
-const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 if (prefersReducedMotion) {
   // Disable or simplify animations
@@ -615,11 +666,13 @@ if (prefersReducedMotion) {
 ### 2. Color Contrast
 
 **WCAG AAA Standards**:
+
 - Normal text: 7:1 contrast ratio
 - Large text (18pt+): 4.5:1 contrast ratio
 - Use OKLCH color space for perceptual uniformity
 
 **Testing**:
+
 ```javascript
 // Check contrast ratio
 function getContrastRatio(color1, color2) {
@@ -634,6 +687,7 @@ function getContrastRatio(color1, color2) {
 ### 3. Keyboard Navigation
 
 **Requirements**:
+
 - All interactive elements focusable
 - Visible focus indicators (not outline: none)
 - Logical tab order
@@ -641,6 +695,7 @@ function getContrastRatio(color1, color2) {
 - Escape key closes modals/overlays
 
 **Focus Styles** (Modern):
+
 ```css
 :focus-visible {
   outline: 3px solid var(--color-accent);
@@ -657,17 +712,17 @@ function getContrastRatio(color1, color2) {
 ### 4. Screen Reader Support
 
 **Semantic HTML**:
+
 - Use proper heading hierarchy (h1-h6)
 - Landmark regions (header, nav, main, footer)
 - aria-labels for icon buttons
 - aria-live regions for dynamic content
 
 **Animation Announcements**:
+
 ```html
 <!-- Announce when content loads -->
-<div role="status" aria-live="polite" aria-atomic="true">
-  Loading complete. 12 items displayed.
-</div>
+<div role="status" aria-live="polite" aria-atomic="true">Loading complete. 12 items displayed.</div>
 ```
 
 ### 5. Touch Targets
@@ -677,6 +732,7 @@ function getContrastRatio(color1, color2) {
 **Spacing**: Minimum 8px between touch targets
 
 **Implementation**:
+
 ```css
 .button {
   min-height: 44px;
@@ -691,6 +747,7 @@ function getContrastRatio(color1, color2) {
 ### 1. Animation Performance
 
 **60 FPS Checklist**:
+
 - Use CSS transforms (translateX/Y/Z, scale, rotate) - GPU accelerated
 - Use opacity for fades - GPU accelerated
 - Avoid: top/left, width/height, margin, padding animations
@@ -698,6 +755,7 @@ function getContrastRatio(color1, color2) {
 - RequestAnimationFrame for JS animations
 
 **GSAP Performance**:
+
 ```javascript
 // Force GPU acceleration
 gsap.set(element, { force3D: true });
@@ -705,20 +763,22 @@ gsap.set(element, { force3D: true });
 // Use will-change during animation only
 gsap.to(element, {
   x: 100,
-  onStart: () => element.style.willChange = 'transform',
-  onComplete: () => element.style.willChange = 'auto'
+  onStart: () => (element.style.willChange = "transform"),
+  onComplete: () => (element.style.willChange = "auto"),
 });
 ```
 
 ### 2. Loading Strategies
 
 **Critical Path**:
+
 - Inline critical CSS (above-the-fold)
 - Defer non-critical CSS
 - Async JavaScript loading
 - Preload fonts and hero images
 
 **Progressive Enhancement**:
+
 ```html
 <!-- Load essential styles first -->
 <style>
@@ -726,45 +786,52 @@ gsap.to(element, {
 </style>
 
 <!-- Defer non-critical styles -->
-<link rel="preload" href="animations.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link rel="stylesheet" href="animations.css"></noscript>
+<link
+  rel="preload"
+  href="animations.css"
+  as="style"
+  onload="this.onload=null;this.rel='stylesheet'"
+/>
+<noscript><link rel="stylesheet" href="animations.css" /></noscript>
 ```
 
 ### 3. Image Optimization
 
 **Modern Formats**:
+
 ```html
 <picture>
-  <source srcset="image.avif" type="image/avif">
-  <source srcset="image.webp" type="image/webp">
-  <img src="image.jpg" alt="Description" loading="lazy">
+  <source srcset="image.avif" type="image/avif" />
+  <source srcset="image.webp" type="image/webp" />
+  <img src="image.jpg" alt="Description" loading="lazy" />
 </picture>
 ```
 
 **Responsive Images**:
+
 ```html
 <img
-  srcset="image-400.jpg 400w,
-          image-800.jpg 800w,
-          image-1200.jpg 1200w"
+  srcset="image-400.jpg 400w, image-800.jpg 800w, image-1200.jpg 1200w"
   sizes="(max-width: 640px) 100vw,
          (max-width: 1024px) 50vw,
          33vw"
   src="image-800.jpg"
   alt="Description"
   loading="lazy"
->
+/>
 ```
 
 ### 4. 3D Content Optimization
 
 **Loading Strategy**:
+
 - Show placeholder while loading
 - Load low-poly model first
 - Progressive enhancement with high-poly
 - Lazy load 3D scenes below fold
 
 **Runtime Performance**:
+
 - Use object pooling
 - Implement LOD (Level of Detail)
 - Frustum culling
@@ -775,15 +842,17 @@ gsap.to(element, {
 ### 5. JavaScript Bundle Size
 
 **Code Splitting**:
+
 ```javascript
 // Dynamic imports
-const AnimationModule = lazy(() => import('./animations'));
+const AnimationModule = lazy(() => import("./animations"));
 
 // Route-based splitting
-const Gallery = lazy(() => import('./pages/Gallery'));
+const Gallery = lazy(() => import("./pages/Gallery"));
 ```
 
 **Tree Shaking**:
+
 - Use ES6 imports
 - Import only what you need
 - Use modern build tools (Vite, esbuild)
@@ -795,6 +864,7 @@ const Gallery = lazy(() => import('./pages/Gallery'));
 **Problem**: Too many animations distract from content and hurt performance.
 
 **Solution**:
+
 - Limit animations to meaningful interactions
 - Use animation to guide attention, not demand it
 - Follow the principle: "Animation with purpose"
@@ -807,6 +877,7 @@ const Gallery = lazy(() => import('./pages/Gallery'));
 **Problem**: Animations work on desktop but lag on mobile devices.
 
 **Solution**:
+
 - Test on real devices (not just simulators)
 - Reduce animation complexity on mobile
 - Disable expensive effects (parallax, 3D) on low-end devices
@@ -814,8 +885,10 @@ const Gallery = lazy(() => import('./pages/Gallery'));
 
 ```javascript
 const isLowEndDevice = () => {
-  return /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent) &&
-         navigator.hardwareConcurrency < 4;
+  return (
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent) &&
+    navigator.hardwareConcurrency < 4
+  );
 };
 
 if (isLowEndDevice()) {
@@ -828,6 +901,7 @@ if (isLowEndDevice()) {
 **Problem**: Experience breaks without JavaScript or on older browsers.
 
 **Solution**:
+
 - Progressive enhancement mindset
 - Core content accessible without JS
 - Feature detection before using modern APIs
@@ -835,7 +909,7 @@ if (isLowEndDevice()) {
 
 ```javascript
 // Feature detection
-if ('IntersectionObserver' in window) {
+if ("IntersectionObserver" in window) {
   // Use scroll-triggered animations
 } else {
   // Show content immediately
@@ -847,6 +921,7 @@ if ('IntersectionObserver' in window) {
 **Problem**: Forgetting keyboard users, screen readers, or motion-sensitive users.
 
 **Solution**:
+
 - Test with keyboard only
 - Test with screen reader (NVDA, VoiceOver)
 - Always check `prefers-reduced-motion`
@@ -854,6 +929,7 @@ if ('IntersectionObserver' in window) {
 - Maintain proper focus management
 
 **Checklist**:
+
 - [ ] All interactive elements keyboard accessible
 - [ ] Focus indicators visible
 - [ ] Color contrast meets WCAG AAA
@@ -865,6 +941,7 @@ if ('IntersectionObserver' in window) {
 **Problem**: Blank screen or layout shifts during content load.
 
 **Solution**:
+
 - Skeleton screens for predictable layouts
 - Smooth loading transitions
 - Reserve space for dynamic content
@@ -892,6 +969,7 @@ function ProductCard({ loading, data }) {
 **Problem**: Overriding native scroll behavior frustrates users.
 
 **Solution**:
+
 - Preserve browser's native scroll (momentum, keyboard)
 - Use ScrollTrigger/Locomotive without changing scroll physics
 - Allow users to scroll at their own pace
@@ -905,6 +983,7 @@ function ProductCard({ loading, data }) {
 ### Token Structure
 
 **Modern Design Tokens** (CSS Custom Properties):
+
 ```css
 :root {
   /* Colors - OKLCH for perceptual uniformity */
@@ -937,6 +1016,7 @@ function ProductCard({ loading, data }) {
 ### Component Architecture
 
 **Atomic Design** (Brad Frost):
+
 1. **Atoms**: Buttons, inputs, labels
 2. **Molecules**: Form fields, cards
 3. **Organisms**: Navigation, hero sections
@@ -950,6 +1030,7 @@ function ProductCard({ loading, data }) {
 This skill references the following skills for implementation:
 
 ### Animation & Interaction
+
 - `gsap-scrolltrigger` - Scroll-driven animations, pinning, scrubbing
 - `motion-framer` - React animations, gestures, layout animations
 - `react-spring-physics` - Physics-based animations
@@ -958,22 +1039,26 @@ This skill references the following skills for implementation:
 - `scroll-reveal-libraries` - Simple scroll reveals (AOS)
 
 ### 3D & WebGL
+
 - `threejs-webgl` - Custom 3D scenes and effects
 - `react-three-fiber` - 3D in React applications
 - `babylonjs-engine` - Physics-based 3D, VR/XR
 - `lightweight-3d-effects` - Vanta.js backgrounds, Zdog illustrations
 
 ### Page Transitions & Scroll
+
 - `barba-js` - Page transitions
 - `locomotive-scroll` - Smooth scrolling
 
 ### Component Libraries
+
 - `animated-component-libraries` - Magic UI, React Bits
 - `pixijs-2d` - Canvas-based 2D graphics
 
 ### Detailed References
 
 See the `references/` directory for in-depth documentation:
+
 - `design_trends_2024.md` - Current web design trends and forecasts
 - `interaction_patterns.md` - Comprehensive micro-interaction catalog
 - `accessibility_guide.md` - WCAG compliance patterns and testing
@@ -982,6 +1067,7 @@ See the `references/` directory for in-depth documentation:
 ### Scripts
 
 The `scripts/` directory includes tools for implementing design patterns:
+
 - `pattern_generator.py` - Generate design pattern boilerplate
 - `design_audit.py` - Audit existing designs for compliance
 

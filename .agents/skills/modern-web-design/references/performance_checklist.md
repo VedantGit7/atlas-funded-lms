@@ -5,6 +5,7 @@
 Comprehensive performance optimization guide targeting Core Web Vitals and 60 FPS experiences. This checklist covers measurement, optimization strategies, and modern best practices.
 
 **Performance Budget Targets**:
+
 - Largest Contentful Paint (LCP): < 2.5s
 - First Input Delay (FID): < 100ms
 - Cumulative Layout Shift (CLS): < 0.1
@@ -38,6 +39,7 @@ Comprehensive performance optimization guide targeting Core Web Vitals and 60 FP
 **What it measures**: Time until largest content element is visible.
 
 **Optimization Checklist**:
+
 - [ ] Optimize hero images (WebP/AVIF, < 100KB)
 - [ ] Preload critical resources (`<link rel="preload">`)
 - [ ] Eliminate render-blocking resources
@@ -47,27 +49,29 @@ Comprehensive performance optimization guide targeting Core Web Vitals and 60 FP
 - [ ] Enable compression (Brotli/gzip)
 
 **Implementation**:
+
 ```html
 <!-- Preload critical resources -->
-<link rel="preload" as="image" href="hero.webp" type="image/webp">
-<link rel="preload" as="font" href="inter-var.woff2" type="font/woff2" crossorigin>
+<link rel="preload" as="image" href="hero.webp" type="image/webp" />
+<link rel="preload" as="font" href="inter-var.woff2" type="font/woff2" crossorigin />
 
 <!-- Modern image formats -->
 <picture>
-  <source srcset="hero.avif" type="image/avif">
-  <source srcset="hero.webp" type="image/webp">
-  <img src="hero.jpg" alt="Hero" loading="eager" fetchpriority="high">
+  <source srcset="hero.avif" type="image/avif" />
+  <source srcset="hero.webp" type="image/webp" />
+  <img src="hero.jpg" alt="Hero" loading="eager" fetchpriority="high" />
 </picture>
 ```
 
 **Debugging**:
+
 ```javascript
 // Measure LCP
 new PerformanceObserver((list) => {
   const entries = list.getEntries();
   const lastEntry = entries[entries.length - 1];
-  console.log('LCP:', lastEntry.renderTime || lastEntry.loadTime);
-}).observe({ entryTypes: ['largest-contentful-paint'] });
+  console.log("LCP:", lastEntry.renderTime || lastEntry.loadTime);
+}).observe({ entryTypes: ["largest-contentful-paint"] });
 ```
 
 ---
@@ -79,6 +83,7 @@ new PerformanceObserver((list) => {
 **What it measures**: Responsiveness to user interactions.
 
 **Optimization Checklist**:
+
 - [ ] Split long tasks (< 50ms each)
 - [ ] Defer non-critical JavaScript
 - [ ] Use web workers for heavy computation
@@ -88,10 +93,11 @@ new PerformanceObserver((list) => {
 - [ ] Use passive event listeners
 
 **Implementation**:
+
 ```javascript
 // Split long tasks
 function yieldToMain() {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     setTimeout(resolve, 0);
   });
 }
@@ -108,14 +114,14 @@ async function processLargeArray(array) {
 }
 
 // Passive event listeners
-window.addEventListener('scroll', handleScroll, { passive: true });
+window.addEventListener("scroll", handleScroll, { passive: true });
 
 // Debounced resize handler
 const debouncedResize = debounce(() => {
   handleResize();
 }, 150);
 
-window.addEventListener('resize', debouncedResize);
+window.addEventListener("resize", debouncedResize);
 ```
 
 ---
@@ -127,6 +133,7 @@ window.addEventListener('resize', debouncedResize);
 **What it measures**: Visual stability during page load.
 
 **Optimization Checklist**:
+
 - [ ] Reserve space for images (use `aspect-ratio`)
 - [ ] Reserve space for ads and embeds
 - [ ] Avoid inserting content above existing content
@@ -136,6 +143,7 @@ window.addEventListener('resize', debouncedResize);
 - [ ] Use `font-display: swap` or `font-display: optional`
 
 **Implementation**:
+
 ```css
 /* Reserve space for images */
 img {
@@ -162,6 +170,7 @@ img {
 ```
 
 **Debugging**:
+
 ```javascript
 // Measure CLS
 let clsValue = 0;
@@ -169,10 +178,10 @@ new PerformanceObserver((list) => {
   for (const entry of list.getEntries()) {
     if (!entry.hadRecentInput) {
       clsValue += entry.value;
-      console.log('CLS:', clsValue);
+      console.log("CLS:", clsValue);
     }
   }
-}).observe({ entryTypes: ['layout-shift'] });
+}).observe({ entryTypes: ["layout-shift"] });
 ```
 
 ---
@@ -184,23 +193,28 @@ new PerformanceObserver((list) => {
 **Target**: < 16.67ms per frame
 
 **GPU-Accelerated Properties (Use These)**:
+
 - `transform` (translate, scale, rotate)
 - `opacity`
 - `filter` (some, like blur - be careful)
 
 **Avoid Animating**:
+
 - `top`, `left`, `right`, `bottom`
 - `width`, `height`
 - `margin`, `padding`
 - `border-width`
 
 **Implementation**:
+
 ```css
 /* Good: GPU-accelerated */
 .animated {
   transform: translateX(0);
   opacity: 1;
-  transition: transform 0.3s, opacity 0.3s;
+  transition:
+    transform 0.3s,
+    opacity 0.3s;
 }
 
 .animated.active {
@@ -212,13 +226,16 @@ new PerformanceObserver((list) => {
 .animated-bad {
   left: 0;
   width: 100px;
-  transition: left 0.3s, width 0.3s;
+  transition:
+    left 0.3s,
+    width 0.3s;
 }
 ```
 
 ### Will-Change Optimization
 
 **Use Sparingly**:
+
 ```css
 /* Only during animation */
 .will-animate {
@@ -235,22 +252,28 @@ new PerformanceObserver((list) => {
 ```
 
 **JavaScript Control**:
+
 ```javascript
-element.addEventListener('mouseenter', () => {
-  element.style.willChange = 'transform';
+element.addEventListener("mouseenter", () => {
+  element.style.willChange = "transform";
 });
 
-element.addEventListener('mouseleave', () => {
+element.addEventListener("mouseleave", () => {
   // Remove after animation completes
-  element.addEventListener('transitionend', () => {
-    element.style.willChange = 'auto';
-  }, { once: true });
+  element.addEventListener(
+    "transitionend",
+    () => {
+      element.style.willChange = "auto";
+    },
+    { once: true },
+  );
 });
 ```
 
 ### RequestAnimationFrame
 
 **Always use for JavaScript animations**:
+
 ```javascript
 // Good
 function animate() {
@@ -268,20 +291,21 @@ setInterval(() => {
 ### Performance Monitoring
 
 **Chrome DevTools**:
+
 ```javascript
 // Mark start of expensive operation
-performance.mark('animation-start');
+performance.mark("animation-start");
 
 // ... do animation work ...
 
 // Mark end
-performance.mark('animation-end');
+performance.mark("animation-end");
 
 // Measure duration
-performance.measure('animation-duration', 'animation-start', 'animation-end');
+performance.measure("animation-duration", "animation-start", "animation-end");
 
 // Get measurement
-const measure = performance.getEntriesByName('animation-duration')[0];
+const measure = performance.getEntriesByName("animation-duration")[0];
 console.log(`Animation took ${measure.duration}ms`);
 ```
 
@@ -292,28 +316,31 @@ console.log(`Animation took ${measure.duration}ms`);
 ### Format Selection
 
 **Decision Tree**:
+
 1. **Photos**: AVIF > WebP > JPEG
 2. **Graphics/logos**: SVG > WebP > PNG
 3. **Animations**: WebP animated > GIF
 4. **Icons**: SVG or icon fonts
 
 **Implementation**:
+
 ```html
 <picture>
   <!-- Modern browsers: AVIF (best compression) -->
-  <source srcset="image.avif" type="image/avif">
+  <source srcset="image.avif" type="image/avif" />
 
   <!-- Fallback: WebP (good compression) -->
-  <source srcset="image.webp" type="image/webp">
+  <source srcset="image.webp" type="image/webp" />
 
   <!-- Final fallback: JPEG -->
-  <img src="image.jpg" alt="Description" loading="lazy">
+  <img src="image.jpg" alt="Description" loading="lazy" />
 </picture>
 ```
 
 ### Responsive Images
 
 **Checklist**:
+
 - [ ] Use `srcset` for multiple resolutions
 - [ ] Define `sizes` attribute
 - [ ] Serve appropriately sized images (not full-res everywhere)
@@ -321,15 +348,11 @@ console.log(`Animation took ${measure.duration}ms`);
 - [ ] Set explicit dimensions to prevent CLS
 
 **Implementation**:
+
 ```html
 <img
   src="image-800.jpg"
-  srcset="
-    image-400.jpg 400w,
-    image-800.jpg 800w,
-    image-1200.jpg 1200w,
-    image-1600.jpg 1600w
-  "
+  srcset="image-400.jpg 400w, image-800.jpg 800w, image-1200.jpg 1200w, image-1600.jpg 1600w"
   sizes="
     (max-width: 640px) 100vw,
     (max-width: 1024px) 50vw,
@@ -339,56 +362,60 @@ console.log(`Animation took ${measure.duration}ms`);
   loading="lazy"
   width="1200"
   height="800"
->
+/>
 ```
 
 ### Image Compression
 
 **Tools**:
+
 - **CLI**: ImageMagick, Sharp (Node.js)
 - **GUI**: Squoosh (web), ImageOptim (Mac)
 - **Build tools**: imagemin, @squoosh/lib
 
 **Example (Sharp)**:
+
 ```javascript
-const sharp = require('sharp');
+const sharp = require("sharp");
 
-await sharp('input.jpg')
-  .resize(1200, 800, { fit: 'cover' })
+await sharp("input.jpg")
+  .resize(1200, 800, { fit: "cover" })
   .webp({ quality: 80 })
-  .toFile('output.webp');
+  .toFile("output.webp");
 
-await sharp('input.jpg')
-  .resize(1200, 800, { fit: 'cover' })
+await sharp("input.jpg")
+  .resize(1200, 800, { fit: "cover" })
   .avif({ quality: 70 })
-  .toFile('output.avif');
+  .toFile("output.avif");
 ```
 
 ### Lazy Loading
 
 **Native Lazy Loading**:
+
 ```html
 <!-- Lazy load below-fold images -->
-<img src="image.jpg" loading="lazy" alt="Description">
+<img src="image.jpg" loading="lazy" alt="Description" />
 
 <!-- Eager load above-fold images -->
-<img src="hero.jpg" loading="eager" fetchpriority="high" alt="Hero">
+<img src="hero.jpg" loading="eager" fetchpriority="high" alt="Hero" />
 ```
 
 **Intersection Observer (Advanced)**:
+
 ```javascript
 const imageObserver = new IntersectionObserver((entries, observer) => {
-  entries.forEach(entry => {
+  entries.forEach((entry) => {
     if (entry.isIntersecting) {
       const img = entry.target;
       img.src = img.dataset.src;
-      img.classList.remove('lazy');
+      img.classList.remove("lazy");
       observer.unobserve(img);
     }
   });
 });
 
-document.querySelectorAll('img[data-src]').forEach(img => {
+document.querySelectorAll("img[data-src]").forEach((img) => {
   imageObserver.observe(img);
 });
 ```
@@ -400,15 +427,17 @@ document.querySelectorAll('img[data-src]').forEach(img => {
 ### Font Display Strategy
 
 **Options**:
+
 - `swap`: Show fallback, swap when loaded (FOUT - Flash of Unstyled Text)
 - `optional`: Use cached font if available, otherwise use fallback
 - `fallback`: Brief block, swap if fast, fallback if slow
 
 **Recommended**:
+
 ```css
 @font-face {
-  font-family: 'Inter';
-  src: url('/fonts/inter-var.woff2') format('woff2-variations');
+  font-family: "Inter";
+  src: url("/fonts/inter-var.woff2") format("woff2-variations");
   font-weight: 100 900;
   font-display: swap; /* Show fallback immediately */
 }
@@ -432,29 +461,17 @@ pyftsubset input.ttf \
 ### Preload Critical Fonts
 
 ```html
-<link
-  rel="preload"
-  as="font"
-  href="/fonts/inter-var.woff2"
-  type="font/woff2"
-  crossorigin
->
+<link rel="preload" as="font" href="/fonts/inter-var.woff2" type="font/woff2" crossorigin />
 ```
 
 ### System Font Stack
 
 **Performance-first approach**:
+
 ```css
 body {
   font-family:
-    -apple-system,
-    BlinkMacSystemFont,
-    'Segoe UI',
-    Roboto,
-    Oxygen,
-    Ubuntu,
-    Cantarell,
-    sans-serif;
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
 }
 ```
 
@@ -465,11 +482,12 @@ body {
 ### Code Splitting
 
 **Route-based splitting**:
+
 ```javascript
 // React Router
-const Home = lazy(() => import('./pages/Home'));
-const About = lazy(() => import('./pages/About'));
-const Gallery = lazy(() => import('./pages/Gallery'));
+const Home = lazy(() => import("./pages/Home"));
+const About = lazy(() => import("./pages/About"));
+const Gallery = lazy(() => import("./pages/Gallery"));
 
 <Suspense fallback={<Loading />}>
   <Routes>
@@ -477,13 +495,14 @@ const Gallery = lazy(() => import('./pages/Gallery'));
     <Route path="/about" element={<About />} />
     <Route path="/gallery" element={<Gallery />} />
   </Routes>
-</Suspense>
+</Suspense>;
 ```
 
 **Component-based splitting**:
+
 ```javascript
 // Load heavy components only when needed
-const HeavyChart = lazy(() => import('./components/HeavyChart'));
+const HeavyChart = lazy(() => import("./components/HeavyChart"));
 
 function Dashboard() {
   const [showChart, setShowChart] = useState(false);
@@ -504,17 +523,19 @@ function Dashboard() {
 ### Tree Shaking
 
 **Ensure tree shaking works**:
+
 ```javascript
 // Good: Named imports
-import { map, filter } from 'lodash-es';
+import { map, filter } from "lodash-es";
 
 // Bad: Default import (imports entire library)
-import _ from 'lodash';
+import _ from "lodash";
 ```
 
 ### Bundle Analysis
 
 **Webpack Bundle Analyzer**:
+
 ```bash
 npm install --save-dev webpack-bundle-analyzer
 
@@ -527,6 +548,7 @@ plugins: [
 ```
 
 **Vite**:
+
 ```bash
 npm install --save-dev rollup-plugin-visualizer
 
@@ -545,40 +567,48 @@ export default {
 ### Critical CSS
 
 **Inline above-the-fold CSS**:
+
 ```html
 <style>
   /* Critical CSS inlined */
-  body { font-family: sans-serif; }
-  .hero { height: 100vh; }
+  body {
+    font-family: sans-serif;
+  }
+  .hero {
+    height: 100vh;
+  }
 </style>
 
 <!-- Defer non-critical CSS -->
-<link rel="preload" href="styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link rel="stylesheet" href="styles.css"></noscript>
+<link rel="preload" href="styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+<noscript><link rel="stylesheet" href="styles.css" /></noscript>
 ```
 
 **Tools**:
+
 - Critical (npm package)
 - Critters (Vite/Webpack plugin)
 
 ### Remove Unused CSS
 
 **PurgeCSS**:
+
 ```javascript
 // postcss.config.js
 module.exports = {
   plugins: [
-    require('@fullhuman/postcss-purgecss')({
-      content: ['./src/**/*.html', './src/**/*.jsx'],
-      defaultExtractor: content => content.match(/[\w-/:]+(?<!:)/g) || []
-    })
-  ]
-}
+    require("@fullhuman/postcss-purgecss")({
+      content: ["./src/**/*.html", "./src/**/*.jsx"],
+      defaultExtractor: (content) => content.match(/[\w-/:]+(?<!:)/g) || [],
+    }),
+  ],
+};
 ```
 
 ### CSS Containment
 
 **Improve rendering performance**:
+
 ```css
 .card {
   /* Isolate layout calculations */
@@ -598,16 +628,18 @@ module.exports = {
 ### Loading Strategy
 
 **Checklist**:
+
 - [ ] Show placeholder while loading
 - [ ] Load 3D content below fold lazily
 - [ ] Use low-poly models initially
 - [ ] Progressive enhancement with high-poly
 
 **Implementation**:
+
 ```javascript
 // Lazy load Three.js scene
 const observer = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
+  entries.forEach((entry) => {
     if (entry.isIntersecting) {
       loadThreeJSScene();
       observer.unobserve(entry.target);
@@ -615,12 +647,13 @@ const observer = new IntersectionObserver((entries) => {
   });
 });
 
-observer.observe(document.querySelector('.3d-container'));
+observer.observe(document.querySelector(".3d-container"));
 ```
 
 ### Runtime Performance
 
 **Checklist**:
+
 - [ ] Implement object pooling (reuse objects)
 - [ ] Use LOD (Level of Detail)
 - [ ] Frustum culling (don't render off-screen objects)
@@ -630,6 +663,7 @@ observer.observe(document.querySelector('.3d-container'));
 - [ ] Use instancing for repeated geometry
 
 **Three.js Example**:
+
 ```javascript
 // Object pooling
 const objectPool = [];
@@ -644,9 +678,9 @@ function releaseObject(obj) {
 
 // LOD (Level of Detail)
 const lod = new THREE.LOD();
-lod.addLevel(highPolyMesh, 0);   // 0-50m
+lod.addLevel(highPolyMesh, 0); // 0-50m
 lod.addLevel(mediumPolyMesh, 50); // 50-100m
-lod.addLevel(lowPolyMesh, 100);   // 100m+
+lod.addLevel(lowPolyMesh, 100); // 100m+
 scene.add(lod);
 
 // Instancing
@@ -661,6 +695,7 @@ scene.add(mesh);
 ### Texture Optimization
 
 **Checklist**:
+
 - [ ] Use power-of-two dimensions (512, 1024, 2048)
 - [ ] Compress textures (Basis, KTX2)
 - [ ] Use texture atlases
@@ -682,45 +717,56 @@ scene.add(mesh);
 5. **Images** (lazy load below-fold)
 
 **Implementation**:
+
 ```html
 <!DOCTYPE html>
 <html>
-<head>
-  <!-- Critical CSS inlined -->
-  <style>/* Critical styles */</style>
+  <head>
+    <!-- Critical CSS inlined -->
+    <style>
+      /* Critical styles */
+    </style>
 
-  <!-- Preload critical resources -->
-  <link rel="preload" as="font" href="font.woff2" type="font/woff2" crossorigin>
-  <link rel="preload" as="image" href="hero.webp">
+    <!-- Preload critical resources -->
+    <link rel="preload" as="font" href="font.woff2" type="font/woff2" crossorigin />
+    <link rel="preload" as="image" href="hero.webp" />
 
-  <!-- Defer non-critical CSS -->
-  <link rel="preload" href="styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <!-- Defer non-critical CSS -->
+    <link
+      rel="preload"
+      href="styles.css"
+      as="style"
+      onload="this.onload=null;this.rel='stylesheet'"
+    />
 
-  <!-- Defer JavaScript -->
-  <script defer src="main.js"></script>
-</head>
-<body>
-  <!-- Content -->
-</body>
+    <!-- Defer JavaScript -->
+    <script defer src="main.js"></script>
+  </head>
+  <body>
+    <!-- Content -->
+  </body>
 </html>
 ```
 
 ### Resource Hints
 
 **Preconnect** (DNS, TCP, TLS):
+
 ```html
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://cdn.example.com">
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://cdn.example.com" />
 ```
 
 **DNS-Prefetch**:
+
 ```html
-<link rel="dns-prefetch" href="https://analytics.example.com">
+<link rel="dns-prefetch" href="https://analytics.example.com" />
 ```
 
 **Prefetch** (next page):
+
 ```html
-<link rel="prefetch" href="/next-page.html">
+<link rel="prefetch" href="/next-page.html" />
 ```
 
 ---
@@ -730,16 +776,19 @@ scene.add(mesh);
 ### HTTP Caching Headers
 
 **Static Assets** (immutable):
+
 ```
 Cache-Control: public, max-age=31536000, immutable
 ```
 
 **HTML** (revalidate):
+
 ```
 Cache-Control: no-cache
 ```
 
 **API Responses**:
+
 ```
 Cache-Control: public, max-age=3600, must-revalidate
 ```
@@ -747,24 +796,25 @@ Cache-Control: public, max-age=3600, must-revalidate
 ### Service Worker Caching
 
 **Workbox**:
+
 ```javascript
-import { precacheAndRoute } from 'workbox-precaching';
-import { registerRoute } from 'workbox-routing';
-import { CacheFirst, NetworkFirst } from 'workbox-strategies';
+import { precacheAndRoute } from "workbox-precaching";
+import { registerRoute } from "workbox-routing";
+import { CacheFirst, NetworkFirst } from "workbox-strategies";
 
 // Precache build assets
 precacheAndRoute(self.__WB_MANIFEST);
 
 // Cache images
 registerRoute(
-  ({ request }) => request.destination === 'image',
-  new CacheFirst({ cacheName: 'images' })
+  ({ request }) => request.destination === "image",
+  new CacheFirst({ cacheName: "images" }),
 );
 
 // Network-first for HTML
 registerRoute(
-  ({ request }) => request.mode === 'navigate',
-  new NetworkFirst({ cacheName: 'pages' })
+  ({ request }) => request.mode === "navigate",
+  new NetworkFirst({ cacheName: "pages" }),
 );
 ```
 
@@ -775,18 +825,19 @@ registerRoute(
 ### Real User Monitoring (RUM)
 
 **Web Vitals**:
+
 ```bash
 npm install web-vitals
 ```
 
 ```javascript
-import { getCLS, getFID, getFCP, getLCP, getTTFB } from 'web-vitals';
+import { getCLS, getFID, getFCP, getLCP, getTTFB } from "web-vitals";
 
 function sendToAnalytics({ name, value, id }) {
   // Send to your analytics endpoint
-  fetch('/analytics', {
-    method: 'POST',
-    body: JSON.stringify({ name, value, id })
+  fetch("/analytics", {
+    method: "POST",
+    body: JSON.stringify({ name, value, id }),
   });
 }
 
@@ -800,6 +851,7 @@ getTTFB(sendToAnalytics);
 ### Performance Budget
 
 **Lighthouse CI**:
+
 ```json
 // lighthouserc.json
 {
@@ -809,10 +861,10 @@ getTTFB(sendToAnalytics);
     },
     "assert": {
       "assertions": {
-        "first-contentful-paint": ["error", {"maxNumericValue": 1800}],
-        "largest-contentful-paint": ["error", {"maxNumericValue": 2500}],
-        "cumulative-layout-shift": ["error", {"maxNumericValue": 0.1}],
-        "total-blocking-time": ["error", {"maxNumericValue": 200}]
+        "first-contentful-paint": ["error", { "maxNumericValue": 1800 }],
+        "largest-contentful-paint": ["error", { "maxNumericValue": 2500 }],
+        "cumulative-layout-shift": ["error", { "maxNumericValue": 0.1 }],
+        "total-blocking-time": ["error", { "maxNumericValue": 200 }]
       }
     }
   }
@@ -822,6 +874,7 @@ getTTFB(sendToAnalytics);
 ### Chrome DevTools
 
 **Performance Panel**:
+
 1. Open DevTools (F12)
 2. Performance tab
 3. Click Record
@@ -830,6 +883,7 @@ getTTFB(sendToAnalytics);
 6. Analyze flame chart
 
 **Look for**:
+
 - Long tasks (> 50ms)
 - Excessive layout thrashing
 - Forced synchronous layouts
@@ -840,6 +894,7 @@ getTTFB(sendToAnalytics);
 ## Quick Wins Checklist
 
 **Immediate Impact**:
+
 - [ ] Enable Brotli/gzip compression
 - [ ] Implement lazy loading for images
 - [ ] Add `width` and `height` to images (prevent CLS)
@@ -852,6 +907,7 @@ getTTFB(sendToAnalytics);
 - [ ] Remove unused CSS/JS
 
 **High Impact**:
+
 - [ ] Implement code splitting
 - [ ] Optimize images (< 100KB)
 - [ ] Use system fonts or preload web fonts
@@ -863,5 +919,5 @@ getTTFB(sendToAnalytics);
 
 ---
 
-*Last updated: 2024*
-*Benchmarks based on median 4G mobile connections*
+_Last updated: 2024_
+_Benchmarks based on median 4G mobile connections_

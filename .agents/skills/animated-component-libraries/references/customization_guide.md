@@ -211,11 +211,11 @@ const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
 <BlurText
   text="Complex reveal"
   animateBy="characters"
-  animationFrom={{ filter: 'blur(20px)', opacity: 0, y: 100, scale: 0.8 }}
+  animationFrom={{ filter: "blur(20px)", opacity: 0, y: 100, scale: 0.8 }}
   animationTo={[
-    { filter: 'blur(10px)', opacity: 0.3, y: 50, scale: 0.9 },
-    { filter: 'blur(5px)', opacity: 0.7, y: 10, scale: 1 },
-    { filter: 'blur(0px)', opacity: 1, y: 0, scale: 1 }
+    { filter: "blur(10px)", opacity: 0.3, y: 50, scale: 0.9 },
+    { filter: "blur(5px)", opacity: 0.7, y: 10, scale: 1 },
+    { filter: "blur(0px)", opacity: 1, y: 0, scale: 1 },
   ]}
   stepDuration={0.4}
   easing={(t) => t * t * (3 - 2 * t)} // Smoothstep easing
@@ -411,11 +411,7 @@ const formatCompact = (value) => {
 
   {/* React Bits text animation */}
   <div className="relative z-10 flex items-center justify-center h-full">
-    <BlurText
-      text="Powerful Combination"
-      animateBy="words"
-      className="text-7xl font-bold"
-    />
+    <BlurText text="Powerful Combination" animateBy="words" className="text-7xl font-bold" />
   </div>
 </div>
 ```
@@ -423,37 +419,30 @@ const formatCompact = (value) => {
 ### Shimmer Button + Magnet Effect
 
 ```tsx
-import { ShimmerButton } from "@/components/ui/shimmer-button"
-import Magnet from "./components/Magnet"
+import { ShimmerButton } from "@/components/ui/shimmer-button";
+import Magnet from "./components/Magnet";
 
 <Magnet magnitude={0.3}>
-  <ShimmerButton
-    shimmerDuration="3s"
-    className="px-8 py-3"
-  >
+  <ShimmerButton shimmerDuration="3s" className="px-8 py-3">
     Interactive CTA
   </ShimmerButton>
-</Magnet>
+</Magnet>;
 ```
 
 ### Marquee + CountUp Statistics
 
 ```tsx
-import { Marquee } from "@/components/ui/marquee"
-import CountUp from "./components/CountUp"
+import { Marquee } from "@/components/ui/marquee";
+import CountUp from "./components/CountUp";
 
 <Marquee pauseOnHover>
   {stats.map((stat) => (
     <div key={stat.id} className="mx-8 text-center">
-      <CountUp
-        end={stat.value}
-        separator=","
-        className="text-4xl font-bold"
-      />
+      <CountUp end={stat.value} separator="," className="text-4xl font-bold" />
       <p className="text-sm text-gray-600">{stat.label}</p>
     </div>
   ))}
-</Marquee>
+</Marquee>;
 ```
 
 ## Theming with CSS Variables
@@ -464,16 +453,16 @@ import CountUp from "./components/CountUp"
 /* app/globals.css */
 :root {
   --component-duration: 3s;
-  --component-primary: #4F46E5;
-  --component-secondary: #06B6D4;
+  --component-primary: #4f46e5;
+  --component-secondary: #06b6d4;
   --component-radius: 8px;
-  --component-shadow: 0 10px 40px rgba(0,0,0,0.1);
+  --component-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
 }
 
 .dark {
-  --component-primary: #818CF8;
-  --component-secondary: #22D3EE;
-  --component-shadow: 0 10px 40px rgba(255,255,255,0.05);
+  --component-primary: #818cf8;
+  --component-secondary: #22d3ee;
+  --component-shadow: 0 10px 40px rgba(255, 255, 255, 0.05);
 }
 ```
 
@@ -505,36 +494,36 @@ import CountUp from "./components/CountUp"
 ### Breakpoint-Based Props
 
 ```tsx
-import { useState, useEffect } from 'react'
+import { useState, useEffect } from "react";
 
 function useBreakpoint() {
-  const [breakpoint, setBreakpoint] = useState('desktop')
+  const [breakpoint, setBreakpoint] = useState("desktop");
 
   useEffect(() => {
     const updateBreakpoint = () => {
-      if (window.innerWidth < 640) setBreakpoint('mobile')
-      else if (window.innerWidth < 1024) setBreakpoint('tablet')
-      else setBreakpoint('desktop')
-    }
+      if (window.innerWidth < 640) setBreakpoint("mobile");
+      else if (window.innerWidth < 1024) setBreakpoint("tablet");
+      else setBreakpoint("desktop");
+    };
 
-    updateBreakpoint()
-    window.addEventListener('resize', updateBreakpoint)
-    return () => window.removeEventListener('resize', updateBreakpoint)
-  }, [])
+    updateBreakpoint();
+    window.addEventListener("resize", updateBreakpoint);
+    return () => window.removeEventListener("resize", updateBreakpoint);
+  }, []);
 
-  return breakpoint
+  return breakpoint;
 }
 
 export default function ResponsiveComponent() {
-  const breakpoint = useBreakpoint()
+  const breakpoint = useBreakpoint();
 
   const particleConfig = {
     mobile: { count: 50, spread: 15, size: 60 },
     tablet: { count: 150, spread: 12, size: 80 },
-    desktop: { count: 300, spread: 10, size: 100 }
-  }
+    desktop: { count: 300, spread: 10, size: 100 },
+  };
 
-  const config = particleConfig[breakpoint]
+  const config = particleConfig[breakpoint];
 
   return (
     <Particles
@@ -542,7 +531,7 @@ export default function ResponsiveComponent() {
       particleSpread={config.spread}
       particleBaseSize={config.size}
     />
-  )
+  );
 }
 ```
 
@@ -619,38 +608,34 @@ const prefersReducedMotion =
 ### Conditional Rendering
 
 ```tsx
-const [isLowPowerMode, setIsLowPowerMode] = useState(false)
+const [isLowPowerMode, setIsLowPowerMode] = useState(false);
 
 useEffect(() => {
   // Detect low power mode or battery status
-  if ('getBattery' in navigator) {
+  if ("getBattery" in navigator) {
     navigator.getBattery().then((battery) => {
-      setIsLowPowerMode(battery.level < 0.2)
-    })
+      setIsLowPowerMode(battery.level < 0.2);
+    });
   }
-}, [])
+}, []);
 
-return isLowPowerMode ? (
-  <StaticBackground />
-) : (
-  <Particles particleCount={300} />
-)
+return isLowPowerMode ? <StaticBackground /> : <Particles particleCount={300} />;
 ```
 
 ### Lazy Loading Heavy Components
 
 ```tsx
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense } from "react";
 
-const Particles = lazy(() => import('./components/Particles'))
-const Plasma = lazy(() => import('./components/Plasma'))
+const Particles = lazy(() => import("./components/Particles"));
+const Plasma = lazy(() => import("./components/Plasma"));
 
 export default function OptimizedPage() {
   return (
     <Suspense fallback={<div className="gradient-bg" />}>
       <Particles particleCount={200} />
     </Suspense>
-  )
+  );
 }
 ```
 
@@ -662,10 +647,7 @@ export default function OptimizedPage() {
 // Layered effects
 <div className="relative">
   <Particles particleCount={100} className="absolute inset-0" />
-  <AnimatedGridPattern
-    numSquares={30}
-    className="absolute inset-0 opacity-50"
-  />
+  <AnimatedGridPattern numSquares={30} className="absolute inset-0 opacity-50" />
   <div className="relative z-10">
     <BlurText text="Layered Effects" />
   </div>
@@ -675,25 +657,17 @@ export default function OptimizedPage() {
 ### Custom Animation Sequences
 
 ```tsx
-import { motion, AnimatePresence } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion";
 
 <AnimatePresence>
-  <motion.div
-    initial={{ opacity: 0 }}
-    animate={{ opacity: 1 }}
-    transition={{ delay: 0.5 }}
-  >
+  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}>
     <BlurText text="Delayed text" />
 
-    <motion.div
-      initial={{ y: 50 }}
-      animate={{ y: 0 }}
-      transition={{ delay: 1.5 }}
-    >
+    <motion.div initial={{ y: 50 }} animate={{ y: 0 }} transition={{ delay: 1.5 }}>
       <CountUp end={10000} />
     </motion.div>
   </motion.div>
-</AnimatePresence>
+</AnimatePresence>;
 ```
 
 This guide covers the most common customization patterns. For advanced customizations, consult the component source code and extend as needed.

@@ -8,11 +8,13 @@ description: Lightweight 3D effects for decorative elements and micro-interactio
 ## Overview
 
 This skill combines three powerful libraries for decorative 3D elements and micro-interactions:
+
 - **Zdog**: Pseudo-3D engine for designer-friendly vector illustrations
 - **Vanta.js**: Animated 3D backgrounds powered by Three.js/p5.js
 - **Vanilla-Tilt.js**: Smooth parallax tilt effects responding to mouse/gyroscope
 
 ## When to Use This Skill
+
 - Add decorative 3D illustrations without heavy frameworks
 - Create animated backgrounds for hero sections
 - Implement subtle parallax tilt effects on cards/images
@@ -26,6 +28,7 @@ This skill combines three powerful libraries for decorative 3D elements and micr
 Zdog is a pseudo-3D engine that renders flat, round designs in 3D space using Canvas or SVG.
 
 **Key Features:**
+
 - Designer-friendly declarative API
 - Small file size (~28kb minified)
 - Canvas or SVG rendering
@@ -37,59 +40,59 @@ Zdog is a pseudo-3D engine that renders flat, round designs in 3D space using Ca
 ```html
 <!DOCTYPE html>
 <html>
-<head>
-  <script src="https://unpkg.com/zdog@1/dist/zdog.dist.min.js"></script>
-  <style>
-    .zdog-canvas {
-      display: block;
-      margin: 0 auto;
-      background: #FDB;
-      cursor: move;
-    }
-  </style>
-</head>
-<body>
-  <canvas class="zdog-canvas" width="240" height="240"></canvas>
+  <head>
+    <script src="https://unpkg.com/zdog@1/dist/zdog.dist.min.js"></script>
+    <style>
+      .zdog-canvas {
+        display: block;
+        margin: 0 auto;
+        background: #fdb;
+        cursor: move;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas class="zdog-canvas" width="240" height="240"></canvas>
 
-  <script>
-    let isSpinning = true;
+    <script>
+      let isSpinning = true;
 
-    let illo = new Zdog.Illustration({
-      element: '.zdog-canvas',
-      zoom: 4,
-      dragRotate: true,
-      onDragStart: function() {
-        isSpinning = false;
-      },
-    });
+      let illo = new Zdog.Illustration({
+        element: ".zdog-canvas",
+        zoom: 4,
+        dragRotate: true,
+        onDragStart: function () {
+          isSpinning = false;
+        },
+      });
 
-    // Add shapes
-    new Zdog.Ellipse({
-      addTo: illo,
-      diameter: 20,
-      translate: { z: 10 },
-      stroke: 5,
-      color: '#636',
-    });
+      // Add shapes
+      new Zdog.Ellipse({
+        addTo: illo,
+        diameter: 20,
+        translate: { z: 10 },
+        stroke: 5,
+        color: "#636",
+      });
 
-    new Zdog.Rect({
-      addTo: illo,
-      width: 20,
-      height: 20,
-      translate: { z: -10 },
-      stroke: 3,
-      color: '#E62',
-      fill: true,
-    });
+      new Zdog.Rect({
+        addTo: illo,
+        width: 20,
+        height: 20,
+        translate: { z: -10 },
+        stroke: 3,
+        color: "#E62",
+        fill: true,
+      });
 
-    function animate() {
-      illo.rotate.y += isSpinning ? 0.03 : 0;
-      illo.updateRenderGraph();
-      requestAnimationFrame(animate);
-    }
-    animate();
-  </script>
-</body>
+      function animate() {
+        illo.rotate.y += isSpinning ? 0.03 : 0;
+        illo.updateRenderGraph();
+        requestAnimationFrame(animate);
+      }
+      animate();
+    </script>
+  </body>
 </html>
 ```
 
@@ -103,7 +106,7 @@ new Zdog.Ellipse({
   addTo: illo,
   diameter: 80,
   stroke: 20,
-  color: '#636',
+  color: "#636",
 });
 
 // Rectangle
@@ -112,7 +115,7 @@ new Zdog.Rect({
   width: 80,
   height: 60,
   stroke: 10,
-  color: '#E62',
+  color: "#E62",
   fill: true,
 });
 
@@ -123,7 +126,7 @@ new Zdog.RoundedRect({
   height: 40,
   cornerRadius: 10,
   stroke: 4,
-  color: '#C25',
+  color: "#C25",
   fill: true,
 });
 
@@ -133,7 +136,7 @@ new Zdog.Polygon({
   radius: 40,
   sides: 5,
   stroke: 8,
-  color: '#EA0',
+  color: "#EA0",
   fill: true,
 });
 
@@ -145,7 +148,7 @@ new Zdog.Shape({
     { x: 40, y: 0 },
   ],
   stroke: 6,
-  color: '#636',
+  color: "#636",
 });
 
 // Bezier Curve
@@ -162,7 +165,7 @@ new Zdog.Shape({
     },
   ],
   stroke: 4,
-  color: '#C25',
+  color: "#C25",
   closed: false,
 });
 ```
@@ -183,7 +186,7 @@ new Zdog.Ellipse({
   addTo: head,
   diameter: 60,
   stroke: 30,
-  color: '#FED',
+  color: "#FED",
 });
 
 // Eyes
@@ -191,7 +194,7 @@ new Zdog.Ellipse({
   addTo: head,
   diameter: 8,
   stroke: 4,
-  color: '#333',
+  color: "#333",
   translate: { x: -10, z: 15 },
 });
 
@@ -199,7 +202,7 @@ new Zdog.Ellipse({
   addTo: head,
   diameter: 8,
   stroke: 4,
-  color: '#333',
+  color: "#333",
   translate: { x: 10, z: 15 },
 });
 
@@ -217,7 +220,7 @@ new Zdog.Shape({
     },
   ],
   stroke: 2,
-  color: '#333',
+  color: "#333",
   translate: { y: 5, z: 15 },
   closed: false,
 });
@@ -251,7 +254,7 @@ bounceAnimate();
 let targetRotateY = 0;
 let currentRotateY = 0;
 
-document.addEventListener('mousemove', (event) => {
+document.addEventListener("mousemove", (event) => {
   targetRotateY = (event.clientX / window.innerWidth - 0.5) * Math.PI;
 });
 
@@ -274,6 +277,7 @@ smoothAnimate();
 Vanta.js provides animated WebGL backgrounds with minimal setup, powered by Three.js or p5.js.
 
 **Key Features:**
+
 - 14+ animated effects (Waves, Birds, Net, Clouds, etc.)
 - Mouse/touch interaction
 - Customizable colors and settings
@@ -285,59 +289,60 @@ Vanta.js provides animated WebGL backgrounds with minimal setup, powered by Thre
 ```html
 <!DOCTYPE html>
 <html>
-<head>
-  <style>
-    #vanta-bg {
-      width: 100%;
-      height: 100vh;
-    }
-    .content {
-      position: relative;
-      z-index: 1;
-      color: white;
-      text-align: center;
-      padding: 100px 20px;
-    }
-  </style>
-</head>
-<body>
-  <div id="vanta-bg">
-    <div class="content">
-      <h1>My Animated Background</h1>
-      <p>Content goes here</p>
+  <head>
+    <style>
+      #vanta-bg {
+        width: 100%;
+        height: 100vh;
+      }
+      .content {
+        position: relative;
+        z-index: 1;
+        color: white;
+        text-align: center;
+        padding: 100px 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="vanta-bg">
+      <div class="content">
+        <h1>My Animated Background</h1>
+        <p>Content goes here</p>
+      </div>
     </div>
-  </div>
 
-  <!-- Three.js (required) -->
-  <script src="https://cdn.jsdelivr.net/npm/three@0.134.0/build/three.min.js"></script>
+    <!-- Three.js (required) -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.134.0/build/three.min.js"></script>
 
-  <!-- Vanta.js effect -->
-  <script src="https://cdn.jsdelivr.net/npm/vanta@0.5.24/dist/vanta.waves.min.js"></script>
+    <!-- Vanta.js effect -->
+    <script src="https://cdn.jsdelivr.net/npm/vanta@0.5.24/dist/vanta.waves.min.js"></script>
 
-  <script>
-    VANTA.WAVES({
-      el: "#vanta-bg",
-      mouseControls: true,
-      touchControls: true,
-      gyroControls: false,
-      minHeight: 200.00,
-      minWidth: 200.00,
-      scale: 1.00,
-      scaleMobile: 1.00,
-      color: 0x23153c,
-      shininess: 30.00,
-      waveHeight: 15.00,
-      waveSpeed: 0.75,
-      zoom: 0.65
-    });
-  </script>
-</body>
+    <script>
+      VANTA.WAVES({
+        el: "#vanta-bg",
+        mouseControls: true,
+        touchControls: true,
+        gyroControls: false,
+        minHeight: 200.0,
+        minWidth: 200.0,
+        scale: 1.0,
+        scaleMobile: 1.0,
+        color: 0x23153c,
+        shininess: 30.0,
+        waveHeight: 15.0,
+        waveSpeed: 0.75,
+        zoom: 0.65,
+      });
+    </script>
+  </body>
 </html>
 ```
 
 ### Available Effects
 
 **1. WAVES** (Three.js)
+
 ```javascript
 VANTA.WAVES({
   el: "#vanta-bg",
@@ -345,11 +350,12 @@ VANTA.WAVES({
   shininess: 30,
   waveHeight: 15,
   waveSpeed: 0.75,
-  zoom: 0.65
+  zoom: 0.65,
 });
 ```
 
 **2. CLOUDS** (Three.js)
+
 ```javascript
 VANTA.CLOUDS({
   el: "#vanta-bg",
@@ -359,11 +365,12 @@ VANTA.CLOUDS({
   sunColor: 0xff9919,
   sunGlareColor: 0xff6633,
   sunlightColor: 0xff9933,
-  speed: 1.0
+  speed: 1.0,
 });
 ```
 
 **3. BIRDS** (p5.js required)
+
 ```html
 <script src="https://cdn.jsdelivr.net/npm/p5@1.4.0/lib/p5.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/vanta@0.5.24/dist/vanta.birds.min.js"></script>
@@ -380,12 +387,13 @@ VANTA.CLOUDS({
     separation: 40,
     alignment: 40,
     cohesion: 40,
-    quantity: 3
+    quantity: 3,
   });
 </script>
 ```
 
 **4. NET** (Three.js)
+
 ```javascript
 VANTA.NET({
   el: "#vanta-bg",
@@ -394,11 +402,12 @@ VANTA.NET({
   points: 10,
   maxDistance: 20,
   spacing: 15,
-  showDots: true
+  showDots: true,
 });
 ```
 
 **5. CELLS** (p5.js required)
+
 ```javascript
 VANTA.CELLS({
   el: "#vanta-bg",
@@ -406,11 +415,12 @@ VANTA.CELLS({
   color2: 0xff0000,
   size: 1.5,
   speed: 1.0,
-  scale: 1.0
+  scale: 1.0,
 });
 ```
 
 **6. FOG** (Three.js)
+
 ```javascript
 VANTA.FOG({
   el: "#vanta-bg",
@@ -420,7 +430,7 @@ VANTA.FOG({
   baseColor: 0x000000,
   blurFactor: 0.6,
   speed: 1.0,
-  zoom: 1.0
+  zoom: 1.0,
 });
 ```
 
@@ -466,7 +476,7 @@ vantaEffect.destroy();
 // Update options dynamically
 vantaEffect.setOptions({
   color: 0xff0000,
-  waveHeight: 20
+  waveHeight: 20,
 });
 
 // Resize (usually automatic)
@@ -476,9 +486,9 @@ vantaEffect.resize();
 ### React Integration
 
 ```jsx
-import { useEffect, useRef, useState } from 'react';
-import VANTA from 'vanta/dist/vanta.waves.min';
-import * as THREE from 'three';
+import { useEffect, useRef, useState } from "react";
+import VANTA from "vanta/dist/vanta.waves.min";
+import * as THREE from "three";
 
 function VantaBackground() {
   const vantaRef = useRef(null);
@@ -486,16 +496,18 @@ function VantaBackground() {
 
   useEffect(() => {
     if (!vantaEffect) {
-      setVantaEffect(VANTA.WAVES({
-        el: vantaRef.current,
-        THREE: THREE,
-        mouseControls: true,
-        touchControls: true,
-        color: 0x23153c,
-        shininess: 30,
-        waveHeight: 15,
-        waveSpeed: 0.75
-      }));
+      setVantaEffect(
+        VANTA.WAVES({
+          el: vantaRef.current,
+          THREE: THREE,
+          mouseControls: true,
+          touchControls: true,
+          color: 0x23153c,
+          shininess: 30,
+          waveHeight: 15,
+          waveSpeed: 0.75,
+        }),
+      );
     }
 
     return () => {
@@ -504,7 +516,7 @@ function VantaBackground() {
   }, [vantaEffect]);
 
   return (
-    <div ref={vantaRef} style={{ width: '100%', height: '100vh' }}>
+    <div ref={vantaRef} style={{ width: "100%", height: "100vh" }}>
       <div className="content">
         <h1>React + Vanta.js</h1>
       </div>
@@ -522,6 +534,7 @@ function VantaBackground() {
 Vanilla-Tilt.js adds smooth 3D tilt effects responding to mouse movement and device orientation.
 
 **Key Features:**
+
 - Lightweight (~8.5kb minified)
 - No dependencies
 - Gyroscope support
@@ -533,34 +546,34 @@ Vanilla-Tilt.js adds smooth 3D tilt effects responding to mouse movement and dev
 ```html
 <!DOCTYPE html>
 <html>
-<head>
-  <style>
-    .tilt-card {
-      width: 300px;
-      height: 400px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      border-radius: 15px;
-      margin: 50px auto;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-size: 24px;
-      transform-style: preserve-3d;
-    }
+  <head>
+    <style>
+      .tilt-card {
+        width: 300px;
+        height: 400px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 15px;
+        margin: 50px auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 24px;
+        transform-style: preserve-3d;
+      }
 
-    .tilt-inner {
-      transform: translateZ(60px);
-    }
-  </style>
-</head>
-<body>
-  <div class="tilt-card" data-tilt>
-    <div class="tilt-inner">Hover Me!</div>
-  </div>
+      .tilt-inner {
+        transform: translateZ(60px);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="tilt-card" data-tilt>
+      <div class="tilt-inner">Hover Me!</div>
+    </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/vanilla-tilt@1.8.1/dist/vanilla-tilt.min.js"></script>
-</body>
+    <script src="https://cdn.jsdelivr.net/npm/vanilla-tilt@1.8.1/dist/vanilla-tilt.min.js"></script>
+  </body>
 </html>
 ```
 
@@ -609,10 +622,7 @@ VanillaTilt.init(document.querySelector(".tilt-card"), {
 **Card with Glare Effect:**
 
 ```html
-<div class="tilt-card" data-tilt
-     data-tilt-glare
-     data-tilt-max-glare="0.5"
-     data-tilt-scale="1.1">
+<div class="tilt-card" data-tilt data-tilt-glare data-tilt-max-glare="0.5" data-tilt-scale="1.1">
   <div class="tilt-inner">
     <h3>Premium Card</h3>
     <p>With glare effect</p>
@@ -654,7 +664,7 @@ VanillaTilt.init(element, {
   max: 25,
   speed: 400,
   glare: true,
-  "max-glare": 0.5
+  "max-glare": 0.5,
 });
 
 // Get tilt values
@@ -676,8 +686,8 @@ console.log(values); // { tiltX, tiltY, percentageX, percentageY, angle }
 ### React Integration
 
 ```jsx
-import { useEffect, useRef } from 'react';
-import VanillaTilt from 'vanilla-tilt';
+import { useEffect, useRef } from "react";
+import VanillaTilt from "vanilla-tilt";
 
 function TiltCard({ children, options }) {
   const tiltRef = useRef(null);
@@ -690,7 +700,7 @@ function TiltCard({ children, options }) {
       speed: 400,
       glare: true,
       "max-glare": 0.5,
-      ...options
+      ...options,
     });
 
     return () => {
@@ -708,7 +718,7 @@ function TiltCard({ children, options }) {
 // Usage
 <TiltCard options={{ max: 30, scale: 1.1 }}>
   <h3>My Card</h3>
-</TiltCard>
+</TiltCard>;
 ```
 
 ---
@@ -753,7 +763,7 @@ function TiltCard({ children, options }) {
     touchControls: true,
     color: 0x23153c,
     waveHeight: 20,
-    waveSpeed: 1.0
+    waveSpeed: 1.0,
   });
 </script>
 ```
@@ -770,19 +780,15 @@ function TiltCard({ children, options }) {
 <script src="https://unpkg.com/zdog@1/dist/zdog.dist.min.js"></script>
 
 <script>
-  document.querySelectorAll('.icon').forEach((canvas, index) => {
+  document.querySelectorAll(".icon").forEach((canvas, index) => {
     let illo = new Zdog.Illustration({
       element: canvas,
       zoom: 3,
-      dragRotate: true
+      dragRotate: true,
     });
 
     // Create different icon for each canvas
-    const icons = [
-      createHeartIcon,
-      createStarIcon,
-      createCheckIcon
-    ];
+    const icons = [createHeartIcon, createStarIcon, createCheckIcon];
 
     icons[index](illo);
 
@@ -803,21 +809,21 @@ function TiltCard({ children, options }) {
           bezier: [
             { x: -20, y: -20 },
             { x: -20, y: 0 },
-            { x: 0, y: 10 }
-          ]
+            { x: 0, y: 10 },
+          ],
         },
         {
           bezier: [
             { x: 20, y: 0 },
             { x: 20, y: -20 },
-            { x: 0, y: -10 }
-          ]
-        }
+            { x: 0, y: -10 },
+          ],
+        },
       ],
       stroke: 6,
-      color: '#E62',
+      color: "#E62",
       fill: true,
-      closed: false
+      closed: false,
     });
   }
 </script>
@@ -828,17 +834,17 @@ function TiltCard({ children, options }) {
 ```html
 <div class="card-gallery">
   <div class="card" data-tilt data-tilt-glare data-tilt-max-glare="0.3">
-    <img src="product1.jpg" alt="Product 1">
+    <img src="product1.jpg" alt="Product 1" />
     <h3>Product 1</h3>
   </div>
 
   <div class="card" data-tilt data-tilt-glare data-tilt-max-glare="0.3">
-    <img src="product2.jpg" alt="Product 2">
+    <img src="product2.jpg" alt="Product 2" />
     <h3>Product 2</h3>
   </div>
 
   <div class="card" data-tilt data-tilt-glare data-tilt-max-glare="0.3">
-    <img src="product3.jpg" alt="Product 3">
+    <img src="product3.jpg" alt="Product 3" />
     <h3>Product 3</h3>
   </div>
 </div>
@@ -855,7 +861,7 @@ function TiltCard({ children, options }) {
     background: white;
     border-radius: 15px;
     padding: 20px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     transform-style: preserve-3d;
   }
 
@@ -910,7 +916,7 @@ function TiltCard({ children, options }) {
     color: 0x3fff00,
     backgroundColor: 0x23153c,
     points: 10,
-    maxDistance: 20
+    maxDistance: 20,
   });
 
   // Tilt cards
@@ -918,7 +924,7 @@ function TiltCard({ children, options }) {
     max: 15,
     speed: 400,
     glare: true,
-    "max-glare": 0.3
+    "max-glare": 0.3,
   });
 </script>
 ```
@@ -951,7 +957,8 @@ if (!isMobile) {
     // ... options
   });
 } else {
-  document.getElementById('hero').style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+  document.getElementById("hero").style.background =
+    "linear-gradient(135deg, #667eea 0%, #764ba2 100%)";
 }
 ```
 
@@ -981,7 +988,7 @@ if (!isMobile) {
 ```javascript
 // Intersection Observer to load Vanta only when visible
 const observer = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
+  entries.forEach((entry) => {
     if (entry.isIntersecting && !entry.target.vantaEffect) {
       entry.target.vantaEffect = VANTA.WAVES({
         el: entry.target,
@@ -991,7 +998,7 @@ const observer = new IntersectionObserver((entries) => {
   });
 });
 
-observer.observe(document.getElementById('hero'));
+observer.observe(document.getElementById("hero"));
 ```
 
 ### Pitfall 2: Memory Leaks in SPAs
@@ -1016,6 +1023,7 @@ useEffect(() => {
 **Problem**: Canvas appears blank
 
 **Causes**:
+
 - Forgot to call `updateRenderGraph()`
 - Canvas size is 0
 - Shapes are outside view
@@ -1027,7 +1035,7 @@ useEffect(() => {
 illo.updateRenderGraph();
 
 // Ensure canvas has dimensions
-<canvas width="240" height="240"></canvas>
+<canvas width="240" height="240"></canvas>;
 
 // Check shape positions are visible
 new Zdog.Ellipse({
@@ -1047,7 +1055,7 @@ new Zdog.Ellipse({
 VanillaTilt.init(element, {
   gyroscope: true,
   gyroscopeMinAngleX: -45,
-  gyroscopeMaxAngleX: 45
+  gyroscopeMaxAngleX: 45,
 });
 ```
 
@@ -1059,10 +1067,10 @@ VanillaTilt.init(element, {
 
 ```javascript
 // ❌ Wrong
-color: "#23153c"
+color: "#23153c";
 
 // ✅ Correct
-color: 0x23153c
+color: 0x23153c;
 ```
 
 ---
@@ -1070,16 +1078,19 @@ color: 0x23153c
 ## Resources
 
 **Zdog:**
+
 - [Zdog Documentation](https://zzz.dog/)
 - [Zdog GitHub](https://github.com/metafizzy/zdog)
 - [Zdog Codepen Examples](https://codepen.io/collection/DzdGMe/)
 
 **Vanta.js:**
+
 - [Vanta.js Official Site](https://www.vantajs.com/)
 - [Vanta.js GitHub](https://github.com/tengbao/vanta)
 - [Effect Customizer](https://www.vantajs.com/?effect=waves)
 
 **Vanilla-Tilt.js:**
+
 - [Vanilla-Tilt GitHub](https://github.com/micku7zu/vanilla-tilt.js)
 - [NPM Package](https://www.npmjs.com/package/vanilla-tilt)
 

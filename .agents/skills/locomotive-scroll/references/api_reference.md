@@ -13,37 +13,37 @@ Complete API documentation for Locomotive Scroll.
 ## Constructor Options
 
 ```javascript
-new LocomotiveScroll(options)
+new LocomotiveScroll(options);
 ```
 
 ### Global Options
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `el` | HTMLElement | `document` | Scroll container element |
-| `name` | string | `'scroll'` | Data attribute prefix |
-| `offset` | array | `[0, 0]` | Global offset `[bottom, top]` in px or % |
-| `repeat` | boolean | `false` | Repeat in-view detection |
-| `smooth` | boolean | `false` | Enable smooth scrolling |
-| `initPosition` | object | `{x: 0, y: 0}` | Initial scroll position |
-| `direction` | string | `'vertical'` | Scroll direction: `'vertical'` or `'horizontal'` |
-| `gestureDirection` | string | `'vertical'` | Gesture direction: `'vertical'`, `'horizontal'`, or `'both'` |
-| `reloadOnContextChange` | boolean | `false` | Reload on window resize |
-| `lerp` | number | `0.1` | Linear interpolation amount (0-1, lower = smoother) |
-| `class` | string | `'is-inview'` | Class applied to in-view elements |
-| `scrollbarContainer` | HTMLElement/boolean | `false` | Custom scrollbar container or `false` to hide |
-| `scrollbarClass` | string | `'c-scrollbar'` | Custom scrollbar class |
-| `scrollingClass` | string | `'has-scroll-scrolling'` | Class added while scrolling |
-| `draggingClass` | string | `'has-scroll-dragging'` | Class added while dragging scrollbar |
-| `smoothClass` | string | `'has-scroll-smooth'` | Class added when smooth enabled |
-| `initClass` | string | `'has-scroll-init'` | Class added on init |
-| `getSpeed` | boolean | `false` | Add scroll speed to event |
-| `getDirection` | boolean | `false` | Add scroll direction to event |
-| `scrollFromAnywhere` | boolean | `false` | Trigger smooth scroll from anywhere |
-| `multiplier` | number | `1` | Scroll speed multiplier |
-| `firefoxMultiplier` | number | `50` | Firefox-specific multiplier |
-| `touchMultiplier` | number | `2` | Touch scroll multiplier |
-| `resetNativeScroll` | boolean | `true` | Reset scroll on refresh |
+| Option                  | Type                | Default                  | Description                                                  |
+| ----------------------- | ------------------- | ------------------------ | ------------------------------------------------------------ |
+| `el`                    | HTMLElement         | `document`               | Scroll container element                                     |
+| `name`                  | string              | `'scroll'`               | Data attribute prefix                                        |
+| `offset`                | array               | `[0, 0]`                 | Global offset `[bottom, top]` in px or %                     |
+| `repeat`                | boolean             | `false`                  | Repeat in-view detection                                     |
+| `smooth`                | boolean             | `false`                  | Enable smooth scrolling                                      |
+| `initPosition`          | object              | `{x: 0, y: 0}`           | Initial scroll position                                      |
+| `direction`             | string              | `'vertical'`             | Scroll direction: `'vertical'` or `'horizontal'`             |
+| `gestureDirection`      | string              | `'vertical'`             | Gesture direction: `'vertical'`, `'horizontal'`, or `'both'` |
+| `reloadOnContextChange` | boolean             | `false`                  | Reload on window resize                                      |
+| `lerp`                  | number              | `0.1`                    | Linear interpolation amount (0-1, lower = smoother)          |
+| `class`                 | string              | `'is-inview'`            | Class applied to in-view elements                            |
+| `scrollbarContainer`    | HTMLElement/boolean | `false`                  | Custom scrollbar container or `false` to hide                |
+| `scrollbarClass`        | string              | `'c-scrollbar'`          | Custom scrollbar class                                       |
+| `scrollingClass`        | string              | `'has-scroll-scrolling'` | Class added while scrolling                                  |
+| `draggingClass`         | string              | `'has-scroll-dragging'`  | Class added while dragging scrollbar                         |
+| `smoothClass`           | string              | `'has-scroll-smooth'`    | Class added when smooth enabled                              |
+| `initClass`             | string              | `'has-scroll-init'`      | Class added on init                                          |
+| `getSpeed`              | boolean             | `false`                  | Add scroll speed to event                                    |
+| `getDirection`          | boolean             | `false`                  | Add scroll direction to event                                |
+| `scrollFromAnywhere`    | boolean             | `false`                  | Trigger smooth scroll from anywhere                          |
+| `multiplier`            | number              | `1`                      | Scroll speed multiplier                                      |
+| `firefoxMultiplier`     | number              | `50`                     | Firefox-specific multiplier                                  |
+| `touchMultiplier`       | number              | `2`                      | Touch scroll multiplier                                      |
+| `resetNativeScroll`     | boolean             | `true`                   | Reset scroll on refresh                                      |
 
 ### Mobile/Tablet Options
 
@@ -65,18 +65,19 @@ new LocomotiveScroll(options)
 ```
 
 **Example**:
+
 ```javascript
 new LocomotiveScroll({
-  el: document.querySelector('[data-scroll-container]'),
+  el: document.querySelector("[data-scroll-container]"),
   smooth: true,
   tablet: {
     smooth: true,
-    breakpoint: 1024
+    breakpoint: 1024,
   },
   smartphone: {
     smooth: false,
-    breakpoint: 768
-  }
+    breakpoint: 768,
+  },
 });
 ```
 
@@ -84,12 +85,13 @@ new LocomotiveScroll({
 
 ### Container Attributes
 
-| Attribute | Description |
-|-----------|-------------|
-| `data-scroll-container` | Main scroll container (required) |
-| `data-scroll-section` | Section wrapper for performance optimization |
+| Attribute               | Description                                  |
+| ----------------------- | -------------------------------------------- |
+| `data-scroll-container` | Main scroll container (required)             |
+| `data-scroll-section`   | Section wrapper for performance optimization |
 
 **Example**:
+
 ```html
 <div data-scroll-container>
   <div data-scroll-section>
@@ -100,26 +102,27 @@ new LocomotiveScroll({
 
 ### Element Attributes
 
-| Attribute | Type | Description |
-|-----------|------|-------------|
-| `data-scroll` | - | Mark element for detection |
-| `data-scroll-id` | string | Unique identifier for element |
-| `data-scroll-class` | string | Custom class when in view |
-| `data-scroll-offset` | string | Element-specific offset (px or %) |
-| `data-scroll-repeat` | boolean | Repeat in-view detection |
-| `data-scroll-call` | string | Function to call when in view |
-| `data-scroll-speed` | number | Parallax speed multiplier |
-| `data-scroll-direction` | string | Parallax direction: `'vertical'` or `'horizontal'` |
-| `data-scroll-delay` | number | Parallax delay (0-1) |
-| `data-scroll-position` | string | When to start parallax: `'top'`, `'bottom'`, `'left'`, `'right'` |
-| `data-scroll-target` | string | Target element selector for position reference |
-| `data-scroll-sticky` | - | Enable sticky positioning |
+| Attribute               | Type    | Description                                                      |
+| ----------------------- | ------- | ---------------------------------------------------------------- |
+| `data-scroll`           | -       | Mark element for detection                                       |
+| `data-scroll-id`        | string  | Unique identifier for element                                    |
+| `data-scroll-class`     | string  | Custom class when in view                                        |
+| `data-scroll-offset`    | string  | Element-specific offset (px or %)                                |
+| `data-scroll-repeat`    | boolean | Repeat in-view detection                                         |
+| `data-scroll-call`      | string  | Function to call when in view                                    |
+| `data-scroll-speed`     | number  | Parallax speed multiplier                                        |
+| `data-scroll-direction` | string  | Parallax direction: `'vertical'` or `'horizontal'`               |
+| `data-scroll-delay`     | number  | Parallax delay (0-1)                                             |
+| `data-scroll-position`  | string  | When to start parallax: `'top'`, `'bottom'`, `'left'`, `'right'` |
+| `data-scroll-target`    | string  | Target element selector for position reference                   |
+| `data-scroll-sticky`    | -       | Enable sticky positioning                                        |
 
 ### Detailed Attribute Explanations
 
 #### `data-scroll-speed`
 
 Controls parallax intensity:
+
 - **Positive values**: Element moves faster than scroll
 - **Negative values**: Element moves in opposite direction
 - **0-1**: Element moves slower than scroll
@@ -173,16 +176,12 @@ Pin element within boundaries:
 ```html
 <!-- Sticky within section -->
 <div data-scroll-section>
-  <div data-scroll data-scroll-sticky>
-    Sticks within section
-  </div>
+  <div data-scroll data-scroll-sticky>Sticks within section</div>
 </div>
 
 <!-- Sticky with custom target -->
 <div id="container">
-  <div data-scroll data-scroll-sticky data-scroll-target="#container">
-    Sticks within #container
-  </div>
+  <div data-scroll data-scroll-sticky data-scroll-target="#container">Sticks within #container</div>
 </div>
 ```
 
@@ -191,15 +190,13 @@ Pin element within boundaries:
 Trigger callback when in view:
 
 ```html
-<div data-scroll data-scroll-call="myFunction">
-  Triggers 'myFunction' when visible
-</div>
+<div data-scroll data-scroll-call="myFunction">Triggers 'myFunction' when visible</div>
 ```
 
 ```javascript
-scroll.on('call', (func, way, obj) => {
-  if (func === 'myFunction') {
-    console.log('Element is', way); // 'enter' or 'exit'
+scroll.on("call", (func, way, obj) => {
+  if (func === "myFunction") {
+    console.log("Element is", way); // 'enter' or 'exit'
   }
 });
 ```
@@ -265,6 +262,7 @@ scroll.stop();
 Programmatically scroll to target.
 
 **Parameters**:
+
 - `target`: Can be:
   - `'top'` - Scroll to top
   - `'bottom'` - Scroll to bottom
@@ -285,27 +283,28 @@ Programmatically scroll to target.
   ```
 
 **Examples**:
+
 ```javascript
 // Scroll to top
-scroll.scrollTo('top');
+scroll.scrollTo("top");
 
 // Scroll to element
-scroll.scrollTo('#section');
+scroll.scrollTo("#section");
 
 // Scroll to pixel value
 scroll.scrollTo(500);
 
 // Scroll with options
-scroll.scrollTo('#section', {
+scroll.scrollTo("#section", {
   offset: -100,
   duration: 2000,
   easing: [0.25, 0.0, 0.35, 1.0],
-  callback: () => console.log('Done!')
+  callback: () => console.log("Done!"),
 });
 
 // Instant scroll (no smooth)
-scroll.scrollTo('#section', {
-  disableLerp: true
+scroll.scrollTo("#section", {
+  disableLerp: true,
 });
 ```
 
@@ -322,7 +321,7 @@ scroll.setScroll(0, 500); // x, y
 Add event listener.
 
 ```javascript
-scroll.on('scroll', (args) => {
+scroll.on("scroll", (args) => {
   console.log(args);
 });
 ```
@@ -333,8 +332,8 @@ Remove event listener.
 
 ```javascript
 const handler = (args) => console.log(args);
-scroll.on('scroll', handler);
-scroll.off('scroll', handler);
+scroll.on("scroll", handler);
+scroll.off("scroll", handler);
 ```
 
 ## Events
@@ -344,35 +343,36 @@ scroll.off('scroll', handler);
 Fires on scroll. Receives object with:
 
 ```javascript
-scroll.on('scroll', (args) => {
+scroll.on("scroll", (args) => {
   // Scroll position
-  console.log(args.scroll.x);     // Horizontal scroll
-  console.log(args.scroll.y);     // Vertical scroll
+  console.log(args.scroll.x); // Horizontal scroll
+  console.log(args.scroll.y); // Vertical scroll
 
   // Scroll limits
-  console.log(args.limit.x);      // Max horizontal scroll
-  console.log(args.limit.y);      // Max vertical scroll
+  console.log(args.limit.x); // Max horizontal scroll
+  console.log(args.limit.y); // Max vertical scroll
 
   // Speed (if getSpeed: true)
   console.log(args.speed);
 
   // Direction (if getDirection: true)
-  console.log(args.direction);    // 'up', 'down', 'left', 'right'
+  console.log(args.direction); // 'up', 'down', 'left', 'right'
 
   // Current in-view elements
   console.log(args.currentElements);
 
   // Access specific element
-  if (args.currentElements['hero']) {
-    const el = args.currentElements['hero'];
-    console.log(el.progress);  // 0 to 1
-    console.log(el.el);        // DOM element
-    console.log(el.id);        // data-scroll-id value
+  if (args.currentElements["hero"]) {
+    const el = args.currentElements["hero"];
+    console.log(el.progress); // 0 to 1
+    console.log(el.el); // DOM element
+    console.log(el.id); // data-scroll-id value
   }
 });
 ```
 
 **currentElements structure**:
+
 ```javascript
 {
   'element-id': {
@@ -395,21 +395,22 @@ scroll.on('scroll', (args) => {
 Fires when element with `data-scroll-call` enters/exits viewport.
 
 ```javascript
-scroll.on('call', (func, way, obj) => {
-  console.log(func);  // data-scroll-call value
-  console.log(way);   // 'enter' or 'exit'
-  console.log(obj);   // {el, id}
+scroll.on("call", (func, way, obj) => {
+  console.log(func); // data-scroll-call value
+  console.log(way); // 'enter' or 'exit'
+  console.log(obj); // {el, id}
 });
 ```
 
 **Example**:
+
 ```html
 <div data-scroll data-scroll-call="playVideo">Video</div>
 ```
 
 ```javascript
-scroll.on('call', (func, way) => {
-  if (func === 'playVideo' && way === 'enter') {
+scroll.on("call", (func, way) => {
+  if (func === "playVideo" && way === "enter") {
     video.play();
   }
 });
@@ -460,44 +461,44 @@ console.log(scroll.direction); // 'up' | 'down' | 'left' | 'right'
 ## Complete Usage Example
 
 ```javascript
-import LocomotiveScroll from 'locomotive-scroll';
+import LocomotiveScroll from "locomotive-scroll";
 
 const scroll = new LocomotiveScroll({
-  el: document.querySelector('[data-scroll-container]'),
+  el: document.querySelector("[data-scroll-container]"),
   smooth: true,
   lerp: 0.05,
   multiplier: 1,
-  class: 'is-inview',
+  class: "is-inview",
   repeat: false,
-  offset: ['10%', 0],
+  offset: ["10%", 0],
   getSpeed: true,
   getDirection: true,
   smartphone: {
     smooth: false,
-    breakpoint: 768
-  }
+    breakpoint: 768,
+  },
 });
 
 // Track scroll
-scroll.on('scroll', (args) => {
+scroll.on("scroll", (args) => {
   console.log(args.scroll.y);
 
-  if (args.currentElements['hero']) {
-    const progress = args.currentElements['hero'].progress;
+  if (args.currentElements["hero"]) {
+    const progress = args.currentElements["hero"].progress;
     // Sync with animation
   }
 });
 
 // Handle call events
-scroll.on('call', (func, way) => {
-  if (func === 'lazyLoad' && way === 'enter') {
+scroll.on("call", (func, way) => {
+  if (func === "lazyLoad" && way === "enter") {
     loadImages();
   }
 });
 
 // Update on window resize
-window.addEventListener('resize', () => scroll.update());
+window.addEventListener("resize", () => scroll.update());
 
 // Cleanup on unmount
-window.addEventListener('beforeunload', () => scroll.destroy());
+window.addEventListener("beforeunload", () => scroll.destroy());
 ```

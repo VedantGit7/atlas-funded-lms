@@ -28,19 +28,22 @@ Comprehensive guide to web accessibility compliance following WCAG 2.1/2.2 Level
 ### WCAG Contrast Requirements
 
 **Level AA (Minimum)**:
+
 - Normal text (< 18pt): 4.5:1 contrast ratio
 - Large text (≥ 18pt or 14pt bold): 3:1 contrast ratio
 
 **Level AAA (Enhanced)**:
+
 - Normal text: **7:1 contrast ratio**
 - Large text: **4.5:1 contrast ratio**
 
 ### Checking Contrast
 
 **Manual Calculation**:
+
 ```javascript
 function getLuminance(r, g, b) {
-  const [rs, gs, bs] = [r, g, b].map(c => {
+  const [rs, gs, bs] = [r, g, b].map((c) => {
     c = c / 255;
     return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
   });
@@ -63,6 +66,7 @@ console.log(ratio); // 21:1 (AAA compliant)
 ```
 
 **Tools**:
+
 - WebAIM Contrast Checker: https://webaim.org/resources/contrastchecker/
 - Stark (Figma plugin)
 - Chrome DevTools Accessibility Panel
@@ -70,6 +74,7 @@ console.log(ratio); // 21:1 (AAA compliant)
 ### Color System (AAA Compliant)
 
 **Using OKLCH Color Space**:
+
 ```css
 :root {
   /* Text on white background (AAA compliant) */
@@ -93,15 +98,18 @@ console.log(ratio); // 21:1 (AAA compliant)
 ### Color Blindness Considerations
 
 **Avoid**:
+
 - Red-green as only distinguisher (affects 8% of males)
 - Relying on color alone for meaning
 
 **Best Practices**:
+
 - Use patterns, shapes, or icons alongside color
 - Test with color blindness simulators
 - Provide high-contrast mode
 
 **Simulation Tools**:
+
 - Chrome DevTools: Rendering > Emulate vision deficiencies
 - Colorblindly (browser extension)
 - Stark (Figma)
@@ -113,11 +121,13 @@ console.log(ratio); // 21:1 (AAA compliant)
 ### Font Size Requirements
 
 **WCAG Guidelines**:
+
 - Body text: Minimum 16px (1rem)
 - Small text: Minimum 14px (0.875rem)
 - Users must be able to zoom to 200% without loss of functionality
 
 **Recommended Sizes**:
+
 ```css
 :root {
   /* Fluid typography */
@@ -136,12 +146,14 @@ body {
 ### Line Height & Spacing
 
 **WCAG 1.4.12 (Level AAA)**:
+
 - Line height: Minimum 1.5× font size
 - Paragraph spacing: Minimum 2× font size
 - Letter spacing: Minimum 0.12× font size
 - Word spacing: Minimum 0.16× font size
 
 **Implementation**:
+
 ```css
 p {
   font-size: 1rem;
@@ -155,11 +167,13 @@ p {
 ### Font Choices
 
 **Accessible Fonts**:
+
 - Sans-serif: Inter, Roboto, Open Sans, Atkinson Hyperlegible
 - Serif: Georgia, Merriweather, Lora
 - Avoid: Overly decorative, thin weights (< 300), all-caps for long text
 
 **Dyslexia-Friendly**:
+
 - OpenDyslexic
 - Atkinson Hyperlegible
 - Comic Sans (surprisingly good for dyslexia)
@@ -171,6 +185,7 @@ p {
 ### Requirements
 
 **All interactive elements must be**:
+
 - Focusable with Tab key
 - Activatable with Enter or Space
 - Dismissible with Escape (modals, dropdowns)
@@ -179,6 +194,7 @@ p {
 ### Tab Order
 
 **Logical Tab Order**:
+
 ```html
 <!-- Natural DOM order is best -->
 <button tabindex="0">First</button>
@@ -186,15 +202,16 @@ p {
 <button tabindex="0">Third</button>
 
 <!-- Avoid tabindex > 0 (creates unpredictable order) -->
-<button tabindex="3">Third</button> <!-- BAD -->
-<button tabindex="1">First</button> <!-- BAD -->
+<button tabindex="3">Third</button>
+<!-- BAD -->
+<button tabindex="1">First</button>
+<!-- BAD -->
 ```
 
 **Skip Links**:
+
 ```html
-<a href="#main-content" class="skip-link">
-  Skip to main content
-</a>
+<a href="#main-content" class="skip-link"> Skip to main content </a>
 
 <nav>...</nav>
 
@@ -223,11 +240,13 @@ p {
 ### Focus Indicators
 
 **WCAG 2.4.7 (Level AA)**:
+
 - Focus indicator must be visible
 - Minimum 2px thick
 - Sufficient contrast (3:1 against background)
 
 **Modern Focus Styles**:
+
 ```css
 /* Remove default outline */
 *:focus {
@@ -257,16 +276,17 @@ button:focus-visible {
 ### Keyboard Patterns
 
 **Modal Dialogs**:
+
 ```javascript
 function trapFocus(element) {
   const focusableElements = element.querySelectorAll(
-    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
   );
   const firstFocusable = focusableElements[0];
   const lastFocusable = focusableElements[focusableElements.length - 1];
 
-  element.addEventListener('keydown', (e) => {
-    if (e.key === 'Tab') {
+  element.addEventListener("keydown", (e) => {
+    if (e.key === "Tab") {
       if (e.shiftKey && document.activeElement === firstFocusable) {
         e.preventDefault();
         lastFocusable.focus();
@@ -276,7 +296,7 @@ function trapFocus(element) {
       }
     }
 
-    if (e.key === 'Escape') {
+    if (e.key === "Escape") {
       closeModal();
     }
   });
@@ -286,35 +306,36 @@ function trapFocus(element) {
 ```
 
 **Dropdown Menus**:
+
 ```javascript
 function handleDropdownKeys(e) {
   const items = Array.from(dropdown.querySelectorAll('[role="menuitem"]'));
   const currentIndex = items.indexOf(document.activeElement);
 
   switch (e.key) {
-    case 'ArrowDown':
+    case "ArrowDown":
       e.preventDefault();
       const nextIndex = (currentIndex + 1) % items.length;
       items[nextIndex].focus();
       break;
 
-    case 'ArrowUp':
+    case "ArrowUp":
       e.preventDefault();
       const prevIndex = (currentIndex - 1 + items.length) % items.length;
       items[prevIndex].focus();
       break;
 
-    case 'Home':
+    case "Home":
       e.preventDefault();
       items[0].focus();
       break;
 
-    case 'End':
+    case "End":
       e.preventDefault();
       items[items.length - 1].focus();
       break;
 
-    case 'Escape':
+    case "Escape":
       closeDropdown();
       triggerButton.focus();
       break;
@@ -331,6 +352,7 @@ function handleDropdownKeys(e) {
 **Essential ARIA**:
 
 **Landmarks**:
+
 ```html
 <header role="banner">
   <nav role="navigation" aria-label="Main">
@@ -352,6 +374,7 @@ function handleDropdownKeys(e) {
 ```
 
 **Buttons**:
+
 ```html
 <!-- Icon button needs label -->
 <button aria-label="Close menu">
@@ -366,70 +389,51 @@ function handleDropdownKeys(e) {
 ```
 
 **Live Regions**:
+
 ```html
 <!-- Announce loading state -->
-<div role="status" aria-live="polite" aria-atomic="true">
-  Loading content...
-</div>
+<div role="status" aria-live="polite" aria-atomic="true">Loading content...</div>
 
 <!-- Announce errors -->
-<div role="alert" aria-live="assertive">
-  Error: Form submission failed.
-</div>
+<div role="alert" aria-live="assertive">Error: Form submission failed.</div>
 ```
 
 **Custom Components**:
+
 ```html
 <!-- Accordion -->
 <div class="accordion">
   <h3>
-    <button
-      aria-expanded="false"
-      aria-controls="panel-1"
-      id="button-1"
-    >
-      Section 1
-    </button>
+    <button aria-expanded="false" aria-controls="panel-1" id="button-1">Section 1</button>
   </h3>
-  <div
-    id="panel-1"
-    role="region"
-    aria-labelledby="button-1"
-    hidden
-  >
-    Content...
-  </div>
+  <div id="panel-1" role="region" aria-labelledby="button-1" hidden>Content...</div>
 </div>
 
 <!-- Tab panel -->
 <div role="tablist" aria-label="Content sections">
-  <button role="tab" aria-selected="true" aria-controls="panel-1">
-    Tab 1
-  </button>
-  <button role="tab" aria-selected="false" aria-controls="panel-2">
-    Tab 2
-  </button>
+  <button role="tab" aria-selected="true" aria-controls="panel-1">Tab 1</button>
+  <button role="tab" aria-selected="false" aria-controls="panel-2">Tab 2</button>
 </div>
-<div role="tabpanel" id="panel-1" aria-labelledby="tab-1">
-  Panel content...
-</div>
+<div role="tabpanel" id="panel-1" aria-labelledby="tab-1">Panel content...</div>
 ```
 
 ### Alt Text Guidelines
 
 **Images**:
+
 ```html
 <!-- Informative image -->
-<img src="chart.png" alt="Bar chart showing 50% increase in sales">
+<img src="chart.png" alt="Bar chart showing 50% increase in sales" />
 
 <!-- Decorative image -->
-<img src="decorative.png" alt="" role="presentation">
+<img src="decorative.png" alt="" role="presentation" />
 
 <!-- Complex image -->
-<img src="infographic.png" alt="Sales data for Q4" longdesc="sales-data.html">
+<img src="infographic.png" alt="Sales data for Q4" longdesc="sales-data.html" />
 ```
 
 **Best Practices**:
+
 - Describe the content/function, not "image of..."
 - Keep under 150 characters (screen readers pause)
 - Use empty alt (`alt=""`) for decorative images
@@ -445,6 +449,7 @@ function handleDropdownKeys(e) {
 Users must be able to disable non-essential motion.
 
 **Implementation**:
+
 ```css
 /* Default: animations enabled */
 .animated-element {
@@ -470,23 +475,23 @@ Users must be able to disable non-essential motion.
 ```
 
 **JavaScript Detection**:
+
 ```javascript
-const prefersReducedMotion = window.matchMedia(
-  '(prefers-reduced-motion: reduce)'
-).matches;
+const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 if (prefersReducedMotion) {
   // Disable or simplify animations
   gsap.config({ nullTargetWarn: false, force3D: false });
 
   // Skip scroll animations
-  ScrollTrigger.getAll().forEach(st => st.kill());
+  ScrollTrigger.getAll().forEach((st) => st.kill());
 }
 ```
 
 ### Animation Guidelines
 
 **Safe Animations**:
+
 - Fade in/out (opacity)
 - Slide short distances (< 50px)
 - Scale small amounts (0.95-1.05)
@@ -494,6 +499,7 @@ if (prefersReducedMotion) {
 
 **Vestibular Disorders**:
 Avoid animations that can cause dizziness or nausea:
+
 - Large parallax effects
 - Continuous rotation
 - Zoom effects
@@ -510,8 +516,10 @@ Avoid animations that can cause dizziness or nausea:
 **Spacing**: Minimum 8px between targets
 
 **Implementation**:
+
 ```css
-button, a {
+button,
+a {
   min-height: 44px;
   min-width: 44px;
   padding: 12px 24px;
@@ -520,7 +528,7 @@ button, a {
 
 /* Increase tap target without changing visual size */
 button::before {
-  content: '';
+  content: "";
   position: absolute;
   inset: -8px; /* Extends tap target by 8px all sides */
 }
@@ -529,12 +537,15 @@ button::before {
 ### Mobile Considerations
 
 **Viewport**:
+
 ```html
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
 ```
-*Note*: Allow zoom up to 5× (WCAG requirement)
+
+_Note_: Allow zoom up to 5× (WCAG requirement)
 
 **Touch Gestures**:
+
 - Avoid complex gestures (multi-finger, long-press)
 - Provide alternative interactions
 - Don't rely on hover states
@@ -549,62 +560,58 @@ button::before {
 Every input must have a visible label.
 
 **Implementation**:
+
 ```html
 <!-- Explicit label -->
 <label for="email">Email address</label>
-<input id="email" type="email" required aria-describedby="email-help">
+<input id="email" type="email" required aria-describedby="email-help" />
 <small id="email-help">We'll never share your email.</small>
 
 <!-- Error state -->
-<input
-  id="email"
-  type="email"
-  aria-invalid="true"
-  aria-describedby="email-error"
->
-<div id="email-error" role="alert">
-  Please enter a valid email address.
-</div>
+<input id="email" type="email" aria-invalid="true" aria-describedby="email-error" />
+<div id="email-error" role="alert">Please enter a valid email address.</div>
 ```
 
 ### Form Validation
 
 **Accessible Validation**:
+
 ```javascript
 function validateEmail(input) {
   const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.value);
 
   if (isValid) {
-    input.setAttribute('aria-invalid', 'false');
-    input.removeAttribute('aria-describedby');
+    input.setAttribute("aria-invalid", "false");
+    input.removeAttribute("aria-describedby");
     removeError(input);
   } else {
-    input.setAttribute('aria-invalid', 'true');
-    input.setAttribute('aria-describedby', `${input.id}-error`);
-    showError(input, 'Please enter a valid email address.');
+    input.setAttribute("aria-invalid", "true");
+    input.setAttribute("aria-describedby", `${input.id}-error`);
+    showError(input, "Please enter a valid email address.");
   }
 }
 
 function showError(input, message) {
-  const errorElement = document.getElementById(`${input.id}-error`) ||
-                       createErrorElement(input.id);
+  const errorElement = document.getElementById(`${input.id}-error`) || createErrorElement(input.id);
   errorElement.textContent = message;
-  errorElement.setAttribute('role', 'alert'); // Announces to screen readers
+  errorElement.setAttribute("role", "alert"); // Announces to screen readers
 }
 ```
 
 ### Required Fields
 
 **Indication**:
+
 ```html
 <label for="name">
   Full name
   <abbr title="required" aria-label="required">*</abbr>
 </label>
-<input id="name" type="text" required aria-required="true">
+<input id="name" type="text" required aria-required="true" />
 ```
 
 **Visual + Programmatic**:
+
 - Visual indicator (asterisk, "required")
 - `required` attribute
 - `aria-required="true"`
@@ -616,13 +623,14 @@ function showError(input, message) {
 ### Managing Focus States
 
 **After Modal Opens**:
+
 ```javascript
 function openModal() {
-  modal.style.display = 'block';
-  modal.setAttribute('aria-hidden', 'false');
+  modal.style.display = "block";
+  modal.setAttribute("aria-hidden", "false");
 
   // Focus first focusable element
-  const firstFocusable = modal.querySelector('button, [href], input');
+  const firstFocusable = modal.querySelector("button, [href], input");
   firstFocusable.focus();
 
   // Trap focus
@@ -631,10 +639,11 @@ function openModal() {
 ```
 
 **After Modal Closes**:
+
 ```javascript
 function closeModal() {
-  modal.style.display = 'none';
-  modal.setAttribute('aria-hidden', 'true');
+  modal.style.display = "none";
+  modal.setAttribute("aria-hidden", "true");
 
   // Return focus to trigger button
   triggerButton.focus();
@@ -644,6 +653,7 @@ function closeModal() {
 ### Focus Order
 
 **Best Practices**:
+
 - Follow visual order (top to bottom, left to right)
 - Group related elements
 - Use `tabindex="-1"` for programmatic focus only
@@ -659,6 +669,7 @@ function closeModal() {
 Use proper heading levels (h1-h6) without skipping.
 
 **Correct**:
+
 ```html
 <h1>Page Title</h1>
 <h2>Section</h2>
@@ -668,14 +679,17 @@ Use proper heading levels (h1-h6) without skipping.
 ```
 
 **Incorrect**:
+
 ```html
 <h1>Page Title</h1>
-<h3>Section</h3> <!-- Skipped h2 -->
+<h3>Section</h3>
+<!-- Skipped h2 -->
 ```
 
 ### Landmark Regions
 
 **Essential Landmarks**:
+
 ```html
 <header>
   <nav aria-label="Main navigation">
@@ -706,6 +720,7 @@ Use proper heading levels (h1-h6) without skipping.
 ### Lists & Tables
 
 **Lists**:
+
 ```html
 <!-- Use proper list elements -->
 <ul>
@@ -717,9 +732,12 @@ Use proper heading levels (h1-h6) without skipping.
 ```
 
 **Tables**:
+
 ```html
 <table>
-  <caption>Sales Data Q4 2024</caption>
+  <caption>
+    Sales Data Q4 2024
+  </caption>
   <thead>
     <tr>
       <th scope="col">Month</th>
@@ -742,11 +760,13 @@ Use proper heading levels (h1-h6) without skipping.
 ### Automated Testing Tools
 
 **Browser Extensions**:
+
 - axe DevTools (Chrome/Firefox)
 - WAVE (Web Accessibility Evaluation Tool)
 - Lighthouse (Chrome DevTools)
 
 **Command Line**:
+
 ```bash
 # pa11y
 npm install -g pa11y
@@ -760,24 +780,28 @@ axe https://example.com
 ### Manual Testing Checklist
 
 **Keyboard Navigation**:
+
 - [ ] Tab through all interactive elements
 - [ ] Activate with Enter/Space
 - [ ] Close modals with Escape
 - [ ] Navigate dropdowns with arrow keys
 
 **Screen Reader Testing**:
+
 - [ ] Test with NVDA (Windows), VoiceOver (Mac), JAWS
 - [ ] Check heading structure
 - [ ] Verify alt text
 - [ ] Test form labels and errors
 
 **Visual Testing**:
+
 - [ ] Zoom to 200%
 - [ ] Test color contrast
 - [ ] Check focus indicators
 - [ ] Review with color blindness simulator
 
 **Motion Testing**:
+
 - [ ] Enable `prefers-reduced-motion`
 - [ ] Verify animations are disabled/reduced
 - [ ] Check for essential animations that remain
@@ -785,17 +809,20 @@ axe https://example.com
 ### Screen Reader Testing Commands
 
 **NVDA (Windows)**:
+
 - Toggle: Caps Lock or Insert
 - Next heading: H
 - Next landmark: D
 - Read all: Caps Lock + Down Arrow
 
 **VoiceOver (Mac)**:
+
 - Toggle: Cmd + F5
 - Rotor: Ctrl + Option + U
 - Next heading: Ctrl + Option + Cmd + H
 
 **JAWS (Windows)**:
+
 - List headings: Insert + F6
 - List links: Insert + F7
 - Next heading: H
@@ -817,24 +844,24 @@ function AccessibleModal({ isOpen, onClose, children }) {
       trapFocus(modalRef.current);
 
       // Focus first element
-      const firstFocusable = modalRef.current.querySelector('button, [href], input');
+      const firstFocusable = modalRef.current.querySelector("button, [href], input");
       firstFocusable?.focus();
 
       // Prevent body scroll
-      document.body.style.overflow = 'hidden';
+      document.body.style.overflow = "hidden";
     } else {
       // Return focus
       triggerRef.current?.focus();
-      document.body.style.overflow = '';
+      document.body.style.overflow = "";
     }
 
     // Listen for Escape key
     const handleEscape = (e) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === "Escape") onClose();
     };
-    document.addEventListener('keydown', handleEscape);
+    document.addEventListener("keydown", handleEscape);
 
-    return () => document.removeEventListener('keydown', handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
   }, [isOpen, onClose]);
 
   if (!isOpen) return null;
@@ -847,11 +874,7 @@ function AccessibleModal({ isOpen, onClose, children }) {
       aria-modal="true"
       aria-labelledby="modal-title"
     >
-      <div
-        ref={modalRef}
-        className="modal"
-        onClick={(e) => e.stopPropagation()}
-      >
+      <div ref={modalRef} className="modal" onClick={(e) => e.stopPropagation()}>
         <h2 id="modal-title">Modal Title</h2>
         {children}
         <button onClick={onClose} aria-label="Close modal">
@@ -868,21 +891,12 @@ function AccessibleModal({ isOpen, onClose, children }) {
 ```html
 <div class="accordion">
   <h3>
-    <button
-      aria-expanded="false"
-      aria-controls="panel-1"
-      id="accordion-button-1"
-    >
+    <button aria-expanded="false" aria-controls="panel-1" id="accordion-button-1">
       <span class="accordion-title">Section 1</span>
       <svg class="accordion-icon" aria-hidden="true">...</svg>
     </button>
   </h3>
-  <div
-    id="panel-1"
-    role="region"
-    aria-labelledby="accordion-button-1"
-    hidden
-  >
+  <div id="panel-1" role="region" aria-labelledby="accordion-button-1" hidden>
     <p>Content for section 1...</p>
   </div>
 </div>
@@ -890,14 +904,14 @@ function AccessibleModal({ isOpen, onClose, children }) {
 
 ```javascript
 function initAccordion() {
-  const buttons = document.querySelectorAll('.accordion button');
+  const buttons = document.querySelectorAll(".accordion button");
 
-  buttons.forEach(button => {
-    button.addEventListener('click', () => {
-      const expanded = button.getAttribute('aria-expanded') === 'true';
-      const panel = document.getElementById(button.getAttribute('aria-controls'));
+  buttons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const expanded = button.getAttribute("aria-expanded") === "true";
+      const panel = document.getElementById(button.getAttribute("aria-controls"));
 
-      button.setAttribute('aria-expanded', !expanded);
+      button.setAttribute("aria-expanded", !expanded);
       panel.hidden = expanded;
     });
   });
@@ -909,6 +923,7 @@ function initAccordion() {
 ## WCAG Quick Reference
 
 **Level A (Must Have)**:
+
 - Text alternatives (alt text)
 - Keyboard accessible
 - Color not only means of conveying info
@@ -916,6 +931,7 @@ function initAccordion() {
 - Proper heading hierarchy
 
 **Level AA (Should Have)**:
+
 - 4.5:1 contrast for normal text
 - 3:1 contrast for large text
 - Resize text to 200%
@@ -923,6 +939,7 @@ function initAccordion() {
 - Multiple ways to find pages
 
 **Level AAA (Nice to Have)**:
+
 - 7:1 contrast for normal text
 - 4.5:1 contrast for large text
 - Target size 44×44px minimum
@@ -931,5 +948,5 @@ function initAccordion() {
 
 ---
 
-*Last updated: 2024*
-*Based on WCAG 2.1 and WCAG 2.2 standards*
+_Last updated: 2024_
+_Based on WCAG 2.1 and WCAG 2.2 standards_

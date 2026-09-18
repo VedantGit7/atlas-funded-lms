@@ -76,16 +76,18 @@ starter_babylon/
 ### Materials
 
 **PBR Material (Sphere 1)**
+
 ```javascript
-const pbrMaterial = new PBRMaterial('pbrMat', scene);
+const pbrMaterial = new PBRMaterial("pbrMat", scene);
 pbrMaterial.metallic = 1.0;
 pbrMaterial.roughness = 0.3;
 pbrMaterial.baseColor = new Color3(0.9, 0.1, 0.1);
 ```
 
 **Standard Material (Box)**
+
 ```javascript
-const standardMaterial = new StandardMaterial('standardMat', scene);
+const standardMaterial = new StandardMaterial("standardMat", scene);
 standardMaterial.diffuseColor = new Color3(0.2, 0.8, 0.3);
 standardMaterial.specularPower = 32;
 ```
@@ -104,9 +106,9 @@ standardMaterial.specularPower = 32;
 Replace ArcRotateCamera with FreeCamera for FPS-style:
 
 ```javascript
-import { FreeCamera } from '@babylonjs/core/Cameras/freeCamera.js';
+import { FreeCamera } from "@babylonjs/core/Cameras/freeCamera.js";
 
-const camera = new FreeCamera('camera', new Vector3(0, 5, -10), scene);
+const camera = new FreeCamera("camera", new Vector3(0, 5, -10), scene);
 camera.setTarget(Vector3.Zero());
 camera.attachControl(canvas, true);
 ```
@@ -114,9 +116,9 @@ camera.attachControl(canvas, true);
 ### Add More Lights
 
 ```javascript
-import { PointLight } from '@babylonjs/core/Lights/pointLight.js';
+import { PointLight } from "@babylonjs/core/Lights/pointLight.js";
 
-const pointLight = new PointLight('pointLight', new Vector3(0, 10, 0), scene);
+const pointLight = new PointLight("pointLight", new Vector3(0, 10, 0), scene);
 pointLight.intensity = 0.5;
 pointLight.diffuse = new Color3(1, 0.5, 0);
 ```
@@ -124,25 +126,25 @@ pointLight.diffuse = new Color3(1, 0.5, 0);
 ### Load GLTF Models
 
 ```javascript
-import { SceneLoader } from '@babylonjs/core/Loading/sceneLoader.js';
-import '@babylonjs/loaders/glTF';
+import { SceneLoader } from "@babylonjs/core/Loading/sceneLoader.js";
+import "@babylonjs/loaders/glTF";
 
 const result = await SceneLoader.ImportMeshAsync(
   null,
-  'https://assets.babylonjs.com/meshes/',
-  'village.glb',
-  scene
+  "https://assets.babylonjs.com/meshes/",
+  "village.glb",
+  scene,
 );
 
-console.log('Loaded:', result.meshes);
+console.log("Loaded:", result.meshes);
 ```
 
 ### Add Post-Processing
 
 ```javascript
-import { DefaultRenderingPipeline } from '@babylonjs/core/PostProcesses/RenderPipeline/Pipelines/defaultRenderingPipeline.js';
+import { DefaultRenderingPipeline } from "@babylonjs/core/PostProcesses/RenderPipeline/Pipelines/defaultRenderingPipeline.js";
 
-const pipeline = new DefaultRenderingPipeline('pipeline', true, scene, [camera]);
+const pipeline = new DefaultRenderingPipeline("pipeline", true, scene, [camera]);
 pipeline.fxaaEnabled = true;
 pipeline.samples = 4;
 
@@ -154,13 +156,17 @@ pipeline.bloomWeight = 0.5;
 ### Create Custom Meshes
 
 ```javascript
-import { CreateTorus } from '@babylonjs/core/Meshes/Builders/torusBuilder.js';
+import { CreateTorus } from "@babylonjs/core/Meshes/Builders/torusBuilder.js";
 
-const torus = CreateTorus('torus', {
-  diameter: 3,
-  thickness: 1,
-  tessellation: 16
-}, scene);
+const torus = CreateTorus(
+  "torus",
+  {
+    diameter: 3,
+    thickness: 1,
+    tessellation: 16,
+  },
+  scene,
+);
 
 torus.position.y = 2;
 ```
@@ -168,19 +174,19 @@ torus.position.y = 2;
 ### Add GUI
 
 ```javascript
-import { AdvancedDynamicTexture } from '@babylonjs/gui/2D/advancedDynamicTexture.js';
-import { Button } from '@babylonjs/gui/2D/controls/button.js';
+import { AdvancedDynamicTexture } from "@babylonjs/gui/2D/advancedDynamicTexture.js";
+import { Button } from "@babylonjs/gui/2D/controls/button.js";
 
-const advancedTexture = AdvancedDynamicTexture.CreateFullscreenUI('UI');
+const advancedTexture = AdvancedDynamicTexture.CreateFullscreenUI("UI");
 
-const button = Button.CreateSimpleButton('button', 'Reset Scene');
-button.width = '150px';
-button.height = '40px';
-button.color = 'white';
-button.background = '#4fc3f7';
+const button = Button.CreateSimpleButton("button", "Reset Scene");
+button.width = "150px";
+button.height = "40px";
+button.color = "white";
+button.background = "#4fc3f7";
 button.cornerRadius = 8;
 button.onPointerUpObservable.add(() => {
-  console.log('Reset clicked');
+  console.log("Reset clicked");
 });
 
 advancedTexture.addControl(button);
@@ -200,6 +206,7 @@ advancedTexture.addControl(button);
 ### Inspector
 
 Press **Shift+Ctrl+Alt+I** to toggle the Babylon.js Inspector:
+
 - View scene graph
 - Inspect mesh properties
 - Debug materials
@@ -209,21 +216,25 @@ Press **Shift+Ctrl+Alt+I** to toggle the Babylon.js Inspector:
 ### Console Logs
 
 The template includes helpful console logs:
+
 - Selected mesh names
 - FPS display in top-right corner
 
 ### Common Issues
 
 **Physics not working?**
+
 - Ensure Havok is properly initialized with `await HavokPhysics()`
 - Check that physics aggregates are created after `scene.enablePhysics()`
 
 **Meshes not visible?**
+
 - Check camera position and target
 - Verify mesh positions
 - Ensure materials are applied
 
 **Performance issues?**
+
 - Reduce shadow map size
 - Disable post-processing
 - Use hardware scaling
@@ -234,17 +245,17 @@ The template includes helpful console logs:
 ### Add Animations
 
 ```javascript
-import { Animation } from '@babylonjs/core/Animations/animation.js';
+import { Animation } from "@babylonjs/core/Animations/animation.js";
 
 const animation = Animation.CreateAndStartAnimation(
-  'rotate',
+  "rotate",
   mesh,
-  'rotation.y',
+  "rotation.y",
   30,
   120,
   0,
   Math.PI * 2,
-  Animation.ANIMATIONLOOPMODE_CYCLE
+  Animation.ANIMATIONLOOPMODE_CYCLE,
 );
 ```
 
@@ -253,18 +264,18 @@ const animation = Animation.CreateAndStartAnimation(
 ```javascript
 const env = scene.createDefaultEnvironment();
 const xr = await scene.createDefaultXRExperienceAsync({
-  floorMeshes: [env.ground]
+  floorMeshes: [env.ground],
 });
 ```
 
 ### Add Particles
 
 ```javascript
-import { ParticleSystem } from '@babylonjs/core/Particles/particleSystem.js';
-import { Texture } from '@babylonjs/core/Materials/Textures/texture.js';
+import { ParticleSystem } from "@babylonjs/core/Particles/particleSystem.js";
+import { Texture } from "@babylonjs/core/Materials/Textures/texture.js";
 
-const particleSystem = new ParticleSystem('particles', 2000, scene);
-particleSystem.particleTexture = new Texture('particle.png', scene);
+const particleSystem = new ParticleSystem("particles", 2000, scene);
+particleSystem.particleTexture = new Texture("particle.png", scene);
 particleSystem.emitter = new Vector3(0, 5, 0);
 particleSystem.start();
 ```

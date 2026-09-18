@@ -44,8 +44,8 @@ Every Three.js application requires these core elements:
 ### Basic Scene Setup
 
 ```javascript
-import * as THREE from 'three';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
 // Scene, Camera, Renderer
 const scene = new THREE.Scene();
@@ -55,7 +55,7 @@ const camera = new THREE.PerspectiveCamera(
   75, // FOV
   window.innerWidth / window.innerHeight, // Aspect ratio
   0.1, // Near clipping plane
-  1000 // Far clipping plane
+  1000, // Far clipping plane
 );
 camera.position.set(0, 2, 5);
 
@@ -89,7 +89,7 @@ function animate() {
 animate();
 
 // Handle Resize
-window.addEventListener('resize', () => {
+window.addEventListener("resize", () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
@@ -99,7 +99,7 @@ window.addEventListener('resize', () => {
 ### WebGPU Setup (Modern Alternative)
 
 ```javascript
-import * as THREE from 'three/webgpu';
+import * as THREE from "three/webgpu";
 
 const renderer = new THREE.WebGPURenderer({ antialias: true });
 renderer.setPixelRatio(window.devicePixelRatio);
@@ -120,18 +120,18 @@ const geometry = new THREE.BoxGeometry(1, 1, 1);
 const material = new THREE.MeshStandardMaterial({
   color: 0x00ff00,
   roughness: 0.5,
-  metalness: 0.5
+  metalness: 0.5,
 });
 const cube = new THREE.Mesh(geometry, material);
 scene.add(cube);
 
 // Textured Mesh
 const loader = new THREE.TextureLoader();
-const texture = loader.load('texture.jpg');
+const texture = loader.load("texture.jpg");
 texture.colorSpace = THREE.SRGBColorSpace;
 
 const texturedMaterial = new THREE.MeshStandardMaterial({
-  map: texture
+  map: texture,
 });
 const mesh = new THREE.Mesh(geometry, texturedMaterial);
 scene.add(mesh);
@@ -173,7 +173,7 @@ scene.add(bulbLight);
 const hemiLight = new THREE.HemisphereLight(
   0xddeeff, // Sky color
   0x0f0e0d, // Ground color
-  0.02
+  0.02,
 );
 scene.add(hemiLight);
 ```
@@ -190,11 +190,7 @@ const matrix = new THREE.Matrix4();
 const color = new THREE.Color();
 
 for (let i = 0; i < 1000; i++) {
-  matrix.setPosition(
-    Math.random() * 10 - 5,
-    Math.random() * 10 - 5,
-    Math.random() * 10 - 5
-  );
+  matrix.setPosition(Math.random() * 10 - 5, Math.random() * 10 - 5, Math.random() * 10 - 5);
   instancedMesh.setMatrixAt(i, matrix);
   instancedMesh.setColorAt(i, color.setHex(Math.random() * 0xffffff));
 }
@@ -206,18 +202,18 @@ scene.add(instancedMesh);
 ### 4. Loading 3D Models (glTF)
 
 ```javascript
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
 
 // Setup loaders
 const dracoLoader = new DRACOLoader();
-dracoLoader.setDecoderPath('/draco/');
+dracoLoader.setDecoderPath("/draco/");
 
 const gltfLoader = new GLTFLoader();
 gltfLoader.setDRACOLoader(dracoLoader);
 
 // Load model
-gltfLoader.load('model.glb', (gltf) => {
+gltfLoader.load("model.glb", (gltf) => {
   const model = gltf.scene;
 
   // Enable shadows
@@ -286,7 +282,7 @@ function onMouseClick(event) {
   }
 }
 
-window.addEventListener('click', onMouseClick);
+window.addEventListener("click", onMouseClick);
 ```
 
 ## Integration Patterns
@@ -294,7 +290,7 @@ window.addEventListener('click', onMouseClick);
 ### With GSAP for Animation
 
 ```javascript
-import gsap from 'gsap';
+import gsap from "gsap";
 
 // Animate camera
 gsap.to(camera.position, {
@@ -305,7 +301,7 @@ gsap.to(camera.position, {
   ease: "power2.inOut",
   onUpdate: () => {
     camera.lookAt(scene.position);
-  }
+  },
 });
 
 // Animate mesh properties
@@ -313,7 +309,7 @@ gsap.to(mesh.rotation, {
   y: Math.PI * 2,
   duration: 3,
   repeat: -1,
-  ease: "none"
+  ease: "none",
 });
 ```
 
@@ -327,9 +323,9 @@ gsap.to(mesh.rotation, {
 ### With Post-Processing
 
 ```javascript
-import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
-import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
-import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
+import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
 
 const composer = new EffectComposer(renderer);
 composer.addPass(new RenderPass(scene, camera));
@@ -338,7 +334,7 @@ const bloomPass = new UnrealBloomPass(
   new THREE.Vector2(window.innerWidth, window.innerHeight),
   1.5, // strength
   0.4, // radius
-  0.85 // threshold
+  0.85, // threshold
 );
 composer.addPass(bloomPass);
 
@@ -349,6 +345,7 @@ composer.render();
 ## Performance Optimization
 
 ### 1. Geometry Reuse
+
 ```javascript
 // Bad: Creates new geometry for each mesh
 for (let i = 0; i < 100; i++) {
@@ -366,9 +363,11 @@ for (let i = 0; i < 100; i++) {
 ```
 
 ### 2. Use InstancedMesh for Repeated Objects
+
 For hundreds/thousands of identical objects, use `InstancedMesh` (see pattern above).
 
 ### 3. Texture Optimization
+
 ```javascript
 // Compress textures
 texture.generateMipmaps = true;
@@ -380,15 +379,17 @@ texture.magFilter = THREE.LinearFilter;
 ```
 
 ### 4. Level of Detail (LOD)
+
 ```javascript
 const lod = new THREE.LOD();
-lod.addLevel(highDetailMesh, 0);    // 0-50 units
-lod.addLevel(mediumDetailMesh, 50);  // 50-100 units
-lod.addLevel(lowDetailMesh, 100);    // 100+ units
+lod.addLevel(highDetailMesh, 0); // 0-50 units
+lod.addLevel(mediumDetailMesh, 50); // 50-100 units
+lod.addLevel(lowDetailMesh, 100); // 100+ units
 scene.add(lod);
 ```
 
 ### 5. Frustum Culling
+
 Three.js automatically culls objects outside the camera's view. Ensure objects have correct bounding spheres:
 
 ```javascript
@@ -396,13 +397,14 @@ mesh.geometry.computeBoundingSphere();
 ```
 
 ### 6. Dispose Resources
+
 ```javascript
 function disposeScene() {
   scene.traverse((object) => {
     if (object.geometry) object.geometry.dispose();
     if (object.material) {
       if (Array.isArray(object.material)) {
-        object.material.forEach(material => material.dispose());
+        object.material.forEach((material) => material.dispose());
       } else {
         object.material.dispose();
       }
@@ -415,6 +417,7 @@ function disposeScene() {
 ## Best Practices
 
 ### 1. Use Animation Clocks for Consistent Timing
+
 ```javascript
 const clock = new THREE.Clock();
 
@@ -430,12 +433,14 @@ function animate() {
 ```
 
 ### 2. Camera Setup Guidelines
+
 - **FOV**: 45-75° for most applications
 - **Near plane**: As far as possible (avoid z-fighting)
 - **Far plane**: As close as possible (precision)
 - **Aspect ratio**: Always match canvas dimensions
 
 ### 3. Material Selection
+
 - **MeshBasicMaterial**: Unlit, flat colors (debugging, UI)
 - **MeshLambertMaterial**: Cheap diffuse lighting (mobile)
 - **MeshPhongMaterial**: Specular highlights (older standard)
@@ -443,11 +448,13 @@ function animate() {
 - **MeshPhysicalMaterial**: Advanced PBR (clearcoat, transmission)
 
 ### 4. Coordinate System
+
 - Three.js uses right-handed coordinate system
 - +Y is up, +Z is toward camera, +X is right
 - Rotations use radians (Math.PI = 180°)
 
 ### 5. Scene Organization
+
 ```javascript
 // Group related objects
 const building = new THREE.Group();
@@ -455,16 +462,18 @@ building.add(walls, roof, windows);
 scene.add(building);
 
 // Use meaningful names
-mesh.name = 'player-character';
-const found = scene.getObjectByName('player-character');
+mesh.name = "player-character";
+const found = scene.getObjectByName("player-character");
 ```
 
 ## Common Pitfalls
 
 ### 1. Not Updating Aspect Ratio on Resize
+
 Always update camera aspect ratio and projection matrix when window resizes.
 
 ### 2. Creating New Objects in Animation Loop
+
 ```javascript
 // Bad: Memory leak
 function animate() {
@@ -480,15 +489,18 @@ function animate() {
 ```
 
 ### 3. Forgetting to Enable Shadows
+
 Remember to enable shadows on renderer, lights, and objects.
 
 ### 4. Z-Fighting (Flickering)
+
 - Increase near plane distance
 - Decrease far plane distance
 - Avoid overlapping coplanar surfaces
 - Use `material.polygonOffset = true` with `material.polygonOffsetFactor`
 
 ### 5. Color Space Issues
+
 ```javascript
 // Always set color space for textures
 texture.colorSpace = THREE.SRGBColorSpace;
@@ -498,6 +510,7 @@ renderer.outputColorSpace = THREE.SRGBColorSpace;
 ```
 
 ### 6. Not Disposing Resources
+
 Always call `.dispose()` on geometries, materials, textures, and renderers when no longer needed.
 
 ## Resources
@@ -505,16 +518,19 @@ Always call `.dispose()` on geometries, materials, textures, and renderers when 
 This skill includes bundled resources to accelerate Three.js development:
 
 ### references/
+
 - `api_reference.md`: Quick API reference for core classes (Scene, Camera, Renderer, etc.)
 - `materials_guide.md`: Comprehensive material types and properties
 - `optimization_checklist.md`: Performance optimization strategies
 
 ### scripts/
+
 - `setup_scene.py`: Generate boilerplate Three.js scene setup code
 - `texture_optimizer.py`: Batch optimize textures for web (resize, compress)
 - `gltf_validator.py`: Validate glTF models before use
 
 ### assets/
+
 - `starter_scene/`: Complete HTML/JS boilerplate project
 - `shaders/`: Custom GLSL shader examples (vertex, fragment)
 - `hdri/`: Environment maps for PBR lighting
@@ -523,11 +539,12 @@ This skill includes bundled resources to accelerate Three.js development:
 ## Advanced Topics
 
 ### Custom Shaders (GLSL)
+
 ```javascript
 const material = new THREE.ShaderMaterial({
   uniforms: {
     uTime: { value: 0.0 },
-    uColor: { value: new THREE.Color(0x00ff00) }
+    uColor: { value: new THREE.Color(0x00ff00) },
   },
   vertexShader: `
     varying vec2 vUv;
@@ -543,11 +560,12 @@ const material = new THREE.ShaderMaterial({
     void main() {
       gl_FragColor = vec4(uColor * vUv.x, 1.0);
     }
-  `
+  `,
 });
 ```
 
 ### Render Targets (Render-to-Texture)
+
 ```javascript
 const renderTarget = new THREE.WebGLRenderTarget(512, 512);
 
@@ -558,16 +576,18 @@ renderer.setRenderTarget(null);
 
 // Use texture
 const material = new THREE.MeshBasicMaterial({
-  map: renderTarget.texture
+  map: renderTarget.texture,
 });
 ```
 
 ### GPU Computation (GPGPU)
+
 Use `GPUComputationRenderer` for particle simulations, cloth physics, etc.
 
 ## When to Use This Skill
 
 Use this skill when:
+
 - Building interactive 3D web experiences
 - Creating product configurators or visualizers
 - Implementing WebGL/WebGPU rendering

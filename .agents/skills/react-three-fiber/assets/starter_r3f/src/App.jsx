@@ -1,4 +1,4 @@
-import Experience from './Experience'
+import Experience from "./Experience";
 
 export default function App() {
   return (
@@ -10,5 +10,5 @@ export default function App() {
       </div>
       <Experience />
     </>
-  )
+  );
 }

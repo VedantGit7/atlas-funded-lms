@@ -10,6 +10,7 @@ description: State machine-based vector animation with runtime interactivity and
 Rive is a state machine-based animation platform that enables designers to create interactive vector animations with complex logic and runtime interactivity. Unlike timeline-only animation tools (like Lottie), Rive supports state machines, input handling, and two-way data binding between application code and animations.
 
 **Key Features**:
+
 - State machine system for complex interactive logic
 - ViewModel API for two-way data binding
 - Input handling (boolean, number, trigger inputs)
@@ -19,6 +20,7 @@ Rive is a state machine-based animation platform that enables designers to creat
 - Small file sizes with vector graphics
 
 **When to Use This Skill**:
+
 - Creating UI animations with complex state transitions
 - Building interactive animated components (buttons, toggles, loaders)
 - Implementing game-like UI with state-driven animations
@@ -27,6 +29,7 @@ Rive is a state machine-based animation platform that enables designers to creat
 - Working with designer-created animations requiring runtime control
 
 **Alternatives**:
+
 - **Lottie** (lottie-animations): For simpler timeline-based animations without state machines
 - **Framer Motion** (motion-framer): For code-first React animations with spring physics
 - **GSAP** (gsap-scrolltrigger): For timeline-based web animations with precise control
@@ -36,6 +39,7 @@ Rive is a state machine-based animation platform that enables designers to creat
 ### 1. State Machines
 
 State machines define animation behavior with states and transitions:
+
 - **States**: Different animation states (e.g., idle, hover, pressed)
 - **Inputs**: Variables that control transitions (boolean, number, trigger)
 - **Transitions**: Rules for moving between states
@@ -44,6 +48,7 @@ State machines define animation behavior with states and transitions:
 ### 2. Inputs
 
 Three input types control state machine behavior:
+
 - **Boolean**: On/off states (e.g., isHovered, isActive)
 - **Number**: Numeric values (e.g., progress, volume)
 - **Trigger**: One-time events (e.g., click, submit)
@@ -51,6 +56,7 @@ Three input types control state machine behavior:
 ### 3. ViewModels
 
 Data binding system for dynamic properties:
+
 - **String Properties**: Text content (e.g., username, title)
 - **Number Properties**: Numeric data (e.g., stock price, score)
 - **Color Properties**: Dynamic colors (hex values)
@@ -60,6 +66,7 @@ Data binding system for dynamic properties:
 ### 4. Events
 
 Custom events emitted from animations:
+
 - **General Events**: Custom named events
 - **Event Properties**: Data attached to events
 - **Event Listeners**: React hooks to handle events
@@ -78,7 +85,7 @@ npm install rive-react
 ```
 
 ```jsx
-import Rive from 'rive-react';
+import Rive from "rive-react";
 
 export default function SimpleAnimation() {
   return (
@@ -87,13 +94,14 @@ export default function SimpleAnimation() {
       artboard="Main"
       animations="idle"
       layout={{ fit: "contain", alignment: "center" }}
-      style={{ width: '400px', height: '400px' }}
+      style={{ width: "400px", height: "400px" }}
     />
   );
 }
 ```
 
 **Key Points**:
+
 - `src`: Path to .riv file
 - `artboard`: Which artboard to display
 - `animations`: Which animation timeline to play
@@ -106,44 +114,35 @@ export default function SimpleAnimation() {
 **Implementation**:
 
 ```jsx
-import { useRive, useStateMachineInput } from 'rive-react';
+import { useRive, useStateMachineInput } from "rive-react";
 
 export default function InteractiveButton() {
   const { rive, RiveComponent } = useRive({
-    src: 'button.riv',
-    stateMachines: 'Button State Machine',
+    src: "button.riv",
+    stateMachines: "Button State Machine",
     autoplay: true,
   });
 
   // Get state machine inputs
-  const hoverInput = useStateMachineInput(
-    rive,
-    'Button State Machine',
-    'isHovered',
-    false
-  );
+  const hoverInput = useStateMachineInput(rive, "Button State Machine", "isHovered", false);
 
-  const clickInput = useStateMachineInput(
-    rive,
-    'Button State Machine',
-    'isClicked',
-    false
-  );
+  const clickInput = useStateMachineInput(rive, "Button State Machine", "isClicked", false);
 
   return (
     <div
       onMouseEnter={() => hoverInput && (hoverInput.value = true)}
       onMouseLeave={() => hoverInput && (hoverInput.value = false)}
       onClick={() => clickInput && clickInput.fire()} // Trigger input
-      style={{ cursor: 'pointer' }}
+      style={{ cursor: "pointer" }}
     >
-      <RiveComponent style={{ width: '200px', height: '100px' }} />
+      <RiveComponent style={{ width: "200px", height: "100px" }} />
     </div>
   );
 }
 ```
 
 **Input Types**:
+
 - Boolean: `input.value = true/false`
 - Number: `input.value = 50`
 - Trigger: `input.fire()`
@@ -155,36 +154,35 @@ export default function InteractiveButton() {
 **Implementation**:
 
 ```jsx
-import { useRive, useViewModel, useViewModelInstance,
-         useViewModelInstanceString, useViewModelInstanceNumber } from 'rive-react';
-import { useEffect, useState } from 'react';
+import {
+  useRive,
+  useViewModel,
+  useViewModelInstance,
+  useViewModelInstanceString,
+  useViewModelInstanceNumber,
+} from "rive-react";
+import { useEffect, useState } from "react";
 
 export default function Dashboard() {
   const [stockPrice, setStockPrice] = useState(150.0);
 
   const { rive, RiveComponent } = useRive({
-    src: 'dashboard.riv',
+    src: "dashboard.riv",
     autoplay: true,
     autoBind: false, // Manual binding for ViewModels
   });
 
   // Get ViewModel and instance
-  const viewModel = useViewModel(rive, { name: 'Dashboard' });
+  const viewModel = useViewModel(rive, { name: "Dashboard" });
   const viewModelInstance = useViewModelInstance(viewModel, { rive });
 
   // Bind properties
-  const { setValue: setTitle } = useViewModelInstanceString(
-    'title',
-    viewModelInstance
-  );
+  const { setValue: setTitle } = useViewModelInstanceString("title", viewModelInstance);
 
-  const { setValue: setPrice } = useViewModelInstanceNumber(
-    'stockPrice',
-    viewModelInstance
-  );
+  const { setValue: setPrice } = useViewModelInstanceNumber("stockPrice", viewModelInstance);
 
   useEffect(() => {
-    if (setTitle) setTitle('Stock Dashboard');
+    if (setTitle) setTitle("Stock Dashboard");
   }, [setTitle]);
 
   useEffect(() => {
@@ -200,11 +198,12 @@ export default function Dashboard() {
     return () => clearInterval(interval);
   }, []);
 
-  return <RiveComponent style={{ width: '800px', height: '600px' }} />;
+  return <RiveComponent style={{ width: "800px", height: "600px" }} />;
 }
 ```
 
 **ViewModel Property Hooks**:
+
 - `useViewModelInstanceString` - Text properties
 - `useViewModelInstanceNumber` - Numeric properties
 - `useViewModelInstanceColor` - Color properties (hex)
@@ -218,13 +217,13 @@ export default function Dashboard() {
 **Implementation**:
 
 ```jsx
-import { useRive, EventType, RiveEventType } from 'rive-react';
-import { useEffect } from 'react';
+import { useRive, EventType, RiveEventType } from "rive-react";
+import { useEffect } from "react";
 
 export default function InteractiveRating() {
   const { rive, RiveComponent } = useRive({
-    src: 'rating.riv',
-    stateMachines: 'State Machine 1',
+    src: "rating.riv",
+    stateMachines: "State Machine 1",
     autoplay: true,
     automaticallyHandleEvents: true,
   });
@@ -236,7 +235,7 @@ export default function InteractiveRating() {
       const eventData = event.data;
 
       if (eventData.type === RiveEventType.General) {
-        console.log('Event:', eventData.name);
+        console.log("Event:", eventData.name);
 
         // Access event properties
         const rating = eventData.properties.rating;
@@ -255,7 +254,7 @@ export default function InteractiveRating() {
     };
   }, [rive]);
 
-  return <RiveComponent style={{ width: '400px', height: '300px' }} />;
+  return <RiveComponent style={{ width: "400px", height: "300px" }} />;
 }
 ```
 
@@ -266,28 +265,28 @@ export default function InteractiveRating() {
 **Implementation**:
 
 ```jsx
-import { useRiveFile, useRive } from 'rive-react';
+import { useRiveFile, useRive } from "rive-react";
 
 export default function PreloadedAnimation() {
   const { riveFile, status } = useRiveFile({
-    src: 'large-animation.riv',
+    src: "large-animation.riv",
   });
 
   const { RiveComponent } = useRive({
     riveFile: riveFile,
-    artboard: 'Main',
+    artboard: "Main",
     autoplay: true,
   });
 
-  if (status === 'loading') {
+  if (status === "loading") {
     return <div>Loading animation...</div>;
   }
 
-  if (status === 'failed') {
+  if (status === "failed") {
     return <div>Failed to load animation</div>;
   }
 
-  return <RiveComponent style={{ width: '600px', height: '400px' }} />;
+  return <RiveComponent style={{ width: "600px", height: "400px" }} />;
 }
 ```
 
@@ -298,13 +297,17 @@ export default function PreloadedAnimation() {
 **Implementation**:
 
 ```jsx
-import { useRive, useViewModel, useViewModelInstance,
-         useViewModelInstanceTrigger } from 'rive-react';
-import { useImperativeHandle, forwardRef } from 'react';
+import {
+  useRive,
+  useViewModel,
+  useViewModelInstance,
+  useViewModelInstanceTrigger,
+} from "rive-react";
+import { useImperativeHandle, forwardRef } from "react";
 
 const AnimatedComponent = forwardRef((props, ref) => {
   const { rive, RiveComponent } = useRive({
-    src: 'logo.riv',
+    src: "logo.riv",
     autoplay: true,
     autoBind: false,
   });
@@ -312,10 +315,7 @@ const AnimatedComponent = forwardRef((props, ref) => {
   const viewModel = useViewModel(rive, { useDefault: true });
   const viewModelInstance = useViewModelInstance(viewModel, { rive });
 
-  const { trigger: spinTrigger } = useViewModelInstanceTrigger(
-    'triggerSpin',
-    viewModelInstance
-  );
+  const { trigger: spinTrigger } = useViewModelInstanceTrigger("triggerSpin", viewModelInstance);
 
   // Expose methods to parent
   useImperativeHandle(ref, () => ({
@@ -324,7 +324,7 @@ const AnimatedComponent = forwardRef((props, ref) => {
     play: () => rive && rive.play(),
   }));
 
-  return <RiveComponent style={{ width: '200px', height: '200px' }} />;
+  return <RiveComponent style={{ width: "200px", height: "200px" }} />;
 });
 
 export default function App() {
@@ -347,14 +347,19 @@ export default function App() {
 **Implementation**:
 
 ```jsx
-import { useRive, useViewModel, useViewModelInstance,
-         useViewModelInstanceString, useViewModelInstanceNumber,
-         useViewModelInstanceColor } from 'rive-react';
-import { useEffect } from 'react';
+import {
+  useRive,
+  useViewModel,
+  useViewModelInstance,
+  useViewModelInstanceString,
+  useViewModelInstanceNumber,
+  useViewModelInstanceColor,
+} from "rive-react";
+import { useEffect } from "react";
 
 export default function UserProfile({ user }) {
   const { rive, RiveComponent } = useRive({
-    src: 'profile.riv',
+    src: "profile.riv",
     autoplay: true,
     autoBind: false,
   });
@@ -363,9 +368,9 @@ export default function UserProfile({ user }) {
   const viewModelInstance = useViewModelInstance(viewModel, { rive });
 
   // Bind all properties
-  const { setValue: setName } = useViewModelInstanceString('name', viewModelInstance);
-  const { setValue: setScore } = useViewModelInstanceNumber('score', viewModelInstance);
-  const { setValue: setColor } = useViewModelInstanceColor('avatarColor', viewModelInstance);
+  const { setValue: setName } = useViewModelInstanceString("name", viewModelInstance);
+  const { setValue: setScore } = useViewModelInstanceNumber("score", viewModelInstance);
+  const { setValue: setColor } = useViewModelInstanceColor("avatarColor", viewModelInstance);
 
   useEffect(() => {
     if (user && setName && setScore && setColor) {
@@ -375,7 +380,7 @@ export default function UserProfile({ user }) {
     }
   }, [user, setName, setScore, setColor]);
 
-  return <RiveComponent style={{ width: '300px', height: '300px' }} />;
+  return <RiveComponent style={{ width: "300px", height: "300px" }} />;
 }
 ```
 
@@ -386,8 +391,8 @@ export default function UserProfile({ user }) {
 Animate container while Rive handles interactive content:
 
 ```jsx
-import { motion } from 'framer-motion';
-import Rive from 'rive-react';
+import { motion } from "framer-motion";
+import Rive from "rive-react";
 
 export default function AnimatedCard() {
   return (
@@ -399,7 +404,7 @@ export default function AnimatedCard() {
       <Rive
         src="card.riv"
         stateMachines="Card State Machine"
-        style={{ width: '300px', height: '400px' }}
+        style={{ width: "300px", height: "400px" }}
       />
     </motion.div>
   );
@@ -411,36 +416,36 @@ export default function AnimatedCard() {
 Trigger Rive animations on scroll:
 
 ```jsx
-import { useRive, useStateMachineInput } from 'rive-react';
-import { useEffect, useRef } from 'react';
-import gsap from 'gsap';
-import ScrollTrigger from 'gsap/ScrollTrigger';
+import { useRive, useStateMachineInput } from "rive-react";
+import { useEffect, useRef } from "react";
+import gsap from "gsap";
+import ScrollTrigger from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
 export default function ScrollRive() {
   const containerRef = useRef();
   const { rive, RiveComponent } = useRive({
-    src: 'scroll-animation.riv',
-    stateMachines: 'State Machine 1',
+    src: "scroll-animation.riv",
+    stateMachines: "State Machine 1",
     autoplay: true,
   });
 
-  const trigger = useStateMachineInput(rive, 'State Machine 1', 'trigger');
+  const trigger = useStateMachineInput(rive, "State Machine 1", "trigger");
 
   useEffect(() => {
     if (!trigger) return;
 
     ScrollTrigger.create({
       trigger: containerRef.current,
-      start: 'top center',
+      start: "top center",
       onEnter: () => trigger.fire(),
     });
   }, [trigger]);
 
   return (
     <div ref={containerRef}>
-      <RiveComponent style={{ width: '100%', height: '600px' }} />
+      <RiveComponent style={{ width: "100%", height: "600px" }} />
     </div>
   );
 }
@@ -460,6 +465,7 @@ export default function ScrollRive() {
 ### 2. Optimize Rive Files
 
 **In Rive Editor**:
+
 - Keep artboards under 2MB
 - Use vector graphics (avoid raster images when possible)
 - Minimize number of bones in skeletal animations
@@ -468,7 +474,7 @@ export default function ScrollRive() {
 ### 3. Preload Critical Animations
 
 ```jsx
-const { riveFile } = useRiveFile({ src: 'critical.riv' });
+const { riveFile } = useRiveFile({ src: "critical.riv" });
 // Preload during app initialization
 ```
 
@@ -488,12 +494,13 @@ const { riveFile } = useRiveFile({ src: 'critical.riv' });
 **Problem**: `useStateMachineInput` returns null
 
 **Solution**:
+
 ```jsx
 // ❌ Wrong: Incorrect input name
-const input = useStateMachineInput(rive, 'State Machine', 'wrongName');
+const input = useStateMachineInput(rive, "State Machine", "wrongName");
 
 // ✅ Correct: Match exact name from Rive editor
-const input = useStateMachineInput(rive, 'State Machine', 'isHovered');
+const input = useStateMachineInput(rive, "State Machine", "isHovered");
 
 // Always check if input exists before using
 if (input) {
@@ -506,17 +513,18 @@ if (input) {
 **Problem**: ViewModel property doesn't update animation
 
 **Solution**:
+
 ```jsx
 // ❌ Wrong: autoBind enabled
 const { rive } = useRive({
-  src: 'dashboard.riv',
+  src: "dashboard.riv",
   autoplay: true,
   // autoBind: true (default)
 });
 
 // ✅ Correct: Disable autoBind for ViewModels
 const { rive } = useRive({
-  src: 'dashboard.riv',
+  src: "dashboard.riv",
   autoplay: true,
   autoBind: false, // Required for manual ViewModel control
 });
@@ -527,18 +535,19 @@ const { rive } = useRive({
 **Problem**: Rive events not triggering callback
 
 **Solution**:
+
 ```jsx
 // ❌ Wrong: Missing automaticallyHandleEvents
 const { rive } = useRive({
-  src: 'rating.riv',
-  stateMachines: 'State Machine 1',
+  src: "rating.riv",
+  stateMachines: "State Machine 1",
   autoplay: true,
 });
 
 // ✅ Correct: Enable event handling
 const { rive } = useRive({
-  src: 'rating.riv',
-  stateMachines: 'State Machine 1',
+  src: "rating.riv",
+  stateMachines: "State Machine 1",
   autoplay: true,
   automaticallyHandleEvents: true, // Required for events
 });
@@ -547,15 +556,18 @@ const { rive } = useRive({
 ## Resources
 
 ### Official Documentation
+
 - **Rive Docs**: https://rive.app/docs
 - **React Rive GitHub**: https://github.com/rive-app/rive-react
 - **Rive Community**: https://rive.app/community
 
 ### Rive Editor
+
 - **Web Editor**: https://rive.app/community
 - **Desktop App**: Available for macOS, Windows
 
 ### Learning Resources
+
 - **Tutorials**: https://rive.app/learn
 - **Examples**: https://rive.app/community/files
 - **State Machine Guide**: https://rive.app/docs/state-machine
@@ -570,10 +582,12 @@ const { rive } = useRive({
 ## Scripts
 
 This skill includes utility scripts:
+
 - `component_generator.py` - Generate Rive React component boilerplate
 - `viewmodel_builder.py` - Build ViewModel property bindings
 
 Run scripts from the skill directory:
+
 ```bash
 ./scripts/component_generator.py
 ./scripts/viewmodel_builder.py
@@ -582,5 +596,6 @@ Run scripts from the skill directory:
 ## Assets
 
 Starter templates and examples:
+
 - `starter_rive/` - Complete React + Rive template
 - `examples/` - Real-world integration patterns

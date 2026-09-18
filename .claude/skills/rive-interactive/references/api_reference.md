@@ -19,6 +19,7 @@ const { rive, RiveComponent } = useRive(options);
 ```
 
 **Options**:
+
 - `src` (string): Path to .riv file
 - `riveFile` (File): Preloaded Rive file
 - `artboard` (string): Artboard name
@@ -40,6 +41,7 @@ const input = useStateMachineInput(rive, stateMachineName, inputName, initialVal
 ```
 
 **Input Types**:
+
 - Boolean: `input.value = true/false`
 - Number: `input.value = 50`
 - Trigger: `input.fire()`
@@ -49,7 +51,7 @@ const input = useStateMachineInput(rive, stateMachineName, inputName, initialVal
 Get ViewModel reference.
 
 ```typescript
-const viewModel = useViewModel(rive, { name: 'ViewModelName' });
+const viewModel = useViewModel(rive, { name: "ViewModelName" });
 // Or use default ViewModel
 const viewModel = useViewModel(rive, { useDefault: true });
 ```
@@ -63,7 +65,7 @@ Get or create ViewModel instance.
 const instance = useViewModelInstance(viewModel, { rive });
 
 // Get named instance
-const instance = useViewModelInstance(viewModel, { name: 'Instance1' });
+const instance = useViewModelInstance(viewModel, { name: "Instance1" });
 
 // Create new instance
 const instance = useViewModelInstance(viewModel, { useNew: true, rive });
@@ -74,7 +76,7 @@ const instance = useViewModelInstance(viewModel, { useNew: true, rive });
 Bind string property.
 
 ```typescript
-const { value, setValue } = useViewModelInstanceString('propertyName', instance);
+const { value, setValue } = useViewModelInstanceString("propertyName", instance);
 ```
 
 ### useViewModelInstanceNumber
@@ -82,7 +84,7 @@ const { value, setValue } = useViewModelInstanceString('propertyName', instance)
 Bind number property.
 
 ```typescript
-const { value, setValue } = useViewModelInstanceNumber('propertyName', instance);
+const { value, setValue } = useViewModelInstanceNumber("propertyName", instance);
 ```
 
 ### useViewModelInstanceColor
@@ -90,7 +92,7 @@ const { value, setValue } = useViewModelInstanceNumber('propertyName', instance)
 Bind color property (hex number).
 
 ```typescript
-const { value, setValue } = useViewModelInstanceColor('propertyName', instance);
+const { value, setValue } = useViewModelInstanceColor("propertyName", instance);
 
 // Set color
 setValue(0xff6b6b); // Hex number, no #
@@ -101,7 +103,7 @@ setValue(0xff6b6b); // Hex number, no #
 Bind enum property.
 
 ```typescript
-const { value, setValue } = useViewModelInstanceEnum('propertyName', instance);
+const { value, setValue } = useViewModelInstanceEnum("propertyName", instance);
 ```
 
 ### useViewModelInstanceTrigger
@@ -110,12 +112,12 @@ Fire or listen to trigger events.
 
 ```typescript
 // Fire trigger
-const { trigger } = useViewModelInstanceTrigger('triggerName', instance);
+const { trigger } = useViewModelInstanceTrigger("triggerName", instance);
 trigger();
 
 // Listen to trigger
-useViewModelInstanceTrigger('triggerName', instance, {
-  onTrigger: () => console.log('Triggered!')
+useViewModelInstanceTrigger("triggerName", instance, {
+  onTrigger: () => console.log("Triggered!"),
 });
 ```
 
@@ -124,7 +126,7 @@ useViewModelInstanceTrigger('triggerName', instance, {
 Preload Rive file.
 
 ```typescript
-const { riveFile, status } = useRiveFile({ src: 'animation.riv' });
+const { riveFile, status } = useRiveFile({ src: "animation.riv" });
 // status: 'loading' | 'success' | 'failed'
 ```
 
@@ -135,7 +137,7 @@ const { riveFile, status } = useRiveFile({ src: 'animation.riv' });
 Declarative component for simple use cases.
 
 ```jsx
-import Rive from 'rive-react';
+import Rive from "rive-react";
 
 <Rive
   src="animation.riv"
@@ -146,8 +148,8 @@ import Rive from 'rive-react';
   useOffscreenRenderer={true}
   shouldResizeCanvasToContainer={true}
   automaticallyHandleEvents={false}
-  style={{ width: '400px', height: '400px' }}
-/>
+  style={{ width: "400px", height: "400px" }}
+/>;
 ```
 
 ### RiveComponent (from useRive)
@@ -155,9 +157,9 @@ import Rive from 'rive-react';
 Component returned by useRive hook.
 
 ```jsx
-const { RiveComponent } = useRive({ src: 'animation.riv' });
+const { RiveComponent } = useRive({ src: "animation.riv" });
 
-<RiveComponent style={{ width: '400px', height: '400px' }} />
+<RiveComponent style={{ width: "400px", height: "400px" }} />;
 ```
 
 ## Events
@@ -165,24 +167,24 @@ const { RiveComponent } = useRive({ src: 'animation.riv' });
 ### EventType
 
 ```typescript
-import { EventType } from 'rive-react';
+import { EventType } from "rive-react";
 
-EventType.Load          // Rive file loaded
-EventType.Play          // Animation started
-EventType.Pause         // Animation paused
-EventType.Stop          // Animation stopped
-EventType.Loop          // Animation looped
-EventType.Draw          // Frame drawn
-EventType.RiveEvent     // Custom Rive event
+EventType.Load; // Rive file loaded
+EventType.Play; // Animation started
+EventType.Pause; // Animation paused
+EventType.Stop; // Animation stopped
+EventType.Loop; // Animation looped
+EventType.Draw; // Frame drawn
+EventType.RiveEvent; // Custom Rive event
 ```
 
 ### RiveEventType
 
 ```typescript
-import { RiveEventType } from 'rive-react';
+import { RiveEventType } from "rive-react";
 
-RiveEventType.General   // General custom event
-RiveEventType.OpenUrl   // Open URL event
+RiveEventType.General; // General custom event
+RiveEventType.OpenUrl; // Open URL event
 ```
 
 ### Event Listening
@@ -195,8 +197,8 @@ useEffect(() => {
     const eventData = event.data;
 
     if (eventData.type === RiveEventType.General) {
-      console.log('Event:', eventData.name);
-      console.log('Properties:', eventData.properties);
+      console.log("Event:", eventData.name);
+      console.log("Properties:", eventData.properties);
     }
   };
 
@@ -212,9 +214,17 @@ useEffect(() => {
 
 ```typescript
 interface Layout {
-  fit?: 'contain' | 'cover' | 'fill' | 'fitWidth' | 'fitHeight' | 'none' | 'scaleDown';
-  alignment?: 'center' | 'topLeft' | 'topCenter' | 'topRight' | 'centerLeft' |
-              'centerRight' | 'bottomLeft' | 'bottomCenter' | 'bottomRight';
+  fit?: "contain" | "cover" | "fill" | "fitWidth" | "fitHeight" | "none" | "scaleDown";
+  alignment?:
+    | "center"
+    | "topLeft"
+    | "topCenter"
+    | "topRight"
+    | "centerLeft"
+    | "centerRight"
+    | "bottomLeft"
+    | "bottomCenter"
+    | "bottomRight";
 }
 ```
 
@@ -223,12 +233,12 @@ interface Layout {
 From `useRive` hook:
 
 ```typescript
-rive.play()                          // Play animation
-rive.pause()                         // Pause animation
-rive.stop()                          // Stop animation
-rive.reset()                         // Reset animation
-rive.cleanup()                       // Cleanup resources
-rive.resizeDrawingSurfaceToCanvas()  // Resize canvas
+rive.play(); // Play animation
+rive.pause(); // Pause animation
+rive.stop(); // Stop animation
+rive.reset(); // Reset animation
+rive.cleanup(); // Cleanup resources
+rive.resizeDrawingSurfaceToCanvas(); // Resize canvas
 ```
 
 ## TypeScript Support
@@ -262,24 +272,24 @@ const MyComponent: React.FC<Props> = ({ animationSrc }) => {
 ### Dynamic Animation Switching
 
 ```jsx
-const [animation, setAnimation] = useState('idle');
+const [animation, setAnimation] = useState("idle");
 
 const { RiveComponent } = useRive({
-  src: 'character.riv',
+  src: "character.riv",
   animations: animation,
   autoplay: true,
 });
 
 // Change animation
-<button onClick={() => setAnimation('walk')}>Walk</button>
+<button onClick={() => setAnimation("walk")}>Walk</button>;
 ```
 
 ### Multiple State Machines
 
 ```jsx
 const { rive, RiveComponent } = useRive({
-  src: 'animation.riv',
-  stateMachines: ['State Machine 1', 'State Machine 2'],
+  src: "animation.riv",
+  stateMachines: ["State Machine 1", "State Machine 2"],
   autoplay: true,
 });
 ```
@@ -288,18 +298,18 @@ const { rive, RiveComponent } = useRive({
 
 ```jsx
 const layout = {
-  fit: window.innerWidth < 768 ? 'fitWidth' : 'contain',
-  alignment: 'center'
+  fit: window.innerWidth < 768 ? "fitWidth" : "contain",
+  alignment: "center",
 };
 
-<Rive src="animation.riv" layout={layout} />
+<Rive src="animation.riv" layout={layout} />;
 ```
 
 ## Error Handling
 
 ```jsx
 const { rive, RiveComponent } = useRive({
-  src: 'animation.riv',
+  src: "animation.riv",
   autoplay: true,
 });
 
@@ -313,16 +323,19 @@ return <RiveComponent />;
 ## Performance Tips
 
 1. **Use Off-Screen Renderer**:
+
    ```jsx
    <Rive useOffscreenRenderer={true} />
    ```
 
 2. **Preload Files**:
+
    ```jsx
-   const { riveFile } = useRiveFile({ src: 'animation.riv' });
+   const { riveFile } = useRiveFile({ src: "animation.riv" });
    ```
 
 3. **Disable Auto-Resize**:
+
    ```jsx
    <Rive shouldResizeCanvasToContainer={false} />
    ```

@@ -39,23 +39,24 @@ The `<a-scene>` element represents the 3D scene and contains all entities.
   vr-mode-ui="enabled: true"
   loading-screen="enabled: true"
   renderer="antialias: true; colorManagement: true"
-  webxr="requiredFeatures: hit-test; optionalFeatures: dom-overlay">
+  webxr="requiredFeatures: hit-test; optionalFeatures: dom-overlay"
+>
 </a-scene>
 ```
 
 ### Properties
 
-| Property | Type | Default | Description |
-|----------|------|---------|-------------|
-| `background` | color | - | Scene background color |
-| `fog` | object | - | Fog settings |
-| `stats` | boolean | false | Show performance stats |
-| `inspector` | boolean | false | Enable inspector (Ctrl+Alt+I) |
-| `embedded` | boolean | false | Embed in page (no fullscreen) |
-| `vr-mode-ui` | object | - | VR mode button config |
-| `loading-screen` | object | - | Loading screen config |
-| `renderer` | object | - | Three.js renderer settings |
-| `webxr` | object | - | WebXR configuration |
+| Property         | Type    | Default | Description                   |
+| ---------------- | ------- | ------- | ----------------------------- |
+| `background`     | color   | -       | Scene background color        |
+| `fog`            | object  | -       | Fog settings                  |
+| `stats`          | boolean | false   | Show performance stats        |
+| `inspector`      | boolean | false   | Enable inspector (Ctrl+Alt+I) |
+| `embedded`       | boolean | false   | Embed in page (no fullscreen) |
+| `vr-mode-ui`     | object  | -       | VR mode button config         |
+| `loading-screen` | object  | -       | Loading screen config         |
+| `renderer`       | object  | -       | Three.js renderer settings    |
+| `webxr`          | object  | -       | WebXR configuration           |
 
 ### Events
 
@@ -68,20 +69,20 @@ The `<a-scene>` element represents the 3D scene and contains all entities.
 ### JavaScript API
 
 ```javascript
-const scene = document.querySelector('a-scene');
+const scene = document.querySelector("a-scene");
 
 // Check if scene is loaded
 if (scene.hasLoaded) {
-  console.log('Scene ready');
+  console.log("Scene ready");
 }
 
 // Check VR/AR mode
-if (scene.is('vr-mode')) {
-  console.log('In VR mode');
+if (scene.is("vr-mode")) {
+  console.log("In VR mode");
 }
 
-if (scene.is('ar-mode')) {
-  console.log('In AR mode');
+if (scene.is("ar-mode")) {
+  console.log("In AR mode");
 }
 
 // Enter/exit VR
@@ -119,50 +120,51 @@ The `<a-entity>` is the base building block. All objects are entities with attac
   rotation="0 45 0"
   scale="1 1 1"
   visible="true"
-  mixin="baseEntity">
+  mixin="baseEntity"
+>
 </a-entity>
 ```
 
 ### Core Attributes
 
-| Attribute | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `id` | string | - | Unique identifier |
-| `class` | string | - | CSS-like class names |
-| `mixin` | string | - | Space-separated mixin IDs |
-| `visible` | boolean | true | Visibility |
+| Attribute | Type    | Default | Description               |
+| --------- | ------- | ------- | ------------------------- |
+| `id`      | string  | -       | Unique identifier         |
+| `class`   | string  | -       | CSS-like class names      |
+| `mixin`   | string  | -       | Space-separated mixin IDs |
+| `visible` | boolean | true    | Visibility                |
 
 ### JavaScript API
 
 ```javascript
-const entity = document.querySelector('#myEntity');
+const entity = document.querySelector("#myEntity");
 
 // Set attribute
-entity.setAttribute('position', '1 2 3');
-entity.setAttribute('position', {x: 1, y: 2, z: 3});
+entity.setAttribute("position", "1 2 3");
+entity.setAttribute("position", { x: 1, y: 2, z: 3 });
 
 // Get attribute
-const position = entity.getAttribute('position');
+const position = entity.getAttribute("position");
 console.log(position.x, position.y, position.z);
 
 // Add/remove class
-entity.classList.add('interactive');
-entity.classList.remove('interactive');
+entity.classList.add("interactive");
+entity.classList.remove("interactive");
 
 // Component methods
-entity.setAttribute('my-component', 'value: 5');
-entity.removeAttribute('my-component');
-entity.hasAttribute('my-component');
+entity.setAttribute("my-component", "value: 5");
+entity.removeAttribute("my-component");
+entity.hasAttribute("my-component");
 
 // States
-entity.addState('selected');
-entity.removeState('selected');
-entity.is('selected'); // Check state
+entity.addState("selected");
+entity.removeState("selected");
+entity.is("selected"); // Check state
 
 // Events
-entity.emit('hit', {damage: 10});
-entity.addEventListener('hit', (evt) => {
-  console.log('Damage:', evt.detail.damage);
+entity.emit("hit", { damage: 10 });
+entity.addEventListener("hit", (evt) => {
+  console.log("Damage:", evt.detail.damage);
 });
 
 // Access Three.js object
@@ -195,33 +197,31 @@ Defines the view into the 3D scene.
 #### Properties
 
 ```html
-<a-entity camera="
+<a-entity
+  camera="
   active: true;
   far: 10000;
   fov: 80;
   near: 0.1;
   spectator: false;
   zoom: 1
-"></a-entity>
+"
+></a-entity>
 ```
 
-| Property | Type | Default | Description |
-|----------|------|---------|-------------|
-| `active` | boolean | true | Whether camera is active |
-| `far` | number | 10000 | Far clipping plane |
-| `fov` | number | 80 | Field of view (degrees) |
-| `near` | number | 0.005 | Near clipping plane |
-| `spectator` | boolean | false | Spectator mode (desktop only) |
-| `zoom` | number | 1 | Zoom level |
+| Property    | Type    | Default | Description                   |
+| ----------- | ------- | ------- | ----------------------------- |
+| `active`    | boolean | true    | Whether camera is active      |
+| `far`       | number  | 10000   | Far clipping plane            |
+| `fov`       | number  | 80      | Field of view (degrees)       |
+| `near`      | number  | 0.005   | Near clipping plane           |
+| `spectator` | boolean | false   | Spectator mode (desktop only) |
+| `zoom`      | number  | 1       | Zoom level                    |
 
 #### Example
 
 ```html
-<a-entity
-  camera="fov: 60; near: 0.1; far: 1000"
-  look-controls
-  wasd-controls
-  position="0 1.6 0">
+<a-entity camera="fov: 60; near: 0.1; far: 1000" look-controls wasd-controls position="0 1.6 0">
 </a-entity>
 ```
 
@@ -232,64 +232,82 @@ Defines the shape of an entity.
 #### Properties
 
 ```html
-<a-entity geometry="
+<a-entity
+  geometry="
   primitive: box;
   width: 1;
   height: 1;
   depth: 1
-"></a-entity>
+"
+></a-entity>
 ```
 
 #### Primitives
 
 **Box**
+
 ```html
 <a-entity geometry="primitive: box; width: 1; height: 1; depth: 1"></a-entity>
 ```
 
 **Sphere**
+
 ```html
 <a-entity geometry="primitive: sphere; radius: 1; segmentsWidth: 32; segmentsHeight: 32"></a-entity>
 ```
 
 **Plane**
+
 ```html
 <a-entity geometry="primitive: plane; width: 1; height: 1"></a-entity>
 ```
 
 **Cylinder**
+
 ```html
 <a-entity geometry="primitive: cylinder; radius: 0.5; height: 1; segmentsRadial: 36"></a-entity>
 ```
 
 **Cone**
+
 ```html
 <a-entity geometry="primitive: cone; radiusBottom: 0.5; radiusTop: 0; height: 1"></a-entity>
 ```
 
 **Circle**
+
 ```html
-<a-entity geometry="primitive: circle; radius: 1; segments: 32; thetaStart: 0; thetaLength: 360"></a-entity>
+<a-entity
+  geometry="primitive: circle; radius: 1; segments: 32; thetaStart: 0; thetaLength: 360"
+></a-entity>
 ```
 
 **Ring**
+
 ```html
 <a-entity geometry="primitive: ring; radiusInner: 0.5; radiusOuter: 1"></a-entity>
 ```
 
 **Torus**
+
 ```html
-<a-entity geometry="primitive: torus; radius: 1; radiusTubular: 0.2; segmentsRadial: 36; segmentsTubular: 32"></a-entity>
+<a-entity
+  geometry="primitive: torus; radius: 1; radiusTubular: 0.2; segmentsRadial: 36; segmentsTubular: 32"
+></a-entity>
 ```
 
 **Torus Knot**
+
 ```html
 <a-entity geometry="primitive: torusKnot; radius: 1; radiusTubular: 0.2; p: 2; q: 3"></a-entity>
 ```
 
 **Triangle**
+
 ```html
-<a-entity geometry="primitive: triangle; vertexA: 0 0.5 0; vertexB: -0.5 -0.5 0; vertexC: 0.5 -0.5 0"></a-entity>
+<a-entity
+  geometry="primitive: triangle; vertexA: 0 0.5 0; vertexB: -0.5 -0.5 0; vertexC: 0.5 -0.5 0"
+></a-entity>
 ```
 
 ### Material
@@ -299,7 +317,8 @@ Defines the appearance of the geometry.
 #### Standard Material Properties
 
 ```html
-<a-entity material="
+<a-entity
+  material="
   color: #FFF;
   metalness: 0;
   opacity: 1;
@@ -309,23 +328,24 @@ Defines the appearance of the geometry.
   transparent: false;
   vertexColors: none;
   visible: true
-"></a-entity>
+"
+></a-entity>
 ```
 
-| Property | Type | Default | Description |
-|----------|------|---------|-------------|
-| `color` | color | #FFF | Base color |
-| `metalness` | number | 0 | Metallic property (0-1) |
-| `opacity` | number | 1 | Opacity (0-1, requires transparent: true) |
-| `roughness` | number | 0.5 | Surface roughness (0-1) |
-| `shader` | string | standard | Shader type (standard, flat) |
-| `side` | string | front | Which sides to render (front, back, double) |
-| `transparent` | boolean | false | Enable transparency |
-| `src` | selector | - | Texture image/video |
-| `repeat` | vec2 | 1 1 | Texture repeat |
-| `normalMap` | selector | - | Normal map texture |
-| `emissive` | color | #000 | Emissive color |
-| `emissiveIntensity` | number | 1 | Emissive intensity |
+| Property            | Type     | Default  | Description                                 |
+| ------------------- | -------- | -------- | ------------------------------------------- |
+| `color`             | color    | #FFF     | Base color                                  |
+| `metalness`         | number   | 0        | Metallic property (0-1)                     |
+| `opacity`           | number   | 1        | Opacity (0-1, requires transparent: true)   |
+| `roughness`         | number   | 0.5      | Surface roughness (0-1)                     |
+| `shader`            | string   | standard | Shader type (standard, flat)                |
+| `side`              | string   | front    | Which sides to render (front, back, double) |
+| `transparent`       | boolean  | false    | Enable transparency                         |
+| `src`               | selector | -        | Texture image/video                         |
+| `repeat`            | vec2     | 1 1      | Texture repeat                              |
+| `normalMap`         | selector | -        | Normal map texture                          |
+| `emissive`          | color    | #000     | Emissive color                              |
+| `emissiveIntensity` | number   | 1        | Emissive intensity                          |
 
 #### Flat Shader
 
@@ -337,7 +357,7 @@ Defines the appearance of the geometry.
 
 ```html
 <a-assets>
-  <img id="texture" src="texture.jpg">
+  <img id="texture" src="texture.jpg" />
 </a-assets>
 
 <a-entity material="src: #texture; repeat: 2 2; normalMap: #normalTexture"></a-entity>
@@ -350,13 +370,16 @@ Illuminates the scene.
 #### Types
 
 **Ambient Light**
+
 ```html
 <a-entity light="type: ambient; color: #BBB; intensity: 0.5"></a-entity>
 ```
 
 **Directional Light**
+
 ```html
-<a-entity light="
+<a-entity
+  light="
   type: directional;
   color: #FFF;
   intensity: 0.8;
@@ -365,23 +388,31 @@ Illuminates the scene.
   shadowCameraRight: 5;
   shadowCameraTop: 5;
   shadowCameraBottom: -5
-" position="1 2 1"></a-entity>
+"
+  position="1 2 1"
+></a-entity>
 ```
 
 **Point Light**
+
 ```html
-<a-entity light="
+<a-entity
+  light="
   type: point;
   color: #F00;
   intensity: 2;
   distance: 50;
   decay: 1
-" position="0 3 0"></a-entity>
+"
+  position="0 3 0"
+></a-entity>
 ```
 
 **Spot Light**
+
 ```html
-<a-entity light="
+<a-entity
+  light="
   type: spot;
   color: #FFF;
   intensity: 1.5;
@@ -390,21 +421,24 @@ Illuminates the scene.
   distance: 100;
   decay: 1;
   castShadow: true
-" position="0 5 0" rotation="-90 0 0"></a-entity>
+"
+  position="0 5 0"
+  rotation="-90 0 0"
+></a-entity>
 ```
 
 #### Properties
 
-| Property | Type | Default | Description |
-|----------|------|---------|-------------|
-| `type` | string | directional | Light type |
-| `color` | color | #FFF | Light color |
-| `intensity` | number | 1 | Light intensity |
-| `castShadow` | boolean | false | Cast shadows |
-| `distance` | number | 0 | Max distance (point/spot) |
-| `decay` | number | 1 | Light decay (point/spot) |
-| `angle` | number | 60 | Spot cone angle (degrees) |
-| `penumbra` | number | 0 | Spot edge softness (0-1) |
+| Property     | Type    | Default     | Description               |
+| ------------ | ------- | ----------- | ------------------------- |
+| `type`       | string  | directional | Light type                |
+| `color`      | color   | #FFF        | Light color               |
+| `intensity`  | number  | 1           | Light intensity           |
+| `castShadow` | boolean | false       | Cast shadows              |
+| `distance`   | number  | 0           | Max distance (point/spot) |
+| `decay`      | number  | 1           | Light decay (point/spot)  |
+| `angle`      | number  | 60          | Spot cone angle (degrees) |
+| `penumbra`   | number  | 0           | Spot edge softness (0-1)  |
 
 ### Position, Rotation, Scale
 
@@ -413,13 +447,12 @@ Transform components control entity placement and orientation.
 #### Position
 
 ```html
-<a-entity position="0 1.5 -3"></a-entity>
-<a-entity position="x: 0; y: 1.5; z: -3"></a-entity>
+<a-entity position="0 1.5 -3"></a-entity> <a-entity position="x: 0; y: 1.5; z: -3"></a-entity>
 ```
 
 ```javascript
-entity.setAttribute('position', '1 2 3');
-entity.setAttribute('position', {x: 1, y: 2, z: 3});
+entity.setAttribute("position", "1 2 3");
+entity.setAttribute("position", { x: 1, y: 2, z: 3 });
 entity.object3D.position.set(1, 2, 3);
 ```
 
@@ -433,8 +466,8 @@ entity.object3D.position.set(1, 2, 3);
 
 ```javascript
 // Degrees
-entity.setAttribute('rotation', '0 90 0');
-entity.setAttribute('rotation', {x: 0, y: 90, z: 0});
+entity.setAttribute("rotation", "0 90 0");
+entity.setAttribute("rotation", { x: 0, y: 90, z: 0 });
 
 // Radians (Three.js)
 entity.object3D.rotation.y = Math.PI / 2;
@@ -443,13 +476,12 @@ entity.object3D.rotation.y = Math.PI / 2;
 #### Scale
 
 ```html
-<a-entity scale="2 2 2"></a-entity>
-<a-entity scale="x: 2; y: 1; z: 2"></a-entity>
+<a-entity scale="2 2 2"></a-entity> <a-entity scale="x: 2; y: 1; z: 2"></a-entity>
 ```
 
 ```javascript
-entity.setAttribute('scale', '2 2 2');
-entity.setAttribute('scale', {x: 2, y: 1, z: 2});
+entity.setAttribute("scale", "2 2 2");
+entity.setAttribute("scale", { x: 2, y: 1, z: 2 });
 entity.object3D.scale.set(2, 1, 2);
 ```
 
@@ -460,7 +492,8 @@ Animate entity properties over time.
 #### Properties
 
 ```html
-<a-entity animation="
+<a-entity
+  animation="
   property: rotation;
   to: 0 360 0;
   dur: 2000;
@@ -471,22 +504,23 @@ Animate entity properties over time.
   startEvents: click;
   pauseEvents: pause;
   resumeEvents: resume
-"></a-entity>
+"
+></a-entity>
 ```
 
-| Property | Type | Default | Description |
-|----------|------|---------|-------------|
-| `property` | string | - | Property to animate |
-| `from` | - | current | Starting value |
-| `to` | - | - | Target value |
-| `dur` | number | 1000 | Duration (ms) |
-| `delay` | number | 0 | Delay before start (ms) |
-| `easing` | string | easeInQuad | Easing function |
-| `loop` | boolean/number | false | Loop (true, false, or count) |
-| `dir` | string | normal | Direction (normal, alternate, reverse) |
-| `startEvents` | array | [] | Events that start animation |
-| `pauseEvents` | array | [] | Events that pause animation |
-| `resumeEvents` | array | [] | Events that resume animation |
+| Property       | Type           | Default    | Description                            |
+| -------------- | -------------- | ---------- | -------------------------------------- |
+| `property`     | string         | -          | Property to animate                    |
+| `from`         | -              | current    | Starting value                         |
+| `to`           | -              | -          | Target value                           |
+| `dur`          | number         | 1000       | Duration (ms)                          |
+| `delay`        | number         | 0          | Delay before start (ms)                |
+| `easing`       | string         | easeInQuad | Easing function                        |
+| `loop`         | boolean/number | false      | Loop (true, false, or count)           |
+| `dir`          | string         | normal     | Direction (normal, alternate, reverse) |
+| `startEvents`  | array          | []         | Events that start animation            |
+| `pauseEvents`  | array          | []         | Events that pause animation            |
+| `resumeEvents` | array          | []         | Events that resume animation           |
 
 #### Easing Functions
 
@@ -501,14 +535,16 @@ Animate entity properties over time.
 <!-- Multiple animations -->
 <a-sphere
   animation__rotate="property: rotation; to: 360 360 0; loop: true; dur: 10000"
-  animation__scale="property: scale; to: 1.5 1.5 1.5; dir: alternate; loop: true; dur: 2000">
+  animation__scale="property: scale; to: 1.5 1.5 1.5; dir: alternate; loop: true; dur: 2000"
+>
 </a-sphere>
 
 <!-- Event-triggered -->
 <a-box
   animation__click="property: position; to: 0 5 0; startEvents: click"
   animation__mouseenter="property: scale; to: 1.2 1.2 1.2; startEvents: mouseenter"
-  animation__mouseleave="property: scale; to: 1 1 1; startEvents: mouseleave">
+  animation__mouseleave="property: scale; to: 1 1 1; startEvents: mouseleave"
+>
 </a-box>
 ```
 
@@ -519,27 +555,29 @@ Audio playback component.
 #### Properties
 
 ```html
-<a-entity sound="
+<a-entity
+  sound="
   src: #sound1;
   autoplay: false;
   loop: false;
   on: click;
   poolSize: 1;
   volume: 1
-"></a-entity>
+"
+></a-entity>
 ```
 
-| Property | Type | Default | Description |
-|----------|------|---------|-------------|
-| `src` | selector | - | Audio asset |
-| `autoplay` | boolean | false | Play on load |
-| `loop` | boolean | false | Loop audio |
-| `on` | string | - | Event to play on |
-| `poolSize` | number | 1 | Audio buffer pool size |
-| `volume` | number | 1 | Volume (0-1) |
-| `positional` | boolean | true | 3D positional audio |
-| `refDistance` | number | 1 | Reference distance for falloff |
-| `rolloffFactor` | number | 1 | Rolloff rate |
+| Property        | Type     | Default | Description                    |
+| --------------- | -------- | ------- | ------------------------------ |
+| `src`           | selector | -       | Audio asset                    |
+| `autoplay`      | boolean  | false   | Play on load                   |
+| `loop`          | boolean  | false   | Loop audio                     |
+| `on`            | string   | -       | Event to play on               |
+| `poolSize`      | number   | 1       | Audio buffer pool size         |
+| `volume`        | number   | 1       | Volume (0-1)                   |
+| `positional`    | boolean  | true    | 3D positional audio            |
+| `refDistance`   | number   | 1       | Reference distance for falloff |
+| `rolloffFactor` | number   | 1       | Rolloff rate                   |
 
 #### Example
 
@@ -556,7 +594,10 @@ Audio playback component.
 <a-entity sound="src: #bg-music; autoplay: true; loop: true; volume: 0.5"></a-entity>
 
 <!-- Positional audio -->
-<a-entity sound="src: #ambient; autoplay: true; loop: true; positional: true" position="5 0 0"></a-entity>
+<a-entity
+  sound="src: #ambient; autoplay: true; loop: true; positional: true"
+  position="5 0 0"
+></a-entity>
 ```
 
 ---
@@ -578,18 +619,21 @@ Primitives are shortcuts for entity + common components.
   scale="2 2 2"
   src="#texture"
   metalness="0.5"
-  roughness="0.3">
+  roughness="0.3"
+>
 </a-box>
 ```
 
 Equivalent to:
+
 ```html
 <a-entity
   geometry="primitive: box; width: 1; height: 1; depth: 1"
   material="color: #4CC3D9; metalness: 0.5; roughness: 0.3; src: #texture"
   position="0 1 -3"
   rotation="0 45 0"
-  scale="2 2 2">
+  scale="2 2 2"
+>
 </a-entity>
 ```
 
@@ -605,7 +649,8 @@ Equivalent to:
   phi-length="360"
   theta-start="0"
   theta-length="180"
-  position="0 1.25 -5">
+  position="0 1.25 -5"
+>
 </a-sphere>
 ```
 
@@ -621,7 +666,8 @@ Equivalent to:
   segments-radial="36"
   segments-height="1"
   open-ended="false"
-  position="1 0.75 -3">
+  position="1 0.75 -3"
+>
 </a-cylinder>
 ```
 
@@ -636,7 +682,8 @@ Equivalent to:
   segments-height="1"
   position="0 0 -4"
   rotation="-90 0 0"
-  src="#ground-texture">
+  src="#ground-texture"
+>
 </a-plane>
 ```
 
@@ -648,7 +695,7 @@ Equivalent to:
 
 <!-- 360 image -->
 <a-assets>
-  <img id="sky-texture" src="sky.jpg">
+  <img id="sky-texture" src="sky.jpg" />
 </a-assets>
 <a-sky src="#sky-texture" rotation="0 -130 0"></a-sky>
 
@@ -670,7 +717,8 @@ Equivalent to:
   near="0.1"
   position="0 1.6 0"
   reverse-mouse-drag="false"
-  wasd-controls-enabled="true">
+  wasd-controls-enabled="true"
+>
   <a-cursor></a-cursor>
 </a-camera>
 ```
@@ -678,11 +726,7 @@ Equivalent to:
 ### a-cursor
 
 ```html
-<a-cursor
-  fuse="false"
-  fuse-timeout="1500"
-  max-distance="1000"
-  raycaster="objects: .interactive">
+<a-cursor fuse="false" fuse-timeout="1500" max-distance="1000" raycaster="objects: .interactive">
 </a-cursor>
 ```
 
@@ -692,7 +736,14 @@ Equivalent to:
 <a-light type="ambient" color="#BBB" intensity="0.5"></a-light>
 <a-light type="directional" color="#FFF" intensity="0.8" position="1 2 1"></a-light>
 <a-light type="point" color="#F00" intensity="2" distance="50" position="0 3 0"></a-light>
-<a-light type="spot" color="#FFF" intensity="1.5" angle="45" position="0 5 0" rotation="-90 0 0"></a-light>
+<a-light
+  type="spot"
+  color="#FFF"
+  intensity="1.5"
+  angle="45"
+  position="0 5 0"
+  rotation="-90 0 0"
+></a-light>
 ```
 
 ### a-text
@@ -711,7 +762,8 @@ Equivalent to:
   opacity="1"
   side="front"
   wrap-count="40"
-  position="0 2 -3">
+  position="0 2 -3"
+>
 </a-text>
 ```
 
@@ -722,12 +774,7 @@ Equivalent to:
   <a-asset-item id="tree" src="tree.gltf"></a-asset-item>
 </a-assets>
 
-<a-gltf-model
-  src="#tree"
-  position="0 0 -5"
-  scale="0.5 0.5 0.5"
-  rotation="0 45 0">
-</a-gltf-model>
+<a-gltf-model src="#tree" position="0 0 -5" scale="0.5 0.5 0.5" rotation="0 45 0"> </a-gltf-model>
 ```
 
 ---
@@ -739,7 +786,9 @@ Equivalent to:
 Enable mouse/touch drag to look around.
 
 ```html
-<a-entity camera look-controls="
+<a-entity
+  camera
+  look-controls="
   enabled: true;
   hmdEnabled: true;
   reverseMouseDrag: false;
@@ -747,7 +796,8 @@ Enable mouse/touch drag to look around.
   touchEnabled: true;
   mouseEnabled: true;
   pointerLockEnabled: false
-"></a-entity>
+"
+></a-entity>
 ```
 
 ### wasd-controls
@@ -755,12 +805,15 @@ Enable mouse/touch drag to look around.
 Keyboard movement (W/A/S/D).
 
 ```html
-<a-entity camera wasd-controls="
+<a-entity
+  camera
+  wasd-controls="
   enabled: true;
   acceleration: 65;
   easing: 20;
   fly: false
-"></a-entity>
+"
+></a-entity>
 ```
 
 ### cursor
@@ -768,11 +821,7 @@ Keyboard movement (W/A/S/D).
 Raycaster-based pointer for interactions.
 
 ```html
-<a-cursor
-  raycaster="objects: .interactive; far: 1000"
-  fuse="false"
-  fuse-timeout="1500">
-</a-cursor>
+<a-cursor raycaster="objects: .interactive; far: 1000" fuse="false" fuse-timeout="1500"> </a-cursor>
 ```
 
 ---
@@ -793,10 +842,7 @@ VR controller hands visualization and tracking.
 Laser pointer for VR controllers.
 
 ```html
-<a-entity
-  laser-controls="hand: right"
-  raycaster="objects: .interactive; far: 10">
-</a-entity>
+<a-entity laser-controls="hand: right" raycaster="objects: .interactive; far: 10"> </a-entity>
 ```
 
 ### vive-controls
@@ -804,7 +850,9 @@ Laser pointer for VR controllers.
 HTC Vive controller support.
 
 ```html
-<a-entity vive-controls="hand: left; buttonColor: #FF0000; buttonHighlightColor: #FFFF00"></a-entity>
+<a-entity
+  vive-controls="hand: left; buttonColor: #FF0000; buttonHighlightColor: #FFFF00"
+></a-entity>
 <a-entity vive-controls="hand: right"></a-entity>
 ```
 
@@ -822,12 +870,14 @@ Meta Quest/Oculus Touch controller support.
 Configure WebXR features and settings.
 
 ```html
-<a-scene webxr="
+<a-scene
+  webxr="
   requiredFeatures: hit-test, local-floor;
   optionalFeatures: dom-overlay, unbounded;
   overlayElement: #overlay;
   referenceSpaceType: local-floor
-"></a-scene>
+"
+></a-scene>
 ```
 
 ### ar-hit-test
@@ -835,15 +885,13 @@ Configure WebXR features and settings.
 AR surface detection and object placement.
 
 ```html
-<a-scene
-  webxr="optionalFeatures: hit-test"
-  ar-hit-test="target: #furniture; type: footprint">
-
+<a-scene webxr="optionalFeatures: hit-test" ar-hit-test="target: #furniture; type: footprint">
   <a-entity id="furniture" gltf-model="#chair"></a-entity>
 </a-scene>
 ```
 
 Events:
+
 - `ar-hit-test-start`: Hit testing started
 - `ar-hit-test-achieved`: Surface detected
 - `ar-hit-test-select`: User selected placement location
@@ -857,23 +905,23 @@ Systems provide global scene-level functionality.
 ### Geometry System
 
 ```javascript
-const geometrySystem = document.querySelector('a-scene').systems.geometry;
+const geometrySystem = document.querySelector("a-scene").systems.geometry;
 ```
 
 ### Material System
 
 ```javascript
-const materialSystem = document.querySelector('a-scene').systems.material;
+const materialSystem = document.querySelector("a-scene").systems.material;
 ```
 
 ### Accessing Systems
 
 ```javascript
-AFRAME.registerComponent('my-component', {
-  init: function() {
+AFRAME.registerComponent("my-component", {
+  init: function () {
     const geometrySystem = this.el.sceneEl.systems.geometry;
     const materialSystem = this.el.sceneEl.systems.material;
-  }
+  },
 });
 ```
 
@@ -886,49 +934,49 @@ Register custom components to extend A-Frame.
 ### Basic Component
 
 ```javascript
-AFRAME.registerComponent('my-component', {
+AFRAME.registerComponent("my-component", {
   // Component schema (configuration)
   schema: {
-    color: {type: 'color', default: '#FFF'},
-    size: {type: 'number', default: 1},
-    enabled: {type: 'boolean', default: true}
+    color: { type: "color", default: "#FFF" },
+    size: { type: "number", default: 1 },
+    enabled: { type: "boolean", default: true },
   },
 
   // Initialize (called once)
-  init: function() {
-    console.log('Component initialized');
+  init: function () {
+    console.log("Component initialized");
     // this.el = entity element
     // this.data = component data
     // this.el.sceneEl = scene element
   },
 
   // Update (called when properties change)
-  update: function(oldData) {
-    console.log('Component updated');
+  update: function (oldData) {
+    console.log("Component updated");
     // this.data = new data
     // oldData = previous data
   },
 
   // Remove (called when component removed)
-  remove: function() {
-    console.log('Component removed');
+  remove: function () {
+    console.log("Component removed");
   },
 
   // Tick (called every frame)
-  tick: function(time, timeDelta) {
+  tick: function (time, timeDelta) {
     // time = total elapsed time (ms)
     // timeDelta = time since last tick (ms)
   },
 
   // Pause (called when entity/scene pauses)
-  pause: function() {
-    console.log('Component paused');
+  pause: function () {
+    console.log("Component paused");
   },
 
   // Play (called when entity/scene plays)
-  play: function() {
-    console.log('Component playing');
-  }
+  play: function () {
+    console.log("Component playing");
+  },
 });
 ```
 
@@ -969,23 +1017,24 @@ schema: {
 ### Multi-Property Components
 
 ```javascript
-AFRAME.registerComponent('light', {
+AFRAME.registerComponent("light", {
   schema: {
-    type: {default: 'directional', oneOf: ['ambient', 'directional', 'point', 'spot']},
-    color: {type: 'color', default: '#FFF'},
-    intensity: {type: 'number', default: 1}
+    type: { default: "directional", oneOf: ["ambient", "directional", "point", "spot"] },
+    color: { type: "color", default: "#FFF" },
+    intensity: { type: "number", default: 1 },
   },
 
-  init: function() {
+  init: function () {
     // Access individual properties
     console.log(this.data.type);
     console.log(this.data.color);
     console.log(this.data.intensity);
-  }
+  },
 });
 ```
 
 Usage:
+
 ```html
 <a-entity light="type: point; color: #F00; intensity: 2"></a-entity>
 ```
@@ -993,17 +1042,18 @@ Usage:
 ### Single-Property Components
 
 ```javascript
-AFRAME.registerComponent('visible', {
-  schema: {type: 'boolean', default: true},
+AFRAME.registerComponent("visible", {
+  schema: { type: "boolean", default: true },
 
-  update: function() {
+  update: function () {
     // this.data is the boolean value directly
     this.el.object3D.visible = this.data;
-  }
+  },
 });
 ```
 
 Usage:
+
 ```html
 <a-entity visible="false"></a-entity>
 ```
@@ -1015,15 +1065,15 @@ Usage:
 ### Creating Entities
 
 ```javascript
-const scene = document.querySelector('a-scene');
+const scene = document.querySelector("a-scene");
 
 // Create entity
-const entity = document.createElement('a-entity');
+const entity = document.createElement("a-entity");
 
 // Set attributes
-entity.setAttribute('geometry', {primitive: 'box', width: 2});
-entity.setAttribute('material', {color: 'red'});
-entity.setAttribute('position', {x: 0, y: 1, z: -3});
+entity.setAttribute("geometry", { primitive: "box", width: 2 });
+entity.setAttribute("material", { color: "red" });
+entity.setAttribute("position", { x: 0, y: 1, z: -3 });
 
 // Append to scene
 scene.appendChild(entity);
@@ -1032,40 +1082,40 @@ scene.appendChild(entity);
 ### Removing Entities
 
 ```javascript
-const entity = document.querySelector('#myEntity');
+const entity = document.querySelector("#myEntity");
 entity.parentNode.removeChild(entity);
 ```
 
 ### Event Handling
 
 ```javascript
-const box = document.querySelector('a-box');
+const box = document.querySelector("a-box");
 
 // Listen to events
-box.addEventListener('click', (evt) => {
-  console.log('Clicked at:', evt.detail.intersection.point);
+box.addEventListener("click", (evt) => {
+  console.log("Clicked at:", evt.detail.intersection.point);
 });
 
-box.addEventListener('mouseenter', () => {
-  box.setAttribute('color', 'yellow');
+box.addEventListener("mouseenter", () => {
+  box.setAttribute("color", "yellow");
 });
 
-box.addEventListener('mouseleave', () => {
-  box.setAttribute('color', 'blue');
+box.addEventListener("mouseleave", () => {
+  box.setAttribute("color", "blue");
 });
 
 // Emit custom events
-box.emit('hit', {damage: 10});
+box.emit("hit", { damage: 10 });
 
-box.addEventListener('hit', (evt) => {
-  console.log('Damage:', evt.detail.damage);
+box.addEventListener("hit", (evt) => {
+  console.log("Damage:", evt.detail.damage);
 });
 ```
 
 ### Accessing Components
 
 ```javascript
-const entity = document.querySelector('#myEntity');
+const entity = document.querySelector("#myEntity");
 
 // Get component instance
 const material = entity.components.material;
@@ -1081,7 +1131,7 @@ material.update();
 ### Three.js Integration
 
 ```javascript
-const entity = document.querySelector('a-box');
+const entity = document.querySelector("a-box");
 
 // Access Three.js Object3D
 const object3D = entity.object3D;
@@ -1092,12 +1142,12 @@ object3D.rotation.y = Math.PI / 4;
 object3D.scale.set(2, 2, 2);
 
 // Access Three.js mesh
-const mesh = entity.getObject3D('mesh');
+const mesh = entity.getObject3D("mesh");
 console.log(mesh.geometry);
 console.log(mesh.material);
 
 // Add custom Three.js objects
-const scene = document.querySelector('a-scene').object3D;
+const scene = document.querySelector("a-scene").object3D;
 const customMesh = new THREE.Mesh(geometry, material);
 scene.add(customMesh);
 ```
@@ -1105,26 +1155,26 @@ scene.add(customMesh);
 ### Wait for Scene Load
 
 ```javascript
-const scene = document.querySelector('a-scene');
+const scene = document.querySelector("a-scene");
 
 if (scene.hasLoaded) {
   run();
 } else {
-  scene.addEventListener('loaded', run);
+  scene.addEventListener("loaded", run);
 }
 
 function run() {
-  console.log('Scene is ready');
+  console.log("Scene is ready");
 }
 ```
 
 ### Animation Control
 
 ```javascript
-const entity = document.querySelector('#animated');
+const entity = document.querySelector("#animated");
 
 // Start animation
-entity.emit('startAnimation');
+entity.emit("startAnimation");
 
 // Pause animation
 entity.components.animation.pauseAnimation();
@@ -1136,27 +1186,27 @@ entity.components.animation.resumeAnimation();
 ### States
 
 ```javascript
-const enemy = document.querySelector('#enemy');
+const enemy = document.querySelector("#enemy");
 
 // Add state
-enemy.addState('attacking');
-enemy.addState('angry');
+enemy.addState("attacking");
+enemy.addState("angry");
 
 // Check state
-if (enemy.is('attacking')) {
-  console.log('Enemy is attacking');
+if (enemy.is("attacking")) {
+  console.log("Enemy is attacking");
 }
 
 // Remove state
-enemy.removeState('attacking');
+enemy.removeState("attacking");
 
 // Listen to state changes
-enemy.addEventListener('stateadded', (evt) => {
-  console.log('State added:', evt.detail);
+enemy.addEventListener("stateadded", (evt) => {
+  console.log("State added:", evt.detail);
 });
 
-enemy.addEventListener('stateremoved', (evt) => {
-  console.log('State removed:', evt.detail);
+enemy.addEventListener("stateremoved", (evt) => {
+  console.log("State removed:", evt.detail);
 });
 ```
 
@@ -1169,14 +1219,15 @@ enemy.addEventListener('stateremoved', (evt) => {
 Use with keyboard events:
 
 ```javascript
-document.addEventListener('keydown', (evt) => {
-  if (evt.key === 'w' || evt.key === 'W') {
-    console.log('W pressed');
+document.addEventListener("keydown", (evt) => {
+  if (evt.key === "w" || evt.key === "W") {
+    console.log("W pressed");
   }
 });
 ```
 
 Common keys:
+
 - `'w'`, `'a'`, `'s'`, `'d'` - Movement
 - `' '` - Spacebar
 - `'Escape'` - Escape
@@ -1187,9 +1238,9 @@ Common keys:
 
 ```javascript
 // Material side
-'front' // THREE.FrontSide
-'back'  // THREE.BackSide
-'double' // THREE.DoubleSide
+"front"; // THREE.FrontSide
+"back"; // THREE.BackSide
+"double"; // THREE.DoubleSide
 ```
 
 ### Easing Functions
@@ -1211,8 +1262,8 @@ See Animation component for full list of easing functions.
   <body>
     <a-scene>
       <a-assets>
-        <img id="ground-texture" src="ground.jpg">
-        <img id="sky-texture" src="sky.jpg">
+        <img id="ground-texture" src="ground.jpg" />
+        <img id="sky-texture" src="sky.jpg" />
         <a-asset-item id="tree" src="tree.gltf"></a-asset-item>
       </a-assets>
 

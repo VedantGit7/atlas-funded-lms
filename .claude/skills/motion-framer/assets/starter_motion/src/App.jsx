@@ -1,12 +1,12 @@
-import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import HoverCard from './components/HoverCard'
-import DraggableBox from './components/DraggableBox'
-import StaggerList from './components/StaggerList'
-import './App.css'
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import HoverCard from "./components/HoverCard";
+import DraggableBox from "./components/DraggableBox";
+import StaggerList from "./components/StaggerList";
+import "./App.css";
 
 function App() {
-  const [showModal, setShowModal] = useState(false)
+  const [showModal, setShowModal] = useState(false);
 
   return (
     <div className="app">
@@ -31,15 +31,9 @@ function App() {
         <section className="section">
           <h2>Hover Animations</h2>
           <div className="grid">
-            <HoverCard title="Card 1">
-              Hover over me to see the animation
-            </HoverCard>
-            <HoverCard title="Card 2">
-              Different hover effects
-            </HoverCard>
-            <HoverCard title="Card 3">
-              Smooth transitions
-            </HoverCard>
+            <HoverCard title="Card 1">Hover over me to see the animation</HoverCard>
+            <HoverCard title="Card 2">Different hover effects</HoverCard>
+            <HoverCard title="Card 3">Smooth transitions</HoverCard>
           </div>
         </section>
 
@@ -61,7 +55,7 @@ function App() {
             whileTap={{ scale: 0.95 }}
             onClick={() => setShowModal(!showModal)}
           >
-            {showModal ? 'Close' : 'Open'} Modal
+            {showModal ? "Close" : "Open"} Modal
           </motion.button>
 
           <AnimatePresence mode="wait">
@@ -79,7 +73,7 @@ function App() {
                   initial={{ opacity: 0, scale: 0.9, y: 20 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.9, y: -20 }}
-                  transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
                   onClick={(e) => e.stopPropagation()}
                 >
                   <h3>Modal Title</h3>
@@ -100,16 +94,12 @@ function App() {
       </main>
 
       <footer className="footer">
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
-        >
+        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}>
           Built with Framer Motion
         </motion.p>
       </footer>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
