@@ -313,7 +313,7 @@ export function InviteAcceptCard({
           <p
             role="alert"
             className={`mt-4 text-[13px] ${
-              passwordState.ok ? "text-[var(--fba-grn)]" : "text-[var(--fba-red)]"
+              passwordState.ok ? "text-[var(--fba-grn)]" : "text-[var(--fba-red-tx)]"
             }`}
           >
             {passwordState.message}
@@ -446,7 +446,7 @@ export function InviteAcceptCard({
       {mismatch ? (
         <div
           role="alert"
-          className="mt-5 space-y-3 rounded-[10px] border-[1.5px] border-[var(--fba-red)]/30 bg-[var(--fba-red)]/5 p-4 text-[13px] text-[var(--fba-red)]"
+          className="mt-5 space-y-3 rounded-[10px] border-[1.5px] border-[var(--fba-red)]/30 bg-[var(--fba-red)]/5 p-4 text-[13px] text-[var(--fba-red-tx)]"
         >
           <p>
             You are signed in with a different email than the one that received this invitation.
@@ -469,7 +469,7 @@ export function InviteAcceptCard({
             <p
               role="alert"
               className={`mt-4 text-[13px] ${
-                acceptState.ok ? "text-[var(--fba-grn)]" : "text-[var(--fba-red)]"
+                acceptState.ok ? "text-[var(--fba-grn)]" : "text-[var(--fba-red-tx)]"
               }`}
             >
               {acceptState.message}

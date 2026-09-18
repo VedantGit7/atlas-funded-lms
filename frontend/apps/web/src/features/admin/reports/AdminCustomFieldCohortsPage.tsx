@@ -298,7 +298,7 @@ export function AdminCustomFieldCohortsPage() {
 
             {groups.length === 0 ? (
               <div className="flex flex-1 flex-col items-center justify-center p-8 text-center">
-                <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--admin-surface-high)] text-[var(--admin-outline)]">
+                <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--admin-surface-high)] text-[var(--admin-on-surface-variant)]">
                   <UserX className="h-8 w-8" strokeWidth={1.25} aria-hidden="true" />
                 </div>
                 <h3 className="mb-2 text-base font-semibold text-[var(--admin-on-surface)]">
@@ -486,7 +486,7 @@ export function AdminCustomFieldCohortsPage() {
 
             {messages.length === 0 ? (
               <div className="flex flex-1 flex-col items-center justify-center bg-[var(--admin-surface-low)] p-6 text-center">
-                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded bg-[var(--admin-surface-high)] text-[var(--admin-outline)]">
+                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded bg-[var(--admin-surface-high)] text-[var(--admin-on-surface-variant)]">
                   <MessageSquareOff className="h-6 w-6" strokeWidth={1.25} aria-hidden="true" />
                 </div>
                 <h3 className="mb-2 text-base font-semibold text-[var(--admin-on-surface)]">

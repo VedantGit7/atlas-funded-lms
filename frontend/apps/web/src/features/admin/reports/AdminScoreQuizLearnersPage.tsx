@@ -176,10 +176,22 @@ function resultChipClass(status: ScoreLearnerResultStatus): string {
   return "border-[var(--admin-border)] bg-[var(--admin-surface-high)] text-[var(--admin-on-surface-variant)]";
 }
 
+/** Fill for the score bar. */
 function scoreBarTone(status: ScoreLearnerResultStatus): string {
-  if (status === "fail") return "bg-[var(--admin-danger)] text-[var(--admin-danger)]";
-  if (status === "pass") return "bg-[var(--admin-primary)] text-[var(--admin-on-surface)]";
-  return "bg-[var(--admin-outline)] text-[var(--admin-on-surface-variant)]";
+  if (status === "fail") return "bg-[var(--admin-danger)]";
+  if (status === "pass") return "bg-[var(--admin-primary)]";
+  return "bg-[var(--admin-outline)]";
+}
+
+/**
+ * Colour for the score label beside the bar. Separate from the fill: they were
+ * one string that callers split on spaces, which read as a text colour painted
+ * on its own background.
+ */
+function scoreTextTone(status: ScoreLearnerResultStatus): string {
+  if (status === "fail") return "text-[var(--admin-danger)]";
+  if (status === "pass") return "text-[var(--admin-on-surface)]";
+  return "text-[var(--admin-on-surface-variant)]";
 }
 
 function productScoresHref(
@@ -1381,7 +1393,7 @@ export function AdminScoreQuizLearnersPage({ assessmentId }: { assessmentId: str
                                   </span>
                                 ) : (
                                   <div
-                                    className={`flex items-center gap-3 font-mono text-[13px] ${scoreBarTone(learner.resultStatus).split(" ").slice(1).join(" ")}`}
+                                    className={`flex items-center gap-3 font-mono text-[13px] ${scoreTextTone(learner.resultStatus)}`}
                                   >
                                     <span className="w-10 text-right tabular-nums">
                                       {formatPct(learner.scorePct)}

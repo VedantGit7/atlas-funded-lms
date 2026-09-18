@@ -84,7 +84,7 @@ const LEGACY_EXTRA: Pick<
   navInactive: "",
   readOnlyField: "rounded-lg border border-border bg-muted px-3 py-2.5",
   primaryButtonMuted: "opacity-80",
-  toggleKnob: "bg-white",
+  toggleKnob: "bg-card",
   pageTitle: "text-2xl font-semibold text-foreground",
   pageDesc: "text-sm text-muted-foreground",
   avatarOverlay: "bg-black/40 text-white",
@@ -114,7 +114,7 @@ const CLASSES: Record<AccountThemeKind, AccountThemeClasses> = {
     outlineButton:
       "inline-flex items-center justify-center gap-2 rounded-lg border border-[var(--admin-border)] px-4 py-2.5 text-sm font-semibold text-[var(--admin-on-surface)] transition-colors hover:bg-[var(--admin-surface-high)] disabled:cursor-not-allowed disabled:opacity-50",
     dangerButton:
-      "inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--admin-danger)] px-4 py-2.5 text-sm font-semibold text-[var(--admin-on-primary)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50",
+      "inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--admin-danger)] px-4 py-2.5 text-sm font-semibold text-[var(--admin-on-danger)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50",
     dangerOutlineButton:
       "inline-flex items-center justify-center gap-2 rounded-lg border border-[var(--admin-danger)]/30 px-4 py-2.5 text-sm font-semibold text-[var(--admin-danger)] transition-colors hover:bg-[var(--admin-danger)]/10 disabled:cursor-not-allowed disabled:opacity-50",
     ghostButton:
@@ -205,10 +205,10 @@ const CLASSES: Record<AccountThemeKind, AccountThemeClasses> = {
     dangerButton:
       "inline-flex items-center justify-center gap-2 rounded-lg bg-destructive px-4 py-2.5 text-sm font-semibold text-destructive-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50",
     dangerOutlineButton:
-      "inline-flex items-center justify-center gap-2 rounded-lg border border-destructive/30 px-4 py-2.5 text-sm font-semibold text-destructive transition-colors hover:bg-destructive/10 disabled:cursor-not-allowed disabled:opacity-50",
+      "inline-flex items-center justify-center gap-2 rounded-lg border border-destructive/30 px-4 py-2.5 text-sm font-semibold text-destructive-text transition-colors hover:bg-destructive/10 disabled:cursor-not-allowed disabled:opacity-50",
     ghostButton: "text-sm font-semibold text-foreground underline-offset-2 hover:underline",
     errorBanner:
-      "rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive",
+      "rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive-text",
     infoBanner: "rounded-lg border border-border bg-muted px-4 py-3 text-sm text-muted-foreground",
     tabActive:
       "border-b-2 border-foreground px-3 py-3 text-sm font-medium text-foreground transition-colors",

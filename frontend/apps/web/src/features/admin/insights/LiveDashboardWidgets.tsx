@@ -76,7 +76,7 @@ function statusPillClass(tone: ReturnType<typeof liveStatusBarTone>): string {
 function WidgetEmpty({ title, body, icon }: { title: string; body: string; icon: ReactNode }) {
   return (
     <div className="flex flex-1 flex-col items-center justify-center px-6 py-10 text-center">
-      <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[var(--admin-surface-low)] text-[var(--admin-outline)]">
+      <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[var(--admin-surface-low)] text-[var(--admin-on-surface-variant)]">
         {icon}
       </div>
       <h4 className="text-sm font-semibold text-[var(--admin-on-surface)]">{title}</h4>

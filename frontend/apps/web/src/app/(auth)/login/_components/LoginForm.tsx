@@ -34,7 +34,7 @@ const primaryButtonClass =
   "w-full rounded-[10px] bg-[var(--fba-ind)] px-4 py-4 text-[15px] font-bold text-white shadow-[0_10px_40px_rgba(0,0,0,0.07)] transition-colors hover:bg-[var(--fba-ind-d)] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60";
 
 const inlineLinkClass =
-  "text-[13px] font-semibold text-[var(--fba-ind)] transition-colors hover:underline";
+  "text-[13px] font-semibold text-[var(--fba-ind-tx)] transition-colors hover:underline";
 
 function EyeIcon({ open }: { open: boolean }) {
   return (
@@ -304,7 +304,7 @@ export function LoginForm() {
     return (
       <Form {...mfaForm}>
         <div className="mb-8 flex flex-col items-center text-center">
-          <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-[14px] border border-[var(--fba-ind)]/15 bg-[var(--fba-ind-l)] text-[var(--fba-ind)]">
+          <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-[14px] border border-[var(--fba-ind)]/15 bg-[var(--fba-ind-l)] text-[var(--fba-ind-tx)]">
             <ShieldCheckIcon />
           </div>
           <h2
@@ -352,7 +352,7 @@ export function LoginForm() {
                     ariaLabel="Authenticator verification code"
                   />
                 </FormControl>
-                <FormMessage className="mt-2 text-center text-[13px] text-[var(--fba-red)]" />
+                <FormMessage className="mt-2 text-center text-[13px] text-[var(--fba-red-tx)]" />
               </FormItem>
             )}
           />
@@ -363,7 +363,7 @@ export function LoginForm() {
               className={
                 mfaState.ok
                   ? "text-center text-[13px] text-[var(--fba-grn)]"
-                  : "text-center text-[13px] text-[var(--fba-red)]"
+                  : "text-center text-[13px] text-[var(--fba-red-tx)]"
               }
             >
               {mfaState.message}
@@ -383,7 +383,7 @@ export function LoginForm() {
         <div className="mt-8 text-center">
           <Link
             href="/login"
-            className="group inline-flex items-center gap-2 text-[13px] font-semibold text-[var(--fba-ind)] transition-colors hover:text-[var(--fba-ind-d)]"
+            className="group inline-flex items-center gap-2 text-[13px] font-semibold text-[var(--fba-ind-tx)] transition-colors hover:text-[var(--fba-ind-d)]"
           >
             <ArrowLeftIcon />
             Back to Sign In
@@ -469,7 +469,7 @@ export function LoginForm() {
                   className={fieldInputClass}
                 />
               </FormControl>
-              <FormMessage className="mt-2 text-[13px] text-[var(--fba-red)]" />
+              <FormMessage className="mt-2 text-[13px] text-[var(--fba-red-tx)]" />
             </FormItem>
           )}
         />
@@ -508,7 +508,7 @@ export function LoginForm() {
                   <EyeIcon open={showPassword} />
                 </button>
               </div>
-              <FormMessage className="mt-2 text-[13px] text-[var(--fba-red)]" />
+              <FormMessage className="mt-2 text-[13px] text-[var(--fba-red-tx)]" />
             </FormItem>
           )}
         />
@@ -532,7 +532,7 @@ export function LoginForm() {
             className={
               loginState.ok
                 ? "text-[13px] text-[var(--fba-grn)]"
-                : "text-[13px] text-[var(--fba-red)]"
+                : "text-[13px] text-[var(--fba-red-tx)]"
             }
           >
             {loginState.message || "We couldn't sign you in with that provider. Please try again."}

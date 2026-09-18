@@ -111,7 +111,7 @@ function DashboardLearnerTable({ learners }: { learners: CourseLearnerRow[] }) {
 function DashboardEmptyState({ courseId }: { courseId: string }) {
   return (
     <div className="flex flex-col items-center justify-center px-4 py-20 text-center">
-      <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[var(--admin-surface-high)] text-[var(--admin-outline)]">
+      <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[var(--admin-surface-high)] text-[var(--admin-on-surface-variant)]">
         <UserRoundPlus className="h-7 w-7" strokeWidth={1.75} aria-hidden="true" />
       </div>
       <h2 className="text-base font-semibold text-[var(--admin-on-surface)]">

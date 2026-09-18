@@ -20,7 +20,5 @@ export function CardTitle({ className, ...props }: HTMLAttributes<HTMLHeadingEle
 }
 
 export function CardDescription({ className, ...props }: HTMLAttributes<HTMLParagraphElement>) {
-  return (
-    <p className={cn("text-sm text-neutral-500 dark:text-neutral-400", className)} {...props} />
-  );
+  return <p className={cn("text-sm text-muted-foreground", className)} {...props} />;
 }

@@ -238,9 +238,9 @@ function PipelinePanel({ stages }: { stages: ExportRunPipelineStage[] }) {
                 <div
                   className={`relative flex h-6 w-6 items-center justify-center rounded-full border-2 ${
                     complete
-                      ? "border-[var(--admin-success)] bg-[var(--admin-success)] text-[var(--admin-on-primary)]"
+                      ? "border-[var(--admin-success)] bg-[var(--admin-success)] text-[var(--admin-on-danger)]"
                       : failed
-                        ? "border-[var(--admin-danger)] bg-[var(--admin-danger)] text-[var(--admin-on-primary)]"
+                        ? "border-[var(--admin-danger)] bg-[var(--admin-danger)] text-[var(--admin-on-danger)]"
                         : current
                           ? "border-[var(--admin-primary-strong)] bg-[var(--admin-surface)] text-[var(--admin-primary-strong)] motion-safe:animate-[admin-pipeline-pulse_2s_cubic-bezier(0.4,0,0.6,1)_infinite]"
                           : "border-[var(--admin-outline)] bg-[var(--admin-surface-high)] text-[var(--admin-on-surface-variant)]"
@@ -401,7 +401,7 @@ function DeleteFileModal({
         <div className="flex flex-col gap-3 px-6 py-6 sm:flex-row-reverse">
           <button
             type="button"
-            className="inline-flex h-12 flex-1 items-center justify-center gap-2 rounded-lg bg-[var(--admin-danger)] text-base font-bold text-[var(--admin-on-primary)] transition-colors hover:opacity-90 disabled:opacity-50"
+            className="inline-flex h-12 flex-1 items-center justify-center gap-2 rounded-lg bg-[var(--admin-danger)] text-base font-bold text-[var(--admin-on-danger)] transition-colors hover:opacity-90 disabled:opacity-50"
             disabled={busy}
             onClick={onConfirm}
           >
@@ -806,7 +806,7 @@ export function AdminExportRunDetailPage() {
           <div className="ml-8 flex flex-wrap gap-3">
             <button
               type="button"
-              className="inline-flex h-8 items-center rounded-lg bg-[var(--admin-danger)] px-4 text-sm font-semibold text-[var(--admin-on-primary)] transition-colors hover:opacity-90 disabled:opacity-50"
+              className="inline-flex h-8 items-center rounded-lg bg-[var(--admin-danger)] px-4 text-sm font-semibold text-[var(--admin-on-danger)] transition-colors hover:opacity-90 disabled:opacity-50"
               disabled={actionBusy || !detail.canRetry}
               onClick={() => void handleRetry()}
             >

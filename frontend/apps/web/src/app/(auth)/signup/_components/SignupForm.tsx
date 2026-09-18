@@ -31,7 +31,7 @@ const primaryButtonClass =
   "w-full rounded-[10px] bg-[var(--fba-ind)] px-4 py-4 text-[15px] font-bold text-white shadow-[0_10px_40px_rgba(0,0,0,0.07)] transition-colors hover:bg-[var(--fba-ind-d)] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60";
 
 const inlineLinkClass =
-  "text-[13px] font-semibold text-[var(--fba-ind)] transition-colors hover:underline";
+  "text-[13px] font-semibold text-[var(--fba-ind-tx)] transition-colors hover:underline";
 
 function EyeIcon({ open }: { open: boolean }) {
   return (
@@ -256,7 +256,7 @@ export function SignupForm() {
                   className={fieldInputClass}
                 />
               </FormControl>
-              <FormMessage className="mt-2 text-[13px] text-[var(--fba-red)]" />
+              <FormMessage className="mt-2 text-[13px] text-[var(--fba-red-tx)]" />
             </FormItem>
           )}
         />
@@ -277,7 +277,7 @@ export function SignupForm() {
                   className={fieldInputClass}
                 />
               </FormControl>
-              <FormMessage className="mt-2 text-[13px] text-[var(--fba-red)]" />
+              <FormMessage className="mt-2 text-[13px] text-[var(--fba-red-tx)]" />
             </FormItem>
           )}
         />
@@ -302,7 +302,7 @@ export function SignupForm() {
                     }}
                   />
                 </FormControl>
-                <FormMessage className="mt-2 text-[13px] text-[var(--fba-red)]" />
+                <FormMessage className="mt-2 text-[13px] text-[var(--fba-red-tx)]" />
               </FormItem>
             )}
           />
@@ -336,7 +336,7 @@ export function SignupForm() {
                   <EyeIcon open={showPassword} />
                 </button>
               </div>
-              <FormMessage className="mt-2 text-[13px] text-[var(--fba-red)]" />
+              <FormMessage className="mt-2 text-[13px] text-[var(--fba-red-tx)]" />
             </FormItem>
           )}
         />
@@ -373,7 +373,7 @@ export function SignupForm() {
             </button>
           </div>
           {confirmError ? (
-            <p className="mt-2 text-[13px] text-[var(--fba-red)]">{confirmError}</p>
+            <p className="mt-2 text-[13px] text-[var(--fba-red-tx)]">{confirmError}</p>
           ) : null}
         </div>
 
@@ -381,7 +381,9 @@ export function SignupForm() {
           <p
             role="alert"
             className={
-              state.ok ? "text-[13px] text-[var(--fba-grn)]" : "text-[13px] text-[var(--fba-red)]"
+              state.ok
+                ? "text-[13px] text-[var(--fba-grn)]"
+                : "text-[13px] text-[var(--fba-red-tx)]"
             }
           >
             {state.message || "We couldn't sign you up with that provider. Please try again."}

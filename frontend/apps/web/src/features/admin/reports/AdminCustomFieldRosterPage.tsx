@@ -745,7 +745,7 @@ export function AdminCustomFieldRosterPage() {
           </div>
           <button
             type="button"
-            className="inline-flex h-8 items-center gap-2 rounded-sm bg-[var(--admin-danger)] px-4 font-mono text-[10px] font-semibold uppercase tracking-wider text-white transition-transform active:translate-y-px"
+            className="inline-flex h-8 items-center gap-2 rounded-sm bg-[var(--admin-danger)] px-4 font-mono text-[10px] font-semibold uppercase tracking-wider text-[var(--admin-on-danger)] transition-transform active:translate-y-px"
             onClick={() => void load()}
           >
             <RefreshCw className="h-3.5 w-3.5" aria-hidden />

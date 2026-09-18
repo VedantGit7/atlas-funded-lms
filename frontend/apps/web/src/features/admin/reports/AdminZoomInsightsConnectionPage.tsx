@@ -49,7 +49,7 @@ const dangerOutlineButtonClassName =
   "inline-flex h-9 items-center justify-center gap-2 rounded border border-[color-mix(in_srgb,var(--admin-danger)_45%,var(--admin-border))] bg-[var(--admin-surface)] px-3 text-[13px] font-semibold text-[var(--admin-danger)] transition-all hover:bg-[color-mix(in_srgb,var(--admin-danger)_10%,var(--admin-surface))] active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-danger)]/30 disabled:cursor-not-allowed disabled:opacity-50";
 
 const dangerSolidButtonClassName =
-  "inline-flex h-9 items-center justify-center gap-2 rounded border border-[var(--admin-danger)] bg-[var(--admin-danger)] px-3 text-[13px] font-semibold text-[var(--admin-on-primary)] transition-all hover:opacity-90 active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-danger)]/40 disabled:cursor-not-allowed disabled:opacity-50";
+  "inline-flex h-9 items-center justify-center gap-2 rounded border border-[var(--admin-danger)] bg-[var(--admin-danger)] px-3 text-[13px] font-semibold text-[var(--admin-on-danger)] transition-all hover:opacity-90 active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-danger)]/40 disabled:cursor-not-allowed disabled:opacity-50";
 
 const fieldClassName =
   "h-9 w-full rounded border border-[var(--admin-border)] bg-[var(--admin-bg)] px-3 text-[13px] text-[var(--admin-on-surface)] placeholder:text-[var(--admin-on-surface-variant)] focus-visible:border-[var(--admin-primary)] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--admin-primary)]";

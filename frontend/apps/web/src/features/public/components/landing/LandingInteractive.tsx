@@ -19,7 +19,7 @@ export function LandingFaq() {
     <div id="faq" className="px-7 py-24 max-[768px]:px-4 max-[768px]:py-16">
       <div className="mx-auto max-w-[720px]">
         <div className="mb-[52px] text-center">
-          <div className="mb-3.5 text-[11px] font-semibold uppercase tracking-[0.15em] text-[var(--fba-ind)]">
+          <div className="mb-3.5 text-[11px] font-semibold uppercase tracking-[0.15em] text-[var(--fba-ind-tx)]">
             FAQ
           </div>
           <h2 className="m-0 text-[40px] font-extrabold leading-[1.1] text-[var(--fba-tx)] max-[768px]:text-[32px]">
@@ -44,7 +44,7 @@ export function LandingFaq() {
                   </div>
                   <div
                     className={`w-5 shrink-0 text-center text-[22px] font-light leading-none ${
-                      isOpen ? "text-[var(--fba-ind)]" : "text-[var(--fba-tx3)]"
+                      isOpen ? "text-[var(--fba-ind-tx)]" : "text-[var(--fba-tx3)]"
                     }`}
                     aria-hidden
                   >

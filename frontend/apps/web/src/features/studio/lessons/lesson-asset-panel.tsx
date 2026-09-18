@@ -144,7 +144,7 @@ export function LessonAssetPanel({ lessonId, editable }: LessonAssetPanelProps) 
                   <p className="truncate text-sm font-medium text-[var(--admin-on-surface)]">
                     {asset.fileName ?? asset.assetType}
                   </p>
-                  <span className="inline-block rounded bg-[var(--admin-surface-high)] px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[var(--admin-outline)]">
+                  <span className="inline-block rounded bg-[var(--admin-surface-high)] px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[var(--admin-on-surface-variant)]">
                     {asset.provider}
                   </span>
                 </div>
@@ -153,7 +153,7 @@ export function LessonAssetPanel({ lessonId, editable }: LessonAssetPanelProps) 
                 <button
                   type="button"
                   aria-label={`Remove ${asset.fileName ?? asset.assetType}`}
-                  className="text-[var(--admin-outline)] opacity-0 transition-opacity hover:text-[var(--admin-danger)] group-hover:opacity-100"
+                  className="text-[var(--admin-on-surface-variant)] opacity-0 transition-opacity hover:text-[var(--admin-danger)] group-hover:opacity-100"
                   disabled={busy}
                   onClick={() => {
                     void removeAsset(asset.id);

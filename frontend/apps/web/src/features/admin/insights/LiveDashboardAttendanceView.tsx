@@ -390,7 +390,7 @@ export function LiveDashboardAttendanceView({
             >
               Admin
             </Link>
-            <span className="text-[var(--admin-outline)]">/</span>
+            <span className="text-[var(--admin-on-surface-variant)]">/</span>
             <Link
               href={adminInsightHref(slug)}
               prefetch={false}
@@ -398,7 +398,7 @@ export function LiveDashboardAttendanceView({
             >
               {sectionTitle}
             </Link>
-            <span className="text-[var(--admin-outline)]">/</span>
+            <span className="text-[var(--admin-on-surface-variant)]">/</span>
             <Link
               href={adminInsightAttendanceHref(slug)}
               prefetch={false}
@@ -889,7 +889,7 @@ export function LiveDashboardAttendanceView({
                             </td>
                             <td className="px-4 py-2">
                               {emptyDay || day.rate == null ? (
-                                <span className="font-data text-sm text-[var(--admin-outline)]">
+                                <span className="font-data text-sm text-[var(--admin-on-surface-variant)]">
                                   -
                                 </span>
                               ) : (
@@ -918,7 +918,7 @@ export function LiveDashboardAttendanceView({
                                 <Link
                                   href={board.sessionsBoardHref}
                                   prefetch={false}
-                                  className="inline-flex text-[var(--admin-outline)] opacity-0 transition-opacity group-hover:opacity-100"
+                                  className="inline-flex text-[var(--admin-on-surface-variant)] opacity-0 transition-opacity group-hover:opacity-100"
                                   aria-label={`Open sessions for ${day.label}`}
                                 >
                                   <ChevronRight className="h-[18px] w-[18px]" aria-hidden="true" />

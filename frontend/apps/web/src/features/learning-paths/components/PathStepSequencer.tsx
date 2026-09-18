@@ -268,7 +268,7 @@ export function PathStepSequencer({
                                 onClick={() => {
                                   removeStep(step.id);
                                 }}
-                                className="rounded-lg p-1 text-[var(--admin-on-surface-variant)] transition-colors hover:bg-red-50 hover:text-red-600 disabled:opacity-40 dark:hover:bg-red-950/40 dark:hover:text-red-400"
+                                className="rounded-lg p-1 text-[var(--admin-on-surface-variant)] transition-colors hover:bg-destructive/10 hover:text-destructive-text disabled:opacity-40 dark:hover:bg-red-950/40 dark:hover:text-red-400"
                               >
                                 <Trash2 className="h-4 w-4" aria-hidden="true" />
                               </button>

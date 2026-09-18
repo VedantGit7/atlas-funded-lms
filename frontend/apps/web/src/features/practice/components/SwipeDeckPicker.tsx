@@ -28,7 +28,7 @@ export function SwipeDeckPicker({
         <h2 id="swipe-deck-picker-title" className="text-lg font-semibold">
           Choose a practice deck
         </h2>
-        <p className="text-sm text-neutral-600">
+        <p className="text-sm text-muted-foreground">
           Start with cards that are due for review or pick a published deck.
         </p>
       </div>
@@ -36,12 +36,12 @@ export function SwipeDeckPicker({
       <div className="grid gap-3 sm:grid-cols-2">
         <button
           type="button"
-          className="rounded border p-4 text-left hover:bg-neutral-50 disabled:opacity-60"
+          className="rounded border p-4 text-left hover:bg-muted disabled:opacity-60"
           disabled={starting}
           onClick={onStartDue}
         >
           <div className="font-medium">Due queue</div>
-          <div className="text-sm text-neutral-600">
+          <div className="text-sm text-muted-foreground">
             {dueCount > 0
               ? `${String(dueCount)} cards due now`
               : "Review due cards first, then new cards"}
@@ -52,14 +52,14 @@ export function SwipeDeckPicker({
           <button
             key={deck.collectionId}
             type="button"
-            className="rounded border p-4 text-left hover:bg-neutral-50 disabled:opacity-60"
+            className="rounded border p-4 text-left hover:bg-muted disabled:opacity-60"
             disabled={starting}
             onClick={() => {
               onStartDeck(deck.collectionId);
             }}
           >
             <div className="font-medium">{deck.title}</div>
-            <div className="text-sm text-neutral-600">{deck.itemCount} swipe cards</div>
+            <div className="text-sm text-muted-foreground">{deck.itemCount} swipe cards</div>
           </button>
         ))}
       </div>

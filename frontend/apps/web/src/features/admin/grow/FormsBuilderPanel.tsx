@@ -505,11 +505,11 @@ export function FormsBuilderPanel({ formId }: { formId: string }) {
                       ) : null}
                     </p>
                     {field.fieldType === "textarea" ? (
-                      <div className="min-h-20 w-full border-b-2 border-[var(--admin-border)] py-3 text-lg text-[var(--admin-outline)]">
+                      <div className="min-h-20 w-full border-b-2 border-[var(--admin-border)] py-3 text-lg text-[var(--admin-on-surface-variant)]">
                         {field.placeholder || "Type your answer here..."}
                       </div>
                     ) : (
-                      <div className="w-full border-b-2 border-[var(--admin-border)] py-3 text-lg text-[var(--admin-outline)]">
+                      <div className="w-full border-b-2 border-[var(--admin-border)] py-3 text-lg text-[var(--admin-on-surface-variant)]">
                         {field.placeholder ||
                           (field.fieldType === "email"
                             ? "email@company.com"
@@ -882,7 +882,7 @@ export function FormsBuilderPanel({ formId }: { formId: string }) {
               </button>
               <button
                 type="button"
-                className="rounded-xl bg-[var(--admin-danger)] px-4 py-2 text-sm font-semibold text-[var(--admin-on-primary)] disabled:opacity-50"
+                className="rounded-xl bg-[var(--admin-danger)] px-4 py-2 text-sm font-semibold text-[var(--admin-on-danger)] disabled:opacity-50"
                 disabled={busy || deleteConfirm.trim() !== form.title.trim()}
                 onClick={() => {
                   void onDelete();

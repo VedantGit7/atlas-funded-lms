@@ -20,7 +20,7 @@ export function InviteSecuritySetup({ continuePath }: InviteSecuritySetupProps) 
 
   return (
     <section aria-labelledby="invite-security-title" className={cardClass}>
-      <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--fba-ind)]">
+      <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--fba-ind-tx)]">
         Almost there
       </p>
       <h1 id="invite-security-title" className={`mb-2 ${headlineClass}`}>

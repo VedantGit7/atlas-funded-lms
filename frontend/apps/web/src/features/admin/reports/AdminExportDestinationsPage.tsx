@@ -268,7 +268,7 @@ function DeleteDestinationModal({
           </button>
           <button
             type="button"
-            className="inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-[var(--admin-danger)] px-4 text-[13px] font-semibold text-[var(--admin-on-primary)] transition-all hover:opacity-90 active:translate-y-px disabled:opacity-50"
+            className="inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-[var(--admin-danger)] px-4 text-[13px] font-semibold text-[var(--admin-on-danger)] transition-all hover:opacity-90 active:translate-y-px disabled:opacity-50"
             onClick={onConfirm}
             disabled={busy}
           >

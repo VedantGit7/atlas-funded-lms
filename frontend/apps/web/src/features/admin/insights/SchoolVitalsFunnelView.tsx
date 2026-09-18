@@ -675,7 +675,7 @@ export function SchoolVitalsFunnelView({
                   />
                   {board.currentLabel}
                 </span>
-                <span className="text-[var(--admin-outline)]">vs</span>
+                <span className="text-[var(--admin-on-surface-variant)]">vs</span>
                 <span className="inline-flex items-center gap-2 font-data text-sm text-[var(--admin-on-surface-variant)]">
                   <span
                     className="h-3 w-3 rounded-full border border-[var(--admin-outline)]"
@@ -842,7 +842,7 @@ export function SchoolVitalsFunnelView({
                     <p className="text-sm text-[var(--admin-on-surface-variant)]">
                       No data available
                     </p>
-                    <p className="mt-1 text-xs text-[var(--admin-outline)]">
+                    <p className="mt-1 text-xs text-[var(--admin-on-surface-variant)]">
                       Ratios only appear for arithmetically valid relationships.
                     </p>
                   </div>

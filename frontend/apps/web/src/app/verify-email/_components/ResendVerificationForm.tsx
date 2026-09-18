@@ -108,7 +108,7 @@ export function ResendVerificationForm({
               {state.message}
             </div>
           ) : (
-            <p role="alert" className="text-[13px] text-[var(--fba-red)]">
+            <p role="alert" className="text-[13px] text-[var(--fba-red-tx)]">
               {state.message}
             </p>
           )
@@ -145,7 +145,7 @@ export function ResendVerificationForm({
 
         <Link
           href="/login"
-          className="inline-flex w-full items-center justify-center gap-1.5 text-[13px] font-semibold text-[var(--fba-ind)] transition-opacity hover:opacity-80"
+          className="inline-flex w-full items-center justify-center gap-1.5 text-[13px] font-semibold text-[var(--fba-ind-tx)] transition-opacity hover:opacity-80"
         >
           <svg
             width="16"

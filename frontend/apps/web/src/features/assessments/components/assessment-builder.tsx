@@ -412,7 +412,7 @@ export function AssessmentBuilder({ initialAssessment, availableItems }: Assessm
                         onClick={() => {
                           removeItem(item.itemId);
                         }}
-                        className="rounded-lg p-1 text-[var(--admin-on-surface-variant)] opacity-0 transition-all group-hover:opacity-100 hover:bg-red-50 hover:text-[var(--admin-danger)] dark:hover:bg-red-950/40"
+                        className="rounded-lg p-1 text-[var(--admin-on-surface-variant)] opacity-0 transition-all group-hover:opacity-100 hover:bg-destructive/10 hover:text-[var(--admin-danger)] dark:hover:bg-red-950/40"
                       >
                         <X className="h-4 w-4" aria-hidden="true" />
                       </button>

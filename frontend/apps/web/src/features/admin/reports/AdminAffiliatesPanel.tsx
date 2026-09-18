@@ -2117,7 +2117,7 @@ export function AdminAffiliatesPanel() {
               </button>
               <button
                 type="button"
-                className="inline-flex h-9 items-center rounded bg-[var(--admin-danger)] px-4 text-xs font-medium text-[var(--admin-on-primary)] disabled:opacity-50"
+                className="inline-flex h-9 items-center rounded bg-[var(--admin-danger)] px-4 text-xs font-medium text-[var(--admin-on-danger)] disabled:opacity-50"
                 disabled={busy}
                 onClick={() => void confirmSuspend()}
               >

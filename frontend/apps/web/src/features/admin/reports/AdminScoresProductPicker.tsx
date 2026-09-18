@@ -436,9 +436,9 @@ export function AdminScoresProductPicker({
               aria-hidden="true"
             />
             {formatCount(summary.productCount)} products
-            <span className="text-[var(--admin-outline)]">·</span>
+            <span className="text-[var(--admin-on-surface-variant)]">·</span>
             {formatCount(summary.assessmentCount)} assessments
-            <span className="text-[var(--admin-outline)]">·</span>
+            <span className="text-[var(--admin-on-surface-variant)]">·</span>
             {formatCount(summary.attemptCount)} attempts
           </p>
         </div>
@@ -514,7 +514,7 @@ export function AdminScoresProductPicker({
             }}
           />
           <div className="relative z-10 flex max-w-lg flex-col items-center">
-            <div className="mb-8 flex h-28 w-28 items-center justify-center rounded-full border border-[var(--admin-border)] bg-[var(--admin-surface)] text-[var(--admin-outline)]">
+            <div className="mb-8 flex h-28 w-28 items-center justify-center rounded-full border border-[var(--admin-border)] bg-[var(--admin-surface)] text-[var(--admin-on-surface-variant)]">
               <ClipboardList className="h-14 w-14" strokeWidth={1.25} aria-hidden="true" />
             </div>
             <h2 className="mb-3 text-2xl font-semibold tracking-[-0.02em] text-[var(--admin-on-surface)]">

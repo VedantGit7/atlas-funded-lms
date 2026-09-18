@@ -308,7 +308,7 @@ function FindingMenu({
           event.stopPropagation();
           setOpen((value) => !value);
         }}
-        className="flex h-8 w-8 items-center justify-center rounded-lg text-[var(--admin-outline)] transition-colors hover:bg-[var(--admin-surface-high)] hover:text-[var(--admin-primary)]"
+        className="flex h-8 w-8 items-center justify-center rounded-lg text-[var(--admin-on-surface-variant)] transition-colors hover:bg-[var(--admin-surface-high)] hover:text-[var(--admin-primary)]"
       >
         <MoreVertical className="h-4 w-4" />
       </button>
@@ -1055,7 +1055,7 @@ export function AdminSuperLiveInsightsOutliersPage() {
                                 className="inline-flex items-center gap-2"
                               >
                                 {index > 0 ? (
-                                  <span className="text-[var(--admin-outline)]">|</span>
+                                  <span className="text-[var(--admin-on-surface-variant)]">|</span>
                                 ) : null}
                                 <span className={evidenceToneClass(chip.tone)}>{chip.label}</span>
                               </span>

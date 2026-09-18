@@ -453,7 +453,7 @@ export function VerifyEmailScreen({
         <div className="fba-ve-rise w-full max-w-[480px] text-center">
           <VerifyHero status={status} />
 
-          <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--fba-ind)]">
+          <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--fba-ind-tx)]">
             {copy.eyebrow}
           </p>
           <h1 className="mb-3 text-[30px] font-extrabold leading-[1.15] tracking-[-0.02em] text-[var(--fba-tx)] sm:text-[34px]">
@@ -559,7 +559,7 @@ export function VerifyEmailScreen({
                         {" or "}
                         <a
                           href={`mailto:${supportEmail}`}
-                          className="font-semibold text-[var(--fba-ind)] underline decoration-[var(--fba-bdr2)] underline-offset-2 transition-colors hover:decoration-[var(--fba-ind)]"
+                          className="font-semibold text-[var(--fba-ind-tx)] underline decoration-[var(--fba-bdr2)] underline-offset-2 transition-colors hover:decoration-[var(--fba-ind-tx)]"
                         >
                           contact support
                         </a>
@@ -577,17 +577,17 @@ export function VerifyEmailScreen({
       {/* Footer */}
       <footer className="relative z-10 border-t border-[var(--fba-bdr)] py-8">
         <div className="mx-auto flex w-full max-w-[1100px] flex-col items-center gap-3 px-5 text-center sm:px-8">
-          <span className="text-[13px] font-extrabold text-[var(--fba-ind)]">{fullName}</span>
+          <span className="text-[13px] font-extrabold text-[var(--fba-ind-tx)]">{fullName}</span>
           <nav className="flex flex-wrap justify-center gap-5">
             <Link
               href="/terms"
-              className="text-[12px] text-[var(--fba-tx3)] transition-colors hover:text-[var(--fba-ind)]"
+              className="text-[12px] text-[var(--fba-tx3)] transition-colors hover:text-[var(--fba-ind-tx)]"
             >
               Terms of Service
             </Link>
             <Link
               href="/privacy"
-              className="text-[12px] text-[var(--fba-tx3)] transition-colors hover:text-[var(--fba-ind)]"
+              className="text-[12px] text-[var(--fba-tx3)] transition-colors hover:text-[var(--fba-ind-tx)]"
             >
               Privacy Policy
             </Link>

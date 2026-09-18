@@ -733,7 +733,7 @@ export function AdminLiveClassAttendanceExportsPage() {
                               </button>
                             ) : expired ? (
                               <Ban
-                                className="ml-auto h-[18px] w-[18px] text-[var(--admin-outline)]"
+                                className="ml-auto h-[18px] w-[18px] text-[var(--admin-on-surface-variant)]"
                                 aria-label="Expired"
                               />
                             ) : queued ? (

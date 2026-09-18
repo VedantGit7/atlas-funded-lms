@@ -378,7 +378,7 @@ export function LearnerNotificationPopover({
               onClick={() => {
                 setOpen(false);
               }}
-              className="flex min-h-10 w-full items-center justify-center rounded-[var(--radius)] bg-[var(--brand-primary)] px-3 py-2.5 text-xs font-semibold text-[var(--primary-foreground)] transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)]"
+              className="flex min-h-10 w-full items-center justify-center rounded-[var(--radius)] bg-primary px-3 py-2.5 text-xs font-semibold text-primary-foreground transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)]"
             >
               Open notifications
             </Link>

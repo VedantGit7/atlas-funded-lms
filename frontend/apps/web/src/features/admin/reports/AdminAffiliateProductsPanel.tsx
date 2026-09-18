@@ -1232,7 +1232,7 @@ export function AdminAffiliateProductsPanel() {
               </button>
               <button
                 type="button"
-                className="inline-flex h-10 items-center rounded-md bg-[var(--admin-danger)] px-4 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50"
+                className="inline-flex h-10 items-center rounded-md bg-[var(--admin-danger)] px-4 text-sm font-medium text-[var(--admin-on-danger)] hover:opacity-90 disabled:opacity-50"
                 onClick={() => void confirmDisable()}
                 disabled={busy || !disableReason}
               >

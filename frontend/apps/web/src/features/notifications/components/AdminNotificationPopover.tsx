@@ -215,7 +215,7 @@ export function AdminNotificationPopover() {
         <Bell className="h-5 w-5" aria-hidden="true" />
         {badgeUnread > 0 ? (
           <span
-            className="absolute right-0.5 top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--admin-danger)] px-1 text-[10px] font-bold leading-none text-white ring-2 ring-[var(--admin-bg)]"
+            className="absolute right-0.5 top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--admin-danger)] px-1 text-[10px] font-bold leading-none text-[var(--admin-on-danger)] ring-2 ring-[var(--admin-bg)]"
             aria-hidden="true"
           >
             {badgeUnread > 9 ? "9+" : badgeUnread}

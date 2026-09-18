@@ -23,6 +23,15 @@
   --fba-ind: #3730a3;
   --fba-ind-d: #2e2789;
   --fba-ind-l: #eef2ff;
+  /* Indigo when it spells something. Identical to --fba-ind in light mode; it
+     separates in dark mode, where the fill has to stay dark enough for white
+     text and the text has to be light enough to read on the dark surfaces --
+     one value cannot do both. Same reasoning as the -tx tokens below. */
+  --fba-ind-tx: #3730a3;
+  /* Large brand surfaces (the auth side panel) that carry translucent white
+     text. The same indigo as the fill in light mode; deeper in dark mode, where
+     the fill is lightened for buttons and white at 55% on it measured 2.57:1. */
+  --fba-panel: #3730a3;
   --fba-gld: #c9a84c;
   --fba-gld-l: #fef3c7;
   --fba-gld-b: #fde68a;
@@ -43,6 +52,9 @@
   /* Error red clears AA on white (4.83) but not on --fba-bg2 (3.99), which is
      where the trade rows sit. */
   --fba-red-tx: #ca2121;
+  /* Text on a gold fill. --fba-tx flips to near-white in dark mode, which is
+     2.0:1 on gold; the gold itself does not flip. */
+  --fba-on-gld: #1a1714;
   /* The warning amber was a hardcoded #d97706 in the landing markup: 3.19:1. */
   --fba-amb-tx: #b06105;
 
@@ -77,9 +89,20 @@
      tx3 was 2.58:1 on --fba-surf. Same ramp, same thresholds. */
   --fba-tx2: #a8a7bc;
   --fba-tx3: #8785a1;
-  --fba-ind: #6366f1;
-  --fba-ind-d: #5558e8;
+  /* #6366f1 carried white text at 4.47:1, just under AA; #5b5ef0 clears it
+     (4.88). Text that is indigo uses --fba-ind-tx instead. */
+  --fba-ind: #5b5ef0;
+  --fba-ind-d: #4f46e5;
   --fba-ind-l: #1e1d3a;
+  --fba-ind-tx: #a5b4fc;
+  --fba-panel: #2e2a6e;
+  /* The text-only variants had no dark values, so in dark mode they stayed
+     their light-mode colours -- dark text on a dark surface. Each clears 4.5:1
+     on bg, bg2, surf and ind-l. */
+  --fba-gld-tx: #e6c364;
+  --fba-grn-tx: #4ade80;
+  --fba-red-tx: #f87171;
+  --fba-amb-tx: #fbbf24;
   --fba-gld-l: color-mix(in srgb, var(--fba-gld) 18%, var(--fba-surf));
   --fba-nav-bg: rgba(15, 14, 26, 0.97);
   --fba-footer-bg: #07060f;

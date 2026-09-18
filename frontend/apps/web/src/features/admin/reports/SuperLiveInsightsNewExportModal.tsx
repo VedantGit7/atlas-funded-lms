@@ -30,7 +30,7 @@ const secondaryButtonClassName =
   "inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-[var(--admin-outline)] bg-[var(--admin-surface)] px-4 text-[13px] font-semibold text-[var(--admin-on-surface)] transition-all hover:bg-[var(--admin-surface-high)] active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]/30 disabled:cursor-not-allowed disabled:opacity-50";
 
 const fieldClassName =
-  "h-10 w-full rounded-lg border border-[var(--admin-border)] bg-[var(--admin-bg)] px-3 text-sm text-[var(--admin-on-surface)] outline-none placeholder:text-[var(--admin-outline)] focus:border-[var(--admin-primary)] focus:ring-1 focus:ring-[var(--admin-primary)]";
+  "h-10 w-full rounded-lg border border-[var(--admin-border)] bg-[var(--admin-bg)] px-3 text-sm text-[var(--admin-on-surface)] outline-none placeholder:text-[var(--admin-on-surface-variant)] focus:border-[var(--admin-primary)] focus:ring-1 focus:ring-[var(--admin-primary)]";
 
 const DATASET_OPTIONS: Array<{
   value: SliExportDataset;
@@ -862,7 +862,7 @@ export function SuperLiveInsightsNewExportModal({
                     }}
                     placeholder="recipient@example.com, …"
                     rows={3}
-                    className="mt-1 w-full rounded-lg border border-[var(--admin-border)] bg-[var(--admin-bg)] px-3 py-2 text-sm text-[var(--admin-on-surface)] outline-none placeholder:text-[var(--admin-outline)] focus:border-[var(--admin-primary)] focus:ring-1 focus:ring-[var(--admin-primary)]"
+                    className="mt-1 w-full rounded-lg border border-[var(--admin-border)] bg-[var(--admin-bg)] px-3 py-2 text-sm text-[var(--admin-on-surface)] outline-none placeholder:text-[var(--admin-on-surface-variant)] focus:border-[var(--admin-primary)] focus:ring-1 focus:ring-[var(--admin-primary)]"
                   />
                 ) : null}
               </div>

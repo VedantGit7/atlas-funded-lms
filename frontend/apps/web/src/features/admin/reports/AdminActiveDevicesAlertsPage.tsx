@@ -414,14 +414,14 @@ export function AdminActiveDevicesAlertsPage() {
             {summary?.unsupportedRules.length ? (
               <>
                 <div className="my-4 h-px w-full bg-[var(--admin-border)]" />
-                <p className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-wider text-[var(--admin-outline)]">
+                <p className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-wider text-[var(--admin-on-surface-variant)]">
                   Not configured
                 </p>
                 <ul className="space-y-1">
                   {summary.unsupportedRules.map((rule) => (
                     <li key={rule.key}>
                       <div
-                        className="rounded-r border-l-4 border-transparent px-3 py-2 text-sm text-[var(--admin-outline)]"
+                        className="rounded-r border-l-4 border-transparent px-3 py-2 text-sm text-[var(--admin-on-surface-variant)]"
                         title={rule.reason}
                       >
                         <div className="flex items-center justify-between">
@@ -571,7 +571,7 @@ export function AdminActiveDevicesAlertsPage() {
                             {alert.email}
                           </span>
                         ) : null}
-                        <span className="text-xs text-[var(--admin-outline)]">
+                        <span className="text-xs text-[var(--admin-on-surface-variant)]">
                           {typeLabel(alert.alertType)}
                         </span>
                       </div>
@@ -924,7 +924,7 @@ export function AdminActiveDevicesAlertsPage() {
                     </div>
                     <div className="relative">
                       <textarea
-                        className="h-24 w-full resize-none rounded border border-[var(--admin-border)] bg-[var(--admin-surface)] p-3 text-sm text-[var(--admin-on-surface)] outline-none placeholder:text-[var(--admin-outline)] focus:border-[var(--admin-primary)] focus:ring-1 focus:ring-[var(--admin-primary)]"
+                        className="h-24 w-full resize-none rounded border border-[var(--admin-border)] bg-[var(--admin-surface)] p-3 text-sm text-[var(--admin-on-surface)] outline-none placeholder:text-[var(--admin-on-surface-variant)] focus:border-[var(--admin-primary)] focus:ring-1 focus:ring-[var(--admin-primary)]"
                         placeholder="Add internal note..."
                         value={noteDraft}
                         onChange={(event) => {
@@ -962,7 +962,7 @@ export function AdminActiveDevicesAlertsPage() {
                   </button>
                   <button
                     type="button"
-                    className="inline-flex h-10 items-center gap-2 rounded bg-[var(--admin-danger)] px-4 text-sm font-semibold text-[var(--admin-on-primary)] hover:opacity-90 disabled:opacity-50"
+                    className="inline-flex h-10 items-center gap-2 rounded bg-[var(--admin-danger)] px-4 text-sm font-semibold text-[var(--admin-on-danger)] hover:opacity-90 disabled:opacity-50"
                     disabled={busy || !detail.capabilities.canRevokeSessions}
                     onClick={() => void handleRevokeSessions()}
                   >

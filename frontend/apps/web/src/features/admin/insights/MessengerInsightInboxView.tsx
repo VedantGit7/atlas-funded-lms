@@ -653,7 +653,7 @@ function ConversationsPanel({
               onFilterChange(event.target.value);
             }}
             placeholder="Filter by learner or message"
-            className="w-full rounded-md border border-[var(--admin-border)] bg-[var(--admin-surface)] py-2 pl-8 pr-3 text-sm text-[var(--admin-on-surface)] outline-none placeholder:text-[var(--admin-outline)] focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]/30"
+            className="w-full rounded-md border border-[var(--admin-border)] bg-[var(--admin-surface)] py-2 pl-8 pr-3 text-sm text-[var(--admin-on-surface)] outline-none placeholder:text-[var(--admin-on-surface-variant)] focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]/30"
           />
         </label>
       </header>

@@ -345,7 +345,7 @@ function RefundDetailDrawer({
             {detail.canRefund ? (
               <button
                 type="button"
-                className="flex-[2] rounded bg-[var(--admin-danger)] py-3 font-mono text-xs font-bold uppercase tracking-wide text-[var(--admin-on-primary)] shadow-[0_0_12px_color-mix(in_srgb,var(--admin-danger)_25%,transparent)]"
+                className="flex-[2] rounded bg-[var(--admin-danger)] py-3 font-mono text-xs font-bold uppercase tracking-wide text-[var(--admin-on-danger)] shadow-[0_0_12px_color-mix(in_srgb,var(--admin-danger)_25%,transparent)]"
                 onClick={() => {
                   onIssueRefund(detail);
                 }}

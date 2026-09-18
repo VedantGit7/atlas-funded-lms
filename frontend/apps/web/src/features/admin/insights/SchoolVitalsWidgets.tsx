@@ -358,7 +358,7 @@ const VIZ_ICONS: Partial<Record<VizType, typeof LineChart>> = {
 function WidgetEmpty({ title, body, icon }: { title: string; body: string; icon: ReactNode }) {
   return (
     <div className="flex flex-1 flex-col items-center justify-center px-8 py-12 text-center">
-      <div className="mb-4 text-[var(--admin-outline)]">{icon}</div>
+      <div className="mb-4 text-[var(--admin-on-surface-variant)]">{icon}</div>
       <h4 className="text-base font-semibold text-[var(--admin-on-surface)]">{title}</h4>
       <p className="mt-1 max-w-sm text-sm text-[var(--admin-on-surface-variant)]">{body}</p>
     </div>

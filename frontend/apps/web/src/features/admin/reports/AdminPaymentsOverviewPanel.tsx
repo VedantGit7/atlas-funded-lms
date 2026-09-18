@@ -638,7 +638,7 @@ export function AdminPaymentsOverviewPanel({ onNavigateTab, onRecordPayment }: P
           </div>
           <button
             type="button"
-            className="relative z-10 inline-flex items-center gap-2 rounded border border-[var(--admin-danger)] px-4 py-1.5 font-mono text-xs font-bold uppercase tracking-wide text-[var(--admin-danger)] transition-colors hover:bg-[var(--admin-danger)] hover:text-[var(--admin-on-primary)]"
+            className="relative z-10 inline-flex items-center gap-2 rounded border border-[var(--admin-danger)] px-4 py-1.5 font-mono text-xs font-bold uppercase tracking-wide text-[var(--admin-danger)] transition-colors hover:bg-[var(--admin-danger)] hover:text-[var(--admin-on-danger)]"
             onClick={() => void loadOverview()}
           >
             <RefreshCw className="h-3.5 w-3.5" aria-hidden="true" />

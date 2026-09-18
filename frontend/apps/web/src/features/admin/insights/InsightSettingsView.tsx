@@ -691,7 +691,7 @@ function RestrictModal({
             type="button"
             disabled={mutating}
             onClick={onConfirm}
-            className="inline-flex h-11 items-center justify-center rounded bg-[var(--admin-danger)] px-5 text-sm font-medium text-[var(--admin-on-primary)] hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex h-11 items-center justify-center rounded bg-[var(--admin-danger)] px-5 text-sm font-medium text-[var(--admin-on-danger)] hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Confirm restriction
           </button>
@@ -744,7 +744,7 @@ function DiscardModal({ onCancel, onConfirm }: { onCancel: () => void; onConfirm
           <button
             type="button"
             onClick={onConfirm}
-            className="inline-flex h-11 items-center justify-center rounded bg-[var(--admin-danger)] px-4 text-sm text-[var(--admin-on-primary)] hover:opacity-90"
+            className="inline-flex h-11 items-center justify-center rounded bg-[var(--admin-danger)] px-4 text-sm text-[var(--admin-on-danger)] hover:opacity-90"
           >
             Discard changes
           </button>

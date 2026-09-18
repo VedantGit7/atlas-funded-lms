@@ -323,7 +323,7 @@ function ErrorStrip({ message, onRetry }: { message: string; onRetry: () => void
       </div>
       <button
         type="button"
-        className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded bg-[var(--admin-danger)] px-4 text-sm font-semibold text-[var(--admin-on-primary)] outline-none transition-[background-color,transform] duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[var(--admin-danger)]/30 motion-safe:active:translate-y-px"
+        className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded bg-[var(--admin-danger)] px-4 text-sm font-semibold text-[var(--admin-on-danger)] outline-none transition-[background-color,transform] duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[var(--admin-danger)]/30 motion-safe:active:translate-y-px"
         onClick={onRetry}
       >
         <RefreshCw className="h-4 w-4" aria-hidden="true" />

@@ -56,7 +56,7 @@ export function MemberCompetencyPanel({ membershipId }: MemberCompetencyPanelPro
   if (error) {
     return (
       <section className="rounded border p-4">
-        <p className="text-sm text-red-600" role="alert">
+        <p className="text-sm text-destructive-text" role="alert">
           {error}
         </p>
       </section>

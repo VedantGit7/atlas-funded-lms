@@ -549,7 +549,7 @@ export function AdminBatchLearnerDetailPage({
           </div>
           <button
             type="button"
-            className="inline-flex h-8 items-center justify-center rounded-lg bg-[var(--admin-danger)] px-4 text-xs font-semibold text-white transition-all hover:opacity-90 active:translate-y-px"
+            className="inline-flex h-8 items-center justify-center rounded-lg bg-[var(--admin-danger)] px-4 text-xs font-semibold text-[var(--admin-on-danger)] transition-all hover:opacity-90 active:translate-y-px"
             onClick={() => void load()}
           >
             <RefreshCw className="mr-2 h-3.5 w-3.5" aria-hidden="true" />
@@ -697,7 +697,7 @@ export function AdminBatchLearnerDetailPage({
           </div>
           <button
             type="button"
-            className="inline-flex h-8 items-center justify-center rounded-lg bg-[var(--admin-danger)] px-3 text-xs font-semibold text-white"
+            className="inline-flex h-8 items-center justify-center rounded-lg bg-[var(--admin-danger)] px-3 text-xs font-semibold text-[var(--admin-on-danger)]"
             onClick={() => {
               setActionError(null);
               void load();
@@ -1215,7 +1215,7 @@ export function AdminBatchLearnerDetailPage({
                   ))}
                 </div>
                 {heatmapMonths.length > 0 ? (
-                  <div className="flex items-center justify-between px-0.5 font-mono text-[10px] text-[var(--admin-outline)]">
+                  <div className="flex items-center justify-between px-0.5 font-mono text-[10px] text-[var(--admin-on-surface-variant)]">
                     {heatmapMonths.map((month) => (
                       <span key={month}>{month}</span>
                     ))}
@@ -1478,7 +1478,7 @@ export function AdminBatchLearnerDetailPage({
               </button>
               <button
                 type="button"
-                className="inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-[var(--admin-danger)] px-4 text-sm font-medium text-white transition-all hover:opacity-90 active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-danger)]/30 disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-[var(--admin-danger)] px-4 text-sm font-medium text-[var(--admin-on-danger)] transition-all hover:opacity-90 active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-danger)]/30 disabled:cursor-not-allowed disabled:opacity-50"
                 disabled={removeBusy || (removeReason === "other" && !removeNotes.trim())}
                 onClick={() => void handleRemove()}
               >

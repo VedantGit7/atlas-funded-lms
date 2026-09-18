@@ -204,7 +204,7 @@ function EmptyOverview({ onInvite }: { onInvite: () => void }) {
               className="flex flex-col items-center justify-center rounded-lg border border-dashed border-[var(--admin-border)] bg-[var(--admin-surface-low)] p-6"
             >
               <Icon className="mb-2 h-6 w-6 text-[var(--admin-outline)]" aria-hidden />
-              <span className="font-mono text-3xl text-[var(--admin-outline)]">-</span>
+              <span className="font-mono text-3xl text-[var(--admin-on-surface-variant)]">-</span>
               <span className="mt-2 text-[11px] font-medium tracking-wider text-[var(--admin-on-surface-variant)] uppercase">
                 {label}
               </span>
@@ -227,7 +227,9 @@ function EmptyOverview({ onInvite }: { onInvite: () => void }) {
           Free up inactive seats once learners start joining.
         </p>
         <div className="flex h-28 w-full items-center justify-center rounded-lg border border-dashed border-[var(--admin-border)] bg-[var(--admin-surface-low)]">
-          <p className="font-mono text-sm text-[var(--admin-outline)]">Nothing to reclaim yet</p>
+          <p className="font-mono text-sm text-[var(--admin-on-surface-variant)]">
+            Nothing to reclaim yet
+          </p>
         </div>
         <button type="button" className={`${secondaryButtonClassName} mt-4`} onClick={onInvite}>
           Invite users

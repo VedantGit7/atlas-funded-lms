@@ -179,7 +179,7 @@ export function AdminPaymentInvoiceVoidModal({ open, detail, onClose, onVoided }
           </button>
           <button
             type="button"
-            className="inline-flex items-center gap-2 rounded border border-[var(--admin-danger)] bg-[var(--admin-danger)] px-4 py-2 text-sm font-semibold text-[var(--admin-on-primary)] hover:opacity-90 disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded border border-[var(--admin-danger)] bg-[var(--admin-danger)] px-4 py-2 text-sm font-semibold text-[var(--admin-on-danger)] hover:opacity-90 disabled:opacity-50"
             disabled={!canSubmit}
             onClick={() => void submit()}
           >

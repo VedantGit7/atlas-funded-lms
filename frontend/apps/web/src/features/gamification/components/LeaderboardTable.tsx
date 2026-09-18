@@ -139,7 +139,7 @@ export function LeaderboardTable({
 
       {loading ? <p className="text-sm">Loading leaderboard…</p> : null}
       {error ? (
-        <p className="text-sm text-red-700" role="alert">
+        <p className="text-sm text-destructive-text" role="alert">
           {error}
           {requestId ? ` (Request ID: ${requestId})` : null}
         </p>

@@ -40,7 +40,7 @@ export function ActiveQuestsCard({ quests }: ActiveQuestsCardProps) {
               </div>
               <div className="mt-1 h-1.5 w-full rounded-full bg-black/10">
                 <div
-                  className="h-1.5 rounded-full bg-emerald-600"
+                  className="h-1.5 rounded-full bg-success"
                   style={{ width: `${String(percent)}%` }}
                 />
               </div>

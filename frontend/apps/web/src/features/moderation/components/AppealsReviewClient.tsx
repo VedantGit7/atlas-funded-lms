@@ -79,11 +79,13 @@ function AppealReviewCard({
           <span className="rounded bg-[var(--admin-primary-container)] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[var(--admin-on-primary-container)]">
             {target.label}
           </span>
-          <code className={`${monoClassName} text-[var(--admin-outline)]`}>
+          <code className={`${monoClassName} text-[var(--admin-on-surface-variant)]`}>
             {formatCaseRef(item.id)}
           </code>
         </div>
-        <span className="text-xs text-[var(--admin-outline)]">Received {receivedLabel}</span>
+        <span className="text-xs text-[var(--admin-on-surface-variant)]">
+          Received {receivedLabel}
+        </span>
       </div>
 
       <div className="mb-4">
@@ -114,7 +116,7 @@ function AppealReviewCard({
 
       <div className="flex flex-col gap-4 border-t border-[var(--admin-border)] pt-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="space-y-2">
-          <div className="flex items-center gap-1.5 text-[13px] text-[var(--admin-outline)]">
+          <div className="flex items-center gap-1.5 text-[13px] text-[var(--admin-on-surface-variant)]">
             <History className="h-4 w-4 shrink-0" aria-hidden="true" />
             <span>Original decision: {formatOriginalDecisionSummary(item)}</span>
           </div>
@@ -131,7 +133,7 @@ function AppealReviewCard({
           <button
             type="button"
             disabled
-            className="cursor-not-allowed rounded-lg border border-[var(--admin-border)] px-4 py-2 text-[13px] font-medium text-[var(--admin-outline)]"
+            className="cursor-not-allowed rounded-lg border border-[var(--admin-border)] px-4 py-2 text-[13px] font-medium text-[var(--admin-on-surface-variant)]"
           >
             Review unavailable
           </button>
@@ -301,7 +303,7 @@ export function AppealsReviewClient({ viewerMembershipId }: AppealsReviewClientP
             ))}
           </div>
 
-          <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-[var(--admin-border)] pt-5 text-[13px] text-[var(--admin-outline)]">
+          <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-[var(--admin-border)] pt-5 text-[13px] text-[var(--admin-on-surface-variant)]">
             <span>
               Showing {openAppeals.length} open {openAppeals.length === 1 ? "appeal" : "appeals"}
             </span>

@@ -104,10 +104,10 @@ export function PublicMarketingFormClient({
   }
 
   if (loading) {
-    return <p className="p-8 text-sm text-neutral-600">Loading form…</p>;
+    return <p className="p-8 text-sm text-muted-foreground">Loading form…</p>;
   }
   if (error || !form) {
-    return <p className="p-8 text-sm text-red-600">{error ?? "Form not available."}</p>;
+    return <p className="p-8 text-sm text-destructive-text">{error ?? "Form not available."}</p>;
   }
   if (done && !done.redirectUrl) {
     return (
@@ -116,7 +116,7 @@ export function PublicMarketingFormClient({
         {done.thankYouHtml ? (
           <SafeHtml html={done.thankYouHtml} variant="inline" />
         ) : (
-          <p className="text-neutral-700">Thanks — your response was submitted.</p>
+          <p className="text-foreground">Thanks — your response was submitted.</p>
         )}
       </div>
     );
@@ -126,7 +126,7 @@ export function PublicMarketingFormClient({
     <div className="mx-auto max-w-lg space-y-6 p-8">
       <header className="space-y-2">
         <h1 className="text-2xl font-semibold tracking-tight">{form.title}</h1>
-        {form.description ? <p className="text-neutral-600">{form.description}</p> : null}
+        {form.description ? <p className="text-muted-foreground">{form.description}</p> : null}
       </header>
       <form onSubmit={(e) => void onSubmit(e)} className="space-y-4">
         {form.fields.map((field) => (
@@ -144,7 +144,7 @@ export function PublicMarketingFormClient({
                 onChange={(e) => {
                   setAnswers((prev) => ({ ...prev, [field.key]: e.target.value }));
                 }}
-                className="min-h-24 w-full rounded-lg border border-neutral-300 px-3 py-2.5 text-sm"
+                className="min-h-24 w-full rounded-lg border border-input px-3 py-2.5 text-sm"
               />
             ) : (
               <input
@@ -166,7 +166,7 @@ export function PublicMarketingFormClient({
                 onChange={(e) => {
                   setAnswers((prev) => ({ ...prev, [field.key]: e.target.value }));
                 }}
-                className="w-full rounded-lg border border-neutral-300 px-3 py-2.5 text-sm"
+                className="w-full rounded-lg border border-input px-3 py-2.5 text-sm"
               />
             )}
           </div>
@@ -175,7 +175,7 @@ export function PublicMarketingFormClient({
           <div className="space-y-3">
             <a
               href={`/auth/oauth/google?remember=0&next=${encodeURIComponent("/")}`}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-neutral-300 bg-white px-4 py-2.5 text-sm font-medium text-neutral-800 hover:bg-neutral-50"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-input bg-card px-4 py-2.5 text-sm font-medium text-foreground hover:bg-muted"
             >
               <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden>
                 <path
@@ -197,9 +197,9 @@ export function PublicMarketingFormClient({
               </svg>
               Continue with Google
             </a>
-            <div className="relative py-1 text-center text-xs text-neutral-400">
-              <span className="relative z-[1] bg-white px-2">or</span>
-              <span className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-neutral-200" />
+            <div className="relative py-1 text-center text-xs text-muted-foreground">
+              <span className="relative z-[1] bg-card px-2">or</span>
+              <span className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-muted" />
             </div>
           </div>
         ) : null}

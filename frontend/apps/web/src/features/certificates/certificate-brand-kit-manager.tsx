@@ -204,7 +204,7 @@ export function CertificateBrandKitManager({ initialKits }: { initialKits: Brand
       {error ? (
         <div
           role="alert"
-          className="rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700"
+          className="rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive-text"
         >
           {error}
         </div>
@@ -299,7 +299,7 @@ export function CertificateBrandKitManager({ initialKits }: { initialKits: Brand
                   </button>
                   <button
                     type="button"
-                    className="inline-flex items-center rounded-lg border border-red-200 p-2 text-red-600 transition-colors hover:bg-red-50 disabled:opacity-50"
+                    className="inline-flex items-center rounded-lg border border-destructive/30 p-2 text-destructive-text transition-colors hover:bg-destructive/10 disabled:opacity-50"
                     aria-label={`Delete ${kit.name}`}
                     onClick={() => void remove(kit)}
                     disabled={busy}

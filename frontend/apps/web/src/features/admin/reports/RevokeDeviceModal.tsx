@@ -164,7 +164,7 @@ export function RevokeDeviceModal({
           </button>
           <button
             type="button"
-            className="inline-flex h-10 min-w-[140px] items-center justify-center gap-2 rounded bg-[var(--admin-danger)] px-4 text-[12px] font-semibold uppercase tracking-[0.06em] text-[var(--admin-on-primary)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex h-10 min-w-[140px] items-center justify-center gap-2 rounded bg-[var(--admin-danger)] px-4 text-[12px] font-semibold uppercase tracking-[0.06em] text-[var(--admin-on-danger)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
             disabled={busy || !reason}
             onClick={() => {
               onConfirm({ reason, notifyLearner });

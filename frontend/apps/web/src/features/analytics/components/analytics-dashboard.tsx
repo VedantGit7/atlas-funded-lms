@@ -268,7 +268,7 @@ export function AnalyticsDashboard({
 
       {status === "loading" ? <p>Loading analytics…</p> : null}
       {status === "error" ? (
-        <p role="alert" className="rounded border border-red-300 p-3">
+        <p role="alert" className="rounded border border-destructive/40 p-3">
           {errorMessage}
         </p>
       ) : null}
@@ -286,7 +286,7 @@ export function AnalyticsDashboard({
             <h2 id="analytics-summary-heading" className="text-lg font-semibold">
               Summary
             </h2>
-            <p className="text-sm text-neutral-700">
+            <p className="text-sm text-foreground">
               {dashboard.data.summary.totalEvents.toLocaleString()} tracked events between{" "}
               {dashboard.data.from} and {dashboard.data.to}.
             </p>

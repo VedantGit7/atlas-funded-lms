@@ -536,7 +536,7 @@ export function SystemEmailEditorPanel({ emailKey }: SystemEmailEditorPanelProps
                             <button
                               type="button"
                               onClick={() => void copyToken(variable.key)}
-                              className="rounded p-1 text-[var(--admin-outline)] opacity-70 transition-opacity hover:text-[var(--admin-primary)] group-hover:opacity-100"
+                              className="rounded p-1 text-[var(--admin-on-surface-variant)] opacity-70 transition-opacity hover:text-[var(--admin-primary)] group-hover:opacity-100"
                               aria-label={copied ? `Copied ${token}` : `Copy ${token}`}
                             >
                               {copied ? (
@@ -633,7 +633,7 @@ export function SystemEmailEditorPanel({ emailKey }: SystemEmailEditorPanelProps
                 <div className="min-w-0 flex-1 space-y-1">
                   <div className="flex items-start justify-between gap-2">
                     <span className="font-bold text-[var(--admin-on-surface)]">{senderLabel}</span>
-                    <span className="shrink-0 text-[12px] font-semibold text-[var(--admin-outline)]">
+                    <span className="shrink-0 text-[12px] font-semibold text-[var(--admin-on-surface-variant)]">
                       Just now
                     </span>
                   </div>
@@ -668,7 +668,7 @@ export function SystemEmailEditorPanel({ emailKey }: SystemEmailEditorPanelProps
                 />
 
                 <div className="space-y-3 border-t border-[var(--admin-border)] pt-6 text-center">
-                  <p className="text-[11px] leading-relaxed text-[var(--admin-outline)]">
+                  <p className="text-[11px] leading-relaxed text-[var(--admin-on-surface-variant)]">
                     Preview uses sample personalization values. Delivery uses your transactional
                     email channel settings.
                   </p>

@@ -120,7 +120,7 @@ function ChannelIcon({
       className={`flex h-7 w-7 items-center justify-center rounded ${
         enabled
           ? "bg-[color-mix(in_srgb,var(--admin-primary)_12%,var(--admin-surface))] text-[var(--admin-primary)]"
-          : "bg-[var(--admin-surface-low)] text-[var(--admin-outline)]"
+          : "bg-[var(--admin-surface-low)] text-[var(--admin-on-surface-variant)]"
       }`}
     >
       <Icon className="h-3.5 w-3.5" strokeWidth={2} aria-hidden="true" />
@@ -622,7 +622,7 @@ export function PushMessageListPanel() {
                             className={
                               row.sentAt || row.scheduledAt
                                 ? "font-medium text-[var(--admin-on-surface)]"
-                                : "italic text-[var(--admin-outline)]"
+                                : "italic text-[var(--admin-on-surface-variant)]"
                             }
                           >
                             {row.status === "SENT"
@@ -720,7 +720,7 @@ export function PushMessageListPanel() {
                 onClick={() => {
                   setPage((current) => Math.max(1, current - 1));
                 }}
-                className="rounded p-1 text-[var(--admin-on-surface-variant)] transition-colors hover:bg-[var(--admin-surface-low)] disabled:cursor-not-allowed disabled:text-[var(--admin-outline)]"
+                className="rounded p-1 text-[var(--admin-on-surface-variant)] transition-colors hover:bg-[var(--admin-surface-low)] disabled:cursor-not-allowed disabled:text-[var(--admin-on-surface-variant)]"
               >
                 <ChevronLeft className="h-5 w-5" aria-hidden="true" />
               </button>
@@ -759,7 +759,7 @@ export function PushMessageListPanel() {
                 onClick={() => {
                   setPage((current) => Math.min(pageCount, current + 1));
                 }}
-                className="rounded p-1 text-[var(--admin-on-surface-variant)] transition-colors hover:bg-[var(--admin-surface-low)] disabled:cursor-not-allowed disabled:text-[var(--admin-outline)]"
+                className="rounded p-1 text-[var(--admin-on-surface-variant)] transition-colors hover:bg-[var(--admin-surface-low)] disabled:cursor-not-allowed disabled:text-[var(--admin-on-surface-variant)]"
               >
                 <ChevronRight className="h-5 w-5" aria-hidden="true" />
               </button>

@@ -202,7 +202,7 @@ export function AtlasFaq() {
                   </div>
                   <div
                     className={`w-5 shrink-0 text-center text-[22px] font-light leading-none ${
-                      isOpen ? "text-[var(--atl-acc)]" : "text-[var(--atl-tx3)]"
+                      isOpen ? "text-[var(--atl-acc-tx)]" : "text-[var(--atl-tx3)]"
                     }`}
                     aria-hidden
                   >

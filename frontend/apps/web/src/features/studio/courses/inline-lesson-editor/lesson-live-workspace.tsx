@@ -264,7 +264,7 @@ export function LessonLiveWorkspace({ lesson, editable, onSaved }: LessonLiveWor
 
       <div className="flex flex-1 flex-col p-5">
         <div className="flex flex-1 flex-col items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--admin-primary)_6%,var(--admin-surface-low))] px-6 py-12 text-center">
-          <div className="mb-5 inline-flex items-center gap-2 rounded-md bg-[var(--admin-danger)] px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-[var(--admin-on-primary)]">
+          <div className="mb-5 inline-flex items-center gap-2 rounded-md bg-[var(--admin-danger)] px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-[var(--admin-on-danger)]">
             <span
               className="h-2 w-2 rounded-full bg-[var(--admin-on-primary)]"
               aria-hidden="true"

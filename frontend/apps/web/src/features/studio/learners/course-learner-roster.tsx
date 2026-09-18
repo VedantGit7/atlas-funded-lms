@@ -141,7 +141,7 @@ export function CourseLearnerRoster({ courseId, courseTitle }: CourseLearnerRost
 
   if (errorMessage) {
     return (
-      <p role="alert" className="rounded border border-red-300 p-3">
+      <p role="alert" className="rounded border border-destructive/40 p-3">
         {errorMessage}
       </p>
     );

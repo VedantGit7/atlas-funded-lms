@@ -526,7 +526,7 @@ export function AdminProgressLearnerDetailPage({
               {detail.summary.timeOnContentLabel ?? "—"}
             </span>
             {!detail.summary.timeOnContentLabel ? (
-              <span className="font-mono text-[10px] text-[var(--admin-outline)]">
+              <span className="font-mono text-[10px] text-[var(--admin-on-surface-variant)]">
                 Not tracked yet
               </span>
             ) : null}
@@ -691,7 +691,7 @@ export function AdminProgressLearnerDetailPage({
                               {lesson.durationLabel ??
                                 (lesson.status === "not_started" ? "—" : "—")}
                             </span>
-                            <span className="font-mono text-[10px] text-[var(--admin-outline)]">
+                            <span className="font-mono text-[10px] text-[var(--admin-on-surface-variant)]">
                               {lesson.completedAt
                                 ? formatAbsolute(lesson.completedAt)
                                 : lesson.lastSeenAt
@@ -753,7 +753,7 @@ export function AdminProgressLearnerDetailPage({
                     </div>
                   ))}
                 </div>
-                <div className="flex items-center justify-between px-1 font-mono text-[10px] text-[var(--admin-outline)]">
+                <div className="flex items-center justify-between px-1 font-mono text-[10px] text-[var(--admin-on-surface-variant)]">
                   {months.map((month) => (
                     <span key={month}>{month}</span>
                   ))}
@@ -846,7 +846,7 @@ export function AdminProgressLearnerDetailPage({
                         ) : null}
                       </div>
                       <div className="mt-3 flex items-center justify-between border-t border-[var(--admin-border)] pt-3">
-                        <span className="font-mono text-[10px] text-[var(--admin-outline)]">
+                        <span className="font-mono text-[10px] text-[var(--admin-on-surface-variant)]">
                           {assessment.submittedAt
                             ? new Date(assessment.submittedAt).toLocaleDateString(undefined, {
                                 day: "numeric",
@@ -932,7 +932,7 @@ export function AdminProgressLearnerDetailPage({
                   className={
                     detail.enrolment.certificateIssued
                       ? "font-mono text-xs text-[var(--admin-on-surface)]"
-                      : "font-mono text-xs text-[var(--admin-outline)]"
+                      : "font-mono text-xs text-[var(--admin-on-surface-variant)]"
                   }
                 >
                   {detail.enrolment.certificateLabel ?? "N/A"}

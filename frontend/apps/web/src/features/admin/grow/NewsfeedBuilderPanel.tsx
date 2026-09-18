@@ -790,7 +790,7 @@ export function NewsfeedBuilderPanel({ postId }: { postId: string }) {
               </p>
               <button
                 type="button"
-                className="mt-4 inline-flex items-center gap-2 rounded-xl bg-[var(--admin-danger)] px-4 py-2.5 text-xs font-bold text-[var(--admin-on-primary)] disabled:opacity-50"
+                className="mt-4 inline-flex items-center gap-2 rounded-xl bg-[var(--admin-danger)] px-4 py-2.5 text-xs font-bold text-[var(--admin-on-danger)] disabled:opacity-50"
                 disabled={busy || live}
                 onClick={() => {
                   setDeleteOpen(true);
@@ -917,7 +917,7 @@ export function NewsfeedBuilderPanel({ postId }: { postId: string }) {
               </button>
               <button
                 type="button"
-                className="rounded-xl bg-[var(--admin-danger)] px-4 py-2 text-sm font-semibold text-[var(--admin-on-primary)] disabled:opacity-50"
+                className="rounded-xl bg-[var(--admin-danger)] px-4 py-2 text-sm font-semibold text-[var(--admin-on-danger)] disabled:opacity-50"
                 disabled={busy || deleteConfirm.trim() !== post.title.trim()}
                 onClick={() => void onDelete()}
               >

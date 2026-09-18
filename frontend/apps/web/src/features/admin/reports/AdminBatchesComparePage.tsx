@@ -722,7 +722,9 @@ export function AdminBatchesComparePage() {
                 index >= 2 ? "opacity-50" : "",
               ].join(" ")}
             >
-              <span className="text-xs text-[var(--admin-outline)]">Slot {index + 1}</span>
+              <span className="text-xs text-[var(--admin-on-surface-variant)]">
+                Slot {index + 1}
+              </span>
             </div>
           ))}
         </div>
@@ -960,7 +962,7 @@ export function AdminBatchesComparePage() {
               <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
               Batches
             </Link>
-            <span className="text-[var(--admin-outline)]">/</span>
+            <span className="text-[var(--admin-on-surface-variant)]">/</span>
             <span className="text-[var(--admin-on-surface)]">Compare</span>
           </div>
           <h1 className="text-2xl font-semibold tracking-[-0.01em] text-[var(--admin-on-surface)]">
@@ -1022,7 +1024,7 @@ export function AdminBatchesComparePage() {
                 </div>
                 <button
                   type="button"
-                  className="text-[var(--admin-outline)] transition-colors hover:text-[var(--admin-danger)]"
+                  className="text-[var(--admin-on-surface-variant)] transition-colors hover:text-[var(--admin-danger)]"
                   aria-label={`Remove ${item.name}`}
                   onClick={() => {
                     removeBatch(item.id);
@@ -1057,7 +1059,7 @@ export function AdminBatchesComparePage() {
                   </span>
                   <button
                     type="button"
-                    className="text-[var(--admin-outline)] hover:text-[var(--admin-danger)]"
+                    className="text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-danger)]"
                     onClick={() => {
                       removeBatch(id);
                     }}

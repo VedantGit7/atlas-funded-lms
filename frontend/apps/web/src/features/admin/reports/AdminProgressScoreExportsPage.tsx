@@ -191,7 +191,7 @@ function FailureDrawer({
               <p className="mb-2 text-[12px] font-semibold tracking-[0.06em] text-[var(--admin-on-surface-variant)] uppercase">
                 Execution trace
               </p>
-              <pre className="max-h-56 overflow-auto rounded-sm border border-[var(--admin-border)] bg-[color-mix(in_srgb,var(--admin-on-surface)_92%,black)] p-4 font-mono text-[11px] leading-relaxed text-[color-mix(in_srgb,#7CFC9A_70%,white)]">
+              <pre className="max-h-56 overflow-auto rounded-sm border border-[var(--admin-border)] bg-[var(--admin-code-bg)] p-4 font-mono text-[11px] leading-relaxed text-[var(--admin-code-fg)]">
                 {item.errorTrace.join("\n")}
               </pre>
             </div>
@@ -587,7 +587,7 @@ export function AdminProgressScoreExportsPage() {
                           <div className="font-mono text-[13px] text-[var(--admin-on-surface)]">
                             {formatRelative(item.createdAt)}
                           </div>
-                          <div className="font-mono text-[11px] text-[var(--admin-outline)]">
+                          <div className="font-mono text-[11px] text-[var(--admin-on-surface-variant)]">
                             {formatUtc(item.createdAt)}
                           </div>
                           {expired ? (

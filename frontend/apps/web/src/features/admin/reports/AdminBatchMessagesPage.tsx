@@ -216,7 +216,7 @@ function ErrorStrip({
       {onRetry ? (
         <button
           type="button"
-          className="inline-flex h-8 items-center justify-center rounded-lg bg-[var(--admin-danger)] px-4 text-xs font-semibold text-white hover:opacity-90"
+          className="inline-flex h-8 items-center justify-center rounded-lg bg-[var(--admin-danger)] px-4 text-xs font-semibold text-[var(--admin-on-danger)] hover:opacity-90"
           onClick={onRetry}
         >
           <RefreshCw className="mr-2 h-3.5 w-3.5" aria-hidden="true" />

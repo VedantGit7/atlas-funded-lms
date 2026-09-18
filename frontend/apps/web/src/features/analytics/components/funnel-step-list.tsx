@@ -30,12 +30,12 @@ export function FunnelStepList({ stages, title }: FunnelStepListProps) {
                 <span aria-label={`${formatStageLabel(stage.stageKey)} count`}>{stage.count}</span>
               </div>
               <div
-                className="mt-2 h-2 rounded bg-neutral-200"
+                className="mt-2 h-2 rounded bg-muted"
                 role="img"
                 aria-label={`${formatStageLabel(stage.stageKey)} volume bar`}
               >
                 <div
-                  className="h-2 rounded bg-neutral-700"
+                  className="h-2 rounded bg-primary"
                   style={{ width: `${String(widthPercent)}%` }}
                 />
               </div>

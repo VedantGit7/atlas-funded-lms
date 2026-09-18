@@ -280,7 +280,7 @@ export function ModerationQueueClient() {
                           <div className="relative inline-block">
                             <button
                               type="button"
-                              className="rounded p-1 text-[var(--admin-outline)] transition-colors hover:text-[var(--admin-primary)]"
+                              className="rounded p-1 text-[var(--admin-on-surface-variant)] transition-colors hover:text-[var(--admin-primary)]"
                               aria-label={`Actions for case ${item.id.slice(0, 8)}`}
                               aria-expanded={openActionMenuId === item.id}
                               onClick={(event) => {

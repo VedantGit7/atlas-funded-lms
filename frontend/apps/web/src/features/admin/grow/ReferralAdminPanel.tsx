@@ -221,7 +221,7 @@ export function ReferralAdminPanel() {
           <Link
             href={WALLET_HREF}
             prefetch={false}
-            className="inline-flex items-center justify-center rounded-lg bg-[var(--admin-warning)] px-4 py-1.5 text-xs font-bold text-[var(--admin-on-primary)] transition-opacity hover:opacity-90"
+            className="inline-flex items-center justify-center rounded-lg bg-[var(--admin-warning)] px-4 py-1.5 text-xs font-bold text-[var(--admin-on-warning)] transition-opacity hover:opacity-90"
           >
             Enable Wallet
           </Link>

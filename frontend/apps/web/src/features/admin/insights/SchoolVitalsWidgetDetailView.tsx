@@ -847,7 +847,7 @@ function UnderlyingTable({
                       }}
                     >
                       {column.label}
-                      <span className="font-data text-[10px] font-normal uppercase tracking-wide text-[var(--admin-outline)]">
+                      <span className="font-data text-[10px] font-normal uppercase tracking-wide text-[var(--admin-on-surface-variant)]">
                         {column.kind}
                       </span>
                     </button>

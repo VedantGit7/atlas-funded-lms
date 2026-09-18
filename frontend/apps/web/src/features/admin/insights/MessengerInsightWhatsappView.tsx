@@ -345,7 +345,7 @@ function ConnectionBanner({ board }: { board: InsightMessengerWhatsappBoard }) {
           WhatsApp connected
           {board.lastSentAt ? ` · last send ${formatRelativeTime(board.lastSentAt)}` : ""}
         </span>
-        <span className="text-[11px] uppercase tracking-wide text-[var(--admin-outline)]">
+        <span className="text-[11px] uppercase tracking-wide text-[var(--admin-on-surface-variant)]">
           Fixed reporting window
         </span>
       </div>
@@ -376,7 +376,7 @@ function ConnectionBanner({ board }: { board: InsightMessengerWhatsappBoard }) {
       <Link
         href={board.settingsHref}
         prefetch={false}
-        className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-lg bg-[var(--admin-warning)] px-4 text-sm font-semibold text-[var(--admin-on-primary)] outline-none transition hover:brightness-110 focus-visible:ring-2 focus-visible:ring-[var(--admin-warning)]/40 active:translate-y-px"
+        className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-lg bg-[var(--admin-warning)] px-4 text-sm font-semibold text-[var(--admin-on-warning)] outline-none transition hover:brightness-110 focus-visible:ring-2 focus-visible:ring-[var(--admin-warning)]/40 active:translate-y-px"
       >
         Reconnect WhatsApp
         <ArrowRight className="h-4 w-4" aria-hidden="true" />

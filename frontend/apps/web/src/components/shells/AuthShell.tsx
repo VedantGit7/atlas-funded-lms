@@ -46,7 +46,7 @@ export function AuthShell({ branding, requestId, children }: AuthShellProps) {
       <ShellSkipLink />
 
       {/* Left: brand panel */}
-      <aside className="relative hidden w-[45%] flex-col justify-between overflow-hidden bg-[var(--fba-ind)] p-10 md:flex">
+      <aside className="relative hidden w-[45%] flex-col justify-between overflow-hidden bg-[var(--fba-panel)] p-10 md:flex">
         <div
           className="pointer-events-none absolute inset-0 opacity-10"
           aria-hidden
@@ -81,7 +81,7 @@ export function AuthShell({ branding, requestId, children }: AuthShellProps) {
           <h2 className="mb-4 text-[32px] font-extrabold leading-[1.2] tracking-[-0.01em] text-white">
             Trade the right way.
           </h2>
-          <p className="mb-8 text-[18px] leading-[1.6] text-white/55">
+          <p className="mb-8 text-[18px] leading-[1.6] text-white/60">
             Pass your funded evaluation with structured prep, the right way, the first time.
           </p>
           <ul className="space-y-4">
@@ -94,7 +94,7 @@ export function AuthShell({ branding, requestId, children }: AuthShellProps) {
           </ul>
         </div>
 
-        <p className="relative z-10 text-[12px] uppercase leading-relaxed tracking-wider text-white/30">
+        <p className="relative z-10 text-[12px] uppercase leading-relaxed tracking-wider text-white/70">
           Not financial advice. Trading carries significant risk. {brandName} is an educational
           platform.
         </p>

@@ -128,7 +128,7 @@ export function ResetProgressModal({
                   setReason(event.target.value);
                 }}
                 placeholder="Enter administrative reason for this action…"
-                className="w-full resize-none border border-[var(--admin-on-surface)] bg-[var(--admin-bg)] p-4 text-sm text-[var(--admin-on-surface)] placeholder:text-[var(--admin-outline)] transition-colors focus:border-[var(--admin-warning)] focus:ring-1 focus:ring-[var(--admin-warning)] focus:outline-none disabled:opacity-60"
+                className="w-full resize-none border border-[var(--admin-on-surface)] bg-[var(--admin-bg)] p-4 text-sm text-[var(--admin-on-surface)] placeholder:text-[var(--admin-on-surface-variant)] transition-colors focus:border-[var(--admin-warning)] focus:ring-1 focus:ring-[var(--admin-warning)] focus:outline-none disabled:opacity-60"
               />
             </div>
           </div>
@@ -146,7 +146,7 @@ export function ResetProgressModal({
           <button
             type="button"
             disabled={!canSubmit}
-            className="inline-flex h-10 items-center gap-2 bg-[var(--admin-warning)] px-8 font-mono text-xs font-bold tracking-[0.08em] text-[var(--admin-on-primary)] uppercase transition-[filter] hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-warning)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--admin-surface)] disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex h-10 items-center gap-2 bg-[var(--admin-warning)] px-8 font-mono text-xs font-bold tracking-[0.08em] text-[var(--admin-on-warning)] uppercase transition-[filter] hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-warning)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--admin-surface)] disabled:cursor-not-allowed disabled:opacity-50"
             onClick={() => {
               onConfirm({
                 clearAssessmentAttempts: clearAttempts,

@@ -426,7 +426,7 @@ export function AdminPaymentRefundModal({ open, detail, onClose, onRefunded }: P
               <button
                 type="button"
                 disabled={!canSubmit}
-                className="flex items-center gap-2 border border-[var(--admin-danger)] bg-[var(--admin-danger)] px-6 py-2 font-mono text-[11px] font-bold uppercase tracking-wider text-[var(--admin-on-primary)] shadow-[0_0_15px_color-mix(in_srgb,var(--admin-danger)_30%,transparent)] hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+                className="flex items-center gap-2 border border-[var(--admin-danger)] bg-[var(--admin-danger)] px-6 py-2 font-mono text-[11px] font-bold uppercase tracking-wider text-[var(--admin-on-danger)] shadow-[0_0_15px_color-mix(in_srgb,var(--admin-danger)_30%,transparent)] hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
                 onClick={() => void submit()}
               >
                 {busy ? (

@@ -222,7 +222,7 @@ export function DiagnosticIdentityGate({
               />
 
               {message ? (
-                <p role="alert" className="text-sm text-red-700">
+                <p role="alert" className="text-sm text-destructive-text">
                   {message}
                 </p>
               ) : null}
@@ -295,7 +295,7 @@ export function DiagnosticIdentityGate({
               />
 
               {message ? (
-                <p role="alert" className="text-sm text-red-700">
+                <p role="alert" className="text-sm text-destructive-text">
                   {message}
                 </p>
               ) : null}

@@ -38,7 +38,7 @@ export function GamificationTabRail({ activeTab, onTabChange }: GamificationTabR
       className="w-full shrink-0 lg:w-56 lg:border-r lg:border-[var(--admin-border)] lg:pr-4"
       aria-label="Gamification domains"
     >
-      <p className="mb-3 px-2 text-[10px] font-bold uppercase tracking-[0.12em] text-[var(--admin-outline)]">
+      <p className="mb-3 px-2 text-[10px] font-bold uppercase tracking-[0.12em] text-[var(--admin-on-surface-variant)]">
         Logic domains
       </p>
       <nav className="flex flex-col gap-0.5">
@@ -59,7 +59,7 @@ export function GamificationTabRail({ activeTab, onTabChange }: GamificationTabR
                   ? "bg-[color-mix(in_srgb,var(--admin-primary)_10%,var(--admin-surface))] font-semibold text-[var(--admin-primary)]"
                   : tab.enabled
                     ? "text-[var(--admin-on-surface-variant)] hover:bg-[var(--admin-surface-high)]"
-                    : "cursor-not-allowed text-[var(--admin-outline)] opacity-60",
+                    : "cursor-not-allowed text-[var(--admin-on-surface-variant)] opacity-60",
               ].join(" ")}
               aria-current={active ? "page" : undefined}
             >
@@ -85,7 +85,7 @@ export function FlowConnector({ label }: { label: string }) {
   return (
     <div className="relative mx-2 hidden min-w-[4rem] flex-1 items-center lg:flex">
       <div className="h-px w-full border-t-2 border-dashed border-[var(--admin-outline)]" />
-      <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-[var(--admin-surface)] px-2 text-[10px] font-bold uppercase tracking-wide text-[var(--admin-outline)]">
+      <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-[var(--admin-surface)] px-2 text-[10px] font-bold uppercase tracking-wide text-[var(--admin-on-surface-variant)]">
         {label}
       </span>
       <ChevronRight

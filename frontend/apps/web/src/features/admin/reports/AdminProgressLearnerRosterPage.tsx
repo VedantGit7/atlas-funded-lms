@@ -692,7 +692,7 @@ export function AdminProgressLearnerRosterPage({
           <button
             type="button"
             onClick={() => void load()}
-            className={`${primaryButtonClassName} h-9 gap-2 bg-[var(--admin-warning)] text-[var(--admin-on-surface)] hover:brightness-110`}
+            className={`${primaryButtonClassName} h-9 gap-2 bg-[var(--admin-warning)] text-[var(--admin-on-warning)] hover:brightness-110`}
           >
             <RefreshCw className="h-4 w-4" aria-hidden="true" />
             Retry

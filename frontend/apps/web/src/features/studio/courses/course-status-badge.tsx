@@ -35,7 +35,9 @@ export function CourseStatusBadge({ status }: { status: CourseStatus }) {
 
   if (status === "ARCHIVED") {
     return (
-      <span className={`${base} bg-[var(--admin-surface-high)] text-[var(--admin-outline)]`}>
+      <span
+        className={`${base} bg-[var(--admin-surface-high)] text-[var(--admin-on-surface-variant)]`}
+      >
         <span className="h-1.5 w-1.5 rounded-full bg-[var(--admin-outline)]" aria-hidden="true" />
         {STATUS_LABELS[status]}
       </span>

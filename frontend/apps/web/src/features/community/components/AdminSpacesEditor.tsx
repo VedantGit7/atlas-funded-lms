@@ -190,7 +190,7 @@ export function AdminSpacesEditor({
         >
           Create space
         </button>
-        {error ? <p className="text-sm text-red-600">{error}</p> : null}
+        {error ? <p className="text-sm text-destructive-text">{error}</p> : null}
       </section>
 
       <table className="w-full border-collapse text-sm">
@@ -298,7 +298,7 @@ export function AdminSpacesEditor({
           aria-modal="true"
           aria-labelledby="space-delete-confirm-title"
         >
-          <div className="w-full max-w-md rounded-lg border bg-white p-4 shadow-lg">
+          <div className="w-full max-w-md rounded-lg border bg-card p-4 shadow-lg">
             <h2 id="space-delete-confirm-title" className="font-semibold">
               Delete community space
             </h2>
@@ -309,7 +309,7 @@ export function AdminSpacesEditor({
             <div className="mt-4 flex flex-col gap-2 sm:flex-row-reverse sm:justify-start">
               <button
                 type="button"
-                className="rounded bg-red-700 px-3 py-2 text-sm text-white"
+                className="rounded bg-destructive px-3 py-2 text-sm text-destructive-foreground"
                 onClick={() => {
                   deleteSpace(pendingDeleteId);
                 }}

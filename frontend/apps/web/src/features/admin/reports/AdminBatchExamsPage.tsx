@@ -677,7 +677,7 @@ export function AdminBatchExamsPage({ batchId }: { batchId: string }) {
           </div>
           <button
             type="button"
-            className="inline-flex h-8 items-center justify-center rounded-lg bg-[var(--admin-danger)] px-4 text-xs font-semibold text-white hover:opacity-90"
+            className="inline-flex h-8 items-center justify-center rounded-lg bg-[var(--admin-danger)] px-4 text-xs font-semibold text-[var(--admin-on-danger)] hover:opacity-90"
             onClick={() => void load()}
           >
             <RefreshCw className="mr-2 h-3.5 w-3.5" aria-hidden="true" />
@@ -1062,7 +1062,7 @@ export function AdminBatchExamsPage({ batchId }: { batchId: string }) {
                         <td className="px-4 py-3">
                           <p className="font-mono text-xs text-[var(--admin-on-surface)]">
                             {formatPct(item.highScorePct)}
-                            <span className="mx-1.5 text-[var(--admin-outline)]">|</span>
+                            <span className="mx-1.5 text-[var(--admin-on-surface-variant)]">|</span>
                             {formatPct(item.lowScorePct)}
                           </p>
                         </td>

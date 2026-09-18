@@ -263,7 +263,7 @@ export function TenantUnavailableScreen({
             ) : (
               <Link
                 href="/login"
-                className="inline-flex w-full items-center justify-center rounded-lg border-2 border-[var(--fba-ind)] px-6 py-3.5 text-[15px] font-semibold text-[var(--fba-ind)] no-underline transition-all hover:bg-[var(--fba-ind)] hover:text-white active:scale-[0.98]"
+                className="inline-flex w-full items-center justify-center rounded-lg border-2 border-[var(--fba-ind)] px-6 py-3.5 text-[15px] font-semibold text-[var(--fba-ind-tx)] no-underline transition-all hover:bg-[var(--fba-ind)] hover:text-white active:scale-[0.98]"
               >
                 Admin sign in
               </Link>

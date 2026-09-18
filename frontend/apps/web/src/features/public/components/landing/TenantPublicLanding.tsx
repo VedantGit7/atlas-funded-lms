@@ -32,7 +32,7 @@ type TenantPublicLandingProps = {
 
 function SectionEyebrow({ children }: { children: string }) {
   return (
-    <div className="mb-3.5 text-[11px] font-semibold uppercase tracking-[0.15em] text-[var(--fba-ind)]">
+    <div className="mb-3.5 text-[11px] font-semibold uppercase tracking-[0.15em] text-[var(--fba-ind-tx)]">
       {children}
     </div>
   );
@@ -87,15 +87,15 @@ export function TenantPublicLanding({
       >
         <div className="mx-auto max-w-[720px]">
           <div className="mb-[30px] inline-flex items-center gap-2 rounded-[40px] border border-[var(--fba-gld-b)] bg-[var(--fba-gld-l)] px-4 py-[7px]">
-            <div className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#d97706]" />
-            <span className="text-[11px] font-medium text-[#92400e]">
+            <div className="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--fba-amb-tx)]" />
+            <span className="text-[11px] font-medium text-[var(--fba-gld-tx)]">
               Free Diagnostic - No Account Required
             </span>
           </div>
           <h1 className="mb-1 text-[58px] font-extrabold leading-[1.03] text-balance text-[var(--fba-tx)] max-[768px]:text-[40px]">
             Become a Funded
           </h1>
-          <h1 className="mb-[26px] text-[58px] font-extrabold leading-[1.1] text-balance text-[var(--fba-ind)] max-[768px]:text-[40px]">
+          <h1 className="mb-[26px] text-[58px] font-extrabold leading-[1.1] text-balance text-[var(--fba-ind-tx)] max-[768px]:text-[40px]">
             {heroAccent}
           </h1>
           <p className="mx-auto mb-[38px] max-w-[540px] text-[17px] leading-[1.75] text-pretty text-[var(--fba-tx2)]">
@@ -120,8 +120,8 @@ export function TenantPublicLanding({
             </a>
           </div>
           <div className="mt-5 text-xs text-[var(--fba-tx3)]">
-            Trusted by <span className="font-bold text-[var(--fba-ind)]">4,200+</span> traders · No
-            credit card required · Cancel anytime
+            Trusted by <span className="font-bold text-[var(--fba-ind-tx)]">4,200+</span> traders ·
+            No credit card required · Cancel anytime
           </div>
         </div>
       </div>
@@ -132,7 +132,7 @@ export function TenantPublicLanding({
           {STATS.map((stat, i) => {
             const valueColor =
               "accent" in stat
-                ? "text-[var(--fba-ind)]"
+                ? "text-[var(--fba-ind-tx)]"
                 : "gold" in stat
                   ? "text-[var(--fba-gld-tx)]"
                   : "text-[var(--fba-tx)]";
@@ -187,7 +187,7 @@ export function TenantPublicLanding({
                 </p>
                 <a
                   href={item.link.href}
-                  className="text-[13px] font-semibold text-[var(--fba-ind)] no-underline transition-colors hover:text-[var(--fba-ind-d)]"
+                  className="text-[13px] font-semibold text-[var(--fba-ind-tx)] no-underline transition-colors hover:text-[var(--fba-ind-d)]"
                 >
                   {item.link.label}
                 </a>
@@ -242,8 +242,8 @@ export function TenantPublicLanding({
               </div>
             </div>
             {/* Foundation */}
-            <div className="relative flex flex-1 flex-col rounded-2xl border-2 border-[var(--fba-ind)] bg-[var(--fba-ind)] p-8">
-              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-[40px] bg-[var(--fba-gld)] px-3.5 py-[5px] text-[10px] font-bold uppercase tracking-[0.08em] text-[var(--fba-tx)]">
+            <div className="relative flex flex-1 flex-col rounded-2xl border-2 border-[var(--fba-panel)] bg-[var(--fba-panel)] p-8">
+              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-[40px] bg-[var(--fba-gld)] px-3.5 py-[5px] text-[10px] font-bold uppercase tracking-[0.08em] text-[var(--fba-on-gld)]">
                 Most Popular
               </div>
               <div className="mb-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/70">
@@ -256,7 +256,7 @@ export function TenantPublicLanding({
               <div className="mb-7 text-[13px] text-white/70">or $249 billed once</div>
               <Link
                 href="/signup"
-                className="mb-7 block rounded-[9px] bg-white py-3.5 text-center text-[13px] font-bold text-[var(--fba-ind)] no-underline transition-colors hover:bg-[var(--fba-ind-l)]"
+                className="mb-7 block rounded-[9px] bg-white py-3.5 text-center text-[13px] font-bold text-[var(--fba-ind)] no-underline transition-colors hover:opacity-90"
               >
                 Start Foundation
               </Link>
@@ -329,7 +329,9 @@ export function TenantPublicLanding({
                     <div className="mt-[5px] text-[11px] text-[var(--fba-tx3)]">{t.detail}</div>
                   </div>
                   <div className="rounded-md bg-[var(--fba-ind-l)] px-2.5 py-[5px]">
-                    <div className="text-[10px] font-semibold text-[var(--fba-ind)]">{t.badge}</div>
+                    <div className="text-[10px] font-semibold text-[var(--fba-ind-tx)]">
+                      {t.badge}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -376,7 +378,7 @@ export function TenantPublicLanding({
       <LandingFaq />
 
       {/* Final CTA */}
-      <div className="bg-[var(--fba-ind)] px-7 py-[88px] text-center max-[768px]:px-4 max-[768px]:py-16">
+      <div className="bg-[var(--fba-panel)] px-7 py-[88px] text-center max-[768px]:px-4 max-[768px]:py-16">
         <div className="mx-auto max-w-[620px]">
           <div className="mb-[18px] text-[11px] font-semibold uppercase tracking-[0.15em] text-white/60">
             Start Today
@@ -393,7 +395,7 @@ export function TenantPublicLanding({
             onClick={() => {
               captureLandingCtaClick("final_cta");
             }}
-            className="inline-flex items-center gap-2 rounded-[11px] bg-white px-9 py-[18px] text-[15px] font-bold text-[var(--fba-ind)] no-underline transition-colors hover:bg-[var(--fba-ind-l)]"
+            className="inline-flex items-center gap-2 rounded-[11px] bg-white px-9 py-[18px] text-[15px] font-bold text-[var(--fba-ind)] no-underline transition-colors hover:opacity-90"
           >
             Take the Free Diagnostic →
           </Link>

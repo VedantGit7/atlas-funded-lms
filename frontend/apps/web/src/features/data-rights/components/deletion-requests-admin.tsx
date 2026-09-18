@@ -345,7 +345,7 @@ function ProcessDialog({
             </button>
             <button
               type="button"
-              className="flex-[2] rounded-lg bg-[var(--admin-danger)] px-4 py-2.5 text-sm font-semibold text-[var(--admin-on-primary)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex-[2] rounded-lg bg-[var(--admin-danger)] px-4 py-2.5 text-sm font-semibold text-[var(--admin-on-danger)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
               onClick={onConfirm}
               disabled={busy || !confirmed}
             >

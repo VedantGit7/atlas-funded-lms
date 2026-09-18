@@ -208,7 +208,7 @@ export function PasswordResetForm() {
     return (
       <Form {...completeForm}>
         <div className="mb-8 flex flex-col items-center text-center">
-          <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-[14px] border border-[var(--fba-ind)]/15 bg-[var(--fba-ind-l)] text-[var(--fba-ind)]">
+          <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-[14px] border border-[var(--fba-ind)]/15 bg-[var(--fba-ind-l)] text-[var(--fba-ind-tx)]">
             <KeyIcon />
           </div>
           <h2
@@ -262,7 +262,7 @@ export function PasswordResetForm() {
                     <EyeIcon open={showPassword} />
                   </button>
                 </div>
-                <FormMessage className="mt-2 text-[13px] text-[var(--fba-red)]" />
+                <FormMessage className="mt-2 text-[13px] text-[var(--fba-red-tx)]" />
               </FormItem>
             )}
           />
@@ -273,7 +273,7 @@ export function PasswordResetForm() {
               className={
                 completeState.ok
                   ? "text-[13px] text-[var(--fba-grn)]"
-                  : "text-[13px] text-[var(--fba-red)]"
+                  : "text-[13px] text-[var(--fba-red-tx)]"
               }
             >
               {completeState.message}
@@ -288,7 +288,7 @@ export function PasswordResetForm() {
         <div className="mt-8 text-center">
           <Link
             href="/login"
-            className="group inline-flex items-center gap-2 text-[13px] font-semibold text-[var(--fba-ind)] transition-colors hover:text-[var(--fba-ind-d)]"
+            className="group inline-flex items-center gap-2 text-[13px] font-semibold text-[var(--fba-ind-tx)] transition-colors hover:text-[var(--fba-ind-d)]"
           >
             <ArrowLeftIcon />
             Back to Sign In
@@ -301,7 +301,7 @@ export function PasswordResetForm() {
   return (
     <Form {...requestForm}>
       <div className="mb-8 flex flex-col items-center text-center">
-        <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-[14px] border border-[var(--fba-ind)]/15 bg-[var(--fba-ind-l)] text-[var(--fba-ind)]">
+        <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-[14px] border border-[var(--fba-ind)]/15 bg-[var(--fba-ind-l)] text-[var(--fba-ind-tx)]">
           <KeyIcon />
         </div>
         <h2
@@ -345,7 +345,7 @@ export function PasswordResetForm() {
                   />
                 </FormControl>
               </div>
-              <FormMessage className="mt-2 text-[13px] text-[var(--fba-red)]" />
+              <FormMessage className="mt-2 text-[13px] text-[var(--fba-red-tx)]" />
             </FormItem>
           )}
         />
@@ -372,7 +372,7 @@ export function PasswordResetForm() {
       <div className="mt-8 text-center">
         <Link
           href="/login"
-          className="group inline-flex items-center gap-2 text-[13px] font-semibold text-[var(--fba-ind)] transition-colors hover:text-[var(--fba-ind-d)]"
+          className="group inline-flex items-center gap-2 text-[13px] font-semibold text-[var(--fba-ind-tx)] transition-colors hover:text-[var(--fba-ind-d)]"
         >
           <ArrowLeftIcon />
           Back to Sign In

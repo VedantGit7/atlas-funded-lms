@@ -320,7 +320,7 @@ export function EnrollCourseDialog({
             role="dialog"
             aria-modal="true"
             aria-labelledby="enroll-course-title"
-            className="w-full max-w-md rounded-lg border bg-white p-6 shadow-lg"
+            className="w-full max-w-md rounded-lg border bg-card p-6 shadow-lg"
             onClick={(event) => {
               event.stopPropagation();
             }}
@@ -342,7 +342,7 @@ export function EnrollCourseDialog({
 
             {isPaid ? (
               <div className="mt-4 space-y-4">
-                <div className="rounded-md border bg-slate-50 p-3 text-sm">
+                <div className="rounded-md border bg-muted/50 p-3 text-sm">
                   {quoting && !quote ? (
                     <p>Loading priceâ€¦</p>
                   ) : (
@@ -362,13 +362,13 @@ export function EnrollCourseDialog({
                         </div>
                       ) : null}
                       {discount > 0 ? (
-                        <div className="mt-1 flex justify-between gap-3 text-emerald-700">
+                        <div className="mt-1 flex justify-between gap-3 text-success-text">
                           <span>Coupon{appliedCode ? ` (${appliedCode})` : ""}</span>
                           <span>-{formatMoney(discount, displayCurrency)}</span>
                         </div>
                       ) : null}
                       {walletDiscount > 0 ? (
-                        <div className="mt-1 flex justify-between gap-3 text-emerald-700">
+                        <div className="mt-1 flex justify-between gap-3 text-success-text">
                           <span>Wallet ({walletCreditsApplied} credits)</span>
                           <span>-{formatMoney(walletDiscount, displayCurrency)}</span>
                         </div>
@@ -399,7 +399,7 @@ export function EnrollCourseDialog({
                         <button
                           key={coupon.id}
                           type="button"
-                          className="rounded border px-2 py-1 text-xs font-medium hover:bg-slate-50"
+                          className="rounded border px-2 py-1 text-xs font-medium hover:bg-muted"
                           onClick={() => {
                             selectPublicCoupon(coupon.code);
                           }}
@@ -492,7 +492,7 @@ export function EnrollCourseDialog({
             ) : null}
 
             {error ? (
-              <p role="alert" className="mt-3 text-sm text-red-700">
+              <p role="alert" className="mt-3 text-sm text-destructive-text">
                 {error}
               </p>
             ) : null}

@@ -10,14 +10,16 @@ export function DiagnosticMockCard() {
           Readiness Score
         </div>
         <div className="mb-2 flex items-baseline gap-1.5">
-          <div className="text-[60px] font-extrabold leading-none text-[var(--fba-ind)]">47</div>
-          <div className="text-[22px] font-semibold leading-none text-[var(--fba-ind)] opacity-75">
+          <div className="text-[60px] font-extrabold leading-none text-[var(--fba-ind-tx)]">47</div>
+          <div className="text-[22px] font-semibold leading-none text-[var(--fba-ind-tx)] opacity-75">
             /100
           </div>
         </div>
-        <div className="mb-7 inline-flex items-center gap-[7px] rounded-[20px] border border-[#fed7aa] bg-[#fff7ed] px-3 py-[5px]">
-          <div className="h-[5px] w-[5px] rounded-full bg-[#d97706]" />
-          <span className="text-[11px] font-medium text-[#c2410c]">Below Average - Keep Going</span>
+        <div className="mb-7 inline-flex items-center gap-[7px] rounded-[20px] border border-[color-mix(in_srgb,var(--fba-amb-tx)_35%,var(--fba-surf))] bg-[color-mix(in_srgb,var(--fba-amb-tx)_10%,var(--fba-surf))] px-3 py-[5px]">
+          <div className="h-[5px] w-[5px] rounded-full bg-[var(--fba-amb-tx)]" />
+          <span className="text-[11px] font-medium text-[var(--fba-tx)]">
+            Below Average - Keep Going
+          </span>
         </div>
         <div className="flex flex-col gap-[18px]">
           {[
@@ -28,7 +30,7 @@ export function DiagnosticMockCard() {
               label: "Risk Management",
               pct: 30,
               color: "var(--fba-red)",
-              textColor: "var(--fba-red)",
+              textColor: "var(--fba-red-tx)",
             },
             {
               label: "Trading Psychology",
@@ -69,7 +71,7 @@ export function DiagnosticMockCard() {
           <span className="text-xs font-medium leading-[1.4] text-[var(--fba-tx2)]">
             Personalized study plan ready
           </span>
-          <span className="cursor-pointer text-xs font-bold text-[var(--fba-ind)]">
+          <span className="cursor-pointer text-xs font-bold text-[var(--fba-ind-tx)]">
             View Report →
           </span>
         </div>
@@ -103,19 +105,19 @@ export function ToolsMockCard() {
                   className={`flex-1 rounded-[7px] px-1 py-[9px] text-center ${
                     isToday
                       ? "border-[1.5px] border-[var(--fba-ind)] bg-[var(--fba-ind-l)]"
-                      : "border border-[#bbf7d0] bg-[#dcfce7]"
+                      : "border border-[color-mix(in_srgb,var(--fba-grn-tx)_30%,var(--fba-surf))] bg-[color-mix(in_srgb,var(--fba-grn-tx)_12%,var(--fba-surf))]"
                   }`}
                 >
                   <div
                     className={`text-[8px] font-bold leading-none ${
-                      isToday ? "text-[var(--fba-ind)]" : "text-[#15803d]"
+                      isToday ? "text-[var(--fba-ind-tx)]" : "text-[var(--fba-grn-tx)]"
                     }`}
                   >
                     {day}
                   </div>
                   <div
                     className={`mt-1 text-[9px] font-bold leading-none ${
-                      isToday ? "text-[var(--fba-ind)]" : "text-[#15803d]"
+                      isToday ? "text-[var(--fba-ind-tx)]" : "text-[var(--fba-grn-tx)]"
                     }`}
                   >
                     {isToday ? "→" : "✓"}
@@ -138,12 +140,12 @@ export function ToolsMockCard() {
               <div className="text-sm font-bold text-[var(--fba-tx)]">1.0%</div>
             </div>
             <div className="rounded-[9px] bg-[var(--fba-ind-l)] px-[13px] py-[11px]">
-              <div className="mb-[5px] text-[10px] text-[var(--fba-ind)]">Max Loss / Trade</div>
-              <div className="text-sm font-bold text-[var(--fba-ind)]">$100.00</div>
+              <div className="mb-[5px] text-[10px] text-[var(--fba-ind-tx)]">Max Loss / Trade</div>
+              <div className="text-sm font-bold text-[var(--fba-ind-tx)]">$100.00</div>
             </div>
-            <div className="rounded-[9px] bg-[#dcfce7] px-[13px] py-[11px]">
-              <div className="mb-[5px] text-[10px] text-[#15803d]">Daily Limit Safe</div>
-              <div className="text-sm font-bold text-[#15803d]">$500.00</div>
+            <div className="rounded-[9px] bg-[color-mix(in_srgb,var(--fba-grn-tx)_12%,var(--fba-surf))] px-[13px] py-[11px]">
+              <div className="mb-[5px] text-[10px] text-[var(--fba-grn-tx)]">Daily Limit Safe</div>
+              <div className="text-sm font-bold text-[var(--fba-grn-tx)]">$500.00</div>
             </div>
           </div>
         </div>
@@ -167,10 +169,10 @@ export function ToolsMockCard() {
               </div>
             ))}
             <div className="mt-0.5 flex items-center justify-between rounded-[7px] bg-[var(--fba-ind-l)] px-[11px] py-[9px]">
-              <span className="text-[11px] font-semibold text-[var(--fba-ind)]">
+              <span className="text-[11px] font-semibold text-[var(--fba-ind-tx)]">
                 Today&apos;s P&amp;L
               </span>
-              <span className="text-xs font-extrabold text-[var(--fba-ind)]">+$148</span>
+              <span className="text-xs font-extrabold text-[var(--fba-ind-tx)]">+$148</span>
             </div>
           </div>
         </div>
@@ -202,7 +204,7 @@ export function DiagnosticSection() {
       <div className="mx-auto flex max-w-[1100px] items-center gap-[72px] max-[900px]:flex-col max-[900px]:gap-10">
         <div className="min-w-0 flex-1">
           <div className="mb-[22px] inline-flex items-center gap-2 rounded-[40px] border border-[var(--fba-gld-b)] bg-[var(--fba-gld-l)] px-3.5 py-1.5">
-            <span className="text-[10px] font-semibold uppercase tracking-[0.06em] text-[#92400e]">
+            <span className="text-[10px] font-semibold uppercase tracking-[0.06em] text-[var(--fba-gld-tx)]">
               Free · No Signup · 5 Minutes
             </span>
           </div>
@@ -251,7 +253,7 @@ export function ToolsSection() {
         <ToolsMockCard />
         <div className="min-w-0 flex-1">
           <div className="mb-[22px] inline-flex items-center gap-2 rounded-[40px] border border-[rgba(55,48,163,0.2)] bg-[var(--fba-ind-l)] px-3.5 py-1.5">
-            <span className="text-[10px] font-semibold uppercase tracking-[0.06em] text-[var(--fba-ind)]">
+            <span className="text-[10px] font-semibold uppercase tracking-[0.06em] text-[var(--fba-ind-tx)]">
               Free Forever · No Signup
             </span>
           </div>
@@ -278,7 +280,7 @@ export function ToolsSection() {
           </div>
           <Link
             href="/signup"
-            className="inline-flex items-center gap-2 rounded-[9px] border-[1.5px] border-[var(--fba-ind)] bg-[var(--fba-surf)] px-[26px] py-[15px] text-sm font-bold text-[var(--fba-ind)] no-underline transition-colors hover:bg-[var(--fba-ind-l)]"
+            className="inline-flex items-center gap-2 rounded-[9px] border-[1.5px] border-[var(--fba-ind)] bg-[var(--fba-surf)] px-[26px] py-[15px] text-sm font-bold text-[var(--fba-ind-tx)] no-underline transition-colors hover:bg-[var(--fba-ind-l)]"
           >
             Access Free Tools →
           </Link>

@@ -650,7 +650,7 @@ export function AdminPollLiveMonitorPage({ pollId }: { pollId: string }) {
           </div>
           <button
             type="button"
-            className="inline-flex h-8 items-center justify-center rounded-lg bg-[var(--admin-danger)] px-4 text-xs font-semibold text-white"
+            className="inline-flex h-8 items-center justify-center rounded-lg bg-[var(--admin-danger)] px-4 text-xs font-semibold text-[var(--admin-on-danger)]"
             onClick={() => void load()}
           >
             Retry

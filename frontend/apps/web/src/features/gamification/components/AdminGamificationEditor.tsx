@@ -610,7 +610,7 @@ export function AdminGamificationEditor({
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-sm font-semibold text-[var(--admin-on-surface)]">
                           {badge.name}
-                          <span className="ml-2 text-xs font-normal text-[var(--admin-outline)]">
+                          <span className="ml-2 text-xs font-normal text-[var(--admin-on-surface-variant)]">
                             {badge.key}
                           </span>
                         </p>

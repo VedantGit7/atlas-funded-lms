@@ -688,7 +688,7 @@ export function AnnouncementsCreatePanel() {
                         {imagePreview ? (
                           <img src={imagePreview} alt="" className="h-full w-full object-cover" />
                         ) : (
-                          <div className="flex h-full items-center justify-center text-[var(--admin-outline)]">
+                          <div className="flex h-full items-center justify-center text-[var(--admin-on-surface-variant)]">
                             <Megaphone className="h-8 w-8" aria-hidden="true" />
                           </div>
                         )}

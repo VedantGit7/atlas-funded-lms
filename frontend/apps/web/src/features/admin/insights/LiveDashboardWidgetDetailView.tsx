@@ -353,7 +353,7 @@ function EmptyCanvas({
 }) {
   return (
     <div className="flex min-h-[320px] flex-col items-center justify-center rounded-b-xl bg-[color-mix(in_srgb,var(--admin-page)_50%,transparent)] px-8 py-12 text-center">
-      <div className="mb-4 text-[var(--admin-outline)]">
+      <div className="mb-4 text-[var(--admin-on-surface-variant)]">
         <Activity className="h-12 w-12" aria-hidden="true" />
       </div>
       <h3 className="text-base font-semibold text-[var(--admin-on-surface)]">{title}</h3>
@@ -936,7 +936,7 @@ function UnderlyingTable({
                 >
                   <span className="inline-flex items-center gap-1">
                     {column.label}
-                    <span className="font-data text-[10px] font-normal uppercase tracking-wide text-[var(--admin-outline)]">
+                    <span className="font-data text-[10px] font-normal uppercase tracking-wide text-[var(--admin-on-surface-variant)]">
                       {column.kind}
                     </span>
                   </span>

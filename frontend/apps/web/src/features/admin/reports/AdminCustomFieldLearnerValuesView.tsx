@@ -648,7 +648,7 @@ function FieldEditControl({
                 className={[
                   "h-9 px-3 text-[12px] font-medium transition-colors",
                   draft === option.key
-                    ? "bg-[var(--admin-primary)] text-white"
+                    ? "bg-[var(--admin-primary)] text-[var(--admin-on-primary)]"
                     : "bg-[var(--admin-surface)] text-[var(--admin-on-surface-variant)] hover:bg-[var(--admin-surface-high)]",
                 ].join(" ")}
                 onClick={() => {

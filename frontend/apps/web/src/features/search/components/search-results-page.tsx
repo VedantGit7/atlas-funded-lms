@@ -66,17 +66,20 @@ export function SearchResultsPage({
       />
 
       {errorMessage ? (
-        <p role="alert" className="rounded border border-red-300 bg-red-50 p-4 text-sm">
+        <p
+          role="alert"
+          className="rounded border border-destructive/40 bg-destructive/10 p-4 text-sm"
+        >
           {errorMessage}
         </p>
       ) : null}
 
       {initialQuery.length < 2 ? (
-        <p className="text-sm text-neutral-600">Enter at least 2 characters to search.</p>
+        <p className="text-sm text-muted-foreground">Enter at least 2 characters to search.</p>
       ) : null}
 
       {showEmpty ? (
-        <p className="rounded border border-dashed p-6 text-sm text-neutral-600">
+        <p className="rounded border border-dashed p-6 text-sm text-muted-foreground">
           No results matched your search.
         </p>
       ) : null}
@@ -91,7 +94,7 @@ export function SearchResultsPage({
       </div>
 
       {loadError ? (
-        <p role="alert" className="text-sm text-red-700">
+        <p role="alert" className="text-sm text-destructive-text">
           {loadError}
         </p>
       ) : null}
