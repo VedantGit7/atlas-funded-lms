@@ -94,5 +94,18 @@
       "guardsPassed": 8,
       "dockerContextVerified": true
     }
+  },
+  "privacyExportCiCoverage": {
+    "affectedTestsPassed": 85,
+    "expectedRegressionFailures": 3,
+    "databaseFilesPassed": 3,
+    "databaseTestsPassed": 15,
+    "databaseTestsSkipped": 0,
+    "database": "fresh disposable PostgreSQL 16",
+    "evidence": [
+      ".test-results/ci-data-rights-env/",
+      ".test-results/staging-privacy-db-green.log"
+    ],
+    "hostedValidation": "required for subsequent commit"
   }
 }

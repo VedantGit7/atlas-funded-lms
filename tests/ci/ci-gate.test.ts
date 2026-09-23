@@ -251,9 +251,13 @@ describe("workflow graph and supply chain", () => {
         "F03_TEST_DATABASE_URL",
         "F07_TEST_DATABASE_URL",
         "F08_TEST_DATABASE_URL",
+        "F14_TEST_DATABASE_URL",
+        "F15_TEST_DATABASE_URL",
         "F04_TEST_REDIS_URL",
       ])
         expect(job.env[key]).toBeTruthy();
+      for (const key of ["F14_TEST_DATABASE_URL", "F15_TEST_DATABASE_URL"])
+        expect(job.env[key]).toBe(job.env.DATABASE_URL);
       expect(job.services.redis).toBeTruthy();
     }
   });

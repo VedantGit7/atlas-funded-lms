@@ -94,6 +94,8 @@ beforeAll(() => {
     F03_TEST_DATABASE_URL: "postgresql://admin:test@127.0.0.1:1/f03_fixture",
     F07_TEST_DATABASE_URL: "postgresql://admin:test@127.0.0.1:1/f07_fixture",
     F08_TEST_DATABASE_URL: "postgresql://admin:test@127.0.0.1:1/f08_fixture",
+    F14_TEST_DATABASE_URL: "postgresql://admin:test@127.0.0.1:1/f14_fixture",
+    F15_TEST_DATABASE_URL: "postgresql://admin:test@127.0.0.1:1/f15_fixture",
     F04_TEST_REDIS_URL: "redis://127.0.0.1:1/15",
   });
   const git = (args: string[]) =>
@@ -257,6 +259,8 @@ describe("release suite generator", () => {
     "F03_TEST_DATABASE_URL",
     "F07_TEST_DATABASE_URL",
     "F08_TEST_DATABASE_URL",
+    "F14_TEST_DATABASE_URL",
+    "F15_TEST_DATABASE_URL",
     "F04_TEST_REDIS_URL",
   ])("blocks integration before command execution without %s", (key) => {
     const { result, evidence } = run({ [key]: undefined });
