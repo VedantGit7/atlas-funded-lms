@@ -1,4 +1,4 @@
-import type { Page } from "@playwright/test";
+import { expect, type Locator, type Page } from "@playwright/test";
 
 /**
  * Wait until React has taken over the server-rendered HTML.
@@ -40,4 +40,37 @@ export async function waitForHydration(
     undefined,
     { timeout: timeoutMs },
   );
+}
+
+/**
+ * Body hydration can precede a streamed client boundary. Before a critical
+ * client-only action, require its own handler instead of treating the body
+ * marker as proof that every descendant is interactive. This does not click,
+ * retry an action, or replace the journey's visible/persisted outcome checks.
+ */
+export async function waitForClickHandler(
+  control: Locator,
+  timeoutMs: number = HYDRATION_TIMEOUT_MS,
+): Promise<void> {
+  await expect
+    .poll(
+      () =>
+        control.evaluate(
+          (element) =>
+            Object.keys(element).some((key) => {
+              if (!key.startsWith("__reactProps$")) return false;
+              const props = (element as unknown as Record<string, unknown>)[key];
+              return (
+                props !== null &&
+                typeof props === "object" &&
+                "onClick" in props &&
+                typeof props.onClick === "function"
+              );
+            }),
+          undefined,
+          { timeout: Math.min(timeoutMs, 1_000) },
+        ),
+      { timeout: timeoutMs, message: "The control's React click handler must be ready" },
+    )
+    .toBe(true);
 }

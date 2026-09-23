@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import { test, expect } from "../fixtures/axe";
 import { loginWithCredentials } from "../helpers/auth";
 import { requiredCredential } from "../helpers/env";
-import { waitForHydration } from "../helpers/hydration";
+import { waitForClickHandler, waitForHydration } from "../helpers/hydration";
 import { scenario } from "../helpers/scenario";
 
 test.describe("J06 instructor authoring and independent review", () => {
@@ -42,7 +42,9 @@ test.describe("J06 instructor authoring and independent review", () => {
     await expect(page).toHaveURL(new RegExp(`/studio/courses/${course.id}(?:/dashboard)?$`));
     await page.goto(`/studio/courses/${course.id}/editor`);
     await waitForHydration(page);
-    await page.getByRole("button", { name: "Add Section", exact: true }).click();
+    const addSection = page.getByRole("button", { name: "Add Section", exact: true });
+    await waitForClickHandler(addSection);
+    await addSection.click();
     const chapter = page.getByRole("dialog", { name: "Add Chapter" });
     await chapter.getByLabel(/^Title/).fill("Browser chapter");
     const moduleCreation = page.waitForResponse(
