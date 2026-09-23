@@ -1,6 +1,6 @@
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join, resolve } from "node:path";
+import { delimiter, join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 import { test } from "node:test";
 import assert from "node:assert/strict";
@@ -25,6 +25,118 @@ const generatedCoverage = [
   "frontend/apps/web/coverage/coverage-final.json",
   "frontend/packages/contracts/coverage/coverage-final.json",
 ];
+
+test("the API build creates referenced declarations before Next checks a fresh checkout", () => {
+  const root = mkdtempSync(join(tmpdir(), "atlas-api-build-"));
+  const script = JSON.parse(readFileSync(join(repository, "backend/apps/api/package.json"), "utf8"))
+    .scripts.build;
+  const app = join(root, "app");
+  const library = join(root, "library");
+  const bin = join(root, "bin");
+  try {
+    for (const dir of [join(app, "src"), join(library, "src"), bin])
+      mkdirSync(dir, { recursive: true });
+    const options = {
+      composite: true,
+      rootDir: "src",
+      target: "ES2022",
+      module: "NodeNext",
+      types: [],
+    };
+    writeFileSync(
+      join(library, "tsconfig.json"),
+      JSON.stringify({
+        compilerOptions: { ...options, declaration: true, outDir: "dist" },
+        include: ["src/**/*.ts"],
+      }),
+    );
+    writeFileSync(join(library, "src/index.ts"), "export const value: number = 1;\n");
+    writeFileSync(
+      join(app, "tsconfig.json"),
+      JSON.stringify({
+        compilerOptions: { ...options, noEmit: true },
+        include: ["src/**/*.ts"],
+        references: [{ path: "../library" }],
+      }),
+    );
+    writeFileSync(
+      join(app, "src/index.ts"),
+      'import { value } from "../../library/src/index"; export const result: number = value;\n',
+    );
+    const nextProbe = join(root, "next-probe.cjs");
+    writeFileSync(
+      nextProbe,
+      [
+        'const { spawnSync } = require("node:child_process");',
+        'const { writeFileSync } = require("node:fs");',
+        'if (process.argv[2] !== "build") throw new Error("Expected Next build");',
+        'writeFileSync("next-started.txt", "Next type-check boundary reached");',
+        'const check = spawnSync(process.execPath, [process.env.ATLAS_TEST_TSC, "--noEmit", "-p", "tsconfig.json"], { stdio: "inherit" });',
+        "process.exit(check.status ?? 1);",
+      ].join("\n"),
+    );
+    const windows = process.platform === "win32";
+    for (const [name, variable] of [
+      ["tsc", "ATLAS_TEST_TSC"],
+      ["next", "ATLAS_TEST_NEXT"],
+    ]) {
+      writeFileSync(
+        join(bin, windows ? `${name}.cmd` : name),
+        windows
+          ? `@"%ATLAS_TEST_NODE%" "%${variable}%" %*\r\n`
+          : `#!/bin/sh\nexec "$ATLAS_TEST_NODE" "$${variable}" "$@"\n`,
+        { mode: 0o755 },
+      );
+    }
+    const env = {
+      ...process.env,
+      PATH: `${bin}${delimiter}${process.env.PATH}`,
+      ATLAS_TEST_NODE: process.execPath,
+      ATLAS_TEST_TSC: require.resolve("typescript/bin/tsc"),
+      ATLAS_TEST_NEXT: nextProbe,
+    };
+    const fresh = spawnSync(
+      process.execPath,
+      [env.ATLAS_TEST_TSC, "--noEmit", "-p", "tsconfig.json"],
+      {
+        cwd: app,
+        encoding: "utf8",
+        timeout: 30000,
+      },
+    );
+    assert.notEqual(fresh.status, 0);
+    assert.match(fresh.stdout, /TS6305/);
+    const run = () =>
+      spawnSync(script, { cwd: app, env, shell: true, encoding: "utf8", timeout: 30000 });
+    const built = run();
+    assert.equal(built.status, 0, built.stdout + built.stderr);
+    assert.match(readFileSync(join(library, "dist/index.d.ts"), "utf8"), /value: number/);
+    assert.ok(readFileSync(join(app, "next-started.txt"), "utf8"));
+
+    rmSync(join(app, "next-started.txt"));
+    writeFileSync(join(library, "src/index.ts"), 'export const value: number = "invalid";\n');
+    const rejected = run();
+    assert.notEqual(rejected.status, 0);
+    assert.match(rejected.stdout, /TS2322/);
+    assert.throws(() => readFileSync(join(app, "next-started.txt")), { code: "ENOENT" });
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("CI, managed images, and production browser serving use the API package build", () => {
+  const scripts = JSON.parse(readFileSync(join(repository, "package.json"), "utf8")).scripts;
+  assert.equal(scripts.build, "pnpm -r build");
+  assert.match(scripts["browser:serve:api"], /^pnpm --filter @atlas\/api-app build && /);
+  assert.match(
+    readFileSync(join(repository, "deploy/managed-node/Dockerfile"), "utf8"),
+    /pnpm --filter @atlas\/api-app build/,
+  );
+  assert.match(
+    readFileSync(join(repository, ".github/workflows/ci.yml"), "utf8"),
+    /run: pnpm build/,
+  );
+});
 
 test("the Git index contains no generated Next declarations or TypeScript build caches", () => {
   const tracked = spawnSync("git", ["ls-files", "*next-env.d.ts", "*.tsbuildinfo"], {
