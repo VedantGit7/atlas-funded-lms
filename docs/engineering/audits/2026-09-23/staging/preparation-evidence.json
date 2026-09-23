@@ -107,5 +107,24 @@
       ".test-results/staging-privacy-db-green.log"
     ],
     "hostedValidation": "required for subsequent commit"
+  },
+  "hostedCandidateVerification": {
+    "headSha": "0bcddfa5b4424e4f0915031d32c673dcf1a18aa2",
+    "testedMergeSha": "dd07e40e97c914a8e2ddf518a4a146ec43607d02",
+    "runId": 35829104227,
+    "integrationTestsPassed": 601,
+    "integrationFilesPassed": 109,
+    "integrationSkipped": 0,
+    "browserJourneysPassed": 25,
+    "browserFaultsDetected": 7,
+    "mandatoryReleaseGatesPassed": 27,
+    "verdict": "NOT_READY",
+    "blocker": "Tracked generated outputs changed during validation",
+    "releaseArtifactId": 10737527169,
+    "browserArtifactId": 10737251529,
+    "runtimeWarnings": [
+      "Two hydration mismatches",
+      "One usage metering persistence warning"
+    ]
   }
 }

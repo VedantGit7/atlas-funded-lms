@@ -7,6 +7,13 @@ import assert from "node:assert/strict";
 import { ESLint } from "eslint";
 import { getFileInfo } from "prettier";
 import { pathToFileURL } from "node:url";
+import { createRequire } from "node:module";
+
+const require = createRequire(import.meta.url);
+const { writeAppTypeDeclarations } = require("next/dist/lib/typescript/writeAppTypeDeclarations");
+const {
+  writeConfigurationDefaults,
+} = require("next/dist/lib/typescript/writeConfigurationDefaults");
 
 const repository = resolve(import.meta.dirname, "../..");
 const productCoverage = "backend/apps/api/src/app/api/v1/locales/coverage/route.ts";
@@ -18,6 +25,134 @@ const generatedCoverage = [
   "frontend/apps/web/coverage/coverage-final.json",
   "frontend/packages/contracts/coverage/coverage-final.json",
 ];
+
+test("the Git index contains no generated Next declarations or TypeScript build caches", () => {
+  const tracked = spawnSync("git", ["ls-files", "*next-env.d.ts", "*.tsbuildinfo"], {
+    cwd: repository,
+    encoding: "utf8",
+  });
+  assert.equal(tracked.status, 0, tracked.stderr);
+  assert.equal(tracked.stdout.trim(), "");
+});
+
+test("Next and TypeScript regeneration preserve clean source evidence while source edits fail", async () => {
+  const root = mkdtempSync(join(tmpdir(), "atlas-generated-source-"));
+  const apps = ["backend/apps/api", "frontend/apps/web"];
+  const git = (args) => {
+    const result = spawnSync("git", args, { cwd: root, encoding: "utf8" });
+    assert.equal(result.status, 0, result.stderr);
+    return result.stdout.trim();
+  };
+  const captureUrl = pathToFileURL(join(repository, "scripts/release/evidence-contract.mjs")).href;
+  const capture = () => {
+    const result = spawnSync(
+      process.execPath,
+      [
+        "--input-type=module",
+        "-e",
+        `import { captureSource } from ${JSON.stringify(captureUrl)}; console.log(JSON.stringify(captureSource({...process.env, CI: 'false', GITHUB_ACTIONS: 'false', GIT_SHA: undefined, GITHUB_SHA: undefined})));`,
+      ],
+      { cwd: root, encoding: "utf8" },
+    );
+    assert.equal(result.status, 0, result.stderr);
+    return JSON.parse(result.stdout);
+  };
+  const generate = async (distDir) => {
+    for (const app of apps) {
+      const baseDir = join(root, app);
+      mkdirSync(baseDir, { recursive: true });
+      await writeAppTypeDeclarations({
+        baseDir,
+        distDir,
+        imageImportsEnabled: true,
+        hasPagesDir: false,
+        hasAppDir: true,
+        strictRouteTypes: false,
+        typedRoutes: false,
+      });
+    }
+  };
+  try {
+    git(["init"]);
+    writeFileSync(join(root, ".gitignore"), readFileSync(join(repository, ".gitignore")));
+    writeFileSync(
+      join(root, "tsconfig.base.json"),
+      readFileSync(join(repository, "tsconfig.base.json")),
+    );
+    const contracts = join(root, "frontend/packages/contracts");
+    mkdirSync(join(contracts, "src"), { recursive: true });
+    writeFileSync(join(contracts, "src/index.ts"), "export const value = 1;\n");
+    writeFileSync(
+      join(contracts, "tsconfig.json"),
+      JSON.stringify({
+        compilerOptions: { composite: true, rootDir: "src", outDir: "dist", types: [] },
+        include: ["src/**/*.ts"],
+      }),
+    );
+    await generate(".next/dev");
+    for (const app of apps)
+      writeFileSync(
+        join(root, app, "tsconfig.json"),
+        readFileSync(join(repository, app, "tsconfig.json")),
+      );
+    const development = readFileSync(join(root, apps[0], "next-env.d.ts"), "utf8");
+    assert.match(development, /\.next\/dev\/types\/routes\.d\.ts/);
+    git(["add", "."]);
+    git([
+      "-c",
+      "user.name=Generated output fixture",
+      "-c",
+      "user.email=ci@example.invalid",
+      "-c",
+      "commit.gpgsign=false",
+      "commit",
+      "--no-verify",
+      "-m",
+      "fixture",
+    ]);
+    assert.equal(capture().source.clean, true);
+
+    await generate(".next");
+    for (const app of apps) {
+      const config = join(root, app, "tsconfig.json");
+      const before = readFileSync(config, "utf8");
+      await writeConfigurationDefaults(
+        require("typescript").version,
+        config,
+        false,
+        true,
+        ".next",
+        false,
+        false,
+      );
+      assert.equal(readFileSync(config, "utf8"), before, `${app} production config must be stable`);
+    }
+    const production = readFileSync(join(root, apps[0], "next-env.d.ts"), "utf8");
+    assert.notEqual(production, development);
+    assert.match(production, /\.next\/types\/routes\.d\.ts/);
+    const build = spawnSync(
+      process.execPath,
+      [require.resolve("typescript/bin/tsc"), "-b", contracts],
+      {
+        cwd: root,
+        encoding: "utf8",
+        timeout: 30000,
+      },
+    );
+    assert.equal(build.status, 0, build.stdout + build.stderr);
+    assert.ok(readFileSync(join(contracts, "tsconfig.tsbuildinfo"), "utf8").length > 0);
+    const regenerated = capture();
+    assert.equal(regenerated.source.clean, true, git(["status", "--porcelain"]));
+    assert.deepEqual(regenerated.errors, []);
+    assert.equal(git(["ls-files", "*next-env.d.ts", "*.tsbuildinfo"]), "");
+
+    writeFileSync(join(contracts, "src/index.ts"), "export const value = 2;\n");
+    assert.equal(capture().source.clean, false);
+    assert.match(capture().errors.join(" "), /dirty/);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
 
 test("Git and Docker ignore patterns preserve source and exclude generated coverage reports", () => {
   const root = mkdtempSync(join(tmpdir(), "atlas-coverage-ignore-"));

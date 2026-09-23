@@ -30,6 +30,8 @@
 tmp-*
 **/*.log
 **/tsconfig.tsbuildinfo
+/backend/apps/api/next-env.d.ts
+/frontend/apps/web/next-env.d.ts
 backend/packages/db/src/generated
 docs/engineering/audits
 **/.agents
