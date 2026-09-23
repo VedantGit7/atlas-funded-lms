@@ -10,17 +10,17 @@
 
 ## Candidate and CI
 
-- [ ] Compare the working tree with the 22 September source fingerprint and inspect current main before choosing the release base. Preserve any unrelated changes.
-- [ ] Review all candidate paths for secrets and local artifacts; inspect audit evidence separately because ordinary source guards do not scan every document.
-- [ ] Correct the verified Node engine mismatch: pin the supported 24 LTS runtime consistently in `.node-version`, CI, drills and managed-node Docker targets; add engine compatibility regressions and run CI structure checks.
-- [ ] Validate a frozen dependency install using the selected runtime. Run the required commit checks and affected tests; retain the previous full-suite evidence as historical, not candidate-SHA hosted proof.
+- [x] Compare the working tree with the 22 September source fingerprint and inspect current main before choosing the release base. Preserve any unrelated changes.
+- [x] Review all candidate paths for secrets and local artifacts; inspect audit evidence separately because ordinary source guards do not scan every document.
+- [x] Correct the verified Node engine mismatch: pin the supported 24 LTS runtime consistently in `.node-version`, CI, drills and managed-node Docker targets; add engine compatibility regressions and run CI structure checks.
+- [x] Validate a frozen dependency install using the selected runtime. Run the required commit checks and affected tests; retain the previous full-suite evidence as historical, not candidate-SHA hosted proof.
 - [ ] Create `release/atlas-staging-20260923`, commit the reviewed remediation, reconcile main without discarding changes, and push the candidate to the existing private repository.
 - [ ] Open a draft pull request, attach it to this task, inspect hosted CI admission/jobs/artifacts, and fix concrete failures within scope. Never mark missing or rejected CI as passing.
 
 ## Staging access and deployment
 
-- [ ] Recheck connected Vercel/Supabase/GitHub access and inspect existing deployment configuration. Confirm application hosting and account prerequisites; do not infer a server from a purchased domain.
-- [ ] Prepare the exact hostname/resource/secret/build/migration/rollout checklist for an isolated staging environment under fundedbeyond.com. Keep production domain routing unchanged.
+- [x] Recheck connected Vercel/Supabase/GitHub access and inspect existing deployment configuration. Confirm application hosting and account prerequisites; do not infer a server from a purchased domain.
+- [x] Prepare the exact hostname/resource/secret/build/migration/rollout checklist for an isolated staging environment under fundedbeyond.com. Keep production domain routing unchanged.
 - [ ] Deploy only after the managed host, isolated providers, credentials and protected ingress exist. Run the existing per-service configuration validators, then matching-release health/auth/tenant/storage/worker checks. Record inaccessible or unprovisioned dependencies explicitly.
 - [ ] Save candidate identity, test outcomes, hosted run/PR links and concrete remaining account actions in `docs/engineering/staging-release-preparation-2026-09-23.md` and sanitized evidence under `docs/engineering/audits/2026-09-23/staging`.
 

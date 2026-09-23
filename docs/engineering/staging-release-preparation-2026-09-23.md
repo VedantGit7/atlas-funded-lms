@@ -15,7 +15,9 @@ Candidate branch: `release/atlas-staging-20260923`. Starting commit: `ca8c0f1e7e
 - Excluded local editor connection settings from Git. Synthetic test URLs and the local TLS test fixture remain intentional test inputs.
 - Prepared [the staging deployment checklist](../../deploy/staging/README.md), including proposed addresses, isolated resources, build secrets, configuration validation, ingress, worker health, migration, rollback and acceptance requirements.
 
-The local logs are under `docs/engineering/audits/2026-09-23/staging/`; log files are ignored by Git. Required commit/push checks and hosted results will be recorded after they run.
+The frozen-install/source-guard logs are under `docs/engineering/audits/2026-09-23/staging/`; log files are ignored by Git. The focused 93-test and Actionlint results were recorded in the review task's tool transcript. All eighteen staged lint/format batches and the repository type check passed during the commit. The hook emitted a generated-file restaging warning because already-tracked Prisma output also matches an ignore rule; the commit succeeded and an independent comparison confirmed no residual working-tree changes. Push checks and hosted results are recorded below when available.
+
+The workstation's global Node remains 24.11.1. Verification used the checksum-verified portable 24.21.0 runtime under `.test-results/node-v24.21.0/`. Developers must select the version in `.node-version` before using the repository's package commands; this task did not replace the global runtime.
 
 ## Fresh account and infrastructure checks
 
@@ -38,4 +40,4 @@ The closure matrix's remaining CSP enforcement/compatibility, privacy retention 
 
 ## Publication and CI
 
-Pending candidate commit, push and draft pull request. This section must be updated with observed outcomes; missing runs or rejected jobs are not passes.
+Remediation committed as `faa7064ba89a60929ad5c20df732f2416154b2a0`. Main reconciled cleanly; the merge introduced no source differences. Push and draft pull request are pending. Missing runs or rejected jobs are not passes.
