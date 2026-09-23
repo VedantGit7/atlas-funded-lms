@@ -3,6 +3,7 @@ import { loginWithCredentials } from "../helpers/auth";
 import { requiredCredential } from "../helpers/env";
 import { waitForHydration } from "../helpers/hydration";
 import { scenario } from "../helpers/scenario";
+import { coldRouteNavigationOptions } from "../helpers/navigation";
 
 test.describe("J02 learner enrollment and persisted lesson progress", () => {
   test("enrolls, resumes saved progress, and completes a lesson with the keyboard", async ({
@@ -62,7 +63,7 @@ test.describe("J02 learner enrollment and persisted lesson progress", () => {
     );
     // Follow the published outline: a missing learner link is a product failure.
     await page.locator(`a[href="${lessonPath}"]`).click();
-    await expect(page).toHaveURL(new RegExp(`${lessonPath}$`));
+    await expect(page).toHaveURL(new RegExp(`${lessonPath}$`), coldRouteNavigationOptions());
     const firstProgress = await firstProgressResponse;
     expect(firstProgress.status()).toBe(200);
     const firstSaved = (await firstProgress.json()) as {

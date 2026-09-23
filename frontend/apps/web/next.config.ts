@@ -38,6 +38,9 @@ const nextConfig: NextConfig = {
   outputFileTracingRoot: repoRoot,
   transpilePackages: ["@atlas/design-system"],
   experimental: {
+    // Cold API compilation exceeded Next's 30s rewrite deadline in browser CI.
+    // Production routes are prebuilt and retain the existing bounded deadline.
+    proxyTimeout: process.env["NODE_ENV"] === "development" ? 90_000 : 30_000,
     // Only metadata crosses the web proxy; large uploads use signed object URLs.
     proxyClientMaxBodySize: process.env["NODE_ENV"] === "development" ? "140mb" : "4mb",
     serverActions: {

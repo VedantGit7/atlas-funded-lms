@@ -3,6 +3,7 @@ import { loginWithCredentials } from "../helpers/auth";
 import { requiredCredential } from "../helpers/env";
 import { waitForHydration } from "../helpers/hydration";
 import { scenario } from "../helpers/scenario";
+import { coldRouteNavigationOptions } from "../helpers/navigation";
 
 test.describe("J03 learner assessment lifecycle", () => {
   test("autosaves an answer, restores it on reload, and persists a graded submission", async ({
@@ -101,7 +102,10 @@ test.describe("J03 learner assessment lifecycle", () => {
         requiresManualGrading: false,
       },
     });
-    await expect(page).toHaveURL(new RegExp(`/attempts/${attemptId}/result$`));
+    await expect(page).toHaveURL(
+      new RegExp(`/attempts/${attemptId}/result$`),
+      coldRouteNavigationOptions(),
+    );
     await expect(page.getByRole("heading", { name: "Attempt result", exact: true })).toBeVisible();
     await expect(page.getByText("GRADED", { exact: true })).toBeVisible();
     await expect(page.getByText("100%", { exact: true })).toBeVisible();
