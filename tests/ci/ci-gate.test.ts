@@ -239,6 +239,11 @@ describe("workflow graph and supply chain", () => {
       ".test-results/f16-probes/evidence.json",
     ]);
   });
+  it("configures the platform browser origin for the separate API server", () => {
+    const browserEnv = ci.jobs["browser-smoke"].env;
+    expect(browserEnv.E2E_PLATFORM_BASE_URL).toBeTruthy();
+    expect(browserEnv.PLATFORM_HOST).toBe(new URL(browserEnv.E2E_PLATFORM_BASE_URL).hostname);
+  });
   it("runs isolated security integration suites with their required local services", () => {
     for (const id of ["integration-tests", "release-evidence-validation"]) {
       const job = ci.jobs[id];

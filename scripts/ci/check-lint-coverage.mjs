@@ -3,6 +3,7 @@ import { dirname, join, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { ESLint } from "eslint";
 import { LINT_SHARDS } from "./lint-shards.mjs";
+import { isCoverageOutputPath } from "../guards/source-paths.mjs";
 
 /**
  * Assert that the shards in scripts/ci/lint-shards.mjs lint every file that a
@@ -32,7 +33,6 @@ const SKIP_DIRS = new Set([
   ".next-perf",
   "dist",
   "build",
-  "coverage",
   "out",
   ".turbo",
 ]);
@@ -43,6 +43,7 @@ function walk(dir, acc = []) {
     if (SKIP_DIRS.has(entry)) continue;
     if (dir === repoRoot && ROOT_SKIP_DIRS.has(entry)) continue;
     const full = join(dir, entry);
+    if (isCoverageOutputPath(relative(repoRoot, full))) continue;
     let stat;
     try {
       stat = statSync(full);

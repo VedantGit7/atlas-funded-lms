@@ -47,9 +47,52 @@
     "domain": {
       "name": "fundedbeyond.com",
       "ownership": "user-reported",
-      "dnsChanged": false
+      "dnsChanged": false,
+      "nameservers": [
+        "aaron.ns.cloudflare.com",
+        "elisabeth.ns.cloudflare.com"
+      ],
+      "dnsWriteAccessVerified": false
     }
   },
   "deploymentPerformed": false,
-  "productionApproved": false
+  "productionApproved": false,
+  "publication": {
+    "pr": "https://github.com/VedantGit7/atlas-funded-lms/pull/95",
+    "initialHead": "a3bcfff05dce76bc0974acfed24610a32a2eeb9c",
+    "initialPrRun": 35826081404,
+    "testedMergeSha": "0e45de4fdcf0d201f7ba294242525c1fca70380e",
+    "duplicatePushRunCancelled": 35826050238
+  },
+  "prePush": {
+    "testFiles": 324,
+    "testsPassed": 2528,
+    "routeMetadata": true,
+    "prismaBoundary": true
+  },
+  "ciFailureReproductions": {
+    "permissionFixtures": {
+      "red": {
+        "filesFailed": 4,
+        "testsFailed": 11,
+        "testsPassed": 3
+      },
+      "green": {
+        "filesPassed": 4,
+        "testsPassed": 14
+      },
+      "fullIntegration": {
+        "filesPassed": 106,
+        "filesSkipped": 3,
+        "testsPassed": 586,
+        "testsSkipped": 15
+      }
+    },
+    "coverageSource": {
+      "regressionsPassed": 4,
+      "localeAndPageTestsPassed": 12,
+      "guardsPassed": 8,
+      "dockerContextVerified": true
+    }
+  }
 }

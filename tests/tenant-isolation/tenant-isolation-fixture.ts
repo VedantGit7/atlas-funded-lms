@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { seedGlobalAccessCatalogue } from "@atlas/access";
 import { withPlatformScope, withTenantTx } from "@atlas/db";
 import { buildTestTenantSlug } from "../../scripts/db/test-tenant-slugs.mjs";
 
@@ -18,6 +19,11 @@ export type TenantIsolationFixture = {
   tenantA: IsolationTenantFixture;
   tenantB: IsolationTenantFixture;
 };
+
+// Tenant roles reference the global catalogue. A fresh test database must not
+// depend on the access-seed test happening to run before authorization tests.
+// Share initialization within this worker and let a failed initialization retry.
+let accessCatalogueReady: Promise<void> | undefined;
 
 function suffix(): string {
   return randomUUID().slice(0, 8);
@@ -46,6 +52,14 @@ export function tenantCtx(fixture: IsolationTenantFixture, requestId = randomUUI
 }
 
 export async function createTenantIsolationFixture(): Promise<TenantIsolationFixture> {
+  accessCatalogueReady ??= seedGlobalAccessCatalogue({
+    requestId: `test_fixture_catalogue_${randomUUID()}`,
+  }).catch((error: unknown) => {
+    accessCatalogueReady = undefined;
+    throw error;
+  });
+  await accessCatalogueReady;
+
   const runId = suffix();
 
   const fixture: TenantIsolationFixture = {

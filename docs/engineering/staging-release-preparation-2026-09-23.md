@@ -32,6 +32,10 @@ The workstation's global Node remains 24.11.1. Verification used the checksum-ve
 
 Purchasing the domain supplies an address. It does not provision the API, background worker, application database, Redis, private object storage, or monitoring. The staging checklist proposes subdomains while leaving the root domain and `www` unchanged.
 
+Public DNS confirms Cloudflare nameservers `aaron.ns.cloudflare.com` and `elisabeth.ns.cloudflare.com`. This establishes the DNS provider, not write access to the zone. No DNS records were changed.
+
+For the missing staging compute, Railway is a suitable proposed host because it can run the existing container images as separate services. This is an architectural recommendation, not a provisioned account. Its Hobby plan has a $5 monthly minimum with $5 of included usage; additional resource use costs extra, so $5 is not an estimate for the full Atlas deployment. The owner must connect an account and approve its spending settings before resources are created. See the official [service documentation](https://docs.railway.com/services) and [pricing](https://docs.railway.com/pricing/plans). Railway deployment health checks do not provide ongoing health monitoring; retain the external worker monitoring and restart requirements in the staging checklist ([health-check documentation](https://docs.railway.com/deployments/healthchecks)).
+
 ## Acceptance still outstanding
 
 Hosted validation requires protected web/API ingress, isolated provider settings, matching release identities across web/API/worker, database isolation checks, operator MFA, tenant access checks, upload/download/SCORM and worker recovery checks. Then complete capacity, restore, rollback and alert drills using the actual staging resources.
@@ -40,4 +44,18 @@ The closure matrix's remaining CSP enforcement/compatibility, privacy retention 
 
 ## Publication and CI
 
-Remediation committed as `faa7064ba89a60929ad5c20df732f2416154b2a0`. Main reconciled cleanly; the merge introduced no source differences. Push and draft pull request are pending. Missing runs or rejected jobs are not passes.
+Remediation committed as `faa7064ba89a60929ad5c20df732f2416154b2a0`. Main reconciled cleanly; the merge introduced no source differences. Candidate `a3bcfff05dce76bc0974acfed24610a32a2eeb9c` was pushed to the dedicated release branch and published as [draft PR #95](https://github.com/VedantGit7/atlas-funded-lms/pull/95). The PR is attached to the task. Main remains unchanged.
+
+The normal pre-push checks passed: 2,528 unit tests across 324 files, route metadata and Prisma boundaries. The [first PR CI run](https://github.com/VedantGit7/atlas-funded-lms/actions/runs/35826081404) was admitted and completed dependency installation successfully. Its actual tested merge SHA is `0e45de4fdcf0d201f7ba294242525c1fca70380e`. The duplicate push-triggered run `35826050238` was intentionally cancelled to avoid duplicate runner usage; that cancellation is not a test result.
+
+The first hosted E2E job identified a source-packaging discrepancy: the locale coverage route existed locally but was absent from Git. This is why hosted clean-checkout validation remains necessary even after local success. The current PR check results and retained run evidence, rather than this initial publication snapshot, determine candidate readiness. Missing, failed or skipped mandatory jobs are not passes. The optional release-health job cannot verify a hosted environment until that environment exists.
+
+## Hosted failures corrected in the follow-up candidate
+
+The broad `coverage/` exclusion hid a real locale API route from Git, Docker, lint/format checks and source guards. Coverage exclusions now apply to generated reports at repository/workspace roots. The original route is included unchanged. Four regression tests demonstrate that product source is included while generated reports remain excluded, and that seven guards actually reject unsafe code under a product `coverage` path. Twelve locale/page-reachability tests, eight real guard checks, scoped lint and a real Docker context copy passed. Evidence: `.test-results/ci-coverage-route/`.
+
+The integration job also exposed an order dependency in common tenant fixtures: roles were created before the global permission catalogue was available. A newly provisioned PostgreSQL 16 database reproduced eleven failures across four files (three other tests passed). The fixture now awaits the real idempotent catalogue seed before creating tenants; production authorization is unchanged. All fourteen tests then passed. A second freshly provisioned database with isolated Redis passed the full integration set: 106 files / 586 tests passed, three files / 15 tests explicitly skipped because their additional opt-in prerequisites were not supplied. These skips are not counted as successful validation. Guarded cleanup removed only the run-owned fixtures. An independent read-only review found no actionable issues in the fixture change.
+
+Local reproduction evidence is `.test-results/staging-fresh-db-red.log`, `.test-results/staging-fresh-db-green.log` and `.test-results/staging-integration-green.log`. Hosted verification of the follow-up commit remains required; consult the draft PR's exact-commit checks and run artifacts before rollout.
+
+The initial browser run passed 24 journeys and rejected platform tenant creation with `Invalid origin`. The CI browser environment lacked `PLATFORM_HOST`, unlike the verified local browser harness. The workflow now sets the canonical platform hostname and explicit matching browser base URL. A regression first reproduced the missing configuration. This fixes the harness configuration while preserving the application's origin checks.

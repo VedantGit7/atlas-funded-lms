@@ -18,8 +18,7 @@ function walkFiles(directory) {
         isGeneratedSourcePath(normalized) ||
         normalized.includes("/.next/") ||
         normalized.includes("/dist/") ||
-        normalized.includes("/build/") ||
-        normalized.includes("/coverage/")
+        normalized.includes("/build/")
       ) {
         continue;
       }

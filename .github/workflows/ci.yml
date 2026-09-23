@@ -1067,6 +1067,10 @@ jobs:
       ATLAS_APP_LOGIN_PASSWORD: atlas_ci_app_only
       ATLAS_PLATFORM_LOGIN_PASSWORD: atlas_ci_platform_only
       E2E_TENANT_SLUG: fundedbeyond
+      # The web proxy changes Host; platform writes validate the browser's
+      # configured origin, not the API transport hostname.
+      PLATFORM_HOST: platform.localhost
+      E2E_PLATFORM_BASE_URL: http://platform.localhost:3000
       # The auth stack is local (supabase/config.toml), so these are the Supabase
       # CLI's well-known development keys rather than secrets. They are published
       # constants, identical on every machine, and grant nothing outside this

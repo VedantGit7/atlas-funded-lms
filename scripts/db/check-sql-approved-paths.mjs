@@ -1,5 +1,6 @@
 import { readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
+import { isCoverageOutputPath } from "../guards/source-paths.mjs";
 
 // Paths moved under backend/ in the F-1 monorepo split. The pre-split spellings
 // below scanned directories that no longer exist, so this guard passed while
@@ -32,7 +33,7 @@ function walkFiles(directory) {
         normalized.includes("/.next/") ||
         normalized.includes("/dist/") ||
         normalized.includes("/build/") ||
-        normalized.includes("/coverage/")
+        isCoverageOutputPath(normalized)
       ) {
         return [];
       }

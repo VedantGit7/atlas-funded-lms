@@ -73,7 +73,6 @@ function walkFiles(directory) {
         normalized.includes("/.next/") ||
         normalized.includes("/dist/") ||
         normalized.includes("/build/") ||
-        normalized.includes("/coverage/") ||
         normalized.includes("/docs/locked/")
       ) {
         return [];

@@ -11,7 +11,12 @@ playwright-report/
 out/
 dist/
 build/
-coverage/
+/coverage/
+/backend/apps/*/coverage/
+/backend/packages/*/coverage/
+/backend/packages/domain/*/coverage/
+/frontend/apps/*/coverage/
+/frontend/packages/*/coverage/
 .turbo/
 
 # Package manager lockfiles

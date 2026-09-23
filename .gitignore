@@ -28,7 +28,12 @@ Thumbs.db
 
 # local generated files
 .storage/
-coverage/
+/coverage/
+/backend/apps/*/coverage/
+/backend/packages/*/coverage/
+/backend/packages/domain/*/coverage/
+/frontend/apps/*/coverage/
+/frontend/packages/*/coverage/
 .test-results/
 .next-e2e/
 .next-perf/
