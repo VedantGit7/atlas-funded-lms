@@ -6,4 +6,6 @@ These unmodified WOFF2 files are the same Google Fonts assets previously downloa
 
 The URL namespace is immutable and files include a content hash. A future update must use a new version directory, update CSS/preloads/manifest together, retain the license and verify rendering. Do not overwrite deployed bytes at an existing URL. Other font families still use the existing Google Fonts build integration.
 
+Keep the CSS family named `Cormorant Garamond`: the certificate editor also selects it by that literal name, independently of `--font-cormorant`. Both interfaces must resolve to the same font files.
+
 Sources: [Google Fonts family](https://fonts.google.com/specimen/Cormorant+Garamond), [upstream license](https://github.com/google/fonts/blob/main/ofl/cormorantgaramond/OFL.txt), [Next 16.3.5 parser](https://github.com/vercel/next.js/blob/v16.3.5/crates/next-core/src/next_font/google/mod.rs#L586-L596).

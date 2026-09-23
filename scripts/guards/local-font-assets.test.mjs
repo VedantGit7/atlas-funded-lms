@@ -27,6 +27,9 @@ test("vendored font bytes, subsets and redistribution license remain intact", ()
   assert.match(readFileSync(resolve(fontRoot, "OFL.txt"), "utf8"), /SIL OPEN FONT LICENSE/);
   const css = read("frontend/apps/web/src/styles/cormorant-garamond.css");
   assert.doesNotMatch(css, /https?:\/\//);
+  // The certificate inspector selects this literal family, independently of the CSS variable.
+  assert.match(css, /font-family: "Cormorant Garamond";/);
+  assert.match(css, /--font-cormorant: "Cormorant Garamond", "Cormorant Garamond Fallback";/);
   const faces = [...css.matchAll(/@font-face\s*\{([^}]+)\}/g)].map((m) => m[1]);
   for (const asset of manifest.assets) {
     assert.match(
