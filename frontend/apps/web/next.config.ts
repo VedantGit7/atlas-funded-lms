@@ -62,6 +62,15 @@ const nextConfig: NextConfig = {
         source: "/fonts/cormorant-garamond/v21/:path*",
         headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
       },
+      ...[
+        "/fonts/plus-jakarta-sans/v12/:path*",
+        "/fonts/jetbrains-mono/v24/:path*",
+        "/fonts/inter/v20/:path*",
+        "/fonts/playfair-display/v40/:path*",
+      ].map((source) => ({
+        source,
+        headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
+      })),
     ]);
   },
   // Local dev uses tenant/platform hostnames (see plan/frontend-planning/local-dev-urls.md)

@@ -157,6 +157,6 @@ export const config = {
      * Keep static assets out of middleware.
      * Tenant resolution itself happens in server route wrappers/loaders.
      */
-    "/((?!_next/static|_next/image|_next/webpack-hmr|fonts/cormorant-garamond/v21/|favicon.ico|robots.txt|sitemap.xml).*)",
+    "/((?!_next/static|_next/image|_next/webpack-hmr|fonts/cormorant-garamond/v21/|fonts/plus-jakarta-sans/v12/|fonts/jetbrains-mono/v24/|fonts/inter/v20/|fonts/playfair-display/v40/|favicon.ico|robots.txt|sitemap.xml).*)",
   ],
 };

@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { Plus_Jakarta_Sans } from "next/font/google";
 import { TenantBrandMark } from "@/components/patterns/TenantBrandMark";
 import type { z } from "zod";
 import type { PublicLandingPageSchema } from "@atlas/contracts/domain-branding/schemas/public-landing";
@@ -12,13 +11,6 @@ import { captureLandingCtaClick } from "./landing-analytics";
 import { useFbaTheme } from "@/components/theme/use-fba-theme";
 import "@/components/theme/fba-theme.css";
 import "./fba-landing.css";
-
-const plusJakarta = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800"],
-  variable: "--font-plus-jakarta",
-  display: "swap",
-});
 
 type PublicLandingPage = z.infer<typeof PublicLandingPageSchema>;
 
@@ -71,7 +63,7 @@ export function TenantPublicLanding({
   const ctaHref = landing.primaryCta.href || "/diagnostic";
 
   return (
-    <div className={`fba-scope fba-landing ${plusJakarta.variable} ${darkMode ? "fba-dark" : ""}`}>
+    <div className={`fba-scope fba-landing font-plus-jakarta-sans ${darkMode ? "fba-dark" : ""}`}>
       <LandingNav
         darkMode={darkMode}
         onToggleDark={toggleDark}

@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { Plus_Jakarta_Sans } from "next/font/google";
 import { useCallback } from "react";
 import { TenantBrandMark } from "@/components/patterns/TenantBrandMark";
 import { FbaDarkModeButton } from "@/components/theme/FbaDarkModeButton";
@@ -9,13 +8,6 @@ import { useFbaTheme } from "@/components/theme/use-fba-theme";
 import "@/components/theme/fba-theme.css";
 import type { LegalDocument } from "./legal-types";
 import { LegalContentRenderer } from "./LegalContentRenderer";
-
-const plusJakarta = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-  variable: "--font-plus-jakarta",
-  display: "swap",
-});
 
 type FbaLegalDocumentProps = {
   document: LegalDocument;
@@ -53,7 +45,7 @@ export function FbaLegalDocument({
 
   return (
     <div
-      className={`fba-scope ${plusJakarta.variable} ${darkMode ? "fba-dark" : ""} min-h-screen bg-[var(--fba-bg)]`}
+      className={`fba-scope font-plus-jakarta-sans ${darkMode ? "fba-dark" : ""} min-h-screen bg-[var(--fba-bg)]`}
     >
       <header className="sticky top-0 z-50 border-b border-[var(--fba-bdr)] bg-[var(--fba-nav-bg)] backdrop-blur-[8px]">
         <div className="mx-auto flex h-[62px] max-w-[1100px] items-center justify-between gap-4 px-7 max-[768px]:px-4">

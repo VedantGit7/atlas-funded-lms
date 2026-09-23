@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { Plus_Jakarta_Sans } from "next/font/google";
 import type { PublicTenantBranding } from "@atlas/tenant-branding";
 import { resolveTenantLogoUrl } from "@/lib/brand";
 import { TenantBrandMark } from "@/components/patterns/TenantBrandMark";
@@ -9,13 +8,6 @@ import { ShellSkipLink } from "./shared/ShellSkipLink";
 import { FbaDarkModeButton } from "@/components/theme/FbaDarkModeButton";
 import { useFbaTheme } from "@/components/theme/use-fba-theme";
 import "@/components/theme/fba-theme.css";
-
-const plusJakarta = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-  variable: "--font-plus-jakarta",
-  display: "swap",
-});
 
 type AuthShellProps = Readonly<{
   branding: PublicTenantBranding;
@@ -41,7 +33,7 @@ export function AuthShell({ branding, requestId, children }: AuthShellProps) {
 
   return (
     <div
-      className={`fba-scope ${plusJakarta.variable} ${darkMode ? "fba-dark" : ""} flex min-h-screen`}
+      className={`fba-scope font-plus-jakarta-sans ${darkMode ? "fba-dark" : ""} flex min-h-screen`}
     >
       <ShellSkipLink />
 

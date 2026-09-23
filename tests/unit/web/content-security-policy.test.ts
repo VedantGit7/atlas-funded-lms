@@ -36,6 +36,15 @@ describe("F13 document CSP", () => {
   it("keeps immutable font assets outside session handling while protecting application routes", () => {
     const matches = (url: string) => unstable_doesMiddlewareMatch({ config, url });
     expect(matches("/fonts/cormorant-garamond/v21/normal-latin.5d618c462b7a.woff2")).toBe(false);
+    for (const path of [
+      "plus-jakarta-sans/v12",
+      "jetbrains-mono/v24",
+      "inter/v20",
+      "playfair-display/v40",
+    ]) {
+      expect(matches(`/fonts/${path}/normal-latin.woff2`)).toBe(false);
+      expect(matches(`/fonts/${path}-other`)).toBe(true);
+    }
     for (const url of [
       "/admin",
       "/platform",

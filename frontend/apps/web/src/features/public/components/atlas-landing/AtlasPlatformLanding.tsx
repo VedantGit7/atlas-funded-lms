@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { Plus_Jakarta_Sans } from "next/font/google";
 import {
   ATLAS_CAPABILITIES,
   ATLAS_PRICING,
@@ -12,13 +11,6 @@ import {
 import { AtlasBrandMark, AtlasFaq, AtlasNav, useAtlasTheme } from "./AtlasLandingInteractive";
 import { AuthoringSection, ConsolePreviewCard, PlatformSection } from "./AtlasLandingSections";
 import "./atlas-landing.css";
-
-const plusJakarta = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800"],
-  variable: "--font-plus-jakarta",
-  display: "swap",
-});
 
 function CheckRow({ children, light }: { children: string; light?: boolean }) {
   return (
@@ -42,7 +34,7 @@ export function AtlasPlatformLanding() {
 
   return (
     <div
-      className={`atlas-landing ${plusJakarta.variable} ${mounted && darkMode ? "atl-dark" : ""}`}
+      className={`atlas-landing font-plus-jakarta-sans ${mounted && darkMode ? "atl-dark" : ""}`}
     >
       <AtlasNav darkMode={darkMode} onToggleDark={toggleDark} />
 

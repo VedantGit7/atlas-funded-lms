@@ -1,22 +1,11 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
-import { JetBrains_Mono, Plus_Jakarta_Sans } from "next/font/google";
 
 import "./globals.css";
 import "../styles/cormorant-garamond.css";
+import "../styles/plus-jakarta-sans.css";
+import "../styles/jetbrains-mono.css";
 
-const jakarta = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-jakarta",
-});
-
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ["latin"],
-  weight: ["400", "500"],
-  display: "swap",
-  variable: "--font-jetbrains",
-});
 import { AppProviders } from "@/components/providers/AppProviders";
 import { AnalyticsConsentBridge } from "../observability/AnalyticsConsentBridge";
 import { MarketingSnippetsInjector } from "../features/marketing/MarketingSnippetsInjector";
@@ -65,7 +54,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
   const nonce = (await headers()).get("x-nonce") ?? undefined;
   const hasSession = await hasSessionCookie();
   const theme = await loadTenantThemeRuntime();
-  const baseClassName = `${jakarta.variable} font-cormorant ${jetbrainsMono.variable}`;
+  const baseClassName = `font-plus-jakarta-sans font-cormorant font-jetbrains-mono`;
   const appearance = await resolveAppearanceHtmlProps(
     baseClassName,
     theme.style ?? undefined,
@@ -106,6 +95,20 @@ export default async function RootLayout({ children }: RootLayoutProps) {
       suppressHydrationWarning
     >
       <head>
+        <link
+          rel="preload"
+          href="/fonts/plus-jakarta-sans/v12/normal-latin.cd8db90cd950.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preload"
+          href="/fonts/jetbrains-mono/v24/normal-latin.2c32b9b3ee35.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
         <link
           rel="preload"
           href="/fonts/cormorant-garamond/v21/normal-latin.5d618c462b7a.woff2"

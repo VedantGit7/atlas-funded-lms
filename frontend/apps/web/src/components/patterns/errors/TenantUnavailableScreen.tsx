@@ -2,19 +2,11 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Plus_Jakarta_Sans } from "next/font/google";
 import type { PublicTenantBranding } from "@atlas/tenant-branding";
 import type { TenantUnavailableReason } from "@atlas/tenant-gate";
 import { FbaDarkModeButton } from "@/components/theme/FbaDarkModeButton";
 import { useFbaTheme } from "@/components/theme/use-fba-theme";
 import "@/components/theme/fba-theme.css";
-
-const plusJakarta = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-  variable: "--font-plus-jakarta",
-  display: "swap",
-});
 
 type TenantUnavailableVariant = TenantUnavailableReason | "TRANSIENT";
 
@@ -200,7 +192,7 @@ export function TenantUnavailableScreen({
 
   return (
     <div
-      className={`fba-scope ${plusJakarta.variable} ${darkMode ? "fba-dark" : ""} relative flex min-h-screen flex-col overflow-hidden bg-[var(--fba-bg)] text-[var(--fba-tx)]`}
+      className={`fba-scope font-plus-jakarta-sans ${darkMode ? "fba-dark" : ""} relative flex min-h-screen flex-col overflow-hidden bg-[var(--fba-bg)] text-[var(--fba-tx)]`}
     >
       {/* Atmospheric glows */}
       <div

@@ -3,18 +3,10 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { TenantBrandMark } from "@/components/patterns/TenantBrandMark";
-import { Plus_Jakarta_Sans } from "next/font/google";
 import { FbaDarkModeButton } from "@/components/theme/FbaDarkModeButton";
 import { useFbaTheme } from "@/components/theme/use-fba-theme";
 import "@/components/theme/fba-theme.css";
 import { ResendVerificationForm } from "./ResendVerificationForm";
-
-const plusJakarta = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-  variable: "--font-plus-jakarta",
-  display: "swap",
-});
 
 export type VerifyEmailStatus = "success" | "sent" | "expired" | "invalid";
 
@@ -401,7 +393,7 @@ export function VerifyEmailScreen({
 
   return (
     <div
-      className={`fba-scope ${plusJakarta.variable} ${darkMode ? "fba-dark" : ""} relative flex min-h-screen flex-col overflow-hidden bg-[var(--fba-bg)] text-[var(--fba-tx)]`}
+      className={`fba-scope font-plus-jakarta-sans ${darkMode ? "fba-dark" : ""} relative flex min-h-screen flex-col overflow-hidden bg-[var(--fba-bg)] text-[var(--fba-tx)]`}
     >
       {/* Ambient background glows */}
       <div
