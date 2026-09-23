@@ -51,7 +51,15 @@ const nextConfig: NextConfig = {
   // Keep framing exceptions after the baseline. The proxy owns per-request
   // document CSP; the SCORM route owns its enforced opaque sandbox policy.
   headers() {
-    return Promise.resolve([securityHeadersRule, scormFramingHeadersRule, formFramingHeadersRule]);
+    return Promise.resolve([
+      securityHeadersRule,
+      scormFramingHeadersRule,
+      formFramingHeadersRule,
+      {
+        source: "/fonts/cormorant-garamond/v21/:path*",
+        headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
+      },
+    ]);
   },
   // Local dev uses tenant/platform hostnames (see plan/frontend-planning/local-dev-urls.md)
   // instead of bare "localhost", so Next's dev-resource origin check needs these allowed

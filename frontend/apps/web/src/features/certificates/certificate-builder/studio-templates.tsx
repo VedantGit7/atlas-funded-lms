@@ -10,7 +10,7 @@
 import { useCallback, useEffect, useMemo, useState, type MouseEvent } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Plus_Jakarta_Sans, Cormorant_Garamond, JetBrains_Mono } from "next/font/google";
+import { Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
 import { Search, User, Menu, X, Plus, Star, ChevronDown, LayoutTemplate } from "lucide-react";
 import {
   GALLERY_CATEGORY_CHIPS,
@@ -36,14 +36,6 @@ const studioSans = Plus_Jakarta_Sans({
   weight: ["400", "500", "600", "700", "800"],
   display: "swap",
   variable: "--font-jakarta",
-});
-
-const studioDisplay = Cormorant_Garamond({
-  subsets: ["latin"],
-  weight: ["500", "600", "700"],
-  style: ["normal", "italic"],
-  display: "swap",
-  variable: "--font-cormorant",
 });
 
 const studioMono = JetBrains_Mono({
@@ -82,7 +74,7 @@ export function CertificateStudioTemplates({
   const [favorites, setFavorites] = useState<string[]>([]);
   const [usage, setUsage] = useState<Record<string, number>>({});
 
-  const fontClass = `${studioSans.variable} ${studioDisplay.variable} ${studioMono.variable}`;
+  const fontClass = `${studioSans.variable} font-cormorant ${studioMono.variable}`;
 
   useEffect(() => {
     setFavorites(loadTemplateFavorites());

@@ -1,21 +1,14 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
-import { Cormorant_Garamond, JetBrains_Mono, Plus_Jakarta_Sans } from "next/font/google";
+import { JetBrains_Mono, Plus_Jakarta_Sans } from "next/font/google";
 
 import "./globals.css";
+import "../styles/cormorant-garamond.css";
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-jakarta",
-});
-
-const cormorant = Cormorant_Garamond({
-  subsets: ["latin"],
-  weight: ["500", "600", "700"],
-  style: ["normal", "italic"],
-  display: "swap",
-  variable: "--font-cormorant",
 });
 
 const jetbrainsMono = JetBrains_Mono({
@@ -70,7 +63,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
   // Request headers opt the root into dynamic rendering; never cache nonce HTML.
   const nonce = (await headers()).get("x-nonce") ?? undefined;
   const theme = await loadTenantThemeRuntime();
-  const baseClassName = `${jakarta.variable} ${cormorant.variable} ${jetbrainsMono.variable}`;
+  const baseClassName = `${jakarta.variable} font-cormorant ${jetbrainsMono.variable}`;
   const appearance = await resolveAppearanceHtmlProps(
     baseClassName,
     theme.style ?? undefined,
@@ -111,6 +104,20 @@ export default async function RootLayout({ children }: RootLayoutProps) {
       suppressHydrationWarning
     >
       <head>
+        <link
+          rel="preload"
+          href="/fonts/cormorant-garamond/v21/normal-latin.5d618c462b7a.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preload"
+          href="/fonts/cormorant-garamond/v21/italic-latin.e6d6d1d73858.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
         <ThemeInitScript {...(nonce ? { nonce } : {})} tenantModeDefault={theme.modeDefault} />
       </head>
       <body suppressHydrationWarning>

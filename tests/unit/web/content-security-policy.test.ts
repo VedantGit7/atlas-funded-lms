@@ -1,9 +1,10 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
+import { unstable_doesMiddlewareMatch } from "next/experimental/testing/server";
 import { renderToStaticMarkup } from "../../../frontend/apps/web/node_modules/react-dom/server.node.js";
 import { createElement } from "../../../frontend/apps/web/node_modules/react";
 import * as policy from "../../../configs/security-headers.mjs";
-import { proxy } from "../../../frontend/apps/web/src/proxy";
+import { config, proxy } from "../../../frontend/apps/web/src/proxy";
 import { ThemeInitScript } from "../../../frontend/apps/web/src/components/ThemeInitScript";
 
 const session = vi.hoisted(() => ({ valid: true, refreshed: false }));
@@ -32,6 +33,19 @@ afterEach(() => {
 });
 
 describe("F13 document CSP", () => {
+  it("keeps immutable font assets outside session handling while protecting application routes", () => {
+    const matches = (url: string) => unstable_doesMiddlewareMatch({ config, url });
+    expect(matches("/fonts/cormorant-garamond/v21/normal-latin.5d618c462b7a.woff2")).toBe(false);
+    for (const url of [
+      "/admin",
+      "/platform",
+      "/api/v1/fonts",
+      "/fonts/cormorant-garamond/v21-other",
+    ]) {
+      expect(matches(url)).toBe(true);
+    }
+  });
+
   it("rejects a mistyped enforcement switch instead of silently disabling protection", () => {
     expect(() => build(nonce, { CSP_ENFORCE: "true" })).toThrow("CSP_ENFORCE");
   });

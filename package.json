@@ -127,7 +127,7 @@
     "check:outbox-worker": "node scripts/guards/check-outbox-worker-coverage.mjs",
     "check:server-authority": "node scripts/guards/check-server-authority.mjs",
     "check:contracts": "node scripts/sync-contracts.mjs --check",
-    "test:architecture": "node --test scripts/guards/server-authority.test.mjs scripts/sync-contracts.test.mjs scripts/guards/generated-output.test.mjs scripts/guards/check-secrets.test.mjs",
+    "test:architecture": "node --test scripts/guards/server-authority.test.mjs scripts/sync-contracts.test.mjs scripts/guards/generated-output.test.mjs scripts/guards/local-font-assets.test.mjs scripts/guards/check-secrets.test.mjs",
     "test:performance-tooling": "node --test scripts/perf/*.test.mjs tests/performance/*.test.mjs",
     "test:supabase-security": "node scripts/security/verify-f19-event-trigger.mjs",
     "db:proctoring-integrity:check": "node scripts/db/check-proctoring-integrity.mjs",
