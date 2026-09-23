@@ -1,21 +1,12 @@
 import { AtlasHttpError } from "@atlas/core/http/errors";
+import type { SessionAssuranceLevel } from "./session";
 
 /**
- * MFA enforcement. Audit finding H5.
- *
- * `mfa_enabled` was computed on every sign-in, stored on the principal, and
- * **never checked anywhere**. The platform console — the one surface with
- * cross-tenant reach — was reachable with a password alone.
- *
- * A note on what `mfaEnabled` means, because the earlier record got this wrong
- * and then corrected itself: `listFactors()` types `data.totp` and `data.phone`
- * as `Factor<K, "verified">[]` and keeps unverified factors in `data.all`, so
- * those arrays are pre-filtered by Supabase. Presence in them **is**
- * verification — the value is trustworthy, which is what makes enforcing on it
- * meaningful rather than theatre.
+ * MFA enforcement (F01). Only verified assurance on the current access token
+ * proves that this session completed MFA. A verified enrolled factor does not.
  */
 
-/** Thrown as 403 with a code the client can act on by starting enrolment. */
+/** Thrown as 403 so the client can start enrollment or a session challenge. */
 export function mfaRequiredError(detail: string): AtlasHttpError {
   return new AtlasHttpError({
     code: "MFA_REQUIRED",
@@ -30,11 +21,14 @@ export function mfaRequiredError(detail: string): AtlasHttpError {
  * Deliberately unconditional: platform permissions cross every tenant, so there
  * is no operation on that surface where a password alone is an acceptable bar.
  */
-export function assertPlatformMfa(args: { mfaEnabled: boolean; principalId: string }): void {
-  if (args.mfaEnabled) return;
+export function assertPlatformMfa(args: {
+  sessionAssuranceLevel?: SessionAssuranceLevel | undefined;
+  principalId: string;
+}): void {
+  if (args.sessionAssuranceLevel === "aal2") return;
 
   throw mfaRequiredError(
-    "Platform access requires multi-factor authentication. Enrol a factor and sign in again.",
+    "Platform access requires multi-factor authentication. Complete MFA verification for this session.",
   );
 }
 
@@ -47,13 +41,13 @@ export function assertPlatformMfa(args: { mfaEnabled: boolean; principalId: stri
  * guessed.
  */
 export function assertTenantMfa(args: {
-  mfaEnabled: boolean;
+  sessionAssuranceLevel?: SessionAssuranceLevel | undefined;
   required: boolean;
   permission: string;
 }): void {
-  if (!args.required || args.mfaEnabled) return;
+  if (!args.required || args.sessionAssuranceLevel === "aal2") return;
 
   throw mfaRequiredError(
-    `This action requires multi-factor authentication (${args.permission}). Enrol a factor and sign in again.`,
+    `This action requires multi-factor authentication (${args.permission}). Complete MFA verification for this session.`,
   );
 }

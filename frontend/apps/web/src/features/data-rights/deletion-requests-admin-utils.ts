@@ -4,11 +4,20 @@ export type DeletionDisplayStatus = DeletionRequestItem["status"];
 
 export const DELETION_STATUS_LABELS: Record<DeletionDisplayStatus, string> = {
   QUEUED: "Queued",
-  RUNNING: "Processing",
-  SUCCEEDED: "Completed",
+  RUNNING: "Removing school access",
+  SUCCEEDED: "Processed · erasure not verified",
   FAILED: "Failed",
   CANCELLED: "Cancelled",
 };
+
+export function deletionOutcomeLabel(request: DeletionRequestItem): string {
+  return request.status === "SUCCEEDED" &&
+    request.outcome?.accessRemoved === true &&
+    request.outcome.erasure === "not_performed" &&
+    request.outcome.retentionReviewRequired
+    ? "Access removed · records retained"
+    : (DELETION_STATUS_LABELS[request.status] ?? "Unknown · review required");
+}
 
 export const DELETIONS_PAGE_SIZE = 10;
 
@@ -64,8 +73,8 @@ export function formatGracePeriod(request: DeletionRequestItem): string {
   if (scheduled.getTime() <= Date.now()) return "Ready to process";
   const diffMs = scheduled.getTime() - Date.now();
   const diffDays = Math.ceil(diffMs / 86_400_000);
-  if (diffDays <= 1) return "Executes within 24 hours";
-  return `Executes in ${diffDays} days`;
+  if (diffDays <= 1) return "Eligible within 24 hours";
+  return `Eligible in ${diffDays} days`;
 }
 
 export function filterDeletionRequests(

@@ -1,4 +1,5 @@
 import { Client } from "pg";
+import { isCanonicalTenantSettingPolicy } from "./db/rls-policy-expression";
 
 async function main(): Promise<void> {
   const databaseUrl = process.env["DATABASE_URL"];
@@ -152,14 +153,22 @@ WHERE table_schema = 'public'
         order by c.relname, p.polname`,
     );
 
-    if (permissiveResult.rows.length > 0) {
+    // Newer policies use this exact null-safe UUID equality rather than the
+    // helper. Accept the entire catalog expression only, never an occurrence
+    // inside an OR branch. The older current_tenant_id marker check above is
+    // still heuristic: this guard is not a complete SQL policy-semantic proof.
+    const unrecognizedPolicies = permissiveResult.rows.filter(
+      ({ qual }) => !isCanonicalTenantSettingPolicy(qual),
+    );
+
+    if (unrecognizedPolicies.length > 0) {
       console.error(
-        "RLS check FAILED: permissive policies on the application role that do not scope by tenant.",
+        "RLS check FAILED: permissive application-role policies have an unrecognized tenant scope.",
       );
       console.error(
-        "PostgreSQL ORs permissive policies, so each of these defeats the isolation policy on the same table:",
+        "PostgreSQL ORs permissive policies; review these expressions for an isolation bypass:",
       );
-      for (const row of permissiveResult.rows) {
+      for (const row of unrecognizedPolicies) {
         console.error(`  ${row.relname}.${row.polname}  USING (${row.qual ?? "true"})`);
       }
       console.error(
@@ -171,7 +180,8 @@ WHERE table_schema = 'public'
 
     console.log(
       `PASS: RLS is enabled and forced on all ${tenantTableCount} tenant_id tables, ` +
-        `and no permissive application-role policy bypasses tenant scoping.`,
+        `and permissive application-role policies pass the tenant-scope syntax check. ` +
+        `This is not a complete SQL policy-semantic proof.`,
     );
   } finally {
     await client.end();

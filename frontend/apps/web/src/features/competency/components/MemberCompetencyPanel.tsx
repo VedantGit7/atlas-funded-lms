@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { competencyApiClient } from "@atlas/contracts-modules/competency/competency.api-client";
+import { competencyApiClient } from "@/modules/competency/competency.api-client";
 import { CompetencyScoreCards } from "./CompetencyScoreCards";
 
 type MemberCompetencyPanelProps = {

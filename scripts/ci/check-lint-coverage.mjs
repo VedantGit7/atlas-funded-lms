@@ -28,16 +28,20 @@ const SKIP_DIRS = new Set([
   "node_modules",
   ".git",
   ".next",
+  ".next-e2e",
+  ".next-perf",
   "dist",
   "build",
   "coverage",
   "out",
   ".turbo",
 ]);
+const ROOT_SKIP_DIRS = new Set([".test-results", "test-results", "playwright-report"]);
 
 function walk(dir, acc = []) {
   for (const entry of readdirSync(dir)) {
     if (SKIP_DIRS.has(entry)) continue;
+    if (dir === repoRoot && ROOT_SKIP_DIRS.has(entry)) continue;
     const full = join(dir, entry);
     let stat;
     try {

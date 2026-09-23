@@ -1,0 +1,380 @@
+{
+  "finding": "F08",
+  "verifiedAt": "2026-09-20T06:52:11.433Z",
+  "status": "implemented-and-verified-locally",
+  "baseCommit": "ca8c0f1e7e69780b4e2ddc2a1136907a2e47c350",
+  "productionMigrationApplied": false,
+  "developmentBusinessSchemaMigrated": false,
+  "liveExternalDeliveryExecuted": false,
+  "checks": [
+    {
+      "name": "Real isolated local PostgreSQL migrations, retry, concurrency, RLS and replay",
+      "exitCode": 0,
+      "files": 1,
+      "passed": 16,
+      "log": "f08-postgres.log"
+    },
+    {
+      "name": "Broader unit/security/events and replay API regressions",
+      "exitCode": 0,
+      "files": 296,
+      "passed": 2172,
+      "log": "f08-regressions.log",
+      "note": "Precedes final mixed-report and real report-publication fixes; final focused check covers them."
+    },
+    {
+      "name": "Final mixed-report, real report publication and PostHog checks",
+      "exitCode": 0,
+      "files": 5,
+      "passed": 26,
+      "log": "f08-final-focused.log"
+    },
+    {
+      "name": "Final project TypeScript build check",
+      "exitCode": 0,
+      "log": "f08-typecheck.log"
+    },
+    {
+      "name": "Final scoped implementation/test ESLint",
+      "exitCode": 0,
+      "log": "f08-lint.log"
+    },
+    {
+      "name": "Prisma schema validation",
+      "exitCode": 0,
+      "log": "f08-prisma-validate.log"
+    },
+    {
+      "name": "Eight repository guards",
+      "exitCode": 0,
+      "log": "f08-guards.json"
+    },
+    {
+      "name": "Scoped working tree whitespace check",
+      "exitCode": 0,
+      "log": "f08-diff-check.log"
+    }
+  ],
+  "independentReview": "All review findings addressed; final read-only review found no remaining significant blocker. Reviewer did not independently rerun tests.",
+  "limitations": [
+    "Migrations 109 and 110 and coordinated worker rollout pending",
+    "No complete browser/provider end-to-end acceptance or production load test",
+    "Uncertain non-idempotent outcomes and legacy failures intentionally held for operator investigation",
+    "No self-service reconciliation override; permanent report effects and expired links require reviewed recovery/new run",
+    "Local evidence for dirty working tree, not candidate-SHA CI or deployment proof"
+  ],
+  "sourceHashes": [
+    {
+      "path": "backend/apps/api/src/events/outbox-consumers.ts",
+      "sha256": "f78b3e877d5d2b526010d4a43fb02e5c056b7e41532d23612cb4c4772403b4c0"
+    },
+    {
+      "path": "backend/apps/api/src/server/analytics/analytics-worker-router.ts",
+      "sha256": "b72044309a028e0a25e973a86a1ec7c303ff2fef8fa39db38e59bee759efa063"
+    },
+    {
+      "path": "backend/apps/api/src/server/automation/automation-worker-router.ts",
+      "sha256": "25921469b3e7f4a46ce71020bf0eee9063b06dd78fdda377266a5b4bd0305248"
+    },
+    {
+      "path": "backend/apps/api/src/server/certificates/certificate-worker-router.ts",
+      "sha256": "3fa430cc34f2b22cf0ded00b5174c7ba27fa4e4034e763bffcae1aad402bdc3a"
+    },
+    {
+      "path": "backend/apps/api/src/server/competency/competency-worker-router.ts",
+      "sha256": "f4c84c3af60aa617e5ec6844ab4af1dad5007d17bd2deaa38d03b67ed560a7e9"
+    },
+    {
+      "path": "backend/apps/api/src/server/data-rights/data-rights-worker-router.ts",
+      "sha256": "f35720f8761fea2d62bc5cd5974c806c83bafe3446e0c07b2b2e6f45d6085620"
+    },
+    {
+      "path": "backend/apps/api/src/server/gamification/gamification-worker-router.ts",
+      "sha256": "1d2c4a1f91974124d51683e37ef7c6dd99859156a1e331cc08c9fecef3a41aed"
+    },
+    {
+      "path": "backend/apps/api/src/server/marketing-integrations/marketing-integrations.dispatch.ts",
+      "sha256": "da3989836aff9a2fde035b7f35eba2399e02480a3b06b2bfd491fbde042f5410"
+    },
+    {
+      "path": "backend/apps/api/src/server/marketing-integrations/marketing-integrations.events.ts",
+      "sha256": "63dd0b6a9da13e886ed4e34268e2aba732ed1c807935a162fb478218928bb157"
+    },
+    {
+      "path": "backend/apps/api/src/server/marketing-integrations/marketing-integrations.worker.ts",
+      "sha256": "29098e02be691aebcd778b80cd46dfb75b0577d6b37869e9f6cd94ed12f89b51"
+    },
+    {
+      "path": "backend/apps/api/src/server/marketing-workflows/marketing-workflow-email.events.ts",
+      "sha256": "cb49c3029d81e26ce812a6c693d73b3e9429aaecdf27fd4b57582ed4ad0ec947"
+    },
+    {
+      "path": "backend/apps/api/src/server/marketing-workflows/marketing-workflow-email.worker.ts",
+      "sha256": "7bf444b0ea9f808a08d9244c18ce3f123df1ff1579d1336f67eea19ef04ec714"
+    },
+    {
+      "path": "backend/apps/api/src/server/marketing-workflows/marketing-workflow.engine.ts",
+      "sha256": "8827f903085d20f3869153ed69f6033c0c80dda8b0f176ec7c1b1a34f73573c9"
+    },
+    {
+      "path": "backend/apps/api/src/server/marketing-workflows/marketing-workflow.repository.ts",
+      "sha256": "27ddfcabc6a7be1b01a244a29183e9cab61b840715b00c125fcb9bbdc49ca6c2"
+    },
+    {
+      "path": "backend/apps/api/src/server/notifications/notification.email-provider.ts",
+      "sha256": "dd15e7f503e41da7801dfe1cddbdc4723f9e5dacac1fe13073557cad0057b38c"
+    },
+    {
+      "path": "backend/apps/api/src/server/notifications/notification.worker.ts",
+      "sha256": "47e0f7ecea3502b79cd980d56835d84c7663b095f846cb0958e8b02eb175ea76"
+    },
+    {
+      "path": "backend/apps/api/src/server/readiness/readiness.worker.ts",
+      "sha256": "cc9b05c55d558fed3f54c63957f808f8a48734fb27ffd6a68846d8dc75789b71"
+    },
+    {
+      "path": "backend/apps/api/src/server/reports/report-delivery.service.ts",
+      "sha256": "36abab089a3360aad6ef7529463e3f7a5d85a0c7e165e661804d40adcc653215"
+    },
+    {
+      "path": "backend/apps/api/src/server/reports/reports-worker-router.ts",
+      "sha256": "6b653fdee68968cb50eea4d276d7843c1c0eee7cfb25afc832cc5fef715a23e5"
+    },
+    {
+      "path": "backend/apps/api/src/server/search/search-worker-router.ts",
+      "sha256": "18b4df9c2e7953f8b87648c62da6a231d60afd4783927ca05e9c8c9e7aebb48a"
+    },
+    {
+      "path": "backend/apps/api/src/worker/outbox-processors.ts",
+      "sha256": "c109a5b44385559e36b51ca941ac54fdc604c5dd48225796ab249fff37dfea8a"
+    },
+    {
+      "path": "backend/packages/domain/src/data-rights/data-rights-export-runner.ts",
+      "sha256": "7df676c9e288e676acd6547aa810c2cd18aa6506a9afcc8a3a8fffd5372b9c31"
+    },
+    {
+      "path": "backend/packages/domain/src/data-rights/data-rights.repository.ts",
+      "sha256": "ff8f3b0521893fd5954ce8d9a10ae51eb4286d7356c8fb08ee516704bd8c2136"
+    },
+    {
+      "path": "backend/packages/domain/src/data-rights/data-rights.worker.ts",
+      "sha256": "6ab211c9ebb9c4ab172dbf433a907ef480d68f78951337b4b1bf161ecf230991"
+    },
+    {
+      "path": "backend/packages/domain/src/reports/report-delivery-effects.repository.ts",
+      "sha256": "05c88fb4385fbabd9f3599e6d0e22dccbf1be8d43acd4776fa986b90e0087b0c"
+    },
+    {
+      "path": "backend/packages/domain/src/reports/reports-delivery.ts",
+      "sha256": "1bb604158e72a46324ac0fefe1b81b3cea1423bc195cb135f94b8c2ebaf76a57"
+    },
+    {
+      "path": "backend/packages/domain/src/reports/reports-export-runner.ts",
+      "sha256": "31d02d46afe0c7983f08d998e0b9729a55b7d802e12597a47a1959ca61be76a9"
+    },
+    {
+      "path": "backend/packages/domain/src/reports/reports.repository.ts",
+      "sha256": "90c9cedecaa9a813a9479e680e24374fd3207fea25ac814d0721ae7746570b3f"
+    },
+    {
+      "path": "backend/packages/domain/src/reports/reports.worker.ts",
+      "sha256": "9d9a5585b1515f7ceac5a09bd7035676c282a9d3572a25a27533529e2ab5e405"
+    },
+    {
+      "path": "backend/packages/events/src/event-types.ts",
+      "sha256": "30decff9db7af7f70250cbde3ed79cf5276dff22d68bbddf9541b20b54abf267"
+    },
+    {
+      "path": "backend/packages/events/src/index.ts",
+      "sha256": "46cde7c994efc2360a2546bdf8d21a5113f96e478c75f6a17f0295d6582139d7"
+    },
+    {
+      "path": "backend/packages/events/src/repositories/dead-letter.repository.ts",
+      "sha256": "17045e181b46f1078a79e887c77d4c82e3cfa85be85516616eff6fdfa775ac7c"
+    },
+    {
+      "path": "backend/packages/events/src/repositories/event-delivery.repository.ts",
+      "sha256": "fe915fc8f6b3616362cddbb618d9ff00e7320a02ab85e1b87a3fa3a2af374715"
+    },
+    {
+      "path": "backend/packages/events/src/repositories/outbox-job.repository.ts",
+      "sha256": "12881c021567bc7932b5118491fa48e3070310c152459e98cf57e608e883063c"
+    },
+    {
+      "path": "backend/packages/events/src/repositories/outbox.repository.ts",
+      "sha256": "c23b000234a2ecca8cc805e2ff09e317a75fd15746e8d653fa6932dc5a6edc0d"
+    },
+    {
+      "path": "backend/packages/events/src/services/dead-letter-replay.service.ts",
+      "sha256": "437ef2e4472a84be5b62c00a11936a4652a10f77e8a1192267aa2f07c11a5224"
+    },
+    {
+      "path": "backend/packages/events/src/services/outbox-worker.service.ts",
+      "sha256": "34c0be59c6a44b9554d3548175df081da6c3cb5fc5613a171ec86f4b52027bf2"
+    },
+    {
+      "path": "backend/packages/observability/src/posthog/outbox-mapper.ts",
+      "sha256": "c3ef3cf43d9ede8509149d017e2b41e5b946fc737fcd9b72b7f0931ae8f52a97"
+    },
+    {
+      "path": "backend/packages/observability/src/posthog/server.ts",
+      "sha256": "cf9b5536ccc5345ee42fa31089e145d9cfb532197426d74ba6d23422f99b3b2e"
+    },
+    {
+      "path": "backend/prisma/migrations/20260920020000_109_outbox_delivery_jobs/migration.sql",
+      "sha256": "ffd3ac69867efde6f998f27cbf2ff9d23f20d88e75a2d9b7d77cf918d33d2d8c"
+    },
+    {
+      "path": "backend/prisma/migrations/20260920021000_110_report_delivery_effects/migration.sql",
+      "sha256": "122c3c141944222a94a40c7dbade2edc2b1b0a8bf586e2e8acb334b10666829c"
+    },
+    {
+      "path": "backend/prisma/schema.prisma",
+      "sha256": "1a58f1f0c457af0e71f4e70af9ae68e225c390b2b630ec59e52d60952bc752ab"
+    },
+    {
+      "path": "backend/prisma/sql/grants/025_02_table_grants.sql",
+      "sha256": "742dc78679905ea98ebbc460b05f0498357b0d095a9e7d3cbd00f49f19a48b44"
+    },
+    {
+      "path": "docs/engineering/f08-outbox-retry-remediation.md",
+      "sha256": "e1f36866d4f49780cc77effbe411182f60d92782068a2e379fbcb04fb1f218d3"
+    },
+    {
+      "path": "docs/runbooks/outbox-delivery.md",
+      "sha256": "55a8ba64d9bf44cba1bfb0eb93df59b9ce114a86c654bc2d40da29b622f4680c"
+    },
+    {
+      "path": "frontend/apps/web/src/server/analytics/analytics-worker-router.ts",
+      "sha256": "836d82502dd72cf241643f5536bc5f4c0f90ff4bf87af3fa2dcb28f0be7a7ead"
+    },
+    {
+      "path": "frontend/apps/web/src/server/automation/automation-worker-router.ts",
+      "sha256": "ce1dd47e2b8ba4e61b208e4fde88253f405f40c098e7a0c75f1bb3e9a94f0327"
+    },
+    {
+      "path": "frontend/apps/web/src/server/certificates/certificate-worker-router.ts",
+      "sha256": "ea72b55ee4c8b1bbac1a54740b13ff5723a6f17832e1cc38d260990c0c15a473"
+    },
+    {
+      "path": "frontend/apps/web/src/server/competency/competency-worker-router.ts",
+      "sha256": "ecb3a8b1d48c9558610ffd2dc0b735e5550dfc2e16107bdb4b926c4f9c4c3ef7"
+    },
+    {
+      "path": "frontend/apps/web/src/server/data-rights/data-rights-worker-router.ts",
+      "sha256": "f53cb0e2af7ce566f465ae973db15df70b1e1ea93f10f8bd7b665e8833383aff"
+    },
+    {
+      "path": "frontend/apps/web/src/server/gamification/gamification-worker-router.ts",
+      "sha256": "8bafeea90b3f97278dd366b34f08ae0de0114647c8bd0ddb7184e40c22716e93"
+    },
+    {
+      "path": "frontend/apps/web/src/server/notifications/notification.email-provider.ts",
+      "sha256": "1b475f856336253b03422c67ecee306d11e85b2e602b0f55926b27f3e74cbecb"
+    },
+    {
+      "path": "frontend/apps/web/src/server/notifications/notification.worker.ts",
+      "sha256": "7238cf42151a5dbc4df001667f9de43c27a48d287fbcb5b90c02b0d051c8504d"
+    },
+    {
+      "path": "frontend/apps/web/src/server/readiness/readiness.worker.ts",
+      "sha256": "0db2630994be7fb467ae62ec4dd2fe1269f52bf7b765abcbbc45e1b79e3de0cf"
+    },
+    {
+      "path": "frontend/apps/web/src/server/reports/report-delivery.service.ts",
+      "sha256": "a6c01e97e83e084e6c4df5551653abd192a6e905160aa43cebe1ac5f41a81f68"
+    },
+    {
+      "path": "frontend/apps/web/src/server/reports/reports-worker-router.ts",
+      "sha256": "bdd117cdd7999a94a70c1cdcc5fed4c8c4f2bbe60dbce6572b1531330243ef78"
+    },
+    {
+      "path": "frontend/apps/web/src/server/search/search-worker-router.ts",
+      "sha256": "b759b69806b2fdf4517ea40890a39f6e4477a2540e8df817d96182409071d7c0"
+    },
+    {
+      "path": "frontend/packages/contracts/src/events/event-types.ts",
+      "sha256": "30decff9db7af7f70250cbde3ed79cf5276dff22d68bbddf9541b20b54abf267"
+    },
+    {
+      "path": "tests/api/dead-letter-replay.post.test.ts",
+      "sha256": "889d82cd1b154d20083c08804aa39a15cca5e350620bd4f9e79d8ce655a4b6fc"
+    },
+    {
+      "path": "tests/e2e/data-rights.e2e.ts",
+      "sha256": "91c3db4cd66991e27b5d9102c398042056af20e914e30aa59312c13eb15e792d"
+    },
+    {
+      "path": "tests/events/outbox-worker.test.ts",
+      "sha256": "7b47bf6860234987ccb49ffa5db81cc2f1573c4575b370b9bef020d201c68078"
+    },
+    {
+      "path": "tests/integration/api/analytics.test.ts",
+      "sha256": "39f1f3bb1d1586af8cba1c682286e211a1c4f86c93298e0a3b74cc22c0eeb634"
+    },
+    {
+      "path": "tests/integration/api/data-rights-worker.test.ts",
+      "sha256": "779938c37e093503b684fbc659d497a3b94dd03b382c44b6846fd630bf2f595c"
+    },
+    {
+      "path": "tests/integration/events/outbox-retry.postgres.test.ts",
+      "sha256": "924413f90c0288603f3d185eaf2b6cbe5b5e5b8590dff72a8cddf68be0f53e92"
+    },
+    {
+      "path": "tests/tenant-isolation/data-rights.test.ts",
+      "sha256": "d3ce212a2c65644f700db926d08be39618250e8d86c5c151fbfd433aea54f03d"
+    },
+    {
+      "path": "tests/unit/data-rights/data-rights-worker-recovery.test.ts",
+      "sha256": "038fd3b40077d945100dd5555b31fb5d1e9def095be7a5591f0f2cbad9807ef9"
+    },
+    {
+      "path": "tests/unit/events/marketing-webhook-delivery.test.ts",
+      "sha256": "8b483697d53ba94317abade297b7fb9e1be4d4ad65ad485c3f4fe44f06199ae6"
+    },
+    {
+      "path": "tests/unit/events/marketing-workflow-email.test.ts",
+      "sha256": "af802cc6a243e6e2fc04e4b58d79ccb8d88499beee9b42565a70e80dff7d43e6"
+    },
+    {
+      "path": "tests/unit/events/report-event-publication.test.ts",
+      "sha256": "3ea4e8b564b7630663f4c67a492ee2cee94636fc1e43be16471a11c966b8b203"
+    },
+    {
+      "path": "tests/unit/notifications/consumer-transaction-boundary.test.ts",
+      "sha256": "2aa28019a3ef45f7a18015d307ad1ea8655f86a38f3db4b5fd822f7e5c4ec38e"
+    },
+    {
+      "path": "tests/unit/notifications/notification-delivery-boundary.test.ts",
+      "sha256": "6e4d54912a0d9c23f48c48680473d31490bfd28d16fd0351fb0aa4078ffde52d"
+    },
+    {
+      "path": "tests/unit/notifications/smtp-outcomes.test.ts",
+      "sha256": "62a0f6e3326191d7579068cb38870075a1f7552dd8c82c1ca6b956539554b349"
+    },
+    {
+      "path": "tests/unit/observability/posthog-delivery.test.ts",
+      "sha256": "e79c4842b2495fa7f7b79e89a968105fff1c1f3468ef1496ecce8a56ace9ac13"
+    },
+    {
+      "path": "tests/unit/observability/posthog-outbox-identity.test.ts",
+      "sha256": "52a768cd27d95e4391d68b02e87bc317627cd6104391c66ee0c6573a91aebfbf"
+    },
+    {
+      "path": "tests/unit/reports/report-delivery-effects.test.ts",
+      "sha256": "d8bac0219b4b041d5379f0420332e3de04ecdba102a0d6960adadcd73ea7b0c0"
+    },
+    {
+      "path": "tests/unit/reports/report-delivery-safety.test.ts",
+      "sha256": "5667650c107634331333d47fcc4a0868b1bbdfbe31ffd5bd11579fb2272968b2"
+    },
+    {
+      "path": "tests/unit/reports/report-generation-recovery.test.ts",
+      "sha256": "954c017319fae7915da32424627027f595f3a7634fe413feca874aa205a20589"
+    },
+    {
+      "path": "vitest.config.ts",
+      "sha256": "16c69458bf94b11ce60b8d115b4f6538b49838c5fb666bfe4560d9e3eacdedf2"
+    }
+  ]
+}

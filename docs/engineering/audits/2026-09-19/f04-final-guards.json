@@ -1,0 +1,32 @@
+[
+  {
+    "check": "scripts/guards/check-route-metadata.mjs",
+    "exitCode": 0,
+    "output": ""
+  },
+  {
+    "check": "scripts/guards/check-prisma-boundary.mjs",
+    "exitCode": 0,
+    "output": ""
+  },
+  {
+    "check": "scripts/guards/check-audit-compliance.mjs",
+    "exitCode": 0,
+    "output": "check-audit-compliance: OK (2438 files scanned)."
+  },
+  {
+    "check": "scripts/guards/check-outbox-compliance.mjs",
+    "exitCode": 0,
+    "output": ""
+  },
+  {
+    "check": "scripts/guards/check-package-exports.mjs",
+    "exitCode": 0,
+    "output": "check-package-exports: OK (5322 files, 22 workspace packages)."
+  },
+  {
+    "check": "scripts/ci/check-frontend-api-closure.mjs",
+    "exitCode": 0,
+    "output": "Frontend API closure OK (804 routes scanned, strict=no)."
+  }
+]

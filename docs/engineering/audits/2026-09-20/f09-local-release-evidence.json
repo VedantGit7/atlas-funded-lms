@@ -1,0 +1,357 @@
+{
+  "schemaVersion": "2",
+  "evidenceType": "release-suite",
+  "storyId": "ATL-STORY-045",
+  "generatedAt": "2026-09-20T07:18:16.550Z",
+  "commitSha": "ca8c0f1e7e69780b4e2ddc2a1136907a2e47c350",
+  "source": {
+    "headSha": "ca8c0f1e7e69780b4e2ddc2a1136907a2e47c350",
+    "clean": false,
+    "ci": false,
+    "ciRunId": null,
+    "ciRunAttempt": null
+  },
+  "environment": "local",
+  "verdict": "NOT_READY",
+  "productionApproved": false,
+  "gates": [
+    {
+      "id": "format_check",
+      "name": "Format check",
+      "kind": "automated",
+      "severity": "P0",
+      "status": "skipped",
+      "message": "Source provenance could not be established"
+    },
+    {
+      "id": "lint",
+      "name": "Lint",
+      "kind": "automated",
+      "severity": "P0",
+      "status": "skipped",
+      "message": "Source provenance could not be established"
+    },
+    {
+      "id": "typecheck",
+      "name": "Typecheck",
+      "kind": "automated",
+      "severity": "P0",
+      "status": "skipped",
+      "message": "Source provenance could not be established"
+    },
+    {
+      "id": "route_metadata",
+      "name": "Route metadata",
+      "kind": "automated",
+      "severity": "P0",
+      "status": "skipped",
+      "message": "Source provenance could not be established"
+    },
+    {
+      "id": "zod_boundaries",
+      "name": "Zod API boundaries",
+      "kind": "automated",
+      "severity": "P0",
+      "status": "skipped",
+      "message": "Source provenance could not be established"
+    },
+    {
+      "id": "permission_metadata",
+      "name": "Permission metadata",
+      "kind": "automated",
+      "severity": "P0",
+      "status": "skipped",
+      "message": "Source provenance could not be established"
+    },
+    {
+      "id": "entitlement_metadata",
+      "name": "Entitlement metadata",
+      "kind": "automated",
+      "severity": "P1",
+      "status": "skipped",
+      "message": "Source provenance could not be established"
+    },
+    {
+      "id": "prisma_boundary",
+      "name": "Prisma import boundary",
+      "kind": "automated",
+      "severity": "P0",
+      "status": "skipped",
+      "message": "Source provenance could not be established"
+    },
+    {
+      "id": "audit_metadata",
+      "name": "Audit obligations",
+      "kind": "automated",
+      "severity": "P0",
+      "status": "skipped",
+      "message": "Source provenance could not be established"
+    },
+    {
+      "id": "outbox_metadata",
+      "name": "Outbox obligations",
+      "kind": "automated",
+      "severity": "P0",
+      "status": "skipped",
+      "message": "Source provenance could not be established"
+    },
+    {
+      "id": "forbidden_scope",
+      "name": "Forbidden product scope",
+      "kind": "automated",
+      "severity": "P0",
+      "status": "skipped",
+      "message": "Source provenance could not be established"
+    },
+    {
+      "id": "tenant_resource_registry",
+      "name": "Tenant resource IDOR registry",
+      "kind": "automated",
+      "severity": "P0",
+      "status": "skipped",
+      "message": "Source provenance could not be established"
+    },
+    {
+      "id": "security_check",
+      "name": "Security regression bundle",
+      "kind": "automated",
+      "severity": "P0",
+      "status": "skipped",
+      "message": "Source provenance could not be established"
+    },
+    {
+      "id": "unit_tests",
+      "name": "Unit tests",
+      "kind": "automated",
+      "severity": "P0",
+      "status": "skipped",
+      "message": "Source provenance could not be established"
+    },
+    {
+      "id": "integration_tests",
+      "name": "Integration tests",
+      "kind": "automated",
+      "severity": "P0",
+      "status": "skipped",
+      "message": "Source provenance could not be established"
+    },
+    {
+      "id": "authorization_tests",
+      "name": "Authorization matrix",
+      "kind": "automated",
+      "severity": "P0",
+      "status": "skipped",
+      "message": "Source provenance could not be established"
+    },
+    {
+      "id": "tenant_isolation_tests",
+      "name": "Tenant isolation",
+      "kind": "automated",
+      "severity": "P0",
+      "status": "skipped",
+      "message": "Source provenance could not be established"
+    },
+    {
+      "id": "rls_tests",
+      "name": "RLS state check",
+      "kind": "automated",
+      "severity": "P0",
+      "status": "skipped",
+      "message": "Source provenance could not be established"
+    },
+    {
+      "id": "worker_tests",
+      "name": "Worker/event pipeline",
+      "kind": "automated",
+      "severity": "P1",
+      "status": "skipped",
+      "message": "Source provenance could not be established"
+    },
+    {
+      "id": "storage_tests",
+      "name": "Storage policy",
+      "kind": "automated",
+      "severity": "P1",
+      "status": "skipped",
+      "message": "Source provenance could not be established"
+    },
+    {
+      "id": "e2e_tests",
+      "name": "E2E wiring suite",
+      "kind": "automated",
+      "severity": "P0",
+      "status": "skipped",
+      "message": "Source provenance could not be established"
+    },
+    {
+      "id": "tenant_config_validate",
+      "name": "Tenant config manifests",
+      "kind": "automated",
+      "severity": "P0",
+      "status": "skipped",
+      "message": "Source provenance could not be established"
+    },
+    {
+      "id": "db_migrate_check",
+      "name": "Migration status",
+      "kind": "automated",
+      "severity": "P0",
+      "status": "skipped",
+      "message": "Source provenance could not be established"
+    },
+    {
+      "id": "db_rls_check",
+      "name": "RLS policies",
+      "kind": "automated",
+      "severity": "P0",
+      "status": "skipped",
+      "message": "Source provenance could not be established"
+    },
+    {
+      "id": "db_seed_check",
+      "name": "Seed/config check",
+      "kind": "automated",
+      "severity": "P1",
+      "status": "skipped",
+      "message": "Source provenance could not be established"
+    },
+    {
+      "id": "build",
+      "name": "Production build",
+      "kind": "automated",
+      "severity": "P0",
+      "status": "skipped",
+      "message": "Source provenance could not be established"
+    },
+    {
+      "id": "observability_contract",
+      "name": "Observability contract",
+      "kind": "automated",
+      "severity": "P1",
+      "status": "skipped",
+      "message": "Source provenance could not be established"
+    },
+    {
+      "id": "release_health",
+      "name": "Staging release health",
+      "kind": "automated",
+      "severity": "P1",
+      "status": "skipped",
+      "message": "Source provenance could not be established"
+    },
+    {
+      "id": "restore_validation",
+      "name": "Restored environment validation",
+      "kind": "automated",
+      "severity": "P1",
+      "status": "skipped",
+      "message": "Source provenance could not be established"
+    },
+    {
+      "id": "legal_readiness",
+      "name": "legal readiness",
+      "kind": "manual",
+      "severity": "P0",
+      "status": "manual_required",
+      "message": "Requires human sign-off before production review"
+    },
+    {
+      "id": "monitoring_alerts",
+      "name": "monitoring alerts",
+      "kind": "manual",
+      "severity": "P0",
+      "status": "manual_required",
+      "message": "Requires human sign-off before production review"
+    },
+    {
+      "id": "backup_restore_drill",
+      "name": "backup restore drill",
+      "kind": "manual",
+      "severity": "P0",
+      "status": "manual_required",
+      "message": "Requires human sign-off before production review"
+    },
+    {
+      "id": "rollback_target",
+      "name": "rollback target",
+      "kind": "manual",
+      "severity": "P0",
+      "status": "manual_required",
+      "message": "Requires human sign-off before production review"
+    },
+    {
+      "id": "domain_ssl",
+      "name": "domain ssl",
+      "kind": "manual",
+      "severity": "P0",
+      "status": "manual_required",
+      "message": "Requires human sign-off before production review"
+    },
+    {
+      "id": "production_secrets_review",
+      "name": "production secrets review",
+      "kind": "manual",
+      "severity": "P0",
+      "status": "manual_required",
+      "message": "Requires human sign-off before production review"
+    },
+    {
+      "id": "incident_owner",
+      "name": "incident owner",
+      "kind": "manual",
+      "severity": "P0",
+      "status": "manual_required",
+      "message": "Requires human sign-off before production review"
+    },
+    {
+      "id": "cto_approval",
+      "name": "cto approval",
+      "kind": "manual",
+      "severity": "P0",
+      "status": "manual_required",
+      "message": "Requires human sign-off before production review"
+    }
+  ],
+  "manualGatesRequired": [
+    "legal_readiness",
+    "monitoring_alerts",
+    "backup_restore_drill",
+    "rollback_target",
+    "domain_ssl",
+    "production_secrets_review",
+    "incident_owner",
+    "cto_approval"
+  ],
+  "blockers": [
+    "Checkout is dirty; evidence is not proof of the committed candidate",
+    "format_check: skipped",
+    "lint: skipped",
+    "typecheck: skipped",
+    "route_metadata: skipped",
+    "zod_boundaries: skipped",
+    "permission_metadata: skipped",
+    "entitlement_metadata: skipped",
+    "prisma_boundary: skipped",
+    "audit_metadata: skipped",
+    "outbox_metadata: skipped",
+    "forbidden_scope: skipped",
+    "tenant_resource_registry: skipped",
+    "security_check: skipped",
+    "unit_tests: skipped",
+    "integration_tests: skipped",
+    "authorization_tests: skipped",
+    "tenant_isolation_tests: skipped",
+    "rls_tests: skipped",
+    "worker_tests: skipped",
+    "storage_tests: skipped",
+    "e2e_tests: skipped",
+    "tenant_config_validate: skipped",
+    "db_migrate_check: skipped",
+    "db_rls_check: skipped",
+    "db_seed_check: skipped",
+    "build: skipped",
+    "observability_contract: skipped"
+  ],
+  "warnings": [],
+  "rollbackTarget": null
+}

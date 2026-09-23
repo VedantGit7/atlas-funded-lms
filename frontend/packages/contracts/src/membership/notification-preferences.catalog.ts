@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 /** Product / learning notifications (tenant-scoped, per membership). */
 export const PRODUCT_NOTIFICATION_CATEGORIES = [
   "certificate.issued",
@@ -21,6 +23,8 @@ export const NOTIFICATION_PREFERENCE_CATEGORIES = [
 ] as const;
 
 export type NotificationPreferenceCategory = (typeof NOTIFICATION_PREFERENCE_CATEGORIES)[number];
+
+export const notificationPreferenceCategorySchema = z.enum(NOTIFICATION_PREFERENCE_CATEGORIES);
 
 export const NOTIFICATION_CATEGORY_LABELS: Record<NotificationPreferenceCategory, string> = {
   "certificate.issued": "A certificate is issued to me",
@@ -49,3 +53,58 @@ export const NOTIFICATION_CATEGORY_GROUPS = {
 } as const;
 
 export type NotificationChannelPrefs = { email: boolean; inApp: boolean };
+export type PartialNotificationChannelPrefs = {
+  email?: boolean | undefined;
+  inApp?: boolean | undefined;
+};
+
+/** Opt-out model: missing row means enabled. */
+export function isNotificationCategoryEnabled(
+  prefs: Record<string, boolean | undefined>,
+  category: NotificationPreferenceCategory,
+): boolean {
+  return prefs[category] !== false;
+}
+
+export function buildDefaultNotificationPreferences(): Record<
+  NotificationPreferenceCategory,
+  NotificationChannelPrefs
+> {
+  const defaults = {} as Record<NotificationPreferenceCategory, NotificationChannelPrefs>;
+  for (const key of NOTIFICATION_PREFERENCE_CATEGORIES) {
+    defaults[key] = { email: true, inApp: true };
+  }
+  return defaults;
+}
+
+export function mergeNotificationPreferences(
+  overrides: Record<string, PartialNotificationChannelPrefs | undefined>,
+): Record<NotificationPreferenceCategory, NotificationChannelPrefs> {
+  const merged = buildDefaultNotificationPreferences();
+  for (const key of NOTIFICATION_PREFERENCE_CATEGORIES) {
+    const override = overrides[key];
+    if (override === undefined) continue;
+    merged[key] = {
+      email: override.email !== undefined ? override.email : merged[key].email,
+      inApp: override.inApp !== undefined ? override.inApp : merged[key].inApp,
+    };
+  }
+  return merged;
+}
+
+export function validateNotificationPreferenceInput(
+  notifications: Record<string, PartialNotificationChannelPrefs> | undefined,
+): Record<string, PartialNotificationChannelPrefs> {
+  if (!notifications) {
+    return {};
+  }
+
+  const validated: Record<string, PartialNotificationChannelPrefs> = {};
+  for (const [key, value] of Object.entries(notifications)) {
+    const parsed = notificationPreferenceCategorySchema.safeParse(key);
+    if (parsed.success) {
+      validated[parsed.data] = value;
+    }
+  }
+  return validated;
+}

@@ -2,13 +2,17 @@ export { APPROVED_EVENT_TYPES, assertApprovedEventType } from "./event-types";
 export { OutboxEventEnvelopeSchema, type OutboxEventEnvelope } from "./schemas/event-envelope";
 export {
   insertOutboxEvent,
-  pollOutboxEventsForProcessing,
   type OutboxPollRow,
   type PublishOutboxInput,
 } from "./repositories/outbox.repository";
 export { outbox, publishOutboxEvent, type OutboxPublishInput } from "./services/outbox.service";
 export { replayDeadLetterEvent } from "./services/dead-letter-replay.service";
-export { processOutboxBatch, type OutboxHandler } from "./services/outbox-worker.service";
+export {
+  processOutboxBatch,
+  OutboxDeliveryError,
+  type OutboxHandler,
+  type OutboxTransactions,
+} from "./services/outbox-worker.service";
 export {
   insertEventDeliveryAttempt,
   findEventDelivery,

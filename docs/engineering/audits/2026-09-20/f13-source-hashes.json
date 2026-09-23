@@ -1,0 +1,82 @@
+{
+  "scope": "F13 local source snapshot; not deployment evidence",
+  "createdAt": "2026-09-20T08:40:59.7420854Z",
+  "files": [
+    {
+      "path": ".env.example",
+      "sha256": "417f72582555affb1acb17d0399e1ca93db55d54cd7ea2ca220e2c6b06bf3eb1"
+    },
+    {
+      "path": "configs/security-headers.mjs",
+      "sha256": "6ba3e5e595e48d84a19ef2c6b80eaa88e7326b2b12c6d1efc763cd7dc5902195"
+    },
+    {
+      "path": "configs/security-headers.d.mts",
+      "sha256": "0b7fc6e9094fae5e93b6fe9f900041328e1cbd092040a5e7ef99be8d2e8875ac"
+    },
+    {
+      "path": "frontend/apps/web/next.config.ts",
+      "sha256": "9fde767317ff3936ae56049734e51ec0191e9ad9d00ce5dbde0faf97b154fc03"
+    },
+    {
+      "path": "backend/apps/api/next.config.ts",
+      "sha256": "34b48df4803dcab5140d5830648bd1c68db190c2bb27458cf74fdda68094531a"
+    },
+    {
+      "path": "frontend/apps/web/src/proxy.ts",
+      "sha256": "f3a7072e57b8b54efe6baffdbf8f958266cb40d98670159df54b0195e11d6681"
+    },
+    {
+      "path": "frontend/apps/web/src/app/layout.tsx",
+      "sha256": "a911b591420d30072d9c39ddc17691e96e1d5dcd7e888fa18662147b71749952"
+    },
+    {
+      "path": "frontend/apps/web/src/components/ThemeInitScript.tsx",
+      "sha256": "a55cb063d2821342d1bc61563b01c950c7d6b88c47f66ba42fa4b31fff4d10b6"
+    },
+    {
+      "path": "backend/packages/storage/src/scorm-content-headers.ts",
+      "sha256": "f3e2b09ffd103c7365ab73a0cc065f344ff98531e15f647ca3dc4ea66dc89bb8"
+    },
+    {
+      "path": "backend/packages/api/src/csp-report.ts",
+      "sha256": "115a90d0fba8652cf2bf67af5ff46fa38dcfd981295a2b5903d38d179959c4eb"
+    },
+    {
+      "path": "backend/packages/api/src/rate-limit.ts",
+      "sha256": "af28cf0860e4c48698ac91be170fd8ee51d09a62c51f4d0067881ceeffbc9f44"
+    },
+    {
+      "path": "backend/packages/authorization/src/route-metadata.ts",
+      "sha256": "e76a9f0566ebae28f7f7881abb5bb89bdb14e013952a0e0ace4373a7ae37e1c9"
+    },
+    {
+      "path": "backend/apps/api/src/app/api/v1/public/security/csp-report/route.ts",
+      "sha256": "1f64b577aa992a60433eca9d6894c019a18fee8da2fd230914b5c2cc55a25e6b"
+    },
+    {
+      "path": "tests/unit/web/content-security-policy.test.ts",
+      "sha256": "7a91143e8c5a28a1bccaa0153a0e51305c91229c67854428fa0d92e7e7ea7e01"
+    },
+    {
+      "path": "tests/unit/api/csp-report.test.ts",
+      "sha256": "9d30ec56406af190460815e57adfc83ebeed95f99cfbc300b374859a548b5d03"
+    },
+    {
+      "path": "tests/unit/storage/scorm-content-headers.test.ts",
+      "sha256": "1868c7f3a4a422756bc4dfb927d58577f043955b841b48f938a1e951c443e306"
+    },
+    {
+      "path": "scripts/security/verify-csp-browser.mjs",
+      "sha256": "d11ecd84633f28051f77093850da9f883c47dc1027daf4361af58985553b0a60"
+    },
+    {
+      "path": "docs/engineering/f13-csp-remediation.md",
+      "sha256": "52af3a4af05f60c4796c2999833d2d4dbf46bbb2bfaa1a67505f5daf8e794427"
+    },
+    {
+      "path": "docs/runbooks/content-security-policy.md",
+      "sha256": "05aadc57cbdf811b1d3d404a4960445bb124714ee28724cb4619c882f39ebad9"
+    }
+  ]
+}

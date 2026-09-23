@@ -45,6 +45,7 @@ export type CourseModuleMinAggregateOutputType = {
   scorm_package_reference_id: string | null
   scorm_launch_path: string | null
   scorm_version: string | null
+  scormContentVersion: string | null
   created_at: Date | null
   updated_at: Date | null
   deleted_at: Date | null
@@ -61,6 +62,7 @@ export type CourseModuleMaxAggregateOutputType = {
   scorm_package_reference_id: string | null
   scorm_launch_path: string | null
   scorm_version: string | null
+  scormContentVersion: string | null
   created_at: Date | null
   updated_at: Date | null
   deleted_at: Date | null
@@ -77,6 +79,7 @@ export type CourseModuleCountAggregateOutputType = {
   scorm_package_reference_id: number
   scorm_launch_path: number
   scorm_version: number
+  scormContentVersion: number
   created_at: number
   updated_at: number
   deleted_at: number
@@ -103,6 +106,7 @@ export type CourseModuleMinAggregateInputType = {
   scorm_package_reference_id?: true
   scorm_launch_path?: true
   scorm_version?: true
+  scormContentVersion?: true
   created_at?: true
   updated_at?: true
   deleted_at?: true
@@ -119,6 +123,7 @@ export type CourseModuleMaxAggregateInputType = {
   scorm_package_reference_id?: true
   scorm_launch_path?: true
   scorm_version?: true
+  scormContentVersion?: true
   created_at?: true
   updated_at?: true
   deleted_at?: true
@@ -135,6 +140,7 @@ export type CourseModuleCountAggregateInputType = {
   scorm_package_reference_id?: true
   scorm_launch_path?: true
   scorm_version?: true
+  scormContentVersion?: true
   created_at?: true
   updated_at?: true
   deleted_at?: true
@@ -238,6 +244,7 @@ export type CourseModuleGroupByOutputType = {
   scorm_package_reference_id: string | null
   scorm_launch_path: string | null
   scorm_version: string | null
+  scormContentVersion: string | null
   created_at: Date
   updated_at: Date
   deleted_at: Date | null
@@ -277,6 +284,7 @@ export type CourseModuleWhereInput = {
   scorm_package_reference_id?: Prisma.UuidNullableFilter<"CourseModule"> | string | null
   scorm_launch_path?: Prisma.StringNullableFilter<"CourseModule"> | string | null
   scorm_version?: Prisma.StringNullableFilter<"CourseModule"> | string | null
+  scormContentVersion?: Prisma.UuidNullableFilter<"CourseModule"> | string | null
   created_at?: Prisma.DateTimeFilter<"CourseModule"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"CourseModule"> | Date | string
   deleted_at?: Prisma.DateTimeNullableFilter<"CourseModule"> | Date | string | null
@@ -293,6 +301,7 @@ export type CourseModuleOrderByWithRelationInput = {
   scorm_package_reference_id?: Prisma.SortOrderInput | Prisma.SortOrder
   scorm_launch_path?: Prisma.SortOrderInput | Prisma.SortOrder
   scorm_version?: Prisma.SortOrderInput | Prisma.SortOrder
+  scormContentVersion?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   deleted_at?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -313,6 +322,7 @@ export type CourseModuleWhereUniqueInput = Prisma.AtLeast<{
   scorm_package_reference_id?: Prisma.UuidNullableFilter<"CourseModule"> | string | null
   scorm_launch_path?: Prisma.StringNullableFilter<"CourseModule"> | string | null
   scorm_version?: Prisma.StringNullableFilter<"CourseModule"> | string | null
+  scormContentVersion?: Prisma.UuidNullableFilter<"CourseModule"> | string | null
   created_at?: Prisma.DateTimeFilter<"CourseModule"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"CourseModule"> | Date | string
   deleted_at?: Prisma.DateTimeNullableFilter<"CourseModule"> | Date | string | null
@@ -329,6 +339,7 @@ export type CourseModuleOrderByWithAggregationInput = {
   scorm_package_reference_id?: Prisma.SortOrderInput | Prisma.SortOrder
   scorm_launch_path?: Prisma.SortOrderInput | Prisma.SortOrder
   scorm_version?: Prisma.SortOrderInput | Prisma.SortOrder
+  scormContentVersion?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   deleted_at?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -353,6 +364,7 @@ export type CourseModuleScalarWhereWithAggregatesInput = {
   scorm_package_reference_id?: Prisma.UuidNullableWithAggregatesFilter<"CourseModule"> | string | null
   scorm_launch_path?: Prisma.StringNullableWithAggregatesFilter<"CourseModule"> | string | null
   scorm_version?: Prisma.StringNullableWithAggregatesFilter<"CourseModule"> | string | null
+  scormContentVersion?: Prisma.UuidNullableWithAggregatesFilter<"CourseModule"> | string | null
   created_at?: Prisma.DateTimeWithAggregatesFilter<"CourseModule"> | Date | string
   updated_at?: Prisma.DateTimeWithAggregatesFilter<"CourseModule"> | Date | string
   deleted_at?: Prisma.DateTimeNullableWithAggregatesFilter<"CourseModule"> | Date | string | null
@@ -369,6 +381,7 @@ export type CourseModuleCreateInput = {
   scorm_package_reference_id?: string | null
   scorm_launch_path?: string | null
   scorm_version?: string | null
+  scormContentVersion?: string | null
   created_at?: Date | string
   updated_at?: Date | string
   deleted_at?: Date | string | null
@@ -385,6 +398,7 @@ export type CourseModuleUncheckedCreateInput = {
   scorm_package_reference_id?: string | null
   scorm_launch_path?: string | null
   scorm_version?: string | null
+  scormContentVersion?: string | null
   created_at?: Date | string
   updated_at?: Date | string
   deleted_at?: Date | string | null
@@ -401,6 +415,7 @@ export type CourseModuleUpdateInput = {
   scorm_package_reference_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   scorm_launch_path?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   scorm_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scormContentVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -417,6 +432,7 @@ export type CourseModuleUncheckedUpdateInput = {
   scorm_package_reference_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   scorm_launch_path?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   scorm_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scormContentVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -433,6 +449,7 @@ export type CourseModuleCreateManyInput = {
   scorm_package_reference_id?: string | null
   scorm_launch_path?: string | null
   scorm_version?: string | null
+  scormContentVersion?: string | null
   created_at?: Date | string
   updated_at?: Date | string
   deleted_at?: Date | string | null
@@ -449,6 +466,7 @@ export type CourseModuleUpdateManyMutationInput = {
   scorm_package_reference_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   scorm_launch_path?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   scorm_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scormContentVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -465,6 +483,7 @@ export type CourseModuleUncheckedUpdateManyInput = {
   scorm_package_reference_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   scorm_launch_path?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   scorm_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scormContentVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -487,6 +506,7 @@ export type CourseModuleCountOrderByAggregateInput = {
   scorm_package_reference_id?: Prisma.SortOrder
   scorm_launch_path?: Prisma.SortOrder
   scorm_version?: Prisma.SortOrder
+  scormContentVersion?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   deleted_at?: Prisma.SortOrder
@@ -507,6 +527,7 @@ export type CourseModuleMaxOrderByAggregateInput = {
   scorm_package_reference_id?: Prisma.SortOrder
   scorm_launch_path?: Prisma.SortOrder
   scorm_version?: Prisma.SortOrder
+  scormContentVersion?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   deleted_at?: Prisma.SortOrder
@@ -523,6 +544,7 @@ export type CourseModuleMinOrderByAggregateInput = {
   scorm_package_reference_id?: Prisma.SortOrder
   scorm_launch_path?: Prisma.SortOrder
   scorm_version?: Prisma.SortOrder
+  scormContentVersion?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   deleted_at?: Prisma.SortOrder
@@ -549,6 +571,7 @@ export type CourseModuleSelect<ExtArgs extends runtime.Types.Extensions.Internal
   scorm_package_reference_id?: boolean
   scorm_launch_path?: boolean
   scorm_version?: boolean
+  scormContentVersion?: boolean
   created_at?: boolean
   updated_at?: boolean
   deleted_at?: boolean
@@ -565,6 +588,7 @@ export type CourseModuleSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   scorm_package_reference_id?: boolean
   scorm_launch_path?: boolean
   scorm_version?: boolean
+  scormContentVersion?: boolean
   created_at?: boolean
   updated_at?: boolean
   deleted_at?: boolean
@@ -581,6 +605,7 @@ export type CourseModuleSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   scorm_package_reference_id?: boolean
   scorm_launch_path?: boolean
   scorm_version?: boolean
+  scormContentVersion?: boolean
   created_at?: boolean
   updated_at?: boolean
   deleted_at?: boolean
@@ -597,12 +622,13 @@ export type CourseModuleSelectScalar = {
   scorm_package_reference_id?: boolean
   scorm_launch_path?: boolean
   scorm_version?: boolean
+  scormContentVersion?: boolean
   created_at?: boolean
   updated_at?: boolean
   deleted_at?: boolean
 }
 
-export type CourseModuleOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "course_id" | "title" | "position" | "status" | "content_kind" | "scorm_package_reference_id" | "scorm_launch_path" | "scorm_version" | "created_at" | "updated_at" | "deleted_at", ExtArgs["result"]["courseModule"]>
+export type CourseModuleOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "course_id" | "title" | "position" | "status" | "content_kind" | "scorm_package_reference_id" | "scorm_launch_path" | "scorm_version" | "scormContentVersion" | "created_at" | "updated_at" | "deleted_at", ExtArgs["result"]["courseModule"]>
 
 export type $CourseModulePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "CourseModule"
@@ -618,6 +644,7 @@ export type $CourseModulePayload<ExtArgs extends runtime.Types.Extensions.Intern
     scorm_package_reference_id: string | null
     scorm_launch_path: string | null
     scorm_version: string | null
+    scormContentVersion: string | null
     created_at: Date
     updated_at: Date
     deleted_at: Date | null
@@ -1054,6 +1081,7 @@ export interface CourseModuleFieldRefs {
   readonly scorm_package_reference_id: Prisma.FieldRef<"CourseModule", 'String'>
   readonly scorm_launch_path: Prisma.FieldRef<"CourseModule", 'String'>
   readonly scorm_version: Prisma.FieldRef<"CourseModule", 'String'>
+  readonly scormContentVersion: Prisma.FieldRef<"CourseModule", 'String'>
   readonly created_at: Prisma.FieldRef<"CourseModule", 'DateTime'>
   readonly updated_at: Prisma.FieldRef<"CourseModule", 'DateTime'>
   readonly deleted_at: Prisma.FieldRef<"CourseModule", 'DateTime'>

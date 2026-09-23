@@ -7,6 +7,8 @@
     "./services/outbox.service": "./src/services/outbox.service.ts",
     "./services/outbox-worker.service": "./src/services/outbox-worker.service.ts",
     "./event-types": "./src/event-types.ts",
+    "./transaction": "./src/transaction.ts",
+    "./repositories/outbox-job.repository": "./src/repositories/outbox-job.repository.ts",
     "./schemas/dead-letter-list": "./src/schemas/dead-letter-list.ts",
     "./schemas/event-envelope": "./src/schemas/event-envelope.ts",
     "./services/dead-letter-replay.service": "./src/services/dead-letter-replay.service.ts"

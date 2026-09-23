@@ -12,19 +12,25 @@ import { AtlasHttpError } from "@atlas/core/http/errors";
 import { getOrCreateRequestId } from "@atlas/core/request/request-id";
 import { attachRequestIdHeader, inferRouteGroup, runRouteLifecycle } from "@atlas/observability";
 import { requireSupabaseUser, upsertAuthPrincipal } from "@atlas/auth";
+import type { SessionAssuranceLevel } from "@atlas/auth";
 import { withGlobalDb } from "@atlas/db/global-db";
 import type { TenantTx } from "@atlas/db";
 import { withTenantTx } from "@atlas/db/with-tenant-tx";
-import { ensurePlatformSuperAdminTenantAccess, requireActiveMembership } from "@atlas/membership";
+import { requireActiveMembership } from "@atlas/membership";
 import { resolveTenantFromRequest } from "@atlas/tenancy";
 import { assertSameOrigin } from "./assert-same-origin";
-import { fingerprintRequest, withIdempotency } from "./idempotency-registry";
+import {
+  fingerprintRequest,
+  validateIdempotencyKey,
+  withIdempotency,
+} from "./idempotency-registry";
 import { assertTenantMfa } from "@atlas/auth/mfa-enforcement";
 import { toSafeErrorEnvelope } from "./error-envelope";
 import { loadResourceRefOrDefault } from "./load-resource-ref";
 import type { RouteMetadata, TenantRouteContext } from "./route-metadata";
 import { noBodySchema } from "./schemas";
 import { recordTenantUsage } from "./tenant-usage-meter";
+import { enforceIngressRateLimit, enforceProtectedRateLimit } from "./rate-limit";
 
 type InferParams<TParams extends z.ZodType | undefined> = TParams extends z.ZodType
   ? z.infer<TParams> extends object
@@ -36,21 +42,26 @@ function asParamRecord(params: object): Record<string, string> {
   return params as Record<string, string>;
 }
 
-export async function runProtectedTenantRoutePipeline<TInput>(args: {
+async function authorizeProtectedTenantRoute<TInput>(args: {
   tx: TenantTx;
   ctx: TenantRouteContext;
   metadata: RouteMetadata<TInput>;
   params: Record<string, string>;
   input: TInput;
   /**
-   * Whether the caller's session has a verified second factor (H5).
-   *
-   * Threaded explicitly rather than added to `TenantRouteContext`, which is
-   * constructed in hundreds of places; an optional flag there would default to
-   * "no MFA" at every one of them and quietly deny.
+   * Verified assurance on the current access token, separate from enrollment.
+   * Missing assurance fails closed on routes requiring MFA.
    */
-  mfaEnabled?: boolean;
+  sessionAssuranceLevel?: SessionAssuranceLevel | undefined;
 }): Promise<ResourceRef> {
+  await enforceProtectedRateLimit({
+    plane: "tenant",
+    tenantId: args.ctx.tenantId,
+    actorId: args.ctx.actorMembershipId,
+    permission: args.metadata.permission,
+    bucket: args.metadata.rateLimit,
+    requestId: args.ctx.requestId,
+  });
   await enforceEntitlement(args.tx, {
     tenantId: args.ctx.tenantId,
     key: args.metadata.entitlement ?? null,
@@ -87,15 +98,22 @@ export async function runProtectedTenantRoutePipeline<TInput>(args: {
   // should learn "denied", not "you need MFA" — the latter tells them the
   // action exists and that they would otherwise be allowed to perform it.
   assertTenantMfa({
-    mfaEnabled: args.mfaEnabled ?? false,
+    sessionAssuranceLevel: args.sessionAssuranceLevel,
     required: args.metadata.mfa === "required",
     permission: args.metadata.permission,
   });
 
-  // Metering runs last, for the same reason MFA runs after the permission
-  // decision: a caller who is going to be denied must not consume a unit of the
-  // tenant's plan on the way out. Routes that declare no usage function are
-  // unaffected — the gate above is the whole of their entitlement handling.
+  return resource;
+}
+
+async function consumeProtectedTenantRouteUsage<TInput>(args: {
+  tx: TenantTx;
+  ctx: TenantRouteContext;
+  metadata: RouteMetadata<TInput>;
+  params: Record<string, string>;
+  input: TInput;
+}): Promise<void> {
+  // This is a mutation: charge only the claimed operation, never a replay.
   if (args.metadata.entitlementUsage) {
     await consumeEntitlementUnits(args.tx, {
       tenantId: args.ctx.tenantId,
@@ -108,7 +126,14 @@ export async function runProtectedTenantRoutePipeline<TInput>(args: {
       }),
     });
   }
+}
 
+/** Non-replay callers retain the complete authorization-and-metering pipeline. */
+export async function runProtectedTenantRoutePipeline<TInput>(
+  args: Parameters<typeof authorizeProtectedTenantRoute<TInput>>[0],
+): Promise<ResourceRef> {
+  const resource = await authorizeProtectedTenantRoute(args);
+  await consumeProtectedTenantRouteUsage(args);
   return resource;
 }
 
@@ -130,7 +155,7 @@ export async function runProtectedTenantRouteHandler<
   metadata: RouteMetadata<TInput>;
   params: TParams;
   input: TInput;
-  mfaEnabled?: boolean;
+  sessionAssuranceLevel?: SessionAssuranceLevel | undefined;
   handler: ProtectedTenantRouteHandler<TInput, TOutput, TParams>;
 }): Promise<TOutput> {
   const resource = await runProtectedTenantRoutePipeline({
@@ -139,7 +164,7 @@ export async function runProtectedTenantRouteHandler<
     metadata: args.metadata,
     params: asParamRecord(args.params),
     input: args.input,
-    ...(args.mfaEnabled === undefined ? {} : { mfaEnabled: args.mfaEnabled }),
+    sessionAssuranceLevel: args.sessionAssuranceLevel,
   });
 
   return args.handler({
@@ -177,6 +202,7 @@ function requireIdempotencyKey(req: NextRequest): void {
       message: "Idempotency-Key header is required.",
     });
   }
+  validateIdempotencyKey(idempotencyKey);
 }
 
 function rejectClientSuppliedQueryParams(req: NextRequest): void {
@@ -244,6 +270,7 @@ export function createTenantRoute<
           classifyError: (error) => toSafeErrorEnvelope(error, requestId).body.error.code,
         },
         async () => {
+          await enforceIngressRateLimit({ req, plane: "tenant", requestId });
           if (config.metadata.idempotency === "required") {
             requireIdempotencyKey(req);
           }
@@ -307,13 +334,6 @@ export function createTenantRoute<
               markLogin: false,
             });
 
-            await ensurePlatformSuperAdminTenantAccess({
-              db,
-              tenantId: resolvedTenant.tenantId,
-              requestId,
-              email: supabaseUser.email,
-            });
-
             return { tenant: resolvedTenant, principal: resolvedPrincipal };
           });
           metered.tenantId = tenant.tenantId;
@@ -342,21 +362,26 @@ export function createTenantRoute<
                 authPrincipalId: principal.id,
               });
 
-              const runHandler = () =>
-                runProtectedTenantRouteHandler({
-                  tx,
-                  ctx: {
-                    tenantId: tenant.tenantId,
-                    requestId,
-                    actorMembershipId: membership.membershipId,
-                    ...(idempotencyKey ? { idempotencyKey } : {}),
-                  },
-                  metadata: config.metadata,
-                  params,
-                  input,
-                  mfaEnabled: supabaseUser.mfaEnabled,
-                  handler: config.handler,
-                });
+              const pipelineArgs = {
+                tx,
+                ctx: {
+                  tenantId: tenant.tenantId,
+                  requestId,
+                  actorMembershipId: membership.membershipId,
+                  ...(idempotencyKey ? { idempotencyKey } : {}),
+                },
+                metadata: config.metadata,
+                params: asParamRecord(params),
+                input,
+                sessionAssuranceLevel: supabaseUser.sessionAssuranceLevel,
+              };
+              // F03: every request, including a replay, uses current resource,
+              // permission, entitlement, and session-MFA evidence.
+              const resource = await authorizeProtectedTenantRoute(pipelineArgs);
+              const runHandler = async () => {
+                await consumeProtectedTenantRouteUsage(pipelineArgs);
+                return config.handler({ tx, ctx: pipelineArgs.ctx, input, resource, params });
+              };
 
               // M10. The claim is made in this transaction, so the record and
               // the handler's writes commit together — a handler that throws
@@ -406,14 +431,14 @@ export function createTenantRoute<
     } catch (error) {
       const safe = toSafeErrorEnvelope(error, requestId);
       return attachRequestIdHeader(
-        NextResponse.json(safe.body, { status: safe.status }),
+        NextResponse.json(safe.body, { status: safe.status, headers: safe.headers ?? {} }),
         requestId,
       );
     } finally {
       // Failed requests are counted too: a denied or invalid request still
       // spent server time resolving the tenant and checking permissions.
       if (metered.tenantId !== null) {
-        recordTenantUsage(metered.tenantId, {
+        await recordTenantUsage(metered.tenantId, {
           requests: 1,
           durationMs: performance.now() - startedAt,
         });

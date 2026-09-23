@@ -57,6 +57,7 @@ function mapRunRow(row: Record<string, unknown>): ReportRunRow {
     format: String(row["format"]) as ReportFormat,
     row_count: typeof row["row_count"] === "number" ? row["row_count"] : null,
     r2_object_key: typeof row["r2_object_key"] === "string" ? row["r2_object_key"] : null,
+    artifact_json: row["artifact_json"] ?? null,
     error_json: row["error_json"] ?? null,
     progress_percent:
       typeof row["progress_percent"] === "number"
@@ -446,6 +447,28 @@ export const reportsRepository = {
     return row ? mapRunRow(row) : null;
   },
 
+  /** Never use this to take over a RUNNING job; its existing worker may still be alive. */
+  async lockRunningReportRun(tx: TenantTx, reportRunId: string): Promise<boolean> {
+    const rows = await tx.$queryRaw<Array<{ id: string }>>`
+      select id from report_runs
+      where id = ${reportRunId}::uuid and status = 'RUNNING'
+      for update
+    `;
+    return rows.length > 0;
+  },
+
+  /** Called only by the worker that claimed this run, after its work has stopped. */
+  async requeueReportRun(tx: TenantTx, reportRunId: string): Promise<void> {
+    await tx.$executeRaw`
+      update report_runs
+      set status = 'QUEUED', started_at = null, completed_at = null,
+        progress_percent = 0,
+        error_json = '{"code":"REPORT_GENERATION_RETRY_PENDING"}'::jsonb,
+        updated_at = now()
+      where id = ${reportRunId}::uuid and status = 'RUNNING'
+    `;
+  },
+
   async updateReportRunProgress(
     tx: TenantTx,
     args: {
@@ -478,6 +501,7 @@ export const reportsRepository = {
       objectKey: string;
       rowCount: number;
       expiresAt: Date;
+      artifact: { provider: string; bucket: string };
     },
   ): Promise<ReportRunRow | null> {
     const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
@@ -490,6 +514,8 @@ export const reportsRepository = {
         error_json = null,
         completed_at = now(),
         expires_at = ${args.expiresAt},
+        file_retention_managed = true,
+        artifact_json = ${JSON.stringify(args.artifact)}::jsonb,
         updated_at = now()
       where id = ${args.reportRunId}::uuid
       returning *

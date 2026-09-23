@@ -1,6 +1,6 @@
 import type { NextRequest } from "next/server";
 import { ATLAS_ACCESS_TOKEN_COOKIE, ATLAS_REFRESH_TOKEN_COOKIE } from "../auth-cookies";
-import { ATLAS_INTERNAL_TENANT_HOST_HEADER } from "../http-headers";
+import { buildApiProxyHeaders } from "@atlas/core/http/api-proxy";
 import {
   appendSetCookieHeaders,
   buildCookieHeaderFromPairs,
@@ -92,12 +92,11 @@ export async function refreshSessionCookieHeader(
   try {
     response = await fetch(`${API_INTERNAL_URL}/api/v1/public/auth/refresh`, {
       method: "POST",
-      headers: {
+      headers: buildApiProxyHeaders(tenantHost, {
         ...(cookieHeader ? { cookie: cookieHeader } : {}),
-        "x-forwarded-host": tenantHost,
-        [ATLAS_INTERNAL_TENANT_HOST_HEADER]: tenantHost,
         "content-type": "application/json",
-      },
+      }),
+      redirect: "error",
       cache: "no-store",
     });
   } catch {
@@ -138,12 +137,11 @@ export async function tryRefreshSessionForProxy(req: NextRequest): Promise<Respo
   try {
     response = await fetch(`${API_INTERNAL_URL}/api/v1/public/auth/refresh`, {
       method: "POST",
-      headers: {
+      headers: buildApiProxyHeaders(browserHost, {
         ...(cookieHeader ? { cookie: cookieHeader } : {}),
-        "x-forwarded-host": browserHost,
-        [ATLAS_INTERNAL_TENANT_HOST_HEADER]: browserHost,
         "content-type": "application/json",
-      },
+      }),
+      redirect: "error",
       cache: "no-store",
     });
   } catch {

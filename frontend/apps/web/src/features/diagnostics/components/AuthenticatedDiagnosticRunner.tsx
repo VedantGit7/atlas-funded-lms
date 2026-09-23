@@ -6,7 +6,7 @@ import { motion, useReducedMotion } from "motion/react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { clientApi } from "../../../lib/client-api";
 import { captureProductEvent } from "../../../observability/capture-product-event";
-import type { DiagnosticQuestion } from "@atlas/contracts-modules/diagnostics/diagnostic.types";
+import type { DiagnosticQuestion } from "@atlas/contracts/diagnostics/diagnostic.types";
 import { DiagnosticQuestionCard } from "./DiagnosticQuestionCard";
 
 const EASE = [0.16, 1, 0.3, 1] as const;

@@ -1,40 +1,14 @@
 import { randomUUID } from "node:crypto";
+import type { TenantTx } from "@atlas/db";
 import { withTenantTx } from "@atlas/db/with-tenant-tx";
+import { appendDurableUsage } from "@atlas/db/metering-client";
 import {
   addMeteredUsage,
   METERED_USAGE_KEYS,
 } from "@atlas/domain-config/repositories/usage.repository";
 
-/**
- * Per-tenant usage metering for cost attribution (DoD item 8).
- *
- * The architecture review: "only the *usage* side is metered; the *cost* side
- * isn't instrumented." Storage, members and domains can be read from tables that
- * already exist. Two drivers could not: how much server work each tenant causes,
- * and how many emails the platform pays to send on its behalf. Neither left a
- * per-tenant record anywhere.
- *
- * Counting happens in memory and is written in batches, never inside the
- * request. The obvious alternative -- an UPDATE on the tenant's monthly row in
- * every request's own transaction -- serialises all of a busy tenant's requests
- * on that one row lock, which would make cost measurement the platform's
- * bottleneck. Batching turns N writes per tenant into one per flush interval.
- *
- * The trade is precision on a crash: counts accumulated since the last flush are
- * lost if the process dies without flushing. For attributing a monthly bill that
- * is a rounding error, which is why this is acceptable here and would not be for
- * anything that is billed to a customer. Entitlement limits, which are, use the
- * transactional counter in entitlement_usage instead.
- */
-
-export type UsageIncrement = {
-  requests?: number;
-  durationMs?: number;
-  emails?: number;
-};
-
-type Bucket = { requests: number; durationMs: number; emails: number };
-
+/** Operational cost attribution. Customer billing uses its separate transactional ledger. */
+export type UsageIncrement = { requests?: number; durationMs?: number; emails?: number };
 export type MeteredBatch = {
   tenantId: string;
   periodStart: Date;
@@ -42,223 +16,146 @@ export type MeteredBatch = {
   durationMs: number;
   emails: number;
 };
-
+export type UsageEvent = MeteredBatch & { id: string };
 export type UsageBatchWriter = (batch: MeteredBatch) => Promise<void>;
-
-export type TenantUsageMeter = {
-  record(tenantId: string, increment: UsageIncrement, at?: Date): void;
-  /** Writes everything accumulated so far. Failed batches are kept for the next flush. */
-  flush(): Promise<{ written: number; failed: number }>;
-  /** Number of tenant-month buckets waiting to be written. */
-  pendingBuckets(): number;
-  stop(): void;
-};
-
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
-function monthStartUtc(at: Date): Date {
-  return new Date(Date.UTC(at.getUTCFullYear(), at.getUTCMonth(), 1));
+function positive(value: number | undefined): number {
+  return value !== undefined && Number.isFinite(value) && value > 0
+    ? Math.min(value, Number.MAX_SAFE_INTEGER)
+    : 0;
 }
 
-function nonNegativeFinite(value: number | undefined): number {
-  return value !== undefined && Number.isFinite(value) && value > 0 ? value : 0;
+async function addBatch(tx: TenantTx, batch: MeteredBatch): Promise<void> {
+  await addMeteredUsage(tx, {
+    rollupKey: METERED_USAGE_KEYS.apiRequests,
+    periodStart: batch.periodStart,
+    count: batch.requests,
+    durationMs: batch.durationMs,
+  });
+  await addMeteredUsage(tx, {
+    rollupKey: METERED_USAGE_KEYS.emailsSent,
+    periodStart: batch.periodStart,
+    count: batch.emails,
+    durationMs: 0,
+  });
 }
-
-/**
- * The production writer: one tenant transaction per tenant-month, so the write
- * goes through the same RLS policy as every other tenant write. There is no
- * request actor for a background flush; `allowAnonymousTenantRead` is the flag
- * the outbox worker's retention tasks use for the same situation.
- */
-export const writeMeteredBatch: UsageBatchWriter = async (batch) => {
-  await withTenantTx(
+/** Explicit rollup utility retained for operational imports and cost tests. */
+export const writeMeteredBatch: UsageBatchWriter = (batch) =>
+  withTenantTx(
     { tenantId: batch.tenantId, requestId: randomUUID(), allowAnonymousTenantRead: true },
-    async (tx) => {
-      await addMeteredUsage(tx, {
-        rollupKey: METERED_USAGE_KEYS.apiRequests,
-        periodStart: batch.periodStart,
-        count: batch.requests,
-        durationMs: batch.durationMs,
-      });
-      await addMeteredUsage(tx, {
-        rollupKey: METERED_USAGE_KEYS.emailsSent,
-        periodStart: batch.periodStart,
-        count: batch.emails,
-        durationMs: 0,
-      });
-    },
+    (tx) => addBatch(tx, batch),
   );
-};
 
-export function createTenantUsageMeter(options: {
-  writer: UsageBatchWriter;
-  /** Flush period. 0 disables the timer; flush() can still be called directly. */
-  intervalMs: number;
-  onError?: (error: unknown, batch: MeteredBatch) => void;
-}): TenantUsageMeter {
-  let buckets = new Map<string, Bucket>();
-  let timer: ReturnType<typeof setInterval> | null = null;
-  let flushing: Promise<{ written: number; failed: number }> | null = null;
+export async function appendTenantUsageEvent(tx: TenantTx, event: UsageEvent): Promise<void> {
+  await tx.$executeRaw`INSERT INTO tenant_usage_events(id,tenant_id,period_start,requests,duration_ms,emails)
+    VALUES(${event.id}::uuid,${event.tenantId}::uuid,${event.periodStart}::date,${event.requests}::bigint,${event.durationMs}::float8,${event.emails}::bigint)
+    ON CONFLICT(id) DO NOTHING`;
+}
 
-  function key(tenantId: string, periodStart: Date): string {
-    return `${tenantId}|${periodStart.toISOString()}`;
-  }
-
-  function add(bucketKey: string, increment: Bucket): void {
-    const existing = buckets.get(bucketKey);
-    if (existing) {
-      existing.requests += increment.requests;
-      existing.durationMs += increment.durationMs;
-      existing.emails += increment.emails;
-    } else {
-      buckets.set(bucketKey, { ...increment });
-    }
-  }
-
-  function ensureTimer(): void {
-    if (timer !== null || options.intervalMs <= 0) return;
-    timer = setInterval(() => {
-      void flush();
-    }, options.intervalMs);
-    // Never keep a process alive just to report on it.
-    timer.unref();
-  }
-
-  async function flushOnce(): Promise<{ written: number; failed: number }> {
-    const pending = buckets;
-    buckets = new Map();
-    let written = 0;
-    let failed = 0;
-
-    for (const [bucketKey, bucket] of pending) {
-      const [tenantId, periodIso] = bucketKey.split("|") as [string, string];
-      const batch: MeteredBatch = {
-        tenantId,
-        periodStart: new Date(periodIso),
-        requests: bucket.requests,
-        durationMs: bucket.durationMs,
-        emails: bucket.emails,
-      };
+/** No timer or in-memory backlog. A resolved true means the write was acknowledged. */
+export function createDurableUsageRecorder(options: {
+  writer: (event: UsageEvent) => Promise<void>;
+  onError?: (error: unknown, event: UsageEvent) => void;
+}) {
+  return async (tenantId: string, increment: UsageIncrement, at = new Date()): Promise<boolean> => {
+    if (!UUID_PATTERN.test(tenantId) || !Number.isFinite(at.getTime())) return false;
+    const event: UsageEvent = {
+      id: randomUUID(),
+      tenantId,
+      periodStart: new Date(Date.UTC(at.getUTCFullYear(), at.getUTCMonth(), 1)),
+      requests: Math.floor(positive(increment.requests)),
+      emails: Math.floor(positive(increment.emails)),
+      durationMs: positive(increment.durationMs),
+    };
+    if (!event.requests && !event.emails && !event.durationMs) return false;
+    let failure: unknown;
+    // A connection can fail after COMMIT. Keep one ID across both attempts.
+    for (let attempt = 0; attempt < 2; attempt++) {
       try {
-        await options.writer(batch);
-        written += 1;
+        await options.writer(event);
+        return true;
       } catch (error) {
-        failed += 1;
-        // Put the counts back so a database blip delays them instead of
-        // dropping them. Merged, because new requests may have arrived for the
-        // same bucket while this flush was running.
-        add(bucketKey, bucket);
-        options.onError?.(error, batch);
+        failure = error;
       }
     }
-
-    return { written, failed };
-  }
-
-  function flush(): Promise<{ written: number; failed: number }> {
-    // One flush at a time. A second flush started while the first is still
-    // writing would run concurrently with the first one's re-queueing of failed
-    // buckets, and two writers for the same tenant-month would contend on the
-    // same rollup row for no benefit.
-    if (flushing) return flushing;
-    flushing = flushOnce().finally(() => {
-      flushing = null;
-    });
-    return flushing;
-  }
-
-  return {
-    record(tenantId, increment, at = new Date()) {
-      if (!UUID_PATTERN.test(tenantId)) return;
-      const bucket: Bucket = {
-        requests: nonNegativeFinite(increment.requests),
-        durationMs: nonNegativeFinite(increment.durationMs),
-        emails: nonNegativeFinite(increment.emails),
-      };
-      if (bucket.requests === 0 && bucket.durationMs === 0 && bucket.emails === 0) return;
-      add(key(tenantId, monthStartUtc(at)), bucket);
-      ensureTimer();
-    },
-    flush,
-    pendingBuckets: () => buckets.size,
-    stop() {
-      if (timer !== null) {
-        clearInterval(timer);
-        timer = null;
-      }
-    },
+    try {
+      options.onError?.(failure, event);
+    } catch {
+      /* diagnostics must not replace a business response */
+    }
+    return false;
   };
 }
-
-// ---------------------------------------------------------------------------
-// Process-wide instance
-// ---------------------------------------------------------------------------
-
-/**
- * Metering is on unless `ATLAS_USAGE_METERING=off`. Under Vitest it defaults to
- * off: route tests run the real tenant route wrapper against fixture tenant ids
- * that have no row in `tenants`, and a background flush would write rollups for
- * them or log a foreign-key failure into unrelated test output. Tests of the
- * meter build their own instance with createTenantUsageMeter.
- */
-function meteringEnabled(env: NodeJS.ProcessEnv): boolean {
-  const setting = env["ATLAS_USAGE_METERING"]?.trim().toLowerCase();
-  if (setting === "off") return false;
-  if (setting === "on") return true;
-  return env["VITEST"] === undefined;
+const persist = createDurableUsageRecorder({
+  writer: appendDurableUsage,
+  onError: (_error, event) => {
+    console.error(
+      JSON.stringify({
+        level: "error",
+        message: "usage_meter.persistence_failed",
+        tenantId: event.tenantId,
+        eventId: event.id,
+        timestamp: new Date().toISOString(),
+      }),
+    );
+  },
+});
+export async function recordTenantUsage(
+  tenantId: string,
+  increment: UsageIncrement,
+): Promise<void> {
+  const setting = process.env["ATLAS_USAGE_METERING"]?.trim().toLowerCase();
+  if (setting === "off" || (process.env["VITEST"] !== undefined && setting !== "on")) return;
+  await persist(tenantId, increment);
 }
 
-const FLUSH_INTERVAL_MS = 60_000;
-
-/**
- * Held on globalThis rather than in module scope. Next.js may bundle this module
- * into more than one route chunk, and module-level state would then give each
- * route its own meter, each flushing its own partial count.
- */
-const GLOBAL_KEY = Symbol.for("atlas.tenantUsageMeter");
-
-type GlobalWithMeter = typeof globalThis & { [GLOBAL_KEY]?: TenantUsageMeter | null };
-
-function processMeter(): TenantUsageMeter | null {
-  const store = globalThis as GlobalWithMeter;
-  if (store[GLOBAL_KEY] === undefined) {
-    store[GLOBAL_KEY] = meteringEnabled(process.env)
-      ? createTenantUsageMeter({
-          writer: writeMeteredBatch,
-          intervalMs: FLUSH_INTERVAL_MS,
-          onError: (error, batch) => {
-            console.error(
-              JSON.stringify({
-                level: "error",
-                message: "usage_meter.flush_failed",
-                module: "tenant-usage-meter",
-                // The tenant id is already an opaque uuid and is the only way to
-                // find which rollup is short; no personal data is involved.
-                tenantId: batch.tenantId,
-                error: error instanceof Error ? error.message.slice(0, 300) : "unknown",
-                timestamp: new Date().toISOString(),
-              }),
-            );
-          },
-        })
-      : null;
+/** Caller must use one tenant transaction: locks, increments and acknowledgement commit together. */
+export async function drainTenantUsageEvents(
+  tx: TenantTx,
+  options: { limit: number },
+): Promise<{ processed: number }> {
+  if (!Number.isInteger(options.limit) || options.limit < 1 || options.limit > 1000)
+    throw new Error("Usage drain limit must be between 1 and 1000");
+  const rows = await tx.$queryRaw<
+    Array<{
+      id: string;
+      tenant_id: string;
+      period_start: Date;
+      requests: number;
+      duration_ms: number;
+      emails: number;
+    }>
+  >`
+    SELECT id::text,tenant_id::text,period_start,requests::float8,duration_ms,emails::float8 FROM tenant_usage_events
+    WHERE processed_at IS NULL ORDER BY created_at,id LIMIT ${options.limit} FOR UPDATE SKIP LOCKED`;
+  const groups = new Map<string, MeteredBatch>();
+  for (const row of rows) {
+    const key = row.tenant_id + "|" + row.period_start.toISOString();
+    const group = groups.get(key) ?? {
+      tenantId: row.tenant_id,
+      periodStart: row.period_start,
+      requests: 0,
+      durationMs: 0,
+      emails: 0,
+    };
+    group.requests += row.requests;
+    group.durationMs += row.duration_ms;
+    group.emails += row.emails;
+    groups.set(key, group);
   }
-  return store[GLOBAL_KEY] ?? null;
+  // Stable lock order for workers holding distinct event batches in the same months.
+  for (const [, batch] of [...groups.entries()].sort(([a], [b]) => a.localeCompare(b)))
+    await addBatch(tx, batch);
+  const ids = rows.map((row) => row.id);
+  if (ids.length)
+    await tx.$executeRaw`UPDATE tenant_usage_events SET processed_at=now() WHERE id=ANY(${ids}::uuid[])`;
+  // Retain acknowledgement IDs for retries, then prune only old processed entries.
+  await tx.$executeRaw`DELETE FROM tenant_usage_events WHERE id IN (
+    SELECT id FROM tenant_usage_events WHERE processed_at<now()-interval '30 days'
+    ORDER BY processed_at,id LIMIT ${options.limit} FOR UPDATE SKIP LOCKED)`;
+  return { processed: rows.length };
 }
-
-/** Records usage against a tenant. Never throws: metering must not fail a request. */
-export function recordTenantUsage(tenantId: string, increment: UsageIncrement): void {
-  try {
-    processMeter()?.record(tenantId, increment);
-  } catch {
-    // Deliberately swallowed. See the file comment.
-  }
-}
-
-/** Writes pending usage now. Call on graceful shutdown so the last minute is kept. */
+/** Compatibility with graceful shutdown: every production record was already awaited. */
 export async function flushTenantUsageMeter(): Promise<void> {
-  const meter = processMeter();
-  if (!meter) return;
-  meter.stop();
-  await meter.flush();
+  await Promise.resolve();
 }

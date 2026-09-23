@@ -60,6 +60,7 @@ export type DeletionRequestCountAggregateOutputType = {
   target_id: number
   status: number
   reason: number
+  outcome_json: number
   scheduled_at: number
   completed_at: number
   created_at: number
@@ -104,6 +105,7 @@ export type DeletionRequestCountAggregateInputType = {
   target_id?: true
   status?: true
   reason?: true
+  outcome_json?: true
   scheduled_at?: true
   completed_at?: true
   created_at?: true
@@ -191,6 +193,7 @@ export type DeletionRequestGroupByOutputType = {
   target_id: string
   status: $Enums.JobStatus
   reason: string | null
+  outcome_json: runtime.JsonValue | null
   scheduled_at: Date | null
   completed_at: Date | null
   created_at: Date
@@ -226,6 +229,7 @@ export type DeletionRequestWhereInput = {
   target_id?: Prisma.StringFilter<"DeletionRequest"> | string
   status?: Prisma.EnumJobStatusFilter<"DeletionRequest"> | $Enums.JobStatus
   reason?: Prisma.StringNullableFilter<"DeletionRequest"> | string | null
+  outcome_json?: Prisma.JsonNullableFilter<"DeletionRequest">
   scheduled_at?: Prisma.DateTimeNullableFilter<"DeletionRequest"> | Date | string | null
   completed_at?: Prisma.DateTimeNullableFilter<"DeletionRequest"> | Date | string | null
   created_at?: Prisma.DateTimeFilter<"DeletionRequest"> | Date | string
@@ -240,6 +244,7 @@ export type DeletionRequestOrderByWithRelationInput = {
   target_id?: Prisma.SortOrder
   status?: Prisma.SortOrder
   reason?: Prisma.SortOrderInput | Prisma.SortOrder
+  outcome_json?: Prisma.SortOrderInput | Prisma.SortOrder
   scheduled_at?: Prisma.SortOrderInput | Prisma.SortOrder
   completed_at?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrder
@@ -257,6 +262,7 @@ export type DeletionRequestWhereUniqueInput = Prisma.AtLeast<{
   target_id?: Prisma.StringFilter<"DeletionRequest"> | string
   status?: Prisma.EnumJobStatusFilter<"DeletionRequest"> | $Enums.JobStatus
   reason?: Prisma.StringNullableFilter<"DeletionRequest"> | string | null
+  outcome_json?: Prisma.JsonNullableFilter<"DeletionRequest">
   scheduled_at?: Prisma.DateTimeNullableFilter<"DeletionRequest"> | Date | string | null
   completed_at?: Prisma.DateTimeNullableFilter<"DeletionRequest"> | Date | string | null
   created_at?: Prisma.DateTimeFilter<"DeletionRequest"> | Date | string
@@ -271,6 +277,7 @@ export type DeletionRequestOrderByWithAggregationInput = {
   target_id?: Prisma.SortOrder
   status?: Prisma.SortOrder
   reason?: Prisma.SortOrderInput | Prisma.SortOrder
+  outcome_json?: Prisma.SortOrderInput | Prisma.SortOrder
   scheduled_at?: Prisma.SortOrderInput | Prisma.SortOrder
   completed_at?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrder
@@ -291,6 +298,7 @@ export type DeletionRequestScalarWhereWithAggregatesInput = {
   target_id?: Prisma.StringWithAggregatesFilter<"DeletionRequest"> | string
   status?: Prisma.EnumJobStatusWithAggregatesFilter<"DeletionRequest"> | $Enums.JobStatus
   reason?: Prisma.StringNullableWithAggregatesFilter<"DeletionRequest"> | string | null
+  outcome_json?: Prisma.JsonNullableWithAggregatesFilter<"DeletionRequest">
   scheduled_at?: Prisma.DateTimeNullableWithAggregatesFilter<"DeletionRequest"> | Date | string | null
   completed_at?: Prisma.DateTimeNullableWithAggregatesFilter<"DeletionRequest"> | Date | string | null
   created_at?: Prisma.DateTimeWithAggregatesFilter<"DeletionRequest"> | Date | string
@@ -305,6 +313,7 @@ export type DeletionRequestCreateInput = {
   target_id: string
   status?: $Enums.JobStatus
   reason?: string | null
+  outcome_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   scheduled_at?: Date | string | null
   completed_at?: Date | string | null
   created_at?: Date | string
@@ -319,6 +328,7 @@ export type DeletionRequestUncheckedCreateInput = {
   target_id: string
   status?: $Enums.JobStatus
   reason?: string | null
+  outcome_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   scheduled_at?: Date | string | null
   completed_at?: Date | string | null
   created_at?: Date | string
@@ -333,6 +343,7 @@ export type DeletionRequestUpdateInput = {
   target_id?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
   reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  outcome_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   scheduled_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -347,6 +358,7 @@ export type DeletionRequestUncheckedUpdateInput = {
   target_id?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
   reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  outcome_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   scheduled_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -361,6 +373,7 @@ export type DeletionRequestCreateManyInput = {
   target_id: string
   status?: $Enums.JobStatus
   reason?: string | null
+  outcome_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   scheduled_at?: Date | string | null
   completed_at?: Date | string | null
   created_at?: Date | string
@@ -375,6 +388,7 @@ export type DeletionRequestUpdateManyMutationInput = {
   target_id?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
   reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  outcome_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   scheduled_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -389,6 +403,7 @@ export type DeletionRequestUncheckedUpdateManyInput = {
   target_id?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
   reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  outcome_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   scheduled_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -403,6 +418,7 @@ export type DeletionRequestCountOrderByAggregateInput = {
   target_id?: Prisma.SortOrder
   status?: Prisma.SortOrder
   reason?: Prisma.SortOrder
+  outcome_json?: Prisma.SortOrder
   scheduled_at?: Prisma.SortOrder
   completed_at?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
@@ -447,6 +463,7 @@ export type DeletionRequestSelect<ExtArgs extends runtime.Types.Extensions.Inter
   target_id?: boolean
   status?: boolean
   reason?: boolean
+  outcome_json?: boolean
   scheduled_at?: boolean
   completed_at?: boolean
   created_at?: boolean
@@ -461,6 +478,7 @@ export type DeletionRequestSelectCreateManyAndReturn<ExtArgs extends runtime.Typ
   target_id?: boolean
   status?: boolean
   reason?: boolean
+  outcome_json?: boolean
   scheduled_at?: boolean
   completed_at?: boolean
   created_at?: boolean
@@ -475,6 +493,7 @@ export type DeletionRequestSelectUpdateManyAndReturn<ExtArgs extends runtime.Typ
   target_id?: boolean
   status?: boolean
   reason?: boolean
+  outcome_json?: boolean
   scheduled_at?: boolean
   completed_at?: boolean
   created_at?: boolean
@@ -489,13 +508,14 @@ export type DeletionRequestSelectScalar = {
   target_id?: boolean
   status?: boolean
   reason?: boolean
+  outcome_json?: boolean
   scheduled_at?: boolean
   completed_at?: boolean
   created_at?: boolean
   updated_at?: boolean
 }
 
-export type DeletionRequestOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "requested_by_membership_id" | "target_type" | "target_id" | "status" | "reason" | "scheduled_at" | "completed_at" | "created_at" | "updated_at", ExtArgs["result"]["deletionRequest"]>
+export type DeletionRequestOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "requested_by_membership_id" | "target_type" | "target_id" | "status" | "reason" | "outcome_json" | "scheduled_at" | "completed_at" | "created_at" | "updated_at", ExtArgs["result"]["deletionRequest"]>
 
 export type $DeletionRequestPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "DeletionRequest"
@@ -508,6 +528,7 @@ export type $DeletionRequestPayload<ExtArgs extends runtime.Types.Extensions.Int
     target_id: string
     status: $Enums.JobStatus
     reason: string | null
+    outcome_json: runtime.JsonValue | null
     scheduled_at: Date | null
     completed_at: Date | null
     created_at: Date
@@ -942,6 +963,7 @@ export interface DeletionRequestFieldRefs {
   readonly target_id: Prisma.FieldRef<"DeletionRequest", 'String'>
   readonly status: Prisma.FieldRef<"DeletionRequest", 'JobStatus'>
   readonly reason: Prisma.FieldRef<"DeletionRequest", 'String'>
+  readonly outcome_json: Prisma.FieldRef<"DeletionRequest", 'Json'>
   readonly scheduled_at: Prisma.FieldRef<"DeletionRequest", 'DateTime'>
   readonly completed_at: Prisma.FieldRef<"DeletionRequest", 'DateTime'>
   readonly created_at: Prisma.FieldRef<"DeletionRequest", 'DateTime'>

@@ -54,7 +54,7 @@ export async function uploadModuleScormPackage(moduleId: string, file: File): Pr
   );
 
   const uploadUrl = uploadResponse.data.upload.url;
-  if (uploadUrl.includes("localhost.local-storage")) {
+  if (new URL(uploadUrl).hostname === "localhost.local-storage") {
     await clientApi.post(
       `/api/v1/modules/${moduleId}/scorm-package/blob`,
       {

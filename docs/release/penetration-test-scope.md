@@ -61,9 +61,11 @@ reporting them as new findings is not.
 - **CSP is Report-Only**, pending a nonce for an inline theme script. If you can
   demonstrate an XSS that the other controls do not stop, that changes the
   priority of enforcement and we want to know.
-- **`PLATFORM_OPERATOR_ASSIGNMENTS` remains as break-glass**, checked after the
-  database and logged. If it can be reached without the logging, that is a
-  finding.
+- **F02 removes environment-based platform authorization and automatic tenant
+  admin provisioning.** On deployments containing the fix, stale environment
+  settings must not restore a revoked grant, membership, or role. Verify the
+  deployed revision and legacy access review described in
+  [the operator access runbook](../runbooks/platform-operator-access.md).
 - Full list in the [security exception register](security-exception-register.md).
 
 ## Questions the internal work could not answer

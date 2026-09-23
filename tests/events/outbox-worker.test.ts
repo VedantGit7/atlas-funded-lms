@@ -1,224 +1,184 @@
-import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-
-const pollOutboxEventsForProcessingMock = vi.fn();
-const findEventDeliveryMock = vi.fn();
-const insertEventDeliveryAttemptMock = vi.fn();
-const insertDeadLetterEventMock = vi.fn();
-
-vi.mock("@atlas/events/repositories/outbox.repository", () => ({
-  pollOutboxEventsForProcessing: (...args: unknown[]) => pollOutboxEventsForProcessingMock(...args),
+import { beforeEach, describe, it, expect, vi } from "vitest";
+import type { EventsDbTx } from "@atlas/events/transaction";
+const mocks = vi.hoisted(() => ({
+  materialize: vi.fn(),
+  claim: vi.fn(),
+  lock: vi.fn(),
+  finish: vi.fn(),
+  receipt: vi.fn(),
+  dead: vi.fn(),
+  renew: vi.fn(),
 }));
-
+vi.mock("@atlas/events/repositories/outbox-job.repository", () => ({
+  materializeDeliveryJobs: mocks.materialize,
+  claimDeliveryJob: mocks.claim,
+  lockDeliveryJob: mocks.lock,
+  finishDeliveryJob: mocks.finish,
+  renewDeliveryLease: mocks.renew,
+}));
 vi.mock("@atlas/events/repositories/event-delivery.repository", () => ({
-  findEventDelivery: (...args: unknown[]) => findEventDeliveryMock(...args),
-  insertEventDeliveryAttempt: (...args: unknown[]) => insertEventDeliveryAttemptMock(...args),
+  insertEventDeliveryAttempt: mocks.receipt,
 }));
-
 vi.mock("@atlas/events/repositories/dead-letter.repository", () => ({
-  insertDeadLetterEvent: (...args: unknown[]) => insertDeadLetterEventMock(...args),
+  insertDeadLetterEvent: mocks.dead,
 }));
-
-import { processOutboxBatch } from "@atlas/events/services/outbox-worker.service";
-
-const tx = { $queryRaw: vi.fn() };
-
-const polledEvent = {
-  id: "018f0000-0000-7000-8000-000000000001",
-  tenant_id: "018f0000-0000-7000-8000-000000000002",
-  event_type: "course.published",
-  aggregate_type: "course",
-  aggregate_id: "018f0000-0000-7000-8000-000000000003",
-  payload_json: { courseId: "018f0000-0000-7000-8000-000000000003" },
-  metadata_json: { requestId: "req_worker_test" },
-  idempotency_key: "idem_worker_test",
-  occurred_at: new Date("2025-01-01T00:00:00.000Z"),
+import {
+  processOutboxBatch,
+  OutboxDeliveryError,
+  deliveryIdempotencyKey,
+  retryDelayMs,
+} from "@atlas/events/services/outbox-worker.service";
+const job = {
+  id: "job",
+  outbox_event_id: "event",
+  destination_key: "test.destination",
+  status: "processing",
+  lease_token: "lease",
+  attempt_count: 1,
+  cycle_attempt_count: 1,
+  max_attempts: 4,
 };
-
-describe("processOutboxBatch", () => {
+const event = {
+  id: "event",
+  tenant_id: "tenant",
+  event_type: "course.published",
+  payload_json: { courseId: "course" },
+  metadata_json: { requestId: "request" },
+};
+let depth = 0;
+const tx = { $queryRaw: vi.fn() } as EventsDbTx;
+const db = {
+  transaction: async <T>(fn: (tx: EventsDbTx) => Promise<T>) => {
+    depth++;
+    try {
+      return await fn(tx);
+    } finally {
+      depth--;
+    }
+  },
+};
+const execute = (handle: () => Promise<void>, retryOnCrash = true) =>
+  processOutboxBatch(db, {
+    limit: 2,
+    maxRetries: 3,
+    handlers: {
+      "course.published": [{ destinationKey: job.destination_key, retryOnCrash, handle }],
+    },
+  });
+describe("durable outbox transaction and retry policy", () => {
+  it("renews a long-running handler lease in short independent transactions", async () => {
+    vi.useFakeTimers();
+    try {
+      mocks.renew.mockImplementation(async () => {
+        expect(depth).toBe(1);
+        return true;
+      });
+      await execute(async () => {
+        await vi.advanceTimersByTimeAsync(60_000);
+        expect(mocks.renew).toHaveBeenCalledTimes(1);
+        expect(depth).toBe(0);
+      });
+      expect(mocks.renew).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
   beforeEach(() => {
-    pollOutboxEventsForProcessingMock.mockReset();
-    findEventDeliveryMock.mockReset();
-    insertEventDeliveryAttemptMock.mockReset();
-    insertDeadLetterEventMock.mockReset();
-    tx.$queryRaw.mockReset();
-
-    findEventDeliveryMock.mockResolvedValue(null);
-    pollOutboxEventsForProcessingMock.mockResolvedValue([polledEvent]);
-    insertEventDeliveryAttemptMock.mockResolvedValue({
-      id: "018f0000-0000-7000-8000-000000000010",
-    });
-    insertDeadLetterEventMock.mockResolvedValue({ id: "018f0000-0000-7000-8000-000000000011" });
+    Object.values(mocks).forEach((mock) => mock.mockReset());
+    depth = 0;
+    mocks.claim
+      .mockResolvedValueOnce({ job, event, recovered: false, exhausted: false })
+      .mockResolvedValue(null);
+    mocks.lock.mockResolvedValue(job);
+    mocks.dead.mockResolvedValue({ id: "dead" });
   });
-
-  it("polls available outbox events", async () => {
-    pollOutboxEventsForProcessingMock.mockResolvedValue([]);
-
-    const result = await processOutboxBatch(tx, {
-      limit: 25,
-      handlers: {},
-      maxRetries: 3,
+  it("commits claim before invoking the handler and records outcome in a new transaction", async () => {
+    const handle = vi.fn(async () => {
+      expect(depth).toBe(0);
     });
-
-    expect(pollOutboxEventsForProcessingMock).toHaveBeenCalledWith(tx, 25, []);
-    expect(result).toEqual({ processed: 0, delivered: 0, failed: 0, skipped: 0 });
-  });
-
-  it("passes this group's subscriptions to the poll so it only claims its own undelivered work", async () => {
-    // Without this the poll returned the oldest rows regardless of handler or
-    // delivery state, so the outbox head-of-line blocked forever.
-    pollOutboxEventsForProcessingMock.mockResolvedValue([]);
-
-    await processOutboxBatch(tx, {
-      limit: 25,
-      handlers: {
-        "course.published": [
-          { destinationKey: "search.index", handle: vi.fn() },
-          { destinationKey: "analytics.rollup", handle: vi.fn() },
-        ],
-        "user.registered": [{ destinationKey: "search.index", handle: vi.fn() }],
-      },
-      maxRetries: 3,
-    });
-
-    expect(pollOutboxEventsForProcessingMock).toHaveBeenCalledWith(tx, 25, [
-      { eventType: "course.published", destinationKey: "search.index" },
-      { eventType: "course.published", destinationKey: "analytics.rollup" },
-      { eventType: "user.registered", destinationKey: "search.index" },
-    ]);
-  });
-
-  it("inserts a succeeded event_deliveries row when the handler succeeds", async () => {
-    const handle = vi.fn().mockResolvedValue(undefined);
-
-    const result = await processOutboxBatch(tx, {
-      limit: 10,
-      maxRetries: 3,
-      handlers: {
-        "course.published": [
-          {
-            destinationKey: "analytics.projection",
-            handle,
-          },
-        ],
-      },
-    });
-
-    expect(handle).toHaveBeenCalledWith({
-      id: polledEvent.id,
-      eventType: polledEvent.event_type,
-      tenantId: polledEvent.tenant_id,
-      payload: polledEvent.payload_json,
-      requestId: "req_worker_test",
-    });
-    expect(insertEventDeliveryAttemptMock).toHaveBeenCalledWith(tx, {
-      tenantId: polledEvent.tenant_id,
-      outboxEventId: polledEvent.id,
-      destinationKey: "analytics.projection",
-      status: "SUCCEEDED",
-      requestId: "req_worker_test",
-    });
-    expect(insertDeadLetterEventMock).not.toHaveBeenCalled();
-    expect(result).toEqual({ processed: 1, delivered: 1, failed: 0, skipped: 0 });
-  });
-
-  it("inserts failed event_deliveries and dead_letter_events rows when the handler fails", async () => {
-    const handle = vi.fn().mockRejectedValue(new Error("Destination unavailable"));
-
-    const result = await processOutboxBatch(tx, {
-      limit: 10,
-      maxRetries: 3,
-      handlers: {
-        "course.published": [
-          {
-            destinationKey: "analytics.projection",
-            handle,
-          },
-        ],
-      },
-    });
-
-    expect(insertEventDeliveryAttemptMock).toHaveBeenCalledWith(tx, {
-      tenantId: polledEvent.tenant_id,
-      outboxEventId: polledEvent.id,
-      destinationKey: "analytics.projection",
-      status: "FAILED",
-      errorCode: "HANDLER_FAILED",
-      safeErrorMessage: "Destination unavailable",
-      requestId: "req_worker_test",
-    });
-    expect(insertDeadLetterEventMock).toHaveBeenCalledWith(tx, {
-      outboxEventId: polledEvent.id,
-      tenantId: polledEvent.tenant_id,
-      destinationKey: "analytics.projection",
-      eventType: polledEvent.event_type,
-      errorCode: "HANDLER_FAILED",
-      safeErrorMessage: "Destination unavailable",
-      retryCount: 1,
-      requestId: "req_worker_test",
-      payloadJson: polledEvent.payload_json,
-    });
-    expect(result).toEqual({ processed: 1, delivered: 0, failed: 1, skipped: 0 });
-  });
-
-  it("does not mutate the source outbox event row", async () => {
-    const handle = vi.fn().mockResolvedValue(undefined);
-
-    await processOutboxBatch(tx, {
-      limit: 10,
-      maxRetries: 3,
-      handlers: {
-        "course.published": [
-          {
-            destinationKey: "analytics.projection",
-            handle,
-          },
-        ],
-      },
-    });
-
-    expect(pollOutboxEventsForProcessingMock).toHaveBeenCalledTimes(1);
-    expect(tx.$queryRaw).not.toHaveBeenCalled();
-    expect(insertEventDeliveryAttemptMock).toHaveBeenCalledTimes(1);
-    expect(insertDeadLetterEventMock).not.toHaveBeenCalled();
-  });
-
-  it("does not update or delete outbox events in the worker service", () => {
-    const workerSource = readFileSync(
-      resolve(
-        import.meta.dirname,
-        "../../backend/packages/events/src/services/outbox-worker.service.ts",
-      ),
-      "utf8",
+    const result = await execute(handle);
+    expect(result.delivered).toBe(1);
+    expect(handle).toHaveBeenCalledWith(
+      expect.objectContaining({
+        idempotencyKey: deliveryIdempotencyKey(event.id, job.destination_key),
+        attempt: 1,
+      }),
     );
-
-    expect(workerSource).not.toMatch(/UPDATE\s+outbox_events/i);
-    expect(workerSource).not.toMatch(/DELETE\s+FROM\s+outbox_events/i);
-    expect(workerSource).toContain("findEventDelivery");
-    expect(workerSource).toContain("insertEventDeliveryAttempt");
-    expect(workerSource).toContain("insertDeadLetterEvent");
+    expect(mocks.finish).toHaveBeenCalledWith(
+      tx,
+      job,
+      expect.objectContaining({ status: "succeeded" }),
+    );
   });
-
-  it("skips handlers when a delivery row already exists", async () => {
-    findEventDeliveryMock.mockResolvedValue({ status: "SENT" });
-    const handle = vi.fn();
-
-    const result = await processOutboxBatch(tx, {
-      limit: 10,
-      maxRetries: 3,
-      handlers: {
-        "course.published": [
-          {
-            destinationKey: "analytics.projection",
-            handle,
-          },
-        ],
-      },
+  it("schedules first transient failure without dead-lettering", async () => {
+    await execute(async () => {
+      throw new Error("provider secret must not be stored");
     });
-
+    expect(mocks.dead).not.toHaveBeenCalled();
+    expect(mocks.finish).toHaveBeenCalledWith(
+      tx,
+      job,
+      expect.objectContaining({ status: "retry", delayMs: expect.any(Number) }),
+    );
+    expect(JSON.stringify(mocks.receipt.mock.calls)).not.toContain("provider secret");
+  });
+  it("dead-letters after the persisted budget is exhausted", async () => {
+    mocks.lock.mockResolvedValue({ ...job, attempt_count: 4, cycle_attempt_count: 4 });
+    await execute(async () => {
+      throw new Error("down");
+    });
+    expect(mocks.dead).toHaveBeenCalledWith(tx, expect.objectContaining({ retryCount: 3 }));
+    expect(mocks.finish).toHaveBeenCalledWith(
+      tx,
+      expect.anything(),
+      expect.objectContaining({ status: "dead" }),
+    );
+  });
+  it("permanent failure stops on its first attempt", async () => {
+    await execute(async () => {
+      throw new OutboxDeliveryError("permanent", "INVALID_DESTINATION");
+    });
+    expect(mocks.dead).toHaveBeenCalledTimes(1);
+  });
+  it("uncertain acceptance is held for reconciliation", async () => {
+    await execute(async () => {
+      throw new OutboxDeliveryError("reconciliation_required", "SMTP_OUTCOME_UNKNOWN");
+    });
+    expect(mocks.finish).toHaveBeenCalledWith(
+      tx,
+      job,
+      expect.objectContaining({ status: "reconciliation_required" }),
+    );
+  });
+  it("does not resubmit an interrupted non-idempotent delivery", async () => {
+    mocks.claim
+      .mockReset()
+      .mockResolvedValueOnce({ job, event, recovered: true, exhausted: false })
+      .mockResolvedValue(null);
+    const handle = vi.fn();
+    await execute(handle, false);
     expect(handle).not.toHaveBeenCalled();
-    expect(insertEventDeliveryAttemptMock).not.toHaveBeenCalled();
-    expect(result).toEqual({ processed: 1, delivered: 0, failed: 0, skipped: 1 });
+    expect(mocks.finish).toHaveBeenCalledWith(
+      tx,
+      job,
+      expect.objectContaining({ status: "reconciliation_required" }),
+    );
+  });
+  it("fences a stale worker result", async () => {
+    mocks.lock.mockResolvedValue({ ...job, lease_token: "newer-lease" });
+    expect((await execute(async () => {})).skipped).toBe(1);
+    expect(mocks.receipt).not.toHaveBeenCalled();
+  });
+  it("does not reclassify a database result failure as a handler error", async () => {
+    mocks.receipt.mockRejectedValue(new Error("commit failed"));
+    await expect(execute(async () => {})).rejects.toThrow("commit failed");
+    expect(mocks.dead).not.toHaveBeenCalled();
+  });
+  it("uses stable destination-specific identities and bounded exponential jitter", () => {
+    expect(deliveryIdempotencyKey("one", "a")).toBe(deliveryIdempotencyKey("one", "a"));
+    expect(deliveryIdempotencyKey("one", "a")).not.toBe(deliveryIdempotencyKey("one", "b"));
+    expect(retryDelayMs(1, () => 0)).toBe(2500);
+    expect(retryDelayMs(2, () => 1)).toBe(10000);
+    expect(retryDelayMs(50, () => 1)).toBe(3600000);
   });
 });

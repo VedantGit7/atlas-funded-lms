@@ -1,0 +1,132 @@
+{
+  "finding": "F09",
+  "recordedAt": "2026-09-20T07:29:24.5089582Z",
+  "status": "implemented_locally_hosted_acceptance_pending",
+  "baseHead": "ca8c0f1e7e69780b4e2ddc2a1136907a2e47c350",
+  "cleanCheckout": false,
+  "sourceHashes": [
+    {
+      "path": ".github/workflows/ci.yml",
+      "sha256": "6ff6a04fce65777e4f693850f524e247b58bf551c1d22d273e4fae8756f83bf7"
+    },
+    {
+      "path": ".github/workflows/drills.yml",
+      "sha256": "105c359511a9fa485ab1c818ce27a110fd31623e90d45033c5133019796151e5"
+    },
+    {
+      "path": ".github/CODEOWNERS",
+      "sha256": "f4cd03ccaa3ff009985c0ed4f9ca35c3e7dab33f820ff7fb203b05b542852861"
+    },
+    {
+      "path": ".github/dependabot.yml",
+      "sha256": "b73f22254a56c8aa802d5cab720547c46ef8e2553901f952865a7d43a389ade4"
+    },
+    {
+      "path": ".gitignore",
+      "sha256": "affddb3c8be35c2a48777eab246c68e8053679336d7f9363058a6bfd1203d0e0"
+    },
+    {
+      "path": "package.json",
+      "sha256": "8d2d349936c799bb66908427cc3cb83334f98f6f181f15f29d843407ca5c9935"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "sha256": "0ba34a10f4d275f51ce17c35cb5f0a010219cc1ceacc21f29ba36f72cdad82fc"
+    },
+    {
+      "path": "scripts/ci/required-jobs.json",
+      "sha256": "cf22422fae1a5282fb746b0508cbd2bc90c03467edfa519e52bc894c958798c0"
+    },
+    {
+      "path": "scripts/ci/write-ci-evidence.mjs",
+      "sha256": "40c455f5459ffb8512a4b98a0d88afba628a3f880c8e6d9c989da00bc50f48f9"
+    },
+    {
+      "path": "scripts/release/run-suite.mjs",
+      "sha256": "e79567f37e8981acf76de94144addb1b61a87c83b79fb068a1db53e84e532a82"
+    },
+    {
+      "path": "scripts/release/validate-evidence.mjs",
+      "sha256": "00be69f1ce1c6c9f641ce83b445d8eeda69793b10cdc0ea15af21d4569c650ca"
+    },
+    {
+      "path": "scripts/release/evidence-contract.mjs",
+      "sha256": "97c7671a1e2f4c03d729d14c8d3b74ec1f7d2b2f511104cb153331a21dcfc1de"
+    },
+    {
+      "path": "tests/ci/ci-gate.test.ts",
+      "sha256": "810d953643c00b80988b7ccd411c71b65c35ca196a96484bc96de4d034532c37"
+    },
+    {
+      "path": "tests/unit/release-readiness/release-evidence.test.ts",
+      "sha256": "dc414574de80bd1176daaafd3a8085ce78e86aa28bf6f6a8aaafbe2edeebf1cf"
+    },
+    {
+      "path": "docs/engineering/f09-ci-release-evidence-remediation.md",
+      "sha256": "62dee0cd7510eaf7fd2f3e2145658defee79cfa36e94606c9f7fcb65176e57e3"
+    },
+    {
+      "path": "docs/runbooks/ci-release-evidence.md",
+      "sha256": "77c90e2847743c165092cf4f5a4c42961daadafb9d8548b9296639aa25914a55"
+    },
+    {
+      "path": "docs/engineering/atlas-lms-comprehensive-audit-2026-09-19.md",
+      "sha256": "45c6b2b7e31db32a75987e635bc7dbc80a65d35cfb6aaf23e0e45f8c0f29ec71"
+    }
+  ],
+  "checks": {
+    "regressions": {
+      "passed": 542,
+      "log": "f09-final-regressions.log",
+      "skippedReason": "Existing optional CERTIFICATE_PDF_WORKER test",
+      "skipped": 1,
+      "filesPassed": 53
+    },
+    "actionlint": {
+      "pyflakes": false,
+      "exitCode": 0,
+      "log": "f09-workflow-validation.log",
+      "version": "1.7.12",
+      "shellcheck": false
+    },
+    "scopedLint": {
+      "exitCode": 0,
+      "log": "f09-final-lint.log"
+    },
+    "scopedFormat": {
+      "exitCode": 0,
+      "log": "f09-final-format.log"
+    },
+    "typecheck": {
+      "exitCode": 0,
+      "log": "f09-typecheck.log"
+    },
+    "frozenOfflineLockfile": {
+      "exitCode": 0,
+      "log": "f09-lockfile-check.log"
+    },
+    "diffCheck": {
+      "exitCode": 0,
+      "log": "f09-final-diff-check.log"
+    },
+    "staleEvidence": {
+      "expectedRejection": true,
+      "exitCode": 1,
+      "log": "f09-stale-evidence-rejected.log"
+    },
+    "dirtyCheckoutGeneration": {
+      "artifact": "f09-local-release-evidence.json",
+      "exitCode": 1,
+      "claimedPasses": 0,
+      "verdict": "NOT_READY"
+    },
+    "independentReview": "No remaining blockers after prerequisite enforcement fix"
+  },
+  "hosted": {
+    "candidateRunExecuted": false,
+    "pushed": false,
+    "snapshot": "f09-hosted-status.json",
+    "negativeFailureDemonstrated": false
+  },
+  "productionApproved": false
+}

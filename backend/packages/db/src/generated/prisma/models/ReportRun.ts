@@ -37,6 +37,7 @@ export type ReportRunSumAggregateOutputType = {
 }
 
 export type ReportRunMinAggregateOutputType = {
+  file_retention_managed: boolean | null
   id: string | null
   tenant_id: string | null
   report_definition_id: string | null
@@ -55,6 +56,7 @@ export type ReportRunMinAggregateOutputType = {
 }
 
 export type ReportRunMaxAggregateOutputType = {
+  file_retention_managed: boolean | null
   id: string | null
   tenant_id: string | null
   report_definition_id: string | null
@@ -73,6 +75,8 @@ export type ReportRunMaxAggregateOutputType = {
 }
 
 export type ReportRunCountAggregateOutputType = {
+  artifact_json: number
+  file_retention_managed: number
   id: number
   tenant_id: number
   report_definition_id: number
@@ -105,6 +109,7 @@ export type ReportRunSumAggregateInputType = {
 }
 
 export type ReportRunMinAggregateInputType = {
+  file_retention_managed?: true
   id?: true
   tenant_id?: true
   report_definition_id?: true
@@ -123,6 +128,7 @@ export type ReportRunMinAggregateInputType = {
 }
 
 export type ReportRunMaxAggregateInputType = {
+  file_retention_managed?: true
   id?: true
   tenant_id?: true
   report_definition_id?: true
@@ -141,6 +147,8 @@ export type ReportRunMaxAggregateInputType = {
 }
 
 export type ReportRunCountAggregateInputType = {
+  artifact_json?: true
+  file_retention_managed?: true
   id?: true
   tenant_id?: true
   report_definition_id?: true
@@ -248,6 +256,8 @@ export type ReportRunGroupByArgs<ExtArgs extends runtime.Types.Extensions.Intern
 }
 
 export type ReportRunGroupByOutputType = {
+  artifact_json: runtime.JsonValue | null
+  file_retention_managed: boolean
   id: string
   tenant_id: string
   report_definition_id: string
@@ -291,6 +301,8 @@ export type ReportRunWhereInput = {
   AND?: Prisma.ReportRunWhereInput | Prisma.ReportRunWhereInput[]
   OR?: Prisma.ReportRunWhereInput[]
   NOT?: Prisma.ReportRunWhereInput | Prisma.ReportRunWhereInput[]
+  artifact_json?: Prisma.JsonNullableFilter<"ReportRun">
+  file_retention_managed?: Prisma.BoolFilter<"ReportRun"> | boolean
   id?: Prisma.UuidFilter<"ReportRun"> | string
   tenant_id?: Prisma.UuidFilter<"ReportRun"> | string
   report_definition_id?: Prisma.UuidFilter<"ReportRun"> | string
@@ -313,6 +325,8 @@ export type ReportRunWhereInput = {
 }
 
 export type ReportRunOrderByWithRelationInput = {
+  artifact_json?: Prisma.SortOrderInput | Prisma.SortOrder
+  file_retention_managed?: Prisma.SortOrder
   id?: Prisma.SortOrder
   tenant_id?: Prisma.SortOrder
   report_definition_id?: Prisma.SortOrder
@@ -339,6 +353,8 @@ export type ReportRunWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.ReportRunWhereInput | Prisma.ReportRunWhereInput[]
   OR?: Prisma.ReportRunWhereInput[]
   NOT?: Prisma.ReportRunWhereInput | Prisma.ReportRunWhereInput[]
+  artifact_json?: Prisma.JsonNullableFilter<"ReportRun">
+  file_retention_managed?: Prisma.BoolFilter<"ReportRun"> | boolean
   tenant_id?: Prisma.UuidFilter<"ReportRun"> | string
   report_definition_id?: Prisma.UuidFilter<"ReportRun"> | string
   report_schedule_id?: Prisma.UuidNullableFilter<"ReportRun"> | string | null
@@ -360,6 +376,8 @@ export type ReportRunWhereUniqueInput = Prisma.AtLeast<{
 }, "id">
 
 export type ReportRunOrderByWithAggregationInput = {
+  artifact_json?: Prisma.SortOrderInput | Prisma.SortOrder
+  file_retention_managed?: Prisma.SortOrder
   id?: Prisma.SortOrder
   tenant_id?: Prisma.SortOrder
   report_definition_id?: Prisma.SortOrder
@@ -388,6 +406,8 @@ export type ReportRunScalarWhereWithAggregatesInput = {
   AND?: Prisma.ReportRunScalarWhereWithAggregatesInput | Prisma.ReportRunScalarWhereWithAggregatesInput[]
   OR?: Prisma.ReportRunScalarWhereWithAggregatesInput[]
   NOT?: Prisma.ReportRunScalarWhereWithAggregatesInput | Prisma.ReportRunScalarWhereWithAggregatesInput[]
+  artifact_json?: Prisma.JsonNullableWithAggregatesFilter<"ReportRun">
+  file_retention_managed?: Prisma.BoolWithAggregatesFilter<"ReportRun"> | boolean
   id?: Prisma.UuidWithAggregatesFilter<"ReportRun"> | string
   tenant_id?: Prisma.UuidWithAggregatesFilter<"ReportRun"> | string
   report_definition_id?: Prisma.UuidWithAggregatesFilter<"ReportRun"> | string
@@ -408,6 +428,8 @@ export type ReportRunScalarWhereWithAggregatesInput = {
 }
 
 export type ReportRunCreateInput = {
+  artifact_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  file_retention_managed?: boolean
   id: string
   tenant_id: string
   requested_by_membership_id: string
@@ -428,6 +450,8 @@ export type ReportRunCreateInput = {
 }
 
 export type ReportRunUncheckedCreateInput = {
+  artifact_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  file_retention_managed?: boolean
   id: string
   tenant_id: string
   report_definition_id: string
@@ -448,6 +472,8 @@ export type ReportRunUncheckedCreateInput = {
 }
 
 export type ReportRunUpdateInput = {
+  artifact_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  file_retention_managed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
   requested_by_membership_id?: Prisma.StringFieldUpdateOperationsInput | string
@@ -468,6 +494,8 @@ export type ReportRunUpdateInput = {
 }
 
 export type ReportRunUncheckedUpdateInput = {
+  artifact_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  file_retention_managed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
   report_definition_id?: Prisma.StringFieldUpdateOperationsInput | string
@@ -488,6 +516,8 @@ export type ReportRunUncheckedUpdateInput = {
 }
 
 export type ReportRunCreateManyInput = {
+  artifact_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  file_retention_managed?: boolean
   id: string
   tenant_id: string
   report_definition_id: string
@@ -508,6 +538,8 @@ export type ReportRunCreateManyInput = {
 }
 
 export type ReportRunUpdateManyMutationInput = {
+  artifact_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  file_retention_managed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
   requested_by_membership_id?: Prisma.StringFieldUpdateOperationsInput | string
@@ -526,6 +558,8 @@ export type ReportRunUpdateManyMutationInput = {
 }
 
 export type ReportRunUncheckedUpdateManyInput = {
+  artifact_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  file_retention_managed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
   report_definition_id?: Prisma.StringFieldUpdateOperationsInput | string
@@ -556,6 +590,8 @@ export type ReportRunOrderByRelationAggregateInput = {
 }
 
 export type ReportRunCountOrderByAggregateInput = {
+  artifact_json?: Prisma.SortOrder
+  file_retention_managed?: Prisma.SortOrder
   id?: Prisma.SortOrder
   tenant_id?: Prisma.SortOrder
   report_definition_id?: Prisma.SortOrder
@@ -581,6 +617,7 @@ export type ReportRunAvgOrderByAggregateInput = {
 }
 
 export type ReportRunMaxOrderByAggregateInput = {
+  file_retention_managed?: Prisma.SortOrder
   id?: Prisma.SortOrder
   tenant_id?: Prisma.SortOrder
   report_definition_id?: Prisma.SortOrder
@@ -599,6 +636,7 @@ export type ReportRunMaxOrderByAggregateInput = {
 }
 
 export type ReportRunMinOrderByAggregateInput = {
+  file_retention_managed?: Prisma.SortOrder
   id?: Prisma.SortOrder
   tenant_id?: Prisma.SortOrder
   report_definition_id?: Prisma.SortOrder
@@ -706,6 +744,8 @@ export type ReportRunUncheckedUpdateManyWithoutScheduleNestedInput = {
 }
 
 export type ReportRunCreateWithoutDefinitionInput = {
+  artifact_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  file_retention_managed?: boolean
   id: string
   tenant_id: string
   requested_by_membership_id: string
@@ -725,6 +765,8 @@ export type ReportRunCreateWithoutDefinitionInput = {
 }
 
 export type ReportRunUncheckedCreateWithoutDefinitionInput = {
+  artifact_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  file_retention_managed?: boolean
   id: string
   tenant_id: string
   report_schedule_id?: string | null
@@ -773,6 +815,8 @@ export type ReportRunScalarWhereInput = {
   AND?: Prisma.ReportRunScalarWhereInput | Prisma.ReportRunScalarWhereInput[]
   OR?: Prisma.ReportRunScalarWhereInput[]
   NOT?: Prisma.ReportRunScalarWhereInput | Prisma.ReportRunScalarWhereInput[]
+  artifact_json?: Prisma.JsonNullableFilter<"ReportRun">
+  file_retention_managed?: Prisma.BoolFilter<"ReportRun"> | boolean
   id?: Prisma.UuidFilter<"ReportRun"> | string
   tenant_id?: Prisma.UuidFilter<"ReportRun"> | string
   report_definition_id?: Prisma.UuidFilter<"ReportRun"> | string
@@ -793,6 +837,8 @@ export type ReportRunScalarWhereInput = {
 }
 
 export type ReportRunCreateWithoutScheduleInput = {
+  artifact_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  file_retention_managed?: boolean
   id: string
   tenant_id: string
   requested_by_membership_id: string
@@ -812,6 +858,8 @@ export type ReportRunCreateWithoutScheduleInput = {
 }
 
 export type ReportRunUncheckedCreateWithoutScheduleInput = {
+  artifact_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  file_retention_managed?: boolean
   id: string
   tenant_id: string
   report_definition_id: string
@@ -857,6 +905,8 @@ export type ReportRunUpdateManyWithWhereWithoutScheduleInput = {
 }
 
 export type ReportRunCreateManyDefinitionInput = {
+  artifact_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  file_retention_managed?: boolean
   id: string
   tenant_id: string
   report_schedule_id?: string | null
@@ -876,6 +926,8 @@ export type ReportRunCreateManyDefinitionInput = {
 }
 
 export type ReportRunUpdateWithoutDefinitionInput = {
+  artifact_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  file_retention_managed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
   requested_by_membership_id?: Prisma.StringFieldUpdateOperationsInput | string
@@ -895,6 +947,8 @@ export type ReportRunUpdateWithoutDefinitionInput = {
 }
 
 export type ReportRunUncheckedUpdateWithoutDefinitionInput = {
+  artifact_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  file_retention_managed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
   report_schedule_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -914,6 +968,8 @@ export type ReportRunUncheckedUpdateWithoutDefinitionInput = {
 }
 
 export type ReportRunUncheckedUpdateManyWithoutDefinitionInput = {
+  artifact_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  file_retention_managed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
   report_schedule_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -933,6 +989,8 @@ export type ReportRunUncheckedUpdateManyWithoutDefinitionInput = {
 }
 
 export type ReportRunCreateManyScheduleInput = {
+  artifact_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  file_retention_managed?: boolean
   id: string
   tenant_id: string
   report_definition_id: string
@@ -952,6 +1010,8 @@ export type ReportRunCreateManyScheduleInput = {
 }
 
 export type ReportRunUpdateWithoutScheduleInput = {
+  artifact_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  file_retention_managed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
   requested_by_membership_id?: Prisma.StringFieldUpdateOperationsInput | string
@@ -971,6 +1031,8 @@ export type ReportRunUpdateWithoutScheduleInput = {
 }
 
 export type ReportRunUncheckedUpdateWithoutScheduleInput = {
+  artifact_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  file_retention_managed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
   report_definition_id?: Prisma.StringFieldUpdateOperationsInput | string
@@ -990,6 +1052,8 @@ export type ReportRunUncheckedUpdateWithoutScheduleInput = {
 }
 
 export type ReportRunUncheckedUpdateManyWithoutScheduleInput = {
+  artifact_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  file_retention_managed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
   report_definition_id?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1011,6 +1075,8 @@ export type ReportRunUncheckedUpdateManyWithoutScheduleInput = {
 
 
 export type ReportRunSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  artifact_json?: boolean
+  file_retention_managed?: boolean
   id?: boolean
   tenant_id?: boolean
   report_definition_id?: boolean
@@ -1033,6 +1099,8 @@ export type ReportRunSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
 }, ExtArgs["result"]["reportRun"]>
 
 export type ReportRunSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  artifact_json?: boolean
+  file_retention_managed?: boolean
   id?: boolean
   tenant_id?: boolean
   report_definition_id?: boolean
@@ -1055,6 +1123,8 @@ export type ReportRunSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
 }, ExtArgs["result"]["reportRun"]>
 
 export type ReportRunSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  artifact_json?: boolean
+  file_retention_managed?: boolean
   id?: boolean
   tenant_id?: boolean
   report_definition_id?: boolean
@@ -1077,6 +1147,8 @@ export type ReportRunSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
 }, ExtArgs["result"]["reportRun"]>
 
 export type ReportRunSelectScalar = {
+  artifact_json?: boolean
+  file_retention_managed?: boolean
   id?: boolean
   tenant_id?: boolean
   report_definition_id?: boolean
@@ -1096,7 +1168,7 @@ export type ReportRunSelectScalar = {
   updated_at?: boolean
 }
 
-export type ReportRunOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "report_definition_id" | "report_schedule_id" | "requested_by_membership_id" | "status" | "params_json" | "format" | "row_count" | "r2_object_key" | "error_json" | "progress_percent" | "started_at" | "completed_at" | "expires_at" | "created_at" | "updated_at", ExtArgs["result"]["reportRun"]>
+export type ReportRunOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"artifact_json" | "file_retention_managed" | "id" | "tenant_id" | "report_definition_id" | "report_schedule_id" | "requested_by_membership_id" | "status" | "params_json" | "format" | "row_count" | "r2_object_key" | "error_json" | "progress_percent" | "started_at" | "completed_at" | "expires_at" | "created_at" | "updated_at", ExtArgs["result"]["reportRun"]>
 export type ReportRunInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   definition?: boolean | Prisma.ReportDefinitionDefaultArgs<ExtArgs>
   schedule?: boolean | Prisma.ReportRun$scheduleArgs<ExtArgs>
@@ -1117,6 +1189,8 @@ export type $ReportRunPayload<ExtArgs extends runtime.Types.Extensions.InternalA
     schedule: Prisma.$ReportSchedulePayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
+    artifact_json: runtime.JsonValue | null
+    file_retention_managed: boolean
     id: string
     tenant_id: string
     report_definition_id: string
@@ -1217,8 +1291,8 @@ export interface ReportRunDelegate<ExtArgs extends runtime.Types.Extensions.Inte
    * // Get first 10 ReportRuns
    * const reportRuns = await prisma.reportRun.findMany({ take: 10 })
    * 
-   * // Only select the `id`
-   * const reportRunWithIdOnly = await prisma.reportRun.findMany({ select: { id: true } })
+   * // Only select the `artifact_json`
+   * const reportRunWithArtifact_jsonOnly = await prisma.reportRun.findMany({ select: { artifact_json: true } })
    * 
    */
   findMany<T extends ReportRunFindManyArgs>(args?: Prisma.SelectSubset<T, ReportRunFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReportRunPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
@@ -1262,9 +1336,9 @@ export interface ReportRunDelegate<ExtArgs extends runtime.Types.Extensions.Inte
    *   ]
    * })
    * 
-   * // Create many ReportRuns and only return the `id`
-   * const reportRunWithIdOnly = await prisma.reportRun.createManyAndReturn({
-   *   select: { id: true },
+   * // Create many ReportRuns and only return the `artifact_json`
+   * const reportRunWithArtifact_jsonOnly = await prisma.reportRun.createManyAndReturn({
+   *   select: { artifact_json: true },
    *   data: [
    *     // ... provide data here
    *   ]
@@ -1353,9 +1427,9 @@ export interface ReportRunDelegate<ExtArgs extends runtime.Types.Extensions.Inte
    *   ]
    * })
    * 
-   * // Update zero or more ReportRuns and only return the `id`
-   * const reportRunWithIdOnly = await prisma.reportRun.updateManyAndReturn({
-   *   select: { id: true },
+   * // Update zero or more ReportRuns and only return the `artifact_json`
+   * const reportRunWithArtifact_jsonOnly = await prisma.reportRun.updateManyAndReturn({
+   *   select: { artifact_json: true },
    *   where: {
    *     // ... provide filter here
    *   },
@@ -1559,6 +1633,8 @@ export interface Prisma__ReportRunClient<T, Null = never, ExtArgs extends runtim
  * Fields of the ReportRun model
  */
 export interface ReportRunFieldRefs {
+  readonly artifact_json: Prisma.FieldRef<"ReportRun", 'Json'>
+  readonly file_retention_managed: Prisma.FieldRef<"ReportRun", 'Boolean'>
   readonly id: Prisma.FieldRef<"ReportRun", 'String'>
   readonly tenant_id: Prisma.FieldRef<"ReportRun", 'String'>
   readonly report_definition_id: Prisma.FieldRef<"ReportRun", 'String'>

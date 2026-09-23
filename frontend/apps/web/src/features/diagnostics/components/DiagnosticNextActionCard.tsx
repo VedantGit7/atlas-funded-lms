@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import type { DiagnosticNextAction } from "@atlas/contracts-modules/diagnostics/diagnostic.types";
+import type { DiagnosticNextAction } from "@atlas/contracts/diagnostics/diagnostic.types";
 
 type DiagnosticNextActionCardProps = {
   nextAction: DiagnosticNextAction;

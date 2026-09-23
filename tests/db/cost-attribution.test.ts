@@ -177,8 +177,8 @@ describeWithDb("per-tenant cost attribution", () => {
 
   afterAll(async () => {
     const tenants = [tenantA, tenantB];
-    await owner.query(`delete from platform_cost_rates where reason like 'cost-attr-test%'`);
-    await owner.query(`delete from platform_fixed_costs where reason like 'cost-attr-test%'`);
+    await owner.query(`delete from platform_cost_rates where reason like $1`, [`${REASON} %`]);
+    await owner.query(`delete from platform_fixed_costs where reason like $1`, [`${REASON} %`]);
     for (const table of [
       "analytics_rollups",
       "storage_references",

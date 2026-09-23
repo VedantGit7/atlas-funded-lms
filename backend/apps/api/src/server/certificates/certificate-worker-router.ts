@@ -24,18 +24,23 @@ export async function processCertificateOutboxBatch(args: {
     parentRequestId: args.requestId,
     jobName: "certificates-outbox",
     execute: () =>
-      withTenantTx(
+      processOutboxBatch(
         {
-          tenantId: args.tenantId,
-          requestId: args.requestId,
-          allowAnonymousTenantRead: true,
+          transaction: (fn) =>
+            withTenantTx(
+              {
+                tenantId: args.tenantId,
+                requestId: args.requestId,
+                allowAnonymousTenantRead: true,
+              },
+              fn,
+            ),
         },
-        async (tx) =>
-          processOutboxBatch(tx, {
-            limit: args.limit ?? 25,
-            maxRetries: args.maxRetries ?? 3,
-            handlers: createCertificateOutboxConsumers(),
-          }),
+        {
+          limit: args.limit ?? 25,
+          maxRetries: args.maxRetries ?? 3,
+          handlers: createCertificateOutboxConsumers(),
+        },
       ),
   });
 }

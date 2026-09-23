@@ -1,7 +1,7 @@
 import { AdminPageGate } from "../../../components/patterns/AdminPageGate";
 import { AdminTrashPanel } from "../../../features/admin/trash/AdminTrashPanel";
 import { ServerApiError, serverApi } from "../../../lib/server-api";
-import type { ContentTrashListResponse } from "@atlas/contracts/admin/content-trash.dto";
+import type { ContentTrashListResponse } from "@atlas/contracts/content-trash/content-trash.contract";
 
 export default async function AdminTrashPage() {
   try {

@@ -5,6 +5,8 @@ import { assertTenantKeyPrefix, getStorageProvider, parseStorageEnv } from "@atl
 import type { ServiceCtx } from "../shared/domain.types";
 import { createExportJob } from "../data-rights/data-rights.service";
 import { dataRightsRepository } from "../data-rights/data-rights.repository";
+import { resolveVerifiedExportDownload } from "../data-rights/export-artifact";
+import { enqueueExportCleanup } from "./export-file-cleanup.repository";
 import type { JobStatus } from "./reports.contract";
 import {
   cancelExportRunResponseSchema,
@@ -438,33 +440,37 @@ async function resolveSignedDownloadForKey(
   ctx: ServiceCtx,
   objectKey: string | null,
   status: JobStatus,
+  expiresAt: Date | null,
+  artifactJson?: unknown,
 ): Promise<{ url: string; expiresAt: string } | null> {
-  if (status !== "SUCCEEDED" || !objectKey) return null;
+  if (status !== "SUCCEEDED" || !objectKey || !expiresAt || expiresAt.getTime() <= Date.now())
+    return null;
 
   const env = parseStorageEnv(process.env);
+  const artifact = asRecord(artifactJson);
+  if (
+    artifactJson != null &&
+    (artifact["provider"] !== env.STORAGE_PROVIDER || artifact["bucket"] !== env.R2_BUCKET_NAME)
+  )
+    return null;
   const provider = getStorageProvider();
   assertTenantKeyPrefix({ tenantId: ctx.tenantId, key: objectKey });
 
+  const ttl = Math.min(
+    env.STORAGE_SIGNED_DOWNLOAD_TTL_SECONDS,
+    Math.floor((expiresAt.getTime() - Date.now()) / 1000),
+  );
+  if (ttl < 1) return null;
   const signed = await provider.createSignedDownloadUrl({
     bucket: env.R2_BUCKET_NAME,
     key: objectKey,
-    expiresInSeconds: env.STORAGE_SIGNED_DOWNLOAD_TTL_SECONDS,
+    expiresInSeconds: ttl,
   });
 
   return {
     url: signed.url,
-    expiresAt: signed.expiresAt.toISOString(),
+    expiresAt: new Date(Math.min(signed.expiresAt.getTime(), expiresAt.getTime())).toISOString(),
   };
-}
-
-async function deleteStorageObject(ctx: ServiceCtx, objectKey: string): Promise<void> {
-  const env = parseStorageEnv(process.env);
-  const provider = getStorageProvider();
-  assertTenantKeyPrefix({ tenantId: ctx.tenantId, key: objectKey });
-  await provider.deleteObject({
-    bucket: env.R2_BUCKET_NAME,
-    key: objectKey,
-  });
 }
 
 function invalidExportAction(message: string): AtlasHttpError {
@@ -475,7 +481,12 @@ function invalidExportAction(message: string): AtlasHttpError {
   });
 }
 
-async function loadReportRunDetail(tx: TenantTx, ctx: ServiceCtx, runId: string) {
+async function loadReportRunDetail(
+  tx: TenantTx,
+  ctx: ServiceCtx,
+  runId: string,
+  includeDownload = true,
+) {
   const run = await reportsRepository.findReportRunById(tx, runId);
   if (!run || run.tenant_id !== ctx.tenantId) {
     return null;
@@ -501,7 +512,15 @@ async function loadReportRunDetail(tx: TenantTx, ctx: ServiceCtx, runId: string)
     tx,
     run.requested_by_membership_id,
   );
-  const download = await resolveSignedDownloadForKey(ctx, run.r2_object_key, run.status);
+  const download = includeDownload
+    ? await resolveSignedDownloadForKey(
+        ctx,
+        run.r2_object_key,
+        run.status,
+        run.expires_at,
+        run.artifact_json,
+      )
+    : null;
   const hasFile = Boolean(run.r2_object_key);
   const format = run.format;
 
@@ -548,8 +567,10 @@ async function loadReportRunDetail(tx: TenantTx, ctx: ServiceCtx, runId: string)
     failureHint: failureHint(errorCode, errorMessage),
     pipeline,
     hasFile,
-    canDownload: run.status === "SUCCEEDED" && hasFile,
-    canDeleteFile: hasFile,
+    canDownload: Boolean(download),
+    canDeleteFile:
+      hasFile &&
+      (run.status === "SUCCEEDED" || run.status === "FAILED" || run.status === "CANCELLED"),
     canCancel: run.status === "QUEUED" || run.status === "RUNNING",
     canRetry: run.status === "FAILED" || run.status === "CANCELLED" || run.status === "SUCCEEDED",
     download,
@@ -558,7 +579,12 @@ async function loadReportRunDetail(tx: TenantTx, ctx: ServiceCtx, runId: string)
   };
 }
 
-async function loadExportJobDetail(tx: TenantTx, ctx: ServiceCtx, jobId: string) {
+async function loadExportJobDetail(
+  tx: TenantTx,
+  ctx: ServiceCtx,
+  jobId: string,
+  includeDownload = true,
+) {
   const job = await dataRightsRepository.findExportJobById(tx, jobId);
   if (!job || job.tenant_id !== ctx.tenantId) {
     return null;
@@ -584,7 +610,7 @@ async function loadExportJobDetail(tx: TenantTx, ctx: ServiceCtx, jobId: string)
     tx,
     job.requested_by_membership_id,
   );
-  const download = await resolveSignedDownloadForKey(ctx, job.r2_object_key, job.status);
+  const download = includeDownload ? await resolveVerifiedExportDownload(ctx, job) : null;
   const hasFile = Boolean(job.r2_object_key);
 
   return {
@@ -630,8 +656,13 @@ async function loadExportJobDetail(tx: TenantTx, ctx: ServiceCtx, jobId: string)
     failureHint: failureHint(errorCode, errorMessage),
     pipeline,
     hasFile,
-    canDownload: job.status === "SUCCEEDED" && hasFile,
-    canDeleteFile: hasFile,
+    canDownload: Boolean(download),
+    canDeleteFile:
+      hasFile &&
+      (job.status === "SUCCEEDED" ||
+        job.status === "FAILED" ||
+        (job.status === "CANCELLED" &&
+          typeof asRecord(job.artifact_json)["writerStoppedAt"] === "string")),
     canCancel: job.status === "QUEUED" || job.status === "RUNNING",
     canRetry: job.status === "FAILED" || job.status === "CANCELLED" || job.status === "SUCCEEDED",
     download,
@@ -640,25 +671,31 @@ async function loadExportJobDetail(tx: TenantTx, ctx: ServiceCtx, jobId: string)
   };
 }
 
-async function resolveSource(tx: TenantTx, ctx: ServiceCtx, runId: string, preferred?: SourceType) {
+async function resolveSource(
+  tx: TenantTx,
+  ctx: ServiceCtx,
+  runId: string,
+  preferred?: SourceType,
+  includeDownload = true,
+) {
   if (preferred === "report_run") {
-    const detail = await loadReportRunDetail(tx, ctx, runId);
+    const detail = await loadReportRunDetail(tx, ctx, runId, includeDownload);
     if (detail) return detail;
-    const fallback = await loadExportJobDetail(tx, ctx, runId);
+    const fallback = await loadExportJobDetail(tx, ctx, runId, includeDownload);
     if (fallback) return fallback;
     throw reportRunNotFound();
   }
   if (preferred === "export_job") {
-    const detail = await loadExportJobDetail(tx, ctx, runId);
+    const detail = await loadExportJobDetail(tx, ctx, runId, includeDownload);
     if (detail) return detail;
-    const fallback = await loadReportRunDetail(tx, ctx, runId);
+    const fallback = await loadReportRunDetail(tx, ctx, runId, includeDownload);
     if (fallback) return fallback;
     throw reportRunNotFound();
   }
 
-  const reportRun = await loadReportRunDetail(tx, ctx, runId);
+  const reportRun = await loadReportRunDetail(tx, ctx, runId, includeDownload);
   if (reportRun) return reportRun;
-  const exportJob = await loadExportJobDetail(tx, ctx, runId);
+  const exportJob = await loadExportJobDetail(tx, ctx, runId, includeDownload);
   if (exportJob) return exportJob;
   throw reportRunNotFound();
 }
@@ -679,34 +716,15 @@ export async function deleteExportRunFile(
   runId: string,
   body: ExportRunActionBody = {},
 ) {
-  const detail = await resolveSource(tx, ctx, runId, body.sourceType);
+  const detail = await resolveSource(tx, ctx, runId, body.sourceType, false);
   if (!detail.canDeleteFile) {
-    throw invalidExportAction("This export has no file to delete.");
+    throw invalidExportAction(
+      "Only completed exports with a stopped writer and a stored file can be deleted.",
+    );
   }
 
-  if (detail.sourceType === "report_run") {
-    const run = await reportsRepository.findReportRunById(tx, runId);
-    if (!run?.r2_object_key) {
-      throw invalidExportAction("This export has no file to delete.");
-    }
-    try {
-      await deleteStorageObject(ctx, run.r2_object_key);
-    } catch {
-      // Keep ledger consistent if the object is already gone.
-    }
-    await reportsRepository.clearReportRunFile(tx, runId);
-  } else {
-    const job = await dataRightsRepository.findExportJobById(tx, runId);
-    if (!job?.r2_object_key) {
-      throw invalidExportAction("This export has no file to delete.");
-    }
-    try {
-      await deleteStorageObject(ctx, job.r2_object_key);
-    } catch {
-      // Keep ledger consistent if the object is already gone.
-    }
-    await dataRightsRepository.clearExportJobFile(tx, runId);
-  }
+  const queued = await enqueueExportCleanup(tx, { sourceType: detail.sourceType, sourceId: runId });
+  if (!queued) throw invalidExportAction("Only completed exports with a file can be deleted.");
 
   await auditWriter.write(
     tx,
@@ -717,10 +735,10 @@ export async function deleteExportRunFile(
       requestId: ctx.requestId,
     },
     {
-      action: "report.export.file_deleted",
+      action: "report.export.file_deletion_requested",
       target: { type: detail.sourceType, id: runId },
       before: { hasFile: true },
-      after: { hasFile: false },
+      after: { hasFile: true, deletionPending: true },
       reason: null,
       metadata: { fileName: detail.fileName },
     },
@@ -730,8 +748,9 @@ export async function deleteExportRunFile(
     data: {
       id: runId,
       sourceType: detail.sourceType,
-      deleted: true,
-      hasFile: false,
+      deleted: false,
+      hasFile: true,
+      deletionPending: true,
     },
   });
 }
@@ -742,7 +761,7 @@ export async function cancelExportRun(
   runId: string,
   body: ExportRunActionBody = {},
 ) {
-  const detail = await resolveSource(tx, ctx, runId, body.sourceType);
+  const detail = await resolveSource(tx, ctx, runId, body.sourceType, false);
   if (!detail.canCancel) {
     throw invalidExportAction("Only queued or running exports can be cancelled.");
   }
@@ -792,7 +811,7 @@ export async function retryExportRun(
   runId: string,
   body: ExportRunActionBody = {},
 ) {
-  const detail = await resolveSource(tx, ctx, runId, body.sourceType);
+  const detail = await resolveSource(tx, ctx, runId, body.sourceType, false);
   if (!detail.canRetry) {
     throw invalidExportAction("This export cannot be re-run.");
   }

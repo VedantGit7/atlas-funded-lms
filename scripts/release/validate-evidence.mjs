@@ -1,177 +1,183 @@
 #!/usr/bin/env node
-
-/**
- * Freshness and integrity guard for `release-evidence.json` (audit finding H18).
- *
- * The CI job named `release-evidence-validation` asserted `test -f
- * release-evidence.json` — existence, and nothing else. What that permitted:
- *
- *   - The committed artifact was **8 weeks stale** (generated 2026-06-22) while
- *     three substantial merges had landed since.
- *   - It read `verdict: READY_FOR_STAGING` with **9 of 30 P0 gates skipped**,
- *     among them `integration_tests`, `tenant_isolation_tests`, `rls_tests` and
- *     `db_rls_check` — precisely the guarantees the hardening programme exists
- *     to protect.
- *   - Three gates it reported as `passed` were measurably failing at the time of
- *     the audit.
- *
- * A stale green artifact satisfied every one of those conditions. This asserts
- * what "validation" was supposed to mean:
- *
- *   1. It parses, and has the schema fields the readers depend on.
- *   2. It is fresh — generated within RELEASE_EVIDENCE_MAX_AGE_HOURS (default 24).
- *   3. It describes *this* commit when a commit SHA is available on both sides.
- *   4. No gate failed.
- *   5. No automated P0 gate was skipped, because an unrun gate is an unanswered
- *      question rather than a pass.
- *   6. The recorded verdict is consistent with the gates it lists — so an
- *      artifact that was hand-edited, or produced by an older generator whose
- *      verdict logic was laxer, cannot assert readiness it did not earn.
- *
- * Rule 5 is the one that matters most: it is the exact hole H18 describes, and
- * `run-suite.mjs` now refuses to emit READY_FOR_STAGING under those conditions.
- * This checks the artifact independently, so a stale file generated before that
- * fix cannot slip through.
- */
-
-import { readFileSync, existsSync } from "node:fs";
-import { execFileSync } from "node:child_process";
-import { join } from "node:path";
-import process from "node:process";
-
-const repoRoot = process.cwd();
-const evidencePath = join(
-  repoRoot,
-  process.env["RELEASE_EVIDENCE_PATH"] ?? "release-evidence.json",
-);
-const maxAgeHours = Number(process.env["RELEASE_EVIDENCE_MAX_AGE_HOURS"] ?? "24");
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+import {
+  EXPECTED_GATES,
+  MANUAL_GATES,
+  SCHEMA_VERSION,
+  EVIDENCE_TYPE,
+  SHA_PATTERN,
+  RUN_ID_PATTERN,
+  captureSource,
+  deriveVerdict,
+  gateBlockers,
+} from "./evidence-contract.mjs";
 
 const failures = [];
-const notes = [];
-
-function fail(message) {
-  failures.push(message);
+const fail = (message) => failures.push(message);
+const object = (value) => value !== null && typeof value === "object" && !Array.isArray(value);
+const strings = (value) => Array.isArray(value) && value.every((item) => typeof item === "string");
+function knownFields(value, allowed, label) {
+  for (const key of Object.keys(value)) {
+    if (!allowed.includes(key)) fail(`Unknown ${label} field: ${key}`);
+  }
 }
-
-if (!existsSync(evidencePath)) {
-  console.error(`\nrelease-evidence.json not found at ${evidencePath}.`);
-  console.error("Generate it with `pnpm release:suite`.");
-  process.exit(1);
-}
-
+const maxAgeHours = Number(process.env.RELEASE_EVIDENCE_MAX_AGE_HOURS ?? "24");
+if (!Number.isFinite(maxAgeHours) || maxAgeHours <= 0)
+  fail("RELEASE_EVIDENCE_MAX_AGE_HOURS must be a finite positive number");
 let evidence;
 try {
-  evidence = JSON.parse(readFileSync(evidencePath, "utf8"));
+  evidence = JSON.parse(
+    readFileSync(resolve(process.env.RELEASE_EVIDENCE_PATH ?? "release-evidence.json"), "utf8"),
+  );
 } catch (error) {
-  console.error(`\nrelease-evidence.json is not valid JSON: ${error.message}`);
+  console.error(`Release evidence cannot be read: ${error.message}`);
   process.exit(1);
 }
-
-/* 1. Shape ---------------------------------------------------------- */
-
-for (const field of ["schemaVersion", "generatedAt", "verdict", "gates"]) {
-  if (evidence[field] === undefined) fail(`missing required field \`${field}\``);
-}
-if (!Array.isArray(evidence.gates)) {
-  fail("`gates` is not an array");
-}
-
-if (failures.length > 0) {
-  console.error("\nRelease evidence is malformed:\n");
-  for (const f of failures) console.error(`- ${f}`);
+if (!object(evidence)) {
+  console.error("Release evidence must be an object");
   process.exit(1);
 }
-
-/* 2. Freshness ------------------------------------------------------ */
-
-const generatedAt = new Date(evidence.generatedAt);
-if (Number.isNaN(generatedAt.getTime())) {
-  fail(`\`generatedAt\` is not a valid date: ${evidence.generatedAt}`);
-} else {
-  const ageHours = (Date.now() - generatedAt.getTime()) / 3_600_000;
-  if (ageHours > maxAgeHours) {
-    fail(
-      `stale by ${(ageHours / 24).toFixed(1)} days — generated ${evidence.generatedAt}, ` +
-        `limit is ${maxAgeHours}h. A point-in-time snapshot vouches only for the tree it ran against.`,
-    );
-  } else {
-    notes.push(`age ${ageHours.toFixed(1)}h (limit ${maxAgeHours}h)`);
-  }
-}
-
-/* 3. Commit correspondence ------------------------------------------ */
-
-let headSha = process.env["GIT_SHA"] ?? "";
-if (!headSha) {
-  try {
-    headSha = execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim();
-  } catch {
-    headSha = "";
-  }
-}
-if (evidence.commitSha && headSha) {
-  if (evidence.commitSha !== headSha) {
-    fail(
-      `describes commit ${String(evidence.commitSha).slice(0, 12)} but HEAD is ${headSha.slice(0, 12)}`,
-    );
-  } else {
-    notes.push(`commit ${headSha.slice(0, 12)}`);
-  }
-} else {
-  notes.push("commit correspondence not checked (no commitSha recorded)");
-}
-
-/* 4 & 5. Gate outcomes ---------------------------------------------- */
-
-const failed = evidence.gates.filter((g) => g.status === "failed");
-if (failed.length > 0) {
-  fail(`${failed.length} gate(s) failed: ${failed.map((g) => g.id).join(", ")}`);
-}
-
-const skippedP0 = evidence.gates.filter(
-  (g) => g.severity === "P0" && g.status === "skipped" && g.kind !== "manual",
+knownFields(
+  evidence,
+  [
+    "schemaVersion",
+    "evidenceType",
+    "storyId",
+    "generatedAt",
+    "branch",
+    "commitSha",
+    "source",
+    "environment",
+    "verdict",
+    "productionApproved",
+    "gates",
+    "manualGatesRequired",
+    "blockers",
+    "warnings",
+    "rollbackTarget",
+  ],
+  "evidence",
 );
-if (skippedP0.length > 0) {
-  fail(
-    `${skippedP0.length} automated P0 gate(s) skipped: ${skippedP0.map((g) => g.id).join(", ")}\n` +
-      "  An unrun gate is an unanswered question, not a pass.",
+if (evidence.branch !== undefined && typeof evidence.branch !== "string") fail("Invalid branch");
+if (evidence.schemaVersion !== SCHEMA_VERSION)
+  fail("Unsupported schemaVersion; regenerate evidence");
+if (evidence.evidenceType !== EVIDENCE_TYPE) fail("Invalid evidenceType");
+if (evidence.storyId !== "ATL-STORY-045") fail("Invalid storyId");
+if (typeof evidence.environment !== "string" || !evidence.environment.trim())
+  fail("Missing environment");
+if (typeof evidence.commitSha !== "string" || !SHA_PATTERN.test(evidence.commitSha))
+  fail("Missing or invalid full commitSha");
+if (evidence.productionApproved !== false)
+  fail("productionApproved must be false; automated evidence cannot approve production");
+if (!["NOT_READY", "READY_FOR_STAGING", "READY_FOR_PRODUCTION_REVIEW"].includes(evidence.verdict))
+  fail("Unknown verdict");
+for (const field of ["blockers", "warnings", "manualGatesRequired"]) {
+  if (!strings(evidence[field])) fail(`${field} must be an array of strings`);
+}
+if (
+  !(
+    evidence.rollbackTarget === null ||
+    (typeof evidence.rollbackTarget === "string" && evidence.rollbackTarget.trim())
+  )
+)
+  fail("Invalid rollbackTarget");
+
+const timestamp = typeof evidence.generatedAt === "string" ? Date.parse(evidence.generatedAt) : NaN;
+if (!Number.isFinite(timestamp) || new Date(timestamp).toISOString() !== evidence.generatedAt)
+  fail("generatedAt must be an ISO UTC timestamp");
+else {
+  const age = Date.now() - timestamp;
+  if (age > maxAgeHours * 3_600_000) fail("Release evidence is stale");
+  if (age < -5 * 60_000) fail("Release evidence timestamp is in the future");
+}
+const current = captureSource();
+failures.push(...current.errors);
+if (evidence.commitSha !== current.source.headSha) fail("commitSha does not match actual HEAD");
+if (!object(evidence.source)) fail("Missing source provenance");
+else {
+  const source = evidence.source;
+  knownFields(source, ["headSha", "clean", "ci", "ciRunId", "ciRunAttempt"], "source");
+  if (source.headSha !== evidence.commitSha || source.clean !== true)
+    fail("Evidence must describe a clean checkout at commitSha");
+  if (typeof source.ci !== "boolean") fail("source.ci must be boolean");
+  if (source.ci) {
+    if (
+      typeof source.ciRunId !== "string" ||
+      !RUN_ID_PATTERN.test(source.ciRunId) ||
+      typeof source.ciRunAttempt !== "string" ||
+      !RUN_ID_PATTERN.test(source.ciRunAttempt)
+    )
+      fail("Missing CI run identity");
+  } else if (source.ciRunId !== null || source.ciRunAttempt !== null)
+    fail("Local evidence must not claim CI run identity");
+  if (
+    current.source.ci &&
+    (source.ci !== true ||
+      source.ciRunId !== current.source.ciRunId ||
+      source.ciRunAttempt !== current.source.ciRunAttempt)
+  )
+    fail("Evidence does not match current CI run and attempt");
+}
+if (
+  strings(evidence.manualGatesRequired) &&
+  (evidence.manualGatesRequired.length !== MANUAL_GATES.length ||
+    new Set(evidence.manualGatesRequired).size !== MANUAL_GATES.length ||
+    MANUAL_GATES.some((id) => !evidence.manualGatesRequired.includes(id)))
+)
+  fail("manualGatesRequired must contain every expected human sign-off exactly once");
+
+const seen = new Set();
+if (!Array.isArray(evidence.gates)) fail("gates must be an array");
+else {
+  for (const gate of evidence.gates) {
+    if (!object(gate)) {
+      fail("Invalid gate object");
+      continue;
+    }
+    knownFields(
+      gate,
+      ["id", "name", "kind", "severity", "status", "command", "message", "durationMs"],
+      "gate",
+    );
+    for (const key of ["command", "message"])
+      if (gate[key] !== undefined && typeof gate[key] !== "string") fail(`Invalid gate ${key}`);
+    if (gate.durationMs !== undefined && (!Number.isFinite(gate.durationMs) || gate.durationMs < 0))
+      fail("Invalid gate durationMs");
+    const expected = EXPECTED_GATES.find(({ id }) => id === gate.id);
+    if (!expected) {
+      fail(`Unknown gate: ${gate.id}`);
+      continue;
+    }
+    if (seen.has(gate.id)) fail(`Duplicate gate: ${gate.id}`);
+    seen.add(gate.id);
+    if (typeof gate.name !== "string" || !gate.name.trim()) fail(`Missing gate name: ${gate.id}`);
+    if (gate.kind !== expected.kind || gate.severity !== expected.severity)
+      fail(`Invalid gate kind/severity: ${gate.id}`);
+    const statuses =
+      expected.kind === "manual" ? ["manual_required"] : ["passed", "failed", "skipped"];
+    if (!statuses.includes(gate.status)) fail(`Invalid gate status: ${gate.id}`);
+  }
+  for (const expected of EXPECTED_GATES)
+    if (!seen.has(expected.id)) fail(`Missing gate: ${expected.id}`);
+  if (evidence.gates.every(object)) {
+    failures.push(...gateBlockers(evidence.gates));
+    const derived = deriveVerdict(
+      evidence.gates,
+      strings(evidence.blockers) ? evidence.blockers : ["malformed blockers"],
+    );
+    if (evidence.verdict !== derived) fail(`Verdict inconsistent with gates: expected ${derived}`);
+  }
+}
+if (evidence.verdict === "NOT_READY") fail("Release evidence is NOT_READY");
+if (Array.isArray(evidence.blockers) && evidence.blockers.length)
+  fail("Release evidence contains blockers");
+if (failures.length) {
+  console.error(
+    `Release evidence validation FAILED:\n${failures.map((failure) => `- ${failure}`).join("\n")}`,
   );
+  process.exit(1);
 }
-
-/* 6. Verdict consistency -------------------------------------------- */
-
-const READY = new Set(["READY_FOR_STAGING", "READY_FOR_PRODUCTION_REVIEW"]);
-if (READY.has(evidence.verdict) && (failed.length > 0 || skippedP0.length > 0)) {
-  fail(
-    `verdict \`${evidence.verdict}\` is not supported by the gates it lists ` +
-      `(${failed.length} failed, ${skippedP0.length} P0 skipped)`,
-  );
-}
-
-if (evidence.productionApproved === true && evidence.verdict !== "READY_FOR_PRODUCTION_REVIEW") {
-  fail(`productionApproved is true but verdict is \`${evidence.verdict}\``);
-}
-
-/* Report ------------------------------------------------------------ */
-
-const counts = {};
-for (const g of evidence.gates) counts[g.status] = (counts[g.status] ?? 0) + 1;
-
-console.log(`Release evidence: ${evidence.gates.length} gates`);
 console.log(
-  `  ${Object.entries(counts)
-    .map(([k, v]) => `${k}: ${v}`)
-    .join("  ")}`,
+  `Release evidence validation passed: ${evidence.gates.length} gates, ${evidence.verdict}, commit ${evidence.commitSha}`,
 );
-console.log(`  verdict: ${evidence.verdict}`);
-for (const n of notes) console.log(`  ${n}`);
-
-if (failures.length > 0) {
-  console.error("\nRelease evidence validation FAILED:\n");
-  for (const f of failures) console.error(`- ${f}`);
-  console.error("\nRegenerate with `pnpm release:suite` against the current tree.");
-  process.exit(1);
-}
-
-console.log("\nRelease evidence validation passed.");
-process.exit(0);

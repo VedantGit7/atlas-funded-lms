@@ -8,6 +8,8 @@ import { processNotificationOutboxBatch } from "../server/notifications/notifica
 import { processReadinessOutboxBatch } from "../server/readiness/readiness.worker";
 import { processReportsOutboxBatch } from "../server/reports/reports-worker-router";
 import { processSearchOutboxBatch } from "../server/search/search-worker-router";
+import { processPaymentRefundBatch } from "./refund-worker";
+import { processScormOutboxBatch } from "../server/courses/scorm-worker-router";
 
 export type OutboxBatchResult = {
   processed: number;
@@ -18,6 +20,8 @@ export type OutboxBatchResult = {
 
 export type OutboxProcessor = {
   name: string;
+  /** Heavy artifact processors claim one item at a time per tenant pass. */
+  maxBatchLimit?: number;
   run: (args: {
     tenantId: string;
     requestId: string;
@@ -41,14 +45,16 @@ export type OutboxProcessor = {
  * fails the build when an exported `process*OutboxBatch` is missing from it.
  */
 export const OUTBOX_PROCESSORS: readonly OutboxProcessor[] = [
+  { name: "scorm", maxBatchLimit: 1, run: processScormOutboxBatch },
+  { name: "payment-refunds", run: processPaymentRefundBatch },
   { name: "notifications", run: processNotificationOutboxBatch },
   { name: "search", run: processSearchOutboxBatch },
-  { name: "certificates", run: processCertificateOutboxBatch },
+  { name: "certificates", maxBatchLimit: 1, run: processCertificateOutboxBatch },
   { name: "gamification", run: processGamificationOutboxBatch },
   { name: "competency", run: processCompetencyOutboxBatch },
   { name: "readiness", run: processReadinessOutboxBatch },
   { name: "analytics", run: processAnalyticsOutboxBatch },
-  { name: "reports", run: processReportsOutboxBatch },
+  { name: "reports", maxBatchLimit: 1, run: processReportsOutboxBatch },
   { name: "automation", run: processAutomationOutboxBatch },
-  { name: "data-rights", run: processDataRightsOutboxBatch },
+  { name: "data-rights", maxBatchLimit: 1, run: processDataRightsOutboxBatch },
 ];

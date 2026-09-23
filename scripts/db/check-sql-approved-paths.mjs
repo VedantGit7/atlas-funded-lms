@@ -5,6 +5,8 @@ import { join } from "node:path";
 // below scanned directories that no longer exist, so this guard passed while
 // inspecting no SQL at all.
 const approvedSqlDirectories = [
+  // Supabase Auth's hosted database has separate migration history from the LMS.
+  "supabase/migrations/",
   "backend/prisma/migrations/",
   "backend/prisma/sql/setup/",
   "backend/prisma/sql/functions/",
@@ -13,9 +15,10 @@ const approvedSqlDirectories = [
   "backend/prisma/sql/indexes/",
   "backend/prisma/sql/grants/",
   "backend/prisma/sql/partitions/",
+  "backend/prisma/sql/test-only/",
 ];
 
-const roots = ["backend", "frontend", "scripts", "tests"];
+const roots = ["backend", "frontend", "scripts", "tests", "supabase"];
 const failures = [];
 
 function walkFiles(directory) {
@@ -56,7 +59,7 @@ for (const file of sqlFiles) {
 }
 
 if (failures.length > 0) {
-  console.error("\nBlocked: raw SQL files must live only in approved prisma/sql folders.\n");
+  console.error("\nBlocked: raw SQL files must live only in approved migration/SQL folders.\n");
   for (const failure of failures) {
     console.error(`- ${failure}`);
   }

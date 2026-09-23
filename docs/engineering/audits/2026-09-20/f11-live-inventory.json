@@ -1,0 +1,65 @@
+{
+  "observedDate": "2026-09-20",
+  "sources": [
+    "Signed-in Vercel dashboard DOM",
+    "Supabase connector project/table metadata",
+    "Read-only public HTTPS HEAD"
+  ],
+  "vercel": {
+    "projectId": "prj_mLNnaCQpELmd5nwk6z4jWKSlrjhg",
+    "teamId": "team_LFRrS4VsrCp4yghJP4qrDo3k",
+    "team": "vedantwedhane-8075s-projects",
+    "plan": "Hobby",
+    "rootDirectory": {
+      "before": "",
+      "after": "frontend/apps/web",
+      "saved": true,
+      "verifiedOnRevisit": true
+    },
+    "buildCommand": "pnpm build",
+    "installCommand": "pnpm install --frozen-lockfile",
+    "includeOutsideRoot": true,
+    "node": "24.x",
+    "production": "No Production Deployment",
+    "previewDeployment": "Bs19QhQ6k3gEh5z6yJg6vB4ebEeY",
+    "previewSha": "ca8c0f1e7e69780b4e2ddc2a1136907a2e47c350",
+    "buildFailure": "Install postinstall prisma generate failed: PrismaConfigEnvError: Cannot resolve environment variable: DATABASE_URL",
+    "environmentVariables": "No Environment Variables Added",
+    "authentication": "Enabled, Standard Protection",
+    "protectedSourceMaps": true,
+    "listedDomains": [
+      {
+        "domain": "atlas-funded-lms.vercel.app",
+        "status": "No Deployment"
+      }
+    ],
+    "cron": "Enabled, onboarding shown; no registered jobs displayed",
+    "deploymentChecks": "No checks configured"
+  },
+  "publicDomain": {
+    "url": "https://academy.fundedbeyond.com",
+    "observedAt": "2026-09-20T07:41:58Z",
+    "status": 302,
+    "server": "cloudflare",
+    "location": "https://fundedbeyond-com.l.ink/"
+  },
+  "supabase": {
+    "projectId": "rolumnldqjelwfvtmmqf",
+    "region": "ap-south-1",
+    "status": "ACTIVE_HEALTHY",
+    "publicTablesReturned": 0
+  },
+  "accessLimits": {
+    "vercelConnector": "No teams returned; known deployment 403 wrong team scope; browser fallback succeeded",
+    "cloudflare": "No callable connector tools found; DNS/control-plane configuration unverified"
+  },
+  "externalChanges": ["Vercel project Root Directory saved as frontend/apps/web"],
+  "notPerformed": [
+    "Deployment",
+    "DNS cutover",
+    "Cloud database mutation",
+    "Plan upgrade",
+    "Secret creation or upload",
+    "Scheduler registration"
+  ]
+}

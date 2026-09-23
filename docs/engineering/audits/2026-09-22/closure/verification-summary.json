@@ -1,0 +1,190 @@
+{
+  "assessedAt": "2026-09-22T03:24:00.774Z",
+  "decision": "NOT_READY_FOR_PRODUCTION",
+  "scope": "Combined local F01-F22 verification and dated read-only hosted observations. No deployment, commit, push or paid/permission changes.",
+  "sourceFingerprint": "b0bf09a9279483450d27778f859d2e4888560633f47132bd39b4055627ebe94b",
+  "checks": {
+    "offline": {
+      "success": true,
+      "passed": 2981,
+      "failed": 0,
+      "skipped": 1,
+      "total": 2982
+    },
+    "initialDatabase": {
+      "success": false,
+      "passed": 1107,
+      "failed": 8,
+      "skipped": 61,
+      "total": 1176
+    },
+    "integrationFixtureRecheck": {
+      "success": true,
+      "passed": 20,
+      "failed": 0,
+      "skipped": 0,
+      "total": 20
+    },
+    "credentialFreePrismaRecheck": {
+      "success": true,
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0,
+      "total": 3
+    },
+    "dedicatedPostgresAndSeeds": {
+      "success": true,
+      "passed": 68,
+      "failed": 0,
+      "skipped": 0,
+      "total": 68
+    },
+    "restrictedRoleAndRedis": {
+      "success": true,
+      "passed": 10,
+      "failed": 0,
+      "skipped": 0,
+      "total": 10
+    },
+    "rlsExpressionRegression": {
+      "success": true,
+      "passed": 15,
+      "failed": 0,
+      "skipped": 0,
+      "total": 15
+    },
+    "retentionFixtureRecheck": {
+      "success": true,
+      "passed": 9,
+      "failed": 0,
+      "skipped": 0,
+      "total": 9
+    },
+    "nativeArchitectureSecretsCleanup": {
+      "passed": 54,
+      "failed": 0,
+      "evidence": "native-tests-final.log"
+    },
+    "performanceTooling": {
+      "passed": 22,
+      "failed": 0,
+      "evidence": "performance-tooling.log"
+    },
+    "lessonProgress": {
+      "passed": 25,
+      "failed": 0,
+      "evidence": "lesson-progress-final.log"
+    },
+    "localStorage": {
+      "passed": 4,
+      "failed": 0,
+      "evidence": "local-storage-regression.log"
+    },
+    "browser": {
+      "passed": 25,
+      "failed": 0,
+      "skipped": 0,
+      "flaky": 0,
+      "evidence": "browser-final.json",
+      "serverMode": "development",
+      "productionBrowserAcceptance": false
+    },
+    "builds": {
+      "api": "passed_after_runtime_fixes",
+      "web": "passed",
+      "evidence": "build-browser-manifest.json",
+      "appEnv": "test",
+      "nodeEnv": "production"
+    },
+    "lint": {
+      "initialCompleteShardRunExit": 1,
+      "initialFailedShards": [
+        "deploy",
+        "tests"
+      ],
+      "remainingShards": "passed",
+      "corrections": "passed",
+      "evidence": [
+        "lint-final.log",
+        "lint-corrections.log"
+      ],
+      "singleFullGreenRerun": false
+    },
+    "typecheck": {
+      "repositoryExitCode": 0,
+      "deploymentToolingExitCode": 0,
+      "evidence": [
+        "typecheck.log",
+        "deploy-typecheck.log"
+      ]
+    },
+    "format": {
+      "exitCode": 0,
+      "evidence": "format-complete.log"
+    },
+    "migrationStatus": {
+      "exitCode": 0,
+      "migrationFiles": 117,
+      "pending": [],
+      "unfinished": [],
+      "evidence": "local-migration-status-final.log"
+    },
+    "schemaComparison": {
+      "equalCategories": [
+        "columns",
+        "constraints",
+        "indexes",
+        "policies",
+        "rls"
+      ],
+      "historicalChecksumsUnresolved": 5,
+      "lineEndingOnlyMismatches": 26,
+      "evidence": "local-schema-comparison.json"
+    },
+    "rls": {
+      "restrictedRole": true,
+      "tenantTables": 227,
+      "passed": true,
+      "semanticProof": false,
+      "evidence": "check-rls-state-restricted-fixed.log"
+    },
+    "dependencyAudit": {
+      "productionAdvisories": 0,
+      "unsuppressedAllTreeAdvisories": 0,
+      "suppressedHighDevToolAdvisories": 2,
+      "exception": "SEC-09",
+      "frozenReinstall": false
+    },
+    "learnerBundle": {
+      "worstGzipKb": 403.8,
+      "targetKb": 150,
+      "ratchetPassed": true,
+      "productTargetMet": false,
+      "measuredRoutes": 71
+    }
+  },
+  "limits": [
+    "Initial broad database run was not green; all eight failures passed affected reruns and all61skips passed dedicated runs. Counts overlap and must not be summed.",
+    "One offline certificate-PDF worker deployment gate remains explicitly skipped.",
+    "No final candidate-SHA hosted CI, staging provider acceptance, capacity100/200 or production restore/rollback proof.",
+    "Historical injected browser failure probes not rerun to completion; four browser journeys remain shell smoke.",
+    "Admin locale-dependent date hydration warning remains a follow-up.",
+    "Policy syntax guard is not a complete proof of SQL semantics; five historical migration checksum sources unresolved."
+  ],
+  "blockers": [
+    "F10 repository protection/plan/admin capability and independent reviewer",
+    "F11/F22 isolated protected application staging and managed API/worker/provider deployment",
+    "F13 enforced CSP compatibility and messaging/framing acceptance",
+    "F14 retention-approved comprehensive export/erasure/backup lifecycle",
+    "F17 production-shaped load/soak plus150kBlearnerbudget",
+    "F19 eligible plan and enabled verified leaked-password protection",
+    "Real-provider refunds/delivery/R2/restarts, restore/rollback/alerts, reference-aware SCORM orphan cleanup"
+  ],
+  "cleanup": {
+    "closurePostgres": "stopped",
+    "closureRedis": "stopped",
+    "browserServices": "stopped",
+    "userDevelopmentDatabase": "preserved; reviewed pending migrations and existing declared indexes reconciled"
+  },
+  "completedAt": "2026-09-22T03:24:49.546Z"
+}

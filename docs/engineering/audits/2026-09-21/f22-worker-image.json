@@ -1,0 +1,47 @@
+{
+  "verifiedAt": "2026-09-21T16:07:33Z",
+  "scope": "local Docker worker image only; no deployment or provider connectivity",
+  "imageTag": "atlas-worker:f22-runtime-check",
+  "manifestDigest": "sha256:45717b23971f74b9171ccae3d0f7756aa78558667363e0abaf0bfba7af9163c7",
+  "manifestListDigest": "sha256:4e895b3da409b5c0b0edeabe0950c29ae81f77c8e7b8b7e84f666fdb7721ea72",
+  "configDigest": "sha256:7317699c971f4e9ada7dfe9de980ad4c3b70439967de3510d222228b48c88a28",
+  "build": {
+    "command": "docker build --progress=plain -f deploy/managed-node/Dockerfile --target worker -t atlas-worker:f22-runtime-check .",
+    "exitCode": 0,
+    "nodeBase": "node:24-bookworm-slim",
+    "pnpm": "11.6.0",
+    "generatedPrismaClient": "7.8.0",
+    "explicitGenerationPassed": true,
+    "finalReviewedSourceIncluded": true,
+    "installPolicyIncludesRootNpmrc": true,
+    "reusedLayersAfterSourceChange": [
+      "manifest-copy",
+      "pnpm-install",
+      "prisma-generation",
+      "chromium-install"
+    ],
+    "networkDisabledImportCheck": { "passed": true, "processors": 12 }
+  },
+  "offlineRuntime": {
+    "exitCode": 0,
+    "readOnlyFilesystem": true,
+    "temporaryDiskBytes": 268435456,
+    "memoryLimit": "2g",
+    "cpus": 2,
+    "uid": 1000,
+    "consumerImports": true,
+    "excludedPathsAbsent": [".env.local", ".env.test", ".test-results", "supabase/.temp"],
+    "chromiumPdfBytes": 9052
+  },
+  "defaultEntrypointWithoutSecrets": {
+    "exitCode": 1,
+    "expectedFailure": "REDIS_URL (or RATE_LIMIT_REDIS_URL) is required in production and staging.",
+    "reachedDeploymentValidation": true
+  },
+  "notVerified": [
+    "API image build",
+    "configured live worker",
+    "production provider connectivity",
+    "host restart policy"
+  ]
+}

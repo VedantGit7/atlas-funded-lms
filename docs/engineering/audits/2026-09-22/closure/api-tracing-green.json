@@ -1,0 +1,6 @@
+{
+  "check": "API standalone excludes unrelated app source",
+  "status": "passed",
+  "traceEntries": 761,
+  "appSourceEntries": 0
+}

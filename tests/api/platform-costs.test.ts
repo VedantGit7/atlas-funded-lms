@@ -1,3 +1,5 @@
+import { createPlatformIdempotencyStore } from "../helpers/platform-idempotency-tx";
+const replayStore = createPlatformIdempotencyStore();
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
 import { AtlasHttpError } from "@atlas/core/http/errors";
@@ -24,7 +26,7 @@ const {
   mockRequirePlatformPrincipal: vi.fn(),
   mockWithGlobalDb: vi.fn((fn: (db: unknown) => unknown) => fn({ $queryRaw: vi.fn() })),
   mockWithPlatformScope: vi.fn((_ctx: unknown, _reason: string, fn: (tx: unknown) => unknown) =>
-    fn({ $queryRaw: vi.fn() }),
+    fn(replayStore.wrap({ $queryRaw: vi.fn() })),
   ),
   mockGetReport: vi.fn(),
   mockGetRateCard: vi.fn(),

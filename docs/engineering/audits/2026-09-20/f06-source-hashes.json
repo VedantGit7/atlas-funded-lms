@@ -1,0 +1,58 @@
+[
+  {
+    "path": "backend/packages/security/src/outbound-policy.ts",
+    "sha256": "4407b2c8bfdaf6adbdc0c5cb31ee5b3817a175fcf3f4693b9a67042aeab48105"
+  },
+  {
+    "path": "backend/packages/security/src/pinned-outbound-transport.ts",
+    "sha256": "1b8367836a83057273d4267b188841147699d24732115485c5d1c02e584cd313"
+  },
+  {
+    "path": "backend/packages/security/src/safe-outbound-fetch.ts",
+    "sha256": "74f6064c3c8161d3755e10c5a7a91acebff5351cbc8d5ae2c9949ec3ca1b879c"
+  },
+  {
+    "path": "tests/unit/security/outbound-pinning.test.ts",
+    "sha256": "13bb496082b43d3da4316cc8d4bd155a2667aee68dfad794734e1b6f1020a0d9"
+  },
+  {
+    "path": "tests/unit/security/safe-outbound-fetch.test.ts",
+    "sha256": "319e59e56c8bf1cdcbb4a8e011f3b9cd63d1d0c9858e2319a7d96c074871fea7"
+  },
+  {
+    "path": "tests/integration/security/outbound-socket.test.ts",
+    "sha256": "86c9ed732707b5797c3403653f56970c80c63220ee497c75059a0acdf864ea11"
+  },
+  {
+    "path": "tests/fixtures/outbound-tls/README.md",
+    "sha256": "68593c829960d4aed399a8aa21a6b6929aef1622f24468b626b99f17bcb899cc"
+  },
+  {
+    "path": "tests/fixtures/outbound-tls/key.pem",
+    "sha256": "afb8e724a506f282b7d473bc8ef83c756b81a049ee3202d804838a59f1f23a4e"
+  },
+  {
+    "path": "tests/fixtures/outbound-tls/cert.pem",
+    "sha256": "28c711aff0c0d5114c87d50b128d6bf2006036137003596adac0ae272fd91216"
+  },
+  {
+    "path": ".env.example",
+    "sha256": "1d684a815ccff0dd6ab2d8f717d51a353a072cc18010ab463f8e9c536759af74"
+  },
+  {
+    "path": "docs/runbooks/outbound-webhooks.md",
+    "sha256": "36381df97cd0120107803f1ef0e4fd13a0c1cd16b120d0c00193a2968ec47300"
+  },
+  {
+    "path": "docs/engineering/f06-outbound-request-remediation.md",
+    "sha256": "158aca52cd3b6f128f8c9f2ccc82d2d3baa4c96313ed6f79e81d52db5646b9b9"
+  },
+  {
+    "path": "docs/engineering/atlas-lms-comprehensive-audit-2026-09-19.md",
+    "sha256": "0933350e70741510b0bb8a530130ab9d80f6711e37bd0778e91dace15429303f"
+  },
+  {
+    "path": "docs/engineering/audits/2026-09-20/f06-review.md",
+    "sha256": "70523904ff76644f1c657d972ef36602cacd16c54ee751870b59aa809d9e0119"
+  }
+]

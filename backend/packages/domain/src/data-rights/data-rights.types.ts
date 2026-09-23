@@ -8,6 +8,7 @@ export type ServiceCtx = {
 };
 
 export type ExportJobRow = {
+  artifact_json?: unknown;
   id: string;
   tenant_id: string;
   requested_by_membership_id: string;
@@ -21,6 +22,7 @@ export type ExportJobRow = {
 };
 
 export type DeletionRequestRow = {
+  outcome_json?: unknown;
   id: string;
   tenant_id: string;
   requested_by_membership_id: string | null;

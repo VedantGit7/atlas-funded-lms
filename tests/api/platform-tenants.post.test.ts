@@ -1,3 +1,5 @@
+import { createPlatformIdempotencyStore } from "../helpers/platform-idempotency-tx";
+const replayStore = createPlatformIdempotencyStore();
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
 import { AtlasHttpError } from "@atlas/core/http/errors";
@@ -31,15 +33,17 @@ const {
   mockProvisionTenant: vi.fn(),
   mockWithGlobalDb: vi.fn((fn: (db: unknown) => unknown) => fn({ $queryRaw: vi.fn() })),
   mockWithPlatformScope: vi.fn((_ctx: unknown, _reason: string, fn: (tx: unknown) => unknown) =>
-    fn({
-      // A bare vi.fn() returns undefined, so any repository doing rows[0] throws.
-      // The route pipeline now claims an idempotency key through this tx (M10),
-      // which made that latent stub gap visible as a 500.
-      $queryRaw: vi.fn().mockResolvedValue([]),
-      $queryRawUnsafe: vi.fn().mockResolvedValue([]),
-      $executeRaw: vi.fn().mockResolvedValue(0),
-      $executeRawUnsafe: vi.fn().mockResolvedValue(0),
-    }),
+    fn(
+      replayStore.wrap({
+        // A bare vi.fn() returns undefined, so any repository doing rows[0] throws.
+        // The route pipeline now claims an idempotency key through this tx (M10),
+        // which made that latent stub gap visible as a 500.
+        $queryRaw: vi.fn().mockResolvedValue([]),
+        $queryRawUnsafe: vi.fn().mockResolvedValue([]),
+        $executeRaw: vi.fn().mockResolvedValue(0),
+        $executeRawUnsafe: vi.fn().mockResolvedValue(0),
+      }),
+    ),
   ),
   mockResolveTenant: vi.fn(),
   mockRequireActiveMembership: vi.fn(),
@@ -214,6 +218,7 @@ function createRequest(headers: Record<string, string> = {}, body: unknown = cre
 describe("POST /api/v1/platform/tenants", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    replayStore.clear();
     mockRequirePlatformPrincipal.mockResolvedValue(platformPrincipal);
     mockProvisionTenant.mockResolvedValue(tenantResponse);
     findTenantBySlugMock.mockResolvedValue(null);
@@ -256,7 +261,7 @@ describe("POST /api/v1/platform/tenants", () => {
     expect(mockProvisionTenant).not.toHaveBeenCalled();
   });
 
-  it("returns the existing tenant when the same slug is submitted again", async () => {
+  it("rejects the same slug submitted as a new operation", async () => {
     mockProvisionTenant.mockImplementation(await getRealProvisionTenant());
     findTenantBySlugMock.mockResolvedValueOnce(null).mockResolvedValueOnce({ id: tenantId });
 
@@ -264,16 +269,14 @@ describe("POST /api/v1/platform/tenants", () => {
     const second = await POST(createRequest({ "idempotency-key": "provision-key-002" }));
 
     expect(first.status).toBe(200);
-    expect(second.status).toBe(200);
+    expect(second.status).toBe(409);
     expect(insertProvisioningTenantMock).toHaveBeenCalledTimes(1);
     expect(mockProvisionTenant).toHaveBeenCalledTimes(2);
   });
 
   it("returns the original tenant when the same Idempotency-Key is replayed", async () => {
     mockProvisionTenant.mockImplementation(await getRealProvisionTenant());
-    findTenantIdByProvisioningIdempotencyKeyMock
-      .mockResolvedValueOnce(null)
-      .mockResolvedValueOnce(tenantId);
+    findTenantIdByProvisioningIdempotencyKeyMock.mockResolvedValue(null);
 
     const first = await POST(createRequest());
     const second = await POST(createRequest());
@@ -282,7 +285,7 @@ describe("POST /api/v1/platform/tenants", () => {
     expect(second.status).toBe(200);
     expect(insertProvisioningTenantMock).toHaveBeenCalledTimes(1);
     expect(findTenantBySlugMock).toHaveBeenCalledTimes(1);
-    expect(mockProvisionTenant).toHaveBeenCalledTimes(2);
+    expect(mockProvisionTenant).toHaveBeenCalledTimes(1);
   });
 
   it("denies requests missing a platform reason", async () => {
@@ -376,6 +379,7 @@ describe("POST /api/v1/platform/tenants", () => {
 describe("cross-origin protection on the platform plane (H20)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    replayStore.clear();
     mockRequirePlatformPrincipal.mockResolvedValue(platformPrincipal);
     mockProvisionTenant.mockResolvedValue(tenantResponse);
     findTenantBySlugMock.mockResolvedValue(null);

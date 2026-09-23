@@ -1,3 +1,4 @@
+import { recordRefundWebhook } from "@atlas/domain/payments/refund-workflow";
 import { NextResponse } from "next/server";
 import { createPublicRouteHandler } from "@atlas/api";
 import { withGlobalDb } from "@atlas/db/global-db";
@@ -32,12 +33,14 @@ export const POST = createPublicRouteHandler(
           allowAnonymousTenantRead: true,
         },
         async (tx) => {
-          const { provider } = await resolvePaymentProvider(tx, {
+          const { provider, gatewayId } = await resolvePaymentProvider(tx, {
             gatewayKey: "razorpay",
             requireWebhookSecret: true,
           });
 
           const parsed = await provider.parseWebhook({ rawBody, signature });
+          if (parsed.refund)
+            return { data: await recordRefundWebhook(tx, "razorpay", gatewayId, parsed.refund) };
 
           if (parsed.status === "failed") {
             const current = await paymentsRepository.findByExternalId(tx, parsed.externalId);

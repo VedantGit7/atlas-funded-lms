@@ -52,9 +52,8 @@ describeWithDb("data-rights API integration", () => {
             idempotencyKey: "export-create-1",
           },
           metadata: createExportMetadata,
-          // Starting an export is an H5 step-up route, so the pipeline denies a
-          // session without a verified factor.
-          mfaEnabled: true,
+          // Starting an export requires assurance on this session, not enrollment.
+          sessionAssuranceLevel: "aal2",
           params: {},
           input: {},
         });

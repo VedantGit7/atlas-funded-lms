@@ -12,6 +12,7 @@ export const APPROVED_EVENT_TYPES = new Set<string>([
   "domain.changed",
   "course.submitted_for_review",
   "course.published",
+  "course.module.scorm_processing_requested",
   "workflow.transitioned",
   "learning.enrollment.created",
   "learning.course_review.created",
@@ -46,6 +47,8 @@ export const APPROVED_EVENT_TYPES = new Set<string>([
   "automation.run.completed",
   "search.reindex_requested",
   "analytics.projection_requested",
+  "report.generate_requested",
+  "report.run_succeeded",
   "data.export_requested",
   "data.deletion_requested",
   "security.password_changed",
@@ -57,6 +60,7 @@ export const APPROVED_EVENT_TYPES = new Set<string>([
   "security.mfa_disabled",
   "marketing.form_submitted",
   "marketing.webhook_dispatch_requested",
+  "marketing.workflow_email_requested",
 ]);
 
 export function assertApprovedEventType(eventType: string): void {

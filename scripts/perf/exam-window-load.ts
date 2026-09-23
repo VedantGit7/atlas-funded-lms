@@ -15,8 +15,8 @@
  *     can hold before the connection pool starves.
  *   - It does **not** measure HTTP, TLS, serialisation, Supabase round-trips, or
  *     the network. Those sit outside the pool and would only lower the number.
- *   - Run against a developer machine it establishes a **floor and a regression
- *     baseline**, not a production ceiling. Production numbers require
+ *   - Run against a developer machine it establishes a **local regression
+ *     baseline**, not a production capacity bound. Production numbers require
  *     production-grade hardware and the real managed database.
  *
  * The workload models an exam window because that is the product's genuine peak:
@@ -33,6 +33,7 @@ import { writeFileSync } from "node:fs";
 import process from "node:process";
 import { withGlobalDb } from "@atlas/db/global-db";
 import { withTenantTx } from "@atlas/db/with-tenant-tx";
+import { microbenchmarkSettings } from "./microbenchmark-guard.mjs";
 
 type LevelResult = {
   concurrency: number;
@@ -40,24 +41,22 @@ type LevelResult = {
   errors: number;
   durationMs: number;
   rps: number;
-  p50Ms: number;
-  p95Ms: number;
-  p99Ms: number;
-  maxMs: number;
+  p50Ms: number | null;
+  p95Ms: number | null;
+  p99Ms: number | null;
+  maxMs: number | null;
   firstError?: string;
 };
 
-const LEVELS = (process.env["PERF_LEVELS"] ?? "1,5,10,20,40,80,160")
-  .split(",")
-  .map((v) => Number.parseInt(v.trim(), 10))
-  .filter((v) => Number.isInteger(v) && v > 0);
+const settings = microbenchmarkSettings(process.env);
+const LEVELS = settings.levels;
+const SECONDS_PER_LEVEL = settings.seconds;
+const runKeyPrefix = `perf-${randomUUID()}-`;
 
-const SECONDS_PER_LEVEL = Number.parseInt(process.env["PERF_SECONDS"] ?? "6", 10);
-
-function percentile(sorted: number[], p: number): number {
-  if (sorted.length === 0) return 0;
-  const index = Math.min(sorted.length - 1, Math.floor((p / 100) * sorted.length));
-  return sorted[index] ?? 0;
+function percentile(sorted: number[], p: number): number | null {
+  if (sorted.length === 0) return null;
+  const index = Math.max(0, Math.ceil((p / 100) * sorted.length) - 1);
+  return sorted[index] ?? null;
 }
 
 /**
@@ -85,7 +84,7 @@ async function simulateExamAnswer(tenantId: string): Promise<void> {
           response_json, response_omitted, completed_at
         )
         VALUES (
-          ${tenantId}::uuid, ${`perf-${randomUUID()}`}, 'PERF /exam/answer',
+          ${tenantId}::uuid, ${`${runKeyPrefix}${randomUUID()}`}, 'PERF /exam/answer',
           ${randomUUID()}, 'COMPLETED', '{}'::jsonb, false, now()
         )
       `;
@@ -107,9 +106,9 @@ async function runLevel(concurrency: number, tenantId: string): Promise<LevelRes
       try {
         await simulateExamAnswer(tenantId);
         latencies.push(performance.now() - t0);
-      } catch (error) {
+      } catch {
         errors += 1;
-        firstError ??= error instanceof Error ? error.message.slice(0, 200) : String(error);
+        firstError ??= "database-operation-failed";
         // A starved pool fails fast and would otherwise spin this loop.
         await new Promise((resolve) => setTimeout(resolve, 25));
       }
@@ -130,17 +129,13 @@ async function runLevel(concurrency: number, tenantId: string): Promise<LevelRes
     p50Ms: percentile(latencies, 50),
     p95Ms: percentile(latencies, 95),
     p99Ms: percentile(latencies, 99),
-    maxMs: latencies[latencies.length - 1] ?? 0,
+    maxMs: latencies[latencies.length - 1] ?? null,
     ...(firstError ? { firstError } : {}),
   };
 }
 
 async function main(): Promise<void> {
-  const tenantId = process.env["PERF_TENANT_ID"] ?? (await resolveAnyTenantId());
-  if (!tenantId) {
-    console.error("No tenant found. Seed a database first (pnpm db:seed).");
-    process.exit(1);
-  }
+  const tenantId = settings.tenantId;
 
   console.log(`Exam-window load: tenant ${tenantId}`);
   console.log(`pool max: ${process.env["DATABASE_POOL_MAX"] ?? "20 (default)"}`);
@@ -153,9 +148,9 @@ async function main(): Promise<void> {
     console.log(
       `c=${String(concurrency).padStart(4)}  ` +
         `${result.rps.toFixed(0).padStart(6)} rps  ` +
-        `p50 ${result.p50Ms.toFixed(1).padStart(7)}ms  ` +
-        `p95 ${result.p95Ms.toFixed(1).padStart(8)}ms  ` +
-        `p99 ${result.p99Ms.toFixed(1).padStart(8)}ms  ` +
+        `p50 ${result.p50Ms?.toFixed(1) ?? "unavailable"}ms  ` +
+        `p95 ${result.p95Ms?.toFixed(1) ?? "unavailable"}ms  ` +
+        `p99 ${result.p99Ms?.toFixed(1) ?? "unavailable"}ms  ` +
         `errors ${String(result.errors).padStart(5)}` +
         (result.firstError ? `  (${result.firstError})` : ""),
     );
@@ -165,7 +160,7 @@ async function main(): Promise<void> {
   await withTenantTx(
     { tenantId, requestId: randomUUID(), allowAnonymousTenantRead: true },
     async (tx) => {
-      await tx.$executeRaw`DELETE FROM idempotency_records WHERE scope = 'PERF /exam/answer'`;
+      await tx.$executeRaw`DELETE FROM idempotency_records WHERE scope = 'PERF /exam/answer' AND idempotency_key LIKE ${`${runKeyPrefix}%`}`;
     },
   );
 
@@ -177,7 +172,7 @@ async function main(): Promise<void> {
         generatedAt: new Date().toISOString(),
         poolMax: process.env["DATABASE_POOL_MAX"] ?? "20",
         secondsPerLevel: SECONDS_PER_LEVEL,
-        note: "Route-pipeline shape (withGlobalDb then withTenantTx). Excludes HTTP and auth. Developer-machine numbers are a floor and a regression baseline, not a production ceiling.",
+        note: "Database-only local regression microbenchmark. Excludes HTTP/auth; establishes no production capacity bound. Failed or empty samples cannot establish throughput.",
         results,
       },
       null,
@@ -195,21 +190,12 @@ async function main(): Promise<void> {
       : "no errors at any level tested",
   );
   console.log(`written: ${outPath}`);
-}
-
-async function resolveAnyTenantId(): Promise<string | null> {
-  const rows = await withGlobalDb(
-    async (db) =>
-      db.$queryRaw<Array<{ id: string }>>`
-        SELECT id::text FROM tenants WHERE deleted_at IS NULL ORDER BY created_at LIMIT 1
-      `,
-  );
-  return rows[0]?.id ?? null;
+  if (results.some((r) => r.errors > 0 || r.completed === 0)) process.exitCode = 1;
 }
 
 main()
-  .then(() => process.exit(0))
-  .catch((error: unknown) => {
-    console.error(error);
+  .then(() => process.exit(process.exitCode ?? 0))
+  .catch(() => {
+    console.error("Isolated database microbenchmark failed; no raw database error was logged.");
     process.exit(1);
   });

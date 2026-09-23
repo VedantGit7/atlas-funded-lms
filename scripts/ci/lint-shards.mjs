@@ -14,6 +14,8 @@ export const LINT_SHARDS = [
   "backend/packages",
   "frontend/packages",
   "backend/prisma",
+  "backend/prisma.generate.config.ts",
+  "deploy",
   "scripts",
   "tests",
   // Previously JSON-only; now holds shared ESM config (security-headers.mjs).

@@ -26,10 +26,16 @@ import {
 const describeWithDb =
   process.env["DATABASE_URL"] && process.env["PLATFORM_DATABASE_URL"] ? describe : describe.skip;
 
-// proctoring_media_artifacts declares no foreign keys, so these need only a
-// stable identifier rather than a full session, attempt and membership chain.
-function seedSession(_tenantId: string): Promise<string> {
-  return Promise.resolve(randomUUID());
+// F21 requires a real parent session; a random UUID alone is no longer accepted.
+async function seedSession(
+  tenant: Awaited<ReturnType<typeof createTenantIsolationFixture>>["tenantA"],
+): Promise<string> {
+  const id = randomUUID();
+  await withTenantTx(tenantCtx(tenant), async (tx) => {
+    await tx.$executeRaw`INSERT INTO proctoring_sessions(id,tenant_id,attempt_id,membership_id)
+      VALUES(${id}::uuid,${tenant.tenantId}::uuid,${randomUUID()}::uuid,${tenant.membershipId}::uuid)`;
+  });
+  return id;
 }
 
 describeWithDb("proctoring media retention (M12)", () => {
@@ -46,7 +52,7 @@ describeWithDb("proctoring media retention (M12)", () => {
 
   it("gives every artifact an expiry", async () => {
     const fixture = await createTenantIsolationFixture();
-    const sessionId = await seedSession(fixture.tenantA.tenantId);
+    const sessionId = await seedSession(fixture.tenantA);
 
     const artifact = await withTenantTx(tenantCtx(fixture.tenantA), async (tx) =>
       insertProctoringMediaArtifact(tx, {
@@ -68,7 +74,7 @@ describeWithDb("proctoring media retention (M12)", () => {
     // it holds, because the whole finding is that omission produced immortal
     // footage.
     const fixture = await createTenantIsolationFixture();
-    const sessionId = await seedSession(fixture.tenantA.tenantId);
+    const sessionId = await seedSession(fixture.tenantA);
 
     const rows = await withTenantTx(tenantCtx(fixture.tenantA), async (tx) => {
       await tx.$executeRaw`
@@ -112,7 +118,7 @@ describeWithDb("proctoring media retention (M12)", () => {
 
   it("deletes the object before the row, and keeps the row when that fails", async () => {
     const fixture = await createTenantIsolationFixture();
-    const sessionId = await seedSession(fixture.tenantA.tenantId);
+    const sessionId = await seedSession(fixture.tenantA);
     const objectKey = `proctoring/${sessionId}/expired.webm`;
 
     await withTenantTx(tenantCtx(fixture.tenantA), async (tx) => {
@@ -162,7 +168,7 @@ describeWithDb("proctoring media retention (M12)", () => {
 
   it("leaves unexpired artifacts alone", async () => {
     const fixture = await createTenantIsolationFixture();
-    const sessionId = await seedSession(fixture.tenantA.tenantId);
+    const sessionId = await seedSession(fixture.tenantA);
 
     await withTenantTx(tenantCtx(fixture.tenantA), async (tx) =>
       insertProctoringMediaArtifact(tx, {
@@ -178,5 +184,54 @@ describeWithDb("proctoring media retention (M12)", () => {
       purgeExpiredProctoringMedia(tx, () => Promise.resolve()),
     );
     expect(run.deleted).toBe(0);
+  });
+
+  it("preserves session and append-only event parents while media cleanup retries", async () => {
+    const fixture = await createTenantIsolationFixture();
+    const tenant = fixture.tenantA;
+    const sessionId = await seedSession(tenant);
+    const eventId = randomUUID();
+    await withTenantTx(tenantCtx(tenant), async (tx) => {
+      await tx.$executeRaw`INSERT INTO proctoring_events(id,tenant_id,proctoring_session_id,event_type)
+        VALUES(${eventId}::uuid,${tenant.tenantId}::uuid,${sessionId}::uuid,'webcam_capture')`;
+      await insertProctoringMediaArtifact(tx, {
+        tenantId: tenant.tenantId,
+        proctoringSessionId: sessionId,
+        proctoringEventId: eventId,
+        kind: "webcam",
+        objectKey: `proctoring/${sessionId}/retained.webm`,
+        contentType: "video/webm",
+      });
+      await tx.$executeRaw`UPDATE proctoring_media_artifacts SET retention_expires_at=now()-interval '1 day'
+        WHERE proctoring_session_id=${sessionId}::uuid`;
+    });
+    const removeSession = () =>
+      withTenantTx(
+        tenantCtx(tenant),
+        (tx) => tx.$executeRaw`DELETE FROM proctoring_sessions WHERE id=${sessionId}::uuid`,
+      );
+    await expect(removeSession()).rejects.toThrow(/foreign key constraint/i);
+    await withTenantTx(tenantCtx(tenant), (tx) =>
+      purgeExpiredProctoringMedia(tx, () => Promise.reject(new Error("storage unavailable"))),
+    );
+    await expect(removeSession()).rejects.toThrow(/foreign key constraint/i);
+    await withTenantTx(tenantCtx(tenant), (tx) =>
+      purgeExpiredProctoringMedia(tx, () => Promise.resolve()),
+    );
+    // Existing immutable event evidence remains immutable after media expiry.
+    await expect(
+      withTenantTx(
+        tenantCtx(tenant),
+        (tx) => tx.$executeRaw`DELETE FROM proctoring_events WHERE id=${eventId}::uuid`,
+      ),
+    ).rejects.toThrow();
+    const events = await withTenantTx(
+      tenantCtx(tenant),
+      (tx) =>
+        tx.$queryRaw<
+          Array<{ id: string }>
+        >`SELECT id FROM proctoring_events WHERE id=${eventId}::uuid`,
+    );
+    expect(events).toHaveLength(1);
   });
 });

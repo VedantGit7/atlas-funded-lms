@@ -1,3 +1,4 @@
+import { runExportFileCleanup } from "@atlas/domain/reports/export-file-cleanup";
 import { randomUUID } from "node:crypto";
 import { withGlobalDb } from "@atlas/db/global-db";
 import { withTenantTx } from "@atlas/db/with-tenant-tx";
@@ -6,15 +7,19 @@ import { purgeExpiredProctoringMedia } from "../server/proctoring/proctoring-med
 import { purgeExpiredAttributionEvents } from "@atlas/domain/sales-marketing/attribution-retention";
 import { getStorageProvider, parseStorageEnv } from "@atlas/storage";
 import { OUTBOX_PROCESSORS, type OutboxProcessor } from "./outbox-processors";
+import { drainTenantUsageEvents } from "@atlas/api/tenant-usage-meter";
 
 export type SweepOptions = {
   /** Max events each processor drains per tenant per pass. */
   batchLimit: number;
   maxRetries: number;
+  /** Completed bounded work keeps liveness independent of the tenant count. */
+  onProgress?: (() => void) | undefined;
   /** Set when shutdown has been requested; the sweep stops at the next boundary. */
   signal?: AbortSignal | undefined;
   processors?: readonly OutboxProcessor[] | undefined;
   listTenantIds?: (() => Promise<string[]>) | undefined;
+  listRetentionTenantIds?: (() => Promise<string[]>) | undefined;
   /**
    * Retention tasks, injectable for the same reason the processors are: a unit
    * test of sweep orchestration should not need a database and an object store
@@ -25,6 +30,7 @@ export type SweepOptions = {
 
 export type RetentionTask = {
   name: string;
+  includeInactiveTenants?: boolean;
   run: (input: { tenantId: string; requestId: string }) => Promise<number>;
 };
 
@@ -47,7 +53,16 @@ export type SweepResult = {
   proctoringMediaPurged: number;
   /** Expired attribution events deleted this sweep. */
   attributionEventsPurged: number;
+  exportFilesPurged: number;
+  usageEventsProcessed: number;
 };
+
+export async function listAllRetentionTenantIds(): Promise<string[]> {
+  const rows = await withGlobalDb(
+    (db) => db.$queryRaw<{ id: string }[]>`SELECT id FROM tenants ORDER BY id`,
+  );
+  return rows.map((row) => row.id);
+}
 
 export async function listActiveTenantIds(): Promise<string[]> {
   const rows = await withGlobalDb(
@@ -81,15 +96,42 @@ export async function listActiveTenantIds(): Promise<string[]> {
  */
 const RETENTION_COUNTERS: Record<
   string,
-  "idempotencyRecordsPurged" | "proctoringMediaPurged" | "attributionEventsPurged"
+  | "idempotencyRecordsPurged"
+  | "proctoringMediaPurged"
+  | "attributionEventsPurged"
+  | "exportFilesPurged"
+  | "usageEventsProcessed"
 > = {
+  "usage-meter-drain": "usageEventsProcessed",
+  "export-file-purge": "exportFilesPurged",
   "idempotency-purge": "idempotencyRecordsPurged",
   "proctoring-media-purge": "proctoringMediaPurged",
   "attribution-events-purge": "attributionEventsPurged",
 };
 
-export function defaultRetentionTasks(): RetentionTask[] {
+export function defaultRetentionTasks(batchLimit = 25): RetentionTask[] {
   return [
+    {
+      name: "usage-meter-drain",
+      includeInactiveTenants: true,
+      run: async ({ tenantId, requestId }) =>
+        withTenantTx(
+          { tenantId, requestId, allowAnonymousTenantRead: true },
+          async (tx) => (await drainTenantUsageEvents(tx, { limit: batchLimit })).processed,
+        ),
+    },
+    {
+      name: "export-file-purge",
+      includeInactiveTenants: true,
+      run: async (ctx) => {
+        const result = await runExportFileCleanup(ctx);
+        if (result.failed)
+          throw new Error(
+            `${result.failed} export deletion(s) unconfirmed; references retained for retry.`,
+          );
+        return result.deleted;
+      },
+    },
     {
       name: "idempotency-purge",
       run: async ({ tenantId, requestId }) =>
@@ -126,6 +168,12 @@ export function defaultRetentionTasks(): RetentionTask[] {
 }
 
 export async function runOutboxSweep(options: SweepOptions): Promise<SweepResult> {
+  if (
+    !Number.isSafeInteger(options.batchLimit) ||
+    options.batchLimit < 1 ||
+    options.batchLimit > 100
+  )
+    throw new Error("OUTBOX_WORKER_BATCH_LIMIT must be an integer between 1 and 100");
   const startedAt = Date.now();
   const requestId = randomUUID();
   const processors = options.processors ?? OUTBOX_PROCESSORS;
@@ -145,6 +193,8 @@ export async function runOutboxSweep(options: SweepOptions): Promise<SweepResult
     idempotencyRecordsPurged: 0,
     proctoringMediaPurged: 0,
     attributionEventsPurged: 0,
+    exportFilesPurged: 0,
+    usageEventsProcessed: 0,
   };
 
   const tenantIds = await listTenants();
@@ -163,10 +213,11 @@ export async function runOutboxSweep(options: SweepOptions): Promise<SweepResult
       }
 
       try {
+        const limit = Math.min(options.batchLimit, processor.maxBatchLimit ?? options.batchLimit);
         const batch = await processor.run({
           tenantId,
           requestId: `${requestId}:${processor.name}:${tenantId}`,
-          limit: options.batchLimit,
+          limit,
           maxRetries: options.maxRetries,
         });
 
@@ -175,7 +226,8 @@ export async function runOutboxSweep(options: SweepOptions): Promise<SweepResult
         result.failed += batch.failed;
         result.skipped += batch.skipped;
 
-        if (batch.processed >= options.batchLimit) result.saturated = true;
+        if (batch.processed >= limit) result.saturated = true;
+        options.onProgress?.();
       } catch (error) {
         result.errors.push({
           processor: processor.name,
@@ -196,15 +248,24 @@ export async function runOutboxSweep(options: SweepOptions): Promise<SweepResult
   //         exams. The table had an expiry column and nothing that ever acted on
   //         it, and a retention policy with no deletion job is indistinguishable
   //         from no policy.
-  const retentionTasks = options.retentionTasks ?? defaultRetentionTasks();
+  const retentionTasks = options.retentionTasks ?? defaultRetentionTasks(options.batchLimit);
 
-  for (const tenantId of tenantIds) {
+  const retentionTenantIds = retentionTasks.some((task) => task.includeInactiveTenants)
+    ? await (options.listRetentionTenantIds ?? listAllRetentionTenantIds)()
+    : tenantIds;
+  const activeTenants = new Set(tenantIds);
+  for (const tenantId of retentionTenantIds) {
     if (options.signal?.aborted) {
       result.abortedEarly = true;
       break;
     }
 
     for (const task of retentionTasks) {
+      if (options.signal?.aborted) {
+        result.abortedEarly = true;
+        break;
+      }
+      if (!task.includeInactiveTenants && !activeTenants.has(tenantId)) continue;
       try {
         const purged = await task.run({
           tenantId,
@@ -212,6 +273,9 @@ export async function runOutboxSweep(options: SweepOptions): Promise<SweepResult
         });
         const counter = RETENTION_COUNTERS[task.name];
         if (counter) result[counter] += purged;
+        if (task.name === "usage-meter-drain" && purged >= options.batchLimit)
+          result.saturated = true;
+        options.onProgress?.();
       } catch (error) {
         result.errors.push({
           processor: task.name,

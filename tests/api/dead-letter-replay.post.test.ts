@@ -1,3 +1,5 @@
+import { createPlatformIdempotencyStore } from "../helpers/platform-idempotency-tx";
+const replayStore = createPlatformIdempotencyStore();
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
 import { AtlasHttpError } from "@atlas/core/http/errors";
@@ -10,16 +12,18 @@ const {
   mockWithPlatformScope,
   mockAuditWriterWrite,
   mockOutboxPublish,
+  mockReplayDeliveryJob,
   mockFindDeadLetterForReplay,
 } = vi.hoisted(() => ({
   mockRequirePlatformPrincipal: vi.fn(),
   mockReplayDeadLetterEvent: vi.fn(),
   mockWithGlobalDb: vi.fn((fn: (db: unknown) => unknown) => fn({ $queryRaw: vi.fn() })),
   mockWithPlatformScope: vi.fn((_ctx: unknown, _reason: string, fn: (tx: unknown) => unknown) =>
-    fn({ $queryRaw: vi.fn() }),
+    fn(replayStore.wrap({ $queryRaw: vi.fn() })),
   ),
   mockAuditWriterWrite: vi.fn(),
   mockOutboxPublish: vi.fn(),
+  mockReplayDeliveryJob: vi.fn(),
   mockFindDeadLetterForReplay: vi.fn(),
 }));
 
@@ -65,6 +69,10 @@ vi.mock("@atlas/events/services/outbox.service", () => ({
   outbox: {
     publish: (...args: unknown[]) => mockOutboxPublish(...args),
   },
+}));
+
+vi.mock("@atlas/events/repositories/outbox-job.repository", () => ({
+  replayDeliveryJob: (...args: unknown[]) => mockReplayDeliveryJob(...args),
 }));
 
 import { POST } from "../../backend/apps/api/src/app/api/v1/internal/outbox/dead-letter/[id]/replay/route";
@@ -192,6 +200,8 @@ describe("replayDeadLetterEvent", () => {
   beforeEach(() => {
     mockAuditWriterWrite.mockReset();
     mockOutboxPublish.mockReset();
+    mockReplayDeliveryJob.mockReset();
+    mockReplayDeliveryJob.mockResolvedValue(undefined);
     mockFindDeadLetterForReplay.mockReset();
 
     mockFindDeadLetterForReplay.mockResolvedValue(deadLetterRow);
@@ -224,7 +234,7 @@ describe("replayDeadLetterEvent", () => {
     );
   });
 
-  it("creates a new outbox event when replaying", async () => {
+  it("requeues only the original destination without republishing the event", async () => {
     const result = await replayDeadLetterEvent(
       { $queryRaw: vi.fn() },
       {
@@ -236,16 +246,13 @@ describe("replayDeadLetterEvent", () => {
       { deadLetterId },
     );
 
-    expect(mockOutboxPublish).toHaveBeenCalledWith(
-      expect.anything(),
-      expect.objectContaining({
-        eventType: deadLetterRow.event_type,
-        aggregateType: "dead_letter_event",
-        aggregateId: deadLetterId,
-        idempotencyKey: "replay-key-001",
-      }),
-    );
-    expect(result.replayedOutboxEventId).toBe(replayedOutboxEventId);
+    expect(mockOutboxPublish).not.toHaveBeenCalled();
+    expect(mockReplayDeliveryJob).toHaveBeenCalledWith(expect.anything(), {
+      deadLetterId,
+      outboxEventId: deadLetterRow.outbox_event_id,
+      destinationKey: deadLetterRow.destination_key,
+    });
+    expect(result.replayedOutboxEventId).toBe(deadLetterRow.outbox_event_id);
   });
 
   it("does not update or delete the original dead-letter row", async () => {

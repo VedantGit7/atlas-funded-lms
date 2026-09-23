@@ -47,6 +47,11 @@ export { Prisma }
  */
 export type Tenant = Prisma.TenantModel
 /**
+ * Model TenantUsageEvent
+ * 
+ */
+export type TenantUsageEvent = Prisma.TenantUsageEventModel
+/**
  * Model TenantDomain
  * 
  */
@@ -1194,3 +1199,23 @@ export type MarketingNewsfeedPost = Prisma.MarketingNewsfeedPostModel
  * 
  */
 export type MarketingNewsfeedSave = Prisma.MarketingNewsfeedSaveModel
+/**
+ * Model PaymentRefundIntent
+ * 
+ */
+export type PaymentRefundIntent = Prisma.PaymentRefundIntentModel
+/**
+ * Model OutboxDeliveryJob
+ * 
+ */
+export type OutboxDeliveryJob = Prisma.OutboxDeliveryJobModel
+/**
+ * Model ReportDeliveryEffect
+ * 
+ */
+export type ReportDeliveryEffect = Prisma.ReportDeliveryEffectModel
+/**
+ * Model ExportFileCleanupRequest
+ * 
+ */
+export type ExportFileCleanupRequest = Prisma.ExportFileCleanupRequestModel

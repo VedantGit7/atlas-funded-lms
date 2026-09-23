@@ -27,6 +27,8 @@ import {
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
 import { AdminPaymentRefundModal } from "./AdminPaymentRefundModal";
 import { PaymentsReportTabs } from "./PaymentsReportTabs";
+import { PaymentRefundHistory } from "./PaymentRefundHistory";
+import { refundBalanceLabel, refundOutcomeTitle } from "./refund-submission";
 
 const PAGE_SIZE = 20;
 
@@ -250,9 +252,19 @@ function RefundDetailDrawer({
                 </div>
                 <div className="space-y-3 p-4">
                   <div className="flex justify-between font-mono text-sm">
-                    <span className="text-[var(--admin-on-surface-variant)]">Refunded to date</span>
+                    <span className="text-[var(--admin-on-surface-variant)]">
+                      Confirmed refunds
+                    </span>
                     <span className="text-[var(--admin-on-surface)]">
                       {formatMoney(detail.refundedAmountCents, detail.currency)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between border-t border-[var(--admin-border)] pt-3 font-mono text-sm">
+                    <span className="text-[var(--admin-on-surface-variant)]">
+                      Reserved for requests
+                    </span>
+                    <span className="text-[var(--admin-on-surface)]">
+                      {formatMoney(detail.reservedRefundAmountCents, detail.currency)}
                     </span>
                   </div>
                   <div className="flex justify-between border-t border-[var(--admin-border)] pt-3 font-mono text-sm">
@@ -272,7 +284,7 @@ function RefundDetailDrawer({
                   <div className="flex items-start gap-2 border border-[color-mix(in_srgb,var(--admin-warning)_25%,transparent)] bg-[color-mix(in_srgb,var(--admin-warning)_8%,transparent)] p-3 text-sm text-[var(--admin-warning)]">
                     <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
                     <p>
-                      Issuing a refund with access revocation will remove enrollment for{" "}
+                      When selected, course access is removed only after gateway confirmation for{" "}
                       <span className="font-semibold text-[var(--admin-on-surface)]">
                         {detail.product.title ?? "this product"}
                       </span>
@@ -286,48 +298,14 @@ function RefundDetailDrawer({
                 )}
               </section>
 
-              <section>
-                <h3 className="mb-2 font-mono text-[10px] font-bold uppercase tracking-wider text-[var(--admin-on-surface-variant)]">
-                  Recorded refunds
-                </h3>
-                {detail.refunds.length === 0 ? (
-                  <p className="rounded border border-dashed border-[var(--admin-border)] p-4 text-sm text-[var(--admin-on-surface-variant)]">
-                    No refunds recorded on this order yet.
-                  </p>
-                ) : (
-                  <ul className="space-y-3">
-                    {detail.refunds.map((refund) => (
-                      <li
-                        key={refund.id}
-                        className="rounded border border-[var(--admin-border)] bg-[var(--admin-surface-high)] p-4"
-                      >
-                        <div className="flex items-start justify-between gap-3">
-                          <div>
-                            <p className="font-mono text-sm text-[var(--admin-on-surface)]">
-                              {formatMoney(refund.amountCents, detail.currency)} ·{" "}
-                              {reasonLabel(refund.reason)}
-                            </p>
-                            {refund.note ? (
-                              <p className="mt-2 text-sm italic text-[var(--admin-on-surface-variant)]">
-                                “{refund.note}”
-                              </p>
-                            ) : null}
-                          </div>
-                          <span className="font-mono text-[10px] text-[var(--admin-on-surface-variant)]">
-                            {formatDateTime(refund.createdAt)}
-                          </span>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </section>
+              <PaymentRefundHistory refunds={detail.refunds} currency={detail.currency} />
 
               <div className="flex gap-2 rounded border border-[color-mix(in_srgb,var(--admin-warning)_25%,transparent)] bg-[color-mix(in_srgb,var(--admin-warning)_8%,transparent)] p-3 text-sm text-[var(--admin-warning)]">
                 <Info className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
                 <p>
-                  Refunds are recorded on the LMS ledger. Process the matching reverse on your
-                  payment gateway if required; automated gateway refunds are not wired yet.
+                  Gateway refund requests are processed automatically and remain unconfirmed until
+                  the provider confirms them. Manual adjustments send no money. Requests awaiting
+                  reconciliation keep their amount reserved until their outcome is verified.
                 </p>
               </div>
             </div>
@@ -350,7 +328,7 @@ function RefundDetailDrawer({
                   onIssueRefund(detail);
                 }}
               >
-                Issue refund — {formatMoney(detail.refundableAmountCents, detail.currency)}
+                Review refund — {formatMoney(detail.refundableAmountCents, detail.currency)}
               </button>
             ) : null}
           </div>
@@ -476,7 +454,7 @@ export function AdminPaymentsRefundsLedgerPage() {
     if (!summary) return null;
     if (key === "disputes") return 0;
     if (key === "all") {
-      return summary.refundableCount + summary.partialCount + summary.refundedCount;
+      return queue === "all" ? data.pageInfo.totalCount : null;
     }
     const entry = QUEUES.find((item) => item.key === key);
     if (!entry?.countKey) return null;
@@ -503,8 +481,7 @@ export function AdminPaymentsRefundsLedgerPage() {
             Refunds
           </h1>
           <p className="mt-1 max-w-2xl text-sm text-[var(--admin-on-surface-variant)]">
-            Record and review ledger refunds against paid orders. This is not a support request
-            queue.
+            Review gateway refund requests, confirmed refunds, and manual ledger adjustments.
           </p>
         </div>
       </div>
@@ -651,8 +628,8 @@ export function AdminPaymentsRefundsLedgerPage() {
                   Disputes are not available yet
                 </h3>
                 <p className="mt-2 text-sm text-[var(--admin-on-surface-variant)]">
-                  Chargeback and dispute workflows need provider event ingestion. Use the refundable
-                  and refunded queues for LMS ledger refunds.
+                  Chargeback and dispute workflows are unavailable here. Use the refund views to
+                  review gateway requests and manual adjustments.
                 </p>
               </div>
             </div>
@@ -689,7 +666,7 @@ export function AdminPaymentsRefundsLedgerPage() {
                     ? "No paid orders currently have a remaining refundable balance."
                     : queue === "partial"
                       ? "No partially refunded orders in this view."
-                      : "All processed ledger refunds will appear here for audit."}
+                      : "Refund requests and adjustments will appear here for review."}
                 </p>
                 {queue === "refundable" || queue === "all" ? (
                   <Link
@@ -847,8 +824,9 @@ function RefundRow({
   onOpen: () => void;
   onIssue: () => void;
 }) {
-  const isFullyRefunded = item.refundableAmountCents === 0 && item.refundedAmountCents > 0;
-  const isPartial = item.refundedAmountCents > 0 && item.refundableAmountCents > 0;
+  const balanceLabel = refundBalanceLabel(item);
+  const isFullyRefunded = balanceLabel === "Fully refunded";
+  const isPartial = balanceLabel === "Partially refunded";
 
   return (
     <div
@@ -874,7 +852,7 @@ function RefundRow({
       </div>
       <div className="flex w-full flex-col items-start gap-1 md:w-32">
         <span className="border border-[var(--admin-border)] bg-[var(--admin-surface-high)] px-2 py-0.5 font-mono text-[10px] text-[var(--admin-on-surface)]">
-          {isFullyRefunded ? "Refunded" : isPartial ? "Partial" : "Refundable"}
+          {balanceLabel}
         </span>
         {item.latestRefund ? (
           <span className="border border-[var(--admin-border)] px-1 py-0.5 font-mono text-[10px] text-[var(--admin-on-surface-variant)]">
@@ -895,10 +873,10 @@ function RefundRow({
         </span>
       </button>
       <div className="w-full text-left font-mono text-xs text-[var(--admin-on-surface)] md:w-32 md:text-right">
-        {formatMoney(
-          isFullyRefunded || isPartial ? item.refundedAmountCents : item.refundableAmountCents,
-          item.currency,
-        )}
+        <div>Confirmed: {formatMoney(item.refundedAmountCents, item.currency)}</div>
+        <div className="mt-1 text-[10px] text-[var(--admin-on-surface-variant)]">
+          Reserved: {formatMoney(item.reservedRefundAmountCents, item.currency)}
+        </div>
         <div className="mt-0.5 text-[10px] text-[var(--admin-on-surface-variant)]">
           {item.gatewayKey ?? "—"}
         </div>
@@ -906,16 +884,17 @@ function RefundRow({
       <div className="flex min-w-0 flex-1 flex-col">
         <span className="font-mono text-[11px] text-[var(--admin-on-surface-variant)]">
           {item.latestRefund
-            ? `Refund ${formatRelative(item.latestRefund.createdAt)} · ${item.latestRefund.id.slice(0, 8)}`
+            ? `Latest record ${formatRelative(item.latestRefund.createdAt)} · ${item.latestRefund.id.slice(0, 8)}`
             : `Paid ${formatRelative(item.paidAt ?? item.createdAt)}`}
         </span>
         <span className="mt-0.5 font-mono text-xs text-[var(--admin-primary)]">
-          {isFullyRefunded
-            ? "Fully refunded on ledger"
-            : isPartial
-              ? `${formatMoney(item.refundableAmountCents, item.currency)} still refundable`
-              : "Eligible to record a refund"}
+          {formatMoney(item.refundableAmountCents, item.currency)} available to refund
         </span>
+        {item.latestRefund ? (
+          <span className="mt-1 text-xs text-[var(--admin-on-surface-variant)]">
+            {refundOutcomeTitle(item.latestRefund.status)}
+          </span>
+        ) : null}
       </div>
       <div className="flex w-full items-center justify-end gap-2 md:w-[160px] md:opacity-0 md:transition-opacity md:group-hover:opacity-100">
         {item.canRefund ? (
@@ -924,7 +903,7 @@ function RefundRow({
             className="border border-[var(--admin-primary)] bg-[var(--admin-primary)] px-3 py-1 font-mono text-[10px] font-bold uppercase text-[var(--admin-on-primary)]"
             onClick={onIssue}
           >
-            Issue
+            Review
           </button>
         ) : null}
         <button

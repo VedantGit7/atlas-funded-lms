@@ -1,6 +1,8 @@
 import { runOutboxSweep, type SweepResult } from "./outbox-sweep";
 import { createHealthState, startHealthServer } from "./worker-health";
 import { flushTenantUsageMeter } from "@atlas/api/tenant-usage-meter";
+import { validateDeploymentStartup } from "@atlas/api/deployment-startup";
+import { pingWorkerHeartbeat } from "@atlas/observability/better-stack/heartbeat";
 
 /**
  * Outbox worker entrypoint.
@@ -13,13 +15,18 @@ import { flushTenantUsageMeter } from "@atlas/api/tenant-usage-meter";
  * Run with:  pnpm worker:outbox
  */
 
-function readInt(name: string, fallback: number): number {
+function readInt(name: string, fallback: number, maximum = Number.MAX_SAFE_INTEGER): number {
   const raw = process.env[name];
   if (raw === undefined || raw.trim() === "") return fallback;
 
-  const parsed = Number.parseInt(raw.trim(), 10);
-  if (!Number.isInteger(parsed) || parsed <= 0) {
-    throw new Error(`${name} must be a positive integer (got "${raw}").`);
+  const parsed = Number(raw.trim());
+  if (
+    !/^\d+$/.test(raw.trim()) ||
+    !Number.isSafeInteger(parsed) ||
+    parsed <= 0 ||
+    parsed > maximum
+  ) {
+    throw new Error(`${name} must be an integer between 1 and ${maximum}.`);
   }
   return parsed;
 }
@@ -67,15 +74,18 @@ async function sleep(ms: number, signal: AbortSignal): Promise<void> {
 }
 
 export async function main(): Promise<number> {
+  const deployment = validateDeploymentStartup("worker");
+  if (deployment.deployed) await import("../../sentry.server.config");
   const idleIntervalMs = readInt("OUTBOX_WORKER_INTERVAL_MS", 5_000);
-  const batchLimit = readInt("OUTBOX_WORKER_BATCH_LIMIT", 25);
+  const batchLimit = readInt("OUTBOX_WORKER_BATCH_LIMIT", 25, 100);
   const maxRetries = readInt("OUTBOX_WORKER_MAX_RETRIES", 3);
-  const healthPort = readInt("OUTBOX_WORKER_HEALTH_PORT", 8081);
+  const healthPort = readInt("OUTBOX_WORKER_HEALTH_PORT", 8081, 65535);
   const shutdownTimeoutMs = readInt("OUTBOX_WORKER_SHUTDOWN_TIMEOUT_MS", 30_000);
 
   const state = createHealthState();
-  // A sweep that takes longer than several idle intervals is wedged, not busy.
-  const staleAfterMs = Math.max(idleIntervalMs * 6, 120_000);
+  // SCORM extraction has a four-minute deadline. Allow it to finish; progress
+  // boundaries keep a long multi-tenant sweep from looking like a stuck worker.
+  const staleAfterMs = Math.max(idleIntervalMs * 6, 300_000);
   const healthServer = startHealthServer({ state, port: healthPort, staleAfterMs });
 
   const shutdown = new AbortController();
@@ -108,12 +118,14 @@ export async function main(): Promise<number> {
     log("info", "worker.shutdown.requested", { signal, shutdownTimeoutMs });
   };
 
-  process.on("SIGTERM", () => {
+  const onTerm = () => {
     onSignal("SIGTERM");
-  });
-  process.on("SIGINT", () => {
+  };
+  const onInt = () => {
     onSignal("SIGINT");
-  });
+  };
+  process.on("SIGTERM", onTerm);
+  process.on("SIGINT", onInt);
 
   log("info", "worker.started", { idleIntervalMs, batchLimit, maxRetries, healthPort });
 
@@ -128,16 +140,22 @@ export async function main(): Promise<number> {
         batchLimit,
         maxRetries,
         signal: shutdown.signal,
+        onProgress: () => {
+          state.lastProgressAt = Date.now();
+        },
       });
 
       state.consecutiveFailedSweeps = 0;
       state.lastSweepError = null;
+      // Report successful worker cycles even when there are no active tenants.
+      await pingWorkerHeartbeat();
 
-      if (sweep.processed > 0 || sweep.errors.length > 0) {
+      if (sweep.processed > 0 || sweep.usageEventsProcessed > 0 || sweep.errors.length > 0) {
         log("info", "worker.sweep.completed", {
           requestId: sweep.requestId,
           tenants: sweep.tenants,
           processed: sweep.processed,
+          usageEventsProcessed: sweep.usageEventsProcessed,
           delivered: sweep.delivered,
           failed: sweep.failed,
           skipped: sweep.skipped,
@@ -179,9 +197,7 @@ export async function main(): Promise<number> {
     }
   }
 
-  // The notification processors meter emails in memory; write what has not
-  // been flushed yet so a deploy does not drop the last minute of it. Still
-  // inside the shutdown deadline, which force-exits if the database is gone.
+  // Compatibility hook: usage is already durable before request/job completion.
   try {
     await flushTenantUsageMeter();
   } catch (error) {
@@ -189,6 +205,8 @@ export async function main(): Promise<number> {
   }
 
   clearTimeout(shutdownDeadline);
+  process.off("SIGTERM", onTerm);
+  process.off("SIGINT", onInt);
   healthServer.close();
   log("info", "worker.stopped", { sweeps: state.sweeps });
   return 0;

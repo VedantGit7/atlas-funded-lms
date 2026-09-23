@@ -9,7 +9,7 @@ import { SeasonalEventBanner } from "../../../features/gamification/components/S
 import { StreakPanel } from "../../../features/gamification/components/StreakPanel";
 import { XpLedgerTimeline } from "../../../features/gamification/components/XpLedgerTimeline";
 import { ServerApiError } from "../../../lib/server-api";
-import { gamificationServerApi } from "@atlas/contracts-modules/gamification/gamification.server-api";
+import { gamificationServerApi } from "@/modules/gamification/gamification.server-api";
 
 export default async function AchievementsPage() {
   try {

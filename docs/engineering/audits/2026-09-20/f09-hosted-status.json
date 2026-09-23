@@ -1,0 +1,52 @@
+{
+  "checkedAt": "2026-09-20T07:20:23.784Z",
+  "repository": "VedantGit7/atlas-funded-lms",
+  "runs": [
+    {
+      "id": 35425980742,
+      "name": ".github/workflows/ci.yml",
+      "commitSha": "d684a56aacfbf5e93e92b4b4c671e3e2465fc062",
+      "conclusion": "failure",
+      "url": "https://github.com/VedantGit7/atlas-funded-lms/actions/runs/35425980742",
+      "createdAt": "2026-09-19T06:12:27Z"
+    },
+    {
+      "id": 35425980312,
+      "name": ".github/workflows/drills.yml",
+      "commitSha": "d684a56aacfbf5e93e92b4b4c671e3e2465fc062",
+      "conclusion": "failure",
+      "url": "https://github.com/VedantGit7/atlas-funded-lms/actions/runs/35425980312",
+      "createdAt": "2026-09-19T06:12:27Z"
+    },
+    {
+      "id": 35383359832,
+      "name": ".github/workflows/ci.yml",
+      "commitSha": "ca8c0f1e7e69780b4e2ddc2a1136907a2e47c350",
+      "conclusion": "failure",
+      "url": "https://github.com/VedantGit7/atlas-funded-lms/actions/runs/35383359832",
+      "createdAt": "2026-09-18T18:59:25Z"
+    },
+    {
+      "id": 35383358851,
+      "name": ".github/workflows/drills.yml",
+      "commitSha": "ca8c0f1e7e69780b4e2ddc2a1136907a2e47c350",
+      "conclusion": "failure",
+      "url": "https://github.com/VedantGit7/atlas-funded-lms/actions/runs/35383358851",
+      "createdAt": "2026-09-18T18:59:24Z"
+    }
+  ],
+  "latestJobs": [
+    {
+      "id": 35425980742,
+      "jobs": [],
+      "error": false
+    },
+    {
+      "id": 35425980312,
+      "jobs": [],
+      "error": false
+    }
+  ],
+  "annotations": "Connector check-suite endpoint unsupported; in-app browser not signed in to private repository. Exact hosted annotation unavailable.",
+  "note": "No workflow pushed or rerun. These are pre-remediation remote commits."
+}

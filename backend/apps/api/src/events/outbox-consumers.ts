@@ -1,4 +1,6 @@
 import type { OutboxHandler } from "@atlas/events/services/outbox-worker.service";
+import { MARKETING_WORKFLOW_EMAIL_REQUESTED_EVENT } from "../server/marketing-workflows/marketing-workflow-email.events";
+import { marketingWorkflowEmailOutboxHandlers } from "../server/marketing-workflows/marketing-workflow-email.worker";
 import { withPostHogProductHandlers } from "@atlas/observability/posthog/outbox-mapper";
 
 import {
@@ -292,6 +294,11 @@ export function createMarketingWorkflowOutboxConsumers(): Record<string, OutboxH
   // group because this factory is already folded into the engagement consumers,
   // which the competency processor runs.
   appendHandlers(map, MARKETING_WEBHOOK_DISPATCH_EVENT, marketingWebhookOutboxHandlers);
+  appendHandlers(
+    map,
+    MARKETING_WORKFLOW_EMAIL_REQUESTED_EVENT,
+    marketingWorkflowEmailOutboxHandlers,
+  );
 
   return map;
 }

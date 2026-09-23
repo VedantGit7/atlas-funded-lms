@@ -4,6 +4,8 @@ import type {
   CreateCheckoutResult,
   ParsedWebhook,
   PaymentProvider,
+  RefundInput,
+  RefundResult,
 } from "../payment-provider";
 
 export type RazorpayAdapterConfig = {
@@ -32,6 +34,12 @@ type RazorpayPayment = {
 
 type RazorpayRefund = {
   id: string;
+  amount: number;
+  currency: string;
+  payment_id: string;
+  status: string;
+  receipt?: string | null;
+  notes?: Record<string, string> | null;
 };
 
 type RazorpayPaymentsList = {
@@ -43,6 +51,7 @@ type RazorpayWebhookPayload = {
   payload?: {
     payment?: { entity?: RazorpayPayment };
     order?: { entity?: RazorpayOrder & { notes?: Record<string, string> | null } };
+    refund?: { entity?: RazorpayRefund };
   };
 };
 
@@ -53,7 +62,7 @@ function basicAuthHeader(keyId: string, secretKey: string): string {
 async function razorpayFetch<T>(
   config: RazorpayAdapterConfig,
   path: string,
-  init?: { method?: string; body?: unknown },
+  init?: { method?: string; body?: unknown; headers?: Record<string, string> },
 ): Promise<T> {
   const method = init?.method ?? "GET";
   const response = await fetch(`https://api.razorpay.com/v1${path}`, {
@@ -62,7 +71,9 @@ async function razorpayFetch<T>(
       Authorization: basicAuthHeader(config.keyId, config.secretKey),
       "Content-Type": "application/json",
       Accept: "application/json",
+      ...init?.headers,
     },
+    signal: AbortSignal.timeout(20_000),
     ...(init?.body !== undefined ? { body: JSON.stringify(init.body) } : {}),
   });
 
@@ -112,11 +123,51 @@ export function computeRazorpayWebhookSignature(rawBody: string, webhookSecret: 
   return createHmac("sha256", webhookSecret).update(rawBody).digest("hex");
 }
 
+function normalizeRefund(refund: RazorpayRefund, externalId?: string): RefundResult {
+  if (
+    !refund.id ||
+    !Number.isSafeInteger(refund.amount) ||
+    refund.amount <= 0 ||
+    typeof refund.currency !== "string" ||
+    !/^[a-z]{3}$/i.test(refund.currency) ||
+    !refund.payment_id
+  ) {
+    throw new Error("Razorpay returned an invalid refund record.");
+  }
+  return {
+    refundId: refund.id,
+    status:
+      refund.status === "processed"
+        ? "succeeded"
+        : refund.status === "failed"
+          ? "failed"
+          : "pending",
+    amountCents: refund.amount,
+    currency: refund.currency.toUpperCase(),
+    externalId: externalId ?? refund.notes?.["atlasPaymentExternalId"] ?? refund.payment_id,
+    intentId: refund.notes?.["atlasRefundIntentId"] ?? refund.receipt ?? null,
+  };
+}
+
 /**
  * Razorpay HTTP API is confined to this adapter. Business logic must depend only on PaymentProvider.
  * Checkout uses Orders API; the browser opens Checkout.js with the returned clientCheckout payload.
  */
 export function createRazorpayPaymentProvider(config: RazorpayAdapterConfig): PaymentProvider {
+  async function resolvePayment(externalId: string, reconciliation = false): Promise<string> {
+    if (!externalId.startsWith("order_")) return externalId;
+    const list = await razorpayFetch<RazorpayPaymentsList>(
+      config,
+      `/orders/${encodeURIComponent(externalId)}/payments`,
+    );
+    // Fully refunded payments may no longer be captured when reconciling.
+    const payment = list.items?.find(
+      (item) => item.status === "captured" || (reconciliation && item.status === "refunded"),
+    );
+    if (!payment?.id) throw new Error("Razorpay order has no captured payment to refund.");
+    return payment.id;
+  }
+
   return {
     async createCheckout(input: CreateCheckoutInput): Promise<CreateCheckoutResult> {
       const currency = input.currency.toUpperCase();
@@ -155,7 +206,7 @@ export function createRazorpayPaymentProvider(config: RazorpayAdapterConfig): Pa
       };
     },
 
-    parseWebhook(args: { rawBody: string; signature: string }): Promise<ParsedWebhook> {
+    async parseWebhook(args: { rawBody: string; signature: string }): Promise<ParsedWebhook> {
       try {
         verifyRazorpayWebhookSignature({
           rawBody: args.rawBody,
@@ -176,6 +227,24 @@ export function createRazorpayPaymentProvider(config: RazorpayAdapterConfig): Pa
       const rawType = typeof event.event === "string" ? event.event : "unknown";
       const payment = event.payload?.payment?.entity;
       const order = event.payload?.order?.entity;
+
+      if (
+        rawType === "refund.created" ||
+        rawType === "refund.processed" ||
+        rawType === "refund.failed" ||
+        rawType === "refund.speed_changed"
+      ) {
+        if (!event.payload?.refund?.entity)
+          throw new Error(`Razorpay ${rawType} webhook missing refund.`);
+        const refund = normalizeRefund(event.payload.refund.entity);
+        return {
+          externalId: refund.externalId,
+          paymentOrderId: null,
+          status: "pending",
+          rawType,
+          refund,
+        };
+      }
 
       if (rawType === "payment.captured" || rawType === "order.paid") {
         const externalId =
@@ -221,36 +290,59 @@ export function createRazorpayPaymentProvider(config: RazorpayAdapterConfig): Pa
       });
     },
 
-    async refund(args: { externalId: string; amountCents?: number }) {
-      let paymentId = args.externalId;
-
-      if (args.externalId.startsWith("order_")) {
-        const list = await razorpayFetch<RazorpayPaymentsList>(
-          config,
-          `/orders/${encodeURIComponent(args.externalId)}/payments`,
+    async refund(args: RefundInput): Promise<RefundResult> {
+      if (
+        !Number.isSafeInteger(args.amountCents) ||
+        args.amountCents <= 0 ||
+        !args.intentId ||
+        !args.idempotencyKey
+      ) {
+        throw new Error(
+          "Refund requires an exact positive amount and durable intent/idempotency key.",
         );
-        const captured =
-          list.items?.find((item) => item.status === "captured") ??
-          list.items?.find((item) => item.status === "authorized") ??
-          list.items?.[0];
-        if (!captured?.id) {
-          throw new Error("Razorpay order has no payment to refund.");
-        }
-        paymentId = captured.id;
       }
-
+      const paymentId = await resolvePayment(args.externalId);
       const refund = await razorpayFetch<RazorpayRefund>(
         config,
         `/payments/${encodeURIComponent(paymentId)}/refund`,
         {
           method: "POST",
+          // Supported by Razorpay's official CLI: cmd/refunds/create.go.
+          headers: { "X-Refund-Idempotency": args.idempotencyKey },
           body: {
-            ...(args.amountCents != null ? { amount: args.amountCents } : {}),
+            amount: args.amountCents,
+            receipt: args.intentId,
+            notes: { atlasRefundIntentId: args.intentId, atlasPaymentExternalId: args.externalId },
           },
         },
       );
 
-      return { refundId: refund.id };
+      if (refund.payment_id !== paymentId) {
+        throw new Error("Razorpay refund does not match the requested payment.");
+      }
+      return normalizeRefund(refund, args.externalId);
+    },
+
+    async findRefund(args): Promise<RefundResult | null> {
+      const paymentId = await resolvePayment(args.externalId, true);
+      const matches = (refund: RazorpayRefund) =>
+        refund.payment_id === paymentId &&
+        (refund.notes?.["atlasRefundIntentId"] ?? refund.receipt) === args.intentId;
+      const path = `/payments/${encodeURIComponent(paymentId)}/refunds`;
+      if (args.refundId) {
+        const refund = await razorpayFetch<RazorpayRefund>(
+          config,
+          `${path}/${encodeURIComponent(args.refundId)}`,
+        );
+        return matches(refund) ? normalizeRefund(refund, args.externalId) : null;
+      }
+      // Bounded read-only reconciliation; absence does not justify another POST.
+      const list = await razorpayFetch<{ items?: RazorpayRefund[] }>(
+        config,
+        `${path}?count=100&skip=0`,
+      );
+      const refund = list.items?.find(matches);
+      return refund ? normalizeRefund(refund, args.externalId) : null;
     },
   };
 }

@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { Rocket } from "lucide-react";
 import { AdminConfirmDialog } from "../../../components/shells/admin/AdminConfirmDialog";
 import { ClientApiError } from "../../../lib/client-api";
-import { readinessApiClient } from "@atlas/contracts-modules/readiness/readiness.api-client";
+import { readinessApiClient } from "@/modules/readiness/readiness.api-client";
 import type { ReadinessPolicyDto } from "@atlas/contracts/readiness/readiness.types";
 import type { ScoringProfileDto } from "@atlas/contracts/competency/competency-config.types";
 import { alertErrorClassName, defaultLegalChecklist } from "../readiness-admin-shared";

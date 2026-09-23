@@ -1,0 +1,88 @@
+[
+  {
+    "command": "scripts/guards/check-prisma-boundary.mjs",
+    "exitCode": 0,
+    "signal": null,
+    "durationMs": 13584
+  },
+  {
+    "command": "scripts/guards/check-route-metadata.mjs",
+    "exitCode": 0,
+    "signal": null,
+    "durationMs": 2062
+  },
+  {
+    "command": "scripts/guards/check-audit-compliance.mjs",
+    "exitCode": 0,
+    "signal": null,
+    "durationMs": 11873
+  },
+  {
+    "command": "scripts/guards/check-outbox-compliance.mjs",
+    "exitCode": 0,
+    "signal": null,
+    "durationMs": 42143
+  },
+  {
+    "command": "scripts/guards/check-forbidden-scope.mjs",
+    "exitCode": 0,
+    "signal": null,
+    "durationMs": 18885
+  },
+  {
+    "command": "scripts/guards/check-secrets.mjs",
+    "exitCode": 1,
+    "signal": null,
+    "durationMs": 22680
+  },
+  {
+    "command": "scripts/guards/check-package-exports.mjs",
+    "exitCode": 0,
+    "signal": null,
+    "durationMs": 17338
+  },
+  {
+    "command": "scripts/guards/check-server-authority.mjs",
+    "exitCode": null,
+    "signal": "SIGTERM",
+    "error": "ETIMEDOUT",
+    "durationMs": 120070
+  },
+  {
+    "command": "scripts/sync-contracts.mjs --check",
+    "exitCode": 1,
+    "signal": null,
+    "durationMs": 11855
+  },
+  {
+    "command": "scripts/guards/check-outbox-worker-coverage.mjs",
+    "exitCode": 0,
+    "signal": null,
+    "durationMs": 1070
+  },
+  {
+    "command": "scripts/db/check-no-session-tenant-set.mjs",
+    "exitCode": null,
+    "signal": "SIGTERM",
+    "error": "ETIMEDOUT",
+    "durationMs": 120056
+  },
+  {
+    "command": "scripts/db/check-sql-approved-paths.mjs",
+    "exitCode": 0,
+    "signal": null,
+    "durationMs": 7139
+  },
+  {
+    "command": "scripts/ci/check-frontend-api-closure.mjs --strict",
+    "exitCode": 0,
+    "signal": null,
+    "durationMs": 6952
+  },
+  {
+    "command": "scripts/ci/check-lint-coverage.mjs",
+    "exitCode": 1,
+    "signal": null,
+    "durationMs": 18674
+  }
+]

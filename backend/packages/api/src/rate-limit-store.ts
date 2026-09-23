@@ -1,4 +1,6 @@
 import Redis from "ioredis";
+import { validateClientIpConfiguration } from "./client-ip";
+import { isDeployedRuntime } from "@atlas/core/config/runtime-environment";
 
 /**
  * Rate-limit counter storage.
@@ -30,7 +32,33 @@ export type RateLimitStore = {
   close(): Promise<void>;
 };
 
-const PRODUCTION_LIKE_ENVS = new Set(["production", "staging"]);
+export class RateLimitConfigurationError extends Error {}
+
+export function validateRateLimitConfiguration(env: NodeJS.ProcessEnv = process.env): {
+  url: string | null;
+  sharedRequired: boolean;
+} {
+  validateClientIpConfiguration(env);
+  const url = env["RATE_LIMIT_REDIS_URL"]?.trim() || env["REDIS_URL"]?.trim() || null;
+  const sharedRequired = isDeployedRuntime(env);
+  if (url) {
+    let parsed: URL;
+    try {
+      parsed = new URL(url);
+    } catch {
+      throw new RateLimitConfigurationError("Invalid Redis URL for rate limiting.");
+    }
+    if (!["redis:", "rediss:"].includes(parsed.protocol) || !parsed.hostname)
+      throw new RateLimitConfigurationError(
+        "Invalid Redis URL for rate limiting; use redis:// or rediss://.",
+      );
+  } else if (sharedRequired) {
+    throw new RateLimitConfigurationError(
+      "REDIS_URL (or RATE_LIMIT_REDIS_URL) is required in production and staging.",
+    );
+  }
+  return { url, sharedRequired };
+}
 
 /* ------------------------------------------------------------------ memory */
 
@@ -126,17 +154,22 @@ export class RedisRateLimitStore implements RateLimitStore {
   async hit(key: string, windowMs: number): Promise<RateLimitHit> {
     // Typed as unknown rather than [number, number]: this crosses a wire, and
     // a client that returns strings must not silently produce NaN comparisons.
-    const result = (await this.client.eval(
-      HIT_SCRIPT,
-      1,
-      `${this.prefix}${key}`,
-      windowMs,
-    )) as unknown[];
+    const result = await this.client.eval(HIT_SCRIPT, 1, `${this.prefix}${key}`, windowMs);
+    if (!Array.isArray(result) || result.length !== 2)
+      throw new Error("Invalid rate-limit counter response");
 
     const count = Number(result[0]);
     const ttlMs = Number(result[1]);
 
-    return { count, resetAt: Date.now() + (Number.isFinite(ttlMs) ? ttlMs : windowMs) };
+    if (
+      !Number.isSafeInteger(count) ||
+      count < 1 ||
+      !Number.isSafeInteger(ttlMs) ||
+      ttlMs < 0 ||
+      ttlMs > windowMs
+    )
+      throw new Error("Invalid rate-limit counter response");
+    return { count, resetAt: Date.now() + ttlMs };
   }
 
   /**
@@ -175,27 +208,23 @@ function createRedisStore(url: string): RateLimitStore {
     lazyConnect: false,
   });
 
+  // Do not let asynchronous connection events print URL credentials. The
+  // limiter reports command failures through a safe, throttled log event.
+  client.on("error", () => {});
   return new RedisRateLimitStore(client);
 }
 
 export function resolveRateLimitStore(env: NodeJS.ProcessEnv = process.env): RateLimitStore {
-  if (activeStore) return activeStore;
-
-  const url = env["RATE_LIMIT_REDIS_URL"]?.trim() || env["REDIS_URL"]?.trim();
-  const appEnv = env["APP_ENV"] ?? "";
+  const { url, sharedRequired } = validateRateLimitConfiguration(env);
+  if (activeStore) {
+    if (sharedRequired && activeStore.kind !== "redis")
+      throw new RateLimitConfigurationError("A shared Redis rate-limit store is required.");
+    return activeStore;
+  }
 
   if (url) {
     activeStore = createRedisStore(url);
     return activeStore;
-  }
-
-  // Fail loudly rather than shipping a limiter that multiplies by instance count.
-  if (PRODUCTION_LIKE_ENVS.has(appEnv)) {
-    throw new Error(
-      `REDIS_URL (or RATE_LIMIT_REDIS_URL) must be set when APP_ENV=${appEnv}. ` +
-        "Without a shared store the rate limiter counts per process, so the real " +
-        "limit is multiplied by the instance count and resets on every deploy.",
-    );
   }
 
   activeStore = new MemoryRateLimitStore();

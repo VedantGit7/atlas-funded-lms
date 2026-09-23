@@ -1,6 +1,7 @@
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { isGeneratedSourcePath } from "../guards/source-paths.mjs";
 
 const guardScriptPath = resolve(fileURLToPath(import.meta.url));
 // Post F-1 these live under backend/ and frontend/. The pre-split spellings
@@ -18,7 +19,7 @@ function walkFiles(directory) {
       const normalized = path.replaceAll("\\", "/");
 
       if (
-        normalized.includes("/node_modules/") ||
+        isGeneratedSourcePath(normalized) ||
         normalized.includes("/.next/") ||
         normalized.includes("/dist/") ||
         normalized.includes("/build/") ||

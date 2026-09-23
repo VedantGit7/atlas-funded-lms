@@ -4,12 +4,13 @@ import { deletionRequestInvalidState, invalidDeletionTarget } from "./data-right
 import { dataRightsRepository } from "./data-rights.repository";
 import type { DeletionRequestRow, ServiceCtx } from "./data-rights.types";
 import { DELETION_TARGET_TYPES } from "./data-rights.contract";
+import { buildAccessRemovalOutcome, type AccessRemovalOutcome } from "./privacy-lifecycle.contract";
 
 export async function processApprovedDeletionRequest(
   tx: TenantTx,
   ctx: ServiceCtx,
   request: DeletionRequestRow,
-): Promise<void> {
+): Promise<AccessRemovalOutcome> {
   if (request.status !== "QUEUED") {
     throw deletionRequestInvalidState("This deletion request cannot be processed.");
   }
@@ -23,13 +24,19 @@ export async function processApprovedDeletionRequest(
   if (request.target_type === "membership") {
     await removeMember(tx, ctx, request.target_id);
   }
+  return buildAccessRemovalOutcome();
 }
 
 export async function completeDeletionRequest(
   tx: TenantTx,
   deletionRequestId: string,
+  outcome: AccessRemovalOutcome,
 ): Promise<DeletionRequestRow> {
-  const updated = await dataRightsRepository.markDeletionRequestSucceeded(tx, deletionRequestId);
+  const updated = await dataRightsRepository.markDeletionRequestSucceeded(
+    tx,
+    deletionRequestId,
+    outcome,
+  );
   if (!updated) {
     const existing = await dataRightsRepository.findDeletionRequestById(tx, deletionRequestId);
     if (existing?.status === "SUCCEEDED") {

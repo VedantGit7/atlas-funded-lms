@@ -264,7 +264,7 @@ describe("enforcePublicRateLimit", () => {
     ).resolves.toBeUndefined();
   });
 
-  it("degrades to per-process counters instead of failing the request when the store is down", async () => {
+  it("fails closed instead of multiplying quotas when the shared store is down", async () => {
     const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
     const broken: RateLimitStore = {
       kind: "redis",
@@ -275,18 +275,12 @@ describe("enforcePublicRateLimit", () => {
     setRateLimitStore(broken);
     const req = request({ "x-forwarded-for": "203.0.113.13" });
 
-    // Still served...
     await expect(
       enforcePublicRateLimit({ req, bucket: "publicDiagnostic", requestId: "r" }),
-    ).resolves.toBeUndefined();
-
-    // ...but still counted, so throttling is degraded rather than removed.
-    for (let i = 0; i < 9; i += 1) {
-      await enforcePublicRateLimit({ req, bucket: "publicDiagnostic", requestId: "r" });
-    }
+    ).rejects.toMatchObject({ code: "SERVICE_UNAVAILABLE", status: 503, retryAfterSeconds: 5 });
     await expect(
       enforcePublicRateLimit({ req, bucket: "publicDiagnostic", requestId: "r" }),
-    ).rejects.toMatchObject({ code: "RATE_LIMITED" });
+    ).rejects.toMatchObject({ code: "SERVICE_UNAVAILABLE", status: 503 });
 
     consoleError.mockRestore();
   });

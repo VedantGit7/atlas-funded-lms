@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 
 import type { AuditListResponse } from "@atlas/contracts/audit/audit";
-import type { AdminOverviewResponse } from "@atlas/contracts/admin/admin-overview.dto";
+import type { AdminOverviewResponse } from "@atlas/contracts/admin/admin-overview.contract";
 import type {
   MemberStatsResponse,
   MembersListResponse,
@@ -557,8 +557,8 @@ export default async function AdminDashboardPage() {
             />
             <QuickLink
               icon={Trash2}
-              label="Deletion requests"
-              caption="Process data-rights deletions"
+              label="School-access removal"
+              caption="Remove school access; records retained"
               href="/admin/deletion-requests"
             />
           </div>

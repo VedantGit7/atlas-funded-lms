@@ -1,0 +1,337 @@
+{
+  "stats": {
+    "startTime": "2026-09-22T03:11:57.877Z",
+    "duration": 280583.533,
+    "expected": 25,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "tests": [
+    {
+      "title": "courses catalog shell has no serious axe violations when public",
+      "file": "accessibility/axe-learner-routes.spec.ts",
+      "project": "chromium-tenant",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 4575,
+          "errors": []
+        }
+      ]
+    },
+    {
+      "title": "login page has no serious axe violations",
+      "file": "accessibility/axe-public-routes.spec.ts",
+      "project": "chromium-tenant",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 4349,
+          "errors": []
+        }
+      ]
+    },
+    {
+      "title": "public landing has no serious axe violations",
+      "file": "accessibility/axe-public-routes.spec.ts",
+      "project": "chromium-tenant",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 6899,
+          "errors": []
+        }
+      ]
+    },
+    {
+      "title": "login form supports keyboard tab order",
+      "file": "accessibility/keyboard-flows.spec.ts",
+      "project": "chromium-tenant",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 2869,
+          "errors": []
+        }
+      ]
+    },
+    {
+      "title": "login submit via keyboard Enter",
+      "file": "accessibility/keyboard-flows.spec.ts",
+      "project": "chromium-tenant",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 3035,
+          "errors": []
+        }
+      ]
+    },
+    {
+      "title": "public landing quick links are keyboard reachable",
+      "file": "accessibility/keyboard-flows.spec.ts",
+      "project": "chromium-tenant",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 2700,
+          "errors": []
+        }
+      ]
+    },
+    {
+      "title": "loads public landing shell",
+      "file": "journeys/01-public-diagnostic-signup.spec.ts",
+      "project": "chromium-tenant",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 6356,
+          "errors": []
+        }
+      ]
+    },
+    {
+      "title": "loads public diagnostic runner",
+      "file": "journeys/01-public-diagnostic-signup.spec.ts",
+      "project": "chromium-tenant",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 2015,
+          "errors": []
+        }
+      ]
+    },
+    {
+      "title": "signup screen is reachable from auth plane",
+      "file": "journeys/01-public-diagnostic-signup.spec.ts",
+      "project": "chromium-tenant",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 3242,
+          "errors": []
+        }
+      ]
+    },
+    {
+      "title": "enrolls, resumes saved progress, and completes a lesson with the keyboard",
+      "file": "journeys/02-learner-dashboard-enrollment.spec.ts",
+      "project": "chromium-tenant",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 31222,
+          "errors": []
+        }
+      ]
+    },
+    {
+      "title": "autosaves an answer, restores it on reload, and persists a graded submission",
+      "file": "journeys/03-learner-assessment.spec.ts",
+      "project": "chromium-tenant",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 19454,
+          "errors": []
+        }
+      ]
+    },
+    {
+      "title": "swipe surface loads for authenticated learner",
+      "file": "journeys/04-learner-swipe.spec.ts",
+      "project": "chromium-tenant",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 8321,
+          "errors": []
+        }
+      ]
+    },
+    {
+      "title": "readiness surface loads for authenticated learner",
+      "file": "journeys/05-learner-readiness-cta.spec.ts",
+      "project": "chromium-tenant",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 7412,
+          "errors": []
+        }
+      ]
+    },
+    {
+      "title": "creates a draft, submits it, and publishes it through a separate reviewer",
+      "file": "journeys/06-instructor-authoring.spec.ts",
+      "project": "chromium-tenant",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 50180,
+          "errors": []
+        }
+      ]
+    },
+    {
+      "title": "returns an independently submitted course to draft with a persisted review note",
+      "file": "journeys/07-review-approval.spec.ts",
+      "project": "chromium-tenant",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 22921,
+          "errors": []
+        }
+      ]
+    },
+    {
+      "title": "moderation queue surface loads",
+      "file": "journeys/08-moderation-case.spec.ts",
+      "project": "chromium-tenant",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 8919,
+          "errors": []
+        }
+      ]
+    },
+    {
+      "title": "grants and revokes a role with persisted membership changes",
+      "file": "journeys/09-admin-member-workflows.spec.ts",
+      "project": "chromium-tenant",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 31793,
+          "errors": []
+        }
+      ]
+    },
+    {
+      "title": "denies foreign read, update, delete and download without changing foreign records",
+      "file": "journeys/11-cross-tenant-negative.spec.ts",
+      "project": "chromium-tenant",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 22179,
+          "errors": []
+        }
+      ]
+    },
+    {
+      "title": "serves brand kits through the web proxy only to authorized members",
+      "file": "journeys/12-canonical-api-routing.spec.ts",
+      "project": "chromium-tenant",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 7434,
+          "errors": []
+        }
+      ]
+    },
+    {
+      "title": "serves public credential bytes without a session and denies a foreign credential",
+      "file": "journeys/12-canonical-api-routing.spec.ts",
+      "project": "chromium-tenant",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 514,
+          "errors": []
+        }
+      ]
+    },
+    {
+      "title": "login shell light mode",
+      "file": "visual/branding-shells.spec.ts",
+      "project": "chromium-tenant",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 2782,
+          "errors": []
+        }
+      ]
+    },
+    {
+      "title": "login shell dark mode",
+      "file": "visual/branding-shells.spec.ts",
+      "project": "chromium-tenant",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 2635,
+          "errors": []
+        }
+      ]
+    },
+    {
+      "title": "login shell light mode",
+      "file": "visual/branding-shells.spec.ts",
+      "project": "chromium-tenant",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 2702,
+          "errors": []
+        }
+      ]
+    },
+    {
+      "title": "login shell dark mode",
+      "file": "visual/branding-shells.spec.ts",
+      "project": "chromium-tenant",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 2680,
+          "errors": []
+        }
+      ]
+    },
+    {
+      "title": "provisions an isolated tenant and persists an entitlement change",
+      "file": "journeys/10-platform-provision-entitlements.spec.ts",
+      "project": "chromium-platform",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 18543,
+          "errors": []
+        }
+      ]
+    }
+  ]
+}

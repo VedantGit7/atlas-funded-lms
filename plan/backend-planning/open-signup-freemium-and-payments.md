@@ -107,10 +107,8 @@ flowchart TD
 
 ### Changes
 
-1. New service `ensureSelfServiceLearnerMembership` in the membership package, modeled on
-   `ensurePlatformSuperAdminTenantAccess` in
-   [backend/packages/membership/src/platform-super-admin-tenant-access.ts](backend/packages/membership/src/platform-super-admin-tenant-access.ts):
-   - Idempotent upsert of an `ACTIVE` membership for `(tenantId, authPrincipalId)`.
+1. New service `ensureSelfServiceLearnerMembership` in the membership package:
+   - Insert a new `ACTIVE` membership for `(tenantId, authPrincipalId)` with conflict-do-nothing semantics. Never reactivate an existing suspended/removed membership. The former implicit platform-admin helper was removed by F02 and must not be used as a provisioning model.
    - Calls existing `assignDefaultLearnerRole` from
      [backend/packages/access/src/seed/seed-user-roles.ts](backend/packages/access/src/seed/seed-user-roles.ts).
    - Creates the member profile with the saved `displayName` via

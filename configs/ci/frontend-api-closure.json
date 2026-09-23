@@ -86,6 +86,18 @@
     {
       "path": "/api/v1/manage/course-backups/[id]/download",
       "reason": "ManageCourseBackupPanel.downloadBackup fetches job.downloadUrl, which the list response supplies per backup. The UI exists; the path is data, so no static scan can see it."
+    },
+    {
+      "path": "/api/v1/certificates/[id]/wallet/apple/download",
+      "reason": "certificate-wallet.service.ts supplies downloadUrl; VerificationActions.tsx navigates to that server-issued URL after creating an Apple wallet pass."
+    },
+    {
+      "path": "/api/v1/public/credentials/[credentialId]/download",
+      "reason": "certificate.service.ts supplies downloadUrl; VerificationCard and VerificationActions render its download link."
+    },
+    {
+      "path": "/api/v1/public/security/csp-report",
+      "reason": "configs/security-headers.mjs configures the browser CSP report-uri; the browser submits violations without an application fetch call."
     }
   ],
   "uiWiredRequired": [

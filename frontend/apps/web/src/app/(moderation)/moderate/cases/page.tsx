@@ -2,7 +2,7 @@ import { PageGate, PageHeader } from "../../../../components/patterns/PageGate";
 import { ModerationQueueClient } from "../../../../features/moderation/components/ModerationQueueClient";
 import { ServerApiError, serverApi } from "../../../../lib/server-api";
 import type { z } from "zod";
-import type { moderationCaseListResponseSchema } from "../../../../server/moderation/moderation.dto";
+import type { moderationCaseListResponseSchema } from "@atlas/contracts/moderation/moderation.dto";
 
 type ModerationCaseListResponse = z.infer<typeof moderationCaseListResponseSchema>;
 

@@ -126,6 +126,7 @@ export type PaymentRefundLedgerRow = {
   gateway_key: string | null;
   amount_cents: number;
   refunded_amount_cents: number;
+  reserved_amount_cents: number;
   refundable_amount_cents: number;
   currency: string;
   status: string;
@@ -607,7 +608,11 @@ export const paymentsRosterRepository = {
                 else '[]'::jsonb
               end
             ) elem
-          ), 0)::int as refunded_amount_cents
+          ), 0)::int as refunded_amount_cents,
+          coalesce((select sum(ri.amount_cents) from payment_refund_intents ri
+            where ri.tenant_id = po.tenant_id and ri.order_id = po.id
+              and ri.status in ('requested','processing','pending','reconciliation_required')
+          ), 0)::int as reserved_amount_cents
         from payment_orders po
         left join memberships m on m.id = po.membership_id and m.tenant_id = po.tenant_id
         left join member_profiles mp
@@ -640,12 +645,12 @@ export const paymentsRosterRepository = {
       )
       select
         count(*) filter (
-          where lower(status) = 'paid' and refunded_amount_cents = 0
+          where lower(status) = 'paid' and refunded_amount_cents = 0 and reserved_amount_cents < amount_cents
         )::int as refundable_count,
         count(*) filter (
           where lower(status) = 'paid'
             and refunded_amount_cents > 0
-            and refunded_amount_cents < amount_cents
+            and refunded_amount_cents + reserved_amount_cents < amount_cents
         )::int as partial_count,
         count(*) filter (
           where lower(status) like '%refund%'
@@ -653,8 +658,8 @@ export const paymentsRosterRepository = {
         )::int as refunded_count,
         coalesce(sum(
           case
-            when lower(status) = 'paid' and refunded_amount_cents < amount_cents
-            then amount_cents - refunded_amount_cents
+            when lower(status) = 'paid' and refunded_amount_cents + reserved_amount_cents < amount_cents
+            then greatest(0, amount_cents - refunded_amount_cents - reserved_amount_cents)
             else 0
           end
         ), 0)::int as refundable_amount_cents,
@@ -692,7 +697,11 @@ export const paymentsRosterRepository = {
                 else '[]'::jsonb
               end
             ) elem
-          ), 0)::int as refunded_amount_cents
+          ), 0)::int as refunded_amount_cents,
+          coalesce((select sum(ri.amount_cents) from payment_refund_intents ri
+            where ri.tenant_id = po.tenant_id and ri.order_id = po.id
+              and ri.status in ('requested','processing','pending','reconciliation_required')
+          ), 0)::int as reserved_amount_cents
         from payment_orders po
         left join memberships m on m.id = po.membership_id and m.tenant_id = po.tenant_id
         left join member_profiles mp
@@ -728,7 +737,8 @@ export const paymentsRosterRepository = {
       where (
         ${queue} = 'all'
         and (
-          (lower(status) = 'paid' and refunded_amount_cents < amount_cents)
+          (lower(status) = 'paid' and refunded_amount_cents + reserved_amount_cents < amount_cents)
+          or reserved_amount_cents > 0
           or lower(status) like '%refund%'
           or refunded_amount_cents >= amount_cents
         )
@@ -736,13 +746,13 @@ export const paymentsRosterRepository = {
       or (
         ${queue} = 'refundable'
         and lower(status) = 'paid'
-        and refunded_amount_cents = 0
+        and refunded_amount_cents = 0 and reserved_amount_cents < amount_cents
       )
       or (
         ${queue} = 'partial'
         and lower(status) = 'paid'
         and refunded_amount_cents > 0
-        and refunded_amount_cents < amount_cents
+        and refunded_amount_cents + reserved_amount_cents < amount_cents
       )
       or (
         ${queue} = 'refunded'
@@ -788,6 +798,10 @@ export const paymentsRosterRepository = {
               end
             ) elem
           ), 0)::int as refunded_amount_cents,
+          coalesce((select sum(ri.amount_cents) from payment_refund_intents ri
+            where ri.tenant_id = po.tenant_id and ri.order_id = po.id
+              and ri.status in ('requested','processing','pending','reconciliation_required')
+          ), 0)::int as reserved_amount_cents,
           po.currency,
           po.status,
           po.invoice_number,
@@ -833,7 +847,8 @@ export const paymentsRosterRepository = {
         gateway_key,
         amount_cents,
         refunded_amount_cents,
-        greatest(0, amount_cents - refunded_amount_cents)::int as refundable_amount_cents,
+        reserved_amount_cents,
+        (case when lower(status) = 'refunded' then 0 else greatest(0, amount_cents - refunded_amount_cents - reserved_amount_cents) end)::int as refundable_amount_cents,
         currency,
         status,
         invoice_number,
@@ -844,7 +859,8 @@ export const paymentsRosterRepository = {
       where (
         ${queue} = 'all'
         and (
-          (lower(status) = 'paid' and refunded_amount_cents < amount_cents)
+          (lower(status) = 'paid' and refunded_amount_cents + reserved_amount_cents < amount_cents)
+          or reserved_amount_cents > 0
           or lower(status) like '%refund%'
           or refunded_amount_cents >= amount_cents
         )
@@ -852,13 +868,13 @@ export const paymentsRosterRepository = {
       or (
         ${queue} = 'refundable'
         and lower(status) = 'paid'
-        and refunded_amount_cents = 0
+        and refunded_amount_cents = 0 and reserved_amount_cents < amount_cents
       )
       or (
         ${queue} = 'partial'
         and lower(status) = 'paid'
         and refunded_amount_cents > 0
-        and refunded_amount_cents < amount_cents
+        and refunded_amount_cents + reserved_amount_cents < amount_cents
       )
       or (
         ${queue} = 'refunded'

@@ -1,5 +1,8 @@
 import { createTransport, type Transporter } from "nodemailer";
+import { createHash } from "node:crypto";
+import { OutboxDeliveryError } from "@atlas/events/services/outbox-worker.service";
 import { recordTenantUsage } from "@atlas/api/tenant-usage-meter";
+import { isDeployedRuntime } from "@atlas/core/config/runtime-environment";
 
 /**
  * Email delivery.
@@ -32,19 +35,22 @@ export type EmailSendInput = {
   subject: string;
   body: string;
   requestId: string;
+  /** Stable delivery identity; SMTP Message-ID is correlation, not deduplication. */
+  idempotencyKey?: string;
+  messageId?: string;
   fromName?: string;
   fromEmail?: string;
   replyToEmail?: string | null;
 };
 
 export type EmailProvider = {
+  /** True only for providers that guarantee deduplication of this key. */
+  supportsIdempotency?: boolean;
   isConfigured(): boolean;
   send(input: EmailSendInput): Promise<void>;
 };
 
 type ProviderMode = "smtp" | "mock" | "unconfigured";
-
-const PRODUCTION_LIKE_ENVS = new Set(["production", "staging"]);
 
 function resolveMode(env: NodeJS.ProcessEnv): ProviderMode {
   const configured = env["NOTIFICATION_EMAIL_PROVIDER"]?.trim().toLowerCase();
@@ -85,6 +91,7 @@ class UnconfiguredEmailProvider implements EmailProvider {
 }
 
 export class SmtpEmailProvider implements EmailProvider {
+  readonly supportsIdempotency = false;
   private transporter: Transporter | null = null;
 
   constructor(private readonly env: NodeJS.ProcessEnv = process.env) {}
@@ -108,6 +115,10 @@ export class SmtpEmailProvider implements EmailProvider {
       port: Number.isFinite(port) ? port : 587,
       // 465 is implicit TLS; other ports upgrade via STARTTLS.
       secure: port === 465,
+      requireTLS: isDeployedRuntime(this.env) && port !== 465,
+      connectionTimeout: 10_000,
+      greetingTimeout: 10_000,
+      socketTimeout: 30_000,
       ...(user && pass ? { auth: { user, pass } } : {}),
     });
 
@@ -116,21 +127,66 @@ export class SmtpEmailProvider implements EmailProvider {
 
   async send(input: EmailSendInput): Promise<void> {
     if (!this.isConfigured()) {
-      throw new Error("EMAIL_PROVIDER_NOT_CONFIGURED");
+      throw new OutboxDeliveryError("permanent", "EMAIL_PROVIDER_NOT_CONFIGURED");
     }
 
     const defaultFrom = this.env["NOTIFICATION_EMAIL_FROM"] ?? "";
     const fromEmail = input.fromEmail?.trim() || defaultFrom;
     const from = input.fromName ? `"${input.fromName}" <${fromEmail}>` : fromEmail;
 
-    await this.getTransporter().sendMail({
-      from,
-      to: input.to,
-      subject: input.subject,
-      html: input.body,
-      ...(input.replyToEmail ? { replyTo: input.replyToEmail } : {}),
-      headers: { "X-Request-Id": input.requestId },
-    });
+    const transporter = this.getTransporter();
+    const messageId =
+      input.messageId ??
+      (input.idempotencyKey
+        ? `<atlas-${createHash("sha256").update(input.idempotencyKey).digest("hex")}@outbox.local>`
+        : undefined);
+    let deadline: ReturnType<typeof setTimeout> | undefined;
+    try {
+      const result: unknown = await Promise.race([
+        transporter.sendMail({
+          from,
+          to: input.to,
+          subject: input.subject,
+          html: input.body,
+          ...(messageId ? { messageId } : {}),
+          ...(input.replyToEmail ? { replyTo: input.replyToEmail } : {}),
+          headers: { "X-Request-Id": input.requestId },
+        }),
+        new Promise<never>((_resolve, reject) => {
+          deadline = setTimeout(() => {
+            reject(new OutboxDeliveryError("reconciliation_required", "SMTP_DEADLINE_EXCEEDED"));
+            transporter.close();
+            this.transporter = null;
+          }, 45_000);
+        }),
+      ]);
+      if (
+        typeof result !== "object" ||
+        result === null ||
+        !("accepted" in result) ||
+        !Array.isArray(result.accepted) ||
+        result.accepted.length === 0
+      ) {
+        throw new OutboxDeliveryError("reconciliation_required", "SMTP_ACCEPTANCE_UNKNOWN");
+      }
+    } catch (error) {
+      if (error instanceof OutboxDeliveryError) throw error;
+      const responseCode =
+        typeof error === "object" && error !== null && "responseCode" in error
+          ? error.responseCode
+          : undefined;
+      // An explicit negative SMTP reply proves this submission was rejected.
+      // A socket loss or timeout can happen after acceptance, so never retry it.
+      if (typeof responseCode === "number" && responseCode >= 400 && responseCode < 600) {
+        throw new OutboxDeliveryError(
+          responseCode < 500 ? "retryable" : "permanent",
+          `SMTP_${responseCode}`,
+        );
+      }
+      throw new OutboxDeliveryError("reconciliation_required", "SMTP_ACCEPTANCE_UNKNOWN");
+    } finally {
+      if (deadline !== undefined) clearTimeout(deadline);
+    }
   }
 }
 
@@ -143,6 +199,10 @@ export class SmtpEmailProvider implements EmailProvider {
 class MeteredEmailProvider implements EmailProvider {
   constructor(private readonly inner: EmailProvider) {}
 
+  get supportsIdempotency(): boolean {
+    return this.inner.supportsIdempotency === true;
+  }
+
   isConfigured(): boolean {
     return this.inner.isConfigured();
   }
@@ -150,19 +210,18 @@ class MeteredEmailProvider implements EmailProvider {
   async send(input: EmailSendInput): Promise<void> {
     await this.inner.send(input);
     if (input.tenantId !== null) {
-      recordTenantUsage(input.tenantId, { emails: 1 });
+      await recordTenantUsage(input.tenantId, { emails: 1 });
     }
   }
 }
 
 let cachedProvider: EmailProvider | null = null;
+let cachedForDeployment = false;
 
 export function getEmailProvider(env: NodeJS.ProcessEnv = process.env): EmailProvider {
-  if (cachedProvider) return cachedProvider;
-
   const mode = resolveMode(env);
   const appEnv = env["APP_ENV"] ?? "";
-  const productionLike = PRODUCTION_LIKE_ENVS.has(appEnv);
+  const productionLike = isDeployedRuntime(env);
 
   // Fail closed. Silently discarding password resets and signup verifications
   // in production is worse than refusing to start.
@@ -172,6 +231,15 @@ export function getEmailProvider(env: NodeJS.ProcessEnv = process.env): EmailPro
         "A mock or unconfigured provider silently discards password resets and signup verification.",
     );
   }
+
+  if (productionLike && mode === "smtp" && !new SmtpEmailProvider(env).isConfigured()) {
+    throw new Error(
+      "SMTP email provider is selected but SMTP_HOST / NOTIFICATION_EMAIL_FROM are not set.",
+    );
+  }
+  if (productionLike && !cachedForDeployment) cachedProvider = null;
+  if (cachedProvider) return cachedProvider;
+  cachedForDeployment = productionLike;
 
   if (mode === "smtp") {
     const provider = new SmtpEmailProvider(env);
@@ -192,4 +260,5 @@ export function getEmailProvider(env: NodeJS.ProcessEnv = process.env): EmailPro
 
 export function setEmailProviderForTests(provider: EmailProvider | null): void {
   cachedProvider = provider;
+  cachedForDeployment = false;
 }

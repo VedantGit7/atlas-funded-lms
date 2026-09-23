@@ -4,7 +4,7 @@ import { AdminSpacesEditor } from "../../../../features/community/components/Adm
 import { ADMIN_MODERATION_CASES_PATH } from "../../../../features/moderation/moderation-paths";
 import { ServerApiError, serverApi } from "../../../../lib/server-api";
 import { resolveModerationSpaceVisibilityOptions } from "../../../../lib/server/moderation-navigation-projection";
-import { communityServerApi } from "@atlas/contracts-modules/community/community.server-api";
+import { communityServerApi } from "@/modules/community/community.server-api";
 import type { EntitlementView } from "@atlas/domain-config/schemas/entitlements";
 
 export default async function ModerateSpacesPage() {

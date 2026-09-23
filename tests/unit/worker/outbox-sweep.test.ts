@@ -49,6 +49,106 @@ function options(overrides: Partial<SweepOptions> = {}): SweepOptions {
 }
 
 describe("runOutboxSweep", () => {
+  it.each([0, -1, 1.5, 101, Infinity])(
+    "rejects unbounded or invalid batch limit %s",
+    async (batchLimit) => {
+      await expect(runOutboxSweep(options({ batchLimit }))).rejects.toThrow(/between 1 and 100/);
+    },
+  );
+  it("caps heavy work at one claim and signals remaining backlog", async () => {
+    let seenLimit: number | undefined;
+    const result = await runOutboxSweep(
+      options({
+        listTenantIds: async () => ["t1"],
+        processors: [
+          {
+            name: "heavy",
+            maxBatchLimit: 1,
+            run: async ({ limit }) => {
+              seenLimit = limit;
+              return { ...EMPTY, processed: 1, delivered: 1 };
+            },
+          },
+        ],
+      }),
+    );
+    expect(seenLimit).toBe(1);
+    expect(result.saturated).toBe(true);
+  });
+  it("drains durable usage for inactive and deleted tenants even with no active tenants", async () => {
+    const visited: string[] = [];
+    const result = await runOutboxSweep(
+      options({
+        listTenantIds: async () => [],
+        listRetentionTenantIds: async () => ["inactive", "deleted"],
+        retentionTasks: [
+          {
+            name: "usage-meter-drain",
+            includeInactiveTenants: true,
+            run: async ({ tenantId }) => {
+              visited.push(tenantId);
+              return 25;
+            },
+          },
+        ],
+      }),
+    );
+    expect(visited).toEqual(["inactive", "deleted"]);
+    expect(result.usageEventsProcessed).toBe(50);
+    expect(result.saturated).toBe(true);
+  });
+  it("serializes processor calls and resumes unstarted work after a worker restart", async () => {
+    const controller = new AbortController();
+    const completed = new Set<string>();
+    let running = 0;
+    let maximum = 0;
+    const makeProcessor = (stop: boolean): OutboxProcessor => ({
+      name: "durable",
+      run: async ({ tenantId }) => {
+        running++;
+        maximum = Math.max(maximum, running);
+        await Promise.resolve();
+        const processed = completed.has(tenantId) ? 0 : 1;
+        completed.add(tenantId);
+        running--;
+        if (stop) controller.abort();
+        return { ...EMPTY, processed, delivered: processed };
+      },
+    });
+    const first = await runOutboxSweep(
+      options({ signal: controller.signal, processors: [makeProcessor(true)] }),
+    );
+    expect(first.abortedEarly).toBe(true);
+    expect([...completed]).toEqual(["t1"]);
+    const restarted = await runOutboxSweep(options({ processors: [makeProcessor(false)] }));
+    expect(restarted.delivered).toBe(1);
+    expect([...completed]).toEqual(["t1", "t2"]);
+    expect(maximum).toBe(1);
+  });
+  it("cleans up exports for inactive tenants without processing their outbox", async () => {
+    const processor = stubProcessor("p");
+    const visited: string[] = [];
+    const result = await runOutboxSweep(
+      options({
+        processors: [processor],
+        listTenantIds: async () => ["active"],
+        listRetentionTenantIds: async () => ["active", "inactive", "deleted"],
+        retentionTasks: [
+          {
+            name: "export-file-purge",
+            includeInactiveTenants: true,
+            run: async ({ tenantId }) => {
+              visited.push(tenantId);
+              return 1;
+            },
+          },
+        ],
+      }),
+    );
+    expect(processor.calls).toEqual(["active"]);
+    expect(visited).toEqual(["active", "inactive", "deleted"]);
+    expect(result.exportFilesPurged).toBe(3);
+  });
   it("invokes every processor for every active tenant", async () => {
     const a = stubProcessor("a");
     const b = stubProcessor("b");
@@ -171,11 +271,20 @@ describe("evaluateLiveness", () => {
 
   it("reports unhealthy when the loop has stopped ticking", () => {
     const state = createHealthState();
+    state.startedAt = Date.now() - 180_000;
     state.lastSweepFinishedAt = Date.now() - 120_000;
 
     const liveness = evaluateLiveness(state, 60_000);
     expect(liveness.healthy).toBe(false);
     expect(liveness.reason).toContain("no completed sweep");
+  });
+
+  it("remains live while bounded work progresses during a large tenant sweep", () => {
+    const state = createHealthState();
+    state.startedAt = Date.now() - 600_000;
+    state.lastSweepFinishedAt = Date.now() - 400_000;
+    state.lastProgressAt = Date.now();
+    expect(evaluateLiveness(state, 300_000).healthy).toBe(true);
   });
 
   it("reports unhealthy after repeated total sweep failure", () => {
@@ -254,11 +363,15 @@ describe("retention tasks (M10, M12)", () => {
             controller.abort();
             return Promise.resolve(1);
           }),
+          task("must-not-start", () => {
+            throw new Error("started work after shutdown");
+          }),
         ],
       }),
     );
 
     expect(seen).toEqual(["t1"]);
     expect(result.abortedEarly).toBe(true);
+    expect(result.errors).toEqual([]);
   });
 });

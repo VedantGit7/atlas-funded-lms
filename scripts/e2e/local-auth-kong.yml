@@ -1,0 +1,10 @@
+_format_version: "2.1"
+services:
+  - name: local-test-auth
+    url: http://auth:9999
+    routes:
+      - name: local-test-auth
+        strip_path: true
+        paths: [/auth/v1/]
+    plugins:
+      - name: cors

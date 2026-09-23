@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { Cormorant_Garamond, JetBrains_Mono, Plus_Jakarta_Sans } from "next/font/google";
 
 import "./globals.css";
@@ -66,6 +67,8 @@ type RootLayoutProps = Readonly<{
 }>;
 
 export default async function RootLayout({ children }: RootLayoutProps) {
+  // Request headers opt the root into dynamic rendering; never cache nonce HTML.
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
   const theme = await loadTenantThemeRuntime();
   const baseClassName = `${jakarta.variable} ${cormorant.variable} ${jetbrainsMono.variable}`;
   const appearance = await resolveAppearanceHtmlProps(
@@ -108,7 +111,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
       suppressHydrationWarning
     >
       <head>
-        <ThemeInitScript tenantModeDefault={theme.modeDefault} />
+        <ThemeInitScript {...(nonce ? { nonce } : {})} tenantModeDefault={theme.modeDefault} />
       </head>
       <body suppressHydrationWarning>
         <AppProviders initialDisplayCurrency={displayCurrency} initialFxRates={fxRates}>

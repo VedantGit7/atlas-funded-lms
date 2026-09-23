@@ -7,6 +7,7 @@ import {
 import { handleCourseCertificateSourceEvent } from "./course-certificate-issuance.service";
 import { isCertificateFeatureEnabled } from "./certificate-feature-flags";
 import { processCertificateOutboxBatch } from "./certificate-worker-router";
+import { isDeployedRuntime } from "@atlas/core/config/runtime-environment";
 
 export const COURSE_CERTIFICATE_WORKER_DESTINATION = "course.certificates";
 
@@ -65,7 +66,7 @@ export async function handleCourseCertificateOutboxEvent(event: {
   );
 
   // Drain any certificate.issued events published above (already off-request).
-  if (isCertificateFeatureEnabled("pdfWorker")) {
+  if (!isDeployedRuntime() && isCertificateFeatureEnabled("pdfWorker")) {
     await processCertificateOutboxBatch({
       tenantId,
       requestId: `${event.requestId}:certificate-pdf`,

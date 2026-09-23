@@ -2,7 +2,7 @@ import Link from "next/link";
 import { PageGate } from "../../../../../components/patterns/PageGate";
 import { AuthenticatedDiagnosticRunner } from "../../../../../features/diagnostics/components/AuthenticatedDiagnosticRunner";
 import { ServerApiError } from "../../../../../lib/server-api";
-import { diagnosticServerApi } from "@atlas/contracts-modules/diagnostics/diagnostic.server-api";
+import { diagnosticServerApi } from "@/modules/diagnostics/diagnostic.server-api";
 
 type LearnerDiagnosticSessionPageProps = {
   params: Promise<{ id: string }>;

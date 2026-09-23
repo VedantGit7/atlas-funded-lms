@@ -1,5 +1,10 @@
 import type { TenantTx } from "@atlas/db";
-import type { ExportSettings } from "./export-settings.dto";
+import { enqueueExportCleanup } from "./export-file-cleanup.repository";
+import {
+  DEFAULT_EXPORT_SETTINGS,
+  exportSettingsSchema,
+  type ExportSettings,
+} from "./export-settings.dto";
 
 const AVG_FILE_BYTES = 22_000;
 
@@ -33,6 +38,45 @@ export function estimateBytes(fileCount: number): number {
 }
 
 export const exportSettingsRepository = {
+  async shortenFileRetention(tx: TenantTx, retentionMs: number): Promise<void> {
+    if (!Number.isFinite(retentionMs) || retentionMs <= 0)
+      throw new Error("Invalid file retention.");
+    await tx.$executeRaw`
+      update report_runs
+      set expires_at = least(expires_at, coalesce(completed_at, created_at) + ${retentionMs} * interval '1 millisecond')
+      where tenant_id = current_setting('app.tenant_id', true)::uuid
+        and file_retention_managed = true and r2_object_key is not null
+        and status in ('SUCCEEDED', 'FAILED', 'CANCELLED')
+        and expires_at > coalesce(completed_at, created_at) + ${retentionMs} * interval '1 millisecond'
+    `;
+    await tx.$executeRaw`
+      update export_jobs
+      set expires_at = least(expires_at, coalesce((artifact_json->>'retentionStartedAt')::timestamptz, created_at) + ${retentionMs} * interval '1 millisecond')
+      where tenant_id = current_setting('app.tenant_id', true)::uuid
+        and artifact_json is not null and r2_object_key is not null
+        and status in ('SUCCEEDED', 'FAILED', 'CANCELLED')
+        and expires_at > coalesce((artifact_json->>'retentionStartedAt')::timestamptz, created_at) + ${retentionMs} * interval '1 millisecond'
+    `;
+  },
+  async getFileRetentionMs(tx: TenantTx): Promise<number> {
+    const row = await this.get(tx);
+    const raw =
+      row?.settings_json &&
+      typeof row.settings_json === "object" &&
+      !Array.isArray(row.settings_json)
+        ? (row.settings_json as Record<string, unknown>)
+        : {};
+    const settings = exportSettingsSchema
+      .pick({ fileRetentionValue: true, fileRetentionUnit: true })
+      .parse({
+        fileRetentionValue: raw["fileRetentionValue"] ?? DEFAULT_EXPORT_SETTINGS.fileRetentionValue,
+        fileRetentionUnit: raw["fileRetentionUnit"] ?? DEFAULT_EXPORT_SETTINGS.fileRetentionUnit,
+      });
+    return (
+      settings.fileRetentionValue *
+      (settings.fileRetentionUnit === "hours" ? 3_600_000 : 86_400_000)
+    );
+  },
   async get(tx: TenantTx): Promise<ExportSettingsRow | null> {
     const rows = await tx.$queryRaw<ExportSettingsRow[]>`
       select
@@ -146,7 +190,7 @@ export const exportSettingsRepository = {
         from report_runs
         where r2_object_key is not null
         union all
-        select created_at as finished_at
+        select coalesce((artifact_json->>'retentionStartedAt')::timestamptz, created_at) as finished_at
         from export_jobs
         where r2_object_key is not null
       )
@@ -158,49 +202,11 @@ export const exportSettingsRepository = {
   },
 
   async purgeExpiredFiles(tx: TenantTx): Promise<number> {
-    const reportResult = await tx.$executeRaw`
-      update report_runs
-      set
-        r2_object_key = null,
-        updated_at = now()
-      where r2_object_key is not null
-        and expires_at is not null
-        and expires_at <= now()
-    `;
-    const jobResult = await tx.$executeRaw`
-      update export_jobs
-      set
-        r2_object_key = null,
-        updated_at = now()
-      where r2_object_key is not null
-        and expires_at is not null
-        and expires_at <= now()
-    `;
-    const a = typeof reportResult === "number" ? reportResult : 0;
-    const b = typeof jobResult === "number" ? jobResult : 0;
-    return a + b;
+    return enqueueExportCleanup(tx, { includeLegacyReports: true });
   },
 
   async purgeFilesOlderThan(tx: TenantTx, cutoff: Date): Promise<number> {
-    const reportResult = await tx.$executeRaw`
-      update report_runs
-      set
-        r2_object_key = null,
-        updated_at = now()
-      where r2_object_key is not null
-        and coalesce(completed_at, created_at) < ${cutoff}
-    `;
-    const jobResult = await tx.$executeRaw`
-      update export_jobs
-      set
-        r2_object_key = null,
-        updated_at = now()
-      where r2_object_key is not null
-        and created_at < ${cutoff}
-    `;
-    const a = typeof reportResult === "number" ? reportResult : 0;
-    const b = typeof jobResult === "number" ? jobResult : 0;
-    return a + b;
+    return enqueueExportCleanup(tx, { cutoff });
   },
 
   async listRecentSettingsAudit(tx: TenantTx, limit = 8) {

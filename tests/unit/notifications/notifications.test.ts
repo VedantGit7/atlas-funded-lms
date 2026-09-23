@@ -1,6 +1,6 @@
+import { buildNotificationIdempotencyKey } from "../../../backend/apps/api/src/server/notifications/notification.keys";
 import { describe, expect, it } from "vitest";
 import {
-  buildNotificationIdempotencyKey,
   createNotificationTemplateBodySchema,
   plainTextBodySchema,
 } from "../../../backend/apps/api/src/server/notifications/notification.dto";
@@ -71,7 +71,7 @@ describe("mark-read idempotence", () => {
 describe("mark-archive helpers", () => {
   it("builds deterministic archive idempotency keys", async () => {
     const { buildArchiveReceiptIdempotencyKey } =
-      await import("../../../backend/apps/api/src/server/notifications/notification.dto");
+      await import("../../../backend/apps/api/src/server/notifications/notification.keys");
     const args = {
       dispatchId: "11111111-1111-1111-1111-111111111111",
       membershipId: "33333333-3333-3333-3333-333333333333",

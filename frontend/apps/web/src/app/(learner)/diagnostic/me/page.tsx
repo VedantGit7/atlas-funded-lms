@@ -1,7 +1,7 @@
 import { PageGate, PageHeader } from "../../../../components/patterns/PageGate";
 import { DiagnosticCatalog } from "../../../../features/diagnostics/components/DiagnosticCatalog";
 import { ServerApiError } from "../../../../lib/server-api";
-import { diagnosticServerApi } from "@atlas/contracts-modules/diagnostics/diagnostic.server-api";
+import { diagnosticServerApi } from "@/modules/diagnostics/diagnostic.server-api";
 
 export default async function LearnerDiagnosticPage() {
   try {

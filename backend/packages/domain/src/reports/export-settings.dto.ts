@@ -155,6 +155,7 @@ export const purgeExpiredBodySchema = rejectClientTenantFields.extend({}).strict
 
 export const purgeExpiredResponseSchema = z.object({
   data: z.object({
+    queuedCount: z.number().int().nonnegative(),
     deletedCount: z.number().int().nonnegative(),
     estimatedBytesFreed: z.number().int().nonnegative(),
   }),

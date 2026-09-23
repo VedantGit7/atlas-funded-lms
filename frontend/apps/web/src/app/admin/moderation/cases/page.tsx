@@ -12,9 +12,9 @@ export default async function AdminModerationCasesPage() {
 
     return (
       <PageGate state="ready" title="Moderation queue">
-        <main>
+        <div>
           <ModerationQueueClient />
-        </main>
+        </div>
       </PageGate>
     );
   } catch (error) {

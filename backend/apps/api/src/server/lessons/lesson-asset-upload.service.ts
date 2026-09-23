@@ -1,3 +1,4 @@
+import { assertLocalBlobUpload, readLocalBlobBody } from "@atlas/storage/local-blob-upload";
 import type { NextRequest } from "next/server";
 import { z } from "zod";
 import type { TenantTx } from "@atlas/db";
@@ -47,10 +48,13 @@ function normalizeByteCount(value: bigint | number | string): number {
 }
 
 export async function parseLessonAssetBlobRequest(req: NextRequest): Promise<LessonAssetBlobBody> {
+  assertLocalBlobUpload();
   const contentType = (req.headers.get("content-type") ?? "").toLowerCase();
 
   if (contentType.includes("application/json")) {
-    return lessonAssetBlobBodySchema.parse(await req.json());
+    return lessonAssetBlobBodySchema.parse(
+      JSON.parse((await readLocalBlobBody(req)).toString("utf8")),
+    );
   }
 
   const assetReferenceId = req.headers.get("x-asset-reference-id")?.trim() ?? "";
@@ -63,26 +67,7 @@ export async function parseLessonAssetBlobRequest(req: NextRequest): Promise<Les
     });
   }
 
-  const contentLength = req.headers.get("content-length");
-  let contentBuffer: Buffer;
-  if (req.body) {
-    const reader = req.body.getReader();
-    const chunks: Uint8Array[] = [];
-    for (;;) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      chunks.push(value);
-    }
-    contentBuffer = Buffer.concat(chunks);
-  } else {
-    contentBuffer = Buffer.alloc(0);
-  }
-  console.log(
-    "[blob-upload] content-length header:",
-    contentLength,
-    "| buffer received:",
-    contentBuffer.byteLength,
-  );
+  const contentBuffer = await readLocalBlobBody(req);
 
   if (contentBuffer.byteLength === 0) {
     throw new AtlasHttpError({
@@ -149,6 +134,7 @@ export async function storeLessonAssetBlobService(
   lessonId: string,
   input: LessonAssetBlobBody,
 ) {
+  assertLocalBlobUpload();
   await requireEditableStudioLesson(tx, ctx, lessonId);
 
   const asset = await findAssetReferenceById(tx, input.assetReferenceId);

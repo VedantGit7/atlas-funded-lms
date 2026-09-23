@@ -1,13 +1,44 @@
+import { addAbortSignal, Readable, Writable } from "node:stream";
+import { pipeline } from "node:stream/promises";
+import { boundedObjectStream } from "./bounded-object-stream";
 import type {
   CreateSignedDownloadUrlInput,
   CreateSignedUploadUrlInput,
   ObjectMetadata,
   StorageProvider,
+  GetObjectStreamInput,
+  PutObjectStreamInput,
 } from "./storage-provider";
 
 export class LocalMockStorageProvider implements StorageProvider {
   private readonly objects = new Map<string, ObjectMetadata>();
   private readonly bodies = new Map<string, Buffer>();
+
+  async putObjectStream(input: PutObjectStreamInput): Promise<void> {
+    if (input.signal?.aborted) input.body.destroy();
+    input.signal?.throwIfAborted();
+    const chunks: Buffer[] = [];
+    await pipeline(
+      input.body,
+      boundedObjectStream(input.sizeBytes),
+      new Writable({
+        write(chunk: Buffer, _encoding, callback) {
+          chunks.push(chunk);
+          callback();
+        },
+      }),
+      { signal: input.signal },
+    );
+    await this.putObject({ ...input, body: Buffer.concat(chunks, input.sizeBytes) });
+  }
+
+  async getObjectStream(input: GetObjectStreamInput): Promise<Readable | null> {
+    input.signal?.throwIfAborted();
+    const body = await this.getObjectBody(input);
+    if (!body) return null;
+    const stream = Readable.from([body]);
+    return input.signal ? addAbortSignal(input.signal, stream) : stream;
+  }
 
   async createSignedUploadUrl(input: CreateSignedUploadUrlInput) {
     await Promise.resolve();

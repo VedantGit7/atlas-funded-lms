@@ -1,4 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { buildApiProxyHeaders } from "@atlas/core/http/api-proxy";
+import { ATLAS_INTERNAL_TENANT_HOST_HEADER } from "@/lib/http-headers";
 import { resolveSafeRedirectPath } from "@/lib/auth/safe-redirect";
 import {
   OAUTH_NEXT_COOKIE,
@@ -26,15 +28,17 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ prov
 
   let providerUrl: string;
   let codeVerifier: string;
+  const browserHost =
+    req.headers.get(ATLAS_INTERNAL_TENANT_HOST_HEADER) ?? req.headers.get("host") ?? "";
 
   try {
     const apiRes = await fetch(`${API_INTERNAL_URL}/api/v1/public/auth/oauth/start`, {
       method: "POST",
-      headers: {
+      headers: buildApiProxyHeaders(browserHost, {
         "content-type": "application/json",
-        "x-forwarded-host": req.headers.get("host") ?? "",
         "idempotency-key": `public-oauth-start-${crypto.randomUUID()}`,
-      },
+      }),
+      redirect: "error",
       body: JSON.stringify({ provider, redirectTo: callbackUrl, rememberMe: remember }),
       cache: "no-store",
     });

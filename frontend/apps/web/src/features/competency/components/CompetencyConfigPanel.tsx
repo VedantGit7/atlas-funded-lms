@@ -9,7 +9,7 @@ import {
   listCompetencyDimensions,
   listProfileBands,
   listScoringProfiles,
-} from "@atlas/contracts-modules/competency/competency-config.api-client";
+} from "@/modules/competency/competency-config.api-client";
 import { CompetencyPageHeader } from "./CompetencyPageHeader";
 import { DimensionEditor } from "./DimensionEditor";
 import { ScoringProfileEditor } from "./ScoringProfileEditor";

@@ -6,9 +6,11 @@ import {
   SPOOFABLE_TENANT_HEADERS,
 } from "@atlas/core/http/headers";
 import { createRequestId, stripClientSuppliedRequestIds } from "@atlas/core/request/request-id";
+import { sanitizeApiProxyHeaders } from "@atlas/core/http/api-proxy";
 
 export function proxy(req: NextRequest) {
   const requestHeaders = new Headers(req.headers);
+  sanitizeApiProxyHeaders(requestHeaders);
 
   // Never trust client-supplied tenant context headers.
   for (const header of SPOOFABLE_TENANT_HEADERS) {

@@ -13,6 +13,7 @@ import {
 } from "./lesson-progress-guards";
 import {
   findLessonProgress,
+  lockEnrollmentForProgress,
   markEnrollmentCompletedIfAllLessonsDone,
   upsertLessonProgress,
 } from "./lesson-progress.repository";
@@ -47,6 +48,20 @@ export async function recordLessonProgress(
   });
 
   if (!enrollment) {
+    throw lessonEnrollmentRequired();
+  }
+
+  // A progress row may not exist yet. Lock the stable enrollment first so
+  // overlapping autosaves/completions read the last committed progress and
+  // publish the completion event only once, including across course lessons.
+  if (
+    !(await lockEnrollmentForProgress({
+      tx,
+      tenantId: ctx.tenantId,
+      membershipId: ctx.actorMembershipId,
+      enrollmentId: enrollment.id,
+    }))
+  ) {
     throw lessonEnrollmentRequired();
   }
 

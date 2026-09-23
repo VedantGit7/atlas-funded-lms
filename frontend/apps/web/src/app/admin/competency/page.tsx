@@ -1,6 +1,6 @@
 import { AdminPageGate } from "../../../components/patterns/AdminPageGate";
 import { CompetencyConfigPanel } from "../../../features/competency/components/CompetencyConfigPanel";
-import { competencyConfigServerApi } from "@atlas/contracts-modules/competency/competency-config.server-api";
+import { competencyConfigServerApi } from "@/modules/competency/competency-config.server-api";
 import { ServerApiError } from "../../../lib/server-api";
 
 export default async function AdminCompetencyPage() {

@@ -1,4 +1,5 @@
 import { after } from "next/server";
+import { isDeployedRuntime } from "@atlas/core/config/runtime-environment";
 import { isCertificateFeatureEnabled } from "./certificate-feature-flags";
 import { processCertificateOutboxBatch } from "./certificate-worker-router";
 
@@ -8,12 +9,14 @@ import { processCertificateOutboxBatch } from "./certificate-worker-router";
  * No-op unless CERTIFICATE_PDF_WORKER=true.
  */
 export function scheduleCertificatePdfDrain(args: { tenantId: string; requestId: string }): void {
+  // Deployed PDF work belongs to the durable worker, never a response callback.
+  if (isDeployedRuntime()) return;
   if (!isCertificateFeatureEnabled("pdfWorker")) {
     return;
   }
 
   after(() => {
-    void processCertificateOutboxBatch({
+    return processCertificateOutboxBatch({
       tenantId: args.tenantId,
       requestId: `${args.requestId}:certificate-pdf`,
       limit: 10,

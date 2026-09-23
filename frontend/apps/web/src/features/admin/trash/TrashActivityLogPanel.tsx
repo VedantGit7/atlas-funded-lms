@@ -7,7 +7,7 @@ import { ArrowLeft, CalendarClock, Columns3, Search, SlidersHorizontal } from "l
 import type {
   ContentTrashActivityItem,
   ContentTrashActivityResponse,
-} from "@atlas/contracts/admin/content-trash-activity.dto";
+} from "@atlas/contracts/content-trash/content-trash.contract";
 
 import { clientApi } from "../../../lib/client-api";
 

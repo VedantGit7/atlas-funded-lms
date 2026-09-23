@@ -8,11 +8,7 @@ import {
 import { ATLAS_ACCESS_TOKEN_COOKIE, ATLAS_REFRESH_TOKEN_COOKIE } from "@atlas/auth/cookies";
 import { withGlobalDb } from "@atlas/db/global-db";
 import { withTenantTx } from "@atlas/db/with-tenant-tx";
-import {
-  findMembershipByPrincipal,
-  ensurePlatformSuperAdminTenantAccess,
-  ensureSelfServiceLearnerMembership,
-} from "@atlas/membership";
+import { findMembershipByPrincipal, ensureSelfServiceLearnerMembership } from "@atlas/membership";
 import {
   lookupTenantFromHost,
   resolvePlatformHost,
@@ -51,17 +47,6 @@ async function buildResponse(args: {
   serviceStatus: "signed_in" | "verification_required";
   mfaEnabled: boolean;
 }): Promise<PublicAuthApiResponse> {
-  // Grant the global platform super admin tenant-admin access before resolving
-  // membership, so the role-based redirect below points it at /admin.
-  if (args.serviceStatus === "signed_in") {
-    await ensurePlatformSuperAdminTenantAccess({
-      db: args.db,
-      tenantId: args.tenantId,
-      requestId: args.requestId,
-      email: args.email,
-    });
-  }
-
   return withTenantTx(
     {
       tenantId: args.tenantId,

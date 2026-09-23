@@ -19,25 +19,9 @@
  * floating point is fine here and would not be for a figure charged to anyone.
  */
 
-export const COST_DRIVER_KEYS = [
-  "storage_gb_month",
-  "active_member",
-  "email_sent",
-  "custom_domain",
-  "api_million_requests",
-] as const;
-
-export type CostDriverKey = (typeof COST_DRIVER_KEYS)[number];
-
-export const ALLOCATION_KEYS = [
-  "api_requests",
-  "active_members",
-  "member_days",
-  "storage_gb",
-  "equal",
-] as const;
-
-export type AllocationKey = (typeof ALLOCATION_KEYS)[number];
+import type { AllocationKey, CostDriverKey } from "./cost-attribution.catalog";
+export { ALLOCATION_KEYS, COST_DRIVER_KEYS } from "./cost-attribution.catalog";
+export type { AllocationKey, CostDriverKey } from "./cost-attribution.catalog";
 
 /** What was measured for one tenant in one month. */
 export type TenantUsage = {

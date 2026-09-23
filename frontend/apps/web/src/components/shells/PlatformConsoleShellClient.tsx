@@ -106,7 +106,7 @@ function PlatformConsoleShellInner({
       headerActions={
         <>
           <span className="hidden text-sm text-muted-foreground md:inline">
-            {mfaEnabled ? "MFA verified" : "Session assurance pending"}
+            {mfaEnabled ? "MFA enrolled" : "MFA not enrolled"}
           </span>
           <span className="hidden text-sm text-muted-foreground md:inline">{displayEmail}</span>
         </>

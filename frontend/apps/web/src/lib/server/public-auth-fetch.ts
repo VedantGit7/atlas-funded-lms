@@ -1,9 +1,10 @@
+import "server-only";
 import type {
   AcceptInvitationApiResponse,
   PublicAuthApiResponse,
   SetInvitationPasswordApiResponse,
 } from "../api/public-client";
-import { ATLAS_INTERNAL_TENANT_HOST_HEADER } from "../http-headers";
+import { buildApiProxyHeaders } from "@atlas/core/http/api-proxy";
 import { applySetCookieHeaders } from "./apply-set-cookie-headers";
 import { resolveCookieHeaderForInternalApi } from "./resolve-request-cookies";
 import { resolveTenantHostForInternalApi } from "./resolve-tenant-host";
@@ -59,13 +60,12 @@ async function postJson<T>(path: string, body: object, idempotencyPrefix: string
   try {
     response = await fetch(url, {
       method: "POST",
-      headers: {
+      headers: buildApiProxyHeaders(forwardedHost, {
         "content-type": "application/json",
         ...(cookieHeader ? { cookie: cookieHeader } : {}),
-        "x-forwarded-host": forwardedHost,
-        [ATLAS_INTERNAL_TENANT_HOST_HEADER]: forwardedHost,
         "idempotency-key": `${idempotencyPrefix}-${crypto.randomUUID()}`,
-      },
+      }),
+      redirect: "error",
       body: JSON.stringify(body),
       cache: "no-store",
       signal: AbortSignal.timeout(INTERNAL_API_TIMEOUT_MS),
@@ -179,13 +179,12 @@ export async function confirmEmailViaInternalApi(input: {
   try {
     response = await fetch(url, {
       method: "POST",
-      headers: {
+      headers: buildApiProxyHeaders(forwardedHost, {
         "content-type": "application/json",
         ...(cookieHeader ? { cookie: cookieHeader } : {}),
-        "x-forwarded-host": forwardedHost,
-        [ATLAS_INTERNAL_TENANT_HOST_HEADER]: forwardedHost,
         "idempotency-key": `public-auth-confirm-${crypto.randomUUID()}`,
-      },
+      }),
+      redirect: "error",
       body: JSON.stringify({ tokenHash: input.tokenHash, type: input.type }),
       cache: "no-store",
       signal: AbortSignal.timeout(INTERNAL_API_TIMEOUT_MS),

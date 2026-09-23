@@ -1,14 +1,13 @@
+import { buildNotificationIdempotencyKey } from "./notification.keys";
 import { withTenantTx } from "@atlas/db";
+import { OutboxDeliveryError } from "@atlas/events/services/outbox-worker.service";
 import {
   getMemberPreferences,
   isMemberOptedOutOfCategory,
   isMemberOptedOutOfChannel,
 } from "@atlas/membership";
 import type { NotificationPreferenceCategory } from "@atlas/membership";
-import {
-  buildNotificationIdempotencyKey,
-  notificationQueuedOutboxPayloadSchema,
-} from "./notification.dto";
+import { notificationQueuedOutboxPayloadSchema } from "./notification.dto";
 import { getEmailProvider } from "./notification.email-provider";
 import {
   CERTIFICATE_ISSUED_EVENT,
@@ -372,23 +371,18 @@ export async function processNotificationSourceEvent(
 }
 
 export async function processNotificationQueuedEvent(
-  tx: Parameters<typeof notificationRepository.insertDispatch>[0],
+  db: {
+    transaction: <T>(
+      fn: (tx: Parameters<typeof notificationRepository.insertDispatch>[0]) => Promise<T>,
+    ) => Promise<T>;
+  },
   ctx: ServiceCtx,
   payload: unknown,
 ): Promise<void> {
-  const parsed = notificationQueuedOutboxPayloadSchema.parse(payload);
-
-  if (parsed.channel === "in_app") {
-    if (!parsed.dispatchId) {
-      return;
-    }
-
-    const dispatch = await notificationRepository.findDispatchById(tx, parsed.dispatchId);
-    if (!dispatch || dispatch.tenant_id !== ctx.tenantId || dispatch.status === "SENT") {
-      return;
-    }
-    return;
-  }
+  const result = notificationQueuedOutboxPayloadSchema.safeParse(payload);
+  if (!result.success) throw new OutboxDeliveryError("permanent", "NOTIFICATION_PAYLOAD_INVALID");
+  const parsed = result.data;
+  if (parsed.channel === "in_app") return;
 
   const idempotencyKey = buildNotificationIdempotencyKey({
     sourceEventId: parsed.sourceEventId,
@@ -396,90 +390,71 @@ export async function processNotificationQueuedEvent(
     recipientMembershipId: parsed.membershipId,
     channel: parsed.channel,
   });
-
-  const existing = await notificationRepository.findDispatchByIdempotencyKey(tx, {
-    tenantId: ctx.tenantId,
-    idempotencyKey,
+  const prepared = await db.transaction(async (tx) => {
+    const existing = await notificationRepository.findDispatchByIdempotencyKey(tx, {
+      tenantId: ctx.tenantId,
+      idempotencyKey,
+    });
+    if (existing?.status === "SENT") return null;
+    if (existing?.status === "FAILED") {
+      throw new OutboxDeliveryError("permanent", "NOTIFICATION_DISPATCH_FAILED");
+    }
+    if (existing) {
+      throw new OutboxDeliveryError("reconciliation_required", "NOTIFICATION_DISPATCH_UNKNOWN");
+    }
+    const rendered = parsed.renderedPayload;
+    if (!rendered)
+      throw new OutboxDeliveryError("permanent", "NOTIFICATION_RENDERED_PAYLOAD_MISSING");
+    const to = await notificationRepository.findMembershipEmail(tx, parsed.membershipId);
+    if (!to) throw new OutboxDeliveryError("permanent", "NOTIFICATION_DESTINATION_MISSING");
+    const channel = await readTenantEmailChannel(tx, "transactionalEmail");
+    return { to, rendered, channel };
   });
-  if (existing) {
-    return;
-  }
+  if (!prepared) return;
 
-  const rendered = parsed.renderedPayload;
-  if (!rendered) {
-    throw new Error("Email notification queued event missing rendered payload.");
-  }
-
-  const to = await notificationRepository.findMembershipEmail(tx, parsed.membershipId);
   const emailProvider = getEmailProvider();
-
-  if (!to) {
-    await notificationRepository.insertDispatch(tx, {
+  if (!emailProvider.isConfigured())
+    throw new OutboxDeliveryError("permanent", "EMAIL_PROVIDER_NOT_CONFIGURED");
+  try {
+    await emailProvider.send({
       tenantId: ctx.tenantId,
-      membershipId: parsed.membershipId,
-      channel: parsed.channel,
-      templateKey: parsed.templateKey,
-      destination: null,
+      to: prepared.to,
+      subject: prepared.rendered.emailSubject ?? prepared.rendered.title,
+      body: prepared.rendered.body,
+      requestId: ctx.requestId,
       idempotencyKey,
-      status: "FAILED",
-      payloadJson: {
-        email: {
-          subject: rendered.emailSubject ?? rendered.title,
-          body: rendered.body,
-        },
-      },
+      fromName: prepared.channel.fromName.trim() || "Academy",
+      fromEmail: prepared.channel.fromEmail.trim() || "noreply@localhost.test",
+      replyToEmail: prepared.channel.replyToEmail,
     });
-    throw new Error("Notification email destination missing.");
+  } catch (error) {
+    if (error instanceof OutboxDeliveryError) throw error;
+    throw new OutboxDeliveryError("reconciliation_required", "NOTIFICATION_ACCEPTANCE_UNKNOWN");
   }
 
-  if (!emailProvider.isConfigured()) {
-    await notificationRepository.insertDispatch(tx, {
-      tenantId: ctx.tenantId,
-      membershipId: parsed.membershipId,
-      channel: parsed.channel,
-      templateKey: parsed.templateKey,
-      destination: to,
-      idempotencyKey,
-      status: "FAILED",
-      payloadJson: {
-        email: {
-          subject: rendered.emailSubject ?? rendered.title,
-          body: rendered.body,
+  try {
+    await db.transaction(async (tx) => {
+      await notificationRepository.insertDispatch(tx, {
+        tenantId: ctx.tenantId,
+        membershipId: parsed.membershipId,
+        channel: parsed.channel,
+        templateKey: parsed.templateKey,
+        destination: prepared.to,
+        idempotencyKey,
+        status: "SENT",
+        payloadJson: {
+          email: {
+            subject: prepared.rendered.emailSubject ?? prepared.rendered.title,
+            body: prepared.rendered.body,
+          },
         },
-      },
+        sentAt: new Date(),
+      });
     });
-    throw new Error("EMAIL_PROVIDER_NOT_CONFIGURED");
+  } catch {
+    // SMTP may have accepted the email; retrying a failed receipt write can duplicate it.
+    throw new OutboxDeliveryError("reconciliation_required", "NOTIFICATION_RECEIPT_UNKNOWN");
   }
-
-  const channel = await readTenantEmailChannel(tx, "transactionalEmail");
-
-  await emailProvider.send({
-    tenantId: ctx.tenantId,
-    to,
-    subject: rendered.emailSubject ?? rendered.title,
-    body: rendered.body,
-    requestId: ctx.requestId,
-    fromName: channel.fromName.trim() || "Academy",
-    fromEmail: channel.fromEmail.trim() || "noreply@localhost.test",
-    replyToEmail: channel.replyToEmail,
-  });
-
-  await notificationRepository.insertDispatch(tx, {
-    tenantId: ctx.tenantId,
-    membershipId: parsed.membershipId,
-    channel: parsed.channel,
-    templateKey: parsed.templateKey,
-    destination: to,
-    idempotencyKey,
-    status: "SENT",
-    payloadJson: {
-      email: {
-        subject: rendered.emailSubject ?? rendered.title,
-        body: rendered.body,
-      },
-    },
-    sentAt: new Date(),
-  });
 }
 
 export async function handleNotificationSourceOutboxEvent(event: {
@@ -536,23 +511,17 @@ export async function handleNotificationQueuedOutboxEvent(event: {
     return;
   }
 
-  await withTenantTx(
+  await processNotificationQueuedEvent(
+    {
+      transaction: (fn) =>
+        withTenantTx({ tenantId, requestId: event.requestId, allowAnonymousTenantRead: true }, fn),
+    },
     {
       tenantId,
+      actorMembershipId: "00000000-0000-0000-0000-000000000000",
       requestId: event.requestId,
-      allowAnonymousTenantRead: true,
     },
-    async (tx) => {
-      await processNotificationQueuedEvent(
-        tx,
-        {
-          tenantId,
-          actorMembershipId: "00000000-0000-0000-0000-000000000000",
-          requestId: event.requestId,
-        },
-        event.payload,
-      );
-    },
+    event.payload,
   );
 }
 
@@ -566,6 +535,8 @@ export const notificationSourceOutboxHandlers = [
 export const notificationQueuedOutboxHandlers = [
   {
     destinationKey: NOTIFICATION_QUEUED_WORKER_DESTINATION,
+    // SMTP cannot deduplicate a crashed send, even with a stable Message-ID.
+    retryOnCrash: false,
     handle: handleNotificationQueuedOutboxEvent,
   },
 ];
@@ -578,18 +549,18 @@ export async function processNotificationOutboxBatch(args: {
 }): Promise<{ processed: number; delivered: number; failed: number; skipped: number }> {
   const { processOutboxBatch } = await import("@atlas/events/services/outbox-worker.service");
   const { createNotificationOutboxConsumers } = await import("../../events/outbox-consumers");
-
-  return withTenantTx(
+  return processOutboxBatch(
     {
-      tenantId: args.tenantId,
-      requestId: args.requestId,
-      allowAnonymousTenantRead: true,
+      transaction: (fn) =>
+        withTenantTx(
+          { tenantId: args.tenantId, requestId: args.requestId, allowAnonymousTenantRead: true },
+          fn,
+        ),
     },
-    async (tx) =>
-      processOutboxBatch(tx, {
-        limit: args.limit ?? 25,
-        maxRetries: args.maxRetries ?? 3,
-        handlers: createNotificationOutboxConsumers(),
-      }),
+    {
+      limit: args.limit ?? 25,
+      maxRetries: args.maxRetries ?? 3,
+      handlers: createNotificationOutboxConsumers(),
+    },
   );
 }

@@ -7,6 +7,7 @@ import { ClientApiError, clientApi } from "../../../lib/client-api";
 import { SettingsToggleRow } from "../../account-settings/account-settings-fields";
 import { AccountSettingsToast } from "../../account-settings/account-settings-toast";
 import { useAccountTheme } from "../../account-settings/account-theme-context";
+import { loadProfileExport } from "../profile-export";
 
 type ProfileVisibility = "PUBLIC" | "PRIVATE";
 
@@ -89,36 +90,27 @@ export function PrivacyDataForm({
     setMessage(null);
     setRequestId(null);
     try {
-      const [account, profile, preferences, entitlements] = await Promise.all([
-        clientApi.get<{ data: unknown }>("/api/v1/me"),
-        clientApi.get<{ data: unknown }>(`/api/v1/members/${membershipId}/profile`),
-        clientApi.get<{ data: unknown }>("/api/v1/me/preferences"),
-        clientApi
-          .get<{ data: unknown }>("/api/v1/entitlements")
-          .catch(() => ({ data: [] as unknown })),
-      ]);
-
-      const bundle = {
-        exportedAt: new Date().toISOString(),
-        account: account.data,
-        profile: profile.data,
-        preferences: preferences.data,
-        entitlements: entitlements.data,
-      };
+      const bundle = await loadProfileExport(membershipId, (path) =>
+        clientApi.get<{ data: unknown }>(path),
+      );
 
       const blob = new Blob([JSON.stringify(bundle, null, 2)], { type: "application/json" });
       const url = URL.createObjectURL(blob);
       const anchor = document.createElement("a");
       anchor.href = url;
-      anchor.download = `my-data-${new Date().toISOString().slice(0, 10)}.json`;
+      anchor.download = `my-profile-snapshot-${new Date().toISOString().slice(0, 10)}.json`;
       document.body.appendChild(anchor);
       anchor.click();
       anchor.remove();
       URL.revokeObjectURL(url);
-      setToast("Your data export has been downloaded");
+      setToast(
+        bundle.manifest.omitted.some((item) => item.reason === "fetch_failed")
+          ? "Partial profile snapshot downloaded. Entitlements could not be fetched; see the manifest."
+          : "Partial profile snapshot downloaded. See the manifest for included fields and omissions.",
+      );
     } catch (error) {
       const formatted = formatClientError(error);
-      setMessage(formatted.message);
+      setMessage(`Unable to download the profile snapshot. ${formatted.message}`);
       setRequestId(formatted.requestId);
     } finally {
       setExporting(false);
@@ -223,7 +215,7 @@ export function PrivacyDataForm({
             <SettingsToggleRow
               icon={BarChart3}
               title="Product analytics"
-              description="Allow anonymized usage analytics that help improve the platform."
+              description="Allow usage analytics that help improve the platform."
               checked={privacy.analyticsConsent}
               onChange={(checked) => {
                 setPrivacy((current) => ({ ...current, analyticsConsent: checked }));
@@ -264,7 +256,10 @@ export function PrivacyDataForm({
       <section className={classes.card}>
         <h2 className={classes.sectionTitle}>Your data</h2>
         <p className={`${classes.sectionDesc} mt-1`}>
-          Download a copy of your account data, or request permanent erasure.
+          Download a partial snapshot of your account, profile, preferences, and available school
+          entitlements. The file lists included fields and omissions. Learning history, assessment
+          submissions, billing records, and other school records are not included. Contact your
+          school for a full data-rights review or a separate erasure review.
         </p>
         <div className="mt-5 flex flex-col gap-3 sm:flex-row">
           <button
@@ -276,11 +271,11 @@ export function PrivacyDataForm({
             }}
           >
             <Download className="h-4 w-4" aria-hidden="true" />
-            {exporting ? "Preparing…" : "Download my data"}
+            {exporting ? "Preparing…" : "Download profile snapshot"}
           </button>
           <Link href="/profile/danger-zone" className={classes.dangerOutlineButton}>
             <Trash2 className="h-4 w-4" aria-hidden="true" />
-            Request account deletion
+            Request school-access removal
           </Link>
         </div>
       </section>

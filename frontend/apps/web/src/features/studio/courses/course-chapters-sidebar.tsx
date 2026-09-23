@@ -428,7 +428,7 @@ export function CourseChaptersSidebar({
                         <p className={`${builderHelperClassName} px-4 pb-2`}>
                           {module.scormPackageReady
                             ? "SCORM package attached"
-                            : "SCORM package pending upload"}
+                            : "SCORM package awaiting upload or processing. Refresh to check readiness."}
                         </p>
                       ) : isLoadingLessons && moduleLessons === undefined ? (
                         <p className={`${builderHelperClassName} px-4 pb-2`}>Loading lessons…</p>

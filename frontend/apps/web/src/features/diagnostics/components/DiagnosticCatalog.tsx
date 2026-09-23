@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { BadgeCheck, Brain, Clock, ListChecks, Timer, X } from "lucide-react";
 import { cn } from "@atlas/design-system";
-import type { DiagnosticCatalogItem } from "@atlas/contracts-modules/diagnostics/diagnostic.types";
-import { diagnosticApiClient } from "@atlas/contracts-modules/diagnostics/diagnostic.api-client";
+import type { DiagnosticCatalogItem } from "@atlas/contracts/diagnostics/diagnostic.types";
+import { diagnosticApiClient } from "@/modules/diagnostics/diagnostic.api-client";
 import {
   catalogActionLabel,
   catalogIcon,

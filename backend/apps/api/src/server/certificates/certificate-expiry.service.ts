@@ -12,6 +12,7 @@ import { withTenantTx } from "@atlas/db/with-tenant-tx";
 import { certificateRepository } from "./certificate.repository";
 import { setCertificateStatusBit } from "./certificate-status-list.service";
 import { processCertificateOutboxBatch } from "./certificate-worker-router";
+import { isDeployedRuntime } from "@atlas/core/config/runtime-environment";
 
 export async function expireDueCertificatesForActiveTenants(
   requestId: string,
@@ -53,6 +54,9 @@ export async function expireDueCertificatesForActiveTenants(
       },
     );
     expired += tenantExpired;
+
+    // Production PDF generation belongs to the bounded worker, not cron HTTP.
+    if (isDeployedRuntime()) continue;
 
     try {
       const drainResult = await processCertificateOutboxBatch({

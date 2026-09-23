@@ -9,7 +9,7 @@ import {
   deleteLearningPath,
   formatLearningPathApiError,
   updateLearningPath,
-} from "@atlas/contracts-modules/learning-paths/learning-path.api-client";
+} from "@/modules/learning-paths/learning-path.api-client";
 import type { z } from "zod";
 import type { learningPathDetailResponseSchema } from "@atlas/contracts/learning-paths/learning-path.schemas";
 import { serializeStepsForApi } from "../learning-path-step-utils";

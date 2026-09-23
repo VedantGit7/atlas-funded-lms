@@ -35,7 +35,8 @@ export async function waitForHydration(
   timeoutMs: number = HYDRATION_TIMEOUT_MS,
 ): Promise<void> {
   await page.waitForFunction(
-    () => Object.keys(document.body).some((key) => key.startsWith("__react")),
+    () =>
+      document.body !== null && Object.keys(document.body).some((key) => key.startsWith("__react")),
     undefined,
     { timeout: timeoutMs },
   );

@@ -1,0 +1,141 @@
+{
+  "finding": "F04",
+  "recordedAtUtc": "2026-09-19T12:15:55.4430824Z",
+  "scope": "Local implementation; deployment prerequisites remain open",
+  "baseCommit": "ca8c0f1e7e69780b4e2ddc2a1136907a2e47c350",
+  "checks": [
+    {
+      "name": "Initial red reproduction",
+      "log": "f04-tests-red.log",
+      "passed": 1,
+      "failed": 21
+    },
+    {
+      "name": "Offline unit/security/lint-rules/events",
+      "log": "f04-offline-tests.log",
+      "exitCode": 0,
+      "passed": 2335,
+      "skipped": 1
+    },
+    {
+      "name": "Expanded route/authorization/CI discovery",
+      "log": "f04-final-route-tests.log",
+      "exitCode": 1,
+      "passed": 457,
+      "failed": 16,
+      "skipped": 2,
+      "resolution": "15 stale F03 claim fixtures corrected and retested; CI cache access retried successfully"
+    },
+    {
+      "name": "Final API and changed-fixture regression, including real Redis",
+      "log": "f04-final-focused-tests.log",
+      "exitCode": 0,
+      "files": 24,
+      "passed": 210,
+      "failed": 0
+    },
+    {
+      "name": "Exact sensitive-route audit CI test",
+      "log": "f04-ci-audit-test.log",
+      "exitCode": 0,
+      "passed": 1
+    },
+    {
+      "name": "TypeScript project check",
+      "log": "f04-typecheck.log",
+      "exitCode": 0
+    },
+    {
+      "name": "Changed-file ESLint",
+      "log": "f04-lint.log",
+      "exitCode": 0
+    },
+    {
+      "name": "Changed-file formatting",
+      "log": "f04-format-check.log",
+      "exitCode": 0
+    },
+    {
+      "name": "Git whitespace validation",
+      "log": "f04-diff-check.log",
+      "exitCode": 0
+    }
+  ],
+  "guards": [
+    {
+      "check": "scripts/guards/check-route-metadata.mjs",
+      "exitCode": 0,
+      "output": ""
+    },
+    {
+      "check": "scripts/guards/check-prisma-boundary.mjs",
+      "exitCode": 0,
+      "output": ""
+    },
+    {
+      "check": "scripts/guards/check-audit-compliance.mjs",
+      "exitCode": 0,
+      "output": "check-audit-compliance: OK (2438 files scanned)."
+    },
+    {
+      "check": "scripts/guards/check-outbox-compliance.mjs",
+      "exitCode": 0,
+      "output": ""
+    },
+    {
+      "check": "scripts/guards/check-package-exports.mjs",
+      "exitCode": 0,
+      "output": "check-package-exports: OK (5322 files, 22 workspace packages)."
+    },
+    {
+      "check": "scripts/ci/check-frontend-api-closure.mjs",
+      "exitCode": 0,
+      "output": "Frontend API closure OK (804 routes scanned, strict=no)."
+    }
+  ],
+  "browser": {
+    "url": "http://platform.localhost:3000/platform",
+    "result": "Existing local authenticated operator session opened console, catalog and tenant list with data",
+    "temporaryReason": "F04 local read-only verification of rate limiting",
+    "reasonCleared": true,
+    "businessMutations": false,
+    "runtimeStore": "development memory",
+    "requestId": "req_621557fe-7c9e-40ef-8ead-eb8d91732fdc"
+  },
+  "redis": {
+    "testCount": 3,
+    "connections": 2,
+    "concurrentIncrements": 100,
+    "randomExpiringPrefixes": true,
+    "flushUsed": false,
+    "containerId": "b493bea3785d4cc033428b5dd7dc3e820b9964923be851e570b38c501aeb9a33",
+    "imageDigest": "sha256:520775a41a63e77e06c73e35d2fd9cc15921a609516818796b4ecbb813078bc7",
+    "containerStoppedAndAutoRemoved": true,
+    "existingPostgresPreserved": true
+  },
+  "review": {
+    "reviewer": "review_f04",
+    "fixed": [
+      "Diagnostic Retry-After forwarding",
+      "Custom route validation ordering",
+      "Unattributed internal calls sharing a global ingress quota"
+    ],
+    "deploymentCondition": "All protected unknown-IP traffic skips only the ingress IP tier; edge limits and origin restrictions must protect unauthenticated attempts."
+  },
+  "deploymentChanges": false,
+  "prerequisites": [
+    "Shared Redis configured in both apps and replicas",
+    "Verified trusted IP forwarding and restricted origin access",
+    "Edge protection for unattributed traffic and failed authentication",
+    "Configured outage alert and representative staging/load checks"
+  ],
+  "limitations": [
+    "No production deployment or provider policy changes",
+    "No full Next.js production bundle build",
+    "No full database/browser suite",
+    "Browser check used development memory; real Redis verified separately",
+    "Test counts overlap across runs"
+  ],
+  "sourceHashManifest": "f04-source-hashes.json",
+  "hashedFiles": 39
+}

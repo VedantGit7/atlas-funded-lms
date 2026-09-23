@@ -1,0 +1,36 @@
+# Managed Node API and worker runtime (F22)
+
+The existing Vercel web service forwards API traffic to a separate managed Node API. A continuously running managed Node worker owns SCORM extraction, certificate PDFs, reports, privacy exports and durable usage aggregation. API and worker startup require `ATLAS_SERVICE_RUNTIME=managed-node`; detected Vercel Functions, Lambda, Netlify Functions, Azure Functions, Google function and Next edge environments are rejected. This declaration is an operator contract, not automatic verification of an unknown hosting platform.
+
+No API/worker host has been selected or provisioned. The repository includes provider-neutral Docker targets and a Compose service definition in `deploy/managed-node`. A selected host must support persistent processes, outbound PostgreSQL/R2/Redis/SMTP/monitoring connections, private health probes, ephemeral writable `/tmp`, graceful termination and automatic restart. Scale-to-zero/request-only workers are unsupported.
+
+## Build and launch
+
+For local development, `pnpm dev` starts the web, API and outbox worker together and stops the group when a member exits. If starting web/API separately, also run `pnpm worker:outbox`; package readiness and usage rollups depend on it. Do not run a second worker on the same health port. These local commands load development settings and are not production startup commands.
+
+Run from the repository root with Docker BuildKit. Installations use Node 24 and the frozen pnpm lockfile; browser installation matches the locked Playwright dependency. Use an immutable source SHA in the image tags. Apply the separately reviewed migrations/grants before runtime startup; no image build runs migrations.
+
+Dependency layers contain only workspace manifests, the frozen lockfile, installation policy and Prisma generation inputs. Application source is copied afterward, and Chromium is installed in a separate dependency stage. Source-only edits therefore reuse the package/browser layers. BuildKit also caches the pnpm store and APT downloads; schema or dependency changes correctly invalidate the affected layers.
+
+```sh
+docker build -f deploy/managed-node/Dockerfile --target worker -t atlas-worker:SOURCE_SHA .
+docker build -f deploy/managed-node/Dockerfile --target api --secret id=api_build_env,src=/secure/api-build.env -t atlas-api:SOURCE_SHA .
+```
+
+The API build secret is a dotenv-format file containing the actual staging/production F05 configuration, including `ATLAS_SERVICE_RUNTIME=managed-node` and `APP_ENV`. Do not check it into the repository. Next embeds intentionally public build settings; never use public variable names for secrets. Runtime settings come from the host secret manager. The Docker build context excludes env files, local storage, generated clients, private key/backup files and development outputs. An explicit schema-only Prisma generation step runs after installation; the image does not rely on lifecycle scripts to create the client. The worker build then imports its complete processor graph, generated client and usage drain as the unprivileged runtime user with networking disabled.
+
+Export `ATLAS_API_IMAGE`, `ATLAS_WORKER_IMAGE`, `ATLAS_API_ENV_FILE`, and `ATLAS_WORKER_ENV_FILE`, then review `docker compose -f deploy/managed-node/compose.yaml config --quiet` before `up -d`. The API binds only loopback port 3001 in this reference deployment; connect it to an authenticated TLS ingress or private managed-service origin. Do not expose worker port 8081 publicly. Web remains on its existing Vercel deployment.
+
+The worker image starts Node directly with the TypeScript loader, preserving SIGTERM delivery. Set `TSX_TSCONFIG_PATH=/app/backend/apps/api/tsconfig.json` when starting outside Compose. Both services run as an unprivileged user. The reference limits are 2 CPUs/2 GiB per service, 256 MiB `/tmp` and 256 MiB worker shared memory; validate measured workload headroom before changing replica counts. Compose restarts exited processes; an unhealthy Docker health check by itself does **not** restart a container. Configure the managed host's liveness restart policy against `/healthz` and readiness against `/readyz`.
+
+## Work and recovery contract
+
+- Sweeps execute processors serially. General processor batches default to 25 and are capped at 100; SCORM, certificate, report and privacy-export processors claim at most one job per tenant per pass. They use the existing database delivery leases and retry policy. Concurrency scales with the explicitly configured worker replica count.
+- Usage drains process at most the configured batch limit for each tenant per sweep, including inactive/deleted tenants. Committed usage survives process termination. A full batch triggers another sweep without the idle wait; failures remain durable for subsequent attempts.
+- Production PDF and report creation paths publish durable events and leave execution to the worker. Request completion and `after()` callbacks are not durability boundaries. Development retains the optional callback convenience and returns its Promise to Next.
+- Privacy exports page 100 records and spool to private ephemeral disk, capped at 100,000 rows, 64 MiB and 120 seconds of generation. Artifacts remain in object storage. The F15 protection intentionally holds ambiguous `RUNNING` uploads for reconciliation after a lost process; never blindly replay a remote side effect whose outcome is unknown. SCORM limits and upload evidence are recorded with the F22 remediation report.
+- SIGTERM stops starting new processor/maintenance units, allows the current unit to finish, then exits. The worker's default shutdown deadline is 30 seconds; host grace must exceed it (Compose: 45 seconds). Forced termination leaves durable claims/outcomes for the next instance. Provider side effects without deduplication can require reconciliation; restart safety does not promise exactly-once external delivery.
+
+## Required host acceptance evidence
+
+Run deployment preflight for API/worker, verify `/healthz` advances and `/readyz` becomes unavailable during shutdown, and record release SHA/process IDs. Create disposable queued usage and an idempotent outbox job, terminate the process between claim and completion, restart, and verify committed usage is counted once and the expired claim is safely recovered. Also test an uncertain remote export/upload outcome reaches reconciliation rather than unsafe duplication. Perform the greater-than-4.5-MiB direct object-store upload test from the actual web origin and read the processed result from a fresh instance. Local unit/database tests and rendered Compose configuration do not establish successful host deployment, live provider CORS, browser installation or production restart behavior.

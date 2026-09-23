@@ -1,6 +1,10 @@
 import type { NextConfig } from "next";
 import bundleAnalyzer from "@next/bundle-analyzer";
-import { securityHeadersRule } from "../../../configs/security-headers.mjs";
+import {
+  securityHeadersRule,
+  scormFramingHeadersRule,
+  formFramingHeadersRule,
+} from "../../../configs/security-headers.mjs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { withSentryConfig } from "@sentry/nextjs";
@@ -16,6 +20,12 @@ const apiInternalUrl = process.env["API_INTERNAL_URL"] ?? "http://127.0.0.1:3001
 const repoRoot = path.join(webSrcDir, "..", "..", "..");
 
 const nextConfig: NextConfig = {
+  distDir:
+    process.env["ATLAS_PERF_BUILD"] === "1"
+      ? ".next-perf"
+      : process.env["ATLAS_BROWSER_BUILD"] === "1"
+        ? ".next-e2e"
+        : ".next",
   reactStrictMode: true,
   poweredByHeader: false,
   // F7: emit .next/standalone so a deployment carries only the traced files
@@ -28,23 +38,20 @@ const nextConfig: NextConfig = {
   outputFileTracingRoot: repoRoot,
   transpilePackages: ["@atlas/design-system"],
   experimental: {
-    // API requests are rewritten to the backend; raise proxy buffers for uploads.
-    proxyClientMaxBodySize: "110mb",
+    // Only metadata crosses the web proxy; large uploads use signed object URLs.
+    proxyClientMaxBodySize: process.env["NODE_ENV"] === "development" ? "140mb" : "4mb",
     serverActions: {
-      bodySizeLimit: "110mb",
+      bodySizeLimit: "1mb",
     },
     // H16. 556 files import from the lucide-react barrel, which pulled the whole
     // icon set into a chunk loaded by 325 routes. Rewriting the barrel to deep
     // imports is the single largest lever on learner first-load weight.
     optimizePackageImports: ["lucide-react"],
   },
-  // H2. configs/security-headers.mjs describes itself as shared by both Next
-  // apps and was wired into the API only -- so the app that actually serves HTML
-  // to browsers sent no CSP, no X-Frame-Options and no HSTS. Clickjacking of
-  // /admin and /studio, and the second line of defence against both stored-XSS
-  // vectors, depended on this being here rather than on the JSON API.
+  // Keep framing exceptions after the baseline. The proxy owns per-request
+  // document CSP; the SCORM route owns its enforced opaque sandbox policy.
   headers() {
-    return Promise.resolve([securityHeadersRule]);
+    return Promise.resolve([securityHeadersRule, scormFramingHeadersRule, formFramingHeadersRule]);
   },
   // Local dev uses tenant/platform hostnames (see plan/frontend-planning/local-dev-urls.md)
   // instead of bare "localhost", so Next's dev-resource origin check needs these allowed
@@ -57,8 +64,8 @@ const nextConfig: NextConfig = {
   },
   async rewrites() {
     return {
-      // Run before filesystem routes so mirrored `app/api/v1/**/route.ts` files
-      // do not shadow the canonical backend handlers in dev.
+      // Business API handlers live exclusively in the backend app.
+      // The web proxy stamps trusted tenant/session context before this rewrite.
       beforeFiles: [
         {
           source: "/api/v1/:path*",

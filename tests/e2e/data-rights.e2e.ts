@@ -42,26 +42,23 @@ describeWithE2E("data-rights e2e", () => {
 
     expect(created.data.status).toBe("QUEUED");
 
-    await withTenantTx(authoringTenantTx(fixture, fixture.adminMembershipId), async (tx) => {
-      await processExportRequestedEvent(
-        tx,
-        {
-          tenantId: fixture.tenantId,
-          actorMembershipId: fixture.adminMembershipId,
-          requestId: admin.requestId,
-        },
-        {
-          id: randomUUID(),
-          eventType: "data.export_requested",
-          payload: dataExportRequestedPayloadSchema.parse({
-            exportJobId: created.data.id,
-            requestedAt: new Date().toISOString(),
-            requestedByMembershipId: fixture.adminMembershipId,
-            schemaVersion: 1,
-          }),
-        },
-      );
-    });
+    await processExportRequestedEvent(
+      {
+        tenantId: fixture.tenantId,
+        actorMembershipId: fixture.adminMembershipId,
+        requestId: admin.requestId,
+      },
+      {
+        id: randomUUID(),
+        eventType: "data.export_requested",
+        payload: dataExportRequestedPayloadSchema.parse({
+          exportJobId: created.data.id,
+          requestedAt: new Date().toISOString(),
+          requestedByMembershipId: fixture.adminMembershipId,
+          schemaVersion: 1,
+        }),
+      },
+    );
 
     const { getExportJob } = await import("@atlas/domain/data-rights/data-rights.service");
 

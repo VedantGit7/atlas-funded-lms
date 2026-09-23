@@ -1,0 +1,179 @@
+{
+  "finding": "F07",
+  "verifiedAt": "2026-09-19T20:10:16.976Z",
+  "status": "implemented-and-verified-locally",
+  "productionMigrationApplied": false,
+  "liveRefundExecuted": false,
+  "checks": [
+    {
+      "name": "Focused refund adapter/service/DTO/UI tests",
+      "exitCode": 0,
+      "files": 7,
+      "passed": 85,
+      "log": "f07-focused.log"
+    },
+    {
+      "name": "Isolated local PostgreSQL workflow and ledger tests",
+      "exitCode": 0,
+      "files": 1,
+      "passed": 13,
+      "log": "f07-postgres.log"
+    },
+    {
+      "name": "Broader unit/security/events regressions",
+      "exitCode": 0,
+      "files": 283,
+      "passed": 2076,
+      "log": "f07-regressions.log"
+    },
+    {
+      "name": "Project TypeScript build check",
+      "exitCode": 0,
+      "log": "f07-typecheck.log"
+    },
+    {
+      "name": "All F07 TypeScript and TSX files scoped ESLint",
+      "exitCode": 0,
+      "log": "f07-lint.log"
+    },
+    {
+      "name": "Prisma schema validate",
+      "exitCode": 0,
+      "log": "f07-prisma-validate.log"
+    },
+    {
+      "name": "Eight repository guards",
+      "exitCode": 0,
+      "log": "f07-guards.json"
+    }
+  ],
+  "independentReview": "Four issues fixed; no remaining important correctness/security blocker identified in reviewed scope.",
+  "limitations": [
+    "No complete browser/HTTP/provider end-to-end test",
+    "Migration and deployed worker/provider test-mode acceptance pending",
+    "Unknown outcomes require investigation; no blind refund resubmission",
+    "No refund-notification delivery or self-service reconciliation override"
+  ],
+  "sources": [
+    {
+      "path": "backend/packages/domain/src/payments/refund-intents.repository.ts",
+      "sha256": "32589dcc9270b54e1f8fb839dc80483f3b7cd2e995dbd317531c835807506149"
+    },
+    {
+      "path": "backend/packages/domain/src/payments/refund-workflow.ts",
+      "sha256": "eed7183a5050b86959427ede40372890dbf96b25304937254a2514323374a7c5"
+    },
+    {
+      "path": "backend/packages/domain/src/payments/payment-provider.ts",
+      "sha256": "8c711c57478dc07ac4065d4c385492fc59135ac851a25848655e0be5b7eeb6b0"
+    },
+    {
+      "path": "backend/packages/domain/src/payments/adapters/stripe.adapter.ts",
+      "sha256": "5a283120f8873a6b2a66b59e662f87d7a18c3cad53b61bbeda5185644c817c3c"
+    },
+    {
+      "path": "backend/packages/domain/src/payments/adapters/razorpay.adapter.ts",
+      "sha256": "ecd4b3e6136219be76dd2e24b31a8e602a94e9895adf15fc53ef687b8188e49d"
+    },
+    {
+      "path": "backend/packages/domain/src/reports/payments-roster.dto.ts",
+      "sha256": "e724a8db32608c4ec25f7994ef9a7b55f33d9d58dae8ee3b4b472aafe500c015"
+    },
+    {
+      "path": "backend/packages/domain/src/reports/payments-roster.service.ts",
+      "sha256": "f2c7ce759292f54364ae1b05dc3f9efa52fe84f310b8c687c36242a4a490e5bb"
+    },
+    {
+      "path": "backend/packages/domain/src/reports/payments-roster.repository.ts",
+      "sha256": "cdc1c2871cbce016bcd18b380b11646d591eff7adfb11ddcf4ed44a28dd189bf"
+    },
+    {
+      "path": "backend/apps/api/src/worker/refund-worker.ts",
+      "sha256": "216bdfa28a18a70c0fe2425dabbf668fc72e663076ab3d7c6f82cd5b8e80b815"
+    },
+    {
+      "path": "backend/apps/api/src/worker/outbox-processors.ts",
+      "sha256": "c109a5b44385559e36b51ca941ac54fdc604c5dd48225796ab249fff37dfea8a"
+    },
+    {
+      "path": "backend/apps/api/src/app/api/v1/payments/webhooks/stripe/route.ts",
+      "sha256": "a102ff20430620db2231e324fd6d621eaaa439990aeea78053096431590958e5"
+    },
+    {
+      "path": "backend/apps/api/src/app/api/v1/payments/webhooks/razorpay/route.ts",
+      "sha256": "456d1c57d174062f31f8c17520fcb87466c391a1959d167aede7a7c63b4feeda"
+    },
+    {
+      "path": "backend/prisma/migrations/20260920010000_108_refund_intents/migration.sql",
+      "sha256": "c7e4cb736ba6921827ce99a279ced12956e73352f8b11099f3e46e675a125331"
+    },
+    {
+      "path": "backend/prisma/schema.prisma",
+      "sha256": "2d20f1321cb2f9ccfd74c73a79c75220004189d6a95600e723db72d1820ff64a"
+    },
+    {
+      "path": "backend/prisma/sql/grants/025_02_table_grants.sql",
+      "sha256": "ad4502b20ebb60c176c5f3637410e575c21ae811e43388cf50615c3546554712"
+    },
+    {
+      "path": "frontend/apps/web/src/features/admin/reports/AdminPaymentOrderRefundPage.tsx",
+      "sha256": "a3fd393ad3754153758e13913f77482caf83ad34961f1127d26243fdc91e0840"
+    },
+    {
+      "path": "frontend/apps/web/src/features/admin/reports/AdminPaymentRefundModal.tsx",
+      "sha256": "0745d16b8a053dc60f004f062388be7dcedc447a43d97e00e11a4184d260e759"
+    },
+    {
+      "path": "frontend/apps/web/src/features/admin/reports/AdminPaymentsRefundsLedgerPage.tsx",
+      "sha256": "10006df0ee238147b4572a3ce8c4335c458f773fe9f16a274941e1059e1e8e4c"
+    },
+    {
+      "path": "frontend/apps/web/src/features/admin/reports/AdminPaymentOrderDetailPage.tsx",
+      "sha256": "4626ac4080b5dd943decd84477e274f501ea78fe33f6e2c52bbd4b7709d3e56d"
+    },
+    {
+      "path": "frontend/apps/web/src/features/admin/reports/AdminPaymentTransactionDetailBody.tsx",
+      "sha256": "7e89b53d59875a73b9de54db3afea9893d9d23485c05f3893bcd2ab5aab5c393"
+    },
+    {
+      "path": "frontend/apps/web/src/features/admin/reports/PaymentRefundHistory.tsx",
+      "sha256": "d744c513234bba5384688cbab82a3e9efec1609bb399fb503cc236c7af0c643c"
+    },
+    {
+      "path": "frontend/apps/web/src/features/admin/reports/admin-payments-roster-api.ts",
+      "sha256": "c2677841f1ad57445ef4269557fff9975c74e3ec5c1184ccdb542e4955f2ba74"
+    },
+    {
+      "path": "frontend/apps/web/src/features/admin/reports/refund-submission.ts",
+      "sha256": "7b4d600696725c57fbde9248847ff581706b88e9eb21123f3a71ca80983b0968"
+    },
+    {
+      "path": "tests/unit/payments/refund-adapters.test.ts",
+      "sha256": "a8854f312bdc882966ea246ec8a9fafccc387ae767f99ea66d925bfae3431f02"
+    },
+    {
+      "path": "tests/unit/payments/refund-boundary.test.ts",
+      "sha256": "13e45c808cb89fe4b1541675896eba6b337611fdcabedea311e30e71a04b771c"
+    },
+    {
+      "path": "tests/unit/payments/refund-request.test.ts",
+      "sha256": "f6b39234e0244eff1facefc13cfe04b98dea07792e796e2c7fb01bc1a17ea825"
+    },
+    {
+      "path": "tests/unit/reports/payments-roster.test.ts",
+      "sha256": "130048c1b1d35ea5f94b132d53fc0c865712aa3ea7c809263e40ca56ddd3dae1"
+    },
+    {
+      "path": "tests/unit/admin/refund-submission.test.ts",
+      "sha256": "66ac8c716ece4bac1b826bdb092d32a30830b456b6d5f4b920d0e5a77380409a"
+    },
+    {
+      "path": "tests/unit/admin/payment-refund-history.test.ts",
+      "sha256": "287a1fc423b40032d342775417f07d6e9e2b0a4b15f020ea6fb8f149d4e23b38"
+    },
+    {
+      "path": "tests/integration/payments/refund-workflow.postgres.test.ts",
+      "sha256": "e309dcda2355885ba8a99205d4862a5129e4301bf9fb58fc53cc75d36ec6e9b8"
+    }
+  ]
+}

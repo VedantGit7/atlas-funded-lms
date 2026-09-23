@@ -32,7 +32,13 @@ overrides:
   # 3.1.5, which is itself affected. Reaches the build through ajv, via both
   # prisma and @sentry/nextjs -> webpack -> schema-utils.
   "fast-uri@<3.1.6": "^3.1.6"
-  "hono@<4.12.34": "^4.12.34"
+  "hono@<4.13.5": "^4.13.5"
+  # F12: retain each consumer's fflate minor line and use its ZIP64 fix.
+  "fflate@>=0.4.5 <0.4.9": "^0.4.9"
+  "fflate@>=0.6.0 <0.6.11": "^0.6.11"
+  # Fix both query-parser DoS advisories in the Lighthouse tooling tree.
+  "qs@<6.16.0": "^6.16.0"
+  "baseline-browser-mapping@>=2.0.0 <2.11.0": "^2.11.0"
   "ip-address@<=10.3.0": "^10.3.1"
   # maxTotalMergeKeys does not bound CPU on merge keys. The previous floor
   # (^3.15.0) resolved 3.15.1, which is still affected. Scoped to the 3.x
@@ -71,6 +77,8 @@ overrides:
 # of being permanently red on one nobody can act on. Tracked as SEC-09 in
 # docs/release/security-exception-register.md -- revisit when extract-zip
 # publishes a fix or @lhci/cli moves off puppeteer.
+# F12 rechecked 2026-09-20: npm still publishes 2.0.1 as latest; an unfiltered
+# audit returns only these two existing exceptions after the security updates.
 auditConfig:
   ignoreGhsas:
     - GHSA-jmr9-qjv8-65gv

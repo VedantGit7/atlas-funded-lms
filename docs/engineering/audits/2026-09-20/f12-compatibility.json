@@ -1,0 +1,24 @@
+{
+  "ok": true,
+  "checks": [
+    "fflate 0.4.9 gzip and zip round trips",
+    "fflate 0.6.11 gzip and zip round trips",
+    "fflate 0.8.3 gzip and zip round trips",
+    "qs nested query and arrays",
+    "installed virtual-store lock matches all resolved package keys"
+  ],
+  "preExistingPeer": {
+    "viteBefore": [
+      "vite@8.0.16"
+    ],
+    "viteAfter": [
+      "vite@8.0.16"
+    ],
+    "sentryBefore": [
+      "@sentry/server-utils@10.59.0"
+    ],
+    "sentryAfter": [
+      "@sentry/server-utils@10.59.0"
+    ]
+  }
+}

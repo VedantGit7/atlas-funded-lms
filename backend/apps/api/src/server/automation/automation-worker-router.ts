@@ -13,18 +13,23 @@ export async function processAutomationOutboxBatch(args: {
     parentRequestId: args.requestId,
     jobName: "automation-outbox",
     execute: () =>
-      withTenantTx(
+      processOutboxBatch(
         {
-          tenantId: args.tenantId,
-          requestId: args.requestId,
-          allowAnonymousTenantRead: true,
+          transaction: (fn) =>
+            withTenantTx(
+              {
+                tenantId: args.tenantId,
+                requestId: args.requestId,
+                allowAnonymousTenantRead: true,
+              },
+              fn,
+            ),
         },
-        async (tx) =>
-          processOutboxBatch(tx, {
-            limit: args.limit ?? 25,
-            maxRetries: args.maxRetries ?? 3,
-            handlers: createAutomationOutboxConsumers(),
-          }),
+        {
+          limit: args.limit ?? 25,
+          maxRetries: args.maxRetries ?? 3,
+          handlers: createAutomationOutboxConsumers(),
+        },
       ),
   });
 }

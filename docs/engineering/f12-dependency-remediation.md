@@ -1,0 +1,47 @@
+# F12 — Dependency advisory remediation
+
+Date: 2026-09-20. Status: **all 12 unsuppressed audit entries remediated locally; existing SEC-09 exception remains**. Changes are installed in the local workspace and recorded in the lockfile. They have not been deployed.
+
+## Result
+
+The fresh baseline reproduced the original audit: 12 unsuppressed advisory entries (one high and eleven moderate). Registry totals additionally counted two previously suppressed high `extract-zip` advisories. After the updates, `pnpm audit --json` exits successfully with an empty `advisories` object. Its raw totals still show those two high exceptions; this is not a zero-vulnerability claim.
+
+A separate npm bulk-advisory query over every resolved package/version, without the workspace suppressions, returned **only `extract-zip`, with two advisories**. No suppression was added or broadened. The existing 24-hour minimum release age remains enabled, and every selected patch was published before that window.
+
+The production-only dependency audit reports **zero advisories at every severity**, including zero high entries in its raw totals. The installed dependency-path report confirms `extract-zip` is reached only through the root Lighthouse development dependency.
+
+## Changes and reachability
+
+| Dependency                         | Before → after                                  | Change and relevance                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| ---------------------------------- | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `adm-zip`                          | 0.6.0 → 0.6.1                                   | Raised root development and storage runtime dependency floors to `^0.6.1`. Fixes the allocation and symlink advisories. The LMS SCORM path reads ZIP entries in memory and retains its existing 25 MiB per-entry, 250 MiB total, and 2,000-entry caps before decompression. It does not use the affected filesystem extraction path. [Allocation advisory](https://github.com/advisories/GHSA-7q85-xj36-vmfc), [symlink advisory](https://github.com/advisories/GHSA-vwc7-r8mq-g2x9). |
+| `vitest` and its matching packages | 4.1.9 → 4.1.11                                  | Raised direct floor to `^4.1.11`; the mocker, runner, snapshot and other matching packages move together. Fixes development/test-server file-read exposure while staying on major 4. [Vitest advisory](https://github.com/advisories/GHSA-82fw-gwwq-j7x9).                                                                                                                                                                                                                            |
+| `fflate`                           | 0.4.8 → 0.4.9; 0.6.10 → 0.6.11                  | Narrow vulnerable-range overrides preserve the minor lines expected by PostHog and three-stdlib. The unaffected 0.8.3 copy stays unchanged. These dependencies reach the frontend; dependency reachability does not establish that the vulnerable ZIP function is invoked by a user journey. [ZIP64 advisory](https://github.com/advisories/GHSA-px8p-9vwx-vf98).                                                                                                                     |
+| `qs`                               | 6.15.2 → 6.16.0                                 | Scoped override fixes both query-parser advisories in Lighthouse's Express/body-parser tree. This is development tooling, not the LMS request parser. [Comma-array advisory](https://github.com/advisories/GHSA-x5fp-wj9c-mxmx), [isBuffer advisory](https://github.com/advisories/GHSA-4mjr-xmp4-gh2g).                                                                                                                                                                              |
+| `baseline-browser-mapping`         | 2.10.38 removed; consumers use existing 2.11.24 | Scoped override removes the vulnerable copy used by Next/build tooling, preserving the already-resolved safe version. [Invalid-input advisory](https://github.com/advisories/GHSA-w5vr-8v7q-w6rv).                                                                                                                                                                                                                                                                                    |
+| `hono`                             | 4.13.3 → 4.13.8                                 | Raised the existing override's minimum to 4.13.5; resolved safe 4.13.8. It arrives via Prisma's development tooling. The LMS does not become a Hono application because the dependency tree contains it. Fixes the [SSG output-path](https://github.com/advisories/GHSA-gqvv-2mrq-wpjv), [body parsing](https://github.com/advisories/GHSA-g6gw-c38x-mqfc), and [query-fragment](https://github.com/advisories/GHSA-crvj-82cr-hjcx) advisories.                                       |
+
+The lockfile delta is restricted to these affected packages, Vitest's coordinated dependency changes and their resolution references. `es-module-lexer@2.1.0` disappears through the Vitest mocker update. No Next.js, Prisma, React or Vite version was changed. Existing F01–F11 manifest and lockfile changes were preserved.
+
+## Existing exception reviewed
+
+SEC-09 remains open for `GHSA-jmr9-qjv8-65gv` and `GHSA-7pqw-9j4j-h8q3`. The official npm registry still reports `extract-zip@2.0.1` as latest; the advisory's patched `>=2.0.2` is not published. It reaches this workspace through the existing `@lhci/cli` development dependency and browser-download tooling. It is not the SCORM ZIP reader. Keep downloaded browser archives restricted to trusted sources, and do not expose Lighthouse tooling as an upload/extraction service.
+
+The existing owner (Frontend platform), expiry (2026-11-30), and exact two-ID suppression are unchanged. The exception can be retired when a safe package/parent chain is available, or through a separate approved decision to replace/remove the Lighthouse workflow. No dependency was removed merely to conceal its advisory. See the [exception register](../release/security-exception-register.md).
+
+## Verification
+
+- Frozen-lockfile installation succeeded across all 30 workspace projects. Lifecycle scripts were disabled for the install; the package versions actually used by the tests match the resolved lockfile.
+- **2,336 tests passed across the regression run and one isolated retry**: unit, security and CI suites, plus the mocked R2 integration suite. The initial run passed 2,335 and failed one CI guard because sandboxing denied access to the existing pnpm cache. That exact test passed after granting cache access; no code was changed to bypass it.
+- SCORM coverage includes normal package/manifest extraction, traversal rejection, declared entry and aggregate size caps, entry count and launch-path normalization. Upload/download, MIME/size/checksum, storage configuration and secret-leakage checks also passed.
+- Compatibility smoke checks passed for ZIP and gzip round trips on all three installed fflate minor lines and nested/array query parsing on qs 6.16.0.
+- The repository TypeScript build check passed. The actual Prisma CLI generation fixture passed as part of the CI tests without a database connection.
+- Peer inspection reports an existing mismatch: `@sentry/server-utils@10.59.0` declares Vite 3–6 support while the workspace has Vite 8.0.16. Both versions are identical before/after F12. This update does not resolve that separate compatibility warning.
+
+Database and Redis connection variables were removed before tests to prevent the repository's global teardown from touching a real database. Provider tests use mocks. No live database, email, storage or deployment mutation was performed. A new full Next/Vercel deployment was not attempted: the F11 hosting and environment prerequisites remain unresolved. Type checking and local regression tests do not substitute for that rollout acceptance.
+
+## Evidence and maintenance
+
+Evidence is in `audits/2026-09-20/f12-*`: baseline/final/unfiltered audit JSON, publication metadata, exact lockfile delta, install output, regression output, retry output and compatibility checks. `f12-verification.json` records outcomes and SHA-256 hashes of the final source/configuration files.
+
+For subsequent releases, run the frozen install, audit and relevant application tests again. Audit data changes over time; today's empty unsuppressed result does not certify future releases. Review the existing suppression separately rather than interpreting the successful audit exit status as a clean unfiltered tree.

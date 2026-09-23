@@ -1,3 +1,6 @@
+import { createHash } from "node:crypto";
+import { OutboxDeliveryError } from "@atlas/events/services/outbox-worker.service";
+import type { MarketingWebhookDispatchPayload } from "./marketing-integrations.events";
 import { safeOutboundFetch } from "@atlas/security/safe-outbound-fetch";
 import { publishOutboxEvent } from "@atlas/events";
 import type { TenantTx } from "@atlas/db";
@@ -12,7 +15,8 @@ import { marketingIntegrationsRepository } from "./marketing-integrations.reposi
 async function deliverWebhook(args: {
   url: string;
   eventKey: string;
-  payload: Record<string, unknown>;
+  requestBody: string;
+  idempotencyKey: string;
   timeoutMs?: number;
 }): Promise<{
   ok: boolean;
@@ -20,11 +24,7 @@ async function deliverWebhook(args: {
   message: string;
   requestBody: string;
 }> {
-  const requestBody = JSON.stringify({
-    event: args.eventKey,
-    occurredAt: new Date().toISOString(),
-    data: args.payload,
-  });
+  const requestBody = args.requestBody;
   const controller = new AbortController();
   const timer = setTimeout(() => {
     controller.abort();
@@ -38,6 +38,7 @@ async function deliverWebhook(args: {
         "content-type": "application/json",
         "user-agent": "Atlas-Marketing-Integrations/1.0",
         "x-atlas-event": args.eventKey,
+        "idempotency-key": args.idempotencyKey,
       },
       body: requestBody,
       signal: controller.signal,
@@ -46,8 +47,8 @@ async function deliverWebhook(args: {
       ? `Delivered with status ${response.status}.`
       : `Remote responded with status ${response.status}.`;
     return { ok: response.ok, statusCode: response.status, message, requestBody };
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Webhook delivery failed.";
+  } catch {
+    const message = "WEBHOOK_ACCEPTANCE_UNKNOWN";
     return { ok: false, statusCode: null, message, requestBody };
   } finally {
     clearTimeout(timer);
@@ -98,49 +99,96 @@ export async function dispatchMarketingIntegrationWebhooks(
   });
 }
 
-/**
- * Perform the fan-out. Runs under the outbox worker, never in a request.
- *
- * Delivery failures are recorded but do not throw: one dead remote URL must not
- * fail the whole batch or block the other webhooks for that event.
- */
-export async function deliverMarketingIntegrationWebhooks(
-  tx: TenantTx,
-  ctx: Pick<ServiceCtx, "tenantId">,
-  eventKey: MarketingIntegrationEventKey,
-  payload: Record<string, unknown>,
+async function prepareMarketingWebhookDeliveries(
+  db: { transaction: <T>(fn: (tx: TenantTx) => Promise<T>) => Promise<T> },
+  ctx: Pick<ServiceCtx, "tenantId" | "requestId">,
+  event: { id: string; payload: MarketingWebhookDispatchPayload },
 ): Promise<void> {
-  const webhooks = await marketingIntegrationsRepository.listEnabledWebhooksForEvent(tx, eventKey);
-  if (webhooks.length === 0) return;
-
-  for (const webhook of webhooks) {
-    const result = await deliverWebhook({
-      url: webhook.url,
+  const { eventKey, data } = event.payload;
+  await db.transaction(async (tx) => {
+    const webhooks = await marketingIntegrationsRepository.listEnabledWebhooksForEvent(
+      tx,
       eventKey,
-      payload: {
-        tenantId: ctx.tenantId,
-        ...payload,
-      },
+    );
+    const requestBody = JSON.stringify({
+      event: eventKey,
+      occurredAt: new Date().toISOString(),
+      data: { ...data, tenantId: ctx.tenantId },
     });
-    try {
+    for (const webhook of webhooks) {
+      const idempotencyKey =
+        "atlas-webhook-" +
+        createHash("sha256")
+          .update(JSON.stringify([event.id, webhook.id]))
+          .digest("hex");
+      await publishOutboxEvent(tx, {
+        ctx,
+        eventType: MARKETING_WEBHOOK_DISPATCH_EVENT,
+        aggregateType: "marketing_integration_endpoint",
+        aggregateId: webhook.id,
+        payload: {
+          eventKey,
+          data: {},
+          schemaVersion: 1,
+          delivery: { webhookId: webhook.id, url: webhook.url, idempotencyKey, requestBody },
+        },
+        idempotencyKey,
+      });
+    }
+  });
+}
+
+/** Create one durable job per endpoint, or send a single frozen endpoint snapshot. */
+export async function deliverMarketingIntegrationWebhooks(
+  db: { transaction: <T>(fn: (tx: TenantTx) => Promise<T>) => Promise<T> },
+  ctx: Pick<ServiceCtx, "tenantId" | "requestId">,
+  event: { id: string; payload: MarketingWebhookDispatchPayload },
+): Promise<void> {
+  const { eventKey, delivery } = event.payload;
+  if (!delivery) {
+    await prepareMarketingWebhookDeliveries(db, ctx, event);
+    return;
+  }
+
+  // The header is a correlation key: arbitrary tenant endpoints do not promise deduplication.
+  const result = await deliverWebhook({
+    url: delivery.url,
+    eventKey,
+    requestBody: delivery.requestBody,
+    idempotencyKey: delivery.idempotencyKey,
+  });
+  try {
+    await db.transaction(async (tx) => {
       await marketingIntegrationsRepository.markWebhookDelivery(tx, {
-        id: webhook.id,
+        id: delivery.webhookId,
         status: result.ok
           ? `ok:${result.statusCode ?? 0}`
-          : `error:${result.message.slice(0, 180)}`,
+          : `error:${result.statusCode ?? "unknown"}`,
       });
       await marketingIntegrationsRepository.insertDelivery(tx, {
-        webhookId: webhook.id,
+        webhookId: delivery.webhookId,
         eventKey,
-        url: webhook.url,
+        url: delivery.url,
         ok: result.ok,
         statusCode: result.statusCode,
         message: result.message,
-        requestBody: result.requestBody,
+        requestBody: delivery.requestBody,
         source: "dispatch",
       });
-    } catch {
-      // Best-effort status write.
-    }
+    });
+  } catch {
+    throw new OutboxDeliveryError("reconciliation_required", "WEBHOOK_RECEIPT_UNKNOWN");
   }
+  if (result.ok) return;
+  if (result.statusCode === 429) throw new OutboxDeliveryError("retryable", "WEBHOOK_RATE_LIMITED");
+  if (
+    result.statusCode !== null &&
+    result.statusCode >= 400 &&
+    result.statusCode < 500 &&
+    result.statusCode !== 408
+  ) {
+    throw new OutboxDeliveryError("permanent", "WEBHOOK_REJECTED");
+  }
+  // A timeout or server error may occur after the receiver performed the action.
+  throw new OutboxDeliveryError("reconciliation_required", "WEBHOOK_ACCEPTANCE_UNKNOWN");
 }

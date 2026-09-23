@@ -4,7 +4,7 @@ import { PageGate } from "../../../../../components/patterns/PageGate";
 import { PostCard, type FeedPost } from "../../../../../features/community/components/PostCard";
 import type { CommentItem } from "../../../../../features/community/components/CommentTree";
 import { ServerApiError, serverApi } from "../../../../../lib/server-api";
-import { communityServerApi } from "@atlas/contracts-modules/community/community.server-api";
+import { communityServerApi } from "@/modules/community/community.server-api";
 
 type PostPageProps = {
   params: Promise<{ id: string }>;

@@ -10,7 +10,7 @@ import {
   deleteCompetencyDimension,
   formatCompetencyConfigApiError,
   updateCompetencyDimension,
-} from "@atlas/contracts-modules/competency/competency-config.api-client";
+} from "@/modules/competency/competency-config.api-client";
 import {
   alertErrorClassName,
   dimensionIconClassName,

@@ -13,7 +13,10 @@ const STORAGE_VALIDATION_MESSAGES: Partial<Record<string, string>> = {
   [STORAGE_ERROR_CODES.SELF_HOSTED_VIDEO_FORBIDDEN]: "Self-hosted video uploads are not allowed.",
 };
 
-export function toSafeErrorEnvelope(error: unknown, requestId: string) {
+export function toSafeErrorEnvelope(
+  error: unknown,
+  requestId: string,
+): ReturnType<typeof toCoreSafeErrorEnvelope> {
   if (error instanceof EntitlementRequiredError) {
     return {
       status: error.status,

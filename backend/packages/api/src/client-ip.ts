@@ -1,3 +1,5 @@
+import { isIP } from "node:net";
+
 /**
  * Client IP resolution for rate limiting.
  *
@@ -28,11 +30,24 @@ function parseHops(env: NodeJS.ProcessEnv): number {
   const raw = env["TRUSTED_PROXY_HOPS"];
   if (raw === undefined || raw.trim() === "") return 1;
 
-  const parsed = Number.parseInt(raw.trim(), 10);
-  if (!Number.isInteger(parsed) || parsed < 0) {
-    throw new Error(`TRUSTED_PROXY_HOPS must be a non-negative integer (got "${raw}").`);
+  const parsed = Number(raw.trim());
+  if (!/^\d+$/.test(raw.trim()) || !Number.isSafeInteger(parsed) || parsed < 0) {
+    throw new Error("TRUSTED_PROXY_HOPS must be a non-negative integer.");
   }
   return parsed;
+}
+
+export function validateClientIpConfiguration(env: NodeJS.ProcessEnv = process.env): void {
+  parseHops(env);
+  const header = env["TRUSTED_CLIENT_IP_HEADER"]?.trim();
+  if (header && !/^[a-zA-Z0-9-]+$/.test(header))
+    throw new Error("Invalid TRUSTED_CLIENT_IP_HEADER.");
+}
+
+function normalizeIp(value: string): string {
+  if (isIP(value) === 4) return value;
+  if (isIP(value) === 6) return new URL(`http://[${value}]/`).hostname;
+  return UNKNOWN_CLIENT;
 }
 
 /**
@@ -46,7 +61,7 @@ export function resolveClientIp(req: Request, env: NodeJS.ProcessEnv = process.e
     const value = req.headers.get(trustedHeader)?.trim();
     // A trusted edge header is single-valued. If it arrived as a list the edge
     // did not set it, so it is not trustworthy.
-    if (value && !value.includes(",")) return value;
+    if (value && !value.includes(",")) return normalizeIp(value);
     return UNKNOWN_CLIENT;
   }
 
@@ -65,5 +80,5 @@ export function resolveClientIp(req: Request, env: NodeJS.ProcessEnv = process.e
   // the header did not travel the path we configured for. Do not trust it.
   if (entries.length < hops) return UNKNOWN_CLIENT;
 
-  return entries[entries.length - hops] ?? UNKNOWN_CLIENT;
+  return normalizeIp(entries[entries.length - hops] ?? "");
 }

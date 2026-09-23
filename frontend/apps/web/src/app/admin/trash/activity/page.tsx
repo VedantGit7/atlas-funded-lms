@@ -1,7 +1,7 @@
 import { AdminPageGate } from "../../../../components/patterns/AdminPageGate";
 import { TrashActivityLogPanel } from "../../../../features/admin/trash/TrashActivityLogPanel";
 import { ServerApiError, serverApi } from "../../../../lib/server-api";
-import type { ContentTrashActivityResponse } from "@atlas/contracts/admin/content-trash-activity.dto";
+import type { ContentTrashActivityResponse } from "@atlas/contracts/content-trash/content-trash.contract";
 
 export default async function AdminTrashActivityPage() {
   try {

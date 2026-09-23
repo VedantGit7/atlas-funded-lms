@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/form";
 import { useZodForm } from "@/lib/forms/use-zod-form";
 import { clientApi } from "../../../lib/client-api";
-import { diagnosticApiClient } from "@atlas/contracts-modules/diagnostics/diagnostic.api-client";
+import { diagnosticApiClient } from "@/modules/diagnostics/diagnostic.api-client";
 
 type DiagnosticIdentityGateProps = {
   anonymousId: string;

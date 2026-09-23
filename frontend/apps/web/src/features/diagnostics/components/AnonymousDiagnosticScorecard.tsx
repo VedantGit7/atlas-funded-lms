@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { diagnosticApiClient } from "@atlas/contracts-modules/diagnostics/diagnostic.api-client";
+import { diagnosticApiClient } from "@/modules/diagnostics/diagnostic.api-client";
 import { DiagnosticResultScorecard } from "./DiagnosticResultScorecard";
-import type { DiagnosticScorecard } from "@atlas/contracts-modules/diagnostics/diagnostic.types";
+import type { DiagnosticScorecard } from "@atlas/contracts/diagnostics/diagnostic.types";
 
 type AnonymousDiagnosticScorecardProps = {
   anonymousId: string;

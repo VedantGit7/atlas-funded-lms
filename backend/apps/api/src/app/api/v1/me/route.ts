@@ -1,3 +1,4 @@
+import { enforceIngressRateLimit } from "@atlas/api/rate-limit";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { resolveTenantFromRequest } from "@atlas/tenancy";
@@ -16,7 +17,6 @@ import {
   listMembershipRoles,
   meMembershipOutputSchema,
   requireActiveMembership,
-  ensurePlatformSuperAdminTenantAccess,
 } from "@atlas/membership";
 
 const meRouteMetadata: RouteMetadata = {
@@ -44,6 +44,7 @@ export async function GET(req: NextRequest) {
   const requestId = getOrCreateRequestId(req.headers);
 
   try {
+    await enforceIngressRateLimit({ req, plane: "tenant", requestId });
     return await withGlobalDb(async (db) => {
       const tenant = await resolveTenantFromRequest({ req, db });
       const supabaseUser = await requireSupabaseUser(req);
@@ -53,13 +54,6 @@ export async function GET(req: NextRequest) {
         email: supabaseUser.email,
         mfaEnabled: supabaseUser.mfaEnabled,
         markLogin: false,
-      });
-
-      await ensurePlatformSuperAdminTenantAccess({
-        db,
-        tenantId: tenant.tenantId,
-        requestId,
-        email: supabaseUser.email,
       });
 
       const result = await withTenantTx(
@@ -76,6 +70,7 @@ export async function GET(req: NextRequest) {
           });
 
           return runProtectedTenantRouteHandler({
+            sessionAssuranceLevel: supabaseUser.sessionAssuranceLevel,
             tx,
             ctx: {
               tenantId: tenant.tenantId,
@@ -132,6 +127,6 @@ export async function GET(req: NextRequest) {
     });
   } catch (error) {
     const safe = toSafeErrorEnvelope(error, requestId);
-    return NextResponse.json(safe.body, { status: safe.status });
+    return NextResponse.json(safe.body, { status: safe.status, headers: safe.headers ?? {} });
   }
 }

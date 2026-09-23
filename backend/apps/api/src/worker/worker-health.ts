@@ -16,6 +16,7 @@ import { createServer, type Server } from "node:http";
 export type WorkerHealthState = {
   startedAt: number;
   lastSweepFinishedAt: number | null;
+  lastProgressAt: number | null;
   lastSweepError: string | null;
   consecutiveFailedSweeps: number;
   sweeps: number;
@@ -26,6 +27,7 @@ export function createHealthState(): WorkerHealthState {
   return {
     startedAt: Date.now(),
     lastSweepFinishedAt: null,
+    lastProgressAt: null,
     lastSweepError: null,
     consecutiveFailedSweeps: 0,
     sweeps: 0,
@@ -40,10 +42,14 @@ export function evaluateLiveness(
 ): { healthy: boolean; reason: string } {
   // Before the first sweep completes, grant one stale-window of grace so a slow
   // cold start is not mistaken for a hang.
-  const since = state.lastSweepFinishedAt ?? state.startedAt;
+  const since = Math.max(
+    state.lastSweepFinishedAt ?? 0,
+    state.lastProgressAt ?? 0,
+    state.startedAt,
+  );
 
   if (now - since > staleAfterMs) {
-    return { healthy: false, reason: `no completed sweep in ${now - since}ms` };
+    return { healthy: false, reason: `no completed sweep or work unit in ${now - since}ms` };
   }
   // Repeated total failure means the loop is running but achieving nothing —
   // usually a lost database. Restarting is the correct response.
@@ -78,6 +84,7 @@ export function startHealthServer(args: {
         reason: liveness.reason,
         sweeps: args.state.sweeps,
         lastSweepFinishedAt: args.state.lastSweepFinishedAt,
+        lastProgressAt: args.state.lastProgressAt,
         // Only the message, never a stack: this endpoint may be reachable
         // from inside the cluster network.
         lastSweepError: args.state.lastSweepError,

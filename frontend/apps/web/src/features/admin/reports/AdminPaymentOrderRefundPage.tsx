@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useId, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -43,6 +43,12 @@ import {
   REFUND_NOTE_MAX,
   revokeAccessBlockedReason,
 } from "./payment-refund-rules";
+import {
+  refundOutcomeTitle,
+  refundRequestIdentity,
+  type RefundRequestIdentity,
+  type RefundStatus,
+} from "./refund-submission";
 
 const ORDERS_HREF = "/admin/reports/payments/orders";
 
@@ -89,13 +95,17 @@ export function AdminPaymentOrderRefundPage({ orderId }: { orderId: string }) {
   const [reason, setReason] = useState<RefundReason>("customer_requested");
   const [note, setNote] = useState("");
   const [revokeAccess, setRevokeAccess] = useState(false);
-  const [notifyLearner, setNotifyLearner] = useState(true);
+  const [refundMethod, setRefundMethod] = useState<"gateway" | "manual_adjustment">("gateway");
+  const [manualReference, setManualReference] = useState("");
+  const requestIdentity = useRef<RefundRequestIdentity | null>(null);
+  const submitting = useRef(false);
   const [touched, setTouched] = useState(false);
 
   const [confirming, setConfirming] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [gatewayNote, setGatewayNote] = useState<string | null>(null);
+  const [refundStatus, setRefundStatus] = useState<RefundStatus>("requested");
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -208,14 +218,16 @@ export function AdminPaymentOrderRefundPage({ orderId }: { orderId: string }) {
             <Undo2 className="h-7 w-7" aria-hidden="true" />
           </span>
           <h1 className="text-lg font-bold text-[var(--admin-on-surface)]">
-            Nothing left to refund
+            No available refund balance
           </h1>
           {/* The same condition the endpoint enforces, said before the operator
               fills in a form the server would reject. */}
           <p className="mt-2 max-w-md text-sm text-[var(--admin-on-surface-variant)]">
-            {detail.refundedAmountCents > 0
-              ? `This payment has already been refunded in full — ${formatAmount(detail.refundedAmountCents, detail.currency)} of ${formatAmount(detail.amountCents, detail.currency)}.`
-              : "This payment has no refundable balance. Only a settled payment can be reversed."}
+            {detail.reservedRefundAmountCents > 0
+              ? `${formatAmount(detail.reservedRefundAmountCents, detail.currency)} is reserved for refund requests awaiting confirmation or reconciliation.`
+              : detail.refundedAmountCents >= detail.amountCents
+                ? `This payment has already been refunded in full — ${formatAmount(detail.refundedAmountCents, detail.currency)} of ${formatAmount(detail.amountCents, detail.currency)}.`
+                : "This payment has no refundable balance. Only a settled payment can be reversed."}
           </p>
           <div className="mt-6 flex flex-wrap justify-center gap-2">
             <Link href={`${ORDERS_HREF}/${orderId}`} className={manageSecondaryButtonClassName}>
@@ -239,34 +251,57 @@ export function AdminPaymentOrderRefundPage({ orderId }: { orderId: string }) {
   const amountTooLarge = Number.isFinite(amountCents) && amountCents > refundableCents;
 
   const noteValid = isRefundNoteValid(note);
-  const canSubmit = amountValid && noteValid && !saving;
+  const manualReferenceValid =
+    refundMethod === "gateway" ||
+    (manualReference.trim().length > 0 && manualReference.trim().length <= 200);
+  const canSubmit = amountValid && noteValid && manualReferenceValid && !saving;
 
   const revokeBlockedReason = revokeAccessBlockedReason(detail);
-  const canRevokeAccess = revokeBlockedReason === null;
+  const canRevokeAccess = revokeBlockedReason === null && refundMethod === "gateway";
 
   async function submit() {
-    if (!canSubmit || detail === null) return;
+    if (!canSubmit || detail === null || submitting.current) return;
+    submitting.current = true;
     setSaving(true);
     setError(null);
     try {
-      const response = await refundPaymentTransaction(detail.id, {
+      const body = {
         mode,
+        refundMethod,
+        ...(refundMethod === "manual_adjustment"
+          ? { manualReference: manualReference.trim() }
+          : {}),
         ...(mode === "partial" ? { amountCents } : {}),
         reason,
         note: note.trim(),
         revokeAccess: canRevokeAccess && revokeAccess,
-        notifyLearner,
+        notifyLearner: false,
+      };
+      requestIdentity.current = refundRequestIdentity(requestIdentity.current, {
+        orderId: detail.id,
+        ...body,
       });
-      // The gateway note is the server telling us whether money actually moved.
-      // It is not a detail to swallow behind a success toast.
+      const response = await refundPaymentTransaction(detail.id, {
+        ...body,
+        refundRequestId: requestIdentity.current.refundRequestId,
+      });
       setGatewayNote(response.data.gatewayNote);
+      setRefundStatus(response.data.refund.status);
+      if (["succeeded", "manual_adjustment", "failed"].includes(response.data.refund.status))
+        requestIdentity.current = null;
       setConfirming(false);
       setSaving(false);
       router.refresh();
     } catch (caught) {
-      setError(caught instanceof ClientApiError ? caught.message : "Could not record the refund.");
+      setError(
+        caught instanceof ClientApiError
+          ? caught.message
+          : "Could not confirm the request. Retry with the same details to check it safely.",
+      );
       setConfirming(false);
       setSaving(false);
+    } finally {
+      submitting.current = false;
     }
   }
 
@@ -275,14 +310,13 @@ export function AdminPaymentOrderRefundPage({ orderId }: { orderId: string }) {
       <div className="space-y-5">
         {breadcrumb}
         <div className={ordersEmptyPanelClassName}>
-          <span className="mb-5 inline-flex h-16 w-16 items-center justify-center rounded-full border border-[var(--admin-border)] bg-[color-mix(in_srgb,var(--admin-success)_12%,var(--admin-surface))] text-[var(--admin-success)]">
+          <span className="mb-5 inline-flex h-16 w-16 items-center justify-center rounded-full border border-[var(--admin-border)] bg-[var(--admin-surface-high)] text-[var(--admin-on-surface-variant)]">
             <Undo2 className="h-7 w-7" aria-hidden="true" />
           </span>
-          <h1 className="text-lg font-bold text-[var(--admin-on-surface)]">Refund recorded</h1>
+          <h1 className="text-lg font-bold text-[var(--admin-on-surface)]">
+            {refundOutcomeTitle(refundStatus)}
+          </h1>
           <p className="mt-2 max-w-lg text-sm text-[var(--admin-on-surface-variant)]">
-            {/* Verbatim from the server. It usually says the gateway reverse
-                still has to be done by hand, which is the single most important
-                thing an operator can be told here. */}
             {gatewayNote}
           </p>
           <div className="mt-6 flex flex-wrap justify-center gap-2">
@@ -309,7 +343,7 @@ export function AdminPaymentOrderRefundPage({ orderId }: { orderId: string }) {
       <div>
         <h1 className={managePageTitleClassName}>Refund this payment</h1>
         <p className={managePageDescClassName}>
-          Reverses part or all of a settled payment on the ledger.
+          Request a gateway refund or record an explicit manual ledger adjustment.
         </p>
       </div>
 
@@ -325,8 +359,8 @@ export function AdminPaymentOrderRefundPage({ orderId }: { orderId: string }) {
                 A refund cannot be undone here
               </p>
               <p className="mt-1 text-sm text-[var(--admin-on-surface-variant)]">
-                It is written to the ledger immediately. Depending on the gateway, the matching
-                reverse may still need doing by hand — the confirmation will say which.
+                Gateway refunds remain pending until the provider confirms them. Manual adjustments
+                only update the ledger and send no money.
               </p>
             </div>
           </div>
@@ -352,6 +386,45 @@ export function AdminPaymentOrderRefundPage({ orderId }: { orderId: string }) {
             ) : null}
 
             <div className="space-y-5">
+              <div>
+                <label className={labelClassName} htmlFor={`${fieldId}-method`}>
+                  Refund method
+                </label>
+                <select
+                  id={`${fieldId}-method`}
+                  className={ordersFieldClassName}
+                  disabled={saving}
+                  value={refundMethod}
+                  onChange={(event) => {
+                    setRefundMethod(event.target.value as "gateway" | "manual_adjustment");
+                  }}
+                >
+                  <option value="gateway">Request gateway refund</option>
+                  <option value="manual_adjustment">
+                    Manual ledger adjustment — no money sent
+                  </option>
+                </select>
+                {refundMethod === "manual_adjustment" ? (
+                  <div className="mt-3">
+                    <label className={labelClassName} htmlFor={`${fieldId}-reference`}>
+                      Manual adjustment reference (required)
+                    </label>
+                    <input
+                      id={`${fieldId}-reference`}
+                      className={ordersFieldClassName}
+                      value={manualReference}
+                      maxLength={200}
+                      disabled={saving}
+                      onChange={(event) => {
+                        setManualReference(event.target.value);
+                      }}
+                    />
+                    <p className={helpClassName}>
+                      Records an adjustment only. No money is sent and course access is unchanged.
+                    </p>
+                  </div>
+                ) : null}
+              </div>
               <div>
                 <span className={labelClassName}>Amount</span>
                 <div className="inline-flex overflow-hidden rounded-lg border border-[var(--admin-outline)]">
@@ -509,14 +582,16 @@ export function AdminPaymentOrderRefundPage({ orderId }: { orderId: string }) {
                   />
                   <span>
                     <span className="block text-sm font-medium text-[var(--admin-on-surface)]">
-                      Revoke course access
+                      Revoke course access after gateway confirmation
                     </span>
                     <span className="block text-xs text-[var(--admin-on-surface-variant)]">
                       {/* Disabled rather than silently ignored: the service only
                           revokes when the payment carries both a course and a
                           membership. */}
                       {revokeBlockedReason ??
-                        "Removes the learner's enrolment in the course this payment bought."}
+                        (refundMethod === "manual_adjustment"
+                          ? "Manual adjustments do not revoke course access."
+                          : "Access remains active until the gateway confirms the refund.")}
                     </span>
                   </span>
                 </label>
@@ -525,18 +600,15 @@ export function AdminPaymentOrderRefundPage({ orderId }: { orderId: string }) {
                   <input
                     type="checkbox"
                     className="mt-0.5 h-4 w-4 accent-[var(--admin-primary)]"
-                    checked={notifyLearner}
-                    disabled={saving}
-                    onChange={(event) => {
-                      setNotifyLearner(event.target.checked);
-                    }}
+                    checked={false}
+                    disabled
                   />
                   <span>
                     <span className="block text-sm font-medium text-[var(--admin-on-surface)]">
-                      Notify the learner
+                      Learner email unavailable
                     </span>
                     <span className="block text-xs text-[var(--admin-on-surface-variant)]">
-                      Queues a refund notification.
+                      No notification will be sent or queued.
                     </span>
                   </span>
                 </label>
@@ -570,6 +642,10 @@ export function AdminPaymentOrderRefundPage({ orderId }: { orderId: string }) {
                     : "None",
                 ],
                 ["Refundable", formatAmount(refundableCents, detail.currency)],
+                [
+                  "Awaiting confirmation",
+                  formatAmount(detail.reservedRefundAmountCents, detail.currency),
+                ],
                 ["Learner", detail.learner.name ?? detail.learner.email ?? "—"],
                 ["Product", detail.product.title ?? "—"],
                 ["Gateway", detail.gatewayKey ?? detail.gateway.provider ?? "—"],
@@ -621,10 +697,13 @@ export function AdminPaymentOrderRefundPage({ orderId }: { orderId: string }) {
                 id={`${fieldId}-confirm`}
                 className="text-base font-bold text-[var(--admin-on-surface)]"
               >
-                Refund {formatAmount(amountCents, detail.currency)}?
+                {refundMethod === "gateway" ? "Request refund of" : "Record adjustment of"}{" "}
+                {formatAmount(amountCents, detail.currency)}?
               </h2>
               <p className="mt-1 text-sm text-[var(--admin-on-surface-variant)]">
-                This is written to the ledger immediately and cannot be undone here.
+                {refundMethod === "gateway"
+                  ? "The refund is pending until the gateway confirms it."
+                  : "This updates the ledger only. No money will be sent."}
               </p>
             </header>
 
@@ -633,8 +712,17 @@ export function AdminPaymentOrderRefundPage({ orderId }: { orderId: string }) {
                 ["Amount", formatAmount(amountCents, detail.currency)],
                 ["Reason", REFUND_REASONS.find((r) => r.value === reason)?.label ?? reason],
                 ["Learner", detail.learner.name ?? detail.learner.email ?? "—"],
-                ["Course access", canRevokeAccess && revokeAccess ? "Revoked" : "Left in place"],
-                ["Learner notified", notifyLearner ? "Yes" : "No"],
+                [
+                  "Course access",
+                  canRevokeAccess && revokeAccess ? "Revoke after confirmation" : "Left in place",
+                ],
+                ["Learner email", "Not sent or queued"],
+                [
+                  "Method",
+                  refundMethod === "gateway"
+                    ? "Gateway refund"
+                    : `Manual adjustment: ${manualReference.trim()}`,
+                ],
               ].map(([label, value]) => (
                 <div key={label} className="flex justify-between gap-3 py-2.5">
                   <dt className="text-xs font-semibold uppercase tracking-wide text-[var(--admin-on-surface-variant)]">
@@ -675,7 +763,11 @@ export function AdminPaymentOrderRefundPage({ orderId }: { orderId: string }) {
                 ) : (
                   <Undo2 className="h-4 w-4" aria-hidden="true" />
                 )}
-                {saving ? "Refunding…" : "Refund"}
+                {saving
+                  ? "Submitting…"
+                  : refundMethod === "gateway"
+                    ? "Request refund"
+                    : "Record adjustment"}
               </button>
             </footer>
           </div>

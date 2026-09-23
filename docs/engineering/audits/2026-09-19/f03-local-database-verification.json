@@ -1,0 +1,19 @@
+{
+  "database": "localhost:15432/atlas_lms_dev",
+  "migration": [
+    {
+      "migration_name": "20260919120000_107_platform_idempotency",
+      "applied": true
+    }
+  ],
+  "access": [
+    {
+      "relrowsecurity": true,
+      "relforcerowsecurity": true,
+      "tenant_can_read": false,
+      "worker_can_read": false,
+      "platform_can_use": true
+    }
+  ],
+  "scratchSchemas": []
+}

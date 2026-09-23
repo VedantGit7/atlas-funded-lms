@@ -41,15 +41,10 @@ function inferLessonAssetContentType(file: File): string {
   }
 }
 
-async function readFilePayload(file: File): Promise<{ bytes: ArrayBuffer; sizeBytes: number }> {
-  const bytes = await file.arrayBuffer();
-  return { bytes, sizeBytes: bytes.byteLength };
-}
-
 async function uploadLessonAssetBlob(
   lessonId: string,
   assetReferenceId: string,
-  bytes: ArrayBuffer,
+  bytes: File,
   contentType: string,
   purpose: LessonAssetPurpose,
 ): Promise<void> {
@@ -97,7 +92,6 @@ export async function uploadLessonAssetFile(
   purpose: LessonAssetPurpose,
 ): Promise<string> {
   const contentType = inferLessonAssetContentType(file);
-  const { bytes, sizeBytes } = await readFilePayload(file);
 
   const uploadResponse = await clientApi.post<SignedUploadResponse>(
     `/api/v1/lessons/${lessonId}/assets/upload`,
@@ -105,25 +99,19 @@ export async function uploadLessonAssetFile(
       purpose,
       fileName: file.name,
       contentType,
-      sizeBytes,
+      sizeBytes: file.size,
     },
     `lesson-asset-upload-${purpose}`,
   );
 
   const uploadUrl = uploadResponse.data.upload.url;
-  if (uploadUrl.includes("localhost.local-storage")) {
-    await uploadLessonAssetBlob(
-      lessonId,
-      uploadResponse.data.asset.id,
-      bytes,
-      contentType,
-      purpose,
-    );
+  if (new URL(uploadUrl).hostname === "localhost.local-storage") {
+    await uploadLessonAssetBlob(lessonId, uploadResponse.data.asset.id, file, contentType, purpose);
   } else {
     const uploadResult = await fetch(uploadUrl, {
       method: "PUT",
       headers: uploadResponse.data.upload.requiredHeaders,
-      body: bytes,
+      body: file,
     });
 
     if (!uploadResult.ok) {

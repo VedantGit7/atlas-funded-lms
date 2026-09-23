@@ -1,0 +1,31 @@
+{
+  "finding": "F06",
+  "verifiedAt": "2026-09-20T01:05:15.8266958+05:30",
+  "status": "implemented-and-verified-locally",
+  "deployed": false,
+  "externalProviderDeliveryVerified": false,
+  "hostingEgressConfigured": false,
+  "runtime": "Node 24.11.1",
+  "ciNode22Execution": "pending",
+  "broadRegression": {
+    "filesPassed": 326,
+    "testsPassed": 2483,
+    "testsSkipped": 1
+  },
+  "focusedRegression": {
+    "note": "Overlaps broad regression",
+    "filesPassed": 43,
+    "testsPassed": 378
+  },
+  "independentOutboundRegression": {
+    "testsPassed": 91,
+    "note": "Overlaps broad and focused regression"
+  },
+  "typecheckExitCode": 0,
+  "lintExitCode": 0,
+  "guardsPassed": 4,
+  "diffCheckExitCode": 0,
+  "independentReview": "no-substantive-outstanding-concerns",
+  "sourceFiles": 14,
+  "secretScanExitCode": 0
+}

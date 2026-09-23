@@ -6,11 +6,16 @@ import {
   GetObjectCommand,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { addAbortSignal, Readable } from "node:stream";
+import { pipeline } from "node:stream/promises";
+import { boundedObjectStream } from "./bounded-object-stream";
 import type {
   CreateSignedDownloadUrlInput,
   CreateSignedUploadUrlInput,
   ObjectMetadata,
   StorageProvider,
+  GetObjectStreamInput,
+  PutObjectStreamInput,
 } from "./storage-provider";
 import type { StorageEnv } from "../schemas/storage-env";
 
@@ -32,6 +37,10 @@ export class R2StorageProvider implements StorageProvider {
 
     this.client = new S3Client({
       region: "auto",
+      // R2 does not implement every S3 checksum type. Keep uploads fixed-length;
+      // export integrity is checked against downloaded bytes, never an ETag.
+      requestChecksumCalculation: "WHEN_REQUIRED",
+      responseChecksumValidation: "WHEN_REQUIRED",
       endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
       credentials: {
         accessKeyId,
@@ -81,13 +90,18 @@ export class R2StorageProvider implements StorageProvider {
     };
   }
 
-  async headObject(input: { bucket: string; key: string }): Promise<ObjectMetadata | null> {
+  async headObject(input: {
+    bucket: string;
+    key: string;
+    signal?: AbortSignal;
+  }): Promise<ObjectMetadata | null> {
     try {
       const result = await this.client.send(
         new HeadObjectCommand({
           Bucket: input.bucket,
           Key: input.key,
         }),
+        { abortSignal: input.signal ?? AbortSignal.timeout(30_000) },
       );
 
       return {
@@ -97,7 +111,7 @@ export class R2StorageProvider implements StorageProvider {
         etag: result.ETag ?? null,
       };
     } catch (error) {
-      if (error instanceof Error && error.name === "NotFound") return null;
+      if (error instanceof Error && ["NotFound", "NoSuchKey"].includes(error.name)) return null;
       throw error;
     }
   }
@@ -109,6 +123,7 @@ export class R2StorageProvider implements StorageProvider {
           Bucket: input.bucket,
           Key: input.key,
         }),
+        { abortSignal: AbortSignal.timeout(30_000) },
       );
 
       if (!result.Body) return null;
@@ -136,15 +151,61 @@ export class R2StorageProvider implements StorageProvider {
           atlasManaged: "true",
         },
       }),
+      { abortSignal: AbortSignal.timeout(30_000) },
     );
   }
 
-  async deleteObject(input: { bucket: string; key: string }): Promise<void> {
+  async deleteObject(input: { bucket: string; key: string; signal?: AbortSignal }): Promise<void> {
     await this.client.send(
       new DeleteObjectCommand({
         Bucket: input.bucket,
         Key: input.key,
       }),
+      { abortSignal: input.signal ?? AbortSignal.timeout(30_000) },
     );
+  }
+
+  async putObjectStream(input: PutObjectStreamInput): Promise<void> {
+    const signal = input.signal ?? AbortSignal.timeout(30_000);
+    if (signal.aborted) input.body.destroy();
+    signal.throwIfAborted();
+    const bounded = boundedObjectStream(input.sizeBytes);
+    const pumping = pipeline(input.body, bounded, { signal });
+    const uploading = this.client.send(
+      new PutObjectCommand({
+        Bucket: input.bucket,
+        Key: input.key,
+        Body: bounded,
+        ContentLength: input.sizeBytes,
+        ContentType: input.contentType,
+        Metadata: { atlasManaged: "true" },
+      }),
+      { abortSignal: signal },
+    );
+    try {
+      await Promise.all([pumping, uploading]);
+    } catch (error) {
+      input.body.destroy();
+      bounded.destroy();
+      await Promise.allSettled([pumping, uploading]);
+      throw error;
+    }
+  }
+
+  async getObjectStream(input: GetObjectStreamInput): Promise<Readable | null> {
+    const signal = input.signal ?? AbortSignal.timeout(30_000);
+    signal.throwIfAborted();
+    try {
+      const result = await this.client.send(
+        new GetObjectCommand({ Bucket: input.bucket, Key: input.key }),
+        { abortSignal: signal },
+      );
+      if (!result.Body) throw new Error("STORAGE_STREAM_BODY_MISSING");
+      if (!(result.Body instanceof Readable)) throw new Error("STORAGE_STREAM_BODY_UNSUPPORTED");
+      return addAbortSignal(signal, result.Body);
+    } catch (error) {
+      if (error instanceof Error && ["NoSuchKey", "NotFound"].includes(error.name)) return null;
+      throw error;
+    }
   }
 }

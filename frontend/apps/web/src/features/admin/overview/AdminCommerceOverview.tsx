@@ -15,7 +15,7 @@ import {
   Users,
 } from "lucide-react";
 
-import type { AdminOverviewResponse } from "@atlas/contracts/admin/admin-overview.dto";
+import type { AdminOverviewResponse } from "@atlas/contracts/admin/admin-overview.contract";
 
 import { ADMIN_MODERATION_CASES_PATH } from "../../moderation/moderation-paths";
 
@@ -507,7 +507,7 @@ export function AdminCommerceOverview({
               />
               <TaskRow
                 icon={MessageSquare}
-                label="Deletion requests"
+                label="School-access removal"
                 caption={
                   data.pendingTasks.deletionRequests > 0
                     ? `${formatCount(data.pendingTasks.deletionRequests)} in progress`

@@ -61,17 +61,22 @@ export async function processReadinessOutboxBatch(args: {
   limit?: number;
   maxRetries?: number;
 }): Promise<{ processed: number; delivered: number; failed: number; skipped: number }> {
-  return withTenantTx(
+  return processOutboxBatch(
     {
-      tenantId: args.tenantId,
-      requestId: args.requestId,
-      allowAnonymousTenantRead: true,
+      transaction: (fn) =>
+        withTenantTx(
+          {
+            tenantId: args.tenantId,
+            requestId: args.requestId,
+            allowAnonymousTenantRead: true,
+          },
+          fn,
+        ),
     },
-    async (tx) =>
-      processOutboxBatch(tx, {
-        limit: args.limit ?? 25,
-        maxRetries: args.maxRetries ?? 3,
-        handlers: createReadinessOutboxConsumers(),
-      }),
+    {
+      limit: args.limit ?? 25,
+      maxRetries: args.maxRetries ?? 3,
+      handlers: createReadinessOutboxConsumers(),
+    },
   );
 }

@@ -1,8 +1,8 @@
 import { PageGate, PageHeader } from "../../../components/patterns/PageGate";
 import { ProgressDashboard } from "../../../features/progress/components/ProgressDashboard";
 import { ServerApiError, serverApi } from "../../../lib/server-api";
-import { competencyServerApi } from "@atlas/contracts-modules/competency/competency.server-api";
-import { gamificationServerApi } from "@atlas/contracts-modules/gamification/gamification.server-api";
+import { competencyServerApi } from "@/modules/competency/competency.server-api";
+import { gamificationServerApi } from "@/modules/gamification/gamification.server-api";
 import type { certificateListResponseSchema } from "@atlas/contracts/certificates/certificate.dto";
 import type { z } from "zod";
 

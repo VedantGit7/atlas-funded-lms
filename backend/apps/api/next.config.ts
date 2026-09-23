@@ -2,12 +2,16 @@ import type { NextConfig } from "next";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { withSentryConfig } from "@sentry/nextjs";
-import { securityHeadersRule } from "../../../configs/security-headers.mjs";
+import {
+  securityHeadersRule,
+  scormFramingHeadersRule,
+} from "../../../configs/security-headers.mjs";
 
 const apiDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.join(apiDir, "..", "..", "..");
 
 const nextConfig: NextConfig = {
+  distDir: process.env["ATLAS_BROWSER_BUILD"] === "1" ? ".next-e2e" : ".next",
   reactStrictMode: true,
   poweredByHeader: false,
   // F7: emit .next/standalone so a deployment carries only the traced files
@@ -20,12 +24,12 @@ const nextConfig: NextConfig = {
   outputFileTracingRoot: repoRoot,
   // Next types `headers` as returning a promise; there is nothing to await here.
   headers() {
-    return Promise.resolve([securityHeadersRule]);
+    return Promise.resolve([securityHeadersRule, scormFramingHeadersRule]);
   },
   allowedDevOrigins: ["127.0.0.1", "*.localhost.test", "*.localhost"],
   experimental: {
     serverActions: {
-      bodySizeLimit: "110mb",
+      bodySizeLimit: "1mb",
     },
   },
   transpilePackages: [

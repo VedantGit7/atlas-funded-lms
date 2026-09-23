@@ -49,21 +49,22 @@ export function AccountDeletionCard({
     <>
       <div className="flex flex-wrap items-center justify-between gap-4 bg-[var(--acct-danger-surface)] p-6">
         <div>
-          <h3 className={classes.sectionDangerTitle}>Delete account</h3>
+          <h3 className={classes.sectionDangerTitle}>Remove school access</h3>
           <p className={`${classes.sectionDesc} text-[var(--acct-on-danger-container)]`}>
-            Once you delete your account, there is no going back. Please be certain.
+            Request removal of your access to this school. Your account and school records are
+            retained. Erasure requires a separate review with your school.
           </p>
           {pending ? (
             <p
               role="status"
               className={`${classes.helper} mt-2 font-medium text-[var(--acct-danger)]`}
             >
-              A deletion request is pending review.
+              A school-access removal request is pending review. No data has been erased.
             </p>
           ) : null}
           {!canRequestDeletion ? (
             <p className={`${classes.helper} mt-2`}>
-              You do not have permission to request deletion.
+              You do not have permission to request school-access removal.
             </p>
           ) : null}
         </div>
@@ -75,7 +76,7 @@ export function AccountDeletionCard({
               setConfirmOpen(true);
             }}
           >
-            Delete your account
+            Request school-access removal
           </button>
         ) : null}
       </div>
@@ -99,7 +100,7 @@ export function AccountDeletionCard({
           >
             <div className="flex items-center justify-between border-b border-[var(--acct-border)] p-6">
               <h3 id="confirm-deletion-title" className={classes.sectionTitle}>
-                Are you absolutely sure?
+                Request removal of school access?
               </h3>
               <button
                 type="button"
@@ -117,13 +118,14 @@ export function AccountDeletionCard({
               <div className={`${classes.errorBanner} mb-6 flex gap-3`}>
                 <Info className="h-5 w-5 shrink-0" aria-hidden="true" />
                 <p className="text-sm">
-                  Unexpected bad things will happen if you do not read this. This action cannot be
-                  undone.
+                  When processed, this request removes your membership access to this school. School
+                  records remain retained.
                 </p>
               </div>
               <p className="mb-4 text-sm text-[var(--acct-on-surface)]">
-                This will permanently delete your account and remove all associations with your
-                data.
+                This does not delete your identity, learning history, billing records, or public
+                contributions. It does not affect access to other schools. Contact your school for a
+                separate erasure review.
               </p>
               <div className="space-y-2">
                 <label className={classes.label} htmlFor="confirm-email">
@@ -151,7 +153,7 @@ export function AccountDeletionCard({
                   disabled={!canConfirmDelete || busy}
                   onClick={() => void submitDeletionRequest()}
                 >
-                  {busy ? "Submitting…" : "Delete this account"}
+                  {busy ? "Submitting…" : "Submit school-access removal request"}
                 </button>
               </div>
               <div className="mt-4 flex justify-end">

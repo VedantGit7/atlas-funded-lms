@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { Client } from "pg";
@@ -58,7 +58,7 @@ function applySql(phase) {
 
 /**
  * This script provisions from empty. Run against an already-populated database
- * (for example atlas_lms_test, which db:test:setup builds by pg_dump-cloning dev)
+ * (including an already-provisioned atlas_lms_test)
  * `prisma migrate deploy` fails with a duplicate-object error and leaves a failed
  * migration marker behind. Detect that up front and explain it instead.
  */
@@ -79,7 +79,7 @@ async function assertDatabaseIsEmpty() {
       );
       console.error("db:provision is for empty databases only.");
       console.error("  - existing database, new migrations -> pnpm db:migrate:deploy");
-      console.error("  - local test database               -> pnpm db:test:setup");
+      console.error("  - fresh empty test database         -> pnpm db:test:setup");
       console.error("  - genuinely start over              -> drop and recreate, then re-run");
       process.exit(1);
     }
@@ -91,6 +91,16 @@ async function assertDatabaseIsEmpty() {
 try {
   await assertDatabaseIsEmpty();
   applySql("setup");
+  // Migration 039 grants to these group roles, before the post-migration grants phase.
+  const rolesClient = new Client({ connectionString: process.env.DATABASE_URL });
+  await rolesClient.connect();
+  try {
+    await rolesClient.query(
+      readFileSync(join(repoRoot, "backend/prisma/sql/grants/025_01_roles.sql"), "utf8"),
+    );
+  } finally {
+    await rolesClient.end();
+  }
   run("prisma migrate deploy", "pnpm", [
     "exec",
     "prisma",

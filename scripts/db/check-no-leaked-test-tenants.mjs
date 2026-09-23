@@ -38,8 +38,10 @@ try {
   console.error(`[check-no-leaked-test-tenants] FAILED: ${total} leaked test tenant(s) found.`);
   console.error("  sample slugs:", result.rows.map((row) => row.slug).join(", "));
   console.error(
-    "  Test fixtures must clean up after themselves. Run `pnpm db:cleanup-test-tenants -- --apply` " +
-      "to purge, and ensure the vitest global teardown is active.",
+    "  Inspect fixture ownership and the failed test run's UUID before cleanup. " +
+      "Guarded cleanup requires dedicated test credentials, explicit opt-in, and " +
+      "`pnpm db:cleanup-test-tenants --run-id <UUID>` for a dry run. " +
+      "Legacy rows without run ownership require separate review; slug matches do not authorize deletion.",
   );
   process.exit(1);
 } finally {

@@ -1,175 +1,101 @@
-import { lookup } from "node:dns/promises";
-import { isIP } from "node:net";
+import {
+  abortError,
+  BlockedOutboundRequestError,
+  parseOutboundUrl,
+  resolveOutboundAddress,
+  withAbort,
+} from "./outbound-policy";
+import { OUTBOUND_MAX_BYTES, pinnedOutboundTransport } from "./pinned-outbound-transport";
 
-/**
- * Outbound HTTP for tenant-configured URLs, with SSRF protections.
- *
- * Audit finding H3: four surfaces accept a URL from tenant configuration and
- * fetch it server-side — marketing integration webhooks (dispatch and test),
- * report delivery webhooks, and destination roster delivery. Validation was
- * `z.url()`, which checks syntax only. A probe confirmed the schema accepted
- * the cloud metadata address, loopback, RFC1918 and IPv6 loopback.
- *
- * Three protections are needed and all three matter:
- *
- *   1. Protocol allowlist — only http/https.
- *   2. Resolve the hostname, then check the resolved ADDRESS. Checking the
- *      hostname string alone is defeated by a DNS name that points at
- *      127.0.0.1.
- *   3. `redirect: "manual"` — otherwise an attacker-controlled public host can
- *      302 to an internal address and every check above is bypassed.
- */
+export { BlockedOutboundRequestError, isBlockedAddress } from "./outbound-policy";
 
-export class BlockedOutboundRequestError extends Error {
-  constructor(
-    message: string,
-    readonly reason:
-      | "BLOCKED_PROTOCOL"
-      | "BLOCKED_ADDRESS"
-      | "BLOCKED_REDIRECT"
-      | "UNRESOLVABLE_HOST",
-  ) {
-    super(message);
-    this.name = "BlockedOutboundRequestError";
-  }
-}
-
-const ALLOWED_PROTOCOLS = new Set(["http:", "https:"]);
-
-function ipv4ToInt(address: string): number | null {
-  const parts = address.split(".");
-  if (parts.length !== 4) return null;
-
-  let value = 0;
-  for (const part of parts) {
-    const octet = Number(part);
-    if (!Number.isInteger(octet) || octet < 0 || octet > 255) return null;
-    value = value * 256 + octet;
-  }
-  return value;
-}
-
-/** RFC1918, loopback, link-local (incl. cloud metadata), CGNAT, broadcast, multicast. */
-function isPrivateIpv4(address: string): boolean {
-  const value = ipv4ToInt(address);
-  if (value === null) return true; // unparseable: refuse rather than guess
-
-  const inRange = (cidrBase: string, bits: number): boolean => {
-    const base = ipv4ToInt(cidrBase);
-    if (base === null) return false;
-    const mask = bits === 0 ? 0 : (-1 << (32 - bits)) >>> 0;
-    return (value & mask) === (base & mask);
-  };
-
-  return (
-    inRange("0.0.0.0", 8) ||
-    inRange("10.0.0.0", 8) ||
-    inRange("100.64.0.0", 10) ||
-    inRange("127.0.0.0", 8) ||
-    inRange("169.254.0.0", 16) || // includes 169.254.169.254 cloud metadata
-    inRange("172.16.0.0", 12) ||
-    inRange("192.0.0.0", 24) ||
-    inRange("192.168.0.0", 16) ||
-    inRange("198.18.0.0", 15) ||
-    inRange("224.0.0.0", 4) ||
-    inRange("240.0.0.0", 4)
-  );
-}
-
-function isPrivateIpv6(address: string): boolean {
-  const normalised = address.toLowerCase().split("%")[0] ?? "";
-
-  if (normalised === "::1" || normalised === "::") return true;
-  // Unique-local (fc00::/7) and link-local (fe80::/10).
-  if (/^f[cd]/.test(normalised)) return true;
-  if (/^fe[89ab]/.test(normalised)) return true;
-
-  // IPv4-mapped addresses must be judged on the embedded IPv4. Two spellings
-  // reach us: the dotted form (::ffff:127.0.0.1) and the hex form
-  // (::ffff:7f00:1). WHATWG URL parsing normalises to the HEX form, so matching
-  // only the dotted spelling let http://[::ffff:127.0.0.1]/ through.
-  const dotted = /^::ffff:(\d+\.\d+\.\d+\.\d+)$/.exec(normalised);
-  if (dotted?.[1]) return isPrivateIpv4(dotted[1]);
-
-  const hex = /^::ffff:([0-9a-f]{1,4}):([0-9a-f]{1,4})$/.exec(normalised);
-  if (hex?.[1] && hex[2]) {
-    const high = Number.parseInt(hex[1], 16);
-    const low = Number.parseInt(hex[2], 16);
-    const ipv4 = [high >> 8, high & 0xff, low >> 8, low & 0xff].join(".");
-    return isPrivateIpv4(ipv4);
-  }
-
-  return false;
-}
-
-export function isBlockedAddress(address: string): boolean {
-  const version = isIP(address);
-  if (version === 4) return isPrivateIpv4(address);
-  if (version === 6) return isPrivateIpv6(address);
-  return true; // not an IP literal: refuse rather than guess
-}
-
+/** Validation only. Sending must use safeOutboundFetch so DNS stays pinned. */
 export async function assertOutboundUrlAllowed(rawUrl: string): Promise<URL> {
-  let url: URL;
-  try {
-    url = new URL(rawUrl);
-  } catch {
-    throw new BlockedOutboundRequestError(`Invalid URL: ${rawUrl}`, "BLOCKED_PROTOCOL");
-  }
-
-  if (!ALLOWED_PROTOCOLS.has(url.protocol)) {
-    throw new BlockedOutboundRequestError(
-      `Protocol not allowed: ${url.protocol}`,
-      "BLOCKED_PROTOCOL",
-    );
-  }
-
-  // A bare IP literal never needs resolving.
-  const literal = url.hostname.replace(/^\[|\]$/g, "");
-  if (isIP(literal)) {
-    if (isBlockedAddress(literal)) {
-      throw new BlockedOutboundRequestError(`Blocked address: ${literal}`, "BLOCKED_ADDRESS");
-    }
-    return url;
-  }
-
-  let resolved: Awaited<ReturnType<typeof lookup>>;
-  try {
-    resolved = await lookup(url.hostname, { all: false });
-  } catch {
-    throw new BlockedOutboundRequestError(
-      `Could not resolve host: ${url.hostname}`,
-      "UNRESOLVABLE_HOST",
-    );
-  }
-
-  if (isBlockedAddress(resolved.address)) {
-    throw new BlockedOutboundRequestError(
-      `Host ${url.hostname} resolves to a blocked address (${resolved.address})`,
-      "BLOCKED_ADDRESS",
-    );
-  }
-
+  const url = parseOutboundUrl(rawUrl);
+  await withAbort(resolveOutboundAddress(url), AbortSignal.timeout(15_000));
   return url;
 }
 
+async function readRequestBody(request: Request, signal: AbortSignal): Promise<Uint8Array | null> {
+  if (!request.body) return null;
+  const reader = request.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let size = 0;
+  try {
+    for (;;) {
+      const result = await withAbort(reader.read(), signal);
+      if (result.done) break;
+      size += result.value.byteLength;
+      if (size > OUTBOUND_MAX_BYTES)
+        throw new BlockedOutboundRequestError(
+          "Outbound request exceeds size limit",
+          "REQUEST_TOO_LARGE",
+        );
+      chunks.push(result.value);
+    }
+    return Buffer.concat(chunks);
+  } catch (error) {
+    void reader.cancel().catch(() => {});
+    throw error;
+  } finally {
+    reader.releaseLock();
+  }
+}
+
 /**
- * Drop-in replacement for `fetch` on tenant-configured URLs.
- *
- * Redirects are never followed. A 3xx is surfaced to the caller rather than
- * chased, because following one would re-open every check above.
+ * Bounded HTTP(S) for tenant webhooks. All resolved addresses must be public;
+ * one is pinned to a fresh socket, preserving Host and TLS certificate identity.
+ * No redirects, proxy agents, compressed responses or transport overrides.
+ * Buffers <=1 MiB per body; the 15s deadline includes DNS and the complete body.
  */
 export async function safeOutboundFetch(rawUrl: string, init: RequestInit = {}): Promise<Response> {
-  const url = await assertOutboundUrlAllowed(rawUrl);
-
-  const response = await fetch(url, { ...init, redirect: "manual" });
-
-  if (response.status >= 300 && response.status < 400) {
-    throw new BlockedOutboundRequestError(
-      `Redirect not followed (${response.status}) for ${url.hostname}`,
-      "BLOCKED_REDIRECT",
+  const deadline = new AbortController();
+  const timer = setTimeout(() => {
+    deadline.abort(
+      new BlockedOutboundRequestError("Outbound request deadline exceeded", "REQUEST_TIMEOUT"),
     );
+  }, 15_000);
+  const signal = init.signal ? AbortSignal.any([init.signal, deadline.signal]) : deadline.signal;
+  try {
+    signal.throwIfAborted();
+    const url = parseOutboundUrl(rawUrl);
+    // Request normalizes BodyInit/Headers; none of init is passed to Node options.
+    const request = new Request(url, init);
+    const forbidden = [
+      "host",
+      "connection",
+      "content-length",
+      "transfer-encoding",
+      "upgrade",
+      "proxy-authorization",
+      "proxy-connection",
+      "expect",
+      "trailer",
+      "te",
+    ];
+    if (forbidden.some((header) => request.headers.has(header))) {
+      throw new BlockedOutboundRequestError(
+        "Outbound transport headers cannot be overridden",
+        "BLOCKED_HEADERS",
+      );
+    }
+    const body = await readRequestBody(request, signal);
+    const address = await withAbort(resolveOutboundAddress(url), signal);
+    signal.throwIfAborted();
+    const headers = Object.fromEntries(request.headers);
+    headers["host"] = url.host;
+    headers["accept-encoding"] = "identity";
+    headers["connection"] = "close";
+    if (body) headers["content-length"] = String(body.byteLength);
+    return await pinnedOutboundTransport(url, address, request.method, headers, body, signal);
+  } catch (error) {
+    if (error instanceof BlockedOutboundRequestError) throw error;
+    if (signal.aborted) throw abortError(signal);
+    throw new BlockedOutboundRequestError(
+      "Outbound request could not be completed",
+      "REQUEST_FAILED",
+    );
+  } finally {
+    clearTimeout(timer);
   }
-
-  return response;
 }

@@ -1,0 +1,14 @@
+{
+  "database": "atlas_lms_dev",
+  "counts": {
+    "artifacts": 0,
+    "sessions": 0,
+    "events": 0,
+    "missing_tenants": 0,
+    "invalid_sessions": 0,
+    "invalid_events": 0
+  },
+  "clean": true,
+  "validated": false,
+  "constraints": []
+}

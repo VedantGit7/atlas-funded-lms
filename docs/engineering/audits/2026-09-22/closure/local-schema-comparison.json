@@ -1,0 +1,30 @@
+{
+  "checkedAt": "2026-09-22T03:07:17.015Z",
+  "local": "localhost:15432/atlas_lms_dev",
+  "reference": "fresh117migrations",
+  "appliedMigrations": 119,
+  "unfinished": [],
+  "pending": [],
+  "diff": {
+    "columns": {
+      "localOnly": [],
+      "freshOnly": []
+    },
+    "constraints": {
+      "localOnly": [],
+      "freshOnly": []
+    },
+    "indexes": {
+      "localOnly": [],
+      "freshOnly": []
+    },
+    "policies": {
+      "localOnly": [],
+      "freshOnly": []
+    },
+    "rls": {
+      "localOnly": [],
+      "freshOnly": []
+    }
+  }
+}

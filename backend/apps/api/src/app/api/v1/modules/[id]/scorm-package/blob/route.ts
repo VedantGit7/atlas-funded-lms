@@ -1,3 +1,4 @@
+import { readLocalBlobBody } from "@atlas/storage/local-blob-upload";
 import { z } from "zod";
 import { createTenantRoute } from "@atlas/api";
 import { storeModuleScormPackageBlobService } from "../../../../../../../server/courses/module-scorm.service";
@@ -21,7 +22,10 @@ export const POST = createTenantRoute<
 >({
   metadata: postRouteMetadata,
   params: uuidParamSchema,
-  body: moduleScormPackageBlobBodySchema,
+  readBody: async (req) =>
+    moduleScormPackageBlobBodySchema.parse(
+      JSON.parse((await readLocalBlobBody(req)).toString("utf8")),
+    ),
   output: blobResponseSchema,
   handler: async ({ tx, ctx, params, input }) => {
     const moduleId = params["id"];

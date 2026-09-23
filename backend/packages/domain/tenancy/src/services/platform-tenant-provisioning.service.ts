@@ -1,6 +1,7 @@
 import type { PlatformTx } from "@atlas/db";
 import { auditWriter } from "@atlas/audit";
 import { outbox } from "@atlas/events";
+import { AtlasHttpError } from "@atlas/core/http/errors";
 import {
   ProvisionTenantRequestSchema,
   type ProvisionTenantRequest,
@@ -41,12 +42,23 @@ export async function provisionTenant(
 
   const replayTenantId = await findTenantIdByProvisioningIdempotencyKey(tx, ctx.idempotencyKey);
   if (replayTenantId) {
-    return readPlatformTenantDetail(tx, replayTenantId);
+    // Verified retries are served by the platform wrapper. Older job rows have
+    // no actor/fingerprint evidence and cannot safely act as a replay cache.
+    throw new AtlasHttpError({
+      code: "IDEMPOTENCY_CONFLICT",
+      status: 409,
+      message:
+        "A provisioning job already used this key. Inspect the existing operation before retrying.",
+    });
   }
 
   const existing = await findTenantBySlug(tx, input.slug);
   if (existing) {
-    return readPlatformTenantDetail(tx, existing.id);
+    throw new AtlasHttpError({
+      code: "VALIDATION_ERROR",
+      status: 409,
+      message: "A tenant with this slug already exists.",
+    });
   }
 
   const tenant = await insertProvisioningTenant(tx, input);

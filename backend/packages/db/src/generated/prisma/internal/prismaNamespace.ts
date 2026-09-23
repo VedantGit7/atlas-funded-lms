@@ -385,6 +385,7 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 
 export const ModelName = {
   Tenant: 'Tenant',
+  TenantUsageEvent: 'TenantUsageEvent',
   TenantDomain: 'TenantDomain',
   AuthPrincipal: 'AuthPrincipal',
   PlatformOperator: 'PlatformOperator',
@@ -612,7 +613,11 @@ export const ModelName = {
   MarketingIntegrationWebhookDelivery: 'MarketingIntegrationWebhookDelivery',
   MarketingNewsfeedSettings: 'MarketingNewsfeedSettings',
   MarketingNewsfeedPost: 'MarketingNewsfeedPost',
-  MarketingNewsfeedSave: 'MarketingNewsfeedSave'
+  MarketingNewsfeedSave: 'MarketingNewsfeedSave',
+  PaymentRefundIntent: 'PaymentRefundIntent',
+  OutboxDeliveryJob: 'OutboxDeliveryJob',
+  ReportDeliveryEffect: 'ReportDeliveryEffect',
+  ExportFileCleanupRequest: 'ExportFileCleanupRequest'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -628,7 +633,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "tenant" | "tenantDomain" | "authPrincipal" | "platformOperator" | "membership" | "memberProfile" | "memberNotificationPreference" | "permission" | "permissionBundle" | "role" | "rolePermission" | "userRole" | "permissionOverride" | "tenantConfig" | "tenantConfigVersion" | "featureFlag" | "featureFlagOverride" | "entitlement" | "entitlementGrantHistory" | "tenantSubscription" | "tenantActiveDay" | "learnerBillingConfig" | "learnerBillingLocation" | "fxRate" | "paymentGateway" | "auditEntry" | "secretRef" | "outboxEvent" | "eventDelivery" | "deadLetterEvent" | "provisioningJob" | "tenantBranding" | "tenantTheme" | "tenantBrandingVersion" | "tenantThemeVersion" | "lessonAsset" | "storageReference" | "course" | "courseModule" | "moduleScormProgress" | "lesson" | "tag" | "lessonTag" | "courseTag" | "enrollment" | "mockTest" | "mockTestEnrollment" | "testSeries" | "testSeriesItem" | "testSeriesEnrollment" | "testSeriesItemProgress" | "bundle" | "bundleItem" | "bundleEnrollment" | "learnerSubscriptionPlan" | "learnerSubscriptionPlanItem" | "learnerSubscriptionEnrollment" | "lessonProgress" | "courseReview" | "workflowDefinition" | "workflowTransition" | "learningPath" | "pathStep" | "pathStepGate" | "pathEnrollment" | "pathStepProgress" | "itemType" | "item" | "itemOption" | "itemDimensionWeight" | "itemCollection" | "itemCollectionItem" | "assessment" | "assessmentItem" | "attempt" | "attemptAnswer" | "gradingTask" | "examSecurityPolicy" | "proctoringSession" | "proctoringEvent" | "proctoringReport" | "identityVerification" | "proctoringMediaArtifact" | "practiceSession" | "practiceResponse" | "srsState" | "competencyDimension" | "scoringProfile" | "scoringConfigVersion" | "competencyBand" | "signalSource" | "competencySignal" | "competencyScore" | "compositeReadinessState" | "competencyScoreSnapshot" | "diagnosticSession" | "readinessPolicy" | "attributionToken" | "certificateTemplate" | "certificate" | "certificateBrandKit" | "certificateStatusList" | "certificateRenderJob" | "certificateWalletPass" | "credentialVerification" | "gamificationProfile" | "pointLedger" | "badge" | "badgeAward" | "streakState" | "streakFreeze" | "groupStreakState" | "leaderboardDefinition" | "leaderboardSnapshot" | "questDefinition" | "questProgress" | "gamificationCurrency" | "memberBalance" | "rewardItem" | "rewardRedemption" | "seasonalEvent" | "notificationTemplate" | "notificationDispatch" | "communitySpace" | "groupMembership" | "post" | "comment" | "reaction" | "mention" | "moderationCase" | "moderationDecision" | "appeal" | "searchIndexEntry" | "analyticsRollup" | "funnelDailyRollup" | "itemStatistic" | "materializedViewRegistry" | "automationRule" | "automationRun" | "localeResource" | "localeMetadata" | "localeCanonicalKey" | "localeQaCheckRun" | "localeQaIssue" | "extensionPoint" | "extensionRegistration" | "exportJob" | "deletionRequest" | "reportDefinition" | "reportSchedule" | "reportRun" | "reportDeliveryDestination" | "reportExportSettings" | "atRiskRule" | "atRiskAlert" | "deviceSecurityAlert" | "devicePolicyOverride" | "deviceBlockedFingerprint" | "deviceSession" | "paymentOrder" | "paymentInstalmentPlan" | "paymentInstalment" | "batch" | "batchMembership" | "poll" | "pollOption" | "pollResponse" | "salesAttributionEvent" | "salesAttributionRetentionSetting" | "salesCoupon" | "salesCouponCourse" | "salesCouponRedemption" | "salesWalletConfig" | "salesWallet" | "salesWalletTransaction" | "salesReferralConfig" | "salesReferralCode" | "salesReferralAttribution" | "salesReferralPurchaseCredit" | "salesReferralPending" | "salesAffiliateConfig" | "salesAffiliate" | "salesAffiliateProduct" | "salesAffiliateRequest" | "salesAffiliateCommission" | "salesAffiliatePayout" | "customFieldDefinition" | "customFieldValue" | "customFieldValueHistory" | "customFieldSegment" | "zoomConnection" | "zoomSyncRun" | "zoomWebhookEvent" | "zoomMeeting" | "zoomMeetingParticipant" | "liveSession" | "liveAttendance" | "messengerConversation" | "messengerMessage" | "biExportJob" | "subSchool" | "productCopyJob" | "courseBackupJob" | "pushMessage" | "marketingEmailCampaign" | "marketingCampaign" | "announcement" | "whatsappConnection" | "whatsappTemplate" | "whatsappCampaign" | "whatsappConversation" | "whatsappInboxMessage" | "marketingWorkflow" | "marketingWorkflowRun" | "marketingWorkflowRunLog" | "marketingForm" | "marketingContact" | "marketingFormSubmission" | "marketingCta" | "marketingPromoSlider" | "marketingPromoSlide" | "marketingEvent" | "marketingEventRegistration" | "marketingIntegrationSettings" | "marketingIntegrationWebhook" | "marketingIntegrationWebhookDelivery" | "marketingNewsfeedSettings" | "marketingNewsfeedPost" | "marketingNewsfeedSave"
+    modelProps: "tenant" | "tenantUsageEvent" | "tenantDomain" | "authPrincipal" | "platformOperator" | "membership" | "memberProfile" | "memberNotificationPreference" | "permission" | "permissionBundle" | "role" | "rolePermission" | "userRole" | "permissionOverride" | "tenantConfig" | "tenantConfigVersion" | "featureFlag" | "featureFlagOverride" | "entitlement" | "entitlementGrantHistory" | "tenantSubscription" | "tenantActiveDay" | "learnerBillingConfig" | "learnerBillingLocation" | "fxRate" | "paymentGateway" | "auditEntry" | "secretRef" | "outboxEvent" | "eventDelivery" | "deadLetterEvent" | "provisioningJob" | "tenantBranding" | "tenantTheme" | "tenantBrandingVersion" | "tenantThemeVersion" | "lessonAsset" | "storageReference" | "course" | "courseModule" | "moduleScormProgress" | "lesson" | "tag" | "lessonTag" | "courseTag" | "enrollment" | "mockTest" | "mockTestEnrollment" | "testSeries" | "testSeriesItem" | "testSeriesEnrollment" | "testSeriesItemProgress" | "bundle" | "bundleItem" | "bundleEnrollment" | "learnerSubscriptionPlan" | "learnerSubscriptionPlanItem" | "learnerSubscriptionEnrollment" | "lessonProgress" | "courseReview" | "workflowDefinition" | "workflowTransition" | "learningPath" | "pathStep" | "pathStepGate" | "pathEnrollment" | "pathStepProgress" | "itemType" | "item" | "itemOption" | "itemDimensionWeight" | "itemCollection" | "itemCollectionItem" | "assessment" | "assessmentItem" | "attempt" | "attemptAnswer" | "gradingTask" | "examSecurityPolicy" | "proctoringSession" | "proctoringEvent" | "proctoringReport" | "identityVerification" | "proctoringMediaArtifact" | "practiceSession" | "practiceResponse" | "srsState" | "competencyDimension" | "scoringProfile" | "scoringConfigVersion" | "competencyBand" | "signalSource" | "competencySignal" | "competencyScore" | "compositeReadinessState" | "competencyScoreSnapshot" | "diagnosticSession" | "readinessPolicy" | "attributionToken" | "certificateTemplate" | "certificate" | "certificateBrandKit" | "certificateStatusList" | "certificateRenderJob" | "certificateWalletPass" | "credentialVerification" | "gamificationProfile" | "pointLedger" | "badge" | "badgeAward" | "streakState" | "streakFreeze" | "groupStreakState" | "leaderboardDefinition" | "leaderboardSnapshot" | "questDefinition" | "questProgress" | "gamificationCurrency" | "memberBalance" | "rewardItem" | "rewardRedemption" | "seasonalEvent" | "notificationTemplate" | "notificationDispatch" | "communitySpace" | "groupMembership" | "post" | "comment" | "reaction" | "mention" | "moderationCase" | "moderationDecision" | "appeal" | "searchIndexEntry" | "analyticsRollup" | "funnelDailyRollup" | "itemStatistic" | "materializedViewRegistry" | "automationRule" | "automationRun" | "localeResource" | "localeMetadata" | "localeCanonicalKey" | "localeQaCheckRun" | "localeQaIssue" | "extensionPoint" | "extensionRegistration" | "exportJob" | "deletionRequest" | "reportDefinition" | "reportSchedule" | "reportRun" | "reportDeliveryDestination" | "reportExportSettings" | "atRiskRule" | "atRiskAlert" | "deviceSecurityAlert" | "devicePolicyOverride" | "deviceBlockedFingerprint" | "deviceSession" | "paymentOrder" | "paymentInstalmentPlan" | "paymentInstalment" | "batch" | "batchMembership" | "poll" | "pollOption" | "pollResponse" | "salesAttributionEvent" | "salesAttributionRetentionSetting" | "salesCoupon" | "salesCouponCourse" | "salesCouponRedemption" | "salesWalletConfig" | "salesWallet" | "salesWalletTransaction" | "salesReferralConfig" | "salesReferralCode" | "salesReferralAttribution" | "salesReferralPurchaseCredit" | "salesReferralPending" | "salesAffiliateConfig" | "salesAffiliate" | "salesAffiliateProduct" | "salesAffiliateRequest" | "salesAffiliateCommission" | "salesAffiliatePayout" | "customFieldDefinition" | "customFieldValue" | "customFieldValueHistory" | "customFieldSegment" | "zoomConnection" | "zoomSyncRun" | "zoomWebhookEvent" | "zoomMeeting" | "zoomMeetingParticipant" | "liveSession" | "liveAttendance" | "messengerConversation" | "messengerMessage" | "biExportJob" | "subSchool" | "productCopyJob" | "courseBackupJob" | "pushMessage" | "marketingEmailCampaign" | "marketingCampaign" | "announcement" | "whatsappConnection" | "whatsappTemplate" | "whatsappCampaign" | "whatsappConversation" | "whatsappInboxMessage" | "marketingWorkflow" | "marketingWorkflowRun" | "marketingWorkflowRunLog" | "marketingForm" | "marketingContact" | "marketingFormSubmission" | "marketingCta" | "marketingPromoSlider" | "marketingPromoSlide" | "marketingEvent" | "marketingEventRegistration" | "marketingIntegrationSettings" | "marketingIntegrationWebhook" | "marketingIntegrationWebhookDelivery" | "marketingNewsfeedSettings" | "marketingNewsfeedPost" | "marketingNewsfeedSave" | "paymentRefundIntent" | "outboxDeliveryJob" | "reportDeliveryEffect" | "exportFileCleanupRequest"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -703,6 +708,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.TenantCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.TenantCountAggregateOutputType> | number
+        }
+      }
+    }
+    TenantUsageEvent: {
+      payload: Prisma.$TenantUsageEventPayload<ExtArgs>
+      fields: Prisma.TenantUsageEventFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.TenantUsageEventFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantUsageEventPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.TenantUsageEventFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantUsageEventPayload>
+        }
+        findFirst: {
+          args: Prisma.TenantUsageEventFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantUsageEventPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.TenantUsageEventFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantUsageEventPayload>
+        }
+        findMany: {
+          args: Prisma.TenantUsageEventFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantUsageEventPayload>[]
+        }
+        create: {
+          args: Prisma.TenantUsageEventCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantUsageEventPayload>
+        }
+        createMany: {
+          args: Prisma.TenantUsageEventCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.TenantUsageEventCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantUsageEventPayload>[]
+        }
+        delete: {
+          args: Prisma.TenantUsageEventDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantUsageEventPayload>
+        }
+        update: {
+          args: Prisma.TenantUsageEventUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantUsageEventPayload>
+        }
+        deleteMany: {
+          args: Prisma.TenantUsageEventDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.TenantUsageEventUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.TenantUsageEventUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantUsageEventPayload>[]
+        }
+        upsert: {
+          args: Prisma.TenantUsageEventUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantUsageEventPayload>
+        }
+        aggregate: {
+          args: Prisma.TenantUsageEventAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTenantUsageEvent>
+        }
+        groupBy: {
+          args: Prisma.TenantUsageEventGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TenantUsageEventGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.TenantUsageEventCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TenantUsageEventCountAggregateOutputType> | number
         }
       }
     }
@@ -17578,6 +17657,302 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    PaymentRefundIntent: {
+      payload: Prisma.$PaymentRefundIntentPayload<ExtArgs>
+      fields: Prisma.PaymentRefundIntentFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PaymentRefundIntentFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaymentRefundIntentPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PaymentRefundIntentFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaymentRefundIntentPayload>
+        }
+        findFirst: {
+          args: Prisma.PaymentRefundIntentFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaymentRefundIntentPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PaymentRefundIntentFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaymentRefundIntentPayload>
+        }
+        findMany: {
+          args: Prisma.PaymentRefundIntentFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaymentRefundIntentPayload>[]
+        }
+        create: {
+          args: Prisma.PaymentRefundIntentCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaymentRefundIntentPayload>
+        }
+        createMany: {
+          args: Prisma.PaymentRefundIntentCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.PaymentRefundIntentCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaymentRefundIntentPayload>[]
+        }
+        delete: {
+          args: Prisma.PaymentRefundIntentDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaymentRefundIntentPayload>
+        }
+        update: {
+          args: Prisma.PaymentRefundIntentUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaymentRefundIntentPayload>
+        }
+        deleteMany: {
+          args: Prisma.PaymentRefundIntentDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PaymentRefundIntentUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.PaymentRefundIntentUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaymentRefundIntentPayload>[]
+        }
+        upsert: {
+          args: Prisma.PaymentRefundIntentUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaymentRefundIntentPayload>
+        }
+        aggregate: {
+          args: Prisma.PaymentRefundIntentAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePaymentRefundIntent>
+        }
+        groupBy: {
+          args: Prisma.PaymentRefundIntentGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PaymentRefundIntentGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PaymentRefundIntentCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PaymentRefundIntentCountAggregateOutputType> | number
+        }
+      }
+    }
+    OutboxDeliveryJob: {
+      payload: Prisma.$OutboxDeliveryJobPayload<ExtArgs>
+      fields: Prisma.OutboxDeliveryJobFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.OutboxDeliveryJobFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OutboxDeliveryJobPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.OutboxDeliveryJobFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OutboxDeliveryJobPayload>
+        }
+        findFirst: {
+          args: Prisma.OutboxDeliveryJobFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OutboxDeliveryJobPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.OutboxDeliveryJobFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OutboxDeliveryJobPayload>
+        }
+        findMany: {
+          args: Prisma.OutboxDeliveryJobFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OutboxDeliveryJobPayload>[]
+        }
+        create: {
+          args: Prisma.OutboxDeliveryJobCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OutboxDeliveryJobPayload>
+        }
+        createMany: {
+          args: Prisma.OutboxDeliveryJobCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.OutboxDeliveryJobCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OutboxDeliveryJobPayload>[]
+        }
+        delete: {
+          args: Prisma.OutboxDeliveryJobDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OutboxDeliveryJobPayload>
+        }
+        update: {
+          args: Prisma.OutboxDeliveryJobUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OutboxDeliveryJobPayload>
+        }
+        deleteMany: {
+          args: Prisma.OutboxDeliveryJobDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.OutboxDeliveryJobUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.OutboxDeliveryJobUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OutboxDeliveryJobPayload>[]
+        }
+        upsert: {
+          args: Prisma.OutboxDeliveryJobUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OutboxDeliveryJobPayload>
+        }
+        aggregate: {
+          args: Prisma.OutboxDeliveryJobAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateOutboxDeliveryJob>
+        }
+        groupBy: {
+          args: Prisma.OutboxDeliveryJobGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.OutboxDeliveryJobGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.OutboxDeliveryJobCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.OutboxDeliveryJobCountAggregateOutputType> | number
+        }
+      }
+    }
+    ReportDeliveryEffect: {
+      payload: Prisma.$ReportDeliveryEffectPayload<ExtArgs>
+      fields: Prisma.ReportDeliveryEffectFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ReportDeliveryEffectFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportDeliveryEffectPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ReportDeliveryEffectFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportDeliveryEffectPayload>
+        }
+        findFirst: {
+          args: Prisma.ReportDeliveryEffectFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportDeliveryEffectPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ReportDeliveryEffectFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportDeliveryEffectPayload>
+        }
+        findMany: {
+          args: Prisma.ReportDeliveryEffectFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportDeliveryEffectPayload>[]
+        }
+        create: {
+          args: Prisma.ReportDeliveryEffectCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportDeliveryEffectPayload>
+        }
+        createMany: {
+          args: Prisma.ReportDeliveryEffectCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ReportDeliveryEffectCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportDeliveryEffectPayload>[]
+        }
+        delete: {
+          args: Prisma.ReportDeliveryEffectDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportDeliveryEffectPayload>
+        }
+        update: {
+          args: Prisma.ReportDeliveryEffectUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportDeliveryEffectPayload>
+        }
+        deleteMany: {
+          args: Prisma.ReportDeliveryEffectDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ReportDeliveryEffectUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ReportDeliveryEffectUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportDeliveryEffectPayload>[]
+        }
+        upsert: {
+          args: Prisma.ReportDeliveryEffectUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportDeliveryEffectPayload>
+        }
+        aggregate: {
+          args: Prisma.ReportDeliveryEffectAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateReportDeliveryEffect>
+        }
+        groupBy: {
+          args: Prisma.ReportDeliveryEffectGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ReportDeliveryEffectGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ReportDeliveryEffectCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ReportDeliveryEffectCountAggregateOutputType> | number
+        }
+      }
+    }
+    ExportFileCleanupRequest: {
+      payload: Prisma.$ExportFileCleanupRequestPayload<ExtArgs>
+      fields: Prisma.ExportFileCleanupRequestFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ExportFileCleanupRequestFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ExportFileCleanupRequestPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ExportFileCleanupRequestFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ExportFileCleanupRequestPayload>
+        }
+        findFirst: {
+          args: Prisma.ExportFileCleanupRequestFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ExportFileCleanupRequestPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ExportFileCleanupRequestFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ExportFileCleanupRequestPayload>
+        }
+        findMany: {
+          args: Prisma.ExportFileCleanupRequestFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ExportFileCleanupRequestPayload>[]
+        }
+        create: {
+          args: Prisma.ExportFileCleanupRequestCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ExportFileCleanupRequestPayload>
+        }
+        createMany: {
+          args: Prisma.ExportFileCleanupRequestCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ExportFileCleanupRequestCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ExportFileCleanupRequestPayload>[]
+        }
+        delete: {
+          args: Prisma.ExportFileCleanupRequestDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ExportFileCleanupRequestPayload>
+        }
+        update: {
+          args: Prisma.ExportFileCleanupRequestUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ExportFileCleanupRequestPayload>
+        }
+        deleteMany: {
+          args: Prisma.ExportFileCleanupRequestDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ExportFileCleanupRequestUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ExportFileCleanupRequestUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ExportFileCleanupRequestPayload>[]
+        }
+        upsert: {
+          args: Prisma.ExportFileCleanupRequestUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ExportFileCleanupRequestPayload>
+        }
+        aggregate: {
+          args: Prisma.ExportFileCleanupRequestAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateExportFileCleanupRequest>
+        }
+        groupBy: {
+          args: Prisma.ExportFileCleanupRequestGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ExportFileCleanupRequestGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ExportFileCleanupRequestCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ExportFileCleanupRequestCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -17633,6 +18008,20 @@ export const TenantScalarFieldEnum = {
 } as const
 
 export type TenantScalarFieldEnum = (typeof TenantScalarFieldEnum)[keyof typeof TenantScalarFieldEnum]
+
+
+export const TenantUsageEventScalarFieldEnum = {
+  id: 'id',
+  tenant_id: 'tenant_id',
+  period_start: 'period_start',
+  requests: 'requests',
+  duration_ms: 'duration_ms',
+  emails: 'emails',
+  created_at: 'created_at',
+  processed_at: 'processed_at'
+} as const
+
+export type TenantUsageEventScalarFieldEnum = (typeof TenantUsageEventScalarFieldEnum)[keyof typeof TenantUsageEventScalarFieldEnum]
 
 
 export const TenantDomainScalarFieldEnum = {
@@ -18200,6 +18589,7 @@ export const CourseModuleScalarFieldEnum = {
   scorm_package_reference_id: 'scorm_package_reference_id',
   scorm_launch_path: 'scorm_launch_path',
   scorm_version: 'scorm_version',
+  scormContentVersion: 'scormContentVersion',
   created_at: 'created_at',
   updated_at: 'updated_at',
   deleted_at: 'deleted_at'
@@ -19825,6 +20215,7 @@ export const ExportJobScalarFieldEnum = {
   status: 'status',
   scope_json: 'scope_json',
   r2_object_key: 'r2_object_key',
+  artifact_json: 'artifact_json',
   error_json: 'error_json',
   expires_at: 'expires_at',
   created_at: 'created_at',
@@ -19842,6 +20233,7 @@ export const DeletionRequestScalarFieldEnum = {
   target_id: 'target_id',
   status: 'status',
   reason: 'reason',
+  outcome_json: 'outcome_json',
   scheduled_at: 'scheduled_at',
   completed_at: 'completed_at',
   created_at: 'created_at',
@@ -19890,6 +20282,8 @@ export type ReportScheduleScalarFieldEnum = (typeof ReportScheduleScalarFieldEnu
 
 
 export const ReportRunScalarFieldEnum = {
+  artifact_json: 'artifact_json',
+  file_retention_managed: 'file_retention_managed',
   id: 'id',
   tenant_id: 'tenant_id',
   report_definition_id: 'report_definition_id',
@@ -21285,6 +21679,95 @@ export const MarketingNewsfeedSaveScalarFieldEnum = {
 export type MarketingNewsfeedSaveScalarFieldEnum = (typeof MarketingNewsfeedSaveScalarFieldEnum)[keyof typeof MarketingNewsfeedSaveScalarFieldEnum]
 
 
+export const PaymentRefundIntentScalarFieldEnum = {
+  id: 'id',
+  tenant_id: 'tenant_id',
+  order_id: 'order_id',
+  request_key: 'request_key',
+  request_fingerprint: 'request_fingerprint',
+  amount_cents: 'amount_cents',
+  currency: 'currency',
+  gateway_key: 'gateway_key',
+  gateway_id: 'gateway_id',
+  external_id: 'external_id',
+  status: 'status',
+  provider_refund_id: 'provider_refund_id',
+  payload_json: 'payload_json',
+  lease_token: 'lease_token',
+  lease_until: 'lease_until',
+  attempts: 'attempts',
+  next_attempt_at: 'next_attempt_at',
+  last_error: 'last_error',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type PaymentRefundIntentScalarFieldEnum = (typeof PaymentRefundIntentScalarFieldEnum)[keyof typeof PaymentRefundIntentScalarFieldEnum]
+
+
+export const OutboxDeliveryJobScalarFieldEnum = {
+  id: 'id',
+  tenant_id: 'tenant_id',
+  outbox_event_id: 'outbox_event_id',
+  destination_key: 'destination_key',
+  status: 'status',
+  attempt_count: 'attempt_count',
+  cycle_attempt_count: 'cycle_attempt_count',
+  max_attempts: 'max_attempts',
+  next_attempt_at: 'next_attempt_at',
+  lease_token: 'lease_token',
+  lease_until: 'lease_until',
+  last_error_code: 'last_error_code',
+  last_dead_letter_id: 'last_dead_letter_id',
+  replayed_dead_letter_id: 'replayed_dead_letter_id',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type OutboxDeliveryJobScalarFieldEnum = (typeof OutboxDeliveryJobScalarFieldEnum)[keyof typeof OutboxDeliveryJobScalarFieldEnum]
+
+
+export const ReportDeliveryEffectScalarFieldEnum = {
+  effect_key: 'effect_key',
+  tenant_id: 'tenant_id',
+  report_run_id: 'report_run_id',
+  ordinal: 'ordinal',
+  kind: 'kind',
+  destination_id: 'destination_id',
+  request_json: 'request_json',
+  retry_on_crash: 'retry_on_crash',
+  status: 'status',
+  lease_token: 'lease_token',
+  lease_until: 'lease_until',
+  attempts: 'attempts',
+  error_kind: 'error_kind',
+  last_error: 'last_error',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type ReportDeliveryEffectScalarFieldEnum = (typeof ReportDeliveryEffectScalarFieldEnum)[keyof typeof ReportDeliveryEffectScalarFieldEnum]
+
+
+export const ExportFileCleanupRequestScalarFieldEnum = {
+  id: 'id',
+  tenant_id: 'tenant_id',
+  source_type: 'source_type',
+  source_id: 'source_id',
+  object_key: 'object_key',
+  artifact_json: 'artifact_json',
+  status: 'status',
+  lease_token: 'lease_token',
+  lease_until: 'lease_until',
+  attempts: 'attempts',
+  last_error: 'last_error',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type ExportFileCleanupRequestScalarFieldEnum = (typeof ExportFileCleanupRequestScalarFieldEnum)[keyof typeof ExportFileCleanupRequestScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -21410,6 +21893,34 @@ export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaM
 
 
 /**
+ * Reference to a field of type 'BigInt'
+ */
+export type BigIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BigInt'>
+    
+
+
+/**
+ * Reference to a field of type 'BigInt[]'
+ */
+export type ListBigIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BigInt[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Float'
+ */
+export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
+    
+
+
+/**
+ * Reference to a field of type 'Float[]'
+ */
+export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
+    
+
+
+/**
  * Reference to a field of type 'DomainStatus'
  */
 export type EnumDomainStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DomainStatus'>
@@ -21497,20 +22008,6 @@ export type EnumJobStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$Prisma
  * Reference to a field of type 'JobStatus[]'
  */
 export type ListEnumJobStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'JobStatus[]'>
-    
-
-
-/**
- * Reference to a field of type 'BigInt'
- */
-export type BigIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BigInt'>
-    
-
-
-/**
- * Reference to a field of type 'BigInt[]'
- */
-export type ListBigIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BigInt[]'>
     
 
 
@@ -21625,20 +22122,6 @@ export type EnumModerationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<
 export type ListEnumModerationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ModerationStatus[]'>
     
 
-
-/**
- * Reference to a field of type 'Float'
- */
-export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
-    
-
-
-/**
- * Reference to a field of type 'Float[]'
- */
-export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
-    
-
 /**
  * Batch Payload for updateMany & deleteMany & createMany
  */
@@ -21750,6 +22233,7 @@ export type PrismaClientOptions = ({
 }
 export type GlobalOmitConfig = {
   tenant?: Prisma.TenantOmit
+  tenantUsageEvent?: Prisma.TenantUsageEventOmit
   tenantDomain?: Prisma.TenantDomainOmit
   authPrincipal?: Prisma.AuthPrincipalOmit
   platformOperator?: Prisma.PlatformOperatorOmit
@@ -21978,6 +22462,10 @@ export type GlobalOmitConfig = {
   marketingNewsfeedSettings?: Prisma.MarketingNewsfeedSettingsOmit
   marketingNewsfeedPost?: Prisma.MarketingNewsfeedPostOmit
   marketingNewsfeedSave?: Prisma.MarketingNewsfeedSaveOmit
+  paymentRefundIntent?: Prisma.PaymentRefundIntentOmit
+  outboxDeliveryJob?: Prisma.OutboxDeliveryJobOmit
+  reportDeliveryEffect?: Prisma.ReportDeliveryEffectOmit
+  exportFileCleanupRequest?: Prisma.ExportFileCleanupRequestOmit
 }
 
 /* Types for Logging */

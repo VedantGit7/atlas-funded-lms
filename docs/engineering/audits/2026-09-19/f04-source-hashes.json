@@ -1,0 +1,158 @@
+[
+  {
+    "path": ".env.example",
+    "sha256": "9e75e9a65c5ccc6a3e9d018538478259e41c4fe8501d607f6178255339602fc2"
+  },
+  {
+    "path": "backend/apps/api/src/app/api/v1/certificates/[id]/download/route.ts",
+    "sha256": "dc084f323982663bf39821aea3e2b2d66353ae2758b0a21c7b2b9febe5e7bd30"
+  },
+  {
+    "path": "backend/apps/api/src/app/api/v1/certificates/[id]/wallet/apple/download/route.ts",
+    "sha256": "b68c9764a005edf7fd51fcfd8e8cab4a8525b6ca2d88f426d5b20264409d5b9d"
+  },
+  {
+    "path": "backend/apps/api/src/app/api/v1/me/route.ts",
+    "sha256": "9a4f1266b6e740803e32d06b755d9dd27276f424d2bbc342e37e4821296f5071"
+  },
+  {
+    "path": "backend/apps/api/src/app/api/v1/modules/[id]/scorm-content/route.ts",
+    "sha256": "f005b68472fa0916c95fbc640e07d1c4162f5e3201556e1b8ad1b665379e7f53"
+  },
+  {
+    "path": "backend/apps/api/src/app/api/v1/public/diagnostic/[anonId]/merge/route.ts",
+    "sha256": "3a0182b00c8469b27741c3c0cd64342b016493bf00756b7c98c6405dee89f479"
+  },
+  {
+    "path": "backend/apps/api/src/app/api/v1/public/verify/[credentialId]/route.ts",
+    "sha256": "ab34d3f59126059deeb22c6192d083e1f77fab37ce1682c1b45b2e5bf543f05d"
+  },
+  {
+    "path": "backend/apps/api/src/instrumentation.ts",
+    "sha256": "db6c1813bb21acaaf389015d780e55779be867e928220e91e72c22104bd7db9f"
+  },
+  {
+    "path": "backend/packages/api/src/client-ip.ts",
+    "sha256": "ccf0cbb39d7076c5ae439cbe1aa6d7b0ec2c20bea266c54c0e6c3f671aedf89d"
+  },
+  {
+    "path": "backend/packages/api/src/create-platform-route.ts",
+    "sha256": "3d275870990acab6ba19902827a2fcd66fbfb9ff6bc9e4527521342d7e5d7f33"
+  },
+  {
+    "path": "backend/packages/api/src/create-tenant-route.ts",
+    "sha256": "be4484039d0f8eda295d00b46836d66c5e4875f415cfea8c7cf08ac8c78482a5"
+  },
+  {
+    "path": "backend/packages/api/src/error-envelope.ts",
+    "sha256": "e122725881e3d25f983f49df66c8938681775b364e1bde917c2fd16f6f887a9d"
+  },
+  {
+    "path": "backend/packages/api/src/public-route.ts",
+    "sha256": "de127a514a02c8c7f9140fce5682aeeb8d67784f6b0a380e75b662b6cccb3b3a"
+  },
+  {
+    "path": "backend/packages/api/src/rate-limit-store.ts",
+    "sha256": "076900f426e008575d3082992e631d3cc1ac41977566926b31c3ea3c5db3d670"
+  },
+  {
+    "path": "backend/packages/api/src/rate-limit.ts",
+    "sha256": "0a6e40dcbaebd14243ff08f47382d596ce7b264422146af8de9829eaf9bc74e7"
+  },
+  {
+    "path": "backend/packages/core/src/http/errors.ts",
+    "sha256": "1278749d51946751136b3cf592a9ba0691d3b46604df81d0af6d078f2a6d15cc"
+  },
+  {
+    "path": "docs/engineering/atlas-lms-comprehensive-audit-2026-09-19.md",
+    "sha256": "627a7980da1c1c9bc32200dba9ef9885e421285b20ed474db54d3a6163ae0aca"
+  },
+  {
+    "path": "docs/engineering/f04-rate-limiting-remediation.md",
+    "sha256": "b2961141298c6f805d0816244e0c4bb764cb7cc0305db4ff4bad0d0f1e6d17a9"
+  },
+  {
+    "path": "docs/runbooks/rate-limiting.md",
+    "sha256": "eb75f3d74566782a7ccbec793be5a1eb19a88d4aee037c256209344ae4db0fde"
+  },
+  {
+    "path": "frontend/apps/web/src/app/api/v1/certificates/[id]/download/route.ts",
+    "sha256": "dc084f323982663bf39821aea3e2b2d66353ae2758b0a21c7b2b9febe5e7bd30"
+  },
+  {
+    "path": "frontend/apps/web/src/app/api/v1/certificates/[id]/wallet/apple/download/route.ts",
+    "sha256": "b68c9764a005edf7fd51fcfd8e8cab4a8525b6ca2d88f426d5b20264409d5b9d"
+  },
+  {
+    "path": "frontend/apps/web/src/app/api/v1/me/route.ts",
+    "sha256": "f73f2b72a952ddf1d70e42dfa6632ff26aa927e1343890f300f17d95ae5cfd4a"
+  },
+  {
+    "path": "frontend/apps/web/src/app/api/v1/public/diagnostic/[anonId]/merge/route.ts",
+    "sha256": "afb9555bf5d6d853817553726640c9a9aa485cb4c7547bfdc1d3b5b51e73b4d5"
+  },
+  {
+    "path": "frontend/apps/web/src/app/api/v1/public/verify/[credentialId]/route.ts",
+    "sha256": "ab34d3f59126059deeb22c6192d083e1f77fab37ce1682c1b45b2e5bf543f05d"
+  },
+  {
+    "path": "frontend/apps/web/src/instrumentation.ts",
+    "sha256": "db6c1813bb21acaaf389015d780e55779be867e928220e91e72c22104bd7db9f"
+  },
+  {
+    "path": "tests/api/branding-publish.post.test.ts",
+    "sha256": "14e7814924395ee7f860ad8019f114f8ec23a90fdd5662c249062c05bb512ea4"
+  },
+  {
+    "path": "tests/api/branding.get-put.test.ts",
+    "sha256": "056aa391387c4336e4aa6aaa5137597b61dec684ca7d305462281a81760a1f24"
+  },
+  {
+    "path": "tests/api/domains.delete.test.ts",
+    "sha256": "3b07288f6e8e9cbbd793a714989a48db98c482103c5a3126fe3643d7a79201cf"
+  },
+  {
+    "path": "tests/api/domains.get-post.test.ts",
+    "sha256": "50c03217d6ef8a0273e4cc8f12e6de5c97d561206d28b82c2bf08ddf5a67096b"
+  },
+  {
+    "path": "tests/api/learner-product-status.post.test.ts",
+    "sha256": "b0448f2dfa177cef9e8758de0a3c877fa5b1b50d1eda6077651c1a5ecf636daa"
+  },
+  {
+    "path": "tests/api/theme.put.test.ts",
+    "sha256": "a8f984ccb14e0957bebbbcddc74fddd21648eebb42a942ad2bba729d8ecd3322"
+  },
+  {
+    "path": "tests/integration/api/rate-limit.redis.test.ts",
+    "sha256": "49f0e0171270c79a21f87ca46b95a1010b8578f0e012fc6f28fef3d2f8bdc0ff"
+  },
+  {
+    "path": "tests/unit/api/protected-rate-limit.test.ts",
+    "sha256": "7363f6f5098b4d9c845e4d1d8c6306043b6bfd2c5aa1dc515eeabe420c91d082"
+  },
+  {
+    "path": "tests/unit/api/rate-limit-budgets.test.ts",
+    "sha256": "8f47a36c08ff8ef77084d56605353e3a8dfc6df04fd01855f3b26d2ef6564ac5"
+  },
+  {
+    "path": "tests/unit/api/rate-limit-manual-routes.test.ts",
+    "sha256": "d2de97f2a1f15d4c1fffc533b92ec4faf64560e12a80739fef9bd5452cb9985a"
+  },
+  {
+    "path": "tests/unit/api/rate-limit-security.test.ts",
+    "sha256": "743800e579c1d567e4a2257d232e9a5b78605ac146fedc1cb7dbcfafb8148e4f"
+  },
+  {
+    "path": "tests/unit/api/rate-limit-startup.test.ts",
+    "sha256": "46ef6c67f045754b96e745cf42dfacde4f1f59486eabfa5a8de953e32c3613ac"
+  },
+  {
+    "path": "tests/unit/api/rate-limit.test.ts",
+    "sha256": "ef21b73264161ff0a90a085419875453a562789a1a0f5517bd462b6997ad9fb5"
+  },
+  {
+    "path": "tests/unit/auth/session-assurance.test.ts",
+    "sha256": "56fe35331fabdc2f6965f459fda64fc466fa977713398dbf5710682a25cc82d2"
+  }
+]

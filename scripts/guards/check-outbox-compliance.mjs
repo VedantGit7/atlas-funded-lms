@@ -1,3 +1,4 @@
+import { isGeneratedSourcePath } from "./source-paths.mjs";
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 
@@ -90,7 +91,7 @@ function walkFiles(directory) {
       const normalized = path.replaceAll("\\", "/");
 
       if (
-        normalized.includes("/node_modules/") ||
+        isGeneratedSourcePath(normalized) ||
         normalized.includes("/.next/") ||
         normalized.includes("/dist/") ||
         normalized.includes("/build/") ||

@@ -6,12 +6,11 @@ import {
   readCookieFromRequest,
 } from "./cookie-names";
 import { applyAuthSessionToCookieStore, readSessionPersistence } from "./cookie-store";
-import {
-  createSupabaseAdminServerClient,
-  createSupabasePublicServerClient,
-} from "./supabase-server";
+import { createSupabaseAdminServerClient } from "./supabase-server";
 import { authRequired } from "./auth-errors";
 import { refreshSessionFromRefreshToken } from "./public-auth.service";
+
+export type SessionAssuranceLevel = "aal1" | "aal2" | null;
 
 export async function extractAccessToken(req: Request): Promise<string | null> {
   const bearer = getBearerToken(req);
@@ -41,58 +40,34 @@ export async function extractRefreshToken(req: Request): Promise<string | null> 
   return cookieStore.get(ATLAS_REFRESH_TOKEN_COOKIE)?.value ?? null;
 }
 
-async function resolveMfaEnabledForSession(args: {
-  accessToken: string;
-  refreshToken: string;
-}): Promise<boolean> {
-  const supabase = createSupabasePublicServerClient();
-  const { error: sessionError } = await supabase.auth.setSession({
-    access_token: args.accessToken,
-    refresh_token: args.refreshToken,
-  });
-
-  if (sessionError) {
-    return false;
-  }
-
-  const { data, error } = await supabase.auth.mfa.listFactors();
-  if (error) {
-    return false;
-  }
-
-  // `listFactors()` types `data.totp` and `data.phone` as `Factor<K, "verified">[]`
-  // — the SDK returns only verified factors there, and keeps unverified ones in
-  // `data.all`. The old `.some((f) => f.status === "verified")` was therefore
-  // comparing "verified" to "verified" and could never be false for a non-empty
-  // list. It was redundant, not wrong: presence in these arrays IS verification.
-  //
-  // Audit finding H5 assumed the opposite — that the predicate might fail to
-  // discriminate verified from pending factors, making MFA enforcement unsafe to
-  // build on. It does not; see the Phase 2 note in the remediation plan.
-  const verifiedFactors = [...data.totp, ...data.phone];
-  return verifiedFactors.length > 0;
-}
-
-async function resolveUserFromAccessToken(accessToken: string, refreshToken: string | null) {
+async function resolveUserFromAccessToken(accessToken: string) {
   const supabase = createSupabaseAdminServerClient();
-  const result = (await supabase.auth.getUser(accessToken)) as {
-    data: { user: { id: string; email: string; factors?: unknown } | null };
-    error: { message: string } | null;
-  };
+  const result = await supabase.auth.getUser(accessToken);
 
-  if (result.error || !result.data.user?.id || !result.data.user.email) {
+  if (result.error || !result.data.user.id || !result.data.user.email) {
     throw authRequired();
   }
 
   const user = result.data.user;
-  const mfaEnabled = refreshToken
-    ? await resolveMfaEnabledForSession({ accessToken, refreshToken })
-    : false;
+  // Verify the exact token used above. Enrollment and a different cookie/refresh
+  // session must never promote this request's assurance. getClaims verifies the
+  // signature and expiration; getUser also checks the user with the auth service.
+  const { data, error } = await supabase.auth.getClaims(accessToken);
+  if (error || !data || data.claims.sub !== user.id) {
+    throw authRequired();
+  }
+  const aal = data.claims.aal;
+  const sessionAssuranceLevel: SessionAssuranceLevel =
+    aal === "aal2" ? "aal2" : aal === "aal1" ? "aal1" : null;
+
+  // Account enrollment information only, never an authorization decision.
+  const mfaEnabled = user.factors?.some((factor) => factor.status === "verified") ?? false;
 
   return {
     supabaseUserId: user.id,
-    email: user.email,
+    email: result.data.user.email,
     mfaEnabled,
+    sessionAssuranceLevel,
   };
 }
 
@@ -123,7 +98,7 @@ export async function requireSupabaseUser(req: Request) {
 
   if (accessToken) {
     try {
-      return await resolveUserFromAccessToken(accessToken, refreshToken);
+      return await resolveUserFromAccessToken(accessToken);
     } catch {
       if (!refreshToken) {
         throw authRequired();
@@ -139,11 +114,10 @@ export async function requireSupabaseUser(req: Request) {
   }
 
   const nextAccessToken = await extractAccessToken(req);
-  const nextRefreshToken = await extractRefreshToken(req);
 
   if (!nextAccessToken) {
     throw authRequired();
   }
 
-  return resolveUserFromAccessToken(nextAccessToken, nextRefreshToken);
+  return resolveUserFromAccessToken(nextAccessToken);
 }

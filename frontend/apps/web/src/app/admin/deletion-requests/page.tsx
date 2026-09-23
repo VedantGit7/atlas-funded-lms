@@ -10,7 +10,7 @@ export default async function AdminDeletionRequestsPage() {
     }>("/api/v1/deletion-requests");
 
     return (
-      <AdminPageGate screenId="T24" state="ready" title="Deletion Requests">
+      <AdminPageGate screenId="T24" state="ready" title="School-access removal">
         <main>
           <DeletionRequestsPanel initialRequests={requests.data.items} canManage canFileForOthers />
         </main>
@@ -22,8 +22,8 @@ export default async function AdminDeletionRequestsPage() {
         <AdminPageGate
           screenId="T24"
           state="denied"
-          title="Deletion Requests"
-          deniedMessage="You do not have permission to manage deletion requests."
+          title="School-access removal"
+          deniedMessage="You do not have permission to manage school-access removal requests."
         />
       );
     }
@@ -33,8 +33,8 @@ export default async function AdminDeletionRequestsPage() {
         <AdminPageGate
           screenId="T24"
           state="error"
-          title="Deletion Requests"
-          errorMessage={`Failed to load deletion requests. Request ID: ${error.requestId}`}
+          title="School-access removal"
+          errorMessage={`Failed to load school-access removal requests. Request ID: ${error.requestId}`}
         />
       );
     }

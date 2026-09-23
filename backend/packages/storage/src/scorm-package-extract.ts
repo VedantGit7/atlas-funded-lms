@@ -104,12 +104,16 @@ function guessContentType(relativePath: string): string {
  * so a permitted 100 MB upload could materialise ~100 GB and OOM the shared API
  * process, taking down every tenant on the instance.
  *
- * Limits are checked against each entry's DECLARED uncompressed size, before any
- * getData() call, so a bomb is rejected without ever being expanded.
+ * Limits are checked before getData(). Deflated output is capped by AdmZip at
+ * the declared size; STORED entries allocate their compressed extent instead,
+ * so both sizes must be bounded and consistent before reading them.
  */
 export const MAX_SCORM_ENTRIES = 2_000;
 export const MAX_SCORM_ENTRY_BYTES = 25 * 1024 * 1024;
 export const MAX_SCORM_TOTAL_BYTES = 250 * 1024 * 1024;
+export const MAX_SCORM_ZIP_BYTES = 100 * 1024 * 1024;
+export const MAX_SCORM_PATH_BYTES = 1_024;
+export const MAX_SCORM_PATH_DEPTH = 32;
 
 function assertWithinDecompressionLimits(entries: readonly AdmZip.IZipEntry[]): void {
   if (entries.length > MAX_SCORM_ENTRIES) {
@@ -120,10 +124,19 @@ function assertWithinDecompressionLimits(entries: readonly AdmZip.IZipEntry[]): 
 
   for (const entry of entries) {
     const declaredSize = entry.header.size;
+    const storedSize = entry.header.method === 0 ? entry.header.compressedSize : declaredSize;
+    if (
+      !Number.isSafeInteger(declaredSize) ||
+      declaredSize < 0 ||
+      !Number.isSafeInteger(storedSize) ||
+      storedSize < 0
+    )
+      throw new Error("SCORM_INVALID_ARCHIVE");
 
-    if (declaredSize > MAX_SCORM_ENTRY_BYTES) {
+    if (Math.max(declaredSize, storedSize) > MAX_SCORM_ENTRY_BYTES) {
       throw new Error("SCORM_ENTRY_TOO_LARGE");
     }
+    if (storedSize !== declaredSize) throw new Error("SCORM_INVALID_ARCHIVE");
 
     totalBytes += declaredSize;
 
@@ -133,8 +146,85 @@ function assertWithinDecompressionLimits(entries: readonly AdmZip.IZipEntry[]): 
   }
 }
 
-export function extractScormPackage(zipBuffer: Buffer): ExtractedScormPackage {
-  const zip = new AdmZip(zipBuffer);
+function readBoundedEntry(entry: AdmZip.IZipEntry): Buffer {
+  const content = entry.getData();
+  if (content.length > MAX_SCORM_ENTRY_BYTES) throw new Error("SCORM_ENTRY_TOO_LARGE");
+  if (content.length !== entry.header.size) throw new Error("SCORM_INVALID_ARCHIVE");
+  return content;
+}
+
+/** Validate metadata before AdmZip creates entries and implicit parent folders. */
+function preflightDirectory(zipBuffer: Buffer): { end: number; count: number } {
+  let end = -1;
+  for (
+    let offset = zipBuffer.length - 22;
+    offset >= Math.max(0, zipBuffer.length - 65557);
+    offset--
+  ) {
+    if (zipBuffer.readUInt32LE(offset) !== 0x06054b50) continue;
+    if (offset + 22 + zipBuffer.readUInt16LE(offset + 20) !== zipBuffer.length) continue;
+    end = offset;
+    break;
+  }
+  if (end < 0) throw new Error("SCORM_INVALID_ARCHIVE");
+  const count = zipBuffer.readUInt16LE(end + 10);
+  if (count > MAX_SCORM_ENTRIES) throw new Error("SCORM_TOO_MANY_ENTRIES");
+  let cursor = zipBuffer.readUInt32LE(end + 16);
+  if (
+    zipBuffer.readUInt16LE(end + 4) !== 0 ||
+    zipBuffer.readUInt16LE(end + 6) !== 0 ||
+    zipBuffer.readUInt16LE(end + 8) !== count ||
+    cursor + zipBuffer.readUInt32LE(end + 12) !== end
+  )
+    throw new Error("SCORM_INVALID_ARCHIVE");
+  // No ZIP64 or ambiguous alternate footer is supported. AdmZip scans these
+  // preceding bytes even after finding a classic footer.
+  for (let i = Math.max(0, end - 20); i < end; i++) {
+    const signature = zipBuffer.readUInt32LE(i);
+    if ([0x06054b50, 0x06064b50, 0x07064b50].includes(signature))
+      throw new Error("SCORM_INVALID_ARCHIVE");
+  }
+  for (let index = 0; index < count; index++) {
+    if (cursor + 46 > end || zipBuffer.readUInt32LE(cursor) !== 0x02014b50)
+      throw new Error("SCORM_INVALID_ARCHIVE");
+    const nameLength = zipBuffer.readUInt16LE(cursor + 28);
+    const extraLength = zipBuffer.readUInt16LE(cursor + 30);
+    const commentLength = zipBuffer.readUInt16LE(cursor + 32);
+    const nameStart = cursor + 46;
+    const extraStart = nameStart + nameLength;
+    const extraEnd = extraStart + extraLength;
+    const next = extraEnd + commentLength;
+    if (next > end || zipBuffer.readUInt16LE(cursor + 34) !== 0)
+      throw new Error("SCORM_INVALID_ARCHIVE");
+    if (nameLength < 1 || nameLength > MAX_SCORM_PATH_BYTES) throw new Error("SCORM_INVALID_PATH");
+    const name = zipBuffer.subarray(nameStart, extraStart).toString("utf8").replace(/\\/g, "/");
+    if (
+      Buffer.byteLength(name, "utf8") > MAX_SCORM_PATH_BYTES ||
+      name.split("/").length > MAX_SCORM_PATH_DEPTH
+    )
+      throw new Error("SCORM_INVALID_PATH");
+    for (let extra = extraStart; extra < extraEnd; ) {
+      if (extra + 4 > extraEnd) throw new Error("SCORM_INVALID_ARCHIVE");
+      const field = zipBuffer.readUInt16LE(extra);
+      const length = zipBuffer.readUInt16LE(extra + 2);
+      if (field === 0x0001 || extra + 4 + length > extraEnd)
+        throw new Error("SCORM_INVALID_ARCHIVE");
+      extra += 4 + length;
+    }
+    cursor = next;
+  }
+  if (cursor !== end) throw new Error("SCORM_INVALID_ARCHIVE");
+  return { end, count };
+}
+
+/** The worker consumes this iterator sequentially, retaining only one expanded entry. */
+export function openScormPackage(zipBuffer: Buffer) {
+  if (zipBuffer.length > MAX_SCORM_ZIP_BYTES) throw new Error("SCORM_ZIP_TOO_LARGE");
+  const directory = preflightDirectory(zipBuffer);
+  // Ignore archive comments so embedded footer signatures cannot redirect the
+  // library away from the directory just validated. subarray adds no ZIP copy.
+  const zip = new AdmZip(zipBuffer.subarray(0, directory.end + 22), { readEntries: false });
+  if (zip.getEntryCount() !== directory.count) throw new Error("SCORM_INVALID_ARCHIVE");
   const fileEntries = zip.getEntries().filter((entry) => !entry.isDirectory);
 
   assertWithinDecompressionLimits(fileEntries);
@@ -147,31 +237,37 @@ export function extractScormPackage(zipBuffer: Buffer): ExtractedScormPackage {
     throw new Error("SCORM_MANIFEST_NOT_FOUND");
   }
 
-  const manifestXml = manifestEntry.getData().toString("utf8");
+  const manifestXml = readBoundedEntry(manifestEntry).toString("utf8");
   const launchPath = resolveLaunchPath(manifestXml, entries);
   const scormVersion = detectScormVersion(manifestXml);
 
-  const files = fileEntries.map((entry) => {
-    const relativePath = normalizeZipPath(entry.entryName);
-    // Reject traversal at extraction time too, not only when building storage
-    // keys, so a crafted archive cannot smuggle a `..` segment downstream.
-    assertSafeRelativePath(relativePath);
-    return {
-      relativePath,
-      content: entry.getData(),
-      contentType: guessContentType(relativePath),
-    };
-  });
-
-  if (!files.some((file) => file.relativePath === launchPath)) {
-    throw new Error("SCORM_LAUNCH_FILE_NOT_FOUND");
+  for (const entry of fileEntries) assertSafeRelativePath(entry.entryName);
+  if (new Set(entries).size !== entries.length) throw new Error("SCORM_DUPLICATE_PATH");
+  if (!entries.includes(launchPath)) throw new Error("SCORM_LAUNCH_FILE_NOT_FOUND");
+  function* files() {
+    for (const entry of fileEntries) {
+      const relativePath = normalizeZipPath(entry.entryName);
+      // Reject traversal at extraction time too, not only when building storage
+      // keys, so a crafted archive cannot smuggle a `..` segment downstream.
+      assertSafeRelativePath(relativePath);
+      yield {
+        relativePath,
+        content: readBoundedEntry(entry),
+        contentType: guessContentType(relativePath),
+      };
+    }
   }
 
   return {
     launchPath,
     scormVersion,
-    files,
+    files: files(),
   };
+}
+
+export function extractScormPackage(zipBuffer: Buffer): ExtractedScormPackage {
+  const opened = openScormPackage(zipBuffer);
+  return { ...opened, files: [...opened.files] };
 }
 
 /**
@@ -213,7 +309,9 @@ export function buildScormContentStorageKey(args: {
   tenantId: string;
   moduleId: string;
   relativePath: string;
+  contentVersion?: string | null;
 }): string {
   const safePath = assertSafeRelativePath(args.relativePath);
-  return `tenants/${args.tenantId}/modules/${args.moduleId}/scorm/content/${safePath}`;
+  const version = args.contentVersion ? `${assertSafeRelativePath(args.contentVersion)}/` : "";
+  return `tenants/${args.tenantId}/modules/${args.moduleId}/scorm/content/${version}${safePath}`;
 }

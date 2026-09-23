@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isDeployedRuntime } from "@atlas/core/config/runtime-environment";
 
 const optionalNonEmpty = z.string().trim().min(1).optional();
 
@@ -41,10 +42,7 @@ export function validateProductionObservabilityEnv(
     return { ok: false, errors };
   }
 
-  const deploymentEnv =
-    env["RELEASE_ENV"]?.trim() || env["APP_ENV"]?.trim() || env["NODE_ENV"]?.trim();
-
-  if (deploymentEnv === "production" && !env["OBSERVABILITY_HASH_SALT"]?.trim()) {
+  if (isDeployedRuntime(env) && !env["OBSERVABILITY_HASH_SALT"]?.trim()) {
     errors.push("OBSERVABILITY_HASH_SALT is required in production.");
   }
 

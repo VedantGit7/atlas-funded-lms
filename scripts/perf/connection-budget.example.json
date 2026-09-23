@@ -1,0 +1,9 @@
+{
+  "databaseMaxConnections": 120,
+  "reservedConnections": 10,
+  "processes": {
+    "web": { "instances": 1, "tenantPoolMax": 20, "platformPoolMax": 10, "usagePoolMax": 2 },
+    "api": { "instances": 1, "tenantPoolMax": 20, "platformPoolMax": 10, "usagePoolMax": 2 },
+    "worker": { "instances": 1, "tenantPoolMax": 20, "platformPoolMax": 10, "usagePoolMax": 2 }
+  }
+}

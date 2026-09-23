@@ -1,6 +1,7 @@
 "use client";
 
 import { clientApi } from "../../../lib/client-api";
+import type { RefundStatus } from "./refund-submission";
 
 export const PAYMENT_TRANSACTION_COLUMN_OPTIONS = [
   { key: "learner_name", label: "Learner" },
@@ -145,6 +146,7 @@ export type PaymentRefundLedgerItem = {
   amountCents: number;
   refundedAmountCents: number;
   refundableAmountCents: number;
+  reservedRefundAmountCents: number;
   currency: string;
   status: string;
   invoiceNumber: string | null;
@@ -152,19 +154,7 @@ export type PaymentRefundLedgerItem = {
   createdAt: string;
   canRefund: boolean;
   refundCount: number;
-  latestRefund: {
-    id: string;
-    amountCents: number;
-    reason: string;
-    note: string | null;
-    mode: "full" | "partial";
-    revokeAccess: boolean;
-    notifyLearner: boolean;
-    accessRevoked: boolean;
-    notifyQueued: boolean;
-    actorMembershipId: string | null;
-    createdAt: string;
-  } | null;
+  latestRefund: PaymentTransactionDetail["refunds"][number] | null;
 };
 
 type PageInfo = {
@@ -701,6 +691,9 @@ export type PaymentTransactionDetail = {
   }>;
   refunds: Array<{
     id: string;
+    status: RefundStatus;
+    fulfillment: "gateway" | "manual_adjustment" | "legacy_recorded";
+    gatewayRefundId?: string;
     amountCents: number;
     reason: string;
     note: string | null;
@@ -716,6 +709,7 @@ export type PaymentTransactionDetail = {
   refundableAmountCents: number;
   canRefund: boolean;
   canDownloadInvoice: boolean;
+  reservedRefundAmountCents: number;
   metadata: Record<string, unknown> | null;
 };
 
@@ -728,6 +722,9 @@ export async function fetchPaymentTransactionDetail(orderId: string) {
 export async function refundPaymentTransaction(
   orderId: string,
   body: {
+    refundRequestId: string;
+    refundMethod?: "gateway" | "manual_adjustment";
+    manualReference?: string;
     mode: "full" | "partial";
     amountCents?: number | undefined;
     reason: "duplicate" | "fraudulent" | "customer_requested" | "other";
@@ -750,8 +747,8 @@ export async function refundPaymentTransaction(
   }>(
     `/api/v1/reports/payments/transactions/${orderId}/refund`,
     body,
-    `payments-refund-${orderId}`,
-    { successMessage: "Refund recorded on the ledger." },
+    `payments-refund-${orderId}-${body.refundRequestId}`,
+    { silent: true },
   );
 }
 

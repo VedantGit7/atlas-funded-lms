@@ -1,0 +1,4 @@
+/* Development tooling is not part of the shipped page. */
+nextjs-portal {
+  display: none !important;
+}

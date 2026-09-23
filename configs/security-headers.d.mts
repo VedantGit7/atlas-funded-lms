@@ -17,3 +17,12 @@ export declare const securityHeadersRule: {
   source: string;
   headers: SecurityHeader[];
 };
+
+export declare const scormFramingHeadersRule: typeof securityHeadersRule;
+export declare const formFramingHeadersRule: typeof securityHeadersRule;
+export declare const CSP_REPORT_PATH: string;
+export declare function buildDocumentCsp(
+  nonce: string,
+  env?: Record<string, string | undefined>,
+  options?: { sameOriginFrame?: boolean },
+): string;

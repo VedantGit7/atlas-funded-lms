@@ -1,0 +1,123 @@
+{
+  "auditDate": "2026-09-19",
+  "method": "Sanitized summary of read-only connector, catalog, DNS and HTTP observations. Not a raw service export.",
+  "repository": {
+    "name": "VedantGit7/atlas-funded-lms",
+    "private": true,
+    "head": "ca8c0f1e7e69780b4e2ddc2a1136907a2e47c350",
+    "branch": "feat/security-hardening-p0p1-and-browser-suite",
+    "remoteMain": "d15794708e6a2d0231286612e4bc573e92deb619"
+  },
+  "localDatabase": {
+    "environment": "local development",
+    "host": "localhost",
+    "port": 15432,
+    "database": "atlas_lms_dev",
+    "postgresVersion": "16.14",
+    "login": "atlas_app_login",
+    "loginSuperuser": false,
+    "loginBypassRls": false,
+    "publicTables": 234,
+    "tenantTables": 222,
+    "tenantTablesRlsEnabledAndForced": 222,
+    "tenantTablesWithoutTenantLeadingIndex": 0,
+    "completedMigrations": 108,
+    "unfinishedMigrations": 0,
+    "approximateSize": "883 MB",
+    "invalidIndexes": 0,
+    "nonInternalTriggers": 21,
+    "disabledNonInternalTriggers": 0,
+    "membershipsVisibleWithoutTenantContext": 0,
+    "proctoringMediaArtifactsForeignKeys": 0,
+    "globalTablesWithoutRls": [
+      "_prisma_migrations",
+      "tenants",
+      "auth_principals",
+      "permissions",
+      "permission_bundles",
+      "feature_flags",
+      "item_types",
+      "extension_points",
+      "materialized_view_registry",
+      "platform_operators",
+      "platform_cost_rates",
+      "platform_fixed_costs"
+    ]
+  },
+  "supabase": {
+    "projectId": "rolumnldqjelwfvtmmqf",
+    "status": "ACTIVE_HEALTHY",
+    "region": "ap-south-1",
+    "postgresVersion": "17.6.1.155",
+    "publicTables": 0,
+    "publicPolicies": 0,
+    "atlasRoles": 0,
+    "storageBuckets": 0,
+    "performanceAdvisorLints": 0,
+    "securityAdvisorFindings": [
+      "Leaked-password protection disabled",
+      "Anonymous EXECUTE grant on public.rls_auto_enable() SECURITY DEFINER function",
+      "Authenticated EXECUTE grant on public.rls_auto_enable() SECURITY DEFINER function"
+    ],
+    "functionContext": {
+      "name": "public.rls_auto_enable()",
+      "returns": "event_trigger",
+      "searchPath": "pg_catalog",
+      "interpretation": "Broad grant hygiene finding; this is not an ordinary callable data-returning RPC and the advisory alone does not demonstrate privilege escalation."
+    },
+    "limits": "Separate LMS application database is not hosted in this project's public schema."
+  },
+  "github": {
+    "currentCommitCi": {
+      "runId": "35383359832",
+      "conclusion": "failure",
+      "jobsReturned": 0,
+      "url": "https://github.com/VedantGit7/atlas-funded-lms/actions/runs/35383359832"
+    },
+    "currentCommitDrills": {
+      "runId": "35383358851",
+      "conclusion": "failure"
+    },
+    "branchProtection": {
+      "branchProtectedField": false,
+      "embeddedProtectionEnabled": true,
+      "detailEndpoint": 403,
+      "rulesetsEndpoint": 403,
+      "interpretation": "Inconsistent branch summary and inaccessible details; effective protection unverified."
+    },
+    "vercelCommitStatus": {
+      "state": "failure",
+      "deploymentId": "dpl_Bs19QhQ6k3gEh5z6yJg6vB4ebEeY",
+      "url": "https://vercel.com/vedantwedhane-8075s-projects/atlas-funded-lms/Bs19QhQ6k3gEh5z6yJg6vB4ebEeY"
+    },
+    "limits": "Workflow failure root cause not established from zero returned jobs."
+  },
+  "vercel": {
+    "listTeamsReturned": 0,
+    "teamSlug": "vedantwedhane-8075s-projects",
+    "teamId": "team_LFRrS4VsrCp4yghJP4qrDo3k",
+    "deploymentLookup": "403: connected integration not authorized for the deployment team",
+    "projectLookup": "Connector schema/adapter error: expected idOrName",
+    "buildLogsLookup": "Tool not available on connector server",
+    "limits": "Live deployment configuration, environment, logs and billing not verified."
+  },
+  "cloudflare": {
+    "accountToolsAvailable": false,
+    "documentedHostname": "academy.fundedbeyond.com",
+    "hostnameSource": "docs/runbooks/tenant-config-fundedbeyond.md:36",
+    "ipv4": [
+      "104.21.32.20",
+      "172.67.182.72"
+    ],
+    "http": {
+      "observedAt": "2026-09-19T07:03:52Z",
+      "method": "HEAD",
+      "status": 302,
+      "location": "https://fundedbeyond-com.l.ink/",
+      "server": "cloudflare",
+      "x-frame-options": "SAMEORIGIN",
+      "cf-cache-status": "DYNAMIC"
+    },
+    "limits": "Public DNS/HTTP confirms Cloudflare fronting the hostname, not account WAF/TLS/cache/R2 settings or a deployed LMS."
+  }
+}

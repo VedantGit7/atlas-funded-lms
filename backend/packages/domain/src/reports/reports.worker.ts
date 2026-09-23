@@ -1,5 +1,6 @@
 import { withTenantTx, type TenantTx } from "@atlas/db";
 import { outbox } from "@atlas/events";
+import { OutboxDeliveryError } from "@atlas/events/services/outbox-worker.service";
 import { renderReportArtifact, storeReportArtifact } from "./reports-export-runner";
 import { applyPaymentExportGrouping, type PaymentExportGrouping } from "./reports-group-subtotals";
 import { buildReportDataset } from "./reports.datasets";
@@ -11,6 +12,7 @@ import {
   reportRunSucceededPayloadSchema,
 } from "./reports.events";
 import { reportsRepository } from "./reports.repository";
+import { exportSettingsRepository } from "./export-settings.repository";
 import { getSystemReportDefinition } from "./reports.registry";
 import { extractSelectedColumns, filterDatasetByColumns } from "./reports.allowed-columns";
 import type { ReportDatasetResult, ServiceCtx } from "./reports.types";
@@ -136,6 +138,7 @@ export async function processReportGenerate(
     });
 
     const stored = await storeReportArtifact(ctx, {
+      retentionMs: await exportSettingsRepository.getFileRetentionMs(tx),
       reportRunId: payload.reportRunId,
       content: rendered.content,
       contentType: rendered.contentType,
@@ -147,6 +150,7 @@ export async function processReportGenerate(
     await reportsRepository.markReportRunSucceeded(tx, {
       reportRunId: payload.reportRunId,
       objectKey: stored.objectKey,
+      artifact: stored.artifact,
       rowCount: dataRowCount,
       expiresAt: stored.expiresAt,
     });
@@ -205,6 +209,7 @@ async function publishSucceeded(
     reportDefinitionKey: string;
     format: string;
     rowCount: number;
+    idempotencyKey?: string;
   },
 ): Promise<void> {
   const succeededPayload = reportRunSucceededPayloadSchema.parse({
@@ -226,7 +231,7 @@ async function publishSucceeded(
     aggregateType: "report_run",
     aggregateId: args.reportRunId,
     payload: succeededPayload,
-    idempotencyKey: `${ctx.requestId}:report-ready:${args.reportRunId}`,
+    idempotencyKey: args.idempotencyKey ?? `${ctx.requestId}:report-ready:${args.reportRunId}`,
   });
 }
 
@@ -255,8 +260,19 @@ export async function processReportGenerateStandalone(args: {
 
   const claimed = await withTenantTx(txOpts, async (tx) => {
     const existing = await reportsRepository.findReportRunById(tx, payload.reportRunId);
-    if (!existing || existing.status !== "QUEUED") return null;
-    return reportsRepository.claimReportRunForProcessing(tx, payload.reportRunId);
+    if (!existing) throw new OutboxDeliveryError("permanent", "REPORT_RUN_NOT_FOUND");
+    if (existing.status === "SUCCEEDED") return null;
+    if (existing.status === "RUNNING") {
+      // The outbox lease does not own inline generation. Do not reset or steal a
+      // RUNNING run: it may still upload, even after an outbox lease expires.
+      throw new OutboxDeliveryError("reconciliation_required", "REPORT_RUN_ALREADY_RUNNING");
+    }
+    if (existing.status !== "QUEUED") {
+      throw new OutboxDeliveryError("permanent", "REPORT_RUN_TERMINAL");
+    }
+    const run = await reportsRepository.claimReportRunForProcessing(tx, payload.reportRunId);
+    if (!run) throw new OutboxDeliveryError("retryable", "REPORT_RUN_CLAIM_CONFLICT");
+    return run;
   });
   if (!claimed) return;
 
@@ -269,14 +285,7 @@ export async function processReportGenerateStandalone(args: {
         claimed.report_definition_id,
       );
       if (!definition) {
-        await failRun(
-          tx,
-          payload.reportRunId,
-          "REPORT_DEFINITION_NOT_FOUND",
-          "Report definition was not found.",
-          trace,
-        );
-        return null;
+        throw new OutboxDeliveryError("permanent", "REPORT_DEFINITION_NOT_FOUND");
       }
 
       const params =
@@ -314,10 +323,9 @@ export async function processReportGenerateStandalone(args: {
         params,
         dataset,
         title: getSystemReportDefinition(definition.key)?.title ?? definition.title,
+        retentionMs: await exportSettingsRepository.getFileRetentionMs(tx),
       };
     });
-
-    if (!prepared) return;
 
     const rendered = await (async () => {
       await withTenantTx(txOpts, async (tx) => {
@@ -340,21 +348,28 @@ export async function processReportGenerateStandalone(args: {
         stage: "uploading",
         trace: [...trace, stamp("Uploading artifact…")],
       });
+    });
 
-      const stored = await storeReportArtifact(ctx, {
-        reportRunId: payload.reportRunId,
-        content: rendered.content,
-        contentType: rendered.contentType,
-        fileExtension: rendered.fileExtension,
-      });
-      trace.push(stamp("Upload OK"));
+    const stored = await storeReportArtifact(ctx, {
+      retentionMs: prepared.retentionMs,
+      reportRunId: payload.reportRunId,
+      content: rendered.content,
+      contentType: rendered.contentType,
+      fileExtension: rendered.fileExtension,
+    });
+    trace.push(stamp("Upload OK"));
 
+    await withTenantTx(txOpts, async (tx) => {
+      if (!(await reportsRepository.lockRunningReportRun(tx, payload.reportRunId))) {
+        throw new OutboxDeliveryError("permanent", "REPORT_RUN_NOT_RUNNING");
+      }
       const dataRowCount = prepared.dataset.rows.filter(
         (row) => row["_is_subtotal"] !== true,
       ).length;
       await reportsRepository.markReportRunSucceeded(tx, {
         reportRunId: payload.reportRunId,
         objectKey: stored.objectKey,
+        artifact: stored.artifact,
         rowCount: dataRowCount,
         expiresAt: stored.expiresAt,
       });
@@ -365,14 +380,26 @@ export async function processReportGenerateStandalone(args: {
         reportDefinitionKey: prepared.definition.key,
         format: claimed.format,
         rowCount: dataRowCount,
+        idempotencyKey: `report-ready:${payload.reportRunId}`,
       });
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Export generation failed.";
+    const failure =
+      error instanceof OutboxDeliveryError
+        ? error
+        : new OutboxDeliveryError("retryable", "REPORT_GENERATION_FAILED");
     await withTenantTx(txOpts, async (tx) => {
-      await failRun(tx, payload.reportRunId, "REPORT_GENERATION_FAILED", message, trace);
+      if (failure.kind === "permanent") {
+        if (await reportsRepository.lockRunningReportRun(tx, payload.reportRunId)) {
+          await failRun(tx, payload.reportRunId, failure.code, failure.code, trace);
+        }
+      } else if (failure.kind === "retryable") {
+        // No other worker can claim RUNNING. Only this successfully claimed
+        // attempt can requeue it, and only once all its external work stopped.
+        await reportsRepository.requeueReportRun(tx, payload.reportRunId);
+      }
     });
-    throw new Error("REPORT_GENERATION_FAILED", { cause: error });
+    throw failure;
   }
 }
 

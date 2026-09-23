@@ -186,47 +186,41 @@ describeWithDb("data-rights tenant isolation", () => {
         }),
     );
 
-    await withTenantTx(authoringTenantTx(fixtureA, fixtureA.adminMembershipId), async (tx) => {
-      await processExportRequestedEvent(
-        tx,
-        {
-          tenantId: fixtureA.tenantId,
-          actorMembershipId: fixtureA.adminMembershipId,
-          requestId: "req_iso_worker_a",
-        },
-        {
-          id: randomUUID(),
-          eventType: "data.export_requested",
-          payload: dataExportRequestedPayloadSchema.parse({
-            exportJobId: jobA.data.id,
-            requestedAt: new Date().toISOString(),
-            requestedByMembershipId: fixtureA.adminMembershipId,
-            schemaVersion: 1,
-          }),
-        },
-      );
-    });
+    await processExportRequestedEvent(
+      {
+        tenantId: fixtureA.tenantId,
+        actorMembershipId: fixtureA.adminMembershipId,
+        requestId: "req_iso_worker_a",
+      },
+      {
+        id: randomUUID(),
+        eventType: "data.export_requested",
+        payload: dataExportRequestedPayloadSchema.parse({
+          exportJobId: jobA.data.id,
+          requestedAt: new Date().toISOString(),
+          requestedByMembershipId: fixtureA.adminMembershipId,
+          schemaVersion: 1,
+        }),
+      },
+    );
 
-    await withTenantTx(authoringTenantTx(fixtureB, fixtureB.adminMembershipId), async (tx) => {
-      await processExportRequestedEvent(
-        tx,
-        {
-          tenantId: fixtureB.tenantId,
-          actorMembershipId: fixtureB.adminMembershipId,
-          requestId: "req_iso_worker_b",
-        },
-        {
-          id: randomUUID(),
-          eventType: "data.export_requested",
-          payload: dataExportRequestedPayloadSchema.parse({
-            exportJobId: jobB.data.id,
-            requestedAt: new Date().toISOString(),
-            requestedByMembershipId: fixtureB.adminMembershipId,
-            schemaVersion: 1,
-          }),
-        },
-      );
-    });
+    await processExportRequestedEvent(
+      {
+        tenantId: fixtureB.tenantId,
+        actorMembershipId: fixtureB.adminMembershipId,
+        requestId: "req_iso_worker_b",
+      },
+      {
+        id: randomUUID(),
+        eventType: "data.export_requested",
+        payload: dataExportRequestedPayloadSchema.parse({
+          exportJobId: jobB.data.id,
+          requestedAt: new Date().toISOString(),
+          requestedByMembershipId: fixtureB.adminMembershipId,
+          schemaVersion: 1,
+        }),
+      },
+    );
 
     const rowA = await withTenantTx(
       authoringTenantTx(fixtureA),

@@ -1,7 +1,7 @@
 import { PageGate } from "../../../components/patterns/PageGate";
 import { SwipePracticeClient } from "../../../features/practice/components/SwipePracticeClient";
 import { ServerApiError } from "../../../lib/server-api";
-import { practiceServerApi } from "@atlas/contracts-modules/practice/practice.server-api";
+import { practiceServerApi } from "@/modules/practice/practice.server-api";
 
 export default async function PracticePage() {
   try {

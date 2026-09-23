@@ -36,12 +36,15 @@ const {
     mockWithGlobalDb: vi.fn((fn: (db: unknown) => unknown) => fn({ $queryRaw: vi.fn() })),
     mockWithTenantTx: vi.fn((_ctx: unknown, fn: (tx: unknown) => unknown) =>
       fn({
-        // A bare vi.fn() returns undefined, so any repository doing rows[0]
-        // throws before the handler is reached. The route pipeline now claims an
-        // idempotency key through this tx (M10), and this test asserts the
-        // handler *was* reached with tenant A scope -- so the stub has to model
-        // a raw query returning no rows rather than returning nothing at all.
-        $queryRaw: vi.fn().mockResolvedValue([]),
+        // The route must own its claim before reaching the tenant-scoped
+        // deletion service. Other queries still return no fixture rows.
+        $queryRaw: vi.fn((query: TemplateStringsArray) =>
+          Promise.resolve(
+            /INSERT INTO idempotency_records/i.test(query.join(" "))
+              ? [{ id: "018f0000-0000-7000-8000-000000000040" }]
+              : [],
+          ),
+        ),
         $queryRawUnsafe: vi.fn().mockResolvedValue([]),
         $executeRaw: vi.fn().mockResolvedValue(0),
         $executeRawUnsafe: vi.fn().mockResolvedValue(0),

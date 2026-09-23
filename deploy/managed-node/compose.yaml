@@ -1,0 +1,51 @@
+# Supply immutable, already-built image tags and secret-manager exported env files.
+# This defines no paid host, public ingress, database or migration service.
+services:
+  api:
+    image: ${ATLAS_API_IMAGE:?Set an immutable API image tag}
+    env_file:
+      - ${ATLAS_API_ENV_FILE:?Set the API runtime env file path}
+    environment:
+      ATLAS_SERVICE_RUNTIME: managed-node
+      PORT: "3001"
+    init: true
+    restart: unless-stopped
+    stop_grace_period: 45s
+    mem_limit: 2g
+    cpus: 2
+    read_only: true
+    tmpfs:
+      - /tmp:size=256m,mode=1777
+    ports:
+      - "127.0.0.1:3001:3001"
+  worker:
+    image: ${ATLAS_WORKER_IMAGE:?Set an immutable worker image tag}
+    env_file:
+      - ${ATLAS_WORKER_ENV_FILE:?Set the worker runtime env file path}
+    environment:
+      ATLAS_SERVICE_RUNTIME: managed-node
+      TSX_TSCONFIG_PATH: /app/backend/apps/api/tsconfig.json
+      OUTBOX_WORKER_BATCH_LIMIT: "25"
+      OUTBOX_WORKER_HEALTH_PORT: "8081"
+      OUTBOX_WORKER_SHUTDOWN_TIMEOUT_MS: "30000"
+    init: true
+    restart: unless-stopped
+    stop_grace_period: 45s
+    mem_limit: 2g
+    cpus: 2
+    read_only: true
+    tmpfs:
+      - /tmp:size=256m,mode=1777
+    shm_size: 256m
+    healthcheck:
+      test:
+        [
+          CMD,
+          node,
+          -e,
+          "fetch('http://127.0.0.1:8081/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 5s
+      start_period: 120s
+      retries: 3

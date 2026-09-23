@@ -1,0 +1,158 @@
+[
+  {
+    "path": "backend/packages/core/src/config/runtime-environment.ts",
+    "sha256": "3990df02c2add54ea763cad8ce8fe04342c05c42e1847e84c6f67a46bc20e038"
+  },
+  {
+    "path": "backend/packages/core/src/config/deployment-contract.ts",
+    "sha256": "d81702757137b4429a7ce3526cb6cb8f6a866a51e69b7bc70b3d248a2701fccf"
+  },
+  {
+    "path": "backend/packages/core/package.json",
+    "sha256": "a8f5a06cb6d9469e4249c7064efe5e6c5333fd692129e422ac9d8acae5f764ab"
+  },
+  {
+    "path": "backend/packages/api/src/deployment-startup.ts",
+    "sha256": "0a9dd5869879ab5196549d6679d91df1688911f94f14c6e215cc26a4154813a3"
+  },
+  {
+    "path": "backend/packages/api/package.json",
+    "sha256": "668441c62de298fce787d5518ecd868fe021cf52e3427a6fe8bbf9a490a91cf2"
+  },
+  {
+    "path": "backend/packages/api/tsconfig.json",
+    "sha256": "08423e51ed8a46582c26bd1949c8171429d4a1aa3fcfc0981150363448b67a27"
+  },
+  {
+    "path": "backend/packages/storage/package.json",
+    "sha256": "fd106135e7884bd7c8c2132ac1ec1ecbd901ef098e8ee7edb3653585b2b53d45"
+  },
+  {
+    "path": "backend/packages/storage/tsconfig.json",
+    "sha256": "6ad7b686b96ec0be7231c70ff881b9f83b9d03b62810ca933d672efb1b11126e"
+  },
+  {
+    "path": "backend/packages/storage/src/schemas/storage-env.ts",
+    "sha256": "1ad67ff057f3559d94088f4230545f8e67cf38aba3ebfb07e8565512becdd6a3"
+  },
+  {
+    "path": "backend/packages/storage/src/providers/storage-provider-factory.ts",
+    "sha256": "84c9283bd2adc26ed541a5f6ea811168ef0a2d2955eb522a6b139473cb01a3bd"
+  },
+  {
+    "path": "backend/packages/observability/src/env.ts",
+    "sha256": "2dc9a3cf6eca36e01493c53a858ee74b649207dd1374ecb6b8ab9b5a330e8cf4"
+  },
+  {
+    "path": "backend/apps/api/src/instrumentation.ts",
+    "sha256": "fc040c70eb9c664ba5ccd30d2ba58f4e83795cb6fff66ba71c69d17d771061f8"
+  },
+  {
+    "path": "frontend/apps/web/src/instrumentation.ts",
+    "sha256": "4e8a87bf93d33bc9a5633a544c6ea763d4097db75437e502273bd6607ca3257a"
+  },
+  {
+    "path": "backend/apps/api/src/worker/main.ts",
+    "sha256": "e9a463f7126765689bb2088397fd5a4202fd8cabf838c5ffc3e017b93430067e"
+  },
+  {
+    "path": "backend/apps/api/src/server/notifications/notification.email-provider.ts",
+    "sha256": "ea0aee543a60b1a8868b075c2173b1f543a82b459bf51234dff39fd94231f1b0"
+  },
+  {
+    "path": "frontend/apps/web/src/server/notifications/notification.email-provider.ts",
+    "sha256": "1b475f856336253b03422c67ecee306d11e85b2e602b0f55926b27f3e74cbecb"
+  },
+  {
+    "path": "frontend/apps/web/src/server/notifications/notification.worker.ts",
+    "sha256": "b5f60845640046259431fe9d5277040d89de2b8ed685b136cb60d71d52838e68"
+  },
+  {
+    "path": "backend/apps/api/sentry.server.config.ts",
+    "sha256": "28ac81fdc02377c70940ca2f3c2018e00d8a1d76b72a53bf3173d6c47897af9c"
+  },
+  {
+    "path": "frontend/apps/web/sentry.server.config.ts",
+    "sha256": "28ac81fdc02377c70940ca2f3c2018e00d8a1d76b72a53bf3173d6c47897af9c"
+  },
+  {
+    "path": "scripts/validate-deployment.ts",
+    "sha256": "47b536b6c70408b1d0dfe6fb2097ca6f1f7a6bce407c4dcedcffab9fc57d3d02"
+  },
+  {
+    "path": "package.json",
+    "sha256": "ee2143bd00c783a42ef87d85440b0daedf066dfdbc7351028fdff63ed61a054a"
+  },
+  {
+    "path": "pnpm-lock.yaml",
+    "sha256": "86353f0477d54da0b3ec0ba4948ee02239cb0e291ebf3ec995587680a47829a8"
+  },
+  {
+    "path": "tests/helpers/deployment-env.ts",
+    "sha256": "bae31f8d990173ecf5238ca6a4b247286db8ec3660c14157490fb0ef6bb6c321"
+  },
+  {
+    "path": "tests/unit/storage/deployment-storage.test.ts",
+    "sha256": "3d526b24b292bdf13251adbc0ef2c1c46edbf8fec61dbf8cde38d605ce224a87"
+  },
+  {
+    "path": "tests/unit/observability/deployment-monitoring.test.ts",
+    "sha256": "6f8a961bbf01a4ad304a76c9d7f918665b709875a089f9f422b3829361a59363"
+  },
+  {
+    "path": "tests/unit/notifications/deployment-web-email.test.ts",
+    "sha256": "1c603a11e352122006f86504c75f8d3c534991b1bd9b75000b5de1fff7730565"
+  },
+  {
+    "path": "tests/unit/notifications/deployment-email.test.ts",
+    "sha256": "45168dff61ea8ccade1fdb0547cc148546214c5c7f7ec89a99694629beeccadf"
+  },
+  {
+    "path": "tests/unit/api/deployment-worker.test.ts",
+    "sha256": "46d855fd163622cf33bce8ef94c78a7bf29fa747b2c85c22b5f47942400945f2"
+  },
+  {
+    "path": "tests/unit/api/deployment-startup.test.ts",
+    "sha256": "18eecad045a53e3e9c1dc6df5c93554bf380998e4fd19506d4f76102ca6f9e67"
+  },
+  {
+    "path": "tests/unit/api/deployment-contract.test.ts",
+    "sha256": "913c014fe811037944836c7534272fa641d95c733f71940b0191c17592366d8c"
+  },
+  {
+    "path": "vitest.config.ts",
+    "sha256": "16c69458bf94b11ce60b8d115b4f6538b49838c5fb666bfe4560d9e3eacdedf2"
+  },
+  {
+    "path": "backend/packages/api/src/rate-limit-store.ts",
+    "sha256": "9cb2d4de8831eaa3e07b25fb5a1d50706efa12933328fae7bd7a9d7679bad469"
+  },
+  {
+    "path": "tests/unit/api/deployment-preflight.test.ts",
+    "sha256": "3608cad5c36324ed3ad410119f631c3ea84ce578a383ae9fe326bc3b3629fc9a"
+  },
+  {
+    "path": "frontend/apps/web/src/server/reports/report-delivery.service.ts",
+    "sha256": "3347886fc1fb04981cd6a3cf12b9051dfd9c1d11a2c514ed2e245b2eff8598d9"
+  },
+  {
+    "path": ".env.example",
+    "sha256": "93e72e264603e898b4e7a67f20234fc5f204e9b9bea42821e5c8c82d50abf97b"
+  },
+  {
+    "path": "docs/runbooks/deployment-configuration.md",
+    "sha256": "2bc68b465cf53b825deb0bd1ab118a32794af996c88efd46ff983973ca0189f0"
+  },
+  {
+    "path": "docs/engineering/f05-deployment-configuration-remediation.md",
+    "sha256": "ab024241c00a95ab74aac09f7018c762f86dd82eb74fc032180eb8b7ca8fd08c"
+  },
+  {
+    "path": "docs/engineering/atlas-lms-comprehensive-audit-2026-09-19.md",
+    "sha256": "0332779420efd45153123b5663929bd0609ed27535702e5491c81e95766c4cf9"
+  },
+  {
+    "path": "docs/engineering/audits/2026-09-20/f05-review.md",
+    "sha256": "306e069781bfe2746b2563cfc9e6d2c280829ffac8f3b49953b296881b8d8e91"
+  }
+]

@@ -8,11 +8,7 @@ import { createPublicRouteHandler } from "@atlas/api";
 import { loginWithPassword, setAuthCookies } from "@atlas/auth";
 import { withGlobalDb } from "@atlas/db/global-db";
 import { withTenantTx } from "@atlas/db/with-tenant-tx";
-import {
-  findMembershipByPrincipal,
-  ensurePlatformSuperAdminTenantAccess,
-  ensureSelfServiceLearnerMembership,
-} from "@atlas/membership";
+import { findMembershipByPrincipal, ensureSelfServiceLearnerMembership } from "@atlas/membership";
 import {
   PublicLoginRequestSchema,
   PublicAuthResponseSchema,
@@ -73,16 +69,6 @@ export const POST = createPublicRouteHandler(routeMetadata, async ({ req, reques
         email: input.email,
         password: input.password,
       },
-    });
-
-    // Grant the global platform super admin tenant-admin access on tenant
-    // sign-in (no-op for everyone else) so the role-based redirect resolves to
-    // /admin. MFA accounts complete this in the verify-mfa orchestrator instead.
-    await ensurePlatformSuperAdminTenantAccess({
-      db,
-      tenantId: tenant.tenantId,
-      requestId,
-      email: input.email,
     });
 
     const body = await withTenantTx(

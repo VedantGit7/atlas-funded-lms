@@ -1,0 +1,22 @@
+{
+  "finding": "F20",
+  "date": "2026-09-20",
+  "environment": "local disposable PostgreSQL 17 containers only",
+  "boundaryTests": { "passed": 11, "failed": 0 },
+  "postgresAndVitestSafetyChecks": { "passed": 18, "failed": 0 },
+  "freshFullSchemaSetup": { "passed": true, "catalogueRowsSeeded": 146 },
+  "changedDatabaseFixtures": { "filesPassed": 4, "testsPassed": 20, "failed": 0 },
+  "broadUnitAndCiRun": {
+    "passed": 2517,
+    "failed": 1,
+    "failure": "Prisma generation subprocess timeout under parallel execution"
+  },
+  "focusedGenerationRerun": { "passed": 3, "failed": 0 },
+  "targetedTypeScript": "passed",
+  "targetedLint": "passed",
+  "formatting": "passed",
+  "sqlPlacement": "passed",
+  "hostedDatabaseMutations": false,
+  "applicationBuildRun": false,
+  "hostedCiRun": false
+}

@@ -1,0 +1,27 @@
+[
+  {
+    "guard": "check-route-metadata",
+    "exitCode": 0,
+    "output": ""
+  },
+  {
+    "guard": "check-audit-compliance",
+    "exitCode": 0,
+    "output": "check-audit-compliance: OK (2457 files scanned)."
+  },
+  {
+    "guard": "check-package-exports",
+    "exitCode": 0,
+    "output": "check-package-exports: OK (5386 files, 22 workspace packages)."
+  },
+  {
+    "guard": "check-prisma-boundary",
+    "exitCode": 0,
+    "output": ""
+  },
+  {
+    "guard": "check-secrets",
+    "exitCode": 0,
+    "output": ""
+  }
+]

@@ -47,7 +47,7 @@ export type RouteMetadata<TInput = unknown> = {
   rateLimit: string;
   idempotency: "none" | "required";
   /**
-   * H5: require a verified second factor for this route.
+   * Require verified current-session AAL2 for this route, not just enrollment.
    *
    * Intended for the categories the audit named — tenant-admin destructive
    * actions, payouts and refunds, and data exports. Defaults to "none" so the

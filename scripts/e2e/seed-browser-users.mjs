@@ -12,16 +12,18 @@
  * so a pipeline can run it on every job and a contributor can run it once.
  *
  * Usage:
- *   pnpm e2e:seed-users                 # seed against .env.local
+ *   node scripts/e2e/local-run.mjs seed # use the isolated local stack
  *   pnpm e2e:seed-users -- --print-env  # also print the E2E_* lines to export
  *
  * Requires SUPABASE_URL (or NEXT_PUBLIC_SUPABASE_URL), SUPABASE_SERVICE_ROLE_KEY
- * and DATABASE_URL. It refuses to run without an explicit tenant slug so it can
+ * and DATABASE_URL. It requires an explicit tenant slug and guarded local targets so it can
  * never be pointed at a production tenant by accident.
  */
 
 import { randomUUID } from "node:crypto";
-import { appendFileSync } from "node:fs";
+import { appendFileSync, writeFileSync } from "node:fs";
+import { assertIsolatedFixtureTarget } from "./isolated-target.mjs";
+import { totp } from "./totp.mjs";
 import { createClient } from "@supabase/supabase-js";
 import pg from "pg";
 
@@ -47,12 +49,18 @@ const USERS = [
   { envPrefix: "E2E_ADMIN", role: "admin", local: "e2e-admin" },
   // The platform plane is not a tenant: J10 runs against the platform host,
   // which never resolves a tenant, so this user gets an identity and no
-  // membership. Its authority comes from PLATFORM_OPERATOR_ASSIGNMENTS, which
-  // is how the system grants platform operators everywhere else.
+  // membership. Its authority comes from an explicit database grant below.
   { envPrefix: "E2E_PLATFORM", role: null, local: "e2e-platform" },
+  { envPrefix: "E2E_ROLE_TARGET", role: "learner", local: "e2e-role-target" },
+  {
+    envPrefix: "E2E_FOREIGN_ADMIN",
+    role: "admin",
+    local: "e2e-foreign-admin",
+    tenantSlug: "second-smoke-academy",
+  },
 ];
 
-/** The role granted to the platform journey user via the env assignment map. */
+/** The role recorded for a newly created platform journey fixture. */
 const PLATFORM_ROLE_KEY = "super_admin";
 
 function fail(message) {
@@ -67,6 +75,7 @@ const databaseUrl = process.env["DATABASE_URL"];
 if (!supabaseUrl) fail("SUPABASE_URL (or NEXT_PUBLIC_SUPABASE_URL) is not set.");
 if (!serviceRoleKey) fail("SUPABASE_SERVICE_ROLE_KEY is not set.");
 if (!databaseUrl) fail("DATABASE_URL is not set.");
+assertIsolatedFixtureTarget({ databaseUrl, authUrl: supabaseUrl });
 if (!tenantSlug) {
   fail(
     "No tenant given. Pass --tenant=<slug> or set E2E_TENANT_SLUG. " +
@@ -133,17 +142,51 @@ try {
     fail(`no tenant with slug "${tenantSlug}". Seed tenants first (pnpm db:seed:tenants).`);
 
   const lines = [];
-  const platformEmails = [];
 
   for (const user of USERS) {
     const email = emailFor(user);
     const authUserId = await upsertAuthUser(email);
+    const userTenant = user.tenantSlug
+      ? (await client.query("select id::text as id from tenants where slug=$1", [user.tenantSlug]))
+          .rows[0]?.id
+      : tenantId;
+    if (!userTenant) throw new Error("Missing foreign fixture tenant");
+
+    if (user.role === "admin" || user.role === null) {
+      // Real enrollment and verification: the resulting session must be AAL2.
+      const current = await supabase.auth.admin.mfa.listFactors({ userId: authUserId });
+      if (current.error) throw current.error;
+      for (const factor of current.data.factors) {
+        const removed = await supabase.auth.admin.mfa.deleteFactor({
+          userId: authUserId,
+          id: factor.id,
+        });
+        if (removed.error) throw removed.error;
+      }
+      const actor = createClient(supabaseUrl, serviceRoleKey, {
+        auth: { autoRefreshToken: false, persistSession: false },
+      });
+      const login = await actor.auth.signInWithPassword({ email, password: passwordFromEnv });
+      if (login.error) throw login.error;
+      const enrolled = await actor.auth.mfa.enroll({
+        factorType: "totp",
+        friendlyName: "Disposable browser fixture",
+      });
+      if (enrolled.error) throw enrolled.error;
+      const verified = await actor.auth.mfa.challengeAndVerify({
+        factorId: enrolled.data.id,
+        code: totp(enrolled.data.totp.secret),
+      });
+      if (verified.error) throw verified.error;
+      lines.push(`${user.envPrefix}_TOTP_SECRET=${enrolled.data.totp.secret}`);
+      await actor.auth.signOut();
+    }
 
     let roleId = null;
     if (user.role !== null) {
       const role = await client.query(
         `select id::text as id from roles where tenant_id = $1::uuid and key = $2 and deleted_at is null limit 1`,
-        [tenantId, user.role],
+        [userTenant, user.role],
       );
       roleId = role.rows[0]?.id ?? null;
       if (!roleId) {
@@ -185,7 +228,7 @@ try {
          on conflict (tenant_id, auth_principal_id)
          do update set status = 'ACTIVE', updated_at = now()
          returning id::text as id`,
-        [randomUUID(), tenantId, principalId],
+        [randomUUID(), userTenant, principalId],
       );
       const membershipId = membership.rows[0].id;
 
@@ -193,10 +236,50 @@ try {
         `insert into user_roles (id, tenant_id, membership_id, role_id, created_at)
          values ($1::uuid, $2::uuid, $3::uuid, $4::uuid, now())
          on conflict (tenant_id, membership_id, role_id) do nothing`,
-        [randomUUID(), tenantId, membershipId, roleId],
+        [randomUUID(), userTenant, membershipId, roleId],
       );
     } else {
-      platformEmails.push(email);
+      // This is explicit fixture setup, never a request-time fallback. Serialize
+      // the history check and insertion so a concurrent seed/revocation cannot
+      // turn a previously revoked grant into an accidental new grant.
+      await client.query("BEGIN");
+      try {
+        await client.query("LOCK TABLE platform_operators IN SHARE ROW EXCLUSIVE MODE");
+        const history = await client.query(
+          `select role_key, revoked_at from platform_operators
+           where auth_principal_id = $1::uuid`,
+          [principalId],
+        );
+        if (history.rows.length === 0) {
+          await client.query(
+            `insert into platform_operators (
+               id, auth_principal_id, role_key, granted_by_principal_id, grant_reason
+             ) values ($1::uuid, $2::uuid, $3, $2::uuid, $4)`,
+            [
+              randomUUID(),
+              principalId,
+              PLATFORM_ROLE_KEY,
+              `Browser test fixture for ${tenantSlug}`,
+            ],
+          );
+        } else {
+          const activeGrant = history.rows.find((row) => row.revoked_at === null);
+          if (!activeGrant) {
+            throw new Error(
+              "Platform fixture grant was revoked; explicit operator review is required.",
+            );
+          }
+          if (activeGrant.role_key !== PLATFORM_ROLE_KEY) {
+            throw new Error(
+              "Platform fixture role differs; refusing to overwrite an existing grant.",
+            );
+          }
+        }
+        await client.query("COMMIT");
+      } catch (error) {
+        await client.query("ROLLBACK");
+        throw error;
+      }
     }
 
     console.log(`seeded ${(user.role ?? "platform").padEnd(10)} ${email}`);
@@ -204,21 +287,13 @@ try {
     lines.push(`${user.envPrefix}_PASSWORD=${passwordFromEnv}`);
   }
 
-  if (platformEmails.length > 0) {
-    // Platform authority is configuration, not a database row: the API reads
-    // this map at request time. Emitting it here keeps the grant next to the
-    // identity it grants, so the two cannot drift.
-    lines.push(
-      `PLATFORM_OPERATOR_ASSIGNMENTS=${platformEmails
-        .map((address) => `${address}=${PLATFORM_ROLE_KEY}`)
-        .join(",")}`,
-    );
-  }
-
   if (printEnv) {
     // Printed only on request: the password is a secret, and a script that
     // echoes it by default ends up in a CI log.
     console.log("\n# Journey credentials\n" + lines.join("\n"));
+  }
+  if (process.env["E2E_CREDENTIALS_PATH"]) {
+    writeFileSync(process.env["E2E_CREDENTIALS_PATH"], `${lines.join("\n")}\n`, { mode: 0o600 });
   }
 
   // Hand the credentials to the following workflow steps. The specs read

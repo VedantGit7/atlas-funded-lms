@@ -71,7 +71,7 @@ export async function insertDeadLetterEvent(
       ${input.tenantId},
       ${input.outboxEventId}::uuid,
       ${input.destinationKey},
-      ${errorJson},
+      ${JSON.stringify(errorJson)}::jsonb,
       now()
     )
     RETURNING id

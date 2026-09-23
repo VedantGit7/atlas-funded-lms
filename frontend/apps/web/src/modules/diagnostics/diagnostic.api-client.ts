@@ -7,7 +7,7 @@ import type {
   publicDiagnosticMergeResponseSchema,
   publicDiagnosticResultResponseSchema,
   publicDiagnosticStartUnionResponseSchema,
-} from "./diagnostic.schemas";
+} from "@atlas/contracts/diagnostics/diagnostic.schemas";
 
 type PublicDiagnosticStartBody = z.infer<typeof PublicDiagnosticStartBodySchema>;
 type PublicDiagnosticStartResponse = z.infer<typeof publicDiagnosticStartUnionResponseSchema>;

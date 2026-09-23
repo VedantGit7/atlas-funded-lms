@@ -1,0 +1,21 @@
+[
+  {
+    "probe": "MFA guard accepts factor enrollment with no session AAL input",
+    "accepted": true
+  },
+  {
+    "probe": "NODE_ENV production alone storage default",
+    "provider": "local-fs"
+  },
+  {
+    "probe": "Replay is not actor bound and skips handler (including authorization in tenant wrapper)",
+    "handlerCalled": false,
+    "replay": {
+      "fixtureResponseOwner": "member-A"
+    }
+  },
+  {
+    "probe": "Public limiter permits request with production APP_ENV and no Redis by catching configuration error",
+    "allowed": true
+  }
+]

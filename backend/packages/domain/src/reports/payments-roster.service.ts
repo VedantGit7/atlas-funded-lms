@@ -1,8 +1,17 @@
-import { randomUUID } from "node:crypto";
 import type { TenantTx } from "@atlas/db";
 import type { ServiceCtx } from "../shared/domain.types";
 import { paymentsRepository } from "../payments/payments.repository";
 import { resolvePaymentProvider } from "../payments/payment-provider.registry";
+import {
+  lockRefundOrder,
+  listRefundIntents,
+  listRefundIntentsForOrders,
+  findRefundRequest,
+  reserveRefund,
+  refundFingerprint,
+  RESERVED_REFUND_STATES,
+} from "../payments/refund-intents.repository";
+import { applyRefundLedger, refundPublicRecord } from "../payments/refund-workflow";
 import {
   createPaymentInstalmentPlanBodySchema,
   createPaymentInstalmentPlanResponseSchema,
@@ -1118,6 +1127,8 @@ function displayOrderId(orderId: string): string {
 }
 
 type StoredRefund = {
+  status: string;
+  fulfillment: string;
   id: string;
   amountCents: number;
   reason: string;
@@ -1144,6 +1155,11 @@ function readRefunds(metadata: Record<string, unknown>): StoredRefund[] {
     const mode = record["mode"] === "partial" ? "partial" : "full";
     if (!id || amountCents == null || amountCents <= 0 || !createdAt) continue;
     out.push({
+      status: asString(record["status"]) ?? "legacy_recorded",
+      fulfillment: asString(record["fulfillment"]) ?? "legacy_recorded",
+      ...(asString(record["gatewayRefundId"])
+        ? { gatewayRefundId: String(record["gatewayRefundId"]) }
+        : {}),
       id,
       amountCents: Math.trunc(amountCents),
       reason: asString(record["reason"]) ?? "other",
@@ -1186,7 +1202,10 @@ function buildTransactionDetailPayload(row: PaymentTransactionDetailRow) {
   const statusLower = row.status.toLowerCase();
   const isFailed = statusLower === "failed" || statusLower === "cancelled";
   const isRefunded = statusLower.includes("refund");
-  const refundableAmountCents = isFailed ? 0 : Math.max(0, row.amount_cents - refundedAmountCents);
+  const refundableAmountCents =
+    isFailed || statusLower === "refunded"
+      ? 0
+      : Math.max(0, row.amount_cents - refundedAmountCents);
   const canRefund = refundableAmountCents > 0 && (statusLower === "paid" || isRefunded);
   const couponAmountCents = row.coupon_amount_cents;
   const taxAmountCents = row.tax_amount_cents;
@@ -1468,11 +1487,36 @@ function buildTransactionDetailPayload(row: PaymentTransactionDetailRow) {
   };
 }
 
+async function buildRefundAwareDetail(tx: TenantTx, row: PaymentTransactionDetailRow) {
+  const detail = buildTransactionDetailPayload(row);
+  const intents = await listRefundIntents(tx, row.id);
+  const reservedRefundAmountCents = intents
+    .filter((intent) => RESERVED_REFUND_STATES.includes(intent.status))
+    .reduce((sum, intent) => sum + intent.amount_cents, 0);
+  const ids = new Set(detail.refunds.map((refund) => refund.id));
+  const refundableAmountCents = Math.max(
+    0,
+    detail.refundableAmountCents - reservedRefundAmountCents,
+  );
+  return {
+    ...detail,
+    reservedRefundAmountCents,
+    refundableAmountCents,
+    canRefund: detail.canRefund && refundableAmountCents > 0,
+    refunds: [
+      ...detail.refunds,
+      ...intents
+        .filter((intent) => !ids.has(intent.id))
+        .map((intent) => refundPublicRecord(intent)),
+    ],
+  };
+}
+
 export async function getPaymentTransactionDetail(tx: TenantTx, _ctx: ServiceCtx, orderId: string) {
   const row = await paymentsRosterRepository.findTransactionDetailByOrderId(tx, orderId);
   if (!row) throw paymentTransactionNotFound();
   return paymentTransactionDetailResponseSchema.parse({
-    data: buildTransactionDetailPayload(row),
+    data: await buildRefundAwareDetail(tx, row),
   });
 }
 
@@ -1507,6 +1551,16 @@ export async function listPaymentRefunds(
     paymentsRosterRepository.getRefundsQueueSummary(tx, summaryFilter),
   ]);
 
+  const intents = await listRefundIntentsForOrders(
+    tx,
+    rows.map((row) => row.id),
+  );
+  const intentsByOrder = new Map<string, typeof intents>();
+  for (const intent of intents) {
+    const group = intentsByOrder.get(intent.order_id) ?? [];
+    group.push(intent);
+    intentsByOrder.set(intent.order_id, group);
+  }
   const totalPages = totalCount === 0 ? 0 : Math.ceil(totalCount / query.limit);
   const currency = (summary.currency ?? rows[0]?.currency ?? "USD").toUpperCase();
 
@@ -1528,6 +1582,12 @@ export async function listPaymentRefunds(
             ? (row.metadata_json as Record<string, unknown>)
             : {},
         );
+        const recordedIds = new Set(refunds.map((refund) => refund.id));
+        refunds.push(
+          ...(intentsByOrder.get(row.id) ?? [])
+            .filter((intent) => !recordedIds.has(intent.id))
+            .map((intent) => refundPublicRecord(intent)),
+        );
         const statusLower = row.status.toLowerCase();
         const canRefund =
           row.refundable_amount_cents > 0 &&
@@ -1546,6 +1606,7 @@ export async function listPaymentRefunds(
           amountCents: row.amount_cents,
           refundedAmountCents: row.refunded_amount_cents,
           refundableAmountCents: row.refundable_amount_cents,
+          reservedRefundAmountCents: row.reserved_amount_cents,
           currency: row.currency.toUpperCase(),
           status: row.status,
           invoiceNumber: row.invoice_number,
@@ -1567,7 +1628,7 @@ export async function listPaymentRefunds(
       capabilities: {
         requestQueue: false,
         disputesAvailable: false,
-        gatewayRefundsAutomated: false,
+        gatewayRefundsAutomated: true,
       },
     },
   });
@@ -1580,97 +1641,79 @@ export async function refundPaymentTransaction(
   rawBody: unknown,
 ) {
   const body = refundPaymentTransactionBodySchema.parse(rawBody);
+  if (!(await lockRefundOrder(tx, orderId))) throw paymentTransactionNotFound();
   const row = await paymentsRosterRepository.findTransactionDetailByOrderId(tx, orderId);
   if (!row) throw paymentTransactionNotFound();
-
-  const detail = buildTransactionDetailPayload(row);
-  if (!detail.canRefund || detail.refundableAmountCents <= 0) {
-    throw paymentTransactionNotRefundable("This payment has no remaining refundable balance.");
-  }
-
-  const amountCents =
-    body.mode === "full" ? detail.refundableAmountCents : (body.amountCents as number);
-
-  if (amountCents > detail.refundableAmountCents) {
+  const fingerprint = refundFingerprint(body, orderId, ctx.actorMembershipId);
+  const previous = await findRefundRequest(tx, body.refundRequestId);
+  if (previous && (previous.order_id !== orderId || previous.request_fingerprint !== fingerprint))
     throw paymentTransactionNotRefundable(
-      `Refund amount exceeds refundable balance (${String(detail.refundableAmountCents)} cents).`,
+      "This request ID was already used with different refund details.",
     );
-  }
-
+  const detail = await buildRefundAwareDetail(tx, row);
+  let intent = previous;
   let accessRevoked = false;
-  if (body.revokeAccess && row.membership_id && detail.product.courseId) {
-    accessRevoked = await paymentsRosterRepository.revokeCourseEnrollment(tx, {
-      membershipId: row.membership_id,
-      courseId: detail.product.courseId,
-    });
-  }
-
-  let gatewayRefundId: string | null = null;
-  let gatewayNote =
-    "Refund recorded on the LMS ledger. Process the matching reverse on your payment gateway if required; automated gateway refunds are not wired yet.";
-
-  if (row.external_id && row.gateway_key) {
-    try {
-      const { provider } = await resolvePaymentProvider(tx, {
-        gatewayKey: row.gateway_key,
-      });
-      if (provider.refund) {
-        const gatewayRefund = await provider.refund({
-          externalId: row.external_id,
-          ...(body.mode === "full" ? {} : { amountCents }),
-        });
-        gatewayRefundId = gatewayRefund.refundId;
-        gatewayNote = `Refund submitted to ${row.gateway_key} (${gatewayRefund.refundId}).`;
-      }
-    } catch {
-      gatewayNote =
-        "Refund recorded on the LMS ledger, but the payment gateway refund failed. Process the reverse on your gateway manually.";
+  if (!intent) {
+    if (!detail.canRefund)
+      throw paymentTransactionNotRefundable("This payment has no unreserved refundable balance.");
+    const amountCents = body.mode === "full" ? detail.refundableAmountCents : body.amountCents;
+    if (!amountCents) throw paymentTransactionNotRefundable("Refund amount is required.");
+    let gatewayId: string | null = null;
+    if (body.refundMethod === "gateway") {
+      if (!row.external_id || !row.gateway_key)
+        throw paymentTransactionNotRefundable(
+          "This payment requires an explicit manual adjustment with a reference.",
+        );
+      const resolved = await resolvePaymentProvider(tx, { gatewayKey: row.gateway_key });
+      if (resolved.gatewayKey !== row.gateway_key)
+        throw paymentTransactionNotRefundable(
+          "The original payment gateway is unavailable. Restore its configuration before requesting a refund.",
+        );
+      gatewayId = resolved.gatewayId;
     }
+    intent = await reserveRefund(tx, {
+      tenantId: ctx.tenantId,
+      orderId,
+      requestKey: body.refundRequestId,
+      fingerprint,
+      amountCents,
+      availableCents: detail.refundableAmountCents,
+      currency: row.currency,
+      gatewayKey: row.gateway_key,
+      gatewayId,
+      externalId: row.external_id,
+      payload: {
+        mode: body.mode,
+        reason: body.reason,
+        note: body.note,
+        revokeAccess: body.revokeAccess,
+        notifyLearner: body.notifyLearner,
+        actorMembershipId: ctx.actorMembershipId,
+        membershipId: row.membership_id,
+        courseId: detail.product.courseId,
+        refundMethod: body.refundMethod,
+        ...(body.manualReference ? { manualReference: body.manualReference } : {}),
+      },
+    });
+    if (intent.status === "manual_adjustment") accessRevoked = await applyRefundLedger(tx, intent);
   }
-
-  const notifyQueued = Boolean(body.notifyLearner && row.email);
-  const refund: StoredRefund = {
-    id: randomUUID(),
-    amountCents,
-    reason: body.reason,
-    note: body.note,
-    mode: body.mode,
-    revokeAccess: body.revokeAccess,
-    notifyLearner: body.notifyLearner,
-    accessRevoked,
-    notifyQueued,
-    actorMembershipId: ctx.actorMembershipId,
-    createdAt: new Date().toISOString(),
-    ...(gatewayRefundId ? { gatewayRefundId } : {}),
-  };
-
-  const metadata = asRecord(row.metadata_json);
-  const nextRefunds = [...readRefunds(metadata), refund];
-  const nextRefundedTotal = nextRefunds.reduce((sum, item) => sum + item.amountCents, 0);
-  const nextStatus = nextRefundedTotal >= row.amount_cents ? "refunded" : row.status;
-
-  const updated = await paymentsRosterRepository.updateOrderRefund(tx, {
-    orderId,
-    status: nextStatus,
-    metadataJson: {
-      ...metadata,
-      refunds: nextRefunds,
-    },
-  });
-  if (!updated) throw paymentTransactionNotFound();
-
-  const updatedDetail = buildTransactionDetailPayload(updated);
-
+  const currentRow = await paymentsRosterRepository.findTransactionDetailByOrderId(tx, orderId);
+  if (!currentRow) throw paymentTransactionNotFound();
+  const current = await buildRefundAwareDetail(tx, currentRow);
+  const recorded = current.refunds.find((refund) => refund.id === intent.id);
   return refundPaymentTransactionResponseSchema.parse({
     data: {
-      orderId: updated.id,
-      status: updated.status,
-      refund,
-      refundedAmountCents: updatedDetail.refundedAmountCents,
-      refundableAmountCents: updatedDetail.refundableAmountCents,
-      accessRevoked,
-      notifyQueued,
-      gatewayNote,
+      orderId,
+      status: currentRow.status,
+      refund: recorded ?? refundPublicRecord(intent, accessRevoked),
+      refundedAmountCents: current.refundedAmountCents,
+      refundableAmountCents: current.refundableAmountCents,
+      accessRevoked: recorded?.accessRevoked ?? accessRevoked,
+      notifyQueued: false,
+      gatewayNote:
+        intent.status === "manual_adjustment"
+          ? "Manual ledger adjustment recorded. No money was sent by the LMS."
+          : "Refund request saved. Gateway confirmation is required before the refund is recorded or access is revoked.",
     },
   });
 }

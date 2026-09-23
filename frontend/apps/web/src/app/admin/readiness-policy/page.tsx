@@ -1,7 +1,7 @@
 import { AdminPageGate } from "../../../components/patterns/AdminPageGate";
 import { ReadinessPolicyEditor } from "../../../features/readiness/components/ReadinessPolicyEditor";
-import { competencyConfigServerApi } from "@atlas/contracts-modules/competency/competency-config.server-api";
-import { readinessServerApi } from "@atlas/contracts-modules/readiness/readiness.server-api";
+import { competencyConfigServerApi } from "@/modules/competency/competency-config.server-api";
+import { readinessServerApi } from "@/modules/readiness/readiness.server-api";
 import { ServerApiError } from "../../../lib/server-api";
 
 export default async function AdminReadinessPolicyPage() {
