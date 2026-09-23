@@ -18,7 +18,7 @@
     "analyze:web": "pnpm --filter @atlas/web analyze",
     "lint": "node scripts/ci/run-lint.mjs",
     "lint:coverage": "node scripts/ci/check-lint-coverage.mjs",
-    "typecheck": "tsc -b",
+    "typecheck": "node --max-old-space-size=4096 node_modules/typescript/bin/tsc -b",
     "test": "pnpm test:cleanup-boundary && pnpm test:unit && pnpm test:structure && pnpm test:security && pnpm test:events && pnpm test:authorization && pnpm test:routes && pnpm test:integration && pnpm test:db && pnpm test:tenant-isolation && pnpm test:e2e && pnpm test:architecture && pnpm test:performance-tooling",
     "test:unit": "vitest run tests/unit",
     "test:integration": "dotenv -e .env.test -- vitest run tests/integration",
