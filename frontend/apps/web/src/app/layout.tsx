@@ -25,6 +25,7 @@ import { ThemeInitScript } from "../components/ThemeInitScript";
 import { resolveDocumentDescription, resolveDocumentTitle } from "../lib/branding/document-title";
 import { loadPublicBootstrap } from "../lib/server/bootstrap";
 import { resolveAppearanceHtmlProps } from "../lib/server/resolve-appearance-html";
+import { hasSessionCookie } from "../lib/server/has-session-cookie";
 
 /**
  * Derives the tab title from the resolved tenant.
@@ -62,6 +63,7 @@ type RootLayoutProps = Readonly<{
 export default async function RootLayout({ children }: RootLayoutProps) {
   // Request headers opt the root into dynamic rendering; never cache nonce HTML.
   const nonce = (await headers()).get("x-nonce") ?? undefined;
+  const hasSession = await hasSessionCookie();
   const theme = await loadTenantThemeRuntime();
   const baseClassName = `${jakarta.variable} font-cormorant ${jetbrainsMono.variable}`;
   const appearance = await resolveAppearanceHtmlProps(
@@ -122,7 +124,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
       </head>
       <body suppressHydrationWarning>
         <AppProviders initialDisplayCurrency={displayCurrency} initialFxRates={fxRates}>
-          <AnalyticsConsentBridge>
+          <AnalyticsConsentBridge hasSession={hasSession}>
             <MarketingSnippetsInjector />
             {children}
           </AnalyticsConsentBridge>

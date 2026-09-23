@@ -6,6 +6,7 @@ import { PostHogProvider } from "./PostHogProvider";
 
 type AnalyticsConsentBridgeProps = {
   children: React.ReactNode;
+  hasSession: boolean;
 };
 
 type PreferencesResponse = {
@@ -16,17 +17,24 @@ type PreferencesResponse = {
   };
 };
 
-export function AnalyticsConsentBridge({ children }: AnalyticsConsentBridgeProps) {
+export function AnalyticsConsentBridge({ children, hasSession }: AnalyticsConsentBridgeProps) {
   const [analyticsConsent, setAnalyticsConsent] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
 
+    // Anonymous pages must not trigger private requests and automatic auth refreshes.
+    // Cookie presence only permits the fetch; the API still verifies consent.
+    if (!hasSession) {
+      setAnalyticsConsent(false);
+      return;
+    }
+
     async function loadConsent() {
       try {
         const response = await clientApi.get<PreferencesResponse>("/api/v1/me/preferences");
         if (!cancelled) {
-          setAnalyticsConsent(response.data.privacy?.analyticsConsent ?? false);
+          setAnalyticsConsent(response.data.privacy?.analyticsConsent === true);
         }
       } catch {
         if (!cancelled) {
@@ -40,7 +48,9 @@ export function AnalyticsConsentBridge({ children }: AnalyticsConsentBridgeProps
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [hasSession]);
 
-  return <PostHogProvider analyticsConsent={analyticsConsent}>{children}</PostHogProvider>;
+  return (
+    <PostHogProvider analyticsConsent={hasSession && analyticsConsent}>{children}</PostHogProvider>
+  );
 }
