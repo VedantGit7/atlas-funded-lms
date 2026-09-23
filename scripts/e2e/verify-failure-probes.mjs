@@ -109,6 +109,77 @@ function sourceLocations(errors, spec) {
   return [...locations.values()].slice(0, 20);
 }
 
+function phaseDiagnostics(test, spec) {
+  if (spec !== "02-learner-dashboard-enrollment") return {};
+  const phases = new Set([
+    "J02 login",
+    "J02 enrollment",
+    "J02 course before enrollment",
+    "J02 course after enrollment",
+  ]);
+  const phaseTimings = [];
+  const bounded = (value) => Number.isFinite(value) && value >= 0 && value <= 86400000;
+  for (const result of (test?.results ?? []).slice(0, 1)) {
+    const phaseStarts = new Map();
+    const resultStart = Date.parse(result.startTime);
+    for (const annotation of (test?.annotations ?? []).slice(0, 100)) {
+      if (
+        annotation.type !== "j02-phase-start" ||
+        typeof annotation.description !== "string" ||
+        annotation.description.length > 1024
+      )
+        continue;
+      try {
+        const value = JSON.parse(annotation.description);
+        const offset = value?.startedAt - resultStart;
+        if (phases.has(value?.phase) && Number.isSafeInteger(value.startedAt) && bounded(offset))
+          phaseStarts.set(value.phase, offset);
+      } catch {
+        /* Never retain raw annotations. */
+      }
+    }
+    const pending = Array.isArray(result.steps) ? [...result.steps] : [];
+    for (let count = 0; pending.length && count < 1000 && phaseTimings.length < 20; count++) {
+      const step = pending.shift();
+      if (!step || typeof step !== "object") continue;
+      if (phases.has(step.title) && (bounded(step.duration) || step.duration === -1)) {
+        phaseTimings.push({
+          phase: step.title,
+          startOffsetMs: phaseStarts.get(step.title) ?? null,
+          durationMs: step.duration === -1 ? null : step.duration,
+          completed: step.duration !== -1,
+          errorCategory: !step.error
+            ? null
+            : /timeout|timed out/i.test(String(step.error.message))
+              ? "timeout"
+              : "other",
+        });
+      }
+      if (Array.isArray(step.steps)) pending.unshift(...step.steps.slice(0, 100));
+    }
+  }
+  const courseResponses = [];
+  for (const annotation of (test?.annotations ?? []).slice(0, 100)) {
+    if (annotation.type !== "j02-course-status" || typeof annotation.description !== "string")
+      continue;
+    if (annotation.description.length > 1024) continue;
+    try {
+      const value = JSON.parse(annotation.description);
+      if (
+        ["before", "after"].includes(value?.phase) &&
+        Number.isInteger(value.status) &&
+        value.status >= 100 &&
+        value.status <= 599
+      )
+        courseResponses.push({ phase: value.phase, status: value.status });
+    } catch {
+      /* Raw annotation text must never enter evidence. */
+    }
+    if (courseResponses.length === 2) break;
+  }
+  return { phaseTimings, courseResponses };
+}
+
 persist("running");
 try {
   assertIsolatedFixtureTarget({
@@ -198,6 +269,7 @@ try {
       applied,
       intendedAssertionMatched,
       locations: sourceLocations([...failures, ...(data.errors ?? [])], probe.spec),
+      ...phaseDiagnostics(test, probe.spec),
     };
     persist("running");
     if (
@@ -210,7 +282,12 @@ try {
       !intendedAssertionMatched
     )
       throw new Error("Probe did not fail at its intended outcome assertion");
-    evidence.push({ fault: probe.fault, detected: true, spec: probe.spec });
+    evidence.push({
+      fault: probe.fault,
+      detected: true,
+      spec: probe.spec,
+      ...phaseDiagnostics(test, probe.spec),
+    });
     persist("running");
     console.log(`Detected injected fault: ${probe.fault}`);
   }

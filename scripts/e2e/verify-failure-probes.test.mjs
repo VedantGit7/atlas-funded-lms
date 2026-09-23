@@ -39,7 +39,7 @@ function runFixture(t, mode = "valid") {
     const fs = require('node:fs');
     const { mode, sentinel } = JSON.parse(fs.readFileSync('fixture.json'));
     const fault = process.env.E2E_FAILURE_PROBE;
-    const target = fault === 'entitlement-not-saved';
+    const target = mode === 'phase-diagnostics' ? fault === 'completion-not-saved' : fault === 'entitlement-not-saved';
     const observed = JSON.parse(fs.readFileSync('.test-results/f16-probes/evidence.json'));
     if (observed.current.stage !== 'spawn') process.exit(99);
     fs.appendFileSync('observed.jsonl', JSON.stringify(observed) + '\\n');
@@ -85,6 +85,25 @@ function runFixture(t, mode = "valid") {
       }] }], suites: [] }]
     };
     if (target && mode === 'multiple-results') report.suites[0].specs[0].tests[0].results.push(report.suites[0].specs[0].tests[0].results[0]);
+    if (target && mode === 'phase-diagnostics') {
+      const test = report.suites[0].specs[0].tests[0];
+      test.annotations = [
+        {type:'j02-phase-start',description:JSON.stringify({phase:'J02 course after enrollment',startedAt:Date.parse('2026-09-23T00:00:20Z'),secret:sentinel})},
+        {type:'j02-phase-start',description:JSON.stringify({phase:'J02 enrollment',startedAt:sentinel})},
+        {type:'j02-phase-start',description:sentinel},
+        {type:'j02-course-status',description:JSON.stringify({phase:'before',status:200,secret:sentinel})},
+        {type:'j02-course-status',description:JSON.stringify({phase:sentinel,status:200})},
+        {type:'j02-course-status',description:JSON.stringify({phase:'after',status:999})},
+        {type:'j02-course-status',description:sentinel}
+      ];
+      Object.assign(test.results[0], {status:'timedOut',startTime:'2026-09-23T00:00:00Z',steps:[
+        {title:'J02 login',duration:1000},
+        {title:sentinel,steps:[{title:'J02 course after enrollment',duration:130000,error:{message:'Test timeout of 150000ms exceeded '+sentinel}}]},
+        {title:'J02 enrollment',duration:-1},
+        {title:'J02 login',duration:-2},
+        {title:'J02 course before enrollment',duration:200,error:{message:sentinel}}
+      ]});
+    }
     fs.writeFileSync(process.env.PLAYWRIGHT_JSON_OUTPUT_FILE, JSON.stringify(report));
     process.exit(target && mode === 'unexpected-pass' ? 0 : 1);
   `,
@@ -185,4 +204,41 @@ test("seed failure is terminal and never runs a browser", (t) => {
   assert.equal(evidence.probes.length, 0);
   assert.equal(evidence.failure.stage, "seed");
   assert.equal(evidence.failure.process.exitCode, 2);
+});
+
+test("retains only bounded known phase timings and valid course status, without accepting a timeout", (t) => {
+  const { child, evidence } = runFixture(t, "phase-diagnostics");
+  assert.notEqual(child.status, 0);
+  assert.equal(evidence.failure.applied, false);
+  assert.deepEqual(evidence.failure.phaseTimings, [
+    {
+      phase: "J02 login",
+      startOffsetMs: null,
+      durationMs: 1000,
+      completed: true,
+      errorCategory: null,
+    },
+    {
+      phase: "J02 course after enrollment",
+      startOffsetMs: 20000,
+      durationMs: 130000,
+      completed: true,
+      errorCategory: "timeout",
+    },
+    {
+      phase: "J02 enrollment",
+      startOffsetMs: null,
+      durationMs: null,
+      completed: false,
+      errorCategory: null,
+    },
+    {
+      phase: "J02 course before enrollment",
+      startOffsetMs: null,
+      durationMs: 200,
+      completed: true,
+      errorCategory: "other",
+    },
+  ]);
+  assert.deepEqual(evidence.failure.courseResponses, [{ phase: "before", status: 200 }]);
 });

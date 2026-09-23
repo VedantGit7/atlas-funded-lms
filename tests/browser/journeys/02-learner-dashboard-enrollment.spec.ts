@@ -4,6 +4,7 @@ import { requiredCredential } from "../helpers/env";
 import { waitForHydration } from "../helpers/hydration";
 import { scenario } from "../helpers/scenario";
 import { coldRouteNavigationOptions } from "../helpers/navigation";
+import { probePhase } from "../helpers/probe-phase";
 
 test.describe("J02 learner enrollment and persisted lesson progress", () => {
   test("enrolls, resumes saved progress, and completes a lesson with the keyboard", async ({
@@ -13,43 +14,59 @@ test.describe("J02 learner enrollment and persisted lesson progress", () => {
     const coursePath = `/courses/${fixture.courseId}`;
     const lessonPath = `${coursePath}/lessons/${fixture.lessonId}`;
     const progressPath = `/api/v1/lessons/${fixture.lessonId}/progress`;
-    await loginWithCredentials(
-      page,
-      requiredCredential("E2E_LEARNER_EMAIL"),
-      requiredCredential("E2E_LEARNER_PASSWORD"),
-      "/courses",
+    await probePhase("J02 login", () =>
+      loginWithCredentials(
+        page,
+        requiredCredential("E2E_LEARNER_EMAIL"),
+        requiredCredential("E2E_LEARNER_PASSWORD"),
+        "/courses",
+      ),
     );
     await expect(page.getByRole("main")).toBeVisible();
 
-    const beforeEnrollment = await page.request.get(`/api/v1/courses/${fixture.courseId}`);
+    const beforeEnrollment = await probePhase("J02 course before enrollment", () =>
+      page.request.get(`/api/v1/courses/${fixture.courseId}`),
+    );
+    test.info().annotations.push({
+      type: "j02-course-status",
+      description: JSON.stringify({ phase: "before", status: beforeEnrollment.status() }),
+    });
     expect(beforeEnrollment.status()).toBe(200);
     expect(await beforeEnrollment.json()).toMatchObject({
       data: { id: fixture.courseId, enrollmentStatus: "not_enrolled" },
     });
 
-    await page.goto("/courses");
-    await page.locator(`a[href="${coursePath}"]`).click();
-    await expect(page).toHaveURL(new RegExp(`${coursePath}$`));
-    await waitForHydration(page);
-    await page.getByRole("button", { name: "Enroll", exact: true }).click();
-    const enrollmentResponse = page.waitForResponse(
-      (response) =>
-        new URL(response.url()).pathname === "/api/v1/enrollments" &&
-        response.request().method() === "POST",
-    );
-    await page
-      .getByRole("dialog", { name: "Confirm enrollment" })
-      .getByRole("button", { name: "Confirm enrollment", exact: true })
-      .click();
-    const enrolled = await enrollmentResponse;
-    expect(enrolled.status()).toBe(200);
-    expect(enrolled.request().postDataJSON()).toEqual({ courseId: fixture.courseId });
-    expect(await enrolled.json()).toMatchObject({
-      data: { courseId: fixture.courseId, status: "active", created: true },
+    await probePhase("J02 enrollment", async () => {
+      await page.goto("/courses");
+      await page.locator(`a[href="${coursePath}"]`).click();
+      await expect(page).toHaveURL(new RegExp(`${coursePath}$`));
+      await waitForHydration(page);
+      await page.getByRole("button", { name: "Enroll", exact: true }).click();
+      const enrollmentResponse = page.waitForResponse(
+        (response) =>
+          new URL(response.url()).pathname === "/api/v1/enrollments" &&
+          response.request().method() === "POST",
+      );
+      await page
+        .getByRole("dialog", { name: "Confirm enrollment" })
+        .getByRole("button", { name: "Confirm enrollment", exact: true })
+        .click();
+      const enrolled = await enrollmentResponse;
+      expect(enrolled.status()).toBe(200);
+      expect(enrolled.request().postDataJSON()).toEqual({ courseId: fixture.courseId });
+      expect(await enrolled.json()).toMatchObject({
+        data: { courseId: fixture.courseId, status: "active", created: true },
+      });
+      await expect(page.getByText(/You are enrolled/)).toBeVisible();
     });
-    await expect(page.getByText(/You are enrolled/)).toBeVisible();
 
-    const afterEnrollment = await page.request.get(`/api/v1/courses/${fixture.courseId}`);
+    const afterEnrollment = await probePhase("J02 course after enrollment", () =>
+      page.request.get(`/api/v1/courses/${fixture.courseId}`),
+    );
+    test.info().annotations.push({
+      type: "j02-course-status",
+      description: JSON.stringify({ phase: "after", status: afterEnrollment.status() }),
+    });
     expect(afterEnrollment.status()).toBe(200);
     expect(await afterEnrollment.json()).toMatchObject({
       data: { id: fixture.courseId, enrollmentStatus: "enrolled" },
