@@ -1,5 +1,5 @@
 import type { Page } from "@playwright/test";
-import { waitForHydration } from "./hydration";
+import { waitForSubmitHandler } from "./hydration";
 import { totp } from "../../../scripts/e2e/totp.mjs";
 
 /**
@@ -23,18 +23,20 @@ export async function loginWithCredentials(
 ): Promise<void> {
   await page.goto(destination ? `/login?next=${encodeURIComponent(destination)}` : "/login");
 
-  // Wait for hydration before clicking. The form is progressively enhanced:
+  // Wait for this form's handler before filling controlled inputs or clicking.
+  // The body can hydrate before a streamed form boundary. The form is progressively enhanced:
   // until React attaches, the button submits natively, the server re-renders
   // /login, and the client-side `window.location.href = destination` that
   // performs the post-login navigation never runs. The symptom is a POST that
   // returns an HTML document and a page that simply sits there — which is
   // exactly what this helper used to do. See helpers/hydration.ts for why a
   // load-state wait is not a substitute.
-  await waitForHydration(page);
+  const signIn = page.getByRole("button", { name: "Sign In", exact: true });
+  await waitForSubmitHandler(page.locator("form").filter({ has: signIn }));
 
   await page.getByLabel("Email", { exact: true }).fill(email);
   await page.getByLabel("Password", { exact: true }).fill(password);
-  await page.getByRole("button", { name: "Sign in" }).click();
+  await signIn.click();
   const prefix = ["E2E_ADMIN", "E2E_PLATFORM", "E2E_FOREIGN_ADMIN"].find(
     (candidate) => process.env[`${candidate}_EMAIL`] === email,
   );

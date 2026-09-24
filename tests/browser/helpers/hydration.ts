@@ -52,25 +52,44 @@ export async function waitForClickHandler(
   control: Locator,
   timeoutMs: number = HYDRATION_TIMEOUT_MS,
 ): Promise<void> {
+  return waitForHandler(control, "onClick", timeoutMs);
+}
+
+/** A hydrated body does not establish that a streamed form can handle submission. */
+export async function waitForSubmitHandler(
+  form: Locator,
+  timeoutMs: number = HYDRATION_TIMEOUT_MS,
+): Promise<void> {
+  return waitForHandler(form, "onSubmit", timeoutMs);
+}
+
+async function waitForHandler(
+  control: Locator,
+  handler: "onClick" | "onSubmit",
+  timeoutMs: number,
+): Promise<void> {
   await expect
     .poll(
       () =>
         control.evaluate(
-          (element) =>
+          (element, handler) =>
             Object.keys(element).some((key) => {
               if (!key.startsWith("__reactProps$")) return false;
               const props = (element as unknown as Record<string, unknown>)[key];
               return (
                 props !== null &&
                 typeof props === "object" &&
-                "onClick" in props &&
-                typeof props.onClick === "function"
+                handler in props &&
+                typeof (props as Record<string, unknown>)[handler] === "function"
               );
             }),
-          undefined,
+          handler,
           { timeout: Math.min(timeoutMs, 1_000) },
         ),
-      { timeout: timeoutMs, message: "The control's React click handler must be ready" },
+      {
+        timeout: timeoutMs,
+        message: `The control's React ${handler === "onSubmit" ? "submit" : "click"} handler must be ready`,
+      },
     )
     .toBe(true);
 }
