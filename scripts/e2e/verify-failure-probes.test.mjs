@@ -39,7 +39,7 @@ function runFixture(t, mode = "valid") {
     const fs = require('node:fs');
     const { mode, sentinel } = JSON.parse(fs.readFileSync('fixture.json'));
     const fault = process.env.E2E_FAILURE_PROBE;
-    const target = mode === 'phase-diagnostics' ? fault === 'completion-not-saved' : fault === 'entitlement-not-saved';
+    const target = mode === 'grading-diagnostics' ? fault === 'wrong-grade' : mode === 'phase-diagnostics' ? fault === 'completion-not-saved' : fault === 'entitlement-not-saved';
     const observed = JSON.parse(fs.readFileSync('.test-results/f16-probes/evidence.json'));
     if (observed.current.stage !== 'spawn') process.exit(99);
     fs.appendFileSync('observed.jsonl', JSON.stringify(observed) + '\\n');
@@ -103,6 +103,25 @@ function runFixture(t, mode = "valid") {
         {title:'J02 login',duration:-2},
         {title:'J02 course before enrollment',duration:200,error:{message:sentinel}}
       ]});
+    }
+    if (target && mode === 'grading-diagnostics') {
+      const test = report.suites[0].specs[0].tests[0];
+      test.annotations = [
+        {type:'j03-phase-start',description:JSON.stringify({phase:'J03 submit',startedAt:Date.parse('2026-09-24T00:00:20Z'),secret:sentinel})},
+        {type:'j03-phase-start',description:JSON.stringify({phase:sentinel,startedAt:0})},
+        {type:'j03-phase-start',description:sentinel},
+        {type:'j03-upstream-status',description:'200'},
+        {type:'j03-upstream-status',description:sentinel},
+        {type:'j03-upstream-status',description:'999'}
+      ];
+      Object.assign(test.results[0], {status:'failed',startTime:'2026-09-24T00:00:00Z',steps:[
+        {title:'J03 login',duration:1000},
+        {title:'J03 submit',duration:30000,error:{message:'Timeout '+sentinel},steps:[
+          {title:'J03 intercept upstream',duration:-1},
+          {title:sentinel,duration:1}
+        ]}
+      ],errors:[{message:'Timeout '+sentinel,location:{file:'/repo/tests/browser/helpers/auth.ts',line:65,column:14},
+        stack:'at login (/repo/tests/browser/helpers/auth.ts:65:14)\\n at /private/' + sentinel + ':4:5'}]});
     }
     fs.writeFileSync(process.env.PLAYWRIGHT_JSON_OUTPUT_FILE, JSON.stringify(report));
     process.exit(target && mode === 'unexpected-pass' ? 0 : 1);
@@ -204,6 +223,41 @@ test("seed failure is terminal and never runs a browser", (t) => {
   assert.equal(evidence.probes.length, 0);
   assert.equal(evidence.failure.stage, "seed");
   assert.equal(evidence.failure.process.exitCode, 2);
+});
+
+test("grading failure retains safe phases, helper coordinates and upstream status without passing", (t) => {
+  const { child, evidence } = runFixture(t, "grading-diagnostics");
+  assert.notEqual(child.status, 0);
+  assert.equal(evidence.probes.length, 1);
+  assert.equal(evidence.failure.applied, false);
+  assert.equal(evidence.failure.intendedAssertionMatched, false);
+  assert.deepEqual(evidence.failure.phaseTimings, [
+    {
+      phase: "J03 login",
+      startOffsetMs: null,
+      durationMs: 1000,
+      completed: true,
+      errorCategory: null,
+    },
+    {
+      phase: "J03 submit",
+      startOffsetMs: 20000,
+      durationMs: 30000,
+      completed: true,
+      errorCategory: "timeout",
+    },
+    {
+      phase: "J03 intercept upstream",
+      startOffsetMs: null,
+      durationMs: null,
+      completed: false,
+      errorCategory: null,
+    },
+  ]);
+  assert.deepEqual(evidence.failure.upstreamStatuses, [200]);
+  assert.deepEqual(evidence.failure.locations, [
+    { file: "tests/browser/helpers/auth.ts", line: 65, column: 14 },
+  ]);
 });
 
 test("retains only bounded known phase timings and valid course status, without accepting a timeout", (t) => {

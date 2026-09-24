@@ -78,10 +78,15 @@ function testsFrom(suites) {
     ...testsFrom(suite.suites ?? []),
   ]);
 }
-// Only the known journey filename and numeric coordinates may leave a raw report.
+// Only known source filenames and numeric coordinates may leave a raw report.
 // Error messages, stack text, attachments and process output can contain credentials.
 function sourceLocations(errors, spec) {
-  const file = `tests/browser/journeys/${spec}.spec.ts`;
+  const files = [
+    `tests/browser/journeys/${spec}.spec.ts`,
+    ...["auth", "hydration", "failure-probe", "navigation", "probe-phase"].map(
+      (name) => `tests/browser/helpers/${name}.ts`,
+    ),
+  ];
   const locations = new Map();
   function add(candidate, line, column) {
     const normalized =
@@ -91,12 +96,13 @@ function sourceLocations(errors, spec) {
             .replace(/^at\s+/, "")
             .replaceAll("\\", "/")
         : "";
-    if (normalized !== file && !normalized.endsWith(`/${file}`)) return;
+    const file = files.find((file) => normalized === file || normalized.endsWith(`/${file}`));
+    if (!file) return;
     if (
       ![line, column].every((value) => Number.isSafeInteger(value) && value > 0 && value < 10000000)
     )
       return;
-    locations.set(`${line}:${column}`, { file, line, column });
+    locations.set(`${file}:${line}:${column}`, { file, line, column });
   }
   for (const error of errors) {
     add(error?.location?.file, error?.location?.line, error?.location?.column);
@@ -110,13 +116,28 @@ function sourceLocations(errors, spec) {
 }
 
 function phaseDiagnostics(test, spec) {
-  if (spec !== "02-learner-dashboard-enrollment") return {};
-  const phases = new Set([
-    "J02 login",
-    "J02 enrollment",
-    "J02 course before enrollment",
-    "J02 course after enrollment",
-  ]);
+  const grading = spec === "03-learner-assessment";
+  if (!grading && spec !== "02-learner-dashboard-enrollment") return {};
+  const phases = new Set(
+    grading
+      ? [
+          "J03 login",
+          "J03 start",
+          "J03 autosave",
+          "J03 reload",
+          "J03 submit",
+          "J03 result",
+          "J03 intercept upstream",
+          "J03 intercept json",
+          "J03 intercept fulfill",
+        ]
+      : [
+          "J02 login",
+          "J02 enrollment",
+          "J02 course before enrollment",
+          "J02 course after enrollment",
+        ],
+  );
   const phaseTimings = [];
   const bounded = (value) => Number.isFinite(value) && value >= 0 && value <= 86400000;
   for (const result of (test?.results ?? []).slice(0, 1)) {
@@ -124,7 +145,7 @@ function phaseDiagnostics(test, spec) {
     const resultStart = Date.parse(result.startTime);
     for (const annotation of (test?.annotations ?? []).slice(0, 100)) {
       if (
-        annotation.type !== "j02-phase-start" ||
+        annotation.type !== (grading ? "j03-phase-start" : "j02-phase-start") ||
         typeof annotation.description !== "string" ||
         annotation.description.length > 1024
       )
@@ -157,6 +178,19 @@ function phaseDiagnostics(test, spec) {
       }
       if (Array.isArray(step.steps)) pending.unshift(...step.steps.slice(0, 100));
     }
+  }
+  if (grading) {
+    const upstreamStatuses = (test?.annotations ?? [])
+      .slice(0, 100)
+      .filter(
+        (annotation) =>
+          annotation.type === "j03-upstream-status" &&
+          typeof annotation.description === "string" &&
+          /^[1-5]\d{2}$/.test(annotation.description),
+      )
+      .slice(0, 10)
+      .map((annotation) => Number(annotation.description));
+    return { phaseTimings, upstreamStatuses };
   }
   const courseResponses = [];
   for (const annotation of (test?.annotations ?? []).slice(0, 100)) {

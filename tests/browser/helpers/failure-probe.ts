@@ -1,6 +1,7 @@
-import type { Page } from "@playwright/test";
+import { test, type Page } from "@playwright/test";
 import { assertIsolatedFixtureTarget } from "../../../scripts/e2e/isolated-target.mjs";
 import { scenario } from "./scenario";
+import { probePhase } from "./probe-phase";
 
 /** Test-only fault injection. The normal suite must reject these false successes. */
 export async function installFailureProbe(
@@ -26,12 +27,17 @@ export async function installFailureProbe(
     });
   } else if (fault === "wrong-grade") {
     await page.route("**/api/v1/attempts/*/submit", async (route) => {
-      const response = await route.fetch();
-      const body = await response.json();
-      await route.fulfill({
-        response,
-        json: { ...body, data: { ...body.data, scorePercent: 0, passed: false } },
-      });
+      const response = await probePhase("J03 intercept upstream", () => route.fetch());
+      test
+        .info()
+        .annotations.push({ type: "j03-upstream-status", description: String(response.status()) });
+      const body = await probePhase("J03 intercept json", () => response.json());
+      await probePhase("J03 intercept fulfill", () =>
+        route.fulfill({
+          response,
+          json: { ...body, data: { ...body.data, scorePercent: 0, passed: false } },
+        }),
+      );
       applied(fault);
     });
   } else if (fault === "role-not-revoked") {
