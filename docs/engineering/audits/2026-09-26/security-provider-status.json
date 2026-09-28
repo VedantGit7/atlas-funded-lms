@@ -1,0 +1,36 @@
+{
+  "checkedAt": "2026-09-26",
+  "repository": "VedantGit7/atlas-funded-lms",
+  "candidate": "0c405545d5c9d51dc29b27f11163c18e723d5bbc",
+  "ciRequired": {
+    "conclusion": "success",
+    "publisherAppId": 15368,
+    "runId": 35966713362,
+    "url": "https://github.com/VedantGit7/atlas-funded-lms/actions/runs/35966713362/job/107536867184"
+  },
+  "rulesetsApi": {
+    "status": 403,
+    "message": "Upgrade to GitHub Pro or make this repository public to enable this feature."
+  },
+  "rulesetsBrowser": {
+    "url": "https://github.com/VedantGit7/atlas-funded-lms/settings/rules",
+    "existingRulesets": 0,
+    "enforcementWarning": "Your rulesets won't be enforced on this private repository until you move to GitHub Team organization account."
+  },
+  "collaborators": "After owner reauthentication, GitHub Manage access shows 0 collaborators; only the owner can contribute.",
+  "codeOwners": "Only VedantGit7 in local CODEOWNERS; independent reviewer not designated.",
+  "githubBasePlan": "GitHub Free; signed-in comparison quotes GitHub Pro at $4 and includes private-repository rules/code owners. No upgrade purchased.",
+  "supabase": {
+    "organizationId": "uoubdxyhutdqsngtsoxz",
+    "plan": "free",
+    "stagingProjectId": "acfkhlnrlnlignkqpxhc",
+    "existingProjectId": "rolumnldqjelwfvtmmqf",
+    "emailSettings": "After owner sign-in, staging Email settings show Prevent use of leaked passwords off and a Pro plan requirement; no settings changed.",
+    "organizationUpgradeQuote": "From $25.00/month, plus project compute/usage as applicable; no subscription purchased.",
+    "existingProjectSecurityAdvisors": ["auth_leaked_password_protection"],
+    "stagingSecurityAdvisors": [],
+    "advisorLimitation": "Staging's empty advisor list does not establish password enforcement; its actual switch is off."
+  },
+  "mutations": [],
+  "note": "Prior candidate CI does not verify the new security-control working tree. Provider requirements remain open."
+}

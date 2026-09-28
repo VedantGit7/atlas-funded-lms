@@ -33,6 +33,18 @@ describe("F04 production startup prerequisites", () => {
       /non-negative integer/,
     );
   });
+  it.each(["x-atlas-client-ip", "X-Atlas-Proxy-Authenticated", "bad header"])(
+    "rejects unsafe edge header configuration %s even with production Redis configured",
+    (header) => {
+      expect(() =>
+        validateRateLimitConfiguration({
+          APP_ENV: "production",
+          REDIS_URL: "rediss://redis.example.test:6380",
+          TRUSTED_CLIENT_IP_HEADER: header,
+        }),
+      ).toThrow(/Invalid TRUSTED_CLIENT_IP_HEADER/);
+    },
+  );
   it("collapses malformed client IPs instead of issuing attacker-chosen buckets", () => {
     expect(
       resolveClientIp(

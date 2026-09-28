@@ -2,7 +2,11 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import {
+  AnimatePresence,
+  motion,
+  useReducedMotion,
+} from "../../../components/motion/animation-boundary";
 import { BadgeCheck, Brain, Clock, ListChecks, Timer, X } from "lucide-react";
 import { cn } from "@atlas/design-system";
 import type { DiagnosticCatalogItem } from "@atlas/contracts/diagnostics/diagnostic.types";

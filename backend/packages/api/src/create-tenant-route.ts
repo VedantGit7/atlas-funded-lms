@@ -29,8 +29,9 @@ import { toSafeErrorEnvelope } from "./error-envelope";
 import { loadResourceRefOrDefault } from "./load-resource-ref";
 import type { RouteMetadata, TenantRouteContext } from "./route-metadata";
 import { noBodySchema } from "./schemas";
-import { recordTenantUsage } from "./tenant-usage-meter";
+import { createTenantRequestUsage } from "./tenant-usage-meter";
 import { enforceIngressRateLimit, enforceProtectedRateLimit } from "./rate-limit";
+import { measureRouteStage } from "./route-stage-timings";
 
 type InferParams<TParams extends z.ZodType | undefined> = TParams extends z.ZodType
   ? z.infer<TParams> extends object
@@ -256,7 +257,7 @@ export function createTenantRoute<
     const startedAt = performance.now();
     // A holder rather than a `let`: the tenant is assigned inside the lifecycle
     // callback, which control-flow analysis cannot see from the `finally`.
-    const metered: { tenantId: string | null } = { tenantId: null };
+    const metered: { usage?: ReturnType<typeof createTenantRequestUsage> } = {};
 
     try {
       return await runRouteLifecycle(
@@ -288,7 +289,9 @@ export function createTenantRoute<
           // tenant-unavailable. That ordering is preferable anyway: it does not
           // disclose whether a tenant host exists to an anonymous caller.
           // ---------------------------------------------------------------
-          const supabaseUser = await requireSupabaseUser(req);
+          const supabaseUser = await measureRouteStage("authentication", () =>
+            requireSupabaseUser(req),
+          );
 
           let input: TInput;
 
@@ -324,19 +327,24 @@ export function createTenantRoute<
           // request failed after the 10s connect timeout. Measured 0 successful
           // requests at 20 concurrent; 364 rps at 80 concurrent once un-nested.
           // ---------------------------------------------------------------
-          const { tenant, principal } = await withGlobalDb(async (db) => {
-            const resolvedTenant = await resolveTenantFromRequest({ req, db });
-            const resolvedPrincipal = await upsertAuthPrincipal({
-              db,
-              supabaseUserId: supabaseUser.supabaseUserId,
-              email: supabaseUser.email,
-              mfaEnabled: supabaseUser.mfaEnabled,
-              markLogin: false,
-            });
+          const { tenant, principal } = await measureRouteStage("global_total", () =>
+            withGlobalDb((db) =>
+              measureRouteStage("global_work", async () => {
+                const resolvedTenant = await resolveTenantFromRequest({ req, db });
+                const resolvedPrincipal = await upsertAuthPrincipal({
+                  db,
+                  supabaseUserId: supabaseUser.supabaseUserId,
+                  email: supabaseUser.email,
+                  mfaEnabled: supabaseUser.mfaEnabled,
+                  markLogin: false,
+                });
 
-            return { tenant: resolvedTenant, principal: resolvedPrincipal };
-          });
-          metered.tenantId = tenant.tenantId;
+                return { tenant: resolvedTenant, principal: resolvedPrincipal };
+              }),
+            ),
+          );
+          const usage = createTenantRequestUsage(tenant.tenantId);
+          metered.usage = usage;
 
           // Cross-tenant CSRF guard. Runs after tenant resolution because it
           // needs the resolved host to compare against. See assert-same-origin.ts
@@ -349,66 +357,80 @@ export function createTenantRoute<
 
           // Phase 3: second connection, acquired only after the first is back
           // in the pool.
-          const result = await withTenantTx(
-            {
-              tenantId: tenant.tenantId,
-              requestId,
-              allowAnonymousTenantRead: true,
-            },
-            async (tx) => {
-              const membership = await requireActiveMembership({
-                tx,
+          const result = await measureRouteStage("tenant_total", () =>
+            withTenantTx(
+              {
                 tenantId: tenant.tenantId,
-                authPrincipalId: principal.id,
-              });
+                requestId,
+                allowAnonymousTenantRead: true,
+              },
+              (tx) =>
+                measureRouteStage("tenant_work", async () => {
+                  const membership = await requireActiveMembership({
+                    tx,
+                    tenantId: tenant.tenantId,
+                    authPrincipalId: principal.id,
+                  });
 
-              const pipelineArgs = {
-                tx,
-                ctx: {
-                  tenantId: tenant.tenantId,
-                  requestId,
-                  actorMembershipId: membership.membershipId,
-                  ...(idempotencyKey ? { idempotencyKey } : {}),
-                },
-                metadata: config.metadata,
-                params: asParamRecord(params),
-                input,
-                sessionAssuranceLevel: supabaseUser.sessionAssuranceLevel,
-              };
-              // F03: every request, including a replay, uses current resource,
-              // permission, entitlement, and session-MFA evidence.
-              const resource = await authorizeProtectedTenantRoute(pipelineArgs);
-              const runHandler = async () => {
-                await consumeProtectedTenantRouteUsage(pipelineArgs);
-                return config.handler({ tx, ctx: pipelineArgs.ctx, input, resource, params });
-              };
+                  const pipelineArgs = {
+                    tx,
+                    ctx: {
+                      tenantId: tenant.tenantId,
+                      requestId,
+                      actorMembershipId: membership.membershipId,
+                      ...(idempotencyKey ? { idempotencyKey } : {}),
+                    },
+                    metadata: config.metadata,
+                    params: asParamRecord(params),
+                    input,
+                    sessionAssuranceLevel: supabaseUser.sessionAssuranceLevel,
+                  };
+                  // F03: every request, including a replay, uses current resource,
+                  // permission, entitlement, and session-MFA evidence.
+                  const resource = await authorizeProtectedTenantRoute(pipelineArgs);
+                  const runHandler = async () => {
+                    await consumeProtectedTenantRouteUsage(pipelineArgs);
+                    return config.handler({ tx, ctx: pipelineArgs.ctx, input, resource, params });
+                  };
 
-              // M10. The claim is made in this transaction, so the record and
-              // the handler's writes commit together — a handler that throws
-              // leaves no claim, and the client's retry is a first attempt
-              // rather than a key that is permanently poisoned.
-              if (config.metadata.idempotency !== "required" || idempotencyKey === undefined) {
-                return runHandler();
-              }
-
-              return withIdempotency(
-                tx,
-                {
-                  tenantId: tenant.tenantId,
-                  idempotencyKey,
-                  scope: `${req.method} ${pathname}`,
-                  requestFingerprint: fingerprintRequest({
-                    method: req.method,
-                    path: pathname,
-                    body: input,
-                  }),
-                  actorMembershipId: membership.membershipId,
-                  requestId,
-                },
-                runHandler,
-              );
-            },
+                  // M10. The claim is made in this transaction, so the record and
+                  // the handler's writes commit together — a handler that throws
+                  // leaves no claim, and the client's retry is a first attempt
+                  // rather than a key that is permanently poisoned.
+                  const outcome =
+                    config.metadata.idempotency !== "required" || idempotencyKey === undefined
+                      ? await runHandler()
+                      : await withIdempotency(
+                          tx,
+                          {
+                            tenantId: tenant.tenantId,
+                            idempotencyKey,
+                            scope: `${req.method} ${pathname}`,
+                            requestFingerprint: fingerprintRequest({
+                              method: req.method,
+                              path: pathname,
+                              body: input,
+                            }),
+                            actorMembershipId: membership.membershipId,
+                            requestId,
+                          },
+                          runHandler,
+                        );
+                  // A successful operation and its operational request count
+                  // commit atomically. Replays count as requests too, without
+                  // charging entitlement units or executing business work twice.
+                  await measureRouteStage("usage", () =>
+                    usage.append(tx, {
+                      requests: 1,
+                      durationMs: performance.now() - startedAt,
+                    }),
+                  );
+                  return outcome;
+                }),
+            ),
           );
+          usage.committed();
+          delete metered.usage;
 
           // Phase 4: no connection held while validating and serialising output.
           let body: TOutput;
@@ -437,11 +459,14 @@ export function createTenantRoute<
     } finally {
       // Failed requests are counted too: a denied or invalid request still
       // spent server time resolving the tenant and checking permissions.
-      if (metered.tenantId !== null) {
-        await recordTenantUsage(metered.tenantId, {
-          requests: 1,
-          durationMs: performance.now() - startedAt,
-        });
+      const usage = metered.usage;
+      if (usage) {
+        await measureRouteStage("usage", () =>
+          usage.fallback({
+            requests: 1,
+            durationMs: performance.now() - startedAt,
+          }),
+        );
       }
     }
   }

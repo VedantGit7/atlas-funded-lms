@@ -64,12 +64,21 @@ jobs:
 
       # The drill dumps and restores through the container, so it needs the
       # service container's name rather than the local default.
+      - name: Seed synthetic restore data in the disposable CI database
+        run: node scripts/reliability/seed-restore-fixture.mjs
+        env:
+          RESTORE_DRILL_CONTAINER: ${{ job.services.postgres.id }}
+          RESTORE_DRILL_SOURCE_DB: atlas_lms_ci
+          RESTORE_DRILL_USER: atlas
+          RESTORE_DRILL_SEED_FIXTURE: "1"
+
       - name: Backup and restore drill
         run: pnpm release:restore:drill
         env:
           RESTORE_DRILL_CONTAINER: ${{ job.services.postgres.id }}
           RESTORE_DRILL_SOURCE_DB: atlas_lms_ci
-          RESTORE_DRILL_TARGET_DB: atlas_lms_ci_drill
+          RESTORE_DRILL_USER: atlas
+          RESTORE_DRILL_QUIESCED: "1"
 
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: ${{ always() }}

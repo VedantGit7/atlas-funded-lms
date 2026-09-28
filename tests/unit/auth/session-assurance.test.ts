@@ -27,7 +27,11 @@ vi.mock("../../../backend/packages/auth/src/supabase-server", () => {
       mfa: { listFactors: mocks.listFactors },
     },
   });
-  return { createSupabaseAdminServerClient: client, createSupabasePublicServerClient: client };
+  return {
+    createSupabaseAdminServerClient: client,
+    createSupabasePublicServerClient: client,
+    createSupabaseSessionVerificationClient: client,
+  };
 });
 vi.mock("../../../backend/packages/auth/src/public-auth.service", () => ({
   refreshSessionFromRefreshToken: mocks.refresh,
@@ -128,9 +132,16 @@ describe("verified session assurance (F01)", () => {
     });
   });
 
-  it("rejects a thrown verification error", async () => {
+  it("fails closed as unavailable for a thrown verification error", async () => {
     mocks.getClaims.mockRejectedValue(new Error("verification unavailable"));
-    await expect(requireSupabaseUser(request())).rejects.toMatchObject({ code: "AUTH_REQUIRED" });
+    await expect(requireSupabaseUser(request())).rejects.toMatchObject({ status: 503 });
+  });
+
+  it("does not refresh or switch identity when the auth provider is unavailable", async () => {
+    mocks.cookieValues.set(ATLAS_REFRESH_TOKEN_COOKIE, "different-refresh-token");
+    mocks.getUser.mockResolvedValue({ data: { user: null }, error: { status: 503 } });
+    await expect(requireSupabaseUser(request())).rejects.toMatchObject({ status: 503 });
+    expect(mocks.refresh).not.toHaveBeenCalled();
   });
 
   it("does not use claims when the auth service rejects the user", async () => {
@@ -170,5 +181,21 @@ describe("verified session assurance (F01)", () => {
     ).resolves.toMatchObject({ sessionAssuranceLevel: "aal2" });
     expect(mocks.getUser).toHaveBeenCalledWith("refreshed-token");
     expect(mocks.getClaims).toHaveBeenCalledWith("refreshed-token");
+  });
+
+  it("classifies a transport failure while verifying a newly refreshed token", async () => {
+    mocks.cookieValues.set(ATLAS_REFRESH_TOKEN_COOKIE, "refresh-token");
+    mocks.refresh.mockResolvedValue({
+      accessToken: "refreshed-token",
+      refreshToken: "rotated",
+      expiresIn: 3600,
+    });
+    mocks.applyCookies.mockImplementation(async () => {
+      mocks.cookieValues.set(ATLAS_ACCESS_TOKEN_COOKIE, "refreshed-token");
+    });
+    mocks.getClaims.mockRejectedValue(new TypeError("provider connection failed"));
+    await expect(
+      requireSupabaseUser(new Request("https://tenant.example.com/api/v1/me")),
+    ).rejects.toMatchObject({ status: 503, expose: false });
   });
 });

@@ -63,7 +63,8 @@ vi.mock("@atlas/authorization", async (importOriginal) => ({
 vi.mock("../../../backend/packages/api/src/load-resource-ref", () => ({
   loadResourceRefOrDefault: state.resource,
 }));
-vi.mock("../../../backend/packages/api/src/tenant-usage-meter", () => ({
+vi.mock("../../../backend/packages/api/src/tenant-usage-meter", async (original) => ({
+  ...(await original<Record<string, unknown>>()),
   recordTenantUsage: vi.fn(),
 }));
 import { createTenantRoute } from "@atlas/api/create-tenant-route";

@@ -3,6 +3,7 @@
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createSupabasePublicServerClient } from "@atlas/auth/supabase-server";
+import { passwordPolicyRejection } from "@atlas/auth/auth-errors";
 import {
   PublicPasswordResetCompleteSchema,
   PublicPasswordResetRequestSchema,
@@ -70,23 +71,30 @@ export async function completePasswordResetAction(
 
   try {
     const supabase = createSupabasePublicServerClient();
-    await supabase.auth.setSession({
+    const { error: sessionError } = await supabase.auth.setSession({
       access_token: parsed.data.accessToken,
       refresh_token: parsed.data.refreshToken ?? "",
     });
+    if (sessionError) {
+      return { ok: false, message: "Reset link is invalid or expired.", requestId };
+    }
 
     const { error } = await supabase.auth.updateUser({ password: parsed.data.password });
 
     if (error) {
-      return { ok: false, message: "Unable to reset password. Request a new link.", requestId };
+      return {
+        ok: false,
+        message:
+          passwordPolicyRejection(error)?.message ??
+          "Unable to reset password. Request a new link.",
+        requestId,
+      };
     }
-
-    redirect("/login");
   } catch {
     return { ok: false, message: "Unable to reset password. Request a new link.", requestId };
   }
 
-  return { ok: true, message: GENERIC_PASSWORD_RESET_MESSAGE, requestId };
+  redirect("/login");
 }
 
 export async function clearRecoverySessionAction(): Promise<void> {

@@ -81,7 +81,8 @@ vi.mock("@atlas/authorization", async (importOriginal) => ({
     bypassedResourcePredicate: false,
   }),
 }));
-vi.mock("../../../backend/packages/api/src/tenant-usage-meter", () => ({
+vi.mock("../../../backend/packages/api/src/tenant-usage-meter", async (original) => ({
+  ...(await original<Record<string, unknown>>()),
   recordTenantUsage: vi.fn(),
 }));
 

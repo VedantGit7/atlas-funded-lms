@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { TenantLogo } from "@atlas/design-system";
-import { MarketingCtaRuntime } from "../../features/marketing/MarketingCtaRuntime";
+import { TenantLogo } from "@atlas/design-system/components/tenant-logo";
+import { DeferredMarketingCtaRuntime as MarketingCtaRuntime } from "../../features/marketing/DeferredMarketingCtaRuntime";
 import { ShellSkipLink } from "./shared/ShellSkipLink";
 
 type PublicSiteShellProps = {

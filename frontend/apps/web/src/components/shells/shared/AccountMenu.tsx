@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
-import { cn, dropdownPanelEnterEndClassName } from "@atlas/design-system";
+import { cn } from "@atlas/design-system/lib/cn";
+import { dropdownPanelEnterEndClassName } from "@atlas/design-system/lib/dropdown-motion";
 
 export type AccountMenuItem = {
   href: string;

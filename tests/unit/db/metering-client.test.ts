@@ -4,6 +4,7 @@ import {
   appendDurableUsage,
   closeUsageMeteringPool,
   createDurableUsageAppender,
+  createDurableUsageBatchAppender,
   resolveUsagePoolMax,
   USAGE_ACQUIRE_TIMEOUT_MS,
   USAGE_TRANSACTION_TIMEOUT_MS,
@@ -56,17 +57,67 @@ function connection(options: { delayMs?: number; failInsert?: boolean } = {}) {
 }
 
 describe("isolated durable usage connection", () => {
+  it("does not resurrect the pool for a delayed retry after close", async () => {
+    vi.useFakeTimers();
+    const previousPool = globalThis.__atlasUsagePgPool;
+    const previousClosed = globalThis.__atlasUsageMeteringClosed;
+    const db = connection({ failInsert: true });
+    globalThis.__atlasUsagePgPool = db.pool;
+    try {
+      const first = expect(appendDurableUsage(event)).rejects.toThrow("insert failed");
+      await vi.advanceTimersByTimeAsync(5);
+      await first;
+      await closeUsageMeteringPool();
+      await vi.advanceTimersByTimeAsync(25);
+      await expect(appendDurableUsage(event)).rejects.toThrow("closed");
+      expect(globalThis.__atlasUsagePgPool).toBeUndefined();
+      expect(db.connect).toHaveBeenCalledOnce();
+    } finally {
+      await closeUsageMeteringPool();
+      globalThis.__atlasUsagePgPool = previousPool;
+      globalThis.__atlasUsageMeteringClosed = previousClosed;
+    }
+  });
+  it("persists a same-tenant batch in one RLS transaction and rejects mixed tenants before checkout", async () => {
+    const db = connection();
+    const append = createDurableUsageBatchAppender(db.pool);
+    const second = { ...event, id: "018f0000-0000-7000-8000-000000000003" };
+    await append([event, second]);
+    expect(db.connect).toHaveBeenCalledOnce();
+    expect(db.query).toHaveBeenCalledTimes(5);
+    expect(db.query.mock.calls[1]?.[0]).toBe("SET LOCAL ROLE atlas_app");
+    expect(db.query.mock.calls[2]?.[1]).toEqual([event.tenantId, event.id]);
+    const insert = db.query.mock.calls[3];
+    if (!insert) throw new Error("Expected the durable batch insert");
+    expect(insert[0]).toContain("unnest");
+    expect(insert[0]).toContain("ON CONFLICT (id) DO NOTHING");
+    expect(insert[1]).toEqual([
+      [event.id, second.id],
+      event.tenantId,
+      ["2026-09-01", "2026-09-01"],
+      [1, 1],
+      [12.5, 12.5],
+      [0, 0],
+    ]);
+    await expect(append([event, { ...second, tenantId: "another-tenant" }])).rejects.toThrow(
+      "same tenant",
+    );
+    expect(db.connect).toHaveBeenCalledOnce();
+  });
   it("emits optional usage-pool metrics and stops emission on shutdown", async () => {
     vi.useFakeTimers();
     vi.stubEnv("DATABASE_POOL_METRICS", "1");
     const output = vi.spyOn(console, "info").mockImplementation(() => {});
     const previousPool = globalThis.__atlasUsagePgPool;
+    const previousClosed = globalThis.__atlasUsageMeteringClosed;
     const db = connection();
     globalThis.__atlasUsagePgPool = db.pool;
     try {
-      await appendDurableUsage(event);
+      const pending = appendDurableUsage(event);
+      await vi.advanceTimersByTimeAsync(5);
+      await pending;
       await vi.advanceTimersByTimeAsync(60_000);
-      expect(output).toHaveBeenCalledOnce();
+      expect(output).toHaveBeenCalledTimes(2);
       const snapshot = JSON.parse(output.mock.calls[0]?.[0] as string);
       expect(snapshot).toMatchObject({
         event: "db_pool_metrics",
@@ -75,12 +126,20 @@ describe("isolated durable usage connection", () => {
         query: { count: 5, errors: 0 },
       });
       expect(JSON.stringify(snapshot)).not.toContain(event.tenantId);
+      expect(JSON.parse(output.mock.calls[1]?.[0] as string)).toMatchObject({
+        event: "usage_meter_metrics",
+        acknowledgedEvents: 1,
+        acknowledgedRequests: 1,
+        retainedEvents: 0,
+        failedBatchAttempts: 0,
+      });
       await closeUsageMeteringPool();
       await vi.advanceTimersByTimeAsync(60_000);
-      expect(output).toHaveBeenCalledOnce();
+      expect(output).toHaveBeenCalledTimes(3);
     } finally {
       await closeUsageMeteringPool();
       globalThis.__atlasUsagePgPool = previousPool;
+      globalThis.__atlasUsageMeteringClosed = previousClosed;
     }
   });
 
@@ -94,12 +153,12 @@ describe("isolated durable usage connection", () => {
     expect(db.query.mock.calls[2]?.[1]).toEqual([event.tenantId, event.id]);
     expect(statements[3]).toContain("ON CONFLICT (id) DO NOTHING");
     expect(db.query.mock.calls[3]?.[1]).toEqual([
-      event.id,
+      [event.id],
       event.tenantId,
-      "2026-09-01",
-      event.requests,
-      event.durationMs,
-      event.emails,
+      ["2026-09-01"],
+      [event.requests],
+      [event.durationMs],
+      [event.emails],
     ]);
     expect(statements.at(-1)).toBe("COMMIT");
     expect(db.connect).toHaveBeenCalledOnce();

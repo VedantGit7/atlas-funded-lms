@@ -1,0 +1,54 @@
+{
+  "ok": true,
+  "generatedAt": "2026-09-26T09:03:42.607Z",
+  "durationMs": 2704,
+  "evidenceScope": "local-process-and-http-fixture-drill",
+  "candidate": "local-fixture-candidate-v2",
+  "rollback": "local-fixture-previous-v1",
+  "localRestartMs": 593,
+  "localRollbackMs": 804,
+  "fixtureProcessIds": {
+    "initial": 9972,
+    "restarted": 26672,
+    "previous": 15952
+  },
+  "heartbeatReceiverStatuses": [
+    503,
+    204
+  ],
+  "hostedDeploymentProven": false,
+  "productionArtifactsUsed": false,
+  "databaseRecoveryProven": false,
+  "providerAlertDeliveryProven": false,
+  "humanAcknowledgementProven": false,
+  "note": "Actual local process kill/restart and replacement; synthetic release endpoint and sweep state. Uses real heartbeat sender and worker health implementation. No provider or human alerts sent.",
+  "checks": [
+    {
+      "name": "candidate.observed_and_wrong_rollback_rejected",
+      "ok": true
+    },
+    {
+      "name": "worker.startup_grace_without_completed_sweep",
+      "ok": true,
+      "implication": "200 does not prove completed work"
+    },
+    {
+      "name": "real_worker_health_stall_recovery_drain",
+      "ok": true,
+      "sweepSource": "simulated state; no worker jobs run"
+    },
+    {
+      "name": "real_heartbeat_sender_failure_recovery_and_redaction",
+      "ok": true,
+      "delivery": "loopback HTTP receipts only"
+    },
+    {
+      "name": "local_process_kill_restart_on_same_origin",
+      "ok": true
+    },
+    {
+      "name": "local_fixture_identity_rollback_on_same_origin",
+      "ok": true
+    }
+  ]
+}

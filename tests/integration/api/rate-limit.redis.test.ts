@@ -55,6 +55,26 @@ describe.skipIf(!redisUrl)("F04 isolated real Redis", () => {
     );
     expect(hits.every((hit) => hit.resetAt > Date.now())).toBe(true);
   });
+  it("accepts the first cold hit with the production offline-queue-disabled options", async () => {
+    if (!redisUrl) throw new Error("F04_TEST_REDIS_URL is required for this integration suite");
+    const cold = new Redis(redisUrl, {
+      lazyConnect: false,
+      connectTimeout: 2000,
+      commandTimeout: 1000,
+      enableOfflineQueue: false,
+      maxRetriesPerRequest: 1,
+    });
+    cold.on("error", () => {});
+    try {
+      const store = new RedisRateLimitStore(cold, { prefix: `atlas:f04:cold:${randomUUID()}:` });
+      const hits = await Promise.all(Array.from({ length: 10 }, () => store.hit("cold", 60000)));
+      expect(hits.map((hit) => hit.count).sort((x, y) => x - y)).toEqual(
+        Array.from({ length: 10 }, (_, index) => index + 1),
+      );
+    } finally {
+      await cold.quit().catch(() => undefined);
+    }
+  });
   it("preserves the public quota across application store instances", async () => {
     const args = {
       req: new Request("https://example.test/login", {

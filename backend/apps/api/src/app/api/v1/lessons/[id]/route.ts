@@ -29,10 +29,10 @@ export const GET = createTenantRoute<
   input: lessonDetailQuerySchema,
   // Studio schema must be first so studio-only fields are not stripped.
   output: z.union([studioLessonDetailResponseSchema, learnerLessonDetailResponseSchema]),
-  handler: async ({ tx, ctx, params, input }) => {
+  handler: async ({ tx, ctx, params, input, resource }) => {
     const lessonId = params["id"];
     if (!lessonId) throw new Error("Missing lesson id");
-    return await getLesson(tx, ctx, lessonId, input);
+    return await getLesson(tx, ctx, lessonId, input, resource);
   },
 });
 

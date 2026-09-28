@@ -1,7 +1,7 @@
 {
-  "maxLearnerFirstLoadKb": 404.1962890625,
-  "worstRoute": "/(public)/diagnostic/result",
-  "sharedRootKb": 129.6,
+  "maxLearnerFirstLoadKb": 204.4345703125,
+  "worstRoute": "/(learner)/hall-of-fame",
+  "sharedRootKb": 129.2,
   "targetKb": 150,
   "note": "Ratchet baseline for H16. May only decrease. Regenerate with `pnpm ci:learner-bundle-boundary --update-baseline` after a real reduction."
 }

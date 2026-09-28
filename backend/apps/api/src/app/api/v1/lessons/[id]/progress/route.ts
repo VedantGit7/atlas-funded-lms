@@ -19,9 +19,9 @@ export const POST = createTenantRoute<
   params: uuidParamSchema,
   body: lessonProgressBodySchema,
   output: lessonProgressResponseSchema,
-  handler: async ({ tx, ctx, params, input }) => {
+  handler: async ({ tx, ctx, params, input, resource }) => {
     const lessonId = params["id"];
     if (!lessonId) throw new Error("Missing lesson id");
-    return await recordLessonProgress(tx, ctx, lessonId, input);
+    return await recordLessonProgress(tx, ctx, lessonId, input, resource);
   },
 });

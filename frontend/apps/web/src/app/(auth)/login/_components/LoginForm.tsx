@@ -3,10 +3,14 @@
 import { useActionState, useEffect, startTransition, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import {
-  PublicLoginRequestSchema,
-  PublicMfaVerifyRequestSchema,
-} from "@atlas/contracts/domain-identity/schemas/public-auth";
+const loadPublicLoginRequestSchema = () =>
+  import("@atlas/contracts/domain-identity/schemas/public-auth").then(
+    (module) => module.PublicLoginRequestSchema,
+  );
+const loadPublicMfaVerifyRequestSchema = () =>
+  import("@atlas/contracts/domain-identity/schemas/public-auth").then(
+    (module) => module.PublicMfaVerifyRequestSchema,
+  );
 import {
   Form,
   FormControl,
@@ -15,7 +19,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useZodForm } from "@/lib/forms/use-zod-form";
+import { useLazyZodForm } from "@/lib/forms/use-lazy-zod-form";
 import { HiddenFormField } from "@/lib/forms/hidden-form-field";
 import { valuesToFormData } from "@/lib/forms/values-to-form-data";
 import { loginAction, type LoginActionState } from "../_actions/login-action";
@@ -253,8 +257,9 @@ export function LoginForm() {
     }
   }, [mfaState.ok, mfaState.destination]);
 
-  const loginForm = useZodForm({
-    schema: PublicLoginRequestSchema,
+  const loginForm = useLazyZodForm({
+    schema: loadPublicLoginRequestSchema,
+    errorField: "email",
     defaultValues: {
       email: "",
       password: "",
@@ -262,8 +267,9 @@ export function LoginForm() {
     },
   });
 
-  const mfaForm = useZodForm({
-    schema: PublicMfaVerifyRequestSchema,
+  const mfaForm = useLazyZodForm({
+    schema: loadPublicMfaVerifyRequestSchema,
+    errorField: "code",
     defaultValues: {
       code: "",
     },
@@ -347,7 +353,7 @@ export function LoginForm() {
                     onChange={field.onChange}
                     length={6}
                     autoFocus
-                    disabled={mfaPending}
+                    disabled={mfaPending || mfaForm.formState.isSubmitting}
                     invalid={!mfaRetried && Boolean(mfaState.message && !mfaState.ok)}
                     ariaLabel="Authenticator verification code"
                   />
@@ -372,11 +378,11 @@ export function LoginForm() {
 
           <button
             type="submit"
-            disabled={mfaPending}
+            disabled={mfaPending || mfaForm.formState.isSubmitting}
             className={`flex items-center justify-center gap-2 ${primaryButtonClass}`}
           >
-            {mfaPending ? "Verifying..." : "Verify code"}
-            {mfaPending ? null : <ArrowRightIcon />}
+            {mfaPending || mfaForm.formState.isSubmitting ? "Verifying..." : "Verify code"}
+            {mfaPending || mfaForm.formState.isSubmitting ? null : <ArrowRightIcon />}
           </button>
         </form>
 
@@ -539,8 +545,12 @@ export function LoginForm() {
           </p>
         ) : null}
 
-        <button type="submit" disabled={loginPending} className={primaryButtonClass}>
-          {loginPending ? "Signing in..." : "Sign In"}
+        <button
+          type="submit"
+          disabled={loginPending || loginForm.formState.isSubmitting}
+          className={primaryButtonClass}
+        >
+          {loginPending || loginForm.formState.isSubmitting ? "Signing in..." : "Sign In"}
         </button>
       </form>
 

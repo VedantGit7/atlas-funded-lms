@@ -11,7 +11,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { Bell, Loader2, Settings } from "lucide-react";
-import { cn, dropdownPanelEnterEndClassName } from "@atlas/design-system";
+import { cn } from "@atlas/design-system/lib/cn";
+import { dropdownPanelEnterEndClassName } from "@atlas/design-system/lib/dropdown-motion";
 import { ClientApiError, clientApi } from "../../../lib/client-api";
 import {
   formatNotificationTimestamp,

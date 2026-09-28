@@ -151,13 +151,18 @@ export function defaultRetentionTasks(batchLimit = 25): RetentionTask[] {
               await storage.deleteObject({ bucket, key: objectKey });
             }),
         );
+        // Report partial failure after the transaction commits successful row
+        // deletions. Failed objects keep their references for the next sweep.
+        if (outcome.failed)
+          throw new Error(
+            `${outcome.failed} proctoring media deletion(s) failed; references retained for retry.`,
+          );
         return outcome.deleted;
       },
     },
     {
       // A no-op for every tenant that has not opted in, which is the default.
-      // The sweep runs for all tenants; deletion is only ever a tenant's own
-      // choice.
+      // This task visits active tenants only; deletion follows their setting.
       name: "attribution-events-purge",
       run: async ({ tenantId, requestId }) =>
         withTenantTx({ tenantId, requestId, allowAnonymousTenantRead: true }, async (tx) =>

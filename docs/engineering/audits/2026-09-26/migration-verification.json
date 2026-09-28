@@ -1,0 +1,302 @@
+{
+  "checkedAt": "2026-09-26T09:02:16.603Z",
+  "target": {
+    "container": "atlas-postgres",
+    "database": "atlas_lms_dev",
+    "user": "atlas"
+  },
+  "reference": {
+    "container": "atlas-ops-drill-20260926",
+    "database": "atlas_lms_ops_source",
+    "user": "atlas"
+  },
+  "scope": "Five historical migration gaps; current catalog comparison is not a historical application attestation.",
+  "provenanceVerified": false,
+  "verified": false,
+  "currentCatalogMatchesReference": true,
+  "migrations": [
+    {
+      "name": "20260724120000_059_reports_insights_domains",
+      "ledger": [
+        {
+          "migration_name": "20260724120000_059_reports_insights_domains",
+          "checksum": "4392e9569fc9d14229f08a082fef70ee00c720106d2045ba4451c64b5b906799",
+          "started_at": "2026-07-24T11:47:28.743752+00:00",
+          "finished_at": "2026-07-24T11:47:29.235297+00:00",
+          "rolled_back_at": null,
+          "applied_steps_count": 1
+        }
+      ],
+      "checks": [
+        {
+          "status": "content-mismatch",
+          "hashes": {
+            "raw": "6b323fe3c5eef42568df0ac39d320e01d43ada2deeb5856c6a5090f457713257",
+            "lf": "329edbc6782c42e00582ff0bc68305e49b9964f9eeb00a40b226df612fc6294d",
+            "crlf": "6b323fe3c5eef42568df0ac39d320e01d43ada2deeb5856c6a5090f457713257"
+          },
+          "recoveredPrefix": {
+            "checksum": "4392e9569fc9d14229f08a082fef70ee00c720106d2045ba4451c64b5b906799",
+            "lineEnding": "CRLF",
+            "lines": 515,
+            "byteLength": 19109,
+            "appendedSql": "\n-- Grants (new tables do not inherit prior GRANT ON ALL TABLES)\nGRANT SELECT, INSERT, UPDATE, DELETE ON report_definitions TO atlas_app, atlas_worker, atlas_platform;\nGRANT SELECT, INSERT, UPDATE, DELETE ON report_schedules TO atlas_app, atlas_worker, atlas_platform;\nGRANT SELECT, INSERT, UPDATE, DELETE ON report_runs TO atlas_app, atlas_worker, atlas_platform;\nGRANT SELECT, INSERT, UPDATE, DELETE ON at_risk_rules TO atlas_app, atlas_worker, atlas_platform;\nGRANT SELECT, INSERT, UPDATE, DELETE ON at_risk_alerts TO atlas_app, atlas_worker, atlas_platform;\nGRANT SELECT, INSERT, UPDATE, DELETE ON device_sessions TO atlas_app, atlas_worker, atlas_platform;\nGRANT SELECT, INSERT, UPDATE, DELETE ON payment_orders TO atlas_app, atlas_worker, atlas_platform;\nGRANT SELECT, INSERT, UPDATE, DELETE ON batches TO atlas_app, atlas_worker, atlas_platform;\nGRANT SELECT, INSERT, UPDATE, DELETE ON batch_memberships TO atlas_app, atlas_worker, atlas_platform;\nGRANT SELECT, INSERT, UPDATE, DELETE ON polls TO atlas_app, atlas_worker, atlas_platform;\nGRANT SELECT, INSERT, UPDATE, DELETE ON poll_options TO atlas_app, atlas_worker, atlas_platform;\nGRANT SELECT, INSERT, UPDATE, DELETE ON poll_responses TO atlas_app, atlas_worker, atlas_platform;\nGRANT SELECT, INSERT, UPDATE, DELETE ON sales_attribution_events TO atlas_app, atlas_worker, atlas_platform;\nGRANT SELECT, INSERT, UPDATE, DELETE ON custom_field_definitions TO atlas_app, atlas_worker, atlas_platform;\nGRANT SELECT, INSERT, UPDATE, DELETE ON custom_field_values TO atlas_app, atlas_worker, atlas_platform;\nGRANT SELECT, INSERT, UPDATE, DELETE ON zoom_connections TO atlas_app, atlas_worker, atlas_platform;\nGRANT SELECT, INSERT, UPDATE, DELETE ON zoom_meetings TO atlas_app, atlas_worker, atlas_platform;\nGRANT SELECT, INSERT, UPDATE, DELETE ON zoom_meeting_participants TO atlas_app, atlas_worker, atlas_platform;\nGRANT SELECT, INSERT, UPDATE, DELETE ON live_sessions TO atlas_app, atlas_worker, atlas_platform;\nGRANT SELECT, INSERT, UPDATE, DELETE ON live_attendance TO atlas_app, atlas_worker, atlas_platform;\nGRANT SELECT, INSERT, UPDATE, DELETE ON messenger_conversations TO atlas_app, atlas_worker, atlas_platform;\nGRANT SELECT, INSERT, UPDATE, DELETE ON messenger_messages TO atlas_app, atlas_worker, atlas_platform;\nGRANT SELECT, INSERT, UPDATE, DELETE ON bi_export_jobs TO atlas_app, atlas_worker, atlas_platform;\n"
+          },
+          "path": "backend/prisma/migrations/20260724120000_059_reports_insights_domains/migration.sql",
+          "reachableAndReflogBlobChecks": [
+            {
+              "object": "6120a7a4766df507873e43dead646f2332b260b0",
+              "status": "content-mismatch",
+              "hashes": {
+                "raw": "329edbc6782c42e00582ff0bc68305e49b9964f9eeb00a40b226df612fc6294d",
+                "lf": "329edbc6782c42e00582ff0bc68305e49b9964f9eeb00a40b226df612fc6294d",
+                "crlf": "6b323fe3c5eef42568df0ac39d320e01d43ada2deeb5856c6a5090f457713257"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "20260803140000_083_payment_report_fields",
+      "ledger": [
+        {
+          "migration_name": "20260803140000_083_payment_report_fields",
+          "checksum": "manual-apply-payment-report-fields",
+          "started_at": "2026-08-03T08:45:45.11444+00:00",
+          "finished_at": "2026-08-03T08:45:45.11444+00:00",
+          "rolled_back_at": null,
+          "applied_steps_count": 1
+        }
+      ],
+      "checks": [
+        {
+          "status": "invalid-ledger-checksum",
+          "hashes": {
+            "raw": "e2e7e6263d2057d103334cfd83fba95c65e28c7c56b9ff0d33e2c44d2ad23f06",
+            "lf": "422a4ab6c39da7f32f0978962f3cce7387e1a65be9da680b7a726a9c4b76805a",
+            "crlf": "e2e7e6263d2057d103334cfd83fba95c65e28c7c56b9ff0d33e2c44d2ad23f06"
+          },
+          "recoveredPrefix": null,
+          "path": "backend/prisma/migrations/20260803140000_083_payment_report_fields/migration.sql",
+          "reachableAndReflogBlobChecks": [
+            {
+              "object": "5ed7ce14e3df0f3abf91237a7e436feaca6910aa",
+              "status": "invalid-ledger-checksum",
+              "hashes": {
+                "raw": "422a4ab6c39da7f32f0978962f3cce7387e1a65be9da680b7a726a9c4b76805a",
+                "lf": "422a4ab6c39da7f32f0978962f3cce7387e1a65be9da680b7a726a9c4b76805a",
+                "crlf": "e2e7e6263d2057d103334cfd83fba95c65e28c7c56b9ff0d33e2c44d2ad23f06"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "20260803160000_084_learner_product_types",
+      "ledger": [
+        {
+          "migration_name": "20260803160000_084_learner_product_types",
+          "checksum": "",
+          "started_at": "2026-08-03T09:14:28.74074+00:00",
+          "finished_at": "2026-08-03T09:14:28.74074+00:00",
+          "rolled_back_at": null,
+          "applied_steps_count": 1
+        }
+      ],
+      "checks": [
+        {
+          "status": "invalid-ledger-checksum",
+          "hashes": {
+            "raw": "66596fe2a97fce881bcec4edbafb565c18170700a087b3ff840052cb7bb545fd",
+            "lf": "94a0c12c7725de0016831e1284da934686d41ca15979aaedec43f52799468563",
+            "crlf": "66596fe2a97fce881bcec4edbafb565c18170700a087b3ff840052cb7bb545fd"
+          },
+          "recoveredPrefix": null,
+          "path": "backend/prisma/migrations/20260803160000_084_learner_product_types/migration.sql",
+          "reachableAndReflogBlobChecks": [
+            {
+              "object": "3a0c2de2db5f15e4e789e94d7ec0a4b8d655cf96",
+              "status": "invalid-ledger-checksum",
+              "hashes": {
+                "raw": "94a0c12c7725de0016831e1284da934686d41ca15979aaedec43f52799468563",
+                "lf": "94a0c12c7725de0016831e1284da934686d41ca15979aaedec43f52799468563",
+                "crlf": "66596fe2a97fce881bcec4edbafb565c18170700a087b3ff840052cb7bb545fd"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "20260803170000_085_batch_report_fields",
+      "ledger": [
+        {
+          "migration_name": "20260803170000_085_batch_report_fields",
+          "checksum": "",
+          "started_at": "2026-08-03T09:46:48.372856+00:00",
+          "finished_at": "2026-08-03T09:46:48.372856+00:00",
+          "rolled_back_at": null,
+          "applied_steps_count": 1
+        }
+      ],
+      "checks": [
+        {
+          "status": "invalid-ledger-checksum",
+          "hashes": {
+            "raw": "620153eaa270a2c73cfe17b7f807b03fb5a24c2c610bcb4b013e12ceee08dfb6",
+            "lf": "fbb560e83c749968ad01059bb1759660defe72eee6de21dcc874598cf59fca52",
+            "crlf": "620153eaa270a2c73cfe17b7f807b03fb5a24c2c610bcb4b013e12ceee08dfb6"
+          },
+          "recoveredPrefix": null,
+          "path": "backend/prisma/migrations/20260803170000_085_batch_report_fields/migration.sql",
+          "reachableAndReflogBlobChecks": [
+            {
+              "object": "d7689e358ab6e0302c36663d229e4a4436c66582",
+              "status": "invalid-ledger-checksum",
+              "hashes": {
+                "raw": "fbb560e83c749968ad01059bb1759660defe72eee6de21dcc874598cf59fca52",
+                "lf": "fbb560e83c749968ad01059bb1759660defe72eee6de21dcc874598cf59fca52",
+                "crlf": "620153eaa270a2c73cfe17b7f807b03fb5a24c2c610bcb4b013e12ceee08dfb6"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "20260803180000_086_poll_report_fields",
+      "ledger": [
+        {
+          "migration_name": "20260803180000_086_poll_report_fields",
+          "checksum": "manual-apply",
+          "started_at": "2026-08-03T10:14:59.877966+00:00",
+          "finished_at": "2026-08-03T10:14:59.877966+00:00",
+          "rolled_back_at": null,
+          "applied_steps_count": 1
+        }
+      ],
+      "checks": [
+        {
+          "status": "invalid-ledger-checksum",
+          "hashes": {
+            "raw": "e94de845e1be88f7194b29f8d46b605500a9b496ae79aecf0cd2d640c2371580",
+            "lf": "09e08110d8e8374959729e48eebbec061bc04e4799a8a8dc95c8b1af53ca505d",
+            "crlf": "e94de845e1be88f7194b29f8d46b605500a9b496ae79aecf0cd2d640c2371580"
+          },
+          "recoveredPrefix": null,
+          "path": "backend/prisma/migrations/20260803180000_086_poll_report_fields/migration.sql",
+          "reachableAndReflogBlobChecks": [
+            {
+              "object": "8cb974e14b114df8508dc39cdc09d8b8764a11de",
+              "status": "invalid-ledger-checksum",
+              "hashes": {
+                "raw": "09e08110d8e8374959729e48eebbec061bc04e4799a8a8dc95c8b1af53ca505d",
+                "lf": "09e08110d8e8374959729e48eebbec061bc04e4799a8a8dc95c8b1af53ca505d",
+                "crlf": "e94de845e1be88f7194b29f8d46b605500a9b496ae79aecf0cd2d640c2371580"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "tables": [
+    "at_risk_alerts",
+    "at_risk_rules",
+    "batch_memberships",
+    "batches",
+    "bi_export_jobs",
+    "bundle_enrollments",
+    "bundle_items",
+    "bundles",
+    "custom_field_definitions",
+    "custom_field_values",
+    "device_sessions",
+    "learner_subscription_enrollments",
+    "learner_subscription_plan_items",
+    "learner_subscription_plans",
+    "live_attendance",
+    "live_sessions",
+    "messenger_conversations",
+    "messenger_messages",
+    "mock_test_enrollments",
+    "mock_tests",
+    "payment_instalment_plans",
+    "payment_instalments",
+    "payment_orders",
+    "poll_options",
+    "poll_responses",
+    "polls",
+    "report_definitions",
+    "report_runs",
+    "report_schedules",
+    "sales_attribution_events",
+    "test_series",
+    "test_series_enrollments",
+    "test_series_item_progress",
+    "test_series_items",
+    "zoom_connections",
+    "zoom_meeting_participants",
+    "zoom_meetings"
+  ],
+  "catalogCoverage": {
+    "expectedTables": 37,
+    "targetComplete": true,
+    "referenceComplete": true
+  },
+  "comparison": {
+    "matches": true,
+    "categories": {
+      "tables": {
+        "referenceOnly": [],
+        "targetOnly": []
+      },
+      "columns": {
+        "referenceOnly": [],
+        "targetOnly": []
+      },
+      "constraints": {
+        "referenceOnly": [],
+        "targetOnly": []
+      },
+      "indexes": {
+        "referenceOnly": [],
+        "targetOnly": []
+      },
+      "policies": {
+        "referenceOnly": [],
+        "targetOnly": []
+      },
+      "grants": {
+        "referenceOnly": [],
+        "targetOnly": []
+      },
+      "triggers": {
+        "referenceOnly": [],
+        "targetOnly": []
+      }
+    }
+  },
+  "targetCatalogSha256": "bc44198bd6f0a8521315770f01afcedf08a1c964f5c96da69ee40be789146d32",
+  "referenceCatalogSha256": "bc44198bd6f0a8521315770f01afcedf08a1c964f5c96da69ee40be789146d32",
+  "targetCatalogCounts": {
+    "tables": 37,
+    "columns": 413,
+    "constraints": 61,
+    "indexes": 122,
+    "policies": 74,
+    "grants": 777,
+    "triggers": 1
+  },
+  "backfillCandidates": {
+    "rows_before_083": 0,
+    "missing_coupon_with_metadata": 0,
+    "missing_type_with_metadata": 0,
+    "missing_gateway_with_metadata": 0,
+    "missing_title_with_metadata": 0,
+    "missing_title_with_matching_course": 0
+  },
+  "historicalBackfillExecution": "unverifiable-without-historical-data-or-application-records"
+}

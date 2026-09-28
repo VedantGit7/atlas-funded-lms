@@ -30,6 +30,18 @@ The administration UI can display the recorded result. After removing access, th
 
 ## Deployment and rollback
 
+### Current retention operations and monitoring
+
+F15 export-file cleanup queues storage deletion, preserves the original provider/bucket identity, and clears references only after confirmed object absence. It includes inactive/deleted tenants; F22 usage draining also includes them. Tenant replay, proctoring-media and attribution purge tasks still run only for active, non-deleted tenants. Do not extend their destructive scope on the assumption that an existing software default is an approved policy. Run-record metadata retention settings still have no age-based deletion job.
+
+Proctoring deletion failures are exposed as `worker.sweep.processor_failed` for `proctoring-media-purge`. Successful row deletions commit before a partial failure is reported; failed objects retain their rows for retry, and the sweep continues with other tasks. Partial batches are omitted from the successful-purge counter, so use it as a progress indicator, not as a complete deletion receipt. Configure and verify alerts on the deployed worker; local tests do not prove provider monitoring.
+
+Proctoring cleanup currently uses the configured storage provider/bucket rather than a persisted original location and does not check object absence after deletion. Before relying on media cleanup across a storage configuration change, reconcile original locations and implement verified cleanup. Do not discard references or mark media erased on the strength of a successful request to a different/unknown storage location.
+
+There is still no enforced hold registry or fail-closed hold lookup covering all purge entry points. Record the hold authority, scope, review/release rules and affected data domains before implementing it. A prospective hold must also account for manual cleanup and existing queued work. Unknown hold status or a failed lookup must block the relevant destructive action in that future design; an unused callback alone is not a control.
+
+### Original F14 rollout procedure
+
 Apply migration `20260920030000_111_privacy_outcomes` through the normal reviewed migration process **before** deploying the new API. It changes an existing tenant-isolated table and preserves existing RLS/grants. No production or development application database migration was executed during F14 verification. The isolated test applies it only to disposable tables in the local maintenance database.
 
 Deploy compatible API/UI together. Verify an old idempotency retry, a new access-removal request, retained outcome display, a legacy success row, both partial exports and owner/cross-tenant denial. Verify from another school that the same user's membership/login remains valid. Code rollback can leave the nullable column intact; do not drop the evidence column or erase recorded outcomes as a rollback step.

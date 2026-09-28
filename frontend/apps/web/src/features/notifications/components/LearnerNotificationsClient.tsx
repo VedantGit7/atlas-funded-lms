@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
-import { motion, useReducedMotion } from "motion/react";
+import { motion, useReducedMotion } from "../../../components/motion/animation-boundary";
 import { Bell, ChevronRight, Search, Settings, X } from "lucide-react";
 import { ClientApiError, clientApi } from "../../../lib/client-api";
 import {

@@ -1,15 +1,47 @@
-import { createTenantResourceRef } from "@atlas/authorization";
+import { createTenantResourceRef, type ResourceRef } from "@atlas/authorization";
 import type { TenantTx } from "@atlas/db";
 import { findModuleWithCourse } from "./course-authoring.repository";
 import { courseNotFound, moduleNotFound } from "./courses.errors";
 import { findCourseAuthProjection, findEnrollmentForMembership } from "./courses.repository";
 import { findLessonWithModuleAndCourse } from "../lessons/lessons.repository";
 import { lessonNotFound } from "../lessons/lessons.errors";
+import { createResourceProjection } from "../resource-projection";
 
 type LoaderCtx = {
   tenantId: string;
   actorMembershipId: string;
 };
+
+const courseProjections = createResourceProjection<{
+  course: NonNullable<Awaited<ReturnType<typeof findCourseAuthProjection>>>;
+  enrollment: Awaited<ReturnType<typeof findEnrollmentForMembership>>;
+}>();
+const lessonProjections = createResourceProjection<{
+  lesson: NonNullable<Awaited<ReturnType<typeof findLessonWithModuleAndCourse>>>;
+  enrollment: Awaited<ReturnType<typeof findEnrollmentForMembership>>;
+}>();
+
+export function getLoadedCourseProjection(
+  tx: TenantTx,
+  ctx: LoaderCtx,
+  courseId: string,
+  resource?: ResourceRef,
+) {
+  const loaded = courseProjections.get(resource, tx, ctx);
+  return loaded?.course.id === courseId && resource?.id === courseId ? loaded : undefined;
+}
+
+export function getLoadedLessonProjection(
+  tx: TenantTx,
+  ctx: LoaderCtx,
+  lessonId: string,
+  resource?: ResourceRef,
+) {
+  const loaded = lessonProjections.get(resource, tx, ctx);
+  return loaded?.lesson.id === lessonId && resource?.id === loaded.lesson.courseId
+    ? loaded
+    : undefined;
+}
 
 export async function loadCourseResourceRef(args: {
   tx: TenantTx;
@@ -51,13 +83,15 @@ export async function loadCourseResourceRef(args: {
     relationships["instructorOfCourse"] = args.ctx.actorMembershipId;
   }
 
-  return createTenantResourceRef({
+  const resource = createTenantResourceRef({
     type: "course",
     id: course.id,
     tenantId: args.ctx.tenantId,
     ownerMembershipId: course.createdByMembershipId,
     relationships,
   });
+  courseProjections.set(resource, args.tx, args.ctx, { course, enrollment });
+  return resource;
 }
 
 export async function loadCourseCatalogResourceRef(args: { ctx: LoaderCtx }) {
@@ -138,12 +172,17 @@ export async function loadLessonParentCourseResourceRef(args: {
     throw lessonNotFound();
   }
 
-  return loadCourseResourceRef({
+  const resource = await loadCourseResourceRef({
     tx: args.tx,
     ctx: args.ctx,
     courseId: lesson.courseId,
     requirePublished: args.requirePublished ?? lesson.courseStatus === "PUBLISHED",
   });
+  const course = getLoadedCourseProjection(args.tx, args.ctx, lesson.courseId, resource);
+  if (course) {
+    lessonProjections.set(resource, args.tx, args.ctx, { lesson, enrollment: course.enrollment });
+  }
+  return resource;
 }
 
 export async function loadModuleLessonsResourceRef(args: {

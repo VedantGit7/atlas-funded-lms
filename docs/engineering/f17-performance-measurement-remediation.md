@@ -1,5 +1,7 @@
 # F17 — Performance measurements and a smaller learner bundle
 
+Latest work: [28 September Step 5 verification](step5-verification-2026-09-28.md). The corrected short local load run has zero request errors and exact durable usage reconciliation, but latency still fails. The user selected USD 0/local testing; hosted acceptance remains open. The measurements below remain historical.
+
 Date: 20 September 2026. Source: working tree based on `ca8c0f1e7e69780b4e2ddc2a1136907a2e47c350`, including the preceding F01–F16 remediations. Changes are local, not deployed.
 
 ## Status and capacity decision

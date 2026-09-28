@@ -1,6 +1,6 @@
 "use client";
 
-import * as Sentry from "@sentry/nextjs";
+import { reportClientError } from "../../observability/report-client-error";
 import { useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -19,7 +19,7 @@ export function RouteErrorFallback({
   description = "An unexpected error occurred. Try again.",
 }: RouteErrorFallbackProps) {
   useEffect(() => {
-    Sentry.captureException(error);
+    void reportClientError(error);
   }, [error]);
 
   const requestId =

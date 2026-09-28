@@ -1,6 +1,6 @@
 import { performance } from "node:perf_hooks";
 import { setTimeout as delay } from "node:timers/promises";
-import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
+import { readFileSync, writeFileSync, mkdirSync, appendFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { randomUUID } from "node:crypto";
@@ -10,13 +10,15 @@ export function validateConfig(c, approvedOrigin = process.env.PERF_APPROVED_STA
   const origin = new URL(c.origin);
   if (origin.origin !== c.origin || origin.username || origin.password)
     throw new Error("An exact credential-free origin is required");
-  if (c.mode === "local-smoke") {
+  if (c.mode === "local-smoke" || c.mode === "local-endurance") {
     if (
       origin.protocol !== "http:" ||
       origin.hostname !== "fundedbeyond.localhost" ||
       origin.port !== "3100"
     )
       throw new Error("Local smoke requires the isolated F16 frontend origin on port 3100");
+    if (c.mode === "local-endurance" && c.disposableFixtures !== true)
+      throw new Error("Local endurance requires explicitly disposable fixtures");
   } else if (
     c.mode !== "staging" ||
     origin.protocol !== "https:" ||
@@ -30,13 +32,30 @@ export function validateConfig(c, approvedOrigin = process.env.PERF_APPROVED_STA
   if (typeof c.build !== "string" || !c.build.trim() || c.build.length > 120)
     throw new Error("Build provenance is required");
   const maxUsers = c.mode === "local-smoke" ? 5 : 200;
-  const maxSeconds = c.mode === "local-smoke" ? 60 : 3600;
+  const maxSeconds = c.mode === "local-smoke" ? 60 : 7200;
   if (!integer(c.pacingMs, 100, 60000) || !integer(c.timeoutMs, 100, 120000))
     throw new Error("Invalid pacing/timeout");
+  if (!integer(c.drainMs ?? 0, 0, 120000))
+    throw new Error("Phase drain must be bounded between zero and two minutes");
+  if (!integer(c.refreshIntervalMs ?? 300000, 1000, 900000))
+    throw new Error("Refresh interval must be between one second and fifteen minutes");
+  if (!integer(c.setupPacingMs ?? c.pacingMs, 100, 60000)) throw new Error("Invalid setup pacing");
+  if (
+    c.fixtureProxyToken !== undefined &&
+    (c.mode !== "local-endurance" || !/^[a-zA-Z0-9_-]{32,128}$/.test(c.fixtureProxyToken))
+  )
+    throw new Error("Fixture proxy credentials require isolated local endurance mode");
+  if (
+    c.slo !== undefined &&
+    (!integer(c.slo?.requestP95Ms, 1, 120000) || !integer(c.slo?.journeyP95Ms, 1, 600000))
+  )
+    throw new Error("Explicit positive request and journey latency gates are required");
   if (
     !Array.isArray(c.phases) ||
-    c.phases.length !== 3 ||
-    c.phases.map((p) => p.name).join() !== "warmup,sustained,burst" ||
+    !["warmup,sustained,burst", "warmup,sustained,burst,endurance"].includes(
+      c.phases.map((p) => p.name).join(),
+    ) ||
+    (c.mode === "local-smoke" && c.phases.length !== 3) ||
     c.phases.some((p) => !integer(p.users, 1, maxUsers) || !integer(p.seconds, 1, maxSeconds))
   )
     throw new Error("Require bounded warmup, sustained and burst phases");
@@ -88,6 +107,68 @@ export function summarize(samples) {
   };
 }
 
+// Fixed storage regardless of run length. Integer upper bounds grow by ~1%;
+// reported percentiles are conservative bucket bounds, never exact samples.
+const latencyBounds = [0];
+for (let bound = 1; bound < 7200000; bound = Math.ceil(bound * 1.01)) latencyBounds.push(bound);
+latencyBounds.push(Infinity);
+export function createSummary() {
+  const all = new Float64Array(latencyBounds.length);
+  const successful = new Float64Array(latencyBounds.length);
+  const statuses = new Float64Array(600);
+  let attempts = 0,
+    successes = 0,
+    max = 0,
+    successMax = 0;
+  const distribution = (buckets, count, maximum) => {
+    if (!count) return null;
+    const percentile = (fraction) => {
+      let sum = 0;
+      for (let i = 0; i < buckets.length; i++) {
+        sum += buckets[i];
+        if (sum >= Math.ceil(count * fraction)) return Math.min(latencyBounds[i], maximum);
+      }
+      return maximum;
+    };
+    return { p50: percentile(0.5), p95: percentile(0.95), p99: percentile(0.99), max: maximum };
+  };
+  return {
+    storageBins: all.length + successful.length + statuses.length,
+    add(sample) {
+      if (!Number.isFinite(sample.ms) || sample.ms < 0) throw new Error("Invalid latency sample");
+      let low = 0,
+        high = latencyBounds.length - 1;
+      while (low < high) {
+        const middle = Math.floor((low + high) / 2);
+        if (latencyBounds[middle] < sample.ms) low = middle + 1;
+        else high = middle;
+      }
+      all[low]++;
+      attempts++;
+      max = Math.max(max, sample.ms);
+      statuses[integer(sample.status, 0, 599) ? sample.status : 0]++;
+      if (sample.ok) {
+        successful[low]++;
+        successes++;
+        successMax = Math.max(successMax, sample.ms);
+      }
+    },
+    snapshot() {
+      return {
+        attempts,
+        successes,
+        errors: attempts - successes,
+        errorRate: attempts ? (attempts - successes) / attempts : null,
+        successLatencyMs: distribution(successful, successes, successMax),
+        allAttemptLatencyMs: distribution(all, attempts, max),
+        statuses: Object.fromEntries([...statuses.entries()].filter(([, count]) => count)),
+        latencyMethod:
+          "bounded histogram; percentile upper bounds (integer milliseconds, approximately 1% buckets)",
+      };
+    },
+  };
+}
+
 /** One origin, no redirects, bounded body/time, in-memory cookie jar. Artifacts never include response bodies or cookies. */
 export async function requestJson({
   origin,
@@ -97,6 +178,7 @@ export async function requestJson({
   jar,
   timeoutMs,
   signal,
+  fixtureProxy,
   check = (value) => value?.data != null,
 }) {
   const url = new URL(path, origin);
@@ -122,6 +204,12 @@ export async function requestJson({
         "content-type": "application/json",
         "idempotency-key": randomUUID(),
         cookie: [...jar].map(([key, value]) => `${key}=${value}`).join("; "),
+        ...(fixtureProxy
+          ? {
+              "x-atlas-perf-token": fixtureProxy.token,
+              "x-atlas-perf-actor": String(fixtureProxy.actor),
+            }
+          : {}),
       },
       ...(body === undefined ? {} : { body: JSON.stringify(body) }),
     });
@@ -159,9 +247,13 @@ export async function requestJson({
   }
 }
 
-export async function runWorkload(config, { request = requestJson } = {}) {
+export async function runWorkload(
+  config,
+  { request = requestJson, onProgress = () => {}, progressIntervalMs = 60000 } = {},
+) {
   const c = validateConfig(config);
-  const actors = c.users.map(() => ({ jar: new Map() }));
+  if (!integer(progressIntervalMs, 100, 60000)) throw new Error("Invalid progress interval");
+  const actors = c.users.map((_, index) => ({ jar: new Map(), index }));
   const setup = [];
   const phases = [];
   const { courseId, lessonId } = c.fixture;
@@ -172,10 +264,21 @@ export async function runWorkload(config, { request = requestJson } = {}) {
       path,
       jar: actor.jar,
       timeoutMs: c.timeoutMs,
+      ...(c.fixtureProxyToken
+        ? { fixtureProxy: { token: c.fixtureProxyToken, actor: actor.index } }
+        : {}),
       ...options,
     })),
   });
   // Authentication and one-time enrollment are measured separately, never silently hidden in warmup.
+  const runStartedAt = new Date().toISOString();
+  onProgress({
+    capturedAt: runStartedAt,
+    phase: "setup",
+    completedActors: 0,
+    targetActors: actors.length,
+    capacityVerified: false,
+  });
   for (let i = 0; i < actors.length; i++) {
     const login = await send(actors[i], "login", "/api/v1/public/auth/login", {
       method: "POST",
@@ -191,117 +294,233 @@ export async function runWorkload(config, { request = requestJson } = {}) {
     });
     setup.push(enrollment);
     if (!enrollment.ok) break;
-    await delay(c.pacingMs);
+    onProgress({
+      capturedAt: new Date().toISOString(),
+      phase: "setup",
+      completedActors: i + 1,
+      targetActors: actors.length,
+      capacityVerified: false,
+    });
+    await delay(c.setupPacingMs ?? c.pacingMs);
   }
   if (setup.length === actors.length * 2 && setup.every((s) => s.ok)) {
     for (const phase of c.phases) {
-      const requests = [];
-      const journeys = [];
+      const requests = createSummary();
+      const journeys = createSummary();
+      const operations = new Map();
+      const record = (sample) => {
+        requests.add(sample);
+        if (!operations.has(sample.name)) operations.set(sample.name, createSummary());
+        operations.get(sample.name).add(sample);
+      };
       const started = performance.now();
+      const startedAt = new Date().toISOString();
       const deadline = started + phase.seconds * 1000;
-      const signal = AbortSignal.timeout(phase.seconds * 1000);
+      const drainMs = c.drainMs ?? 0;
+      const hardDeadline = deadline + drainMs;
+      const signal = AbortSignal.timeout(phase.seconds * 1000 + drainMs);
       let incompleteJourneys = 0;
       let cancelledRequests = 0;
+      let deadlineOverruns = 0;
+      let actorsCompletedDuration = 0;
+      const completedJourneysByActor = new Uint32Array(phase.users);
+      let activeActors = phase.users;
+      const reportProgress = () =>
+        onProgress({
+          capturedAt: new Date().toISOString(),
+          phase: phase.name,
+          elapsedMs: performance.now() - started,
+          targetSeconds: phase.seconds,
+          activeActors,
+          targetActors: phase.users,
+          actorsCompletedDuration,
+          requests: requests.snapshot(),
+          journeys: journeys.snapshot(),
+          capacityVerified: false,
+        });
+      reportProgress();
+      const progressTimer = setInterval(reportProgress, progressIntervalMs);
+      progressTimer.unref();
       // Closed loop: one sequence at a time per distinct actor. Report achieved load, not a fixed arrival-rate capacity claim.
-      await Promise.all(
-        actors.slice(0, phase.users).map(async (actor) => {
-          const refresh = await send(actor, "refresh", "/api/v1/public/auth/refresh", {
-            signal,
-            method: "POST",
-            body: {},
-            check: (b) => b?.data?.refreshed === true,
-          });
-          if (refresh.reason === "phase-deadline") {
-            cancelledRequests++;
-            return;
-          }
-          requests.push(refresh);
-          if (!refresh.ok) return;
-          // Atlas stores percentage progress, so the fixture must choose an exactly representable position.
-          const position = c.fixture.positionSeconds;
-          while (performance.now() < deadline && requests.length < 250000) {
-            const begin = performance.now();
-            let ok = true;
-            let incomplete = false;
-            const steps = [
-              [
-                "identity",
-                "/api/v1/me",
-                { check: (b) => typeof b?.data?.membership?.id === "string" },
-              ],
-              ["course", `/api/v1/courses/${courseId}`, { check: (b) => b?.data?.id === courseId }],
-              ["lesson", `/api/v1/lessons/${lessonId}`, { check: (b) => b?.data?.id === lessonId }],
-              [
-                "progress-save",
-                `/api/v1/lessons/${lessonId}/progress`,
-                {
-                  method: "POST",
-                  body: { positionSeconds: position, completed: false },
-                  check: (b) => b?.data?.positionSeconds === position,
-                },
-              ],
-              [
-                "progress-read",
-                `/api/v1/lessons/${lessonId}`,
-                { check: (b) => b?.data?.progress?.positionSeconds === position },
-              ],
-            ];
-            for (const [name, path, options] of steps) {
-              if (performance.now() >= deadline) {
-                incomplete = true;
-                break;
+      try {
+        await Promise.all(
+          actors.slice(0, phase.users).map(async (actor, actorIndex) => {
+            try {
+              let nextRefresh = 0;
+              // Atlas stores percentage progress, so the fixture must choose an exactly representable position.
+              const position = c.fixture.positionSeconds;
+              while (performance.now() < deadline) {
+                if (performance.now() >= nextRefresh) {
+                  const refresh = await send(actor, "refresh", "/api/v1/public/auth/refresh", {
+                    signal,
+                    method: "POST",
+                    body: {},
+                    check: (b) => b?.data?.refreshed === true,
+                  });
+                  if (refresh.reason === "phase-deadline") {
+                    cancelledRequests++;
+                    break;
+                  }
+                  record(refresh);
+                  if (performance.now() >= hardDeadline) {
+                    deadlineOverruns++;
+                    break;
+                  }
+                  if (!refresh.ok) return;
+                  nextRefresh = performance.now() + (c.refreshIntervalMs ?? 300000);
+                }
+                // Refresh may finish during drain; never admit a new journey after the load window.
+                if (performance.now() >= deadline) break;
+                const begin = performance.now();
+                let ok = true;
+                let incomplete = false;
+                const steps = [
+                  [
+                    "identity",
+                    "/api/v1/me",
+                    { check: (b) => typeof b?.data?.membership?.id === "string" },
+                  ],
+                  [
+                    "course",
+                    `/api/v1/courses/${courseId}`,
+                    { check: (b) => b?.data?.id === courseId },
+                  ],
+                  [
+                    "lesson",
+                    `/api/v1/lessons/${lessonId}`,
+                    { check: (b) => b?.data?.id === lessonId },
+                  ],
+                  [
+                    "progress-save",
+                    `/api/v1/lessons/${lessonId}/progress`,
+                    {
+                      method: "POST",
+                      body: { positionSeconds: position, completed: false },
+                      check: (b) => b?.data?.positionSeconds === position,
+                    },
+                  ],
+                  [
+                    "progress-read",
+                    `/api/v1/lessons/${lessonId}`,
+                    { check: (b) => b?.data?.progress?.positionSeconds === position },
+                  ],
+                ];
+                for (const [name, path, options] of steps) {
+                  if (performance.now() >= hardDeadline) {
+                    incomplete = true;
+                    break;
+                  }
+                  const result = await send(actor, name, path, { ...options, signal });
+                  if (result.reason === "phase-deadline") {
+                    cancelledRequests++;
+                    incomplete = true;
+                    break;
+                  }
+                  record(result);
+                  if (performance.now() >= hardDeadline) {
+                    deadlineOverruns++;
+                    incomplete = true;
+                    break;
+                  }
+                  if (!result.ok) {
+                    ok = false;
+                    break;
+                  }
+                }
+                if (incomplete) {
+                  incompleteJourneys++;
+                  break;
+                }
+                journeys.add({ ms: performance.now() - begin, ok, status: ok ? 200 : 0 });
+                completedJourneysByActor[actorIndex]++;
+                const remaining = deadline - performance.now();
+                if (remaining > 0) await delay(Math.ceil(Math.min(c.pacingMs, remaining)));
               }
-              const result = await send(actor, name, path, { ...options, signal });
-              if (result.reason === "phase-deadline") {
-                cancelledRequests++;
-                incomplete = true;
-                break;
-              }
-              requests.push(result);
-              if (!result.ok) {
-                ok = false;
-                break;
-              }
+              // Timer callbacks may run just below a fractional millisecond deadline.
+              if (signal.aborted && performance.now() < deadline)
+                await delay(Math.ceil(deadline - performance.now()));
+              if (performance.now() >= deadline) actorsCompletedDuration++;
+            } finally {
+              activeActors--;
             }
-            if (incomplete) {
-              incompleteJourneys++;
-              break;
-            }
-            journeys.push({ ms: performance.now() - begin, ok, status: ok ? 200 : 0 });
-            const remaining = deadline - performance.now();
-            if (remaining > 0) await delay(Math.min(c.pacingMs, remaining));
-          }
-        }),
-      );
+          }),
+        );
+      } finally {
+        clearInterval(progressTimer);
+      }
+      reportProgress();
       const elapsedMs = performance.now() - started;
       phases.push({
         ...phase,
         includedInSizing:
           phase.name !== "warmup" && c.mode === "staging" && c.build !== "development",
         elapsedMs,
+        drainMs,
+        drainElapsedMs: Math.max(0, elapsedMs - phase.seconds * 1000),
+        startedAt,
+        finishedAt: new Date().toISOString(),
+        actorsCompletedDuration,
+        actorsWithCompletedJourneys: completedJourneysByActor.filter((count) => count > 0).length,
+        minCompletedJourneysPerActor: Math.min(...completedJourneysByActor),
+        durationCompleted:
+          actorsCompletedDuration === phase.users && elapsedMs >= phase.seconds * 1000,
         incompleteJourneys,
         cancelledRequests,
-        requestRps: requests.length / (elapsedMs / 1000),
-        truncated: requests.length >= 250000,
-        requests: summarize(requests),
-        journeys: summarize(journeys),
+        deadlineOverruns,
+        requestRps: requests.snapshot().attempts / (elapsedMs / 1000),
+        truncated: false,
+        requests: requests.snapshot(),
+        journeys: journeys.snapshot(),
         byOperation: Object.fromEntries(
-          [...new Set(requests.map((r) => r.name))].map((name) => [
-            name,
-            summarize(requests.filter((r) => r.name === name)),
-          ]),
+          [...operations].map(([name, metrics]) => [name, metrics.snapshot()]),
         ),
       });
     }
   }
+  const passed =
+    setup.length === actors.length * 2 &&
+    setup.every((s) => s.ok) &&
+    phases.length === c.phases.length &&
+    phases.every(
+      (p) =>
+        p.durationCompleted &&
+        p.actorsWithCompletedJourneys === p.users &&
+        !p.truncated &&
+        p.incompleteJourneys === 0 &&
+        p.cancelledRequests === 0 &&
+        p.deadlineOverruns === 0 &&
+        p.requests.errors === 0 &&
+        p.journeys.attempts > 0,
+    );
+  for (const phase of phases)
+    phase.performancePassed =
+      c.slo && phase.name !== "warmup"
+        ? phase.durationCompleted &&
+          phase.actorsWithCompletedJourneys === phase.users &&
+          phase.incompleteJourneys === 0 &&
+          phase.cancelledRequests === 0 &&
+          phase.deadlineOverruns === 0 &&
+          phase.requests.errors === 0 &&
+          phase.journeys.attempts > 0 &&
+          phase.requests.successLatencyMs?.p95 <= c.slo.requestP95Ms &&
+          phase.journeys.successLatencyMs?.p95 <= c.slo.journeyP95Ms
+        : null;
   return {
     schemaVersion: 1,
     capturedAt: new Date().toISOString(),
+    startedAt: runStartedAt,
     mode: c.mode,
     origin: c.origin,
     build: c.build,
     planningTarget: { sustained: 100, burst: 200 },
     capacityVerified: false,
+    slo: c.slo ? { requestP95Ms: c.slo.requestP95Ms, journeyP95Ms: c.slo.journeyP95Ms } : null,
+    performancePassed: c.slo
+      ? passed && phases.filter((p) => p.name !== "warmup").every((p) => p.performancePassed)
+      : null,
+    pacingMs: c.pacingMs,
+    setupPacingMs: c.setupPacingMs ?? c.pacingMs,
+    refreshIntervalMs: c.refreshIntervalMs ?? 300000,
     model:
       "closed-loop distinct authenticated learners; think time follows each journey; setup measured separately",
     setup: summarize(setup),
@@ -334,15 +553,13 @@ export async function runWorkload(config, { request = requestJson } = {}) {
         "uploads",
         "exports",
         "background worker throughput",
-        "soak",
+        ...(phases.some((p) => p.name === "endurance" && p.seconds >= 7200 && p.durationCompleted)
+          ? []
+          : ["two-hour soak"]),
         "mobile browser metrics (separate runner)",
       ],
     },
-    passed:
-      setup.length === actors.length * 2 &&
-      setup.every((s) => s.ok) &&
-      phases.length === 3 &&
-      phases.every((p) => !p.truncated && p.requests.errors === 0 && p.journeys.attempts > 0),
+    passed,
   };
 }
 
@@ -354,15 +571,22 @@ if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1]
     if (resolve(configPath) === resolve(outputPath))
       throw new Error("Config and evidence paths must differ");
     mkdirSync(dirname(outputPath), { recursive: true });
-    writeFileSync(
-      outputPath,
-      `${JSON.stringify({ capturedAt: new Date().toISOString(), passed: false, capacityVerified: false, status: "incomplete" })}\n`,
-    );
-    const result = await runWorkload(JSON.parse(readFileSync(configPath, "utf8")));
+    const incomplete = `${JSON.stringify({ capturedAt: new Date().toISOString(), passed: false, capacityVerified: false, status: "incomplete" })}\n`;
+    writeFileSync(outputPath, incomplete);
+    writeFileSync(`${outputPath}.progress.json`, incomplete);
+    writeFileSync(`${outputPath}.progress.jsonl`, "");
+    const result = await runWorkload(JSON.parse(readFileSync(configPath, "utf8")), {
+      onProgress: (progress) => {
+        const line = `${JSON.stringify(progress)}\n`;
+        writeFileSync(`${outputPath}.progress.json`, line);
+        appendFileSync(`${outputPath}.progress.jsonl`, line);
+      },
+    });
     writeFileSync(outputPath, `${JSON.stringify(result, null, 2)}\n`);
     console.log(
       JSON.stringify({
         passed: result.passed,
+        performancePassed: result.performancePassed,
         capacityVerified: false,
         outputPath,
         phases: result.phases.map((p) => ({
@@ -373,7 +597,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1]
         })),
       }),
     );
-    if (!result.passed) process.exitCode = 1;
+    if (!result.passed || result.performancePassed === false) process.exitCode = 1;
   } catch {
     console.error(
       "Performance run rejected or could not complete. Check target, private configuration and service availability; no credentials were logged.",

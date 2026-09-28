@@ -1,4 +1,6 @@
 import { cookies } from "next/headers";
+import { isAuthError, isAuthRetryableFetchError } from "@supabase/supabase-js";
+import { AtlasHttpError } from "@atlas/core/http/errors";
 import {
   ATLAS_ACCESS_TOKEN_COOKIE,
   ATLAS_REFRESH_TOKEN_COOKIE,
@@ -6,8 +8,8 @@ import {
   readCookieFromRequest,
 } from "./cookie-names";
 import { applyAuthSessionToCookieStore, readSessionPersistence } from "./cookie-store";
-import { createSupabaseAdminServerClient } from "./supabase-server";
-import { authRequired } from "./auth-errors";
+import { createSupabaseSessionVerificationClient } from "./supabase-server";
+import { authProviderUnavailable, authRequired } from "./auth-errors";
 import { refreshSessionFromRefreshToken } from "./public-auth.service";
 
 export type SessionAssuranceLevel = "aal1" | "aal2" | null;
@@ -41,10 +43,11 @@ export async function extractRefreshToken(req: Request): Promise<string | null> 
 }
 
 async function resolveUserFromAccessToken(accessToken: string) {
-  const supabase = createSupabaseAdminServerClient();
+  const supabase = createSupabaseSessionVerificationClient();
   const result = await supabase.auth.getUser(accessToken);
 
-  if (result.error || !result.data.user.id || !result.data.user.email) {
+  if (result.error) throw verificationError(result.error);
+  if (!result.data.user.id || !result.data.user.email) {
     throw authRequired();
   }
 
@@ -53,7 +56,8 @@ async function resolveUserFromAccessToken(accessToken: string) {
   // session must never promote this request's assurance. getClaims verifies the
   // signature and expiration; getUser also checks the user with the auth service.
   const { data, error } = await supabase.auth.getClaims(accessToken);
-  if (error || !data || data.claims.sub !== user.id) {
+  if (error) throw verificationError(error);
+  if (!data || data.claims.sub !== user.id) {
     throw authRequired();
   }
   const aal = data.claims.aal;
@@ -69,6 +73,19 @@ async function resolveUserFromAccessToken(accessToken: string) {
     mfaEnabled,
     sessionAssuranceLevel,
   };
+}
+
+function verificationError(error: unknown): AtlasHttpError {
+  if (error instanceof AtlasHttpError) return error;
+  const status =
+    typeof error === "object" && error !== null && "status" in error ? error.status : undefined;
+  if (
+    isAuthRetryableFetchError(error) ||
+    (typeof status === "number" && (status >= 500 || status === 429)) ||
+    (error instanceof Error && !isAuthError(error))
+  )
+    return authProviderUnavailable();
+  return authRequired();
 }
 
 export async function refreshAuthenticatedSession(req: Request): Promise<boolean> {
@@ -99,9 +116,13 @@ export async function requireSupabaseUser(req: Request) {
   if (accessToken) {
     try {
       return await resolveUserFromAccessToken(accessToken);
-    } catch {
+    } catch (error) {
+      const failure = verificationError(error);
+      // Provider outages are not evidence of invalid credentials. Fail closed
+      // without refreshing or replacing the identity presented on this request.
+      if (failure.status !== 401) throw failure;
       if (!refreshToken) {
-        throw authRequired();
+        throw failure;
       }
     }
   } else if (!refreshToken) {
@@ -119,5 +140,9 @@ export async function requireSupabaseUser(req: Request) {
     throw authRequired();
   }
 
-  return resolveUserFromAccessToken(nextAccessToken);
+  try {
+    return await resolveUserFromAccessToken(nextAccessToken);
+  } catch (error) {
+    throw verificationError(error);
+  }
 }

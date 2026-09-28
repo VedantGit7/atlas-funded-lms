@@ -1,0 +1,1369 @@
+{
+  "capturedAt": "2026-09-26T13:22:01.752Z",
+  "mode": "local-smoke",
+  "pools": [
+    {
+      "pool": "tenant",
+      "pid": 6920,
+      "capturedAt": "2026-09-26T11:56:05.762Z",
+      "uptimeMs": 3545010.7269,
+      "acquisition": {
+        "count": 65502,
+        "errors": 306,
+        "meanMs": 1743.3626157124613,
+        "maxMs": 13737.819499999983,
+        "inFlight": 46,
+        "percentileUpperBoundsMs": {
+          "p50": 5000,
+          "p95": 5000,
+          "p99": 10000
+        },
+        "buckets": [
+          {
+            "upperBoundMs": 1,
+            "count": 9489
+          },
+          {
+            "upperBoundMs": 5,
+            "count": 253
+          },
+          {
+            "upperBoundMs": 10,
+            "count": 87
+          },
+          {
+            "upperBoundMs": 25,
+            "count": 119
+          },
+          {
+            "upperBoundMs": 50,
+            "count": 122
+          },
+          {
+            "upperBoundMs": 100,
+            "count": 206
+          },
+          {
+            "upperBoundMs": 250,
+            "count": 624
+          },
+          {
+            "upperBoundMs": 500,
+            "count": 1646
+          },
+          {
+            "upperBoundMs": 1000,
+            "count": 5590
+          },
+          {
+            "upperBoundMs": 5000,
+            "count": 44975
+          },
+          {
+            "upperBoundMs": 10000,
+            "count": 1971
+          },
+          {
+            "upperBoundMs": null,
+            "count": 420
+          }
+        ]
+      },
+      "query": {
+        "count": 693000,
+        "errors": 0,
+        "meanMs": 65.76579616782121,
+        "maxMs": 4022.3887000000104,
+        "inFlight": 19,
+        "percentileUpperBoundsMs": {
+          "p50": 100,
+          "p95": 250,
+          "p99": 500
+        },
+        "buckets": [
+          {
+            "upperBoundMs": 1,
+            "count": 8255
+          },
+          {
+            "upperBoundMs": 5,
+            "count": 49480
+          },
+          {
+            "upperBoundMs": 10,
+            "count": 15708
+          },
+          {
+            "upperBoundMs": 25,
+            "count": 43361
+          },
+          {
+            "upperBoundMs": 50,
+            "count": 176539
+          },
+          {
+            "upperBoundMs": 100,
+            "count": 311373
+          },
+          {
+            "upperBoundMs": 250,
+            "count": 77945
+          },
+          {
+            "upperBoundMs": 500,
+            "count": 6545
+          },
+          {
+            "upperBoundMs": 1000,
+            "count": 2827
+          },
+          {
+            "upperBoundMs": 5000,
+            "count": 967
+          },
+          {
+            "upperBoundMs": 10000,
+            "count": 0
+          },
+          {
+            "upperBoundMs": null,
+            "count": 0
+          }
+        ]
+      },
+      "connections": {
+        "total": 20,
+        "idle": 0,
+        "waiting": 46
+      }
+    },
+    {
+      "pool": "usage",
+      "pid": 6920,
+      "capturedAt": "2026-09-26T11:56:06.580Z",
+      "uptimeMs": 3544788.2083,
+      "acquisition": {
+        "count": 39517,
+        "errors": 24240,
+        "meanMs": 477.8360529822605,
+        "maxMs": 4568.385099999839,
+        "inFlight": 3,
+        "percentileUpperBoundsMs": {
+          "p50": 1000,
+          "p95": 1000,
+          "p99": 5000
+        },
+        "buckets": [
+          {
+            "upperBoundMs": 1,
+            "count": 3157
+          },
+          {
+            "upperBoundMs": 5,
+            "count": 102
+          },
+          {
+            "upperBoundMs": 10,
+            "count": 29
+          },
+          {
+            "upperBoundMs": 25,
+            "count": 46
+          },
+          {
+            "upperBoundMs": 50,
+            "count": 51
+          },
+          {
+            "upperBoundMs": 100,
+            "count": 109
+          },
+          {
+            "upperBoundMs": 250,
+            "count": 624
+          },
+          {
+            "upperBoundMs": 500,
+            "count": 8232
+          },
+          {
+            "upperBoundMs": 1000,
+            "count": 26767
+          },
+          {
+            "upperBoundMs": 5000,
+            "count": 400
+          },
+          {
+            "upperBoundMs": 10000,
+            "count": 0
+          },
+          {
+            "upperBoundMs": null,
+            "count": 0
+          }
+        ]
+      },
+      "query": {
+        "count": 76315,
+        "errors": 80,
+        "meanMs": 47.1990472764203,
+        "maxMs": 2436.8059999999823,
+        "inFlight": 1,
+        "percentileUpperBoundsMs": {
+          "p50": 50,
+          "p95": 250,
+          "p99": 250
+        },
+        "buckets": [
+          {
+            "upperBoundMs": 1,
+            "count": 3123
+          },
+          {
+            "upperBoundMs": 5,
+            "count": 13207
+          },
+          {
+            "upperBoundMs": 10,
+            "count": 5054
+          },
+          {
+            "upperBoundMs": 25,
+            "count": 7248
+          },
+          {
+            "upperBoundMs": 50,
+            "count": 16405
+          },
+          {
+            "upperBoundMs": 100,
+            "count": 25369
+          },
+          {
+            "upperBoundMs": 250,
+            "count": 5306
+          },
+          {
+            "upperBoundMs": 500,
+            "count": 385
+          },
+          {
+            "upperBoundMs": 1000,
+            "count": 157
+          },
+          {
+            "upperBoundMs": 5000,
+            "count": 61
+          },
+          {
+            "upperBoundMs": 10000,
+            "count": 0
+          },
+          {
+            "upperBoundMs": null,
+            "count": 0
+          }
+        ]
+      },
+      "connections": {
+        "total": 2,
+        "idle": 0,
+        "waiting": 2
+      }
+    },
+    {
+      "pool": "tenant",
+      "pid": 9400,
+      "capturedAt": "2026-09-26T12:26:05.666Z",
+      "uptimeMs": 1740618.2755,
+      "acquisition": {
+        "count": 37531,
+        "errors": 0,
+        "meanMs": 1123.8217743518792,
+        "maxMs": 6367.779600000009,
+        "inFlight": 47,
+        "percentileUpperBoundsMs": {
+          "p50": 5000,
+          "p95": 5000,
+          "p99": 5000
+        },
+        "buckets": [
+          {
+            "upperBoundMs": 1,
+            "count": 6587
+          },
+          {
+            "upperBoundMs": 5,
+            "count": 92
+          },
+          {
+            "upperBoundMs": 10,
+            "count": 35
+          },
+          {
+            "upperBoundMs": 25,
+            "count": 55
+          },
+          {
+            "upperBoundMs": 50,
+            "count": 59
+          },
+          {
+            "upperBoundMs": 100,
+            "count": 146
+          },
+          {
+            "upperBoundMs": 250,
+            "count": 452
+          },
+          {
+            "upperBoundMs": 500,
+            "count": 1280
+          },
+          {
+            "upperBoundMs": 1000,
+            "count": 4558
+          },
+          {
+            "upperBoundMs": 5000,
+            "count": 24233
+          },
+          {
+            "upperBoundMs": 10000,
+            "count": 34
+          },
+          {
+            "upperBoundMs": null,
+            "count": 0
+          }
+        ]
+      },
+      "query": {
+        "count": 404630,
+        "errors": 0,
+        "meanMs": 50.82799610804841,
+        "maxMs": 1784.001500000013,
+        "inFlight": 19,
+        "percentileUpperBoundsMs": {
+          "p50": 50,
+          "p95": 250,
+          "p99": 250
+        },
+        "buckets": [
+          {
+            "upperBoundMs": 1,
+            "count": 4503
+          },
+          {
+            "upperBoundMs": 5,
+            "count": 36518
+          },
+          {
+            "upperBoundMs": 10,
+            "count": 12656
+          },
+          {
+            "upperBoundMs": 25,
+            "count": 32486
+          },
+          {
+            "upperBoundMs": 50,
+            "count": 136299
+          },
+          {
+            "upperBoundMs": 100,
+            "count": 161699
+          },
+          {
+            "upperBoundMs": 250,
+            "count": 17731
+          },
+          {
+            "upperBoundMs": 500,
+            "count": 1603
+          },
+          {
+            "upperBoundMs": 1000,
+            "count": 1012
+          },
+          {
+            "upperBoundMs": 5000,
+            "count": 123
+          },
+          {
+            "upperBoundMs": 10000,
+            "count": 0
+          },
+          {
+            "upperBoundMs": null,
+            "count": 0
+          }
+        ]
+      },
+      "connections": {
+        "total": 20,
+        "idle": 0,
+        "waiting": 47
+      }
+    },
+    {
+      "pool": "usage",
+      "pid": 9400,
+      "capturedAt": "2026-09-26T12:26:08.206Z",
+      "uptimeMs": 1740933.4358,
+      "acquisition": {
+        "count": 22399,
+        "errors": 12586,
+        "meanMs": 447.7257556944515,
+        "maxMs": 2023.9449000000022,
+        "inFlight": 18,
+        "percentileUpperBoundsMs": {
+          "p50": 1000,
+          "p95": 1000,
+          "p99": 1000
+        },
+        "buckets": [
+          {
+            "upperBoundMs": 1,
+            "count": 2397
+          },
+          {
+            "upperBoundMs": 5,
+            "count": 38
+          },
+          {
+            "upperBoundMs": 10,
+            "count": 29
+          },
+          {
+            "upperBoundMs": 25,
+            "count": 75
+          },
+          {
+            "upperBoundMs": 50,
+            "count": 52
+          },
+          {
+            "upperBoundMs": 100,
+            "count": 86
+          },
+          {
+            "upperBoundMs": 250,
+            "count": 317
+          },
+          {
+            "upperBoundMs": 500,
+            "count": 5241
+          },
+          {
+            "upperBoundMs": 1000,
+            "count": 14082
+          },
+          {
+            "upperBoundMs": 5000,
+            "count": 82
+          },
+          {
+            "upperBoundMs": 10000,
+            "count": 0
+          },
+          {
+            "upperBoundMs": null,
+            "count": 0
+          }
+        ]
+      },
+      "query": {
+        "count": 49052,
+        "errors": 22,
+        "meanMs": 37.51335781211813,
+        "maxMs": 1974.1371999999974,
+        "inFlight": 2,
+        "percentileUpperBoundsMs": {
+          "p50": 50,
+          "p95": 100,
+          "p99": 250
+        },
+        "buckets": [
+          {
+            "upperBoundMs": 1,
+            "count": 2195
+          },
+          {
+            "upperBoundMs": 5,
+            "count": 8402
+          },
+          {
+            "upperBoundMs": 10,
+            "count": 4324
+          },
+          {
+            "upperBoundMs": 25,
+            "count": 5688
+          },
+          {
+            "upperBoundMs": 50,
+            "count": 13102
+          },
+          {
+            "upperBoundMs": 100,
+            "count": 13903
+          },
+          {
+            "upperBoundMs": 250,
+            "count": 1232
+          },
+          {
+            "upperBoundMs": 500,
+            "count": 123
+          },
+          {
+            "upperBoundMs": 1000,
+            "count": 72
+          },
+          {
+            "upperBoundMs": 5000,
+            "count": 11
+          },
+          {
+            "upperBoundMs": 10000,
+            "count": 0
+          },
+          {
+            "upperBoundMs": null,
+            "count": 0
+          }
+        ]
+      },
+      "connections": {
+        "total": 2,
+        "idle": 0,
+        "waiting": 18
+      }
+    },
+    {
+      "pool": "tenant",
+      "pid": 17916,
+      "capturedAt": "2026-09-26T12:47:17.835Z",
+      "uptimeMs": 1261264.5423,
+      "acquisition": {
+        "count": 26395,
+        "errors": 0,
+        "meanMs": 1148.476918696721,
+        "maxMs": 4877.9179999998305,
+        "inFlight": 47,
+        "percentileUpperBoundsMs": {
+          "p50": 5000,
+          "p95": 5000,
+          "p99": 5000
+        },
+        "buckets": [
+          {
+            "upperBoundMs": 1,
+            "count": 4801
+          },
+          {
+            "upperBoundMs": 5,
+            "count": 85
+          },
+          {
+            "upperBoundMs": 10,
+            "count": 44
+          },
+          {
+            "upperBoundMs": 25,
+            "count": 66
+          },
+          {
+            "upperBoundMs": 50,
+            "count": 89
+          },
+          {
+            "upperBoundMs": 100,
+            "count": 182
+          },
+          {
+            "upperBoundMs": 250,
+            "count": 516
+          },
+          {
+            "upperBoundMs": 500,
+            "count": 967
+          },
+          {
+            "upperBoundMs": 1000,
+            "count": 2878
+          },
+          {
+            "upperBoundMs": 5000,
+            "count": 16767
+          },
+          {
+            "upperBoundMs": 10000,
+            "count": 0
+          },
+          {
+            "upperBoundMs": null,
+            "count": 0
+          }
+        ]
+      },
+      "query": {
+        "count": 284394,
+        "errors": 0,
+        "meanMs": 54.42836952678206,
+        "maxMs": 2266.939799999993,
+        "inFlight": 20,
+        "percentileUpperBoundsMs": {
+          "p50": 100,
+          "p95": 250,
+          "p99": 250
+        },
+        "buckets": [
+          {
+            "upperBoundMs": 1,
+            "count": 2356
+          },
+          {
+            "upperBoundMs": 5,
+            "count": 24311
+          },
+          {
+            "upperBoundMs": 10,
+            "count": 8952
+          },
+          {
+            "upperBoundMs": 25,
+            "count": 19416
+          },
+          {
+            "upperBoundMs": 50,
+            "count": 86178
+          },
+          {
+            "upperBoundMs": 100,
+            "count": 123991
+          },
+          {
+            "upperBoundMs": 250,
+            "count": 17047
+          },
+          {
+            "upperBoundMs": 500,
+            "count": 1530
+          },
+          {
+            "upperBoundMs": 1000,
+            "count": 516
+          },
+          {
+            "upperBoundMs": 5000,
+            "count": 97
+          },
+          {
+            "upperBoundMs": 10000,
+            "count": 0
+          },
+          {
+            "upperBoundMs": null,
+            "count": 0
+          }
+        ]
+      },
+      "connections": {
+        "total": 20,
+        "idle": 0,
+        "waiting": 47
+      }
+    },
+    {
+      "pool": "usage",
+      "pid": 17916,
+      "capturedAt": "2026-09-26T12:47:19.143Z",
+      "uptimeMs": 1260751.2349999999,
+      "acquisition": {
+        "count": 15726,
+        "errors": 8845,
+        "meanMs": 446.8293720399329,
+        "maxMs": 2616.785600000003,
+        "inFlight": 9,
+        "percentileUpperBoundsMs": {
+          "p50": 1000,
+          "p95": 1000,
+          "p99": 1000
+        },
+        "buckets": [
+          {
+            "upperBoundMs": 1,
+            "count": 1693
+          },
+          {
+            "upperBoundMs": 5,
+            "count": 30
+          },
+          {
+            "upperBoundMs": 10,
+            "count": 21
+          },
+          {
+            "upperBoundMs": 25,
+            "count": 28
+          },
+          {
+            "upperBoundMs": 50,
+            "count": 37
+          },
+          {
+            "upperBoundMs": 100,
+            "count": 71
+          },
+          {
+            "upperBoundMs": 250,
+            "count": 253
+          },
+          {
+            "upperBoundMs": 500,
+            "count": 3575
+          },
+          {
+            "upperBoundMs": 1000,
+            "count": 9958
+          },
+          {
+            "upperBoundMs": 5000,
+            "count": 60
+          },
+          {
+            "upperBoundMs": 10000,
+            "count": 0
+          },
+          {
+            "upperBoundMs": null,
+            "count": 0
+          }
+        ]
+      },
+      "query": {
+        "count": 34376,
+        "errors": 21,
+        "meanMs": 41.309779119152545,
+        "maxMs": 2264.5176999999676,
+        "inFlight": 2,
+        "percentileUpperBoundsMs": {
+          "p50": 50,
+          "p95": 100,
+          "p99": 250
+        },
+        "buckets": [
+          {
+            "upperBoundMs": 1,
+            "count": 1153
+          },
+          {
+            "upperBoundMs": 5,
+            "count": 5804
+          },
+          {
+            "upperBoundMs": 10,
+            "count": 2806
+          },
+          {
+            "upperBoundMs": 25,
+            "count": 3647
+          },
+          {
+            "upperBoundMs": 50,
+            "count": 8579
+          },
+          {
+            "upperBoundMs": 100,
+            "count": 10913
+          },
+          {
+            "upperBoundMs": 250,
+            "count": 1282
+          },
+          {
+            "upperBoundMs": 500,
+            "count": 136
+          },
+          {
+            "upperBoundMs": 1000,
+            "count": 44
+          },
+          {
+            "upperBoundMs": 5000,
+            "count": 12
+          },
+          {
+            "upperBoundMs": 10000,
+            "count": 0
+          },
+          {
+            "upperBoundMs": null,
+            "count": 0
+          }
+        ]
+      },
+      "connections": {
+        "total": 2,
+        "idle": 0,
+        "waiting": 9
+      }
+    },
+    {
+      "pool": "tenant",
+      "pid": 11860,
+      "capturedAt": "2026-09-26T13:10:41.841Z",
+      "uptimeMs": 1382305.8603,
+      "acquisition": {
+        "count": 20494,
+        "errors": 3,
+        "meanMs": 2141.4526180930993,
+        "maxMs": 10478.517200000002,
+        "inFlight": 22,
+        "percentileUpperBoundsMs": {
+          "p50": 5000,
+          "p95": 5000,
+          "p99": 10000
+        },
+        "buckets": [
+          {
+            "upperBoundMs": 1,
+            "count": 2599
+          },
+          {
+            "upperBoundMs": 5,
+            "count": 777
+          },
+          {
+            "upperBoundMs": 10,
+            "count": 51
+          },
+          {
+            "upperBoundMs": 25,
+            "count": 49
+          },
+          {
+            "upperBoundMs": 50,
+            "count": 60
+          },
+          {
+            "upperBoundMs": 100,
+            "count": 110
+          },
+          {
+            "upperBoundMs": 250,
+            "count": 316
+          },
+          {
+            "upperBoundMs": 500,
+            "count": 446
+          },
+          {
+            "upperBoundMs": 1000,
+            "count": 837
+          },
+          {
+            "upperBoundMs": 5000,
+            "count": 14653
+          },
+          {
+            "upperBoundMs": 10000,
+            "count": 589
+          },
+          {
+            "upperBoundMs": null,
+            "count": 7
+          }
+        ]
+      },
+      "query": {
+        "count": 220618,
+        "errors": 0,
+        "meanMs": 99.6478596420064,
+        "maxMs": 4053.9368999999715,
+        "inFlight": 20,
+        "percentileUpperBoundsMs": {
+          "p50": 100,
+          "p95": 250,
+          "p99": 500
+        },
+        "buckets": [
+          {
+            "upperBoundMs": 1,
+            "count": 13
+          },
+          {
+            "upperBoundMs": 5,
+            "count": 5196
+          },
+          {
+            "upperBoundMs": 10,
+            "count": 3561
+          },
+          {
+            "upperBoundMs": 25,
+            "count": 10114
+          },
+          {
+            "upperBoundMs": 50,
+            "count": 19294
+          },
+          {
+            "upperBoundMs": 100,
+            "count": 96992
+          },
+          {
+            "upperBoundMs": 250,
+            "count": 80386
+          },
+          {
+            "upperBoundMs": 500,
+            "count": 3460
+          },
+          {
+            "upperBoundMs": 1000,
+            "count": 1095
+          },
+          {
+            "upperBoundMs": 5000,
+            "count": 507
+          },
+          {
+            "upperBoundMs": 10000,
+            "count": 0
+          },
+          {
+            "upperBoundMs": null,
+            "count": 0
+          }
+        ]
+      },
+      "connections": {
+        "total": 20,
+        "idle": 0,
+        "waiting": 22
+      }
+    },
+    {
+      "pool": "usage",
+      "pid": 11860,
+      "capturedAt": "2026-09-26T13:10:45.606Z",
+      "uptimeMs": 1383680.9236,
+      "acquisition": {
+        "count": 14243,
+        "errors": 11516,
+        "meanMs": 516.740475552903,
+        "maxMs": 4588.93339999998,
+        "inFlight": 6,
+        "percentileUpperBoundsMs": {
+          "p50": 1000,
+          "p95": 1000,
+          "p99": 1000
+        },
+        "buckets": [
+          {
+            "upperBoundMs": 1,
+            "count": 660
+          },
+          {
+            "upperBoundMs": 5,
+            "count": 178
+          },
+          {
+            "upperBoundMs": 10,
+            "count": 12
+          },
+          {
+            "upperBoundMs": 25,
+            "count": 29
+          },
+          {
+            "upperBoundMs": 50,
+            "count": 28
+          },
+          {
+            "upperBoundMs": 100,
+            "count": 67
+          },
+          {
+            "upperBoundMs": 250,
+            "count": 195
+          },
+          {
+            "upperBoundMs": 500,
+            "count": 1021
+          },
+          {
+            "upperBoundMs": 1000,
+            "count": 11936
+          },
+          {
+            "upperBoundMs": 5000,
+            "count": 117
+          },
+          {
+            "upperBoundMs": 10000,
+            "count": 0
+          },
+          {
+            "upperBoundMs": null,
+            "count": 0
+          }
+        ]
+      },
+      "query": {
+        "count": 13608,
+        "errors": 26,
+        "meanMs": 71.5229271604938,
+        "maxMs": 3986.9253999999783,
+        "inFlight": 0,
+        "percentileUpperBoundsMs": {
+          "p50": 100,
+          "p95": 250,
+          "p99": 500
+        },
+        "buckets": [
+          {
+            "upperBoundMs": 1,
+            "count": 23
+          },
+          {
+            "upperBoundMs": 5,
+            "count": 1235
+          },
+          {
+            "upperBoundMs": 10,
+            "count": 783
+          },
+          {
+            "upperBoundMs": 25,
+            "count": 1962
+          },
+          {
+            "upperBoundMs": 50,
+            "count": 2075
+          },
+          {
+            "upperBoundMs": 100,
+            "count": 4135
+          },
+          {
+            "upperBoundMs": 250,
+            "count": 3185
+          },
+          {
+            "upperBoundMs": 500,
+            "count": 146
+          },
+          {
+            "upperBoundMs": 1000,
+            "count": 43
+          },
+          {
+            "upperBoundMs": 5000,
+            "count": 21
+          },
+          {
+            "upperBoundMs": 10000,
+            "count": 0
+          },
+          {
+            "upperBoundMs": null,
+            "count": 0
+          }
+        ]
+      },
+      "connections": {
+        "total": 2,
+        "idle": 0,
+        "waiting": 6
+      }
+    },
+    {
+      "pool": "tenant",
+      "pid": 27844,
+      "capturedAt": "2026-09-26T13:21:17.590Z",
+      "uptimeMs": 600538.1568,
+      "acquisition": {
+        "count": 10050,
+        "errors": 0,
+        "meanMs": 1383.6655691840745,
+        "maxMs": 6537.298600000002,
+        "inFlight": 0,
+        "percentileUpperBoundsMs": {
+          "p50": 5000,
+          "p95": 5000,
+          "p99": 5000
+        },
+        "buckets": [
+          {
+            "upperBoundMs": 1,
+            "count": 1671
+          },
+          {
+            "upperBoundMs": 5,
+            "count": 148
+          },
+          {
+            "upperBoundMs": 10,
+            "count": 13
+          },
+          {
+            "upperBoundMs": 25,
+            "count": 18
+          },
+          {
+            "upperBoundMs": 50,
+            "count": 39
+          },
+          {
+            "upperBoundMs": 100,
+            "count": 47
+          },
+          {
+            "upperBoundMs": 250,
+            "count": 205
+          },
+          {
+            "upperBoundMs": 500,
+            "count": 387
+          },
+          {
+            "upperBoundMs": 1000,
+            "count": 1127
+          },
+          {
+            "upperBoundMs": 5000,
+            "count": 6327
+          },
+          {
+            "upperBoundMs": 10000,
+            "count": 68
+          },
+          {
+            "upperBoundMs": null,
+            "count": 0
+          }
+        ]
+      },
+      "query": {
+        "count": 108540,
+        "errors": 0,
+        "meanMs": 71.05756098949682,
+        "maxMs": 4835.216599999985,
+        "inFlight": 0,
+        "percentileUpperBoundsMs": {
+          "p50": 100,
+          "p95": 250,
+          "p99": 500
+        },
+        "buckets": [
+          {
+            "upperBoundMs": 1,
+            "count": 82
+          },
+          {
+            "upperBoundMs": 5,
+            "count": 6966
+          },
+          {
+            "upperBoundMs": 10,
+            "count": 2737
+          },
+          {
+            "upperBoundMs": 25,
+            "count": 5775
+          },
+          {
+            "upperBoundMs": 50,
+            "count": 23658
+          },
+          {
+            "upperBoundMs": 100,
+            "count": 49092
+          },
+          {
+            "upperBoundMs": 250,
+            "count": 19076
+          },
+          {
+            "upperBoundMs": 500,
+            "count": 951
+          },
+          {
+            "upperBoundMs": 1000,
+            "count": 95
+          },
+          {
+            "upperBoundMs": 5000,
+            "count": 108
+          },
+          {
+            "upperBoundMs": 10000,
+            "count": 0
+          },
+          {
+            "upperBoundMs": null,
+            "count": 0
+          }
+        ]
+      },
+      "connections": {
+        "total": 0,
+        "idle": 0,
+        "waiting": 0
+      }
+    },
+    {
+      "pool": "usage",
+      "pid": 27844,
+      "capturedAt": "2026-09-26T13:21:30.168Z",
+      "uptimeMs": 600368.5758,
+      "acquisition": {
+        "count": 6317,
+        "errors": 4028,
+        "meanMs": 474.7026804654117,
+        "maxMs": 2600.3384999999544,
+        "inFlight": 0,
+        "percentileUpperBoundsMs": {
+          "p50": 1000,
+          "p95": 1000,
+          "p99": 1000
+        },
+        "buckets": [
+          {
+            "upperBoundMs": 1,
+            "count": 496
+          },
+          {
+            "upperBoundMs": 5,
+            "count": 17
+          },
+          {
+            "upperBoundMs": 10,
+            "count": 5
+          },
+          {
+            "upperBoundMs": 25,
+            "count": 9
+          },
+          {
+            "upperBoundMs": 50,
+            "count": 12
+          },
+          {
+            "upperBoundMs": 100,
+            "count": 23
+          },
+          {
+            "upperBoundMs": 250,
+            "count": 92
+          },
+          {
+            "upperBoundMs": 500,
+            "count": 1227
+          },
+          {
+            "upperBoundMs": 1000,
+            "count": 4413
+          },
+          {
+            "upperBoundMs": 5000,
+            "count": 23
+          },
+          {
+            "upperBoundMs": 10000,
+            "count": 0
+          },
+          {
+            "upperBoundMs": null,
+            "count": 0
+          }
+        ]
+      },
+      "query": {
+        "count": 11438,
+        "errors": 9,
+        "meanMs": 51.92035293757625,
+        "maxMs": 4344.152999999991,
+        "inFlight": 0,
+        "percentileUpperBoundsMs": {
+          "p50": 50,
+          "p95": 250,
+          "p99": 250
+        },
+        "buckets": [
+          {
+            "upperBoundMs": 1,
+            "count": 93
+          },
+          {
+            "upperBoundMs": 5,
+            "count": 1704
+          },
+          {
+            "upperBoundMs": 10,
+            "count": 942
+          },
+          {
+            "upperBoundMs": 25,
+            "count": 1202
+          },
+          {
+            "upperBoundMs": 50,
+            "count": 2343
+          },
+          {
+            "upperBoundMs": 100,
+            "count": 3896
+          },
+          {
+            "upperBoundMs": 250,
+            "count": 1170
+          },
+          {
+            "upperBoundMs": 500,
+            "count": 70
+          },
+          {
+            "upperBoundMs": 1000,
+            "count": 10
+          },
+          {
+            "upperBoundMs": 5000,
+            "count": 8
+          },
+          {
+            "upperBoundMs": 10000,
+            "count": 0
+          },
+          {
+            "upperBoundMs": null,
+            "count": 0
+          }
+        ]
+      },
+      "connections": {
+        "total": 0,
+        "idle": 0,
+        "waiting": 0
+      }
+    }
+  ],
+  "poolScope": "Latest cumulative process snapshots from supplied logs, not phase-isolated deltas. Histogram bounds are not exact percentiles; null means absent or above largest finite bucket.",
+  "worker": {
+    "unfinishedJobs": 0,
+    "runnableJobs": 0,
+    "oldestRunnableLagMs": 0,
+    "workerExecutionVerified": false,
+    "scope": "Point-in-time materialized delivery jobs for the fixture tenant only. Does not prove worker processing or measure jobs not yet materialized."
+  },
+  "database": {
+    "maxConnections": 100,
+    "version": "16.14"
+  },
+  "capacityVerified": false
+}

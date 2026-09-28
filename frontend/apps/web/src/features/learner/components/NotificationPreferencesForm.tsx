@@ -6,7 +6,7 @@ import {
   NOTIFICATION_CATEGORY_LABELS,
   type NotificationChannelPrefs,
   type NotificationPreferenceCategory,
-} from "@atlas/contracts/membership/notification-preferences.catalog";
+} from "@atlas/contracts/membership/notification-preferences.data";
 import { ClientApiError, clientApi } from "../../../lib/client-api";
 import { AccountSettingsToast } from "../../account-settings/account-settings-toast";
 import { useAccountTheme } from "../../account-settings/account-theme-context";

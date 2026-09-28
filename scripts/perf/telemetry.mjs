@@ -1,4 +1,4 @@
-import { readFileSync, mkdirSync, writeFileSync } from "node:fs";
+import { createReadStream, readFileSync, mkdirSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import pg from "pg";
@@ -76,13 +76,53 @@ export function poolEvidence(log) {
   return [...latest.values()];
 }
 
+/** Read long-running process logs without retaining raw lines or the whole file. */
+export async function poolEvidenceFromFile(path) {
+  const latest = new Map();
+  const maxLineLength = 65536;
+  let pending = "";
+  let discardLine = false;
+  const recordLine = (line) => {
+    for (const record of poolEvidence(line)) {
+      const key = `${record.pid}:${record.pool}`;
+      if (!latest.has(key) && latest.size >= 256)
+        throw new Error("Too many process pool identities in telemetry log");
+      latest.set(key, record);
+    }
+  };
+  const stream = createReadStream(path, { encoding: "utf8", highWaterMark: 65536 });
+  for await (const chunk of stream) {
+    let offset = 0;
+    while (offset < chunk.length) {
+      const newline = chunk.indexOf("\n", offset);
+      const end = newline === -1 ? chunk.length : newline;
+      if (!discardLine) {
+        if (pending.length + end - offset > maxLineLength) {
+          pending = "";
+          discardLine = true;
+        } else {
+          pending += chunk.slice(offset, end);
+        }
+      }
+      if (newline === -1) break;
+      if (!discardLine) recordLine(pending);
+      pending = "";
+      discardLine = false;
+      offset = newline + 1;
+    }
+  }
+  if (pending && !discardLine) recordLine(pending);
+  return [...latest.values()];
+}
+
 export async function collectLocalTelemetry(logPaths) {
   const env = localEnv();
   assertIsolatedFixtureTarget({ databaseUrl: ownerUrl, authUrl: env.SUPABASE_URL });
   const fixture = JSON.parse(readFileSync(env.E2E_SCENARIO_PATH, "utf8"));
   if (!/^[\da-f-]{36}$/i.test(fixture.tenantId))
     throw new Error("Missing disposable tenant fixture");
-  const pools = logPaths.flatMap((path) => poolEvidence(readFileSync(path, "utf8")));
+  const pools = [];
+  for (const path of logPaths) pools.push(...(await poolEvidenceFromFile(path)));
   const client = new pg.Client({ connectionString: ownerUrl, connectionTimeoutMillis: 10000 });
   await client.connect();
   try {

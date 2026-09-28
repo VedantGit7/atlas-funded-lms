@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { ChartLine } from "lucide-react";
-import { motion, useReducedMotion } from "motion/react";
+import { motion, useReducedMotion } from "../../../components/motion/animation-boundary";
 import type { z } from "zod";
 import type {
   competencyScoreDtoSchema,

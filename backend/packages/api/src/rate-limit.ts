@@ -1,6 +1,8 @@
 import { createHash } from "node:crypto";
 import type { RateLimitBucket } from "@atlas/authorization/route-metadata";
 import { AtlasHttpError } from "@atlas/core/http/errors";
+import { isDeployedRuntime } from "@atlas/core/config/runtime-environment";
+import { ATLAS_PROXY_AUTHENTICATED_HEADER } from "@atlas/core/http/api-proxy";
 import { resolveClientIp } from "./client-ip";
 import {
   RateLimitConfigurationError,
@@ -98,10 +100,17 @@ export async function enforceIngressRateLimit(args: {
 }): Promise<void> {
   validateRateLimitConfiguration();
   const clientIp = resolveClientIp(args.req);
-  // Internal SSR calls have no edge IP. They still require authentication and
-  // actor/tenant quotas; a global unknown bucket would couple unrelated tenants.
-  // Pre-authentication protection for unattributed traffic belongs at the edge.
-  if (clientIp === "unknown") return;
+  if (clientIp === "unknown") {
+    // Only authenticated server fetches may omit attribution. Browser rewrites
+    // are a distinct authenticated source and cannot claim this exception.
+    if (
+      isDeployedRuntime() &&
+      args.req.headers.get(ATLAS_PROXY_AUTHENTICATED_HEADER) !== "server"
+    ) {
+      throwUnattributedRequest();
+    }
+    return;
+  }
   const operation = ["GET", "HEAD", "OPTIONS"].includes(args.req.method.toUpperCase())
     ? "read"
     : "write";
@@ -149,10 +158,22 @@ export async function enforcePublicRateLimit(args: {
 }): Promise<void> {
   const max = PUBLIC_LIMITS[args.bucket];
   if (!max) throw new RateLimitConfigurationError("Unknown public rate-limit bucket.");
+  validateRateLimitConfiguration();
+  const clientIp = resolveClientIp(args.req);
+  if (clientIp === "unknown" && isDeployedRuntime()) throwUnattributedRequest();
   await enforceBudgets(
-    [{ key: `public:${args.bucket}:${identity([resolveClientIp(args.req)])}`, max }],
+    [{ key: `public:${args.bucket}:${identity([clientIp])}`, max }],
     args.requestId,
   );
+}
+
+function throwUnattributedRequest(): never {
+  throw new AtlasHttpError({
+    code: "SERVICE_UNAVAILABLE",
+    status: 503,
+    message: "Request protection is temporarily unavailable. Please retry shortly.",
+    retryAfterSeconds: 5,
+  });
 }
 
 export async function resetRateLimitsForTests(store?: RateLimitStore | null): Promise<void> {

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { FadePresence } from "../../../components/motion/FadePresence";
 import { BadgeCheck, MessageSquare } from "lucide-react";
 import { cn } from "@atlas/design-system";
 import { ClientApiError, clientApi } from "../../../lib/client-api";
@@ -57,7 +57,6 @@ export function PostCard({
   const [commentCount, setCommentCount] = useState(
     post.commentCount ?? initialComments?.length ?? 0,
   );
-  const reduceMotion = useReducedMotion();
 
   const isOwn = post.authorMembershipId === viewer.membershipId;
   const name = authorDisplayName(post.author, post.authorMembershipId);
@@ -176,41 +175,34 @@ export function PostCard({
         ) : null}
       </div>
 
-      <AnimatePresence initial={false}>
-        {expanded ? (
-          <motion.div
-            initial={reduceMotion ? false : { opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="border-t border-border bg-muted/30 px-5 py-6 sm:px-6"
-          >
-            {loading ? (
-              <div className="space-y-3" aria-hidden="true">
-                {[0, 1].map((index) => (
-                  <div key={index} className="flex gap-3">
-                    <div className="h-8 w-8 rounded-full bg-muted motion-safe:animate-pulse" />
-                    <div className="flex-1 space-y-2">
-                      <div className="h-3 w-32 rounded bg-muted motion-safe:animate-pulse" />
-                      <div className="h-3 w-full rounded bg-muted motion-safe:animate-pulse" />
-                    </div>
-                  </div>
-                ))}
+      <FadePresence
+        open={expanded}
+        className="border-t border-border bg-muted/30 px-5 py-6 sm:px-6"
+      >
+        {loading ? (
+          <div className="space-y-3" aria-hidden="true">
+            {[0, 1].map((index) => (
+              <div key={index} className="flex gap-3">
+                <div className="h-8 w-8 rounded-full bg-muted motion-safe:animate-pulse" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-3 w-32 rounded bg-muted motion-safe:animate-pulse" />
+                  <div className="h-3 w-full rounded bg-muted motion-safe:animate-pulse" />
+                </div>
               </div>
-            ) : error ? (
-              <p className="text-sm text-destructive">{error}</p>
-            ) : comments ? (
-              <CommentTree
-                postId={post.id}
-                postAuthorMembershipId={post.authorMembershipId}
-                viewer={viewer}
-                initialComments={comments}
-                onCountChange={setCommentCount}
-              />
-            ) : null}
-          </motion.div>
+            ))}
+          </div>
+        ) : error ? (
+          <p className="text-sm text-destructive">{error}</p>
+        ) : comments ? (
+          <CommentTree
+            postId={post.id}
+            postAuthorMembershipId={post.authorMembershipId}
+            viewer={viewer}
+            initialComments={comments}
+            onCountChange={setCommentCount}
+          />
         ) : null}
-      </AnimatePresence>
+      </FadePresence>
     </article>
   );
 }

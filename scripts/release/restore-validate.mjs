@@ -1,60 +1,32 @@
 #!/usr/bin/env node
 
-import { spawnSync } from "node:child_process";
+import { observeHealth } from "./health-observation.mjs";
 
 const baseUrl = process.env.RESTORED_ENV_BASE_URL?.trim();
-
+const expectedRelease = process.env.RESTORED_ENV_EXPECTED_RELEASE?.trim();
 const failures = [];
 const checks = [];
 
-if (!baseUrl) {
+if (!baseUrl)
   failures.push("RESTORED_ENV_BASE_URL is required after manual isolated non-production restore");
-  console.log(JSON.stringify({ ok: false, failures, checks }, null, 2));
-  process.exit(1);
+if (!expectedRelease) failures.push("RESTORED_ENV_EXPECTED_RELEASE is required");
+
+let origin;
+if (failures.length === 0) {
+  const health = observeHealth(baseUrl, expectedRelease);
+  origin = health.origin;
+  checks.push({ name: "restore.application_health", ok: health.ok });
+  if (!health.ok) failures.push(health.failure);
 }
-
-function runCheck(name, script, args) {
-  const result = spawnSync("pnpm", [script, ...args], {
-    stdio: "pipe",
-    encoding: "utf8",
-    shell: process.platform === "win32",
-    env: {
-      ...process.env,
-      RELEASE_HEALTH_BASE_URL: baseUrl,
-    },
-  });
-
-  const ok = result.status === 0;
-  checks.push({ name, ok, command: `pnpm ${script} ${args.join(" ")}`.trim() });
-  if (!ok) {
-    failures.push(`${name} failed`);
-  }
-}
-
-runCheck("restore.health", "release:health", ["--", "--base-url", baseUrl]);
-runCheck("restore.tenant_config.fundedbeyond", "tenant-config:verify", [
-  "--",
-  "--tenant",
-  "fundedbeyond",
-  "--environment",
-  "test",
-]);
-runCheck("restore.tenant_config.second_smoke", "tenant-config:verify", [
-  "--",
-  "--tenant",
-  "second-smoke-academy",
-  "--environment",
-  "test",
-]);
-runCheck("restore.tenant_isolation", "test:tenant-isolation", []);
 
 const result = {
   ok: failures.length === 0,
-  baseUrl,
+  evidenceScope: "application-health-only",
+  restoreProven: false,
+  ...(origin ? { baseUrl: origin } : {}),
   checks,
   failures,
-  note: "Restore validation assumes manual isolated non-production restore completed first",
+  note: "HTTP health observes an expected release only. It does not perform a restore or verify restored data, RLS, tenant isolation, backup integrity, RPO or RTO. Run a separately authorized isolated database restore drill for that evidence.",
 };
-
 console.log(JSON.stringify(result, null, 2));
-process.exit(result.ok ? 0 : 1);
+process.exitCode = result.ok ? 0 : 1;

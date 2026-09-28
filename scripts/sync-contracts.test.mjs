@@ -28,6 +28,7 @@ const files = [
   "backend/packages/membership/src/schemas/shared.ts",
   "backend/packages/membership/src/schemas/admin-members.ts",
   "backend/packages/membership/src/notification-preferences.catalog.ts",
+  "backend/packages/membership/src/notification-preferences.data.ts",
   "backend/packages/events/src/event-types.ts",
   "backend/packages/audit/src/schemas/audit.ts",
   "backend/apps/api/src/server/certificates/certificate-design-document.ts",
@@ -36,6 +37,7 @@ const files = [
 const manual = [
   "access/permission-guards.ts",
   "item-registry/answer-contracts.ts",
+  "item-registry/answer-ui.ts",
   ...["theme-contrast", "theme-css-vars", "theme-diff", "theme-presets"].map(
     (name) => `domain-branding/utils/${name}.ts`,
   ),

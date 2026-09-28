@@ -17,6 +17,21 @@ export default defineConfig({
   resolve: {
     alias: [
       {
+        find: /^@\/(.+)$/,
+        replacement: path.resolve(import.meta.dirname, "frontend/apps/web/src/$1"),
+      },
+      {
+        find: /^@atlas\/design-system\/(.+)$/,
+        replacement: path.resolve(import.meta.dirname, "frontend/packages/design-system/src/$1"),
+      },
+      {
+        find: "@atlas/design-system",
+        replacement: path.resolve(
+          import.meta.dirname,
+          "frontend/packages/design-system/src/index.ts",
+        ),
+      },
+      {
         find: "server-only",
         replacement: path.resolve(import.meta.dirname, "tests/helpers/server-only.ts"),
       },

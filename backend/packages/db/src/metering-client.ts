@@ -12,9 +12,172 @@ export type DurableUsageEvent = {
 
 export const USAGE_ACQUIRE_TIMEOUT_MS = 500;
 export const USAGE_TRANSACTION_TIMEOUT_MS = 1_500;
+export const USAGE_BATCH_DELAY_MS = 5;
+export const USAGE_BATCH_MAX_EVENTS = 64;
+export const USAGE_QUEUE_MAX_EVENTS = 1_024;
+export const USAGE_QUEUE_TIMEOUT_MS = 500;
+const USAGE_BATCH_CONCURRENCY = 2;
+
+/** A rejected admission has not reached PostgreSQL and must never be acknowledged. */
+export type UsageAdmissionReason = "capacity" | "deadline" | "closed" | "unknown";
+export class UsageAdmissionError extends Error {
+  constructor(
+    message: string,
+    readonly reason: UsageAdmissionReason = "unknown",
+  ) {
+    super(message);
+  }
+}
+
+type PendingUsage = {
+  event: DurableUsageEvent;
+  expiresAt: number;
+  timer: ReturnType<typeof setTimeout>;
+  resolve: () => void;
+  reject: (reason: unknown) => void;
+};
+
+/** Coalescing is only scheduling: callers retain an unresolved promise until COMMIT. */
+export function createBoundedUsageBatcher(
+  writer: (events: readonly DurableUsageEvent[]) => Promise<void>,
+) {
+  const tenants = new Map<string, PendingUsage[]>();
+  const idleWaiters = new Set<() => void>();
+  let retained = 0;
+  let active = 0;
+  let closed = false;
+  let scheduled: ReturnType<typeof setTimeout> | undefined;
+  const totals = {
+    acknowledgedEvents: 0,
+    acknowledgedRequests: 0,
+    acknowledgedEmails: 0,
+    committedBatches: 0,
+    failedBatchAttempts: 0,
+    rejectedAdmissions: 0,
+    rejectedCapacity: 0,
+    rejectedDeadline: 0,
+    rejectedClosed: 0,
+  };
+
+  function settled(count: number) {
+    retained -= count;
+    if (retained === 0) {
+      for (const resolve of idleWaiters) resolve();
+      idleWaiters.clear();
+    }
+  }
+
+  function schedule() {
+    if (!scheduled && tenants.size && active < USAGE_BATCH_CONCURRENCY) {
+      // Keep the timer referenced: pending acknowledgements must keep CLI producers alive.
+      scheduled = setTimeout(dispatch, USAGE_BATCH_DELAY_MS);
+    }
+  }
+
+  function dispatch() {
+    scheduled = undefined;
+    while (active < USAGE_BATCH_CONCURRENCY && tenants.size) {
+      const nextTenant = tenants.entries().next().value;
+      if (!nextTenant) break;
+      const [tenantId, queue] = nextTenant;
+      tenants.delete(tenantId);
+      const candidates = queue.splice(0, USAGE_BATCH_MAX_EVENTS);
+      // Round-robin tenants so a busy tenant cannot starve another tenant's acknowledgement.
+      if (queue.length) tenants.set(tenantId, queue);
+      const batch = candidates.filter((entry) => {
+        clearTimeout(entry.timer);
+        if (entry.expiresAt > Date.now()) return true;
+        entry.reject(new UsageAdmissionError("Usage metering queue deadline exceeded", "deadline"));
+        totals.rejectedAdmissions++;
+        totals.rejectedDeadline++;
+        settled(1);
+        return false;
+      });
+      if (!batch.length) continue;
+      active++;
+      void (async () => {
+        try {
+          await writer(batch.map((entry) => entry.event));
+          totals.committedBatches++;
+          for (const entry of batch) {
+            totals.acknowledgedEvents++;
+            totals.acknowledgedRequests += entry.event.requests;
+            totals.acknowledgedEmails += entry.event.emails;
+            entry.resolve();
+          }
+        } catch (error) {
+          totals.failedBatchAttempts++;
+          for (const entry of batch) entry.reject(error);
+        } finally {
+          active--;
+          settled(batch.length);
+          schedule();
+        }
+      })();
+    }
+  }
+
+  function append(event: DurableUsageEvent): Promise<void> {
+    if (closed) {
+      totals.rejectedAdmissions++;
+      totals.rejectedClosed++;
+      return Promise.reject(new UsageAdmissionError("Usage metering is closed", "closed"));
+    }
+    if (retained >= USAGE_QUEUE_MAX_EVENTS) {
+      totals.rejectedAdmissions++;
+      totals.rejectedCapacity++;
+      return Promise.reject(
+        new UsageAdmissionError("Usage metering queue capacity exceeded", "capacity"),
+      );
+    }
+    retained++;
+    return new Promise<void>((resolve, reject) => {
+      const entry: PendingUsage = {
+        event,
+        resolve,
+        reject,
+        expiresAt: Date.now() + USAGE_QUEUE_TIMEOUT_MS,
+        timer: setTimeout(() => {
+          const queue = tenants.get(event.tenantId);
+          if (!queue) return;
+          const index = queue.indexOf(entry);
+          if (index < 0) return;
+          queue.splice(index, 1);
+          if (!queue.length) tenants.delete(event.tenantId);
+          reject(new UsageAdmissionError("Usage metering queue deadline exceeded", "deadline"));
+          totals.rejectedAdmissions++;
+          totals.rejectedDeadline++;
+          settled(1);
+        }, USAGE_QUEUE_TIMEOUT_MS),
+      };
+      const queue = tenants.get(event.tenantId) ?? [];
+      queue.push(entry);
+      tenants.set(event.tenantId, queue);
+      schedule();
+    });
+  }
+
+  function flush(): Promise<void> {
+    if (!retained) return Promise.resolve();
+    return new Promise<void>((resolve) => idleWaiters.add(resolve));
+  }
+
+  return {
+    append,
+    flush,
+    snapshot: () => ({ ...totals, retainedEvents: retained, activeBatches: active }),
+    close: () => {
+      closed = true;
+      return flush();
+    },
+  };
+}
 
 declare global {
   var __atlasUsagePgPool: Pool | undefined;
+  var __atlasUsageBatcher: ReturnType<typeof createBoundedUsageBatcher> | undefined;
+  var __atlasUsageMetricsTimer: ReturnType<typeof setInterval> | undefined;
+  var __atlasUsageMeteringClosed: boolean | undefined;
 }
 
 export function resolveUsagePoolMax(value: string | undefined): number {
@@ -53,8 +216,13 @@ function getUsagePool(): Pool {
 }
 
 /** Injectable pool boundary; all SQL stays parameterized and tenant scoped. */
-export function createDurableUsageAppender(pool: Pick<Pool, "connect">) {
-  return async (event: DurableUsageEvent): Promise<void> => {
+export function createDurableUsageBatchAppender(pool: Pick<Pool, "connect">) {
+  return async (events: readonly DurableUsageEvent[]): Promise<void> => {
+    const event = events[0];
+    if (!event || events.length > USAGE_BATCH_MAX_EVENTS)
+      throw new Error("Usage batch must contain between 1 and 64 events");
+    if (events.some((item) => item.tenantId !== event.tenantId))
+      throw new Error("Usage batch must contain events for the same tenant");
     const client = await pool.connect();
     const state = { released: false, expired: false };
     let committed = false;
@@ -81,15 +249,17 @@ export function createDurableUsageAppender(pool: Pick<Pool, "connect">) {
       );
       await client.query(
         `INSERT INTO tenant_usage_events (id, tenant_id, period_start, requests, duration_ms, emails)
-         VALUES ($1::uuid, $2::uuid, $3::date, $4::bigint, $5::float8, $6::bigint)
+         SELECT item.id, $2::uuid, item.period_start, item.requests, item.duration_ms, item.emails
+         FROM unnest($1::uuid[], $3::date[], $4::bigint[], $5::float8[], $6::bigint[])
+           AS item(id, period_start, requests, duration_ms, emails)
          ON CONFLICT (id) DO NOTHING`,
         [
-          event.id,
+          events.map((item) => item.id),
           event.tenantId,
-          event.periodStart.toISOString().slice(0, 10),
-          event.requests,
-          event.durationMs,
-          event.emails,
+          events.map((item) => item.periodStart.toISOString().slice(0, 10)),
+          events.map((item) => item.requests),
+          events.map((item) => item.durationMs),
+          events.map((item) => item.emails),
         ],
       );
       await client.query("COMMIT");
@@ -107,12 +277,53 @@ export function createDurableUsageAppender(pool: Pick<Pool, "connect">) {
   };
 }
 
-export async function appendDurableUsage(event: DurableUsageEvent): Promise<void> {
-  await createDurableUsageAppender(getUsagePool())(event);
+export function createDurableUsageAppender(pool: Pick<Pool, "connect">) {
+  const append = createDurableUsageBatchAppender(pool);
+  return (event: DurableUsageEvent): Promise<void> => append([event]);
 }
 
-/** Stop producers before calling this during controlled shutdown or CLI tests. */
+export async function appendDurableUsage(event: DurableUsageEvent): Promise<void> {
+  if (globalThis.__atlasUsageMeteringClosed)
+    throw new UsageAdmissionError("Usage metering is closed", "closed");
+  if (!globalThis.__atlasUsageBatcher) {
+    globalThis.__atlasUsageBatcher = createBoundedUsageBatcher(
+      createDurableUsageBatchAppender(getUsagePool()),
+    );
+    if (process.env["DATABASE_POOL_METRICS"] === "1") {
+      globalThis.__atlasUsageMetricsTimer = setInterval(emitUsageMetrics, 60_000);
+      globalThis.__atlasUsageMetricsTimer.unref();
+    }
+  }
+  await globalThis.__atlasUsageBatcher.append(event);
+}
+
+function emitUsageMetrics(): void {
+  if (!globalThis.__atlasUsageBatcher) return;
+  console.info(
+    JSON.stringify({
+      event: "usage_meter_metrics",
+      pid: process.pid,
+      timestamp: new Date().toISOString(),
+      ...globalThis.__atlasUsageBatcher.snapshot(),
+    }),
+  );
+}
+
+export async function flushUsageMetering(): Promise<void> {
+  await globalThis.__atlasUsageBatcher?.flush();
+}
+
+/** Terminal for this process. Flush the recorder first to include delayed retries. */
 export async function closeUsageMeteringPool(): Promise<void> {
+  // Set before the first await: a delayed retry must not create a fresh pool.
+  globalThis.__atlasUsageMeteringClosed = true;
+  await globalThis.__atlasUsageBatcher?.close();
+  if (globalThis.__atlasUsageMetricsTimer) {
+    clearInterval(globalThis.__atlasUsageMetricsTimer);
+    globalThis.__atlasUsageMetricsTimer = undefined;
+    emitUsageMetrics();
+  }
+  globalThis.__atlasUsageBatcher = undefined;
   const pool = globalThis.__atlasUsagePgPool;
   globalThis.__atlasUsagePgPool = undefined;
   await pool?.end();

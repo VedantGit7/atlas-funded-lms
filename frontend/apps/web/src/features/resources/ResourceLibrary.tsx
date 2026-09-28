@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { FadePresence } from "../../components/motion/FadePresence";
 import {
   Check,
   ChevronDown,
@@ -56,7 +56,6 @@ export function ResourceLibrary({
   const [sort, setSort] = useState<ResourceSort>("recent");
   const [view, setView] = useState<"grid" | "list">("grid");
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const reduce = useReducedMotion();
 
   const buildQuery = useCallback(
     (nextCursor?: string | null) => {
@@ -207,20 +206,9 @@ export function ResourceLibrary({
             <SortDropdown value={sort} onChange={setSort} />
           </div>
 
-          <AnimatePresence initial={false}>
-            {filtersOpen ? (
-              <motion.div
-                key="mobile-filters"
-                initial={reduce ? { opacity: 0 } : { height: 0, opacity: 0 }}
-                animate={reduce ? { opacity: 1 } : { height: "auto", opacity: 1 }}
-                exit={reduce ? { opacity: 0 } : { height: 0, opacity: 0 }}
-                transition={{ duration: reduce ? 0.12 : 0.2, ease: [0.16, 1, 0.3, 1] }}
-                className="overflow-hidden lg:hidden"
-              >
-                <div className="pt-1">{rail}</div>
-              </motion.div>
-            ) : null}
-          </AnimatePresence>
+          <FadePresence open={filtersOpen} collapse className="overflow-hidden lg:hidden">
+            <div className="pt-1">{rail}</div>
+          </FadePresence>
 
           {(hasActiveFilters || total > 0) && (
             <div className="flex flex-wrap items-center gap-2 border-t border-border pt-3">

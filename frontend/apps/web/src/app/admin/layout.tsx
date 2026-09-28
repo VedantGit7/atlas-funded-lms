@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { TenantAdminShell } from "../../components/shells/TenantAdminShell";
+import { QueryProvider } from "../../components/providers/QueryProvider";
 import {
   resolveDocumentDescription,
   resolveDocumentTitle,
@@ -42,8 +43,12 @@ export default async function AdminLayout({ children }: { children: ReactNode })
 
   // Dedicated Certificate Builder — no admin shell chrome; owns its own UI.
   if (isCertificateBuilderRoute(pathname)) {
-    return <>{children}</>;
+    return <QueryProvider>{children}</QueryProvider>;
   }
 
-  return <TenantAdminShell>{children}</TenantAdminShell>;
+  return (
+    <QueryProvider>
+      <TenantAdminShell>{children}</TenantAdminShell>
+    </QueryProvider>
+  );
 }

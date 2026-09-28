@@ -1,8 +1,4 @@
 import type { ReactNode } from "react";
-import { AdminAccountShell } from "./AdminAccountShell";
-import { LearnerShell } from "./LearnerShell";
-import { ModerationShell } from "./ModerationShell";
-import { StudioShell } from "./StudioShell";
 import { resolveAccountShellKind } from "../../lib/server/account-role";
 import {
   AccountThemeProvider,
@@ -37,13 +33,21 @@ export async function AccountShell({ children }: AccountShellProps) {
   const themedChildren = <AccountThemeProvider kind={themeKind}>{children}</AccountThemeProvider>;
 
   switch (kind) {
-    case "admin":
+    case "admin": {
+      const { AdminAccountShell } = await import("./AdminAccountShell");
       return <AdminAccountShell>{themedChildren}</AdminAccountShell>;
-    case "instructor":
+    }
+    case "instructor": {
+      const { StudioShell } = await import("./StudioShell");
       return <StudioShell>{themedChildren}</StudioShell>;
-    case "moderator":
+    }
+    case "moderator": {
+      const { ModerationShell } = await import("./ModerationShell");
       return <ModerationShell>{themedChildren}</ModerationShell>;
-    case "learner":
+    }
+    case "learner": {
+      const { LearnerShell } = await import("./LearnerShell");
       return <LearnerShell>{themedChildren}</LearnerShell>;
+    }
   }
 }

@@ -1,10 +1,14 @@
 # F10 repository protection remediation
 
-## Status — 20 September 2026
+## Status — 26 September 2026
 
 **Prepared locally; blocked from activation; F10 remains open.** The importable ruleset and operational procedure are ready. No GitHub rules, collaborators, branch refs, subscription, or repository visibility have been changed.
 
-## Fresh evidence
+Rechecked on 26 September: the rulesets API still returns the private-repository plan restriction. The signed-in settings page shows **no rulesets** and warns that rules will not be enforced on the current private-repository plan. After owner reauthentication, Manage access shows **zero collaborators**: only the owner can contribute. The owner must choose an eligible plan and designate an independent reviewer whose access can be explicitly authorized; making the repository public is not a remediation.
+
+The CI prerequisite is now satisfied for the prior release candidate: `ci-required` succeeded on candidate `0c405545d5c9d51dc29b27f11163c18e723d5bbc` in [run 35966713362](https://github.com/VedantGit7/atlas-funded-lms/actions/runs/35966713362/job/107536867184), published by GitHub Actions app **15368**. This does not certify subsequent working-tree changes. [Current provider evidence](audits/2026-09-26/security-provider-status.json).
+
+## Historical evidence — 20 September
 
 Checked `VedantGit7/atlas-funded-lms` using the connected `VedantGit7` account. The repository is private, its default branch is `main`, and account metadata reports administrator permissions. Main currently points to `d15794708e6a2d0231286612e4bc573e92deb619`.
 
@@ -36,7 +40,7 @@ To complete F10:
 
 1. Enable an eligible private-repository plan for the owning account and make an administrator-capable settings session/client available.
 2. Designate an independent trusted code owner with existing or explicitly authorized write access.
-3. Publish and verify the F09 aggregate on a real candidate; confirm its check publisher.
+3. Preserve the confirmed `ci-required` publisher binding (`15368`) and obtain a successful result for each new candidate. The initial hosted-result prerequisite is complete for `0c40554`.
 4. Import the prepared ruleset, read back effective main/release rules, then retain ordinary/admin rejection and valid-candidate acceptance evidence according to the runbook.
 
 Do not mark F10 resolved until these steps are complete. No paid upgrade or security-policy bypass was attempted.

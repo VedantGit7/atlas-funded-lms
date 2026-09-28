@@ -49,7 +49,7 @@ const nextConfig: NextConfig = {
     // H16. 556 files import from the lucide-react barrel, which pulled the whole
     // icon set into a chunk loaded by 325 routes. Rewriting the barrel to deep
     // imports is the single largest lever on learner first-load weight.
-    optimizePackageImports: ["lucide-react"],
+    optimizePackageImports: ["lucide-react", "@atlas/design-system"],
   },
   // Keep framing exceptions after the baseline. The proxy owns per-request
   // document CSP; the SCORM route owns its enforced opaque sandbox policy.

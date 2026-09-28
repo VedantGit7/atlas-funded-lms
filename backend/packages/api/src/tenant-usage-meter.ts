@@ -1,7 +1,11 @@
 import { randomUUID } from "node:crypto";
 import type { TenantTx } from "@atlas/db";
 import { withTenantTx } from "@atlas/db/with-tenant-tx";
-import { appendDurableUsage } from "@atlas/db/metering-client";
+import {
+  appendDurableUsage,
+  flushUsageMetering,
+  UsageAdmissionError,
+} from "@atlas/db/metering-client";
 import {
   addMeteredUsage,
   METERED_USAGE_KEYS,
@@ -23,6 +27,23 @@ function positive(value: number | undefined): number {
   return value !== undefined && Number.isFinite(value) && value > 0
     ? Math.min(value, Number.MAX_SAFE_INTEGER)
     : 0;
+}
+
+function createUsageEvent(
+  tenantId: string,
+  increment: UsageIncrement,
+  at = new Date(),
+): UsageEvent | undefined {
+  if (!UUID_PATTERN.test(tenantId) || !Number.isFinite(at.getTime())) return;
+  const event: UsageEvent = {
+    id: randomUUID(),
+    tenantId,
+    periodStart: new Date(Date.UTC(at.getUTCFullYear(), at.getUTCMonth(), 1)),
+    requests: Math.floor(positive(increment.requests)),
+    emails: Math.floor(positive(increment.emails)),
+    durationMs: positive(increment.durationMs),
+  };
+  return event.requests || event.emails || event.durationMs ? event : undefined;
 }
 
 async function addBatch(tx: TenantTx, batch: MeteredBatch): Promise<void> {
@@ -52,22 +73,14 @@ export async function appendTenantUsageEvent(tx: TenantTx, event: UsageEvent): P
     ON CONFLICT(id) DO NOTHING`;
 }
 
-/** No timer or in-memory backlog. A resolved true means the write was acknowledged. */
+/** A resolved true means PostgreSQL acknowledged the commit, including any coalescing delay. */
 export function createDurableUsageRecorder(options: {
   writer: (event: UsageEvent) => Promise<void>;
   onError?: (error: unknown, event: UsageEvent) => void;
 }) {
-  return async (tenantId: string, increment: UsageIncrement, at = new Date()): Promise<boolean> => {
-    if (!UUID_PATTERN.test(tenantId) || !Number.isFinite(at.getTime())) return false;
-    const event: UsageEvent = {
-      id: randomUUID(),
-      tenantId,
-      periodStart: new Date(Date.UTC(at.getUTCFullYear(), at.getUTCMonth(), 1)),
-      requests: Math.floor(positive(increment.requests)),
-      emails: Math.floor(positive(increment.emails)),
-      durationMs: positive(increment.durationMs),
-    };
-    if (!event.requests && !event.emails && !event.durationMs) return false;
+  let active = 0;
+  let draining: { promise: Promise<void>; resolve: () => void } | undefined;
+  const recordOne = async (event: UsageEvent): Promise<boolean> => {
     let failure: unknown;
     // A connection can fail after COMMIT. Keep one ID across both attempts.
     for (let attempt = 0; attempt < 2; attempt++) {
@@ -76,6 +89,10 @@ export function createDurableUsageRecorder(options: {
         return true;
       } catch (error) {
         failure = error;
+        // Retrying admission immediately would amplify pressure without resolving
+        // an ambiguous commit. Database failures retain the original ID on retry.
+        if (error instanceof UsageAdmissionError) break;
+        if (attempt === 0) await new Promise((resolve) => setTimeout(resolve, 25));
       }
     }
     try {
@@ -85,28 +102,99 @@ export function createDurableUsageRecorder(options: {
     }
     return false;
   };
+  const recordEvent = (event: UsageEvent): Promise<boolean> => {
+    active++;
+    return recordOne(event).finally(() => {
+      active--;
+      if (active === 0) {
+        draining?.resolve();
+        draining = undefined;
+      }
+    });
+  };
+  const record = (
+    tenantId: string,
+    increment: UsageIncrement,
+    at = new Date(),
+  ): Promise<boolean> => {
+    const event = createUsageEvent(tenantId, increment, at);
+    return event ? recordEvent(event) : Promise.resolve(false);
+  };
+  return Object.assign(record, {
+    recordEvent,
+    flush: (): Promise<void> => {
+      if (!active) return Promise.resolve();
+      if (!draining) {
+        let resolve = () => {};
+        const promise = new Promise<void>((done) => {
+          resolve = done;
+        });
+        draining = { promise, resolve };
+      }
+      return draining.promise;
+    },
+  });
 }
-const persist = createDurableUsageRecorder({
+declare global {
+  var __atlasUsageRecorder: ReturnType<typeof createDurableUsageRecorder> | undefined;
+}
+// Match the process-wide batcher lifecycle, including module reloads and split bundles.
+const persist = (globalThis.__atlasUsageRecorder ??= createDurableUsageRecorder({
   writer: appendDurableUsage,
-  onError: (_error, event) => {
+  onError: (error, event) => {
     console.error(
       JSON.stringify({
         level: "error",
         message: "usage_meter.persistence_failed",
         tenantId: event.tenantId,
         eventId: event.id,
+        failureKind: error instanceof UsageAdmissionError ? "admission" : "database",
+        admissionReason: error instanceof UsageAdmissionError ? error.reason : undefined,
         timestamp: new Date().toISOString(),
       }),
     );
   },
-});
+}));
 export async function recordTenantUsage(
   tenantId: string,
   increment: UsageIncrement,
 ): Promise<void> {
-  const setting = process.env["ATLAS_USAGE_METERING"]?.trim().toLowerCase();
-  if (setting === "off" || (process.env["VITEST"] !== undefined && setting !== "on")) return;
+  if (!usageMeteringEnabled()) return;
   await persist(tenantId, increment);
+}
+
+function usageMeteringEnabled(): boolean {
+  const setting = process.env["ATLAS_USAGE_METERING"]?.trim().toLowerCase();
+  return setting !== "off" && (process.env["VITEST"] === undefined || setting === "on");
+}
+
+/**
+ * Journal successful requests inside their business transaction. Call committed()
+ * only after the transaction resolves; an uncertain COMMIT falls back with the
+ * identical event, so PostgreSQL deduplicates it even if the first commit won.
+ * Successful duration stops before journal insertion/commit/output serialization.
+ * Failed requests retain bounded, explicitly best-effort operational recording.
+ */
+export function createTenantRequestUsage(tenantId: string) {
+  const enabled = usageMeteringEnabled();
+  let event: UsageEvent | undefined;
+  let committed = false;
+  return {
+    async append(tx: TenantTx, increment: UsageIncrement): Promise<void> {
+      if (!enabled) return;
+      event ??= createUsageEvent(tenantId, increment);
+      if (!event) throw new Error("Invalid transactional usage event");
+      await appendTenantUsageEvent(tx, event);
+    },
+    committed(): void {
+      committed = true;
+    },
+    async fallback(increment: UsageIncrement): Promise<boolean> {
+      if (!enabled || committed) return true;
+      event ??= createUsageEvent(tenantId, increment);
+      return event ? persist.recordEvent(event) : false;
+    },
+  };
 }
 
 /** Caller must use one tenant transaction: locks, increments and acknowledgement commit together. */
@@ -155,7 +243,9 @@ export async function drainTenantUsageEvents(
     ORDER BY processed_at,id LIMIT ${options.limit} FOR UPDATE SKIP LOCKED)`;
   return { processed: rows.length };
 }
-/** Compatibility with graceful shutdown: every production record was already awaited. */
+/** Stop producers first. Wait for every admitted write to acknowledge or report failure. */
 export async function flushTenantUsageMeter(): Promise<void> {
-  await Promise.resolve();
+  // A settled batch can still have a recorder waiting to retry or report failure.
+  await persist.flush();
+  await flushUsageMetering();
 }

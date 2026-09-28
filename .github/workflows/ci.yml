@@ -181,6 +181,7 @@ jobs:
           DATABASE_URL: postgresql://generate:generate@127.0.0.1:5432/generate
         run: pnpm db:generate:ci
       - run: pnpm test:architecture
+      - run: pnpm test:reliability-tooling
       - run: pnpm test:supabase-security
       - run: pnpm test:cleanup-boundary
       - run: pnpm test:cleanup-postgres

@@ -29,10 +29,12 @@ Writes `release-evidence.json` with:
 
 ### Optional environment probes
 
-| Variable                  | Gate                            |
-| ------------------------- | ------------------------------- |
-| `RELEASE_HEALTH_BASE_URL` | Staging `pnpm release:health`   |
-| `RESTORED_ENV_BASE_URL`   | Post-restore validation harness |
+| Variable                          | Gate                                                                 |
+| --------------------------------- | -------------------------------------------------------------------- |
+| `RELEASE_HEALTH_BASE_URL`         | Staging application health origin                                    |
+| `RELEASE_HEALTH_EXPECTED_RELEASE` | Required expected identity for the staging health probe              |
+| `RESTORED_ENV_BASE_URL`           | Restored application's health origin                                 |
+| `RESTORED_ENV_EXPECTED_RELEASE`   | Required expected identity for the restored application health probe |
 
 ## Static contract gates
 
@@ -52,14 +54,14 @@ Writes `release-evidence.json` with:
 ## Restore validation (manual prerequisite)
 
 1. Perform **manual isolated non-production restore** per ops runbook.
-2. Set `RESTORED_ENV_BASE_URL` to the restored base URL.
+2. Set `RESTORED_ENV_BASE_URL` to the restored base URL and `RESTORED_ENV_EXPECTED_RELEASE` to its expected release identity.
 3. Run:
 
 ```bash
 pnpm release:restore:validate
 ```
 
-Verifies health, tenant config manifests, and tenant isolation tests against the restored environment.
+Checks application health and the expected release identity only. The result reports `evidenceScope: application-health-only` and `restoreProven: false`. It does not run tenant configuration or isolation tests, prove restored data or backup integrity, or measure RPO/RTO. Retain separate isolated database restore evidence for the manual restore gate.
 
 ## Rollback verification
 
@@ -67,13 +69,17 @@ Verifies health, tenant config manifests, and tenant isolation tests against the
 pnpm release:rollback:verify
 ```
 
-Confirms rollback runbook presence and immutable `RELEASE_SHA` / `RELEASE_VERSION` target. Use `--strict-production` to require `RELEASE_OWNER` and `INCIDENT_OWNER`.
+Checks runbook presence and an explicit target identity from `ROLLBACK_TARGET_RELEASE` (or legacy `RELEASE_SHA` / `RELEASE_VERSION`). This is preflight evidence only and does not prove artifact immutability. Use `--strict-production` to require `RELEASE_OWNER` and `INCIDENT_OWNER`.
+
+After an authorized rollback, set `RELEASE_HEALTH_BASE_URL` and a distinct `RELEASE_CANDIDATE_RELEASE`, then add `--verify-health` to observe the target release. The result remains `rollbackProven: false`; retain deployment history and before/after evidence separately. See [the rollback runbook](rollback.md).
 
 **Does not** perform automatic production rollback.
 
 ## Manual gates (never auto-passed)
 
 See [manual-gates-checklist.md](../release/manual-gates-checklist.md).
+
+**Latest capacity evidence, 26 September 2026:** [Performance verification](../engineering/performance-targets-2026-09-26.md) did not meet acceptance. The local two-hour clock completed, but only 98/100 learners completed endurance, 194/200 completed burst, latency/error gates failed and the development API restarted four times. Usage persistence also failed under load. Learner JavaScript improved from 403.8 to 290.6 KiB gzip; 150 KiB remains open. These observations neither prove hosted production capacity nor close the performance gate.
 
 ## Security exceptions
 

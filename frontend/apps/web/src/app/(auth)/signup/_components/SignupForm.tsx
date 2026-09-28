@@ -8,7 +8,10 @@ import {
   persistUtmAttribution,
   sendSignupAttributionEvent,
 } from "@/lib/attribution/utm-storage";
-import { PublicSignupRequestSchema } from "@atlas/contracts/domain-identity/schemas/public-auth";
+const loadPublicSignupRequestSchema = () =>
+  import("@atlas/contracts/domain-identity/schemas/public-auth").then(
+    (module) => module.PublicSignupRequestSchema,
+  );
 import {
   Form,
   FormControl,
@@ -17,7 +20,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useZodForm } from "@/lib/forms/use-zod-form";
+import { useLazyZodForm } from "@/lib/forms/use-lazy-zod-form";
 import { HiddenFormField } from "@/lib/forms/hidden-form-field";
 import { valuesToFormData } from "@/lib/forms/values-to-form-data";
 import { signupAction, type SignupActionState } from "../_actions/signup-action";
@@ -180,8 +183,9 @@ export function SignupForm() {
     return `/auth/oauth/${provider}?${params.toString()}`;
   };
 
-  const form = useZodForm({
-    schema: PublicSignupRequestSchema,
+  const form = useLazyZodForm({
+    schema: loadPublicSignupRequestSchema,
+    errorField: "email",
     defaultValues: {
       displayName: "",
       email: "",
@@ -396,8 +400,12 @@ export function SignupForm() {
           </p>
         ) : null}
 
-        <button type="submit" disabled={pending} className={primaryButtonClass}>
-          {pending ? "Creating account..." : "Create Account"}
+        <button
+          type="submit"
+          disabled={pending || form.formState.isSubmitting}
+          className={primaryButtonClass}
+        >
+          {pending || form.formState.isSubmitting ? "Creating account..." : "Create Account"}
         </button>
       </form>
 

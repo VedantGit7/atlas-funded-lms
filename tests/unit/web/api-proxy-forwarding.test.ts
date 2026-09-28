@@ -3,6 +3,7 @@ import { NextRequest } from "next/server";
 import { proxy as apiProxy } from "../../../backend/apps/api/src/proxy";
 import { proxy as webProxy } from "../../../frontend/apps/web/src/proxy";
 import { resolveRequestHostFromHeaders } from "../../../backend/packages/tenancy/src/host";
+import { resolveClientIp } from "../../../backend/packages/api/src/client-ip";
 
 const key = "synthetic-api-proxy-credential-0123456789";
 const proxyKeyHeader = "x-atlas-proxy-key";
@@ -164,4 +165,61 @@ describe("F11 authenticated web-to-API host forwarding", () => {
 
     expect(upstreamHeaders(apiProxy(apiRequest())).get("x-atlas-tenant-host")).toBeNull();
   });
+
+  it("does not let direct API callers mint client-IP attribution", () => {
+    vi.stubEnv("TRUSTED_PROXY_HOPS", "1");
+    vi.stubEnv("TRUSTED_CLIENT_IP_HEADER", "");
+    const forwarded = upstreamHeaders(
+      apiProxy(
+        new NextRequest("https://api.example.com/api/v1/me", {
+          headers: {
+            host: "api.example.com",
+            "x-forwarded-for": "198.51.100.99",
+            "x-atlas-client-ip": "198.51.100.98",
+            "x-atlas-proxy-authenticated": "1",
+            "x-atlas-proxy-source": "server",
+          },
+        }),
+      ),
+    );
+
+    expect(
+      resolveClientIp(new Request("https://api.example.com/api/v1/me", { headers: forwarded })),
+    ).toBe("unknown");
+    expect(forwarded.get("x-atlas-client-ip")).toBeNull();
+    expect(forwarded.get("x-atlas-proxy-authenticated")).toBeNull();
+    expect(forwarded.get("x-atlas-proxy-source")).toBeNull();
+  });
+
+  it.each(["/api/v1/me", "/login"])(
+    "overwrites forged client IP for %s at the web boundary",
+    async (path) => {
+      vi.stubEnv("TRUSTED_PROXY_HOPS", "1");
+      vi.stubEnv("TRUSTED_CLIENT_IP_HEADER", "");
+      const forwarded = upstreamHeaders(
+        await webProxy(
+          new NextRequest(`https://tenant.example.com${path}`, {
+            headers: {
+              host: "tenant.example.com",
+              "x-forwarded-for": "192.0.2.99, 198.51.100.42",
+              "x-atlas-client-ip": "192.0.2.99",
+              "x-atlas-proxy-authenticated": "1",
+            },
+          }),
+        ),
+      );
+      expect(forwarded.get("x-atlas-client-ip")).toBe("198.51.100.42");
+      expect(forwarded.get("x-atlas-proxy-authenticated")).toBeNull();
+      if (path.startsWith("/api")) {
+        const accepted = upstreamHeaders(
+          apiProxy(new NextRequest("https://api.example.com/api/v1/me", { headers: forwarded })),
+        );
+        expect(resolveClientIp(new Request("https://api.example.com", { headers: accepted }))).toBe(
+          "198.51.100.42",
+        );
+        expect(accepted.get("x-atlas-proxy-authenticated")).toBe("browser");
+        expect(accepted.get(proxyKeyHeader)).toBeNull();
+      }
+    },
+  );
 });

@@ -1,0 +1,301 @@
+{
+  "capturedAt": "2026-09-26T11:28:33.938Z",
+  "scope": "Modified and untracked source/test/configuration files captured during the unchanged corrected load run; earlier security and reliability work remains included. No commit or deployment.",
+  "head": "0c405545d5c9d51dc29b27f11163c18e723d5bbc",
+  "branch": "release/atlas-staging-20260923",
+  "trackedDiffSha256": "1ca6c426bba11af60ff7db371da58ddba7f38f7e46e5fdfa7e599492dea9ce4d",
+  "files": [
+    {
+      "path": "backend/apps/api/src/app/api/v1/me/route.ts",
+      "sha256": "3e6583635ae3cb77b781b4857928d486c56197d814a7a1b21fbaa4b531028e63"
+    },
+    {
+      "path": "backend/apps/api/src/app/api/v1/public/auth/login/route.ts",
+      "sha256": "22912138cdb04d0d563a850aff786f1e255436565942d6dfdb6b65ed7e458398"
+    },
+    {
+      "path": "backend/apps/api/src/worker/outbox-sweep.ts",
+      "sha256": "73ba9be42f662578996688c33bf5900bb92a92146930ac60e96fe5aab35af4df"
+    },
+    {
+      "path": "backend/packages/api/src/client-ip.ts",
+      "sha256": "eee6e448a42584609d1a9afa0d5d6db5daf8589e0ded38c8f8b1ed893702134d"
+    },
+    {
+      "path": "backend/packages/api/src/rate-limit-store.ts",
+      "sha256": "1109caa08faed122983b549b78b0d2ec8b405db91cfa369f761d462eb87cd517"
+    },
+    {
+      "path": "backend/packages/api/src/rate-limit.ts",
+      "sha256": "5960836b6c0dc2276bb2894c075aa4a5c85e62483c371cfa00d8b3cf1931a6d8"
+    },
+    {
+      "path": "backend/packages/auth/package.json",
+      "sha256": "94472e74c54e7e8169e0a66d3ef7d09c60a4517306154eec756da3bdd9330c12"
+    },
+    {
+      "path": "backend/packages/auth/src/account-security.service.ts",
+      "sha256": "3a237bfb04f4708170d451cead391b92115d8f1a13d6945fb10b8dbabdff4c4c"
+    },
+    {
+      "path": "backend/packages/auth/src/auth-errors.ts",
+      "sha256": "a9c0de03cc1db8521f149ebd8f6ba8c06461d17e15e1394f237314656a14824a"
+    },
+    {
+      "path": "backend/packages/auth/src/public-auth.service.ts",
+      "sha256": "15656d03d4288f9b411b0aa3412779d17183d0977e47557ecdc39d8c930dd11a"
+    },
+    {
+      "path": "backend/packages/core/src/config/deployment-contract.ts",
+      "sha256": "bf0ad4a815ab7a2742bdfc6ffc652a644f7b59063cb3a7036edacb336312b736"
+    },
+    {
+      "path": "backend/packages/core/src/http/api-proxy.ts",
+      "sha256": "9ff219b2030b945313004dedf6c844cc12ead5e2be50374bd94858dc9b22a683"
+    },
+    {
+      "path": "backend/packages/core/src/http/client-ip.ts",
+      "sha256": "5da998cddc57d1b351e78dd2b7fb1516275ecb7ba0d714175f117bdda9d7c160"
+    },
+    {
+      "path": "configs/learner-bundle-baseline.json",
+      "sha256": "e5f4e6382e3835f8e3fa5d1eb91eb466b6747fb690dbea0084b0c67517ed0abb"
+    },
+    {
+      "path": "frontend/apps/web/src/app/(auth)/invite/accept/_actions/accept-invitation-action.ts",
+      "sha256": "8de5c9619824a601e16570240e86f590f625178a7fa1e67132bc74d3c48a4756"
+    },
+    {
+      "path": "frontend/apps/web/src/app/(auth)/reset-password/_actions/reset-password-action.ts",
+      "sha256": "c508ab83965b4f0efde36ce4d5e95df7de007ba85b5320dc182eeaa3ae839658"
+    },
+    {
+      "path": "frontend/apps/web/src/app/auth/callback/route.ts",
+      "sha256": "22817eaef874997d94a137e7d2e4bb70cc717a774b887b66d275108b5aa1ba3b"
+    },
+    {
+      "path": "frontend/apps/web/src/app/auth/oauth/[provider]/route.ts",
+      "sha256": "6536e528eec5ea059097250ca3c87cc3953ba3f1ce15b4a3001dd126abf67dab"
+    },
+    {
+      "path": "frontend/apps/web/src/features/certificates/certificates-view.ts",
+      "sha256": "c629755a2f3ee314514904cc4d5168a8851463731367d5d76a4281dbbacd7d25"
+    },
+    {
+      "path": "frontend/apps/web/src/features/certificates/components/CertificateShareDialog.tsx",
+      "sha256": "5631cd3a9cf4d434afc501572d0055c1100603a6f209af178f179a16d561fb7c"
+    },
+    {
+      "path": "frontend/apps/web/src/features/diagnostics/components/AnonymousDiagnosticResultView.tsx",
+      "sha256": "bdf3864bb7c30d1f2e3914c1d3e2dacd0b2537f5eca96f0fd030c5a80b7f59ae"
+    },
+    {
+      "path": "frontend/apps/web/src/features/diagnostics/components/DeferredDiagnosticIdentityGate.tsx",
+      "sha256": "b42f76f1b37b49f381136b7f0e23fe96b47b6dcbb6c3aa58428f075cea0da73a"
+    },
+    {
+      "path": "frontend/apps/web/src/features/diagnostics/components/PublicDiagnosticRunner.tsx",
+      "sha256": "67422c9b8c9080f6da6927049bbfab59fda008c6e8297ee0475b9d784e8400d4"
+    },
+    {
+      "path": "frontend/apps/web/src/lib/api/server.ts",
+      "sha256": "957e3f01b292ae97f6dccb22a66870a6f617fa9f71084e24b784086ab3d418f4"
+    },
+    {
+      "path": "frontend/apps/web/src/lib/server/load-invite-accept-context.ts",
+      "sha256": "40ebdd29d85fc5b49b0cb041dba3f6148ee450b2521445cdee8cf5abb259daf0"
+    },
+    {
+      "path": "frontend/apps/web/src/lib/server/public-auth-fetch.ts",
+      "sha256": "87188545bfe92b5d49fbcc4d399514a1448c278af559e6170affff80fa25077f"
+    },
+    {
+      "path": "frontend/apps/web/src/lib/server/resolve-client-ip.ts",
+      "sha256": "ffe903d8d42050ab6236bcf862a04ce9cda2dea7df74dd700f0b14d3395331c2"
+    },
+    {
+      "path": "frontend/apps/web/src/lib/server/session-refresh.ts",
+      "sha256": "201993860f7d319c9c439acfe36e3ff1507f8ee9af7dd9dd2d24d24de90edca7"
+    },
+    {
+      "path": "frontend/apps/web/src/observability/posthog-browser.ts",
+      "sha256": "b27a5ad76dc416a8e8d32b977fa77a421b00ecd2bfcfaaba932224a411afce7b"
+    },
+    {
+      "path": "frontend/apps/web/src/proxy.ts",
+      "sha256": "d047d5a7677dd8faaf3899f040fcd0bc8c4ace47b2cabd4837a7df02ea2a755d"
+    },
+    {
+      "path": "scripts/db/migration-verification.mjs",
+      "sha256": "7e4051cd8bb4506aa903126cb9c16b9bf5c32a7b48dd59d07146b59a941e3469"
+    },
+    {
+      "path": "scripts/db/migration-verification.test.mjs",
+      "sha256": "40100a9bb7d7d7193d2db4f82a3b205587f791d288c9d446aacc1e8c44ed431c"
+    },
+    {
+      "path": "scripts/perf/capacity-fixture.mjs",
+      "sha256": "71dc8a4a7f6d9f66788a37c31790403ccd1d44b2bb2c9ac85d91361faebf3232"
+    },
+    {
+      "path": "scripts/perf/capacity-fixture.test.mjs",
+      "sha256": "a53ed96f0f9e96871dfe2f111c7cdee2834749448a208ccda595f97b0db2eb12"
+    },
+    {
+      "path": "scripts/perf/http-workload.mjs",
+      "sha256": "95cd4220c860e15b72ab3079eade3706e6e411e99f0773a717f82669fe84196e"
+    },
+    {
+      "path": "scripts/perf/http-workload.test.mjs",
+      "sha256": "ad0f645a22a11400b70e29eb4888ad3f20be1c264108ff37eaed972121fed3d4"
+    },
+    {
+      "path": "scripts/perf/local-capacity-services.mjs",
+      "sha256": "5408d68c298391b6081f9972ebdcfb51f3ad88ce12e0c30b68b90f488aec1968"
+    },
+    {
+      "path": "scripts/perf/local-capacity-services.test.mjs",
+      "sha256": "93cfadcf32c018850a412f6b11f6d0d2354a69801be23802a814cfbe25473fa3"
+    },
+    {
+      "path": "scripts/perf/local-edge.mjs",
+      "sha256": "9a91e12edf2ed3740ec51a891b85f009a49c7ac5223eff0aa348656d1c3a2bcb"
+    },
+    {
+      "path": "scripts/perf/local-edge.test.mjs",
+      "sha256": "ac6eba8907284d26120e6aca45fe2df1ac2791b0c2c13c943bccec39161672ff"
+    },
+    {
+      "path": "scripts/perf/telemetry.mjs",
+      "sha256": "5184ed864cda323ee8a803be730c6bd1062dc7209d2201f72f3a73ca490a7d4f"
+    },
+    {
+      "path": "scripts/perf/telemetry.test.mjs",
+      "sha256": "3487d341c931df2458cdb02b55fb479f678621da33c57c9dec5a847cfff9f5ea"
+    },
+    {
+      "path": "scripts/release/health-observation.mjs",
+      "sha256": "00a86c931a326930d562df7199e5869a4e54466ce7b016e8dff841116be2627a"
+    },
+    {
+      "path": "scripts/release/restore-drill.mjs",
+      "sha256": "8ac2a6b77eb0a34c7259568cb26b9d1d2e636bb5c969950875b65c31f927c716"
+    },
+    {
+      "path": "scripts/release/restore-drill.test.mjs",
+      "sha256": "d470b3d13c3644553efcab5deffd0eda515972446d27444e1aca403e10ebca54"
+    },
+    {
+      "path": "scripts/release/restore-validate.mjs",
+      "sha256": "e3aef7f318305c29ed00ae0804e9510802e78bd579d992353a18136397b766e4"
+    },
+    {
+      "path": "scripts/release/rollback-verify.mjs",
+      "sha256": "f00a92c3714e3e9c8363833502de837476e39ad1720ea32d27499560f9c7e5d3"
+    },
+    {
+      "path": "scripts/reliability/alerts-rollback-child.ts",
+      "sha256": "91c4f5eb89152a6a058179ff8fe577fa9b05231865efb3d8f71386764ce555b8"
+    },
+    {
+      "path": "scripts/reliability/alerts-rollback-local-drill.mjs",
+      "sha256": "ab61a82777195601c3d49118d2aec270819fe0dc84cb1a00e2d2a69a44af7b27"
+    },
+    {
+      "path": "scripts/reliability/alerts-rollback-verifiers.test.mjs",
+      "sha256": "e6f30b9cce0ed82e303a19947bb808d6ecc860290ffff60759babba96b5ef3db"
+    },
+    {
+      "path": "scripts/reliability/seed-restore-fixture.mjs",
+      "sha256": "302b2f9a6ce865ef37ec07c7377522446b4a765f9984f1af6d81c5ec76c24233"
+    },
+    {
+      "path": "scripts/reliability/seed-restore-fixture.test.mjs",
+      "sha256": "bee4d6190a9623c511c2d298ecd38c07dfdf2e235b4a041667d16fcd55e18702"
+    },
+    {
+      "path": "scripts/security/verify-scorm-auth-boundary.mjs",
+      "sha256": "475d4a9c307d7ef919a80d0805d0abb0826d38310d0b764236f656ee2ce3d856"
+    },
+    {
+      "path": "tests/api/public-auth-login.post.test.ts",
+      "sha256": "86d8f1440bfd1fb5167b43ac3b4e93e03a6d25841fa7b78e2bf86df829df3106"
+    },
+    {
+      "path": "tests/integration/api/rate-limit.redis.test.ts",
+      "sha256": "af17da100f2117ea794b18c31085912da0755200535918173f2f6f41e67bd987"
+    },
+    {
+      "path": "tests/integration/api/worker-storage-recovery.postgres.test.ts",
+      "sha256": "4230a537cbc18254b67ca4d1cca735f1e3a3fee642b737db829e25c905cafa65"
+    },
+    {
+      "path": "tests/unit/api/client-ip-boundary.test.ts",
+      "sha256": "7aefd585fb763a731d474d5fdfd6323ddf96cc47b36020571792c44e77d9806f"
+    },
+    {
+      "path": "tests/unit/api/deployment-contract.test.ts",
+      "sha256": "05497ea26c8aaa0d57cc33f8c4c67af3c9d2ba4fdda7c3339b684d9a90c14bf0"
+    },
+    {
+      "path": "tests/unit/api/me-transaction-lifetime.test.ts",
+      "sha256": "6e28eccabf7d5a3e931a595e03b76b099f6da891a25066db8242ef9e202cbbba"
+    },
+    {
+      "path": "tests/unit/api/protected-rate-limit.test.ts",
+      "sha256": "538fd5a634eb1398067e881c8da51a9470168fc6e38e5a000f7f4f1bf7b25fc1"
+    },
+    {
+      "path": "tests/unit/api/rate-limit-manual-routes.test.ts",
+      "sha256": "3c88e08dd32465c4468a3bd3c823a57e971cec8a9a07025848dfd70e93a52732"
+    },
+    {
+      "path": "tests/unit/api/rate-limit-readiness.test.ts",
+      "sha256": "2c4e4c9d7042a7bcce7f14debed640500a946c946ff4df44ff9c29344402eec3"
+    },
+    {
+      "path": "tests/unit/api/rate-limit-startup.test.ts",
+      "sha256": "3eff5ee43a9a08c72ca825d6fe1d5d292cdb47b629940c4363de0991b0af75b6"
+    },
+    {
+      "path": "tests/unit/api/rate-limit.test.ts",
+      "sha256": "331a81c7cf38686596e27aa369767899e02ecacf790971661eb2d7c347390ca8"
+    },
+    {
+      "path": "tests/unit/auth/password-policy-rejections.test.ts",
+      "sha256": "adf2b43ae456326854a5a28a3a5bb7b3ffbb3a708326d01537c52be02bd997e8"
+    },
+    {
+      "path": "tests/unit/frontend/certificate-sharing.test.ts",
+      "sha256": "f3283a01e5f74de8274f91faf0f71bda446d0eaa4f590c9671f487db4689501e"
+    },
+    {
+      "path": "tests/unit/frontend/diagnostic-identity-lazy.test.ts",
+      "sha256": "727ffdfc7341577a28aa157c22ca9f657096fc148ac1a726aeb23eade71928b5"
+    },
+    {
+      "path": "tests/unit/frontend/diagnostic-identity-load-failure.test.ts",
+      "sha256": "83e0e31a3e5d43332d2b6fa8ca56115f274d2bdec6422dbbbb17b1379a6dab7d"
+    },
+    {
+      "path": "tests/unit/frontend/posthog-lazy.test.ts",
+      "sha256": "3471a62f8f094fc393cdc671cd41424af0322f1747fa778fb91f3f9df11cb015"
+    },
+    {
+      "path": "tests/unit/storage/worker-storage-large-upload.test.ts",
+      "sha256": "81e066d9cbcadebd4ff8f06c87452a38018e4fe293085bd1d2924aa64de964eb"
+    },
+    {
+      "path": "tests/unit/web/api-proxy-forwarding.test.ts",
+      "sha256": "f25a3f00c618560dacac786d2d0d165207c2d623690efa03acabe0a06c570f0e"
+    },
+    {
+      "path": "tests/unit/web/internal-api-forwarding.test.ts",
+      "sha256": "450f8bea387cb35f90e77361f02341aa79e291789614b7ff9caad0471218abb7"
+    },
+    {
+      "path": "tests/unit/worker/proctoring-retention-failures.test.ts",
+      "sha256": "54ebaf4e7d3e0d15f23f8caac7915138b6972fb4137c16e5489acea0db36a274"
+    }
+  ]
+}

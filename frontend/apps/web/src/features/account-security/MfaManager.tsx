@@ -1,7 +1,6 @@
 "use client";
 
-import { SafeHtml } from "@/components/SafeHtml";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type ComponentType } from "react";
 import { Smartphone } from "lucide-react";
 import { ClientApiError, clientApi } from "../../lib/client-api";
 import { useAccountTheme } from "../account-settings/account-theme-context";
@@ -17,35 +16,6 @@ type MfaFactor = {
 function formatError(error: unknown): string {
   if (error instanceof ClientApiError) return error.message;
   return "Something went wrong. Please try again.";
-}
-
-function MfaQrCode({ qrCode }: { qrCode: string }) {
-  const { classes } = useAccountTheme();
-  const value = qrCode.trim();
-
-  if (value.startsWith("data:image")) {
-    return (
-      <div className="flex justify-center overflow-hidden rounded-lg border border-[var(--acct-border)] bg-[var(--acct-surface)] p-4">
-        <img
-          src={value}
-          alt="Scan this code with your authenticator app"
-          className="h-44 w-44 max-w-full object-contain"
-        />
-      </div>
-    );
-  }
-
-  if (value.startsWith("<svg") || value.startsWith("<?xml")) {
-    return (
-      <SafeHtml
-        html={value}
-        variant="svg"
-        className={`flex justify-center overflow-hidden rounded-lg border border-[var(--acct-border)] bg-[var(--acct-surface)] p-4 [&>svg]:h-44 [&>svg]:w-44 [&>svg]:max-w-full ${classes.field}`}
-      />
-    );
-  }
-
-  return null;
 }
 
 type MfaManagerProps = Readonly<{
@@ -64,6 +34,8 @@ export function MfaManager({ highlight = false, continuePath = null }: MfaManage
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [QrCode, setQrCode] = useState<ComponentType<{ qrCode: string }> | null>(null);
+  const enrolling = useRef(false);
 
   const loadFactors = useCallback(async () => {
     const response = await clientApi.get<{ data: { factors: MfaFactor[] } }>(
@@ -79,9 +51,15 @@ export function MfaManager({ highlight = false, continuePath = null }: MfaManage
   }, [loadFactors]);
 
   async function startEnroll() {
+    if (enrolling.current) return;
+    enrolling.current = true;
     setBusy(true);
     setMessage(null);
     try {
+      // Load the sanitizer before creating an enrollment. A chunk failure leaves
+      // settings usable and cannot strand a newly created factor without its QR.
+      const { MfaQrCode } = await import("./MfaQrCode");
+      setQrCode(() => MfaQrCode);
       const response = await clientApi.post<{
         data: { factorId: string; qrCode: string; secret: string; uri: string };
       }>("/api/v1/me/security/mfa", {}, "mfa-enroll");
@@ -93,6 +71,7 @@ export function MfaManager({ highlight = false, continuePath = null }: MfaManage
     } catch (error) {
       setMessage(formatError(error));
     } finally {
+      enrolling.current = false;
       setBusy(false);
     }
   }
@@ -199,7 +178,7 @@ export function MfaManager({ highlight = false, continuePath = null }: MfaManage
           </ul>
         ) : null}
 
-        {enroll ? (
+        {enroll && QrCode ? (
           <form
             className="space-y-3 border-t border-[var(--acct-border)] pt-4"
             onSubmit={(event) => {
@@ -207,7 +186,7 @@ export function MfaManager({ highlight = false, continuePath = null }: MfaManage
               void verifyEnroll();
             }}
           >
-            <MfaQrCode qrCode={enroll.qrCode} />
+            <QrCode qrCode={enroll.qrCode} />
             <p className={classes.helper}>Manual key: {enroll.secret}</p>
             <input
               type="text"

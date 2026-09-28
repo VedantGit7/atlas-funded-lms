@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { motion, useReducedMotion } from "motion/react";
+import { motion, useReducedMotion } from "../../../components/motion/animation-boundary";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { clientApi } from "../../../lib/client-api";
 import { captureProductEvent } from "../../../observability/capture-product-event";

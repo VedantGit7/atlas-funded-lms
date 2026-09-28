@@ -1,14 +1,10 @@
-"use client";
-
 import Link from "next/link";
 import { TenantBrandMark } from "@/components/patterns/TenantBrandMark";
 import type { z } from "zod";
 import type { PublicLandingPageSchema } from "@atlas/contracts/domain-branding/schemas/public-landing";
 import { HOW_IT_WORKS, STATS, TESTIMONIALS, WHO_ITS_FOR } from "./landing-data";
 import { DiagnosticSection, ToolsSection } from "./LandingSections";
-import { LandingFaq, LandingNav } from "./LandingInteractive";
-import { captureLandingCtaClick } from "./landing-analytics";
-import { useFbaTheme } from "@/components/theme/use-fba-theme";
+import { LandingFaq, LandingCtaLink, TenantLandingFrame } from "./LandingInteractive";
 import "@/components/theme/fba-theme.css";
 import "./fba-landing.css";
 
@@ -52,7 +48,6 @@ export function TenantPublicLanding({
   authCta = null,
   logoUrl = null,
 }: TenantPublicLandingProps) {
-  const { darkMode, toggleDark } = useFbaTheme();
   // Neutral fallback: this component is the public landing for every tenant
   // (see PublicLandingView), not just tenant #1.
   const footerBrandName = landing.publicName?.trim() ?? "Academy";
@@ -63,15 +58,7 @@ export function TenantPublicLanding({
   const ctaHref = landing.primaryCta.href || "/diagnostic";
 
   return (
-    <div className={`fba-scope fba-landing font-plus-jakarta-sans ${darkMode ? "fba-dark" : ""}`}>
-      <LandingNav
-        darkMode={darkMode}
-        onToggleDark={toggleDark}
-        publicName={landing.publicName}
-        authCta={authCta}
-        logoUrl={logoUrl}
-      />
-
+    <TenantLandingFrame publicName={landing.publicName} authCta={authCta} logoUrl={logoUrl}>
       {/* Hero */}
       <div
         id="hero"
@@ -95,15 +82,13 @@ export function TenantPublicLanding({
               "Start with a free trader-readiness diagnostic, build daily habits with free tools, then go deeper with structured courses, designed to get you through your first funded evaluation."}
           </p>
           <div className="flex flex-wrap justify-center gap-3">
-            <Link
+            <LandingCtaLink
               href={ctaHref}
-              onClick={() => {
-                captureLandingCtaClick("hero_primary_cta");
-              }}
+              source="hero_primary_cta"
               className="rounded-[10px] bg-[var(--fba-ind)] px-[30px] py-[17px] text-sm font-bold text-white no-underline transition-colors hover:bg-[var(--fba-ind-d)]"
             >
               {ctaLabel}
-            </Link>
+            </LandingCtaLink>
             <a
               href="#courses"
               className="rounded-[10px] border-[1.5px] border-[var(--fba-bdr2)] bg-[var(--fba-surf)] px-[30px] py-[17px] text-sm font-semibold text-[var(--fba-tx)] no-underline transition-colors hover:border-[var(--fba-tx3)] hover:bg-[var(--fba-bg2)]"
@@ -382,15 +367,13 @@ export function TenantPublicLanding({
             Take the free diagnostic. No account. No credit card. Just the clearest picture
             you&apos;ll ever get of your evaluation readiness.
           </p>
-          <Link
+          <LandingCtaLink
             href="/diagnostic"
-            onClick={() => {
-              captureLandingCtaClick("final_cta");
-            }}
+            source="final_cta"
             className="inline-flex items-center gap-2 rounded-[11px] bg-white px-9 py-[18px] text-[15px] font-bold text-[var(--fba-ind)] no-underline transition-colors hover:opacity-90"
           >
             Take the Free Diagnostic →
-          </Link>
+          </LandingCtaLink>
           <div className="mt-3.5 text-xs text-white/70">
             Free forever · 5 minutes · No signup required
           </div>
@@ -475,6 +458,6 @@ export function TenantPublicLanding({
           </div>
         </div>
       </footer>
-    </div>
+    </TenantLandingFrame>
   );
 }

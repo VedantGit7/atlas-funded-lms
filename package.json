@@ -19,7 +19,7 @@
     "lint": "node scripts/ci/run-lint.mjs",
     "lint:coverage": "node scripts/ci/check-lint-coverage.mjs",
     "typecheck": "node --max-old-space-size=4096 node_modules/typescript/bin/tsc -b",
-    "test": "pnpm test:cleanup-boundary && pnpm test:unit && pnpm test:structure && pnpm test:security && pnpm test:events && pnpm test:authorization && pnpm test:routes && pnpm test:integration && pnpm test:db && pnpm test:tenant-isolation && pnpm test:e2e && pnpm test:architecture && pnpm test:performance-tooling",
+    "test": "pnpm test:cleanup-boundary && pnpm test:unit && pnpm test:structure && pnpm test:security && pnpm test:events && pnpm test:authorization && pnpm test:routes && pnpm test:integration && pnpm test:db && pnpm test:tenant-isolation && pnpm test:e2e && pnpm test:architecture && pnpm test:performance-tooling && pnpm test:reliability-tooling",
     "test:unit": "vitest run tests/unit",
     "test:integration": "dotenv -e .env.test -- vitest run tests/integration",
     "test:db": "dotenv -e .env.test -- vitest run tests/db",
@@ -129,6 +129,7 @@
     "check:contracts": "node scripts/sync-contracts.mjs --check",
     "test:architecture": "node --test scripts/guards/server-authority.test.mjs scripts/sync-contracts.test.mjs scripts/guards/generated-output.test.mjs scripts/guards/local-font-assets.test.mjs scripts/guards/check-secrets.test.mjs scripts/e2e/verify-failure-probes.test.mjs",
     "test:performance-tooling": "node --test scripts/perf/*.test.mjs tests/performance/*.test.mjs",
+    "test:reliability-tooling": "node --test scripts/release/restore-drill.test.mjs scripts/reliability/alerts-rollback-verifiers.test.mjs scripts/reliability/seed-restore-fixture.test.mjs scripts/db/migration-verification.test.mjs",
     "test:supabase-security": "node scripts/security/verify-f19-event-trigger.mjs",
     "db:proctoring-integrity:check": "node scripts/db/check-proctoring-integrity.mjs",
     "test:proctoring-integrity": "node scripts/db/verify-proctoring-integrity.mjs"

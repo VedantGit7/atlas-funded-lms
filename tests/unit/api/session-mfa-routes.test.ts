@@ -38,7 +38,8 @@ vi.mock("../../../backend/packages/api/src/idempotency-registry", async (importO
   ...(await importOriginal<Record<string, unknown>>()),
   withIdempotency: mocks.idempotency,
 }));
-vi.mock("../../../backend/packages/api/src/tenant-usage-meter", () => ({
+vi.mock("../../../backend/packages/api/src/tenant-usage-meter", async (original) => ({
+  ...(await original<Record<string, unknown>>()),
   recordTenantUsage: vi.fn(),
 }));
 vi.mock("../../../backend/packages/api/src/load-resource-ref", () => ({

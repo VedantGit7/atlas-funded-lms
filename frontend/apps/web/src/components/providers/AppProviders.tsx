@@ -4,7 +4,6 @@ import type { ReactNode } from "react";
 
 import { AppToastViewport } from "../feedback/AppToastViewport";
 import { CurrencyProvider } from "../../features/currency/CurrencyProvider";
-import { QueryProvider } from "./QueryProvider";
 import { ThemeProvider } from "./ThemeProvider";
 
 type AppProvidersProps = Readonly<{
@@ -19,16 +18,14 @@ export function AppProviders({
   initialFxRates,
 }: AppProvidersProps) {
   return (
-    <QueryProvider>
-      <ThemeProvider>
-        <CurrencyProvider
-          initialDisplayCurrency={initialDisplayCurrency}
-          initialFxRates={initialFxRates}
-        >
-          {children}
-          <AppToastViewport />
-        </CurrencyProvider>
-      </ThemeProvider>
-    </QueryProvider>
+    <ThemeProvider>
+      <CurrencyProvider
+        initialDisplayCurrency={initialDisplayCurrency}
+        initialFxRates={initialFxRates}
+      >
+        {children}
+        <AppToastViewport />
+      </CurrencyProvider>
+    </ThemeProvider>
   );
 }

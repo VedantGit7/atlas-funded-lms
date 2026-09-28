@@ -2,22 +2,35 @@
 
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import { observeHealth } from "./health-observation.mjs";
 
 const failures = [];
 const checks = [];
 
-const rollbackTarget = process.env.RELEASE_SHA?.trim() || process.env.RELEASE_VERSION?.trim();
+const rollbackTarget =
+  process.env.ROLLBACK_TARGET_RELEASE?.trim() ||
+  process.env.RELEASE_SHA?.trim() ||
+  process.env.RELEASE_VERSION?.trim();
+const candidateRelease = process.env.RELEASE_CANDIDATE_RELEASE?.trim();
+const verifyHealth = process.argv.includes("--verify-health");
 checks.push({
   name: "rollback.target.present",
   ok: Boolean(rollbackTarget),
+  required: true,
   note: rollbackTarget
     ? "present"
     : "set RELEASE_SHA or RELEASE_VERSION before production rollback",
 });
 
 const strictProduction = process.argv.includes("--strict-production");
-if (strictProduction && !rollbackTarget) {
+if (!rollbackTarget) {
   failures.push("Set RELEASE_SHA or RELEASE_VERSION to identify immutable rollback target");
+}
+if (verifyHealth && (!candidateRelease || candidateRelease === rollbackTarget)) {
+  failures.push("Set RELEASE_CANDIDATE_RELEASE to a different identity from the rollback target");
+}
+if (verifyHealth && !process.env.RELEASE_HEALTH_BASE_URL?.trim()) {
+  failures.push("RELEASE_HEALTH_BASE_URL is required for --verify-health");
 }
 
 const runbookPath = join(process.cwd(), "docs/runbooks/rollback.md");
@@ -50,11 +63,13 @@ const incidentOwner = process.env.INCIDENT_OWNER?.trim();
 checks.push({
   name: "release.owner.documented",
   ok: Boolean(releaseOwner),
+  required: strictProduction,
   note: releaseOwner ? "present" : "set RELEASE_OWNER before production rollback",
 });
 checks.push({
   name: "incident.owner.documented",
   ok: Boolean(incidentOwner),
+  required: strictProduction,
   note: incidentOwner ? "present" : "set INCIDENT_OWNER before production rollback",
 });
 
@@ -70,10 +85,20 @@ if (strictProduction) {
 const result = {
   ok: failures.length === 0,
   rollbackTarget: rollbackTarget ?? null,
+  candidateRelease: candidateRelease ?? null,
+  evidenceScope: verifyHealth ? "target-health-only" : "preflight-only",
+  rollbackProven: false,
   checks,
   failures,
-  note: "Verification only — does not perform automatic production rollback",
+  note: "Does not deploy, prove artifact immutability, observe a prior candidate, or verify workers/data/alert delivery. Retain deployment history and before/after evidence separately.",
 };
+
+if (verifyHealth && failures.length === 0) {
+  const health = observeHealth(process.env.RELEASE_HEALTH_BASE_URL, rollbackTarget);
+  checks.push({ name: "rollback.target.health", ok: health.ok });
+  if (!health.ok) failures.push(health.failure);
+  result.ok = failures.length === 0;
+}
 
 console.log(JSON.stringify(result, null, 2));
 process.exit(result.ok ? 0 : 1);

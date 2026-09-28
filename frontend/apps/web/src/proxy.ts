@@ -2,7 +2,14 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { randomBytes } from "node:crypto";
 import { buildDocumentCsp } from "../../../../configs/security-headers.mjs";
-import { ATLAS_API_PROXY_KEY_HEADER, buildApiProxyHeaders } from "@atlas/core/http/api-proxy";
+import {
+  ATLAS_API_PROXY_KEY_HEADER,
+  ATLAS_CLIENT_IP_HEADER,
+  ATLAS_PROXY_AUTHENTICATED_HEADER,
+  ATLAS_PROXY_SOURCE_HEADER,
+  buildApiProxyHeaders,
+  resolveEdgeClientIp,
+} from "@atlas/core/http/api-proxy";
 import {
   ATLAS_INTERNAL_COOKIE_HEADER,
   ATLAS_INTERNAL_REQUEST_ID_HEADER,
@@ -47,6 +54,10 @@ function buildForwardedRequestHeaders(
     requestHeaders.set("content-security-policy", documentCsp.value);
   }
   requestHeaders.delete(ATLAS_API_PROXY_KEY_HEADER);
+  requestHeaders.delete(ATLAS_PROXY_AUTHENTICATED_HEADER);
+  requestHeaders.delete(ATLAS_PROXY_SOURCE_HEADER);
+  const clientIp = resolveEdgeClientIp(req.headers);
+  requestHeaders.set(ATLAS_CLIENT_IP_HEADER, clientIp);
 
   for (const header of SPOOFABLE_TENANT_HEADERS) {
     requestHeaders.delete(header);
@@ -64,7 +75,13 @@ function buildForwardedRequestHeaders(
     requestHeaders.set(ATLAS_INTERNAL_TENANT_HOST_HEADER, browserHost);
     requestHeaders.set("x-forwarded-host", browserHost);
     if (req.nextUrl.pathname === "/api/v1" || req.nextUrl.pathname.startsWith("/api/v1/")) {
-      requestHeaders = buildApiProxyHeaders(browserHost, requestHeaders);
+      requestHeaders = buildApiProxyHeaders(
+        browserHost,
+        requestHeaders,
+        process.env,
+        clientIp,
+        "browser",
+      );
     }
   }
 

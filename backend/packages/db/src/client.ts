@@ -2,6 +2,7 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 import { PrismaClient } from "./generated/prisma/client";
 import { connectionTimeoutMillis, instrumentPool } from "./pool-instrumentation";
+import { prismaLogLevels } from "./prisma-logging";
 
 declare global {
   var __atlasPrisma: PrismaClient | undefined;
@@ -30,7 +31,7 @@ function createPrismaClient(): PrismaClient {
 
   return new PrismaClient({
     adapter,
-    log: process.env["NODE_ENV"] === "development" ? ["query", "error", "warn"] : ["error"],
+    log: prismaLogLevels(),
   });
 }
 

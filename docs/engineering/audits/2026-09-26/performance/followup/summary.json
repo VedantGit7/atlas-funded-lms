@@ -1,0 +1,99 @@
+{
+  "capturedAt": "2026-09-26T16:49:06.494Z",
+  "mode": "local-development-diagnostic",
+  "capacityVerified": false,
+  "passed": false,
+  "phases": [
+    {
+      "name": "warmup",
+      "users": 100,
+      "targetSeconds": 60,
+      "elapsedMs": 75629.70980000001,
+      "drainElapsedMs": 15629.709800000011,
+      "actorsCompletedDuration": 100,
+      "requests": 1100,
+      "errors": 0,
+      "statuses": {
+        "200": 1100
+      },
+      "requestP95Ms": 6418,
+      "journeyP95Ms": 27585,
+      "incompleteJourneys": 0,
+      "cancelledRequests": 0,
+      "deadlineOverruns": 0
+    },
+    {
+      "name": "sustained",
+      "users": 100,
+      "targetSeconds": 120,
+      "elapsedMs": 124400.17700000003,
+      "drainElapsedMs": 4400.177000000025,
+      "actorsCompletedDuration": 100,
+      "requests": 1625,
+      "errors": 0,
+      "statuses": {
+        "200": 1625
+      },
+      "requestP95Ms": 6885,
+      "journeyP95Ms": 28422,
+      "incompleteJourneys": 0,
+      "cancelledRequests": 0,
+      "deadlineOverruns": 0
+    },
+    {
+      "name": "burst",
+      "users": 200,
+      "targetSeconds": 60,
+      "elapsedMs": 67697.71960000001,
+      "drainElapsedMs": 7697.719600000011,
+      "actorsCompletedDuration": 200,
+      "requests": 1206,
+      "errors": 6,
+      "statuses": {
+        "200": 1200,
+        "401": 3,
+        "503": 3
+      },
+      "requestP95Ms": 12925,
+      "journeyP95Ms": 62431,
+      "incompleteJourneys": 0,
+      "cancelledRequests": 0,
+      "deadlineOverruns": 0
+    }
+  ],
+  "usage": {
+    "schemaVersion": 1,
+    "capturedAt": "2026-09-26T16:45:21.777Z",
+    "durableRequestDelta": 3018,
+    "minimumExpectedRequests": 3020,
+    "maximumExpectedRequests": 3020,
+    "withinExpectedBounds": false,
+    "exact": false,
+    "limitations": "Requires snapshots around the full workload including enrollment setup, no unrelated tenant traffic or journal pruning, and completed server work before the final snapshot. Errors and cancellations create count uncertainty. Combine with terminal failure logs and acknowledgement counters; HTTP success alone does not establish durability."
+  },
+  "sourceUnchanged": {
+    "capturedAt": "2026-09-26T16:46:33.084Z",
+    "files": 158,
+    "unchanged": true
+  },
+  "twoHourRun": false,
+  "scope": "Short diagnostic only: warmup60s/sustained120s/burst60s plus bounded drain. No full15-minute sustained,5-minute burst or2-hour endurance acceptance; no hosted traffic.",
+  "initialAttempt": {
+    "status": "failed-before-login",
+    "reason": "Node local hostname resolution; corrected using existing process-only local DNS helper. No capacity evidence from that attempt."
+  },
+  "cleanup": [
+    {
+      "service": "api",
+      "status": "exited",
+      "exitCode": 1,
+      "signal": null
+    },
+    {
+      "service": "web",
+      "status": "exited",
+      "exitCode": 1,
+      "signal": null
+    }
+  ]
+}

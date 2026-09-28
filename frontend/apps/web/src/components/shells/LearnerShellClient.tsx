@@ -27,7 +27,7 @@ import {
   X,
   type LucideIcon,
 } from "lucide-react";
-import { TenantLogo } from "@atlas/design-system";
+import { TenantLogo } from "@atlas/design-system/components/tenant-logo";
 import type { PublicTenantBranding } from "@atlas/tenant-branding";
 import type { LearnerNavItem } from "../../features/learner/learner-navigation";
 import { performAtlasLogout } from "../../lib/auth/perform-logout";
@@ -48,13 +48,7 @@ const LearnerConfirmDialog = dynamic(
   { ssr: false },
 );
 import { ThemeModeToggle } from "../ThemeModeToggle";
-const MarketingCtaRuntime = dynamic(
-  () =>
-    import("../../features/marketing/MarketingCtaRuntime").then((m) => ({
-      default: m.MarketingCtaRuntime,
-    })),
-  { ssr: false },
-);
+import { DeferredMarketingCtaRuntime as MarketingCtaRuntime } from "../../features/marketing/DeferredMarketingCtaRuntime";
 import { LearnerNotificationPopover } from "../../features/notifications/components/LearnerNotificationPopover";
 import { ShellBottomNav } from "./shared/ShellBottomNav";
 import { ShellSkipLink } from "./shared/ShellSkipLink";

@@ -1,7 +1,7 @@
 import type { EmailOtpType } from "@supabase/supabase-js";
 import type { PublicLoginInput, PublicSignupInput } from "./schemas";
 import { createSupabasePublicServerClient } from "./supabase-server";
-import { invalidCredentials, authEmailRateLimited } from "./auth-errors";
+import { invalidCredentials, authEmailRateLimited, passwordPolicyRejection } from "./auth-errors";
 import { upsertAuthPrincipal } from "./auth-principal.repository";
 import { toSessionSafeIdentity } from "./auth-principal.service";
 
@@ -87,7 +87,7 @@ function throwMappedSignupError(error: {
     throw authEmailRateLimited();
   }
 
-  throw invalidCredentials();
+  throw passwordPolicyRejection(error) ?? invalidCredentials();
 }
 
 export async function signupWithPassword(args: { db: QueryableDb; input: PublicSignupInput }) {
@@ -242,7 +242,7 @@ export async function setPasswordFromInvitationSession(args: {
   });
 
   if (updateError) {
-    throw invalidCredentials();
+    throw passwordPolicyRejection(updateError) ?? invalidCredentials();
   }
 
   const updatedUser = updated.user;

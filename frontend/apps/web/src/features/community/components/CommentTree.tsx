@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { FadePresence } from "../../../components/motion/FadePresence";
 import { CornerDownRight, Pencil, Trash2 } from "lucide-react";
 import { cn } from "@atlas/design-system";
 import { ClientApiError, clientApi } from "../../../lib/client-api";
@@ -160,7 +160,6 @@ export function CommentTree({
   const [comments, setComments] = useState<CommentItem[]>(initialComments);
   const [replyingToId, setReplyingToId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const reduceMotion = useReducedMotion();
 
   const viewerName = authorDisplayName(
     { membershipId: viewer.membershipId, displayName: viewer.displayName, roleKey: null },
@@ -302,29 +301,19 @@ export function CommentTree({
               </div>
             ) : null}
 
-            <AnimatePresence initial={false}>
-              {isReplying ? (
-                <motion.div
-                  initial={reduceMotion ? false : { opacity: 0, y: -4 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -4 }}
-                  transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
-                  className="mt-3"
-                >
-                  <CommentComposer
-                    viewerName={viewerName}
-                    compact
-                    autoFocus
-                    placeholder={`Reply to ${name}`}
-                    submitLabel="Reply"
-                    onSubmit={(text) => addComment(text, node.id)}
-                    onCancel={() => {
-                      setReplyingToId(null);
-                    }}
-                  />
-                </motion.div>
-              ) : null}
-            </AnimatePresence>
+            <FadePresence open={isReplying} duration={180} offset={-4} className="mt-3">
+              <CommentComposer
+                viewerName={viewerName}
+                compact
+                autoFocus
+                placeholder={`Reply to ${name}`}
+                submitLabel="Reply"
+                onSubmit={(text) => addComment(text, node.id)}
+                onCancel={() => {
+                  setReplyingToId(null);
+                }}
+              />
+            </FadePresence>
 
             {node.replies.length > 0 ? (
               <ul

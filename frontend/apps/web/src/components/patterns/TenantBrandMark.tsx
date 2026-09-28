@@ -1,5 +1,3 @@
-import Image from "next/image";
-
 /** Words that carry no tenant identity, so they never contribute an initial. */
 const GENERIC_NAME_WORDS =
   /^(academy|academia|institute|school|schools|college|university|training|trainings|education|educational|learning|learn|lms|the|of|and|for)$/i;
@@ -67,7 +65,7 @@ type TenantBrandMarkProps = {
  * academy saw tenant #1's mark on its admin, studio, auth, loading,
  * verify-email and certificate-builder screens.
  *
- * `unoptimized` is deliberate: tenant logo URLs are absolute, per-tenant and
+ * Native images deliberately bypass optimization: logo URLs are absolute, per-tenant and
  * may be signed storage URLs, so they cannot be enumerated in
  * `images.remotePatterns` and must not be run through the image optimizer
  * (which would also cache a URL that expires).
@@ -75,14 +73,15 @@ type TenantBrandMarkProps = {
 export function TenantBrandMark({ logoUrl, name, size, className }: TenantBrandMarkProps) {
   if (logoUrl) {
     return (
-      <Image
-        src={logoUrl}
+      <img
+        loading="lazy"
+        decoding="async"
         alt=""
         width={size}
         height={size}
-        unoptimized
         className={className}
         style={{ width: size, height: size, objectFit: "contain" }}
+        src={logoUrl}
       />
     );
   }

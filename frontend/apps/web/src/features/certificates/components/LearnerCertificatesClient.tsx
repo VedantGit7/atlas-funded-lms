@@ -7,7 +7,8 @@ import { cn } from "@atlas/design-system";
 import { clientApi, ClientApiError } from "../../../lib/client-api";
 import { ProgressReveal } from "../../progress/components/ProgressReveal";
 import { CertificateCard } from "./CertificateCard";
-import { CertificateShareDialog, type ShareCertificate } from "./CertificateShareDialog";
+import type { ShareCertificate } from "./CertificateShareDialog";
+import { DeferredCertificateShareDialog } from "./DeferredCertificateShareDialog";
 import {
   type CertificateDto,
   type StatusFilter,
@@ -229,7 +230,7 @@ export function LearnerCertificatesClient({
         </div>
       ) : null}
 
-      <CertificateShareDialog
+      <DeferredCertificateShareDialog
         share={share}
         onClose={() => {
           setShare(null);

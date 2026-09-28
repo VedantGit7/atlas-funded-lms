@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { resolveClientIp } from "../../../backend/packages/api/src/client-ip";
 import {
   MemoryRateLimitStore,
@@ -64,13 +64,13 @@ describe("resolveClientIp — trusted proxy hops", () => {
     expect(ip).toBe("203.0.113.9");
   });
 
-  it("defaults to one hop", () => {
+  it("defaults to zero trusted hops", () => {
     expect(
       resolveClientIp(
         request({ "x-forwarded-for": "1.2.3.4, 203.0.113.9" }),
         {} as NodeJS.ProcessEnv,
       ),
-    ).toBe("203.0.113.9");
+    ).toBe("unknown");
   });
 
   it("distrusts a header shorter than the configured hop count", () => {
@@ -92,6 +92,15 @@ describe("resolveClientIp — trusted proxy hops", () => {
   it("returns unknown when no forwarding header is present", () => {
     expect(resolveClientIp(request(), {} as NodeJS.ProcessEnv)).toBe("unknown");
   });
+
+  it.each(["fe80::1%eth0", "198.51.100.1,", ",198.51.100.1"])(
+    "treats malformed or scoped forwarding value %s as unknown",
+    (value) => {
+      expect(
+        resolveClientIp(request({ "x-forwarded-for": value }), { TRUSTED_PROXY_HOPS: "1" }),
+      ).toBe("unknown");
+    },
+  );
 
   it("prefers a configured trusted edge header", () => {
     const ip = resolveClientIp(
@@ -207,6 +216,7 @@ describe("RedisRateLimitStore", () => {
 /* ---------------------------------------------------------- enforcement */
 
 describe("enforcePublicRateLimit", () => {
+  beforeEach(() => vi.stubEnv("TRUSTED_PROXY_HOPS", "1"));
   it("allows exactly the bucket maximum and then throws", async () => {
     setRateLimitStore(new MemoryRateLimitStore());
     const req = request({ "x-forwarded-for": "203.0.113.9" });

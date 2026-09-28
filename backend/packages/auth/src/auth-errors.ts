@@ -16,6 +16,26 @@ export function invalidCredentials(): AtlasHttpError {
   });
 }
 
+export const PASSWORD_POLICY_REJECTION_MESSAGE =
+  "This password does not meet security requirements. Choose a stronger, unique password.";
+
+/** Only password writes may expose this static policy guidance, never login failures. */
+export function passwordPolicyRejection(error: unknown): AtlasHttpError | null {
+  if (
+    typeof error !== "object" ||
+    error === null ||
+    !("code" in error) ||
+    error.code !== "weak_password"
+  ) {
+    return null;
+  }
+  return new AtlasHttpError({
+    code: "VALIDATION_ERROR",
+    status: 400,
+    message: PASSWORD_POLICY_REJECTION_MESSAGE,
+  });
+}
+
 export function authEmailRateLimited(): AtlasHttpError {
   return new AtlasHttpError({
     code: "VALIDATION_ERROR",

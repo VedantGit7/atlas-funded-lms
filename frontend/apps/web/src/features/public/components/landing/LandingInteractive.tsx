@@ -1,12 +1,56 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useState } from "react";
+import { useCallback, useState, type ComponentProps, type ReactNode } from "react";
 import { TenantBrandMark } from "@/components/patterns/TenantBrandMark";
 import { FAQ_DATA } from "./landing-data";
 import { captureLandingCtaClick } from "./landing-analytics";
 import { FbaDarkModeButton } from "@/components/theme/FbaDarkModeButton";
 import "./fba-landing.css";
+import { useFbaTheme } from "@/components/theme/use-fba-theme";
+
+export function TenantLandingFrame({
+  children,
+  publicName,
+  authCta,
+  logoUrl,
+}: {
+  publicName: string | null;
+  authCta: { label: string; href: string } | null;
+  logoUrl: string | null;
+  children: ReactNode;
+}) {
+  const { darkMode, toggleDark } = useFbaTheme();
+  return (
+    <div className={`fba-scope fba-landing font-plus-jakarta-sans ${darkMode ? "fba-dark" : ""}`}>
+      <LandingNav
+        darkMode={darkMode}
+        onToggleDark={toggleDark}
+        publicName={publicName}
+        authCta={authCta}
+        logoUrl={logoUrl}
+      />
+      {children}
+    </div>
+  );
+}
+
+export function LandingCtaLink({
+  source,
+  children,
+  ...props
+}: ComponentProps<typeof Link> & { source: string }) {
+  return (
+    <Link
+      {...props}
+      onClick={() => {
+        captureLandingCtaClick(source);
+      }}
+    >
+      {children}
+    </Link>
+  );
+}
 
 export function LandingFaq() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);

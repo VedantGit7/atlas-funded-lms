@@ -27,6 +27,7 @@ const excluded =
 const handwritten = new Set([
   "access/permission-guards.ts",
   "item-registry/answer-contracts.ts",
+  "item-registry/answer-ui.ts",
   "domain-branding/utils/theme-contrast.ts",
   "domain-branding/utils/theme-css-vars.ts",
   "domain-branding/utils/theme-diff.ts",
@@ -62,6 +63,10 @@ const sourceFiles = [
   [
     "backend/packages/membership/src/notification-preferences.catalog.ts",
     "membership/notification-preferences.catalog.ts",
+  ],
+  [
+    "backend/packages/membership/src/notification-preferences.data.ts",
+    "membership/notification-preferences.data.ts",
   ],
   ["backend/packages/events/src/event-types.ts", "events/event-types.ts"],
   ["backend/packages/audit/src/schemas/audit.ts", "audit/audit.ts"],

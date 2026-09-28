@@ -1,1 +1,1 @@
-export { Card, CardTitle, CardDescription } from "@atlas/design-system";
+export { Card, CardTitle, CardDescription } from "@atlas/design-system/components/card";

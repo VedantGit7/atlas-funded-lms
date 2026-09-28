@@ -4,6 +4,7 @@ import { setRateLimitStore } from "@atlas/api/rate-limit-store";
 
 const hit = vi.fn();
 beforeEach(() => {
+  vi.stubEnv("TRUSTED_PROXY_HOPS", "1");
   vi.stubEnv("NODE_ENV", "test");
   vi.stubEnv("APP_ENV", "development");
   vi.stubEnv("REDIS_URL", "");

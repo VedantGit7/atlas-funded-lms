@@ -1,4 +1,6 @@
 import type { TenantTx } from "@atlas/db";
+import type { ResourceRef } from "@atlas/authorization";
+import { getLoadedLessonProjection } from "../courses/load-course-resource-ref";
 import { auditWriter } from "@atlas/audit";
 import { AtlasHttpError } from "@atlas/core/http/errors";
 import { validateProviderVideoRef } from "@atlas/storage/provider-video.service";
@@ -365,8 +367,14 @@ export async function getLessonForEditor(tx: TenantTx, ctx: ServiceCtx, lessonId
   };
 }
 
-export async function getLessonForPlayer(tx: TenantTx, ctx: ServiceCtx, lessonId: string) {
-  const lesson = await findLessonWithModuleAndCourse({ tx, lessonId });
+export async function getLessonForPlayer(
+  tx: TenantTx,
+  ctx: ServiceCtx,
+  lessonId: string,
+  resource?: ResourceRef,
+) {
+  const loaded = getLoadedLessonProjection(tx, ctx, lessonId, resource);
+  const lesson = loaded?.lesson ?? (await findLessonWithModuleAndCourse({ tx, lessonId }));
 
   if (!lesson || lesson.tenantId !== ctx.tenantId) {
     throw lessonNotFound();
@@ -376,11 +384,13 @@ export async function getLessonForPlayer(tx: TenantTx, ctx: ServiceCtx, lessonId
     throw lessonNotFound();
   }
 
-  const enrollment = await findEnrollmentForMembership({
-    tx,
-    courseId: lesson.courseId,
-    membershipId: ctx.actorMembershipId,
-  });
+  const enrollment = loaded
+    ? loaded.enrollment
+    : await findEnrollmentForMembership({
+        tx,
+        courseId: lesson.courseId,
+        membershipId: ctx.actorMembershipId,
+      });
 
   if (!enrollment) {
     throw lessonEnrollmentRequired();
@@ -455,12 +465,13 @@ export async function getLesson(
   ctx: ServiceCtx,
   lessonId: string,
   query?: LessonDetailQuery,
+  resource?: ResourceRef,
 ) {
   if (query?.view === "studio") {
     return getLessonForEditor(tx, ctx, lessonId);
   }
 
-  return getLessonForPlayer(tx, ctx, lessonId);
+  return getLessonForPlayer(tx, ctx, lessonId, resource);
 }
 
 export async function updateLesson(

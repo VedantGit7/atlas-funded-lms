@@ -1,5 +1,3 @@
-"use client";
-
 import Link from "next/link";
 import {
   ATLAS_CAPABILITIES,
@@ -8,7 +6,7 @@ import {
   ATLAS_STEPS,
   ATLAS_TESTIMONIALS,
 } from "./atlas-landing-data";
-import { AtlasBrandMark, AtlasFaq, AtlasNav, useAtlasTheme } from "./AtlasLandingInteractive";
+import { AtlasBrandMark, AtlasFaq, AtlasLandingFrame } from "./AtlasLandingInteractive";
 import { AuthoringSection, ConsolePreviewCard, PlatformSection } from "./AtlasLandingSections";
 import "./atlas-landing.css";
 
@@ -30,14 +28,8 @@ function CheckRow({ children, light }: { children: string; light?: boolean }) {
 }
 
 export function AtlasPlatformLanding() {
-  const { darkMode, toggleDark, mounted } = useAtlasTheme();
-
   return (
-    <div
-      className={`atlas-landing font-plus-jakarta-sans ${mounted && darkMode ? "atl-dark" : ""}`}
-    >
-      <AtlasNav darkMode={darkMode} onToggleDark={toggleDark} />
-
+    <AtlasLandingFrame>
       {/* Hero */}
       <div className="relative overflow-hidden px-7 max-[768px]:px-4">
         <div className="pointer-events-none absolute inset-0 atl-hero-grid" aria-hidden />
@@ -405,6 +397,6 @@ export function AtlasPlatformLanding() {
           </div>
         </div>
       </footer>
-    </div>
+    </AtlasLandingFrame>
   );
 }

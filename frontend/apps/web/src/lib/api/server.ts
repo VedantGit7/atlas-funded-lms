@@ -6,6 +6,7 @@ import { buildApiProxyHeaders } from "@atlas/core/http/api-proxy";
 import { resolveCookieHeaderForInternalApi } from "../server/resolve-request-cookies";
 import { resolveTenantHostForInternalApi } from "../server/resolve-tenant-host";
 import { refreshSessionCookieHeader } from "../server/session-refresh";
+import { resolveClientIpForInternalApi } from "../server/resolve-client-ip";
 
 const API_INTERNAL_URL = process.env["API_INTERNAL_URL"] ?? "http://127.0.0.1:3001";
 
@@ -44,7 +45,12 @@ async function buildInternalApiRequest(
 async function request<T>(path: string, init?: RequestInit, options?: RequestOptions): Promise<T> {
   const { url, forwardedHost } = await buildInternalApiRequest(path);
   const cookie = options?.cookieHeader ?? (await resolveCookieHeaderForInternalApi());
-  const requestHeaders = buildApiProxyHeaders(forwardedHost, init?.headers);
+  const requestHeaders = buildApiProxyHeaders(
+    forwardedHost,
+    init?.headers,
+    process.env,
+    await resolveClientIpForInternalApi(),
+  );
 
   if (cookie) {
     requestHeaders.set("cookie", cookie);

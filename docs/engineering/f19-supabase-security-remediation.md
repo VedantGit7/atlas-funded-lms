@@ -2,6 +2,16 @@
 
 Updated 20 September 2026. **The database permission findings are fixed on the connected hosted project. Leaked-password protection remains blocked by the organization's Free plan. F19 is partially complete.**
 
+### Recheck — 26 September 2026
+
+The organization remains on Free. The authenticated staging Email provider settings (`acfkhlnrlnlignkqpxhc`) show **Prevent use of leaked passwords: off** and link to the Pro plan requirement. The organization upgrade panel quotes **from $25/month**; two running projects also incur project compute charges, so that headline price is not a final two-project bill. No upgrade, password change or provider-setting change was made.
+
+Fresh security advisors for `rolumnldqjelwfvtmmqf` report only leaked-password protection disabled; the original function-permission warnings have not returned. Staging advisors return no findings, but the observed off switch means this is **not** evidence that staging password protection is enabled. Both projects need their setting checked and enforced after an approved eligible-plan upgrade. [Supabase password protection](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection), [pricing](https://supabase.com/pricing), [billing and project compute](https://supabase.com/docs/guides/platform/billing-faq).
+
+The previous source candidate has since passed hosted release CI; the historical local-only statements below describe the 20 September remediation, not the current release-verification status. New security-control changes still need their own verification.
+
+Application follow-up: password writes now map only Supabase's exact `weak_password` code to static guidance in signup, invitation, account-change and reset flows. Login, reauthentication and unknown errors remain generic. Invitation UI preserves only the exact safe status/code/message combination. Reset now stops on session-establishment failure and allows successful Next navigation outside its error catch. Seventeen new regression cases plus existing signup/anti-enumeration tests passed (23 focused tests); the [combined security verification](security-controls-2026-09-26.md#verification) includes these tests. Provider responses were mocked for these checks; native breached-password enforcement is still off and has not been demonstrated. [Provider error codes](https://supabase.com/docs/guides/auth/debugging/error-codes).
+
 ## Hosted result
 
 Project: `atlas-funded-lms` / `rolumnldqjelwfvtmmqf`, organization `uoubdxyhutdqsngtsoxz`.

@@ -1,4 +1,5 @@
 import { createPrivateKey } from "node:crypto";
+import { validateClientIpConfiguration } from "../http/client-ip";
 import {
   isDeployedRuntime,
   resolveRuntimeEnvironment,
@@ -48,6 +49,18 @@ export function validateDeploymentConfiguration(
       ]);
   }
   if (!deployed) return { environment, deployed, service };
+  if (service === "web") {
+    try {
+      validateClientIpConfiguration(env);
+      if (!value("TRUSTED_CLIENT_IP_HEADER") && Number(value("TRUSTED_PROXY_HOPS")) === 0) {
+        issues.push(
+          "Web client-IP attribution requires explicit TRUSTED_PROXY_HOPS > 0 or TRUSTED_CLIENT_IP_HEADER",
+        );
+      }
+    } catch {
+      issues.push("TRUSTED_PROXY_HOPS / TRUSTED_CLIENT_IP_HEADER configuration is invalid");
+    }
+  }
   if (service !== "web" && value("ATLAS_SERVICE_RUNTIME") !== "managed-node")
     issues.push("ATLAS_SERVICE_RUNTIME must be managed-node for deployed API and worker services");
   for (const key of [

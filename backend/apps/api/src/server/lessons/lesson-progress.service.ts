@@ -1,4 +1,6 @@
 import type { TenantTx } from "@atlas/db";
+import type { ResourceRef } from "@atlas/authorization";
+import { getLoadedLessonProjection } from "../courses/load-course-resource-ref";
 import { outbox } from "@atlas/events";
 import { findEnrollmentForMembership } from "../courses/courses.repository";
 import type { LessonProgressBody } from "./lesson-schemas";
@@ -30,8 +32,10 @@ export async function recordLessonProgress(
   ctx: ServiceCtx,
   lessonId: string,
   input: LessonProgressBody,
+  resource?: ResourceRef,
 ) {
-  const lesson = await findLessonWithModuleAndCourse({ tx, lessonId });
+  const loaded = getLoadedLessonProjection(tx, ctx, lessonId, resource);
+  const lesson = loaded?.lesson ?? (await findLessonWithModuleAndCourse({ tx, lessonId }));
 
   if (!lesson || lesson.tenantId !== ctx.tenantId) {
     throw lessonNotFound();
@@ -41,11 +45,13 @@ export async function recordLessonProgress(
     throw lessonNotFound();
   }
 
-  const enrollment = await findEnrollmentForMembership({
-    tx,
-    courseId: lesson.courseId,
-    membershipId: ctx.actorMembershipId,
-  });
+  const enrollment = loaded
+    ? loaded.enrollment
+    : await findEnrollmentForMembership({
+        tx,
+        courseId: lesson.courseId,
+        membershipId: ctx.actorMembershipId,
+      });
 
   if (!enrollment) {
     throw lessonEnrollmentRequired();

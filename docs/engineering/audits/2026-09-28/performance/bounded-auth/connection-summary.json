@@ -1,0 +1,11 @@
+{
+  "samples": 246,
+  "failedSamples": 0,
+  "maximumConnectionsByDatabase": {
+    "atlas_auth_e2e": 5,
+    "atlas_lms_e2e": 21
+  },
+  "scope": "Read-only samples every two seconds, including an observer connection. Sampled maxima are not guaranteed instantaneous peaks.",
+  "authPoolMaximum": 10,
+  "authIdlePoolMaximum": 5
+}

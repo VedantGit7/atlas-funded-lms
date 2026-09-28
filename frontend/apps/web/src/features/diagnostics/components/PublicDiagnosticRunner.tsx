@@ -7,7 +7,7 @@ import { diagnosticApiClient } from "@/modules/diagnostics/diagnostic.api-client
 import type { DiagnosticQuestion } from "@atlas/contracts/diagnostics/diagnostic.types";
 import { captureProductEvent } from "../../../observability/capture-product-event";
 import { sendAttributionEvent } from "../../../lib/attribution/utm-storage";
-import { DiagnosticIdentityGate } from "./DiagnosticIdentityGate";
+import { DeferredDiagnosticIdentityGate as DiagnosticIdentityGate } from "./DeferredDiagnosticIdentityGate";
 import { DiagnosticQuestionCard } from "./DiagnosticQuestionCard";
 
 type RunnerState =

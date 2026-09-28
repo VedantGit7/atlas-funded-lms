@@ -1,1 +1,1 @@
-export { Skeleton } from "@atlas/design-system";
+export { Skeleton } from "@atlas/design-system/components/skeleton";

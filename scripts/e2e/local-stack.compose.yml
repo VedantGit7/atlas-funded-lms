@@ -24,6 +24,10 @@ services:
       API_EXTERNAL_URL: http://127.0.0.1:54326
       GOTRUE_DB_DRIVER: postgres
       GOTRUE_DB_DATABASE_URL: postgres://atlas:atlas_e2e_only_password@database:5432/atlas_auth_e2e?sslmode=disable
+      # Auth shares this disposable PostgreSQL server with the application.
+      # GoTrue's default is unlimited; bursts must not exhaust all DB slots.
+      GOTRUE_DB_MAX_POOL_SIZE: "10"
+      GOTRUE_DB_MAX_IDLE_POOL_SIZE: "5"
       GOTRUE_SITE_URL: http://fundedbeyond.localhost:3100
       GOTRUE_URI_ALLOW_LIST: http://*.localhost:3100/**
       GOTRUE_DISABLE_SIGNUP: "false"

@@ -8,6 +8,7 @@ import { buildApiProxyHeaders } from "@atlas/core/http/api-proxy";
 import { applySetCookieHeaders } from "./apply-set-cookie-headers";
 import { resolveCookieHeaderForInternalApi } from "./resolve-request-cookies";
 import { resolveTenantHostForInternalApi } from "./resolve-tenant-host";
+import { resolveClientIpForInternalApi } from "./resolve-client-ip";
 
 const API_INTERNAL_URL = process.env["API_INTERNAL_URL"] ?? "http://127.0.0.1:3001";
 
@@ -60,11 +61,16 @@ async function postJson<T>(path: string, body: object, idempotencyPrefix: string
   try {
     response = await fetch(url, {
       method: "POST",
-      headers: buildApiProxyHeaders(forwardedHost, {
-        "content-type": "application/json",
-        ...(cookieHeader ? { cookie: cookieHeader } : {}),
-        "idempotency-key": `${idempotencyPrefix}-${crypto.randomUUID()}`,
-      }),
+      headers: buildApiProxyHeaders(
+        forwardedHost,
+        {
+          "content-type": "application/json",
+          ...(cookieHeader ? { cookie: cookieHeader } : {}),
+          "idempotency-key": `${idempotencyPrefix}-${crypto.randomUUID()}`,
+        },
+        process.env,
+        await resolveClientIpForInternalApi(),
+      ),
       redirect: "error",
       body: JSON.stringify(body),
       cache: "no-store",
@@ -179,11 +185,16 @@ export async function confirmEmailViaInternalApi(input: {
   try {
     response = await fetch(url, {
       method: "POST",
-      headers: buildApiProxyHeaders(forwardedHost, {
-        "content-type": "application/json",
-        ...(cookieHeader ? { cookie: cookieHeader } : {}),
-        "idempotency-key": `public-auth-confirm-${crypto.randomUUID()}`,
-      }),
+      headers: buildApiProxyHeaders(
+        forwardedHost,
+        {
+          "content-type": "application/json",
+          ...(cookieHeader ? { cookie: cookieHeader } : {}),
+          "idempotency-key": `public-auth-confirm-${crypto.randomUUID()}`,
+        },
+        process.env,
+        await resolveClientIpForInternalApi(),
+      ),
       redirect: "error",
       body: JSON.stringify({ tokenHash: input.tokenHash, type: input.type }),
       cache: "no-store",

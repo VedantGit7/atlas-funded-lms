@@ -1,0 +1,146 @@
+{
+  "terminalUsageFailures": 0,
+  "queryLogLines": 0,
+  "automaticRestartMessages": 0,
+  "stages": {
+    "timestamp": "2026-09-28T07:40:06.258Z",
+    "elapsedMs": 371266,
+    "boundsMs": [
+      1,
+      5,
+      10,
+      25,
+      50,
+      100,
+      250,
+      500,
+      1000,
+      5000,
+      10000,
+      null
+    ],
+    "stages": {
+      "authentication": {
+        "count": 2840,
+        "errors": 13,
+        "totalMs": 596747,
+        "maxMs": 2353,
+        "buckets": [
+          0,
+          0,
+          0,
+          0,
+          244,
+          203,
+          1842,
+          395,
+          113,
+          43,
+          0,
+          0
+        ]
+      },
+      "global_total": {
+        "count": 2827,
+        "errors": 0,
+        "totalMs": 3631389,
+        "maxMs": 2704,
+        "buckets": [
+          0,
+          0,
+          208,
+          113,
+          79,
+          49,
+          34,
+          49,
+          268,
+          2027,
+          0,
+          0
+        ]
+      },
+      "global_work": {
+        "count": 2827,
+        "errors": 0,
+        "totalMs": 249703,
+        "maxMs": 1011,
+        "buckets": [
+          0,
+          235,
+          90,
+          109,
+          202,
+          1265,
+          843,
+          81,
+          1,
+          1,
+          0,
+          0
+        ]
+      },
+      "tenant_total": {
+        "count": 2827,
+        "errors": 0,
+        "totalMs": 4752630,
+        "maxMs": 3217,
+        "buckets": [
+          0,
+          0,
+          0,
+          207,
+          70,
+          74,
+          110,
+          23,
+          169,
+          2174,
+          0,
+          0
+        ]
+      },
+      "tenant_work": {
+        "count": 2827,
+        "errors": 0,
+        "totalMs": 1331300,
+        "maxMs": 1764,
+        "buckets": [
+          0,
+          0,
+          5,
+          223,
+          85,
+          71,
+          221,
+          691,
+          1469,
+          62,
+          0,
+          0
+        ]
+      },
+      "usage": {
+        "count": 4604,
+        "errors": 0,
+        "totalMs": 80547,
+        "maxMs": 448,
+        "buckets": [
+          2308,
+          324,
+          71,
+          351,
+          1053,
+          469,
+          25,
+          3,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    }
+  },
+  "scope": "Last cumulative request-triggered stage sample, not phase-isolated. Transaction total minus work includes checkout, setup and commit, not pure pool wait. Successful usage journal inserts are in tenant transactions; dedicated usage-pool metrics only describe fallback/email writes."
+}

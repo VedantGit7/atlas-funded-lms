@@ -20,6 +20,8 @@ export const LINT_SHARDS = [
   "tests",
   // Previously JSON-only; now holds shared ESM config (security-headers.mjs).
   "configs",
+  // Audit evidence can include executable measurement helpers.
+  "docs/engineering/audits",
   // Root-level config and stray files that no directory shard covers.
   "*.{ts,mts,cts,tsx,mjs,cjs,js,jsx}",
 ];

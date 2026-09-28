@@ -1,0 +1,289 @@
+{
+  "capturedAt": "2026-09-26T16:46:22.828Z",
+  "mode": "local-smoke",
+  "pools": [
+    {
+      "pool": "tenant",
+      "pid": 22936,
+      "capturedAt": "2026-09-26T16:45:47.086Z",
+      "uptimeMs": 480090.8514,
+      "acquisition": {
+        "count": 8382,
+        "errors": 0,
+        "meanMs": 1699.8088854688617,
+        "maxMs": 6944.611399999994,
+        "inFlight": 0,
+        "percentileUpperBoundsMs": {
+          "p50": 5000,
+          "p95": 10000,
+          "p99": 10000
+        },
+        "buckets": [
+          {
+            "upperBoundMs": 1,
+            "count": 1561
+          },
+          {
+            "upperBoundMs": 5,
+            "count": 4
+          },
+          {
+            "upperBoundMs": 10,
+            "count": 5
+          },
+          {
+            "upperBoundMs": 25,
+            "count": 15
+          },
+          {
+            "upperBoundMs": 50,
+            "count": 8
+          },
+          {
+            "upperBoundMs": 100,
+            "count": 14
+          },
+          {
+            "upperBoundMs": 250,
+            "count": 75
+          },
+          {
+            "upperBoundMs": 500,
+            "count": 247
+          },
+          {
+            "upperBoundMs": 1000,
+            "count": 797
+          },
+          {
+            "upperBoundMs": 5000,
+            "count": 5082
+          },
+          {
+            "upperBoundMs": 10000,
+            "count": 574
+          },
+          {
+            "upperBoundMs": null,
+            "count": 0
+          }
+        ]
+      },
+      "query": {
+        "count": 78457,
+        "errors": 0,
+        "meanMs": 44.751751605338036,
+        "maxMs": 2029.7911000000313,
+        "inFlight": 0,
+        "percentileUpperBoundsMs": {
+          "p50": 50,
+          "p95": 100,
+          "p99": 250
+        },
+        "buckets": [
+          {
+            "upperBoundMs": 1,
+            "count": 5617
+          },
+          {
+            "upperBoundMs": 5,
+            "count": 4345
+          },
+          {
+            "upperBoundMs": 10,
+            "count": 1294
+          },
+          {
+            "upperBoundMs": 25,
+            "count": 9500
+          },
+          {
+            "upperBoundMs": 50,
+            "count": 28386
+          },
+          {
+            "upperBoundMs": 100,
+            "count": 25667
+          },
+          {
+            "upperBoundMs": 250,
+            "count": 3447
+          },
+          {
+            "upperBoundMs": 500,
+            "count": 173
+          },
+          {
+            "upperBoundMs": 1000,
+            "count": 25
+          },
+          {
+            "upperBoundMs": 5000,
+            "count": 3
+          },
+          {
+            "upperBoundMs": 10000,
+            "count": 0
+          },
+          {
+            "upperBoundMs": null,
+            "count": 0
+          }
+        ]
+      },
+      "connections": {
+        "total": 0,
+        "idle": 0,
+        "waiting": 0
+      }
+    },
+    {
+      "pool": "usage",
+      "pid": 22936,
+      "capturedAt": "2026-09-26T16:45:48.686Z",
+      "uptimeMs": 480094.5588,
+      "acquisition": {
+        "count": 1251,
+        "errors": 0,
+        "meanMs": 2.726124540367298,
+        "maxMs": 428.0189000000246,
+        "inFlight": 0,
+        "percentileUpperBoundsMs": {
+          "p50": 1,
+          "p95": 1,
+          "p99": 25
+        },
+        "buckets": [
+          {
+            "upperBoundMs": 1,
+            "count": 1226
+          },
+          {
+            "upperBoundMs": 5,
+            "count": 5
+          },
+          {
+            "upperBoundMs": 10,
+            "count": 2
+          },
+          {
+            "upperBoundMs": 25,
+            "count": 8
+          },
+          {
+            "upperBoundMs": 50,
+            "count": 0
+          },
+          {
+            "upperBoundMs": 100,
+            "count": 1
+          },
+          {
+            "upperBoundMs": 250,
+            "count": 1
+          },
+          {
+            "upperBoundMs": 500,
+            "count": 8
+          },
+          {
+            "upperBoundMs": 1000,
+            "count": 0
+          },
+          {
+            "upperBoundMs": 5000,
+            "count": 0
+          },
+          {
+            "upperBoundMs": 10000,
+            "count": 0
+          },
+          {
+            "upperBoundMs": null,
+            "count": 0
+          }
+        ]
+      },
+      "query": {
+        "count": 6255,
+        "errors": 0,
+        "meanMs": 37.66032885691446,
+        "maxMs": 604.2728999999817,
+        "inFlight": 0,
+        "percentileUpperBoundsMs": {
+          "p50": 50,
+          "p95": 100,
+          "p99": 250
+        },
+        "buckets": [
+          {
+            "upperBoundMs": 1,
+            "count": 545
+          },
+          {
+            "upperBoundMs": 5,
+            "count": 940
+          },
+          {
+            "upperBoundMs": 10,
+            "count": 87
+          },
+          {
+            "upperBoundMs": 25,
+            "count": 693
+          },
+          {
+            "upperBoundMs": 50,
+            "count": 2047
+          },
+          {
+            "upperBoundMs": 100,
+            "count": 1743
+          },
+          {
+            "upperBoundMs": 250,
+            "count": 193
+          },
+          {
+            "upperBoundMs": 500,
+            "count": 6
+          },
+          {
+            "upperBoundMs": 1000,
+            "count": 1
+          },
+          {
+            "upperBoundMs": 5000,
+            "count": 0
+          },
+          {
+            "upperBoundMs": 10000,
+            "count": 0
+          },
+          {
+            "upperBoundMs": null,
+            "count": 0
+          }
+        ]
+      },
+      "connections": {
+        "total": 0,
+        "idle": 0,
+        "waiting": 0
+      }
+    }
+  ],
+  "poolScope": "Latest cumulative process snapshots from supplied logs, not phase-isolated deltas. Histogram bounds are not exact percentiles; null means absent or above largest finite bucket.",
+  "worker": {
+    "unfinishedJobs": 0,
+    "runnableJobs": 0,
+    "oldestRunnableLagMs": 0,
+    "workerExecutionVerified": false,
+    "scope": "Point-in-time materialized delivery jobs for the fixture tenant only. Does not prove worker processing or measure jobs not yet materialized."
+  },
+  "database": {
+    "maxConnections": 100,
+    "version": "16.14"
+  },
+  "capacityVerified": false
+}

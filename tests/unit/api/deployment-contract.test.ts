@@ -3,6 +3,51 @@ import { validateDeploymentConfiguration } from "@atlas/core/config/deployment-c
 import { deploymentEnv } from "../../helpers/deployment-env";
 
 describe("F05 deployment contract", () => {
+  it.each(["", "0"])(
+    "rejects deployed web with TRUSTED_PROXY_HOPS=%s and no edge header",
+    (hops) => {
+      expect(() =>
+        validateDeploymentConfiguration(
+          { ...deploymentEnv(), TRUSTED_PROXY_HOPS: hops, TRUSTED_CLIENT_IP_HEADER: "" },
+          "web",
+        ),
+      ).toThrow(/client-IP attribution/);
+    },
+  );
+  it.each(["api", "worker"] as const)(
+    "does not require edge attribution settings on %s",
+    (service) => {
+      expect(() =>
+        validateDeploymentConfiguration(
+          { ...deploymentEnv(), TRUSTED_PROXY_HOPS: "0", TRUSTED_CLIENT_IP_HEADER: "" },
+          service,
+        ),
+      ).not.toThrow();
+    },
+  );
+  it("accepts an explicitly configured single-value web edge header at zero hops", () => {
+    expect(() =>
+      validateDeploymentConfiguration(
+        {
+          ...deploymentEnv(),
+          TRUSTED_PROXY_HOPS: "0",
+          TRUSTED_CLIENT_IP_HEADER: "cf-connecting-ip",
+        },
+        "web",
+      ),
+    ).not.toThrow();
+  });
+  it.each(["x-atlas-client-ip", "invalid header"])(
+    "rejects unsafe deployed web edge header %s",
+    (header) => {
+      expect(() =>
+        validateDeploymentConfiguration(
+          { ...deploymentEnv(), TRUSTED_CLIENT_IP_HEADER: header },
+          "web",
+        ),
+      ).toThrow(/TRUSTED_CLIENT_IP_HEADER/);
+    },
+  );
   it("does not let a development label enable API execution on Lambda", () => {
     expect(() =>
       validateDeploymentConfiguration(

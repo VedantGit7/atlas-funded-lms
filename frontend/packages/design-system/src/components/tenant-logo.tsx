@@ -1,7 +1,6 @@
 "use client";
 
 import type { ImgHTMLAttributes } from "react";
-import Image from "next/image";
 import { useEffect, useState } from "react";
 import { cn } from "../lib/cn";
 
@@ -84,8 +83,9 @@ export function TenantLogo({
   if (resolvedLogoUrl) {
     return (
       <span className={cn("relative inline-flex min-h-8 max-w-[10rem] items-center", className)}>
-        <Image
-          src={resolvedLogoUrl}
+        <img
+          loading="lazy"
+          decoding="async"
           alt={publicName}
           width={width}
           height={height}
@@ -109,9 +109,9 @@ export function TenantLogo({
            * A logo is a small, already-sized asset; optimising it buys little
            * and costs a page-level crash risk tied to tenant configuration.
            */
-          unoptimized
           className={cn("h-8 w-auto object-contain", imageClassName)}
           {...imageProps}
+          src={resolvedLogoUrl}
         />
       </span>
     );

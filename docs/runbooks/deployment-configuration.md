@@ -45,6 +45,8 @@ The public-key distinction follows [Supabase's API key guidance](https://supabas
 
 F11 additionally requires `API_PROXY_SECRET` on web and API (not worker): at least 32 nontrivial characters, distinct from `CRON_SECRET` and `INTERNAL_WORKER_SECRET`, and shared only by web/API within the same environment. API ingress authenticates it before trusting forwarded tenant hosts. See the [deployment topology runbook](deployment-topology.md) for build-time API origin configuration, preview separation and rollout requirements.
 
+Deployed **web** additionally requires explicit client-IP attribution: positive `TRUSTED_PROXY_HOPS` or a valid `TRUSTED_CLIENT_IP_HEADER`. The default/template is zero trusted hops, which intentionally fails deployed web validation until configured. API and worker need no edge attribution setting. Configuration validation cannot prove that an edge overwrites/appends the selected headers or blocks direct origin access; verify that separately. Public calls and browser API rewrites with absent/invalid attribution fail closed with retryable 503.
+
 ## Release verification before routing production traffic
 
 1. Run preflight with the actual injected configuration for API, web and worker. Start a fresh instance of each. Confirm missing required settings stop the instance before readiness in an isolated staging rollout. Confirm the normal build/start path succeeds with complete settings.

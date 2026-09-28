@@ -118,6 +118,10 @@ export class MemoryRateLimitStore implements RateLimitStore {
 export type RateLimitRedisClient = {
   eval(script: string, numKeys: number, ...args: (string | number)[]): Promise<unknown>;
   quit(): Promise<unknown>;
+  /** Stateful clients must be ready before commands can run with offline queuing disabled. */
+  readonly status?: string;
+  once?(event: "ready" | "error" | "end", listener: () => void): unknown;
+  off?(event: "ready" | "error" | "end", listener: () => void): unknown;
 };
 
 /**
@@ -143,6 +147,7 @@ export class RedisRateLimitStore implements RateLimitStore {
   readonly kind = "redis" as const;
 
   private readonly prefix: string;
+  private readiness: Promise<void> | null = null;
 
   constructor(
     private readonly client: RateLimitRedisClient,
@@ -152,6 +157,7 @@ export class RedisRateLimitStore implements RateLimitStore {
   }
 
   async hit(key: string, windowMs: number): Promise<RateLimitHit> {
+    await this.waitUntilReady();
     // Typed as unknown rather than [number, number]: this crosses a wire, and
     // a client that returns strings must not silently produce NaN comparisons.
     const result = await this.client.eval(HIT_SCRIPT, 1, `${this.prefix}${key}`, windowMs);
@@ -170,6 +176,43 @@ export class RedisRateLimitStore implements RateLimitStore {
     )
       throw new Error("Invalid rate-limit counter response");
     return { count, resetAt: Date.now() + ttlMs };
+  }
+
+  private waitUntilReady(): Promise<void> {
+    const client = this.client;
+    // Stateless adapters implement their own connection handling.
+    if (client.status === undefined || client.status === "ready") return Promise.resolve();
+    if (this.readiness) return this.readiness;
+    const unavailable = () => new Error("Redis rate-limit connection unavailable");
+    const once = client.once?.bind(client);
+    const off = client.off?.bind(client);
+    if (client.status === "end" || !once || !off) return Promise.reject(unavailable());
+
+    // Share a bounded wait, not an offline command queue. Every caller still
+    // performs its own atomic EVAL after readiness; failures never admit a hit.
+    this.readiness = new Promise<void>((resolve, reject) => {
+      const cleanup = () => {
+        clearTimeout(timer);
+        off("ready", ready);
+        off("error", failed);
+        off("end", failed);
+      };
+      const ready = () => {
+        cleanup();
+        resolve();
+      };
+      const failed = () => {
+        cleanup();
+        reject(unavailable());
+      };
+      const timer = setTimeout(failed, 2000);
+      once("ready", ready);
+      once("error", failed);
+      once("end", failed);
+    }).finally(() => {
+      this.readiness = null;
+    });
+    return this.readiness;
   }
 
   /**

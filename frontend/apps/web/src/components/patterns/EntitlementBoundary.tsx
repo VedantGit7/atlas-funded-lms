@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { EmptyState } from "@atlas/design-system";
+import { EmptyState } from "@atlas/design-system/components/empty-state";
 
 type EntitlementBoundaryProps = Readonly<{
   /** Server-projected entitlement result — never derived from plan names client-side. */

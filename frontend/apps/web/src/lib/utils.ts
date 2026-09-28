@@ -1,1 +1,1 @@
-export { cn } from "@atlas/design-system";
+export { cn } from "@atlas/design-system/lib/cn";

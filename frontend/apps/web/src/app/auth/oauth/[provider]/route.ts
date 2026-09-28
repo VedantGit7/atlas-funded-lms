@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { buildApiProxyHeaders } from "@atlas/core/http/api-proxy";
+import { ATLAS_CLIENT_IP_HEADER, buildApiProxyHeaders } from "@atlas/core/http/api-proxy";
 import { ATLAS_INTERNAL_TENANT_HOST_HEADER } from "@/lib/http-headers";
 import { resolveSafeRedirectPath } from "@/lib/auth/safe-redirect";
 import {
@@ -34,10 +34,15 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ prov
   try {
     const apiRes = await fetch(`${API_INTERNAL_URL}/api/v1/public/auth/oauth/start`, {
       method: "POST",
-      headers: buildApiProxyHeaders(browserHost, {
-        "content-type": "application/json",
-        "idempotency-key": `public-oauth-start-${crypto.randomUUID()}`,
-      }),
+      headers: buildApiProxyHeaders(
+        browserHost,
+        {
+          "content-type": "application/json",
+          "idempotency-key": `public-oauth-start-${crypto.randomUUID()}`,
+        },
+        process.env,
+        req.headers.get(ATLAS_CLIENT_IP_HEADER) ?? "unknown",
+      ),
       redirect: "error",
       body: JSON.stringify({ provider, redirectTo: callbackUrl, rememberMe: remember }),
       cache: "no-store",

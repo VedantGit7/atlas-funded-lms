@@ -21,7 +21,9 @@ Use `pnpm release:evidence:validate` to validate the generated artifact. `RELEAS
 
 Required failed or skipped checks, missing service prerequisites, dirty source, changed HEAD, invalid provenance, or malformed gate data produce `NOT_READY`. Legacy schema-1 release artifacts must be regenerated. The `--skip-db`, `--skip-build`, and `--skip-e2e` flags may assist investigation, but cannot produce release-ready evidence when they skip mandatory gates.
 
-Set `RELEASE_HEALTH_BASE_URL` and `RESTORED_ENV_BASE_URL` when the respective environments are available. If absent, their gates remain explicitly skipped. Automated readiness never approves production: legal readiness, monitoring, restore drill, rollback target, domain/SSL, secrets review, incident owner, and CTO approval require human sign-off.
+For staging health, set `RELEASE_HEALTH_BASE_URL` together with `RELEASE_HEALTH_EXPECTED_RELEASE`. For restored application health, set `RESTORED_ENV_BASE_URL` together with `RESTORED_ENV_EXPECTED_RELEASE`. If a base URL is absent, its gate remains explicitly skipped; a configured probe fails without its expected identity. Restore validation checks HTTP application health only and reports `restoreProven: false`; it does not establish restored data, tenant isolation, backup integrity, or RPO/RTO. Attach separate isolated database restore evidence.
+
+Automated readiness never approves production: legal readiness, monitoring, restore drill, rollback target, domain/SSL, secrets review, incident owner, and CTO approval require human sign-off.
 
 ## Verifying failure enforcement
 

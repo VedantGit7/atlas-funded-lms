@@ -39,7 +39,8 @@ vi.mock("../../../backend/packages/api/src/load-resource-ref", () => ({
     tenantScoped: true,
   }),
 }));
-vi.mock("../../../backend/packages/api/src/tenant-usage-meter", () => ({
+vi.mock("../../../backend/packages/api/src/tenant-usage-meter", async (original) => ({
+  ...(await original<Record<string, unknown>>()),
   recordTenantUsage: vi.fn(),
 }));
 import { createTenantRoute } from "@atlas/api/create-tenant-route";
@@ -87,6 +88,7 @@ function route(plane: "tenant" | "platform", bucket?: string) {
   });
 }
 beforeEach(() => {
+  vi.stubEnv("TRUSTED_PROXY_HOPS", "1");
   vi.resetAllMocks();
   vi.stubEnv("APP_ENV", "development");
   vi.stubEnv("NODE_ENV", "test");

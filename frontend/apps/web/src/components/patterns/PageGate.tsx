@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { EmptyState } from "@atlas/design-system";
+import { EmptyState } from "@atlas/design-system/components/empty-state";
 
 type PageGateState = "ready" | "denied" | "not_found" | "error";
 

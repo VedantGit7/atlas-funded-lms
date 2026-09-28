@@ -30,10 +30,10 @@ export const GET = createTenantRoute<
   params: courseIdParamsSchema,
   input: courseDetailQuerySchema,
   output: z.union([courseDetailResponseSchema, studioCourseDetailResponseSchema]),
-  handler: async ({ tx, ctx, params, input }) => {
+  handler: async ({ tx, ctx, params, input, resource }) => {
     const courseId = params["id"];
     if (!courseId) throw new Error("Missing course id");
-    return await getPublishedCourseDetail(tx, ctx, courseId, input);
+    return await getPublishedCourseDetail(tx, ctx, courseId, input, resource);
   },
 });
 
