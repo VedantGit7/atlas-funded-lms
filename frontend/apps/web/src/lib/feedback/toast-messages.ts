@@ -27,34 +27,35 @@ type ToastDefinition = {
   action?: ToastAction;
 };
 
-const ACTION_SUFFIXES = new Set([
-  "update",
-  "save",
-  "create",
-  "delete",
-  "publish",
-  "archive",
-  "restore",
-  "submit",
-  "attach",
-  "confirm",
-  "link",
-  "move",
-  "set",
-  "start",
-  "verify",
-  "enroll",
-  "issue",
-  "revoke",
-  "join",
-  "suspend",
-  "remove",
-  "resend",
-  "invite",
-  "unenroll",
-  "freeze",
-  "reindex",
-]);
+// Undefined entries are stripped from labels but keep HTTP-method inference.
+const ACTION_SUFFIXES: Record<string, ToastAction | undefined> = {
+  update: undefined,
+  save: "saved",
+  create: "created",
+  delete: "deleted",
+  publish: "published",
+  archive: "archived",
+  restore: "restored",
+  submit: "submitted",
+  attach: "attached",
+  confirm: undefined,
+  link: "attached",
+  move: "moved",
+  set: undefined,
+  start: undefined,
+  verify: undefined,
+  enroll: "enrolled",
+  issue: "issued",
+  revoke: "revoked",
+  join: "joined",
+  suspend: "suspended",
+  remove: "removed",
+  resend: undefined,
+  invite: undefined,
+  unenroll: undefined,
+  freeze: undefined,
+  reindex: undefined,
+};
 
 const SILENT_PREFIXES = [
   "lesson-progress-",
@@ -238,29 +239,6 @@ const IDEMPOTENCY_TOASTS: Record<string, ToastDefinition> = {
   "platform-support-open": { label: "Support session", action: "created" },
 };
 
-const ACTION_MESSAGES: Record<ToastAction, string> = {
-  updated: "updated",
-  created: "created",
-  deleted: "deleted",
-  saved: "saved",
-  published: "published",
-  archived: "archived",
-  removed: "removed",
-  enrolled: "enrolled",
-  submitted: "submitted",
-  issued: "issued",
-  revoked: "revoked",
-  restored: "restored",
-  joined: "joined",
-  sent: "sent",
-  suspended: "suspended",
-  linked: "linked",
-  attached: "attached",
-  moved: "moved",
-  set: "set",
-  invited: "invited",
-};
-
 function isUuidSegment(value: string): boolean {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
 }
@@ -278,21 +256,12 @@ function titleCaseWords(words: string[]): string {
 }
 
 function inferActionFromPrefix(prefix: string, method: MutationHttpMethod): ToastAction {
-  if (prefix.endsWith("-publish")) return "published";
-  if (prefix.endsWith("-archive")) return "archived";
-  if (prefix.endsWith("-delete")) return "deleted";
-  if (prefix.endsWith("-create")) return "created";
-  if (prefix.endsWith("-save")) return "saved";
-  if (prefix.endsWith("-restore")) return "restored";
-  if (prefix.endsWith("-submit")) return "submitted";
-  if (prefix.endsWith("-enroll")) return "enrolled";
-  if (prefix.endsWith("-issue")) return "issued";
-  if (prefix.endsWith("-revoke")) return "revoked";
-  if (prefix.endsWith("-join")) return "joined";
-  if (prefix.endsWith("-suspend")) return "suspended";
-  if (prefix.endsWith("-remove")) return "removed";
-  if (prefix.endsWith("-attach") || prefix.endsWith("-link")) return "attached";
-  if (prefix.endsWith("-move")) return "moved";
+  const separator = prefix.lastIndexOf("-");
+  const suffix = prefix.slice(separator + 1);
+  if (separator >= 0 && Object.hasOwn(ACTION_SUFFIXES, suffix)) {
+    const action = ACTION_SUFFIXES[suffix];
+    if (action) return action;
+  }
   if (prefix.endsWith("-set-primary")) return "set";
 
   if (method === "DELETE") return "deleted";
@@ -305,7 +274,7 @@ function normalizePrefix(prefix: string): string {
   for (;;) {
     const last = parts.at(-1);
     if (last === undefined) break;
-    if (!ACTION_SUFFIXES.has(last) && !isUuidSegment(last)) break;
+    if (!Object.hasOwn(ACTION_SUFFIXES, last) && !isUuidSegment(last)) break;
     parts.pop();
   }
   return parts.join("-");
@@ -338,7 +307,7 @@ function humanizePrefix(prefix: string): string {
 }
 
 export function formatToastSuccessMessage(label: string, action: ToastAction): string {
-  return `${label} ${ACTION_MESSAGES[action]} successfully`;
+  return `${label} ${action} successfully`;
 }
 
 function stripTrailingUuid(key: string): string {

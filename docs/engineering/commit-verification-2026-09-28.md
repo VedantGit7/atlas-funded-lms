@@ -18,6 +18,12 @@ The initial browser and type-check attempts exposed a corrupted generated `.next
 
 Raw verification outputs are retained locally under `.test-results/commit-verification-20260928/`. The GitHub checks for the containing commit provide independent clean-checkout verification; earlier successful runs must not be treated as evidence for a new commit.
 
+## CI bundle follow-up
+
+The initial pushed candidate `c1feca8` failed the Linux CI bundle guard: it measured 204.5 KiB against the exact 204.4345703125 KiB baseline that passed locally. The follow-up consolidates duplicate notification action data and removes an identity-only message lookup. All 47 compatibility cases passed before and after the refactor, covering action wording, HTTP-method fallback, exact overrides, silent updates, explicit messages and inherited object-property names. Independent review found no blocking behavior regression.
+
+The fresh local production build `7oFKwUq1zzeFosEkraXe7` passed TypeScript and the unchanged guard. Its maximum is **204.3134765625 KiB**, a 124-byte gzip reduction; readiness is **204.2548828125 KiB** across the same 71 measured routes. Neither the regression allowance nor the 150 KiB target was increased. Raw build, guard and measurement outputs remain in the local verification directory. Only the follow-up commit's own successful GitHub run can close remote verification.
+
 ## Outstanding acceptance
 
 The [Step 5 report](step5-verification-2026-09-28.md) remains authoritative for performance: the largest measured learner first load is 204.435 KiB gzip, above the unchanged 150 KiB target. The corrected short local 100/200-learner diagnostic had no request failures and matched usage accounting, but failed latency targets. Hosted sustained/burst and two-hour endurance acceptance remain open. Passing the bundle regression guard does not close those targets.
