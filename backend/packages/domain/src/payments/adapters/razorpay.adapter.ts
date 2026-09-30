@@ -28,8 +28,10 @@ type RazorpayPayment = {
   id: string;
   order_id?: string | null;
   status?: string | null;
+  /** Checkout.js notes. Browser-controlled: never read (audit finding C1). */
   notes?: Record<string, string> | null;
   amount?: number;
+  currency?: string | null;
 };
 
 type RazorpayRefund = {
@@ -50,10 +52,34 @@ type RazorpayWebhookPayload = {
   event?: string;
   payload?: {
     payment?: { entity?: RazorpayPayment };
-    order?: { entity?: RazorpayOrder & { notes?: Record<string, string> | null } };
+    order?: {
+      entity?: RazorpayOrder & { notes?: Record<string, string> | null; amount_paid?: number };
+    };
     refund?: { entity?: RazorpayRefund };
   };
 };
+
+/**
+ * Our payment order id, for diagnostics only. Read from the Razorpay ORDER's notes, which the
+ * server set via the Orders API and the browser cannot change. The payment's notes are ignored:
+ * Checkout.js copies client-supplied notes onto the payment (audit finding C1).
+ */
+function serverOrderNote(order: { notes?: Record<string, string> | null } | undefined) {
+  return order?.notes?.["paymentOrderId"] ?? null;
+}
+
+/** Captured amount and currency, preferring the payment entity over the order aggregate. */
+function capturedAmount(
+  payment: RazorpayPayment | undefined,
+  order: (RazorpayOrder & { amount_paid?: number }) | undefined,
+): { amountCents: number | null; currency: string | null } {
+  const amount = payment?.amount ?? order?.amount_paid ?? null;
+  const currency = payment?.currency ?? order?.currency ?? null;
+  return {
+    amountCents: typeof amount === "number" && Number.isSafeInteger(amount) ? amount : null,
+    currency: typeof currency === "string" && currency ? currency.toUpperCase() : null,
+  };
+}
 
 function basicAuthHeader(keyId: string, secretKey: string): string {
   return `Basic ${Buffer.from(`${keyId}:${secretKey}`).toString("base64")}`;
@@ -190,6 +216,8 @@ export function createRazorpayPaymentProvider(config: RazorpayAdapterConfig): Pa
         },
       });
 
+      // `notes` stay on the server-created Razorpay order only. Handing them to Checkout.js would
+      // copy browser-editable values onto the payment (audit finding C1).
       return {
         externalId: order.id,
         checkoutUrl: null,
@@ -201,7 +229,6 @@ export function createRazorpayPaymentProvider(config: RazorpayAdapterConfig): Pa
           currency,
           name: input.courseTitle,
           description: input.courseTitle,
-          notes,
         },
       };
     },
@@ -255,13 +282,12 @@ export function createRazorpayPaymentProvider(config: RazorpayAdapterConfig): Pa
         if (!externalId) {
           return Promise.reject(new Error(`Razorpay ${rawType} webhook missing order/payment id.`));
         }
-        const paymentOrderId =
-          payment?.notes?.["paymentOrderId"] ?? order?.notes?.["paymentOrderId"] ?? null;
         return Promise.resolve({
           externalId,
-          paymentOrderId,
+          paymentOrderId: serverOrderNote(order),
           status: "paid",
           rawType,
+          ...capturedAmount(payment, order),
         });
       }
 
@@ -272,7 +298,7 @@ export function createRazorpayPaymentProvider(config: RazorpayAdapterConfig): Pa
           "unknown";
         return Promise.resolve({
           externalId,
-          paymentOrderId: payment?.notes?.["paymentOrderId"] ?? null,
+          paymentOrderId: serverOrderNote(order),
           status: "failed",
           rawType,
         });
@@ -283,8 +309,7 @@ export function createRazorpayPaymentProvider(config: RazorpayAdapterConfig): Pa
           (typeof order?.id === "string" && order.id) ||
           (typeof payment?.id === "string" && payment.id) ||
           rawType,
-        paymentOrderId:
-          payment?.notes?.["paymentOrderId"] ?? order?.notes?.["paymentOrderId"] ?? null,
+        paymentOrderId: serverOrderNote(order),
         status: "pending",
         rawType,
       });

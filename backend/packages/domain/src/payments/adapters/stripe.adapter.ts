@@ -140,6 +140,8 @@ export function createStripePaymentProvider(config: StripeAdapterConfig): Paymen
           paymentOrderId,
           status: paid ? "paid" : "pending",
           rawType: event.type,
+          amountCents: typeof session.amount_total === "number" ? session.amount_total : null,
+          currency: session.currency ? session.currency.toUpperCase() : null,
         });
       }
 

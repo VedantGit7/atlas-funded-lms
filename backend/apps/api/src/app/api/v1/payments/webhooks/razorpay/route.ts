@@ -79,7 +79,8 @@ export const POST = createPublicRouteHandler(
             }),
             {
               externalId: parsed.externalId,
-              paymentOrderId: parsed.paymentOrderId,
+              amountCents: parsed.amountCents,
+              currency: parsed.currency,
             },
           );
 
