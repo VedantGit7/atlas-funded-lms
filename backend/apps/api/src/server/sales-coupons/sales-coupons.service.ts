@@ -7,6 +7,7 @@ import {
   resolvePaymentProvider,
 } from "@atlas/domain/payments/payment-provider.registry";
 import type { ServiceCtx } from "@atlas/domain/shared/domain.types";
+import { structuredLogger } from "@atlas/observability/logger";
 import { findCourseAuthProjection, readCoursePricing } from "../courses/courses.repository";
 import { courseNotFound, coursePurchaseRequired } from "../courses/courses.errors";
 import {
@@ -665,11 +666,15 @@ async function findPaymentOrderById(
   return rows[0] ?? null;
 }
 
-async function findPaymentOrderByExternalId(
+/**
+ * Up to two orders carrying `externalId`. Two means the reference is ambiguous (manually
+ * recorded payments may reuse a reference), which the caller must treat as "no match".
+ */
+async function findPaymentOrdersByExternalId(
   tx: TenantTx,
   externalId: string,
-): Promise<PaymentOrderFulfillRow | null> {
-  const rows = await tx.$queryRawUnsafe<PaymentOrderFulfillRow[]>(
+): Promise<PaymentOrderFulfillRow[]> {
+  return await tx.$queryRawUnsafe<PaymentOrderFulfillRow[]>(
     `
     select
       id::text,
@@ -684,11 +689,10 @@ async function findPaymentOrderByExternalId(
       coupon_amount_cents
     from payment_orders
     where external_id = $1
-    limit 1
+    limit 2
     `,
     externalId,
   );
-  return rows[0] ?? null;
 }
 
 /**
@@ -838,29 +842,99 @@ export async function fulfillPaidCourseOrder(
   };
 }
 
+/** What a signature-verified gateway webhook says was actually captured. */
+export type VerifiedGatewayPayment = {
+  /** The gateway reference the server stored on the order at checkout. */
+  externalId: string;
+  /** Captured amount in minor units, as reported by the gateway. */
+  amountCents: number | null | undefined;
+  /** Captured currency, as reported by the gateway. */
+  currency: string | null | undefined;
+};
+
+function describePaymentMismatch(
+  order: PaymentOrderFulfillRow,
+  payment: VerifiedGatewayPayment,
+): string | null {
+  if (payment.amountCents == null || !payment.currency) {
+    return "gateway did not report the captured amount and currency";
+  }
+  if (payment.amountCents !== order.amount_cents) {
+    return "captured amount differs from the order amount";
+  }
+  if (payment.currency.toUpperCase() !== order.currency.toUpperCase()) {
+    return "captured currency differs from the order currency";
+  }
+  return null;
+}
+
+/**
+ * Fulfils the course order that a signature-verified gateway webhook paid for.
+ *
+ * Audit finding C1: this used to select the order by a `paymentOrderId` carried in the webhook,
+ * which on Razorpay came from Checkout.js notes that the browser controls, and then re-bound that
+ * order to the paid gateway reference. Paying for a cheap order could therefore fulfil an
+ * expensive one.
+ *
+ * Now the order is selected only by the gateway reference the server stored at checkout, the
+ * reference is never rewritten, and the captured amount and currency must equal what the order
+ * charged. Anything else is left unfulfilled, recorded on the order, and logged for
+ * reconciliation. It returns null rather than throwing so the gateway does not retry forever.
+ */
 export async function fulfillPaidCourseOrderByExternalId(
   tx: TenantTx,
   ctx: ServiceCtx,
-  args: { externalId: string; paymentOrderId?: string | null },
+  payment: VerifiedGatewayPayment,
 ): Promise<{ enrollmentId: string; created: boolean; paymentOrderId: string } | null> {
-  let order =
-    (args.paymentOrderId ? await findPaymentOrderById(tx, args.paymentOrderId) : null) ??
-    (await findPaymentOrderByExternalId(tx, args.externalId));
+  const matches = await findPaymentOrdersByExternalId(tx, payment.externalId);
 
+  if (matches.length > 1) {
+    structuredLogger.error({
+      message: "Paid webhook reference matches more than one payment order; not fulfilled.",
+      module: "payments.fulfilment",
+      errorCode: "PAYMENT_REFERENCE_AMBIGUOUS",
+      requestId: ctx.requestId,
+      externalId: payment.externalId,
+    });
+    return null;
+  }
+
+  const order = matches[0];
   if (!order) return null;
 
-  if (order.external_id !== args.externalId) {
+  const mismatch = describePaymentMismatch(order, payment);
+  if (mismatch) {
     await tx.$executeRawUnsafe(
       `
       update payment_orders
-      set external_id = $2, updated_at = now()
+      set
+        metadata_json = coalesce(metadata_json, '{}'::jsonb)
+          || jsonb_build_object('paymentMismatch', $2::jsonb),
+        updated_at = now()
       where id = $1::uuid
-        and (external_id is null or external_id <> $2)
       `,
       order.id,
-      args.externalId,
+      JSON.stringify({
+        reason: mismatch,
+        externalId: payment.externalId,
+        capturedAmountCents: payment.amountCents ?? null,
+        capturedCurrency: payment.currency ?? null,
+        detectedAt: new Date().toISOString(),
+      }),
     );
-    order = { ...order, external_id: args.externalId };
+    structuredLogger.error({
+      message: `Paid webhook not fulfilled: ${mismatch}.`,
+      module: "payments.fulfilment",
+      errorCode: "PAYMENT_AMOUNT_MISMATCH",
+      requestId: ctx.requestId,
+      paymentOrderId: order.id,
+      externalId: payment.externalId,
+      orderAmountCents: order.amount_cents,
+      orderCurrency: order.currency,
+      capturedAmountCents: payment.amountCents ?? null,
+      capturedCurrency: payment.currency ?? null,
+    });
+    return null;
   }
 
   return fulfillPaidCourseOrder(tx, ctx, order);

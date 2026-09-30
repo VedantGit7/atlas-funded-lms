@@ -38,7 +38,6 @@ type RazorpayClientCheckout = {
   currency: string;
   name: string;
   description?: string;
-  notes?: Record<string, string>;
 };
 
 type PurchaseResponse = {
@@ -242,7 +241,6 @@ export function EnrollCourseDialog({
             name: clientCheckout.name,
             description: clientCheckout.description ?? clientCheckout.name,
             order_id: clientCheckout.orderId,
-            notes: clientCheckout.notes ?? {},
             handler: () => {
               // Enrollment is fulfilled by the Razorpay webhook; navigate to success.
               window.location.assign(successUrl);

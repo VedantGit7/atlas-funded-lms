@@ -17,6 +17,10 @@ export type RazorpayClientCheckout = {
   currency: string;
   name: string;
   description?: string;
+  /**
+   * Deprecated; always omitted. Checkout.js copies client notes onto the payment, so anything sent
+   * here is attacker-controlled by the time it returns in a webhook (audit finding C1).
+   */
   notes?: Record<string, string>;
 };
 
@@ -29,10 +33,23 @@ export type CreateCheckoutResult = {
 };
 
 export type ParsedWebhook = {
+  /**
+   * The gateway reference the server stored on `payment_orders.external_id` when it created the
+   * checkout (Razorpay order id, Stripe Checkout Session id). This is the ONLY value that may
+   * select the order to fulfil.
+   */
   externalId: string;
+  /**
+   * Diagnostic only. Never use this to select or fulfil an order: on Razorpay it can originate
+   * from checkout notes, which the browser controls (audit finding C1).
+   */
   paymentOrderId: string | null;
   status: "paid" | "failed" | "pending";
   rawType: string;
+  /** For `paid`: the captured amount in minor units, as reported by the gateway. */
+  amountCents?: number | null;
+  /** For `paid`: the captured currency (ISO 4217), as reported by the gateway. */
+  currency?: string | null;
   refund?: RefundResult;
 };
 
