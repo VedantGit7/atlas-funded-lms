@@ -55,6 +55,18 @@ export async function waitForClickHandler(
   return waitForHandler(control, "onClick", timeoutMs);
 }
 
+/**
+ * Radios, checkboxes and selects react through `onChange`, not `onClick`. Clicking a label before
+ * its input's handler is attached changes nothing and leaves the control unchecked forever: J06
+ * clicked "Live" on the publish panel after only body hydration and saw it unchecked for 30s.
+ */
+export async function waitForChangeHandler(
+  control: Locator,
+  timeoutMs: number = HYDRATION_TIMEOUT_MS,
+): Promise<void> {
+  return waitForHandler(control, "onChange", timeoutMs);
+}
+
 /** A hydrated body does not establish that a streamed form can handle submission. */
 export async function waitForSubmitHandler(
   form: Locator,
@@ -65,7 +77,7 @@ export async function waitForSubmitHandler(
 
 async function waitForHandler(
   control: Locator,
-  handler: "onClick" | "onSubmit",
+  handler: "onClick" | "onSubmit" | "onChange",
   timeoutMs: number,
 ): Promise<void> {
   await expect
@@ -88,7 +100,7 @@ async function waitForHandler(
         ),
       {
         timeout: timeoutMs,
-        message: `The control's React ${handler === "onSubmit" ? "submit" : "click"} handler must be ready`,
+        message: `The control's React ${handler.slice(2).toLowerCase()} handler must be ready`,
       },
     )
     .toBe(true);
