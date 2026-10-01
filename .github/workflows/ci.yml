@@ -1150,31 +1150,25 @@ jobs:
           echo 'PLATFORM_DATABASE_URL=postgresql://atlas_platform_login:atlas_ci_platform_only@localhost:5432/atlas_lms_ci' >> "$GITHUB_ENV"
 
       - run: pnpm exec playwright install --with-deps chromium
-      # Two dev servers, Chromium, Postgres and the Supabase auth stack share this runner.
-      # Journeys have failed on dropped proxy connections that neither server logged, so
-      # record memory pressure while they run instead of guessing at it afterwards.
-      - name: Sample runner resources during browser journeys
-        run: |
-          mkdir -p .test-results/f16-resources
-          echo "cpus=$(nproc)" > .test-results/f16-resources/usage.log
-          (while true; do
-            {
-              date -u +%FT%TZ
-              free -m | sed -n '2,3p'
-              ps -eo rss=,comm= --sort=-rss | head -n 6 | awk '{ print "  " int($1 / 1024) " MB " $2 }'
-            } >> .test-results/f16-resources/usage.log
-            sleep 15
-          done) &
       - name: Browser journeys and accessibility
-        run: pnpm exec playwright test
+        run: |
+          # Two dev servers, Chromium, Postgres and the Supabase auth stack share this runner,
+          # and journeys have failed on dropped proxy connections that neither server logged.
+          # Memory snapshots go straight into this log: a cancelled job uploads no artifacts.
+          echo "[runner] cpus=$(nproc)"
+          (while sleep 30; do
+            mem=$(free -m | awk '/^Mem:/ { printf "used=%sMB avail=%sMB", $3, $7 } /^Swap:/ { printf " swap=%sMB", $3 }')
+            top=$(ps -eo rss=,comm= --sort=-rss | head -n 4 | awk '{ printf "%s=%dMB ", $2, $1 / 1024 }')
+            echo "[runner] $(date -u +%T) $mem top: $top"
+          done) &
+          sampler=$!
+          trap 'kill "$sampler" 2>/dev/null || true' EXIT
+          pnpm exec playwright test
       - name: Verify critical journeys reject broken outcomes
         run: node scripts/e2e/verify-failure-probes.mjs
-      - name: Explain runner resource pressure
-        if: ${{ failure() }}
+      - name: Report kernel out-of-memory kills
+        if: ${{ failure() || cancelled() }}
         run: |
-          echo "::group::Last resource samples"
-          tail -n 160 .test-results/f16-resources/usage.log || true
-          echo "::endgroup::"
           sudo dmesg -T 2>/dev/null | grep -iE "out of memory|oom-kill|killed process" ||
             echo "No kernel out-of-memory kills recorded."
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -1185,7 +1179,6 @@ jobs:
           path: |
             playwright-report/
             .test-results/f16-probes/evidence.json
-            .test-results/f16-resources/usage.log
           retention-days: 7
 
   build:

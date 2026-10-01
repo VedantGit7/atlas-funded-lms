@@ -43,11 +43,6 @@ const nextConfig: NextConfig = {
     proxyTimeout: process.env["NODE_ENV"] === "development" ? 90_000 : 30_000,
     // Only metadata crosses the web proxy; large uploads use signed object URLs.
     proxyClientMaxBodySize: process.env["NODE_ENV"] === "development" ? "140mb" : "4mb",
-    // CI only: browser CI's dev server aborted on a Turbopack panic in the persistent
-    // cache's restore path ("Restore of Data for task … failed … Aborting"), killing every
-    // journey after it. A CI run starts cold, so the cache buys nothing there; local dev
-    // keeps it for fast restarts.
-    turbopackFileSystemCacheForDev: process.env["CI"] !== "true",
     serverActions: {
       bodySizeLimit: "1mb",
     },

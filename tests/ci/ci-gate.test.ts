@@ -237,8 +237,6 @@ describe("workflow graph and supply chain", () => {
     expect(upload.with.path.trim().split(/\s+/)).toEqual([
       "playwright-report/",
       ".test-results/f16-probes/evidence.json",
-      // Runner memory samples, so a dropped-connection failure can be told apart from pressure.
-      ".test-results/f16-resources/usage.log",
     ]);
   });
   it("configures the platform browser origin for the separate API server", () => {

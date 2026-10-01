@@ -31,9 +31,6 @@ const nextConfig: NextConfig = {
     serverActions: {
       bodySizeLimit: "1mb",
     },
-    // CI only: see frontend/apps/web/next.config.ts. A Turbopack panic in the persistent
-    // cache's restore path aborted a browser-CI dev server; CI runs start cold anyway.
-    turbopackFileSystemCacheForDev: process.env["CI"] !== "true",
   },
   transpilePackages: [
     "@atlas/api",
