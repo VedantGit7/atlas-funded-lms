@@ -1,10 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { SmtpEmailProvider } from "../../../backend/apps/api/src/server/notifications/notification.email-provider";
 
-const smtp = vi.hoisted(() => ({ sendMail: vi.fn(), close: vi.fn(), createTransport: vi.fn() }));
-vi.mock("../../../backend/apps/api/node_modules/nodemailer", () => ({
-  createTransport: smtp.createTransport,
-}));
+const smtp = { sendMail: vi.fn(), close: vi.fn(), createTransport: vi.fn() };
 
 const input = {
   tenantId: null,
@@ -14,8 +11,13 @@ const input = {
   requestId: "r",
   idempotencyKey: "original-event:destination",
 };
+// The fake transport is injected rather than mocked by module path: nodemailer 10 resolves to
+// separate ESM and CommonJS builds, so a path-based mock no longer reaches the provider's import.
 const provider = () =>
-  new SmtpEmailProvider({ SMTP_HOST: "smtp.test", NOTIFICATION_EMAIL_FROM: "sender@example.test" });
+  new SmtpEmailProvider(
+    { SMTP_HOST: "smtp.test", NOTIFICATION_EMAIL_FROM: "sender@example.test" },
+    smtp.createTransport as never,
+  );
 
 beforeEach(() => {
   vi.clearAllMocks();
