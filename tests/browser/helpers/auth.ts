@@ -3,6 +3,13 @@ import { waitForSubmitHandler } from "./hydration";
 import { totp } from "../../../scripts/e2e/totp.mjs";
 
 /**
+ * Time to leave /login after submitting. A cold dev server may first compile the
+ * auth routes and then the destination page, so dev mode gets the same headroom
+ * the dev-mode journeys already carry; a production build answers in seconds.
+ */
+const LOGIN_EXIT_TIMEOUT_MS = process.env["BROWSER_E2E_DEV"] === "1" ? 150_000 : 60_000;
+
+/**
  * Log in through the real form, as a learner would.
  *
  * `getByLabel("Password")` matched two controls — the input, whose label is
@@ -57,8 +64,44 @@ export async function loginWithCredentials(
   // have to compile. Waiting for its full load here charges that compile to the
   // login step and hides which part was slow — the spec's own assertions wait
   // for the content anyway.
-  await page.waitForURL((url) => !url.pathname.endsWith("/login"), {
-    timeout: 60_000,
-    waitUntil: "commit",
-  });
+  //
+  // Leaving /login is raced against the form showing an error, and each ends on
+  // its own line. The failure-probe verifier records only the file and line a
+  // journey failed at, and J09's probe once stalled here for 60 s with nothing to
+  // say whether the MFA code was rejected or a cold dev server was still compiling
+  // the verify route and the destination (each probe starts fresh servers).
+  const left = page
+    .waitForURL((url) => !url.pathname.endsWith("/login"), {
+      timeout: LOGIN_EXIT_TIMEOUT_MS,
+      waitUntil: "commit",
+    })
+    .then(() => "left" as const);
+  const rejected = page
+    .waitForFunction(
+      () =>
+        [...document.querySelectorAll('[role="alert"]')].some(
+          (alert) => alert.className.includes("fba-red-tx") && alert.textContent?.trim(),
+        ),
+      undefined,
+      { timeout: LOGIN_EXIT_TIMEOUT_MS },
+    )
+    .then(
+      () => "rejected" as const,
+      // A successful login navigates away, which destroys this check's execution
+      // context. That must never decide the race, so a failed check never settles.
+      () => new Promise<never>(() => undefined),
+    );
+  // If `rejected` wins, `left` keeps waiting until its timeout; keep that rejection quiet.
+  left.catch(() => undefined);
+
+  const outcome = await Promise.race([left, rejected]).catch(() => "stalled" as const);
+  if (outcome === "rejected") {
+    const message = await page.getByRole("alert").first().innerText();
+    throw new Error(`Login was rejected and stayed on /login: ${message}`);
+  }
+  if (outcome === "stalled") {
+    throw new Error(
+      `Login did not leave /login within ${String(LOGIN_EXIT_TIMEOUT_MS / 1000)} s and showed no error.`,
+    );
+  }
 }
