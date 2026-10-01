@@ -1151,9 +1151,26 @@ jobs:
 
       - run: pnpm exec playwright install --with-deps chromium
       - name: Browser journeys and accessibility
-        run: pnpm exec playwright test
+        run: |
+          # Two dev servers, Chromium, Postgres and the Supabase auth stack share this runner,
+          # and journeys have failed on dropped proxy connections that neither server logged.
+          # Memory snapshots go straight into this log: a cancelled job uploads no artifacts.
+          echo "[runner] cpus=$(nproc)"
+          (while sleep 30; do
+            mem=$(free -m | awk '/^Mem:/ { printf "used=%sMB avail=%sMB", $3, $7 } /^Swap:/ { printf " swap=%sMB", $3 }')
+            top=$(ps -eo rss=,comm= --sort=-rss | head -n 4 | awk '{ printf "%s=%dMB ", $2, $1 / 1024 }')
+            echo "[runner] $(date -u +%T) $mem top: $top"
+          done) &
+          sampler=$!
+          trap 'kill "$sampler" 2>/dev/null || true' EXIT
+          pnpm exec playwright test
       - name: Verify critical journeys reject broken outcomes
         run: node scripts/e2e/verify-failure-probes.mjs
+      - name: Report kernel out-of-memory kills
+        if: ${{ failure() || cancelled() }}
+        run: |
+          sudo dmesg -T 2>/dev/null | grep -iE "out of memory|oom-kill|killed process" ||
+            echo "No kernel out-of-memory kills recorded."
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: ${{ always() }}
         with:

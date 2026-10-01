@@ -52,7 +52,9 @@ describe("browser journey wiring", () => {
     // The previous command named `journeys/01-…` and `accessibility`, so adding
     // a twelfth journey would have left it running nowhere by default. A bare
     // `playwright test` picks up whatever the registry grows.
-    expect(workflows).toMatch(/run: pnpm exec playwright test\s*$/m);
+    // Either a one-line `run:` or the last line of a block script (the journeys step also starts
+    // a memory sampler); either way the command must carry no path arguments.
+    expect(workflows).toMatch(/^\s*(?:run: )?pnpm exec playwright test\s*$/m);
     expect(workflows).not.toContain("playwright test tests/browser/journeys/01");
   });
 
