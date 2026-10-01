@@ -56,6 +56,13 @@ export type AttemptMetadata = {
       canReviewAnswers: boolean;
     }
   >;
+  /** How the attempt was finalized. Absent on attempts submitted before this was recorded. */
+  submission?: {
+    /** `learner`: the learner submitted. `deadline`: the time limit closed the attempt. */
+    trigger: "learner" | "deadline";
+    /** True when finalization happened after `dueAt` (inside or beyond the grace window). */
+    afterDeadline: boolean;
+  };
 };
 
 export function parseAttemptMetadata(metadataJson: unknown): AttemptMetadata {
@@ -141,6 +148,55 @@ export const attemptsRepository = {
       metadata_json: row.metadata_json,
       idempotency_key: row.idempotency_key,
     };
+  },
+
+  /**
+   * Reads an attempt and holds its row lock until the transaction ends.
+   *
+   * Finalization (learner submit, a read past the deadline, and the worker's deadline sweep) all
+   * start here, so two of them can never grade the same attempt: the second waits, then sees the
+   * status the first committed.
+   */
+  async findByIdForUpdate(tx: TenantTx, attemptId: string): Promise<AttemptRow | null> {
+    const rows = await tx.$queryRaw<AttemptRow[]>`
+      select
+        id::text,
+        tenant_id::text,
+        assessment_id::text,
+        membership_id::text,
+        status::text as status,
+        started_at,
+        submitted_at,
+        graded_at,
+        score_pct,
+        metadata_json,
+        idempotency_key
+      from attempts
+      where id = ${attemptId}::uuid
+      for update
+    `;
+    return rows[0] ?? null;
+  },
+
+  /**
+   * In-progress attempts whose deadline plus grace has passed, oldest deadline first.
+   * `dueAt` is always an ISO timestamp written by `insertAttempt`.
+   */
+  async listExpiredStartedAttemptIds(
+    tx: TenantTx,
+    args: { graceMs: number; limit: number },
+  ): Promise<string[]> {
+    const rows = await tx.$queryRaw<Array<{ id: string }>>`
+      select id::text
+      from attempts
+      where status = 'STARTED'::"AttemptStatus"
+        and metadata_json ? 'dueAt'
+        and (metadata_json->>'dueAt')::timestamptz
+          < now() - make_interval(secs => ${args.graceMs / 1000})
+      order by (metadata_json->>'dueAt')::timestamptz
+      limit ${args.limit}
+    `;
+    return rows.map((row) => row.id);
   },
 
   async countAttemptsForMembership(
