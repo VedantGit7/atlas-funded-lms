@@ -3,6 +3,7 @@ import { test, expect } from "../fixtures/axe";
 import { loginWithCredentials } from "../helpers/auth";
 import { requiredCredential } from "../helpers/env";
 import { waitForHydration } from "../helpers/hydration";
+import { coldRouteNavigationOptions } from "../helpers/navigation";
 import { scenario } from "../helpers/scenario";
 import { provisionedTenantPersistence } from "../helpers/persistence";
 
@@ -52,7 +53,12 @@ test.describe("J10 platform provision and entitlements", () => {
     });
     const { data: tenant } = (await provisioned.json()) as { data: { id: string } };
     await expect(page).toHaveURL(new RegExp(`/platform/tenants/${tenant.id}$`));
-    await expect(page.getByRole("heading", { name, exact: true })).toBeVisible();
+    // Client navigation changes the URL at once; this heading is the first proof the tenant
+    // detail route has rendered, and on a fresh dev server (each failure probe starts one)
+    // that route compiles cold. The saved-state checks below keep their normal timeouts.
+    await expect(page.getByRole("heading", { name, exact: true })).toBeVisible(
+      coldRouteNavigationOptions(),
+    );
     await expect(page.locator("dd").filter({ hasText: /^ACTIVE$/ })).toBeVisible();
     await expect(page.locator("dd").filter({ hasText: /^SUCCEEDED$/ })).toBeVisible();
     const headers = { "x-atlas-platform-reason": reason };
