@@ -115,6 +115,43 @@ function sourceLocations(errors, spec) {
   return [...locations.values()].slice(0, 20);
 }
 
+// The probe's own dev servers log to its output, which is otherwise discarded: it can carry
+// anything. Only the route shape and error code of the API's structured `route.failure` lines
+// may leave it — enough to tell a login Supabase rejected from an API error or no API call at all.
+function serverFailures(output) {
+  const failures = [];
+  for (const line of output.split("\n")) {
+    if (failures.length === 20) break;
+    const start = line.indexOf("{");
+    if (start === -1 || !line.includes('"route.failure"')) continue;
+    let value;
+    try {
+      value = JSON.parse(line.slice(start));
+    } catch {
+      continue;
+    }
+    if (value?.message !== "route.failure") continue;
+    const route =
+      typeof value.route === "string" && value.route.startsWith("/api/v1/")
+        ? value.route
+            .split("/")
+            .slice(0, 12)
+            .map((segment, index) =>
+              index < 3 || (segment.length <= 32 && /^[a-z]+(?:-[a-z]+){0,3}$/.test(segment))
+                ? segment
+                : ":param",
+            )
+            .join("/")
+        : "other";
+    const errorCode =
+      typeof value.errorCode === "string" && /^[A-Z][A-Z_]{1,39}$/.test(value.errorCode)
+        ? value.errorCode
+        : "other";
+    failures.push({ route, errorCode });
+  }
+  return failures;
+}
+
 function phaseDiagnostics(test, spec) {
   const grading = spec === "03-learner-assessment";
   if (!grading && spec !== "02-learner-dashboard-enrollment") return {};
@@ -253,6 +290,7 @@ try {
       },
     );
     current.process = processSummary(result);
+    current.serverFailures = serverFailures(`${result.stdout ?? ""}\n${result.stderr ?? ""}`);
     if (result.error) throw new Error("Probe process failed");
     current.stage = "report";
     current.reportStatus = "pending";
