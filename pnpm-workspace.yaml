@@ -27,6 +27,9 @@ overrides:
   # Test tooling only (vitest -> jsdom): WebSocket DoS, TLS validation bypass
   # and cache poisoning, all fixed in 8.10.2.
   "undici@>=8.0.0 <8.10.2": "^8.10.2"
+  # Lighthouse CI tooling only (@lhci/cli -> puppeteer -> proxy-agent -> get-uri):
+  # quadratic CPU in Client.list(), fixed in 6.2.1.
+  "basic-ftp@<6.2.1": "^6.2.1"
   "@hono/node-server@<1.19.13": "^1.19.13"
   "body-parser@<1.20.6": "^1.20.6"
   "cookie@<0.7.0": "^0.7.0"
@@ -92,6 +95,13 @@ auditConfig:
     # so the reasoning above applies unchanged -- but it had to be named
     # explicitly, because suppressing by id is what keeps a NEW advisory loud.
     - GHSA-7pqw-9j4j-h8q3
+    # SEC-10: node-forge RSA PKCS#1 v1.5 signature VERIFICATION accepts extra
+    # nested DigestAlgorithm elements (high). Unfixable today: 1.4.0 is the latest
+    # published release and the advisory's "patched >=1.4.1" does not exist yet.
+    # Atlas only SIGNS with node-forge (Apple Wallet pass PKCS#7 in
+    # certificate-wallet.service.ts); nothing verifies an RSA signature with it, and
+    # the unused web copy was removed. Remove this line when 1.4.1 ships.
+    - GHSA-86w9-cpqp-85rv
 
 allowBuilds:
   "@prisma/client": true
