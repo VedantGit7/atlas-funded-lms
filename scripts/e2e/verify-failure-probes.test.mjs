@@ -58,9 +58,15 @@ function runFixture(t, mode = "valid") {
       fs.writeSync(1, Buffer.alloc(2 * 1024 * 1024, 'x'));
       process.exit(1);
     }
+    if (target && mode === 'server-failures') {
+      fs.writeSync(1, '[WebServer] ' + JSON.stringify({message:'route.failure',route:'/api/v1/public/auth/login',errorCode:'AUTH_REQUIRED',errorMessage:sentinel}) + '\\n');
+      fs.writeSync(1, '[WebServer] ' + JSON.stringify({message:'route.failure',route:'/api/v1/courses/4dc3529d-eb9a-47ce-a333-3dff75ab4c87/' + sentinel,errorCode:sentinel}) + '\\n');
+      fs.writeSync(2, '[WebServer] {"message":"route.failure",' + sentinel + '\\n');
+      fs.writeSync(1, '[WebServer] ' + JSON.stringify({message:sentinel,route:'/api/v1/courses',errorCode:'AUTH_REQUIRED'}) + ' route.failure\\n');
+    }
     const file = 'tests/browser/journeys/10-platform-provision-entitlements.spec.ts';
     const error = {
-      message: (target && ['wrong-assertion', 'stack-only', 'malformed-location'].includes(mode) ? 'other assertion' : messages[fault]) + sentinel,
+      message: (target && ['wrong-assertion', 'stack-only', 'malformed-location', 'server-failures'].includes(mode) ? 'other assertion' : messages[fault]) + sentinel,
       stack: sentinel + '\\n at ' + file + ':118:42\\n at ' + sentinel + ':2:3',
       location: { file, line: 118, column: 42 },
       snippet: sentinel
@@ -215,6 +221,17 @@ for (const mode of [
     }
   });
 }
+
+test("keeps only the route shape and error code of the probe servers' route failures", (t) => {
+  const { child, evidence } = runFixture(t, "server-failures");
+  assert.notEqual(child.status, 0);
+  assert.equal(evidence.failure.fault, "entitlement-not-saved");
+  assert.equal(evidence.failure.stage, "outcome");
+  assert.deepEqual(evidence.failure.serverFailures, [
+    { route: "/api/v1/public/auth/login", errorCode: "AUTH_REQUIRED" },
+    { route: "/api/v1/courses/:param/:param", errorCode: "other" },
+  ]);
+});
 
 test("seed failure is terminal and never runs a browser", (t) => {
   const { child, evidence } = runFixture(t, "seed-error");
