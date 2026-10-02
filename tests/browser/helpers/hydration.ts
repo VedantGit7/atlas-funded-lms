@@ -83,21 +83,28 @@ async function waitForHandler(
   await expect
     .poll(
       () =>
-        control.evaluate(
-          (element, handler) =>
-            Object.keys(element).some((key) => {
-              if (!key.startsWith("__reactProps$")) return false;
-              const props = (element as unknown as Record<string, unknown>)[key];
-              return (
-                props !== null &&
-                typeof props === "object" &&
-                handler in props &&
-                typeof (props as Record<string, unknown>)[handler] === "function"
-              );
-            }),
-          handler,
-          { timeout: Math.min(timeoutMs, 1_000) },
-        ),
+        control
+          .evaluate(
+            (element, handler) =>
+              Object.keys(element).some((key) => {
+                if (!key.startsWith("__reactProps$")) return false;
+                const props = (element as unknown as Record<string, unknown>)[key];
+                return (
+                  props !== null &&
+                  typeof props === "object" &&
+                  handler in props &&
+                  typeof (props as Record<string, unknown>)[handler] === "function"
+                );
+              }),
+            handler,
+            { timeout: Math.min(timeoutMs, 1_000) },
+          )
+          // `expect.poll` fails at the FIRST exception rather than retrying, so one
+          // transient error (the control not attached within this 1 s probe on a cold
+          // dev server, or a dev reload replacing the document mid-check) used to end
+          // the whole wait. J11's failure probe died here after 3.3 s of a 60 s budget.
+          // A thrown check means "not ready yet"; only the overall timeout fails.
+          .catch(() => false),
       {
         timeout: timeoutMs,
         message: `The control's React ${handler.slice(2).toLowerCase()} handler must be ready`,
