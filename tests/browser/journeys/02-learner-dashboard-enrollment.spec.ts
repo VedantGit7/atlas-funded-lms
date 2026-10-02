@@ -39,7 +39,7 @@ test.describe("J02 learner enrollment and persisted lesson progress", () => {
     await probePhase("J02 enrollment", async () => {
       await page.goto("/courses");
       await page.locator(`a[href="${coursePath}"]`).click();
-      await expect(page).toHaveURL(new RegExp(`${coursePath}$`));
+      await expect(page).toHaveURL(new RegExp(`${coursePath}$`), coldRouteNavigationOptions());
       await waitForHydration(page);
       await page.getByRole("button", { name: "Enroll", exact: true }).click();
       const enrollmentResponse = page.waitForResponse(
