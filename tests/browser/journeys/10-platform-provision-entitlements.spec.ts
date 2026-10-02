@@ -52,10 +52,15 @@ test.describe("J10 platform provision and entitlements", () => {
       ],
     });
     const { data: tenant } = (await provisioned.json()) as { data: { id: string } };
-    await expect(page).toHaveURL(new RegExp(`/platform/tenants/${tenant.id}$`));
-    // Client navigation changes the URL at once; this heading is the first proof the tenant
-    // detail route has rendered, and on a fresh dev server (each failure probe starts one)
-    // that route compiles cold. The saved-state checks below keep their normal timeouts.
+    // This is the run's first visit to the tenant detail route, so on a fresh dev server (the
+    // main run and every failure probe start one) it compiles cold. `router.push` commits the URL
+    // only once that route's payload arrives — no loading boundary sits between /tenants/new and
+    // /tenants/[id] — so both the URL and the heading wait on the compile. The saved-state checks
+    // below keep their normal timeouts.
+    await expect(page).toHaveURL(
+      new RegExp(`/platform/tenants/${tenant.id}$`),
+      coldRouteNavigationOptions(),
+    );
     await expect(page.getByRole("heading", { name, exact: true })).toBeVisible(
       coldRouteNavigationOptions(),
     );

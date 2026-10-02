@@ -42,10 +42,13 @@ test.describe("J03 learner assessment lifecycle", () => {
       });
       const attemptId = startBody.data.id;
       expect(attemptId).toMatch(/^[\da-f-]{36}$/i);
-      await expect(page).toHaveURL(new RegExp(`/attempts/${attemptId}$`));
+      await expect(page).toHaveURL(
+        new RegExp(`/attempts/${attemptId}$`),
+        coldRouteNavigationOptions(),
+      );
       await expect(
         page.getByRole("heading", { name: "Assessment attempt", exact: true }),
-      ).toBeVisible();
+      ).toBeVisible(coldRouteNavigationOptions());
       await waitForHydration(page);
 
       return attemptId;
