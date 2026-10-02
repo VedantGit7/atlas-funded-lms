@@ -1171,6 +1171,17 @@ jobs:
         run: |
           sudo dmesg -T 2>/dev/null | grep -iE "out of memory|oom-kill|killed process" ||
             echo "No kernel out-of-memory kills recorded."
+      - name: Summarize local auth responses
+        if: ${{ failure() || cancelled() }}
+        run: |
+          # The API reports every Supabase sign-in failure as invalid credentials, so a rejected
+          # journey login cannot tell a wrong password from a rate limit (sign-ins are capped per
+          # IP in supabase/config.toml). Counts of method, path and status only, never bodies.
+          container=$(docker ps --format '{{.Names}}' | grep -m1 '^supabase_auth_' || true)
+          if [ -z "$container" ]; then echo "No local auth container is running."; exit 0; fi
+          docker logs "$container" 2>&1 |
+            jq -Rr 'fromjson? | select(.path != null and .status != null) | "\(.method) \(.path) \(.status)"' |
+            sort | uniq -c | sort -rn | head -n 30
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: ${{ always() }}
         with:

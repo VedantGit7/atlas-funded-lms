@@ -97,6 +97,15 @@ export async function loginWithCredentials(
   const outcome = await Promise.race([left, rejected]).catch(() => "stalled" as const);
   if (outcome === "rejected") {
     const message = await page.getByRole("alert").first().innerText();
+    // Same reasoning: the verifier keeps no message text, so each known rejection fails on its
+    // own line. J02's probe was once rejected 2.7 s in with nothing to say which of these it was.
+    // Supabase reports a bad password and a rate limit alike, and the API maps both to this one.
+    if (message.includes("Invalid email or password")) {
+      throw new Error(`Login was rejected as invalid credentials: ${message}`);
+    }
+    if (message.includes("active access")) {
+      throw new Error(`Login was rejected for lack of an active membership: ${message}`);
+    }
     throw new Error(`Login was rejected and stayed on /login: ${message}`);
   }
   if (outcome === "stalled") {
