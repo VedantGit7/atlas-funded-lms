@@ -1,10 +1,7 @@
 import { test, expect } from "../fixtures/axe";
 
-test.describe("J01 public diagnostic and signup path", () => {
-  test("loads public landing and diagnostic entry", async ({
-    page,
-    assertNoCriticalViolations,
-  }) => {
+test.describe("J01 shell smoke: public landing, diagnostic and signup", () => {
+  test("loads public landing shell", async ({ page, assertNoCriticalViolations }) => {
     await page.goto("/p/home");
     await expect(page.getByRole("main")).toBeVisible();
     await assertNoCriticalViolations();

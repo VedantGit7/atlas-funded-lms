@@ -21,6 +21,7 @@ export async function findEventDelivery(
     FROM event_deliveries
     WHERE outbox_event_id = ${input.outboxEventId}::uuid
       AND destination_key = ${input.destinationKey}
+    ORDER BY attempt_count DESC,created_at DESC
     LIMIT 1
   `;
 
@@ -37,6 +38,7 @@ export async function insertEventDeliveryAttempt(
     errorCode?: string | null;
     safeErrorMessage?: string | null;
     requestId: string;
+    attemptCount?: number;
   },
 ): Promise<{ id: string }> {
   const id = createUuidV7();
@@ -66,9 +68,9 @@ export async function insertEventDeliveryAttempt(
       ${input.outboxEventId}::uuid,
       ${input.destinationKey},
       ${DB_STATUS[input.status]}::"DispatchStatus",
-      1,
+      ${input.attemptCount ?? 1},
       now(),
-      ${responseJson}
+      ${JSON.stringify(responseJson)}::jsonb
     )
     RETURNING id
   `;

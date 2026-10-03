@@ -1,0 +1,79 @@
+{
+  "generatedAt": "2026-09-22T03:21:46.553Z",
+  "nodeVersion": "v24.11.1",
+  "buildEnvironment": {
+    "nodeEnv": "production",
+    "appEnv": "test",
+    "harness": "scripts/perf/local-web.mjs localWebEnvironment",
+    "hostAcceptance": false,
+    "productionRuntimeStarted": false
+  },
+  "builds": {
+    "web": {
+      "exitCode": 0,
+      "log": "web-build-network-retry.log",
+      "buildId": "PB1uOpSes7ehRZLnfomq6",
+      "artifact": {
+        "nonDependencyFiles": 4726,
+        "nonDependencyBytes": 58742408,
+        "sensitiveFiles": [],
+        "rawAppSources": []
+      }
+    },
+    "api": {
+      "exitCode": 0,
+      "log": "api-build-final.log",
+      "buildId": "IzBWOF1lgRmh5t3T7vLJX",
+      "artifact": {
+        "nonDependencyFiles": 8046,
+        "nonDependencyBytes": 114452875,
+        "sensitiveFiles": [],
+        "rawAppSources": []
+      },
+      "representativeTrace": {
+        "entries": 761,
+        "rawAppSourceEntries": 0
+      }
+    }
+  },
+  "browser": {
+    "report": "browser-final.json",
+    "passed": 25,
+    "failed": 0,
+    "skipped": 0,
+    "flaky": 0,
+    "linuxChromium": "Playwright 1.61.0 Ubuntu 24.04",
+    "updateSnapshots": "none",
+    "workers": 1,
+    "retries": 0
+  },
+  "regressions": {
+    "lessonProgress": {
+      "passed": 25,
+      "files": 3,
+      "report": "lesson-progress-final.log",
+      "redFailures": 2
+    },
+    "localStorage": {
+      "passed": 4,
+      "report": "local-storage-regression.log"
+    }
+  },
+  "optionalFailureProbes": {
+    "status": "interrupted",
+    "completedRun": false,
+    "reason": "Parent narrowed remaining verification after fresh full browser and concurrency evidence; no fresh seven-probe claim."
+  },
+  "cleanup": {
+    "apiWebStopped": true,
+    "dockerF16StackStopped": true,
+    "linuxBrowserStopped": true,
+    "nextEnvRestored": true
+  },
+  "changedSourceSha256": {
+    "backend/packages/storage/src/providers/local-filesystem-storage-provider.ts": "edb8d1148d88f1f1c165bbcc88c00b97adcf89fd5f1ae79230f20ec90552d51c",
+    "backend/apps/api/src/server/lessons/lesson-progress.repository.ts": "89e0582418ec6bc49b8e1bbb24b6515299b1507b8f71814d98555a7499c7b5ac",
+    "backend/apps/api/src/server/lessons/lesson-progress.service.ts": "78958b0d8d20d70af8f41e07f84ebf111dc5fb8ba1bf2f5768d20aac5455510a",
+    "tests/integration/api/lesson-progress.test.ts": "213b47085e78aa08422b4fee55a51bbd428676e088d047d51de874b3926ca521"
+  }
+}

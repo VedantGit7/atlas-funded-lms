@@ -776,7 +776,8 @@ export const HELP_ARTICLES: readonly HelpArticle[] = [
     slug: "privacy-and-data-export",
     categoryId: "account",
     title: "Privacy and data export",
-    summary: "Analytics opt-out, profile visibility, downloading your data, and account deletion.",
+    summary:
+      "Analytics opt-out, profile visibility, partial profile downloads, and school-access removal.",
     lastUpdated: "July 8, 2026",
     readMinutes: 5,
     relatedSlugs: ["updating-your-profile"],
@@ -787,17 +788,17 @@ export const HELP_ARTICLES: readonly HelpArticle[] = [
         blocks: [
           {
             type: "p",
-            text: "Settings → Privacy & Data controls optional analytics, visibility of your profile to other members, and self-service export of your personal data as JSON.",
+            text: "Settings → Privacy & Data controls optional analytics and profile visibility. The JSON download is a partial account, profile, preferences, and available school-entitlements snapshot with a manifest of included fields and omissions. Learning records, assessment submissions, billing records, files, and other records are not included. Contact your school for a full data-rights review.",
           },
         ],
       },
       {
         id: "deletion",
-        title: "Account deletion",
+        title: "School-access removal and erasure review",
         blocks: [
           {
             type: "p",
-            text: "Deletion requests are processed per your academy’s data retention policy. Some records (billing, certificates issued) may be retained in anonymized or legal-hold form. Review the Privacy Policy linked in the site footer before confirming.",
+            text: "The danger-zone action requests removal of your access to this school. Processing retains your identity and school records, including learning, billing, and public contributions. It does not remove access to other schools or erase these records. Contact your school for a separate erasure and retention review.",
           },
         ],
       },

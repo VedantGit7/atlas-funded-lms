@@ -1,5 +1,9 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { withTenantTx } from "@atlas/db";
+import {
+  setEmailProviderForTests,
+  type EmailSendInput,
+} from "../../../backend/apps/api/src/server/notifications/notification.email-provider";
 import {
   handleNotificationQueuedOutboxEvent,
   handleNotificationSourceOutboxEvent,
@@ -24,6 +28,13 @@ const describeWithDb =
   process.env["DATABASE_URL"] && process.env["PLATFORM_DATABASE_URL"] ? describe : describe.skip;
 
 describeWithDb("notification integration", () => {
+  const sendEmail = vi.fn<(input: EmailSendInput) => Promise<void>>();
+  beforeEach(() => {
+    sendEmail.mockReset().mockResolvedValue(undefined);
+    setEmailProviderForTests({ isConfigured: () => true, send: sendEmail });
+  });
+  afterEach(() => setEmailProviderForTests(null));
+
   it("creates templates, dispatches from certificate events, and marks read without audit/outbox", async () => {
     const fixture = await createCertificateFixture();
     const admin = adminCtx(fixture, "req_notification_admin");
@@ -111,6 +122,7 @@ describeWithDb("notification integration", () => {
           select id::text, payload_json
           from outbox_events
           where event_type = 'notification.queued'
+            and payload_json->>'channel' = 'email'
           order by occurred_at desc
           limit 1
         `,
@@ -133,6 +145,26 @@ describeWithDb("notification integration", () => {
       payload: queuedEvent.payload_json,
       requestId: "req_notification_queued_replay",
     });
+
+    // The controlled provider is invoked once; replay observes the persisted
+    // receipt instead of reporting a false delivery or sending a second email.
+    expect(sendEmail).toHaveBeenCalledTimes(1);
+    expect(sendEmail).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tenantId: fixture.tenantId,
+        idempotencyKey: expect.any(String),
+      }),
+    );
+    const emailReceipts = await withTenantTx(
+      authoringTenantTx(fixture),
+      (tx) =>
+        tx.$queryRaw<Array<{ status: string }>>`
+        select status from notification_dispatches
+        where membership_id = ${fixture.learnerMembershipId}::uuid
+          and channel = 'email'
+      `,
+    );
+    expect(emailReceipts).toEqual([{ status: "SENT" }]);
 
     const inbox = await withTenantTx(
       authoringTenantTx(fixture, fixture.learnerMembershipId),

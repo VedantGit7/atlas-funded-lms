@@ -1,0 +1,712 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-09-26T16:39:34.391Z",
+  "startedAt": "2026-09-26T16:37:45.195Z",
+  "mode": "local-endurance",
+  "origin": "http://fundedbeyond.localhost:3100",
+  "build": "development-step5-followup-20260926",
+  "planningTarget": {
+    "sustained": 100,
+    "burst": 200
+  },
+  "capacityVerified": false,
+  "slo": {
+    "requestP95Ms": 1000,
+    "journeyP95Ms": 3000
+  },
+  "performancePassed": true,
+  "pacingMs": 20000,
+  "setupPacingMs": 100,
+  "refreshIntervalMs": 300000,
+  "model": "closed-loop distinct authenticated learners; think time follows each journey; setup measured separately",
+  "setup": {
+    "attempts": 4,
+    "successes": 4,
+    "errors": 0,
+    "errorRate": 0,
+    "successLatencyMs": {
+      "p50": 287.30409999999756,
+      "p95": 2954.7468999999983,
+      "p99": 2954.7468999999983,
+      "max": 2954.7468999999983
+    },
+    "allAttemptLatencyMs": {
+      "p50": 287.30409999999756,
+      "p95": 2954.7468999999983,
+      "p99": 2954.7468999999983,
+      "max": 2954.7468999999983
+    },
+    "statuses": {
+      "200": 4
+    }
+  },
+  "setupByOperation": {
+    "login": {
+      "attempts": 2,
+      "successes": 2,
+      "errors": 0,
+      "errorRate": 0,
+      "successLatencyMs": {
+        "p50": 287.30409999999756,
+        "p95": 2954.7468999999983,
+        "p99": 2954.7468999999983,
+        "max": 2954.7468999999983
+      },
+      "allAttemptLatencyMs": {
+        "p50": 287.30409999999756,
+        "p95": 2954.7468999999983,
+        "p99": 2954.7468999999983,
+        "max": 2954.7468999999983
+      },
+      "statuses": {
+        "200": 2
+      }
+    },
+    "enrollment": {
+      "attempts": 2,
+      "successes": 2,
+      "errors": 0,
+      "errorRate": 0,
+      "successLatencyMs": {
+        "p50": 201.22479999999996,
+        "p95": 498.58360000000175,
+        "p99": 498.58360000000175,
+        "max": 498.58360000000175
+      },
+      "allAttemptLatencyMs": {
+        "p50": 201.22479999999996,
+        "p95": 498.58360000000175,
+        "p99": 498.58360000000175,
+        "max": 498.58360000000175
+      },
+      "statuses": {
+        "200": 2
+      }
+    }
+  },
+  "phases": [
+    {
+      "name": "warmup",
+      "users": 2,
+      "seconds": 45,
+      "includedInSizing": false,
+      "elapsedMs": 45005.3309,
+      "drainMs": 60000,
+      "drainElapsedMs": 5.330900000000838,
+      "startedAt": "2026-09-26T16:37:49.358Z",
+      "finishedAt": "2026-09-26T16:38:34.363Z",
+      "actorsCompletedDuration": 2,
+      "actorsWithCompletedJourneys": 2,
+      "minCompletedJourneysPerActor": 2,
+      "durationCompleted": true,
+      "incompleteJourneys": 0,
+      "cancelledRequests": 0,
+      "deadlineOverruns": 0,
+      "requestRps": 0.4888309797984398,
+      "truncated": false,
+      "requests": {
+        "attempts": 22,
+        "successes": 22,
+        "errors": 0,
+        "errorRate": 0,
+        "successLatencyMs": {
+          "p50": 291,
+          "p95": 4750,
+          "p99": 4766.438299999998,
+          "max": 4766.438299999998
+        },
+        "allAttemptLatencyMs": {
+          "p50": 291,
+          "p95": 4750,
+          "p99": 4766.438299999998,
+          "max": 4766.438299999998
+        },
+        "statuses": {
+          "200": 22
+        },
+        "latencyMethod": "bounded histogram; percentile upper bounds (integer milliseconds, approximately 1% buckets)"
+      },
+      "journeys": {
+        "attempts": 4,
+        "successes": 4,
+        "errors": 0,
+        "errorRate": 0,
+        "successLatencyMs": {
+          "p50": 1418,
+          "p95": 9353.962500000001,
+          "p99": 9353.962500000001,
+          "max": 9353.962500000001
+        },
+        "allAttemptLatencyMs": {
+          "p50": 1418,
+          "p95": 9353.962500000001,
+          "p99": 9353.962500000001,
+          "max": 9353.962500000001
+        },
+        "statuses": {
+          "200": 4
+        },
+        "latencyMethod": "bounded histogram; percentile upper bounds (integer milliseconds, approximately 1% buckets)"
+      },
+      "byOperation": {
+        "refresh": {
+          "attempts": 2,
+          "successes": 2,
+          "errors": 0,
+          "errorRate": 0,
+          "successLatencyMs": {
+            "p50": 323,
+            "p95": 327.4436999999998,
+            "p99": 327.4436999999998,
+            "max": 327.4436999999998
+          },
+          "allAttemptLatencyMs": {
+            "p50": 323,
+            "p95": 327.4436999999998,
+            "p99": 327.4436999999998,
+            "max": 327.4436999999998
+          },
+          "statuses": {
+            "200": 2
+          },
+          "latencyMethod": "bounded histogram; percentile upper bounds (integer milliseconds, approximately 1% buckets)"
+        },
+        "identity": {
+          "attempts": 4,
+          "successes": 4,
+          "errors": 0,
+          "errorRate": 0,
+          "successLatencyMs": {
+            "p50": 351,
+            "p95": 677.681700000001,
+            "p99": 677.681700000001,
+            "max": 677.681700000001
+          },
+          "allAttemptLatencyMs": {
+            "p50": 351,
+            "p95": 677.681700000001,
+            "p99": 677.681700000001,
+            "max": 677.681700000001
+          },
+          "statuses": {
+            "200": 4
+          },
+          "latencyMethod": "bounded histogram; percentile upper bounds (integer milliseconds, approximately 1% buckets)"
+        },
+        "course": {
+          "attempts": 4,
+          "successes": 4,
+          "errors": 0,
+          "errorRate": 0,
+          "successLatencyMs": {
+            "p50": 279,
+            "p95": 2063.029699999999,
+            "p99": 2063.029699999999,
+            "max": 2063.029699999999
+          },
+          "allAttemptLatencyMs": {
+            "p50": 279,
+            "p95": 2063.029699999999,
+            "p99": 2063.029699999999,
+            "max": 2063.029699999999
+          },
+          "statuses": {
+            "200": 4
+          },
+          "latencyMethod": "bounded histogram; percentile upper bounds (integer milliseconds, approximately 1% buckets)"
+        },
+        "lesson": {
+          "attempts": 4,
+          "successes": 4,
+          "errors": 0,
+          "errorRate": 0,
+          "successLatencyMs": {
+            "p50": 288,
+            "p95": 4766.438299999998,
+            "p99": 4766.438299999998,
+            "max": 4766.438299999998
+          },
+          "allAttemptLatencyMs": {
+            "p50": 288,
+            "p95": 4766.438299999998,
+            "p99": 4766.438299999998,
+            "max": 4766.438299999998
+          },
+          "statuses": {
+            "200": 4
+          },
+          "latencyMethod": "bounded histogram; percentile upper bounds (integer milliseconds, approximately 1% buckets)"
+        },
+        "progress-save": {
+          "attempts": 4,
+          "successes": 4,
+          "errors": 0,
+          "errorRate": 0,
+          "successLatencyMs": {
+            "p50": 285,
+            "p95": 1842.7193000000007,
+            "p99": 1842.7193000000007,
+            "max": 1842.7193000000007
+          },
+          "allAttemptLatencyMs": {
+            "p50": 285,
+            "p95": 1842.7193000000007,
+            "p99": 1842.7193000000007,
+            "max": 1842.7193000000007
+          },
+          "statuses": {
+            "200": 4
+          },
+          "latencyMethod": "bounded histogram; percentile upper bounds (integer milliseconds, approximately 1% buckets)"
+        },
+        "progress-read": {
+          "attempts": 4,
+          "successes": 4,
+          "errors": 0,
+          "errorRate": 0,
+          "successLatencyMs": {
+            "p50": 252,
+            "p95": 278.8787000000011,
+            "p99": 278.8787000000011,
+            "max": 278.8787000000011
+          },
+          "allAttemptLatencyMs": {
+            "p50": 252,
+            "p95": 278.8787000000011,
+            "p99": 278.8787000000011,
+            "max": 278.8787000000011
+          },
+          "statuses": {
+            "200": 4
+          },
+          "latencyMethod": "bounded histogram; percentile upper bounds (integer milliseconds, approximately 1% buckets)"
+        }
+      },
+      "performancePassed": null
+    },
+    {
+      "name": "sustained",
+      "users": 2,
+      "seconds": 30,
+      "includedInSizing": false,
+      "elapsedMs": 30016.911300000007,
+      "drainMs": 60000,
+      "drainElapsedMs": 16.91130000000703,
+      "startedAt": "2026-09-26T16:38:34.366Z",
+      "finishedAt": "2026-09-26T16:39:04.383Z",
+      "actorsCompletedDuration": 2,
+      "actorsWithCompletedJourneys": 2,
+      "minCompletedJourneysPerActor": 2,
+      "durationCompleted": true,
+      "incompleteJourneys": 0,
+      "cancelledRequests": 0,
+      "deadlineOverruns": 0,
+      "requestRps": 0.7329201788992858,
+      "truncated": false,
+      "requests": {
+        "attempts": 22,
+        "successes": 22,
+        "errors": 0,
+        "errorRate": 0,
+        "successLatencyMs": {
+          "p50": 285,
+          "p95": 331,
+          "p99": 357.0485999999946,
+          "max": 357.0485999999946
+        },
+        "allAttemptLatencyMs": {
+          "p50": 285,
+          "p95": 331,
+          "p99": 357.0485999999946,
+          "max": 357.0485999999946
+        },
+        "statuses": {
+          "200": 22
+        },
+        "latencyMethod": "bounded histogram; percentile upper bounds (integer milliseconds, approximately 1% buckets)"
+      },
+      "journeys": {
+        "attempts": 4,
+        "successes": 4,
+        "errors": 0,
+        "errorRate": 0,
+        "successLatencyMs": {
+          "p50": 1389,
+          "p95": 1583.363599999997,
+          "p99": 1583.363599999997,
+          "max": 1583.363599999997
+        },
+        "allAttemptLatencyMs": {
+          "p50": 1389,
+          "p95": 1583.363599999997,
+          "p99": 1583.363599999997,
+          "max": 1583.363599999997
+        },
+        "statuses": {
+          "200": 4
+        },
+        "latencyMethod": "bounded histogram; percentile upper bounds (integer milliseconds, approximately 1% buckets)"
+      },
+      "byOperation": {
+        "refresh": {
+          "attempts": 2,
+          "successes": 2,
+          "errors": 0,
+          "errorRate": 0,
+          "successLatencyMs": {
+            "p50": 201,
+            "p95": 212.052199999991,
+            "p99": 212.052199999991,
+            "max": 212.052199999991
+          },
+          "allAttemptLatencyMs": {
+            "p50": 201,
+            "p95": 212.052199999991,
+            "p99": 212.052199999991,
+            "max": 212.052199999991
+          },
+          "statuses": {
+            "200": 2
+          },
+          "latencyMethod": "bounded histogram; percentile upper bounds (integer milliseconds, approximately 1% buckets)"
+        },
+        "identity": {
+          "attempts": 4,
+          "successes": 4,
+          "errors": 0,
+          "errorRate": 0,
+          "successLatencyMs": {
+            "p50": 249,
+            "p95": 291.5034000000014,
+            "p99": 291.5034000000014,
+            "max": 291.5034000000014
+          },
+          "allAttemptLatencyMs": {
+            "p50": 249,
+            "p95": 291.5034000000014,
+            "p99": 291.5034000000014,
+            "max": 291.5034000000014
+          },
+          "statuses": {
+            "200": 4
+          },
+          "latencyMethod": "bounded histogram; percentile upper bounds (integer milliseconds, approximately 1% buckets)"
+        },
+        "course": {
+          "attempts": 4,
+          "successes": 4,
+          "errors": 0,
+          "errorRate": 0,
+          "successLatencyMs": {
+            "p50": 288,
+            "p95": 293.01669999999285,
+            "p99": 293.01669999999285,
+            "max": 293.01669999999285
+          },
+          "allAttemptLatencyMs": {
+            "p50": 288,
+            "p95": 293.01669999999285,
+            "p99": 293.01669999999285,
+            "max": 293.01669999999285
+          },
+          "statuses": {
+            "200": 4
+          },
+          "latencyMethod": "bounded histogram; percentile upper bounds (integer milliseconds, approximately 1% buckets)"
+        },
+        "lesson": {
+          "attempts": 4,
+          "successes": 4,
+          "errors": 0,
+          "errorRate": 0,
+          "successLatencyMs": {
+            "p50": 294,
+            "p95": 317.42110000000685,
+            "p99": 317.42110000000685,
+            "max": 317.42110000000685
+          },
+          "allAttemptLatencyMs": {
+            "p50": 294,
+            "p95": 317.42110000000685,
+            "p99": 317.42110000000685,
+            "max": 317.42110000000685
+          },
+          "statuses": {
+            "200": 4
+          },
+          "latencyMethod": "bounded histogram; percentile upper bounds (integer milliseconds, approximately 1% buckets)"
+        },
+        "progress-save": {
+          "attempts": 4,
+          "successes": 4,
+          "errors": 0,
+          "errorRate": 0,
+          "successLatencyMs": {
+            "p50": 273,
+            "p95": 330.5277999999962,
+            "p99": 330.5277999999962,
+            "max": 330.5277999999962
+          },
+          "allAttemptLatencyMs": {
+            "p50": 273,
+            "p95": 330.5277999999962,
+            "p99": 330.5277999999962,
+            "max": 330.5277999999962
+          },
+          "statuses": {
+            "200": 4
+          },
+          "latencyMethod": "bounded histogram; percentile upper bounds (integer milliseconds, approximately 1% buckets)"
+        },
+        "progress-read": {
+          "attempts": 4,
+          "successes": 4,
+          "errors": 0,
+          "errorRate": 0,
+          "successLatencyMs": {
+            "p50": 252,
+            "p95": 357.0485999999946,
+            "p99": 357.0485999999946,
+            "max": 357.0485999999946
+          },
+          "allAttemptLatencyMs": {
+            "p50": 252,
+            "p95": 357.0485999999946,
+            "p99": 357.0485999999946,
+            "max": 357.0485999999946
+          },
+          "statuses": {
+            "200": 4
+          },
+          "latencyMethod": "bounded histogram; percentile upper bounds (integer milliseconds, approximately 1% buckets)"
+        }
+      },
+      "performancePassed": true
+    },
+    {
+      "name": "burst",
+      "users": 2,
+      "seconds": 30,
+      "includedInSizing": false,
+      "elapsedMs": 30003.9715,
+      "drainMs": 60000,
+      "drainElapsedMs": 3.9714999999996508,
+      "startedAt": "2026-09-26T16:39:04.386Z",
+      "finishedAt": "2026-09-26T16:39:34.390Z",
+      "actorsCompletedDuration": 2,
+      "actorsWithCompletedJourneys": 2,
+      "minCompletedJourneysPerActor": 2,
+      "durationCompleted": true,
+      "incompleteJourneys": 0,
+      "cancelledRequests": 0,
+      "deadlineOverruns": 0,
+      "requestRps": 0.7332362650724422,
+      "truncated": false,
+      "requests": {
+        "attempts": 22,
+        "successes": 22,
+        "errors": 0,
+        "errorRate": 0,
+        "successLatencyMs": {
+          "p50": 210,
+          "p95": 282,
+          "p99": 288.2755000000034,
+          "max": 288.2755000000034
+        },
+        "allAttemptLatencyMs": {
+          "p50": 210,
+          "p95": 282,
+          "p99": 288.2755000000034,
+          "max": 288.2755000000034
+        },
+        "statuses": {
+          "200": 22
+        },
+        "latencyMethod": "bounded histogram; percentile upper bounds (integer milliseconds, approximately 1% buckets)"
+      },
+      "journeys": {
+        "attempts": 4,
+        "successes": 4,
+        "errors": 0,
+        "errorRate": 0,
+        "successLatencyMs": {
+          "p50": 1050,
+          "p95": 1264.4271000000008,
+          "p99": 1264.4271000000008,
+          "max": 1264.4271000000008
+        },
+        "allAttemptLatencyMs": {
+          "p50": 1050,
+          "p95": 1264.4271000000008,
+          "p99": 1264.4271000000008,
+          "max": 1264.4271000000008
+        },
+        "statuses": {
+          "200": 4
+        },
+        "latencyMethod": "bounded histogram; percentile upper bounds (integer milliseconds, approximately 1% buckets)"
+      },
+      "byOperation": {
+        "refresh": {
+          "attempts": 2,
+          "successes": 2,
+          "errors": 0,
+          "errorRate": 0,
+          "successLatencyMs": {
+            "p50": 198.45930000000226,
+            "p95": 198.45930000000226,
+            "p99": 198.45930000000226,
+            "max": 198.45930000000226
+          },
+          "allAttemptLatencyMs": {
+            "p50": 198.45930000000226,
+            "p95": 198.45930000000226,
+            "p99": 198.45930000000226,
+            "max": 198.45930000000226
+          },
+          "statuses": {
+            "200": 2
+          },
+          "latencyMethod": "bounded histogram; percentile upper bounds (integer milliseconds, approximately 1% buckets)"
+        },
+        "identity": {
+          "attempts": 4,
+          "successes": 4,
+          "errors": 0,
+          "errorRate": 0,
+          "successLatencyMs": {
+            "p50": 167,
+            "p95": 195.84070000000065,
+            "p99": 195.84070000000065,
+            "max": 195.84070000000065
+          },
+          "allAttemptLatencyMs": {
+            "p50": 167,
+            "p95": 195.84070000000065,
+            "p99": 195.84070000000065,
+            "max": 195.84070000000065
+          },
+          "statuses": {
+            "200": 4
+          },
+          "latencyMethod": "bounded histogram; percentile upper bounds (integer milliseconds, approximately 1% buckets)"
+        },
+        "course": {
+          "attempts": 4,
+          "successes": 4,
+          "errors": 0,
+          "errorRate": 0,
+          "successLatencyMs": {
+            "p50": 204,
+            "p95": 243.58809999999357,
+            "p99": 243.58809999999357,
+            "max": 243.58809999999357
+          },
+          "allAttemptLatencyMs": {
+            "p50": 204,
+            "p95": 243.58809999999357,
+            "p99": 243.58809999999357,
+            "max": 243.58809999999357
+          },
+          "statuses": {
+            "200": 4
+          },
+          "latencyMethod": "bounded histogram; percentile upper bounds (integer milliseconds, approximately 1% buckets)"
+        },
+        "lesson": {
+          "attempts": 4,
+          "successes": 4,
+          "errors": 0,
+          "errorRate": 0,
+          "successLatencyMs": {
+            "p50": 225,
+            "p95": 281.97060000000056,
+            "p99": 281.97060000000056,
+            "max": 281.97060000000056
+          },
+          "allAttemptLatencyMs": {
+            "p50": 225,
+            "p95": 281.97060000000056,
+            "p99": 281.97060000000056,
+            "max": 281.97060000000056
+          },
+          "statuses": {
+            "200": 4
+          },
+          "latencyMethod": "bounded histogram; percentile upper bounds (integer milliseconds, approximately 1% buckets)"
+        },
+        "progress-save": {
+          "attempts": 4,
+          "successes": 4,
+          "errors": 0,
+          "errorRate": 0,
+          "successLatencyMs": {
+            "p50": 276,
+            "p95": 288.2755000000034,
+            "p99": 288.2755000000034,
+            "max": 288.2755000000034
+          },
+          "allAttemptLatencyMs": {
+            "p50": 276,
+            "p95": 288.2755000000034,
+            "p99": 288.2755000000034,
+            "max": 288.2755000000034
+          },
+          "statuses": {
+            "200": 4
+          },
+          "latencyMethod": "bounded histogram; percentile upper bounds (integer milliseconds, approximately 1% buckets)"
+        },
+        "progress-read": {
+          "attempts": 4,
+          "successes": 4,
+          "errors": 0,
+          "errorRate": 0,
+          "successLatencyMs": {
+            "p50": 201,
+            "p95": 266.38580000000366,
+            "p99": 266.38580000000366,
+            "max": 266.38580000000366
+          },
+          "allAttemptLatencyMs": {
+            "p50": 201,
+            "p95": 266.38580000000366,
+            "p99": 266.38580000000366,
+            "max": 266.38580000000366
+          },
+          "statuses": {
+            "200": 4
+          },
+          "latencyMethod": "bounded histogram; percentile upper bounds (integer milliseconds, approximately 1% buckets)"
+        }
+      },
+      "performancePassed": true
+    }
+  ],
+  "telemetry": {
+    "poolWaitMs": null,
+    "queryMs": null,
+    "workerLagMs": null,
+    "reason": "Attach matching process pool metrics and worker backlog evidence; absence is not zero."
+  },
+  "coverage": {
+    "measured": [
+      "login",
+      "refresh",
+      "identity",
+      "course",
+      "lesson",
+      "progress-save",
+      "progress-read"
+    ],
+    "excluded": [
+      "quiz lifecycle",
+      "uploads",
+      "exports",
+      "background worker throughput",
+      "two-hour soak",
+      "mobile browser metrics (separate runner)"
+    ]
+  },
+  "passed": true
+}

@@ -1,0 +1,53 @@
+{
+  "capturedAt": "2026-09-20T10:52:41.012Z",
+  "files": [
+    {
+      "path": "backend/packages/domain/src/data-rights/export-spool.ts",
+      "sha256": "70593745fbc8c0c761ebbf7cc7a0f237da904caa0228279270f79096124e2ed5"
+    },
+    {
+      "path": "backend/packages/domain/src/data-rights/export-artifact.ts",
+      "sha256": "a2b2478a46421ccfbd56dc2d97109917bf1897b4c1fcb9ae416282807a590672"
+    },
+    {
+      "path": "backend/packages/domain/src/data-rights/export-pages.repository.ts",
+      "sha256": "da094a034436f5097eb025ad84454c3cec07914f6ef446fc9668e2caebb13eaa"
+    },
+    {
+      "path": "backend/packages/domain/src/data-rights/data-rights.worker.ts",
+      "sha256": "d72b9aed047cd0e445390e17c9066f89baab168c3a301c06c44d2b803774c53c"
+    },
+    {
+      "path": "backend/packages/domain/src/reports/export-file-cleanup.ts",
+      "sha256": "a43e8b25b86c030e75dbfccaee76d83d9edd4cb535f4193b2333007b9bc3af70"
+    },
+    {
+      "path": "backend/packages/domain/src/reports/export-file-cleanup.repository.ts",
+      "sha256": "6e619eebec9e80853a927c37fd3968754d6fd7f6b9a90ef08f17019cb0a6abd3"
+    },
+    {
+      "path": "backend/packages/domain/src/reports/export-settings.repository.ts",
+      "sha256": "5d0ba874ade8d345b434a35dba34e4950328a9b152feb537ba896aec1f2ded39"
+    },
+    {
+      "path": "backend/packages/domain/src/reports/reports-export-runner.ts",
+      "sha256": "f657a51caeedbfeb93c8ad3ea00e6eeb6e5f126a47367044c8ddae64e0b05862"
+    },
+    {
+      "path": "backend/packages/domain/src/reports/reports.worker.ts",
+      "sha256": "7420d784ceaa89bc1f92b8c9711078e7ef2423a8871dce9f0ba1b422df6239fc"
+    },
+    {
+      "path": "backend/packages/domain/src/reports/reports-delivery.ts",
+      "sha256": "621d1dd41c7c430fe6581c304009e6722d14ad36106ba2665221b37ef0e7e69c"
+    },
+    {
+      "path": "backend/prisma/migrations/20260920040000_112_export_artifacts/migration.sql",
+      "sha256": "06d4c027cdab8810a1790a5b0e58bb295bec2b019e14daa941697e78df3d7aea"
+    },
+    {
+      "path": "backend/prisma/migrations/20260920050000_113_export_file_cleanup/migration.sql",
+      "sha256": "a0705bc3a0be39ce4a67256f26d2c49ce185e724e813e2a229af2d3a23d18648"
+    }
+  ]
+}

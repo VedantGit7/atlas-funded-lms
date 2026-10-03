@@ -115,8 +115,9 @@ export const deleteExportRunFileResponseSchema = z.object({
     .object({
       id: z.uuid(),
       sourceType: z.enum(["report_run", "export_job"]),
-      deleted: z.literal(true),
-      hasFile: z.literal(false),
+      deleted: z.literal(false),
+      hasFile: z.literal(true),
+      deletionPending: z.literal(true),
     })
     .strict(),
 });

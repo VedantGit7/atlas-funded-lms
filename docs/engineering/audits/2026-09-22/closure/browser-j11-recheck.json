@@ -1,0 +1,25 @@
+{
+  "stats": {
+    "startTime": "2026-09-22T03:10:32.733Z",
+    "duration": 45750.261,
+    "expected": 1,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "tests": [
+    {
+      "title": "denies foreign read, update, delete and download without changing foreign records",
+      "file": "journeys/11-cross-tenant-negative.spec.ts",
+      "project": "chromium-tenant",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 41236,
+          "errors": []
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "family": "Playfair Display",
+  "version": "v40",
+  "sourceCss": "https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap",
+  "sourceCssSha256": "f9443a7bc9e1bce9c98597467fbbd947c14f6d9dc13ea33d5a94580f55e89413",
+  "retrievedAt": "2026-09-23",
+  "licenseUrl": "https://raw.githubusercontent.com/google/fonts/main/ofl/playfairdisplay/OFL.txt",
+  "licenseSha256": "566be814f8e96e93dfa16101331557eb6b5467e9e03f627c0910fe93ca12300e",
+  "metricsSource": "Next.js 16.3.5 getFallbackFontOverrideMetrics",
+  "metrics": {
+    "fallbackFont": "Times New Roman",
+    "ascentOverride": "97.25%",
+    "descentOverride": "22.56%",
+    "lineGapOverride": "0.00%",
+    "sizeAdjust": "111.26%"
+  },
+  "assets": [
+    {
+      "file": "normal-cyrillic.cca811cbda6c.woff2",
+      "style": "normal",
+      "subset": "cyrillic",
+      "url": "https://fonts.gstatic.com/s/playfairdisplay/v40/nuFvD-vYSZviVYUb_rj3ij__anPXJzDwcbmjWBN2PKeiunDTbtPK-F2qC0usEw.woff2",
+      "sha256": "cca811cbda6cf99f6f501f12793883baf3c6e61d348bd78e811155e3f3fcf4a5",
+      "bytes": 12360,
+      "preload": false
+    },
+    {
+      "file": "normal-vietnamese.00ef6bc79801.woff2",
+      "style": "normal",
+      "subset": "vietnamese",
+      "url": "https://fonts.gstatic.com/s/playfairdisplay/v40/nuFvD-vYSZviVYUb_rj3ij__anPXJzDwcbmjWBN2PKeiunDYbtPK-F2qC0usEw.woff2",
+      "sha256": "00ef6bc7980163d10e2a1924b0f532e1960b3f58f564adc3c6cf0e9f658ecd38",
+      "bytes": 5712,
+      "preload": false
+    },
+    {
+      "file": "normal-latin-ext.29e6381bb7b5.woff2",
+      "style": "normal",
+      "subset": "latin-ext",
+      "url": "https://fonts.gstatic.com/s/playfairdisplay/v40/nuFvD-vYSZviVYUb_rj3ij__anPXJzDwcbmjWBN2PKeiunDZbtPK-F2qC0usEw.woff2",
+      "sha256": "29e6381bb7b50d8cd365191e5ecd2460f2c8bc9bdb1b6c95153d355dad2929e0",
+      "bytes": 13052,
+      "preload": false
+    },
+    {
+      "file": "normal-latin.02af2688dd8c.woff2",
+      "style": "normal",
+      "subset": "latin",
+      "url": "https://fonts.gstatic.com/s/playfairdisplay/v40/nuFvD-vYSZviVYUb_rj3ij__anPXJzDwcbmjWBN2PKeiunDXbtPK-F2qC0s.woff2",
+      "sha256": "02af2688dd8c8a55069e99bba3f5c70c67c8f7fb0b7fca9c4fc40c4ffc474d06",
+      "bytes": 23316,
+      "preload": true
+    }
+  ]
+}

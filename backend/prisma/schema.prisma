@@ -116,8 +116,26 @@ model Tenant {
   memberships                     Membership[]
   member_profiles                 MemberProfile[]
   member_notification_preferences MemberNotificationPreference[]
+  proctoring_media_artifacts       ProctoringMediaArtifact[]
+  usage_events                    TenantUsageEvent[]
 
   @@map("tenants")
+}
+
+model TenantUsageEvent {
+  id           String    @id @db.Uuid
+  tenant_id    String    @db.Uuid
+  period_start DateTime  @db.Date
+  requests     BigInt    @default(0)
+  duration_ms  Float     @default(0) @db.DoublePrecision
+  emails       BigInt    @default(0)
+  created_at   DateTime  @default(now()) @db.Timestamptz(6)
+  processed_at DateTime? @db.Timestamptz(6)
+  tenant       Tenant    @relation(fields: [tenant_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  // Pending and processed partial indexes are maintained by migration 116.
+  @@index([tenant_id, created_at], map: "tenant_usage_events_tenant_created_idx")
+  @@map("tenant_usage_events")
 }
 
 model TenantDomain {
@@ -572,7 +590,7 @@ model EventDelivery {
   response_json   Json?
   created_at      DateTime       @default(now()) @db.Timestamptz(6)
 
-  @@unique([outbox_event_id, destination_key])
+  @@unique([outbox_event_id, destination_key, attempt_count], map: "event_deliveries_event_destination_attempt_key")
   @@index([tenant_id, status, next_attempt_at])
   @@map("event_deliveries")
 }
@@ -731,6 +749,7 @@ model CourseModule {
   scorm_package_reference_id String?                 @db.Uuid
   scorm_launch_path          String?
   scorm_version              String?
+  scormContentVersion        String?                 @map("scorm_content_version") @db.Uuid
   created_at                 DateTime                @default(now()) @db.Timestamptz(6)
   updated_at                 DateTime                @updatedAt @db.Timestamptz(6)
   deleted_at                 DateTime?               @db.Timestamptz(6)
@@ -1443,6 +1462,9 @@ model ProctoringSession {
   summary_json  Json?
   consent_json  Json?
 
+  media_artifacts ProctoringMediaArtifact[]
+
+  @@unique([tenant_id, id], map: "proctoring_sessions_tenant_id_id_key")
   @@unique([tenant_id, attempt_id])
   @@index([tenant_id, membership_id, started_at])
   @@map("proctoring_sessions")
@@ -1458,6 +1480,9 @@ model ProctoringEvent {
   occurred_at           DateTime @default(now()) @db.Timestamptz(6)
   idempotency_key       String?
 
+  media_artifacts ProctoringMediaArtifact[]
+
+  @@unique([tenant_id, proctoring_session_id, id], map: "proctoring_events_tenant_session_id_key")
   @@unique([tenant_id, idempotency_key])
   @@index([tenant_id, proctoring_session_id, occurred_at])
   @@map("proctoring_events")
@@ -1503,6 +1528,11 @@ model ProctoringMediaArtifact {
   metadata_json         Json?
   created_at            DateTime @default(now()) @db.Timestamptz(6)
 
+  tenant  Tenant            @relation(fields: [tenant_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "proctoring_media_artifacts_tenant_fkey")
+  session ProctoringSession  @relation(fields: [tenant_id, proctoring_session_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "proctoring_media_artifacts_session_fkey")
+  event   ProctoringEvent?   @relation(fields: [tenant_id, proctoring_session_id, proctoring_event_id], references: [tenant_id, proctoring_session_id, id], onDelete: Restrict, onUpdate: Restrict, map: "proctoring_media_artifacts_event_fkey")
+
+  @@index([tenant_id, proctoring_session_id, proctoring_event_id], map: "proctoring_media_artifacts_tenant_session_event_idx")
   @@index([tenant_id, proctoring_session_id, created_at])
   @@index([tenant_id, retention_expires_at])
   @@map("proctoring_media_artifacts")
@@ -2503,6 +2533,7 @@ model ExportJob {
   status                     JobStatus @default(QUEUED)
   scope_json                 Json
   r2_object_key              String?
+  artifact_json              Json?
   error_json                 Json?
   expires_at                 DateTime? @db.Timestamptz(6)
   created_at                 DateTime  @default(now()) @db.Timestamptz(6)
@@ -2520,6 +2551,7 @@ model DeletionRequest {
   target_id                  String
   status                     JobStatus @default(QUEUED)
   reason                     String?
+  outcome_json               Json?
   scheduled_at               DateTime? @db.Timestamptz(6)
   completed_at               DateTime? @db.Timestamptz(6)
   created_at                 DateTime  @default(now()) @db.Timestamptz(6)
@@ -2575,6 +2607,8 @@ model ReportSchedule {
 }
 
 model ReportRun {
+  artifact_json              Json?
+  file_retention_managed     Boolean   @default(false)
   id                         String    @id @db.Uuid
   tenant_id                  String    @db.Uuid
   report_definition_id       String    @db.Uuid
@@ -2762,6 +2796,7 @@ model PaymentOrder {
   created_at          DateTime  @default(now()) @db.Timestamptz(6)
   updated_at          DateTime  @updatedAt @db.Timestamptz(6)
 
+  @@unique([tenant_id, id], map: "payment_orders_tenant_id_id_key")
   @@index([tenant_id, status, created_at])
   @@index([tenant_id, membership_id])
   @@index([tenant_id, paid_at])
@@ -4125,4 +4160,98 @@ model MarketingNewsfeedSave {
   @@unique([tenant_id, post_id, membership_id])
   @@index([tenant_id, membership_id, created_at])
   @@map("marketing_newsfeed_saves")
+}
+
+model PaymentRefundIntent {
+  id                  String    @id @db.Uuid
+  tenant_id           String    @db.Uuid
+  order_id            String    @db.Uuid
+  request_key         String    @db.Uuid
+  request_fingerprint String
+  amount_cents        Int
+  currency            String
+  gateway_key         String?
+  gateway_id          String?   @db.Uuid
+  external_id         String?
+  status              String
+  provider_refund_id  String?
+  payload_json        Json
+  lease_token         String?   @db.Uuid
+  lease_until         DateTime? @db.Timestamptz(6)
+  attempts            Int       @default(0)
+  next_attempt_at     DateTime  @default(now()) @db.Timestamptz(6)
+  last_error          String?
+  created_at          DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime  @default(now()) @db.Timestamptz(6)
+
+  @@unique([tenant_id, request_key], map: "payment_refund_request_key")
+  @@index([tenant_id, order_id, created_at], map: "payment_refund_order_idx")
+  @@map("payment_refund_intents")
+}
+
+model OutboxDeliveryJob {
+  id                      String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenant_id               String?   @db.Uuid
+  outbox_event_id         String    @db.Uuid
+  destination_key         String
+  status                  String    @default("pending")
+  attempt_count           Int       @default(0)
+  cycle_attempt_count     Int       @default(0)
+  max_attempts            Int
+  next_attempt_at         DateTime  @default(now()) @db.Timestamptz(6)
+  lease_token             String?   @db.Uuid
+  lease_until             DateTime? @db.Timestamptz(6)
+  last_error_code         String?
+  last_dead_letter_id     String?   @db.Uuid
+  replayed_dead_letter_id String?   @db.Uuid
+  created_at              DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at              DateTime  @default(now()) @db.Timestamptz(6)
+
+  @@unique([outbox_event_id, destination_key], map: "outbox_delivery_jobs_event_destination_key")
+  @@index([tenant_id, status, updated_at], map: "outbox_delivery_jobs_tenant_state_idx")
+  @@map("outbox_delivery_jobs")
+}
+
+model ReportDeliveryEffect {
+  effect_key     String    @id
+  tenant_id      String    @db.Uuid
+  report_run_id  String    @db.Uuid
+  ordinal        Int
+  kind           String
+  destination_id String?   @db.Uuid
+  request_json   Json
+  retry_on_crash Boolean
+  status         String
+  lease_token    String?   @db.Uuid
+  lease_until    DateTime? @db.Timestamptz(6)
+  attempts       Int       @default(0)
+  error_kind     String?
+  last_error     String?
+  created_at     DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime  @default(now()) @db.Timestamptz(6)
+
+  @@unique([tenant_id, report_run_id, ordinal])
+  @@index([tenant_id, report_run_id], map: "report_delivery_effects_run_idx")
+  @@map("report_delivery_effects")
+}
+
+model ExportFileCleanupRequest {
+  id            String    @id @default(uuid()) @db.Uuid
+  tenant_id     String    @db.Uuid
+  source_type   String
+  source_id     String    @db.Uuid
+  object_key    String
+  artifact_json Json?
+  status        String    @default("pending")
+  lease_token   String?   @db.Uuid
+  lease_until   DateTime? @db.Timestamptz(6)
+  attempts      Int       @default(0)
+  last_error    String?
+  created_at    DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime  @default(now()) @db.Timestamptz(6)
+
+  @@unique([tenant_id, source_type, source_id, object_key], map: "export_file_cleanup_requests_source_key")
+  @@index([tenant_id, status, created_at], map: "export_file_cleanup_requests_pending_idx")
+  @@index([tenant_id, object_key], map: "export_file_cleanup_requests_key_idx")
+  @@map("export_file_cleanup_requests")
 }

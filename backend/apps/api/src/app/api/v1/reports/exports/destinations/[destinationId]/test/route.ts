@@ -25,7 +25,7 @@ export const POST = createTenantRoute<
     return testDestination(tx, ctx, params["destinationId"], {
       sendEmail: emailProvider.isConfigured()
         ? async (input: { to: string; subject: string; body: string; requestId: string }) => {
-            await emailProvider.send(input);
+            await emailProvider.send({ ...input, tenantId: ctx.tenantId });
           }
         : null,
     });

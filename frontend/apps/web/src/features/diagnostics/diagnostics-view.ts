@@ -28,7 +28,7 @@ import {
 import type {
   DiagnosticCatalogItem,
   DiagnosticCatalogStatus,
-} from "@atlas/contracts-modules/diagnostics/diagnostic.types";
+} from "@atlas/contracts/diagnostics/diagnostic.types";
 
 export { formatBandLabel, readinessTone, toGaugePercent };
 export type { ReadinessTone };

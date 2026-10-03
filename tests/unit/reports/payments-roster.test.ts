@@ -21,6 +21,7 @@ import {
   paymentTransactionsQuerySchema,
   exportPaymentRosterBodySchema,
   refundPaymentTransactionBodySchema,
+  refundPaymentTransactionResponseSchema,
   voidPaymentInvoiceBodySchema,
 } from "@atlas/domain/reports/payments-roster.dto";
 
@@ -536,6 +537,18 @@ describe("payments roster dto", () => {
     expect(list.data.summary.refundableCount).toBe(3);
     expect(list.data.capabilities.requestQueue).toBe(false);
     expect(list.data.items[0]?.canRefund).toBe(true);
+    expect(list.data.items[0]?.reservedRefundAmountCents).toBe(0);
+    const reservedList = paymentRefundsListResponseSchema.parse({
+      data: {
+        ...list.data,
+        items: list.data.items.map((item) => ({
+          ...item,
+          reservedRefundAmountCents: 2500,
+          refundableAmountCents: item.refundableAmountCents - 2500,
+        })),
+      },
+    });
+    expect(reservedList.data.items[0]?.reservedRefundAmountCents).toBe(2500);
   });
 
   it("parses transaction query with amount and date field filters", () => {
@@ -616,15 +629,18 @@ describe("payments roster dto", () => {
 
   it("requires note and amount for partial refund body", () => {
     const full = refundPaymentTransactionBodySchema.parse({
+      refundRequestId: "11111111-1111-4111-8111-111111111111",
       mode: "full",
       reason: "customer_requested",
       note: "Customer asked for a full refund.",
     });
     expect(full.mode).toBe("full");
     expect(full.notifyLearner).toBe(true);
+    expect(full.refundMethod).toBe("gateway");
 
     expect(() =>
       refundPaymentTransactionBodySchema.parse({
+        refundRequestId: "11111111-1111-4111-8111-111111111111",
         mode: "partial",
         reason: "duplicate",
         note: "Duplicate charge",
@@ -632,6 +648,7 @@ describe("payments roster dto", () => {
     ).toThrow();
 
     const partial = refundPaymentTransactionBodySchema.parse({
+      refundRequestId: "11111111-1111-4111-8111-111111111111",
       mode: "partial",
       amountCents: 2500,
       reason: "duplicate",
@@ -641,6 +658,66 @@ describe("payments roster dto", () => {
     });
     expect(partial.amountCents).toBe(2500);
     expect(partial.revokeAccess).toBe(true);
+  });
+
+  it("requires a UUID request identity and a reference for manual adjustments", () => {
+    const body = { reason: "other", note: "Already settled outside the gateway" };
+    expect(refundPaymentTransactionBodySchema.safeParse(body).success).toBe(false);
+    expect(
+      refundPaymentTransactionBodySchema.safeParse({ ...body, refundRequestId: "bad" }).success,
+    ).toBe(false);
+    const identified = {
+      ...body,
+      refundRequestId: "11111111-1111-4111-8111-111111111111",
+      refundMethod: "manual_adjustment",
+    };
+    for (const manualReference of [undefined, "", "   ", "a".repeat(201)]) {
+      expect(
+        refundPaymentTransactionBodySchema.safeParse({ ...identified, manualReference }).success,
+      ).toBe(false);
+    }
+    expect(
+      refundPaymentTransactionBodySchema.parse({ ...identified, manualReference: " bank-123 " })
+        .manualReference,
+    ).toBe("bank-123");
+  });
+
+  it("preserves pending refund state and defaults old records to legacy", () => {
+    const refund = {
+      id: "refund-1",
+      amountCents: 2500,
+      reason: "duplicate",
+      note: null,
+      mode: "partial",
+      revokeAccess: true,
+      notifyLearner: false,
+      accessRevoked: false,
+      notifyQueued: false,
+      actorMembershipId: null,
+      createdAt: "2026-07-22T09:05:00.000Z",
+    };
+    const data = {
+      orderId: "11111111-1111-4111-8111-111111111111",
+      status: "paid",
+      refund,
+      refundedAmountCents: 0,
+      refundableAmountCents: 7500,
+      accessRevoked: false,
+      notifyQueued: false,
+      gatewayNote: "Awaiting gateway confirmation.",
+    };
+    const legacy = refundPaymentTransactionResponseSchema.parse({ data });
+    expect(legacy.data.refund.status).toBe("legacy_recorded");
+    expect(legacy.data.refund.fulfillment).toBe("legacy_recorded");
+    const pending = refundPaymentTransactionResponseSchema.parse({
+      data: {
+        ...data,
+        refund: { ...refund, status: "pending", fulfillment: "gateway", gatewayRefundId: "re_123" },
+      },
+    });
+    expect(pending.data.refund.status).toBe("pending");
+    expect(pending.data.refundedAmountCents).toBe(0);
+    expect(pending.data.refund.gatewayRefundId).toBe("re_123");
   });
 
   it("validates transaction detail response shape", () => {
@@ -717,6 +794,7 @@ describe("payments roster dto", () => {
       },
     });
     expect(parsed.data.canRefund).toBe(true);
+    expect(parsed.data.reservedRefundAmountCents).toBe(0);
     expect(parsed.data.displayId).toBe("11111111");
   });
 });

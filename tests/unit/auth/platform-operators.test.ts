@@ -10,10 +10,9 @@ import { describe, expect, it } from "vitest";
  * why. Anyone who could set an environment variable could grant themselves
  * `super_admin` — a much lower bar than writing to the database.
  *
- * Grants are rows in `platform_operators` now, with revocation as a soft revoke
- * so the history survives. Verified live: grant resolves, revoke takes effect
- * immediately, the revoked row is retained, a re-grant does not collide, and
- * `atlas_app` can read the table but not write it.
+ * F02 makes active database rows the only source of runtime platform grants.
+ * Behavioral revocation coverage is in platform-revocation.test.ts; the schema
+ * checks below preserve history and the application's read-only grant access.
  */
 
 const MIGRATION = "backend/prisma/migrations/20260819130000_101_platform_operators/migration.sql";
@@ -23,7 +22,7 @@ function stripComments(source: string): string {
 }
 
 describe("platform operators (H7)", () => {
-  it("resolves from the database before consulting env config", () => {
+  it("resolves from the database without an environment grant fallback", () => {
     const source = stripComments(
       readFileSync("backend/packages/auth/src/platform-auth.ts", "utf8"),
     );
@@ -32,17 +31,7 @@ describe("platform operators (H7)", () => {
     const envLookup = source.indexOf("PLATFORM_OPERATOR_ASSIGNMENTS");
 
     expect(dbLookup, "database lookup must exist").toBeGreaterThan(-1);
-    expect(envLookup, "env break-glass must still exist").toBeGreaterThan(-1);
-    // Order matters: if env were consulted first, a database revocation could be
-    // silently overridden by stale deploy config.
-    expect(dbLookup).toBeLessThan(envLookup);
-  });
-
-  it("logs loudly whenever the env break-glass path grants access", () => {
-    const source = readFileSync("backend/packages/auth/src/platform-auth.ts", "utf8");
-
-    expect(source).toContain("structuredLogger.warn");
-    expect(source).toContain("platform.operator.break_glass");
+    expect(envLookup, "environment settings must not authorize requests").toBe(-1);
   });
 
   it("keeps grant history instead of deleting revoked rows", () => {

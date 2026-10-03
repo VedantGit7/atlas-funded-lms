@@ -16,6 +16,9 @@ import {
 } from "@atlas/db";
 import { toSafeErrorEnvelope } from "./error-envelope";
 import type { PlatformRouteContext, PlatformRouteMetadata } from "./route-metadata";
+import { fingerprintRequest, validateIdempotencyKey } from "./idempotency-registry";
+import { withPlatformIdempotency } from "./platform-idempotency-registry";
+import { enforceIngressRateLimit, enforceProtectedRateLimit } from "./rate-limit";
 
 const MIN_PLATFORM_REASON_LENGTH = 10;
 
@@ -60,6 +63,7 @@ function readIdempotencyKey(req: NextRequest): string {
     });
   }
 
+  validateIdempotencyKey(idempotencyKey);
   return idempotencyKey;
 }
 
@@ -120,23 +124,20 @@ export function createPlatformRoute<
           classifyError: (error) => toSafeErrorEnvelope(error, requestId).body.error.code,
         },
         async () => {
+          await enforceIngressRateLimit({ req, plane: "platform", requestId });
           if (!config.metadata.permission.startsWith("platform.")) {
             throw new Error("Platform route must declare a platform.* permission");
           }
 
-          // H20. Phase 2.5 named createTenantRoute *and* createPlatformRoute;
-          // only the tenant wrapper got the check, leaving the highest-privilege
-          // surface in the product as the one without CSRF protection.
-          //
-          // There is no tenant to resolve here, so the comparison is against the
-          // request's own Host. That is exactly the right pair for CSRF: in a
-          // browser-driven attack the browser sets Origin to the attacking page
-          // and Host to the target, so a mismatch is the attack and a match
-          // cannot be forged cross-origin.
+          // The web rewrite changes Host to the separate API service hostname.
+          // Compare browser Origin with the configured platform hostname instead;
+          // forwarded tenant headers are not authority for the platform plane.
+          // Deployment startup requires PLATFORM_HOST. Local development keeps
+          // the direct Host fallback when that setting is absent.
           assertSameOrigin({
             method: req.method,
             origin: req.headers.get("origin"),
-            host: req.headers.get("host") ?? "",
+            host: process.env["PLATFORM_HOST"]?.trim() || req.headers.get("host") || "",
           });
 
           // Same un-nesting as createTenantRoute: withPlatformScope used to run
@@ -181,6 +182,14 @@ export function createPlatformRoute<
             idempotencyKey,
           };
 
+          await enforceProtectedRateLimit({
+            plane: "platform",
+            actorId: ctx.platformPrincipalId,
+            permission: config.metadata.permission,
+            bucket: config.metadata.rateLimit,
+            requestId,
+          });
+
           const result = await withPlatformScope(
             {
               principalId: platformPrincipal.platformPrincipalId,
@@ -191,14 +200,34 @@ export function createPlatformRoute<
               route: new URL(req.url).pathname,
             },
             reason,
-            async (tx) =>
-              config.handler({
+            async (tx) => {
+              const runHandler = async () =>
+                config.output.parse(
+                  await config.handler({
+                    tx,
+                    ctx,
+                    query,
+                    params,
+                    body,
+                  }),
+                );
+              if (config.metadata.idempotency !== "required") return runHandler();
+              return withPlatformIdempotency(
                 tx,
-                ctx,
-                query,
-                params,
-                body,
-              }),
+                {
+                  idempotencyKey,
+                  actorPrincipalId: ctx.platformPrincipalId,
+                  scope: `${req.method} ${pathname}`,
+                  requestId,
+                  requestFingerprint: fingerprintRequest({
+                    method: req.method,
+                    path: pathname,
+                    body: { query, params, body },
+                  }),
+                },
+                runHandler,
+              );
+            },
           );
 
           const bodyOut = config.output.parse(result);
@@ -216,14 +245,14 @@ export function createPlatformRoute<
         });
         const safe = toSafeErrorEnvelope(atlasError, requestId);
         return attachRequestIdHeader(
-          NextResponse.json(safe.body, { status: safe.status }),
+          NextResponse.json(safe.body, { status: safe.status, headers: safe.headers ?? {} }),
           requestId,
         );
       }
 
       const safe = toSafeErrorEnvelope(error, requestId);
       return attachRequestIdHeader(
-        NextResponse.json(safe.body, { status: safe.status }),
+        NextResponse.json(safe.body, { status: safe.status, headers: safe.headers ?? {} }),
         requestId,
       );
     }

@@ -1456,7 +1456,7 @@ function DeleteDigestModal({
             type="button"
             disabled={mutating}
             onClick={onConfirm}
-            className="inline-flex h-11 items-center justify-center gap-2 rounded bg-[var(--admin-danger)] px-4 text-sm font-medium text-[var(--admin-on-primary)] outline-none hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[var(--admin-danger)]/30 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex h-11 items-center justify-center gap-2 rounded bg-[var(--admin-danger)] px-4 text-sm font-medium text-[var(--admin-on-danger)] outline-none hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[var(--admin-danger)]/30 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Trash2 className="h-4 w-4" aria-hidden="true" />
             Delete digest

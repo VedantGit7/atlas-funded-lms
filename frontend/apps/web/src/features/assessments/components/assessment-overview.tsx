@@ -67,7 +67,9 @@ export function AssessmentOverviewPanel({ overview }: AssessmentOverviewProps) {
     <div className="space-y-6">
       <header>
         <h1 className="text-2xl font-semibold">{overview.title}</h1>
-        {overview.description ? <p className="mt-2 text-gray-700">{overview.description}</p> : null}
+        {overview.description ? (
+          <p className="mt-2 text-foreground">{overview.description}</p>
+        ) : null}
       </header>
 
       <section className="rounded border p-4">
@@ -91,19 +93,19 @@ export function AssessmentOverviewPanel({ overview }: AssessmentOverviewProps) {
       </section>
 
       {overview.config.secureMode ? (
-        <p className="rounded border border-amber-300 bg-amber-50 p-3 text-sm">
+        <p className="rounded border border-warning/40 bg-warning/10 p-3 text-sm">
           Secure mode is enabled for this assessment.
         </p>
       ) : null}
 
       {proctoringEnabled ? (
-        <p className="rounded border border-blue-300 bg-blue-50 p-3 text-sm">
+        <p className="rounded border border-primary/30 bg-primary/10 p-3 text-sm">
           L{String(level >= 1 ? level : 1)} proctoring signals may be recorded during this attempt.
           Monitoring is advisory only.
         </p>
       ) : null}
 
-      {error ? <p className="text-sm text-red-600">{error}</p> : null}
+      {error ? <p className="text-sm text-destructive-text">{error}</p> : null}
 
       <button
         type="button"

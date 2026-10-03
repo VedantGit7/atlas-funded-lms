@@ -5,7 +5,7 @@ import { useState } from "react";
 import {
   enrollInLearningPath,
   formatLearningPathApiError,
-} from "@atlas/contracts-modules/learning-paths/learning-path.api-client";
+} from "@/modules/learning-paths/learning-path.api-client";
 
 type EnrollPathButtonProps = {
   pathId: string;

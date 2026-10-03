@@ -6,10 +6,13 @@
     ".": "./src/index.ts",
     "./http/errors": "./src/http/errors.ts",
     "./http/headers": "./src/http/headers.ts",
+    "./http/api-proxy": "./src/http/api-proxy.ts",
     "./id/uuid-v7": "./src/id/uuid-v7.ts",
     "./request/request-id": "./src/request/request-id.ts",
     "./csv/escape": "./src/csv/escape.ts",
-    "./actor/system-actor": "./src/actor/system-actor.ts"
+    "./actor/system-actor": "./src/actor/system-actor.ts",
+    "./config/runtime-environment": "./src/config/runtime-environment.ts",
+    "./config/deployment-contract": "./src/config/deployment-contract.ts"
   },
   "dependencies": {
     "uuid": "^14.0.0"

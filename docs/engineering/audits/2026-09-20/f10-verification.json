@@ -1,0 +1,79 @@
+{
+  "finding": "F10",
+  "generatedAt": "2026-09-20T07:38:28.779Z",
+  "status": "prepared_locally_activation_blocked",
+  "checks": [
+    {
+      "name": "Active branch target",
+      "status": "passed"
+    },
+    {
+      "name": "No bypass actors or excluded branches",
+      "status": "passed"
+    },
+    {
+      "name": "Default main and single/nested release coverage",
+      "status": "passed"
+    },
+    {
+      "name": "No duplicate or unexpected rules",
+      "status": "passed"
+    },
+    {
+      "name": "Independent review and stale approval protections",
+      "status": "passed"
+    },
+    {
+      "name": "Strict aggregate from observed publisher",
+      "status": "passed"
+    },
+    {
+      "name": "Required aggregate job exists and always evaluates",
+      "status": "passed"
+    },
+    {
+      "name": "CI includes PR target and merge-group triggers",
+      "status": "passed"
+    },
+    {
+      "name": "Governance files are covered by CODEOWNERS",
+      "status": "passed"
+    },
+    {
+      "name": "Live limitations remain visible",
+      "status": "passed"
+    }
+  ],
+  "sourceHashes": [
+    {
+      "path": ".github/rulesets/atlas-release-protection.json",
+      "sha256": "3f7be8d118ff565c7088996e0e5d951bc311680c89529ace0ec8b4c8ec55ef64"
+    },
+    {
+      "path": "docs/engineering/f10-repository-protection-remediation.md",
+      "sha256": "70e1e76efdf167ff5831d8068eb54af8ddaf3e388eb637299db05904f945358f"
+    },
+    {
+      "path": "docs/runbooks/repository-protection.md",
+      "sha256": "559493d226681b308a156733e5095a70c0af367498be3ae274705f7d7700ce53"
+    },
+    {
+      "path": "docs/superpowers/plans/2026-09-20-f10-repository-protection.md",
+      "sha256": "fe7166bb4eb9321fba0885c8011bfa69c6b209885b13527442ba1e993872179f"
+    },
+    {
+      "path": "docs/engineering/audits/2026-09-20/f10-hosted-status.json",
+      "sha256": "e28bc43cbf8de81ff71cbefa0c025cc19f14ffab39c7e1e4d249f062a0ddf5ca"
+    }
+  ],
+  "review": "Independent review found no payload schema defect; confirmed plan/access and independent-owner prerequisites",
+  "remoteApplied": false,
+  "hostedAcceptance": false,
+  "limitations": [
+    "GitHub rulesets endpoint requires eligible private-repository plan",
+    "Managed connection cannot administer branch protection",
+    "F09 aggregate hosted candidate run pending",
+    "Independent eligible code-owner coverage not configured"
+  ],
+  "note": "Local assertions validate intended configuration only; they do not prove effective GitHub enforcement."
+}

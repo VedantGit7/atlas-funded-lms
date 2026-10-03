@@ -90,7 +90,7 @@ export function ConfirmDialog({
             onClick={onConfirm}
             className={
               destructive
-                ? "rounded-lg bg-[var(--admin-danger)] px-4 py-2 text-sm font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+                ? "rounded-lg bg-[var(--admin-danger)] px-4 py-2 text-sm font-bold text-[var(--admin-on-danger)] transition-opacity hover:opacity-90 disabled:opacity-50"
                 : "rounded-lg bg-[var(--admin-on-surface)] px-4 py-2 text-sm font-bold text-[var(--admin-surface)] transition-opacity hover:opacity-90 disabled:opacity-50"
             }
           >

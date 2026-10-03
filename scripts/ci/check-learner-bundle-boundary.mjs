@@ -49,7 +49,7 @@ import process from "node:process";
 
 const repoRoot = process.cwd();
 const webAppRoot = join(repoRoot, "frontend/apps/web");
-const nextRoot = join(webAppRoot, ".next");
+const nextRoot = join(webAppRoot, process.env["ATLAS_PERF_BUILD"] === "1" ? ".next-perf" : ".next");
 const appServerRoot = join(nextRoot, "server", "app");
 const baselinePath = join(repoRoot, "configs/learner-bundle-baseline.json");
 
@@ -135,8 +135,15 @@ if (!existsSync(appServerRoot)) {
   process.exit(1);
 }
 
+if (!existsSync(join(nextRoot, "BUILD_ID"))) {
+  throw new Error(
+    "Missing BUILD_ID: a completed production build is required for bundle evidence.",
+  );
+}
+
 const buildManifest = JSON.parse(readFileSync(join(nextRoot, "build-manifest.json"), "utf8"));
 const rootChunks = (buildManifest.rootMainFiles ?? []).map((f) => f.replace(/^\/_next\//, ""));
+if (rootChunks.length === 0) throw new Error("Missing shared root chunks in build manifest.");
 
 const gzipCache = new Map();
 function gzipKb(chunk) {
@@ -144,7 +151,8 @@ function gzipKb(chunk) {
   const cached = gzipCache.get(clean);
   if (cached !== undefined) return cached;
   const path = join(nextRoot, clean);
-  const value = existsSync(path) ? gzipSync(readFileSync(path)).length / 1024 : 0;
+  if (!existsSync(path)) throw new Error(`Missing bundle chunk: ${clean}`);
+  const value = gzipSync(readFileSync(path)).length / 1024;
   gzipCache.set(clean, value);
   return value;
 }
@@ -170,24 +178,33 @@ function parseManifest(path) {
     .trim()
     .replace(/;\s*$/, "");
   try {
-    return JSON.parse(payload);
+    const parsed = JSON.parse(payload);
+    return typeof parsed === "string" ? JSON.parse(parsed) : parsed;
   } catch {
-    try {
-      // Some Next versions emit the manifest as a JSON-encoded string.
-      return JSON.parse(JSON.parse(payload));
-    } catch {
-      return null;
-    }
+    return null;
   }
 }
 
 /** Route groups whose routes a learner never loads. */
 const NON_LEARNER = /^\/(admin|studio|platform|\(admin\)|\(studio\)|\(platform\))(\/|$)/;
 
+const appPaths = JSON.parse(readFileSync(join(nextRoot, "server/app-paths-manifest.json"), "utf8"));
+for (const [route, output] of Object.entries(appPaths)) {
+  if (!route.endsWith("/page") || NON_LEARNER.test(route)) continue;
+  const manifestPath = join(
+    nextRoot,
+    "server",
+    output.replace(/\.js$/, "_client-reference-manifest.js"),
+  );
+  if (!existsSync(manifestPath)) throw new Error(`Missing route manifest: ${route}`);
+}
+
 const routes = [];
 for (const manifestPath of collectManifests(appServerRoot)) {
   const manifest = parseManifest(manifestPath);
-  if (!manifest) continue;
+  if (!manifest || !manifest.entryJSFiles || typeof manifest.entryJSFiles !== "object") {
+    throw new Error(`Invalid route manifest: ${relative(nextRoot, manifestPath)}`);
+  }
 
   const chunks = new Set(rootChunks);
   for (const files of Object.values(manifest.entryJSFiles ?? {})) {
@@ -223,12 +240,25 @@ learnerRoutes.sort((a, b) => b.firstLoadKb - a.firstLoadKb);
 const worst = learnerRoutes[0];
 const sharedKb = rootChunks.reduce((sum, c) => sum + gzipKb(c), 0);
 
+if (!existsSync(baselinePath))
+  throw new Error("Missing ratchet baseline; restore the reviewed baseline.");
+const baseline = JSON.parse(readFileSync(baselinePath, "utf8"));
+const allowedKb = Number(baseline.maxLearnerFirstLoadKb);
+if (!Number.isFinite(allowedKb) || allowedKb <= 0 || !Number.isFinite(targetKb) || targetKb <= 0) {
+  throw new Error("Bundle baseline and target must be positive finite numbers.");
+}
+
 if (updateBaseline) {
+  if (worst.firstLoadKb > allowedKb) {
+    throw new Error(
+      "Ratchet baseline may only decrease; reduce the learner bundle before updating.",
+    );
+  }
   writeFileSync(
     baselinePath,
     `${JSON.stringify(
       {
-        maxLearnerFirstLoadKb: Number(worst.firstLoadKb.toFixed(1)),
+        maxLearnerFirstLoadKb: worst.firstLoadKb,
         worstRoute: worst.route,
         sharedRootKb: Number(sharedKb.toFixed(1)),
         targetKb,
@@ -242,17 +272,6 @@ if (updateBaseline) {
   process.exit(0);
 }
 
-if (!existsSync(baselinePath)) {
-  console.error(
-    `\nMissing ${relative(repoRoot, baselinePath)}.\n` +
-      "Generate it with `pnpm ci:learner-bundle-boundary --update-baseline`.",
-  );
-  process.exit(1);
-}
-
-const baseline = JSON.parse(readFileSync(baselinePath, "utf8"));
-const allowedKb = Number(baseline.maxLearnerFirstLoadKb);
-
 console.log(`Learner import boundary OK.`);
 console.log(
   `Shared root ${sharedKb.toFixed(1)} kB gz | ${learnerRoutes.length} learner routes measured`,
@@ -262,11 +281,11 @@ for (const r of learnerRoutes.slice(1, 5)) {
   console.log(`  next: ${r.firstLoadKb.toFixed(1).padStart(7)} kB  ${r.route}`);
 }
 
-if (worst.firstLoadKb > allowedKb + 0.5) {
+if (worst.firstLoadKb > allowedKb) {
   console.error(
     `\nLearner first-load regression: ${worst.firstLoadKb.toFixed(1)} kB exceeds the ` +
       `recorded baseline of ${allowedKb.toFixed(1)} kB on ${worst.route}.\n` +
-      "Reduce it, or run with --update-baseline only if the increase is deliberate and justified.",
+      "Reduce it. --update-baseline may only decrease the recorded allowance.",
   );
   process.exit(1);
 }

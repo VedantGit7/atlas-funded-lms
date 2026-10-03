@@ -501,7 +501,7 @@ export function AdminShell({
               ].join(" ")}
             >
               <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
-              {mfaEnabled ? "MFA verified" : "Assurance pending"}
+              {mfaEnabled ? "MFA enrolled" : "MFA not enrolled"}
             </span>
 
             <ThemeModeToggle className="inline-flex h-9 w-9 items-center justify-center rounded-full text-[var(--admin-on-surface-variant)] transition-colors hover:text-[var(--admin-primary)]" />

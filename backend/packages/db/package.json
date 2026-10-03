@@ -8,6 +8,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./global-db": "./src/global-db.ts",
+    "./metering-client": "./src/metering-client.ts",
     "./with-tenant-tx": "./src/with-tenant-tx.ts",
     "./seed/tenant-workflow-definitions": "./src/seed/tenant-workflow-definitions.ts",
     "./generated/prisma/client": "./src/generated/prisma/client"

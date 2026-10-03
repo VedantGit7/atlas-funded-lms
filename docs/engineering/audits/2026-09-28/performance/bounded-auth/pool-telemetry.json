@@ -1,0 +1,154 @@
+{
+  "capturedAt": "2026-09-28T08:00:31.689Z",
+  "mode": "local-smoke",
+  "pools": [
+    {
+      "pool": "tenant",
+      "pid": 12548,
+      "capturedAt": "2026-09-28T08:00:18.292Z",
+      "uptimeMs": 480186.2531,
+      "acquisition": {
+        "count": 9292,
+        "errors": 0,
+        "meanMs": 1373.9623686181637,
+        "maxMs": 5721.643299999996,
+        "inFlight": 0,
+        "percentileUpperBoundsMs": {
+          "p50": 5000,
+          "p95": 5000,
+          "p99": 10000
+        },
+        "buckets": [
+          {
+            "upperBoundMs": 1,
+            "count": 1588
+          },
+          {
+            "upperBoundMs": 5,
+            "count": 1
+          },
+          {
+            "upperBoundMs": 10,
+            "count": 8
+          },
+          {
+            "upperBoundMs": 25,
+            "count": 14
+          },
+          {
+            "upperBoundMs": 50,
+            "count": 14
+          },
+          {
+            "upperBoundMs": 100,
+            "count": 20
+          },
+          {
+            "upperBoundMs": 250,
+            "count": 89
+          },
+          {
+            "upperBoundMs": 500,
+            "count": 546
+          },
+          {
+            "upperBoundMs": 1000,
+            "count": 1386
+          },
+          {
+            "upperBoundMs": 5000,
+            "count": 5526
+          },
+          {
+            "upperBoundMs": 10000,
+            "count": 100
+          },
+          {
+            "upperBoundMs": null,
+            "count": 0
+          }
+        ]
+      },
+      "query": {
+        "count": 90900,
+        "errors": 0,
+        "meanMs": 33.43891915181524,
+        "maxMs": 1714.347000000038,
+        "inFlight": 0,
+        "percentileUpperBoundsMs": {
+          "p50": 50,
+          "p95": 100,
+          "p99": 250
+        },
+        "buckets": [
+          {
+            "upperBoundMs": 1,
+            "count": 5145
+          },
+          {
+            "upperBoundMs": 5,
+            "count": 5829
+          },
+          {
+            "upperBoundMs": 10,
+            "count": 2970
+          },
+          {
+            "upperBoundMs": 25,
+            "count": 21765
+          },
+          {
+            "upperBoundMs": 50,
+            "count": 40147
+          },
+          {
+            "upperBoundMs": 100,
+            "count": 13317
+          },
+          {
+            "upperBoundMs": 250,
+            "count": 1512
+          },
+          {
+            "upperBoundMs": 500,
+            "count": 175
+          },
+          {
+            "upperBoundMs": 1000,
+            "count": 20
+          },
+          {
+            "upperBoundMs": 5000,
+            "count": 20
+          },
+          {
+            "upperBoundMs": 10000,
+            "count": 0
+          },
+          {
+            "upperBoundMs": null,
+            "count": 0
+          }
+        ]
+      },
+      "connections": {
+        "total": 0,
+        "idle": 0,
+        "waiting": 0
+      }
+    }
+  ],
+  "poolScope": "Latest cumulative process snapshots from supplied logs, not phase-isolated deltas. Histogram bounds are not exact percentiles; null means absent or above largest finite bucket.",
+  "worker": {
+    "unfinishedJobs": 0,
+    "runnableJobs": 0,
+    "oldestRunnableLagMs": 0,
+    "workerExecutionVerified": false,
+    "scope": "Point-in-time materialized delivery jobs for the fixture tenant only. Does not prove worker processing or measure jobs not yet materialized."
+  },
+  "database": {
+    "maxConnections": 100,
+    "version": "16.14"
+  },
+  "capacityVerified": false
+}

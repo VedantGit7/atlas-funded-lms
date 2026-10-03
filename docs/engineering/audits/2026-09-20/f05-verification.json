@@ -1,0 +1,31 @@
+{
+  "finding": "F05",
+  "verifiedAt": "2026-09-20T00:42:44.6678591+05:30",
+  "status": "implemented-and-verified-locally",
+  "deployed": false,
+  "providerConnectivityVerified": false,
+  "persistentUploadRestartVerified": false,
+  "broadRegression": {
+    "testsSkipped": 1,
+    "testsPassed": 2425,
+    "note": "Before final type narrowing and report tenant context edits",
+    "filesPassed": 323
+  },
+  "finalFocusedRegression": {
+    "note": "After final code edits; overlaps broad regression",
+    "testsPassed": 427,
+    "filesPassed": 52
+  },
+  "typecheckExitCode": 0,
+  "lintExitCode": 0,
+  "guardsPassed": 4,
+  "diffCheckExitCode": 0,
+  "localPreflight": "passed-development",
+  "localHttp": {
+    "authenticated": false,
+    "status": 200
+  },
+  "authenticatedBrowserCheck": "not-completed-extension-timeout",
+  "independentReview": "no-substantive-remaining-findings",
+  "sourceFiles": 39
+}

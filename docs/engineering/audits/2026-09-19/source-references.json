@@ -1,0 +1,337 @@
+{
+  "mfa-session": {
+    "file": "backend/packages/auth/src/session.ts",
+    "matches": [
+      {
+        "line": 58,
+        "text": "const { data, error } = await supabase.auth.mfa.listFactors();"
+      },
+      {
+        "line": 63,
+        "text": "// `listFactors()` types `data.totp` and `data.phone` as `Factor<K, \"verified\">[]`"
+      },
+      {
+        "line": 72,
+        "text": "const verifiedFactors = [...data.totp, ...data.phone];"
+      },
+      {
+        "line": 73,
+        "text": "return verifiedFactors.length > 0;"
+      },
+      {
+        "line": 88,
+        "text": "const mfaEnabled = refreshToken"
+      },
+      {
+        "line": 95,
+        "text": "mfaEnabled,"
+      }
+    ]
+  },
+  "mfa-guard": {
+    "file": "backend/packages/auth/src/mfa-enforcement.ts",
+    "matches": [
+      {
+        "line": 33,
+        "text": "export function assertPlatformMfa(args: { mfaEnabled: boolean; principalId: string }): void {"
+      },
+      {
+        "line": 34,
+        "text": "if (args.mfaEnabled) return;"
+      },
+      {
+        "line": 54,
+        "text": "if (!args.required || args.mfaEnabled) return;"
+      }
+    ]
+  },
+  "operator": {
+    "file": "backend/packages/auth/src/platform-auth.ts",
+    "matches": [
+      {
+        "line": 10,
+        "text": "import { findActivePlatformOperator } from \"./platform-operators.repository\";"
+      },
+      {
+        "line": 30,
+        "text": "* `PLATFORM_OPERATOR_ASSIGNMENTS` remains only as break-glass: bootstrapping the"
+      },
+      {
+        "line": 41,
+        "text": "const grant = await findActivePlatformOperator(db, principalId);"
+      },
+      {
+        "line": 46,
+        "text": "const raw = process.env[\"PLATFORM_OPERATOR_ASSIGNMENTS\"] ?? \"\";"
+      },
+      {
+        "line": 73,
+        "text": "\"Platform access granted from PLATFORM_OPERATOR_ASSIGNMENTS, not from platform_operators. \" +"
+      },
+      {
+        "line": 74,
+        "text": "\"This grant is unattributable and survives database revocation. Move it into the table.\","
+      }
+    ]
+  },
+  "elevation": {
+    "file": "backend/packages/membership/src/platform-super-admin-tenant-access.ts",
+    "matches": [
+      {
+        "line": 22,
+        "text": "function isPlatformSuperAdmin(email: string): boolean {"
+      },
+      {
+        "line": 64,
+        "text": "and m.status = 'ACTIVE'"
+      },
+      {
+        "line": 114,
+        "text": "status = 'ACTIVE',"
+      },
+      {
+        "line": 140,
+        "text": "export async function ensurePlatformSuperAdminTenantAccess(args: {"
+      }
+    ]
+  },
+  "idempotency": {
+    "file": "backend/packages/api/src/idempotency-registry.ts",
+    "matches": [
+      {
+        "line": 113,
+        "text": "ON CONFLICT (tenant_id, idempotency_key) DO NOTHING"
+      },
+      {
+        "line": 147,
+        "text": "return existing.response_json as T;"
+      }
+    ]
+  },
+  "route": {
+    "file": "backend/packages/api/src/create-tenant-route.ts",
+    "matches": [
+      {
+        "line": 14,
+        "text": "import { requireSupabaseUser, upsertAuthPrincipal } from \"@atlas/auth\";"
+      },
+      {
+        "line": 254,
+        "text": "// requireSupabaseUser makes up to three Supabase HTTPS calls. It used"
+      },
+      {
+        "line": 264,
+        "text": "const supabaseUser = await requireSupabaseUser(req);"
+      },
+      {
+        "line": 345,
+        "text": "const runHandler = () =>"
+      },
+      {
+        "line": 369,
+        "text": "return withIdempotency("
+      }
+    ]
+  },
+  "ratelimit": {
+    "file": "backend/packages/api/src/rate-limit.ts",
+    "matches": [
+      {
+        "line": 63,
+        "text": "hit = await resolveRateLimitStore().hit(key, config.windowMs);"
+      },
+      {
+        "line": 64,
+        "text": "} catch (error) {"
+      }
+    ]
+  },
+  "storage": {
+    "file": "backend/packages/storage/src/schemas/storage-env.ts",
+    "matches": [
+      {
+        "line": 4,
+        "text": "STORAGE_PROVIDER: z.enum([\"r2\", \"local-mock\", \"local-fs\"]).default(\"local-fs\"),"
+      },
+      {
+        "line": 34,
+        "text": "const appEnv = env[\"APP_ENV\"] ?? \"\";"
+      }
+    ]
+  },
+  "ssrf": {
+    "file": "backend/packages/security/src/safe-outbound-fetch.ts",
+    "matches": [
+      {
+        "line": 138,
+        "text": "resolved = await lookup(url.hostname, { all: false });"
+      },
+      {
+        "line": 165,
+        "text": "const response = await fetch(url, { ...init, redirect: \"manual\" });"
+      }
+    ]
+  },
+  "outbox": {
+    "file": "backend/packages/events/src/services/outbox-worker.service.ts",
+    "matches": [
+      {
+        "line": 25,
+        "text": "maxRetries: number;"
+      },
+      {
+        "line": 52,
+        "text": "if (existingDelivery != null) {"
+      },
+      {
+        "line": 58,
+        "text": "await handler.handle({"
+      },
+      {
+        "line": 95,
+        "text": "retryCount: 1,"
+      }
+    ]
+  },
+  "refund": {
+    "file": "backend/packages/domain/src/reports/payments-roster.service.ts",
+    "matches": [
+      {
+        "line": 1576,
+        "text": "export async function refundPaymentTransaction("
+      },
+      {
+        "line": 1618,
+        "text": "const gatewayRefund = await provider.refund({"
+      },
+      {
+        "line": 1627,
+        "text": "\"Refund recorded on the LMS ledger, but the payment gateway refund failed. Process the reverse on your gateway manually.\";"
+      },
+      {
+        "line": 1648,
+        "text": "const nextRefunds = [...readRefunds(metadata), refund];"
+      },
+      {
+        "line": 1649,
+        "text": "const nextRefundedTotal = nextRefunds.reduce((sum, item) => sum + item.amountCents, 0);"
+      },
+      {
+        "line": 1657,
+        "text": "refunds: nextRefunds,"
+      }
+    ]
+  },
+  "privacy": {
+    "file": "backend/packages/domain/src/data-rights/data-rights-deletion-processor.ts",
+    "matches": [
+      {
+        "line": 24,
+        "text": "await removeMember(tx, ctx, request.target_id);"
+      },
+      {
+        "line": 32,
+        "text": "const updated = await dataRightsRepository.markDeletionRequestSucceeded(tx, deletionRequestId);"
+      }
+    ]
+  },
+  "ci": {
+    "file": ".github/workflows/ci.yml",
+    "matches": [
+      {
+        "line": 29,
+        "text": "x-generate-prisma-client: &generate-prisma-client"
+      },
+      {
+        "line": 213,
+        "text": "static-suite-tests:"
+      },
+      {
+        "line": 800,
+        "text": "BROWSER_E2E_SKIP_VISUAL: \"1\""
+      },
+      {
+        "line": 871,
+        "text": "build:"
+      }
+    ]
+  },
+  "headers": {
+    "file": "configs/security-headers.mjs",
+    "matches": [
+      {
+        "line": 26,
+        "text": "const CSP_DIRECTIVES = ["
+      },
+      {
+        "line": 46,
+        "text": "const enforceCsp = process.env[\"CSP_ENFORCE\"] === \"1\";"
+      }
+    ]
+  },
+  "export": {
+    "file": "backend/packages/domain/src/data-rights/data-rights-export-runner.ts",
+    "matches": [
+      {
+        "line": 40,
+        "text": "if (env.STORAGE_PROVIDER === \"r2\") {"
+      },
+      {
+        "line": 53,
+        "text": "return { objectKey, expiresAt };"
+      }
+    ]
+  },
+  "scorm": {
+    "file": "backend/packages/storage/src/scorm-package-extract.ts",
+    "matches": [
+      {
+        "line": 110,
+        "text": "export const MAX_SCORM_ENTRIES = 2_000;"
+      },
+      {
+        "line": 115,
+        "text": "if (entries.length > MAX_SCORM_ENTRIES) {"
+      },
+      {
+        "line": 140,
+        "text": "assertWithinDecompressionLimits(fileEntries);"
+      }
+    ]
+  },
+  "pool": {
+    "file": "backend/packages/db/src/client.ts",
+    "matches": [
+      {
+        "line": 11,
+        "text": "const max = Number.parseInt(process.env[\"DATABASE_POOL_MAX\"] ?? \"20\", 10);"
+      }
+    ]
+  },
+  "usage": {
+    "file": "backend/packages/api/src/tenant-usage-meter.ts",
+    "matches": [
+      {
+        "line": 100,
+        "text": "let timer: ReturnType<typeof setInterval> | null = null;"
+      },
+      {
+        "line": 120,
+        "text": "timer = setInterval(() => {"
+      },
+      {
+        "line": 124,
+        "text": "timer.unref();"
+      }
+    ]
+  },
+  "cleanup": {
+    "file": "tests/global-teardown.ts",
+    "matches": [
+      {
+        "line": 25,
+        "text": "const report = (await purgeTestTenants({ apply: true })) as {"
+      }
+    ]
+  }
+}

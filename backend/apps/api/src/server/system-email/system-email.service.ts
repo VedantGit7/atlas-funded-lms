@@ -272,6 +272,7 @@ export async function testSystemEmail(
   const renderedBody = renderSystemEmailText(dto.body, sampleVariables);
 
   await provider.send({
+    tenantId: ctx.tenantId,
     to: body.testEmail,
     subject: `[TEST] ${subject}`,
     body: renderedBody,

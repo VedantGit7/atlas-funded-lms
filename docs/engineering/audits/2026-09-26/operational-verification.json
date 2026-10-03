@@ -1,0 +1,73 @@
+{
+  "generatedAt": "2026-09-26T09:21:32.9610243Z",
+  "baseCommit": "0c405545d5c9d51dc29b27f11163c18e723d5bbc",
+  "branch": "release/atlas-staging-20260923",
+  "workingTreeUncommitted": true,
+  "productionApproved": false,
+  "node": "24.21.0",
+  "postgres": "17",
+  "checks": {
+    "tooling": {
+      "passed": 38,
+      "failed": 0
+    },
+    "workerStorageDrills": {
+      "passed": 3,
+      "failed": 0
+    },
+    "existingWorkerStorageRegressions": {
+      "failed": 0,
+      "passed": 50,
+      "files": 9
+    },
+    "structure": {
+      "failed": 0,
+      "passed": 442,
+      "files": 46,
+      "skipped": 1
+    },
+    "finalWorkflowWiring": {
+      "passed": 4,
+      "failed": 0
+    },
+    "typecheck": "passed",
+    "scopedLint": "passed",
+    "secretScan": "passed",
+    "migrationVerifier": {
+      "provenanceVerified": false,
+      "currentCatalogMatchesReference": true,
+      "exitCode": 2
+    }
+  },
+  "cleanup": {
+    "ownedContainer": "atlas-ops-drill-20260926",
+    "syntheticSourceRetained": true,
+    "remainingScratchDatabases": 0,
+    "existingDevelopmentStatus": "running healthy",
+    "workerFixtureTenants": 0,
+    "workerFixturePrincipals": 0,
+    "existingDevelopmentContainer": "atlas-postgres",
+    "ownedContainerStatus": "stopped exit 0"
+  },
+  "sourceSha256": {
+    "scripts/release/restore-drill.mjs": "8ac2a6b77eb0a34c7259568cb26b9d1d2e636bb5c969950875b65c31f927c716",
+    "scripts/release/restore-drill.test.mjs": "d470b3d13c3644553efcab5deffd0eda515972446d27444e1aca403e10ebca54",
+    "scripts/release/restore-validate.mjs": "e3aef7f318305c29ed00ae0804e9510802e78bd579d992353a18136397b766e4",
+    "scripts/release/rollback-verify.mjs": "f00a92c3714e3e9c8363833502de837476e39ad1720ea32d27499560f9c7e5d3",
+    "scripts/release/health-observation.mjs": "00a86c931a326930d562df7199e5869a4e54466ce7b016e8dff841116be2627a",
+    "scripts/db/migration-verification.mjs": "7e4051cd8bb4506aa903126cb9c16b9bf5c32a7b48dd59d07146b59a941e3469",
+    "scripts/db/migration-verification.test.mjs": "40100a9bb7d7d7193d2db4f82a3b205587f791d288c9d446aacc1e8c44ed431c",
+    "scripts/reliability/seed-restore-fixture.mjs": "302b2f9a6ce865ef37ec07c7377522446b4a765f9984f1af6d81c5ec76c24233",
+    "scripts/reliability/seed-restore-fixture.test.mjs": "bee4d6190a9623c511c2d298ecd38c07dfdf2e235b4a041667d16fcd55e18702",
+    "scripts/reliability/alerts-rollback-child.ts": "91c4f5eb89152a6a058179ff8fe577fa9b05231865efb3d8f71386764ce555b8",
+    "scripts/reliability/alerts-rollback-local-drill.mjs": "ab61a82777195601c3d49118d2aec270819fe0dc84cb1a00e2d2a69a44af7b27",
+    "scripts/reliability/alerts-rollback-verifiers.test.mjs": "e6f30b9cce0ed82e303a19947bb808d6ecc860290ffff60759babba96b5ef3db",
+    "scripts/reliability/worker-storage-child.mts": "940543ea5962670e13e14a5a62b3b1321ed08a8ef13e594ac485d4085e459aaa",
+    "scripts/reliability/worker-storage-db-child.mts": "1ae590a4580837c4a2550131297a07ea62964ecafaf0795136236f0bb3926b77",
+    "tests/unit/storage/worker-storage-large-upload.test.ts": "81e066d9cbcadebd4ff8f06c87452a38018e4fe293085bd1d2924aa64de964eb",
+    "tests/integration/api/worker-storage-recovery.postgres.test.ts": "4230a537cbc18254b67ca4d1cca735f1e3a3fee642b737db829e25c905cafa65",
+    ".github/workflows/ci.yml": "3341b2634e81817e4ae8093251a110496c2e8b50496e29f0744f2271bd6b205e",
+    ".github/workflows/drills.yml": "08cb44abff3ed4bd1f978b78b2ddebb2a2d480a8303d34a8ad65d95425673da5",
+    "package.json": "8a8255241e2bc780775d5cc9c82ca8044a8f9719480c856a4ca3861bace145d3"
+  }
+}

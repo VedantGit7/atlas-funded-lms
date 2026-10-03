@@ -1032,7 +1032,7 @@ export function AdminActiveDevicesRosterPage() {
                             aria-haspopup="menu"
                             aria-expanded={menuOpen}
                             aria-controls={menuOpen ? menuId : undefined}
-                            className="rounded p-0.5 text-[var(--admin-outline)] transition-colors hover:bg-[var(--admin-surface-high)] hover:text-[var(--admin-on-surface)]"
+                            className="rounded p-0.5 text-[var(--admin-on-surface-variant)] transition-colors hover:bg-[var(--admin-surface-high)] hover:text-[var(--admin-on-surface)]"
                             onClick={() => {
                               setMenuLearnerId((current) =>
                                 current === learner.membershipId ? null : learner.membershipId,
@@ -1132,7 +1132,7 @@ export function AdminActiveDevicesRosterPage() {
             <div className="flex items-center gap-1">
               <button
                 type="button"
-                className="rounded p-1 text-[var(--admin-outline)] hover:bg-[var(--admin-surface-high)] disabled:opacity-30"
+                className="rounded p-1 text-[var(--admin-on-surface-variant)] hover:bg-[var(--admin-surface-high)] disabled:opacity-30"
                 disabled={busy || page <= 1}
                 onClick={() => {
                   setPage((current) => Math.max(1, current - 1));

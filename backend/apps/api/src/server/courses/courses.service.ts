@@ -1,4 +1,6 @@
 import type { TenantTx } from "@atlas/db";
+import type { ResourceRef } from "@atlas/authorization";
+import { getLoadedCourseProjection } from "./load-course-resource-ref";
 import { courseNotFound } from "./courses.errors";
 import { findResumeLessonIdForLearner } from "../lessons/lessons.repository";
 import {
@@ -108,6 +110,7 @@ export async function getPublishedCourseDetail(
   ctx: ServiceCtx,
   courseId: string,
   query?: CourseDetailQuery,
+  resource?: ResourceRef,
 ) {
   if (query?.view === "studio") {
     return getCourseForBuilder(
@@ -121,7 +124,8 @@ export async function getPublishedCourseDetail(
     );
   }
 
-  const course = await findCourseAuthProjection({ tx, courseId });
+  const loaded = getLoadedCourseProjection(tx, ctx, courseId, resource);
+  const course = loaded?.course ?? (await findCourseAuthProjection({ tx, courseId }));
 
   if (!course || course.tenantId !== ctx.tenantId) {
     throw courseNotFound();
@@ -129,11 +133,13 @@ export async function getPublishedCourseDetail(
 
   assertLearnerVisiblePublishedCourse(course.status);
 
-  const enrollment = await findEnrollmentForMembership({
-    tx,
-    courseId,
-    membershipId: ctx.actorMembershipId,
-  });
+  const enrollment = loaded
+    ? loaded.enrollment
+    : await findEnrollmentForMembership({
+        tx,
+        courseId,
+        membershipId: ctx.actorMembershipId,
+      });
 
   const meta = learnerMetadataProjection(course.metadataJson);
   const pricing = readCoursePricing(course.metadataJson);

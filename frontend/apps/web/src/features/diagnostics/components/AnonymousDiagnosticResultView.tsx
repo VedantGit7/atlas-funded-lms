@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { AnonymousDiagnosticScorecard } from "./AnonymousDiagnosticScorecard";
-import { DiagnosticIdentityGate } from "./DiagnosticIdentityGate";
+import { DeferredDiagnosticIdentityGate as DiagnosticIdentityGate } from "./DeferredDiagnosticIdentityGate";
 
 type AnonymousDiagnosticResultViewProps = {
   anonymousId: string;

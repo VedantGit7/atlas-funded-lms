@@ -21,11 +21,11 @@ function walk(dir) {
     );
     next = next.replace(
       /from (['"])(?:\.\.\/)+modules\/diagnostics\//g,
-      (_, quote) => `from ${quote}@atlas/contracts-modules/diagnostics/`,
+      (_, quote) => `from ${quote}@/modules/diagnostics/`,
     );
     next = next.replace(
       /from (['"])(?:\.\.\/)+modules\//g,
-      (_, quote) => `from ${quote}@atlas/contracts-modules/`,
+      (_, quote) => `from ${quote}@/modules/`,
     );
     if (next !== original) {
       fs.writeFileSync(full, next);

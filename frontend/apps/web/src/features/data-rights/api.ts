@@ -25,6 +25,12 @@ export type DeletionRequestItem = {
   completedAt: string | null;
   createdAt: string;
   updatedAt: string;
+  outcome?: {
+    accessRemoved: boolean;
+    erasure: string;
+    retentionReviewRequired: boolean;
+  } | null;
+  completionMessage?: string | null;
 };
 
 export async function fetchExportJobs(params?: { status?: string; cursor?: string }) {

@@ -1,6 +1,16 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+
+const { mockResetPostHogBrowser } = vi.hoisted(() => ({ mockResetPostHogBrowser: vi.fn() }));
+
+// clearClientDataCache("host_change") resets analytics identity through a fire-and-forget dynamic
+// import. Left unmocked and unawaited, that import could finish loading after this file's
+// environment was torn down, which Vitest reports as an EnvironmentTeardownError (seen in CI).
+vi.mock("../../frontend/apps/web/src/observability/posthog-browser", () => ({
+  resetPostHogBrowser: mockResetPostHogBrowser,
+}));
+
 import {
   clearClientDataCache,
   tenantQueryKey,
@@ -44,6 +54,15 @@ describe("learner tenant isolation frontend guards", () => {
     clearClientDataCache("host_change");
     expect(readClientDataCache(tenantQueryKey("tenant-a.host", ["courses"]))).toBeUndefined();
     expect(readClientDataCache(tenantQueryKey("tenant-b.host", ["courses"]))).toBeUndefined();
+  });
+
+  it("resets analytics identity when the tenant host changes", async () => {
+    mockResetPostHogBrowser.mockClear();
+    clearClientDataCache("host_change");
+    // Awaited so the reset finishes inside this test instead of racing environment teardown.
+    await vi.waitFor(() => {
+      expect(mockResetPostHogBrowser).toHaveBeenCalledOnce();
+    });
   });
 
   it("learner navigation projection uses entitlement keys only", () => {

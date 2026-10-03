@@ -63,7 +63,7 @@ export function VerificationActions({
         onClick={() => {
           void handleShare();
         }}
-        className={`${buttonBase} bg-neutral-900 text-white hover:bg-neutral-800 focus-visible:ring-neutral-900`}
+        className={`${buttonBase} bg-primary text-primary-foreground hover:opacity-90 focus-visible:ring-neutral-900`}
       >
         {copied ? "Link copied" : "Share"}
       </button>
@@ -72,7 +72,7 @@ export function VerificationActions({
         <a
           href={downloadUrl}
           download
-          className={`${buttonBase} border border-neutral-300 bg-white text-neutral-900 hover:bg-neutral-50 focus-visible:ring-neutral-400`}
+          className={`${buttonBase} border border-input bg-card text-foreground hover:bg-muted focus-visible:ring-ring`}
         >
           Download
         </a>
@@ -159,12 +159,14 @@ function WalletIssueButton({
         type="button"
         onClick={() => void handleClick()}
         disabled={busy}
-        className={`${buttonBase} border border-neutral-300 bg-white text-neutral-900 hover:bg-neutral-50 focus-visible:ring-neutral-400 disabled:cursor-wait disabled:opacity-60`}
+        className={`${buttonBase} border border-input bg-card text-foreground hover:bg-muted focus-visible:ring-ring disabled:cursor-wait disabled:opacity-60`}
       >
         {busy ? "Working…" : label}
       </button>
       {message ? (
-        <span className="mt-1 max-w-xs text-[11px] leading-snug text-neutral-500">{message}</span>
+        <span className="mt-1 max-w-xs text-[11px] leading-snug text-muted-foreground">
+          {message}
+        </span>
       ) : null}
     </span>
   );

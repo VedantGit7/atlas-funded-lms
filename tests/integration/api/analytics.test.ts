@@ -103,30 +103,37 @@ describeWithDb("analytics API integration", () => {
           now()
         )
       `;
+    });
 
-      const first = await processOutboxBatch(tx, {
-        limit: 10,
-        maxRetries: 3,
-        handlers: createAnalyticsOutboxConsumers(),
-      });
-      const second = await processOutboxBatch(tx, {
-        limit: 10,
-        maxRetries: 3,
-        handlers: createAnalyticsOutboxConsumers(),
-      });
+    const db = {
+      transaction: <T>(fn: Parameters<typeof withTenantTx<T>>[1]) =>
+        withTenantTx(authoringTenantTx(fixture), fn),
+    };
 
-      expect(first.delivered).toBeGreaterThan(0);
+    const first = await processOutboxBatch(db, {
+      limit: 10,
+      maxRetries: 3,
+      handlers: createAnalyticsOutboxConsumers(),
+    });
+    const second = await processOutboxBatch(db, {
+      limit: 10,
+      maxRetries: 3,
+      handlers: createAnalyticsOutboxConsumers(),
+    });
 
-      // The second pass must not deliver again. `skipped` used to be the signal,
-      // but that counter only increments for events the poll hands back and the
-      // in-loop delivery check then rejects. Since pollOutboxEventsForProcessing
-      // started excluding already-delivered (event, destination) pairs in SQL —
-      // the fix for the outbox head-of-line block — a duplicate never reaches the
-      // loop, so it is now correctly counted as nothing at all.
-      expect(second.processed).toBe(0);
-      expect(second.delivered).toBe(0);
-      expect(second.failed).toBe(0);
+    expect(first.delivered).toBeGreaterThan(0);
 
+    // The second pass must not deliver again. `skipped` used to be the signal,
+    // but that counter only increments for events the poll hands back and the
+    // in-loop delivery check then rejects. Since pollOutboxEventsForProcessing
+    // started excluding already-delivered (event, destination) pairs in SQL —
+    // the fix for the outbox head-of-line block — a duplicate never reaches the
+    // loop, so it is now correctly counted as nothing at all.
+    expect(second.processed).toBe(0);
+    expect(second.delivered).toBe(0);
+    expect(second.failed).toBe(0);
+
+    await withTenantTx(authoringTenantTx(fixture), async (tx) => {
       const deliveries = await tx.$queryRaw<Array<{ count: number }>>`
         select count(*)::int as count
         from event_deliveries

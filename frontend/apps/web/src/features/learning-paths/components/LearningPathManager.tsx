@@ -18,7 +18,7 @@ import {
 import {
   createLearningPath,
   formatLearningPathApiError,
-} from "@atlas/contracts-modules/learning-paths/learning-path.api-client";
+} from "@/modules/learning-paths/learning-path.api-client";
 import { primaryButtonClassName } from "../../../app/admin/branding/_components/branding-admin-shared";
 import {
   PATH_TYPE_CONFIG,

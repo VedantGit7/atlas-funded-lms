@@ -29,21 +29,20 @@ export async function handleMarketingWebhookOutboxEvent(event: {
 
   const payload = marketingWebhookDispatchPayloadSchema.parse(event.payload);
 
-  await withTenantTx(
+  await deliverMarketingIntegrationWebhooks(
     {
-      tenantId,
-      requestId: event.requestId,
-      allowAnonymousTenantRead: true,
+      transaction: (fn) =>
+        withTenantTx({ tenantId, requestId: event.requestId, allowAnonymousTenantRead: true }, fn),
     },
-    async (tx) => {
-      await deliverMarketingIntegrationWebhooks(tx, { tenantId }, payload.eventKey, payload.data);
-    },
+    { tenantId, requestId: event.requestId },
+    { id: event.id, payload },
   );
 }
 
 export const marketingWebhookOutboxHandlers: OutboxHandler[] = [
   {
     destinationKey: MARKETING_WEBHOOK_WORKER_DESTINATION,
+    retryOnCrash: false,
     handle: handleMarketingWebhookOutboxEvent,
   },
 ];

@@ -1,13 +1,31 @@
-import { createHmac, timingSafeEqual } from "node:crypto";
-import { mkdir, readFile, stat, unlink, writeFile } from "node:fs/promises";
+import { createHmac, randomUUID, timingSafeEqual } from "node:crypto";
+import { createWriteStream } from "node:fs";
+import { mkdir, open, readFile, rename, stat, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { Readable } from "node:stream";
+import { pipeline } from "node:stream/promises";
 import type { StorageEnv } from "../schemas/storage-env";
 import type {
   CreateSignedDownloadUrlInput,
   CreateSignedUploadUrlInput,
   ObjectMetadata,
   StorageProvider,
+  GetObjectStreamInput,
+  PutObjectStreamInput,
 } from "./storage-provider";
+import { boundedObjectStream } from "./bounded-object-stream";
+
+function missing(error: unknown): boolean {
+  return (error as NodeJS.ErrnoException).code === "ENOENT";
+}
+
+async function removeIfPresent(file: string): Promise<void> {
+  try {
+    await unlink(file);
+  } catch (error) {
+    if (!missing(error)) throw error;
+  }
+}
 
 type StoredObjectMeta = {
   contentType: string;
@@ -35,7 +53,9 @@ export class LocalFilesystemStorageProvider implements StorageProvider {
   private readonly signingSecret: string;
 
   constructor(env: StorageEnv) {
-    this.root = path.resolve(process.cwd(), env.STORAGE_LOCAL_ROOT);
+    // Local objects are runtime data, never build inputs. Without this marker,
+    // Turbopack treats the configurable root as a dependency on the whole app.
+    this.root = path.resolve(/* turbopackIgnore: true */ process.cwd(), env.STORAGE_LOCAL_ROOT);
     this.uploadTtlSeconds = env.STORAGE_SIGNED_UPLOAD_TTL_SECONDS;
     this.downloadTtlSeconds = env.STORAGE_SIGNED_DOWNLOAD_TTL_SECONDS;
     this.downloadBasePath = env.STORAGE_LOCAL_DOWNLOAD_BASE_PATH;
@@ -44,7 +64,20 @@ export class LocalFilesystemStorageProvider implements StorageProvider {
   }
 
   private objectPath(bucket: string, key: string): string {
-    return path.join(this.root, bucket, key);
+    if (
+      !bucket ||
+      !/^[a-zA-Z0-9._-]+$/.test(bucket) ||
+      bucket === "." ||
+      bucket === ".." ||
+      path.isAbsolute(key) ||
+      key.split(/[\\/]/).includes("..")
+    ) {
+      throw new Error("STORAGE_PATH_TRAVERSAL");
+    }
+    const bucketRoot = path.resolve(this.root, bucket);
+    const file = path.resolve(bucketRoot, key);
+    if (!file.startsWith(`${bucketRoot}${path.sep}`)) throw new Error("STORAGE_PATH_TRAVERSAL");
+    return file;
   }
 
   private metaPath(bucket: string, key: string): string {
@@ -59,15 +92,10 @@ export class LocalFilesystemStorageProvider implements StorageProvider {
     try {
       const raw = await readFile(this.metaPath(bucket, key), "utf8");
       return JSON.parse(raw) as StoredObjectMeta;
-    } catch {
-      return null;
+    } catch (error) {
+      if (missing(error)) return null;
+      throw error;
     }
-  }
-
-  private async writeMeta(bucket: string, key: string, meta: StoredObjectMeta): Promise<void> {
-    const metaFile = this.metaPath(bucket, key);
-    await this.ensureParentDir(metaFile);
-    await writeFile(metaFile, JSON.stringify(meta), "utf8");
   }
 
   // The local-filesystem provider computes these synchronously; the interface
@@ -107,22 +135,25 @@ export class LocalFilesystemStorageProvider implements StorageProvider {
     const filePath = this.objectPath(input.bucket, input.key);
     try {
       const fileStat = await stat(filePath);
+      if (!fileStat.isFile()) throw new Error("STORAGE_OBJECT_NOT_FILE");
       const meta = await this.readMeta(input.bucket, input.key);
       return {
         contentType: meta?.contentType ?? "application/octet-stream",
         sizeBytes: fileStat.size,
         checksumSha256: meta?.checksumSha256 ?? null,
       };
-    } catch {
-      return null;
+    } catch (error) {
+      if (missing(error)) return null;
+      throw error;
     }
   }
 
   async getObjectBody(input: { bucket: string; key: string }): Promise<Buffer | null> {
     try {
       return await readFile(this.objectPath(input.bucket, input.key));
-    } catch {
-      return null;
+    } catch (error) {
+      if (missing(error)) return null;
+      throw error;
     }
   }
 
@@ -132,22 +163,66 @@ export class LocalFilesystemStorageProvider implements StorageProvider {
     body: Buffer;
     contentType: string;
   }): Promise<void> {
-    const filePath = this.objectPath(input.bucket, input.key);
-    await this.ensureParentDir(filePath);
-    await writeFile(filePath, input.body);
-    const existing = await this.readMeta(input.bucket, input.key);
-    await this.writeMeta(input.bucket, input.key, {
-      contentType: input.contentType,
-      sizeBytes: input.body.byteLength,
-      checksumSha256: existing?.checksumSha256 ?? null,
+    await this.putObjectStream({
+      ...input,
+      sizeBytes: input.body.length,
+      body: Readable.from([input.body]),
     });
+  }
+
+  async putObjectStream(input: PutObjectStreamInput): Promise<void> {
+    if (input.signal?.aborted) input.body.destroy();
+    input.signal?.throwIfAborted();
+    const bounded = boundedObjectStream(input.sizeBytes);
+    const file = this.objectPath(input.bucket, input.key);
+    const temporary = `${file}.${randomUUID()}.tmp`;
+    const temporaryMeta = `${temporary}.meta.json`;
+    await this.ensureParentDir(file);
+    try {
+      await pipeline(input.body, bounded, createWriteStream(temporary, { flags: "wx" }), {
+        signal: input.signal,
+      });
+      await writeFile(
+        temporaryMeta,
+        JSON.stringify({
+          contentType: input.contentType,
+          sizeBytes: input.sizeBytes,
+          checksumSha256: null,
+        }),
+        { flag: "wx", signal: input.signal },
+      );
+      input.signal?.throwIfAborted();
+      await rename(temporary, file);
+      await rename(temporaryMeta, this.metaPath(input.bucket, input.key));
+    } finally {
+      await Promise.all([removeIfPresent(temporary), removeIfPresent(temporaryMeta)]);
+    }
+  }
+
+  async getObjectStream(input: GetObjectStreamInput): Promise<Readable | null> {
+    input.signal?.throwIfAborted();
+    const file = this.objectPath(input.bucket, input.key);
+    try {
+      const handle = await open(file, "r");
+      try {
+        if (!(await handle.stat()).isFile()) throw new Error("STORAGE_OBJECT_NOT_FILE");
+        input.signal?.throwIfAborted();
+        return handle.createReadStream({ signal: input.signal });
+      } catch (error) {
+        await handle.close();
+        throw error;
+      }
+    } catch (error) {
+      if (missing(error)) return null;
+      throw error;
+    }
   }
 
   async deleteObject(input: { bucket: string; key: string }): Promise<void> {
     const filePath = this.objectPath(input.bucket, input.key);
     const metaFile = this.metaPath(input.bucket, input.key);
-    await unlink(filePath).catch(() => undefined);
-    await unlink(metaFile).catch(() => undefined);
+    await removeIfPresent(filePath);
+    await removeIfPresent(metaFile);
   }
 
   verifyDownloadToken(args: {

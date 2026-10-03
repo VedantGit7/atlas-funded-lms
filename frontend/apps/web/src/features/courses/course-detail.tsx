@@ -61,8 +61,8 @@ export function CourseDetail({ course, modules, tagId }: CourseDetailProps) {
           <span
             className={`inline-flex items-center rounded-full border px-3 py-1 text-sm font-medium ${
               isPaid
-                ? "border-amber-300 bg-amber-50 text-amber-800"
-                : "border-emerald-300 bg-emerald-50 text-emerald-800"
+                ? "border-warning/40 bg-warning/10 text-warning-text"
+                : "border-success/40 bg-success/10 text-success-text"
             }`}
           >
             <CoursePrice course={course} />
@@ -87,7 +87,7 @@ export function CourseDetail({ course, modules, tagId }: CourseDetailProps) {
       <section className="space-y-4">
         <h2 className="text-xl font-semibold">Module outline</h2>
         {tagId ? (
-          <div className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-2 text-sm text-blue-800">
+          <div className="rounded-lg border border-primary/30 bg-primary/10 px-4 py-2 text-sm text-foreground">
             Filtering lessons by tag.{" "}
             <a href={`/courses/${course.id}`} className="font-semibold underline">
               Clear filter

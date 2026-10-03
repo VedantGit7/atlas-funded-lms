@@ -2,7 +2,7 @@ import { consumeEntitlementUnits, enforceEntitlement } from "@atlas/authorizatio
 import { auditWriter } from "@atlas/audit";
 import type { TenantTx } from "@atlas/db";
 import { outbox } from "@atlas/events";
-import { assertTenantKeyPrefix, getStorageProvider, parseStorageEnv } from "@atlas/storage";
+import { resolveVerifiedExportDownload } from "./export-artifact";
 import { loadMembershipResourceRef } from "@atlas/membership";
 import { createTenantResourceRef } from "@atlas/authorization";
 import { APPROVED_EXPORT_DOMAINS, EXPORT_SCOPE_VERSION } from "./data-rights.contract";
@@ -44,6 +44,7 @@ import {
 import { dataRightsRepository } from "./data-rights.repository";
 import type { DeletionRequestRow, ExportJobRow, ServiceCtx } from "./data-rights.types";
 import { DELETION_TARGET_TYPES } from "./data-rights.contract";
+import { accessRemovalOutcomeSchema } from "./privacy-lifecycle.contract";
 
 function mapExportErrorCode(errorJson: unknown): string | null {
   if (!errorJson || typeof errorJson !== "object" || Array.isArray(errorJson)) {
@@ -54,6 +55,7 @@ function mapExportErrorCode(errorJson: unknown): string | null {
 }
 
 function mapExportJobBaseDto(job: ExportJobRow) {
+  const scope = exportScopeSchema.safeParse(job.scope_json);
   return exportJobDtoSchema.omit({ download: true }).parse({
     id: job.id,
     status: job.status,
@@ -62,12 +64,24 @@ function mapExportJobBaseDto(job: ExportJobRow) {
     updatedAt: job.updated_at.toISOString(),
     expiresAt: job.expires_at?.toISOString() ?? null,
     errorCode: mapExportErrorCode(job.error_json),
+    scope: scope.success ? scope.data : null,
+    completePersonalDataExport: false,
   });
 }
 
 function mapDeletionRequestDto(request: DeletionRequestRow) {
+  const parsed = accessRemovalOutcomeSchema.safeParse(request.outcome_json);
+  const outcome = request.status === "SUCCEEDED" && parsed.success ? parsed.data : null;
   return deletionRequestDtoSchema.parse({
     id: request.id,
+    operation: "remove_school_access",
+    outcome,
+    completionMessage:
+      request.status !== "SUCCEEDED"
+        ? null
+        : outcome
+          ? "School access removed. Personal records remain; data erasure requires a separate review. Your shared login is unchanged."
+          : "Legacy request completed. Data erasure was not verified; no detailed outcome was recorded.",
     status: request.status,
     targetType: request.target_type,
     targetId: request.target_id,
@@ -121,35 +135,6 @@ async function consumeExportAllowance(tx: TenantTx, ctx: ServiceCtx): Promise<vo
     requestId: ctx.requestId,
     units: 1,
   });
-}
-
-async function resolveSignedDownload(
-  tx: TenantTx,
-  ctx: ServiceCtx,
-  job: ExportJobRow,
-): Promise<{ url: string; expiresAt: string } | null> {
-  if (job.status !== "SUCCEEDED" || !job.r2_object_key) {
-    return null;
-  }
-
-  const env = parseStorageEnv(process.env);
-  const provider = getStorageProvider();
-
-  assertTenantKeyPrefix({
-    tenantId: ctx.tenantId,
-    key: job.r2_object_key,
-  });
-
-  const signed = await provider.createSignedDownloadUrl({
-    bucket: env.R2_BUCKET_NAME,
-    key: job.r2_object_key,
-    expiresInSeconds: env.STORAGE_SIGNED_DOWNLOAD_TTL_SECONDS,
-  });
-
-  return {
-    url: signed.url,
-    expiresAt: signed.expiresAt.toISOString(),
-  };
 }
 
 export async function listExportJobs(tx: TenantTx, ctx: ServiceCtx, rawQuery: unknown) {
@@ -245,7 +230,7 @@ export async function getExportJob(tx: TenantTx, ctx: ServiceCtx, exportJobId: s
     throw exportJobNotFound();
   }
 
-  const download = await resolveSignedDownload(tx, ctx, job);
+  const download = await resolveVerifiedExportDownload(ctx, job);
 
   return exportJobDetailResponseSchema.parse({
     data: {
@@ -354,7 +339,7 @@ export async function processDeletionRequest(
 ) {
   processDeletionRequestBodySchema.parse(rawBody);
 
-  const request = await dataRightsRepository.findDeletionRequestById(tx, deletionRequestId);
+  const request = await dataRightsRepository.findDeletionRequestById(tx, deletionRequestId, true);
   if (!request || request.tenant_id !== ctx.tenantId) {
     throw deletionRequestNotFound();
   }
@@ -371,8 +356,8 @@ export async function processDeletionRequest(
     targetId: request.target_id,
   };
 
-  await processApprovedDeletionRequest(tx, ctx, request);
-  const completed = await completeDeletionRequest(tx, deletionRequestId);
+  const outcome = await processApprovedDeletionRequest(tx, ctx, request);
+  const completed = await completeDeletionRequest(tx, deletionRequestId, outcome);
 
   await auditWriter.write(
     tx,
@@ -389,6 +374,7 @@ export async function processDeletionRequest(
       after: {
         status: completed.status,
         completedAt: completed.completed_at?.toISOString() ?? null,
+        outcome,
       },
       reason: null,
       metadata: {},

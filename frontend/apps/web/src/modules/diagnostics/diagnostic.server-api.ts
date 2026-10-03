@@ -4,7 +4,7 @@ import type {
   authenticatedDiagnosticResultResponseSchema,
   authenticatedDiagnosticStartResponseSchema,
   diagnosticCatalogResponseSchema,
-} from "./diagnostic.schemas";
+} from "@atlas/contracts/diagnostics/diagnostic.schemas";
 
 type AuthenticatedDiagnosticStartResponse = z.infer<
   typeof authenticatedDiagnosticStartResponseSchema

@@ -1,5 +1,3 @@
-"use client";
-
 import Link from "next/link";
 
 export function ConsolePreviewCard() {
@@ -62,7 +60,7 @@ export function ConsolePreviewCard() {
                   className={`rounded-full px-2.5 py-[3px] text-[10px] font-semibold ${
                     t.tone === "grn"
                       ? "bg-[color-mix(in_srgb,var(--atl-grn)_14%,transparent)] text-[var(--atl-grn)]"
-                      : "bg-[color-mix(in_srgb,#d97706_16%,transparent)] text-[#b45309]"
+                      : "bg-[color-mix(in_srgb,var(--atl-amb-tx)_16%,transparent)] text-[var(--atl-amb-tx)]"
                   }`}
                 >
                   {t.status}
@@ -73,7 +71,7 @@ export function ConsolePreviewCard() {
         </div>
         <div className="mt-5 flex items-center justify-between border-t border-[var(--atl-bdr)] pt-4">
           <span className="text-[11px] text-[var(--atl-tx2)]">3 academies, fully isolated</span>
-          <span className="text-[11px] font-bold text-[var(--atl-acc)]">View all</span>
+          <span className="text-[11px] font-bold text-[var(--atl-acc-tx)]">View all</span>
         </div>
       </div>
     </div>
@@ -126,7 +124,9 @@ export function AuthoringPreviewCard() {
         </div>
         <div className="mt-5 grid grid-cols-3 gap-2.5">
           <div className="rounded-[10px] bg-[var(--atl-acc-l)] px-3 py-2.5">
-            <div className="text-[15px] font-extrabold leading-none text-[var(--atl-acc)]">68%</div>
+            <div className="text-[15px] font-extrabold leading-none text-[var(--atl-acc-tx)]">
+              68%
+            </div>
             <div className="mt-1 text-[9.5px] text-[var(--atl-tx2)]">avg progress</div>
           </div>
           <div className="rounded-[10px] bg-[var(--atl-bg2)] px-3 py-2.5">
@@ -228,7 +228,7 @@ export function AuthoringSection() {
           </div>
           <Link
             href="/login"
-            className="inline-flex items-center gap-2 rounded-[10px] border-[1.5px] border-[var(--atl-acc)] bg-[var(--atl-surf)] px-[26px] py-[15px] text-sm font-bold text-[var(--atl-acc)] no-underline transition-colors hover:bg-[var(--atl-acc-l)]"
+            className="inline-flex items-center gap-2 rounded-[10px] border-[1.5px] border-[var(--atl-acc)] bg-[var(--atl-surf)] px-[26px] py-[15px] text-sm font-bold text-[var(--atl-acc-tx)] no-underline transition-colors hover:bg-[var(--atl-acc-l)]"
           >
             Sign in to console
           </Link>

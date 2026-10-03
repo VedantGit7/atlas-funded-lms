@@ -28,7 +28,7 @@ describe("F8 browser journeys registry", () => {
     for (const journey of authenticated) {
       const source = readFileSync(resolve(browserRoot, journey.spec), "utf8");
       expect(source).toMatch(
-        /test\.skip|hasLearnerCredentials|hasAdminCredentials|hasPlatformCredentials|hasInstructorCredentials/,
+        /test\.skip|hasLearnerCredentials|hasAdminCredentials|hasPlatformCredentials|hasInstructorCredentials|requiredCredential/,
       );
     }
   });

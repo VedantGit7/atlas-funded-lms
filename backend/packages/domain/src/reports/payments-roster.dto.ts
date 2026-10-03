@@ -711,6 +711,22 @@ const paymentTransactionFlowStepSchema = z
 const paymentTransactionRefundRecordSchema = z
   .object({
     id: z.string(),
+    status: z
+      .enum([
+        "requested",
+        "processing",
+        "pending",
+        "succeeded",
+        "failed",
+        "reconciliation_required",
+        "manual_adjustment",
+        "legacy_recorded",
+      ])
+      .default("legacy_recorded"),
+    fulfillment: z
+      .enum(["gateway", "manual_adjustment", "legacy_recorded"])
+      .default("legacy_recorded"),
+    gatewayRefundId: z.string().optional(),
     amountCents: z.number().int().positive(),
     reason: z.string(),
     note: z.string().nullable(),
@@ -780,6 +796,7 @@ export const paymentTransactionDetailResponseSchema = z.object({
     events: z.array(paymentTransactionEventSchema),
     refunds: z.array(paymentTransactionRefundRecordSchema),
     refundedAmountCents: z.number().int().nonnegative(),
+    reservedRefundAmountCents: z.number().int().nonnegative().default(0),
     refundableAmountCents: z.number().int().nonnegative(),
     canRefund: z.boolean(),
     canDownloadInvoice: z.boolean(),
@@ -793,6 +810,9 @@ export type PaymentTransactionDetailResponse = z.output<
 
 export const refundPaymentTransactionBodySchema = rejectClientTenantFields
   .extend({
+    refundRequestId: z.uuid(),
+    refundMethod: z.enum(["gateway", "manual_adjustment"]).default("gateway"),
+    manualReference: z.string().trim().min(1).max(200).optional(),
     mode: z.enum(["full", "partial"]).default("full"),
     amountCents: z.number().int().positive().optional(),
     reason: z.enum(PAYMENT_REFUND_REASONS),
@@ -802,6 +822,13 @@ export const refundPaymentTransactionBodySchema = rejectClientTenantFields
   })
   .strict()
   .superRefine((body, ctx) => {
+    if (body.refundMethod === "manual_adjustment" && !body.manualReference) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Manual adjustments require a reference.",
+        path: ["manualReference"],
+      });
+    }
     if (body.mode === "partial" && body.amountCents == null) {
       ctx.addIssue({
         code: "custom",
@@ -872,6 +899,7 @@ export const paymentRefundsListResponseSchema = z.object({
           amountCents: z.number().int(),
           refundedAmountCents: z.number().int().nonnegative(),
           refundableAmountCents: z.number().int().nonnegative(),
+          reservedRefundAmountCents: z.number().int().nonnegative().default(0),
           currency: z.string(),
           status: z.string(),
           invoiceNumber: z.string().nullable(),

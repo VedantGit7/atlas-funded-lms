@@ -16,6 +16,25 @@ export type LessonProgressRow = {
   completedAt: Date | null;
 };
 
+/** Serialize progress and course completion before reading possibly missing progress. */
+export async function lockEnrollmentForProgress(args: {
+  tx: Tx;
+  tenantId: string;
+  membershipId: string;
+  enrollmentId: string;
+}): Promise<boolean> {
+  const rows = await args.tx.$queryRaw<Array<{ id: string }>>`
+    select id::text
+    from enrollments
+    where id = ${args.enrollmentId}::uuid
+      and tenant_id = ${args.tenantId}::uuid
+      and membership_id = ${args.membershipId}::uuid
+      and status = 'active'
+    for update
+  `;
+  return rows.length > 0;
+}
+
 export async function findLessonProgress(args: {
   tx: Tx;
   lessonId: string;

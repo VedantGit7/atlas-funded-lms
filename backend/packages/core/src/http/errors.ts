@@ -20,6 +20,7 @@ export type AtlasErrorCode =
   // 429. Distinct from INTERNAL_ERROR so clients can back off instead of
   // treating a throttle as a server fault (audit finding L4).
   | "RATE_LIMITED"
+  | "SERVICE_UNAVAILABLE"
   // 409. Distinct because the two idempotency conflicts need opposite client
   // responses: an in-flight duplicate should be retried with the same key,
   // while a key reused for a different request must never be retried at all.
@@ -32,13 +33,26 @@ export class AtlasHttpError extends Error {
   readonly code: AtlasErrorCode;
   readonly status: number;
   readonly expose: boolean;
+  readonly retryAfterSeconds?: number;
 
-  constructor(args: { code: AtlasErrorCode; status: number; message: string; expose?: boolean }) {
+  constructor(args: {
+    code: AtlasErrorCode;
+    status: number;
+    message: string;
+    expose?: boolean;
+    retryAfterSeconds?: number;
+  }) {
     super(args.message);
     this.name = "AtlasHttpError";
     this.code = args.code;
     this.status = args.status;
     this.expose = args.expose ?? true;
+    if (
+      args.retryAfterSeconds !== undefined &&
+      Number.isSafeInteger(args.retryAfterSeconds) &&
+      args.retryAfterSeconds > 0
+    )
+      this.retryAfterSeconds = args.retryAfterSeconds;
   }
 }
 
@@ -46,7 +60,14 @@ function isValidationError(error: unknown): boolean {
   return error instanceof Error && error.name === "ZodError";
 }
 
-export function toSafeErrorEnvelope(error: unknown, requestId: string) {
+export function toSafeErrorEnvelope(
+  error: unknown,
+  requestId: string,
+): {
+  status: number;
+  headers?: Record<string, string>;
+  body: { error: { code: string; message: string; requestId: string } };
+} {
   if (isValidationError(error)) {
     return {
       status: 400,
@@ -63,6 +84,9 @@ export function toSafeErrorEnvelope(error: unknown, requestId: string) {
   if (error instanceof AtlasHttpError) {
     return {
       status: error.status,
+      ...(error.retryAfterSeconds
+        ? { headers: { "Retry-After": String(error.retryAfterSeconds) } }
+        : {}),
       body: {
         error: {
           code: error.code,

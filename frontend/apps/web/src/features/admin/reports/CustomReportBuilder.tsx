@@ -106,8 +106,8 @@ export function CustomReportBuilder({ onSaved, onRunStarted }: CustomReportBuild
         Pick an approved dataset, choose columns, save a tenant-scoped definition, and run it.
       </p>
 
-      {error ? <p className="mt-3 text-sm text-red-600">{error}</p> : null}
-      {message ? <p className="mt-3 text-sm text-emerald-700">{message}</p> : null}
+      {error ? <p className="mt-3 text-sm text-destructive-text">{error}</p> : null}
+      {message ? <p className="mt-3 text-sm text-success-text">{message}</p> : null}
 
       <div className="mt-4 grid gap-4 lg:grid-cols-2">
         <label className="block text-sm">

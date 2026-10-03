@@ -29,7 +29,7 @@ describe("F3 public + auth forms", () => {
 
     for (const relativePath of authForms) {
       const source = readFileSync(resolve(webRoot, relativePath), "utf8");
-      expect(source).toContain("useZodForm");
+      expect(source).toMatch(/use(?:Lazy)?ZodForm\(/);
       expect(source).toContain("@atlas/contracts/domain-identity/schemas");
     }
 

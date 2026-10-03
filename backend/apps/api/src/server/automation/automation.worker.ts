@@ -1,10 +1,11 @@
+import { buildAutomationActionIdempotencyKey } from "./automation.keys";
 import { randomUUID } from "node:crypto";
 import type { TenantTx } from "@atlas/db";
 import { withTenantTx } from "@atlas/db";
 import { outbox } from "@atlas/events";
 import { issueCertificate } from "../certificates/certificate.service";
 import type { JobStatus } from "./automation.dto";
-import { buildAutomationActionIdempotencyKey } from "./automation.dto";
+
 import { AUTOMATION_RUN_COMPLETED_EVENT, isAutomationCycleEvent } from "./automation.events";
 import {
   assertAutomationTriggerEventType,

@@ -1,0 +1,141 @@
+{
+  "checkedAt": "2026-09-20T07:35:15.605Z",
+  "repository": "VedantGit7/atlas-funded-lms",
+  "private": true,
+  "defaultBranch": "main",
+  "accountPermissions": {
+    "admin": true,
+    "maintain": true,
+    "push": true,
+    "triage": true,
+    "pull": true
+  },
+  "branch": {
+    "name": "main",
+    "sha": "d15794708e6a2d0231286612e4bc573e92deb619",
+    "protected": false,
+    "summaryProtection": {
+      "enabled": true,
+      "required_status_checks": {
+        "enforcement_level": "non_admins",
+        "contexts": [
+          "authorization-tests",
+          "audit-compliance-check",
+          "build",
+          "dependency-scan",
+          "forbidden-scope-check",
+          "format-check",
+          "integration-tests",
+          "install",
+          "outbox-compliance-check",
+          "lint",
+          "migration-validation",
+          "secret-scan",
+          "prisma-boundary-check",
+          "route-metadata-check",
+          "rls-tests",
+          "tenant-isolation-tests",
+          "typecheck",
+          "unit-tests"
+        ],
+        "checks": [
+          {
+            "context": "authorization-tests",
+            "app_id": 15368
+          },
+          {
+            "context": "audit-compliance-check",
+            "app_id": 15368
+          },
+          {
+            "context": "build",
+            "app_id": 15368
+          },
+          {
+            "context": "dependency-scan",
+            "app_id": 15368
+          },
+          {
+            "context": "forbidden-scope-check",
+            "app_id": 15368
+          },
+          {
+            "context": "format-check",
+            "app_id": 15368
+          },
+          {
+            "context": "integration-tests",
+            "app_id": 15368
+          },
+          {
+            "context": "install",
+            "app_id": 15368
+          },
+          {
+            "context": "outbox-compliance-check",
+            "app_id": 15368
+          },
+          {
+            "context": "lint",
+            "app_id": 15368
+          },
+          {
+            "context": "migration-validation",
+            "app_id": 15368
+          },
+          {
+            "context": "secret-scan",
+            "app_id": 15368
+          },
+          {
+            "context": "prisma-boundary-check",
+            "app_id": 15368
+          },
+          {
+            "context": "route-metadata-check",
+            "app_id": 15368
+          },
+          {
+            "context": "rls-tests",
+            "app_id": 15368
+          },
+          {
+            "context": "tenant-isolation-tests",
+            "app_id": 15368
+          },
+          {
+            "context": "typecheck",
+            "app_id": 15368
+          },
+          {
+            "context": "unit-tests",
+            "app_id": 15368
+          }
+        ]
+      }
+    }
+  },
+  "protectionRead": {
+    "error": "GitHub API error 403: {\"message\":\"Resource not accessible by integration\",\"documentation_url\":\"https://docs.github.com/rest/branches/branch-protection#get-branch-protection\",\"status\":\"403\"}",
+    "error_code": "FORBIDDEN",
+    "error_data": {
+      "message": "Resource not accessible by integration",
+      "documentation_url": "https://docs.github.com/rest/branches/branch-protection#get-branch-protection",
+      "status": "403"
+    }
+  },
+  "rulesetsRead": {
+    "error": "GitHub API error 403: {\"message\":\"Upgrade to GitHub Pro or make this repository public to enable this feature.\",\"documentation_url\":\"https://docs.github.com/rest/repos/rules#get-all-repository-rulesets\",\"status\":\"403\"}",
+    "error_code": "FORBIDDEN",
+    "error_data": {
+      "message": "Upgrade to GitHub Pro or make this repository public to enable this feature.",
+      "documentation_url": "https://docs.github.com/rest/repos/rules#get-all-repository-rulesets",
+      "status": "403"
+    }
+  },
+  "effectiveRulesRead": {
+    "error": "HTTPError: 400: GitHub Fetch URL is not an allowed public GitHub repository or search endpoint. (Response: None)",
+    "error_code": "INVALID_ARGUMENT"
+  },
+  "remoteMutationsPerformed": false
+}

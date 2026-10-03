@@ -1,4 +1,4 @@
-import type { Page } from "@playwright/test";
+import { expect, type Locator, type Page } from "@playwright/test";
 
 /**
  * Wait until React has taken over the server-rendered HTML.
@@ -35,8 +35,80 @@ export async function waitForHydration(
   timeoutMs: number = HYDRATION_TIMEOUT_MS,
 ): Promise<void> {
   await page.waitForFunction(
-    () => Object.keys(document.body).some((key) => key.startsWith("__react")),
+    () =>
+      document.body !== null && Object.keys(document.body).some((key) => key.startsWith("__react")),
     undefined,
     { timeout: timeoutMs },
   );
+}
+
+/**
+ * Body hydration can precede a streamed client boundary. Before a critical
+ * client-only action, require its own handler instead of treating the body
+ * marker as proof that every descendant is interactive. This does not click,
+ * retry an action, or replace the journey's visible/persisted outcome checks.
+ */
+export async function waitForClickHandler(
+  control: Locator,
+  timeoutMs: number = HYDRATION_TIMEOUT_MS,
+): Promise<void> {
+  return waitForHandler(control, "onClick", timeoutMs);
+}
+
+/**
+ * Radios, checkboxes and selects react through `onChange`, not `onClick`. Clicking a label before
+ * its input's handler is attached changes nothing and leaves the control unchecked forever: J06
+ * clicked "Live" on the publish panel after only body hydration and saw it unchecked for 30s.
+ */
+export async function waitForChangeHandler(
+  control: Locator,
+  timeoutMs: number = HYDRATION_TIMEOUT_MS,
+): Promise<void> {
+  return waitForHandler(control, "onChange", timeoutMs);
+}
+
+/** A hydrated body does not establish that a streamed form can handle submission. */
+export async function waitForSubmitHandler(
+  form: Locator,
+  timeoutMs: number = HYDRATION_TIMEOUT_MS,
+): Promise<void> {
+  return waitForHandler(form, "onSubmit", timeoutMs);
+}
+
+async function waitForHandler(
+  control: Locator,
+  handler: "onClick" | "onSubmit" | "onChange",
+  timeoutMs: number,
+): Promise<void> {
+  await expect
+    .poll(
+      () =>
+        control
+          .evaluate(
+            (element, handler) =>
+              Object.keys(element).some((key) => {
+                if (!key.startsWith("__reactProps$")) return false;
+                const props = (element as unknown as Record<string, unknown>)[key];
+                return (
+                  props !== null &&
+                  typeof props === "object" &&
+                  handler in props &&
+                  typeof (props as Record<string, unknown>)[handler] === "function"
+                );
+              }),
+            handler,
+            { timeout: Math.min(timeoutMs, 1_000) },
+          )
+          // `expect.poll` fails at the FIRST exception rather than retrying, so one
+          // transient error (the control not attached within this 1 s probe on a cold
+          // dev server, or a dev reload replacing the document mid-check) used to end
+          // the whole wait. J11's failure probe died here after 3.3 s of a 60 s budget.
+          // A thrown check means "not ready yet"; only the overall timeout fails.
+          .catch(() => false),
+      {
+        timeout: timeoutMs,
+        message: `The control's React ${handler.slice(2).toLowerCase()} handler must be ready`,
+      },
+    )
+    .toBe(true);
 }

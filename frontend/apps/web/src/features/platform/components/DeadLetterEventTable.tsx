@@ -88,7 +88,7 @@ export function DeadLetterEventTable() {
     <PlatformReasonGate ready={isValid}>
       <section className="space-y-4">
         <h1 className="text-2xl font-semibold">Eventing / dead-letter ops</h1>
-        <p className="text-sm opacity-70">
+        <p className="text-sm text-muted-foreground">
           Replay uses the approved outbox replay endpoint only. No client-side worker rerun.
         </p>
 
@@ -98,7 +98,7 @@ export function DeadLetterEventTable() {
           </p>
         ) : null}
         {error ? (
-          <p role="alert" className="text-sm text-red-700">
+          <p role="alert" className="text-sm text-destructive">
             {error}
           </p>
         ) : null}
@@ -107,7 +107,7 @@ export function DeadLetterEventTable() {
 
         <table className="w-full border-collapse text-sm">
           <thead>
-            <tr className="border-b text-left">
+            <tr className="border-b border-border text-left">
               <th className="py-2 pr-4">Failed at</th>
               <th className="py-2 pr-4">Tenant</th>
               <th className="py-2 pr-4">Event</th>
@@ -117,7 +117,7 @@ export function DeadLetterEventTable() {
           </thead>
           <tbody>
             {rows.map((row) => (
-              <tr key={row.id} className="border-b">
+              <tr key={row.id} className="border-b border-border">
                 <td className="py-2 pr-4">{new Date(row.failedAt).toLocaleString()}</td>
                 <td className="py-2 pr-4 font-mono text-xs">{row.tenantId?.slice(0, 8) ?? "—"}</td>
                 <td className="py-2 pr-4">{row.eventType}</td>
@@ -125,7 +125,7 @@ export function DeadLetterEventTable() {
                 <td className="py-2">
                   <button
                     type="button"
-                    className="rounded border px-2 py-1"
+                    className="rounded border border-border px-2 py-1 hover:bg-muted"
                     onClick={() => {
                       setSelectedId(row.id);
                       setActionReason("");
@@ -143,7 +143,7 @@ export function DeadLetterEventTable() {
         {hasMore ? (
           <button
             type="button"
-            className="rounded border px-3 py-2 text-sm"
+            className="rounded border border-border px-3 py-2 text-sm hover:bg-muted"
             disabled={loading || !nextCursor}
             onClick={() => {
               void loadRows(nextCursor, true);

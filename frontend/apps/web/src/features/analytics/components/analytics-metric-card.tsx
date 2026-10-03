@@ -11,7 +11,7 @@ export function AnalyticsMetricCard({ label, value, description }: AnalyticsMetr
       <p className="text-2xl font-semibold" aria-label={`${label} count`}>
         {value.toLocaleString()}
       </p>
-      {description ? <p className="mt-1 text-sm text-neutral-600">{description}</p> : null}
+      {description ? <p className="mt-1 text-sm text-muted-foreground">{description}</p> : null}
     </article>
   );
 }

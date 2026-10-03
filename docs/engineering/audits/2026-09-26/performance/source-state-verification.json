@@ -1,0 +1,8 @@
+{
+  "checkedAt": "2026-09-26T13:21:45.331Z",
+  "baselineCapturedAt": "2026-09-26T11:28:33.938Z",
+  "checkedFiles": 73,
+  "mismatches": [],
+  "passed": true,
+  "scope": "Verifies the captured source/test/config file bytes remained unchanged; documentation, new unlisted files and ignored runtime artifacts are outside this comparison."
+}

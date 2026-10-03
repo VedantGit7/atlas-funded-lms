@@ -75,3 +75,34 @@ REVOKE INSERT, UPDATE, DELETE ON platform_operators FROM atlas_app, atlas_worker
 
 GRANT SELECT, INSERT, UPDATE ON platform_operators TO atlas_platform;
 REVOKE DELETE ON platform_operators FROM atlas_platform;
+
+-- DoD item 8 supplier cost tables (migration 106). Platform-global and
+-- commercially sensitive: the tenant roles get nothing, not even SELECT, and the
+-- rate history is append-only even for the platform role. Repeated here for the
+-- same reason as the blocks above -- the blanket GRANT at the top of this file
+-- runs after migrate deploy on a fresh provision.
+REVOKE ALL ON platform_cost_rates FROM atlas_app, atlas_worker;
+REVOKE ALL ON platform_fixed_costs FROM atlas_app, atlas_worker;
+
+GRANT SELECT, INSERT ON platform_cost_rates TO atlas_platform;
+REVOKE UPDATE, DELETE ON platform_cost_rates FROM atlas_platform;
+
+GRANT SELECT, INSERT, UPDATE ON platform_fixed_costs TO atlas_platform;
+REVOKE DELETE ON platform_fixed_costs FROM atlas_platform;
+
+-- F03: keep cached platform responses out of tenant and worker roles even
+-- after the broad grants above are reapplied during provisioning.
+REVOKE ALL ON platform_idempotency_records FROM PUBLIC, atlas_app, atlas_worker;
+GRANT SELECT, INSERT, UPDATE, DELETE ON platform_idempotency_records TO atlas_platform;
+
+-- F07: preserve durable financial request identities after baseline grants.
+REVOKE DELETE ON payment_refund_intents FROM atlas_app, atlas_worker;
+REVOKE ALL ON payment_refund_intents FROM atlas_platform;
+
+-- F08: scheduling state is mutable; append-only delivery evidence is not.
+REVOKE DELETE ON outbox_delivery_jobs FROM atlas_app, atlas_worker, atlas_platform;
+REVOKE UPDATE, DELETE ON event_deliveries FROM atlas_app, atlas_worker, atlas_platform;
+
+-- F08: report effect state remains private to tenant application/worker roles.
+REVOKE ALL ON report_delivery_effects FROM atlas_platform;
+REVOKE DELETE ON report_delivery_effects FROM atlas_app,atlas_worker;

@@ -35,6 +35,7 @@ export async function exportPollRoster(tx: TenantTx, ctx: ServiceCtx, rawBody: u
     const adminEmail = await notificationRepository.findMembershipEmail(tx, ctx.actorMembershipId);
     if (provider.isConfigured() && adminEmail) {
       await provider.send({
+        tenantId: ctx.tenantId,
         to: adminEmail,
         subject: "Your Polls export is ready",
         body: [

@@ -2,7 +2,7 @@ import { test, expect } from "../fixtures/axe";
 import { loginWithCredentials } from "../helpers/auth";
 import { hasAdminCredentials, requiredCredential } from "../helpers/env";
 
-test.describe("J08 moderation case decision", () => {
+test.describe("J08 shell smoke: moderation queue", () => {
   test.beforeEach(() => {
     test.skip(!hasAdminCredentials(), "Set E2E_ADMIN_EMAIL and E2E_ADMIN_PASSWORD");
   });

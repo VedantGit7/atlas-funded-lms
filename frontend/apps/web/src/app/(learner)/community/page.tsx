@@ -2,7 +2,7 @@ import { PageGate } from "../../../components/patterns/PageGate";
 import { CommunityExperience } from "../../../features/community/components/CommunityExperience";
 import type { FeedPost } from "../../../features/community/components/PostCard";
 import { ServerApiError, serverApi } from "../../../lib/server-api";
-import { communityServerApi } from "@atlas/contracts-modules/community/community.server-api";
+import { communityServerApi } from "@/modules/community/community.server-api";
 
 type CommunityPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;

@@ -23,21 +23,33 @@ yarn-debug.log*
 Thumbs.db
 .vscode/
 .idea/
+.claude/settings.local.json
+.claude/launch.json
 
 # local generated files
 .storage/
-coverage/
+/backend/apps/api/next-env.d.ts
+/frontend/apps/web/next-env.d.ts
+*.tsbuildinfo
+/coverage/
+/backend/apps/*/coverage/
+/backend/packages/*/coverage/
+/backend/packages/domain/*/coverage/
+/frontend/apps/*/coverage/
+/frontend/packages/*/coverage/
 .test-results/
+.next-e2e/
+.next-perf/
 test-results/
 playwright-report/
 lhci-reports/
 release-evidence.json
+ci-evidence.json
 
 # Paths below moved under backend/ in the F-1 monorepo split. The old spellings
 # silently stopped matching, which is why the generated Prisma client became
 # tracked and now produces ~30k-line diffs on every regenerate.
 backend/packages/**/src/**/*.d.ts
-backend/packages/**/tsconfig.tsbuildinfo
 backend/packages/db/src/generated/
 # Untracked scratch scripts kept at the repo root (see eslint.config.mjs ignores).
 tmp-*

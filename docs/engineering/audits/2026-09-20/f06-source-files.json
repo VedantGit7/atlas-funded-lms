@@ -1,0 +1,16 @@
+[
+  "backend/packages/security/src/outbound-policy.ts",
+  "backend/packages/security/src/pinned-outbound-transport.ts",
+  "backend/packages/security/src/safe-outbound-fetch.ts",
+  "tests/unit/security/outbound-pinning.test.ts",
+  "tests/unit/security/safe-outbound-fetch.test.ts",
+  "tests/integration/security/outbound-socket.test.ts",
+  "tests/fixtures/outbound-tls/README.md",
+  "tests/fixtures/outbound-tls/key.pem",
+  "tests/fixtures/outbound-tls/cert.pem",
+  ".env.example",
+  "docs/runbooks/outbound-webhooks.md",
+  "docs/engineering/f06-outbound-request-remediation.md",
+  "docs/engineering/atlas-lms-comprehensive-audit-2026-09-19.md",
+  "docs/engineering/audits/2026-09-20/f06-review.md"
+]

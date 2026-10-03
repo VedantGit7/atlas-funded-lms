@@ -135,7 +135,7 @@ function FlowNode({
   dimmed?: boolean | undefined;
 }) {
   const toneClasses = {
-    neutral: "border-[var(--admin-outline)] text-[var(--admin-outline)]",
+    neutral: "border-[var(--admin-outline)] text-[var(--admin-on-surface-variant)]",
     warning:
       "border-[var(--admin-warning)] text-[var(--admin-warning)] shadow-[var(--admin-warning)]/10",
     success:

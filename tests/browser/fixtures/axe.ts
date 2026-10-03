@@ -1,8 +1,10 @@
 import AxeBuilder from "@axe-core/playwright";
 import { test as base, expect } from "@playwright/test";
 import type { Page } from "@playwright/test";
+import { installFailureProbe } from "../helpers/failure-probe";
 
 type AxeFixtures = {
+  failureProbe: undefined;
   assertNoCriticalViolations: () => Promise<void>;
 };
 
@@ -58,6 +60,15 @@ async function waitForAnimationsToSettle(page: Page): Promise<void> {
 }
 
 export const test = base.extend<AxeFixtures>({
+  failureProbe: [
+    async ({ page }, use, testInfo) => {
+      await installFailureProbe(page, (fault) =>
+        testInfo.annotations.push({ type: "failure-probe", description: fault }),
+      );
+      await use(undefined);
+    },
+    { auto: true },
+  ],
   assertNoCriticalViolations: async ({ page }, use) => {
     await use(async () => {
       // Stop the animations before measuring, then let what remains settle.

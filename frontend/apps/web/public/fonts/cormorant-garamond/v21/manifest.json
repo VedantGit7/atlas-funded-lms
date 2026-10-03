@@ -1,0 +1,107 @@
+{
+  "family": "Cormorant Garamond",
+  "version": "Google Fonts v21",
+  "retrievedAt": "2026-09-23",
+  "sourceCss": "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600;1,700&display=swap",
+  "sourceCssSha256": "a816f8e84d93b0ae89d5b7f1295c2ea98fafb7d6635b238c13e52a519f3e15f4",
+  "metricsSource": "Next.js 16.3.5 getFallbackFontOverrideMetrics",
+  "metrics": {
+    "fallbackFont": "Times New Roman",
+    "ascent": "95.27%",
+    "descent": "29.59%",
+    "lineGap": "0.00%",
+    "sizeAdjust": "96.98%"
+  },
+  "assets": [
+    {
+      "file": "italic-cyrillic-ext.919a7720ae16.woff2",
+      "style": "italic",
+      "subset": "cyrillic-ext",
+      "url": "https://fonts.gstatic.com/s/cormorantgaramond/v21/co3ZmX5slCNuHLi8bLeY9MK7whWMhyjYrEtFmSqn7B6DxjY.woff2",
+      "sha256": "919a7720ae1671f06ebdd4f65bb9c2f0d619f81f805d85aec025c89139536292",
+      "bytes": 25196,
+      "preload": false
+    },
+    {
+      "file": "italic-cyrillic.3170a883f196.woff2",
+      "style": "italic",
+      "subset": "cyrillic",
+      "url": "https://fonts.gstatic.com/s/cormorantgaramond/v21/co3ZmX5slCNuHLi8bLeY9MK7whWMhyjYrEtMmSqn7B6DxjY.woff2",
+      "sha256": "3170a883f1968a2d1135259e40fd88508da70c20337e491f171f9405d0749053",
+      "bytes": 21264,
+      "preload": false
+    },
+    {
+      "file": "italic-vietnamese.3512ad3b4ddd.woff2",
+      "style": "italic",
+      "subset": "vietnamese",
+      "url": "https://fonts.gstatic.com/s/cormorantgaramond/v21/co3ZmX5slCNuHLi8bLeY9MK7whWMhyjYrEtHmSqn7B6DxjY.woff2",
+      "sha256": "3512ad3b4ddd21fa75ab44296867da1f82948350ffba678a04afbb511015cb08",
+      "bytes": 11556,
+      "preload": false
+    },
+    {
+      "file": "italic-latin-ext.06bc9a8c179a.woff2",
+      "style": "italic",
+      "subset": "latin-ext",
+      "url": "https://fonts.gstatic.com/s/cormorantgaramond/v21/co3ZmX5slCNuHLi8bLeY9MK7whWMhyjYrEtGmSqn7B6DxjY.woff2",
+      "sha256": "06bc9a8c179afaf7dd5d3b4987ad2f4a82ca85a542c9e498b18bf32ad0257d8e",
+      "bytes": 34444,
+      "preload": false
+    },
+    {
+      "file": "italic-latin.e6d6d1d73858.woff2",
+      "style": "italic",
+      "subset": "latin",
+      "url": "https://fonts.gstatic.com/s/cormorantgaramond/v21/co3ZmX5slCNuHLi8bLeY9MK7whWMhyjYrEtImSqn7B6D.woff2",
+      "sha256": "e6d6d1d73858aa9b66f3a3539f9dec22faab2276e61ad1d813bc04dd59c9c122",
+      "bytes": 39304,
+      "preload": true
+    },
+    {
+      "file": "normal-cyrillic-ext.d04439363ec8.woff2",
+      "style": "normal",
+      "subset": "cyrillic-ext",
+      "url": "https://fonts.gstatic.com/s/cormorantgaramond/v21/co3bmX5slCNuHLi8bLeY9MK7whWMhyjYpHtKky2F7i6C.woff2",
+      "sha256": "d04439363ec805132dc6c6e6a925f76efe17646f9811af8e10e218ea3dba5335",
+      "bytes": 23408,
+      "preload": false
+    },
+    {
+      "file": "normal-cyrillic.d81372bae1f8.woff2",
+      "style": "normal",
+      "subset": "cyrillic",
+      "url": "https://fonts.gstatic.com/s/cormorantgaramond/v21/co3bmX5slCNuHLi8bLeY9MK7whWMhyjYrXtKky2F7i6C.woff2",
+      "sha256": "d81372bae1f872f1418c0b7eb412f8a92a156a950fda8d2383701c75d38969df",
+      "bytes": 21132,
+      "preload": false
+    },
+    {
+      "file": "normal-vietnamese.826f73ca737f.woff2",
+      "style": "normal",
+      "subset": "vietnamese",
+      "url": "https://fonts.gstatic.com/s/cormorantgaramond/v21/co3bmX5slCNuHLi8bLeY9MK7whWMhyjYpntKky2F7i6C.woff2",
+      "sha256": "826f73ca737feec0eb1004808629973d6b611fddc2bd2a689b5fe331f6be6427",
+      "bytes": 11264,
+      "preload": false
+    },
+    {
+      "file": "normal-latin-ext.9dc38267bdee.woff2",
+      "style": "normal",
+      "subset": "latin-ext",
+      "url": "https://fonts.gstatic.com/s/cormorantgaramond/v21/co3bmX5slCNuHLi8bLeY9MK7whWMhyjYp3tKky2F7i6C.woff2",
+      "sha256": "9dc38267bdee93a653200ef3c1e8060e3f1399073432c415c683b419d3b50464",
+      "bytes": 33740,
+      "preload": false
+    },
+    {
+      "file": "normal-latin.5d618c462b7a.woff2",
+      "style": "normal",
+      "subset": "latin",
+      "url": "https://fonts.gstatic.com/s/cormorantgaramond/v21/co3bmX5slCNuHLi8bLeY9MK7whWMhyjYqXtKky2F7g.woff2",
+      "sha256": "5d618c462b7a5b74f442e1548880086af71764d9cc7d35c16ab45353da934621",
+      "bytes": 37776,
+      "preload": true
+    }
+  ]
+}

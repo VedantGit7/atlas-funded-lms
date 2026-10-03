@@ -3,10 +3,14 @@
 import { useActionState, useEffect, startTransition, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import {
-  PublicLoginRequestSchema,
-  PublicMfaVerifyRequestSchema,
-} from "@atlas/contracts/domain-identity/schemas/public-auth";
+const loadPublicLoginRequestSchema = () =>
+  import("@atlas/contracts/domain-identity/schemas/public-auth").then(
+    (module) => module.PublicLoginRequestSchema,
+  );
+const loadPublicMfaVerifyRequestSchema = () =>
+  import("@atlas/contracts/domain-identity/schemas/public-auth").then(
+    (module) => module.PublicMfaVerifyRequestSchema,
+  );
 import {
   Form,
   FormControl,
@@ -15,7 +19,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useZodForm } from "@/lib/forms/use-zod-form";
+import { useLazyZodForm } from "@/lib/forms/use-lazy-zod-form";
 import { HiddenFormField } from "@/lib/forms/hidden-form-field";
 import { valuesToFormData } from "@/lib/forms/values-to-form-data";
 import { loginAction, type LoginActionState } from "../_actions/login-action";
@@ -34,7 +38,7 @@ const primaryButtonClass =
   "w-full rounded-[10px] bg-[var(--fba-ind)] px-4 py-4 text-[15px] font-bold text-white shadow-[0_10px_40px_rgba(0,0,0,0.07)] transition-colors hover:bg-[var(--fba-ind-d)] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60";
 
 const inlineLinkClass =
-  "text-[13px] font-semibold text-[var(--fba-ind)] transition-colors hover:underline";
+  "text-[13px] font-semibold text-[var(--fba-ind-tx)] transition-colors hover:underline";
 
 function EyeIcon({ open }: { open: boolean }) {
   return (
@@ -253,8 +257,9 @@ export function LoginForm() {
     }
   }, [mfaState.ok, mfaState.destination]);
 
-  const loginForm = useZodForm({
-    schema: PublicLoginRequestSchema,
+  const loginForm = useLazyZodForm({
+    schema: loadPublicLoginRequestSchema,
+    errorField: "email",
     defaultValues: {
       email: "",
       password: "",
@@ -262,8 +267,9 @@ export function LoginForm() {
     },
   });
 
-  const mfaForm = useZodForm({
-    schema: PublicMfaVerifyRequestSchema,
+  const mfaForm = useLazyZodForm({
+    schema: loadPublicMfaVerifyRequestSchema,
+    errorField: "code",
     defaultValues: {
       code: "",
     },
@@ -304,7 +310,7 @@ export function LoginForm() {
     return (
       <Form {...mfaForm}>
         <div className="mb-8 flex flex-col items-center text-center">
-          <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-[14px] border border-[var(--fba-ind)]/15 bg-[var(--fba-ind-l)] text-[var(--fba-ind)]">
+          <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-[14px] border border-[var(--fba-ind)]/15 bg-[var(--fba-ind-l)] text-[var(--fba-ind-tx)]">
             <ShieldCheckIcon />
           </div>
           <h2
@@ -347,12 +353,12 @@ export function LoginForm() {
                     onChange={field.onChange}
                     length={6}
                     autoFocus
-                    disabled={mfaPending}
+                    disabled={mfaPending || mfaForm.formState.isSubmitting}
                     invalid={!mfaRetried && Boolean(mfaState.message && !mfaState.ok)}
                     ariaLabel="Authenticator verification code"
                   />
                 </FormControl>
-                <FormMessage className="mt-2 text-center text-[13px] text-[var(--fba-red)]" />
+                <FormMessage className="mt-2 text-center text-[13px] text-[var(--fba-red-tx)]" />
               </FormItem>
             )}
           />
@@ -363,7 +369,7 @@ export function LoginForm() {
               className={
                 mfaState.ok
                   ? "text-center text-[13px] text-[var(--fba-grn)]"
-                  : "text-center text-[13px] text-[var(--fba-red)]"
+                  : "text-center text-[13px] text-[var(--fba-red-tx)]"
               }
             >
               {mfaState.message}
@@ -372,18 +378,18 @@ export function LoginForm() {
 
           <button
             type="submit"
-            disabled={mfaPending}
+            disabled={mfaPending || mfaForm.formState.isSubmitting}
             className={`flex items-center justify-center gap-2 ${primaryButtonClass}`}
           >
-            {mfaPending ? "Verifying..." : "Verify code"}
-            {mfaPending ? null : <ArrowRightIcon />}
+            {mfaPending || mfaForm.formState.isSubmitting ? "Verifying..." : "Verify code"}
+            {mfaPending || mfaForm.formState.isSubmitting ? null : <ArrowRightIcon />}
           </button>
         </form>
 
         <div className="mt-8 text-center">
           <Link
             href="/login"
-            className="group inline-flex items-center gap-2 text-[13px] font-semibold text-[var(--fba-ind)] transition-colors hover:text-[var(--fba-ind-d)]"
+            className="group inline-flex items-center gap-2 text-[13px] font-semibold text-[var(--fba-ind-tx)] transition-colors hover:text-[var(--fba-ind-d)]"
           >
             <ArrowLeftIcon />
             Back to Sign In
@@ -469,7 +475,7 @@ export function LoginForm() {
                   className={fieldInputClass}
                 />
               </FormControl>
-              <FormMessage className="mt-2 text-[13px] text-[var(--fba-red)]" />
+              <FormMessage className="mt-2 text-[13px] text-[var(--fba-red-tx)]" />
             </FormItem>
           )}
         />
@@ -508,7 +514,7 @@ export function LoginForm() {
                   <EyeIcon open={showPassword} />
                 </button>
               </div>
-              <FormMessage className="mt-2 text-[13px] text-[var(--fba-red)]" />
+              <FormMessage className="mt-2 text-[13px] text-[var(--fba-red-tx)]" />
             </FormItem>
           )}
         />
@@ -532,15 +538,19 @@ export function LoginForm() {
             className={
               loginState.ok
                 ? "text-[13px] text-[var(--fba-grn)]"
-                : "text-[13px] text-[var(--fba-red)]"
+                : "text-[13px] text-[var(--fba-red-tx)]"
             }
           >
             {loginState.message || "We couldn't sign you in with that provider. Please try again."}
           </p>
         ) : null}
 
-        <button type="submit" disabled={loginPending} className={primaryButtonClass}>
-          {loginPending ? "Signing in..." : "Sign In"}
+        <button
+          type="submit"
+          disabled={loginPending || loginForm.formState.isSubmitting}
+          className={primaryButtonClass}
+        >
+          {loginPending || loginForm.formState.isSubmitting ? "Signing in..." : "Sign In"}
         </button>
       </form>
 

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
-import { TenantLogo } from "@atlas/design-system";
+import { TenantLogo } from "@atlas/design-system/components/tenant-logo";
 import type { ModerationNavItem } from "../../features/moderation/moderation-navigation";
 import type { PublicTenantBranding } from "@atlas/tenant-branding";
 import { OperationalShellLayout } from "./shared/OperationalShellLayout";

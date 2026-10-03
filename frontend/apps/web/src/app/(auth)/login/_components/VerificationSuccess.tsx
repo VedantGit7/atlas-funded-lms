@@ -107,7 +107,7 @@ export function VerificationSuccess({
 
       <a
         href={destination}
-        className="group inline-flex items-center gap-2 border-b border-transparent pb-0.5 text-[14px] font-bold text-[var(--fba-ind)] transition-colors hover:border-[var(--fba-ind)] hover:text-[var(--fba-ind-d)]"
+        className="group inline-flex items-center gap-2 border-b border-transparent pb-0.5 text-[14px] font-bold text-[var(--fba-ind-tx)] transition-colors hover:border-[var(--fba-ind)] hover:text-[var(--fba-ind-d)]"
       >
         Not redirected? Continue manually
         <ArrowRightIcon />

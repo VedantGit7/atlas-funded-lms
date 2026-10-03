@@ -1,7 +1,7 @@
 import { PageGate, PageHeader } from "../../../components/patterns/PageGate";
 import { LeaderboardTable } from "../../../features/gamification/components/LeaderboardTable";
 import { ServerApiError } from "../../../lib/server-api";
-import { gamificationServerApi } from "@atlas/contracts-modules/gamification/gamification.server-api";
+import { gamificationServerApi } from "@/modules/gamification/gamification.server-api";
 
 type LeaderboardsPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;

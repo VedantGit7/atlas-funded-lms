@@ -1,0 +1,19 @@
+[
+  "backend/packages/api/src/create-tenant-route.ts",
+  "backend/packages/api/src/idempotency-registry.ts",
+  "backend/packages/api/src/create-platform-route.ts",
+  "backend/packages/api/src/platform-idempotency-registry.ts",
+  "backend/packages/domain/tenancy/src/services/platform-tenant-provisioning.service.ts",
+  "tests/unit/api/idempotency-security.test.ts",
+  "tests/unit/api/idempotency-authorization.test.ts",
+  "tests/unit/api/platform-idempotency.test.ts",
+  "tests/unit/tenancy/platform-tenant-provisioning.test.ts",
+  "tests/integration/api/idempotency-registry.test.ts",
+  "tests/integration/api/idempotency-security.postgres.test.ts",
+  "tests/helpers/platform-idempotency-tx.ts",
+  "tests/api/platform-tenants.post.test.ts",
+  "tests/api/platform-tenant-lifecycle.post.test.ts",
+  "tests/api/platform-costs.test.ts",
+  "tests/api/platform-tenant-entitlements.test.ts",
+  "tests/api/dead-letter-replay.post.test.ts"
+]

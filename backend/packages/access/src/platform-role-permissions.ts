@@ -9,6 +9,8 @@ export const PLATFORM_ROLE_PERMISSIONS: Record<PlatformRoleKey, readonly string[
     "platform.catalog.manage",
     "platform.audit.read",
     "platform.support.access",
+    "platform.cost.read",
+    "platform.cost.manage",
   ],
   operations: [
     "platform.tenant.read",
@@ -17,7 +19,12 @@ export const PLATFORM_ROLE_PERMISSIONS: Record<PlatformRoleKey, readonly string[
     "platform.feature_flag.manage",
     "platform.audit.read",
     "platform.support.access",
+    // Operations owns the supplier accounts, so it keeps the rate card current.
+    "platform.cost.read",
+    "platform.cost.manage",
   ],
+  // Support deliberately has no cost access: supplier pricing and per-tenant
+  // margins are commercial information a support agent has no need to see.
   support: ["platform.tenant.read", "platform.audit.read", "platform.support.access"],
 };
 

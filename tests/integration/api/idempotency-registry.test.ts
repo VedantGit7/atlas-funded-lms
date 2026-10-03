@@ -38,7 +38,11 @@ describeWithDb("idempotency registry (M10)", () => {
     const first = await withTenantTx(tenantCtx(fixture.tenantA), async (tx) =>
       withIdempotency(
         tx,
-        { tenantId: fixture.tenantA.tenantId, ...claimFor(key, { a: 1 }) },
+        {
+          tenantId: fixture.tenantA.tenantId,
+          actorMembershipId: fixture.tenantA.membershipId,
+          ...claimFor(key, { a: 1 }),
+        },
         () => {
           calls += 1;
           return Promise.resolve({ data: { id: "created-1", calls } });
@@ -49,7 +53,11 @@ describeWithDb("idempotency registry (M10)", () => {
     const second = await withTenantTx(tenantCtx(fixture.tenantA), async (tx) =>
       withIdempotency(
         tx,
-        { tenantId: fixture.tenantA.tenantId, ...claimFor(key, { a: 1 }) },
+        {
+          tenantId: fixture.tenantA.tenantId,
+          actorMembershipId: fixture.tenantA.membershipId,
+          ...claimFor(key, { a: 1 }),
+        },
         () => {
           calls += 1;
           return Promise.resolve({ data: { id: "created-2", calls } });
@@ -69,7 +77,11 @@ describeWithDb("idempotency registry (M10)", () => {
     await withTenantTx(tenantCtx(fixture.tenantA), async (tx) =>
       withIdempotency(
         tx,
-        { tenantId: fixture.tenantA.tenantId, ...claimFor(key, { amount: 100 }) },
+        {
+          tenantId: fixture.tenantA.tenantId,
+          actorMembershipId: fixture.tenantA.membershipId,
+          ...claimFor(key, { amount: 100 }),
+        },
         () => Promise.resolve({ ok: true }),
       ),
     );
@@ -81,7 +93,11 @@ describeWithDb("idempotency registry (M10)", () => {
       withTenantTx(tenantCtx(fixture.tenantA), async (tx) =>
         withIdempotency(
           tx,
-          { tenantId: fixture.tenantA.tenantId, ...claimFor(key, { amount: 999 }) },
+          {
+            tenantId: fixture.tenantA.tenantId,
+            actorMembershipId: fixture.tenantA.membershipId,
+            ...claimFor(key, { amount: 999 }),
+          },
           () => Promise.resolve({ ok: true }),
         ),
       ),
@@ -94,8 +110,14 @@ describeWithDb("idempotency registry (M10)", () => {
 
     await expect(
       withTenantTx(tenantCtx(fixture.tenantA), async (tx) =>
-        withIdempotency(tx, { tenantId: fixture.tenantA.tenantId, ...claimFor(key, {}) }, () =>
-          Promise.reject(new Error("handler blew up")),
+        withIdempotency(
+          tx,
+          {
+            tenantId: fixture.tenantA.tenantId,
+            actorMembershipId: fixture.tenantA.membershipId,
+            ...claimFor(key, {}),
+          },
+          () => Promise.reject(new Error("handler blew up")),
         ),
       ),
     ).rejects.toThrow("handler blew up");
@@ -104,8 +126,14 @@ describeWithDb("idempotency registry (M10)", () => {
     // client's retry would hit an IN_PROGRESS row forever and the key would be
     // permanently unusable for an operation that never happened.
     const retried = await withTenantTx(tenantCtx(fixture.tenantA), async (tx) =>
-      withIdempotency(tx, { tenantId: fixture.tenantA.tenantId, ...claimFor(key, {}) }, () =>
-        Promise.resolve({ recovered: true }),
+      withIdempotency(
+        tx,
+        {
+          tenantId: fixture.tenantA.tenantId,
+          actorMembershipId: fixture.tenantA.membershipId,
+          ...claimFor(key, {}),
+        },
+        () => Promise.resolve({ recovered: true }),
       ),
     );
     expect(retried).toEqual({ recovered: true });
@@ -116,8 +144,14 @@ describeWithDb("idempotency registry (M10)", () => {
     const key = `idem-${randomUUID()}`;
 
     await withTenantTx(tenantCtx(fixture.tenantA), async (tx) =>
-      withIdempotency(tx, { tenantId: fixture.tenantA.tenantId, ...claimFor(key, {}) }, () =>
-        Promise.resolve({ tenant: "a" }),
+      withIdempotency(
+        tx,
+        {
+          tenantId: fixture.tenantA.tenantId,
+          actorMembershipId: fixture.tenantA.membershipId,
+          ...claimFor(key, {}),
+        },
+        () => Promise.resolve({ tenant: "a" }),
       ),
     );
 
@@ -125,8 +159,14 @@ describeWithDb("idempotency registry (M10)", () => {
     // tenant B from reading A's record, so a shared key must not surface A's
     // stored response to B.
     const forB = await withTenantTx(tenantCtx(fixture.tenantB), async (tx) =>
-      withIdempotency(tx, { tenantId: fixture.tenantB.tenantId, ...claimFor(key, {}) }, () =>
-        Promise.resolve({ tenant: "b" }),
+      withIdempotency(
+        tx,
+        {
+          tenantId: fixture.tenantB.tenantId,
+          actorMembershipId: fixture.tenantB.membershipId,
+          ...claimFor(key, {}),
+        },
+        () => Promise.resolve({ tenant: "b" }),
       ),
     );
     expect(forB).toEqual({ tenant: "b" });
@@ -137,8 +177,14 @@ describeWithDb("idempotency registry (M10)", () => {
     const key = `idem-${randomUUID()}`;
 
     await withTenantTx(tenantCtx(fixture.tenantA), async (tx) => {
-      await withIdempotency(tx, { tenantId: fixture.tenantA.tenantId, ...claimFor(key, {}) }, () =>
-        Promise.resolve({ ok: true }),
+      await withIdempotency(
+        tx,
+        {
+          tenantId: fixture.tenantA.tenantId,
+          actorMembershipId: fixture.tenantA.membershipId,
+          ...claimFor(key, {}),
+        },
+        () => Promise.resolve({ ok: true }),
       );
       await tx.$executeRaw`
         UPDATE idempotency_records

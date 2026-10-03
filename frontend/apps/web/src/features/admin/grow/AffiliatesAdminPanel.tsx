@@ -856,7 +856,7 @@ export function AffiliatesAdminPanel() {
             >
               {entry.label}
               {showBadge ? (
-                <span className="inline-flex min-w-[1.25rem] items-center justify-center rounded-full bg-[var(--admin-warning)] px-1.5 py-0.5 text-[10px] font-bold text-[var(--admin-on-primary)]">
+                <span className="inline-flex min-w-[1.25rem] items-center justify-center rounded-full bg-[var(--admin-warning)] px-1.5 py-0.5 text-[10px] font-bold text-[var(--admin-on-warning)]">
                   {pendingRequests}
                 </span>
               ) : null}
@@ -1877,7 +1877,7 @@ export function AffiliatesAdminPanel() {
                                   onClick={() =>
                                     void onReviewRequest(request.id, "reject", rejectNote)
                                   }
-                                  className="rounded-lg bg-[var(--admin-danger)] px-3 py-1.5 text-xs font-semibold text-[var(--admin-on-primary)] disabled:opacity-50"
+                                  className="rounded-lg bg-[var(--admin-danger)] px-3 py-1.5 text-xs font-semibold text-[var(--admin-on-danger)] disabled:opacity-50"
                                 >
                                   Confirm reject
                                 </button>
@@ -1899,7 +1899,7 @@ export function AffiliatesAdminPanel() {
                                 type="button"
                                 disabled={reviewingId === request.id}
                                 onClick={() => void onReviewRequest(request.id, "approve")}
-                                className="rounded-lg bg-[var(--admin-success)] px-3 py-1.5 text-xs font-semibold text-[var(--admin-on-primary)] disabled:opacity-50"
+                                className="rounded-lg bg-[var(--admin-success)] px-3 py-1.5 text-xs font-semibold text-[var(--admin-on-success)] disabled:opacity-50"
                               >
                                 Approve
                               </button>

@@ -1,0 +1,147 @@
+{
+  "finding": "F03",
+  "status": "implemented and locally verified; local migration applied; production rollout pending",
+  "baseCommit": "ca8c0f1e7e69780b4e2ddc2a1136907a2e47c350",
+  "includesPriorFixes": [
+    "F01",
+    "F02"
+  ],
+  "verifiedAt": "2026-09-19T11:28:04.280Z",
+  "regressionsBeforeFix": {
+    "tenantAndRegistryFailed": 15,
+    "platformWrapperFailed": 4,
+    "legacyProvisioningFailed": 2
+  },
+  "offlineRegression": {
+    "files": 311,
+    "passed": 2288,
+    "skipped": 1,
+    "exitCode": 0
+  },
+  "finalTargetedTests": {
+    "files": 42,
+    "passed": 282,
+    "exitCode": 0
+  },
+  "postgresTests": {
+    "passed": 7,
+    "exitCode": 0,
+    "scope": "Random isolated schema on local maintenance connection; schema removed"
+  },
+  "typescript": {
+    "exitCode": 0
+  },
+  "changedFileLint": {
+    "files": 17,
+    "warnings": 0,
+    "exitCode": 0
+  },
+  "format": {
+    "codeFiles": 17,
+    "documentationFiles": 2,
+    "exitCode": 0
+  },
+  "staticChecks": [
+    {
+      "command": [
+        "scripts/guards/check-route-metadata.mjs"
+      ],
+      "exitCode": 0,
+      "output": ""
+    },
+    {
+      "command": [
+        "scripts/guards/check-prisma-boundary.mjs"
+      ],
+      "exitCode": 0,
+      "output": ""
+    },
+    {
+      "command": [
+        "scripts/guards/check-secrets.mjs"
+      ],
+      "exitCode": 0,
+      "output": ""
+    },
+    {
+      "command": [
+        "scripts/guards/check-audit-compliance.mjs"
+      ],
+      "exitCode": 0,
+      "output": "check-audit-compliance: OK (2438 files scanned).\n"
+    },
+    {
+      "command": [
+        "scripts/ci/check-frontend-api-closure.mjs",
+        "--strict"
+      ],
+      "exitCode": 0,
+      "output": "Frontend API closure OK (804 routes scanned, strict=yes).\n"
+    },
+    {
+      "command": [
+        "scripts/db/check-no-session-tenant-set.mjs"
+      ],
+      "exitCode": 0,
+      "output": ""
+    },
+    {
+      "command": [
+        "scripts/db/check-sql-approved-paths.mjs"
+      ],
+      "exitCode": 0,
+      "output": ""
+    }
+  ],
+  "databaseVerification": {
+    "database": "localhost:15432/atlas_lms_dev",
+    "migration": [
+      {
+        "migration_name": "20260919120000_107_platform_idempotency",
+        "applied": true
+      }
+    ],
+    "access": [
+      {
+        "relrowsecurity": true,
+        "relforcerowsecurity": true,
+        "tenant_can_read": false,
+        "worker_can_read": false,
+        "platform_can_use": true
+      }
+    ],
+    "scratchSchemas": []
+  },
+  "browserVerification": "Existing authenticated operator session loads platform navigation and normal operational-reason gate after local migration",
+  "review": "Independent read-only review found no additional production defects; identified legacy route test mocks corrected; final targeted suite passed",
+  "limits": [
+    "No production migration or deployment",
+    "Full production build not run",
+    "Live business mutations and external provider effects not exercised",
+    "Platform retention scheduler must be configured before production rollout",
+    "Existing tenant retention worker visits active tenants only",
+    "Legacy platform mutation outcomes cannot be reconstructed; provisioning fallback fails closed",
+    "External side effects still require provider idempotency or an outbox"
+  ],
+  "sourceHashes": {
+    "backend/packages/api/src/create-tenant-route.ts": "10191ef2ae425049ef974dd103fd197e0ef460611214e7024f8f8899578a67f4",
+    "backend/packages/api/src/idempotency-registry.ts": "27bd109df3317cba7e68348a3d8d7542deda6975ad1c3579943c661bf10249f4",
+    "backend/packages/api/src/create-platform-route.ts": "868f57be767356ec8c5e29d65863ec3dad286502bdb726b542a89c9a43d4bb90",
+    "backend/packages/api/src/platform-idempotency-registry.ts": "16d695d3c8cdb1f03d06321989a61e2552fb5b92792e679ea45ba2aa5d17d0bf",
+    "backend/packages/domain/tenancy/src/services/platform-tenant-provisioning.service.ts": "a23772d37e4021fd08d84fdd69edd58a01b3a835e523d57d4ec9cce577f4c917",
+    "tests/unit/api/idempotency-security.test.ts": "38f2b967938447d566881c230a67249b3237994947b6386f30944ef778b5b7f6",
+    "tests/unit/api/idempotency-authorization.test.ts": "92ef46d1af15e2d5ce5fc386bd7a3e6a132540b88f8b0e35aa93e0e88e3b69bd",
+    "tests/unit/api/platform-idempotency.test.ts": "4105e777c852999e931b050a3a7bcf86c597ea86673501171113d43bf2f0940f",
+    "tests/unit/tenancy/platform-tenant-provisioning.test.ts": "21675d15d48310b96f291ee36de8f1c8377fa29c8d89c04e4459404fd5216617",
+    "tests/integration/api/idempotency-registry.test.ts": "e05267f6b3e8b600cf75348b8c5cd81c5abccb128f961ae97b1911e9b594d946",
+    "tests/integration/api/idempotency-security.postgres.test.ts": "2505069428eb585609d94a435ed677b9d7df98e9fa4a5248f87c9814c2490df8",
+    "tests/helpers/platform-idempotency-tx.ts": "e38375afc1284594dbbcab41a7cd35b5871d801ea3170927d173c8462e6f3b79",
+    "tests/api/platform-tenants.post.test.ts": "468a5b094717c08fd0067a50f32a3dc6855058804835943b6ae1c0b38ff249dc",
+    "tests/api/platform-tenant-lifecycle.post.test.ts": "e0b2be7c121bfdfec29faa164edafda576e9a1924fb759af0d27a5a4b4c8841c",
+    "tests/api/platform-costs.test.ts": "97272456ee270e69d6fe7b852b2b49623456de768fae52a8a925fc8d2500ddba",
+    "tests/api/platform-tenant-entitlements.test.ts": "6a10043e6d7e100f9217f6e0976e6a5d64f24ae38a60b9cdefa76fa72f5317f8",
+    "tests/api/dead-letter-replay.post.test.ts": "2bd6182aee8889b677da384678bbf8230016527e8794152f2ae65283e6cef7c6",
+    "backend/prisma/migrations/20260919120000_107_platform_idempotency/migration.sql": "ddd7f35978f400b83061bb211685e6f47bfa94a23f01a677fab0db6454e65f3b",
+    "backend/prisma/sql/grants/025_02_table_grants.sql": "a9a35f5ab465104067f8728dc0cb2a54eac1160af9a703d3deb68f585f00f8f4"
+  }
+}

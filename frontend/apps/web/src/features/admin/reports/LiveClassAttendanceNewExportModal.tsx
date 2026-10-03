@@ -370,7 +370,7 @@ export function LiveClassAttendanceNewExportModal({
                         setSessionSearch(event.target.value);
                       }}
                       placeholder="Search sessions…"
-                      className="h-10 w-full rounded-md border border-[var(--admin-border)] bg-[var(--admin-bg)] pr-3 pl-9 text-sm text-[var(--admin-on-surface)] outline-none placeholder:text-[var(--admin-outline)] focus:border-[var(--admin-primary)] focus:ring-1 focus:ring-[var(--admin-primary)]"
+                      className="h-10 w-full rounded-md border border-[var(--admin-border)] bg-[var(--admin-bg)] pr-3 pl-9 text-sm text-[var(--admin-on-surface)] outline-none placeholder:text-[var(--admin-on-surface-variant)] focus:border-[var(--admin-primary)] focus:ring-1 focus:ring-[var(--admin-primary)]"
                     />
                   </div>
                 </div>

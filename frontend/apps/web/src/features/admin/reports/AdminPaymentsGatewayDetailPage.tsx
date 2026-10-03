@@ -222,7 +222,7 @@ function DisableGatewayModal({
           <button
             type="button"
             disabled={!matched || busy}
-            className="inline-flex items-center gap-2 bg-[var(--admin-danger)] px-6 py-3 font-mono text-xs font-bold uppercase tracking-wider text-[var(--admin-on-danger,var(--admin-bg))] disabled:opacity-40"
+            className="inline-flex items-center gap-2 bg-[var(--admin-danger)] px-6 py-3 font-mono text-xs font-bold uppercase tracking-wider text-[var(--admin-on-danger)] disabled:opacity-40"
             onClick={onConfirm}
           >
             <Ban className="h-4 w-4" aria-hidden="true" />

@@ -312,7 +312,7 @@ function ErrorDetailPanel({ message, onRetry }: { message: string; onRetry: () =
         </div>
         <button
           type="button"
-          className="inline-flex h-9 items-center justify-center rounded-lg bg-[var(--admin-danger)] px-4 text-xs font-semibold text-white transition-all hover:opacity-90 active:translate-y-px"
+          className="inline-flex h-9 items-center justify-center rounded-lg bg-[var(--admin-danger)] px-4 text-xs font-semibold text-[var(--admin-on-danger)] transition-all hover:opacity-90 active:translate-y-px"
           onClick={onRetry}
         >
           <RefreshCw className="mr-2 h-3.5 w-3.5" aria-hidden="true" />
@@ -839,7 +839,7 @@ export function AdminPollDetailPage({ pollId }: { pollId: string }) {
           </div>
           <button
             type="button"
-            className="inline-flex h-8 items-center justify-center rounded-lg bg-[var(--admin-danger)] px-4 text-xs font-semibold text-white"
+            className="inline-flex h-8 items-center justify-center rounded-lg bg-[var(--admin-danger)] px-4 text-xs font-semibold text-[var(--admin-on-danger)]"
             onClick={() => {
               void loadDetail();
               void loadRespondents();

@@ -18,7 +18,15 @@ import process from "node:process";
 
 const repoRoot = path.resolve(import.meta.dirname, "..", "..");
 const SCAN_ROOTS = ["backend", "frontend", "scripts", "tests"];
-const SKIP_DIRS = new Set(["node_modules", ".next", "dist", "generated", ".turbo"]);
+const SKIP_DIRS = new Set([
+  "node_modules",
+  ".next",
+  ".next-e2e",
+  ".next-perf",
+  "dist",
+  "generated",
+  ".turbo",
+]);
 const SOURCE_EXTENSIONS = new Set([".ts", ".tsx", ".mts", ".cts"]);
 
 const IMPORT_PATTERN = /(?:from\s*|import\s*\(\s*|require\s*\(\s*)["'](@atlas\/[^"']+)["']/g;

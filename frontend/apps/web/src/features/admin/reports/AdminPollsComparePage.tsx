@@ -673,7 +673,7 @@ export function AdminPollsComparePage() {
                 </span>
                 <button
                   type="button"
-                  className="text-[var(--admin-outline)] transition-colors hover:text-[var(--admin-danger)]"
+                  className="text-[var(--admin-on-surface-variant)] transition-colors hover:text-[var(--admin-danger)]"
                   aria-label={`Remove ${poll.title}`}
                   onClick={() => {
                     removePoll(poll.id);
@@ -722,7 +722,7 @@ export function AdminPollsComparePage() {
                     </span>
                     <button
                       type="button"
-                      className="text-[var(--admin-outline)] hover:text-[var(--admin-danger)]"
+                      className="text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-danger)]"
                       aria-label="Remove poll"
                       onClick={() => {
                         removePoll(id);
@@ -778,7 +778,7 @@ export function AdminPollsComparePage() {
                   setPickerQuery(event.target.value);
                 }}
                 placeholder="Search polls…"
-                className="h-8 w-full bg-transparent text-sm text-[var(--admin-on-surface)] outline-none placeholder:text-[var(--admin-outline)]"
+                className="h-8 w-full bg-transparent text-sm text-[var(--admin-on-surface)] outline-none placeholder:text-[var(--admin-on-surface-variant)]"
                 autoFocus
               />
             </div>
@@ -843,7 +843,7 @@ export function AdminPollsComparePage() {
 
       {!loading && !canCompare ? (
         <div className="flex flex-1 flex-col items-center justify-center rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] px-6 py-16 text-center">
-          <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-[var(--admin-surface-low)] text-[var(--admin-outline)]">
+          <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-[var(--admin-surface-low)] text-[var(--admin-on-surface-variant)]">
             <GitCompareArrows className="h-10 w-10" aria-hidden="true" strokeWidth={1.5} />
           </div>
           <h2 className="text-base font-semibold text-[var(--admin-on-surface)]">

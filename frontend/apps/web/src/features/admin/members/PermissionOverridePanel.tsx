@@ -68,7 +68,7 @@ function EffectToggle({
               active
                 ? option === "ALLOW"
                   ? "bg-[var(--admin-primary)] text-[var(--admin-on-primary)] shadow-sm"
-                  : "bg-[var(--admin-danger)] text-white shadow-sm"
+                  : "bg-[var(--admin-danger)] text-[var(--admin-on-danger)] shadow-sm"
                 : "text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-on-surface)]",
             ].join(" ")}
           >

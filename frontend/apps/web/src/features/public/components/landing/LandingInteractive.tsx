@@ -1,12 +1,56 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useState } from "react";
+import { useCallback, useState, type ComponentProps, type ReactNode } from "react";
 import { TenantBrandMark } from "@/components/patterns/TenantBrandMark";
 import { FAQ_DATA } from "./landing-data";
 import { captureLandingCtaClick } from "./landing-analytics";
 import { FbaDarkModeButton } from "@/components/theme/FbaDarkModeButton";
 import "./fba-landing.css";
+import { useFbaTheme } from "@/components/theme/use-fba-theme";
+
+export function TenantLandingFrame({
+  children,
+  publicName,
+  authCta,
+  logoUrl,
+}: {
+  publicName: string | null;
+  authCta: { label: string; href: string } | null;
+  logoUrl: string | null;
+  children: ReactNode;
+}) {
+  const { darkMode, toggleDark } = useFbaTheme();
+  return (
+    <div className={`fba-scope fba-landing font-plus-jakarta-sans ${darkMode ? "fba-dark" : ""}`}>
+      <LandingNav
+        darkMode={darkMode}
+        onToggleDark={toggleDark}
+        publicName={publicName}
+        authCta={authCta}
+        logoUrl={logoUrl}
+      />
+      {children}
+    </div>
+  );
+}
+
+export function LandingCtaLink({
+  source,
+  children,
+  ...props
+}: ComponentProps<typeof Link> & { source: string }) {
+  return (
+    <Link
+      {...props}
+      onClick={() => {
+        captureLandingCtaClick(source);
+      }}
+    >
+      {children}
+    </Link>
+  );
+}
 
 export function LandingFaq() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
@@ -19,7 +63,7 @@ export function LandingFaq() {
     <div id="faq" className="px-7 py-24 max-[768px]:px-4 max-[768px]:py-16">
       <div className="mx-auto max-w-[720px]">
         <div className="mb-[52px] text-center">
-          <div className="mb-3.5 text-[11px] font-semibold uppercase tracking-[0.15em] text-[var(--fba-ind)]">
+          <div className="mb-3.5 text-[11px] font-semibold uppercase tracking-[0.15em] text-[var(--fba-ind-tx)]">
             FAQ
           </div>
           <h2 className="m-0 text-[40px] font-extrabold leading-[1.1] text-[var(--fba-tx)] max-[768px]:text-[32px]">
@@ -44,7 +88,7 @@ export function LandingFaq() {
                   </div>
                   <div
                     className={`w-5 shrink-0 text-center text-[22px] font-light leading-none ${
-                      isOpen ? "text-[var(--fba-ind)]" : "text-[var(--fba-tx3)]"
+                      isOpen ? "text-[var(--fba-ind-tx)]" : "text-[var(--fba-tx3)]"
                     }`}
                     aria-hidden
                   >

@@ -1,0 +1,20 @@
+[
+  "backend/apps/api/src/app/api/v1/certificates/[id]/download/route.ts",
+  "backend/apps/api/src/app/api/v1/certificates/[id]/wallet/apple/download/route.ts",
+  "backend/apps/api/src/app/api/v1/me/route.ts",
+  "backend/apps/api/src/app/api/v1/modules/[id]/scorm-content/route.ts",
+  "backend/packages/api/src/create-tenant-route.ts",
+  "backend/packages/api/src/route-metadata.ts",
+  "backend/packages/auth/src/mfa-enforcement.ts",
+  "backend/packages/auth/src/platform-auth.ts",
+  "backend/packages/auth/src/session.ts",
+  "frontend/apps/web/src/app/api/v1/certificates/[id]/download/route.ts",
+  "frontend/apps/web/src/app/api/v1/certificates/[id]/wallet/apple/download/route.ts",
+  "frontend/apps/web/src/app/api/v1/me/route.ts",
+  "frontend/apps/web/src/components/shells/PlatformConsoleShellClient.tsx",
+  "frontend/apps/web/src/components/shells/admin/AdminShell.tsx",
+  "frontend/apps/web/src/components/shells/studio/StudioShell.tsx",
+  "tests/unit/auth/mfa-enforcement.test.ts",
+  "tests/unit/auth/session-assurance.test.ts",
+  "tests/unit/api/session-mfa-routes.test.ts"
+]

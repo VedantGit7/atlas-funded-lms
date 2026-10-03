@@ -1,0 +1,55 @@
+{
+  "family": "Plus Jakarta Sans",
+  "version": "v12",
+  "sourceCss": "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap",
+  "sourceCssSha256": "9b94b4104e1df43a7f92e53c64d93ffea412435a8fa9d6d6a053365a01c4a2b9",
+  "retrievedAt": "2026-09-23",
+  "licenseUrl": "https://raw.githubusercontent.com/google/fonts/main/ofl/plusjakartasans/OFL.txt",
+  "licenseSha256": "995c7199cab65954f545996326755daee7b63cc6b42b06c13da1f9502ab08a99",
+  "metricsSource": "Next.js 16.3.5 getFallbackFontOverrideMetrics",
+  "metrics": {
+    "fallbackFont": "Arial",
+    "ascentOverride": "98.88%",
+    "descentOverride": "21.15%",
+    "lineGapOverride": "0.00%",
+    "sizeAdjust": "104.98%"
+  },
+  "assets": [
+    {
+      "file": "normal-cyrillic-ext.a16f29d7d2a2.woff2",
+      "style": "normal",
+      "subset": "cyrillic-ext",
+      "url": "https://fonts.gstatic.com/s/plusjakartasans/v12/LDIoaomQNQcsA88c7O9yZ4KMCoOg4Ko70yygg_vbd-E.woff2",
+      "sha256": "a16f29d7d2a21a4f9b3249a82eb2725ed5bdb91500dfb5c4758977de27477f20",
+      "bytes": 1716,
+      "preload": false
+    },
+    {
+      "file": "normal-vietnamese.5c913fc1b1f8.woff2",
+      "style": "normal",
+      "subset": "vietnamese",
+      "url": "https://fonts.gstatic.com/s/plusjakartasans/v12/LDIoaomQNQcsA88c7O9yZ4KMCoOg4Ko50yygg_vbd-E.woff2",
+      "sha256": "5c913fc1b1f86f4b475e5df45a796aa480d1f7f0891ed6f1a5991d6d1be887c3",
+      "bytes": 8292,
+      "preload": false
+    },
+    {
+      "file": "normal-latin-ext.0303e02b53b0.woff2",
+      "style": "normal",
+      "subset": "latin-ext",
+      "url": "https://fonts.gstatic.com/s/plusjakartasans/v12/LDIoaomQNQcsA88c7O9yZ4KMCoOg4Ko40yygg_vbd-E.woff2",
+      "sha256": "0303e02b53b0298fb26a0193941a2e8754f0f9a9fce50d90b178d8da3424873f",
+      "bytes": 21688,
+      "preload": false
+    },
+    {
+      "file": "normal-latin.cd8db90cd950.woff2",
+      "style": "normal",
+      "subset": "latin",
+      "url": "https://fonts.gstatic.com/s/plusjakartasans/v12/LDIoaomQNQcsA88c7O9yZ4KMCoOg4Ko20yygg_vb.woff2",
+      "sha256": "cd8db90cd950e26bc8761f65d323588bd5cd112d326d6d322bc7c8ea86771215",
+      "bytes": 27272,
+      "preload": true
+    }
+  ]
+}

@@ -269,7 +269,7 @@ export type EventDeliveryOrderByWithRelationInput = {
 
 export type EventDeliveryWhereUniqueInput = Prisma.AtLeast<{
   id?: string
-  outbox_event_id_destination_key?: Prisma.EventDeliveryOutbox_event_idDestination_keyCompoundUniqueInput
+  outbox_event_id_destination_key_attempt_count?: Prisma.EventDeliveryOutbox_event_idDestination_keyAttempt_countCompoundUniqueInput
   AND?: Prisma.EventDeliveryWhereInput | Prisma.EventDeliveryWhereInput[]
   OR?: Prisma.EventDeliveryWhereInput[]
   NOT?: Prisma.EventDeliveryWhereInput | Prisma.EventDeliveryWhereInput[]
@@ -282,7 +282,7 @@ export type EventDeliveryWhereUniqueInput = Prisma.AtLeast<{
   next_attempt_at?: Prisma.DateTimeNullableFilter<"EventDelivery"> | Date | string | null
   response_json?: Prisma.JsonNullableFilter<"EventDelivery">
   created_at?: Prisma.DateTimeFilter<"EventDelivery"> | Date | string
-}, "id" | "outbox_event_id_destination_key">
+}, "id" | "outbox_event_id_destination_key_attempt_count">
 
 export type EventDeliveryOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -409,9 +409,10 @@ export type EventDeliveryUncheckedUpdateManyInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
-export type EventDeliveryOutbox_event_idDestination_keyCompoundUniqueInput = {
+export type EventDeliveryOutbox_event_idDestination_keyAttempt_countCompoundUniqueInput = {
   outbox_event_id: string
   destination_key: string
+  attempt_count: number
 }
 
 export type EventDeliveryCountOrderByAggregateInput = {

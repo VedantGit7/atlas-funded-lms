@@ -30,8 +30,12 @@ function enforceVerifyRateLimit(req: Request): void {
   const recent = (verifyHits.get(key) ?? []).filter((ts) => now - ts < VERIFY_WINDOW_MS);
   if (recent.length >= VERIFY_MAX_PER_WINDOW) {
     throw new AtlasHttpError({
-      code: "INTERNAL_ERROR",
+      code: "RATE_LIMITED",
       status: 429,
+      retryAfterSeconds: Math.max(
+        1,
+        Math.ceil(((recent[0] ?? now) + VERIFY_WINDOW_MS - now) / 1000),
+      ),
       message: "Too many verification requests. Please try again later.",
     });
   }

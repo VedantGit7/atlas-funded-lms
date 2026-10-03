@@ -185,15 +185,20 @@ describe("platform tenant provisioning", () => {
     expect(postRouteMetadata.idempotency).toBe("required");
   });
 
-  it("returns the existing tenant when the idempotency key was already used", async () => {
+  it("rejects legacy provisioning replay without actor and payload evidence", async () => {
     findTenantIdByProvisioningIdempotencyKeyMock.mockResolvedValue(tenantId);
 
-    const result = await provisionTenant(tx, ctx, validInput);
-
-    expect(result).toEqual(tenantDetail);
+    await expect(provisionTenant(tx, ctx, validInput)).rejects.toMatchObject({ status: 409 });
     expect(findTenantBySlugMock).not.toHaveBeenCalled();
     expect(insertProvisioningTenantMock).not.toHaveBeenCalled();
-    expect(readPlatformTenantDetailMock).toHaveBeenCalledWith(tx, tenantId);
+    expect(readPlatformTenantDetailMock).not.toHaveBeenCalled();
+  });
+
+  it("rejects an existing slug instead of treating a different request as a replay", async () => {
+    findTenantBySlugMock.mockResolvedValue({ id: tenantId });
+    await expect(provisionTenant(tx, ctx, validInput)).rejects.toMatchObject({ status: 409 });
+    expect(readPlatformTenantDetailMock).not.toHaveBeenCalled();
+    expect(insertProvisioningTenantMock).not.toHaveBeenCalled();
   });
 
   it("creates tenant in PROVISIONING and moves to ACTIVE after successful provisioning", async () => {

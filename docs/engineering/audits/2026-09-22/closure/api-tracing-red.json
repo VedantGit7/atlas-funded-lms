@@ -1,0 +1,13 @@
+{
+  "check": "API standalone excludes unrelated app source",
+  "status": "failed",
+  "traceEntries": 2396,
+  "appSourceEntries": 1628,
+  "examples": [
+    "backend\\apps\\api\\src\\app\\api\\v1\\admin\\overview\\route.metadata.ts",
+    "backend\\apps\\api\\src\\app\\api\\v1\\admin\\overview\\route.ts",
+    "backend\\apps\\api\\src\\app\\api\\v1\\analytics\\at-risk\\alerts\\[alertId]\\acknowledge\\route.metadata.ts",
+    "backend\\apps\\api\\src\\app\\api\\v1\\analytics\\at-risk\\alerts\\[alertId]\\acknowledge\\route.ts",
+    "backend\\apps\\api\\src\\app\\api\\v1\\analytics\\at-risk\\alerts\\route.metadata.ts"
+  ]
+}

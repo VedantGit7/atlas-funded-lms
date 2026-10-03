@@ -12,7 +12,7 @@ export default async function PublicFormPage({ params, searchParams }: PageProps
   const source =
     sourceRaw === "CTA" || sourceRaw === "WEBSITE" || sourceRaw === "LINK" ? sourceRaw : "LINK";
   return (
-    <main className="min-h-screen bg-neutral-50 text-neutral-900">
+    <main className="min-h-screen bg-muted/50 text-foreground">
       <PublicMarketingFormClient token={token} source={source} />
     </main>
   );

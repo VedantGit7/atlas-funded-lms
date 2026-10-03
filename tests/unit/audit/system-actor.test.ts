@@ -81,7 +81,7 @@ describe("no new entry point repeats the mistake (M16)", () => {
   // recurrence protection at a fraction of the cost.
   const ROOTS = [
     resolve(import.meta.dirname, "../../../backend/apps/api/src"),
-    resolve(import.meta.dirname, "../../../frontend/apps/web/src/server"),
+    resolve(import.meta.dirname, "../../../frontend/apps/web/src"),
   ];
 
   function walk(dir: string, out: string[] = []): string[] {

@@ -1,4 +1,4 @@
-import { readFile } from "node:fs/promises";
+import { Readable } from "node:stream";
 import { createPublicRouteHandler } from "@atlas/api";
 import { AtlasHttpError } from "@atlas/core/http/errors";
 import { LocalFilesystemStorageProvider, parseStorageEnv } from "@atlas/storage";
@@ -59,15 +59,23 @@ export const GET = createPublicRouteHandler(routeMetadata, async ({ req }) => {
     });
   }
 
-  const meta = await provider.readMetaForDownload(query.bucket, query.key);
-  const filePath = provider.resolveObjectPath(query.bucket, query.key);
-  const body = await readFile(filePath);
+  const location = { bucket: query.bucket, key: query.key };
+  const meta = await provider.headObject(location);
+  const body = meta ? await provider.getObjectStream({ ...location, signal: req.signal }) : null;
+  if (!meta || !body) {
+    throw new AtlasHttpError({
+      code: "PERMISSION_DENIED",
+      status: 404,
+      message: "File is no longer available.",
+    });
+  }
 
-  return new NextResponse(body, {
+  return new NextResponse(Readable.toWeb(body) as ReadableStream<Uint8Array>, {
     status: 200,
     headers: {
-      "content-type": meta?.contentType ?? "application/octet-stream",
-      "cache-control": "private, max-age=60",
+      "content-type": meta.contentType,
+      "content-length": String(meta.sizeBytes),
+      "cache-control": "private, no-store",
     },
   });
 });

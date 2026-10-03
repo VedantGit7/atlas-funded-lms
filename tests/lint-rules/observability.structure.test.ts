@@ -3,8 +3,9 @@ import { describe, expect, it } from "vitest";
 import { resolveSplitPath } from "./split-layout-paths";
 
 describe("observability e2e wiring", () => {
-  it("middleware overwrites client request ids", () => {
-    const source = readFileSync(resolveSplitPath("middleware.ts"), "utf8");
+  it("proxy overwrites client request ids", () => {
+    // Renamed from middleware.ts in Next 16: same file convention, new name.
+    const source = readFileSync(resolveSplitPath("proxy.ts"), "utf8");
     expect(source).toContain("stripClientSuppliedRequestIds");
     expect(source).toContain("createRequestId");
   });

@@ -1,0 +1,18 @@
+[
+  {
+    "guard": "scripts/guards/check-route-metadata.mjs",
+    "exitCode": 0
+  },
+  {
+    "guard": "scripts/guards/check-package-exports.mjs",
+    "exitCode": 0
+  },
+  {
+    "guard": "scripts/ci/check-frontend-api-closure.mjs",
+    "exitCode": 0
+  },
+  {
+    "guard": "scripts/observability/check-contract.mjs",
+    "exitCode": 0
+  }
+]

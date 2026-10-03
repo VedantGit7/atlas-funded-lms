@@ -274,7 +274,8 @@ export const checkoutPurchaseResponseSchema = z.object({
         currency: z.string().length(3),
         name: z.string().min(1),
         description: z.string().optional(),
-        notes: z.record(z.string(), z.string()).optional(),
+        // No `notes`: this object stripping unknown keys is what guarantees internal ids never
+        // reach Checkout.js, whose notes return browser-controlled in webhooks (audit finding C1).
       })
       .nullable()
       .optional(),

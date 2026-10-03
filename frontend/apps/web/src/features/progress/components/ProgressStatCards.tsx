@@ -1,7 +1,7 @@
 "use client";
 
 import { Award, Flame, Gauge, Sparkles, TrendingUp } from "lucide-react";
-import { motion, useReducedMotion } from "motion/react";
+import { motion, useReducedMotion } from "../../../components/motion/animation-boundary";
 import { cn } from "@atlas/design-system";
 import { CountUp } from "./CountUp";
 import { formatXp, humanizeKey, padCount } from "../progress-view";

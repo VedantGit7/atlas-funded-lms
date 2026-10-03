@@ -907,7 +907,7 @@ export function AdminActiveDevicesExportsPage() {
                           <div className="font-mono text-[13px] text-[var(--admin-on-surface)]">
                             {formatRelative(item.createdAt)}
                           </div>
-                          <div className="font-mono text-[11px] text-[var(--admin-outline)]">
+                          <div className="font-mono text-[11px] text-[var(--admin-on-surface-variant)]">
                             {formatUtc(item.createdAt)}
                           </div>
                         </td>
@@ -1103,7 +1103,7 @@ export function AdminActiveDevicesExportsPage() {
             onClick={() => {
               setToastRun(null);
             }}
-            className="text-[var(--admin-outline)] hover:text-[var(--admin-surface)]"
+            className="text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-surface)]"
           >
             <X className="h-4 w-4" aria-hidden="true" />
           </button>

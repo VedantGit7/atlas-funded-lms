@@ -75,7 +75,7 @@ export function LessonCommentsPanel({ lessonId }: LessonCommentsPanelProps) {
       <h2 className="text-lg font-semibold">Comments</h2>
       {loading ? <p className="text-sm opacity-70">Loading comments…</p> : null}
       {error ? (
-        <p role="alert" className="text-sm text-red-600">
+        <p role="alert" className="text-sm text-destructive-text">
           {error}
         </p>
       ) : null}

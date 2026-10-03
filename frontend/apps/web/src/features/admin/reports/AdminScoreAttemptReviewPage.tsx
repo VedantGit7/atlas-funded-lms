@@ -300,7 +300,7 @@ function VoidModal({
           </button>
           <button
             type="button"
-            className="inline-flex items-center gap-2 rounded-sm bg-[var(--admin-warning)] px-6 py-2.5 font-mono text-[12px] font-bold uppercase tracking-[0.08em] text-[var(--admin-on-primary)] hover:brightness-110 disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-sm bg-[var(--admin-warning)] px-6 py-2.5 font-mono text-[12px] font-bold uppercase tracking-[0.08em] text-[var(--admin-on-warning)] hover:brightness-110 disabled:opacity-50"
             disabled={busy || !reason.trim()}
             onClick={() => {
               onConfirm(reason.trim());
@@ -877,11 +877,13 @@ export function AdminScoreAttemptReviewPage({
                                   ? "border-l-4 border-l-[color:var(--admin-outline)]"
                                   : "",
                                 correctRail ? "border-l-4 border-l-[var(--admin-primary)]" : "",
-                                learnerRail && !correctRail ? "!border-l-[color:#6366f1]" : "",
+                                learnerRail && !correctRail
+                                  ? "!border-l-[var(--admin-primary)]"
+                                  : "",
                               ].join(" ")}
                               style={
                                 learnerRail && !correctRail
-                                  ? { borderLeftColor: "#6366f1", borderLeftWidth: 4 }
+                                  ? { borderLeftColor: "var(--admin-primary)", borderLeftWidth: 4 }
                                   : undefined
                               }
                             >
@@ -904,7 +906,10 @@ export function AdminScoreAttemptReviewPage({
                                 {learnerRail && !correctRail ? (
                                   <span
                                     className="rounded-sm border px-2 py-0.5 font-mono text-[10px] uppercase"
-                                    style={{ borderColor: "#6366f1", color: "#6366f1" }}
+                                    style={{
+                                      borderColor: "var(--admin-primary)",
+                                      color: "var(--admin-primary)",
+                                    }}
                                   >
                                     Learner Choice
                                   </span>
@@ -1117,7 +1122,7 @@ export function AdminScoreAttemptReviewPage({
                   <hr className="border-[var(--admin-border)]" />
                   <button
                     type="button"
-                    className="inline-flex w-full items-center justify-center gap-2 rounded-sm border border-[var(--admin-danger)] bg-[color-mix(in_srgb,var(--admin-danger)_12%,transparent)] py-2.5 font-mono text-[12px] text-[var(--admin-danger)] transition-colors hover:bg-[var(--admin-danger)] hover:text-[var(--admin-on-primary)] disabled:opacity-40"
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-sm border border-[var(--admin-danger)] bg-[color-mix(in_srgb,var(--admin-danger)_12%,transparent)] py-2.5 font-mono text-[12px] text-[var(--admin-danger)] transition-colors hover:bg-[var(--admin-danger)] hover:text-[var(--admin-on-danger)] disabled:opacity-40"
                     disabled={busy || data.attempt.status === "VOIDED"}
                     onClick={() => {
                       setVoidOpen(true);

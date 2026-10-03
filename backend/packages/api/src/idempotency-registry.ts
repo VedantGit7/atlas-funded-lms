@@ -35,7 +35,20 @@ type ClaimRow = {
   request_fingerprint: string;
   response_json: unknown;
   response_omitted: boolean;
+  actor_membership_id: string | null;
+  scope: string;
+  replay_valid: boolean;
 };
+
+export function validateIdempotencyKey(key: string): void {
+  if (!key.trim() || Buffer.byteLength(key, "utf8") > 256) {
+    throw new AtlasHttpError({
+      code: "VALIDATION_ERROR",
+      status: 400,
+      message: "Idempotency-Key must contain between 1 and 256 UTF-8 bytes.",
+    });
+  }
+}
 
 export function fingerprintRequest(input: { method: string; path: string; body: unknown }): string {
   // Key order in a parsed body is stable for a given handler, and the value has
@@ -92,11 +105,19 @@ export async function withIdempotency<T>(
     idempotencyKey: string;
     scope: string;
     requestFingerprint: string;
-    actorMembershipId?: string | undefined;
+    actorMembershipId: string;
     requestId?: string | undefined;
   },
   handler: () => Promise<T>,
 ): Promise<T> {
+  validateIdempotencyKey(claim.idempotencyKey);
+  if (!claim.actorMembershipId) {
+    throw new AtlasHttpError({
+      code: "VALIDATION_ERROR",
+      status: 400,
+      message: "Idempotency requires an authenticated actor.",
+    });
+  }
   const inserted = await tx.$queryRaw<Array<{ id: string }>>`
     INSERT INTO idempotency_records (
       tenant_id, idempotency_key, scope, actor_membership_id, request_id, request_fingerprint, status
@@ -105,7 +126,7 @@ export async function withIdempotency<T>(
       ${claim.tenantId}::uuid,
       ${claim.idempotencyKey},
       ${claim.scope},
-      ${claim.actorMembershipId ?? null}::uuid,
+      ${claim.actorMembershipId}::uuid,
       ${claim.requestId ?? null},
       ${claim.requestFingerprint},
       'IN_PROGRESS'
@@ -118,7 +139,9 @@ export async function withIdempotency<T>(
 
   if (claimedId === undefined) {
     const rows = await tx.$queryRaw<ClaimRow[]>`
-      SELECT id::text, status, request_fingerprint, response_json, response_omitted
+      SELECT id::text, status, request_fingerprint, response_json, response_omitted,
+             actor_membership_id::text, scope,
+             (expires_at > statement_timestamp()) AS replay_valid
       FROM idempotency_records
       WHERE tenant_id = ${claim.tenantId}::uuid
         AND idempotency_key = ${claim.idempotencyKey}
@@ -126,14 +149,26 @@ export async function withIdempotency<T>(
     `;
     const existing = rows[0];
 
-    // The row was deleted by the retention sweep between the failed insert and
-    // this read. Treat it as a fresh request rather than failing on a race.
+    // A retention race must never execute a mutation without owning a claim.
     if (!existing) {
-      return handler();
+      throw idempotentRequestInFlight();
     }
 
-    if (existing.request_fingerprint !== claim.requestFingerprint) {
+    if (
+      existing.actor_membership_id !== claim.actorMembershipId ||
+      existing.scope !== claim.scope ||
+      existing.request_fingerprint !== claim.requestFingerprint
+    ) {
       throw idempotencyKeyReused();
+    }
+
+    if (!existing.replay_valid) {
+      throw new AtlasHttpError({
+        code: "IDEMPOTENCY_CONFLICT",
+        status: 409,
+        message:
+          "The replay window has expired. Reconcile the operation's outcome before submitting another request.",
+      });
     }
 
     if (existing.status !== "COMPLETED") {
@@ -172,6 +207,6 @@ export async function withIdempotency<T>(
 export async function purgeExpiredIdempotencyRecords(tx: IdempotencyTx): Promise<number> {
   return tx.$executeRaw`
     DELETE FROM idempotency_records
-     WHERE expires_at < now()
+     WHERE expires_at < now() AND status = 'COMPLETED'
   `;
 }

@@ -583,7 +583,7 @@ export function AdminProgressScoreCohortsPage() {
                         {msg.failedCount > 0 ? (
                           <button
                             type="button"
-                            className="flex items-center gap-1 rounded-sm bg-[var(--admin-warning)] px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-wider text-[var(--admin-on-primary)] disabled:opacity-50"
+                            className="flex items-center gap-1 rounded-sm bg-[var(--admin-warning)] px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-wider text-[var(--admin-on-warning)] disabled:opacity-50"
                             disabled={retryBusy === msg.campaignId}
                             onClick={() => void handleRetry(msg.campaignId)}
                           >

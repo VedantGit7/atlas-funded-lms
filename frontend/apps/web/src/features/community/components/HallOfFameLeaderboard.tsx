@@ -1,7 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import {
+  AnimatePresence,
+  motion,
+  useReducedMotion,
+} from "../../../components/motion/animation-boundary";
 import { Crown, Sparkles, TrendingUp, Trophy } from "lucide-react";
 import type { z } from "zod";
 import { cn } from "@atlas/design-system";

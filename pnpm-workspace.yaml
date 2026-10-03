@@ -19,9 +19,17 @@ minimumReleaseAgeExclude:
 overrides:
   # Three separate advisories, one per major line. The 1.x copy is not dev-only:
   # it reaches production through exceljs -> archiver -> glob -> minimatch.
-  "brace-expansion@<1.1.16": "^1.1.16"
-  "brace-expansion@>=2.0.0 <2.1.2": "^2.1.2"
-  "brace-expansion@>=5.0.0 <5.0.7": "^5.0.7"
+  # Raised again (2026-10-01): two further recursion DoS advisories per line,
+  # patched in 1.1.20 / 2.1.6 / 5.0.11.
+  "brace-expansion@<1.1.20": "^1.1.20"
+  "brace-expansion@>=2.0.0 <2.1.6": "^2.1.6"
+  "brace-expansion@>=4.0.0 <5.0.11": "^5.0.11"
+  # Test tooling only (vitest -> jsdom): WebSocket DoS, TLS validation bypass
+  # and cache poisoning, all fixed in 8.10.2.
+  "undici@>=8.0.0 <8.10.2": "^8.10.2"
+  # Lighthouse CI tooling only (@lhci/cli -> puppeteer -> proxy-agent -> get-uri):
+  # quadratic CPU in Client.list(), fixed in 6.2.1.
+  "basic-ftp@<6.2.1": "^6.2.1"
   "@hono/node-server@<1.19.13": "^1.19.13"
   "body-parser@<1.20.6": "^1.20.6"
   "cookie@<0.7.0": "^0.7.0"
@@ -32,7 +40,13 @@ overrides:
   # 3.1.5, which is itself affected. Reaches the build through ajv, via both
   # prisma and @sentry/nextjs -> webpack -> schema-utils.
   "fast-uri@<3.1.6": "^3.1.6"
-  "hono@<4.12.34": "^4.12.34"
+  "hono@<4.13.5": "^4.13.5"
+  # F12: retain each consumer's fflate minor line and use its ZIP64 fix.
+  "fflate@>=0.4.5 <0.4.9": "^0.4.9"
+  "fflate@>=0.6.0 <0.6.11": "^0.6.11"
+  # Fix both query-parser DoS advisories in the Lighthouse tooling tree.
+  "qs@<6.16.0": "^6.16.0"
+  "baseline-browser-mapping@>=2.0.0 <2.11.0": "^2.11.0"
   "ip-address@<=10.3.0": "^10.3.1"
   # maxTotalMergeKeys does not bound CPU on merge keys. The previous floor
   # (^3.15.0) resolved 3.15.1, which is still affected. Scoped to the 3.x
@@ -71,6 +85,8 @@ overrides:
 # of being permanently red on one nobody can act on. Tracked as SEC-09 in
 # docs/release/security-exception-register.md -- revisit when extract-zip
 # publishes a fix or @lhci/cli moves off puppeteer.
+# F12 rechecked 2026-09-20: npm still publishes 2.0.1 as latest; an unfiltered
+# audit returns only these two existing exceptions after the security updates.
 auditConfig:
   ignoreGhsas:
     - GHSA-jmr9-qjv8-65gv
@@ -79,6 +95,13 @@ auditConfig:
     # so the reasoning above applies unchanged -- but it had to be named
     # explicitly, because suppressing by id is what keeps a NEW advisory loud.
     - GHSA-7pqw-9j4j-h8q3
+    # SEC-10: node-forge RSA PKCS#1 v1.5 signature VERIFICATION accepts extra
+    # nested DigestAlgorithm elements (high). Unfixable today: 1.4.0 is the latest
+    # published release and the advisory's "patched >=1.4.1" does not exist yet.
+    # Atlas only SIGNS with node-forge (Apple Wallet pass PKCS#7 in
+    # certificate-wallet.service.ts); nothing verifies an RSA signature with it, and
+    # the unused web copy was removed. Remove this line when 1.4.1 ships.
+    - GHSA-86w9-cpqp-85rv
 
 allowBuilds:
   "@prisma/client": true

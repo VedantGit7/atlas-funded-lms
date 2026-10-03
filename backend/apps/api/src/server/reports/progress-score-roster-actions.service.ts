@@ -117,6 +117,7 @@ async function sendAudienceMessage(
 
     try {
       await provider.send({
+        tenantId: ctx.tenantId,
         to: target.email,
         subject: args.subject,
         body: renderedBody,

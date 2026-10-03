@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
+import { setAuthCookies } from "@atlas/auth";
 
 const tenantA = {
   tenantId: "018f0000-0000-7000-8000-000000000001",
@@ -164,7 +165,27 @@ describe("POST /api/v1/public/auth/login", () => {
 
     expect(response.status).toBe(400);
     expect(body.error.code).toBe("VALIDATION_ERROR");
+    expect(mockLoginWithPassword).not.toHaveBeenCalled();
+    expect(setAuthCookies).not.toHaveBeenCalled();
   });
+
+  it.each(["tenant-a.example.com", "platform.localhost"])(
+    "keeps failed authentication on %s generic and issues no session or membership",
+    async (host) => {
+      const { invalidCredentials } = await import("@atlas/auth/auth-errors");
+      mockLoginWithPassword.mockRejectedValueOnce(invalidCredentials());
+      const response = await POST(
+        createRequest({ email: "user@example.com", password: "incorrect-password" }, host),
+      );
+      expect(response.status).toBe(401);
+      expect(await response.json()).toMatchObject({
+        error: { code: "AUTH_REQUIRED", message: "Invalid email or password" },
+      });
+      expect(mockWithTenantTx).not.toHaveBeenCalled();
+      expect(mockEnsureSelfServiceLearnerMembership).not.toHaveBeenCalled();
+      expect(setAuthCookies).not.toHaveBeenCalled();
+    },
+  );
 
   it("authenticates platform operators on the platform host without a tenant", async () => {
     const response = await POST(
@@ -256,5 +277,129 @@ describe("POST /api/v1/public/auth/login", () => {
     await POST(createRequest({ email: "user@example.com", password: "password123" }));
 
     expect(mockEnsureSelfServiceLearnerMembership).not.toHaveBeenCalled();
+  });
+
+  it("performs tenant and platform password verification without holding a database connection", async () => {
+    const originalGlobal = mockWithGlobalDb.getMockImplementation();
+    let held = 0;
+    mockWithGlobalDb.mockImplementation(async (fn: (db: unknown) => unknown) => {
+      held += 1;
+      try {
+        return await fn({ $queryRaw: mockGlobalQueryRaw });
+      } finally {
+        held -= 1;
+      }
+    });
+    mockGlobalQueryRaw.mockImplementation(async () => {
+      expect(held).toBe(1);
+      return [{ id: "principal-id" }];
+    });
+    mockLoginWithPassword.mockImplementation(
+      async ({ db }: { db: { $queryRaw: (query: TemplateStringsArray) => Promise<unknown> } }) => {
+        // The real service first waits for Supabase, then mirrors its verified principal.
+        expect(held).toBe(0);
+        await Promise.resolve();
+        await db.$queryRaw`select verified_principal`;
+        return {
+          status: "signed_in",
+          identity: { mfaEnabled: false },
+          displayName: null,
+          session: { accessToken: "access", refreshToken: "refresh", expiresIn: 3600 },
+        };
+      },
+    );
+    try {
+      const tenantResponse = await POST(
+        createRequest({ email: "user@example.com", password: "password123", rememberMe: true }),
+      );
+      expect(tenantResponse.status).toBe(200);
+      expect(setAuthCookies).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          accessToken: "access",
+          refreshToken: "refresh",
+          expiresInSeconds: 3600,
+          persistent: true,
+        }),
+      );
+      const platformResponse = await POST(
+        createRequest(
+          { email: "operator@example.com", password: "password123" },
+          "platform.localhost",
+        ),
+      );
+      expect(platformResponse.status).toBe(200);
+      expect(await platformResponse.json()).toEqual({
+        data: { status: "AUTHENTICATED", redirectTo: "/platform" },
+      });
+      expect(held).toBe(0);
+    } finally {
+      if (originalGlobal) mockWithGlobalDb.mockImplementation(originalGlobal);
+    }
+  });
+
+  it("completes simultaneous tenant logins through a one-connection pool without nested acquisition", async () => {
+    const originalGlobal = mockWithGlobalDb.getMockImplementation();
+    const originalTenant = mockWithTenantTx.getMockImplementation();
+    let occupied = false;
+    const waiters: Array<() => void> = [];
+    async function pooled<T>(work: () => Promise<T>): Promise<T> {
+      await new Promise<void>((resolve, reject) => {
+        if (!occupied) {
+          occupied = true;
+          resolve();
+          return;
+        }
+        const grant = () => {
+          clearTimeout(timeout);
+          resolve();
+        };
+        const timeout = setTimeout(() => {
+          const index = waiters.indexOf(grant);
+          if (index !== -1) waiters.splice(index, 1);
+          reject(new Error("One-connection pool acquisition timed out"));
+        }, 100);
+        waiters.push(grant);
+      });
+      try {
+        return await work();
+      } finally {
+        const next = waiters.shift();
+        if (next) next();
+        else occupied = false;
+      }
+    }
+    mockGlobalQueryRaw.mockResolvedValue([{ id: "principal-id" }]);
+    mockWithGlobalDb.mockImplementation((fn: (db: unknown) => unknown) =>
+      pooled(async () => fn({ $queryRaw: mockGlobalQueryRaw })),
+    );
+    mockWithTenantTx.mockImplementation((_ctx: unknown, fn: (tx: unknown) => unknown) =>
+      pooled(async () => fn({})),
+    );
+    mockLoginWithPassword.mockImplementation(
+      async ({ db }: { db: { $queryRaw: (query: TemplateStringsArray) => Promise<unknown> } }) => {
+        await Promise.resolve();
+        await db.$queryRaw`select verified_principal`;
+        return {
+          status: "signed_in",
+          identity: { mfaEnabled: false },
+          displayName: null,
+          session: { accessToken: "access", refreshToken: "refresh", expiresIn: 3600 },
+        };
+      },
+    );
+    try {
+      const responses = await Promise.all(
+        Array.from({ length: 4 }, (_, index) =>
+          POST(createRequest({ email: `learner-${index}@example.com`, password: "password123" })),
+        ),
+      );
+      expect(responses.map((response) => response.status)).toEqual([200, 200, 200, 200]);
+      expect(occupied).toBe(false);
+      expect(waiters).toHaveLength(0);
+      expect(mockEnsureSelfServiceLearnerMembership).not.toHaveBeenCalled();
+    } finally {
+      if (originalGlobal) mockWithGlobalDb.mockImplementation(originalGlobal);
+      if (originalTenant) mockWithTenantTx.mockImplementation(originalTenant);
+    }
   });
 });

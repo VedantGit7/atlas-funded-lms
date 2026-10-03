@@ -1,3 +1,7 @@
+import {
+  buildArchiveReceiptIdempotencyKey,
+  buildReadReceiptIdempotencyKey,
+} from "./notification.keys";
 import type { TenantTx } from "@atlas/db";
 import { outbox } from "@atlas/events";
 import type {
@@ -7,8 +11,6 @@ import type {
   UpdateNotificationTemplateBody,
 } from "./notification.contract";
 import {
-  buildArchiveReceiptIdempotencyKey,
-  buildReadReceiptIdempotencyKey,
   extractArchiveReceiptAt,
   extractInboxPayload,
   extractReadReceiptAt,

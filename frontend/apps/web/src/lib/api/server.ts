@@ -1,10 +1,12 @@
+import "server-only";
 import { randomUUID } from "node:crypto";
 
 import { ServerApiError, type ApiErrorBody } from "./errors";
-import { ATLAS_INTERNAL_TENANT_HOST_HEADER } from "../http-headers";
+import { buildApiProxyHeaders } from "@atlas/core/http/api-proxy";
 import { resolveCookieHeaderForInternalApi } from "../server/resolve-request-cookies";
 import { resolveTenantHostForInternalApi } from "../server/resolve-tenant-host";
 import { refreshSessionCookieHeader } from "../server/session-refresh";
+import { resolveClientIpForInternalApi } from "../server/resolve-client-ip";
 
 const API_INTERNAL_URL = process.env["API_INTERNAL_URL"] ?? "http://127.0.0.1:3001";
 
@@ -43,17 +45,21 @@ async function buildInternalApiRequest(
 async function request<T>(path: string, init?: RequestInit, options?: RequestOptions): Promise<T> {
   const { url, forwardedHost } = await buildInternalApiRequest(path);
   const cookie = options?.cookieHeader ?? (await resolveCookieHeaderForInternalApi());
-  const requestHeaders = new Headers(init?.headers);
+  const requestHeaders = buildApiProxyHeaders(
+    forwardedHost,
+    init?.headers,
+    process.env,
+    await resolveClientIpForInternalApi(),
+  );
 
   if (cookie) {
     requestHeaders.set("cookie", cookie);
   }
-  requestHeaders.set("x-forwarded-host", forwardedHost);
-  requestHeaders.set(ATLAS_INTERNAL_TENANT_HOST_HEADER, forwardedHost);
 
   const response = await fetch(url, {
     ...init,
     headers: requestHeaders,
+    redirect: "error",
     cache: "no-store",
   });
 

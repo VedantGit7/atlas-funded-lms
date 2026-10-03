@@ -1,4 +1,5 @@
 import { test, expect } from "../fixtures/axe";
+import { waitForHydration } from "../helpers/hydration";
 
 test.describe("keyboard accessibility flows", () => {
   /**
@@ -69,22 +70,27 @@ test.describe("keyboard accessibility flows", () => {
 
   test("login submit via keyboard Enter", async ({ page }) => {
     await page.goto("/login");
+    await waitForHydration(page);
     await page.getByLabel("Email", { exact: true }).fill("invalid@example.test");
 
     const password = page.getByLabel("Password", { exact: true });
     await password.fill("invalid-password");
+    const submitted = page.waitForResponse(
+      (response) =>
+        new URL(response.url()).pathname === "/login" && response.request().method() === "POST",
+    );
     await password.press("Enter");
-
-    // The form stays on screen and reachable; this asserts Enter submits from
-    // the field rather than doing nothing, without depending on what the backend
-    // says about invalid credentials.
-    await expect(page.getByRole("button", { name: /sign in/i })).toBeVisible();
+    expect((await submitted).status()).toBe(200);
+    await expect(
+      page.getByRole("alert").filter({ hasText: /invalid|incorrect|sign.in|credentials/i }),
+    ).toBeVisible();
+    await expect(password).toBeFocused();
   });
 
   test("public landing quick links are keyboard reachable", async ({ page }) => {
     await page.goto("/p/home");
     await page.keyboard.press("Tab");
     const focusedTag = await page.evaluate(() => document.activeElement?.tagName);
-    expect(focusedTag).toBeTruthy();
+    expect(["A", "BUTTON", "INPUT", "SELECT", "TEXTAREA"]).toContain(focusedTag);
   });
 });

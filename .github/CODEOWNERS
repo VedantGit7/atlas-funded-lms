@@ -4,16 +4,19 @@
 
 * @VedantGit7
 
-/prisma/ @VedantGit7
-/src/db/ @VedantGit7
-/src/permissions/ @VedantGit7
-/src/entitlements/ @VedantGit7
-/src/tenancy/ @VedantGit7
-/src/app/api/ @VedantGit7
-/src/app/platform/ @VedantGit7
+/backend/prisma/ @VedantGit7
+/backend/packages/db/ @VedantGit7
+/backend/packages/authorization/ @VedantGit7
+/backend/packages/access/ @VedantGit7
+/backend/packages/auth/ @VedantGit7
+/backend/packages/tenancy/ @VedantGit7
+/backend/packages/domain/tenancy/ @VedantGit7
+/backend/apps/api/src/app/api/ @VedantGit7
+/frontend/apps/web/src/app/api/ @VedantGit7
+/frontend/apps/web/src/app/platform/ @VedantGit7
 /infrastructure/ @VedantGit7
 /.github/ @VedantGit7
 /scripts/ @VedantGit7
 /monitoring/ @VedantGit7
-/runbooks/ @VedantGit7
+/docs/runbooks/ @VedantGit7
 /docs/locked/ @VedantGit7

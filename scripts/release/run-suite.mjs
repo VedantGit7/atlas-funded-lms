@@ -1,229 +1,101 @@
 #!/usr/bin/env node
-
-import { execFileSync, spawnSync } from "node:child_process";
+import { spawnSync } from "node:child_process";
 import { writeFileSync } from "node:fs";
 import { join } from "node:path";
+import {
+  AUTOMATED_GATES,
+  MANUAL_GATES,
+  SCHEMA_VERSION,
+  EVIDENCE_TYPE,
+  GATE_PREREQUISITES,
+  captureSource,
+  deriveVerdict,
+  gateBlockers,
+} from "./evidence-contract.mjs";
 
-/**
- * Resolve the commit this evidence describes.
- *
- * This used to be `process.env.GIT_SHA ?? undefined`, and nothing sets GIT_SHA
- * outside CI — so commitSha was always absent and validate-evidence took its
- * “commit correspondence not checked” branch on every local run. The check
- * existed and could never fire, which is the same defect as an unrun gate:
- * a question nobody answered, reported as though it had been.
- *
- * Falling back to `git rev-parse HEAD` mirrors what the validator already does
- * to find HEAD, so the two agree by construction.
- */
-function resolveCommitSha() {
-  const fromEnv = process.env.GIT_SHA?.trim();
-  if (fromEnv) return fromEnv;
-  try {
-    return execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim();
-  } catch {
-    // Not a git checkout (a release tarball, say). Absent is honest here;
-    // the validator reports correspondence as unchecked rather than passing it.
-    return undefined;
-  }
-}
-
-function readArg(name) {
-  const index = process.argv.indexOf(`--${name}`);
-  if (index === -1) {
-    return undefined;
-  }
-  return process.argv[index + 1];
-}
-
-const outputPath = readArg("output") ?? join(process.cwd(), "release-evidence.json");
-const skipDb = process.argv.includes("--skip-db");
-const skipBuild = process.argv.includes("--skip-build");
-const skipE2E = process.argv.includes("--skip-e2e");
-
-function runCommand(id, name, command, args, options = {}) {
-  const started = Date.now();
-  const result = spawnSync(command, args, {
-    stdio: "pipe",
-    encoding: "utf8",
-    shell: process.platform === "win32",
-    ...options,
-  });
-  const durationMs = Date.now() - started;
-  const ok = result.status === 0;
-
-  return {
-    id,
-    name,
-    kind: "automated",
-    severity: options.severity ?? "P0",
-    status: options.skip ? "skipped" : ok ? "passed" : "failed",
-    command: `${command} ${args.join(" ")}`.trim(),
-    message: ok
-      ? undefined
-      : (result.stderr || result.stdout || `exit ${result.status}`).slice(0, 500),
-    durationMs,
-  };
-}
-
-function gate(id, name, script, severity = "P0", skip = false) {
-  if (skip) {
+const outputIndex = process.argv.indexOf("--output");
+const outputPath =
+  outputIndex === -1 ? join(process.cwd(), "release-evidence.json") : process.argv[outputIndex + 1];
+const before = captureSource();
+const skippedGroups = new Set(
+  ["db", "build", "e2e"].filter((group) => process.argv.includes(`--skip-${group}`)),
+);
+const gates = AUTOMATED_GATES.map(({ id, name, script, severity, group }) => {
+  const base = { id, name, kind: "automated", severity };
+  let skipReason;
+  if (before.errors.length) skipReason = "Source provenance could not be established";
+  else if (skippedGroups.has(group)) skipReason = "Skipped by release suite flag";
+  else if (group === "health" && !process.env.RELEASE_HEALTH_BASE_URL?.trim())
+    skipReason = "RELEASE_HEALTH_BASE_URL not configured";
+  else if (group === "restore" && !process.env.RESTORED_ENV_BASE_URL?.trim())
+    skipReason = "RESTORED_ENV_BASE_URL not configured (manual isolated restore prerequisite)";
+  if (skipReason) return { ...base, status: "skipped", message: skipReason };
+  const missing = (GATE_PREREQUISITES[id] ?? []).filter((key) => !process.env[key]?.trim());
+  if (missing.length) {
     return {
-      id,
-      name,
-      kind: "automated",
-      severity,
-      status: "skipped",
-      message: "Skipped by release suite flag",
+      ...base,
+      status: "failed",
+      message: `Missing required gate prerequisites: ${missing.join(", ")}`,
     };
   }
 
-  return runCommand(id, name, "pnpm", [script], { severity });
-}
-
-const gates = [];
-
-gates.push(gate("format_check", "Format check", "format:check"));
-gates.push(gate("lint", "Lint", "lint"));
-gates.push(gate("typecheck", "Typecheck", "typecheck"));
-gates.push(gate("route_metadata", "Route metadata", "ci:route-metadata"));
-gates.push(gate("zod_boundaries", "Zod API boundaries", "ci:zod-boundaries"));
-gates.push(gate("permission_metadata", "Permission metadata", "ci:permission-metadata"));
-gates.push(gate("entitlement_metadata", "Entitlement metadata", "ci:entitlement-metadata", "P1"));
-gates.push(gate("prisma_boundary", "Prisma import boundary", "ci:prisma-boundary"));
-gates.push(gate("audit_metadata", "Audit obligations", "ci:audit-metadata"));
-gates.push(gate("outbox_metadata", "Outbox obligations", "ci:outbox-metadata"));
-gates.push(gate("forbidden_scope", "Forbidden product scope", "ci:forbidden-scope"));
-gates.push(
-  gate("tenant_resource_registry", "Tenant resource IDOR registry", "ci:tenant-resource-registry"),
-);
-gates.push(gate("security_check", "Security regression bundle", "security:check"));
-gates.push(gate("unit_tests", "Unit tests", "test:unit"));
-gates.push(gate("integration_tests", "Integration tests", "test:integration", "P0", skipDb));
-gates.push(gate("authorization_tests", "Authorization matrix", "test:authorization"));
-gates.push(
-  gate("tenant_isolation_tests", "Tenant isolation", "test:tenant-isolation", "P0", skipDb),
-);
-gates.push(gate("rls_tests", "RLS state check", "test:rls", "P0", skipDb));
-gates.push(gate("worker_tests", "Worker/event pipeline", "test:workers", "P1"));
-gates.push(gate("storage_tests", "Storage policy", "test:storage", "P1"));
-gates.push(gate("e2e_tests", "E2E wiring suite", "test:e2e", "P0", skipE2E));
-gates.push(
-  gate("tenant_config_validate", "Tenant config manifests", "db:seed:check", "P0", skipDb),
-);
-gates.push(gate("db_migrate_check", "Migration status", "db:migrate:check", "P0", skipDb));
-gates.push(gate("db_rls_check", "RLS policies", "db:rls:check", "P0", skipDb));
-gates.push(gate("db_seed_check", "Seed/config check", "db:seed:check", "P1", skipDb));
-gates.push(gate("build", "Production build", "build", "P0", skipBuild));
-gates.push(gate("observability_contract", "Observability contract", "observability:check", "P1"));
-
-const releaseHealthUrl = process.env.RELEASE_HEALTH_BASE_URL?.trim();
-if (releaseHealthUrl) {
-  gates.push(
-    runCommand(
-      "release_health",
-      "Staging release health",
-      "pnpm",
-      ["release:health", "--", "--base-url", releaseHealthUrl],
-      { severity: "P1" },
-    ),
-  );
-} else {
-  gates.push({
-    id: "release_health",
-    name: "Staging release health",
-    kind: "automated",
-    severity: "P1",
-    status: "skipped",
-    message: "RELEASE_HEALTH_BASE_URL not configured",
+  // Pass health configuration through the environment; do not interpolate a URL
+  // into the Windows command shell. The health script reads this variable.
+  const started = Date.now();
+  const result = spawnSync("pnpm", [script], {
+    stdio: "pipe",
+    encoding: "utf8",
+    shell: process.platform === "win32",
+    env:
+      id === "db_rls_check"
+        ? {
+            ...process.env,
+            DATABASE_URL: process.env.ATLAS_APP_LOGIN_URL,
+            REQUIRE_NON_SUPERUSER_DB: "1",
+          }
+        : process.env,
   });
-}
-
-const restoredBaseUrl = process.env.RESTORED_ENV_BASE_URL?.trim();
-if (restoredBaseUrl) {
-  gates.push(
-    runCommand(
-      "restore_validation",
-      "Restored environment validation",
-      "pnpm",
-      ["release:restore:validate"],
-      { severity: "P1" },
-    ),
-  );
-} else {
-  gates.push({
-    id: "restore_validation",
-    name: "Restored environment validation",
-    kind: "automated",
-    severity: "P1",
-    status: "skipped",
-    message: "RESTORED_ENV_BASE_URL not configured (manual isolated restore prerequisite)",
-  });
-}
-
-const automatedP0Failures = gates.filter(
-  (gate) => gate.severity === "P0" && gate.status === "failed",
-);
-const launchCriticalP1Failures = gates.filter(
-  (gate) =>
-    gate.severity === "P1" &&
-    gate.status === "failed" &&
-    ["release_health", "restore_validation", "worker_tests", "storage_tests"].includes(gate.id),
-);
-
-/**
- * H18. A skipped P0 gate used to be treated as an absent problem rather than an
- * unanswered question, so `--skip-db --skip-build --skip-e2e` -- which is how CI
- * invoked this suite -- produced READY_FOR_STAGING with integration_tests,
- * tenant_isolation_tests, rls_tests, e2e_tests, db_rls_check and build all
- * unrun. The artifact vouched for guarantees nothing had checked.
- *
- * Manual gates are different: they are recorded as manual_required by design and
- * tracked through manualGatesRequired, so they do not block staging here.
- */
-const automatedP0Skips = gates.filter(
-  (gate) => gate.severity === "P0" && gate.status === "skipped",
-);
-
-let verdict = "NOT_READY";
-if (
-  automatedP0Failures.length === 0 &&
-  automatedP0Skips.length === 0 &&
-  launchCriticalP1Failures.length === 0
-) {
-  verdict = "READY_FOR_STAGING";
-}
-const releaseHealthPassed = gates.find((gate) => gate.id === "release_health")?.status === "passed";
-if (
-  releaseHealthPassed &&
-  automatedP0Failures.length === 0 &&
-  automatedP0Skips.length === 0 &&
-  launchCriticalP1Failures.length === 0
-) {
-  verdict = "READY_FOR_PRODUCTION_REVIEW";
-}
-
+  const ok = result.status === 0 && !result.error;
+  return {
+    ...base,
+    status: ok ? "passed" : "failed",
+    command: `pnpm ${script}`,
+    ...(ok
+      ? {}
+      : {
+          message: (
+            result.error?.message ||
+            result.stderr ||
+            result.stdout ||
+            `exit ${result.status}`
+          ).slice(0, 500),
+        }),
+    durationMs: Date.now() - started,
+  };
+});
+const after = captureSource();
+const sourceErrors = [...new Set([...before.errors, ...after.errors])];
+if (before.source.headSha !== after.source.headSha)
+  sourceErrors.push("HEAD changed during release suite");
+const blockers = [...sourceErrors, ...gateBlockers(gates)];
 const evidence = {
-  schemaVersion: "1",
+  schemaVersion: SCHEMA_VERSION,
+  evidenceType: EVIDENCE_TYPE,
   storyId: "ATL-STORY-045",
   generatedAt: new Date().toISOString(),
   branch: process.env.GIT_BRANCH ?? undefined,
-  commitSha: resolveCommitSha(),
+  commitSha: before.source.headSha,
+  source: {
+    ...before.source,
+    clean:
+      before.source.clean && after.source.clean && before.source.headSha === after.source.headSha,
+  },
   environment: process.env.RELEASE_ENV ?? process.env.APP_ENV ?? "local",
-  verdict,
+  verdict: deriveVerdict(gates, blockers),
   productionApproved: false,
   gates: [
     ...gates,
-    ...[
-      "legal_readiness",
-      "monitoring_alerts",
-      "backup_restore_drill",
-      "rollback_target",
-      "domain_ssl",
-      "production_secrets_review",
-      "incident_owner",
-      "cto_approval",
-    ].map((id) => ({
+    ...MANUAL_GATES.map((id) => ({
       id,
       name: id.replaceAll("_", " "),
       kind: "manual",
@@ -232,28 +104,13 @@ const evidence = {
       message: "Requires human sign-off before production review",
     })),
   ],
-  manualGatesRequired: [
-    "legal_readiness",
-    "monitoring_alerts",
-    "backup_restore_drill",
-    "rollback_target",
-    "domain_ssl",
-    "production_secrets_review",
-    "incident_owner",
-    "cto_approval",
-  ],
-  blockers: [
-    ...automatedP0Failures.map((gate) => `${gate.id}: ${gate.message ?? "failed"}`),
-    ...launchCriticalP1Failures.map((gate) => `P1 launch-critical: ${gate.id}`),
-  ],
+  manualGatesRequired: [...MANUAL_GATES],
+  blockers,
   warnings: gates
     .filter((gate) => gate.severity === "P1" && gate.status === "failed")
     .map((gate) => `${gate.id}: ${gate.message ?? "failed"}`),
   rollbackTarget: process.env.RELEASE_SHA?.trim() || process.env.RELEASE_VERSION?.trim() || null,
 };
-
 writeFileSync(outputPath, `${JSON.stringify(evidence, null, 2)}\n`, "utf8");
 console.log(JSON.stringify(evidence, null, 2));
-
-const exitCode = verdict === "NOT_READY" ? 1 : 0;
-process.exit(exitCode);
+process.exit(evidence.verdict === "NOT_READY" ? 1 : 0);

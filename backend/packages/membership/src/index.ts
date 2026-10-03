@@ -13,6 +13,5 @@ export * from "./member-admin.service";
 export * from "./member-preferences.service";
 export * from "./notification-preferences.catalog";
 export * from "./member-notification-preferences.repository";
-export * from "./platform-super-admin-tenant-access";
 export * from "./self-service-membership";
 export * from "./member-self-archive.service";

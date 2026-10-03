@@ -16,9 +16,7 @@ export default async function ProfileDangerZonePage() {
     }>("/api/v1/me");
 
     const [deletionStatus, archiveStatus, profile] = await Promise.all([
-      serverApi
-        .get<{ data: { pending: boolean } }>("/api/v1/me/deletion-request")
-        .catch(() => ({ data: { pending: false } })),
+      serverApi.get<{ data: { pending: boolean } }>("/api/v1/me/deletion-request"),
       serverApi
         .get<{ data: { archivedAt: string | null } }>("/api/v1/me/archive")
         .catch(() => ({ data: { archivedAt: null } })),
@@ -33,7 +31,7 @@ export default async function ProfileDangerZonePage() {
       <PageGate state="ready" title="Danger zone">
         <AccountSettingsPageHeader
           title="Danger zone"
-          description="Irreversible actions that affect your entire account visibility and data presence."
+          description="Manage profile visibility and request removal of your access to this school."
         />
 
         <section className="overflow-hidden rounded-xl border border-[var(--acct-danger-border)] bg-[var(--acct-surface-lowest)] shadow-sm">
@@ -70,9 +68,10 @@ export default async function ProfileDangerZonePage() {
               What happens to your data?
             </h4>
             <p className="mt-1 text-sm leading-relaxed text-[var(--acct-on-surface-variant)]">
-              Deleting your account results in permanent removal of personal profile data and
-              history. Public contributions may be anonymized. You cannot undo this action once an
-              administrator approves deletion.
+              Processing a school-access removal request removes your membership access to this
+              school. Your identity, profile, learning history, billing records, and public
+              contributions are retained. Access to other schools is unaffected. Contact your school
+              for a separate erasure review; this action does not erase those records.
             </p>
           </div>
         </div>

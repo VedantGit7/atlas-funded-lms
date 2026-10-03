@@ -1,0 +1,82 @@
+{
+  "family": "Inter",
+  "version": "v20",
+  "sourceCss": "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap",
+  "sourceCssSha256": "c3d736d3f08e992dd4fbeecc86eab2a369a66fe6069a0b3dd4100736fe064d3f",
+  "retrievedAt": "2026-09-23",
+  "licenseUrl": "https://raw.githubusercontent.com/google/fonts/main/ofl/inter/OFL.txt",
+  "licenseSha256": "5b9321a4298cfeb6b34354164a1c3afc3db114569984c502b9b35d988fd58c57",
+  "metricsSource": "Next.js 16.3.5 getFallbackFontOverrideMetrics",
+  "metrics": {
+    "fallbackFont": "Arial",
+    "ascentOverride": "90.44%",
+    "descentOverride": "22.52%",
+    "lineGapOverride": "0.00%",
+    "sizeAdjust": "107.12%"
+  },
+  "assets": [
+    {
+      "file": "normal-cyrillic-ext.fccca918fea4.woff2",
+      "style": "normal",
+      "subset": "cyrillic-ext",
+      "url": "https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa2JL7W0Q5n-wU.woff2",
+      "sha256": "fccca918fea40089dacadc7045861314d1a6bc91f1f323cc1eeb22ebcdb321b5",
+      "bytes": 25844,
+      "preload": false
+    },
+    {
+      "file": "normal-cyrillic.aebf2ab4a4ce.woff2",
+      "style": "normal",
+      "subset": "cyrillic",
+      "url": "https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa0ZL7W0Q5n-wU.woff2",
+      "sha256": "aebf2ab4a4ce6810d73c1ac7be7cafb4e5ec4cee2d6db5fb3e09691747ec4bd6",
+      "bytes": 18744,
+      "preload": false
+    },
+    {
+      "file": "normal-greek-ext.a2e2c783ca6f.woff2",
+      "style": "normal",
+      "subset": "greek-ext",
+      "url": "https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa2ZL7W0Q5n-wU.woff2",
+      "sha256": "a2e2c783ca6f9c20486e81e72a279203e86730bbf8f01ff6a5ee9dbd09e1c271",
+      "bytes": 11272,
+      "preload": false
+    },
+    {
+      "file": "normal-greek.46dd4cdca58c.woff2",
+      "style": "normal",
+      "subset": "greek",
+      "url": "https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1pL7W0Q5n-wU.woff2",
+      "sha256": "46dd4cdca58c26ae87cc6927657bf83b2e8abfc39ffd0ab176e301a8d28d22bf",
+      "bytes": 19044,
+      "preload": false
+    },
+    {
+      "file": "normal-vietnamese.8db00ff46c67.woff2",
+      "style": "normal",
+      "subset": "vietnamese",
+      "url": "https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa2pL7W0Q5n-wU.woff2",
+      "sha256": "8db00ff46c67b22cda8bed865acf7077651cac8d2841d5b40980556b48961931",
+      "bytes": 10280,
+      "preload": false
+    },
+    {
+      "file": "normal-latin-ext.a28eb6d3ccb5.woff2",
+      "style": "normal",
+      "subset": "latin-ext",
+      "url": "https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa25L7W0Q5n-wU.woff2",
+      "sha256": "a28eb6d3ccb534ae0c94ca999371df024aab60b08c3c8a5720ee9e32fa0faaa2",
+      "bytes": 85272,
+      "preload": false
+    },
+    {
+      "file": "normal-latin.c940764593d0.woff2",
+      "style": "normal",
+      "subset": "latin",
+      "url": "https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1ZL7W0Q5nw.woff2",
+      "sha256": "c940764593d0fe5d596be327ca7558855e018039fb78509aa21921fd3644c3e4",
+      "bytes": 48432,
+      "preload": true
+    }
+  ]
+}

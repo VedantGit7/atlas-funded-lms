@@ -1,4 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { ATLAS_CLIENT_IP_HEADER, buildApiProxyHeaders } from "@atlas/core/http/api-proxy";
+import { ATLAS_INTERNAL_TENANT_HOST_HEADER } from "@/lib/http-headers";
 import { resolvePostAuthRedirect } from "@/lib/auth/safe-redirect";
 import {
   OAUTH_NEXT_COOKIE,
@@ -55,14 +57,21 @@ export async function GET(req: NextRequest) {
   }
 
   let apiRes: Response;
+  const browserHost =
+    req.headers.get(ATLAS_INTERNAL_TENANT_HOST_HEADER) ?? req.headers.get("host") ?? "";
   try {
     apiRes = await fetch(`${API_INTERNAL_URL}/api/v1/public/auth/oauth/callback`, {
       method: "POST",
-      headers: {
-        "content-type": "application/json",
-        "x-forwarded-host": req.headers.get("host") ?? "",
-        "idempotency-key": `public-oauth-callback-${crypto.randomUUID()}`,
-      },
+      headers: buildApiProxyHeaders(
+        browserHost,
+        {
+          "content-type": "application/json",
+          "idempotency-key": `public-oauth-callback-${crypto.randomUUID()}`,
+        },
+        process.env,
+        req.headers.get(ATLAS_CLIENT_IP_HEADER) ?? "unknown",
+      ),
+      redirect: "error",
       body: JSON.stringify({
         code,
         codeVerifier,
@@ -90,7 +99,9 @@ export async function GET(req: NextRequest) {
     return clearOAuthCookies(NextResponse.redirect(`${loginUrl}?error=oauth`));
   }
 
-  const response = NextResponse.redirect(`${origin}${destination}`);
+  // Clear temporary cookies before appending the API's raw Set-Cookie headers;
+  // response.cookies mutations rebuild that header and would discard them.
+  const response = clearOAuthCookies(NextResponse.redirect(`${origin}${destination}`));
 
   // Relay the auth session cookies (access/refresh) set by the API onto the
   // browser redirect.
@@ -100,5 +111,5 @@ export async function GET(req: NextRequest) {
     response.headers.append("set-cookie", header);
   }
 
-  return clearOAuthCookies(response);
+  return response;
 }

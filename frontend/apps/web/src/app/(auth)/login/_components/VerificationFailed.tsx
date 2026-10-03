@@ -123,7 +123,7 @@ export function VerificationFailed({ message, onRetry }: VerificationFailedProps
         </button>
         <Link
           href="/login"
-          className="group inline-flex w-full items-center justify-center gap-2 text-[13px] font-semibold text-[var(--fba-ind)] transition-colors hover:text-[var(--fba-ind-d)]"
+          className="group inline-flex w-full items-center justify-center gap-2 text-[13px] font-semibold text-[var(--fba-ind-tx)] transition-colors hover:text-[var(--fba-ind-d)]"
         >
           <ArrowLeftIcon />
           Back to Sign In

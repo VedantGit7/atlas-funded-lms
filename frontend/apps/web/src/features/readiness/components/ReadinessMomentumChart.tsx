@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowDownRight, ArrowUpRight, ChartLine, Minus } from "lucide-react";
-import { motion, useReducedMotion } from "motion/react";
+import { motion, useReducedMotion } from "../../../components/motion/animation-boundary";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 

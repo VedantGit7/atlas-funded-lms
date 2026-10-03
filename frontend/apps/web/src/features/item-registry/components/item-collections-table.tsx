@@ -584,7 +584,7 @@ export function ItemCollectionsTable({
                       onClick={() => {
                         setPendingDeleteId(selected.id);
                       }}
-                      className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-red-200 px-3 py-1.5 text-sm text-red-600 transition-colors hover:bg-red-50 dark:border-red-900/50 dark:text-red-400 dark:hover:bg-red-950/40"
+                      className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-red-200 px-3 py-1.5 text-sm text-red-600 transition-colors hover:bg-destructive/10 dark:border-red-900/50 dark:text-red-400 dark:hover:bg-red-950/40"
                     >
                       <Trash2 className="h-4 w-4" aria-hidden="true" />
                       Delete
@@ -688,7 +688,7 @@ export function ItemCollectionsTable({
                                           itemId: entry.itemId,
                                         });
                                       }}
-                                      className="rounded p-1 text-[var(--admin-on-surface-variant)] opacity-70 transition-[opacity,background-color,color] hover:bg-red-50 hover:text-red-600 group-hover:opacity-100 disabled:opacity-40 dark:hover:bg-red-950/40 dark:hover:text-red-400"
+                                      className="rounded p-1 text-[var(--admin-on-surface-variant)] opacity-70 transition-[opacity,background-color,color] hover:bg-destructive/10 hover:text-destructive-text group-hover:opacity-100 disabled:opacity-40 dark:hover:bg-red-950/40 dark:hover:text-red-400"
                                     >
                                       <X className="h-4 w-4" aria-hidden="true" />
                                     </button>
@@ -922,7 +922,7 @@ export function ItemCollectionsTable({
                 onClick={() => {
                   void onDeleteCollection(pendingDeleteId);
                 }}
-                className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-red-700 disabled:opacity-40"
+                className="rounded-lg bg-destructive px-4 py-2 text-sm font-semibold text-destructive-foreground transition-colors hover:opacity-90 disabled:opacity-40"
               >
                 {pending ? "Deleting..." : "Delete collection"}
               </button>

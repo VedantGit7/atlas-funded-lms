@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { competencyApiClient } from "@atlas/contracts-modules/competency/competency.api-client";
+import { competencyApiClient } from "@/modules/competency/competency.api-client";
 import type { z } from "zod";
 import type { competencySignalDtoSchema } from "@atlas/contracts/competency/competency-projection.schemas";
 import {

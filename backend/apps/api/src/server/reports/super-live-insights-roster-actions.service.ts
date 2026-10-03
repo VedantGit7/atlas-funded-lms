@@ -42,6 +42,7 @@ export async function exportSuperLiveInsightsRoster(
     const adminEmail = await notificationRepository.findMembershipEmail(tx, ctx.actorMembershipId);
     if (provider.isConfigured() && adminEmail) {
       await provider.send({
+        tenantId: ctx.tenantId,
         to: adminEmail,
         subject: "Your Super Live Insights export is ready",
         body: [

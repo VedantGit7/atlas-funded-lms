@@ -75,6 +75,7 @@ export type RetentionImpact = {
 };
 
 export type PurgeExpiredResult = {
+  queuedCount: number;
   deletedCount: number;
   estimatedBytesFreed: number;
 };

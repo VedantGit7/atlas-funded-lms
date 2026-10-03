@@ -34,6 +34,7 @@ export async function exportResourceUsageRoster(tx: TenantTx, ctx: ServiceCtx, r
     const adminEmail = await notificationRepository.findMembershipEmail(tx, ctx.actorMembershipId);
     if (provider.isConfigured() && adminEmail) {
       await provider.send({
+        tenantId: ctx.tenantId,
         to: adminEmail,
         subject: "Your Resource Usage export is ready",
         body: [

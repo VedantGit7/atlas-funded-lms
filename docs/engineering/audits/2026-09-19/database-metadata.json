@@ -1,0 +1,29 @@
+{
+  "tenant_indexes": [
+    {
+      "tables_without_tenant_leading_index": "0"
+    }
+  ],
+  "invalid_indexes": [],
+  "proctoring_fks": [
+    {
+      "foreign_keys": "0"
+    }
+  ],
+  "triggers": [
+    {
+      "total_triggers": "21",
+      "disabled": "0"
+    }
+  ],
+  "migration_count": [
+    {
+      "count": "108"
+    }
+  ],
+  "no_context": [
+    {
+      "visible_memberships_without_tenant_context": "0"
+    }
+  ]
+}

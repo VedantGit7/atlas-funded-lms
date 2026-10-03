@@ -2,7 +2,7 @@ import { test, expect } from "../fixtures/axe";
 import { loginWithCredentials } from "../helpers/auth";
 import { hasLearnerCredentials, requiredCredential } from "../helpers/env";
 
-test.describe("J05 learner readiness CTA", () => {
+test.describe("J05 shell smoke: learner readiness page", () => {
   test.beforeEach(() => {
     test.skip(!hasLearnerCredentials(), "Set E2E_LEARNER_EMAIL and E2E_LEARNER_PASSWORD");
   });

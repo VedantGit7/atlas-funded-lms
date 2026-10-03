@@ -1,14 +1,10 @@
-import { createHash } from "node:crypto";
 import { z } from "zod";
 import {
   automationRuleKeySchema,
   automationTriggerEventTypeSchema,
   parseAutomationAction,
   parseAutomationCondition,
-  type REGISTERED_AUTOMATION_ACTION_TYPES,
 } from "./automation.registry";
-
-type AutomationActionType = (typeof REGISTERED_AUTOMATION_ACTION_TYPES)[number];
 
 export const ENTITY_STATUSES = ["ACTIVE", "INACTIVE", "ARCHIVED"] as const;
 export type EntityStatus = (typeof ENTITY_STATUSES)[number];
@@ -138,16 +134,6 @@ export function buildAutomationRunIdempotencyKey(args: {
   sourceEventId: string;
 }): string {
   return `${args.automationRuleId}:${args.sourceEventId}`;
-}
-
-export function buildAutomationActionIdempotencyKey(args: {
-  automationRuleId: string;
-  sourceEventId: string;
-  actionType: AutomationActionType;
-}): string {
-  return createHash("sha256")
-    .update(`${args.automationRuleId}:${args.sourceEventId}:${args.actionType}`)
-    .digest("hex");
 }
 
 export type CreateAutomationRuleBody = z.infer<typeof createAutomationRuleBodySchema>;

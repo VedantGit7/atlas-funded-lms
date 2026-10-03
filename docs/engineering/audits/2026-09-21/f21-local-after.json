@@ -1,0 +1,30 @@
+{
+  "database": "atlas_lms_dev",
+  "counts": {
+    "artifacts": 0,
+    "sessions": 0,
+    "events": 0,
+    "missing_tenants": 0,
+    "invalid_sessions": 0,
+    "invalid_events": 0
+  },
+  "clean": true,
+  "validated": true,
+  "constraints": [
+    {
+      "name": "proctoring_media_artifacts_event_fkey",
+      "validated": true,
+      "definition": "FOREIGN KEY (tenant_id, proctoring_session_id, proctoring_event_id) REFERENCES proctoring_events(tenant_id, proctoring_session_id, id) ON UPDATE RESTRICT ON DELETE RESTRICT"
+    },
+    {
+      "name": "proctoring_media_artifacts_session_fkey",
+      "validated": true,
+      "definition": "FOREIGN KEY (tenant_id, proctoring_session_id) REFERENCES proctoring_sessions(tenant_id, id) ON UPDATE RESTRICT ON DELETE RESTRICT"
+    },
+    {
+      "name": "proctoring_media_artifacts_tenant_fkey",
+      "validated": true,
+      "definition": "FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON UPDATE RESTRICT ON DELETE RESTRICT"
+    }
+  ]
+}

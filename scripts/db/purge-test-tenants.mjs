@@ -1,278 +1,172 @@
 import { fileURLToPath } from "node:url";
 import { resolve } from "node:path";
-import { Client } from "pg";
-import { PROTECTED_TENANT_SLUGS, TEST_TENANT_SLUG_REGEX } from "./test-tenant-slugs.mjs";
+import {
+  cleanupConfiguration,
+  cleanupClient,
+  assertDatabaseIdentity,
+  UUID,
+} from "./test-cleanup-boundary.mjs";
+import { PROTECTED_TENANT_SLUGS } from "./test-tenant-slugs.mjs";
+const quote = (value) => '"' + value.replaceAll('"', '""') + '"';
 
-/**
- * Purge leaked automated-test tenants (and their tenant-scoped + orphaned global
- * rows) from a database.
- *
- * Test suites such as the tenant-isolation fixtures and various e2e/smoke tests
- * provision throwaway tenants with deterministic slug prefixes and an 8-char hex
- * suffix. Historically they had no teardown, so they accumulated (tens of
- * thousands of rows on shared dev databases). This module removes exactly those
- * rows and nothing else.
- *
- * Safety:
- * - Targets are matched by a strict slug regex (prefix + 8 hex chars); real
- *   tenants like `fundedbeyond` never match, and an explicit allowlist guards it.
- * - Dry-run is the default. Destructive work only runs with { apply: true }.
- * - Deletion happens in a single transaction with session_replication_role set
- *   to 'replica' so append-only and FK RESTRICT triggers don't block cleanup of
- *   test data. Requires a superuser connection (the local `atlas` role is).
- */
-
-// Slug regex + protected slugs come from the shared source of truth so the
-// purge can never drift from what the fixtures actually create.
-const PROTECTED_SLUGS = PROTECTED_TENANT_SLUGS;
-
-async function listTenantScopedTables(client) {
-  const result = await client.query(`
-    select table_name
-    from information_schema.columns
-    where table_schema = 'public' and column_name = 'tenant_id'
-    order by table_name
-  `);
-  return result.rows.map((row) => row.table_name);
-}
-
-/**
- * @param {{ apply?: boolean, log?: (message: string) => void }} [options]
- * @returns {Promise<{ tenants: number, sampleSlugs: string[], childRows: number, principals: number, applied: boolean, perTable: Array<{ table: string, rows: number }> }>}
- */
+/** Delete only database-recorded IDs for one explicitly authorized disposable run. */
 export async function purgeTestTenants(options = {}) {
-  const apply = options.apply ?? false;
-  const log = options.log ?? (() => {});
-
-  const databaseUrl = process.env.DATABASE_URL;
-  if (!databaseUrl) {
-    throw new Error("DATABASE_URL is required to purge test tenants.");
-  }
-
-  const client = new Client({ connectionString: databaseUrl });
-  await client.connect();
-
-  try {
-    const tenantScopedTables = await listTenantScopedTables(client);
-
-    // Identify targets up front for reporting.
-    const targets = await client.query(
-      `select id::text, slug
-         from tenants
-        where slug ~ $1
-          and slug <> all($2::text[])
-        order by created_at asc`,
-      [TEST_TENANT_SLUG_REGEX, PROTECTED_SLUGS],
+  const env = options.env ?? process.env;
+  const config = cleanupConfiguration(env);
+  const runId = options.runId ?? env.TEST_RUN_ID;
+  if (!UUID.test(runId ?? ""))
+    throw new Error(
+      "An explicit UUID runId / TEST_RUN_ID is required; slug-based sweeping is forbidden.",
     );
-
-    const tenantCount = targets.rows.length;
-    const sampleSlugs = targets.rows.slice(0, 10).map((row) => row.slug);
-
-    if (tenantCount === 0) {
-      log("[purge-test-tenants] no matching test tenants found.");
-      return {
-        tenants: 0,
-        sampleSlugs: [],
-        childRows: 0,
-        principals: 0,
-        applied: false,
-        perTable: [],
-      };
-    }
-
-    // Build the temp target tables once; reused for both dry-run counting and apply.
-    const buildTargets = async () => {
+  const apply = options.apply === true;
+  const client = cleanupClient(config);
+  await client.connect();
+  try {
+    await client.query("BEGIN");
+    await client.query("SET LOCAL lock_timeout = '5s'; SET LOCAL statement_timeout = '60s'");
+    await assertDatabaseIdentity(client, config);
+    const run = (
       await client.query(
-        `create temp table _purge_targets on commit drop as
-           select id from tenants
-            where slug ~ $1
-              and slug <> all($2::text[])`,
-        [TEST_TENANT_SLUG_REGEX, PROTECTED_SLUGS],
-      );
-      await client.query(`
-        create temp table _purge_principals on commit drop as
-          select distinct m.auth_principal_id as id
-            from memberships m
-            join _purge_targets t on t.id = m.tenant_id
-      `);
+        "SELECT status FROM atlas_test_cleanup.runs WHERE id=$1::uuid FOR UPDATE",
+        [runId],
+      )
+    ).rows[0];
+    if (!run) throw new Error("Cleanup run is not registered in this disposable database.");
+    const targets = (
+      await client.query(
+        `SELECT t.id::text, t.slug FROM public.tenants t
+      JOIN atlas_test_cleanup.owned_rows r ON r.entity_id=t.id AND r.entity_kind='tenant'
+      WHERE r.run_id=$1::uuid ORDER BY t.id FOR UPDATE OF t`,
+        [runId],
+      )
+    ).rows;
+    if (targets.some((row) => PROTECTED_TENANT_SLUGS.includes(row.slug)))
+      throw new Error("Protected tenant encountered; entire cleanup refused.");
+    const ids = targets.map((row) => row.id);
+    const tables = (
+      await client.query(`SELECT DISTINCT c.relname AS name FROM pg_class c
+      JOIN pg_namespace n ON n.oid=c.relnamespace JOIN pg_attribute a ON a.attrelid=c.oid
+      WHERE n.nspname='public' AND c.relkind IN ('r','p') AND a.attname='tenant_id' AND NOT a.attisdropped ORDER BY c.relname`)
+    ).rows;
+    const report = {
+      runId,
+      tenants: ids.length,
+      sampleSlugs: targets.slice(0, 10).map((t) => t.slug),
+      childRows: 0,
+      principals: 0,
+      retainedPrincipals: 0,
+      applied: apply,
+      perTable: [],
     };
-
-    if (!apply) {
-      // Dry run: count everything inside a transaction, then roll back.
-      await client.query("begin");
-      try {
-        await buildTargets();
-
-        const perTable = [];
-        let childRows = 0;
-        for (const table of tenantScopedTables) {
-          const countResult = await client.query(
-            `select count(*)::int as n
-               from "${table}" x
-               join _purge_targets t on t.id = x.tenant_id`,
-          );
-          const rows = countResult.rows[0].n;
-          if (rows > 0) {
-            perTable.push({ table, rows });
-            childRows += rows;
-          }
-        }
-
-        const principalResult = await client.query(`
-          select count(*)::int as n
-            from _purge_principals p
-           where not exists (
-             select 1 from memberships m
-              where m.auth_principal_id = p.id
-                and m.tenant_id not in (select id from _purge_targets)
-           )
-        `);
-        const principals = principalResult.rows[0].n;
-
-        return {
-          tenants: tenantCount,
-          sampleSlugs,
-          childRows,
-          principals,
-          applied: false,
-          perTable,
-        };
-      } finally {
-        await client.query("rollback");
-      }
+    if (apply) await client.query("SET LOCAL session_replication_role = 'replica'");
+    for (const table of tables) {
+      const sql = apply
+        ? `DELETE FROM public.${quote(table.name)} WHERE tenant_id=ANY($1::uuid[])`
+        : `SELECT count(*)::int AS n FROM public.${quote(table.name)} WHERE tenant_id=ANY($1::uuid[])`;
+      const result = await client.query(sql, [ids]);
+      const rows = apply ? result.rowCount : result.rows[0].n;
+      if (rows) report.perTable.push({ table: table.name, rows });
+      report.childRows += rows;
     }
-
-    // Apply: delete in small per-tenant batches. Short transactions keep the lock
-    // footprint tiny so the purge co-exists with a running dev server, and any
-    // lock contention is retried instead of aborting the whole run.
-    const targetIds = targets.rows.map((row) => row.id);
-    const BATCH_SIZE = 200;
-    const MAX_RETRIES = 6;
-
-    const perTableTotals = new Map();
-    let childRows = 0;
-    let deletedTenants = 0;
-    let deletedPrincipals = 0;
-
-    const sleep = (ms) => new Promise((done) => setTimeout(done, ms));
-    const isRetryable = (error) =>
-      error && (error.code === "40P01" || error.code === "55P03" || error.code === "40001");
-
-    for (let offset = 0; offset < targetIds.length; offset += BATCH_SIZE) {
-      const batch = targetIds.slice(offset, offset + BATCH_SIZE);
-
-      for (let attempt = 1; ; attempt += 1) {
-        try {
-          await client.query("begin");
-          await client.query("set local session_replication_role = 'replica'");
-          await client.query("set local lock_timeout = '4s'");
-
-          const principalRows = await client.query(
-            `select distinct auth_principal_id as id
-               from memberships
-              where tenant_id = any($1::uuid[])`,
-            [batch],
+    if (apply) {
+      await client.query("DELETE FROM public.tenants WHERE id=ANY($1::uuid[])", [ids]);
+      // Keep normal FK protection when removing global identities. Never infer
+      // ownership just because an existing user's last membership was a fixture.
+      await client.query("SET LOCAL session_replication_role = 'origin'");
+    }
+    const owned = (
+      await client.query(
+        `SELECT p.id::text FROM public.auth_principals p
+      JOIN atlas_test_cleanup.owned_rows r ON r.entity_kind='principal' AND r.entity_id=p.id
+      WHERE r.run_id=$1::uuid AND NOT EXISTS (SELECT 1 FROM public.memberships m
+        WHERE m.auth_principal_id=p.id ${apply ? "" : "AND NOT (m.tenant_id=ANY($2::uuid[]))"})
+      ORDER BY p.id FOR UPDATE OF p`,
+        apply ? [runId] : [runId, ids],
+      )
+    ).rows.map((r) => r.id);
+    if (apply && owned.length) {
+      // The row locks also block new FK references until commit. Inspect every
+      // referencing key: CASCADE and SET NULL are not protective delete errors.
+      const references = (
+        await client.query(`SELECT n.nspname AS schema_name, c.relname AS table_name,
+        fk.conname AS constraint_name, array_agg(child.attname::text ORDER BY key.ordinality) AS child_columns,
+        array_agg(parent.attname::text ORDER BY key.ordinality) AS parent_columns
+        FROM pg_constraint fk JOIN pg_class c ON c.oid=fk.conrelid
+        JOIN pg_namespace n ON n.oid=c.relnamespace
+        CROSS JOIN LATERAL unnest(fk.conkey,fk.confkey) WITH ORDINALITY AS key(child_num,parent_num,ordinality)
+        JOIN pg_attribute child ON child.attrelid=fk.conrelid AND child.attnum=key.child_num
+        JOIN pg_attribute parent ON parent.attrelid=fk.confrelid AND parent.attnum=key.parent_num
+        WHERE fk.contype='f' AND fk.confrelid='public.auth_principals'::regclass
+        GROUP BY fk.oid,n.nspname,c.relname,fk.conname ORDER BY n.nspname,c.relname,fk.conname`)
+      ).rows;
+      for (const reference of references) {
+        const match = reference.child_columns
+          .map(
+            (column, index) =>
+              `child.${quote(column)}=parent.${quote(reference.parent_columns[index])}`,
+          )
+          .join(" AND ");
+        const result = await client.query(
+          `SELECT EXISTS (
+          SELECT 1 FROM ${quote(reference.schema_name)}.${quote(reference.table_name)} child
+          JOIN public.auth_principals parent ON ${match}
+          WHERE parent.id=ANY($1::uuid[])) AS referenced`,
+          [owned],
+        );
+        if (result.rows[0].referenced) {
+          const error = new Error(
+            `Owned principal is still referenced by ${reference.schema_name}.${reference.table_name} (${reference.constraint_name}); entire cleanup refused.`,
           );
-          const principalIds = principalRows.rows.map((row) => row.id);
-
-          for (const table of tenantScopedTables) {
-            const deleteResult = await client.query(
-              `delete from "${table}" where tenant_id = any($1::uuid[])`,
-              [batch],
-            );
-            const rows = deleteResult.rowCount ?? 0;
-            if (rows > 0) {
-              perTableTotals.set(table, (perTableTotals.get(table) ?? 0) + rows);
-              childRows += rows;
-            }
-          }
-
-          const tenantDelete = await client.query(
-            `delete from tenants where id = any($1::uuid[])`,
-            [batch],
-          );
-          deletedTenants += tenantDelete.rowCount ?? 0;
-
-          if (principalIds.length > 0) {
-            const principalDelete = await client.query(
-              `delete from auth_principals a
-                where a.id = any($1::uuid[])
-                  and not exists (
-                    select 1 from memberships m where m.auth_principal_id = a.id
-                  )`,
-              [principalIds],
-            );
-            deletedPrincipals += principalDelete.rowCount ?? 0;
-          }
-
-          await client.query("commit");
-          break;
-        } catch (error) {
-          await client.query("rollback").catch(() => {});
-          if (isRetryable(error) && attempt < MAX_RETRIES) {
-            log(
-              `[purge-test-tenants] batch at offset ${offset} hit ${error.code}; ` +
-                `retry ${attempt}/${MAX_RETRIES - 1}`,
-            );
-            await sleep(250 * attempt);
-            continue;
-          }
+          error.code = "TEST_CLEANUP_REFERENCED_PRINCIPAL";
           throw error;
         }
       }
-    }
-
-    const perTable = [...perTableTotals.entries()].map(([table, rows]) => ({ table, rows }));
-
-    return {
-      tenants: deletedTenants,
-      sampleSlugs,
-      childRows,
-      principals: deletedPrincipals,
-      applied: true,
-      perTable,
-    };
+      report.principals = (
+        await client.query("DELETE FROM public.auth_principals WHERE id=ANY($1::uuid[])", [owned])
+      ).rowCount;
+    } else report.principals = owned.length;
+    report.retainedPrincipals =
+      (
+        await client.query(
+          `SELECT count(*)::int AS n FROM public.auth_principals p
+      JOIN atlas_test_cleanup.owned_rows r ON r.entity_kind='principal' AND r.entity_id=p.id WHERE r.run_id=$1::uuid`,
+          [runId],
+        )
+      ).rows[0].n - (apply ? 0 : owned.length);
+    if (apply) {
+      await client.query("DELETE FROM atlas_test_cleanup.owned_rows WHERE run_id=$1::uuid", [
+        runId,
+      ]);
+      await client.query("UPDATE atlas_test_cleanup.runs SET status='cleaned' WHERE id=$1::uuid", [
+        runId,
+      ]);
+      await client.query("COMMIT");
+    } else await client.query("ROLLBACK");
+    return report;
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
   } finally {
     await client.end();
   }
 }
 
-async function main() {
-  const apply = process.argv.includes("--apply");
-  const report = await purgeTestTenants({
-    apply,
-    log: (message) => {
-      console.log(message);
-    },
-  });
-
-  console.log(`[purge-test-tenants] mode=${apply ? "apply" : "dry-run"}`);
-  console.log(`[purge-test-tenants] matched test tenants: ${report.tenants}`);
-  if (report.sampleSlugs.length > 0) {
-    console.log(`[purge-test-tenants] sample slugs: ${report.sampleSlugs.join(", ")}`);
+const entry = process.argv[1];
+if (entry && fileURLToPath(import.meta.url) === resolve(entry)) {
+  const args = process.argv.slice(2);
+  const index = args.indexOf("--run-id");
+  const runId = index >= 0 ? args[index + 1] : process.env.TEST_RUN_ID;
+  const allowed = args.filter((_, i) => i !== index && i !== index + 1);
+  if (
+    (allowed.some((arg) => arg !== "--apply") && index >= 0) ||
+    (index < 0 && args.some((arg) => arg !== "--apply"))
+  ) {
+    throw new Error("Usage: purge-test-tenants.mjs [--apply] --run-id UUID");
   }
-
-  if (report.perTable.length > 0) {
-    console.log(`[purge-test-tenants] ${apply ? "deleted" : "would delete"} child rows by table:`);
-    for (const entry of report.perTable.sort((a, b) => b.rows - a.rows)) {
-      console.log(`  ${entry.table}: ${entry.rows}`);
-    }
-  }
-
-  console.log(
-    `[purge-test-tenants] ${apply ? "deleted" : "would delete"} ${report.childRows} child rows, ` +
-      `${report.tenants} tenants, ${report.principals} orphaned principals.`,
-  );
-
-  if (!apply && report.tenants > 0) {
-    console.log("[purge-test-tenants] re-run with --apply to perform the deletion.");
-  }
-}
-
-const entryPath = process.argv[1];
-if (entryPath && fileURLToPath(import.meta.url) === resolve(entryPath)) {
-  main().catch((error) => {
-    console.error(error);
-    process.exit(1);
-  });
+  purgeTestTenants({ apply: args.includes("--apply"), runId })
+    .then((report) => console.log(JSON.stringify(report, null, 2)))
+    .catch((error) => {
+      console.error("[purge-test-tenants] cleanup refused or failed:", error.message);
+      process.exitCode = 1;
+    });
 }

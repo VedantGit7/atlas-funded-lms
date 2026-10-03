@@ -775,7 +775,7 @@ export function AdminPaymentsRosterPage() {
 
           <section className={analyticsTableShellClassName}>
             {loading ? (
-              <p className="p-4 text-sm text-neutral-600">Loading…</p>
+              <p className="p-4 text-sm text-muted-foreground">Loading…</p>
             ) : tab === "gateways" && !selectedGateway ? (
               <table className="w-full text-left text-sm">
                 <thead className={analyticsTableHeadClassName}>
@@ -789,7 +789,7 @@ export function AdminPaymentsRosterPage() {
                 <tbody>
                   {gateways.length === 0 ? (
                     <tr>
-                      <td className="px-4 py-6 text-neutral-500" colSpan={4}>
+                      <td className="px-4 py-6 text-muted-foreground" colSpan={4}>
                         No payment gateways configured yet.
                       </td>
                     </tr>
@@ -849,7 +849,7 @@ export function AdminPaymentsRosterPage() {
                 <tbody>
                   {invoices.length === 0 ? (
                     <tr>
-                      <td className="px-4 py-6 text-neutral-500" colSpan={7}>
+                      <td className="px-4 py-6 text-muted-foreground" colSpan={7}>
                         No invoices yet. Paid orders receive invoice numbers automatically.
                       </td>
                     </tr>
@@ -910,7 +910,7 @@ export function AdminPaymentsRosterPage() {
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div>
                       <h2 className="text-lg font-medium">{selectedPlan.productTitle}</h2>
-                      <p className="text-sm text-neutral-600">
+                      <p className="text-sm text-muted-foreground">
                         {selectedPlan.learnerName ?? selectedPlan.email} · Remaining{" "}
                         {formatMoney(selectedPlan.remainingAmountCents, selectedPlan.currency)}
                       </p>
@@ -975,7 +975,7 @@ export function AdminPaymentsRosterPage() {
                   <tbody>
                     {instalments.length === 0 ? (
                       <tr>
-                        <td className="px-4 py-6 text-neutral-500" colSpan={5}>
+                        <td className="px-4 py-6 text-muted-foreground" colSpan={5}>
                           No instalment plans yet. Create a plan to track remaining balances.
                         </td>
                       </tr>
@@ -1029,7 +1029,7 @@ export function AdminPaymentsRosterPage() {
                 <tbody>
                   {transactions.length === 0 ? (
                     <tr>
-                      <td className="px-4 py-6 text-neutral-500" colSpan={8}>
+                      <td className="px-4 py-6 text-muted-foreground" colSpan={8}>
                         No transactions found for the selected filters.
                       </td>
                     </tr>
@@ -1078,7 +1078,7 @@ export function AdminPaymentsRosterPage() {
 
           {totalPages > 1 ? (
             <div className="flex items-center justify-between gap-3">
-              <p className="text-sm text-neutral-600">
+              <p className="text-sm text-muted-foreground">
                 Page {page} of {totalPages} · {totalCount} rows
               </p>
               <div className="flex gap-2">

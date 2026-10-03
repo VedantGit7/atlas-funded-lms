@@ -1,24 +1,12 @@
-"use client";
-
 import Link from "next/link";
-import { Plus_Jakarta_Sans } from "next/font/google";
 import { TenantBrandMark } from "@/components/patterns/TenantBrandMark";
 import type { z } from "zod";
 import type { PublicLandingPageSchema } from "@atlas/contracts/domain-branding/schemas/public-landing";
 import { HOW_IT_WORKS, STATS, TESTIMONIALS, WHO_ITS_FOR } from "./landing-data";
 import { DiagnosticSection, ToolsSection } from "./LandingSections";
-import { LandingFaq, LandingNav } from "./LandingInteractive";
-import { captureLandingCtaClick } from "./landing-analytics";
-import { useFbaTheme } from "@/components/theme/use-fba-theme";
+import { LandingFaq, LandingCtaLink, TenantLandingFrame } from "./LandingInteractive";
 import "@/components/theme/fba-theme.css";
 import "./fba-landing.css";
-
-const plusJakarta = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800"],
-  variable: "--font-plus-jakarta",
-  display: "swap",
-});
 
 type PublicLandingPage = z.infer<typeof PublicLandingPageSchema>;
 
@@ -32,7 +20,7 @@ type TenantPublicLandingProps = {
 
 function SectionEyebrow({ children }: { children: string }) {
   return (
-    <div className="mb-3.5 text-[11px] font-semibold uppercase tracking-[0.15em] text-[var(--fba-ind)]">
+    <div className="mb-3.5 text-[11px] font-semibold uppercase tracking-[0.15em] text-[var(--fba-ind-tx)]">
       {children}
     </div>
   );
@@ -60,7 +48,6 @@ export function TenantPublicLanding({
   authCta = null,
   logoUrl = null,
 }: TenantPublicLandingProps) {
-  const { darkMode, toggleDark } = useFbaTheme();
   // Neutral fallback: this component is the public landing for every tenant
   // (see PublicLandingView), not just tenant #1.
   const footerBrandName = landing.publicName?.trim() ?? "Academy";
@@ -71,15 +58,7 @@ export function TenantPublicLanding({
   const ctaHref = landing.primaryCta.href || "/diagnostic";
 
   return (
-    <div className={`fba-scope fba-landing ${plusJakarta.variable} ${darkMode ? "fba-dark" : ""}`}>
-      <LandingNav
-        darkMode={darkMode}
-        onToggleDark={toggleDark}
-        publicName={landing.publicName}
-        authCta={authCta}
-        logoUrl={logoUrl}
-      />
-
+    <TenantLandingFrame publicName={landing.publicName} authCta={authCta} logoUrl={logoUrl}>
       {/* Hero */}
       <div
         id="hero"
@@ -87,15 +66,15 @@ export function TenantPublicLanding({
       >
         <div className="mx-auto max-w-[720px]">
           <div className="mb-[30px] inline-flex items-center gap-2 rounded-[40px] border border-[var(--fba-gld-b)] bg-[var(--fba-gld-l)] px-4 py-[7px]">
-            <div className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#d97706]" />
-            <span className="text-[11px] font-medium text-[#92400e]">
+            <div className="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--fba-amb-tx)]" />
+            <span className="text-[11px] font-medium text-[var(--fba-gld-tx)]">
               Free Diagnostic - No Account Required
             </span>
           </div>
           <h1 className="mb-1 text-[58px] font-extrabold leading-[1.03] text-balance text-[var(--fba-tx)] max-[768px]:text-[40px]">
             Become a Funded
           </h1>
-          <h1 className="mb-[26px] text-[58px] font-extrabold leading-[1.1] text-balance text-[var(--fba-ind)] max-[768px]:text-[40px]">
+          <h1 className="mb-[26px] text-[58px] font-extrabold leading-[1.1] text-balance text-[var(--fba-ind-tx)] max-[768px]:text-[40px]">
             {heroAccent}
           </h1>
           <p className="mx-auto mb-[38px] max-w-[540px] text-[17px] leading-[1.75] text-pretty text-[var(--fba-tx2)]">
@@ -103,15 +82,13 @@ export function TenantPublicLanding({
               "Start with a free trader-readiness diagnostic, build daily habits with free tools, then go deeper with structured courses, designed to get you through your first funded evaluation."}
           </p>
           <div className="flex flex-wrap justify-center gap-3">
-            <Link
+            <LandingCtaLink
               href={ctaHref}
-              onClick={() => {
-                captureLandingCtaClick("hero_primary_cta");
-              }}
+              source="hero_primary_cta"
               className="rounded-[10px] bg-[var(--fba-ind)] px-[30px] py-[17px] text-sm font-bold text-white no-underline transition-colors hover:bg-[var(--fba-ind-d)]"
             >
               {ctaLabel}
-            </Link>
+            </LandingCtaLink>
             <a
               href="#courses"
               className="rounded-[10px] border-[1.5px] border-[var(--fba-bdr2)] bg-[var(--fba-surf)] px-[30px] py-[17px] text-sm font-semibold text-[var(--fba-tx)] no-underline transition-colors hover:border-[var(--fba-tx3)] hover:bg-[var(--fba-bg2)]"
@@ -120,8 +97,8 @@ export function TenantPublicLanding({
             </a>
           </div>
           <div className="mt-5 text-xs text-[var(--fba-tx3)]">
-            Trusted by <span className="font-bold text-[var(--fba-ind)]">4,200+</span> traders · No
-            credit card required · Cancel anytime
+            Trusted by <span className="font-bold text-[var(--fba-ind-tx)]">4,200+</span> traders ·
+            No credit card required · Cancel anytime
           </div>
         </div>
       </div>
@@ -132,7 +109,7 @@ export function TenantPublicLanding({
           {STATS.map((stat, i) => {
             const valueColor =
               "accent" in stat
-                ? "text-[var(--fba-ind)]"
+                ? "text-[var(--fba-ind-tx)]"
                 : "gold" in stat
                   ? "text-[var(--fba-gld-tx)]"
                   : "text-[var(--fba-tx)]";
@@ -187,7 +164,7 @@ export function TenantPublicLanding({
                 </p>
                 <a
                   href={item.link.href}
-                  className="text-[13px] font-semibold text-[var(--fba-ind)] no-underline transition-colors hover:text-[var(--fba-ind-d)]"
+                  className="text-[13px] font-semibold text-[var(--fba-ind-tx)] no-underline transition-colors hover:text-[var(--fba-ind-d)]"
                 >
                   {item.link.label}
                 </a>
@@ -242,8 +219,8 @@ export function TenantPublicLanding({
               </div>
             </div>
             {/* Foundation */}
-            <div className="relative flex flex-1 flex-col rounded-2xl border-2 border-[var(--fba-ind)] bg-[var(--fba-ind)] p-8">
-              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-[40px] bg-[var(--fba-gld)] px-3.5 py-[5px] text-[10px] font-bold uppercase tracking-[0.08em] text-[var(--fba-tx)]">
+            <div className="relative flex flex-1 flex-col rounded-2xl border-2 border-[var(--fba-panel)] bg-[var(--fba-panel)] p-8">
+              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-[40px] bg-[var(--fba-gld)] px-3.5 py-[5px] text-[10px] font-bold uppercase tracking-[0.08em] text-[var(--fba-on-gld)]">
                 Most Popular
               </div>
               <div className="mb-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/70">
@@ -256,7 +233,7 @@ export function TenantPublicLanding({
               <div className="mb-7 text-[13px] text-white/70">or $249 billed once</div>
               <Link
                 href="/signup"
-                className="mb-7 block rounded-[9px] bg-white py-3.5 text-center text-[13px] font-bold text-[var(--fba-ind)] no-underline transition-colors hover:bg-[var(--fba-ind-l)]"
+                className="mb-7 block rounded-[9px] bg-white py-3.5 text-center text-[13px] font-bold text-[var(--fba-ind)] no-underline transition-colors hover:opacity-90"
               >
                 Start Foundation
               </Link>
@@ -329,7 +306,9 @@ export function TenantPublicLanding({
                     <div className="mt-[5px] text-[11px] text-[var(--fba-tx3)]">{t.detail}</div>
                   </div>
                   <div className="rounded-md bg-[var(--fba-ind-l)] px-2.5 py-[5px]">
-                    <div className="text-[10px] font-semibold text-[var(--fba-ind)]">{t.badge}</div>
+                    <div className="text-[10px] font-semibold text-[var(--fba-ind-tx)]">
+                      {t.badge}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -376,7 +355,7 @@ export function TenantPublicLanding({
       <LandingFaq />
 
       {/* Final CTA */}
-      <div className="bg-[var(--fba-ind)] px-7 py-[88px] text-center max-[768px]:px-4 max-[768px]:py-16">
+      <div className="bg-[var(--fba-panel)] px-7 py-[88px] text-center max-[768px]:px-4 max-[768px]:py-16">
         <div className="mx-auto max-w-[620px]">
           <div className="mb-[18px] text-[11px] font-semibold uppercase tracking-[0.15em] text-white/60">
             Start Today
@@ -388,15 +367,13 @@ export function TenantPublicLanding({
             Take the free diagnostic. No account. No credit card. Just the clearest picture
             you&apos;ll ever get of your evaluation readiness.
           </p>
-          <Link
+          <LandingCtaLink
             href="/diagnostic"
-            onClick={() => {
-              captureLandingCtaClick("final_cta");
-            }}
-            className="inline-flex items-center gap-2 rounded-[11px] bg-white px-9 py-[18px] text-[15px] font-bold text-[var(--fba-ind)] no-underline transition-colors hover:bg-[var(--fba-ind-l)]"
+            source="final_cta"
+            className="inline-flex items-center gap-2 rounded-[11px] bg-white px-9 py-[18px] text-[15px] font-bold text-[var(--fba-ind)] no-underline transition-colors hover:opacity-90"
           >
             Take the Free Diagnostic →
-          </Link>
+          </LandingCtaLink>
           <div className="mt-3.5 text-xs text-white/70">
             Free forever · 5 minutes · No signup required
           </div>
@@ -481,6 +458,6 @@ export function TenantPublicLanding({
           </div>
         </div>
       </footer>
-    </div>
+    </TenantLandingFrame>
   );
 }

@@ -1,0 +1,19 @@
+[
+  "backend/apps/api/src/app/api/v1/certificates/[id]/download/route.ts",
+  "backend/apps/api/src/app/api/v1/certificates/[id]/wallet/apple/download/route.ts",
+  "backend/apps/api/src/app/api/v1/me/route.ts",
+  "backend/apps/api/src/app/api/v1/modules/[id]/scorm-content/route.ts",
+  "backend/apps/api/src/app/api/v1/public/auth/login/route.ts",
+  "backend/apps/api/src/lib/public-auth-orchestrator.ts",
+  "backend/packages/api/src/create-tenant-route.ts",
+  "backend/packages/auth/src/platform-auth.ts",
+  "backend/packages/membership/src/index.ts",
+  "frontend/apps/web/src/app/api/v1/certificates/[id]/download/route.ts",
+  "frontend/apps/web/src/app/api/v1/certificates/[id]/wallet/apple/download/route.ts",
+  "scripts/e2e/seed-browser-users.mjs",
+  "tests/unit/auth/platform-operators.test.ts",
+  "tests/unit/auth/platform-revocation.test.ts",
+  "tests/unit/api/platform-tenant-revocation.test.ts",
+  "tests/unit/auth/platform-fixture-seeding.test.ts",
+  "tests/unit/api/session-mfa-routes.test.ts"
+]

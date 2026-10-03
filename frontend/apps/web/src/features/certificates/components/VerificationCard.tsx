@@ -118,7 +118,12 @@ export function VerificationCard({
   });
 
   return (
-    <article className="mx-auto max-w-xl overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm print:shadow-none">
+    // A printable credential, so it stays paper-white in both themes -- the same
+    // call the admin certificate preview makes (--admin-certificate-paper). The
+    // ink colour and colour-scheme are set here rather than inherited: in dark
+    // mode the page foreground is near-white, and any child without its own
+    // text colour would otherwise render white on this white card.
+    <article className="mx-auto max-w-xl overflow-hidden rounded-2xl border border-neutral-200 bg-white text-neutral-900 shadow-sm [color-scheme:light] print:shadow-none">
       <header className="flex items-start gap-4 border-b border-neutral-200 bg-neutral-50/60 p-6">
         <img
           src={data.issuer.logoUrl ?? FALLBACK_LOGO}

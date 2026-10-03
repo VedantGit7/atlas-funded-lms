@@ -427,7 +427,7 @@ export function InsightAlertsView({
               }}
             >
               <div className={insightKpiLabelClassName}>Muted</div>
-              <div className={`${insightKpiValueClassName} text-[var(--admin-outline)]`}>
+              <div className={`${insightKpiValueClassName} text-[var(--admin-on-surface-variant)]`}>
                 {formatInsightNumber(board.summary.muted)}
               </div>
               {mutedTitle ? (

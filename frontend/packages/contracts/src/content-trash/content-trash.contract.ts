@@ -70,6 +70,8 @@ export const contentTrashActivityResponseSchema = z.object({
 });
 
 export type ContentTrashListResponse = z.infer<typeof contentTrashListResponseSchema>;
+export type ContentTrashItem = z.infer<typeof contentTrashItemSchema>;
+export type ContentTrashActivityItem = z.infer<typeof contentTrashActivityItemSchema>;
 export type ContentTrashActionBody = z.infer<typeof contentTrashActionBodySchema>;
 export type ContentTrashActionResponse = z.infer<typeof contentTrashActionResponseSchema>;
 export type ContentTrashActivityResponse = z.infer<typeof contentTrashActivityResponseSchema>;

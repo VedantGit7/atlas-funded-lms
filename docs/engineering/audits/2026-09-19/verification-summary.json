@@ -1,0 +1,11 @@
+{
+  "auditDate": "2026-09-19",
+  "head": "ca8c0f1e7e69780b4e2ddc2a1136907a2e47c350",
+  "offlineTests": { "exitCode": 0, "filesPassed": 303, "testsPassed": 2215, "testsSkipped": 1, "runnerDurationSeconds": 146.49 },
+  "typescript": { "exitCode": 0, "method": "Installed TypeScript compiler invoked directly after local Corepack permission error" },
+  "repositoryGuards": { "passed": 11, "failed": 1, "failedGuard": "release-evidence", "reason": "Stale by approximately 26.9 days and refers to a different commit" },
+  "lint": { "status": "incomplete", "terminationExitCode": 1, "reason": "Audit run manually interrupted after approximately 14 minutes during backend/apps shard", "diagnosticsEmittedBeforeStop": false, "fullPassEstablished": false, "runningProcessesStopped": true },
+  "dependencyAudit": { "completed": true, "userApprovedMetadataSubmission": true, "unsuppressedAdvisoryEntries": { "high": 1, "moderate": 11 }, "rawMetadataCounts": { "critical": 0, "high": 3, "moderate": 11 }, "existingSuppressedHighEntries": 2 },
+  "notRun": ["Full production build", "Database-mutating integration suites", "Authenticated browser end-to-end journeys", "Fresh load test", "Fresh restore drill"],
+  "reportValidation": { "findings": 22, "sourceReferenceTargetsChecked": 16, "sourceReferenceTargetsExistAndLinesInRange": true }
+}

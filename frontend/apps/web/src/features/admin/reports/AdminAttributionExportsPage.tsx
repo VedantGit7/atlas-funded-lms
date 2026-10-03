@@ -501,7 +501,7 @@ export function AdminAttributionExportsPage() {
                   >
                     Select all
                   </button>
-                  <span className="text-xs text-[var(--admin-outline)]">·</span>
+                  <span className="text-xs text-[var(--admin-on-surface-variant)]">·</span>
                   <button
                     type="button"
                     className="text-xs font-semibold text-[var(--admin-primary)] hover:underline"

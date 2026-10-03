@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { useMemo, useState, type ReactNode } from "react";
 import type { PaymentTransactionDetail } from "./admin-payments-roster-api";
+import { PaymentRefundHistory } from "./PaymentRefundHistory";
 import {
   formatAbsolute,
   formatClock,
@@ -266,8 +267,14 @@ export function AdminPaymentTransactionDetailBody({
                   ) : null}
                   {detail.refundedAmountCents > 0 ? (
                     <div className="flex justify-between pt-1 text-[var(--admin-warning)]">
-                      <span>Refunded to date</span>
+                      <span>Confirmed refunds</span>
                       <span>{formatMoney(detail.refundedAmountCents, detail.currency)}</span>
+                    </div>
+                  ) : null}
+                  {detail.reservedRefundAmountCents > 0 ? (
+                    <div className="flex justify-between pt-1 text-[var(--admin-on-surface-variant)]">
+                      <span>Reserved for refund requests</span>
+                      <span>{formatMoney(detail.reservedRefundAmountCents, detail.currency)}</span>
                     </div>
                   ) : null}
                 </div>
@@ -635,6 +642,8 @@ export function AdminPaymentTransactionDetailBody({
           </section>
         ) : null}
       </div>
+
+      <PaymentRefundHistory refunds={detail.refunds} currency={detail.currency} />
 
       {isDrawer && onOpenFull ? (
         <button

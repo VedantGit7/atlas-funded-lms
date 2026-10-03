@@ -1,5 +1,7 @@
 import { z } from "zod";
 import { JOB_STATUSES } from "./data-rights.contract";
+import { accessRemovalOutcomeSchema } from "./privacy-lifecycle.contract";
+import { exportScopeSchema } from "./data-rights.events";
 
 const rejectClientTenantFields = z
   .object({
@@ -39,6 +41,8 @@ export const exportJobDtoSchema = z
     updatedAt: z.iso.datetime(),
     expiresAt: z.iso.datetime().nullable(),
     errorCode: z.string().nullable(),
+    scope: exportScopeSchema.nullable().default(null),
+    completePersonalDataExport: z.literal(false).default(false),
     download: z
       .object({
         url: z.url(),
@@ -91,12 +95,16 @@ export const createDeletionRequestBodySchema = rejectClientTenantFields
 export const processDeletionRequestBodySchema = rejectClientTenantFields
   .extend({
     confirm: z.literal(true),
+    operation: z.literal("remove_school_access").optional(),
   })
   .strict();
 
 export const deletionRequestDtoSchema = z
   .object({
     id: z.uuid(),
+    operation: z.literal("remove_school_access").default("remove_school_access"),
+    outcome: accessRemovalOutcomeSchema.nullable().default(null),
+    completionMessage: z.string().nullable().default(null),
     status: z.enum(JOB_STATUSES),
     targetType: z.literal("membership"),
     targetId: z.uuid(),

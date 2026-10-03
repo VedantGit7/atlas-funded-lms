@@ -1,7 +1,11 @@
 import { randomUUID } from "node:crypto";
 import type { TenantTx } from "@atlas/db";
 import type { JobStatus } from "./data-rights.contract";
-import type { DeletionRequestRow, ExportJobRow, TenantExportSnapshot } from "./data-rights.types";
+import type { DeletionRequestRow, ExportJobRow } from "./data-rights.types";
+import {
+  accessRemovalOutcomeSchema,
+  type AccessRemovalOutcome,
+} from "./privacy-lifecycle.contract";
 
 function mapExportJobRow(row: Record<string, unknown>): ExportJobRow {
   return {
@@ -10,6 +14,7 @@ function mapExportJobRow(row: Record<string, unknown>): ExportJobRow {
     requested_by_membership_id: String(row["requested_by_membership_id"]),
     status: String(row["status"]) as JobStatus,
     scope_json: row["scope_json"],
+    artifact_json: row["artifact_json"] ?? null,
     r2_object_key: typeof row["r2_object_key"] === "string" ? row["r2_object_key"] : null,
     error_json: row["error_json"] ?? null,
     expires_at: row["expires_at"] instanceof Date ? row["expires_at"] : null,
@@ -20,6 +25,7 @@ function mapExportJobRow(row: Record<string, unknown>): ExportJobRow {
 
 function mapDeletionRequestRow(row: Record<string, unknown>): DeletionRequestRow {
   return {
+    outcome_json: row["outcome_json"] ?? null,
     id: String(row["id"]),
     tenant_id: String(row["tenant_id"]),
     requested_by_membership_id:
@@ -155,23 +161,63 @@ export const dataRightsRepository = {
     return row ? mapExportJobRow(row) : null;
   },
 
+  async lockRunningExportJob(tx: TenantTx, exportJobId: string): Promise<boolean> {
+    const rows = await tx.$queryRaw<Array<{ id: string }>>`
+      select id from export_jobs
+      where id = ${exportJobId}::uuid and status = 'RUNNING'
+      for update
+    `;
+    return rows.length > 0;
+  },
+
+  /** Release only this worker's successfully claimed job after its work stops. */
+  async requeueExportJob(tx: TenantTx, exportJobId: string): Promise<void> {
+    await tx.$executeRaw`
+      update export_jobs
+      set status = 'QUEUED',
+        error_json = '{"code":"EXPORT_GENERATION_RETRY_PENDING"}'::jsonb,
+        updated_at = now()
+      where id = ${exportJobId}::uuid and status = 'RUNNING'
+    `;
+  },
+
+  async registerExportArtifact(
+    tx: TenantTx,
+    args: { exportJobId: string; objectKey: string; expiresAt: Date; artifact: unknown },
+  ): Promise<void> {
+    const count = await tx.$executeRaw`
+      update export_jobs set r2_object_key = ${args.objectKey}, artifact_json = ${JSON.stringify(args.artifact)}::jsonb,
+        expires_at = ${args.expiresAt}, updated_at = now()
+      where id = ${args.exportJobId}::uuid and status = 'RUNNING'
+    `;
+    if (count !== 1) throw new Error("EXPORT_JOB_NOT_RUNNING");
+  },
+  async markExportWriterStopped(tx: TenantTx, exportJobId: string): Promise<void> {
+    await tx.$executeRaw`
+      update export_jobs set artifact_json = artifact_json || jsonb_build_object('writerStoppedAt', now()), updated_at = now()
+      where id = ${exportJobId}::uuid and status in ('RUNNING', 'CANCELLED') and artifact_json is not null
+    `;
+  },
   async markExportJobSucceeded(
     tx: TenantTx,
     args: {
       exportJobId: string;
       objectKey: string;
       expiresAt: Date;
+      artifact: unknown;
     },
   ): Promise<ExportJobRow | null> {
     const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
       update export_jobs
       set
         status = 'SUCCEEDED',
+        artifact_json = ${JSON.stringify(args.artifact)}::jsonb,
         r2_object_key = ${args.objectKey},
         expires_at = ${args.expiresAt},
         error_json = null,
         updated_at = now()
-      where id = ${args.exportJobId}::uuid
+      where id = ${args.exportJobId}::uuid and status = 'RUNNING'
+        and r2_object_key = ${args.objectKey}
       returning *
     `;
 
@@ -192,7 +238,7 @@ export const dataRightsRepository = {
         status = 'FAILED',
         error_json = ${JSON.stringify({ code: args.errorCode })}::jsonb,
         updated_at = now()
-      where id = ${args.exportJobId}::uuid
+      where id = ${args.exportJobId}::uuid and status = 'RUNNING'
     `;
   },
 
@@ -342,7 +388,17 @@ export const dataRightsRepository = {
   async findDeletionRequestById(
     tx: TenantTx,
     deletionRequestId: string,
+    lockForProcessing = false,
   ): Promise<DeletionRequestRow | null> {
+    if (lockForProcessing) {
+      const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
+        select * from deletion_requests
+        where id = ${deletionRequestId}::uuid
+          and tenant_id = current_setting('app.tenant_id', true)::uuid
+        for update
+      `;
+      return rows[0] ? mapDeletionRequestRow(rows[0]) : null;
+    }
     const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
       select *
       from deletion_requests
@@ -357,82 +413,23 @@ export const dataRightsRepository = {
   async markDeletionRequestSucceeded(
     tx: TenantTx,
     deletionRequestId: string,
+    outcome: AccessRemovalOutcome,
   ): Promise<DeletionRequestRow | null> {
+    const evidence = accessRemovalOutcomeSchema.parse(outcome);
     const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
       update deletion_requests
       set
         status = 'SUCCEEDED',
+        outcome_json = ${JSON.stringify(evidence)}::jsonb,
         completed_at = now(),
         updated_at = now()
       where id = ${deletionRequestId}::uuid
+        and tenant_id = current_setting('app.tenant_id', true)::uuid
         and status = 'QUEUED'
       returning *
     `;
 
     const row = rows[0];
     return row ? mapDeletionRequestRow(row) : null;
-  },
-
-  async buildTenantExportSnapshot(tx: TenantTx, tenantId: string): Promise<TenantExportSnapshot> {
-    const memberships = await tx.$queryRaw<Array<{ id: string; status: string; joined_at: Date }>>`
-      select id::text, status, joined_at
-      from memberships
-      where tenant_id = ${tenantId}::uuid
-      order by joined_at asc
-    `;
-
-    const profiles = await tx.$queryRaw<
-      Array<{ membership_id: string; display_name: string | null }>
-    >`
-      select membership_id::text, display_name
-      from member_profiles
-      where tenant_id = ${tenantId}::uuid
-      order by created_at asc
-    `;
-
-    const courses = await tx.$queryRaw<
-      Array<{ id: string; slug: string; title: string; status: string }>
-    >`
-      select id::text, slug, title, status
-      from courses
-      where tenant_id = ${tenantId}::uuid
-        and deleted_at is null
-      order by updated_at desc
-    `;
-
-    const enrollments = await tx.$queryRaw<
-      Array<{ id: string; course_id: string; membership_id: string; status: string }>
-    >`
-      select id::text, course_id::text, membership_id::text, status
-      from enrollments
-      where tenant_id = ${tenantId}::uuid
-      order by enrolled_at desc
-    `;
-
-    return {
-      exportedAt: new Date().toISOString(),
-      tenantId,
-      memberships: memberships.map((row) => ({
-        id: row.id,
-        status: row.status,
-        joinedAt: row.joined_at.toISOString(),
-      })),
-      memberProfiles: profiles.map((row) => ({
-        membershipId: row.membership_id,
-        displayName: row.display_name,
-      })),
-      courses: courses.map((row) => ({
-        id: row.id,
-        slug: row.slug,
-        title: row.title,
-        status: row.status,
-      })),
-      enrollments: enrollments.map((row) => ({
-        id: row.id,
-        courseId: row.course_id,
-        membershipId: row.membership_id,
-        status: row.status,
-      })),
-    };
   },
 };

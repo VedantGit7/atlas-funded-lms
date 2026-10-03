@@ -110,7 +110,7 @@ export function DeleteModuleDialog({
           </button>
           <button
             type="button"
-            className="flex-1 rounded-lg bg-[var(--admin-danger)] px-4 py-2.5 text-sm font-semibold text-[var(--admin-on-primary)] transition-all hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50 motion-safe:active:scale-[0.98]"
+            className="flex-1 rounded-lg bg-[var(--admin-danger)] px-4 py-2.5 text-sm font-semibold text-[var(--admin-on-danger)] transition-all hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50 motion-safe:active:scale-[0.98]"
             onClick={() => {
               void confirmDelete();
             }}
@@ -121,7 +121,7 @@ export function DeleteModuleDialog({
         </div>
 
         <div className="border-t border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-8 py-2 text-center">
-          <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--admin-outline)]">
+          <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--admin-on-surface-variant)]">
             Action cannot be undone
           </span>
         </div>

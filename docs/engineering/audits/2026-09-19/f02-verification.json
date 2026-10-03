@@ -1,0 +1,106 @@
+{
+  "finding": "F02",
+  "status": "implemented and locally verified; rollout and legacy-access review pending",
+  "baseCommit": "ca8c0f1e7e69780b4e2ddc2a1136907a2e47c350",
+  "includesPriorF01": true,
+  "verifiedAt": "2026-09-19T10:38:58.400Z",
+  "targetedTests": {
+    "files": 29,
+    "passed": 171,
+    "exitCode": 0
+  },
+  "offlineRegression": {
+    "files": 308,
+    "passed": 2259,
+    "skipped": 1,
+    "exitCode": 0
+  },
+  "publicLoginTests": {
+    "files": 1,
+    "passed": 7,
+    "exitCode": 0
+  },
+  "typescript": {
+    "exitCode": 0
+  },
+  "changedFileLint": {
+    "files": 17,
+    "exitCode": 0,
+    "warnings": 0
+  },
+  "format": {
+    "codeFiles": 17,
+    "documentationFiles": 5,
+    "exitCode": 0
+  },
+  "staticChecks": [
+    {
+      "command": [
+        "scripts/guards/check-route-metadata.mjs"
+      ],
+      "exitCode": 0,
+      "output": ""
+    },
+    {
+      "command": [
+        "scripts/guards/check-prisma-boundary.mjs"
+      ],
+      "exitCode": 0,
+      "output": ""
+    },
+    {
+      "command": [
+        "scripts/guards/check-secrets.mjs"
+      ],
+      "exitCode": 0,
+      "output": ""
+    },
+    {
+      "command": [
+        "scripts/guards/check-audit-compliance.mjs"
+      ],
+      "exitCode": 0,
+      "output": "check-audit-compliance: OK (2437 files scanned).\n"
+    },
+    {
+      "command": [
+        "scripts/ci/check-frontend-api-closure.mjs",
+        "--strict"
+      ],
+      "exitCode": 0,
+      "output": "Frontend API closure OK (804 routes scanned, strict=yes).\n"
+    }
+  ],
+  "review": "Independent read-only review found no actionable introduced defects",
+  "deletedFiles": [
+    "backend/packages/membership/src/platform-super-admin-tenant-access.ts"
+  ],
+  "limits": [
+    "Not deployed; no live database grant, membership, or configuration changes performed",
+    "Approved database operator grants must be established before rollout",
+    "Historical automatically provisioned tenant-admin grants require manual review; no bulk cleanup performed",
+    "Controlled recovery grant removal deadlines are operational; automatic expiry is not implemented",
+    "External service behavior tested with doubles; live bootstrap, revocation, database concurrency, and production browser journeys not exercised",
+    "Full production build not run",
+    "F03 replay authorization and remaining audit findings are separate work"
+  ],
+  "sourceHashes": {
+    "backend/apps/api/src/app/api/v1/certificates/[id]/download/route.ts": "cdeebdadf590df04c4f7275ae39cffab0e13fe58f69300c2da19ca686b9b54d1",
+    "backend/apps/api/src/app/api/v1/certificates/[id]/wallet/apple/download/route.ts": "972ad4d3d8d42d48789b9defeded92f8e13d7d54a9000e715f2c6b267ab2e3d5",
+    "backend/apps/api/src/app/api/v1/me/route.ts": "04dfd9e2d5ee644062300034bf85ac4bd1250a55e6286d894cd988424ae284f1",
+    "backend/apps/api/src/app/api/v1/modules/[id]/scorm-content/route.ts": "a0d019b6b6e3ef53cc49e4c8ab43b28fa4a44fab91160219389d76f04b2c1289",
+    "backend/apps/api/src/app/api/v1/public/auth/login/route.ts": "7630c7c877122a39bbb358baf60c5e1344396575149396cfc6a34e66fa22b06b",
+    "backend/apps/api/src/lib/public-auth-orchestrator.ts": "69c3bcd6fa0e87ac38e826de8f80a8e22b09bdc2bcc4c05dc7a116bcff121276",
+    "backend/packages/api/src/create-tenant-route.ts": "36d607a0cd716a1f1810e86cb44a8908ab3220af2b86c656ffc9f1365fff7ce7",
+    "backend/packages/auth/src/platform-auth.ts": "419bf06f82d19a0ff170cd5b0cc7becd730fbac09480c75431fda3e094224628",
+    "backend/packages/membership/src/index.ts": "9a19ad630aa92af1924056fffc130eb28204e99df70dcfebadf6eb572bdff3d5",
+    "frontend/apps/web/src/app/api/v1/certificates/[id]/download/route.ts": "cdeebdadf590df04c4f7275ae39cffab0e13fe58f69300c2da19ca686b9b54d1",
+    "frontend/apps/web/src/app/api/v1/certificates/[id]/wallet/apple/download/route.ts": "972ad4d3d8d42d48789b9defeded92f8e13d7d54a9000e715f2c6b267ab2e3d5",
+    "scripts/e2e/seed-browser-users.mjs": "7bbc9cc810c48f61bb1e78d3295f232a69871c78ef7bc65181f01b1b286b3c85",
+    "tests/unit/auth/platform-operators.test.ts": "600bd35b12629fe10c9f7e55accd7c7b609f6bc0855f261fd081459154a8bb6b",
+    "tests/unit/auth/platform-revocation.test.ts": "e091570ac279396aeb95374ac2f5e81379cc419c54a34bb6f5c63ba639250617",
+    "tests/unit/api/platform-tenant-revocation.test.ts": "01e04fa8e5541dd38f3db0380e0f8b26db1175d5f4822e67691689e22029e948",
+    "tests/unit/auth/platform-fixture-seeding.test.ts": "69c739ea16a7f542daf4b3b81041ba8ca475309bfcbf567aeca342ba11516e6c",
+    "tests/unit/api/session-mfa-routes.test.ts": "24e47fae1ac3e6a5283ea2ba7f9e37b82f5146aa42f62d3ebaba891a5c1cb7c0"
+  }
+}

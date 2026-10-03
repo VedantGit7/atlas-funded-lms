@@ -126,7 +126,7 @@ export function DropdownMenu({
           setOpen((value) => !value);
         }}
         className={cn(
-          "inline-flex items-center justify-center rounded-md p-1.5 text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-primary,#6366f1)]/40 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100",
+          "inline-flex items-center justify-center rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-primary,#6366f1)]/40 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100",
           triggerClassName,
         )}
       >
@@ -141,7 +141,7 @@ export function DropdownMenu({
               aria-label={label}
               style={{ top: position.top, left: position.left, minWidth: position.minWidth }}
               className={cn(
-                "fixed z-[80] overflow-hidden rounded-lg border border-neutral-200 bg-white py-1 shadow-lg dark:border-neutral-700 dark:bg-neutral-900",
+                "fixed z-[80] overflow-hidden rounded-lg border border-border bg-card py-1 text-card-foreground shadow-lg",
                 align === "end" ? dropdownPanelEnterEndClassName : dropdownPanelEnterClassName,
                 contentClassName,
               )}
@@ -159,8 +159,8 @@ export function DropdownMenu({
                   className={cn(
                     "flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm transition-colors disabled:cursor-not-allowed disabled:opacity-40",
                     item.destructive
-                      ? "text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/40"
-                      : "text-neutral-700 hover:bg-neutral-100 dark:text-neutral-200 dark:hover:bg-neutral-800",
+                      ? "text-destructive hover:bg-destructive/10"
+                      : "text-foreground hover:bg-muted",
                     itemClassName,
                   )}
                 >

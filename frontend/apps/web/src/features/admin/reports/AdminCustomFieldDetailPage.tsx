@@ -784,7 +784,7 @@ function BooleanDistribution({ data }: { data: CustomFieldDetailBoolean }) {
       <div className="flex h-10 w-full overflow-hidden rounded-sm border border-[var(--admin-border)]">
         {data.yesCount > 0 ? (
           <div
-            className="flex items-center justify-center bg-[color-mix(in_srgb,var(--admin-success)_70%,var(--admin-surface))] px-2 text-[11px] font-medium text-[var(--admin-on-surface)]"
+            className="flex items-center justify-center bg-[var(--admin-success)] px-2 text-[11px] font-medium text-[var(--admin-on-success)]"
             style={{ width: `${yesPct}%` }}
             title={`Yes ${formatCount(data.yesCount)}`}
           >
@@ -1602,7 +1602,7 @@ export function AdminCustomFieldDetailPage({ fieldKey }: { fieldKey: string }) {
                       className={[
                         "h-9 px-3 text-[12px] font-medium transition-colors",
                         valueFilter === option.key
-                          ? "bg-[var(--admin-primary)] text-white"
+                          ? "bg-[var(--admin-primary)] text-[var(--admin-on-primary)]"
                           : "bg-[var(--admin-surface)] text-[var(--admin-on-surface-variant)] hover:bg-[var(--admin-surface-high)]",
                       ].join(" ")}
                       onClick={() => {

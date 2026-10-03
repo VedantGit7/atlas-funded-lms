@@ -1,4 +1,6 @@
 import { cookies } from "next/headers";
+import { isAuthError, isAuthRetryableFetchError } from "@supabase/supabase-js";
+import { AtlasHttpError } from "@atlas/core/http/errors";
 import {
   ATLAS_ACCESS_TOKEN_COOKIE,
   ATLAS_REFRESH_TOKEN_COOKIE,
@@ -6,12 +8,11 @@ import {
   readCookieFromRequest,
 } from "./cookie-names";
 import { applyAuthSessionToCookieStore, readSessionPersistence } from "./cookie-store";
-import {
-  createSupabaseAdminServerClient,
-  createSupabasePublicServerClient,
-} from "./supabase-server";
-import { authRequired } from "./auth-errors";
+import { createSupabaseSessionVerificationClient } from "./supabase-server";
+import { authProviderUnavailable, authRequired } from "./auth-errors";
 import { refreshSessionFromRefreshToken } from "./public-auth.service";
+
+export type SessionAssuranceLevel = "aal1" | "aal2" | null;
 
 export async function extractAccessToken(req: Request): Promise<string | null> {
   const bearer = getBearerToken(req);
@@ -41,59 +42,50 @@ export async function extractRefreshToken(req: Request): Promise<string | null> 
   return cookieStore.get(ATLAS_REFRESH_TOKEN_COOKIE)?.value ?? null;
 }
 
-async function resolveMfaEnabledForSession(args: {
-  accessToken: string;
-  refreshToken: string;
-}): Promise<boolean> {
-  const supabase = createSupabasePublicServerClient();
-  const { error: sessionError } = await supabase.auth.setSession({
-    access_token: args.accessToken,
-    refresh_token: args.refreshToken,
-  });
+async function resolveUserFromAccessToken(accessToken: string) {
+  const supabase = createSupabaseSessionVerificationClient();
+  const result = await supabase.auth.getUser(accessToken);
 
-  if (sessionError) {
-    return false;
-  }
-
-  const { data, error } = await supabase.auth.mfa.listFactors();
-  if (error) {
-    return false;
-  }
-
-  // `listFactors()` types `data.totp` and `data.phone` as `Factor<K, "verified">[]`
-  // — the SDK returns only verified factors there, and keeps unverified ones in
-  // `data.all`. The old `.some((f) => f.status === "verified")` was therefore
-  // comparing "verified" to "verified" and could never be false for a non-empty
-  // list. It was redundant, not wrong: presence in these arrays IS verification.
-  //
-  // Audit finding H5 assumed the opposite — that the predicate might fail to
-  // discriminate verified from pending factors, making MFA enforcement unsafe to
-  // build on. It does not; see the Phase 2 note in the remediation plan.
-  const verifiedFactors = [...data.totp, ...data.phone];
-  return verifiedFactors.length > 0;
-}
-
-async function resolveUserFromAccessToken(accessToken: string, refreshToken: string | null) {
-  const supabase = createSupabaseAdminServerClient();
-  const result = (await supabase.auth.getUser(accessToken)) as {
-    data: { user: { id: string; email: string; factors?: unknown } | null };
-    error: { message: string } | null;
-  };
-
-  if (result.error || !result.data.user?.id || !result.data.user.email) {
+  if (result.error) throw verificationError(result.error);
+  if (!result.data.user.id || !result.data.user.email) {
     throw authRequired();
   }
 
   const user = result.data.user;
-  const mfaEnabled = refreshToken
-    ? await resolveMfaEnabledForSession({ accessToken, refreshToken })
-    : false;
+  // Verify the exact token used above. Enrollment and a different cookie/refresh
+  // session must never promote this request's assurance. getClaims verifies the
+  // signature and expiration; getUser also checks the user with the auth service.
+  const { data, error } = await supabase.auth.getClaims(accessToken);
+  if (error) throw verificationError(error);
+  if (!data || data.claims.sub !== user.id) {
+    throw authRequired();
+  }
+  const aal = data.claims.aal;
+  const sessionAssuranceLevel: SessionAssuranceLevel =
+    aal === "aal2" ? "aal2" : aal === "aal1" ? "aal1" : null;
+
+  // Account enrollment information only, never an authorization decision.
+  const mfaEnabled = user.factors?.some((factor) => factor.status === "verified") ?? false;
 
   return {
     supabaseUserId: user.id,
-    email: user.email,
+    email: result.data.user.email,
     mfaEnabled,
+    sessionAssuranceLevel,
   };
+}
+
+function verificationError(error: unknown): AtlasHttpError {
+  if (error instanceof AtlasHttpError) return error;
+  const status =
+    typeof error === "object" && error !== null && "status" in error ? error.status : undefined;
+  if (
+    isAuthRetryableFetchError(error) ||
+    (typeof status === "number" && (status >= 500 || status === 429)) ||
+    (error instanceof Error && !isAuthError(error))
+  )
+    return authProviderUnavailable();
+  return authRequired();
 }
 
 export async function refreshAuthenticatedSession(req: Request): Promise<boolean> {
@@ -123,10 +115,14 @@ export async function requireSupabaseUser(req: Request) {
 
   if (accessToken) {
     try {
-      return await resolveUserFromAccessToken(accessToken, refreshToken);
-    } catch {
+      return await resolveUserFromAccessToken(accessToken);
+    } catch (error) {
+      const failure = verificationError(error);
+      // Provider outages are not evidence of invalid credentials. Fail closed
+      // without refreshing or replacing the identity presented on this request.
+      if (failure.status !== 401) throw failure;
       if (!refreshToken) {
-        throw authRequired();
+        throw failure;
       }
     }
   } else if (!refreshToken) {
@@ -139,11 +135,14 @@ export async function requireSupabaseUser(req: Request) {
   }
 
   const nextAccessToken = await extractAccessToken(req);
-  const nextRefreshToken = await extractRefreshToken(req);
 
   if (!nextAccessToken) {
     throw authRequired();
   }
 
-  return resolveUserFromAccessToken(nextAccessToken, nextRefreshToken);
+  try {
+    return await resolveUserFromAccessToken(nextAccessToken);
+  } catch (error) {
+    throw verificationError(error);
+  }
 }

@@ -1,0 +1,7 @@
+{
+  "capturedAt": "2026-09-28T08:01:24.3521605Z",
+  "since": "2026-09-28T07:50:00Z",
+  "sqlstate53300": 0,
+  "tooManyClients": 0,
+  "scope": "Counts from isolated local GoTrue container logs, after bounded pool recreation; no raw log content exported"
+}

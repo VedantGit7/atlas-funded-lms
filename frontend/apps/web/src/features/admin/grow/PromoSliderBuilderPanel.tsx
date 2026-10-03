@@ -994,7 +994,7 @@ export function PromoSliderBuilderPanel({ sliderId }: { sliderId: string }) {
             )}
             <button
               type="button"
-              className="inline-flex items-center rounded-lg bg-[var(--admin-danger)] px-4 py-2 text-[12px] font-bold uppercase tracking-[0.04em] text-[var(--admin-on-primary)] disabled:opacity-50"
+              className="inline-flex items-center rounded-lg bg-[var(--admin-danger)] px-4 py-2 text-[12px] font-bold uppercase tracking-[0.04em] text-[var(--admin-on-danger)] disabled:opacity-50"
               disabled={busy || live}
               onClick={() => {
                 setDeleteOpen(true);
@@ -1060,7 +1060,7 @@ export function PromoSliderBuilderPanel({ sliderId }: { sliderId: string }) {
               </button>
               <button
                 type="button"
-                className="rounded-xl bg-[var(--admin-danger)] px-4 py-2 text-sm font-semibold text-[var(--admin-on-primary)] disabled:opacity-50"
+                className="rounded-xl bg-[var(--admin-danger)] px-4 py-2 text-sm font-semibold text-[var(--admin-on-danger)] disabled:opacity-50"
                 disabled={busy || !deleteMatches}
                 onClick={() => {
                   void onDelete();

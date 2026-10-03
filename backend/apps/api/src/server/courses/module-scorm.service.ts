@@ -1,3 +1,5 @@
+import { assertLocalBlobUpload } from "@atlas/storage/local-blob-upload";
+import { outbox } from "@atlas/events/services/outbox.service";
 import type { TenantTx } from "@atlas/db";
 import { auditWriter } from "@atlas/audit";
 import { AtlasHttpError } from "@atlas/core/http/errors";
@@ -5,11 +7,6 @@ import { confirmAssetUpload } from "@atlas/storage/asset-reference.service";
 import { findAssetReferenceById } from "@atlas/storage/asset-reference.repository";
 import { createModuleScormUpload } from "@atlas/storage/module-scorm.service";
 import { getStorageProvider } from "@atlas/storage/providers/storage-provider-factory";
-import { parseStorageEnv } from "@atlas/storage/schemas/storage-env";
-import {
-  buildScormContentStorageKey,
-  extractScormPackage,
-} from "@atlas/storage/scorm-package-extract";
 import type {
   ModuleScormPackageBlobBody,
   ModuleScormPackageConfirmBody,
@@ -20,7 +17,6 @@ import {
   findModuleWithCourse,
   findModuleScormStorageReference,
   listCourseModulesForBuilder,
-  updateModuleScormLaunchMetadata,
   updateModuleScormPackageReference,
 } from "./course-authoring.repository";
 import { assertModuleEditable } from "./course-state-guards";
@@ -55,60 +51,6 @@ async function requireEditableScormModule(tx: TenantTx, ctx: ServiceCtx, moduleI
   return module;
 }
 
-async function extractAndPublishScormPackage(
-  tx: TenantTx,
-  ctx: ServiceCtx,
-  moduleId: string,
-  assetReferenceId: string,
-) {
-  const env = parseStorageEnv(process.env);
-  const asset = await findAssetReferenceById(tx, assetReferenceId);
-
-  if (!asset || asset.tenant_id !== ctx.tenantId) {
-    throw new AtlasHttpError({
-      code: "VALIDATION_ERROR",
-      status: 400,
-      message: "SCORM package reference was not found.",
-    });
-  }
-
-  const provider = getStorageProvider();
-  const zipBuffer = await provider.getObjectBody({
-    bucket: asset.bucket,
-    key: asset.object_key,
-  });
-
-  if (!zipBuffer) {
-    throw new AtlasHttpError({
-      code: "VALIDATION_ERROR",
-      status: 400,
-      message: "SCORM package file is missing. Upload the ZIP file before confirming.",
-    });
-  }
-
-  const extracted = extractScormPackage(zipBuffer);
-
-  for (const file of extracted.files) {
-    await provider.putObject({
-      bucket: env.R2_BUCKET_NAME,
-      key: buildScormContentStorageKey({
-        tenantId: ctx.tenantId,
-        moduleId,
-        relativePath: file.relativePath,
-      }),
-      body: file.content,
-      contentType: file.contentType,
-    });
-  }
-
-  await updateModuleScormLaunchMetadata({
-    tx,
-    moduleId,
-    launchPath: extracted.launchPath,
-    scormVersion: extracted.scormVersion,
-  });
-}
-
 export async function createModuleScormPackageUploadService(
   tx: TenantTx,
   ctx: ServiceCtx,
@@ -136,6 +78,7 @@ export async function storeModuleScormPackageBlobService(
   moduleId: string,
   input: ModuleScormPackageBlobBody,
 ) {
+  assertLocalBlobUpload();
   await requireEditableScormModule(tx, ctx, moduleId);
 
   const asset = await findAssetReferenceById(tx, input.assetReferenceId);
@@ -235,7 +178,14 @@ export async function confirmModuleScormPackageUploadService(
     assetReferenceId: input.assetReferenceId,
   });
 
-  await extractAndPublishScormPackage(tx, ctx, moduleId, input.assetReferenceId);
+  await outbox.publish(tx, {
+    ctx,
+    eventType: "course.module.scorm_processing_requested",
+    aggregateType: "course_module",
+    aggregateId: moduleId,
+    payload: { moduleId, assetReferenceId: input.assetReferenceId },
+    idempotencyKey: `scorm:${moduleId}:${input.assetReferenceId}:${ctx.requestId}`,
+  });
 
   await auditWriter.write(
     tx,

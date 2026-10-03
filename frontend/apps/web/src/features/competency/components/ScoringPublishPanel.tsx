@@ -7,7 +7,7 @@ import type { ScoringProfileDto } from "@atlas/contracts/competency/competency-c
 import {
   formatCompetencyConfigApiError,
   publishScoringConfig,
-} from "@atlas/contracts-modules/competency/competency-config.api-client";
+} from "@/modules/competency/competency-config.api-client";
 import {
   alertErrorClassName,
   alertInfoClassName,

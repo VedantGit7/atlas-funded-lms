@@ -1,0 +1,49 @@
+[
+  {
+    "name": "extract-zip",
+    "version": "2.0.1",
+    "path": "D:\\Projects\\atlas-funded-lms\\atlas-funded-lms\\node_modules\\.pnpm\\extract-zip@2.0.1\\node_modules\\extract-zip",
+    "dependents": [
+      {
+        "name": "@puppeteer/browsers",
+        "version": "2.3.0",
+        "dependents": [
+          {
+            "name": "puppeteer-core",
+            "version": "22.15.0",
+            "dependents": [
+              {
+                "name": "lighthouse",
+                "version": "12.1.0",
+                "dependents": [
+                  {
+                    "name": "@lhci/cli",
+                    "version": "0.14.0",
+                    "dependents": [
+                      {
+                        "name": "atlas-lms",
+                        "version": "0.0.0",
+                        "depField": "devDependencies"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "@lhci/utils",
+                    "version": "0.14.0",
+                    "dependents": [
+                      {
+                        "name": "@lhci/cli",
+                        "version": "0.14.0",
+                        "deduped": true
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]

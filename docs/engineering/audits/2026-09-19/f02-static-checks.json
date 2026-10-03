@@ -1,0 +1,38 @@
+[
+  {
+    "command": [
+      "scripts/guards/check-route-metadata.mjs"
+    ],
+    "exitCode": 0,
+    "output": ""
+  },
+  {
+    "command": [
+      "scripts/guards/check-prisma-boundary.mjs"
+    ],
+    "exitCode": 0,
+    "output": ""
+  },
+  {
+    "command": [
+      "scripts/guards/check-secrets.mjs"
+    ],
+    "exitCode": 0,
+    "output": ""
+  },
+  {
+    "command": [
+      "scripts/guards/check-audit-compliance.mjs"
+    ],
+    "exitCode": 0,
+    "output": "check-audit-compliance: OK (2437 files scanned).\n"
+  },
+  {
+    "command": [
+      "scripts/ci/check-frontend-api-closure.mjs",
+      "--strict"
+    ],
+    "exitCode": 0,
+    "output": "Frontend API closure OK (804 routes scanned, strict=yes).\n"
+  }
+]

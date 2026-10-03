@@ -287,7 +287,7 @@ export function Select({
                 maxHeight: MENU_MAX_HEIGHT,
               }}
               className={cn(
-                "fixed z-[80] overflow-auto overscroll-contain rounded-lg border border-neutral-200 bg-white py-1 shadow-lg dark:border-neutral-700 dark:bg-neutral-900",
+                "fixed z-[80] overflow-auto overscroll-contain rounded-lg border border-border bg-card py-1 text-card-foreground shadow-lg",
                 position.placement === "top"
                   ? dropdownPanelEnterBottomClassName
                   : dropdownPanelEnterClassName,
@@ -316,17 +316,12 @@ export function Select({
                     }}
                     className={cn(
                       "flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-sm transition-colors disabled:cursor-not-allowed disabled:opacity-40",
-                      isHighlighted
-                        ? "bg-neutral-100 text-neutral-900 dark:bg-neutral-800 dark:text-neutral-100"
-                        : "text-neutral-700 dark:text-neutral-200",
+                      isHighlighted ? "bg-muted text-foreground" : "text-foreground",
                     )}
                   >
                     <span className="min-w-0 flex-1 truncate">{option.label}</span>
                     {isSelected ? (
-                      <Check
-                        className="h-4 w-4 shrink-0 text-neutral-900 dark:text-neutral-100"
-                        aria-hidden="true"
-                      />
+                      <Check className="h-4 w-4 shrink-0 text-foreground" aria-hidden="true" />
                     ) : null}
                   </button>
                 );

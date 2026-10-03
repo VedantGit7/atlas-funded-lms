@@ -1,0 +1,391 @@
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync, readFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { delimiter, join, resolve } from "node:path";
+import { spawnSync } from "node:child_process";
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import { ESLint } from "eslint";
+import { getFileInfo } from "prettier";
+import { pathToFileURL } from "node:url";
+import { createRequire } from "node:module";
+
+const require = createRequire(import.meta.url);
+const { writeAppTypeDeclarations } = require("next/dist/lib/typescript/writeAppTypeDeclarations");
+const {
+  writeConfigurationDefaults,
+} = require("next/dist/lib/typescript/writeConfigurationDefaults");
+
+const repository = resolve(import.meta.dirname, "../..");
+const productCoverage = "backend/apps/api/src/app/api/v1/locales/coverage/route.ts";
+const generatedCoverage = [
+  "coverage/coverage-final.json",
+  "backend/apps/api/coverage/coverage-final.json",
+  "backend/packages/db/coverage/coverage-final.json",
+  "backend/packages/domain/access/coverage/coverage-final.json",
+  "frontend/apps/web/coverage/coverage-final.json",
+  "frontend/packages/contracts/coverage/coverage-final.json",
+];
+
+test("the API build creates referenced declarations before Next checks a fresh checkout", () => {
+  const root = mkdtempSync(join(tmpdir(), "atlas-api-build-"));
+  const script = JSON.parse(readFileSync(join(repository, "backend/apps/api/package.json"), "utf8"))
+    .scripts.build;
+  const app = join(root, "app");
+  const library = join(root, "library");
+  const bin = join(root, "bin");
+  try {
+    for (const dir of [join(app, "src"), join(library, "src"), bin])
+      mkdirSync(dir, { recursive: true });
+    const options = {
+      composite: true,
+      rootDir: "src",
+      target: "ES2022",
+      module: "NodeNext",
+      types: [],
+    };
+    writeFileSync(
+      join(library, "tsconfig.json"),
+      JSON.stringify({
+        compilerOptions: { ...options, declaration: true, outDir: "dist" },
+        include: ["src/**/*.ts"],
+      }),
+    );
+    writeFileSync(join(library, "src/index.ts"), "export const value: number = 1;\n");
+    writeFileSync(
+      join(app, "tsconfig.json"),
+      JSON.stringify({
+        compilerOptions: { ...options, noEmit: true },
+        include: ["src/**/*.ts"],
+        references: [{ path: "../library" }],
+      }),
+    );
+    writeFileSync(
+      join(app, "src/index.ts"),
+      'import { value } from "../../library/src/index"; export const result: number = value;\n',
+    );
+    const nextProbe = join(root, "next-probe.cjs");
+    writeFileSync(
+      nextProbe,
+      [
+        'const { spawnSync } = require("node:child_process");',
+        'const { writeFileSync } = require("node:fs");',
+        'if (process.argv[2] !== "build") throw new Error("Expected Next build");',
+        'writeFileSync("next-started.txt", "Next type-check boundary reached");',
+        'const check = spawnSync(process.execPath, [process.env.ATLAS_TEST_TSC, "--noEmit", "-p", "tsconfig.json"], { stdio: "inherit" });',
+        "process.exit(check.status ?? 1);",
+      ].join("\n"),
+    );
+    const windows = process.platform === "win32";
+    for (const [name, variable] of [
+      ["tsc", "ATLAS_TEST_TSC"],
+      ["next", "ATLAS_TEST_NEXT"],
+    ]) {
+      writeFileSync(
+        join(bin, windows ? `${name}.cmd` : name),
+        windows
+          ? `@"%ATLAS_TEST_NODE%" "%${variable}%" %*\r\n`
+          : `#!/bin/sh\nexec "$ATLAS_TEST_NODE" "$${variable}" "$@"\n`,
+        { mode: 0o755 },
+      );
+    }
+    const env = {
+      ...process.env,
+      PATH: `${bin}${delimiter}${process.env.PATH}`,
+      ATLAS_TEST_NODE: process.execPath,
+      ATLAS_TEST_TSC: require.resolve("typescript/bin/tsc"),
+      ATLAS_TEST_NEXT: nextProbe,
+    };
+    const fresh = spawnSync(
+      process.execPath,
+      [env.ATLAS_TEST_TSC, "--noEmit", "-p", "tsconfig.json"],
+      {
+        cwd: app,
+        encoding: "utf8",
+        timeout: 30000,
+      },
+    );
+    assert.notEqual(fresh.status, 0);
+    assert.match(fresh.stdout, /TS6305/);
+    const run = () =>
+      spawnSync(script, { cwd: app, env, shell: true, encoding: "utf8", timeout: 30000 });
+    const built = run();
+    assert.equal(built.status, 0, built.stdout + built.stderr);
+    assert.match(readFileSync(join(library, "dist/index.d.ts"), "utf8"), /value: number/);
+    assert.ok(readFileSync(join(app, "next-started.txt"), "utf8"));
+
+    rmSync(join(app, "next-started.txt"));
+    writeFileSync(join(library, "src/index.ts"), 'export const value: number = "invalid";\n');
+    const rejected = run();
+    assert.notEqual(rejected.status, 0);
+    assert.match(rejected.stdout, /TS2322/);
+    assert.throws(() => readFileSync(join(app, "next-started.txt")), { code: "ENOENT" });
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("CI, managed images, and production browser serving use the API package build", () => {
+  const scripts = JSON.parse(readFileSync(join(repository, "package.json"), "utf8")).scripts;
+  assert.equal(scripts.build, "pnpm -r build");
+  assert.match(scripts["browser:serve:api"], /^pnpm --filter @atlas\/api-app build && /);
+  assert.match(
+    readFileSync(join(repository, "deploy/managed-node/Dockerfile"), "utf8"),
+    /pnpm --filter @atlas\/api-app build/,
+  );
+  assert.match(
+    readFileSync(join(repository, ".github/workflows/ci.yml"), "utf8"),
+    /run: pnpm build/,
+  );
+});
+
+test("the Git index contains no generated Next declarations or TypeScript build caches", () => {
+  const tracked = spawnSync("git", ["ls-files", "*next-env.d.ts", "*.tsbuildinfo"], {
+    cwd: repository,
+    encoding: "utf8",
+  });
+  assert.equal(tracked.status, 0, tracked.stderr);
+  assert.equal(tracked.stdout.trim(), "");
+});
+
+test("Next and TypeScript regeneration preserve clean source evidence while source edits fail", async () => {
+  const root = mkdtempSync(join(tmpdir(), "atlas-generated-source-"));
+  const apps = ["backend/apps/api", "frontend/apps/web"];
+  const git = (args) => {
+    const result = spawnSync("git", args, { cwd: root, encoding: "utf8" });
+    assert.equal(result.status, 0, result.stderr);
+    return result.stdout.trim();
+  };
+  const captureUrl = pathToFileURL(join(repository, "scripts/release/evidence-contract.mjs")).href;
+  const capture = () => {
+    const result = spawnSync(
+      process.execPath,
+      [
+        "--input-type=module",
+        "-e",
+        `import { captureSource } from ${JSON.stringify(captureUrl)}; console.log(JSON.stringify(captureSource({...process.env, CI: 'false', GITHUB_ACTIONS: 'false', GIT_SHA: undefined, GITHUB_SHA: undefined})));`,
+      ],
+      { cwd: root, encoding: "utf8" },
+    );
+    assert.equal(result.status, 0, result.stderr);
+    return JSON.parse(result.stdout);
+  };
+  const generate = async (distDir) => {
+    for (const app of apps) {
+      const baseDir = join(root, app);
+      mkdirSync(baseDir, { recursive: true });
+      await writeAppTypeDeclarations({
+        baseDir,
+        distDir,
+        imageImportsEnabled: true,
+        hasPagesDir: false,
+        hasAppDir: true,
+        strictRouteTypes: false,
+        typedRoutes: false,
+      });
+    }
+  };
+  try {
+    git(["init"]);
+    writeFileSync(join(root, ".gitignore"), readFileSync(join(repository, ".gitignore")));
+    writeFileSync(
+      join(root, "tsconfig.base.json"),
+      readFileSync(join(repository, "tsconfig.base.json")),
+    );
+    const contracts = join(root, "frontend/packages/contracts");
+    mkdirSync(join(contracts, "src"), { recursive: true });
+    writeFileSync(join(contracts, "src/index.ts"), "export const value = 1;\n");
+    writeFileSync(
+      join(contracts, "tsconfig.json"),
+      JSON.stringify({
+        compilerOptions: { composite: true, rootDir: "src", outDir: "dist", types: [] },
+        include: ["src/**/*.ts"],
+      }),
+    );
+    await generate(".next/dev");
+    for (const app of apps)
+      writeFileSync(
+        join(root, app, "tsconfig.json"),
+        readFileSync(join(repository, app, "tsconfig.json")),
+      );
+    const development = readFileSync(join(root, apps[0], "next-env.d.ts"), "utf8");
+    assert.match(development, /\.next\/dev\/types\/routes\.d\.ts/);
+    git(["add", "."]);
+    git([
+      "-c",
+      "user.name=Generated output fixture",
+      "-c",
+      "user.email=ci@example.invalid",
+      "-c",
+      "commit.gpgsign=false",
+      "commit",
+      "--no-verify",
+      "-m",
+      "fixture",
+    ]);
+    assert.equal(capture().source.clean, true);
+
+    await generate(".next");
+    for (const app of apps) {
+      const config = join(root, app, "tsconfig.json");
+      const before = readFileSync(config, "utf8");
+      await writeConfigurationDefaults(
+        require("typescript").version,
+        config,
+        false,
+        true,
+        ".next",
+        false,
+        false,
+      );
+      assert.equal(readFileSync(config, "utf8"), before, `${app} production config must be stable`);
+    }
+    const production = readFileSync(join(root, apps[0], "next-env.d.ts"), "utf8");
+    assert.notEqual(production, development);
+    assert.match(production, /\.next\/types\/routes\.d\.ts/);
+    const build = spawnSync(
+      process.execPath,
+      [require.resolve("typescript/bin/tsc"), "-b", contracts],
+      {
+        cwd: root,
+        encoding: "utf8",
+        timeout: 30000,
+      },
+    );
+    assert.equal(build.status, 0, build.stdout + build.stderr);
+    assert.ok(readFileSync(join(contracts, "tsconfig.tsbuildinfo"), "utf8").length > 0);
+    const regenerated = capture();
+    assert.equal(regenerated.source.clean, true, git(["status", "--porcelain"]));
+    assert.deepEqual(regenerated.errors, []);
+    assert.equal(git(["ls-files", "*next-env.d.ts", "*.tsbuildinfo"]), "");
+
+    writeFileSync(join(contracts, "src/index.ts"), "export const value = 2;\n");
+    assert.equal(capture().source.clean, false);
+    assert.match(capture().errors.join(" "), /dirty/);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("Git and Docker ignore patterns preserve source and exclude generated coverage reports", () => {
+  const root = mkdtempSync(join(tmpdir(), "atlas-coverage-ignore-"));
+  try {
+    assert.equal(spawnSync("git", ["init"], { cwd: root }).status, 0);
+    // These root-relative directory globs have the same matching semantics in both files.
+    for (const ignoreFile of [".gitignore", ".dockerignore"]) {
+      writeFileSync(join(root, ".gitignore"), readFileSync(join(repository, ignoreFile)));
+      for (const path of [...generatedCoverage, productCoverage]) {
+        const result = spawnSync("git", ["check-ignore", "--no-index", path], {
+          cwd: root,
+          encoding: "utf8",
+        });
+        assert.equal(result.status, path === productCoverage ? 1 : 0, `${ignoreFile}: ${path}`);
+      }
+    }
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("ESLint and Prettier inspect the product coverage route but skip generated reports", async () => {
+  const eslint = new ESLint({ cwd: repository });
+  for (const path of [...generatedCoverage, productCoverage]) {
+    const ignored = path !== productCoverage;
+    assert.equal(await eslint.isPathIgnored(join(repository, path)), ignored, path);
+    assert.equal(
+      (
+        await getFileInfo(join(repository, path), {
+          ignorePath: join(repository, ".prettierignore"),
+        })
+      ).ignored,
+      ignored,
+      path,
+    );
+  }
+});
+
+test("required source guards inspect coverage source while excluding workspace reports", () => {
+  const root = mkdtempSync(join(tmpdir(), "atlas-coverage-guards-"));
+  const guards = [
+    "guards/check-prisma-boundary.mjs",
+    "guards/check-secrets.mjs",
+    "guards/check-forbidden-scope.mjs",
+    "guards/check-audit-compliance.mjs",
+    "guards/check-outbox-compliance.mjs",
+    "db/check-no-session-tenant-set.mjs",
+    "db/check-sql-approved-paths.mjs",
+  ];
+  const source = [
+    'import { PrismaClient } from "@prisma/client";',
+    "export function createTenant() {}",
+    "sendEmail();",
+    'const product = "challengeCheckout";',
+    `const secret = "${["AKIA", "0123456789ABCDEF"].join("")}";`,
+    `const query = "${["SET", "app.tenant_id = 1"].join(" ")}";`,
+  ].join("\n");
+  const put = (directory) => {
+    mkdirSync(join(root, directory), { recursive: true });
+    writeFileSync(join(root, directory, "fixture.ts"), source);
+    writeFileSync(join(root, directory, "fixture.sql"), ["SET", "app.tenant_id = 1;"].join(" "));
+  };
+  const run = (script) =>
+    spawnSync(process.execPath, [join(repository, "scripts", script)], {
+      cwd: root,
+      encoding: "utf8",
+      timeout: 30000,
+    });
+  try {
+    mkdirSync(join(root, "backend/apps/api/src"), { recursive: true });
+    for (let i = 0; i < 500; i += 1)
+      writeFileSync(join(root, `backend/apps/api/src/fixture-${i}.ts`), "export {};\n");
+    put("backend/apps/api/coverage");
+    for (const script of guards) {
+      const result = run(script);
+      assert.equal(result.status, 0, `${script}: ${result.stderr}`);
+    }
+    put("backend/apps/api/src/app/api/v1/locales/coverage");
+    for (const script of guards) {
+      const result = run(script);
+      assert.equal(result.status, 1, `${script}: ${result.stderr}`);
+      assert.match(result.stderr.replaceAll("\\", "/"), /src\/app\/api\/v1\/locales\/coverage/);
+    }
+    const walkerUrl = pathToFileURL(join(repository, "scripts/ci/lib/page-reachability.mjs")).href;
+    const traversal = spawnSync(
+      process.execPath,
+      [
+        "--input-type=module",
+        "-e",
+        `import { walkFiles } from ${JSON.stringify(walkerUrl)}; console.log(JSON.stringify(walkFiles('.')));`,
+      ],
+      { cwd: root, encoding: "utf8", timeout: 10000 },
+    );
+    assert.equal(traversal.status, 0, traversal.stderr);
+    const paths = JSON.parse(traversal.stdout).map((path) => path.replaceAll("\\", "/"));
+    assert.ok(paths.includes("backend/apps/api/src/app/api/v1/locales/coverage/fixture.ts"));
+    assert.ok(!paths.some((path) => path.startsWith("backend/apps/api/coverage/")));
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+const guard = resolve(import.meta.dirname, "check-prisma-boundary.mjs");
+test("Prisma boundary ignores generated verification builds but still rejects real source imports", () => {
+  const root = mkdtempSync(join(tmpdir(), "atlas-guard-output-"));
+  try {
+    for (const dir of [".next", ".next-e2e", ".next-perf"]) {
+      const folder = join(root, "frontend/apps/web", dir);
+      mkdirSync(folder, { recursive: true });
+      writeFileSync(join(folder, "compiled.js"), 'import { PrismaClient } from "@prisma/client";');
+    }
+    const run = () =>
+      spawnSync(process.execPath, [guard], { cwd: root, encoding: "utf8", timeout: 10000 });
+    assert.equal(run().status, 0);
+    const folder = join(root, "frontend/apps/web/src");
+    mkdirSync(folder, { recursive: true });
+    writeFileSync(join(folder, "bad.ts"), 'import { PrismaClient } from "@prisma/client";');
+    const rejected = run();
+    assert.equal(rejected.status, 1);
+    assert.match(rejected.stderr, /src.bad.ts/);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});

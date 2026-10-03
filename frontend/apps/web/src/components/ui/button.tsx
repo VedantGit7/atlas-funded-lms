@@ -1,1 +1,1 @@
-export { Button, type ButtonProps } from "@atlas/design-system";
+export { Button, type ButtonProps } from "@atlas/design-system/components/button";

@@ -1,0 +1,14 @@
+[
+  {
+    "name": "check-rls-state",
+    "exitCode": 1
+  },
+  {
+    "name": "check-tenant-leading-indexes",
+    "exitCode": 0
+  },
+  {
+    "name": "check-append-only-trigger-coverage",
+    "exitCode": 0
+  }
+]

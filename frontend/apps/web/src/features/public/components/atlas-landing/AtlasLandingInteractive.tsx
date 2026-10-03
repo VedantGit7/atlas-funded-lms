@@ -1,9 +1,22 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { ATLAS_FAQ } from "./atlas-landing-data";
 import "./atlas-landing.css";
+
+/** Only the theme and navigation hydrate; the page content arrives as a server slot. */
+export function AtlasLandingFrame({ children }: { children: ReactNode }) {
+  const { darkMode, toggleDark, mounted } = useAtlasTheme();
+  return (
+    <div
+      className={`atlas-landing font-plus-jakarta-sans ${mounted && darkMode ? "atl-dark" : ""}`}
+    >
+      <AtlasNav darkMode={darkMode} onToggleDark={toggleDark} />
+      {children}
+    </div>
+  );
+}
 
 export function AtlasBrandMark({ className }: { className?: string }) {
   return (
@@ -202,7 +215,7 @@ export function AtlasFaq() {
                   </div>
                   <div
                     className={`w-5 shrink-0 text-center text-[22px] font-light leading-none ${
-                      isOpen ? "text-[var(--atl-acc)]" : "text-[var(--atl-tx3)]"
+                      isOpen ? "text-[var(--atl-acc-tx)]" : "text-[var(--atl-tx3)]"
                     }`}
                     aria-hidden
                   >

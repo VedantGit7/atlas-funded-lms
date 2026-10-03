@@ -16,8 +16,8 @@ import type {
   ContentTrashItem,
   ContentTrashKind,
   ContentTrashListResponse,
-} from "@atlas/contracts/admin/content-trash.dto";
-import { TRASH_RETENTION_DAYS } from "@atlas/contracts/admin/content-trash.dto";
+} from "@atlas/contracts/content-trash/content-trash.contract";
+import { TRASH_RETENTION_DAYS } from "@atlas/contracts/content-trash/content-trash.contract";
 
 import { clientApi, createClientUuid } from "../../../lib/client-api";
 

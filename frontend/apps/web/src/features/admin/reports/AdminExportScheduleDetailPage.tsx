@@ -287,7 +287,7 @@ function DeleteModal({
           </button>
           <button
             type="button"
-            className="inline-flex h-9 items-center gap-2 rounded-lg bg-[var(--admin-danger)] px-4 text-[13px] font-semibold text-[var(--admin-on-primary)] disabled:opacity-50"
+            className="inline-flex h-9 items-center gap-2 rounded-lg bg-[var(--admin-danger)] px-4 text-[13px] font-semibold text-[var(--admin-on-danger)] disabled:opacity-50"
             onClick={onConfirm}
             disabled={busy}
           >

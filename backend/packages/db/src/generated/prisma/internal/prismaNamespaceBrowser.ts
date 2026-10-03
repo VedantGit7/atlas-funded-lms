@@ -52,6 +52,7 @@ export const AnyNull = runtime.AnyNull
 
 export const ModelName = {
   Tenant: 'Tenant',
+  TenantUsageEvent: 'TenantUsageEvent',
   TenantDomain: 'TenantDomain',
   AuthPrincipal: 'AuthPrincipal',
   PlatformOperator: 'PlatformOperator',
@@ -279,7 +280,11 @@ export const ModelName = {
   MarketingIntegrationWebhookDelivery: 'MarketingIntegrationWebhookDelivery',
   MarketingNewsfeedSettings: 'MarketingNewsfeedSettings',
   MarketingNewsfeedPost: 'MarketingNewsfeedPost',
-  MarketingNewsfeedSave: 'MarketingNewsfeedSave'
+  MarketingNewsfeedSave: 'MarketingNewsfeedSave',
+  PaymentRefundIntent: 'PaymentRefundIntent',
+  OutboxDeliveryJob: 'OutboxDeliveryJob',
+  ReportDeliveryEffect: 'ReportDeliveryEffect',
+  ExportFileCleanupRequest: 'ExportFileCleanupRequest'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -314,6 +319,20 @@ export const TenantScalarFieldEnum = {
 } as const
 
 export type TenantScalarFieldEnum = (typeof TenantScalarFieldEnum)[keyof typeof TenantScalarFieldEnum]
+
+
+export const TenantUsageEventScalarFieldEnum = {
+  id: 'id',
+  tenant_id: 'tenant_id',
+  period_start: 'period_start',
+  requests: 'requests',
+  duration_ms: 'duration_ms',
+  emails: 'emails',
+  created_at: 'created_at',
+  processed_at: 'processed_at'
+} as const
+
+export type TenantUsageEventScalarFieldEnum = (typeof TenantUsageEventScalarFieldEnum)[keyof typeof TenantUsageEventScalarFieldEnum]
 
 
 export const TenantDomainScalarFieldEnum = {
@@ -881,6 +900,7 @@ export const CourseModuleScalarFieldEnum = {
   scorm_package_reference_id: 'scorm_package_reference_id',
   scorm_launch_path: 'scorm_launch_path',
   scorm_version: 'scorm_version',
+  scormContentVersion: 'scormContentVersion',
   created_at: 'created_at',
   updated_at: 'updated_at',
   deleted_at: 'deleted_at'
@@ -2506,6 +2526,7 @@ export const ExportJobScalarFieldEnum = {
   status: 'status',
   scope_json: 'scope_json',
   r2_object_key: 'r2_object_key',
+  artifact_json: 'artifact_json',
   error_json: 'error_json',
   expires_at: 'expires_at',
   created_at: 'created_at',
@@ -2523,6 +2544,7 @@ export const DeletionRequestScalarFieldEnum = {
   target_id: 'target_id',
   status: 'status',
   reason: 'reason',
+  outcome_json: 'outcome_json',
   scheduled_at: 'scheduled_at',
   completed_at: 'completed_at',
   created_at: 'created_at',
@@ -2571,6 +2593,8 @@ export type ReportScheduleScalarFieldEnum = (typeof ReportScheduleScalarFieldEnu
 
 
 export const ReportRunScalarFieldEnum = {
+  artifact_json: 'artifact_json',
+  file_retention_managed: 'file_retention_managed',
   id: 'id',
   tenant_id: 'tenant_id',
   report_definition_id: 'report_definition_id',
@@ -3964,6 +3988,95 @@ export const MarketingNewsfeedSaveScalarFieldEnum = {
 } as const
 
 export type MarketingNewsfeedSaveScalarFieldEnum = (typeof MarketingNewsfeedSaveScalarFieldEnum)[keyof typeof MarketingNewsfeedSaveScalarFieldEnum]
+
+
+export const PaymentRefundIntentScalarFieldEnum = {
+  id: 'id',
+  tenant_id: 'tenant_id',
+  order_id: 'order_id',
+  request_key: 'request_key',
+  request_fingerprint: 'request_fingerprint',
+  amount_cents: 'amount_cents',
+  currency: 'currency',
+  gateway_key: 'gateway_key',
+  gateway_id: 'gateway_id',
+  external_id: 'external_id',
+  status: 'status',
+  provider_refund_id: 'provider_refund_id',
+  payload_json: 'payload_json',
+  lease_token: 'lease_token',
+  lease_until: 'lease_until',
+  attempts: 'attempts',
+  next_attempt_at: 'next_attempt_at',
+  last_error: 'last_error',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type PaymentRefundIntentScalarFieldEnum = (typeof PaymentRefundIntentScalarFieldEnum)[keyof typeof PaymentRefundIntentScalarFieldEnum]
+
+
+export const OutboxDeliveryJobScalarFieldEnum = {
+  id: 'id',
+  tenant_id: 'tenant_id',
+  outbox_event_id: 'outbox_event_id',
+  destination_key: 'destination_key',
+  status: 'status',
+  attempt_count: 'attempt_count',
+  cycle_attempt_count: 'cycle_attempt_count',
+  max_attempts: 'max_attempts',
+  next_attempt_at: 'next_attempt_at',
+  lease_token: 'lease_token',
+  lease_until: 'lease_until',
+  last_error_code: 'last_error_code',
+  last_dead_letter_id: 'last_dead_letter_id',
+  replayed_dead_letter_id: 'replayed_dead_letter_id',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type OutboxDeliveryJobScalarFieldEnum = (typeof OutboxDeliveryJobScalarFieldEnum)[keyof typeof OutboxDeliveryJobScalarFieldEnum]
+
+
+export const ReportDeliveryEffectScalarFieldEnum = {
+  effect_key: 'effect_key',
+  tenant_id: 'tenant_id',
+  report_run_id: 'report_run_id',
+  ordinal: 'ordinal',
+  kind: 'kind',
+  destination_id: 'destination_id',
+  request_json: 'request_json',
+  retry_on_crash: 'retry_on_crash',
+  status: 'status',
+  lease_token: 'lease_token',
+  lease_until: 'lease_until',
+  attempts: 'attempts',
+  error_kind: 'error_kind',
+  last_error: 'last_error',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type ReportDeliveryEffectScalarFieldEnum = (typeof ReportDeliveryEffectScalarFieldEnum)[keyof typeof ReportDeliveryEffectScalarFieldEnum]
+
+
+export const ExportFileCleanupRequestScalarFieldEnum = {
+  id: 'id',
+  tenant_id: 'tenant_id',
+  source_type: 'source_type',
+  source_id: 'source_id',
+  object_key: 'object_key',
+  artifact_json: 'artifact_json',
+  status: 'status',
+  lease_token: 'lease_token',
+  lease_until: 'lease_until',
+  attempts: 'attempts',
+  last_error: 'last_error',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type ExportFileCleanupRequestScalarFieldEnum = (typeof ExportFileCleanupRequestScalarFieldEnum)[keyof typeof ExportFileCleanupRequestScalarFieldEnum]
 
 
 export const SortOrder = {

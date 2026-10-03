@@ -464,20 +464,20 @@ export function AdminScoresAssessmentListPage({
                 aria-label="Breadcrumb"
               >
                 <span>Admin</span>
-                <span className="text-[var(--admin-outline)]">/</span>
+                <span className="text-[var(--admin-on-surface-variant)]">/</span>
                 <span>Reports</span>
-                <span className="text-[var(--admin-outline)]">/</span>
+                <span className="text-[var(--admin-on-surface-variant)]">/</span>
                 <span>Progress &amp; Score</span>
-                <span className="text-[var(--admin-outline)]">/</span>
+                <span className="text-[var(--admin-on-surface-variant)]">/</span>
                 <Link
                   href="/admin/reports/progress-score/scores"
                   className="hover:text-[var(--admin-primary)]"
                 >
                   Scores
                 </Link>
-                <span className="text-[var(--admin-outline)]">/</span>
+                <span className="text-[var(--admin-on-surface-variant)]">/</span>
                 <span>{typeLabel}</span>
-                <span className="text-[var(--admin-outline)]">/</span>
+                <span className="text-[var(--admin-on-surface-variant)]">/</span>
                 <span className="text-[var(--admin-on-surface)]">{title}</span>
               </nav>
             </div>
@@ -953,7 +953,7 @@ export function AdminScoresAssessmentListPage({
                   <h2 className="mb-6 font-mono text-[11px] font-medium uppercase tracking-[0.1em] text-[var(--admin-on-surface-variant)]">
                     Score spread by assessment
                   </h2>
-                  <div className="mb-2 flex justify-between font-mono text-[10px] text-[var(--admin-outline)]">
+                  <div className="mb-2 flex justify-between font-mono text-[10px] text-[var(--admin-on-surface-variant)]">
                     <span>0</span>
                     <span>50</span>
                     <span>100</span>

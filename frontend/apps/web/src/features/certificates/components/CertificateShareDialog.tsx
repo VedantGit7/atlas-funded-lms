@@ -1,9 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import {
+  AnimatePresence,
+  motion,
+  useReducedMotion,
+} from "../../../components/motion/animation-boundary";
 import { BadgeCheck, Check, Copy, Mail, Send, Share2, X } from "lucide-react";
-import { embedCode, shareTargets } from "../certificates-view";
+import { shareTargets } from "../certificates-view";
 
 export type ShareCertificate = {
   /** Absolute public verification URL. */
@@ -46,30 +50,21 @@ function SharePanel({ share, onClose }: { share: ShareCertificate; onClose: () =
   const reduce = useReducedMotion();
   const closeRef = useRef<HTMLButtonElement>(null);
   const [copiedLink, setCopiedLink] = useState(false);
-  const [copiedEmbed, setCopiedEmbed] = useState(false);
 
   useEffect(() => {
     closeRef.current?.focus();
   }, []);
 
   const targets = shareTargets(share.url, share.title);
-  const embed = embedCode(share.url, share.title);
 
-  async function copy(value: string, target: "link" | "embed") {
+  async function copyLink() {
     if (typeof navigator === "undefined") return;
     try {
-      await navigator.clipboard.writeText(value);
-      if (target === "link") {
-        setCopiedLink(true);
-        setTimeout(() => {
-          setCopiedLink(false);
-        }, 2000);
-      } else {
-        setCopiedEmbed(true);
-        setTimeout(() => {
-          setCopiedEmbed(false);
-        }, 2000);
-      }
+      await navigator.clipboard.writeText(share.url);
+      setCopiedLink(true);
+      setTimeout(() => {
+        setCopiedLink(false);
+      }, 2000);
     } catch {
       // Clipboard unavailable; no action needed.
     }
@@ -178,7 +173,7 @@ function SharePanel({ share, onClose }: { share: ShareCertificate; onClose: () =
                 <button
                   type="button"
                   onClick={() => {
-                    void copy(share.url, "link");
+                    void copyLink();
                   }}
                   className="inline-flex shrink-0 items-center gap-1.5 rounded-md bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
@@ -193,31 +188,6 @@ function SharePanel({ share, onClose }: { share: ShareCertificate; onClose: () =
               <p className="mt-2 text-[11px] leading-tight text-muted-foreground">
                 Anyone with this link can verify the authenticity of this credential.
               </p>
-            </div>
-
-            <div>
-              <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                Embed code
-              </p>
-              <div className="flex items-stretch gap-2">
-                <code className="min-w-0 flex-1 truncate rounded-md border border-border bg-muted px-3 py-2 font-mono text-xs text-muted-foreground">
-                  {embed}
-                </code>
-                <button
-                  type="button"
-                  onClick={() => {
-                    void copy(embed, "embed");
-                  }}
-                  className="inline-flex shrink-0 items-center justify-center rounded-md border border-border px-3 py-2 text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  aria-label={copiedEmbed ? "Embed code copied" : "Copy embed code"}
-                >
-                  {copiedEmbed ? (
-                    <Check className="h-4 w-4" strokeWidth={2.5} aria-hidden="true" />
-                  ) : (
-                    <Copy className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
-                  )}
-                </button>
-              </div>
             </div>
           </div>
         </div>

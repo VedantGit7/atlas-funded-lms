@@ -1,11 +1,9 @@
 "use client";
 
-import { useEffect } from "react";
-import { animate, motion, useMotionValue, useReducedMotion, useTransform } from "motion/react";
+import { useRef } from "react";
+import { useAnimatedNumber, useEntryAnimation } from "../../../components/motion/native-animation";
 import { cn } from "@atlas/design-system";
 import { toGaugePercent } from "../readiness-view";
-
-const EASE = [0.16, 1, 0.3, 1] as const;
 
 type ScoreGaugeProps = {
   /** Raw score; clamped to 0-100 for the arc fill. */
@@ -50,7 +48,7 @@ export function ScoreGauge({
   caption,
   className,
 }: ScoreGaugeProps) {
-  const reduce = useReducedMotion();
+  const ref = useRef<SVGCircleElement>(null);
   const cfg = VARIANTS[variant];
   const pct = toGaugePercent(score);
   const target = displayValue ?? Math.round(score);
@@ -60,19 +58,12 @@ export function ScoreGauge({
   const arcLength = circumference * cfg.sweep;
   const drawn = (pct / 100) * arcLength;
 
-  const count = useMotionValue(reduce ? target : 0);
-  const display = useTransform(count, (value) => Math.round(value).toString());
-
-  useEffect(() => {
-    if (reduce) {
-      count.set(target);
-      return;
-    }
-    const controls = animate(count, target, { duration: 1.1, ease: EASE });
-    return () => {
-      controls.stop();
-    };
-  }, [count, target, reduce]);
+  const display = useAnimatedNumber(target, 1100);
+  useEntryAnimation(
+    ref,
+    [{ strokeDashoffset: circumference }, { strokeDashoffset: circumference - drawn }],
+    { duration: 1200, threshold: 0.4 },
+  );
 
   return (
     <div
@@ -98,7 +89,8 @@ export function ScoreGauge({
           strokeLinecap="round"
           strokeDasharray={`${String(arcLength)} ${String(circumference)}`}
         />
-        <motion.circle
+        <circle
+          ref={ref}
           cx={cfg.size / 2}
           cy={cfg.size / 2}
           r={radius}
@@ -107,10 +99,7 @@ export function ScoreGauge({
           strokeWidth={cfg.stroke}
           strokeLinecap="round"
           strokeDasharray={circumference}
-          initial={{ strokeDashoffset: reduce ? circumference - drawn : circumference }}
-          whileInView={{ strokeDashoffset: circumference - drawn }}
-          viewport={{ once: true, amount: 0.4 }}
-          transition={{ duration: reduce ? 0 : 1.2, ease: EASE }}
+          strokeDashoffset={circumference - drawn}
         />
       </svg>
 
@@ -118,7 +107,7 @@ export function ScoreGauge({
         <span
           className={cn("font-semibold leading-none tracking-tight tabular-nums", cfg.numberClass)}
         >
-          <motion.span>{display}</motion.span>
+          <span>{display}</span>
         </span>
         {caption ? (
           <span

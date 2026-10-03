@@ -49,6 +49,7 @@ export async function exportLiveClassAttendanceRoster(
     const adminEmail = await notificationRepository.findMembershipEmail(tx, ctx.actorMembershipId);
     if (provider.isConfigured() && adminEmail) {
       await provider.send({
+        tenantId: ctx.tenantId,
         to: adminEmail,
         subject: "Your Live Class Attendance export is ready",
         body: [
@@ -190,6 +191,7 @@ export async function sendLiveClassAttendanceMessage(
 
       try {
         await provider.send({
+          tenantId: ctx.tenantId,
           to: target.email,
           subject: body.subject.replaceAll("{{session_title}}", sessionTitle),
           body: renderedBody,

@@ -238,9 +238,9 @@ function PipelinePanel({ stages }: { stages: ExportRunPipelineStage[] }) {
                 <div
                   className={`relative flex h-6 w-6 items-center justify-center rounded-full border-2 ${
                     complete
-                      ? "border-[var(--admin-success)] bg-[var(--admin-success)] text-[var(--admin-on-primary)]"
+                      ? "border-[var(--admin-success)] bg-[var(--admin-success)] text-[var(--admin-on-danger)]"
                       : failed
-                        ? "border-[var(--admin-danger)] bg-[var(--admin-danger)] text-[var(--admin-on-primary)]"
+                        ? "border-[var(--admin-danger)] bg-[var(--admin-danger)] text-[var(--admin-on-danger)]"
                         : current
                           ? "border-[var(--admin-primary-strong)] bg-[var(--admin-surface)] text-[var(--admin-primary-strong)] motion-safe:animate-[admin-pipeline-pulse_2s_cubic-bezier(0.4,0,0.6,1)_infinite]"
                           : "border-[var(--admin-outline)] bg-[var(--admin-surface-high)] text-[var(--admin-on-surface-variant)]"
@@ -393,20 +393,20 @@ function DeleteFileModal({
           <div className="flex gap-3 rounded-lg bg-[color-mix(in_srgb,var(--admin-surface-variant)_40%,transparent)] p-3">
             <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-[var(--admin-on-surface-variant)]" />
             <p className="text-sm leading-normal text-[var(--admin-on-surface-variant)]">
-              The run record and its parameters are kept for audit while the file itself is removed
-              permanently.
+              Deletion is queued for the background worker. New downloads stop immediately; the file
+              remains listed until deletion is confirmed. The run record stays available for audit.
             </p>
           </div>
         </div>
         <div className="flex flex-col gap-3 px-6 py-6 sm:flex-row-reverse">
           <button
             type="button"
-            className="inline-flex h-12 flex-1 items-center justify-center gap-2 rounded-lg bg-[var(--admin-danger)] text-base font-bold text-[var(--admin-on-primary)] transition-colors hover:opacity-90 disabled:opacity-50"
+            className="inline-flex h-12 flex-1 items-center justify-center gap-2 rounded-lg bg-[var(--admin-danger)] text-base font-bold text-[var(--admin-on-danger)] transition-colors hover:opacity-90 disabled:opacity-50"
             disabled={busy}
             onClick={onConfirm}
           >
             <Trash2 className="h-4 w-4" aria-hidden="true" />
-            {busy ? "Deleting…" : "Delete file"}
+            {busy ? "Queuing…" : "Queue deletion"}
           </button>
           <button
             type="button"
@@ -436,6 +436,7 @@ export function AdminExportRunDetailPage() {
   const [detail, setDetail] = useState<ExportRunDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [cleanupNotice, setCleanupNotice] = useState<string | null>(null);
   const [copyFlash, setCopyFlash] = useState<"id" | "name" | "params" | null>(null);
   const [showAllParams, setShowAllParams] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -578,6 +579,9 @@ export function AdminExportRunDetailPage() {
     setError(null);
     try {
       await deleteExportRunFile(detail.id, detail.sourceType);
+      setCleanupNotice(
+        "File deletion is queued. New downloads are disabled; the file stays listed until deletion is confirmed.",
+      );
       setDeleteOpen(false);
       await load();
     } catch (deleteError) {
@@ -772,6 +776,11 @@ export function AdminExportRunDetailPage() {
         </div>
       </div>
 
+      {cleanupNotice ? (
+        <p role="status" className="rounded-lg border border-[var(--admin-outline)] p-4 text-sm">
+          {cleanupNotice}
+        </p>
+      ) : null}
       {error ? (
         <div className="rounded-lg border border-[color-mix(in_srgb,var(--admin-danger)_30%,var(--admin-border))] bg-[color-mix(in_srgb,var(--admin-danger)_8%,transparent)] px-4 py-3 text-sm text-[var(--admin-danger)]">
           {error}
@@ -806,7 +815,7 @@ export function AdminExportRunDetailPage() {
           <div className="ml-8 flex flex-wrap gap-3">
             <button
               type="button"
-              className="inline-flex h-8 items-center rounded-lg bg-[var(--admin-danger)] px-4 text-sm font-semibold text-[var(--admin-on-primary)] transition-colors hover:opacity-90 disabled:opacity-50"
+              className="inline-flex h-8 items-center rounded-lg bg-[var(--admin-danger)] px-4 text-sm font-semibold text-[var(--admin-on-danger)] transition-colors hover:opacity-90 disabled:opacity-50"
               disabled={actionBusy || !detail.canRetry}
               onClick={() => void handleRetry()}
             >

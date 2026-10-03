@@ -1,8 +1,6 @@
+import { buildAutomationActionIdempotencyKey } from "../../../backend/apps/api/src/server/automation/automation.keys";
 import { describe, expect, it } from "vitest";
-import {
-  buildAutomationActionIdempotencyKey,
-  buildAutomationRunIdempotencyKey,
-} from "../../../backend/apps/api/src/server/automation/automation.dto";
+import { buildAutomationRunIdempotencyKey } from "../../../backend/apps/api/src/server/automation/automation.dto";
 import {
   assertAutomationTriggerEventType,
   automationActionSchema,

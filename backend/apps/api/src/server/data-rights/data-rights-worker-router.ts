@@ -16,18 +16,23 @@ export async function processDataRightsOutboxBatch(args: {
     parentRequestId: args.requestId,
     jobName: "data-rights-outbox",
     execute: () =>
-      withTenantTx(
+      processOutboxBatch(
         {
-          tenantId: args.tenantId,
-          requestId: args.requestId,
-          allowAnonymousTenantRead: true,
+          transaction: (fn) =>
+            withTenantTx(
+              {
+                tenantId: args.tenantId,
+                requestId: args.requestId,
+                allowAnonymousTenantRead: true,
+              },
+              fn,
+            ),
         },
-        async (tx) =>
-          processOutboxBatch(tx, {
-            limit: args.limit ?? 25,
-            maxRetries: args.maxRetries ?? 3,
-            handlers: createDataRightsOutboxConsumers(),
-          }),
+        {
+          limit: args.limit ?? 25,
+          maxRetries: args.maxRetries ?? 3,
+          handlers: createDataRightsOutboxConsumers(),
+        },
       ),
   });
 }

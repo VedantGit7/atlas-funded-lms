@@ -1,0 +1,181 @@
+{
+  "durationSeconds": 318.157704,
+  "samples": 30090,
+  "top": [
+    {
+      "frame": "(idle) | ",
+      "seconds": 121.221211,
+      "percent": 38.10101144193814
+    },
+    {
+      "frame": "init | repo:node_modules/.pnpm/next@16.3.5_@babel+core@7.2_e96efa599b0d84a6766a141ba047025e/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.dev.js",
+      "seconds": 23.707276,
+      "percent": 7.451428563382241
+    },
+    {
+      "frame": "collectStackTracePrivate | repo:node_modules/.pnpm/next@16.3.5_@babel+core@7.2_e96efa599b0d84a6766a141ba047025e/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.dev.js",
+      "seconds": 18.134789,
+      "percent": 5.699941433402558
+    },
+    {
+      "frame": "(garbage collector) | ",
+      "seconds": 11.041812,
+      "percent": 3.4705494350467254
+    },
+    {
+      "frame": "readFileUtf8 | ",
+      "seconds": 9.229861,
+      "percent": 2.9010355256102716
+    },
+    {
+      "frame": "registerDestroyHook | ",
+      "seconds": 6.585616,
+      "percent": 2.069923477073752
+    },
+    {
+      "frame": "(program) | ",
+      "seconds": 5.552569,
+      "percent": 1.7452267078997505
+    },
+    {
+      "frame": "existsSync | ",
+      "seconds": 5.368384,
+      "percent": 1.6873355621626125
+    },
+    {
+      "frame": "writev | ",
+      "seconds": 4.008005,
+      "percent": 1.259755146022632
+    },
+    {
+      "frame": "createContext | node:vm",
+      "seconds": 3.587127,
+      "percent": 1.1274690769314724
+    },
+    {
+      "frame": "runMicrotasks | ",
+      "seconds": 3.54208,
+      "percent": 1.1133103645389275
+    },
+    {
+      "frame": "hn | repo:node_modules/.pnpm/@prisma+client@7.8.0_prisma_52a931712aa5552a5ac5a34284e24f7f/node_modules/@prisma/client/runtime/client.js",
+      "seconds": 2.919413,
+      "percent": 0.9176000404478962
+    },
+    {
+      "frame": " | repo:node_modules/.pnpm/@prisma+client@7.8.0_prisma_52a931712aa5552a5ac5a34284e24f7f/node_modules/@prisma/client/runtime/client.js",
+      "seconds": 2.238405,
+      "percent": 0.7035525698278294
+    },
+    {
+      "frame": "emitHook | node:internal/async_hooks",
+      "seconds": 2.20186,
+      "percent": 0.6920661191344304
+    },
+    {
+      "frame": "parseStackTracePrivate | repo:node_modules/.pnpm/next@16.3.5_@babel+core@7.2_e96efa599b0d84a6766a141ba047025e/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.dev.js",
+      "seconds": 2.144285,
+      "percent": 0.6739697338923328
+    },
+    {
+      "frame": "get | repo:node_modules/.pnpm/@prisma+client@7.8.0_prisma_52a931712aa5552a5ac5a34284e24f7f/node_modules/@prisma/client/runtime/client.js",
+      "seconds": 2.123535,
+      "percent": 0.6674478060803741
+    },
+    {
+      "frame": "writeBuffer | ",
+      "seconds": 1.847496,
+      "percent": 0.5806860503557826
+    },
+    {
+      "frame": "now | ",
+      "seconds": 1.681182,
+      "percent": 0.5284119345910548
+    },
+    {
+      "frame": "readFileSync | node:fs",
+      "seconds": 1.640599,
+      "percent": 0.5156563010299599
+    },
+    {
+      "frame": "writeUtf8String | ",
+      "seconds": 1.479151,
+      "percent": 0.46491161662585806
+    },
+    {
+      "frame": "getOwnPropertyDescriptor | repo:node_modules/.pnpm/@prisma+client@7.8.0_prisma_52a931712aa5552a5ac5a34284e24f7f/node_modules/@prisma/client/runtime/client.js",
+      "seconds": 1.279674,
+      "percent": 0.40221404582363685
+    },
+    {
+      "frame": "promiseResolve | repo:node_modules/.pnpm/next@16.3.5_@babel+core@7.2_e96efa599b0d84a6766a141ba047025e/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.dev.js",
+      "seconds": 1.259408,
+      "percent": 0.39584424394232814
+    },
+    {
+      "frame": "ee | repo:node_modules/.pnpm/@prisma+client@7.8.0_prisma_52a931712aa5552a5ac5a34284e24f7f/node_modules/@prisma/client/runtime/client.js",
+      "seconds": 1.234229,
+      "percent": 0.3879302381410121
+    },
+    {
+      "frame": "join | node:path",
+      "seconds": 1.21444,
+      "percent": 0.3817103620219349
+    },
+    {
+      "frame": "memoryUsage | ",
+      "seconds": 1.021596,
+      "percent": 0.321097607951122
+    },
+    {
+      "frame": "spawn | ",
+      "seconds": 1.016397,
+      "percent": 0.31946351143573054
+    },
+    {
+      "frame": "request | repo:node_modules/.pnpm/@prisma+client@7.8.0_prisma_52a931712aa5552a5ac5a34284e24f7f/node_modules/@prisma/client/runtime/client.js",
+      "seconds": 0.98348,
+      "percent": 0.3091173766026585
+    },
+    {
+      "frame": "destroy | repo:node_modules/.pnpm/next@16.3.5_@babel+core@7.2_e96efa599b0d84a6766a141ba047025e/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.dev.js",
+      "seconds": 0.92653,
+      "percent": 0.29121743496935487
+    },
+    {
+      "frame": "nextTick | node:internal/process/task_queues",
+      "seconds": 0.899768,
+      "percent": 0.28280587679568553
+    },
+    {
+      "frame": "before | repo:node_modules/.pnpm/next@16.3.5_@babel+core@7.2_e96efa599b0d84a6766a141ba047025e/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.dev.js",
+      "seconds": 0.864046,
+      "percent": 0.2715781030463463
+    },
+    {
+      "frame": " | repo:node_modules/.pnpm/next@16.3.5_@babel+core@7.2_e96efa599b0d84a6766a141ba047025e/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js",
+      "seconds": 0.835409,
+      "percent": 0.2625772140462951
+    },
+    {
+      "frame": "clearRequireCache | repo:node_modules/.pnpm/next@16.3.5_@babel+core@7.2_e96efa599b0d84a6766a141ba047025e/node_modules/next/dist/server/dev/hot-reloader-turbopack.js",
+      "seconds": 0.834914,
+      "percent": 0.2624216307081303
+    },
+    {
+      "frame": "addFields | repo:node_modules/.pnpm/pg@8.21.0/node_modules/pg/lib/result.js",
+      "seconds": 0.829016,
+      "percent": 0.26056783166066366
+    },
+    {
+      "frame": "rawMatcher | repo:node_modules/.pnpm/next@16.3.5_@babel+core@7.2_e96efa599b0d84a6766a141ba047025e/node_modules/next/dist/shared/lib/router/utils/route-matcher.js",
+      "seconds": 0.772598,
+      "percent": 0.2428351028271655
+    },
+    {
+      "frame": "sp | repo:node_modules/.pnpm/@prisma+client@7.8.0_prisma_52a931712aa5552a5ac5a34284e24f7f/node_modules/@prisma/client/runtime/client.js",
+      "seconds": 0.7226,
+      "percent": 0.22712024274319864
+    }
+  ]
+}

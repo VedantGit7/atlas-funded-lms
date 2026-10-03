@@ -838,7 +838,7 @@ export function AdminBatchDetailPage({ batchId }: { batchId: string }) {
           </div>
           <button
             type="button"
-            className="inline-flex h-8 items-center justify-center rounded-lg bg-[var(--admin-danger)] px-4 text-xs font-semibold text-white transition-all hover:opacity-90 active:translate-y-px"
+            className="inline-flex h-8 items-center justify-center rounded-lg bg-[var(--admin-danger)] px-4 text-xs font-semibold text-[var(--admin-on-danger)] transition-all hover:opacity-90 active:translate-y-px"
             onClick={() => void loadDetail()}
           >
             <RefreshCw className="mr-2 h-3.5 w-3.5" aria-hidden="true" />
@@ -1415,7 +1415,7 @@ export function AdminBatchDetailPage({ batchId }: { batchId: string }) {
                 </div>
                 <button
                   type="button"
-                  className="inline-flex h-8 items-center justify-center rounded-lg bg-[var(--admin-danger)] px-4 text-xs font-semibold text-white"
+                  className="inline-flex h-8 items-center justify-center rounded-lg bg-[var(--admin-danger)] px-4 text-xs font-semibold text-[var(--admin-on-danger)]"
                   onClick={() => void loadLearners()}
                 >
                   <RefreshCw className="mr-2 h-3.5 w-3.5" aria-hidden="true" />

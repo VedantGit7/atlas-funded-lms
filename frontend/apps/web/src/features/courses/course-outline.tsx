@@ -29,26 +29,34 @@ type CourseOutlineProps = {
   tagId?: string;
 };
 
+export function courseModuleLessonsPath(moduleId: string, tagId?: string): string {
+  const path = `/api/v1/modules/${moduleId}/lessons`;
+  return tagId ? `${path}?tagId=${encodeURIComponent(tagId)}` : path;
+}
+
 export function CourseOutline({ courseId, modules, enrolled, tagId }: CourseOutlineProps) {
   const [moduleLessons, setModuleLessons] = useState<Record<string, LessonOutlineItem[]>>({});
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!tagId || !enrolled) {
-      setModuleLessons({});
+    let cancelled = false;
+    setModuleLessons({});
+
+    if (!enrolled) {
+      setLoading(false);
       return;
     }
 
     setLoading(true);
 
-    // Fetch lessons for all modules with tag filter
+    // Enrolled learners can open lessons with or without a tag filter.
     void Promise.all(
       modules
         .filter((m) => m.contentKind === "standard")
         .map(async (module) => {
           try {
             const response = await clientApi.get<{ data: { items: LessonOutlineItem[] } }>(
-              `/api/v1/modules/${module.id}/lessons?tagId=${tagId}`,
+              courseModuleLessonsPath(module.id, tagId),
             );
             return { moduleId: module.id, lessons: response.data.items };
           } catch {
@@ -57,6 +65,7 @@ export function CourseOutline({ courseId, modules, enrolled, tagId }: CourseOutl
         }),
     )
       .then((results) => {
+        if (cancelled) return;
         const lessonsMap: Record<string, LessonOutlineItem[]> = {};
         for (const result of results) {
           lessonsMap[result.moduleId] = result.lessons;
@@ -64,11 +73,15 @@ export function CourseOutline({ courseId, modules, enrolled, tagId }: CourseOutl
         setModuleLessons(lessonsMap);
       })
       .finally(() => {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       });
+
+    return () => {
+      cancelled = true;
+    };
   }, [tagId, enrolled, modules]);
 
-  const showLessons = tagId && enrolled;
+  const showLessons = enrolled;
 
   if (modules.length === 0) {
     return <p role="status">This course does not have a published module outline yet.</p>;
@@ -79,7 +92,7 @@ export function CourseOutline({ courseId, modules, enrolled, tagId }: CourseOutl
       {modules.map((module) => {
         const isScorm = module.contentKind === "scorm";
         const lessons = moduleLessons[module.id] || [];
-        const hasLessons = showLessons && lessons.length > 0;
+        const hasLessons = showLessons && !loading && lessons.length > 0;
 
         return (
           <li key={module.id} className="rounded-lg border p-4">
@@ -96,7 +109,7 @@ export function CourseOutline({ courseId, modules, enrolled, tagId }: CourseOutl
                 ) : (
                   <p className="mt-1 text-sm opacity-70">
                     {showLessons && !loading
-                      ? `${String(lessons.length)} matching ${lessons.length === 1 ? "lesson" : "lessons"}`
+                      ? `${String(lessons.length)} ${tagId ? "matching " : ""}${lessons.length === 1 ? "lesson" : "lessons"}`
                       : `${String(module.lessonCount)} ${module.lessonCount === 1 ? "lesson" : "lessons"}`}
                   </p>
                 )}
@@ -135,7 +148,9 @@ export function CourseOutline({ courseId, modules, enrolled, tagId }: CourseOutl
               </ol>
             ) : showLessons && !loading && !isScorm && lessons.length === 0 ? (
               <p className="mt-3 border-t pt-3 text-sm text-muted-foreground">
-                No lessons match this tag in this chapter.
+                {tagId
+                  ? "No lessons match this tag in this chapter."
+                  : "This chapter does not have any published lessons yet."}
               </p>
             ) : null}
           </li>

@@ -465,6 +465,7 @@ export async function updateModuleScormPackageReference(args: {
   await args.tx.$executeRaw`
     update course_modules
     set scorm_package_reference_id = ${args.assetReferenceId}::uuid,
+        scorm_launch_path = CASE WHEN scorm_package_reference_id = ${args.assetReferenceId}::uuid THEN scorm_launch_path ELSE NULL END,
         updated_at = now()
     where id = ${args.moduleId}::uuid
       and deleted_at is null
@@ -541,6 +542,7 @@ export async function findModuleWithCourse(args: { tx: Tx; moduleId: string }): 
   scormPackageReferenceId: string | null;
   scormLaunchPath: string | null;
   scormVersion: string | null;
+  scormContentVersion: string | null;
 } | null> {
   const rows = await args.tx.$queryRaw<
     Array<{
@@ -556,6 +558,7 @@ export async function findModuleWithCourse(args: { tx: Tx; moduleId: string }): 
       scorm_package_reference_id: string | null;
       scorm_launch_path: string | null;
       scorm_version: string | null;
+      scorm_content_version: string | null;
     }>
   >`
     select
@@ -570,7 +573,8 @@ export async function findModuleWithCourse(args: { tx: Tx; moduleId: string }): 
       m.content_kind::text,
       m.scorm_package_reference_id::text,
       m.scorm_launch_path,
-      m.scorm_version
+      m.scorm_version,
+      m.scorm_content_version::text
     from course_modules m
     inner join courses c
       on c.id = m.course_id
@@ -597,6 +601,7 @@ export async function findModuleWithCourse(args: { tx: Tx; moduleId: string }): 
     scormPackageReferenceId: row.scorm_package_reference_id,
     scormLaunchPath: row.scorm_launch_path,
     scormVersion: row.scorm_version,
+    scormContentVersion: row.scorm_content_version,
   };
 }
 

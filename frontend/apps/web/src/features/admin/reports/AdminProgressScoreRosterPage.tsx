@@ -480,7 +480,7 @@ export function AdminProgressScoreRosterPage({
             <section className={generalSettingsFormCardClassName}>
               <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
                 <div>
-                  <p className="text-sm text-neutral-600">
+                  <p className="text-sm text-muted-foreground">
                     {mainTab === "progress"
                       ? courseTitle || selectedProduct.title
                       : `${quizTitle}${passMark != null ? ` · Pass mark ${String(passMark)}%` : ""}`}
@@ -751,7 +751,7 @@ export function AdminProgressScoreRosterPage({
 
           <section className={analyticsTableShellClassName}>
             {loading ? (
-              <p className="p-4 text-sm text-neutral-600">Loading…</p>
+              <p className="p-4 text-sm text-muted-foreground">Loading…</p>
             ) : !selectedProduct ? (
               <table className="w-full text-left text-sm">
                 <thead className={analyticsTableHeadClassName}>
@@ -764,7 +764,7 @@ export function AdminProgressScoreRosterPage({
                 <tbody>
                   {products.length === 0 ? (
                     <tr>
-                      <td className="px-4 py-6 text-neutral-500" colSpan={3}>
+                      <td className="px-4 py-6 text-muted-foreground" colSpan={3}>
                         No {productNoun} found.
                       </td>
                     </tr>
@@ -799,7 +799,7 @@ export function AdminProgressScoreRosterPage({
                 <tbody>
                   {quizzes.length === 0 ? (
                     <tr>
-                      <td className="px-4 py-6 text-neutral-500" colSpan={4}>
+                      <td className="px-4 py-6 text-muted-foreground" colSpan={4}>
                         No quizzes found for this product.
                       </td>
                     </tr>
@@ -847,7 +847,7 @@ export function AdminProgressScoreRosterPage({
                 <tbody>
                   {learners.length === 0 ? (
                     <tr>
-                      <td className="px-4 py-6 text-neutral-500" colSpan={5}>
+                      <td className="px-4 py-6 text-muted-foreground" colSpan={5}>
                         No learners matched the current filters.
                       </td>
                     </tr>
@@ -922,7 +922,7 @@ export function AdminProgressScoreRosterPage({
                 <tbody>
                   {scoreLearners.length === 0 ? (
                     <tr>
-                      <td className="px-4 py-6 text-neutral-500" colSpan={6}>
+                      <td className="px-4 py-6 text-muted-foreground" colSpan={6}>
                         No quiz attempts matched the current filters.
                       </td>
                     </tr>
@@ -967,7 +967,7 @@ export function AdminProgressScoreRosterPage({
 
           {showLearnerRoster && totalPages > 1 ? (
             <div className="flex items-center justify-between gap-3">
-              <p className="text-sm text-neutral-600">
+              <p className="text-sm text-muted-foreground">
                 Page {page} of {totalPages} · {totalCount} rows
               </p>
               <div className="flex gap-2">

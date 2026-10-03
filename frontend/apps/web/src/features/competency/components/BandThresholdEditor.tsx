@@ -7,7 +7,7 @@ import {
   formatCompetencyConfigApiError,
   listProfileBands,
   replaceProfileBands,
-} from "@atlas/contracts-modules/competency/competency-config.api-client";
+} from "@/modules/competency/competency-config.api-client";
 import {
   alertErrorClassName,
   outlineButtonClassName,

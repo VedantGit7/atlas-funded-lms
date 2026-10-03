@@ -487,7 +487,7 @@ function ExpandedPanel({
               title={`${session.title}: ${session.cancelled ? "Cancelled" : formatPct(session.turnoutPct)}`}
             >
               {isDrop && !session.cancelled ? (
-                <span className="absolute -top-5 rounded bg-[var(--admin-danger)] px-1.5 py-0.5 font-mono text-[10px] text-[var(--admin-on-primary)]">
+                <span className="absolute -top-5 rounded bg-[var(--admin-danger)] px-1.5 py-0.5 font-mono text-[10px] text-[var(--admin-on-danger)]">
                   {formatPct(session.turnoutPct)}
                 </span>
               ) : null}
@@ -527,7 +527,7 @@ function ExpandedPanel({
             ].join(" ")}
           >
             <div>S{session.ordinal}</div>
-            <div className="text-[var(--admin-outline)]">
+            <div className="text-[var(--admin-on-surface-variant)]">
               {formatDateShort(session.scheduledAt)}
             </div>
           </div>
@@ -1488,7 +1488,7 @@ export function AdminLiveClassAttendanceSeriesPage() {
                           <td className="px-4 py-2 text-right">
                             <button
                               type="button"
-                              className="text-[var(--admin-outline)] opacity-0 transition-opacity group-hover:opacity-100 hover:text-[var(--admin-on-surface)]"
+                              className="text-[var(--admin-on-surface-variant)] opacity-0 transition-opacity group-hover:opacity-100 hover:text-[var(--admin-on-surface)]"
                               aria-label={expanded ? "Collapse series" : "Expand series"}
                               onClick={() => {
                                 toggleExpand(item.seriesId);

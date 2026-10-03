@@ -22,7 +22,9 @@ import {
   attemptsRepository,
   parseAttemptMetadata,
   type AttemptMetadata,
+  type AttemptRow,
 } from "./attempts.repository";
+import { systemServiceCtx } from "@atlas/core/actor/system-actor";
 import {
   decodeExplanationJson,
   itemRegistryRepository,
@@ -33,7 +35,32 @@ type ServiceCtx = {
   tenantId: string;
   actorMembershipId: string;
   requestId: string;
+  /** Set when no member initiated the action (see `systemServiceCtx`). Recorded on audit. */
+  systemSource?: string;
 };
+
+/**
+ * How long after `dueAt` the server still accepts answer saves and treats a submit as on time.
+ *
+ * Audit finding H1: with no allowance at all, an auto-submit fired at 00:00 that reached the
+ * server a few hundred milliseconds late was rejected, and the attempt stayed STARTED forever with
+ * its answers never graded. The window absorbs network latency and in-flight autosaves; it is not
+ * extra exam time, because the runner auto-submits at 00:00.
+ */
+export const ATTEMPT_DEADLINE_GRACE_MS = 30_000;
+
+/** `open`: before `dueAt` (or untimed). `grace`: inside the grace window. `closed`: after it. */
+export type AttemptDeadlinePhase = "open" | "grace" | "closed";
+
+export function attemptDeadlinePhase(
+  metadata: AttemptMetadata,
+  nowMs: number = Date.now(),
+): AttemptDeadlinePhase {
+  if (!metadata.dueAt) return "open";
+  const dueMs = Date.parse(metadata.dueAt);
+  if (!Number.isFinite(dueMs) || nowMs <= dueMs) return "open";
+  return nowMs <= dueMs + ATTEMPT_DEADLINE_GRACE_MS ? "grace" : "closed";
+}
 
 type StartAttemptConsent = {
   consentedAt: string;
@@ -259,9 +286,20 @@ export async function startAttempt(
 }
 
 export async function getAttempt(tx: TenantTx, ctx: ServiceCtx, attemptId: string) {
-  const attempt = await attemptsRepository.findById(tx, attemptId);
+  let attempt = await attemptsRepository.findById(tx, attemptId);
   if (!attempt || attempt.tenant_id !== ctx.tenantId) {
     throw attemptNotFound();
+  }
+
+  // An attempt opened after its deadline (a closed tab, a returning learner, an instructor
+  // reviewing) is finalized now rather than waiting for the worker's sweep, so nobody is ever
+  // shown a runner that can no longer save.
+  if (
+    attempt.status === "STARTED" &&
+    attemptDeadlinePhase(parseAttemptMetadata(attempt.metadata_json)) === "closed"
+  ) {
+    await finalizeExpiredAttempt(tx, ctx, attemptId);
+    attempt = (await attemptsRepository.findById(tx, attemptId)) ?? attempt;
   }
 
   const assessment = await assessmentsRepository.findById(tx, attempt.assessment_id);
@@ -325,17 +363,19 @@ export async function saveAttemptAnswer(
   input: SaveAnswerInput,
   idempotencyKey: string,
 ) {
-  const attempt = await attemptsRepository.findById(tx, attemptId);
-  if (!attempt || attempt.tenant_id !== ctx.tenantId) {
+  // Locked: this rewrites metadata_json wholesale, so an unlocked save racing a finalization
+  // could overwrite the submission record the finalizer just wrote.
+  const attempt = await attemptsRepository.findByIdForUpdate(tx, attemptId);
+  if (
+    !attempt ||
+    attempt.tenant_id !== ctx.tenantId ||
+    attempt.membership_id !== ctx.actorMembershipId
+  ) {
     throw attemptNotFound();
   }
 
   if (attempt.status !== "STARTED") {
     throw attemptNotInProgress();
-  }
-
-  if (attempt.membership_id !== ctx.actorMembershipId) {
-    throw attemptNotFound();
   }
 
   const metadata = parseAttemptMetadata(attempt.metadata_json);
@@ -349,7 +389,8 @@ export async function saveAttemptAnswer(
     };
   }
 
-  if (metadata.dueAt && new Date(metadata.dueAt).getTime() < Date.now()) {
+  // Saves in flight at 00:00 are still accepted inside the grace window.
+  if (attemptDeadlinePhase(metadata) === "closed") {
     throw attemptTimeExpired();
   }
 
@@ -392,70 +433,129 @@ export async function saveAttemptAnswer(
   };
 }
 
+type SubmitAttemptResult = NonNullable<AttemptMetadata["submitIdempotency"]>[string];
+
+/** The result view of an attempt that is already SUBMITTED or GRADED. */
+async function submittedAttemptResult(
+  tx: TenantTx,
+  attempt: AttemptRow,
+): Promise<SubmitAttemptResult> {
+  const assessment = await assessmentsRepository.findById(tx, attempt.assessment_id);
+  const config = assessment ? extractAssessmentConfig(assessment.config_json) : null;
+  const scorePercent = attempt.score_pct != null ? Number(attempt.score_pct) : null;
+  const passed =
+    scorePercent != null && config != null ? scorePercent >= config.passMarkPercent : null;
+  const status = toSubmittedAttemptStatus(attempt.status);
+
+  return {
+    id: attempt.id,
+    status,
+    submittedAt: attempt.submitted_at?.toISOString() ?? new Date().toISOString(),
+    scorePercent,
+    passed,
+    requiresManualGrading: attempt.status === "SUBMITTED" && scorePercent == null,
+    canReviewAnswers: config
+      ? canReviewAnswers({
+          showAnswersPolicy: config.showAnswersPolicy,
+          attemptStatus: status,
+          passed,
+        })
+      : false,
+  };
+}
+
 export async function submitAttempt(
   tx: TenantTx,
   ctx: ServiceCtx,
   attemptId: string,
   idempotencyKey: string,
 ) {
-  const attempt = await attemptsRepository.findById(tx, attemptId);
-  if (!attempt || attempt.tenant_id !== ctx.tenantId) {
-    throw attemptNotFound();
-  }
-
-  if (attempt.membership_id !== ctx.actorMembershipId) {
+  const attempt = await attemptsRepository.findByIdForUpdate(tx, attemptId);
+  if (
+    !attempt ||
+    attempt.tenant_id !== ctx.tenantId ||
+    attempt.membership_id !== ctx.actorMembershipId
+  ) {
     throw attemptNotFound();
   }
 
   const metadata = parseAttemptMetadata(attempt.metadata_json);
   const replay = metadata.submitIdempotency?.[idempotencyKey];
   if (replay) {
-    return {
-      data: {
-        id: attemptId,
-        status: replay.status,
-        submittedAt: replay.submittedAt,
-        scorePercent: replay.scorePercent,
-        passed: replay.passed,
-        requiresManualGrading: replay.requiresManualGrading,
-        canReviewAnswers: replay.canReviewAnswers,
-      },
-    };
+    return { data: { ...replay, id: attemptId } };
   }
 
   if (attempt.status !== "STARTED") {
+    // Already finalized, by an earlier submit or by the deadline. The learner gets their result
+    // rather than an error, which is also what an auto-submit racing the sweep should see.
     if (attempt.status === "SUBMITTED" || attempt.status === "GRADED") {
-      const assessment = await assessmentsRepository.findById(tx, attempt.assessment_id);
-      const config = assessment ? extractAssessmentConfig(assessment.config_json) : null;
-      const scorePercent = attempt.score_pct != null ? Number(attempt.score_pct) : null;
-      const passed =
-        scorePercent != null && config != null ? scorePercent >= config.passMarkPercent : null;
-
-      return {
-        data: {
-          id: attempt.id,
-          status: toSubmittedAttemptStatus(attempt.status),
-          submittedAt: attempt.submitted_at?.toISOString() ?? new Date().toISOString(),
-          scorePercent,
-          passed,
-          requiresManualGrading: attempt.status === "SUBMITTED" && scorePercent == null,
-          canReviewAnswers: config
-            ? canReviewAnswers({
-                showAnswersPolicy: config.showAnswersPolicy,
-                attemptStatus: attempt.status,
-                passed,
-              })
-            : false,
-        },
-      };
+      return { data: await submittedAttemptResult(tx, attempt) };
     }
 
     throw attemptNotInProgress();
   }
 
-  if (metadata.dueAt && new Date(metadata.dueAt).getTime() < Date.now()) {
-    throw attemptTimeExpired();
+  // Audit finding H1: a submit after the deadline used to throw, leaving the attempt STARTED with
+  // its saved answers never graded. It is now always accepted and graded from the answers saved
+  // so far; saves after the grace window are already rejected, so nothing late is counted.
+  return {
+    data: await finalizeLockedAttempt(tx, ctx, attempt, {
+      idempotencyKey,
+      trigger: "learner",
+    }),
+  };
+}
+
+/**
+ * Finalizes an in-progress attempt whose deadline and grace window have passed, grading the
+ * answers saved before it closed. Returns false when there is nothing to do: the attempt is
+ * missing, already finalized, untimed, or not yet past its grace window.
+ *
+ * Used by reads of an expired attempt and by the worker's deadline sweep. It is attributed to
+ * the system, not to whoever happened to trigger it, because the time limit closed the attempt.
+ */
+export async function finalizeExpiredAttempt(
+  tx: TenantTx,
+  ctx: { tenantId: string; requestId: string },
+  attemptId: string,
+): Promise<boolean> {
+  const attempt = await attemptsRepository.findByIdForUpdate(tx, attemptId);
+  if (!attempt || attempt.tenant_id !== ctx.tenantId || attempt.status !== "STARTED") {
+    return false;
   }
+
+  if (attemptDeadlinePhase(parseAttemptMetadata(attempt.metadata_json)) !== "closed") {
+    return false;
+  }
+
+  await finalizeLockedAttempt(
+    tx,
+    systemServiceCtx({
+      tenantId: ctx.tenantId,
+      requestId: ctx.requestId,
+      source: "assessments.attempt_deadline",
+    }),
+    attempt,
+    { idempotencyKey: `deadline:${attempt.id}`, trigger: "deadline" },
+  );
+  return true;
+}
+
+/**
+ * Grades a STARTED attempt from its saved draft answers and records the submission.
+ *
+ * The caller must hold the attempt's row lock (`findByIdForUpdate`) and have checked that it is
+ * STARTED, so concurrent finalizations cannot both grade it.
+ */
+async function finalizeLockedAttempt(
+  tx: TenantTx,
+  ctx: ServiceCtx,
+  attempt: AttemptRow,
+  args: { idempotencyKey: string; trigger: "learner" | "deadline" },
+): Promise<SubmitAttemptResult> {
+  const attemptId = attempt.id;
+  const metadata = parseAttemptMetadata(attempt.metadata_json);
+  const afterDeadline = attemptDeadlinePhase(metadata) !== "open";
 
   const assessment = await assessmentsRepository.findById(tx, attempt.assessment_id);
   if (!assessment) {
@@ -487,7 +587,7 @@ export async function submitAttempt(
       attemptId,
       assessmentItemId: itemResult.assessmentItemId,
       answerJson: answer ?? {},
-      idempotencyKey: `${idempotencyKey}:${itemResult.assessmentItemId}`,
+      idempotencyKey: `${args.idempotencyKey}:${itemResult.assessmentItemId}`,
       isCorrect: itemResult.isCorrect,
       pointsAwarded: itemResult.pointsAwarded,
     });
@@ -513,14 +613,15 @@ export async function submitAttempt(
       attemptStatus: nextStatus,
       passed,
     }),
-  } satisfies NonNullable<AttemptMetadata["submitIdempotency"]>[string];
+  } satisfies SubmitAttemptResult;
 
   const nextMetadata: AttemptMetadata = {
     ...metadata,
     submitIdempotency: {
       ...(metadata.submitIdempotency ?? {}),
-      [idempotencyKey]: resultPayload,
+      [args.idempotencyKey]: resultPayload,
     },
+    submission: { trigger: args.trigger, afterDeadline },
   };
 
   await attemptsRepository.submitAttempt(tx, {
@@ -539,6 +640,7 @@ export async function submitAttempt(
       actorMembershipId: ctx.actorMembershipId,
       platformPrincipalId: null,
       requestId: ctx.requestId,
+      ...(ctx.systemSource ? { systemSource: ctx.systemSource } : {}),
     },
     {
       action: "attempt.submitted",
@@ -550,14 +652,20 @@ export async function submitAttempt(
         requiresManualGrading: scoring.requiresManualGrading,
       },
       reason: null,
-      metadata: { assessmentId: attempt.assessment_id },
+      metadata: {
+        assessmentId: attempt.assessment_id,
+        trigger: args.trigger,
+        afterDeadline,
+      },
     },
   );
 
+  // Consumers (gamification, competency, certificates, analytics) credit `payload.membershipId`,
+  // so it must be the attempt's owner even when the deadline, not the learner, finalized it.
   await outbox.publish(tx, {
     ctx: {
       tenantId: ctx.tenantId,
-      actorMembershipId: ctx.actorMembershipId,
+      actorMembershipId: attempt.membership_id,
       requestId: ctx.requestId,
     },
     eventType: "assessment.submitted",
@@ -566,7 +674,7 @@ export async function submitAttempt(
     payload: {
       attemptId,
       assessmentId: attempt.assessment_id,
-      membershipId: ctx.actorMembershipId,
+      membershipId: attempt.membership_id,
       status: nextStatus,
       scorePercent: scoring.scorePercent,
       requiresManualGrading: scoring.requiresManualGrading,
@@ -574,5 +682,5 @@ export async function submitAttempt(
     idempotencyKey: `${ctx.requestId}:assessment.submitted:${attemptId}`,
   });
 
-  return { data: resultPayload };
+  return resultPayload;
 }

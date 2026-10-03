@@ -7,7 +7,7 @@ import {
   responseToWire,
   type ItemOptionWire,
   type ItemResponseUiState,
-} from "@atlas/contracts/item-registry/answer-contracts";
+} from "@atlas/contracts/item-registry/answer-ui";
 import { ArrowDown, ArrowUp, Upload } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { getItemTypeVisual } from "../item-type-config";

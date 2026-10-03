@@ -213,9 +213,19 @@ export default tseslint.config(
     ignores: [
       "**/node_modules/**",
       "**/.next/**",
+      "**/.next-e2e/**",
+      "**/.next-perf/**",
+      ".test-results/**",
+      "test-results/**",
+      "playwright-report/**",
       "**/dist/**",
       "**/build/**",
-      "**/coverage/**",
+      "coverage/**",
+      "backend/apps/*/coverage/**",
+      "backend/packages/*/coverage/**",
+      "backend/packages/domain/*/coverage/**",
+      "frontend/apps/*/coverage/**",
+      "frontend/packages/*/coverage/**",
       "**/.turbo/**",
       "**/out/**",
       "**/pnpm-lock.yaml",
@@ -678,6 +688,7 @@ export default tseslint.config(
       // Tooling config, in no tsconfig project. Without this ESLint reported a
       // parsing error ("not found by the project service") instead of linting it.
       "playwright.config.ts",
+      "backend/prisma.generate.config.ts",
       // The web app keeps a second test tree outside the root `tests/` glob and
       // outside any tsconfig project, so those files were reported as parsing
       // errors rather than linted at all.

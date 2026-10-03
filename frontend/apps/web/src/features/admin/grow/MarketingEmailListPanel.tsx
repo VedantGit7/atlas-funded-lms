@@ -749,7 +749,7 @@ export function MarketingEmailListPanel() {
                   onClick={() => {
                     setPage((current) => Math.max(1, current - 1));
                   }}
-                  className="rounded p-1 text-[var(--admin-on-surface-variant)] transition-colors hover:bg-[var(--admin-surface-low)] disabled:cursor-not-allowed disabled:text-[var(--admin-outline)]"
+                  className="rounded p-1 text-[var(--admin-on-surface-variant)] transition-colors hover:bg-[var(--admin-surface-low)] disabled:cursor-not-allowed disabled:text-[var(--admin-on-surface-variant)]"
                 >
                   <ChevronLeft className="h-5 w-5" aria-hidden="true" />
                 </button>
@@ -788,7 +788,7 @@ export function MarketingEmailListPanel() {
                   onClick={() => {
                     setPage((current) => Math.min(pageCount, current + 1));
                   }}
-                  className="rounded p-1 text-[var(--admin-on-surface-variant)] transition-colors hover:bg-[var(--admin-surface-low)] disabled:cursor-not-allowed disabled:text-[var(--admin-outline)]"
+                  className="rounded p-1 text-[var(--admin-on-surface-variant)] transition-colors hover:bg-[var(--admin-surface-low)] disabled:cursor-not-allowed disabled:text-[var(--admin-on-surface-variant)]"
                 >
                   <ChevronRight className="h-5 w-5" aria-hidden="true" />
                 </button>

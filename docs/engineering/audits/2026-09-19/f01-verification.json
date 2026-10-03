@@ -1,0 +1,86 @@
+{
+  "finding": "F01",
+  "status": "implemented and locally verified; not deployed",
+  "baseCommit": "ca8c0f1e7e69780b4e2ddc2a1136907a2e47c350",
+  "verifiedAt": "2026-09-19T08:18:04.904Z",
+  "targetedTests": {
+    "files": 23,
+    "passed": 145,
+    "exitCode": 0
+  },
+  "offlineRegression": {
+    "files": 305,
+    "passed": 2246,
+    "skipped": 1,
+    "exitCode": 0
+  },
+  "typescript": {
+    "exitCode": 0
+  },
+  "changedFileLint": {
+    "files": 18,
+    "exitCode": 0,
+    "warnings": 0
+  },
+  "format": {
+    "exitCode": 0
+  },
+  "staticChecks": [
+    {
+      "command": [
+        "scripts/guards/check-route-metadata.mjs"
+      ],
+      "exitCode": 0,
+      "output": ""
+    },
+    {
+      "command": [
+        "scripts/guards/check-prisma-boundary.mjs"
+      ],
+      "exitCode": 0,
+      "output": ""
+    },
+    {
+      "command": [
+        "scripts/guards/check-secrets.mjs"
+      ],
+      "exitCode": 0,
+      "output": ""
+    },
+    {
+      "command": [
+        "scripts/ci/check-frontend-api-closure.mjs",
+        "--strict"
+      ],
+      "exitCode": 0,
+      "output": "Frontend API closure OK (804 routes scanned, strict=yes).\n"
+    }
+  ],
+  "review": "Independent read-only review found no actionable introduced defects",
+  "limits": [
+    "No deployment or live Supabase MFA challenge exercised",
+    "Full production build not run",
+    "Pre-existing expired request cookie refresh behavior unchanged",
+    "F02 and general F03 replay authorization remain open"
+  ],
+  "sourceHashes": {
+    "backend/apps/api/src/app/api/v1/certificates/[id]/download/route.ts": "7f563ce5d470394fd08da0cabeac0bae22c20c08209d5aeccc079a605a97d1c9",
+    "backend/apps/api/src/app/api/v1/certificates/[id]/wallet/apple/download/route.ts": "fc76272c279b882e827b24d80874891a57b4f0ffe700e7e2797f3dfc837306b8",
+    "backend/apps/api/src/app/api/v1/me/route.ts": "5c296850e159610486efc502f0c002c5f23e71fd3c62013dbc6ca4a836ed6086",
+    "backend/apps/api/src/app/api/v1/modules/[id]/scorm-content/route.ts": "1fac73b9c3e74a0bb89e5b7091fdf9b8a222ce2c7bedf8b150082ef926c325ae",
+    "backend/packages/api/src/create-tenant-route.ts": "d1ddbeb40f8c2e302866f415764890ece3c9c243140af03391025b3802c3b806",
+    "backend/packages/api/src/route-metadata.ts": "2e11de1611a3be3f7862c315b0f33c67ddddc2275aff4f437b863330800f5fa4",
+    "backend/packages/auth/src/mfa-enforcement.ts": "c5f7d74c5db7aa6d9ec47bba96f181419c8706d73302164aa16fab12143fa8c7",
+    "backend/packages/auth/src/platform-auth.ts": "77530f0a6924bc20e9c61264e6851dccf80d41f909fd03bf37d51e36ca117103",
+    "backend/packages/auth/src/session.ts": "d48c27dc38b2808d6f79661f2e766fb16230004f294412259d7227c075125469",
+    "frontend/apps/web/src/app/api/v1/certificates/[id]/download/route.ts": "7f563ce5d470394fd08da0cabeac0bae22c20c08209d5aeccc079a605a97d1c9",
+    "frontend/apps/web/src/app/api/v1/certificates/[id]/wallet/apple/download/route.ts": "fc76272c279b882e827b24d80874891a57b4f0ffe700e7e2797f3dfc837306b8",
+    "frontend/apps/web/src/app/api/v1/me/route.ts": "9d1a96106d1ce33eb6dd0c7a7c17b26f37219b8af553b8906e51b3ae2522535b",
+    "frontend/apps/web/src/components/shells/PlatformConsoleShellClient.tsx": "874987831ecf671838235835afef0cde779040bd02e5231775bfa2f5a3691df5",
+    "frontend/apps/web/src/components/shells/admin/AdminShell.tsx": "3ebdf1fbc6781808d9e8e14a92a1a29d7f762aa2e45db6ffef3b7c799f0df5e1",
+    "frontend/apps/web/src/components/shells/studio/StudioShell.tsx": "98c7be1aecae41ae36e821926a990af1e259c40bddb55990d40e3b4bc11ac8b1",
+    "tests/unit/auth/mfa-enforcement.test.ts": "717282b2d7e9e6fb23e0c8342078c5eb1c00412a5497c7f6dc60bf4e972235be",
+    "tests/unit/auth/session-assurance.test.ts": "db033dfad31332417806853b914f95a68087124eae184fd6e6fa5da9713445b8",
+    "tests/unit/api/session-mfa-routes.test.ts": "08d2487d37b73b1854becdd9e88525d038d24f50c011893296e351dbc040e73d"
+  }
+}

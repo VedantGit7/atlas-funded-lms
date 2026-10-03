@@ -279,7 +279,7 @@ export function AdminActiveDevicesSessionDetailPage({
       </button>
       <button
         type="button"
-        className="inline-flex h-10 items-center gap-2 rounded bg-[var(--admin-danger)] px-4 text-sm font-semibold text-[var(--admin-on-primary)] transition-opacity hover:opacity-90 disabled:opacity-50"
+        className="inline-flex h-10 items-center gap-2 rounded bg-[var(--admin-danger)] px-4 text-sm font-semibold text-[var(--admin-on-danger)] transition-opacity hover:opacity-90 disabled:opacity-50"
         disabled={busy || !detail.capabilities.canRevoke}
         onClick={() => {
           setRevokeOpen(true);
@@ -612,7 +612,7 @@ export function AdminActiveDevicesSessionDetailPage({
                     </span>
                     <button
                       type="button"
-                      className="text-[var(--admin-outline)] hover:text-[var(--admin-primary)]"
+                      className="text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-primary)]"
                       aria-label="Copy device ID"
                       onClick={() => void copyText(fingerprintValue, "id")}
                     >
@@ -658,7 +658,9 @@ export function AdminActiveDevicesSessionDetailPage({
                     ["Session age", detail.device.sessionAgeLabel],
                   ].map(([label, value]) => (
                     <div key={label} className="flex flex-col gap-1">
-                      <span className="text-[12px] text-[var(--admin-outline)]">{label}</span>
+                      <span className="text-[12px] text-[var(--admin-on-surface-variant)]">
+                        {label}
+                      </span>
                       <span className="font-mono text-[13px] text-[var(--admin-on-surface)]">
                         {value}
                       </span>
@@ -676,7 +678,9 @@ export function AdminActiveDevicesSessionDetailPage({
                     ["IP", detail.network.ipAddress ?? "-"],
                   ].map(([label, value]) => (
                     <div key={label} className="flex flex-col gap-1">
-                      <span className="text-[12px] text-[var(--admin-outline)]">{label}</span>
+                      <span className="text-[12px] text-[var(--admin-on-surface-variant)]">
+                        {label}
+                      </span>
                       <span className="font-mono text-[13px] text-[var(--admin-on-surface)]">
                         {value}
                       </span>
@@ -693,7 +697,9 @@ export function AdminActiveDevicesSessionDetailPage({
                   {detail.network.note}
                 </p>
                 <div className="flex items-center justify-between border-b border-[var(--admin-border)] py-2">
-                  <span className="text-[12px] text-[var(--admin-outline)]">IP address</span>
+                  <span className="text-[12px] text-[var(--admin-on-surface-variant)]">
+                    IP address
+                  </span>
                   <span className="font-mono text-[13px] text-[var(--admin-on-surface)]">
                     {detail.network.ipAddress ?? "-"}
                   </span>
@@ -710,7 +716,7 @@ export function AdminActiveDevicesSessionDetailPage({
                   </span>
                   <button
                     type="button"
-                    className="shrink-0 text-[var(--admin-outline)] hover:text-[var(--admin-primary)]"
+                    className="shrink-0 text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-primary)]"
                     onClick={() => void copyText(fingerprintValue, "hash")}
                   >
                     <Copy className="h-4 w-4" aria-hidden="true" />
@@ -738,7 +744,9 @@ export function AdminActiveDevicesSessionDetailPage({
                   <h3 className="text-[12px] font-semibold uppercase tracking-wider text-[var(--admin-on-surface-variant)]">
                     Recent activity
                   </h3>
-                  <span className="text-[12px] text-[var(--admin-outline)]">Session lifecycle</span>
+                  <span className="text-[12px] text-[var(--admin-on-surface-variant)]">
+                    Session lifecycle
+                  </span>
                 </div>
                 <div className="mb-4 flex h-6 gap-px overflow-hidden rounded border border-[var(--admin-border)] bg-[var(--admin-surface-variant)]">
                   {detail.heatstrip.map((hour) => (
@@ -775,7 +783,7 @@ export function AdminActiveDevicesSessionDetailPage({
                         <span
                           className={`inline-block rounded px-2 py-0.5 font-mono text-[11px] ${
                             event.result === "flagged"
-                              ? "bg-[var(--admin-danger)] text-[var(--admin-on-primary)]"
+                              ? "bg-[var(--admin-danger)] text-[var(--admin-on-danger)]"
                               : "bg-[var(--admin-surface-high)] text-[var(--admin-on-surface)]"
                           }`}
                         >
@@ -809,7 +817,7 @@ export function AdminActiveDevicesSessionDetailPage({
                 </div>
                 <button
                   type="button"
-                  className="inline-flex h-10 items-center rounded bg-[color-mix(in_srgb,var(--admin-danger)_14%,var(--admin-surface))] px-4 text-sm font-semibold text-[var(--admin-danger)] hover:bg-[var(--admin-danger)] hover:text-[var(--admin-on-primary)]"
+                  className="inline-flex h-10 items-center rounded bg-[color-mix(in_srgb,var(--admin-danger)_14%,var(--admin-surface))] px-4 text-sm font-semibold text-[var(--admin-danger)] hover:bg-[var(--admin-danger)] hover:text-[var(--admin-on-danger)]"
                   disabled={busy}
                   onClick={() => {
                     setRevokeOpen(true);
@@ -818,7 +826,7 @@ export function AdminActiveDevicesSessionDetailPage({
                   Revoke device
                 </button>
               </div>
-              <p className="text-right text-[12px] text-[var(--admin-outline)]">
+              <p className="text-right text-[12px] text-[var(--admin-on-surface-variant)]">
                 Revoking signs this device out immediately.
               </p>
             </footer>

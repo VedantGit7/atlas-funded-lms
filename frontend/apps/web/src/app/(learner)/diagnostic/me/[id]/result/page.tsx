@@ -1,7 +1,7 @@
 import { PageGate } from "../../../../../../components/patterns/PageGate";
 import { DiagnosticResultScorecard } from "../../../../../../features/diagnostics/components/DiagnosticResultScorecard";
 import { ServerApiError, serverApi } from "../../../../../../lib/server-api";
-import { diagnosticServerApi } from "@atlas/contracts-modules/diagnostics/diagnostic.server-api";
+import { diagnosticServerApi } from "@/modules/diagnostics/diagnostic.server-api";
 
 type LearnerDiagnosticResultPageProps = {
   params: Promise<{ id: string }>;

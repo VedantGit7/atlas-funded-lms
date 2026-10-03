@@ -3,10 +3,20 @@ node_modules/
 
 # Build outputs
 .next/
+.next-e2e/
+.next-perf/
+.test-results/
+test-results/
+playwright-report/
 out/
 dist/
 build/
-coverage/
+/coverage/
+/backend/apps/*/coverage/
+/backend/packages/*/coverage/
+/backend/packages/domain/*/coverage/
+/frontend/apps/*/coverage/
+/frontend/packages/*/coverage/
 .turbo/
 
 # Package manager lockfiles
@@ -23,3 +33,9 @@ docs/locked/**
 # Generated/cache files
 *.tsbuildinfo
 backend/packages/db/src/generated/**
+
+# Raw verification evidence must preserve the original captured bytes.
+docs/engineering/audits/**
+
+# Local editor launch state
+.claude/

@@ -184,8 +184,12 @@ export async function storeReportArtifact(
     content: Uint8Array;
     contentType: string;
     fileExtension: string;
+    retentionMs?: number;
   },
-): Promise<{ objectKey: string; expiresAt: Date }> {
+): Promise<{ objectKey: string; expiresAt: Date; artifact: { provider: string; bucket: string } }> {
+  const retentionMs = args.retentionMs ?? 7 * 86_400_000;
+  if (!Number.isFinite(retentionMs) || retentionMs <= 0)
+    throw new Error("REPORT_RETENTION_INVALID");
   const env = parseStorageEnv(process.env);
   const provider = getStorageProvider();
   const objectKey = buildTenantStorageKey({
@@ -208,6 +212,7 @@ export async function storeReportArtifact(
       method: "PUT",
       body: Buffer.from(args.content),
       headers: upload.requiredHeaders,
+      signal: AbortSignal.timeout(30_000),
     });
 
     if (!response.ok) {
@@ -222,6 +227,10 @@ export async function storeReportArtifact(
     });
   }
 
-  const expiresAt = new Date(Date.now() + env.STORAGE_SIGNED_DOWNLOAD_TTL_SECONDS * 1000);
-  return { objectKey, expiresAt };
+  const expiresAt = new Date(Date.now() + retentionMs);
+  return {
+    objectKey,
+    expiresAt,
+    artifact: { provider: env.STORAGE_PROVIDER, bucket: env.R2_BUCKET_NAME },
+  };
 }

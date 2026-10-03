@@ -1,8 +1,13 @@
-import { createHmac } from "node:crypto";
+import { createHash, createHmac } from "node:crypto";
 import { safeOutboundFetch } from "@atlas/security/safe-outbound-fetch";
 import type { TenantTx } from "@atlas/db";
 import { assertTenantKeyPrefix, getStorageProvider, parseStorageEnv } from "@atlas/storage";
-import { getReportRun, listReportSchedules } from "./reports.service";
+import { mapRunBaseDto } from "./reports.service";
+import { OutboxDeliveryError } from "@atlas/events/services/outbox-worker.service";
+import {
+  reportDeliveryEffectsRepository,
+  type ReportDeliveryEffect,
+} from "./report-delivery-effects.repository";
 import { reportsRepository } from "./reports.repository";
 import type { ServiceCtx } from "./reports.types";
 import {
@@ -16,7 +21,16 @@ export type ReportDeliveryEmailSender = (input: {
   subject: string;
   body: string;
   requestId: string;
+  idempotencyKey: string;
 }) => Promise<void>;
+
+export type ReportDeliveryTransaction = <T>(fn: (tx: TenantTx) => Promise<T>) => Promise<T>;
+type DeliveryArgs = {
+  reportRunId: string;
+  sendEmail: ReportDeliveryEmailSender | null;
+  emailSupportsIdempotency?: boolean;
+  resolveMembershipEmail: (tx: TenantTx, membershipId: string) => Promise<string | null>;
+};
 
 function asStringArray(value: unknown): string[] {
   if (!Array.isArray(value)) return [];
@@ -120,29 +134,12 @@ async function deliverToStorageDestination(args: {
   });
 }
 
-/**
- * Delivers a succeeded report run via email and/or webhook using params_json,
- * optional schedule delivery_json, and saved destinations (destinationId).
- */
-export async function deliverSucceededReportRun(
-  tx: TenantTx,
-  ctx: ServiceCtx,
-  args: {
-    reportRunId: string;
-    sendEmail: ReportDeliveryEmailSender | null;
-    resolveMembershipEmail: (membershipId: string) => Promise<string | null>;
-  },
-): Promise<{
-  emailed: number;
-  webhookDelivered: boolean;
-  storageDelivered: boolean;
-  skipped: boolean;
-}> {
-  const detail = await getReportRun(tx, ctx, args.reportRunId);
-  if (detail.data.status !== "SUCCEEDED" || !detail.data.download) {
-    return { emailed: 0, webhookDelivered: false, storageDelivered: false, skipped: true };
-  }
-
+/** Only database reads and recipient resolution happen in this short transaction. */
+async function prepareReportDelivery(tx: TenantTx, ctx: ServiceCtx, args: DeliveryArgs) {
+  const run = await reportsRepository.findReportRunById(tx, args.reportRunId);
+  if (!run || run.tenant_id !== ctx.tenantId || run.status !== "SUCCEEDED" || !run.r2_object_key)
+    return null;
+  const detail = { data: mapRunBaseDto(run) };
   const params = detail.data.params;
   const paramsDelivery = asRecord(params["delivery"]);
   let deliveryMode =
@@ -168,9 +165,9 @@ export async function deliverSucceededReportRun(
   let storageDestination: DestinationRow | null = null;
 
   if (detail.data.scheduleId) {
-    const schedules = await listReportSchedules(tx, ctx);
-    const schedule = schedules.data.items.find((item) => item.id === detail.data.scheduleId);
-    const delivery = schedule?.delivery ?? null;
+    const schedules = await reportsRepository.listSchedules(tx);
+    const schedule = schedules.find((item) => item.id === detail.data.scheduleId);
+    const delivery = schedule ? asRecord(schedule.delivery_json) : null;
     if (delivery) {
       const scheduleEmails = asStringArray(delivery["emails"]);
       if (scheduleEmails.length > 0) emails = [...new Set([...emails, ...scheduleEmails])];
@@ -214,135 +211,305 @@ export async function deliverSucceededReportRun(
   }
 
   if (deliveryMode === "email_me" || deliveryMode === "email") {
-    const actorEmail = await args.resolveMembershipEmail(detail.data.requestedByMembershipId);
+    const actorEmail = await args.resolveMembershipEmail(tx, detail.data.requestedByMembershipId);
     if (actorEmail && (deliveryMode === "email_me" || emails.length === 0)) {
       emails = [...new Set([actorEmail, ...emails])];
     }
   }
 
-  const shouldEmail = emails.length > 0;
-  const shouldWebhook = Boolean(webhookUrl);
-  const shouldStorage = Boolean(storageDestination);
+  return {
+    run,
+    data: detail.data,
+    emails: [...new Set(emails)],
+    webhookUrl,
+    webhookSigningSecret,
+    destinationId,
+    storageDestination,
+  };
+}
 
-  if (!shouldEmail && !shouldWebhook && !shouldStorage) {
-    return { emailed: 0, webhookDelivered: false, storageDelivered: false, skipped: true };
-  }
+function effectKey(ctx: ServiceCtx, runId: string, kind: string, endpoint: string): string {
+  return `report:${createHash("sha256")
+    .update(JSON.stringify([ctx.tenantId, runId, kind, endpoint]))
+    .digest("hex")}`;
+}
 
-  const downloadUrl = detail.data.download.url;
-  const expiresAt = detail.data.download.expiresAt;
-  const title = detail.data.definitionTitle;
-  let emailed = 0;
-  let webhookDelivered = false;
-  let storageDelivered = false;
-
-  if (shouldEmail && args.sendEmail) {
-    const subject = `${title} export is ready`;
-    const body = [
-      `Your ${title} export is ready.`,
-      "",
-      `Format: ${detail.data.format.toUpperCase()}`,
-      `Rows: ${detail.data.rowCount ?? 0}`,
-      `Download (expires ${expiresAt}):`,
-      downloadUrl,
-      "",
-      `Run ID: ${detail.data.id}`,
-    ].join("\n");
-
-    for (const to of emails) {
-      await args.sendEmail({
+async function freezeRequests(
+  ctx: ServiceCtx,
+  plan: NonNullable<Awaited<ReturnType<typeof prepareReportDelivery>>>,
+  args: DeliveryArgs,
+): Promise<ReportDeliveryEffect[]> {
+  const { data, emails, webhookUrl, webhookSigningSecret, destinationId, storageDestination } =
+    plan;
+  const effects: ReportDeliveryEffect[] = [];
+  if (!emails.length && !webhookUrl && !storageDestination) return effects;
+  const objectKey = plan.run.r2_object_key;
+  if (!objectKey) throw new OutboxDeliveryError("permanent", "REPORT_STORAGE_SOURCE_MISSING");
+  const env = parseStorageEnv(process.env);
+  const artifact = asRecord(plan.run.artifact_json);
+  if (
+    plan.run.artifact_json != null &&
+    (artifact["provider"] !== env.STORAGE_PROVIDER || artifact["bucket"] !== env.R2_BUCKET_NAME)
+  )
+    throw new OutboxDeliveryError("permanent", "REPORT_STORAGE_IDENTITY_CHANGED");
+  const retentionExpiry = plan.run.expires_at;
+  const ttl = retentionExpiry
+    ? Math.min(
+        env.STORAGE_SIGNED_DOWNLOAD_TTL_SECONDS,
+        Math.floor((retentionExpiry.getTime() - Date.now()) / 1000),
+      )
+    : 0;
+  if (!retentionExpiry || ttl < 1)
+    throw new OutboxDeliveryError("permanent", "REPORT_ARTIFACT_EXPIRED");
+  assertTenantKeyPrefix({ tenantId: ctx.tenantId, key: objectKey });
+  // Signing can call a storage adapter, so it too runs outside the transaction.
+  const signed = await getStorageProvider().createSignedDownloadUrl({
+    bucket: env.R2_BUCKET_NAME,
+    key: objectKey,
+    expiresInSeconds: ttl,
+  });
+  const downloadUrl = signed.url;
+  const expiresAt = new Date(
+    Math.min(signed.expiresAt.getTime(), retentionExpiry.getTime()),
+  ).toISOString();
+  for (const to of emails) {
+    const key = effectKey(ctx, data.id, "email", to);
+    effects.push({
+      effectKey: key,
+      kind: "email",
+      destinationId,
+      retryOnCrash: args.emailSupportsIdempotency === true,
+      request: {
+        expiresAt,
         to,
-        subject,
-        body,
-        requestId: `${ctx.requestId}:report-delivery:${detail.data.id}:${to}`,
-      });
-      emailed += 1;
-    }
-  } else if (shouldEmail && !args.sendEmail) {
-    throw new Error("REPORT_EMAIL_NOT_CONFIGURED");
+        subject: `${data.definitionTitle} export is ready`,
+        body: [
+          `Your ${data.definitionTitle} export is ready.`,
+          "",
+          `Format: ${data.format.toUpperCase()}`,
+          `Rows: ${data.rowCount ?? 0}`,
+          `Download (expires ${expiresAt}):`,
+          downloadUrl,
+          "",
+          `Run ID: ${data.id}`,
+        ].join("\n"),
+        requestId: key,
+        idempotencyKey: key,
+      },
+    });
   }
-
-  if (shouldWebhook && webhookUrl) {
-    const payload = {
+  if (webhookUrl) {
+    const key = effectKey(ctx, data.id, "webhook", webhookUrl);
+    const body = JSON.stringify({
       event: "report.run_succeeded",
-      reportRunId: detail.data.id,
-      definitionKey: detail.data.definitionKey,
-      format: detail.data.format,
-      rowCount: detail.data.rowCount,
+      reportRunId: data.id,
+      definitionKey: data.definitionKey,
+      format: data.format,
+      rowCount: data.rowCount,
       downloadUrl,
       expiresAt,
-      completedAt: detail.data.completedAt,
-    };
-    const body = JSON.stringify(payload);
+      completedAt: data.completedAt,
+    });
     const headers: Record<string, string> = {
       "content-type": "application/json",
       "x-atlas-event": "report.run_succeeded",
-      "x-request-id": ctx.requestId,
+      "x-request-id": key,
+      "idempotency-key": key,
     };
     if (webhookSigningSecret) {
       headers["x-atlas-signature"] = signWebhookBody(body, webhookSigningSecret);
       headers["x-atlas-signature-alg"] = "hmac-sha256";
     }
+    effects.push({
+      effectKey: key,
+      kind: "webhook",
+      destinationId,
+      // The header aids receiver deduplication but is not an acceptance guarantee.
+      retryOnCrash: false,
+      request: { url: webhookUrl, body, headers, expiresAt },
+    });
+  }
+  if (storageDestination) {
+    effects.push({
+      effectKey: effectKey(ctx, data.id, "storage", storageDestination.id),
+      kind: "storage",
+      destinationId: storageDestination.id,
+      retryOnCrash: true,
+      request: {
+        destination: { id: storageDestination.id, config_json: storageDestination.config_json },
+        objectKey: plan.run.r2_object_key,
+        format: data.format,
+        definitionKey: data.definitionKey,
+        reportRunId: data.id,
+      },
+    });
+  }
+  return effects;
+}
 
-    // Tenant-configured destination URL: SSRF-guarded. Note the payload carries
-    // a signed report download URL, so an unguarded fetch could hand tenant data
-    // to an attacker-chosen endpoint.
-    const response = await safeOutboundFetch(webhookUrl, {
+async function executeEffect(
+  effect: ReportDeliveryEffect,
+  ctx: ServiceCtx,
+  args: DeliveryArgs,
+): Promise<void> {
+  if (effect.kind === "email" || effect.kind === "webhook") {
+    const expiresAt = effect.request["expiresAt"];
+    const expiry = typeof expiresAt === "string" ? Date.parse(expiresAt) : NaN;
+    // Frozen provider bytes cannot be refreshed on retry. An expired link needs
+    // a new report run; successful receipts are skipped before reaching here.
+    if (!Number.isFinite(expiry) || expiry <= Date.now()) {
+      throw new OutboxDeliveryError("permanent", "REPORT_DELIVERY_LINK_EXPIRED");
+    }
+  }
+  if (effect.kind === "email") {
+    if (!args.sendEmail) throw new OutboxDeliveryError("retryable", "REPORT_EMAIL_NOT_CONFIGURED");
+    await args.sendEmail(effect.request as Parameters<ReportDeliveryEmailSender>[0]);
+  } else if (effect.kind === "webhook") {
+    const request = effect.request as {
+      url: string;
+      body: string;
+      headers: Record<string, string>;
+    };
+    const response = await safeOutboundFetch(request.url, {
       method: "POST",
-      headers,
-      body,
+      headers: request.headers,
+      body: request.body,
       signal: AbortSignal.timeout(15_000),
     });
-    if (!response.ok) {
-      if (destinationId) {
-        const dest = await destinationsRosterRepository.getById(tx, destinationId);
-        if (dest) {
-          await recordDestinationDelivery(
-            tx,
-            dest,
-            false,
-            `Webhook failed with status ${response.status}`,
-          );
-        }
-      }
-      throw new Error(`REPORT_WEBHOOK_FAILED:${response.status}`);
-    }
-    webhookDelivered = true;
+    if (!response.ok)
+      throw new OutboxDeliveryError(
+        response.status === 429
+          ? "retryable"
+          : response.status >= 500 || response.status === 408
+            ? "reconciliation_required"
+            : "permanent",
+        `REPORT_WEBHOOK_HTTP_${response.status}`,
+      );
+  } else {
+    await deliverToStorageDestination({
+      ctx,
+      ...(effect.request as Omit<Parameters<typeof deliverToStorageDestination>[0], "ctx">),
+    });
   }
+}
 
-  if (shouldStorage && storageDestination) {
-    const runRow = await reportsRepository.findReportRunById(tx, args.reportRunId);
-    const objectKey = runRow?.r2_object_key ?? null;
-    if (!objectKey) {
-      await recordDestinationDelivery(tx, storageDestination, false, "Export file missing.");
-      throw new Error("REPORT_STORAGE_SOURCE_MISSING");
-    }
+function deliveryError(error: unknown, effect: ReportDeliveryEffect): OutboxDeliveryError {
+  const kind = asRecord(error)["kind"];
+  if (kind === "retryable" || kind === "permanent" || kind === "reconciliation_required") {
+    const code = asRecord(error)["code"];
+    return new OutboxDeliveryError(
+      kind,
+      typeof code === "string" ? code : "REPORT_DELIVERY_FAILED",
+    );
+  }
+  return new OutboxDeliveryError(
+    !effect.retryOnCrash ? "reconciliation_required" : "retryable",
+    "REPORT_DELIVERY_OUTCOME_UNKNOWN",
+  );
+}
 
+/** Prepare/claim/receipt transactions never enclose external delivery. */
+export async function deliverSucceededReportRun(
+  withTx: ReportDeliveryTransaction,
+  ctx: ServiceCtx,
+  args: DeliveryArgs,
+): Promise<{
+  emailed: number;
+  webhookDelivered: boolean;
+  storageDelivered: boolean;
+  skipped: boolean;
+}> {
+  let effects = await withTx((tx) => reportDeliveryEffectsRepository.list(tx, args.reportRunId));
+  if (!effects.length) {
+    const plan = await withTx((tx) => prepareReportDelivery(tx, ctx, args));
+    if (!plan)
+      return { emailed: 0, webhookDelivered: false, storageDelivered: false, skipped: true };
+    const requests = await freezeRequests(ctx, plan, args);
+    effects = await withTx((tx) =>
+      reportDeliveryEffectsRepository.freeze(tx, args.reportRunId, requests),
+    );
+  }
+  const result = {
+    emailed: 0,
+    webhookDelivered: false,
+    storageDelivered: false,
+    skipped: effects.length === 0,
+  };
+  let failureToReport: OutboxDeliveryError | null = null;
+  const outcomePriority = { permanent: 1, reconciliation_required: 2, retryable: 3 };
+  for (const effect of effects) {
     try {
-      await deliverToStorageDestination({
-        ctx,
-        destination: storageDestination,
-        objectKey,
-        format: detail.data.format,
-        definitionKey: detail.data.definitionKey,
-        reportRunId: detail.data.id,
+      const claim = await withTx((tx) =>
+        reportDeliveryEffectsRepository.claim(tx, effect.effectKey),
+      );
+      if (claim.status === "succeeded") continue;
+      if (claim.status !== "claimed" || !claim.leaseToken) {
+        throw new OutboxDeliveryError(
+          claim.status === "reconciliation_required"
+            ? "reconciliation_required"
+            : claim.status === "permanent"
+              ? "permanent"
+              : "retryable",
+          `REPORT_EFFECT_${claim.status.toUpperCase()}`,
+        );
+      }
+      const leaseToken = claim.leaseToken;
+      let failure: OutboxDeliveryError | null = null;
+      try {
+        await executeEffect(effect, ctx, args);
+      } catch (error) {
+        failure = deliveryError(error, effect);
+      }
+      // A receipt-write failure leaves processing intact: SMTP must reconcile.
+      const recorded = await withTx(async (tx) => {
+        const recorded = await reportDeliveryEffectsRepository.finish(
+          tx,
+          effect.effectKey,
+          leaseToken,
+          failure
+            ? failure.kind === "reconciliation_required"
+              ? "reconciliation_required"
+              : "failed"
+            : "succeeded",
+          failure?.kind ?? null,
+          failure?.code ?? null,
+        );
+        if (recorded && effect.destinationId) {
+          const destination = await destinationsRosterRepository.getById(tx, effect.destinationId);
+          if (destination)
+            await recordDestinationDelivery(tx, destination, !failure, failure?.code ?? null);
+        }
+        return recorded;
+      }).catch(() => {
+        throw new OutboxDeliveryError(
+          effect.retryOnCrash ? "retryable" : "reconciliation_required",
+          "REPORT_EFFECT_RECEIPT_COMMIT_FAILED",
+        );
       });
-      storageDelivered = true;
-      await recordDestinationDelivery(tx, storageDestination, true, null);
+      if (!recorded)
+        throw new OutboxDeliveryError("reconciliation_required", "REPORT_EFFECT_RECEIPT_LOST");
+      if (failure) throw failure;
+      if (effect.kind === "email") result.emailed += 1;
+      if (effect.kind === "webhook") result.webhookDelivered = true;
+      if (effect.kind === "storage") result.storageDelivered = true;
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Storage delivery failed.";
-      await recordDestinationDelivery(tx, storageDestination, false, message);
-      throw error;
+      const failure =
+        error instanceof OutboxDeliveryError
+          ? error
+          : new OutboxDeliveryError("retryable", "REPORT_EFFECT_STATE_UNAVAILABLE");
+      // Keep the parent retryable while any independent endpoint has pending
+      // work. Terminal/held receipts are skipped on those retries. Once pending
+      // work finishes, reconciliation takes precedence over permanent failure.
+      if (
+        !failureToReport ||
+        outcomePriority[failure.kind] > outcomePriority[failureToReport.kind]
+      ) {
+        failureToReport = failure;
+      }
     }
   }
-
-  if (destinationId && (shouldEmail || shouldWebhook) && !shouldStorage) {
-    const dest = await destinationsRosterRepository.getById(tx, destinationId);
-    if (dest) {
-      await recordDestinationDelivery(tx, dest, true, null);
-    }
-  }
-
-  return { emailed, webhookDelivered, storageDelivered, skipped: false };
+  if (failureToReport) throw failureToReport;
+  return result;
 }
 
 export { signWebhookBody };

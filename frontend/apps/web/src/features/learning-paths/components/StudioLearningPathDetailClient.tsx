@@ -9,7 +9,7 @@ import {
   deleteLearningPath,
   formatLearningPathApiError,
   updateLearningPath,
-} from "@atlas/contracts-modules/learning-paths/learning-path.api-client";
+} from "@/modules/learning-paths/learning-path.api-client";
 import type { z } from "zod";
 import type { learningPathDetailResponseSchema } from "@atlas/contracts/learning-paths/learning-path.schemas";
 import { serializeStepsForApi } from "../learning-path-step-utils";
@@ -191,7 +191,7 @@ export function StudioLearningPathDetailClient({ path }: StudioLearningPathDetai
               onClick={() => {
                 setShowDelete(true);
               }}
-              className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-red-300 px-3 py-2 text-sm font-semibold text-red-600 transition-colors hover:bg-red-50 disabled:opacity-40 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950/40"
+              className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-red-300 px-3 py-2 text-sm font-semibold text-red-600 transition-colors hover:bg-destructive/10 disabled:opacity-40 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950/40"
             >
               <Trash2 className="h-4 w-4" aria-hidden="true" />
               Delete path
@@ -248,7 +248,7 @@ export function StudioLearningPathDetailClient({ path }: StudioLearningPathDetai
                 onClick={() => {
                   void handleDelete();
                 }}
-                className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-red-700 disabled:opacity-40"
+                className="rounded-lg bg-destructive px-4 py-2 text-sm font-semibold text-destructive-foreground transition-colors hover:opacity-90 disabled:opacity-40"
               >
                 {busy ? "Deleting..." : "Delete path"}
               </button>

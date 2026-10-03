@@ -8,7 +8,10 @@ import {
   persistUtmAttribution,
   sendSignupAttributionEvent,
 } from "@/lib/attribution/utm-storage";
-import { PublicSignupRequestSchema } from "@atlas/contracts/domain-identity/schemas/public-auth";
+const loadPublicSignupRequestSchema = () =>
+  import("@atlas/contracts/domain-identity/schemas/public-auth").then(
+    (module) => module.PublicSignupRequestSchema,
+  );
 import {
   Form,
   FormControl,
@@ -17,7 +20,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useZodForm } from "@/lib/forms/use-zod-form";
+import { useLazyZodForm } from "@/lib/forms/use-lazy-zod-form";
 import { HiddenFormField } from "@/lib/forms/hidden-form-field";
 import { valuesToFormData } from "@/lib/forms/values-to-form-data";
 import { signupAction, type SignupActionState } from "../_actions/signup-action";
@@ -31,7 +34,7 @@ const primaryButtonClass =
   "w-full rounded-[10px] bg-[var(--fba-ind)] px-4 py-4 text-[15px] font-bold text-white shadow-[0_10px_40px_rgba(0,0,0,0.07)] transition-colors hover:bg-[var(--fba-ind-d)] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60";
 
 const inlineLinkClass =
-  "text-[13px] font-semibold text-[var(--fba-ind)] transition-colors hover:underline";
+  "text-[13px] font-semibold text-[var(--fba-ind-tx)] transition-colors hover:underline";
 
 function EyeIcon({ open }: { open: boolean }) {
   return (
@@ -180,8 +183,9 @@ export function SignupForm() {
     return `/auth/oauth/${provider}?${params.toString()}`;
   };
 
-  const form = useZodForm({
-    schema: PublicSignupRequestSchema,
+  const form = useLazyZodForm({
+    schema: loadPublicSignupRequestSchema,
+    errorField: "email",
     defaultValues: {
       displayName: "",
       email: "",
@@ -256,7 +260,7 @@ export function SignupForm() {
                   className={fieldInputClass}
                 />
               </FormControl>
-              <FormMessage className="mt-2 text-[13px] text-[var(--fba-red)]" />
+              <FormMessage className="mt-2 text-[13px] text-[var(--fba-red-tx)]" />
             </FormItem>
           )}
         />
@@ -277,7 +281,7 @@ export function SignupForm() {
                   className={fieldInputClass}
                 />
               </FormControl>
-              <FormMessage className="mt-2 text-[13px] text-[var(--fba-red)]" />
+              <FormMessage className="mt-2 text-[13px] text-[var(--fba-red-tx)]" />
             </FormItem>
           )}
         />
@@ -302,7 +306,7 @@ export function SignupForm() {
                     }}
                   />
                 </FormControl>
-                <FormMessage className="mt-2 text-[13px] text-[var(--fba-red)]" />
+                <FormMessage className="mt-2 text-[13px] text-[var(--fba-red-tx)]" />
               </FormItem>
             )}
           />
@@ -336,7 +340,7 @@ export function SignupForm() {
                   <EyeIcon open={showPassword} />
                 </button>
               </div>
-              <FormMessage className="mt-2 text-[13px] text-[var(--fba-red)]" />
+              <FormMessage className="mt-2 text-[13px] text-[var(--fba-red-tx)]" />
             </FormItem>
           )}
         />
@@ -373,7 +377,7 @@ export function SignupForm() {
             </button>
           </div>
           {confirmError ? (
-            <p className="mt-2 text-[13px] text-[var(--fba-red)]">{confirmError}</p>
+            <p className="mt-2 text-[13px] text-[var(--fba-red-tx)]">{confirmError}</p>
           ) : null}
         </div>
 
@@ -381,7 +385,9 @@ export function SignupForm() {
           <p
             role="alert"
             className={
-              state.ok ? "text-[13px] text-[var(--fba-grn)]" : "text-[13px] text-[var(--fba-red)]"
+              state.ok
+                ? "text-[13px] text-[var(--fba-grn)]"
+                : "text-[13px] text-[var(--fba-red-tx)]"
             }
           >
             {state.message || "We couldn't sign you up with that provider. Please try again."}
@@ -394,8 +400,12 @@ export function SignupForm() {
           </p>
         ) : null}
 
-        <button type="submit" disabled={pending} className={primaryButtonClass}>
-          {pending ? "Creating account..." : "Create Account"}
+        <button
+          type="submit"
+          disabled={pending || form.formState.isSubmitting}
+          className={primaryButtonClass}
+        >
+          {pending || form.formState.isSubmitting ? "Creating account..." : "Create Account"}
         </button>
       </form>
 

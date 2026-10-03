@@ -26,11 +26,11 @@ export function SwipeSessionSummaryDialog({
       aria-modal="true"
       aria-labelledby="swipe-summary-title"
     >
-      <div className="w-full max-w-md rounded bg-white p-6 shadow-lg">
+      <div className="w-full max-w-md rounded bg-card p-6 shadow-lg">
         <h2 id="swipe-summary-title" className="text-xl font-semibold">
           Session complete
         </h2>
-        <p className="mt-2 text-sm text-neutral-600">
+        <p className="mt-2 text-sm text-muted-foreground">
           Practice recorded. Your responses were saved.
         </p>
 
@@ -49,7 +49,7 @@ export function SwipeSessionSummaryDialog({
           </div>
         </dl>
 
-        <p className="mt-4 text-sm text-neutral-500">
+        <p className="mt-4 text-sm text-muted-foreground">
           XP and streak totals will appear in a future update.
         </p>
 

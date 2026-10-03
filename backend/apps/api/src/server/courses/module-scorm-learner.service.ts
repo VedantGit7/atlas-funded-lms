@@ -105,7 +105,7 @@ export async function getModuleScormContentForLearner(
   moduleId: string,
   relativePath: string,
 ) {
-  await requireEnrolledScormModule(tx, ctx, moduleId);
+  const module = await requireEnrolledScormModule(tx, ctx, moduleId);
   const env = parseStorageEnv(process.env);
   const provider = getStorageProvider();
 
@@ -118,6 +118,7 @@ export async function getModuleScormContentForLearner(
       tenantId: ctx.tenantId,
       moduleId,
       relativePath,
+      contentVersion: module.scormContentVersion,
     });
   } catch {
     throw new AtlasHttpError({

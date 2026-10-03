@@ -9,35 +9,15 @@ const tenantBaseUrl =
 const platformBaseUrl = process.env["E2E_PLATFORM_BASE_URL"] ?? "http://platform.localhost:3000";
 const runBrowserE2e = process.env["BROWSER_E2E"] === "1";
 
-/**
- * Run the suite against a production build rather than `next dev`.
- *
- * The dev server compiles each route on first request, which cost ten to twenty
- * seconds before React attached and forced every timeout in this file to be
- * sized for a compiler rather than an application. It also means the suite was
- * exercising code that no user ever runs: dev bundles, HMR clients and
- * development-only React paths.
- *
- * `BROWSER_E2E_DEV=1` opts back into the dev server for a fast local
- * edit-and-rerun loop, where paying for a build on every change is worse than
- * paying for a compile on first hit.
- */
+/** Production builds are the default; the isolated CI/local stack explicitly uses development mode. */
 const useDevServer = process.env["BROWSER_E2E_DEV"] === "1";
 
-/**
- * Skip the screenshot comparisons.
- *
- * Playwright names baselines per platform, and every committed baseline is a
- * `-win32.png` taken on a maintainer's machine. On a Linux runner Playwright
- * looks for `-linux.png`, finds nothing, and writes a new "actual" — so the
- * visual specs cannot pass in CI until Linux baselines exist, and a run that
- * silently regenerates them proves nothing.
- *
- * Excluding them by name in the CI command would reintroduce the hand-listed
- * subset that left eight journeys running nowhere, so the exclusion lives here,
- * behind an explicit flag, and the whole suite is still what CI invokes.
- */
+/** Local troubleshooting may skip visuals; CI must compare committed Linux baselines. */
 const skipVisualRegression = process.env["BROWSER_E2E_SKIP_VISUAL"] === "1";
+if (process.env["CI"] && skipVisualRegression) {
+  throw new Error("CI must compare the committed Linux visual baselines.");
+}
+const linuxBrowserEndpoint = process.env["E2E_LINUX_BROWSER_WS"];
 /** A glob rather than a regex: it matches on either path separator without escaping. */
 const visualSpecs = "**/tests/browser/visual/**";
 
@@ -63,7 +43,14 @@ export default defineConfig({
   testDir: "tests/browser",
   fullyParallel: true,
   forbidOnly: Boolean(process.env["CI"]),
-  retries: process.env["CI"] ? 1 : 0,
+  // A partially completed journey must not retry against the same mutable fixture.
+  retries: 0,
+  updateSnapshots: process.env["CI"] ? "none" : "missing",
+  ...(linuxBrowserEndpoint
+    ? {
+        snapshotPathTemplate: "{testDir}/{testFilePath}-snapshots/{arg}-{projectName}-linux{ext}",
+      }
+    : {}),
   workers: process.env["CI"] ? 1 : undefined,
   reporter: process.env["CI"] ? [["github"], ["html", { open: "never" }]] : [["list"]],
   // A cold Turbopack dev compile of a route costs ten to twenty seconds before
@@ -80,7 +67,10 @@ export default defineConfig({
     timeout: useDevServer ? 30_000 : 10_000,
   },
   use: {
-    trace: "on-first-retry",
+    ...(linuxBrowserEndpoint
+      ? { connectOptions: { wsEndpoint: linuxBrowserEndpoint, exposeNetwork: "<loopback>" } }
+      : {}),
+    trace: "retain-on-failure",
     screenshot: "only-on-failure",
     video: "retain-on-failure",
   },

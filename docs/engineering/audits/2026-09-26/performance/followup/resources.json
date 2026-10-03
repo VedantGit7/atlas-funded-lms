@@ -1,0 +1,286 @@
+{
+  "scope": "Read-only samples with matching PID and creation timestamp (one-millisecond precision tolerance). Observation starts partway through the canary; these are sampled process resident/private bytes, not V8 heap or production memory measurements.",
+  "samples": [
+    {
+      "capturedAt": "2026-09-26T16:39:50.2246624Z",
+      "processes": [
+        {
+          "privateBytes": 874508288,
+          "workingSetBytes": 885563392,
+          "pid": 22936,
+          "role": "api",
+          "cpuSeconds": 24.0625
+        },
+        {
+          "privateBytes": 440758272,
+          "workingSetBytes": 434909184,
+          "pid": 28476,
+          "role": "web",
+          "cpuSeconds": 22.4375
+        }
+      ]
+    },
+    {
+      "capturedAt": "2026-09-26T16:40:20.2560765Z",
+      "processes": [
+        {
+          "privateBytes": 1127694336,
+          "workingSetBytes": 1133006848,
+          "pid": 22936,
+          "role": "api",
+          "cpuSeconds": 29.28125
+        },
+        {
+          "privateBytes": 479916032,
+          "workingSetBytes": 474255360,
+          "pid": 28476,
+          "role": "web",
+          "cpuSeconds": 24.296875
+        }
+      ]
+    },
+    {
+      "capturedAt": "2026-09-26T16:40:50.2677230Z",
+      "processes": [
+        {
+          "privateBytes": 1400356864,
+          "workingSetBytes": 1400532992,
+          "pid": 22936,
+          "role": "api",
+          "cpuSeconds": 33.96875
+        },
+        {
+          "privateBytes": 560406528,
+          "workingSetBytes": 512069632,
+          "pid": 28476,
+          "role": "web",
+          "cpuSeconds": 26.21875
+        }
+      ]
+    },
+    {
+      "capturedAt": "2026-09-26T16:41:20.2922117Z",
+      "processes": [
+        {
+          "privateBytes": 1853333504,
+          "workingSetBytes": 1868763136,
+          "pid": 22936,
+          "role": "api",
+          "cpuSeconds": 62.09375
+        },
+        {
+          "privateBytes": 694710272,
+          "workingSetBytes": 679333888,
+          "pid": 28476,
+          "role": "web",
+          "cpuSeconds": 33.640625
+        }
+      ]
+    },
+    {
+      "capturedAt": "2026-09-26T16:41:50.3165291Z",
+      "processes": [
+        {
+          "privateBytes": 1398194176,
+          "workingSetBytes": 1400434688,
+          "pid": 22936,
+          "role": "api",
+          "cpuSeconds": 77.359375
+        },
+        {
+          "privateBytes": 702803968,
+          "workingSetBytes": 684773376,
+          "pid": 28476,
+          "role": "web",
+          "cpuSeconds": 36.609375
+        }
+      ]
+    },
+    {
+      "capturedAt": "2026-09-26T16:42:20.3429345Z",
+      "processes": [
+        {
+          "privateBytes": 1381310464,
+          "workingSetBytes": 1400905728,
+          "pid": 22936,
+          "role": "api",
+          "cpuSeconds": 111
+        },
+        {
+          "privateBytes": 874766336,
+          "workingSetBytes": 865800192,
+          "pid": 28476,
+          "role": "web",
+          "cpuSeconds": 43.65625
+        }
+      ]
+    },
+    {
+      "capturedAt": "2026-09-26T16:42:50.3597230Z",
+      "processes": [
+        {
+          "privateBytes": 1425018880,
+          "workingSetBytes": 1442058240,
+          "pid": 22936,
+          "role": "api",
+          "cpuSeconds": 132.875
+        },
+        {
+          "privateBytes": 949854208,
+          "workingSetBytes": 938659840,
+          "pid": 28476,
+          "role": "web",
+          "cpuSeconds": 47
+        }
+      ]
+    },
+    {
+      "capturedAt": "2026-09-26T16:43:20.3849705Z",
+      "processes": [
+        {
+          "privateBytes": 1610637312,
+          "workingSetBytes": 1615503360,
+          "pid": 22936,
+          "role": "api",
+          "cpuSeconds": 156.453125
+        },
+        {
+          "privateBytes": 905625600,
+          "workingSetBytes": 878370816,
+          "pid": 28476,
+          "role": "web",
+          "cpuSeconds": 52.59375
+        }
+      ]
+    },
+    {
+      "capturedAt": "2026-09-26T16:43:50.4059999Z",
+      "processes": [
+        {
+          "privateBytes": 1506353152,
+          "workingSetBytes": 1467994112,
+          "pid": 22936,
+          "role": "api",
+          "cpuSeconds": 172.65625
+        },
+        {
+          "privateBytes": 899272704,
+          "workingSetBytes": 873099264,
+          "pid": 28476,
+          "role": "web",
+          "cpuSeconds": 56.25
+        }
+      ]
+    },
+    {
+      "capturedAt": "2026-09-26T16:44:20.4320450Z",
+      "processes": [
+        {
+          "privateBytes": 2006470656,
+          "workingSetBytes": 1944956928,
+          "pid": 22936,
+          "role": "api",
+          "cpuSeconds": 202.953125
+        },
+        {
+          "privateBytes": 947494912,
+          "workingSetBytes": 936247296,
+          "pid": 28476,
+          "role": "web",
+          "cpuSeconds": 64.09375
+        }
+      ]
+    },
+    {
+      "capturedAt": "2026-09-26T16:44:50.4522368Z",
+      "processes": [
+        {
+          "privateBytes": 2066165760,
+          "workingSetBytes": 2024165376,
+          "pid": 22936,
+          "role": "api",
+          "cpuSeconds": 231.8125
+        },
+        {
+          "privateBytes": 949198848,
+          "workingSetBytes": 937476096,
+          "pid": 28476,
+          "role": "web",
+          "cpuSeconds": 70.953125
+        }
+      ]
+    },
+    {
+      "capturedAt": "2026-09-26T16:45:20.4804219Z",
+      "processes": [
+        {
+          "privateBytes": 2825912320,
+          "workingSetBytes": 2769027072,
+          "pid": 22936,
+          "role": "api",
+          "cpuSeconds": 257.9375
+        },
+        {
+          "privateBytes": 917340160,
+          "workingSetBytes": 905633792,
+          "pid": 28476,
+          "role": "web",
+          "cpuSeconds": 76.109375
+        }
+      ]
+    },
+    {
+      "capturedAt": "2026-09-26T16:45:50.4995500Z",
+      "processes": [
+        {
+          "privateBytes": 2564227072,
+          "workingSetBytes": 2510012416,
+          "pid": 22936,
+          "role": "api",
+          "cpuSeconds": 262.3125
+        },
+        {
+          "privateBytes": 918159360,
+          "workingSetBytes": 905773056,
+          "pid": 28476,
+          "role": "web",
+          "cpuSeconds": 76.171875
+        }
+      ]
+    },
+    {
+      "capturedAt": "2026-09-26T16:46:20.5134715Z",
+      "processes": [
+        {
+          "privateBytes": 2564227072,
+          "workingSetBytes": 2510012416,
+          "pid": 22936,
+          "role": "api",
+          "cpuSeconds": 262.3125
+        },
+        {
+          "privateBytes": 918159360,
+          "workingSetBytes": 905773056,
+          "pid": 28476,
+          "role": "web",
+          "cpuSeconds": 76.171875
+        }
+      ]
+    },
+    {
+      "capturedAt": "2026-09-26T16:46:50.5395374Z",
+      "processes": [
+        {
+          "missingOrReused": true,
+          "pid": 22936,
+          "role": "api"
+        },
+        {
+          "missingOrReused": true,
+          "pid": 28476,
+          "role": "web"
+        }
+      ]
+    }
+  ]
+}

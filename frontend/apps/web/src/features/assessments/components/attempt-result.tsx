@@ -20,7 +20,7 @@ export function AttemptResultPanel({ attempt }: AttemptResultPanelProps) {
       <header>
         <h1 className="text-2xl font-semibold">Attempt result</h1>
         {attempt.submittedAt ? (
-          <p className="mt-2 text-sm text-gray-600">
+          <p className="mt-2 text-sm text-muted-foreground">
             Submitted {new Date(attempt.submittedAt).toLocaleString()}
           </p>
         ) : null}
@@ -64,7 +64,9 @@ export function AttemptResultPanel({ attempt }: AttemptResultPanelProps) {
           </ol>
         </section>
       ) : (
-        <p className="text-sm text-gray-600">Answer review is not available for this attempt.</p>
+        <p className="text-sm text-muted-foreground">
+          Answer review is not available for this attempt.
+        </p>
       )}
 
       <Link

@@ -2,37 +2,24 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { assertPlatformMfa, assertTenantMfa } from "@atlas/auth/mfa-enforcement";
 
-/**
- * Audit finding H5 — MFA enforcement.
- *
- * `mfa_enabled` was computed on every sign-in, stored on the principal, and
- * never checked anywhere. The platform console — the one surface with
- * cross-tenant reach — was reachable with a password alone.
- *
- * On why enforcing on this value is meaningful rather than theatre: Supabase's
- * `listFactors()` types `data.totp` and `data.phone` as `Factor<K, "verified">[]`
- * and keeps unverified factors in `data.all`, so presence in those arrays *is*
- * verification. An earlier note claimed the predicate could not distinguish
- * pending from verified factors; that was inferred from a lint message rather
- * than the SDK types, and is wrong.
- */
+// Factor enrollment must never stand in for current-session assurance (F01).
+function session(sessionAssuranceLevel: "aal1" | "aal2" | null | undefined) {
+  return { sessionAssuranceLevel, mfaEnabled: true, principalId: "p1" };
+}
 
 describe("platform MFA (H5)", () => {
-  it("rejects a platform operator without a verified factor", () => {
-    expect(() => assertPlatformMfa({ mfaEnabled: false, principalId: "p1" })).toThrowError(
-      /multi-factor/i,
-    );
+  it.each(["aal1", null, undefined] as const)("rejects an enrolled operator at %s", (level) => {
+    expect(() => assertPlatformMfa(session(level))).toThrowError(/multi-factor/i);
   });
 
-  it("allows one with a verified factor", () => {
-    expect(() => assertPlatformMfa({ mfaEnabled: true, principalId: "p1" })).not.toThrow();
+  it("allows a verified AAL2 session", () => {
+    expect(() => assertPlatformMfa(session("aal2"))).not.toThrow();
   });
 
   it("raises MFA_REQUIRED, distinct from PERMISSION_DENIED", () => {
-    // The caller has the permission and lacks a factor, so the client can offer
-    // enrolment rather than a dead-end denial.
+    // The client must complete a challenge for this session.
     try {
-      assertPlatformMfa({ mfaEnabled: false, principalId: "p1" });
+      assertPlatformMfa(session("aal1"));
       throw new Error("should have thrown");
     } catch (error) {
       expect((error as { code?: string }).code).toBe("MFA_REQUIRED");
@@ -56,16 +43,22 @@ describe("platform MFA (H5)", () => {
 describe("tenant MFA (H5)", () => {
   it("only applies when the route declares it", () => {
     expect(() =>
-      assertTenantMfa({ mfaEnabled: false, required: false, permission: "course.read" }),
+      assertTenantMfa({ ...session(null), required: false, permission: "course.read" }),
     ).not.toThrow();
 
     expect(() =>
-      assertTenantMfa({ mfaEnabled: false, required: true, permission: "role.delete" }),
+      assertTenantMfa({ ...session("aal1"), required: true, permission: "role.delete" }),
     ).toThrowError(/multi-factor/i);
 
     expect(() =>
-      assertTenantMfa({ mfaEnabled: true, required: true, permission: "role.delete" }),
+      assertTenantMfa({ ...session("aal2"), required: true, permission: "role.delete" }),
     ).not.toThrow();
+  });
+
+  it.each([null, undefined] as const)("denies required MFA when assurance is %s", (level) => {
+    expect(() =>
+      assertTenantMfa({ ...session(level), required: true, permission: "role.delete" }),
+    ).toThrowError(/multi-factor/i);
   });
 
   it("covers the categories the audit named", () => {
@@ -94,6 +87,6 @@ describe("tenant MFA (H5)", () => {
     expect(pipeline).toContain("assertTenantMfa");
     // The flag must reach the pipeline from the session, or every route would
     // read as "no MFA" and the requirement would deny universally.
-    expect(pipeline).toContain("mfaEnabled: supabaseUser.mfaEnabled");
+    expect(pipeline).toContain("sessionAssuranceLevel: supabaseUser.sessionAssuranceLevel");
   });
 });

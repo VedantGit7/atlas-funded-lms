@@ -52,11 +52,7 @@ export function Avatar({
   return (
     <span
       aria-hidden={alt ? undefined : true}
-      className={cn(
-        base,
-        "bg-neutral-100 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-200",
-        fallbackClassName,
-      )}
+      className={cn(base, "bg-muted text-muted-foreground", fallbackClassName)}
     >
       {initialsOf(name)}
     </span>

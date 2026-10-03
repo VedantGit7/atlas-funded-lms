@@ -1,9 +1,9 @@
 import { test, expect } from "../fixtures/axe";
+import { resolve } from "node:path";
+import { waitForHydration } from "../helpers/hydration";
 
-// This suite proves two REAL tenants render with different branding, so it has
-// to name the real tenant-config slugs and their dev hosts. That is tenant
-// configuration, which is what the rule permits — not a brand baked into
-// product code. Both hosts are overridable by environment.
+// Capture the auth shell for each configured tenant fixture. The slugs and
+// hosts are test configuration; both hosts are overridable by environment.
 const BRANDING_HOSTS = [
   {
     /* eslint-disable-next-line atlas/no-hardcoded-tenant-strings */
@@ -19,20 +19,17 @@ const BRANDING_HOSTS = [
 
 for (const fixture of BRANDING_HOSTS) {
   test.describe(`visual branding (${fixture.name})`, () => {
-    test.beforeEach(() => {
-      test.skip(
-        Boolean(process.env["CI"]) && process.env["VISUAL_REGRESSION"] !== "1",
-        "Set VISUAL_REGRESSION=1 in CI after snapshot baselines are committed",
-      );
-    });
-
     test.use({ baseURL: fixture.baseURL });
 
     test("login shell light mode", async ({ page }) => {
       await page.goto("/login");
       await expect(page.getByLabel("Email")).toBeVisible();
+      await waitForHydration(page);
+      await page.addStyleTag({ path: resolve("tests/browser/visual/snapshot.css") });
+      await expect(page.locator("nextjs-portal")).toBeHidden();
       await expect(page).toHaveScreenshot(`${fixture.name}-login-light.png`, {
         maxDiffPixelRatio: 0.03,
+        mask: [page.getByText(/^Request ID:/)],
       });
     });
 
@@ -40,8 +37,12 @@ for (const fixture of BRANDING_HOSTS) {
       await page.emulateMedia({ colorScheme: "dark" });
       await page.goto("/login");
       await expect(page.getByLabel("Email")).toBeVisible();
+      await waitForHydration(page);
+      await page.addStyleTag({ path: resolve("tests/browser/visual/snapshot.css") });
+      await expect(page.locator("nextjs-portal")).toBeHidden();
       await expect(page).toHaveScreenshot(`${fixture.name}-login-dark.png`, {
         maxDiffPixelRatio: 0.03,
+        mask: [page.getByText(/^Request ID:/)],
       });
     });
   });

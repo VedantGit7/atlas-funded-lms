@@ -1021,7 +1021,7 @@ function ResetLayoutModal({
           </button>
           <button
             type="button"
-            className="inline-flex h-11 items-center justify-center rounded bg-[var(--admin-danger)] px-4 text-sm font-medium text-[var(--admin-on-primary)] outline-none transition-[background-color,transform] duration-200 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[var(--admin-danger)]/30 motion-safe:active:scale-[0.98]"
+            className="inline-flex h-11 items-center justify-center rounded bg-[var(--admin-danger)] px-4 text-sm font-medium text-[var(--admin-on-danger)] outline-none transition-[background-color,transform] duration-200 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[var(--admin-danger)]/30 motion-safe:active:scale-[0.98]"
             onClick={onConfirm}
           >
             Confirm reset

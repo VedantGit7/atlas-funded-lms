@@ -1,5 +1,6 @@
 import { readdirSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
+import { isCoverageOutputPath } from "../../guards/source-paths.mjs";
 
 /**
  * Page reachability: can a user actually navigate to each `page.tsx`?
@@ -14,12 +15,13 @@ import { join, relative } from "node:path";
  * this logic has already had were in the matching, not the crawling.
  */
 
-const PRUNE = new Set([".next", "node_modules", "dist", ".turbo", ".git", "coverage"]);
+const PRUNE = new Set([".next", "node_modules", "dist", ".turbo", ".git"]);
 
 export function walkFiles(dir, out = []) {
   for (const entry of readdirSync(dir)) {
     if (PRUNE.has(entry)) continue;
     const path = join(dir, entry);
+    if (isCoverageOutputPath(relative(process.cwd(), path))) continue;
     let stats;
     try {
       stats = statSync(path);

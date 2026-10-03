@@ -488,7 +488,7 @@ export function AdminPaymentOrderDetailPage({ orderId }: { orderId: string }) {
                       Open in Transactions
                     </span>
                     <span className="block text-[11px] text-[var(--admin-on-surface-variant)]">
-                      Refunds are issued there
+                      Review refund requests there
                     </span>
                   </span>
                 </span>

@@ -29,10 +29,15 @@ const {
   mockWithGlobalDb: vi.fn((fn: (db: unknown) => unknown) => fn({ $queryRaw: vi.fn() })),
   mockWithTenantTx: vi.fn((_ctx: unknown, fn: (tx: unknown) => unknown) =>
     fn({
-      // A bare vi.fn() returns undefined, so any repository doing rows[0]
-      // throws. The route pipeline now claims an idempotency key through this
-      // tx (M10), which made that latent stub gap visible as a 500.
-      $queryRaw: vi.fn().mockResolvedValue([]),
+      // Model a successful claim only for its INSERT. No claim must still fail
+      // closed in the real idempotency implementation before the handler runs.
+      $queryRaw: vi.fn((query: TemplateStringsArray) =>
+        Promise.resolve(
+          /INSERT INTO idempotency_records/i.test(query.join(" "))
+            ? [{ id: "018f0000-0000-7000-8000-000000000030" }]
+            : [],
+        ),
+      ),
       $queryRawUnsafe: vi.fn().mockResolvedValue([]),
       $executeRaw: vi.fn().mockResolvedValue(0),
       $executeRawUnsafe: vi.fn().mockResolvedValue(0),

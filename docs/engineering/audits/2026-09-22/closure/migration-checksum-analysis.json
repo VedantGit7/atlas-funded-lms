@@ -1,0 +1,219 @@
+[
+  {
+    "name": "20260616061212_016_competency_scoring_foundation",
+    "currentLfMatches": true,
+    "currentCrlfMatches": false,
+    "headMatches": true,
+    "currentEqualsHead": false
+  },
+  {
+    "name": "20260616063712_017_readiness_cta_diagnostic_app_state",
+    "currentLfMatches": true,
+    "currentCrlfMatches": false,
+    "headMatches": true,
+    "currentEqualsHead": false
+  },
+  {
+    "name": "20260616065636_018_certificates_foundation",
+    "currentLfMatches": true,
+    "currentCrlfMatches": false,
+    "headMatches": true,
+    "currentEqualsHead": false
+  },
+  {
+    "name": "20260616070945_019_gamification_foundation",
+    "currentLfMatches": true,
+    "currentCrlfMatches": false,
+    "headMatches": true,
+    "currentEqualsHead": false
+  },
+  {
+    "name": "20260616071844_020_notifications_foundation",
+    "currentLfMatches": true,
+    "currentCrlfMatches": false,
+    "headMatches": true,
+    "currentEqualsHead": false
+  },
+  {
+    "name": "20260616072826_021_community_moderation_foundation",
+    "currentLfMatches": true,
+    "currentCrlfMatches": false,
+    "headMatches": true,
+    "currentEqualsHead": false
+  },
+  {
+    "name": "20260616073739_022_search_analytics_projections",
+    "currentLfMatches": true,
+    "currentCrlfMatches": false,
+    "headMatches": true,
+    "currentEqualsHead": false
+  },
+  {
+    "name": "20260616074812_023_automation_locales_extensions",
+    "currentLfMatches": true,
+    "currentCrlfMatches": false,
+    "headMatches": true,
+    "currentEqualsHead": false
+  },
+  {
+    "name": "20260616075829_024_data_rights_foundation",
+    "currentLfMatches": true,
+    "currentCrlfMatches": false,
+    "headMatches": true,
+    "currentEqualsHead": false
+  },
+  {
+    "name": "20260616134119_025_indexes_partitions_grants_rls_hardening",
+    "currentLfMatches": true,
+    "currentCrlfMatches": false,
+    "headMatches": true,
+    "currentEqualsHead": false
+  },
+  {
+    "name": "20260619000000_029_align_soft_delete_and_hotpath_indexes",
+    "currentLfMatches": true,
+    "currentCrlfMatches": false,
+    "headMatches": true,
+    "currentEqualsHead": false
+  },
+  {
+    "name": "20260707120000_040_gamification_quests",
+    "currentLfMatches": true,
+    "currentCrlfMatches": false,
+    "headMatches": true,
+    "currentEqualsHead": false
+  },
+  {
+    "name": "20260707130000_041_gamification_rewards_shop",
+    "currentLfMatches": true,
+    "currentCrlfMatches": false,
+    "headMatches": true,
+    "currentEqualsHead": false
+  },
+  {
+    "name": "20260707140000_042_gamification_seasonal_events",
+    "currentLfMatches": true,
+    "currentCrlfMatches": false,
+    "headMatches": true,
+    "currentEqualsHead": false
+  },
+  {
+    "name": "20260708160000_046_profile_settings_extensions",
+    "currentLfMatches": true,
+    "currentCrlfMatches": false,
+    "headMatches": true,
+    "currentEqualsHead": false
+  },
+  {
+    "name": "20260709120000_047_tenant_subscriptions",
+    "currentLfMatches": true,
+    "currentCrlfMatches": false,
+    "headMatches": true,
+    "currentEqualsHead": false
+  },
+  {
+    "name": "20260709130000_048_usage_metering",
+    "currentLfMatches": true,
+    "currentCrlfMatches": false,
+    "headMatches": true,
+    "currentEqualsHead": false
+  },
+  {
+    "name": "20260710120000_049_learner_billing_config",
+    "currentLfMatches": true,
+    "currentCrlfMatches": false,
+    "headMatches": true,
+    "currentEqualsHead": false
+  },
+  {
+    "name": "20260710130000_050_learner_billing_home_currency",
+    "currentLfMatches": true,
+    "currentCrlfMatches": false,
+    "headMatches": true,
+    "currentEqualsHead": false
+  },
+  {
+    "name": "20260710140000_051_payment_gateways",
+    "currentLfMatches": true,
+    "currentCrlfMatches": false,
+    "headMatches": true,
+    "currentEqualsHead": false
+  },
+  {
+    "name": "20260710150000_052_learner_billing_gst_invoice_locations",
+    "currentLfMatches": true,
+    "currentCrlfMatches": false,
+    "headMatches": true,
+    "currentEqualsHead": false
+  },
+  {
+    "name": "20260710160000_053_learner_billing_learner_config",
+    "currentLfMatches": true,
+    "currentCrlfMatches": false,
+    "headMatches": true,
+    "currentEqualsHead": false
+  },
+  {
+    "name": "20260710170000_054_learner_billing_location_status",
+    "currentLfMatches": true,
+    "currentCrlfMatches": false,
+    "headMatches": true,
+    "currentEqualsHead": false
+  },
+  {
+    "name": "20260710180000_055_fx_rates",
+    "currentLfMatches": true,
+    "currentCrlfMatches": false,
+    "headMatches": true,
+    "currentEqualsHead": false
+  },
+  {
+    "name": "20260714120000_056_course_reviews",
+    "currentLfMatches": true,
+    "currentCrlfMatches": false,
+    "headMatches": true,
+    "currentEqualsHead": false
+  },
+  {
+    "name": "20260715120000_057_learner_owned_decks",
+    "currentLfMatches": true,
+    "currentCrlfMatches": false,
+    "headMatches": true,
+    "currentEqualsHead": false
+  },
+  {
+    "name": "20260724120000_059_reports_insights_domains",
+    "currentLfMatches": false,
+    "currentCrlfMatches": false,
+    "headMatches": false,
+    "currentEqualsHead": false
+  },
+  {
+    "name": "20260803140000_083_payment_report_fields",
+    "currentLfMatches": false,
+    "currentCrlfMatches": false,
+    "headMatches": false,
+    "currentEqualsHead": false
+  },
+  {
+    "name": "20260803160000_084_learner_product_types",
+    "currentLfMatches": false,
+    "currentCrlfMatches": false,
+    "headMatches": false,
+    "currentEqualsHead": false
+  },
+  {
+    "name": "20260803170000_085_batch_report_fields",
+    "currentLfMatches": false,
+    "currentCrlfMatches": false,
+    "headMatches": false,
+    "currentEqualsHead": false
+  },
+  {
+    "name": "20260803180000_086_poll_report_fields",
+    "currentLfMatches": false,
+    "currentCrlfMatches": false,
+    "headMatches": false,
+    "currentEqualsHead": false
+  }
+]

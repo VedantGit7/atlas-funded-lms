@@ -1,28 +1,11 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, JetBrains_Mono, Plus_Jakarta_Sans } from "next/font/google";
+import { headers } from "next/headers";
 
 import "./globals.css";
+import "../styles/cormorant-garamond.css";
+import "../styles/plus-jakarta-sans.css";
+import "../styles/jetbrains-mono.css";
 
-const jakarta = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-jakarta",
-});
-
-const cormorant = Cormorant_Garamond({
-  subsets: ["latin"],
-  weight: ["500", "600", "700"],
-  style: ["normal", "italic"],
-  display: "swap",
-  variable: "--font-cormorant",
-});
-
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ["latin"],
-  weight: ["400", "500"],
-  display: "swap",
-  variable: "--font-jetbrains",
-});
 import { AppProviders } from "@/components/providers/AppProviders";
 import { AnalyticsConsentBridge } from "../observability/AnalyticsConsentBridge";
 import { MarketingSnippetsInjector } from "../features/marketing/MarketingSnippetsInjector";
@@ -31,6 +14,7 @@ import { ThemeInitScript } from "../components/ThemeInitScript";
 import { resolveDocumentDescription, resolveDocumentTitle } from "../lib/branding/document-title";
 import { loadPublicBootstrap } from "../lib/server/bootstrap";
 import { resolveAppearanceHtmlProps } from "../lib/server/resolve-appearance-html";
+import { hasSessionCookie } from "../lib/server/has-session-cookie";
 
 /**
  * Derives the tab title from the resolved tenant.
@@ -66,8 +50,11 @@ type RootLayoutProps = Readonly<{
 }>;
 
 export default async function RootLayout({ children }: RootLayoutProps) {
+  // Request headers opt the root into dynamic rendering; never cache nonce HTML.
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
+  const hasSession = await hasSessionCookie();
   const theme = await loadTenantThemeRuntime();
-  const baseClassName = `${jakarta.variable} ${cormorant.variable} ${jetbrainsMono.variable}`;
+  const baseClassName = `font-plus-jakarta-sans font-cormorant font-jetbrains-mono`;
   const appearance = await resolveAppearanceHtmlProps(
     baseClassName,
     theme.style ?? undefined,
@@ -108,11 +95,39 @@ export default async function RootLayout({ children }: RootLayoutProps) {
       suppressHydrationWarning
     >
       <head>
-        <ThemeInitScript tenantModeDefault={theme.modeDefault} />
+        <link
+          rel="preload"
+          href="/fonts/plus-jakarta-sans/v12/normal-latin.cd8db90cd950.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preload"
+          href="/fonts/jetbrains-mono/v24/normal-latin.2c32b9b3ee35.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preload"
+          href="/fonts/cormorant-garamond/v21/normal-latin.5d618c462b7a.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preload"
+          href="/fonts/cormorant-garamond/v21/italic-latin.e6d6d1d73858.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
+        <ThemeInitScript {...(nonce ? { nonce } : {})} tenantModeDefault={theme.modeDefault} />
       </head>
       <body suppressHydrationWarning>
         <AppProviders initialDisplayCurrency={displayCurrency} initialFxRates={fxRates}>
-          <AnalyticsConsentBridge>
+          <AnalyticsConsentBridge hasSession={hasSession}>
             <MarketingSnippetsInjector />
             {children}
           </AnalyticsConsentBridge>

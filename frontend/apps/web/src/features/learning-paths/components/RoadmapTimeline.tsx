@@ -25,7 +25,7 @@ export function RoadmapTimeline({
           return (
             <li
               key={step.stepId}
-              className={`rounded border p-4 ${step.locked ? "opacity-70" : ""} ${isCurrent ? "border-blue-500" : ""}`}
+              className={`rounded border p-4 ${step.locked ? "opacity-70" : ""} ${isCurrent ? "border-primary" : ""}`}
             >
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="space-y-1">

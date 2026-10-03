@@ -1,11 +1,6 @@
 import type { NextRequest } from "next/server";
-import {
-  parsePlatformOperatorAssignments,
-  resolvePlatformPermissionsForRole,
-  type PlatformRoleKey,
-} from "./platform-role-resolution";
+import { resolvePlatformPermissionsForRole } from "./platform-role-resolution";
 import { AtlasHttpError } from "@atlas/core/http/errors";
-import { structuredLogger } from "@atlas/observability/logger";
 import { assertPlatformMfa } from "./mfa-enforcement";
 import { findActivePlatformOperator } from "./platform-operators.repository";
 import { upsertAuthPrincipal } from "./auth-principal.repository";
@@ -20,74 +15,17 @@ export type PlatformPrincipal = {
   platformPermissions: readonly string[];
 };
 
-/**
- * Resolve the platform role for a principal. Audit finding H7.
- *
- * Database first. Grants are rows in `platform_operators`, so they carry who
- * granted them, when, why, and their revocation history — and they can be
- * revoked without a deploy.
- *
- * `PLATFORM_OPERATOR_ASSIGNMENTS` remains only as break-glass: bootstrapping the
- * first operator on a fresh environment, and recovering when every grant has
- * been revoked by mistake. It is deliberately checked *after* the table, so a
- * database revocation cannot be silently overridden by stale deploy config, and
- * every use is logged loudly because an env-var grant is exactly the
- * unattributable escalation this finding was about.
- */
-async function resolvePlatformRoleForPrincipal(
-  db: QueryableDb,
-  principalId: string,
-): Promise<PlatformRoleKey | null> {
-  const grant = await findActivePlatformOperator(db, principalId);
-  if (grant) {
-    return grant.roleKey;
-  }
-
-  const raw = process.env["PLATFORM_OPERATOR_ASSIGNMENTS"] ?? "";
-  if (!raw.trim()) {
-    return null;
-  }
-
-  const rows = await db.$queryRaw<{ email_normalized: string }[]>`
-    SELECT email_normalized
-    FROM auth_principals
-    WHERE id = ${principalId}::uuid
-    LIMIT 1
-  `;
-  const email = rows[0]?.email_normalized;
-  if (!email) {
-    return null;
-  }
-
-  const assignments = parsePlatformOperatorAssignments(raw);
-  const role = assignments.get(email) ?? null;
-
-  if (role) {
-    structuredLogger.warn({
-      message: "platform.operator.break_glass_env_grant",
-      module: "platform-auth",
-      eventType: "platform.operator.break_glass",
-      actorSafeId: principalId,
-      role,
-      detail:
-        "Platform access granted from PLATFORM_OPERATOR_ASSIGNMENTS, not from platform_operators. " +
-        "This grant is unattributable and survives database revocation. Move it into the table.",
-    });
-  }
-
-  return role;
-}
-
+/** Active database grants are the sole source of platform authority (F02). */
 export async function loadPlatformPermissions(
   db: QueryableDb,
   principalId: string,
 ): Promise<string[]> {
-  const role = await resolvePlatformRoleForPrincipal(db, principalId);
-  if (!role) {
+  const grant = await findActivePlatformOperator(db, principalId);
+  if (!grant) {
     return [];
   }
 
-  return [...resolvePlatformPermissionsForRole(role)];
+  return [...resolvePlatformPermissionsForRole(grant.roleKey)];
 }
 
 function hasPlatformPermission(
@@ -127,7 +65,10 @@ export async function requirePlatformPrincipal(args: {
   // operator learns "denied" rather than "you need MFA" — the second answer
   // would confirm that the account is a platform operator to anyone who can
   // reach the endpoint.
-  assertPlatformMfa({ mfaEnabled: supabaseUser.mfaEnabled, principalId: principal.id });
+  assertPlatformMfa({
+    sessionAssuranceLevel: supabaseUser.sessionAssuranceLevel,
+    principalId: principal.id,
+  });
 
   return {
     platformPrincipalId: principal.id,

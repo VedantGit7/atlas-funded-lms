@@ -2,6 +2,11 @@ import path from "node:path";
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
+  // The web app's tsconfig sets `jsx: "preserve"` because Next.js compiles JSX
+  // itself. Vite honours that and would hand untransformed JSX to Node the first
+  // time a test imports a component, so tests compile it here instead. Only
+  // matters for files that contain JSX; everything else is unaffected.
+  oxc: { jsx: { runtime: "automatic" } },
   test: {
     environment: "node",
     include: ["tests/**/*.test.ts", "tests/**/*.e2e.ts"],
@@ -11,6 +16,29 @@ export default defineConfig({
   },
   resolve: {
     alias: [
+      {
+        find: /^@\/(.+)$/,
+        replacement: path.resolve(import.meta.dirname, "frontend/apps/web/src/$1"),
+      },
+      {
+        find: /^@atlas\/design-system\/(.+)$/,
+        replacement: path.resolve(import.meta.dirname, "frontend/packages/design-system/src/$1"),
+      },
+      {
+        find: "@atlas/design-system",
+        replacement: path.resolve(
+          import.meta.dirname,
+          "frontend/packages/design-system/src/index.ts",
+        ),
+      },
+      {
+        find: "server-only",
+        replacement: path.resolve(import.meta.dirname, "tests/helpers/server-only.ts"),
+      },
+      {
+        find: /^@atlas\/api-server\/(.+)$/,
+        replacement: path.resolve(import.meta.dirname, "backend/apps/api/src/server/$1.ts"),
+      },
       {
         find: /^@atlas\/core\/(.+)$/,
         replacement: path.resolve(import.meta.dirname, "backend/packages/core/src/$1.ts"),

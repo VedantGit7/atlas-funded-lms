@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { Plus_Jakarta_Sans } from "next/font/google";
 import { useCallback } from "react";
 import { TenantBrandMark } from "@/components/patterns/TenantBrandMark";
 import { FbaDarkModeButton } from "@/components/theme/FbaDarkModeButton";
@@ -9,13 +8,6 @@ import { useFbaTheme } from "@/components/theme/use-fba-theme";
 import "@/components/theme/fba-theme.css";
 import type { LegalDocument } from "./legal-types";
 import { LegalContentRenderer } from "./LegalContentRenderer";
-
-const plusJakarta = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-  variable: "--font-plus-jakarta",
-  display: "swap",
-});
 
 type FbaLegalDocumentProps = {
   document: LegalDocument;
@@ -53,7 +45,7 @@ export function FbaLegalDocument({
 
   return (
     <div
-      className={`fba-scope ${plusJakarta.variable} ${darkMode ? "fba-dark" : ""} min-h-screen bg-[var(--fba-bg)]`}
+      className={`fba-scope font-plus-jakarta-sans ${darkMode ? "fba-dark" : ""} min-h-screen bg-[var(--fba-bg)]`}
     >
       <header className="sticky top-0 z-50 border-b border-[var(--fba-bdr)] bg-[var(--fba-nav-bg)] backdrop-blur-[8px]">
         <div className="mx-auto flex h-[62px] max-w-[1100px] items-center justify-between gap-4 px-7 max-[768px]:px-4">
@@ -90,7 +82,7 @@ export function FbaLegalDocument({
 
       <div className="mx-auto max-w-[1100px] px-7 py-12 max-[768px]:px-4 max-[768px]:py-8">
         <div className="mb-10 border-b border-[var(--fba-bdr)] pb-10">
-          <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--fba-ind)]">
+          <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--fba-ind-tx)]">
             Legal
           </p>
           <h1 className="mb-3 text-[40px] font-extrabold leading-[1.15] tracking-[-0.02em] text-[var(--fba-tx)] max-[768px]:text-[32px]">
@@ -122,7 +114,7 @@ export function FbaLegalDocument({
                   }}
                   className="block rounded-[10px] border border-[var(--fba-bdr)] bg-[var(--fba-surf)] px-3 py-3 no-underline transition-colors hover:border-[var(--fba-bdr2)] hover:bg-[var(--fba-bg2)]"
                 >
-                  <span className="mb-1 block text-[10px] font-bold uppercase tracking-[0.12em] text-[var(--fba-ind)]">
+                  <span className="mb-1 block text-[10px] font-bold uppercase tracking-[0.12em] text-[var(--fba-ind-tx)]">
                     {section.sectionNumber}
                   </span>
                   <span className="text-[13px] font-medium leading-snug text-[var(--fba-tx)]">
@@ -133,7 +125,7 @@ export function FbaLegalDocument({
               <div className="mt-4 border-t border-[var(--fba-bdr)] pt-4">
                 <Link
                   href={siblingHref}
-                  className="text-[13px] font-semibold text-[var(--fba-ind)] no-underline hover:underline"
+                  className="text-[13px] font-semibold text-[var(--fba-ind-tx)] no-underline hover:underline"
                 >
                   View {siblingLabel}
                 </Link>
@@ -149,7 +141,7 @@ export function FbaLegalDocument({
                 className={`scroll-mt-[88px] ${index > 0 ? "mt-14 border-t border-[var(--fba-bdr)] pt-14" : ""}`}
               >
                 <div className="mb-6">
-                  <span className="mb-2 block text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--fba-ind)]">
+                  <span className="mb-2 block text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--fba-ind-tx)]">
                     {section.sectionNumber}
                   </span>
                   <h2 className="text-[26px] font-extrabold leading-[1.25] tracking-[-0.01em] text-[var(--fba-tx)] max-[768px]:text-[22px]">

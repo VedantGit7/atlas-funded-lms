@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@atlas/design-system";
-import type { DiagnosticQuestion } from "@atlas/contracts-modules/diagnostics/diagnostic.types";
+import type { DiagnosticQuestion } from "@atlas/contracts/diagnostics/diagnostic.types";
 
 type DiagnosticQuestionCardProps = {
   question: DiagnosticQuestion;

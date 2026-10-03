@@ -1,3 +1,5 @@
+import { createPlatformIdempotencyStore } from "../helpers/platform-idempotency-tx";
+const replayStore = createPlatformIdempotencyStore();
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
 import { AtlasHttpError } from "@atlas/core/http/errors";
@@ -50,7 +52,7 @@ vi.mock("@atlas/db", async (importOriginal) => {
   return {
     ...actual,
     withPlatformScope: (_ctx: unknown, _reason: string, fn: (tx: unknown) => unknown) =>
-      fn({ $queryRaw: txQueryRawMock, $executeRaw: txExecuteRawMock }),
+      fn(replayStore.wrap({ $queryRaw: txQueryRawMock, $executeRaw: txExecuteRawMock })),
   };
 });
 
@@ -155,6 +157,7 @@ function createPutRequest(headers: Record<string, string> = {}, body: unknown = 
 describe("GET /api/v1/platform/tenants/[id]/entitlements", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    replayStore.clear();
     mockRequirePlatformPrincipal.mockResolvedValue(platformPrincipal);
     mockReadPlatformTenantEntitlements.mockResolvedValue(entitlementsPayload);
   });
@@ -193,6 +196,7 @@ describe("GET /api/v1/platform/tenants/[id]/entitlements", () => {
 describe("PUT /api/v1/platform/tenants/[id]/entitlements", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    replayStore.clear();
     mockRequirePlatformPrincipal.mockResolvedValue(platformPrincipal);
     mockReplacePlatformTenantEntitlements.mockResolvedValue(entitlementsPayload);
     mockAuditWriterWrite.mockResolvedValue(undefined);

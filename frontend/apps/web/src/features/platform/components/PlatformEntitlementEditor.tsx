@@ -71,12 +71,12 @@ export function PlatformEntitlementEditor({
   return (
     <div className="space-y-3">
       {entitlements.map((entry, index) => (
-        <div key={`${entry.key}-${index}`} className="rounded border p-3 text-sm">
+        <div key={`${entry.key}-${index}`} className="rounded border border-border p-3 text-sm">
           <div className="flex flex-wrap items-start justify-between gap-2">
             <label className="block min-w-48 flex-1">
               <span className="font-medium">Key</span>
               <input
-                className="mt-1 w-full rounded border px-2 py-1 font-mono"
+                className="mt-1 w-full rounded border border-input bg-background text-foreground px-2 py-1 font-mono"
                 value={entry.key}
                 onChange={(event) => {
                   updateRow(index, { key: event.target.value });
@@ -86,7 +86,7 @@ export function PlatformEntitlementEditor({
             </label>
             <button
               type="button"
-              className="rounded border px-2 py-1 text-xs"
+              className="rounded border border-border px-2 py-1 text-xs hover:bg-muted"
               onClick={() => {
                 removeRow(index);
               }}
@@ -107,7 +107,7 @@ export function PlatformEntitlementEditor({
           <label className="mt-2 block">
             <span className="font-medium">Value (JSON or boolean)</span>
             <input
-              className="mt-1 w-full rounded border px-2 py-1 font-mono"
+              className="mt-1 w-full rounded border border-input bg-background text-foreground px-2 py-1 font-mono"
               value={entry.valueRaw}
               onChange={(event) => {
                 updateRow(index, { valueRaw: event.target.value });
@@ -117,7 +117,7 @@ export function PlatformEntitlementEditor({
           <label className="mt-2 block">
             <span className="font-medium">Expires at (optional)</span>
             <input
-              className="mt-1 w-full rounded border px-2 py-1"
+              className="mt-1 w-full rounded border border-input bg-background text-foreground px-2 py-1"
               type="datetime-local"
               value={entry.expiresAt}
               onChange={(event) => {
@@ -127,7 +127,11 @@ export function PlatformEntitlementEditor({
           </label>
         </div>
       ))}
-      <button type="button" className="rounded border px-3 py-2 text-sm" onClick={addRow}>
+      <button
+        type="button"
+        className="rounded border border-border px-3 py-2 text-sm hover:bg-muted"
+        onClick={addRow}
+      >
         Add entitlement
       </button>
     </div>

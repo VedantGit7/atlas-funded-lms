@@ -1575,7 +1575,7 @@ export function AdminZoomInsightsMeetingDetailPage({ meetingId }: { meetingId: s
               <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  className="flex h-8 w-8 items-center justify-center rounded text-[var(--admin-outline)] hover:bg-[var(--admin-surface-high)] hover:text-[var(--admin-primary)] disabled:opacity-40"
+                  className="flex h-8 w-8 items-center justify-center rounded text-[var(--admin-on-surface-variant)] hover:bg-[var(--admin-surface-high)] hover:text-[var(--admin-primary)] disabled:opacity-40"
                   disabled={page <= 1}
                   onClick={() => {
                     setPage((current) => Math.max(1, current - 1));

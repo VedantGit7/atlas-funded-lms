@@ -1,0 +1,32 @@
+{
+  "extract-zip": [
+    {
+      "id": 1139346,
+      "url": "https://github.com/advisories/GHSA-jmr9-qjv8-65gv",
+      "title": "extract-zip unvalidated symlink path traversal",
+      "severity": "high",
+      "vulnerable_versions": "<=2.0.1",
+      "cwe": [
+        "CWE-22"
+      ],
+      "cvss": {
+        "score": 8.1,
+        "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:N"
+      }
+    },
+    {
+      "id": 1193685,
+      "url": "https://github.com/advisories/GHSA-7pqw-9j4j-h8q3",
+      "title": "extract-zip allows arbitrary file writes through symlink archive entries",
+      "severity": "high",
+      "vulnerable_versions": "<=2.0.1",
+      "cwe": [
+        "CWE-22"
+      ],
+      "cvss": {
+        "score": 8.1,
+        "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:H/A:H"
+      }
+    }
+  ]
+}

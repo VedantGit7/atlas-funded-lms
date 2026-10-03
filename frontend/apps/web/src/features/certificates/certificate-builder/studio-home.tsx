@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Inter, Playfair_Display, JetBrains_Mono } from "next/font/google";
 import { Search, User, BookOpen, Pencil, Copy, Trash2, Menu, X, ChevronLeft } from "lucide-react";
 import type { CertificateDesignDocument } from "@atlas/contracts/certificates/certificate-design-document";
 import { TenantBrandMark } from "../../../components/patterns/TenantBrandMark";
@@ -27,27 +26,8 @@ import { CERTIFICATE_STUDIO_TEMPLATES } from "./studio-routes";
 import { StudioPaperPreview } from "./studio-paper-preview";
 import { StudioDocPreview } from "./studio-doc-preview";
 import "./studio-home.css";
-
-const studioSans = Inter({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  display: "swap",
-  variable: "--font-studio-sans",
-});
-
-const studioDisplay = Playfair_Display({
-  subsets: ["latin"],
-  weight: ["700"],
-  display: "swap",
-  variable: "--font-studio-display",
-});
-
-const studioMono = JetBrains_Mono({
-  subsets: ["latin"],
-  weight: ["400", "500"],
-  display: "swap",
-  variable: "--font-studio-mono",
-});
+import "../../../styles/inter.css";
+import "../../../styles/playfair-display.css";
 
 type TemplateStatus = "DRAFT" | "REVIEW" | "PUBLISHED" | "ARCHIVED";
 
@@ -172,7 +152,7 @@ export function CertificateStudioHome({ publicName, onOpenStudio }: CertificateS
   const [busyId, setBusyId] = useState<string | null>(null);
   const [brandKit, setBrandKit] = useState<BrandKitSummary>(DEFAULT_BRAND);
 
-  const fontClass = `${studioSans.variable} ${studioDisplay.variable} ${studioMono.variable}`;
+  const fontClass = `font-inter font-playfair-display font-jetbrains-mono`;
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -314,6 +294,20 @@ export function CertificateStudioHome({ publicName, onOpenStudio }: CertificateS
 
   return (
     <div className={`cert-home ${fontClass}`} style={{ fontFamily: "var(--ch-font-sans)" }}>
+      <link
+        rel="preload"
+        href="/fonts/inter/v20/normal-latin.c940764593d0.woff2"
+        as="font"
+        type="font/woff2"
+        crossOrigin="anonymous"
+      />
+      <link
+        rel="preload"
+        href="/fonts/playfair-display/v40/normal-latin.02af2688dd8c.woff2"
+        as="font"
+        type="font/woff2"
+        crossOrigin="anonymous"
+      />
       <header className="cert-home__topbar">
         <div className="cert-home__topbar-left">
           <button

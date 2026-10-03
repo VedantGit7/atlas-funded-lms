@@ -1,0 +1,74 @@
+[
+  {
+    "name": "route-metadata",
+    "exitCode": 0,
+    "durationMs": 381,
+    "output": ""
+  },
+  {
+    "name": "prisma-boundary",
+    "exitCode": 0,
+    "durationMs": 3303,
+    "output": ""
+  },
+  {
+    "name": "audit-compliance",
+    "exitCode": 0,
+    "durationMs": 3294,
+    "output": "check-audit-compliance: OK (2438 files scanned).\n"
+  },
+  {
+    "name": "outbox-compliance",
+    "exitCode": 0,
+    "durationMs": 6091,
+    "output": ""
+  },
+  {
+    "name": "outbox-worker",
+    "exitCode": 0,
+    "durationMs": 170,
+    "output": "check-outbox-worker-coverage: OK (10 processors registered).\n"
+  },
+  {
+    "name": "forbidden-scope",
+    "exitCode": 0,
+    "durationMs": 3131,
+    "output": ""
+  },
+  {
+    "name": "secrets",
+    "exitCode": 0,
+    "durationMs": 3480,
+    "output": ""
+  },
+  {
+    "name": "sql-session",
+    "exitCode": 0,
+    "durationMs": 2710,
+    "output": ""
+  },
+  {
+    "name": "sql-paths",
+    "exitCode": 0,
+    "durationMs": 738,
+    "output": ""
+  },
+  {
+    "name": "api-closure",
+    "exitCode": 0,
+    "durationMs": 2067,
+    "output": "Frontend API closure OK (804 routes scanned, strict=yes).\n"
+  },
+  {
+    "name": "observability",
+    "exitCode": 0,
+    "durationMs": 1555,
+    "output": "{\n  \"ok\": true,\n  \"checks\": 5\n}\n"
+  },
+  {
+    "name": "release-evidence",
+    "exitCode": 1,
+    "durationMs": 167,
+    "output": "Release evidence: 37 gates\n  passed: 27  skipped: 2  manual_required: 8\n  verdict: READY_FOR_STAGING\n\nRelease evidence validation FAILED:\n\n- stale by 26.9 days — generated 2026-08-23T10:10:55.256Z, limit is 24h. A point-in-time snapshot vouches only for the tree it ran against.\n- describes commit 9872b623d897 but HEAD is ca8c0f1e7e69\n\nRegenerate with `pnpm release:suite` against the current tree.\n"
+  }
+]

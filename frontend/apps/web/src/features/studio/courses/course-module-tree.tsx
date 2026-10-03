@@ -281,7 +281,7 @@ export function CourseModuleTree({
                       type="button"
                       aria-label={`Reorder ${module.title}`}
                       disabled={!editable}
-                      className="drag-handle mt-0.5 shrink-0 text-[var(--admin-on-surface-variant)] transition-colors hover:text-[var(--admin-outline)] disabled:opacity-40"
+                      className="drag-handle mt-0.5 shrink-0 text-[var(--admin-on-surface-variant)] transition-colors hover:text-[var(--admin-on-surface-variant)] disabled:opacity-40"
                       onMouseDown={() => {
                         setDraggingId(module.id);
                       }}
@@ -341,7 +341,7 @@ export function CourseModuleTree({
                             <button
                               type="button"
                               aria-label={`Edit ${module.title}`}
-                              className="rounded p-1 text-[var(--admin-outline)] transition-colors hover:text-[var(--admin-primary)]"
+                              className="rounded p-1 text-[var(--admin-on-surface-variant)] transition-colors hover:text-[var(--admin-primary)]"
                               onClick={() => {
                                 setEditingId(module.id);
                                 setEditingTitle(module.title);
@@ -352,7 +352,7 @@ export function CourseModuleTree({
                             <button
                               type="button"
                               aria-label={`Delete ${module.title}`}
-                              className="rounded p-1 text-[var(--admin-outline)] transition-colors hover:text-[var(--admin-danger)]"
+                              className="rounded p-1 text-[var(--admin-on-surface-variant)] transition-colors hover:text-[var(--admin-danger)]"
                               onClick={() => {
                                 setDeleteTarget({ id: module.id, title: module.title });
                               }}

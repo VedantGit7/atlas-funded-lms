@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { BarChart3, Loader2, RefreshCw } from "lucide-react";
-import { diagnosticApiClient } from "@atlas/contracts-modules/diagnostics/diagnostic.api-client";
+import { diagnosticApiClient } from "@/modules/diagnostics/diagnostic.api-client";
 
 export function DiagnosticResultActions() {
   const router = useRouter();

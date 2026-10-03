@@ -687,7 +687,7 @@ export function AnnouncementsListPanel() {
                 type="button"
                 disabled={deleteBusy || !deleteMatches}
                 onClick={() => void onDelete()}
-                className="rounded-lg bg-[var(--admin-danger)] px-5 py-2 text-[12px] font-bold text-[var(--admin-on-primary)] transition-opacity disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-lg bg-[var(--admin-danger)] px-5 py-2 text-[12px] font-bold text-[var(--admin-on-danger)] transition-opacity disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Confirm delete
               </button>

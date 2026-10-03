@@ -4,7 +4,7 @@ import { useState } from "react";
 import {
   publishLearningPath,
   formatLearningPathApiError,
-} from "@atlas/contracts-modules/learning-paths/learning-path.api-client";
+} from "@/modules/learning-paths/learning-path.api-client";
 import { primaryButtonClassName } from "../../../app/admin/branding/_components/branding-admin-shared";
 import { STATUS_CONFIG, STATUS_LABELS } from "../learning-path-studio-shared";
 

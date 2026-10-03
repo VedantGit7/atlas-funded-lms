@@ -1,6 +1,6 @@
 "use client";
 
-import * as Sentry from "@sentry/nextjs";
+import { reportClientError } from "../observability/report-client-error";
 import { useEffect } from "react";
 
 type GlobalErrorProps = Readonly<{
@@ -10,7 +10,7 @@ type GlobalErrorProps = Readonly<{
 
 export default function GlobalError({ error, reset }: GlobalErrorProps) {
   useEffect(() => {
-    Sentry.captureException(error);
+    void reportClientError(error);
   }, [error]);
 
   const requestId =

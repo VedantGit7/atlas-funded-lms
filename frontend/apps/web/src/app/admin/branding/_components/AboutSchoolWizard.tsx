@@ -442,7 +442,7 @@ function Stepper({
               className={[
                 "flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold motion-safe:transition-colors motion-safe:duration-200",
                 complete
-                  ? "bg-[var(--admin-success)] text-[var(--admin-on-primary)]"
+                  ? "bg-[var(--admin-success)] text-[var(--admin-on-success)]"
                   : active
                     ? "bg-[var(--admin-primary)] text-[var(--admin-on-primary)]"
                     : "bg-[var(--admin-surface-high)] text-[var(--admin-on-surface-variant)]",

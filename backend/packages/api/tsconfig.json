@@ -13,6 +13,7 @@
   "include": ["src/**/*.ts", "src/**/*.tsx"],
   "exclude": ["node_modules", "dist", "build", ".next"],
   "references": [
+    { "path": "../storage" },
     { "path": "../auth" },
     { "path": "../authorization" },
     { "path": "../core" },

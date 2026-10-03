@@ -213,11 +213,22 @@ async function resolveSignedDownload(
   ctx: ServiceCtx,
   run: ReportRunRow,
 ): Promise<{ url: string; expiresAt: string } | null> {
-  if (run.status !== "SUCCEEDED" || !run.r2_object_key) {
+  if (
+    run.status !== "SUCCEEDED" ||
+    !run.r2_object_key ||
+    !run.expires_at ||
+    run.expires_at.getTime() <= Date.now()
+  ) {
     return null;
   }
 
   const env = parseStorageEnv(process.env);
+  const artifact = asRecord(run.artifact_json);
+  if (
+    run.artifact_json != null &&
+    (artifact["provider"] !== env.STORAGE_PROVIDER || artifact["bucket"] !== env.R2_BUCKET_NAME)
+  )
+    return null;
   const provider = getStorageProvider();
 
   assertTenantKeyPrefix({
@@ -225,15 +236,22 @@ async function resolveSignedDownload(
     key: run.r2_object_key,
   });
 
+  const ttl = Math.min(
+    env.STORAGE_SIGNED_DOWNLOAD_TTL_SECONDS,
+    Math.floor((run.expires_at.getTime() - Date.now()) / 1000),
+  );
+  if (ttl < 1) return null;
   const signed = await provider.createSignedDownloadUrl({
     bucket: env.R2_BUCKET_NAME,
     key: run.r2_object_key,
-    expiresInSeconds: env.STORAGE_SIGNED_DOWNLOAD_TTL_SECONDS,
+    expiresInSeconds: ttl,
   });
 
   return {
     url: signed.url,
-    expiresAt: signed.expiresAt.toISOString(),
+    expiresAt: new Date(
+      Math.min(signed.expiresAt.getTime(), run.expires_at.getTime()),
+    ).toISOString(),
   };
 }
 

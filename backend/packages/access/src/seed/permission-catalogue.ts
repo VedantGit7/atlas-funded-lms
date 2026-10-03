@@ -49,6 +49,18 @@ export const PERMISSIONS: readonly PermissionDefinition[] = [
     resourceType: "tenant",
     platformOnly: true,
   },
+  {
+    key: "platform.cost.read",
+    description: "Read per-tenant cost attribution and the supplier rate card",
+    resourceType: "cost",
+    platformOnly: true,
+  },
+  {
+    key: "platform.cost.manage",
+    description: "Set supplier unit rates and fixed monthly costs",
+    resourceType: "cost",
+    platformOnly: true,
+  },
 
   // Tenancy
   {

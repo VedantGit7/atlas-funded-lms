@@ -26,8 +26,6 @@
       "@atlas/config/*": ["backend/packages/config/src/*"],
       "@atlas/contracts": ["frontend/packages/contracts/src/index.ts"],
       "@atlas/contracts/*": ["frontend/packages/contracts/src/*"],
-      "@atlas/contracts-modules/*": ["frontend/apps/web/src/modules/*"],
-      "@atlas/api-server/*": ["backend/apps/api/src/server/*"],
       "@atlas/tenant-branding": ["frontend/apps/web/src/lib/tenant-branding.ts"],
       "@atlas/tenant-gate": ["frontend/apps/web/src/lib/tenant-gate.ts"],
       "@atlas/tenant-theme": ["frontend/apps/web/src/lib/tenant-theme.ts"],

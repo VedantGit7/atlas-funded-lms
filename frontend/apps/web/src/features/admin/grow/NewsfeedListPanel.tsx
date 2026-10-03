@@ -757,7 +757,7 @@ export function NewsfeedListPanel() {
               </button>
               <button
                 type="button"
-                className="rounded-xl bg-[var(--admin-danger)] px-4 py-2 text-sm font-semibold text-[var(--admin-on-primary)] disabled:opacity-50"
+                className="rounded-xl bg-[var(--admin-danger)] px-4 py-2 text-sm font-semibold text-[var(--admin-on-danger)] disabled:opacity-50"
                 disabled={deleteBusy || !deleteMatches}
                 onClick={() => void onDelete()}
               >

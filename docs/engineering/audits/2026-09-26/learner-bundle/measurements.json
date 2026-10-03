@@ -1,0 +1,516 @@
+{
+  "generatedAt": "2026-09-26T10:46:01.256Z",
+  "measurement": "Sum of gzip-compressed unique rootMainFiles and per-route entryJSFiles; KiB=1024 bytes. Manifest estimate, not observed browser transfer.",
+  "build": {
+    "nextVersion": "16.3.5",
+    "buildId": "d3nd6qP9wObtt7-JVw1Av",
+    "isolatedDistDir": ".next-perf",
+    "environment": "sanitized localWebEnvironment; no hosted load",
+    "exitCode": 0,
+    "exitObservedAt": "2026-09-26T10:44:29Z"
+  },
+  "baseline": {
+    "worstInitialGzipKiBRounded": 403.8,
+    "routeCount": 71,
+    "sharedRootGzipKiBRounded": 129.2,
+    "precisionKiB": 0.1,
+    "coverage": "Original guard logged five heaviest routes only; no exact baseline per-route bytes retained."
+  },
+  "after": {
+    "worstInitialGzipKiB": 290.57421875,
+    "worstRoute": "/profile/notifications",
+    "routeCount": 71,
+    "targetKiB": 150,
+    "targetMet": false
+  },
+  "comparisons": [
+    {
+      "route": "/(public)/diagnostic/result",
+      "beforeGzipKiBRounded": 403.8,
+      "analyticsOnlyGzipKiBRounded": 337.9,
+      "afterGzipKiB": 260.607421875,
+      "estimatedReductionKiB": 143.2
+    },
+    {
+      "route": "/profile/notifications",
+      "beforeGzipKiBRounded": 356.5,
+      "analyticsOnlyGzipKiBRounded": 290.6,
+      "afterGzipKiB": 290.57421875,
+      "estimatedReductionKiB": 65.9
+    },
+    {
+      "route": "/",
+      "beforeGzipKiBRounded": 353.3,
+      "analyticsOnlyGzipKiBRounded": 287.4,
+      "afterGzipKiB": 287.42578125,
+      "estimatedReductionKiB": 65.9
+    },
+    {
+      "route": "/(public)/diagnostic",
+      "beforeGzipKiBRounded": 350.7,
+      "analyticsOnlyGzipKiBRounded": 284.9,
+      "afterGzipKiB": 207.3466796875,
+      "estimatedReductionKiB": 143.4
+    },
+    {
+      "route": "/attempts/[id]",
+      "beforeGzipKiBRounded": 344.8,
+      "analyticsOnlyGzipKiBRounded": 278.9,
+      "afterGzipKiB": 278.9208984375,
+      "estimatedReductionKiB": 65.9
+    }
+  ],
+  "sourceFiles": [
+    {
+      "file": "frontend/apps/web/src/observability/posthog-browser.ts",
+      "sha256": "b27a5ad76dc416a8e8d32b977fa77a421b00ecd2bfcfaaba932224a411afce7b"
+    },
+    {
+      "file": "frontend/apps/web/src/features/diagnostics/components/DeferredDiagnosticIdentityGate.tsx",
+      "sha256": "b42f76f1b37b49f381136b7f0e23fe96b47b6dcbb6c3aa58428f075cea0da73a"
+    },
+    {
+      "file": "frontend/apps/web/src/features/diagnostics/components/AnonymousDiagnosticResultView.tsx",
+      "sha256": "bdf3864bb7c30d1f2e3914c1d3e2dacd0b2537f5eca96f0fd030c5a80b7f59ae"
+    },
+    {
+      "file": "frontend/apps/web/src/features/diagnostics/components/PublicDiagnosticRunner.tsx",
+      "sha256": "67422c9b8c9080f6da6927049bbfab59fda008c6e8297ee0475b9d784e8400d4"
+    }
+  ],
+  "routes": [
+    {
+      "route": "/profile/notifications",
+      "initialGzipBytes": 297548,
+      "initialGzipKiB": 290.57421875,
+      "initialChunkCount": 22
+    },
+    {
+      "route": "/",
+      "initialGzipBytes": 294324,
+      "initialGzipKiB": 287.42578125,
+      "initialChunkCount": 21
+    },
+    {
+      "route": "/attempts/[id]",
+      "initialGzipBytes": 285615,
+      "initialGzipKiB": 278.9208984375,
+      "initialChunkCount": 21
+    },
+    {
+      "route": "/(auth)/login",
+      "initialGzipBytes": 282955,
+      "initialGzipKiB": 276.3232421875,
+      "initialChunkCount": 19
+    },
+    {
+      "route": "/(auth)/signup",
+      "initialGzipBytes": 281058,
+      "initialGzipKiB": 274.470703125,
+      "initialChunkCount": 19
+    },
+    {
+      "route": "/(auth)/reset-password",
+      "initialGzipBytes": 279730,
+      "initialGzipKiB": 273.173828125,
+      "initialChunkCount": 19
+    },
+    {
+      "route": "/(learner)/community",
+      "initialGzipBytes": 275240,
+      "initialGzipKiB": 268.7890625,
+      "initialChunkCount": 21
+    },
+    {
+      "route": "/(learner)/community/spaces/[id]",
+      "initialGzipBytes": 275240,
+      "initialGzipKiB": 268.7890625,
+      "initialChunkCount": 21
+    },
+    {
+      "route": "/(learner)/achievements",
+      "initialGzipBytes": 272573,
+      "initialGzipKiB": 266.1845703125,
+      "initialChunkCount": 20
+    },
+    {
+      "route": "/(learner)/readiness",
+      "initialGzipBytes": 271791,
+      "initialGzipKiB": 265.4208984375,
+      "initialChunkCount": 20
+    },
+    {
+      "route": "/(learner)/progress",
+      "initialGzipBytes": 271754,
+      "initialGzipKiB": 265.384765625,
+      "initialChunkCount": 20
+    },
+    {
+      "route": "/(learner)/hall-of-fame",
+      "initialGzipBytes": 271742,
+      "initialGzipKiB": 265.373046875,
+      "initialChunkCount": 20
+    },
+    {
+      "route": "/(learner)/community/posts/[id]",
+      "initialGzipBytes": 271465,
+      "initialGzipKiB": 265.1025390625,
+      "initialChunkCount": 20
+    },
+    {
+      "route": "/(learner)/certificates",
+      "initialGzipBytes": 269418,
+      "initialGzipKiB": 263.103515625,
+      "initialChunkCount": 20
+    },
+    {
+      "route": "/(learner)/resources",
+      "initialGzipBytes": 269246,
+      "initialGzipKiB": 262.935546875,
+      "initialChunkCount": 20
+    },
+    {
+      "route": "/(learner)/diagnostic/me",
+      "initialGzipBytes": 268031,
+      "initialGzipKiB": 261.7490234375,
+      "initialChunkCount": 20
+    },
+    {
+      "route": "/(learner)/diagnostic/me/[id]/result",
+      "initialGzipBytes": 267467,
+      "initialGzipKiB": 261.1982421875,
+      "initialChunkCount": 20
+    },
+    {
+      "route": "/(public)/diagnostic/result",
+      "initialGzipBytes": 266862,
+      "initialGzipKiB": 260.607421875,
+      "initialChunkCount": 21
+    },
+    {
+      "route": "/(learner)/notifications",
+      "initialGzipBytes": 265097,
+      "initialGzipKiB": 258.8837890625,
+      "initialChunkCount": 20
+    },
+    {
+      "route": "/(learner)/diagnostic/me/[id]",
+      "initialGzipBytes": 264202,
+      "initialGzipKiB": 258.009765625,
+      "initialChunkCount": 20
+    },
+    {
+      "route": "/profile/security",
+      "initialGzipBytes": 245330,
+      "initialGzipKiB": 239.580078125,
+      "initialChunkCount": 22
+    },
+    {
+      "route": "/profile",
+      "initialGzipBytes": 235998,
+      "initialGzipKiB": 230.466796875,
+      "initialChunkCount": 21
+    },
+    {
+      "route": "/profile/privacy",
+      "initialGzipBytes": 235537,
+      "initialGzipKiB": 230.0166015625,
+      "initialChunkCount": 21
+    },
+    {
+      "route": "/profile/appearance",
+      "initialGzipBytes": 234989,
+      "initialGzipKiB": 229.4814453125,
+      "initialChunkCount": 21
+    },
+    {
+      "route": "/profile/learning",
+      "initialGzipBytes": 234245,
+      "initialGzipKiB": 228.7548828125,
+      "initialChunkCount": 21
+    },
+    {
+      "route": "/profile/affiliate",
+      "initialGzipBytes": 234192,
+      "initialGzipKiB": 228.703125,
+      "initialChunkCount": 21
+    },
+    {
+      "route": "/profile/wallet",
+      "initialGzipBytes": 233123,
+      "initialGzipKiB": 227.6591796875,
+      "initialChunkCount": 21
+    },
+    {
+      "route": "/profile/danger-zone",
+      "initialGzipBytes": 232993,
+      "initialGzipKiB": 227.5322265625,
+      "initialChunkCount": 21
+    },
+    {
+      "route": "/profile/referral",
+      "initialGzipBytes": 232043,
+      "initialGzipKiB": 226.6044921875,
+      "initialChunkCount": 21
+    },
+    {
+      "route": "/profile/subscription",
+      "initialGzipBytes": 230828,
+      "initialGzipKiB": 225.41796875,
+      "initialChunkCount": 21
+    },
+    {
+      "route": "/(learner)/help/category/[categoryId]",
+      "initialGzipBytes": 223974,
+      "initialGzipKiB": 218.724609375,
+      "initialChunkCount": 19
+    },
+    {
+      "route": "/(learner)/help",
+      "initialGzipBytes": 223974,
+      "initialGzipKiB": 218.724609375,
+      "initialChunkCount": 19
+    },
+    {
+      "route": "/(learner)/practice",
+      "initialGzipBytes": 223183,
+      "initialGzipKiB": 217.9521484375,
+      "initialChunkCount": 19
+    },
+    {
+      "route": "/(learner)/leaderboards",
+      "initialGzipBytes": 220410,
+      "initialGzipKiB": 215.244140625,
+      "initialChunkCount": 19
+    },
+    {
+      "route": "/courses/[id]",
+      "initialGzipBytes": 218283,
+      "initialGzipKiB": 213.1669921875,
+      "initialChunkCount": 19
+    },
+    {
+      "route": "/(public)/p/[slug]",
+      "initialGzipBytes": 217758,
+      "initialGzipKiB": 212.654296875,
+      "initialChunkCount": 19
+    },
+    {
+      "route": "/(learner)/help/[slug]",
+      "initialGzipBytes": 215670,
+      "initialGzipKiB": 210.615234375,
+      "initialChunkCount": 19
+    },
+    {
+      "route": "/(learner)/search",
+      "initialGzipBytes": 215438,
+      "initialGzipKiB": 210.388671875,
+      "initialChunkCount": 19
+    },
+    {
+      "route": "/paths/[id]",
+      "initialGzipBytes": 214432,
+      "initialGzipKiB": 209.40625,
+      "initialChunkCount": 19
+    },
+    {
+      "route": "/courses",
+      "initialGzipBytes": 214213,
+      "initialGzipKiB": 209.1923828125,
+      "initialChunkCount": 19
+    },
+    {
+      "route": "/(public)/diagnostic",
+      "initialGzipBytes": 212323,
+      "initialGzipKiB": 207.3466796875,
+      "initialChunkCount": 19
+    },
+    {
+      "route": "/(auth)/invite/security",
+      "initialGzipBytes": 212226,
+      "initialGzipKiB": 207.251953125,
+      "initialChunkCount": 18
+    },
+    {
+      "route": "/(learner)/newsfeed/[slug]",
+      "initialGzipBytes": 211721,
+      "initialGzipKiB": 206.7587890625,
+      "initialChunkCount": 17
+    },
+    {
+      "route": "/courses/[id]/lessons/[lessonId]",
+      "initialGzipBytes": 210442,
+      "initialGzipKiB": 205.509765625,
+      "initialChunkCount": 19
+    },
+    {
+      "route": "/roadmap",
+      "initialGzipBytes": 210378,
+      "initialGzipKiB": 205.447265625,
+      "initialChunkCount": 19
+    },
+    {
+      "route": "/(public)/events/[id]",
+      "initialGzipBytes": 210205,
+      "initialGzipKiB": 205.2783203125,
+      "initialChunkCount": 19
+    },
+    {
+      "route": "/(public)/verify/[credentialId]",
+      "initialGzipBytes": 209510,
+      "initialGzipKiB": 204.599609375,
+      "initialChunkCount": 19
+    },
+    {
+      "route": "/(public)/affiliate",
+      "initialGzipBytes": 209047,
+      "initialGzipKiB": 204.1474609375,
+      "initialChunkCount": 19
+    },
+    {
+      "route": "/assessments/[id]",
+      "initialGzipBytes": 208529,
+      "initialGzipKiB": 203.6416015625,
+      "initialChunkCount": 19
+    },
+    {
+      "route": "/(moderation)/moderate/cases",
+      "initialGzipBytes": 208518,
+      "initialGzipKiB": 203.630859375,
+      "initialChunkCount": 18
+    },
+    {
+      "route": "/courses/[id]/modules/[moduleId]",
+      "initialGzipBytes": 207935,
+      "initialGzipKiB": 203.0615234375,
+      "initialChunkCount": 19
+    },
+    {
+      "route": "/attempts/[id]/result",
+      "initialGzipBytes": 207510,
+      "initialGzipKiB": 202.646484375,
+      "initialChunkCount": 19
+    },
+    {
+      "route": "/(moderation)/moderate/cases/[id]",
+      "initialGzipBytes": 207188,
+      "initialGzipKiB": 202.33203125,
+      "initialChunkCount": 18
+    },
+    {
+      "route": "/(moderation)/moderate/appeals",
+      "initialGzipBytes": 206313,
+      "initialGzipKiB": 201.4775390625,
+      "initialChunkCount": 18
+    },
+    {
+      "route": "/(learner)/newsfeed",
+      "initialGzipBytes": 201237,
+      "initialGzipKiB": 196.5205078125,
+      "initialChunkCount": 16
+    },
+    {
+      "route": "/(auth)/invite/accept",
+      "initialGzipBytes": 201087,
+      "initialGzipKiB": 196.3740234375,
+      "initialChunkCount": 17
+    },
+    {
+      "route": "/(moderation)/moderate/spaces",
+      "initialGzipBytes": 200092,
+      "initialGzipKiB": 195.40234375,
+      "initialChunkCount": 18
+    },
+    {
+      "route": "/verify-email",
+      "initialGzipBytes": 197732,
+      "initialGzipKiB": 193.09765625,
+      "initialChunkCount": 16
+    },
+    {
+      "route": "/f/[token]",
+      "initialGzipBytes": 196008,
+      "initialGzipKiB": 191.4140625,
+      "initialChunkCount": 16
+    },
+    {
+      "route": "/(legal)/privacy",
+      "initialGzipBytes": 195469,
+      "initialGzipKiB": 190.8876953125,
+      "initialChunkCount": 16
+    },
+    {
+      "route": "/(legal)/terms",
+      "initialGzipBytes": 195469,
+      "initialGzipKiB": 190.8876953125,
+      "initialChunkCount": 16
+    },
+    {
+      "route": "/review",
+      "initialGzipBytes": 190737,
+      "initialGzipKiB": 186.2666015625,
+      "initialChunkCount": 15
+    },
+    {
+      "route": "/(learner)/swipe",
+      "initialGzipBytes": 190720,
+      "initialGzipKiB": 186.25,
+      "initialChunkCount": 15
+    },
+    {
+      "route": "/settings",
+      "initialGzipBytes": 190712,
+      "initialGzipKiB": 186.2421875,
+      "initialChunkCount": 15
+    },
+    {
+      "route": "/polls/[id]",
+      "initialGzipBytes": 190188,
+      "initialGzipKiB": 185.73046875,
+      "initialChunkCount": 15
+    },
+    {
+      "route": "/tenant-unavailable",
+      "initialGzipBytes": 189296,
+      "initialGzipKiB": 184.859375,
+      "initialChunkCount": 15
+    },
+    {
+      "route": "/_not-found",
+      "initialGzipBytes": 182890,
+      "initialGzipKiB": 178.603515625,
+      "initialChunkCount": 14
+    },
+    {
+      "route": "/_global-error",
+      "initialGzipBytes": 140189,
+      "initialGzipKiB": 136.9033203125,
+      "initialChunkCount": 9
+    },
+    {
+      "route": "/auth/callback/route",
+      "initialGzipBytes": 132308,
+      "initialGzipKiB": 129.20703125,
+      "initialChunkCount": 7
+    },
+    {
+      "route": "/auth/confirm/route",
+      "initialGzipBytes": 132308,
+      "initialGzipKiB": 129.20703125,
+      "initialChunkCount": 7
+    },
+    {
+      "route": "/auth/oauth/[provider]/route",
+      "initialGzipBytes": 132308,
+      "initialGzipKiB": 129.20703125,
+      "initialChunkCount": 7
+    }
+  ],
+  "ratchet": {
+    "historicalCheckedInCeilingKiB": 404.1962890625,
+    "finalCeilingKiB": 290.57421875,
+    "interimUnacceptedMeasurementKiB": 290.55078125,
+    "reviewCorrectionAndFormattingBytes": 24,
+    "note": "The interim working measurement was not an accepted release ceiling. After review, the original checked-in allowance was restored and the unmodified ratchet lowered it once to the final verified build."
+  }
+}

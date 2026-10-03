@@ -423,7 +423,7 @@ function RetentionReductionModal({
             You are reducing retention from{" "}
             <span className="font-semibold">{impact.currentRetentionLabel}</span> to{" "}
             <span className="font-semibold">{impact.nextRetentionLabel}</span>. Files outside the
-            new window are deleted immediately and cannot be recovered.
+            new window are queued for permanent deletion and new downloads stop immediately.
           </p>
           <div className="flex items-center justify-between gap-4 rounded-lg border border-[color-mix(in_srgb,var(--admin-danger)_30%,var(--admin-border))] bg-[var(--admin-surface)] px-4 py-3">
             <div>
@@ -455,7 +455,8 @@ function RetentionReductionModal({
             />
             <span className="text-sm text-[var(--admin-on-surface)]">
               I acknowledge that {impact.filesDeletedImmediately.toLocaleString()} file
-              {impact.filesDeletedImmediately === 1 ? "" : "s"} will be permanently deleted.
+              {impact.filesDeletedImmediately === 1 ? "" : "s"} will be queued for permanent
+              deletion.
             </span>
           </label>
         </div>
@@ -472,7 +473,7 @@ function RetentionReductionModal({
             type="button"
             disabled={!acknowledged || busy}
             onClick={onApply}
-            className="inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-[var(--admin-danger)] px-4 text-[13px] font-semibold text-[var(--admin-on-primary)] transition-all hover:opacity-90 active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-danger)]/30 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-[var(--admin-danger)] px-4 text-[13px] font-semibold text-[var(--admin-on-danger)] transition-all hover:opacity-90 active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-danger)]/30 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {busy ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : null}
             Apply new retention policy
@@ -529,7 +530,7 @@ function PurgeExpiredModal({
         </div>
         <div className="px-6 pt-4 pb-8">
           <p className="text-sm text-[var(--admin-on-surface-variant)]">
-            This will permanently delete{" "}
+            This will queue permanent deletion of{" "}
             <span className="font-semibold text-[var(--admin-on-surface)]">
               {expiredCount.toLocaleString()}
             </span>{" "}
@@ -637,6 +638,7 @@ export function AdminExportSettingsPage() {
   const [saving, setSaving] = useState(false);
   const [purging, setPurging] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [cleanupNotice, setCleanupNotice] = useState<string | null>(null);
   const [draft, setDraft] = useState<ExportSettings | null>(null);
   const [saved, setSaved] = useState<ExportSettings | null>(null);
   const [storage, setStorage] = useState<ExportSettingsPayload["storage"] | null>(null);
@@ -858,7 +860,10 @@ export function AdminExportSettingsPage() {
     setPurging(true);
     setError(null);
     try {
-      await purgeExpiredExportFiles();
+      const outcome = await purgeExpiredExportFiles();
+      setCleanupNotice(
+        `${outcome.data.queuedCount} file(s) queued for deletion. Counts update after storage confirms deletion.`,
+      );
       setPurgeModalOpen(false);
       await load();
     } catch (caught) {
@@ -949,6 +954,11 @@ export function AdminExportSettingsPage() {
         </div>
       </div>
 
+      {cleanupNotice ? (
+        <p role="status" className="rounded-lg border border-[var(--admin-border)] p-4 text-sm">
+          {cleanupNotice}
+        </p>
+      ) : null}
       {error ? (
         <div
           role="alert"
@@ -1051,7 +1061,8 @@ export function AdminExportSettingsPage() {
                   </div>
                 </div>
                 <p className="text-xs text-[var(--admin-on-surface-variant)]">
-                  After this, the file is deleted. The run record and its parameters stay for audit.
+                  After this, new downloads stop and deletion is queued. The run record and its
+                  parameters stay for audit.
                 </p>
               </div>
 

@@ -949,15 +949,15 @@ export function AdminZoomInsightsParticipantsPage() {
           <Link href="/admin" className="hover:underline">
             Admin
           </Link>
-          <span className="text-[var(--admin-outline)]">/</span>
+          <span className="text-[var(--admin-on-surface-variant)]">/</span>
           <Link href="/admin/reports" className="hover:underline">
             Reports
           </Link>
-          <span className="text-[var(--admin-outline)]">/</span>
+          <span className="text-[var(--admin-on-surface-variant)]">/</span>
           <Link href="/admin/reports/zoom-insights" className="hover:underline">
             Zoom Insights
           </Link>
-          <span className="text-[var(--admin-outline)]">/</span>
+          <span className="text-[var(--admin-on-surface-variant)]">/</span>
           <span className="text-[var(--admin-on-surface)]">Participants</span>
         </div>
       </div>
@@ -1057,7 +1057,7 @@ export function AdminZoomInsightsParticipantsPage() {
             </div>
             <button
               type="button"
-              className="rounded-lg bg-[var(--admin-danger)] px-4 py-1.5 text-sm font-semibold text-[var(--admin-on-primary)]"
+              className="rounded-lg bg-[var(--admin-danger)] px-4 py-1.5 text-sm font-semibold text-[var(--admin-on-danger)]"
               onClick={() => void loadPeople()}
             >
               Retry

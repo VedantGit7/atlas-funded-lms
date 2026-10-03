@@ -30,7 +30,7 @@ const TONE_CONFIRM_BTN: Record<ConfirmTone, string> = {
   primary:
     "bg-[var(--admin-primary)] text-[var(--admin-on-primary)] hover:opacity-90 focus-visible:ring-[var(--admin-primary)]/50",
   danger:
-    "bg-[var(--admin-danger)] text-[var(--admin-on-primary)] hover:opacity-90 focus-visible:ring-[var(--admin-danger)]/50",
+    "bg-[var(--admin-danger)] text-[var(--admin-on-danger)] hover:opacity-90 focus-visible:ring-[var(--admin-danger)]/50",
 };
 
 const FOCUSABLE =

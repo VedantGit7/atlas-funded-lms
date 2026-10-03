@@ -7,6 +7,7 @@ import {
 } from "../lib/auth-cookies";
 
 type ThemeInitScriptProps = {
+  nonce?: string;
   /** Tenant's configured fallback, used only when no personal cookie exists yet. */
   tenantModeDefault: "system" | "light" | "dark";
 };
@@ -55,6 +56,11 @@ function buildThemeInitScript(tenantModeDefault: "system" | "light" | "dark"): s
  * paint. Resolves purely from client-readable cookies + prefers-color-scheme —
  * no DB round-trip.
  */
-export function ThemeInitScript({ tenantModeDefault }: ThemeInitScriptProps) {
-  return <script dangerouslySetInnerHTML={{ __html: buildThemeInitScript(tenantModeDefault) }} />;
+export function ThemeInitScript({ tenantModeDefault, nonce }: ThemeInitScriptProps) {
+  return (
+    <script
+      nonce={nonce}
+      dangerouslySetInnerHTML={{ __html: buildThemeInitScript(tenantModeDefault) }}
+    />
+  );
 }

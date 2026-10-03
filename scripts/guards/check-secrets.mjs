@@ -1,3 +1,5 @@
+import { isGeneratedSourcePath } from "./source-paths.mjs";
+import { isApprovedDatabaseFixture } from "./secret-fixtures.mjs";
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 
@@ -67,11 +69,10 @@ function walkFiles(directory) {
       const normalized = path.replaceAll("\\", "/");
 
       if (
-        normalized.includes("/node_modules/") ||
+        isGeneratedSourcePath(normalized) ||
         normalized.includes("/.next/") ||
         normalized.includes("/dist/") ||
         normalized.includes("/build/") ||
-        normalized.includes("/coverage/") ||
         normalized.includes("/docs/locked/")
       ) {
         return [];
@@ -116,7 +117,8 @@ for (const file of files) {
   const normalized = file.replaceAll("\\", "/");
 
   for (const { name, pattern } of secretPatterns) {
-    if (pattern.test(content)) {
+    const matches = [...content.matchAll(new RegExp(pattern.source, "g"))];
+    if (matches.length > 0) {
       if (
         name === "Database URL" &&
         normalized.includes(".github/workflows/") &&
@@ -129,7 +131,13 @@ for (const file of files) {
         continue;
       }
 
-      failures.push(`${file}: ${name}`);
+      if (
+        matches.some(
+          ([literal]) => name !== "Database URL" || !isApprovedDatabaseFixture(normalized, literal),
+        )
+      ) {
+        failures.push(`${file}: ${name}`);
+      }
     }
   }
 }

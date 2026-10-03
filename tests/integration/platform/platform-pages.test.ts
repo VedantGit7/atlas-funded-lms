@@ -14,9 +14,11 @@ describe("platform console integration wiring", () => {
     "app/platform/audit/page.tsx",
     "app/platform/support/page.tsx",
     "app/platform/eventing/page.tsx",
+    // P9, per-tenant cost attribution (DoD item 8).
+    "app/platform/costs/page.tsx",
   ];
 
-  it("includes all P1-P8 page files", () => {
+  it("includes all P1-P9 page files", () => {
     for (const page of pages) {
       expect(existsSync(resolve(webRoot, page))).toBe(true);
     }
@@ -31,6 +33,7 @@ describe("platform console integration wiring", () => {
       "app/platform/audit/page.tsx": "canAuditRead",
       "app/platform/support/page.tsx": "canSupportAccess",
       "app/platform/eventing/page.tsx": "canEventingReplay",
+      "app/platform/costs/page.tsx": "canCostRead",
     };
 
     for (const [page, capability] of Object.entries(capabilityByPage)) {

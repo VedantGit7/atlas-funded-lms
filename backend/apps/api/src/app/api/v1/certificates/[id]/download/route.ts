@@ -1,3 +1,4 @@
+import { enforceIngressRateLimit } from "@atlas/api/rate-limit";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { runProtectedTenantRouteHandler, toSafeErrorEnvelope } from "@atlas/api";
@@ -6,7 +7,7 @@ import { attachRequestIdHeader } from "@atlas/observability";
 import { requireSupabaseUser, upsertAuthPrincipal } from "@atlas/auth";
 import { withGlobalDb } from "@atlas/db/global-db";
 import { withTenantTx } from "@atlas/db/with-tenant-tx";
-import { ensurePlatformSuperAdminTenantAccess, requireActiveMembership } from "@atlas/membership";
+import { requireActiveMembership } from "@atlas/membership";
 import { resolveTenantFromRequest } from "@atlas/tenancy";
 import { certificateParamsSchema } from "../../../../../../server/certificates/certificate.params";
 import { getCertificateDownload } from "../../../../../../server/certificates/certificate.service";
@@ -21,9 +22,11 @@ import { downloadCertificateMetadata } from "../../../../../../server/certificat
  */
 export async function GET(req: NextRequest, context: { params: Promise<{ id: string }> }) {
   const requestId = getOrCreateRequestId(req.headers);
-  const { id: certificateId } = certificateParamsSchema.parse(await context.params);
 
   try {
+    await enforceIngressRateLimit({ req, plane: "tenant", requestId });
+    const { id: certificateId } = certificateParamsSchema.parse(await context.params);
+
     return await withGlobalDb(async (db) => {
       const tenant = await resolveTenantFromRequest({ req, db });
       const supabaseUser = await requireSupabaseUser(req);
@@ -33,13 +36,6 @@ export async function GET(req: NextRequest, context: { params: Promise<{ id: str
         email: supabaseUser.email,
         mfaEnabled: supabaseUser.mfaEnabled,
         markLogin: false,
-      });
-
-      await ensurePlatformSuperAdminTenantAccess({
-        db,
-        tenantId: tenant.tenantId,
-        requestId,
-        email: supabaseUser.email,
       });
 
       const result = await withTenantTx(
@@ -52,6 +48,7 @@ export async function GET(req: NextRequest, context: { params: Promise<{ id: str
           });
 
           return runProtectedTenantRouteHandler({
+            sessionAssuranceLevel: supabaseUser.sessionAssuranceLevel,
             tx,
             ctx: {
               tenantId: tenant.tenantId,
@@ -83,7 +80,10 @@ export async function GET(req: NextRequest, context: { params: Promise<{ id: str
     });
   } catch (error) {
     const safe = toSafeErrorEnvelope(error, requestId);
-    return attachRequestIdHeader(NextResponse.json(safe.body, { status: safe.status }), requestId);
+    return attachRequestIdHeader(
+      NextResponse.json(safe.body, { status: safe.status, headers: safe.headers ?? {} }),
+      requestId,
+    );
   }
 }
 

@@ -49,7 +49,7 @@ export function CourseEditorWorkspace({
 
   return (
     <div className="flex min-h-[min(28rem,calc(100vh-12rem))] flex-1 flex-col items-center justify-center px-6 py-16 text-center">
-      <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[var(--admin-surface-high)] text-[var(--admin-outline)]">
+      <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[var(--admin-surface-high)] text-[var(--admin-on-surface-variant)]">
         <BookOpen className="h-7 w-7" strokeWidth={1.75} aria-hidden="true" />
       </div>
       <p className="max-w-sm text-sm font-medium text-[var(--admin-on-surface-variant)]">

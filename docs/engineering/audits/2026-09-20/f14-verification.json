@@ -1,0 +1,150 @@
+{
+  "scope": "F14 local partial remediation; not deployment or comprehensive privacy acceptance",
+  "createdAt": "2026-09-20T10:09:09.6785389Z",
+  "tests": {
+    "focusedPassed": 35,
+    "broadSkipped": 1,
+    "countsOverlap": true,
+    "broadPassed": 2804,
+    "isolatedPostgresPassed": 5
+  },
+  "checks": {
+    "typecheck": "passed",
+    "format": "passed",
+    "prismaValidate": "passed",
+    "prismaGenerate": "passed",
+    "scopedLint": "passed",
+    "repositoryGuards": "5 passed"
+  },
+  "migrationAppliedToApplicationDatabase": false,
+  "comprehensiveErasureImplemented": false,
+  "limitations": [
+    "No approved cross-domain retention schedule found",
+    "Legal holds and complete subject export not implemented",
+    "Provider deletion/backup expiry unverified",
+    "No authenticated browser acceptance",
+    "SQL fixture substitutes permission/audit dependencies; no production RLS claim"
+  ],
+  "files": [
+    {
+      "path": "frontend/apps/web/src/features/learner/profile-export.ts",
+      "sha256": "cd836838b6394426ca2431c76cbe0de14007d48a03190b027a4c73523afff5eb"
+    },
+    {
+      "path": "frontend/apps/web/src/features/learner/components/PrivacyDataForm.tsx",
+      "sha256": "e34679c5f63e3720e0e168d2cddacb7be5c021121f81613a04c94bc1b34c5824"
+    },
+    {
+      "path": "frontend/apps/web/src/features/data-rights/api.ts",
+      "sha256": "88506f7c3d67ced3a43209613b541a0942a61246538f367e5f0781af412ddae1"
+    },
+    {
+      "path": "frontend/apps/web/src/features/data-rights/deletion-requests-admin-utils.ts",
+      "sha256": "c26570f3f09ea7ead87efc19e6a3bdc17fd68aae4c67c8cbd85512caf4450599"
+    },
+    {
+      "path": "frontend/apps/web/src/features/data-rights/components/account-deletion-card.tsx",
+      "sha256": "c0c8157635499324aad1c743e548acae09637eb47644bb170337a194d0c1f4d1"
+    },
+    {
+      "path": "frontend/apps/web/src/features/data-rights/components/deletion-requests-admin.tsx",
+      "sha256": "465b1327bfa7a2ae171176b32e0955cef2ea950358e88a94bf37102f79728003"
+    },
+    {
+      "path": "frontend/apps/web/src/features/data-rights/components/exports-admin.tsx",
+      "sha256": "1f9179dee5ef1490df63ece0d2fa1ad222f9679e5c1f70e8c7f817b69a712c0b"
+    },
+    {
+      "path": "frontend/apps/web/src/app/profile/danger-zone/page.tsx",
+      "sha256": "0a8f6f981cb84667df052bf09f743582266441e5da3838a327d6db228a13f32c"
+    },
+    {
+      "path": "frontend/apps/web/src/app/admin/deletion-requests/page.tsx",
+      "sha256": "6401d88a877a5b9f5182f09d84bbbf8cc6131bae128f81b4480c598fcc3baec3"
+    },
+    {
+      "path": "frontend/apps/web/src/features/admin/settings/admin-settings-catalog.ts",
+      "sha256": "aa98c0429e8288f06a292d0451e78b91c76aea866940c0fd81d84fcf995d2c63"
+    },
+    {
+      "path": "frontend/apps/web/src/features/admin/overview/AdminCommerceOverview.tsx",
+      "sha256": "abf4768af25824396b95de841d8974d469a1df21ee06c5eca22fdf0a129b4b8c"
+    },
+    {
+      "path": "frontend/apps/web/src/app/admin/page.tsx",
+      "sha256": "57438e459c5c65a3bc1401c340728220bb8671f8e8aab52af63daa440c6fe1c8"
+    },
+    {
+      "path": "frontend/apps/web/src/features/admin/admin-navigation.ts",
+      "sha256": "beebb77c75c0c7b6e81069b3b46d6dd445cff683cd60b561b7432d9887e0a414"
+    },
+    {
+      "path": "frontend/apps/web/src/features/help-center/help-center-content.ts",
+      "sha256": "d7fcce11e443ec3d8bedffb97888205ec6256a89afb9cef7830093aa2d3db81d"
+    },
+    {
+      "path": "tests/unit/frontend/privacy-export.test.ts",
+      "sha256": "5faf0f8fc5981b918352919cb39609346be1dd8b6cbb21bb32e2b352bdb3edb8"
+    },
+    {
+      "path": "backend/packages/domain/src/data-rights/privacy-lifecycle.contract.ts",
+      "sha256": "15dc7124b01795e06a5a41ee5ce615c71f477ebf03ab33e5a74ef16ccf449701"
+    },
+    {
+      "path": "backend/packages/domain/src/data-rights/data-rights.dto.ts",
+      "sha256": "b36188a43017bf3edc815a6ae6a05231d6d9dbc6ff09dbbbf768ed783edbf61a"
+    },
+    {
+      "path": "backend/packages/domain/src/data-rights/data-rights.types.ts",
+      "sha256": "248d0792fba71c903fd2c6125b1bb348461d7563c8a2e113aeac349b6e09ff24"
+    },
+    {
+      "path": "backend/packages/domain/src/data-rights/data-rights-deletion-processor.ts",
+      "sha256": "506fe7a176a1d290a6eb835d987e578874f4bcaaf64c972b8c20a378950d309b"
+    },
+    {
+      "path": "backend/packages/domain/src/data-rights/data-rights.service.ts",
+      "sha256": "469730507491a099a2355c41fcd929ab6d99cb35cda6a685ff92a03a4e0e8f28"
+    },
+    {
+      "path": "backend/packages/domain/src/data-rights/data-rights.repository.ts",
+      "sha256": "a2225c94e7252d3e76699e6635c31a2e4ccc1085e6d4aecdbfcf3b01cb677fc8"
+    },
+    {
+      "path": "backend/packages/domain/src/data-rights/data-rights-export-runner.ts",
+      "sha256": "b188e33858d3b4748be9064cd86471b447888eea43c4f22e528a4ec2884f7f1f"
+    },
+    {
+      "path": "backend/prisma/schema.prisma",
+      "sha256": "845c90e90e3ef910f1ecd1c86c655a9774d2c17b40d8eac4db9e6e1826fd8626"
+    },
+    {
+      "path": "backend/prisma/migrations/20260920030000_111_privacy_outcomes/migration.sql",
+      "sha256": "a69281f9aa13a597bd6f1c5c4e009dc5962b53438f2d0a2741471f50ba6ceca5"
+    },
+    {
+      "path": "backend/packages/db/src/generated/prisma/models/DeletionRequest.ts",
+      "sha256": "482e6701b908decdbb7271908822af0f3bbbdeaf6cbc604641d359f612f4c71c"
+    },
+    {
+      "path": "tests/unit/data-rights/privacy-outcomes.test.ts",
+      "sha256": "be918344fd89460b248016b70d1f11493b2161c2f0337e41f82c9c195575cb99"
+    },
+    {
+      "path": "tests/integration/data-rights/privacy-lifecycle.postgres.test.ts",
+      "sha256": "e2245b9f4b67f84cbd4c8bf1aed50031e0ebe346b0da3a8a15aa19f36615db5e"
+    },
+    {
+      "path": "docs/engineering/f14-privacy-lifecycle-remediation.md",
+      "sha256": "263033e97e6185d06c32541aa6b83950870ecce9b9103396784d7189840434a1"
+    },
+    {
+      "path": "docs/engineering/f14-data-inventory.md",
+      "sha256": "efc4ffda09ae7e19af8b3a321ae31c5084601bdd0b45168f7960618d882ebeb0"
+    },
+    {
+      "path": "docs/runbooks/privacy-lifecycle.md",
+      "sha256": "29edf21df66f4d78c20208845867ee99827bfa276098663cb8ca194a59324090"
+    }
+  ]
+}

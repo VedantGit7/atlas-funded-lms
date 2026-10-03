@@ -8,8 +8,8 @@ import type {
   leaderboardListResponseSchema,
 } from "@atlas/contracts/gamification/gamification.schemas";
 import { ServerApiError } from "../server-api";
-import { communityServerApi } from "@atlas/contracts-modules/community/community.server-api";
-import { gamificationServerApi } from "@atlas/contracts-modules/gamification/gamification.server-api";
+import { communityServerApi } from "@/modules/community/community.server-api";
+import { gamificationServerApi } from "@/modules/gamification/gamification.server-api";
 
 type PostListResponse = z.infer<typeof postListResponseSchema>;
 type SpaceListResponse = z.infer<typeof spaceListResponseSchema>;

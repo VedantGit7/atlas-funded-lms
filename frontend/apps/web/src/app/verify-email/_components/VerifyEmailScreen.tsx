@@ -3,18 +3,10 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { TenantBrandMark } from "@/components/patterns/TenantBrandMark";
-import { Plus_Jakarta_Sans } from "next/font/google";
 import { FbaDarkModeButton } from "@/components/theme/FbaDarkModeButton";
 import { useFbaTheme } from "@/components/theme/use-fba-theme";
 import "@/components/theme/fba-theme.css";
 import { ResendVerificationForm } from "./ResendVerificationForm";
-
-const plusJakarta = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-  variable: "--font-plus-jakarta",
-  display: "swap",
-});
 
 export type VerifyEmailStatus = "success" | "sent" | "expired" | "invalid";
 
@@ -401,7 +393,7 @@ export function VerifyEmailScreen({
 
   return (
     <div
-      className={`fba-scope ${plusJakarta.variable} ${darkMode ? "fba-dark" : ""} relative flex min-h-screen flex-col overflow-hidden bg-[var(--fba-bg)] text-[var(--fba-tx)]`}
+      className={`fba-scope font-plus-jakarta-sans ${darkMode ? "fba-dark" : ""} relative flex min-h-screen flex-col overflow-hidden bg-[var(--fba-bg)] text-[var(--fba-tx)]`}
     >
       {/* Ambient background glows */}
       <div
@@ -453,7 +445,7 @@ export function VerifyEmailScreen({
         <div className="fba-ve-rise w-full max-w-[480px] text-center">
           <VerifyHero status={status} />
 
-          <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--fba-ind)]">
+          <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--fba-ind-tx)]">
             {copy.eyebrow}
           </p>
           <h1 className="mb-3 text-[30px] font-extrabold leading-[1.15] tracking-[-0.02em] text-[var(--fba-tx)] sm:text-[34px]">
@@ -559,7 +551,7 @@ export function VerifyEmailScreen({
                         {" or "}
                         <a
                           href={`mailto:${supportEmail}`}
-                          className="font-semibold text-[var(--fba-ind)] underline decoration-[var(--fba-bdr2)] underline-offset-2 transition-colors hover:decoration-[var(--fba-ind)]"
+                          className="font-semibold text-[var(--fba-ind-tx)] underline decoration-[var(--fba-bdr2)] underline-offset-2 transition-colors hover:decoration-[var(--fba-ind-tx)]"
                         >
                           contact support
                         </a>
@@ -577,17 +569,17 @@ export function VerifyEmailScreen({
       {/* Footer */}
       <footer className="relative z-10 border-t border-[var(--fba-bdr)] py-8">
         <div className="mx-auto flex w-full max-w-[1100px] flex-col items-center gap-3 px-5 text-center sm:px-8">
-          <span className="text-[13px] font-extrabold text-[var(--fba-ind)]">{fullName}</span>
+          <span className="text-[13px] font-extrabold text-[var(--fba-ind-tx)]">{fullName}</span>
           <nav className="flex flex-wrap justify-center gap-5">
             <Link
               href="/terms"
-              className="text-[12px] text-[var(--fba-tx3)] transition-colors hover:text-[var(--fba-ind)]"
+              className="text-[12px] text-[var(--fba-tx3)] transition-colors hover:text-[var(--fba-ind-tx)]"
             >
               Terms of Service
             </Link>
             <Link
               href="/privacy"
-              className="text-[12px] text-[var(--fba-tx3)] transition-colors hover:text-[var(--fba-ind)]"
+              className="text-[12px] text-[var(--fba-tx3)] transition-colors hover:text-[var(--fba-ind-tx)]"
             >
               Privacy Policy
             </Link>

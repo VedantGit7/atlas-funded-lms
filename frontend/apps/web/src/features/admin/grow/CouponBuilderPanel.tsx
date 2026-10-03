@@ -545,7 +545,7 @@ export function CouponBuilderPanel({ couponId }: CouponBuilderPanelProps) {
                 type="button"
                 disabled={deleteBusy || !deleteMatches}
                 onClick={() => void onDelete()}
-                className="rounded-lg bg-[var(--admin-danger)] px-4 py-2 text-sm font-semibold text-[var(--admin-on-primary)] disabled:opacity-50"
+                className="rounded-lg bg-[var(--admin-danger)] px-4 py-2 text-sm font-semibold text-[var(--admin-on-danger)] disabled:opacity-50"
               >
                 {deleteBusy ? "Deleting…" : "Delete"}
               </button>

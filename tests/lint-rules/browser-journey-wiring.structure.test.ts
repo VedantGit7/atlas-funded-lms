@@ -52,7 +52,9 @@ describe("browser journey wiring", () => {
     // The previous command named `journeys/01-…` and `accessibility`, so adding
     // a twelfth journey would have left it running nowhere by default. A bare
     // `playwright test` picks up whatever the registry grows.
-    expect(workflows).toMatch(/run: pnpm exec playwright test\s*$/m);
+    // Either a one-line `run:` or the last line of a block script (the journeys step also starts
+    // a memory sampler); either way the command must carry no path arguments.
+    expect(workflows).toMatch(/^\s*(?:run: )?pnpm exec playwright test\s*$/m);
     expect(workflows).not.toContain("playwright test tests/browser/journeys/01");
   });
 
@@ -74,7 +76,10 @@ describe("browser journey wiring", () => {
     // Applied, not planned: the seed runner defaults to dry-run, so a step that
     // looks successful can insert nothing and leave every host resolving to no
     // tenant.
-    expect(workflows).toContain("tenant-config:apply");
+    // This is the test fixture manifest, not a product tenant default.
+    // eslint-disable-next-line atlas/no-hardcoded-tenant-strings
+    expect(workflows).toContain("scripts/tenants/apply.ts --tenant fundedbeyond");
+    expect(workflows).toContain("scripts/tenants/apply.ts --tenant second-smoke-academy");
     expect(workflows).toContain("--apply");
   });
 
@@ -109,12 +114,15 @@ describe("browser journey wiring", () => {
     expect(workflows).toContain("supabase start");
   });
 
-  it("excludes the screenshot comparisons deliberately, not by omission", () => {
-    // Every baseline is a -win32.png and the runner is Linux, so Playwright
-    // would write a new baseline and pass without comparing anything. The
-    // exclusion is a named flag rather than a shortened command, so it stays
-    // visible and the whole-suite invocation above still holds.
-    expect(workflows).toContain("BROWSER_E2E_SKIP_VISUAL");
+  it("requires comparisons against committed Linux screenshots", () => {
+    const config = readFileSync(join(repoRoot, "playwright.config.ts"), "utf8");
+    expect(workflows).not.toMatch(/BROWSER_E2E_SKIP_VISUAL:\s*["']?1/);
+    expect(config).toContain("CI must compare the committed Linux visual baselines.");
+    expect(config).toContain('updateSnapshots: process.env["CI"] ? "none" : "missing"');
+    const snapshots = readdirSync(
+      join(repoRoot, "tests/browser/visual/branding-shells.spec.ts-snapshots"),
+    );
+    expect(snapshots.filter((name) => name.endsWith("-linux.png"))).toHaveLength(4);
   });
 
   it("does not reintroduce a hosted Supabase dependency", () => {

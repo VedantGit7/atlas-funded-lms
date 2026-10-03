@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/form";
 import { useZodForm } from "@/lib/forms/use-zod-form";
 import { clientApi } from "../../../lib/client-api";
-import { diagnosticApiClient } from "@atlas/contracts-modules/diagnostics/diagnostic.api-client";
+import { diagnosticApiClient } from "@/modules/diagnostics/diagnostic.api-client";
 
 type DiagnosticIdentityGateProps = {
   anonymousId: string;
@@ -222,7 +222,7 @@ export function DiagnosticIdentityGate({
               />
 
               {message ? (
-                <p role="alert" className="text-sm text-red-700">
+                <p role="alert" className="text-sm text-destructive-text">
                   {message}
                 </p>
               ) : null}
@@ -295,7 +295,7 @@ export function DiagnosticIdentityGate({
               />
 
               {message ? (
-                <p role="alert" className="text-sm text-red-700">
+                <p role="alert" className="text-sm text-destructive-text">
                   {message}
                 </p>
               ) : null}

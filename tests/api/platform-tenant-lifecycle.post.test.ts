@@ -1,3 +1,5 @@
+import { createPlatformIdempotencyStore } from "../helpers/platform-idempotency-tx";
+const replayStore = createPlatformIdempotencyStore();
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
 import { ATLAS_PLATFORM_REASON_HEADER } from "@atlas/core/http/headers";
@@ -25,15 +27,17 @@ const {
   mockArchiveTenant: vi.fn(),
   mockWithGlobalDb: vi.fn((fn: (db: unknown) => unknown) => fn({ $queryRaw: vi.fn() })),
   mockWithPlatformScope: vi.fn((_ctx: unknown, _reason: string, fn: (tx: unknown) => unknown) =>
-    fn({
-      // A bare vi.fn() returns undefined, so any repository doing rows[0] throws.
-      // The route pipeline now claims an idempotency key through this tx (M10),
-      // which made that latent stub gap visible as a 500.
-      $queryRaw: vi.fn().mockResolvedValue([]),
-      $queryRawUnsafe: vi.fn().mockResolvedValue([]),
-      $executeRaw: vi.fn().mockResolvedValue(0),
-      $executeRawUnsafe: vi.fn().mockResolvedValue(0),
-    }),
+    fn(
+      replayStore.wrap({
+        // A bare vi.fn() returns undefined, so any repository doing rows[0] throws.
+        // The route pipeline now claims an idempotency key through this tx (M10),
+        // which made that latent stub gap visible as a 500.
+        $queryRaw: vi.fn().mockResolvedValue([]),
+        $queryRawUnsafe: vi.fn().mockResolvedValue([]),
+        $executeRaw: vi.fn().mockResolvedValue(0),
+        $executeRawUnsafe: vi.fn().mockResolvedValue(0),
+      }),
+    ),
   ),
   mockRequireActiveMembership: vi.fn(),
   mockAuditWriterWrite: vi.fn(),
@@ -158,6 +162,7 @@ const routeContext = { params: Promise.resolve({ id: tenantId }) };
 describe("POST /api/v1/platform/tenants/[id]/lifecycle", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    replayStore.clear();
     mockRequirePlatformPrincipal.mockResolvedValue(platformPrincipal);
     mockSuspendTenant.mockResolvedValue(activeTenantDetail);
     mockResumeTenant.mockResolvedValue(activeTenantDetail);

@@ -1,8 +1,9 @@
 import { headers } from "next/headers";
 import { createSupabaseAdminServerClient } from "@atlas/auth/supabase-server";
 import { extractAccessToken } from "@atlas/auth/session";
-import { ATLAS_INTERNAL_TENANT_HOST_HEADER } from "../http-headers";
+import { buildApiProxyHeaders } from "@atlas/core/http/api-proxy";
 import { resolveTenantHostForInternalApi } from "./resolve-tenant-host";
+import { resolveClientIpForInternalApi } from "./resolve-client-ip";
 
 const API_INTERNAL_URL = process.env["API_INTERNAL_URL"] ?? "http://127.0.0.1:3001";
 
@@ -40,10 +41,13 @@ async function readInvitePreview(
   try {
     const response = await fetch(url, {
       method: "GET",
-      headers: {
-        "x-forwarded-host": forwardedHost,
-        [ATLAS_INTERNAL_TENANT_HOST_HEADER]: forwardedHost,
-      },
+      headers: buildApiProxyHeaders(
+        forwardedHost,
+        undefined,
+        process.env,
+        await resolveClientIpForInternalApi(),
+      ),
+      redirect: "error",
       cache: "no-store",
       signal: AbortSignal.timeout(8_000),
     });

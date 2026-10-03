@@ -15,6 +15,14 @@ html:has(.atlas-landing) {
      landing only; the platform landing carried the identical defect. */
   --atl-tx3: #616b80;
   --atl-acc: #2563eb;
+  /* The accent when it spells something; separates from --atl-acc in dark. */
+  --atl-acc-tx: #2563eb;
+  /* Amber as text (the hardcoded #b45309 had no dark value). */
+  --atl-amb-tx: #b45309;
+  /* Large accent surfaces (featured plan, closing CTA band) that carry
+     translucent white text. White at 70% on the #2563eb accent measured
+     3.34:1 even in light mode; this clears 4.5:1 down to 60% white. */
+  --atl-panel: #1e3a8a;
   --atl-acc-d: #1d4ed8;
   --atl-acc-l: #eaf1ff;
   --atl-grn: #059669;
@@ -38,8 +46,16 @@ html:has(.atlas-landing) {
   --atl-tx2: #9aa6bb;
   /* Same token, dark palette -- 2.98:1 on --atl-surf. */
   --atl-tx3: #7b8598;
-  --atl-acc: #4f7cf0;
-  --atl-acc-d: #3f6ae0;
+  /* #4f7cf0 was 3.84:1 under white text. The fill is darkened to clear AA
+     (4.83) and text that is accent-coloured uses --atl-acc-tx, which has to go
+     the other way to be read on these dark surfaces. */
+  --atl-acc: #3f6ae0;
+  --atl-acc-d: #2f5fe0;
+  --atl-acc-tx: #8fb0ff;
+  --atl-amb-tx: #fbbf24;
+  --atl-panel: #172554;
+  /* Green had no dark value: #059669 is 4.2:1 as text on these surfaces. */
+  --atl-grn: #34d399;
   --atl-acc-l: #14203a;
   --atl-nav-bg: rgba(10, 14, 23, 0.85);
   --atl-footer-bg: #060912;

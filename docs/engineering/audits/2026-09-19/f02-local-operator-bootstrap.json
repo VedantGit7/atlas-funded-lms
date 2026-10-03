@@ -1,0 +1,32 @@
+{
+  "finding": "F02",
+  "operation": "Initial local operator bootstrap following user-reported superadmin lockout",
+  "performedAt": "2026-09-19T10:54:30.061Z",
+  "database": {
+    "host": "localhost",
+    "port": 15432,
+    "name": "atlas_lms_dev"
+  },
+  "principalId": "d9cf1011-dbbd-499c-bb7f-cc4cba9eeb68",
+  "grantId": "3d3f79bf-ffad-4a4b-a099-1bfbb6c39569",
+  "role": "super_admin",
+  "maintenanceRecord": "Codex task 01a0b871-b512-7c01-bd5a-b1f9286405d5; user reported loss of their superadmin access after F02",
+  "before": {
+    "principalStatus": "active",
+    "legacyEnvironmentAssignmentPresent": true,
+    "operatorHistoryRows": 0
+  },
+  "safeguards": [
+    "Exact local development database asserted",
+    "Transaction and table lock",
+    "Bootstrap refused if any operator history exists",
+    "Verified active principal and reported account match",
+    "No tenant memberships or roles changed",
+    "No MFA bypass"
+  ],
+  "verification": {
+    "database": "Active super_admin grant read back after commit",
+    "browser": "Existing authenticated platform tab reloaded successfully; console navigation visible and normal operational-reason prompt shown"
+  },
+  "scope": "Local database only; no deployment or production database changes"
+}

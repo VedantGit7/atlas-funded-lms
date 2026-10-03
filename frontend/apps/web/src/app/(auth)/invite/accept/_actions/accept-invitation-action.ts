@@ -6,6 +6,7 @@ import {
   SetInvitationPasswordRequestSchema,
 } from "@atlas/contracts/domain-identity/schemas/invitation-public";
 import { extractAccessToken } from "@atlas/auth/session";
+import { PASSWORD_POLICY_REJECTION_MESSAGE } from "@atlas/auth/auth-errors";
 import { safeInvitationErrorMessage } from "../../../../../lib/auth-messages";
 import { ServerPublicApiError, serverPublicApi } from "../../../../../lib/server/public-auth-fetch";
 import { readFormString } from "../../../../../lib/server/form";
@@ -107,7 +108,12 @@ export async function setInvitationPasswordAction(
     if (error instanceof ServerPublicApiError) {
       return {
         ok: false,
-        message: safeInvitationErrorMessage(error.code),
+        message:
+          error.status === 400 &&
+          error.code === "VALIDATION_ERROR" &&
+          error.message === PASSWORD_POLICY_REJECTION_MESSAGE
+            ? PASSWORD_POLICY_REJECTION_MESSAGE
+            : safeInvitationErrorMessage(error.code),
         requestId: error.requestId,
       };
     }

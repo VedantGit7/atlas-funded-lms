@@ -60,7 +60,7 @@ import {
 } from "../deletion-requests-admin-shared";
 import {
   DELETIONS_PAGE_SIZE,
-  DELETION_STATUS_LABELS,
+  deletionOutcomeLabel,
   canProcessRequest,
   deletionStatusBadgeClassName,
   filterDeletionRequests,
@@ -83,7 +83,8 @@ export type DeletionRequestsAdminProps = {
   defaultTargetMembershipId?: string;
 };
 
-function DeletionStatusBadge({ status }: { status: DeletionDisplayStatus }) {
+function DeletionStatusBadge({ request }: { request: DeletionRequestItem }) {
+  const status: DeletionDisplayStatus = request.status;
   const Icon =
     status === "RUNNING"
       ? Loader2
@@ -103,7 +104,7 @@ function DeletionStatusBadge({ status }: { status: DeletionDisplayStatus }) {
         className={`h-3.5 w-3.5 ${status === "RUNNING" ? "motion-safe:animate-spin" : ""}`}
         aria-hidden="true"
       />
-      {DELETION_STATUS_LABELS[status]}
+      {deletionOutcomeLabel(request)}
     </span>
   );
 }
@@ -167,7 +168,7 @@ function FileRequestDialog({
       >
         <div className="mb-5 flex items-center justify-between gap-3">
           <h2 id={headingId} className="text-lg font-semibold text-[var(--admin-on-surface)]">
-            New deletion request
+            New school-access removal request
           </h2>
           <button
             type="button"
@@ -181,6 +182,10 @@ function FileRequestDialog({
         </div>
 
         <div className="space-y-4">
+          <p className="text-sm text-[var(--admin-on-surface-variant)]">
+            This requests school-access removal only. Records are retained and require a separate
+            erasure and retention review.
+          </p>
           <div className="rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-3 py-2 text-sm text-[var(--admin-on-surface-variant)]">
             Target type:{" "}
             <span className="font-semibold text-[var(--admin-on-surface)]">Membership</span>
@@ -304,16 +309,17 @@ function ProcessDialog({
           <div className="flex items-center gap-3 text-[var(--admin-danger)]">
             <AlertTriangle className="h-8 w-8 shrink-0" aria-hidden="true" />
             <h2 id={headingId} className="text-lg font-bold text-[var(--admin-on-surface)]">
-              Irreversible action
+              Remove school access
             </h2>
           </div>
 
           <div id={descriptionId} className={deletionsDangerPanelClassName}>
             <p>
-              You are about to permanently delete the{" "}
-              <strong>{formatTargetType(request.targetType)}</strong> record{" "}
+              You are about to remove school access for the{" "}
+              <strong>{formatTargetType(request.targetType)}</strong>{" "}
               <code className={deletionsTargetIdClassName}>{formatShortId(request.targetId)}</code>.
-              Associated learner data will be removed and cannot be recovered.
+              The identity and associated school records are retained. Access to other schools is
+              unaffected. A separate erasure and retention review is required.
             </p>
           </div>
 
@@ -345,11 +351,11 @@ function ProcessDialog({
             </button>
             <button
               type="button"
-              className="flex-[2] rounded-lg bg-[var(--admin-danger)] px-4 py-2.5 text-sm font-semibold text-[var(--admin-on-primary)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex-[2] rounded-lg bg-[var(--admin-danger)] px-4 py-2.5 text-sm font-semibold text-[var(--admin-on-danger)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
               onClick={onConfirm}
               disabled={busy || !confirmed}
             >
-              {busy ? "Processing…" : "Process — permanently delete"}
+              {busy ? "Processing…" : "Remove school access"}
             </button>
           </div>
         </div>
@@ -401,7 +407,7 @@ function DetailsDialog({ request, onClose }: DetailsDialogProps) {
           <div className="flex justify-between gap-4">
             <dt className="text-[var(--admin-on-surface-variant)]">Status</dt>
             <dd>
-              <DeletionStatusBadge status={request.status} />
+              <DeletionStatusBadge request={request} />
             </dd>
           </div>
           <div className="flex justify-between gap-4">
@@ -416,9 +422,18 @@ function DetailsDialog({ request, onClose }: DetailsDialogProps) {
               {new Date(request.createdAt).toLocaleString()}
             </dd>
           </div>
+          {request.status === "SUCCEEDED" ? (
+            <div>
+              <dt className="text-[var(--admin-on-surface-variant)]">Data outcome</dt>
+              <dd className="mt-1 text-[var(--admin-on-surface)]">
+                {request.completionMessage ??
+                  "This historical request has no verified erasure outcome. Do not treat it as evidence of data deletion. A separate review is required."}
+              </dd>
+            </div>
+          ) : null}
           {request.completedAt ? (
             <div className="flex justify-between gap-4">
-              <dt className="text-[var(--admin-on-surface-variant)]">Completed</dt>
+              <dt className="text-[var(--admin-on-surface-variant)]">Processed</dt>
               <dd className="text-[var(--admin-on-surface)]">
                 {new Date(request.completedAt).toLocaleString()}
               </dd>
@@ -575,10 +590,11 @@ export function DeletionRequestsAdmin({
           <div className={deletionsPageHeaderClassName}>
             <div>
               <h1 className="text-2xl font-semibold tracking-tight text-[var(--admin-on-surface)]">
-                Deletion Requests
+                School-access removal requests
               </h1>
               <p className="mt-1 text-sm text-[var(--admin-on-surface-variant)]">
-                Monitor and process data removal requests across your tenant.
+                Remove school membership access. Records remain retained; a separate erasure and
+                retention review is required. Processing does not delete the global identity.
               </p>
             </div>
             {canFileForOthers ? (
@@ -607,7 +623,7 @@ export function DeletionRequestsAdmin({
             aria-labelledby="deletion-requests-heading"
           >
             <h2 id="deletion-requests-heading" className="sr-only">
-              Deletion requests
+              School-access removal requests
             </h2>
 
             <div className={deletionsTableToolbarClassName}>
@@ -623,7 +639,7 @@ export function DeletionRequestsAdmin({
                     setSearchQuery(event.target.value);
                   }}
                   placeholder="Search requests…"
-                  aria-label="Search deletion requests"
+                  aria-label="Search school-access removal requests"
                   className={deletionsSearchInputClassName}
                 />
               </div>
@@ -647,7 +663,7 @@ export function DeletionRequestsAdmin({
                   className={`${ghostButtonClassName} inline-flex h-9 w-9 items-center justify-center p-0`}
                   onClick={() => void handleRefresh()}
                   disabled={refreshing}
-                  aria-label="Refresh deletion requests"
+                  aria-label="Refresh school-access removal requests"
                 >
                   <RefreshCw
                     className={`h-4 w-4 ${refreshing ? "motion-safe:animate-spin" : ""}`}
@@ -660,11 +676,13 @@ export function DeletionRequestsAdmin({
             {filteredRequests.length === 0 && !refreshing ? (
               <EmptyState
                 className={deletionsEmptyStateClassName}
-                title={searchQuery ? "No matching requests" : "No deletion requests yet"}
+                title={
+                  searchQuery ? "No matching requests" : "No school-access removal requests yet"
+                }
                 description={
                   searchQuery
                     ? "Try a different search term or clear the filter."
-                    : "File a request when a membership must be removed under your data-rights workflow."
+                    : "File a request to remove school membership access. Records are retained; erasure requires a separate review."
                 }
               />
             ) : (
@@ -737,7 +755,7 @@ export function DeletionRequestsAdmin({
                                 }
                               >
                                 <TableCell className="px-4 py-4 sm:px-5">
-                                  <DeletionStatusBadge status={request.status} />
+                                  <DeletionStatusBadge request={request} />
                                 </TableCell>
                                 <TableCell className="px-4 py-4 sm:px-5">
                                   <div className="flex flex-col gap-0.5">
@@ -772,7 +790,7 @@ export function DeletionRequestsAdmin({
                                   </time>
                                 </TableCell>
                                 <TableCell className="px-4 py-4 sm:px-5">
-                                  {grace.startsWith("Executes") ? (
+                                  {grace.startsWith("Eligible") ? (
                                     <span className="inline-flex items-center gap-1 text-xs font-semibold text-[var(--admin-danger)]">
                                       <Timer className="h-3.5 w-3.5" aria-hidden="true" />
                                       {grace}
@@ -794,7 +812,7 @@ export function DeletionRequestsAdmin({
                                           setProcessConfirmValue("");
                                         }}
                                       >
-                                        Process
+                                        Remove access
                                       </button>
                                     ) : request.status === "RUNNING" ? (
                                       <span className="text-xs text-[var(--admin-on-surface-variant)] opacity-60">
@@ -889,12 +907,12 @@ export function DeletionRequestsAdmin({
               <div className="mb-2 flex items-center gap-2 text-[var(--admin-danger)]">
                 <Trash2 className="h-5 w-5" aria-hidden="true" />
                 <h3 className="text-base font-semibold text-[var(--admin-on-surface)]">
-                  Irreversible
+                  Records retained
                 </h3>
               </div>
               <p className="text-sm text-[var(--admin-on-surface-variant)]">
-                Processing a queued request permanently removes membership-linked learner data. This
-                cannot be undone.
+                Processing removes access to this school. Identity, learning, billing, and other
+                school records remain. Review retention and erasure separately with your school.
               </p>
             </article>
             <article className={deletionsInfoCardClassName}>

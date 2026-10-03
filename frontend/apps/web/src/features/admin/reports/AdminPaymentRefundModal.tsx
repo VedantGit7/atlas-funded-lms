@@ -1,7 +1,7 @@
 "use client";
 
 import { AlertTriangle, Check, Info, Loader2, RefreshCw, X } from "lucide-react";
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { ClientApiError } from "../../../lib/client-api";
 import {
   refundPaymentTransaction,
@@ -14,6 +14,12 @@ import {
   parseRefundAmountCents,
   revokeAccessBlockedReason,
 } from "./payment-refund-rules";
+import {
+  refundOutcomeTitle,
+  refundRequestIdentity,
+  type RefundRequestIdentity,
+  type RefundStatus,
+} from "./refund-submission";
 
 type RefundReason = "duplicate" | "fraudulent" | "customer_requested" | "other";
 
@@ -38,17 +44,17 @@ export function AdminPaymentRefundModal({ open, detail, onClose, onRefunded }: P
   const [reason, setReason] = useState<RefundReason>("customer_requested");
   const [note, setNote] = useState("");
   const [revokeAccess, setRevokeAccess] = useState(false);
-  const [notifyLearner, setNotifyLearner] = useState(true);
+  const [refundMethod, setRefundMethod] = useState<"gateway" | "manual_adjustment">("gateway");
+  const [manualReference, setManualReference] = useState("");
+  const requestIdentity = useRef<RefundRequestIdentity | null>(null);
+  const submitting = useRef(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  /**
-   * The server's word on whether money actually moved.
-   *
-   * Held rather than discarded on success: it usually says the gateway reverse
-   * still has to be done by hand, which is the most consequential thing an
-   * operator can be told here. Closing on a toast threw it away.
-   */
-  const [outcome, setOutcome] = useState<{ gatewayNote: string; amountCents: number } | null>(null);
+  const [outcome, setOutcome] = useState<{
+    gatewayNote: string;
+    amountCents: number;
+    status: RefundStatus;
+  } | null>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -57,7 +63,8 @@ export function AdminPaymentRefundModal({ open, detail, onClose, onRefunded }: P
     setReason("customer_requested");
     setNote("");
     setRevokeAccess(false);
-    setNotifyLearner(true);
+    setRefundMethod("gateway");
+    setManualReference("");
     setBusy(false);
     setError(null);
     setOutcome(null);
@@ -86,10 +93,13 @@ export function AdminPaymentRefundModal({ open, detail, onClose, onRefunded }: P
   const refundableCents = detail.refundableAmountCents;
   const amountCents = mode === "full" ? refundableCents : parseRefundAmountCents(amountInput);
   const amountValid = isRefundAmountValid(amountCents, refundableCents);
-  const canSubmit = !busy && isRefundNoteValid(note) && amountValid;
+  const manualReferenceValid =
+    refundMethod === "gateway" ||
+    (manualReference.trim().length > 0 && manualReference.trim().length <= 200);
+  const canSubmit = !busy && isRefundNoteValid(note) && amountValid && manualReferenceValid;
 
   const revokeBlockedReason = revokeAccessBlockedReason(detail);
-  const canRevokeAccess = revokeBlockedReason === null;
+  const canRevokeAccess = revokeBlockedReason === null && refundMethod === "gateway";
 
   /**
    * Closing the outcome is what notifies the caller.
@@ -104,24 +114,40 @@ export function AdminPaymentRefundModal({ open, detail, onClose, onRefunded }: P
   }
 
   async function submit() {
-    if (!canSubmit) return;
+    if (!canSubmit || submitting.current) return;
+    submitting.current = true;
     setBusy(true);
     setError(null);
     try {
-      const response = await refundPaymentTransaction(detail.id, {
+      const body = {
         mode,
+        refundMethod,
+        ...(refundMethod === "manual_adjustment"
+          ? { manualReference: manualReference.trim() }
+          : {}),
         ...(mode === "partial" ? { amountCents } : {}),
         reason,
         note: note.trim(),
         // Never send a revoke the server would silently skip.
         revokeAccess: canRevokeAccess && revokeAccess,
-        notifyLearner,
+        notifyLearner: false,
+      };
+      requestIdentity.current = refundRequestIdentity(requestIdentity.current, {
+        orderId: detail.id,
+        ...body,
       });
+      const response = await refundPaymentTransaction(detail.id, {
+        ...body,
+        refundRequestId: requestIdentity.current.refundRequestId,
+      });
+      if (["succeeded", "manual_adjustment", "failed"].includes(response.data.refund.status))
+        requestIdentity.current = null;
       // `onRefunded` unmounts this modal at one call site, so the outcome is
       // shown first and the caller is told once the operator dismisses it.
       setOutcome({
         gatewayNote: response.data.gatewayNote,
         amountCents: response.data.refund.amountCents,
+        status: response.data.refund.status,
       });
     } catch (err) {
       const message =
@@ -129,9 +155,10 @@ export function AdminPaymentRefundModal({ open, detail, onClose, onRefunded }: P
           ? err.message
           : err instanceof Error
             ? err.message
-            : "Refund failed.";
+            : "Could not confirm the request. Retry with the same details to check it safely.";
       setError(message);
     } finally {
+      submitting.current = false;
       setBusy(false);
     }
   }
@@ -155,7 +182,7 @@ export function AdminPaymentRefundModal({ open, detail, onClose, onRefunded }: P
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="relative flex w-full max-w-lg flex-col overflow-hidden border border-[var(--admin-border)] bg-[var(--admin-surface)] shadow-2xl shadow-[0_0_24px_color-mix(in_srgb,var(--admin-danger)_8%,transparent)]"
+        className="relative flex max-h-[calc(100dvh-2rem)] w-full max-w-lg flex-col overflow-y-auto border border-[var(--admin-border)] bg-[var(--admin-surface)] shadow-2xl shadow-[0_0_24px_color-mix(in_srgb,var(--admin-danger)_8%,transparent)]"
       >
         <div
           className="absolute inset-x-0 top-0 z-10 h-1 bg-[var(--admin-danger)]"
@@ -172,7 +199,9 @@ export function AdminPaymentRefundModal({ open, detail, onClose, onRefunded }: P
           <div className="mt-1 flex items-start gap-3 border-b border-[var(--admin-danger)] bg-[color-mix(in_srgb,var(--admin-danger)_12%,transparent)] px-6 py-4">
             <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-[var(--admin-danger)]" />
             <div>
-              <h3 className="text-lg font-semibold text-[var(--admin-danger)]">Refund failed</h3>
+              <h3 className="text-lg font-semibold text-[var(--admin-danger)]">
+                Request could not be confirmed
+              </h3>
               <p className="mt-1 font-mono text-xs text-[var(--admin-on-surface-variant)]">
                 {error}
               </p>
@@ -188,12 +217,16 @@ export function AdminPaymentRefundModal({ open, detail, onClose, onRefunded }: P
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h2 id={titleId} className="text-xl font-semibold text-[var(--admin-on-surface)]">
-                  {outcome ? "Refund recorded" : busy ? "Processing refund" : "Approve refund"}
+                  {outcome
+                    ? refundOutcomeTitle(outcome.status)
+                    : busy
+                      ? "Submitting request"
+                      : "Review refund"}
                 </h2>
                 <p className="mt-1 text-sm text-[var(--admin-on-surface-variant)]">
                   {outcome
-                    ? "The ledger has been updated. Read the note below before closing."
-                    : "Review the details before confirming. This updates the LMS ledger."}
+                    ? "Read the gateway status below before closing."
+                    : "Choose a gateway refund or an explicit manual ledger adjustment."}
                 </p>
               </div>
               <button
@@ -218,18 +251,17 @@ export function AdminPaymentRefundModal({ open, detail, onClose, onRefunded }: P
         {outcome ? (
           <>
             <div className="space-y-4 bg-[color-mix(in_srgb,var(--admin-bg)_50%,transparent)] p-6">
-              <div className="flex items-start gap-3 border border-[color-mix(in_srgb,var(--admin-success)_30%,transparent)] bg-[color-mix(in_srgb,var(--admin-success)_10%,transparent)] p-4">
-                <Check
-                  className="mt-0.5 h-5 w-5 shrink-0 text-[var(--admin-success)]"
+              <div className="flex items-start gap-3 border border-[var(--admin-border)] bg-[var(--admin-surface-high)] p-4">
+                <Info
+                  className="mt-0.5 h-5 w-5 shrink-0 text-[var(--admin-on-surface-variant)]"
                   aria-hidden="true"
                 />
                 <div>
                   <p className="text-sm font-semibold text-[var(--admin-on-surface)]">
-                    {formatMoney(outcome.amountCents, detail.currency)} refunded on the ledger
+                    {formatMoney(outcome.amountCents, detail.currency)} —{" "}
+                    {refundOutcomeTitle(outcome.status)}
                   </p>
                   <p className="mt-1 text-sm text-[var(--admin-on-surface-variant)]">
-                    {/* Verbatim from the server — it states whether the gateway
-                        reverse still has to be done by hand. */}
                     {outcome.gatewayNote}
                   </p>
                 </div>
@@ -248,6 +280,51 @@ export function AdminPaymentRefundModal({ open, detail, onClose, onRefunded }: P
         ) : (
           <>
             <div className="space-y-6 bg-[color-mix(in_srgb,var(--admin-bg)_50%,transparent)] p-6">
+              <div className="space-y-2">
+                <label
+                  htmlFor={`${titleId}-method`}
+                  className="block text-sm text-[var(--admin-on-surface)]"
+                >
+                  Refund method
+                </label>
+                <select
+                  id={`${titleId}-method`}
+                  className="w-full border border-[var(--admin-border)] bg-[var(--admin-bg)] p-2 text-sm text-[var(--admin-on-surface)]"
+                  disabled={busy}
+                  value={refundMethod}
+                  onChange={(event) => {
+                    setRefundMethod(event.target.value as "gateway" | "manual_adjustment");
+                  }}
+                >
+                  <option value="gateway">Request gateway refund</option>
+                  <option value="manual_adjustment">
+                    Manual ledger adjustment — no money sent
+                  </option>
+                </select>
+                {refundMethod === "manual_adjustment" ? (
+                  <>
+                    <label
+                      htmlFor={`${titleId}-reference`}
+                      className="block text-sm text-[var(--admin-on-surface)]"
+                    >
+                      Manual adjustment reference (required)
+                    </label>
+                    <input
+                      id={`${titleId}-reference`}
+                      className="w-full border border-[var(--admin-border)] bg-[var(--admin-bg)] p-2 text-sm text-[var(--admin-on-surface)]"
+                      disabled={busy}
+                      value={manualReference}
+                      maxLength={200}
+                      onChange={(event) => {
+                        setManualReference(event.target.value);
+                      }}
+                    />
+                    <p className="text-xs text-[var(--admin-on-surface-variant)]">
+                      Records an adjustment only. No money is sent and course access is unchanged.
+                    </p>
+                  </>
+                ) : null}
+              </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <span className="block font-mono text-[11px] font-bold uppercase tracking-wider text-[var(--admin-on-surface-variant)]">
@@ -374,16 +451,21 @@ export function AdminPaymentRefundModal({ open, detail, onClose, onRefunded }: P
                 <CheckboxRow
                   checked={canRevokeAccess && revokeAccess}
                   disabled={busy || !canRevokeAccess}
-                  label="Revoke course access"
-                  hint={revokeBlockedReason ?? undefined}
+                  label="Revoke course access after gateway confirmation"
+                  hint={
+                    revokeBlockedReason ??
+                    (refundMethod === "manual_adjustment"
+                      ? "Manual adjustments do not revoke course access."
+                      : "Access remains active until the gateway confirms the refund.")
+                  }
                   onChange={setRevokeAccess}
                 />
                 <CheckboxRow
-                  checked={notifyLearner}
-                  disabled={busy}
-                  label="Notify the learner by email"
-                  hint="Queued as a ledger flag until outbound mail is wired"
-                  onChange={setNotifyLearner}
+                  checked={false}
+                  disabled
+                  label="Learner email unavailable"
+                  hint="No notification will be sent or queued."
+                  onChange={() => {}}
                 />
               </div>
 
@@ -393,9 +475,8 @@ export function AdminPaymentRefundModal({ open, detail, onClose, onRefunded }: P
                   aria-hidden="true"
                 />
                 <p className="text-sm text-[var(--admin-danger)]">
-                  Recording a refund on the ledger is permanent for audit. Reverse the charge in
-                  your payment gateway separately if required — automated gateway refunds are not
-                  wired yet.
+                  Gateway refunds remain pending until the provider confirms them. Manual
+                  adjustments only update the ledger and send no money.
                 </p>
               </div>
 
@@ -403,9 +484,7 @@ export function AdminPaymentRefundModal({ open, detail, onClose, onRefunded }: P
                 <div className="flex items-start gap-2 border-l-2 border-[var(--admin-primary)] bg-[var(--admin-surface-high)] p-4">
                   <Loader2 className="mt-0.5 h-4 w-4 animate-spin text-[var(--admin-primary)]" />
                   <div>
-                    <p className="text-sm text-[var(--admin-on-surface)]">
-                      Recording refund on the ledger…
-                    </p>
+                    <p className="text-sm text-[var(--admin-on-surface)]">Submitting request…</p>
                     <p className="mt-1 font-mono text-xs text-[var(--admin-on-surface-variant)]">
                       Do not close this window.
                     </p>
@@ -426,7 +505,7 @@ export function AdminPaymentRefundModal({ open, detail, onClose, onRefunded }: P
               <button
                 type="button"
                 disabled={!canSubmit}
-                className="flex items-center gap-2 border border-[var(--admin-danger)] bg-[var(--admin-danger)] px-6 py-2 font-mono text-[11px] font-bold uppercase tracking-wider text-[var(--admin-on-primary)] shadow-[0_0_15px_color-mix(in_srgb,var(--admin-danger)_30%,transparent)] hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+                className="flex items-center gap-2 border border-[var(--admin-danger)] bg-[var(--admin-danger)] px-6 py-2 font-mono text-[11px] font-bold uppercase tracking-wider text-[var(--admin-on-danger)] shadow-[0_0_15px_color-mix(in_srgb,var(--admin-danger)_30%,transparent)] hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
                 onClick={() => void submit()}
               >
                 {busy ? (
@@ -440,7 +519,7 @@ export function AdminPaymentRefundModal({ open, detail, onClose, onRefunded }: P
                     Retry refund
                   </>
                 ) : (
-                  `Approve refund — ${formatMoney(
+                  `${refundMethod === "gateway" ? "Request refund" : "Record adjustment"} — ${formatMoney(
                     amountValid ? amountCents : refundableCents,
                     detail.currency,
                   )}`

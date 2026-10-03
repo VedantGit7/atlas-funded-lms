@@ -1,4 +1,4 @@
-import { withTenantTx } from "@atlas/db";
+import { withTenantTx, type TenantTx } from "@atlas/db";
 import {
   REPORT_DELIVERY_WORKER_DESTINATION,
   REPORT_RUN_SUCCEEDED_EVENT,
@@ -26,37 +26,25 @@ export async function handleReportDeliveryOutboxEvent(event: {
   const payload = reportRunSucceededPayloadSchema.parse(event.payload);
   const emailProvider = getEmailProvider();
 
-  await withTenantTx(
+  const withTx = <T>(fn: (tx: TenantTx) => Promise<T>) =>
+    withTenantTx({ tenantId, requestId: event.requestId, allowAnonymousTenantRead: true }, fn);
+  const run = await withTx((tx) => reportsRepository.findReportRunById(tx, payload.reportRunId));
+  const actorMembershipId = run?.requested_by_membership_id;
+  if (!actorMembershipId)
+    throw new Error("Report delivery requires the schedule/run owner membership.");
+  await deliverSucceededReportRun(
+    withTx,
+    { tenantId, actorMembershipId, requestId: event.requestId },
     {
-      tenantId,
-      requestId: event.requestId,
-      allowAnonymousTenantRead: true,
-    },
-    async (tx) => {
-      const run = await reportsRepository.findReportRunById(tx, payload.reportRunId);
-      const actorMembershipId = run?.requested_by_membership_id;
-      if (!actorMembershipId) {
-        throw new Error("Report delivery requires the schedule/run owner membership.");
-      }
-
-      await deliverSucceededReportRun(
-        tx,
-        {
-          tenantId,
-          actorMembershipId,
-          requestId: event.requestId,
-        },
-        {
-          reportRunId: payload.reportRunId,
-          sendEmail: emailProvider.isConfigured()
-            ? async (input: { to: string; subject: string; body: string; requestId: string }) => {
-                await emailProvider.send(input);
-              }
-            : null,
-          resolveMembershipEmail: (membershipId: string) =>
-            notificationRepository.findMembershipEmail(tx, membershipId),
-        },
-      );
+      reportRunId: payload.reportRunId,
+      emailSupportsIdempotency: emailProvider.supportsIdempotency === true,
+      sendEmail: emailProvider.isConfigured()
+        ? async (input) => {
+            await emailProvider.send({ ...input, tenantId });
+          }
+        : null,
+      resolveMembershipEmail: (tx, membershipId) =>
+        notificationRepository.findMembershipEmail(tx, membershipId),
     },
   );
 }

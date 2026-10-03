@@ -46,7 +46,11 @@ const {
   // must resolve rather than return undefined.
   mockWithTenantTx: vi.fn((_ctx: unknown, fn: (tx: unknown) => unknown) =>
     fn({
-      $queryRaw: vi.fn().mockResolvedValue([]),
+      $queryRaw: vi.fn(async (sql: TemplateStringsArray) =>
+        sql.join("").includes("INSERT INTO idempotency_records")
+          ? [{ id: "018f0000-0000-7000-8000-000000000088" }]
+          : [],
+      ),
       $queryRawUnsafe: vi.fn().mockResolvedValue([]),
       $executeRaw: vi.fn().mockResolvedValue(0),
       $executeRawUnsafe: vi.fn().mockResolvedValue(0),

@@ -78,7 +78,7 @@ export async function fetchExportRunDetail(
 
 export async function deleteExportRunFile(runId: string, sourceType?: "report_run" | "export_job") {
   return clientApi.post<{
-    data: { id: string; sourceType: string; deleted: true; hasFile: false };
+    data: { id: string; sourceType: string; deleted: false; hasFile: true; deletionPending: true };
   }>(
     `/api/v1/reports/exports/${encodeURIComponent(runId)}/file`,
     sourceType ? { sourceType } : {},

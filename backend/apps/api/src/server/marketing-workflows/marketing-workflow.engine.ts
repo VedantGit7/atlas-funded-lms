@@ -1,9 +1,12 @@
 import type { TenantTx } from "@atlas/db";
 import type { ServiceCtx } from "@atlas/domain/shared/domain.types";
 import { notificationRepository } from "../notifications/notification.repository";
-import { getEmailProvider } from "../notifications/notification.email-provider";
+import { publishOutboxEvent } from "@atlas/events";
+import {
+  MARKETING_WORKFLOW_EMAIL_REQUESTED_EVENT,
+  marketingWorkflowEmailPayloadSchema,
+} from "./marketing-workflow-email.events";
 import { readTenantEmailChannel } from "../tenant-settings/tenant-settings.service";
-import { buildSafeInboxPayload } from "../notifications/notification.service";
 import { registerMarketingEventFromWorkflow } from "../marketing-events/marketing-events.service";
 import {
   TRIGGER_EVENT_MAP,
@@ -82,7 +85,7 @@ function delayMs(config: { days: number; hours: number; minutes: number }) {
   return ((config.days * 24 + config.hours) * 60 + config.minutes) * 60_000;
 }
 
-async function sendActionEmail(args: {
+async function queueActionEmail(args: {
   tx: TenantTx;
   ctx: ServiceCtx;
   run: MarketingWorkflowRunRow;
@@ -109,58 +112,41 @@ async function sendActionEmail(args: {
     return;
   }
 
-  const provider = getEmailProvider();
   const channel = await readTenantEmailChannel(args.tx, "marketingEmail");
   const idempotencyKey = `marketing.workflow:${args.run.id}:${args.node.id}`;
   const existing = await notificationRepository.findDispatchByIdempotencyKey(args.tx, {
     tenantId: args.ctx.tenantId,
     idempotencyKey,
   });
-  if (existing) return;
+  if (existing?.status === "SENT") return;
+  if (existing) throw new Error("WORKFLOW_EMAIL_DISPATCH_NOT_SENT");
 
-  if (provider.isConfigured()) {
-    await provider.send({
+  await publishOutboxEvent(args.tx, {
+    ctx: args.ctx,
+    eventType: MARKETING_WORKFLOW_EMAIL_REQUESTED_EVENT,
+    aggregateType: "marketing_workflow_run",
+    aggregateId: args.run.id,
+    idempotencyKey,
+    payload: marketingWorkflowEmailPayloadSchema.parse({
+      runId: args.run.id,
+      nodeId: args.node.id,
+      actionTitle: args.node.title,
+      membershipId: args.run.membership_id,
+      idempotencyKey,
       to: email,
       subject: args.subject,
       body: args.bodyHtml,
-      requestId: args.ctx.requestId,
       fromName: channel.fromName,
       fromEmail: channel.fromEmail,
       replyToEmail: channel.replyToEmail,
-    });
-  }
-
-  if (args.run.membership_id) {
-    await notificationRepository.insertDispatch(args.tx, {
-      tenantId: args.ctx.tenantId,
-      membershipId: args.run.membership_id,
-      channel: "email",
-      templateKey: "marketing.workflow",
-      destination: email,
-      idempotencyKey,
-      status: "SENT",
-      payloadJson: {
-        ...buildSafeInboxPayload({
-          title: args.subject,
-          body: args.bodyHtml.replace(/<[^>]+>/g, " ").slice(0, 500),
-          actionPath: "/",
-        }),
-        workflow: {
-          runId: args.run.id,
-          nodeId: args.node.id,
-          actionTitle: args.node.title,
-        },
-      },
-      sentAt: new Date(),
-    });
-  }
-
+    }),
+  });
   await marketingWorkflowRepository.insertLog(args.tx, {
     runId: args.run.id,
     nodeId: args.node.id,
     nodeType: args.node.type,
-    status: "SENT",
-    message: `Email sent to ${email}`,
+    status: "QUEUED",
+    message: "Email queued for delivery.",
   });
 }
 
@@ -259,7 +245,7 @@ async function executeAction(args: {
     bodyHtml += `<p><strong>Event:</strong> ${config.eventLabel}</p>`;
   }
 
-  await sendActionEmail({
+  await queueActionEmail({
     tx: args.tx,
     ctx: args.ctx,
     run: args.run,
@@ -342,27 +328,8 @@ async function advanceRun(
     // Remaining node types are actions after trigger/delay/condition handling.
 
     {
-      try {
-        await executeAction({ tx, ctx, run, node });
-      } catch (error) {
-        const message = error instanceof Error ? error.message : "Action failed";
-        await marketingWorkflowRepository.insertLog(tx, {
-          runId: run.id,
-          nodeId: node.id,
-          nodeType: node.type,
-          status: "FAILED",
-          message,
-        });
-        await marketingWorkflowRepository.updateRun(tx, {
-          id: run.id,
-          status: "FAILED",
-          currentNodeId: node.id,
-          waitUntil: null,
-          errorMessage: message,
-          completed: true,
-        });
-        return;
-      }
+      // Queue persistence must commit with workflow progress; failures roll back for retry.
+      await executeAction({ tx, ctx, run, node });
       currentId = node.next ?? null;
       continue;
     }

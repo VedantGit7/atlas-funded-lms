@@ -44,7 +44,7 @@ export function createPublicRouteHandler(
     } catch (error) {
       const safe = toSafeErrorEnvelope(error, requestId);
       return attachRequestIdHeader(
-        NextResponse.json(safe.body, { status: safe.status }),
+        NextResponse.json(safe.body, { status: safe.status, headers: safe.headers ?? {} }),
         requestId,
       );
     }

@@ -1,10 +1,13 @@
 "use client";
 
-import { type ReactNode } from "react";
+import { useRef, type ReactNode } from "react";
 import dynamic from "next/dynamic";
-import { motion, useReducedMotion } from "motion/react";
-
-const EASE = [0.16, 1, 0.3, 1] as const;
+import {
+  useEntryAnimation,
+  useReducedMotion,
+} from "../../../../components/motion/native-animation";
+import { EntryReveal } from "../../../../components/motion/EntryReveal";
+import { useCurrency } from "../../../currency/CurrencyProvider";
 
 /** Scroll/entry reveal. Collapses to instant under reduced motion. */
 export function Reveal({
@@ -16,17 +19,10 @@ export function Reveal({
   delay?: number;
   className?: string;
 }) {
-  const reduce = useReducedMotion();
   return (
-    <motion.div
-      className={className}
-      initial={reduce ? false : { opacity: 0, y: 18 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.2 }}
-      transition={{ duration: 0.55, delay, ease: EASE }}
-    >
+    <EntryReveal delay={delay} distance={18} className={className}>
       {children}
-    </motion.div>
+    </EntryReveal>
   );
 }
 
@@ -44,11 +40,14 @@ export function RadialProgress({
   color: string;
   children?: ReactNode;
 }) {
-  const reduce = useReducedMotion();
+  const ref = useRef<SVGCircleElement>(null);
   const clamped = Math.max(0, Math.min(100, value));
   const r = (size - stroke) / 2;
   const circumference = 2 * Math.PI * r;
   const offset = circumference - (clamped / 100) * circumference;
+  useEntryAnimation(ref, [{ strokeDashoffset: circumference }, { strokeDashoffset: offset }], {
+    duration: 1100,
+  });
 
   return (
     <div
@@ -64,7 +63,8 @@ export function RadialProgress({
           stroke="var(--border)"
           strokeWidth={stroke}
         />
-        <motion.circle
+        <circle
+          ref={ref}
           cx={size / 2}
           cy={size / 2}
           r={r}
@@ -73,10 +73,7 @@ export function RadialProgress({
           strokeWidth={stroke}
           strokeLinecap="round"
           strokeDasharray={circumference}
-          initial={reduce ? { strokeDashoffset: offset } : { strokeDashoffset: circumference }}
-          whileInView={{ strokeDashoffset: offset }}
-          viewport={{ once: true }}
-          transition={{ duration: reduce ? 0 : 1.1, ease: EASE }}
+          strokeDashoffset={offset}
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">{children}</div>
@@ -86,21 +83,16 @@ export function RadialProgress({
 
 /** Animated numeric bar (0-100) using tokens. */
 export function ProgressBar({ value, className = "" }: { value: number; className?: string }) {
-  const reduce = useReducedMotion();
+  const ref = useRef<HTMLDivElement>(null);
   const clamped = Math.max(0, Math.min(100, value));
+  const width = `${String(clamped)}%`;
+  useEntryAnimation(ref, [{ width: 0 }, { width }], { duration: 1000 });
   return (
     <div className={`h-2.5 w-full overflow-hidden rounded-full bg-[var(--muted)] ${className}`}>
-      <motion.div
-        className="h-full rounded-full bg-[var(--primary)]"
-        initial={reduce ? { width: `${String(clamped)}%` } : { width: 0 }}
-        whileInView={{ width: `${String(clamped)}%` }}
-        viewport={{ once: true }}
-        transition={{ duration: reduce ? 0 : 1, ease: EASE }}
-      />
+      <div ref={ref} className="h-full rounded-full bg-[var(--primary)]" style={{ width }} />
     </div>
   );
 }
-
 const TradingScene = dynamic(() => import("./TradingScene"), {
   ssr: false,
   loading: () => <CoreFallback />,
@@ -122,7 +114,9 @@ function CoreFallback({ color = "#6aa9ff" }: { color?: string }) {
 }
 
 /** Renders the cycling trading 3D scene, or a calm static orb under reduced motion. */
-export function HeroSceneMount({ color, usdInr }: { color: string; usdInr: number | null }) {
+export function HeroSceneMount({ color }: { color: string }) {
+  const { rates } = useCurrency();
+  const usdInr = typeof rates["INR"] === "number" ? rates["INR"] : null;
   const reduce = useReducedMotion();
   if (reduce) return <CoreFallback color={color} />;
   return <TradingScene accent={color} usdInr={usdInr} />;

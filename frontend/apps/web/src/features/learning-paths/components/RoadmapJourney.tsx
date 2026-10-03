@@ -251,7 +251,7 @@ export function RoadmapJourney({
                 </span>
               </span>
             ) : state === "completed" ? (
-              <span className="flex h-14 w-14 items-center justify-center rounded-full border-4 border-background bg-[var(--success)] text-white shadow-md">
+              <span className="flex h-14 w-14 items-center justify-center rounded-full border-4 border-background bg-[var(--success)] text-success-foreground shadow-md">
                 <Check className="h-6 w-6" strokeWidth={3} aria-hidden="true" />
               </span>
             ) : state === "available" ? (

@@ -87,11 +87,6 @@ export function shareTargets(url: string, title: string): ShareTargets {
   };
 }
 
-/** Embeddable snippet that renders the public verification page. */
-export function embedCode(url: string, title: string): string {
-  return `<iframe src="${url}" title="${title}" width="360" height="220" loading="lazy" style="border:0"></iframe>`;
-}
-
 /** Query string for the certificates list endpoint, honouring the active filter. */
 export function buildListQuery(status: StatusFilter, cursor: string | null, limit: number): string {
   const params = new URLSearchParams();

@@ -1,7 +1,4 @@
-"use client";
-
 import Link from "next/link";
-import { Plus_Jakarta_Sans } from "next/font/google";
 import {
   ATLAS_CAPABILITIES,
   ATLAS_PRICING,
@@ -9,22 +6,15 @@ import {
   ATLAS_STEPS,
   ATLAS_TESTIMONIALS,
 } from "./atlas-landing-data";
-import { AtlasBrandMark, AtlasFaq, AtlasNav, useAtlasTheme } from "./AtlasLandingInteractive";
+import { AtlasBrandMark, AtlasFaq, AtlasLandingFrame } from "./AtlasLandingInteractive";
 import { AuthoringSection, ConsolePreviewCard, PlatformSection } from "./AtlasLandingSections";
 import "./atlas-landing.css";
-
-const plusJakarta = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800"],
-  variable: "--font-plus-jakarta",
-  display: "swap",
-});
 
 function CheckRow({ children, light }: { children: string; light?: boolean }) {
   return (
     <div className="flex gap-2.5">
       <span
-        className={`shrink-0 text-[13px] font-bold ${light ? "text-white" : "text-[var(--atl-acc)]"}`}
+        className={`shrink-0 text-[13px] font-bold ${light ? "text-white" : "text-[var(--atl-acc-tx)]"}`}
       >
         {"\u2713"}
       </span>
@@ -38,14 +28,8 @@ function CheckRow({ children, light }: { children: string; light?: boolean }) {
 }
 
 export function AtlasPlatformLanding() {
-  const { darkMode, toggleDark, mounted } = useAtlasTheme();
-
   return (
-    <div
-      className={`atlas-landing ${plusJakarta.variable} ${mounted && darkMode ? "atl-dark" : ""}`}
-    >
-      <AtlasNav darkMode={darkMode} onToggleDark={toggleDark} />
-
+    <AtlasLandingFrame>
       {/* Hero */}
       <div className="relative overflow-hidden px-7 max-[768px]:px-4">
         <div className="pointer-events-none absolute inset-0 atl-hero-grid" aria-hidden />
@@ -89,7 +73,7 @@ export function AtlasPlatformLanding() {
           {ATLAS_STATS.map((stat, i) => {
             const valueColor =
               "accent" in stat
-                ? "text-[var(--atl-acc)]"
+                ? "text-[var(--atl-acc-tx)]"
                 : "grn" in stat
                   ? "text-[var(--atl-grn)]"
                   : "text-[var(--atl-tx)]";
@@ -133,7 +117,7 @@ export function AtlasPlatformLanding() {
                 className="rounded-[14px] border-[1.5px] border-[var(--atl-bdr)] bg-[var(--atl-surf)] p-[32px_28px] transition-[box-shadow,transform,border-color] hover:-translate-y-0.5 hover:border-[var(--atl-bdr2)] hover:shadow-[0_10px_30px_rgba(12,19,34,0.07)]"
               >
                 <div className="mb-[22px] text-[48px] font-extrabold leading-none text-[var(--atl-acc-l)]">
-                  <span className="text-[var(--atl-acc)]">{item.step}</span>
+                  <span className="text-[var(--atl-acc-tx)]">{item.step}</span>
                 </div>
                 <div className="mb-3 text-lg font-bold leading-[1.25] text-[var(--atl-tx)]">
                   {item.title}
@@ -152,7 +136,7 @@ export function AtlasPlatformLanding() {
       <div className="border-t border-[var(--atl-bdr)] bg-[var(--atl-bg2)] px-7 py-24 max-[768px]:px-4 max-[768px]:py-16">
         <div className="mx-auto max-w-[1140px]">
           <div className="mb-14 max-w-[560px]">
-            <div className="mb-3.5 text-[11px] font-semibold uppercase tracking-[0.15em] text-[var(--atl-acc)]">
+            <div className="mb-3.5 text-[11px] font-semibold uppercase tracking-[0.15em] text-[var(--atl-acc-tx)]">
               Everything included
             </div>
             <h2 className="text-[40px] font-extrabold leading-[1.1] tracking-[-0.02em] text-[var(--atl-tx)] max-[768px]:text-[32px]">
@@ -167,7 +151,7 @@ export function AtlasPlatformLanding() {
                   key={cap.title}
                   className={`rounded-[14px] border-[1.5px] p-[28px_26px] transition-[box-shadow,border-color] hover:shadow-[0_10px_30px_rgba(12,19,34,0.07)] ${
                     tinted
-                      ? "border-transparent bg-[var(--atl-acc)] text-white"
+                      ? "border-transparent bg-[var(--atl-panel)] text-white"
                       : "border-[var(--atl-bdr)] bg-[var(--atl-surf)] hover:border-[var(--atl-bdr2)]"
                   }`}
                 >
@@ -196,7 +180,7 @@ export function AtlasPlatformLanding() {
       <div id="pricing" className="px-7 py-24 max-[768px]:px-4 max-[768px]:py-16">
         <div className="mx-auto max-w-[1140px]">
           <div className="mb-14 text-center">
-            <div className="mb-3.5 text-[11px] font-semibold uppercase tracking-[0.15em] text-[var(--atl-acc)]">
+            <div className="mb-3.5 text-[11px] font-semibold uppercase tracking-[0.15em] text-[var(--atl-acc-tx)]">
               Pricing
             </div>
             <h2 className="mb-3.5 text-[40px] font-extrabold leading-[1.1] tracking-[-0.02em] text-[var(--atl-tx)] max-[768px]:text-[32px]">
@@ -213,7 +197,7 @@ export function AtlasPlatformLanding() {
                 key={plan.tier}
                 className={`flex flex-1 flex-col rounded-2xl p-8 ${
                   plan.featured
-                    ? "relative border-2 border-[var(--atl-acc)] bg-[var(--atl-acc)]"
+                    ? "relative border-2 border-[var(--atl-panel)] bg-[var(--atl-panel)]"
                     : "border-[1.5px] border-[var(--atl-bdr)] bg-[var(--atl-surf)]"
                 }`}
               >
@@ -224,7 +208,7 @@ export function AtlasPlatformLanding() {
                 ) : null}
                 <div
                   className={`mb-4 text-[11px] font-semibold uppercase tracking-[0.12em] ${
-                    plan.featured ? "text-white/50" : "text-[var(--atl-tx3)]"
+                    plan.featured ? "text-white/70" : "text-[var(--atl-tx3)]"
                   }`}
                 >
                   {plan.tier}
@@ -239,14 +223,14 @@ export function AtlasPlatformLanding() {
                   </div>
                   <div
                     className={`text-[14px] font-medium ${
-                      plan.featured ? "text-white/55" : "text-[var(--atl-tx3)]"
+                      plan.featured ? "text-white/70" : "text-[var(--atl-tx3)]"
                     }`}
                   >
                     {plan.cadence}
                   </div>
                 </div>
                 <div
-                  className={`mb-7 text-[13px] ${plan.featured ? "text-white/55" : "text-[var(--atl-tx3)]"}`}
+                  className={`mb-7 text-[13px] ${plan.featured ? "text-white/70" : "text-[var(--atl-tx3)]"}`}
                 >
                   {plan.note}
                 </div>
@@ -254,7 +238,7 @@ export function AtlasPlatformLanding() {
                   href="#contact"
                   className={`mb-7 block rounded-[9px] py-3.5 text-center text-[13px] font-bold no-underline transition-colors ${
                     plan.featured
-                      ? "bg-white text-[var(--atl-acc)] hover:bg-[var(--atl-acc-l)]"
+                      ? "bg-white text-[var(--atl-acc)] hover:opacity-90"
                       : "border-[1.5px] border-[var(--atl-bdr2)] bg-[var(--atl-bg2)] text-[var(--atl-tx)] hover:border-[var(--atl-tx3)]"
                   }`}
                 >
@@ -290,7 +274,7 @@ export function AtlasPlatformLanding() {
                 key={t.name}
                 className="flex flex-col rounded-2xl border-[1.5px] border-[var(--atl-bdr)] bg-[var(--atl-surf)] p-[30px] transition-[box-shadow,transform] hover:-translate-y-0.5 hover:shadow-[0_10px_30px_rgba(12,19,34,0.07)]"
               >
-                <div className="mb-4 text-sm font-bold tracking-[0.04em] text-[var(--atl-acc)]">
+                <div className="mb-4 text-sm font-bold tracking-[0.04em] text-[var(--atl-acc-tx)]">
                   {"\u2605\u2605\u2605\u2605\u2605"}
                 </div>
                 <p className="mb-[22px] flex-1 text-sm leading-[1.8] text-[var(--atl-tx2)]">
@@ -304,7 +288,9 @@ export function AtlasPlatformLanding() {
                     <div className="mt-[5px] text-[11px] text-[var(--atl-tx3)]">{t.detail}</div>
                   </div>
                   <div className="rounded-md bg-[var(--atl-acc-l)] px-2.5 py-[5px]">
-                    <div className="text-[10px] font-semibold text-[var(--atl-acc)]">{t.badge}</div>
+                    <div className="text-[10px] font-semibold text-[var(--atl-acc-tx)]">
+                      {t.badge}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -318,10 +304,10 @@ export function AtlasPlatformLanding() {
       {/* Final CTA */}
       <div
         id="contact"
-        className="bg-[var(--atl-acc)] px-7 py-[88px] text-center max-[768px]:px-4 max-[768px]:py-16"
+        className="bg-[var(--atl-panel)] px-7 py-[88px] text-center max-[768px]:px-4 max-[768px]:py-16"
       >
         <div className="mx-auto max-w-[620px]">
-          <div className="mb-[18px] text-[11px] font-semibold uppercase tracking-[0.15em] text-white/45">
+          <div className="mb-[18px] text-[11px] font-semibold uppercase tracking-[0.15em] text-white/70">
             Book a demo
           </div>
           <h2 className="mb-5 text-[44px] font-extrabold leading-[1.08] tracking-[-0.02em] text-balance text-white max-[768px]:text-[32px]">
@@ -333,11 +319,11 @@ export function AtlasPlatformLanding() {
           </p>
           <a
             href="mailto:sales@atlaslms.dev?subject=Atlas%20LMS%20demo"
-            className="inline-flex items-center gap-2 rounded-[11px] bg-white px-9 py-[18px] text-[15px] font-bold text-[var(--atl-acc)] no-underline transition-colors hover:bg-[var(--atl-acc-l)]"
+            className="inline-flex items-center gap-2 rounded-[11px] bg-white px-9 py-[18px] text-[15px] font-bold text-[var(--atl-acc)] no-underline transition-colors hover:opacity-90"
           >
             Talk to our team
           </a>
-          <div className="mt-3.5 text-xs text-white/45">
+          <div className="mt-3.5 text-xs text-white/70">
             Operators can also sign in at the platform console
           </div>
         </div>
@@ -354,7 +340,7 @@ export function AtlasPlatformLanding() {
                   Atlas LMS
                 </span>
               </div>
-              <p className="m-0 max-w-[280px] text-[13px] leading-[1.75] text-white/45">
+              <p className="m-0 max-w-[280px] text-[13px] leading-[1.75] text-white/70">
                 The multi-tenant, white-label learning platform for academies and training teams.
               </p>
             </div>
@@ -384,7 +370,7 @@ export function AtlasPlatformLanding() {
               },
             ].map((col) => (
               <div key={col.title} className="min-w-[120px] flex-1">
-                <div className="mb-[18px] text-[10px] font-semibold uppercase tracking-[0.14em] text-white/30">
+                <div className="mb-[18px] text-[10px] font-semibold uppercase tracking-[0.14em] text-white/55">
                   {col.title}
                 </div>
                 <div className="flex flex-col gap-[11px]">
@@ -402,15 +388,15 @@ export function AtlasPlatformLanding() {
             ))}
           </div>
           <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/10 pt-[26px]">
-            <div className="text-xs text-white/30">
+            <div className="text-xs text-white/55">
               {"\u00A9"} 2026 Atlas LMS. All rights reserved.
             </div>
-            <div className="text-xs text-white/25">
+            <div className="text-xs text-white/55">
               Built for multi-tenant, white-label delivery.
             </div>
           </div>
         </div>
       </footer>
-    </div>
+    </AtlasLandingFrame>
   );
 }

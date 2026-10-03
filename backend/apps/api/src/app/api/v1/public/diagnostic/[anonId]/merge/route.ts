@@ -98,6 +98,6 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     const safe = toSafeErrorEnvelope(error, requestId);
-    return NextResponse.json(safe.body, { status: safe.status });
+    return NextResponse.json(safe.body, { status: safe.status, headers: safe.headers ?? {} });
   }
 }

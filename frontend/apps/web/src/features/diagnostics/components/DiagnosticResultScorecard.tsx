@@ -1,4 +1,4 @@
-import type { DiagnosticScorecard } from "@atlas/contracts-modules/diagnostics/diagnostic.types";
+import type { DiagnosticScorecard } from "@atlas/contracts/diagnostics/diagnostic.types";
 import { ReadinessReveal } from "../../readiness/components/ReadinessReveal";
 import { ScoreGauge } from "../../readiness/components/ScoreGauge";
 import {

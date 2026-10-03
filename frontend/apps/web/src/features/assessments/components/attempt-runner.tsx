@@ -21,9 +21,10 @@ type AttemptRunnerProps = {
   initialAttempt: AttemptRunner;
 };
 
-function formatRemaining(serverNow: string, dueAt: string | null): string | null {
-  if (!dueAt) return null;
-  const remainingMs = new Date(dueAt).getTime() - new Date(serverNow).getTime();
+/** Longest the auto-submit waits for in-flight autosaves before submitting anyway. */
+const AUTO_SUBMIT_SAVE_WAIT_MS = 5_000;
+
+export function formatRemaining(remainingMs: number): string {
   if (remainingMs <= 0) return "00:00";
   const totalSeconds = Math.floor(remainingMs / 1000);
   const minutes = Math.floor(totalSeconds / 60);
@@ -38,28 +39,46 @@ export function AttemptRunner({ initialAttempt }: AttemptRunnerProps) {
   const [autosaveState, setAutosaveState] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [serverOffsetMs, setServerOffsetMs] = useState(
-    new Date(initialAttempt.serverNow).getTime() - Date.now(),
+  // Server clock minus client clock, measured once when the attempt payload arrives. Audit
+  // finding H1: this used to be recomputed every second against the same `serverNow`, which
+  // pinned "now" to the moment the page loaded, so the countdown never moved.
+  const serverOffsetMs = useMemo(
+    () => new Date(attempt.serverNow).getTime() - Date.now(),
+    [attempt.serverNow],
   );
+  const [clientNowMs, setClientNowMs] = useState(() => Date.now());
   const itemStartedAtRef = useRef<Map<string, number>>(new Map());
   const attemptStartedRef = useRef(false);
+  const pendingSavesRef = useRef<Set<Promise<void>>>(new Set());
+  const autoSubmitStartedRef = useRef(false);
 
   const activeItem: RunnerItem | undefined = attempt.items[activeIndex];
   const activeVisual = getItemTypeVisual(activeItem?.itemTypeKey ?? "mcq_single");
 
-  const timerLabel = useMemo(() => {
-    const now = new Date(Date.now() + serverOffsetMs).toISOString();
-    return formatRemaining(now, attempt.dueAt);
-  }, [attempt.dueAt, serverOffsetMs, autosaveState]);
+  const remainingMs = attempt.dueAt
+    ? new Date(attempt.dueAt).getTime() - (clientNowMs + serverOffsetMs)
+    : null;
+  const timeUp = remainingMs != null && remainingMs <= 0;
+  const timerLabel = remainingMs != null ? formatRemaining(remainingMs) : null;
 
   useEffect(() => {
+    if (!attempt.dueAt) return;
     const interval = window.setInterval(() => {
-      setServerOffsetMs(new Date(attempt.serverNow).getTime() - Date.now());
+      setClientNowMs(Date.now());
     }, 1000);
     return () => {
       window.clearInterval(interval);
     };
-  }, [attempt.serverNow]);
+  }, [attempt.dueAt]);
+
+  // At 00:00, submit what has been saved. The server grades saved answers even when this request
+  // lands after the deadline, and a worker closes the attempt if the request never arrives.
+  useEffect(() => {
+    if (!timeUp || autoSubmitStartedRef.current) return;
+    autoSubmitStartedRef.current = true;
+    void submitAttempt({ auto: true });
+    // Runs once, at expiry; the ref above guards against a second submit.
+  }, [timeUp]);
 
   useEffect(() => {
     if (attemptStartedRef.current) return;
@@ -93,7 +112,7 @@ export function AttemptRunner({ initialAttempt }: AttemptRunnerProps) {
     });
   }, [attempt.id, attempt.l1ProctoringEnabled, attempt.proctoringLevel]);
 
-  async function saveAnswer(item: RunnerItem, answerJson: Record<string, unknown>) {
+  async function saveAnswerNow(item: RunnerItem, answerJson: Record<string, unknown>) {
     setAutosaveState("saving");
     const startedAt = itemStartedAtRef.current.get(item.assessmentItemId) ?? Date.now();
     const latencyMs = Math.max(0, Date.now() - startedAt);
@@ -104,6 +123,7 @@ export function AttemptRunner({ initialAttempt }: AttemptRunnerProps) {
         `/api/v1/attempts/${attempt.id}/answers`,
         { itemId: item.itemId, answerJson: answerWithLatency },
         `attempt-answer-${item.assessmentItemId}`,
+        { silent: true },
       );
       setAttempt((current) => ({
         ...current,
@@ -119,24 +139,58 @@ export function AttemptRunner({ initialAttempt }: AttemptRunnerProps) {
     }
   }
 
-  async function handleSubmit() {
-    if (!window.confirm("Submit attempt? You cannot change answers after submission.")) return;
+  function saveAnswer(item: RunnerItem, answerJson: Record<string, unknown>) {
+    // Answers are locked once time is up; the auto-submit is already grading what was saved.
+    if (timeUp) return;
+    const pending = saveAnswerNow(item, answerJson);
+    pendingSavesRef.current.add(pending);
+    void pending.finally(() => {
+      pendingSavesRef.current.delete(pending);
+    });
+  }
+
+  /** Lets autosaves that were in flight at 00:00 land before submitting, without waiting forever. */
+  async function waitForPendingSaves() {
+    const pending = [...pendingSavesRef.current];
+    if (pending.length === 0) return;
+    await Promise.race([
+      Promise.allSettled(pending),
+      new Promise((resolve) => window.setTimeout(resolve, AUTO_SUBMIT_SAVE_WAIT_MS)),
+    ]);
+  }
+
+  async function submitAttempt({ auto }: { auto: boolean }) {
     setSubmitting(true);
     setError(null);
     try {
-      await clientApi.post(`/api/v1/attempts/${attempt.id}/submit`, {}, "attempt-submit");
+      await waitForPendingSaves();
+      await clientApi.post(`/api/v1/attempts/${attempt.id}/submit`, {}, "attempt-submit", {
+        silent: true,
+      });
       captureProductEvent("assessment_submitted", {
         routeGroup: "learner",
         source: "attempt_runner",
-        outcome: "submitted",
+        outcome: auto ? "auto_submitted" : "submitted",
       });
       router.push(`/attempts/${attempt.id}/result`);
       router.refresh();
     } catch (err) {
-      setError(err instanceof ClientApiError ? err.message : "Submit failed.");
+      const reason = err instanceof ClientApiError ? err.message : "Submit failed.";
+      setError(
+        auto
+          ? `${reason} Your saved answers will still be graded automatically; you can retry below.`
+          : reason,
+      );
     } finally {
       setSubmitting(false);
     }
+  }
+
+  async function handleSubmit() {
+    if (!timeUp && !window.confirm("Submit attempt? You cannot change answers after submission.")) {
+      return;
+    }
+    await submitAttempt({ auto: false });
   }
 
   return (
@@ -172,6 +226,15 @@ export function AttemptRunner({ initialAttempt }: AttemptRunnerProps) {
           </p>
         </div>
       </header>
+
+      {timeUp ? (
+        <p
+          role="status"
+          className="rounded-xl border border-[color-mix(in_srgb,var(--admin-warning)_35%,var(--admin-border))] bg-[color-mix(in_srgb,var(--admin-warning)_10%,var(--admin-surface))] p-3 text-sm text-[var(--admin-warning)]"
+        >
+          Time is up. Your saved answers are being submitted; further changes are not saved.
+        </p>
+      ) : null}
 
       {attempt.secureMode ? (
         <p className="rounded-xl border border-[color-mix(in_srgb,var(--admin-warning)_35%,var(--admin-border))] bg-[color-mix(in_srgb,var(--admin-warning)_10%,var(--admin-surface))] p-3 text-sm text-[var(--admin-warning)]">
@@ -211,9 +274,10 @@ export function AttemptRunner({ initialAttempt }: AttemptRunnerProps) {
                 }))}
                 onAnswerChange={(answerJson) => {
                   if (!answerJson) return;
-                  void saveAnswer(activeItem, answerJson);
+                  saveAnswer(activeItem, answerJson);
                 }}
                 mode="attempt"
+                disabled={timeUp}
                 showStem={activeItem.itemTypeKey !== "swipe"}
               />
             </>

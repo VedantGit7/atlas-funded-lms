@@ -341,6 +341,16 @@ export const marketingWorkflowRepository = {
     `;
   },
 
+  async hasEmailReceipt(tx: TenantTx, runId: string, nodeId: string): Promise<boolean> {
+    const rows = await tx.$queryRaw<Array<{ id: string }>>`
+      select id::text from marketing_workflow_run_logs
+      where tenant_id = app.current_tenant_id()
+        and run_id = ${runId}::uuid and node_id = ${nodeId} and status = 'SENT'
+      limit 1
+    `;
+    return rows.length > 0;
+  },
+
   async insertLog(
     tx: TenantTx,
     args: {

@@ -2,6 +2,7 @@ import type { ResourceRef } from "./types";
 
 export type RateLimitBucket =
   | "publicRead"
+  | "cspReport"
   | "publicAuth"
   | "publicInvitationAccept"
   | "publicDiagnostic"

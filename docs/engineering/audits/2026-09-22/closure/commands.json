@@ -1,0 +1,61 @@
+{
+  "runtime": "Node24.11.1; pnpm11.6.0; Windows host; local PostgreSQL17; Linux Chromium Playwright1.61.0",
+  "execution": "Commands executed directly using the installed Node binary. Secrets and ephemeral passwords deliberately omitted.",
+  "commands": [
+    {
+      "name": "offline",
+      "command": "node node_modules/vitest/vitest.mjs run tests/unit tests/security tests/lint-rules --maxWorkers=2 --reporter=json"
+    },
+    {
+      "name": "database",
+      "command": "node node_modules/vitest/vitest.mjs run tests/integration tests/db tests/authorization tests/api tests/ci tests/tenant-isolation tests/e2e tests/events --maxWorkers=2 --reporter=json",
+      "environment": "F20 marked loopback15445/atlas_lms_test, dedicated cleanup role, opt-in and per-run ownership; dedicated Fxx suites rerun with maxWorkers1 and matching targetURLs"
+    },
+    {
+      "name": "static",
+      "command": "See static-checks.json, static-final.json and individual guard logs"
+    },
+    {
+      "name": "lint",
+      "command": "node scripts/ci/run-lint.mjs; then node node_modules/eslint/bin/eslint.js deploy tests/unit/reports/export-cleanup-service.test.ts tests/unit/reports/report-artifact-retention.test.ts --max-warnings=0"
+    },
+    {
+      "name": "typecheck",
+      "command": "node node_modules/typescript/bin/tsc -b --pretty false; node node_modules/typescript/bin/tsc -p deploy/managed-node/tsconfig.json --pretty false"
+    },
+    {
+      "name": "format",
+      "command": "node node_modules/prettier/bin/prettier.cjs . --check"
+    },
+    {
+      "name": "architecture",
+      "command": "node --test scripts/guards/server-authority.test.mjs scripts/sync-contracts.test.mjs scripts/guards/generated-output.test.mjs scripts/guards/check-secrets.test.mjs scripts/db/test-cleanup-boundary.test.mjs"
+    },
+    {
+      "name": "performance-tooling",
+      "command": "node --test scripts/perf/*.test.mjs tests/performance/*.test.mjs"
+    },
+    {
+      "name": "dependency-audit",
+      "command": "pnpm audit --json; pnpm audit --prod --json"
+    },
+    {
+      "name": "build-browser",
+      "command": "See build-browser-verification.md and build-browser-manifest.json; supported sanitized local harness, no production endpoints or customer accounts"
+    },
+    {
+      "name": "learner-budget",
+      "command": "ATLAS_PERF_BUILD=1 node scripts/ci/check-learner-bundle-boundary.mjs"
+    },
+    {
+      "name": "database-guards",
+      "command": "node node_modules/tsx/dist/cli.mjs scripts/check-rls-state.ts; scripts/check-tenant-leading-indexes.ts; scripts/check-append-only-trigger-coverage.ts",
+      "environment": "disposable target; final RLS run uses restricted app login and REQUIRE_NON_SUPERUSER_DB=1"
+    },
+    {
+      "name": "local-migration-status",
+      "command": "node node_modules/prisma/build/index.js migrate status --config backend/prisma.config.ts",
+      "environment": "reviewed local dev owner URL, not a hosted database"
+    }
+  ]
+}

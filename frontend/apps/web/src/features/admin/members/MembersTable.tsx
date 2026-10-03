@@ -168,8 +168,8 @@ function formatLastActive(iso: string | null | undefined): string {
 }
 
 const presenceDotClass: Record<Exclude<Presence, "offline">, string> = {
-  online: "bg-emerald-500 shadow-[0_0_0_3px_rgba(16,185,129,0.25)]",
-  idle: "bg-amber-500",
+  online: "bg-success shadow-[0_0_0_3px_rgba(16,185,129,0.25)]",
+  idle: "bg-warning",
 };
 
 function hasValidTimestamp(iso: string | null | undefined): boolean {

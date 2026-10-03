@@ -88,7 +88,7 @@ function DomainCard({
       <p className="mt-1 text-[12px] leading-relaxed text-[var(--admin-on-surface-variant)]">
         {description}
       </p>
-      <div className="mt-4 flex items-center justify-between border-t border-[var(--admin-border)] pt-3 text-[11px] text-[var(--admin-outline)]">
+      <div className="mt-4 flex items-center justify-between border-t border-[var(--admin-border)] pt-3 text-[11px] text-[var(--admin-on-surface-variant)]">
         <span className={monoClassName}>{footer}</span>
         {onClick ? <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" /> : null}
       </div>
@@ -178,7 +178,9 @@ export function GamificationOverviewPanel({
             </div>
             <div className="text-center">
               <p className="text-sm font-bold">Experience (XP)</p>
-              <p className="text-[11px] text-[var(--admin-outline)]">Accumulation layer</p>
+              <p className="text-[11px] text-[var(--admin-on-surface-variant)]">
+                Accumulation layer
+              </p>
             </div>
           </div>
 
@@ -193,7 +195,7 @@ export function GamificationOverviewPanel({
             </div>
             <div className="text-center">
               <p className="text-sm font-bold">Leaderboards</p>
-              <p className="text-[11px] text-[var(--admin-outline)]">Ranking logic</p>
+              <p className="text-[11px] text-[var(--admin-on-surface-variant)]">Ranking logic</p>
             </div>
           </div>
         </div>
@@ -214,7 +216,7 @@ export function GamificationOverviewPanel({
               <Medal className="h-7 w-7 text-[var(--admin-warning)]" aria-hidden="true" />
             </div>
             <p className="text-sm font-bold">Badges</p>
-            <p className="text-[11px] text-[var(--admin-outline)]">Achievement layer</p>
+            <p className="text-[11px] text-[var(--admin-on-surface-variant)]">Achievement layer</p>
           </div>
           <FlowConnector label="Feeds" />
           <div className="flex flex-col items-center gap-2">
@@ -222,7 +224,7 @@ export function GamificationOverviewPanel({
               <Coins className="h-8 w-8 text-[var(--admin-warning)]" aria-hidden="true" />
             </div>
             <p className="text-sm font-bold">Recognition</p>
-            <p className="text-[11px] text-[var(--admin-outline)]">Hall of fame</p>
+            <p className="text-[11px] text-[var(--admin-on-surface-variant)]">Hall of fame</p>
             <Link
               href="/hall-of-fame"
               className="mt-1 inline-flex items-center gap-1 text-[10px] font-semibold text-[var(--admin-primary)] hover:underline"
@@ -242,7 +244,7 @@ export function GamificationOverviewPanel({
               />
             </div>
             <p className="text-sm font-bold">Rewards shop</p>
-            <p className="text-[11px] text-[var(--admin-outline)]">Currency & catalog</p>
+            <p className="text-[11px] text-[var(--admin-on-surface-variant)]">Currency & catalog</p>
           </div>
         </div>
       </section>

@@ -506,7 +506,7 @@ function AddOverrideModal({
           <div className="flex flex-col gap-2">
             <label className="text-[12px] font-semibold tracking-[0.06em] text-[var(--admin-on-surface-variant)] uppercase">
               Override expiry{" "}
-              <span className="ml-1 font-mono text-[11px] font-normal normal-case text-[var(--admin-outline)]">
+              <span className="ml-1 font-mono text-[11px] font-normal normal-case text-[var(--admin-on-surface-variant)]">
                 (Optional)
               </span>
             </label>
@@ -1228,7 +1228,7 @@ export function AdminActiveDevicesPoliciesPage() {
                             type="button"
                             aria-label="Copy fingerprint"
                             onClick={() => void copyFingerprint(item)}
-                            className="text-[var(--admin-outline)] opacity-0 transition-opacity group-hover:opacity-100 hover:text-[var(--admin-primary)]"
+                            className="text-[var(--admin-on-surface-variant)] opacity-0 transition-opacity group-hover:opacity-100 hover:text-[var(--admin-primary)]"
                           >
                             {copiedId === item.id ? (
                               <Check className="h-3.5 w-3.5" aria-hidden="true" />
@@ -1358,7 +1358,7 @@ export function AdminActiveDevicesPoliciesPage() {
                         {item.updatedByLabel ?? "System"}
                       </td>
                       <td className="px-4 py-1 text-right">
-                        <div className="flex items-center justify-end gap-2 text-[var(--admin-outline)]">
+                        <div className="flex items-center justify-end gap-2 text-[var(--admin-on-surface-variant)]">
                           <button
                             type="button"
                             aria-label={`Delete override for ${item.scopeLabel}`}

@@ -63,13 +63,13 @@ export function SupportSessionPanel() {
     <PlatformReasonGate ready={isValid}>
       <section className="space-y-4">
         <h1 className="text-2xl font-semibold">Support sessions</h1>
-        <p className="text-sm opacity-70">
+        <p className="text-sm text-muted-foreground">
           Reason-bound, time-boxed read-biased tenant scope. No tenant application link or
           cross-tenant standing access.
         </p>
 
         {error ? (
-          <p role="alert" className="text-sm text-red-700">
+          <p role="alert" className="text-sm text-destructive">
             {error}
           </p>
         ) : null}
@@ -84,7 +84,7 @@ export function SupportSessionPanel() {
           <label className="block text-sm">
             Target tenant ID
             <input
-              className="mt-1 rounded border px-3 py-2"
+              className="mt-1 rounded border border-input bg-background text-foreground px-3 py-2"
               value={tenantId}
               onChange={(event) => {
                 setTenantId(event.target.value);
@@ -92,14 +92,17 @@ export function SupportSessionPanel() {
               required
             />
           </label>
-          <button type="submit" className="rounded bg-neutral-900 px-3 py-2 text-sm text-white">
+          <button
+            type="submit"
+            className="rounded bg-primary px-3 py-2 text-sm text-primary-foreground hover:opacity-90"
+          >
             Open support session
           </button>
         </form>
 
         <table className="w-full border-collapse text-sm">
           <thead>
-            <tr className="border-b text-left">
+            <tr className="border-b border-border text-left">
               <th className="py-2 pr-4">Tenant</th>
               <th className="py-2 pr-4">Session</th>
               <th className="py-2">Expires</th>
@@ -107,10 +110,10 @@ export function SupportSessionPanel() {
           </thead>
           <tbody>
             {sessions.map((session) => (
-              <tr key={session.sessionId} className="border-b">
+              <tr key={session.sessionId} className="border-b border-border">
                 <td className="py-2 pr-4">
                   {session.tenantDisplayName}
-                  <div className="text-xs opacity-70">{session.tenantSlug}</div>
+                  <div className="text-xs text-muted-foreground">{session.tenantSlug}</div>
                 </td>
                 <td className="py-2 pr-4">{session.sessionId.slice(0, 8)}</td>
                 <td className="py-2">{new Date(session.expiresAt).toLocaleString()}</td>

@@ -1,0 +1,42 @@
+[
+  {
+    "script": "scripts/guards/check-route-metadata.mjs",
+    "exitCode": 0,
+    "output": ""
+  },
+  {
+    "script": "scripts/guards/check-prisma-boundary.mjs",
+    "exitCode": 0,
+    "output": ""
+  },
+  {
+    "script": "scripts/guards/check-audit-compliance.mjs",
+    "exitCode": 0,
+    "output": "check-audit-compliance: OK (2450 files scanned).\n"
+  },
+  {
+    "script": "scripts/guards/check-outbox-compliance.mjs",
+    "exitCode": 0,
+    "output": ""
+  },
+  {
+    "script": "scripts/guards/check-outbox-worker-coverage.mjs",
+    "exitCode": 0,
+    "output": "check-outbox-worker-coverage: OK (10 processors registered).\n"
+  },
+  {
+    "script": "scripts/guards/check-secrets.mjs",
+    "exitCode": 0,
+    "output": ""
+  },
+  {
+    "script": "scripts/db/check-no-session-tenant-set.mjs",
+    "exitCode": 0,
+    "output": ""
+  },
+  {
+    "script": "scripts/db/check-sql-approved-paths.mjs",
+    "exitCode": 0,
+    "output": ""
+  }
+]

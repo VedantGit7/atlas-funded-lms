@@ -60,7 +60,7 @@ export function BiExportPanel() {
         Request a CSV or JSONL snapshot of an approved dataset to R2 for downstream BI tools.
       </p>
 
-      {error ? <p className="mt-3 text-sm text-red-600">{error}</p> : null}
+      {error ? <p className="mt-3 text-sm text-destructive-text">{error}</p> : null}
 
       <div className="mt-4 flex flex-col gap-4 lg:flex-row lg:items-end">
         <label className="block min-w-[220px] text-sm">

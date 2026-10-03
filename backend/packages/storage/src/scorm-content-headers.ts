@@ -35,6 +35,9 @@ export function scormContentSecurityHeaders(): Record<string, string> {
       "media-src 'self' data: blob:",
       "frame-ancestors 'self'",
     ].join("; "),
+    // Permit the learner player to embed the package. Both Next apps must also
+    // exempt this route from global DENY/CSP headers, which Next applies first.
+    "x-frame-options": "SAMEORIGIN",
     // Never let the browser second-guess the declared type.
     "x-content-type-options": "nosniff",
     // Do not leak the tenant URL to anything the package contacts.

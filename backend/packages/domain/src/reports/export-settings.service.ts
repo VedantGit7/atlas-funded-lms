@@ -91,7 +91,7 @@ function summarizeAudit(action: string, metadata: unknown): string {
   const summary = typeof meta["summary"] === "string" ? meta["summary"] : null;
   if (summary) return summary;
   if (action === "reports.export_settings.updated") return "Export settings updated";
-  if (action === "reports.export_settings.purged") return "Expired export files purged";
+  if (action === "reports.export_settings.purged") return "Expired export file deletion requested";
   return action.replace(/^reports\.export_settings\./, "").replaceAll("_", " ");
 }
 
@@ -190,7 +190,7 @@ export async function updateExportSettings(
     retentionMs(after.fileRetentionValue, after.fileRetentionUnit) <
     retentionMs(before.fileRetentionValue, before.fileRetentionUnit);
 
-  let purgedByRetention = 0;
+  let queuedByRetention = 0;
   if (reducingRetention) {
     const cutoff = retentionCutoff(after.fileRetentionValue, after.fileRetentionUnit);
     const impactCount = await exportSettingsRepository.countFilesOutsideRetention(tx, cutoff);
@@ -198,12 +198,16 @@ export async function updateExportSettings(
       throw new AtlasHttpError({
         code: "VALIDATION_ERROR",
         status: 400,
-        message: `Reducing retention would delete ${impactCount} file(s) immediately. Confirm acknowledgement to continue.`,
+        message: `Reducing retention would queue ${impactCount} file(s) for deletion. Confirm acknowledgement to continue.`,
       });
     }
     if (impactCount > 0 && body.acknowledgeRetentionPurge) {
-      purgedByRetention = await exportSettingsRepository.purgeFilesOlderThan(tx, cutoff);
+      queuedByRetention = await exportSettingsRepository.purgeFilesOlderThan(tx, cutoff);
     }
+    await exportSettingsRepository.shortenFileRetention(
+      tx,
+      retentionMs(after.fileRetentionValue, after.fileRetentionUnit),
+    );
   }
 
   await exportSettingsRepository.upsert(tx, after, ctx.actorMembershipId);
@@ -225,7 +229,7 @@ export async function updateExportSettings(
       reason: null,
       metadata: {
         summary,
-        purgedByRetention,
+        queuedByRetention,
       },
     },
   );
@@ -257,8 +261,9 @@ export async function getRetentionImpact(
 }
 
 export async function purgeExpiredExportFiles(tx: TenantTx, ctx: ServiceCtx) {
-  const deletedCount = await exportSettingsRepository.purgeExpiredFiles(tx);
-  const estimatedBytesFreed = estimateBytes(deletedCount);
+  const queuedCount = await exportSettingsRepository.purgeExpiredFiles(tx);
+  const deletedCount = 0;
+  const estimatedBytesFreed = 0;
 
   await auditWriter.write(
     tx,
@@ -269,18 +274,18 @@ export async function purgeExpiredExportFiles(tx: TenantTx, ctx: ServiceCtx) {
       requestId: ctx.requestId,
     },
     {
-      action: "reports.export_settings.purged",
+      action: "reports.export_settings.purge_requested",
       target: { type: "report_export_settings", id: ctx.tenantId },
       before: null,
-      after: { deletedCount, estimatedBytesFreed },
+      after: { queuedCount, deletedCount, estimatedBytesFreed },
       reason: null,
       metadata: {
-        summary: `Deleted ${deletedCount} expired export file(s)`,
+        summary: `Queued ${queuedCount} expired export file(s) for deletion`,
       },
     },
   );
 
   return purgeExpiredResponseSchema.parse({
-    data: { deletedCount, estimatedBytesFreed },
+    data: { queuedCount, deletedCount, estimatedBytesFreed },
   });
 }

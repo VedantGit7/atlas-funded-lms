@@ -1,11 +1,14 @@
 import type { ApprovedPostHogEvent } from "./taxonomy";
-import { captureServerPostHogEvent } from "./server";
+import { captureServerPostHogEventImmediate } from "./server";
 import { actorSafeId, tenantSafeId } from "../safe-identifiers";
 
 type OutboxHandler = {
   destinationKey: string;
+  retryOnCrash?: boolean;
   handle: (event: {
     id: string;
+    idempotencyKey: string;
+    attempt: number;
     eventType: string;
     tenantId: string | null;
     payload: unknown;
@@ -34,13 +37,14 @@ export function mapOutboxEventToPostHog(eventType: string): ApprovedPostHogEvent
   return OUTBOX_TO_POSTHOG[eventType] ?? null;
 }
 
-export function captureOutboxConfirmedPostHogEvent(args: {
+export async function captureOutboxConfirmedPostHogEvent(args: {
+  eventId?: string;
   eventType: string;
   tenantId: string | null;
   actorMembershipId?: string | null;
   actorPlane?: "tenant" | "platform" | "public";
   properties?: Record<string, unknown>;
-}): void {
+}): Promise<void> {
   const mapped = mapOutboxEventToPostHog(args.eventType);
   if (!mapped) {
     return;
@@ -50,8 +54,9 @@ export function captureOutboxConfirmedPostHogEvent(args: {
   const safeActor = actorSafeId(args.actorMembershipId ?? undefined);
   const distinctId = safeActor ?? safeTenant ?? "anonymous";
 
-  captureServerPostHogEvent({
+  await captureServerPostHogEventImmediate({
     event: mapped,
+    ...(args.eventId ? { uuid: args.eventId } : {}),
     distinctId,
     properties: {
       tenantSafeId: safeTenant,
@@ -66,6 +71,8 @@ export function captureOutboxConfirmedPostHogEvent(args: {
 export function withPostHogProductHandlers(
   handlers: Record<string, OutboxHandler[]>,
 ): Record<string, OutboxHandler[]> {
+  // Disabled optional analytics does not create falsely successful deliveries.
+  if (!process.env["POSTHOG_SERVER_KEY"]?.trim()) return handlers;
   const posthogHandler = createPostHogOutboxHandler();
 
   for (const eventType of POSTHOG_OUTBOX_EVENT_TYPES) {
@@ -78,13 +85,13 @@ export function withPostHogProductHandlers(
 export function createPostHogOutboxHandler(): OutboxHandler {
   return {
     destinationKey: POSTHOG_OUTBOX_DESTINATION_KEY,
-    handle: (event) => {
-      captureOutboxConfirmedPostHogEvent({
+    handle: async (event) => {
+      await captureOutboxConfirmedPostHogEvent({
+        eventId: event.id,
         eventType: event.eventType,
         tenantId: event.tenantId,
         actorPlane: event.tenantId ? "tenant" : "platform",
       });
-      return Promise.resolve();
     },
   };
 }

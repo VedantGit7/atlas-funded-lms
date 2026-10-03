@@ -1,4 +1,5 @@
 import { after } from "next/server";
+import { isDeployedRuntime } from "@atlas/core/config/runtime-environment";
 import {
   REPORT_GENERATE_REQUESTED_EVENT,
   reportGenerateRequestedPayloadSchema,
@@ -18,8 +19,11 @@ export function schedulePaymentExportProcessing(args: {
   format: "csv" | "xlsx" | "pdf" | "json";
   requestedAt: string;
 }): void {
+  // The request transaction already published the generation event. The managed
+  // worker owns deployed processing, so request termination cannot orphan work.
+  if (isDeployedRuntime()) return;
   after(() => {
-    void (async () => {
+    return (async () => {
       const payload = reportGenerateRequestedPayloadSchema.parse({
         reportRunId: args.reportRunId,
         reportDefinitionKey: "payments",

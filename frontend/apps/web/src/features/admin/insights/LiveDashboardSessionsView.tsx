@@ -512,8 +512,10 @@ function SessionRow({
       <td className="px-4 text-right">
         {session.attendanceRate == null ? (
           <div>
-            <div className="font-data text-sm text-[var(--admin-outline)]">-</div>
-            <div className="text-[10px] text-[var(--admin-outline)]">No roster recorded</div>
+            <div className="font-data text-sm text-[var(--admin-on-surface-variant)]">-</div>
+            <div className="text-[10px] text-[var(--admin-on-surface-variant)]">
+              No roster recorded
+            </div>
           </div>
         ) : (
           <div>
@@ -595,7 +597,7 @@ function TurnoutHistogram({ board }: { board: InsightLiveSessionsBoard }) {
 
       <div className="relative flex h-48 w-full items-end gap-1 border-b border-[var(--admin-border)] pb-1">
         <div className="pointer-events-none absolute inset-y-0 left-1/2 z-[1] w-px border-l-2 border-dashed border-[var(--admin-outline)]">
-          <span className="absolute -top-6 left-1/2 -translate-x-1/2 whitespace-nowrap bg-[var(--admin-surface)] px-1 text-[10px] text-[var(--admin-outline)]">
+          <span className="absolute -top-6 left-1/2 -translate-x-1/2 whitespace-nowrap bg-[var(--admin-surface)] px-1 text-[10px] text-[var(--admin-on-surface-variant)]">
             Low attendance threshold
           </span>
         </div>
@@ -615,7 +617,7 @@ function TurnoutHistogram({ board }: { board: InsightLiveSessionsBoard }) {
           );
         })}
       </div>
-      <div className="mt-2 flex justify-between text-[10px] text-[var(--admin-outline)]">
+      <div className="mt-2 flex justify-between text-[10px] text-[var(--admin-on-surface-variant)]">
         <span>0%</span>
         <span>25%</span>
         <span>50%</span>
@@ -726,7 +728,7 @@ export function LiveDashboardSessionsView({
             >
               Admin
             </Link>
-            <span className="text-[var(--admin-outline)]">/</span>
+            <span className="text-[var(--admin-on-surface-variant)]">/</span>
             <Link
               href={adminInsightHref(slug)}
               prefetch={false}
@@ -734,7 +736,7 @@ export function LiveDashboardSessionsView({
             >
               {sectionTitle}
             </Link>
-            <span className="text-[var(--admin-outline)]">/</span>
+            <span className="text-[var(--admin-on-surface-variant)]">/</span>
             <Link
               href={adminInsightSessionsHref(slug)}
               prefetch={false}
@@ -747,7 +749,7 @@ export function LiveDashboardSessionsView({
           <p className={insightPageDescClassName}>
             Every session in the window, with turnout and watch time.
           </p>
-          <p className="mt-1 text-xs text-[var(--admin-outline)]">
+          <p className="mt-1 text-xs text-[var(--admin-on-surface-variant)]">
             {board?.caveat ?? "Per-session analytics and comparison live in Live Class Attendance."}
           </p>
         </div>
@@ -925,7 +927,7 @@ export function LiveDashboardSessionsView({
                           setSearchDraft(event.target.value);
                         }}
                         placeholder="Search session title"
-                        className="w-full rounded border border-[var(--admin-outline)] bg-[var(--admin-surface)] py-1.5 pl-9 pr-3 text-sm text-[var(--admin-on-surface)] outline-none transition-[border-color,box-shadow] placeholder:text-[var(--admin-outline)] focus:border-[var(--admin-primary)] focus:ring-1 focus:ring-[var(--admin-primary)]"
+                        className="w-full rounded border border-[var(--admin-outline)] bg-[var(--admin-surface)] py-1.5 pl-9 pr-3 text-sm text-[var(--admin-on-surface)] outline-none transition-[border-color,box-shadow] placeholder:text-[var(--admin-on-surface-variant)] focus:border-[var(--admin-primary)] focus:ring-1 focus:ring-[var(--admin-primary)]"
                       />
                     </div>
                     <FilterDropdown

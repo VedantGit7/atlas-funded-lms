@@ -26,6 +26,15 @@
   --destructive-foreground: #ffffff;
   --success: #16a34a;
   --warning: #d97706;
+  /* Text on a success/warning fill. Dark in both modes: white on #16a34a is
+     3.3:1 (fails AA), and the dark-mode fills below are pastel. */
+  --success-foreground: #052e16;
+  --warning-foreground: #1c1002;
+  /* Status colour as text, including on its own 15% tint (badges, banners),
+     where the fills above fall under 4.5:1. */
+  --destructive-text: #b91c1c;
+  --success-text: #166534;
+  --warning-text: #92400e;
 
   /* League tier accents (gamification). Metallic hues tuned to read on the
      light surface; the dark block re-tunes them for the dark chassis. */
@@ -78,6 +87,11 @@
   --destructive-foreground: #0a0a0a;
   --success: #4ade80;
   --warning: #fbbf24;
+  --success-foreground: #052e16;
+  --warning-foreground: #1c1002;
+  --destructive-text: #fca5a5;
+  --success-text: #86efac;
+  --warning-text: #fcd34d;
 
   --league-gold: #eab308;
   --league-silver: #c7ccd4;
@@ -112,6 +126,23 @@
   --foreground: var(--card-foreground);
 }
 
+/* Tailwind v4 draws a border with no colour utility in currentColor -- the
+   text colour, so near-black in light mode and near-white in dark. The v3
+   default was a neutral grey, and much of this app was written against it:
+   ~170 bare `border` / `border-b` classes rendered as harsh text-coloured lines
+   in dark mode. This restores a themed default, as Tailwind's v4 upgrade guide
+   recommends. It is in the base layer, so every explicit border-* utility still
+   wins. */
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--border);
+  }
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -125,7 +156,12 @@
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
   --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-destructive-text: var(--destructive-text);
+  --color-success-text: var(--success-text);
+  --color-warning-text: var(--warning-text);
   --color-brand-primary: var(--brand-primary);
   --color-brand-accent: var(--brand-accent);
   --color-brand-header: var(--brand-header);
@@ -517,6 +553,11 @@ body {
   --admin-success: #15803d;
   --admin-warning: #b45309;
   --admin-danger: #dc2626;
+  /* Text on a success/warning/danger fill. White here (>= 4.8:1 on each); dark
+     in dark mode, where the fills are pastel and white fails. */
+  --admin-on-success: #ffffff;
+  --admin-on-warning: #ffffff;
+  --admin-on-danger: #ffffff;
   /* Lesson-type accent tokens (icon + selected card tint). */
   --admin-lesson-video: #16a34a;
   --admin-lesson-audio: #ea580c;
@@ -527,6 +568,11 @@ body {
   --admin-lesson-scorm: #0284c7;
   --admin-lesson-quiz: #7c3aed;
   --admin-lesson-assignment: #1d4ed8;
+  /* Log / code blocks: a terminal-style surface, dark in both modes. It was
+     written as on-surface mixed with black, which is near-black in light mode
+     and near-white in dark -- where its light green text then sat at 1.1:1. */
+  --admin-code-bg: #111018;
+  --admin-code-fg: #b7f5c6;
   /* Drawer/modal scrim stays dark in both modes (darkens content behind). */
   --admin-scrim: rgb(0 0 0 / 0.6);
   /* Certificate artifact "paper": stays a fixed light surface in both app  */
@@ -554,20 +600,25 @@ body {
   --admin-surface-variant: #2a283e;
   --admin-border: #2a283e;
   --admin-outline: #464553;
-  /* Indigo 500 (#6366f1) carries white --admin-on-primary at 4.47:1, just
-     under AA. Darkened until it clears with margin (4.88) rather than nudged
-     until the checker stops complaining; still visibly distinct from
-     --admin-primary-strong, which paints the hover state. */
-  --admin-primary: #5b5ef0;
-  --admin-primary-strong: #4f46e5;
+  /* Dark mode follows the usual dark-theme pairing: a light primary with a
+     dark --admin-on-primary. The light-mode value (#5b5ef0) is 3.3-3.9:1 as
+     text on these dark surfaces, and --admin-primary is text in some 1,700
+     places (links, labels, icons), so keeping it made the admin area fail AA
+     wherever it said anything in the accent colour. Fills pair with
+     --admin-on-primary and stay readable: #1e1b4b on #a5b4fc is 8.0:1. */
+  --admin-primary: #a5b4fc;
+  --admin-primary-strong: #c7d2fe;
   --admin-primary-container: #3730a3;
-  --admin-on-primary: #ffffff;
+  --admin-on-primary: #1e1b4b;
   --admin-on-primary-container: #e0e7ff;
   --admin-on-surface: #f7efea;
   --admin-on-surface-variant: #c8c4d5;
   --admin-success: #62df7d;
   --admin-warning: #e6c364;
   --admin-danger: #ff8a80;
+  --admin-on-success: #1b1924;
+  --admin-on-warning: #1b1924;
+  --admin-on-danger: #1b1924;
   --admin-lesson-video: #4ade80;
   --admin-lesson-audio: #fb923c;
   --admin-lesson-pdf: #f87171;

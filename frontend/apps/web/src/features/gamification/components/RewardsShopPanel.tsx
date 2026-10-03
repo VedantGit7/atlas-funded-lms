@@ -400,7 +400,7 @@ export function RewardsShopPanel({
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-semibold text-[var(--admin-on-surface)]">
                       {item.name}
-                      <span className="ml-2 text-xs font-normal text-[var(--admin-outline)]">
+                      <span className="ml-2 text-xs font-normal text-[var(--admin-on-surface-variant)]">
                         {item.key}
                       </span>
                     </p>

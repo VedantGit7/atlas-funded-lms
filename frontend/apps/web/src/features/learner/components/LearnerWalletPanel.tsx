@@ -62,7 +62,7 @@ export function LearnerWalletPanel() {
 
   if (error) {
     return (
-      <p role="alert" className="text-sm text-red-700">
+      <p role="alert" className="text-sm text-destructive-text">
         {error}
       </p>
     );
@@ -112,7 +112,7 @@ export function LearnerWalletPanel() {
         ) : (
           <div className="overflow-x-auto rounded-lg border">
             <table className="min-w-full text-left text-sm">
-              <thead className="bg-slate-50 text-xs uppercase tracking-wide opacity-70">
+              <thead className="bg-muted/50 text-xs uppercase tracking-wide opacity-70">
                 <tr>
                   <th className="px-3 py-2">When</th>
                   <th className="px-3 py-2">Type</th>

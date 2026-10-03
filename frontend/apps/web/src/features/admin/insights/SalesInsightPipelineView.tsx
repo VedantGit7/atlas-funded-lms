@@ -718,7 +718,7 @@ export function SalesInsightPipelineView({
                           <Link
                             href={stage.href}
                             prefetch={false}
-                            className="inline-flex rounded p-1 text-[var(--admin-outline)] outline-none hover:text-[var(--admin-primary)] focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]/30"
+                            className="inline-flex rounded p-1 text-[var(--admin-on-surface-variant)] outline-none hover:text-[var(--admin-primary)] focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]/30"
                             aria-label={`Open ${stage.label}`}
                           >
                             <ChevronRight className="h-5 w-5" aria-hidden="true" />

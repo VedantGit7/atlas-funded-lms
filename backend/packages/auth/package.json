@@ -11,6 +11,7 @@
     "./schemas": "./src/schemas.ts",
     "./platform-auth": "./src/platform-auth.ts",
     "./supabase-server": "./src/supabase-server.ts",
+    "./auth-errors": "./src/auth-errors.ts",
     "./platform-operators.repository": "./src/platform-operators.repository.ts",
     "./mfa-enforcement": "./src/mfa-enforcement.ts"
   },
@@ -29,7 +30,7 @@
     "@atlas/core": "workspace:*",
     "@atlas/observability": "workspace:*",
     "@supabase/supabase-js": "^2.108.2",
-    "next": "^16.3.5",
+    "next": "^16.3.7",
     "zod": "^4.4.3"
   },
   "devDependencies": {

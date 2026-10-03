@@ -2,7 +2,7 @@ import type { AuditDbTx } from "@atlas/audit/transaction";
 import { auditWriter } from "@atlas/audit";
 import { assertApprovedEventType } from "../event-types";
 import { findDeadLetterForReplay } from "../repositories/dead-letter.repository";
-import { outbox } from "./outbox.service";
+import { replayDeliveryJob } from "../repositories/outbox-job.repository";
 
 export async function replayDeadLetterEvent(
   tx: AuditDbTx,
@@ -23,6 +23,12 @@ export async function replayDeadLetterEvent(
   }
 
   assertApprovedEventType(deadLetter.event_type);
+  if (!deadLetter.destination_key) throw new Error("DEAD_LETTER_DESTINATION_REQUIRED");
+  await replayDeliveryJob(tx, {
+    deadLetterId: deadLetter.id,
+    outboxEventId: deadLetter.outbox_event_id,
+    destinationKey: deadLetter.destination_key,
+  });
 
   await auditWriter.write(
     tx,
@@ -50,20 +56,7 @@ export async function replayDeadLetterEvent(
     },
   );
 
-  const replay = await outbox.publish(tx, {
-    ctx: {
-      tenantId: deadLetter.tenant_id,
-      actorMembershipId: null,
-      requestId: ctx.requestId,
-    },
-    eventType: deadLetter.event_type,
-    aggregateType: "dead_letter_event",
-    aggregateId: input.deadLetterId,
-    payload: deadLetter.payload_json,
-    idempotencyKey: ctx.idempotencyKey,
-  });
-
   return {
-    replayedOutboxEventId: replay.id,
+    replayedOutboxEventId: deadLetter.outbox_event_id,
   };
 }

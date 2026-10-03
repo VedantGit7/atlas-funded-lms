@@ -12,8 +12,8 @@ import { ReadinessScoreSummary } from "../../../features/readiness/components/Re
 import { ReadinessPageViewTracker } from "../../../features/readiness/components/ReadinessPageViewTracker";
 import { formatShortDate } from "../../../features/readiness/readiness-view";
 import { ServerApiError } from "../../../lib/server-api";
-import { competencyServerApi } from "@atlas/contracts-modules/competency/competency.server-api";
-import { readinessServerApi } from "@atlas/contracts-modules/readiness/readiness.server-api";
+import { competencyServerApi } from "@/modules/competency/competency.server-api";
+import { readinessServerApi } from "@/modules/readiness/readiness.server-api";
 import { deriveProminence } from "@atlas/contracts/readiness/readiness.schemas";
 import { DEFAULT_COMPOSITE_KEY } from "@atlas/contracts/readiness/readiness.types";
 

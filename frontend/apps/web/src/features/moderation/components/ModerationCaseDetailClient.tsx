@@ -413,7 +413,7 @@ export function ModerationCaseDetailClient({ caseId }: { caseId: string }) {
               <button
                 type="button"
                 disabled={busy || detail.target?.deleted}
-                className="inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--admin-danger)] px-4 py-2.5 text-sm font-bold text-[var(--admin-on-primary)] shadow-md transition-all hover:opacity-90 motion-safe:active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--admin-danger)] px-4 py-2.5 text-sm font-bold text-[var(--admin-on-danger)] shadow-md transition-all hover:opacity-90 motion-safe:active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
                 onClick={() => {
                   setPendingDecision({
                     decisionKey: "actioned",

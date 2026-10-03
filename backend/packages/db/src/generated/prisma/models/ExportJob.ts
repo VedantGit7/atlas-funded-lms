@@ -53,6 +53,7 @@ export type ExportJobCountAggregateOutputType = {
   status: number
   scope_json: number
   r2_object_key: number
+  artifact_json: number
   error_json: number
   expires_at: number
   created_at: number
@@ -90,6 +91,7 @@ export type ExportJobCountAggregateInputType = {
   status?: true
   scope_json?: true
   r2_object_key?: true
+  artifact_json?: true
   error_json?: true
   expires_at?: true
   created_at?: true
@@ -176,6 +178,7 @@ export type ExportJobGroupByOutputType = {
   status: $Enums.JobStatus
   scope_json: runtime.JsonValue
   r2_object_key: string | null
+  artifact_json: runtime.JsonValue | null
   error_json: runtime.JsonValue | null
   expires_at: Date | null
   created_at: Date
@@ -210,6 +213,7 @@ export type ExportJobWhereInput = {
   status?: Prisma.EnumJobStatusFilter<"ExportJob"> | $Enums.JobStatus
   scope_json?: Prisma.JsonFilter<"ExportJob">
   r2_object_key?: Prisma.StringNullableFilter<"ExportJob"> | string | null
+  artifact_json?: Prisma.JsonNullableFilter<"ExportJob">
   error_json?: Prisma.JsonNullableFilter<"ExportJob">
   expires_at?: Prisma.DateTimeNullableFilter<"ExportJob"> | Date | string | null
   created_at?: Prisma.DateTimeFilter<"ExportJob"> | Date | string
@@ -223,6 +227,7 @@ export type ExportJobOrderByWithRelationInput = {
   status?: Prisma.SortOrder
   scope_json?: Prisma.SortOrder
   r2_object_key?: Prisma.SortOrderInput | Prisma.SortOrder
+  artifact_json?: Prisma.SortOrderInput | Prisma.SortOrder
   error_json?: Prisma.SortOrderInput | Prisma.SortOrder
   expires_at?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrder
@@ -239,6 +244,7 @@ export type ExportJobWhereUniqueInput = Prisma.AtLeast<{
   status?: Prisma.EnumJobStatusFilter<"ExportJob"> | $Enums.JobStatus
   scope_json?: Prisma.JsonFilter<"ExportJob">
   r2_object_key?: Prisma.StringNullableFilter<"ExportJob"> | string | null
+  artifact_json?: Prisma.JsonNullableFilter<"ExportJob">
   error_json?: Prisma.JsonNullableFilter<"ExportJob">
   expires_at?: Prisma.DateTimeNullableFilter<"ExportJob"> | Date | string | null
   created_at?: Prisma.DateTimeFilter<"ExportJob"> | Date | string
@@ -252,6 +258,7 @@ export type ExportJobOrderByWithAggregationInput = {
   status?: Prisma.SortOrder
   scope_json?: Prisma.SortOrder
   r2_object_key?: Prisma.SortOrderInput | Prisma.SortOrder
+  artifact_json?: Prisma.SortOrderInput | Prisma.SortOrder
   error_json?: Prisma.SortOrderInput | Prisma.SortOrder
   expires_at?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrder
@@ -271,6 +278,7 @@ export type ExportJobScalarWhereWithAggregatesInput = {
   status?: Prisma.EnumJobStatusWithAggregatesFilter<"ExportJob"> | $Enums.JobStatus
   scope_json?: Prisma.JsonWithAggregatesFilter<"ExportJob">
   r2_object_key?: Prisma.StringNullableWithAggregatesFilter<"ExportJob"> | string | null
+  artifact_json?: Prisma.JsonNullableWithAggregatesFilter<"ExportJob">
   error_json?: Prisma.JsonNullableWithAggregatesFilter<"ExportJob">
   expires_at?: Prisma.DateTimeNullableWithAggregatesFilter<"ExportJob"> | Date | string | null
   created_at?: Prisma.DateTimeWithAggregatesFilter<"ExportJob"> | Date | string
@@ -284,6 +292,7 @@ export type ExportJobCreateInput = {
   status?: $Enums.JobStatus
   scope_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
   r2_object_key?: string | null
+  artifact_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   error_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   expires_at?: Date | string | null
   created_at?: Date | string
@@ -297,6 +306,7 @@ export type ExportJobUncheckedCreateInput = {
   status?: $Enums.JobStatus
   scope_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
   r2_object_key?: string | null
+  artifact_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   error_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   expires_at?: Date | string | null
   created_at?: Date | string
@@ -310,6 +320,7 @@ export type ExportJobUpdateInput = {
   status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
   scope_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   r2_object_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  artifact_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   error_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -323,6 +334,7 @@ export type ExportJobUncheckedUpdateInput = {
   status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
   scope_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   r2_object_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  artifact_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   error_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -336,6 +348,7 @@ export type ExportJobCreateManyInput = {
   status?: $Enums.JobStatus
   scope_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
   r2_object_key?: string | null
+  artifact_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   error_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   expires_at?: Date | string | null
   created_at?: Date | string
@@ -349,6 +362,7 @@ export type ExportJobUpdateManyMutationInput = {
   status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
   scope_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   r2_object_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  artifact_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   error_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -362,6 +376,7 @@ export type ExportJobUncheckedUpdateManyInput = {
   status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
   scope_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   r2_object_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  artifact_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   error_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -375,6 +390,7 @@ export type ExportJobCountOrderByAggregateInput = {
   status?: Prisma.SortOrder
   scope_json?: Prisma.SortOrder
   r2_object_key?: Prisma.SortOrder
+  artifact_json?: Prisma.SortOrder
   error_json?: Prisma.SortOrder
   expires_at?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
@@ -412,6 +428,7 @@ export type ExportJobSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   status?: boolean
   scope_json?: boolean
   r2_object_key?: boolean
+  artifact_json?: boolean
   error_json?: boolean
   expires_at?: boolean
   created_at?: boolean
@@ -425,6 +442,7 @@ export type ExportJobSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   status?: boolean
   scope_json?: boolean
   r2_object_key?: boolean
+  artifact_json?: boolean
   error_json?: boolean
   expires_at?: boolean
   created_at?: boolean
@@ -438,6 +456,7 @@ export type ExportJobSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   status?: boolean
   scope_json?: boolean
   r2_object_key?: boolean
+  artifact_json?: boolean
   error_json?: boolean
   expires_at?: boolean
   created_at?: boolean
@@ -451,13 +470,14 @@ export type ExportJobSelectScalar = {
   status?: boolean
   scope_json?: boolean
   r2_object_key?: boolean
+  artifact_json?: boolean
   error_json?: boolean
   expires_at?: boolean
   created_at?: boolean
   updated_at?: boolean
 }
 
-export type ExportJobOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "requested_by_membership_id" | "status" | "scope_json" | "r2_object_key" | "error_json" | "expires_at" | "created_at" | "updated_at", ExtArgs["result"]["exportJob"]>
+export type ExportJobOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "requested_by_membership_id" | "status" | "scope_json" | "r2_object_key" | "artifact_json" | "error_json" | "expires_at" | "created_at" | "updated_at", ExtArgs["result"]["exportJob"]>
 
 export type $ExportJobPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "ExportJob"
@@ -469,6 +489,7 @@ export type $ExportJobPayload<ExtArgs extends runtime.Types.Extensions.InternalA
     status: $Enums.JobStatus
     scope_json: runtime.JsonValue
     r2_object_key: string | null
+    artifact_json: runtime.JsonValue | null
     error_json: runtime.JsonValue | null
     expires_at: Date | null
     created_at: Date
@@ -902,6 +923,7 @@ export interface ExportJobFieldRefs {
   readonly status: Prisma.FieldRef<"ExportJob", 'JobStatus'>
   readonly scope_json: Prisma.FieldRef<"ExportJob", 'Json'>
   readonly r2_object_key: Prisma.FieldRef<"ExportJob", 'String'>
+  readonly artifact_json: Prisma.FieldRef<"ExportJob", 'Json'>
   readonly error_json: Prisma.FieldRef<"ExportJob", 'Json'>
   readonly expires_at: Prisma.FieldRef<"ExportJob", 'DateTime'>
   readonly created_at: Prisma.FieldRef<"ExportJob", 'DateTime'>

@@ -349,6 +349,7 @@ export type PaymentOrderOrderByWithRelationInput = {
 
 export type PaymentOrderWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  tenant_id_id?: Prisma.PaymentOrderTenant_idIdCompoundUniqueInput
   AND?: Prisma.PaymentOrderWhereInput | Prisma.PaymentOrderWhereInput[]
   OR?: Prisma.PaymentOrderWhereInput[]
   NOT?: Prisma.PaymentOrderWhereInput | Prisma.PaymentOrderWhereInput[]
@@ -369,7 +370,7 @@ export type PaymentOrderWhereUniqueInput = Prisma.AtLeast<{
   paid_at?: Prisma.DateTimeNullableFilter<"PaymentOrder"> | Date | string | null
   created_at?: Prisma.DateTimeFilter<"PaymentOrder"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"PaymentOrder"> | Date | string
-}, "id">
+}, "id" | "tenant_id_id">
 
 export type PaymentOrderOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -566,6 +567,11 @@ export type PaymentOrderUncheckedUpdateManyInput = {
   paid_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type PaymentOrderTenant_idIdCompoundUniqueInput = {
+  tenant_id: string
+  id: string
 }
 
 export type PaymentOrderCountOrderByAggregateInput = {

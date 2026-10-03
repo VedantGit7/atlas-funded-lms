@@ -238,15 +238,15 @@ export function MarketingCtaRuntime({ isAuthenticated = false }: MarketingCtaRun
       {slideIns.map((cta) => (
         <div
           key={cta.id}
-          className="fixed bottom-4 right-4 z-[70] w-[min(100vw-2rem,20rem)] overflow-hidden rounded-xl border border-neutral-200 shadow-lg"
+          className="fixed bottom-4 right-4 z-[70] w-[min(100vw-2rem,20rem)] overflow-hidden rounded-xl border border-border shadow-lg"
           style={{ backgroundColor: cta.backgroundColor }}
         >
           {cta.imageUrl ? (
             <img src={cta.imageUrl} alt="" className="h-28 w-full object-cover" />
           ) : null}
           <div className="space-y-2 p-4">
-            <p className="font-semibold text-neutral-900">{cta.headline}</p>
-            <CtaBody html={cta.bodyHtml} className="text-sm text-neutral-600 prose-sm" />
+            <p className="font-semibold text-foreground">{cta.headline}</p>
+            <CtaBody html={cta.bodyHtml} className="text-sm text-muted-foreground prose-sm" />
             {cta.linkUrl ? (
               <button
                 type="button"
@@ -272,7 +272,7 @@ export function MarketingCtaRuntime({ isAuthenticated = false }: MarketingCtaRun
             <button
               type="button"
               aria-label="Close"
-              className="absolute right-3 top-3 z-10 rounded-md px-2 py-1 text-sm text-neutral-500 hover:bg-neutral-100"
+              className="absolute right-3 top-3 z-10 rounded-md px-2 py-1 text-sm text-muted-foreground hover:bg-muted"
               onClick={() => {
                 setActivePopupId(null);
               }}
@@ -283,13 +283,13 @@ export function MarketingCtaRuntime({ isAuthenticated = false }: MarketingCtaRun
               <img src={activePopup.imageUrl} alt="" className="h-40 w-full object-cover" />
             ) : null}
             <div className="space-y-3 p-5 pt-10">
-              <h2 className="text-lg font-semibold text-neutral-900">{activePopup.headline}</h2>
-              <CtaBody html={activePopup.bodyHtml} className="text-sm text-neutral-600" />
+              <h2 className="text-lg font-semibold text-foreground">{activePopup.headline}</h2>
+              <CtaBody html={activePopup.bodyHtml} className="text-sm text-muted-foreground" />
               {activePopup.formShareToken ? (
                 <iframe
                   title="CTA form"
                   src={`/f/${encodeURIComponent(activePopup.formShareToken)}?source=CTA`}
-                  className="h-[28rem] w-full rounded-lg border border-neutral-200 bg-white"
+                  className="h-[28rem] w-full rounded-lg border border-border bg-card"
                 />
               ) : null}
               {activePopup.linkUrl ? (
@@ -308,7 +308,7 @@ export function MarketingCtaRuntime({ isAuthenticated = false }: MarketingCtaRun
                 </button>
               ) : null}
               {!activePopup.formShareToken && !activePopup.linkUrl ? (
-                <p className="text-center text-sm text-neutral-500">
+                <p className="text-center text-sm text-muted-foreground">
                   This promotion has no action configured yet.
                 </p>
               ) : null}

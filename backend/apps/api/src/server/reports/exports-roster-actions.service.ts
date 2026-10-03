@@ -40,6 +40,7 @@ export async function exportExportsHistory(tx: TenantTx, ctx: ServiceCtx, rawBod
     const adminEmail = await notificationRepository.findMembershipEmail(tx, ctx.actorMembershipId);
     if (provider.isConfigured() && adminEmail) {
       await provider.send({
+        tenantId: ctx.tenantId,
         to: adminEmail,
         subject: "Your Export History report is ready",
         body: [

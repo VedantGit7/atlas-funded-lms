@@ -1,0 +1,119 @@
+{
+  "finding": "F12",
+  "date": "2026-09-20",
+  "status": "fixable_advisories_remediated_locally_existing_SEC09_retained",
+  "deploymentStatus": "Not committed, pushed or deployed; F11 rollout prerequisites remain",
+  "baseline": {
+    "unsuppressed": 12,
+    "unsuppressedHigh": 1,
+    "unsuppressedModerate": 11,
+    "rawHigh": 3,
+    "rawModerate": 11,
+    "evidence": "f12-audit-before.json"
+  },
+  "after": {
+    "unsuppressed": 0,
+    "rawHigh": 2,
+    "rawModerate": 0,
+    "unfilteredAdvisoryPackages": ["extract-zip"],
+    "unfilteredAdvisories": 2,
+    "productionAdvisories": 0,
+    "evidence": ["f12-audit-after.json", "f12-audit-unfiltered.json", "f12-audit-production.json"]
+  },
+  "exceptions": {
+    "added": [],
+    "retained": ["GHSA-jmr9-qjv8-65gv", "GHSA-7pqw-9j4j-h8q3"],
+    "register": "docs/release/security-exception-register.md",
+    "expiry": "2026-11-30",
+    "owner": "Frontend platform",
+    "fixUnavailable": true,
+    "latestPublishedExtractZip": "2.0.1"
+  },
+  "checks": [
+    {
+      "name": "Frozen install without lifecycle scripts",
+      "exitCode": 0,
+      "evidence": "f12-install.log"
+    },
+    {
+      "name": "Unit/security/CI/mocked R2 regressions",
+      "initialPassed": 2335,
+      "initialFailed": 1,
+      "initialFailure": "pnpm cache sandbox EPERM in metadata guard",
+      "retryPassed": 1,
+      "remainingFailures": 0,
+      "totalDistinctTestsPassed": 2336,
+      "files": 306,
+      "evidence": ["f12-regression-tests.log", "f12-ci-guard-recheck.log"]
+    },
+    {
+      "name": "TypeScript project check",
+      "exitCode": 0,
+      "evidence": "f12-typecheck.log"
+    },
+    {
+      "name": "fflate/qs compatibility and installed lock parity",
+      "passed": true,
+      "evidence": "f12-compatibility.json"
+    },
+    {
+      "name": "Scoped formatting",
+      "passed": true,
+      "evidence": "f12-format.log"
+    },
+    {
+      "name": "Secret guard",
+      "exitCode": 0
+    },
+    {
+      "name": "Package exports",
+      "exitCode": 0
+    },
+    {
+      "name": "Peer dependencies",
+      "exitCode": 1,
+      "preExisting": true,
+      "detail": "Sentry server-utils 10.59.0 expects Vite 3-6; unchanged installed Vite 8.0.16",
+      "evidence": "f12-peer-check.log"
+    }
+  ],
+  "notRun": [
+    "Full hosted Next/Vercel build and smoke journeys",
+    "Live provider/database integration",
+    "Deployment"
+  ],
+  "sourceFiles": [
+    {
+      "path": "package.json",
+      "sha256": "48383a0333efdd9d8ccb1e5e4e20a374f388618a0a713b951151f47858ba4aea"
+    },
+    {
+      "path": "backend/packages/storage/package.json",
+      "sha256": "2b5ea8dbb297c2320b57e5aab260ccbdafb3ab0b64ef9a2e7dd61ee08ad08e80"
+    },
+    {
+      "path": "pnpm-workspace.yaml",
+      "sha256": "4b2e63b84c8a352bc99af302607d03d1a1f8e2a045a056eb8b58ec22ce83a2c2"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "sha256": "ae66a0ec7fb439376cc82707e26d8a418f057b8344d8e86e9f693af7f6074874"
+    },
+    {
+      "path": "docs/engineering/f12-dependency-remediation.md",
+      "sha256": "af4c103c2c9552c774a0545e7a8cac98a8cae563dcb428b9c4a24bcdd8d554e1"
+    },
+    {
+      "path": "docs/engineering/atlas-lms-comprehensive-audit-2026-09-19.md",
+      "sha256": "db077ecb233a488c716217e4841483e41b04ef386d2e7670485ab2d6ec2f9597"
+    },
+    {
+      "path": "docs/release/security-exception-register.md",
+      "sha256": "3d10eab63d6ac50a7bbcde23cd84a984278b113350569f7186d7c31fe0755aaf"
+    },
+    {
+      "path": "docs/superpowers/plans/2026-09-20-f12-dependencies.md",
+      "sha256": "2aef7980bad8d1fc626c71e03d74118c4924bd166a448f9038aff37e25af55c8"
+    }
+  ]
+}

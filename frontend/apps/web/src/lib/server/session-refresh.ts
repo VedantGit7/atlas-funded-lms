@@ -1,6 +1,7 @@
 import type { NextRequest } from "next/server";
 import { ATLAS_ACCESS_TOKEN_COOKIE, ATLAS_REFRESH_TOKEN_COOKIE } from "../auth-cookies";
-import { ATLAS_INTERNAL_TENANT_HOST_HEADER } from "../http-headers";
+import { buildApiProxyHeaders, resolveEdgeClientIp } from "@atlas/core/http/api-proxy";
+import { resolveClientIpForInternalApi } from "./resolve-client-ip";
 import {
   appendSetCookieHeaders,
   buildCookieHeaderFromPairs,
@@ -92,12 +93,16 @@ export async function refreshSessionCookieHeader(
   try {
     response = await fetch(`${API_INTERNAL_URL}/api/v1/public/auth/refresh`, {
       method: "POST",
-      headers: {
-        ...(cookieHeader ? { cookie: cookieHeader } : {}),
-        "x-forwarded-host": tenantHost,
-        [ATLAS_INTERNAL_TENANT_HOST_HEADER]: tenantHost,
-        "content-type": "application/json",
-      },
+      headers: buildApiProxyHeaders(
+        tenantHost,
+        {
+          ...(cookieHeader ? { cookie: cookieHeader } : {}),
+          "content-type": "application/json",
+        },
+        process.env,
+        await resolveClientIpForInternalApi(),
+      ),
+      redirect: "error",
       cache: "no-store",
     });
   } catch {
@@ -115,7 +120,7 @@ export async function refreshSessionCookieHeader(
  * Attempts to mint a fresh access token from the refresh-token cookie before
  * protected-route middleware sends the user to /login.
  */
-export async function tryRefreshSessionForMiddleware(req: NextRequest): Promise<Response | null> {
+export async function tryRefreshSessionForProxy(req: NextRequest): Promise<Response | null> {
   const refreshToken = req.cookies.get(ATLAS_REFRESH_TOKEN_COOKIE)?.value;
   const accessToken = req.cookies.get(ATLAS_ACCESS_TOKEN_COOKIE)?.value;
 
@@ -138,12 +143,16 @@ export async function tryRefreshSessionForMiddleware(req: NextRequest): Promise<
   try {
     response = await fetch(`${API_INTERNAL_URL}/api/v1/public/auth/refresh`, {
       method: "POST",
-      headers: {
-        ...(cookieHeader ? { cookie: cookieHeader } : {}),
-        "x-forwarded-host": browserHost,
-        [ATLAS_INTERNAL_TENANT_HOST_HEADER]: browserHost,
-        "content-type": "application/json",
-      },
+      headers: buildApiProxyHeaders(
+        browserHost,
+        {
+          ...(cookieHeader ? { cookie: cookieHeader } : {}),
+          "content-type": "application/json",
+        },
+        process.env,
+        resolveEdgeClientIp(req.headers),
+      ),
+      redirect: "error",
       cache: "no-store",
     });
   } catch {

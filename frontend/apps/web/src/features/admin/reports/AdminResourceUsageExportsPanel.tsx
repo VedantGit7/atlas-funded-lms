@@ -724,16 +724,16 @@ export function AdminResourceUsageExportsPanel() {
                               </button>
                             ) : queued ? (
                               <Hourglass
-                                className="ml-auto h-[18px] w-[18px] text-[var(--admin-outline)]"
+                                className="ml-auto h-[18px] w-[18px] text-[var(--admin-on-surface-variant)]"
                                 aria-label="Queued"
                               />
                             ) : building ? (
                               <Loader2
-                                className="ml-auto h-[18px] w-[18px] animate-spin text-[var(--admin-outline)]"
+                                className="ml-auto h-[18px] w-[18px] animate-spin text-[var(--admin-on-surface-variant)]"
                                 aria-label="Building"
                               />
                             ) : (
-                              <span className="text-[var(--admin-outline)]">-</span>
+                              <span className="text-[var(--admin-on-surface-variant)]">-</span>
                             )}
                           </td>
                           {building && progress != null ? (

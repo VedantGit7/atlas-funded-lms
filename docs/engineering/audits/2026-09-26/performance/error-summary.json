@@ -1,0 +1,1169 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-09-26T13:21:08.637Z",
+  "capacityVerified": false,
+  "source": {
+    "log": ".test-results/performance-2026-09-26/api-1790420063782-5446f468.log",
+    "report": ".test-results/performance-2026-09-26/target-corrected.json"
+  },
+  "phaseWindows": [
+    {
+      "name": "warmup",
+      "startedAt": "2026-09-26T10:58:30.341Z",
+      "finishedAt": "2026-09-26T11:00:30.365Z"
+    },
+    {
+      "name": "sustained",
+      "startedAt": "2026-09-26T11:00:30.367Z",
+      "finishedAt": "2026-09-26T11:15:30.508Z"
+    },
+    {
+      "name": "burst",
+      "startedAt": "2026-09-26T11:15:30.518Z",
+      "finishedAt": "2026-09-26T11:20:30.597Z"
+    },
+    {
+      "name": "endurance",
+      "startedAt": "2026-09-26T11:20:30.602Z",
+      "finishedAt": "2026-09-26T13:20:30.621Z"
+    }
+  ],
+  "totals": {
+    "routeFailure": 451,
+    "usagePersistenceFailed": 26492,
+    "memoryRestartWarnings": 4
+  },
+  "byPhaseOrScope": {
+    "warmup": {
+      "routeFailure": 0,
+      "usagePersistenceFailed": 364,
+      "memoryRestartWarnings": 0,
+      "routeFailures": {}
+    },
+    "sustained": {
+      "routeFailure": 1,
+      "usagePersistenceFailed": 2454,
+      "memoryRestartWarnings": 0,
+      "routeFailures": {
+        "/api/v1/lessons/[id] SERVICE_UNAVAILABLE": 1
+      }
+    },
+    "burst": {
+      "routeFailure": 404,
+      "usagePersistenceFailed": 1080,
+      "memoryRestartWarnings": 0,
+      "routeFailures": {
+        "/api/v1/lessons/[id] SERVICE_UNAVAILABLE": 7,
+        "/api/v1/public/auth/refresh SERVICE_UNAVAILABLE": 6,
+        "/api/v1/lessons/[id] INTERNAL_ERROR": 139,
+        "/api/v1/courses/[id] INTERNAL_ERROR": 151,
+        "/api/v1/lessons/[id]/progress INTERNAL_ERROR": 92,
+        "/api/v1/lessons/[id]/progress SERVICE_UNAVAILABLE": 3,
+        "/api/v1/courses/[id] SERVICE_UNAVAILABLE": 6
+      }
+    },
+    "endurance": {
+      "routeFailure": 46,
+      "usagePersistenceFailed": 22594,
+      "memoryRestartWarnings": 0,
+      "routeFailures": {
+        "/api/v1/lessons/[id]/progress INTERNAL_ERROR": 13,
+        "/api/v1/lessons/[id]/progress SERVICE_UNAVAILABLE": 4,
+        "/api/v1/courses/[id] SERVICE_UNAVAILABLE": 5,
+        "/api/v1/lessons/[id] SERVICE_UNAVAILABLE": 10,
+        "/api/v1/lessons/[id] INTERNAL_ERROR": 12,
+        "/api/v1/public/auth/refresh SERVICE_UNAVAILABLE": 2
+      }
+    },
+    "setup": {
+      "routeFailure": 0,
+      "usagePersistenceFailed": 0,
+      "memoryRestartWarnings": 0,
+      "routeFailures": {}
+    },
+    "beforeRun": {
+      "routeFailure": 0,
+      "usagePersistenceFailed": 0,
+      "memoryRestartWarnings": 0,
+      "routeFailures": {}
+    },
+    "betweenPhases": {
+      "routeFailure": 0,
+      "usagePersistenceFailed": 0,
+      "memoryRestartWarnings": 0,
+      "routeFailures": {}
+    },
+    "afterPhases": {
+      "routeFailure": 0,
+      "usagePersistenceFailed": 0,
+      "memoryRestartWarnings": 0,
+      "routeFailures": {}
+    },
+    "untimed": {
+      "routeFailure": 0,
+      "usagePersistenceFailed": 0,
+      "memoryRestartWarnings": 4,
+      "routeFailures": {}
+    }
+  },
+  "byMinute": [
+    {
+      "phaseOrScope": "warmup",
+      "minuteUtc": "2026-09-26T10:58:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 116,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "warmup",
+      "minuteUtc": "2026-09-26T10:59:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 180,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "sustained",
+      "minuteUtc": "2026-09-26T11:00:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 101,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "warmup",
+      "minuteUtc": "2026-09-26T11:00:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 68,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "sustained",
+      "minuteUtc": "2026-09-26T11:01:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 186,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "sustained",
+      "minuteUtc": "2026-09-26T11:02:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 179,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "sustained",
+      "minuteUtc": "2026-09-26T11:03:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 148,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "sustained",
+      "minuteUtc": "2026-09-26T11:04:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 150,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "sustained",
+      "minuteUtc": "2026-09-26T11:05:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 165,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "sustained",
+      "minuteUtc": "2026-09-26T11:06:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 168,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "sustained",
+      "minuteUtc": "2026-09-26T11:07:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 152,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "sustained",
+      "minuteUtc": "2026-09-26T11:08:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 158,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "sustained",
+      "minuteUtc": "2026-09-26T11:09:00.000Z",
+      "routeFailure": 1,
+      "usagePersistenceFailed": 190,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "sustained",
+      "minuteUtc": "2026-09-26T11:10:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 155,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "sustained",
+      "minuteUtc": "2026-09-26T11:11:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 155,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "sustained",
+      "minuteUtc": "2026-09-26T11:12:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 147,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "sustained",
+      "minuteUtc": "2026-09-26T11:13:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 213,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "sustained",
+      "minuteUtc": "2026-09-26T11:14:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 166,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "burst",
+      "minuteUtc": "2026-09-26T11:15:00.000Z",
+      "routeFailure": 26,
+      "usagePersistenceFailed": 69,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "sustained",
+      "minuteUtc": "2026-09-26T11:15:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 21,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "burst",
+      "minuteUtc": "2026-09-26T11:16:00.000Z",
+      "routeFailure": 52,
+      "usagePersistenceFailed": 334,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "burst",
+      "minuteUtc": "2026-09-26T11:17:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 199,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "burst",
+      "minuteUtc": "2026-09-26T11:18:00.000Z",
+      "routeFailure": 84,
+      "usagePersistenceFailed": 224,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "burst",
+      "minuteUtc": "2026-09-26T11:19:00.000Z",
+      "routeFailure": 108,
+      "usagePersistenceFailed": 157,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "burst",
+      "minuteUtc": "2026-09-26T11:20:00.000Z",
+      "routeFailure": 134,
+      "usagePersistenceFailed": 97,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T11:20:00.000Z",
+      "routeFailure": 12,
+      "usagePersistenceFailed": 86,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T11:21:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 168,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T11:22:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 210,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T11:23:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 153,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T11:24:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 158,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T11:25:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 155,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T11:26:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 175,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T11:27:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 157,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T11:28:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 164,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T11:29:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 210,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T11:30:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 214,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T11:31:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 182,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T11:32:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 162,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T11:33:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 155,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T11:34:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 172,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T11:35:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 168,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T11:36:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 173,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T11:37:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 197,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T11:38:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 217,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T11:39:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 194,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T11:40:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 162,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T11:41:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 154,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T11:42:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 155,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T11:43:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 182,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T11:44:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 162,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T11:45:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 211,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T11:46:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 185,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T11:47:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 177,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T11:48:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 212,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T11:49:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 171,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T11:50:00.000Z",
+      "routeFailure": 2,
+      "usagePersistenceFailed": 159,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T11:51:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 157,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T11:52:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 165,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T11:53:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 151,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T11:54:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 185,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T11:55:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 212,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T11:56:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 175,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T11:57:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 154,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T11:58:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 156,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T11:59:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 144,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T12:00:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 201,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T12:01:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 209,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T12:02:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 187,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T12:03:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 156,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T12:04:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 152,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T12:05:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 195,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T12:06:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 218,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T12:07:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 196,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T12:08:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 146,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T12:09:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 142,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T12:10:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 157,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T12:11:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 222,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T12:12:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 194,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T12:13:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 176,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T12:14:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 151,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T12:15:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 143,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T12:16:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 150,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T12:17:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 219,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T12:18:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 212,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T12:19:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 190,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T12:20:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 138,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T12:21:00.000Z",
+      "routeFailure": 1,
+      "usagePersistenceFailed": 160,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T12:22:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 145,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T12:23:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 177,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T12:24:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 227,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T12:25:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 204,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T12:26:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 206,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T12:27:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 218,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T12:28:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 147,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T12:29:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 155,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T12:30:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 144,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T12:31:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 150,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T12:32:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 221,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T12:33:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 199,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T12:34:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 193,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T12:35:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 155,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T12:36:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 155,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T12:37:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 143,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T12:38:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 185,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T12:39:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 188,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T12:40:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 194,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T12:41:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 203,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T12:42:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 150,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T12:43:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 158,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T12:44:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 158,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T12:45:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 180,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T12:46:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 158,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T12:47:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 129,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T12:48:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 264,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T12:49:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 168,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T12:50:00.000Z",
+      "routeFailure": 1,
+      "usagePersistenceFailed": 132,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T12:51:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 222,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T12:52:00.000Z",
+      "routeFailure": 1,
+      "usagePersistenceFailed": 223,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T12:53:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 359,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T12:54:00.000Z",
+      "routeFailure": 1,
+      "usagePersistenceFailed": 189,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T12:55:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 209,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T12:56:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 215,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T12:57:00.000Z",
+      "routeFailure": 1,
+      "usagePersistenceFailed": 284,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T12:58:00.000Z",
+      "routeFailure": 3,
+      "usagePersistenceFailed": 293,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T12:59:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 98,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T13:00:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 172,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T13:01:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 196,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T13:02:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 291,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T13:03:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 119,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T13:04:00.000Z",
+      "routeFailure": 15,
+      "usagePersistenceFailed": 150,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T13:05:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 280,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T13:06:00.000Z",
+      "routeFailure": 1,
+      "usagePersistenceFailed": 344,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T13:07:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 339,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T13:08:00.000Z",
+      "routeFailure": 3,
+      "usagePersistenceFailed": 278,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T13:09:00.000Z",
+      "routeFailure": 1,
+      "usagePersistenceFailed": 331,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T13:10:00.000Z",
+      "routeFailure": 2,
+      "usagePersistenceFailed": 343,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T13:11:00.000Z",
+      "routeFailure": 2,
+      "usagePersistenceFailed": 62,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T13:12:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 300,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T13:13:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 156,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T13:14:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 288,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T13:15:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 147,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T13:16:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 162,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T13:17:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 155,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T13:18:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 162,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T13:19:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 154,
+      "memoryRestartWarnings": 0
+    },
+    {
+      "phaseOrScope": "endurance",
+      "minuteUtc": "2026-09-26T13:20:00.000Z",
+      "routeFailure": 0,
+      "usagePersistenceFailed": 154,
+      "memoryRestartWarnings": 0
+    }
+  ],
+  "parsing": {
+    "lines": 20097516,
+    "oversizedLines": 0,
+    "malformedJsonLines": 0,
+    "nonJsonLines": 19936329,
+    "otherJsonRecords": 133958,
+    "unterminatedFinalLines": 0,
+    "untimedRecognizedEvents": 4,
+    "unrecognizedRouteCodes": 0,
+    "unrecognizedRouteTemplates": 0,
+    "minuteEventsOmittedAtBound": 0,
+    "poolRecords": 282,
+    "invalidPoolRecords": 0,
+    "processIdentityBoundExceeded": 0
+  },
+  "memoryRestarts": {
+    "warningCount": 4,
+    "confirmedCompletedRestartCount": null,
+    "distinctPoolProcessCount": 5,
+    "poolUptimeRegressions": 0
+  },
+  "scope": [
+    "Only structured route.failure and terminal usage_meter.persistence_failed are counted as failures. Raw development errors, SQL, identifiers, parameter values and arbitrary messages are never exported.",
+    "Phase attribution uses each log event timestamp with start-inclusive/end-exclusive windows. Boundary failures are attributed by failure emission time, not request start. Setup, pre-run, gaps, post-phase and untimed events remain separate.",
+    "Route lifecycle coverage excludes handlers without that wrapper, including the special /me handler. Zero logged route failures is not proof that every HTTP request succeeded; compare the final workload report.",
+    "Each terminal usage warning follows both failed attempts for one recorder invocation. An ambiguous lost COMMIT acknowledgement may still have persisted the event, so this is not an exact lost-record count.",
+    "Installed Next memory-threshold warning lines have no timestamp. Their count measures restart intent across this whole file; completed restarts and phase attribution are not established. Distinct pool process identities and uptime regressions are separate evidence, not memory-restart counts.",
+    "Malformed, oversized, unterminated and untimed lines are preserved as counts. Oversized/unparseable lines can conceal recognized events. Unknown routes/codes are collapsed to fixed labels.",
+    "Bounded memory: 64KiB read chunks, 64KiB retained line characters, 4096 minute buckets, 256 process identities; event totals remain accurate if minute detail reaches its bound. No historical file rotation or other service logs are included."
+  ],
+  "scan": {
+    "logBytesAtStart": 502598581,
+    "logBytesAtFinish": 502598581,
+    "fileChangedDuringScan": false,
+    "scope": "Reads exactly the byte prefix present at scan start; later appends are excluded."
+  }
+}

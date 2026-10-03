@@ -1,0 +1,182 @@
+{
+  "capturedAt": "2026-09-28T07:33:25.255Z",
+  "head": "0c405545d5c9d51dc29b27f11163c18e723d5bbc",
+  "files": [
+    {
+      "path": "backend/apps/api/src/app/api/v1/courses/[id]/route.ts",
+      "sha256": "ffec643d2e2067e6626c1a8435c391b4dd1d0d466b00088f044f7c10e14ea8d7"
+    },
+    {
+      "path": "backend/apps/api/src/app/api/v1/lessons/[id]/progress/route.ts",
+      "sha256": "ed2b8948154d81929c88ba64ad7797dae9dea4a49b073b3f6e0b0e6dcbff08d9"
+    },
+    {
+      "path": "backend/apps/api/src/app/api/v1/lessons/[id]/route.ts",
+      "sha256": "caebe70b658a52583b085c959a59734fc20e538c8bb14f9e215fdaa27a601a62"
+    },
+    {
+      "path": "backend/apps/api/src/app/api/v1/me/route.ts",
+      "sha256": "8ea00c1fa5ab2b7ec89724d142af380b2a21ead25c182d1b636b2ca434ca44c9"
+    },
+    {
+      "path": "backend/apps/api/src/app/api/v1/public/auth/login/route.ts",
+      "sha256": "22912138cdb04d0d563a850aff786f1e255436565942d6dfdb6b65ed7e458398"
+    },
+    {
+      "path": "backend/apps/api/src/server/courses/courses.service.ts",
+      "sha256": "ace2920847d97398b34ceda3460f87463d75d13bf4b4d81dec7c0c92fdd3b1ab"
+    },
+    {
+      "path": "backend/apps/api/src/server/courses/load-course-resource-ref.ts",
+      "sha256": "9988756df5d1b30c206708a12b96df97b9467cf2f31307258a679f9e72ba5911"
+    },
+    {
+      "path": "backend/apps/api/src/server/lessons/lesson-progress.service.ts",
+      "sha256": "55ddea28550c2fb43204c6417e811ceff9e2fa7283a95f1a0599d20d94edd735"
+    },
+    {
+      "path": "backend/apps/api/src/server/lessons/lessons.service.ts",
+      "sha256": "5e499c1e2ef61570fdc0c176823888595a00d882d07a719efd537c676e6a37b1"
+    },
+    {
+      "path": "backend/apps/api/src/server/resource-projection.ts",
+      "sha256": "533950d6908161740fc1cb1a958041b003e9f8017366325b0b3016a6421105c7"
+    },
+    {
+      "path": "backend/apps/api/src/worker/outbox-sweep.ts",
+      "sha256": "73ba9be42f662578996688c33bf5900bb92a92146930ac60e96fe5aab35af4df"
+    },
+    {
+      "path": "backend/packages/api/src/client-ip.ts",
+      "sha256": "eee6e448a42584609d1a9afa0d5d6db5daf8589e0ded38c8f8b1ed893702134d"
+    },
+    {
+      "path": "backend/packages/api/src/create-tenant-route.ts",
+      "sha256": "d25458e10a2197a1f1167251b68952f93424426a97ac9f8a5bc94271c5260131"
+    },
+    {
+      "path": "backend/packages/api/src/rate-limit-store.ts",
+      "sha256": "1109caa08faed122983b549b78b0d2ec8b405db91cfa369f761d462eb87cd517"
+    },
+    {
+      "path": "backend/packages/api/src/rate-limit.ts",
+      "sha256": "5960836b6c0dc2276bb2894c075aa4a5c85e62483c371cfa00d8b3cf1931a6d8"
+    },
+    {
+      "path": "backend/packages/api/src/route-stage-timings.ts",
+      "sha256": "db606ba118416d1084779a8bd20e4670328f5308336eec76296038b7da65dd39"
+    },
+    {
+      "path": "backend/packages/api/src/tenant-usage-meter.ts",
+      "sha256": "eee7baf6923327162b46d47d230fc48f5d5d6f11ad09b94b29b04926183e5540"
+    },
+    {
+      "path": "backend/packages/auth/package.json",
+      "sha256": "94472e74c54e7e8169e0a66d3ef7d09c60a4517306154eec756da3bdd9330c12"
+    },
+    {
+      "path": "backend/packages/auth/src/account-security.service.ts",
+      "sha256": "3a237bfb04f4708170d451cead391b92115d8f1a13d6945fb10b8dbabdff4c4c"
+    },
+    {
+      "path": "backend/packages/auth/src/auth-errors.ts",
+      "sha256": "a9c0de03cc1db8521f149ebd8f6ba8c06461d17e15e1394f237314656a14824a"
+    },
+    {
+      "path": "backend/packages/auth/src/public-auth.service.ts",
+      "sha256": "15656d03d4288f9b411b0aa3412779d17183d0977e47557ecdc39d8c930dd11a"
+    },
+    {
+      "path": "backend/packages/auth/src/session-verification-fetch.ts",
+      "sha256": "a0d0773b9d7b5c6415176535d2beb9cde2812ea497b75a37cbdcc2506204f7b2"
+    },
+    {
+      "path": "backend/packages/auth/src/session.ts",
+      "sha256": "f170c1c74b65521f121cfbd3dbaf8912dcda9eb280d978e5d8056867a963b357"
+    },
+    {
+      "path": "backend/packages/auth/src/supabase-server.ts",
+      "sha256": "012aa945d2cd36593b2a6709a8af3c55af052d8073e85d67c7bc710c7d5acaf8"
+    },
+    {
+      "path": "backend/packages/core/src/config/deployment-contract.ts",
+      "sha256": "bf0ad4a815ab7a2742bdfc6ffc652a644f7b59063cb3a7036edacb336312b736"
+    },
+    {
+      "path": "backend/packages/core/src/http/api-proxy.ts",
+      "sha256": "9ff219b2030b945313004dedf6c844cc12ead5e2be50374bd94858dc9b22a683"
+    },
+    {
+      "path": "backend/packages/core/src/http/client-ip.ts",
+      "sha256": "5da998cddc57d1b351e78dd2b7fb1516275ecb7ba0d714175f117bdda9d7c160"
+    },
+    {
+      "path": "backend/packages/db/src/client.ts",
+      "sha256": "b42336a0b5f3901125f7c5bb9fe16f6aeb4f180d6dfdcb3b95fcce03487d57a3"
+    },
+    {
+      "path": "backend/packages/db/src/metering-client.ts",
+      "sha256": "23912fe431686c4f0fc5be3bbf55476de9f96f251d9437db56e1567a03839558"
+    },
+    {
+      "path": "backend/packages/db/src/prisma-logging.ts",
+      "sha256": "b0b0cbc866cfb04caa73ca472398bf369123e79ef59ad1fee3e0308c553a9e2a"
+    },
+    {
+      "path": "backend/packages/membership/src/notification-preferences.catalog.ts",
+      "sha256": "6c06fc277be1da68d80ce982c84b9c671a537076a0942c3538a95ffeee59fb6e"
+    },
+    {
+      "path": "backend/packages/membership/src/notification-preferences.data.ts",
+      "sha256": "f4ffb107181cea2d951c8b4e87f0af4370e589bc7a80f7e630698ac69aee0a0d"
+    },
+    {
+      "path": "scripts/perf/capacity-fixture.mjs",
+      "sha256": "71dc8a4a7f6d9f66788a37c31790403ccd1d44b2bb2c9ac85d91361faebf3232"
+    },
+    {
+      "path": "scripts/perf/capacity-fixture.test.mjs",
+      "sha256": "a53ed96f0f9e96871dfe2f111c7cdee2834749448a208ccda595f97b0db2eb12"
+    },
+    {
+      "path": "scripts/perf/http-workload.mjs",
+      "sha256": "3e691fef77208f0a650e1b29f16110da677cb53bf1b9a943c494475c26e86f53"
+    },
+    {
+      "path": "scripts/perf/http-workload.test.mjs",
+      "sha256": "39cd741b845de90a891d4e7b53f3f1e10c8e8c0338ef66b8cd45a9bc62e142cc"
+    },
+    {
+      "path": "scripts/perf/local-capacity-services.mjs",
+      "sha256": "284ec214cd81f50423f790364928c94f18d18a55824fa39e623d6846bfcdc183"
+    },
+    {
+      "path": "scripts/perf/local-capacity-services.test.mjs",
+      "sha256": "5bb01beaa6e21b4906cafe8dc19b61c274fedf828ff9035c8f4a192256dcb578"
+    },
+    {
+      "path": "scripts/perf/local-edge.mjs",
+      "sha256": "9a91e12edf2ed3740ec51a891b85f009a49c7ac5223eff0aa348656d1c3a2bcb"
+    },
+    {
+      "path": "scripts/perf/local-edge.test.mjs",
+      "sha256": "ac6eba8907284d26120e6aca45fe2df1ac2791b0c2c13c943bccec39161672ff"
+    },
+    {
+      "path": "scripts/perf/telemetry.mjs",
+      "sha256": "5184ed864cda323ee8a803be730c6bd1062dc7209d2201f72f3a73ca490a7d4f"
+    },
+    {
+      "path": "scripts/perf/telemetry.test.mjs",
+      "sha256": "3487d341c931df2458cdb02b55fb479f678621da33c57c9dec5a847cfff9f5ea"
+    },
+    {
+      "path": "scripts/perf/usage-verification.mjs",
+      "sha256": "cc3ad85844315899020f67816532b0581b77567b257006007bb99c7d9812ec2c"
+    },
+    {
+      "path": "scripts/perf/usage-verification.test.mjs",
+      "sha256": "9277e0898457e694e1cfd87f0a594ad5d36a8150e6e177c620ca593b2b658dfd"
+    }
+  ]
+}

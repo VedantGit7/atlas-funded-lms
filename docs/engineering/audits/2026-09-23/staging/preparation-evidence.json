@@ -1,0 +1,130 @@
+{
+  "observedAt": "2026-09-23",
+  "branch": "release/atlas-staging-20260923",
+  "runtime": "24.21.0",
+  "affectedTests": {
+    "files": 5,
+    "passed": 93,
+    "evidence": "staging_ci_review tool transcript",
+    "command": ".test-results/node-v24.21.0/node.exe node_modules/vitest/vitest.mjs run tests/ci/ci-gate.test.ts tests/unit/release-readiness tests/unit/api/deployment-worker.test.ts --reporter=dot",
+    "exitCode": 0
+  },
+  "workflowValidation": {
+    "tool": "actionlint 1.7.12",
+    "exitCode": 0,
+    "evidence": "staging_ci_review tool transcript"
+  },
+  "stagedSecretReview": {
+    "reviewedExistingFiles": 713,
+    "liveProviderKeysFound": 0,
+    "localConnectionSettingsExcluded": true,
+    "reviewedFixtures": [
+      "localhost/example database URLs",
+      "supabase-demo JWTs",
+      "outbound TLS fixture key"
+    ]
+  },
+  "hosted": {
+    "vercel": {
+      "status": "blocked",
+      "reason": "Connected team scope is inaccessible (403)"
+    },
+    "githubProtection": {
+      "status": "blocked",
+      "reason": "Rulesets API requires eligible private-repository plan (403)"
+    },
+    "cloudflare": {
+      "status": "unavailable",
+      "reason": "No callable connector or configured deployment credentials"
+    },
+    "supabase": {
+      "status": "existing project healthy",
+      "isolationVerified": false
+    },
+    "managedHost": {
+      "status": "not configured"
+    },
+    "domain": {
+      "name": "fundedbeyond.com",
+      "ownership": "user-reported",
+      "dnsChanged": false,
+      "nameservers": [
+        "aaron.ns.cloudflare.com",
+        "elisabeth.ns.cloudflare.com"
+      ],
+      "dnsWriteAccessVerified": false
+    }
+  },
+  "deploymentPerformed": false,
+  "productionApproved": false,
+  "publication": {
+    "pr": "https://github.com/VedantGit7/atlas-funded-lms/pull/95",
+    "initialHead": "a3bcfff05dce76bc0974acfed24610a32a2eeb9c",
+    "initialPrRun": 35826081404,
+    "testedMergeSha": "0e45de4fdcf0d201f7ba294242525c1fca70380e",
+    "duplicatePushRunCancelled": 35826050238
+  },
+  "prePush": {
+    "testFiles": 324,
+    "testsPassed": 2528,
+    "routeMetadata": true,
+    "prismaBoundary": true
+  },
+  "ciFailureReproductions": {
+    "permissionFixtures": {
+      "red": {
+        "filesFailed": 4,
+        "testsFailed": 11,
+        "testsPassed": 3
+      },
+      "green": {
+        "filesPassed": 4,
+        "testsPassed": 14
+      },
+      "fullIntegration": {
+        "filesPassed": 106,
+        "filesSkipped": 3,
+        "testsPassed": 586,
+        "testsSkipped": 15
+      }
+    },
+    "coverageSource": {
+      "regressionsPassed": 4,
+      "localeAndPageTestsPassed": 12,
+      "guardsPassed": 8,
+      "dockerContextVerified": true
+    }
+  },
+  "privacyExportCiCoverage": {
+    "affectedTestsPassed": 85,
+    "expectedRegressionFailures": 3,
+    "databaseFilesPassed": 3,
+    "databaseTestsPassed": 15,
+    "databaseTestsSkipped": 0,
+    "database": "fresh disposable PostgreSQL 16",
+    "evidence": [
+      ".test-results/ci-data-rights-env/",
+      ".test-results/staging-privacy-db-green.log"
+    ],
+    "hostedValidation": "required for subsequent commit"
+  },
+  "hostedCandidateVerification": {
+    "headSha": "0bcddfa5b4424e4f0915031d32c673dcf1a18aa2",
+    "testedMergeSha": "dd07e40e97c914a8e2ddf518a4a146ec43607d02",
+    "runId": 35829104227,
+    "integrationTestsPassed": 601,
+    "integrationFilesPassed": 109,
+    "integrationSkipped": 0,
+    "browserJourneysPassed": 25,
+    "browserFaultsDetected": 7,
+    "mandatoryReleaseGatesPassed": 27,
+    "verdict": "NOT_READY",
+    "blocker": "Tracked generated outputs changed during validation",
+    "releaseArtifactId": 10737527169,
+    "browserArtifactId": 10737251529,
+    "runtimeWarnings": [
+      "Two hydration mismatches",
+      "One usage metering persistence warning"
+    ]
+  }
+}

@@ -1,10 +1,14 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import {
+  AnimatePresence,
+  motion,
+  useReducedMotion,
+} from "../../../components/motion/animation-boundary";
 import { ArrowRight, CircleAlert, Rocket, X } from "lucide-react";
 import { ClientApiError } from "../../../lib/client-api";
-import { readinessApiClient } from "@atlas/contracts-modules/readiness/readiness.api-client";
+import { readinessApiClient } from "@/modules/readiness/readiness.api-client";
 import type { CtaPolicyConfig, CtaProminence } from "@atlas/contracts/readiness/readiness.types";
 
 type ReadinessCtaCardProps = {

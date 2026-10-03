@@ -339,7 +339,7 @@ export function CourseChaptersSidebar({
 
         {!hasChapters ? (
           <div className="flex flex-1 flex-col items-center justify-center px-6 py-12 text-center">
-            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--admin-surface-high)] text-[var(--admin-outline)]">
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--admin-surface-high)] text-[var(--admin-on-surface-variant)]">
               <BookOpen className="h-6 w-6" strokeWidth={1.75} aria-hidden="true" />
             </div>
             <p className="text-sm font-medium text-[var(--admin-on-surface)]">No chapters yet</p>
@@ -428,7 +428,7 @@ export function CourseChaptersSidebar({
                         <p className={`${builderHelperClassName} px-4 pb-2`}>
                           {module.scormPackageReady
                             ? "SCORM package attached"
-                            : "SCORM package pending upload"}
+                            : "SCORM package awaiting upload or processing. Refresh to check readiness."}
                         </p>
                       ) : isLoadingLessons && moduleLessons === undefined ? (
                         <p className={`${builderHelperClassName} px-4 pb-2`}>Loading lessons…</p>

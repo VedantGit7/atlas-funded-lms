@@ -1,6 +1,5 @@
 "use client";
 
-import { createSupabaseBrowserClient } from "../supabase/browser";
 import { clearClientDataCache } from "../query/client-data-cache";
 import { clearAtlasAuthSession } from "./clear-auth-session";
 
@@ -20,6 +19,8 @@ export async function performAtlasLogout(options: PerformLogoutOptions = {}): Pr
   await clearAtlasAuthSession();
 
   try {
+    // The learner shell needs the auth SDK only after a sign-out request.
+    const { createSupabaseBrowserClient } = await import("../supabase/browser");
     const supabase = createSupabaseBrowserClient();
     await supabase.auth.signOut();
   } catch {

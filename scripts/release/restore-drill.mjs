@@ -1,249 +1,271 @@
-#!/usr/bin/env node
-
-/**
- * Backup and restore drill (hardening programme Phase 5.2).
- *
- * `restore-validate.mjs` checks an environment that has *already* been restored
- * by hand — it takes a base URL and probes it over HTTP. It never performs a
- * restore, never times one, and cannot tell you whether the procedure works. So
- * "we have a restore script" was true while "we have ever restored anything"
- * was not, and RPO/RTO were assumptions.
- *
- * This performs the cycle end to end and times each phase:
- *
- *   1. dump the source database
- *   2. create a scratch target
- *   3. restore into it
- *   4. verify the restored copy is actually usable, not merely present
- *   5. drop the scratch target
- *
- * Step 4 is the part that distinguishes a drill from a file copy. A restore that
- * produces tables but loses row-level security would look successful and be a
- * tenant-isolation breach, so the verification asserts RLS is enabled *and*
- * forced, the `app` schema and `app.current_tenant_id()` survived, migration
- * history is intact, and row counts match the source.
- *
- * Scope, stated plainly: run against a developer database this proves the
- * *procedure* and produces a timed baseline. It is not the production drill —
- * that needs the real managed database and its backup mechanism, and remains
- * open as SEC-06 in the security exception register.
- *
- * Usage:
- *   pnpm release:restore:drill
- *   RESTORE_DRILL_SOURCE_DB=atlas_lms_dev pnpm release:restore:drill
- */
-
 import { execFileSync } from "node:child_process";
+import { createHash, randomUUID } from "node:crypto";
 import { writeFileSync } from "node:fs";
-import process from "node:process";
+import { resolve } from "node:path";
+import { pathToFileURL } from "node:url";
 
-const container = process.env["RESTORE_DRILL_CONTAINER"] ?? "atlas-postgres";
-const sourceDb = process.env["RESTORE_DRILL_SOURCE_DB"] ?? "atlas_lms_dev";
-const targetDb = process.env["RESTORE_DRILL_TARGET_DB"] ?? "atlas_lms_restore_drill";
-const dbUser = process.env["RESTORE_DRILL_USER"] ?? "atlas";
-const dumpPath = `/tmp/${targetDb}.dump`;
-const outPath = process.env["RESTORE_DRILL_OUT"] ?? "restore-drill.json";
-
-/** Tables whose row counts must survive the round trip. */
-const COUNT_TABLES = ["tenants", "memberships", "roles", "entitlements", "_prisma_migrations"];
-
-function inContainer(args, { input } = {}) {
-  return execFileSync("docker", ["exec", "-i", container, ...args], {
-    encoding: "utf8",
-    input,
-    maxBuffer: 64 * 1024 * 1024,
-  });
+export function restoreConfiguration(env = process.env) {
+  const container = env.RESTORE_DRILL_CONTAINER?.trim();
+  const sourceDb = env.RESTORE_DRILL_SOURCE_DB?.trim();
+  const dbUser = env.RESTORE_DRILL_USER?.trim();
+  const runId = randomUUID().replaceAll("-", "");
+  const targetDb = env.RESTORE_DRILL_TARGET_DB || `atlas_restore_drill_${runId}`;
+  if (!container || !/^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,127}$/.test(container))
+    throw new Error("Explicit valid RESTORE_DRILL_CONTAINER is required.");
+  if (!sourceDb || !/^[a-z][a-z0-9_]{0,62}$/.test(sourceDb))
+    throw new Error("Explicit valid RESTORE_DRILL_SOURCE_DB is required.");
+  if (!dbUser || !/^[a-z][a-z0-9_]{0,62}$/.test(dbUser))
+    throw new Error("Explicit valid RESTORE_DRILL_USER is required.");
+  if (targetDb === sourceDb || !/^atlas_restore_drill_[a-f0-9]{32}$/.test(targetDb))
+    throw new Error(
+      "Target must be a unique atlas_restore_drill UUID name different from the source.",
+    );
+  if (env.RESTORE_DRILL_QUIESCED !== "1")
+    throw new Error("Stop source writes and explicitly set RESTORE_DRILL_QUIESCED=1.");
+  return { container, sourceDb, dbUser, targetDb, runId };
 }
 
-function psql(db, sql) {
-  return inContainer(["psql", "-U", dbUser, "-d", db, "-t", "-A", "-c", sql]).trim();
-}
-
-function timed(label, fn) {
-  const startedAt = Date.now();
-  const value = fn();
-  const durationMs = Date.now() - startedAt;
-  console.log(`  ${label.padEnd(28)} ${(durationMs / 1000).toFixed(2)}s`);
-  return { value, durationMs };
-}
-
-const failures = [];
-const phases = {};
-
-console.log(`Restore drill: ${sourceDb} -> ${targetDb} (container ${container})\n`);
-
-try {
-  // ---- 1. Source facts, so the restore has something to be checked against.
-  const sourceCounts = {};
-  for (const table of COUNT_TABLES) {
-    sourceCounts[table] = Number(psql(sourceDb, `select count(*)::bigint from ${table}`));
-  }
-  const sourceTableCount = Number(
-    psql(
-      sourceDb,
-      `select count(*)::bigint from information_schema.tables
-        where table_schema='public' and table_type='BASE TABLE'`,
-    ),
-  );
-  console.log(`source: ${sourceTableCount} tables, ${sourceCounts["tenants"]} tenants\n`);
-
-  // ---- 2. Dump.
-  phases.dump = timed("dump", () =>
-    inContainer(["pg_dump", "-U", dbUser, "-d", sourceDb, "-Fc", "-f", dumpPath]),
-  ).durationMs;
-
-  const dumpBytes = Number(inContainer(["stat", "-c", "%s", dumpPath]).trim() || "0");
-
-  // ---- 3. Fresh target.
-  phases.createTarget = timed("create target", () => {
-    inContainer([
-      "psql",
-      "-U",
-      dbUser,
-      "-d",
-      "postgres",
-      "-c",
-      `drop database if exists ${targetDb}`,
-    ]);
-    inContainer([
-      "psql",
-      "-U",
-      dbUser,
-      "-d",
-      "postgres",
-      "-c",
-      `create database ${targetDb} owner ${dbUser}`,
-    ]);
-  }).durationMs;
-
-  // ---- 4. Restore.
-  phases.restore = timed("restore", () => {
-    try {
-      inContainer(["pg_restore", "-U", dbUser, "-d", targetDb, "--no-owner", dumpPath]);
-    } catch (error) {
-      // pg_restore exits non-zero on benign role/ownership notices. Treat the
-      // verification below as the arbiter rather than the exit code, but keep
-      // the output so a real failure is not swallowed.
-      const text = String(error.stdout ?? "") + String(error.stderr ?? "");
-      if (/FATAL|could not connect|out of memory/i.test(text)) throw error;
-      phases.restoreWarnings = text.split("\n").filter(Boolean).length;
-    }
-  }).durationMs;
-
-  // ---- 5. Verify. A restore that loses RLS is worse than one that fails.
-  phases.verify = timed("verify", () => {
-    const restoredTables = Number(
-      psql(
-        targetDb,
-        `select count(*)::bigint from information_schema.tables
-          where table_schema='public' and table_type='BASE TABLE'`,
-      ),
-    );
-    if (restoredTables !== sourceTableCount) {
-      failures.push(`table count ${restoredTables} != source ${sourceTableCount}`);
-    }
-
-    for (const table of COUNT_TABLES) {
-      const restored = Number(psql(targetDb, `select count(*)::bigint from ${table}`));
-      if (restored !== sourceCounts[table]) {
-        failures.push(`${table}: ${restored} rows restored, source had ${sourceCounts[table]}`);
-      }
-    }
-
-    // The tenant-isolation guarantee has to survive the round trip.
-    const unprotected = Number(
-      psql(
-        targetDb,
-        `select count(*)::bigint
-           from information_schema.columns c
-           join pg_class pc on pc.relname = c.table_name
-          where c.table_schema='public' and c.column_name='tenant_id'
-            and (pc.relrowsecurity = false or pc.relforcerowsecurity = false)`,
-      ),
-    );
-    if (unprotected > 0) {
-      failures.push(`${unprotected} tenant table(s) restored without RLS enabled and forced`);
-    }
-
-    const tenantFn = psql(
-      targetDb,
-      `select count(*)::bigint from pg_proc p
-         join pg_namespace n on n.oid = p.pronamespace
-        where n.nspname='app' and p.proname='current_tenant_id'`,
-    );
-    if (Number(tenantFn) !== 1) {
-      failures.push("app.current_tenant_id() missing from the restored database");
-    }
-
-    const policies = Number(psql(targetDb, `select count(*)::bigint from pg_policy`));
-    if (policies === 0) failures.push("no RLS policies restored");
-
-    phases.restoredTables = restoredTables;
-    phases.restoredPolicies = policies;
-  }).durationMs;
-
-  // ---- 6. Clean up.
-  phases.cleanup = timed("cleanup", () => {
-    inContainer([
-      "psql",
-      "-U",
-      dbUser,
-      "-d",
-      "postgres",
-      "-c",
-      `drop database if exists ${targetDb}`,
-    ]);
-    inContainer(["rm", "-f", dumpPath]);
-  }).durationMs;
-
-  const rtoMs = phases.dump + phases.createTarget + phases.restore + phases.verify;
-
+export function runRestoreDrill({ container, sourceDb, dbUser, targetDb, runId }) {
+  const dumpPath = `/tmp/atlas_restore_drill_${runId}.dump`;
+  const marker = `atlas-restore-drill:${runId}`;
   const report = {
     generatedAt: new Date().toISOString(),
     sourceDatabase: sourceDb,
+    targetDatabase: targetDb,
     environment: "local-docker",
     productionDrill: false,
-    note: "Proves the procedure and gives a timed baseline. NOT the production drill (SEC-06): that needs the managed database and its own backup mechanism.",
-    dumpBytes,
-    sourceTableCount,
-    sourceCounts,
-    phasesMs: phases,
-    measuredRtoMs: rtoMs,
-    ok: failures.length === 0,
-    failures,
+    rpoMeasured: false,
+    databaseConfigurationRestored: false,
+    clusterRolesRestored: false,
+    scope:
+      "Quiesced local database dump and restoration in the same cluster; excludes database settings/ACLs/locale, cluster roles, managed backups, external Auth/storage and application recovery.",
+    phasesMs: {},
+    checks: {},
+    cleanupComplete: false,
+    ok: false,
+    failures: [],
   };
-
-  writeFileSync(outPath, `${JSON.stringify(report, null, 2)}\n`);
-
-  console.log(
-    `\nrestored ${phases.restoredTables} tables, ${phases.restoredPolicies} RLS policies`,
-  );
-  console.log(`dump size: ${(dumpBytes / 1024 / 1024).toFixed(1)} MB`);
-  console.log(`measured RTO (dump+create+restore+verify): ${(rtoMs / 1000).toFixed(2)}s`);
-  console.log(`written: ${outPath}`);
-
-  if (failures.length > 0) {
-    console.error("\nRestore drill FAILED:\n");
-    for (const failure of failures) console.error(`- ${failure}`);
-    process.exit(1);
-  }
-
-  console.log("\nRestore drill passed.");
-  process.exit(0);
-} catch (error) {
-  console.error("\nRestore drill errored:", error instanceof Error ? error.message : error);
-  try {
-    inContainer([
+  let targetCreated = false;
+  let dumpCreated = false;
+  let phase = "configuration";
+  const docker = (...args) =>
+    execFileSync("docker", ["exec", container, ...args], {
+      encoding: "utf8",
+      timeout: 900_000,
+      maxBuffer: 64 * 1024 * 1024,
+      stdio: ["ignore", "pipe", "pipe"],
+      shell: false,
+    });
+  const sql = (database, statement) =>
+    docker(
       "psql",
+      "-X",
+      "-v",
+      "ON_ERROR_STOP=1",
       "-U",
       dbUser,
       "-d",
-      "postgres",
+      database,
+      "-A",
+      "-t",
       "-c",
-      `drop database if exists ${targetDb}`,
-    ]);
+      statement,
+    ).trim();
+  const quote = (value) => `"${value.replaceAll('"', '""')}"`;
+  const hash = (value) => createHash("sha256").update(value).digest("hex");
+  const timed = (name, fn) => {
+    phase = name;
+    const start = performance.now();
+    try {
+      return fn();
+    } finally {
+      report.phasesMs[name] = Math.round(performance.now() - start);
+    }
+  };
+  const snapshot = (database) => {
+    const tables = JSON.parse(
+      sql(
+        database,
+        `/* restore-drill:tables */ SELECT coalesce(json_agg(t ORDER BY schema,name),'[]'::json) FROM (SELECT n.nspname AS schema,c.relname AS name FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE c.relkind IN ('r','p') AND n.nspname !~ '^pg_' AND n.nspname <> 'information_schema') t`,
+      ),
+    );
+    const contents = [];
+    // Keep commands below Windows argument limits while avoiding one Docker process per table.
+    for (let offset = 0; offset < tables.length; offset += 20) {
+      const batch = tables.slice(offset, offset + 20);
+      const statements = batch.map(
+        ({ schema, name }) =>
+          `/* restore-drill:rows */ SELECT json_build_object('rows',count(*)::text,'digest',md5(coalesce(string_agg(h,'' ORDER BY h),''))) FROM (SELECT md5(row_to_json(t)::text) h FROM ONLY ${quote(schema)}.${quote(name)} t) hashes;`,
+      );
+      const values = sql(database, statements.join("\n"))
+        .split("\n")
+        .map((line) => JSON.parse(line));
+      if (values.length !== batch.length) throw new Error("Incomplete table snapshot.");
+      contents.push(...batch.map((table, index) => ({ ...table, ...values[index] })));
+    }
+    const sequences = JSON.parse(
+      sql(
+        database,
+        `/* restore-drill:sequences */ SELECT coalesce(json_agg(t ORDER BY schemaname,sequencename),'[]'::json) FROM (SELECT schemaname,sequencename,sequenceowner,start_value,min_value,max_value,increment_by,cycle,cache_size,last_value::text FROM pg_sequences WHERE schemaname !~ '^pg_' AND schemaname <> 'information_schema') t`,
+      ),
+    );
+    for (const sequence of sequences) {
+      sequence.state = JSON.parse(
+        sql(
+          database,
+          `/* restore-drill:sequence-state */ SELECT json_build_object('last_value',last_value::text,'is_called',is_called) FROM ${quote(sequence.schemaname)}.${quote(sequence.sequencename)}`,
+        ),
+      );
+    }
+    const security = JSON.parse(
+      sql(
+        database,
+        `/* restore-drill:security */ WITH tenant_tables AS (SELECT c.relrowsecurity,c.relforcerowsecurity FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='public' AND c.relkind IN ('r','p') AND EXISTS (SELECT 1 FROM pg_attribute a WHERE a.attrelid=c.oid AND a.attname='tenant_id' AND NOT a.attisdropped)) SELECT json_build_object('tenantTables',(SELECT count(*) FROM tenant_tables),'unprotected',(SELECT count(*) FROM tenant_tables WHERE NOT relrowsecurity OR NOT relforcerowsecurity),'policies',(SELECT count(*) FROM pg_policy),'tenantFunction',(SELECT count(*) FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='app' AND p.proname='current_tenant_id'))`,
+      ),
+    );
+    const schema = docker("pg_dump", "-U", dbUser, "-d", database, "--schema-only", "--no-comments")
+      .replaceAll("\r\n", "\n")
+      .split("\n")
+      .filter((line) => !line.startsWith("--") && !/^\\(?:un)?restrict\b/.test(line))
+      .join("\n")
+      .trim();
+    return { contents, sequences, security, schemaSha256: hash(schema) };
+  };
+  try {
+    timed("collisionCheck", () => {
+      if (
+        sql(
+          "postgres",
+          `/* restore-drill:exists */ SELECT count(*) FROM pg_database WHERE datname='${targetDb}'`,
+        ) !== "0"
+      )
+        throw new Error("Target already exists.");
+    });
+    const source = timed("sourceSnapshot", () => snapshot(sourceDb));
+    report.checks.securityBaseline =
+      source.contents.length > 0 &&
+      source.security.tenantTables > 0 &&
+      source.security.unprotected === 0 &&
+      source.security.policies > 0 &&
+      source.security.tenantFunction === 1;
+    if (!report.checks.securityBaseline) throw new Error("Source security baseline failed.");
+    report.dataCoverage = Object.fromEntries(
+      ["tenants", "tenant_domains", "tenant_usage_events"].map((name) => [
+        name,
+        Number(
+          source.contents.find((table) => table.schema === "public" && table.name === name)?.rows ??
+            0,
+        ),
+      ]),
+    );
+    report.checks.applicationDataPresent = Object.values(report.dataCoverage).every(
+      (rows) => rows >= 2,
+    );
+    if (!report.checks.applicationDataPresent)
+      throw new Error("Missing representative application data.");
+    report.sourceTableCount = source.contents.length;
+    report.sourceRowCount = source.contents.reduce((sum, table) => sum + Number(table.rows), 0);
+    report.sourceSnapshotSha256 = hash(JSON.stringify(source));
+    timed("dump", () => {
+      docker("touch", dumpPath);
+      dumpCreated = true;
+      docker("chmod", "600", dumpPath);
+      docker("pg_dump", "-U", dbUser, "-d", sourceDb, "-Fc", "-f", dumpPath);
+      report.dumpBytes = Number(docker("stat", "-c", "%s", dumpPath).trim());
+      if (!(report.dumpBytes > 0)) throw new Error("Empty dump.");
+    });
+    timed("sourceQuiescenceCheck", () => {
+      report.checks.sourceUnchanged = JSON.stringify(snapshot(sourceDb)) === JSON.stringify(source);
+      if (!report.checks.sourceUnchanged) throw new Error("Source changed.");
+    });
+    timed("createTarget", () => {
+      sql("postgres", `CREATE DATABASE ${quote(targetDb)} OWNER ${quote(dbUser)}`);
+      targetCreated = true;
+      sql("postgres", `COMMENT ON DATABASE ${quote(targetDb)} IS '${marker}'`);
+    });
+    timed("restore", () =>
+      docker(
+        "pg_restore",
+        "-U",
+        dbUser,
+        "-d",
+        targetDb,
+        "--exit-on-error",
+        "--single-transaction",
+        dumpPath,
+      ),
+    );
+    timed("verify", () => {
+      const restored = snapshot(targetDb);
+      report.checks.tableContentsMatch =
+        JSON.stringify(restored.contents) === JSON.stringify(source.contents);
+      report.checks.sequencesMatch =
+        JSON.stringify(restored.sequences) === JSON.stringify(source.sequences);
+      report.checks.schemaOwnershipGrantsMatch = restored.schemaSha256 === source.schemaSha256;
+      report.checks.securityMatches =
+        JSON.stringify(restored.security) === JSON.stringify(source.security);
+      report.restoredTables = restored.contents.length;
+      report.restoredPolicies = restored.security.policies;
+      report.restoredSnapshotSha256 = hash(JSON.stringify(restored));
+      if (Object.values(report.checks).some((value) => !value))
+        throw new Error("Restored snapshot differs.");
+    });
+    report.databaseRecoveryDurationMs =
+      report.phasesMs.createTarget + report.phasesMs.restore + report.phasesMs.verify;
   } catch {
-    // best effort
+    report.failures.push(`${phase} failed; no restore success is claimed.`);
+  } finally {
+    let cleanupOk = true;
+    if (targetCreated) {
+      try {
+        const actual = sql(
+          "postgres",
+          `/* restore-drill:ownership */ SELECT shobj_description(oid,'pg_database') FROM pg_database WHERE datname='${targetDb}'`,
+        );
+        if (actual !== marker) {
+          cleanupOk = false;
+          report.failures.push("Target ownership changed; no database was dropped.");
+        } else {
+          sql("postgres", `DROP DATABASE ${quote(targetDb)}`);
+        }
+      } catch {
+        cleanupOk = false;
+        report.failures.push(
+          "Owned target cleanup failed; inspect its ownership before manual removal.",
+        );
+      }
+    }
+    if (dumpCreated) {
+      try {
+        docker("rm", "-f", dumpPath);
+      } catch {
+        cleanupOk = false;
+        report.failures.push("Owned dump cleanup failed.");
+      }
+    }
+    report.cleanupComplete = cleanupOk;
   }
-  process.exit(1);
+  report.ok = report.failures.length === 0 && report.checks.securityBaseline === true;
+  return report;
+}
+
+if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
+  let report;
+  try {
+    report = runRestoreDrill(restoreConfiguration());
+  } catch (error) {
+    report = {
+      ok: false,
+      productionDrill: false,
+      cleanupComplete: true,
+      failures: [error.message],
+    };
+  }
+  writeFileSync(
+    process.env.RESTORE_DRILL_OUT || "restore-drill.json",
+    `${JSON.stringify(report, null, 2)}\n`,
+    { mode: 0o600 },
+  );
+  console.log(JSON.stringify(report, null, 2));
+  process.exitCode = report.ok ? 0 : 1;
 }

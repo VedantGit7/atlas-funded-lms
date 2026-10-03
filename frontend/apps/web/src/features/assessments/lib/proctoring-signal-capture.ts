@@ -1,5 +1,5 @@
 import { clientApi, createClientUuid } from "../../../lib/client-api";
-import type { ProctoringEventType } from "../../../server/proctoring/proctoring.schemas";
+import type { ProctoringEventType } from "@atlas/contracts/proctoring/proctoring.schemas";
 
 type BufferedEvent = {
   eventType: ProctoringEventType;

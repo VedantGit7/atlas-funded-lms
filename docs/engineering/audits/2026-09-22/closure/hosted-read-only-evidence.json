@@ -1,0 +1,321 @@
+{
+  "checkedAtUtc": "2026-09-22 02:45:08 UTC",
+  "scope": "Read-only connected-service verification on 2026-09-22. No hosted mutations; no credentials, user data, source payloads, email addresses or signed URLs retained.",
+  "sourceTree": {
+    "localHead": "ca8c0f1e7e69780b4e2ddc2a1136907a2e47c350",
+    "remediations": "Uncommitted working tree; this SHA does not identify the remediation candidate.",
+    "freshLocalVerification": "Recorded separately by the consolidated local verification run."
+  },
+  "github": {
+    "repository": "VedantGit7/atlas-funded-lms",
+    "visibility": "private",
+    "defaultBranch": "main",
+    "accountPermissions": {
+      "admin": true,
+      "maintain": true,
+      "pull": true,
+      "push": true,
+      "triage": true
+    },
+    "main": {
+      "sha": "d15794708e6a2d0231286612e4bc573e92deb619",
+      "protected": false,
+      "protection": {
+        "enabled": true,
+        "required_status_checks": {
+          "enforcement_level": "non_admins",
+          "contexts": [
+            "authorization-tests",
+            "audit-compliance-check",
+            "build",
+            "dependency-scan",
+            "forbidden-scope-check",
+            "format-check",
+            "integration-tests",
+            "install",
+            "outbox-compliance-check",
+            "lint",
+            "migration-validation",
+            "secret-scan",
+            "prisma-boundary-check",
+            "route-metadata-check",
+            "rls-tests",
+            "tenant-isolation-tests",
+            "typecheck",
+            "unit-tests"
+          ],
+          "checks": [
+            {
+              "context": "authorization-tests",
+              "app_id": 15368
+            },
+            {
+              "context": "audit-compliance-check",
+              "app_id": 15368
+            },
+            {
+              "context": "build",
+              "app_id": 15368
+            },
+            {
+              "context": "dependency-scan",
+              "app_id": 15368
+            },
+            {
+              "context": "forbidden-scope-check",
+              "app_id": 15368
+            },
+            {
+              "context": "format-check",
+              "app_id": 15368
+            },
+            {
+              "context": "integration-tests",
+              "app_id": 15368
+            },
+            {
+              "context": "install",
+              "app_id": 15368
+            },
+            {
+              "context": "outbox-compliance-check",
+              "app_id": 15368
+            },
+            {
+              "context": "lint",
+              "app_id": 15368
+            },
+            {
+              "context": "migration-validation",
+              "app_id": 15368
+            },
+            {
+              "context": "secret-scan",
+              "app_id": 15368
+            },
+            {
+              "context": "prisma-boundary-check",
+              "app_id": 15368
+            },
+            {
+              "context": "route-metadata-check",
+              "app_id": 15368
+            },
+            {
+              "context": "rls-tests",
+              "app_id": 15368
+            },
+            {
+              "context": "tenant-isolation-tests",
+              "app_id": 15368
+            },
+            {
+              "context": "typecheck",
+              "app_id": 15368
+            },
+            {
+              "context": "unit-tests",
+              "app_id": 15368
+            }
+          ]
+        }
+      }
+    },
+    "branchProtectionRead": {
+      "error": "GitHub API error 403: {\"message\":\"Resource not accessible by integration\",\"documentation_url\":\"https://docs.github.com/rest/branches/branch-protection#get-branch-protection\",\"status\":\"403\"}",
+      "error_code": "FORBIDDEN",
+      "error_data": {
+        "message": "Resource not accessible by integration",
+        "documentation_url": "https://docs.github.com/rest/branches/branch-protection#get-branch-protection",
+        "status": "403"
+      }
+    },
+    "rulesetsRead": {
+      "error": "GitHub API error 403: {\"message\":\"Upgrade to GitHub Pro or make this repository public to enable this feature.\",\"documentation_url\":\"https://docs.github.com/rest/repos/rules#get-all-repository-rulesets\",\"status\":\"403\"}",
+      "error_code": "FORBIDDEN",
+      "error_data": {
+        "message": "Upgrade to GitHub Pro or make this repository public to enable this feature.",
+        "documentation_url": "https://docs.github.com/rest/repos/rules#get-all-repository-rulesets",
+        "status": "403"
+      }
+    },
+    "latestRuns": {
+      "totalCount": 313,
+      "sampleSize": 5,
+      "runs": [
+        {
+          "id": 35425980742,
+          "name": ".github/workflows/ci.yml",
+          "sha": "d684a56aacfbf5e93e92b4b4c671e3e2465fc062",
+          "event": "push",
+          "status": "completed",
+          "conclusion": "failure",
+          "createdAt": "2026-09-19T06:12:27Z",
+          "url": "https://github.com/VedantGit7/atlas-funded-lms/actions/runs/35425980742"
+        },
+        {
+          "id": 35425980312,
+          "name": ".github/workflows/drills.yml",
+          "sha": "d684a56aacfbf5e93e92b4b4c671e3e2465fc062",
+          "event": "push",
+          "status": "completed",
+          "conclusion": "failure",
+          "createdAt": "2026-09-19T06:12:27Z",
+          "url": "https://github.com/VedantGit7/atlas-funded-lms/actions/runs/35425980312"
+        },
+        {
+          "id": 35425887297,
+          "name": "npm_and_yarn in /. for adm-zip - Update #1582978362",
+          "sha": "d15794708e6a2d0231286612e4bc573e92deb619",
+          "event": "dynamic",
+          "status": "completed",
+          "conclusion": "success",
+          "createdAt": "2026-09-19T06:10:22Z",
+          "url": "https://github.com/VedantGit7/atlas-funded-lms/actions/runs/35425887297"
+        },
+        {
+          "id": 35383359832,
+          "name": ".github/workflows/ci.yml",
+          "sha": "ca8c0f1e7e69780b4e2ddc2a1136907a2e47c350",
+          "event": "push",
+          "status": "completed",
+          "conclusion": "failure",
+          "createdAt": "2026-09-18T18:59:25Z",
+          "url": "https://github.com/VedantGit7/atlas-funded-lms/actions/runs/35383359832"
+        },
+        {
+          "id": 35383358851,
+          "name": ".github/workflows/drills.yml",
+          "sha": "ca8c0f1e7e69780b4e2ddc2a1136907a2e47c350",
+          "event": "push",
+          "status": "completed",
+          "conclusion": "failure",
+          "createdAt": "2026-09-18T18:59:24Z",
+          "url": "https://github.com/VedantGit7/atlas-funded-lms/actions/runs/35383358851"
+        }
+      ]
+    },
+    "latestCiJobs": {
+      "total_count": 0,
+      "jobs": []
+    },
+    "interpretation": "No successful candidate CI established. Branch summary is internally inconsistent; neither account admin metadata nor it proves effective administrative protection. Required contexts omit ci-required. Plan and integration capability block full readback. No upgrade or permissions change attempted."
+  },
+  "vercel": {
+    "teams": {
+      "result": {
+        "teams": [],
+        "pagination": {
+          "count": 0
+        }
+      }
+    },
+    "projectLookupError": [
+      {
+        "type": "text",
+        "text": "Input validation error: Invalid arguments for tool get_project: idOrName: Invalid input: expected string, received undefined"
+      }
+    ],
+    "deploymentsReadError": [
+      {
+        "type": "text",
+        "text": "Vercel API request failed (403 Forbidden): {\"error\":{\"code\":\"forbidden\",\"message\":\"Not authorized: Trying to access resource under scope \\\"vedantwedhane-8075s-projects\\\". You must re-authenticate to this scope or use a token with access to this scope.\",\"saml\":false,\"teamId\":\"team_LFRrS4VsrCp4yghJP4qrDo3k\",\"scope\":\"vedantwedhane-8075s-projects\",\"enforced\":false}}"
+      }
+    ],
+    "interpretation": "No fresh deployment or settings verification possible through current connector. get_project schema translation expects idOrName despite exposed projectId; deployment list independently confirms scope authorization failure. Historical no-healthy-deployment/settings reports are not promoted to fresh facts."
+  },
+  "supabase": {
+    "project": [
+      {
+        "id": "rolumnldqjelwfvtmmqf",
+        "name": "atlas-funded-lms",
+        "region": "ap-south-1",
+        "status": "ACTIVE_HEALTHY"
+      }
+    ],
+    "organization": {
+      "id": "uoubdxyhutdqsngtsoxz",
+      "name": "atlas-funded-lms",
+      "plan": "free",
+      "opt_in_tags": [],
+      "allowed_release_channels": [
+        "ga",
+        "preview"
+      ]
+    },
+    "migrations": [
+      {
+        "version": "20260920145340",
+        "name": "harden_rls_auto_enable_execute"
+      }
+    ],
+    "inventory": [
+      {
+        "database_name": "postgres",
+        "public_table_count": 0,
+        "anon_rls_helper_execute_count": 0,
+        "authenticated_rls_helper_execute_count": 0
+      }
+    ],
+    "helperPrivileges": [
+      {
+        "schema_name": "public",
+        "proname": "rls_auto_enable",
+        "owner": "postgres",
+        "security_definer": true,
+        "result_type": "event_trigger",
+        "proconfig": [
+          "search_path=pg_catalog"
+        ],
+        "anon_execute": false,
+        "authenticated_execute": false,
+        "service_role_execute": true,
+        "public_execute": false,
+        "event_triggers": [
+          {
+            "name": "ensure_rls",
+            "tags": [
+              "CREATE TABLE",
+              "CREATE TABLE AS",
+              "SELECT INTO"
+            ],
+            "event": "ddl_command_end",
+            "enabled": "O"
+          }
+        ]
+      }
+    ],
+    "securityAdvisors": {
+      "lints": [
+        {
+          "name": "auth_leaked_password_protection",
+          "title": "Leaked Password Protection Disabled",
+          "level": "WARN",
+          "facing": "EXTERNAL",
+          "categories": [
+            "SECURITY"
+          ],
+          "description": "Leaked password protection is currently disabled.",
+          "remediation": "https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection",
+          "count": 1,
+          "findings": [
+            {
+              "detail": "Supabase Auth prevents the use of compromised passwords by checking against HaveIBeenPwned.org. Enable this feature to enhance security.",
+              "metadata": {
+                "type": "auth",
+                "entity": "Auth"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "interpretation": "F19 helper ACL remains hardened; retained event trigger has not been behaviorally invoked by this read-only check. Leaked-password protection remains disabled and organization remains Free. Zero public base tables means these advisors do not certify application-schema RLS, grants, migrations or application deployment."
+  },
+  "limitations": [
+    "GitHub Actions sample is latest five runs, not complete run history; latest failed CI job list is empty.",
+    "No hosted login, mutation, password change, upload, worker restart, live delivery, migration, load or restore test performed.",
+    "No fresh DNS/browser hosting assessment performed by this inventory task.",
+    "No callable Cloudflare control-plane tools discovered."
+  ]
+}

@@ -1,5 +1,3 @@
-"use client";
-
 import type { ReactNode } from "react";
 import Link from "next/link";
 import {
@@ -28,7 +26,6 @@ import {
   Zap,
   type LucideIcon,
 } from "lucide-react";
-import { useCurrency } from "../../../currency/CurrencyProvider";
 import { scoreBandLabel, scoreColor } from "./dashboard-model";
 import { HeroSceneMount, ProgressBar, RadialProgress, Reveal } from "./dashboard-ui";
 import { LearnerPromoSliderCarousel } from "./LearnerPromoSliderCarousel";
@@ -198,8 +195,6 @@ export function LearnerDashboard({
 }) {
   const greeting = data.displayName?.trim() ? `Welcome back, ${data.displayName}` : "Welcome back";
   const coreColor = data.readiness?.color ?? "#6aa9ff";
-  const { rates } = useCurrency();
-  const usdInr = typeof rates["INR"] === "number" ? rates["INR"] : null;
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 pb-24 md:pb-8">
@@ -323,7 +318,7 @@ export function LearnerDashboard({
               className="relative isolate z-0 h-56 w-full overflow-hidden rounded-2xl border border-white/10 sm:h-72"
               style={{ background: "radial-gradient(120% 120% at 70% 15%, #111c33, #060a14)" }}
             >
-              <HeroSceneMount color={coreColor} usdInr={usdInr} />
+              <HeroSceneMount color={coreColor} />
             </div>
           </div>
         </section>

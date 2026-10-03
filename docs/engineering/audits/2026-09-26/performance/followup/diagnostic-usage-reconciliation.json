@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-09-26T16:45:21.777Z",
+  "durableRequestDelta": 3018,
+  "minimumExpectedRequests": 3020,
+  "maximumExpectedRequests": 3020,
+  "withinExpectedBounds": false,
+  "exact": false,
+  "limitations": "Requires snapshots around the full workload including enrollment setup, no unrelated tenant traffic or journal pruning, and completed server work before the final snapshot. Errors and cancellations create count uncertainty. Combine with terminal failure logs and acknowledgement counters; HTTP success alone does not establish durability."
+}

@@ -59,21 +59,18 @@ describeWithDb("data-rights worker", () => {
       schemaVersion: 1,
     });
 
-    await withTenantTx(authoringTenantTx(fixture, fixture.adminMembershipId), async (tx) => {
-      await processExportRequestedEvent(
-        tx,
-        {
-          tenantId: fixture.tenantId,
-          actorMembershipId: fixture.adminMembershipId,
-          requestId: admin.requestId,
-        },
-        {
-          id: randomUUID(),
-          eventType: DATA_EXPORT_REQUESTED_EVENT,
-          payload,
-        },
-      );
-    });
+    await processExportRequestedEvent(
+      {
+        tenantId: fixture.tenantId,
+        actorMembershipId: fixture.adminMembershipId,
+        requestId: admin.requestId,
+      },
+      {
+        id: randomUUID(),
+        eventType: DATA_EXPORT_REQUESTED_EVENT,
+        payload,
+      },
+    );
 
     const job = await withTenantTx(
       authoringTenantTx(fixture),
@@ -143,29 +140,36 @@ describeWithDb("data-rights worker", () => {
           now()
         )
       `;
+    });
 
-      const first = await processOutboxBatch(tx, {
-        limit: 5,
-        maxRetries: 1,
-        handlers: createDataRightsOutboxConsumers(),
-      });
+    const db = {
+      transaction: <T>(fn: Parameters<typeof withTenantTx<T>>[1]) =>
+        withTenantTx(authoringTenantTx(fixture), fn),
+    };
 
-      const second = await processOutboxBatch(tx, {
-        limit: 5,
-        maxRetries: 1,
-        handlers: createDataRightsOutboxConsumers(),
-      });
+    const first = await processOutboxBatch(db, {
+      limit: 5,
+      maxRetries: 1,
+      handlers: createDataRightsOutboxConsumers(),
+    });
 
-      expect(first.delivered).toBeGreaterThan(0);
+    const second = await processOutboxBatch(db, {
+      limit: 5,
+      maxRetries: 1,
+      handlers: createDataRightsOutboxConsumers(),
+    });
 
-      // See the analytics duplicate-delivery test: the poll now filters
-      // already-delivered pairs in SQL, so a replay is invisible to the loop
-      // rather than counted as `skipped`. The delivery row is the durable
-      // guarantee, so assert on that instead of a worker counter.
-      expect(second.processed).toBe(0);
-      expect(second.delivered).toBe(0);
-      expect(second.failed).toBe(0);
+    expect(first.delivered).toBeGreaterThan(0);
 
+    // See the analytics duplicate-delivery test: the poll now filters
+    // already-delivered pairs in SQL, so a replay is invisible to the loop
+    // rather than counted as `skipped`. The delivery row is the durable
+    // guarantee, so assert on that instead of a worker counter.
+    expect(second.processed).toBe(0);
+    expect(second.delivered).toBe(0);
+    expect(second.failed).toBe(0);
+
+    await withTenantTx(authoringTenantTx(fixture), async (tx) => {
       const deliveries = await tx.$queryRaw<Array<{ count: number }>>`
         select count(*)::int as count
         from event_deliveries

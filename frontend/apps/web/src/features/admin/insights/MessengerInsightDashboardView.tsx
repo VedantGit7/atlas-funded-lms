@@ -358,7 +358,7 @@ function ZeroActivityEmpty() {
 
 function MessageEmptyIcon() {
   return (
-    <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full border border-[var(--admin-border)] bg-[var(--admin-surface-low)] text-[var(--admin-outline)]">
+    <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full border border-[var(--admin-border)] bg-[var(--admin-surface-low)] text-[var(--admin-on-surface-variant)]">
       <Mail className="h-6 w-6" aria-hidden="true" />
     </div>
   );

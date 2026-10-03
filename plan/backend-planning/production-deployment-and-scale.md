@@ -292,7 +292,9 @@ Phases 1–2 are independent of the hosting decision and should not wait on it.
 - [ ] Restore from backup rehearsed end to end, timed and documented
 - [ ] Quantitative entitlement limits enforced for at least learners and storage
 - [ ] Proctoring media retention active with a documented retention window
-- [ ] Per-tenant cost attribution available for pricing decisions
+- [x] Per-tenant cost attribution available for pricing decisions -- Platform console P9
+      (`/platform/costs`), 2026-09-18. The rate card and fixed costs must be entered once
+      hosting is chosen; see `docs/runbooks/cost-attribution.md` for what is and is not metered.
 - [ ] `pnpm ci` and `pnpm sprint0:gate` green
 
 ---

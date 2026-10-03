@@ -50,6 +50,7 @@ export type ReportRunRow = {
   format: ReportFormat;
   row_count: number | null;
   r2_object_key: string | null;
+  artifact_json?: unknown;
   error_json: unknown;
   progress_percent: number | null;
   started_at: Date | null;

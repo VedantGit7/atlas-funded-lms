@@ -206,7 +206,7 @@ export function AdminPaymentInstalmentCancelModal({ open, plan, onClose, onCance
           </button>
           <button
             type="button"
-            className="rounded bg-[var(--admin-danger)] px-5 py-2 text-sm font-bold text-[var(--admin-on-primary)] disabled:opacity-50"
+            className="rounded bg-[var(--admin-danger)] px-5 py-2 text-sm font-bold text-[var(--admin-on-danger)] disabled:opacity-50"
             disabled={busy || !reason}
             onClick={() => void submit()}
           >

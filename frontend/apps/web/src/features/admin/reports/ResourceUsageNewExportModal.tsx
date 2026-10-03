@@ -448,7 +448,7 @@ export function ResourceUsageNewExportModal({
                             setMetricKey(event.target.value);
                           }}
                           placeholder="usage.storage_gb"
-                          className="h-10 w-full rounded-md border border-[var(--admin-border)] bg-[var(--admin-bg)] pr-3 pl-9 font-mono text-sm text-[var(--admin-on-surface)] outline-none placeholder:text-[var(--admin-outline)] focus:border-[var(--admin-primary)] focus:ring-1 focus:ring-[var(--admin-primary)]"
+                          className="h-10 w-full rounded-md border border-[var(--admin-border)] bg-[var(--admin-bg)] pr-3 pl-9 font-mono text-sm text-[var(--admin-on-surface)] outline-none placeholder:text-[var(--admin-on-surface-variant)] focus:border-[var(--admin-primary)] focus:ring-1 focus:ring-[var(--admin-primary)]"
                         />
                       </div>
                       <p className="mt-1 text-[11px] text-[var(--admin-on-surface-variant)]">
@@ -553,7 +553,7 @@ export function ResourceUsageNewExportModal({
                             ? "Search courses by title..."
                             : "Search learners by name or email..."
                         }
-                        className="h-10 w-full rounded-md border border-[var(--admin-border)] bg-[var(--admin-bg)] pr-3 pl-9 text-sm text-[var(--admin-on-surface)] outline-none placeholder:text-[var(--admin-outline)] focus:border-[var(--admin-primary)] focus:ring-1 focus:ring-[var(--admin-primary)]"
+                        className="h-10 w-full rounded-md border border-[var(--admin-border)] bg-[var(--admin-bg)] pr-3 pl-9 text-sm text-[var(--admin-on-surface)] outline-none placeholder:text-[var(--admin-on-surface-variant)] focus:border-[var(--admin-primary)] focus:ring-1 focus:ring-[var(--admin-primary)]"
                       />
                     </div>
                     <p className="mt-1 text-[11px] text-[var(--admin-on-surface-variant)]">
