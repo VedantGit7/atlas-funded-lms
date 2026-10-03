@@ -2,7 +2,8 @@ import { randomUUID } from "node:crypto";
 import { test, expect } from "../fixtures/axe";
 import { loginWithCredentials } from "../helpers/auth";
 import { requiredCredential } from "../helpers/env";
-import { waitForClickHandler, waitForHydration } from "../helpers/hydration";
+import { waitForChangeHandler, waitForClickHandler, waitForHydration } from "../helpers/hydration";
+import { coldRouteNavigationOptions } from "../helpers/navigation";
 import { scenario } from "../helpers/scenario";
 
 test.describe("J06 instructor authoring and independent review", () => {
@@ -39,7 +40,10 @@ test.describe("J06 instructor authoring and independent review", () => {
     expect(created.status()).toBe(200);
     const { data: course } = (await created.json()) as { data: { id: string; status: string } };
     expect(course.status).toBe("DRAFT");
-    await expect(page).toHaveURL(new RegExp(`/studio/courses/${course.id}(?:/dashboard)?$`));
+    await expect(page).toHaveURL(
+      new RegExp(`/studio/courses/${course.id}(?:/dashboard)?$`),
+      coldRouteNavigationOptions(),
+    );
     await page.goto(`/studio/courses/${course.id}/editor`);
     await waitForHydration(page);
     const addSection = page.getByRole("button", { name: "Add Section", exact: true });
@@ -60,6 +64,10 @@ test.describe("J06 instructor authoring and independent review", () => {
     const live = page
       .getByRole("radiogroup", { name: "Course visibility" })
       .getByRole("radio", { name: /^Live/ });
+    // The publish panel is a streamed client boundary: body hydration does not mean this radio
+    // can change yet, and a click that lands first is silently lost.
+    await expect(live).toBeEnabled();
+    await waitForChangeHandler(live);
     await page
       .getByRole("radiogroup", { name: "Course visibility" })
       .getByText("Live", { exact: true })

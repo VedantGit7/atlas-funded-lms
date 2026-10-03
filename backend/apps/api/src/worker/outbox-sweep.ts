@@ -4,6 +4,7 @@ import { withGlobalDb } from "@atlas/db/global-db";
 import { withTenantTx } from "@atlas/db/with-tenant-tx";
 import { purgeExpiredIdempotencyRecords } from "@atlas/api/idempotency-registry";
 import { purgeExpiredProctoringMedia } from "../server/proctoring/proctoring-media-retention";
+import { finalizeExpiredAttemptsForTenant } from "../server/attempts/attempt-deadline-sweep";
 import { purgeExpiredAttributionEvents } from "@atlas/domain/sales-marketing/attribution-retention";
 import { getStorageProvider, parseStorageEnv } from "@atlas/storage";
 import { OUTBOX_PROCESSORS, type OutboxProcessor } from "./outbox-processors";
@@ -55,6 +56,8 @@ export type SweepResult = {
   attributionEventsPurged: number;
   exportFilesPurged: number;
   usageEventsProcessed: number;
+  /** Timed attempts closed by their deadline this sweep (H1). */
+  expiredAttemptsFinalized: number;
 };
 
 export async function listAllRetentionTenantIds(): Promise<string[]> {
@@ -101,12 +104,14 @@ const RETENTION_COUNTERS: Record<
   | "attributionEventsPurged"
   | "exportFilesPurged"
   | "usageEventsProcessed"
+  | "expiredAttemptsFinalized"
 > = {
   "usage-meter-drain": "usageEventsProcessed",
   "export-file-purge": "exportFilesPurged",
   "idempotency-purge": "idempotencyRecordsPurged",
   "proctoring-media-purge": "proctoringMediaPurged",
   "attribution-events-purge": "attributionEventsPurged",
+  "attempt-deadline-finalize": "expiredAttemptsFinalized",
 };
 
 export function defaultRetentionTasks(batchLimit = 25): RetentionTask[] {
@@ -161,6 +166,23 @@ export function defaultRetentionTasks(batchLimit = 25): RetentionTask[] {
       },
     },
     {
+      // H1: grade timed attempts the learner never submitted (closed tab, lost connection).
+      // Not retention, but it needs the same per-active-tenant visit every sweep.
+      name: "attempt-deadline-finalize",
+      run: async ({ tenantId, requestId }) => {
+        const outcome = await finalizeExpiredAttemptsForTenant({
+          tenantId,
+          requestId,
+          limit: batchLimit,
+        });
+        if (outcome.failed)
+          throw new Error(
+            `${outcome.failed} expired attempt(s) could not be finalized; first: ${outcome.firstError ?? "unknown"}`,
+          );
+        return outcome.finalized;
+      },
+    },
+    {
       // A no-op for every tenant that has not opted in, which is the default.
       // This task visits active tenants only; deletion follows their setting.
       name: "attribution-events-purge",
@@ -200,6 +222,7 @@ export async function runOutboxSweep(options: SweepOptions): Promise<SweepResult
     attributionEventsPurged: 0,
     exportFilesPurged: 0,
     usageEventsProcessed: 0,
+    expiredAttemptsFinalized: 0,
   };
 
   const tenantIds = await listTenants();
@@ -278,7 +301,10 @@ export async function runOutboxSweep(options: SweepOptions): Promise<SweepResult
         });
         const counter = RETENTION_COUNTERS[task.name];
         if (counter) result[counter] += purged;
-        if (task.name === "usage-meter-drain" && purged >= options.batchLimit)
+        if (
+          (task.name === "usage-meter-drain" || task.name === "attempt-deadline-finalize") &&
+          purged >= options.batchLimit
+        )
           result.saturated = true;
         options.onProgress?.();
       } catch (error) {

@@ -94,7 +94,14 @@ export class SmtpEmailProvider implements EmailProvider {
   readonly supportsIdempotency = false;
   private transporter: Transporter | null = null;
 
-  constructor(private readonly env: NodeJS.ProcessEnv = process.env) {}
+  /**
+   * `transportFactory` exists for tests. Mocking nodemailer by module path stopped working when
+   * nodemailer 10 split into separate ESM and CommonJS builds, so tests inject the fake instead.
+   */
+  constructor(
+    private readonly env: NodeJS.ProcessEnv = process.env,
+    private readonly transportFactory: typeof createTransport = createTransport,
+  ) {}
 
   isConfigured(): boolean {
     return Boolean(this.env["SMTP_HOST"] && this.env["NOTIFICATION_EMAIL_FROM"]);
@@ -110,7 +117,7 @@ export class SmtpEmailProvider implements EmailProvider {
     const user = this.env["SMTP_USER"];
     const pass = this.env["SMTP_PASSWORD"];
 
-    this.transporter = createTransport({
+    this.transporter = this.transportFactory({
       host,
       port: Number.isFinite(port) ? port : 587,
       // 465 is implicit TLS; other ports upgrade via STARTTLS.

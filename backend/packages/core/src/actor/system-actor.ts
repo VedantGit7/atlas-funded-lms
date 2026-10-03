@@ -29,7 +29,8 @@ export type SystemActorSource =
   | "payments.razorpay.webhook"
   | "zoom.webhook"
   | "marketing.public_action"
-  | "sales.public_attribution";
+  | "sales.public_attribution"
+  | "assessments.attempt_deadline";
 
 export function isSystemActor(actorMembershipId: string | null | undefined): boolean {
   return actorMembershipId === SYSTEM_ACTOR_MEMBERSHIP_ID;

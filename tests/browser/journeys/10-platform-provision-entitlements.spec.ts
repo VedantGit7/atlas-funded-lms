@@ -3,6 +3,7 @@ import { test, expect } from "../fixtures/axe";
 import { loginWithCredentials } from "../helpers/auth";
 import { requiredCredential } from "../helpers/env";
 import { waitForHydration } from "../helpers/hydration";
+import { coldRouteNavigationOptions } from "../helpers/navigation";
 import { scenario } from "../helpers/scenario";
 import { provisionedTenantPersistence } from "../helpers/persistence";
 
@@ -51,8 +52,18 @@ test.describe("J10 platform provision and entitlements", () => {
       ],
     });
     const { data: tenant } = (await provisioned.json()) as { data: { id: string } };
-    await expect(page).toHaveURL(new RegExp(`/platform/tenants/${tenant.id}$`));
-    await expect(page.getByRole("heading", { name, exact: true })).toBeVisible();
+    // This is the run's first visit to the tenant detail route, so on a fresh dev server (the
+    // main run and every failure probe start one) it compiles cold. `router.push` commits the URL
+    // only once that route's payload arrives — no loading boundary sits between /tenants/new and
+    // /tenants/[id] — so both the URL and the heading wait on the compile. The saved-state checks
+    // below keep their normal timeouts.
+    await expect(page).toHaveURL(
+      new RegExp(`/platform/tenants/${tenant.id}$`),
+      coldRouteNavigationOptions(),
+    );
+    await expect(page.getByRole("heading", { name, exact: true })).toBeVisible(
+      coldRouteNavigationOptions(),
+    );
     await expect(page.locator("dd").filter({ hasText: /^ACTIVE$/ })).toBeVisible();
     await expect(page.locator("dd").filter({ hasText: /^SUCCEEDED$/ })).toBeVisible();
     const headers = { "x-atlas-platform-reason": reason };

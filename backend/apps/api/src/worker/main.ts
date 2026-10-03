@@ -150,12 +150,18 @@ export async function main(): Promise<number> {
       // Report successful worker cycles even when there are no active tenants.
       await pingWorkerHeartbeat();
 
-      if (sweep.processed > 0 || sweep.usageEventsProcessed > 0 || sweep.errors.length > 0) {
+      if (
+        sweep.processed > 0 ||
+        sweep.usageEventsProcessed > 0 ||
+        sweep.expiredAttemptsFinalized > 0 ||
+        sweep.errors.length > 0
+      ) {
         log("info", "worker.sweep.completed", {
           requestId: sweep.requestId,
           tenants: sweep.tenants,
           processed: sweep.processed,
           usageEventsProcessed: sweep.usageEventsProcessed,
+          expiredAttemptsFinalized: sweep.expiredAttemptsFinalized,
           delivered: sweep.delivered,
           failed: sweep.failed,
           skipped: sweep.skipped,
