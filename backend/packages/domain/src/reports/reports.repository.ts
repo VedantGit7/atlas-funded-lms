@@ -707,6 +707,22 @@ export const reportsRepository = {
     return rows.length > 0;
   },
 
+  /** Cheap probe so a frequent tick can skip the full pass when nothing is due. */
+  async hasDueSchedules(tx: TenantTx, args: { asOf: Date }): Promise<boolean> {
+    const rows = await tx.$queryRaw<Array<{ due: boolean }>>`
+      select exists (
+        select 1 from report_schedules
+        where is_active = true and next_run_at <= ${args.asOf}
+      ) as due
+    `;
+    return rows[0]?.due === true;
+  },
+
+  /**
+   * Claims due schedules for this transaction. `skip locked` lets several worker instances tick at
+   * once without enqueuing the same scheduled report twice: a schedule another tick holds is
+   * skipped, and by the time that tick commits it has advanced `next_run_at`.
+   */
   async listDueSchedules(
     tx: TenantTx,
     args: { asOf: Date; limit: number },
@@ -719,6 +735,7 @@ export const reportsRepository = {
         and rs.next_run_at <= ${args.asOf}
       order by rs.next_run_at asc
       limit ${args.limit}
+      for update of rs skip locked
     `;
 
     return rows.map((row) => ({

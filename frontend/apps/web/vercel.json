@@ -8,10 +8,6 @@
     {
       "path": "/api/v1/internal/certificates/expire",
       "schedule": "0 2 * * *"
-    },
-    {
-      "path": "/api/v1/internal/reports/tick",
-      "schedule": "*/15 * * * *"
     }
   ]
 }

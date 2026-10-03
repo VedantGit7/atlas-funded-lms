@@ -5,6 +5,7 @@ import { withTenantTx } from "@atlas/db/with-tenant-tx";
 import { purgeExpiredIdempotencyRecords } from "@atlas/api/idempotency-registry";
 import { purgeExpiredProctoringMedia } from "../server/proctoring/proctoring-media-retention";
 import { finalizeExpiredAttemptsForTenant } from "../server/attempts/attempt-deadline-sweep";
+import { tickDueReportSchedulesForTenant } from "../server/reports/reports-tick.service";
 import { purgeExpiredAttributionEvents } from "@atlas/domain/sales-marketing/attribution-retention";
 import { getStorageProvider, parseStorageEnv } from "@atlas/storage";
 import { OUTBOX_PROCESSORS, type OutboxProcessor } from "./outbox-processors";
@@ -58,6 +59,8 @@ export type SweepResult = {
   usageEventsProcessed: number;
   /** Timed attempts closed by their deadline this sweep (H1). */
   expiredAttemptsFinalized: number;
+  /** Scheduled report runs enqueued this sweep (formerly a Vercel cron). */
+  scheduledReportRunsEnqueued: number;
 };
 
 export async function listAllRetentionTenantIds(): Promise<string[]> {
@@ -105,6 +108,7 @@ const RETENTION_COUNTERS: Record<
   | "exportFilesPurged"
   | "usageEventsProcessed"
   | "expiredAttemptsFinalized"
+  | "scheduledReportRunsEnqueued"
 > = {
   "usage-meter-drain": "usageEventsProcessed",
   "export-file-purge": "exportFilesPurged",
@@ -112,6 +116,7 @@ const RETENTION_COUNTERS: Record<
   "proctoring-media-purge": "proctoringMediaPurged",
   "attribution-events-purge": "attributionEventsPurged",
   "attempt-deadline-finalize": "expiredAttemptsFinalized",
+  "report-schedule-tick": "scheduledReportRunsEnqueued",
 };
 
 export function defaultRetentionTasks(batchLimit = 25): RetentionTask[] {
@@ -183,6 +188,14 @@ export function defaultRetentionTasks(batchLimit = 25): RetentionTask[] {
       },
     },
     {
+      // Scheduled reports. This was a Vercel cron every 15 minutes, which the Hobby plan
+      // rejects; the worker checks each tenant once a minute and the `reports` processor
+      // above already generates what it enqueues.
+      name: "report-schedule-tick",
+      run: async ({ tenantId, requestId }) =>
+        tickDueReportSchedulesForTenant({ tenantId, requestId: `${requestId}:${tenantId}` }),
+    },
+    {
       // A no-op for every tenant that has not opted in, which is the default.
       // This task visits active tenants only; deletion follows their setting.
       name: "attribution-events-purge",
@@ -223,6 +236,7 @@ export async function runOutboxSweep(options: SweepOptions): Promise<SweepResult
     exportFilesPurged: 0,
     usageEventsProcessed: 0,
     expiredAttemptsFinalized: 0,
+    scheduledReportRunsEnqueued: 0,
   };
 
   const tenantIds = await listTenants();
