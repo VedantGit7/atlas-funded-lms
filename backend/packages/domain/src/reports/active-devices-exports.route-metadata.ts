@@ -17,6 +17,7 @@ export const getActiveDevicesExportsMetadata = {
 
 export const createActiveDevicesExportMetadata = {
   permission: "reports.run",
+  mfa: "required",
   audit: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",
@@ -26,6 +27,7 @@ export const createActiveDevicesExportMetadata = {
 
 export const retryActiveDevicesExportMetadata = {
   permission: "reports.run",
+  mfa: "required",
   audit: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",
@@ -35,6 +37,7 @@ export const retryActiveDevicesExportMetadata = {
 
 export const mutateDeviceExportScheduleMetadata = {
   permission: "reports.run",
+  mfa: "required",
   audit: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",

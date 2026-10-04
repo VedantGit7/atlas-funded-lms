@@ -17,6 +17,7 @@ export const listSuperLiveInsightsRosterMetadata = {
 
 export const exportSuperLiveInsightsRosterMetadata = {
   permission: "reports.run",
+  mfa: "required",
   audit: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",

@@ -164,3 +164,74 @@ export const STEP_UP_MFA_OPERATIONS: readonly StepUpOperation[] = [
     reason: "Removes an export destination.",
   },
 ];
+
+export type StepUpRouteRule = {
+  /** Matched against the route path under backend/apps/api/src/app. */
+  pattern: RegExp;
+  methods: readonly StepUpOperation["method"][];
+  category: StepUpCategory;
+  reason: string;
+};
+
+/**
+ * Report exports, by route shape (H4 follow-up). There are dozens of these and
+ * every new report adds more, so they are matched by path rather than listed:
+ * a new report's export endpoints are covered the day they are written.
+ *
+ * Report data leaves the tenant three ways, and each is a rule here:
+ * producing an export (which can email it to any address or post it to a
+ * webhook), retrieving a finished file, and changing where scheduled exports
+ * are delivered. Viewing a report on screen is not a rule: `POST
+ * /reports/runs` and its status and preview stay open, and the status
+ * response carries no download link, so the file itself is only reachable
+ * through the download route below.
+ */
+export const STEP_UP_MFA_ROUTE_RULES: readonly StepUpRouteRule[] = [
+  {
+    pattern: /^\/api\/v1\/reports\/(?:.+\/)?(?:export|exports|bi-exports)$/,
+    methods: ["POST"],
+    category: "bulk-data",
+    reason: "Produces a report export, which can be emailed to any address or sent to a webhook.",
+  },
+  {
+    pattern: /^\/api\/v1\/reports\/(?:.+\/)?exports\/\[runId\]\/retry$/,
+    methods: ["POST"],
+    category: "bulk-data",
+    reason: "Regenerates and redelivers a report export.",
+  },
+  {
+    pattern: /^\/api\/v1\/reports\/schedules(?:\/\[id\])?$/,
+    methods: ["POST", "PATCH"],
+    category: "bulk-data",
+    reason: "Sets the recipients and webhook that scheduled report runs are delivered to.",
+  },
+  {
+    pattern:
+      /^\/api\/v1\/reports\/(?:.+\/)?exports\/schedules\/(?:bulk|\[scheduleId\](?:\/(?:run|duplicate))?)$/,
+    methods: ["POST", "PATCH"],
+    category: "bulk-data",
+    reason: "Starts, copies or redirects a scheduled export delivery.",
+  },
+  {
+    pattern: /^\/api\/v1\/reports\/exports\/destinations\/\[destinationId\]\/test$/,
+    methods: ["POST"],
+    category: "bulk-data",
+    reason: "Sends sample report data to an export destination.",
+  },
+  {
+    pattern:
+      /^\/api\/v1\/(?:reports\/runs\/\[runId\]\/download\/\[format\]|reports\/exports\/\[runId\]|reports\/bi-exports\/\[id\]|exports\/\[id\]|sales\/attribution\/export)$/,
+    methods: ["GET"],
+    category: "bulk-data",
+    reason: "Returns an export file, or a signed link to one.",
+  },
+];
+
+/** True when a route/method falls under a report export rule. */
+export function matchesStepUpRouteRule(route: string, method: string): StepUpRouteRule | null {
+  return (
+    STEP_UP_MFA_ROUTE_RULES.find(
+      (rule) => (rule.methods as readonly string[]).includes(method) && rule.pattern.test(route),
+    ) ?? null
+  );
+}

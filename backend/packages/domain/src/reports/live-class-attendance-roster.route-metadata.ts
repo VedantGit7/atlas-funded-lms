@@ -17,6 +17,7 @@ export const listLiveClassAttendanceRosterMetadata = {
 
 export const exportLiveClassAttendanceRosterMetadata = {
   permission: "reports.run",
+  mfa: "required",
   audit: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",

@@ -17,6 +17,7 @@ export const listExportsRosterMetadata = {
 
 export const exportExportsRosterMetadata = {
   permission: "reports.run",
+  mfa: "required",
   audit: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",
@@ -26,6 +27,7 @@ export const exportExportsRosterMetadata = {
 
 export const getExportRunDetailMetadata = {
   permission: "reports.run",
+  mfa: "required",
   audit: "none",
   rateLimit: "authenticatedTenantRead",
   idempotency: "none",
@@ -53,6 +55,7 @@ export const cancelExportRunMetadata = {
 
 export const retryExportRunMetadata = {
   permission: "reports.run",
+  mfa: "required",
   audit: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",
@@ -80,6 +83,7 @@ export const listSchedulesRosterMetadata = {
 
 export const runScheduleNowMetadata = {
   permission: "reports.schedule.manage",
+  mfa: "required",
   audit: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",
@@ -89,6 +93,7 @@ export const runScheduleNowMetadata = {
 
 export const bulkMutateSchedulesMetadata = {
   permission: "reports.schedule.manage",
+  mfa: "required",
   audit: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",
@@ -107,6 +112,7 @@ export const getScheduleDetailMetadata = {
 
 export const duplicateScheduleMetadata = {
   permission: "reports.schedule.manage",
+  mfa: "required",
   audit: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",
@@ -155,6 +161,7 @@ export const deleteDestinationMetadata = {
 
 export const testDestinationMetadata = {
   permission: "reports.schedule.manage",
+  mfa: "required",
   audit: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",
@@ -164,6 +171,7 @@ export const testDestinationMetadata = {
 
 export const exportDestinationsListMetadata = {
   permission: "reports.run",
+  mfa: "required",
   audit: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",

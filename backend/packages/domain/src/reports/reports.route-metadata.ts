@@ -30,6 +30,7 @@ export const createCustomReportDefinitionMetadata = {
 
 export const createBiExportMetadata = {
   permission: "reports.run",
+  mfa: "required",
   audit: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",
@@ -48,6 +49,7 @@ export const listBiExportMetadata = {
 
 export const getBiExportMetadata = {
   permission: "reports.run",
+  mfa: "required",
   audit: "none",
   rateLimit: "authenticatedTenantRead",
   idempotency: "none",
@@ -95,6 +97,34 @@ export const getReportRunMetadata = {
   },
 } satisfies RouteMetadata;
 
+/**
+ * The finished file itself (H4 follow-up). Run status and preview keep
+ * getReportRunMetadata so viewing a report on screen needs no challenge; the
+ * file is only retrievable here, with step-up MFA.
+ */
+export const downloadReportRunMetadata = {
+  permission: "reports.run",
+  mfa: "required",
+  audit: "none",
+  rateLimit: "authenticatedTenantRead",
+  idempotency: "none",
+  resourceLoader: async ({
+    tx,
+    ctx,
+    params,
+  }: {
+    tx: Parameters<typeof loadReportRunResourceRef>[0]["tx"];
+    ctx: LoaderCtx;
+    params: Record<string, string>;
+  }) => {
+    const reportRunId = params["runId"] ?? params["id"];
+    if (!reportRunId) {
+      throw new Error("Missing report run id");
+    }
+    return loadReportRunResourceRef({ tx, tenantId: ctx.tenantId, reportRunId });
+  },
+} satisfies RouteMetadata;
+
 export const listReportSchedulesMetadata = {
   permission: "reports.library.view",
   audit: "none",
@@ -106,6 +136,7 @@ export const listReportSchedulesMetadata = {
 
 export const createReportScheduleMetadata = {
   permission: "reports.schedule.manage",
+  mfa: "required",
   audit: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",
@@ -115,6 +146,7 @@ export const createReportScheduleMetadata = {
 
 export const updateReportScheduleMetadata = {
   permission: "reports.schedule.manage",
+  mfa: "required",
   audit: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",

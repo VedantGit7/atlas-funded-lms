@@ -14,7 +14,7 @@ import {
 } from "@atlas/domain/reports/reports-export-runner";
 import { getSystemReportDefinition } from "@atlas/domain/reports/reports.registry";
 import { reportsRepository } from "@atlas/domain/reports/reports.repository";
-import { getReportRunMetadata } from "@atlas/domain/reports/reports.route-metadata";
+import { downloadReportRunMetadata } from "@atlas/domain/reports/reports.route-metadata";
 import { getReportRun } from "@atlas/domain/reports/reports.service";
 
 const paramsSchema = z.object({
@@ -47,7 +47,7 @@ export const GET = createTenantRoute<
   Zod.output<typeof downloadResponseSchema>,
   typeof paramsSchema
 >({
-  metadata: getReportRunMetadata,
+  metadata: downloadReportRunMetadata,
   params: paramsSchema,
   output: downloadResponseSchema,
   handler: async ({ tx, ctx, params }) => {

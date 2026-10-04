@@ -320,6 +320,13 @@ export function AdminReportSectionPage({ slug, title }: AdminReportSectionPagePr
         />
       ) : null}
 
+      {preview?.totalRowCount != null && preview.totalRowCount > preview.rows.length ? (
+        <p className="text-sm text-[var(--admin-on-surface-variant)]">
+          Showing the first {preview.rows.length.toLocaleString()} of{" "}
+          {preview.totalRowCount.toLocaleString()} rows. Download the report for all of them.
+        </p>
+      ) : null}
+
       {activeRunId ? (
         <div className="flex flex-wrap gap-2">
           {(["csv", "xlsx", "pdf"] as const).map((format) => (

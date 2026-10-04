@@ -17,6 +17,7 @@ export const getCustomFieldExportsMetadata = {
 
 export const createCustomFieldExportMetadata = {
   permission: "reports.run",
+  mfa: "required",
   audit: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",
@@ -26,6 +27,7 @@ export const createCustomFieldExportMetadata = {
 
 export const retryCustomFieldExportMetadata = {
   permission: "reports.run",
+  mfa: "required",
   audit: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",
@@ -35,6 +37,7 @@ export const retryCustomFieldExportMetadata = {
 
 export const mutateCustomFieldExportScheduleMetadata = {
   permission: "reports.run",
+  mfa: "required",
   audit: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",

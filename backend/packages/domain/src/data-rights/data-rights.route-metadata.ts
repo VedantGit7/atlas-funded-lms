@@ -45,6 +45,7 @@ export const createExportMetadata = {
 
 export const getExportMetadata = {
   permission: "data.export.run",
+  mfa: "required",
   entitlement: "data.export.enable",
   audit: "none",
   rateLimit: "authenticatedTenantRead",

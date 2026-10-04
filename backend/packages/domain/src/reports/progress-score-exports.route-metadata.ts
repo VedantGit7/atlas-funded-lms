@@ -17,6 +17,7 @@ export const getProgressScoreExportsMetadata = {
 
 export const createProgressScoreExportMetadata = {
   permission: "reports.run",
+  mfa: "required",
   audit: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",
@@ -26,6 +27,7 @@ export const createProgressScoreExportMetadata = {
 
 export const retryProgressScoreExportMetadata = {
   permission: "reports.run",
+  mfa: "required",
   audit: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",
@@ -35,6 +37,7 @@ export const retryProgressScoreExportMetadata = {
 
 export const mutateProgressScoreExportScheduleMetadata = {
   permission: "reports.run",
+  mfa: "required",
   audit: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",

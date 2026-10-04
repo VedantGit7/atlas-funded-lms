@@ -166,6 +166,9 @@ describeWithDb("data-rights API integration", () => {
           metadata: getExportMetadata,
           params: { id: created.data.id },
           input: {},
+          // The export detail returns a download link, so it requires a
+          // step-up (aal2) session (H4 follow-up).
+          sessionAssuranceLevel: "aal2",
         });
 
         return getExportJob(

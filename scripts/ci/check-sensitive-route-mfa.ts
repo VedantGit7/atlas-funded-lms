@@ -4,6 +4,8 @@ import ts from "typescript";
 import {
   STEP_UP_MFA_OPERATIONS,
   STEP_UP_MFA_PERMISSIONS,
+  STEP_UP_MFA_ROUTE_RULES,
+  matchesStepUpRouteRule,
 } from "../../backend/packages/authorization/src/step-up-mfa-policy";
 
 /**
@@ -14,7 +16,10 @@ import {
  * `mfa`. Then:
  *
  * - a mutation declaring a permission in STEP_UP_MFA_PERMISSIONS must require MFA;
- * - every route/method in STEP_UP_MFA_OPERATIONS must exist and require MFA.
+ * - every route/method in STEP_UP_MFA_OPERATIONS must exist and require MFA;
+ * - every route/method matching STEP_UP_MFA_ROUTE_RULES (report exports) must
+ *   require MFA, and every rule must match at least one route, so a renamed
+ *   path cannot quietly leave a rule checking nothing.
  *
  * Parsed with the TypeScript compiler rather than regular expressions: the
  * audit guard beside this one records three separate regex blind spots (first
@@ -242,6 +247,29 @@ for (const operation of STEP_UP_MFA_OPERATIONS) {
     );
   } else if (binding.metadata.mfa !== "required") {
     violations.push(`${where(binding)}: ${operation.reason} Declare mfa: "required"`);
+  }
+}
+
+for (const rule of STEP_UP_MFA_ROUTE_RULES) {
+  const covered = all.filter(
+    (binding) =>
+      (rule.methods as readonly string[]).includes(binding.method) &&
+      rule.pattern.test(binding.route),
+  );
+  if (covered.length === 0) {
+    violations.push(`${rule.pattern.source}: route rule matches no route; update or remove it`);
+  }
+}
+
+for (const binding of all) {
+  const rule = matchesStepUpRouteRule(binding.route, binding.method);
+  if (!rule) continue;
+  if (!binding.metadata) {
+    violations.push(
+      `${where(binding)}: matches a report export rule but its metadata could not be resolved`,
+    );
+  } else if (binding.metadata.mfa !== "required") {
+    violations.push(`${where(binding)}: ${rule.reason} Declare mfa: "required"`);
   }
 }
 
