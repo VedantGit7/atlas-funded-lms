@@ -45,6 +45,14 @@ The public-key distinction follows [Supabase's API key guidance](https://supabas
 
 F11 additionally requires `API_PROXY_SECRET` on web and API (not worker): at least 32 nontrivial characters, distinct from `CRON_SECRET` and `INTERNAL_WORKER_SECRET`, and shared only by web/API within the same environment. API ingress authenticates it before trusting forwarded tenant hosts. See the [deployment topology runbook](deployment-topology.md) for build-time API origin configuration, preview separation and rollout requirements.
 
+The deployed **API** additionally requires `SCORM_CONTENT_SIGNING_KEYS`. These keys sign the per-launch SCORM package-read capabilities (see the [CSP runbook](content-security-policy.md#scorm-playback-audit-h2)).
+
+- **Format:** `<kid>:<secret>` pairs, comma-separated, at most four. A kid is 1–16 characters of `[A-Za-z0-9_-]`. Each secret is at least 32 nontrivial characters. Every secret must differ from every other service secret.
+- **Signing and verifying:** the first key signs; every listed key verifies.
+- **Rotation:** prepend a new key and deploy. Wait out the six-hour capability lifetime, then remove the old key.
+- **Scope:** web and worker do not need it.
+- **Local development:** without it, local development uses a random per-process key, so open lessons stop loading their remaining files after an API restart until they are reopened.
+
 Deployed **web** additionally requires explicit client-IP attribution: positive `TRUSTED_PROXY_HOPS` or a valid `TRUSTED_CLIENT_IP_HEADER`. The default/template is zero trusted hops, which intentionally fails deployed web validation until configured. API and worker need no edge attribution setting. Configuration validation cannot prove that an edge overwrites/appends the selected headers or blocks direct origin access; verify that separately. Public calls and browser API rewrites with absent/invalid attribution fail closed with retryable 503.
 
 ## Release verification before routing production traffic

@@ -5,6 +5,11 @@ import {
   resolveRuntimeEnvironment,
   type RuntimeEnvironment,
 } from "./runtime-environment";
+import {
+  parseScormContentSigningKeys,
+  SCORM_CONTENT_SIGNING_KEYS_ENV,
+  ScormContentSigningKeysError,
+} from "./scorm-content-keys";
 
 export type DeploymentService = "api" | "web" | "worker";
 
@@ -252,6 +257,29 @@ export function validateDeploymentConfiguration(
     secret("API_PROXY_SECRET");
     if ([value("CRON_SECRET"), value("INTERNAL_WORKER_SECRET")].includes(value("API_PROXY_SECRET")))
       issues.push("API_PROXY_SECRET must be distinct from cron and worker secrets");
+  }
+  if (service === "api") {
+    // The API mints and verifies SCORM package-read capabilities; web only forwards them.
+    const raw = requireValue(SCORM_CONTENT_SIGNING_KEYS_ENV);
+    if (raw) {
+      try {
+        const otherSecrets = new Set(
+          ["CRON_SECRET", "INTERNAL_WORKER_SECRET", "API_PROXY_SECRET", "OBSERVABILITY_HASH_SALT"]
+            .map(value)
+            .filter(Boolean),
+        );
+        if (parseScormContentSigningKeys(raw).some((key) => otherSecrets.has(key.secret)))
+          issues.push(
+            `${SCORM_CONTENT_SIGNING_KEYS_ENV} secrets must be distinct from every other service secret`,
+          );
+      } catch (error) {
+        issues.push(
+          error instanceof ScormContentSigningKeysError
+            ? error.message
+            : `${SCORM_CONTENT_SIGNING_KEYS_ENV} is invalid`,
+        );
+      }
+    }
   }
   const billingKey = requireValue("LEARNER_BILLING_ENC_KEY");
   if (

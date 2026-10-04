@@ -1,16 +1,20 @@
 import type { TenantTx } from "@atlas/db";
 import { AtlasHttpError } from "@atlas/core/http/errors";
-import { parseStorageEnv } from "@atlas/storage/schemas/storage-env";
-import { buildScormContentStorageKey } from "@atlas/storage/scorm-package-extract";
-import { getStorageProvider } from "@atlas/storage/providers/storage-provider-factory";
 import { findEnrollmentForMembership } from "./courses.repository";
 import { moduleNotFound } from "./courses.errors";
 import { findModuleWithCourse } from "./course-authoring.repository";
 import type { ModuleScormProgressBody } from "./course-authoring-schemas";
+import { mintScormContentCapability } from "./scorm-content-capability";
 import {
   findModuleScormProgress,
+  lockModuleScormProgress,
   upsertModuleScormProgress,
 } from "./module-scorm-progress.repository";
+import {
+  parseScormDurationSeconds,
+  SCORM_INTERNAL_PREFIX,
+  SCORM_TOTAL_SECONDS_KEY,
+} from "./scorm-runtime";
 
 type ServiceCtx = {
   tenantId: string;
@@ -18,7 +22,7 @@ type ServiceCtx = {
   requestId: string;
 };
 
-async function requireEnrolledScormModule(tx: TenantTx, ctx: ServiceCtx, moduleId: string) {
+export async function requireEnrolledScormModule(tx: TenantTx, ctx: ServiceCtx, moduleId: string) {
   const module = await findModuleWithCourse({ tx, moduleId });
 
   if (!module || module.tenantId !== ctx.tenantId) {
@@ -80,75 +84,35 @@ export async function getModuleScormLaunchForLearner(
   });
 
   const launchPath = module.scormLaunchPath ?? "";
-  const contentUrl = `/api/v1/modules/${moduleId}/scorm-content?path=${encodeURIComponent(launchPath)}`;
+  const scormVersion = normalizeScormVersion(module.scormVersion);
+  // A fresh capability per launch: reopening the chapter is how a long session renews it.
+  const capability = mintScormContentCapability({
+    tenantId: ctx.tenantId,
+    membershipId: ctx.actorMembershipId,
+    moduleId: module.id,
+    contentVersion: module.scormContentVersion ?? null,
+    scormVersion,
+  });
+  const contentUrl = `/api/v1/public/scorm/${capability.token}/${launchPath
+    .split("/")
+    .map((segment) => encodeURIComponent(segment))
+    .join("/")}`;
 
   return {
     data: {
       moduleId: module.id,
       courseId: module.courseId,
       title: module.title,
-      scormVersion: normalizeScormVersion(module.scormVersion),
+      scormVersion,
       launchPath,
       contentUrl,
+      launchId: capability.launchId,
       progress: {
         status: normalizeScormProgressStatus(progress?.status),
         progressPct: progress?.progressPct ?? 0,
         completedAt: progress?.completedAt?.toISOString() ?? null,
       },
     },
-  };
-}
-
-export async function getModuleScormContentForLearner(
-  tx: TenantTx,
-  ctx: ServiceCtx,
-  moduleId: string,
-  relativePath: string,
-) {
-  const module = await requireEnrolledScormModule(tx, ctx, moduleId);
-  const env = parseStorageEnv(process.env);
-  const provider = getStorageProvider();
-
-  // `relativePath` comes straight from a client query parameter. The key builder
-  // now rejects traversal instead of silently stripping it, so translate that
-  // into a 404 rather than letting a raw Error surface as a 500.
-  let key: string;
-  try {
-    key = buildScormContentStorageKey({
-      tenantId: ctx.tenantId,
-      moduleId,
-      relativePath,
-      contentVersion: module.scormContentVersion,
-    });
-  } catch {
-    throw new AtlasHttpError({
-      code: "PERMISSION_DENIED",
-      status: 404,
-      message: "SCORM content file was not found.",
-    });
-  }
-
-  const body = await provider.getObjectBody({
-    bucket: env.R2_BUCKET_NAME,
-    key,
-  });
-
-  if (!body) {
-    throw new AtlasHttpError({
-      code: "PERMISSION_DENIED",
-      status: 404,
-      message: "SCORM content file was not found.",
-    });
-  }
-
-  const metadata = await provider.headObject({
-    bucket: env.R2_BUCKET_NAME,
-    key,
-  });
-
-  return {
-    body,
-    contentType: metadata?.contentType ?? "application/octet-stream",
   };
 }
 
@@ -169,7 +133,7 @@ export async function getModuleScormProgressForLearner(
     data: {
       status: normalizeScormProgressStatus(progress?.status),
       progressPct: progress?.progressPct ?? 0,
-      cmi: (progress?.cmiJson ?? {}) as Record<string, string | number | boolean>,
+      cmi: publicCmi(progress?.cmiJson ?? {}),
       completedAt: progress?.completedAt?.toISOString() ?? null,
       lastSeenAt: progress?.lastSeenAt?.toISOString() ?? null,
     },
@@ -182,29 +146,34 @@ function asCmiString(value: unknown): string {
   return "";
 }
 
-function deriveProgressFromCmi(cmi: Record<string, unknown>) {
-  const lessonStatus = asCmiString(
-    cmi["cmi.core.lesson_status"] ?? cmi["cmi.completion_status"] ?? "",
-  );
-  const scoreRaw = cmi["cmi.core.score.raw"] ?? cmi["cmi.score.raw"];
-  const score =
-    typeof scoreRaw === "string" || typeof scoreRaw === "number" ? Number(scoreRaw) : null;
-
+/**
+ * Chapter progress from either SCORM namespace.
+ *
+ * 1.2 reports one `lesson_status`; 2004 separates completion from success, and
+ * a passed assessment counts as done. A score is not progress (a learner
+ * scoring 40% is not 40% through), so only 2004's `progress_measure` moves the
+ * percentage before completion.
+ */
+export function deriveScormProgress(cmi: Record<string, unknown>): {
+  status: "not_started" | "in_progress" | "completed";
+  progressPct: number;
+} {
+  const lessonStatus = asCmiString(cmi["cmi.core.lesson_status"]);
+  const completionStatus = asCmiString(cmi["cmi.completion_status"]);
+  const successStatus = asCmiString(cmi["cmi.success_status"]);
   const completed =
-    lessonStatus === "completed" || lessonStatus === "passed" || lessonStatus === "failed";
+    ["completed", "passed", "failed"].includes(lessonStatus) ||
+    completionStatus === "completed" ||
+    successStatus === "passed";
+  if (completed) return { status: "completed", progressPct: 100 };
 
-  const progressPct = completed
-    ? 100
-    : score != null && !Number.isNaN(score)
-      ? Math.max(0, Math.min(100, score))
-      : 0;
-  const status = completed ? "completed" : progressPct > 0 ? "in_progress" : "not_started";
-
-  return {
-    status,
-    progressPct,
-    completedAt: completed ? new Date() : null,
-  };
+  const measureText = asCmiString(cmi["cmi.progress_measure"]);
+  const measure = measureText === "" ? Number.NaN : Number(measureText);
+  const progressPct = Number.isFinite(measure)
+    ? Math.max(0, Math.min(99, Math.round(measure * 100)))
+    : 0;
+  const started = Object.keys(cmi).some((key) => key.startsWith("cmi."));
+  return { status: started ? "in_progress" : "not_started", progressPct };
 }
 
 export async function recordModuleScormProgressForLearner(
@@ -215,22 +184,33 @@ export async function recordModuleScormProgressForLearner(
 ) {
   await requireEnrolledScormModule(tx, ctx, moduleId);
 
-  const existing = await findModuleScormProgress({
+  const existing = await lockModuleScormProgress({
     tx,
+    tenantId: ctx.tenantId,
     moduleId,
     membershipId: ctx.actorMembershipId,
   });
 
-  const mergedCmi = {
-    ...(existing?.cmiJson ?? {}),
-    ...input.cmi,
-  };
+  const previousTotal = Number(existing.cmiJson?.[SCORM_TOTAL_SECONDS_KEY] ?? 0);
+  const mergedCmi: Record<string, unknown> = { ...(existing.cmiJson ?? {}), ...input.cmi };
+  if (input.terminated === true) {
+    // Credited once, when the content ends its session; commits repeat session_time.
+    const session =
+      parseScormDurationSeconds(input.cmi["cmi.session_time"]) ??
+      parseScormDurationSeconds(input.cmi["cmi.core.session_time"]) ??
+      0;
+    mergedCmi[SCORM_TOTAL_SECONDS_KEY] =
+      (Number.isFinite(previousTotal) && previousTotal > 0 ? previousTotal : 0) + session;
+  }
 
-  const derived = deriveProgressFromCmi(mergedCmi);
-  const status = input.completed === true ? "completed" : derived.status;
-  const progressPct = input.completed === true ? 100 : derived.progressPct;
-  const completedAt =
-    status === "completed" ? (existing?.completedAt ?? derived.completedAt ?? new Date()) : null;
+  const derived = deriveScormProgress(mergedCmi);
+  // Completion is sticky: content that reports "incomplete" on a later visit must
+  // not take a finished chapter away from the learner.
+  const completed =
+    existing.status === "completed" || input.completed === true || derived.status === "completed";
+  const status = completed ? "completed" : derived.status;
+  const progressPct = completed ? 100 : Math.max(existing.progressPct, derived.progressPct);
+  const completedAt = completed ? (existing.completedAt ?? new Date()) : null;
 
   const saved = await upsertModuleScormProgress({
     tx,
@@ -247,9 +227,20 @@ export async function recordModuleScormProgressForLearner(
     data: {
       status: normalizeScormProgressStatus(saved.status),
       progressPct: saved.progressPct,
-      cmi: mergedCmi as Record<string, string | number | boolean>,
+      cmi: publicCmi(mergedCmi),
       completedAt: saved.completedAt?.toISOString() ?? null,
       lastSeenAt: saved.lastSeenAt?.toISOString() ?? null,
     },
   };
+}
+
+/** Saved CMI as the player may see it: internal bookkeeping stays server-side. */
+function publicCmi(cmi: Record<string, unknown>): Record<string, string | number | boolean> {
+  const result: Record<string, string | number | boolean> = {};
+  for (const [key, value] of Object.entries(cmi)) {
+    if (key.startsWith(SCORM_INTERNAL_PREFIX)) continue;
+    if (typeof value === "string" || typeof value === "number" || typeof value === "boolean")
+      result[key] = value;
+  }
+  return result;
 }

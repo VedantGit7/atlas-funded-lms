@@ -36,7 +36,9 @@ export class LocalMockStorageProvider implements StorageProvider {
     input.signal?.throwIfAborted();
     const body = await this.getObjectBody(input);
     if (!body) return null;
-    const stream = Readable.from([body]);
+    const stream = Readable.from([
+      input.range ? body.subarray(input.range.start, input.range.end + 1) : body,
+    ]);
     return input.signal ? addAbortSignal(input.signal, stream) : stream;
   }
 

@@ -1150,6 +1150,10 @@ jobs:
           echo 'PLATFORM_DATABASE_URL=postgresql://atlas_platform_login:atlas_ci_platform_only@localhost:5432/atlas_lms_ci' >> "$GITHUB_ENV"
 
       - run: pnpm exec playwright install --with-deps chromium
+      # SCORM playback (audit H2) in real Chromium with the production sandbox headers,
+      # runtime injection and player bridge; a fixture server, so no app servers needed.
+      - name: SCORM runtime bridge acceptance
+        run: pnpm test:scorm-browser
       - name: Browser journeys and accessibility
         run: |
           # Two dev servers, Chromium, Postgres and the Supabase auth stack share this runner,

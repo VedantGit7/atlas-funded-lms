@@ -19,6 +19,7 @@ const PUBLIC_LIMITS: Record<RateLimitBucket, number> = {
   publicAuth: 20,
   publicInvitationAccept: 10,
   publicDiagnostic: 10,
+  scormContent: 600,
   authenticatedTenantRead: 240,
   authenticatedTenantWrite: 60,
 };
@@ -155,6 +156,12 @@ export async function enforcePublicRateLimit(args: {
   req: Request;
   bucket: RateLimitBucket;
   requestId: string;
+  /**
+   * Count against a verified capability instead of the client IP. A classroom
+   * behind one NAT address must not share a single package launch's budget;
+   * the IP-wide ingress budget still applies separately.
+   */
+  subject?: string;
 }): Promise<void> {
   const max = PUBLIC_LIMITS[args.bucket];
   if (!max) throw new RateLimitConfigurationError("Unknown public rate-limit bucket.");
@@ -162,7 +169,12 @@ export async function enforcePublicRateLimit(args: {
   const clientIp = resolveClientIp(args.req);
   if (clientIp === "unknown" && isDeployedRuntime()) throwUnattributedRequest();
   await enforceBudgets(
-    [{ key: `public:${args.bucket}:${identity([clientIp])}`, max }],
+    [
+      {
+        key: `public:${args.bucket}:${identity(args.subject ? ["subject", args.subject] : [clientIp])}`,
+        max,
+      },
+    ],
     args.requestId,
   );
 }

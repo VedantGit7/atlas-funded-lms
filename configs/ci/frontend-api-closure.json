@@ -74,10 +74,6 @@
       "reason": "Signed download URL opened directly by the browser on the local-fs dev provider; it is a navigation target, never fetched."
     },
     {
-      "path": "/api/v1/modules/[id]/scorm-content",
-      "reason": "SCORM package content served into a sandboxed iframe (audit C1). The browser loads it as a document; fetching it would defeat the opaque origin."
-    },
-    {
       "path": "/api/v1/usage/snapshot",
       "reason": "Scheduler-triggered metering snapshot, same shape as reports/internal/tick. Nothing in-app should trigger billing metering."
     }
@@ -98,6 +94,10 @@
     {
       "path": "/api/v1/public/security/csp-report",
       "reason": "configs/security-headers.mjs configures the browser CSP report-uri; the browser submits violations without an application fetch call."
+    },
+    {
+      "path": "/api/v1/public/scorm/[token]/[...path]",
+      "reason": "module-scorm-learner.service.ts supplies the launch's contentUrl (a per-launch package-read capability); scorm-player.tsx loads it as the sandboxed iframe's src. Package files load beneath it by relative URL; nothing fetches it, which would defeat the opaque origin."
     }
   ],
   "uiWiredRequired": [

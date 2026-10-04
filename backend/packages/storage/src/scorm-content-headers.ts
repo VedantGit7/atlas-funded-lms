@@ -1,7 +1,7 @@
 /**
  * Response headers for served SCORM package content.
  *
- * Audit finding C1: `GET /api/v1/modules/[id]/scorm-content` returns
+ * Audit finding C1: package files (now `GET /api/v1/public/scorm/<capability>/<path>`) are
  * author-uploaded files with a `content-type` of `text/html`,
  * `application/javascript` or `image/svg+xml`, from the application's own
  * origin — the origin that holds the learner's session cookies. A content
