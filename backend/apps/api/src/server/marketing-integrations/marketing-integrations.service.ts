@@ -1,3 +1,5 @@
+import { createHash } from "node:crypto";
+import { auditWriter } from "@atlas/audit";
 import { AtlasHttpError } from "@atlas/core/http/errors";
 import { safeOutboundFetch } from "@atlas/security/safe-outbound-fetch";
 import type { TenantTx } from "@atlas/db";
@@ -118,13 +120,43 @@ export async function getMarketingIntegrationSnippets(tx: TenantTx, _ctx: Servic
   });
 }
 
+export const MARKETING_SNIPPETS_UPDATED = "marketing_integration.snippets_updated" as const;
+
+/**
+ * What an auditor needs to see about a snippet without storing up to 100 KB of
+ * HTML per field: a fingerprint to match against, and the script it brings in.
+ */
+export function summarizeSnippet(html: string | null | undefined) {
+  if (!html) return null;
+  const origins = new Set<string>();
+  let inlineScripts = 0;
+  for (const match of html.matchAll(/<script\b([^>]*)>/gi)) {
+    const src = /\bsrc\s*=\s*["']?([^"'\s>]+)/i.exec(match[1] ?? "")?.[1];
+    if (!src) {
+      inlineScripts += 1;
+      continue;
+    }
+    try {
+      origins.add(new URL(src, "https://tenant.invalid").origin);
+    } catch {
+      origins.add("unparseable");
+    }
+  }
+  return {
+    sha256: createHash("sha256").update(html).digest("hex"),
+    length: html.length,
+    scriptOrigins: [...origins].sort(),
+    inlineScripts,
+  };
+}
+
 export async function updateMarketingIntegrationSnippets(
   tx: TenantTx,
-  _ctx: ServiceCtx,
+  ctx: ServiceCtx,
   body: unknown,
 ) {
   const input = updateMarketingIntegrationSnippetsBodySchema.parse(body);
-  await marketingIntegrationsRepository.ensureSettings(tx);
+  const previous = await marketingIntegrationsRepository.ensureSettings(tx);
 
   if (input.siteBodyHtml !== undefined) {
     await tx.$executeRaw`
@@ -146,6 +178,41 @@ export async function updateMarketingIntegrationSnippets(
       set signup_tracking_html = ${input.signupTrackingHtml}, updated_at = now()
       where tenant_id = app.current_tenant_id()
     `;
+  }
+
+  // Snippets run as script in every learner's and visitor's session: who
+  // changed them, and what they now load, must be on record (audit H5).
+  const fields = [
+    ["siteBodyHtml", "site_body_html"],
+    ["orderTrackingHtml", "order_tracking_html"],
+    ["signupTrackingHtml", "signup_tracking_html"],
+  ] as const;
+  const changed = fields.filter(
+    ([field, column]) =>
+      input[field] !== undefined && (input[field] ?? null) !== (previous[column] ?? null),
+  );
+  if (changed.length > 0) {
+    await auditWriter.write(
+      tx,
+      {
+        tenantId: ctx.tenantId,
+        actorMembershipId: ctx.actorMembershipId,
+        platformPrincipalId: null,
+        requestId: ctx.requestId,
+      },
+      {
+        action: MARKETING_SNIPPETS_UPDATED,
+        target: { type: "marketing_integration_settings", id: ctx.tenantId },
+        before: Object.fromEntries(
+          changed.map(([field, column]) => [field, summarizeSnippet(previous[column])]),
+        ),
+        after: Object.fromEntries(
+          changed.map(([field]) => [field, summarizeSnippet(input[field])]),
+        ),
+        reason: null,
+        metadata: { fields: changed.map(([field]) => field) },
+      },
+    );
   }
 
   const settings = await marketingIntegrationsRepository.getSettings(tx);
@@ -374,6 +441,51 @@ export async function rotateMarketingIntegrationApiKey(tx: TenantTx, ctx: Servic
       apiKeyCreatedAt: settings.api_key_created_at.toISOString(),
     },
   });
+}
+
+const NO_SNIPPETS = {
+  data: { siteBodyHtml: null, orderTrackingHtml: null, signupTrackingHtml: null },
+};
+
+/**
+ * True when this principal holds any role in the tenant beyond learner.
+ *
+ * Tenant snippets are arbitrary script running in the app's own origin, so in
+ * a signed-in viewer's session they can call the API as that viewer. That is
+ * the tenant's own decision for its learners and visitors; it must never reach
+ * the people who administer the tenant (audit H5). Custom roles count as
+ * staff: whether one is privileged is not something to guess here.
+ */
+async function viewerHoldsStaffRole(tx: TenantTx, tenantId: string, principalId: string) {
+  const rows = await tx.$queryRaw<Array<{ staff: boolean }>>`
+    select exists (
+      select 1
+      from memberships m
+      join user_roles ur on ur.membership_id = m.id and ur.tenant_id = m.tenant_id
+      join roles r on r.id = ur.role_id and r.tenant_id = ur.tenant_id and r.deleted_at is null
+      where m.tenant_id = ${tenantId}::uuid
+        and m.auth_principal_id = ${principalId}::uuid
+        and r.key <> 'learner'
+    ) as staff
+  `;
+  return rows[0]?.staff === true;
+}
+
+/**
+ * Snippets for this viewer: none for signed-in staff, the tenant's snippets
+ * for learners and anonymous visitors. `principalId` is null when anonymous.
+ */
+export async function getPublicMarketingIntegrationSnippetsForViewer(
+  tx: TenantTx,
+  viewer: { tenantId: string; principalId: string | null },
+) {
+  if (viewer.principalId && (await viewerHoldsStaffRole(tx, viewer.tenantId, viewer.principalId)))
+    return publicMarketingIntegrationSnippetsResponseSchema.parse(NO_SNIPPETS);
+  return getPublicMarketingIntegrationSnippets(tx);
+}
+
+export function noPublicMarketingIntegrationSnippets() {
+  return publicMarketingIntegrationSnippetsResponseSchema.parse(NO_SNIPPETS);
 }
 
 export async function getPublicMarketingIntegrationSnippets(tx: TenantTx) {

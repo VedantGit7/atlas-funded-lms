@@ -55,6 +55,16 @@ export function validateDeploymentConfiguration(
   }
   if (!deployed) return { environment, deployed, service };
   if (service === "web") {
+    // Report-only CSP is not XSS prevention, and tenant snippets run on this
+    // origin (audit H5). Deployed web enforces unless an incident explicitly
+    // records the emergency rollback described in the CSP runbook.
+    if (
+      value("CSP_ENFORCE") !== "1" &&
+      !/^[A-Za-z0-9][A-Za-z0-9_.:/-]{2,63}$/.test(value("CSP_REPORT_ONLY_INCIDENT"))
+    )
+      issues.push(
+        "CSP_ENFORCE must be 1 in deployed web; report-only requires CSP_REPORT_ONLY_INCIDENT naming the incident",
+      );
     try {
       validateClientIpConfiguration(env);
       if (!value("TRUSTED_CLIENT_IP_HEADER") && Number(value("TRUSTED_PROXY_HOPS")) === 0) {

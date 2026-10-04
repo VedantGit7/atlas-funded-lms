@@ -132,6 +132,36 @@ describe("F05 deployment contract", () => {
       ).not.toThrow();
     },
   );
+  it("requires an enforced CSP on deployed web (audit H5)", () => {
+    for (const value of ["", "0"]) {
+      expect(() =>
+        validateDeploymentConfiguration({ ...deploymentEnv(), CSP_ENFORCE: value }, "web"),
+      ).toThrow(/CSP_ENFORCE must be 1/);
+    }
+    expect(() => validateDeploymentConfiguration(deploymentEnv(), "web")).not.toThrow();
+  });
+  it("allows report-only on web only as a recorded incident rollback", () => {
+    const rollback = { ...deploymentEnv(), CSP_ENFORCE: "0" };
+    expect(() =>
+      validateDeploymentConfiguration(
+        { ...rollback, CSP_REPORT_ONLY_INCIDENT: "INC-2026-0142" },
+        "web",
+      ),
+    ).not.toThrow();
+    for (const incident of ["x", "no spaces allowed", "<script>"]) {
+      expect(() =>
+        validateDeploymentConfiguration({ ...rollback, CSP_REPORT_ONLY_INCIDENT: incident }, "web"),
+      ).toThrow(/CSP_ENFORCE must be 1/);
+    }
+  });
+  it.each(["api", "worker"] as const)(
+    "does not require browser CSP settings on the %s",
+    (service) => {
+      expect(() =>
+        validateDeploymentConfiguration({ ...deploymentEnv(), CSP_ENFORCE: "" }, service),
+      ).not.toThrow();
+    },
+  );
   it("does not require the web/API forwarding secret on the worker", () => {
     expect(() =>
       validateDeploymentConfiguration({ ...deploymentEnv(), API_PROXY_SECRET: "" }, "worker"),

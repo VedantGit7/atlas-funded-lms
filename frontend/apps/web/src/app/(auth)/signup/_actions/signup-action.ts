@@ -1,5 +1,6 @@
 "use server";
 
+import { withSignupCompleteMarker } from "../../../../features/marketing/snippet-scope";
 import { redirect } from "next/navigation";
 import { PublicSignupRequestSchema } from "@atlas/contracts/domain-identity/schemas/public-auth";
 import { GENERIC_SIGNUP_ERROR_MESSAGE } from "../../../../lib/auth-messages";
@@ -67,7 +68,8 @@ export async function signupAction(
     }
 
     if (body.data.redirectTo) {
-      redirect(body.data.redirectTo);
+      // Signup tracking fires on the page this lands on, never on the signup form.
+      redirect(withSignupCompleteMarker(body.data.redirectTo));
     }
 
     redirect("/login");
