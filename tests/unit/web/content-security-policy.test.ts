@@ -222,7 +222,7 @@ describe("F13 document CSP", () => {
 
   it("does not attach the web document policy to API/SCORM rewrites", async () => {
     const response = await proxy(
-      new NextRequest("http://localhost/api/v1/modules/test/scorm-content", {
+      new NextRequest("http://localhost/api/v1/public/scorm/capability/index.html", {
         headers: {
           host: "localhost",
           "x-nonce": "forged",

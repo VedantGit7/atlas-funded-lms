@@ -21,7 +21,7 @@ const downloads = [
   () => import("../../../backend/apps/api/src/app/api/v1/certificates/[id]/download/route"),
   () =>
     import("../../../backend/apps/api/src/app/api/v1/certificates/[id]/wallet/apple/download/route"),
-  () => import("../../../backend/apps/api/src/app/api/v1/modules/[id]/scorm-content/route"),
+  () => import("../../../backend/apps/api/src/app/api/v1/public/scorm/[token]/[...path]/route"),
 ];
 describe("F04 custom HTTP boundaries", () => {
   it.each(downloads.map((load, index) => ({ load, index })))(

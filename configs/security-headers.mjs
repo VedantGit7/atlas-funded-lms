@@ -9,7 +9,7 @@ export const securityHeaders = [
 ];
 export const securityHeadersRule = { source: "/:path*", headers: securityHeaders };
 export const scormFramingHeadersRule = {
-  source: "/api/v1/modules/:id/scorm-content",
+  source: "/api/v1/public/scorm/:token/:path*",
   headers: [{ key: "X-Frame-Options", value: "SAMEORIGIN" }],
 };
 export const formFramingHeadersRule = {

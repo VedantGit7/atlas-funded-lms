@@ -6,6 +6,8 @@ export type RateLimitBucket =
   | "publicAuth"
   | "publicInvitationAccept"
   | "publicDiagnostic"
+  // Per SCORM launch capability: one package page fans out to hundreds of files.
+  | "scormContent"
   | "authenticatedTenantRead"
   | "authenticatedTenantWrite";
 

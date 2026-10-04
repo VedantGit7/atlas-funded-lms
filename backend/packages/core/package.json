@@ -12,7 +12,8 @@
     "./csv/escape": "./src/csv/escape.ts",
     "./actor/system-actor": "./src/actor/system-actor.ts",
     "./config/runtime-environment": "./src/config/runtime-environment.ts",
-    "./config/deployment-contract": "./src/config/deployment-contract.ts"
+    "./config/deployment-contract": "./src/config/deployment-contract.ts",
+    "./config/scorm-content-keys": "./src/config/scorm-content-keys.ts"
   },
   "dependencies": {
     "uuid": "^14.0.0"

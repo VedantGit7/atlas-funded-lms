@@ -77,22 +77,49 @@ function resolveLaunchPath(manifestXml: string, entries: string[]): string {
   return normalizeZipPath(htmlEntry);
 }
 
-function guessContentType(relativePath: string): string {
-  const lower = relativePath.toLowerCase();
-  if (lower.endsWith(".html") || lower.endsWith(".htm")) return "text/html";
-  if (lower.endsWith(".js")) return "application/javascript";
-  if (lower.endsWith(".css")) return "text/css";
-  if (lower.endsWith(".json")) return "application/json";
-  if (lower.endsWith(".xml")) return "application/xml";
-  if (lower.endsWith(".png")) return "image/png";
-  if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) return "image/jpeg";
-  if (lower.endsWith(".gif")) return "image/gif";
-  if (lower.endsWith(".svg")) return "image/svg+xml";
-  if (lower.endsWith(".woff")) return "font/woff";
-  if (lower.endsWith(".woff2")) return "font/woff2";
-  if (lower.endsWith(".mp3")) return "audio/mpeg";
-  if (lower.endsWith(".mp4")) return "video/mp4";
-  return "application/octet-stream";
+const SCORM_CONTENT_TYPES: Record<string, string> = {
+  html: "text/html",
+  htm: "text/html",
+  xhtml: "application/xhtml+xml",
+  js: "application/javascript",
+  mjs: "application/javascript",
+  css: "text/css",
+  json: "application/json",
+  xml: "application/xml",
+  txt: "text/plain",
+  vtt: "text/vtt",
+  csv: "text/csv",
+  pdf: "application/pdf",
+  png: "image/png",
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  gif: "image/gif",
+  svg: "image/svg+xml",
+  webp: "image/webp",
+  avif: "image/avif",
+  bmp: "image/bmp",
+  ico: "image/x-icon",
+  woff: "font/woff",
+  woff2: "font/woff2",
+  ttf: "font/ttf",
+  otf: "font/otf",
+  eot: "application/vnd.ms-fontobject",
+  mp3: "audio/mpeg",
+  m4a: "audio/mp4",
+  wav: "audio/wav",
+  ogg: "audio/ogg",
+  oga: "audio/ogg",
+  mp4: "video/mp4",
+  m4v: "video/mp4",
+  webm: "video/webm",
+  ogv: "video/ogg",
+  wasm: "application/wasm",
+};
+
+/** Stored with each extracted file, and derived the same way when serving it. */
+export function scormContentTypeFor(relativePath: string): string {
+  const extension = /\.([a-z0-9]+)$/i.exec(relativePath)?.[1]?.toLowerCase() ?? "";
+  return SCORM_CONTENT_TYPES[extension] ?? "application/octet-stream";
 }
 
 /**
@@ -253,7 +280,7 @@ export function openScormPackage(zipBuffer: Buffer) {
       yield {
         relativePath,
         content: readBoundedEntry(entry),
-        contentType: guessContentType(relativePath),
+        contentType: scormContentTypeFor(relativePath),
       };
     }
   }

@@ -36,18 +36,46 @@ Filter structured logs for `message=csp.report.received`, then group by release,
 
 ## Framing and SCORM
 
-Ordinary pages retain X-Frame-Options DENY and CSP frame-ancestors none. `/f/:token` permits same-origin framing for the existing form modal. `/api/v1/modules/:id/scorm-content` permits same-origin framing while its **separate enforced CSP sandbox omits allow-same-origin**. Both app configs put this narrow framing exception after the baseline. Never add a static global CSP: the installed Next response sender can retain that header instead of the route sandbox or per-request policy.
+Ordinary pages retain X-Frame-Options DENY and CSP frame-ancestors none. `/f/:token` permits same-origin framing for the existing form modal. `/api/v1/public/scorm/:token/:path*` permits same-origin framing while its **separate enforced CSP sandbox omits allow-same-origin**. Both app configs put this narrow framing exception after the baseline. Never add a static global CSP: the installed Next response sender can retain that header instead of the route sandbox or per-request policy.
 
-The existing SCORM player expects direct parent `window.API` access, which an opaque sandbox correctly prevents. The remaining implementation and acceptance requirements are:
+### SCORM playback (audit H2)
 
-- Provide synchronous local SCORM APIs inside the opaque package document, plus a bounded validated messaging bridge. Bind accepted messages to the current `iframe.contentWindow` and launch session; an opaque sender origin of `null` alone is not authentication. Accept only the expected progress protocol and bounded CMI values, with no arbitrary parent URL/fetch/action capability. Keep parent cookies and DOM inaccessible; never add `allow-same-origin`.
-- Load saved CMI before package API initialization. The current player constructs its API before its separate asynchronous CMI read finishes, so resume data is not reliably supplied. Verify refresh, navigation between modules, repeated commits, rejected/stale messages and persistence failures.
-- Implement and verify both advertised versions. The current player exposes only the SCORM 1.2 API; it does not expose SCORM 2004's `API_1484_11`. Verify initialize/get/set/commit/finish or terminate, completion and resume with representative packages for each supported version.
-- Resolve package assets through authorized package routing. The current launch URL is `/api/v1/modules/:id/scorm-content?path=...`, and its response serves stored bytes unchanged. A relative `scripts/course.js` URL resolves outside that query endpoint rather than identifying a package file. Verify nested launch paths, relative scripts/styles/media and subdocuments, denied traversal, and enrollment/tenant isolation for every asset. Do not bypass the opaque sandbox or use unprotected storage URLs to make assets load.
+Package files are served as `/api/v1/public/scorm/<capability>/<path in package>`. The player's iframe also carries `sandbox="allow-scripts allow-forms allow-popups"`, so package documents run in an opaque origin even if a proxy drops the header: they cannot read the app's cookies, storage or DOM. Never add `allow-same-origin`.
 
-`node scripts/security/verify-scorm-auth-boundary.mjs` is a local diagnostic of the **open** authorization boundary. With the real production sandbox policy, Chrome sends a fixture SameSite=Lax cookie on iframe navigation, then omits it from the opaque document's relative script request, which is classified cross-site and receives 401. The diagnostic also confirms parent DOM/cookie/storage denial. A successful diagnostic means this blocker was reproduced, not that SCORM works. It uses no LMS credentials or external providers.
+- **Package-read capability.** The browser sends no session cookie from an opaque origin, so each launch (`GET /api/v1/modules/:id/scorm-launch`) mints a signed capability and puts it in the URL path. Relative references (`scripts/app.js`, `../media/clip.mp4`) then resolve beneath it and carry it automatically. It is scoped to one tenant, membership, module and stored content version, and expires after six hours. Reopening the chapter mints a fresh one. It is signed with `SCORM_CONTENT_SIGNING_KEYS` (see [deployment configuration](deployment-configuration.md)).
+- **Every file is re-authorized.** The capability says who and what, not whether. Each request runs one short tenant transaction that rechecks:
+  - the membership is active and has `course.read`;
+  - the module is a published SCORM module in a published course;
+  - the enrollment is active;
+  - the stored package is still the version the launch was minted for.
 
-Before implementing asset routes, define a dedicated package-read capability or equivalent credential-free asset architecture. A capability would need a narrow tenant/membership/module/content-version scope, dedicated signing-key custody and rotation, expiry and renewal for long lessons, revocation on enrollment/membership/content changes, safe URL/log/referrer handling, and permission revalidation for every asset. Never put parent session credentials in package HTML. Keep unsupported nested SCOs blocked under the existing framing policy rather than relaxing origin isolation. Neither this capability nor a runtime bridge was implemented by the local follow-up.
+  Revoking any of these takes effect on the next file. Every refusal is the same 404. Storage is read only after the transaction ends, so no pooled connection is held across network I/O. Byte ranges are served for media.
+
+- **Logs and referrers.** The path is a credential. The route logs the fixed name `/api/v1/public/scorm/[token]/[...path]`, never the URL, and package responses send `referrer-policy: no-referrer`. Requests are limited per launch (`scormContent`, 600/minute), so a classroom behind one NAT address does not share a budget.
+- **Runtime.** Each package HTML file gets one injected `<script src>` for `.atlas-scorm-runtime.js` beneath the same capability. It is placed after any `<meta charset>`, and the package's bytes and encoding are otherwise untouched. That response carries the runtime and the learner's saved data, with `no-store`. Every document gets a local, synchronous SCORM 1.2 `API` and SCORM 2004 `API_1484_11`, each with the standard data model, validation and error codes, seeded with saved data, entry (`resume` after a suspend) and accumulated time.
+- **Bridge.** The runtime reports `hello`, `initialize`, `commit` and `terminate` to the player with `postMessage`, targeted at the app origin. The player:
+  - accepts only this launch's protocol, only from its own iframe or frames inside it, with bounded data-model keys and values, and never acts on anything else;
+  - attaches its listener before the iframe loads;
+  - answers `hello` with the newest saved data, so a multi-page SCO's next document is current;
+  - serializes saves (at most one in flight, at least 2 s apart, merged while waiting, backing off on failure);
+  - sends a final `keepalive` save when the learner leaves.
+
+  The server merges commits under a row lock and credits session time once, on terminate (capped at 12 hours). It treats a 1.2 `lesson_status` of completed, passed or failed, or a 2004 completion of completed or success of passed, as complete. Completion is sticky. A score is not progress; only 2004's `progress_measure` moves the percentage before completion.
+
+- **App pages cannot run package JavaScript.** The app document CSP allows `'self'` scripts, so `<script src="/api/v1/public/scorm/…/evil.js">` in a tenant snippet would otherwise run author-uploaded code with the app's authority. The route refuses same-origin subresource requests (Fetch Metadata `sec-fetch-site: same-origin` with a non-navigation destination) before doing anything else. Package documents' own requests are cross-site, and the player's iframe load is a navigation.
+- **Nested SCO frames are not supported.** An iframe inside a package has an opaque parent, which no `frame-ancestors` source matches; Chromium confirms that even `frame-ancestors *` refuses it. Such packages stay blocked rather than relaxing the framing policy. A multi-page SCO that navigates its own frame works. Supporting nested frames needs a dedicated cookie-less content origin, which would let the package frames share an origin.
+
+`pnpm test:scorm-browser` (`scripts/security/verify-scorm-runtime-bridge.mjs`) runs this in real Chromium with the production sandbox headers, injection, runtime, Fetch Metadata rule and player bridge, against a fixture server. CI runs it in the `browser-smoke` job. It checks:
+
+- isolation;
+- cookie-free relative loading;
+- resume;
+- multi-page refresh;
+- impostor-frame rejection;
+- the snippet bypass;
+- the nested-frame limitation.
+
+The route's database behaviour is covered by `tests/integration/api/scorm-content-capability.test.ts`.
 
 The certificate share dialog now offers direct and social links only; the unsupported external iframe offer and snippet helper were removed in the 2026-09-26 local follow-up. Public verification pages retain ordinary DENY framing. External certificate embedding requires an explicit authorized-origin design and separate acceptance before it can be offered again.
 

@@ -207,7 +207,10 @@ export class LocalFilesystemStorageProvider implements StorageProvider {
       try {
         if (!(await handle.stat()).isFile()) throw new Error("STORAGE_OBJECT_NOT_FILE");
         input.signal?.throwIfAborted();
-        return handle.createReadStream({ signal: input.signal });
+        return handle.createReadStream({
+          signal: input.signal,
+          ...(input.range ? { start: input.range.start, end: input.range.end } : {}),
+        });
       } catch (error) {
         await handle.close();
         throw error;

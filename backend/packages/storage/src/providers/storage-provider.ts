@@ -60,4 +60,10 @@ export type PutObjectStreamInput = {
   signal?: AbortSignal;
 };
 
-export type GetObjectStreamInput = { bucket: string; key: string; signal?: AbortSignal };
+export type GetObjectStreamInput = {
+  bucket: string;
+  key: string;
+  signal?: AbortSignal;
+  /** Inclusive byte offsets, already validated against the object's size by the caller. */
+  range?: { start: number; end: number };
+};

@@ -197,7 +197,13 @@ export class R2StorageProvider implements StorageProvider {
     signal.throwIfAborted();
     try {
       const result = await this.client.send(
-        new GetObjectCommand({ Bucket: input.bucket, Key: input.key }),
+        new GetObjectCommand({
+          Bucket: input.bucket,
+          Key: input.key,
+          ...(input.range
+            ? { Range: `bytes=${String(input.range.start)}-${String(input.range.end)}` }
+            : {}),
+        }),
         { abortSignal: signal },
       );
       if (!result.Body) throw new Error("STORAGE_STREAM_BODY_MISSING");

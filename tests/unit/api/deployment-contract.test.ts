@@ -98,6 +98,40 @@ describe("F05 deployment contract", () => {
       }
     },
   );
+  it("requires valid SCORM content signing keys on the API, distinct from other secrets", () => {
+    const env = deploymentEnv();
+    for (const keys of [
+      "",
+      "no-separator",
+      "k1:short",
+      `k1:${env.API_PROXY_SECRET ?? ""}`,
+      `k1:${env.CRON_SECRET ?? ""}`,
+    ]) {
+      expect(() =>
+        validateDeploymentConfiguration({ ...env, SCORM_CONTENT_SIGNING_KEYS: keys }, "api"),
+      ).toThrow(/SCORM_CONTENT_SIGNING_KEYS/);
+    }
+    expect(() =>
+      validateDeploymentConfiguration(
+        {
+          ...env,
+          SCORM_CONTENT_SIGNING_KEYS: `${env.SCORM_CONTENT_SIGNING_KEYS ?? ""},old:${"e".repeat(20)}f${"0".repeat(20)}`,
+        },
+        "api",
+      ),
+    ).not.toThrow();
+  });
+  it.each(["web", "worker"] as const)(
+    "does not require SCORM signing keys on the %s",
+    (service) => {
+      expect(() =>
+        validateDeploymentConfiguration(
+          { ...deploymentEnv(), SCORM_CONTENT_SIGNING_KEYS: "" },
+          service,
+        ),
+      ).not.toThrow();
+    },
+  );
   it("does not require the web/API forwarding secret on the worker", () => {
     expect(() =>
       validateDeploymentConfiguration({ ...deploymentEnv(), API_PROXY_SECRET: "" }, "worker"),

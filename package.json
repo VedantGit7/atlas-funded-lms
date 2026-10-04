@@ -131,6 +131,7 @@
     "test:performance-tooling": "node --test scripts/perf/*.test.mjs tests/performance/*.test.mjs",
     "test:reliability-tooling": "node --test scripts/release/restore-drill.test.mjs scripts/reliability/alerts-rollback-verifiers.test.mjs scripts/reliability/seed-restore-fixture.test.mjs scripts/db/migration-verification.test.mjs",
     "test:supabase-security": "node scripts/security/verify-f19-event-trigger.mjs",
+    "test:scorm-browser": "node scripts/security/verify-scorm-runtime-bridge.mjs",
     "db:proctoring-integrity:check": "node scripts/db/check-proctoring-integrity.mjs",
     "test:proctoring-integrity": "node scripts/db/verify-proctoring-integrity.mjs"
   },

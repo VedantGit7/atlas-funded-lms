@@ -156,9 +156,24 @@ export const moduleScormPackageBlobBodySchema = mutationBodySchema({
 
 export type ModuleScormPackageBlobBody = z.output<typeof moduleScormPackageBlobBodySchema>;
 
+// Data-model element names only: no internal ("atlas.") keys, no arbitrary JSON paths.
+const scormCmiKeySchema = z.string().regex(/^(?:cmi\.[A-Za-z0-9_.]{1,250}|adl\.nav\.request)$/);
+// 64,000 characters is SCORM 2004's largest single element (suspend_data).
+const scormCmiValueSchema = z.union([z.string().max(64_000), z.number(), z.boolean()]);
+
 export const moduleScormProgressBodySchema = mutationBodySchema({
-  cmi: z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])),
+  cmi: z
+    .record(scormCmiKeySchema, scormCmiValueSchema)
+    .refine((cmi) => Object.keys(cmi).length <= 4_000, "Too many SCORM data elements.")
+    .refine(
+      (cmi) =>
+        Object.values(cmi).reduce<number>((total, value) => total + String(value).length, 0) <=
+        1_000_000,
+      "SCORM data is too large.",
+    ),
   completed: z.boolean().optional(),
+  // The content ended its session (LMSFinish / Terminate): credit its session time.
+  terminated: z.boolean().optional(),
 });
 
 export type ModuleScormProgressBody = z.output<typeof moduleScormProgressBodySchema>;
@@ -171,6 +186,8 @@ export const moduleScormLaunchResponseSchema = z.object({
     scormVersion: z.enum(["1.2", "2004"]),
     launchPath: z.string(),
     contentUrl: z.string(),
+    // Binds the runtime bridge's messages to this launch.
+    launchId: z.string().regex(/^[A-Za-z0-9_-]{16,64}$/),
     progress: z.object({
       status: z.enum(["not_started", "in_progress", "completed"]),
       progressPct: z.number().int().min(0).max(100),
