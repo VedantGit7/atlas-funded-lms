@@ -9,6 +9,7 @@ const PLATFORM_ROLE_PERMISSIONS: Record<PlatformRoleKey, readonly string[]> = {
     "platform.catalog.manage",
     "platform.audit.read",
     "platform.support.access",
+    "platform.identity.manage",
   ],
   operations: [
     "platform.tenant.read",

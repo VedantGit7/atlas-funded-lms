@@ -3,6 +3,13 @@ export type AtlasErrorCode =
   | "TENANT_DOMAIN_INACTIVE"
   | "TENANT_UNAVAILABLE"
   | "AUTH_REQUIRED"
+  // Audit finding H6. Each needs a different next step from the person signing
+  // in, so none of them collapses into AUTH_REQUIRED: a disabled account must
+  // contact support, an unverified email must open the verification link, and
+  // a re-registered email waits for a platform operator to review the link.
+  | "ACCOUNT_DISABLED"
+  | "EMAIL_NOT_VERIFIED"
+  | "ACCOUNT_REVIEW_REQUIRED"
   | "NO_MEMBERSHIP"
   | "MEMBERSHIP_PENDING"
   | "MEMBERSHIP_SUSPENDED"

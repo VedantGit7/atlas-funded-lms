@@ -253,7 +253,7 @@ export function PasswordResetForm() {
                       required
                       type={showPassword ? "text" : "password"}
                       autoComplete="new-password"
-                      placeholder="At least 8 characters"
+                      placeholder="At least 10 characters"
                       className={`${fieldInputClass} pr-12`}
                     />
                   </FormControl>

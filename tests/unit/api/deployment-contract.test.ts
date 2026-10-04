@@ -162,6 +162,27 @@ describe("F05 deployment contract", () => {
       ).not.toThrow();
     },
   );
+  it.each(["api", "web"] as const)(
+    "refuses to deploy %s with the breached-password check off (audit H6)",
+    (service) => {
+      for (const mode of ["off", "OFF", " off "]) {
+        expect(() =>
+          validateDeploymentConfiguration(
+            { ...deploymentEnv(), PASSWORD_BREACH_CHECK: mode },
+            service,
+          ),
+        ).toThrow(/PASSWORD_BREACH_CHECK/);
+      }
+      for (const mode of ["", "enforce"]) {
+        expect(() =>
+          validateDeploymentConfiguration(
+            { ...deploymentEnv(), PASSWORD_BREACH_CHECK: mode },
+            service,
+          ),
+        ).not.toThrow();
+      }
+    },
+  );
   it("does not require the web/API forwarding secret on the worker", () => {
     expect(() =>
       validateDeploymentConfiguration({ ...deploymentEnv(), API_PROXY_SECRET: "" }, "worker"),

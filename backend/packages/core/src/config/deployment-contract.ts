@@ -54,6 +54,11 @@ export function validateDeploymentConfiguration(
       ]);
   }
   if (!deployed) return { environment, deployed, service };
+  // Both services set passwords: the API for signup, change and invitations,
+  // the web for password reset. Only the test runtime may skip the breached-
+  // password lookup (audit H6); it already fails open if the service is down.
+  if (service !== "worker" && value("PASSWORD_BREACH_CHECK").toLowerCase() === "off")
+    issues.push("PASSWORD_BREACH_CHECK must not be off in deployed API and web services");
   if (service === "web") {
     // Report-only CSP is not XSS prevention, and tenant snippets run on this
     // origin (audit H5). Deployed web enforces unless an incident explicitly

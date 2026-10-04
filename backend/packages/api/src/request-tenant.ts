@@ -53,6 +53,7 @@ export async function authenticateTenantRequest(req: TenantRequest): Promise<{
       db,
       supabaseUserId: supabaseUser.supabaseUserId,
       email: supabaseUser.email,
+      emailConfirmed: supabaseUser.emailConfirmed,
       mfaEnabled: supabaseUser.mfaEnabled,
       markLogin: false,
     }),

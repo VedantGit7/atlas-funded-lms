@@ -76,6 +76,16 @@ REVOKE INSERT, UPDATE, DELETE ON platform_operators FROM atlas_app, atlas_worker
 GRANT SELECT, INSERT, UPDATE ON platform_operators TO atlas_platform;
 REVOKE DELETE ON platform_operators FROM atlas_platform;
 
+-- H6: the sign-in path records that a re-registration was blocked; only the
+-- platform plane decides it. Without this block the blanket GRANT above would
+-- let atlas_app approve its own relink request on a freshly provisioned
+-- database (migration 118 sets the same narrow grants).
+REVOKE ALL ON auth_principal_relink_requests FROM atlas_app, atlas_worker;
+GRANT SELECT, INSERT ON auth_principal_relink_requests TO atlas_app;
+GRANT UPDATE (last_seen_at, attempt_count) ON auth_principal_relink_requests TO atlas_app;
+GRANT SELECT, INSERT, UPDATE ON auth_principal_relink_requests TO atlas_platform;
+REVOKE DELETE ON auth_principal_relink_requests FROM atlas_platform;
+
 -- DoD item 8 supplier cost tables (migration 106). Platform-global and
 -- commercially sensitive: the tenant roles get nothing, not even SELECT, and the
 -- rate history is append-only even for the platform role. Repeated here for the

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { resolveTenantFromRequest } from "@atlas/tenancy";
-import { createPublicRouteHandler } from "@atlas/api";
+import { createPublicRouteHandler, globalDbPerStatement } from "@atlas/api";
 import { setAuthCookies, setPasswordFromInvitationSession } from "@atlas/auth";
 import { withGlobalDb } from "@atlas/db/global-db";
 import { withTenantTx } from "@atlas/db/with-tenant-tx";
@@ -32,14 +32,14 @@ export const POST = createPublicRouteHandler(routeMetadata, async ({ req, reques
 
   const tenant = await withGlobalDb(async (db) => resolveTenantFromRequest({ req, db }));
 
-  const { principal, session } = await withGlobalDb(async (db) =>
-    setPasswordFromInvitationSession({
-      db,
-      accessToken: input.accessToken,
-      refreshToken: input.refreshToken ?? "",
-      password: input.password,
-    }),
-  );
+  // Supabase round trips run with no pooled connection held (audit H3), and a
+  // refused re-registration keeps its relink request for review (audit H6).
+  const { principal, session } = await setPasswordFromInvitationSession({
+    db: globalDbPerStatement,
+    accessToken: input.accessToken,
+    refreshToken: input.refreshToken ?? "",
+    password: input.password,
+  });
 
   const result = await withTenantTx(
     {

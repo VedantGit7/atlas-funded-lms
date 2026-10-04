@@ -14,7 +14,8 @@ const fixture = vi.hoisted(() => {
       return [
         { ok: text.includes("from memberships") ? state.status === "ACTIVE" && state.admin : true },
       ];
-    if (text.includes("from auth_principals")) return [{ id: "principal-1" }];
+    if (text.includes("from auth_principals"))
+      return [{ id: "principal-1", global_status: "active" }];
     if (text.includes("from memberships"))
       return state.status
         ? [

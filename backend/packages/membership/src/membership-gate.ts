@@ -1,9 +1,10 @@
 import {
   findMembershipByPrincipal,
+  findPrincipalGlobalStatus,
   recordMembershipActiveDay,
   touchMembershipLastActive,
 } from "./membership.repository";
-import { membershipStatusToError, noMembership } from "./membership-errors";
+import { membershipStatusToError, noMembership, principalDisabled } from "./membership-errors";
 import type { ActiveMembershipContext } from "./types";
 
 type Tx = Parameters<typeof findMembershipByPrincipal>[0]["tx"];
@@ -27,6 +28,16 @@ export async function requireActiveMembership(args: {
 
   if (membership.status !== "ACTIVE") {
     throw membershipStatusToError(membership.status);
+  }
+
+  // An ACTIVE membership belongs to an active account, never a disabled one.
+  const principalStatus = await findPrincipalGlobalStatus({
+    tx: args.tx,
+    authPrincipalId: args.authPrincipalId,
+  });
+
+  if (principalStatus !== "active") {
+    throw principalDisabled();
   }
 
   await touchMembershipLastActive({

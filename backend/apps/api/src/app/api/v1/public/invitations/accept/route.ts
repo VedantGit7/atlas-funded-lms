@@ -28,6 +28,7 @@ export const POST = createPublicRouteHandler(routeMetadata, async ({ req, reques
       db,
       supabaseUserId: supabaseUser.supabaseUserId,
       email: supabaseUser.email,
+      emailConfirmed: supabaseUser.emailConfirmed,
       mfaEnabled: supabaseUser.mfaEnabled,
       markLogin: false,
     }),

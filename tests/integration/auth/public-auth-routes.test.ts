@@ -128,10 +128,10 @@ describe("public auth routes service layer", () => {
 
     expect(result.status).toBe("verification_required");
     expect(result.session).toBeUndefined();
-    expect(result.identity).toMatchObject({
-      authenticated: true,
-      emailNormalized: "user@example.com",
-    });
+    // Audit H6: no principal for an address its owner has not confirmed yet.
+    // It is created when the verification link is opened.
+    expect(result.identity).toBeUndefined();
+    expect(db.$queryRaw).not.toHaveBeenCalled();
   });
 
   it("signup does not mirror an obfuscated already-registered user", async () => {

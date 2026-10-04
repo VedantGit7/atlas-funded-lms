@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { confirmEmailViaInternalApi } from "../../../lib/server/public-auth-fetch";
 import { resolveRequestOrigin } from "../../../lib/server/resolve-request-origin";
 import { withSignupCompleteMarker } from "../../../features/marketing/snippet-scope";
+import { identityBlockQueryValue, isIdentityBlockCode } from "../../../lib/auth-messages";
 
 // Supabase email-verification links point here with a single-use `token_hash`
 // (token-hash / PKCE SSR flow). We verify it server-side via the internal API,
@@ -44,6 +45,15 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   }
 
   const result = await confirmEmailViaInternalApi({ tokenHash, type });
+
+  if (!result.ok && isIdentityBlockCode(result.errorCode)) {
+    // The link was valid, but the account is disabled or this email belongs to
+    // an earlier account awaiting review (audit H6). "Link expired" would send
+    // the person round the resend loop for nothing.
+    return NextResponse.redirect(
+      new URL(`/login?error=${identityBlockQueryValue(result.errorCode)}`, origin),
+    );
+  }
 
   if (!result.ok) {
     // The email was likely already verified by a prior click, or the link

@@ -47,10 +47,18 @@ export const PublicOAuthCallbackRequestSchema = z
   })
   .strict();
 
+/**
+ * Minimum length for a password being set (audit H6). Sign-in schemas keep the
+ * older minimum so existing passwords still work until they are changed. Must
+ * match NEW_PASSWORD_MIN_LENGTH in @atlas/auth/password-policy and
+ * `minimum_password_length` in supabase/config.toml.
+ */
+export const NEW_PASSWORD_MIN_LENGTH = 10;
+
 export const PublicSignupRequestSchema = z
   .object({
     email: z.string().trim().toLowerCase().pipe(z.email()),
-    password: z.string().min(8).max(200),
+    password: z.string().min(NEW_PASSWORD_MIN_LENGTH).max(200),
     displayName: z.string().trim().min(2).max(120),
     inviteToken: z.string().min(20).max(500).optional(),
     /** Optional Learnyst-style referral / invite code (not an admin invite token). */
@@ -125,7 +133,7 @@ export const PublicPasswordResetRequestSchema = z
 
 export const PublicPasswordResetCompleteSchema = z
   .object({
-    password: z.string().min(8).max(200),
+    password: z.string().min(NEW_PASSWORD_MIN_LENGTH).max(200),
     accessToken: z.string().min(1).max(4000),
     refreshToken: z.string().max(4000).optional(),
   })

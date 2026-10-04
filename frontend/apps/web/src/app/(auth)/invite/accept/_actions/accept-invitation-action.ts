@@ -90,7 +90,7 @@ export async function setInvitationPasswordAction(
     return {
       ok: false,
       message: passwordIssue
-        ? "Password must be at least 8 characters."
+        ? "Password must be at least 10 characters."
         : "This invitation link is invalid or has expired. Request a new invitation.",
       requestId: crypto.randomUUID(),
     };

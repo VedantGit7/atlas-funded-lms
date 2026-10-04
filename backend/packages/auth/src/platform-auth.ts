@@ -47,6 +47,7 @@ export async function requirePlatformPrincipal(args: {
     db: args.db,
     supabaseUserId: supabaseUser.supabaseUserId,
     email: supabaseUser.email,
+    emailConfirmed: supabaseUser.emailConfirmed,
     mfaEnabled: supabaseUser.mfaEnabled,
     markLogin: false,
   });

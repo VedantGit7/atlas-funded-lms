@@ -158,6 +158,8 @@ export type ConfirmEmailResult = {
   redirectTo: string | null;
   /** Raw Set-Cookie headers from the API, forwarded verbatim onto the redirect. */
   setCookies: string[];
+  /** The API's error code when verification succeeded but sign-in was refused. */
+  errorCode?: string | null;
 };
 
 /**
@@ -209,7 +211,8 @@ export async function confirmEmailViaInternalApi(input: {
   const payload: unknown = await response.json().catch(() => null);
 
   if (!response.ok) {
-    return failure;
+    const errorCode = (payload as { error?: { code?: string } } | null)?.error?.code ?? null;
+    return { ...failure, errorCode };
   }
 
   const data = (payload as PublicAuthApiResponse | null)?.data ?? null;

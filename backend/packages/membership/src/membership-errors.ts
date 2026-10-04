@@ -33,6 +33,14 @@ export function membershipRemoved(): AtlasHttpError {
   });
 }
 
+export function principalDisabled(): AtlasHttpError {
+  return new AtlasHttpError({
+    code: "ACCOUNT_DISABLED",
+    status: 403,
+    message: "This account has been disabled. Contact support if you think this is a mistake.",
+  });
+}
+
 export function invalidInvitation(): AtlasHttpError {
   return new AtlasHttpError({
     code: "INVALID_INVITATION",

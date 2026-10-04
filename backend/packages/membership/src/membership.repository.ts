@@ -51,6 +51,25 @@ export async function findMembershipByPrincipal(args: {
 }
 
 /**
+ * The principal's account status, read by the membership gate (audit H6).
+ * Principal resolution already refuses a disabled principal at sign-in and on
+ * every request; reading it again here keeps tenant access closed even for a
+ * caller that reached the gate some other way. Null when no principal exists.
+ */
+export async function findPrincipalGlobalStatus(args: {
+  tx: Tx;
+  authPrincipalId: string;
+}): Promise<string | null> {
+  const rows = await args.tx.$queryRaw<{ global_status: string }[]>`
+    select global_status
+    from auth_principals
+    where id = ${args.authPrincipalId}::uuid
+  `;
+
+  return rows[0]?.global_status ?? null;
+}
+
+/**
  * Inserts a brand-new ACTIVE membership for an open self-service signup.
  *
  * Uses `on conflict do nothing` so it never overrides an existing membership in

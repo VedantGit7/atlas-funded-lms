@@ -71,6 +71,12 @@ export type AuthPrincipal = Prisma.AuthPrincipalModel
  */
 export type PlatformOperator = Prisma.PlatformOperatorModel
 /**
+ * Model AuthPrincipalRelinkRequest
+ * H6: a confirmed email signed in under a different Supabase user than the
+ * principal it belongs to. Only a platform approval moves the principal.
+ */
+export type AuthPrincipalRelinkRequest = Prisma.AuthPrincipalRelinkRequestModel
+/**
  * Model Membership
  * 
  */

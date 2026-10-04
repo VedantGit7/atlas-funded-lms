@@ -20,6 +20,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { identityBlockMessageFromQuery } from "@/lib/auth-messages";
 import { useLazyZodForm } from "@/lib/forms/use-lazy-zod-form";
 import { HiddenFormField } from "@/lib/forms/hidden-form-field";
 import { valuesToFormData } from "@/lib/forms/values-to-form-data";
@@ -121,7 +122,8 @@ export function SignupForm() {
     .trim()
     .toUpperCase();
   const redirectTo = searchParams.get("next") ?? undefined;
-  const oauthFailed = searchParams.get("error") === "oauth";
+  const identityBlocked = identityBlockMessageFromQuery(searchParams.get("error"));
+  const oauthFailed = searchParams.get("error") === "oauth" || identityBlocked !== null;
   const [state, formAction, pending] = useActionState(signupAction, initialState);
 
   const [showPassword, setShowPassword] = useState(false);
@@ -325,7 +327,7 @@ export function SignupForm() {
                     required
                     type={showPassword ? "text" : "password"}
                     autoComplete="new-password"
-                    placeholder="At least 8 characters"
+                    placeholder="At least 10 characters"
                     className={`${fieldInputClass} pr-12`}
                   />
                 </FormControl>
@@ -390,7 +392,8 @@ export function SignupForm() {
                 : "text-[13px] text-[var(--fba-red-tx)]"
             }
           >
-            {state.message || "We couldn't sign you up with that provider. Please try again."}
+            {state.message ||
+              (identityBlocked ?? "We couldn't sign you up with that provider. Please try again.")}
           </p>
         ) : null}
 

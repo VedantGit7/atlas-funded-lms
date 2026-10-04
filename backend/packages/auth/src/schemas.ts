@@ -1,10 +1,11 @@
 import { z } from "zod";
+import { NEW_PASSWORD_MIN_LENGTH } from "./password-policy";
 
 export const emailSchema = z.string().trim().toLowerCase().pipe(z.email());
 
 export const publicSignupInputSchema = z.object({
   email: emailSchema,
-  password: z.string().min(8).max(128),
+  password: z.string().min(NEW_PASSWORD_MIN_LENGTH).max(128),
   displayName: z.string().trim().min(2).max(120).optional(),
   inviteToken: z.string().min(20).max(500).optional(),
   referralCode: z.preprocess(
