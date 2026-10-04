@@ -4,7 +4,8 @@
   "private": true,
   "exports": {
     ".": "./src/index.ts",
-    "./route-metadata": "./src/route-metadata.ts"
+    "./route-metadata": "./src/route-metadata.ts",
+    "./step-up-mfa-policy": "./src/step-up-mfa-policy.ts"
   },
   "scripts": {
     "build": "echo \"No authorization build configured yet.\"",

@@ -12,6 +12,7 @@ export const routeMetadata = getRouteMetadata;
 
 export const postRouteMetadata = {
   permission: "tenancy.domain.manage",
+  mfa: "required",
   entitlement: null,
   audit: "required",
   rateLimit: "tenantMutation",

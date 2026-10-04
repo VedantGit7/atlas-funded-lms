@@ -8,6 +8,7 @@ export const getRouteMetadata = {
 
 export const postRouteMetadata = {
   permission: "config.update",
+  mfa: "required",
   entitlement: null,
   audit: "required",
   rateLimit: "tenantMutation",

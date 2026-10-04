@@ -26,6 +26,7 @@ export const mutateResourceUsageDormantMetadata = {
 
 export const mutateResourceUsageInactiveMetadata = {
   permission: "membership.suspend",
+  mfa: "required",
   audit: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",

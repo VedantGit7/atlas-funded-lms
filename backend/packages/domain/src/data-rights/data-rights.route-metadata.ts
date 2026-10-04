@@ -117,6 +117,7 @@ export const getMyDeletionRequestStatusMetadata = {
 
 export const processDeletionRequestMetadata = {
   permission: "data.deletion.manage",
+  mfa: "required",
   audit: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",

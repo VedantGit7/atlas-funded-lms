@@ -23,6 +23,7 @@ export const listMarketingIntegrationsMetadata = {
 
 export const mutateMarketingIntegrationsMetadata = {
   permission: "config.update",
+  mfa: "required",
   audit: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "none",

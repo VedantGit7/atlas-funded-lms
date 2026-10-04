@@ -3,6 +3,7 @@
 import { ClientApiError, type ApiErrorBody } from "./errors";
 import { toast } from "../feedback/toast";
 import { createUuid } from "../create-uuid";
+import { requestMfaStepUp } from "./mfa-step-up";
 
 export type ClientApiMutationOptions = {
   /** Full toast message override */
@@ -28,6 +29,7 @@ async function request<T>(
   path: string,
   init: RequestInit & { idempotencyKey?: string; body?: BodyInit | null },
   allowRefreshRetry = true,
+  allowStepUp = true,
 ): Promise<T> {
   const headers = new Headers(init.headers);
 
@@ -52,7 +54,7 @@ async function request<T>(
     });
 
     if (refreshResponse.ok) {
-      return request<T>(path, init, false);
+      return request<T>(path, init, false, allowStepUp);
     }
   }
 
@@ -74,6 +76,17 @@ async function request<T>(
 
   if (!response.ok) {
     const envelope = body as ApiErrorBody;
+    // A sensitive action needs this session to complete MFA (audit H4). Once
+    // the user steps up, repeat the same request, with the same idempotency
+    // key: the server refused it before doing any work.
+    if (
+      allowStepUp &&
+      response.status === 403 &&
+      envelope.error?.code === "MFA_REQUIRED" &&
+      (await requestMfaStepUp(envelope.error.message ?? ""))
+    ) {
+      return request<T>(path, init, allowRefreshRetry, false);
+    }
     throw new ClientApiError(
       envelope.error?.code ?? "UNKNOWN_ERROR",
       response.status,

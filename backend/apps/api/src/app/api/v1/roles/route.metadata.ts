@@ -19,6 +19,7 @@ export const getRouteMetadata = {
 
 export const postRouteMetadata = {
   permission: "role.create",
+  mfa: "required",
   entitlement: null,
   audit: "required",
   rateLimit: "tenantMutation",

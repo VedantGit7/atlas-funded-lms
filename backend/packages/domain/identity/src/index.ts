@@ -49,6 +49,7 @@ export {
   VerifyPhoneRequestSchema,
   MfaEnrollResponseSchema,
   MfaVerifyRequestSchema,
+  MfaStepUpRequestSchema,
   MfaListResponseSchema,
   IdentitiesListResponseSchema,
   LinkIdentityRequestSchema,

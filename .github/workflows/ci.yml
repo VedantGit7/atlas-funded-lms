@@ -705,6 +705,8 @@ jobs:
         env:
           DATABASE_URL: postgresql://generate:generate@127.0.0.1:5432/generate
       - run: pnpm ci:audit-metadata
+      # Step-up MFA on privilege, credential, money and bulk-data operations (audit H4).
+      - run: pnpm ci:mfa-metadata
 
   package-exports-check:
     name: package-exports-check

@@ -125,6 +125,7 @@ export const listDestinationsRosterMetadata = {
 
 export const createDestinationMetadata = {
   permission: "reports.schedule.manage",
+  mfa: "required",
   audit: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",
@@ -134,6 +135,7 @@ export const createDestinationMetadata = {
 
 export const updateDestinationMetadata = {
   permission: "reports.schedule.manage",
+  mfa: "required",
   audit: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",
@@ -143,6 +145,7 @@ export const updateDestinationMetadata = {
 
 export const deleteDestinationMetadata = {
   permission: "reports.schedule.manage",
+  mfa: "required",
   audit: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",

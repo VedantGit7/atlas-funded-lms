@@ -3,6 +3,7 @@ import { createTenantResourceRef } from "@atlas/authorization";
 
 export const routeMetadata = {
   permission: "permission_override.manage",
+  mfa: "required",
   entitlement: null,
   audit: "required",
   rateLimit: "tenantMutation",

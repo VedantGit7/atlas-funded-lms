@@ -55,6 +55,7 @@ export const getPaymentOrderMetadata = {
 /** Exporting the ledger is the same read as listing it. */
 export const exportPaymentOrdersMetadata = {
   permission: "reports.run",
+  mfa: "required",
   entitlement: "analytics.dashboard.view",
   audit: "none",
   rateLimit: "authenticatedTenantRead",

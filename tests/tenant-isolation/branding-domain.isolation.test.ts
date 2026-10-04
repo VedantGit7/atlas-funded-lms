@@ -336,7 +336,9 @@ function setupTenantAApiMocks() {
   mockRequireSupabaseUser.mockResolvedValue({
     supabaseUserId: "018f0000-0000-7000-8000-000000000001",
     email: "admin@tenant-a.example.com",
-    mfaEnabled: false,
+    mfaEnabled: true,
+    // Domain changes require a session that completed MFA (audit H4).
+    sessionAssuranceLevel: "aal2",
   });
   mockUpsertAuthPrincipal.mockResolvedValue({
     id: "018f0000-0000-7000-8000-000000000098",

@@ -19,6 +19,7 @@ export const getRouteMetadata = {
 
 export const postRouteMetadata = {
   permission: "permission_override.manage",
+  mfa: "required",
   entitlement: null,
   audit: "required",
   rateLimit: "tenantMutation",

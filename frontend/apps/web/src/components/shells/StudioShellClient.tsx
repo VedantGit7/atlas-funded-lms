@@ -1,5 +1,6 @@
 "use client";
 
+import { MfaStepUpProvider } from "../security/MfaStepUpProvider";
 import type { ReactNode } from "react";
 import type { PublicTenantBranding } from "@atlas/tenant-branding";
 import type { StudioNavItem } from "../../features/studio/studio-navigation";
@@ -40,6 +41,7 @@ export function StudioShellClient({
       pendingGradingCount={pendingGradingCount}
       mfaEnabled={mfaEnabled}
     >
+      <MfaStepUpProvider />
       {children}
     </StudioShell>
   );

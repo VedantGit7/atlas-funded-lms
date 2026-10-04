@@ -12,6 +12,7 @@ export const getExtensionRegistrationsRouteMetadata = {
 
 export const postExtensionRegistrationsRouteMetadata = {
   permission: "extension.registration.manage",
+  mfa: "required",
   entitlement: null,
   audit: "required",
   rateLimit: "tenantMutation",
@@ -21,6 +22,7 @@ export const postExtensionRegistrationsRouteMetadata = {
 
 export const putExtensionRegistrationsRouteMetadata = {
   permission: "extension.registration.manage",
+  mfa: "required",
   entitlement: null,
   audit: "required",
   rateLimit: "tenantMutation",
@@ -30,6 +32,7 @@ export const putExtensionRegistrationsRouteMetadata = {
 
 export const deleteExtensionRegistrationsRouteMetadata = {
   permission: "extension.registration.manage",
+  mfa: "required",
   entitlement: null,
   audit: "required",
   rateLimit: "tenantMutation",

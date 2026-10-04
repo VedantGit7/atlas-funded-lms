@@ -44,6 +44,14 @@ export const MfaVerifyRequestSchema = z
   })
   .strict();
 
+/** Step-up: complete MFA for this session with an enrolled factor (audit H4). */
+export const MfaStepUpRequestSchema = z
+  .object({
+    code: z.string().regex(/^\d{6}$/, "Enter the 6-digit code from your authenticator app."),
+    factorId: z.string().min(1).optional(),
+  })
+  .strict();
+
 export const MfaFactorSchema = z.object({
   id: z.string(),
   factorType: z.string(),

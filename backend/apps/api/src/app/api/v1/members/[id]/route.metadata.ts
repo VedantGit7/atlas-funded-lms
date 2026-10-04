@@ -31,6 +31,7 @@ export const routeMetadata = getRouteMetadata;
 
 export const deleteRouteMetadata = {
   permission: "membership.remove",
+  mfa: "required",
   entitlement: null,
   audit: "required",
   rateLimit: "tenantMutation",

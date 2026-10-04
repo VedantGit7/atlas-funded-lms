@@ -3,6 +3,7 @@ import { createTenantResourceRef } from "@atlas/authorization";
 
 export const inviteRouteMetadata = {
   permission: "membership.invite",
+  mfa: "required",
   entitlement: null,
   audit: "required",
   rateLimit: "tenantMutation",

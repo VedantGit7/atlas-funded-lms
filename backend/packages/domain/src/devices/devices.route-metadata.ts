@@ -35,6 +35,7 @@ export const listDeviceSessionsMetadata = {
 
 export const deleteDeviceSessionsMetadata = {
   permission: "membership.suspend",
+  mfa: "required",
   audit: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",

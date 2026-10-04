@@ -1,5 +1,6 @@
 "use client";
 
+import { MfaStepUpProvider } from "../../security/MfaStepUpProvider";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
@@ -392,6 +393,7 @@ export function AdminShell({
   return (
     <div className="admin-theme flex min-h-screen bg-[var(--admin-bg)] text-[var(--admin-on-surface)]">
       <DeviceSessionCapture />
+      <MfaStepUpProvider />
       <a
         href="#admin-main"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[60] focus:rounded-lg focus:bg-[var(--admin-primary)] focus:px-4 focus:py-2 focus:text-[var(--admin-on-primary)]"
