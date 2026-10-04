@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
-import { createPublicRouteHandler } from "@atlas/api";
-import { withGlobalDb } from "@atlas/db/global-db";
+import { createPublicRouteHandler, resolveRequestTenant } from "@atlas/api";
 import { withTenantTx } from "@atlas/db/with-tenant-tx";
-import { resolveTenantFromRequest } from "@atlas/tenancy";
 import { submitPublicMarketingForm } from "../../../../../../../../server/marketing-forms/marketing-forms.service";
 import { routeMetadata } from "./route.metadata";
 
@@ -19,17 +17,15 @@ function readToken(req: Request): string {
 export const POST = createPublicRouteHandler(routeMetadata, async ({ req, requestId }) => {
   const token = readToken(req);
   const body: unknown = await req.json();
-  return withGlobalDb(async (db) => {
-    const tenant = await resolveTenantFromRequest({ req, db });
-    const result = await withTenantTx(
-      {
-        tenantId: tenant.tenantId,
-        requestId,
-        allowAnonymousTenantRead: true,
-      },
-      async (tx) =>
-        submitPublicMarketingForm(tx, { tenantId: tenant.tenantId, requestId }, token, body),
-    );
-    return NextResponse.json(result, { status: 200 });
-  });
+  const tenant = await resolveRequestTenant(req);
+  const result = await withTenantTx(
+    {
+      tenantId: tenant.tenantId,
+      requestId,
+      allowAnonymousTenantRead: true,
+    },
+    async (tx) =>
+      submitPublicMarketingForm(tx, { tenantId: tenant.tenantId, requestId }, token, body),
+  );
+  return NextResponse.json(result, { status: 200 });
 });

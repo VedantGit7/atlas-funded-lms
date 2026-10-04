@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server";
-import { resolveTenantFromRequest } from "@atlas/tenancy";
-import { createPublicRouteHandler } from "@atlas/api";
-import { withGlobalDb } from "@atlas/db/global-db";
+import { createPublicRouteHandler, resolveRequestTenant } from "@atlas/api";
 import { withTenantTx } from "@atlas/db/with-tenant-tx";
 import { hashClientIp } from "@atlas/security";
 import { AtlasHttpError } from "@atlas/core/http/errors";
@@ -45,29 +43,27 @@ function enforceVerifyRateLimit(req: Request): void {
 
 export const GET = createPublicRouteHandler(routeMetadata, async ({ req, requestId }) => {
   enforceVerifyRateLimit(req);
-  return withGlobalDb(async (db) => {
-    const tenant = await resolveTenantFromRequest({ req, db });
-    const url = new URL(req.url);
-    const segments = url.pathname.split("/");
-    const credentialId = segments.at(-1) ?? "";
-    publicCredentialParamsSchema.parse({ credentialId });
+  const tenant = await resolveRequestTenant(req);
+  const url = new URL(req.url);
+  const segments = url.pathname.split("/");
+  const credentialId = segments.at(-1) ?? "";
+  publicCredentialParamsSchema.parse({ credentialId });
 
-    const body = await withTenantTx(
-      {
+  const body = await withTenantTx(
+    {
+      tenantId: tenant.tenantId,
+      requestId,
+      allowAnonymousTenantRead: true,
+    },
+    async (tx) =>
+      verifyCredentialPublic({
+        tx,
         tenantId: tenant.tenantId,
         requestId,
-        allowAnonymousTenantRead: true,
-      },
-      async (tx) =>
-        verifyCredentialPublic({
-          tx,
-          tenantId: tenant.tenantId,
-          requestId,
-          credentialId,
-          req,
-        }),
-    );
+        credentialId,
+        req,
+      }),
+  );
 
-    return NextResponse.json(publicVerifyResponseSchema.parse(body));
-  });
+  return NextResponse.json(publicVerifyResponseSchema.parse(body));
 });

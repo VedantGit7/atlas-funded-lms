@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
-import { createPublicRouteHandler } from "@atlas/api";
-import { withGlobalDb } from "@atlas/db/global-db";
+import { createPublicRouteHandler, resolveRequestTenant } from "@atlas/api";
 import { withTenantTx } from "@atlas/db/with-tenant-tx";
-import { resolveTenantFromRequest } from "@atlas/tenancy";
 import { registerPublicMarketingEvent } from "../../../../../../../../server/marketing-events/marketing-events.service";
 import { routeMetadata } from "./route.metadata";
 
@@ -19,16 +17,14 @@ function readId(req: Request): string {
 export const POST = createPublicRouteHandler(routeMetadata, async ({ req, requestId }) => {
   const id = readId(req);
   const body: unknown = await req.json();
-  return withGlobalDb(async (db) => {
-    const tenant = await resolveTenantFromRequest({ req, db });
-    const result = await withTenantTx(
-      {
-        tenantId: tenant.tenantId,
-        requestId,
-        allowAnonymousTenantRead: true,
-      },
-      async (tx) => registerPublicMarketingEvent(tx, id, body),
-    );
-    return NextResponse.json(result, { status: 200 });
-  });
+  const tenant = await resolveRequestTenant(req);
+  const result = await withTenantTx(
+    {
+      tenantId: tenant.tenantId,
+      requestId,
+      allowAnonymousTenantRead: true,
+    },
+    async (tx) => registerPublicMarketingEvent(tx, id, body),
+  );
+  return NextResponse.json(result, { status: 200 });
 });

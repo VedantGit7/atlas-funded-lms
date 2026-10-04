@@ -3,10 +3,7 @@ import type { NextRequest } from "next/server";
 import { AtlasHttpError } from "@atlas/core/http/errors";
 import { getOrCreateRequestId } from "@atlas/core/request/request-id";
 import { assertPublicRouteMetadata } from "@atlas/authorization/route-metadata";
-import { toSafeErrorEnvelope, enforcePublicRateLimit } from "@atlas/api";
-import { resolveTenantFromRequest } from "@atlas/tenancy";
-import { requireSupabaseUser, upsertAuthPrincipal } from "@atlas/auth";
-import { withGlobalDb } from "@atlas/db/global-db";
+import { authenticateTenantRequest, toSafeErrorEnvelope, enforcePublicRateLimit } from "@atlas/api";
 import { withTenantTx } from "@atlas/db/with-tenant-tx";
 import { requireActiveMembership } from "@atlas/membership";
 import { rejectClientTenantId } from "@atlas/domain-identity";
@@ -46,56 +43,48 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    return await withGlobalDb(async (db) => {
-      const tenant = await resolveTenantFromRequest({ req, db });
-      const supabaseUser = await requireSupabaseUser(req);
-      const principal = await upsertAuthPrincipal({
-        db,
-        supabaseUserId: supabaseUser.supabaseUserId,
-        email: supabaseUser.email,
-        mfaEnabled: supabaseUser.mfaEnabled,
-        markLogin: false,
-      });
+    // Supabase first with no connection held, then tenant and principal on one
+    // released connection, then the tenant transaction (audit H3).
+    const { tenant, principal } = await authenticateTenantRequest(req);
 
-      const rawBody: unknown = await req.json();
-      rejectClientTenantId(rawBody);
-      PublicDiagnosticMergeBodySchema.parse(rawBody);
-      const anonymousId = readAnonIdFromRequest(req);
+    const rawBody: unknown = await req.json();
+    rejectClientTenantId(rawBody);
+    PublicDiagnosticMergeBodySchema.parse(rawBody);
+    const anonymousId = readAnonIdFromRequest(req);
 
-      const cookie = readDiagnosticSessionCookie(req);
-      if (!cookie || cookie.anonymousId !== anonymousId) {
-        throw diagnosticSessionInvalid();
-      }
+    const cookie = readDiagnosticSessionCookie(req);
+    if (!cookie || cookie.anonymousId !== anonymousId) {
+      throw diagnosticSessionInvalid();
+    }
 
-      const body = await withTenantTx(
-        {
+    const body = await withTenantTx(
+      {
+        tenantId: tenant.tenantId,
+        requestId,
+        allowAnonymousTenantRead: true,
+      },
+      async (tx) => {
+        const membership = await requireActiveMembership({
+          tx,
           tenantId: tenant.tenantId,
-          requestId,
-          allowAnonymousTenantRead: true,
-        },
-        async (tx) => {
-          const membership = await requireActiveMembership({
-            tx,
+          authPrincipalId: principal.id,
+        });
+
+        return mergeAnonymousDiagnosticSession({
+          tx,
+          ctx: {
             tenantId: tenant.tenantId,
-            authPrincipalId: principal.id,
-          });
+            actorMembershipId: membership.membershipId,
+            requestId,
+          },
+          anonymousId,
+          secret: cookie.secret,
+          idempotencyKey,
+        });
+      },
+    );
 
-          return mergeAnonymousDiagnosticSession({
-            tx,
-            ctx: {
-              tenantId: tenant.tenantId,
-              actorMembershipId: membership.membershipId,
-              requestId,
-            },
-            anonymousId,
-            secret: cookie.secret,
-            idempotencyKey,
-          });
-        },
-      );
-
-      return NextResponse.json(publicDiagnosticMergeResponseSchema.parse(body));
-    });
+    return NextResponse.json(publicDiagnosticMergeResponseSchema.parse(body));
   } catch (error) {
     const safe = toSafeErrorEnvelope(error, requestId);
     return NextResponse.json(safe.body, { status: safe.status, headers: safe.headers ?? {} });

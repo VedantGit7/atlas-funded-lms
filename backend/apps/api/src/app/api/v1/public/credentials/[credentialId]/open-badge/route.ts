@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server";
-import { resolveTenantFromRequest } from "@atlas/tenancy";
-import { createPublicRouteHandler } from "@atlas/api";
-import { withGlobalDb } from "@atlas/db/global-db";
+import { createPublicRouteHandler, resolveRequestTenant } from "@atlas/api";
 import { withTenantTx } from "@atlas/db/with-tenant-tx";
 import { publicCredentialParamsSchema } from "../../../../../../../server/certificates/certificate.params";
 import { getPublicOpenBadgeCredential } from "../../../../../../../server/certificates/open-badge.service";
@@ -16,39 +14,37 @@ function resolveOrigin(headers: Headers): string {
 }
 
 export const GET = createPublicRouteHandler(routeMetadata, async ({ req, requestId }) => {
-  return withGlobalDb(async (db) => {
-    const tenant = await resolveTenantFromRequest({ req, db });
-    const url = new URL(req.url);
-    const segments = url.pathname.split("/");
-    // .../credentials/{credentialId}/open-badge
-    const credentialId = segments.at(-2) ?? "";
-    publicCredentialParamsSchema.parse({ credentialId });
+  const tenant = await resolveRequestTenant(req);
+  const url = new URL(req.url);
+  const segments = url.pathname.split("/");
+  // .../credentials/{credentialId}/open-badge
+  const credentialId = segments.at(-2) ?? "";
+  publicCredentialParamsSchema.parse({ credentialId });
 
-    const origin = resolveOrigin(req.headers);
-    const verificationUrl = `${origin}/verify/${encodeURIComponent(credentialId)}`;
+  const origin = resolveOrigin(req.headers);
+  const verificationUrl = `${origin}/verify/${encodeURIComponent(credentialId)}`;
 
-    const credential = await withTenantTx(
-      {
+  const credential = await withTenantTx(
+    {
+      tenantId: tenant.tenantId,
+      requestId,
+      allowAnonymousTenantRead: true,
+    },
+    async (tx) =>
+      getPublicOpenBadgeCredential({
+        tx,
         tenantId: tenant.tenantId,
         requestId,
-        allowAnonymousTenantRead: true,
-      },
-      async (tx) =>
-        getPublicOpenBadgeCredential({
-          tx,
-          tenantId: tenant.tenantId,
-          requestId,
-          credentialId,
-          verificationUrl,
-        }),
-    );
+        credentialId,
+        verificationUrl,
+      }),
+  );
 
-    if (!credential) {
-      return NextResponse.json({ error: { code: "NOT_FOUND" } }, { status: 404 });
-    }
+  if (!credential) {
+    return NextResponse.json({ error: { code: "NOT_FOUND" } }, { status: 404 });
+  }
 
-    return NextResponse.json(credential, {
-      headers: { "content-type": "application/ld+json" },
-    });
+  return NextResponse.json(credential, {
+    headers: { "content-type": "application/ld+json" },
   });
 });

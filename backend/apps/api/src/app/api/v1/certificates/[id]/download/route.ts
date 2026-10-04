@@ -1,16 +1,20 @@
 import { enforceIngressRateLimit } from "@atlas/api/rate-limit";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import { runProtectedTenantRouteHandler, toSafeErrorEnvelope } from "@atlas/api";
+import {
+  authenticateTenantRequest,
+  runProtectedTenantRouteHandler,
+  toSafeErrorEnvelope,
+} from "@atlas/api";
 import { getOrCreateRequestId } from "@atlas/core/request/request-id";
 import { attachRequestIdHeader } from "@atlas/observability";
-import { requireSupabaseUser, upsertAuthPrincipal } from "@atlas/auth";
-import { withGlobalDb } from "@atlas/db/global-db";
 import { withTenantTx } from "@atlas/db/with-tenant-tx";
 import { requireActiveMembership } from "@atlas/membership";
-import { resolveTenantFromRequest } from "@atlas/tenancy";
 import { certificateParamsSchema } from "../../../../../../server/certificates/certificate.params";
-import { getCertificateDownload } from "../../../../../../server/certificates/certificate.service";
+import {
+  materializeCertificateDownload,
+  planCertificateDownload,
+} from "../../../../../../server/certificates/certificate.service";
 import { downloadCertificateMetadata } from "../../../../../../server/certificates/certificate.route-metadata";
 
 /**
@@ -27,57 +31,51 @@ export async function GET(req: NextRequest, context: { params: Promise<{ id: str
     await enforceIngressRateLimit({ req, plane: "tenant", requestId });
     const { id: certificateId } = certificateParamsSchema.parse(await context.params);
 
-    return await withGlobalDb(async (db) => {
-      const tenant = await resolveTenantFromRequest({ req, db });
-      const supabaseUser = await requireSupabaseUser(req);
-      const principal = await upsertAuthPrincipal({
-        db,
-        supabaseUserId: supabaseUser.supabaseUserId,
-        email: supabaseUser.email,
-        mfaEnabled: supabaseUser.mfaEnabled,
-        markLogin: false,
-      });
+    // Supabase verification, then tenant and principal, each releasing its
+    // connection before the tenant transaction (audit H3).
+    const { supabaseUser, tenant, principal } = await authenticateTenantRequest(req);
 
-      const result = await withTenantTx(
-        { tenantId: tenant.tenantId, requestId, allowAnonymousTenantRead: true },
-        async (tx) => {
-          const membership = await requireActiveMembership({
-            tx,
+    const plan = await withTenantTx(
+      { tenantId: tenant.tenantId, requestId, allowAnonymousTenantRead: true },
+      async (tx) => {
+        const membership = await requireActiveMembership({
+          tx,
+          tenantId: tenant.tenantId,
+          authPrincipalId: principal.id,
+        });
+
+        return runProtectedTenantRouteHandler({
+          sessionAssuranceLevel: supabaseUser.sessionAssuranceLevel,
+          tx,
+          ctx: {
             tenantId: tenant.tenantId,
-            authPrincipalId: principal.id,
-          });
-
-          return runProtectedTenantRouteHandler({
-            sessionAssuranceLevel: supabaseUser.sessionAssuranceLevel,
-            tx,
-            ctx: {
-              tenantId: tenant.tenantId,
-              actorMembershipId: membership.membershipId,
-              requestId,
-            },
-            metadata: downloadCertificateMetadata,
-            params: { id: certificateId },
-            input: {},
-            handler: async ({ tx, ctx }) => getCertificateDownload(tx, ctx, certificateId),
-          });
-        },
-      );
-
-      const responseBody: BodyInit =
-        typeof result.body === "string" ? result.body : new Uint8Array(result.body);
-
-      return attachRequestIdHeader(
-        new NextResponse(responseBody, {
-          status: 200,
-          headers: {
-            "content-type": result.contentType,
-            "content-disposition": `attachment; filename="${result.filename}"`,
-            "cache-control": "private, no-store",
+            actorMembershipId: membership.membershipId,
+            requestId,
           },
-        }),
-        requestId,
-      );
-    });
+          metadata: downloadCertificateMetadata,
+          params: { id: certificateId },
+          input: {},
+          handler: async ({ tx, ctx }) => planCertificateDownload(tx, ctx, certificateId),
+        });
+      },
+    );
+    // Object storage only after the transaction has returned its connection.
+    const result = await materializeCertificateDownload(plan);
+
+    const responseBody: BodyInit =
+      typeof result.body === "string" ? result.body : new Uint8Array(result.body);
+
+    return attachRequestIdHeader(
+      new NextResponse(responseBody, {
+        status: 200,
+        headers: {
+          "content-type": result.contentType,
+          "content-disposition": `attachment; filename="${result.filename}"`,
+          "cache-control": "private, no-store",
+        },
+      }),
+      requestId,
+    );
   } catch (error) {
     const safe = toSafeErrorEnvelope(error, requestId);
     return attachRequestIdHeader(

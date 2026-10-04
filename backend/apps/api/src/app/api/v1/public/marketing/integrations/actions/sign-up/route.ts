@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
-import { createPublicRouteHandler, toSafeErrorEnvelope } from "@atlas/api";
-import { withGlobalDb } from "@atlas/db/global-db";
+import { createPublicRouteHandler, toSafeErrorEnvelope, resolveRequestTenant } from "@atlas/api";
 import { withTenantTx } from "@atlas/db/with-tenant-tx";
-import { resolveTenantFromRequest } from "@atlas/tenancy";
 import {
   requireIntegrationApiKey,
   runIntegrationSignUpAction,
@@ -26,29 +24,27 @@ function readApiKey(req: Request): string | null {
 export const POST = createPublicRouteHandler(routeMetadata, async ({ req, requestId }) => {
   try {
     const body: unknown = await req.json();
-    return await withGlobalDb(async (db) => {
-      const tenant = await resolveTenantFromRequest({ req, db });
-      const result = await withTenantTx(
-        {
-          tenantId: tenant.tenantId,
-          requestId,
-          allowAnonymousTenantRead: true,
-        },
-        async (tx) => {
-          await requireIntegrationApiKey(tx, readApiKey(req));
-          return runIntegrationSignUpAction(
-            tx,
-            systemServiceCtx({
-              tenantId: tenant.tenantId,
-              requestId,
-              source: "marketing.public_action",
-            }),
-            body,
-          );
-        },
-      );
-      return NextResponse.json(result, { status: 200 });
-    });
+    const tenant = await resolveRequestTenant(req);
+    const result = await withTenantTx(
+      {
+        tenantId: tenant.tenantId,
+        requestId,
+        allowAnonymousTenantRead: true,
+      },
+      async (tx) => {
+        await requireIntegrationApiKey(tx, readApiKey(req));
+        return runIntegrationSignUpAction(
+          tx,
+          systemServiceCtx({
+            tenantId: tenant.tenantId,
+            requestId,
+            source: "marketing.public_action",
+          }),
+          body,
+        );
+      },
+    );
+    return NextResponse.json(result, { status: 200 });
   } catch (error) {
     const safe = toSafeErrorEnvelope(error, requestId);
     return NextResponse.json(safe.body, { status: safe.status });
