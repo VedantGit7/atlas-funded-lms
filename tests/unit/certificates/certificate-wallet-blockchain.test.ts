@@ -6,9 +6,17 @@ import {
 } from "../../../backend/apps/api/src/server/certificates/certificate-blockchain.service";
 import { isCertificateFeatureEnabled } from "../../../backend/apps/api/src/server/certificates/certificate-feature-flags";
 import {
-  issueAppleWalletPass,
+  completeAppleWalletPassIssue,
   issueGoogleWalletPass,
+  planAppleWalletPassIssue,
 } from "../../../backend/apps/api/src/server/certificates/certificate-wallet.service";
+
+type IssueCtx = Parameters<typeof planAppleWalletPassIssue>[1];
+
+/** The route's two phases: plan in the transaction, complete after it. */
+async function issueAppleWalletPass(tx: never, ctx: IssueCtx, certificateId: string) {
+  return completeAppleWalletPassIssue(await planAppleWalletPassIssue(tx, ctx, certificateId), ctx);
+}
 
 const ENV_KEYS = [
   "CERTIFICATE_WALLETS",

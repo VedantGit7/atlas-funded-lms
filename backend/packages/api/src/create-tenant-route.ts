@@ -229,6 +229,22 @@ type TenantRouteConfig<TInput, TOutput, TParams extends z.ZodType | undefined = 
   readBody?: (req: NextRequest) => Promise<unknown>;
   params?: TParams;
   handler: ProtectedTenantRouteHandler<TInput, TOutput, InferParams<TParams>>;
+  /**
+   * Work that must not run inside the request transaction: object storage,
+   * outbound HTTP, heavy CPU (audit H3). Runs after the handler's transaction
+   * commits, holding no pooled connection; it may open its own short
+   * transaction. Its return value is the response body. The handler's writes
+   * are already committed when it runs, so a failure here must leave a state
+   * the next request can recover from.
+   *
+   * Not allowed on idempotent routes: a replay returns the stored handler
+   * result and would run this step a second time.
+   */
+  afterCommit?: (args: {
+    result: TOutput;
+    ctx: TenantRouteContext;
+    params: InferParams<TParams>;
+  }) => Promise<unknown>;
 };
 
 export function createTenantRoute<TInput = Record<string, never>, TOutput = unknown>(
@@ -248,6 +264,10 @@ export function createTenantRoute<
 >(
   config: TenantRouteConfig<TInput, TOutput, TParams>,
 ): TenantRouteWithParams | TenantRouteWithoutParams {
+  if (config.afterCommit && config.metadata.idempotency === "required") {
+    throw new Error('afterCommit cannot be combined with idempotency: "required"');
+  }
+
   async function route(req: NextRequest, routeContext?: TenantRouteContextArg) {
     const requestId = getOrCreateRequestId(req.headers);
     const pathname = new URL(req.url).pathname;
@@ -316,6 +336,9 @@ export function createTenantRoute<
               : ({} as InferParams<TParams>);
 
           const idempotencyKey = req.headers.get("idempotency-key")?.trim() ?? undefined;
+          // The context the handler ran with, for afterCommit. A holder for the
+          // same reason as `metered`: it is assigned inside a callback.
+          const committed: { ctx?: TenantRouteContext } = {};
 
           // ---------------------------------------------------------------
           // Phase 2: first connection, released before phase 3 begins.
@@ -389,6 +412,7 @@ export function createTenantRoute<
                   // F03: every request, including a replay, uses current resource,
                   // permission, entitlement, and session-MFA evidence.
                   const resource = await authorizeProtectedTenantRoute(pipelineArgs);
+                  committed.ctx = pipelineArgs.ctx;
                   const runHandler = async () => {
                     await consumeProtectedTenantRouteUsage(pipelineArgs);
                     return config.handler({ tx, ctx: pipelineArgs.ctx, input, resource, params });
@@ -434,9 +458,17 @@ export function createTenantRoute<
           delete metered.usage;
 
           // Phase 4: no connection held while validating and serialising output.
+          let responseValue: unknown = result;
+          const afterCommit = config.afterCommit;
+          const handlerCtx = committed.ctx;
+          if (afterCommit && handlerCtx) {
+            responseValue = await measureRouteStage("after_commit", () =>
+              afterCommit({ result, ctx: handlerCtx, params }),
+            );
+          }
           let body: TOutput;
           try {
-            body = config.output.parse(result) as TOutput;
+            body = config.output.parse(responseValue) as TOutput;
           } catch (error) {
             if (error instanceof ZodError) {
               throw new AtlasHttpError({
