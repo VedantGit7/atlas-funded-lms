@@ -316,6 +316,9 @@ importers:
 
   backend/packages/auth:
     dependencies:
+      '@atlas/access':
+        specifier: workspace:*
+        version: link:../access
       '@atlas/core':
         specifier: workspace:*
         version: link:../core
