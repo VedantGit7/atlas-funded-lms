@@ -29,6 +29,7 @@
     "test:e2e": "echo \"No auth e2e tests configured yet.\""
   },
   "dependencies": {
+    "@atlas/access": "workspace:*",
     "@atlas/core": "workspace:*",
     "@atlas/observability": "workspace:*",
     "@supabase/supabase-js": "^2.108.2",

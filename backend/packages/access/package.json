@@ -4,6 +4,7 @@
   "private": true,
   "exports": {
     ".": "./src/index.ts",
+    "./platform-role-permissions": "./src/platform-role-permissions.ts",
     "./seed/permission-catalogue": "./src/seed/permission-catalogue.ts",
     "./seed/tenant-system-roles": "./src/seed/tenant-system-roles.ts"
   },

@@ -1,4 +1,4 @@
-import type { PlatformRoleKey } from "./platform-role-resolution";
+import type { PlatformRoleKey } from "@atlas/access/platform-role-permissions";
 
 type QueryableDb = {
   $queryRaw<T = unknown>(query: TemplateStringsArray, ...values: unknown[]): Promise<T>;

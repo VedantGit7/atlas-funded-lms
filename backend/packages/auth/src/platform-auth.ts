@@ -1,5 +1,7 @@
 import type { NextRequest } from "next/server";
-import { resolvePlatformPermissionsForRole } from "./platform-role-resolution";
+// The role catalogue is the only definition of what each platform role may do.
+// A hand-copied map here once drifted from it and denied the cost console.
+import { resolvePlatformPermissionsForRole } from "@atlas/access/platform-role-permissions";
 import { AtlasHttpError } from "@atlas/core/http/errors";
 import { assertPlatformMfa } from "./mfa-enforcement";
 import { findActivePlatformOperator } from "./platform-operators.repository";
