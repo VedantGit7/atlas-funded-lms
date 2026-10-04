@@ -1,6 +1,6 @@
 # Content Security Policy rollout (F13)
 
-Status: implementation prepared locally; production enforcement and full journey acceptance remain pending. `CSP_ENFORCE=0` (or unset) reports violations; `1` enforces. Other nonempty values fail instead of silently weakening the policy. Changing the flag requires restarting/redeploying the web application. Report-only is not XSS prevention.
+Status: deployed web must enforce (audit H5). `CSP_ENFORCE=1` enforces; `0` (or unset) only reports, and deployment validation refuses a deployed web service that is not enforcing unless `CSP_REPORT_ONLY_INCIDENT` names the incident that justified rolling back. Other nonempty values fail instead of silently weakening the policy. Changing the flag requires restarting/redeploying the web application. Report-only is not XSS prevention.
 
 ## What the application now supplies
 
@@ -25,6 +25,16 @@ Inline styles remain allowed for tenant themes and component styles. Local devel
 | Marketing integrations             | Never automatically nonce tenant snippets. Raw inline tracking snippets will be blocked on enforcement; migrate to approved external scripts or separately reviewed application-owned integrations.                         |
 
 `CSP_SCRIPT_ORIGINS`, `CSP_IMAGE_ORIGINS`, `CSP_MEDIA_ORIGINS`, `CSP_CONNECT_ORIGINS`, and `CSP_FRAME_ORIGINS` accept comma/whitespace-separated **exact HTTPS origins** (maximum 32 / 4,096 characters per list). Paths, credentials, queries, fragments, wildcard hosts, directives and HTTP destinations are rejected. These are deployment-wide grants: do not add arbitrary tenant-supplied hosts automatically. Each grant needs a provider purpose and the narrowest applicable directive. Provider variables are parsed to origins; never paste secrets into these lists.
+
+## Tenant code snippets (audit H5)
+
+Marketing integrations let a tenant admin add HTML and script (site body, order tracking, signup tracking). That code runs in this origin, with the authority of whoever is viewing the page. Three controls bound it:
+
+- **Where it runs.** Only on public and learner pages, decided by `frontend/apps/web/src/features/marketing/snippet-scope.ts`. It never runs on staff areas (`/admin`, `/studio`, `/platform`, `/moderate`, `/review`), on credential pages (`/login`, `/signup`, `/reset-password`, `/invite`, `/auth`, `/verify-email`), or on account security (`/profile`, `/settings`). Supabase accounts span tenants, so a password typed on one tenant's page also opens that person's accounts elsewhere. Every top-level route must be classified, and a structure test fails on an unclassified one. Injected code cannot be unloaded, so a document that has run snippets turns any navigation into those areas into a full page load. Signup tracking fires on the first page after signup completes (the `signupComplete` marker), never on the signup form.
+- **Who it runs for.** `GET /api/v1/public/marketing/integrations/snippets` returns nothing to a signed-in viewer holding any role beyond learner, and nothing when a presented session cannot be verified. It is `private, no-store` with `Vary: Cookie`.
+- **What it can do.** With `CSP_ENFORCE=1`, recreated snippet scripts get no nonce: inline snippet code is blocked, and external scripts run only from `CSP_SCRIPT_ORIGINS`. Package JavaScript cannot be pulled into app pages either; the SCORM route refuses same-origin subresource requests.
+
+Editing snippets requires step-up MFA and is audited (audit H4).
 
 ## Reports and operational use
 
@@ -85,6 +95,6 @@ The certificate share dialog now offers direct and social links only; the unsupp
 2. Exercise login/password reset/OAuth, learner lesson navigation/video/assessment, admin and platform operations, checkout, consent/analytics, tenant custom assets, forms, and proctoring camera/microphone. Inspect policy responses, reports, and browser errors; add only documented necessary origins. Verify refresh, direct loads and client-side navigation.
 3. Resolve the SCORM routing, API bridge, version and resume gaps above. Verify package scripts remain opaque and cannot read parent cookies/DOM while completion tracking persists correctly. Verify certificate direct/social sharing works and no unsupported iframe offer is exposed; ordinary verification-page framing must remain denied.
 4. Turn on `CSP_ENFORCE=1` in staging, repeat journeys and submit a controlled nonce-free inline script/event-handler fixture. Confirm the scripts do not execute, trusted theme/framework hydration still works, reports arrive, normal pages reject framing, and permitted forms/SCORM still frame correctly. Keep a saved candidate/release/provider inventory with the results.
-5. Roll out enforcement to production only after the above acceptance, and watch failures against the baseline. Do not interpret zero reports as proof of safety. The emergency rollback is `CSP_ENFORCE=0` plus redeploy; record the incident and correction because this removes document CSP enforcement. The separate SCORM sandbox must stay enforced throughout.
+5. Roll out enforcement to production only after the above acceptance, and watch failures against the baseline. Do not interpret zero reports as proof of safety. The emergency rollback is `CSP_ENFORCE=0` with `CSP_REPORT_ONLY_INCIDENT=<incident reference>` plus redeploy (deployment validation refuses report-only without it); record the incident and correction because this removes document CSP enforcement. The separate SCORM sandbox must stay enforced throughout.
 
 No production environment flags are changed by this local implementation. SEC-01 remains open until enforcement and the journey evidence are complete.

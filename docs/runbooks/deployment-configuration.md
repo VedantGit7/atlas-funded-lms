@@ -53,6 +53,8 @@ The deployed **API** additionally requires `SCORM_CONTENT_SIGNING_KEYS`. These k
 - **Scope:** web and worker do not need it.
 - **Local development:** without it, local development uses a random per-process key, so open lessons stop loading their remaining files after an API restart until they are reopened.
 
+Deployed **web** also requires `CSP_ENFORCE=1` (audit H5). Report-only is accepted only with `CSP_REPORT_ONLY_INCIDENT` set to an incident reference (3 to 64 characters of `[A-Za-z0-9_.:/-]`). That is the emergency rollback described in the [CSP runbook](content-security-policy.md), and it must be removed when the incident closes.
+
 Deployed **web** additionally requires explicit client-IP attribution: positive `TRUSTED_PROXY_HOPS` or a valid `TRUSTED_CLIENT_IP_HEADER`. The default/template is zero trusted hops, which intentionally fails deployed web validation until configured. API and worker need no edge attribution setting. Configuration validation cannot prove that an edge overwrites/appends the selected headers or blocks direct origin access; verify that separately. Public calls and browser API rewrites with absent/invalid attribution fail closed with retryable 503.
 
 ## Release verification before routing production traffic

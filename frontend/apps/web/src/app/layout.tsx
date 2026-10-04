@@ -8,7 +8,7 @@ import "../styles/jetbrains-mono.css";
 
 import { AppProviders } from "@/components/providers/AppProviders";
 import { AnalyticsConsentBridge } from "../observability/AnalyticsConsentBridge";
-import { MarketingSnippetsInjector } from "../features/marketing/MarketingSnippetsInjector";
+import { LazyMarketingSnippets } from "../features/marketing/LazyMarketingSnippets";
 import { loadTenantThemeRuntime } from "@atlas/tenant-theme";
 import { ThemeInitScript } from "../components/ThemeInitScript";
 import { resolveDocumentDescription, resolveDocumentTitle } from "../lib/branding/document-title";
@@ -128,7 +128,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
       <body suppressHydrationWarning>
         <AppProviders initialDisplayCurrency={displayCurrency} initialFxRates={fxRates}>
           <AnalyticsConsentBridge hasSession={hasSession}>
-            <MarketingSnippetsInjector />
+            <LazyMarketingSnippets />
             {children}
           </AnalyticsConsentBridge>
         </AppProviders>

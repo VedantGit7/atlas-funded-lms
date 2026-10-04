@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { confirmEmailViaInternalApi } from "../../../lib/server/public-auth-fetch";
 import { resolveRequestOrigin } from "../../../lib/server/resolve-request-origin";
+import { withSignupCompleteMarker } from "../../../features/marketing/snippet-scope";
 
 // Supabase email-verification links point here with a single-use `token_hash`
 // (token-hash / PKCE SSR flow). We verify it server-side via the internal API,
@@ -56,7 +57,10 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   if (authenticated) {
     // Verified + signed in → show the branded "You're all set" success screen,
     // which then auto-redirects to the role home (or an explicit, safe `next`).
-    const dest = next ?? result.redirectTo ?? "/";
+    const target = next ?? result.redirectTo ?? "/";
+    // A confirmed signup is a completed signup: tag the destination so the
+    // tenant's signup-tracking snippet fires there, not on the credential page.
+    const dest = type === "signup" ? withSignupCompleteMarker(target) : target;
     destination = new URL("/verify-email", origin);
     destination.searchParams.set("status", "success");
     destination.searchParams.set("next", dest);
