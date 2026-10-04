@@ -53,12 +53,20 @@ export async function GET(req: NextRequest, context: { params: Promise<{ id: str
           metadata: downloadAppleWalletPassMetadata,
           params: { id: certificateId },
           input: {},
-          handler: async ({ tx, ctx }) => planAppleWalletPassDownload(tx, ctx, certificateId),
+          handler: async ({ tx, ctx }) => ({
+            ...(await planAppleWalletPassDownload(tx, ctx, certificateId)),
+            actorMembershipId: ctx.actorMembershipId,
+          }),
         });
       },
     );
-    // Object storage only after the transaction has returned its connection.
-    const result = await materializeAppleWalletPassDownload(plan);
+    // Signing, upload and the object read only after the transaction has
+    // returned its connection.
+    const result = await materializeAppleWalletPassDownload(plan, {
+      tenantId: tenant.tenantId,
+      actorMembershipId: plan.actorMembershipId,
+      requestId,
+    });
 
     return attachRequestIdHeader(
       new NextResponse(new Uint8Array(result.body), {

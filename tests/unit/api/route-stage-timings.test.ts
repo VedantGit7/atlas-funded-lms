@@ -65,7 +65,8 @@ describe("bounded route stage timings", () => {
     }
     expect(emit).toHaveBeenCalledTimes(100);
     const last = emit.mock.calls.at(-1)?.[0];
-    expect(Object.keys(last.stages)).toHaveLength(6);
+    // Six request stages plus after_commit (post-transaction work, audit H3).
+    expect(Object.keys(last.stages)).toHaveLength(7);
     expect(last.stages.global_total.count).toBe(10_000);
     expect(last.stages.global_total.buckets).toHaveLength(12);
     expect(last.stages.global_total.buckets.reduce((a: number, b: number) => a + b, 0)).toBe(

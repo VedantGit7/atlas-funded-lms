@@ -5,10 +5,15 @@
  * service returns a deterministic `not_configured` payload (CI-safe, no throw).
  * When configured, Apple builds a signed .pkpass uploaded to R2; Google returns
  * a signed Save-to-Wallet JWT URL.
+ *
+ * Apple issuance is split around the request transaction (audit H3): the plan
+ * runs inside it (access, the certificate, configuration); signing and the
+ * object-storage upload run after it commits, holding no pooled connection;
+ * a short second transaction then records where the pass is stored.
  */
 
 import { createHash } from "node:crypto";
-import type { TenantTx } from "@atlas/db";
+import { withTenantTx, type TenantTx } from "@atlas/db";
 import { certificateRepository } from "./certificate.repository";
 import { certificateNotFound } from "./certificate.errors";
 import { isCertificateFeatureEnabled } from "./certificate-feature-flags";
@@ -136,9 +141,9 @@ async function buildApplePkPass(certificate: CertificateRow): Promise<Buffer> {
   const files: Record<string, Buffer> = {
     "pass.json": Buffer.from(JSON.stringify(passJson), "utf8"),
     "icon.png": MINIMAL_PNG,
-    "paula.r@example.org": MINIMAL_PNG,
+    "icon@2x.png": MINIMAL_PNG,
     "logo.png": MINIMAL_PNG,
-    "carol.w@example.org": MINIMAL_PNG,
+    "logo@2x.png": MINIMAL_PNG,
   };
 
   const manifest: Record<string, string> = {};
@@ -268,13 +273,23 @@ async function loadOwnedCertificate(
   return certificate;
 }
 
-export async function issueAppleWalletPass(
+export type AppleWalletIssuePlan =
+  | { kind: "done"; data: WalletPassResult }
+  | { kind: "build"; certificate: CertificateRow };
+
+/**
+ * Transaction half of Apple issuance: ownership, the feature and credentials.
+ * Records `not_configured` here because that needs no storage; a pass to build
+ * is handed to completeAppleWalletPassIssue.
+ */
+export async function planAppleWalletPassIssue(
   tx: TenantTx,
   ctx: ServiceCtx,
   certificateId: string,
-): Promise<{ data: WalletPassResult }> {
+): Promise<AppleWalletIssuePlan> {
   if (!isCertificateFeatureEnabled("wallets")) {
     return {
+      kind: "done",
       data: {
         platform: "apple",
         status: "not_configured",
@@ -300,9 +315,25 @@ export async function issueAppleWalletPass(
       externalId: null,
       status: result.status,
     });
-    return { data: result };
+    return { kind: "done", data: result };
   }
 
+  return { kind: "build", certificate };
+}
+
+/**
+ * After the request transaction: sign and upload the pass with no pooled
+ * connection held, then record it in a short transaction of its own. The object
+ * key is deterministic per certificate, so a retry after a failure here
+ * overwrites the same object rather than leaving strays.
+ */
+export async function completeAppleWalletPassIssue(
+  plan: AppleWalletIssuePlan,
+  ctx: ServiceCtx,
+): Promise<{ data: WalletPassResult }> {
+  if (plan.kind === "done") return { data: plan.data };
+
+  const { certificate } = plan;
   const pkpass = await buildApplePkPass(certificate);
   const { objectKey } = await storeCertificateWalletPass({
     tenantId: ctx.tenantId,
@@ -310,25 +341,32 @@ export async function issueAppleWalletPass(
     content: pkpass,
   });
 
-  const downloadUrl = `/api/v1/certificates/${certificate.id}/wallet/apple/download`;
-  const result: WalletPassResult = {
-    platform: "apple",
-    status: "active",
-    passObjectKey: objectKey,
-    downloadUrl,
-    message: "Apple Wallet pass generated.",
+  await withTenantTx(
+    { tenantId: ctx.tenantId, requestId: ctx.requestId, actorMembershipId: ctx.actorMembershipId },
+    async (tx) => {
+      // Still there and still this tenant's: it may have been removed while the
+      // pass was being signed and uploaded.
+      await loadOwnedCertificate(tx, ctx, certificate.id);
+      await certificateRepository.upsertWalletPass(tx, {
+        tenantId: ctx.tenantId,
+        certificateId: certificate.id,
+        platform: "apple",
+        passObjectKey: objectKey,
+        externalId: null,
+        status: "active",
+      });
+    },
+  );
+
+  return {
+    data: {
+      platform: "apple",
+      status: "active",
+      passObjectKey: objectKey,
+      downloadUrl: `/api/v1/certificates/${certificate.id}/wallet/apple/download`,
+      message: "Apple Wallet pass generated.",
+    },
   };
-
-  await certificateRepository.upsertWalletPass(tx, {
-    tenantId: ctx.tenantId,
-    certificateId: certificate.id,
-    platform: "apple",
-    passObjectKey: objectKey,
-    externalId: null,
-    status: result.status,
-  });
-
-  return { data: result };
 }
 
 export async function issueGoogleWalletPass(
@@ -392,63 +430,57 @@ export type AppleWalletDownload = {
   filename: string;
 };
 
-/** Database half of a pass download: ownership, and lazy issuance when no pass exists yet. */
+export type AppleWalletDownloadPlan =
+  | { kind: "stored"; passObjectKey: string; filename: string }
+  | { kind: "issue"; issue: AppleWalletIssuePlan; filename: string };
+
+/** Database half of a pass download: ownership, and whether a pass must be issued first. */
 export async function planAppleWalletPassDownload(
   tx: TenantTx,
   ctx: ServiceCtx,
   certificateId: string,
-): Promise<{ passObjectKey: string; filename: string }> {
+): Promise<AppleWalletDownloadPlan> {
   if (!isCertificateFeatureEnabled("wallets")) {
     throw certificateNotFound();
   }
 
   const certificate = await loadOwnedCertificate(tx, ctx, certificateId);
-  let pass = await certificateRepository.findWalletPass(tx, {
+  const filename = `${certificate.credential_id}.pkpass`;
+  const pass = await certificateRepository.findWalletPass(tx, {
     tenantId: ctx.tenantId,
     certificateId: certificate.id,
     platform: "apple",
   });
 
-  if (!pass?.pass_object_key || pass.status !== "active") {
-    // Lazily issue so the download URL works after a fresh deploy. Issuance
-    // still builds and stores the pass inside this transaction; only the
-    // regular download path keeps storage I/O outside it.
-    const issued = await issueAppleWalletPass(tx, ctx, certificateId);
-    if (issued.data.status !== "active" || !issued.data.passObjectKey) {
-      throw certificateNotFound();
-    }
-    pass = await certificateRepository.findWalletPass(tx, {
-      tenantId: ctx.tenantId,
-      certificateId: certificate.id,
-      platform: "apple",
-    });
+  if (pass?.pass_object_key && pass.status === "active") {
+    return { kind: "stored", passObjectKey: pass.pass_object_key, filename };
   }
 
-  if (!pass?.pass_object_key) {
-    throw certificateNotFound();
-  }
-  return { passObjectKey: pass.pass_object_key, filename: `${certificate.credential_id}.pkpass` };
+  // Issued lazily so the download URL works after a fresh deploy; the build and
+  // upload happen in materializeAppleWalletPassDownload, after this commits.
+  return { kind: "issue", issue: await planAppleWalletPassIssue(tx, ctx, certificateId), filename };
 }
 
 /** Storage half: run after the transaction, holding no pooled connection (audit H3). */
-export async function materializeAppleWalletPassDownload(plan: {
-  passObjectKey: string;
-  filename: string;
-}): Promise<AppleWalletDownload> {
+export async function materializeAppleWalletPassDownload(
+  plan: AppleWalletDownloadPlan,
+  ctx: ServiceCtx,
+): Promise<AppleWalletDownload> {
+  let passObjectKey: string;
+  if (plan.kind === "stored") {
+    passObjectKey = plan.passObjectKey;
+  } else {
+    const issued = await completeAppleWalletPassIssue(plan.issue, ctx);
+    if (issued.data.status !== "active" || !issued.data.passObjectKey) {
+      throw certificateNotFound();
+    }
+    passObjectKey = issued.data.passObjectKey;
+  }
+
   const { loadCertificateWalletPass } = await import("./certificate-wallet-store");
-  const body = await loadCertificateWalletPass(plan.passObjectKey);
+  const body = await loadCertificateWalletPass(passObjectKey);
   if (!body) {
     throw certificateNotFound();
   }
   return { body, contentType: APPLE_PKPASS_CONTENT_TYPE, filename: plan.filename };
-}
-
-export async function getAppleWalletPassDownload(
-  tx: TenantTx,
-  ctx: ServiceCtx,
-  certificateId: string,
-): Promise<AppleWalletDownload> {
-  return materializeAppleWalletPassDownload(
-    await planAppleWalletPassDownload(tx, ctx, certificateId),
-  );
 }

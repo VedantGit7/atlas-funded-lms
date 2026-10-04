@@ -5,6 +5,7 @@ const stages = [
   "tenant_total",
   "tenant_work",
   "usage",
+  "after_commit",
 ] as const;
 export type RouteStage = (typeof stages)[number];
 const boundsMs = [1, 5, 10, 25, 50, 100, 250, 500, 1_000, 5_000, 10_000] as const;
