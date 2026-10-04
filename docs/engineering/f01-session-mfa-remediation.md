@@ -61,7 +61,13 @@ F01 made the gate correct, but only three tenant routes declared it (`membership
 - **Enrollment:** verifying a new factor (`POST /api/v1/me/security/mfa/verify`) does the same.
 - **Client:** when an admin or studio action returns `MFA_REQUIRED`, the API client opens the step-up dialog (`MfaStepUpProvider`) and retries the request once with the same idempotency key. Users without an authenticator are sent to `/profile/security?setup=mfa&next=…` and return verified.
 
-Report exports other than payment orders are not yet covered. Their downloads are spread across many report-specific endpoints rather than one, so they remain gated by report permissions only.
+**Report exports** (H4 follow-up) are covered by path rules (`STEP_UP_MFA_ROUTE_RULES`) rather than a list, so a new report's export endpoints are covered when they are written. Report data leaves a tenant three ways, and each requires MFA:
+
+- **Producing an export:** `POST …/export`, `…/exports`, `…/bi-exports`, and export retries. An export can be emailed to any address or posted to a webhook.
+- **Retrieving a file:** `GET /reports/runs/[runId]/download/[format]`, export run detail, BI export detail, data-rights export detail and the attribution export. Each returns the file or a signed link to it.
+- **Changing scheduled delivery:** creating or editing report schedules and export schedules, running, copying or bulk-changing them, and testing a destination. A schedule's `delivery` holds recipient emails and a webhook URL. Deleting a per-report export schedule shares its metadata and also asks for MFA.
+
+Viewing a report on screen is not challenged. `POST /reports/runs`, run status and run preview stay open. Run status carries no download link, and the preview returns at most `REPORT_PREVIEW_ROW_LIMIT` (500) rows, so the full result is only reachable through the download route. The guard fails if a rule stops matching any route.
 
 ## References
 

@@ -111,6 +111,7 @@ export const getAttributionBreakdownMetadata = {
 /** Exporting the log is the same read as listing it. */
 export const exportAttributionEventsMetadata = {
   permission: "reports.run",
+  mfa: "required",
   entitlement: "analytics.dashboard.view",
   audit: "none",
   rateLimit: "authenticatedTenantRead",

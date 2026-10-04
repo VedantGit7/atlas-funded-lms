@@ -45,6 +45,7 @@ export const messageResourceUsageInactiveMetadata = {
 
 export const exportResourceUsageRosterMetadata = {
   permission: "reports.run",
+  mfa: "required",
   audit: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",

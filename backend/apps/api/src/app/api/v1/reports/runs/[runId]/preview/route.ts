@@ -9,7 +9,10 @@ import {
 import { reportsRepository } from "@atlas/domain/reports/reports.repository";
 import { getReportRun } from "@atlas/domain/reports/reports.service";
 import { getReportRunMetadata } from "@atlas/domain/reports/reports.route-metadata";
-import { reportPreviewResponseSchema } from "@atlas/api-server/reports/reports.schemas";
+import {
+  REPORT_PREVIEW_ROW_LIMIT,
+  reportPreviewResponseSchema,
+} from "@atlas/api-server/reports/reports.schemas";
 
 const paramsSchema = z.object({ runId: z.uuid() });
 
@@ -59,7 +62,7 @@ export const GET = createTenantRoute<
             label: column,
             kind: "string" as const,
           })),
-          rows: previewDataset.rows.map((row) => {
+          rows: previewDataset.rows.slice(0, REPORT_PREVIEW_ROW_LIMIT).map((row) => {
             const mapped: Record<string, string | number | null> = {};
             for (const column of previewDataset.columns) {
               const value = row[column];
@@ -77,6 +80,9 @@ export const GET = createTenantRoute<
           }),
           dimensions: previewDataset.columns.slice(0, 1),
           measures: previewDataset.columns.slice(1),
+          ...(previewDataset.rows.length > REPORT_PREVIEW_ROW_LIMIT
+            ? { totalRowCount: previewDataset.rows.length }
+            : {}),
         },
       },
     };

@@ -17,6 +17,7 @@ export const listPollsRosterMetadata = {
 
 export const exportPollsRosterMetadata = {
   permission: "reports.run",
+  mfa: "required",
   audit: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",

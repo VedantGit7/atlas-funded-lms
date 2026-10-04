@@ -35,6 +35,8 @@ export type NormalizedResult = {
   dimensions?: string[] | undefined;
   measures?: string[] | undefined;
   series?: NormalizedSeries[] | undefined;
+  /** Set when `rows` is a preview of a larger result; the full result is a download. */
+  totalRowCount?: number | undefined;
 };
 
 export const ALL_VIZ_TYPES: VizType[] = [

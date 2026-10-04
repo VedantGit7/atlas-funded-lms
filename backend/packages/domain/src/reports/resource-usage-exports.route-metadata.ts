@@ -17,6 +17,7 @@ export const getResourceUsageExportsMetadata = {
 
 export const createResourceUsageExportMetadata = {
   permission: "reports.run",
+  mfa: "required",
   audit: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",
@@ -26,6 +27,7 @@ export const createResourceUsageExportMetadata = {
 
 export const retryResourceUsageExportMetadata = {
   permission: "reports.run",
+  mfa: "required",
   audit: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",
@@ -35,6 +37,7 @@ export const retryResourceUsageExportMetadata = {
 
 export const mutateResourceUsageExportScheduleMetadata = {
   permission: "reports.run",
+  mfa: "required",
   audit: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",

@@ -17,6 +17,7 @@ export const getLiveClassAttendanceExportsMetadata = {
 
 export const createLiveClassAttendanceExportMetadata = {
   permission: "reports.run",
+  mfa: "required",
   audit: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",
@@ -26,6 +27,7 @@ export const createLiveClassAttendanceExportMetadata = {
 
 export const retryLiveClassAttendanceExportMetadata = {
   permission: "reports.run",
+  mfa: "required",
   audit: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",
@@ -35,6 +37,7 @@ export const retryLiveClassAttendanceExportMetadata = {
 
 export const mutateLiveClassAttendanceExportScheduleMetadata = {
   permission: "reports.run",
+  mfa: "required",
   audit: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",

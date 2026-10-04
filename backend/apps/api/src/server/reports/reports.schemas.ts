@@ -45,7 +45,16 @@ export const normalizedResultSchema = z.object({
   dimensions: z.array(z.string()).optional(),
   measures: z.array(z.string()).optional(),
   series: z.array(z.object({ key: z.string(), label: z.string() })).optional(),
+  /** Rows in the full result when `rows` holds only the on-screen preview. */
+  totalRowCount: z.number().int().min(0).optional(),
 });
+
+/**
+ * Rows a report preview returns for on-screen viewing. The full result is a
+ * file, retrieved through the download route, which requires step-up MFA; an
+ * uncapped preview would hand out the same data without it.
+ */
+export const REPORT_PREVIEW_ROW_LIMIT = 500;
 
 export const reportDefinitionsQuerySchema = z
   .object({

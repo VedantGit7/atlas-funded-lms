@@ -17,6 +17,7 @@ export const getSalesMarketingExportsMetadata = {
 
 export const createSalesMarketingExportMetadata = {
   permission: "reports.run",
+  mfa: "required",
   audit: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",
@@ -26,6 +27,7 @@ export const createSalesMarketingExportMetadata = {
 
 export const retrySalesMarketingExportMetadata = {
   permission: "reports.run",
+  mfa: "required",
   audit: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",
@@ -35,6 +37,7 @@ export const retrySalesMarketingExportMetadata = {
 
 export const mutateSalesMarketingExportScheduleMetadata = {
   permission: "reports.run",
+  mfa: "required",
   audit: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",

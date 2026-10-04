@@ -17,6 +17,7 @@ export const getSuperLiveInsightsExportsMetadata = {
 
 export const createSuperLiveInsightsExportMetadata = {
   permission: "reports.run",
+  mfa: "required",
   audit: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",
@@ -26,6 +27,7 @@ export const createSuperLiveInsightsExportMetadata = {
 
 export const retrySuperLiveInsightsExportMetadata = {
   permission: "reports.run",
+  mfa: "required",
   audit: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",
@@ -35,6 +37,7 @@ export const retrySuperLiveInsightsExportMetadata = {
 
 export const mutateSuperLiveInsightsExportScheduleMetadata = {
   permission: "reports.run",
+  mfa: "required",
   audit: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",

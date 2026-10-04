@@ -17,6 +17,7 @@ export const getZoomInsightsExportsMetadata = {
 
 export const createZoomInsightsExportMetadata = {
   permission: "reports.run",
+  mfa: "required",
   audit: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",
@@ -26,6 +27,7 @@ export const createZoomInsightsExportMetadata = {
 
 export const retryZoomInsightsExportMetadata = {
   permission: "reports.run",
+  mfa: "required",
   audit: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",
@@ -35,6 +37,7 @@ export const retryZoomInsightsExportMetadata = {
 
 export const mutateZoomInsightsExportScheduleMetadata = {
   permission: "reports.run",
+  mfa: "required",
   audit: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",
