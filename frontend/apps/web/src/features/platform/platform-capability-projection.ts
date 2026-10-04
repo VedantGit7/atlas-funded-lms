@@ -7,7 +7,8 @@ export type PlatformCapabilityKey =
   | "platform.audit.read"
   | "platform.support.access"
   | "platform.cost.read"
-  | "platform.cost.manage";
+  | "platform.cost.manage"
+  | "platform.identity.manage";
 
 export type PlatformCapabilityProjection = {
   canTenantRead: boolean;
@@ -20,6 +21,7 @@ export type PlatformCapabilityProjection = {
   canEventingReplay: boolean;
   canCostRead: boolean;
   canCostManage: boolean;
+  canIdentityManage: boolean;
 };
 
 export function projectPlatformCapabilities(
@@ -39,5 +41,6 @@ export function projectPlatformCapabilities(
     canEventingReplay: has("platform.tenant.manage"),
     canCostRead: has("platform.cost.read"),
     canCostManage: has("platform.cost.manage"),
+    canIdentityManage: has("platform.identity.manage"),
   };
 }

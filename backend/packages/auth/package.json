@@ -12,6 +12,8 @@
     "./platform-auth": "./src/platform-auth.ts",
     "./supabase-server": "./src/supabase-server.ts",
     "./auth-errors": "./src/auth-errors.ts",
+    "./password-policy": "./src/password-policy.ts",
+    "./supabase-admin-users": "./src/supabase-admin-users.ts",
     "./platform-operators.repository": "./src/platform-operators.repository.ts",
     "./mfa-enforcement": "./src/mfa-enforcement.ts"
   },

@@ -101,6 +101,7 @@
     "ci:tenant-resource-registry": "tsx scripts/ci/check-tenant-resource-registry.ts",
     "ci:forbidden-scope": "pnpm check:forbidden-scope",
     "security:check": "node scripts/security/check.mjs",
+    "security:supabase-auth": "node scripts/security/verify-supabase-auth-config.mjs",
     "test:rls": "dotenv -e .env.test -- vitest run tests/tenant-isolation/rls-direct-query.test.ts tests/tenant-isolation/transaction-pooling.test.ts tests/db",
     "test:storage": "dotenv -e .env.test -- vitest run tests/security/storage-secret-leakage.test.ts tests/tenant-isolation/storage-key-isolation.test.ts",
     "release:suite": "node scripts/release/run-suite.mjs",

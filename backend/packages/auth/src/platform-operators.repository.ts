@@ -36,15 +36,19 @@ export async function findActivePlatformOperator(
       grant_reason: string | null;
     }>
   >`
-    SELECT id::text,
-           auth_principal_id::text,
-           role_key,
-           granted_at,
-           granted_by_principal_id::text,
-           grant_reason
-      FROM platform_operators
-     WHERE auth_principal_id = ${authPrincipalId}::uuid
-       AND revoked_at IS NULL
+    SELECT po.id::text,
+           po.auth_principal_id::text,
+           po.role_key,
+           po.granted_at,
+           po.granted_by_principal_id::text,
+           po.grant_reason
+      FROM platform_operators po
+      -- H6: a grant held by a disabled account confers nothing.
+      JOIN auth_principals ap
+        ON ap.id = po.auth_principal_id
+       AND ap.global_status = 'active'
+     WHERE po.auth_principal_id = ${authPrincipalId}::uuid
+       AND po.revoked_at IS NULL
      LIMIT 1
   `;
 

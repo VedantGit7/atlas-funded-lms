@@ -335,6 +335,7 @@ export function createTenantRoute<
                   db,
                   supabaseUserId: supabaseUser.supabaseUserId,
                   email: supabaseUser.email,
+                  emailConfirmed: supabaseUser.emailConfirmed,
                   mfaEnabled: supabaseUser.mfaEnabled,
                   markLogin: false,
                 });

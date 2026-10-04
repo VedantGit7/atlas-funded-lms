@@ -89,7 +89,7 @@ function passwordStrength(password: string): number {
   }
 
   let score = 0;
-  if (password.length >= 8) score += 1;
+  if (password.length >= 10) score += 1;
   if (/[a-z]/.test(password) && /[A-Z]/.test(password)) score += 1;
   if (/\d/.test(password)) score += 1;
   if (/[^A-Za-z0-9]/.test(password)) score += 1;
@@ -335,9 +335,9 @@ export function InviteAcceptCard({
                 name="password"
                 type={showPassword ? "text" : "password"}
                 required
-                minLength={8}
+                minLength={10}
                 autoComplete="new-password"
-                placeholder="At least 8 characters"
+                placeholder="At least 10 characters"
                 value={password}
                 onChange={(event) => {
                   setPassword(event.target.value);

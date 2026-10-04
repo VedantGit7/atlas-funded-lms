@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { ATLAS_CLIENT_IP_HEADER, buildApiProxyHeaders } from "@atlas/core/http/api-proxy";
 import { ATLAS_INTERNAL_TENANT_HOST_HEADER } from "@/lib/http-headers";
 import { resolvePostAuthRedirect } from "@/lib/auth/safe-redirect";
+import { identityBlockQueryValue, isIdentityBlockCode } from "@/lib/auth-messages";
 import {
   OAUTH_NEXT_COOKIE,
   OAUTH_REMEMBER_COOKIE,
@@ -85,7 +86,14 @@ export async function GET(req: NextRequest) {
   }
 
   if (!apiRes.ok) {
-    return clearOAuthCookies(NextResponse.redirect(`${loginUrl}?error=oauth`));
+    // A provider sign-in can reach an account that is disabled or awaiting
+    // relink review (audit H6); say so instead of "try again".
+    const failure = (await apiRes.json().catch(() => null)) as {
+      error?: { code?: string };
+    } | null;
+    const code = failure?.error?.code;
+    const errorParam = isIdentityBlockCode(code) ? identityBlockQueryValue(code) : "oauth";
+    return clearOAuthCookies(NextResponse.redirect(`${loginUrl}?error=${errorParam}`));
   }
 
   const payload = (await apiRes.json()) as CallbackApiResponse;

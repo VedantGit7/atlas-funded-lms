@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { NEW_PASSWORD_MIN_LENGTH } from "./public-auth";
 
 export const invitationAcceptStatusSchema = z.enum([
   "ACCEPTED",
@@ -36,7 +37,7 @@ export const PreviewInvitationResponseSchema = z.object({
 export const SetInvitationPasswordRequestSchema = z
   .object({
     token: z.string().min(20).max(500),
-    password: z.string().min(8).max(200),
+    password: z.string().min(NEW_PASSWORD_MIN_LENGTH).max(200),
     accessToken: z.string().min(1).max(4000),
     refreshToken: z.string().max(4000).optional(),
   })

@@ -11,6 +11,7 @@ export type PlatformNavItem = {
   requiresSupportAccess?: boolean;
   requiresEventingReplay?: boolean;
   requiresCostRead?: boolean;
+  requiresIdentityManage?: boolean;
   mobilePrimary?: boolean;
 };
 
@@ -66,6 +67,12 @@ export const PLATFORM_PRIMARY_NAV: readonly PlatformNavItem[] = [
     screenId: "P9",
     requiresCostRead: true,
   },
+  {
+    href: "/platform/accounts",
+    label: "Accounts",
+    screenId: "P10",
+    requiresIdentityManage: true,
+  },
 ] as const;
 
 import type { PlatformCapabilityProjection } from "./platform-capability-projection";
@@ -84,6 +91,7 @@ export function filterPlatformNavigation(
     if (item.requiresSupportAccess && !capabilities.canSupportAccess) return false;
     if (item.requiresEventingReplay && !capabilities.canEventingReplay) return false;
     if (item.requiresCostRead && !capabilities.canCostRead) return false;
+    if (item.requiresIdentityManage && !capabilities.canIdentityManage) return false;
     return true;
   });
 }

@@ -4,6 +4,7 @@ import { createSupabasePublicServerClient } from "./supabase-server";
 import { invalidCredentials, authEmailRateLimited, passwordPolicyRejection } from "./auth-errors";
 import { upsertAuthPrincipal } from "./auth-principal.repository";
 import { toSessionSafeIdentity } from "./auth-principal.service";
+import { assertPasswordNotBreached } from "./password-policy";
 
 type QueryableDb = Parameters<typeof upsertAuthPrincipal>[0]["db"];
 
@@ -14,6 +15,7 @@ type SupabasePasswordSignInResult = {
     user: {
       id: string;
       email: string;
+      email_confirmed_at?: string | null;
       factors?: unknown;
       user_metadata?: SupabaseUserMetadata;
     } | null;
@@ -24,7 +26,13 @@ type SupabasePasswordSignInResult = {
 
 function assertPasswordSignInResult(result: SupabasePasswordSignInResult): asserts result is {
   data: {
-    user: { id: string; email: string; factors?: unknown; user_metadata?: SupabaseUserMetadata };
+    user: {
+      id: string;
+      email: string;
+      email_confirmed_at?: string | null;
+      factors?: unknown;
+      user_metadata?: SupabaseUserMetadata;
+    };
     session: { access_token: string; refresh_token: string; expires_in: number };
   };
   error: null;
@@ -59,6 +67,7 @@ export async function loginWithPassword(args: { db: QueryableDb; input: PublicLo
     db: args.db,
     supabaseUserId: user.id,
     email: user.email,
+    emailConfirmed: Boolean(user.email_confirmed_at),
     mfaEnabled: Array.isArray(user.factors) && user.factors.length > 0,
     markLogin: true,
   });
@@ -107,6 +116,8 @@ export async function signupWithPassword(args: { db: QueryableDb; input: PublicS
     options.emailRedirectTo = emailRedirectTo;
   }
 
+  await assertPasswordNotBreached(args.input.password);
+
   const { data, error } = await supabase.auth.signUp({
     email: args.input.email,
     password: args.input.password,
@@ -140,24 +151,34 @@ export async function signupWithPassword(args: { db: QueryableDb; input: PublicS
     };
   }
 
+  // No session means the email is not confirmed yet. The principal is created
+  // when the verification link is opened, never for an unproven address
+  // (audit H6): mirroring it now would bind the address to whoever typed it.
+  if (!data.session) {
+    return {
+      status: "verification_required" as const,
+      identity: undefined,
+      session: undefined,
+    };
+  }
+
   const principal = await upsertAuthPrincipal({
     db: args.db,
     supabaseUserId: data.user.id,
     email: data.user.email,
+    emailConfirmed: Boolean(data.user.email_confirmed_at),
     mfaEnabled: Array.isArray(data.user.factors) && data.user.factors.length > 0,
-    markLogin: Boolean(data.session),
+    markLogin: true,
   });
 
   return {
-    status: data.session ? ("signed_in" as const) : ("verification_required" as const),
+    status: "signed_in" as const,
     identity: toSessionSafeIdentity(principal),
-    session: data.session
-      ? {
-          accessToken: data.session.access_token,
-          refreshToken: data.session.refresh_token,
-          expiresIn: data.session.expires_in,
-        }
-      : undefined,
+    session: {
+      accessToken: data.session.access_token,
+      refreshToken: data.session.refresh_token,
+      expiresIn: data.session.expires_in,
+    },
   };
 }
 
@@ -191,6 +212,7 @@ export async function establishSessionFromTokenHash(args: {
     db: args.db,
     supabaseUserId: user.id,
     email: user.email,
+    emailConfirmed: Boolean(user.email_confirmed_at),
     mfaEnabled: Array.isArray(user.factors) && user.factors.length > 0,
     markLogin: true,
   });
@@ -237,6 +259,8 @@ export async function setPasswordFromInvitationSession(args: {
     throw invalidCredentials();
   }
 
+  await assertPasswordNotBreached(args.password);
+
   const { data: updated, error: updateError } = await supabase.auth.updateUser({
     password: args.password,
   });
@@ -262,6 +286,7 @@ export async function setPasswordFromInvitationSession(args: {
     db: args.db,
     supabaseUserId: updatedUser.id,
     email: updatedUser.email,
+    emailConfirmed: Boolean(updatedUser.email_confirmed_at),
     mfaEnabled: Array.isArray(updatedUser.factors) && updatedUser.factors.length > 0,
     markLogin: true,
   });
@@ -338,6 +363,7 @@ export async function establishSessionFromTokens(args: {
     db: args.db,
     supabaseUserId: user.id,
     email: user.email,
+    emailConfirmed: Boolean(user.email_confirmed_at),
     mfaEnabled: Array.isArray(user.factors) && user.factors.length > 0,
     markLogin: true,
   });

@@ -19,6 +19,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { identityBlockMessageFromQuery } from "@/lib/auth-messages";
 import { useLazyZodForm } from "@/lib/forms/use-lazy-zod-form";
 import { HiddenFormField } from "@/lib/forms/hidden-form-field";
 import { valuesToFormData } from "@/lib/forms/values-to-form-data";
@@ -214,7 +215,8 @@ const SOCIAL_PROVIDERS = [
 export function LoginForm() {
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("next") ?? undefined;
-  const oauthFailed = searchParams.get("error") === "oauth";
+  const identityBlocked = identityBlockMessageFromQuery(searchParams.get("error"));
+  const oauthFailed = searchParams.get("error") === "oauth" || identityBlocked !== null;
   const verified = searchParams.get("verified") === "1";
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
@@ -541,7 +543,8 @@ export function LoginForm() {
                 : "text-[13px] text-[var(--fba-red-tx)]"
             }
           >
-            {loginState.message || "We couldn't sign you in with that provider. Please try again."}
+            {loginState.message ||
+              (identityBlocked ?? "We couldn't sign you in with that provider. Please try again.")}
           </p>
         ) : null}
 

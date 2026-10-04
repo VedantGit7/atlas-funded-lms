@@ -96,3 +96,7 @@ This code change does not retroactively remove legacy memberships. Completing th
 ## Browser test fixtures
 
 `scripts/e2e/seed-browser-users.mjs` explicitly creates a database grant for a new platform fixture. It reuses a matching active grant but refuses to resurrect a revoked grant or override a different active role. Grant checks and insertion are serialized in a database transaction. Run this script only for the designated test environment; it is not production recovery tooling. It no longer emits an environment-based platform grant. A database grant alone does not satisfy F01's MFA requirement for browser journeys.
+
+## Grants and account changes (audit H6)
+
+A grant belongs to an account, not to an email address. A sign-in never carries a grant to a different Supabase user: approving a relink in the platform console revokes the account's grant, and a disabled account's grant confers nothing while it stays disabled. See [identity and account review](identity-and-account-review.md).

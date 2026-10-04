@@ -1,5 +1,6 @@
 import { AtlasHttpError } from "@atlas/core/http/errors";
 import { authRequired, passwordPolicyRejection } from "./auth-errors";
+import { assertPasswordNotBreached } from "./password-policy";
 import { requireSupabaseUserClient } from "./supabase-user-client";
 
 function mapAuthError(): never {
@@ -21,6 +22,8 @@ export async function changePassword(args: { currentPassword: string; newPasswor
   if (signIn.error) {
     mapAuthError();
   }
+
+  await assertPasswordNotBreached(args.newPassword);
 
   const { error } = await supabase.auth.updateUser({ password: args.newPassword });
   if (error) {

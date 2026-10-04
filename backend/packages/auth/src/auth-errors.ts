@@ -45,6 +45,36 @@ export function authEmailRateLimited(): AtlasHttpError {
   });
 }
 
+export function accountDisabled(): AtlasHttpError {
+  return new AtlasHttpError({
+    code: "ACCOUNT_DISABLED",
+    status: 403,
+    message: "This account has been disabled. Contact support if you think this is a mistake.",
+  });
+}
+
+export function emailNotVerified(): AtlasHttpError {
+  return new AtlasHttpError({
+    code: "EMAIL_NOT_VERIFIED",
+    status: 403,
+    message: "Verify your email address using the link we sent you, then sign in.",
+  });
+}
+
+/**
+ * The email is confirmed, but it belongs to an earlier account bound to a
+ * different sign-in. The earlier account's memberships and grants never move
+ * automatically (audit H6); a platform operator reviews the request.
+ */
+export function accountReviewRequired(): AtlasHttpError {
+  return new AtlasHttpError({
+    code: "ACCOUNT_REVIEW_REQUIRED",
+    status: 409,
+    message:
+      "This email belongs to an earlier account. For your security, support must confirm the change before you can sign in. Contact support to continue.",
+  });
+}
+
 export function authProviderUnavailable(): AtlasHttpError {
   return new AtlasHttpError({
     code: "INTERNAL_ERROR",

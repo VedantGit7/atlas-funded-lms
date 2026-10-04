@@ -93,7 +93,12 @@ export async function startOAuthSignIn(args: {
 
 type ExchangeCodeResult = {
   data: {
-    user: { id: string; email: string; factors?: unknown } | null;
+    user: {
+      id: string;
+      email: string;
+      email_confirmed_at?: string | null;
+      factors?: unknown;
+    } | null;
     session: { access_token: string; refresh_token: string; expires_in: number } | null;
   };
   error: { message: string } | null;
@@ -125,6 +130,7 @@ export async function completeOAuthSignIn(args: {
     db: args.db,
     supabaseUserId: user.id,
     email: user.email,
+    emailConfirmed: Boolean(user.email_confirmed_at),
     mfaEnabled: Array.isArray(user.factors) && user.factors.length > 0,
     markLogin: true,
   });

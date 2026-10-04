@@ -5,9 +5,9 @@ import {
   resolvePostAuthRedirect,
   resolveSafeRedirectPath,
 } from "../../../../lib/auth/safe-redirect";
-import { GENERIC_LOGIN_ERROR_MESSAGE } from "../../../../lib/auth-messages";
+import { GENERIC_LOGIN_ERROR_MESSAGE, identityBlockMessage } from "../../../../lib/auth-messages";
 import { readFormString } from "../../../../lib/server/form";
-import { serverPublicApi } from "../../../../lib/server/public-auth-fetch";
+import { serverPublicApi, ServerPublicApiError } from "../../../../lib/server/public-auth-fetch";
 
 export type LoginActionState = {
   ok: boolean;
@@ -42,8 +42,17 @@ export async function loginAction(
 
   try {
     body = await serverPublicApi.login(parsed.data);
-  } catch {
-    return { ok: false, message: GENERIC_LOGIN_ERROR_MESSAGE, requestId };
+  } catch (error) {
+    // Only reached after the password was accepted, so naming the account
+    // state reveals nothing a wrong password could learn (audit H6).
+    const identityMessage =
+      error instanceof ServerPublicApiError ? identityBlockMessage(error.code) : null;
+    return {
+      ok: false,
+      message: identityMessage ?? GENERIC_LOGIN_ERROR_MESSAGE,
+      requestId:
+        identityMessage && error instanceof ServerPublicApiError ? error.requestId : requestId,
+    };
   }
 
   if (body.data.status === "MFA_REQUIRED") {

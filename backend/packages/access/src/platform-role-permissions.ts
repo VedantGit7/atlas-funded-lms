@@ -11,6 +11,9 @@ export const PLATFORM_ROLE_PERMISSIONS: Record<PlatformRoleKey, readonly string[
     "platform.support.access",
     "platform.cost.read",
     "platform.cost.manage",
+    // H6: moving an account to a new sign-in or disabling it is a super_admin
+    // decision; operations and support raise it, they do not make it.
+    "platform.identity.manage",
   ],
   operations: [
     "platform.tenant.read",

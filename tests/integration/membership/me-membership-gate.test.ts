@@ -6,8 +6,10 @@ const mockFindMembership = vi.fn();
 // be listed. `requireActiveMembership` gained activity tracking
 // (touchMembershipLastActive, recordMembershipActiveDay) after this mock was
 // written, and the missing exports made the gate throw rather than resolve.
+// It also reads the account's status (audit H6), refusing disabled accounts.
 vi.mock("../../../backend/packages/membership/src/membership.repository", () => ({
   findMembershipByPrincipal: (...args: unknown[]) => mockFindMembership(...args),
+  findPrincipalGlobalStatus: () => Promise.resolve("active"),
   touchMembershipLastActive: () => Promise.resolve(),
   recordMembershipActiveDay: () => Promise.resolve(),
 }));

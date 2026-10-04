@@ -1,10 +1,10 @@
 import { z } from "zod";
-import { PublicOAuthProviderSchema } from "./public-auth";
+import { NEW_PASSWORD_MIN_LENGTH, PublicOAuthProviderSchema } from "./public-auth";
 
 export const ChangePasswordRequestSchema = z
   .object({
     currentPassword: z.string().min(8).max(200),
-    newPassword: z.string().min(8).max(200),
+    newPassword: z.string().min(NEW_PASSWORD_MIN_LENGTH).max(200),
   })
   .strict();
 

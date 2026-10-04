@@ -80,13 +80,13 @@ export function ChangePasswordForm() {
                 id="new-password"
                 type="password"
                 className={classes.field}
-                placeholder="Min. 8 characters"
+                placeholder="At least 10 characters"
                 value={newPassword}
                 onChange={(e) => {
                   setNewPassword(e.target.value);
                 }}
                 required
-                minLength={8}
+                minLength={10}
               />
             </div>
             <div className="space-y-2">
@@ -103,7 +103,7 @@ export function ChangePasswordForm() {
                   setConfirmPassword(e.target.value);
                 }}
                 required
-                minLength={8}
+                minLength={10}
               />
             </div>
           </div>

@@ -50,6 +50,13 @@ export const PERMISSIONS: readonly PermissionDefinition[] = [
     platformOnly: true,
   },
   {
+    key: "platform.identity.manage",
+    description:
+      "Review blocked re-registrations (relink requests) and disable or re-enable accounts",
+    resourceType: "auth_principal",
+    platformOnly: true,
+  },
+  {
     key: "platform.cost.read",
     description: "Read per-tenant cost attribution and the supplier rate card",
     resourceType: "cost",

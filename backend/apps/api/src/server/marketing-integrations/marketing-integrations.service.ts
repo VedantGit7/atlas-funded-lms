@@ -527,6 +527,9 @@ export async function runIntegrationSignUpAction(tx: TenantTx, ctx: ServiceCtx, 
   let created = false;
 
   if (!principalId) {
+    // A placeholder until the learner signs up: no Supabase user holds this
+    // random id, and the first sign-in with this email *confirmed* claims the
+    // row (audit H6). 'active' would make it look bound to a real account.
     const idRows = await tx.$queryRawUnsafe<Array<{ id: string }>>(
       `
       insert into auth_principals (
@@ -536,7 +539,7 @@ export async function runIntegrationSignUpAction(tx: TenantTx, ctx: ServiceCtx, 
         gen_random_uuid(),
         $1,
         $1,
-        'active',
+        'unclaimed',
         false
       )
       on conflict (email_normalized) do update

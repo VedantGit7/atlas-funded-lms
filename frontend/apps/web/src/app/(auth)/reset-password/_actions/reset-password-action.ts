@@ -3,7 +3,11 @@
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createSupabasePublicServerClient } from "@atlas/auth/supabase-server";
-import { passwordPolicyRejection } from "@atlas/auth/auth-errors";
+import {
+  PASSWORD_POLICY_REJECTION_MESSAGE,
+  passwordPolicyRejection,
+} from "@atlas/auth/auth-errors";
+import { isPasswordBreached } from "@atlas/auth/password-policy";
 import {
   PublicPasswordResetCompleteSchema,
   PublicPasswordResetRequestSchema,
@@ -62,11 +66,16 @@ export async function completePasswordResetAction(
   });
 
   if (!parsed.success) {
-    return { ok: false, message: "Password must be at least 8 characters.", requestId };
+    return { ok: false, message: "Password must be at least 10 characters.", requestId };
   }
 
   if (!parsed.data.accessToken) {
     return { ok: false, message: "Reset link is invalid or expired.", requestId };
+  }
+
+  // Audit H6: a password known from a breach is refused before it is set.
+  if (await isPasswordBreached(parsed.data.password)) {
+    return { ok: false, message: PASSWORD_POLICY_REJECTION_MESSAGE, requestId };
   }
 
   try {

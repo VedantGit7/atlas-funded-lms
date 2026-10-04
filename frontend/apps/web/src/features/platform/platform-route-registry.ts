@@ -10,6 +10,8 @@ export const PLATFORM_ROUTE_REGISTRY = [
   // DoD item 8, per-tenant cost attribution. Added after the P1-P8 console was
   // specified; see tests/unit/platform/platform-console.test.ts.
   { screenId: "P9", pathPattern: "/platform/costs" },
+  // Audit H6: review of blocked re-registrations and account status.
+  { screenId: "P10", pathPattern: "/platform/accounts" },
 ] as const;
 
 export type PlatformScreenId = (typeof PLATFORM_ROUTE_REGISTRY)[number]["screenId"];

@@ -70,6 +70,9 @@ async function resolveUserFromAccessToken(accessToken: string) {
   return {
     supabaseUserId: user.id,
     email: result.data.user.email,
+    // A principal is only created or claimed for an address its owner has
+    // proven (audit H6). Read from the auth service, never from the token.
+    emailConfirmed: Boolean(user.email_confirmed_at),
     mfaEnabled,
     sessionAssuranceLevel,
   };
