@@ -152,6 +152,47 @@ export async function enforceProtectedRateLimit(args: {
   await enforceBudgets(budgets, args.requestId);
 }
 
+/**
+ * Second-factor codes are six digits, so the general write budget (60 a
+ * minute) would allow far too many guesses at a stolen password's second
+ * factor. Every attempt counts, successful or not.
+ */
+const MFA_ATTEMPT_WINDOW_MS = 15 * 60_000;
+const MFA_ATTEMPTS_PER_WINDOW = 10;
+
+export async function enforceMfaAttemptRateLimit(args: {
+  tenantId: string;
+  actorId: string;
+  requestId: string;
+}): Promise<void> {
+  if (!args.tenantId || !args.actorId)
+    throw new RateLimitConfigurationError("Missing MFA rate-limit identity.");
+  const store = resolveRateLimitStore();
+  let hit;
+  try {
+    hit = await store.hit(
+      `tenant:mfa_attempt:${identity([args.tenantId, args.actorId])}`,
+      MFA_ATTEMPT_WINDOW_MS,
+    );
+  } catch {
+    throw new AtlasHttpError({
+      code: "SERVICE_UNAVAILABLE",
+      status: 503,
+      message: "Request protection is temporarily unavailable. Please retry shortly.",
+      retryAfterSeconds: 5,
+    });
+  }
+  if (hit.count > MFA_ATTEMPTS_PER_WINDOW) {
+    const retryAfterSeconds = Math.max(1, Math.ceil((hit.resetAt - Date.now()) / 1000));
+    throw new AtlasHttpError({
+      code: "RATE_LIMITED",
+      status: 429,
+      message: `Too many verification attempts. Try again in ${String(Math.ceil(retryAfterSeconds / 60))} min.`,
+      retryAfterSeconds,
+    });
+  }
+}
+
 export async function enforcePublicRateLimit(args: {
   req: Request;
   bucket: RateLimitBucket;

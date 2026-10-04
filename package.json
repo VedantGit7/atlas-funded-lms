@@ -96,6 +96,7 @@
     "ci:entitlement-metadata": "tsx scripts/ci/check-entitlement-metadata.ts",
     "ci:prisma-boundary": "pnpm check:prisma-boundary",
     "ci:audit-metadata": "tsx scripts/ci/check-sensitive-route-audit.ts",
+    "ci:mfa-metadata": "tsx scripts/ci/check-sensitive-route-mfa.ts",
     "ci:outbox-metadata": "pnpm check:outbox-compliance",
     "ci:tenant-resource-registry": "tsx scripts/ci/check-tenant-resource-registry.ts",
     "ci:forbidden-scope": "pnpm check:forbidden-scope",

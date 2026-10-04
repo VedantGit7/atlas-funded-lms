@@ -110,6 +110,35 @@ export async function enrollMfaTotp() {
   };
 }
 
+/** A session that completed MFA (aal2), to be set as the caller's cookies. */
+export type MfaVerifiedSession = { accessToken: string; refreshToken: string; expiresIn: number };
+
+async function verifiedSession(
+  supabase: Awaited<ReturnType<typeof requireSupabaseUserClient>>["supabase"],
+): Promise<MfaVerifiedSession> {
+  const { data, error } = await supabase.auth.getSession();
+  if (error || !data.session) mapAuthError();
+  return {
+    accessToken: data.session.access_token,
+    refreshToken: data.session.refresh_token,
+    expiresIn: data.session.expires_in,
+  };
+}
+
+function invalidMfaCode(): AtlasHttpError {
+  return new AtlasHttpError({
+    code: "VALIDATION_ERROR",
+    status: 400,
+    message: "That code didn't work. Check your authenticator app and try again.",
+  });
+}
+
+/**
+ * Verifies a newly enrolled factor. Verification also completes MFA for this
+ * session, so the returned aal2 session must replace the caller's cookies:
+ * otherwise someone who enrolls in order to reach a step-up action still holds
+ * an aal1 session and is challenged again (audit H4).
+ */
 export async function verifyMfaEnrollment(args: { factorId: string; code: string }) {
   const { supabase } = await requireSupabaseUserClient();
 
@@ -125,10 +154,45 @@ export async function verifyMfaEnrollment(args: { factorId: string; code: string
   });
 
   if (verify.error) {
+    throw invalidMfaCode();
+  }
+
+  return { ok: true as const, session: await verifiedSession(supabase) };
+}
+
+/**
+ * Step-up: completes MFA for the current session with an already-verified
+ * factor, returning the aal2 session (audit H4). Routes that declare
+ * `mfa: "required"` accept the session from then on.
+ */
+export async function stepUpMfa(args: { code: string; factorId?: string | undefined }) {
+  const { supabase } = await requireSupabaseUserClient();
+  const { data, error } = await supabase.auth.mfa.listFactors();
+  if (error) {
     mapAuthError();
   }
 
-  return { ok: true as const };
+  // `totp` lists verified TOTP factors only; unverified enrollments cannot step up.
+  const factor = args.factorId
+    ? data.totp.find((candidate) => candidate.id === args.factorId)
+    : data.totp[0];
+  if (!factor) {
+    throw new AtlasHttpError({
+      code: "VALIDATION_ERROR",
+      status: 409,
+      message: "Set up an authenticator app before continuing.",
+    });
+  }
+
+  const verify = await supabase.auth.mfa.challengeAndVerify({
+    factorId: factor.id,
+    code: args.code,
+  });
+  if (verify.error) {
+    throw invalidMfaCode();
+  }
+
+  return { session: await verifiedSession(supabase) };
 }
 
 export async function unenrollMfaFactor(args: { factorId: string }) {

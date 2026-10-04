@@ -97,6 +97,8 @@ describeWithDb("removeMember integration", () => {
         tx,
         ctx,
         metadata: deleteRouteMetadata,
+        // Removing a member requires a session that completed MFA (audit H4).
+        sessionAssuranceLevel: "aal2",
         params: { id: invitedMembershipId },
         input: {},
         handler: async ({ tx: routeTx, ctx: routeCtx }) =>

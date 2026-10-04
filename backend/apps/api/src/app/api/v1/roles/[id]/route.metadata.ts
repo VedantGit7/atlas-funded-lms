@@ -4,6 +4,7 @@ import { requireRoleById } from "@atlas/domain-access";
 
 export const putRouteMetadata = {
   permission: "role.update",
+  mfa: "required",
   entitlement: null,
   audit: "required",
   rateLimit: "tenantMutation",

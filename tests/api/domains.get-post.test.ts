@@ -165,7 +165,9 @@ function setupAuthenticatedAdmin(permission: string) {
   mockRequireSupabaseUser.mockResolvedValue({
     supabaseUserId: "018f0000-0000-7000-8000-000000000099",
     email: "admin@example.com",
-    mfaEnabled: false,
+    mfaEnabled: true,
+    // Domain changes require a session that completed MFA (audit H4).
+    sessionAssuranceLevel: "aal2",
   });
   mockUpsertAuthPrincipal.mockResolvedValue({
     id: "018f0000-0000-7000-8000-000000000098",
@@ -271,6 +273,27 @@ describe("POST /api/v1/domains", () => {
         permission: "tenancy.domain.manage",
       }),
     );
+  });
+
+  it("refuses a password-only session: adding a domain requires step-up MFA (audit H4)", async () => {
+    mockRequireSupabaseUser.mockResolvedValue({
+      supabaseUserId: "018f0000-0000-7000-8000-000000000099",
+      email: "admin@example.com",
+      mfaEnabled: true,
+      sessionAssuranceLevel: "aal1",
+    });
+    const response = await POST(
+      createPostRequest({
+        hostname: "learn.example.com",
+        type: "CUSTOM_DOMAIN",
+        makePrimary: false,
+      }),
+    );
+    const body = (await response.json()) as { error: { code: string } };
+
+    expect(response.status).toBe(403);
+    expect(body.error.code).toBe("MFA_REQUIRED");
+    expect(mockCreateTenantDomain).not.toHaveBeenCalled();
   });
 
   it("returns ENTITLEMENT_REQUIRED for custom domains without branding.custom_domain.enable", async () => {

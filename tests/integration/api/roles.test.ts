@@ -95,7 +95,9 @@ describe("roles API", () => {
     mockRequireSupabaseUser.mockResolvedValue({
       supabaseUserId: "supabase-user",
       email: "admin@example.com",
-      mfaEnabled: false,
+      mfaEnabled: true,
+      // Creating and editing roles requires a session that completed MFA (audit H4).
+      sessionAssuranceLevel: "aal2",
     });
     mockUpsertAuthPrincipal.mockResolvedValue({ id: "principal-id" });
     mockRequireActiveMembership.mockResolvedValue({ membershipId: adminMembershipId });
@@ -155,5 +157,29 @@ describe("roles API", () => {
 
     expect(response.status).toBe(200);
     expect(mockCreateRole).toHaveBeenCalledOnce();
+  });
+
+  it("refuses to create a role from a password-only session (audit H4)", async () => {
+    mockCreateRole.mockClear();
+    mockCan.mockResolvedValue({ allowed: true, permission: "role.create", reason: "ALLOWED" });
+    mockRequireSupabaseUser.mockResolvedValue({
+      supabaseUserId: "supabase-user",
+      email: "admin@example.com",
+      mfaEnabled: true,
+      sessionAssuranceLevel: "aal1",
+    });
+
+    const response = await POST(
+      new NextRequest("http://tenant-a.localhost/api/v1/roles", {
+        method: "POST",
+        headers: { "content-type": "application/json", "idempotency-key": "role-create-aal1" },
+        body: JSON.stringify({ key: "support", name: "Support", permissions: ["profile.read"] }),
+      }),
+    );
+    const body = (await response.json()) as { error: { code: string } };
+
+    expect(response.status).toBe(403);
+    expect(body.error.code).toBe("MFA_REQUIRED");
+    expect(mockCreateRole).not.toHaveBeenCalled();
   });
 });

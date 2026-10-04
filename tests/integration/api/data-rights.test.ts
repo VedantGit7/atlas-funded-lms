@@ -308,6 +308,8 @@ describeWithDb("data-rights API integration", () => {
             idempotencyKey: "deletion-process-1",
           },
           metadata: processDeletionRequestMetadata,
+          // Processing an erasure requires a session that completed MFA (audit H4).
+          sessionAssuranceLevel: "aal2",
           params: { id: created.data.id },
           input: { confirm: true },
         });

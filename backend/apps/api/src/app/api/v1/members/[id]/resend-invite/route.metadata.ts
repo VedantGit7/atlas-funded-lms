@@ -24,6 +24,7 @@ const memberResourceLoader: RouteMetadata["resourceLoader"] = async ({ tx, ctx, 
 
 export const postRouteMetadata = {
   permission: "membership.invite",
+  mfa: "required",
   entitlement: null,
   audit: "required",
   rateLimit: "tenantMutation",

@@ -36,6 +36,33 @@ Logs and the file manifest are in `audits/2026-09-19/f01-*`. Tests mock external
 
 The review also noted an existing refresh limitation: when the request already contains an expired access cookie, the refresh path can reread that stale request cookie instead of the updated cookie store. The absent-access-token refresh case is covered here. That pre-existing behavior is unchanged and should be addressed separately. F02 and the actor/permission/entitlement portions of F03 remain open.
 
+## Step-up coverage and recovery (audit H4)
+
+F01 made the gate correct, but only three tenant routes declared it (`membership.suspend`, `role.delete`, `role.revoke`). Nothing let a signed-in user complete MFA for an existing session, and verifying a newly enrolled factor discarded the aal2 session Supabase returned. As a result, a password alone could assign admin roles, change payment-gateway keys, add domains, inject site-wide scripts, and export or erase data.
+
+**Policy** (`backend/packages/authorization/src/step-up-mfa-policy.ts`):
+
+- **Narrow permissions:** every mutation declaring one of these must require MFA.
+  - `role.*`, `permission_override.manage`;
+  - `membership.invite`, `membership.suspend`, `membership.remove`;
+  - `tenancy.domain.manage`, `extension.registration.manage`;
+  - `data.export.run`, `data.deletion.manage`.
+- **Route-and-method registry**, for operations behind coarse permissions such as `config.update`:
+  - payment gateways and learner billing configuration;
+  - marketing integration credentials, webhooks and site snippets;
+  - report export destinations;
+  - the bulk payment-orders export.
+
+`pnpm ci:mfa-metadata` (`scripts/ci/check-sensitive-route-mfa.ts`, in the `audit-metadata-check` CI job) resolves every tenant route's metadata, following imports, and fails CI when a covered operation does not declare `mfa: "required"`.
+
+**Recovery in the product:**
+
+- **Step-up endpoint:** `POST /api/v1/me/security/mfa/step-up` verifies the user's authenticator and replaces the session cookies with the aal2 session. Attempts are limited to 10 per member per 15 minutes.
+- **Enrollment:** verifying a new factor (`POST /api/v1/me/security/mfa/verify`) does the same.
+- **Client:** when an admin or studio action returns `MFA_REQUIRED`, the API client opens the step-up dialog (`MfaStepUpProvider`) and retries the request once with the same idempotency key. Users without an authenticator are sent to `/profile/security?setup=mfa&next=…` and return verified.
+
+Report exports other than payment orders are not yet covered. Their downloads are spread across many report-specific endpoints rather than one, so they remain gated by report permissions only.
+
 ## References
 
 Final formatting checks passed on the 18 code files and this note. Route metadata, Prisma boundary, secret scanning, and strict frontend API closure checks also passed. The machine-readable `audits/2026-09-19/f01-verification.json` records final results and source hashes.
