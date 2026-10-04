@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server";
-import { resolveTenantFromRequest } from "@atlas/tenancy";
-import { createPublicRouteHandler } from "@atlas/api";
-import { withGlobalDb } from "@atlas/db/global-db";
+import { createPublicRouteHandler, resolveRequestTenant } from "@atlas/api";
 import { withTenantTx } from "@atlas/db/with-tenant-tx";
 import {
   LegalDocumentSlugSchema,
@@ -21,21 +19,19 @@ export const dynamic = "force-dynamic";
 export const GET = createPublicRouteHandler(routeMetadata, async ({ req, requestId }) => {
   const slug = readSlugFromRequest(req);
 
-  return withGlobalDb(async (db) => {
-    const tenant = await resolveTenantFromRequest({ req, db });
+  const tenant = await resolveRequestTenant(req);
 
-    const document = await withTenantTx(
-      {
-        tenantId: tenant.tenantId,
-        requestId,
-        allowAnonymousTenantRead: true,
-      },
-      async (tx) => readTenantLegalDocument(tx, slug),
-    );
+  const document = await withTenantTx(
+    {
+      tenantId: tenant.tenantId,
+      requestId,
+      allowAnonymousTenantRead: true,
+    },
+    async (tx) => readTenantLegalDocument(tx, slug),
+  );
 
-    return NextResponse.json(PublicLegalDocumentResponseSchema.parse({ data: { document } }), {
-      status: 200,
-      headers: { "cache-control": "public, max-age=60" },
-    });
+  return NextResponse.json(PublicLegalDocumentResponseSchema.parse({ data: { document } }), {
+    status: 200,
+    headers: { "cache-control": "public, max-age=60" },
   });
 });

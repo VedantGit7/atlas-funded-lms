@@ -15,6 +15,12 @@ export {
 export { resolveClientIp } from "./client-ip";
 export { createPublicRouteHandler, type PublicRouteMetadata } from "./public-route";
 export {
+  authenticateTenantRequest,
+  globalDbPerStatement,
+  resolveRequestTenant,
+  type ResolvedRequestTenant,
+} from "./request-tenant";
+export {
   runProtectedTenantRouteHandler,
   runProtectedTenantRoutePipeline,
   createTenantRoute,

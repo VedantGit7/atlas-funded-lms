@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { resolveTenantFromRequest } from "@atlas/tenancy";
-import { createPublicRouteHandler } from "@atlas/api";
-import { withGlobalDb } from "@atlas/db/global-db";
+import { createPublicRouteHandler, resolveRequestTenant } from "@atlas/api";
 import { withTenantTx } from "@atlas/db/with-tenant-tx";
 import { getEncodedStatusListCredential } from "../../../../../../../server/certificates/certificate-status-list.service";
 import { routeMetadata } from "./route.metadata";
@@ -18,37 +16,35 @@ function resolveOrigin(headers: Headers): string {
 }
 
 export const GET = createPublicRouteHandler(routeMetadata, async ({ req, requestId }) => {
-  return withGlobalDb(async (db) => {
-    const tenant = await resolveTenantFromRequest({ req, db });
-    const url = new URL(req.url);
-    const segments = url.pathname.split("/");
-    const id = segments.at(-1) ?? "";
-    statusListIdSchema.parse(id);
+  const tenant = await resolveRequestTenant(req);
+  const url = new URL(req.url);
+  const segments = url.pathname.split("/");
+  const id = segments.at(-1) ?? "";
+  statusListIdSchema.parse(id);
 
-    const origin = resolveOrigin(req.headers);
-    const publicUrl = `${origin}/api/v1/public/credentials/status-list/${id}`;
+  const origin = resolveOrigin(req.headers);
+  const publicUrl = `${origin}/api/v1/public/credentials/status-list/${id}`;
 
-    const credential = await withTenantTx(
-      {
+  const credential = await withTenantTx(
+    {
+      tenantId: tenant.tenantId,
+      requestId,
+      allowAnonymousTenantRead: true,
+    },
+    async (tx) =>
+      getEncodedStatusListCredential({
+        tx,
         tenantId: tenant.tenantId,
-        requestId,
-        allowAnonymousTenantRead: true,
-      },
-      async (tx) =>
-        getEncodedStatusListCredential({
-          tx,
-          tenantId: tenant.tenantId,
-          id,
-          publicUrl,
-        }),
-    );
+        id,
+        publicUrl,
+      }),
+  );
 
-    if (!credential) {
-      return NextResponse.json({ error: { code: "NOT_FOUND" } }, { status: 404 });
-    }
+  if (!credential) {
+    return NextResponse.json({ error: { code: "NOT_FOUND" } }, { status: 404 });
+  }
 
-    return NextResponse.json(credential, {
-      headers: { "content-type": "application/ld+json" },
-    });
+  return NextResponse.json(credential, {
+    headers: { "content-type": "application/ld+json" },
   });
 });

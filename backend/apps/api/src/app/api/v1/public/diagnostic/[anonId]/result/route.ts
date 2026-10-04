@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server";
-import { resolveTenantFromRequest } from "@atlas/tenancy";
-import { createPublicRouteHandler } from "@atlas/api";
-import { withGlobalDb } from "@atlas/db/global-db";
+import { createPublicRouteHandler, resolveRequestTenant } from "@atlas/api";
 import { withTenantTx } from "@atlas/db/with-tenant-tx";
 import { readDiagnosticSessionCookie } from "@atlas/security";
 import {
@@ -21,30 +19,28 @@ function readAnonIdFromRequest(req: Request): string {
 }
 
 export const GET = createPublicRouteHandler(routeMetadata, async ({ req, requestId }) => {
-  return withGlobalDb(async (db) => {
-    const tenant = await resolveTenantFromRequest({ req, db });
-    const anonymousId = readAnonIdFromRequest(req);
+  const tenant = await resolveRequestTenant(req);
+  const anonymousId = readAnonIdFromRequest(req);
 
-    const cookie = readDiagnosticSessionCookie(req);
-    if (!cookie || cookie.anonymousId !== anonymousId) {
-      throw diagnosticSessionInvalid();
-    }
+  const cookie = readDiagnosticSessionCookie(req);
+  if (!cookie || cookie.anonymousId !== anonymousId) {
+    throw diagnosticSessionInvalid();
+  }
 
-    const body = await withTenantTx(
-      {
-        tenantId: tenant.tenantId,
-        requestId,
-        allowAnonymousTenantRead: true,
-      },
-      async (tx) =>
-        getPublicDiagnosticResult({
-          tx,
-          ctx: { tenantId: tenant.tenantId, requestId },
-          anonymousId,
-          secret: cookie.secret,
-        }),
-    );
+  const body = await withTenantTx(
+    {
+      tenantId: tenant.tenantId,
+      requestId,
+      allowAnonymousTenantRead: true,
+    },
+    async (tx) =>
+      getPublicDiagnosticResult({
+        tx,
+        ctx: { tenantId: tenant.tenantId, requestId },
+        anonymousId,
+        secret: cookie.secret,
+      }),
+  );
 
-    return NextResponse.json(publicDiagnosticResultResponseSchema.parse(body));
-  });
+  return NextResponse.json(publicDiagnosticResultResponseSchema.parse(body));
 });

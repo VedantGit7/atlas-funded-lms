@@ -392,11 +392,12 @@ export type AppleWalletDownload = {
   filename: string;
 };
 
-export async function getAppleWalletPassDownload(
+/** Database half of a pass download: ownership, and lazy issuance when no pass exists yet. */
+export async function planAppleWalletPassDownload(
   tx: TenantTx,
   ctx: ServiceCtx,
   certificateId: string,
-): Promise<AppleWalletDownload> {
+): Promise<{ passObjectKey: string; filename: string }> {
   if (!isCertificateFeatureEnabled("wallets")) {
     throw certificateNotFound();
   }
@@ -409,7 +410,9 @@ export async function getAppleWalletPassDownload(
   });
 
   if (!pass?.pass_object_key || pass.status !== "active") {
-    // Lazily issue so the download URL works after a fresh deploy.
+    // Lazily issue so the download URL works after a fresh deploy. Issuance
+    // still builds and stores the pass inside this transaction; only the
+    // regular download path keeps storage I/O outside it.
     const issued = await issueAppleWalletPass(tx, ctx, certificateId);
     if (issued.data.status !== "active" || !issued.data.passObjectKey) {
       throw certificateNotFound();
@@ -424,16 +427,28 @@ export async function getAppleWalletPassDownload(
   if (!pass?.pass_object_key) {
     throw certificateNotFound();
   }
+  return { passObjectKey: pass.pass_object_key, filename: `${certificate.credential_id}.pkpass` };
+}
 
+/** Storage half: run after the transaction, holding no pooled connection (audit H3). */
+export async function materializeAppleWalletPassDownload(plan: {
+  passObjectKey: string;
+  filename: string;
+}): Promise<AppleWalletDownload> {
   const { loadCertificateWalletPass } = await import("./certificate-wallet-store");
-  const body = await loadCertificateWalletPass(pass.pass_object_key);
+  const body = await loadCertificateWalletPass(plan.passObjectKey);
   if (!body) {
     throw certificateNotFound();
   }
+  return { body, contentType: APPLE_PKPASS_CONTENT_TYPE, filename: plan.filename };
+}
 
-  return {
-    body,
-    contentType: APPLE_PKPASS_CONTENT_TYPE,
-    filename: `${certificate.credential_id}.pkpass`,
-  };
+export async function getAppleWalletPassDownload(
+  tx: TenantTx,
+  ctx: ServiceCtx,
+  certificateId: string,
+): Promise<AppleWalletDownload> {
+  return materializeAppleWalletPassDownload(
+    await planAppleWalletPassDownload(tx, ctx, certificateId),
+  );
 }

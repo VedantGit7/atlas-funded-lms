@@ -47,7 +47,10 @@ import {
   certificateIssueSourceSchema,
   certificateTemplateJsonUnionSchema,
 } from "./certificate.dto";
-import { certificateDesignDocumentSchema } from "./certificate-design-document";
+import {
+  certificateDesignDocumentSchema,
+  type CertificateDesignDocument,
+} from "./certificate-design-document";
 import { anchorCertificateHash } from "./certificate-blockchain.service";
 import { setCertificateStatusBit } from "./certificate-status-list.service";
 import {
@@ -512,18 +515,30 @@ export type CertificateDownload = {
   fromStorage: boolean;
 };
 
+/** What to serve for a certificate download, decided in the tenant transaction. */
+export type CertificateDownloadPlan = {
+  baseName: string;
+  /** Stored PDF to serve when present. */
+  r2ObjectKey: string | null;
+  /** HTML fallback; null when there is no usable design. */
+  html: {
+    design: CertificateDesignDocument;
+    data: Record<string, string>;
+    verificationUrl: string;
+  } | null;
+};
+
 /**
- * Resolve a downloadable representation of an issued certificate.
- *
- * When `r2_object_key` is set, streams the PDF from object storage. Otherwise
- * falls back to a generated HTML preview from the design snapshot. When neither
- * a stored render nor a usable design is available, throws 409.
+ * Database half of a certificate download: authorization and everything read
+ * from the database. Object storage and rendering happen afterwards, in
+ * {@link materializeCertificateDownload}, so no pooled connection is held
+ * across them (audit H3).
  */
-export async function getCertificateDownload(
+export async function planCertificateDownload(
   tx: TenantTx,
   ctx: ServiceCtx,
   certificateId: string,
-): Promise<CertificateDownload> {
+): Promise<CertificateDownloadPlan> {
   const admin = await isAdminBypass(tx, ctx);
   const certificate = await certificateRepository.findCertificateById(tx, certificateId);
   if (!certificate || certificate.tenant_id !== ctx.tenantId) {
@@ -534,13 +549,41 @@ export async function getCertificateDownload(
   }
 
   const safeCredential = certificate.credential_id.replace(/[^a-zA-Z0-9_-]/g, "");
+  const snapshot =
+    certificate.design_snapshot_json ??
+    (await certificateRepository.findTemplateById(tx, certificate.template_id))?.template_json;
+  const parsed = certificateDesignDocumentSchema.safeParse(snapshot);
+  let html: CertificateDownloadPlan["html"] = null;
+  if (parsed.success) {
+    const data = sampleDataFromVariables(parsed.data);
+    if (certificate.recipient_name) data["recipient_name"] = certificate.recipient_name;
+    if (certificate.course_title) data["course_title"] = certificate.course_title;
+    const verificationUrl = buildVerificationPath(certificate.credential_id);
+    data["credential_id"] = certificate.credential_id;
+    data["verification_url"] = verificationUrl;
+    html = { design: parsed.data, data, verificationUrl };
+  }
 
-  if (certificate.r2_object_key) {
+  return {
+    baseName: `certificate-${safeCredential || certificate.id}`,
+    r2ObjectKey: certificate.r2_object_key,
+    html,
+  };
+}
+
+/**
+ * Storage and rendering half: prefers the stored PDF, falls back to an HTML
+ * render of the design, and throws 409 when neither is available.
+ */
+export async function materializeCertificateDownload(
+  plan: CertificateDownloadPlan,
+): Promise<CertificateDownload> {
+  if (plan.r2ObjectKey) {
     const { loadCertificatePdfArtifact } = await import("./certificate-pdf-store");
-    const pdf = await loadCertificatePdfArtifact(certificate.r2_object_key);
+    const pdf = await loadCertificatePdfArtifact(plan.r2ObjectKey);
     if (pdf) {
       return {
-        filename: `certificate-${safeCredential || certificate.id}.pdf`,
+        filename: `${plan.baseName}.pdf`,
         contentType: "application/pdf",
         body: pdf,
         fromStorage: true,
@@ -548,32 +591,35 @@ export async function getCertificateDownload(
     }
   }
 
-  const snapshot =
-    certificate.design_snapshot_json ??
-    (await certificateRepository.findTemplateById(tx, certificate.template_id))?.template_json;
-
-  const parsed = certificateDesignDocumentSchema.safeParse(snapshot);
-  if (!parsed.success) {
+  if (!plan.html) {
     throw certificateDownloadNotReady();
   }
 
-  const data = sampleDataFromVariables(parsed.data);
-  if (certificate.recipient_name) data["recipient_name"] = certificate.recipient_name;
-  if (certificate.course_title) data["course_title"] = certificate.course_title;
-  data["credential_id"] = certificate.credential_id;
-  data["verification_url"] = buildVerificationPath(certificate.credential_id);
-
-  const html = await designDocumentToHtmlAsync(parsed.data, data, {
+  const html = await designDocumentToHtmlAsync(plan.html.design, plan.html.data, {
     watermark: false,
-    verificationUrl: data["verification_url"],
+    verificationUrl: plan.html.verificationUrl,
   });
 
   return {
-    filename: `certificate-${safeCredential || certificate.id}.html`,
+    filename: `${plan.baseName}.html`,
     contentType: "text/html; charset=utf-8",
     body: html,
     fromStorage: false,
   };
+}
+
+/**
+ * Resolve a downloadable representation of an issued certificate.
+ *
+ * For callers that already hold no connection besides `tx`, or none at all in
+ * tests. Routes plan inside the transaction and materialize after it.
+ */
+export async function getCertificateDownload(
+  tx: TenantTx,
+  ctx: ServiceCtx,
+  certificateId: string,
+): Promise<CertificateDownload> {
+  return materializeCertificateDownload(await planCertificateDownload(tx, ctx, certificateId));
 }
 
 export async function listCertificates(tx: TenantTx, ctx: ServiceCtx, query: CertificateListQuery) {

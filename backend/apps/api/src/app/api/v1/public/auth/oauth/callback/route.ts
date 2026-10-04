@@ -1,12 +1,7 @@
 import { NextResponse } from "next/server";
-import {
-  resolvePlatformHost,
-  resolveRequestHostFromHeaders,
-  resolveTenantFromRequest,
-} from "@atlas/tenancy";
-import { createPublicRouteHandler } from "@atlas/api";
+import { resolvePlatformHost, resolveRequestHostFromHeaders } from "@atlas/tenancy";
+import { createPublicRouteHandler, globalDbPerStatement, resolveRequestTenant } from "@atlas/api";
 import { completeOAuthSignIn, setAuthCookies } from "@atlas/auth";
-import { withGlobalDb } from "@atlas/db/global-db";
 import { withTenantTx } from "@atlas/db/with-tenant-tx";
 import { findMembershipByPrincipal } from "@atlas/membership";
 import {
@@ -29,9 +24,12 @@ export const POST = createPublicRouteHandler(routeMetadata, async ({ req, reques
   // sufficient to enter the platform console (authorization is enforced by the
   // platform console shell gate).
   if (resolvePlatformHost(host)) {
-    const result = await withGlobalDb(async (db) =>
-      completeOAuthSignIn({ db, code: input.code, codeVerifier: input.codeVerifier }),
-    );
+    // The code exchange is a Supabase round trip: no connection held across it (audit H3).
+    const result = await completeOAuthSignIn({
+      db: globalDbPerStatement,
+      code: input.code,
+      codeVerifier: input.codeVerifier,
+    });
 
     const body = PublicAuthResponseSchema.parse({
       data: { status: "AUTHENTICATED", redirectTo: "/platform" },
@@ -49,58 +47,57 @@ export const POST = createPublicRouteHandler(routeMetadata, async ({ req, reques
     return response;
   }
 
-  return withGlobalDb(async (db) => {
-    const tenant = await resolveTenantFromRequest({ req, db });
+  // One pooled connection at a time, none during the Supabase round trip (audit H3).
+  const tenant = await resolveRequestTenant(req);
 
-    const result = await completeOAuthSignIn({
-      db,
-      code: input.code,
-      codeVerifier: input.codeVerifier,
-    });
-
-    const body = await withTenantTx(
-      {
-        tenantId: tenant.tenantId,
-        requestId,
-        allowAnonymousTenantRead: true,
-      },
-      async (tx) => {
-        const principalRows = await db.$queryRaw<{ id: string }[]>`
-          select id::text
-          from auth_principals
-          where email_normalized = ${result.identity.emailNormalized}
-          limit 1
-        `;
-        const principalId = principalRows[0]?.id;
-
-        const membership = principalId
-          ? await findMembershipByPrincipal({
-              tx,
-              tenantId: tenant.tenantId,
-              authPrincipalId: principalId,
-            })
-          : null;
-
-        return buildPublicAuthResponse({
-          tx,
-          tenantId: tenant.tenantId,
-          serviceStatus: result.status,
-          // OAuth providers complete their own MFA; no second challenge here.
-          mfaEnabled: false,
-          membership: membership ? { id: membership.id, status: membership.status } : null,
-        });
-      },
-    );
-
-    const response = NextResponse.json(body);
-    setAuthCookies({
-      response,
-      accessToken: result.session.accessToken,
-      refreshToken: result.session.refreshToken,
-      expiresInSeconds: result.session.expiresIn,
-      persistent,
-    });
-
-    return response;
+  const result = await completeOAuthSignIn({
+    db: globalDbPerStatement,
+    code: input.code,
+    codeVerifier: input.codeVerifier,
   });
+
+  const principalRows = await globalDbPerStatement.$queryRaw<{ id: string }[]>`
+    select id::text
+    from auth_principals
+    where email_normalized = ${result.identity.emailNormalized}
+    limit 1
+  `;
+  const principalId = principalRows[0]?.id;
+
+  const body = await withTenantTx(
+    {
+      tenantId: tenant.tenantId,
+      requestId,
+      allowAnonymousTenantRead: true,
+    },
+    async (tx) => {
+      const membership = principalId
+        ? await findMembershipByPrincipal({
+            tx,
+            tenantId: tenant.tenantId,
+            authPrincipalId: principalId,
+          })
+        : null;
+
+      return buildPublicAuthResponse({
+        tx,
+        tenantId: tenant.tenantId,
+        serviceStatus: result.status,
+        // OAuth providers complete their own MFA; no second challenge here.
+        mfaEnabled: false,
+        membership: membership ? { id: membership.id, status: membership.status } : null,
+      });
+    },
+  );
+
+  const response = NextResponse.json(body);
+  setAuthCookies({
+    response,
+    accessToken: result.session.accessToken,
+    refreshToken: result.session.refreshToken,
+    expiresInSeconds: result.session.expiresIn,
+    persistent,
+  });
+
+  return response;
 });

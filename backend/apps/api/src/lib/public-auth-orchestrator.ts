@@ -6,6 +6,7 @@ import {
   readSessionPersistenceFromStore,
 } from "@atlas/auth/cookie-store";
 import { ATLAS_ACCESS_TOKEN_COOKIE, ATLAS_REFRESH_TOKEN_COOKIE } from "@atlas/auth/cookies";
+import { globalDbPerStatement } from "@atlas/api";
 import { withGlobalDb } from "@atlas/db/global-db";
 import { withTenantTx } from "@atlas/db/with-tenant-tx";
 import { findMembershipByPrincipal, ensureSelfServiceLearnerMembership } from "@atlas/membership";
@@ -36,17 +37,34 @@ async function resolveActiveTenantFromRequest() {
   return { host, requestId };
 }
 
+/**
+ * The active tenant for a host, on a short-lived connection released before any
+ * auth round trip or tenant transaction (audit H3).
+ */
+async function lookupActiveTenant(host: string, requestId: string) {
+  const tenant = await withGlobalDb((db) => lookupTenantFromHost({ host, requestId, db }));
+  if (!tenant || tenant.tenantState !== "ACTIVE" || tenant.tenantDomainStatus !== "ACTIVE") {
+    throw new Error("tenant unavailable");
+  }
+  return tenant;
+}
+
 async function buildResponse(args: {
-  db: {
-    $queryRaw<T>(query: TemplateStringsArray, ...values: unknown[]): Promise<T>;
-    $executeRaw(query: TemplateStringsArray, ...values: unknown[]): Promise<unknown>;
-  };
   tenantId: string;
   requestId: string;
   email: string;
   serviceStatus: "signed_in" | "verification_required";
   mfaEnabled: boolean;
 }): Promise<PublicAuthApiResponse> {
+  // A global table: read on its own connection, never from inside the tenant transaction.
+  const principalRows = await globalDbPerStatement.$queryRaw<{ id: string }[]>`
+    select id::text
+    from auth_principals
+    where email_normalized = ${args.email}
+    limit 1
+  `;
+  const principalId = principalRows[0]?.id;
+
   return withTenantTx(
     {
       tenantId: args.tenantId,
@@ -54,13 +72,6 @@ async function buildResponse(args: {
       allowAnonymousTenantRead: true,
     },
     async (tx) => {
-      const principalRows = await args.db.$queryRaw<{ id: string }[]>`
-        select id::text
-        from auth_principals
-        where email_normalized = ${args.email}
-        limit 1
-      `;
-      const principalId = principalRows[0]?.id;
       let membership = principalId
         ? await findMembershipByPrincipal({
             tx,
@@ -128,28 +139,15 @@ export async function orchestratePublicLogin(input: {
   const parsed = PublicLoginRequestSchema.parse(input);
   const { host, requestId } = await resolveActiveTenantFromRequest();
 
-  const { authResult, body } = await withGlobalDb(async (db) => {
-    const tenant = await lookupTenantFromHost({ host, requestId, db });
-
-    if (!tenant || tenant.tenantState !== "ACTIVE" || tenant.tenantDomainStatus !== "ACTIVE") {
-      throw new Error("tenant unavailable");
-    }
-
-    const authResult = await loginWithPassword({
-      db,
-      input: parsed,
-    });
-
-    const body = await buildResponse({
-      db,
-      tenantId: tenant.tenantId,
-      requestId: tenant.requestId,
-      email: parsed.email,
-      serviceStatus: authResult.status,
-      mfaEnabled: authResult.identity.mfaEnabled,
-    });
-
-    return { authResult, body };
+  const tenant = await lookupActiveTenant(host, requestId);
+  // Supabase verification with no pooled connection held.
+  const authResult = await loginWithPassword({ db: globalDbPerStatement, input: parsed });
+  const body = await buildResponse({
+    tenantId: tenant.tenantId,
+    requestId: tenant.requestId,
+    email: parsed.email,
+    serviceStatus: authResult.status,
+    mfaEnabled: authResult.identity.mfaEnabled,
   });
 
   await setSessionCookies({
@@ -197,24 +195,16 @@ export async function orchestratePublicMfaVerify(input: {
     });
   }
 
-  const body = await withGlobalDb(async (db) => {
-    const tenant = await lookupTenantFromHost({ host, requestId, db });
-
-    if (!tenant || tenant.tenantState !== "ACTIVE" || tenant.tenantDomainStatus !== "ACTIVE") {
-      throw new Error("tenant unavailable");
-    }
-
-    return buildResponse({
-      db,
-      tenantId: tenant.tenantId,
-      requestId: tenant.requestId,
-      email: verified.user.email,
-      serviceStatus: "signed_in",
-      // The challenge above already satisfies the MFA requirement for this
-      // session, so the membership/redirect resolution below must not
-      // re-trigger the MFA_REQUIRED gate.
-      mfaEnabled: false,
-    });
+  const tenant = await lookupActiveTenant(host, requestId);
+  const body = await buildResponse({
+    tenantId: tenant.tenantId,
+    requestId: tenant.requestId,
+    email: verified.user.email,
+    serviceStatus: "signed_in",
+    // The challenge above already satisfies the MFA requirement for this
+    // session, so the membership/redirect resolution below must not
+    // re-trigger the MFA_REQUIRED gate.
+    mfaEnabled: false,
   });
 
   return body;
@@ -230,45 +220,36 @@ export async function orchestratePublicSignup(input: {
   const parsed = PublicSignupRequestSchema.parse(input);
   const { host, requestId } = await resolveActiveTenantFromRequest();
 
-  const { authResult, body } = await withGlobalDb(async (db) => {
-    const tenant = await lookupTenantFromHost({ host, requestId, db });
+  const tenant = await lookupActiveTenant(host, requestId);
 
-    if (!tenant || tenant.tenantState !== "ACTIVE" || tenant.tenantDomainStatus !== "ACTIVE") {
-      throw new Error("tenant unavailable");
-    }
+  const referralCode = parsed.referralCode;
+  if (referralCode) {
+    await withTenantTx(
+      {
+        tenantId: tenant.tenantId,
+        requestId: tenant.requestId,
+        allowAnonymousTenantRead: true,
+      },
+      async (tx) => {
+        await stashReferralCodeForSignup(tx, {
+          emailNormalized: parsed.email,
+          referralCode,
+        });
+      },
+    );
+  }
 
-    const referralCode = parsed.referralCode;
-    if (referralCode) {
-      await withTenantTx(
-        {
-          tenantId: tenant.tenantId,
-          requestId: tenant.requestId,
-          allowAnonymousTenantRead: true,
-        },
-        async (tx) => {
-          await stashReferralCodeForSignup(tx, {
-            emailNormalized: parsed.email,
-            referralCode,
-          });
-        },
-      );
-    }
+  const authResult = await signupWithPassword({
+    db: globalDbPerStatement,
+    input: publicSignupInputSchema.parse(parsed),
+  });
 
-    const authResult = await signupWithPassword({
-      db,
-      input: publicSignupInputSchema.parse(parsed),
-    });
-
-    const body = await buildResponse({
-      db,
-      tenantId: tenant.tenantId,
-      requestId: tenant.requestId,
-      email: parsed.email,
-      serviceStatus: authResult.status,
-      mfaEnabled: authResult.identity?.mfaEnabled ?? false,
-    });
-
-    return { authResult, body };
+  const body = await buildResponse({
+    tenantId: tenant.tenantId,
+    requestId: tenant.requestId,
+    email: parsed.email,
+    serviceStatus: authResult.status,
+    mfaEnabled: authResult.identity?.mfaEnabled ?? false,
   });
 
   if (authResult.session) {
