@@ -418,6 +418,41 @@ async function resolveCoursePrice(tx: TenantTx, courseId: string) {
   };
 }
 
+/**
+ * How long an open checkout holds a use of its coupon (audit M1). Matches the
+ * lifetime of a Stripe Checkout session; an order paid later than this is
+ * still honoured at fulfilment, and recorded if it takes the coupon over.
+ */
+const COUPON_RESERVATION_HOURS = 24;
+
+/**
+ * Refuses a coupon whose uses are all redeemed or held by open checkouts.
+ * With `lock` the coupon row stays locked until the transaction ends, so the
+ * order created next is counted by any checkout that runs after it.
+ */
+async function assertCouponHasFreeUse(
+  tx: TenantTx,
+  ctx: ServiceCtx,
+  args: { couponId: string; courseId: string; lock: boolean },
+): Promise<void> {
+  const uses = await salesCouponsRepository.countCouponUses(tx, {
+    couponId: args.couponId,
+    membershipId: ctx.actorMembershipId,
+    courseId: args.courseId,
+    reservationHours: COUPON_RESERVATION_HOURS,
+    lock: args.lock,
+  });
+  if (!uses) {
+    throw validationError("Invalid or inactive coupon code.");
+  }
+  if (uses.totalUsageLimit != null && uses.totalUses >= uses.totalUsageLimit) {
+    throw validationError("This coupon has reached its usage limit.");
+  }
+  if (uses.memberUses >= uses.perLearnerLimit) {
+    throw validationError("You have already used this coupon the maximum number of times.");
+  }
+}
+
 async function applyCouponToPrice(
   tx: TenantTx,
   ctx: ServiceCtx,
@@ -464,18 +499,12 @@ async function applyCouponToPrice(
     throw validationError("This coupon does not apply to this course.");
   }
 
-  const totalUsed = Number(coupon.redemption_count ?? 0);
-  if (coupon.total_usage_limit != null && totalUsed >= coupon.total_usage_limit) {
-    throw validationError("This coupon has reached its usage limit.");
-  }
-
-  const memberUsed = await salesCouponsRepository.countRedemptionsForMembership(tx, {
+  // Advisory here; planCheckoutPurchase repeats it under the coupon's lock.
+  await assertCouponHasFreeUse(tx, ctx, {
     couponId: coupon.id,
-    membershipId: ctx.actorMembershipId,
+    courseId: args.courseId,
+    lock: false,
   });
-  if (memberUsed >= coupon.per_learner_limit) {
-    throw validationError("You have already used this coupon the maximum number of times.");
-  }
 
   const discountCents = computeDiscountCents({
     originalAmountCents: args.originalAmountCents,
@@ -761,6 +790,114 @@ async function flagDuplicatePayment(
   });
 }
 
+/**
+ * Records the coupon on a paid order (audit M1).
+ *
+ * This used to re-check the coupon's limits here and throw, after the learner
+ * had paid: the webhook failed, the gateway retried forever, and the learner
+ * was charged the discounted price with no course. Limits are now enforced
+ * when the order is created (a coupon's open checkouts hold its uses), so a
+ * paid order always keeps the price it was sold at. Going over a limit is
+ * still possible (an open order paid after its reservation lapsed, or orders
+ * from before reservations), so that is recorded for review, never refused.
+ */
+async function redeemCouponForPaidOrder(
+  tx: TenantTx,
+  ctx: ServiceCtx,
+  args: {
+    order: PaymentOrderFulfillRow;
+    metadata: CourseCheckoutMetadata & { couponId: string; couponCode: string };
+    membershipId: string;
+  },
+): Promise<void> {
+  const { order, metadata, membershipId } = args;
+  const audit = {
+    tenantId: ctx.tenantId,
+    actorMembershipId: ctx.actorMembershipId,
+    platformPrincipalId: null,
+    requestId: ctx.requestId,
+  };
+
+  // The row lock serialises redemptions of the coupon, so the counts are exact.
+  const limits = await salesCouponsRepository.lockCouponForRedemption(tx, {
+    couponId: metadata.couponId,
+    membershipId,
+  });
+
+  if (!limits) {
+    // Deleted after the order was priced. There is nothing to attach a
+    // redemption to; the order keeps its discount.
+    await auditWriter.write(tx, audit, {
+      action: "coupon.redemption_skipped",
+      target: { type: "payment_order", id: order.id },
+      before: null,
+      after: { couponId: metadata.couponId, couponCode: metadata.couponCode },
+      reason: "Coupon was deleted before the order was paid; discount honoured.",
+      metadata: { discountCents: metadata.discountCents, membershipId },
+    });
+    structuredLogger.warn({
+      message: "Paid order used a coupon that no longer exists; discount honoured.",
+      module: "payments.fulfilment",
+      eventType: "coupon.redemption_skipped",
+      requestId: ctx.requestId,
+      paymentOrderId: order.id,
+      couponId: metadata.couponId,
+    });
+    return;
+  }
+
+  await salesCouponsRepository.insertRedemption(tx, {
+    couponId: metadata.couponId,
+    membershipId,
+    courseId: metadata.courseId,
+    paymentOrderId: order.id,
+    discountCents: metadata.discountCents,
+    originalAmountCents: metadata.originalAmountCents,
+    finalAmountCents: metadata.finalAmountCents,
+    currency: order.currency,
+    codeSnapshot: metadata.couponCode,
+  });
+
+  const overTotal =
+    limits.totalUsageLimit != null && limits.totalRedemptions >= limits.totalUsageLimit;
+  const overLearner = limits.memberRedemptions >= limits.perLearnerLimit;
+  if (!overTotal && !overLearner) return;
+
+  const exceeded = [overTotal ? "total" : null, overLearner ? "per_learner" : null].filter(
+    (value): value is string => value !== null,
+  );
+  await auditWriter.write(tx, audit, {
+    action: "coupon.redeemed_over_limit",
+    target: { type: "sales_coupon", id: metadata.couponId },
+    before: {
+      totalRedemptions: limits.totalRedemptions,
+      memberRedemptions: limits.memberRedemptions,
+    },
+    after: {
+      totalRedemptions: limits.totalRedemptions + 1,
+      memberRedemptions: limits.memberRedemptions + 1,
+    },
+    reason: "Paid order honoured although the coupon was over its limit.",
+    metadata: {
+      paymentOrderId: order.id,
+      membershipId,
+      exceeded,
+      totalUsageLimit: limits.totalUsageLimit,
+      perLearnerLimit: limits.perLearnerLimit,
+      discountCents: metadata.discountCents,
+    },
+  });
+  structuredLogger.warn({
+    message: "Coupon redeemed over its limit by a paid order; discount honoured.",
+    module: "payments.fulfilment",
+    eventType: "coupon.redeemed_over_limit",
+    requestId: ctx.requestId,
+    paymentOrderId: order.id,
+    couponId: metadata.couponId,
+    exceeded,
+  });
+}
+
 export async function fulfillPaidCourseOrder(
   tx: TenantTx,
   ctx: ServiceCtx,
@@ -835,38 +972,10 @@ export async function fulfillPaidCourseOrder(
           order.id,
         );
         if (existingRedemption.length === 0) {
-          // Authoritative limit enforcement. The check performed at price
-          // calculation is advisory only: it runs in an earlier transaction, so
-          // concurrent checkouts can each pass it before any has redeemed.
-          // Locking the coupon row here serialises redemptions and makes the
-          // counts below trustworthy.
-          const limits = await salesCouponsRepository.lockCouponForRedemption(tx, {
-            couponId: metadata.couponId,
+          await redeemCouponForPaidOrder(tx, ctx, {
+            order,
+            metadata: { ...metadata, couponId: metadata.couponId, couponCode: metadata.couponCode },
             membershipId,
-          });
-
-          if (!limits) {
-            throw validationError("This coupon is no longer available.");
-          }
-
-          if (limits.totalUsageLimit != null && limits.totalRedemptions >= limits.totalUsageLimit) {
-            throw validationError("This coupon has reached its usage limit.");
-          }
-
-          if (limits.memberRedemptions >= limits.perLearnerLimit) {
-            throw validationError("You have already used this coupon the maximum number of times.");
-          }
-
-          await salesCouponsRepository.insertRedemption(tx, {
-            couponId: metadata.couponId,
-            membershipId,
-            courseId: metadata.courseId,
-            paymentOrderId: order.id,
-            discountCents: metadata.discountCents,
-            originalAmountCents: metadata.originalAmountCents,
-            finalAmountCents: metadata.finalAmountCents,
-            currency: order.currency,
-            codeSnapshot: metadata.couponCode,
           });
         }
       }
@@ -1349,6 +1458,14 @@ export async function planCheckoutPurchase(
     ...(body.couponCode != null ? { couponCode: body.couponCode } : {}),
     ...(body.affiliateCode != null ? { affiliateCode: body.affiliateCode } : {}),
   });
+
+  // Audit M1: the order about to be created holds one of the coupon's uses
+  // until it is paid, fails or lapses. Checked under the coupon's row lock, so
+  // two learners cannot both take its last use, and refused here, before
+  // payment, rather than after it.
+  if (coupon) {
+    await assertCouponHasFreeUse(tx, ctx, { couponId: coupon.id, courseId: course.id, lock: true });
+  }
 
   let walletCreditsApplied = 0;
   let walletDiscountCents = 0;
