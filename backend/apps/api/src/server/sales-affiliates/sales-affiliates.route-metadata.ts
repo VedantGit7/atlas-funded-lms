@@ -43,6 +43,20 @@ export const adminAffiliateWriteMetadata = {
   resourceLoader: async ({ ctx }: { ctx: LoaderCtx }) => loadTenantConfigRef({ ctx }),
 } satisfies RouteMetadata;
 
+/**
+ * Editing a partner can redirect where their commissions are paid, and the
+ * reveal returns full bank and UPI details: both require step-up MFA (audit M6).
+ */
+export const adminAffiliatePartnerWriteMetadata = {
+  ...adminAffiliateWriteMetadata,
+  mfa: "required",
+} satisfies RouteMetadata;
+
+export const adminAffiliatePayoutRevealMetadata = {
+  ...adminAffiliateWriteMetadata,
+  mfa: "required",
+} satisfies RouteMetadata;
+
 export const learnerAffiliateReadMetadata = {
   permission: "enrollment.create",
   audit: "none",

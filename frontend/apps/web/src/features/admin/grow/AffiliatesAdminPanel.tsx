@@ -33,7 +33,6 @@ import {
   formatAffiliateDate,
   formatAffiliateDateTime,
   formatPctOverride,
-  maskBankAccount,
   parseOptionalPct,
   partnerInitials,
   partnerLabel,
@@ -50,6 +49,7 @@ import {
   type AffiliateCommission,
   type AffiliateConfig,
   type AffiliatePartner,
+  type AffiliatePayoutDetails,
   type AffiliatePayout,
   type AffiliateProduct,
   type AffiliateRequest,
@@ -274,11 +274,16 @@ export function AffiliatesAdminPanel() {
     tier: AffiliatePartner["tier"];
     status: AffiliatePartner["status"];
     couponCode: string;
+    /** Empty means "keep what is on file"; the server never sends these back. */
     payoutUpi: string;
     payoutBankAccount: string;
+    clearUpi: boolean;
+    clearBankAccount: boolean;
     payoutIfsc: string;
     payoutAccountName: string;
   } | null>(null);
+  const [revealedPayout, setRevealedPayout] = useState<AffiliatePayoutDetails | null>(null);
+  const [revealingPayout, setRevealingPayout] = useState(false);
   const [partnerCommissions, setPartnerCommissions] = useState<AffiliateCommission[]>([]);
   const [partnerPayouts, setPartnerPayouts] = useState<AffiliatePayout[]>([]);
   const [partnerDetailLoading, setPartnerDetailLoading] = useState(false);
@@ -494,11 +499,14 @@ export function AffiliatesAdminPanel() {
       tier: selectedPartner.tier,
       status: selectedPartner.status,
       couponCode: selectedPartner.couponCode,
-      payoutUpi: selectedPartner.payoutUpi ?? "",
-      payoutBankAccount: selectedPartner.payoutBankAccount ?? "",
+      payoutUpi: "",
+      payoutBankAccount: "",
+      clearUpi: false,
+      clearBankAccount: false,
       payoutIfsc: selectedPartner.payoutIfsc ?? "",
       payoutAccountName: selectedPartner.payoutAccountName ?? "",
     });
+    setRevealedPayout(null);
   }, [selectedPartner]);
 
   const mergedProducts = useMemo(() => {
@@ -700,8 +708,17 @@ export function AffiliatesAdminPanel() {
           tier: partnerDraft.tier,
           status: partnerDraft.status,
           couponCode: partnerDraft.couponCode.trim(),
-          payoutUpi: partnerDraft.payoutUpi.trim() || null,
-          payoutBankAccount: partnerDraft.payoutBankAccount.trim() || null,
+          // Bank account and UPI are sent only when changed or removed.
+          ...(partnerDraft.clearUpi
+            ? { payoutUpi: null }
+            : partnerDraft.payoutUpi.trim()
+              ? { payoutUpi: partnerDraft.payoutUpi.trim() }
+              : {}),
+          ...(partnerDraft.clearBankAccount
+            ? { payoutBankAccount: null }
+            : partnerDraft.payoutBankAccount.trim()
+              ? { payoutBankAccount: partnerDraft.payoutBankAccount.trim() }
+              : {}),
           payoutIfsc: partnerDraft.payoutIfsc.trim() || null,
           payoutAccountName: partnerDraft.payoutAccountName.trim() || null,
         },
@@ -714,6 +731,27 @@ export function AffiliatesAdminPanel() {
       toast.error(caught instanceof ClientApiError ? caught.message : "Could not update partner.");
     } finally {
       setUpdatingPartner(false);
+    }
+  }
+
+  async function onRevealPayout() {
+    if (!selectedPartner) return;
+    setRevealingPayout(true);
+    try {
+      // Requires step-up MFA and is audited (audit M6); the client prompts for MFA.
+      const response = await clientApi.post<{ data: AffiliatePayoutDetails }>(
+        `/api/v1/sales/affiliates/partners/${selectedPartner.id}/payout-details`,
+        null,
+        "affiliate-payout-reveal",
+        { silent: true },
+      );
+      setRevealedPayout(response.data);
+    } catch (caught) {
+      toast.error(
+        caught instanceof ClientApiError ? caught.message : "Could not show payout details.",
+      );
+    } finally {
+      setRevealingPayout(false);
     }
   }
 
@@ -1636,9 +1674,40 @@ export function AffiliatesAdminPanel() {
                       </p>
                     </div>
                     <p className="text-xs text-[var(--admin-on-surface-variant)]">
-                      Partners can also update these from their profile. Edit here if you need to
-                      correct details before recording a payout.
+                      Partners can also update these from their profile. Bank account and UPI are
+                      stored encrypted and shown masked; type a new value to replace one.
                     </p>
+                    {selectedPartner.payoutDetailsOnFile ? (
+                      revealedPayout?.affiliateId === selectedPartner.id ? (
+                        <dl className="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-1 rounded-md border border-[var(--admin-border)] bg-[var(--admin-surface)] p-3 text-xs">
+                          <dt className="text-[var(--admin-on-surface-variant)]">Account name</dt>
+                          <dd className="text-[var(--admin-on-surface)]">
+                            {revealedPayout.payoutAccountName ?? "Not set"}
+                          </dd>
+                          <dt className="text-[var(--admin-on-surface-variant)]">Bank account</dt>
+                          <dd className="font-mono text-[var(--admin-on-surface)]">
+                            {revealedPayout.payoutBankAccount ?? "Not set"}
+                          </dd>
+                          <dt className="text-[var(--admin-on-surface-variant)]">IFSC</dt>
+                          <dd className="font-mono text-[var(--admin-on-surface)]">
+                            {revealedPayout.payoutIfsc ?? "Not set"}
+                          </dd>
+                          <dt className="text-[var(--admin-on-surface-variant)]">UPI ID</dt>
+                          <dd className="font-mono text-[var(--admin-on-surface)]">
+                            {revealedPayout.payoutUpi ?? "Not set"}
+                          </dd>
+                        </dl>
+                      ) : (
+                        <button
+                          type="button"
+                          disabled={revealingPayout}
+                          onClick={() => void onRevealPayout()}
+                          className="inline-flex items-center gap-2 self-start rounded-md border border-[var(--admin-border)] bg-[var(--admin-surface)] px-3 py-1.5 text-xs font-semibold text-[var(--admin-on-surface)] hover:bg-[var(--admin-surface-high)] disabled:opacity-50"
+                        >
+                          {revealingPayout ? "Verifying…" : "Show full details to pay"}
+                        </button>
+                      )
+                    ) : null}
                     <div className="space-y-3">
                       <div>
                         <label className={MESSENGER_WIZARD_LABEL_CLASS}>Account name</label>
@@ -1657,19 +1726,34 @@ export function AffiliatesAdminPanel() {
                         <label className={MESSENGER_WIZARD_LABEL_CLASS}>Bank account</label>
                         <input
                           value={partnerDraft.payoutBankAccount}
+                          disabled={partnerDraft.clearBankAccount}
                           onChange={(event) => {
                             setPartnerDraft({
                               ...partnerDraft,
                               payoutBankAccount: event.target.value,
                             });
                           }}
+                          autoComplete="off"
                           className={`${MESSENGER_WIZARD_FIELD_CLASS} h-10 font-mono`}
                           placeholder={
-                            selectedPartner.payoutBankAccount
-                              ? maskBankAccount(selectedPartner.payoutBankAccount)
+                            selectedPartner.payoutBankAccountMasked
+                              ? `${selectedPartner.payoutBankAccountMasked} (leave blank to keep)`
                               : "Account number"
                           }
                         />
+                        {selectedPartner.payoutBankAccountMasked ? (
+                          <PayoutClearToggle
+                            checked={partnerDraft.clearBankAccount}
+                            label="Remove saved bank account"
+                            onChange={(checked) => {
+                              setPartnerDraft({
+                                ...partnerDraft,
+                                clearBankAccount: checked,
+                                payoutBankAccount: "",
+                              });
+                            }}
+                          />
+                        ) : null}
                       </div>
                       <div className="grid grid-cols-2 gap-3">
                         <div>
@@ -1689,14 +1773,34 @@ export function AffiliatesAdminPanel() {
                           <label className={MESSENGER_WIZARD_LABEL_CLASS}>UPI ID</label>
                           <input
                             value={partnerDraft.payoutUpi}
+                            disabled={partnerDraft.clearUpi}
                             onChange={(event) => {
                               setPartnerDraft({
                                 ...partnerDraft,
                                 payoutUpi: event.target.value,
                               });
                             }}
+                            autoComplete="off"
                             className={`${MESSENGER_WIZARD_FIELD_CLASS} h-10 font-mono`}
+                            placeholder={
+                              selectedPartner.payoutUpiMasked
+                                ? `${selectedPartner.payoutUpiMasked} (leave blank to keep)`
+                                : "name@bank"
+                            }
                           />
+                          {selectedPartner.payoutUpiMasked ? (
+                            <PayoutClearToggle
+                              checked={partnerDraft.clearUpi}
+                              label="Remove saved UPI ID"
+                              onChange={(checked) => {
+                                setPartnerDraft({
+                                  ...partnerDraft,
+                                  clearUpi: checked,
+                                  payoutUpi: "",
+                                });
+                              }}
+                            />
+                          ) : null}
                         </div>
                       </div>
                     </div>
@@ -2052,5 +2156,29 @@ export function AffiliatesAdminPanel() {
         </div>
       ) : null}
     </div>
+  );
+}
+
+/** Removing a saved value is explicit; an empty field otherwise keeps it (audit M6). */
+function PayoutClearToggle({
+  checked,
+  label,
+  onChange,
+}: {
+  checked: boolean;
+  label: string;
+  onChange: (checked: boolean) => void;
+}) {
+  return (
+    <label className="mt-1.5 inline-flex items-center gap-2 text-xs text-[var(--admin-on-surface-variant)]">
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(event) => {
+          onChange(event.target.checked);
+        }}
+      />
+      {label}
+    </label>
   );
 }

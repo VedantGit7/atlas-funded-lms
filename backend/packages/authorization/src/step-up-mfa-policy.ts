@@ -146,6 +146,18 @@ export const STEP_UP_MFA_OPERATIONS: readonly StepUpOperation[] = [
     reason: "Sends a sample learner event to the configured outbound URL.",
   },
   {
+    route: "/api/v1/sales/affiliates/partners/[id]",
+    method: "PUT",
+    category: "money",
+    reason: "Can change the bank or UPI account an affiliate's commissions are paid to (audit M6).",
+  },
+  {
+    route: "/api/v1/sales/affiliates/partners/[id]/payout-details",
+    method: "POST",
+    category: "bulk-data",
+    reason: "Returns an affiliate's full bank account and UPI details (audit M6).",
+  },
+  {
     route: "/api/v1/reports/exports/destinations",
     method: "POST",
     category: "credentials",
