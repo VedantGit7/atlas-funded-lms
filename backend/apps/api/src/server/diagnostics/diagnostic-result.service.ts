@@ -1,3 +1,9 @@
+import {
+  orderItems,
+  orderOptions,
+  secureShuffle,
+  type PresentationOrder,
+} from "../attempts/presentation-order";
 import type { TenantTx } from "@atlas/db";
 import { AtlasHttpError } from "@atlas/core/http/errors";
 import {
@@ -29,18 +35,16 @@ import type {
   DiagnosticSessionMetadata,
 } from "./diagnostic.types";
 
-function shuffle<T>(items: T[]): T[] {
-  const copy = [...items];
-  for (let index = copy.length - 1; index > 0; index -= 1) {
-    const swapIndex = Math.floor(Math.random() * (index + 1));
-    const current = copy[index];
-    const swap = copy[swapIndex];
-    if (current !== undefined && swap !== undefined) {
-      copy[index] = swap;
-      copy[swapIndex] = current;
-    }
+/** The order a projection was presented in, so an attempt made from it keeps that order (audit M9). */
+export function presentationFromProjection(questions: DiagnosticQuestion[]): PresentationOrder {
+  const optionOrder: Record<string, string[]> = {};
+  for (const question of questions) {
+    optionOrder[question.assessmentItemId] = question.options.map((option) => option.id);
   }
-  return copy;
+  return {
+    itemOrder: questions.map((question) => question.assessmentItemId),
+    optionOrder,
+  };
 }
 
 async function loadScoringItems(tx: TenantTx, assessmentId: string): Promise<ScoringItem[]> {
@@ -71,9 +75,15 @@ async function loadScoringItems(tx: TenantTx, assessmentId: string): Promise<Sco
   return items;
 }
 
+/**
+ * The diagnostic's questions. For an attempt, in the order the attempt stored
+ * when it started; otherwise (an anonymous session, which stores the
+ * projection it returns) in a freshly drawn order (audit M9).
+ */
 export async function buildPublicDiagnosticQuestions(
   tx: TenantTx,
   assessmentId: string,
+  attempt?: { id: string; presentation: PresentationOrder | undefined },
 ): Promise<{ title: string; items: DiagnosticQuestion[] }> {
   const assessment = await assessmentsRepository.findById(tx, assessmentId);
   if (!assessment) {
@@ -86,11 +96,16 @@ export async function buildPublicDiagnosticQuestions(
 
   const config = extractAssessmentConfig(assessment.config_json);
   const rows = await assessmentsRepository.listAssessmentItems(tx, assessmentId);
-  let orderedRows = [...rows].sort((a, b) => a.position - b.position);
-
-  if (config.shuffleItems) {
-    orderedRows = shuffle(orderedRows);
-  }
+  const sorted = [...rows].sort((a, b) => a.position - b.position);
+  const orderedRows = attempt
+    ? orderItems(rows, {
+        order: attempt.presentation,
+        attemptId: attempt.id,
+        shuffleItems: config.shuffleItems,
+      })
+    : config.shuffleItems
+      ? secureShuffle(sorted)
+      : sorted;
 
   const items: DiagnosticQuestion[] = [];
 
@@ -98,10 +113,17 @@ export async function buildPublicDiagnosticQuestions(
     const item = await itemRegistryRepository.findItemById(tx, row.item_id);
     if (!item) continue;
 
-    let options = await itemRegistryRepository.listItemOptions(tx, row.item_id);
-    if (config.shuffleOptions) {
-      options = shuffle(options);
-    }
+    const stored = await itemRegistryRepository.listItemOptions(tx, row.item_id);
+    const options = attempt
+      ? orderOptions(stored, {
+          order: attempt.presentation,
+          attemptId: attempt.id,
+          assessmentItemId: row.id,
+          shuffleOptions: config.shuffleOptions,
+        })
+      : config.shuffleOptions
+        ? secureShuffle(stored)
+        : [...stored].sort((a, b) => a.position - b.position);
 
     items.push({
       assessmentItemId: row.id,
