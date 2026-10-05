@@ -12,6 +12,8 @@ SEC-10 opened **2026-10-02**: GHSA-86w9-cpqp-85rv was published against every re
 
 SEC-09 reviewed **2026-09-20** during F12. Official npm metadata still reports `extract-zip@2.0.1` as latest, and an unfiltered audit of the updated lockfile returns only its two existing high advisories. The 12 previously unsuppressed entries are patched. SEC-09's owner, expiry and exact advisory exclusions are unchanged; see the [F12 report](../engineering/f12-dependency-remediation.md) for reachability and verification. A successful configured audit does not mean the unfiltered tree is free of advisories.
 
+SEC-09 rechecked **2026-10-04**: `extract-zip` is still at 2.0.1. Upgrading `@lhci/cli` to its newest release (0.15.1) does not remove it: lighthouse 12.6.1 pins puppeteer-core 24, whose `@puppeteer/browsers` 2.13.2 still depends on `extract-zip`. The downloader without it ships with puppeteer 25, which lighthouse does not yet support. The same review raised the `dompurify` (3.4.16) and `ip-address` (10.7.1) overrides for newer advisories.
+
 This register previously read "No open exceptions at story delivery" while the
 2026-08-15 audit was finding 6 critical and 18 high issues. It was empty because
 nothing had detected them, not because they had been assessed — which is the
