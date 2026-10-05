@@ -12,6 +12,7 @@ import { attemptKeyConflict } from "../attempts/attempts.errors";
 import { attemptsRepository } from "../../server/attempts/attempts.repository";
 import { diagnosticRepository, parseDiagnosticSessionMetadata } from "./diagnostic.repository";
 import { diagnosticSessionInvalid } from "./diagnostic-public-session.service";
+import { presentationFromProjection } from "./diagnostic-result.service";
 import { toAttemptDraftAnswers } from "./diagnostic-result.service";
 
 type ServiceCtx = {
@@ -107,15 +108,19 @@ export async function mergeAnonymousDiagnosticSession(args: {
     };
   }
 
+  // Audit M9: the attempt keeps the order the anonymous session presented.
+  const presentation = presentationFromProjection(metadata.questionProjection ?? []);
   const attempt = await attemptsRepository.insertAttempt(args.tx, {
     tenantId: args.ctx.tenantId,
     assessmentId: session.assessment_id,
     membershipId: args.ctx.actorMembershipId,
     idempotencyKey: mergeIdempotencyKey,
     dueAt: null,
+    presentation,
   });
 
   await attemptsRepository.updateMetadata(args.tx, attempt.id, {
+    presentation,
     draftAnswers: toAttemptDraftAnswers(metadata.answers),
   });
 

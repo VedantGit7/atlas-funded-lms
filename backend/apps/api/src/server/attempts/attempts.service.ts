@@ -31,6 +31,13 @@ import {
   itemRegistryRepository,
 } from "../item-registry/item-registry.repository";
 import { finalizeProctoringReport, startProctoringSession } from "../proctoring/proctoring.service";
+import {
+  orderItems,
+  orderOptions,
+  planPresentationOrder,
+  readPresentationOrder,
+  type PresentationOrder,
+} from "./presentation-order";
 
 type ServiceCtx = {
   tenantId: string;
@@ -89,18 +96,29 @@ function toSubmittedAttemptStatus(status: string): SubmittedAttemptStatus {
   return status === "GRADED" ? "GRADED" : "SUBMITTED";
 }
 
-function shuffle<T>(items: T[]): T[] {
-  const copy = [...items];
-  for (let index = copy.length - 1; index > 0; index -= 1) {
-    const swapIndex = Math.floor(Math.random() * (index + 1));
-    const current = copy[index];
-    const swap = copy[swapIndex];
-    if (current !== undefined && swap !== undefined) {
-      copy[index] = swap;
-      copy[swapIndex] = current;
-    }
+/**
+ * Draw the attempt's item and option order once, at start (audit M9). Stored
+ * even when nothing is shuffled, so a reordering by the author does not move
+ * questions under a learner mid-attempt.
+ */
+async function planAttemptPresentation(
+  tx: TenantTx,
+  assessmentId: string,
+  config: ReturnType<typeof extractAssessmentConfig>,
+): Promise<PresentationOrder> {
+  const rows = await assessmentsRepository.listAssessmentItems(tx, assessmentId);
+  const items = [];
+  for (const row of rows) {
+    const options = config.shuffleOptions
+      ? await itemRegistryRepository.listItemOptions(tx, row.item_id)
+      : [];
+    items.push({ id: row.id, position: row.position, options });
   }
-  return copy;
+  return planPresentationOrder({
+    items,
+    shuffleItems: config.shuffleItems,
+    shuffleOptions: config.shuffleOptions,
+  });
 }
 
 async function loadScoringItems(tx: TenantTx, assessmentId: string): Promise<ScoringItem[]> {
@@ -135,16 +153,18 @@ async function loadScoringItems(tx: TenantTx, assessmentId: string): Promise<Sco
 
 async function buildRunnerItems(
   tx: TenantTx,
-  assessmentId: string,
+  attempt: Pick<AttemptRow, "id" | "assessment_id">,
   metadata: AttemptMetadata,
   config: ReturnType<typeof extractAssessmentConfig>,
 ) {
-  const rows = await assessmentsRepository.listAssessmentItems(tx, assessmentId);
-  let orderedRows = [...rows].sort((a, b) => a.position - b.position);
-
-  if (config.shuffleItems) {
-    orderedRows = shuffle(orderedRows);
-  }
+  const rows = await assessmentsRepository.listAssessmentItems(tx, attempt.assessment_id);
+  // Audit M9: the order drawn at start, the same on every fetch.
+  const order = readPresentationOrder(metadata.presentation);
+  const orderedRows = orderItems(rows, {
+    order,
+    attemptId: attempt.id,
+    shuffleItems: config.shuffleItems,
+  });
 
   const items = [];
 
@@ -154,10 +174,12 @@ async function buildRunnerItems(
       continue;
     }
 
-    let options = await itemRegistryRepository.listItemOptions(tx, row.item_id);
-    if (config.shuffleOptions) {
-      options = shuffle(options);
-    }
+    const options = orderOptions(await itemRegistryRepository.listItemOptions(tx, row.item_id), {
+      order,
+      attemptId: attempt.id,
+      assessmentItemId: row.id,
+      shuffleOptions: config.shuffleOptions,
+    });
 
     const draft = metadata.draftAnswers?.[row.id];
 
@@ -261,6 +283,7 @@ export async function startAttempt(
     membershipId: ctx.actorMembershipId,
     idempotencyKey,
     dueAt,
+    presentation: await planAttemptPresentation(tx, assessmentId, config),
   });
 
   if (config.proctoringLevel >= 1) {
@@ -354,7 +377,7 @@ export async function getAttempt(tx: TenantTx, ctx: ServiceCtx, attemptId: strin
     return {
       data: {
         ...base,
-        items: await buildRunnerItems(tx, attempt.assessment_id, metadata, config),
+        items: await buildRunnerItems(tx, attempt, metadata, config),
       },
     };
   }
@@ -362,9 +385,7 @@ export async function getAttempt(tx: TenantTx, ctx: ServiceCtx, attemptId: strin
   return {
     data: {
       ...base,
-      items: reviewAllowed
-        ? await buildRunnerItems(tx, attempt.assessment_id, metadata, config)
-        : [],
+      items: reviewAllowed ? await buildRunnerItems(tx, attempt, metadata, config) : [],
       canReviewAnswers: reviewAllowed,
       scorePercent,
       passed,

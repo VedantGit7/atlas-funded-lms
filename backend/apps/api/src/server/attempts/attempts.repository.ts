@@ -1,3 +1,4 @@
+import type { PresentationOrder } from "./presentation-order";
 import { randomUUID } from "node:crypto";
 import type { TenantTx } from "@atlas/db";
 
@@ -29,6 +30,8 @@ export type AttemptAnswerRow = {
 
 export type AttemptMetadata = {
   dueAt?: string;
+  /** Item and option order drawn at start (audit M9). Absent on older attempts. */
+  presentation?: PresentationOrder;
   draftAnswers?: Record<
     string,
     {
@@ -261,10 +264,14 @@ export const attemptsRepository = {
       membershipId: string;
       idempotencyKey: string;
       dueAt: string | null;
+      presentation: PresentationOrder;
     },
   ): Promise<AttemptRow> {
     const id = randomUUID();
-    const metadata: AttemptMetadata = args.dueAt ? { dueAt: args.dueAt } : {};
+    const metadata: AttemptMetadata = {
+      ...(args.dueAt ? { dueAt: args.dueAt } : {}),
+      presentation: args.presentation,
+    };
 
     await tx.$executeRaw`
       insert into attempts (

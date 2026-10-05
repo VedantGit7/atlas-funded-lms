@@ -1,7 +1,11 @@
 import type { TenantTx } from "@atlas/db";
 import { AtlasHttpError } from "@atlas/core/http/errors";
 import { startAttempt } from "../../server/attempts/attempts.service";
-import { attemptsRepository } from "../../server/attempts/attempts.repository";
+import {
+  attemptsRepository,
+  parseAttemptMetadata,
+} from "../../server/attempts/attempts.repository";
+import { readPresentationOrder } from "../../server/attempts/presentation-order";
 import {
   buildAuthenticatedScorecard,
   buildPublicDiagnosticQuestions,
@@ -30,7 +34,12 @@ export async function startAuthenticatedDiagnostic(args: {
   }
 
   const started = await startAttempt(args.tx, args.ctx, assessment.id, args.idempotencyKey);
-  const projection = await buildPublicDiagnosticQuestions(args.tx, assessment.id);
+  const attempt = await attemptsRepository.findById(args.tx, started.data.id);
+  // Audit M9: the order the attempt stored at start, so a reload shows the same.
+  const projection = await buildPublicDiagnosticQuestions(args.tx, assessment.id, {
+    id: started.data.id,
+    presentation: readPresentationOrder(parseAttemptMetadata(attempt?.metadata_json).presentation),
+  });
 
   const session = await diagnosticRepository.insertMembershipSession(args.tx, {
     tenantId: args.ctx.tenantId,
@@ -85,7 +94,10 @@ export async function getAuthenticatedDiagnosticResult(args: {
       : null;
 
   if (attempt && attempt.status === "STARTED" && session.assessment_id) {
-    const projection = await buildPublicDiagnosticQuestions(args.tx, session.assessment_id);
+    const projection = await buildPublicDiagnosticQuestions(args.tx, session.assessment_id, {
+      id: attempt.id,
+      presentation: readPresentationOrder(parseAttemptMetadata(attempt.metadata_json).presentation),
+    });
     return {
       data: {
         sessionId: session.id,
