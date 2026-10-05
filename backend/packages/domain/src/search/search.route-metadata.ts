@@ -26,7 +26,7 @@ export const searchQueryMetadata = {
 
 export const searchReindexMetadata = {
   permission: "search.reindex.manage",
-  audit: "none",
+  audit: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",
   resourceLoader: async ({ ctx }) => loadSearchCatalogResourceRef({ ctx }),

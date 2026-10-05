@@ -5,6 +5,7 @@ export const routeMetadata = {
   permission: "diagnostic.start",
   entitlement: null,
   audit: "none",
+  auditExempt: "learner_activity",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",
   resourceLoader: async ({ tx, ctx }) => loadPublishedDiagnosticAssessmentResourceRef({ tx, ctx }),

@@ -11,7 +11,7 @@ export const listLocaleResourcesMetadata = {
 
 export const upsertLocaleResourcesMetadata = {
   permission: "locale.manage",
-  audit: "none",
+  audit: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",
   resourceLoader: loadLocaleResourceCatalogResourceRef,
@@ -19,7 +19,7 @@ export const upsertLocaleResourcesMetadata = {
 
 export const deleteLocaleResourceMetadata = {
   permission: "locale.manage",
-  audit: "none",
+  audit: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",
   resourceLoader: loadLocaleResourceCatalogResourceRef,
@@ -35,7 +35,7 @@ export const listLocaleMetadataMetadata = {
 
 export const upsertLocaleMetadataMetadata = {
   permission: "locale.manage",
-  audit: "none",
+  audit: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",
   resourceLoader: loadLocaleResourceCatalogResourceRef,
@@ -43,7 +43,7 @@ export const upsertLocaleMetadataMetadata = {
 
 export const deleteLocaleMetadataMetadata = {
   permission: "locale.manage",
-  audit: "none",
+  audit: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",
   resourceLoader: loadLocaleResourceCatalogResourceRef,
@@ -83,7 +83,7 @@ export const listLocaleReviewQueueMetadata = {
 
 export const updateLocaleReviewMetadata = {
   permission: "locale.manage",
-  audit: "none",
+  audit: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",
   resourceLoader: loadLocaleResourceCatalogResourceRef,
@@ -99,7 +99,7 @@ export const getLocaleQaChecksMetadata = {
 
 export const runLocaleQaChecksMetadata = {
   permission: "locale.manage",
-  audit: "none",
+  audit: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",
   resourceLoader: loadLocaleResourceCatalogResourceRef,
@@ -108,6 +108,7 @@ export const runLocaleQaChecksMetadata = {
 export const previewLocaleImportMetadata = {
   permission: "locale.manage",
   audit: "none",
+  auditExempt: "read_only",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "none",
   resourceLoader: loadLocaleResourceCatalogResourceRef,
@@ -115,7 +116,7 @@ export const previewLocaleImportMetadata = {
 
 export const importLocaleResourcesMetadata = {
   permission: "locale.manage",
-  audit: "none",
+  audit: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",
   resourceLoader: loadLocaleResourceCatalogResourceRef,

@@ -5,6 +5,7 @@ export const routeMetadata = {
   permission: "practice.start",
   entitlement: null,
   audit: "none",
+  auditExempt: "learner_activity",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",
   resourceLoader: async ({ ctx }) => loadSelfPracticeResourceRef({ ctx }),

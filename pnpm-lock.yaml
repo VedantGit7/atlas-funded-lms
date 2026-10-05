@@ -264,6 +264,9 @@ importers:
 
   backend/packages/api:
     dependencies:
+      '@atlas/audit':
+        specifier: workspace:*
+        version: link:../audit
       '@atlas/auth':
         specifier: workspace:*
         version: link:../auth

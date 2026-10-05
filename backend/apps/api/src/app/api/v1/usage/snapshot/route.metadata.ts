@@ -1,7 +1,7 @@
 export const routeMetadata = {
   permission: "usage.snapshot",
   entitlement: null,
-  audit: "none",
+  audit: "required",
   rateLimit: "tenantMutation",
   idempotency: "none",
 } as const;

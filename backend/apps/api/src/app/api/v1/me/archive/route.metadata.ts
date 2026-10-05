@@ -14,7 +14,7 @@ const selfArchiveResourceLoader: RouteMetadata["resourceLoader"] = ({ ctx }) =>
 export const archiveMutationMetadata = {
   permission: "profile.update",
   entitlement: null,
-  audit: "none",
+  audit: "required",
   rateLimit: "tenantMutation",
   idempotency: "required",
   resourceLoader: selfArchiveResourceLoader,

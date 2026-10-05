@@ -16,7 +16,7 @@ export const getAssessmentsRouteMetadata = {
 export const postAssessmentsRouteMetadata = {
   permission: "assessment.create",
   entitlement: null,
-  audit: "none",
+  audit: "required",
   rateLimit: "tenantMutation",
   idempotency: "required",
   resourceLoader: loadAssessmentCreateResourceRef,

@@ -32,6 +32,7 @@ import { noBodySchema } from "./schemas";
 import { createTenantRequestUsage } from "./tenant-usage-meter";
 import { enforceIngressRateLimit, enforceProtectedRateLimit } from "./rate-limit";
 import { measureRouteStage } from "./route-stage-timings";
+import { ensureMutationAudited } from "./mutation-audit";
 
 type InferParams<TParams extends z.ZodType | undefined> = TParams extends z.ZodType
   ? z.infer<TParams> extends object
@@ -424,7 +425,22 @@ export function createTenantRoute<
                   committed.ctx = pipelineArgs.ctx;
                   const runHandler = async () => {
                     await consumeProtectedTenantRouteUsage(pipelineArgs);
-                    return config.handler({ tx, ctx: pipelineArgs.ctx, input, resource, params });
+                    const output = await config.handler({
+                      tx,
+                      ctx: pipelineArgs.ctx,
+                      input,
+                      resource,
+                      params,
+                    });
+                    // M7: a mutation declaring audit: "required" is on the record.
+                    await ensureMutationAudited(tx, {
+                      ctx: pipelineArgs.ctx,
+                      metadata: config.metadata,
+                      method: req.method,
+                      route: pathname,
+                      resource,
+                    });
+                    return output;
                   };
 
                   // M10. The claim is made in this transaction, so the record and

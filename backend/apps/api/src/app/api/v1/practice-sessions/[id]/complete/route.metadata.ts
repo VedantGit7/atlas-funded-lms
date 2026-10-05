@@ -5,6 +5,7 @@ export const completeSessionRouteMetadata = {
   permission: "practice.start",
   entitlement: null,
   audit: "none",
+  auditExempt: "learner_activity",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",
   resourceLoader: async ({ tx, ctx, params }) => {

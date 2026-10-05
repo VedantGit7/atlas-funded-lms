@@ -22,6 +22,7 @@ export const postRouteMetadata = {
   permission: "enrollment.create",
   entitlement: null,
   audit: "none",
+  auditExempt: "learner_activity",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "none",
   resourceLoader: async ({ tx, ctx, input }) => {

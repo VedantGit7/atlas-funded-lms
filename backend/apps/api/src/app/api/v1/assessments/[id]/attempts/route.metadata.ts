@@ -5,6 +5,7 @@ export const startAttemptRouteMetadata = {
   permission: "attempt.start",
   entitlement: null,
   audit: "none",
+  auditExempt: "learner_activity",
   rateLimit: "tenantMutation",
   idempotency: "required",
   resourceLoader: async ({ tx, ctx, params }) => {

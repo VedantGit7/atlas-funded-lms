@@ -1,3 +1,4 @@
+import { recordAuditChange } from "../audit-change";
 import {
   buildArchiveReceiptIdempotencyKey,
   buildReadReceiptIdempotencyKey,
@@ -115,7 +116,15 @@ export async function createNotificationTemplate(
     status: input.status ?? "ACTIVE",
   });
 
-  return { data: mapTemplateDto(created) };
+  const dto = mapTemplateDto(created);
+  await recordAuditChange(tx, ctx, {
+    action: "notification_template.created",
+    target: { type: "notification_template", id: created.id },
+    before: null,
+    after: dto,
+  });
+
+  return { data: dto };
 }
 
 export async function updateNotificationTemplate(
@@ -163,7 +172,15 @@ export async function updateNotificationTemplate(
     throw notificationTemplateNotFound();
   }
 
-  return { data: mapTemplateDto(updated) };
+  const dto = mapTemplateDto(updated);
+  await recordAuditChange(tx, ctx, {
+    action: "notification_template.updated",
+    target: { type: "notification_template", id: updated.id },
+    before: mapTemplateDto(existing),
+    after: dto,
+  });
+
+  return { data: dto };
 }
 
 export async function deleteNotificationTemplate(
@@ -177,6 +194,12 @@ export async function deleteNotificationTemplate(
   }
 
   await notificationRepository.deleteTemplate(tx, input.id);
+  await recordAuditChange(tx, ctx, {
+    action: "notification_template.deleted",
+    target: { type: "notification_template", id: input.id },
+    before: mapTemplateDto(existing),
+    after: null,
+  });
   return { data: { id: input.id, deleted: true as const } };
 }
 

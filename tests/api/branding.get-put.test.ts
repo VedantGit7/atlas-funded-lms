@@ -57,7 +57,10 @@ const {
       $queryRaw: vi.fn(async (sql: TemplateStringsArray) =>
         sql.join("").includes("INSERT INTO idempotency_records")
           ? [{ id: "018f0000-0000-7000-8000-000000000088" }]
-          : [],
+          : // The service wrote its audit entry (M7: the route wrapper checks).
+            sql.join("").includes("atlas.audit_written")
+            ? [{ written: "on" }]
+            : [],
       ),
       $queryRawUnsafe: vi.fn().mockResolvedValue([]),
       $executeRaw: vi.fn().mockResolvedValue(0),

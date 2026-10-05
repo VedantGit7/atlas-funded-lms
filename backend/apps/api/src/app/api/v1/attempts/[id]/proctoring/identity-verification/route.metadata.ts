@@ -5,6 +5,7 @@ export const identityVerificationRouteMetadata = {
   permission: "attempt.submit",
   entitlement: null,
   audit: "none",
+  auditExempt: "learner_activity",
   rateLimit: "tenantMutation",
   idempotency: "required",
   resourceLoader: async ({ tx, ctx, params }) => {

@@ -6,6 +6,7 @@ export const routeMetadata = {
   entitlement: "gamification.enable",
   // Dry-run computation: reads only, no state change to audit.
   audit: "none",
+  auditExempt: "read_only",
   rateLimit: "authenticatedTenantRead",
   idempotency: "none",
   resourceLoader: async ({ ctx }) => loadBadgeCatalogResourceRef({ ctx }),

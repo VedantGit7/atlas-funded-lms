@@ -17,7 +17,7 @@ export const getItemRouteMetadata = {
 export const putItemRouteMetadata = {
   permission: "item.update",
   entitlement: null,
-  audit: "none",
+  audit: "required",
   rateLimit: "tenantMutation",
   idempotency: "required",
   resourceLoader: getItemRouteMetadata.resourceLoader,

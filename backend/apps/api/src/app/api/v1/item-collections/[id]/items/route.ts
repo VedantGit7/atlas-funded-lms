@@ -60,9 +60,9 @@ export const DELETE = createTenantRoute<
   params: uuidParamSchema,
   body: DeleteCollectionItemBodySchema,
   output: collectionItemRemoveResponseSchema,
-  handler: async ({ tx, params, input }) => {
+  handler: async ({ tx, ctx, params, input }) => {
     const collectionId = params["id"];
     if (!collectionId) throw new Error("Missing collection id");
-    return itemRegistryService.removeItemFromCollection(tx, collectionId, input);
+    return itemRegistryService.removeItemFromCollection(tx, ctx, collectionId, input);
   },
 });

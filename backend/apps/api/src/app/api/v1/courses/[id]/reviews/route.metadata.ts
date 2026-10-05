@@ -22,6 +22,7 @@ export const postReviewRouteMetadata = {
   permission: "course_review.create",
   entitlement: null,
   audit: "none",
+  auditExempt: "member_content",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "none",
   resourceLoader: async ({ tx, ctx, params }) => {

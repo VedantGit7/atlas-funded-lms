@@ -35,7 +35,10 @@ const {
         Promise.resolve(
           /INSERT INTO idempotency_records/i.test(query.join(" "))
             ? [{ id: "018f0000-0000-7000-8000-000000000030" }]
-            : [],
+            : // createRole (mocked) writes its audit entry (M7).
+              query.join(" ").includes("atlas.audit_written")
+              ? [{ written: "on" }]
+              : [],
         ),
       ),
       $queryRawUnsafe: vi.fn().mockResolvedValue([]),

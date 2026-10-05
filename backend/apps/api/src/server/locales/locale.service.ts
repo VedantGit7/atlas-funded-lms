@@ -1,3 +1,4 @@
+import { recordAuditChange } from "../audit-change";
 import type { TenantTx } from "@atlas/db";
 import type {
   LocaleImportBody,
@@ -112,13 +113,20 @@ export async function listLocaleResources(tx: TenantTx, ctx: ServiceCtx) {
   return { data: rows.map(mapResourceDto) };
 }
 
+/** Per-key changes recorded in one audit entry; a bulk import beyond this records counts only. */
+const AUDITED_KEY_LIMIT = 200;
+
 export async function upsertLocaleResources(
   tx: TenantTx,
   ctx: ServiceCtx,
   locale: string,
   input: UpsertLocaleResourcesBody,
+  source: "edit" | "import" = "edit",
 ) {
   const updated: LocaleResourceDto[] = [];
+  const previous = buildResourceMap(
+    await localeRepository.listResourcesByLocale(tx, ctx.tenantId, locale),
+  );
 
   for (const resource of input.resources) {
     const row = await localeRepository.upsertResource(tx, {
@@ -138,6 +146,28 @@ export async function upsertLocaleResources(
     input.resources.map((resource) => resource.key),
   );
 
+  // Audit M7: translations are tenant content; record what changed, per key.
+  const changes = input.resources
+    .filter((resource) => previous.get(resource.key) !== resource.value)
+    .map((resource) => ({
+      key: resource.key,
+      before: previous.get(resource.key) ?? null,
+      after: resource.value,
+    }));
+  await recordAuditChange(tx, ctx, {
+    action: source === "import" ? "locale.resources.imported" : "locale.resources.updated",
+    target: { type: "locale", id: null },
+    before: null,
+    after: null,
+    metadata: {
+      locale,
+      submitted: input.resources.length,
+      changed: changes.length,
+      changes: changes.slice(0, AUDITED_KEY_LIMIT),
+      ...(changes.length > AUDITED_KEY_LIMIT ? { changesTruncated: true } : {}),
+    },
+  });
+
   return { data: updated };
 }
 
@@ -147,10 +177,18 @@ export async function deleteLocaleResource(
   locale: string,
   key: string,
 ) {
+  const existing = await localeRepository.getResource(tx, ctx.tenantId, locale, key);
   const deleted = await localeRepository.deleteResource(tx, ctx.tenantId, locale, key);
   if (!deleted) {
     throw new Error("Locale resource not found.");
   }
+
+  await recordAuditChange(tx, ctx, {
+    action: "locale.resource.deleted",
+    target: { type: "locale", id: null },
+    before: { locale, key, value: existing?.value ?? null },
+    after: null,
+  });
 
   return {
     data: {
@@ -190,7 +228,16 @@ export async function upsertLocaleMetadata(
     isFallback: input.isFallback ?? existing?.is_fallback ?? false,
   });
 
-  return { data: mapMetadataDto(row) };
+  const dto = mapMetadataDto(row);
+  await recordAuditChange(tx, ctx, {
+    action: existing ? "locale.metadata.updated" : "locale.metadata.created",
+    target: { type: "locale", id: null },
+    before: existing ? mapMetadataDto(existing) : null,
+    after: dto,
+    metadata: { locale },
+  });
+
+  return { data: dto };
 }
 
 export async function deleteLocaleMetadata(tx: TenantTx, ctx: ServiceCtx, locale: string) {
@@ -203,6 +250,13 @@ export async function deleteLocaleMetadata(tx: TenantTx, ctx: ServiceCtx, locale
   }
 
   await localeRepository.deleteMetadata(tx, ctx.tenantId, locale);
+  await recordAuditChange(tx, ctx, {
+    action: "locale.metadata.deleted",
+    target: { type: "locale", id: null },
+    before: mapMetadataDto(existing),
+    after: null,
+    metadata: { locale },
+  });
 
   return {
     data: {
@@ -309,6 +363,7 @@ export async function updateLocaleReview(
   key: string,
   input: UpdateLocaleReviewBody,
 ) {
+  const previous = await localeRepository.getResource(tx, ctx.tenantId, locale, key);
   const row = await localeRepository.updateReviewStatus(tx, {
     tenantId: ctx.tenantId,
     locale,
@@ -320,6 +375,14 @@ export async function updateLocaleReview(
   if (!row) {
     throw new Error("Locale resource not found.");
   }
+
+  await recordAuditChange(tx, ctx, {
+    action: "locale.review.updated",
+    target: { type: "locale", id: null },
+    before: { reviewStatus: previous?.review_status ?? null },
+    after: { reviewStatus: row.review_status },
+    metadata: { locale, key },
+  });
 
   const sourceLocale = await resolveSourceLocale(tx, ctx.tenantId);
   const sourceResource = await localeRepository.getResource(tx, ctx.tenantId, sourceLocale, key);
@@ -389,6 +452,13 @@ export async function runLocaleQaChecksForTenant(tx: TenantTx, ctx: ServiceCtx) 
     })),
   });
 
+  await recordAuditChange(tx, ctx, {
+    action: "locale.qa_checks.run",
+    target: { type: "locale_qa_run", id: run.id },
+    before: null,
+    after: { issueCount: issueDrafts.length, locales: targetLocales },
+  });
+
   return {
     data: {
       run: mapQaRunDto(run),
@@ -417,9 +487,13 @@ export async function importLocaleResources(
   ctx: ServiceCtx,
   input: LocaleImportBody,
 ) {
-  const updated = await upsertLocaleResources(tx, ctx, input.locale, {
-    resources: input.resources,
-  });
+  const updated = await upsertLocaleResources(
+    tx,
+    ctx,
+    input.locale,
+    { resources: input.resources },
+    "import",
+  );
   return {
     data: {
       locale: input.locale,

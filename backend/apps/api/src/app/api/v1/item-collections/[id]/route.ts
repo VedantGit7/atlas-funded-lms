@@ -23,10 +23,10 @@ export const PUT = createTenantRoute<
   params: uuidParamSchema,
   body: UpdateItemCollectionBodySchema,
   output: itemCollectionDetailResponseSchema,
-  handler: async ({ tx, params, input }) => {
+  handler: async ({ tx, ctx, params, input }) => {
     const collectionId = params["id"];
     if (!collectionId) throw new Error("Missing collection id");
-    return itemRegistryService.updateCollection(tx, collectionId, input);
+    return itemRegistryService.updateCollection(tx, ctx, collectionId, input);
   },
 });
 

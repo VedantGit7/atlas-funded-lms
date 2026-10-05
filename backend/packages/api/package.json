@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@atlas/storage": "workspace:*",
+    "@atlas/audit": "workspace:*",
     "@atlas/auth": "workspace:*",
     "@atlas/authorization": "workspace:*",
     "@atlas/core": "workspace:*",

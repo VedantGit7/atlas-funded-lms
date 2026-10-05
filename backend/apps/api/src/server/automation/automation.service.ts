@@ -1,3 +1,4 @@
+import { recordAuditChange } from "../audit-change";
 import type { TenantTx } from "@atlas/db";
 import { outbox } from "@atlas/events";
 import {
@@ -101,7 +102,15 @@ export async function createAutomationRule(
     idempotencyKey: `${ctx.requestId}:${AUTOMATION_RULE_CREATED_EVENT}:${created.id}`,
   });
 
-  return { data: mapRuleDto(created) };
+  const dto = mapRuleDto(created);
+  await recordAuditChange(tx, ctx, {
+    action: "automation_rule.created",
+    target: { type: "automation_rule", id: created.id },
+    before: null,
+    after: dto,
+  });
+
+  return { data: dto };
 }
 
 export async function updateAutomationRule(
@@ -162,7 +171,15 @@ export async function updateAutomationRule(
     idempotencyKey: `${ctx.requestId}:${AUTOMATION_RULE_UPDATED_EVENT}:${updated.id}`,
   });
 
-  return { data: mapRuleDto(updated) };
+  const dto = mapRuleDto(updated);
+  await recordAuditChange(tx, ctx, {
+    action: "automation_rule.updated",
+    target: { type: "automation_rule", id: updated.id },
+    before: mapRuleDto(existing),
+    after: dto,
+  });
+
+  return { data: dto };
 }
 
 export async function deleteAutomationRule(
@@ -176,5 +193,11 @@ export async function deleteAutomationRule(
   }
 
   await automationRepository.deleteRule(tx, input.id);
+  await recordAuditChange(tx, ctx, {
+    action: "automation_rule.deleted",
+    target: { type: "automation_rule", id: input.id },
+    before: mapRuleDto(existing),
+    after: null,
+  });
   return { data: { id: input.id, deleted: true as const } };
 }

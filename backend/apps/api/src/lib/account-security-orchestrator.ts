@@ -1,4 +1,5 @@
 import type { TenantTx } from "@atlas/db";
+import { recordAuditChange } from "../server/audit-change";
 import { publishSecurityEvent } from "../server/notifications/security-notification.service";
 import type { SecurityNotificationEventKey } from "../server/notifications/security-notification.events";
 
@@ -49,6 +50,15 @@ export async function emitSecurityNotification(
   },
 ): Promise<void> {
   const siteUrl = args.siteUrl ?? (await resolveTenantPublicSiteUrl(tx, ctx.tenantId));
+
+  // Audit M7: a change to how the member signs in is on the record, under the
+  // same name as the notification the member receives about it.
+  await recordAuditChange(tx, ctx, {
+    action: args.eventType,
+    target: { type: "membership", id: ctx.actorMembershipId },
+    before: null,
+    after: null,
+  });
 
   await publishSecurityEvent(tx, ctx, {
     eventType: args.eventType,

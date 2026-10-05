@@ -18,7 +18,7 @@ const collectionResourceLoader = async ({
 export const putItemCollectionRouteMetadata = {
   permission: "item_collection.manage",
   entitlement: null,
-  audit: "none",
+  audit: "required",
   rateLimit: "tenantMutation",
   idempotency: "required",
   resourceLoader: collectionResourceLoader,

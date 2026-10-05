@@ -21,7 +21,9 @@ vi.mock("../../../backend/packages/auth/src/platform-operators.repository", () =
 }));
 vi.mock("@atlas/db/global-db", () => ({ withGlobalDb: (fn: (db: object) => unknown) => fn({}) }));
 vi.mock("@atlas/db/with-tenant-tx", () => ({
-  withTenantTx: (_ctx: unknown, fn: (tx: object) => unknown) => fn({}),
+  // The handler stands in for a service that wrote its audit entry (M7).
+  withTenantTx: (_ctx: unknown, fn: (tx: object) => unknown) =>
+    fn({ $queryRaw: async () => [{ written: "on" }] }),
 }));
 vi.mock("@atlas/membership", () => ({
   requireActiveMembership: mocks.membership,

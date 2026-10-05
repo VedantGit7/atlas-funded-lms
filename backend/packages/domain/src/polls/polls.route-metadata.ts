@@ -52,6 +52,7 @@ export const getPollRespondentViewMetadata = {
 export const respondPollMetadata = {
   permission: "enrollment.read",
   audit: "none",
+  auditExempt: "learner_activity",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "none",
   resourceLoader: async ({ ctx }: { ctx: LoaderCtx }) =>

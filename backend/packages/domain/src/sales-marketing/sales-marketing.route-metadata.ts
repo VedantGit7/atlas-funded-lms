@@ -132,6 +132,7 @@ export const getAttributionEventMetadata = {
 export const createAttributionEventMetadata = {
   permission: "profile.update",
   audit: "none",
+  auditExempt: "client_telemetry",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "none",
   resourceLoader: async ({ ctx }: { ctx: LoaderCtx }) =>

@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { createTenantRoute } from "@atlas/api";
 import { archiveOwnMembership, findOwnArchiveStatus } from "@atlas/membership";
+import { recordAuditChange } from "@atlas/api-server/audit-change";
 import { archiveMutationMetadata, archiveReadMetadata } from "./route.metadata";
 
 const archiveResponseSchema = z.object({
@@ -29,10 +30,21 @@ export const POST = createTenantRoute<
   metadata: archiveMutationMetadata,
   output: archiveResponseSchema,
   handler: async ({ tx, ctx }) => {
+    const before = await findOwnArchiveStatus({
+      tx,
+      tenantId: ctx.tenantId,
+      membershipId: ctx.actorMembershipId,
+    });
     const result = await archiveOwnMembership({
       tx,
       tenantId: ctx.tenantId,
       membershipId: ctx.actorMembershipId,
+    });
+    await recordAuditChange(tx, ctx, {
+      action: "membership.self_archived",
+      target: { type: "membership", id: ctx.actorMembershipId },
+      before,
+      after: result,
     });
     return { data: result };
   },
