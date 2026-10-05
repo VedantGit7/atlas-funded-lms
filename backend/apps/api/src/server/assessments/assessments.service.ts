@@ -165,6 +165,41 @@ async function hydrateAssessmentItems(
   return items;
 }
 
+/**
+ * What learners are assessed against (audit M7): the title and type, the
+ * configuration (pass mark, attempts, time limit, proctoring) and which items
+ * count for how many points.
+ */
+async function assessmentSnapshot(
+  tx: TenantTx,
+  assessment: { title: string; assessment_type: string; status: string; config_json: unknown },
+  assessmentId: string,
+) {
+  const items = await assessmentsRepository.listAssessmentItems(tx, assessmentId);
+  return {
+    title: assessment.title,
+    assessmentType: assessment.assessment_type,
+    status: assessment.status,
+    description: readDescription(assessment.config_json),
+    config: extractAssessmentConfig(assessment.config_json),
+    items: items.map((row) => ({
+      itemId: row.item_id,
+      position: row.position,
+      points: Number(row.points),
+      required: readItemRequired(row.config_json),
+    })),
+  };
+}
+
+function assessmentAuditActor(ctx: ServiceCtx) {
+  return {
+    tenantId: ctx.tenantId,
+    actorMembershipId: ctx.actorMembershipId,
+    platformPrincipalId: null,
+    requestId: ctx.requestId,
+  };
+}
+
 export async function listAssessments(tx: TenantTx, ctx: ServiceCtx, query: ListAssessmentsQuery) {
   const admin = await isAdminBypass(tx, ctx);
   const learnerOnly = !admin;
@@ -212,6 +247,14 @@ export async function createAssessment(
   } catch {
     throw assessmentSlugConflict();
   }
+
+  await auditWriter.write(tx, assessmentAuditActor(ctx), {
+    action: "assessment.created",
+    target: { type: "assessment", id: created.id },
+    before: null,
+    after: await assessmentSnapshot(tx, created, created.id),
+    metadata: {},
+  });
 
   return {
     data: {
@@ -310,6 +353,7 @@ export async function updateAssessment(
 ) {
   const assessment = await requireOwnedAssessment(tx, ctx, assessmentId);
   assertAssessmentEditable(assessment.status as AssessmentLifecycleStatus);
+  const before = await assessmentSnapshot(tx, assessment, assessmentId);
 
   if (input.items) {
     validateAssessmentItemPositions(input.items.map((item) => item.position));
@@ -360,6 +404,19 @@ export async function updateAssessment(
   if (!updated) {
     throw assessmentNotFound();
   }
+
+  const after = await assessmentSnapshot(tx, updated, assessmentId);
+  await auditWriter.write(tx, assessmentAuditActor(ctx), {
+    action: "assessment.updated",
+    target: { type: "assessment", id: assessmentId },
+    before,
+    after,
+    metadata: {
+      changedFields: (Object.keys(after) as Array<keyof typeof after>).filter(
+        (key) => JSON.stringify(before[key]) !== JSON.stringify(after[key]),
+      ),
+    },
+  });
 
   return {
     data: {

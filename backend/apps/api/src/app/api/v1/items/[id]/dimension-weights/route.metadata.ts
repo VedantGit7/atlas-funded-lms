@@ -27,7 +27,7 @@ export const getDimensionWeightsRouteMetadata = {
 export const putDimensionWeightsRouteMetadata = {
   permission: "item.update",
   entitlement: null,
-  audit: "none",
+  audit: "required",
   rateLimit: "tenantMutation",
   idempotency: "required",
   resourceLoader: itemResourceLoader,

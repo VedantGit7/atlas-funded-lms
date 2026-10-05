@@ -17,7 +17,7 @@ export const getAssessmentRouteMetadata = {
 export const putAssessmentRouteMetadata = {
   permission: "assessment.update",
   entitlement: null,
-  audit: "none",
+  audit: "required",
   rateLimit: "tenantMutation",
   idempotency: "none",
   resourceLoader: async ({ tx, ctx, params }) => {

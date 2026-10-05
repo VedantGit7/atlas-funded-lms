@@ -5,6 +5,7 @@ export const routeMetadata = {
   permission: "gamification.profile.read",
   entitlement: "gamification.enable",
   audit: "none",
+  auditExempt: "learner_activity",
   rateLimit: "tenantMutation",
   idempotency: "required",
   resourceLoader: async ({ ctx }) => loadSelfGamificationResourceRef({ ctx }),

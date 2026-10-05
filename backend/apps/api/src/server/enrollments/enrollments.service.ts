@@ -1,4 +1,5 @@
 import type { TenantTx } from "@atlas/db";
+import { recordAuditChange } from "../audit-change";
 import { createTenantResourceRef } from "@atlas/authorization";
 import { AtlasHttpError } from "@atlas/core/http/errors";
 import { findMembershipById } from "@atlas/membership/member-admin.repository";
@@ -353,6 +354,14 @@ export async function cancelEnrollmentById(tx: TenantTx, ctx: ServiceCtx, enroll
   if (!cancelled) {
     throw courseNotFound();
   }
+
+  await recordAuditChange(tx, ctx, {
+    action: "enrollment.cancelled",
+    target: { type: "enrollment", id: enrollmentId },
+    before: { status: enrollment.status },
+    after: { status: "cancelled" },
+    metadata: { courseId: enrollment.courseId, membershipId: enrollment.membershipId },
+  });
 
   return {
     data: {

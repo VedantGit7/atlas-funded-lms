@@ -17,6 +17,7 @@ export const mutateMeNewsfeedSaveMetadata = {
   permission: "course.read",
   entitlement: null,
   audit: "none",
+  auditExempt: "own_preferences",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "none",
   resourceLoader: selfResourceLoader,

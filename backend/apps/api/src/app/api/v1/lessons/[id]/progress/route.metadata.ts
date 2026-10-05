@@ -5,6 +5,7 @@ export const postRouteMetadata = {
   permission: "progress.read",
   entitlement: null,
   audit: "none",
+  auditExempt: "learner_activity",
   rateLimit: "tenantMutation",
   idempotency: "none",
   resourceLoader: async ({ tx, ctx, params }) => {

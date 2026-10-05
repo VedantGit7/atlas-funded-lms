@@ -24,7 +24,7 @@ export const listSpacesMetadata = {
 export const manageSpacesMetadata = {
   permission: "community.space.manage",
   entitlement: communityEntitlement,
-  audit: "none",
+  audit: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",
   resourceLoader: loadCommunitySpaceCatalogResourceRef,
@@ -33,7 +33,7 @@ export const manageSpacesMetadata = {
 export const updateSpaceMetadata = {
   permission: "community.space.manage",
   entitlement: communityEntitlement,
-  audit: "none",
+  audit: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",
   resourceLoader: async ({ tx, ctx, input }) =>
@@ -62,6 +62,7 @@ export const joinSpaceMetadata = {
   permission: "community.space.join",
   entitlement: communityEntitlement,
   audit: "none",
+  auditExempt: "learner_activity",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",
   resourceLoader: async ({ tx, ctx, params }) => loadJoinSpaceResourceRef({ tx, ctx, params }),
@@ -81,6 +82,7 @@ export const createSpacePostMetadata = {
   permission: "post.create",
   entitlement: communityEntitlement,
   audit: "none",
+  auditExempt: "member_content",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",
   resourceLoader: async ({ tx, ctx, params }) =>
@@ -102,6 +104,7 @@ export const createPostCommentMetadata = {
   permission: "comment.create",
   entitlement: communityEntitlement,
   audit: "none",
+  auditExempt: "member_content",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",
   resourceLoader: async ({ tx, ctx, params }) => loadPostResourceRefFromParams({ tx, ctx, params }),
@@ -111,6 +114,7 @@ export const updateCommentMetadata = {
   permission: "comment.update",
   entitlement: communityEntitlement,
   audit: "none",
+  auditExempt: "member_content",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",
   resourceLoader: async ({ tx, ctx, params }) =>
@@ -120,7 +124,7 @@ export const updateCommentMetadata = {
 export const deleteCommentMetadata = {
   permission: "comment.delete",
   entitlement: communityEntitlement,
-  audit: "none",
+  audit: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",
   resourceLoader: async ({ tx, ctx, params }) =>
@@ -130,7 +134,7 @@ export const deleteCommentMetadata = {
 export const deletePostMetadata = {
   permission: "post.delete",
   entitlement: communityEntitlement,
-  audit: "none",
+  audit: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",
   resourceLoader: async ({ tx, ctx, params }) =>
@@ -141,6 +145,7 @@ export const createReactionMetadata = {
   permission: "reaction.create",
   entitlement: communityEntitlement,
   audit: "none",
+  auditExempt: "member_content",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",
   resourceLoader: async ({ tx, ctx, input }) =>

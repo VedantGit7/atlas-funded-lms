@@ -16,7 +16,7 @@ export const listNotificationTemplatesMetadata = {
 
 export const mutateNotificationTemplatesMetadata = {
   permission: "notification.template.manage",
-  audit: "none",
+  audit: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",
   resourceLoader: loadNotificationTemplateCatalogResourceRef,
@@ -24,7 +24,7 @@ export const mutateNotificationTemplatesMetadata = {
 
 export const updateNotificationTemplateMetadata = {
   permission: "notification.template.manage",
-  audit: "none",
+  audit: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",
   resourceLoader: async ({ tx, ctx, input }) =>
@@ -37,7 +37,7 @@ export const updateNotificationTemplateMetadata = {
 
 export const deleteNotificationTemplateMetadata = {
   permission: "notification.template.manage",
-  audit: "none",
+  audit: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",
   resourceLoader: async ({ tx, ctx, input }) =>
@@ -59,6 +59,7 @@ export const listMyNotificationsMetadata = {
 export const markNotificationReadMetadata = {
   permission: "notification.read.self",
   audit: "none",
+  auditExempt: "own_preferences",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",
   resourceLoader: async ({ tx, ctx, params }) =>
@@ -72,6 +73,7 @@ export const markNotificationReadMetadata = {
 export const markNotificationArchivedMetadata = {
   permission: "notification.read.self",
   audit: "none",
+  auditExempt: "own_preferences",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",
   resourceLoader: async ({ tx, ctx, params }) =>

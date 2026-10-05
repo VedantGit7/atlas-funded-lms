@@ -16,7 +16,7 @@ export const getItemsRouteMetadata = {
 export const postItemsRouteMetadata = {
   permission: "item.create",
   entitlement: null,
-  audit: "none",
+  audit: "required",
   rateLimit: "tenantMutation",
   idempotency: "required",
   resourceLoader: async ({ ctx }) => loadItemCreateResourceRef({ ctx }),

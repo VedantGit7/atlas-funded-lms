@@ -19,6 +19,7 @@ function loadMembershipCatalogRef(args: { ctx: LoaderCtx }) {
 export const captureDeviceSessionMetadata = {
   permission: "profile.update",
   audit: "none",
+  auditExempt: "client_telemetry",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "none",
   resourceLoader: async ({ ctx }: { ctx: LoaderCtx }) => loadMembershipCatalogRef({ ctx }),

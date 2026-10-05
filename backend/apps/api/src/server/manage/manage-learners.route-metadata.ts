@@ -28,5 +28,7 @@ export const manageLearnerArchiveMetadata = {
   audit: "required",
   rateLimit: "tenantMutation",
   idempotency: "required",
+  // Suspends the learner\'s access: a step-up action (H4).
+  mfa: "required",
   resourceLoader: memberResourceLoader,
 } satisfies RouteMetadata;

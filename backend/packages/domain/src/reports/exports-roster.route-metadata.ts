@@ -66,6 +66,7 @@ export const retryExportRunMetadata = {
 export const previewExportBuilderMetadata = {
   permission: "reports.run",
   audit: "none",
+  auditExempt: "read_only",
   rateLimit: "authenticatedTenantRead",
   idempotency: "none",
   resourceLoader: async ({ ctx }: { ctx: LoaderCtx }) =>

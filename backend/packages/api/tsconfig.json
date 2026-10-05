@@ -14,6 +14,7 @@
   "exclude": ["node_modules", "dist", "build", ".next"],
   "references": [
     { "path": "../storage" },
+    { "path": "../audit" },
     { "path": "../auth" },
     { "path": "../authorization" },
     { "path": "../core" },

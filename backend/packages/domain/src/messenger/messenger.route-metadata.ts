@@ -32,7 +32,7 @@ export const createConversationMetadata = {
 
 export const sendMessageMetadata = {
   permission: "config.update",
-  audit: "none",
+  audit: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "none",
   resourceLoader: async ({ ctx }: { ctx: LoaderCtx }) => loadTenantConfigRef({ ctx }),

@@ -14,6 +14,7 @@ export const postMyDeckRouteMetadata = {
   permission: "practice_deck.manage",
   entitlement: null,
   audit: "none",
+  auditExempt: "learner_activity",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "none",
   resourceLoader: async ({ ctx }) => await loadMyDeckCreateResourceRef({ ctx }),

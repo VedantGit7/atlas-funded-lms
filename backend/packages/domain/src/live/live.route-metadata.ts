@@ -38,6 +38,7 @@ export const listLiveAttendanceMetadata = listLiveSessionsMetadata;
 export const checkInLiveAttendanceMetadata = {
   permission: "enrollment.read",
   audit: "none",
+  auditExempt: "learner_activity",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "none",
   resourceLoader: async ({ ctx }: { ctx: LoaderCtx }) =>

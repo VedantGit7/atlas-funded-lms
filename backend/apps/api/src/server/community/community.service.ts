@@ -1,3 +1,4 @@
+import { recordAuditChange } from "../audit-change";
 import type { TenantTx } from "@atlas/db";
 import { auditWriter } from "@atlas/audit";
 import { findRolePermissionGrant } from "@atlas/authorization";
@@ -429,7 +430,15 @@ export async function createSpace(tx: TenantTx, ctx: ServiceCtx, input: CreateSp
     ...(input.configJson !== undefined ? { configJson: input.configJson } : {}),
   });
 
-  return { data: mapSpaceDto({ ...created, is_member: false }) };
+  const dto = mapSpaceDto({ ...created, is_member: false });
+  await recordAuditChange(tx, ctx, {
+    action: "community.space.created",
+    target: { type: "community_space", id: created.id },
+    before: null,
+    after: { slug: created.slug, name: created.name, visibility: created.visibility },
+  });
+
+  return { data: dto };
 }
 
 export async function updateSpace(tx: TenantTx, ctx: ServiceCtx, input: UpdateSpaceBody) {
@@ -459,6 +468,23 @@ export async function updateSpace(tx: TenantTx, ctx: ServiceCtx, input: UpdateSp
   if (!updated) {
     throw communitySpaceNotFound();
   }
+
+  await recordAuditChange(tx, ctx, {
+    action: "community.space.updated",
+    target: { type: "community_space", id: updated.id },
+    before: {
+      slug: existing.slug,
+      name: existing.name,
+      visibility: existing.visibility,
+      configJson: existing.config_json,
+    },
+    after: {
+      slug: updated.slug,
+      name: updated.name,
+      visibility: updated.visibility,
+      configJson: updated.config_json,
+    },
+  });
 
   const membership = await communityRepository.findGroupMembership(
     tx,
@@ -722,6 +748,14 @@ export async function deleteComment(tx: TenantTx, ctx: ServiceCtx, commentId: st
         metadata: { moderationPath: true },
       },
     );
+  } else {
+    // The author removing their own comment: kept on the record (audit M7).
+    await recordAuditChange(tx, ctx, {
+      action: "community.comment.deleted_by_author",
+      target: { type: "comment", id: commentId },
+      before: { deleted: false },
+      after: { deleted: true },
+    });
   }
 
   return { data: { id: commentId, deleted: true as const } };
@@ -812,6 +846,14 @@ export async function deletePost(tx: TenantTx, ctx: ServiceCtx, postId: string) 
         metadata: { moderationPath: true },
       },
     );
+  } else {
+    // The author removing their own post: kept on the record (audit M7).
+    await recordAuditChange(tx, ctx, {
+      action: "community.post.deleted_by_author",
+      target: { type: "post", id: postId },
+      before: { deleted: false },
+      after: { deleted: true },
+    });
   }
 
   return { data: { id: postId, deleted: true as const } };

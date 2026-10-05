@@ -15,6 +15,7 @@ export const avatarMutationMetadata = {
   permission: "profile.update",
   entitlement: null,
   audit: "none",
+  auditExempt: "own_preferences",
   rateLimit: "tenantMutation",
   idempotency: "required",
   resourceLoader: selfAvatarResourceLoader,

@@ -4,7 +4,7 @@ import { loadModuleParentCourseResourceRef } from "../../../../../../../server/c
 export const postRouteMetadata = {
   permission: "course.update",
   entitlement: null,
-  audit: "none",
+  audit: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",
   resourceLoader: async ({ tx, ctx, params }) => {

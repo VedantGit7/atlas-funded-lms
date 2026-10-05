@@ -4,7 +4,7 @@ import { loadEnrollmentManageResourceRef } from "../../../../../server/enrollmen
 export const deleteEnrollmentRouteMetadata = {
   permission: "enrollment.manage",
   entitlement: null,
-  audit: "none",
+  audit: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "none",
   resourceLoader: async ({ tx, ctx, params }) => {

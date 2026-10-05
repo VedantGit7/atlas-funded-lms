@@ -21,7 +21,8 @@ vi.mock("@atlas/db/with-tenant-tx", () => ({
   withTenantTx: async (_ctx: unknown, fn: (tx: object) => unknown) => {
     state.sequence.push("begin");
     try {
-      const result = await fn({});
+      // The handler stands in for a service that wrote its audit entry (M7).
+      const result = await fn({ $queryRaw: async () => [{ written: "on" }] });
       state.sequence.push("commit");
       if (state.failCommit) throw new Error("Commit acknowledgement lost");
       return result;

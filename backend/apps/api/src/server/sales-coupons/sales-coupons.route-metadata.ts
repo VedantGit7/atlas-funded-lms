@@ -46,6 +46,7 @@ export const mutateCouponsMetadata = {
 export const learnerCouponMetadata = {
   permission: "enrollment.create",
   audit: "none",
+  auditExempt: "read_only",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "none",
   resourceLoader: async ({ ctx }: { ctx: LoaderCtx }) => loadSelfEnrollmentRef({ ctx }),
@@ -57,9 +58,11 @@ export const learnerCouponMetadata = {
  * one, and audited because it creates a financial record.
  */
 export const checkoutPurchaseMetadata = {
-  ...learnerCouponMetadata,
+  permission: "enrollment.create",
   audit: "required",
+  rateLimit: "authenticatedTenantWrite",
   idempotency: "required",
+  resourceLoader: async ({ ctx }: { ctx: LoaderCtx }) => loadSelfEnrollmentRef({ ctx }),
 } satisfies RouteMetadata;
 
 export const learnerCouponReadMetadata = {

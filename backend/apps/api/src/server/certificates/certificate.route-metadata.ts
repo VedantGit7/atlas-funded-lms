@@ -82,6 +82,7 @@ export const renderCertificatePreviewMetadata = {
   permission: "certificate_template.read",
   entitlement: "certification.enable",
   audit: "none",
+  auditExempt: "read_only",
   rateLimit: "authenticatedTenantRead",
   idempotency: "none",
   resourceLoader: loadCertificateTemplateCatalogResourceRef,
@@ -141,6 +142,7 @@ export const certificateWalletPassMetadata = {
   permission: "certificate.read",
   entitlement: "certification.enable",
   audit: "none",
+  auditExempt: "learner_activity",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "none",
   resourceLoader: async ({ tx, ctx, params }) =>

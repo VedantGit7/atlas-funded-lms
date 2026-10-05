@@ -16,7 +16,7 @@ export const getItemCollectionsRouteMetadata = {
 export const postItemCollectionsRouteMetadata = {
   permission: "item_collection.manage",
   entitlement: null,
-  audit: "none",
+  audit: "required",
   rateLimit: "tenantMutation",
   idempotency: "required",
   resourceLoader: async ({ ctx }) => loadItemCollectionManageResourceRef({ ctx }),

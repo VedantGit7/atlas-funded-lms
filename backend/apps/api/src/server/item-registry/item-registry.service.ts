@@ -145,6 +145,41 @@ async function hydrateItem(tx: TenantTx, itemId: string) {
   return mapItem(item, options);
 }
 
+function auditActor(ctx: ServiceCtx) {
+  return {
+    tenantId: ctx.tenantId,
+    actorMembershipId: ctx.actorMembershipId,
+    platformPrincipalId: null,
+    requestId: ctx.requestId,
+  };
+}
+
+/**
+ * What a learner is marked against (audit M7): the stem, the answer key and
+ * which options are correct. Options are replaced on every edit, so they are
+ * recorded by position and content rather than by id.
+ */
+function itemSnapshot(item: ReturnType<typeof mapItem>) {
+  return {
+    itemTypeKey: item.itemTypeKey,
+    status: item.status,
+    tags: item.tags,
+    contentJson: item.contentJson,
+    answerKeyJson: item.answerKeyJson,
+    options: (item.options ?? []).map((option) => ({
+      position: option.position,
+      optionJson: option.optionJson,
+      isCorrect: option.isCorrect,
+    })),
+  };
+}
+
+function changedKeys(before: Record<string, unknown>, after: Record<string, unknown>): string[] {
+  return Object.keys(after).filter(
+    (key) => key !== "updatedAt" && JSON.stringify(before[key]) !== JSON.stringify(after[key]),
+  );
+}
+
 async function requireOwnedItem(tx: TenantTx, ctx: ServiceCtx, itemId: string) {
   const item = await itemRegistryRepository.findItemById(tx, itemId);
 
@@ -201,7 +236,16 @@ export const itemRegistryService = {
       await itemRegistryRepository.replaceItemOptions(tx, ctx.tenantId, item.id, input.options);
     }
 
-    return { data: await hydrateItem(tx, item.id) };
+    const created = await hydrateItem(tx, item.id);
+    await auditWriter.write(tx, auditActor(ctx), {
+      action: "item.created",
+      target: { type: "item", id: item.id },
+      before: null,
+      after: itemSnapshot(created),
+      metadata: {},
+    });
+
+    return { data: created };
   },
 
   async getItem(tx: TenantTx, itemId: string) {
@@ -210,6 +254,7 @@ export const itemRegistryService = {
 
   async updateItem(tx: TenantTx, ctx: ServiceCtx, itemId: string, input: UpdateItemInput) {
     const existing = await requireOwnedItem(tx, ctx, itemId);
+    const before = itemSnapshot(await hydrateItem(tx, itemId));
 
     const updateData: Parameters<typeof itemRegistryRepository.updateItem>[2] = {
       existingExplanationJson: existing.explanation_json,
@@ -227,7 +272,22 @@ export const itemRegistryService = {
       await itemRegistryRepository.replaceItemOptions(tx, ctx.tenantId, itemId, input.options);
     }
 
-    return { data: await hydrateItem(tx, itemId) };
+    // Audit M7: answer-key edits were untraceable, which matters for disputes.
+    const updated = await hydrateItem(tx, itemId);
+    const after = itemSnapshot(updated);
+    const changed = changedKeys(before, after);
+    await auditWriter.write(tx, auditActor(ctx), {
+      action: "item.updated",
+      target: { type: "item", id: itemId },
+      before,
+      after,
+      metadata: {
+        changedFields: changed,
+        answerKeyChanged: changed.includes("answerKeyJson") || changed.includes("options"),
+      },
+    });
+
+    return { data: updated };
   },
 
   async deleteItem(tx: TenantTx, ctx: ServiceCtx, itemId: string) {
@@ -292,6 +352,12 @@ export const itemRegistryService = {
       throw duplicateDimensionWeight();
     }
 
+    const weightsOf = (rows: Array<{ dimension_id: string; weight: { toString(): string } }>) =>
+      rows
+        .map((row) => ({ dimensionId: row.dimension_id, weight: row.weight.toString() }))
+        .sort((a, b) => a.dimensionId.localeCompare(b.dimensionId));
+    const before = weightsOf(await itemRegistryRepository.listDimensionWeights(tx, itemId));
+
     await itemRegistryRepository.replaceDimensionWeights(
       tx,
       ctx.tenantId,
@@ -301,6 +367,14 @@ export const itemRegistryService = {
         weight: weight.weight,
       })),
     );
+
+    await auditWriter.write(tx, auditActor(ctx), {
+      action: "item.dimension_weights.replaced",
+      target: { type: "item", id: itemId },
+      before: { weights: before },
+      after: { weights: weightsOf(await itemRegistryRepository.listDimensionWeights(tx, itemId)) },
+      metadata: {},
+    });
 
     return this.listDimensionWeights(tx, itemId);
   },
@@ -325,7 +399,16 @@ export const itemRegistryService = {
         metadataJson: input.metadataJson,
       });
 
-      return { data: mapCollection({ ...collection, item_count: 0 }) };
+      const created = mapCollection({ ...collection, item_count: 0 });
+      await auditWriter.write(tx, auditActor(ctx), {
+        action: "item_collection.created",
+        target: { type: "item_collection", id: collection.id },
+        before: null,
+        after: created,
+        metadata: {},
+      });
+
+      return { data: created };
     } catch (error) {
       if (isUniqueViolation(error)) {
         throw itemCollectionSlugConflict();
@@ -335,7 +418,12 @@ export const itemRegistryService = {
     }
   },
 
-  async updateCollection(tx: TenantTx, collectionId: string, input: UpdateItemCollectionInput) {
+  async updateCollection(
+    tx: TenantTx,
+    ctx: ServiceCtx,
+    collectionId: string,
+    input: UpdateItemCollectionInput,
+  ) {
     const existing = await itemRegistryRepository.findCollectionById(tx, collectionId);
 
     if (!existing) {
@@ -356,7 +444,17 @@ export const itemRegistryService = {
         updateData,
       );
 
-      return { data: mapCollection(collection) };
+      const updated = mapCollection(collection);
+      const before = mapCollection(existing);
+      await auditWriter.write(tx, auditActor(ctx), {
+        action: "item_collection.updated",
+        target: { type: "item_collection", id: collectionId },
+        before,
+        after: updated,
+        metadata: { changedFields: changedKeys(before, updated) },
+      });
+
+      return { data: updated };
     } catch (error) {
       if (isUniqueViolation(error)) {
         throw itemCollectionSlugConflict();
@@ -422,6 +520,18 @@ export const itemRegistryService = {
         ...(input.weight !== undefined ? { weight: input.weight } : {}),
       });
 
+      await auditWriter.write(tx, auditActor(ctx), {
+        action: "item_collection.item_added",
+        target: { type: "item_collection", id: collectionId },
+        before: null,
+        after: {
+          itemId: row.item_id,
+          position: row.position,
+          weight: row.weight?.toString() ?? null,
+        },
+        metadata: {},
+      });
+
       return {
         data: {
           id: row.id,
@@ -442,6 +552,7 @@ export const itemRegistryService = {
 
   async removeItemFromCollection(
     tx: TenantTx,
+    ctx: ServiceCtx,
     collectionId: string,
     input: DeleteCollectionItemInput,
   ) {
@@ -451,7 +562,24 @@ export const itemRegistryService = {
       throw itemCollectionNotFound();
     }
 
+    const removed = (await itemRegistryRepository.listCollectionItems(tx, collectionId)).find(
+      (row) => row.item_id === input.itemId,
+    );
     await itemRegistryRepository.removeItemFromCollection(tx, collectionId, input.itemId);
+
+    await auditWriter.write(tx, auditActor(ctx), {
+      action: "item_collection.item_removed",
+      target: { type: "item_collection", id: collectionId },
+      before: removed
+        ? {
+            itemId: removed.item_id,
+            position: removed.position,
+            weight: removed.weight?.toString() ?? null,
+          }
+        : { itemId: input.itemId },
+      after: null,
+      metadata: {},
+    });
 
     return {
       data: {

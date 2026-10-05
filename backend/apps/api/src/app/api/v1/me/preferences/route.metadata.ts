@@ -24,6 +24,7 @@ export const putRouteMetadata = {
   permission: "profile.update",
   entitlement: null,
   audit: "none",
+  auditExempt: "own_preferences",
   rateLimit: "tenantMutation",
   idempotency: "required",
   resourceLoader: selfPreferencesResourceLoader,

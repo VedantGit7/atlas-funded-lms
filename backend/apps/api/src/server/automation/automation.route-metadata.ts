@@ -14,7 +14,7 @@ export const listAutomationRulesMetadata = {
 
 export const mutateAutomationRulesMetadata = {
   permission: "automation.rule.manage",
-  audit: "none",
+  audit: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",
   resourceLoader: loadAutomationRuleCatalogResourceRef,
@@ -22,7 +22,7 @@ export const mutateAutomationRulesMetadata = {
 
 export const updateAutomationRuleMetadata = {
   permission: "automation.rule.manage",
-  audit: "none",
+  audit: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",
   resourceLoader: async ({ tx, ctx, input }) =>
@@ -35,7 +35,7 @@ export const updateAutomationRuleMetadata = {
 
 export const deleteAutomationRuleMetadata = {
   permission: "automation.rule.manage",
-  audit: "none",
+  audit: "required",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "required",
   resourceLoader: async ({ tx, ctx, input }) =>

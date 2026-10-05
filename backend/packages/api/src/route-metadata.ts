@@ -32,6 +32,33 @@ export type EntitlementUsageFn<TInput = unknown> = (args: {
   input: TInput;
 }) => number;
 
+/**
+ * Why a mutation writes no audit entry (audit M7).
+ *
+ * Every tenant mutation declares `audit: "required"` unless it is one of these,
+ * and `pnpm ci:audit-metadata` holds that rule. They are high-volume actions a
+ * member takes on their own account, recorded in their own tables, where an
+ * audit entry would add volume and no accountability:
+ *
+ * - `learner_activity`: the member's own learning (attempts, practice,
+ *   progress, polls, attendance, self-enrolment), kept in its domain tables;
+ * - `member_content`: posts, comments, reactions, reviews and messages the
+ *   member writes, where the row records its author and time;
+ * - `own_preferences`: the member's own non-security settings and saved or
+ *   read state (avatar, preferences, notification state, bookmarks);
+ * - `read_only`: a POST that computes a result and changes nothing;
+ * - `client_telemetry`: client-reported signals stored as events.
+ *
+ * Never available to a sensitive permission (roles, membership, payments,
+ * data export, …); the guard refuses it there.
+ */
+export type AuditExemption =
+  | "learner_activity"
+  | "member_content"
+  | "own_preferences"
+  | "read_only"
+  | "client_telemetry";
+
 export type RouteMetadata<TInput = unknown> = {
   public?: false;
   permission: string;
@@ -43,7 +70,13 @@ export type RouteMetadata<TInput = unknown> = {
    */
   entitlementUsage?: EntitlementUsageFn<TInput>;
   resourceLoader?: ResourceLoaderFn<TInput>;
+  /**
+   * "required": the mutation is on the audit record. The route wrapper checks
+   * that the handler wrote an entry and records one itself if not (M7).
+   */
   audit: "none" | "required";
+  /** Required on a mutation declaring audit: "none"; see AuditExemption. */
+  auditExempt?: AuditExemption;
   rateLimit: string;
   idempotency: "none" | "required";
   /**

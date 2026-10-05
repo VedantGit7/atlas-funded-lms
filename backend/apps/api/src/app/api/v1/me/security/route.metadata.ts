@@ -14,7 +14,7 @@ const selfSecurityResourceLoader: RouteMetadata["resourceLoader"] = ({ ctx }) =>
 export const securityMutationMetadata = {
   permission: "profile.update",
   entitlement: null,
-  audit: "none",
+  audit: "required",
   rateLimit: "tenantMutation",
   idempotency: "required",
   resourceLoader: selfSecurityResourceLoader,

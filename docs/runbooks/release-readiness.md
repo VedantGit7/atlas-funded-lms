@@ -45,7 +45,7 @@ Writes `release-evidence.json` with:
 | `pnpm ci:permission-metadata`      | Protected routes declare permission     |
 | `pnpm ci:entitlement-metadata`     | Tenant routes declare entitlement field |
 | `pnpm ci:prisma-boundary`          | Prisma only in `@atlas/db`              |
-| `pnpm ci:audit-metadata`           | Sensitive routes require audit          |
+| `pnpm ci:audit-metadata`           | Mutations audited or exempt with reason |
 | `pnpm ci:outbox-metadata`          | Side-effect routes require outbox       |
 | `pnpm ci:tenant-resource-registry` | IDOR registry completeness              |
 | `pnpm ci:forbidden-scope`          | No Phase 2–4 product scope              |

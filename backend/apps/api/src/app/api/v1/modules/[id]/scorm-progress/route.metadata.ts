@@ -34,6 +34,7 @@ export const putRouteMetadata = {
   permission: "progress.read",
   entitlement: null,
   audit: "none",
+  auditExempt: "learner_activity",
   rateLimit: "tenantMutation",
   idempotency: "none",
   resourceLoader,

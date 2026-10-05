@@ -18,6 +18,7 @@ export const listCustomFieldSegmentsMetadata = {
 export const previewCustomFieldSegmentMetadata = {
   permission: "reports.library.view",
   audit: "none",
+  auditExempt: "read_only",
   rateLimit: "authenticatedTenantRead",
   idempotency: "none",
   resourceLoader: async ({ ctx }: { ctx: LoaderCtx }) =>

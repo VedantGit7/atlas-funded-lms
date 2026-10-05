@@ -107,6 +107,8 @@ describe("F03 current authorization on actual tenant-wrapper retries", () => {
     state.membershipActive = true;
     state.record = null;
     state.query.mockImplementation(async (sql: TemplateStringsArray, ...values: unknown[]) => {
+      // The handler stands in for a service that wrote its audit entry (M7).
+      if (sql.join("").includes("atlas.audit_written")) return [{ written: "on" }];
       if (sql.join("").includes("INSERT INTO")) {
         if (state.record) return [];
         state.record = {
@@ -170,5 +172,10 @@ describe("F03 current authorization on actual tenant-wrapper retries", () => {
     expect(state.resource).toHaveBeenCalledTimes(2);
     expect(state.consume).toHaveBeenCalledOnce();
     expect(state.handler).toHaveBeenCalledOnce();
+    // M7: the audit check runs with the handler, not again on the replay.
+    const auditChecks = state.query.mock.calls.filter((call) =>
+      (call[0] as TemplateStringsArray).join("").includes("atlas.audit_written"),
+    );
+    expect(auditChecks).toHaveLength(1);
   });
 });
