@@ -103,6 +103,7 @@ describe("local-mock storage provider integration", () => {
 
     expect(metadata).toEqual({
       contentType: "image/png",
+      contentDisposition: null,
       sizeBytes: 2048,
       checksumSha256: "a".repeat(64),
     });

@@ -49,6 +49,7 @@ export class LocalMockStorageProvider implements StorageProvider {
 
     this.objects.set(`${input.bucket}/${input.key}`, {
       contentType: input.contentType,
+      contentDisposition: input.contentDisposition ?? null,
       sizeBytes: input.sizeBytes,
       checksumSha256: input.checksumSha256 ?? null,
     });
@@ -58,6 +59,7 @@ export class LocalMockStorageProvider implements StorageProvider {
       expiresAt,
       requiredHeaders: {
         "content-type": input.contentType,
+        ...(input.contentDisposition ? { "content-disposition": input.contentDisposition } : {}),
       },
     };
   }
@@ -88,12 +90,14 @@ export class LocalMockStorageProvider implements StorageProvider {
     key: string;
     body: Buffer;
     contentType: string;
+    contentDisposition?: string | null;
   }): Promise<void> {
     await Promise.resolve();
     const objectKey = `${input.bucket}/${input.key}`;
     this.bodies.set(objectKey, input.body);
     this.objects.set(objectKey, {
       contentType: input.contentType,
+      contentDisposition: input.contentDisposition ?? null,
       sizeBytes: input.body.byteLength,
       checksumSha256: null,
     });

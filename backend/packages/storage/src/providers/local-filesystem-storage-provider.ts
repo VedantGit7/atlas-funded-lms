@@ -29,6 +29,7 @@ async function removeIfPresent(file: string): Promise<void> {
 
 type StoredObjectMeta = {
   contentType: string;
+  contentDisposition?: string | null;
   sizeBytes: number;
   checksumSha256?: string | null;
 };
@@ -110,6 +111,7 @@ export class LocalFilesystemStorageProvider implements StorageProvider {
       expiresAt,
       requiredHeaders: {
         "content-type": input.contentType,
+        ...(input.contentDisposition ? { "content-disposition": input.contentDisposition } : {}),
       },
     });
   }
@@ -139,6 +141,7 @@ export class LocalFilesystemStorageProvider implements StorageProvider {
       const meta = await this.readMeta(input.bucket, input.key);
       return {
         contentType: meta?.contentType ?? "application/octet-stream",
+        contentDisposition: meta?.contentDisposition ?? null,
         sizeBytes: fileStat.size,
         checksumSha256: meta?.checksumSha256 ?? null,
       };
@@ -162,6 +165,7 @@ export class LocalFilesystemStorageProvider implements StorageProvider {
     key: string;
     body: Buffer;
     contentType: string;
+    contentDisposition?: string | null;
   }): Promise<void> {
     await this.putObjectStream({
       ...input,
@@ -186,6 +190,7 @@ export class LocalFilesystemStorageProvider implements StorageProvider {
         temporaryMeta,
         JSON.stringify({
           contentType: input.contentType,
+          contentDisposition: input.contentDisposition ?? null,
           sizeBytes: input.sizeBytes,
           checksumSha256: null,
         }),

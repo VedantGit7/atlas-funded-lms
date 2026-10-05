@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { clientApi } from "../../../../lib/client-api";
 
 export const collapseEase = "cubic-bezier(0.4, 0, 0.2, 1)";
 
@@ -80,6 +81,57 @@ export function inferBrandingContentType(file: File): string | null {
 
   const extension = file.name.split(".").pop()?.toLowerCase() ?? "";
   return BRANDING_MIME_BY_EXTENSION[extension] ?? null;
+}
+
+export type BrandingAssetPurpose = "branding.logo" | "branding.favicon" | "branding.og-image";
+
+/**
+ * Upload a branding image: get a signed URL, PUT the file, then confirm it so
+ * the server checks the bytes (and sanitizes an SVG) before the asset can be
+ * used (audit M8). Without the confirm the asset never becomes usable.
+ */
+export async function uploadBrandingAsset(args: {
+  file: File;
+  purpose: BrandingAssetPurpose;
+  contentType: string;
+  variant?: "light" | "dark";
+  idempotencyPrefix: string;
+}): Promise<{ assetId: string; url: string | null }> {
+  const signed = await clientApi.post<{
+    data: {
+      asset: { id: string };
+      upload: { url: string; requiredHeaders: Record<string, string> };
+    };
+  }>(
+    "/api/v1/branding/assets/upload",
+    {
+      purpose: args.purpose,
+      fileName: args.file.name,
+      contentType: args.contentType,
+      sizeBytes: args.file.size,
+      ...(args.variant ? { variant: args.variant } : {}),
+    },
+    args.idempotencyPrefix,
+    { silent: true },
+  );
+
+  const stored = await fetch(signed.data.upload.url, {
+    method: "PUT",
+    headers: signed.data.upload.requiredHeaders,
+    body: args.file,
+  });
+  if (!stored.ok) {
+    throw new Error("The file could not be uploaded. Please try again.");
+  }
+
+  const confirmed = await clientApi.post<{
+    data: { asset: { id: string }; url: string | null };
+  }>(
+    "/api/v1/branding/assets/confirm",
+    { assetReferenceId: signed.data.asset.id },
+    `${args.idempotencyPrefix}-confirm`,
+  );
+  return { assetId: confirmed.data.asset.id, url: confirmed.data.url };
 }
 
 const RADIUS_KEYS = ["none", "sm", "md", "lg", "xl"] as const;

@@ -5,6 +5,13 @@ import { assertTenantKeyPrefix } from "./key-builder";
 import { getStorageProvider } from "./providers/storage-provider-factory";
 import { parseStorageEnv } from "./schemas/storage-env";
 
+/** The purposes a branding reference (logo, favicon, OG and about-school image) may point at. */
+export const BRANDING_ASSET_PURPOSES: ReadonlySet<string> = new Set([
+  "branding.logo",
+  "branding.favicon",
+  "branding.og-image",
+]);
+
 type ReadyAssetRow = {
   bucket: string;
   object_key: string;
@@ -38,7 +45,8 @@ export async function resolveBrandingAssetUrl(
   }
 
   const asset = await findAssetReferenceById(tx, assetReferenceId);
-  if (!asset || asset.status !== "READY") {
+  // Only a confirmed branding upload can become a public brand image (audit M8).
+  if (!asset || asset.status !== "READY" || !BRANDING_ASSET_PURPOSES.has(asset.purpose)) {
     return null;
   }
 

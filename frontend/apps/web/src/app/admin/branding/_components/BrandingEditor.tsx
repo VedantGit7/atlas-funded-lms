@@ -40,6 +40,7 @@ import {
   sectionDescClassName,
   sectionTitleClassName,
   statusBannerClassName,
+  uploadBrandingAsset,
 } from "./branding-admin-shared";
 
 type BrandingView = z.infer<typeof TenantBrandingViewSchema>;
@@ -246,31 +247,13 @@ export function BrandingEditor({
         return;
       }
 
-      const purpose = variant === "favicon" ? "branding.favicon" : "branding.logo";
-      const uploadResponse = await clientApi.post<{
-        data: {
-          asset: { id: string };
-          upload: { url: string; requiredHeaders: Record<string, string> };
-        };
-      }>(
-        "/api/v1/branding/assets/upload",
-        {
-          purpose,
-          fileName: file.name,
-          contentType,
-          sizeBytes: file.size,
-          variant: variant === "favicon" ? undefined : variant,
-        },
-        `branding-upload-${variant}`,
-      );
-
-      await fetch(uploadResponse.data.upload.url, {
-        method: "PUT",
-        headers: uploadResponse.data.upload.requiredHeaders,
-        body: file,
+      const { assetId } = await uploadBrandingAsset({
+        file,
+        purpose: variant === "favicon" ? "branding.favicon" : "branding.logo",
+        contentType,
+        ...(variant === "favicon" ? {} : { variant }),
+        idempotencyPrefix: `branding-upload-${variant}`,
       });
-
-      const assetId = uploadResponse.data.asset.id;
       if (variant === "light") {
         setLogoLightRef(assetId);
         await saveBrandingDraft({ logoLightRef: assetId });

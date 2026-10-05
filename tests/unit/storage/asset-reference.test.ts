@@ -11,14 +11,17 @@ const {
   findAssetReferenceByIdMock,
   markAssetReferenceReadyMock,
   softDeleteAssetReferenceMock,
+  updateSizeMock,
 } = vi.hoisted(() => ({
   insertPendingAssetReferenceMock: vi.fn(),
   findAssetReferenceByIdMock: vi.fn(),
   markAssetReferenceReadyMock: vi.fn(),
   softDeleteAssetReferenceMock: vi.fn(),
+  updateSizeMock: vi.fn(),
 }));
 
 vi.mock("@atlas/storage/asset-reference.repository", () => ({
+  updatePendingAssetReferenceSizeBytes: (...args: unknown[]) => updateSizeMock(...args),
   insertPendingAssetReference: (...args: unknown[]) => insertPendingAssetReferenceMock(...args),
   findAssetReferenceById: (...args: unknown[]) => findAssetReferenceByIdMock(...args),
   markAssetReferenceReady: (...args: unknown[]) => markAssetReferenceReadyMock(...args),
@@ -62,12 +65,19 @@ function pendingAssetRow() {
   };
 }
 
+/** A real PNG signature, so confirm's content check (audit M8) passes. */
+const PNG_BYTES = Buffer.concat([
+  Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+  Buffer.alloc(56),
+]);
+
 function createProvider(
   metadata: {
     contentType: string;
     sizeBytes: number;
     checksumSha256?: string | null;
   } | null,
+  body: Buffer | null = PNG_BYTES,
 ): StorageProvider {
   return {
     createSignedUploadUrl: vi.fn(),
@@ -81,9 +91,9 @@ function createProvider(
           }
         : null,
     ),
-    getObjectBody: vi.fn().mockResolvedValue(null),
+    getObjectBody: vi.fn().mockResolvedValue(body),
     putObject: vi.fn().mockResolvedValue(undefined),
-    deleteObject: vi.fn(),
+    deleteObject: vi.fn().mockResolvedValue(undefined),
   };
 }
 
@@ -268,5 +278,92 @@ describe("asset reference lifecycle", () => {
 
     expect(softDeleteAssetReferenceMock).toHaveBeenCalledWith(tx, ASSET_ID);
     expect(result.data.status).toBe("DELETED");
+  });
+});
+
+/** Audit M8: confirm checks the bytes, and SVG is sanitized before use. */
+describe("upload content verification", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    process.env.STORAGE_PROVIDER = "local-mock";
+    process.env.R2_BUCKET_NAME = "test-bucket";
+    markAssetReferenceReadyMock.mockImplementation(async (_tx, input) => ({
+      ...pendingAssetRow(),
+      status: "READY",
+      checksum_sha256: input.checksumSha256 ?? null,
+    }));
+  });
+
+  it("refuses and deletes an upload whose bytes are not the declared type", async () => {
+    findAssetReferenceByIdMock.mockResolvedValue(pendingAssetRow());
+    const html = Buffer.from("<!doctype html><html><script>alert(1)</script></html>");
+    const provider = createProvider({ contentType: "image/png", sizeBytes: 50_000 }, html);
+
+    await expect(
+      confirmAssetUpload(tx, provider, { tenantId: TENANT_ID }, { assetReferenceId: ASSET_ID }),
+    ).rejects.toThrow("ASSET_CONTENT_MISMATCH");
+
+    expect(provider.deleteObject).toHaveBeenCalledWith({
+      bucket: "test-bucket",
+      key: pendingAssetRow().object_key,
+    });
+    expect(markAssetReferenceReadyMock).not.toHaveBeenCalled();
+  });
+
+  it("stores a sanitized SVG, as a download, with its new size and checksum", async () => {
+    const svgRow = {
+      ...pendingAssetRow(),
+      file_name: "logo.svg",
+      content_type: "image/svg+xml",
+      object_key: `tenants/${TENANT_ID}/branding/logos/logo.svg`,
+      size_bytes: 120,
+    };
+    findAssetReferenceByIdMock.mockResolvedValue(svgRow);
+    const evil = Buffer.from(
+      '<svg xmlns="http://www.w3.org/2000/svg" onload="alert(1)"><script>alert(2)</script><rect width="1" height="1"/></svg>',
+    );
+    const provider = createProvider({ contentType: "image/svg+xml", sizeBytes: 120 }, evil);
+
+    await confirmAssetUpload(tx, provider, { tenantId: TENANT_ID }, { assetReferenceId: ASSET_ID });
+
+    const [write] = vi.mocked(provider.putObject).mock.calls[0] ?? [];
+    const stored = write?.body.toString("utf8") ?? "";
+    expect(stored).toContain("<rect");
+    expect(stored).not.toMatch(/script|onload/i);
+    expect(write?.contentDisposition).toMatch(/^attachment;/);
+    expect(updateSizeMock).toHaveBeenCalledWith(tx, ASSET_ID, write?.body.byteLength);
+    expect(markAssetReferenceReadyMock.mock.calls[0]?.[1]).toMatchObject({
+      checksumSha256: expect.stringMatching(/^[a-f0-9]{64}$/),
+    });
+  });
+
+  it("signs a download disposition into uploads of types that must not render inline", async () => {
+    const provider = createProvider(null);
+    vi.mocked(provider.createSignedUploadUrl).mockResolvedValue({
+      url: "https://upload.example/signed",
+      expiresAt: new Date(),
+      requiredHeaders: {},
+    });
+
+    insertPendingAssetReferenceMock.mockImplementation(async (_tx, input) => ({
+      ...pendingAssetRow(),
+      file_name: input.fileName,
+      content_type: input.contentType,
+    }));
+    await createPendingAssetReferenceWithUpload(
+      tx,
+      provider,
+      { tenantId: TENANT_ID },
+      {
+        ...uploadInput,
+        fileName: "logo.svg",
+        contentType: "image/svg+xml",
+      },
+    );
+    await createPendingAssetReferenceWithUpload(tx, provider, { tenantId: TENANT_ID }, uploadInput);
+
+    const calls = vi.mocked(provider.createSignedUploadUrl).mock.calls;
+    expect(calls[0]?.[0].contentDisposition).toMatch(/^attachment; filename="logo.svg"/);
+    expect(calls[1]?.[0].contentDisposition).toBeNull();
   });
 });

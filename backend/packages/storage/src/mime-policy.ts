@@ -9,6 +9,12 @@ const BRANDING_MIME_TYPES = new Set([
   "image/vnd.microsoft.icon",
 ]);
 
+/**
+ * Social platforms do not render SVG previews, and an OG image is always
+ * public, so it is raster only (audit M8).
+ */
+const OG_IMAGE_MIME_TYPES = new Set(["image/png", "image/jpeg", "image/webp"]);
+
 const LESSON_ASSET_MIME_TYPES = new Set([
   "application/pdf",
   "image/png",
@@ -36,11 +42,14 @@ export function assertAllowedMimeType(args: { purpose: AssetPurpose; contentType
     throw new Error("SELF_HOSTED_VIDEO_FORBIDDEN");
   }
 
-  if (
-    args.purpose === "branding.logo" ||
-    args.purpose === "branding.favicon" ||
-    args.purpose === "branding.og-image"
-  ) {
+  if (args.purpose === "branding.og-image") {
+    if (!OG_IMAGE_MIME_TYPES.has(contentType)) {
+      throw new Error("UNSUPPORTED_BRANDING_ASSET_TYPE");
+    }
+    return;
+  }
+
+  if (args.purpose === "branding.logo" || args.purpose === "branding.favicon") {
     if (!BRANDING_MIME_TYPES.has(contentType)) {
       throw new Error("UNSUPPORTED_BRANDING_ASSET_TYPE");
     }

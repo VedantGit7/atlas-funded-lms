@@ -52,7 +52,15 @@ describe("F6 tenant admin", () => {
       "utf8",
     );
 
-    expect(brandingEditor).toContain("/api/v1/branding/assets/upload");
+    // The upload, its PUT and the confirm that finalizes it (audit M8) live in
+    // the shared helper every branding screen uses.
+    const brandingShared = readFileSync(
+      resolve(webRoot, "app/admin/branding/_components/branding-admin-shared.tsx"),
+      "utf8",
+    );
+    expect(brandingEditor).toContain("uploadBrandingAsset(");
+    expect(brandingShared).toContain("/api/v1/branding/assets/upload");
+    expect(brandingShared).toContain("/api/v1/branding/assets/confirm");
 
     expect(brandingEditor).toContain("ConfirmDialog");
   });

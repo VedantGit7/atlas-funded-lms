@@ -1,7 +1,11 @@
 import { Readable } from "node:stream";
 import { createPublicRouteHandler } from "@atlas/api";
 import { AtlasHttpError } from "@atlas/core/http/errors";
-import { LocalFilesystemStorageProvider, parseStorageEnv } from "@atlas/storage";
+import {
+  LocalFilesystemStorageProvider,
+  contentDispositionFor,
+  parseStorageEnv,
+} from "@atlas/storage";
 import { createStorageProvider } from "@atlas/storage/providers/storage-provider-factory";
 import { NextResponse } from "next/server";
 import { z } from "zod";
@@ -70,12 +74,23 @@ export const GET = createPublicRouteHandler(routeMetadata, async ({ req }) => {
     });
   }
 
+  // Audit M8: this route serves uploaded bytes from the app's own origin, the
+  // one holding session cookies. Never let a browser sniff a different type,
+  // download anything that must not render inline, and render whatever does
+  // in an opaque origin with nothing allowed to load or run.
+  const fileName = query.key.split("/").pop() ?? "download";
+  const disposition = meta.contentDisposition ?? contentDispositionFor(meta.contentType, fileName);
+  const isPdf = meta.contentType.toLowerCase().startsWith("application/pdf");
   return new NextResponse(Readable.toWeb(body) as ReadableStream<Uint8Array>, {
     status: 200,
     headers: {
       "content-type": meta.contentType,
       "content-length": String(meta.sizeBytes),
       "cache-control": "private, no-store",
+      "x-content-type-options": "nosniff",
+      ...(disposition ? { "content-disposition": disposition } : {}),
+      // The browser PDF viewer cannot run in a sandboxed document.
+      ...(isPdf ? {} : { "content-security-policy": "default-src 'none'; sandbox" }),
     },
   });
 });

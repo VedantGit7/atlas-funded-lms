@@ -11,6 +11,9 @@ export * from "./key-builder";
 export * from "./mime-policy";
 export * from "./size-policy";
 export * from "./checksum";
+export * from "./content-disposition";
+export * from "./content-sniff";
+export * from "./verify-upload-content";
 
 export * from "./signed-upload";
 export * from "./signed-download";

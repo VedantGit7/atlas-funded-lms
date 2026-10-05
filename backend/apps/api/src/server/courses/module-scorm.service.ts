@@ -4,6 +4,7 @@ import type { TenantTx } from "@atlas/db";
 import { auditWriter } from "@atlas/audit";
 import { AtlasHttpError } from "@atlas/core/http/errors";
 import { confirmAssetUpload } from "@atlas/storage/asset-reference.service";
+import { contentDispositionFor } from "@atlas/storage/content-disposition";
 import { findAssetReferenceById } from "@atlas/storage/asset-reference.repository";
 import { createModuleScormUpload } from "@atlas/storage/module-scorm.service";
 import { getStorageProvider } from "@atlas/storage/providers/storage-provider-factory";
@@ -122,6 +123,7 @@ export async function storeModuleScormPackageBlobService(
     key: asset.object_key,
     body,
     contentType: asset.content_type,
+    contentDisposition: contentDispositionFor(asset.content_type, asset.file_name),
   });
 
   return {
@@ -170,6 +172,9 @@ export async function confirmModuleScormPackageUploadService(
     {
       assetReferenceId: input.assetReferenceId,
     },
+    // The worker parses the archive and refuses anything that is not a valid
+    // ZIP (SCORM_INVALID_ARCHIVE); confirm must not read the package (F22).
+    { contentVerifiedDownstream: true },
   );
 
   await updateModuleScormPackageReference({

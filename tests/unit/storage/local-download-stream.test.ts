@@ -4,7 +4,8 @@ const mocks = vi.hoisted(() => ({ valid: true, stream: vi.fn(), head: vi.fn() })
 vi.mock("@atlas/api", () => ({
   createPublicRouteHandler: (_metadata: unknown, handler: unknown) => handler,
 }));
-vi.mock("@atlas/storage", () => {
+vi.mock("@atlas/storage", async () => {
+  const { contentDispositionFor } = await import("@atlas/storage/content-disposition");
   class LocalFilesystemStorageProvider {
     verifyDownloadToken() {
       return mocks.valid;
@@ -14,6 +15,7 @@ vi.mock("@atlas/storage", () => {
   }
   return {
     LocalFilesystemStorageProvider,
+    contentDispositionFor,
     parseStorageEnv: () => ({ STORAGE_PROVIDER: "local-fs" }),
   };
 });
@@ -39,6 +41,10 @@ describe("F15 local download streaming", () => {
     expect(response.headers.get("cache-control")).toBe("private, no-store");
     expect(response.headers.get("content-length")).toBe("7");
     expect(mocks.stream).toHaveBeenCalledWith(expect.objectContaining({ signal: request.signal }));
+    // Audit M8: served from the app origin, so never sniffed, never rendered.
+    expect(response.headers.get("x-content-type-options")).toBe("nosniff");
+    expect(response.headers.get("content-disposition")).toMatch(/^attachment;/);
+    expect(response.headers.get("content-security-policy")).toContain("sandbox");
   });
   it("rejects invalid links before storage reads and reports missing files", async () => {
     mocks.valid = false;
