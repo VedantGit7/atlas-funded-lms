@@ -68,6 +68,61 @@ export async function refreshFxRatesForActiveTenants(
   return { tenants: tenants.length, asOf };
 }
 
+export type LiveRates = { asOf: string; rates: Record<string, number> };
+
+/**
+ * One live fetch shared by every tenant in a worker sweep (audit M5). A failed
+ * fetch is remembered for the rest of the sweep, so a provider outage costs one
+ * request per sweep rather than one per tenant.
+ */
+export function createFxRateLoader(
+  fetchRates: () => Promise<LiveRates> = fetchLiveRates,
+): () => Promise<LiveRates> {
+  let pending: Promise<LiveRates> | null = null;
+  return () => {
+    pending ??= fetchRates();
+    return pending;
+  };
+}
+
+/** Start of the current UTC day. */
+function startOfUtcDay(now: Date): Date {
+  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+}
+
+/**
+ * Refresh one tenant's cached rates if they were not fetched today (UTC).
+ *
+ * Staleness is judged by when this tenant last fetched, not by the provider's
+ * as-of date: ECB publishes on working days only, so an as-of check would
+ * refetch every minute all weekend. The network call happens between two short
+ * transactions, never inside one. Returns 1 when it refreshed, 0 otherwise.
+ */
+export async function refreshFxRatesForTenantIfStale(args: {
+  tenantId: string;
+  requestId: string;
+  loadRates: () => Promise<LiveRates>;
+  now?: Date;
+}): Promise<number> {
+  const context = {
+    tenantId: args.tenantId,
+    requestId: args.requestId,
+    allowAnonymousTenantRead: true,
+  };
+  const lastFetched = await withTenantTx(context, async (tx) => {
+    const rows = await listFxRateRows(tx);
+    return rows.reduce<Date | null>(
+      (latest, row) => (latest == null || row.fetched_at > latest ? row.fetched_at : latest),
+      null,
+    );
+  });
+  if (lastFetched && lastFetched >= startOfUtcDay(args.now ?? new Date())) return 0;
+
+  const { asOf, rates } = await args.loadRates();
+  await withTenantTx(context, (tx) => upsertFxRates(tx, { base: FX_BASE_CURRENCY, asOf, rates }));
+  return 1;
+}
+
 /** Fetch live rates and persist them for the current tenant. */
 export async function refreshFxRates(tx: TenantTx): Promise<FxRatesResponse> {
   const { asOf, rates } = await fetchLiveRates();

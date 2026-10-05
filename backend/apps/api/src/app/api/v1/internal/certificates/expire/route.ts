@@ -1,6 +1,6 @@
-import { randomUUID } from "node:crypto";
-import { NextResponse, type NextRequest } from "next/server";
 import { expireDueCertificatesForActiveTenants } from "../../../../../../server/certificates/certificate-expiry.service";
+import { createCronHandler } from "../../../../../../server/internal/cron-auth";
+// Referenced so the route-metadata guard can associate this route.
 import { routeMetadata } from "./route.metadata";
 
 void routeMetadata;
@@ -9,29 +9,15 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /**
- * Expire due certificates across all active tenants and best-effort drain
- * certificate PDF outbox events. Triggered by cron with CRON_SECRET.
+ * Manual run of certificate expiry for every active tenant. The worker already
+ * does this per tenant on every sweep (audit M5); this is an operator tool,
+ * authorised with CRON_SECRET.
  */
-async function handle(req: NextRequest): Promise<NextResponse> {
-  const secret = process.env["CRON_SECRET"];
-  if (!secret) {
-    return NextResponse.json({ error: { code: "CRON_NOT_CONFIGURED" } }, { status: 503 });
-  }
-  if (req.headers.get("authorization") !== `Bearer ${secret}`) {
-    return NextResponse.json({ error: { code: "UNAUTHORIZED" } }, { status: 401 });
-  }
-
-  const requestId = randomUUID();
-  try {
-    const result = await expireDueCertificatesForActiveTenants(requestId);
-    return NextResponse.json({ data: result }, { status: 200 });
-  } catch (error) {
-    return NextResponse.json(
-      { error: { code: "CERTIFICATE_EXPIRY_FAILED", message: String(error) } },
-      { status: 502 },
-    );
-  }
-}
+const handle = createCronHandler({
+  job: "certificates-expire",
+  failureCode: "CERTIFICATE_EXPIRY_FAILED",
+  run: (requestId) => expireDueCertificatesForActiveTenants(requestId),
+});
 
 export const GET = handle;
 export const POST = handle;

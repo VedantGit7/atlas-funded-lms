@@ -1,8 +1,6 @@
-import { NextResponse, type NextRequest } from "next/server";
-import {
-  createReportsTickRequestId,
-  tickReportSchedulesForActiveTenants,
-} from "../../../../../../server/reports/reports-tick.service";
+import { tickReportSchedulesForActiveTenants } from "../../../../../../server/reports/reports-tick.service";
+import { createCronHandler } from "../../../../../../server/internal/cron-auth";
+// Referenced so the route-metadata guard can associate this route.
 import { routeMetadata } from "./route.metadata";
 
 void routeMetadata;
@@ -11,29 +9,15 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /**
- * Claim due report schedules across all active tenants and drain report
- * generate outbox events. Triggered by Vercel Cron with CRON_SECRET.
+ * Manual report-schedule tick for every active tenant. The worker ticks each
+ * tenant every minute; this is an operator tool, authorised with CRON_SECRET.
+ * Do not also register it with a scheduler.
  */
-async function handle(req: NextRequest): Promise<NextResponse> {
-  const secret = process.env["CRON_SECRET"];
-  if (!secret) {
-    return NextResponse.json({ error: { code: "CRON_NOT_CONFIGURED" } }, { status: 503 });
-  }
-  if (req.headers.get("authorization") !== `Bearer ${secret}`) {
-    return NextResponse.json({ error: { code: "UNAUTHORIZED" } }, { status: 401 });
-  }
-
-  const requestId = createReportsTickRequestId();
-  try {
-    const result = await tickReportSchedulesForActiveTenants(requestId);
-    return NextResponse.json({ data: result }, { status: 200 });
-  } catch (error) {
-    return NextResponse.json(
-      { error: { code: "REPORT_TICK_FAILED", message: String(error) } },
-      { status: 502 },
-    );
-  }
-}
+const handle = createCronHandler({
+  job: "reports-tick",
+  failureCode: "REPORT_TICK_FAILED",
+  run: (requestId) => tickReportSchedulesForActiveTenants(requestId),
+});
 
 export const GET = handle;
 export const POST = handle;

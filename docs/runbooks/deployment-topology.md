@@ -47,20 +47,19 @@ Vercel Standard Protection is enabled on the current project. Retain it. If auto
 
 ## Scheduled jobs
 
-The repository configuration at `frontend/apps/web/vercel.json` defines:
+No job is registered with Vercel Cron or any external scheduler. The long-running outbox worker visits every active tenant on each sweep (about once a minute) and runs these per tenant, so a slow or failing tenant affects only itself (audit M5):
 
-| Endpoint                               | UTC schedule | Purpose                  |
-| -------------------------------------- | ------------ | ------------------------ |
-| `/api/v1/internal/fx/refresh`          | `0 6 * * *`  | Daily FX refresh         |
-| `/api/v1/internal/certificates/expire` | `0 2 * * *`  | Daily certificate expiry |
+| Worker task            | What it does                                                                               | Log counter                   |
+| ---------------------- | ------------------------------------------------------------------------------------------ | ----------------------------- |
+| `report-schedule-tick` | Enqueues due scheduled reports; the `reports` processor runs them                          | `scheduledReportRunsEnqueued` |
+| `certificate-expiry`   | Marks certificates past `expires_at` as expired, flips status bits                         | `certificatesExpired`         |
+| `fx-rate-refresh`      | Refreshes a tenant's FX rates if not fetched today (UTC); one live fetch per sweep at most | `fxRatesRefreshed`            |
 
-Scheduled reports are **not** a cron. The long-running outbox worker checks each active tenant for due report schedules once a minute (`report-schedule-tick` in `backend/apps/api/src/worker/outbox-sweep.ts`) and generates the runs through its `reports` processor. Several worker instances may run at once: due schedules are claimed with `for update skip locked`, so a schedule is never enqueued twice. Successful ticks appear in the worker log as `scheduledReportRunsEnqueued`. `/api/v1/internal/reports/tick` remains available for a manual, CRON_SECRET-authenticated run; do not register it with a scheduler as well.
+Several worker instances may run at once: due report schedules are claimed with `for update skip locked`, certificate expiry is idempotent, and an FX refresh is an upsert. Successful work appears in the worker log line `worker.sweep.completed`.
 
-Verify endpoint spellings against the checked-in configuration before registering any external scheduler. Both require `Authorization: Bearer <CRON_SECRET>`; missing configuration fails closed. Vercel adds this header when `CRON_SECRET` is configured, as described in [Vercel's cron management documentation](https://vercel.com/docs/cron-jobs/manage-cron-jobs). The web rewrite preserves it and authenticates forwarded context to the API. Configure the same cron secret in the API that actually handles the request.
+The three `CRON_SECRET` endpoints remain as operator tools for a manual run across all tenants: `/api/v1/internal/reports/tick`, `/api/v1/internal/certificates/expire` and `/api/v1/internal/fx/refresh`. Do not register them with a scheduler: the worker already runs the same work. They require `Authorization: Bearer <CRON_SECRET>`, compared in constant time; missing configuration fails closed with 503. Failures answer with a stable code and a request ID, and the detail is only in the server log (`cron.job_failed`). The former alias `/api/v1/reports/internal/tick` was removed.
 
-Hobby allows only once-daily schedules, which both remaining jobs fit. If a job ever needs a higher frequency, run it from the worker as the report tick does, or use an eligible plan or an external scheduler, rather than reducing its frequency to fit a plan. If an external scheduler is chosen, explicitly transfer ownership of the affected schedules and remove their Vercel registrations in the same reviewed rollout to avoid duplicates. Store its bearer secret in the scheduler secret manager. Staging schedules must use staging resources and approved test recipients.
-
-Record at least one successful execution per job with timestamp, environment, release, request ID and intended effect. Authentication unit tests and an enabled cron toggle do not prove scheduling works. Account for retries and overlapping invocations using the existing application delivery/idempotency controls.
+Record at least one successful worker sweep per task in each environment with timestamp, environment, release and request ID.
 
 ## Acceptance evidence
 

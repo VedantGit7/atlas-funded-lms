@@ -6,6 +6,11 @@ import { purgeExpiredIdempotencyRecords } from "@atlas/api/idempotency-registry"
 import { purgeExpiredProctoringMedia } from "../server/proctoring/proctoring-media-retention";
 import { finalizeExpiredAttemptsForTenant } from "../server/attempts/attempt-deadline-sweep";
 import { tickDueReportSchedulesForTenant } from "../server/reports/reports-tick.service";
+import { expireDueCertificatesForTenant } from "../server/certificates/certificate-expiry.service";
+import {
+  createFxRateLoader,
+  refreshFxRatesForTenantIfStale,
+} from "@atlas/domain-config/services/fx.service";
 import { purgeExpiredAttributionEvents } from "@atlas/domain/sales-marketing/attribution-retention";
 import { getStorageProvider, parseStorageEnv } from "@atlas/storage";
 import { OUTBOX_PROCESSORS, type OutboxProcessor } from "./outbox-processors";
@@ -61,6 +66,10 @@ export type SweepResult = {
   expiredAttemptsFinalized: number;
   /** Scheduled report runs enqueued this sweep (formerly a Vercel cron). */
   scheduledReportRunsEnqueued: number;
+  /** Certificates past their expiry marked expired this sweep (formerly a cron, audit M5). */
+  certificatesExpired: number;
+  /** Tenants whose FX rates were refreshed this sweep (daily; formerly a cron, audit M5). */
+  fxRatesRefreshed: number;
 };
 
 export async function listAllRetentionTenantIds(): Promise<string[]> {
@@ -109,6 +118,8 @@ const RETENTION_COUNTERS: Record<
   | "usageEventsProcessed"
   | "expiredAttemptsFinalized"
   | "scheduledReportRunsEnqueued"
+  | "certificatesExpired"
+  | "fxRatesRefreshed"
 > = {
   "usage-meter-drain": "usageEventsProcessed",
   "export-file-purge": "exportFilesPurged",
@@ -117,9 +128,13 @@ const RETENTION_COUNTERS: Record<
   "attribution-events-purge": "attributionEventsPurged",
   "attempt-deadline-finalize": "expiredAttemptsFinalized",
   "report-schedule-tick": "scheduledReportRunsEnqueued",
+  "certificate-expiry": "certificatesExpired",
+  "fx-rate-refresh": "fxRatesRefreshed",
 };
 
 export function defaultRetentionTasks(batchLimit = 25): RetentionTask[] {
+  // One live FX fetch per sweep at most, shared by every tenant that needs it.
+  const loadFxRates = createFxRateLoader();
   return [
     {
       name: "usage-meter-drain",
@@ -196,6 +211,25 @@ export function defaultRetentionTasks(batchLimit = 25): RetentionTask[] {
         tickDueReportSchedulesForTenant({ tenantId, requestId: `${requestId}:${tenantId}` }),
     },
     {
+      // Audit M5: was a daily cron that expired every tenant's certificates in
+      // one HTTP request. Per tenant here, each failure isolated, and expiry is
+      // now within a minute of the due time instead of up to a day late.
+      name: "certificate-expiry",
+      run: async ({ tenantId, requestId }) =>
+        expireDueCertificatesForTenant({ tenantId, requestId: `${requestId}:${tenantId}` }),
+    },
+    {
+      // Audit M5: was a daily cron over every tenant in one request. A no-op
+      // for a tenant already refreshed today (UTC).
+      name: "fx-rate-refresh",
+      run: async ({ tenantId, requestId }) =>
+        refreshFxRatesForTenantIfStale({
+          tenantId,
+          requestId: `${requestId}:${tenantId}`,
+          loadRates: loadFxRates,
+        }),
+    },
+    {
       // A no-op for every tenant that has not opted in, which is the default.
       // This task visits active tenants only; deletion follows their setting.
       name: "attribution-events-purge",
@@ -237,6 +271,8 @@ export async function runOutboxSweep(options: SweepOptions): Promise<SweepResult
     usageEventsProcessed: 0,
     expiredAttemptsFinalized: 0,
     scheduledReportRunsEnqueued: 0,
+    certificatesExpired: 0,
+    fxRatesRefreshed: 0,
   };
 
   const tenantIds = await listTenants();
