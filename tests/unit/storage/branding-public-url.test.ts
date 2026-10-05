@@ -35,6 +35,7 @@ describe("buildPublicSafeAssetUrl", () => {
       buildPublicSafeAssetUrl({
         bucket: "atlas-assets",
         object_key: `tenants/${TENANT_ID}/branding/logos/logo.png`,
+        purpose: "branding.logo",
       }),
     ).toBe(`https://cdn.example.com/atlas-assets/tenants/${TENANT_ID}/branding/logos/logo.png`);
   });
@@ -57,6 +58,7 @@ describe("resolveBrandingAssetUrl", () => {
       id: ASSET_ID,
       bucket: "atlas-assets",
       object_key: `tenants/${TENANT_ID}/branding/logos/logo.png`,
+      purpose: "branding.logo",
       visibility: "public-safe",
       status: "READY",
     });
@@ -75,6 +77,7 @@ describe("resolveBrandingAssetUrl", () => {
       id: ASSET_ID,
       bucket: "atlas-assets",
       object_key: `tenants/${TENANT_ID}/branding/logos/logo.png`,
+      purpose: "branding.logo",
       visibility: "public-safe",
       status: "READY",
     });

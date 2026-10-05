@@ -7,6 +7,7 @@ import { generalSettingsBackLinkClassName } from "../general-settings/general-se
 import {
   ghostButtonClassName,
   inferBrandingContentType,
+  uploadBrandingAsset,
   outlineButtonClassName,
   primaryButtonClassName,
 } from "../../../app/admin/branding/_components/branding-admin-shared";
@@ -98,36 +99,21 @@ export function AdminSeoPage({ initialSeo }: AdminSeoPageProps) {
     try {
       const contentType = inferBrandingContentType(file);
       if (!contentType) {
-        setMessage("Unsupported file type. Upload PNG, JPEG, WebP, or SVG.");
+        setMessage("Unsupported file type. Upload PNG, JPEG, or WebP.");
         return;
       }
 
-      const uploadResponse = await clientApi.post<{
-        data: {
-          asset: { id: string };
-          upload: { url: string; requiredHeaders: Record<string, string> };
-        };
-      }>(
-        "/api/v1/branding/assets/upload",
-        {
-          purpose: "branding.og-image",
-          fileName: file.name,
-          contentType,
-          sizeBytes: file.size,
-        },
-        "seo-meta-image-upload",
-      );
-
-      await fetch(uploadResponse.data.upload.url, {
-        method: "PUT",
-        headers: uploadResponse.data.upload.requiredHeaders,
-        body: file,
+      const { assetId } = await uploadBrandingAsset({
+        file,
+        purpose: "branding.og-image",
+        contentType,
+        idempotencyPrefix: "seo-meta-image-upload",
       });
 
       const previewUrl = URL.createObjectURL(file);
       setSeo((current) => ({
         ...current,
-        metaImageRefId: uploadResponse.data.asset.id,
+        metaImageRefId: assetId,
         metaImageUrl: previewUrl,
       }));
     } catch (error) {
@@ -270,7 +256,7 @@ export function AdminSeoPage({ initialSeo }: AdminSeoPageProps) {
           <input
             ref={fileInputRef}
             type="file"
-            accept="image/png,image/jpeg,image/webp,image/svg+xml"
+            accept="image/png,image/jpeg,image/webp"
             className="sr-only"
             onChange={(event) => {
               const file = event.target.files?.[0];

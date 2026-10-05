@@ -6,7 +6,11 @@ import { useRef, useState } from "react";
 import { Check, ImageIcon, Loader2, Trash2, Upload } from "lucide-react";
 import type { AboutSchoolView } from "@atlas/domain-branding/schemas/about-school";
 import { ClientApiError, clientApi } from "../../../../lib/client-api";
-import { BrandingAnimatedCollapsible, inferBrandingContentType } from "./branding-admin-shared";
+import {
+  BrandingAnimatedCollapsible,
+  inferBrandingContentType,
+  uploadBrandingAsset,
+} from "./branding-admin-shared";
 
 const NAME_LIMIT = 60;
 const ABOUT_LIMIT = 300;
@@ -161,22 +165,13 @@ export function AboutSchoolWizard({ initial }: { initial: AboutSchoolView }) {
         setError("Unsupported file type. Upload a PNG, JPEG, or WebP image.");
         return;
       }
-      const upload = await clientApi.post<{
-        data: {
-          asset: { id: string };
-          upload: { url: string; requiredHeaders: Record<string, string> };
-        };
-      }>(
-        "/api/v1/branding/assets/upload",
-        { purpose: "branding.og-image", fileName: file.name, contentType, sizeBytes: file.size },
-        "about-school-image-upload",
-      );
-      await fetch(upload.data.upload.url, {
-        method: "PUT",
-        headers: upload.data.upload.requiredHeaders,
-        body: file,
+      const { assetId } = await uploadBrandingAsset({
+        file,
+        purpose: "branding.og-image",
+        contentType,
+        idempotencyPrefix: "about-school-image-upload",
       });
-      setImageRefId(upload.data.asset.id);
+      setImageRefId(assetId);
       setImageUrl(URL.createObjectURL(file));
     } catch (caught) {
       setError(caught instanceof ClientApiError ? caught.message : "Could not upload the image.");

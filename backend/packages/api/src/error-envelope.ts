@@ -11,6 +11,9 @@ const STORAGE_VALIDATION_MESSAGES: Partial<Record<string, string>> = {
   [STORAGE_ERROR_CODES.UNSUPPORTED_LESSON_ASSET_TYPE]: "Unsupported lesson asset type.",
   [STORAGE_ERROR_CODES.ASSET_SIZE_LIMIT_EXCEEDED]: "File exceeds the maximum allowed upload size.",
   [STORAGE_ERROR_CODES.SELF_HOSTED_VIDEO_FORBIDDEN]: "Self-hosted video uploads are not allowed.",
+  [STORAGE_ERROR_CODES.ASSET_CONTENT_MISMATCH]:
+    "The file's contents do not match its type. Upload the file in its original format.",
+  [STORAGE_ERROR_CODES.ASSET_SVG_INVALID]: "This SVG could not be read as an image.",
 };
 
 export function toSafeErrorEnvelope(

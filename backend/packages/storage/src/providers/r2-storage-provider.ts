@@ -56,6 +56,7 @@ export class R2StorageProvider implements StorageProvider {
       ContentType: input.contentType,
       ContentLength: input.sizeBytes,
       ChecksumSHA256: input.checksumSha256 ?? undefined,
+      ContentDisposition: input.contentDisposition ?? undefined,
       Metadata: {
         atlasManaged: "true",
       },
@@ -63,6 +64,11 @@ export class R2StorageProvider implements StorageProvider {
 
     const url = await getSignedUrl(this.client, command, {
       expiresIn: input.expiresInSeconds,
+      // Audit M8: without this the presigner signed only host and length, so
+      // the uploader could store any Content-Type (text/html included) under a
+      // public-safe key. Signed, the PUT must send exactly the declared type
+      // and disposition or R2 rejects it.
+      signableHeaders: new Set(["content-type", "content-disposition"]),
     });
 
     return {
@@ -70,6 +76,7 @@ export class R2StorageProvider implements StorageProvider {
       expiresAt: new Date(Date.now() + input.expiresInSeconds * 1000),
       requiredHeaders: {
         "content-type": input.contentType,
+        ...(input.contentDisposition ? { "content-disposition": input.contentDisposition } : {}),
       },
     };
   }
@@ -78,6 +85,8 @@ export class R2StorageProvider implements StorageProvider {
     const command = new GetObjectCommand({
       Bucket: input.bucket,
       Key: input.key,
+      ResponseContentDisposition: input.responseContentDisposition ?? undefined,
+      ResponseContentType: input.responseContentType ?? undefined,
     });
 
     const url = await getSignedUrl(this.client, command, {
@@ -106,6 +115,7 @@ export class R2StorageProvider implements StorageProvider {
 
       return {
         contentType: result.ContentType ?? "application/octet-stream",
+        contentDisposition: result.ContentDisposition ?? null,
         sizeBytes: result.ContentLength ?? 0,
         checksumSha256: result.ChecksumSHA256 ?? null,
         etag: result.ETag ?? null,
@@ -140,6 +150,7 @@ export class R2StorageProvider implements StorageProvider {
     key: string;
     body: Buffer;
     contentType: string;
+    contentDisposition?: string | null;
   }): Promise<void> {
     await this.client.send(
       new PutObjectCommand({
@@ -147,6 +158,7 @@ export class R2StorageProvider implements StorageProvider {
         Key: input.key,
         Body: input.body,
         ContentType: input.contentType,
+        ContentDisposition: input.contentDisposition ?? undefined,
         Metadata: {
           atlasManaged: "true",
         },
@@ -178,6 +190,7 @@ export class R2StorageProvider implements StorageProvider {
         Body: bounded,
         ContentLength: input.sizeBytes,
         ContentType: input.contentType,
+        ContentDisposition: input.contentDisposition ?? undefined,
         Metadata: { atlasManaged: "true" },
       }),
       { abortSignal: signal },

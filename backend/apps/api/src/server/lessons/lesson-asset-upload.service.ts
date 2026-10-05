@@ -4,6 +4,7 @@ import { z } from "zod";
 import type { TenantTx } from "@atlas/db";
 import { AtlasHttpError } from "@atlas/core/http/errors";
 import { confirmAssetUpload } from "@atlas/storage/asset-reference.service";
+import { contentDispositionFor } from "@atlas/storage/content-disposition";
 import {
   findAssetReferenceById,
   updatePendingAssetReferenceSizeBytes,
@@ -217,6 +218,7 @@ export async function storeLessonAssetBlobService(
     key: asset.object_key,
     body,
     contentType: asset.content_type,
+    contentDisposition: contentDispositionFor(asset.content_type, asset.file_name),
   });
 
   return {

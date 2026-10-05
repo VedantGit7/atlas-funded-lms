@@ -7,12 +7,15 @@ import {
 import { assertAllowedMimeType } from "./mime-policy";
 import { assertAllowedSize } from "./size-policy";
 import { assertChecksumMatches } from "./checksum";
+import { contentDispositionFor } from "./content-disposition";
+import { verifyUploadedContent } from "./verify-upload-content";
 import { buildTenantStorageKey, assertTenantKeyPrefix } from "./key-builder";
 import {
   findAssetReferenceById,
   insertPendingAssetReference,
   markAssetReferenceReady,
   softDeleteAssetReference,
+  updatePendingAssetReferenceSizeBytes,
   type StorageReferenceRow,
 } from "./asset-reference.repository";
 import type { StorageProvider } from "./providers/storage-provider";
@@ -84,6 +87,9 @@ export async function createPendingAssetReferenceWithUpload(
     contentType: input.contentType,
     sizeBytes: input.sizeBytes,
     checksumSha256: input.checksumSha256 ?? null,
+    // Audit M8: a type that must not render inline is stored as a download
+    // from the moment it is written, before any confirm step.
+    contentDisposition: contentDispositionFor(input.contentType, input.fileName),
     expiresInSeconds: env.STORAGE_SIGNED_UPLOAD_TTL_SECONDS,
   });
 
@@ -109,6 +115,14 @@ export async function confirmAssetUpload(
   input: {
     assetReferenceId: string;
   },
+  options: {
+    /**
+     * Skip the content check because a later stage parses and validates the
+     * bytes itself, and confirm must not read them: the SCORM worker extracts
+     * and verifies the archive (F22), and a package can be 100 MB.
+     */
+    contentVerifiedDownstream?: boolean;
+  } = {},
 ) {
   const asset = await findAssetReferenceById(tx, input.assetReferenceId);
 
@@ -143,9 +157,18 @@ export async function confirmAssetUpload(
     actual: metadata.checksumSha256,
   });
 
+  // Audit M8: the declared type is only a claim. Check the bytes, and replace
+  // an SVG with its sanitized form before anything can reference it.
+  const rewritten = options.contentVerifiedDownstream
+    ? null
+    : await verifyUploadedContent(provider, asset);
+  if (rewritten) {
+    await updatePendingAssetReferenceSizeBytes(tx, asset.id, rewritten.sizeBytes);
+  }
+
   const ready = await markAssetReferenceReady(tx, {
     assetReferenceId: asset.id,
-    checksumSha256: metadata.checksumSha256 ?? asset.checksum_sha256,
+    checksumSha256: rewritten?.checksumSha256 ?? metadata.checksumSha256 ?? asset.checksum_sha256,
   });
 
   if (!ready) {
@@ -183,6 +206,9 @@ export async function createSignedAssetDownload(
     bucket: asset.bucket,
     key: asset.object_key,
     expiresInSeconds: env.STORAGE_SIGNED_DOWNLOAD_TTL_SECONDS,
+    // Forced on the response, so objects stored before audit M8 are covered too.
+    responseContentDisposition: contentDispositionFor(asset.content_type, asset.file_name),
+    responseContentType: asset.content_type,
   });
 
   return {
