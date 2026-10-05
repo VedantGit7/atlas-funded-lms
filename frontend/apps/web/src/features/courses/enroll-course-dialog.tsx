@@ -1,8 +1,8 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
-import { ClientApiError, clientApi } from "../../lib/client-api";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { ClientApiError, clientApi, createClientUuid } from "../../lib/client-api";
 import { sendAttributionEvent } from "../../lib/attribution/utm-storage";
 import {
   formatMoney,
@@ -99,6 +99,10 @@ export function EnrollCourseDialog({
   const urlPrefillCode = affiliateFromUrl ?? refFromUrl ?? "";
   const [open, setOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  // One idempotency key per checkout attempt (audit M4): a retry or a second
+  // submit of the same order replays the first instead of opening another.
+  // Changing the coupon or wallet credits is a new attempt with a new key.
+  const purchaseAttempt = useRef<{ body: string; key: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [couponCode, setCouponCode] = useState(urlPrefillCode);
   const [appliedCode, setAppliedCode] = useState<string | null>(null);
@@ -210,18 +214,26 @@ export function EnrollCourseDialog({
         typeof window !== "undefined"
           ? `${window.location.pathname}${window.location.search}`
           : "/";
-      const response = await clientApi.post<PurchaseResponse>(
+      const purchaseBody = {
+        courseId,
+        couponCode: appliedCode,
+        ...(affiliateFromUrl ? { affiliateCode: affiliateFromUrl } : {}),
+        walletCreditsToSpend: useWallet ? walletCreditsInput : null,
+        deviceType: "WEB",
+        successUrl: `${origin}${returnPath}${returnPath.includes("?") ? "&" : "?"}checkout=success`,
+        cancelUrl: `${origin}${returnPath}${returnPath.includes("?") ? "&" : "?"}checkout=cancelled`,
+      };
+      const serialized = JSON.stringify(purchaseBody);
+      if (purchaseAttempt.current?.body !== serialized) {
+        purchaseAttempt.current = {
+          body: serialized,
+          key: `checkout-purchase-${createClientUuid()}`,
+        };
+      }
+      const response = await clientApi.postWithKey<PurchaseResponse>(
         "/api/v1/checkout/purchase",
-        {
-          courseId,
-          couponCode: appliedCode,
-          ...(affiliateFromUrl ? { affiliateCode: affiliateFromUrl } : {}),
-          walletCreditsToSpend: useWallet ? walletCreditsInput : null,
-          deviceType: "WEB",
-          successUrl: `${origin}${returnPath}${returnPath.includes("?") ? "&" : "?"}checkout=success`,
-          cancelUrl: `${origin}${returnPath}${returnPath.includes("?") ? "&" : "?"}checkout=cancelled`,
-        },
-        "checkout-purchase",
+        purchaseBody,
+        purchaseAttempt.current.key,
       );
 
       if (response.data.checkoutUrl) {

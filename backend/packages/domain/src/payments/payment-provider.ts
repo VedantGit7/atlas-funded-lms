@@ -7,6 +7,12 @@ export type CreateCheckoutInput = {
   successUrl: string;
   cancelUrl: string;
   metadata: Record<string, string>;
+  /**
+   * Stable per payment order, so a retried create returns the same gateway
+   * session instead of opening another (audit M4). Providers without request
+   * idempotency ignore it; the caller records only the first session.
+   */
+  idempotencyKey?: string;
 };
 
 export type RazorpayClientCheckout = {

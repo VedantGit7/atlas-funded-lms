@@ -17,7 +17,13 @@ const {
   mockGetLearnerBillingConfigRow,
   mockResolvePaymentProvider,
   mockInsertRedemption,
+  mockAuditWrite,
+  txState,
 } = vi.hoisted(() => ({
+  // The fake transaction the after-commit step's own transactions run on, and
+  // whether one is open (the gateway must never be called inside one).
+  txState: { inTx: false, current: null as unknown },
+  mockAuditWrite: vi.fn(),
   mockFindCourseAuthProjection: vi.fn(),
   mockFindActiveEnrollment: vi.fn(),
   mockInsertEnrollment: vi.fn(),
@@ -63,6 +69,22 @@ vi.mock("../../../backend/apps/api/src/server/sales-referrals/sales-referrals.se
   applyReferralPurchaseCredits: (...args: unknown[]) => mockApplyReferralPurchaseCredits(...args),
 }));
 
+vi.mock("@atlas/db", async (importOriginal) => ({
+  ...(await importOriginal<Record<string, unknown>>()),
+  withTenantTx: async (_ctx: unknown, fn: (tx: unknown) => Promise<unknown>) => {
+    txState.inTx = true;
+    try {
+      return await fn(txState.current);
+    } finally {
+      txState.inTx = false;
+    }
+  },
+}));
+
+vi.mock("@atlas/audit", () => ({
+  auditWriter: { write: (...args: unknown[]) => mockAuditWrite(...args) },
+}));
+
 vi.mock("@atlas/domain-config/repositories/learner-billing.repository", () => ({
   getLearnerBillingConfigRow: (...args: unknown[]) => mockGetLearnerBillingConfigRow(...args),
 }));
@@ -100,8 +122,10 @@ vi.mock("../../../backend/apps/api/src/server/sales-coupons/sales-coupons.reposi
 }));
 
 import {
+  completeCheckoutPurchase,
   fulfillPaidCourseOrder,
   fulfillPaidCourseOrderByExternalId,
+  planCheckoutPurchase,
   purchaseCheckout,
 } from "../../../backend/apps/api/src/server/sales-coupons/sales-coupons.service";
 import {
@@ -126,17 +150,30 @@ function paidCourseProjection() {
   };
 }
 
-function createTx(opts?: { orders?: Map<string, Record<string, unknown>>; claimFails?: boolean }) {
+function createTx(opts?: {
+  orders?: Map<string, Record<string, unknown>>;
+  claimFails?: boolean;
+  /** The tenant's active domains, for return-URL checks (audit M4). */
+  domains?: readonly string[];
+}) {
   const orders = opts?.orders ?? new Map<string, Record<string, unknown>>();
   const executeCalls: unknown[][] = [];
+  const domains = new Set(opts?.domains ?? ["app.test"]);
 
   const tx = {
+    $queryRaw: vi.fn(async (sql: TemplateStringsArray, ...values: unknown[]) => {
+      if (sql.join("?").includes("from tenant_domains")) {
+        return [{ ok: domains.has(String(values[0])) }];
+      }
+      return [];
+    }),
     $executeRawUnsafe: vi.fn(async (...args: unknown[]) => {
       executeCalls.push(args);
       const sql = String(args[0] ?? "");
       if (sql.includes("insert into payment_orders")) {
         const id = String(args[1]);
         orders.set(id, {
+          gateway_key: sql.includes("gateway_key") ? String(args[7]) : null,
           id,
           membership_id: String(args[2]),
           external_id: String(args[3]),
@@ -156,6 +193,16 @@ function createTx(opts?: { orders?: Map<string, Record<string, unknown>>; claimF
           existing["external_id"] = String(args[2]);
         }
       }
+      if (sql.includes("update payment_orders") && sql.includes("'duplicatePayment'")) {
+        const row = orders.get(String(args[1]));
+        if (row) {
+          const meta = (row["metadata_json"] as Record<string, unknown>) ?? {};
+          row["metadata_json"] = {
+            ...meta,
+            duplicatePayment: { existingEnrollmentId: String(args[2]), refundRequired: true },
+          };
+        }
+      }
       if (sql.includes("update payment_orders") && sql.includes("paymentMismatch")) {
         const existing = orders.get(String(args[1]));
         if (existing) {
@@ -167,6 +214,33 @@ function createTx(opts?: { orders?: Map<string, Record<string, unknown>>; claimF
     }),
     $queryRawUnsafe: vi.fn(async (...args: unknown[]) => {
       const sql = String(args[0] ?? "");
+      if (sql.includes("select status, gateway_key, metadata_json from payment_orders")) {
+        const row = orders.get(String(args[1]));
+        return row ? [row] : [];
+      }
+      if (sql.includes("'checkoutSession'") && sql.includes("update payment_orders")) {
+        const row = orders.get(String(args[1]));
+        if (!row || !String(row["external_id"]).startsWith("pending_")) return [];
+        row["external_id"] = String(args[2]);
+        const meta = (row["metadata_json"] as Record<string, unknown>) ?? {};
+        row["metadata_json"] = { ...meta, checkoutSession: JSON.parse(String(args[3])) };
+        return [{ id: row["id"] }];
+      }
+      if (sql.includes("'duplicatePayment'") && sql.includes("update payment_orders")) {
+        return [];
+      }
+      if (sql.includes("status = 'pending'") && sql.includes("membership_id = $1")) {
+        return [...orders.values()]
+          .filter(
+            (row) =>
+              row["status"] === "pending" &&
+              row["membership_id"] === String(args[1]) &&
+              row["gateway_key"] === String(args[2]) &&
+              row["amount_cents"] === Number(args[3]) &&
+              (row["metadata_json"] as Record<string, unknown>)["courseId"] === String(args[5]),
+          )
+          .map((row) => ({ id: row["id"] }));
+      }
       if (sql.includes("update learner_billing_config")) {
         return [{ prefix: "INV", next_number: 42 }];
       }
@@ -197,6 +271,7 @@ function createTx(opts?: { orders?: Map<string, Record<string, unknown>>; claimF
     }),
   };
 
+  txState.current = tx;
   return { tx: tx as never, orders, executeCalls };
 }
 
@@ -658,5 +733,247 @@ describe("fulfillPaidCourseOrderByExternalId (audit finding C1)", () => {
     expect(first?.paymentOrderId).toBe(cheapOrderId);
     expect(second?.paymentOrderId).toBe(cheapOrderId);
     expect(mockApplyReferralPurchaseCredits).toHaveBeenCalledOnce();
+  });
+});
+
+describe("checkout return URLs and audit (audit M4)", () => {
+  beforeEach(() => {
+    mockFindCourseAuthProjection.mockResolvedValue(paidCourseProjection());
+    mockFindActiveEnrollment.mockResolvedValue(null);
+    mockGetLearnerBillingConfigRow.mockResolvedValue(null);
+    mockAuditWrite.mockReset();
+    mockResolvePaymentProvider.mockResolvedValue({
+      gatewayKey: "stripe",
+      gatewayId: "gw-1",
+      provider: {
+        createCheckout: vi.fn(async () => ({
+          externalId: "cs_test_m4",
+          checkoutUrl: "https://checkout.stripe.test/session",
+        })),
+        parseWebhook: vi.fn(),
+      },
+    });
+  });
+
+  it.each([
+    ["another site", "https://evil.example/phish"],
+    ["plain http on a public domain", "http://app.test.example/success"],
+    ["embedded credentials", "https://user:pass@app.test/success"],
+    ["a non-default port on a public domain", "https://academy.example:8443/success"],
+    ["not a URL scheme the gateway should follow", "javascript:alert(1)"],
+  ])("refuses %s and creates no order", async (_label, successUrl) => {
+    const { tx, orders } = createTx({ domains: ["app.test", "academy.example"] });
+    await expect(
+      purchaseCheckout(tx, ctx, {
+        courseId,
+        deviceType: "WEB",
+        successUrl,
+        cancelUrl: "https://app.test/cancel",
+      }),
+    ).rejects.toMatchObject({ code: "VALIDATION_ERROR", status: 400 });
+    expect(orders.size).toBe(0);
+    expect(mockAuditWrite).not.toHaveBeenCalled();
+  });
+
+  it("checks the cancel URL too", async () => {
+    const { tx, orders } = createTx();
+    await expect(
+      purchaseCheckout(tx, ctx, {
+        courseId,
+        deviceType: "WEB",
+        successUrl: "https://app.test/success",
+        cancelUrl: "https://evil.example/cancel",
+      }),
+    ).rejects.toMatchObject({ message: expect.stringContaining("cancelUrl") });
+    expect(orders.size).toBe(0);
+  });
+
+  it("accepts the tenant's own domain, and http with a port on development hosts", async () => {
+    const { tx } = createTx({ domains: ["academy.localhost"] });
+    const result = await purchaseCheckout(tx, ctx, {
+      courseId,
+      deviceType: "WEB",
+      successUrl: "http://academy.localhost:3000/courses/x?checkout=success",
+      cancelUrl: "http://academy.localhost:3000/courses/x?checkout=cancelled",
+    });
+    expect(result.data.checkoutUrl).toBe("https://checkout.stripe.test/session");
+  });
+
+  it("audits the paid order it creates", async () => {
+    const { tx } = createTx();
+    const result = await purchaseCheckout(tx, ctx, {
+      courseId,
+      deviceType: "WEB",
+      successUrl: "https://app.test/success",
+      cancelUrl: "https://app.test/cancel",
+    });
+    expect(mockAuditWrite).toHaveBeenCalledOnce();
+    expect(mockAuditWrite.mock.calls[0]?.[2]).toMatchObject({
+      action: "checkout.order.created",
+      target: { type: "payment_order", id: result.data.paymentOrderId },
+      after: { courseId, amountCents: 5000, currency: "USD", gatewayKey: "stripe" },
+    });
+  });
+
+  it("audits a fully discounted order, which has no gateway", async () => {
+    mockFindCourseAuthProjection.mockResolvedValue({
+      ...paidCourseProjection(),
+      metadataJson: { accessTier: "PAID", priceCents: 0, currency: "USD" },
+    });
+    const { tx } = createTx();
+    await purchaseCheckout(tx, ctx, { courseId, deviceType: "WEB" });
+    expect(mockAuditWrite.mock.calls[0]?.[2]).toMatchObject({
+      action: "checkout.order.created",
+      after: { amountCents: 0, gatewayKey: null },
+    });
+  });
+});
+
+describe("one open checkout per learner and course, gateway after commit (audit M4)", () => {
+  const body = {
+    courseId,
+    deviceType: "WEB" as const,
+    successUrl: "https://app.test/success",
+    cancelUrl: "https://app.test/cancel",
+  };
+  let createCheckout: ReturnType<typeof vi.fn>;
+
+  beforeEach(() => {
+    mockFindCourseAuthProjection.mockResolvedValue(paidCourseProjection());
+    mockFindActiveEnrollment.mockResolvedValue(null);
+    mockGetLearnerBillingConfigRow.mockResolvedValue(null);
+    mockAuditWrite.mockReset();
+    let sessions = 0;
+    createCheckout = vi.fn(async (input: { paymentOrderId: string }) => {
+      sessions += 1;
+      return {
+        externalId: `cs_test_${String(sessions)}`,
+        checkoutUrl: `https://checkout.stripe.test/${input.paymentOrderId}/${String(sessions)}`,
+        calledInsideTransaction: txState.inTx,
+      };
+    });
+    mockResolvePaymentProvider.mockResolvedValue({
+      gatewayKey: "stripe",
+      gatewayId: "gw-1",
+      provider: { createCheckout, parseWebhook: vi.fn() },
+    });
+  });
+
+  it("calls the gateway with no transaction open, with a per-order idempotency key", async () => {
+    const { tx, orders } = createTx();
+    const result = await purchaseCheckout(tx, ctx, body);
+    const order = orders.get(result.data.paymentOrderId);
+
+    expect(createCheckout).toHaveBeenCalledOnce();
+    expect(createCheckout.mock.calls[0]?.[0]).toMatchObject({
+      idempotencyKey: `atlas-checkout-${result.data.paymentOrderId}`,
+    });
+    expect(await createCheckout.mock.results[0]?.value).toMatchObject({
+      calledInsideTransaction: false,
+    });
+    expect(order?.["external_id"]).toBe("cs_test_1");
+    expect(order?.["metadata_json"]).toMatchObject({
+      checkoutSession: { checkoutUrl: result.data.checkoutUrl },
+    });
+  });
+
+  it("reuses the open order for the same price instead of opening a second", async () => {
+    const { tx, orders } = createTx();
+    const first = await purchaseCheckout(tx, ctx, body);
+    const second = await purchaseCheckout(tx, ctx, body);
+
+    expect(second.data.paymentOrderId).toBe(first.data.paymentOrderId);
+    expect(second.data.checkoutUrl).toBe(first.data.checkoutUrl);
+    expect(orders.size).toBe(1);
+    expect(createCheckout).toHaveBeenCalledOnce();
+    expect(mockAuditWrite).toHaveBeenCalledOnce();
+  });
+
+  it("opens a new order when the price differs", async () => {
+    const { tx, orders } = createTx();
+    const first = await purchaseCheckout(tx, ctx, body);
+    mockFindCourseAuthProjection.mockResolvedValue({
+      ...paidCourseProjection(),
+      metadataJson: { accessTier: "PAID", priceCents: 4000, currency: "USD" },
+    });
+    const second = await purchaseCheckout(tx, ctx, body);
+
+    expect(second.data.paymentOrderId).not.toBe(first.data.paymentOrderId);
+    expect(orders.size).toBe(2);
+  });
+
+  it("returns the recorded session on a replay without calling the gateway again", async () => {
+    const { tx } = createTx();
+    const plan = await planCheckoutPurchase(tx, ctx, body);
+    const first = await completeCheckoutPurchase(plan, ctx);
+    const replay = await completeCheckoutPurchase(plan, ctx);
+
+    expect(replay.data.checkoutUrl).toBe(first.data.checkoutUrl);
+    expect(createCheckout).toHaveBeenCalledOnce();
+  });
+
+  it("marks a payment for a course the learner already holds for refund, without side effects", async () => {
+    const orders = new Map<string, Record<string, unknown>>();
+    const { tx } = createTx({ orders });
+    const orderId = "018f0000-0000-7000-8000-0000000000d1";
+    orders.set(orderId, {
+      id: orderId,
+      membership_id: actorMembershipId,
+      external_id: "cs_dup",
+      amount_cents: 5000,
+      currency: "USD",
+      status: "pending",
+      invoice_number: null,
+      tax_amount_cents: 0,
+      coupon_amount_cents: 1000,
+      metadata_json: {
+        kind: "course_checkout",
+        courseId,
+        courseTitle: "Paid Course",
+        productTitle: "Paid Course",
+        productType: "course",
+        couponId: "018f0000-0000-7000-8000-0000000000c1",
+        couponCode: "SAVE10",
+        affiliateId: null,
+        affiliateCode: "AFF1",
+        affiliateCommissionPct: 10,
+        originalAmountCents: 6000,
+        discountCents: 1000,
+        walletCreditsApplied: 5,
+        walletDiscountCents: 500,
+        taxAmountCents: 0,
+        amountAfterCouponCents: 5000,
+        finalAmountCents: 5000,
+      },
+    });
+    mockFindActiveEnrollment.mockResolvedValue({
+      id: "018f0000-0000-7000-8000-0000000000e1",
+      status: "active",
+      enrolledAt: new Date(),
+    });
+    mockSpendWalletCredits.mockReset();
+    mockApplyAffiliateCommission.mockReset();
+    mockApplyReferralPurchaseCredits.mockReset();
+    mockInsertEnrollment.mockReset();
+
+    const result = await fulfillPaidCourseOrder(tx, ctx, orders.get(orderId) as never);
+
+    expect(result).toEqual({
+      enrollmentId: "018f0000-0000-7000-8000-0000000000e1",
+      created: false,
+      paymentOrderId: orderId,
+    });
+    expect(orders.get(orderId)?.["status"]).toBe("paid");
+    expect(orders.get(orderId)?.["metadata_json"]).toMatchObject({
+      duplicatePayment: { refundRequired: true },
+    });
+    expect(mockSpendWalletCredits).not.toHaveBeenCalled();
+    expect(mockApplyAffiliateCommission).not.toHaveBeenCalled();
+    expect(mockApplyReferralPurchaseCredits).not.toHaveBeenCalled();
+    expect(mockInsertRedemption).not.toHaveBeenCalled();
+    expect(mockInsertEnrollment).not.toHaveBeenCalled();
+    expect(mockAuditWrite.mock.calls.at(-1)?.[2]).toMatchObject({
+      action: "checkout.order.duplicate_payment",
+    });
   });
 });

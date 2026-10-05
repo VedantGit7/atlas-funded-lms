@@ -237,14 +237,17 @@ type TenantRouteConfig<TInput, TOutput, TParams extends z.ZodType | undefined = 
    * are already committed when it runs, so a failure here must leave a state
    * the next request can recover from.
    *
-   * Not allowed on idempotent routes: a replay returns the stored handler
-   * result and would run this step a second time.
+   * On an idempotent route a replay returns the stored handler result and runs
+   * this step again, so it must be idempotent itself; the route says so with
+   * `afterCommitIsIdempotent: true`.
    */
   afterCommit?: (args: {
     result: TOutput;
     ctx: TenantRouteContext;
     params: InferParams<TParams>;
   }) => Promise<unknown>;
+  /** Required with afterCommit on an idempotent route; see afterCommit. */
+  afterCommitIsIdempotent?: boolean;
 };
 
 export function createTenantRoute<TInput = Record<string, never>, TOutput = unknown>(
@@ -264,8 +267,14 @@ export function createTenantRoute<
 >(
   config: TenantRouteConfig<TInput, TOutput, TParams>,
 ): TenantRouteWithParams | TenantRouteWithoutParams {
-  if (config.afterCommit && config.metadata.idempotency === "required") {
-    throw new Error('afterCommit cannot be combined with idempotency: "required"');
+  if (
+    config.afterCommit &&
+    config.metadata.idempotency === "required" &&
+    config.afterCommitIsIdempotent !== true
+  ) {
+    throw new Error(
+      'afterCommit on an idempotency: "required" route reruns on every replay; it must be idempotent and declare afterCommitIsIdempotent: true',
+    );
   }
 
   async function route(req: NextRequest, routeContext?: TenantRouteContextArg) {
