@@ -72,10 +72,12 @@ export const affiliatePartnerDtoSchema = z.object({
   tier: affiliateTierSchema,
   status: affiliateStatusSchema,
   couponCode: z.string(),
-  payoutUpi: z.string().nullable(),
-  payoutBankAccount: z.string().nullable(),
+  /** Masked (audit M6); full details only via the audited reveal route. */
+  payoutUpiMasked: z.string().nullable(),
+  payoutBankAccountMasked: z.string().nullable(),
   payoutIfsc: z.string().nullable(),
   payoutAccountName: z.string().nullable(),
+  payoutDetailsOnFile: z.boolean(),
   unpaidCents: z.number().int().nonnegative(),
   paidCents: z.number().int().nonnegative(),
   createdAt: z.iso.datetime(),
@@ -246,16 +248,30 @@ export const myAffiliateResponseSchema = z.object({
     products: z.array(myAffiliateProductDtoSchema),
     unpaidCents: z.number().int().nonnegative(),
     paidCents: z.number().int().nonnegative(),
-    payoutUpi: z.string().nullable(),
-    payoutBankAccount: z.string().nullable(),
+    /** Masked (audit M6): re-enter a value to change it. */
+    payoutUpiMasked: z.string().nullable(),
+    payoutBankAccountMasked: z.string().nullable(),
     payoutIfsc: z.string().nullable(),
     payoutAccountName: z.string().nullable(),
+    payoutDetailsOnFile: z.boolean(),
     sharePath: z.string().nullable(),
   }),
 });
 
 export const joinAffiliateProgramBodySchema = z.object({}).strict();
 
+/** Full payout details for paying an affiliate: MFA and an audit entry per reveal (audit M6). */
+export const affiliatePayoutDetailsResponseSchema = z.object({
+  data: z.object({
+    affiliateId: z.uuid(),
+    payoutUpi: z.string().nullable(),
+    payoutBankAccount: z.string().nullable(),
+    payoutIfsc: z.string().nullable(),
+    payoutAccountName: z.string().nullable(),
+  }),
+});
+
+/** Omitted fields are kept; `null` clears a field (audit M6: screens never echo values back). */
 export const updateMyAffiliatePayoutBodySchema = z
   .object({
     payoutUpi: z.string().trim().max(200).optional().nullable(),

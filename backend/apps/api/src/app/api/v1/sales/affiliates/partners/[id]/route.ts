@@ -5,7 +5,7 @@ import {
   affiliatePartnerResponseSchema,
   updateAffiliateBodySchema,
 } from "../../../../../../../server/sales-affiliates/sales-affiliates.schemas";
-import { adminAffiliateWriteMetadata } from "../../../../../../../server/sales-affiliates/sales-affiliates.route-metadata";
+import { adminAffiliatePartnerWriteMetadata } from "../../../../../../../server/sales-affiliates/sales-affiliates.route-metadata";
 import { updateAffiliate } from "../../../../../../../server/sales-affiliates/sales-affiliates.service";
 
 const paramsSchema = zod.object({ id: zod.uuid() });
@@ -15,7 +15,7 @@ export const PUT = createTenantRoute<
   z.output<typeof affiliatePartnerResponseSchema>,
   typeof paramsSchema
 >({
-  metadata: adminAffiliateWriteMetadata,
+  metadata: adminAffiliatePartnerWriteMetadata,
   params: paramsSchema,
   body: updateAffiliateBodySchema,
   output: affiliatePartnerResponseSchema,

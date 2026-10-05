@@ -22,10 +22,12 @@ type MyAffiliate = {
   products: MyAffiliateProduct[];
   unpaidCents: number;
   paidCents: number;
-  payoutUpi: string | null;
-  payoutBankAccount: string | null;
+  /** Masked by the server (audit M6); type a new value to replace it. */
+  payoutUpiMasked: string | null;
+  payoutBankAccountMasked: string | null;
   payoutIfsc: string | null;
   payoutAccountName: string | null;
+  payoutDetailsOnFile: boolean;
   sharePath: string | null;
 };
 
@@ -51,8 +53,10 @@ export function LearnerAffiliatePanel() {
         "my-affiliate",
       );
       setAffiliate(response.data);
-      setPayoutUpi(response.data.payoutUpi ?? "");
-      setPayoutBankAccount(response.data.payoutBankAccount ?? "");
+      // Bank account and UPI are never sent back in full; the fields start
+      // empty and an empty field keeps what is on file.
+      setPayoutUpi("");
+      setPayoutBankAccount("");
       setPayoutIfsc(response.data.payoutIfsc ?? "");
       setPayoutAccountName(response.data.payoutAccountName ?? "");
       setError(null);
@@ -107,8 +111,8 @@ export function LearnerAffiliatePanel() {
       const response = await clientApi.put<{ data: MyAffiliate }>(
         "/api/v1/me/affiliate",
         {
-          payoutUpi: payoutUpi.trim() || null,
-          payoutBankAccount: payoutBankAccount.trim() || null,
+          ...(payoutUpi.trim() ? { payoutUpi: payoutUpi.trim() } : {}),
+          ...(payoutBankAccount.trim() ? { payoutBankAccount: payoutBankAccount.trim() } : {}),
           payoutIfsc: payoutIfsc.trim() || null,
           payoutAccountName: payoutAccountName.trim() || null,
         },
@@ -116,6 +120,8 @@ export function LearnerAffiliatePanel() {
         { successMessage: "Payout details saved." },
       );
       setAffiliate(response.data);
+      setPayoutUpi("");
+      setPayoutBankAccount("");
     } catch (caught) {
       toast.error(
         caught instanceof ClientApiError ? caught.message : "Could not save payout details.",
@@ -280,7 +286,8 @@ export function LearnerAffiliatePanel() {
         <div>
           <p className="text-sm font-medium">Payout details</p>
           <p className="mt-1 text-sm opacity-70">
-            Add your bank or UPI details so admins can send commission payouts.
+            Add your bank or UPI details so admins can send commission payouts. They are stored
+            encrypted and shown here masked.
           </p>
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -291,6 +298,12 @@ export function LearnerAffiliatePanel() {
               onChange={(e) => {
                 setPayoutUpi(e.target.value);
               }}
+              autoComplete="off"
+              placeholder={
+                affiliate.payoutUpiMasked
+                  ? `${affiliate.payoutUpiMasked} (leave blank to keep)`
+                  : "name@bank"
+              }
               className={FIELD}
             />
           </div>
@@ -311,6 +324,13 @@ export function LearnerAffiliatePanel() {
               onChange={(e) => {
                 setPayoutBankAccount(e.target.value);
               }}
+              autoComplete="off"
+              inputMode="numeric"
+              placeholder={
+                affiliate.payoutBankAccountMasked
+                  ? `${affiliate.payoutBankAccountMasked} (leave blank to keep)`
+                  : "Account number"
+              }
               className={FIELD}
             />
           </div>

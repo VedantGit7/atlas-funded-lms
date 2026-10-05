@@ -69,6 +69,7 @@
     "test:cleanup-boundary": "node --test scripts/db/test-cleanup-boundary.test.mjs",
     "test:cleanup-postgres": "node scripts/db/verify-test-cleanup.mjs",
     "db:check-no-leaked-test-tenants": "dotenv -e .env.test -- node scripts/db/check-no-leaked-test-tenants.mjs",
+    "data:encrypt-affiliate-payouts": "tsx scripts/data/encrypt-affiliate-payout-details.ts",
     "db:check-no-direct-prisma": "tsx scripts/check-no-direct-prisma.ts",
     "db:check-no-session-tenant-set": "node scripts/db/check-no-session-tenant-set.mjs",
     "db:check-no-platform-scope-outside-wrapper": "tsx scripts/check-no-platform-scope-outside-wrapper.ts",

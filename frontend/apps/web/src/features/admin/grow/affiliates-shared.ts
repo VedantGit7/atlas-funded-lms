@@ -37,10 +37,12 @@ export type AffiliatePartner = {
   tier: AffiliateTier;
   status: AffiliatePartnerStatus;
   couponCode: string;
-  payoutUpi: string | null;
-  payoutBankAccount: string | null;
+  /** Masked by the server (audit M6); full details only via the reveal. */
+  payoutUpiMasked: string | null;
+  payoutBankAccountMasked: string | null;
   payoutIfsc: string | null;
   payoutAccountName: string | null;
+  payoutDetailsOnFile: boolean;
   unpaidCents: number;
   paidCents: number;
   createdAt: string;
@@ -225,12 +227,13 @@ export function partnerStatusLabel(status: AffiliatePartnerStatus): string {
   return status === "ACTIVE" ? "Active" : "Inactive";
 }
 
-export function maskBankAccount(value: string | null | undefined): string {
-  if (!value?.trim()) return "Not set";
-  const digits = value.replace(/\s/g, "");
-  if (digits.length <= 4) return "****";
-  return `****${digits.slice(-4)}`;
-}
+export type AffiliatePayoutDetails = {
+  affiliateId: string;
+  payoutUpi: string | null;
+  payoutBankAccount: string | null;
+  payoutIfsc: string | null;
+  payoutAccountName: string | null;
+};
 
 export function formatPctOverride(value: number | null | undefined, globalDefault: number): string {
   if (value == null) return `Default (${globalDefault}%)`;

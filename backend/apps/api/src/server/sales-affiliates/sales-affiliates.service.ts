@@ -1,12 +1,20 @@
+import { auditWriter } from "@atlas/audit";
 import { AtlasHttpError } from "@atlas/core/http/errors";
 import type { TenantTx } from "@atlas/db";
 import type { ServiceCtx } from "@atlas/domain/shared/domain.types";
+import {
+  changedPayoutFields,
+  maskedPayoutView,
+  openPayoutDetails,
+  sealPayoutPatch,
+} from "./affiliate-payout-details";
 import { findCourseAuthProjection } from "../courses/courses.repository";
 import {
   affiliateCommissionsListQuerySchema,
   affiliateCommissionsListResponseSchema,
   affiliateConfigResponseSchema,
   affiliatePartnerResponseSchema,
+  affiliatePayoutDetailsResponseSchema,
   affiliatePayoutsListResponseSchema,
   affiliateProductsResponseSchema,
   affiliateRequestsListResponseSchema,
@@ -78,7 +86,8 @@ function toConfigDto(row: AffiliateConfigRow | null) {
   };
 }
 
-function toPartnerDto(row: AffiliateListRow) {
+function toPartnerDto(tenantId: string, row: AffiliateListRow) {
+  const payout = maskedPayoutView(openPayoutDetails(row, { tenantId, affiliateId: row.id }));
   return {
     id: row.id,
     membershipId: row.membership_id,
@@ -87,10 +96,7 @@ function toPartnerDto(row: AffiliateListRow) {
     tier: row.tier as "STANDARD" | "PREMIUM",
     status: row.status as "ACTIVE" | "INACTIVE",
     couponCode: row.coupon_code,
-    payoutUpi: row.payout_upi,
-    payoutBankAccount: row.payout_bank_account,
-    payoutIfsc: row.payout_ifsc,
-    payoutAccountName: row.payout_account_name,
+    ...payout,
     unpaidCents: row.unpaid_cents,
     paidCents: row.paid_cents,
     createdAt: row.created_at.toISOString(),
@@ -186,7 +192,7 @@ async function requireAffiliate(tx: TenantTx, id: string): Promise<AffiliateRow>
   return row;
 }
 
-async function loadPartnerDto(tx: TenantTx, affiliateId: string) {
+async function loadPartnerDto(tx: TenantTx, tenantId: string, affiliateId: string) {
   const rows = await salesAffiliatesRepository.listAffiliates(tx, {
     id: affiliateId,
     limit: 1,
@@ -194,7 +200,7 @@ async function loadPartnerDto(tx: TenantTx, affiliateId: string) {
   });
   const row = rows[0];
   if (!row) throw notFound();
-  return toPartnerDto(row);
+  return toPartnerDto(tenantId, row);
 }
 
 export async function getAffiliateSummary(tx: TenantTx, _ctx: ServiceCtx) {
@@ -264,7 +270,7 @@ export async function upsertAffiliateProduct(tx: TenantTx, _ctx: ServiceCtx, raw
   });
 }
 
-export async function listAffiliates(tx: TenantTx, _ctx: ServiceCtx, rawQuery: unknown) {
+export async function listAffiliates(tx: TenantTx, ctx: ServiceCtx, rawQuery: unknown) {
   const query = affiliatesListQuerySchema.parse(rawQuery ?? {});
   const rows = await salesAffiliatesRepository.listAffiliates(tx, {
     ...(query.q ? { q: query.q } : {}),
@@ -272,7 +278,7 @@ export async function listAffiliates(tx: TenantTx, _ctx: ServiceCtx, rawQuery: u
     limit: query.limit,
   });
   return affiliatesListResponseSchema.parse({
-    data: { items: rows.map(toPartnerDto) },
+    data: { items: rows.map((row) => toPartnerDto(ctx.tenantId, row)) },
   });
 }
 
@@ -305,16 +311,11 @@ export async function createAffiliate(tx: TenantTx, ctx: ServiceCtx, rawBody: un
   });
 
   return affiliatePartnerResponseSchema.parse({
-    data: await loadPartnerDto(tx, id),
+    data: await loadPartnerDto(tx, ctx.tenantId, id),
   });
 }
 
-export async function updateAffiliate(
-  tx: TenantTx,
-  _ctx: ServiceCtx,
-  id: string,
-  rawBody: unknown,
-) {
+export async function updateAffiliate(tx: TenantTx, ctx: ServiceCtx, id: string, rawBody: unknown) {
   const body = updateAffiliateBodySchema.parse(rawBody);
   await requireAffiliate(tx, id);
 
@@ -329,10 +330,7 @@ export async function updateAffiliate(
   } = {
     ...(body.tier !== undefined ? { tier: body.tier } : {}),
     ...(body.status !== undefined ? { status: body.status } : {}),
-    ...(body.payoutUpi !== undefined ? { payoutUpi: body.payoutUpi } : {}),
-    ...(body.payoutBankAccount !== undefined ? { payoutBankAccount: body.payoutBankAccount } : {}),
-    ...(body.payoutIfsc !== undefined ? { payoutIfsc: body.payoutIfsc } : {}),
-    ...(body.payoutAccountName !== undefined ? { payoutAccountName: body.payoutAccountName } : {}),
+    ...sealPayoutPatch(body, { tenantId: ctx.tenantId, affiliateId: id }),
   };
 
   if (body.couponCode !== undefined) {
@@ -346,9 +344,15 @@ export async function updateAffiliate(
   }
 
   await salesAffiliatesRepository.updateAffiliate(tx, id, patch);
+  await auditAffiliateChange(tx, ctx, id, "affiliate.partner.updated", {
+    tier: body.tier,
+    status: body.status,
+    couponCode: patch.couponCode,
+    payoutFieldsChanged: changedPayoutFields(body),
+  });
 
   return affiliatePartnerResponseSchema.parse({
-    data: await loadPartnerDto(tx, id),
+    data: await loadPartnerDto(tx, ctx.tenantId, id),
   });
 }
 
@@ -527,10 +531,11 @@ export async function getMyAffiliate(tx: TenantTx, ctx: ServiceCtx) {
       products: myProducts,
       unpaidCents,
       paidCents,
-      payoutUpi: affiliate?.payout_upi ?? null,
-      payoutBankAccount: affiliate?.payout_bank_account ?? null,
-      payoutIfsc: affiliate?.payout_ifsc ?? null,
-      payoutAccountName: affiliate?.payout_account_name ?? null,
+      ...maskedPayoutView(
+        affiliate
+          ? openPayoutDetails(affiliate, { tenantId: ctx.tenantId, affiliateId: affiliate.id })
+          : { upi: null, bankAccount: null, ifsc: null, accountName: null },
+      ),
       sharePath: affiliate?.coupon_code
         ? `/?affiliate=${encodeURIComponent(affiliate.coupon_code)}`
         : null,
@@ -594,14 +599,72 @@ export async function updateMyAffiliatePayoutDetails(
     throw validationError("You are not an affiliate.");
   }
 
-  await salesAffiliatesRepository.updateAffiliate(tx, affiliate.id, {
-    payoutUpi: body.payoutUpi ?? null,
-    payoutBankAccount: body.payoutBankAccount ?? null,
-    payoutIfsc: body.payoutIfsc ?? null,
-    payoutAccountName: body.payoutAccountName ?? null,
-  });
+  // Omitted fields keep their value: screens show masked values and never send
+  // them back, so "not sent" must not mean "erase".
+  const patch = sealPayoutPatch(body, { tenantId: ctx.tenantId, affiliateId: affiliate.id });
+  const changed = changedPayoutFields(body);
+  if (changed.length > 0) {
+    await salesAffiliatesRepository.updateAffiliate(tx, affiliate.id, patch);
+    await auditAffiliateChange(tx, ctx, affiliate.id, "affiliate.payout_details.updated", {
+      payoutFieldsChanged: changed,
+      changedBy: "affiliate",
+    });
+  }
 
   return getMyAffiliate(tx, ctx);
+}
+
+/**
+ * Full payout details, for an admin paying the affiliate (audit M6). Every
+ * call is audited; the route requires step-up MFA.
+ */
+export async function revealAffiliatePayoutDetails(
+  tx: TenantTx,
+  ctx: ServiceCtx,
+  affiliateId: string,
+) {
+  const affiliate = await requireAffiliate(tx, affiliateId);
+  const details = openPayoutDetails(affiliate, { tenantId: ctx.tenantId, affiliateId });
+  await auditAffiliateChange(tx, ctx, affiliateId, "affiliate.payout_details.revealed", {
+    fieldsPresent: Object.entries(details)
+      .filter(([, value]) => value != null)
+      .map(([field]) => field),
+  });
+  return affiliatePayoutDetailsResponseSchema.parse({
+    data: {
+      affiliateId,
+      payoutUpi: details.upi,
+      payoutBankAccount: details.bankAccount,
+      payoutIfsc: details.ifsc,
+      payoutAccountName: details.accountName,
+    },
+  });
+}
+
+/** Audit entries for affiliate changes; never carry payout values. */
+async function auditAffiliateChange(
+  tx: TenantTx,
+  ctx: ServiceCtx,
+  affiliateId: string,
+  action: string,
+  after: Record<string, unknown>,
+): Promise<void> {
+  await auditWriter.write(
+    tx,
+    {
+      tenantId: ctx.tenantId,
+      actorMembershipId: ctx.actorMembershipId,
+      platformPrincipalId: null,
+      requestId: ctx.requestId,
+    },
+    {
+      action,
+      target: { type: "sales_affiliate", id: affiliateId },
+      before: null,
+      after: Object.fromEntries(Object.entries(after).filter(([, value]) => value !== undefined)),
+      metadata: {},
+    },
+  );
 }
 
 export async function getPublicAffiliateStatus(tx: TenantTx) {
