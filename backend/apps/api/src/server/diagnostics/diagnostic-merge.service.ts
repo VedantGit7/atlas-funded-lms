@@ -8,6 +8,7 @@ import {
   verifySessionSecret,
 } from "@atlas/security";
 import { submitAttempt } from "../../server/attempts/attempts.service";
+import { attemptKeyConflict } from "../attempts/attempts.errors";
 import { attemptsRepository } from "../../server/attempts/attempts.repository";
 import { diagnosticRepository, parseDiagnosticSessionMetadata } from "./diagnostic.repository";
 import { diagnosticSessionInvalid } from "./diagnostic-public-session.service";
@@ -83,16 +84,22 @@ export async function mergeAnonymousDiagnosticSession(args: {
   }
 
   const mergeIdempotencyKey = `diagnostic-merge:${session.id}`;
-  const existingAttempt = await attemptsRepository.findByIdempotencyKey(
-    args.tx,
-    mergeIdempotencyKey,
-  );
+  // Audit M2: only this learner's merge of this session counts as "already
+  // merged"; another learner's never hands back their attempt.
+  const byKey = await attemptsRepository.findOwnByIdempotencyKey(args.tx, {
+    idempotencyKey: mergeIdempotencyKey,
+    membershipId: args.ctx.actorMembershipId,
+    assessmentId: session.assessment_id,
+  });
+  if (byKey.kind === "foreign") {
+    throw attemptKeyConflict();
+  }
 
-  if (existingAttempt) {
+  if (byKey.kind === "own") {
     return {
       data: {
         sessionId: session.id,
-        attemptId: existingAttempt.id,
+        attemptId: byKey.attempt.id,
         membershipId: args.ctx.actorMembershipId,
         resultPath: `/diagnostic/me/${session.id}/result`,
         alreadyMerged: true,

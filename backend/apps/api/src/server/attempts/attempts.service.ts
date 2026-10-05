@@ -11,6 +11,7 @@ import {
 import { canReviewAnswers, scoreAttempt, type ScoringItem } from "../assessments/scoring.service";
 import { assessmentNotFound } from "../assessments/assessments.errors";
 import {
+  attemptKeyConflict,
   attemptLimitReached,
   attemptNotFound,
   attemptNotInProgress,
@@ -188,8 +189,24 @@ export async function startAttempt(
   idempotencyKey: string,
   consent?: StartAttemptConsent | null,
 ) {
-  const existing = await attemptsRepository.findByIdempotencyKey(tx, idempotencyKey);
-  if (existing) {
+  // Audit M2: one start at a time per learner and assessment, so the count
+  // below and the insert after it cannot interleave with another start.
+  await attemptsRepository.lockAttemptStarts(tx, {
+    tenantId: ctx.tenantId,
+    assessmentId,
+    membershipId: ctx.actorMembershipId,
+  });
+
+  const byKey = await attemptsRepository.findOwnByIdempotencyKey(tx, {
+    idempotencyKey,
+    membershipId: ctx.actorMembershipId,
+    assessmentId,
+  });
+  if (byKey.kind === "foreign") {
+    throw attemptKeyConflict();
+  }
+  if (byKey.kind === "own") {
+    const existing = byKey.attempt;
     const metadata = parseAttemptMetadata(existing.metadata_json);
     return {
       data: {

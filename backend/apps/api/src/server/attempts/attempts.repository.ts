@@ -113,6 +113,45 @@ export const attemptsRepository = {
     };
   },
 
+  /**
+   * The attempt a start request's key already created, if it belongs to this
+   * learner and assessment (audit M2). Keys are unique per tenant, so a key
+   * reused by another learner or for another assessment is reported as
+   * `foreign` without returning that attempt.
+   */
+  async findOwnByIdempotencyKey(
+    tx: TenantTx,
+    args: { idempotencyKey: string; membershipId: string; assessmentId: string },
+  ): Promise<{ kind: "none" } | { kind: "own"; attempt: AttemptRow } | { kind: "foreign" }> {
+    const attempt = await this.findByIdempotencyKey(tx, args.idempotencyKey);
+    if (!attempt) return { kind: "none" };
+    if (
+      attempt.membership_id !== args.membershipId ||
+      attempt.assessment_id !== args.assessmentId
+    ) {
+      return { kind: "foreign" };
+    }
+    return { kind: "own", attempt };
+  },
+
+  /**
+   * Serialises attempt starts for one learner on one assessment until the
+   * transaction ends (audit M2). Counting attempts and inserting one is two
+   * statements; without this, concurrent starts each counted below the limit
+   * and all inserted.
+   */
+  async lockAttemptStarts(
+    tx: TenantTx,
+    args: { tenantId: string; assessmentId: string; membershipId: string },
+  ): Promise<void> {
+    await tx.$executeRaw`
+      select pg_advisory_xact_lock(
+        hashtextextended(${`attempt-start:${args.tenantId}:${args.assessmentId}:${args.membershipId}`}::text, 0)
+      )
+    `;
+  },
+
+  /** Unscoped; callers must use findOwnByIdempotencyKey. */
   async findByIdempotencyKey(tx: TenantTx, idempotencyKey: string): Promise<AttemptRow | null> {
     const row = await tx.attempt.findFirst({
       where: { idempotency_key: idempotencyKey },
