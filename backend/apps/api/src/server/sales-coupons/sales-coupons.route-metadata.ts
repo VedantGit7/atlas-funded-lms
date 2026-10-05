@@ -51,6 +51,17 @@ export const learnerCouponMetadata = {
   resourceLoader: async ({ ctx }: { ctx: LoaderCtx }) => loadSelfEnrollmentRef({ ctx }),
 } satisfies RouteMetadata;
 
+/**
+ * Creating a payment order (audit M4). Idempotent so a retried or doubled
+ * submit with the same key replays the first order instead of opening a second
+ * one, and audited because it creates a financial record.
+ */
+export const checkoutPurchaseMetadata = {
+  ...learnerCouponMetadata,
+  audit: "required",
+  idempotency: "required",
+} satisfies RouteMetadata;
+
 export const learnerCouponReadMetadata = {
   permission: "enrollment.create",
   audit: "none",

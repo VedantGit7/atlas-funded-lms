@@ -69,29 +69,32 @@ export function createStripePaymentProvider(config: StripeAdapterConfig): Paymen
 
   return {
     async createCheckout(input: CreateCheckoutInput): Promise<CreateCheckoutResult> {
-      const session = await stripe.checkout.sessions.create({
-        mode: "payment",
-        success_url: input.successUrl,
-        cancel_url: input.cancelUrl,
-        line_items: [
-          {
-            quantity: 1,
-            price_data: {
-              currency: input.currency.toLowerCase(),
-              unit_amount: input.amountCents,
-              product_data: {
-                name: input.courseTitle,
+      const session = await stripe.checkout.sessions.create(
+        {
+          mode: "payment",
+          success_url: input.successUrl,
+          cancel_url: input.cancelUrl,
+          line_items: [
+            {
+              quantity: 1,
+              price_data: {
+                currency: input.currency.toLowerCase(),
+                unit_amount: input.amountCents,
+                product_data: {
+                  name: input.courseTitle,
+                },
               },
             },
+          ],
+          metadata: {
+            paymentOrderId: input.paymentOrderId,
+            tenantId: input.tenantId,
+            ...input.metadata,
           },
-        ],
-        metadata: {
-          paymentOrderId: input.paymentOrderId,
-          tenantId: input.tenantId,
-          ...input.metadata,
+          client_reference_id: input.paymentOrderId,
         },
-        client_reference_id: input.paymentOrderId,
-      });
+        input.idempotencyKey ? { idempotencyKey: input.idempotencyKey } : undefined,
+      );
 
       if (!session.url) {
         throw new Error("Stripe Checkout session did not return a URL.");

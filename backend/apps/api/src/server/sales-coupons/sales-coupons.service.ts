@@ -1,6 +1,8 @@
 import { randomInt, randomUUID } from "node:crypto";
+import { auditWriter } from "@atlas/audit";
 import { AtlasHttpError } from "@atlas/core/http/errors";
-import type { TenantTx } from "@atlas/db";
+import { withTenantTx, type TenantTx } from "@atlas/db";
+import type { z } from "zod";
 import { getLearnerBillingConfigRow } from "@atlas/domain-config/repositories/learner-billing.repository";
 import {
   PaymentProviderNotConfiguredError,
@@ -40,6 +42,7 @@ import {
   validateCouponResponseSchema,
 } from "./sales-coupons.schemas";
 import { salesCouponsRepository, type CouponRow } from "./sales-coupons.repository";
+import { assertTenantReturnUrl } from "./checkout-return-url";
 import { previewWalletSpend, spendWalletCredits } from "../sales-wallet/sales-wallet.service";
 import { applyReferralPurchaseCredits } from "../sales-referrals/sales-referrals.service";
 import {
@@ -699,6 +702,65 @@ async function findPaymentOrdersByExternalId(
  * Marks a course PaymentOrder paid and enrolls the learner.
  * Idempotent on already-paid orders / existing enrollments.
  */
+/**
+ * A paid order for a course the learner already holds. The money was taken,
+ * so the order stays paid; it is marked for refund, audited, and logged at
+ * error level so it reaches whoever handles refunds. Refunding it through the
+ * normal refund flow does not revoke access unless the operator asks.
+ */
+async function flagDuplicatePayment(
+  tx: TenantTx,
+  ctx: ServiceCtx,
+  args: { order: PaymentOrderFulfillRow; enrollmentId: string },
+): Promise<void> {
+  await tx.$executeRawUnsafe(
+    `
+    update payment_orders
+    set metadata_json = coalesce(metadata_json, '{}'::jsonb)
+          || jsonb_build_object(
+            'duplicatePayment',
+            jsonb_build_object('existingEnrollmentId', $2::text, 'refundRequired', true, 'detectedAt', now())
+          ),
+        updated_at = now()
+    where id = $1::uuid
+    `,
+    args.order.id,
+    args.enrollmentId,
+  );
+
+  await auditWriter.write(
+    tx,
+    {
+      tenantId: ctx.tenantId,
+      actorMembershipId: ctx.actorMembershipId,
+      platformPrincipalId: null,
+      requestId: ctx.requestId,
+    },
+    {
+      action: "checkout.order.duplicate_payment",
+      target: { type: "payment_order", id: args.order.id },
+      before: null,
+      after: { refundRequired: true, existingEnrollmentId: args.enrollmentId },
+      reason: "Paid for a course the learner already holds; refund required.",
+      metadata: {
+        amountCents: args.order.amount_cents,
+        currency: args.order.currency,
+        membershipId: args.order.membership_id,
+      },
+    },
+  );
+
+  structuredLogger.error({
+    message: "Duplicate course payment received; order marked for refund.",
+    module: "payments.fulfilment",
+    eventType: "payment.duplicate_detected",
+    errorCode: "PAYMENT_DUPLICATE",
+    paymentOrderId: args.order.id,
+    amountCents: args.order.amount_cents,
+    currency: args.order.currency,
+  });
+}
+
 export async function fulfillPaidCourseOrder(
   tx: TenantTx,
   ctx: ServiceCtx,
@@ -738,6 +800,20 @@ export async function fulfillPaidCourseOrder(
 
     // Only the winner of the claim applies one-time side effects (wallet/coupon/affiliates).
     if (claimed.length > 0) {
+      // Audit M4: a learner who is already enrolled bought nothing with this
+      // payment (two open orders, both paid; or access granted another way).
+      // Record it for a refund rather than spending wallet credits, redeeming
+      // the coupon and paying commission a second time.
+      const enrolled = await findActiveEnrollment({
+        tx,
+        courseId: metadata.courseId,
+        membershipId,
+      });
+      if (enrolled) {
+        await flagDuplicatePayment(tx, ctx, { order, enrollmentId: enrolled.id });
+        return { enrollmentId: enrolled.id, created: false, paymentOrderId: order.id };
+      }
+
       if (metadata.walletCreditsApplied > 0) {
         await spendWalletCredits(tx, {
           membershipId,
@@ -1108,9 +1184,148 @@ export async function quoteCheckout(tx: TenantTx, ctx: ServiceCtx, rawBody: unkn
   });
 }
 
-export async function purchaseCheckout(tx: TenantTx, ctx: ServiceCtx, rawBody: unknown) {
+async function auditCheckoutOrder(
+  tx: TenantTx,
+  ctx: ServiceCtx,
+  order: {
+    paymentOrderId: string;
+    metadata: CourseCheckoutMetadata;
+    currency: string;
+    gatewayKey: string | null;
+  },
+): Promise<void> {
+  await auditWriter.write(
+    tx,
+    {
+      tenantId: ctx.tenantId,
+      actorMembershipId: ctx.actorMembershipId,
+      platformPrincipalId: null,
+      requestId: ctx.requestId,
+    },
+    {
+      action: "checkout.order.created",
+      target: { type: "payment_order", id: order.paymentOrderId },
+      before: null,
+      after: {
+        courseId: order.metadata.courseId,
+        amountCents: order.metadata.finalAmountCents,
+        currency: order.currency,
+        gatewayKey: order.gatewayKey,
+      },
+      metadata: {
+        originalAmountCents: order.metadata.originalAmountCents,
+        couponCode: order.metadata.couponCode,
+        affiliateCode: order.metadata.affiliateCode,
+        walletCreditsApplied: order.metadata.walletCreditsApplied,
+        taxAmountCents: order.metadata.taxAmountCents,
+      },
+    },
+  );
+}
+
+type CheckoutPurchaseResponse = z.output<typeof checkoutPurchaseResponseSchema>;
+
+type CheckoutSession = {
+  checkoutUrl: string | null;
+  clientCheckout: CheckoutPurchaseResponse["data"]["clientCheckout"] | null;
+};
+
+/**
+ * The transaction half of a purchase, as plain data. It is what the route's
+ * idempotency record stores and replays, so it carries no provider objects.
+ */
+export type CheckoutPurchasePlan =
+  | { kind: "done"; response: CheckoutPurchaseResponse }
+  | {
+      kind: "gateway";
+      paymentOrderId: string;
+      gatewayKey: string;
+      amountCents: number;
+      currency: string;
+      courseId: string;
+      courseTitle: string;
+      successUrl: string;
+      cancelUrl: string;
+      pricing: CheckoutPurchaseResponse["data"]["pricing"];
+    };
+
+/** An open checkout older than this is not reused (Stripe sessions last 24 hours). */
+const REUSABLE_CHECKOUT_HOURS = 23;
+
+/**
+ * At most one open checkout per learner, course and price (audit M4).
+ *
+ * Serialised per learner and course, so two tabs or a retry with a new key
+ * cannot both pass the "no open order" check. An open order for the same price
+ * is reused rather than duplicated; a different price (another coupon, other
+ * wallet credits) is a new order, and fulfilment guards against both being paid.
+ */
+async function lockCheckoutForCourse(tx: TenantTx, ctx: ServiceCtx, courseId: string) {
+  await tx.$executeRawUnsafe(
+    `select pg_advisory_xact_lock(hashtextextended($1::text, 0))`,
+    `checkout:${ctx.tenantId}:${ctx.actorMembershipId}:${courseId}`,
+  );
+}
+
+async function findReusableCheckoutOrder(
+  tx: TenantTx,
+  ctx: ServiceCtx,
+  args: {
+    metadata: CourseCheckoutMetadata;
+    currency: string;
+    gatewayKey: string;
+  },
+): Promise<string | null> {
+  const rows = await tx.$queryRawUnsafe<Array<{ id: string }>>(
+    `
+    select id::text
+    from payment_orders
+    where membership_id = $1::uuid
+      and status = 'pending'
+      and gateway_key = $2::text
+      and amount_cents = $3::int
+      and upper(currency) = upper($4::text)
+      and metadata_json->>'kind' = 'course_checkout'
+      and metadata_json->>'courseId' = $5::text
+      and coalesce(metadata_json->>'couponId', '') = coalesce($6::text, '')
+      and coalesce(metadata_json->>'affiliateCode', '') = coalesce($7::text, '')
+      and coalesce((metadata_json->>'walletCreditsApplied')::int, 0) = $8::int
+      and created_at > now() - make_interval(hours => $9::int)
+    order by created_at desc
+    limit 1
+    `,
+    ctx.actorMembershipId,
+    args.gatewayKey,
+    args.metadata.finalAmountCents,
+    args.currency,
+    args.metadata.courseId,
+    args.metadata.couponId,
+    args.metadata.affiliateCode,
+    args.metadata.walletCreditsApplied,
+    REUSABLE_CHECKOUT_HOURS,
+  );
+  return rows[0]?.id ?? null;
+}
+
+/**
+ * Transaction half of a course purchase: prices the order, records it, and for
+ * a $0 order fulfils it. The payment gateway is never called here; a paid order
+ * gets its gateway session in completeCheckoutPurchase, after this commits.
+ */
+export async function planCheckoutPurchase(
+  tx: TenantTx,
+  ctx: ServiceCtx,
+  rawBody: unknown,
+): Promise<CheckoutPurchasePlan> {
   const body = checkoutPurchaseBodySchema.parse(rawBody);
+  // Checked before any order exists, so a bad redirect leaves nothing behind.
+  const successUrl =
+    body.successUrl != null ? await assertTenantReturnUrl(tx, body.successUrl, "successUrl") : null;
+  const cancelUrl =
+    body.cancelUrl != null ? await assertTenantReturnUrl(tx, body.cancelUrl, "cancelUrl") : null;
   const { course, originalAmountCents, currency } = await resolveCoursePrice(tx, body.courseId);
+
+  await lockCheckoutForCourse(tx, ctx, course.id);
 
   const existing = await findActiveEnrollment({
     tx,
@@ -1218,31 +1433,33 @@ export async function purchaseCheckout(tx: TenantTx, ctx: ServiceCtx, rawBody: u
 
     const order = await findPaymentOrderById(tx, paymentOrderId);
     if (!order) throw validationError("Failed to create payment order.");
+    await auditCheckoutOrder(tx, ctx, { paymentOrderId, metadata, currency, gatewayKey: null });
 
     const fulfilled = await fulfillPaidCourseOrder(tx, ctx, order);
-    return checkoutPurchaseResponseSchema.parse({
-      data: {
-        enrollmentId: fulfilled.enrollmentId,
-        paymentOrderId,
-        created: fulfilled.created,
-        checkoutUrl: null,
-        clientCheckout: null,
-        pricing,
-      },
-    });
+    return {
+      kind: "done",
+      response: checkoutPurchaseResponseSchema.parse({
+        data: {
+          enrollmentId: fulfilled.enrollmentId,
+          paymentOrderId,
+          created: fulfilled.created,
+          checkoutUrl: null,
+          clientCheckout: null,
+          pricing,
+        },
+      }),
+    };
   }
 
-  // Amount due > $0: create pending order and redirect to PaymentProvider checkout.
-  if (!body.successUrl || !body.cancelUrl) {
+  // Amount due > $0: record a pending order. The gateway session is created
+  // after this transaction commits (completeCheckoutPurchase).
+  if (!successUrl || !cancelUrl) {
     throw validationError("successUrl and cancelUrl are required for paid checkout.");
   }
 
   let gatewayKey: string;
-  let provider;
   try {
-    const resolvedProvider = await resolvePaymentProvider(tx);
-    gatewayKey = resolvedProvider.gatewayKey;
-    provider = resolvedProvider.provider;
+    gatewayKey = (await resolvePaymentProvider(tx)).gatewayKey;
   } catch (error) {
     if (error instanceof PaymentProviderNotConfiguredError) {
       throw validationError(
@@ -1250,6 +1467,24 @@ export async function purchaseCheckout(tx: TenantTx, ctx: ServiceCtx, rawBody: u
       );
     }
     throw error;
+  }
+
+  const gatewayPlan = (orderId: string): CheckoutPurchasePlan => ({
+    kind: "gateway",
+    paymentOrderId: orderId,
+    gatewayKey,
+    amountCents: finalAmountCents,
+    currency,
+    courseId: course.id,
+    courseTitle: course.title,
+    successUrl,
+    cancelUrl,
+    pricing,
+  });
+
+  const reusable = await findReusableCheckoutOrder(tx, ctx, { metadata, currency, gatewayKey });
+  if (reusable) {
+    return gatewayPlan(reusable);
   }
 
   await tx.$executeRawUnsafe(
@@ -1275,41 +1510,133 @@ export async function purchaseCheckout(tx: TenantTx, ctx: ServiceCtx, rawBody: u
     discountCents,
     taxAmountCents,
   );
+  await auditCheckoutOrder(tx, ctx, { paymentOrderId, metadata, currency, gatewayKey });
 
-  const checkout = await provider.createCheckout({
-    tenantId: ctx.tenantId,
-    paymentOrderId,
-    amountCents: finalAmountCents,
-    currency,
-    courseTitle: course.title,
-    successUrl: body.successUrl,
-    cancelUrl: body.cancelUrl,
-    metadata: {
-      courseId: course.id,
-      membershipId: ctx.actorMembershipId,
-    },
-  });
+  return gatewayPlan(paymentOrderId);
+}
 
-  await tx.$executeRawUnsafe(
-    `
-    update payment_orders
-    set external_id = $2, updated_at = now()
-    where id = $1::uuid
-    `,
-    paymentOrderId,
-    checkout.externalId,
-  );
+function readStoredSession(metadata: unknown): CheckoutSession | null {
+  if (!metadata || typeof metadata !== "object") return null;
+  const session = (metadata as Record<string, unknown>)["checkoutSession"];
+  if (!session || typeof session !== "object") return null;
+  const value = session as Record<string, unknown>;
+  return {
+    checkoutUrl: typeof value["checkoutUrl"] === "string" ? value["checkoutUrl"] : null,
+    clientCheckout:
+      value["clientCheckout"] && typeof value["clientCheckout"] === "object"
+        ? (value["clientCheckout"] as CheckoutSession["clientCheckout"])
+        : null,
+  };
+}
 
+function gatewayResponse(
+  plan: Extract<CheckoutPurchasePlan, { kind: "gateway" }>,
+  session: CheckoutSession,
+): CheckoutPurchaseResponse {
   return checkoutPurchaseResponseSchema.parse({
     data: {
       enrollmentId: null,
-      paymentOrderId,
+      paymentOrderId: plan.paymentOrderId,
       created: false,
-      checkoutUrl: checkout.checkoutUrl ?? null,
-      clientCheckout: checkout.clientCheckout ?? null,
-      pricing,
+      checkoutUrl: session.checkoutUrl,
+      clientCheckout: session.clientCheckout,
+      pricing: plan.pricing,
     },
   });
+}
+
+/**
+ * After the purchase transaction commits: create (or find) the order's gateway
+ * session with no pooled connection held, then record it in a short
+ * transaction. Runs again on an idempotent replay and for a reused order, so it
+ * is idempotent itself: a session already recorded on the order is returned,
+ * Stripe receives an idempotency key per order, and a concurrent second
+ * session never replaces the first recorded one.
+ */
+export async function completeCheckoutPurchase(
+  plan: CheckoutPurchasePlan,
+  ctx: ServiceCtx,
+): Promise<CheckoutPurchaseResponse> {
+  if (plan.kind === "done") return plan.response;
+
+  const txCtx = {
+    tenantId: ctx.tenantId,
+    requestId: ctx.requestId,
+    actorMembershipId: ctx.actorMembershipId,
+  };
+
+  const prepared = await withTenantTx(txCtx, async (tx) => {
+    const rows = await tx.$queryRawUnsafe<
+      Array<{ status: string; gateway_key: string | null; metadata_json: unknown }>
+    >(
+      `select status, gateway_key, metadata_json from payment_orders where id = $1::uuid limit 1`,
+      plan.paymentOrderId,
+    );
+    const order = rows[0];
+    if (!order) throw validationError("Payment order not found.");
+    const stored = readStoredSession(order.metadata_json);
+    if (stored) return { stored };
+    if (order.status !== "pending") {
+      throw validationError("This order is no longer awaiting payment.");
+    }
+    const { provider } = await resolvePaymentProvider(tx, {
+      gatewayKey: order.gateway_key ?? plan.gatewayKey,
+    });
+    return { provider };
+  });
+
+  if ("stored" in prepared) return gatewayResponse(plan, prepared.stored);
+
+  const checkout = await prepared.provider.createCheckout({
+    tenantId: ctx.tenantId,
+    paymentOrderId: plan.paymentOrderId,
+    amountCents: plan.amountCents,
+    currency: plan.currency,
+    courseTitle: plan.courseTitle,
+    successUrl: plan.successUrl,
+    cancelUrl: plan.cancelUrl,
+    metadata: {
+      courseId: plan.courseId,
+      membershipId: ctx.actorMembershipId,
+    },
+    idempotencyKey: `atlas-checkout-${plan.paymentOrderId}`,
+  });
+  const session: CheckoutSession = {
+    checkoutUrl: checkout.checkoutUrl ?? null,
+    clientCheckout: checkout.clientCheckout ?? null,
+  };
+
+  const recorded = await withTenantTx(txCtx, async (tx) => {
+    // Only the first session is recorded; webhooks match on this external id.
+    const updated = await tx.$queryRawUnsafe<Array<{ id: string }>>(
+      `
+      update payment_orders
+      set external_id = $2,
+          metadata_json = coalesce(metadata_json, '{}'::jsonb)
+            || jsonb_build_object('checkoutSession', $3::jsonb),
+          updated_at = now()
+      where id = $1::uuid
+        and external_id = 'pending_' || id::text
+      returning id::text
+      `,
+      plan.paymentOrderId,
+      checkout.externalId,
+      JSON.stringify(session),
+    );
+    if (updated[0]) return session;
+    const rows = await tx.$queryRawUnsafe<Array<{ metadata_json: unknown }>>(
+      `select metadata_json from payment_orders where id = $1::uuid limit 1`,
+      plan.paymentOrderId,
+    );
+    return readStoredSession(rows[0]?.metadata_json) ?? session;
+  });
+
+  return gatewayResponse(plan, recorded);
+}
+
+/** Both halves in sequence, for callers outside a route (the route runs them around its commit). */
+export async function purchaseCheckout(tx: TenantTx, ctx: ServiceCtx, rawBody: unknown) {
+  return completeCheckoutPurchase(await planCheckoutPurchase(tx, ctx, rawBody), ctx);
 }
 
 export async function getCouponPerformance(tx: TenantTx, _ctx: ServiceCtx, rawQuery: unknown) {

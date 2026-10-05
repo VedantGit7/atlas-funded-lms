@@ -254,9 +254,10 @@ export const checkoutQuoteResponseSchema = z.object({
   }),
 });
 
+/** Return URLs are also checked against the tenant's own domains (audit M4). */
 export const checkoutPurchaseBodySchema = checkoutQuoteBodySchema.extend({
-  successUrl: z.url().optional(),
-  cancelUrl: z.url().optional(),
+  successUrl: z.url().max(2048).optional(),
+  cancelUrl: z.url().max(2048).optional(),
 });
 
 export const checkoutPurchaseResponseSchema = z.object({
