@@ -47,3 +47,13 @@ export function invalidAttemptItem(): AtlasHttpError {
     message: "Item does not belong to this attempt.",
   });
 }
+
+/** 409: the key already started a different attempt (another learner or assessment). Audit M2. */
+export function attemptKeyConflict(): AtlasHttpError {
+  return new AtlasHttpError({
+    code: "IDEMPOTENCY_CONFLICT",
+    status: 409,
+    message:
+      "This Idempotency-Key was already used for a different request. Use a new key for a new operation.",
+  });
+}
