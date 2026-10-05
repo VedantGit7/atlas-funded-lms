@@ -14,6 +14,42 @@ import { setCertificateStatusBit } from "./certificate-status-list.service";
 import { processCertificateOutboxBatch } from "./certificate-worker-router";
 import { isDeployedRuntime } from "@atlas/core/config/runtime-environment";
 
+/**
+ * Expire one tenant's due certificates (audit M5: the worker runs this per
+ * tenant on every sweep, so a slow or failing tenant affects only itself).
+ */
+export async function expireDueCertificatesForTenant(args: {
+  tenantId: string;
+  requestId: string;
+}): Promise<number> {
+  return withTenantTx(
+    { tenantId: args.tenantId, requestId: args.requestId, allowAnonymousTenantRead: true },
+    async (tx) => {
+      const due = await certificateRepository.listDueCertificates(tx);
+      if (due.length === 0) return 0;
+
+      await certificateRepository.expireDueCertificates(tx);
+
+      for (const cert of due) {
+        if (cert.status_list_index == null) continue;
+        try {
+          await setCertificateStatusBit({
+            tx,
+            tenantId: args.tenantId,
+            statusListIndex: cert.status_list_index,
+            revoked: true,
+          });
+        } catch {
+          // Status-list bit flip is best-effort; the certificate is still expired.
+        }
+      }
+
+      return due.length;
+    },
+  );
+}
+
+/** Operator run across every active tenant (the scheduled path is the worker). */
 export async function expireDueCertificatesForActiveTenants(
   requestId: string,
 ): Promise<{ tenants: number; expired: number; drained: number }> {
@@ -28,32 +64,10 @@ export async function expireDueCertificatesForActiveTenants(
   let drained = 0;
 
   for (const tenant of tenants) {
-    const tenantExpired = await withTenantTx(
-      { tenantId: tenant.id, requestId, allowAnonymousTenantRead: true },
-      async (tx) => {
-        const due = await certificateRepository.listDueCertificates(tx);
-        if (due.length === 0) return 0;
-
-        await certificateRepository.expireDueCertificates(tx);
-
-        for (const cert of due) {
-          if (cert.status_list_index == null) continue;
-          try {
-            await setCertificateStatusBit({
-              tx,
-              tenantId: tenant.id,
-              statusListIndex: cert.status_list_index,
-              revoked: true,
-            });
-          } catch {
-            // Status-list bit flip is best-effort; the certificate is still expired.
-          }
-        }
-
-        return due.length;
-      },
-    );
-    expired += tenantExpired;
+    expired += await expireDueCertificatesForTenant({
+      tenantId: tenant.id,
+      requestId: `${requestId}:${tenant.id}`,
+    });
 
     // Production PDF generation belongs to the bounded worker, not cron HTTP.
     if (isDeployedRuntime()) continue;

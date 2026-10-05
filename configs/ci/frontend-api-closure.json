@@ -58,10 +58,6 @@
       "reason": "Invoked by external sites and marketing integrations, not by this app."
     },
     {
-      "path": "/api/v1/reports/internal/tick",
-      "reason": "Scheduler-triggered report tick."
-    },
-    {
       "path": "/api/v1/iap/verify",
       "reason": "Mobile in-app purchase receipt verification; there is no web purchase flow."
     },
@@ -75,7 +71,7 @@
     },
     {
       "path": "/api/v1/usage/snapshot",
-      "reason": "Scheduler-triggered metering snapshot, same shape as reports/internal/tick. Nothing in-app should trigger billing metering."
+      "reason": "Scheduler-triggered metering snapshot, same shape as the internal report tick. Nothing in-app should trigger billing metering."
     }
   ],
   "runtimeLinked": [
