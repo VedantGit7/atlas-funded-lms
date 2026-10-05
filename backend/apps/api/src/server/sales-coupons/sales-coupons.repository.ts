@@ -300,22 +300,6 @@ export const salesCouponsRepository = {
     await tx.$executeRaw`delete from sales_coupons where id = ${id}::uuid`;
   },
 
-  async countRedemptionsForMembership(
-    tx: TenantTx,
-    args: { couponId: string; membershipId: string },
-  ): Promise<number> {
-    const rows = await tx.$queryRawUnsafe<Array<{ count: bigint }>>(
-      `
-      select count(*)::bigint as count
-      from sales_coupon_redemptions
-      where coupon_id = $1::uuid and membership_id = $2::uuid
-      `,
-      args.couponId,
-      args.membershipId,
-    );
-    return Number(rows[0]?.count ?? 0);
-  },
-
   async couponAppliesToCourse(
     tx: TenantTx,
     args: { couponId: string; courseId: string; appliesToAll: boolean },
@@ -377,6 +361,10 @@ export const salesCouponsRepository = {
    * Taking the coupon row lock serialises redemptions of the same coupon, so the
    * counts returned here are authoritative for the caller's transaction.
    *
+   * Since audit M1 the limits are enforced when an order is created
+   * (countCouponUses); fulfilment uses these counts only to record a paid order
+   * that takes the coupon over its limit.
+   *
    * A unique index is deliberately NOT used for the per-learner limit:
    * `per_learner_limit` is an integer that may exceed 1, which a unique
    * constraint cannot express.
@@ -419,6 +407,84 @@ export const salesCouponsRepository = {
       perLearnerLimit: coupon.per_learner_limit,
       totalRedemptions: counts[0]?.total ?? 0,
       memberRedemptions: counts[0]?.mine ?? 0,
+    };
+  },
+
+  /**
+   * Uses of a coupon that are spent or spoken for (audit M1): redemptions, plus
+   * open checkouts that carry the coupon and may still be paid. Fulfilment
+   * honours every paid order, so the limit has to be enforced here, before the
+   * learner is sent to pay.
+   *
+   * The learner's own open orders for this course are left out: they are
+   * alternatives to the checkout being priced (only one can enrol them, and
+   * fulfilment flags any other paid one as a duplicate), so they share its slot.
+   *
+   * With `lock`, the coupon row is locked first, which serialises checkouts and
+   * redemptions of the coupon and makes the counts authoritative for the
+   * transaction. Without it the counts are advisory (quotes and validation).
+   */
+  async countCouponUses(
+    tx: TenantTx,
+    args: {
+      couponId: string;
+      membershipId: string;
+      courseId: string;
+      reservationHours: number;
+      lock: boolean;
+    },
+  ): Promise<{
+    totalUsageLimit: number | null;
+    perLearnerLimit: number;
+    totalUses: number;
+    memberUses: number;
+  } | null> {
+    const coupons = args.lock
+      ? await tx.$queryRaw<Array<{ total_usage_limit: number | null; per_learner_limit: number }>>`
+          select total_usage_limit, per_learner_limit
+          from sales_coupons
+          where id = ${args.couponId}::uuid
+          for update
+        `
+      : await tx.$queryRaw<Array<{ total_usage_limit: number | null; per_learner_limit: number }>>`
+          select total_usage_limit, per_learner_limit
+          from sales_coupons
+          where id = ${args.couponId}::uuid
+        `;
+    const coupon = coupons[0];
+    if (!coupon) return null;
+
+    const counts = await tx.$queryRaw<Array<{ total: number; mine: number }>>`
+      with uses as (
+        select r.membership_id
+        from sales_coupon_redemptions r
+        where r.coupon_id = ${args.couponId}::uuid
+        union all
+        select o.membership_id
+        from payment_orders o
+        where o.status = 'pending'
+          and o.created_at > now() - make_interval(hours => ${args.reservationHours}::int)
+          and o.metadata_json->>'kind' = 'course_checkout'
+          and o.metadata_json->>'couponId' = ${args.couponId}::text
+          and not (
+            o.membership_id = ${args.membershipId}::uuid
+            and o.metadata_json->>'courseId' = ${args.courseId}::text
+          )
+          and not exists (
+            select 1 from sales_coupon_redemptions r where r.payment_order_id = o.id
+          )
+      )
+      select
+        count(*)::int as total,
+        count(*) filter (where membership_id = ${args.membershipId}::uuid)::int as mine
+      from uses
+    `;
+
+    return {
+      totalUsageLimit: coupon.total_usage_limit,
+      perLearnerLimit: coupon.per_learner_limit,
+      totalUses: counts[0]?.total ?? 0,
+      memberUses: counts[0]?.mine ?? 0,
     };
   },
 

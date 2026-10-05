@@ -18,6 +18,10 @@ const {
   mockResolvePaymentProvider,
   mockInsertRedemption,
   mockAuditWrite,
+  mockFindCouponByCode,
+  mockCouponAppliesToCourse,
+  mockCountCouponUses,
+  mockLockCouponForRedemption,
   txState,
 } = vi.hoisted(() => ({
   // The fake transaction the after-commit step's own transactions run on, and
@@ -36,6 +40,10 @@ const {
   mockGetLearnerBillingConfigRow: vi.fn(),
   mockResolvePaymentProvider: vi.fn(),
   mockInsertRedemption: vi.fn(),
+  mockFindCouponByCode: vi.fn(),
+  mockCouponAppliesToCourse: vi.fn(),
+  mockCountCouponUses: vi.fn(),
+  mockLockCouponForRedemption: vi.fn(),
 }));
 
 vi.mock(
@@ -101,9 +109,10 @@ vi.mock("@atlas/domain/payments/payment-provider.registry", () => ({
 
 vi.mock("../../../backend/apps/api/src/server/sales-coupons/sales-coupons.repository", () => ({
   salesCouponsRepository: {
-    findByCode: vi.fn(),
-    couponAppliesToCourse: vi.fn(),
-    countRedemptionsForMembership: vi.fn(),
+    findByCode: (...args: unknown[]) => mockFindCouponByCode(...args),
+    couponAppliesToCourse: (...args: unknown[]) => mockCouponAppliesToCourse(...args),
+    countCouponUses: (...args: unknown[]) => mockCountCouponUses(...args),
+    lockCouponForRedemption: (...args: unknown[]) => mockLockCouponForRedemption(...args),
     insertRedemption: (...args: unknown[]) => mockInsertRedemption(...args),
     list: vi.fn(),
     summary: vi.fn(),
@@ -975,5 +984,171 @@ describe("one open checkout per learner and course, gateway after commit (audit 
     expect(mockAuditWrite.mock.calls.at(-1)?.[2]).toMatchObject({
       action: "checkout.order.duplicate_payment",
     });
+  });
+});
+
+describe("coupon limits (audit M1)", () => {
+  const couponId = "018f0000-0000-7000-8000-0000000000c1";
+
+  function couponOrder(orders: Map<string, Record<string, unknown>>) {
+    const orderId = "018f0000-0000-7000-8000-0000000000d2";
+    orders.set(orderId, {
+      id: orderId,
+      membership_id: actorMembershipId,
+      external_id: "cs_m1",
+      amount_cents: 4000,
+      currency: "USD",
+      status: "pending",
+      invoice_number: null,
+      tax_amount_cents: 0,
+      coupon_amount_cents: 1000,
+      metadata_json: {
+        kind: "course_checkout",
+        courseId,
+        courseTitle: "Paid Course",
+        productTitle: "Paid Course",
+        productType: "course",
+        couponId,
+        couponCode: "SAVE20",
+        affiliateId: null,
+        affiliateCode: null,
+        affiliateCommissionPct: null,
+        originalAmountCents: 5000,
+        discountCents: 1000,
+        walletCreditsApplied: 0,
+        walletDiscountCents: 0,
+        taxAmountCents: 0,
+        amountAfterCouponCents: 4000,
+        finalAmountCents: 4000,
+      },
+    });
+    return orderId;
+  }
+
+  beforeEach(() => {
+    mockFindActiveEnrollment.mockReset();
+    mockFindActiveEnrollment.mockResolvedValue(null);
+    mockInsertEnrollment.mockReset();
+    mockInsertEnrollment.mockResolvedValue({
+      id: "018f0000-0000-7000-8000-000000000050",
+      enrolledAt: new Date(),
+      created: true,
+    });
+    mockInsertRedemption.mockReset();
+    mockInsertRedemption.mockResolvedValue("redemption-1");
+    mockLockCouponForRedemption.mockReset();
+    mockAuditWrite.mockReset();
+    mockApplyReferralPurchaseCredits.mockResolvedValue(undefined);
+  });
+
+  it("honours a paid order that takes the coupon over its limit, and records it", async () => {
+    const orders = new Map<string, Record<string, unknown>>();
+    const { tx } = createTx({ orders });
+    const orderId = couponOrder(orders);
+    mockLockCouponForRedemption.mockResolvedValue({
+      totalUsageLimit: 1,
+      perLearnerLimit: 1,
+      totalRedemptions: 1,
+      memberRedemptions: 0,
+    });
+
+    const result = await fulfillPaidCourseOrder(tx, ctx, orders.get(orderId) as never);
+
+    expect(result).toMatchObject({ created: true, paymentOrderId: orderId });
+    expect(mockInsertRedemption).toHaveBeenCalledWith(
+      tx,
+      expect.objectContaining({ couponId, paymentOrderId: orderId, discountCents: 1000 }),
+    );
+    expect(mockInsertEnrollment).toHaveBeenCalledOnce();
+    expect(mockAuditWrite.mock.calls.at(-1)?.[2]).toMatchObject({
+      action: "coupon.redeemed_over_limit",
+      target: { type: "sales_coupon", id: couponId },
+      metadata: { paymentOrderId: orderId, exceeded: ["total"] },
+    });
+  });
+
+  it("records nothing extra for a redemption within the limit", async () => {
+    const orders = new Map<string, Record<string, unknown>>();
+    const { tx } = createTx({ orders });
+    const orderId = couponOrder(orders);
+    mockLockCouponForRedemption.mockResolvedValue({
+      totalUsageLimit: 5,
+      perLearnerLimit: 1,
+      totalRedemptions: 2,
+      memberRedemptions: 0,
+    });
+
+    await fulfillPaidCourseOrder(tx, ctx, orders.get(orderId) as never);
+
+    expect(mockInsertRedemption).toHaveBeenCalledOnce();
+    expect(mockAuditWrite).not.toHaveBeenCalled();
+  });
+
+  it("enrols the buyer when the coupon was deleted after the order was priced", async () => {
+    const orders = new Map<string, Record<string, unknown>>();
+    const { tx } = createTx({ orders });
+    const orderId = couponOrder(orders);
+    mockLockCouponForRedemption.mockResolvedValue(null);
+
+    const result = await fulfillPaidCourseOrder(tx, ctx, orders.get(orderId) as never);
+
+    expect(result).toMatchObject({ created: true });
+    expect(orders.get(orderId)?.["status"]).toBe("paid");
+    expect(mockInsertRedemption).not.toHaveBeenCalled();
+    expect(mockAuditWrite.mock.calls.at(-1)?.[2]).toMatchObject({
+      action: "coupon.redemption_skipped",
+      target: { type: "payment_order", id: orderId },
+    });
+  });
+
+  it("refuses the checkout before payment when the locked count finds no free use", async () => {
+    mockFindCourseAuthProjection.mockResolvedValue(paidCourseProjection());
+    mockResolveAffiliateForCheckout.mockResolvedValue(null);
+    mockFindCouponByCode.mockResolvedValue({
+      id: couponId,
+      code: "SAVE20",
+      name: "Save 20",
+      status: "ACTIVE",
+      discount_type: "PERCENT",
+      discount_value: 20,
+      max_discount_cents: null,
+      currency: "USD",
+      starts_at: null,
+      ends_at: null,
+      total_usage_limit: 1,
+      per_learner_limit: 1,
+      min_purchase_cents: null,
+      visibility: "PRIVATE",
+      device_type: "ALL",
+      applies_to_all_courses: true,
+    });
+    mockCouponAppliesToCourse.mockResolvedValue(true);
+    // Free at quote time; taken by another checkout by the time this one holds
+    // the coupon's lock.
+    mockCountCouponUses.mockImplementation(async (_tx: unknown, args: { lock: boolean }) => ({
+      totalUsageLimit: 1,
+      perLearnerLimit: 1,
+      totalUses: args.lock ? 1 : 0,
+      memberUses: 0,
+    }));
+    mockResolvePaymentProvider.mockReset();
+
+    const { tx, orders } = createTx();
+    await expect(
+      planCheckoutPurchase(tx, ctx, {
+        courseId,
+        deviceType: "WEB",
+        couponCode: "save20",
+        successUrl: "https://app.test/success",
+        cancelUrl: "https://app.test/cancel",
+      }),
+    ).rejects.toMatchObject({ message: "This coupon has reached its usage limit." });
+
+    expect(mockCountCouponUses).toHaveBeenLastCalledWith(
+      tx,
+      expect.objectContaining({ couponId, membershipId: actorMembershipId, courseId, lock: true }),
+    );
+    expect(orders.size).toBe(0);
+    expect(mockResolvePaymentProvider).not.toHaveBeenCalled();
   });
 });
