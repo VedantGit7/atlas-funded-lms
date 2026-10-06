@@ -5,6 +5,9 @@ export async function register() {
     const { validateDeploymentStartup } = await import("@atlas/api/deployment-startup");
     validateDeploymentStartup("api");
     await import("../sentry.server.config");
+    // Background: readiness is not delayed (audit M8 follow-up).
+    const { warmSvgSanitizer } = await import("./server/warm-svg-sanitizer");
+    void warmSvgSanitizer();
   }
 
   if (process.env["NEXT_RUNTIME"] === "edge") {
